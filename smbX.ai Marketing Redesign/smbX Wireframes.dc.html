@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f0eee9;font-family:system-ui,sans-serif}
+a{color:#1a1a1a}a:hover{color:#D4714E}
+.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 13px/1.2 system-ui,sans-serif;color:#1a1a1a}
+.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;margin-bottom:8px}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 system-ui,sans-serif;color:rgba(0,0,0,.55)}
+.dv-card{max-width:100%;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
+.dv-opt:target .dv-oid{background:#2a78d6;color:#fff}
+.dv-next{margin:22px 0 0;font:12px/1.5 system-ui,sans-serif;color:rgba(0,0,0,.5)}
+.dv-group{flex-basis:100%;font:700 11px ui-monospace,Menlo,monospace;letter-spacing:1.5px;text-transform:uppercase;color:rgba(0,0,0,.45);margin:26px 0 2px;padding-top:18px;border-top:1px dashed rgba(0,0,0,.15)}
+.wf{background:#fff;font-family:'Patrick Hand',cursive;color:#222;font-size:12px}
+.bar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1.5px solid #2b2b2b}
+.logo{font-weight:700;font-size:13px}
+.nav{display:flex;gap:9px;font-size:10px;color:#666}
+.tl{background:#e4e2dd;border-radius:3px;height:7px}
+.imgph{background:repeating-linear-gradient(45deg,#f5f3ee,#f5f3ee 6px,#e9e6df 6px,#e9e6df 12px);border:1px dashed #b9b4aa;display:flex;align-items:center;justify-content:center;color:#96917f;font:9px ui-monospace,monospace;border-radius:8px}
+.dock{border:1.5px solid #2b2b2b;border-radius:14px;background:#fff;display:flex;align-items:center;gap:8px;padding:7px 10px;font-size:11px;color:#8a857c}
+.send{width:20px;height:20px;border-radius:50%;background:#D4714E;flex:none;margin-left:auto}
+.terra{color:#D4714E}
+.note{font:9px/1.5 ui-monospace,monospace;color:#909090}
+.secl{font:700 8.5px ui-monospace,monospace;color:#D4714E;letter-spacing:1.2px}
+.wcard{border:1.5px solid #2b2b2b;border-radius:10px;background:#fff}
+.bubu{background:#FFF0EB;border:1px solid rgba(212,113,78,.4);border-radius:10px;padding:6px 9px;font-size:10.5px;margin-left:auto;max-width:75%}
+.buby{background:#fff;border:1.5px solid #ddd;border-radius:10px;padding:6px 9px;font-size:10.5px;max-width:88%}
+.chip{border:1.5px solid #2b2b2b;border-radius:999px;padding:1px 9px;font-size:10px}
+.phone{border:2px solid #2b2b2b;border-radius:18px;overflow:hidden;background:#fff;width:172px}
+</style>
+</helmet>
+
+<section class="dv-turn" id="t5">
+<div class="dv-thd"><a class="dv-tid" href="#t5">5</a><span class="dv-tname">HANDOFF SET — full wireframes for Claude Code, in the committed <a class="dv-oid" href="#t4">turn-4</a> grammar. Marketing → morph → conversation → logged-in app, desktop + mobile.</span></div>
+
+<div class="dv-opts">
+<div class="dv-group">A · Marketing pages (public, anonymous)</div>
+
+<div class="dv-opt" id="5a" data-screen-label="5a Home desktop full">
+<div class="dv-olabel"><a class="dv-oid" href="#5a">5a</a>Homepage `/` — desktop, full scroll (≈3 viewports)</div>
+<div class="dv-card wf" style="width:520px">
+<div class="bar" style="padding:9px 30px;border-bottom:none"><span class="logo">smb<span class="terra">X</span>.ai</span><span class="nav" style="gap:13px;font-size:10px"><span>Sell</span><span>Buy</span><span>Brokers</span><span>How it works</span><span>Pricing</span></span></div>
+<div style="padding:36px 30px 28px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+<div style="width:18px;height:18px;border:2px solid #D4714E;border-radius:50%;transform:rotate(45deg)"></div>
+<div style="font-size:26px;font-weight:700;line-height:1.02;max-width:330px;letter-spacing:-.5px">What's your business worth?</div>
+<div style="font-size:11px;color:#777">Real numbers in your first minute. No signup. <span class="terra">No success fees, ever.</span></div>
+<div class="dock" style="width:360px;border-radius:999px;padding:11px 14px">＋&nbsp; Tell Yulia about your deal…<span class="send" style="width:22px;height:22px"></span></div>
+<div style="display:flex;gap:7px"><span class="chip" style="font-size:9px">I'm selling</span><span class="chip" style="font-size:9px">I'm buying</span><span class="chip" style="font-size:9px">I'm a broker</span></div>
+</div>
+<div style="border-top:1.5px solid #eee;padding:12px 30px;display:flex;align-items:center;justify-content:center;gap:10px">
+<div style="font-size:14px;font-weight:700">$1.08M<span style="color:#999">–</span>$1.89M</div>
+<div class="note">sample ticker · rotates 3 deals (seller range / buyer multiple flag / broker CIM-in-days) · pauses on hover</div>
+</div>
+<div style="border-top:2px dashed #d4714e55;position:relative"><span class="note" style="position:absolute;right:8px;top:2px;color:#c98e75">— fold @900px</span></div>
+<div style="background:#FAF8F4;padding:18px 30px;text-align:center">
+<div style="font-size:16px;font-weight:700">A broker's cut on a $2M sale: <s style="color:#999">~$180K</s>. Ours: <span class="terra">$0.</span></div>
+<div class="note" style="margin-top:4px">cream band · the trust moat, stated once, big</div>
+</div>
+<div style="padding:16px 30px;display:flex;gap:10px">
+<div style="flex:1;font-size:10px"><b>1 · Tell her</b><div class="tl" style="width:85%;margin-top:5px"></div><div class="tl" style="width:60%;margin-top:3px"></div></div>
+<div style="flex:1;font-size:10px"><b>2 · Get your Baseline™</b><div class="tl" style="width:85%;margin-top:5px"></div><div class="tl" style="width:60%;margin-top:3px"></div></div>
+<div style="flex:1;font-size:10px"><b>3 · She runs the deal</b><div class="tl" style="width:85%;margin-top:5px"></div><div class="tl" style="width:60%;margin-top:3px"></div></div>
+</div>
+<div style="padding:14px 30px;border-top:1.5px solid #eee;display:flex;flex-direction:column;align-items:center;gap:8px">
+<div style="font-size:13px;font-weight:700">Still reading? Just ask her.</div>
+<div class="dock" style="width:320px;border-radius:999px;padding:9px 12px;font-size:10px">Tell Yulia about your deal…<span class="send" style="width:18px;height:18px"></span></div>
+<div class="note">footer: logo · Sell Buy Brokers How Pricing · legal. that's the whole page</div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="5b" data-screen-label="5b Home mobile full">
+<div class="dv-olabel"><a class="dv-oid" href="#5b">5b</a>Homepage — mobile, full scroll</div>
+<div class="dv-card wf" style="padding:14px;background:#fff">
+<div class="phone" style="height:470px;display:flex;flex-direction:column">
+<div style="padding:8px 10px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px">≡</span><span class="logo" style="font-size:10px">smb<span class="terra">X</span>.ai</span><span style="width:11px"></span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:26px 14px 18px">
+<div style="width:14px;height:14px;border:1.5px solid #D4714E;border-radius:50%;transform:rotate(45deg)"></div>
+<div style="font-size:16px;font-weight:700;line-height:1.1">What's your business worth?</div>
+<div style="font-size:8.5px;color:#777">No signup. No success fees, ever.</div>
+<div class="dock" style="width:92%;font-size:9px;padding:8px 10px;border-radius:999px">＋ Tell Yulia about your deal…<span class="send" style="width:16px;height:16px"></span></div>
+<div style="display:flex;gap:4px"><span class="chip" style="font-size:7.5px">Selling</span><span class="chip" style="font-size:7.5px">Buying</span><span class="chip" style="font-size:7.5px">Broker</span></div>
+</div>
+<div style="border-top:2px dashed #d4714e55"></div>
+<div style="text-align:center;padding:10px"><div style="font-size:13px;font-weight:700">$1.08M<span style="color:#999">–</span>$1.89M</div><div class="note">ticker</div></div>
+<div style="background:#FAF8F4;padding:10px 14px;text-align:center;font-size:10px;font-weight:700">Broker: <s style="color:#999">~$180K</s> → Yulia: <span class="terra">$0</span></div>
+<div style="padding:10px 14px;display:flex;flex-direction:column;gap:5px;font-size:8.5px">
+<div><b>1 · Tell her</b> <span class="tl" style="display:inline-block;width:80px;vertical-align:middle"></span></div>
+<div><b>2 · Get your Baseline™</b> <span class="tl" style="display:inline-block;width:60px;vertical-align:middle"></span></div>
+<div><b>3 · She runs the deal</b> <span class="tl" style="display:inline-block;width:70px;vertical-align:middle"></span></div>
+</div>
+<div style="flex:1"></div>
+<div style="padding:6px 10px 10px"><div class="dock" style="font-size:9px;padding:7px 9px;border-radius:999px">Tell Yulia about your deal…</div><div class="note" style="text-align:center;margin-top:3px">dock is sticky bottom on scroll — always one tap from typing</div></div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="5c" data-screen-label="5c Sell page pair">
+<div class="dv-olabel"><a class="dv-oid" href="#5c">5c</a>`/sell` — desktop + mobile (calm, principal voice)</div>
+<div class="dv-card wf" style="padding:14px;display:flex;gap:14px;background:#fff;align-items:flex-start">
+<div style="width:400px">
+<div class="bar" style="padding:8px 24px;border-bottom:none"><span class="logo" style="font-size:12px">smb<span class="terra">X</span>.ai</span><span class="nav" style="font-size:9px"><span><b>Sell</b></span><span>Buy</span><span>Brokers</span><span>How</span><span>Pricing</span></span></div>
+<div style="padding:26px 24px 18px;display:flex;gap:18px">
+<div style="flex:1.2;display:flex;flex-direction:column;gap:9px">
+<div class="secl">FOR OWNERS</div>
+<div style="font-size:19px;font-weight:700;line-height:1.05;letter-spacing:-.4px">You built it. Find out what it's worth — today.</div>
+<div style="font-size:10px;color:#777">Yulia runs your deal. You make the decisions.</div>
+<div class="dock" style="border-radius:999px;font-size:10px">Tell Yulia about your business…<span class="send" style="width:18px;height:18px"></span></div>
+</div>
+<div style="flex:1">
+<div class="wcard" style="padding:10px 12px;box-shadow:3px 3px 0 #e4e2dd">
+<div class="secl">THE BASELINE™ · SAMPLE</div>
+<div style="font-size:15px;font-weight:700;margin:5px 0">$1.08M<span style="color:#999">–</span>$1.89M</div>
+<div style="font-size:9px;color:#777">$1.8M revenue → SDE $360–540K → 3.0–3.5×</div>
+<div class="note" style="margin-top:5px">every number sourced</div>
+</div>
+</div>
+</div>
+<div style="padding:0 24px 14px;display:flex;gap:8px;font-size:9px">
+<div style="flex:1"><b>What happens to my employees?</b><div class="tl" style="width:85%;margin-top:4px"></div></div>
+<div style="flex:1"><b>Do I have to tell anyone I'm selling?</b><div class="tl" style="width:85%;margin-top:4px"></div></div>
+<div style="flex:1"><b>What if I'm not ready yet?</b><div class="tl" style="width:85%;margin-top:4px"></div></div>
+</div>
+<div style="padding:6px 12px;border-top:1.5px solid #eee" class="note">anxiety-first FAQ (not features) → fee anchor → footer dock. placeholder: "Tell Yulia about your business…" · she inherits SELLER intent through the morph</div>
+</div>
+<div class="phone" style="height:300px;display:flex;flex-direction:column">
+<div style="padding:7px 9px;display:flex;justify-content:space-between"><span style="font-size:10px">≡</span><span class="logo" style="font-size:9px">smb<span class="terra">X</span>.ai</span><span style="width:10px"></span></div>
+<div style="padding:14px 12px;display:flex;flex-direction:column;gap:7px;text-align:center;align-items:center">
+<div class="secl" style="font-size:7px">FOR OWNERS</div>
+<div style="font-size:13px;font-weight:700;line-height:1.1">You built it. Find out what it's worth.</div>
+<div class="wcard" style="padding:7px 9px;width:80%"><div style="font-size:11px;font-weight:700">$1.08M–$1.89M</div><div class="note" style="font-size:7.5px">sample Baseline™</div></div>
+</div>
+<div style="flex:1"></div>
+<div style="padding:6px 9px 10px"><div class="dock" style="font-size:8.5px;padding:7px 9px;border-radius:999px">Tell Yulia about your business…</div></div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="5d" data-screen-label="5d Buy page pair">
+<div class="dv-olabel"><a class="dv-oid" href="#5d">5d</a>`/buy` — desktop + mobile (deal-check artifact leads)</div>
+<div class="dv-card wf" style="padding:14px;display:flex;gap:14px;background:#fff;align-items:flex-start">
+<div style="width:400px">
+<div class="bar" style="padding:8px 24px;border-bottom:none"><span class="logo" style="font-size:12px">smb<span class="terra">X</span>.ai</span><span class="nav" style="font-size:9px"><span>Sell</span><span><b>Buy</b></span><span>Brokers</span><span>How</span><span>Pricing</span></span></div>
+<div style="padding:26px 24px 18px;display:flex;gap:18px">
+<div style="flex:1.2;display:flex;flex-direction:column;gap:9px">
+<div class="secl">FOR BUYERS &amp; SEARCHERS</div>
+<div style="font-size:19px;font-weight:700;line-height:1.05;letter-spacing:-.4px">Is that asking price fair? Find out before you offer.</div>
+<div style="font-size:10px;color:#777">Paste a listing. Get the multiple, the market, and the questions to ask.</div>
+<div class="dock" style="border-radius:999px;font-size:10px">Tell Yulia what you're looking for…<span class="send" style="width:18px;height:18px"></span></div>
+</div>
+<div style="flex:1">
+<div class="wcard" style="padding:10px 12px;box-shadow:3px 3px 0 #e4e2dd">
+<div class="secl">DEAL CHECK · SAMPLE</div>
+<div style="font-size:15px;font-weight:700;margin:5px 0">6.58×</div>
+<div style="font-size:9px;color:#777">$2.5M ask ÷ $380K SDE · HVAC trades 2.5–3.5×</div>
+<div style="font-size:9px" class="terra"><b>That's rich. Ask about add-backs.</b></div>
+</div>
+</div>
+</div>
+<div style="padding:6px 12px;border-top:1.5px solid #eee" class="note">supports paste-a-listing + file upload via ChatDock attachment. below: "what Yulia does per deal stage" 3-up → fee anchor → footer dock</div>
+</div>
+<div class="phone" style="height:300px;display:flex;flex-direction:column">
+<div style="padding:7px 9px;display:flex;justify-content:space-between"><span style="font-size:10px">≡</span><span class="logo" style="font-size:9px">smb<span class="terra">X</span>.ai</span><span style="width:10px"></span></div>
+<div style="padding:14px 12px;display:flex;flex-direction:column;gap:7px;text-align:center;align-items:center">
+<div class="secl" style="font-size:7px">FOR BUYERS</div>
+<div style="font-size:13px;font-weight:700;line-height:1.1">Is that ask fair?</div>
+<div class="wcard" style="padding:7px 9px;width:80%"><div style="font-size:11px;font-weight:700">6.58× <span style="font-size:8px" class="terra">rich</span></div><div class="note" style="font-size:7.5px">sample deal check</div></div>
+</div>
+<div style="flex:1"></div>
+<div style="padding:6px 9px 10px"><div class="dock" style="font-size:8.5px;padding:7px 9px;border-radius:999px">Tell Yulia what you're looking for…</div></div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="5e" data-screen-label="5e Broker page pair">
+<div class="dv-olabel"><a class="dv-oid" href="#5e">5e</a>`/brokers` — desktop + mobile (terse, throughput voice)</div>
+<div class="dv-card wf" style="padding:14px;display:flex;gap:14px;background:#fff;align-items:flex-start">
+<div style="width:400px">
+<div class="bar" style="padding:8px 24px;border-bottom:none"><span class="logo" style="font-size:12px">smb<span class="terra">X</span>.ai</span><span class="nav" style="font-size:9px"><span>Sell</span><span>Buy</span><span><b>Brokers</b></span><span>How</span><span>Pricing</span></span></div>
+<div style="padding:24px 24px 14px;display:flex;flex-direction:column;gap:9px">
+<div class="secl">FOR BROKERS · ADVISORS · SPONSORS</div>
+<div style="font-size:19px;font-weight:700;line-height:1.05;letter-spacing:-.4px">Yulia does the analyst work. You run the deal.</div>
+<div style="display:flex;gap:16px">
+<div><div style="font-size:14px;font-weight:700">[18 hrs]</div><div class="note">saved / listing</div></div>
+<div><div style="font-size:14px;font-weight:700">[3×]</div><div class="note">listings carried</div></div>
+<div><div style="font-size:14px;font-weight:700">[days]</div><div class="note">CIM, not weeks</div></div>
+</div>
+<div class="dock" style="border-radius:999px;font-size:10px;max-width:330px">Tell Yulia about the deal you're working…<span class="send" style="width:18px;height:18px"></span></div>
+</div>
+<div style="padding:0 24px 12px;display:flex;flex-wrap:wrap;gap:4px;font-size:9px">
+<span class="chip" style="font-size:8.5px">Valuation + comps memo</span><span class="chip" style="font-size:8.5px">CIM / teaser drafts</span><span class="chip" style="font-size:8.5px">Buyer screening</span><span class="chip" style="font-size:8.5px">Data-room prep</span><span class="chip" style="font-size:8.5px">Q&amp;A grunt work</span>
+</div>
+<div style="padding:6px 12px;border-top:1.5px solid #eee" class="note">no definitions, no hand-holding, capability chips not narrative. stats bracketed = need real sourcing. density mode: Yulia opens terse from this page</div>
+</div>
+<div class="phone" style="height:300px;display:flex;flex-direction:column">
+<div style="padding:7px 9px;display:flex;justify-content:space-between"><span style="font-size:10px">≡</span><span class="logo" style="font-size:9px">smb<span class="terra">X</span>.ai</span><span style="width:10px"></span></div>
+<div style="padding:14px 12px;display:flex;flex-direction:column;gap:7px">
+<div class="secl" style="font-size:7px">FOR BROKERS</div>
+<div style="font-size:13px;font-weight:700;line-height:1.1">Yulia does the analyst work. You run the deal.</div>
+<div style="display:flex;gap:10px"><div><div style="font-size:11px;font-weight:700">[18h]</div><div class="note" style="font-size:7px">saved</div></div><div><div style="font-size:11px;font-weight:700">[3×]</div><div class="note" style="font-size:7px">listings</div></div></div>
+<div style="display:flex;flex-wrap:wrap;gap:3px"><span class="chip" style="font-size:7px">Valuation</span><span class="chip" style="font-size:7px">CIM</span><span class="chip" style="font-size:7px">Buyers</span><span class="chip" style="font-size:7px">Data room</span></div>
+</div>
+<div style="flex:1"></div>
+<div style="padding:6px 9px 10px"><div class="dock" style="font-size:8.5px;padding:7px 9px;border-radius:999px">Tell Yulia about the deal you're working…</div></div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="5f" data-screen-label="5f How it works pair">
+<div class="dv-olabel"><a class="dv-oid" href="#5f">5f</a>`/how-it-works` — desktop + mobile (receipts + engine, merged <a class="dv-oid" href="#1m">1m</a>/<a class="dv-oid" href="#1n">1n</a>)</div>
+<div class="dv-card wf" style="padding:14px;display:flex;gap:14px;background:#fff;align-items:flex-start">
+<div style="width:400px">
+<div class="bar" style="padding:8px 24px;border-bottom:none"><span class="logo" style="font-size:12px">smb<span class="terra">X</span>.ai</span><span class="nav" style="font-size:9px"><span>Sell</span><span>Buy</span><span>Brokers</span><span><b>How</b></span><span>Pricing</span></span></div>
+<div style="padding:20px 24px 8px;text-align:center"><div style="font-size:19px;font-weight:700;letter-spacing:-.4px">Not guessed. Computed.</div><div style="font-size:9.5px;color:#777">One real deal, first message to close. $5.2M-EBITDA machining co.</div></div>
+<div style="display:flex;gap:5px;padding:10px 24px">
+<div class="wcard" style="flex:1;padding:6px;font-size:8.5px;text-align:center">Talk</div>
+<div class="wcard" style="flex:1;padding:6px;font-size:8.5px;text-align:center;border-color:#D4714E">Baseline™</div>
+<div class="wcard" style="flex:1;padding:6px;font-size:8.5px;text-align:center">Rundown™</div>
+<div class="wcard" style="flex:1;padding:6px;font-size:8.5px;text-align:center">Deal work</div>
+<div class="wcard" style="flex:1;padding:6px;font-size:8.5px;text-align:center">Close</div>
+</div>
+<div class="note" style="padding:0 24px">email ask marked honestly between Talk → Baseline ("where should I send it?")</div>
+<div style="margin:10px 24px;border-left:2px solid #2b2b2b;padding-left:12px;display:flex;flex-direction:column;gap:8px">
+<div style="font-size:10px"><b>The math, shown</b><div class="wcard" style="padding:6px 8px;font-size:9px;margin-top:3px">EBITDA $5.2M × 4.2–4.8× → <b>$21.8M–$25.0M</b> <span class="note">each factor expands to its source</span></div></div>
+<div style="font-size:10px"><b>Same inputs → same answer</b> <span class="note">deterministic engine · sourced (Census/BLS/comps) · versioned</span></div>
+<div style="font-size:10px"><b>The deliverable</b> <span class="note">Rundown™ excerpt, redacted real sample</span></div>
+</div>
+<div style="padding:10px 24px 14px"><div class="dock" style="border-radius:999px;font-size:10px;max-width:300px;margin:0 auto">Tell Yulia about your deal…<span class="send" style="width:18px;height:18px"></span></div></div>
+</div>
+<div class="phone" style="height:300px;display:flex;flex-direction:column">
+<div style="padding:7px 9px;display:flex;justify-content:space-between"><span style="font-size:10px">≡</span><span class="logo" style="font-size:9px">smb<span class="terra">X</span>.ai</span><span style="width:10px"></span></div>
+<div style="padding:12px;display:flex;flex-direction:column;gap:6px">
+<div style="font-size:13px;font-weight:700;text-align:center">Not guessed. Computed.</div>
+<div style="display:flex;gap:3px;justify-content:center"><span class="chip" style="font-size:6.5px">Talk</span><span class="chip" style="font-size:6.5px;border-color:#D4714E;color:#D4714E">Baseline</span><span class="chip" style="font-size:6.5px">Rundown</span><span class="chip" style="font-size:6.5px">Close</span></div>
+<div class="wcard" style="padding:6px 8px;font-size:8px">$5.2M × 4.2–4.8× → <b>$21.8–25.0M</b><div class="note" style="font-size:7px">tap a factor → its source</div></div>
+<div class="note" style="font-size:7.5px">timeline stacks vertically; engine box below</div>
+</div>
+<div style="flex:1"></div>
+<div style="padding:6px 9px 10px"><div class="dock" style="font-size:8.5px;padding:7px 9px;border-radius:999px">Tell Yulia about your deal…</div></div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="5g" data-screen-label="5g Pricing pair">
+<div class="dv-olabel"><a class="dv-oid" href="#5g">5g</a>`/pricing` — desktop + mobile (model-agnostic, ⚠ numbers TBD)</div>
+<div class="dv-card wf" style="padding:14px;display:flex;gap:14px;background:#fff;align-items:flex-start">
+<div style="width:400px">
+<div class="bar" style="padding:8px 24px;border-bottom:none"><span class="logo" style="font-size:12px">smb<span class="terra">X</span>.ai</span><span class="nav" style="font-size:9px"><span>Sell</span><span>Buy</span><span>Brokers</span><span>How</span><span><b>Pricing</b></span></span></div>
+<div style="padding:22px 24px 10px;text-align:center">
+<div style="font-size:18px;font-weight:700;line-height:1.1;letter-spacing:-.4px">On a <span class="terra">$2.0M</span> sale, a broker takes <s style="color:#999">~$180K</s>.<br>Yulia takes no cut. Ever.</div>
+<div style="margin:10px auto 0;width:240px;height:14px;border:1.5px solid #2b2b2b;border-radius:999px;position:relative"><div style="position:absolute;left:38%;top:-3px;width:18px;height:18px;border-radius:50%;background:#D4714E"></div></div>
+<div class="note" style="margin-top:4px">deal-size slider → broker fee recomputes live (Double Lehman) · the only interactive marketing element</div>
+</div>
+<div style="display:flex;gap:8px;padding:8px 24px 12px">
+<div class="wcard" style="flex:1;padding:9px;border-style:dashed"><b style="font-size:10px">[Tier A]</b><div style="font-size:12px;font-weight:700">[$—]</div><div class="tl" style="width:85%;margin-top:4px"></div></div>
+<div class="wcard" style="flex:1;padding:9px;border-style:dashed;box-shadow:3px 3px 0 #e4e2dd"><b style="font-size:10px">[Tier B]</b><div style="font-size:12px;font-weight:700">[$—]</div><div class="tl" style="width:85%;margin-top:4px"></div></div>
+<div class="wcard" style="flex:1;padding:9px;border-style:dashed"><b style="font-size:10px">[Tier C]</b><div style="font-size:12px;font-weight:700">[$—]</div><div class="tl" style="width:85%;margin-top:4px"></div></div>
+</div>
+<div style="padding:0 24px 10px;font-size:9px;color:#777;text-align:center">FAQ rows: Why no success fees? · What's free? · When do I pay?</div>
+<div style="padding:6px 12px;border-top:1.5px solid #eee" class="note">⚠ FLAG: pricing model unresolved (subscription vs per-deal vs wallet). grid + slider work for all three; personalized price-reveal happens in-chat (see <a class="dv-oid" href="#5j">5j</a>), so this page stays evergreen</div>
+</div>
+<div class="phone" style="height:300px;display:flex;flex-direction:column">
+<div style="padding:7px 9px;display:flex;justify-content:space-between"><span style="font-size:10px">≡</span><span class="logo" style="font-size:9px">smb<span class="terra">X</span>.ai</span><span style="width:10px"></span></div>
+<div style="padding:12px;display:flex;flex-direction:column;gap:7px;text-align:center;align-items:center">
+<div style="font-size:12px;font-weight:700;line-height:1.15">Broker: <s style="color:#999">~$180K</s><br>Yulia: no cut. Ever.</div>
+<div style="width:80%;height:10px;border:1.5px solid #2b2b2b;border-radius:999px;position:relative"><div style="position:absolute;left:38%;top:-3px;width:14px;height:14px;border-radius:50%;background:#D4714E"></div></div>
+<div style="display:flex;gap:4px;width:100%"><div class="wcard" style="flex:1;padding:5px;border-style:dashed;font-size:7.5px">[A]<br><b>[$—]</b></div><div class="wcard" style="flex:1;padding:5px;border-style:dashed;font-size:7.5px">[B]<br><b>[$—]</b></div><div class="wcard" style="flex:1;padding:5px;border-style:dashed;font-size:7.5px">[C]<br><b>[$—]</b></div></div>
+</div>
+<div style="flex:1"></div>
+<div style="padding:6px 9px 10px"><div class="dock" style="font-size:8.5px;padding:7px 9px;border-radius:999px">Tell Yulia about your deal…</div></div>
+</div>
+</div>
+</div>
+
+<div class="dv-group">B · The morph (AppPhase: landing → chat · CSS crossfade · NO navigation)</div>
+
+<div class="dv-opt" id="5h" data-screen-label="5h Morph desktop sequence">
+<div class="dv-olabel"><a class="dv-oid" href="#5h">5h</a>Morph — desktop, 3 states + timing spec</div>
+<div class="dv-card wf" style="width:940px;padding:14px;display:flex;gap:12px;background:#fff">
+<div style="flex:1">
+<div class="note" style="margin-bottom:6px">T=0 · user hits send on /sell</div>
+<div class="wcard" style="border-radius:8px;overflow:hidden">
+<div class="bar" style="padding:6px 10px;border-bottom:none"><span class="logo" style="font-size:11px">smb<span class="terra">X</span>.ai</span><span class="nav" style="font-size:8.5px"><span><b>Sell</b></span><span>Buy</span><span>Brokers</span><span>Pricing</span></span></div>
+<div style="padding:14px 16px;display:flex;flex-direction:column;gap:7px;align-items:center;text-align:center">
+<div style="font-size:13px;font-weight:700">You built it. Find out what it's worth.</div>
+<div class="tl" style="width:60%"></div>
+<div class="dock" style="font-size:9px;color:#222;border-radius:999px;width:90%">I own a cleaning company in Phoenix, $1.8M revenue<span class="send" style="width:15px;height:15px"></span></div>
+</div>
+</div>
+</div>
+<div style="flex:1">
+<div class="note" style="margin-bottom:6px">T≈150ms · crossfade midpoint</div>
+<div class="wcard" style="border-radius:8px;overflow:hidden">
+<div class="bar" style="padding:6px 10px;border-bottom:none"><span class="logo" style="font-size:11px">smb<span class="terra">X</span>.ai</span><span style="font-size:8.5px;color:#ccc">Sell Buy… <span style="color:#888">→ ← Yulia</span></span></div>
+<div style="padding:14px 16px;position:relative;min-height:70px">
+<div style="opacity:.25;text-align:center"><div style="font-size:13px;font-weight:700">You built it. Find out…</div></div>
+<div style="position:absolute;right:16px;bottom:8px;opacity:.55" class="bubu" style="font-size:9px">I own a cleaning company…</div>
+</div>
+</div>
+<div class="note" style="margin-top:6px">page fades OUT 0–200ms · chat fades IN 100–300ms · nav links out ~200ms · "← Yulia" in 200ms @100ms delay · logo NEVER moves · dock does not remount (same ChatDock node)</div>
+</div>
+<div style="flex:1">
+<div class="note" style="margin-bottom:6px">T=300ms · chat phase · Yulia streams ≤2s</div>
+<div class="wcard" style="border-radius:8px;overflow:hidden">
+<div class="bar" style="padding:6px 10px;border-bottom:none"><span style="display:flex;gap:7px;align-items:center;white-space:nowrap"><span style="font-size:11px">←</span><span class="logo" style="font-size:11px">smb<span class="terra">X</span>.ai</span></span><span style="font-size:8.5px;color:#666">Yulia</span></div>
+<div style="padding:10px 16px;display:flex;flex-direction:column;gap:6px">
+<div class="bubu" style="font-size:9px">I own a cleaning company in Phoenix, $1.8M revenue</div>
+<div style="font-size:9px;line-height:1.45">Residential cleaning in Phoenix — I know this market well. Preliminary range:</div>
+<div style="font-size:15px;font-weight:700;letter-spacing:-.4px">$1.08M<span style="color:#999">–</span>$1.89M</div>
+<div class="dock" style="font-size:9px;border-radius:999px;padding:6px 8px">Message Yulia…</div>
+</div>
+</div>
+<div class="note" style="margin-top:6px">← reverses morph to the EXACT page + scroll position. /sell context piped in: she never asks buy-or-sell</div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="5i" data-screen-label="5i Morph mobile sequence">
+<div class="dv-olabel"><a class="dv-oid" href="#5i">5i</a>Morph — mobile, 3 states (keyboard stays up throughout)</div>
+<div class="dv-card wf" style="padding:14px;display:flex;gap:14px;background:#fff">
+<div>
+<div class="note" style="margin-bottom:6px">T=0 · typed, keyboard up</div>
+<div class="phone" style="height:280px;display:flex;flex-direction:column">
+<div style="padding:6px 8px;display:flex;justify-content:space-between"><span style="font-size:10px">≡</span><span class="logo" style="font-size:9px">smb<span class="terra">X</span>.ai</span><span style="width:10px"></span></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:0 12px">
+<div style="font-size:12px;font-weight:700">What's your business worth?</div>
+</div>
+<div style="padding:5px 8px"><div class="dock" style="font-size:8px;padding:6px 8px;border-radius:999px;color:#222">cleaning co in Phoenix, $1.8M rev<span class="send" style="width:13px;height:13px"></span></div></div>
+<div style="height:70px;background:repeating-linear-gradient(45deg,#f0efec,#f0efec 5px,#e7e5e0 5px,#e7e5e0 10px);display:flex;align-items:center;justify-content:center" class="note">keyboard</div>
+</div>
+</div>
+<div>
+<div class="note" style="margin-bottom:6px">T≈150ms · crossfade</div>
+<div class="phone" style="height:280px;display:flex;flex-direction:column">
+<div style="padding:6px 8px;display:flex;justify-content:space-between"><span style="font-size:10px;color:#bbb">≡→←</span><span class="logo" style="font-size:9px">smb<span class="terra">X</span>.ai</span><span style="width:10px"></span></div>
+<div style="flex:1;position:relative;padding:8px">
+<div style="opacity:.25;text-align:center;font-size:12px;font-weight:700;margin-top:20px">What's your business…</div>
+<div class="bubu" style="position:absolute;right:8px;bottom:6px;opacity:.55;font-size:8px">cleaning co in Phoenix…</div>
+</div>
+<div style="padding:5px 8px"><div class="dock" style="font-size:8px;padding:6px 8px;border-radius:999px">Message Yulia…</div></div>
+<div style="height:70px;background:repeating-linear-gradient(45deg,#f0efec,#f0efec 5px,#e7e5e0 5px,#e7e5e0 10px);display:flex;align-items:center;justify-content:center" class="note">keyboard NEVER dismisses</div>
+</div>
+</div>
+<div>
+<div class="note" style="margin-bottom:6px">T=300ms · chat, response streams</div>
+<div class="phone" style="height:280px;display:flex;flex-direction:column">
+<div style="padding:6px 8px;display:flex;justify-content:space-between"><span style="font-size:10px;display:flex;gap:4px;align-items:center;white-space:nowrap">← <span class="logo" style="font-size:9px">smb<span class="terra">X</span>.ai</span></span><span style="font-size:8px;color:#666">Yulia</span></div>
+<div style="flex:1;padding:6px 8px;display:flex;flex-direction:column;gap:5px">
+<div class="bubu" style="font-size:8px">cleaning co in Phoenix, $1.8M rev</div>
+<div style="font-size:8px;line-height:1.4">Residential cleaning in Phoenix — I know this market. Preliminary range:</div>
+<div style="font-size:13px;font-weight:700">$1.08M–$1.89M</div>
+</div>
+<div style="padding:5px 8px"><div class="dock" style="font-size:8px;padding:6px 8px;border-radius:999px">Message Yulia…</div></div>
+<div style="height:70px;background:repeating-linear-gradient(45deg,#f0efec,#f0efec 5px,#e7e5e0 5px,#e7e5e0 10px);display:flex;align-items:center;justify-content:center" class="note">--app-height from visualViewport</div>
+</div>
+</div>
+<div style="max-width:150px" class="note">full-bleed, no card chrome. layout heights from --app-height, never 100dvh, no overflow-hidden on the fixed container (locked §7). dock is the SAME ChatDock component, placeholder swaps to "Message Yulia…"</div>
+</div>
+</div>
+
+<div class="dv-group">C · The conversation spine (anonymous → email → price, value always first)</div>
+
+<div class="dv-opt" id="5j" data-screen-label="5j Conversation spine">
+<div class="dv-olabel"><a class="dv-oid" href="#5j">5j</a>First session, beat by beat — the conversion sequence in one strip</div>
+<div class="dv-card wf" style="width:940px;padding:16px;display:flex;gap:14px;background:#fff;align-items:flex-start">
+<div style="flex:1.2;display:flex;flex-direction:column;gap:6px">
+<div class="secl">STAGE 1 · THE 4-BEAT (anonymous)</div>
+<div class="bubu" style="font-size:9px">I own a residential cleaning company in Phoenix, about $1.8M revenue</div>
+<div style="font-size:9px;line-height:1.5"><b>①</b> Residential cleaning in Phoenix — I know this market well. <span class="note">classify</span></div>
+<div><div style="font-size:9px"><b>②</b> At $1.8M revenue, SDE ~$360K–$540K, which puts you at</div>
+<div style="font-size:16px;font-weight:700;letter-spacing:-.4px">$1.08M<span style="color:#999">–</span>$1.89M</div>
+<div class="note">estimate — number gets full width, 3.0–3.5× SDE shown, "rough, and I'll say so"</div></div>
+<div style="font-size:9px;line-height:1.5"><b>③</b> Residential ops above $1M revenue sit in the top tier here. <span class="note">insight, sourced (Census/BLS)</span></div>
+<div style="font-size:9px;line-height:1.5"><b>④</b> What's your total owner comp — salary, insurance, vehicle? <span class="note">the one question that moves the number most</span></div>
+<div style="display:flex;gap:5px"><span class="chip" style="font-size:8px;border-color:#D4714E;color:#D4714E">About $145K + extras</span><span class="chip" style="font-size:8px">How'd you get this?</span></div>
+</div>
+<div style="width:1.5px;background:#e4e2dd;align-self:stretch"></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<div class="secl">STAGE 2 · THE REVEAL → EMAIL</div>
+<div style="font-size:9px;line-height:1.5">Salary + truck + health insurance →</div>
+<div class="wcard" style="padding:8px 10px;background:#FAF8F4;max-width:200px">
+<div style="font-size:14px;font-weight:700" class="terra">+$84K SDE found</div>
+<div style="font-size:8.5px">≈ +$250–290K to your range</div>
+<div class="note" style="font-size:7.5px">Blind Equity™ — the falling-in-love moment</div>
+</div>
+<div style="font-size:9px;line-height:1.5">I'll put your full Baseline™ together — ready in ~20 seconds. <b>Where should I send it?</b></div>
+<div class="wcard" style="padding:7px 9px;max-width:190px"><div style="display:flex;gap:5px;align-items:center"><div style="border:1.5px solid #2b2b2b;border-radius:999px;padding:3px 8px;flex:1;font-size:8.5px;color:#999">you@company.com</div><span class="send" style="width:15px;height:15px"></span></div><div class="note" style="margin-top:4px;font-size:7.5px">= account creation. skippable ("just show me here"). value never gated</div></div>
+</div>
+<div style="width:1.5px;background:#e4e2dd;align-self:stretch"></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<div class="secl">STAGE 3 · PRICE REVEAL (later)</div>
+<div style="font-size:9px;line-height:1.5">Your Rundown™ is ready to generate. A broker's fee on a deal your size: <b>~$180K</b>. This costs:</div>
+<div class="wcard" style="padding:8px 10px;max-width:190px">
+<div style="font-size:13px;font-weight:700" class="terra">[$ —]</div>
+<div style="font-size:8px;color:#777">vs ~$180K · no success fees ever</div>
+<div style="display:flex;gap:4px;margin-top:5px"><span class="chip" style="font-size:7.5px;border-color:#D4714E;color:#D4714E">Continue</span><span class="chip" style="font-size:7.5px">Why this price?</span></div>
+</div>
+<div class="note">anchored, personalized, in-conversation. ⚠ number TBD (model unresolved). NDA/financials asks come LAST, out of this phase</div>
+<div class="secl" style="margin-top:8px">DENSITY MODES</div>
+<div class="note">practitioner ("search fund, three targets") → terse, no term definitions. anxious first-timer → calm, defines SDE inline just-in-time. inferred from page origin + first message</div>
+</div>
+</div>
+</div>
+
+<div class="dv-group">D · The logged-in app (returning user, conversations persist)</div>
+
+<div class="dv-opt" id="5k" data-screen-label="5k App desktop workspace">
+<div class="dv-olabel"><a class="dv-oid" href="#5k">5k</a>App — desktop workspace: sidebar + chat + canvas (<a class="dv-oid" href="#3b">3b</a> in turn-4 grammar)</div>
+<div class="dv-card wf" style="width:720px;background:#f9f9fc">
+<div class="bar" style="padding:8px 16px;background:#fff"><span style="display:flex;gap:8px;align-items:center"><span style="font-size:11px">☰</span><span class="logo" style="font-size:12px">smb<span class="terra">X</span>.ai</span></span><span style="font-size:10px;display:flex;gap:8px;align-items:center"><span><b>Phoenix cleaning co</b> ▾</span><span class="chip" style="font-size:8px">$1.33–2.14M</span><span style="width:16px;height:16px;border-radius:50%;background:#FFF0EB;border:1px solid rgba(212,113,78,.4);font-size:8px;display:inline-flex;align-items:center;justify-content:center">P</span></span></div>
+<div style="display:flex;height:260px">
+<div style="width:130px;background:#fff;border-right:1.5px solid #e4e2dd;padding:8px;display:flex;flex-direction:column;gap:5px">
+<div class="chip" style="font-size:8px;text-align:center;border-radius:999px">＋ New chat</div>
+<div class="note" style="font-size:7.5px;margin-top:3px">DEALS</div>
+<div style="font-size:8.5px;background:#f4f4f2;border-radius:8px;padding:4px 6px"><b>Phoenix cleaning</b><br><span class="note" style="font-size:7px">Baseline v3 · active</span></div>
+<div class="note" style="font-size:7.5px;margin-top:3px">CHATS</div>
+<div style="font-size:8px;padding:2px 6px">Owner comp add-backs</div>
+<div style="font-size:8px;padding:2px 6px">What's a fair multiple…</div>
+<div style="flex:1"></div>
+<div class="note" style="font-size:7px">sidebar slides in/out; chat+canvas never reflow (locked §7)</div>
+</div>
+<div style="width:38%;background:#fff;border-right:1.5px solid #e4e2dd;padding:10px;display:flex;flex-direction:column;gap:6px">
+<div class="bubu" style="font-size:8.5px">owner comp is $145K + truck + health ins</div>
+<div style="font-size:8.5px;line-height:1.45">That's <b>+$84K SDE</b> in add-backs. I've updated your Baseline — new range:</div>
+<div style="font-size:14px;font-weight:700;letter-spacing:-.4px">$1.33M<span style="color:#999">–</span>$2.14M</div>
+<div style="display:flex;gap:4px"><span class="chip" style="font-size:7.5px;border-color:#D4714E;color:#D4714E">Start the Rundown™</span><span class="chip" style="font-size:7.5px">Show the math</span></div>
+<div style="flex:1"></div>
+<div class="dock" style="font-size:8.5px;padding:6px 8px;border-radius:999px">Message Yulia…<span class="send" style="width:14px;height:14px"></span></div>
+</div>
+<div style="flex:1;padding:10px 12px">
+<div style="display:flex;gap:5px;margin-bottom:7px"><span class="chip" style="font-size:8px;border-color:#D4714E;color:#D4714E">Baseline™</span><span class="chip" style="font-size:8px;color:#999;border-color:#ccc">Add-backs</span><span class="chip" style="font-size:8px;color:#999;border-color:#ccc">Rundown™ draft</span><span style="flex:1"></span><span class="note" style="font-size:7.5px">⤓ share</span></div>
+<div style="background:#fff;border:1.5px solid #e4e2dd;border-radius:14px;padding:11px;height:190px">
+<div style="display:flex;justify-content:space-between"><span class="secl" style="font-size:7.5px">THE BASELINE™ · v3</span><span class="note" style="font-size:7px">updated now ●</span></div>
+<div style="font-size:16px;font-weight:700;margin:6px 0;letter-spacing:-.4px">$1.33M<span style="color:#999">–</span>$2.14M <span style="font-size:8px" class="terra">↑ +$250K</span></div>
+<div style="font-size:8px;display:flex;flex-direction:column;gap:3px">
+<div style="display:flex;justify-content:space-between;border-bottom:1px solid #f0efec;padding-bottom:2px"><span>SDE (adj.)</span><b>$444–624K</b></div>
+<div style="display:flex;justify-content:space-between;border-bottom:1px solid #f0efec;padding-bottom:2px"><span>Multiple</span><b>3.0–3.5×</b></div>
+<div style="display:flex;justify-content:space-between"><span>Add-backs found</span><b class="terra">+$84K</b></div>
+</div>
+<div class="note" style="margin-top:6px;font-size:7px">each row expands → math + source · version history at top · canvas = Gemini/Claude artifact panel, 55% width</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="5l" data-screen-label="5l App mobile trio">
+<div class="dv-olabel"><a class="dv-oid" href="#5l">5l</a>App — mobile trio: home · chat · doc drawer (<a class="dv-oid" href="#4b">4b</a>/<a class="dv-oid" href="#4c">4c</a>/<a class="dv-oid" href="#3c">3c</a> final)</div>
+<div class="dv-card wf" style="padding:14px;display:flex;gap:12px;background:#fff">
+<div>
+<div class="note" style="margin-bottom:6px">home = the deal</div>
+<div class="phone" style="background:#f4f4f2;height:310px;display:flex;flex-direction:column">
+<div style="padding:9px 10px 3px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:700">Your deal</span><span style="width:15px;height:15px;border-radius:50%;background:#FFF0EB;border:1px solid rgba(212,113,78,.4);font-size:8px;display:flex;align-items:center;justify-content:center">P</span></div>
+<div style="padding:6px 10px 2px"><div style="font-size:8px;color:#777">Value range ›</div>
+<div style="font-size:19px;font-weight:700;letter-spacing:-.5px">$1.33M<span style="color:#999">–</span>$2.14M</div>
+<div style="font-size:8px" class="terra">↑ $250K from add-backs</div></div>
+<div style="display:flex;gap:5px;padding:7px 10px"><div style="flex:1;background:#fff;border-radius:999px;padding:5px;text-align:center;font-size:8px;border:1.5px solid #2b2b2b"><b>Ask Yulia</b></div><div style="flex:1;background:#fff;border-radius:999px;padding:5px;text-align:center;font-size:8px;border:1.5px solid #ddd">Rundown™</div></div>
+<div style="margin:2px 10px;background:#fff;border-radius:11px;padding:6px 9px;display:flex;justify-content:space-between;font-size:8px"><span><b>Blind Equity™</b></span><span class="terra"><b>+$84K</b></span></div>
+<div style="margin:5px 10px 2px;font-size:9px;font-weight:700">Next up</div>
+<div style="margin:2px 10px;background:#fff;border-radius:11px;padding:6px 9px;display:flex;justify-content:space-between;font-size:8px"><span>Gather 3yr P&amp;L</span><span class="chip" style="font-size:7px;padding:1px 6px">Start</span></div>
+<div style="flex:1"></div>
+<div style="display:flex;justify-content:center;padding:4px 0 8px"><div style="background:#fff;border-radius:999px;box-shadow:0 3px 8px rgba(0,0,0,.1);padding:4px 12px;display:flex;gap:12px;font-size:9px"><span>⌂</span><span style="background:#f0efec;border-radius:999px;padding:1px 7px">💬</span><span>◫</span></div></div>
+</div>
+</div>
+<div>
+<div class="note" style="margin-bottom:6px">chat (bubble-less Yulia)</div>
+<div class="phone" style="height:310px;display:flex;flex-direction:column">
+<div style="padding:7px 9px;display:flex;justify-content:space-between"><span style="font-size:10px;display:flex;gap:4px;align-items:center;white-space:nowrap">← <span class="logo" style="font-size:9px">smb<span class="terra">X</span>.ai</span></span><span style="font-size:8px;color:#666">Yulia</span></div>
+<div style="flex:1;padding:5px 9px;display:flex;flex-direction:column;gap:5px">
+<div class="bubu" style="font-size:8px">owner comp $145K + truck + insurance</div>
+<div style="font-size:8px;line-height:1.45">That's <b>+$84K SDE</b>. New range:</div>
+<div style="font-size:14px;font-weight:700;letter-spacing:-.4px">$1.33M–$2.14M</div>
+<div class="wcard" style="padding:6px 8px;font-size:8px"><span class="secl" style="font-size:6.5px">THE BASELINE™ · V3 · TAP</span><br><b>updated just now</b></div>
+<div style="display:flex;gap:4px;flex-wrap:wrap"><span class="chip" style="font-size:7px;border-color:#D4714E;color:#D4714E">Start Rundown™</span><span class="chip" style="font-size:7px">Show math</span></div>
+</div>
+<div style="padding:5px 9px 9px"><div class="dock" style="font-size:8px;padding:6px 8px;border-radius:999px">Message Yulia…</div></div>
+</div>
+</div>
+<div>
+<div class="note" style="margin-bottom:6px">doc drawer (~92%, swipe down)</div>
+<div class="phone" style="background:#d8d6d1;position:relative;height:310px">
+<div style="padding:4px 8px;font-size:7px;color:#666">chat dims behind</div>
+<div style="position:absolute;left:0;right:0;bottom:0;top:22px;background:#fff;border:1.5px solid #2b2b2b;border-bottom:none;border-radius:14px 14px 0 0;padding:8px 10px">
+<div style="width:26px;height:3px;background:#ccc;border-radius:2px;margin:0 auto 6px"></div>
+<div style="display:flex;gap:4px;margin-bottom:5px"><span class="chip" style="font-size:6.5px;border-color:#D4714E;color:#D4714E">Baseline™</span><span class="chip" style="font-size:6.5px;color:#999">Add-backs</span><span class="chip" style="font-size:6.5px;color:#999">Rundown™</span></div>
+<div style="font-size:14px;font-weight:700;margin:4px 0;letter-spacing:-.4px">$1.33M–$2.14M</div>
+<div style="font-size:7.5px;display:flex;flex-direction:column;gap:2px">
+<div style="display:flex;justify-content:space-between;border-bottom:1px solid #f0efec"><span>SDE (adj.)</span><b>$444–624K</b></div>
+<div style="display:flex;justify-content:space-between;border-bottom:1px solid #f0efec"><span>Multiple</span><b>3.0–3.5×</b></div>
+<div style="display:flex;justify-content:space-between"><span>Add-backs</span><b class="terra">+$84K</b></div>
+</div>
+<div class="note" style="margin-top:6px;font-size:6.5px">same doc component as desktop canvas · honors --app-height · share/export top-right</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="dv-group">E · Engineering notes (for Claude Code)</div>
+
+<div class="dv-opt" id="5m" data-screen-label="5m Spec card">
+<div class="dv-olabel"><a class="dv-oid" href="#5m">5m</a>Component inventory · state machine · rules</div>
+<div class="dv-card wf" style="width:940px;padding:16px;display:flex;gap:18px;background:#fff;font-size:9.5px">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<div class="secl">APPPHASE STATE MACHINE</div>
+<div class="wcard" style="padding:8px 10px;font-family:ui-monospace,monospace;font-size:8.5px;line-height:1.6">landing(page) ──send──▶ chat<br>chat ──back──▶ landing (exact page + scroll)<br>chat ──artifact──▶ chat+canvas (desktop)<br>chat ──artifact tap──▶ drawer (mobile)<br><br>CSS crossfade ~300ms. no route change,<br>no remount. logo + ChatDock persist.</div>
+<div class="secl" style="margin-top:6px">CONTEXT PIPING</div>
+<div class="note" style="font-size:8.5px">origin page → Yulia's system context: / = unknown (chips can set) · /sell = seller, valuation-first · /buy = buyer, deal-check · /brokers = practitioner, terse mode. persona chips on / do the same without navigation.</div>
+<div class="secl" style="margin-top:6px">iOS SAFARI (locked)</div>
+<div class="note" style="font-size:8.5px">--app-height from visualViewport; never 100dvh; no overflow-hidden on fixed chat container; keyboard never dismissed by the morph.</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<div class="secl">SHARED COMPONENTS</div>
+<div class="note" style="font-size:8.5px;line-height:1.6"><b style="color:#444">ChatDock</b> — ONE component everywhere. pill shape, auto-expand textarea 1–5 rows, ＋ (tools/upload), attachment chips, circular terra send (visible only w/ text). placeholder by context (5 variants).<br>
+<b style="color:#444">BigNumber</b> — CashApp-scale range display: Inter 700/800, tight tracking, gray en-dashes; terra ONLY when it's the hero datum.<br>
+<b style="color:#444">ResultCard</b> — Baseline/DealCheck/BlindEquity variants; receipt rows, each expandable to math + source; version chip.<br>
+<b style="color:#444">QuickReplies</b> — pill row after Yulia turns; primary pill terra-outlined; she always drives.<br>
+<b style="color:#444">EmailCard / PriceCard</b> — in-stream cards (<a class="dv-oid" href="#5j">5j</a>), never modals.<br>
+<b style="color:#444">Canvas / Drawer</b> — same doc component; panel ≥768px, slide-up drawer &lt;768px.<br>
+<b style="color:#444">PillNav</b> (app mobile) — floating: home · chat · docs.</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<div class="secl">VISUAL RULES (locked tokens)</div>
+<div class="note" style="font-size:8.5px;line-height:1.6">page #FAFAFA · cream #FAF8F4 · card #FFF/#eeeef0 · app #f9f9fc · text #1A1A18/#44403C/#6E6A63 · terra #D4714E functional only (send, active, hero numbers, logo X, section labels) · terra-soft #FFF0EB user bubbles only · cards ~20px radius · pills 999px · no italics — em = terra color · Inter 400–800; hero headline: show Sora ExtraBold AND Inter 800 variants for Paul · logo asset: assets/logo-terra-x.png</div>
+<div class="secl" style="margin-top:6px">VOICE RULES</div>
+<div class="note" style="font-size:8.5px;line-height:1.6">Yulia never opens generic; 4-beat first response always (classify → estimate → insight → question). user bubble terra-soft; Yulia bubble-less plain text. she ends every turn driving. email after value, price after email, NDA last (not this phase).</div>
+<div class="secl" style="margin-top:6px">OPEN FLAGS FOR PAUL</div>
+<div class="note" style="font-size:8.5px;line-height:1.6">① hero typeface Sora vs Inter 800 · ② pricing model (tiers/numbers placeholder everywhere) · ③ broker-page stats need sourcing</div>
+</div>
+</div>
+</div>
+
+</div>
+<p class="dv-next">Handoff set complete. Try next: "package this for Claude Code" (adds a HANDOFF.md) · "go hi-fi on <a class="dv-oid" href="#5a">5a</a> with both hero typefaces" · "revise the app workspace <a class="dv-oid" href="#5k">5k</a>"</p>
+</section>
+
+<section class="dv-turn" id="t4">
+<div class="dv-thd"><a class="dv-tid" href="#t4">4</a><span class="dv-tname">CashApp/Gemini cues translated — big type, one number per screen, pill CTAs, floating pill nav, greeting + single input</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="4a" data-screen-label="4a Mobile home greeting">
+<div class="dv-olabel"><a class="dv-oid" href="#4a">4a</a>Mobile home — Gemini-style greeting, one input, nothing else</div>
+<div class="dv-card wf" style="padding:14px;display:flex;gap:14px;background:#fff">
+<div>
+<div class="note" style="margin-bottom:6px">first visit (anonymous)</div>
+<div class="phone" style="height:330px;display:flex;flex-direction:column">
+<div style="padding:8px 10px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px">≡</span><span class="logo" style="font-size:10px">smb<span class="terra">X</span>.ai</span><span style="width:11px"></span></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;padding:0 16px">
+<div style="width:16px;height:16px;border:1.5px solid #D4714E;border-radius:50%;transform:rotate(45deg)"></div>
+<div style="font-size:15px;font-weight:700;line-height:1.15">What's your business worth?</div>
+<div class="note">returning user: "Morning, Paul. Your range is holding at $1.4M."</div>
+</div>
+<div style="padding:8px 10px 12px"><div class="dock" style="font-size:9px;padding:8px 10px;border-radius:999px">＋&nbsp; Tell Yulia about your deal…<span class="send" style="width:16px;height:16px"></span></div></div>
+</div>
+</div>
+<div style="max-width:180px" class="note">the whole screen is a greeting + a pill input (Gemini). no cards, no feed, no feature list. keyboard opens on tap, dock rides above it (--app-height)</div>
+</div>
+</div>
+
+<div class="dv-opt" id="4b" data-screen-label="4b Deal screen big number">
+<div class="dv-olabel"><a class="dv-oid" href="#4b">4b</a>Deal screen — CashApp "Money" grammar: one huge number, pill actions, stage rows</div>
+<div class="dv-card wf" style="padding:14px;display:flex;gap:14px;background:#fff">
+<div class="phone" style="background:#f4f4f2">
+<div style="padding:10px 10px 4px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:700">Your deal</span><span style="display:flex;gap:5px"><span style="width:16px;height:16px;border:1.5px solid #2b2b2b;border-radius:50%;font-size:8px;display:flex;align-items:center;justify-content:center">?</span><span style="width:16px;height:16px;border-radius:50%;background:#FFF0EB;border:1px solid rgba(212,113,78,.4);font-size:8px;display:flex;align-items:center;justify-content:center">P</span></span></div>
+<div style="padding:8px 10px 2px"><div style="font-size:9px;color:#777">Value range ›</div>
+<div style="font-size:21px;font-weight:700;letter-spacing:-.5px">$1.33M<span style="color:#999">–</span>$2.14M</div>
+<div style="font-size:8.5px" class="terra">↑ $250K from add-backs this week</div></div>
+<div style="display:flex;gap:6px;padding:8px 10px">
+<div style="flex:1;background:#fff;border-radius:999px;padding:6px;text-align:center;font-size:9px;border:1.5px solid #2b2b2b"><b>Ask Yulia</b></div>
+<div style="flex:1;background:#fff;border-radius:999px;padding:6px;text-align:center;font-size:9px;border:1.5px solid #ddd">Open Rundown™</div>
+</div>
+<div style="margin:4px 10px;background:#fff;border-radius:12px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;font-size:9px"><span><b>Blind Equity™</b> found</span><span class="terra"><b>+$84K</b></span></div>
+<div style="padding:6px 10px 2px;font-size:10px;font-weight:700">Next up</div>
+<div style="margin:2px 10px;background:#fff;border-radius:12px;padding:7px 10px;display:flex;justify-content:space-between;align-items:center;font-size:8.5px"><span>Confirm owner comp</span><span class="chip" style="font-size:8px;padding:1px 7px">Start</span></div>
+<div style="margin:4px 10px 8px;background:#fff;border-radius:12px;padding:7px 10px;display:flex;justify-content:space-between;align-items:center;font-size:8.5px"><span>Gather 3yr P&amp;L</span><span class="chip" style="font-size:8px;padding:1px 7px">Start</span></div>
+<div style="display:flex;justify-content:center;padding:4px 0 8px"><div style="background:#fff;border-radius:999px;box-shadow:0 3px 8px rgba(0,0,0,.1);padding:5px 14px;display:flex;gap:14px;font-size:10px"><span style="background:#f0efec;border-radius:999px;padding:1px 8px">💬</span><span>◫</span><span>⏱</span></div></div>
+</div>
+<div style="max-width:180px" class="note">the deal IS the balance. big number = value range (updates as Yulia works). stage rows = CashApp's Stocks/Savings "Start" rows. floating pill nav: chat · docs · activity. chat stays one tap away, always</div>
+</div>
+</div>
+
+<div class="dv-opt" id="4c" data-screen-label="4c Chat with canned actions">
+<div class="dv-olabel"><a class="dv-oid" href="#4c">4c</a>Chat gets the same grammar — big numbers in-stream, pill quick-replies</div>
+<div class="dv-card wf" style="padding:14px;display:flex;gap:14px;background:#fff">
+<div class="phone" style="background:#fff;height:330px;display:flex;flex-direction:column">
+<div style="padding:8px 10px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;display:flex;gap:5px;align-items:center;white-space:nowrap">← <span class="logo" style="font-size:10px">smb<span class="terra">X</span>.ai</span></span><span style="font-size:9px;color:#666">Yulia</span></div>
+<div style="flex:1;padding:6px 10px;display:flex;flex-direction:column;gap:6px;overflow:hidden">
+<div class="bubu" style="font-size:9px">cleaning co in Phoenix, $1.8M revenue</div>
+<div style="font-size:9px;line-height:1.45;max-width:92%">Residential cleaning in Phoenix — I know this market well. Preliminary range:</div>
+<div style="font-size:17px;font-weight:700;letter-spacing:-.5px">$1.08M<span style="color:#999">–</span>$1.89M</div>
+<div class="note">3.0–3.5× SDE · her replies have NO bubble — plain text + huge numbers on white, CashApp balance-style. only the user gets a (terra-soft) bubble</div>
+<div style="display:flex;gap:5px;flex-wrap:wrap"><span class="chip" style="font-size:8px;border-color:#D4714E;color:#D4714E">Sharpen it</span><span class="chip" style="font-size:8px">How'd you get this?</span></div>
+</div>
+<div style="padding:6px 10px 10px"><div class="dock" style="font-size:9px;padding:7px 9px;border-radius:999px">Message Yulia…</div></div>
+</div>
+<div style="max-width:180px" class="note">quick-reply pills = her "she drives" next steps, tappable. bubble-less Yulia kills the chatbot-widget feel and gives numbers the full screen width. same treatment on desktop</div>
+</div>
+</div>
+
+<div class="dv-opt" id="4d" data-screen-label="4d Desktop translation">
+<div class="dv-olabel"><a class="dv-oid" href="#4d">4d</a>Same grammar on desktop — greeting + pill input + one number</div>
+<div class="dv-card wf" style="width:560px">
+<div class="bar" style="padding:9px 32px;border-bottom:none"><span class="logo">smb<span class="terra">X</span>.ai</span><span class="nav" style="gap:14px;font-size:10px"><span>Sell</span><span>Buy</span><span>Brokers</span><span>How it works</span><span>Pricing</span></span></div>
+<div style="padding:40px 32px 34px;display:flex;flex-direction:column;align-items:center;gap:13px;text-align:center">
+<div style="width:18px;height:18px;border:2px solid #D4714E;border-radius:50%;transform:rotate(45deg)"></div>
+<div style="font-size:27px;font-weight:700;line-height:1.02;max-width:340px;letter-spacing:-.5px">What's your business worth?</div>
+<div class="dock" style="width:380px;border-radius:999px;padding:11px 14px">＋&nbsp; Tell Yulia about your deal…<span class="send" style="width:22px;height:22px"></span></div>
+<div style="display:flex;gap:7px"><span class="chip" style="font-size:9px">I'm selling</span><span class="chip" style="font-size:9px">I'm buying</span><span class="chip" style="font-size:9px">I'm a broker</span></div>
+<div class="note">chips replace persona nav-diving — they just pre-load Yulia's context, same as visiting /sell</div>
+</div>
+<div style="border-top:1.5px solid #eee;padding:14px 32px;display:flex;align-items:center;justify-content:center;gap:10px">
+<div style="font-size:15px;font-weight:700">$1.08M<span style="color:#999">–</span>$1.89M</div>
+<div class="note">live sample ticker, rotating 3 deals — the only other element on the page</div>
+</div>
+<div style="padding:8px 12px" class="note">homepage ≈ the app's empty state. marketing sections (fee anchor, how-it-works) live BELOW the fold for scrollers; the morph is barely a morph since the page already is the chat</div>
+</div>
+</div>
+
+</div>
+<p class="dv-next">Try next: "commit: <a class="dv-oid" href="#4d">4d</a> homepage + <a class="dv-oid" href="#4c">4c</a> chat + <a class="dv-oid" href="#4b">4b</a> deal screen, go hi-fi" · "keep <a class="dv-oid" href="#2a">2a</a>'s Baseline card but with <a class="dv-oid" href="#4c">4c</a>'s bubble-less chat" · "riff on the returning-user home"</p>
+</section>
+
+<section class="dv-turn" id="t3">
+<div class="dv-thd"><a class="dv-tid" href="#t3">3</a><span class="dv-tname">The working UX — CashApp-simple UI, Gemini/Claude-style canvas for docs &amp; analysis (right panel desktop, slide-up drawer mobile)</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="3a" data-screen-label="3a Canvas: card slides left">
+<div class="dv-olabel"><a class="dv-oid" href="#3a">3a</a>Canvas joins the room — chat card (<a class="dv-oid" href="#2d">2d</a>) slides left, doc slides in</div>
+<div class="dv-card wf" style="width:720px;background:#f9f9fc;padding:14px;display:flex;gap:14px">
+<div style="flex:1">
+<div class="note" style="margin-bottom:6px">state 1 · just talking — chat centered, nothing else</div>
+<div class="wcard" style="border-radius:8px;background:#f9f9fc;overflow:hidden">
+<div class="bar" style="padding:6px 12px;background:#fff"><span style="display:flex;gap:7px;align-items:center"><span>←</span><span class="logo" style="font-size:11px">smb<span class="terra">X</span>.ai</span></span><span style="font-size:9px;color:#666">Yulia</span></div>
+<div style="display:flex;justify-content:center;padding:14px 0">
+<div style="width:62%;background:#fff;border:2px solid #eeeef0;border-radius:16px;box-shadow:0 8px 22px rgba(0,0,0,.07);padding:10px;display:flex;flex-direction:column;gap:6px">
+<div class="bubu" style="font-size:9px">cleaning co in Phoenix, $1.8M revenue</div>
+<div class="buby" style="font-size:9px">…range <b class="terra">$1.08M–$1.89M</b>. Want the full Baseline™?</div>
+<div class="dock" style="font-size:9px;padding:5px 8px">Message Yulia…</div>
+</div>
+</div>
+</div>
+</div>
+<div style="flex:1.35">
+<div class="note" style="margin-bottom:6px">state 2 · she produces a doc — chat slides left, canvas slides in (~300ms, same grammar as the morph)</div>
+<div class="wcard" style="border-radius:8px;background:#f9f9fc;overflow:hidden">
+<div class="bar" style="padding:6px 12px;background:#fff"><span style="display:flex;gap:7px;align-items:center"><span>←</span><span class="logo" style="font-size:11px">smb<span class="terra">X</span>.ai</span></span><span style="font-size:9px;color:#666">Yulia</span></div>
+<div style="display:flex;gap:10px;padding:12px">
+<div style="flex:1;background:#fff;border:2px solid #eeeef0;border-radius:14px;padding:9px;display:flex;flex-direction:column;gap:6px">
+<div class="buby" style="font-size:9px;max-width:100%">Here's your Baseline™ →</div>
+<div class="note">chat narrows, stays fully usable — you talk while she revises the doc live</div>
+<div style="flex:1"></div>
+<div class="dock" style="font-size:9px;padding:5px 8px">Message Yulia…</div>
+</div>
+<div style="flex:1.3;background:#fff;border:2px solid #eeeef0;border-radius:14px;box-shadow:0 8px 22px rgba(0,0,0,.07);padding:10px">
+<div style="display:flex;justify-content:space-between;align-items:center"><span class="secl">THE BASELINE™</span><span style="font-size:8px;color:#999">✕</span></div>
+<div class="tl" style="width:88%;margin-top:7px"></div><div class="tl" style="width:70%;margin-top:4px"></div>
+<div style="font-size:14px;margin:7px 0" class="terra"><b>$1.08M – $1.89M</b></div>
+<div class="tl" style="width:80%"></div><div class="tl" style="width:64%;margin-top:4px"></div>
+<div class="note" style="margin-top:7px">every number sourced · updates live as the chat adds add-backs</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="3b" data-screen-label="3b Canvas: full workspace">
+<div class="dv-olabel"><a class="dv-oid" href="#3b">3b</a>Full workspace split — persistent canvas with doc tabs (deeper in a deal)</div>
+<div class="dv-card wf" style="width:720px;background:#f9f9fc">
+<div class="bar" style="padding:8px 16px;background:#fff"><span style="display:flex;gap:8px;align-items:center"><span style="font-size:11px">☰</span><span class="logo" style="font-size:12px">smb<span class="terra">X</span>.ai</span></span><span style="font-size:10px;color:#666">Phoenix cleaning co · <span class="terra">Baseline done</span></span></div>
+<div style="display:flex;gap:0;height:250px">
+<div style="width:38%;border-right:1.5px solid #e4e2dd;background:#fff;padding:10px;display:flex;flex-direction:column;gap:6px">
+<div class="bubu" style="font-size:9px">owner comp is $145K salary + truck + health ins</div>
+<div class="buby" style="font-size:9px">That's <b class="terra">+$84K SDE</b> in add-backs — I've updated the Baseline →</div>
+<div class="note">doc references glow when she edits them</div>
+<div style="flex:1"></div>
+<div class="dock" style="font-size:9px;padding:6px 8px">Message Yulia…<span class="send" style="width:14px;height:14px"></span></div>
+</div>
+<div style="flex:1;padding:10px 14px">
+<div style="display:flex;gap:6px;margin-bottom:8px"><span class="chip" style="border-color:#D4714E;color:#D4714E;font-size:9px">Baseline™</span><span class="chip" style="font-size:9px;color:#999;border-color:#ccc">Add-backs</span><span class="chip" style="font-size:9px;color:#999;border-color:#ccc">Rundown™ (draft)</span></div>
+<div style="background:#fff;border:1.5px solid #e4e2dd;border-radius:12px;padding:12px;height:180px">
+<div style="display:flex;justify-content:space-between"><span class="secl">THE BASELINE™ · v3</span><span style="font-size:8px;color:#999">updated just now ●</span></div>
+<div style="font-size:17px;margin:8px 0" class="terra"><b>$1.33M – $2.14M</b> <span style="font-size:9px;color:#c98e75">↑ was $1.08–1.89M</span></div>
+<div class="tl" style="width:90%"></div><div class="tl" style="width:75%;margin-top:4px"></div><div class="tl" style="width:82%;margin-top:4px"></div>
+<div class="note" style="margin-top:8px">receipt-style: each line expandable to its source (BizComps, BLS…) · version history = trust</div>
+</div>
+</div>
+</div>
+<div style="padding:8px 14px;background:#fff;border-top:1.5px solid #e4e2dd" class="note">☰ = conversations sidebar (locked §7: slides in, no reflow). chrome stays CashApp-minimal: one topbar, no toolbars, no panels beyond chat+canvas</div>
+</div>
+</div>
+
+<div class="dv-opt" id="3c" data-screen-label="3c Mobile drawer">
+<div class="dv-olabel"><a class="dv-oid" href="#3c">3c</a>Mobile — docs live in a slide-up drawer over the chat</div>
+<div class="dv-card wf" style="padding:14px;display:flex;gap:14px;background:#fff">
+<div>
+<div class="note" style="margin-bottom:6px">artifact appears as a tappable card in chat</div>
+<div class="phone" style="background:#f9f9fc">
+<div class="bar" style="padding:6px 8px;background:#fff"><span style="font-size:10px;display:flex;gap:5px;align-items:center;white-space:nowrap">← <span class="logo" style="font-size:10px">smb<span class="terra">X</span>.ai</span></span><span style="font-size:9px;color:#666">Yulia</span></div>
+<div style="padding:10px 8px;display:flex;flex-direction:column;gap:6px">
+<div class="buby" style="font-size:9px">Your Baseline™ is ready ↓</div>
+<div class="wcard" style="padding:8px 9px;box-shadow:2px 2px 0 #e4e2dd">
+<div class="secl" style="font-size:7.5px">THE BASELINE™ · TAP TO OPEN</div>
+<div style="font-size:13px" class="terra"><b>$1.33M–$2.14M</b></div>
+</div>
+<div style="height:30px"></div>
+</div>
+<div style="border-top:1.5px solid #ddd;padding:6px 8px;background:#fff"><div class="dock" style="font-size:9px;padding:5px 8px">Message Yulia…</div></div>
+</div>
+</div>
+<div>
+<div class="note" style="margin-bottom:6px">drawer up ~92% — chat peeks behind, swipe down to return</div>
+<div class="phone" style="background:#d8d6d1;position:relative;height:298px">
+<div style="padding:5px 8px;font-size:8px;color:#666">chat dims behind…</div>
+<div style="position:absolute;left:0;right:0;bottom:0;top:24px;background:#fff;border:1.5px solid #2b2b2b;border-bottom:none;border-radius:14px 14px 0 0;padding:8px 10px">
+<div style="width:28px;height:3px;background:#ccc;border-radius:2px;margin:0 auto 7px"></div>
+<div style="display:flex;justify-content:space-between"><span class="secl" style="font-size:7.5px">THE BASELINE™ · v3</span><span style="font-size:8px;color:#999">⤓</span></div>
+<div style="font-size:14px;margin:6px 0" class="terra"><b>$1.33M – $2.14M</b></div>
+<div class="tl" style="width:88%"></div><div class="tl" style="width:70%;margin-top:4px"></div><div class="tl" style="width:80%;margin-top:4px"></div>
+<div class="tl" style="width:55%;margin-top:4px"></div>
+<div class="note" style="margin-top:8px">drawer height honors --app-height (locked §7) — never fights the keyboard. dock hidden while drawer is up</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="3d" data-screen-label="3d One room continuity strip">
+<div class="dv-olabel"><a class="dv-oid" href="#3d">3d</a>One continuous room — landing → morph → chat → canvas, one grammar</div>
+<div class="dv-card wf" style="width:720px;padding:14px;display:flex;gap:10px;align-items:center;background:#fff">
+<div style="flex:1">
+<div class="note" style="margin-bottom:5px">1 · marketing page</div>
+<div class="wcard" style="padding:8px;font-size:9px;border-radius:8px"><div style="font-weight:700;font-size:11px">What's it worth?</div><div class="tl" style="width:70%;margin:5px 0"></div><div class="dock" style="font-size:8px;padding:4px 6px">Tell Yulia…<span class="send" style="width:11px;height:11px"></span></div></div>
+</div>
+<div style="font-size:13px;color:#c98e75">→</div>
+<div style="flex:1">
+<div class="note" style="margin-bottom:5px">2 · morph (~300ms)</div>
+<div class="wcard" style="padding:8px;font-size:9px;border-radius:8px;background:#f9f9fc"><div class="bubu" style="font-size:8px">my deal…</div><div class="buby" style="font-size:8px;margin-top:4px"><b class="terra">$1.08–1.89M</b>…</div></div>
+</div>
+<div style="font-size:13px;color:#c98e75">→</div>
+<div style="flex:1">
+<div class="note" style="margin-bottom:5px">3 · doc → canvas slides in</div>
+<div class="wcard" style="padding:8px;font-size:9px;border-radius:8px;background:#f9f9fc;display:flex;gap:5px"><div style="flex:1"><div class="tl" style="width:90%"></div><div class="tl" style="width:70%;margin-top:3px"></div></div><div style="flex:1.2;border:1.5px solid #2b2b2b;border-radius:6px;padding:4px;font-size:8px"><span class="terra"><b>$1.33–2.14M</b></span><div class="tl" style="width:80%;margin-top:3px"></div></div></div>
+</div>
+<div style="font-size:13px;color:#c98e75">→</div>
+<div style="flex:1.1">
+<div class="note" style="margin-bottom:5px">4 · weeks later — same room, deal underway</div>
+<div class="wcard" style="padding:8px;font-size:9px;border-radius:8px;background:#f9f9fc;display:flex;gap:5px"><div style="width:16px;border-right:1px solid #ddd;font-size:7px;color:#999">☰</div><div style="flex:1"><div class="tl" style="width:85%"></div><div class="tl" style="width:60%;margin-top:3px"></div></div><div style="flex:1.2;border:1.5px solid #2b2b2b;border-radius:6px;padding:4px;font-size:7.5px">Rundown™ tabs<div class="tl" style="width:75%;margin-top:3px"></div></div></div>
+<div class="note" style="margin-top:5px">every transition = fade/slide, never a page load. one room throughout</div>
+</div>
+</div>
+</div>
+
+</div>
+<p class="dv-next">Try next: "commit: <a class="dv-oid" href="#2a">2a</a> homepage + <a class="dv-oid" href="#3a">3a</a> canvas + <a class="dv-oid" href="#3c">3c</a> mobile, go hi-fi" · "show the broker view of <a class="dv-oid" href="#3b">3b</a>" · "riff on how the canvas first appears"</p>
+</section>
+
+<section class="dv-turn" id="t2">
+<div class="dv-thd"><a class="dv-tid" href="#t2">2</a><span class="dv-tname">Desktop at true proportion — 1440px frames at half scale (turn 1 cards were compressed). How the wide screen actually breathes.</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="2a" data-screen-label="2a Desktop homepage: number leads">
+<div class="dv-olabel"><a class="dv-oid" href="#2a">2a</a>Homepage <a class="dv-oid" href="#1b">1b</a> at desktop width — asymmetric split, fold marked</div>
+<div class="dv-card wf" style="width:720px">
+<div class="bar" style="padding:10px 40px"><span class="logo">smb<span class="terra">X</span>.ai</span><span class="nav" style="gap:16px;font-size:11px"><span>Sell</span><span>Buy</span><span>Brokers</span><span>How it works</span><span>Pricing</span></span></div>
+<div style="display:flex;gap:44px;padding:44px 64px 30px;align-items:flex-start">
+<div style="flex:1.25;display:flex;flex-direction:column;gap:13px;padding-top:10px">
+<div class="secl">YOUR AI DEAL TEAM</div>
+<div style="font-size:31px;line-height:1.05;font-weight:700;max-width:340px">Yulia runs your deal. You make the decisions.</div>
+<div style="font-size:12px;color:#777;max-width:320px">Real numbers about your business in your first minute. No signup, <span class="terra">no success fees, ever</span>.</div>
+<div class="dock" style="max-width:360px;padding:11px 13px">Tell Yulia about your deal…<span class="send"></span></div>
+<div class="note">headline area = the Sora-vs-Inter-800 A/B for Paul</div>
+</div>
+<div style="flex:1;display:flex;justify-content:center">
+<div class="wcard" style="padding:16px 18px;box-shadow:4px 4px 0 #e4e2dd;width:250px;transform:rotate(.6deg)">
+<div class="secl">THE BASELINE™ · LIVE SAMPLE</div>
+<div style="font-size:12px;margin-top:8px;display:flex;flex-direction:column;gap:5px">
+<div style="display:flex;justify-content:space-between"><span>Revenue</span><b>$1.8M</b></div>
+<div style="display:flex;justify-content:space-between"><span>SDE est.</span><b>$360–540K</b></div>
+<div style="display:flex;justify-content:space-between"><span>Multiple</span><b>3.0–3.5×</b></div>
+<div style="display:flex;justify-content:space-between;border-top:1px solid #eee;padding-top:5px;font-size:15px"><span>Range</span><b class="terra">$1.08M–$1.89M</b></div>
+</div>
+<div class="note" style="margin-top:7px">rows animate in sequence, loop w/ 2 other sample deals</div>
+</div>
+</div>
+</div>
+<div style="display:flex;justify-content:center;gap:20px;padding:0 64px 22px;font-size:11px;color:#777"><span><b class="terra">No success fees.</b> Ever.</span><span>·</span><span>Computed, not guessed</span><span>·</span><span>You keep the judgment</span></div>
+<div style="border-top:2px dashed #d4714e55;position:relative"><span class="note" style="position:absolute;right:8px;top:2px;color:#c98e75">— fold @900px</span></div>
+<div style="display:flex;gap:14px;padding:20px 64px">
+<div class="wcard" style="flex:1;padding:12px 14px;font-size:11px"><b>Selling?</b><div class="tl" style="width:80%;margin-top:6px"></div><div class="tl" style="width:55%;margin-top:4px"></div></div>
+<div class="wcard" style="flex:1;padding:12px 14px;font-size:11px"><b>Buying?</b><div class="tl" style="width:80%;margin-top:6px"></div><div class="tl" style="width:55%;margin-top:4px"></div></div>
+<div class="wcard" style="flex:1;padding:12px 14px;font-size:11px"><b>Broker?</b><div class="tl" style="width:80%;margin-top:6px"></div><div class="tl" style="width:55%;margin-top:4px"></div></div>
+</div>
+<div style="background:#FAF8F4;border-top:1.5px solid #2b2b2b;padding:16px 64px;display:flex;align-items:center;justify-content:space-between">
+<div style="font-size:16px">A broker on a $2M sale: <s style="color:#999">~$180K</s> → Yulia: <b class="terra">no cut, ever</b></div>
+<span class="chip">see pricing</span>
+</div>
+<div style="padding:8px 14px" class="note">then: how-it-works teaser (3 steps) → footer with the dock repeated. total page ≈ 3 viewports, no feature grid</div>
+</div>
+</div>
+
+<div class="dv-opt" id="2b" data-screen-label="2b Desktop homepage: chat is the page">
+<div class="dv-olabel"><a class="dv-oid" href="#2b">2b</a>Homepage <a class="dv-oid" href="#1a">1a</a> at desktop width — one centered column, radical whitespace</div>
+<div class="dv-card wf" style="width:720px">
+<div class="bar" style="padding:10px 40px"><span class="logo">smb<span class="terra">X</span>.ai</span><span class="nav" style="gap:16px;font-size:11px"><span>Sell</span><span>Buy</span><span>Brokers</span><span>How it works</span><span>Pricing</span></span></div>
+<div style="padding:64px 0 26px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center">
+<div style="font-size:34px;line-height:1.02;font-weight:700;max-width:430px">What's your business actually worth?</div>
+<div style="font-size:12px;color:#777">Ask Yulia. Real numbers in your first minute. No signup.</div>
+<div class="dock" style="width:430px;padding:13px 15px;font-size:12px">Tell Yulia about your deal…<span class="send" style="width:24px;height:24px"></span></div>
+<div style="width:430px;text-align:left;padding:12px 14px;border:1.5px dashed #c9c4b8;border-radius:12px;display:flex;gap:10px">
+<div style="width:20px;height:20px;border-radius:50%;border:1.5px solid #2b2b2b;flex:none;font-size:10px;display:flex;align-items:center;justify-content:center">Y</div>
+<div style="display:flex;flex-direction:column;gap:6px;flex:1">
+<div class="tl" style="width:85%"></div>
+<div style="font-size:15px" class="terra"><b>$1.08M – $1.89M</b></div>
+<div class="tl" style="width:55%"></div>
+<div class="note">sample analysis auto-types below the input — everything else on the page is quiet</div>
+</div>
+</div>
+</div>
+<div style="border-top:2px dashed #d4714e55;position:relative"><span class="note" style="position:absolute;right:8px;top:2px;color:#c98e75">— fold</span></div>
+<div style="display:flex;justify-content:center;gap:24px;padding:20px 64px;font-size:11px;color:#777"><span><b class="terra">No success fees.</b> Ever.</span><span>·</span><span>Computed, not guessed</span><span>·</span><span>You keep the judgment</span></div>
+<div style="padding:8px 14px;border-top:1.5px solid #2b2b2b" class="note">the wide screen is mostly margin on purpose — the input is the only saturated moment. persona doors + footer below</div>
+</div>
+</div>
+
+<div class="dv-opt" id="2c" data-screen-label="2c Desktop persona doors">
+<div class="dv-olabel"><a class="dv-oid" href="#2c">2c</a>Homepage <a class="dv-oid" href="#1d">1d</a> at desktop width — doors go big, type goes bigger</div>
+<div class="dv-card wf" style="width:720px">
+<div class="bar" style="padding:10px 40px"><span class="logo">smb<span class="terra">X</span>.ai</span><span class="nav" style="gap:16px;font-size:11px"><span>How it works</span><span>Pricing</span></span></div>
+<div style="display:flex;gap:36px;padding:44px 64px;align-items:center">
+<div style="flex:1">
+<div style="font-size:38px;line-height:.98;font-weight:700">Selling?<br>Buying?<br><span style="color:#bbb">Brokering?</span></div>
+<div style="font-size:12px;color:#777;margin-top:10px;max-width:230px">Whatever seat you're in, Yulia's already working.</div>
+</div>
+<div style="flex:1.4;display:flex;gap:12px">
+<div class="wcard" style="flex:1;padding:16px 12px;box-shadow:4px 4px 0 #e4e2dd;min-height:120px"><div style="font-size:15px;font-weight:700">Sell</div><div style="font-size:11px" class="terra"><b>What's it worth?</b></div><div class="tl" style="width:85%;margin-top:8px"></div><div class="tl" style="width:60%;margin-top:4px"></div></div>
+<div class="wcard" style="flex:1;padding:16px 12px;box-shadow:4px 4px 0 #e4e2dd;min-height:120px;margin-top:14px"><div style="font-size:15px;font-weight:700">Buy</div><div style="font-size:11px" class="terra"><b>Is the ask fair?</b></div><div class="tl" style="width:85%;margin-top:8px"></div><div class="tl" style="width:60%;margin-top:4px"></div></div>
+<div class="wcard" style="flex:1;padding:16px 12px;box-shadow:4px 4px 0 #e4e2dd;min-height:120px;margin-top:28px"><div style="font-size:15px;font-weight:700">Broker</div><div style="font-size:11px" class="terra"><b>3× throughput</b></div><div class="tl" style="width:85%;margin-top:8px"></div><div class="tl" style="width:60%;margin-top:4px"></div></div>
+</div>
+</div>
+<div style="padding:0 64px 26px;display:flex;justify-content:center"><div class="dock" style="width:430px;padding:11px 13px">Or just tell Yulia about your deal…<span class="send"></span></div></div>
+<div style="padding:8px 14px;border-top:1.5px solid #2b2b2b" class="note">staggered door heights = the playful CashApp note without gradients or mascots. doors are real links to /sell /buy /brokers</div>
+</div>
+</div>
+
+<div class="dv-opt" id="2d" data-screen-label="2d Desktop chat view with gutters">
+<div class="dv-olabel"><a class="dv-oid" href="#2d">2d</a>Chat view <a class="dv-oid" href="#1g">1g</a> at desktop width — 860px card, gutters, future sidebar ghosted</div>
+<div class="dv-card wf" style="width:720px;background:#f9f9fc">
+<div class="bar" style="padding:10px 40px;background:#fff"><span style="display:flex;gap:10px;align-items:center"><span>←</span><span class="logo">smb<span class="terra">X</span>.ai</span></span><span style="font-size:11px;color:#666">Yulia</span></div>
+<div style="display:flex;padding:22px 0">
+<div style="width:120px;flex:none;display:flex;align-items:flex-start;justify-content:center">
+<div style="border:1.5px dashed #c9c4b8;border-radius:10px;width:86px;padding:8px 7px" class="note">future sidebar slides in here — card narrows, no reflow (locked §7)</div>
+</div>
+<div style="flex:1;max-width:430px;background:#fff;border:2px solid #eeeef0;border-radius:24px;box-shadow:0 14px 34px rgba(0,0,0,.08);padding:18px;display:flex;flex-direction:column;gap:10px">
+<div class="bubu">I own a residential cleaning company in Phoenix, about $1.8M revenue</div>
+<div style="display:flex;gap:8px"><div style="width:20px;height:20px;border-radius:50%;border:1.5px solid #2b2b2b;font-size:10px;display:flex;align-items:center;justify-content:center;flex:none">Y</div>
+<div style="display:flex;flex-direction:column;gap:7px">
+<div class="buby">Residential cleaning in Phoenix — I know this market well. At $1.8M revenue, SDE lands around $360K–$540K depending on add-backs…</div>
+<div class="wcard" style="padding:9px 11px;max-width:210px;box-shadow:3px 3px 0 #e4e2dd">
+<div class="secl">THE BASELINE™</div>
+<div style="font-size:14px;margin-top:3px" class="terra"><b>$1.08M – $1.89M</b></div>
+<div class="note">3.0–3.5× SDE · BizComps AZ</div>
+</div>
+<div class="buby">To sharpen this: what's your total owner comp — salary, insurance, vehicle?</div>
+</div></div>
+<div class="dock" style="font-size:11px">Message Yulia…<span class="send"></span></div>
+</div>
+<div style="width:120px;flex:none"></div>
+</div>
+<div style="padding:8px 14px;background:#fff;border-top:1.5px solid #ddd" class="note">gutters use app bg #f9f9fc — desktop chat feels like the page "zoomed in"; the 4-beat response reads as one Yulia turn: classify → estimate (card) → insight → question</div>
+</div>
+</div>
+
+</div>
+<p class="dv-next">Try next: "commit to <a class="dv-oid" href="#2a">2a</a> + <a class="dv-oid" href="#2d">2d</a>, go hi-fi" · "show <a class="dv-oid" href="#1c">1c</a> at desktop width too" · "riff on the below-fold sections for <a class="dv-oid" href="#2b">2b</a>"</p>
+</section>
+
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">First pass — structural directions for the whole public surface (lighter, CashApp-adjacent tone; terra only on numbers &amp; actions)</span></div>
+
+<div class="dv-opts">
+<div class="dv-group">Homepage — 4 directions</div>
+
+<div class="dv-opt" id="1a" data-screen-label="1a Homepage: chat is the page">
+<div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>The chat IS the page — almost no marketing above the fold</div>
+<div class="dv-card wf" style="width:440px">
+<div class="bar"><span class="logo">smb<span class="terra">X</span>.ai</span><span class="nav"><span>Sell</span><span>Buy</span><span>Brokers</span><span>How it works</span><span>Pricing</span></span></div>
+<div style="padding:34px 30px 18px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+<div style="font-size:26px;line-height:1.05;font-weight:700;max-width:320px">What's your business actually worth?</div>
+<div style="font-size:11px;color:#777">Ask Yulia. Real numbers in your first minute. No signup.</div>
+<div class="dock" style="width:88%;padding:11px 12px">Tell Yulia about your deal…<span class="send"></span></div>
+<div class="note">giant single input = the hero. send → morph</div>
+</div>
+<div style="margin:0 30px 16px;padding:10px 12px;border:1.5px dashed #c9c4b8;border-radius:10px;display:flex;gap:8px;align-items:flex-start">
+<div style="width:18px;height:18px;border-radius:50%;border:1.5px solid #2b2b2b;flex:none;font-size:9px;display:flex;align-items:center;justify-content:center">Y</div>
+<div style="display:flex;flex-direction:column;gap:5px;flex:1">
+<div class="tl" style="width:82%"></div>
+<div style="font-size:13px" class="terra"><b>$1.08M – $1.89M</b> <span class="note" style="color:#c98e75">← sample analysis auto-typing, looped</span></div>
+<div class="tl" style="width:55%"></div>
+</div>
+</div>
+<div style="display:flex;justify-content:center;gap:14px;padding:0 0 14px;font-size:10px;color:#777"><span><b class="terra">No success fees.</b> Ever.</span><span>·</span><span>Numbers computed, not guessed</span><span>·</span><span>You keep the judgment</span></div>
+<div style="border-top:1.5px solid #2b2b2b;padding:8px 12px" class="note">below fold: 3 persona doors → how-it-works strip → footer. that's it.</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1b" data-screen-label="1b Homepage: number leads">
+<div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>The number leads — split hero, live Baseline card as proof</div>
+<div class="dv-card wf" style="width:480px">
+<div class="bar"><span class="logo">smb<span class="terra">X</span>.ai</span><span class="nav"><span>Sell</span><span>Buy</span><span>Brokers</span><span>How it works</span><span>Pricing</span></span></div>
+<div style="display:flex;gap:16px;padding:24px 22px">
+<div style="flex:1.1;display:flex;flex-direction:column;gap:10px">
+<div class="secl">YOUR AI DEAL TEAM</div>
+<div style="font-size:21px;line-height:1.1;font-weight:700">Yulia runs your deal. You make the decisions.</div>
+<div class="tl" style="width:85%"></div><div class="tl" style="width:60%"></div>
+<div class="dock">Tell Yulia about your deal…<span class="send"></span></div>
+<div class="note">hero shown 2× later: Sora XBold vs Inter 800</div>
+</div>
+<div style="flex:1">
+<div class="wcard" style="padding:11px 12px;box-shadow:3px 3px 0 #e4e2dd">
+<div class="secl">THE BASELINE™</div>
+<div style="font-size:10.5px;margin-top:6px;display:flex;flex-direction:column;gap:4px">
+<div>$1.8M revenue</div>
+<div>→ SDE ~$360K–$540K</div>
+<div>→ 3.0×–3.5× SDE</div>
+<div style="font-size:16px" class="terra"><b>$1.08M – $1.89M</b></div>
+<div class="note">src: market comps · animates line-by-line</div>
+</div>
+</div>
+</div>
+</div>
+<div style="display:flex;gap:10px;padding:0 22px 16px">
+<div class="wcard" style="flex:1;padding:8px 10px;font-size:10px"><b>Selling?</b><div class="tl" style="width:80%;margin-top:5px"></div></div>
+<div class="wcard" style="flex:1;padding:8px 10px;font-size:10px"><b>Buying?</b><div class="tl" style="width:80%;margin-top:5px"></div></div>
+<div class="wcard" style="flex:1;padding:8px 10px;font-size:10px"><b>Broker?</b><div class="tl" style="width:80%;margin-top:5px"></div></div>
+</div>
+<div style="background:#FAF8F4;border-top:1.5px solid #2b2b2b;padding:12px 22px;display:flex;align-items:center;gap:12px">
+<div style="font-size:13px"><s style="color:#999">~$180K broker fee</s> → <b class="terra">$0 success fees</b></div>
+<div class="note">fee-anchor band, cream bg</div>
+</div>
+<div style="padding:8px 12px" class="note">below: how-it-works teaser (3 steps) → footer w/ dock repeated</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1c" data-screen-label="1c Homepage: one column narrative">
+<div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>One column, one motion — narrative scroll, conversation as proof</div>
+<div class="dv-card wf" style="width:400px">
+<div class="bar"><span class="logo">smb<span class="terra">X</span>.ai</span><span class="nav"><span>Sell</span><span>Buy</span><span>Brokers</span><span>How</span><span>Pricing</span></span></div>
+<div style="padding:26px 34px;display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center">
+<div style="font-size:23px;line-height:1.05;font-weight:700;max-width:280px">90% of what an investment bank does. None of the fees.</div>
+<div class="dock" style="width:92%">Tell Yulia about your deal…<span class="send"></span></div>
+</div>
+<div style="padding:0 34px 16px;display:flex;flex-direction:column;gap:6px">
+<div class="secl" style="text-align:center">A REAL FIRST MINUTE</div>
+<div class="bubu">I own a cleaning company in Phoenix, about $1.8M revenue</div>
+<div class="buby">Residential cleaning in Phoenix — I know this market. SDE ~$360–540K → <b class="terra">$1.08M–$1.89M</b> at 3.0–3.5×. What's your total owner comp?</div>
+<div class="note" style="text-align:center">verbatim 4-beat sample, static — proof by demonstration</div>
+</div>
+<div style="background:#FAF8F4;border-top:1.5px solid #2b2b2b;border-bottom:1.5px solid #2b2b2b;padding:14px 34px;text-align:center">
+<div style="font-size:16px"><b class="terra">No success fees. Ever.</b></div>
+<div style="font-size:10px;color:#777">A broker's cut on a $2M sale: ~$180K. Ours: $0.</div>
+</div>
+<div style="padding:14px 34px;display:flex;gap:8px">
+<div class="wcard" style="flex:1;padding:8px;font-size:10px;text-align:center">Sell</div>
+<div class="wcard" style="flex:1;padding:8px;font-size:10px;text-align:center">Buy</div>
+<div class="wcard" style="flex:1;padding:8px;font-size:10px;text-align:center">Broker</div>
+</div>
+<div style="padding:0 12px 10px" class="note">then: "computed, not guessed" engine strip → footer. everything centered, calm, generous space</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1d" data-screen-label="1d Homepage: persona doors">
+<div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>Persona doors first — big playful type, pick your seat (most CashApp)</div>
+<div class="dv-card wf" style="width:440px">
+<div class="bar"><span class="logo">smb<span class="terra">X</span>.ai</span><span class="nav"><span>How it works</span><span>Pricing</span></span></div>
+<div style="padding:28px 26px 10px;text-align:center">
+<div style="font-size:30px;line-height:1;font-weight:700">Selling?<br>Buying?<br><span style="color:#999">Brokering?</span></div>
+<div style="font-size:11px;color:#777;margin-top:8px">Whatever seat you're in, Yulia's already working.</div>
+</div>
+<div style="display:flex;gap:10px;padding:14px 26px">
+<div class="wcard" style="flex:1;padding:12px 10px;box-shadow:3px 3px 0 #e4e2dd">
+<div style="font-size:14px;font-weight:700">Sell</div>
+<div style="font-size:10px" class="terra"><b>What's it worth?</b></div>
+<div class="tl" style="width:85%;margin-top:6px"></div>
+</div>
+<div class="wcard" style="flex:1;padding:12px 10px;box-shadow:3px 3px 0 #e4e2dd">
+<div style="font-size:14px;font-weight:700">Buy</div>
+<div style="font-size:10px" class="terra"><b>Is the ask fair?</b></div>
+<div class="tl" style="width:85%;margin-top:6px"></div>
+</div>
+<div class="wcard" style="flex:1;padding:12px 10px;box-shadow:3px 3px 0 #e4e2dd">
+<div style="font-size:14px;font-weight:700">Broker</div>
+<div style="font-size:10px" class="terra"><b>3× throughput</b></div>
+<div class="tl" style="width:85%;margin-top:6px"></div>
+</div>
+</div>
+<div style="padding:4px 26px 18px">
+<div class="dock">Or just tell Yulia about your deal…<span class="send"></span></div>
+<div class="note" style="margin-top:6px">doors deep-link to /sell /buy /brokers; dock still works from here w/ no context</div>
+</div>
+<div style="border-top:1.5px solid #2b2b2b;padding:8px 12px" class="note">below: rotating proof ticker ($1.08M–$1.89M · 6.58× flag · +$84K add-back found) → fee anchor → footer</div>
+</div>
+</div>
+
+<div class="dv-group">The morph — storyboard (locked mechanics: CSS phase machine, no navigation)</div>
+
+<div class="dv-opt" id="1e" data-screen-label="1e Morph storyboard desktop">
+<div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>Desktop morph, 3 states over ~300ms</div>
+<div class="dv-card wf" style="width:940px;padding:14px;display:flex;gap:12px;background:#fff">
+<div style="flex:1">
+<div class="note" style="margin-bottom:6px">T=0 · landing (/sell), user typed + hit send</div>
+<div class="wcard" style="border-radius:8px;overflow:hidden">
+<div class="bar" style="padding:6px 10px"><span class="logo" style="font-size:11px">smb<span class="terra">X</span>.ai</span><span class="nav" style="font-size:9px"><span>Sell</span><span>Buy</span><span>Brokers</span><span>Pricing</span></span></div>
+<div style="padding:16px 18px;display:flex;flex-direction:column;gap:7px">
+<div style="font-size:15px;font-weight:700">Find out what your business is worth</div>
+<div class="tl" style="width:70%"></div><div class="tl" style="width:45%"></div>
+<div class="dock" style="font-size:10px;color:#222">I own a cleaning company in Phoenix, $1.8M revenue<span class="send"></span></div>
+</div>
+</div>
+</div>
+<div style="flex:1">
+<div class="note" style="margin-bottom:6px">T≈150ms · page fades, chat ghosts in, nav → back arrow</div>
+<div class="wcard" style="border-radius:8px;overflow:hidden">
+<div class="bar" style="padding:6px 10px"><span class="logo" style="font-size:11px">smb<span class="terra">X</span>.ai</span><span style="font-size:9px;color:#ccc">Sell Buy Brokers ⟶ <span style="color:#888">← Yulia</span></span></div>
+<div style="padding:16px 18px;position:relative">
+<div style="opacity:.28;display:flex;flex-direction:column;gap:7px">
+<div style="font-size:15px;font-weight:700">Find out what your business is worth</div>
+<div class="tl" style="width:70%"></div>
+</div>
+<div style="position:absolute;inset:auto 18px 10px auto;opacity:.55" class="bubu">I own a cleaning company in Phoenix, $1.8M revenue</div>
+<div style="height:34px"></div>
+</div>
+</div>
+<div class="note" style="margin-top:6px">crossfade only — nothing slides. logo never moves (the anchor)</div>
+</div>
+<div style="flex:1">
+<div class="note" style="margin-bottom:6px">T=300ms · chat view. Yulia streams in ~2s</div>
+<div class="wcard" style="border-radius:8px;overflow:hidden;background:#f9f9fc">
+<div class="bar" style="padding:6px 10px;background:#fff"><span style="display:flex;gap:8px;align-items:center"><span style="font-size:12px">←</span><span class="logo" style="font-size:11px">smb<span class="terra">X</span>.ai</span></span><span style="font-size:9px;color:#666">Yulia</span></div>
+<div style="margin:10px;background:#fff;border:1.5px solid #e4e2dd;border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:7px">
+<div class="bubu">I own a cleaning company in Phoenix, $1.8M revenue</div>
+<div style="display:flex;gap:6px"><div style="width:16px;height:16px;border-radius:50%;border:1.5px solid #2b2b2b;font-size:8px;display:flex;align-items:center;justify-content:center;flex:none">Y</div><div class="buby">Residential cleaning in Phoenix — I know this market well. SDE ~$360–540K → <b class="terra">$1.08M–$1.89M</b>…</div></div>
+<div class="dock" style="font-size:10px">Message Yulia…</div>
+</div>
+<div class="note" style="padding:0 10px 8px">← reverses morph to the exact page. /sell context: she never asks "buying or selling?"</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1f" data-screen-label="1f Morph mobile">
+<div class="dv-olabel"><a class="dv-oid" href="#1f">1f</a>Mobile pair — full-bleed chat, no card chrome</div>
+<div class="dv-card wf" style="padding:14px;display:flex;gap:14px;background:#fff">
+<div>
+<div class="note" style="margin-bottom:6px">landing</div>
+<div class="phone">
+<div class="bar" style="padding:6px 8px"><span class="logo" style="font-size:10px">smb<span class="terra">X</span>.ai</span><span style="font-size:11px">≡</span></div>
+<div style="padding:16px 12px;display:flex;flex-direction:column;gap:8px;text-align:center">
+<div style="font-size:15px;font-weight:700;line-height:1.1">What's your business worth?</div>
+<div class="tl" style="width:70%;margin:0 auto"></div>
+<div style="height:52px"></div>
+</div>
+<div style="border-top:1.5px solid #2b2b2b;padding:7px 8px"><div class="dock" style="font-size:9px;padding:6px 8px">Tell Yulia about your deal…<span class="send" style="width:16px;height:16px"></span></div></div>
+</div>
+<div class="note" style="margin-top:6px;max-width:172px">dock pinned bottom, sized by --app-height (keyboard-safe, per locked spec)</div>
+</div>
+<div>
+<div class="note" style="margin-bottom:6px">chat (same morph)</div>
+<div class="phone" style="background:#f9f9fc">
+<div class="bar" style="padding:6px 8px;background:#fff"><span style="font-size:11px;display:flex;gap:5px;align-items:center;white-space:nowrap">← <span class="logo" style="font-size:10px">smb<span class="terra">X</span>.ai</span></span><span style="font-size:9px;color:#666">Yulia</span></div>
+<div style="padding:10px 8px;display:flex;flex-direction:column;gap:6px">
+<div class="bubu" style="font-size:9px">Cleaning co in Phoenix, $1.8M revenue</div>
+<div class="buby" style="font-size:9px">Phoenix residential cleaning — I know this market. <b class="terra">$1.08M–$1.89M</b> at 3.0–3.5× SDE…</div>
+<div style="height:26px"></div>
+</div>
+<div style="border-top:1.5px solid #ddd;padding:7px 8px;background:#fff"><div class="dock" style="font-size:9px;padding:6px 8px">Message Yulia…</div></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="dv-group">Chat view framing + the result card (the falling-in-love moment)</div>
+
+<div class="dv-opt" id="1g" data-screen-label="1g Chat: elevated card">
+<div class="dv-olabel"><a class="dv-oid" href="#1g">1g</a>Elevated card — "the page zoomed into a workspace"</div>
+<div class="dv-card wf" style="width:360px;background:#f9f9fc">
+<div class="bar" style="background:#fff"><span style="display:flex;gap:8px;align-items:center"><span>←</span><span class="logo">smb<span class="terra">X</span>.ai</span></span><span style="font-size:10px;color:#666">Yulia</span></div>
+<div style="margin:16px 22px;background:#fff;border:2px solid #eeeef0;border-radius:22px;box-shadow:0 12px 30px rgba(0,0,0,.07);padding:14px;display:flex;flex-direction:column;gap:8px">
+<div class="bubu">…$1.8M revenue</div>
+<div class="buby">…preliminary range <b class="terra">$1.08M–$1.89M</b>. What's your total owner comp?</div>
+<div class="dock" style="font-size:10px">Message Yulia…</div>
+</div>
+<div class="note" style="padding:0 22px 14px">max-w 860 centered · ~40px radius · big soft shadow · gutter tint = app bg. sidebar slides into left gutter later, card just narrows — no reflow</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1h" data-screen-label="1h Chat: quiet full bleed">
+<div class="dv-olabel"><a class="dv-oid" href="#1h">1h</a>Quiet full-bleed — no chrome, just the conversation</div>
+<div class="dv-card wf" style="width:360px">
+<div class="bar"><span style="display:flex;gap:8px;align-items:center"><span>←</span><span class="logo">smb<span class="terra">X</span>.ai</span></span><span style="font-size:10px;color:#666">Yulia</span></div>
+<div style="padding:16px 40px;display:flex;flex-direction:column;gap:8px">
+<div class="bubu">…$1.8M revenue</div>
+<div class="buby" style="border:none;padding-left:0">…preliminary range <b class="terra">$1.08M–$1.89M</b>. What's your total owner comp?</div>
+<div class="dock" style="font-size:10px">Message Yulia…</div>
+</div>
+<div class="note" style="padding:0 40px 14px">Yulia's messages lose the bubble entirely — plain text on page bg, avatar in margin. feels like a document being written, less "chatbot". risk: weaker morph moment (nothing to zoom into)</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1i" data-screen-label="1i Result card treatments">
+<div class="dv-olabel"><a class="dv-oid" href="#1i">1i</a>Result-card treatments — 3 mini-variants (pick per moment)</div>
+<div class="dv-card wf" style="width:420px;padding:14px;display:flex;flex-direction:column;gap:12px">
+<div>
+<div class="note">i · inline strip — number lives inside her sentence flow</div>
+<div class="buby" style="margin-top:4px">…which puts your preliminary range at<br><span style="font-size:16px" class="terra"><b>$1.08M – $1.89M</b></span> <span style="font-size:9px;color:#999">3.0–3.5× SDE</span><br>What's your total owner comp?</div>
+</div>
+<div>
+<div class="note">ii · detached Baseline™ card — the math shown as receipt</div>
+<div class="wcard" style="margin-top:4px;padding:10px 12px;box-shadow:3px 3px 0 #e4e2dd;max-width:250px">
+<div class="secl">THE BASELINE™</div>
+<div style="font-size:10px;display:flex;flex-direction:column;gap:3px;margin-top:5px">
+<div style="display:flex;justify-content:space-between"><span>Revenue</span><b>$1.8M</b></div>
+<div style="display:flex;justify-content:space-between"><span>SDE est.</span><b>$360–540K</b></div>
+<div style="display:flex;justify-content:space-between"><span>Multiple</span><b>3.0–3.5×</b></div>
+<div style="display:flex;justify-content:space-between;border-top:1px solid #eee;padding-top:3px;font-size:12px"><span>Range</span><b class="terra">$1.08M–$1.89M</b></div>
+</div>
+<div class="note" style="margin-top:5px">source: BizComps, AZ 2025 · preliminary</div>
+</div>
+</div>
+<div>
+<div class="note">iii · Blind Equity™ reveal — the "money you didn't know you had"</div>
+<div class="wcard" style="margin-top:4px;padding:10px 12px;max-width:250px;background:#FAF8F4">
+<div style="font-size:10px">Owner comp + vehicle + insurance you mentioned →</div>
+<div style="font-size:16px" class="terra"><b>+$84K SDE</b> <span style="font-size:9px">found</span></div>
+<div style="font-size:10px">≈ <b>+$250–290K</b> to your range</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="dv-group">Journey pages — /sell /buy /brokers (one structure, persona-swapped?)</div>
+
+<div class="dv-opt" id="1j" data-screen-label="1j Journey: mirrored calm">
+<div class="dv-olabel"><a class="dv-oid" href="#1j">1j</a>Mirror structure — same skeleton, persona-swapped voice (/sell shown)</div>
+<div class="dv-card wf" style="width:400px">
+<div class="bar"><span class="logo">smb<span class="terra">X</span>.ai</span><span class="nav"><span><b>Sell</b></span><span>Buy</span><span>Brokers</span><span>How</span><span>Pricing</span></span></div>
+<div style="padding:24px 30px;display:flex;flex-direction:column;gap:10px">
+<div class="secl">FOR OWNERS</div>
+<div style="font-size:20px;font-weight:700;line-height:1.1">You built it. Find out what it's worth — today, for free.</div>
+<div class="dock">Tell Yulia about your business…<span class="send"></span></div>
+<div class="note">placeholder swaps per page — this is the context Yulia inherits</div>
+</div>
+<div style="padding:0 30px 14px;display:flex;gap:10px">
+<div style="flex:1;display:flex;flex-direction:column;gap:5px"><div style="font-size:11px"><b>1.</b> Tell her about it</div><div class="tl" style="width:90%"></div><div style="font-size:11px"><b>2.</b> Get The Baseline™</div><div class="tl" style="width:90%"></div><div style="font-size:11px"><b>3.</b> She runs the deal</div><div class="tl" style="width:90%"></div></div>
+<div class="imgph" style="flex:1;height:86px">deliverable preview<br>(Rundown™ page 1)</div>
+</div>
+<div style="background:#FAF8F4;border-top:1.5px solid #2b2b2b;padding:10px 30px;font-size:11px">Plain-language promise: <b class="terra">no success fees</b> · you approve everything · she shows her math</div>
+<div style="padding:8px 12px" class="note">/buy: "Is that ask fair?" + multiple-check artifact · /brokers: terse, throughput stats, "Yulia does the analyst work. You run the deal." — same skeleton, denser</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1k" data-screen-label="1k Journey: deliverable first">
+<div class="dv-olabel"><a class="dv-oid" href="#1k">1k</a>Deliverable-first — the artifact IS the hero (/sell shown)</div>
+<div class="dv-card wf" style="width:400px">
+<div class="bar"><span class="logo">smb<span class="terra">X</span>.ai</span><span class="nav"><span><b>Sell</b></span><span>Buy</span><span>Brokers</span><span>How</span><span>Pricing</span></span></div>
+<div style="padding:20px 30px;display:flex;gap:14px;align-items:flex-start">
+<div class="wcard" style="flex:1.2;padding:10px;transform:rotate(-1.5deg);box-shadow:4px 4px 0 #e4e2dd">
+<div class="secl">THE RUNDOWN™ · SAMPLE</div>
+<div class="tl" style="width:90%;margin-top:6px"></div><div class="tl" style="width:75%;margin-top:4px"></div>
+<div style="font-size:14px;margin:6px 0" class="terra"><b>$1.08M–$1.89M</b></div>
+<div class="tl" style="width:85%"></div><div class="tl" style="width:60%;margin-top:4px"></div>
+<div class="note" style="margin-top:6px">real redacted sample, scrollable</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<div style="font-size:16px;font-weight:700;line-height:1.15">This is what Yulia hands you in week one.</div>
+<div class="tl" style="width:90%"></div><div class="tl" style="width:70%"></div>
+<div style="font-size:10px;color:#777">Yours starts with one sentence ↓</div>
+</div>
+</div>
+<div style="padding:0 30px 18px"><div class="dock">Tell Yulia about your business…<span class="send"></span></div></div>
+<div style="padding:8px 12px;border-top:1.5px solid #2b2b2b" class="note">show, don't claim. persona pages differ mostly by which artifact leads: seller→Rundown, buyer→multiple-check, broker→CIM draft</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1l" data-screen-label="1l Journey: broker throughput">
+<div class="dv-olabel"><a class="dv-oid" href="#1l">1l</a>Broker page gets its own skeleton — terse, throughput-led</div>
+<div class="dv-card wf" style="width:400px">
+<div class="bar"><span class="logo">smb<span class="terra">X</span>.ai</span><span class="nav"><span>Sell</span><span>Buy</span><span><b>Brokers</b></span><span>How</span><span>Pricing</span></span></div>
+<div style="padding:22px 30px;display:flex;flex-direction:column;gap:8px">
+<div class="secl">FOR BROKERS &amp; ADVISORS</div>
+<div style="font-size:19px;font-weight:700;line-height:1.1">Yulia does the analyst work. You run the deal.</div>
+<div style="display:flex;gap:14px;margin-top:4px">
+<div><div style="font-size:15px" class="terra"><b>18 hrs</b></div><div style="font-size:9px;color:#777">saved / listing</div></div>
+<div><div style="font-size:15px" class="terra"><b>3×</b></div><div style="font-size:9px;color:#777">listings carried</div></div>
+<div><div style="font-size:15px" class="terra"><b>CIM in days</b></div><div style="font-size:9px;color:#777">not weeks</div></div>
+</div>
+<div class="dock">Tell Yulia about the deal you're working…<span class="send"></span></div>
+</div>
+<div style="padding:0 30px 14px;display:flex;flex-direction:column;gap:4px;font-size:10.5px">
+<div>✓ Valuation + comps memo <span class="note">— minutes</span></div>
+<div>✓ CIM / teaser drafting</div>
+<div>✓ Buyer-list screening &amp; outreach drafts</div>
+<div>✓ Data-room prep, Q&amp;A grunt work</div>
+</div>
+<div style="padding:8px 12px;border-top:1.5px solid #2b2b2b" class="note">no hand-holding, no term definitions. capability list replaces narrative. stats need real sourcing before hi-fi</div>
+</div>
+</div>
+
+<div class="dv-group">How it works — the anti-"just ChatGPT" page</div>
+
+<div class="dv-opt" id="1m" data-screen-label="1m How it works: receipts">
+<div class="dv-olabel"><a class="dv-oid" href="#1m">1m</a>Show the receipts — one worked deal, top to bottom</div>
+<div class="dv-card wf" style="width:400px">
+<div class="bar"><span class="logo">smb<span class="terra">X</span>.ai</span><span class="nav"><span>Sell</span><span>Buy</span><span>Brokers</span><span><b>How</b></span><span>Pricing</span></span></div>
+<div style="padding:20px 30px;text-align:center">
+<div style="font-size:19px;font-weight:700">Not guessed. Computed.</div>
+<div style="font-size:10px;color:#777">Follow one real-sized deal ($5.2M EBITDA mfg co) from hello to close.</div>
+</div>
+<div style="margin:0 30px;border-left:2px solid #2b2b2b;padding-left:14px;display:flex;flex-direction:column;gap:10px">
+<div><div style="font-size:11px"><b>The message</b></div><div class="bubu" style="margin:3px 0 0;font-size:9px;max-width:100%">owner types one sentence</div></div>
+<div><div style="font-size:11px"><b>The math, shown</b></div><div class="wcard" style="padding:6px 8px;font-size:9px;margin-top:3px">EBITDA $5.2M × 4.2–4.8× <span class="note">← every factor expandable, every source cited</span><br><b class="terra">$21.8M – $25.0M</b></div></div>
+<div><div style="font-size:11px"><b>Same inputs → same answer</b></div><div class="note">deterministic engine strip: reproducible, sourced (Census/BLS/comps), versioned</div></div>
+<div><div style="font-size:11px"><b>The deliverable</b></div><div class="imgph" style="height:40px;margin-top:3px">Rundown™ excerpt</div></div>
+<div><div style="font-size:11px"><b>To close</b></div><div class="tl" style="width:70%;margin-top:3px"></div></div>
+</div>
+<div style="padding:14px 30px"><div class="dock">Tell Yulia about your deal…<span class="send"></span></div></div>
+</div>
+</div>
+
+<div class="dv-opt" id="1n" data-screen-label="1n How it works: split engine/journey">
+<div class="dv-olabel"><a class="dv-oid" href="#1n">1n</a>Two-track — the journey for principals, the engine for skeptics</div>
+<div class="dv-card wf" style="width:400px">
+<div class="bar"><span class="logo">smb<span class="terra">X</span>.ai</span><span class="nav"><span>Sell</span><span>Buy</span><span>Brokers</span><span><b>How</b></span><span>Pricing</span></span></div>
+<div style="padding:18px 30px 10px;text-align:center"><div style="font-size:19px;font-weight:700">First hello → closed deal</div></div>
+<div style="display:flex;gap:6px;padding:10px 30px">
+<div class="wcard" style="flex:1;padding:7px;font-size:9.5px;text-align:center">Talk<div class="tl" style="width:80%;margin:4px auto 0"></div></div>
+<div class="wcard" style="flex:1;padding:7px;font-size:9.5px;text-align:center">Baseline™<div style="font-size:10px" class="terra"><b>range</b></div></div>
+<div class="wcard" style="flex:1;padding:7px;font-size:9.5px;text-align:center">Rundown™<div class="tl" style="width:80%;margin:4px auto 0"></div></div>
+<div class="wcard" style="flex:1;padding:7px;font-size:9.5px;text-align:center">Deal work<div class="tl" style="width:80%;margin:4px auto 0"></div></div>
+<div class="wcard" style="flex:1;padding:7px;font-size:9.5px;text-align:center">Close<div class="tl" style="width:80%;margin:4px auto 0"></div></div>
+</div>
+<div class="note" style="padding:0 30px">↑ email ask sits between Talk and Baseline — "where should I send it?" (marked honestly on the timeline)</div>
+<div style="margin:12px 30px;background:#FAF8F4;border:1.5px solid #2b2b2b;border-radius:10px;padding:10px 12px">
+<div class="secl">UNDER THE HOOD — smb<span>X</span>.ai ENGINE</div>
+<div style="font-size:10px;margin-top:4px;display:flex;flex-direction:column;gap:3px"><div>· numbers computed, never generated</div><div>· every figure carries its source</div><div>· same inputs, same answer, every time</div></div>
+</div>
+<div style="padding:0 12px 10px" class="note">principals read the top track and stop; skeptical practitioners get the engine box. one page, two depths</div>
+</div>
+</div>
+
+<div class="dv-group">Pricing — model-agnostic (numbers unresolved, per brief §9)</div>
+
+<div class="dv-opt" id="1o" data-screen-label="1o Pricing: anchor first">
+<div class="dv-olabel"><a class="dv-oid" href="#1o">1o</a>Anchor-first — the broker fee is the headline, tiers are ghosts</div>
+<div class="dv-card wf" style="width:420px">
+<div class="bar"><span class="logo">smb<span class="terra">X</span>.ai</span><span class="nav"><span>Sell</span><span>Buy</span><span>Brokers</span><span>How</span><span><b>Pricing</b></span></span></div>
+<div style="padding:22px 30px;text-align:center">
+<div style="font-size:19px;font-weight:700;line-height:1.15">On a $2M sale, a broker takes <s style="color:#999">~$180K</s>.</div>
+<div style="font-size:14px;margin-top:4px">Yulia takes <b class="terra">no cut. Ever.</b></div>
+<div class="note" style="margin-top:4px">interactive: slider on deal size recomputes the broker fee (Double Lehman) live</div>
+</div>
+<div style="display:flex;gap:10px;padding:6px 30px 16px">
+<div class="wcard" style="flex:1;padding:10px;border-style:dashed"><div style="font-size:11px"><b>[Tier A]</b></div><div style="font-size:13px" class="terra"><b>[$—]</b></div><div class="tl" style="width:85%;margin-top:5px"></div><div class="tl" style="width:70%;margin-top:3px"></div></div>
+<div class="wcard" style="flex:1;padding:10px;border-style:dashed;box-shadow:3px 3px 0 #e4e2dd"><div style="font-size:11px"><b>[Tier B]</b></div><div style="font-size:13px" class="terra"><b>[$—]</b></div><div class="tl" style="width:85%;margin-top:5px"></div><div class="tl" style="width:70%;margin-top:3px"></div></div>
+<div class="wcard" style="flex:1;padding:10px;border-style:dashed"><div style="font-size:11px"><b>[Tier C]</b></div><div style="font-size:13px" class="terra"><b>[$—]</b></div><div class="tl" style="width:85%;margin-top:5px"></div><div class="tl" style="width:70%;margin-top:3px"></div></div>
+</div>
+<div style="padding:8px 12px;border-top:1.5px solid #2b2b2b" class="note">⚠ FLAG FOR PAUL: tier count/labels/prices are placeholders. grid works for subscription, per-deal, or wallet — cards just relabel. price-reveal UX blocked on model decision</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1p" data-screen-label="1p Pricing: conversational">
+<div class="dv-olabel"><a class="dv-oid" href="#1p">1p</a>Conversational — pricing shown where it actually happens: in chat</div>
+<div class="dv-card wf" style="width:420px">
+<div class="bar"><span class="logo">smb<span class="terra">X</span>.ai</span><span class="nav"><span>Sell</span><span>Buy</span><span>Brokers</span><span>How</span><span><b>Pricing</b></span></span></div>
+<div style="padding:20px 30px 8px;text-align:center"><div style="font-size:18px;font-weight:700">You'll see your price in the conversation — personalized, anchored, before any commitment.</div></div>
+<div style="margin:12px 30px;display:flex;flex-direction:column;gap:7px">
+<div class="buby">Your Rundown™ is ready to generate. On a deal your size a broker's fee would run <b>~$180K</b>. Here's what this costs instead:</div>
+<div class="wcard" style="padding:9px 11px;max-width:230px;margin-left:24px">
+<div class="secl">YOUR PRICE</div>
+<div style="font-size:15px" class="terra"><b>[$ —]</b> <span style="font-size:9px;color:#999">[model TBD]</span></div>
+<div style="font-size:9.5px;color:#777">vs ~$180K broker fee · no success fees ever</div>
+<div style="display:flex;gap:6px;margin-top:6px"><span class="chip" style="border-color:#D4714E;color:#D4714E">Continue</span><span class="chip">Ask Yulia why</span></div>
+</div>
+<div class="note">the in-chat price-reveal card (§8 step 3) — page just explains the philosophy above a live example</div>
+</div>
+<div style="padding:8px 30px 16px"><div style="text-align:center;font-size:11px;color:#777">Below: simple FAQ rows — "Why no success fees?" · "What's free?" · "When do I pay?"</div></div>
+<div style="padding:8px 12px;border-top:1.5px solid #2b2b2b" class="note">works for ANY pricing model since the number is generated per-deal. boldest option; page itself stays evergreen</div>
+</div>
+</div>
+
+<div class="dv-group">Email ask — the soft moment (in-conversation, never a wall)</div>
+
+<div class="dv-opt" id="1q" data-screen-label="1q Email ask card">
+<div class="dv-olabel"><a class="dv-oid" href="#1q">1q</a>"Where should I send it?" — inline card mid-stream</div>
+<div class="dv-card wf" style="width:340px;padding:14px;display:flex;flex-direction:column;gap:7px">
+<div class="buby">Good — with those add-backs your range moves up. I'll put your full Baseline™ together, ready in about 20 seconds. Where should I send it?</div>
+<div class="wcard" style="max-width:240px;margin-left:24px;padding:9px 11px">
+<div style="display:flex;gap:6px;align-items:center"><div style="border:1.5px solid #2b2b2b;border-radius:8px;padding:4px 8px;flex:1;font-size:10px;color:#999">you@company.com</div><span class="send"></span></div>
+<div class="note" style="margin-top:5px">that's the account. no password, no modal, chat keeps flowing behind it</div>
+</div>
+<div class="note">skippable ("just show me here") — value never gated, per §8</div>
+</div>
+</div>
+</div>
+
+<p class="dv-next">Try next: "commit to <a class="dv-oid" href="#1b">1b</a> with the morph from <a class="dv-oid" href="#1e">1e</a> and chat frame <a class="dv-oid" href="#1g">1g</a>, go hi-fi" · "merge <a class="dv-oid" href="#1a">1a</a>'s giant input into <a class="dv-oid" href="#1c">1c</a>" · "riff more on the broker page" · "show homepage directions on mobile"</p>
+</section>
+
+</x-dc>
+</body>
+</html>
