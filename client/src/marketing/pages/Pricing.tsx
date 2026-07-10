@@ -1,203 +1,174 @@
+/**
+ * `/pricing` — wireframe 5g layout, LOCKED numbers.
+ *
+ * The wireframe flagged the pricing model "unresolved" — the repo resolved it
+ * on 2026-05-27 (SMBX_PRICING_LOCKED.md): monthly subscriptions only, no
+ * wallet, no per-deal fees, nothing tied to deal value or outcome. The tier
+ * placeholders are filled from lib/pricing (single source of truth).
+ *
+ * The deal-size slider recomputes the BROKER's Double-Lehman fee — the anchor.
+ * Our price never moves with deal size; that contrast is the whole point.
+ */
 import { useState } from 'react';
-import { MarketingShell } from '../MarketingShell';
-import { Brand } from '../Brand';
-import { enterApp } from '../useEnterApp';
-import { ClosingCTA } from '../components/ClosingCTA';
-import { tierPriceDollars } from '../../lib/pricing';
+import { MarketingShell, HeroDock, useShell } from '../MarketingShell';
+import { PRICING_TIERS, tierPriceDollars } from '../../lib/pricing';
 
-const TIERS: Array<{ name: string; price: string; per?: string; desc: string; features: string[]; recommended?: boolean }> = [
+/** Double Lehman: 10% of the 1st $1M, 8% of the 2nd, 6% of the 3rd,
+ *  4% of the 4th, 2% of everything above. */
+function doubleLehman(dealDollars: number): number {
+  const bands = [0.10, 0.08, 0.06, 0.04];
+  let fee = 0;
+  let left = dealDollars;
+  for (const rate of bands) {
+    const slice = Math.min(left, 1_000_000);
+    fee += slice * rate;
+    left -= slice;
+    if (left <= 0) return fee;
+  }
+  return fee + left * 0.02;
+}
+
+const fmtDeal = (d: number) => (d >= 1_000_000 ? `$${(d / 1_000_000).toFixed(1)}M` : `$${Math.round(d / 1000)}K`);
+const fmtFee = (f: number) => (f >= 1_000_000 ? `$${(f / 1_000_000).toFixed(2)}M` : `$${Math.round(f / 1000)}K`);
+
+const TIER_FEATURES: Record<string, string[]> = {
+  free: ['Unlimited conversation with Yulia', 'One deliverable, free — The Baseline™', 'No card required'],
+  solo: ['Unlimited valuation, scoring, SDE/EBITDA', 'Financing + structuring models', 'PDF / Excel / Word export', 'One supervised agent key'],
+  pro: ['CIM and pitch-book generation', 'Deal rooms and market discovery', 'Diligence and LOI scaffolds', 'Three supervised agent keys'],
+  team: ['Shared deal vault, firm templates', 'Up to 5 seats', 'Specialist handoff coordination'],
+};
+
+function AnchorSlider() {
+  const [deal, setDeal] = useState(2_000_000);
+  const fee = doubleLehman(deal);
+  return (
+    <div className="mk-center" style={{ gap: 14 }}>
+      <h1 className="mk-h1" style={{ maxWidth: '20ch', fontSize: 'clamp(26px, 3.6vw, 40px)' }}>
+        On a <em>{fmtDeal(deal)}</em> sale, a broker takes <s>~{fmtFee(fee)}</s>.<br />
+        Yulia takes no cut. Ever.
+      </h1>
+      <div className="mk-slider-wrap">
+        <input
+          type="range"
+          className="mk-slider"
+          min={300_000}
+          max={25_000_000}
+          step={100_000}
+          value={deal}
+          onChange={e => setDeal(Number(e.target.value))}
+          aria-label="Deal size"
+        />
+        <span className="mk-note">
+          drag the deal size — the broker's fee (Double Lehman) recomputes; our price doesn't move
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function Tiers() {
+  const { send } = useShell();
+  const ask = (q: string) => () => send(q);
+  return (
+    <>
+      <div className="mk-tiers">
+        {(['free', 'solo', 'pro', 'team'] as const).map(id => {
+          const t = PRICING_TIERS[id];
+          const featured = id === 'pro';
+          return (
+            <div className={`mk-card mk-tier${featured ? ' is-featured' : ''}`} key={id}>
+              <span className="t-name">{t.name}{featured && <em> · recommended</em>}</span>
+              <span className="t-price">
+                {tierPriceDollars(id)}
+                {id !== 'free' && <small> / month</small>}
+              </span>
+              <ul>
+                {TIER_FEATURES[id].map(f => <li key={f}>{f}</li>)}
+              </ul>
+              <button type="button" className="mk-chip" onClick={ask(`What does the ${t.name} plan include for my deal?`)}>
+                Ask Yulia
+              </button>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mk-ent-strip">
+        <div>
+          <span className="mk-seclabel">Enterprise · from {tierPriceDollars('enterprise')} / month</span>
+          <p>Single-tenant, SSO, API controls, portfolio infrastructure, governed autonomous agent scope.</p>
+        </div>
+        <button type="button" className="mk-chip" onClick={ask('Tell me about the Enterprise plan.')}>
+          Talk to Yulia about Enterprise
+        </button>
+      </div>
+    </>
+  );
+}
+
+const FAQ = [
   {
-    name: 'Free',
-    price: tierPriceDollars('free'),
-    desc: 'Get started, no card.',
-    features: [
-      'Unlimited conversation with Yulia',
-      'One deliverable artifact, free (The Baseline)',
-      'The full methodology library',
-    ],
+    q: 'Why no success fees?',
+    a: 'Because the moment a fee scales with your deal, the software has a stake in your outcome. smbX.ai is software: flat monthly pricing, no percentage of deal value, no fee contingent on closing, no referral fees. Ever.',
   },
   {
-    name: 'Solo',
-    price: tierPriceDollars('solo'),
-    per: '/ month',
-    desc: 'Everything in Free, plus:',
-    features: [
-      'Unlimited valuation, deal scoring, SDE/EBITDA analysis',
-      'Working capital, financing, and structuring models',
-      'PDF / Excel / Word export',
-      'One supervised agent key',
-    ],
+    q: "What's free?",
+    a: 'Unlimited conversation with Yulia, and your first deliverable — The Baseline™ — free. No card required.',
   },
   {
-    name: 'Pro',
-    price: tierPriceDollars('pro'),
-    per: '/ month',
-    recommended: true,
-    desc: 'Everything in Solo, plus:',
-    features: [
-      'CIM and pitch-book generation',
-      'Deal rooms and market discovery',
-      'Due diligence and LOI scaffolds',
-      'Three supervised agent keys',
-    ],
-  },
-  {
-    name: 'Team',
-    price: tierPriceDollars('team'),
-    per: '/ month',
-    desc: 'Everything in Pro, plus:',
-    features: [
-      'Shared deal vault and firm templates',
-      'Multiple seats',
-      'Specialist handoff coordination',
-    ],
+    q: 'When do I pay?',
+    a: 'When you want unlimited deliverables and the deeper deal work — subscriptions start at $99/month and cancel anytime.',
   },
 ];
 
-const NEVER = [
-  'No success fee.',
-  'No percentage of deal value.',
-  'No fee contingent on a deal closing.',
-  'No referral or finder’s fee.',
-];
-
-const FAQ: Array<{ q: string; a: string }> = [
-  {
-    q: 'Is the methodology really free?',
-    a: 'Yes. The Diligence Standard is open to everyone, no account required.',
-  },
-  {
-    q: 'Do I need a subscription to try it?',
-    a: 'No. Talk to Yulia and generate your first deliverable free. Beyond that, unlimited deliverables are included in a monthly subscription.',
-  },
-  {
-    q: 'Is smbX.ai a broker or advisor?',
-    a: 'smbX.ai is software. It computes the diligence work — valuations, models, allocations, and documents. It does not broker, advise, negotiate, or represent any party.',
-  },
-];
+function Faq() {
+  const [open, setOpen] = useState<number | null>(0);
+  return (
+    <div className="mk-faq">
+      {FAQ.map((item, i) => (
+        <div className={`mk-faq-item${open === i ? ' open' : ''}`} key={item.q}>
+          <button type="button" className="mk-faq-q" aria-expanded={open === i} onClick={() => setOpen(open === i ? null : i)}>
+            {item.q}
+            <span className="pm">{open === i ? '–' : '+'}</span>
+          </button>
+          <div className="mk-faq-a"><p>{item.a}</p></div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function Pricing() {
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
-
   return (
-    <MarketingShell>
-      {/* HERO */}
-      <section style={{ paddingBottom: 'calc(var(--pad-y) * .5)' }}>
-        <div className="wrap-wide center reveal">
-          <span className="eyebrow" style={{ justifyContent: 'center' }}>Pricing</span>
-          <h1 className="display" style={{ marginTop: 18 }}>
-            Flat software pricing. Nothing tied to your deal.
-          </h1>
-          <p className="lead" style={{ marginTop: 22, maxWidth: '52ch', marginLeft: 'auto', marginRight: 'auto' }}>
-            Pay for the software, by the month or by the artifact. No fee scales with your
-            deal’s value. No fee depends on whether it closes.
-          </p>
+    <MarketingShell
+      page="pricing"
+      placeholder="Tell Yulia about your deal…"
+      quickReplies={["What's free?", 'What plan fits my deal?']}
+    >
+      <section className="mk-hero" style={{ paddingBottom: 10 }}>
+        <div className="mk-wrap">
+          <AnchorSlider />
         </div>
       </section>
 
-      {/* TIERS */}
-      <section style={{ paddingTop: 0 }}>
-        <div className="wrap-wide">
-          <div className="tiers reveal">
-            {TIERS.map(t => (
-              <div className={`tier${t.recommended ? ' is-recommended' : ''}`} key={t.name}>
-                {t.recommended && <div className="tbadge">Recommended</div>}
-                <div className="tname">{t.name}</div>
-                <div className="tprice">{t.price}{t.per && <small> {t.per}</small>}</div>
-                <div className="tdesc">{t.desc}</div>
-                <ul>
-                  {t.features.map(f => <li key={f}>{f}</li>)}
-                </ul>
-                <button className={`btn ${t.recommended ? 'btn-accent' : 'btn-ghost'}`} style={{ width: '100%' }} onClick={() => enterApp()}>
-                  Ask Yulia
-                </button>
-              </div>
-            ))}
-          </div>
-
-          {/* Enterprise band */}
-          <div
-            className="reveal"
-            style={{
-              marginTop: 16,
-              background: 'var(--ink)',
-              color: '#fff',
-              borderRadius: 'var(--radius)',
-              padding: '36px 40px',
-              display: 'grid',
-              gridTemplateColumns: '1fr auto',
-              gap: 32,
-              alignItems: 'center',
-            }}
-          >
-            <div>
-              <div style={{ fontFamily: 'var(--mono)', fontSize: '.74rem', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: 10 }}>
-                Enterprise · from {tierPriceDollars('enterprise')} / month
-              </div>
-              <h3 style={{ color: '#fff', fontSize: '1.5rem', marginBottom: 12 }}>
-                Everything in Team, plus governed scale.
-              </h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 24px', color: 'rgba(255,255,255,.72)', fontSize: '.95rem' }}>
-                <span>Single-tenant deployment, SSO, and API controls</span>
-                <span>Portfolio infrastructure and custom governance</span>
-                <span>Governed autonomous agent scope</span>
-              </div>
-            </div>
-            <button className="btn btn-accent btn-lg" style={{ whiteSpace: 'nowrap' }} onClick={() => enterApp()}>
-              Talk to Yulia about Enterprise
-            </button>
-          </div>
+      <section className="mk-section">
+        <div className="mk-wrap">
+          <Tiers />
         </div>
       </section>
 
-      {/* FAQ */}
-      <section style={{ paddingTop: 'var(--pad-y)' }}>
-        <div className="wrap">
-          <div className="faq reveal">
-            <h2 style={{ marginBottom: 24 }}>Questions</h2>
-            {FAQ.map((item, i) => (
-              <div className={`faq-item${openFaq === i ? ' open' : ''}`} key={item.q}>
-                <button
-                  className="faq-q"
-                  aria-expanded={openFaq === i}
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                >
-                  {item.q}
-                  <span className="pm" />
-                </button>
-                <div className="faq-a">
-                  <p>{item.a}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+      <section className="mk-section" style={{ paddingTop: 6 }}>
+        <div className="mk-wrap" style={{ maxWidth: 720 }}>
+          <Faq />
         </div>
       </section>
 
-      {/* WHAT WE NEVER CHARGE — safe-harbor anchor, closing trust note before the CTA */}
-      <section className="dark">
-        <div className="wrap" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 56, alignItems: 'center' }}>
-          <div className="reveal">
-            <span className="eyebrow">The line</span>
-            <h2 style={{ marginTop: 18, maxWidth: '14ch' }}>What we never charge.</h2>
-            <p className="lead" style={{ marginTop: 22, maxWidth: '44ch' }}>
-              <Brand /> is software. Every fee is flat — a monthly subscription. Nothing we
-              charge moves with the size or outcome of your deal.
-            </p>
-          </div>
-          <div className="reveal" data-d="1" style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {NEVER.map(n => (
-              <div className="kv" key={n} style={{ padding: '16px 0' }}>
-                <span style={{ color: '#fff', fontWeight: 500 }}>{n}</span>
-                <span className="mono" style={{ fontSize: '.82rem', color: 'var(--accent)' }}>never</span>
-              </div>
-            ))}
+      <section className="mk-section" style={{ paddingTop: 0 }}>
+        <div className="mk-wrap mk-center">
+          <div style={{ width: 'min(520px, 100%)' }}>
+            <HeroDock />
           </div>
         </div>
       </section>
-
-      {/* CLOSING CTA */}
-      <ClosingCTA heading="Start free. One deliverable, no card." />
     </MarketingShell>
   );
 }

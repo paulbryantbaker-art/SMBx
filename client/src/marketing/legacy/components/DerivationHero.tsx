@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { animate, useReducedMotion } from 'framer-motion';
-import { calculateValuation } from '../../lib/calculations/core';
+import { calculateValuation } from '../../../lib/calculations/core';
 import { ProvenanceSeal } from './ProvenanceSeal';
 import { dataTween } from './motion';
 import { enterApp } from '../useEnterApp';

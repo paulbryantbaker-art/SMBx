@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { enterApp } from './useEnterApp';
 import { Brand } from './Brand';
-import Logo from '../components/public/Logo';
+import Logo from '../../components/public/Logo';
 
 /* Yulia glyph — the half-filled circle mark used across the marketing site. */
 export function YuliaGlyph({ size = 20 }: { size?: number }) {

@@ -1,134 +1,92 @@
-import type { ReactNode } from 'react';
-import { MarketingShell } from '../MarketingShell';
-import { Brand } from '../Brand';
-import { YuliaLauncher } from '../YuliaChat';
-import { ClosingCTA } from '../components/ClosingCTA';
-import { ProductFrame } from '../components/ProductFrame';
-import { CIMDeliverMock, BuyerListMock, DataRoomMock } from '../components/ProductMocks';
-import { AddBackLedger } from '../components/AddBackLedger';
+/**
+ * `/sell` — wireframe 5c. Calm, principal voice: hero + sample Baseline™
+ * card, then the anxiety-first FAQ (not features). Context piped: Yulia
+ * opens seller/valuation-first from this page.
+ */
+import { useState } from 'react';
+import { MarketingShell, HeroDock } from '../MarketingShell';
 
-/* One stage row in the journey walkthrough */
-function Stage({ code, title, children, note }: { code: string; title: string; children: ReactNode; note?: string }) {
-  return (
-    <div className="stage">
-      <div className="scode">{code}<b>{title}</b></div>
-      <div className="sbody">
-        <p>{children}</p>
-        {note && <p className="snote">{note}</p>}
-      </div>
-    </div>
-  );
-}
+const FAQ = [
+  {
+    q: 'What happens to my employees?',
+    a: 'That depends on the buyer you choose — and you choose. Yulia models how different buyer types treat teams, flags it in diligence, and keeps your priorities in the deal file. Nothing is committed without your decision.',
+  },
+  {
+    q: 'Do I have to tell anyone I’m selling?',
+    a: 'No. Everything starts confidential. When it’s time to go to market, buyers see a blind profile first — no name, no address — and nothing goes out without your approval.',
+  },
+  {
+    q: 'What if I’m not ready yet?',
+    a: 'Most owners start about a year before they mean to sell. Your Baseline™ is free — get the number now, see what moves it, and let it grow while you run the business.',
+  },
+];
 
 export default function Sell() {
+  const [open, setOpen] = useState<number | null>(null);
   return (
-    <MarketingShell>
-      {/* HERO — centered editorial */}
-      <section style={{ paddingTop: 'clamp(56px,8vw,100px)', paddingBottom: 0 }}>
-        <div className="wrap center stack" style={{ alignItems: 'center', gap: 0 }}>
-          <span className="eyebrow reveal">For owners</span>
-          <h1 className="display reveal" data-d="1" style={{ marginTop: 22, maxWidth: '15ch' }}>
-            See your business the way a buyer will.
-          </h1>
-          <p className="lead reveal measure-wide" data-d="2" style={{ margin: '24px auto 0', textAlign: 'center' }}>
-            Before a buyer&rsquo;s diligence team takes your numbers apart, Yulia shows you
-            what they&rsquo;ll find — your real earnings, your working capital, your defensible
-            value — and packages it the way a serious process requires.
-          </p>
-          <blockquote className="yq reveal" data-d="3" style={{ margin: '26px auto 0', textAlign: 'center' }}>
-            &ldquo;Your reported $612k is really $1.31M. Here are the eight add-backs a
-            buyer&rsquo;s team will find.&rdquo;
-            <span className="yq-who">— Yulia, on the sample deal below</span>
-          </blockquote>
-          <div className="reveal" data-d="4" style={{ width: '100%' }}>
-            <YuliaLauncher />
+    <MarketingShell
+      page="sell"
+      placeholder="Tell Yulia about your business…"
+      quickReplies={['How did you get this?', 'What would sharpen my number?']}
+    >
+      <section className="mk-hero">
+        <div className="mk-wrap">
+          <div className="mk-split">
+            <div className="mk-split-copy">
+              <span className="mk-seclabel">For owners</span>
+              <h1 className="mk-h1" style={{ maxWidth: '14ch' }}>
+                You built it. Find out what it's worth — today.
+              </h1>
+              <p className="mk-hero-sub">Yulia runs your deal. You make the decisions.</p>
+              <HeroDock />
+            </div>
+            <div className="mk-split-aside">
+              <div className="mk-card mk-sample">
+                <span className="mk-seclabel">The Baseline™ · sample</span>
+                <span className="mk-num mk-num-lg">
+                  $1.08M<span className="dash">–</span>$1.89M
+                </span>
+                <div className="mk-rows">
+                  <div><span>Revenue</span><b>$1.8M</b></div>
+                  <div><span>SDE est.</span><b>$360–540K</b></div>
+                  <div><span>Multiple</span><b>3.0–3.5×</b></div>
+                </div>
+                <span className="mk-note">every number sourced · sample deal</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* BEFORE → AFTER (the value lift) */}
-      <section>
-        <div className="wrap">
-          <div className="reveal center" style={{ maxWidth: '46ch', margin: '0 auto 48px' }}>
-            <span className="eyebrow" style={{ justifyContent: 'center' }}>The number that sets your price</span>
-            <h2 style={{ marginTop: 16 }}>Your profit isn&rsquo;t your value.</h2>
-          </div>
-          {/* LIVE add-back ledger: toggle a line, the SDE / lift / valuation
-              range all re-derive through core.ts. Replaces the static
-              before→after card AND the old MiniValuation (whose $38–52M
-              Northwind range contradicted this page's $1.31M-SDE deal). */}
-          <div className="reveal">
-            <AddBackLedger />
-          </div>
-        </div>
-      </section>
-
-
-      {/* THE SELL-SIDE PATH */}
-      <section>
-        <div className="wrap">
-          <div className="reveal" style={{ maxWidth: '60ch', marginBottom: 44 }}>
-            <span className="eyebrow">The work, stage by stage</span>
-            <h2 style={{ marginTop: 18 }}>From first question to closing table.</h2>
-          </div>
-
-          {/* product surfaces for the sell-side path — CIM, data room, buyer landscape */}
-          <div className="grid g2 reveal" style={{ gap: 24, marginBottom: 24 }}>
-            <ProductFrame variant="browser" url="app.smbx.ai/cim" delay={0.05}>
-              <CIMDeliverMock />
-            </ProductFrame>
-            <ProductFrame variant="browser" url="app.smbx.ai/dataroom" delay={0.1}>
-              <DataRoomMock title="Seller data room" variant="sell" />
-            </ProductFrame>
-          </div>
-          <div className="reveal" style={{ marginBottom: 64 }}>
-            <ProductFrame variant="browser" url="app.smbx.ai/buyers" delay={0.15}>
-              <BuyerListMock />
-            </ProductFrame>
-          </div>
-
-          <div className="stages reveal">
-            <Stage code="S0 · Intake" title="Frame what a buyer wants to see">
-              Tell Yulia about the business. She frames what a buyer will want to see.
-            </Stage>
-            <Stage code="S1 · Financials" title="Normalize your earnings">
-              Yulia normalizes your earnings — add-backs, owner comp, one-time items —
-              into the SDE and EBITDA a buyer will underwrite to.
-            </Stage>
-            <Stage code="S2 · Valuation" title="A defensible baseline">
-              A defensible valuation baseline. What the business is worth, on what
-              multiple, and what moves the number.
-            </Stage>
-            <Stage code="S3 · Packaging" title="A CIM from your actuals">
-              A CIM drafted from your actuals, with the working capital and
-              quality-of-earnings views a buyer expects.
-            </Stage>
-            <Stage code="S4 · Market matching" title="Understand the buyer landscape" note="smbX.ai does not contact buyers or broker the sale.">
-              Yulia helps you understand the buyer landscape and what each type will value.
-            </Stage>
-            <Stage code="S5 · Closing" title="Close-ready and portable">
-              Close-readiness, funds flow, and a portable deal package.
-            </Stage>
+      <section className="mk-section">
+        <div className="mk-wrap">
+          <h2 className="mk-h2">The questions that actually keep owners up</h2>
+          <div className="mk-faq">
+            {FAQ.map((item, i) => (
+              <div className={`mk-faq-item${open === i ? ' open' : ''}`} key={item.q}>
+                <button
+                  type="button"
+                  className="mk-faq-q"
+                  aria-expanded={open === i}
+                  onClick={() => setOpen(open === i ? null : i)}
+                >
+                  {item.q}
+                  <span className="pm">{open === i ? '–' : '+'}</span>
+                </button>
+                <div className="mk-faq-a"><p>{item.a}</p></div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* NO BROKER FEE — dark statement */}
-      <section className="dark center">
-        <div className="wrap reveal" style={{ margin: '0 auto' }}>
-          <h2 className="statement" style={{ margin: '0 auto' }}>
-            <span className="amber">No</span> broker fee.<br />No agenda.
-          </h2>
-          <p className="lead" style={{ margin: '24px auto 0', maxWidth: '46ch' }}>
-            <Brand /> charges a flat software fee, never a percentage of your sale. Yulia has
-            no incentive to push you toward a deal or a price. She shows you the analysis;
-            the decisions are yours.
+      <section className="mk-band">
+        <div className="mk-wrap">
+          <p className="mk-band-line">
+            A broker's cut on a $2M sale: <s>~$180K</s>. Ours: <em>$0.</em>
           </p>
         </div>
       </section>
-
-      {/* CLOSING CTA */}
-      <ClosingCTA heading="Thinking about selling? Start with what it’s worth." launcher />
     </MarketingShell>
   );
 }

@@ -80,15 +80,19 @@ import Terms from './pages/public/Terms';
 
 // Lazy-load secondary pages
 const V6App = lazy(() => import('./components/v6/V6App'));
+// 2026-07 terra marketing surface (smbx-ai-marketing-redesign handoff, turn 5)
 const MarketingHome = lazy(() => import('./marketing/pages/Home'));
 const MarketingBuy = lazy(() => import('./marketing/pages/Buy'));
 const MarketingSell = lazy(() => import('./marketing/pages/Sell'));
-const MarketingRaise = lazy(() => import('./marketing/pages/Raise'));
-const MarketingIntegrate = lazy(() => import('./marketing/pages/Integrate'));
+const MarketingBrokers = lazy(() => import('./marketing/pages/Brokers'));
+const MarketingHowItWorks = lazy(() => import('./marketing/pages/HowItWorks'));
 const MarketingPricing = lazy(() => import('./marketing/pages/Pricing'));
-const MarketingStandard = lazy(() => import('./marketing/pages/Standard'));
-const MarketingStandardModel = lazy(() => import('./marketing/pages/StandardModel'));
-const MarketingConnectors = lazy(() => import('./marketing/pages/Connectors'));
+// Legacy Ramp pages — live but footer-only (Paul, 2026-07-10); restyle or retire later
+const MarketingRaise = lazy(() => import('./marketing/legacy/pages/Raise'));
+const MarketingIntegrate = lazy(() => import('./marketing/legacy/pages/Integrate'));
+const MarketingStandard = lazy(() => import('./marketing/legacy/pages/Standard'));
+const MarketingStandardModel = lazy(() => import('./marketing/legacy/pages/StandardModel'));
+const MarketingConnectors = lazy(() => import('./marketing/legacy/pages/Connectors'));
 const SharedDocument = lazy(() => import('./pages/public/SharedDocument'));
 const SharedDocumentView = lazy(() => import('./pages/SharedDocumentView'));
 const AcceptInvite = lazy(() => import('./pages/public/AcceptInvite'));
@@ -332,6 +336,8 @@ export default function App() {
             /standard so the more specific path matches first. */}
         <Route path="/buy">{marketingOrApp(<MarketingBuy />)}</Route>
         <Route path="/sell">{marketingOrApp(<MarketingSell />)}</Route>
+        <Route path="/brokers">{marketingOrApp(<MarketingBrokers />)}</Route>
+        <Route path="/how-it-works">{marketingOrApp(<MarketingHowItWorks />)}</Route>
         <Route path="/raise">{marketingOrApp(<MarketingRaise />)}</Route>
         <Route path="/integrate">{marketingOrApp(<MarketingIntegrate />)}</Route>
         <Route path="/pricing">{marketingOrApp(<MarketingPricing />)}</Route>

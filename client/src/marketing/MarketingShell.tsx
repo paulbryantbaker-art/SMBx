@@ -1,60 +1,288 @@
-import { useEffect, useRef, type ReactNode } from 'react';
-import { useLocation } from 'wouter';
-import './marketing.css';
-import { MarketingNav, MarketingFooter } from './MarketingChrome';
-import { YuliaFab } from './YuliaChat';
-import { armRevealObserver } from './revealObserver';
-
 /**
- * Wraps every logged-out marketing page. Provides the `.mkt` scope (so the
- * design system tokens + component styles apply here and nowhere else), the
- * sticky nav, the footer, and the floating Yulia chat (FAB).
+ * MarketingShell — the 2026-07 terra surface. One room, two phases:
  *
- * `dark` is unused at the shell level — individual sections opt into `.dark`.
+ *   landing(page) ──send──▶ chat        (CSS crossfade ~300ms, NO navigation)
+ *   chat ──back──▶ landing              (exact page + scroll restored)
+ *
+ * Locked mechanics (wireframes 5h/5i/5m):
+ *   - crossfade only; nothing slides; the logo NEVER moves
+ *   - nav links fade out ~200ms; "←" fades in 200ms @100ms delay
+ *   - mobile: ONE dock, fixed at the bottom in both phases — the same DOM
+ *     node through the morph, so the keyboard is never dismissed
+ *   - chat containers size from --app-height (visualViewport), never 100dvh
+ *   - conversations run on the real anonymous funnel (useMarketingChat);
+ *     context is piped from the origin page at session creation
+ *
+ * Desktop renders in-flow docks (hero/footer/chat) that share one send path;
+ * the crossfade covers the hand-off and the chat dock autofocuses.
  */
-export function MarketingShell({ children }: { children: ReactNode }) {
+import {
+  createContext, useCallback, useContext, useEffect, useMemo, useRef, useState,
+  type ReactNode,
+} from 'react';
+import { Link, useLocation } from 'wouter';
+import './marketing.css';
+import { Brand } from './Brand';
+import { Dock, type DockHandle } from './Dock';
+import { Thread } from './Thread';
+import { useMarketingChat } from './useMarketingChat';
+
+export type MkPage = 'home' | 'sell' | 'buy' | 'brokers' | 'how' | 'pricing';
+
+interface ShellCtxValue {
+  send: (text: string) => void;
+  seed: (text: string) => void;
+  placeholder: string;
+  phase: 'landing' | 'chat';
+}
+const ShellCtx = createContext<ShellCtxValue | null>(null);
+
+export function useShell(): ShellCtxValue {
+  const ctx = useContext(ShellCtx);
+  if (!ctx) throw new Error('useShell must be used inside MarketingShell');
+  return ctx;
+}
+
+/** The in-hero dock. Desktop: a live dock instance. Mobile: a dock-shaped
+ *  proxy that focuses the single fixed bottom dock (one real input per
+ *  viewport). Persona chips pre-load Yulia's context by seeding the dock —
+ *  they never navigate and never auto-send (wireframe 4d). */
+export function HeroDock({ chips }: { chips?: Array<{ label: string; seed: string }> }) {
+  const { placeholder, seed, send } = useShell();
+  const deskRef = useRef<DockHandle>(null);
+  const seedNearest = (text: string) => {
+    if (window.matchMedia('(min-width: 768px)').matches) deskRef.current?.seed(text);
+    else seed(text);
+  };
+  return (
+    <>
+      <div className="mk-dock-wrap">
+        <span className="mk-desktop-only" style={{ display: 'block' }}>
+          <Dock ref={deskRef} placeholder={placeholder} onSend={send} />
+        </span>
+        <button
+          type="button"
+          className="mk-dock mk-dock-proxy mk-mobile-only"
+          onClick={() => seed('')}
+          aria-label={placeholder}
+        >
+          <span className="mk-dock-proxy-text">{placeholder}</span>
+        </button>
+      </div>
+      {chips && chips.length > 0 && (
+        <div className="mk-chips">
+          {chips.map(c => (
+            <button type="button" key={c.label} className="mk-chip" onClick={() => seedNearest(c.seed)}>
+              {c.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
+const NAV: Array<{ href: string; label: string; page: MkPage }> = [
+  { href: '/sell', label: 'Sell', page: 'sell' },
+  { href: '/buy', label: 'Buy', page: 'buy' },
+  { href: '/brokers', label: 'Brokers', page: 'brokers' },
+  { href: '/how-it-works', label: 'How it works', page: 'how' },
+  { href: '/pricing', label: 'Pricing', page: 'pricing' },
+];
+
+interface ShellProps {
+  page: MkPage;
+  placeholder: string;
+  /** Contextual quick replies offered after Yulia's early turns. */
+  quickReplies?: string[];
+  children: ReactNode;
+}
+
+export function MarketingShell({ page, placeholder, quickReplies = [], children }: ShellProps) {
   const [location] = useLocation();
   const rootRef = useRef<HTMLDivElement>(null);
+  const mobileDockRef = useRef<DockHandle>(null);
+  const chatDockRef = useRef<DockHandle>(null);
+  const savedScroll = useRef(0);
+  const [phase, setPhase] = useState<'landing' | 'chat'>('landing');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const chat = useMarketingChat();
 
-  // Arm scroll-triggered reveals (see revealObserver.ts). Reveals play only
-  // when they enter the viewport; without this observer they play on mount —
-  // a safe fallback, never hidden content.
+  // Hero typeface A/B (handoff open decision ①): ?hero=sora | ?hero=inter
+  const heroSora = useMemo(() => {
+    try { return new URLSearchParams(window.location.search).get('hero') === 'sora'; }
+    catch { return false; }
+  }, []);
+
+  // --app-height from visualViewport (locked iOS rule — never 100dvh).
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    return armRevealObserver(root);
+    const vv = window.visualViewport;
+    const set = () => {
+      const h = vv?.height ?? window.innerHeight;
+      root.style.setProperty('--app-height', `${Math.round(h)}px`);
+    };
+    set();
+    vv?.addEventListener('resize', set);
+    vv?.addEventListener('scroll', set);
+    window.addEventListener('resize', set);
+    return () => {
+      vv?.removeEventListener('resize', set);
+      vv?.removeEventListener('scroll', set);
+      window.removeEventListener('resize', set);
+    };
   }, []);
-  // Reset scroll to the top on every route change. wouter reuses this shell
-  // instance across marketing routes, and the footer (which holds the nav
-  // links) sits at the page bottom — so without this, navigating from the
-  // footer would land the next page still scrolled to the bottom.
-  // The marketing scroll container is <body> (height:100vh + overflow:auto),
-  // NOT the window/<html> — so reset all candidates to be robust.
+
+  // Fresh page = top of page (the shell instance is per-page; belt & braces).
   useEffect(() => {
     window.scrollTo(0, 0);
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
   }, [location]);
 
-  // Marketing pages scroll naturally; the app locks body scroll on desktop,
-  // so we release it while a marketing page is mounted.
+  // The app (index.css) locks html/body scrolling; marketing pages scroll
+  // naturally. Release the lock while mounted — except in the chat phase,
+  // where the shell owns its own scroller (.mk-thread) and the page behind
+  // must hold still.
   useEffect(() => {
-    const prevOverflow = document.documentElement.style.overflow;
-    const prevBodyOverflow = document.body.style.overflow;
-    document.documentElement.style.overflow = 'auto';
-    document.body.style.overflow = 'auto';
+    const html = document.documentElement.style;
+    const body = document.body.style;
+    const prevHtml = html.overflow;
+    const prevBody = body.overflow;
+    const free = phase === 'landing';
+    html.overflow = free ? 'auto' : 'hidden';
+    body.overflow = free ? 'auto' : 'hidden';
     return () => {
-      document.documentElement.style.overflow = prevOverflow;
-      document.body.style.overflow = prevBodyOverflow;
+      html.overflow = prevHtml;
+      body.overflow = prevBody;
     };
+  }, [phase]);
+
+  const send = useCallback((text: string) => {
+    if (phase === 'landing') {
+      savedScroll.current = window.scrollY || document.body.scrollTop || document.documentElement.scrollTop || 0;
+      setPhase('chat');
+      // Desktop hands focus to the chat dock; mobile keeps the same node.
+      requestAnimationFrame(() => {
+        if (window.matchMedia('(min-width: 768px)').matches) chatDockRef.current?.focus();
+      });
+    }
+    void chat.send(text);
+  }, [phase, chat]);
+
+  const seed = useCallback((text: string) => {
+    // Mobile: seed + focus the single bottom dock. Desktop: hero dock is live.
+    mobileDockRef.current?.seed(text);
   }, []);
 
+  const back = useCallback(() => {
+    setPhase('landing');
+    requestAnimationFrame(() => {
+      window.scrollTo(0, savedScroll.current);
+      document.body.scrollTop = savedScroll.current;
+      document.documentElement.scrollTop = savedScroll.current;
+    });
+  }, []);
+
+  // Quick replies retire once the visitor is clearly conversing.
+  const userTurns = chat.messages.filter(m => m.role === 'user').length;
+  const activeQuick = userTurns < 3 ? quickReplies : [];
+
+  const ctx = useMemo<ShellCtxValue>(() => ({ send, seed, placeholder, phase }), [send, seed, placeholder, phase]);
+
   return (
-    <div className="mkt" ref={rootRef}>
-      <MarketingNav />
-      <main>{children}</main>
-      <MarketingFooter />
-      <YuliaFab />
-    </div>
+    <ShellCtx.Provider value={ctx}>
+      <div className={`mk${heroSora ? ' mk-hero-sora' : ''}${phase === 'chat' ? ' is-chat' : ''}`} ref={rootRef}>
+        {/* nav — the logo is the fixed anchor; links ⇄ back-arrow crossfade */}
+        <header className="mk-nav">
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+            <button type="button" className="mk-back" onClick={back} aria-label="Back to the page">
+              ←
+            </button>
+            <Link href="/" onClick={() => setMenuOpen(false)}><Brand /></Link>
+          </span>
+          <nav className="mk-nav-links" aria-label="Site">
+            {NAV.map(n => (
+              <Link key={n.href} href={n.href} className={n.page === page ? 'is-active' : ''}>{n.label}</Link>
+            ))}
+            <Link href="/login" className="mk-signin">Sign in</Link>
+          </nav>
+          <button type="button" className="mk-menu-btn" aria-label="Menu" onClick={() => setMenuOpen(v => !v)}>
+            ≡
+          </button>
+          <span className="mk-nav-right-chat">Yulia</span>
+          {menuOpen && (
+            <div className="mk-menu" role="menu">
+              {NAV.map(n => (
+                <Link key={n.href} href={n.href} onClick={() => setMenuOpen(false)}>{n.label}</Link>
+              ))}
+              <Link href="/login" onClick={() => setMenuOpen(false)}>Sign in</Link>
+            </div>
+          )}
+        </header>
+
+        <div className="mk-main">
+          {/* LANDING */}
+          <div className="mk-landing" aria-hidden={phase === 'chat'}>
+            {children}
+            <footer className="mk-footer">
+              <div className="mk-wrap">
+                <div className="mk-footer-cta mk-desktop-only">
+                  <p className="mk-footer-cta-line">Still reading? Just ask her.</p>
+                  <div className="mk-dock-wrap">
+                    <Dock placeholder={placeholder} onSend={send} />
+                  </div>
+                </div>
+                <div className="mk-footer-grid">
+                  {NAV.map(n => <Link key={n.href} href={n.href}>{n.label}</Link>)}
+                  <Link href="/standard">The Diligence Standard</Link>
+                  <Link href="/connectors">Connectors</Link>
+                  <Link href="/integrate">Integrate</Link>
+                  <Link href="/raise">Raise</Link>
+                  <Link href="/legal/terms">Terms</Link>
+                  <Link href="/legal/privacy">Privacy</Link>
+                  <Link href="/login">Sign in</Link>
+                </div>
+                <p className="mk-footer-legal">
+                  smbX.ai is software. It computes the diligence work — valuations, models,
+                  allocations, and documents. It does not broker, advise, negotiate, or
+                  represent any party, and it never takes a success fee.
+                </p>
+              </div>
+            </footer>
+          </div>
+
+          {/* CHAT */}
+          <div className="mk-chat" aria-hidden={phase === 'landing'}>
+            <Thread
+              messages={chat.messages}
+              streamingText={chat.streamingText}
+              sending={chat.sending}
+              gate={chat.gate}
+              error={chat.error}
+              quickReplies={activeQuick}
+              onQuickReply={send}
+            />
+            <div className="mk-chat-dock mk-desktop-only">
+              <div className="mk-dock-wrap">
+                <Dock ref={chatDockRef} placeholder="Message Yulia…" onSend={send} disabled={chat.sending} />
+              </div>
+              <div className="mk-chat-hint">Yulia computes and cites — check important numbers.</div>
+            </div>
+          </div>
+        </div>
+
+        {/* the ONE mobile dock — same DOM node in both phases (keyboard law) */}
+        <div className="mk-mobile-dock mk-mobile-only">
+          <Dock
+            ref={mobileDockRef}
+            placeholder={phase === 'chat' ? 'Message Yulia…' : placeholder}
+            onSend={send}
+            disabled={phase === 'chat' && chat.sending}
+          />
+        </div>
+      </div>
+    </ShellCtx.Provider>
   );
 }
