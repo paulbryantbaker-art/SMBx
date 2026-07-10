@@ -1,4 +1,12 @@
-# smbX Front-End Direction — LOCKED (2026-05-29)
+# smbX Front-End Direction — Ramp (2026-05-29) — SUPERSEDED
+
+> **Status 2026-07-10:** this Ramp direction shipped only as the **marketing** skin
+> (`client/src/marketing/`, `.mkt` scope). The app never adopted it — the 2026-06-24
+> "Atlas" cutover gave the app its own language (`v6/desktop/` + `v6/atlasmobile/`,
+> see `ATLAS_BUILD_CONTRACT.md` / `MOBILE_REDESIGN.md`). A NEW design language is now
+> incoming as a handoff bundle and will replace both. **Operating doc for that
+> retool: `UI_RETOOL_READINESS.md`.** The funnel contracts and the two-greens law
+> documented below carry forward; the palette/type/FAB decisions below do not.
 
 **Decision:** Adopt the Claude Design "Ramp" handoff (warm-neutral base + neon
 green accent + Schibsted Grotesk / JetBrains-Mono-for-numbers + FAB chat) as the

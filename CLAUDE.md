@@ -1,5 +1,5 @@
 CLAUDE.md — smbx.ai
-Last updated: 2026-05-25
+Last updated: 2026-07-10
 
 > **For a current-vs-stale map of the whole repo, read `REPO_STATUS.md` at the root.** Archived docs live in `docs/_archive/` — do not build against them.
 
@@ -7,7 +7,7 @@ Last updated: 2026-05-25
 AI-powered deal intelligence platform for business acquisitions from $300K to mega-cap. Users talk to Yulia (AI deal intelligence) who guides them through buying, selling, or raising capital for businesses. Chat-first experience — users talk to Yulia, not dashboards. Yulia IS the front door — there is no sales team, no contact forms, no dead-end CTAs. Every action routes to chat.
 
 ## Core Architecture
-- `client/src/components/v6/V6App.tsx` is the current app shell — all catch-all routes go through it. Chat.tsx is deleted.
+- `client/src/components/v6/V6App.tsx` is the current app shell — a thin viewport fork into `v6/desktop/AtlasApp.tsx` (≥1024px) and `v6/atlasmobile/AtlasMobileApp.tsx`. All catch-all routes go through it; logged-out users see `client/src/marketing/` instead (two-surface rule in `App.tsx`).
 - Node.js + Express (ESM) backend
 - React 19 + Vite 7 + Tailwind CSS v3 + Radix UI frontend
 - wouter for client routing
@@ -37,9 +37,17 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 12. **THE LINE is product law.** Read `THE_LINE_POLICY.md`. Yulia shows analysis, options, and implications; the user decides. No recommendations for regulated transaction decisions, negotiation, counterparty contact, custody, signing, filing, legal/tax/accounting/appraisal opinions, success fees, referral fees, or deal-value fees.
 
 ## Design System
-**The V6 design language is the two CD handoff bundles** at the repo root: `design_handoff_smbx_desktop_material/` (desktop) and `design_handoff_smbx_app store/` (mobile). Production implements them faithfully — see `DESIGN_SOURCE.md` for the file-by-file implementation map. For a quick token reference, read `DESIGN_TOKENS.md` (auto-generated from `client/src/index.css` by `npm run design:extract`). Reuse saved Studio/List/Compete/texture-card primitives; do not invent adjacent card/button styles when an existing primitive fits.
+**RETOOL IN PROGRESS (2026-07-10).** A new design language is incoming as a design
+handoff bundle: the marketing front end gets a ground-up rebuild, the app a
+token-level re-skin (deeper restructure later). THE LINE and DEFINITIVE are
+untouched. **Operating doc: `UI_RETOOL_READINESS.md`** — surface map, token seams,
+preservation contract, phased playbook. Read it before any UI work.
 
-**V6 in one line:** desktop uses slate-blue `#2E5C8A` + lavender chrome `#ECEAF2`; mobile uses periwinkle `#8A9AE8` + watercolor textures from `client/public/textures/`. Hot pink (`#D44A78`, V3/V4 era) and warm cream + terra (`#F4EEE3` + `#D4714E`, Cowork-DL "Edition" v22 era) are both retired — if your output anchors on either, you read a stale doc.
+Until the bundle lands, production speaks two languages:
+- **App = "Atlas" (2026-06-24 cutover):** desktop shell `client/src/components/v6/desktop/` themed by `atlasTokens.ts` (`T` object, Google-blue `#0b57d0`); mobile shell `v6/atlasmobile/` themed by `mobileTokens.ts` (violet `#5b53d6`, Cash-App-flavored). Build law: `ATLAS_BUILD_CONTRACT.md` (desktop) + `MOBILE_REDESIGN.md` (mobile). Reuse `primitives.tsx` / `iosKit.tsx` atoms; do not invent adjacent card/button styles.
+- **Marketing = "Ramp" (locked 2026-05-29):** `client/src/marketing/` under the `.mkt` scope — warm neutral + neon green `#2BFF77`, Schibsted Grotesk / Fraunces / JetBrains-Mono-for-numbers. See `FRONTEND_DIRECTION.md` (superseded for the app; still describes the live marketing skin).
+
+**Historical (do not build against):** V6 slate-blue/lavender/periwinkle (`design_handoff_smbx_desktop_material/`, `design_handoff_smbx_app store/`, `DESIGN_SOURCE.md`, `DESIGN_TOKENS.md`), hot pink `#D44A78` (V3/V4), warm cream + terra (Cowork-DL "Edition"). If your output anchors on any of these, you read a stale doc.
 
 **Safari toolbar rule still applies:** never use `position:fixed` full-viewport divs with a background color (Safari reads them for toolbar tinting and it breaks dark-mode switching). Use `position:absolute` inside a relative parent instead.
 
@@ -82,6 +90,7 @@ Valuation Explorer, LBO, SBA Financing, DCF, Tax Impact, Cap Table, Sensitivity 
 - SSE canvas_action handler forwards tool results to zustand store
 
 ## Reference Documents
+- **UI_RETOOL_READINESS.md** — Operating doc for the incoming design-language retool: current surface map, token seams, the preservation contract (LINE touchpoints, agent↔UI vocabulary, locked pricing, funnel), and the phased bundle-landing playbook.
 - **YULIA_AGENCY_SPEC.md** — Product/architecture doctrine for Yulia as the agentic operating layer: advisor posture without licensed-advisor boundary crossing, permission levels, surface contracts, data-room/file architecture, and implementation priorities.
 - **YULIA_AGENCY_IMPLEMENTATION_PLAN.md** — Practical wiring plan for context packs, prompt governance, governed tool execution, staged approvals, surface actions, Today, Files, and Data Room.
 - **SMBX_PRICING_LOCKED.md** — Locked canonical pricing record (2026-05-27): Free / $99 Solo / $249 Pro / $749 Team / $3,000+ Enterprise. If any other doc or code constant disagrees, this file wins.
@@ -101,15 +110,20 @@ Valuation Explorer, LBO, SBA Financing, DCF, Tax Impact, Cap Table, Sensitivity 
 ## Key File Map
 | File | Purpose |
 |------|---------|
-| client/src/components/v6/V6App.tsx | Current app shell — catch-all routes, desktop/mobile V6 workspace, tabbed canvas |
+| client/src/components/v6/V6App.tsx | App shell entry — viewport fork into the two Atlas shells |
+| client/src/components/v6/desktop/AtlasApp.tsx | Desktop shell — header tab strip, chat rail, canvas tabs, history wiring |
+| client/src/components/v6/atlasmobile/AtlasMobileApp.tsx | Mobile shell — Today/Deals tabs, Yulia FAB + sheet |
+| client/src/components/v6/desktop/atlasTokens.ts + atlasmobile/mobileTokens.ts | THE app skin knobs (`T` / `M`) — retheme here first |
+| client/src/marketing/ | Logged-out marketing surface (`.mkt` scope, MarketingShell + 9 pages) |
+| client/src/lib/pricing.ts | Canonical client pricing table — all price UI derives from here |
+| client/src/lib/v6SurfaceActions.ts | Agent↔UI surface-action vocabulary (preserve across redesigns) |
 | client/src/components/models/ | 11 interactive financial model components for the human canvas |
 | client/src/lib/calculations/core.ts | Legacy pure calculation helpers for canvas models |
 | server/services/v19ModelRuntime.ts | Server-side V19 model runtime for executable/research `MODEL.*.v1` definitions |
 | server/services/definitiveDealMechanicsCatalog.ts | DEFINITIVE v1.1 123-slot / 30-gate deal-mechanics catalog |
 | client/src/lib/modelStore.ts | Zustand store for model tab state |
 | client/src/components/shared/ChatDock.tsx | THE chat input — used everywhere |
-| client/src/components/shared/DarkModeToggle.tsx | Dark mode + Safari toolbar color management |
-| client/src/components/chat/PortfolioCanvas.tsx | Sourcing portfolio management UI |
+| client/src/components/v6/desktop/screens/Sourcing.tsx (+ atlasmobile twin) | Sourcing portfolio UI |
 | server/index.ts | Express entry + auto-migrations |
 | server/services/aiService.ts | AI orchestration + agentic loop |
 | server/prompts/taxEngine.ts | V18 §9 tax foundation + per-league workflow (18a distillation) |
@@ -136,6 +150,7 @@ Valuation Explorer, LBO, SBA Financing, DCF, Tax Impact, Cap Table, Sensitivity 
 - chat/Sidebar.tsx, HomeSidebar.tsx, PublicChatInput.tsx (orphaned)
 - chartjs-node-canvas (native canvas dep removed — charts render in Puppeteer page)
 - All old logo files (x-logo.png, X2 Transaparant.png, GX.png, redx.png, etc.)
+- 2026-07-10 pre-retool demolition: components/chat/ (except ChatMorph.tsx), components/mobile/ (except StarterSheet.tsx), components/content/, components/canvas/, components/artifacts/, v6/Learn.tsx, v6/workspace.css (live .wkseal/.wk-tick rules extracted to v6/shared/workseal.css), shared/ChapterStrip|DotField|Reveal, lib/wkTheme.ts, lib/randomTextures.ts, v6/shared/verdictMaterial.ts; public/textures pruned to texture-hero-1/2 (+ png masters)
 
 ## AI Orchestration
 | Task | Engine |
