@@ -3,8 +3,9 @@
  * card, then the anxiety-first FAQ (not features). Context piped: Yulia
  * opens seller/valuation-first from this page.
  */
-import { useState } from 'react';
 import { MarketingShell, HeroDock } from '../MarketingShell';
+import { Faq } from '../Faq';
+import { FeeAnchorBand } from '../feeAnchor';
 
 const FAQ = [
   {
@@ -22,7 +23,6 @@ const FAQ = [
 ];
 
 export default function Sell() {
-  const [open, setOpen] = useState<number | null>(null);
   return (
     <MarketingShell
       page="sell"
@@ -61,32 +61,11 @@ export default function Sell() {
       <section className="mk-section">
         <div className="mk-wrap">
           <h2 className="mk-h2">The questions that actually keep owners up</h2>
-          <div className="mk-faq">
-            {FAQ.map((item, i) => (
-              <div className={`mk-faq-item${open === i ? ' open' : ''}`} key={item.q}>
-                <button
-                  type="button"
-                  className="mk-faq-q"
-                  aria-expanded={open === i}
-                  onClick={() => setOpen(open === i ? null : i)}
-                >
-                  {item.q}
-                  <span className="pm">{open === i ? '–' : '+'}</span>
-                </button>
-                <div className="mk-faq-a"><p>{item.a}</p></div>
-              </div>
-            ))}
-          </div>
+          <Faq items={FAQ} />
         </div>
       </section>
 
-      <section className="mk-band">
-        <div className="mk-wrap">
-          <p className="mk-band-line">
-            A broker's cut on a $2M sale: <s>~$180K</s>. Ours: <em>$0.</em>
-          </p>
-        </div>
-      </section>
+      <FeeAnchorBand />
     </MarketingShell>
   );
 }

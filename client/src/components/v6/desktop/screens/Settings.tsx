@@ -25,32 +25,10 @@ import { useAtlasNav, useAtlasChat } from "../atlasNav";
 import type { SettingsPane } from "../atlasNav";
 import type { User } from "../../../../hooks/useAuth";
 import { authHeaders } from "../../../../hooks/useAuth";
-import { tierPriceDollars, type TierId } from "../../../../lib/pricing";
+import { planLabel, planPriceLine } from "../../../../lib/pricing";
 import { T } from "../atlasTokens";
 import { Card, Avatar, Pill, ProgressBar, LoadingState } from "../primitives";
 import { SettingsGlyph, PlusIcon } from "../icons";
-
-/* ─── locked pricing (SMBX_PRICING_LOCKED.md via lib/pricing) ──────────────── */
-const PLAN_LABEL: Record<string, string> = {
-  free: "Free",
-  solo: "Solo",
-  pro: "Pro",
-  team: "Team",
-  enterprise: "Enterprise",
-  // legacy rows normalize to the nearest locked tier display
-  starter: "Solo",
-  professional: "Pro",
-};
-const planMonthly = (id: TierId) => `${tierPriceDollars(id)} / month`;
-const PLAN_PRICE: Record<string, string> = {
-  free: "Free",
-  solo: planMonthly("solo"),
-  pro: planMonthly("pro"),
-  team: planMonthly("team"),
-  enterprise: `${tierPriceDollars("enterprise")}+ / month`,
-  starter: planMonthly("solo"),
-  professional: planMonthly("pro"),
-};
 
 /* ─── server payload shapes (real fields, coerced) ─────────────────────────── */
 interface SubscriptionRow {
@@ -238,7 +216,7 @@ function ProfilePane({ user }: { user: User | null }) {
     { key: "Email", value: user.email || "—" },
     { key: "Role", value: titleCase(user.role) },
     { key: "League", value: user.league ? titleCase(user.league) : "—" },
-    { key: "Plan", value: PLAN_LABEL[(user.plan || "free").toLowerCase()] ?? titleCase(user.plan) },
+    { key: "Plan", value: planLabel(user.plan || 'free') ?? titleCase(user.plan) },
   ];
 
   return (
@@ -329,10 +307,10 @@ function BillingPane() {
   }
 
   const planKey = (sub.data.plan || "free").toLowerCase();
-  const planName = PLAN_LABEL[planKey] ?? titleCase(sub.data.name);
+  const planName = planLabel(planKey) ?? titleCase(sub.data.name);
   // Known plans use our own spaced label; an unknown planKey falls back to the
   // server priceDisplay ("$99/month"), normalized to the screen's "$99 / month".
-  const priceLine = PLAN_PRICE[planKey] ?? normalizePrice(sub.data.priceDisplay) ?? "—";
+  const priceLine = planPriceLine(planKey) ?? normalizePrice(sub.data.priceDisplay) ?? "—";
   const row = sub.data.subscription || null;
   const renewLabel = formatRenew(row);
   const isFree = planKey === "free";

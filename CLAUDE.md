@@ -37,17 +37,19 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 12. **THE LINE is product law.** Read `THE_LINE_POLICY.md`. Yulia shows analysis, options, and implications; the user decides. No recommendations for regulated transaction decisions, negotiation, counterparty contact, custody, signing, filing, legal/tax/accounting/appraisal opinions, success fees, referral fees, or deal-value fees.
 
 ## Design System
-**RETOOL IN PROGRESS (2026-07-10).** A new design language is incoming as a design
-handoff bundle: the marketing front end gets a ground-up rebuild, the app a
-token-level re-skin (deeper restructure later). THE LINE and DEFINITIVE are
-untouched. **Operating doc: `UI_RETOOL_READINESS.md`** — surface map, token seams,
-preservation contract, phased playbook. Read it before any UI work.
+**RETOOL IN PROGRESS (2026-07-10).** The CD handoff bundle landed
+(`smbx-ai-marketing-redesign/`, wireframes turn 5) and the marketing rebuild is
+implemented on the retool branch; CD is iterating toward hi-fi, so expect
+further passes. THE LINE and DEFINITIVE are untouched. **Operating doc:
+`UI_RETOOL_READINESS.md`** — surface map, token seams, preservation contract,
+phased playbook. Read it before any UI work.
 
-Until the bundle lands, production speaks two languages:
-- **App = "Atlas" (2026-06-24 cutover):** desktop shell `client/src/components/v6/desktop/` themed by `atlasTokens.ts` (`T` object, Google-blue `#0b57d0`); mobile shell `v6/atlasmobile/` themed by `mobileTokens.ts` (violet `#5b53d6`, Cash-App-flavored). Build law: `ATLAS_BUILD_CONTRACT.md` (desktop) + `MOBILE_REDESIGN.md` (mobile). Reuse `primitives.tsx` / `iosKit.tsx` atoms; do not invent adjacent card/button styles.
-- **Marketing = "Ramp" (locked 2026-05-29):** `client/src/marketing/` under the `.mkt` scope — warm neutral + neon green `#2BFF77`, Schibsted Grotesk / Fraunces / JetBrains-Mono-for-numbers. See `FRONTEND_DIRECTION.md` (superseded for the app; still describes the live marketing skin).
+The three current languages:
+- **Marketing = "terra" (2026-07-10, the retool):** `client/src/marketing/` under the `.mk` scope — page `#FAFAFA`, cream `#FAF8F4`, terra `#D4714E` FUNCTIONAL ONLY (send, active, hero numbers, logo X — never decorative fills), terra-soft `#FFF0EB` user bubbles only, Inter 400–800, 20px cards / 999px pills, no italics (`em` renders terra). The one idea: every page morphs (~300ms crossfade) into the anonymous Yulia conversation. Source of truth: the bundle's `HANDOFF.md` + wireframes turn 5.
+- **App = "Atlas" (2026-06-24 cutover):** desktop shell `client/src/components/v6/desktop/` themed by `atlasTokens.ts` (`T` object, Google-blue `#0b57d0`); mobile shell `v6/atlasmobile/` themed by `mobileTokens.ts` (violet `#5b53d6`, Cash-App-flavored). Build law: `ATLAS_BUILD_CONTRACT.md` + `MOBILE_REDESIGN.md`. Re-skin toward the new language is a later phase.
+- **Legacy marketing = "Ramp" (2026-05-29):** quarantined at `client/src/marketing/legacy/` under `.mkt` — serves only the footer-linked pages (Raise, Integrate, Connectors, Standard×2) until restyled or retired.
 
-**Historical (do not build against):** V6 slate-blue/lavender/periwinkle (`design_handoff_smbx_desktop_material/`, `design_handoff_smbx_app store/`, `DESIGN_SOURCE.md`, `DESIGN_TOKENS.md`), hot pink `#D44A78` (V3/V4), warm cream + terra (Cowork-DL "Edition"). If your output anchors on any of these, you read a stale doc.
+**Historical (do not build against):** V6 slate-blue/lavender/periwinkle (`design_handoff_smbx_desktop_material/`, `design_handoff_smbx_app store/`, `DESIGN_SOURCE.md`, `DESIGN_TOKENS.md`), hot pink `#D44A78` (V3/V4), and the Cowork-DL warm-cream "Edition" era. (Note: terra `#D4714E` is CURRENT again as the 2026-07 accent — the retired thing is the old Cowork-DL cream system, not the hex.) If your output anchors on any of these, you read a stale doc.
 
 **Safari toolbar rule still applies:** never use `position:fixed` full-viewport divs with a background color (Safari reads them for toolbar tinting and it breaks dark-mode switching). Use `position:absolute` inside a relative parent instead.
 

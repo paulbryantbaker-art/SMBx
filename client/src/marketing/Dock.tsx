@@ -1,11 +1,14 @@
 /**
  * The ChatDock — the one input of the whole marketing surface (wireframe 5m):
- * pill shape, auto-expanding textarea (1–5 rows), circular terra send that is
- * visible only when there's text. Enter sends; Shift+Enter breaks the line.
+ * pill shape, auto-expanding textarea (1–5 rows; the cap lives in CSS
+ * max-height only), circular terra send that is visible only when there's
+ * text. Enter sends; Shift+Enter breaks the line.
  *
  * The shell renders one instance per surface slot; on mobile there is exactly
  * ONE instance (fixed bottom) so the morph never remounts it and the keyboard
- * is never dismissed (locked iOS rule, wireframe 5i).
+ * is never dismissed (locked iOS rule, wireframe 5i). seed() focuses
+ * SYNCHRONOUSLY — iOS only raises the keyboard for focus inside the
+ * user-gesture call stack.
  */
 import { forwardRef, useImperativeHandle, useRef, useState, useCallback } from 'react';
 
@@ -16,37 +19,37 @@ export interface DockHandle {
 
 interface DockProps {
   placeholder: string;
-  onSend: (text: string) => void;
+  /** Return true if the message was accepted; on false the text is KEPT so a
+   *  send during streaming never silently eats what was typed. */
+  onSend: (text: string) => boolean;
   disabled?: boolean;
-  autoFocus?: boolean;
-  ariaLabel?: string;
 }
 
 export const Dock = forwardRef<DockHandle, DockProps>(function Dock(
-  { placeholder, onSend, disabled, autoFocus, ariaLabel },
+  { placeholder, onSend, disabled },
   ref,
 ) {
   const [value, setValue] = useState('');
   const taRef = useRef<HTMLTextAreaElement>(null);
 
-  // 5-row cap = line-height 1.45 × 16px × 5 (matches the CSS max-height).
-  const MAX_H = 1.45 * 16 * 5;
+  // Grow to content; the CSS max-height (calc(1.45em * 5)) clamps the cap.
   const autosize = useCallback(() => {
     const ta = taRef.current;
     if (!ta) return;
     ta.style.height = 'auto';
-    ta.style.height = `${Math.min(ta.scrollHeight, MAX_H)}px`;
-  }, [MAX_H]);
+    ta.style.height = `${ta.scrollHeight}px`;
+  }, []);
 
   useImperativeHandle(ref, () => ({
     focus: () => taRef.current?.focus(),
     seed: (text: string) => {
+      const ta = taRef.current;
+      ta?.focus(); // synchronous — inside the tap's gesture stack (iOS keyboard)
       setValue(text);
       requestAnimationFrame(() => {
-        const ta = taRef.current;
-        if (!ta) return;
-        ta.focus();
-        ta.setSelectionRange(text.length, text.length);
+        const el = taRef.current;
+        if (!el) return;
+        el.setSelectionRange(text.length, text.length);
         autosize();
       });
     },
@@ -55,21 +58,21 @@ export const Dock = forwardRef<DockHandle, DockProps>(function Dock(
   const submit = () => {
     const text = value.trim();
     if (!text || disabled) return;
+    if (!onSend(text)) return; // rejected (mid-stream): keep the text
     setValue('');
     const ta = taRef.current;
     if (ta) ta.style.height = 'auto';
-    onSend(text);
   };
 
   return (
-    <div className={`mk-dock${value.trim() ? ' has-text' : ''}`}>
+    <div className={`mk-dock${value.trim() ? ' has-text' : ''}${disabled ? ' is-disabled' : ''}`}>
       <textarea
         ref={taRef}
         rows={1}
         value={value}
         placeholder={placeholder}
-        aria-label={ariaLabel || placeholder}
-        autoFocus={autoFocus}
+        aria-label={placeholder}
+        disabled={disabled}
         onChange={e => { setValue(e.target.value); autosize(); }}
         onKeyDown={e => {
           if (e.key === 'Enter' && !e.shiftKey) {

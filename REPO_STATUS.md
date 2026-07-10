@@ -2,13 +2,16 @@
 
 **Last updated: 2026-07-10.**
 
-## 2026-07-10 — UI retool pending
+## 2026-07-10 — UI retool in progress
 
-A new design language is incoming as a design handoff bundle: marketing gets a
-ground-up rebuild, the app a token-level re-skin. THE LINE and DEFINITIVE are
-unchanged. Operating doc: **`UI_RETOOL_READINESS.md`** (surface map, token seams,
-preservation contract, phased playbook). The pre-retool demolition removed the
-orphaned pre-Atlas UI (~24k LOC + 76MB textures) — see `CLAUDE.md` § Dead Code.
+The CD bundle landed (`smbx-ai-marketing-redesign/`, wireframes turn 5) and the
+marketing rebuild is implemented on the retool branch: the **terra** language
+(`client/src/marketing/`, `.mk` scope, page-morphs-into-Yulia), with Ramp
+quarantined at `marketing/legacy/` serving the footer-linked pages. CD is
+iterating toward hi-fi on the same structure. The app re-skin is a later phase.
+THE LINE and DEFINITIVE are unchanged. Operating doc: **`UI_RETOOL_READINESS.md`**.
+The pre-retool demolition removed the orphaned pre-Atlas UI (~24k LOC + 76MB
+textures) plus a 47-module orphan sweep — see `CLAUDE.md` § Dead Code.
 
 ## 2026-05-27 locks
 

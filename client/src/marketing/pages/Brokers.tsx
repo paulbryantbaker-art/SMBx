@@ -26,7 +26,7 @@ export default function Brokers() {
     >
       <section className="mk-hero">
         <div className="mk-wrap">
-          <div className="mk-split-copy" style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'flex-start' }}>
+          <div className="mk-split-copy">
             <span className="mk-seclabel">For brokers · advisors · sponsors</span>
             <h1 className="mk-h1" style={{ maxWidth: '16ch' }}>
               Yulia does the analyst work. You run the deal.
@@ -34,7 +34,7 @@ export default function Brokers() {
             <div className="mk-cap-chips">
               {CAPS.map(c => <span className="mk-chip" key={c} style={{ cursor: 'default' }}>{c}</span>)}
             </div>
-            <div style={{ width: 'min(520px, 100%)' }}>
+            <div className="mk-dock-narrow">
               <HeroDock />
             </div>
           </div>

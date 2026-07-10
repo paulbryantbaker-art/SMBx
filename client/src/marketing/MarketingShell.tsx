@@ -30,10 +30,14 @@ import { useMarketingChat } from './useMarketingChat';
 export type MkPage = 'home' | 'sell' | 'buy' | 'brokers' | 'how' | 'pricing';
 
 interface ShellCtxValue {
-  send: (text: string) => void;
+  /** Returns true if the message was accepted (docks keep the text on false). */
+  send: (text: string) => boolean;
   seed: (text: string) => void;
   placeholder: string;
   phase: 'landing' | 'chat';
+  /** True when the anonymous gate is closed — docks hard-disable so typed
+   *  text is never silently swallowed by the gate guard. */
+  dockDisabled: boolean;
 }
 const ShellCtx = createContext<ShellCtxValue | null>(null);
 
@@ -48,7 +52,7 @@ export function useShell(): ShellCtxValue {
  *  viewport). Persona chips pre-load Yulia's context by seeding the dock —
  *  they never navigate and never auto-send (wireframe 4d). */
 export function HeroDock({ chips }: { chips?: Array<{ label: string; seed: string }> }) {
-  const { placeholder, seed, send } = useShell();
+  const { placeholder, seed, send, dockDisabled } = useShell();
   const deskRef = useRef<DockHandle>(null);
   const seedNearest = (text: string) => {
     if (window.matchMedia('(min-width: 768px)').matches) deskRef.current?.seed(text);
@@ -58,7 +62,7 @@ export function HeroDock({ chips }: { chips?: Array<{ label: string; seed: strin
     <>
       <div className="mk-dock-wrap">
         <span className="mk-desktop-only" style={{ display: 'block' }}>
-          <Dock ref={deskRef} placeholder={placeholder} onSend={send} />
+          <Dock ref={deskRef} placeholder={placeholder} onSend={send} disabled={dockDisabled} />
         </span>
         <button
           type="button"
@@ -114,7 +118,9 @@ export function MarketingShell({ page, placeholder, quickReplies = [], children 
     catch { return false; }
   }, []);
 
-  // --app-height from visualViewport (locked iOS rule — never 100dvh).
+  // --app-height from visualViewport (locked iOS rule — never 100dvh), plus
+  // --kb-inset so the fixed mobile dock rides ABOVE the software keyboard
+  // (iOS keeps position:fixed anchored to the unshrunken layout viewport).
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
@@ -122,6 +128,8 @@ export function MarketingShell({ page, placeholder, quickReplies = [], children 
     const set = () => {
       const h = vv?.height ?? window.innerHeight;
       root.style.setProperty('--app-height', `${Math.round(h)}px`);
+      const inset = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
+      root.style.setProperty('--kb-inset', `${Math.round(inset)}px`);
     };
     set();
     vv?.addEventListener('resize', set);
@@ -159,7 +167,15 @@ export function MarketingShell({ page, placeholder, quickReplies = [], children 
     };
   }, [phase]);
 
-  const send = useCallback((text: string) => {
+  // Depend on the stable chat.send, not the per-render chat object — the ctx
+  // must NOT churn on every SSE chunk (it feeds every useShell consumer).
+  const { send: chatSend, sending: chatSending, gate: chatGate } = chat;
+
+  const send = useCallback((text: string): boolean => {
+    // The hook's own guard would silently drop these — reject loudly instead
+    // (docks keep the typed text; gate docks are disabled with a clear label).
+    if (chatSending || chatGate) return false;
+    setMenuOpen(false);
     if (phase === 'landing') {
       savedScroll.current = window.scrollY || document.body.scrollTop || document.documentElement.scrollTop || 0;
       setPhase('chat');
@@ -168,8 +184,9 @@ export function MarketingShell({ page, placeholder, quickReplies = [], children 
         if (window.matchMedia('(min-width: 768px)').matches) chatDockRef.current?.focus();
       });
     }
-    void chat.send(text);
-  }, [phase, chat]);
+    void chatSend(text);
+    return true;
+  }, [phase, chatSend, chatSending, chatGate]);
 
   const seed = useCallback((text: string) => {
     // Mobile: seed + focus the single bottom dock. Desktop: hero dock is live.
@@ -177,6 +194,7 @@ export function MarketingShell({ page, placeholder, quickReplies = [], children 
   }, []);
 
   const back = useCallback(() => {
+    setMenuOpen(false);
     setPhase('landing');
     requestAnimationFrame(() => {
       window.scrollTo(0, savedScroll.current);
@@ -189,7 +207,11 @@ export function MarketingShell({ page, placeholder, quickReplies = [], children 
   const userTurns = chat.messages.filter(m => m.role === 'user').length;
   const activeQuick = userTurns < 3 ? quickReplies : [];
 
-  const ctx = useMemo<ShellCtxValue>(() => ({ send, seed, placeholder, phase }), [send, seed, placeholder, phase]);
+  const dockDisabled = !!chatGate;
+  const ctx = useMemo<ShellCtxValue>(
+    () => ({ send, seed, placeholder, phase, dockDisabled }),
+    [send, seed, placeholder, phase, dockDisabled],
+  );
 
   return (
     <ShellCtx.Provider value={ctx}>
@@ -231,7 +253,7 @@ export function MarketingShell({ page, placeholder, quickReplies = [], children 
                 <div className="mk-footer-cta mk-desktop-only">
                   <p className="mk-footer-cta-line">Still reading? Just ask her.</p>
                   <div className="mk-dock-wrap">
-                    <Dock placeholder={placeholder} onSend={send} />
+                    <Dock placeholder={placeholder} onSend={send} disabled={dockDisabled} />
                   </div>
                 </div>
                 <div className="mk-footer-grid">
@@ -266,7 +288,12 @@ export function MarketingShell({ page, placeholder, quickReplies = [], children 
             />
             <div className="mk-chat-dock mk-desktop-only">
               <div className="mk-dock-wrap">
-                <Dock ref={chatDockRef} placeholder="Message Yulia…" onSend={send} disabled={chat.sending} />
+                <Dock
+                  ref={chatDockRef}
+                  placeholder={chatGate ? 'Create your account to keep chatting' : 'Message Yulia…'}
+                  onSend={send}
+                  disabled={dockDisabled}
+                />
               </div>
               <div className="mk-chat-hint">Yulia computes and cites — check important numbers.</div>
             </div>
@@ -277,9 +304,9 @@ export function MarketingShell({ page, placeholder, quickReplies = [], children 
         <div className="mk-mobile-dock mk-mobile-only">
           <Dock
             ref={mobileDockRef}
-            placeholder={phase === 'chat' ? 'Message Yulia…' : placeholder}
+            placeholder={chatGate ? 'Create your account to keep chatting' : phase === 'chat' ? 'Message Yulia…' : placeholder}
             onSend={send}
-            disabled={phase === 'chat' && chat.sending}
+            disabled={dockDisabled}
           />
         </div>
       </div>

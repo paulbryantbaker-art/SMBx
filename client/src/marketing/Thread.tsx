@@ -1,48 +1,61 @@
 /**
  * The conversation thread (wireframes 5j / 4c / 5m "message rendering"):
  *   - user: right-aligned terra-soft bubble — the ONLY terra-soft surface
- *   - Yulia: NO bubble — plain text on the page bg, avatar alongside, and any
- *     money range typographically promoted to display scale (the CashApp
+ *   - Yulia: NO bubble — plain text on the page bg, avatar alongside, and the
+ *     hero money range typographically promoted to display scale (the CashApp
  *     "balance" treatment; result-card variant 1i-i, inline strip)
  *   - quick replies: pill row after her turns; primary pill terra-outlined
- *   - email ask: in-stream card, never a modal; skippable; value never gated
+ *   - gate: an in-stream card, never a modal. Signup is Google-one-click
+ *     (email/password was deliberately removed), so the card routes to
+ *     /signup rather than collecting an email nothing can use.
  *
  * Data source is the existing anonymous funnel (useMarketingChat): real
  * computed answers, no scripted demo content.
  */
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { memo, useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { useLocation } from 'wouter';
 import type { MktMsg, MktGate } from './useMarketingChat';
 
-/* Promote money ranges inside Yulia's prose. Only the HERO datum of a message
-   (the largest range, wireframe 5m: "terra ONLY when it's the hero datum" —
-   here: display scale only for the hero) gets the CashApp balance treatment;
-   supporting ranges are merely bold. Text stays text — typography, not content. */
-const RANGE_RE = /\$\d[\d,.]*\s?[KMB]?\s?[–—-]\s?\$\d[\d,.]*\s?[KMB]?/g;
+/* Promote money ranges inside Yulia's prose. The dash must be UNSPACED —
+   "$1.08M–$1.89M" is a range; "put down $150K — $1.2M is the loan" is a
+   clause break between two unrelated figures and must not be fused into a
+   fake range. Only the HERO datum of a message (largest bound; ties → the
+   last occurrence, since her estimate lands at the end of the beat) gets
+   display scale; supporting ranges are merely bold. Typography, not content. */
+const RANGE_RE = /\$\d[\d,.]*\s?[KMB]?[–—-]\$\d[\d,.]*\s?[KMB]?/g;
 
-function rangeMagnitude(range: string): number {
-  const m = range.match(/\$(\d[\d,.]*)\s?([KMB])?/);
+function moneyValue(token: string): number {
+  const m = token.match(/\$(\d[\d,.]*)\s?([KMB])?/);
   if (!m) return 0;
   const n = parseFloat(m[1].replace(/,/g, ''));
   const mult = m[2] === 'B' ? 1e9 : m[2] === 'M' ? 1e6 : m[2] === 'K' ? 1e3 : 1;
   return n * mult;
 }
 
+function rangeMagnitude(range: string): number {
+  const parts = range.split(/[–—-]/);
+  return Math.max(moneyValue(parts[0] ?? ''), moneyValue(parts[1] ?? ''));
+}
+
 export function renderYuliaText(text: string): ReactNode[] {
-  const heroMag = Math.max(0, ...[...text.matchAll(RANGE_RE)].map(m => rangeMagnitude(m[0])));
+  // One hero per message: the last range carrying the maximum magnitude.
+  const all = [...text.matchAll(RANGE_RE)].map(m => rangeMagnitude(m[0]));
+  const heroMag = all.length ? Math.max(...all) : 0;
+  const heroOccurrence = all.lastIndexOf(heroMag);
+
   const out: ReactNode[] = [];
+  let occurrence = -1;
   const paragraphs = text.split(/\n{2,}/);
   paragraphs.forEach((para, pi) => {
     const nodes: ReactNode[] = [];
     let last = 0;
     for (const m of para.matchAll(RANGE_RE)) {
       const i = m.index ?? 0;
+      occurrence += 1;
       if (i > last) nodes.push(para.slice(last, i));
-      const range = m[0].replace(/\s?[–—-]\s?/, '–');
-      const [a, b] = range.split('–');
-      const isHero = heroMag > 0 && rangeMagnitude(m[0]) === heroMag;
+      const [a, b] = m[0].split(/[–—-]/);
       nodes.push(
-        isHero ? (
+        occurrence === heroOccurrence ? (
           <span className="mk-range" key={`r${pi}-${i}`}>
             {a}
             <span className="dash">–</span>
@@ -69,37 +82,27 @@ function YuliaMsg({ children }: { children: ReactNode }) {
   );
 }
 
-/** In-stream email card — account creation framed as delivery, skippable. */
-function EmailCard({ prompt, onSkip }: { prompt: string; onSkip?: () => void }) {
+/** Completed messages never change — parse once per content string, not once
+ *  per streamed chunk of the message after them. */
+const YuliaMsgMemo = memo(function YuliaMsgMemo({ content }: { content: string }) {
+  const nodes = useMemo(() => renderYuliaText(content), [content]);
+  return <YuliaMsg>{nodes}</YuliaMsg>;
+});
+
+/** In-stream gate card. Honest about the actual auth: one-click Google. */
+function GateCard({ gate }: { gate: Exclude<MktGate, null> }) {
   const [, navigate] = useLocation();
-  const [email, setEmail] = useState('');
-  const go = () => {
-    const v = email.trim();
-    if (!v) return;
-    navigate(`/signup?email=${encodeURIComponent(v)}`);
-  };
+  const prompt =
+    gate === 'limit'
+      ? 'I can keep going — create your account and I’ll put your full Baseline™ together with everything we’ve covered saved to it.'
+      : 'To pick this up and keep your work saved, create your account — this conversation comes with you.';
   return (
     <div className="mk-stream-card">
       <div style={{ fontSize: 14.5, lineHeight: 1.5 }}>{prompt}</div>
-      <div className="mk-email-row">
-        <input
-          type="email"
-          value={email}
-          placeholder="you@company.com"
-          onChange={e => setEmail(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') go(); }}
-        />
-        <button type="button" className="mk-email-send" onClick={go} aria-label="Continue with this email">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-      </div>
-      {onSkip && (
-        <button type="button" className="mk-skip" onClick={onSkip}>
-          Just show me here
-        </button>
-      )}
+      <button type="button" className="mk-chip is-primary" onClick={() => navigate('/signup')}>
+        Continue — one click with Google
+      </button>
+      <span className="mk-note">No forms, no password. Your conversation follows you in.</span>
     </div>
   );
 }
@@ -115,35 +118,30 @@ export interface ThreadProps {
 }
 
 export function Thread({ messages, streamingText, sending, gate, error, quickReplies, onQuickReply }: ThreadProps) {
-  const endRef = useRef<HTMLDivElement>(null);
-  const [emailSkipped, setEmailSkipped] = useState(false);
+  const scrollerRef = useRef<HTMLDivElement>(null);
 
-  // Follow the stream: keep the newest turn in view.
+  // Follow the stream — but only when the reader is already near the bottom
+  // (scrolling up to re-read must not be hijacked), and only by moving THIS
+  // container (never document scroll: the thread stays mounted, invisible,
+  // in the landing phase).
   useEffect(() => {
-    endRef.current?.scrollIntoView({ block: 'end' });
+    const el = scrollerRef.current;
+    if (!el) return;
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 140;
+    if (nearBottom) el.scrollTop = el.scrollHeight;
   }, [messages.length, streamingText, gate]);
 
   const lastIsYulia = messages.length > 0 && messages[messages.length - 1].role === 'assistant';
   const showQuick = lastIsYulia && !sending && !gate && quickReplies.length > 0;
 
-  const gatePrompt = useMemo(() => {
-    if (gate === 'limit') {
-      return 'I can keep going — I’ll put your full Baseline™ together and save everything we’ve covered. Where should I send it?';
-    }
-    if (gate === 'session') {
-      return 'To pick this up and keep your work saved, tell me where to send it.';
-    }
-    return null;
-  }, [gate]);
-
   return (
-    <div className="mk-thread">
+    <div className="mk-thread" ref={scrollerRef}>
       <div className="mk-thread-inner">
         {messages.map(m =>
           m.role === 'user' ? (
             <div className="mk-msg-user" key={m.id}>{m.content}</div>
           ) : (
-            <YuliaMsg key={m.id}>{renderYuliaText(m.content)}</YuliaMsg>
+            <YuliaMsgMemo key={m.id} content={m.content} />
           ),
         )}
 
@@ -172,16 +170,9 @@ export function Thread({ messages, streamingText, sending, gate, error, quickRep
           </div>
         )}
 
-        {gatePrompt && !emailSkipped && (
-          <EmailCard
-            prompt={gatePrompt}
-            onSkip={gate === 'limit' ? undefined : () => setEmailSkipped(true)}
-          />
-        )}
+        {gate && <GateCard gate={gate} />}
 
         {error && <div className="mk-note" role="alert">{error}</div>}
-
-        <div ref={endRef} />
       </div>
     </div>
   );

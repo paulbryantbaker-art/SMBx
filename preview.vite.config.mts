@@ -1,11 +1,13 @@
-// ONE-OFF single-file preview build for the artifact preview (not committed,
-// not part of the app). Inlines all dynamic imports into one bundle and stubs
-// the auth-gated shells that a logged-out preview can never reach.
+// Single-file preview build for design review (`npm run preview:build`).
+// Produces dist-preview/ (gitignored): one JS bundle + one CSS file that the
+// artifact-preview packaging inlines into a self-contained page. Inlines all
+// dynamic imports and stubs the auth-gated shells a logged-out preview can
+// never reach. NOT the production build — vite.config.ts is untouched.
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
-const STUB = '/tmp/claude-0/-home-user-SMBx/76752821-4b39-5cbd-b981-5799c5073e8b/scratchpad/preview-stub.tsx';
+const STUB = path.resolve(__dirname, 'client/src/preview-stub.tsx');
 
 export default defineConfig({
   plugins: [react()],

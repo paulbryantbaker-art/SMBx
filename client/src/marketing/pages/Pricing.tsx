@@ -12,24 +12,8 @@
 import { useState } from 'react';
 import { MarketingShell, HeroDock, useShell } from '../MarketingShell';
 import { PRICING_TIERS, tierPriceDollars } from '../../lib/pricing';
-
-/** Double Lehman: 10% of the 1st $1M, 8% of the 2nd, 6% of the 3rd,
- *  4% of the 4th, 2% of everything above. */
-function doubleLehman(dealDollars: number): number {
-  const bands = [0.10, 0.08, 0.06, 0.04];
-  let fee = 0;
-  let left = dealDollars;
-  for (const rate of bands) {
-    const slice = Math.min(left, 1_000_000);
-    fee += slice * rate;
-    left -= slice;
-    if (left <= 0) return fee;
-  }
-  return fee + left * 0.02;
-}
-
-const fmtDeal = (d: number) => (d >= 1_000_000 ? `$${(d / 1_000_000).toFixed(1)}M` : `$${Math.round(d / 1000)}K`);
-const fmtFee = (f: number) => (f >= 1_000_000 ? `$${(f / 1_000_000).toFixed(2)}M` : `$${Math.round(f / 1000)}K`);
+import { Faq } from '../Faq';
+import { doubleLehmanCents, fmtAnchorCents } from '../feeAnchor';
 
 const TIER_FEATURES: Record<string, string[]> = {
   free: ['Unlimited conversation with Yulia', 'One deliverable, free — The Baseline™', 'No card required'],
@@ -39,23 +23,24 @@ const TIER_FEATURES: Record<string, string[]> = {
 };
 
 function AnchorSlider() {
-  const [deal, setDeal] = useState(2_000_000);
-  const fee = doubleLehman(deal);
+  // Integer cents throughout (money law); $300K–$25M in $100K steps.
+  const [dealCents, setDealCents] = useState(200_000_000);
+  const feeCents = doubleLehmanCents(dealCents);
   return (
     <div className="mk-center" style={{ gap: 14 }}>
       <h1 className="mk-h1" style={{ maxWidth: '20ch', fontSize: 'clamp(26px, 3.6vw, 40px)' }}>
-        On a <em>{fmtDeal(deal)}</em> sale, a broker takes <s>~{fmtFee(fee)}</s>.<br />
+        On a <em>{fmtAnchorCents(dealCents)}</em> sale, a broker takes <s>~{fmtAnchorCents(feeCents)}</s>.<br />
         Yulia takes no cut. Ever.
       </h1>
       <div className="mk-slider-wrap">
         <input
           type="range"
           className="mk-slider"
-          min={300_000}
-          max={25_000_000}
-          step={100_000}
-          value={deal}
-          onChange={e => setDeal(Number(e.target.value))}
+          min={30_000_000}
+          max={2_500_000_000}
+          step={10_000_000}
+          value={dealCents}
+          onChange={e => setDealCents(Number(e.target.value))}
           aria-label="Deal size"
         />
         <span className="mk-note">
@@ -116,26 +101,9 @@ const FAQ = [
   },
   {
     q: 'When do I pay?',
-    a: 'When you want unlimited deliverables and the deeper deal work — subscriptions start at $99/month and cancel anytime.',
+    a: `When you want unlimited deliverables and the deeper deal work — subscriptions start at ${tierPriceDollars('solo')}/month and cancel anytime.`,
   },
 ];
-
-function Faq() {
-  const [open, setOpen] = useState<number | null>(0);
-  return (
-    <div className="mk-faq">
-      {FAQ.map((item, i) => (
-        <div className={`mk-faq-item${open === i ? ' open' : ''}`} key={item.q}>
-          <button type="button" className="mk-faq-q" aria-expanded={open === i} onClick={() => setOpen(open === i ? null : i)}>
-            {item.q}
-            <span className="pm">{open === i ? '–' : '+'}</span>
-          </button>
-          <div className="mk-faq-a"><p>{item.a}</p></div>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 export default function Pricing() {
   return (
@@ -158,13 +126,13 @@ export default function Pricing() {
 
       <section className="mk-section" style={{ paddingTop: 6 }}>
         <div className="mk-wrap" style={{ maxWidth: 720 }}>
-          <Faq />
+          <Faq items={FAQ} defaultOpen={0} />
         </div>
       </section>
 
       <section className="mk-section" style={{ paddingTop: 0 }}>
         <div className="mk-wrap mk-center">
-          <div style={{ width: 'min(520px, 100%)' }}>
+          <div className="mk-dock-narrow">
             <HeroDock />
           </div>
         </div>

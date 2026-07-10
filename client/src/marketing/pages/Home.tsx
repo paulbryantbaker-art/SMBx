@@ -4,7 +4,8 @@
  * stated once, big; three steps; the shell adds the footer dock.
  */
 import { useEffect, useState } from 'react';
-import { MarketingShell, HeroDock } from '../MarketingShell';
+import { MarketingShell, HeroDock, useShell } from '../MarketingShell';
+import { FeeAnchorBand } from '../feeAnchor';
 
 const TICKER = [
   { num: ['$1.08M', '$1.89M'], note: 'what a $1.8M-revenue cleaning co is worth · sample seller Baseline™' },
@@ -13,13 +14,15 @@ const TICKER = [
 ] as const;
 
 function Ticker() {
+  const { phase } = useShell();
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(false);
   useEffect(() => {
-    if (paused) return;
+    // Don't tick while morphed away — the landing is hidden, nobody can see it.
+    if (paused || phase === 'chat') return;
     const t = setInterval(() => setI(v => (v + 1) % TICKER.length), 4000);
     return () => clearInterval(t);
-  }, [paused]);
+  }, [paused, phase]);
   const item = TICKER[i];
   return (
     <div
@@ -70,13 +73,7 @@ export default function Home() {
         <Ticker />
       </div>
 
-      <section className="mk-band">
-        <div className="mk-wrap">
-          <p className="mk-band-line">
-            A broker's cut on a $2M sale: <s>~$180K</s>. Ours: <em>$0.</em>
-          </p>
-        </div>
-      </section>
+      <FeeAnchorBand />
 
       <div className="mk-wrap">
         <div className="mk-steps">

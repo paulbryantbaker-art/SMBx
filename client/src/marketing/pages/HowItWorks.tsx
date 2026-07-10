@@ -55,7 +55,7 @@ export default function HowItWorks() {
             </div>
             <div>
               <b>Same inputs → same answer</b>
-              <p style={{ margin: '6px 0 0', fontSize: 14.5, color: 'var(--mk-ink-2)', maxWidth: '58ch' }}>
+              <p>
                 The numbers come from a deterministic engine, not free-form generation — sourced
                 (Census, BLS, market comps), reproducible, and versioned. Ask her to show the math
                 on anything; that's the point.
@@ -63,7 +63,7 @@ export default function HowItWorks() {
             </div>
             <div>
               <b>The deliverable</b>
-              <p style={{ margin: '6px 0 0', fontSize: 14.5, color: 'var(--mk-ink-2)', maxWidth: '58ch' }}>
+              <p>
                 The Rundown™ — the full deal document: valuation with receipts, add-backs,
                 structure options, diligence list. Every number expandable to its source.
               </p>
@@ -74,7 +74,7 @@ export default function HowItWorks() {
 
       <section className="mk-section" style={{ paddingTop: 0 }}>
         <div className="mk-wrap mk-center">
-          <div style={{ width: 'min(520px, 100%)' }}>
+          <div className="mk-dock-narrow">
             <HeroDock />
           </div>
         </div>

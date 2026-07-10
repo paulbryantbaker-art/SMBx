@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import PublicNav from './PublicNav';
 import Footer from './Footer';
 import ChatMorph from '../chat/ChatMorph';
@@ -11,6 +12,23 @@ interface Props {
 
 export default function PublicLayout({ children, minimal }: Props) {
   const { morphPhase } = useChatContext();
+
+  // index.css locks html/body scrolling for the desktop app (≥901px). These
+  // long-form public pages (Terms/Privacy) scroll the document — release the
+  // lock while mounted, exactly like the marketing shells do. Without this
+  // the legal pages are scroll-frozen on desktop.
+  useEffect(() => {
+    const html = document.documentElement.style;
+    const body = document.body.style;
+    const prevHtml = html.overflow;
+    const prevBody = body.overflow;
+    html.overflow = 'auto';
+    body.overflow = 'auto';
+    return () => {
+      html.overflow = prevHtml;
+      body.overflow = prevBody;
+    };
+  }, []);
 
   const isChat = morphPhase === 'chat';
   const isMorphing = morphPhase === 'morphing';

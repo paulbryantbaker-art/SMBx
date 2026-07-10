@@ -30,18 +30,7 @@ import { RT } from "../redesign/rt";
 import { DetailSection, Divider, ActionRow } from "../redesign/kit";
 import { ActionSheet } from "../iosKit";
 import { useMobileShell } from "../mobileShell";
-
-/* ─── locked plan labels (mirror desktop Settings PLAN_LABEL) ─────────────── */
-const PLAN_LABEL: Record<string, string> = {
-  free: "Free",
-  solo: "Solo",
-  pro: "Pro",
-  team: "Team",
-  enterprise: "Enterprise",
-  // legacy aliases → locked names
-  starter: "Solo",
-  professional: "Pro",
-};
+import { planLabel } from "../../../../lib/pricing";
 
 function titleCase(s: string | null | undefined): string {
   if (!s) return "";
@@ -60,7 +49,7 @@ function userInitials(u: User | null): string {
 function profileSubtitle(u: User | null): string {
   if (!u) return "";
   const role = titleCase(u.role);
-  const plan = PLAN_LABEL[(u.plan || "free").toLowerCase()] ?? titleCase(u.plan);
+  const plan = planLabel(u.plan || 'free') ?? titleCase(u.plan);
   return [role, plan ? `${plan} plan` : ""].filter(Boolean).join(" · ");
 }
 

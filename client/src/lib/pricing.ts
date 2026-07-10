@@ -144,6 +144,32 @@ export function tierPriceDollars(id: TierId): string {
   return `$${(PRICING_TIERS[id].priceCents / 100).toLocaleString('en-US')}`;
 }
 
+/** Resolve a raw plan id (incl. legacy 'starter'/'professional' aliases) to a
+ *  locked tier, or null when unknown — null lets callers keep their own
+ *  fallback (e.g. the server's display string) instead of misreporting Free. */
+export function knownTier(planId: string | null | undefined): PricingTier | null {
+  const key = (planId || '').toLowerCase();
+  if (key === 'starter') return PRICING_TIERS.solo;
+  if (key === 'professional') return PRICING_TIERS.pro;
+  return key in PRICING_TIERS ? PRICING_TIERS[key as TierId] : null;
+}
+
+/** Settings-style display name for a raw plan id; null when unknown. */
+export function planLabel(planId: string | null | undefined): string | null {
+  return knownTier(planId)?.name ?? null;
+}
+
+/** Settings-style monthly price line: "Free", "$99 / month",
+ *  "$3,000+ / month"; null when unknown. Both Settings screens consume this —
+ *  never redeclare plan→price maps. */
+export function planPriceLine(planId: string | null | undefined): string | null {
+  const tier = knownTier(planId);
+  if (!tier) return null;
+  if (tier.id === 'free') return 'Free';
+  if (tier.id === 'enterprise') return `${tierPriceDollars('enterprise')}+ / month`;
+  return `${tierPriceDollars(tier.id)} / month`;
+}
+
 /** Get a tier by id, normalizing legacy plan names ('starter' -> 'solo', 'professional' -> 'pro'). */
 export function getPricingTier(planId: string | null | undefined): PricingTier {
   if (planId === 'starter') return PRICING_TIERS.solo;

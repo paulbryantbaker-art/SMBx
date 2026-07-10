@@ -1,5 +1,13 @@
 # UI Retool Readiness — the operating doc for the next design language
 
+**Status (2026-07-10, end of day):** the CD bundle LANDED
+(`smbx-ai-marketing-redesign/`, wireframes turn 5 committed set) and the
+marketing rebuild is IMPLEMENTED on the retool branch (terra language, `.mk`
+scope, AppPhase morph, six pages; Ramp quarantined at `marketing/legacy/`).
+Paul judged the first pass too spare — CD is producing a **hi-fi** pass on the
+same turn-5 structure; expect a restyle of the built pages, not a rebuild.
+The app re-skin (Phase 3+) has not started.
+
 **Decision (2026-07-10):** the site UI/UX — logged-out marketing front end AND the
 logged-in app — will be redone in a new design direction. The direction arrives as a
 **design handoff bundle** (same workflow as previous eras). Scope split:
