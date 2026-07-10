@@ -99,9 +99,10 @@ screens (`v6/*/screens/Agent.tsx`, `ApprovalCard`), inline `StagedActionCard` in
 screen's honest-by-design posture (no fabricated agent runs) also stays.
 
 ### 3.3 Agent↔UI contracts (DEFINITIVE surface vocabulary)
-- `client/src/lib/v6SurfaceActions.ts` — the canonical `SurfaceActionKind` /
-  `SurfaceResult` vocabulary (open_*, ~22 run_* canvases, generate_*, and the three
-  `staged_confirmation` actions). Companion `v6ActionContracts.ts`.
+- `client/src/lib/yuliaSurfaceContext.ts` — the LIVE agent↔UI surface vocabulary,
+  consumed by `useAuthChat`/`useAnonymousChat` and both Atlas shells. (The older
+  `v6SurfaceActions.ts` / `v6ActionContracts.ts` pair was superseded by it and
+  deleted in the 2026-07-10 orphan sweep.)
 - The single chat→canvas bridge: SSE `canvas_action` → window event
   `smbx:canvas_action` (subscribed once per shell). Do not invent a second channel.
 - SSE event shapes: `text_delta` / `staged_action` / `canvas_action` /

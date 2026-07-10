@@ -116,7 +116,7 @@ Valuation Explorer, LBO, SBA Financing, DCF, Tax Impact, Cap Table, Sensitivity 
 | client/src/components/v6/desktop/atlasTokens.ts + atlasmobile/mobileTokens.ts | THE app skin knobs (`T` / `M`) — retheme here first |
 | client/src/marketing/ | Logged-out marketing surface (`.mkt` scope, MarketingShell + 9 pages) |
 | client/src/lib/pricing.ts | Canonical client pricing table — all price UI derives from here |
-| client/src/lib/v6SurfaceActions.ts | Agent↔UI surface-action vocabulary (preserve across redesigns) |
+| client/src/lib/yuliaSurfaceContext.ts | Agent↔UI surface-action vocabulary (preserve across redesigns) |
 | client/src/components/models/ | 11 interactive financial model components for the human canvas |
 | client/src/lib/calculations/core.ts | Legacy pure calculation helpers for canvas models |
 | server/services/v19ModelRuntime.ts | Server-side V19 model runtime for executable/research `MODEL.*.v1` definitions |
