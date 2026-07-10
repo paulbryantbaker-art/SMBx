@@ -84,7 +84,7 @@ const V6App = lazy(() => import('./components/v6/V6App'));
 const MarketingHome = lazy(() => import('./marketing/pages/Home'));
 const MarketingBuy = lazy(() => import('./marketing/pages/Buy'));
 const MarketingSell = lazy(() => import('./marketing/pages/Sell'));
-const MarketingBrokers = lazy(() => import('./marketing/pages/Brokers'));
+const MarketingAdvise = lazy(() => import('./marketing/pages/Advise'));
 const MarketingHowItWorks = lazy(() => import('./marketing/pages/HowItWorks'));
 const MarketingPricing = lazy(() => import('./marketing/pages/Pricing'));
 // Legacy Ramp pages — live but footer-only (Paul, 2026-07-10); restyle or retire later
@@ -336,7 +336,9 @@ export default function App() {
             /standard so the more specific path matches first. */}
         <Route path="/buy">{marketingOrApp(<MarketingBuy />)}</Route>
         <Route path="/sell">{marketingOrApp(<MarketingSell />)}</Route>
-        <Route path="/brokers">{marketingOrApp(<MarketingBrokers />)}</Route>
+        <Route path="/advise">{marketingOrApp(<MarketingAdvise />)}</Route>
+        {/* pre-hi-fi URL — the audience page moved to /advise */}
+        <Route path="/brokers"><Redirect to="/advise" /></Route>
         <Route path="/how-it-works">{marketingOrApp(<MarketingHowItWorks />)}</Route>
         <Route path="/raise">{marketingOrApp(<MarketingRaise />)}</Route>
         <Route path="/integrate">{marketingOrApp(<MarketingIntegrate />)}</Route>

@@ -97,7 +97,7 @@ function GateCard({ gate }: { gate: Exclude<MktGate, null> }) {
       ? 'I can keep going — create your account and I’ll put your full Baseline™ together with everything we’ve covered saved to it.'
       : 'To pick this up and keep your work saved, create your account — this conversation comes with you.';
   return (
-    <div className="mk-stream-card">
+    <div className="mk-stream-card mk-glass">
       <div style={{ fontSize: 14.5, lineHeight: 1.5 }}>{prompt}</div>
       <button type="button" className="mk-chip is-primary" onClick={() => navigate('/signup')}>
         Continue — one click with Google

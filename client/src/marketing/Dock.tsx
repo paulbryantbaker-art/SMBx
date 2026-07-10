@@ -66,6 +66,15 @@ export const Dock = forwardRef<DockHandle, DockProps>(function Dock(
 
   return (
     <div className={`mk-dock${value.trim() ? ' has-text' : ''}${disabled ? ' is-disabled' : ''}`}>
+      <button
+        type="button"
+        className="mk-dock-plus"
+        tabIndex={-1}
+        aria-hidden="true"
+        onClick={() => taRef.current?.focus()}
+      >
+        ＋
+      </button>
       <textarea
         ref={taRef}
         rows={1}

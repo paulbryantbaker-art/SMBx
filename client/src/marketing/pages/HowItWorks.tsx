@@ -1,7 +1,6 @@
 /**
- * `/how-it-works` — wireframe 5f. The anti-"just ChatGPT" page: one worked
- * example shown with its math, the deterministic engine, and the timeline
- * with the email ask marked honestly.
+ * `/how-it-works` — hi-fi 4e. "High tech. Human touch." — the four things
+ * ChatGPT can't do, the $28M worked deal, where the line is. Copy verbatim.
  */
 import { MarketingShell, HeroDock } from '../MarketingShell';
 
@@ -12,69 +11,113 @@ export default function HowItWorks() {
       placeholder="Tell Yulia about your deal…"
       quickReplies={['Run my numbers', 'How are sources cited?']}
     >
-      <section className="mk-hero" style={{ paddingBottom: 12 }}>
-        <div className="mk-wrap mk-center" style={{ gap: 12 }}>
-          <h1 className="mk-h1">Not guessed. Computed.</h1>
-          <p className="mk-hero-sub" style={{ maxWidth: '52ch' }}>
-            One worked example, first message to close — a $5.2M-EBITDA machining company.
-          </p>
-        </div>
-      </section>
-
-      <section className="mk-section" style={{ paddingTop: 8 }}>
-        <div className="mk-wrap">
-          <div className="mk-timeline">
-            <div>Talk</div>
-            <div className="is-hot">Baseline™</div>
-            <div>Rundown™</div>
-            <div>Deal work</div>
-            <div>Close</div>
-          </div>
-          <p className="mk-note" style={{ marginTop: 8 }}>
-            The one thing she asks for along the way: where to send your Baseline™. That's the
-            account — no password wall, and the first answers come before it.
+      <section className="mk-hero" style={{ paddingBottom: 20 }}>
+        <div className="mk-wrap mk-center">
+          <h1 className="mk-h1" style={{ maxWidth: '14ch' }}>
+            High tech. <em>Human touch.</em>
+          </h1>
+          <p className="mk-lead" style={{ marginTop: 26, maxWidth: '46em' }}>
+            Yulia does about 90% of what an investment bank does — the analysis, the documents,
+            the process — and none of the parts that require a license or a judgment call. Here's
+            what's actually happening under the hood, and why it holds up when your attorney
+            reads it.
           </p>
         </div>
       </section>
 
       <section className="mk-section">
-        <div className="mk-wrap">
-          <div className="mk-ledger">
-            <div>
-              <b>The math, shown</b>
-              <div className="mk-card mk-sample" style={{ marginTop: 8, maxWidth: 460 }}>
-                <div className="mk-rows">
-                  <div><span>Adjusted EBITDA</span><b>$5.2M</b></div>
-                  <div><span>Market multiple (precision machining)</span><b>4.2–4.8×</b></div>
-                </div>
-                <span className="mk-num mk-num-lg">
-                  $21.8M<span className="dash">–</span>$25.0M
-                </span>
-                <span className="mk-note">each factor carries its source — comps set, adjustments, date</span>
+        <div className="mk-wrap mk-center" style={{ gap: 44 }}>
+          <h2 className="mk-h2">Four things ChatGPT can't do</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 380px), 1fr))', gap: 24, width: 'min(1000px, 100%)', textAlign: 'left' }}>
+            <div className="mk-glass" style={{ padding: '34px 36px' }}>
+              <div style={{ fontSize: 19, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--mk-ink)' }}>
+                She knows your deal, not just "M&amp;A."
               </div>
-            </div>
-            <div>
-              <b>Same inputs → same answer</b>
-              <p>
-                The numbers come from a deterministic engine, not free-form generation — sourced
-                (Census, BLS, market comps), reproducible, and versioned. Ask her to show the math
-                on anything; that's the point.
+              <p style={{ margin: '12px 0 0', fontSize: 15, lineHeight: 1.65, color: 'var(--mk-ink-3)' }}>
+                Yulia works from your financials, your market, and your criteria — and remembers
+                them across months, so the tenth conversation is smarter than the first.
               </p>
             </div>
-            <div>
-              <b>The deliverable</b>
-              <p>
-                The Rundown™ — the full deal document: valuation with receipts, add-backs,
-                structure options, diligence list. Every number expandable to its source.
+            <div className="mk-ink-card" style={{ borderRadius: 26, padding: '34px 36px' }}>
+              <div style={{ fontSize: 19, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--mk-neon)' }}>
+                Her numbers are computed, not guessed.
+              </div>
+              <p style={{ margin: '12px 0 0', fontSize: 15, lineHeight: 1.65, color: 'var(--mk-w2)' }}>
+                Valuations, debt coverage, IRR, sensitivity — these run on a deterministic
+                engine, not a language model's best impression of arithmetic. Same inputs, same
+                outputs, every time. Auditable. Exportable as real formulas.
               </p>
             </div>
+            <div className="mk-glass" style={{ padding: '34px 36px' }}>
+              <div style={{ fontSize: 19, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--mk-ink)' }}>
+                Every number is sourced.
+              </div>
+              <p style={{ margin: '12px 0 0', fontSize: 15, lineHeight: 1.65, color: 'var(--mk-ink-3)' }}>
+                Census, BLS, the Federal Reserve, SEC EDGAR, SBA lending data — the same federal
+                sources that feed Wall Street research desks. She shows her work, so a
+                professional will respect the methodology.
+              </p>
+            </div>
+            <div className="mk-glass" style={{ padding: '34px 36px' }}>
+              <div style={{ fontSize: 19, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--mk-ink)' }}>
+                She drives.
+              </div>
+              <p style={{ margin: '12px 0 0', fontSize: 15, lineHeight: 1.65, color: 'var(--mk-ink-3)' }}>
+                Yulia doesn't wait to be asked what's next. She runs the process — the way a good
+                deal team does — so it doesn't stall in the places deals usually die.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mk-section">
+        <div className="mk-wrap">
+          <div className="mk-prose">
+            <h2 className="mk-h2">What a real deal looks like</h2>
+            <p className="mk-body">
+              Take a <b style={{ color: 'var(--mk-ink)' }}>$28M-revenue industrial services company with $5.4M in
+              EBITDA</b> going to market. Yulia builds the preliminary valuation range and shows
+              the comps. She recasts three years of financials and surfaces the add-backs the
+              owner never documented. She drafts the full confidential information memorandum —
+              the 100-page book an analyst spends three months on — as a complete first draft in
+              under an hour, sourced to the financials. She builds the buyer universe and screens
+              out the chains, subsidiaries, and roll-ups that aren't real targets. She models the
+              debt structures a buyer might use and flags the diligence issues before a buyer
+              finds them.
+            </p>
+            <p style={{ margin: 0, fontSize: 17, lineHeight: 1.6, fontWeight: 600, color: 'var(--mk-green)' }}>
+              Weeks of a full deal team's work, driven from a conversation — with you making
+              every decision along the way.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="mk-section">
+        <div className="mk-wrap" style={{ display: 'flex', justifyContent: 'center' }}>
+          <div className="mk-glass mk-glass-lg" style={{ width: 'min(880px, 100%)', padding: 'clamp(30px, 4vw, 48px) clamp(30px, 4.2vw, 56px)' }}>
+            <h2 className="mk-h2" style={{ fontSize: 'clamp(24px, 2.2vw, 30px)' }}>
+              Where the line is (and why it protects you)
+            </h2>
+            <p className="mk-body" style={{ marginTop: 16 }}>
+              Yulia generates analysis and documents. She does not negotiate on your behalf,
+              represent you to a counterparty, hold your money, practice law, or take a
+              percentage of your deal. When your deal needs judgment and a license, Yulia tells
+              you, and connects you to vetted M&amp;A attorneys, transaction CPAs, and SBA lenders.
+            </p>
+            <p style={{ margin: '14px 0 0', fontSize: 15, lineHeight: 1.65, color: 'var(--mk-ink-3)' }}>
+              This is a partnership with the professionals you hire, not a replacement for them.
+              A client who arrives prepared makes every advisor's job easier — and every
+              advisor's fee more justified.
+            </p>
           </div>
         </div>
       </section>
 
       <section className="mk-section" style={{ paddingTop: 0 }}>
         <div className="mk-wrap mk-center">
-          <div className="mk-dock-narrow">
+          <div style={{ width: '100%' }}>
             <HeroDock />
           </div>
         </div>
