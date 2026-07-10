@@ -6,8 +6,9 @@
  *
  * If this file disagrees with either of those, the lock doc wins. Update both at the same time.
  *
- * This module exists so client-side pricing surfaces (paywall, pricing tiles, Learn page,
- * Settings page, public Terms) all consume one canonical table instead of redeclaring strings.
+ * This module exists so client-side pricing surfaces (paywall, pricing tiles,
+ * Settings page, marketing Pricing page, public Terms) all consume one canonical
+ * table instead of redeclaring strings.
  * Pre-2026-05-27 drift produced three different price ladders across code, docs, and UI —
  * keep all client pricing UI importing from here.
  */
