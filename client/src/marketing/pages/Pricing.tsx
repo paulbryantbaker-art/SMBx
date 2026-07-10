@@ -3,11 +3,12 @@ import { MarketingShell } from '../MarketingShell';
 import { Brand } from '../Brand';
 import { enterApp } from '../useEnterApp';
 import { ClosingCTA } from '../components/ClosingCTA';
+import { tierPriceDollars } from '../../lib/pricing';
 
 const TIERS: Array<{ name: string; price: string; per?: string; desc: string; features: string[]; recommended?: boolean }> = [
   {
     name: 'Free',
-    price: '$0',
+    price: tierPriceDollars('free'),
     desc: 'Get started, no card.',
     features: [
       'Unlimited conversation with Yulia',
@@ -17,7 +18,7 @@ const TIERS: Array<{ name: string; price: string; per?: string; desc: string; fe
   },
   {
     name: 'Solo',
-    price: '$99',
+    price: tierPriceDollars('solo'),
     per: '/ month',
     desc: 'Everything in Free, plus:',
     features: [
@@ -29,7 +30,7 @@ const TIERS: Array<{ name: string; price: string; per?: string; desc: string; fe
   },
   {
     name: 'Pro',
-    price: '$249',
+    price: tierPriceDollars('pro'),
     per: '/ month',
     recommended: true,
     desc: 'Everything in Solo, plus:',
@@ -42,7 +43,7 @@ const TIERS: Array<{ name: string; price: string; per?: string; desc: string; fe
   },
   {
     name: 'Team',
-    price: '$749',
+    price: tierPriceDollars('team'),
     per: '/ month',
     desc: 'Everything in Pro, plus:',
     features: [
@@ -131,7 +132,7 @@ export default function Pricing() {
           >
             <div>
               <div style={{ fontFamily: 'var(--mono)', fontSize: '.74rem', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: 10 }}>
-                Enterprise · from $3,000 / month
+                Enterprise · from {tierPriceDollars('enterprise')} / month
               </div>
               <h3 style={{ color: '#fff', fontSize: '1.5rem', marginBottom: 12 }}>
                 Everything in Team, plus governed scale.

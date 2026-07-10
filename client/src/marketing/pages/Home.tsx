@@ -4,6 +4,7 @@ import { Brand } from '../Brand';
 import { YuliaLauncher } from '../YuliaChat';
 import { CLOSER_CAPABILITIES } from '../components/ClosingCTA';
 import { enterApp } from '../useEnterApp';
+import { tierPriceDollars } from '../../lib/pricing';
 import { HeroWorkspace } from '../components/HeroWorkspace';
 import { DerivationHero } from '../components/DerivationHero';
 import { ConformanceTerminal } from '../components/ConformanceTerminal';
@@ -212,10 +213,10 @@ function HomeCloser() {
             <div className="reveal" data-d="1">
               <div className="mock" style={{ padding: '6px 24px' }}>
                 <PriceRow plan="Free" note="One deliverable, free." />
-                <PriceRow plan="$99 / mo" note="Valuation, scoring, diligence." />
-                <PriceRow plan="$249 / mo" note="+ CIMs, deal rooms, discovery." />
-                <PriceRow plan="$749 / mo" note="+ shared vault, templates, seats." />
-                <PriceRow plan="$3,000+ / mo" note="+ single-tenant, SSO, agents." />
+                <PriceRow plan={`${tierPriceDollars('solo')} / mo`} note="Valuation, scoring, diligence." />
+                <PriceRow plan={`${tierPriceDollars('pro')} / mo`} note="+ CIMs, deal rooms, discovery." />
+                <PriceRow plan={`${tierPriceDollars('team')} / mo`} note="+ shared vault, templates, seats." />
+                <PriceRow plan={`${tierPriceDollars('enterprise')}+ / mo`} note="+ single-tenant, SSO, agents." />
               </div>
             </div>
           </div>

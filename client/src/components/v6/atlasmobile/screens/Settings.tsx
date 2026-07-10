@@ -44,13 +44,14 @@ import type { AtlasScreenProps, SettingsPane } from "../../desktop/atlasNav";
 import { useAtlasNav, useAtlasChat } from "../../desktop/atlasNav";
 import type { User } from "../../../../hooks/useAuth";
 import { authHeaders } from "../../../../hooks/useAuth";
+import { tierPriceDollars, type TierId } from "../../../../lib/pricing";
 import { Card, Avatar, Pill, ProgressBar, LoadingState } from "../../desktop/primitives";
 import { PlusIcon } from "../../desktop/icons";
 import { Switch } from "../iosKit";
 import { RT } from "../redesign/rt";
 import { DetailSection, ActionRow, Divider } from "../redesign/kit";
 
-/* ─── locked pricing (SMBX_PRICING_LOCKED.md) ─────────────────────────────── */
+/* ─── locked pricing (SMBX_PRICING_LOCKED.md via lib/pricing) ──────────────── */
 const PLAN_LABEL: Record<string, string> = {
   free: "Free",
   solo: "Solo",
@@ -61,14 +62,15 @@ const PLAN_LABEL: Record<string, string> = {
   starter: "Solo",
   professional: "Pro",
 };
+const planMonthly = (id: TierId) => `${tierPriceDollars(id)} / month`;
 const PLAN_PRICE: Record<string, string> = {
   free: "Free",
-  solo: "$99 / month",
-  pro: "$249 / month",
-  team: "$749 / month",
-  enterprise: "$3,000+ / month",
-  starter: "$99 / month",
-  professional: "$249 / month",
+  solo: planMonthly("solo"),
+  pro: planMonthly("pro"),
+  team: planMonthly("team"),
+  enterprise: `${tierPriceDollars("enterprise")}+ / month`,
+  starter: planMonthly("solo"),
+  professional: planMonthly("pro"),
 };
 
 /* ─── server payload shapes (real fields, coerced) ─────────────────────────── */

@@ -137,6 +137,13 @@ export const PRICING_TIERS: Record<TierId, PricingTier> = {
 /** Tier order used by the pricing UI top-to-bottom / left-to-right. */
 export const TIER_ORDER: readonly TierId[] = ['free', 'solo', 'pro', 'team', 'enterprise'];
 
+/** Bare dollar amount for a tier, e.g. "$0", "$99", "$3,000" — for surfaces
+ *  that compose their own cadence suffix ("/ mo", "/ month", "+ / month").
+ *  Keeps the digits single-sourced even where the phrasing differs. */
+export function tierPriceDollars(id: TierId): string {
+  return `$${(PRICING_TIERS[id].priceCents / 100).toLocaleString('en-US')}`;
+}
+
 /** Get a tier by id, normalizing legacy plan names ('starter' -> 'solo', 'professional' -> 'pro'). */
 export function getPricingTier(planId: string | null | undefined): PricingTier {
   if (planId === 'starter') return PRICING_TIERS.solo;
