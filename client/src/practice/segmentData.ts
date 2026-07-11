@@ -1,8 +1,8 @@
 /**
- * The five buyer-segment pages — content assembled from the corpdevservices
- * README "Segment Pages" guidance (messaging hooks + pain points per segment;
- * structure: hero → pain ledger → how smbX answers → pledge strip → CTA).
- * Copy is strong-draft per the handoff — iterate freely.
+ * The five buyer-segment pages — content per Paul's reworked copy deck
+ * (2026-07-11): answers are The work / The practitioner / Your side, with the
+ * buy-side loyalty stated once, warmly, in "Your side" — never as a repeated
+ * oath. Structure: hero → pain ledger → answers → CTA (no pledge strip).
  */
 export interface SegmentPain { name: string; body: string; tag: string; }
 export interface SegmentAnswer { k: string; v: string; }
@@ -27,7 +27,7 @@ export const SEGMENTS: Segment[] = [
     cardBody: 'Direct-deal control without building a deal team. Institutional-grade diligence and a disciplined price — on demand.',
     cardLink: 'For family offices →',
     h1: 'Direct-deal control. No deal-team build.',
-    sub: 'Your thesis, our engine, no blind pools, no club-deal compromises. Institutional-grade diligence and a disciplined price — on demand, deal by deal.',
+    sub: 'Your thesis, our team on it — no blind pools, no club-deal compromises. Institutional-grade diligence and a disciplined price, on demand, deal by deal.',
     painTitle: 'Direct deals reward a standing team. You shouldn’t have to build one.',
     pains: [
       {
@@ -47,9 +47,9 @@ export const SEGMENTS: Segment[] = [
       },
     ],
     answers: [
-      { k: 'The engine', v: 'Market maps and off-market sourcing on your thesis, with models and diligence checklists in days — deal capacity that switches on when you need it and costs nothing when you don’t.' },
+      { k: 'The work', v: 'Market maps and off-market sourcing on your thesis, with models and diligence checklists in days — deal capacity that switches on when you need it and costs nothing when you don’t.' },
       { k: 'The practitioner', v: 'A senior operator runs the process, keeps the price disciplined, and handles every seller conversation — no junior hand-offs, no committee lag.' },
-      { k: 'The pledge', v: 'One buyer per target, never the sell side, never two-sided. Your mandate is never resold, shopped, or shared.' },
+      { k: 'Your side', v: 'Buy-side is all we do, and we take one client per target — so your thesis is never resold or shared, and your deal has our full attention.' },
     ],
   },
   {
@@ -79,9 +79,9 @@ export const SEGMENTS: Segment[] = [
       },
     ],
     answers: [
-      { k: 'The engine', v: 'CIM triage, models, and diligence checklists produced in days, not weeks — so a dead deal costs you a conversation, not a quarter.' },
+      { k: 'The work', v: 'CIM triage, models, and diligence checklists produced in days, not weeks — so a dead deal costs you a conversation, not a quarter.' },
       { k: 'The practitioner', v: 'A senior operator packages the deal the way capital partners expect to see it — and keeps the seller warm while you raise.' },
-      { k: 'The pledge', v: 'One buyer per target. Your deal is never shopped to another sponsor — it’s in the engagement letter.' },
+      { k: 'Your side', v: 'We take one client per target — so the deal you worked to find stays yours to close, never shopped to another sponsor.' },
     ],
   },
   {
@@ -101,7 +101,7 @@ export const SEGMENTS: Segment[] = [
       },
       {
         name: 'Partner time',
-        body: 'Partners spend a third or more of their week sourcing — the most expensive hours in the firm doing work an engine should be doing.',
+        body: 'Partners spend a third or more of their week sourcing — the most expensive hours in the firm spent on work that shouldn’t need them.',
         tag: '30–40% ON SOURCING',
       },
       {
@@ -111,9 +111,9 @@ export const SEGMENTS: Segment[] = [
       },
     ],
     answers: [
-      { k: 'The engine', v: 'Off-market maps of the whole segment — not the brokered slice — with triage, models, and memos generated as fast as your pipeline moves.' },
+      { k: 'The work', v: 'Off-market maps of the whole segment — not the brokered slice — with triage, models, and memos generated as fast as your pipeline moves.' },
       { k: 'The practitioner', v: 'Senior execution that flexes deal by deal: outreach, process, and negotiation run by an operator, not a junior BD hire you have to manage.' },
-      { k: 'The pledge', v: 'One buyer per target and never two-sided — your add-on pipeline never leaks to a competing sponsor.' },
+      { k: 'Your side', v: 'One client per target — your add-on pipeline is yours alone, never shared with a competing buyer.' },
     ],
   },
   {
@@ -143,9 +143,9 @@ export const SEGMENTS: Segment[] = [
       },
     ],
     answers: [
-      { k: 'The engine', v: 'The recast, the model, the diligence checklist, and the lender package — built in days and checked against what the market actually pays.' },
-      { k: 'The practitioner', v: 'A senior operator who has seen the broker playbook, tells you when the price is wrong, and says “walk” out loud when the numbers say so.' },
-      { k: 'The pledge', v: 'Aligned to you and only you — never the sell side, never a fee from anyone else in your deal.' },
+      { k: 'The work', v: 'The recast, the model, the diligence checklist, and the lender package — built in days and checked against what the market actually pays.' },
+      { k: 'The practitioner', v: 'A senior operator who has seen the broker playbook, tells you when the price is wrong, and says "walk" out loud when the numbers say so.' },
+      { k: 'Your side', v: 'We work for you, and only you — your interests are the only ones we’re paid to look after, start to finish.' },
     ],
   },
   {
@@ -175,9 +175,9 @@ export const SEGMENTS: Segment[] = [
       },
     ],
     answers: [
-      { k: 'The engine', v: 'Quiet market mapping and target reads without a whisper reaching your competitors — plus models that price the business as it is, not as you’ll make it.' },
+      { k: 'The work', v: 'Quiet market mapping and target reads without a whisper reaching your competitors — plus models that price the business as it is, not as you’ll make it.' },
       { k: 'The practitioner', v: 'Third-party approaches in the practice’s name, a disciplined process, and a repeatable playbook for the next one — while your team stays on the business.' },
-      { k: 'The pledge', v: 'One buyer per target and total discretion — your interest is never revealed until you say so.' },
+      { k: 'Your side', v: 'Total discretion — your interest stays private until you decide otherwise — and one client per target, so your strategy is never shared.' },
     ],
   },
 ];
