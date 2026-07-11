@@ -228,7 +228,11 @@ export default function Landing() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             <div className="pd-founder-photo">
-              <ImageSlot caption="PHOTO — the founder at work, documentary style (not a headshot)" />
+              <img
+                src="/founder-portrait.jpg"
+                alt="The smbX founder"
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 22%' }}
+              />
             </div>
             <div className="pd-advisor-card">
               <div style={{ fontWeight: 700, fontSize: 19 }}>Your advisor</div>
