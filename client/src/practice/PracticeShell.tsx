@@ -4,7 +4,7 @@
  * landing (`/#how` …). The footer carries the five segment links and a quiet
  * team sign-in — the practice app lives behind /login.
  */
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { Link } from 'wouter';
 import './practice.css';
 import { bookHref, bookTarget } from './leads';
@@ -12,6 +12,25 @@ import { SEGMENTS } from './segmentData';
 
 export default function PracticeShell({ home = false, children }: { home?: boolean; children: ReactNode }) {
   const anchor = (hash: string) => (home ? hash : `/${hash}`);
+
+  // index.css scroll-locks html/body at ≥901px for the app workspace shells
+  // (`html, body { height: 100%; overflow: hidden; }`) — without this release
+  // the practice site cannot scroll on desktop at all. Same pattern the
+  // retired MarketingShell used; smooth behavior covers the anchor links
+  // (#how/#who/#why/#yulia/#book) per the handoff.
+  useEffect(() => {
+    const html = document.documentElement.style;
+    const body = document.body.style;
+    const prev = { html: html.overflow, body: body.overflow, behavior: html.scrollBehavior };
+    html.overflow = 'auto';
+    body.overflow = 'auto';
+    html.scrollBehavior = 'smooth';
+    return () => {
+      html.overflow = prev.html;
+      body.overflow = prev.body;
+      html.scrollBehavior = prev.behavior;
+    };
+  }, []);
   return (
     <div className="pd">
       <header className="pd-navwrap">
