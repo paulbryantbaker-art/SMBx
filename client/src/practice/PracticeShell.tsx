@@ -1,8 +1,10 @@
 /**
- * Practice-site chrome: sticky nav + footer (corpdevservices bundle).
- * `home` pages anchor within the page; segment pages anchor back to the
- * landing (`/#how` …). The footer carries the five segment links and a quiet
- * team sign-in — the practice app lives behind /login.
+ * Practice-site chrome: sticky nav + footer (Paul's copy additions,
+ * 2026-07-11). Nav: How it works · Industries · Track record · Who it's for,
+ * with Confidential consultation + Talk to Yulia. Footer carries the firm /
+ * buyers / where-we-work columns, the compliance disclosure block (every
+ * page, anchor #disclosures), and a quiet team sign-in. `home` pages anchor
+ * within the page; subpages anchor back to the landing (`/#how` …).
  */
 import { useEffect, type ReactNode } from 'react';
 import { Link } from 'wouter';
@@ -16,8 +18,7 @@ export default function PracticeShell({ home = false, children }: { home?: boole
   // index.css scroll-locks html/body at ≥901px for the app workspace shells
   // (`html, body { height: 100%; overflow: hidden; }`) — without this release
   // the practice site cannot scroll on desktop at all. Same pattern the
-  // retired MarketingShell used; smooth behavior covers the anchor links
-  // (#how/#who/#why/#yulia/#book) per the handoff.
+  // retired MarketingShell used; smooth behavior covers the anchor links.
   useEffect(() => {
     const html = document.documentElement.style;
     const body = document.body.style;
@@ -31,6 +32,10 @@ export default function PracticeShell({ home = false, children }: { home?: boole
       html.scrollBehavior = prev.behavior;
     };
   }, []);
+
+  const consult = home ? bookHref() : '/#book';
+  const consultTarget = home ? bookTarget() : undefined;
+
   return (
     <div className="pd">
       <header className="pd-navwrap">
@@ -40,12 +45,13 @@ export default function PracticeShell({ home = false, children }: { home?: boole
           </a>
           <nav className="pd-nav-links" aria-label="Site">
             <a href={anchor('#how')}>How it works</a>
+            <a href={anchor('#industries')}>Industries</a>
+            <Link href="/track-record">Track record</Link>
             <a href={anchor('#who')}>Who it's for</a>
-            <a href={anchor('#why')}>Why smbX</a>
           </nav>
           <div className="pd-nav-ctas">
-            <a className="pd-pill pd-nav-book" href={home ? bookHref() : '/#book'} target={home ? bookTarget() : undefined} rel={home && bookTarget() ? 'noreferrer' : undefined}>
-              Book a call
+            <a className="pd-pill pd-nav-book" href={consult} target={consultTarget} rel={consultTarget ? 'noreferrer' : undefined}>
+              Confidential consultation
             </a>
             <a className="pd-pill-primary" href={anchor('#yulia')}>Talk to Yulia</a>
           </div>
@@ -59,16 +65,18 @@ export default function PracticeShell({ home = false, children }: { home?: boole
           <div>
             <img src="/logo-coral-x.png" alt="smbX.ai" style={{ height: 40, margin: '-5px 0 0 -8px' }} />
             <div style={{ marginTop: 14, fontSize: 14, lineHeight: 1.6, color: 'var(--pd-tert)', maxWidth: 340 }}>
-              Buy-side corporate development. A senior operator and a full team's output, on your
-              side of the table.
+              Buy-side corporate development for acquirers in the lower middle market. A senior
+              operator and a full team's output, on your side of the table.
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 'clamp(40px, 5.5vw, 80px)' }}>
+          <div style={{ display: 'flex', gap: 'clamp(32px, 4.5vw, 72px)', flexWrap: 'wrap' }}>
             <div className="pd-footer-col">
               <div className="h">FIRM</div>
               <a href={anchor('#how')}>How it works</a>
-              <a href={anchor('#why')}>Why smbX</a>
-              <a href={home ? bookHref() : '/#book'} target={home ? bookTarget() : undefined} rel={home && bookTarget() ? 'noreferrer' : undefined}>Book a call</a>
+              <a href={anchor('#industries')}>Industries</a>
+              <Link href="/track-record">Track record</Link>
+              <Link href="/about">About</Link>
+              <a href={consult} target={consultTarget} rel={consultTarget ? 'noreferrer' : undefined}>Confidential consultation</a>
               <a href="/login">Sign in</a>
             </div>
             <div className="pd-footer-col">
@@ -77,7 +85,21 @@ export default function PracticeShell({ home = false, children }: { home?: boole
                 <Link key={s.slug} href={`/buyers/${s.slug}`}>{s.footerLabel}</Link>
               ))}
             </div>
+            <div className="pd-footer-col" style={{ maxWidth: 200 }}>
+              <div className="h">WHERE WE WORK</div>
+              <div style={{ color: 'var(--pd-body)', fontSize: 14.5, lineHeight: 1.6 }}>
+                Nationwide, from Dallas–Fort Worth, Texas.
+              </div>
+            </div>
           </div>
+        </div>
+        <div id="disclosures" className="pd-disclosure">
+          smbX advises buyers only. We work exclusively on acquisitions of privately held companies
+          with under $250M in annual revenue, and we do not represent sellers or act for both sides
+          of a transaction. smbX is not a registered broker-dealer or investment adviser, does not
+          offer securities, does not take custody of client funds, and does not provide legal, tax,
+          or accounting advice — we coordinate the licensed specialists your deal requires. Nothing
+          here is an offer to buy or sell any security.
         </div>
         <div className="pd-footer-legal">
           © 2026 smbX. Buy-side only, by design.
@@ -85,6 +107,8 @@ export default function PracticeShell({ home = false, children }: { home?: boole
           <a href="/legal/terms" style={{ color: 'var(--pd-tert)' }}>Terms</a>
           <span style={{ margin: '0 8px' }}>·</span>
           <a href="/legal/privacy" style={{ color: 'var(--pd-tert)' }}>Privacy</a>
+          <span style={{ margin: '0 8px' }}>·</span>
+          <a href="#disclosures" style={{ color: 'var(--pd-tert)' }}>Disclosures</a>
         </div>
       </footer>
     </div>

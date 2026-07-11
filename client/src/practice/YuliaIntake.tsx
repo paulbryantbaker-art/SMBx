@@ -12,8 +12,10 @@ import { bookHref, bookTarget } from './leads';
 
 interface Msg { from: 'y' | 'u'; text: string; }
 
-const OPENING =
-  "Hi — I'm Yulia. Tell me what you're looking to acquire and I'll start mapping the market tonight and define the seller universe for you!";
+const OPENING_1 =
+  "I'm Yulia — I do the analytical work here at smbX. Tell me what you're trying to buy and I'll map the market for you, then get you in front of Paul with something real to talk about.";
+const OPENING_2 =
+  'To start: what kind of business are you looking to acquire, and roughly what size?';
 
 const HINTS = [
   'e.g. "HVAC roll-up in the Southeast"',
@@ -23,7 +25,10 @@ const HINTS = [
 ];
 
 export default function YuliaIntake() {
-  const [messages, setMessages] = useState<Msg[]>([{ from: 'y', text: OPENING }]);
+  const [messages, setMessages] = useState<Msg[]>([
+    { from: 'y', text: OPENING_1 },
+    { from: 'y', text: OPENING_2 },
+  ]);
   const [draft, setDraft] = useState('');
   const [pending, setPending] = useState(false);
   const [done, setDone] = useState(false);

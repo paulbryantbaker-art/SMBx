@@ -87,6 +87,8 @@ const V6App = lazy(() => import('./components/v6/V6App'));
 // tree unrouted as a repurposing pool.
 const PracticeLanding = lazy(() => import('./practice/Landing'));
 const PracticeSegment = lazy(() => import('./practice/SegmentPage'));
+const PracticeAbout = lazy(() => import('./practice/About'));
+const PracticeTrackRecord = lazy(() => import('./practice/TrackRecord'));
 const SharedDocument = lazy(() => import('./pages/public/SharedDocument'));
 const SharedDocumentView = lazy(() => import('./pages/SharedDocumentView'));
 const AcceptInvite = lazy(() => import('./pages/public/AcceptInvite'));
@@ -330,6 +332,8 @@ export default function App() {
         <Route path="/buyers/:slug">
           {(params) => marketingOrApp(<PracticeSegment slug={params.slug} />)}
         </Route>
+        <Route path="/about">{marketingOrApp(<PracticeAbout />)}</Route>
+        <Route path="/track-record">{marketingOrApp(<PracticeTrackRecord />)}</Route>
         <Route path="/buy"><Redirect to="/" /></Route>
         <Route path="/sell"><Redirect to="/" /></Route>
         <Route path="/advise"><Redirect to="/" /></Route>
