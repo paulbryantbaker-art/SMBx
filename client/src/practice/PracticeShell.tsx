@@ -59,7 +59,8 @@ export default function PracticeShell({ home = false, children }: { home?: boole
           <div>
             <img src="/logo-coral-x.png" alt="smbX.ai" style={{ height: 40, margin: '-5px 0 0 -8px' }} />
             <div style={{ marginTop: 14, fontSize: 14, lineHeight: 1.6, color: 'var(--pd-tert)', maxWidth: 340 }}>
-              Buy-side-only corporate development. One senior operator, one AI engine, one buyer per target.
+              Buy-side corporate development. A senior operator and a full team's output, on your
+              side of the table.
             </div>
           </div>
           <div style={{ display: 'flex', gap: 'clamp(40px, 5.5vw, 80px)' }}>

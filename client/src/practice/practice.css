@@ -74,7 +74,17 @@
   line-height: 1.05;
 }
 .pd-mono { font-family: var(--pd-mono); font-size: 12px; color: var(--pd-tert); letter-spacing: 0.08em; }
-.pd-eyebrow { font-family: var(--pd-mono); font-size: 12.5px; letter-spacing: 0.12em; color: var(--pd-coral-link); margin-bottom: 22px; }
+/* Section labels are real headers, not eyebrow micro-text (Paul, 2026-07-11
+   copy update: "section headings should look like headers"). */
+.pd-seclabel {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--pd-coral-link);
+  margin-bottom: 22px;
+}
+.pd-seclabel.right { flex: none; margin-bottom: 0; text-align: right; }
 .pd-sub { font-size: 21px; line-height: 1.6; color: var(--pd-body); }
 
 /* ─── pills / buttons ─── */
@@ -267,12 +277,10 @@
   padding: clamp(70px, 8.3vw, 120px) clamp(36px, 6.6vw, 96px);
   color: #fff; text-align: center;
 }
-.pd-pledge .eyebrow { font-family: var(--pd-mono); font-size: 12.5px; letter-spacing: 0.14em; color: var(--pd-coral-dark-tint); margin-bottom: 36px; }
+.pd-pledge .label { font-size: 16px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--pd-coral-dark-tint); margin-bottom: 36px; }
 .pd-pledge .h { font-size: clamp(44px, 5.8vw, 72px); font-weight: 800; letter-spacing: -0.035em; line-height: 1.04; max-width: 1000px; margin: 0 auto; text-wrap: balance; }
 .pd-pledge .h .coral { color: var(--pd-coral); }
 .pd-pledge .sub { margin: 44px auto 0; max-width: 620px; font-size: 18px; line-height: 1.65; color: rgba(255, 255, 255, 0.6); }
-.pd-pledge.compact { padding: clamp(48px, 5.5vw, 76px) clamp(32px, 5vw, 72px); }
-.pd-pledge.compact .h { font-size: clamp(30px, 3.6vw, 46px); }
 
 /* ─── final CTA ─── */
 .pd-cta-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(44px, 7vw, 100px); align-items: center; }

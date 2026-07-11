@@ -1,9 +1,9 @@
 /**
- * Buyer-segment page template (README "Segment Pages" structure): hero
+ * Buyer-segment page template (Paul's reworked deck, 2026-07-11): hero
  * (H1 hook + sub + Yulia CTA) → their specific pain (ledger-style rows) →
- * how smbX answers it (engine / practitioner / pledge rows) → pledge strip →
- * final CTA. Same nav/footer/tokens as the landing; chat lives on the landing,
- * so CTAs anchor back to /#yulia and /#book.
+ * how smbX answers it (The work / The practitioner / Your side) → final CTA.
+ * The repeated pledge strip is gone — the loyalty point is made once, warmly,
+ * in "Your side." Chat lives on the landing, so CTAs anchor to /#yulia, /#book.
  */
 import PracticeShell from './PracticeShell';
 import { getSegment } from './segmentData';
@@ -32,7 +32,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
       <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(70px, 8vw, 120px)' }}>
         <div className="pd-ledger-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 40, marginBottom: 64 }}>
           <h2 className="pd-h2" style={{ maxWidth: 860 }}>{seg.painTitle}</h2>
-          <div className="pd-mono" style={{ flex: 'none' }}>01 — THE PROBLEM</div>
+          <div className="pd-seclabel right">01 — The problem</div>
         </div>
         <div className="pd-ledger">
           {seg.pains.map(p => (
@@ -47,8 +47,8 @@ export default function SegmentPage({ slug }: { slug: string }) {
 
       {/* ── How smbX answers it ── */}
       <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(80px, 9vw, 130px)' }}>
-        <div className="pd-eyebrow">02 — HOW SMBX ANSWERS IT</div>
-        <h2 className="pd-h2" style={{ maxWidth: 780 }}>An engine for the grind. A practitioner for the judgment.</h2>
+        <div className="pd-seclabel">02 — How smbX answers it</div>
+        <h2 className="pd-h2" style={{ maxWidth: 780 }}>The grind, handled. The judgment, yours.</h2>
         <div className="pd-drows" style={{ marginTop: 56, maxWidth: 900 }}>
           {seg.answers.map(a => (
             <div className="pd-drow" key={a.k}>
@@ -58,14 +58,6 @@ export default function SegmentPage({ slug }: { slug: string }) {
           ))}
         </div>
       </section>
-
-      {/* ── Pledge strip ── */}
-      <div className="pd-bandwrap" style={{ paddingTop: 'clamp(80px, 9vw, 130px)' }}>
-        <div className="pd-pledge compact">
-          <div className="eyebrow">THE PLEDGE, IN EVERY ENGAGEMENT LETTER</div>
-          <div className="h">One buyer per target. Never the sell side. <span className="coral">Never two-sided.</span></div>
-        </div>
-      </div>
 
       {/* ── Final CTA ── */}
       <section className="pd-wrap" style={{ paddingTop: 'clamp(80px, 9vw, 130px)', paddingBottom: 'clamp(30px, 4vw, 60px)', textAlign: 'center' }}>

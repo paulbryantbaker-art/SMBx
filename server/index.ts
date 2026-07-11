@@ -138,6 +138,14 @@ const leadLimiter = rateLimit({
   message: { error: 'Too many submissions, please try again later' },
 });
 
+const intakeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 40, // intake turns per window per IP (~6 full conversations)
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many messages, please try again in a little while' },
+});
+
 // ─── Startup checks ─────────────────────────────────────────
 if (!process.env.ANTHROPIC_API_KEY) {
   console.warn('WARNING: ANTHROPIC_API_KEY not set — AI chat will fail');
@@ -209,53 +217,79 @@ app.get('/api/config', (_req, res) => {
 });
 
 // ─── Practice-site lead capture (public, rate-limited) ─────
-// The corpdevservices landing persists every intake (Yulia script or form)
-// as a lead even if the visitor never books, and pings the practitioner.
+// The corpdevservices landing persists every intake (Yulia chat or form) as
+// a lead even if the visitor never books, and pings the practitioner.
+async function savePracticeLead(input: {
+  persona?: unknown; thesis?: unknown; size?: unknown; email?: unknown; source?: unknown;
+}): Promise<boolean> {
+  const clean = (v: unknown, max: number) =>
+    typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : null;
+  const lead = {
+    persona: clean(input.persona, 200),
+    thesis: clean(input.thesis, 2000),
+    size: clean(input.size, 500),
+    email: clean(input.email, 320),
+    source: clean(input.source, 100) || 'landing',
+  };
+  if (!lead.thesis && !lead.email) return false;
+  const { sql } = await import('./db.js');
+  await sql`
+    INSERT INTO practice_leads (persona, thesis, size_geo, email, source)
+    VALUES (${lead.persona}, ${lead.thesis}, ${lead.size}, ${lead.email}, ${lead.source})
+  `;
+  // Fire-and-forget: tell the practitioner a lead landed.
+  import('./services/emailService.js')
+    .then(async ({ sendEmail }) => {
+      const { teamAllowlist } = await import('./services/practiceMode.js');
+      const to = teamAllowlist()[0];
+      if (!to) return;
+      const esc = (v: string | null) =>
+        (v || '—').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      await sendEmail({
+        to,
+        subject: `New practice lead${lead.email ? `: ${lead.email}` : ''} (${lead.source})`,
+        html: `<div style="font-family:system-ui,sans-serif;font-size:14px;line-height:1.6">
+          <p><b>New lead from the practice site.</b></p>
+          <p>Persona: ${esc(lead.persona)}<br/>
+          Thesis: ${esc(lead.thesis)}<br/>
+          Size/geo: ${esc(lead.size)}<br/>
+          Email: ${esc(lead.email)}<br/>
+          Source: ${esc(lead.source)}</p>
+        </div>`,
+      });
+    })
+    .catch(() => { /* notification is best-effort; the lead row is saved */ });
+  return true;
+}
+
 app.post('/api/practice/leads', leadLimiter, async (req, res) => {
   try {
-    const clean = (v: unknown, max: number) =>
-      typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : null;
-    const lead = {
-      persona: clean(req.body?.persona, 200),
-      thesis: clean(req.body?.thesis, 2000),
-      size: clean(req.body?.size, 500),
-      email: clean(req.body?.email, 320),
-      source: clean(req.body?.source, 100) || 'landing',
-    };
-    if (!lead.thesis && !lead.email) {
-      return res.status(400).json({ error: 'Nothing to save' });
-    }
-    const { sql } = await import('./db.js');
-    await sql`
-      INSERT INTO practice_leads (persona, thesis, size_geo, email, source)
-      VALUES (${lead.persona}, ${lead.thesis}, ${lead.size}, ${lead.email}, ${lead.source})
-    `;
-    // Fire-and-forget: tell the practitioner a lead landed.
-    import('./services/emailService.js')
-      .then(async ({ sendEmail }) => {
-        const { teamAllowlist } = await import('./services/practiceMode.js');
-        const to = teamAllowlist()[0];
-        if (!to) return;
-        const esc = (v: string | null) =>
-          (v || '—').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        await sendEmail({
-          to,
-          subject: `New practice lead${lead.email ? `: ${lead.email}` : ''} (${lead.source})`,
-          html: `<div style="font-family:system-ui,sans-serif;font-size:14px;line-height:1.6">
-            <p><b>New lead from the practice site.</b></p>
-            <p>Persona: ${esc(lead.persona)}<br/>
-            Thesis: ${esc(lead.thesis)}<br/>
-            Size/geo: ${esc(lead.size)}<br/>
-            Email: ${esc(lead.email)}<br/>
-            Source: ${esc(lead.source)}</p>
-          </div>`,
-        });
-      })
-      .catch(() => { /* notification is best-effort; the lead row is saved */ });
+    const ok = await savePracticeLead(req.body || {});
+    if (!ok) return res.status(400).json({ error: 'Nothing to save' });
     return res.status(201).json({ ok: true });
   } catch (err: any) {
     console.error('[practice-leads] save failed:', err.message);
     return res.status(500).json({ error: 'Failed to save' });
+  }
+});
+
+// ─── Practice-site Yulia intake (public, Claude-backed) ────
+// Each call carries the whole short conversation; the service closes
+// deterministically (and we persist the lead) the moment an email appears.
+app.post('/api/practice/intake', intakeLimiter, async (req, res) => {
+  try {
+    const { runPracticeIntake } = await import('./services/practiceIntake.js');
+    const result = await runPracticeIntake(req.body?.messages);
+    if (!result) return res.status(400).json({ error: 'Invalid conversation' });
+    if (result.lead) {
+      // Lead persistence must never block the visitor-facing close message.
+      savePracticeLead({ ...result.lead, source: 'landing-yulia' })
+        .catch(err => console.error('[practice-intake] lead save failed:', err.message));
+    }
+    return res.json({ reply: result.reply, done: result.done });
+  } catch (err: any) {
+    console.error('[practice-intake] failed:', err.message);
+    return res.status(500).json({ error: 'Intake unavailable' });
   }
 });
 

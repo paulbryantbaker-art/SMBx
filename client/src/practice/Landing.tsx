@@ -13,10 +13,13 @@ import { postPracticeLead, bookHref, bookTarget } from './leads';
 import { SEGMENTS } from './segmentData';
 
 const TICKER = [
-  'One buyer per target. Always.',
-  'AI does the reading. You get the judgment.',
-  'Senior attention. Zero overhead.',
-  'From thesis to close.',
+  'Deal thesis defined by your needs',
+  'Premium off-market outreach',
+  'Pipeline management',
+  'Due diligence',
+  'Document management and dataroom',
+  'Full deal life-cycle management',
+  'Closed on your terms',
 ];
 
 function TickerRow() {
@@ -40,7 +43,7 @@ const LEDGER = [
   },
   {
     name: 'Hire a bank',
-    body: 'Retainers, success fees with long tails, and your day-to-day work handed to junior analysts — at a firm chasing similar deals for other clients at the same time.',
+    body: 'Retainers, success fees with long tails, and your day-to-day work handed to junior analysts — at a firm working similar deals for other clients at the same time.',
     tag: 'JUNIOR HANDS · SPLIT LOYALTY',
   },
   {
@@ -113,17 +116,17 @@ export default function Landing() {
           <div className="pd-radar-dot" style={{ left: '9%', top: '66%', width: 7, height: 7, opacity: 0.4 }} />
         </div>
         <div style={{ position: 'relative', maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
-          <div className="pd-badge"><span className="dot" />BUY-SIDE ONLY · NEVER TWO-SIDED</div>
-          <h1 className="pd-h1" style={{ margin: '52px 0 0' }}>Buy the company.<br />Skip the department.</h1>
+          <div className="pd-badge"><span className="dot" />BUY-SIDE ONLY</div>
+          <h1 className="pd-h1" style={{ margin: '52px 0 0' }}>Stress-free corp dev.</h1>
           <div className="pd-sub" style={{ margin: '44px auto 0', maxWidth: 680 }}>
-            One senior operator, an AI engine that does the work of a full deal team, and a promise
-            nobody else makes: one buyer per target, never the sell side.
+            A senior deal team that plugs in immediately and runs your whole acquisition — thesis
+            to close — tailored to your organizational goals from the ground up.
           </div>
           <YuliaIntake />
           <div style={{ marginTop: 20, fontSize: 14.5, color: 'var(--pd-tert)' }}>
             Prefer a human first?{' '}
             <a href={bookHref()} target={bookTarget()} rel={bookTarget() ? 'noreferrer' : undefined} style={{ color: 'var(--pd-coral-link)', fontWeight: 600, textDecoration: 'underline' }}>
-              Book a call now →
+              Book advisor call now →
             </a>
           </div>
         </div>
@@ -139,7 +142,7 @@ export default function Landing() {
         <div className="pd-band">
           <ImageSlot caption="PHOTO — advisor + owner walking a shop floor, warm light" />
           <div className="pd-band-overlay">
-            <div className="pd-band-h">A person on your side. An engine at your back.</div>
+            <div className="pd-band-h">A person on your side. A full team at your back.</div>
             <a className="pd-band-btn" href="#why">Why smbX →</a>
           </div>
         </div>
@@ -148,8 +151,8 @@ export default function Landing() {
       {/* ── Problem ledger ── */}
       <section className="pd-wrap pd-section">
         <div className="pd-ledger-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 40, marginBottom: 72 }}>
-          <h2 className="pd-h2" style={{ maxWidth: 820 }}>You have three ways to buy a company today. All flawed.</h2>
-          <div className="pd-mono" style={{ flex: 'none' }}>01 — THE PROBLEM</div>
+          <h2 className="pd-h2" style={{ maxWidth: 820 }}>There are three ways to buy a company. We built a fourth.</h2>
+          <div className="pd-seclabel right">01 — The problem</div>
         </div>
         <div className="pd-ledger">
           {LEDGER.map(r => (
@@ -162,18 +165,18 @@ export default function Landing() {
           <div className="pd-lrow hl">
             <div className="pd-lname">smbX</div>
             <div className="pd-lbody">
-              One senior operator with an AI engine doing the work of a full deal team — engaged per
-              deal, aligned to you, and gone when you're done.
+              One senior operator doing the work of a full deal team — engaged per deal, aligned to
+              you alone, and gone when you're done.
             </div>
-            <div className="pd-ltag">ENGINE + PRACTITIONER</div>
+            <div className="pd-ltag">SENIOR · ALIGNED · YOURS ALONE</div>
           </div>
         </div>
       </section>
 
       {/* ── Process ── */}
       <section id="how" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
-        <div className="pd-eyebrow">02 — THE SMARTER WAY BEGINS HERE</div>
-        <h2 className="pd-h2" style={{ maxWidth: 760 }}>A simple process for a serious acquisition.</h2>
+        <div className="pd-seclabel">02 — The process</div>
+        <h2 className="pd-h2" style={{ maxWidth: 760 }}>Here's what stress-free looks like.</h2>
         <div className="pd-pgrid">
           <div className="pd-pcard">
             <div className="pd-pnum">1</div>
@@ -184,8 +187,8 @@ export default function Landing() {
           <div className="pd-pcard">
             <div className="pd-pnum">2</div>
             <div className="t">Curated targets</div>
-            <div className="b">The engine maps your market — off-market first — and your advisor hand-picks the targets worth your time, with models and memos ready in days.</div>
-            <a className="pd-link" href="#why">See the engine →</a>
+            <div className="b">We map your market — off-market first — and your advisor hand-picks the targets worth your time, with models and memos ready in days, not quarters.</div>
+            <a className="pd-link" href="#why">How we work →</a>
           </div>
           <div className="pd-pcard">
             <div className="pd-pnum">3</div>
@@ -200,26 +203,26 @@ export default function Landing() {
       <section id="why" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
         <div className="pd-firm-grid">
           <div>
-            <div className="pd-eyebrow">03 — THE FIRM</div>
-            <h2 className="pd-h2">A practice, not a person.</h2>
+            <div className="pd-seclabel">03 — The firm</div>
+            <h2 className="pd-h2">One operator. A full team's output.</h2>
             <div style={{ marginTop: 32, fontSize: 18, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-              smbX is built as a system: a proprietary AI engine that sources, reads, and models like
-              a full deal team — and a senior practitioner who directs it, negotiates, and owns the
-              outcome. The engine compounds with every deal. Your advisor brings the judgment no
-              engine has.
+              smbX is one senior practitioner who sources, runs, and closes your acquisition —
+              with proprietary AI doing the grind a junior bench used to, so the person on your
+              deal is always the senior one. You get a full team's output in days, and one person
+              who owns the outcome, start to close.
             </div>
             <div className="pd-drows" style={{ marginTop: 56 }}>
               <div className="pd-drow">
-                <div className="k">The engine</div>
-                <div className="v">Market maps, off-market sourcing, CIM triage, financial models, diligence checklists — in days, not quarters.</div>
+                <div className="k">The work</div>
+                <div className="v">Market maps, off-market outreach, CIM triage, financial models, diligence checklists, and the data room — a full team's output, in days, not quarters.</div>
               </div>
               <div className="pd-drow">
                 <div className="k">The practitioner</div>
-                <div className="v">Every judgment call, seller conversation, and negotiation handled by a senior operator. No analyst hand-offs, ever.</div>
+                <div className="v">Every judgment call, seller conversation, and negotiation handled by a senior operator. No hand-offs, no juniors, no committee lag.</div>
               </div>
               <div className="pd-drow">
-                <div className="k">The pledge</div>
-                <div className="v">One buyer per target. Never the sell side. Never two-sided. It's in the engagement letter.</div>
+                <div className="k">Your side</div>
+                <div className="v">Buy-side is all we do, and we take one client per target — your deal has our full attention, and it stays yours.</div>
               </div>
             </div>
           </div>
@@ -241,8 +244,8 @@ export default function Landing() {
       {/* ── Who it's for ── */}
       <section id="who" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
         <div className="pd-ledger-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 40, marginBottom: 72 }}>
-          <h2 className="pd-h2">Built for buyers without a standing deal team.</h2>
-          <div className="pd-mono" style={{ flex: 'none' }}>04 — WHO IT'S FOR</div>
+          <h2 className="pd-h2">You bring the thesis. We bring the team.</h2>
+          <div className="pd-seclabel right">04 — Who it's for</div>
         </div>
         <div className="pd-wgrid">
           {SEGMENTS.filter(s => s.slug !== 'operators').map(s => (
@@ -265,14 +268,14 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Pledge ── */}
+      {/* ── Whose side ── */}
       <div className="pd-bandwrap" style={{ paddingTop: 'clamp(110px, 12.5vw, 180px)' }}>
         <div className="pd-pledge">
-          <div className="eyebrow">05 — THE PLEDGE, IN EVERY ENGAGEMENT LETTER</div>
-          <div className="h">One buyer per target. Never the sell side. <span className="coral">Never two-sided.</span></div>
+          <div className="label">05 — Whose side we're on</div>
+          <div className="h">Yours. Start to <span className="coral">finish.</span></div>
           <div className="sub">
-            Everyone else in this market sells the same deal twice — or hands your mandate to an
-            analyst. We're structurally incapable of either.
+            We represent buyers, and only buyers — one client per target. So you get our full
+            attention, straight answers, and a deal that stays yours.
           </div>
         </div>
       </div>
@@ -281,7 +284,7 @@ export default function Landing() {
       <section id="book" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90, paddingBottom: 'clamp(40px, 5vw, 80px)' }}>
         <div className="pd-cta-grid">
           <div>
-            <h2 className="pd-cta-h">Ready to start looking?</h2>
+            <h2 className="pd-cta-h">Let's go find the one.</h2>
             <div style={{ marginTop: 24, fontSize: 18, lineHeight: 1.65, color: 'var(--pd-body)', maxWidth: 480 }}>
               Two minutes with Yulia and your market map is underway. No retainer to find out if
               we're a fit.
