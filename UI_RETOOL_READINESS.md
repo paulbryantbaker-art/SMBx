@@ -119,9 +119,12 @@ screen's honest-by-design posture (no fabricated agent runs) also stays.
 
 ### 3.4 Locked pricing (firewall)
 Free / $99 Solo / $249 Pro / $749 Team / $3,000+ Enterprise — `SMBX_PRICING_LOCKED.md`.
-As of this branch all five client surfaces derive digits from
-`client/src/lib/pricing.ts` (`PRICING_TIERS`, `tierPriceDollars()`). **New UI imports
-from there; never hardcode a price.** No fee may vary with deal value or outcome.
+App surfaces derive digits from `client/src/lib/pricing.ts` (`PRICING_TIERS`,
+`tierPriceDollars()`). **App UI imports from there; never hardcode a price.**
+**July 10 model (deck 2026-07-10):** `/pricing` no longer renders the ladder at
+all — one flat fee per deal, no public grid, verbal range only; see the lock
+file's 2026-07-11 addendum for the ratification checklist. No fee may vary with
+deal outcome.
 
 ### 3.5 Marketing→app funnel contract
 Rebuild the pages, keep the machinery:
@@ -195,8 +198,9 @@ pre-V6 hexes: `Login.tsx`, `Signup.tsx`); admin last.
 
 **Verification gate for every phase:** `npx tsc --noEmit` + `npm run build` clean;
 e2e smoke (`e2e/`); a real-device pass for mobile (populated states, not just anon);
-pricing renders the five locked numbers; disclosure blocks/disclaimers present in a
-generated deliverable + PDF export.
+`/pricing` shows the July 10 flat-fee shape with NO ladder digits while app
+billing surfaces still render the locked numbers via `lib/pricing`; disclosure
+blocks/disclaimers present in a generated deliverable + PDF export.
 
 ---
 

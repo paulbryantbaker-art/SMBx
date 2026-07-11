@@ -23,7 +23,7 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 - Premium PDF export via Puppeteer (headless Chromium) + Chart.js
 
 ## Critical Rules — Read These First
-1. **MONTHLY SUBSCRIPTIONS (LOCKED 2026-05-27).** Free (unlimited chat + 1 deliverable) / $99 Solo / $249 Pro / $749 Team / $3,000+ Enterprise. Canonical record: `SMBX_PRICING_LOCKED.md`. Any older table showing $79 / $199 / $499 / $2,500 is stale — point at the locked file and update. No per-deal fees. No wallet. No success/referral/contingent compensation.
+1. **PRICING (LOCKED 2026-05-27; JULY 10 MODEL IN FLIGHT).** Billing truth is still the monthly ladder: Free (unlimited chat + 1 deliverable) / $99 Solo / $249 Pro / $749 Team / $3,000+ Enterprise — canonical record `SMBX_PRICING_LOCKED.md`. Any older table showing $79 / $199 / $499 / $2,500 is stale. The 2026-07-10 copy deck moved the **marketing surface** to one flat fee per deal (sized by league, fixed before start, non-contingent, never a percentage; no public price grid; subscription demoted to a repeat-acquirer volume plan) — see the lock file's 2026-07-11 addendum; billing/product ratification pending, including a counsel pass on THE LINE's "no pricing tier based on deal size" bullet. Still absolute: no wallet, no success/referral/contingent compensation, nothing that varies with deal outcome.
 2. **WALLET IS DEAD.** walletService, paywallService, dealExecutionFee, platformFeeService deleted. Never recreate.
 3. **FREE TIER.** Unlimited conversation. ONE free deliverable per user. Paywall triggers after first free deliverable, NOT at a fixed gate.
 4. **V6App.tsx is the ONLY current app shell.** Never create parallel layouts. All UI changes go through the V6 shell/components.
@@ -37,25 +37,27 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 12. **THE LINE is product law.** Read `THE_LINE_POLICY.md`. Yulia shows analysis, options, and implications; the user decides. No recommendations for regulated transaction decisions, negotiation, counterparty contact, custody, signing, filing, legal/tax/accounting/appraisal opinions, success fees, referral fees, or deal-value fees.
 
 ## Design System
-**RETOOL IN PROGRESS (2026-07-10).** The CD handoff bundle landed
-(`smbx-ai-marketing-redesign/`, wireframes turn 5) and the marketing rebuild is
-implemented on the retool branch; CD is iterating toward hi-fi, so expect
-further passes. THE LINE and DEFINITIVE are untouched. **Operating doc:
-`UI_RETOOL_READINESS.md`** — surface map, token seams, preservation contract,
-phased playbook. Read it before any UI work.
+**RETOOL IN PROGRESS (2026-07-11).** The CD hi-fi bundle
+(`smbX.ai Marketing Redesign/`, turn 4) and the 2026-07-10 copy deck (final
+copy + the July 10 flat-fee pricing model — see rule 1) are implemented on the
+retool branch; expect further CD passes. THE LINE and DEFINITIVE are untouched.
+**Operating doc: `UI_RETOOL_READINESS.md`** — surface map, token seams,
+preservation contract, phased playbook. Read it before any UI work.
 
 The three current languages:
-- **Marketing = "terra" (2026-07-10, the retool):** `client/src/marketing/` under the `.mk` scope — page `#FAFAFA`, cream `#FAF8F4`, terra `#D4714E` FUNCTIONAL ONLY (send, active, hero numbers, logo X — never decorative fills), terra-soft `#FFF0EB` user bubbles only, Inter 400–800, 20px cards / 999px pills, no italics (`em` renders terra). The one idea: every page morphs (~300ms crossfade) into the anonymous Yulia conversation. Source of truth: the bundle's `HANDOFF.md` + wireframes turn 5.
+- **Marketing = "liquid glass" (2026-07-10 hi-fi, the retool):** `client/src/marketing/` under the `.mk` scope — canvas gradient `#FBFBF9→#F4F6F2→#EFF4EE` with ambient green/blue blobs, light-glass cards (`rgba(255,255,255,.6)` + blur + white hairline), ink-glass cards (charcoal gradient) for the number-hero moments, neon `#00D632` on dark glass ONLY (use green `#009E25` on white), Sora ExtraBold headlines / Inter body, no italics (`em` renders green). The one idea: every page morphs (~300ms crossfade) into the anonymous Yulia conversation. Source of truth: `smbX.ai Marketing Redesign/` (`smbX Hi-Fi.dc.html` turn 4 + `HANDOFF.md`) for look, the 2026-07-10 copy deck for words, wireframes turn 5 for UX/morph structure.
 - **App = "Atlas" (2026-06-24 cutover):** desktop shell `client/src/components/v6/desktop/` themed by `atlasTokens.ts` (`T` object, Google-blue `#0b57d0`); mobile shell `v6/atlasmobile/` themed by `mobileTokens.ts` (violet `#5b53d6`, Cash-App-flavored). Build law: `ATLAS_BUILD_CONTRACT.md` + `MOBILE_REDESIGN.md`. Re-skin toward the new language is a later phase.
 - **Legacy marketing = "Ramp" (2026-05-29):** quarantined at `client/src/marketing/legacy/` under `.mkt` — serves only the footer-linked pages (Raise, Integrate, Connectors, Standard×2) until restyled or retired.
 
-**Historical (do not build against):** V6 slate-blue/lavender/periwinkle (`design_handoff_smbx_desktop_material/`, `design_handoff_smbx_app store/`, `DESIGN_SOURCE.md`, `DESIGN_TOKENS.md`), hot pink `#D44A78` (V3/V4), and the Cowork-DL warm-cream "Edition" era. (Note: terra `#D4714E` is CURRENT again as the 2026-07 accent — the retired thing is the old Cowork-DL cream system, not the hex.) If your output anchors on any of these, you read a stale doc.
+**Historical (do not build against):** V6 slate-blue/lavender/periwinkle (`design_handoff_smbx_desktop_material/`, `design_handoff_smbx_app store/`, `DESIGN_SOURCE.md`, `DESIGN_TOKENS.md`), hot pink `#D44A78` (V3/V4), the Cowork-DL warm-cream "Edition" era, and the short-lived terra `#D4714E` wireframe pass (2026-07-08, superseded by the hi-fi liquid-glass green system two days later). If your output anchors on any of these, you read a stale doc.
 
 **Safari toolbar rule still applies:** never use `position:fixed` full-viewport divs with a background color (Safari reads them for toolbar tinting and it breaks dark-mode switching). Use `position:absolute` inside a relative parent instead.
 
 **No gratuitous eyebrows or micro text (LOCKED 2026-06-01).** Do NOT add decorative eyebrow kickers (small uppercase mono labels like `PIPELINE`, `RECENTS`, `MARKET INTELLIGENCE LIVE`) or micro status/subtitle lines (like `deal intelligence · online`) by default — they clutter and read as AI filler. Lead with the title alone. Add a label or secondary line ONLY when it carries information the user genuinely needs and cannot infer from context. When in doubt, leave it out. Applies to new components, headers, cards, chat surfaces, and FABs; when reskinning or refactoring existing UI, prefer removing these over preserving them.
 
 ## Pricing Model — Monthly Subscriptions
+**In flight (2026-07-10 deck):** the public marketing surface now sells **one flat fee per deal** — sized by league, quoted by Yulia in-conversation after the free Baseline™, never a percentage — with subscription demoted to a repeat-acquirer volume plan. The ladder below remains the live billing model until the July 10 model is ratified (`SMBX_PRICING_LOCKED.md` 2026-07-11 addendum).
+
 **Free:** Unlimited Yulia Q&A, ONE ValueLens or deal score (email required)
 **$99 Solo:** Unlimited ValueLens, deal scoring, VRR, SDE/EBITDA analysis, exports, and one supervised MCP/agent key
 **$249 Pro:** Everything in Solo + CIM, deal room, market discovery, source routing, DD, LOI scaffolds, and three supervised MCP/agent keys

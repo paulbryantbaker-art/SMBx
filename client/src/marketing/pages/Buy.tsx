@@ -120,9 +120,13 @@ export default function Buy() {
             Free to start. <em>No success fees, ever.</em>
           </h2>
           <p className="mk-body" style={{ marginTop: 20, maxWidth: '38em', color: 'var(--mk-ink-3)' }}>
-            Score your first deal for nothing. When you're ready to run one to close, you pay for
-            the work — never a percentage of the purchase price. If you've got a specific listing
-            in mind, paste the numbers — you'll have a real read in minutes.
+            Score your first deal for nothing. When you're ready to run one to close, it's one
+            flat fee for the whole deal — never a percentage of the purchase price. Yulia does
+            the analyst grind; you make the call.
+          </p>
+          <p className="mk-body" style={{ marginTop: 14, maxWidth: '38em', color: 'var(--mk-ink-3)' }}>
+            Tell Yulia what you're hunting for — if you've got a specific listing in mind, paste
+            the numbers and you'll have a real read in minutes.
           </p>
           <div style={{ marginTop: 40, width: '100%' }}>
             <HeroDock />

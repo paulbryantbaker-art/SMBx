@@ -51,7 +51,8 @@ export default function Home() {
           <p className="mk-lead" style={{ marginTop: 28, maxWidth: '44em' }}>
             Rarely what the tax return says. Yulia values a business the way a sharp buyer's
             analyst would — finds the earnings hiding in the numbers, checks it against real
-            market data, shows every source. Start with yours. The first analysis is free.
+            market data, shows every source — then helps you do something about it. Start with
+            yours. The first analysis is free.
           </p>
           <div style={{ marginTop: 52, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 22 }}>
             <HeroDock
@@ -107,13 +108,16 @@ export default function Home() {
 
       <section className="mk-section">
         <div className="mk-wrap mk-center">
-          <h2 className="mk-h2" style={{ maxWidth: '22ch', fontSize: 'clamp(28px, 2.6vw, 36px)' }}>
-            Yulia does the work. You keep the judgment — <em>and the fee.</em>
+          <h2 className="mk-h2" style={{ fontSize: 'clamp(28px, 2.6vw, 36px)' }}>
+            Your own corp dev team.
+            <br />
+            You run the deal. <em>You keep the fee.</em>
           </h2>
           <p className="mk-body" style={{ marginTop: 22, maxWidth: '40em', color: 'var(--mk-ink-3)' }}>
-            She does roughly what an investment bank does, minus the parts that need a license.
-            She never negotiates for you, never takes a cut, never signs anything. When your deal
-            needs a real attorney, CPA, or lender, she tells you and connects you to one.
+            Yulia does roughly what an investment bank does, minus the parts that need a license —
+            the analysis, the documents, the process — for a flat fee instead of a percentage of
+            your deal. She never negotiates for you, never takes a cut, never signs anything. When
+            your deal needs a real attorney, CPA, or lender, she tells you and connects you to one.
           </p>
           <p className="mk-body" style={{ marginTop: 16, maxWidth: '40em', color: 'var(--mk-ink-3)' }}>
             Start the conversation above. It's free, and there's no catch — the first real

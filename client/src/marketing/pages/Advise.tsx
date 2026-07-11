@@ -95,15 +95,28 @@ export default function Advise() {
       </section>
 
       <section className="mk-section">
+        <div className="mk-wrap">
+          <div className="mk-prose">
+            <h2 className="mk-h2" style={{ fontSize: 'clamp(24px, 2.2vw, 30px)' }}>Your clients never pay us a cut</h2>
+            <p className="mk-body">
+              You run on a flat monthly plan built for people who do this repeatedly — brokers,
+              sell-side advisors, independent sponsors, and small corp-dev teams alike. First
+              three client deals free. After that, one flat monthly price no matter how many
+              deals you carry — and your clients never pay smbX a success fee. Tell Yulia you run
+              deals for a living and she'll set it up.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="mk-section">
         <div className="mk-wrap mk-center">
           <h2 className="mk-h2" style={{ fontSize: 'clamp(28px, 2.6vw, 34px)' }}>
             Start your first client deal <em>free.</em>
           </h2>
           <p className="mk-body" style={{ marginTop: 20, maxWidth: '37em', color: 'var(--mk-ink-3)' }}>
             Bring a live engagement. Watch what Yulia does with it before your next meeting. If
-            it doesn't save you a week of work, walk away — you've lost nothing. You run on the
-            same Pro or Team plan as any repeat dealmaker, and your clients never pay smbX a
-            success fee.
+            it doesn't save you a week of work, walk away — you've lost nothing.
           </p>
           <div style={{ marginTop: 40, width: '100%' }}>
             <HeroDock />

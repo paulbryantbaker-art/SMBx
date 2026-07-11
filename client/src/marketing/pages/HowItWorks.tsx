@@ -45,7 +45,9 @@ export default function HowItWorks() {
               <p style={{ margin: '12px 0 0', fontSize: 15, lineHeight: 1.65, color: 'var(--mk-w2)' }}>
                 Valuations, debt coverage, IRR, sensitivity — these run on a deterministic
                 engine, not a language model's best impression of arithmetic. Same inputs, same
-                outputs, every time. Auditable. Exportable as real formulas.
+                outputs, every time. Auditable. Exportable as real formulas. A large language
+                model will confidently get the math wrong; Yulia won't, because she doesn't do
+                the math with a language model.
               </p>
             </div>
             <div className="mk-glass" style={{ padding: '34px 36px' }}>
@@ -75,6 +77,9 @@ export default function HowItWorks() {
         <div className="mk-wrap">
           <div className="mk-prose">
             <h2 className="mk-h2">What a real deal looks like</h2>
+            <p className="mk-body" style={{ fontSize: 14.5, color: 'var(--mk-ink-3)' }}>
+              A mid-sized example — the methodology is the same at every size.
+            </p>
             <p className="mk-body">
               Take a <b style={{ color: 'var(--mk-ink)' }}>$28M-revenue industrial services company with $5.4M in
               EBITDA</b> going to market. Yulia builds the preliminary valuation range and shows
@@ -103,13 +108,33 @@ export default function HowItWorks() {
             <p className="mk-body" style={{ marginTop: 16 }}>
               Yulia generates analysis and documents. She does not negotiate on your behalf,
               represent you to a counterparty, hold your money, practice law, or take a
-              percentage of your deal. When your deal needs judgment and a license, Yulia tells
-              you, and connects you to vetted M&amp;A attorneys, transaction CPAs, and SBA lenders.
+              percentage of your deal. Those things require licenses and fiduciary duties — and
+              honestly, they require a human.
+            </p>
+            <p className="mk-body" style={{ marginTop: 14 }}>
+              So when your deal needs judgment and a license, Yulia tells you, and connects you
+              to vetted M&amp;A attorneys, transaction CPAs, and SBA lenders. The platform handles
+              the intelligence and the process. The professionals handle the judgment. That's not
+              a limitation — that's how deals are supposed to work.
             </p>
             <p style={{ margin: '14px 0 0', fontSize: 15, lineHeight: 1.65, color: 'var(--mk-ink-3)' }}>
               This is a partnership with the professionals you hire, not a replacement for them.
               A client who arrives prepared makes every advisor's job easier — and every
               advisor's fee more justified.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="mk-section">
+        <div className="mk-wrap">
+          <div className="mk-prose">
+            <h2 className="mk-h2" style={{ fontSize: 'clamp(24px, 2.2vw, 30px)' }}>The deal doesn't end at the wire</h2>
+            <p className="mk-body">
+              Most tools stop at close. Yulia keeps going — into the first 180 days after you
+              buy, with an integration plan, a Day Zero checklist, and the value-creation work
+              that turns a good purchase into a great one. The same continuity runs the other way
+              for sellers preparing years ahead. One relationship, the whole lifecycle.
             </p>
           </div>
         </div>

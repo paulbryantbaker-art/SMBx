@@ -491,26 +491,9 @@
 .mk-note { font-size: 12px; color: var(--mk-ink-3); }
 
 /* --------------------------------------------------------------- pricing --- */
+/* July 10 model: no tier grid on the page — the old .mk-sub-grid/.mk-sub-tier
+   subscription-ladder styles were removed with it. */
 .mk-price-cols { display: flex; justify-content: center; align-items: flex-start; gap: 32px; flex-wrap: wrap; }
-.mk-sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-@media (max-width: 560px) { .mk-sub-grid { grid-template-columns: 1fr; } }
-.mk-sub-tier { border: 1px solid var(--mk-ink-bd); border-radius: 18px; padding: 20px 22px; position: relative; }
-.mk-sub-tier.is-popular { border-color: rgba(0, 214, 50, 0.5); }
-.mk-sub-tier .badge {
-  position: absolute;
-  top: -9px; right: 16px;
-  background: var(--mk-neon);
-  color: #0F0F0E;
-  border-radius: 999px;
-  padding: 2px 10px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-}
-.mk-sub-tier .name { font-size: 14px; font-weight: 600; color: var(--mk-w); }
-.mk-sub-tier .price { font-size: 28px; font-weight: 800; letter-spacing: -0.035em; color: var(--mk-neon); margin-top: 4px; }
-.mk-sub-tier .price small { font-size: 13px; font-weight: 400; color: var(--mk-w4); letter-spacing: 0; }
-.mk-sub-tier .desc { font-size: 12.5px; color: var(--mk-w3); margin-top: 4px; }
 
 /* FAQ rows (flat, hairline-divided — hi-fi 4f) */
 .mk-faq { display: flex; flex-direction: column; }

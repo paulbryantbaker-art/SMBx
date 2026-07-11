@@ -95,8 +95,7 @@ export default function Sell() {
       <section className="mk-section">
         <div className="mk-wrap" style={{ display: 'flex', justifyContent: 'center' }}>
           <div className="mk-glass mk-glass-lg" style={{ width: 'min(880px, 100%)', padding: 'clamp(32px, 4vw, 50px) clamp(30px, 4.2vw, 56px)' }}>
-            <div className="mk-eyebrow">Blind Equity™</div>
-            <h2 className="mk-h2" style={{ marginTop: 14 }}>The money you didn't know you had</h2>
+            <h2 className="mk-h2">The money you didn't know you had</h2>
             <p className="mk-body" style={{ marginTop: 18 }}>
               This is the part owners remember. Yulia reads your financials the way a buyer's
               analyst will — but on your side. The personal vehicle. The family payroll. The
@@ -105,7 +104,9 @@ export default function Sell() {
               multiplied.
             </p>
             <p className="mk-body" style={{ marginTop: 14 }}>
-              On a typical deal, that's <em style={{ fontWeight: 700 }}>six figures</em>. Sometimes it's the difference
+              We call it <b style={{ color: 'var(--mk-ink)' }}>Blind Equity™</b>: value that's genuinely yours, just
+              buried where a buyer won't pay for it until someone documents it properly. On a
+              typical deal, that's <em style={{ fontWeight: 700 }}>six figures</em>. Sometimes it's the difference
               between the number you need and the number you'd have settled for.
             </p>
           </div>
@@ -117,21 +118,26 @@ export default function Sell() {
           <div className="mk-prose">
             <h2 className="mk-h2">You might not be selling once. You might be selling twice.</h2>
             <p className="mk-body">
-              A lot of owners in this market sell most of the business to a private-equity-backed
-              platform — take real money off the table today — and roll the rest into equity in
-              the combined company. When that bigger company sells again a few years later, they
-              get a second check. Sometimes the second bite is larger than the first.
+              A lot of owners in this market don't cash out all at once. They sell most of the
+              business to a private-equity-backed platform rolling up their industry — take real
+              money off the table today — and roll the rest into equity in the combined company.
+              When that bigger company sells again a few years later, they get a second check.
+              Sometimes the second bite is larger than the first.
             </p>
             <p className="mk-body">
               That can be the best outcome available to you. It can also be a quiet trap. Rolled
               equity isn't cash — it's a minority stake in someone else's company, with their
-              debt, their board, and their timeline.
+              debt, their board, and their timeline. What class of equity you hold, what gets
+              paid out before you do, and what happens if the plan slips are exactly the terms
+              that decide whether that "upside" is real or just a number in a pitch deck.
             </p>
             <p className="mk-body">
               <b style={{ color: 'var(--mk-ink)' }}>Yulia models both bites.</b> What you clear today, what the rollover
               could be worth under different exit scenarios, and what the equity terms actually
-              mean in plain English. And if a straight sale is the better deal for you, she'll
-              show you that too. No agenda. Just the math on both.
+              mean in plain English — so you're weighing a real second payday against a real
+              risk, not taking a buyer's word for what their stock is worth. And if a straight
+              sale is the better deal for you, she'll show you that too. No agenda. Just the math
+              on both.
             </p>
           </div>
         </div>
@@ -174,8 +180,13 @@ export default function Sell() {
           </h2>
           <p className="mk-body" style={{ marginTop: 20, maxWidth: '38em', color: 'var(--mk-ink-3)' }}>
             The first analysis costs you nothing — Yulia earns your trust before she earns your
-            business. When you're ready to run the deal for real, you pay for the work, never a
-            percentage of what your company sells for.
+            business. When you're ready to run the deal for real, it's one flat fee to run the
+            whole thing to close — never a percentage of what your company sells for. You keep
+            control, and you keep the fee you'd have handed a banker.
+          </p>
+          <p className="mk-body" style={{ marginTop: 14, maxWidth: '38em', color: 'var(--mk-ink-3)' }}>
+            Tell Yulia about your business — in a few minutes you'll know more about what you
+            have than most owners learn in a year of thinking about it.
           </p>
           <div style={{ marginTop: 40, width: '100%' }}>
             <HeroDock />
