@@ -1,8 +1,27 @@
 # REPO_STATUS.md — what's current, what's stale
 
-**Last updated: 2026-07-10.**
+**Last updated: 2026-07-11.**
 
-## 2026-07-10 — UI retool in progress
+## 2026-07-11 — BUSINESS-MODEL PIVOT (THE LINE v2) — read this first
+
+smbX.ai is no longer a public software product. It is a **private buy-side
+corp-dev-as-a-service practice**; the app is the practice's internal instrument.
+Governing doc: **`THE_LINE_POLICY.md` v2** (v1 archived at
+`docs/_archive/THE_LINE_POLICY_v1.md`). What changed in the repo:
+
+- **Practice mode** (`server/services/practiceMode.ts`, default ON): team-only
+  auth (`TEAM_ALLOWLIST`), perimeter middleware on `/api` + `/mcp`, enterprise
+  entitlements for the team, anonymous chat + Stripe checkout 410'd.
+- **Logged-out surface** is one page: `client/src/marketing/PracticeDoor.tsx`.
+  The liquid-glass product-marketing pages (`marketing/pages/`) and legacy Ramp
+  pages are UNROUTED but kept as a repurposing pool.
+- **Compensation**: buy-side retainer + buy-side success fee per engagement
+  letter (counsel confirmation pending — see THE LINE v2). Everything below
+  about product pricing/subscriptions is historical; `SMBX_PRICING_LOCKED.md`
+  carries a retirement banner.
+- **DEFINITIVE / methodology / Yulia's behavioral guardrails: unchanged.**
+
+## 2026-07-10 — UI retool (now pre-pivot history)
 
 The CD bundle landed (`smbx-ai-marketing-redesign/`, wireframes turn 5) and the
 marketing rebuild is implemented on the retool branch: the **terra** language

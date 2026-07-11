@@ -1,10 +1,10 @@
 CLAUDE.md — smbx.ai
-Last updated: 2026-07-10
+Last updated: 2026-07-11
 
 > **For a current-vs-stale map of the whole repo, read `REPO_STATUS.md` at the root.** Archived docs live in `docs/_archive/` — do not build against them.
 
 ## What This Is
-AI-powered deal intelligence platform for business acquisitions from $300K to mega-cap. Users talk to Yulia (AI deal intelligence) who guides them through buying, selling, or raising capital for businesses. Chat-first experience — users talk to Yulia, not dashboards. Yulia IS the front door — there is no sales team, no contact forms, no dead-end CTAs. Every action routes to chat.
+**An AI-forward, buy-side corp-dev-as-a-service practice (THE LINE v2, pivoted 2026-07-11).** smbX.ai is no longer a public product — it is the private instrument of the practice: Paul (and team) running buy-side acquisitions for acquirer clients through close, with Yulia + DEFINITIVE doing the work that used to require an analyst team. The app serves the team only (practice mode); the logged-out surface is a one-page practice front door. Inside the app the experience stays chat-first — the practitioner talks to Yulia, and the practitioner carries the deal.
 
 ## Core Architecture
 - `client/src/components/v6/V6App.tsx` is the current app shell — a thin viewport fork into `v6/desktop/AtlasApp.tsx` (≥1024px) and `v6/atlasmobile/AtlasMobileApp.tsx`. All catch-all routes go through it; logged-out users see `client/src/marketing/` instead (two-surface rule in `App.tsx`).
@@ -13,7 +13,7 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 - wouter for client routing
 - PostgreSQL via raw postgres-js (no ORM)
 - Claude API (primary), Google Gemini (secondary), OpenAI (tertiary)
-- Stripe monthly subscriptions: Free / $99 Solo / $249 Pro / $749 Team / $3,000+ Enterprise. Legacy $79 / $199 / $499 / $2,500+ references are early-access or annual-equivalent only.
+- Billing DORMANT: the Stripe subscription machinery ($99/$249/$749/$3,000 ladder) is retained but unmounted in practice mode — nothing in the app charges money (rule 1)
 - JWT authentication (no sessions, no passport — sessions broke on Railway)
 - Railway deployment (GitHub push → auto-deploy, Dockerfile with Chromium)
 - Auto-migrations on server startup (server/index.ts runs all SQL in server/migrations/)
@@ -23,26 +23,30 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 - Premium PDF export via Puppeteer (headless Chromium) + Chart.js
 
 ## Critical Rules — Read These First
-1. **PRICING (LOCKED 2026-05-27; JULY 10 MODEL IN FLIGHT).** Billing truth is still the monthly ladder: Free (unlimited chat + 1 deliverable) / $99 Solo / $249 Pro / $749 Team / $3,000+ Enterprise — canonical record `SMBX_PRICING_LOCKED.md`. Any older table showing $79 / $199 / $499 / $2,500 is stale. The 2026-07-10 copy deck moved the **marketing surface** to one flat fee per deal (sized by league, fixed before start, non-contingent, never a percentage; no public price grid; subscription demoted to a repeat-acquirer volume plan) — see the lock file's 2026-07-11 addendum; billing/product ratification pending, including a counsel pass on THE LINE's "no pricing tier based on deal size" bullet. Still absolute: no wallet, no success/referral/contingent compensation, nothing that varies with deal outcome.
+1. **COMPENSATION (THE LINE v2, 2026-07-11).** smbX is a practice, not a product — **nothing in the app charges money.** Practice compensation is per-engagement and human-papered: buy-side retainer + buy-side success fee paid by the practice's own acquirer client (engagement letter; one-time §15(b)(13)/state-registration counsel confirmation pending — see `THE_LINE_POLICY.md`). Forbidden absolutely: sell-side, two-sided, or neutral-intermediary compensation; % of capital raised; referral fees; Yulia quoting or collecting any fee. All product billing (subscription ladder, Stripe checkout, the one-day July-10 flat-fee marketing model) is retired/dormant — `SMBX_PRICING_LOCKED.md` is a historical record with a retirement banner. No wallet, ever.
 2. **WALLET IS DEAD.** walletService, paywallService, dealExecutionFee, platformFeeService deleted. Never recreate.
-3. **FREE TIER.** Unlimited conversation. ONE free deliverable per user. Paywall triggers after first free deliverable, NOT at a fixed gate.
+3. **PRACTICE MODE (default ON).** The app serves the team allowlist only: signup/login gated and every authenticated request perimeter-checked (`server/services/practiceMode.ts`; `TEAM_ALLOWLIST` env, fallback `paulbryantbaker@gmail.com`); team runs at full entitlements — no paywall, no free-tier gate; anonymous chat and Stripe checkout return 410. `PRACTICE_MODE=false` restores the retired product posture — a deliberate act, not a default.
 4. **V6App.tsx is the ONLY current app shell.** Never create parallel layouts. All UI changes go through the V6 shell/components.
 5. **NEVER use position:fixed full-viewport divs with background-color.** Safari reads them for toolbar tinting and it breaks dark mode switching. Use position:absolute inside a relative parent instead.
 6. **ValueLens (NOT Bizestimate).** The old name is dead.
-7. **Talk to Yulia (NOT Contact Sales).** All CTAs route to chat.
+7. **No public funnel.** The logged-out surface is the one-page practice front door (`client/src/marketing/PracticeDoor.tsx`) — no product marketing, no pricing page, no anonymous Yulia chat. The retired liquid-glass marketing pages stay unrouted in `marketing/` as a repurposing pool for a future practice site.
 8. **Yulia never says "As an AI."** Expert M&A deal intelligence. Adapts persona by league.
 9. **Financial data: zero hallucination.** Extract exactly from documents, never invent numbers.
 10. **All money stored in cents (integers).** Never use floating point for financial values.
 11. **Mobile browser first.** Design for mobile, then adapt to desktop.
-12. **THE LINE is product law.** Read `THE_LINE_POLICY.md`. Yulia shows analysis, options, and implications; the user decides. No recommendations for regulated transaction decisions, negotiation, counterparty contact, custody, signing, filing, legal/tax/accounting/appraisal opinions, success fees, referral fees, or deal-value fees.
+12. **THE LINE v2 is practice law.** Read `THE_LINE_POLICY.md` (v2, 2026-07-11; v1 archived at `docs/_archive/THE_LINE_POLICY_v1.md`). The perimeter: buy-side only; one buyer per target; never sell-side, two-sided, or neutral-intermediary; targets under $250M revenue; no unlicensed opinions (securities, tax, legal, appraisal → coordinate the specialist). Yulia remains the instrument: analysis, options, implications, models, drafts — she never contacts or negotiates with counterparties on her own, custodies funds, signs, files, or sets/collects compensation. The practitioner runs the deal and owns the judgment.
 
 ## Design System
-**RETOOL IN PROGRESS (2026-07-11).** The CD hi-fi bundle
-(`smbX.ai Marketing Redesign/`, turn 4) and the 2026-07-10 copy deck (final
-copy + the July 10 flat-fee pricing model — see rule 1) are implemented on the
-retool branch; expect further CD passes. THE LINE and DEFINITIVE are untouched.
+**PIVOT (2026-07-11): the public marketing surface is retired.** Logged-out
+users see only `marketing/PracticeDoor.tsx` (one page, liquid-glass language).
+The CD hi-fi bundle (`smbX.ai Marketing Redesign/`, turn 4) and the 2026-07-10
+copy-deck pages were fully implemented and then unrouted the same day by the
+THE LINE v2 pivot — they remain in `marketing/pages/` as a repurposing pool
+for a future practice site. DEFINITIVE is untouched. The app shells (Atlas)
+continue as the working surfaces for the practice.
 **Operating doc: `UI_RETOOL_READINESS.md`** — surface map, token seams,
-preservation contract, phased playbook. Read it before any UI work.
+preservation contract. Read it before any UI work (its funnel sections are
+pre-pivot history).
 
 The three current languages:
 - **Marketing = "liquid glass" (2026-07-10 hi-fi, the retool):** `client/src/marketing/` under the `.mk` scope — canvas gradient `#FBFBF9→#F4F6F2→#EFF4EE` with ambient green/blue blobs, light-glass cards (`rgba(255,255,255,.6)` + blur + white hairline), ink-glass cards (charcoal gradient) for the number-hero moments, neon `#00D632` on dark glass ONLY (use green `#009E25` on white), Sora ExtraBold headlines / Inter body, no italics (`em` renders green). The one idea: every page morphs (~300ms crossfade) into the anonymous Yulia conversation. Source of truth: `smbX.ai Marketing Redesign/` (`smbX Hi-Fi.dc.html` turn 4 + `HANDOFF.md`) for look, the 2026-07-10 copy deck for words, wireframes turn 5 for UX/morph structure.
@@ -55,16 +59,15 @@ The three current languages:
 
 **No gratuitous eyebrows or micro text (LOCKED 2026-06-01).** Do NOT add decorative eyebrow kickers (small uppercase mono labels like `PIPELINE`, `RECENTS`, `MARKET INTELLIGENCE LIVE`) or micro status/subtitle lines (like `deal intelligence · online`) by default — they clutter and read as AI filler. Lead with the title alone. Add a label or secondary line ONLY when it carries information the user genuinely needs and cannot infer from context. When in doubt, leave it out. Applies to new components, headers, cards, chat surfaces, and FABs; when reskinning or refactoring existing UI, prefer removing these over preserving them.
 
-## Pricing Model — Monthly Subscriptions
-**In flight (2026-07-10 deck):** the public marketing surface now sells **one flat fee per deal** — sized by league, quoted by Yulia in-conversation after the free Baseline™, never a percentage — with subscription demoted to a repeat-acquirer volume plan. The ladder below remains the live billing model until the July 10 model is ratified (`SMBX_PRICING_LOCKED.md` 2026-07-11 addendum).
+## Business Model — The Practice (THE LINE v2)
+smbX.ai is a buy-side corp-dev-as-a-service practice. Revenue is per-engagement, papered by humans in the engagement letter: a **buy-side retainer** and a **buy-side success fee**, both paid by the practice's own acquirer client (independent-sponsor economics). The perimeter: buy-side only, one buyer per target, never sell-side/two-sided/neutral-intermediary, targets under $250M revenue. One-time counsel confirmation (Exchange Act §15(b)(13), state M&A-broker regimes, engagement-letter language) is pending — see `THE_LINE_POLICY.md`.
 
-**Free:** Unlimited Yulia Q&A, ONE ValueLens or deal score (email required)
-**$99 Solo:** Unlimited ValueLens, deal scoring, VRR, SDE/EBITDA analysis, exports, and one supervised MCP/agent key
-**$249 Pro:** Everything in Solo + CIM, deal room, market discovery, source routing, DD, LOI scaffolds, and three supervised MCP/agent keys
-**$749 Team:** Shared deal vault, firm templates, seats, specialist handoff coordination, and supervised agent workflows
-**$3,000+ Enterprise:** Everything in Team + single-tenant, SSO, API controls, portfolio infrastructure, custom governance, and governed autonomous agent scope
-
-Credits are included plan allowances and governance controls, not a wallet. Event artifacts may have flat software prices or consume included credits, but no fee may vary with deal value, close, or outcome.
+The app itself charges nothing. **Practice mode** (`server/services/practiceMode.ts`, default ON):
+- `TEAM_ALLOWLIST` (comma-separated emails; fallback `paulbryantbaker@gmail.com`) gates register/login/Google/reset.
+- `practicePerimeter` middleware 403s any JWT belonging to a non-team identity (covers `/api` and `/mcp`, including pre-pivot accounts and external agent keys). Tokenless requests fall through to each route's own auth, so token-link share surfaces keep working.
+- Team members get enterprise-level entitlements (`getUserPlan` short-circuit) — no paywall, no free-deliverable gate.
+- `/api/chat/anonymous` and `/api/stripe` (except the webhook) return 410.
+- The retired subscription machinery (`subscriptionService.ts`, `lib/pricing.ts`, Stripe envs) stays in the tree, dormant.
 
 ## Journeys, Stages, and Deal-Mechanics Gates
 Top-level product journeys remain SELL, BUY, RAISE, and PMI. SELL/BUY/RAISE expose six user-facing stages; PMI exposes four post-close stages.
@@ -177,6 +180,6 @@ npm run build        # Build for production
 ## Environment Variables
 DATABASE_URL, ANTHROPIC_API_KEY, GOOGLE_AI_API_KEY, OPENAI_API_KEY,
 GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_PLACES_API_KEY,
-STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET,
-STRIPE_PRICE_SOLO, STRIPE_PRICE_PRO, STRIPE_PRICE_TEAM, STRIPE_PRICE_ENTERPRISE,
-JWT_SECRET, NODE_ENV, PORT, APP_URL, CENSUS_API_KEY, TEST_MODE
+JWT_SECRET, NODE_ENV, PORT, APP_URL, CENSUS_API_KEY, TEST_MODE,
+PRACTICE_MODE (default true), TEAM_ALLOWLIST (comma-separated emails),
+STRIPE_* (dormant: SECRET_KEY, PUBLISHABLE_KEY, WEBHOOK_SECRET, PRICE_SOLO/PRO/TEAM/ENTERPRISE)

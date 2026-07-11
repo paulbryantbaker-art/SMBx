@@ -26,6 +26,7 @@ import type { SettingsPane } from "../atlasNav";
 import type { User } from "../../../../hooks/useAuth";
 import { authHeaders } from "../../../../hooks/useAuth";
 import { planLabel, planPriceLine } from "../../../../lib/pricing";
+import { usePracticeMode } from "../../../../lib/practiceMode";
 import { T } from "../atlasTokens";
 import { Card, Avatar, Pill, ProgressBar, LoadingState } from "../primitives";
 import { SettingsGlyph, PlusIcon } from "../icons";
@@ -274,6 +275,7 @@ function ProfilePane({ user }: { user: User | null }) {
 /* ─── 6b. ACCOUNT & BILLING ────────────────────────────────────────────────── */
 
 function BillingPane() {
+  const practice = usePracticeMode();
   const sub = useEndpoint<SubscriptionPayload>("/api/stripe/subscription", true);
   const ent = useEndpoint<EntitlementsPayload>("/api/v19/entitlements", true);
   const chat = useAtlasChat();
@@ -300,6 +302,22 @@ function BillingPane() {
       setPortalBusy(false);
     }
   }, []);
+
+  // THE LINE v2 pivot: no product billing. The practice team runs at full
+  // entitlements; compensation lives in client engagement letters, not here.
+  if (practice) {
+    return (
+      <Card pad={20} style={{ borderRadius: T.rCardLg }}>
+        <div style={{ fontSize: 24, fontWeight: 600, color: T.ink, marginTop: 4 }}>Practice workspace</div>
+        <div style={{ fontSize: 13, color: T.muted, marginTop: 4 }}>Full access · nothing billed in-app</div>
+        <HonestNote style={{ marginTop: 16 }}>
+          smbX runs as the practice's internal instrument (THE LINE v2). There is no
+          subscription here — client compensation is papered in each engagement
+          letter, never charged through the app.
+        </HonestNote>
+      </Card>
+    );
+  }
 
   if (sub.loading) return <LoadingState label="Loading your plan…" />;
   if (sub.error || !sub.data) {

@@ -4,6 +4,7 @@ import path from 'path';
 import postgres from 'postgres';
 import { fileURLToPath } from 'url';
 import { optionalAuth, requireAuth } from './middleware/auth.js';
+import { practiceModeEnabled, practicePerimeter, retiredSurface } from './services/practiceMode.js';
 import { authRouter } from './routes/auth.js';
 import { canvasTabsRouter } from './routes/canvasTabs.js';
 import { docViewsRouter } from './routes/docViews.js';
@@ -175,6 +176,12 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), handl
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: false }));
 
+// ─── 2a. Practice perimeter (THE LINE v2) ──────────────────
+// Any request bearing a JWT for a non-team identity is rejected — covers /api
+// and /mcp alike, including pre-pivot accounts and external agent keys.
+// Tokenless requests fall through to each route's own auth.
+app.use(practicePerimeter);
+
 // ─── 2. API routes (public) ────────────────────────────────
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
@@ -184,6 +191,7 @@ app.get('/api/config', (_req, res) => {
   res.json({
     googleClientId: process.env.GOOGLE_CLIENT_ID || null,
     stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY || null,
+    practiceMode: practiceModeEnabled(),
   });
 });
 
@@ -542,9 +550,17 @@ app.get('/api/debug/check-ai', async (_req, res) => {
 });
 
 app.use('/api/auth', authLimiter, authRouter);
-app.use('/api/chat/anonymous', chatLimiter, anonymousRouter);
+if (practiceModeEnabled()) {
+  // Retired public product surfaces: the anonymous marketing funnel and Stripe
+  // checkout/portal have no role in the private practice (THE LINE v2). The
+  // webhook mount above stays live so legacy subscription events still settle.
+  app.use('/api/chat/anonymous', retiredSurface);
+  app.use('/api/stripe', retiredSurface);
+} else {
+  app.use('/api/chat/anonymous', chatLimiter, anonymousRouter);
+  app.use('/api/stripe', requireAuth, stripeRouter); // routes read req.userId; this mount is before the blanket requireAuth, so gate it here (webhook is mounted separately above, stays public)
+}
 app.use('/api/chat', chatLimiter, chatRouter);
-app.use('/api/stripe', requireAuth, stripeRouter); // routes read req.userId; this mount is before the blanket requireAuth, so gate it here (webhook is mounted separately above, stays public)
 app.use('/api', shareLinksRouter); // has both public (/shared/:token) and protected routes
 
 // Studio collateral catalog — generic, non-sensitive (the list of buildable

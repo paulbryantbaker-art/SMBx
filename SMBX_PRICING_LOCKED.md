@@ -1,3 +1,14 @@
+> **RETIRED (2026-07-11) — business-model pivot.** smbX is no longer a software
+> product; it is a buy-side corp-dev-as-a-service practice governed by
+> [`THE_LINE_POLICY.md`](THE_LINE_POLICY.md) (v2). Practice compensation is
+> per-engagement — buy-side retainer + buy-side success fee paid by the acquirer
+> client, papered in the engagement letter — not a product price list. The
+> subscription ladder below is **dormant, not unwound**: `subscriptionService.ts`
+> and Stripe stay in the tree, but practice mode grants the team full entitlements
+> and disables checkout. The 2026-07-11 "July 10 flat-fee" addendum below reached
+> the marketing surface for one day, was never ratified for billing, and is retired
+> with the pivot. Nothing in this file should gate new work.
+
 # smbX Pricing — LOCKED
 
 **Status:** Canonical pricing record. This file is the source of truth for what smbX charges.

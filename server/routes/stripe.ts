@@ -1,14 +1,19 @@
 /**
- * Stripe Routes — Subscription checkout, portal, and webhook handling.
+ * Stripe Routes — DORMANT product-subscription checkout, portal, and webhook.
  *
- * Flow:
+ * 2026-07-11 pivot (THE LINE v2): smbX is a private buy-side practice; nothing
+ * in the product charges money. In practice mode (the default) this router is
+ * not mounted — /api/stripe returns 410 (server/index.ts) and only the webhook
+ * stays live so legacy subscription events still settle. Practice compensation
+ * (buy-side retainer + buy-side success fee) is an engagement-letter matter
+ * between the practitioner and the client, never billed through the product.
+ *
+ * Retired product flow (kept in case a product motion returns):
  * 1. User generates a deliverable that requires a paid plan
  * 2. POST /api/stripe/subscribe creates a Stripe Checkout Session (subscription)
  * 3. User subscribes on Stripe's hosted page
  * 4. Stripe sends webhook → we update user's plan
  * 5. User redirected back to the app, features unlocked
- *
- * No per-deal fees. No wallet. No success fees.
  */
 import { Router } from 'express';
 import Stripe from 'stripe';

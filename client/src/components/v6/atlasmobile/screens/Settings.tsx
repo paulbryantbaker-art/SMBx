@@ -43,6 +43,7 @@ import type { CSSProperties, ReactNode } from "react";
 import type { AtlasScreenProps, SettingsPane } from "../../desktop/atlasNav";
 import { useAtlasNav, useAtlasChat } from "../../desktop/atlasNav";
 import type { User } from "../../../../hooks/useAuth";
+import { usePracticeMode } from "../../../../lib/practiceMode";
 import { authHeaders } from "../../../../hooks/useAuth";
 import { planLabel, planPriceLine } from "../../../../lib/pricing";
 import { Card, Avatar, Pill, ProgressBar, LoadingState } from "../../desktop/primitives";
@@ -281,6 +282,7 @@ function ProfilePane({ user }: { user: User | null }) {
 /* ─── ACCOUNT & BILLING ─────────────────────────────────────────────────────── */
 
 function BillingPane() {
+  const practice = usePracticeMode();
   const sub = useEndpoint<SubscriptionPayload>("/api/stripe/subscription", true);
   const ent = useEndpoint<EntitlementsPayload>("/api/v19/entitlements", true);
   const chat = useAtlasChat();
@@ -307,6 +309,22 @@ function BillingPane() {
       setPortalBusy(false);
     }
   }, []);
+
+  // THE LINE v2 pivot: no product billing. The practice team runs at full
+  // entitlements; compensation lives in client engagement letters, not here.
+  if (practice) {
+    return (
+      <div>
+        <div style={{ fontSize: 20, fontWeight: 700 }}>Practice workspace</div>
+        <div style={{ fontSize: 13, opacity: 0.65, marginTop: 4 }}>Full access · nothing billed in-app</div>
+        <HonestNote style={{ marginTop: 14 }}>
+          smbX runs as the practice's internal instrument (THE LINE v2). There is no
+          subscription here — client compensation is papered in each engagement
+          letter, never charged through the app.
+        </HonestNote>
+      </div>
+    );
+  }
 
   if (sub.loading) return <LoadingState label="Loading your plan…" />;
   if (sub.error || !sub.data) {

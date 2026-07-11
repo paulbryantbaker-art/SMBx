@@ -80,19 +80,11 @@ import Terms from './pages/public/Terms';
 
 // Lazy-load secondary pages
 const V6App = lazy(() => import('./components/v6/V6App'));
-// 2026-07 terra marketing surface (smbx-ai-marketing-redesign handoff, turn 5)
-const MarketingHome = lazy(() => import('./marketing/pages/Home'));
-const MarketingBuy = lazy(() => import('./marketing/pages/Buy'));
-const MarketingSell = lazy(() => import('./marketing/pages/Sell'));
-const MarketingAdvise = lazy(() => import('./marketing/pages/Advise'));
-const MarketingHowItWorks = lazy(() => import('./marketing/pages/HowItWorks'));
-const MarketingPricing = lazy(() => import('./marketing/pages/Pricing'));
-// Legacy Ramp pages — live but footer-only (Paul, 2026-07-10); restyle or retire later
-const MarketingRaise = lazy(() => import('./marketing/legacy/pages/Raise'));
-const MarketingIntegrate = lazy(() => import('./marketing/legacy/pages/Integrate'));
-const MarketingStandard = lazy(() => import('./marketing/legacy/pages/Standard'));
-const MarketingStandardModel = lazy(() => import('./marketing/legacy/pages/StandardModel'));
-const MarketingConnectors = lazy(() => import('./marketing/legacy/pages/Connectors'));
+// 2026-07-11 pivot (THE LINE v2): the public product is retired. The only
+// logged-out surface is the practice front door; the product-marketing pages
+// (marketing/pages/, marketing/legacy/) stay in the tree unrouted as a
+// repurposing pool for a future practice site.
+const PracticeDoor = lazy(() => import('./marketing/PracticeDoor'));
 const SharedDocument = lazy(() => import('./pages/public/SharedDocument'));
 const SharedDocumentView = lazy(() => import('./pages/SharedDocumentView'));
 const AcceptInvite = lazy(() => import('./pages/public/AcceptInvite'));
@@ -329,24 +321,21 @@ export default function App() {
           )}
         </Route>
 
-        {/* Marketing site (Surface 1, logged-out). Each page renders the
-            marketing surface when logged out + not-yet-entered; otherwise the
-            app shell. Submitting a chat / "Ask Yulia" sets the entered-app flag
-            and hard-reloads → the app renders. The model page must precede
-            /standard so the more specific path matches first. */}
-        <Route path="/buy">{marketingOrApp(<MarketingBuy />)}</Route>
-        <Route path="/sell">{marketingOrApp(<MarketingSell />)}</Route>
-        <Route path="/advise">{marketingOrApp(<MarketingAdvise />)}</Route>
-        {/* pre-hi-fi URL — the audience page moved to /advise */}
-        <Route path="/brokers"><Redirect to="/advise" /></Route>
-        <Route path="/how-it-works">{marketingOrApp(<MarketingHowItWorks />)}</Route>
-        <Route path="/raise">{marketingOrApp(<MarketingRaise />)}</Route>
-        <Route path="/integrate">{marketingOrApp(<MarketingIntegrate />)}</Route>
-        <Route path="/pricing">{marketingOrApp(<MarketingPricing />)}</Route>
-        <Route path="/connectors">{marketingOrApp(<MarketingConnectors />)}</Route>
-        <Route path="/standard/working-capital-peg">{marketingOrApp(<MarketingStandardModel />)}</Route>
-        <Route path="/standard">{marketingOrApp(<MarketingStandard />)}</Route>
-        <Route path="/">{marketingOrApp(<MarketingHome />)}</Route>
+        {/* Practice front door (Surface 1, logged-out — THE LINE v2 pivot).
+            Every retired product-marketing URL lands on the door; an authed
+            user gets the app shell per the two-surface rule. */}
+        <Route path="/buy">{marketingOrApp(<PracticeDoor />)}</Route>
+        <Route path="/sell">{marketingOrApp(<PracticeDoor />)}</Route>
+        <Route path="/advise">{marketingOrApp(<PracticeDoor />)}</Route>
+        <Route path="/brokers">{marketingOrApp(<PracticeDoor />)}</Route>
+        <Route path="/how-it-works">{marketingOrApp(<PracticeDoor />)}</Route>
+        <Route path="/raise">{marketingOrApp(<PracticeDoor />)}</Route>
+        <Route path="/integrate">{marketingOrApp(<PracticeDoor />)}</Route>
+        <Route path="/pricing">{marketingOrApp(<PracticeDoor />)}</Route>
+        <Route path="/connectors">{marketingOrApp(<PracticeDoor />)}</Route>
+        <Route path="/standard/working-capital-peg">{marketingOrApp(<PracticeDoor />)}</Route>
+        <Route path="/standard">{marketingOrApp(<PracticeDoor />)}</Route>
+        <Route path="/">{marketingOrApp(<PracticeDoor />)}</Route>
 
         {/* Catch-all → V6 Files Workspace (canonical 2026-05-01).
             Replaced V3App. All retired routes fall through here. */}
