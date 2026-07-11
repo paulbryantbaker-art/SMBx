@@ -1,11 +1,76 @@
+> **RETIRED (2026-07-11) — business-model pivot.** smbX is no longer a software
+> product; it is a buy-side corp-dev-as-a-service practice governed by
+> [`THE_LINE_POLICY.md`](THE_LINE_POLICY.md) (v2). Practice compensation is
+> per-engagement — buy-side retainer + buy-side success fee paid by the acquirer
+> client, papered in the engagement letter — not a product price list. The
+> subscription ladder below is **dormant, not unwound**: `subscriptionService.ts`
+> and Stripe stay in the tree, but practice mode grants the team full entitlements
+> and disables checkout. The 2026-07-11 "July 10 flat-fee" addendum below reached
+> the marketing surface for one day, was never ratified for billing, and is retired
+> with the pivot. Nothing in this file should gate new work.
+
 # smbX Pricing — LOCKED
 
 **Status:** Canonical pricing record. This file is the source of truth for what smbX charges.
 **Locked:** 2026-05-27.
-**Last reviewed:** 2026-05-27.
+**Last reviewed:** 2026-07-11 (addendum added; ladder unchanged).
 **Supersedes:** all earlier pricing tables in `SMBX_PRICING_STRATEGY_AND_RECOMMENDATION.md`, `methodology/METHODOLOGY_V19.md`, and any prior `subscriptionService.ts` constants.
 
-If any other document, marketing page, or code constant disagrees with this file, this file wins. Open a change request before changing prices in code — do not let docs and code drift again.
+If any other document, marketing page, or code constant disagrees with this file, this file wins. Open a change request before changing prices in code — do not let docs and code drift again. (One sanctioned in-flight exception: the marketing surface on the retool branch — see the 2026-07-11 addendum immediately below.)
+
+---
+
+## 2026-07-11 addendum — July 10 flat-fee-per-deal model (marketing live; ratification pending)
+
+The 2026-07-10 marketing copy deck (CD handoff, implemented on branch
+`claude/ui-ux-redesign-93s3y6`) moves the **public marketing story** to a new
+commercial model:
+
+- **One flat fee to run the whole deal**, sized by deal league (the existing six
+  leagues, detected during onboarding), covering everything from first valuation
+  to signed close, however long it takes.
+- **Non-contingent, never a percentage.** The fee is a fixed number set before
+  the engagement starts and does not move with what the deal closes at.
+- **Free first.** Unlimited conversation + the free Baseline™; Yulia quotes the
+  exact fee in-conversation right after the Baseline. **No public price grid** —
+  the page shows only the shape ("a few thousand dollars to the low tens of
+  thousands, start to close"). The league→fee mapping is not committed to any
+  client surface or to this repo's marketing code.
+- **Subscription demoted to a volume plan** for repeat acquirers (PE, family
+  offices, search funds, advisors at 3+ deals/year) — one quiet "running deals
+  regularly?" section, no tier table. Advisors: first three client deals free.
+
+**What this addendum does and does not change:**
+
+- `client/src/marketing/pages/Pricing.tsx` now implements the July 10 model and
+  renders no ladder digits.
+- The ladder below remains the live **billing** truth: `subscriptionService.ts`,
+  `STRIPE_PRICE_*`, in-app Settings, and plan gating are unchanged. Nothing in
+  the product charges per deal yet.
+- `client/src/lib/pricing.ts` stays canonical for every app surface that shows
+  plan labels or digits.
+
+**Ratification checklist before the billing side ships** (the change procedure
+at the bottom of this file still applies):
+
+1. **THE LINE check (drift trigger — route to counsel).**
+   `THE_LINE_POLICY.md` → Pricing Firewall currently forbids "any pricing tier
+   based on deal size, deal value, or deal outcome." The July 10 model passes
+   the four-layer test's compensation layer — flat, set up front, never varying
+   with outcome or close — but collides with that bullet **as written**. Counsel
+   must bless an amendment (e.g. forbid pricing that varies with deal *outcome*
+   or is expressed as a *percentage of value*, with an explicit carve-out for
+   pre-set flat engagement fees sized by league/complexity) before any per-deal
+   fee is charged.
+2. **League→fee memo.** Write the mapping (server-side only, never shipped to a
+   client bundle), link it from this file.
+3. **Per-deal purchase + entitlement rail** for principals; the volume plan for
+   repeat acquirers stays on the existing subscription rail.
+4. **Re-lock.** Replace the ladder section below with the ratified model and
+   update `CLAUDE.md` rule 1.
+
+Until all four are done, the ladder below stays authoritative for anything that
+actually charges money.
 
 ---
 

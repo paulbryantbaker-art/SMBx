@@ -1,171 +1,138 @@
-import type { ReactNode } from 'react';
-import { MarketingShell } from '../MarketingShell';
-import { YuliaLauncher } from '../YuliaChat';
-import { ClosingCTA } from '../components/ClosingCTA';
-import { ProductFrame } from '../components/ProductFrame';
-import { DealPipelineMock, SensitivityMock, DataRoomMock } from '../components/ProductMocks';
-
-/* KV row helper (mirrors Home.tsx) */
-function KV({ k, v, accent, tone }: { k: string; v: string; accent?: boolean; tone?: 'pos' | 'neg' }) {
-  return (
-    <div className="kv">
-      <span className="k">{k}</span>
-      <span className={`v${tone ? ' ' + tone : ''}`} style={accent ? { color: 'var(--accent-strong)' } : undefined}>{v}</span>
-    </div>
-  );
-}
-
-/* One stage row in the journey walkthrough */
-function Stage({ code, title, children, note }: { code: string; title: string; children: ReactNode; note?: string }) {
-  return (
-    <div className="stage">
-      <div className="scode">{code}<b>{title}</b></div>
-      <div className="sbody">
-        <p>{children}</p>
-        {note && <p className="snote">{note}</p>}
-      </div>
-    </div>
-  );
-}
-
-const WHY = [
-  { h: '3 methods', p: 'Multiples, DCF, and comparables — one defensible baseline.' },
-  { h: 'Every figure', p: 'Traceable to its source and the methodology version behind it.' },
-  { h: 'Yours', p: 'Change any assumption and the model re-computes.' },
-  { h: 'Portable', p: 'Export to PDF, Excel, or Word with a hash-verifiable trail.' },
-];
+/**
+ * `/buy` — hi-fi 4c. Buyer voice: the Deal Check card, three value props,
+ * the roll-up play. Copy verbatim from the locked deck.
+ */
+import { MarketingShell, HeroDock } from '../MarketingShell';
 
 export default function Buy() {
   return (
-    <MarketingShell>
-      {/* HERO */}
-      <section style={{ paddingBottom: 'calc(var(--pad-y) * .55)' }}>
-        <div className="wrap" style={{ display: 'grid', gridTemplateColumns: '1.05fr .95fr', gap: 56, alignItems: 'center' }}>
-          <div className="reveal">
-            <span className="eyebrow">For buyers</span>
-            <h1 className="display" data-d="1" style={{ marginTop: 20, maxWidth: '14ch' }}>
-              Diligence at the speed you need to move.
-            </h1>
-            <p className="lead reveal" data-d="2" style={{ marginTop: 24, maxWidth: '46ch' }}>
-              Searchers, PE, family offices, and strategics use Yulia to turn a pile of
-              seller financials into a defensible valuation, a QoE preview, a financing
-              model, and a structuring view — fast enough to keep up with a live process.
-            </p>
-            <blockquote className="yq reveal" data-d="3" style={{ margin: '26px 0 0' }}>
-              &ldquo;Adjusted EBITDA normalizes to $1,058,000, which prices the $4.24M
-              indicative value at 4.0&times;. The working capital peg is $486,200 &mdash; and
-              two diligence items are still open.&rdquo;
-              <span className="yq-who">&mdash; Yulia, on Apex HVAC</span>
-            </blockquote>
-            <div className="reveal" data-d="4">
-              <YuliaLauncher />
-            </div>
+    <MarketingShell
+      page="buy"
+      placeholder="Tell Yulia what you're looking for…"
+      quickReplies={['How do I check add-backs?', 'What multiple is normal here?']}
+    >
+      <section className="mk-hero">
+        <div className="mk-wrap mk-center">
+          <div className="mk-eyebrow" style={{ marginBottom: 22 }}>For buyers &amp; searchers</div>
+          <h1 className="mk-h1 mk-h1-sub" style={{ maxWidth: '18ch' }}>
+            Is this the one? Find out before you're in too deep.
+          </h1>
+          <p className="mk-lead" style={{ marginTop: 26, maxWidth: '44em' }}>
+            The hardest part of buying a business is knowing what to walk away from. Yulia reads
+            a deal the way an experienced buyer does — the real multiple, the real risks, the
+            number the bank will actually lend against — in an afternoon, not a month.
+          </p>
+          <div style={{ marginTop: 44, width: '100%' }}>
+            <HeroDock />
           </div>
-          <div className="reveal" data-d="2">
-            <div className="mock" style={{ maxWidth: 440, margin: '0 auto' }}>
-              <div className="mock-bar">
-                <span className="mock-dot" /><span className="mock-dot" /><span className="mock-dot" />
-                <span className="mock-title">Deal — Apex HVAC</span>
-                <span className="mock-tag"><span className="vdot" />live</span>
-              </div>
-              <div className="mock-body">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-                  <div>
-                    <div className="mono" style={{ fontSize: '.72rem', letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>Indicative value</div>
-                    <div className="mono" style={{ fontSize: '2rem', fontWeight: 500 }}>$4.24M</div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div className="mono" style={{ fontSize: '.72rem', letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>Fit score</div>
-                    <div className="mono" style={{ fontSize: '2rem', fontWeight: 500, color: 'var(--accent-strong)' }}>82</div>
-                  </div>
+        </div>
+      </section>
+
+      <section className="mk-section">
+        <div className="mk-wrap">
+          <div className="mk-splitrow">
+            <div className="copy" style={{ width: 'min(500px, 100%)' }}>
+              <h2 className="mk-h2" style={{ fontSize: 'clamp(25px, 2.3vw, 32px)' }}>
+                The asking price is a starting point, not a fact
+              </h2>
+              <p className="mk-body">
+                Paste a listing and Yulia does the math out loud. She'll tell you the multiple
+                the seller is actually asking, how that compares to what the industry trades at,
+                and whether the price is fair, rich, or a gift.
+              </p>
+              <p className="mk-body">
+                No spin. Just the number and the comparison, so you know where you stand before
+                you make an offer.
+              </p>
+            </div>
+            <div className="card">
+              <div className="mk-ink-card" style={{ width: 'min(440px, 100%)' }}>
+                <div className="mk-eyebrow-neon">Deal check · live sample</div>
+                <div style={{ display: 'flex', gap: 26, marginTop: 18, flexWrap: 'wrap' }}>
+                  <div><div style={{ fontSize: 12.5, color: 'var(--mk-w4)' }}>Revenue</div><div style={{ fontWeight: 700, fontSize: 17, color: 'var(--mk-w)' }}>$850K</div></div>
+                  <div><div style={{ fontSize: 12.5, color: 'var(--mk-w4)' }}>SDE</div><div style={{ fontWeight: 700, fontSize: 17, color: 'var(--mk-w)' }}>$380K</div></div>
+                  <div><div style={{ fontSize: 12.5, color: 'var(--mk-w4)' }}>Asking</div><div style={{ fontWeight: 700, fontSize: 17, color: 'var(--mk-w)' }}>$2.5M</div></div>
                 </div>
-                <KV k="Stage" v="B3 · Diligence" />
-                <KV k="Adjusted EBITDA" v="$1,058,000" />
-                <KV k="Working capital peg" v="$486,200" />
-                <KV k="Open items" v="2" tone="neg" />
+                <div style={{ marginTop: 22, paddingTop: 20, borderTop: '1px solid var(--mk-hair-2)' }}>
+                  <span className="mk-num-neon" style={{ fontSize: 40 }}>6.58×</span>
+                  <span style={{ fontSize: 15, color: 'var(--mk-w2)' }}> SDE — HVAC typically runs 2.5×–3.5×.</span>
+                </div>
+                <div style={{ marginTop: 14, fontSize: 14.5, lineHeight: 1.65, color: 'var(--mk-w2)' }}>
+                  This one's priced like a platform, not a tuck-in. Before you counter, let's see
+                  what's really in that $380K.
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-
-      {/* THE BUY-SIDE PATH */}
-      <section>
-        <div className="wrap">
-          <div className="reveal" style={{ maxWidth: '60ch', marginBottom: 44 }}>
-            <span className="eyebrow">The work, stage by stage</span>
-            <h2 style={{ marginTop: 18 }}>From thesis to close.</h2>
-          </div>
-
-          {/* product surfaces for the buy-side path — sourcing, returns, diligence */}
-          <div className="reveal" style={{ marginBottom: 24 }}>
-            <ProductFrame variant="browser" url="app.smbx.ai/sourcing" delay={0.05}>
-              <DealPipelineMock />
-            </ProductFrame>
-          </div>
-          <div className="grid g2 reveal" style={{ gap: 24, marginBottom: 64 }}>
-            <ProductFrame variant="browser" url="app.smbx.ai/lbo" delay={0.1}>
-              <SensitivityMock />
-            </ProductFrame>
-            <ProductFrame variant="browser" url="app.smbx.ai/dataroom" delay={0.15}>
-              <DataRoomMock variant="diligence" />
-            </ProductFrame>
-          </div>
-
-          <div className="stages reveal">
-            <Stage code="B0 · Thesis" title="Define the box">
-              Industry, size, geography, return targets. Yulia pressure-tests the
-              thesis against what the numbers will need to show.
-            </Stage>
-            <Stage code="B1 · Sourcing" title="An intelligence brief on every target">
-              Screen targets against the thesis. Yulia builds the intelligence brief
-              on each one.
-            </Stage>
-            <Stage code="B2 · Valuation" title="A number you can defend">
-              A valuation baseline from the seller&rsquo;s actuals — multiples, DCF, and
-              the sensitivities that matter. Defensible, not aspirational.
-            </Stage>
-            <Stage code="B3 · Due diligence" title="What their team will find" note="Not an audit, review, or compilation.">
-              A quality-of-earnings preview that normalizes SDE/EBITDA the way your
-              lender&rsquo;s diligence team will. Working capital peg. Customer concentration.
-            </Stage>
-            <Stage code="B4 · Structuring" title="Every structure, with consequences">
-              Asset vs. stock, &sect;1060 allocation, earnouts, seller notes, rollover
-              equity — modeled side by side with the tax and economic consequences of each.
-            </Stage>
-            <Stage code="B5 · Closing" title="A portable package, hash-verified">
-              Funds flow, close-readiness checklist, and a portable deal package with a
-              hash-verifiable audit trail.
-            </Stage>
+      <section className="mk-section">
+        <div className="mk-wrap">
+          <div className="mk-doors">
+            <div className="mk-glass mk-door" style={{ width: 346 }}>
+              <span className="t" style={{ fontSize: 19, lineHeight: 1.25 }}>Know in an afternoon what used to take a month</span>
+              <p style={{ fontSize: 14.5 }}>
+                Experienced buyers walk away from most deals they look at — the skill is doing it
+                fast. Yulia stress-tests the financials, flags the customer concentration, the
+                owner-dependence, the add-backs that don't hold up. The dead ones die cheap and
+                early.
+              </p>
+            </div>
+            <div className="mk-glass mk-door" style={{ width: 346 }}>
+              <span className="t" style={{ fontSize: 19, lineHeight: 1.25 }}>The number the bank will actually see</span>
+              <p style={{ fontSize: 14.5 }}>
+                Before you sign a personal guarantee, know the deal services its own debt. Yulia
+                models the debt structure, the coverage ratio, what an SBA lender will
+                underwrite, and what's left for you after the note is paid.
+              </p>
+            </div>
+            <div className="mk-glass mk-door" style={{ width: 346 }}>
+              <span className="t" style={{ fontSize: 19, lineHeight: 1.25 }}>Find the ones nobody else is bidding on</span>
+              <p style={{ fontSize: 14.5 }}>
+                Yulia helps you build a proprietary search — real businesses in your target
+                market, actually independent and actually acquirable. You're the only buyer in
+                the room, not another name in a bidding war.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* WHY BUYERS USE IT — dark */}
-      <section className="dark">
-        <div className="wrap" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 56, alignItems: 'center' }}>
-          <div className="reveal">
-            <h2 style={{ maxWidth: '14ch' }}>Analyst firepower without the analyst.</h2>
-            <p className="lead" style={{ marginTop: 24, maxWidth: '46ch' }}>
-              You see the numbers a diligence team would build, in the time it takes to
-              read a CIM. Every figure traces to its source. Every assumption is yours to
-              change. Nothing leaves your control.
+      <section className="mk-section">
+        <div className="mk-wrap" style={{ display: 'flex', justifyContent: 'center' }}>
+          <div className="mk-glass mk-glass-lg" style={{ width: 'min(880px, 100%)', padding: 'clamp(30px, 4vw, 48px) clamp(30px, 4.2vw, 56px)' }}>
+            <h2 className="mk-h2" style={{ fontSize: 'clamp(24px, 2.2vw, 30px)' }}>Buying to build something bigger?</h2>
+            <p className="mk-body" style={{ marginTop: 16 }}>
+              Searchers, independent sponsors, and family offices increasingly buy a platform and
+              grow it by acquisition. Yulia runs that playbook with you — shapes the thesis,
+              sources the add-on targets, models what each one does to your combined earnings and
+              debt load, and keeps the pipeline moving while you operate the first.{' '}
+              <em style={{ fontWeight: 600 }}>The engine that scores one deal scores your whole roll-up.</em>
             </p>
           </div>
-          <div className="reveal" data-d="1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            {WHY.map(c => (
-              <div className="card" key={c.h}>
-                <div className="mono" style={{ fontSize: '1.7rem', fontWeight: 500, color: '#fff' }}>{c.h}</div>
-                <p style={{ marginTop: 8 }}>{c.p}</p>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
-      {/* CLOSING CTA */}
-      <ClosingCTA heading="Have a deal in front of you?" launcher />
+      <section className="mk-section">
+        <div className="mk-wrap mk-center">
+          <h2 className="mk-h2" style={{ fontSize: 'clamp(28px, 2.6vw, 34px)' }}>
+            Free to start. <em>No success fees, ever.</em>
+          </h2>
+          <p className="mk-body" style={{ marginTop: 20, maxWidth: '38em', color: 'var(--mk-ink-3)' }}>
+            Score your first deal for nothing. When you're ready to run one to close, it's one
+            flat fee for the whole deal — never a percentage of the purchase price. Yulia does
+            the analyst grind; you make the call.
+          </p>
+          <p className="mk-body" style={{ marginTop: 14, maxWidth: '38em', color: 'var(--mk-ink-3)' }}>
+            Tell Yulia what you're hunting for — if you've got a specific listing in mind, paste
+            the numbers and you'll have a real read in minutes.
+          </p>
+          <div style={{ marginTop: 40, width: '100%' }}>
+            <HeroDock />
+          </div>
+        </div>
+      </section>
     </MarketingShell>
   );
 }

@@ -1,9 +1,15 @@
 /**
- * Subscription Service — CORE pricing engine for smbX.ai.
+ * Subscription Service — DORMANT product billing engine.
+ *
+ * 2026-07-11 pivot (THE LINE v2): smbX is a private buy-side practice, not a
+ * product. In practice mode (the default) every authenticated user is on the
+ * team allowlist and gets enterprise-level entitlements — no paywall, no
+ * checkout. The subscription machinery below is retained intact in case a
+ * product motion ever returns (see SMBX_PRICING_LOCKED.md retirement banner).
  *
  * Replaces: walletService, paywallService, dealExecutionFee, platformFeeService.
  *
- * Pricing model (locked 2026-05-27, source of truth: SMBX_PRICING_LOCKED.md):
+ * Retired product pricing model (locked 2026-05-27, record: SMBX_PRICING_LOCKED.md):
  *   Free       — $0          — Unlimited Yulia conversation + ONE free deliverable (email required)
  *   Solo       — $99/mo      — Unlimited ValueLens, deal scoring, VRR, SDE/EBITDA, exports, 1 supervised MCP/agent key
  *   Pro        — $249/mo     — Everything + CIM, deal room, market discovery, source routing, DD/LOI scaffolds, 3 supervised MCP/agent keys
@@ -21,6 +27,7 @@
  */
 import Stripe from 'stripe';
 import { sql } from '../db.js';
+import { practiceModeEnabled } from './practiceMode.js';
 
 // ─── Plan hierarchy ─────────────────────────────────────────
 export type Plan = 'free' | 'solo' | 'pro' | 'team' | 'enterprise';
@@ -135,8 +142,13 @@ function getStripe(): Stripe {
 
 // ─── Core access logic ──────────────────────────────────────
 
-/** Get user's current plan. TEST_MODE → enterprise. */
+/** Get user's current plan. Practice mode / TEST_MODE → enterprise. */
 export async function getUserPlan(userId: number): Promise<Plan> {
+  // THE LINE v2 pivot: in practice mode only team members can authenticate
+  // (routes/auth.ts + practicePerimeter), and the team runs unmetered.
+  if (practiceModeEnabled()) {
+    return 'enterprise';
+  }
   if (process.env.TEST_MODE === 'true' || process.env.DEV_NO_PAYWALL === 'true') {
     return 'enterprise';
   }

@@ -1,60 +1,320 @@
-import { useEffect, useRef, type ReactNode } from 'react';
-import { useLocation } from 'wouter';
-import './marketing.css';
-import { MarketingNav, MarketingFooter } from './MarketingChrome';
-import { YuliaFab } from './YuliaChat';
-import { armRevealObserver } from './revealObserver';
-
 /**
- * Wraps every logged-out marketing page. Provides the `.mkt` scope (so the
- * design system tokens + component styles apply here and nowhere else), the
- * sticky nav, the footer, and the floating Yulia chat (FAB).
+ * MarketingShell — the liquid-glass surface (hi-fi turn 4). One room, two
+ * phases:
  *
- * `dark` is unused at the shell level — individual sections opt into `.dark`.
+ *   landing(page) ──send──▶ chat        (CSS crossfade ~300ms, NO navigation)
+ *   chat ──back──▶ landing              (exact page + scroll restored)
+ *
+ * Locked mechanics (wireframes 5h/5i/5m, HANDOFF §AppPhase):
+ *   - crossfade only; nothing slides; the logo NEVER moves
+ *   - nav links fade out ~200ms; "←" fades in 200ms @100ms delay
+ *   - mobile: ONE dock, fixed at the bottom in both phases — the same DOM
+ *     node through the morph, so the keyboard is never dismissed
+ *   - chat sizes from --app-height (visualViewport), never 100dvh
+ *   - conversations run on the real anonymous funnel (useMarketingChat);
+ *     context is piped from the origin page at session creation
  */
-export function MarketingShell({ children }: { children: ReactNode }) {
+import {
+  createContext, useCallback, useContext, useEffect, useMemo, useRef, useState,
+  type ReactNode,
+} from 'react';
+import { Link, useLocation } from 'wouter';
+import './marketing.css';
+import { Dock, type DockHandle } from './Dock';
+import { Thread } from './Thread';
+import { useMarketingChat } from './useMarketingChat';
+
+export type MkPage = 'home' | 'sell' | 'buy' | 'advise' | 'how' | 'pricing';
+
+interface ShellCtxValue {
+  /** Returns true if the message was accepted (docks keep the text on false). */
+  send: (text: string) => boolean;
+  seed: (text: string) => void;
+  placeholder: string;
+  phase: 'landing' | 'chat';
+  /** True when the anonymous gate is closed — docks hard-disable so typed
+   *  text is never silently swallowed by the gate guard. */
+  dockDisabled: boolean;
+}
+const ShellCtx = createContext<ShellCtxValue | null>(null);
+
+export function useShell(): ShellCtxValue {
+  const ctx = useContext(ShellCtx);
+  if (!ctx) throw new Error('useShell must be used inside MarketingShell');
+  return ctx;
+}
+
+/** The in-flow dock. Desktop: a live dock instance. Mobile: a dock-shaped
+ *  proxy that focuses the single fixed bottom dock (one real input per
+ *  viewport). Persona chips pre-load Yulia's context by seeding the dock —
+ *  they never navigate and never auto-send. */
+export function HeroDock({ chips, wide }: { chips?: Array<{ label: string; seed: string }>; wide?: boolean }) {
+  const { placeholder, seed, send, dockDisabled } = useShell();
+  const deskRef = useRef<DockHandle>(null);
+  const seedNearest = (text: string) => {
+    if (window.matchMedia('(min-width: 768px)').matches) deskRef.current?.seed(text);
+    else seed(text);
+  };
+  return (
+    <>
+      <div className={`mk-dock-wrap ${wide ? 'mk-dock-hero' : 'mk-dock-narrow'}`} style={{ marginLeft: 'auto', marginRight: 'auto' }}>
+        <span className="mk-desktop-only" style={{ display: 'block' }}>
+          <Dock ref={deskRef} placeholder={placeholder} onSend={send} disabled={dockDisabled} />
+        </span>
+        <button
+          type="button"
+          className="mk-dock mk-dock-proxy mk-mobile-only"
+          onClick={() => seed('')}
+          aria-label={placeholder}
+        >
+          <span className="mk-dock-plus" aria-hidden="true">＋</span>
+          <span className="mk-dock-proxy-text">{placeholder}</span>
+          <span className="mk-send" aria-hidden="true" style={{ width: 42, height: 42 }}>
+            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <path d="M9 15V3M9 3L3.5 8.5M9 3l5.5 5.5" stroke="#0F0F0E" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+        </button>
+      </div>
+      {chips && chips.length > 0 && (
+        <div className="mk-chips">
+          {chips.map(c => (
+            <button type="button" key={c.label} className="mk-chip" onClick={() => seedNearest(c.seed)}>
+              {c.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
+const NAV: Array<{ href: string; label: string; page: MkPage }> = [
+  { href: '/sell', label: 'Sell', page: 'sell' },
+  { href: '/buy', label: 'Buy', page: 'buy' },
+  { href: '/advise', label: 'Advise', page: 'advise' },
+  { href: '/how-it-works', label: 'How it works', page: 'how' },
+  { href: '/pricing', label: 'Pricing', page: 'pricing' },
+];
+
+interface ShellProps {
+  page: MkPage;
+  placeholder: string;
+  /** Contextual quick replies offered after Yulia's early turns. */
+  quickReplies?: string[];
+  children: ReactNode;
+}
+
+export function MarketingShell({ page, placeholder, quickReplies = [], children }: ShellProps) {
   const [location] = useLocation();
   const rootRef = useRef<HTMLDivElement>(null);
+  const mobileDockRef = useRef<DockHandle>(null);
+  const chatDockRef = useRef<DockHandle>(null);
+  const savedScroll = useRef(0);
+  const [phase, setPhase] = useState<'landing' | 'chat'>('landing');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const chat = useMarketingChat();
 
-  // Arm scroll-triggered reveals (see revealObserver.ts). Reveals play only
-  // when they enter the viewport; without this observer they play on mount —
-  // a safe fallback, never hidden content.
+  // --app-height from visualViewport (locked iOS rule — never 100dvh), plus
+  // --kb-inset so the fixed mobile dock rides ABOVE the software keyboard.
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    return armRevealObserver(root);
+    const vv = window.visualViewport;
+    const set = () => {
+      const h = vv?.height ?? window.innerHeight;
+      root.style.setProperty('--app-height', `${Math.round(h)}px`);
+      const inset = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
+      root.style.setProperty('--kb-inset', `${Math.round(inset)}px`);
+    };
+    set();
+    vv?.addEventListener('resize', set);
+    vv?.addEventListener('scroll', set);
+    window.addEventListener('resize', set);
+    return () => {
+      vv?.removeEventListener('resize', set);
+      vv?.removeEventListener('scroll', set);
+      window.removeEventListener('resize', set);
+    };
   }, []);
-  // Reset scroll to the top on every route change. wouter reuses this shell
-  // instance across marketing routes, and the footer (which holds the nav
-  // links) sits at the page bottom — so without this, navigating from the
-  // footer would land the next page still scrolled to the bottom.
-  // The marketing scroll container is <body> (height:100vh + overflow:auto),
-  // NOT the window/<html> — so reset all candidates to be robust.
+
+  // Fresh page = top of page (the shell instance is per-page; belt & braces).
   useEffect(() => {
     window.scrollTo(0, 0);
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
   }, [location]);
 
-  // Marketing pages scroll naturally; the app locks body scroll on desktop,
-  // so we release it while a marketing page is mounted.
+  // The app (index.css) locks html/body scrolling; marketing pages scroll
+  // naturally. Release the lock while mounted — except in the chat phase,
+  // where the shell owns its own scroller (.mk-thread).
   useEffect(() => {
-    const prevOverflow = document.documentElement.style.overflow;
-    const prevBodyOverflow = document.body.style.overflow;
-    document.documentElement.style.overflow = 'auto';
-    document.body.style.overflow = 'auto';
+    const html = document.documentElement.style;
+    const body = document.body.style;
+    const prevHtml = html.overflow;
+    const prevBody = body.overflow;
+    const free = phase === 'landing';
+    html.overflow = free ? 'auto' : 'hidden';
+    body.overflow = free ? 'auto' : 'hidden';
     return () => {
-      document.documentElement.style.overflow = prevOverflow;
-      document.body.style.overflow = prevBodyOverflow;
+      html.overflow = prevHtml;
+      body.overflow = prevBody;
     };
+  }, [phase]);
+
+  // Depend on the stable chat.send, not the per-render chat object — the ctx
+  // must NOT churn on every SSE chunk (it feeds every useShell consumer).
+  const { send: chatSend, sending: chatSending, gate: chatGate } = chat;
+
+  const send = useCallback((text: string): boolean => {
+    if (chatSending || chatGate) return false;
+    setMenuOpen(false);
+    if (phase === 'landing') {
+      savedScroll.current = window.scrollY || document.body.scrollTop || document.documentElement.scrollTop || 0;
+      setPhase('chat');
+      requestAnimationFrame(() => {
+        if (window.matchMedia('(min-width: 768px)').matches) chatDockRef.current?.focus();
+      });
+    }
+    void chatSend(text);
+    return true;
+  }, [phase, chatSend, chatSending, chatGate]);
+
+  const seed = useCallback((text: string) => {
+    mobileDockRef.current?.seed(text);
   }, []);
 
+  const back = useCallback(() => {
+    setMenuOpen(false);
+    setPhase('landing');
+    requestAnimationFrame(() => {
+      window.scrollTo(0, savedScroll.current);
+      document.body.scrollTop = savedScroll.current;
+      document.documentElement.scrollTop = savedScroll.current;
+    });
+  }, []);
+
+  // Nav "Ask Yulia": put the visitor in front of the nearest live dock.
+  const askYulia = useCallback(() => {
+    setMenuOpen(false);
+    if (window.matchMedia('(min-width: 768px)').matches) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const ta = document.querySelector<HTMLTextAreaElement>('.mk-landing .mk-dock textarea');
+      ta?.focus();
+    } else {
+      mobileDockRef.current?.seed('');
+    }
+  }, []);
+
+  // Quick replies retire once the visitor is clearly conversing.
+  const userTurns = chat.messages.filter(m => m.role === 'user').length;
+  const activeQuick = userTurns < 3 ? quickReplies : [];
+
+  const dockDisabled = !!chatGate;
+  const ctx = useMemo<ShellCtxValue>(
+    () => ({ send, seed, placeholder, phase, dockDisabled }),
+    [send, seed, placeholder, phase, dockDisabled],
+  );
+
   return (
-    <div className="mkt" ref={rootRef}>
-      <MarketingNav />
-      <main>{children}</main>
-      <MarketingFooter />
-      <YuliaFab />
-    </div>
+    <ShellCtx.Provider value={ctx}>
+      <div className={`mk${phase === 'chat' ? ' is-chat' : ''}`} ref={rootRef}>
+        {/* ambient glass-refraction blobs (absolute in the relative root) */}
+        <div className="mk-blob mk-blob-green" aria-hidden="true" />
+        <div className="mk-blob mk-blob-blue" aria-hidden="true" />
+
+        {/* floating glass nav pill — the logo is the fixed anchor */}
+        <header className="mk-navwrap">
+          <div className="mk-nav">
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 12 }}>
+              <button type="button" className="mk-back" onClick={back} aria-label="Back to the page">←</button>
+              <Link href="/" onClick={() => setMenuOpen(false)}>
+                <img src="/logo-green-x.png" alt="smbX.ai" className="mk-logo-img" />
+              </Link>
+            </span>
+            <nav className="mk-nav-links" aria-label="Site">
+              {NAV.map(n => (
+                <Link key={n.href} href={n.href} className={n.page === page ? 'is-active' : ''}>{n.label}</Link>
+              ))}
+              <button type="button" className="mk-ask-btn" onClick={askYulia}>Ask Yulia</button>
+            </nav>
+            <button type="button" className="mk-menu-btn" aria-label="Menu" onClick={() => setMenuOpen(v => !v)}>≡</button>
+          </div>
+          <span className="mk-nav-right-chat">Yulia</span>
+          {menuOpen && (
+            <div className="mk-menu" role="menu">
+              {NAV.map(n => (
+                <Link key={n.href} href={n.href} onClick={() => setMenuOpen(false)}>{n.label}</Link>
+              ))}
+              <Link href="/login" onClick={() => setMenuOpen(false)}>Sign in</Link>
+            </div>
+          )}
+        </header>
+
+        <div className="mk-main">
+          {/* LANDING */}
+          <div className="mk-landing" aria-hidden={phase === 'chat'}>
+            {children}
+            <footer className="mk-footer">
+              <div className="mk-wrap">
+                <div className="mk-footer-row">
+                  <img src="/logo-green-x.png" alt="smbX.ai" className="mk-logo-img" />
+                  {NAV.map(n => <Link key={n.href} href={n.href}>{n.label}</Link>)}
+                  <span style={{ color: 'var(--mk-faint)' }}>© 2026 smbX.ai</span>
+                </div>
+                <div className="mk-footer-sub">
+                  <Link href="/standard">The Diligence Standard</Link>
+                  <Link href="/connectors">Connectors</Link>
+                  <Link href="/integrate">Integrate</Link>
+                  <Link href="/raise">Raise</Link>
+                  <Link href="/legal/terms">Terms</Link>
+                  <Link href="/legal/privacy">Privacy</Link>
+                  <Link href="/login">Sign in</Link>
+                </div>
+                <p className="mk-footer-legal">
+                  smbX.ai is software. It computes the diligence work — valuations, models,
+                  allocations, and documents. It does not broker, advise, negotiate, or
+                  represent any party, and it never takes a success fee.
+                </p>
+              </div>
+            </footer>
+          </div>
+
+          {/* CHAT */}
+          <div className="mk-chat" aria-hidden={phase === 'landing'}>
+            <Thread
+              messages={chat.messages}
+              streamingText={chat.streamingText}
+              sending={chat.sending}
+              gate={chat.gate}
+              error={chat.error}
+              quickReplies={activeQuick}
+              onQuickReply={send}
+            />
+            <div className="mk-chat-dock mk-desktop-only">
+              <div className="mk-dock-wrap">
+                <Dock
+                  ref={chatDockRef}
+                  placeholder={chatGate ? 'Create your account to keep chatting' : 'Message Yulia…'}
+                  onSend={send}
+                  disabled={dockDisabled}
+                />
+              </div>
+              <div className="mk-chat-hint">Yulia computes and cites — check important numbers.</div>
+            </div>
+          </div>
+        </div>
+
+        {/* the ONE mobile dock — same DOM node in both phases (keyboard law) */}
+        <div className="mk-mobile-dock mk-mobile-only">
+          <Dock
+            ref={mobileDockRef}
+            placeholder={chatGate ? 'Create your account to keep chatting' : phase === 'chat' ? 'Message Yulia…' : placeholder}
+            onSend={send}
+            disabled={dockDisabled}
+          />
+        </div>
+      </div>
+    </ShellCtx.Provider>
   );
 }

@@ -1,19 +1,19 @@
 CLAUDE.md — smbx.ai
-Last updated: 2026-05-25
+Last updated: 2026-07-11
 
 > **For a current-vs-stale map of the whole repo, read `REPO_STATUS.md` at the root.** Archived docs live in `docs/_archive/` — do not build against them.
 
 ## What This Is
-AI-powered deal intelligence platform for business acquisitions from $300K to mega-cap. Users talk to Yulia (AI deal intelligence) who guides them through buying, selling, or raising capital for businesses. Chat-first experience — users talk to Yulia, not dashboards. Yulia IS the front door — there is no sales team, no contact forms, no dead-end CTAs. Every action routes to chat.
+**An AI-forward, buy-side corp-dev-as-a-service practice (THE LINE v2, pivoted 2026-07-11).** smbX.ai is no longer a public product — it is the private instrument of the practice: Paul (and team) running buy-side acquisitions for acquirer clients through close, with Yulia + DEFINITIVE doing the work that used to require an analyst team. The app serves the team only (practice mode); the logged-out surface is a one-page practice front door. Inside the app the experience stays chat-first — the practitioner talks to Yulia, and the practitioner carries the deal.
 
 ## Core Architecture
-- `client/src/components/v6/V6App.tsx` is the current app shell — all catch-all routes go through it. Chat.tsx is deleted.
+- `client/src/components/v6/V6App.tsx` is the current app shell — a thin viewport fork into `v6/desktop/AtlasApp.tsx` (≥1024px) and `v6/atlasmobile/AtlasMobileApp.tsx`. All catch-all routes go through it; logged-out users see `client/src/marketing/` instead (two-surface rule in `App.tsx`).
 - Node.js + Express (ESM) backend
 - React 19 + Vite 7 + Tailwind CSS v3 + Radix UI frontend
 - wouter for client routing
 - PostgreSQL via raw postgres-js (no ORM)
 - Claude API (primary), Google Gemini (secondary), OpenAI (tertiary)
-- Stripe monthly subscriptions: Free / $99 Solo / $249 Pro / $749 Team / $3,000+ Enterprise. Legacy $79 / $199 / $499 / $2,500+ references are early-access or annual-equivalent only.
+- Billing DORMANT: the Stripe subscription machinery ($99/$249/$749/$3,000 ladder) is retained but unmounted in practice mode — nothing in the app charges money (rule 1)
 - JWT authentication (no sessions, no passport — sessions broke on Railway)
 - Railway deployment (GitHub push → auto-deploy, Dockerfile with Chromium)
 - Auto-migrations on server startup (server/index.ts runs all SQL in server/migrations/)
@@ -23,36 +23,49 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 - Premium PDF export via Puppeteer (headless Chromium) + Chart.js
 
 ## Critical Rules — Read These First
-1. **MONTHLY SUBSCRIPTIONS (LOCKED 2026-05-27).** Free (unlimited chat + 1 deliverable) / $99 Solo / $249 Pro / $749 Team / $3,000+ Enterprise. Canonical record: `SMBX_PRICING_LOCKED.md`. Any older table showing $79 / $199 / $499 / $2,500 is stale — point at the locked file and update. No per-deal fees. No wallet. No success/referral/contingent compensation.
+1. **COMPENSATION (THE LINE v2, 2026-07-11).** smbX is a practice, not a product — **nothing in the app charges money.** Practice compensation is per-engagement and human-papered: buy-side retainer + buy-side success fee paid by the practice's own acquirer client (engagement letter; one-time §15(b)(13)/state-registration counsel confirmation pending — see `THE_LINE_POLICY.md`). Forbidden absolutely: sell-side, two-sided, or neutral-intermediary compensation; % of capital raised; referral fees; Yulia quoting or collecting any fee. All product billing (subscription ladder, Stripe checkout, the one-day July-10 flat-fee marketing model) is retired/dormant — `SMBX_PRICING_LOCKED.md` is a historical record with a retirement banner. No wallet, ever.
 2. **WALLET IS DEAD.** walletService, paywallService, dealExecutionFee, platformFeeService deleted. Never recreate.
-3. **FREE TIER.** Unlimited conversation. ONE free deliverable per user. Paywall triggers after first free deliverable, NOT at a fixed gate.
+3. **PRACTICE MODE (default ON).** The app serves the team allowlist only: signup/login gated and every authenticated request perimeter-checked (`server/services/practiceMode.ts`; `TEAM_ALLOWLIST` env, fallback `paulbryantbaker@gmail.com`); team runs at full entitlements — no paywall, no free-tier gate; anonymous chat and Stripe checkout return 410. `PRACTICE_MODE=false` restores the retired product posture — a deliberate act, not a default.
 4. **V6App.tsx is the ONLY current app shell.** Never create parallel layouts. All UI changes go through the V6 shell/components.
 5. **NEVER use position:fixed full-viewport divs with background-color.** Safari reads them for toolbar tinting and it breaks dark mode switching. Use position:absolute inside a relative parent instead.
 6. **ValueLens (NOT Bizestimate).** The old name is dead.
-7. **Talk to Yulia (NOT Contact Sales).** All CTAs route to chat.
+7. **The public funnel is the practice site (`client/src/practice/`).** Logged-out visitors see the corpdevservices landing + five buyer-segment pages (`/buyers/*`), converting into two actions: the scripted Yulia intake (3 steps, persisted to `/api/practice/leads` even if they never book) and Book a call (`VITE_BOOKING_URL`, falls back to the #book form). No product marketing, no pricing page, and NO anonymous LLM chat — the intake is a client-side script; `/api/chat/anonymous` stays 410. Retired product pages remain unrouted in `marketing/`.
 8. **Yulia never says "As an AI."** Expert M&A deal intelligence. Adapts persona by league.
 9. **Financial data: zero hallucination.** Extract exactly from documents, never invent numbers.
 10. **All money stored in cents (integers).** Never use floating point for financial values.
 11. **Mobile browser first.** Design for mobile, then adapt to desktop.
-12. **THE LINE is product law.** Read `THE_LINE_POLICY.md`. Yulia shows analysis, options, and implications; the user decides. No recommendations for regulated transaction decisions, negotiation, counterparty contact, custody, signing, filing, legal/tax/accounting/appraisal opinions, success fees, referral fees, or deal-value fees.
+12. **THE LINE v2 is practice law.** Read `THE_LINE_POLICY.md` (v2, 2026-07-11; v1 archived at `docs/_archive/THE_LINE_POLICY_v1.md`). The perimeter: buy-side only; one buyer per target; never sell-side, two-sided, or neutral-intermediary; targets under $250M revenue; no unlicensed opinions (securities, tax, legal, appraisal → coordinate the specialist). Yulia remains the instrument: analysis, options, implications, models, drafts — she never contacts or negotiates with counterparties on her own, custodies funds, signs, files, or sets/collects compensation. The practitioner runs the deal and owns the judgment.
 
 ## Design System
-**The V6 design language is the two CD handoff bundles** at the repo root: `design_handoff_smbx_desktop_material/` (desktop) and `design_handoff_smbx_app store/` (mobile). Production implements them faithfully — see `DESIGN_SOURCE.md` for the file-by-file implementation map. For a quick token reference, read `DESIGN_TOKENS.md` (auto-generated from `client/src/index.css` by `npm run design:extract`). Reuse saved Studio/List/Compete/texture-card primitives; do not invent adjacent card/button styles when an existing primitive fits.
+**PRACTICE SITE (2026-07-11, corpdevservices bundle — the current public
+surface.)** The THE LINE v2 pivot retired the product marketing; the same day
+Paul shipped the practice-site design (`corpdevservices/`, approved direction
+3a) and it is implemented at `client/src/practice/`. DEFINITIVE is untouched.
+The app shells (Atlas) continue as the working surfaces for the practice.
 
-**V6 in one line:** desktop uses slate-blue `#2E5C8A` + lavender chrome `#ECEAF2`; mobile uses periwinkle `#8A9AE8` + watercolor textures from `client/public/textures/`. Hot pink (`#D44A78`, V3/V4 era) and warm cream + terra (`#F4EEE3` + `#D4714E`, Cowork-DL "Edition" v22 era) are both retired — if your output anchors on either, you read a stale doc.
+The three current languages:
+- **Practice site = "coral" (2026-07-11, corpdevservices):** `client/src/practice/` under the `.pd` scope — white canvas, ink `#222222`, card gray `#F7F7F7`, accent coral `#FF385C` (links/hover `#E61E4D`, CTA gradient `#E61E4D→#E31C5F→#D70466`), Schibsted Grotesk 400–800 display/body, IBM Plex Mono micro/eyebrows/tags, pills 99px / cards 24px / bands 28px, deliberately airy section spacing. Conversion mechanism: the scripted 3-step Yulia intake card + Book a call; leads persist via `/api/practice/leads`. Source of truth: `corpdevservices/README.md` + `smbX Landing.dc.html`. Photography: three placeholder slots awaiting the founder's photos (`ImageSlot.tsx`); founder bio card awaiting resume + deal sheet; `VITE_BOOKING_URL` awaiting the scheduling link.
+- **Retired marketing = "liquid glass" (2026-07-10 hi-fi, unrouted):** `client/src/marketing/` under the `.mk` scope — the fully-built product marketing (canvas gradient, glass/ink cards, neon `#00D632`, Sora headlines, page-morphs-into-Yulia). Unrouted by the pivot; kept as a parts bin (`smbX.ai Marketing Redesign/` bundle + 2026-07-10 copy deck are its sources). Its copy sells the retired product — never reroute it as-is.
+- **App = "Atlas" (2026-06-24 cutover):** desktop shell `client/src/components/v6/desktop/` themed by `atlasTokens.ts` (`T` object, Google-blue `#0b57d0`); mobile shell `v6/atlasmobile/` themed by `mobileTokens.ts` (violet `#5b53d6`, Cash-App-flavored). Build law: `ATLAS_BUILD_CONTRACT.md` + `MOBILE_REDESIGN.md`. Re-skin toward the new language is a later phase.
+- **Legacy marketing = "Ramp" (2026-05-29):** quarantined at `client/src/marketing/legacy/` under `.mkt` — serves only the footer-linked pages (Raise, Integrate, Connectors, Standard×2) until restyled or retired.
+
+**Historical (do not build against):** V6 slate-blue/lavender/periwinkle (`design_handoff_smbx_desktop_material/`, `design_handoff_smbx_app store/`, `DESIGN_SOURCE.md`, `DESIGN_TOKENS.md`), hot pink `#D44A78` (V3/V4), the Cowork-DL warm-cream "Edition" era, and the short-lived terra `#D4714E` wireframe pass (2026-07-08, superseded by the hi-fi liquid-glass green system two days later). If your output anchors on any of these, you read a stale doc.
 
 **Safari toolbar rule still applies:** never use `position:fixed` full-viewport divs with a background color (Safari reads them for toolbar tinting and it breaks dark-mode switching). Use `position:absolute` inside a relative parent instead.
 
 **No gratuitous eyebrows or micro text (LOCKED 2026-06-01).** Do NOT add decorative eyebrow kickers (small uppercase mono labels like `PIPELINE`, `RECENTS`, `MARKET INTELLIGENCE LIVE`) or micro status/subtitle lines (like `deal intelligence · online`) by default — they clutter and read as AI filler. Lead with the title alone. Add a label or secondary line ONLY when it carries information the user genuinely needs and cannot infer from context. When in doubt, leave it out. Applies to new components, headers, cards, chat surfaces, and FABs; when reskinning or refactoring existing UI, prefer removing these over preserving them.
 
-## Pricing Model — Monthly Subscriptions
-**Free:** Unlimited Yulia Q&A, ONE ValueLens or deal score (email required)
-**$99 Solo:** Unlimited ValueLens, deal scoring, VRR, SDE/EBITDA analysis, exports, and one supervised MCP/agent key
-**$249 Pro:** Everything in Solo + CIM, deal room, market discovery, source routing, DD, LOI scaffolds, and three supervised MCP/agent keys
-**$749 Team:** Shared deal vault, firm templates, seats, specialist handoff coordination, and supervised agent workflows
-**$3,000+ Enterprise:** Everything in Team + single-tenant, SSO, API controls, portfolio infrastructure, custom governance, and governed autonomous agent scope
+## Business Model — The Practice (THE LINE v2)
+smbX.ai is a buy-side corp-dev-as-a-service practice. Revenue is per-engagement, papered by humans in the engagement letter: a **buy-side retainer** and a **buy-side success fee**, both paid by the practice's own acquirer client (independent-sponsor economics). The perimeter: buy-side only, one buyer per target, never sell-side/two-sided/neutral-intermediary, targets under $250M revenue. One-time counsel confirmation (Exchange Act §15(b)(13), state M&A-broker regimes, engagement-letter language) is pending — see `THE_LINE_POLICY.md`.
 
-Credits are included plan allowances and governance controls, not a wallet. Event artifacts may have flat software prices or consume included credits, but no fee may vary with deal value, close, or outcome.
+The app itself charges nothing. **Practice mode** (`server/services/practiceMode.ts`, default ON):
+- `TEAM_ALLOWLIST` (comma-separated emails; fallback `paulbryantbaker@gmail.com`) gates register/login/Google/reset.
+- `practicePerimeter` middleware 403s any JWT belonging to a non-team identity (covers `/api` and `/mcp`, including pre-pivot accounts and external agent keys). Tokenless requests fall through to each route's own auth, so token-link share surfaces keep working.
+- Team members get enterprise-level entitlements (`getUserPlan` short-circuit) — no paywall, no free-deliverable gate.
+- `/api/chat/anonymous` and `/api/stripe` (except the webhook) return 410.
+- **The external agent surface is mothballed (Paul, 2026-07-11):** `/mcp`, agent/MCP discovery (`/.well-known/*`, `/server.json`), the MCP OAuth rail, and the public spec/OpenAPI endpoints return 410 in practice mode (`mothballedAgentSurface`). Code kept intact — reopen deliberately, never by accident.
+- The operational core is NOT gated beyond team auth: deals, chat, deliverables, data room, exports/PDF, share links, models, sourcing all run at full capability — these are the practice's working instruments.
+- The retired subscription machinery (`subscriptionService.ts`, `lib/pricing.ts`, Stripe envs) stays in the tree, dormant.
 
 ## Journeys, Stages, and Deal-Mechanics Gates
 Top-level product journeys remain SELL, BUY, RAISE, and PMI. SELL/BUY/RAISE expose six user-facing stages; PMI exposes four post-close stages.
@@ -82,6 +95,7 @@ Valuation Explorer, LBO, SBA Financing, DCF, Tax Impact, Cap Table, Sensitivity 
 - SSE canvas_action handler forwards tool results to zustand store
 
 ## Reference Documents
+- **UI_RETOOL_READINESS.md** — Operating doc for the incoming design-language retool: current surface map, token seams, the preservation contract (LINE touchpoints, agent↔UI vocabulary, locked pricing, funnel), and the phased bundle-landing playbook.
 - **YULIA_AGENCY_SPEC.md** — Product/architecture doctrine for Yulia as the agentic operating layer: advisor posture without licensed-advisor boundary crossing, permission levels, surface contracts, data-room/file architecture, and implementation priorities.
 - **YULIA_AGENCY_IMPLEMENTATION_PLAN.md** — Practical wiring plan for context packs, prompt governance, governed tool execution, staged approvals, surface actions, Today, Files, and Data Room.
 - **SMBX_PRICING_LOCKED.md** — Locked canonical pricing record (2026-05-27): Free / $99 Solo / $249 Pro / $749 Team / $3,000+ Enterprise. If any other doc or code constant disagrees, this file wins.
@@ -101,15 +115,22 @@ Valuation Explorer, LBO, SBA Financing, DCF, Tax Impact, Cap Table, Sensitivity 
 ## Key File Map
 | File | Purpose |
 |------|---------|
-| client/src/components/v6/V6App.tsx | Current app shell — catch-all routes, desktop/mobile V6 workspace, tabbed canvas |
+| client/src/practice/ | The public practice site (`.pd` coral language): Landing, 5 SegmentPage entries, YuliaIntake, PracticeShell, leads.ts |
+| server/index.ts `/api/practice/leads` | Public rate-limited lead capture (practice_leads table, migration 097) + practitioner email ping |
+| client/src/components/v6/V6App.tsx | App shell entry — viewport fork into the two Atlas shells |
+| client/src/components/v6/desktop/AtlasApp.tsx | Desktop shell — header tab strip, chat rail, canvas tabs, history wiring |
+| client/src/components/v6/atlasmobile/AtlasMobileApp.tsx | Mobile shell — Today/Deals tabs, Yulia FAB + sheet |
+| client/src/components/v6/desktop/atlasTokens.ts + atlasmobile/mobileTokens.ts | THE app skin knobs (`T` / `M`) — retheme here first |
+| client/src/marketing/ | Logged-out marketing surface (`.mkt` scope, MarketingShell + 9 pages) |
+| client/src/lib/pricing.ts | Canonical client pricing table — all price UI derives from here |
+| client/src/lib/yuliaSurfaceContext.ts | Agent↔UI surface-action vocabulary (preserve across redesigns) |
 | client/src/components/models/ | 11 interactive financial model components for the human canvas |
 | client/src/lib/calculations/core.ts | Legacy pure calculation helpers for canvas models |
 | server/services/v19ModelRuntime.ts | Server-side V19 model runtime for executable/research `MODEL.*.v1` definitions |
 | server/services/definitiveDealMechanicsCatalog.ts | DEFINITIVE v1.1 123-slot / 30-gate deal-mechanics catalog |
 | client/src/lib/modelStore.ts | Zustand store for model tab state |
 | client/src/components/shared/ChatDock.tsx | THE chat input — used everywhere |
-| client/src/components/shared/DarkModeToggle.tsx | Dark mode + Safari toolbar color management |
-| client/src/components/chat/PortfolioCanvas.tsx | Sourcing portfolio management UI |
+| client/src/components/v6/desktop/screens/Sourcing.tsx (+ atlasmobile twin) | Sourcing portfolio UI |
 | server/index.ts | Express entry + auto-migrations |
 | server/services/aiService.ts | AI orchestration + agentic loop |
 | server/prompts/taxEngine.ts | V18 §9 tax foundation + per-league workflow (18a distillation) |
@@ -136,6 +157,7 @@ Valuation Explorer, LBO, SBA Financing, DCF, Tax Impact, Cap Table, Sensitivity 
 - chat/Sidebar.tsx, HomeSidebar.tsx, PublicChatInput.tsx (orphaned)
 - chartjs-node-canvas (native canvas dep removed — charts render in Puppeteer page)
 - All old logo files (x-logo.png, X2 Transaparant.png, GX.png, redx.png, etc.)
+- 2026-07-10 pre-retool demolition: components/chat/ (except ChatMorph.tsx), components/mobile/ (except StarterSheet.tsx), components/content/, components/canvas/, components/artifacts/, v6/Learn.tsx, v6/workspace.css (live .wkseal/.wk-tick rules extracted to v6/shared/workseal.css), shared/ChapterStrip|DotField|Reveal, lib/wkTheme.ts, lib/randomTextures.ts, v6/shared/verdictMaterial.ts; public/textures pruned to texture-hero-1/2 (+ png masters)
 
 ## AI Orchestration
 | Task | Engine |
@@ -158,6 +180,6 @@ npm run build        # Build for production
 ## Environment Variables
 DATABASE_URL, ANTHROPIC_API_KEY, GOOGLE_AI_API_KEY, OPENAI_API_KEY,
 GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_PLACES_API_KEY,
-STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET,
-STRIPE_PRICE_SOLO, STRIPE_PRICE_PRO, STRIPE_PRICE_TEAM, STRIPE_PRICE_ENTERPRISE,
-JWT_SECRET, NODE_ENV, PORT, APP_URL, CENSUS_API_KEY, TEST_MODE
+JWT_SECRET, NODE_ENV, PORT, APP_URL, CENSUS_API_KEY, TEST_MODE,
+PRACTICE_MODE (default true), TEAM_ALLOWLIST (comma-separated emails),
+STRIPE_* (dormant: SECRET_KEY, PUBLISHABLE_KEY, WEBHOOK_SECRET, PRICE_SOLO/PRO/TEAM/ENTERPRISE)

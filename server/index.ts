@@ -4,6 +4,7 @@ import path from 'path';
 import postgres from 'postgres';
 import { fileURLToPath } from 'url';
 import { optionalAuth, requireAuth } from './middleware/auth.js';
+import { practiceModeEnabled, practicePerimeter, retiredSurface, mothballedAgentSurface } from './services/practiceMode.js';
 import { authRouter } from './routes/auth.js';
 import { canvasTabsRouter } from './routes/canvasTabs.js';
 import { docViewsRouter } from './routes/docViews.js';
@@ -129,6 +130,14 @@ const apiLimiter = rateLimit({
   message: { error: 'Too many requests, please try again later' },
 });
 
+const leadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 12, // lead submissions per window per IP — humans, not scripts
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many submissions, please try again later' },
+});
+
 // ─── Startup checks ─────────────────────────────────────────
 if (!process.env.ANTHROPIC_API_KEY) {
   console.warn('WARNING: ANTHROPIC_API_KEY not set — AI chat will fail');
@@ -175,6 +184,17 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), handl
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: false }));
 
+// ─── 2a. Practice perimeter (THE LINE v2) ──────────────────
+// Any request bearing a JWT for a non-team identity is rejected — covers /api
+// and /mcp alike, including pre-pivot accounts and external agent keys.
+// Tokenless requests fall through to each route's own auth.
+app.use(practicePerimeter);
+
+// ─── 2b. Mothballed external agent surface (2026-07-11) ────
+// /mcp transport, agent/MCP discovery, MCP OAuth, and public spec/OpenAPI
+// endpoints return 410 in practice mode — disabled, not deleted.
+app.use(mothballedAgentSurface);
+
 // ─── 2. API routes (public) ────────────────────────────────
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
@@ -184,7 +204,59 @@ app.get('/api/config', (_req, res) => {
   res.json({
     googleClientId: process.env.GOOGLE_CLIENT_ID || null,
     stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY || null,
+    practiceMode: practiceModeEnabled(),
   });
+});
+
+// ─── Practice-site lead capture (public, rate-limited) ─────
+// The corpdevservices landing persists every intake (Yulia script or form)
+// as a lead even if the visitor never books, and pings the practitioner.
+app.post('/api/practice/leads', leadLimiter, async (req, res) => {
+  try {
+    const clean = (v: unknown, max: number) =>
+      typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : null;
+    const lead = {
+      persona: clean(req.body?.persona, 200),
+      thesis: clean(req.body?.thesis, 2000),
+      size: clean(req.body?.size, 500),
+      email: clean(req.body?.email, 320),
+      source: clean(req.body?.source, 100) || 'landing',
+    };
+    if (!lead.thesis && !lead.email) {
+      return res.status(400).json({ error: 'Nothing to save' });
+    }
+    const { sql } = await import('./db.js');
+    await sql`
+      INSERT INTO practice_leads (persona, thesis, size_geo, email, source)
+      VALUES (${lead.persona}, ${lead.thesis}, ${lead.size}, ${lead.email}, ${lead.source})
+    `;
+    // Fire-and-forget: tell the practitioner a lead landed.
+    import('./services/emailService.js')
+      .then(async ({ sendEmail }) => {
+        const { teamAllowlist } = await import('./services/practiceMode.js');
+        const to = teamAllowlist()[0];
+        if (!to) return;
+        const esc = (v: string | null) =>
+          (v || '—').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        await sendEmail({
+          to,
+          subject: `New practice lead${lead.email ? `: ${lead.email}` : ''} (${lead.source})`,
+          html: `<div style="font-family:system-ui,sans-serif;font-size:14px;line-height:1.6">
+            <p><b>New lead from the practice site.</b></p>
+            <p>Persona: ${esc(lead.persona)}<br/>
+            Thesis: ${esc(lead.thesis)}<br/>
+            Size/geo: ${esc(lead.size)}<br/>
+            Email: ${esc(lead.email)}<br/>
+            Source: ${esc(lead.source)}</p>
+          </div>`,
+        });
+      })
+      .catch(() => { /* notification is best-effort; the lead row is saved */ });
+    return res.status(201).json({ ok: true });
+  } catch (err: any) {
+    console.error('[practice-leads] save failed:', err.message);
+    return res.status(500).json({ error: 'Failed to save' });
+  }
 });
 
 function discoveryOrigin(req: Request) {
@@ -542,9 +614,17 @@ app.get('/api/debug/check-ai', async (_req, res) => {
 });
 
 app.use('/api/auth', authLimiter, authRouter);
-app.use('/api/chat/anonymous', chatLimiter, anonymousRouter);
+if (practiceModeEnabled()) {
+  // Retired public product surfaces: the anonymous marketing funnel and Stripe
+  // checkout/portal have no role in the private practice (THE LINE v2). The
+  // webhook mount above stays live so legacy subscription events still settle.
+  app.use('/api/chat/anonymous', retiredSurface);
+  app.use('/api/stripe', retiredSurface);
+} else {
+  app.use('/api/chat/anonymous', chatLimiter, anonymousRouter);
+  app.use('/api/stripe', requireAuth, stripeRouter); // routes read req.userId; this mount is before the blanket requireAuth, so gate it here (webhook is mounted separately above, stays public)
+}
 app.use('/api/chat', chatLimiter, chatRouter);
-app.use('/api/stripe', requireAuth, stripeRouter); // routes read req.userId; this mount is before the blanket requireAuth, so gate it here (webhook is mounted separately above, stays public)
 app.use('/api', shareLinksRouter); // has both public (/shared/:token) and protected routes
 
 // Studio collateral catalog — generic, non-sensitive (the list of buildable

@@ -1,242 +1,130 @@
+/**
+ * Homepage `/` — hi-fi 4a. Hero + ink dock, the Blind Equity™ proof card,
+ * three seat doors, the judgment close. Copy verbatim from the locked deck.
+ */
 import { Link } from 'wouter';
-import { MarketingShell } from '../MarketingShell';
-import { Brand } from '../Brand';
-import { YuliaLauncher } from '../YuliaChat';
-import { CLOSER_CAPABILITIES } from '../components/ClosingCTA';
-import { enterApp } from '../useEnterApp';
-import { HeroWorkspace } from '../components/HeroWorkspace';
-import { DerivationHero } from '../components/DerivationHero';
-import { ConformanceTerminal } from '../components/ConformanceTerminal';
-import { ScrollGrow } from '../components/ScrollGrow';
-import { ProductFrame } from '../components/ProductFrame';
-import {
-  ChatIngestMock,
-  ModelBuildMock,
-  CIMDeliverMock,
-  PRODUCE_MOCKS,
-} from '../components/ProductMocks';
+import { MarketingShell, HeroDock } from '../MarketingShell';
 
-const PRODUCES: Array<{ h: string; p: string }> = [
-  { h: 'Valuation', p: 'A defensible valuation baseline — multiples, DCF, and the sensitivities that move the number.' },
-  { h: 'Quality of earnings', p: 'A QoE-style adjustment preview that normalizes SDE and EBITDA the way a buyer’s diligence team will. (Not an audit, review, or compilation.)' },
-  { h: 'Working capital', p: 'The peg calculation, the target, and what happens to the purchase price when the number moves.' },
-  { h: 'Financing', p: 'SBA debt service coverage, LBO entry/exit, IRR and MOIC — modeled, not estimated.' },
-  { h: 'Structure', p: 'Asset vs. stock, §1060 allocation, earnouts, rollovers — the tax and economic consequences of each, side by side.' },
-  { h: 'Documents', p: 'CIMs, pitch books, IC decks, lender books — drafted from the deal state, with citations.' },
-];
-
-export default function Home() {
+function BlindEquityCard() {
   return (
-    <MarketingShell>
-      {/* HERO — one unit: headline, lead, launcher, AND the deal card, all on the
-          dark band (Notion-style — the white product card sits on the dark hero). */}
-      <section className="dark" style={{ paddingTop: 'clamp(56px,9vw,120px)', paddingBottom: 'clamp(56px,8vw,110px)' }}>
-        <div className="wrap center stack" style={{ alignItems: 'center', gap: 0 }}>
-          <h1 className="display reveal" data-d="1" style={{ margin: 0, maxWidth: '16ch' }}>
-            Analyst-grade deal work. On demand.
-          </h1>
-          <p className="lead reveal measure-wide" data-d="2" style={{ margin: '22px auto 0', textAlign: 'center' }}>
-            Yulia is an AI deal-intelligence assistant. She builds the valuations,
-            quality-of-earnings adjustments, working capital pegs, financing models,
-            and CIMs that used to take a deal team — from your real numbers, with
-            every figure traceable to its source.
-          </p>
-          {/* The Working Paper signature: a live worked equation — drag the
-              multiple, edit EBITDA, EV re-derives through core.ts and the
-              seal re-hashes. The site computes; it doesn't just say so. */}
-          <div className="reveal" data-d="3" style={{ width: '100%' }}>
-            <DerivationHero />
-          </div>
-          <div className="reveal" data-d="4" style={{ width: '100%' }}>
-            <YuliaLauncher />
-          </div>
-        </div>
-        {/* The deal workspace, inside the hero. color:var(--ink) resets the inherited
-            text to dark so the white card reads correctly on the dark band. */}
-        <div className="wrap" style={{ marginTop: 'clamp(44px,6vw,80px)', color: 'var(--ink)' }}>
-          <ScrollGrow>
-            <HeroWorkspace />
-          </ScrollGrow>
-        </div>
-      </section>
-
-
-      {/* HOW IT WORKS */}
-      <section>
-        <div className="wrap">
-          <div className="reveal" style={{ maxWidth: '60ch', marginBottom: 64 }}>
-            <span className="eyebrow">How it works</span>
-            <h2 style={{ marginTop: 18 }}>You talk. Yulia builds.</h2>
-          </div>
-          <div className="grid g3" style={{ gap: 38 }}>
-            <div className="step-showcase reveal">
-              <ProductFrame variant="browser" url="app.smbx.ai/chat" delay={0.05}>
-                <ChatIngestMock />
-              </ProductFrame>
-              <div className="step"><span className="sn">01</span><h3>Tell Yulia what you’re working on.</h3><p>A business you’re buying, selling, raising for, or integrating. Upload a tax return, paste a few numbers, or just name the company.</p></div>
-            </div>
-            <div className="step-showcase reveal" data-d="1">
-              <ProductFrame variant="browser" url="app.smbx.ai/deal" delay={0.1}>
-                <ModelBuildMock />
-              </ProductFrame>
-              <div className="step"><span className="sn">02</span><h3>Yulia computes the work product.</h3><p>Not a summary of what you should do — the actual model, allocation, or document, with assumptions you can change and sources you can check.</p></div>
-            </div>
-            <div className="step-showcase reveal" data-d="2">
-              <ProductFrame variant="browser" url="app.smbx.ai/cim" delay={0.15}>
-                <CIMDeliverMock />
-              </ProductFrame>
-              <div className="step"><span className="sn">03</span><h3>Take it anywhere.</h3><p>Export to PDF, Excel, or Word. Or keep working — Yulia carries the deal state forward as the deal moves.</p></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-      {/* WHAT SMBX PRODUCES */}
-      <section className="tint">
-        <div className="wrap">
-          <div className="reveal" style={{ maxWidth: '60ch', marginBottom: 56 }}>
-            <span className="eyebrow">The work product</span>
-            <h2 style={{ marginTop: 18 }}>Real artifacts, not advice.</h2>
-          </div>
-          <div className="grid g3">
-            {PRODUCES.map((f, i) => {
-              const Mock = PRODUCE_MOCKS[i];
-              return (
-                <div className="feature feature-showcase reveal" data-d={(i % 3)} key={f.h}>
-                  {Mock && <Mock />}
-                  <h3>{f.h}</h3>
-                  <p>{f.p}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-
-      {/* THE DILIGENCE STANDARD */}
-      <section>
-        <div className="wrap" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 56, alignItems: 'start' }}>
-          <div className="reveal">
-            <span className="eyebrow">The Diligence Standard</span>
-            <h2 style={{ marginTop: 18 }}>The methodology is open. Read it before you trust it.</h2>
-          </div>
-          <div className="reveal" data-d="1">
-            <p className="lead" style={{ margin: 0 }}>
-              Every number Yulia produces traces to The Diligence Standard — our published
-              methodology library. Each model has its inputs, its computation, its
-              controlling authorities, and a worked example. No black box.
-            </p>
-            <div style={{ marginTop: 30 }}>
-              <Link href="/standard" className="link-arrow">
-                Read the Standard
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* WHAT SMBX IS NOT — dark safe-harbor block, now paired with the
-          conformance run actually playing beside the claim (Working Paper:
-          compliance prose + computation happening is the proof). */}
-      <section className="dark">
-        <div className="wrap mkt-split">
-          <div className="reveal">
-            <h2 style={{ maxWidth: '20ch' }}><Brand /> is software.</h2>
-            <p className="lead" style={{ marginTop: 24 }}>
-              It is not a broker-dealer, investment adviser, or business broker. It is not
-              a law firm, accounting firm, or appraiser. It does not negotiate, sign, file,
-              hold funds, recommend transactions, or match buyers and sellers for a fee.
-            </p>
-            <p style={{ marginTop: 22, fontSize: '1.15rem', fontWeight: 600, color: '#fff' }}>
-              No language model touches the math path.
-            </p>
-            <p style={{ marginTop: 14, fontFamily: 'var(--mono)', letterSpacing: '.04em', color: 'var(--accent)' }}>
-              <Brand /> computes. You decide.
-            </p>
-          </div>
-          <div className="reveal" data-d="1">
-            <ConformanceTerminal replayable />
-          </div>
-        </div>
-        <div className="wrap">
-          <div className="reveal computed-closer-tags" data-d="2" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 10, maxWidth: '64ch', margin: 'clamp(40px,5vw,64px) auto 0' }}>
-            {CLOSER_CAPABILITIES.map(c => (
-              <Link key={c} href="/standard" className="tag tag-link">{c}</Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CLOSER — flat-pricing split + the closing CTA band */}
-      <HomeCloser />
-    </MarketingShell>
-  );
-}
-
-function PriceRow({ plan, note }: { plan: string; note: string }) {
-  return (
-    <div className="row" style={{ justifyContent: 'space-between', gap: 20, padding: '14px 0', borderBottom: '1px solid var(--line)' }}>
-      <span className="mono" style={{ fontWeight: 500, minWidth: 110 }}>{plan}</span>
-      <span style={{ color: 'var(--ink-2)', fontSize: '.92rem', textAlign: 'right' }}>{note}</span>
+    <div className="mk-ink-card" style={{ width: 'min(720px, 100%)', padding: 'clamp(28px, 3.6vw, 44px) clamp(30px, 3.8vw, 52px)' }}>
+      <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--mk-w)' }}>
+        Residential cleaning · Phoenix · $1.8M revenue
+      </div>
+      <div className="row" style={{ marginTop: 14, fontSize: 15 }}>
+        <span style={{ color: 'var(--mk-w3)' }}>Reported SDE</span>
+        <span style={{ fontWeight: 700, fontSize: 20, color: 'var(--mk-w)' }}>$320,000</span>
+      </div>
+      <div className="mk-eyebrow-neon" style={{ margin: '18px 0 4px' }}>Found in the numbers</div>
+      <div className="row"><span>Personal vehicles run through the business</span><span className="neon">+$48,000</span></div>
+      <div className="row"><span>Family phones and one-time expenses</span><span className="neon">+$27,000</span></div>
+      <div className="row"><span>Above-market rent to the owner's own building</span><span className="neon">+$31,000</span></div>
+      <div className="row" style={{ borderBottom: 0 }}>
+        <span style={{ color: 'var(--mk-w3)' }}>Adjusted SDE</span>
+        <span style={{ fontWeight: 700, fontSize: 20, color: 'var(--mk-w)' }}>$426,000</span>
+      </div>
+      <div style={{ marginTop: 8, paddingTop: 22, borderTop: '1px solid var(--mk-hair-2)', fontSize: 17, color: 'var(--mk-w2)' }}>
+        At 3.2× — that's <span className="mk-num-neon" style={{ fontSize: 'clamp(26px, 2.6vw, 34px)' }}>$339,000</span> you
+        almost left on the table.
+      </div>
+      <div style={{ marginTop: 18, fontSize: 13.5, lineHeight: 1.6, color: 'var(--mk-w4)' }}>
+        We call that <span style={{ color: 'var(--mk-neon)', fontWeight: 600 }}>Blind Equity™</span> — value that's really
+        there, just buried where a buyer won't credit it until someone shows the work.
+      </div>
     </div>
   );
 }
 
-/**
- * HomeCloser — the bottom of Home: a flat-pricing split (copy left, price-card
- * right) above the closing CTA band. The capability chips that used to sit here
- * now live up in the "smbX is software" section — in an alternating layout they
- * stranded far from the CTA and read orphaned.
- */
-function HomeCloser() {
+export default function Home() {
   return (
-    <>
-      <section style={{ paddingBottom: 'clamp(40px,5vw,72px)' }}>
-        <div className="wrap">
-          <div className="home-price-split">
-            <div className="reveal">
-              <h2>Flat software pricing. Nothing tied to your deal.</h2>
-              <p className="mono" style={{ marginTop: 22, fontSize: '.9rem', color: 'var(--ink-3)', lineHeight: 1.6, maxWidth: '34ch' }}>
-                No success fees. No percentage of your deal. No fee tied to whether it closes.
-              </p>
-              <div style={{ marginTop: 26 }}>
-                <Link href="/pricing" className="link-arrow">
-                  See full pricing
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                </Link>
-              </div>
+    <MarketingShell
+      page="home"
+      placeholder="Tell Yulia about your deal…"
+      quickReplies={['How did you get this?', 'What moves this number most?']}
+    >
+      <section className="mk-hero">
+        <div className="mk-wrap mk-center" style={{ gap: 0 }}>
+          <h1 className="mk-h1" style={{ maxWidth: 960 }}>
+            <span style={{ whiteSpace: 'nowrap' }}>What is a business</span>{' '}
+            <span style={{ whiteSpace: 'nowrap' }}><em>really</em> worth?</span>
+          </h1>
+          <p className="mk-lead" style={{ marginTop: 28, maxWidth: '44em' }}>
+            Rarely what the tax return says. Yulia values a business the way a sharp buyer's
+            analyst would — finds the earnings hiding in the numbers, checks it against real
+            market data, shows every source — then helps you do something about it. Start with
+            yours. The first analysis is free.
+          </p>
+          <div style={{ marginTop: 52, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 22 }}>
+            <HeroDock
+              wide
+              chips={[
+                { label: "I'm selling", seed: "I'm selling my business — it's a " },
+                { label: "I'm buying", seed: "I'm looking to buy a business — " },
+                { label: 'I advise', seed: "I'm advising on a deal — " },
+              ]}
+            />
+            <div className="mk-trustline">
+              <span><em style={{ fontWeight: 700 }}>No success fees</em>, ever</span>
+              <span className="dot">·</span>
+              <span>Start free</span>
+              <span className="dot">·</span>
+              <span>Every number sourced</span>
             </div>
-            <div className="reveal" data-d="1">
-              <div className="mock" style={{ padding: '6px 24px' }}>
-                <PriceRow plan="Free" note="One deliverable, free." />
-                <PriceRow plan="$99 / mo" note="Valuation, scoring, diligence." />
-                <PriceRow plan="$249 / mo" note="+ CIMs, deal rooms, discovery." />
-                <PriceRow plan="$749 / mo" note="+ shared vault, templates, seats." />
-                <PriceRow plan="$3,000+ / mo" note="+ single-tenant, SSO, agents." />
-              </div>
+            <div className="mk-sources">
+              Built on U.S. Census Bureau · Bureau of Labor Statistics · Federal Reserve (FRED) · SEC EDGAR · SBA · IRS SOI
             </div>
           </div>
         </div>
       </section>
 
-      <section className="cta">
-        <div className="cta-inner reveal">
-          <h2>Bring a deal. See what Yulia builds.</h2>
-          <p className="cta-sub">
-            Paste a few numbers or a tax return — Yulia turns it into analyst-grade work,
-            with every figure traceable to its source.
-          </p>
-          <div className="cta-actions">
-            <button className="btn btn-accent btn-lg" onClick={() => enterApp()}>Ask Yulia</button>
+      <section className="mk-section">
+        <div className="mk-wrap mk-center" style={{ gap: 26 }}>
+          <div className="mk-eyebrow">A live Yulia analysis · under three minutes · every number sourced</div>
+          <BlindEquityCard />
+        </div>
+      </section>
+
+      <section className="mk-section">
+        <div className="mk-wrap">
+          <div className="mk-doors">
+            <Link href="/sell" className="mk-glass mk-door">
+              <span className="t">I'm selling a business</span>
+              <p>Know the real number. Find what's hidden. Walk in prepared.</p>
+              <span className="go">Start here →</span>
+            </Link>
+            <Link href="/buy" className="mk-glass mk-door">
+              <span className="t">I'm buying a business</span>
+              <p>Is this the one? Find out before you're in too deep.</p>
+              <span className="go">Start here →</span>
+            </Link>
+            <Link href="/advise" className="mk-glass mk-door">
+              <span className="t">I advise on deals</span>
+              <p>Do the work of a full analyst team on every deal. Keep being the reason it closes.</p>
+              <span className="go">Start here →</span>
+            </Link>
           </div>
-          <p className="computed-closer-note mono" style={{ marginTop: 'clamp(24px,3vw,36px)' }}>
-            Every artifact is computed, hash-verifiable, and pinned to the methodology that produced it.
+        </div>
+      </section>
+
+      <section className="mk-section">
+        <div className="mk-wrap mk-center">
+          <h2 className="mk-h2" style={{ fontSize: 'clamp(28px, 2.6vw, 36px)' }}>
+            Your own corp dev team.
+            <br />
+            You run the deal. <em>You keep the fee.</em>
+          </h2>
+          <p className="mk-body" style={{ marginTop: 22, maxWidth: '40em', color: 'var(--mk-ink-3)' }}>
+            Yulia does roughly what an investment bank does, minus the parts that need a license —
+            the analysis, the documents, the process — for a flat fee instead of a percentage of
+            your deal. She never negotiates for you, never takes a cut, never signs anything. When
+            your deal needs a real attorney, CPA, or lender, she tells you and connects you to one.
+          </p>
+          <p className="mk-body" style={{ marginTop: 16, maxWidth: '40em', color: 'var(--mk-ink-3)' }}>
+            Start the conversation above. It's free, and there's no catch — the first real
+            analysis costs you nothing but the two minutes it takes to describe your deal.
           </p>
         </div>
       </section>
-    </>
+    </MarketingShell>
   );
 }

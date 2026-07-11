@@ -43,33 +43,14 @@ import type { CSSProperties, ReactNode } from "react";
 import type { AtlasScreenProps, SettingsPane } from "../../desktop/atlasNav";
 import { useAtlasNav, useAtlasChat } from "../../desktop/atlasNav";
 import type { User } from "../../../../hooks/useAuth";
+import { usePracticeMode } from "../../../../lib/practiceMode";
 import { authHeaders } from "../../../../hooks/useAuth";
+import { planLabel, planPriceLine } from "../../../../lib/pricing";
 import { Card, Avatar, Pill, ProgressBar, LoadingState } from "../../desktop/primitives";
 import { PlusIcon } from "../../desktop/icons";
 import { Switch } from "../iosKit";
 import { RT } from "../redesign/rt";
 import { DetailSection, ActionRow, Divider } from "../redesign/kit";
-
-/* ─── locked pricing (SMBX_PRICING_LOCKED.md) ─────────────────────────────── */
-const PLAN_LABEL: Record<string, string> = {
-  free: "Free",
-  solo: "Solo",
-  pro: "Pro",
-  team: "Team",
-  enterprise: "Enterprise",
-  // legacy rows normalize to the nearest locked tier display
-  starter: "Solo",
-  professional: "Pro",
-};
-const PLAN_PRICE: Record<string, string> = {
-  free: "Free",
-  solo: "$99 / month",
-  pro: "$249 / month",
-  team: "$749 / month",
-  enterprise: "$3,000+ / month",
-  starter: "$99 / month",
-  professional: "$249 / month",
-};
 
 /* ─── server payload shapes (real fields, coerced) ─────────────────────────── */
 interface SubscriptionRow {
@@ -240,7 +221,7 @@ function ProfilePane({ user }: { user: User | null }) {
     { key: "Email", value: user.email || "—" },
     { key: "Role", value: titleCase(user.role) },
     { key: "League", value: user.league ? titleCase(user.league) : "—" },
-    { key: "Plan", value: PLAN_LABEL[(user.plan || "free").toLowerCase()] ?? titleCase(user.plan) },
+    { key: "Plan", value: planLabel(user.plan || 'free') ?? titleCase(user.plan) },
   ];
 
   return (
@@ -301,6 +282,7 @@ function ProfilePane({ user }: { user: User | null }) {
 /* ─── ACCOUNT & BILLING ─────────────────────────────────────────────────────── */
 
 function BillingPane() {
+  const practice = usePracticeMode();
   const sub = useEndpoint<SubscriptionPayload>("/api/stripe/subscription", true);
   const ent = useEndpoint<EntitlementsPayload>("/api/v19/entitlements", true);
   const chat = useAtlasChat();
@@ -328,16 +310,32 @@ function BillingPane() {
     }
   }, []);
 
+  // THE LINE v2 pivot: no product billing. The practice team runs at full
+  // entitlements; compensation lives in client engagement letters, not here.
+  if (practice) {
+    return (
+      <div>
+        <div style={{ fontSize: 20, fontWeight: 700 }}>Practice workspace</div>
+        <div style={{ fontSize: 13, opacity: 0.65, marginTop: 4 }}>Full access · nothing billed in-app</div>
+        <HonestNote style={{ marginTop: 14 }}>
+          smbX runs as the practice's internal instrument (THE LINE v2). There is no
+          subscription here — client compensation is papered in each engagement
+          letter, never charged through the app.
+        </HonestNote>
+      </div>
+    );
+  }
+
   if (sub.loading) return <LoadingState label="Loading your plan…" />;
   if (sub.error || !sub.data) {
     return <ErrorNote label="Couldn't load your billing details right now. Please try again in a moment." />;
   }
 
   const planKey = (sub.data.plan || "free").toLowerCase();
-  const planName = PLAN_LABEL[planKey] ?? titleCase(sub.data.name);
+  const planName = planLabel(planKey) ?? titleCase(sub.data.name);
   // Known plans use our own spaced label; an unknown planKey falls back to the
   // server priceDisplay ("$99/month"), normalized to the screen's "$99 / month".
-  const priceLine = PLAN_PRICE[planKey] ?? normalizePrice(sub.data.priceDisplay) ?? "—";
+  const priceLine = planPriceLine(planKey) ?? normalizePrice(sub.data.priceDisplay) ?? "—";
   const row = sub.data.subscription || null;
   const renewLabel = formatRenew(row);
   const isFree = planKey === "free";

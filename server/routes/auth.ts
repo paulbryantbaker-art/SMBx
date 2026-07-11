@@ -5,6 +5,7 @@ import { requireAuth, signToken } from '../middleware/auth.js';
 import { sendEmail, sendWelcomeEmail, brandedEmail } from '../services/emailService.js';
 import { createSql } from '../dbConfig.js';
 import { OAuth2Client } from 'google-auth-library';
+import { practiceModeEnabled, isTeamEmail, PRACTICE_DENIED } from '../services/practiceMode.js';
 
 const BCRYPT_ROUNDS = 12;
 
@@ -30,6 +31,10 @@ authRouter.post('/register', async (req, res) => {
     }
 
     const emailLower = email.toLowerCase();
+
+    if (practiceModeEnabled() && !isTeamEmail(emailLower)) {
+      return res.status(403).json({ error: PRACTICE_DENIED });
+    }
 
     const existing = await sql`SELECT id FROM users WHERE email = ${emailLower} LIMIT 1`;
     if (existing.length > 0) {
@@ -82,6 +87,10 @@ authRouter.post('/login', async (req, res) => {
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
       return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    if (practiceModeEnabled() && !isTeamEmail(user.email)) {
+      return res.status(403).json({ error: PRACTICE_DENIED });
     }
 
     const token = signToken(user.id);
@@ -155,6 +164,10 @@ authRouter.post('/google', async (req, res) => {
     }
 
     const emailLower = email.toLowerCase();
+
+    if (practiceModeEnabled() && !isTeamEmail(emailLower)) {
+      return res.status(403).json({ error: PRACTICE_DENIED });
+    }
 
     // Check if user exists by google_id or email
     let [user] = await sql`
@@ -270,6 +283,13 @@ authRouter.post('/reset-password', async (req, res) => {
 
     if (!resetToken) {
       return res.status(400).json({ error: 'Invalid or expired reset link' });
+    }
+
+    if (practiceModeEnabled()) {
+      const [owner] = await sql`SELECT email FROM users WHERE id = ${resetToken.user_id} LIMIT 1`;
+      if (!isTeamEmail(owner?.email)) {
+        return res.status(403).json({ error: PRACTICE_DENIED });
+      }
     }
 
     const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);

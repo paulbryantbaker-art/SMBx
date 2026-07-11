@@ -48,7 +48,7 @@
   --info: #2E6FBF;
 
   /* Type stack — CD "Ramp": Schibsted Grotesk (display+body), JetBrains Mono (numbers) */
-  --font-display: "Schibsted Grotesk", "Inter Tight", system-ui, sans-serif;
+  --font-display: "Schibsted Grotesk", system-ui, sans-serif;
   --font-body: "Schibsted Grotesk", "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
@@ -1021,25 +1021,6 @@ input[type="range"].model-range::-moz-range-thumb {
   --mb-action:      #D6A35C;
   --mb-action-soft: #FAF1E1;
 
-  /* Hero textures — watercolor washes (replaced CD pastel two-tone gradients).
-     Files live under client/public/textures/. Apply with:
-       background-image: linear-gradient(<verdict-tint>), url(var(--mb-tex-*));
-     Verdict tints are inline in the consuming component since they vary per
-     surface (hero vs artifact vs editorial).
-     2026-06-11: art ships as ~1125px JPEG (q72, ≤250KB each) — the original
-     ~2MB PNG masters stay alongside in client/public/textures/. */
-  --mb-tex-pursue:   url("/textures/texture-pursue.jpg?v=20260611");
-  --mb-tex-watch:    url("/textures/texture-watch.jpg?v=20260611");
-  --mb-tex-pass:     url("/textures/texture-pass.jpg?v=20260611");
-  --mb-tex-baseline: url("/textures/texture-baseline.jpg?v=20260611");
-  --mb-tex-buyers:   url("/textures/texture-buyers.jpg?v=20260611");
-  --mb-tex-sunrise:  url("/textures/texture-sunrise.jpg?v=20260611");
-  /* Spare textures (2026-05-03 drop) — available for new heroes / variants. */
-  --mb-tex-gold-marble:    url("/textures/texture-gold-marble.jpg?v=20260611");
-  --mb-tex-mint-waves:     url("/textures/texture-mint-waves.jpg?v=20260611");
-  --mb-tex-aqua-cloud:     url("/textures/texture-aqua-cloud.jpg?v=20260611");
-  --mb-tex-sage-botanical: url("/textures/texture-sage-botanical.jpg?v=20260611");
-
   /* Verdict semantics */
   --mb-verdict-pursue:      #6FB89A;
   --mb-verdict-pursue-ink:  #3F8A6A;
@@ -1052,7 +1033,7 @@ input[type="range"].model-range::-moz-range-thumb {
   --mb-danger-soft: #FBEAE7;
 
   /* Typography — SF Pro stack with web fallbacks */
-  --mb-font-display: "SF Pro Display", "Inter Tight", -apple-system, system-ui, sans-serif;
+  --mb-font-display: "SF Pro Display", -apple-system, system-ui, sans-serif;
   --mb-font-body:    "SF Pro Text", "Inter", -apple-system, system-ui, sans-serif;
   --mb-font-mono:    "JetBrains Mono", ui-monospace, monospace;
 

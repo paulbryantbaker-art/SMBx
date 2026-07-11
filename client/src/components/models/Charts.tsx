@@ -12,6 +12,7 @@ import {
 } from 'chart.js';
 import { centsToDisplay, pctDisplay, multDisplay } from '../../lib/calculations/core';
 import { useDerivedDisplay } from '../v6/shared/useDerivedDisplay';
+import '../v6/shared/workseal.css';
 
 ChartJS.register(
   CategoryScale, LinearScale, BarElement, ArcElement, PointElement, LineElement,

@@ -1,4 +1,5 @@
 import PublicLayout from '../../components/public/PublicLayout';
+import { tierPriceDollars } from '../../lib/pricing';
 
 export default function Terms() {
   return (
@@ -44,7 +45,7 @@ export default function Terms() {
           <div>
             <h2 className="font-sans text-xl font-bold text-[#1a1918] mb-3 m-0">Payments</h2>
             <p className="m-0">
-              smbx.ai uses a monthly subscription model. Paid plans start at $99/month and can
+              smbx.ai uses a monthly subscription model. Paid plans start at {tierPriceDollars('solo')}/month and can
               be canceled anytime. Tiers differ on usage allowances, deal volume, seats, agent
               scopes, and enterprise infrastructure. Included credits are plan allowances, not
               a wallet. No per-deal fees, no success fees, no referral fees, no deal-value fees,
