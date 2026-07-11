@@ -296,8 +296,50 @@
 
 /* ─── firm section ─── */
 .pd-firm-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(44px, 7vw, 100px); align-items: start; }
-.pd-founder-photo { position: relative; border-radius: 24px; overflow: hidden; height: 480px; }
+/* aspect-ratio (not a fixed 480px height) so the portrait shows head-to-chest
+   instead of an over-zoomed face crop (Paul, 2026-07-11) */
+.pd-founder-photo { position: relative; border-radius: 24px; overflow: hidden; aspect-ratio: 4 / 5; }
 .pd-advisor-card { background: var(--pd-card); border-radius: 20px; padding: 36px 40px; }
+
+/* ─── stat strip (track record) ─── */
+.pd-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(18px, 2vw, 28px); margin-top: 64px; }
+.pd-stat .n { font-size: clamp(40px, 4.4vw, 64px); font-weight: 800; letter-spacing: -0.03em; color: var(--pd-coral-link); line-height: 1; }
+.pd-stat .l { margin-top: 10px; font-size: 15px; line-height: 1.5; color: var(--pd-body); }
+
+/* ─── tombstones (selected transactions) ─── */
+.pd-tombs { border-top: 1.5px solid #222222; margin-top: 56px; }
+.pd-tomb { padding: 38px 0; border-bottom: 1px solid var(--pd-hair); }
+.pd-tomb .t { font-weight: 800; font-size: 24px; letter-spacing: -0.01em; }
+.pd-tomb .meta { font-family: var(--pd-mono); font-size: 12.5px; color: var(--pd-tert); letter-spacing: 0.08em; margin-top: 8px; }
+.pd-tomb .b { margin-top: 16px; font-size: 16.5px; line-height: 1.65; color: var(--pd-body); max-width: 60em; }
+.pd-tomb .names { margin-top: 14px; font-size: 15px; line-height: 1.9; color: var(--pd-ink); }
+.pd-tomb .names .grp { color: var(--pd-tert); font-style: italic; }
+
+/* ─── industries ─── */
+.pd-scar { border: 1px solid var(--pd-hair); border-left: 4px solid var(--pd-coral); border-radius: 16px; padding: 30px 36px; margin-top: 48px; }
+.pd-scar .t { font-weight: 800; font-size: 21px; }
+.pd-scar .b { margin-top: 10px; font-size: 16.5px; line-height: 1.65; color: var(--pd-body); }
+
+/* ─── FAQ ─── */
+.pd-faq { border-top: 1px solid var(--pd-hair); margin-top: 56px; }
+.pd-faq-item { padding: 34px 0; border-bottom: 1px solid var(--pd-hair); }
+.pd-faq-item .q { font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
+.pd-faq-item .a { margin-top: 12px; font-size: 16.5px; line-height: 1.65; color: var(--pd-body); max-width: 56em; }
+
+/* ─── beliefs (about) ─── */
+.pd-drows.wide .pd-drow { grid-template-columns: clamp(180px, 24vw, 320px) minmax(0, 1fr); }
+.pd-drows.wide .pd-drow .k { color: var(--pd-ink); font-size: 18px; }
+
+/* ─── disclosure block ─── */
+.pd-disclosure {
+  max-width: var(--pd-max);
+  margin: 0 auto;
+  padding: 0 var(--pd-pad-x) 26px;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--pd-faint);
+  scroll-margin-top: 90px;
+}
 
 /* ─── footer ─── */
 .pd-footer { border-top: 1px solid var(--pd-hair); margin-top: clamp(100px, 11vw, 160px); }
@@ -317,6 +359,7 @@
   .pd-band { height: 420px; }
   .pd-band-overlay { padding: 32px 36px; }
   .pd-band-h { font-size: 32px; }
+  .pd-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
 }
 @media (max-width: 760px) {
   .pd-nav-links, .pd-nav-book { display: none; }
