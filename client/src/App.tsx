@@ -80,11 +80,13 @@ import Terms from './pages/public/Terms';
 
 // Lazy-load secondary pages
 const V6App = lazy(() => import('./components/v6/V6App'));
-// 2026-07-11 pivot (THE LINE v2): the public product is retired. The only
-// logged-out surface is the practice front door; the product-marketing pages
-// (marketing/pages/, marketing/legacy/) stay in the tree unrouted as a
-// repurposing pool for a future practice site.
-const PracticeDoor = lazy(() => import('./marketing/PracticeDoor'));
+// 2026-07-11 pivot (THE LINE v2): the public product is retired. The logged-out
+// surface is the practice site (corpdevservices bundle): landing + five
+// buyer-segment pages, converting into Yulia intake + booked calls. The old
+// product-marketing pages (marketing/pages/, marketing/legacy/) stay in the
+// tree unrouted as a repurposing pool.
+const PracticeLanding = lazy(() => import('./practice/Landing'));
+const PracticeSegment = lazy(() => import('./practice/SegmentPage'));
 const SharedDocument = lazy(() => import('./pages/public/SharedDocument'));
 const SharedDocumentView = lazy(() => import('./pages/SharedDocumentView'));
 const AcceptInvite = lazy(() => import('./pages/public/AcceptInvite'));
@@ -321,21 +323,25 @@ export default function App() {
           )}
         </Route>
 
-        {/* Practice front door (Surface 1, logged-out — THE LINE v2 pivot).
-            Every retired product-marketing URL lands on the door; an authed
-            user gets the app shell per the two-surface rule. */}
-        <Route path="/buy">{marketingOrApp(<PracticeDoor />)}</Route>
-        <Route path="/sell">{marketingOrApp(<PracticeDoor />)}</Route>
-        <Route path="/advise">{marketingOrApp(<PracticeDoor />)}</Route>
-        <Route path="/brokers">{marketingOrApp(<PracticeDoor />)}</Route>
-        <Route path="/how-it-works">{marketingOrApp(<PracticeDoor />)}</Route>
-        <Route path="/raise">{marketingOrApp(<PracticeDoor />)}</Route>
-        <Route path="/integrate">{marketingOrApp(<PracticeDoor />)}</Route>
-        <Route path="/pricing">{marketingOrApp(<PracticeDoor />)}</Route>
-        <Route path="/connectors">{marketingOrApp(<PracticeDoor />)}</Route>
-        <Route path="/standard/working-capital-peg">{marketingOrApp(<PracticeDoor />)}</Route>
-        <Route path="/standard">{marketingOrApp(<PracticeDoor />)}</Route>
-        <Route path="/">{marketingOrApp(<PracticeDoor />)}</Route>
+        {/* Practice site (Surface 1, logged-out — corpdevservices bundle).
+            Landing + five buyer-segment pages; every retired product-marketing
+            URL redirects home; an authed user gets the app shell per the
+            two-surface rule. */}
+        <Route path="/buyers/:slug">
+          {(params) => marketingOrApp(<PracticeSegment slug={params.slug} />)}
+        </Route>
+        <Route path="/buy"><Redirect to="/" /></Route>
+        <Route path="/sell"><Redirect to="/" /></Route>
+        <Route path="/advise"><Redirect to="/" /></Route>
+        <Route path="/brokers"><Redirect to="/" /></Route>
+        <Route path="/how-it-works"><Redirect to="/" /></Route>
+        <Route path="/raise"><Redirect to="/" /></Route>
+        <Route path="/integrate"><Redirect to="/" /></Route>
+        <Route path="/pricing"><Redirect to="/" /></Route>
+        <Route path="/connectors"><Redirect to="/" /></Route>
+        <Route path="/standard/working-capital-peg"><Redirect to="/" /></Route>
+        <Route path="/standard"><Redirect to="/" /></Route>
+        <Route path="/">{marketingOrApp(<PracticeLanding />)}</Route>
 
         {/* Catch-all → V6 Files Workspace (canonical 2026-05-01).
             Replaced V3App. All retired routes fall through here. */}

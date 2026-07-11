@@ -29,7 +29,7 @@ Last updated: 2026-07-11
 4. **V6App.tsx is the ONLY current app shell.** Never create parallel layouts. All UI changes go through the V6 shell/components.
 5. **NEVER use position:fixed full-viewport divs with background-color.** Safari reads them for toolbar tinting and it breaks dark mode switching. Use position:absolute inside a relative parent instead.
 6. **ValueLens (NOT Bizestimate).** The old name is dead.
-7. **No public funnel.** The logged-out surface is the one-page practice front door (`client/src/marketing/PracticeDoor.tsx`) — no product marketing, no pricing page, no anonymous Yulia chat. The retired liquid-glass marketing pages stay unrouted in `marketing/` as a repurposing pool for a future practice site.
+7. **The public funnel is the practice site (`client/src/practice/`).** Logged-out visitors see the corpdevservices landing + five buyer-segment pages (`/buyers/*`), converting into two actions: the scripted Yulia intake (3 steps, persisted to `/api/practice/leads` even if they never book) and Book a call (`VITE_BOOKING_URL`, falls back to the #book form). No product marketing, no pricing page, and NO anonymous LLM chat — the intake is a client-side script; `/api/chat/anonymous` stays 410. Retired product pages remain unrouted in `marketing/`.
 8. **Yulia never says "As an AI."** Expert M&A deal intelligence. Adapts persona by league.
 9. **Financial data: zero hallucination.** Extract exactly from documents, never invent numbers.
 10. **All money stored in cents (integers).** Never use floating point for financial values.
@@ -37,19 +37,15 @@ Last updated: 2026-07-11
 12. **THE LINE v2 is practice law.** Read `THE_LINE_POLICY.md` (v2, 2026-07-11; v1 archived at `docs/_archive/THE_LINE_POLICY_v1.md`). The perimeter: buy-side only; one buyer per target; never sell-side, two-sided, or neutral-intermediary; targets under $250M revenue; no unlicensed opinions (securities, tax, legal, appraisal → coordinate the specialist). Yulia remains the instrument: analysis, options, implications, models, drafts — she never contacts or negotiates with counterparties on her own, custodies funds, signs, files, or sets/collects compensation. The practitioner runs the deal and owns the judgment.
 
 ## Design System
-**PIVOT (2026-07-11): the public marketing surface is retired.** Logged-out
-users see only `marketing/PracticeDoor.tsx` (one page, liquid-glass language).
-The CD hi-fi bundle (`smbX.ai Marketing Redesign/`, turn 4) and the 2026-07-10
-copy-deck pages were fully implemented and then unrouted the same day by the
-THE LINE v2 pivot — they remain in `marketing/pages/` as a repurposing pool
-for a future practice site. DEFINITIVE is untouched. The app shells (Atlas)
-continue as the working surfaces for the practice.
-**Operating doc: `UI_RETOOL_READINESS.md`** — surface map, token seams,
-preservation contract. Read it before any UI work (its funnel sections are
-pre-pivot history).
+**PRACTICE SITE (2026-07-11, corpdevservices bundle — the current public
+surface.)** The THE LINE v2 pivot retired the product marketing; the same day
+Paul shipped the practice-site design (`corpdevservices/`, approved direction
+3a) and it is implemented at `client/src/practice/`. DEFINITIVE is untouched.
+The app shells (Atlas) continue as the working surfaces for the practice.
 
 The three current languages:
-- **Marketing = "liquid glass" (2026-07-10 hi-fi, the retool):** `client/src/marketing/` under the `.mk` scope — canvas gradient `#FBFBF9→#F4F6F2→#EFF4EE` with ambient green/blue blobs, light-glass cards (`rgba(255,255,255,.6)` + blur + white hairline), ink-glass cards (charcoal gradient) for the number-hero moments, neon `#00D632` on dark glass ONLY (use green `#009E25` on white), Sora ExtraBold headlines / Inter body, no italics (`em` renders green). The one idea: every page morphs (~300ms crossfade) into the anonymous Yulia conversation. Source of truth: `smbX.ai Marketing Redesign/` (`smbX Hi-Fi.dc.html` turn 4 + `HANDOFF.md`) for look, the 2026-07-10 copy deck for words, wireframes turn 5 for UX/morph structure.
+- **Practice site = "coral" (2026-07-11, corpdevservices):** `client/src/practice/` under the `.pd` scope — white canvas, ink `#222222`, card gray `#F7F7F7`, accent coral `#FF385C` (links/hover `#E61E4D`, CTA gradient `#E61E4D→#E31C5F→#D70466`), Schibsted Grotesk 400–800 display/body, IBM Plex Mono micro/eyebrows/tags, pills 99px / cards 24px / bands 28px, deliberately airy section spacing. Conversion mechanism: the scripted 3-step Yulia intake card + Book a call; leads persist via `/api/practice/leads`. Source of truth: `corpdevservices/README.md` + `smbX Landing.dc.html`. Photography: three placeholder slots awaiting the founder's photos (`ImageSlot.tsx`); founder bio card awaiting resume + deal sheet; `VITE_BOOKING_URL` awaiting the scheduling link.
+- **Retired marketing = "liquid glass" (2026-07-10 hi-fi, unrouted):** `client/src/marketing/` under the `.mk` scope — the fully-built product marketing (canvas gradient, glass/ink cards, neon `#00D632`, Sora headlines, page-morphs-into-Yulia). Unrouted by the pivot; kept as a parts bin (`smbX.ai Marketing Redesign/` bundle + 2026-07-10 copy deck are its sources). Its copy sells the retired product — never reroute it as-is.
 - **App = "Atlas" (2026-06-24 cutover):** desktop shell `client/src/components/v6/desktop/` themed by `atlasTokens.ts` (`T` object, Google-blue `#0b57d0`); mobile shell `v6/atlasmobile/` themed by `mobileTokens.ts` (violet `#5b53d6`, Cash-App-flavored). Build law: `ATLAS_BUILD_CONTRACT.md` + `MOBILE_REDESIGN.md`. Re-skin toward the new language is a later phase.
 - **Legacy marketing = "Ramp" (2026-05-29):** quarantined at `client/src/marketing/legacy/` under `.mkt` — serves only the footer-linked pages (Raise, Integrate, Connectors, Standard×2) until restyled or retired.
 
@@ -119,6 +115,8 @@ Valuation Explorer, LBO, SBA Financing, DCF, Tax Impact, Cap Table, Sensitivity 
 ## Key File Map
 | File | Purpose |
 |------|---------|
+| client/src/practice/ | The public practice site (`.pd` coral language): Landing, 5 SegmentPage entries, YuliaIntake, PracticeShell, leads.ts |
+| server/index.ts `/api/practice/leads` | Public rate-limited lead capture (practice_leads table, migration 097) + practitioner email ping |
 | client/src/components/v6/V6App.tsx | App shell entry — viewport fork into the two Atlas shells |
 | client/src/components/v6/desktop/AtlasApp.tsx | Desktop shell — header tab strip, chat rail, canvas tabs, history wiring |
 | client/src/components/v6/atlasmobile/AtlasMobileApp.tsx | Mobile shell — Today/Deals tabs, Yulia FAB + sheet |

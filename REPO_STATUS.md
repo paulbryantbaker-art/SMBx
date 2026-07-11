@@ -16,12 +16,15 @@ Governing doc: **`THE_LINE_POLICY.md` v2** (v1 archived at
 - **External agent surface MOTHBALLED** (Paul, 2026-07-11): `/mcp` transport,
   discovery documents, MCP OAuth, public spec/OpenAPI → 410 in practice mode;
   code intact for a deliberate reopen.
-- **Logged-out surface** is one page: `client/src/marketing/PracticeDoor.tsx`.
-  The liquid-glass product-marketing pages (`marketing/pages/`) and legacy Ramp
-  pages are UNROUTED but kept as a repurposing pool — **Paul intends heavy
-  emphasis on marketing + client conversion for the practice site as a coming
-  phase**, so treat that machinery (AppPhase morph shell, Dock, Thread,
-  anonymous-funnel client code) as preserved-for-repurposing, not dead.
+- **Logged-out surface = the practice site** (`client/src/practice/`, coral
+  `.pd` language from the `corpdevservices/` bundle, 2026-07-11): landing +
+  five `/buyers/*` segment pages, converting into the scripted Yulia intake
+  (leads persist to `practice_leads` via `/api/practice/leads` + email ping to
+  the practitioner) and Book a call (`VITE_BOOKING_URL`, falls back to the
+  on-page form). Awaiting from Paul: photography (3 slots), founder bio + deal
+  sheet, scheduling URL. The liquid-glass product pages (`marketing/pages/`)
+  and legacy Ramp pages stay UNROUTED as a parts bin — their copy sells the
+  retired product; never reroute as-is.
 - **Compensation**: buy-side retainer + buy-side success fee per engagement
   letter (counsel confirmation pending — see THE LINE v2). Everything below
   about product pricing/subscriptions is historical; `SMBX_PRICING_LOCKED.md`
