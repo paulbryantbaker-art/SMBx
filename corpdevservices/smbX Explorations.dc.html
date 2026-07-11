@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#EDECE7;font-family:"Schibsted Grotesk",system-ui,sans-serif}
+a{color:#14140F;text-decoration:none}a:hover{color:#2547D0}
+.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 13px/1.2 system-ui,sans-serif;color:#1a1a1a}
+.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 system-ui,sans-serif;color:rgba(0,0,0,.55)}
+.dv-card{max-width:100%;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
+.dv-opt:target .dv-oid{background:#2a78d6;color:#fff}
+.dv-next{margin:22px 0 0;font:12px/1.5 system-ui,sans-serif;color:rgba(0,0,0,.5)}
+</style>
+</helmet>
+
+<section class="dv-turn" id="t3">
+  <div class="dv-thd"><a class="dv-tid" href="#t3">3</a><span class="dv-tname">Combined <a class="dv-oid" href="#2a">2a</a>+<a class="dv-oid" href="#2b">2b</a>, coral palette — warm white, charcoal ink, coral accent with gradient CTAs</span></div>
+  <div class="dv-opts">
+
+    <!-- ============ OPTION 3A — COMBINED, CORAL ============ -->
+    <div class="dv-opt" id="3a">
+      <div class="dv-olabel"><a class="dv-oid" href="#3a">3a</a>The blend — centered radar hero, photo band, process cards, lead form. Coral accent.</div>
+      <div class="dv-card" style="width:1360px;background:#FFFFFF;color:#222222">
+
+        <!-- nav -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:22px 64px">
+          <div style="font-weight:800;font-size:22px;letter-spacing:-0.02em">smb<span style="color:#FF385C">X</span></div>
+          <div style="display:flex;gap:40px;font-size:15px;font-weight:500;color:#6A6A6A">
+            <a href="#3a" style="color:#6A6A6A">How it works</a>
+            <a href="#3a" style="color:#6A6A6A">Who it's for</a>
+            <a href="#3a" style="color:#6A6A6A">Why smbX</a>
+          </div>
+          <div style="display:flex;gap:10px">
+            <div style="border:1.5px solid #DDDDDD;padding:11px 24px;border-radius:99px;font-size:14.5px;font-weight:600;cursor:pointer" style-hover="border-color:#222222">Book a call</div>
+            <div style="background:linear-gradient(90deg,#E61E4D,#E31C5F 50%,#D70466);color:#fff;padding:12px 26px;border-radius:99px;font-size:14.5px;font-weight:700;cursor:pointer" style-hover="filter:brightness(1.08)">Talk to Yulia</div>
+          </div>
+        </div>
+
+        <!-- centered hero -->
+        <div style="position:relative;padding:96px 64px 84px;text-align:center;overflow:hidden">
+          <div style="position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);width:1100px;height:1100px;border-radius:50%;border:1px solid rgba(34,34,34,.07);pointer-events:none"></div>
+          <div style="position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);width:800px;height:800px;border-radius:50%;border:1px solid rgba(34,34,34,.09);pointer-events:none"></div>
+          <div style="position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);width:540px;height:540px;border-radius:50%;border:1px solid rgba(34,34,34,.11);pointer-events:none"></div>
+          <div style="position:absolute;left:17%;top:26%;width:9px;height:9px;border-radius:50%;background:#FF385C;opacity:.8"></div>
+          <div style="position:absolute;left:81%;top:20%;width:7px;height:7px;border-radius:50%;background:#FF385C;opacity:.5"></div>
+          <div style="position:absolute;left:87%;top:62%;width:8px;height:8px;border-radius:50%;background:#FF385C;opacity:.65"></div>
+          <div style="position:absolute;left:10%;top:68%;width:7px;height:7px;border-radius:50%;background:#FF385C;opacity:.4"></div>
+          <div style="position:relative">
+            <div style="display:inline-flex;align-items:center;gap:10px;border:1px solid #DDDDDD;border-radius:99px;padding:9px 20px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.1em;color:#6A6A6A;background:rgba(255,255,255,.85)"><span style="width:7px;height:7px;border-radius:50%;background:#FF385C"></span>BUY-SIDE ONLY · NEVER TWO-SIDED</div>
+            <div style="margin-top:40px;font-size:110px;line-height:.96;font-weight:800;letter-spacing:-0.04em;text-wrap:balance">Buy the company.<br>Skip the department.</div>
+            <div style="margin:36px auto 0;max-width:660px;font-size:20px;line-height:1.55;color:#6A6A6A">One senior operator, an AI engine that does the work of a full deal team, and a promise nobody else makes: one buyer per target, never the sell side.</div>
+            <div style="margin-top:40px;display:flex;gap:12px;justify-content:center">
+              <div style="background:linear-gradient(90deg,#E61E4D,#E31C5F 50%,#D70466);color:#fff;padding:17px 36px;border-radius:99px;font-size:16.5px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px -10px rgba(230,30,77,.5)" style-hover="filter:brightness(1.08)">Start with Yulia →</div>
+              <div style="border:1.5px solid #DDDDDD;padding:16px 32px;border-radius:99px;font-size:16.5px;font-weight:600;cursor:pointer;background:#fff" style-hover="border-color:#222222">Book a call</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- tagline ticker -->
+        <div style="padding:30px 0;border-top:1px solid #EBEBEB;border-bottom:1px solid #EBEBEB;overflow:hidden;white-space:nowrap;font-size:24px;font-weight:700;letter-spacing:-0.02em;color:#222222">
+          <span style="padding:0 26px">One buyer per target. Always.</span><span style="color:#FF385C">●</span>
+          <span style="padding:0 26px">AI does the reading. You get the judgment.</span><span style="color:#FF385C">●</span>
+          <span style="padding:0 26px">Senior attention. Zero overhead.</span><span style="color:#FF385C">●</span>
+          <span style="padding:0 26px">From thesis to close.</span>
+        </div>
+
+        <!-- photo band -->
+        <div style="margin:32px 24px;border-radius:24px;overflow:hidden;position:relative;background:repeating-linear-gradient(-45deg,#F3F0EA,#F3F0EA 14px,#FAF8F4 14px,#FAF8F4 28px);min-height:460px;display:flex;align-items:flex-end">
+          <div style="position:absolute;top:22px;right:26px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6A6A6A;background:rgba(255,255,255,.8);padding:6px 12px;border-radius:6px">photo: advisor + owner walking a shop floor</div>
+          <div style="position:relative;padding:52px 56px;display:flex;align-items:center;justify-content:space-between;width:100%;box-sizing:border-box">
+            <div style="font-size:44px;font-weight:800;letter-spacing:-0.03em;max-width:620px;line-height:1.05">A person on your side. An engine at your back.</div>
+            <div style="background:rgba(255,255,255,.95);padding:15px 30px;border-radius:99px;font-size:15.5px;font-weight:700;cursor:pointer;flex:none;box-shadow:0 2px 10px rgba(0,0,0,.08)" style-hover="background:#fff">Meet your advisor →</div>
+          </div>
+        </div>
+
+        <!-- numbered process cards -->
+        <div style="padding:80px 64px 96px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.12em;color:#FF385C;margin-bottom:18px">THE SMARTER WAY BEGINS HERE</div>
+          <div style="font-size:52px;font-weight:800;letter-spacing:-0.03em;max-width:720px;line-height:1.05">A simple process for a serious acquisition.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px;margin-top:60px">
+            <div style="background:#F7F7F7;border-radius:20px;padding:40px 36px">
+              <div style="width:52px;height:52px;border-radius:50%;background:#FF385C;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800">1</div>
+              <div style="font-size:24px;font-weight:700;margin-top:26px">Conversation</div>
+              <div style="font-size:16px;line-height:1.6;color:#6A6A6A;margin-top:12px">Tell Yulia what you want to buy. She works your thesis overnight and books you with your advisor — a real senior practitioner, not a call center.</div>
+              <div style="margin-top:24px;font-weight:700;color:#FF385C;font-size:15px;cursor:pointer">Talk to Yulia →</div>
+            </div>
+            <div style="background:#F7F7F7;border-radius:20px;padding:40px 36px">
+              <div style="width:52px;height:52px;border-radius:50%;background:#FF385C;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800">2</div>
+              <div style="font-size:24px;font-weight:700;margin-top:26px">Curated targets</div>
+              <div style="font-size:16px;line-height:1.6;color:#6A6A6A;margin-top:12px">The engine maps your market — off-market first — and your advisor hand-picks the targets worth your time, with models and memos ready in days.</div>
+              <div style="margin-top:24px;font-weight:700;color:#FF385C;font-size:15px;cursor:pointer">See how it works →</div>
+            </div>
+            <div style="background:#F7F7F7;border-radius:20px;padding:40px 36px">
+              <div style="width:52px;height:52px;border-radius:50%;background:#FF385C;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800">3</div>
+              <div style="font-size:24px;font-weight:700;margin-top:26px">Close with confidence</div>
+              <div style="font-size:16px;line-height:1.6;color:#6A6A6A;margin-top:12px">Diligence triaged, price disciplined, negotiation run by someone on your side of the table — and only yours. Then we scale to zero.</div>
+              <div style="margin-top:24px;font-weight:700;color:#FF385C;font-size:15px;cursor:pointer">Book a call →</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- lead form band -->
+        <div style="margin:0 24px 24px;border-radius:24px;background:#222222;color:#fff;padding:72px 64px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center">
+          <div>
+            <div style="font-size:48px;font-weight:800;letter-spacing:-0.03em;line-height:1.05">Ready to start looking?</div>
+            <div style="margin-top:18px;font-size:17px;line-height:1.6;color:rgba(255,255,255,.65)">Two minutes with Yulia and your market map is underway. No retainer to find out if we're a fit.</div>
+          </div>
+          <div style="background:#fff;color:#222222;border-radius:16px;padding:28px">
+            <div style="font-weight:700;font-size:18px">Let's talk.</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">
+              <div style="border:1px solid #DDDDDD;border-radius:10px;padding:13px 16px;font-size:14.5px;color:#9A9A9A">I'm a… (family office, sponsor…)</div>
+              <div style="border:1px solid #DDDDDD;border-radius:10px;padding:13px 16px;font-size:14.5px;color:#9A9A9A">What are you buying?</div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:10px">
+              <div style="flex:1;border:1px solid #DDDDDD;border-radius:10px;padding:13px 16px;font-size:14.5px;color:#9A9A9A">Email</div>
+              <div style="background:linear-gradient(90deg,#E61E4D,#E31C5F 50%,#D70466);color:#fff;border-radius:99px;padding:13px 26px;font-size:14.5px;font-weight:700;cursor:pointer" style-hover="filter:brightness(1.08)">Get started</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <p class="dv-next">Try next: "build the full site from <a class="dv-oid" href="#3a">3a</a>" · "softer coral, less gradient" · "show the segment pages"</p>
+</section>
+
+<section class="dv-turn" id="t2">
+  <div class="dv-thd"><a class="dv-tid" href="#t2">2</a><span class="dv-tname">Brightway blend — <a class="dv-oid" href="#1b">1b</a>'s type + radar merged with Brightway's warmth: photo-forward, pill buttons, numbered process, tagline ticker, embedded lead form. Photo areas are placeholders for real photography.</span></div>
+  <div class="dv-opts">
+
+    <!-- ============ OPTION 2A — PHOTO-FORWARD BLEND ============ -->
+    <div class="dv-opt" id="2a">
+      <div class="dv-olabel"><a class="dv-oid" href="#2a">2a</a>Photo-forward — big human photo hero with headline overlaid, Brightway structure end-to-end</div>
+      <div class="dv-card" style="width:1360px;background:#FCFCF9;color:#101408">
+
+        <!-- nav -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 64px">
+          <div style="font-weight:800;font-size:22px;letter-spacing:-0.02em">smb<span style="color:#20713A">X</span></div>
+          <div style="display:flex;gap:40px;font-size:15px;font-weight:500;color:rgba(16,20,8,.72)">
+            <a href="#2a" style="color:rgba(16,20,8,.72)">How it works</a>
+            <a href="#2a" style="color:rgba(16,20,8,.72)">Who it's for</a>
+            <a href="#2a" style="color:rgba(16,20,8,.72)">Why smbX</a>
+          </div>
+          <div style="display:flex;gap:10px">
+            <div style="border:1.5px solid rgba(16,20,8,.25);padding:11px 24px;border-radius:99px;font-size:14.5px;font-weight:600;cursor:pointer" style-hover="border-color:#101408">Book a call</div>
+            <div style="background:#20713A;color:#FCFCF9;padding:12px 24px;border-radius:99px;font-size:14.5px;font-weight:700;cursor:pointer" style-hover="background:#101408">Talk to Yulia</div>
+          </div>
+        </div>
+
+        <!-- photo hero -->
+        <div style="margin:12px 24px 0;border-radius:24px;overflow:hidden;position:relative;background:repeating-linear-gradient(-45deg,#E8E6DC,#E8E6DC 14px,#EFEDE4 14px,#EFEDE4 28px);min-height:640px;display:flex;align-items:flex-end">
+          <div style="position:absolute;top:24px;right:28px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:rgba(16,20,8,.45);background:rgba(252,252,249,.75);padding:6px 12px;border-radius:6px">photo: owner-operator at their business, warm light</div>
+          <div style="position:relative;padding:64px;max-width:820px">
+            <div style="font-size:88px;line-height:.98;font-weight:800;letter-spacing:-0.04em;text-wrap:balance">The smarter way to buy a company.</div>
+            <div style="margin-top:26px;max-width:560px;font-size:19px;line-height:1.55;color:rgba(16,20,8,.72)">Not the way banks do it, and not alone. One senior operator with an AI engine behind him — on your side, and only yours, from thesis to close.</div>
+            <div style="margin-top:36px;display:flex;gap:12px;align-items:center">
+              <div style="background:#20713A;color:#fff;padding:16px 32px;border-radius:99px;font-size:16px;font-weight:700;cursor:pointer" style-hover="background:#101408">Start with Yulia →</div>
+              <div style="background:rgba(252,252,249,.9);border:1.5px solid rgba(16,20,8,.3);padding:15px 30px;border-radius:99px;font-size:16px;font-weight:600;cursor:pointer" style-hover="border-color:#101408">Book a call</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- tagline ticker -->
+        <div style="padding:34px 0;border-bottom:1px solid rgba(16,20,8,.1);margin-top:36px;overflow:hidden;white-space:nowrap;font-size:26px;font-weight:700;letter-spacing:-0.02em;color:rgba(16,20,8,.85)">
+          <span style="padding:0 28px">Buy the company. Skip the department.</span><span style="color:#20713A">●</span>
+          <span style="padding:0 28px">One buyer per target. Always.</span><span style="color:#20713A">●</span>
+          <span style="padding:0 28px">AI does the reading. You get the judgment.</span><span style="color:#20713A">●</span>
+          <span style="padding:0 28px">Senior attention. Zero overhead.</span>
+        </div>
+
+        <!-- numbered process -->
+        <div style="padding:96px 64px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.12em;color:#20713A;margin-bottom:18px">THE SMARTER WAY BEGINS HERE</div>
+          <div style="font-size:52px;font-weight:800;letter-spacing:-0.03em;max-width:720px;line-height:1.05">A simple process for a serious acquisition.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px;margin-top:64px">
+            <div style="background:#F4F3EC;border-radius:20px;padding:40px 36px">
+              <div style="width:52px;height:52px;border-radius:50%;background:#20713A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800">1</div>
+              <div style="font-size:24px;font-weight:700;margin-top:26px">Conversation</div>
+              <div style="font-size:16px;line-height:1.6;color:rgba(16,20,8,.65);margin-top:12px">Tell Yulia what you want to buy. She works your thesis overnight and books you with your advisor — a real senior practitioner, not a call center.</div>
+              <div style="margin-top:24px;font-weight:700;color:#20713A;font-size:15px;cursor:pointer">Talk to Yulia →</div>
+            </div>
+            <div style="background:#F4F3EC;border-radius:20px;padding:40px 36px">
+              <div style="width:52px;height:52px;border-radius:50%;background:#20713A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800">2</div>
+              <div style="font-size:24px;font-weight:700;margin-top:26px">Curated targets</div>
+              <div style="font-size:16px;line-height:1.6;color:rgba(16,20,8,.65);margin-top:12px">The engine maps your market — off-market first — and your advisor hand-picks the targets worth your time, with models and memos ready in days.</div>
+              <div style="margin-top:24px;font-weight:700;color:#20713A;font-size:15px;cursor:pointer">See how it works →</div>
+            </div>
+            <div style="background:#F4F3EC;border-radius:20px;padding:40px 36px">
+              <div style="width:52px;height:52px;border-radius:50%;background:#20713A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800">3</div>
+              <div style="font-size:24px;font-weight:700;margin-top:26px">Close with confidence</div>
+              <div style="font-size:16px;line-height:1.6;color:rgba(16,20,8,.65);margin-top:12px">Diligence triaged, price disciplined, negotiation run by someone on your side of the table — and only yours. Then we scale to zero.</div>
+              <div style="margin-top:24px;font-weight:700;color:#20713A;font-size:15px;cursor:pointer">Book a call →</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- lead form band -->
+        <div style="margin:0 24px 24px;border-radius:24px;background:#101408;color:#FCFCF9;padding:72px 64px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center">
+          <div>
+            <div style="font-size:48px;font-weight:800;letter-spacing:-0.03em;line-height:1.05">Ready to start looking?</div>
+            <div style="margin-top:18px;font-size:17px;line-height:1.6;color:rgba(252,252,249,.65)">Two minutes with Yulia and your market map is underway. No retainer to find out if we're a fit.</div>
+          </div>
+          <div style="background:#FCFCF9;color:#101408;border-radius:16px;padding:28px">
+            <div style="font-weight:700;font-size:18px">Let's talk.</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">
+              <div style="border:1px solid rgba(16,20,8,.2);border-radius:10px;padding:13px 16px;font-size:14.5px;color:rgba(16,20,8,.45)">I'm a… (family office, sponsor…)</div>
+              <div style="border:1px solid rgba(16,20,8,.2);border-radius:10px;padding:13px 16px;font-size:14.5px;color:rgba(16,20,8,.45)">What are you buying?</div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:10px">
+              <div style="flex:1;border:1px solid rgba(16,20,8,.2);border-radius:10px;padding:13px 16px;font-size:14.5px;color:rgba(16,20,8,.45)">Email</div>
+              <div style="background:#20713A;color:#fff;border-radius:99px;padding:13px 26px;font-size:14.5px;font-weight:700;cursor:pointer" style-hover="background:#101408">Get started</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ OPTION 2B — CENTERED TYPE + PHOTO BAND ============ -->
+    <div class="dv-opt" id="2b">
+      <div class="dv-olabel"><a class="dv-oid" href="#2b">2b</a>Lighter blend — keeps <a class="dv-oid" href="#1b">1b</a>'s centered radar hero, adds Brightway's photo band, process, and warmth below</div>
+      <div class="dv-card" style="width:1360px;background:#FCFCF9;color:#101408">
+
+        <!-- nav -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:24px 64px">
+          <div style="font-weight:800;font-size:22px;letter-spacing:-0.02em">smb<span style="color:#20713A">X</span></div>
+          <div style="display:flex;gap:40px;font-size:15px;font-weight:500;color:rgba(16,20,8,.72)">
+            <a href="#2b" style="color:rgba(16,20,8,.72)">How it works</a>
+            <a href="#2b" style="color:rgba(16,20,8,.72)">Who it's for</a>
+            <a href="#2b" style="color:rgba(16,20,8,.72)">Why smbX</a>
+          </div>
+          <div style="background:#101408;color:#FCFCF9;padding:12px 24px;border-radius:99px;font-size:14.5px;font-weight:600;cursor:pointer" style-hover="background:#20713A">Book a call</div>
+        </div>
+
+        <!-- centered hero (from 1b, warmed) -->
+        <div style="position:relative;padding:96px 64px 80px;text-align:center;overflow:hidden">
+          <div style="position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);width:1100px;height:1100px;border-radius:50%;border:1px solid rgba(16,20,8,.08);pointer-events:none"></div>
+          <div style="position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);width:800px;height:800px;border-radius:50%;border:1px solid rgba(16,20,8,.10);pointer-events:none"></div>
+          <div style="position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);width:540px;height:540px;border-radius:50%;border:1px solid rgba(16,20,8,.12);pointer-events:none"></div>
+          <div style="position:relative">
+            <div style="display:inline-flex;align-items:center;gap:10px;border:1px solid rgba(16,20,8,.18);border-radius:99px;padding:9px 20px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.1em;color:rgba(16,20,8,.65);background:rgba(252,252,249,.8)"><span style="width:7px;height:7px;border-radius:50%;background:#20713A"></span>BUY-SIDE ONLY · NEVER TWO-SIDED</div>
+            <div style="margin-top:40px;font-size:110px;line-height:.96;font-weight:800;letter-spacing:-0.04em;text-wrap:balance">Buy the company.<br>Skip the department.</div>
+            <div style="margin:36px auto 0;max-width:660px;font-size:20px;line-height:1.55;color:rgba(16,20,8,.68)">One senior operator, an AI engine that does the work of a full deal team, and a promise nobody else makes: one buyer per target, never the sell side.</div>
+            <div style="margin-top:40px;display:flex;gap:12px;justify-content:center">
+              <div style="background:#20713A;color:#fff;padding:17px 34px;border-radius:99px;font-size:16.5px;font-weight:700;cursor:pointer" style-hover="background:#101408">Start with Yulia →</div>
+              <div style="border:1.5px solid rgba(16,20,8,.3);padding:16px 32px;border-radius:99px;font-size:16.5px;font-weight:600;cursor:pointer" style-hover="border-color:#101408">Book a call</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- photo band with overlaid tagline (brightway move) -->
+        <div style="margin:24px;border-radius:24px;overflow:hidden;position:relative;background:repeating-linear-gradient(-45deg,#E8E6DC,#E8E6DC 14px,#EFEDE4 14px,#EFEDE4 28px);min-height:440px;display:flex;align-items:flex-end">
+          <div style="position:absolute;top:22px;right:26px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:rgba(16,20,8,.45);background:rgba(252,252,249,.75);padding:6px 12px;border-radius:6px">photo: advisor + owner walking a shop floor</div>
+          <div style="position:relative;padding:52px 56px;display:flex;align-items:center;justify-content:space-between;width:100%;box-sizing:border-box">
+            <div style="font-size:44px;font-weight:800;letter-spacing:-0.03em;max-width:620px;line-height:1.05">A person on your side. An engine at your back.</div>
+            <div style="background:rgba(252,252,249,.95);padding:15px 30px;border-radius:99px;font-size:15.5px;font-weight:700;cursor:pointer;flex:none" style-hover="background:#fff">Meet your advisor →</div>
+          </div>
+        </div>
+
+        <!-- compact process row -->
+        <div style="padding:72px 64px 96px">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid rgba(16,20,8,.9)">
+            <div style="padding:32px 32px 0 0;border-right:1px solid rgba(16,20,8,.1)"><div style="font-size:40px;font-weight:800;color:#20713A">1</div><div style="font-size:21px;font-weight:700;margin-top:12px">Conversation</div><div style="font-size:15.5px;line-height:1.55;color:rgba(16,20,8,.62);margin-top:8px">Yulia takes your thesis, works it overnight, and books your advisor call.</div></div>
+            <div style="padding:32px 32px 0;border-right:1px solid rgba(16,20,8,.1)"><div style="font-size:40px;font-weight:800;color:#20713A">2</div><div style="font-size:21px;font-weight:700;margin-top:12px">Curated targets</div><div style="font-size:15.5px;line-height:1.55;color:rgba(16,20,8,.62);margin-top:8px">The engine maps the market; your advisor hand-picks what's worth your time.</div></div>
+            <div style="padding:32px 0 0 32px"><div style="font-size:40px;font-weight:800;color:#20713A">3</div><div style="font-size:21px;font-weight:700;margin-top:12px">Close with confidence</div><div style="font-size:15.5px;line-height:1.55;color:rgba(16,20,8,.62);margin-top:8px">Diligence, price discipline, and negotiation — run by someone only on your side.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <p class="dv-next">Try next: "build the full site from <a class="dv-oid" href="#2a">2a</a>" · "use <a class="dv-oid" href="#2b">2b</a>'s hero with <a class="dv-oid" href="#2a">2a</a>'s process cards" · "warmer accent color"</p>
+</section>
+
+<section class="dv-turn" id="t1">
+  <div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">smbX landing — three directions. Paper white, precise lines, AI-lab. Placeholder founder/proof content until you send the resume + deal sheet.</span></div>
+  <div class="dv-opts">
+
+    <!-- ============ OPTION 1A — LAB LEDGER ============ -->
+    <div class="dv-opt" id="1a">
+      <div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Lab ledger — hairline grid, cobalt accent, Yulia as a command bar</div>
+      <div class="dv-card" style="width:1360px;background:#FBFBF8;color:#14140F">
+
+        <!-- nav -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:22px 56px;border-bottom:1px solid rgba(20,20,15,.14)">
+          <div style="font-weight:800;font-size:22px;letter-spacing:-0.02em">smb<span style="color:#2547D0">X</span></div>
+          <div style="display:flex;gap:36px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.06em;color:rgba(20,20,15,.7)">
+            <a href="#1a" style="color:rgba(20,20,15,.7)">HOW IT WORKS</a>
+            <a href="#1a" style="color:rgba(20,20,15,.7)">WHO IT'S FOR</a>
+            <a href="#1a" style="color:rgba(20,20,15,.7)">WHY smbX</a>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:rgba(20,20,15,.55)">TALK TO YULIA ↓</div>
+            <div style="background:#14140F;color:#FBFBF8;padding:11px 22px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer" style-hover="background:#2547D0">Book a call</div>
+          </div>
+        </div>
+
+        <!-- hero -->
+        <div style="padding:96px 56px 72px;border-bottom:1px solid rgba(20,20,15,.14);position:relative">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.14em;color:#2547D0;margin-bottom:32px">BUY-SIDE ONLY · CORPORATE DEVELOPMENT · ONE BUYER PER TARGET</div>
+          <div style="font-size:104px;line-height:.98;font-weight:800;letter-spacing:-0.035em;max-width:1100px;text-wrap:balance">A full deal team.<br>One senior operator.<br><span style="color:#2547D0">Your side only.</span></div>
+          <div style="margin-top:40px;max-width:640px;font-size:20px;line-height:1.55;color:rgba(20,20,15,.72)">smbX runs your acquisition from thesis to close — proprietary AI does the reading and the modeling, one accountable practitioner does the judgment and the negotiation. No analysts. No split loyalties. No idle overhead.</div>
+
+          <!-- Yulia command bar -->
+          <div style="margin-top:56px;max-width:840px">
+            <div style="display:flex;align-items:center;gap:14px;background:#FFFFFF;border:1.5px solid rgba(20,20,15,.9);border-radius:10px;padding:8px 8px 8px 22px;box-shadow:6px 6px 0 rgba(37,71,208,.12)">
+              <div style="width:9px;height:9px;border-radius:50%;background:#2547D0;flex:none"></div>
+              <div style="flex:1;font-size:17px;color:rgba(20,20,15,.45)">Tell Yulia what you want to buy — she'll start on your thesis and set up a call…</div>
+              <div style="background:#2547D0;color:#fff;padding:14px 26px;border-radius:7px;font-size:15px;font-weight:700;cursor:pointer" style-hover="background:#14140F">Start with Yulia →</div>
+            </div>
+            <div style="margin-top:14px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:rgba(20,20,15,.5)">YULIA IS smbX'S INTAKE AGENT — SHE GATHERS YOUR THESIS, THEN BOOKS YOUR ADVISOR CONVERSATION.</div>
+          </div>
+        </div>
+
+        <!-- ticker -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border-bottom:1px solid rgba(20,20,15,.14);font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.08em;color:rgba(20,20,15,.65)">
+          <div style="padding:18px 56px;border-right:1px solid rgba(20,20,15,.14)">ONE BUYER PER TARGET</div>
+          <div style="padding:18px 32px;border-right:1px solid rgba(20,20,15,.14)">NEVER THE SELL SIDE</div>
+          <div style="padding:18px 32px;border-right:1px solid rgba(20,20,15,.14)">SENIOR ON EVERY TASK</div>
+          <div style="padding:18px 32px">SCALES TO ZERO BETWEEN DEALS</div>
+        </div>
+
+        <!-- three flawed alternatives: ledger -->
+        <div style="padding:88px 56px 96px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:56px">
+            <div style="font-size:52px;font-weight:800;letter-spacing:-0.03em;line-height:1.05">You have three ways to buy<br>a company today. All flawed.</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:rgba(20,20,15,.5)">01 — THE PROBLEM</div>
+          </div>
+          <div style="border-top:1px solid rgba(20,20,15,.9)">
+            <div style="display:grid;grid-template-columns:220px 1fr 380px;gap:40px;padding:34px 0;border-bottom:1px solid rgba(20,20,15,.14);align-items:baseline">
+              <div style="font-weight:700;font-size:20px">Build a team</div>
+              <div style="font-size:16.5px;line-height:1.55;color:rgba(20,20,15,.7)">A lean two-person corp-dev function runs $600K–$1M+ a year, fully loaded — a fixed cost attached to an occasional activity. It sits idle between deals.</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:rgba(20,20,15,.55)">FIXED COST · IDLE CAPACITY</div>
+            </div>
+            <div style="display:grid;grid-template-columns:220px 1fr 380px;gap:40px;padding:34px 0;border-bottom:1px solid rgba(20,20,15,.14);align-items:baseline">
+              <div style="font-weight:700;font-size:20px">Hire a bank</div>
+              <div style="font-size:16.5px;line-height:1.55;color:rgba(20,20,15,.7)">Retainers, success fees with long tails, and your day-to-day work handed to junior analysts — at a firm chasing similar deals for other clients at the same time.</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:rgba(20,20,15,.55)">JUNIOR HANDS · SPLIT LOYALTY</div>
+            </div>
+            <div style="display:grid;grid-template-columns:220px 1fr 380px;gap:40px;padding:34px 0;border-bottom:1px solid rgba(20,20,15,.14);align-items:baseline">
+              <div style="font-weight:700;font-size:20px">Go it alone</div>
+              <div style="font-size:16.5px;line-height:1.55;color:rgba(20,20,15,.7)">No fees — and no bandwidth, no process, and an information disadvantage against a seller's broker who does this every week.</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:rgba(20,20,15,.55)">OUTGUNNED · OUT OF TIME</div>
+            </div>
+            <div style="display:grid;grid-template-columns:220px 1fr 380px;gap:40px;padding:34px 0;border-bottom:1px solid rgba(20,20,15,.9);align-items:baseline;background:linear-gradient(90deg,rgba(37,71,208,.06),rgba(37,71,208,0))">
+              <div style="font-weight:800;font-size:20px;color:#2547D0">smbX</div>
+              <div style="font-size:16.5px;line-height:1.55;color:rgba(20,20,15,.85)">One senior operator with an AI engine doing the work of a full deal team — engaged per deal, aligned to you, and gone when you're done.</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2547D0">ENGINE + PRACTITIONER</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- footer CTA strip -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:30px 56px;background:#14140F;color:#FBFBF8">
+          <div style="font-size:24px;font-weight:700;letter-spacing:-0.02em">Have a thesis? Yulia's listening.</div>
+          <div style="display:flex;gap:14px">
+            <div style="border:1px solid rgba(251,251,248,.4);padding:12px 24px;border-radius:6px;font-size:14.5px;font-weight:600;cursor:pointer" style-hover="border-color:#fff">Book a call</div>
+            <div style="background:#2547D0;padding:12px 24px;border-radius:6px;font-size:14.5px;font-weight:700;cursor:pointer" style-hover="background:#3A5CE8">Start with Yulia →</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ OPTION 1B — CENTERED SIGNAL ============ -->
+    <div class="dv-opt" id="1b">
+      <div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Centered signal — oversized centered type, radar visual, green accent, Yulia as a chat card</div>
+      <div class="dv-card" style="width:1360px;background:#FCFCF9;color:#101408">
+
+        <!-- nav -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:24px 64px">
+          <div style="font-weight:800;font-size:22px;letter-spacing:-0.02em">smb<span style="color:#20713A">X</span></div>
+          <div style="display:flex;gap:40px;font-size:15px;font-weight:500;color:rgba(16,20,8,.72)">
+            <a href="#1b" style="color:rgba(16,20,8,.72)">How it works</a>
+            <a href="#1b" style="color:rgba(16,20,8,.72)">Who it's for</a>
+            <a href="#1b" style="color:rgba(16,20,8,.72)">Why smbX</a>
+          </div>
+          <div style="background:#101408;color:#FCFCF9;padding:12px 24px;border-radius:99px;font-size:14.5px;font-weight:600;cursor:pointer" style-hover="background:#20713A">Book a call</div>
+        </div>
+
+        <!-- hero -->
+        <div style="position:relative;padding:110px 64px 90px;text-align:center;overflow:hidden">
+          <!-- radar rings -->
+          <div style="position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);width:1150px;height:1150px;border-radius:50%;border:1px solid rgba(16,20,8,.08);pointer-events:none"></div>
+          <div style="position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);width:860px;height:860px;border-radius:50%;border:1px solid rgba(16,20,8,.10);pointer-events:none"></div>
+          <div style="position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);width:580px;height:580px;border-radius:50%;border:1px solid rgba(16,20,8,.12);pointer-events:none"></div>
+          <div style="position:absolute;left:19%;top:24%;width:10px;height:10px;border-radius:50%;background:#20713A;opacity:.85"></div>
+          <div style="position:absolute;left:78%;top:18%;width:7px;height:7px;border-radius:50%;background:#20713A;opacity:.5"></div>
+          <div style="position:absolute;left:86%;top:58%;width:9px;height:9px;border-radius:50%;background:#20713A;opacity:.7"></div>
+          <div style="position:absolute;left:11%;top:66%;width:7px;height:7px;border-radius:50%;background:#20713A;opacity:.45"></div>
+
+          <div style="position:relative">
+            <div style="display:inline-flex;align-items:center;gap:10px;border:1px solid rgba(16,20,8,.18);border-radius:99px;padding:9px 20px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.1em;color:rgba(16,20,8,.65);background:rgba(252,252,249,.8)"><span style="width:7px;height:7px;border-radius:50%;background:#20713A"></span>BUY-SIDE ONLY · NEVER TWO-SIDED</div>
+            <div style="margin-top:44px;font-size:118px;line-height:.96;font-weight:800;letter-spacing:-0.04em;text-wrap:balance">Buy the company.<br>Skip the department.</div>
+            <div style="margin:40px auto 0;max-width:680px;font-size:20px;line-height:1.55;color:rgba(16,20,8,.68)">Corporate development as a service: an AI engine that does the sourcing, reading, and modeling — driven by one senior practitioner who runs your deal from thesis to close.</div>
+
+            <!-- Yulia chat card -->
+            <div style="margin:56px auto 0;max-width:620px;background:#fff;border:1px solid rgba(16,20,8,.14);border-radius:16px;box-shadow:0 24px 60px -24px rgba(16,20,8,.18);text-align:left;overflow:hidden">
+              <div style="display:flex;align-items:center;gap:10px;padding:16px 22px;border-bottom:1px solid rgba(16,20,8,.08)">
+                <div style="width:30px;height:30px;border-radius:50%;background:#20713A;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">Y</div>
+                <div style="font-weight:600;font-size:14.5px">Yulia</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(16,20,8,.45);letter-spacing:.08em">smbX INTAKE</div>
+                <div style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;color:#20713A"><span style="width:7px;height:7px;border-radius:50%;background:#20713A"></span>online</div>
+              </div>
+              <div style="padding:20px 22px;font-size:15.5px;line-height:1.5;color:rgba(16,20,8,.8)">Hi — I'm Yulia. Tell me what you're looking to acquire and I'll start mapping the market tonight. Then I'll book you with your advisor.</div>
+              <div style="display:flex;gap:10px;padding:0 22px 20px">
+                <div style="flex:1;border:1px solid rgba(16,20,8,.18);border-radius:10px;padding:13px 16px;font-size:14.5px;color:rgba(16,20,8,.4)">e.g. "HVAC roll-up in the Southeast, $2–5M EBITDA"</div>
+                <div style="background:#20713A;color:#fff;border-radius:10px;padding:13px 22px;font-size:14.5px;font-weight:700;cursor:pointer" style-hover="background:#101408">Send</div>
+              </div>
+            </div>
+            <div style="margin-top:18px;font-size:14px;color:rgba(16,20,8,.5)">Prefer a human first? <a href="#1b" style="color:#20713A;font-weight:600;text-decoration:underline">Book a call now →</a></div>
+          </div>
+        </div>
+
+        <!-- pipeline -->
+        <div style="padding:96px 64px;border-top:1px solid rgba(16,20,8,.1)">
+          <div style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.12em;color:#20713A;margin-bottom:20px">THESIS → CLOSE</div>
+          <div style="text-align:center;font-size:48px;font-weight:800;letter-spacing:-0.03em;margin-bottom:64px">Not a list of names. A closed deal.</div>
+          <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:0;border-top:1px solid rgba(16,20,8,.9)">
+            <div style="padding:28px 20px 0;border-right:1px solid rgba(16,20,8,.1)"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:rgba(16,20,8,.45)">01</div><div style="font-weight:700;font-size:18px;margin-top:10px">Thesis</div><div style="font-size:14px;line-height:1.5;color:rgba(16,20,8,.6);margin-top:8px">We sharpen what you're buying and why.</div></div>
+            <div style="padding:28px 20px 0;border-right:1px solid rgba(16,20,8,.1)"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:rgba(16,20,8,.45)">02</div><div style="font-weight:700;font-size:18px;margin-top:10px">Sourcing</div><div style="font-size:14px;line-height:1.5;color:rgba(16,20,8,.6);margin-top:8px">The engine maps the market, off-market first.</div></div>
+            <div style="padding:28px 20px 0;border-right:1px solid rgba(16,20,8,.1)"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:rgba(16,20,8,.45)">03</div><div style="font-weight:700;font-size:18px;margin-top:10px">Analysis</div><div style="font-size:14px;line-height:1.5;color:rgba(16,20,8,.6);margin-top:8px">Models and memos in days, not weeks.</div></div>
+            <div style="padding:28px 20px 0;border-right:1px solid rgba(16,20,8,.1)"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:rgba(16,20,8,.45)">04</div><div style="font-weight:700;font-size:18px;margin-top:10px">Diligence</div><div style="font-size:14px;line-height:1.5;color:rgba(16,20,8,.6);margin-top:8px">AI triages the data room; a senior eye verifies.</div></div>
+            <div style="padding:28px 20px 0;border-right:1px solid rgba(16,20,8,.1)"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:rgba(16,20,8,.45)">05</div><div style="font-weight:700;font-size:18px;margin-top:10px">Negotiation</div><div style="font-size:14px;line-height:1.5;color:rgba(16,20,8,.6);margin-top:8px">Your practitioner sits on your side of the table.</div></div>
+            <div style="padding:28px 20px 0"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#20713A">06</div><div style="font-weight:800;font-size:18px;margin-top:10px;color:#20713A">Close</div><div style="font-size:14px;line-height:1.5;color:rgba(16,20,8,.6);margin-top:8px">Signed — and we scale to zero until your next one.</div></div>
+          </div>
+        </div>
+
+        <!-- segments strip -->
+        <div style="padding:0 64px 96px">
+          <div style="font-size:15px;color:rgba(16,20,8,.55);margin-bottom:22px">Built for buyers without a standing deal team:</div>
+          <div style="display:flex;flex-wrap:wrap;gap:12px">
+            <a href="#1b" style="border:1px solid rgba(16,20,8,.2);border-radius:99px;padding:13px 26px;font-size:15.5px;font-weight:600;color:#101408">Family offices →</a>
+            <a href="#1b" style="border:1px solid rgba(16,20,8,.2);border-radius:99px;padding:13px 26px;font-size:15.5px;font-weight:600;color:#101408">Independent sponsors →</a>
+            <a href="#1b" style="border:1px solid rgba(16,20,8,.2);border-radius:99px;padding:13px 26px;font-size:15.5px;font-weight:600;color:#101408">Lower-middle-market PE →</a>
+            <a href="#1b" style="border:1px solid rgba(16,20,8,.2);border-radius:99px;padding:13px 26px;font-size:15.5px;font-weight:600;color:#101408">Searchers &amp; solo acquirers →</a>
+            <a href="#1b" style="border:1px solid rgba(16,20,8,.2);border-radius:99px;padding:13px 26px;font-size:15.5px;font-weight:600;color:#101408">Operators buying competitors →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ OPTION 1C — EDITORIAL SPLIT ============ -->
+    <div class="dv-opt" id="1c">
+      <div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>Editorial split — serif display, left index rail, signal orange, loyalty pledge as the hero</div>
+      <div class="dv-card" style="width:1360px;background:#FAF9F5;color:#181611">
+
+        <!-- nav -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:22px 48px;border-bottom:1px solid rgba(24,22,17,.16)">
+          <div style="font-weight:800;font-size:22px;letter-spacing:-0.02em">smb<span style="color:#C74E1D">X</span></div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.1em;color:rgba(24,22,17,.55)">BUY-SIDE CORPORATE DEVELOPMENT · EST. 2026</div>
+          <div style="display:flex;gap:10px">
+            <div style="border:1px solid rgba(24,22,17,.35);padding:11px 20px;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer" style-hover="border-color:#181611">Book a call</div>
+            <div style="background:#C74E1D;color:#FAF9F5;padding:11px 20px;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer" style-hover="background:#181611">Talk to Yulia</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:280px 1fr">
+          <!-- left rail -->
+          <div style="border-right:1px solid rgba(24,22,17,.16);padding:48px 32px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:2.4;color:rgba(24,22,17,.55)">
+            <div style="color:#C74E1D">→ 00 THE PLEDGE</div>
+            <div>01 THE PROBLEM</div>
+            <div>02 THE ENGINE</div>
+            <div>03 WHO IT'S FOR</div>
+            <div>04 THE PRACTITIONER</div>
+            <div>05 START A DEAL</div>
+            <div style="margin-top:60px;border-top:1px solid rgba(24,22,17,.16);padding-top:24px;line-height:1.9">YULIA STATUS:<br><span style="color:#181611">● LISTENING</span></div>
+          </div>
+
+          <!-- main -->
+          <div>
+            <!-- hero / pledge -->
+            <div style="padding:88px 64px 76px;border-bottom:1px solid rgba(24,22,17,.16)">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.12em;color:rgba(24,22,17,.5);margin-bottom:36px">00 — THE PLEDGE, IN THE ENGAGEMENT LETTER AND ON THE HOMEPAGE</div>
+              <div style="font-family:'Newsreader',serif;font-size:92px;line-height:1.04;letter-spacing:-0.02em;font-weight:400;max-width:900px">One buyer per target. <em style="color:#C74E1D">Never</em> the sell side. <em style="color:#C74E1D">Never</em> two-sided.</div>
+              <div style="margin-top:44px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start">
+                <div style="font-size:18.5px;line-height:1.6;color:rgba(24,22,17,.72)">Everyone else in this market sells the same deal twice — or hands your mandate to an analyst. smbX is one senior operator and a proprietary AI engine, working for you and only you, from thesis to close.</div>
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div style="display:flex;align-items:center;gap:14px;background:#fff;border:1px solid rgba(24,22,17,.9);padding:8px 8px 8px 20px">
+                    <div style="flex:1;font-size:15.5px;color:rgba(24,22,17,.45)">Describe your acquisition to Yulia…</div>
+                    <div style="background:#181611;color:#FAF9F5;padding:12px 22px;font-size:14px;font-weight:700;cursor:pointer" style-hover="background:#C74E1D">Begin →</div>
+                  </div>
+                  <div style="font-size:13px;color:rgba(24,22,17,.5)">She'll work your thesis overnight, then book time with your advisor. Or <a href="#1c" style="text-decoration:underline;color:#181611">book directly</a>.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- who it's for: numbered editorial list -->
+            <div style="padding:72px 64px 88px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:48px">
+                <div style="font-family:'Newsreader',serif;font-size:44px;font-weight:400;letter-spacing:-0.01em">Whose side we take</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:rgba(24,22,17,.5)">03 — WHO IT'S FOR</div>
+              </div>
+              <div style="border-top:1px solid rgba(24,22,17,.9)">
+                <div style="display:grid;grid-template-columns:70px 320px 1fr 40px;gap:28px;padding:26px 0;border-bottom:1px solid rgba(24,22,17,.16);align-items:baseline">
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#C74E1D">i.</div>
+                  <div style="font-weight:700;font-size:19px">Family offices</div>
+                  <div style="font-size:15.5px;line-height:1.55;color:rgba(24,22,17,.65)">Direct-deal control without building a deal team. Institutional diligence, on demand.</div>
+                  <div style="color:#C74E1D">→</div>
+                </div>
+                <div style="display:grid;grid-template-columns:70px 320px 1fr 40px;gap:28px;padding:26px 0;border-bottom:1px solid rgba(24,22,17,.16);align-items:baseline">
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#C74E1D">ii.</div>
+                  <div style="font-weight:700;font-size:19px">Independent sponsors</div>
+                  <div style="font-size:15.5px;line-height:1.55;color:rgba(24,22,17,.65)">Control the deal before you raise a dollar — with materials capital partners say yes to.</div>
+                  <div style="color:#C74E1D">→</div>
+                </div>
+                <div style="display:grid;grid-template-columns:70px 320px 1fr 40px;gap:28px;padding:26px 0;border-bottom:1px solid rgba(24,22,17,.16);align-items:baseline">
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#C74E1D">iii.</div>
+                  <div style="font-weight:700;font-size:19px">Lower-middle-market PE</div>
+                  <div style="font-size:15.5px;line-height:1.55;color:rgba(24,22,17,.65)">Proprietary add-on flow and senior execution capacity — without a million-dollar BD build.</div>
+                  <div style="color:#C74E1D">→</div>
+                </div>
+                <div style="display:grid;grid-template-columns:70px 320px 1fr 40px;gap:28px;padding:26px 0;border-bottom:1px solid rgba(24,22,17,.16);align-items:baseline">
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#C74E1D">iv.</div>
+                  <div style="font-weight:700;font-size:19px">Searchers &amp; solo acquirers</div>
+                  <div style="font-size:15.5px;line-height:1.55;color:rgba(24,22,17,.65)">A senior deal team in your corner for your first — and biggest — acquisition.</div>
+                  <div style="color:#C74E1D">→</div>
+                </div>
+                <div style="display:grid;grid-template-columns:70px 320px 1fr 40px;gap:28px;padding:26px 0;border-bottom:1px solid rgba(24,22,17,.16);align-items:baseline">
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#C74E1D">v.</div>
+                  <div style="font-weight:700;font-size:19px">Operators buying competitors</div>
+                  <div style="font-size:15.5px;line-height:1.55;color:rgba(24,22,17,.65)">Discreet third-party approaches, objective pricing, a repeatable playbook — deal by deal.</div>
+                  <div style="color:#C74E1D">→</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <p class="dv-next">Try next: "build the full landing page from <a class="dv-oid" href="#1a">1a</a>" · "put the pledge section from <a class="dv-oid" href="#1c">1c</a> into <a class="dv-oid" href="#1b">1b</a>" · "show me the Yulia chat flow expanded"</p>
+</section>
+
+</x-dc>
+</body>
+</html>
