@@ -10,11 +10,18 @@ Governing doc: **`THE_LINE_POLICY.md` v2** (v1 archived at
 `docs/_archive/THE_LINE_POLICY_v1.md`). What changed in the repo:
 
 - **Practice mode** (`server/services/practiceMode.ts`, default ON): team-only
-  auth (`TEAM_ALLOWLIST`), perimeter middleware on `/api` + `/mcp`, enterprise
-  entitlements for the team, anonymous chat + Stripe checkout 410'd.
+  auth (`TEAM_ALLOWLIST`; solo = Paul for now), perimeter middleware on `/api` +
+  `/mcp`, enterprise entitlements for the team, anonymous chat + Stripe
+  checkout 410'd.
+- **External agent surface MOTHBALLED** (Paul, 2026-07-11): `/mcp` transport,
+  discovery documents, MCP OAuth, public spec/OpenAPI → 410 in practice mode;
+  code intact for a deliberate reopen.
 - **Logged-out surface** is one page: `client/src/marketing/PracticeDoor.tsx`.
   The liquid-glass product-marketing pages (`marketing/pages/`) and legacy Ramp
-  pages are UNROUTED but kept as a repurposing pool.
+  pages are UNROUTED but kept as a repurposing pool — **Paul intends heavy
+  emphasis on marketing + client conversion for the practice site as a coming
+  phase**, so treat that machinery (AppPhase morph shell, Dock, Thread,
+  anonymous-funnel client code) as preserved-for-repurposing, not dead.
 - **Compensation**: buy-side retainer + buy-side success fee per engagement
   letter (counsel confirmation pending — see THE LINE v2). Everything below
   about product pricing/subscriptions is historical; `SMBX_PRICING_LOCKED.md`

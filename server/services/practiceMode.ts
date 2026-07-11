@@ -108,3 +108,38 @@ export function practicePerimeter(req: Request, res: Response, next: NextFunctio
 export function retiredSurface(_req: Request, res: Response) {
   res.status(410).json({ error: 'This surface was retired. smbX.ai now operates as a private buy-side practice.' });
 }
+
+// ─── Mothballed external agent surface ───────────────────────
+//
+// The DEFINITIVE distribution surfaces — the /mcp transport, agent/MCP
+// discovery documents, the MCP OAuth rail, and the public spec/OpenAPI
+// endpoints — were built to sell the substrate to external agents. Paul
+// mothballed them on 2026-07-11: disabled while practice mode is on, code
+// kept intact so the practice can reopen them deliberately. The operational
+// core (deals, deliverables, chat, models, exports, share links) is not
+// behind this guard.
+const MOTHBALLED_PREFIXES = [
+  '/mcp',
+  '/server.json',
+  '/.well-known/agent-card.json',
+  '/.well-known/definitive.json',
+  '/.well-known/definitive-schemas.json',
+  '/.well-known/mcp',
+  '/.well-known/oauth-protected-resource',
+  '/.well-known/oauth-authorization-server',
+  '/.well-known/openid-configuration',
+  '/oauth',
+  '/api/agent-card',
+  '/api/definitive',
+  '/definitive',
+];
+
+export function mothballedAgentSurface(req: Request, res: Response, next: NextFunction) {
+  if (!practiceModeEnabled()) return next();
+  const p = req.path;
+  const hit = MOTHBALLED_PREFIXES.some(base => p === base || p.startsWith(base + '/'));
+  if (!hit) return next();
+  res.status(410).json({
+    error: 'This surface is mothballed. smbX.ai operates as a private buy-side practice; external agent access is disabled.',
+  });
+}

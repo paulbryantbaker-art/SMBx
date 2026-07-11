@@ -67,6 +67,8 @@ The app itself charges nothing. **Practice mode** (`server/services/practiceMode
 - `practicePerimeter` middleware 403s any JWT belonging to a non-team identity (covers `/api` and `/mcp`, including pre-pivot accounts and external agent keys). Tokenless requests fall through to each route's own auth, so token-link share surfaces keep working.
 - Team members get enterprise-level entitlements (`getUserPlan` short-circuit) — no paywall, no free-deliverable gate.
 - `/api/chat/anonymous` and `/api/stripe` (except the webhook) return 410.
+- **The external agent surface is mothballed (Paul, 2026-07-11):** `/mcp`, agent/MCP discovery (`/.well-known/*`, `/server.json`), the MCP OAuth rail, and the public spec/OpenAPI endpoints return 410 in practice mode (`mothballedAgentSurface`). Code kept intact — reopen deliberately, never by accident.
+- The operational core is NOT gated beyond team auth: deals, chat, deliverables, data room, exports/PDF, share links, models, sourcing all run at full capability — these are the practice's working instruments.
 - The retired subscription machinery (`subscriptionService.ts`, `lib/pricing.ts`, Stripe envs) stays in the tree, dormant.
 
 ## Journeys, Stages, and Deal-Mechanics Gates

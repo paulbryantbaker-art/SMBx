@@ -4,7 +4,7 @@ import path from 'path';
 import postgres from 'postgres';
 import { fileURLToPath } from 'url';
 import { optionalAuth, requireAuth } from './middleware/auth.js';
-import { practiceModeEnabled, practicePerimeter, retiredSurface } from './services/practiceMode.js';
+import { practiceModeEnabled, practicePerimeter, retiredSurface, mothballedAgentSurface } from './services/practiceMode.js';
 import { authRouter } from './routes/auth.js';
 import { canvasTabsRouter } from './routes/canvasTabs.js';
 import { docViewsRouter } from './routes/docViews.js';
@@ -181,6 +181,11 @@ app.use(express.urlencoded({ extended: false }));
 // and /mcp alike, including pre-pivot accounts and external agent keys.
 // Tokenless requests fall through to each route's own auth.
 app.use(practicePerimeter);
+
+// ─── 2b. Mothballed external agent surface (2026-07-11) ────
+// /mcp transport, agent/MCP discovery, MCP OAuth, and public spec/OpenAPI
+// endpoints return 410 in practice mode — disabled, not deleted.
+app.use(mothballedAgentSurface);
 
 // ─── 2. API routes (public) ────────────────────────────────
 app.get('/api/health', (_req, res) => {
