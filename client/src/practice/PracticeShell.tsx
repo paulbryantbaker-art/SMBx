@@ -59,7 +59,13 @@ export default function PracticeShell({ home = false, children }: { home?: boole
             </div>
           </div>
         </div>
-        <div className="pd-footer-legal">© 2026 smbX. Buy-side only, by design.</div>
+        <div className="pd-footer-legal">
+          © 2026 smbX. Buy-side only, by design.
+          <span style={{ margin: '0 8px' }}>·</span>
+          <a href="/legal/terms" style={{ color: 'var(--pd-tert)' }}>Terms</a>
+          <span style={{ margin: '0 8px' }}>·</span>
+          <a href="/legal/privacy" style={{ color: 'var(--pd-tert)' }}>Privacy</a>
+        </div>
       </footer>
     </div>
   );
