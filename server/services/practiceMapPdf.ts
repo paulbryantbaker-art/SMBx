@@ -7,14 +7,35 @@
  * external resources (no font fetch to flake at render time), no charts.
  * Shares the Puppeteer singleton with the premium deliverable renderer.
  */
+import fs from 'fs';
+import path from 'path';
 import { getBrowser } from './premiumPdfRenderer.js';
 import type { IntakeMap } from './practiceIntake.js';
 
 const esc = (v: string): string =>
   v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+/** The header wordmark (smbX.ai), embedded as a data URI so the PDF stays
+ *  self-contained. Falls back to a typographic mark if the file is missing. */
+function logoDataUri(): string | null {
+  const candidates = [
+    path.join(process.cwd(), 'dist', 'client', 'logo-coral-x.png'),
+    path.join(process.cwd(), 'client', 'public', 'logo-coral-x.png'),
+  ];
+  for (const p of candidates) {
+    try {
+      return `data:image/png;base64,${fs.readFileSync(p).toString('base64')}`;
+    } catch { /* try next */ }
+  }
+  return null;
+}
+
 function mapHtml(map: IntakeMap, generatedAt: string): string {
   const pushback = map.verdict === 'PUSHBACK';
+  const logo = logoDataUri();
+  const mark = logo
+    ? `<img src="${logo}" alt="smbX.ai" style="height:20px;width:auto;display:block;">`
+    : `<div class="mark">smb<span class="x">X</span>.ai</div>`;
   const funnel = map.funnel
     .map(
       s => `
@@ -43,7 +64,7 @@ function mapHtml(map: IntakeMap, generatedAt: string): string {
     padding: 52px 56px 40px;
   }
   .mono { font-family: 'SF Mono', 'Cascadia Mono', Consolas, Menlo, monospace; }
-  .head { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 14px; border-bottom: 2px solid #222222; }
+  .head { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 2px solid #222222; }
   .mark { font-weight: 800; font-size: 17px; letter-spacing: -0.02em; }
   .mark .x { color: #E61E4D; }
   .headmeta { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: #9A9A9A; text-align: right; }
@@ -70,7 +91,7 @@ function mapHtml(map: IntakeMap, generatedAt: string): string {
 </head>
 <body>
   <div class="head">
-    <div class="mark">smb<span class="x">X</span></div>
+    ${mark}
     <div class="headmeta">PRELIMINARY MARKET READ<br>${esc(generatedAt.toUpperCase())}</div>
   </div>
   <div class="title">${esc(map.title)}</div>
