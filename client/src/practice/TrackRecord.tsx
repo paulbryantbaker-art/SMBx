@@ -142,8 +142,8 @@ export default function TrackRecord() {
         <div style={{ position: 'relative', maxWidth: 1080, margin: '0 auto', textAlign: 'center' }}>
           <h1 className="pd-h1 pd-h1-seg" style={{ margin: 0 }}>About 150 deals. One side of the table.</h1>
           <div className="pd-sub" style={{ margin: '38px auto 0', maxWidth: 660 }}>
-            A selection of the acquisitions our founder captained — sourced, negotiated, closed,
-            and integrated — before smbX.
+            A selection of the acquisitions our firm's leadership has captained — sourced,
+            negotiated, closed, and integrated — prior to smbX.
           </div>
         </div>
       </section>
@@ -202,7 +202,7 @@ export default function TrackRecord() {
       {/* ── Closer ── */}
       <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(70px, 8vw, 120px)', paddingBottom: 'clamp(30px, 4vw, 60px)' }}>
         <div style={{ fontSize: 18, lineHeight: 1.6, color: 'var(--pd-body)' }}>
-          Thirty minutes with Paul. Confidential, no retainer.
+          Thirty minutes with our team. Confidential, no retainer.
         </div>
         <div style={{ marginTop: 28 }}>
           <a className="pd-pill-primary pd-pill-lg" href={bookHref()} target={bookTarget()} rel={bookTarget() ? 'noreferrer' : undefined}>

@@ -1,5 +1,7 @@
 /**
- * The Yulia intake card — the landing page's core conversion mechanism.
+ * The intake card — publicly the "smbX Target Mapping Engine" (Paul's copy
+ * update, 2026-07-12: the Yulia name stays app-side; this surface speaks as
+ * the firm's system). The landing page's core conversion mechanism.
  *
  * Market Map spec (2026-07-12): the visitor describes a thesis; Yulia
  * delivers an 8-block MARKET MAP that assembles in front of them as the
@@ -34,28 +36,32 @@ type PartialMap = Partial<Omit<MapData, 'funnel'>> & { funnel: FunnelStep[] };
 interface Msg { from: 'y' | 'u'; text?: string; map?: MapData; }
 
 const OPENING =
-  "Hi, I'm Yulia. I can start mapping your acquisition thesis immediately — it takes only a few minutes. Ready?";
+  "Let's outline your acquisition thesis to generate a preliminary market map. Our engine takes about two minutes to process your criteria. Ready?";
 
 const HINTS = [
-  'e.g. "HVAC roll-up in the Southeast"',
-  'e.g. "$2–5M EBITDA, within 4 hours of Atlanta"',
-  'you@firm.com',
-  'Yulia is on it — book the call above',
+  'Sector & Strategy (e.g., "HVAC roll-up in the Southeast")',
+  'Size & Geography (e.g., "$2–5M EBITDA, within 4 hours of Atlanta")',
+  'Delivery Email (e.g., "director@fund.com")',
+  'Generation complete. Your map is being compiled. Book your consultation above.',
 ];
 
+/** The send button rotates with the step (Paul's copy update, Y-4). */
+const SEND_LABELS = ['Continue', 'Generate Map', 'Send', 'Send'];
+
 /** Narration for the block currently being written — shown while the map
- *  streams, so the work is legible without pretending anything. */
+ *  streams, so the work is legible without pretending anything. System
+ *  voice (Target Mapping Engine), not a persona. */
 const NARRATE: Record<string, string> = {
-  TITLE: 'Locking your thesis…',
-  THESIS: 'Locking your thesis…',
-  VERDICT: 'Calling it straight…',
+  TITLE: 'Processing your thesis…',
+  THESIS: 'Processing your thesis…',
+  VERDICT: 'Running the verdict…',
   ANSWER: 'Writing the straight answer…',
   U1: 'Mapping the universe…',
   U2: 'Filtering for your size band…',
-  U3: 'Screening for real fit…',
-  ECON: 'Pulling the economics…',
+  U3: 'Screening for fit…',
+  ECON: 'Compiling the economics…',
   COMP: 'Reading the competitive field…',
-  INSIGHT: 'Writing the part most buyers miss…',
+  INSIGHT: 'Isolating what most buyers miss…',
   KILL: 'Stress-testing the thesis…',
 };
 
@@ -219,7 +225,7 @@ function MapDoc({
       )}
       {map.insight && (
         <div className="map-insight" style={rise()}>
-          <div className="k">{pushback ? 'WHERE THE SAME CAPITAL WORKS BETTER' : 'WHAT MOST BUYERS MISS'}</div>
+          <div className="k">{pushback ? 'WHERE CAPITAL WORKS BETTER' : 'WHAT MOST BUYERS MISS'}</div>
           <div className="v">{map.insight}</div>
         </div>
       )}
@@ -297,7 +303,9 @@ export default function YuliaIntake() {
   }, [messages, pending, live]);
 
   const userTurns = messages.filter(m => m.from === 'u').length;
-  const hint = done ? HINTS[3] : HINTS[Math.min(userTurns, 2)];
+  const step = done ? 3 : Math.min(userTurns, 2);
+  const hint = HINTS[step];
+  const sendLabel = SEND_LABELS[step];
 
   const trackMap = (verdict: string) => {
     if (mapTracked.current) return;
@@ -349,10 +357,10 @@ export default function YuliaIntake() {
           if (!res.ok) throw new Error(String(res.status));
           applyFinal(await res.json(), false);
         } catch {
-          setMessages(m => [...m, { from: 'y', text: 'Connection dropped on my side — send that once more.' }]);
+          setMessages(m => [...m, { from: 'y', text: 'Connection interrupted — please submit your criteria once more.' }]);
         }
       } else {
-        setMessages(m => [...m, { from: 'y', text: 'Connection dropped on my side — send that once more.' }]);
+        setMessages(m => [...m, { from: 'y', text: 'Connection interrupted — please submit your criteria once more.' }]);
       }
     } finally {
       setPending(false);
@@ -393,7 +401,9 @@ export default function YuliaIntake() {
   return (
     <div id="yulia" className="pd-chat">
       <div className="pd-chat-head">
-        <div style={{ fontWeight: 800, fontSize: 17 }}>Yulia</div>
+        <div style={{ fontWeight: 800, fontSize: 17 }}>
+          smb<span style={{ color: 'var(--pd-coral)' }}>X</span> Target Mapping Engine
+        </div>
       </div>
       <div className="pd-msgs" ref={listRef}>
         {messages.map((m, i) => (
@@ -423,7 +433,7 @@ export default function YuliaIntake() {
         )}
         {pending && (
           <div className="pd-msgrow">
-            <div className="pd-working">{live?.narration || (live?.preText ? 'Yulia is writing…' : 'Yulia is working…')}</div>
+            <div className="pd-working">{live?.narration || 'Compiling market data…'}</div>
           </div>
         )}
         {done && (
@@ -436,7 +446,7 @@ export default function YuliaIntake() {
               rel={bookTarget() ? 'noreferrer' : undefined}
               onClick={() => { fireDwell(); trackEvent('practice_booking_clicked', { placement: 'chat-pill' }); }}
             >
-              Book the consultation →
+              Book your consultation →
             </a>
           </div>
         )}
@@ -449,9 +459,9 @@ export default function YuliaIntake() {
           onKeyDown={e => { if (e.key === 'Enter') send(); }}
           placeholder={hint}
           disabled={done}
-          aria-label="Message Yulia"
+          aria-label="Describe your acquisition criteria"
         />
-        <button type="button" className="pd-send" onClick={send} disabled={done || pending}>Send</button>
+        <button type="button" className="pd-send" onClick={send} disabled={done || pending}>{sendLabel}</button>
       </div>
     </div>
   );

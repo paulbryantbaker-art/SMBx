@@ -1,6 +1,6 @@
 /**
  * Buyer-segment page template (Paul's reworked deck, 2026-07-11): hero
- * (H1 hook + sub + Yulia CTA) → their specific pain (ledger-style rows) →
+ * (H1 hook + sub + map-engine CTA) → their specific pain (ledger-style rows) →
  * how smbX answers it (The work / The practitioner / Your side) → final CTA.
  * The repeated pledge strip is gone — the loyalty point is made once, warmly,
  * in "Your side." Chat lives on the landing, so CTAs anchor to /#yulia, /#book.
@@ -21,7 +21,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
           <h1 className="pd-h1 pd-h1-seg" style={{ margin: 0 }}>{seg.h1}</h1>
           <div className="pd-sub" style={{ margin: '38px auto 0', maxWidth: 660 }}>{seg.sub}</div>
           <div style={{ marginTop: 48, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a className="pd-pill-primary pd-pill-lg" href="/#yulia">Talk to Yulia →</a>
+            <a className="pd-pill-primary pd-pill-lg" href="/#yulia">Build your market map →</a>
             <a className="pd-pill pd-pill-lg-quiet" href="/#book">Book a call</a>
           </div>
         </div>
@@ -62,10 +62,10 @@ export default function SegmentPage({ slug }: { slug: string }) {
       <section className="pd-wrap" style={{ paddingTop: 'clamp(80px, 9vw, 130px)', paddingBottom: 'clamp(30px, 4vw, 60px)', textAlign: 'center' }}>
         <h2 className="pd-cta-h" style={{ maxWidth: '16ch', margin: '0 auto' }}>Ready to start looking?</h2>
         <div style={{ margin: '24px auto 0', fontSize: 18, lineHeight: 1.65, color: 'var(--pd-body)', maxWidth: 480 }}>
-          Two minutes with Yulia and your market map is underway. No retainer to find out if we're a fit.
+          Process your thesis in our Target Mapping Engine. No retainer to find out if we're a fit.
         </div>
         <div style={{ marginTop: 40, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <a className="pd-pill-primary pd-pill-lg" href="/#yulia">Start with Yulia →</a>
+          <a className="pd-pill-primary pd-pill-lg" href="/#yulia">Build your market map →</a>
           <a className="pd-pill pd-pill-lg-quiet" href="/#book">Book a call</a>
         </div>
       </section>

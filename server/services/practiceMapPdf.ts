@@ -83,14 +83,14 @@ function mapHtml(map: IntakeMap, generatedAt: string): string {
   ${section('THE ECONOMICS', map.econ)}
   ${section('THE COMPETITIVE PICTURE', map.comp)}
   <div class="insight">
-    <div class="k">${pushback ? 'WHERE THE SAME CAPITAL WORKS BETTER' : 'WHAT MOST BUYERS MISS'}</div>
+    <div class="k">${pushback ? 'WHERE CAPITAL WORKS BETTER' : 'WHAT MOST BUYERS MISS'}</div>
     <div class="v">${esc(map.insight)}</div>
   </div>
   ${section('WHAT WOULD KILL THIS THESIS', map.kill)}
   ${section('WHAT AN ENGAGEMENT PRODUCES', map.produces)}
   <div class="next">
     <div class="k">NEXT STEP</div>
-    <div class="v">A confidential consultation with Paul Baker — 150+ acquisitions closed on the buyer's side. Thirty minutes, no retainer, and a straight answer on whether this thesis is worth your money. Book at smbx.ai.</div>
+    <div class="v">A confidential consultation with our senior deal team. Thirty minutes, no retainer, and a straight answer on whether this thesis is worth your capital. Book at smbx.ai.</div>
   </div>
   <div class="foot">
     ${esc(map.sources)}<br>
