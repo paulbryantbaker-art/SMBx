@@ -313,39 +313,42 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── The engagement — the work, stated as scope ── */}
+      {/* ── The engagement — scope of service as an institutional index ── */}
       <section className="pd-wrap pd-section-lg">
-        <div className="pd-seclabel">The engagement</div>
-        <h2 className="pd-h2" style={{ maxWidth: 760 }}>What we run for you.</h2>
-        <div className="pd-drows" style={{ marginTop: 56, maxWidth: 1000 }}>
-          {ENGAGEMENT.map(e => (
-            <div className="pd-drow" key={e.k}>
-              <div className="k">{e.k}</div>
-              <div className="v">{e.v}</div>
+        <div className="pd-ledger-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 40, marginBottom: 0 }}>
+          <h2 className="pd-h2" style={{ maxWidth: 760 }}>What we run for you.</h2>
+          <div className="pd-seclabel right">The engagement</div>
+        </div>
+        <div className="pd-index">
+          {ENGAGEMENT.map((e, i) => (
+            <div className="pd-indexrow" key={e.k}>
+              <div className="no">{String(i + 1).padStart(2, '0')}</div>
+              <div className="t">{e.k}</div>
+              <div className="b">{e.v}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── Process — a horizontal sequence ── */}
+      {/* ── Process — a timeline: one rule, three nodes ── */}
       <section id="how" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
         <div className="pd-seclabel">The process</div>
         <h2 className="pd-h2" style={{ maxWidth: 760 }}>Execution without the friction.</h2>
-        <div className="pd-steps">
-          <div className="pd-step">
-            <div className="num">01</div>
+        <div className="pd-timeline">
+          <div className="pd-tstep">
+            <div className="no">01</div>
             <div className="t">Conversation</div>
             <div className="b">Provide your target criteria to our mapping engine. We map your market instantly and prepare the brief for your consultation.</div>
             <a className="pd-link" href="#yulia">Build your market map →</a>
           </div>
-          <div className="pd-step">
-            <div className="num">02</div>
+          <div className="pd-tstep">
+            <div className="no">02</div>
             <div className="t">Curated targets</div>
             <div className="b">We cover a market in days — a full target landscape, screened and scored, typically inside a week of the mandate. Our team hand-picks the targets that meet your exact criteria.</div>
             <a className="pd-link" href="#why">How we work →</a>
           </div>
-          <div className="pd-step">
-            <div className="num">03</div>
+          <div className="pd-tstep">
+            <div className="no">03</div>
             <div className="t">Close with confidence</div>
             <div className="b">Diligence run, price disciplined, negotiation carried to signing — and managed through the first 180 days after close.</div>
             <a className="pd-link" href="#book">Book a call →</a>
@@ -353,46 +356,53 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Value creation, pre & post close ── */}
-      <section className="pd-wrap pd-section-lg">
-        <div className="pd-seclabel">Value creation</div>
-        <h2 className="pd-h2" style={{ maxWidth: 920 }}>Closing is just the beginning. Value is realized in the first 180 days.</h2>
-        <div style={{ marginTop: 24, fontSize: 18, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '48em' }}>
-          Most middle-market acquirers don't have a dedicated Integration Management Office (IMO).
-          When a deal closes, the transition often gets dumped on the plates of executives already
-          running the core business. We stay engaged through the wire to execute the integration
-          playbook.
-        </div>
-        <div className="pd-steps">
-          {VALUE_PILLARS.map(p => (
-            <div className="pd-step" key={p.num}>
-              <div className="num">{p.num}</div>
-              <div className="t">{p.t}</div>
-              <div className="b">{p.b}</div>
+      {/* ── Value creation — the third dark movement; the number is the hero ── */}
+      <section className="pd-dark" style={{ marginTop: 'clamp(110px, 12.5vw, 180px)' }}>
+        <div className="pd-wrap pd-dark-pad">
+          <div className="pd-seclabel">Value creation</div>
+          <div className="pd-valgrid" style={{ marginTop: 24 }}>
+            <div>
+              <div className="pd-bignum">180</div>
+              <div className="pd-bignum-label">DAYS</div>
             </div>
-          ))}
+            <div>
+              <h2 className="pd-h2" style={{ maxWidth: 720, fontSize: 'clamp(30px, 3.4vw, 44px)' }}>
+                Closing is just the beginning. Value is realized in the first 180 days.
+              </h2>
+              <div style={{ marginTop: 22, fontSize: 17.5, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '44em' }}>
+                Most middle-market acquirers don't have a dedicated Integration Management Office
+                (IMO). When a deal closes, the transition often gets dumped on the plates of
+                executives already running the core business. We stay engaged through the wire to
+                execute the integration playbook.
+              </div>
+            </div>
+          </div>
+          <div className="pd-steps" style={{ marginTop: 'clamp(64px, 7vw, 100px)' }}>
+            {VALUE_PILLARS.map(p => (
+              <div className="pd-step" key={p.num}>
+                <div className="num">{p.num}</div>
+                <div className="t">{p.t}</div>
+                <div className="b">{p.b}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ── Who it's for ── */}
+      {/* ── Who it's for — segment rows, read like a ledger ── */}
       <section id="who" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
-        <div className="pd-ledger-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 40, marginBottom: 72 }}>
+        <div className="pd-ledger-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 40, marginBottom: 0 }}>
           <h2 className="pd-h2">You bring the thesis. We bring the team.</h2>
           <div className="pd-seclabel right">Who it's for</div>
         </div>
-        <div className="pd-wgrid">
-          {SEGMENTS.filter(s => s.slug !== 'operators').map(s => (
-            <Link key={s.slug} href={`/buyers/${s.slug}`} className="pd-wcard">
+        <div className="pd-whorows">
+          {SEGMENTS.map(s => (
+            <Link key={s.slug} href={`/buyers/${s.slug}`} className="pd-whorow">
               <div className="t">{s.cardTitle}</div>
               <div className="b">{s.cardBody}</div>
-              <span className="pd-link">{s.cardLink}</span>
+              <div className="arr" aria-hidden>→</div>
             </Link>
           ))}
-          <Link href="/buyers/operators" className="pd-wcard" style={{ gridColumn: '1 / -1' }}>
-            <div className="t">Operators buying competitors</div>
-            <div className="b" style={{ maxWidth: '52em' }}>Discreet third-party approaches that protect your position, objective pricing, and a repeatable playbook — run for you, deal by deal.</div>
-            <span className="pd-link">For operators →</span>
-          </Link>
         </div>
       </section>
 
@@ -419,17 +429,14 @@ export default function Landing() {
         <div className="pd-indgrid">
           {HUNTING.map(h => (
             <div className="pd-ind" key={h.k}>
-              <div className="k">{h.k}</div>
-              <div className="v">{h.v}</div>
+              <span className="k">{h.k}</span> <span className="v">— {h.v}</span>
             </div>
           ))}
-          <div className="pd-ind" style={{ display: 'flex', alignItems: 'center' }}>
-            <div className="v" style={{ marginTop: 0 }}>
-              These are theses, not limits. If you're buying in a market we haven't named,{' '}
-              <a className="pd-link" href="#yulia" style={{ fontSize: 14.5 }}>tell us</a> — we've built acquisition
-              programs from a blank sheet before.
-            </div>
-          </div>
+        </div>
+        <div style={{ marginTop: 26, fontSize: 15.5, lineHeight: 1.65, color: 'var(--pd-body)', maxWidth: '52em' }}>
+          These are theses, not limits. If you're buying in a market we haven't named,{' '}
+          <a className="pd-link" href="#yulia" style={{ fontSize: 15 }}>tell us</a> — we've built acquisition
+          programs from a blank sheet before.
         </div>
       </section>
 

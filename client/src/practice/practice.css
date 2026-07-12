@@ -52,6 +52,7 @@
 .pd a.pd-pill-primary, .pd a.pd-pill-primary:hover { color: #ffffff; }
 .pd a.pd-pill, .pd a.pd-pill:hover { color: var(--pd-ink); }
 .pd a.pd-link, .pd a.pd-link:hover { color: var(--pd-coral-link); }
+.pd a.pd-whorow, .pd a.pd-whorow:hover { color: var(--pd-ink); }
 
 @keyframes pd-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 @keyframes pd-rise { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
@@ -276,13 +277,66 @@
 .pd-lbody { font-size: 17px; line-height: 1.6; color: var(--pd-body); }
 .pd-ltag { font-family: var(--pd-mono); font-size: 13px; color: var(--pd-tert); }
 
-/* ─── process — a horizontal sequence, not stacked boxes ─── */
+/* ─── pillar columns (value creation) — mono kicker + hairline top ─── */
 .pd-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(28px, 3.4vw, 56px); margin-top: 76px; }
 .pd-step { border-top: 1.5px solid var(--pd-ink); padding-top: 24px; }
 .pd-step .num { font-family: var(--pd-mono); font-size: 12px; letter-spacing: 0.14em; color: var(--pd-tert); }
 .pd-step .t { font-size: 25px; font-weight: 700; letter-spacing: -0.01em; margin-top: 18px; }
 .pd-step .b { font-size: 16px; line-height: 1.65; color: var(--pd-body); margin-top: 12px; }
 .pd-step .pd-link { display: inline-block; margin-top: 22px; }
+
+/* ─── the engagement index — scope of service as an institutional index:
+   giant serials, asymmetric columns, rows that respond ─── */
+.pd-index { border-top: 1.5px solid var(--pd-ink); margin-top: 64px; }
+.pd-indexrow {
+  display: grid;
+  grid-template-columns: clamp(84px, 9vw, 136px) minmax(0, 5fr) minmax(0, 7fr);
+  gap: clamp(20px, 3vw, 48px);
+  padding: 36px 0;
+  border-bottom: 1px solid var(--pd-hair);
+  align-items: baseline;
+  transition: background-color 160ms ease;
+}
+.pd-indexrow:hover { background: #FAFAFA; }
+.pd-indexrow .no {
+  font-size: clamp(38px, 4.2vw, 58px); font-weight: 800; letter-spacing: -0.03em; line-height: 1;
+  color: var(--pd-faint); font-variant-numeric: tabular-nums; transition: color 160ms ease;
+}
+.pd-indexrow:hover .no { color: var(--pd-coral-link); }
+.pd-indexrow .t { font-size: 23px; font-weight: 700; letter-spacing: -0.012em; }
+.pd-indexrow .b { font-size: 16.5px; line-height: 1.65; color: var(--pd-body); }
+
+/* ─── process timeline — one continuous rule, three nodes, display numerals ─── */
+.pd-timeline {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(28px, 3.4vw, 56px); margin-top: 76px;
+  border-top: 1.5px solid var(--pd-ink);
+}
+.pd-tstep { position: relative; padding-top: 36px; }
+.pd-tstep::before { content: ''; position: absolute; top: -7px; left: 0; width: 12px; height: 12px; background: var(--pd-ink); }
+.pd-tstep .no { font-size: clamp(40px, 4.4vw, 62px); font-weight: 800; letter-spacing: -0.035em; line-height: 1; color: var(--pd-ink); font-variant-numeric: tabular-nums; }
+.pd-tstep .t { font-size: 24px; font-weight: 700; letter-spacing: -0.012em; margin-top: 18px; }
+.pd-tstep .b { font-size: 16px; line-height: 1.65; color: var(--pd-body); margin-top: 12px; }
+.pd-tstep .pd-link { display: inline-block; margin-top: 22px; }
+
+/* ─── value creation — the number is the hero of the band ─── */
+.pd-valgrid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: clamp(36px, 5.5vw, 96px); align-items: start; }
+.pd-bignum { font-size: clamp(140px, 17vw, 260px); font-weight: 800; letter-spacing: -0.055em; line-height: 0.8; color: var(--pd-ink); white-space: nowrap; }
+.pd-bignum-label { margin-top: 20px; font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.18em; color: var(--pd-tert); }
+
+/* ─── who it's for — segment rows, not marketing cards ─── */
+.pd-whorows { border-top: 1.5px solid var(--pd-ink); margin-top: 72px; }
+.pd-whorow {
+  display: grid; grid-template-columns: clamp(200px, 24vw, 330px) minmax(0, 1fr) 44px;
+  gap: clamp(20px, 3vw, 48px); padding: 38px 0;
+  border-bottom: 1px solid var(--pd-hair); align-items: baseline;
+  transition: background-color 160ms ease;
+}
+.pd-whorow:hover { background: #FAFAFA; }
+.pd-whorow .t { font-size: 24px; font-weight: 700; letter-spacing: -0.015em; }
+.pd-whorow .b { font-size: 16.5px; line-height: 1.6; color: var(--pd-body); }
+.pd-whorow .arr { justify-self: end; font-size: 24px; font-weight: 700; color: var(--pd-faint); transition: transform 160ms ease, color 160ms ease; }
+.pd-whorow:hover .arr { transform: translateX(6px); color: var(--pd-coral-link); }
 
 /* ─── definition rows (the firm / segment answers) ─── */
 .pd-drows { display: flex; flex-direction: column; border-top: 1px solid var(--pd-hair); }
@@ -293,22 +347,11 @@
 .pd-drow .k { font-weight: 700; font-size: 17px; color: var(--pd-coral-link); }
 .pd-drow .v { font-size: 16px; line-height: 1.6; color: var(--pd-body); }
 
-/* ─── who cards ─── */
-.pd-wgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(18px, 2vw, 28px); }
-.pd-wcard {
-  display: block; border: 1px solid var(--pd-hair); border-radius: 24px; padding: 44px 44px 40px;
-  transition: border-color 160ms ease, transform 160ms ease; color: var(--pd-ink);
-}
-.pd-wcard:hover { border-color: #222222; color: var(--pd-ink); transform: translateY(-2px); }
-.pd-wcard .t { font-size: 24px; font-weight: 700; }
-.pd-wcard .b { margin-top: 12px; font-size: 16.5px; line-height: 1.6; color: var(--pd-body); }
-.pd-wcard .pd-link { display: inline-block; margin-top: 26px; }
-
-/* ─── industries — a dense two-column list, not cards ─── */
+/* ─── industries — a dense two-column index, single-line entries ─── */
 .pd-indgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 clamp(40px, 5vw, 88px); border-top: 1px solid var(--pd-hair); margin-top: 24px; }
-.pd-ind { padding: 22px 0; border-bottom: 1px solid var(--pd-hair); }
-.pd-ind .k { font-weight: 700; font-size: 16.5px; }
-.pd-ind .v { margin-top: 5px; font-size: 14.5px; line-height: 1.55; color: var(--pd-body); }
+.pd-ind { padding: 17px 0; border-bottom: 1px solid var(--pd-hair); font-size: 15px; line-height: 1.6; }
+.pd-ind .k { font-weight: 700; font-size: 15.5px; color: var(--pd-ink); }
+.pd-ind .v { color: var(--pd-body); }
 
 /* ─── final CTA ─── */
 .pd-cta-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(44px, 7vw, 100px); align-items: center; }
@@ -421,15 +464,23 @@
 /* ─── responsive ─── */
 @media (max-width: 980px) {
   .pd-steps { grid-template-columns: 1fr; margin-top: 56px; gap: 36px; }
+  .pd-timeline { grid-template-columns: 1fr; border-top: none; gap: 44px; margin-top: 48px; }
+  .pd-tstep { border-top: 1.5px solid var(--pd-ink); padding-top: 30px; }
   .pd-firm-grid, .pd-cta-grid { grid-template-columns: 1fr; }
   .pd-askew { grid-template-columns: 1fr; }
   .pd-askew .off { padding-top: 0; }
+  .pd-valgrid { grid-template-columns: 1fr; gap: 44px; }
+  .pd-bignum { font-size: clamp(110px, 22vw, 180px); }
+  .pd-indexrow { grid-template-columns: clamp(64px, 9vw, 100px) minmax(0, 1fr); }
+  .pd-indexrow .b { grid-column: 2; }
   .pd-indgrid { grid-template-columns: 1fr; }
   .pd-dealsearch { margin-left: 0; flex: 1 1 100%; }
 }
 @media (max-width: 760px) {
   .pd-nav-links, .pd-nav-book { display: none; }
-  .pd-wgrid { grid-template-columns: 1fr; }
+  .pd-whorow { grid-template-columns: 1fr; gap: 10px; padding: 30px 0; }
+  .pd-whorow .arr { display: none; }
+  .pd-indexrow { gap: 14px; padding: 28px 0; }
   .pd-stats { grid-template-columns: 1fr; gap: 52px; }
   .pd-lrow { grid-template-columns: 1fr; gap: 10px; padding: 32px 0; }
   .pd-ledger-cols { display: none; }
