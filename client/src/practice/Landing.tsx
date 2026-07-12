@@ -282,7 +282,7 @@ export default function Landing() {
           </div>
           <div className="off">
             <div style={{ fontSize: 'clamp(24px, 2.5vw, 33px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.22 }}>
-              <Mark h="0.92em" /> is that function, without the permanent overhead.
+              <Mark /> is that function, without the permanent overhead.
             </div>
             <div style={{ marginTop: 14, fontSize: 18, lineHeight: 1.6, color: 'var(--pd-body)' }}>
               Structured for your specific mandate — engaged for the deal, with economics tied
