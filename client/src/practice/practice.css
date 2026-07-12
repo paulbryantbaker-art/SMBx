@@ -42,6 +42,15 @@
 .pd button { font-family: inherit; cursor: pointer; }
 .pd input { font-family: inherit; }
 
+/* Anchor-qualified color overrides — the `.pd a` base rules (0,1,1 / 0,2,1)
+   outrank every single-class color rule (0,1,0), which silently rendered
+   gradient-pill text ink instead of white (and class-styled links ink).
+   These (0,3,1) rules win in all states. */
+.pd a.pd-pill-primary, .pd a.pd-pill-primary:hover { color: #ffffff; }
+.pd a.pd-pill, .pd a.pd-pill:hover { color: var(--pd-ink); }
+.pd a.pd-link, .pd a.pd-link:hover { color: var(--pd-coral-link); }
+.pd a.pd-band-btn, .pd a.pd-band-btn:hover { color: var(--pd-ink); }
+
 @keyframes pd-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @keyframes pd-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 @keyframes pd-typing { 0%, 60%, 100% { transform: translateY(0); opacity: .45; } 30% { transform: translateY(-3px); opacity: 1; } }
