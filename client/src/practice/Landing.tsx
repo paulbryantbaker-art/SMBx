@@ -16,22 +16,16 @@ import { postPracticeLead, bookHref, bookTarget } from './leads';
 import { SEGMENTS } from './segmentData';
 import { trackEvent } from '../lib/analytics';
 
-const LEDGER = [
-  {
-    name: 'Build a team',
-    body: 'A lean two-person corp-dev function runs $600K–$1M+ a year, fully loaded — a fixed cost attached to an occasional activity. It sits idle between deals.',
-    tag: 'FIXED COST · IDLE CAPACITY',
-  },
-  {
-    name: 'Hire a bank',
-    body: 'Retainers, success fees with long tails, and your day-to-day work handed to junior analysts — at a firm working similar deals for other clients at the same time.',
-    tag: 'JUNIOR HANDS · SPLIT LOYALTY',
-  },
-  {
-    name: 'Go it alone',
-    body: "No fees — and no bandwidth, no process, and an information disadvantage against a seller's broker who does this every week.",
-    tag: 'OUTGUNNED · OUT OF TIME',
-  },
+/** The engagement — what we run, stated as scope, never as comparison
+ *  (confidence pass, 2026-07-12: "Never describe a competitor. Describe the
+ *  work."). */
+const ENGAGEMENT = [
+  { k: 'Thesis', v: "What you're really trying to build, translated into a target profile a search can run against." },
+  { k: 'Sourcing', v: "Direct, discreet outreach to owners who aren't formally for sale. Most of our deals are never listed." },
+  { k: 'Evaluation', v: "The real multiple, the earnings that hold up and the ones that don't, and the number a lender will actually finance." },
+  { k: 'Structure', v: 'The offer, the deal structure, and the financing model your bank will underwrite.' },
+  { k: 'Diligence & close', v: 'We run the process, coordinate the attorneys, CPAs, and lenders, and drive the negotiation to signing.' },
+  { k: 'Integration', v: 'The first 180 days, where a good purchase becomes a good business.' },
 ];
 
 const HUNTING = [
@@ -50,8 +44,8 @@ const FAQ = [
     a: "Acquisitions of privately held companies with under $250M in annual revenue. That's the ceiling. Below it, we're comfortable anywhere the deal is real — most of our work lands between $5M and $75M in enterprise value.",
   },
   {
-    q: 'How is this different from hiring a bank?',
-    a: "A bank sells you a senior name and staffs your deal with analysts, then charges a retainer plus a percentage — often while working similar mandates for other clients. We're the opposite: one senior operator on every piece of your deal, working for you alone on that target. And because we advise buyers only, we're never quietly on the other side of a transaction you care about.",
+    q: 'Do you replace an investment bank?',
+    a: "Different function. A bank runs a sale process — it markets a company and manages an auction, usually for the seller. Corporate development is the buyer's side of the table: finding targets that aren't for sale, pricing them, and closing them. Some of our clients use both, at different moments in a deal. If you need a banker, we'll tell you, and we'll work alongside them.",
   },
   {
     q: "How do you find targets that aren't for sale?",
@@ -59,7 +53,7 @@ const FAQ = [
   },
   {
     q: 'Who actually does the work?',
-    a: 'Your advisor does. Proprietary AI handles the grind that used to require a bench of analysts — market maps, models, first-pass diligence — which is exactly why a senior operator can be on every part of your deal instead of just the pitch.',
+    a: 'Paul does. Every engagement is run personally — the analysis, the seller conversations, and the negotiation, start to close.',
   },
   {
     q: 'Do you negotiate for us?',
@@ -132,8 +126,8 @@ export default function Landing() {
         <div style={{ position: 'relative', maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
           <h1 className="pd-h1" style={{ margin: 0 }}>Stress-free corp dev.</h1>
           <div className="pd-sub" style={{ margin: '44px auto 0', maxWidth: 680 }}>
-            A senior deal team that plugs in immediately and runs your whole acquisition — thesis
-            to close — tailored to your organizational goals from the ground up.
+            The acquisition function large companies run in-house, available to you deal by deal.
+            We source, evaluate, and close — on the buy side, for one client per target.
           </div>
           <div style={{ margin: '26px auto 0', fontSize: 15, lineHeight: 1.6, color: 'var(--pd-body)', maxWidth: 640 }}>
             Led by <b style={{ color: 'var(--pd-ink)' }}>Paul Baker</b> — 20-year deal captain ·{' '}
@@ -167,32 +161,34 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── The problem — read as analysis, not marketing ── */}
+      {/* ── The gap — an observation about the buyer's situation, never a
+             complaint about anyone else (confidence pass) ── */}
       <section className="pd-wrap pd-section">
         <div className="pd-ledger-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 40, marginBottom: 64 }}>
-          <h2 className="pd-h2" style={{ maxWidth: 820 }}>There are three ways to buy a company. We built a fourth.</h2>
-          <div className="pd-seclabel right">The problem</div>
+          <h2 className="pd-h2" style={{ maxWidth: 900 }}>Most acquirers under $250M don't have a deal team.</h2>
+          <div className="pd-seclabel right">The gap</div>
         </div>
-        <div className="pd-ledger">
-          <div className="pd-ledger-cols" aria-hidden>
-            <div>OPTION</div>
-            <div>THE REALITY</div>
-            <div>THE PATTERN</div>
+        <div className="pd-askew">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+            <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
+              The companies that buy well have a corporate development function: people whose entire
+              job is finding the right targets, pricing them properly, and getting them closed.
+              It's a permanent team, and at scale it pays for itself many times over.
+            </div>
+            <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
+              Below a certain size, the math doesn't work. A director of corp dev and one analyst
+              runs well past half a million dollars a year — for a function you may use twice. So
+              the acquisitions that would compound your business get run off the side of a desk, in
+              the margins of a full-time job, against a seller who does this professionally.
+            </div>
           </div>
-          {LEDGER.map(r => (
-            <div className="pd-lrow" key={r.name}>
-              <div className="pd-lname">{r.name}</div>
-              <div className="pd-lbody">{r.body}</div>
-              <div className="pd-ltag">{r.tag}</div>
+          <div className="off">
+            <div style={{ fontSize: 'clamp(24px, 2.5vw, 33px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.22 }}>
+              smbX is that function, without the standing cost.
             </div>
-          ))}
-          <div className="pd-lrow hl">
-            <div className="pd-lname">smbX</div>
-            <div className="pd-lbody">
-              One senior operator doing the work of a full deal team — engaged per deal, aligned to
-              you alone, and gone when you're done.
+            <div style={{ marginTop: 14, fontSize: 18, lineHeight: 1.6, color: 'var(--pd-body)' }}>
+              Engaged for the deal, gone when it's done.
             </div>
-            <div className="pd-ltag">SENIOR · ALIGNED · YOURS ALONE</div>
           </div>
         </div>
       </section>
@@ -203,9 +199,8 @@ export default function Landing() {
           <div className="pd-seclabel">Track record</div>
           <h2 className="pd-h2" style={{ maxWidth: 820 }}>We've done this about 150 times.</h2>
           <div style={{ marginTop: 24, fontSize: 18, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '46em' }}>
-            smbX is a new firm. The dealmaker isn't. Our founder spent two decades as the deal
-            captain inside the buyer — sourcing, negotiating, closing, and integrating acquisitions
-            at platform scale.
+            Two decades as the deal captain inside the buyer — sourcing, negotiating, closing, and
+            integrating acquisitions at platform scale.
           </div>
           <div className="pd-tombs">
             <div className="pd-tomb">
@@ -237,28 +232,35 @@ export default function Landing() {
         <div className="pd-firm-grid">
           <div>
             <div className="pd-seclabel">The firm</div>
-            <h2 className="pd-h2">New firm. Old hands.</h2>
-            <div style={{ marginTop: 32, fontSize: 18, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-              smbX launched in 2025 to put a real corp-dev function within reach of buyers who
-              could never justify building one. Most buy-side help is a senior name on the pitch
-              and a junior analyst on the actual work. We inverted that: proprietary AI does the
-              grind a junior bench used to — sourcing, models, first-pass diligence — so the
-              senior operator you hired is the one on your deal, reading the numbers, working the
-              seller, and running the negotiation. A full team's output. One principal's judgment.
-              No hand-offs.
+            <h2 className="pd-h2">A corporate development function. Yours when you need one.</h2>
+            <div style={{ marginTop: 32, display: 'flex', flexDirection: 'column', gap: 18, fontSize: 18, lineHeight: 1.7, color: 'var(--pd-body)' }}>
+              <div>
+                Large acquirers run corporate development in-house — a permanent team that finds
+                targets, evaluates them, closes them, and integrates them. Almost nobody buying
+                companies under $250M can justify the standing cost of one.
+              </div>
+              <div>
+                smbX is that function, engaged deal by deal. We source off-market, run the
+                analysis, drive the diligence, and carry the negotiation to close. Paul Baker runs
+                every engagement personally, and he has closed more than 150 acquisitions doing
+                exactly this work inside a national platform and a global bank.
+              </div>
+              <div>
+                We work the buy side, and we take one client per target.
+              </div>
             </div>
             <div className="pd-drows" style={{ marginTop: 56 }}>
               <div className="pd-drow">
-                <div className="k">The work</div>
-                <div className="v">Market maps, off-market sourcing, CIM triage, financial models, diligence checklists — in days, not quarters.</div>
+                <div className="k">The function</div>
+                <div className="v">Sourcing, valuation, modeling, diligence, negotiation, and the first 180 days after close. The whole acquisition lifecycle, run for you.</div>
               </div>
               <div className="pd-drow">
-                <div className="k">The practitioner</div>
-                <div className="v">Every judgment call, seller conversation, and negotiation handled by a senior operator. There's no one to hand you off to.</div>
+                <div className="k">The record</div>
+                <div className="v">150+ acquisitions closed. $5B+ in revenue added to buyers. Two decades on the buy side.</div>
               </div>
               <div className="pd-drow">
-                <div className="k">Your side</div>
-                <div className="v">Buy-side is all we do, and we take one client per target. Your deal gets our full attention — and it stays yours.</div>
+                <div className="k">The focus</div>
+                <div className="v">Buyers only, one client per target. It's a narrower practice than most firms run, and it's why our clients get our full attention.</div>
               </div>
             </div>
           </div>
@@ -288,6 +290,20 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── The engagement — the work, stated as scope ── */}
+      <section className="pd-wrap pd-section-lg">
+        <div className="pd-seclabel">The engagement</div>
+        <h2 className="pd-h2" style={{ maxWidth: 760 }}>What we run for you.</h2>
+        <div className="pd-drows" style={{ marginTop: 56, maxWidth: 1000 }}>
+          {ENGAGEMENT.map(e => (
+            <div className="pd-drow" key={e.k}>
+              <div className="k">{e.k}</div>
+              <div className="v">{e.v}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ── Process — a horizontal sequence ── */}
       <section id="how" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
         <div className="pd-seclabel">The process</div>
@@ -296,19 +312,19 @@ export default function Landing() {
           <div className="pd-step">
             <div className="num">01</div>
             <div className="t">Conversation</div>
-            <div className="b">Tell Yulia what you want to buy. She works your thesis overnight and books you with your advisor — a real senior practitioner, not a call center.</div>
+            <div className="b">Tell Yulia what you want to buy. She maps your market on the spot and sets up your consultation with Paul.</div>
             <a className="pd-link" href="#yulia">Talk to Yulia →</a>
           </div>
           <div className="pd-step">
             <div className="num">02</div>
             <div className="t">Curated targets</div>
-            <div className="b">We map your market — off-market first — and your advisor hand-picks the targets worth your time, with models and memos ready in days, not quarters.</div>
+            <div className="b">We cover a market in days — a full target landscape, screened and scored, typically inside a week of the mandate. Paul hand-picks the ones worth your time.</div>
             <a className="pd-link" href="#why">How we work →</a>
           </div>
           <div className="pd-step">
             <div className="num">03</div>
             <div className="t">Close with confidence</div>
-            <div className="b">Diligence triaged, price disciplined, negotiation run by someone on your side of the table — and only yours. Then we scale to zero.</div>
+            <div className="b">Diligence run, price disciplined, negotiation carried to signing — and through the first 180 days after close.</div>
             <a className="pd-link" href="#book">Book a call →</a>
           </div>
         </div>

@@ -185,8 +185,7 @@ export default function TrackRecord() {
         <div className="pd-mono" style={{ fontSize: 12.5, marginTop: 2 }}>2005–2015 · DIRECTOR, ACQUISITION INTEGRATION</div>
         <div style={{ marginTop: 22, fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '48em' }}>
           Led integration on the bank's largest platform and fintech acquisitions, delivering $2B+
-          in synergies across 100+ stakeholder touchpoints. Every JPMC entry above carries its own
-          filter on the sheet.
+          in synergies across 100+ stakeholder touchpoints.
         </div>
       </section>
 
@@ -202,10 +201,10 @@ export default function TrackRecord() {
 
       {/* ── Closer ── */}
       <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(70px, 8vw, 120px)', paddingBottom: 'clamp(30px, 4vw, 60px)' }}>
-        <h2 className="pd-quote" style={{ maxWidth: '15em' }}>
-          Every deal above was done for a buyer. That hasn't changed.
-        </h2>
-        <div style={{ marginTop: 40 }}>
+        <div style={{ fontSize: 18, lineHeight: 1.6, color: 'var(--pd-body)' }}>
+          Thirty minutes with Paul. Confidential, no retainer.
+        </div>
+        <div style={{ marginTop: 28 }}>
           <a className="pd-pill-primary pd-pill-lg" href={bookHref()} target={bookTarget()} rel={bookTarget() ? 'noreferrer' : undefined}>
             Confidential consultation
           </a>

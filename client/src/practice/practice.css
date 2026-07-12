@@ -262,16 +262,8 @@
 .pd-send:hover { background: var(--pd-cta-hover); }
 .pd-send:disabled { opacity: 0.55; cursor: default; }
 
-/* ─── ledger — the three flawed options, read as analysis (a table) ─── */
+/* ─── ledger rows (segment-page pain tables) ─── */
 .pd-ledger { border-top: 1.5px solid var(--pd-ink); }
-.pd-ledger-cols {
-  display: grid;
-  grid-template-columns: clamp(140px, 16.5vw, 240px) minmax(0, 1fr) clamp(150px, 23.5vw, 340px);
-  gap: clamp(20px, 3.3vw, 48px);
-  padding: 14px 0 12px;
-  font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.12em; color: var(--pd-tert);
-  border-bottom: 1px solid var(--pd-hair);
-}
 .pd-lrow {
   display: grid;
   grid-template-columns: clamp(140px, 16.5vw, 240px) minmax(0, 1fr) clamp(150px, 23.5vw, 340px);
@@ -279,14 +271,10 @@
   padding: 44px 0; border-bottom: 1px solid var(--pd-hair); align-items: baseline;
   transition: background-color 160ms ease;
 }
-.pd-lrow:not(.hl):hover { background: #FAFAFA; }
-.pd-lrow.hl { border-top: 1.5px solid var(--pd-ink); border-bottom: 1.5px solid var(--pd-ink); background: var(--pd-card); }
+.pd-lrow:hover { background: #FAFAFA; }
 .pd-lname { font-weight: 700; font-size: 21px; }
-.pd-lrow.hl .pd-lname { font-weight: 800; color: var(--pd-coral-link); }
 .pd-lbody { font-size: 17px; line-height: 1.6; color: var(--pd-body); }
-.pd-lrow.hl .pd-lbody { color: var(--pd-ink); }
 .pd-ltag { font-family: var(--pd-mono); font-size: 13px; color: var(--pd-tert); }
-.pd-lrow.hl .pd-ltag { color: var(--pd-coral-link); }
 
 /* ─── process — a horizontal sequence, not stacked boxes ─── */
 .pd-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(28px, 3.4vw, 56px); margin-top: 76px; }
