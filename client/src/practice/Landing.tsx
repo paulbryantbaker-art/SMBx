@@ -73,7 +73,7 @@ const FAQ = [
   },
   {
     q: 'Who actually does the work?',
-    a: 'Every mandate is led by a senior deal captain with decades of buy-side experience. You are never handed off to junior staff for the critical phases of analysis, seller conversations, and negotiation.',
+    a: 'Every mandate is led by a senior deal captain with decades of buy-side experience — the analysis, the seller conversations, and the negotiation.',
   },
   {
     q: 'Do you negotiate for us?',
