@@ -17,7 +17,7 @@ import { valueLensTemplate } from '../templates/pdf/valueLens.js';
 
 let browser: Browser | null = null;
 
-async function getBrowser(): Promise<Browser> {
+export async function getBrowser(): Promise<Browser> {
   if (browser && browser.connected) return browser;
 
   const execPath = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser';

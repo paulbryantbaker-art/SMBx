@@ -146,6 +146,14 @@ const intakeLimiter = rateLimit({
   message: { error: 'Too many messages, please try again in a little while' },
 });
 
+const mapPdfLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 6, // each render spins a Chromium page — humans re-download rarely
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many downloads, please try again in a little while' },
+});
+
 // ─── Startup checks ─────────────────────────────────────────
 if (!process.env.ANTHROPIC_API_KEY) {
   console.warn('WARNING: ANTHROPIC_API_KEY not set — AI chat will fail');
@@ -321,10 +329,92 @@ app.post('/api/practice/intake', intakeLimiter, async (req, res) => {
       savePracticeLead({ ...result.lead, source: 'landing-yulia' })
         .catch(err => console.error('[practice-intake] lead save failed:', err.message));
     }
-    return res.json({ reply: result.reply, done: result.done, read: result.read });
+    return res.json({ reply: result.reply, done: result.done, map: result.map });
   } catch (err: any) {
     console.error('[practice-intake] failed:', err.message);
     return res.status(500).json({ error: 'Intake unavailable' });
+  }
+});
+
+// ─── Streaming intake (SSE over POST) ───────────────────────
+// The Market Map assembles in front of the visitor as the model actually
+// writes it — the reveal is real work made legible, never a staged spinner.
+// Events: `delta` {t} raw text chunks, then `final` {reply, done, map}.
+// The client falls back to the JSON endpoint above if this transport fails.
+app.post('/api/practice/intake/stream', intakeLimiter, async (req, res) => {
+  res.set({
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache, no-transform',
+    Connection: 'keep-alive',
+    'X-Accel-Buffering': 'no',
+  });
+  res.flushHeaders?.();
+  const send = (event: string, data: unknown) => {
+    if (!res.writableEnded) res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+  };
+  try {
+    const { runPracticeIntakeStream } = await import('./services/practiceIntake.js');
+    const result = await runPracticeIntakeStream(req.body?.messages, chunk => send('delta', { t: chunk }));
+    if (!result) {
+      send('error', { error: 'Invalid conversation' });
+    } else {
+      if (result.lead) {
+        savePracticeLead({ ...result.lead, source: 'landing-yulia' })
+          .catch(err => console.error('[practice-intake] lead save failed:', err.message));
+      }
+      send('final', { reply: result.reply, done: result.done, map: result.map });
+    }
+  } catch (err: any) {
+    console.error('[practice-intake] stream failed:', err.message);
+    send('error', { error: 'Intake unavailable' });
+  }
+  res.end();
+});
+
+// ─── Market Map PDF (public, tightly rate-limited) ──────────
+// Built for the forward: the visitor downloads the preliminary read as a
+// self-contained, dated, smbX-marked document. The client sends back the map
+// it received; we re-validate every field and RECOMPOSE the trust strings
+// (produces/sources/disclosure) server-side so they can never be tampered.
+app.post('/api/practice/map-pdf', mapPdfLimiter, async (req, res) => {
+  try {
+    const raw = req.body?.map;
+    const str = (v: unknown, max: number): string =>
+      typeof v === 'string' ? v.trim().slice(0, max) : '';
+    const rawFunnel = Array.isArray(raw?.funnel) ? raw.funnel.slice(0, 4) : [];
+    const funnel = rawFunnel
+      .map((s: unknown) => ({ n: str((s as any)?.n, 24) || '—', label: str((s as any)?.label, 220) }))
+      .filter((s: { n: string; label: string }) => s.label);
+    const { composeProduces, MAP_SOURCES } = await import('./services/practiceIntake.js');
+    const map = {
+      title: str(raw?.title, 120),
+      thesis: str(raw?.thesis, 300),
+      verdict: (raw?.verdict === 'PUSHBACK' ? 'PUSHBACK' : 'PROCEED') as 'PROCEED' | 'PUSHBACK',
+      answer: str(raw?.answer, 500),
+      funnel,
+      econ: str(raw?.econ, 1000),
+      comp: str(raw?.comp, 1000),
+      insight: str(raw?.insight, 1200),
+      kill: str(raw?.kill, 600),
+      produces: '',
+      sources: MAP_SOURCES,
+    };
+    map.produces = composeProduces(map);
+    if (!map.title || !map.thesis || map.funnel.length < 3 || !map.insight) {
+      return res.status(400).json({ error: 'Invalid map' });
+    }
+    const generatedAt = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const { renderPracticeMapPdf } = await import('./services/practiceMapPdf.js');
+    const pdf = await renderPracticeMapPdf(map, generatedAt);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename="smbX-market-map.pdf"',
+      'Cache-Control': 'no-store',
+    });
+    return res.send(pdf);
+  } catch (err: any) {
+    console.error('[practice-map-pdf] failed:', err.message);
+    return res.status(500).json({ error: 'PDF unavailable' });
   }
 });
 

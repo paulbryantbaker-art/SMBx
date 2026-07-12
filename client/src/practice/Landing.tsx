@@ -1,9 +1,12 @@
 /**
- * Practice-site landing — corpdevservices layout + Paul's copy deck and
- * additions (2026-07-11). Sections: nav · hero + Yulia intake · ticker ·
- * photo band · problem ledger · process (#how) · track record · the firm
- * (#why) · who it's for (#who) · industries (#industries) · how we find them
- * · whose-side band · FAQ · final CTA (#book) · footer.
+ * Practice-site landing — corpdevservices layout + Paul's copy deck
+ * (2026-07-11) + the intensity pass (2026-07-12): restraint with drama.
+ * Scroll: nav · hero + Yulia intake · stat band (numbers as the largest
+ * objects on the page) · problem table · track record (dark) · the firm
+ * (#why) · process as a horizontal sequence (#how) · who it's for (#who) ·
+ * industries as a dense list (#industries) · how we find them (statement +
+ * asymmetry) · whose-side (dark) · pull-quote · FAQ · final CTA (dark,
+ * #book) · footer.
  */
 import { useState } from 'react';
 import { Link } from 'wouter';
@@ -12,29 +15,6 @@ import YuliaIntake from './YuliaIntake';
 import { postPracticeLead, bookHref, bookTarget } from './leads';
 import { SEGMENTS } from './segmentData';
 import { trackEvent } from '../lib/analytics';
-
-const TICKER = [
-  'Deal thesis defined by your needs',
-  'Premium off-market outreach',
-  'Pipeline management',
-  'Due diligence',
-  'Document management and dataroom',
-  'Full deal life-cycle management',
-  'Closed on your terms',
-];
-
-function TickerRow() {
-  return (
-    <div className="pd-ticker-seg" aria-hidden>
-      {TICKER.map(t => (
-        <span key={t} style={{ display: 'inline-flex', alignItems: 'center' }}>
-          <span className="t">{t}</span>
-          <span className="d">●</span>
-        </span>
-      ))}
-    </div>
-  );
-}
 
 const LEDGER = [
   {
@@ -149,18 +129,8 @@ export default function Landing() {
     <PracticeShell home>
       {/* ── Hero ── */}
       <section className="pd-hero">
-        <div aria-hidden>
-          <div className="pd-radar-ring" style={{ width: 1300, height: 1300, border: '1px solid rgba(34,34,34,.06)' }} />
-          <div className="pd-radar-ring" style={{ width: 960, height: 960, border: '1px solid rgba(34,34,34,.08)' }} />
-          <div className="pd-radar-ring" style={{ width: 640, height: 640, border: '1px solid rgba(34,34,34,.10)' }} />
-          <div className="pd-radar-dot" style={{ left: '16%', top: '22%', width: 9, height: 9, opacity: 0.8 }} />
-          <div className="pd-radar-dot" style={{ left: '82%', top: '18%', width: 7, height: 7, opacity: 0.5 }} />
-          <div className="pd-radar-dot" style={{ left: '88%', top: '60%', width: 8, height: 8, opacity: 0.65 }} />
-          <div className="pd-radar-dot" style={{ left: '9%', top: '66%', width: 7, height: 7, opacity: 0.4 }} />
-        </div>
         <div style={{ position: 'relative', maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
-          <div className="pd-badge"><span className="dot" />BUY-SIDE ONLY</div>
-          <h1 className="pd-h1" style={{ margin: '52px 0 0' }}>Stress-free corp dev.</h1>
+          <h1 className="pd-h1" style={{ margin: 0 }}>Stress-free corp dev.</h1>
           <div className="pd-sub" style={{ margin: '44px auto 0', maxWidth: 680 }}>
             A senior deal team that plugs in immediately and runs your whole acquisition — thesis
             to close — tailored to your organizational goals from the ground up.
@@ -185,31 +155,30 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Stat band — the numbers are the hero, above everything but the
-             promise (visual brief scroll narrative §2) ── */}
+      {/* ── Stat band — the proof is the pitch; make it physically dominant ── */}
       <section className="pd-statband">
         <div className="pd-wrap">
           <div className="pd-stats">
-            <div className="pd-stat"><div className="n">150+</div><div className="l">acquisitions closed</div></div>
-            <div className="pd-stat"><div className="n">$5B+</div><div className="l">in revenue added to buyers</div></div>
-            <div className="pd-stat"><div className="n">20</div><div className="l">years inside corp dev and the investment bank</div></div>
-            <div className="pd-stat"><div className="n">1</div><div className="l">side of the table — always the buyer's</div></div>
+            <div className="pd-stat"><div className="n">150+</div><div className="l">Acquisitions closed</div></div>
+            <div className="pd-stat"><div className="n">$5B+</div><div className="l">In revenue added to buyers</div></div>
+            <div className="pd-stat"><div className="n">20</div><div className="l">Years inside corp dev and the investment bank</div></div>
+            <div className="pd-stat accent"><div className="n">1</div><div className="l">Side of the table — always the buyer's</div></div>
           </div>
         </div>
       </section>
 
-      {/* ── Ticker ── */}
-      <div className="pd-ticker" style={{ borderTop: 0 }}>
-        <div className="pd-ticker-track"><TickerRow /><TickerRow /></div>
-      </div>
-
-      {/* ── Problem ledger ── */}
+      {/* ── The problem — read as analysis, not marketing ── */}
       <section className="pd-wrap pd-section">
-        <div className="pd-ledger-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 40, marginBottom: 72 }}>
+        <div className="pd-ledger-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 40, marginBottom: 64 }}>
           <h2 className="pd-h2" style={{ maxWidth: 820 }}>There are three ways to buy a company. We built a fourth.</h2>
           <div className="pd-seclabel right">The problem</div>
         </div>
         <div className="pd-ledger">
+          <div className="pd-ledger-cols" aria-hidden>
+            <div>OPTION</div>
+            <div>THE REALITY</div>
+            <div>THE PATTERN</div>
+          </div>
           {LEDGER.map(r => (
             <div className="pd-lrow" key={r.name}>
               <div className="pd-lname">{r.name}</div>
@@ -228,36 +197,38 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Track record ── */}
-      <section className="pd-wrap pd-section-lg">
-        <div className="pd-seclabel">Track record</div>
-        <h2 className="pd-h2" style={{ maxWidth: 820 }}>We've done this about 150 times.</h2>
-        <div style={{ marginTop: 24, fontSize: 18, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '46em' }}>
-          smbX is a new firm. The dealmaker isn't. Our founder spent two decades as the deal
-          captain inside the buyer — sourcing, negotiating, closing, and integrating acquisitions
-          at platform scale.
-        </div>
-        <div className="pd-tombs">
-          <div className="pd-tomb">
-            <div className="t">Wrench Group</div>
-            <div className="meta">2016–2025 · FOUNDING PLATFORM THROUGH 36 ACQUISITIONS · ~$2.9B ENTERPRISE VALUE</div>
-            <div className="names">
-              Coolray · Parker &amp; Sons · Morris-Jenkins · NexGen · Service Champions · Williams
-              Comfort Air · Abacus · Berkeys · CoolToday · Lindstrom · Baker Brothers · Boothe's ·
-              Mountain Air · Plumbline <span className="grp">— and two dozen more.</span>
+      {/* ── Track record — the first dark movement ── */}
+      <section className="pd-dark" style={{ marginTop: 'clamp(100px, 12vw, 170px)' }}>
+        <div className="pd-wrap pd-dark-pad">
+          <div className="pd-seclabel">Track record</div>
+          <h2 className="pd-h2" style={{ maxWidth: 820 }}>We've done this about 150 times.</h2>
+          <div style={{ marginTop: 24, fontSize: 18, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '46em' }}>
+            smbX is a new firm. The dealmaker isn't. Our founder spent two decades as the deal
+            captain inside the buyer — sourcing, negotiating, closing, and integrating acquisitions
+            at platform scale.
+          </div>
+          <div className="pd-tombs">
+            <div className="pd-tomb">
+              <div className="t">Wrench Group</div>
+              <div className="meta">2016–2025 · FOUNDING PLATFORM THROUGH 36 ACQUISITIONS · ~$2.9B ENTERPRISE VALUE</div>
+              <div className="names">
+                Coolray · Parker &amp; Sons · Morris-Jenkins · NexGen · Service Champions · Williams
+                Comfort Air · Abacus · Berkeys · CoolToday · Lindstrom · Baker Brothers · Boothe's ·
+                Mountain Air · Plumbline <span className="grp">— and two dozen more.</span>
+              </div>
+            </div>
+            <div className="pd-tomb">
+              <div className="t">JPMorgan Chase</div>
+              <div className="meta">2005–2015 · INTEGRATION LEAD ON MULTI-BILLION-DOLLAR BANK AND FINTECH ACQUISITIONS</div>
+              <div className="names">
+                Bank One · Washington Mutual · Chase Paymentech · Collegiate Funding Services ·
+                Neovest · Vastera · clearXchange.
+              </div>
             </div>
           </div>
-          <div className="pd-tomb">
-            <div className="t">JPMorgan Chase</div>
-            <div className="meta">2005–2015 · INTEGRATION LEAD ON MULTI-BILLION-DOLLAR BANK AND FINTECH ACQUISITIONS</div>
-            <div className="names">
-              Bank One · Washington Mutual · Chase Paymentech · Collegiate Funding Services ·
-              Neovest · Vastera · clearXchange.
-            </div>
+          <div style={{ marginTop: 36 }}>
+            <Link href="/track-record" className="pd-link">Explore the full deal sheet →</Link>
           </div>
-        </div>
-        <div style={{ marginTop: 32 }}>
-          <Link href="/track-record" className="pd-link">See the full track record →</Link>
         </div>
       </section>
 
@@ -317,25 +288,25 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Process ── */}
+      {/* ── Process — a horizontal sequence ── */}
       <section id="how" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
         <div className="pd-seclabel">The process</div>
         <h2 className="pd-h2" style={{ maxWidth: 760 }}>Here's what stress-free looks like.</h2>
-        <div className="pd-pgrid">
-          <div className="pd-pcard">
-            <div className="pd-pnum">1</div>
+        <div className="pd-steps">
+          <div className="pd-step">
+            <div className="num">01</div>
             <div className="t">Conversation</div>
             <div className="b">Tell Yulia what you want to buy. She works your thesis overnight and books you with your advisor — a real senior practitioner, not a call center.</div>
             <a className="pd-link" href="#yulia">Talk to Yulia →</a>
           </div>
-          <div className="pd-pcard">
-            <div className="pd-pnum">2</div>
+          <div className="pd-step">
+            <div className="num">02</div>
             <div className="t">Curated targets</div>
             <div className="b">We map your market — off-market first — and your advisor hand-picks the targets worth your time, with models and memos ready in days, not quarters.</div>
             <a className="pd-link" href="#why">How we work →</a>
           </div>
-          <div className="pd-pcard">
-            <div className="pd-pnum">3</div>
+          <div className="pd-step">
+            <div className="num">03</div>
             <div className="t">Close with confidence</div>
             <div className="b">Diligence triaged, price disciplined, negotiation run by someone on your side of the table — and only yours. Then we scale to zero.</div>
             <a className="pd-link" href="#book">Book a call →</a>
@@ -365,7 +336,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Industries ── */}
+      {/* ── Industries — a dense list, not cards ── */}
       <section id="industries" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
         <div className="pd-seclabel">Industries</div>
         <h2 className="pd-h2" style={{ maxWidth: 820 }}>We know these markets cold. And we'll learn yours.</h2>
@@ -385,54 +356,77 @@ export default function Landing() {
         <div style={{ marginTop: 48, fontSize: 15, fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase' as const, color: 'var(--pd-ink)' }}>
           Where we're actively hunting
         </div>
-        <div className="pd-drows" style={{ marginTop: 20 }}>
+        <div className="pd-indgrid">
           {HUNTING.map(h => (
-            <div className="pd-drow" key={h.k}>
+            <div className="pd-ind" key={h.k}>
               <div className="k">{h.k}</div>
               <div className="v">{h.v}</div>
             </div>
           ))}
-        </div>
-        <div style={{ marginTop: 28, fontSize: 16.5, lineHeight: 1.65, color: 'var(--pd-body)', maxWidth: '52em' }}>
-          These are theses, not limits. If you're buying in a market we haven't named, tell us —
-          we've built acquisition programs from a blank sheet before.
+          <div className="pd-ind" style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="v" style={{ marginTop: 0 }}>
+              These are theses, not limits. If you're buying in a market we haven't named,{' '}
+              <a className="pd-link" href="#yulia" style={{ fontSize: 14.5 }}>tell us</a> — we've built acquisition
+              programs from a blank sheet before.
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ── How we find them ── */}
+      {/* ── How we find them — statement + asymmetry ── */}
       <section className="pd-wrap pd-section-lg">
-        <div className="pd-seclabel">How we find them</div>
-        <h2 className="pd-h2" style={{ maxWidth: 760 }}>The best sellers aren't for sale.</h2>
-        <div style={{ marginTop: 28, maxWidth: '46em', display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-            The owner you want to buy is rarely on a broker's list. They don't want their employees
-            to find out. They don't want their competitors to know. They don't want to sit through
-            a dozen showings with tire-kickers, and they don't want to pay a broker 10% to make it
-            happen.
+        <div className="pd-askew">
+          <div>
+            <div className="pd-seclabel">How we find them</div>
+            <h2 className="pd-quote">The best sellers aren't for sale.</h2>
           </div>
-          <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-            So they wait. And most will only take a call when someone arrives with a specific
-            buyer, a specific thesis, and a serious reason to talk.
-          </div>
-          <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-ink)' }}>
-            <b>That's the call we make on your behalf.</b> No auction, no bidding war, no thirty
-            other buyers who've already seen the book. Just a direct conversation with an owner who
-            hasn't been shopped — where price is a discussion, not a competition.
+          <div className="off" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+            <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
+              The owner you want to buy is rarely on a broker's list. They don't want their employees
+              to find out. They don't want their competitors to know. They don't want to sit through
+              a dozen showings with tire-kickers, and they don't want to pay a broker 10% to make it
+              happen.
+            </div>
+            <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
+              So they wait. And most will only take a call when someone arrives with a specific
+              buyer, a specific thesis, and a serious reason to talk.
+            </div>
+            <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-ink)' }}>
+              <b>That's the call we make on your behalf.</b> No auction, no bidding war, no thirty
+              other buyers who've already seen the book. Just a direct conversation with an owner who
+              hasn't been shopped — where price is a discussion, not a competition.
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Whose side ── */}
-      <div className="pd-bandwrap" style={{ paddingTop: 'clamp(110px, 12.5vw, 180px)' }}>
-        <div className="pd-pledge">
-          <div className="label">Whose side we're on</div>
-          <div className="h">Yours. Start to <span className="coral">finish.</span></div>
-          <div className="sub">
-            We represent buyers, and only buyers — one client per target. So you get our full
-            attention, straight answers, and a deal that stays yours.
+      {/* ── Whose side — the second dark movement ── */}
+      <section className="pd-dark" style={{ marginTop: 'clamp(110px, 12.5vw, 180px)' }}>
+        <div className="pd-wrap pd-dark-pad">
+          <div className="pd-seclabel">Whose side we're on</div>
+          <div className="pd-askew" style={{ alignItems: 'end' }}>
+            <h2 className="pd-quote" style={{ maxWidth: '11em' }}>
+              The seller has a broker. Who's working for you?
+            </h2>
+            <div className="off">
+              <div style={{ fontSize: 'clamp(28px, 3vw, 40px)', fontWeight: 800, letterSpacing: '-0.025em', lineHeight: 1.05 }}>
+                Yours. Start to <span style={{ color: 'var(--pd-coral)' }}>finish.</span>
+              </div>
+              <div style={{ marginTop: 22, fontSize: 17, lineHeight: 1.65, color: 'var(--pd-body)', maxWidth: 460 }}>
+                We represent buyers, and only buyers — one client per target. So you get our full
+                attention, straight answers, and a deal that stays yours.
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* ── Pull-quote — one statement, nothing else ── */}
+      <section className="pd-wrap pd-section-lg">
+        <h2 className="pd-quote" style={{ maxWidth: '13em' }}>
+          Your first deal is the other side's hundredth. Even the odds.
+        </h2>
+      </section>
 
       {/* ── FAQ ── */}
       <section className="pd-wrap pd-section-lg">
@@ -448,29 +442,31 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Final CTA ── */}
-      <section id="book" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90, paddingBottom: 'clamp(40px, 5vw, 80px)' }}>
-        <div className="pd-cta-grid">
-          <div>
-            <h2 className="pd-cta-h">Let's go find the one.</h2>
-            <div style={{ marginTop: 24, fontSize: 18, lineHeight: 1.65, color: 'var(--pd-body)', maxWidth: 480 }}>
-              Two minutes with Yulia and your market map is underway — or talk to Paul directly.
-              Confidential either way, and there's no retainer to find out if we're a fit.
+      {/* ── Final CTA — the third dark movement ── */}
+      <section id="book" className="pd-dark" style={{ marginTop: 'clamp(110px, 12.5vw, 180px)', scrollMarginTop: 90 }}>
+        <div className="pd-wrap pd-dark-pad">
+          <div className="pd-cta-grid">
+            <div>
+              <h2 className="pd-cta-h">Let's go find the one.</h2>
+              <div style={{ marginTop: 24, fontSize: 18, lineHeight: 1.65, color: 'var(--pd-body)', maxWidth: 480 }}>
+                Two minutes with Yulia and your market map is underway — or talk to Paul directly.
+                Confidential either way, and there's no retainer to find out if we're a fit.
+              </div>
+              <div style={{ marginTop: 44, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                <a className="pd-pill-primary pd-pill-lg" href="#yulia" onClick={() => trackEvent('practice_cta_clicked', { placement: 'cta-yulia' })}>Start with Yulia →</a>
+                <a
+                  className="pd-pill pd-pill-lg-quiet"
+                  href={bookHref()}
+                  target={bookTarget()}
+                  rel={bookTarget() ? 'noreferrer' : undefined}
+                  onClick={() => trackEvent('practice_booking_clicked', { placement: 'cta' })}
+                >
+                  Confidential consultation
+                </a>
+              </div>
             </div>
-            <div style={{ marginTop: 44, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <a className="pd-pill-primary pd-pill-lg" href="#yulia" onClick={() => trackEvent('practice_cta_clicked', { placement: 'cta-yulia' })}>Start with Yulia →</a>
-              <a
-                className="pd-pill pd-pill-lg-quiet"
-                href={bookHref()}
-                target={bookTarget()}
-                rel={bookTarget() ? 'noreferrer' : undefined}
-                onClick={() => trackEvent('practice_booking_clicked', { placement: 'cta' })}
-              >
-                Confidential consultation
-              </a>
-            </div>
+            <LeadForm />
           </div>
-          <LeadForm />
         </div>
       </section>
     </PracticeShell>

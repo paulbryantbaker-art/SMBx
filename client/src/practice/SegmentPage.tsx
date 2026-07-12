@@ -18,8 +18,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
       {/* ── Hero ── */}
       <section className="pd-hero" style={{ paddingBottom: 'clamp(60px, 7vw, 100px)' }}>
         <div style={{ position: 'relative', maxWidth: 1080, margin: '0 auto', textAlign: 'center' }}>
-          <div className="pd-badge"><span className="dot" />BUY-SIDE ONLY · {seg.footerLabel.toUpperCase()}</div>
-          <h1 className="pd-h1 pd-h1-seg" style={{ margin: '48px 0 0' }}>{seg.h1}</h1>
+          <h1 className="pd-h1 pd-h1-seg" style={{ margin: 0 }}>{seg.h1}</h1>
           <div className="pd-sub" style={{ margin: '38px auto 0', maxWidth: 660 }}>{seg.sub}</div>
           <div style={{ marginTop: 48, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <a className="pd-pill-primary pd-pill-lg" href="/#yulia">Talk to Yulia →</a>

@@ -18,18 +18,29 @@ export default function PracticeShell({ home = false, children }: { home?: boole
 
   // index.css scroll-locks html/body at ≥901px for the app workspace shells
   // (`html, body { height: 100%; overflow: hidden; }`) — without this release
-  // the practice site cannot scroll on desktop at all. Same pattern the
-  // retired MarketingShell used; smooth behavior covers the anchor links.
+  // the practice site cannot scroll on desktop at all. Height must be
+  // released along with overflow: leaving height:100% makes BODY the scroll
+  // container (a 100vh-tall document), which breaks native fragment jumps,
+  // full-page capture, and print. Same pattern the retired MarketingShell
+  // used; smooth behavior covers the anchor links.
   useEffect(() => {
     const html = document.documentElement.style;
     const body = document.body.style;
-    const prev = { html: html.overflow, body: body.overflow, behavior: html.scrollBehavior };
+    const prev = {
+      htmlOverflow: html.overflow, bodyOverflow: body.overflow,
+      htmlHeight: html.height, bodyHeight: body.height,
+      behavior: html.scrollBehavior,
+    };
     html.overflow = 'auto';
     body.overflow = 'auto';
+    html.height = 'auto';
+    body.height = 'auto';
     html.scrollBehavior = 'smooth';
     return () => {
-      html.overflow = prev.html;
-      body.overflow = prev.body;
+      html.overflow = prev.htmlOverflow;
+      body.overflow = prev.bodyOverflow;
+      html.height = prev.htmlHeight;
+      body.height = prev.bodyHeight;
       html.scrollBehavior = prev.behavior;
     };
   }, []);

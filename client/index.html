@@ -14,10 +14,10 @@
          html bg + theme-color first. -->
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, interactive-widget=resizes-content, viewport-fit=cover" />
     <link rel="manifest" href="/manifest.json" />
-    <title>smbx.ai — M&amp;A workspace</title>
-    <meta name="description" content="Yulia is the deal team you hire. M&amp;A deal work end-to-end — recasts, baselines, buyer lists, IOIs. $149/mo flat. No success fees, ever." />
-    <meta property="og:title" content="smbx.ai — M&amp;A workspace" />
-    <meta property="og:description" content="Yulia is the deal team you hire. M&amp;A deal work end-to-end. $149/mo flat. No success fees, ever." />
+    <title>smbX — Buy-side corporate development</title>
+    <meta name="description" content="Stress-free corp dev. A senior deal team that runs your whole acquisition — thesis to close. Buy-side only, one client per target. Led by a 20-year deal captain with 150+ acquisitions closed for buyers." />
+    <meta property="og:title" content="smbX — Buy-side corporate development" />
+    <meta property="og:description" content="Stress-free corp dev. A senior deal team that runs your whole acquisition — thesis to close. Buy-side only, one client per target." />
     <meta property="og:type" content="website" />
     <meta name="color-scheme" content="light" />
     <meta name="theme-color" content="#F6F7F9" />
@@ -48,35 +48,23 @@
         });
       })();
     </script>
-    <!-- Site-wide Organization + SoftwareApplication schema. Per-page
-         FAQPage / BreadcrumbList are injected by usePageMeta. -->
+    <!-- Site-wide schema: the buy-side practice (THE LINE v2). The retired
+         product's SoftwareApplication/offers schema is gone — the site sells
+         an advisory practice, not software. Per-page FAQPage / BreadcrumbList
+         are injected by usePageMeta. -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@graph": [
         {
-          "@type": "Organization",
+          "@type": "ProfessionalService",
           "@id": "https://smbx.ai/#organization",
-          "name": "smbx.ai",
+          "name": "smbX",
           "url": "https://smbx.ai/",
-          "logo": "https://smbx.ai/GreenLogoBlkBorder.png",
-          "description": "AI deal intelligence for business acquisitions, sales, capital raises, and post-merger integration."
-        },
-        {
-          "@type": "SoftwareApplication",
-          "@id": "https://smbx.ai/#software",
-          "name": "smbx.ai",
-          "applicationCategory": "BusinessApplication",
-          "operatingSystem": "Web",
-          "description": "Chat-first M&A deal intelligence platform. Sell, buy, raise capital, or integrate — guided end-to-end by Yulia, an AI deal advisor.",
-          "offers": {
-            "@type": "AggregateOffer",
-            "priceCurrency": "USD",
-            "lowPrice": "0",
-            "highPrice": "999",
-            "offerCount": "4"
-          },
-          "provider": { "@id": "https://smbx.ai/#organization" }
+          "logo": "https://smbx.ai/logo-coral-x.png",
+          "description": "Buy-side corporate development for acquirers in the lower middle market. A senior operator runs your whole acquisition — thesis to close. Buy-side only, one client per target.",
+          "areaServed": "US",
+          "founder": { "@type": "Person", "name": "Paul Baker" }
         }
       ]
     }

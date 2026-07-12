@@ -2,16 +2,25 @@
  * Claude-backed Yulia intake for the practice site (Paul, 2026-07-11:
  * "we have Yulia tied to Claude AI, let's use that").
  *
- * Shape: the visitor describes an acquisition thesis; Yulia engages with it
- * and collects size/geography, then the best email for their first market
- * map. The moment an email appears in the conversation the server takes over
- * deterministically — persists the lead and returns the fixed close message
- * with the booking affordance — so conversion never depends on model
- * behavior. If the Claude call fails (or no API key), a scripted fallback
- * keeps the card alive.
+ * Shape (Market Map spec, 2026-07-12): the visitor describes an acquisition
+ * thesis; Yulia collects size/geography, then delivers the MARKET MAP — an
+ * 8-block research artifact (thesis, universe funnel, economics, competitive
+ * picture, the insight, kill conditions, what an engagement produces,
+ * sources) — BEFORE asking for anything. The moment an email appears the
+ * server takes over deterministically: persists the lead, runs the honest
+ * lane-conflict check against ENGAGED_LANES, and returns the fixed close, so
+ * conversion never depends on model behavior. If the Claude call fails (or no
+ * API key), a scripted fallback keeps the card alive.
  *
- * THE LINE v2: intake only — no valuations, prices, advice, or fee talk; the
- * practitioner covers that on the call.
+ * Governing rules (from the spec, enforced in the prompt):
+ *  - Give the WHAT, withhold the WHO — market structure yes, named targets no.
+ *  - Tell them when the thesis is bad (VERDICT: PUSHBACK), for free.
+ *  - Never fake precision — ~ranges only, labeled directional; the sources
+ *    footer is a server constant so the model can never invent citations.
+ *
+ * THE LINE v2: intake only — no specific-target valuations, no advice, no fee
+ * talk; market-level structure and rough trading ranges are research
+ * commentary, and the practitioner covers the rest on the call.
  */
 import Anthropic from '@anthropic-ai/sdk';
 
@@ -25,7 +34,7 @@ function getClient(): Anthropic | null {
   if (!client) {
     client = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY,
-      timeout: 30_000,
+      timeout: 45_000,
       maxRetries: 1,
     });
   }
@@ -34,56 +43,131 @@ function getClient(): Anthropic | null {
 
 export interface IntakeMessage { role: 'user' | 'assistant'; content: string; }
 export interface IntakeLead { thesis: string | null; size: string | null; email: string; }
-export interface IntakeRead { title: string; thesis: string; market: string; buyers: string; fullmap: string; }
-export interface IntakeResult { reply: string; done: boolean; lead: IntakeLead | null; read: IntakeRead | null; }
 
-/** Parse the ===READ=== document block out of a model reply. Returns the read
- *  (if well-formed) plus the plain text that follows it; on any malformation
- *  the whole reply falls back to a normal chat bubble. */
-function parseRead(text: string): { read: IntakeRead | null; rest: string } {
-  const start = text.indexOf('===READ===');
+export interface MapFunnelStep { n: string; label: string; }
+export interface IntakeMap {
+  title: string;
+  thesis: string;
+  verdict: 'PROCEED' | 'PUSHBACK';
+  answer: string;          // PUSHBACK only — the straight answer, up top
+  funnel: MapFunnelStep[]; // the narrowing: universe → size band → fit
+  econ: string;
+  comp: string;
+  insight: string;         // "what most buyers miss" — the punchline
+  kill: string;            // what would kill this thesis
+  produces: string;        // server-composed — what an engagement produces
+  sources: string;         // server constant — never model-authored
+}
+
+export interface IntakeResult {
+  reply: string;
+  done: boolean;
+  lead: IntakeLead | null;
+  map: IntakeMap | null;
+}
+
+/** The sources footer is deliberately NOT model output: the model must never
+ *  invent citations. Today the counts are model estimates and the footer says
+ *  so; when the sourcing engine feeds real counts, this one string earns the
+ *  primary-source citations. */
+export const MAP_SOURCES =
+  'Directional estimates from public industry data and smbX deal experience. Counts and ranges are preliminary (~) — an engagement verifies them against primary sources.';
+
+/** "What an engagement produces" — the honest gap, stated plainly. Composed
+ *  with the funnel's final count when available. */
+export function composeProduces(map: { funnel: MapFunnelStep[] }): string {
+  const last = map.funnel[map.funnel.length - 1];
+  const list = last && last.n !== '—' ? `the named list of ${last.n} qualified targets` : 'the named target list';
+  return `This map is the territory. An engagement produces ${list}, the owner research, the off-market outreach under your name, the models and diligence, and the negotiation to close.`;
+}
+
+/** Parse the ===MAP=== artifact out of a model reply. Returns the map (if
+ *  well-formed) plus the plain text around it; on any malformation the whole
+ *  reply falls back to a normal chat message. */
+export function parseMap(text: string): { map: IntakeMap | null; rest: string } {
+  const start = text.indexOf('===MAP===');
   const end = text.indexOf('===END===');
-  if (start === -1 || end === -1 || end <= start) return { read: null, rest: text };
-  const block = text.slice(start + '===READ==='.length, end);
+  if (start === -1 || end === -1 || end <= start) return { map: null, rest: text };
+  const block = text.slice(start + '===MAP==='.length, end);
+  const FIELDS = ['TITLE', 'THESIS', 'VERDICT', 'ANSWER', 'U1', 'U2', 'U3', 'ECON', 'COMP', 'INSIGHT', 'KILL'];
   const field = (name: string): string => {
-    const m = block.match(new RegExp(`^\\s*${name}:\\s*([\\s\\S]*?)(?=\\n\\s*(?:TITLE|THESIS|MARKET|BUYERS|FULLMAP):|$)`, 'm'));
+    const m = block.match(new RegExp(`^\\s*${name}:\\s*([\\s\\S]*?)(?=\\n\\s*(?:${FIELDS.join('|')}):|$)`, 'm'));
     return m ? m[1].trim().replace(/\s+/g, ' ') : '';
   };
-  const read: IntakeRead = {
+  const step = (name: string): MapFunnelStep | null => {
+    const raw = field(name);
+    if (!raw) return null;
+    const bar = raw.indexOf('|');
+    if (bar === -1) return { n: '—', label: raw.trim() };
+    const n = raw.slice(0, bar).trim();
+    const label = raw.slice(bar + 1).trim();
+    if (!label) return null;
+    return { n: n || '—', label };
+  };
+  const funnel = [step('U1'), step('U2'), step('U3')].filter((s): s is MapFunnelStep => s !== null);
+  const verdict = field('VERDICT').toUpperCase() === 'PUSHBACK' ? 'PUSHBACK' : 'PROCEED';
+  const partial = {
     title: field('TITLE'),
     thesis: field('THESIS'),
-    market: field('MARKET'),
-    buyers: field('BUYERS'),
-    fullmap: field('FULLMAP'),
+    verdict: verdict as 'PROCEED' | 'PUSHBACK',
+    answer: field('ANSWER'),
+    funnel,
+    econ: field('ECON'),
+    comp: field('COMP'),
+    insight: field('INSIGHT'),
+    kill: field('KILL'),
   };
-  if (!read.market || !read.title) return { read: null, rest: text };
+  if (!partial.title || !partial.thesis || partial.funnel.length < 3 || !partial.insight) {
+    return { map: null, rest: text };
+  }
+  const map: IntakeMap = { ...partial, produces: composeProduces(partial), sources: MAP_SOURCES };
   const before = text.slice(0, start).trim();
   const after = text.slice(end + '===END==='.length).trim();
   const rest = [before, after].filter(Boolean).join(' ')
-    || "Want the full map? Best email for it — and I'll set up time with Paul.";
-  return { read, rest };
+    || "That's the read. Where should I send the full map? Paul turns it around within 24 hours.";
+  return { map, rest };
 }
-
-const CLOSE_MESSAGE =
-  "Done — your full map is underway. You'll have it within 24 hours. Want to lock in time with Paul while I work?";
 
 const EMAIL_RE = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
 
+/** Honest lane-conflict check. ENGAGED_LANES is the register of lanes the
+ *  practice has actually taken off the board — comma-separated keyword
+ *  groups, e.g. "hvac phoenix, plumbing dallas". A lane matches when every
+ *  keyword in the group appears in the conversation. Empty register (launch
+ *  state) → every lane is genuinely open, so saying so is true. */
+export function laneConflict(conversationText: string): boolean {
+  const lanes = (process.env.ENGAGED_LANES || '')
+    .split(',')
+    .map(l => l.trim().toLowerCase())
+    .filter(Boolean);
+  if (lanes.length === 0) return false;
+  const hay = conversationText.toLowerCase();
+  return lanes.some(lane => lane.split(/\s+/).every(word => hay.includes(word)));
+}
+
+function closeMessage(email: string, conflict: boolean): string {
+  const delivery = `Done — your full map is underway. Paul will have it to you at ${email} within 24 hours.`;
+  if (conflict) {
+    return `${delivery}\n\nOne flag I have to raise: we take one client per target market, and your lane may overlap an engagement we're already running. Paul will tell you exactly where things stand before anything else — we keep that promise in both directions.`;
+  }
+  return `${delivery}\n\nOne thing worth knowing: we take one client per target market, and this lane is open right now. When a client engages, it comes off the board — the consultation with Paul is where that happens. Thirty minutes, confidential, no retainer.`;
+}
+
 const SYSTEM_PROMPT = `You are Yulia — you do the analytical work at smbX, a buy-side-only corporate development practice: one senior operator (Paul, the founder — 150+ acquisitions closed on the buyer's side) who sources, runs, and closes acquisitions for buyers, one client per target.
 
-You are the fast front door: an intake and analysis assistant. You take the thesis, work it, and get the visitor in front of Paul. You do not advise, negotiate, or represent anyone.
+You are the fast front door: an intake analyst. You take the thesis, work it into a preliminary MARKET MAP — a real piece of research, free — and get the visitor in front of Paul. You do not advise, negotiate, or represent anyone.
 
 YOU WILL:
 - Take their acquisition thesis, criteria, and constraints
-- Map markets, size segments, and start preliminary target thinking
-- Flag what's worth a closer look, at a high level
-- Collect the best email for their first market map and set up the confidential consultation with Paul
+- Deliver a preliminary market map: structure, universe, economics, competitive picture, risks
+- Tell them plainly when the thesis is weak — before they've spent a dollar
+- Collect the best email for the full map and set up the confidential consultation with Paul
 
 YOU WILL NOT:
 - Represent anyone, negotiate on anyone's behalf, or contact a target
-- Give legal, tax, accounting, or investment advice — or valuations, price opinions, multiples, or fee terms (Paul covers all of that on the call; fees get scoped in one conversation)
+- Name target companies or hand over a target list — the market structure is free, the named targets are what an engagement produces
+- Give legal, tax, accounting, or investment advice — or valuations of a specific business, or fee terms (Paul scopes fees in one conversation)
 - Work with sellers, or advise both sides of a deal
-- Take on a target already committed to another client
 
 QUALIFICATION — surface this naturally and early (usually your first or second reply):
 "One quick thing so I point you the right way: we work exclusively on the buy side, on privately held companies under $250M in annual revenue. If that's your lane, I can get started right now."
@@ -94,36 +178,46 @@ IF THE VISITOR IS A SELLER:
 IF THE TARGET IS ABOVE THE $250M CEILING:
 "That one's above our line — we work on privately held targets under $250M in revenue. If you've got something in that range, I'm ready when you are."
 
-CONVERSATION SHAPE (adapt naturally — never robotic). The rule underneath it: GIVE VALUE BEFORE ASKING FOR ANYTHING. The visitor gets your first read of their market BEFORE you ask for an email.
-1. They describe a thesis. Engage with it specifically and briefly — show you understood the industry and the angle. If target size (revenue or EBITDA range) or geography is missing, ask for it in one short question, and give the reason ("so the map matches your thesis" / "so I size the right segment").
-2. THE FIRST READ — as soon as you have a rough thesis plus size or geography (usually after one or two exchanges; don't drag it out), your next message IS the read. It renders on the visitor's screen as a titled research document, so output it in EXACTLY this structure:
-===READ===
-TITLE: <a 4–8 word document title for their thesis, e.g. "Elevator Service — Texas Metros">
-THESIS: <one line playing back their thesis in your words>
-MARKET: <2–3 sentences: the shape of that market — how fragmented, what the typical operator looks like (independent, owner-run, size band), succession/ownership dynamics if relevant>
-BUYERS: <1–2 sentences: whether consolidators or sponsors are active in that lane, and what that means for this buyer>
-FULLMAP: <1–2 sentences: what the full map adds — the segment mapped end to end, off-market candidates surfaced, competing-buyer activity, where the openings are>
+CONVERSATION SHAPE (adapt naturally — never robotic). The rule underneath: GIVE VALUE BEFORE ASKING FOR ANYTHING. The visitor gets the map BEFORE you ask for an email.
+1. They describe a thesis. Engage with it specifically and briefly. If target size (revenue or EBITDA range) or geography is missing, ask for it in one short question, with the reason ("so the map matches your thesis").
+2. THE MAP — as soon as you have a rough thesis plus size or geography (usually after one or two exchanges; don't drag it out), your next message IS the map. It renders on the visitor's screen as a titled research document that assembles as you write it, so output it in EXACTLY this structure, fields in this order:
+===MAP===
+TITLE: <4–8 word document title, e.g. "Commercial Landscaping — Southeast">
+THESIS: <their thesis as crisp coordinates, e.g. "Commercial landscaping · GA, NC, SC, TN · $2–8M EBITDA · commercial-contract mix">
+VERDICT: <PROCEED or PUSHBACK>
+ANSWER: <PUSHBACK only — the straight answer in one or two sentences, e.g. "I'd push back on this thesis, and I'd rather tell you now than after a retainer.". Omit the line entirely for PROCEED.>
+U1: <count> | <the widest universe, e.g. "~2,400 | operators in the four-state footprint">
+U2: <count> | <narrowed by their size band>
+U3: <count> | <narrowed to real fit — "the ones actually worth your time">
+ECON: <2–3 sentences: roughly what this niche trades at (a range, e.g. "roughly 4–6× SDE at this size"), what drives premiums, what drives discounts>
+COMP: <2–3 sentences: who else is hunting this lane and how crowded it is — institutional vs. independent activity, where the heat is>
+INSIGHT: <3–4 sentences: the ONE non-obvious, specific, operational thing most buyers miss in this market. This is the punchline — the block where they decide a person with real deal experience is behind this. Route density, contract structure, crew/tech retention, owner-dependence, seasonality, channel mix — whatever is genuinely load-bearing HERE. Never a platitude.>
+KILL: <1–2 sentences: the conditions under which you'd advise walking away from this thesis — checkable ones>
 ===END===
-<then 1–2 plain sentences asking for the best email to send the full map — and offering to set up time with Paul (150+ acquisitions closed on the buyer's side; thirty minutes, confidential, no retainer to find out if it's a fit)>
-3. One question per message, maximum. After the read, your only goal is the email; answer questions helpfully but keep steering there. Never repeat the ===READ=== block once delivered.
+<then 1–2 plain sentences: ask for the best email so Paul can send the full map within 24 hours, and offer the consultation — thirty minutes, confidential, no retainer to find out if it's a fit>
+3. One question per message, maximum. After the map, your only goal is the email; answer questions helpfully but keep steering there. Never repeat the ===MAP=== block once delivered.
 
-THE READ — HARD ACCURACY RULES:
-- NEVER name specific companies as targets or buyers, and NEVER invent counts, statistics, multiples, or percentages. Qualitative and directional only: "mostly independent, owner-run shops", "consolidators have been active in this lane", "a long tail of operators under institutional size."
-- If the thesis is a market you genuinely know little about, say so plainly and describe what the full map will establish instead of guessing.
-- The read is a preliminary, directional take — never present it as the finished work.
+THE MAP — ACCURACY RULES (these are hard):
+- Counts and ranges are DIRECTIONAL ESTIMATES: always ~rounded ("~2,400", "~180", "roughly 5–7×"), never precise-sounding numbers ("183", "5.4×"). Estimate honestly from what you know of the trade; if you genuinely cannot estimate a count responsibly, write that funnel line as "— | <what the full map will establish there>" instead of inventing one.
+- NEVER name a target company. In COMP you may name major, widely known consolidators or platforms when you are confident they are real and active in that lane; when unsure, describe the buyer landscape without names.
+- Never state a valuation of a specific business — market-level trading ranges only.
+- If the thesis is a market you know little about, say so plainly in prose and deliver the map with what you can defend.
+- The map is preliminary and directional — never present it as the finished work.
 
-STYLE: outside the read, 1–3 short sentences. Plain, warm, confident. No bullet lists, no headers, no emoji, no hype. Sound like a sharp operator's chief of staff, not a chatbot.
+THE PUSHBACK (VERDICT: PUSHBACK) — when the lane is saturated, bid up, or structurally against them (institutional platforms paying multiples they can't match, consolidation already done, their size band outgunned), SAY SO. Lead with ANSWER. Use the funnel and COMP to show the crowding evidence. Use INSIGHT to point where the same capital works better — adjacent fragmented niches with similar economics. Use KILL for what would change your mind. This candor costs a bad deal and wins the relationship — it is the most valuable map you can deliver.
+
+STYLE: outside the map, 1–3 short sentences. Plain, warm, confident. No bullet lists, no headers, no emoji, no hype. Sound like a sharp operator's chief of staff, not a chatbot.
 
 HARD RULES — never break:
 - Never claim to be human. If asked: you're smbX's AI analyst; Paul takes it from the market map onward.
-- The only promise allowed: a first pass on their market map within 24 hours once they leave an email.
+- The only promise allowed: the full map within 24 hours once they leave an email.
 - Never ask for or discuss confidential financials in this chat.
 - Off-topic or abusive input: one polite redirect back to what they're looking to acquire.`;
 
 /** Scripted fallback when the model is unavailable — keeps the card alive. */
 function fallbackReply(userTurns: number): string {
   if (userTurns <= 1) return 'Got it. What size are you targeting — revenue or EBITDA range — and any geography?';
-  return 'Perfect. Last one: best email for your first market map?';
+  return 'Perfect. Last one: best email for your market map? Paul turns the full version around within 24 hours.';
 }
 
 function sanitize(messages: unknown): IntakeMessage[] | null {
@@ -141,35 +235,47 @@ function sanitize(messages: unknown): IntakeMessage[] | null {
   return out;
 }
 
+function deterministicClose(messages: IntakeMessage[]): IntakeResult | null {
+  const userMsgs = messages.filter(m => m.role === 'user').map(m => m.content);
+  const emailMsg = userMsgs.find(m => EMAIL_RE.test(m));
+  if (!emailMsg) return null;
+  const email = emailMsg.match(EMAIL_RE)![0];
+  const nonEmailMsgs = userMsgs.filter(m => m !== emailMsg);
+  const conflict = laneConflict(messages.map(m => m.content).join('\n'));
+  return {
+    reply: closeMessage(email, conflict),
+    done: true,
+    lead: {
+      thesis: nonEmailMsgs[0] || null,
+      size: nonEmailMsgs[1] || null,
+      email,
+    },
+    map: null,
+  };
+}
+
+function resultFromText(text: string): IntakeResult {
+  const { map, rest } = parseMap(text);
+  return { reply: rest, done: false, lead: null, map };
+}
+
+/**
+ * Non-streaming intake — the fallback transport (and the simplest test
+ * surface). Same contract as the streaming runner.
+ */
 export async function runPracticeIntake(rawMessages: unknown): Promise<IntakeResult | null> {
   const messages = sanitize(rawMessages);
   if (!messages) return null;
 
-  const userMsgs = messages.filter(m => m.role === 'user').map(m => m.content);
-
-  // Email anywhere in the user's messages → deterministic close + lead.
-  const emailMsg = userMsgs.find(m => EMAIL_RE.test(m));
-  if (emailMsg) {
-    const email = emailMsg.match(EMAIL_RE)![0];
-    const nonEmailMsgs = userMsgs.filter(m => m !== emailMsg);
-    return {
-      reply: CLOSE_MESSAGE,
-      done: true,
-      lead: {
-        thesis: nonEmailMsgs[0] || null,
-        size: nonEmailMsgs[1] || null,
-        email,
-      },
-      read: null,
-    };
-  }
+  const closed = deterministicClose(messages);
+  if (closed) return closed;
 
   const anthropic = getClient();
   if (anthropic) {
     try {
       const response = await anthropic.messages.create({
         model: MODEL,
-        max_tokens: 550, // headroom for the first-read document
+        max_tokens: 1400, // headroom for the full 8-block map
         system: SYSTEM_PROMPT,
         messages,
       });
@@ -178,14 +284,52 @@ export async function runPracticeIntake(rawMessages: unknown): Promise<IntakeRes
         .map(b => (b as { type: 'text'; text: string }).text)
         .join('')
         .trim();
-      if (text) {
-        const { read, rest } = parseRead(text);
-        return { reply: rest, done: false, lead: null, read };
-      }
+      if (text) return resultFromText(text);
     } catch (err: any) {
       console.error('[practice-intake] model call failed:', err.message);
     }
   }
 
-  return { reply: fallbackReply(userMsgs.length), done: false, lead: null, read: null };
+  return { reply: fallbackReply(messages.filter(m => m.role === 'user').length), done: false, lead: null, map: null };
+}
+
+/**
+ * Streaming intake — emits raw model text as it generates so the client can
+ * assemble the map in front of the visitor (the reveal is REAL work made
+ * legible, never a staged spinner). onDelta receives each text chunk; the
+ * returned result is authoritative (server-side parse).
+ */
+export async function runPracticeIntakeStream(
+  rawMessages: unknown,
+  onDelta: (chunk: string) => void,
+): Promise<IntakeResult | null> {
+  const messages = sanitize(rawMessages);
+  if (!messages) return null;
+
+  const closed = deterministicClose(messages);
+  if (closed) return closed;
+
+  const anthropic = getClient();
+  if (anthropic) {
+    try {
+      const stream = anthropic.messages.stream({
+        model: MODEL,
+        max_tokens: 1400,
+        system: SYSTEM_PROMPT,
+        messages,
+      });
+      let text = '';
+      stream.on('text', chunk => {
+        text += chunk;
+        try { onDelta(chunk); } catch { /* client gone — final still returns */ }
+      });
+      await stream.finalMessage();
+      const trimmed = text.trim();
+      if (trimmed) return resultFromText(trimmed);
+    } catch (err: any) {
+      console.error('[practice-intake] stream failed:', err.message);
+    }
+  }
+
+  return { reply: fallbackReply(messages.filter(m => m.role === 'user').length), done: false, lead: null, map: null };
 }

@@ -30,8 +30,7 @@ export default function About() {
       {/* ── Hero ── */}
       <section className="pd-hero" style={{ paddingBottom: 'clamp(50px, 6vw, 90px)' }}>
         <div style={{ position: 'relative', maxWidth: 1080, margin: '0 auto', textAlign: 'center' }}>
-          <div className="pd-badge"><span className="dot" />BUY-SIDE ONLY · FOUNDED 2025</div>
-          <h1 className="pd-h1 pd-h1-seg" style={{ margin: '48px 0 0' }}>New firm. Old hands.</h1>
+          <h1 className="pd-h1 pd-h1-seg" style={{ margin: 0 }}>New firm. Old hands.</h1>
           <div className="pd-sub" style={{ margin: '38px auto 0', maxWidth: 680 }}>
             smbX was built to give buyers in the lower middle market something they've never had —
             a real corporate development function, on demand, on their side of the table.
