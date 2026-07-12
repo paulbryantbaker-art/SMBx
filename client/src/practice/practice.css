@@ -540,9 +540,43 @@
 .pd-faq-item .q { font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
 .pd-faq-item .a { margin-top: 12px; font-size: 16.5px; line-height: 1.65; color: var(--pd-body); max-width: 56em; }
 
-/* ─── beliefs (about) ─── */
-.pd-drows.wide .pd-drow { grid-template-columns: clamp(180px, 24vw, 320px) minmax(0, 1fr); }
-.pd-drows.wide .pd-drow .k { color: var(--pd-ink); font-size: 18px; }
+/* ─── the creed (about) — the page's one dark movement ───
+   Four convictions as carved tenets: hairline-outlined Roman numerals as
+   ghost art, the statement overlapping each numeral at display scale, and
+   coral spent on exactly one strike — the full stop. Even tenets ride
+   lower so the spread reads editorial, not grid. */
+.pd-creed {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: clamp(64px, 8vw, 140px); row-gap: clamp(72px, 8.5vw, 120px);
+  margin-top: clamp(56px, 6.5vw, 88px);
+  padding-bottom: clamp(44px, 5.5vw, 92px); /* absorbs the even-tenet offset */
+}
+.pd-tenet { position: relative; padding-top: clamp(64px, 7.5vw, 104px); }
+.pd-tenet:nth-child(even) { top: clamp(44px, 5.5vw, 92px); }
+/* Mono, not Schibsted: Roman numerals need crossbarred I's — in a bare-stem
+   sans, I/II/III outline into anonymous slabs. */
+.pd-tenet .gn {
+  position: absolute; top: 0; left: -0.02em;
+  font-family: var(--pd-mono);
+  font-size: clamp(120px, 14vw, 200px); font-weight: 600;
+  line-height: 0.78; letter-spacing: -0.06em;
+  color: rgba(255, 255, 255, 0.04);
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.22);
+  user-select: none; pointer-events: none;
+}
+.pd-tenet .k {
+  margin: 0; position: relative;
+  font-size: clamp(26px, 2.7vw, 39px); font-weight: 800;
+  letter-spacing: -0.025em; line-height: 1.06; max-width: 12em;
+}
+.pd-tenet .k .fs { color: var(--pd-coral); }
+.pd-tenet .v { margin: 18px 0 0; font-size: 16.5px; line-height: 1.68; color: var(--pd-body); max-width: 27em; }
+@media (max-width: 900px) {
+  .pd-creed { grid-template-columns: minmax(0, 1fr); row-gap: 64px; margin-top: 48px; padding-bottom: 0; }
+  .pd-tenet { padding-top: clamp(56px, 15vw, 84px); }
+  .pd-tenet:nth-child(even) { top: 0; }
+  .pd-tenet .gn { font-size: clamp(110px, 26vw, 170px); }
+}
 
 /* ─── disclosure block ─── */
 .pd-disclosure {
