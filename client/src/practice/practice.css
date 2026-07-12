@@ -215,12 +215,25 @@
 /* ─── hero — split: statement left, the engine right (the pattern the
    high-converting pages share: benefit copy beside the live product).
    The hero owns the whole first viewport: nothing else above the fold. ─── */
+/* The first fold is one composed unit: the hero centers in the remaining
+   space and the stat band sits exactly at the bottom of the viewport. */
+.pd-fold { display: flex; flex-direction: column; min-height: calc(100svh - 86px); }
+.pd-fold .pd-hero { flex: 1 1 auto; }
 .pd-hero {
   position: relative; overflow: hidden;
-  min-height: calc(100svh - 86px);
   display: flex; align-items: center;
-  padding: clamp(48px, 6vw, 96px) var(--pd-pad-x);
+  padding: clamp(24px, 3vw, 48px) var(--pd-pad-x);
 }
+/* Atmosphere — a barely-there radial wash (warm light on the working
+   surface, faint ink for depth). position:absolute inside the relative
+   hero, never position:fixed (Safari toolbar rule). */
+.pd-hero::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(52% 64% at 72% 44%, rgba(255, 56, 92, 0.07), rgba(255, 56, 92, 0) 70%),
+    radial-gradient(44% 54% at 18% 26%, rgba(34, 34, 34, 0.04), rgba(34, 34, 34, 0) 72%);
+}
+.pd-herosplit { position: relative; }
 .pd-herosplit {
   display: grid; grid-template-columns: minmax(0, 6.5fr) minmax(0, 5.5fr);
   gap: clamp(52px, 7vw, 130px); align-items: center;
@@ -228,7 +241,7 @@
 }
 .pd-herosplit .pd-chat { margin: 0; max-width: none; width: 100%; box-shadow: 0 30px 80px -30px rgba(34, 34, 34, 0.3); }
 @media (max-width: 1024px) {
-  .pd-hero { min-height: 0; }
+  .pd-fold { min-height: 0; }
   .pd-herosplit { grid-template-columns: 1fr; gap: 52px; }
 }
 
@@ -433,14 +446,14 @@
 /* ─── stat band — the proof is the pitch: one row of four, spread across
    the full width, display weight, tiny mono label. ─── */
 .pd-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(28px, 4vw, 56px); }
-.pd-stat .n { font-size: clamp(54px, 6.8vw, 102px); font-weight: 800; letter-spacing: -0.05em; color: var(--pd-ink); line-height: 0.9; white-space: nowrap; }
+.pd-stat .n { font-size: clamp(44px, 5.4vw, 82px); font-weight: 800; letter-spacing: -0.05em; color: var(--pd-ink); line-height: 0.9; white-space: nowrap; }
 .pd-stat.accent .n { color: var(--pd-coral-link); }
-.pd-stat .l { margin-top: 16px; font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--pd-tert); line-height: 1.7; }
+.pd-stat .l { margin-top: 14px; font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--pd-tert); line-height: 1.7; }
 .pd-statband { border-top: 1px solid var(--pd-hair); border-bottom: 1px solid var(--pd-hair); }
-.pd-statband .pd-stats { padding: clamp(64px, 7vw, 110px) 0; }
+.pd-statband .pd-stats { padding: clamp(36px, 4vw, 60px) 0; }
 @media (max-width: 1080px) {
-  .pd-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(44px, 6vw, 72px) clamp(28px, 4vw, 64px); }
-  .pd-stat .n { font-size: clamp(80px, 10.5vw, 140px); }
+  .pd-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(40px, 5.5vw, 64px) clamp(28px, 4vw, 64px); }
+  .pd-stat .n { font-size: clamp(64px, 8.5vw, 104px); }
 }
 
 /* ─── tombstones — the signature device ─── */

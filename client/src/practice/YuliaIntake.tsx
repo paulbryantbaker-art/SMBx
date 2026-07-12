@@ -200,7 +200,7 @@ export function MapDoc({
   return (
     <div className="pd-map">
       <div className="map-head" style={rise()}>
-        <span className="map-mark">smb<span style={{ color: 'var(--pd-coral)' }}>X</span></span>
+        <img src="/logo-coral-x.png" alt="smbX.ai" style={{ height: 22, width: 'auto', display: 'block' }} />
         <span className="map-label">{headLabel || `PRELIMINARY MARKET READ · ${DOC_DATE.toUpperCase()}`}</span>
       </div>
       {map.title && <div className="map-title" style={rise()}>{map.title}</div>}
@@ -441,9 +441,8 @@ export default function YuliaIntake() {
   return (
     <div id="yulia" className="pd-chat">
       <div className="pd-chat-head">
-        <div style={{ fontWeight: 800, fontSize: 17 }}>
-          smb<span style={{ color: 'var(--pd-coral)' }}>X</span> Target Mapping Engine
-        </div>
+        <img src="/logo-coral-x.png" alt="smbX.ai" style={{ height: 28, width: 'auto', display: 'block' }} />
+        <div style={{ fontWeight: 800, fontSize: 17 }}>Target Mapping Engine</div>
       </div>
       <div className="pd-msgs" ref={listRef}>
         {messages.map((m, i) => (

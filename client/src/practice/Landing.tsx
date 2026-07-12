@@ -156,14 +156,15 @@ function LeadForm() {
 export default function Landing() {
   return (
     <PracticeShell home>
-      {/* ── Hero — statement left, the engine right ── */}
+      {/* ── The fold: hero centered, stat band pinned to the viewport bottom ── */}
+      <div className="pd-fold">
       <section className="pd-hero">
         <div className="pd-herosplit">
           <div>
-            <h1 className="pd-h1" style={{ margin: 0, fontSize: 'clamp(40px, 5vw, 80px)' }}>
+            <h1 className="pd-h1" style={{ margin: 0, fontSize: 'clamp(38px, 4.7vw, 74px)' }}>
               Rev up your acquisition engine and start adding real value&nbsp;today.
             </h1>
-            <div className="pd-sub" style={{ margin: '30px 0 0', maxWidth: '30em', fontSize: 'clamp(17px, 1.5vw, 20px)' }}>
+            <div className="pd-sub" style={{ margin: '26px 0 0', maxWidth: '30em', fontSize: 'clamp(17px, 1.4vw, 19px)' }}>
               <b style={{ color: 'var(--pd-ink)', fontWeight: 700 }}>Institutional-grade corporate development, on demand.</b>{' '}
               We execute your M&amp;A vision so you can focus on your business. Through a streamlined
               onboarding process, our senior buy-side team can start mapping targets and building
@@ -188,7 +189,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Stat band — the proof is the pitch; make it physically dominant ── */}
+      {/* ── Stat band — the proof strip at the bottom of the fold ── */}
       <section className="pd-statband">
         <div className="pd-wrap">
           <div className="pd-stats rv-stagger" data-rv>
@@ -199,6 +200,7 @@ export default function Landing() {
           </div>
         </div>
       </section>
+      </div>
 
       {/* ── The first read — show the artifact itself (sample, clearly
              labeled; content from the Market Map spec's worked example) ── */}
