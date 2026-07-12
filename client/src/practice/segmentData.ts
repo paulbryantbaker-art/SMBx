@@ -48,7 +48,7 @@ export const SEGMENTS: Segment[] = [
     ],
     answers: [
       { k: 'The work', v: 'Market maps and off-market sourcing on your thesis, with models and diligence checklists in days — deal capacity that switches on when you need it and costs nothing when you don’t.' },
-      { k: 'The practitioner', v: 'Paul runs the process personally — the analysis, the seller conversations, and the negotiation — and keeps the price disciplined.' },
+      { k: 'The practitioner', v: 'A senior deal captain runs the process — the analysis, the seller conversations, and the negotiation — while maintaining strict price discipline.' },
       { k: 'Your side', v: 'Buy-side is all we do, and we take one client per target — so your thesis is never resold or shared, and your deal has our full attention.' },
     ],
   },
@@ -80,7 +80,7 @@ export const SEGMENTS: Segment[] = [
     ],
     answers: [
       { k: 'The work', v: 'CIM triage, models, and diligence checklists produced in days, not weeks — so a dead deal costs you a conversation, not a quarter.' },
-      { k: 'The practitioner', v: 'A senior operator packages the deal the way capital partners expect to see it — and keeps the seller warm while you raise.' },
+      { k: 'The practitioner', v: 'A senior deal team packages the deal exactly how capital partners expect to see it — and keeps the seller engaged while you finalize funding.' },
       { k: 'Your side', v: 'We take one client per target — so the deal you worked to find stays yours to close, never shopped to another sponsor.' },
     ],
   },
@@ -112,7 +112,7 @@ export const SEGMENTS: Segment[] = [
     ],
     answers: [
       { k: 'The work', v: 'Off-market maps of the whole segment — not the brokered slice — with triage, models, and memos generated as fast as your pipeline moves.' },
-      { k: 'The practitioner', v: 'Senior execution that flexes deal by deal — outreach, process, and negotiation run personally, at the pace of your pipeline.' },
+      { k: 'The practitioner', v: 'Senior execution capacity that flexes deal by deal — outreach, process, and negotiation managed at the pace of your pipeline.' },
       { k: 'Your side', v: 'One client per target — your add-on pipeline is yours alone, never shared with a competing buyer.' },
     ],
   },
@@ -144,7 +144,7 @@ export const SEGMENTS: Segment[] = [
     ],
     answers: [
       { k: 'The work', v: 'The recast, the model, the diligence checklist, and the lender package — built in days and checked against what the market actually pays.' },
-      { k: 'The practitioner', v: 'A senior operator who has seen the broker playbook, tells you when the price is wrong, and says "walk" out loud when the numbers say so.' },
+      { k: 'The practitioner', v: 'A senior deal team that has seen the broker playbook, tells you when the price is wrong, and explicitly advises you to walk when the numbers demand it.' },
       { k: 'Your side', v: 'We work for you, and only you — your interests are the only ones we’re paid to look after, start to finish.' },
     ],
   },
@@ -176,7 +176,7 @@ export const SEGMENTS: Segment[] = [
     ],
     answers: [
       { k: 'The work', v: 'Quiet market mapping and target reads without a whisper reaching your competitors — plus models that price the business as it is, not as you’ll make it.' },
-      { k: 'The practitioner', v: 'Third-party approaches in the practice’s name, a disciplined process, and a repeatable playbook for the next one — while your team stays on the business.' },
+      { k: 'The practitioner', v: 'Discreet third-party approaches made in our firm’s name, maintaining a disciplined process and a repeatable playbook — while your executive team stays focused on the core business.' },
       { k: 'Your side', v: 'Total discretion — your interest stays private until you decide otherwise — and one client per target, so your strategy is never shared.' },
     ],
   },

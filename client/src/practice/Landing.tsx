@@ -1,7 +1,7 @@
 /**
  * Practice-site landing — corpdevservices layout + Paul's copy deck
  * (2026-07-11) + the intensity pass (2026-07-12): restraint with drama.
- * Scroll: nav · hero + Yulia intake · stat band (numbers as the largest
+ * Scroll: nav · hero + Target Mapping Engine · stat band (numbers as the largest
  * objects on the page) · problem table · track record (dark) · the firm
  * (#why) · process as a horizontal sequence (#how) · who it's for (#who) ·
  * industries as a dense list (#industries) · how we find them (statement +
@@ -22,10 +22,30 @@ import { trackEvent } from '../lib/analytics';
 const ENGAGEMENT = [
   { k: 'Thesis', v: "What you're really trying to build, translated into a target profile a search can run against." },
   { k: 'Sourcing', v: "Direct, discreet outreach to owners who aren't formally for sale. Most of our deals are never listed." },
-  { k: 'Evaluation', v: "The real multiple, the earnings that hold up and the ones that don't, and the number a lender will actually finance." },
-  { k: 'Structure', v: 'The offer, the deal structure, and the financing model your bank will underwrite.' },
+  { k: 'Evaluation', v: "The real multiple, the earnings that hold up versus the ones that don't, and the number a lender will actually finance." },
+  { k: 'Structure', v: 'The offer, the deal structure, and the financing model your capital partners will underwrite.' },
   { k: 'Diligence & close', v: 'We run the process, coordinate the attorneys, CPAs, and lenders, and drive the negotiation to signing.' },
-  { k: 'Integration', v: 'The first 180 days, where a good purchase becomes a good business.' },
+  { k: 'Integration', v: 'The first 180 days, where a good purchase becomes a functional business.' },
+];
+
+/** Value creation, pre & post close (Paul's copy update, 2026-07-12 —
+ *  the L-VAL section: the IMO function is part of the pitch). */
+const VALUE_PILLARS = [
+  {
+    num: 'PRE-CLOSE',
+    t: 'Diligence for integration',
+    b: 'Financial diligence confirms the price; integration diligence secures the value. Before you sign, our team maps the operational gaps, system overlaps, and cultural risks, building a 100-day execution plan while you still have leverage.',
+  },
+  {
+    num: 'POST-CLOSE',
+    t: 'The IMO function',
+    b: "You don't need standing integration overhead. Our team acts as your on-demand IMO, driving the transition. We manage vendor consolidation, employee onboarding, and operational alignment so your team can focus on the business.",
+  },
+  {
+    num: 'EXECUTION',
+    t: 'Synergy capture',
+    b: 'The model promised cost savings and cross-sell revenue. We track and execute against those specific targets through the first six months, ensuring the deal you modeled is the business you actually get.',
+  },
 ];
 
 const HUNTING = [
@@ -53,19 +73,19 @@ const FAQ = [
   },
   {
     q: 'Who actually does the work?',
-    a: 'Paul does. Every engagement is run personally — the analysis, the seller conversations, and the negotiation, start to close.',
+    a: 'Every mandate is led by a senior deal captain with decades of buy-side experience. You are never handed off to junior staff for the critical phases of analysis, seller conversations, and negotiation.',
   },
   {
     q: 'Do you negotiate for us?',
-    a: "We run the process and drive the negotiation at your direction — but you're the acquirer. You set the price, you approve every move, and you sign. When your deal needs a licensed attorney, a transaction CPA, or a lender, we bring in the right one and manage the work.",
+    a: 'We run the process and drive the negotiation at your direction — but you are the acquirer. You set the limits, you approve the strategy, and you sign. When your deal requires a licensed attorney, a transaction CPA, or a lender, we bring in the right specialists and manage the workflow.',
   },
   {
     q: 'What does it cost?',
-    a: "A retainer for the engagement, and a success fee when we close the deal you wanted — paid by you, for work we did for you. Never a dollar from the seller or the middle of the transaction. We'll scope it in one conversation.",
+    a: 'A retainer for the engagement, and a success fee when we close the deal you wanted — paid by you, for work we did for you. We never take a dollar from the seller or the middle of the transaction. We will scope the economics in our first conversation.',
   },
   {
     q: 'Will you work with a competitor of mine?',
-    a: 'Not on your target. We take one client per target, so your thesis and your pipeline stay yours.',
+    a: 'Not in your target market. We take one client per target lane, ensuring your thesis and your pipeline remain strictly yours.',
   },
 ];
 
@@ -124,18 +144,19 @@ export default function Landing() {
       {/* ── Hero ── */}
       <section className="pd-hero">
         <div style={{ position: 'relative', maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
-          <h1 className="pd-h1" style={{ margin: 0 }}>Stress-free corp dev.</h1>
-          <div className="pd-sub" style={{ margin: '44px auto 0', maxWidth: 680 }}>
-            The acquisition function large companies run in-house, available to you deal by deal.
-            We source, evaluate, and close — on the buy side, for one client per target.
+          <h1 className="pd-h1" style={{ margin: 0, fontSize: 'clamp(48px, 7vw, 92px)' }}>Institutional-grade corporate development, on&nbsp;demand.</h1>
+          <div className="pd-sub" style={{ margin: '44px auto 0', maxWidth: 720 }}>
+            We execute your M&amp;A vision so you can focus on your business. Through a streamlined
+            onboarding process, our senior buy-side team can start mapping targets and building
+            your thesis immediately.
           </div>
           <div style={{ margin: '26px auto 0', fontSize: 15, lineHeight: 1.6, color: 'var(--pd-body)', maxWidth: 640 }}>
             Led by <b style={{ color: 'var(--pd-ink)' }}>Paul Baker</b> — 20-year deal captain ·{' '}
-            <b style={{ color: 'var(--pd-ink)' }}>150+ acquisitions closed for buyers</b> · Wrench Group · JPMorgan Chase
+            <b style={{ color: 'var(--pd-ink)' }}>150+ acquisitions in the middle market</b> · Wrench Group · JPMorgan Chase
           </div>
           <YuliaIntake />
           <div style={{ marginTop: 20, fontSize: 14.5, color: 'var(--pd-tert)' }}>
-            Prefer a human first?{' '}
+            Prefer to speak with our team first?{' '}
             <a
               href={bookHref()}
               target={bookTarget()}
@@ -143,7 +164,7 @@ export default function Landing() {
               style={{ color: 'var(--pd-coral-link)', fontWeight: 600, textDecoration: 'underline' }}
               onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero-link' })}
             >
-              Book advisor call now →
+              Book a confidential consultation →
             </a>
           </div>
         </div>
@@ -155,7 +176,7 @@ export default function Landing() {
           <div className="pd-stats">
             <div className="pd-stat"><div className="n">150+</div><div className="l">Acquisitions closed</div></div>
             <div className="pd-stat"><div className="n">$5B+</div><div className="l">In revenue added to buyers</div></div>
-            <div className="pd-stat"><div className="n">20</div><div className="l">Years inside corp dev and the investment bank</div></div>
+            <div className="pd-stat"><div className="n">20</div><div className="l">Years of buy-side execution</div></div>
             <div className="pd-stat accent"><div className="n">1</div><div className="l">Side of the table — always the buyer's</div></div>
           </div>
         </div>
@@ -165,29 +186,30 @@ export default function Landing() {
              complaint about anyone else (confidence pass) ── */}
       <section className="pd-wrap pd-section">
         <div className="pd-ledger-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 40, marginBottom: 64 }}>
-          <h2 className="pd-h2" style={{ maxWidth: 900 }}>Most acquirers under $250M don't have a deal team.</h2>
+          <h2 className="pd-h2" style={{ maxWidth: 960 }}>Most acquirers under $250M don't have a dedicated deal team.</h2>
           <div className="pd-seclabel right">The gap</div>
         </div>
         <div className="pd-askew">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
             <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-              The companies that buy well have a corporate development function: people whose entire
-              job is finding the right targets, pricing them properly, and getting them closed.
-              It's a permanent team, and at scale it pays for itself many times over.
+              The companies that buy well have a corporate development function: a permanent team
+              whose entire job is finding the right targets, pricing them properly, and getting
+              them closed. At scale, it pays for itself many times over.
             </div>
             <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-              Below a certain size, the math doesn't work. A director of corp dev and one analyst
-              runs well past half a million dollars a year — for a function you may use twice. So
-              the acquisitions that would compound your business get run off the side of a desk, in
-              the margins of a full-time job, against a seller who does this professionally.
+              Below a certain size, the math doesn't work. A director of corp dev and an analyst
+              runs well past half a million dollars a year — for a function you may only utilize
+              twice a year. As a result, the acquisitions that would compound your business get run
+              off the side of a desk against a seller who does this professionally.
             </div>
           </div>
           <div className="off">
             <div style={{ fontSize: 'clamp(24px, 2.5vw, 33px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.22 }}>
-              smbX is that function, without the standing cost.
+              smbX is that function, without the permanent overhead.
             </div>
             <div style={{ marginTop: 14, fontSize: 18, lineHeight: 1.6, color: 'var(--pd-body)' }}>
-              Engaged for the deal, gone when it's done.
+              Structured for your specific mandate — engaged for the deal, with economics tied
+              directly to a successful close.
             </div>
           </div>
         </div>
@@ -197,10 +219,10 @@ export default function Landing() {
       <section className="pd-dark" style={{ marginTop: 'clamp(100px, 12vw, 170px)' }}>
         <div className="pd-wrap pd-dark-pad">
           <div className="pd-seclabel">Track record</div>
-          <h2 className="pd-h2" style={{ maxWidth: 820 }}>We've done this about 150 times.</h2>
+          <h2 className="pd-h2" style={{ maxWidth: 820 }}>We've done this more than 150 times.</h2>
           <div style={{ marginTop: 24, fontSize: 18, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '46em' }}>
-            Two decades as the deal captain inside the buyer — sourcing, negotiating, closing, and
-            integrating acquisitions at platform scale.
+            Two decades driving the deal from inside the buyer — sourcing, negotiating, closing,
+            and integrating acquisitions at platform scale.
           </div>
           <div className="pd-tombs">
             <div className="pd-tomb">
@@ -232,21 +254,22 @@ export default function Landing() {
         <div className="pd-firm-grid">
           <div>
             <div className="pd-seclabel">The firm</div>
-            <h2 className="pd-h2">A corporate development function. Yours when you need one.</h2>
+            <h2 className="pd-h2">A corporate development function. Yours when you need it.</h2>
             <div style={{ marginTop: 32, display: 'flex', flexDirection: 'column', gap: 18, fontSize: 18, lineHeight: 1.7, color: 'var(--pd-body)' }}>
               <div>
                 Large acquirers run corporate development in-house — a permanent team that finds
                 targets, evaluates them, closes them, and integrates them. Almost nobody buying
-                companies under $250M can justify the standing cost of one.
+                companies under $250M can justify the standing cost of that infrastructure.
               </div>
               <div>
                 smbX is that function, engaged deal by deal. We source off-market, run the
-                analysis, drive the diligence, and carry the negotiation to close. Paul Baker runs
-                every engagement personally, and he has closed more than 150 acquisitions doing
-                exactly this work inside a national platform and a global bank.
+                analysis, drive the diligence, and carry the negotiation to close. Led by Paul
+                Baker, who has closed more than 150 acquisitions doing exactly this work inside a
+                national platform and a global bank, our team brings institutional execution to
+                your thesis.
               </div>
               <div>
-                We work the buy side, and we take one client per target.
+                We work exclusively on the buy side, and we take one client per target.
               </div>
             </div>
             <div className="pd-drows" style={{ marginTop: 56 }}>
@@ -260,7 +283,7 @@ export default function Landing() {
               </div>
               <div className="pd-drow">
                 <div className="k">The focus</div>
-                <div className="v">Buyers only, one client per target. It's a narrower practice than most firms run, and it's why our clients get our full attention.</div>
+                <div className="v">Buyers only, one client per target. It's a narrower practice than most firms run, which ensures our clients get our full strategic bandwidth.</div>
               </div>
             </div>
           </div>
@@ -273,17 +296,17 @@ export default function Landing() {
               />
             </div>
             <div className="pd-advisor-card">
-              <div style={{ fontWeight: 700, fontSize: 19 }}>Your advisor</div>
+              <div style={{ fontWeight: 700, fontSize: 19 }}>Firm leadership</div>
               <div style={{ marginTop: 10, fontSize: 16, lineHeight: 1.65, color: 'var(--pd-body)' }}>
                 <b style={{ color: 'var(--pd-ink)' }}>Paul Baker, Founder.</b> Twenty years as a deal captain — Director of
                 Corporate Development at Wrench Group, where he built the M&amp;A engine that took a
                 startup platform to a national leader through 36 acquisitions, and Director of
                 Acquisition Integration at JPMorgan Chase, integrating the bank's largest fintech
-                and banking deals. He's sat on the buyer's side of the table for 150+ acquisitions.
-                Now he sits on yours.
+                and banking deals. He has sat on the buyer's side of the table for 150+
+                acquisitions. Now he anchors the team sitting on yours.
               </div>
               <div style={{ marginTop: 16 }}>
-                <Link href="/about" className="pd-link">More about Paul →</Link>
+                <Link href="/about" className="pd-link">More about the firm →</Link>
               </div>
             </div>
           </div>
@@ -307,26 +330,47 @@ export default function Landing() {
       {/* ── Process — a horizontal sequence ── */}
       <section id="how" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
         <div className="pd-seclabel">The process</div>
-        <h2 className="pd-h2" style={{ maxWidth: 760 }}>Here's what stress-free looks like.</h2>
+        <h2 className="pd-h2" style={{ maxWidth: 760 }}>Execution without the friction.</h2>
         <div className="pd-steps">
           <div className="pd-step">
             <div className="num">01</div>
             <div className="t">Conversation</div>
-            <div className="b">Tell Yulia what you want to buy. She maps your market on the spot and sets up your consultation with Paul.</div>
-            <a className="pd-link" href="#yulia">Talk to Yulia →</a>
+            <div className="b">Provide your target criteria to our mapping engine. We map your market instantly and prepare the brief for your consultation.</div>
+            <a className="pd-link" href="#yulia">Build your market map →</a>
           </div>
           <div className="pd-step">
             <div className="num">02</div>
             <div className="t">Curated targets</div>
-            <div className="b">We cover a market in days — a full target landscape, screened and scored, typically inside a week of the mandate. Paul hand-picks the ones worth your time.</div>
+            <div className="b">We cover a market in days — a full target landscape, screened and scored, typically inside a week of the mandate. Our team hand-picks the targets that meet your exact criteria.</div>
             <a className="pd-link" href="#why">How we work →</a>
           </div>
           <div className="pd-step">
             <div className="num">03</div>
             <div className="t">Close with confidence</div>
-            <div className="b">Diligence run, price disciplined, negotiation carried to signing — and through the first 180 days after close.</div>
+            <div className="b">Diligence run, price disciplined, negotiation carried to signing — and managed through the first 180 days after close.</div>
             <a className="pd-link" href="#book">Book a call →</a>
           </div>
+        </div>
+      </section>
+
+      {/* ── Value creation, pre & post close ── */}
+      <section className="pd-wrap pd-section-lg">
+        <div className="pd-seclabel">Value creation</div>
+        <h2 className="pd-h2" style={{ maxWidth: 920 }}>Closing is just the beginning. Value is realized in the first 180 days.</h2>
+        <div style={{ marginTop: 24, fontSize: 18, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '48em' }}>
+          Most middle-market acquirers don't have a dedicated Integration Management Office (IMO).
+          When a deal closes, the transition often gets dumped on the plates of executives already
+          running the core business. We stay engaged through the wire to execute the integration
+          playbook.
+        </div>
+        <div className="pd-steps">
+          {VALUE_PILLARS.map(p => (
+            <div className="pd-step" key={p.num}>
+              <div className="num">{p.num}</div>
+              <div className="t">{p.t}</div>
+              <div className="b">{p.b}</div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -394,23 +438,24 @@ export default function Landing() {
         <div className="pd-askew">
           <div>
             <div className="pd-seclabel">How we find them</div>
-            <h2 className="pd-quote">The best sellers aren't for sale.</h2>
+            <h2 className="pd-quote">The best targets aren't for sale.</h2>
           </div>
           <div className="off" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
             <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-              The owner you want to buy is rarely on a broker's list. They don't want their employees
-              to find out. They don't want their competitors to know. They don't want to sit through
-              a dozen showings with tire-kickers, and they don't want to pay a broker 10% to make it
+              The owner you want to buy is rarely on a broker's list. They don't want their
+              employees to find out, their competitors to know, or to sit through a dozen showings
+              with tire-kickers. And they certainly don't want to pay a broker 10% to make it
               happen.
             </div>
             <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-              So they wait. And most will only take a call when someone arrives with a specific
-              buyer, a specific thesis, and a serious reason to talk.
+              So they wait. Most will only take a call when someone arrives with a specific buyer,
+              a defined thesis, and a serious reason to talk.
             </div>
             <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-ink)' }}>
-              <b>That's the call we make on your behalf.</b> No auction, no bidding war, no thirty
-              other buyers who've already seen the book. Just a direct conversation with an owner who
-              hasn't been shopped — where price is a discussion, not a competition.
+              <b>That is the call our team makes on your behalf.</b> No auction, no bidding war, no
+              thirty other buyers who have already seen the book. Just a direct conversation with an
+              owner who hasn't been shopped — where price is a strategic discussion, not a
+              competition.
             </div>
           </div>
         </div>
@@ -422,15 +467,15 @@ export default function Landing() {
           <div className="pd-seclabel">Whose side we're on</div>
           <div className="pd-askew" style={{ alignItems: 'end' }}>
             <h2 className="pd-quote" style={{ maxWidth: '11em' }}>
-              The seller has a broker. Who's working for you?
+              The seller has a broker. Who is working for you?
             </h2>
             <div className="off">
               <div style={{ fontSize: 'clamp(28px, 3vw, 40px)', fontWeight: 800, letterSpacing: '-0.025em', lineHeight: 1.05 }}>
-                Yours. Start to <span style={{ color: 'var(--pd-coral)' }}>finish.</span>
+                We are. Start to <span style={{ color: 'var(--pd-coral)' }}>finish.</span>
               </div>
               <div style={{ marginTop: 22, fontSize: 17, lineHeight: 1.65, color: 'var(--pd-body)', maxWidth: 460 }}>
-                We represent buyers, and only buyers — one client per target. So you get our full
-                attention, straight answers, and a deal that stays yours.
+                We represent buyers, and only buyers — one client per target. You get our full
+                attention, unfiltered analysis, and a proprietary deal that stays yours.
               </div>
             </div>
           </div>
@@ -447,7 +492,7 @@ export default function Landing() {
       {/* ── FAQ ── */}
       <section className="pd-wrap pd-section-lg">
         <div className="pd-seclabel">Straight answers</div>
-        <h2 className="pd-h2" style={{ maxWidth: 760 }}>Questions people ask before they call.</h2>
+        <h2 className="pd-h2" style={{ maxWidth: 760 }}>Common pre-engagement questions.</h2>
         <div className="pd-faq">
           {FAQ.map(f => (
             <div className="pd-faq-item" key={f.q}>
@@ -465,11 +510,12 @@ export default function Landing() {
             <div>
               <h2 className="pd-cta-h">Let's go find the one.</h2>
               <div style={{ marginTop: 24, fontSize: 18, lineHeight: 1.65, color: 'var(--pd-body)', maxWidth: 480 }}>
-                Two minutes with Yulia and your market map is underway — or talk to Paul directly.
-                Confidential either way, and there's no retainer to find out if we're a fit.
+                Take two minutes with our Target Mapping Engine to build your thesis — or speak
+                with our team directly. Confidential either way, and there's no retainer to find
+                out if we're a fit.
               </div>
               <div style={{ marginTop: 44, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                <a className="pd-pill-primary pd-pill-lg" href="#yulia" onClick={() => trackEvent('practice_cta_clicked', { placement: 'cta-yulia' })}>Start with Yulia →</a>
+                <a className="pd-pill-primary pd-pill-lg" href="#yulia" onClick={() => trackEvent('practice_cta_clicked', { placement: 'cta-yulia' })}>Build your market map →</a>
                 <a
                   className="pd-pill pd-pill-lg-quiet"
                   href={bookHref()}

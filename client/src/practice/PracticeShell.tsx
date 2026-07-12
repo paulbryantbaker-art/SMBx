@@ -1,7 +1,7 @@
 /**
  * Practice-site chrome: sticky nav + footer (Paul's copy additions,
  * 2026-07-11). Nav: How it works · Industries · Track record · Who it's for,
- * with Confidential consultation + Talk to Yulia. Footer carries the firm /
+ * with Confidential consultation + Build your market map. Footer carries the firm /
  * buyers / where-we-work columns, the compliance disclosure block (every
  * page, anchor #disclosures), and a quiet team sign-in. `home` pages anchor
  * within the page; subpages anchor back to the landing (`/#how` …).
@@ -71,7 +71,7 @@ export default function PracticeShell({ home = false, children }: { home?: boole
             >
               Confidential consultation
             </a>
-            <a className="pd-pill-primary" href={anchor('#yulia')} onClick={() => trackEvent('practice_cta_clicked', { placement: 'nav-yulia' })}>Talk to Yulia</a>
+            <a className="pd-pill-primary" href={anchor('#yulia')} onClick={() => trackEvent('practice_cta_clicked', { placement: 'nav-yulia' })}>Build your market map</a>
           </div>
         </div>
       </header>
@@ -84,7 +84,7 @@ export default function PracticeShell({ home = false, children }: { home?: boole
             <img src="/logo-coral-x.png" alt="smbX.ai" style={{ height: 40, margin: '-5px 0 0 -8px' }} />
             <div style={{ marginTop: 14, fontSize: 14, lineHeight: 1.6, color: 'var(--pd-tert)', maxWidth: 340 }}>
               Buy-side corporate development for acquirers in the lower middle market. A senior
-              operator and a full team's output, on your side of the table.
+              operator and a full team's output, exclusively on your side of the table.
             </div>
           </div>
           <div style={{ display: 'flex', gap: 'clamp(32px, 4.5vw, 72px)', flexWrap: 'wrap' }}>

@@ -30,10 +30,11 @@ export default function About() {
       {/* ── Hero ── */}
       <section className="pd-hero" style={{ paddingBottom: 'clamp(50px, 6vw, 90px)' }}>
         <div style={{ position: 'relative', maxWidth: 1080, margin: '0 auto', textAlign: 'center' }}>
-          <h1 className="pd-h1 pd-h1-seg" style={{ margin: 0 }}>New firm. Old hands.</h1>
+          <h1 className="pd-h1 pd-h1-seg" style={{ margin: 0 }}>A new firm. Decades of execution.</h1>
           <div className="pd-sub" style={{ margin: '38px auto 0', maxWidth: 680 }}>
-            smbX was built to give buyers in the lower middle market something they've never had —
-            a real corporate development function, on demand, on their side of the table.
+            smbX was built to give buyers in the lower middle market something they have never had —
+            a dedicated corporate development function, on demand, exclusively on their side of
+            the table.
           </div>
         </div>
       </section>
@@ -56,7 +57,7 @@ export default function About() {
           </div>
           <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
             smbX exists to be that team: a complete corporate development function — sourcing,
-            evaluation, negotiation, integration — run by a senior dealmaker who has closed 150+
+            evaluation, negotiation, integration — led by senior dealmakers who have closed 150+
             acquisitions, and pointed at one side of the table. Yours.
           </div>
         </div>
@@ -66,7 +67,7 @@ export default function About() {
       <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(80px, 9vw, 130px)' }}>
         <div className="pd-firm-grid">
           <div>
-            <div className="pd-seclabel">Your advisor</div>
+            <div className="pd-seclabel">Firm leadership</div>
             <h2 className="pd-h2">Paul Baker — Founder</h2>
             <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 18, fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
               <div>
@@ -75,13 +76,12 @@ export default function About() {
               </div>
               <div>
                 For nearly a decade he was Director of Corporate Development and M&amp;A Integration
-                at <b style={{ color: 'var(--pd-ink)' }}>Wrench Group</b>, where he built the acquisition engine that turned
-                four founding companies into one of the largest essential-home-services platforms
-                in the country. He sourced and screened thousands of targets, ran the process from
-                LOI to definitive agreement, and closed{' '}
+                at <b style={{ color: 'var(--pd-ink)' }}>Wrench Group</b>, building the acquisition engine that turned four
+                founding companies into a premier national home-services platform. He oversaw the
+                process from LOI to definitive agreement, and closed{' '}
                 <b style={{ color: 'var(--pd-ink)' }}>36 acquisitions across roughly $2.9 billion in enterprise value</b> —
-                then owned the integration playbook that made them work. He sat across from
-                founders, brokers, bankers, and private equity sponsors on every one.
+                then owned the integration playbook that made them functional. He has sat across
+                from founders, brokers, bankers, and private equity sponsors on every one.
               </div>
               <div>
                 Before that, at <b style={{ color: 'var(--pd-ink)' }}>JPMorgan Chase's Investment Bank</b>, he led
@@ -104,7 +104,7 @@ export default function About() {
             </div>
             <div style={{ marginTop: 36 }}>
               <a className="pd-pill-primary pd-pill-lg" href={bookHref()} target={bookTarget()} rel={bookTarget() ? 'noreferrer' : undefined}>
-                Talk to Paul — confidential consultation
+                Talk to our team — confidential consultation
               </a>
             </div>
           </div>
