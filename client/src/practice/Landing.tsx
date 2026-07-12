@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { Link } from 'wouter';
 import PracticeShell from './PracticeShell';
 import YuliaIntake, { MapDoc, type PartialMap } from './YuliaIntake';
+import Mark from './Mark';
 import { postPracticeLead, bookHref, bookTarget } from './leads';
 import { SEGMENTS } from './segmentData';
 import { trackEvent } from '../lib/analytics';
@@ -103,6 +104,34 @@ const FAQ = [
     a: 'Not in your target market. We take one client per target lane, ensuring your thesis and your pipeline remain strictly yours.',
   },
 ];
+
+/** Who it's for — an interactive index: giant segment names; the hovered or
+ *  focused one swaps its brief into the side panel. Names always navigate. */
+function WhoSelector() {
+  const [active, setActive] = useState(0);
+  return (
+    <div className="pd-whosel" data-rv>
+      <div className="names">
+        {SEGMENTS.map((s, i) => (
+          <Link
+            key={s.slug}
+            href={`/buyers/${s.slug}`}
+            className={`name${i === active ? ' on' : ''}`}
+            onMouseEnter={() => setActive(i)}
+            onFocus={() => setActive(i)}
+          >
+            <span>{s.cardTitle}</span>
+            <span className="arr" aria-hidden>→</span>
+          </Link>
+        ))}
+      </div>
+      <div className="panel" aria-live="polite">
+        <div className="pbody">{SEGMENTS[active].cardBody}</div>
+        <Link className="pd-link" href={`/buyers/${SEGMENTS[active].slug}`}>{SEGMENTS[active].cardLink}</Link>
+      </div>
+    </div>
+  );
+}
 
 function LeadForm() {
   const [persona, setPersona] = useState('');
@@ -253,7 +282,7 @@ export default function Landing() {
           </div>
           <div className="off">
             <div style={{ fontSize: 'clamp(24px, 2.5vw, 33px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.22 }}>
-              smbX is that function, without the permanent overhead.
+              <Mark h="0.92em" /> is that function, without the permanent overhead.
             </div>
             <div style={{ marginTop: 14, fontSize: 18, lineHeight: 1.6, color: 'var(--pd-body)' }}>
               Structured for your specific mandate — engaged for the deal, with economics tied
@@ -310,7 +339,7 @@ export default function Landing() {
                 companies under $250M can justify the standing cost of that infrastructure.
               </div>
               <div>
-                smbX is that function, engaged deal by deal. We source off-market, run the
+                <Mark /> is that function, engaged deal by deal. We source off-market, run the
                 analysis, drive the diligence, and carry the negotiation to close. Led by Paul
                 Baker, who has closed more than 150 acquisitions doing exactly this work inside a
                 national platform and a global bank, our team brings institutional execution to
@@ -443,15 +472,7 @@ export default function Landing() {
           <h2 className="pd-h2">You bring the thesis. We bring the team.</h2>
           <div className="pd-seclabel right">Who it's for</div>
         </div>
-        <div className="pd-whorows rv-stagger" data-rv>
-          {SEGMENTS.map(s => (
-            <Link key={s.slug} href={`/buyers/${s.slug}`} className="pd-whorow">
-              <div className="t">{s.cardTitle}</div>
-              <div className="b">{s.cardBody}</div>
-              <div className="arr" aria-hidden>→</div>
-            </Link>
-          ))}
-        </div>
+        <WhoSelector />
       </section>
 
       {/* ── Industries — a dense list, not cards ── */}
@@ -463,21 +484,23 @@ export default function Landing() {
           fragmented, recurring-revenue niches where a disciplined buyer can still buy well.
           Already have a market? We'll work yours.
         </div>
-        <div className="pd-scar" data-rv>
-          <div className="t" style={{ color: 'var(--pd-coral-link)' }}>Home &amp; essential services</div>
+        <div className="pd-anchorcard" data-rv>
+          <div className="k">Home &amp; essential services</div>
           <div className="b">
             HVAC, plumbing, electrical. Our founder built a national platform here through 36
             acquisitions. We know what these businesses are worth, who's consolidating, and what a
             seller's broker will try.
           </div>
         </div>
-        <div style={{ marginTop: 48, fontSize: 15, fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase' as const, color: 'var(--pd-ink)' }}>
+        <div data-rv style={{ marginTop: 56, fontSize: 15, fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase' as const, color: 'var(--pd-ink)' }}>
           Where we're actively hunting
         </div>
-        <div className="pd-indgrid rv-stagger" data-rv>
-          {HUNTING.map(h => (
-            <div className="pd-ind" key={h.k}>
-              <span className="k">{h.k}</span> <span className="v">— {h.v}</span>
+        <div className="pd-huntboard rv-stagger" data-rv>
+          {HUNTING.map((h, i) => (
+            <div className="pd-hunt" key={h.k}>
+              <span className="no">{String(i + 1).padStart(2, '0')}</span>
+              <span className="nm">{h.k}</span>
+              <span className="th">{h.v}</span>
             </div>
           ))}
         </div>
@@ -490,23 +513,28 @@ export default function Landing() {
 
       {/* ── How we find them — statement + asymmetry ── */}
       <section className="pd-wrap pd-section-lg">
-        <div className="pd-askew rv-stagger" data-rv>
-          <div>
-            <div className="pd-seclabel">How we find them</div>
-            <h2 className="pd-quote">The best targets aren't for sale.</h2>
-          </div>
-          <div className="off" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
+        <div className="pd-seclabel" data-rv>How we find them</div>
+        <h2 className="pd-quote" data-rv style={{ maxWidth: '14em' }}>The best targets aren't for sale.</h2>
+        <div className="pd-findgrid rv-stagger" data-rv>
+          <div className="pd-findcol">
+            <div className="k">THE OWNER</div>
+            <div className="v">
               The owner you want to buy is rarely on a broker's list. They don't want their
               employees to find out, their competitors to know, or to sit through a dozen showings
               with tire-kickers. And they certainly don't want to pay a broker 10% to make it
               happen.
             </div>
-            <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
+          </div>
+          <div className="pd-findcol">
+            <div className="k">THE WAIT</div>
+            <div className="v">
               So they wait. Most will only take a call when someone arrives with a specific buyer,
               a defined thesis, and a serious reason to talk.
             </div>
-            <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-ink)' }}>
+          </div>
+          <div className="pd-findcol">
+            <div className="k">THE CALL</div>
+            <div className="v" style={{ color: 'var(--pd-ink)' }}>
               <b>That is the call our team makes on your behalf.</b> No auction, no bidding war, no
               thirty other buyers who have already seen the book. Just a direct conversation with an
               owner who hasn't been shopped — where price is a strategic discussion, not a

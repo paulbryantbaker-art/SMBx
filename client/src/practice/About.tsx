@@ -3,6 +3,7 @@
  * Why we built it → Your advisor (Paul Baker bio + portrait) → What we believe.
  */
 import PracticeShell from './PracticeShell';
+import Mark from './Mark';
 import { bookHref, bookTarget } from './leads';
 
 const BELIEFS = [
@@ -32,9 +33,9 @@ export default function About() {
         <div style={{ position: 'relative', maxWidth: 1080, margin: '0 auto', textAlign: 'center' }}>
           <h1 className="pd-h1 pd-h1-seg" style={{ margin: 0 }}>A new firm. Decades of execution.</h1>
           <div className="pd-sub" style={{ margin: '38px auto 0', maxWidth: 680 }}>
-            smbX was built to give buyers in the lower middle market something they have never had —
-            a dedicated corporate development function, on demand, exclusively on their side of
-            the table.
+            <Mark /> was built to give buyers in the lower middle market something they have never
+            had — a dedicated corporate development function, on demand, exclusively on their side
+            of the table.
           </div>
         </div>
       </section>
@@ -56,7 +57,7 @@ export default function About() {
             running the biggest transaction of their careers with no one on their side.
           </div>
           <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-            smbX exists to be that team: a complete corporate development function — sourcing,
+            <Mark /> exists to be that team: a complete corporate development function — sourcing,
             evaluation, negotiation, integration — led by senior dealmakers who have closed 150+
             acquisitions, and pointed at one side of the table. Yours.
           </div>

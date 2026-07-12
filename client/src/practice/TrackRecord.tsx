@@ -9,6 +9,7 @@
  */
 import { useMemo, useState } from 'react';
 import PracticeShell from './PracticeShell';
+import Mark from './Mark';
 import { bookHref, bookTarget } from './leads';
 import { trackEvent } from '../lib/analytics';
 
@@ -143,7 +144,7 @@ export default function TrackRecord() {
           <h1 className="pd-h1 pd-h1-seg" style={{ margin: 0 }}>About 150 deals. One side of the table.</h1>
           <div className="pd-sub" style={{ margin: '38px auto 0', maxWidth: 660 }}>
             A selection of the acquisitions our firm's leadership has captained — sourced,
-            negotiated, closed, and integrated — prior to smbX.
+            negotiated, closed, and integrated — prior to <Mark />.
           </div>
         </div>
       </section>
