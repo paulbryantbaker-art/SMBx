@@ -273,6 +273,41 @@ app.post('/api/practice/leads', leadLimiter, async (req, res) => {
   }
 });
 
+// ─── Analytics event capture (public — sendBeacon, no auth) ─
+// Moved above the blanket `app.use('/api', requireAuth)` mount: it previously
+// sat below it, so ANONYMOUS visitors' events 401'd and were silently dropped
+// (sendBeacon never surfaces errors) — exactly the funnel traffic that
+// matters. Found by the conversion-plan Phase 1 smoke.
+app.post('/api/analytics/event', async (req, res) => {
+  try {
+    const { event_type, event_data, session_id, token } = req.body;
+    if (!event_type) return res.json({ ok: false });
+
+    // Extract userId from token if present
+    let userId: number | null = null;
+    if (token) {
+      try {
+        const jwt = await import('jsonwebtoken');
+        const decoded = jwt.default.verify(token, process.env.JWT_SECRET || process.env.SESSION_SECRET || 'dev') as any;
+        userId = decoded.userId || null;
+      } catch { /* invalid token — log as anonymous */ }
+    }
+
+    // Capture IP for geo resolution in admin traffic view
+    const ip = req.ip || (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || null;
+
+    const eventSql = createSql();
+    await eventSql`
+      INSERT INTO analytics_events (user_id, session_id, event_type, event_data, ip_address)
+      VALUES (${userId}, ${session_id || null}, ${event_type}, ${JSON.stringify(event_data || {})}::jsonb, ${ip}::inet)
+    `;
+    await eventSql.end();
+    res.json({ ok: true });
+  } catch {
+    res.json({ ok: false });
+  }
+});
+
 // ─── Practice-site Yulia intake (public, Claude-backed) ────
 // Each call carries the whole short conversation; the service closes
 // deterministically (and we persist the lead) the moment an email appears.
@@ -821,37 +856,6 @@ app.use('/assets', express.static(path.join(clientPath, 'assets'), { maxAge: '1y
 app.use(express.static(clientPath, { maxAge: 0 }));
 
 // ─── 5b. Support: client-side error capture (no auth required) ──
-// Analytics event capture (no auth required — uses sendBeacon)
-app.post('/api/analytics/event', express.json(), async (req, res) => {
-  try {
-    const { event_type, event_data, session_id, token } = req.body;
-    if (!event_type) return res.json({ ok: false });
-
-    // Extract userId from token if present
-    let userId: number | null = null;
-    if (token) {
-      try {
-        const jwt = await import('jsonwebtoken');
-        const decoded = jwt.default.verify(token, process.env.JWT_SECRET || process.env.SESSION_SECRET || 'dev') as any;
-        userId = decoded.userId || null;
-      } catch { /* invalid token — log as anonymous */ }
-    }
-
-    // Capture IP for geo resolution in admin traffic view
-    const ip = req.ip || (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || null;
-
-    const eventSql = createSql();
-    await eventSql`
-      INSERT INTO analytics_events (user_id, session_id, event_type, event_data, ip_address)
-      VALUES (${userId}, ${session_id || null}, ${event_type}, ${JSON.stringify(event_data || {})}::jsonb, ${ip}::inet)
-    `;
-    await eventSql.end();
-    res.json({ ok: true });
-  } catch {
-    res.json({ ok: false });
-  }
-});
-
 app.post('/api/support/client-error', express.json(), async (req, res) => {
   try {
     const supportSql = createSql();
