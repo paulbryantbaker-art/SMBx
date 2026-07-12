@@ -48,7 +48,7 @@ export const SEGMENTS: Segment[] = [
     ],
     answers: [
       { k: 'The work', v: 'Market maps and off-market sourcing on your thesis, with models and diligence checklists in days — deal capacity that switches on when you need it and costs nothing when you don’t.' },
-      { k: 'The practitioner', v: 'A senior operator runs the process, keeps the price disciplined, and handles every seller conversation — no junior hand-offs, no committee lag.' },
+      { k: 'The practitioner', v: 'Paul runs the process personally — the analysis, the seller conversations, and the negotiation — and keeps the price disciplined.' },
       { k: 'Your side', v: 'Buy-side is all we do, and we take one client per target — so your thesis is never resold or shared, and your deal has our full attention.' },
     ],
   },
@@ -112,7 +112,7 @@ export const SEGMENTS: Segment[] = [
     ],
     answers: [
       { k: 'The work', v: 'Off-market maps of the whole segment — not the brokered slice — with triage, models, and memos generated as fast as your pipeline moves.' },
-      { k: 'The practitioner', v: 'Senior execution that flexes deal by deal: outreach, process, and negotiation run by an operator, not a junior BD hire you have to manage.' },
+      { k: 'The practitioner', v: 'Senior execution that flexes deal by deal — outreach, process, and negotiation run personally, at the pace of your pipeline.' },
       { k: 'Your side', v: 'One client per target — your add-on pipeline is yours alone, never shared with a competing buyer.' },
     ],
   },

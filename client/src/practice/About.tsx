@@ -11,8 +11,8 @@ const BELIEFS = [
     v: "Sellers have had professional representation for a hundred years. In the lower middle market, buyers mostly haven't. That's the gap we exist to close.",
   },
   {
-    k: "Judgment doesn't scale — so free it up.",
-    v: 'Technology should absorb the analytical grind so the experienced human spends their hours on what only judgment can do: price, risk, and the conversation across the table.',
+    k: 'Coverage wins.',
+    v: 'The best target is usually not for sale. You find it by covering the whole market — every operator in the segment, not just the companies being shown around.',
   },
   {
     k: 'Focus beats breadth.',
@@ -55,10 +55,9 @@ export default function About() {
             running the biggest transaction of their careers with no one on their side.
           </div>
           <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-            smbX exists to be that team. We launched in 2025 with a simple idea: pair a senior
-            dealmaker who has closed 150+ acquisitions with technology that does the analytical
-            work a bench of junior bankers used to do — and point the whole thing at one side of
-            the table. Yours.
+            smbX exists to be that team: a complete corporate development function — sourcing,
+            evaluation, negotiation, integration — run by a senior dealmaker who has closed 150+
+            acquisitions, and pointed at one side of the table. Yours.
           </div>
         </div>
       </section>
