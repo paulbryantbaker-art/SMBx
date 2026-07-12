@@ -1,17 +1,19 @@
 /**
  * The Yulia intake card — the landing page's core conversion mechanism.
- * Claude-backed via POST /api/practice/intake. Conversion-plan Phase 1
- * (2026-07-11): value BEFORE the ask — Yulia delivers a directional first
- * read of the visitor's market in-chat, then asks for the email; the server
- * still closes deterministically (lead persisted, fixed close message) the
- * moment an email appears, and the booking pill follows. Dignified progress
- * ("Step n of 4") and full funnel instrumentation via the analytics rail.
+ * Claude-backed via POST /api/practice/intake, value-before-ask: Yulia
+ * delivers a directional first read of the visitor's market, rendered as a
+ * titled DOCUMENT (visual brief: "the market map must look like a
+ * deliverable, not a chat message"), then asks for the email; the server
+ * closes deterministically (lead persisted, fixed close) the moment an email
+ * appears. Dignified progress ("Step n of 4"), calm working indicator (no
+ * bouncing dots), full funnel instrumentation.
  */
 import { useEffect, useRef, useState } from 'react';
 import { bookHref, bookTarget } from './leads';
 import { trackEvent } from '../lib/analytics';
 
-interface Msg { from: 'y' | 'u'; text: string; }
+interface Read { title: string; thesis: string; market: string; buyers: string; fullmap: string; }
+interface Msg { from: 'y' | 'u'; text?: string; read?: Read; }
 
 const OPENING_1 =
   "I'm Yulia — I do the analytical work here at smbX. Tell me what you're trying to buy and I'll give you my first read on the market, then get you in front of Paul with something real to talk about.";
@@ -25,9 +27,25 @@ const HINTS = [
   'Yulia is on it — book your call above',
 ];
 
-// A first-read message is much longer than Yulia's usual 1–3 sentences; this
-// threshold is a funnel-metric heuristic, not product logic.
+// Fallback funnel heuristic when the read arrives unstructured.
 const READ_LENGTH_THRESHOLD = 350;
+
+function ReadDoc({ read }: { read: Read }) {
+  return (
+    <div className="pd-doc">
+      <div className="doc-head">
+        <span className="doc-mark">smb<span style={{ color: 'var(--pd-coral)' }}>X</span></span>
+        <span className="doc-label">PRELIMINARY MARKET READ</span>
+      </div>
+      <div className="doc-title">{read.title}</div>
+      {read.thesis && <div className="doc-thesis">{read.thesis}</div>}
+      <div className="doc-sec"><div className="k">MARKET</div><div className="v">{read.market}</div></div>
+      {read.buyers && <div className="doc-sec"><div className="k">WHO ELSE IS BUYING</div><div className="v">{read.buyers}</div></div>}
+      {read.fullmap && <div className="doc-sec"><div className="k">WHAT THE FULL MAP ADDS</div><div className="v">{read.fullmap}</div></div>}
+      <div className="doc-foot">PRELIMINARY &amp; DIRECTIONAL — THE FULL MAP FOLLOWS WITHIN 24 HOURS</div>
+    </div>
+  );
+}
 
 export default function YuliaIntake() {
   const [messages, setMessages] = useState<Msg[]>([
@@ -49,6 +67,12 @@ export default function YuliaIntake() {
   const step = done ? 4 : Math.min(userTurns + 1, 3);
   const hint = done ? HINTS[3] : HINTS[Math.min(userTurns, 2)];
 
+  const trackRead = () => {
+    if (readTracked.current) return;
+    readTracked.current = true;
+    trackEvent('practice_read_delivered');
+  };
+
   const send = async () => {
     const text = draft.trim();
     if (!text || done || pending) return;
@@ -63,16 +87,21 @@ export default function YuliaIntake() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: next.map(m => ({ role: m.from === 'y' ? 'assistant' : 'user', content: m.text })),
+          messages: next
+            .filter(m => m.text)
+            .map(m => ({ role: m.from === 'y' ? 'assistant' : 'user', content: m.text as string })),
         }),
       });
       if (!res.ok) throw new Error(String(res.status));
-      const data = (await res.json()) as { reply: string; done: boolean };
-      setMessages(m => [...m, { from: 'y', text: data.reply }]);
-      if (!data.done && !readTracked.current && data.reply.length >= READ_LENGTH_THRESHOLD) {
-        readTracked.current = true;
-        trackEvent('practice_read_delivered');
-      }
+      const data = (await res.json()) as { reply: string; done: boolean; read: Read | null };
+      setMessages(m => {
+        const out = [...m];
+        if (data.read) out.push({ from: 'y', read: data.read });
+        out.push({ from: 'y', text: data.reply });
+        return out;
+      });
+      if (data.read) trackRead();
+      else if (!data.done && data.reply.length >= READ_LENGTH_THRESHOLD) trackRead();
       if (data.done) {
         setDone(true);
         trackEvent('practice_email_captured');
@@ -99,15 +128,19 @@ export default function YuliaIntake() {
       </div>
       <div className="pd-msgs" ref={listRef}>
         {messages.map((m, i) => (
-          <div className="pd-msgrow" key={i}>
-            <div className={`pd-bub ${m.from === 'y' ? 'pd-bub-y' : 'pd-bub-u'}`}>{m.text}</div>
-          </div>
+          m.read ? (
+            <div className="pd-msgrow" key={i}>
+              <ReadDoc read={m.read} />
+            </div>
+          ) : (
+            <div className="pd-msgrow" key={i}>
+              <div className={`pd-bub ${m.from === 'y' ? 'pd-bub-y' : 'pd-bub-u'}`}>{m.text}</div>
+            </div>
+          )
         ))}
         {pending && (
           <div className="pd-msgrow">
-            <div className="pd-bub pd-bub-y">
-              <span className="pd-typing"><span /><span /><span /></span>
-            </div>
+            <div className="pd-working">{userTurns >= 2 ? 'Yulia is reading the market…' : 'Yulia is working…'}</div>
           </div>
         )}
         {done && (

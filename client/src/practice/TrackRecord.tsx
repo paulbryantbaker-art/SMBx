@@ -28,7 +28,7 @@ export default function TrackRecord() {
           <div className="pd-stat"><div className="n">150+</div><div className="l">acquisitions closed</div></div>
           <div className="pd-stat"><div className="n">$5B+</div><div className="l">revenue added</div></div>
           <div className="pd-stat"><div className="n">~$21B</div><div className="l">in transaction value touched</div></div>
-          <div className="pd-stat"><div className="n">20 yrs</div><div className="l">on the buy side</div></div>
+          <div className="pd-stat"><div className="n">20</div><div className="l">years on the buy side</div></div>
         </div>
       </section>
 

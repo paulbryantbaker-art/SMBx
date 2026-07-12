@@ -34,7 +34,35 @@ function getClient(): Anthropic | null {
 
 export interface IntakeMessage { role: 'user' | 'assistant'; content: string; }
 export interface IntakeLead { thesis: string | null; size: string | null; email: string; }
-export interface IntakeResult { reply: string; done: boolean; lead: IntakeLead | null; }
+export interface IntakeRead { title: string; thesis: string; market: string; buyers: string; fullmap: string; }
+export interface IntakeResult { reply: string; done: boolean; lead: IntakeLead | null; read: IntakeRead | null; }
+
+/** Parse the ===READ=== document block out of a model reply. Returns the read
+ *  (if well-formed) plus the plain text that follows it; on any malformation
+ *  the whole reply falls back to a normal chat bubble. */
+function parseRead(text: string): { read: IntakeRead | null; rest: string } {
+  const start = text.indexOf('===READ===');
+  const end = text.indexOf('===END===');
+  if (start === -1 || end === -1 || end <= start) return { read: null, rest: text };
+  const block = text.slice(start + '===READ==='.length, end);
+  const field = (name: string): string => {
+    const m = block.match(new RegExp(`^\\s*${name}:\\s*([\\s\\S]*?)(?=\\n\\s*(?:TITLE|THESIS|MARKET|BUYERS|FULLMAP):|$)`, 'm'));
+    return m ? m[1].trim().replace(/\s+/g, ' ') : '';
+  };
+  const read: IntakeRead = {
+    title: field('TITLE'),
+    thesis: field('THESIS'),
+    market: field('MARKET'),
+    buyers: field('BUYERS'),
+    fullmap: field('FULLMAP'),
+  };
+  if (!read.market || !read.title) return { read: null, rest: text };
+  const before = text.slice(0, start).trim();
+  const after = text.slice(end + '===END==='.length).trim();
+  const rest = [before, after].filter(Boolean).join(' ')
+    || "Want the full map? Best email for it — and I'll set up time with Paul.";
+  return { read, rest };
+}
 
 const CLOSE_MESSAGE =
   "Done — your full map is underway. You'll have it within 24 hours. Want to lock in time with Paul while I work?";
@@ -68,12 +96,16 @@ IF THE TARGET IS ABOVE THE $250M CEILING:
 
 CONVERSATION SHAPE (adapt naturally — never robotic). The rule underneath it: GIVE VALUE BEFORE ASKING FOR ANYTHING. The visitor gets your first read of their market BEFORE you ask for an email.
 1. They describe a thesis. Engage with it specifically and briefly — show you understood the industry and the angle. If target size (revenue or EBITDA range) or geography is missing, ask for it in one short question, and give the reason ("so the map matches your thesis" / "so I size the right segment").
-2. THE FIRST READ — as soon as you have a rough thesis plus size or geography (usually after one or two exchanges; don't drag it out), your next message IS the read. 100–170 words, one message, plain confident prose (no bullets, no headers):
-   - the shape of that market: how fragmented, what the typical operator looks like (independent, owner-run, size band), succession/ownership dynamics if relevant;
-   - who else is buying: whether consolidators or sponsors are active in that lane, and what that means for an independent buyer;
-   - what the FULL map adds for their thesis: the segment mapped end to end, off-market candidates surfaced, activity of competing buyers, and where the openings are.
-   End the read by asking for the best email to send the full map — and mention you'll set up time with Paul (150+ acquisitions closed on the buyer's side; thirty minutes, confidential, no retainer to find out if it's a fit).
-3. One question per message, maximum. After the read, your only goal is the email; answer questions helpfully but keep steering there.
+2. THE FIRST READ — as soon as you have a rough thesis plus size or geography (usually after one or two exchanges; don't drag it out), your next message IS the read. It renders on the visitor's screen as a titled research document, so output it in EXACTLY this structure:
+===READ===
+TITLE: <a 4–8 word document title for their thesis, e.g. "Elevator Service — Texas Metros">
+THESIS: <one line playing back their thesis in your words>
+MARKET: <2–3 sentences: the shape of that market — how fragmented, what the typical operator looks like (independent, owner-run, size band), succession/ownership dynamics if relevant>
+BUYERS: <1–2 sentences: whether consolidators or sponsors are active in that lane, and what that means for this buyer>
+FULLMAP: <1–2 sentences: what the full map adds — the segment mapped end to end, off-market candidates surfaced, competing-buyer activity, where the openings are>
+===END===
+<then 1–2 plain sentences asking for the best email to send the full map — and offering to set up time with Paul (150+ acquisitions closed on the buyer's side; thirty minutes, confidential, no retainer to find out if it's a fit)>
+3. One question per message, maximum. After the read, your only goal is the email; answer questions helpfully but keep steering there. Never repeat the ===READ=== block once delivered.
 
 THE READ — HARD ACCURACY RULES:
 - NEVER name specific companies as targets or buyers, and NEVER invent counts, statistics, multiples, or percentages. Qualitative and directional only: "mostly independent, owner-run shops", "consolidators have been active in this lane", "a long tail of operators under institutional size."
@@ -128,6 +160,7 @@ export async function runPracticeIntake(rawMessages: unknown): Promise<IntakeRes
         size: nonEmailMsgs[1] || null,
         email,
       },
+      read: null,
     };
   }
 
@@ -136,7 +169,7 @@ export async function runPracticeIntake(rawMessages: unknown): Promise<IntakeRes
     try {
       const response = await anthropic.messages.create({
         model: MODEL,
-        max_tokens: 550, // headroom for the first-read message
+        max_tokens: 550, // headroom for the first-read document
         system: SYSTEM_PROMPT,
         messages,
       });
@@ -145,11 +178,14 @@ export async function runPracticeIntake(rawMessages: unknown): Promise<IntakeRes
         .map(b => (b as { type: 'text'; text: string }).text)
         .join('')
         .trim();
-      if (text) return { reply: text, done: false, lead: null };
+      if (text) {
+        const { read, rest } = parseRead(text);
+        return { reply: rest, done: false, lead: null, read };
+      }
     } catch (err: any) {
       console.error('[practice-intake] model call failed:', err.message);
     }
   }
 
-  return { reply: fallbackReply(userMsgs.length), done: false, lead: null };
+  return { reply: fallbackReply(userMsgs.length), done: false, lead: null, read: null };
 }

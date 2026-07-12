@@ -321,7 +321,7 @@ app.post('/api/practice/intake', intakeLimiter, async (req, res) => {
       savePracticeLead({ ...result.lead, source: 'landing-yulia' })
         .catch(err => console.error('[practice-intake] lead save failed:', err.message));
     }
-    return res.json({ reply: result.reply, done: result.done });
+    return res.json({ reply: result.reply, done: result.done, read: result.read });
   } catch (err: any) {
     console.error('[practice-intake] failed:', err.message);
     return res.status(500).json({ error: 'Intake unavailable' });

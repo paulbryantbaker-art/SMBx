@@ -9,7 +9,6 @@ import { useState } from 'react';
 import { Link } from 'wouter';
 import PracticeShell from './PracticeShell';
 import YuliaIntake from './YuliaIntake';
-import ImageSlot from './ImageSlot';
 import { postPracticeLead, bookHref, bookTarget } from './leads';
 import { SEGMENTS } from './segmentData';
 import { trackEvent } from '../lib/analytics';
@@ -167,8 +166,8 @@ export default function Landing() {
             to close — tailored to your organizational goals from the ground up.
           </div>
           <div style={{ margin: '26px auto 0', fontSize: 15, lineHeight: 1.6, color: 'var(--pd-body)', maxWidth: 640 }}>
-            Led by a 20-year deal captain — <b style={{ color: 'var(--pd-ink)' }}>150+ acquisitions closed for buyers</b>
-            {' '}· Wrench Group · JPMorgan Chase
+            Led by <b style={{ color: 'var(--pd-ink)' }}>Paul Baker</b> — 20-year deal captain ·{' '}
+            <b style={{ color: 'var(--pd-ink)' }}>150+ acquisitions closed for buyers</b> · Wrench Group · JPMorgan Chase
           </div>
           <YuliaIntake />
           <div style={{ marginTop: 20, fontSize: 14.5, color: 'var(--pd-tert)' }}>
@@ -186,20 +185,22 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Ticker ── */}
-      <div className="pd-ticker">
-        <div className="pd-ticker-track"><TickerRow /><TickerRow /></div>
-      </div>
-
-      {/* ── Photo band ── */}
-      <div className="pd-bandwrap" style={{ paddingTop: 'clamp(60px, 6.6vw, 96px)' }}>
-        <div className="pd-band">
-          <ImageSlot caption="PHOTO — advisor + owner walking a shop floor, warm light" />
-          <div className="pd-band-overlay">
-            <div className="pd-band-h">A person on your side. A full team at your back.</div>
-            <a className="pd-band-btn" href="#why">Why smbX →</a>
+      {/* ── Stat band — the numbers are the hero, above everything but the
+             promise (visual brief scroll narrative §2) ── */}
+      <section className="pd-statband">
+        <div className="pd-wrap">
+          <div className="pd-stats">
+            <div className="pd-stat"><div className="n">150+</div><div className="l">acquisitions closed</div></div>
+            <div className="pd-stat"><div className="n">$5B+</div><div className="l">in revenue added to buyers</div></div>
+            <div className="pd-stat"><div className="n">20</div><div className="l">years inside corp dev and the investment bank</div></div>
+            <div className="pd-stat"><div className="n">1</div><div className="l">side of the table — always the buyer's</div></div>
           </div>
         </div>
+      </section>
+
+      {/* ── Ticker ── */}
+      <div className="pd-ticker" style={{ borderTop: 0 }}>
+        <div className="pd-ticker-track"><TickerRow /><TickerRow /></div>
       </div>
 
       {/* ── Problem ledger ── */}
@@ -227,32 +228,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Process ── */}
-      <section id="how" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
-        <div className="pd-seclabel">The process</div>
-        <h2 className="pd-h2" style={{ maxWidth: 760 }}>Here's what stress-free looks like.</h2>
-        <div className="pd-pgrid">
-          <div className="pd-pcard">
-            <div className="pd-pnum">1</div>
-            <div className="t">Conversation</div>
-            <div className="b">Tell Yulia what you want to buy. She works your thesis overnight and books you with your advisor — a real senior practitioner, not a call center.</div>
-            <a className="pd-link" href="#yulia">Talk to Yulia →</a>
-          </div>
-          <div className="pd-pcard">
-            <div className="pd-pnum">2</div>
-            <div className="t">Curated targets</div>
-            <div className="b">We map your market — off-market first — and your advisor hand-picks the targets worth your time, with models and memos ready in days, not quarters.</div>
-            <a className="pd-link" href="#why">How we work →</a>
-          </div>
-          <div className="pd-pcard">
-            <div className="pd-pnum">3</div>
-            <div className="t">Close with confidence</div>
-            <div className="b">Diligence triaged, price disciplined, negotiation run by someone on your side of the table — and only yours. Then we scale to zero.</div>
-            <a className="pd-link" href="#book">Book a call →</a>
-          </div>
-        </div>
-      </section>
-
       {/* ── Track record ── */}
       <section className="pd-wrap pd-section-lg">
         <div className="pd-seclabel">Track record</div>
@@ -261,12 +236,6 @@ export default function Landing() {
           smbX is a new firm. The dealmaker isn't. Our founder spent two decades as the deal
           captain inside the buyer — sourcing, negotiating, closing, and integrating acquisitions
           at platform scale.
-        </div>
-        <div className="pd-stats">
-          <div className="pd-stat"><div className="n">150+</div><div className="l">acquisitions closed</div></div>
-          <div className="pd-stat"><div className="n">$5B+</div><div className="l">in revenue added to buyers</div></div>
-          <div className="pd-stat"><div className="n">20 yrs</div><div className="l">inside corp dev and the investment bank</div></div>
-          <div className="pd-stat"><div className="n">1</div><div className="l">side of the table — always the buyer's</div></div>
         </div>
         <div className="pd-tombs">
           <div className="pd-tomb">
@@ -348,6 +317,32 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── Process ── */}
+      <section id="how" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
+        <div className="pd-seclabel">The process</div>
+        <h2 className="pd-h2" style={{ maxWidth: 760 }}>Here's what stress-free looks like.</h2>
+        <div className="pd-pgrid">
+          <div className="pd-pcard">
+            <div className="pd-pnum">1</div>
+            <div className="t">Conversation</div>
+            <div className="b">Tell Yulia what you want to buy. She works your thesis overnight and books you with your advisor — a real senior practitioner, not a call center.</div>
+            <a className="pd-link" href="#yulia">Talk to Yulia →</a>
+          </div>
+          <div className="pd-pcard">
+            <div className="pd-pnum">2</div>
+            <div className="t">Curated targets</div>
+            <div className="b">We map your market — off-market first — and your advisor hand-picks the targets worth your time, with models and memos ready in days, not quarters.</div>
+            <a className="pd-link" href="#why">How we work →</a>
+          </div>
+          <div className="pd-pcard">
+            <div className="pd-pnum">3</div>
+            <div className="t">Close with confidence</div>
+            <div className="b">Diligence triaged, price disciplined, negotiation run by someone on your side of the table — and only yours. Then we scale to zero.</div>
+            <a className="pd-link" href="#book">Book a call →</a>
+          </div>
+        </div>
+      </section>
+
       {/* ── Who it's for ── */}
       <section id="who" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
         <div className="pd-ledger-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 40, marginBottom: 72 }}>
@@ -362,15 +357,10 @@ export default function Landing() {
               <span className="pd-link">{s.cardLink}</span>
             </Link>
           ))}
-          <Link href="/buyers/operators" className="pd-wcard pd-wcard-wide">
-            <div>
-              <div className="t">Operators buying competitors</div>
-              <div className="b">Discreet third-party approaches that protect your position, objective pricing, and a repeatable playbook — run for you, deal by deal.</div>
-              <span className="pd-link">For operators →</span>
-            </div>
-            <div className="pd-wphoto">
-              <ImageSlot caption="PHOTO — main street storefronts, industrial park" />
-            </div>
+          <Link href="/buyers/operators" className="pd-wcard" style={{ gridColumn: '1 / -1' }}>
+            <div className="t">Operators buying competitors</div>
+            <div className="b" style={{ maxWidth: '52em' }}>Discreet third-party approaches that protect your position, objective pricing, and a repeatable playbook — run for you, deal by deal.</div>
+            <span className="pd-link">For operators →</span>
           </Link>
         </div>
       </section>
