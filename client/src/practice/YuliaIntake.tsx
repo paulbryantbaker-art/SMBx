@@ -5,8 +5,9 @@
  * titled DOCUMENT (visual brief: "the market map must look like a
  * deliverable, not a chat message"), then asks for the email; the server
  * closes deterministically (lead persisted, fixed close) the moment an email
- * appears. Dignified progress ("Step n of 4"), calm working indicator (no
- * bouncing dots), full funnel instrumentation.
+ * appears. Wide flat surface — Yulia speaks on the canvas, no status
+ * micro-text, calm working indicator (no bouncing dots), full funnel
+ * instrumentation.
  */
 import { useEffect, useRef, useState } from 'react';
 import { bookHref, bookTarget } from './leads';
@@ -15,10 +16,8 @@ import { trackEvent } from '../lib/analytics';
 interface Read { title: string; thesis: string; market: string; buyers: string; fullmap: string; }
 interface Msg { from: 'y' | 'u'; text?: string; read?: Read; }
 
-const OPENING_1 =
-  "I'm Yulia — I do the analytical work here at smbX. Tell me what you're trying to buy and I'll give you my first read on the market, then get you in front of Paul with something real to talk about.";
-const OPENING_2 =
-  'To start: what kind of business are you looking to acquire, and roughly what size?';
+const OPENING =
+  "Hi, I'm Yulia. I can start mapping your acquisition thesis immediately — it takes only a few minutes. Ready?";
 
 const HINTS = [
   'e.g. "HVAC roll-up in the Southeast"',
@@ -48,10 +47,7 @@ function ReadDoc({ read }: { read: Read }) {
 }
 
 export default function YuliaIntake() {
-  const [messages, setMessages] = useState<Msg[]>([
-    { from: 'y', text: OPENING_1 },
-    { from: 'y', text: OPENING_2 },
-  ]);
+  const [messages, setMessages] = useState<Msg[]>([{ from: 'y', text: OPENING }]);
   const [draft, setDraft] = useState('');
   const [pending, setPending] = useState(false);
   const [done, setDone] = useState(false);
@@ -60,11 +56,20 @@ export default function YuliaIntake() {
 
   useEffect(() => {
     const el = listRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
+    if (!el) return;
+    // When the read lands, present the document from its title — not its tail.
+    if (messages.slice(-2).some(m => m.read)) {
+      const docs = el.querySelectorAll<HTMLElement>('.pd-doc');
+      const doc = docs[docs.length - 1];
+      if (doc) {
+        el.scrollTop += doc.getBoundingClientRect().top - el.getBoundingClientRect().top - 6;
+        return;
+      }
+    }
+    el.scrollTop = el.scrollHeight;
   }, [messages, pending]);
 
   const userTurns = messages.filter(m => m.from === 'u').length;
-  const step = done ? 4 : Math.min(userTurns + 1, 3);
   const hint = done ? HINTS[3] : HINTS[Math.min(userTurns, 2)];
 
   const trackRead = () => {
@@ -109,7 +114,7 @@ export default function YuliaIntake() {
     } catch {
       setMessages(m => [...m, {
         from: 'y',
-        text: 'Hit a connection hiccup on my side — mind sending that once more?',
+        text: 'Connection dropped on my side — send that once more.',
       }]);
     } finally {
       setPending(false);
@@ -120,11 +125,7 @@ export default function YuliaIntake() {
     <div id="yulia" className="pd-chat">
       <div className="pd-chat-head">
         <div className="pd-avatar">Y</div>
-        <div style={{ fontWeight: 700, fontSize: 15 }}>Yulia</div>
-        <div className="pd-online">
-          <span style={{ color: 'var(--pd-tert)', marginRight: 12 }}>Step {step} of 4</span>
-          <span className="dot" />online
-        </div>
+        <div style={{ fontWeight: 700, fontSize: 17 }}>Yulia</div>
       </div>
       <div className="pd-msgs" ref={listRef}>
         {messages.map((m, i) => (

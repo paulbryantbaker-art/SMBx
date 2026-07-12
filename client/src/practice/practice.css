@@ -13,11 +13,9 @@
   --pd-card: #F7F7F7;
   --pd-border: #DDDDDD;
   --pd-hair: #EBEBEB;
-  --pd-hair-chat: #F0F0F0;
   --pd-coral: #FF385C;
   --pd-coral-link: #E61E4D;
   --pd-coral-dark-tint: #FF7A8F;
-  --pd-green: #008A05;
   --pd-grad: linear-gradient(90deg, #E61E4D, #E31C5F 50%, #D70466);
   --pd-grad-avatar: linear-gradient(135deg, #E61E4D, #D70466);
   --pd-font: 'Schibsted Grotesk', system-ui, sans-serif;
@@ -151,27 +149,31 @@
 .pd-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--pd-coral); }
 
 /* ─── Yulia chat card ─── */
+/* Wide, flat conversation surface (Grok-scale): Yulia speaks directly on the
+   canvas — no assistant bubble — the visitor's turns sit in quiet gray pills,
+   and the opening renders as a large statement. No header hairline, no
+   status micro-text. */
 .pd-chat {
-  margin: 72px auto 0; max-width: 640px; background: #fff;
-  border: 1px solid var(--pd-hair); border-radius: 20px;
-  box-shadow: 0 30px 80px -30px rgba(34, 34, 34, 0.25);
+  margin: 76px auto 0; max-width: 860px; background: #fff;
+  border: 1px solid var(--pd-hair); border-radius: 24px;
+  box-shadow: 0 40px 100px -32px rgba(34, 34, 34, 0.28);
   text-align: left; overflow: hidden; scroll-margin-top: 120px;
 }
-.pd-chat-head { display: flex; align-items: center; gap: 11px; padding: 18px 24px; border-bottom: 1px solid var(--pd-hair-chat); }
+.pd-chat-head { display: flex; align-items: center; gap: 12px; padding: 24px 32px 0; }
 .pd-avatar {
-  width: 32px; height: 32px; border-radius: 50%; background: var(--pd-grad-avatar);
+  width: 34px; height: 34px; border-radius: 50%; background: var(--pd-grad-avatar);
   color: #fff; display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 14px; flex: none;
+  font-weight: 700; font-size: 15px; flex: none;
 }
-.pd-online { margin-left: auto; display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--pd-green); }
-.pd-online .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--pd-green); animation: pd-pulse 2.4s infinite; }
-.pd-msgs { padding: 10px 24px; max-height: 340px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-.pd-msgrow { display: flex; padding: 6px 0; }
-.pd-bub { max-width: 78%; padding: 13px 18px; font-size: 15.5px; line-height: 1.5; border-radius: 16px; }
-.pd-bub-y { background: var(--pd-card); color: var(--pd-ink); border-bottom-left-radius: 4px; margin-right: auto; }
-.pd-bub-u { background: #222222; color: #ffffff; border-bottom-right-radius: 4px; margin-left: auto; }
+.pd-msgs { padding: 16px 32px 4px; max-height: 470px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.pd-msgrow { display: flex; padding: 9px 0; }
+.pd-bub { font-size: 16.5px; line-height: 1.6; }
+.pd-bub-y { max-width: 94%; margin-right: auto; color: var(--pd-ink); }
+/* The opening reads as a statement, not a message. */
+.pd-msgs .pd-msgrow:first-child .pd-bub-y { font-size: 21px; font-weight: 600; letter-spacing: -0.012em; line-height: 1.45; }
+.pd-bub-u { max-width: 72%; margin-left: auto; background: var(--pd-card); color: var(--pd-ink); padding: 12px 18px; border-radius: 16px; font-size: 16px; }
 /* Calm working note — the visual brief bans bouncing typing dots. */
-.pd-working { font-size: 13.5px; color: var(--pd-tert); padding: 4px 2px; animation: pd-pulse 2.2s ease-in-out infinite; }
+.pd-working { font-size: 14px; color: var(--pd-tert); padding: 4px 0; animation: pd-pulse 2.2s ease-in-out infinite; }
 
 /* The first read, rendered as a document — a deliverable, not a chat bubble. */
 .pd-doc {
@@ -179,7 +181,7 @@
   background: #ffffff;
   border: 1px solid var(--pd-border);
   border-radius: 12px;
-  padding: 20px 22px;
+  padding: 24px 28px;
   margin: 6px 0;
   text-align: left;
   box-shadow: 0 10px 32px -20px rgba(34, 34, 34, 0.3);
@@ -187,22 +189,28 @@
 .pd-doc .doc-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--pd-hair); }
 .pd-doc .doc-mark { font-weight: 800; font-size: 13.5px; letter-spacing: -0.02em; color: var(--pd-ink); }
 .pd-doc .doc-label { font-family: var(--pd-mono); font-size: 10.5px; letter-spacing: 0.12em; color: var(--pd-tert); }
-.pd-doc .doc-title { margin-top: 14px; font-size: 18px; font-weight: 800; letter-spacing: -0.015em; color: var(--pd-ink); }
-.pd-doc .doc-thesis { margin-top: 4px; font-size: 13px; line-height: 1.5; color: var(--pd-body); }
+.pd-doc .doc-title { margin-top: 14px; font-size: 20px; font-weight: 800; letter-spacing: -0.015em; color: var(--pd-ink); }
+.pd-doc .doc-thesis { margin-top: 5px; font-size: 13.5px; line-height: 1.55; color: var(--pd-body); }
 .pd-doc .doc-sec { margin-top: 14px; }
 .pd-doc .doc-sec .k { font-family: var(--pd-mono); font-size: 10.5px; letter-spacing: 0.1em; color: var(--pd-coral-link); }
-.pd-doc .doc-sec .v { margin-top: 4px; font-size: 14px; line-height: 1.6; color: var(--pd-ink); }
+.pd-doc .doc-sec .v { margin-top: 4px; font-size: 14.5px; line-height: 1.6; color: var(--pd-ink); }
 .pd-doc .doc-foot { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--pd-hair); font-family: var(--pd-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--pd-tert); }
-.pd-chat-inputrow { display: flex; gap: 10px; padding: 16px 24px 20px; border-top: 1px solid var(--pd-hair-chat); }
-.pd-chat-input {
-  flex: 1; min-width: 0; border: 1px solid var(--pd-border); border-radius: 12px;
-  padding: 14px 16px; font-size: 15px; color: var(--pd-ink); outline: none; background: #fff;
+/* One unified input bar — borderless field + send inside a single container. */
+.pd-chat-inputrow {
+  display: flex; align-items: center; gap: 10px;
+  margin: 14px 32px 28px; padding: 8px 8px 8px 20px;
+  border: 1.5px solid var(--pd-border); border-radius: 16px; background: #fff;
+  transition: border-color 140ms ease;
 }
-.pd-chat-input:focus { border-color: #222222; }
-.pd-chat-input:disabled { background: var(--pd-card); color: var(--pd-tert); }
+.pd-chat-inputrow:focus-within { border-color: #222222; }
+.pd-chat-input {
+  flex: 1; min-width: 0; border: none; padding: 13px 0;
+  font-size: 16.5px; color: var(--pd-ink); outline: none; background: transparent;
+}
+.pd-chat-input:disabled { color: var(--pd-tert); background: transparent; }
 .pd-send {
-  background: var(--pd-grad); color: #fff; border: none; border-radius: 12px;
-  padding: 14px 24px; font-size: 15px; font-weight: 700; display: flex; align-items: center;
+  background: var(--pd-grad); color: #fff; border: none; border-radius: 11px;
+  padding: 13px 26px; font-size: 15px; font-weight: 700; display: flex; align-items: center;
   transition: filter 140ms ease;
 }
 .pd-send:hover { filter: brightness(1.08); }
@@ -398,6 +406,12 @@
   .pd-ledger-head { flex-direction: column; align-items: flex-start !important; gap: 14px !important; }
   .pd-band { height: 340px; }
   .pd-band-overlay { flex-direction: column; align-items: flex-start; gap: 18px; }
-  .pd-chat { margin-top: 48px; }
+  .pd-chat { margin-top: 48px; border-radius: 20px; }
+  .pd-chat-head { padding: 18px 20px 0; }
+  .pd-msgs { padding: 12px 20px 4px; max-height: 420px; }
+  .pd-msgs .pd-msgrow:first-child .pd-bub-y { font-size: 18px; }
+  .pd-bub-u { max-width: 86%; }
+  .pd-chat-inputrow { margin: 10px 14px 18px; padding: 6px 6px 6px 14px; }
+  .pd-send { padding: 12px 18px; }
   .pd-form { padding: 30px 24px; }
 }
