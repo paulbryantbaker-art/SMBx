@@ -345,7 +345,7 @@ export default function YuliaIntake() {
     return () => { alive = false; clearTimeout(timer); };
   }, [done, userTurns]);
 
-  const hint = step === 0 && ghost !== null ? `Sector & Strategy — "${ghost}▏"` : HINTS[step];
+  const hint = step === 0 && ghost ? `Sector & Strategy — "${ghost}▏"` : HINTS[step];
 
   const trackMap = (verdict: string) => {
     if (mapTracked.current) return;
