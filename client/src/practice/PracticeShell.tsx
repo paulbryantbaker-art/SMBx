@@ -6,15 +6,76 @@
  * page, anchor #disclosures), and a quiet team sign-in. `home` pages anchor
  * within the page; subpages anchor back to the landing (`/#how` …).
  */
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'wouter';
 import './practice.css';
 import { bookHref, bookTarget } from './leads';
 import { SEGMENTS } from './segmentData';
 import { trackEvent } from '../lib/analytics';
 
+/** Persistent ask on the long home scroll: appears once the visitor is past
+ *  the hero card, retires while the engine (#yulia) or the final CTA (#book)
+ *  is on screen. Sticky CTAs carry a measured +11–25% lift on long pages. */
+function StickyCta() {
+  const [past, setPast] = useState(false);
+  const [vis, setVis] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const onScroll = () => setPast(window.scrollY > window.innerHeight * 1.1);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    const targets = ['yulia', 'book']
+      .map(id => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+    const io = new IntersectionObserver(
+      entries => setVis(v => {
+        const next = { ...v };
+        for (const e of entries) next[(e.target as HTMLElement).id] = e.isIntersecting;
+        return next;
+      }),
+      { threshold: 0.05 },
+    );
+    targets.forEach(el => io.observe(el));
+    return () => { window.removeEventListener('scroll', onScroll); io.disconnect(); };
+  }, []);
+
+  const on = past && !vis.yulia && !vis.book;
+  return (
+    <a
+      className={`pd-pill-primary pd-sticky${on ? ' on' : ''}`}
+      href="#yulia"
+      onClick={() => trackEvent('practice_cta_clicked', { placement: 'sticky' })}
+      aria-hidden={!on}
+      tabIndex={on ? 0 : -1}
+    >
+      Build your market map →
+    </a>
+  );
+}
+
 export default function PracticeShell({ home = false, children }: { home?: boolean; children: ReactNode }) {
   const anchor = (hash: string) => (home ? hash : `/${hash}`);
+
+  // Scroll-reveal: elements marked data-rv rise in once when they enter the
+  // viewport. Reduced-motion users get everything visible via the CSS guard;
+  // the observer still runs harmlessly.
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll('[data-rv]'));
+    if (els.length === 0) return;
+    const io = new IntersectionObserver(
+      entries => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add('rv-in');
+            io.unobserve(e.target);
+          }
+        }
+      },
+      { rootMargin: '0px 0px -7% 0px', threshold: 0.06 },
+    );
+    els.forEach(el => io.observe(el));
+    return () => io.disconnect();
+  }, []);
 
   // index.css scroll-locks html/body at ≥901px for the app workspace shells
   // (`html, body { height: 100%; overflow: hidden; }`) — without this release
@@ -77,6 +138,8 @@ export default function PracticeShell({ home = false, children }: { home?: boole
       </header>
 
       {children}
+
+      {home && <StickyCta />}
 
       <footer className="pd-footer">
         <div className="pd-footer-inner">

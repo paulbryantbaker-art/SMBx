@@ -57,6 +57,41 @@
 @keyframes pd-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 @keyframes pd-rise { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
 
+/* ─── scroll-reveal system — the page responds to the visitor ───
+   Sections and their children rise in once as they enter the viewport
+   (IntersectionObserver in PracticeShell adds .rv-in). Motion directs the
+   scroll, never decorates: transform/opacity only, one pass, ~60ms child
+   cascade, killed entirely under prefers-reduced-motion. */
+[data-rv] { opacity: 0; translate: 0 24px; transition: opacity 520ms ease, translate 640ms cubic-bezier(0.22, 0.9, 0.26, 1); }
+[data-rv].rv-in { opacity: 1; translate: 0 0; }
+/* Stagger containers stay visible themselves; their children cascade. */
+[data-rv].rv-stagger { opacity: 1; translate: none; }
+.rv-stagger > * { opacity: 0; translate: 0 20px; transition: opacity 480ms ease, translate 580ms cubic-bezier(0.22, 0.9, 0.26, 1); }
+.rv-stagger.rv-in > * { opacity: 1; translate: 0 0; }
+.rv-stagger.rv-in > *:nth-child(2) { transition-delay: 70ms; }
+.rv-stagger.rv-in > *:nth-child(3) { transition-delay: 140ms; }
+.rv-stagger.rv-in > *:nth-child(4) { transition-delay: 210ms; }
+.rv-stagger.rv-in > *:nth-child(5) { transition-delay: 280ms; }
+.rv-stagger.rv-in > *:nth-child(6) { transition-delay: 350ms; }
+.rv-stagger.rv-in > *:nth-child(7) { transition-delay: 420ms; }
+.rv-stagger.rv-in > *:nth-child(n+8) { transition-delay: 490ms; }
+@media (prefers-reduced-motion: reduce) {
+  [data-rv], .rv-stagger > * { opacity: 1 !important; translate: none !important; transition: none !important; }
+}
+
+/* ─── sticky CTA — persistent ask on a long page ─── */
+.pd-sticky {
+  position: fixed; right: 22px; bottom: 22px; z-index: 60;
+  translate: 0 96px; opacity: 0; pointer-events: none;
+  padding: 15px 28px; font-size: 15px;
+  box-shadow: 0 14px 40px -12px rgba(34, 34, 34, 0.45);
+  transition: translate 320ms cubic-bezier(0.22, 0.9, 0.26, 1), opacity 240ms ease, background-color 160ms ease;
+}
+.pd-sticky.on { translate: 0 0; opacity: 1; pointer-events: auto; }
+@media (max-width: 760px) {
+  .pd-sticky { right: 14px; bottom: 14px; padding: 13px 22px; font-size: 14px; }
+}
+
 /* ─── layout ─── */
 /* NOTE: .pd is a column flexbox, and `margin: 0 auto` on a flex item defeats
    the default cross-axis stretch (the item shrink-to-fits instead — width 0
@@ -222,7 +257,7 @@
 .pd-map .map-answer .v { margin-top: 6px; font-size: 17px; font-weight: 700; line-height: 1.5; color: var(--pd-ink); }
 .pd-map .map-funnel { margin-top: 22px; border-top: 1px solid var(--pd-hair); padding-top: 16px; }
 .pd-map .map-funnel .k { font-family: var(--pd-mono); font-size: 10px; letter-spacing: 0.12em; color: var(--pd-coral-link); }
-.pd-map .map-step { display: flex; align-items: baseline; gap: 18px; padding: 8px 0 2px; animation: pd-rise 260ms ease both; }
+.pd-map .map-step { display: flex; align-items: baseline; gap: 26px; padding: 8px 0 2px; animation: pd-rise 260ms ease both; }
 .pd-map .map-step .n { font-size: clamp(30px, 3.8vw, 46px); font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--pd-ink); min-width: clamp(96px, 13vw, 150px); white-space: nowrap; }
 .pd-map .map-step .l { font-size: 14.5px; line-height: 1.45; color: var(--pd-body); }
 .pd-map .map-sec { margin-top: 18px; }

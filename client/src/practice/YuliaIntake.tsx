@@ -32,7 +32,7 @@ interface MapData {
   produces: string;
   sources: string;
 }
-type PartialMap = Partial<Omit<MapData, 'funnel'>> & { funnel: FunnelStep[] };
+export type PartialMap = Partial<Omit<MapData, 'funnel'>> & { funnel: FunnelStep[] };
 interface Msg { from: 'y' | 'u'; text?: string; map?: MapData; }
 
 const OPENING =
@@ -47,6 +47,16 @@ const HINTS = [
 
 /** The send button rotates with the step (Paul's copy update, Y-4). */
 const SEND_LABELS = ['Continue', 'Generate Map', 'Send', 'Send'];
+
+/** Before the first message, the input types example theses to itself — the
+ *  card visibly wants to be talked to. Honest life: these are placeholder
+ *  examples, clearly quoted, never pre-filled input. */
+const TYPE_SAMPLES = [
+  'HVAC roll-up in the Southeast',
+  'Fire & life safety platform, Texas metros',
+  'Commercial landscaping, GA and the Carolinas',
+  'Managed IT tuck-ins under $10M revenue',
+];
 
 /** Narration for the block currently being written — shown while the map
  *  streams, so the work is legible without pretending anything. System
@@ -173,14 +183,15 @@ async function streamIntake(
 
 const DOC_DATE = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-function MapDoc({
-  map, final = false, staggered = false, onPdf, pdfState,
+export function MapDoc({
+  map, final = false, staggered = false, onPdf, pdfState, headLabel,
 }: {
   map: PartialMap;
   final?: boolean;
   staggered?: boolean;
   onPdf?: () => void;
   pdfState?: 'idle' | 'busy' | 'error';
+  headLabel?: string;
 }) {
   const pushback = map.verdict === 'PUSHBACK';
   let blockIndex = 0;
@@ -190,7 +201,7 @@ function MapDoc({
     <div className="pd-map">
       <div className="map-head" style={rise()}>
         <span className="map-mark">smb<span style={{ color: 'var(--pd-coral)' }}>X</span></span>
-        <span className="map-label">PRELIMINARY MARKET READ · {DOC_DATE.toUpperCase()}</span>
+        <span className="map-label">{headLabel || `PRELIMINARY MARKET READ · ${DOC_DATE.toUpperCase()}`}</span>
       </div>
       {map.title && <div className="map-title" style={rise()}>{map.title}</div>}
       {map.thesis && <div className="map-thesis" style={rise()}>{map.thesis}</div>}
@@ -304,8 +315,37 @@ export default function YuliaIntake() {
 
   const userTurns = messages.filter(m => m.from === 'u').length;
   const step = done ? 3 : Math.min(userTurns, 2);
-  const hint = HINTS[step];
   const sendLabel = SEND_LABELS[step];
+
+  // Self-typing placeholder until the first message is sent.
+  const [ghost, setGhost] = useState<string | null>(null);
+  useEffect(() => {
+    if (done || userTurns > 0 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setGhost(null);
+      return;
+    }
+    let alive = true;
+    let timer: number;
+    let i = 0, pos = 0, deleting = false;
+    const tick = () => {
+      if (!alive) return;
+      const s = TYPE_SAMPLES[i % TYPE_SAMPLES.length];
+      let delay = deleting ? 16 : 46;
+      if (!deleting) {
+        pos++;
+        if (pos >= s.length) { deleting = true; delay = 1700; }
+      } else {
+        pos--;
+        if (pos <= 0) { deleting = false; i++; delay = 420; }
+      }
+      setGhost(s.slice(0, Math.max(0, pos)));
+      timer = window.setTimeout(tick, delay);
+    };
+    timer = window.setTimeout(tick, 900);
+    return () => { alive = false; clearTimeout(timer); };
+  }, [done, userTurns]);
+
+  const hint = step === 0 && ghost !== null ? `Sector & Strategy — "${ghost}▏"` : HINTS[step];
 
   const trackMap = (verdict: string) => {
     if (mapTracked.current) return;
