@@ -130,6 +130,10 @@
   letter-spacing: -0.04em;
   text-wrap: balance;
 }
+/* Keep compound words whole in display type (e.g. "Institutional-grade") —
+   released on small screens where the whole compound can't fit a line. */
+.pd-nb { white-space: nowrap; }
+@media (max-width: 600px) { .pd-nb { white-space: normal; } }
 .pd-h1-seg { font-size: clamp(44px, 6.6vw, 84px); }
 .pd-h2 {
   margin: 0;
@@ -411,7 +415,7 @@
 
 /* ─── stat band — the proof is the pitch, so the proof is the largest
    object on the page: 2×2, display weight up to ~170px, tiny mono label. ─── */
-.pd-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(48px, 6vw, 88px) clamp(28px, 4vw, 64px); }
+.pd-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(48px, 6vw, 88px) clamp(28px, 4vw, 64px); max-width: 1180px; margin: 0 auto; }
 .pd-stat .n { font-size: clamp(92px, 11.5vw, 168px); font-weight: 800; letter-spacing: -0.05em; color: var(--pd-ink); line-height: 0.9; white-space: nowrap; }
 .pd-stat.accent .n { color: var(--pd-coral-link); }
 .pd-stat .l { margin-top: 16px; font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--pd-tert); line-height: 1.7; }

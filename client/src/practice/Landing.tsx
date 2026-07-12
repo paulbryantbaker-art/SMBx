@@ -159,7 +159,9 @@ export default function Landing() {
       {/* ── Hero ── */}
       <section className="pd-hero">
         <div style={{ position: 'relative', maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
-          <h1 className="pd-h1" style={{ margin: 0, fontSize: 'clamp(48px, 7vw, 92px)' }}>Institutional-grade corporate development, on&nbsp;demand.</h1>
+          <h1 className="pd-h1" style={{ margin: 0, fontSize: 'clamp(38px, 6.6vw, 88px)', maxWidth: 1240, marginLeft: 'auto', marginRight: 'auto' }}>
+            <span className="pd-nb">Institutional-grade</span> corporate development, on&nbsp;demand.
+          </h1>
           <div className="pd-sub" style={{ margin: '44px auto 0', maxWidth: 720 }}>
             We execute your M&amp;A vision so you can focus on your business. Through a streamlined
             onboarding process, our senior buy-side team can start mapping targets and building
