@@ -8,19 +8,23 @@ import { bookHref, bookTarget } from './leads';
 
 const BELIEFS = [
   {
-    k: 'The buyer deserves a corner.',
+    n: 'I',
+    k: 'The buyer deserves a corner',
     v: "Sellers have had professional representation for a hundred years. In the lower middle market, buyers mostly haven't. That's the gap we exist to close.",
   },
   {
-    k: 'Coverage wins.',
+    n: 'II',
+    k: 'Coverage wins',
     v: 'The best target is usually not for sale. You find it by covering the whole market — every operator in the segment, not just the companies being shown around.',
   },
   {
-    k: 'Focus beats breadth.',
+    n: 'III',
+    k: 'Focus beats breadth',
     v: 'We advise buyers. Only buyers. One client per target. It makes us less flexible and far more useful.',
   },
   {
-    k: "The deal isn't done at close.",
+    n: 'IV',
+    k: "The deal isn't done at close",
     v: 'Value is made or lost in the first six months after the wire. We built the integration playbook that proves it, and we stay through it.',
   },
 ];
@@ -119,16 +123,20 @@ export default function About() {
         </div>
       </section>
 
-      {/* ── What we believe ── */}
-      <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(80px, 9vw, 130px)', paddingBottom: 'clamp(30px, 4vw, 60px)' }}>
-        <div className="pd-seclabel">What we believe</div>
-        <div className="pd-drows wide" style={{ marginTop: 36, maxWidth: 1000 }}>
-          {BELIEFS.map(b => (
-            <div className="pd-drow" key={b.k}>
-              <div className="k">{b.k}</div>
-              <div className="v">{b.v}</div>
-            </div>
-          ))}
+      {/* ── What we believe — the creed, the page's one dark movement ── */}
+      <section className="pd-dark" style={{ marginTop: 'clamp(80px, 9vw, 130px)' }}>
+        <div className="pd-wrap pd-dark-pad">
+          <div className="pd-seclabel">What we believe</div>
+          <h2 className="pd-h2" data-rv style={{ maxWidth: 780 }}>Four convictions run the practice.</h2>
+          <div className="pd-creed rv-stagger" data-rv>
+            {BELIEFS.map(b => (
+              <div className="pd-tenet" key={b.k}>
+                <div className="gn" aria-hidden="true">{b.n}</div>
+                <h3 className="k">{b.k}<span className="fs">.</span></h3>
+                <p className="v">{b.v}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </PracticeShell>
