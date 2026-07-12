@@ -11,6 +11,7 @@ import { Link } from 'wouter';
 import './practice.css';
 import { bookHref, bookTarget } from './leads';
 import { SEGMENTS } from './segmentData';
+import { trackEvent } from '../lib/analytics';
 
 export default function PracticeShell({ home = false, children }: { home?: boolean; children: ReactNode }) {
   const anchor = (hash: string) => (home ? hash : `/${hash}`);
@@ -50,10 +51,16 @@ export default function PracticeShell({ home = false, children }: { home?: boole
             <a href={anchor('#who')}>Who it's for</a>
           </nav>
           <div className="pd-nav-ctas">
-            <a className="pd-pill pd-nav-book" href={consult} target={consultTarget} rel={consultTarget ? 'noreferrer' : undefined}>
+            <a
+              className="pd-pill pd-nav-book"
+              href={consult}
+              target={consultTarget}
+              rel={consultTarget ? 'noreferrer' : undefined}
+              onClick={() => trackEvent('practice_booking_clicked', { placement: 'nav' })}
+            >
               Confidential consultation
             </a>
-            <a className="pd-pill-primary" href={anchor('#yulia')}>Talk to Yulia</a>
+            <a className="pd-pill-primary" href={anchor('#yulia')} onClick={() => trackEvent('practice_cta_clicked', { placement: 'nav-yulia' })}>Talk to Yulia</a>
           </div>
         </div>
       </header>

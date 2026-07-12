@@ -12,6 +12,7 @@ import YuliaIntake from './YuliaIntake';
 import ImageSlot from './ImageSlot';
 import { postPracticeLead, bookHref, bookTarget } from './leads';
 import { SEGMENTS } from './segmentData';
+import { trackEvent } from '../lib/analytics';
 
 const TICKER = [
   'Deal thesis defined by your needs',
@@ -105,6 +106,7 @@ function LeadForm() {
     if (state !== 'idle') return;
     if (!email.includes('@') || !thesis.trim()) return;
     setState('busy');
+    trackEvent('practice_form_submitted');
     await postPracticeLead({ persona, thesis, email, source: 'landing-form' });
     setState('done');
   };
@@ -164,10 +166,20 @@ export default function Landing() {
             A senior deal team that plugs in immediately and runs your whole acquisition — thesis
             to close — tailored to your organizational goals from the ground up.
           </div>
+          <div style={{ margin: '26px auto 0', fontSize: 15, lineHeight: 1.6, color: 'var(--pd-body)', maxWidth: 640 }}>
+            Led by a 20-year deal captain — <b style={{ color: 'var(--pd-ink)' }}>150+ acquisitions closed for buyers</b>
+            {' '}· Wrench Group · JPMorgan Chase
+          </div>
           <YuliaIntake />
           <div style={{ marginTop: 20, fontSize: 14.5, color: 'var(--pd-tert)' }}>
             Prefer a human first?{' '}
-            <a href={bookHref()} target={bookTarget()} rel={bookTarget() ? 'noreferrer' : undefined} style={{ color: 'var(--pd-coral-link)', fontWeight: 600, textDecoration: 'underline' }}>
+            <a
+              href={bookHref()}
+              target={bookTarget()}
+              rel={bookTarget() ? 'noreferrer' : undefined}
+              style={{ color: 'var(--pd-coral-link)', fontWeight: 600, textDecoration: 'underline' }}
+              onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero-link' })}
+            >
               Book advisor call now →
             </a>
           </div>
@@ -456,8 +468,16 @@ export default function Landing() {
               Confidential either way, and there's no retainer to find out if we're a fit.
             </div>
             <div style={{ marginTop: 44, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <a className="pd-pill-primary pd-pill-lg" href="#yulia">Start with Yulia →</a>
-              <a className="pd-pill pd-pill-lg-quiet" href={bookHref()} target={bookTarget()} rel={bookTarget() ? 'noreferrer' : undefined}>Confidential consultation</a>
+              <a className="pd-pill-primary pd-pill-lg" href="#yulia" onClick={() => trackEvent('practice_cta_clicked', { placement: 'cta-yulia' })}>Start with Yulia →</a>
+              <a
+                className="pd-pill pd-pill-lg-quiet"
+                href={bookHref()}
+                target={bookTarget()}
+                rel={bookTarget() ? 'noreferrer' : undefined}
+                onClick={() => trackEvent('practice_booking_clicked', { placement: 'cta' })}
+              >
+                Confidential consultation
+              </a>
             </div>
           </div>
           <LeadForm />
