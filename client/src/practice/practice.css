@@ -213,15 +213,22 @@
 .pd-nav-ctas { display: flex; gap: 10px; }
 
 /* ─── hero — split: statement left, the engine right (the pattern the
-   high-converting pages share: benefit copy beside the live product) ─── */
-.pd-hero { position: relative; overflow: hidden; padding: clamp(70px, 8vw, 120px) var(--pd-pad-x) clamp(70px, 8vw, 120px); }
+   high-converting pages share: benefit copy beside the live product).
+   The hero owns the whole first viewport: nothing else above the fold. ─── */
+.pd-hero {
+  position: relative; overflow: hidden;
+  min-height: calc(100svh - 86px);
+  display: flex; align-items: center;
+  padding: clamp(48px, 6vw, 96px) var(--pd-pad-x);
+}
 .pd-herosplit {
   display: grid; grid-template-columns: minmax(0, 6.5fr) minmax(0, 5.5fr);
-  gap: clamp(44px, 5.5vw, 96px); align-items: center;
-  max-width: var(--pd-max); margin: 0 auto;
+  gap: clamp(52px, 7vw, 130px); align-items: center;
+  width: 100%; max-width: var(--pd-max); margin: 0 auto;
 }
 .pd-herosplit .pd-chat { margin: 0; max-width: none; width: 100%; box-shadow: 0 30px 80px -30px rgba(34, 34, 34, 0.3); }
 @media (max-width: 1024px) {
+  .pd-hero { min-height: 0; }
   .pd-herosplit { grid-template-columns: 1fr; gap: 52px; }
 }
 
@@ -429,7 +436,7 @@
 .pd-stat .n { font-size: clamp(54px, 6.8vw, 102px); font-weight: 800; letter-spacing: -0.05em; color: var(--pd-ink); line-height: 0.9; white-space: nowrap; }
 .pd-stat.accent .n { color: var(--pd-coral-link); }
 .pd-stat .l { margin-top: 16px; font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--pd-tert); line-height: 1.7; }
-.pd-statband { border-top: 1px solid var(--pd-hair); border-bottom: 1px solid var(--pd-hair); margin-top: clamp(60px, 7vw, 100px); }
+.pd-statband { border-top: 1px solid var(--pd-hair); border-bottom: 1px solid var(--pd-hair); }
 .pd-statband .pd-stats { padding: clamp(64px, 7vw, 110px) 0; }
 @media (max-width: 1080px) {
   .pd-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(44px, 6vw, 72px) clamp(28px, 4vw, 64px); }

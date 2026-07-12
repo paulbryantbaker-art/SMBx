@@ -161,16 +161,13 @@ export default function Landing() {
         <div className="pd-herosplit">
           <div>
             <h1 className="pd-h1" style={{ margin: 0, fontSize: 'clamp(40px, 5vw, 80px)' }}>
-              <span className="pd-nb">Institutional-grade</span> corporate development, on&nbsp;demand.
+              Rev up your acquisition engine and start adding real value&nbsp;today.
             </h1>
             <div className="pd-sub" style={{ margin: '30px 0 0', maxWidth: '30em', fontSize: 'clamp(17px, 1.5vw, 20px)' }}>
+              <b style={{ color: 'var(--pd-ink)', fontWeight: 700 }}>Institutional-grade corporate development, on demand.</b>{' '}
               We execute your M&amp;A vision so you can focus on your business. Through a streamlined
               onboarding process, our senior buy-side team can start mapping targets and building
               your thesis immediately.
-            </div>
-            <div style={{ margin: '24px 0 0', fontSize: 15, lineHeight: 1.6, color: 'var(--pd-body)', maxWidth: '40em' }}>
-              Led by <b style={{ color: 'var(--pd-ink)' }}>Paul Baker</b> — 20-year deal captain ·{' '}
-              <b style={{ color: 'var(--pd-ink)' }}>150+ acquisitions in the middle market</b> · Wrench Group · JPMorgan Chase
             </div>
           </div>
           <div>
@@ -208,8 +205,11 @@ export default function Landing() {
       <section className="pd-wrap pd-section">
         <div className="pd-askew rv-stagger" data-rv>
           <div>
+            <MapDoc map={SAMPLE_MAP} headLabel="SAMPLE READ" />
+          </div>
+          <div className="off">
             <div className="pd-seclabel">The first read</div>
-            <h2 className="pd-h2" style={{ maxWidth: 560 }}>A real read on your thesis, before you spend a dollar.</h2>
+            <h2 className="pd-h2" style={{ maxWidth: 560, fontSize: 'clamp(32px, 3.6vw, 48px)' }}>A real read on your thesis, before you spend a dollar.</h2>
             <div style={{ marginTop: 24, fontSize: 17.5, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '30em' }}>
               Describe what you're buying. The Target Mapping Engine returns a preliminary market
               map — the universe, the economics, the competitive picture, and the risks — in about
@@ -224,9 +224,6 @@ export default function Landing() {
                 Build your market map →
               </a>
             </div>
-          </div>
-          <div className="off">
-            <MapDoc map={SAMPLE_MAP} headLabel="SAMPLE READ" />
           </div>
         </div>
       </section>
