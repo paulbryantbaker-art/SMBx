@@ -156,33 +156,37 @@ function LeadForm() {
 export default function Landing() {
   return (
     <PracticeShell home>
-      {/* ── Hero ── */}
+      {/* ── Hero — statement left, the engine right ── */}
       <section className="pd-hero">
-        <div style={{ position: 'relative', maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
-          <h1 className="pd-h1" style={{ margin: 0, fontSize: 'clamp(38px, 6.6vw, 88px)', maxWidth: 1240, marginLeft: 'auto', marginRight: 'auto' }}>
-            <span className="pd-nb">Institutional-grade</span> corporate development, on&nbsp;demand.
-          </h1>
-          <div className="pd-sub" style={{ margin: '44px auto 0', maxWidth: 720 }}>
-            We execute your M&amp;A vision so you can focus on your business. Through a streamlined
-            onboarding process, our senior buy-side team can start mapping targets and building
-            your thesis immediately.
+        <div className="pd-herosplit">
+          <div>
+            <h1 className="pd-h1" style={{ margin: 0, fontSize: 'clamp(40px, 5vw, 80px)' }}>
+              <span className="pd-nb">Institutional-grade</span> corporate development, on&nbsp;demand.
+            </h1>
+            <div className="pd-sub" style={{ margin: '30px 0 0', maxWidth: '30em', fontSize: 'clamp(17px, 1.5vw, 20px)' }}>
+              We execute your M&amp;A vision so you can focus on your business. Through a streamlined
+              onboarding process, our senior buy-side team can start mapping targets and building
+              your thesis immediately.
+            </div>
+            <div style={{ margin: '24px 0 0', fontSize: 15, lineHeight: 1.6, color: 'var(--pd-body)', maxWidth: '40em' }}>
+              Led by <b style={{ color: 'var(--pd-ink)' }}>Paul Baker</b> — 20-year deal captain ·{' '}
+              <b style={{ color: 'var(--pd-ink)' }}>150+ acquisitions in the middle market</b> · Wrench Group · JPMorgan Chase
+            </div>
           </div>
-          <div style={{ margin: '26px auto 0', fontSize: 15, lineHeight: 1.6, color: 'var(--pd-body)', maxWidth: 640 }}>
-            Led by <b style={{ color: 'var(--pd-ink)' }}>Paul Baker</b> — 20-year deal captain ·{' '}
-            <b style={{ color: 'var(--pd-ink)' }}>150+ acquisitions in the middle market</b> · Wrench Group · JPMorgan Chase
-          </div>
-          <YuliaIntake />
-          <div style={{ marginTop: 20, fontSize: 14.5, color: 'var(--pd-tert)' }}>
-            Prefer to speak with our team first?{' '}
-            <a
-              href={bookHref()}
-              target={bookTarget()}
-              rel={bookTarget() ? 'noreferrer' : undefined}
-              style={{ color: 'var(--pd-coral-link)', fontWeight: 600, textDecoration: 'underline' }}
-              onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero-link' })}
-            >
-              Book a confidential consultation →
-            </a>
+          <div>
+            <YuliaIntake />
+            <div style={{ marginTop: 16, fontSize: 14.5, color: 'var(--pd-tert)' }}>
+              Prefer to speak with our team first?{' '}
+              <a
+                href={bookHref()}
+                target={bookTarget()}
+                rel={bookTarget() ? 'noreferrer' : undefined}
+                style={{ color: 'var(--pd-coral-link)', fontWeight: 600, textDecoration: 'underline' }}
+                onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero-link' })}
+              >
+                Book a confidential consultation →
+              </a>
+            </div>
           </div>
         </div>
       </section>
