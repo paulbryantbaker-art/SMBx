@@ -282,26 +282,26 @@
 .pd-map > * { animation: pd-rise 260ms ease both; }
 .pd-map .map-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 12px; border-bottom: 1.5px solid var(--pd-ink); }
 .pd-map .map-mark { font-weight: 800; font-size: 15px; letter-spacing: -0.02em; color: var(--pd-ink); }
-.pd-map .map-label { font-family: var(--pd-mono); font-size: 10px; letter-spacing: 0.13em; color: var(--pd-tert); text-align: right; }
+.pd-map .map-label { font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.12em; color: var(--pd-body); text-align: right; }
 .pd-map .map-title { margin-top: 18px; font-size: clamp(22px, 2.6vw, 30px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; color: var(--pd-ink); }
-.pd-map .map-thesis { margin-top: 8px; font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.06em; color: var(--pd-body); text-transform: uppercase; line-height: 1.6; }
+.pd-map .map-thesis { margin-top: 8px; font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.05em; color: var(--pd-body); text-transform: uppercase; line-height: 1.6; }
 .pd-map .map-answer { margin-top: 20px; border-left: 3px solid var(--pd-ink); padding: 4px 0 4px 16px; }
-.pd-map .map-answer .k { font-family: var(--pd-mono); font-size: 10px; letter-spacing: 0.12em; color: var(--pd-coral-link); }
+.pd-map .map-answer .k { font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.11em; color: var(--pd-coral-link); }
 .pd-map .map-answer .v { margin-top: 6px; font-size: 17px; font-weight: 700; line-height: 1.5; color: var(--pd-ink); }
 .pd-map .map-funnel { margin-top: 22px; border-top: 1px solid var(--pd-hair); padding-top: 16px; }
-.pd-map .map-funnel .k { font-family: var(--pd-mono); font-size: 10px; letter-spacing: 0.12em; color: var(--pd-coral-link); }
+.pd-map .map-funnel .k { font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.11em; color: var(--pd-coral-link); }
 .pd-map .map-step { display: flex; align-items: baseline; gap: 26px; padding: 8px 0 2px; animation: pd-rise 260ms ease both; }
 .pd-map .map-step .n { font-size: clamp(30px, 3.8vw, 46px); font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--pd-ink); min-width: clamp(96px, 13vw, 150px); white-space: nowrap; }
 .pd-map .map-step .l { font-size: 14.5px; line-height: 1.45; color: var(--pd-body); }
 .pd-map .map-sec { margin-top: 18px; }
-.pd-map .map-sec .k { font-family: var(--pd-mono); font-size: 10px; letter-spacing: 0.12em; color: var(--pd-coral-link); }
+.pd-map .map-sec .k { font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.11em; color: var(--pd-coral-link); }
 .pd-map .map-sec .v { margin-top: 5px; font-size: 14.5px; line-height: 1.6; color: var(--pd-ink); }
 /* The punchline block — the one place a tint and a weight shift is earned. */
 .pd-map .map-insight { margin-top: 22px; background: var(--pd-card); border-radius: 10px; padding: 18px 20px; }
-.pd-map .map-insight .k { font-family: var(--pd-mono); font-size: 10px; letter-spacing: 0.12em; color: var(--pd-ink); }
+.pd-map .map-insight .k { font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.11em; color: var(--pd-ink); }
 .pd-map .map-insight .v { margin-top: 7px; font-size: 15.5px; font-weight: 600; line-height: 1.6; color: var(--pd-ink); }
 .pd-map .map-foot { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--pd-hair); display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap; }
-.pd-map .map-foot .src { font-family: var(--pd-mono); font-size: 9.5px; letter-spacing: 0.05em; line-height: 1.6; color: var(--pd-tert); flex: 1 1 320px; }
+.pd-map .map-foot .src { font-family: var(--pd-mono); font-size: 10.5px; letter-spacing: 0.04em; line-height: 1.6; color: var(--pd-body); flex: 1 1 320px; }
 .pd-map .map-pdf {
   border: 1.5px solid var(--pd-ink); background: transparent; color: var(--pd-ink);
   border-radius: 99px; padding: 10px 22px; font-size: 13.5px; font-weight: 700; white-space: nowrap;
@@ -348,7 +348,7 @@
 /* ─── pillar columns (value creation) — mono kicker + hairline top ─── */
 .pd-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(28px, 3.4vw, 56px); margin-top: 76px; }
 .pd-step { border-top: 1.5px solid var(--pd-ink); padding-top: 24px; }
-.pd-step .num { font-family: var(--pd-mono); font-size: 12px; letter-spacing: 0.14em; color: var(--pd-tert); }
+.pd-step .num { font-family: var(--pd-mono); font-size: 12.5px; letter-spacing: 0.12em; color: var(--pd-body); }
 .pd-step .t { font-size: 25px; font-weight: 700; letter-spacing: -0.01em; margin-top: 18px; }
 .pd-step .b { font-size: 16px; line-height: 1.65; color: var(--pd-body); margin-top: 12px; }
 .pd-step .pd-link { display: inline-block; margin-top: 22px; }
@@ -390,7 +390,7 @@
 /* ─── value creation — the number is the hero of the band ─── */
 .pd-valgrid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: clamp(36px, 5.5vw, 96px); align-items: start; }
 .pd-bignum { font-size: clamp(140px, 17vw, 260px); font-weight: 800; letter-spacing: -0.055em; line-height: 0.8; color: var(--pd-ink); white-space: nowrap; }
-.pd-bignum-label { margin-top: 20px; font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.18em; color: var(--pd-tert); }
+.pd-bignum-label { margin-top: 20px; font-family: var(--pd-mono); font-size: 12px; letter-spacing: 0.16em; color: var(--pd-body); }
 
 /* ─── who it's for — an interactive index: giant names, live side panel ─── */
 .pd-whosel {
@@ -435,7 +435,7 @@
   transition: background-color 160ms ease;
 }
 .pd-hunt:hover { background: #FAFAFA; }
-.pd-hunt .no { font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.12em; color: var(--pd-tert); }
+.pd-hunt .no { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.12em; color: var(--pd-body); }
 .pd-hunt .nm { font-size: 21px; font-weight: 700; letter-spacing: -0.012em; }
 .pd-hunt .th { font-size: 15px; line-height: 1.6; color: var(--pd-body); }
 @media (max-width: 860px) {
@@ -446,7 +446,7 @@
 /* ─── how we find them — a three-beat narrative under the statement ─── */
 .pd-findgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(28px, 3.4vw, 56px); margin-top: clamp(48px, 5.5vw, 80px); }
 .pd-findcol { border-top: 1px solid var(--pd-hair); padding-top: 20px; }
-.pd-findcol .k { font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.14em; color: var(--pd-tert); }
+.pd-findcol .k { font-family: var(--pd-mono); font-size: 12px; letter-spacing: 0.12em; color: var(--pd-body); }
 .pd-findcol .v { margin-top: 14px; font-size: 16.5px; line-height: 1.7; color: var(--pd-body); }
 @media (max-width: 980px) { .pd-findgrid { grid-template-columns: 1fr; gap: 36px; } }
 
@@ -485,7 +485,7 @@
 .pd-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(28px, 4vw, 56px); }
 .pd-stat .n { font-size: clamp(44px, 5.4vw, 82px); font-weight: 800; letter-spacing: -0.05em; color: var(--pd-ink); line-height: 0.9; white-space: nowrap; }
 .pd-stat.accent .n { color: var(--pd-coral-link); }
-.pd-stat .l { margin-top: 14px; font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--pd-tert); line-height: 1.7; }
+.pd-stat .l { margin-top: 14px; font-family: var(--pd-mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--pd-body); line-height: 1.7; }
 .pd-statband { border-top: 1px solid var(--pd-hair); border-bottom: 1px solid var(--pd-hair); }
 .pd-statband .pd-stats { padding: clamp(36px, 4vw, 60px) 0; }
 @media (max-width: 1080px) {
@@ -526,7 +526,7 @@
 }
 .pd-dealcard:hover, .pd-dealcard:focus-visible { border-color: var(--pd-ink); transform: translateY(-1px); }
 .pd-dealcard .nm { font-weight: 700; font-size: 16px; letter-spacing: -0.01em; }
-.pd-dealcard .tag { margin-top: 6px; font-family: var(--pd-mono); font-size: 10px; letter-spacing: 0.12em; color: var(--pd-tert); text-transform: uppercase; }
+.pd-dealcard .tag { margin-top: 6px; font-family: var(--pd-mono); font-size: 10.5px; letter-spacing: 0.11em; color: var(--pd-body); text-transform: uppercase; }
 .pd-dealcard .why {
   font-size: 13px; line-height: 1.55; color: var(--pd-body);
   max-height: 0; opacity: 0; overflow: hidden; margin-top: 0;
