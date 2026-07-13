@@ -127,7 +127,7 @@ function DealSheet() {
         })}
       </div>
       {filtered.length === 0 && (
-        <div style={{ marginTop: 20, fontSize: 15, color: 'var(--pd-body)' }}>
+        <div className="pd-body-sm" style={{ marginTop: 20 }}>
           Nothing by that name on the sheet — try a shorter fragment.
         </div>
       )}
@@ -162,18 +162,18 @@ export default function TrackRecord() {
       {/* ── Wrench Group ── */}
       <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(90px, 10vw, 150px)' }}>
         <div className="pd-seclabel">Wrench Group — building a national platform</div>
-        <div className="pd-mono" style={{ marginTop: 2 }}>2016–2025 · DIRECTOR, CORPORATE DEVELOPMENT &amp; M&amp;A INTEGRATION</div>
+        <div className="pd-mono" style={{ marginTop: 2 }}>2016–2025 · 36 ACQUISITIONS · ~$2.9B ENTERPRISE VALUE</div>
         <div style={{ marginTop: 22, fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '48em' }}>
-          Recruited to build the M&amp;A engine for a new essential-services platform. Over nine
-          years: four founding companies, 36 acquisitions, roughly $2.9B in enterprise value, and a
-          national footprint — with Paul as deal captain on every one.
+          The M&amp;A engine behind a new essential-services platform: over nine years, four founding
+          companies grew into a national footprint through 36 acquisitions and roughly $2.9B in
+          enterprise value.
         </div>
       </section>
 
       {/* ── The deal sheet ── */}
       <section className="pd-wrap" style={{ paddingTop: 'clamp(50px, 6vw, 80px)' }}>
-        <h2 className="pd-h2" style={{ fontSize: 'clamp(28px, 3.2vw, 40px)' }}>The deal sheet.</h2>
-        <div style={{ marginTop: 14, fontSize: 16.5, lineHeight: 1.65, color: 'var(--pd-body)', maxWidth: '44em' }}>
+        <h2 className="pd-h2">The deal sheet.</h2>
+        <div className="pd-body" style={{ marginTop: 14, maxWidth: '44em' }}>
           Filter it, search it, hover any entry for what it was. Deal-level terms stay
           confidential — the pattern doesn't.
         </div>
@@ -183,26 +183,16 @@ export default function TrackRecord() {
       {/* ── JPMorgan Chase ── */}
       <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(70px, 8vw, 120px)' }}>
         <div className="pd-seclabel">JPMorgan Chase — integration at scale</div>
-        <div className="pd-mono" style={{ marginTop: 2 }}>2005–2015 · DIRECTOR, ACQUISITION INTEGRATION</div>
+        <div className="pd-mono" style={{ marginTop: 2 }}>2005–2015 · PLATFORM &amp; FINTECH ACQUISITIONS · $2B+ IN SYNERGIES</div>
         <div style={{ marginTop: 22, fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '48em' }}>
-          Led integration on the bank's largest platform and fintech acquisitions, delivering $2B+
-          in synergies across 100+ stakeholder touchpoints.
-        </div>
-      </section>
-
-      {/* ── Deloitte ── */}
-      <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(70px, 8vw, 120px)' }}>
-        <div className="pd-seclabel">Deloitte Consulting</div>
-        <div className="pd-mono" style={{ marginTop: 2 }}>2010–2011 · ENGAGEMENT MANAGER, STRATEGY &amp; OPERATIONS</div>
-        <div style={{ marginTop: 22, fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '48em' }}>
-          Advised Fortune 500 clients on inorganic growth strategy, target operating models, and
-          post-merger integration.
+          Integration on the bank's largest platform and fintech acquisitions — $2B+ in synergies
+          across 100+ stakeholder touchpoints.
         </div>
       </section>
 
       {/* ── Closer ── */}
       <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(70px, 8vw, 120px)', paddingBottom: 'clamp(30px, 4vw, 60px)' }}>
-        <div style={{ fontSize: 18, lineHeight: 1.6, color: 'var(--pd-body)' }}>
+        <div className="pd-body" style={{ lineHeight: 1.7 }}>
           Thirty minutes with our team. Confidential, no retainer.
         </div>
         <div style={{ marginTop: 28 }}>

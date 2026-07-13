@@ -145,7 +145,7 @@ export default function PracticeShell({ home = false, children }: { home?: boole
         <div className="pd-footer-inner">
           <div>
             <img src="/logo-coral-x.png" alt="smbX.ai" style={{ height: 40, margin: '-5px 0 0 -8px' }} />
-            <div style={{ marginTop: 14, fontSize: 14, lineHeight: 1.6, color: 'var(--pd-tert)', maxWidth: 340 }}>
+            <div style={{ marginTop: 14, fontSize: 15, lineHeight: 1.6, color: 'var(--pd-tert)', maxWidth: 340 }}>
               Buy-side corporate development for acquirers in the lower middle market. A senior
               operator and a full team's output, exclusively on your side of the table.
             </div>
@@ -168,7 +168,7 @@ export default function PracticeShell({ home = false, children }: { home?: boole
             </div>
             <div className="pd-footer-col" style={{ maxWidth: 200 }}>
               <div className="h">WHERE WE WORK</div>
-              <div style={{ color: 'var(--pd-body)', fontSize: 14.5, lineHeight: 1.6 }}>
+              <div style={{ color: 'var(--pd-body)', fontSize: 15, lineHeight: 1.6 }}>
                 Nationwide, from Dallas–Fort Worth, Texas.
               </div>
             </div>
