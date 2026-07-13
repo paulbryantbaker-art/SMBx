@@ -241,7 +241,9 @@
 .pd-herosplit .pd-chat { margin: 0; max-width: none; width: 100%; box-shadow: 0 30px 80px -30px rgba(34, 34, 34, 0.3); }
 @media (max-width: 1024px) {
   .pd-fold { min-height: 0; }
-  .pd-herosplit { grid-template-columns: 1fr; gap: 52px; }
+  /* minmax(0): a bare 1fr is minmax(auto,1fr), and the chat card's intrinsic
+     min-content would push the stacked track past narrow viewports. */
+  .pd-herosplit { grid-template-columns: minmax(0, 1fr); gap: 52px; }
 }
 
 /* ─── Yulia chat card ─── */

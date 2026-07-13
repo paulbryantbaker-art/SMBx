@@ -37,9 +37,9 @@ export default function About() {
         <div style={{ position: 'relative', maxWidth: 1080, margin: '0 auto', textAlign: 'center' }}>
           <h1 className="pd-h1 pd-h1-seg" style={{ margin: 0 }}>A new firm. Decades of execution.</h1>
           <div className="pd-sub" style={{ margin: '38px auto 0', maxWidth: 680 }}>
-            <Mark /> was built to give buyers in the lower middle market something they have never
-            had — a dedicated corporate development function, on demand, exclusively on their side
-            of the table.
+            <Mark /> was built to give buyers in the lower middle market something they have
+            rarely had access to — a dedicated corporate development function, on demand,
+            exclusively on their side of the table.
           </div>
         </div>
       </section>

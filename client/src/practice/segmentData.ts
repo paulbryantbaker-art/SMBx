@@ -32,7 +32,7 @@ export const SEGMENTS: Segment[] = [
     pains: [
       {
         name: 'Bandwidth',
-        body: 'Direct deals compete with everything else on the family’s plate. Diligence gaps get papered over — or the deal dies of slowness.',
+        body: 'Direct deals compete with everything else on the family’s plate. Diligence gaps can get papered over — or the deal dies of slowness.',
         tag: 'DILIGENCE GAPS',
       },
       {
@@ -59,7 +59,7 @@ export const SEGMENTS: Segment[] = [
     cardBody: 'Control the deal before you raise a dollar — with diligence and models that make capital partners say yes.',
     cardLink: 'For sponsors →',
     h1: 'Control the deal before you raise a dollar.',
-    sub: 'Investor-grade diligence and models that make capital partners say yes — without burning uncompensated months on deals that die.',
+    sub: 'Investor-grade diligence and models that make capital partners say yes — without burning uncompensated months on deals that fade.',
     painTitle: 'The sponsor’s trap: prove the deal to raise the money, spend the money to prove the deal.',
     pains: [
       {
@@ -69,7 +69,7 @@ export const SEGMENTS: Segment[] = [
       },
       {
         name: 'Dead-deal cost',
-        body: 'Every broken deal is months of sourcing, reading, and modeling — uncompensated. The economics only work if the grind costs you almost nothing.',
+        body: 'Every broken deal is months of sourcing, reading, and modeling — uncompensated. The economics only work if the research phase costs you almost nothing.',
         tag: 'UNCOMPENSATED TIME',
       },
       {
@@ -123,7 +123,7 @@ export const SEGMENTS: Segment[] = [
     cardBody: 'A senior deal team in your corner for your first — and biggest — acquisition. Level the field against the seller’s broker.',
     cardLink: 'For searchers →',
     h1: 'Level the field against the seller’s broker.',
-    sub: 'A senior deal team in your corner for your first — and biggest — acquisition. We run the diligence and the model so your SBA lender and your gut both say go.',
+    sub: 'A senior deal team in your corner for your first — and biggest — acquisition. We run the diligence and the model so your SBA lender and your instincts both say go.',
     painTitle: 'Your first deal is the other side’s hundredth.',
     pains: [
       {
@@ -133,7 +133,7 @@ export const SEGMENTS: Segment[] = [
       },
       {
         name: 'Walking away',
-        body: 'The hardest skill in acquisitions is killing a deal you’ve fallen for — before diligence costs, lender fees, and sunk months make the bad choice for you.',
+        body: 'The hardest skill in acquisitions is killing a deal you’ve fallen for — before diligence costs, lender fees, and sunk months make the choice for you.',
         tag: 'KNOW WHEN TO WALK',
       },
       {

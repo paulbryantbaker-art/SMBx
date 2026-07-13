@@ -55,12 +55,12 @@ const VALUE_PILLARS = [
   {
     num: 'POST-CLOSE',
     t: 'The IMO function',
-    b: "You don't need standing integration overhead. Our team acts as your on-demand IMO, driving the transition. We manage vendor consolidation, employee onboarding, and operational alignment so your team can focus on the business.",
+    b: "You don't need standing integration overhead. Our team acts as your on-demand IMO, helping to drive the transition. We manage vendor consolidation, employee onboarding, and operational alignment so your team can focus on the business.",
   },
   {
     num: 'EXECUTION',
     t: 'Synergy capture',
-    b: 'The model promised cost savings and cross-sell revenue. We track and execute against those specific targets through the first six months, ensuring the deal you modeled is the business you actually get.',
+    b: 'The model promised cost savings and cross-sell revenue. We track and execute against those specific targets through the first six months, ensuring the deal you modeled becomes the business you actually get.',
   },
 ];
 
@@ -191,13 +191,13 @@ export default function Landing() {
         <div className="pd-herosplit">
           <div>
             <h1 className="pd-h1" style={{ margin: 0, fontSize: 'clamp(38px, 4.7vw, 74px)' }}>
-              Rev up your acquisition engine and start adding real value&nbsp;today.
+              Your dedicated corporate development team, ready when you&nbsp;are.
             </h1>
             <div className="pd-sub" style={{ margin: '26px 0 0', maxWidth: '30em', fontSize: 'clamp(17px, 1.4vw, 19px)' }}>
-              <b style={{ color: 'var(--pd-ink)', fontWeight: 700 }}>Institutional-grade corporate development, on demand.</b>{' '}
-              We execute your M&amp;A vision so you can focus on your business. Through a streamlined
-              onboarding process, our senior buy-side team can start mapping targets and building
-              your thesis immediately.
+              <b style={{ color: 'var(--pd-ink)', fontWeight: 700 }}>Institutional-grade execution, on demand.</b>{' '}
+              We guide your M&amp;A vision from thesis to close, so you can focus on running your
+              business. Through a collaborative onboarding process, our senior buy-side team can
+              begin mapping targets and validating your thesis immediately.
             </div>
           </div>
           <div>
@@ -242,9 +242,9 @@ export default function Landing() {
             <div className="pd-seclabel">The first read</div>
             <h2 className="pd-h2" style={{ maxWidth: 560, fontSize: 'clamp(32px, 3.6vw, 48px)' }}>A real read on your thesis, before you spend a dollar.</h2>
             <div style={{ marginTop: 24, fontSize: 17.5, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '30em' }}>
-              Describe what you're buying. The Target Mapping Engine returns a preliminary market
-              map — the universe, the economics, the competitive picture, and the risks — in about
-              a minute. Our team sends the full version within 24 hours.
+              Tell us what you're looking for. The Target Mapping Engine returns a preliminary
+              market map — the universe, the economics, the competitive picture, and the risks —
+              in about a minute. Our team sends the full version within 24 hours.
             </div>
             <div style={{ marginTop: 36 }}>
               <a
@@ -274,10 +274,10 @@ export default function Landing() {
               them closed. At scale, it pays for itself many times over.
             </div>
             <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-              Below a certain size, the math doesn't work. A director of corp dev and an analyst
-              runs well past half a million dollars a year — for a function you may only utilize
-              twice a year. As a result, the acquisitions that would compound your business get run
-              off the side of a desk against a seller who does this professionally.
+              Below a certain size, however, the math gets difficult. A director of corp dev and an
+              analyst can run well past half a million dollars a year — for a function you may only
+              utilize twice a year. As a result, the acquisitions that would compound your business
+              get run off the side of a desk, against a seller who does this professionally.
             </div>
           </div>
           <div className="off">
@@ -410,7 +410,7 @@ export default function Landing() {
       {/* ── Process — a timeline: one rule, three nodes ── */}
       <section id="how" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
         <div className="pd-seclabel">The process</div>
-        <h2 className="pd-h2" data-rv style={{ maxWidth: 760 }}>Execution without the friction.</h2>
+        <h2 className="pd-h2" data-rv style={{ maxWidth: 760 }}>A transparent, step-by-step process.</h2>
         <div className="pd-timeline rv-stagger" data-rv>
           <div className="pd-tstep">
             <div className="no">01</div>
@@ -421,7 +421,7 @@ export default function Landing() {
           <div className="pd-tstep">
             <div className="no">02</div>
             <div className="t">Curated targets</div>
-            <div className="b">We cover a market in days — a full target landscape, screened and scored, typically inside a week of the mandate. Our team hand-picks the targets that meet your exact criteria.</div>
+            <div className="b">We cover a market in days — a full target landscape, screened and scored, typically inside a week of the mandate. Our team hand-picks the targets that closely meet your criteria.</div>
             <a className="pd-link" href="#why">How we work →</a>
           </div>
           <div className="pd-tstep">
@@ -448,9 +448,9 @@ export default function Landing() {
               </h2>
               <div style={{ marginTop: 22, fontSize: 17.5, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '44em' }}>
                 Most middle-market acquirers don't have a dedicated Integration Management Office
-                (IMO). When a deal closes, the transition often gets dumped on the plates of
-                executives already running the core business. We stay engaged through the wire to
-                execute the integration playbook.
+                (IMO). When a deal closes, the transition is often handed to executives who are
+                already stretched thin running the core business. We stay engaged through the
+                transition to help execute the integration playbook.
               </div>
             </div>
           </div>
@@ -591,11 +591,11 @@ export default function Landing() {
         <div className="pd-wrap pd-dark-pad">
           <div className="pd-cta-grid rv-stagger" data-rv>
             <div>
-              <h2 className="pd-cta-h">Let's go find the one.</h2>
+              <h2 className="pd-cta-h">Let's go find the right fit.</h2>
               <div style={{ marginTop: 24, fontSize: 18, lineHeight: 1.65, color: 'var(--pd-body)', maxWidth: 480 }}>
-                Take two minutes with our Target Mapping Engine to build your thesis — or speak
-                with our team directly. Confidential either way, and there's no retainer to find
-                out if we're a fit.
+                Take two minutes with our Target Mapping Engine to outline your thesis — or speak
+                with our team directly. It's confidential either way, and there's no retainer to
+                find out if we're a match.
               </div>
               <div style={{ marginTop: 44, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 <a className="pd-pill-primary pd-pill-lg" href="#yulia" onClick={() => trackEvent('practice_cta_clicked', { placement: 'cta-yulia' })}>Build your market map →</a>

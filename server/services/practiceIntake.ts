@@ -125,7 +125,7 @@ export function parseMap(text: string): { map: IntakeMap | null; rest: string } 
   const before = text.slice(0, start).trim();
   const after = text.slice(end + '===END==='.length).trim();
   const rest = [before, after].filter(Boolean).join(' ')
-    || 'Preliminary analysis complete. Please provide an email address to receive the full market map.';
+    || 'Preliminary analysis is complete. What is the best email address to send the full market map to?';
   return { map, rest };
 }
 
@@ -147,11 +147,11 @@ export function laneConflict(conversationText: string): boolean {
 }
 
 function closeMessage(email: string, conflict: boolean): string {
-  const delivery = `Map generated. Our team will send the full version to ${email} within 24 hours.`;
+  const delivery = `Your map is ready. Our team will send the full version to ${email} within 24 hours.`;
   if (conflict) {
-    return `${delivery}\n\nNote: We take one client per target market, and your lane may overlap an active engagement. We will clarify this overlap during your consultation to protect our clients' pipelines.`;
+    return `${delivery}\n\nA quick note: we only take one client per target market, and your lane may overlap with an active engagement. We'll clarify this during your consultation to make sure everyone's pipeline is safely protected.`;
   }
-  return `${delivery}\n\nNote: We take one client per target market, and this lane is currently open. A 30-minute confidential consultation is required to formalize exclusivity.`;
+  return `${delivery}\n\nA quick note: we only take one client per target market, and this lane is currently open. We can formalize exclusivity during a brief, 30-minute confidential consultation.`;
 }
 
 const SYSTEM_PROMPT = `You are the smbX Target Mapping Engine — the public intake surface of smbX, a buy-side-only corporate development practice: one senior deal team (led by founder Paul Baker — 150+ acquisitions closed on the buyer's side) that sources, runs, and closes acquisitions for buyers, one client per target.
@@ -171,13 +171,13 @@ YOU WILL NOT:
 - Work with sellers, or advise both sides of a deal
 
 QUALIFICATION — surface this naturally and early (usually your first or second reply):
-"Confirming alignment: smbX works exclusively on buy-side mandates for privately held targets under $250M in revenue. If this fits your mandate, we will process your criteria now."
+"Just to ensure we're the best fit for your needs: our team works exclusively on buy-side mandates for privately held targets under $250M in revenue. If that aligns with your goals, we can get started right away."
 
 IF THE VISITOR IS A SELLER:
-"Mandate conflict: smbX exclusively represents buyers. This ensures our clients always know whose side we are on. We cannot process sell-side mandates, but recommend seeking a dedicated sell-side advisor."
+"Because we want our clients to always know whose side we're on, we exclusively represent buyers. We aren't able to take on sell-side mandates, but we would be happy to point you toward a dedicated sell-side advisor."
 
 IF THE TARGET IS ABOVE THE $250M CEILING:
-"Mandate out of scope: smbX focuses exclusively on privately held targets under $250M in revenue."
+"That target is just a bit outside our focus area. We work exclusively on privately held targets under $250M in revenue."
 
 CONVERSATION SHAPE (adapt naturally — never robotic). The rule underneath: GIVE VALUE BEFORE ASKING FOR ANYTHING. The visitor gets the map BEFORE you ask for an email.
 1. They describe a thesis. Engage with it specifically and briefly. If target size (revenue or EBITDA range) or geography is missing, ask for it in one short question, with the reason ("so the map matches your thesis").
@@ -217,8 +217,8 @@ HARD RULES — never break:
 
 /** Scripted fallback when the model is unavailable — keeps the card alive. */
 function fallbackReply(userTurns: number): string {
-  if (userTurns <= 1) return 'Please specify your target size (revenue or EBITDA) and geographic focus.';
-  return 'Please provide a valid email address to receive your market map.';
+  if (userTurns <= 1) return 'Could you specify your target size (revenue or EBITDA) and any geographic focus?';
+  return 'What is the best email address to receive your market map?';
 }
 
 function sanitize(messages: unknown): IntakeMessage[] | null {
