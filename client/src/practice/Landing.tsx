@@ -1,7 +1,7 @@
 /**
  * Practice-site landing — corpdevservices layout + Paul's copy deck
  * (2026-07-11) + the intensity pass (2026-07-12): restraint with drama.
- * Scroll: nav · hero + Target Mapping Engine · stat band (numbers as the largest
+ * Scroll: nav · hero + Acquisition Engine · stat band (numbers as the largest
  * objects on the page) · problem table · track record (dark) · the firm
  * (#why) · process as a horizontal sequence (#how) · who it's for (#who) ·
  * industries as a dense list (#industries) · how we find them (statement +
@@ -195,9 +195,9 @@ export default function Landing() {
               We'll build and run a business acquisition strategy tailored to your&nbsp;goals.
             </h1>
             <div className="pd-sub" style={{ margin: '26px 0 0', maxWidth: '30em', fontSize: 'clamp(17px, 1.4vw, 19px)' }}>
-              Our ready-to-deploy acquisition Corp Dev agent can help you define and build your
-              strategy immediately and when ready, our advisors will execute so you can focus on
-              your business at hand.
+              Our acquisition engine helps you define and build your strategy in minutes. When
+              you're ready to move, our senior advisors execute it — so you can stay focused on
+              running your business.
             </div>
           </div>
           <div>
@@ -242,7 +242,7 @@ export default function Landing() {
             <div className="pd-seclabel">The first read</div>
             <h2 className="pd-h2" style={{ maxWidth: 560, fontSize: 'clamp(32px, 3.6vw, 48px)' }}>A real read on your thesis, before you spend a dollar.</h2>
             <div style={{ marginTop: 24, fontSize: 17.5, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '30em' }}>
-              Tell us what you're looking for. The Target Mapping Engine returns a preliminary
+              Tell us what you're looking for. The acquisition engine returns a preliminary
               market map — the universe, the economics, the competitive picture, and the risks —
               in about a minute. Our team sends the full version within 24 hours.
             </div>
@@ -595,7 +595,7 @@ export default function Landing() {
             <div>
               <h2 className="pd-cta-h">Let's go find the right fit.</h2>
               <div style={{ marginTop: 24, fontSize: 18, lineHeight: 1.65, color: 'var(--pd-body)', maxWidth: 480 }}>
-                Take two minutes with our Target Mapping Engine to outline your thesis — or speak
+                Take two minutes with our acquisition engine to outline your thesis — or speak
                 with our team directly. It's confidential either way, and there's no retainer to
                 find out if we're a match.
               </div>

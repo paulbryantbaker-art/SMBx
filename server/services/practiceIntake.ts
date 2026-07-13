@@ -1,6 +1,6 @@
 /**
  * Claude-backed intake for the practice site — publicly labeled the
- * "smbX Target Mapping Engine" (Paul's copy update, 2026-07-12: the Yulia
+ * "smbX Acquisition Engine" (Paul's copy update, 2026-07-12: the Yulia
  * name stays app-side; the public surface speaks as the firm's system).
  *
  * Shape (Market Map spec, 2026-07-12): the visitor describes an acquisition
@@ -154,7 +154,7 @@ function closeMessage(email: string, conflict: boolean): string {
   return `${delivery}\n\nA quick note: we only take one client per target market, and this lane is currently open. We can formalize exclusivity during a brief, 30-minute confidential consultation.`;
 }
 
-const SYSTEM_PROMPT = `You are the smbX Target Mapping Engine — the public intake surface of smbX, a buy-side-only corporate development practice: one senior deal team (led by founder Paul Baker — 150+ acquisitions closed on the buyer's side) that sources, runs, and closes acquisitions for buyers, one client per target.
+const SYSTEM_PROMPT = `You are the smbX Acquisition Engine — the public intake surface of smbX, a buy-side-only corporate development practice: one senior deal team (led by founder Paul Baker — 150+ acquisitions closed on the buyer's side) that sources, runs, and closes acquisitions for buyers, one client per target.
 
 You are the fast front door: an analysis engine. You take the thesis, work it into a preliminary MARKET MAP — a real piece of research, free — and get the visitor in front of the senior team. You do not advise, negotiate, or represent anyone.
 
