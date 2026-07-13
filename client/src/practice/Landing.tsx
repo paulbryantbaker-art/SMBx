@@ -184,53 +184,78 @@ function LeadForm() {
   );
 }
 
+/** The product showcase — Slack's signature move: a big framed product with a
+ *  pill-tab row below that swaps what's shown. Ours toggles the live engine and
+ *  a sample market read. */
+function HeroShowcase() {
+  const [tab, setTab] = useState<'engine' | 'sample'>('engine');
+  return (
+    <div className="pd-showcase">
+      <div className="pd-show-stage">
+        {tab === 'engine' ? (
+          <YuliaIntake />
+        ) : (
+          <div style={{ maxWidth: 680 }}>
+            <MapDoc map={SAMPLE_MAP} final headLabel="SAMPLE READ" />
+          </div>
+        )}
+      </div>
+      <div className="pd-showtabs">
+        <button type="button" className={tab === 'engine' ? 'on' : ''} onClick={() => setTab('engine')}>
+          Map your market
+        </button>
+        <button
+          type="button"
+          className={tab === 'sample' ? 'on' : ''}
+          onClick={() => { setTab('sample'); trackEvent('practice_cta_clicked', { placement: 'showcase-sample' }); }}
+        >
+          See a sample read
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** A soft curved divider into a deep-color band (Slack signature). */
+function Swoosh({ color = '#141414' }: { color?: string }) {
+  return (
+    <div className="pd-swoosh" aria-hidden="true">
+      <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
+        <path d="M0,100 L1440,100 L1440,46 C1040,86 400,86 0,46 Z" fill={color} />
+      </svg>
+    </div>
+  );
+}
+
 export default function Landing() {
   return (
     <PracticeShell home>
-      {/* ── The fold: hero centered, stat band pinned to the viewport bottom ── */}
-      <div className="pd-fold">
-      <section className="pd-hero">
-        <div className="pd-herosplit">
-          <div>
-            <h1 className="pd-h1" style={{ margin: 0 }}>
-              We'll build and run your business acquisition strategy tailored to your&nbsp;goals.
-            </h1>
-            <div className="pd-sub" style={{ margin: '26px 0 0', maxWidth: '30em' }}>
-              Our acquisition engine helps you define and build your strategy in minutes. When
-              you're ready to move, our senior advisors execute it — so you can stay focused on
-              running your business.
-            </div>
+      {/* ── Hero — centered (Slack layout): statement, two CTAs, an honest
+             proof row (no fabricated logos), then the product showcase ── */}
+      <section className="pd-hero pd-hero-c">
+        <div className="pd-heroc-inner">
+          <h1 className="pd-h1">
+            We'll build and run your business acquisition strategy tailored to your&nbsp;goals.
+          </h1>
+          <p className="pd-sub pd-sub-c">
+            Institutional-grade corporate development, on demand. The acquisition engine builds
+            your strategy in minutes; our senior advisors close the deal.
+          </p>
+          <div className="pd-cta-row">
+            <a className="pd-pill-primary pd-pill-lg" href="#yulia" onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero' })}>Build your market map →</a>
+            <a className="pd-pill pd-pill-lg-quiet" href={bookHref()} target={bookTarget()} rel={bookTarget() ? 'noreferrer' : undefined} onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero' })}>Book a call</a>
           </div>
-          <div>
-            <YuliaIntake />
-            <div className="pd-caption" style={{ marginTop: 16 }}>
-              Prefer to speak with our team first?{' '}
-              <a
-                href={bookHref()}
-                target={bookTarget()}
-                rel={bookTarget() ? 'noreferrer' : undefined}
-                style={{ color: 'var(--pd-coral-link)', fontWeight: 600, textDecoration: 'underline' }}
-                onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero-link' })}
-              >
-                Book a confidential consultation →
-              </a>
-            </div>
+          <div className="pd-proofrow" data-rv>
+            <span className="lab">Two decades on the buy side</span>
+            <span className="dot">·</span>
+            <span className="pf"><b>150+</b> acquisitions</span>
+            <span className="pf"><b>$5B+</b> added</span>
+            <span className="pf"><b>~$21B</b> touched</span>
+            <span className="pf hot"><b>0</b> sell-side. Ever.</span>
           </div>
         </div>
+        <HeroShowcase />
       </section>
-
-      {/* ── Stat band — the proof strip at the bottom of the fold ── */}
-      <section className="pd-statband">
-        <div className="pd-wrap">
-          <div className="pd-stats rv-stagger" data-rv>
-            <div className="pd-stat"><div className="n">150+</div><div className="l">Acquisitions</div></div>
-            <div className="pd-stat"><div className="n">$5B+</div><div className="l">Revenue added</div></div>
-            <div className="pd-stat"><div className="n">20</div><div className="l">Years in corporate development</div></div>
-            <div className="pd-stat accent"><div className="n">0</div><div className="l">Sell-side transactions. Ever.</div></div>
-          </div>
-        </div>
-      </section>
-      </div>
 
       {/* ── The first read — show the artifact itself (sample, clearly
              labeled; content from the Market Map spec's worked example) ── */}
@@ -293,8 +318,9 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Track record — the first dark movement ── */}
-      <section className="pd-dark bl-tr" style={{ marginTop: 'clamp(100px, 12vw, 170px)' }}>
+      {/* ── Track record — the first dark movement, entered on a swoosh ── */}
+      <div style={{ marginTop: 'clamp(80px, 10vw, 150px)' }}><Swoosh color="#141414" /></div>
+      <section className="pd-dark bl-tr">
         <BandArt><FootprintMap /></BandArt>
         <div className="pd-wrap pd-dark-pad">
           <div className="pd-seclabel">Selected transaction experience</div>
