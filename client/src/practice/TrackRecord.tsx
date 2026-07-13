@@ -162,11 +162,11 @@ export default function TrackRecord() {
       {/* ── Wrench Group ── */}
       <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(90px, 10vw, 150px)' }}>
         <div className="pd-seclabel">Wrench Group — building a national platform</div>
-        <div className="pd-mono" style={{ marginTop: 2 }}>2016–2025 · DIRECTOR, CORPORATE DEVELOPMENT &amp; M&amp;A INTEGRATION</div>
+        <div className="pd-mono" style={{ marginTop: 2 }}>2016–2025 · 36 ACQUISITIONS · ~$2.9B ENTERPRISE VALUE</div>
         <div style={{ marginTop: 22, fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '48em' }}>
-          Recruited to build the M&amp;A engine for a new essential-services platform. Over nine
-          years: four founding companies, 36 acquisitions, roughly $2.9B in enterprise value, and a
-          national footprint — with Paul as deal captain on every one.
+          The M&amp;A engine behind a new essential-services platform: over nine years, four founding
+          companies grew into a national footprint through 36 acquisitions and roughly $2.9B in
+          enterprise value.
         </div>
       </section>
 
@@ -183,20 +183,10 @@ export default function TrackRecord() {
       {/* ── JPMorgan Chase ── */}
       <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(70px, 8vw, 120px)' }}>
         <div className="pd-seclabel">JPMorgan Chase — integration at scale</div>
-        <div className="pd-mono" style={{ marginTop: 2 }}>2005–2015 · DIRECTOR, ACQUISITION INTEGRATION</div>
+        <div className="pd-mono" style={{ marginTop: 2 }}>2005–2015 · PLATFORM &amp; FINTECH ACQUISITIONS · $2B+ IN SYNERGIES</div>
         <div style={{ marginTop: 22, fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '48em' }}>
-          Led integration on the bank's largest platform and fintech acquisitions, delivering $2B+
-          in synergies across 100+ stakeholder touchpoints.
-        </div>
-      </section>
-
-      {/* ── Deloitte ── */}
-      <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(70px, 8vw, 120px)' }}>
-        <div className="pd-seclabel">Deloitte Consulting</div>
-        <div className="pd-mono" style={{ marginTop: 2 }}>2010–2011 · ENGAGEMENT MANAGER, STRATEGY &amp; OPERATIONS</div>
-        <div style={{ marginTop: 22, fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '48em' }}>
-          Advised Fortune 500 clients on inorganic growth strategy, target operating models, and
-          post-merger integration.
+          Integration on the bank's largest platform and fintech acquisitions — $2B+ in synergies
+          across 100+ stakeholder touchpoints.
         </div>
       </section>
 
