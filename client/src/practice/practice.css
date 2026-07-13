@@ -125,27 +125,40 @@
 .pd-dark .pd-pill:hover { border-color: #f5f5f5; }
 
 /* ─── type ─── */
+/* ─── unified type scale (2026-07-13 consistency pass) ───
+   One font-size AND one measure per role; everything routes through these
+   classes and per-section inline size/width overrides are removed. Protected
+   drama roles (.pd-quote, .pd-statement, .pd-num*, the Market Map document)
+   keep their own scales. Ladder: h1 hero · h2 section · h3 minor · sub lede ·
+   body · body-sm · caption · mono. */
 .pd-h1 {
   margin: 0;
-  font-size: clamp(56px, 9vw, 112px);
+  font-size: clamp(40px, 5.2vw, 80px);
   line-height: 0.97;
   font-weight: 800;
   letter-spacing: -0.04em;
+  max-width: 18em;
   text-wrap: balance;
 }
 /* Keep compound words whole in display type (e.g. "Institutional-grade") —
    released on small screens where the whole compound can't fit a line. */
 .pd-nb { white-space: nowrap; }
 @media (max-width: 600px) { .pd-nb { white-space: normal; } }
-.pd-h1-seg { font-size: clamp(44px, 6.6vw, 84px); }
+/* .pd-h1-seg is retired — subpage heroes use the one .pd-h1. The class name
+   stays harmless in markup. */
 .pd-h2 {
   margin: 0;
-  font-size: clamp(36px, 4.6vw, 56px);
+  font-size: clamp(34px, 4.4vw, 54px);
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.05;
+  max-width: 18em;
 }
-.pd-mono { font-family: var(--pd-mono); font-size: 13.5px; color: var(--pd-body); letter-spacing: 0.06em; }
+/* Minor header — card / list-row / FAQ / step / tenet / form titles. NOTE:
+   the intake card head deliberately stays at label scale (17/800), never
+   here, so it doesn't match the 21px opening line in its compact card. */
+.pd-h3 { margin: 0; font-size: 21px; font-weight: 700; line-height: 1.25; letter-spacing: -0.012em; }
+.pd-mono { font-family: var(--pd-mono); font-size: 13.5px; color: var(--pd-body); letter-spacing: 0.09em; }
 /* Section labels are real headers, not eyebrow micro-text (Paul, 2026-07-11
    copy update: "section headings should look like headers"). */
 .pd-seclabel {
@@ -157,7 +170,17 @@
   margin-bottom: 22px;
 }
 .pd-seclabel.right { flex: none; margin-bottom: 0; text-align: right; }
-.pd-sub { font-size: 21px; line-height: 1.6; color: var(--pd-body); }
+/* Lede — the single deck paragraph under a hero or an H2. */
+.pd-sub { font-size: 21px; line-height: 1.6; color: var(--pd-body); max-width: 34em; }
+/* Body — THE default reading paragraph, everywhere. */
+.pd-body { font-size: 17px; line-height: 1.7; color: var(--pd-body); max-width: 46em; }
+/* Small supporting prose (dense lists, footer, captions-with-length). */
+.pd-body-sm { font-size: 15px; line-height: 1.6; color: var(--pd-body); max-width: 38em; }
+/* Non-mono readability floor — legal, hover rationale, micro-captions. */
+.pd-caption { font-size: 13.5px; line-height: 1.6; color: var(--pd-tert); }
+/* Statement device — in-flow rhetorical line with a coral accent word;
+   emphatic but below H2 so it reads as a spoken line, not a heading. */
+.pd-statement { margin: 0; font-size: clamp(26px, 2.8vw, 40px); font-weight: 800; letter-spacing: -0.025em; line-height: 1.15; max-width: 14em; }
 /* Editorial pull-quote — drama through typography, zero decoration. */
 .pd-quote {
   margin: 0;
@@ -177,7 +200,7 @@
   display: inline-flex; align-items: center; justify-content: center;
   border: 1.5px solid var(--pd-border);
   padding: 11px 24px; border-radius: 99px;
-  font-size: 14.5px; font-weight: 600; color: var(--pd-ink);
+  font-size: 15px; font-weight: 600; color: var(--pd-ink);
   white-space: nowrap; background: transparent;
   transition: border-color 160ms ease;
 }
@@ -186,13 +209,13 @@
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--pd-cta); color: #fff; border: none;
   padding: 12px 26px; border-radius: 99px;
-  font-size: 14.5px; font-weight: 700; white-space: nowrap;
+  font-size: 15px; font-weight: 700; white-space: nowrap;
   transition: background-color 160ms ease;
 }
 .pd-pill-primary:hover { background: var(--pd-cta-hover); color: #fff; }
 .pd-pill-lg { padding: 17px 36px; font-size: 16.5px; }
 .pd-pill-lg-quiet { padding: 16px 32px; font-size: 16.5px; }
-.pd-link { font-weight: 700; color: var(--pd-coral-link); font-size: 15.5px; }
+.pd-link { font-weight: 700; color: var(--pd-coral-link); font-size: 15px; }
 .pd-link:hover { color: var(--pd-coral-link); text-decoration: underline; }
 
 /* ─── nav ─── */
@@ -210,7 +233,7 @@
   gap: 16px;
 }
 .pd-nav-logo { height: 44px; width: auto; display: block; margin: -6px 0; }
-.pd-nav-links { display: flex; gap: clamp(24px, 3vw, 44px); font-size: 15px; font-weight: 500; }
+.pd-nav-links { display: flex; gap: clamp(24px, 3vw, 44px); font-size: 15px; font-weight: 600; }
 .pd-nav-links a { color: var(--pd-body); }
 .pd-nav-links a:hover { color: var(--pd-ink); }
 .pd-nav-ctas { display: flex; gap: 10px; }
@@ -315,11 +338,11 @@
 .pd-chat-head { display: flex; align-items: center; gap: 12px; padding: 24px 32px 0; }
 .pd-msgs { padding: 14px 32px 4px; max-height: 540px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
 .pd-msgrow { display: flex; padding: 9px 0; }
-.pd-bub { font-size: 16.5px; line-height: 1.6; }
+.pd-bub { font-size: 17px; line-height: 1.7; }
 .pd-bub-y { max-width: 94%; margin-right: auto; color: var(--pd-ink); }
 /* The opening reads as a statement, not a message. */
 .pd-msgs .pd-msgrow:first-child .pd-bub-y { font-size: 21px; font-weight: 600; letter-spacing: -0.012em; line-height: 1.45; }
-.pd-bub-u { max-width: 72%; margin-left: auto; background: var(--pd-card); color: var(--pd-ink); padding: 12px 18px; border-radius: 16px; font-size: 16px; }
+.pd-bub-u { max-width: 72%; margin-left: auto; background: var(--pd-card); color: var(--pd-ink); padding: 12px 18px; border-radius: 16px; font-size: 17px; }
 /* Calm working note — no bouncing dots, no fake progress. */
 .pd-working { color: var(--pd-tert); padding: 4px 0; animation: pd-pulse 2.2s ease-in-out infinite; font-family: var(--pd-mono); letter-spacing: 0.04em; font-size: 13.5px; }
 
@@ -406,7 +429,7 @@
 }
 /* multi-glyph stats ('~1/5', '1st') scale down so they never leave the column */
 .pd-segstat .n.wide { font-size: clamp(84px, 9.5vw, 150px); }
-.pd-segstat .l { margin-top: 18px; font-size: 15.5px; line-height: 1.6; color: var(--pd-body); }
+.pd-segstat .l { margin-top: 18px; font-size: 15px; line-height: 1.6; color: var(--pd-body); }
 @media (max-width: 1024px) {
   .pd-seghero { grid-template-columns: minmax(0, 1fr); gap: 44px; }
   .pd-segstat { justify-self: start; text-align: left; padding-bottom: 0; }
@@ -420,15 +443,15 @@
 .pd-paincol { border-top: 1px solid var(--pd-hair); padding-top: 20px; }
 .pd-paincol .tag { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
 .pd-paincol .nm { margin-top: 14px; font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
-.pd-paincol .bd { margin-top: 10px; font-size: 15.5px; line-height: 1.65; color: var(--pd-body); }
+.pd-paincol .bd { margin-top: 10px; font-size: 15px; line-height: 1.6; color: var(--pd-body); }
 @media (max-width: 900px) { .pd-paingrid { grid-template-columns: minmax(0, 1fr); gap: 36px; } }
 
 /* ─── pillar columns (value creation) — mono kicker + hairline top ─── */
 .pd-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(28px, 3.4vw, 56px); margin-top: 76px; }
 .pd-step { border-top: 1.5px solid var(--pd-ink); padding-top: 24px; }
 .pd-step .num { font-family: var(--pd-mono); font-size: 13.5px; letter-spacing: 0.09em; color: var(--pd-body); }
-.pd-step .t { font-size: 25px; font-weight: 700; letter-spacing: -0.01em; margin-top: 18px; }
-.pd-step .b { font-size: 16px; line-height: 1.65; color: var(--pd-body); margin-top: 12px; }
+.pd-step .t { font-size: 21px; font-weight: 700; letter-spacing: -0.012em; line-height: 1.25; margin-top: 18px; }
+.pd-step .b { font-size: 17px; line-height: 1.7; color: var(--pd-body); margin-top: 12px; }
 .pd-step .pd-link { display: inline-block; margin-top: 22px; }
 
 /* ─── the engagement index — scope of service as an institutional index:
@@ -449,8 +472,8 @@
   color: var(--pd-faint); font-variant-numeric: tabular-nums; transition: color 160ms ease;
 }
 .pd-indexrow:hover .no { color: var(--pd-coral-link); }
-.pd-indexrow .t { font-size: 23px; font-weight: 700; letter-spacing: -0.012em; }
-.pd-indexrow .b { font-size: 16.5px; line-height: 1.65; color: var(--pd-body); }
+.pd-indexrow .t { font-size: 21px; font-weight: 700; letter-spacing: -0.012em; line-height: 1.25; }
+.pd-indexrow .b { font-size: 17px; line-height: 1.7; color: var(--pd-body); }
 
 /* ─── process timeline — one continuous rule, three nodes, display numerals ─── */
 .pd-timeline {
@@ -461,14 +484,14 @@
 .pd-tstep { position: relative; padding-top: 36px; }
 .pd-tstep::before { content: ''; position: absolute; top: -7px; left: 0; width: 12px; height: 12px; background: var(--pd-ink); }
 .pd-tstep .no { font-size: clamp(40px, 4.4vw, 62px); font-weight: 800; letter-spacing: -0.035em; line-height: 1; color: var(--pd-ink); font-variant-numeric: tabular-nums; }
-.pd-tstep .t { font-size: 24px; font-weight: 700; letter-spacing: -0.012em; margin-top: 18px; }
-.pd-tstep .b { font-size: 16px; line-height: 1.65; color: var(--pd-body); margin-top: 12px; }
+.pd-tstep .t { font-size: 21px; font-weight: 700; letter-spacing: -0.012em; line-height: 1.25; margin-top: 18px; }
+.pd-tstep .b { font-size: 17px; line-height: 1.7; color: var(--pd-body); margin-top: 12px; }
 .pd-tstep .pd-link { display: inline-block; margin-top: 22px; }
 
 /* ─── value creation — the number is the hero of the band ─── */
 .pd-valgrid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: clamp(36px, 5.5vw, 96px); align-items: start; }
 .pd-bignum { font-size: clamp(140px, 17vw, 260px); font-weight: 800; letter-spacing: -0.055em; line-height: 0.8; color: var(--pd-ink); white-space: nowrap; }
-.pd-bignum-label { margin-top: 20px; font-family: var(--pd-mono); font-size: 13.5px; letter-spacing: 0.12em; color: var(--pd-body); }
+.pd-bignum-label { margin-top: 20px; font-family: var(--pd-mono); font-size: 13.5px; letter-spacing: 0.09em; color: var(--pd-body); }
 
 /* ─── who it's for — an interactive index: giant names, live side panel ─── */
 .pd-whosel {
@@ -487,7 +510,7 @@
 .pd-whosel .name .arr { font-size: 0.65em; color: var(--pd-coral-link); opacity: 0; transform: translateX(-10px); transition: opacity 200ms ease, transform 200ms ease; }
 .pd-whosel .name.on .arr { opacity: 1; transform: none; }
 .pd-whosel .panel { position: sticky; top: 130px; padding-top: 24px; }
-.pd-whosel .panel .pbody { font-size: 20px; line-height: 1.65; color: var(--pd-body); }
+.pd-whosel .panel .pbody { font-size: 21px; line-height: 1.6; color: var(--pd-body); }
 .pd-whosel .panel .pd-link { display: inline-block; margin-top: 24px; }
 @media (max-width: 980px) {
   .pd-whosel { grid-template-columns: 1fr; }
@@ -503,8 +526,8 @@
   padding: clamp(28px, 3.4vw, 44px) clamp(28px, 3.6vw, 52px);
   margin-top: 48px;
 }
-.pd-anchorcard .k { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; }
-.pd-anchorcard .b { margin-top: 12px; font-size: 16.5px; line-height: 1.7; color: rgba(255, 255, 255, 0.72); max-width: 62em; }
+.pd-anchorcard .k { font-size: 21px; font-weight: 700; letter-spacing: -0.012em; line-height: 1.25; }
+.pd-anchorcard .b { margin-top: 12px; font-size: 17px; line-height: 1.7; color: rgba(255, 255, 255, 0.72); max-width: 46em; }
 .pd-huntboard { border-top: 1px solid var(--pd-hair); margin-top: 22px; }
 .pd-hunt {
   display: grid; grid-template-columns: 56px minmax(0, 4fr) minmax(0, 7fr);
@@ -525,7 +548,7 @@
 .pd-findgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(28px, 3.4vw, 56px); margin-top: clamp(48px, 5.5vw, 80px); }
 .pd-findcol { border-top: 1px solid var(--pd-hair); padding-top: 20px; }
 .pd-findcol .k { font-family: var(--pd-mono); font-size: 13.5px; letter-spacing: 0.09em; color: var(--pd-body); }
-.pd-findcol .v { margin-top: 14px; font-size: 16.5px; line-height: 1.7; color: var(--pd-body); }
+.pd-findcol .v { margin-top: 14px; font-size: 17px; line-height: 1.7; color: var(--pd-body); }
 @media (max-width: 980px) { .pd-findgrid { grid-template-columns: 1fr; gap: 36px; } }
 
 /* ─── definition rows (the firm / segment answers) ─── */
@@ -534,18 +557,18 @@
   display: grid; grid-template-columns: clamp(120px, 14vw, 200px) minmax(0, 1fr);
   gap: clamp(16px, 2.2vw, 32px); padding: 26px 0; border-bottom: 1px solid var(--pd-hair); align-items: baseline;
 }
-.pd-drow .k { font-weight: 700; font-size: 17px; color: var(--pd-coral-link); }
-.pd-drow .v { font-size: 16px; line-height: 1.6; color: var(--pd-body); }
+.pd-drow .k { font-weight: 700; font-size: 21px; letter-spacing: -0.012em; line-height: 1.25; color: var(--pd-coral-link); }
+.pd-drow .v { font-size: 17px; line-height: 1.7; color: var(--pd-body); }
 
 /* ─── final CTA ─── */
 .pd-cta-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(44px, 7vw, 100px); align-items: center; }
-.pd-cta-h { margin: 0; font-size: clamp(40px, 4.8vw, 60px); font-weight: 800; letter-spacing: -0.035em; line-height: 1.03; }
+.pd-cta-h { margin: 0; font-size: clamp(34px, 4.4vw, 54px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; max-width: 18em; }
 .pd-form { background: var(--pd-card); border-radius: 24px; padding: 44px; }
-.pd-form .t { font-weight: 700; font-size: 20px; }
+.pd-form .t { font-weight: 700; font-size: 21px; letter-spacing: -0.012em; }
 .pd-input {
   min-width: 0; width: 100%; box-sizing: border-box;
   border: 1px solid var(--pd-border); border-radius: 12px; padding: 15px 16px;
-  font-size: 14.5px; background: #fff; color: #222222; outline: none;
+  font-size: 16px; background: #fff; color: #222222; outline: none;
   transition: border-color 160ms ease;
 }
 .pd-input:focus { border-color: #222222; }
@@ -563,7 +586,7 @@
 .pd-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(28px, 4vw, 56px); }
 .pd-stat .n { font-size: clamp(44px, 5.4vw, 82px); font-weight: 800; letter-spacing: -0.05em; color: var(--pd-ink); line-height: 0.9; white-space: nowrap; }
 .pd-stat.accent .n { color: var(--pd-coral-link); }
-.pd-stat .l { margin-top: 14px; font-family: var(--pd-mono); font-size: 13.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--pd-body); line-height: 1.65; }
+.pd-stat .l { margin-top: 14px; font-family: var(--pd-mono); font-size: 13.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--pd-body); line-height: 1.65; }
 .pd-statband { border-top: 1px solid var(--pd-hair); border-bottom: 1px solid var(--pd-hair); }
 .pd-statband .pd-stats { padding: clamp(36px, 4vw, 60px) 0; }
 @media (max-width: 1080px) {
@@ -574,9 +597,9 @@
 /* ─── tombstones — the signature device ─── */
 .pd-tombs { border-top: 1.5px solid var(--pd-ink); margin-top: 56px; }
 .pd-tomb { padding: 38px 0; border-bottom: 1px solid var(--pd-hair); }
-.pd-tomb .t { font-weight: 800; font-size: 24px; letter-spacing: -0.01em; }
-.pd-tomb .meta { font-family: var(--pd-mono); font-size: 13.5px; color: var(--pd-body); letter-spacing: 0.06em; margin-top: 8px; }
-.pd-tomb .b { margin-top: 16px; font-size: 16.5px; line-height: 1.65; color: var(--pd-body); max-width: 60em; }
+.pd-tomb .t { font-weight: 700; font-size: 21px; letter-spacing: -0.012em; line-height: 1.25; }
+.pd-tomb .meta { font-family: var(--pd-mono); font-size: 13.5px; color: var(--pd-body); letter-spacing: 0.09em; margin-top: 8px; }
+.pd-tomb .b { margin-top: 16px; font-size: 17px; line-height: 1.7; color: var(--pd-body); max-width: 46em; }
 .pd-tomb .names { margin-top: 14px; font-size: 15px; line-height: 1.9; color: var(--pd-ink); }
 .pd-tomb .names .grp { color: var(--pd-tert); font-style: italic; }
 
@@ -606,7 +629,7 @@
 .pd-dealcard .nm { font-weight: 700; font-size: 16px; letter-spacing: -0.01em; }
 .pd-dealcard .tag { margin-top: 6px; font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.07em; color: var(--pd-body); text-transform: uppercase; }
 .pd-dealcard .why {
-  font-size: 14px; line-height: 1.55; color: var(--pd-body);
+  font-size: 13.5px; line-height: 1.55; color: var(--pd-body);
   max-height: 0; opacity: 0; overflow: hidden; margin-top: 0;
   transition: max-height 200ms ease, opacity 200ms ease, margin-top 200ms ease;
 }
@@ -616,7 +639,7 @@
 .pd-faq { border-top: 1px solid var(--pd-hair); margin-top: 56px; }
 .pd-faq-item { padding: 34px 0; border-bottom: 1px solid var(--pd-hair); }
 .pd-faq-item .q { font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
-.pd-faq-item .a { margin-top: 12px; font-size: 16.5px; line-height: 1.65; color: var(--pd-body); max-width: 56em; }
+.pd-faq-item .a { margin-top: 12px; font-size: 17px; line-height: 1.7; color: var(--pd-body); max-width: 46em; }
 
 /* ─── the creed (about) — the page's one dark movement ───
    Four convictions as carved tenets: hairline-outlined Roman numerals as
@@ -644,11 +667,11 @@
 }
 .pd-tenet .k {
   margin: 0; position: relative;
-  font-size: clamp(26px, 2.7vw, 39px); font-weight: 800;
-  letter-spacing: -0.025em; line-height: 1.06; max-width: 12em;
+  font-size: clamp(26px, 2.8vw, 40px); font-weight: 800;
+  letter-spacing: -0.025em; line-height: 1.15; max-width: 14em;
 }
 .pd-tenet .k .fs { color: var(--pd-coral); }
-.pd-tenet .v { margin: 18px 0 0; font-size: 16.5px; line-height: 1.68; color: var(--pd-body); max-width: 27em; }
+.pd-tenet .v { margin: 18px 0 0; font-size: 17px; line-height: 1.7; color: var(--pd-body); max-width: 27em; }
 @media (max-width: 900px) {
   .pd-creed { grid-template-columns: minmax(0, 1fr); row-gap: 64px; margin-top: 48px; padding-bottom: 0; }
   .pd-tenet { padding-top: clamp(56px, 15vw, 84px); }

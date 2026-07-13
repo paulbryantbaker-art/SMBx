@@ -44,7 +44,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
         <BandArt><Mesh /></BandArt>
         <div className="pd-wrap pd-dark-pad">
           <div className="pd-seclabel">The problem</div>
-          <h2 className="pd-h2" data-rv style={{ maxWidth: 860 }}>{seg.painTitle}</h2>
+          <h2 className="pd-h2" data-rv>{seg.painTitle}</h2>
           <div className="pd-paingrid rv-stagger" data-rv>
             {seg.pains.map(p => (
               <div className="pd-paincol" key={p.name}>
@@ -62,7 +62,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
         <div className="pd-seclabel">How smbX answers it</div>
         <div className="pd-askew rv-stagger" data-rv>
           <div>
-            <h2 className="pd-h2" style={{ maxWidth: 640 }}>The heavy lifting, handled. The final judgment, yours.</h2>
+            <h2 className="pd-h2">The heavy lifting, handled. The final judgment, yours.</h2>
             <div className="pd-drows" style={{ marginTop: 48 }}>
               <div className="pd-drow">
                 <div className="k">{work.k}</div>
@@ -93,7 +93,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
             <div className="pd-stat accent"><div className="n">1</div><div className="l">Side of the table — always the buyer's</div></div>
           </div>
         </div>
-        <div data-rv style={{ marginTop: 22, fontSize: 15.5, lineHeight: 1.6, color: 'var(--pd-body)' }}>
+        <div data-rv className="pd-body-sm" style={{ marginTop: 22 }}>
           The record behind every engagement — <Link href="/track-record" className="pd-link">explore the full deal sheet →</Link>
         </div>
       </section>
@@ -102,7 +102,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
       <section className="pd-dark bl-cta" style={{ marginTop: 'clamp(90px, 10vw, 150px)' }}>
         <div className="pd-wrap pd-dark-pad">
           <h2 className="pd-cta-h" data-rv style={{ maxWidth: 640 }}>Ready to start looking?</h2>
-          <div data-rv style={{ marginTop: 22, fontSize: 18, lineHeight: 1.65, color: 'var(--pd-body)', maxWidth: 480 }}>
+          <div data-rv className="pd-body" style={{ marginTop: 22, maxWidth: 480 }}>
             Process your thesis in our acquisition engine. No retainer to find out if we're a fit.
           </div>
           <div data-rv style={{ marginTop: 40, display: 'flex', gap: 12, flexWrap: 'wrap' }}>

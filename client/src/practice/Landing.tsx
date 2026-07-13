@@ -153,7 +153,7 @@ function LeadForm() {
     return (
       <div className="pd-form">
         <div className="t">Got it — you're on the map.</div>
-        <div style={{ marginTop: 14, fontSize: 16, lineHeight: 1.65, color: 'var(--pd-body)' }}>
+        <div style={{ marginTop: 14, fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
           We'll come back within 24 hours with a first read on your thesis. Prefer not to wait?{' '}
           <a className="pd-link" href={bookHref()} target={bookTarget()} rel={bookTarget() ? 'noreferrer' : undefined}>Book the call now →</a>
         </div>
@@ -191,10 +191,10 @@ export default function Landing() {
       <section className="pd-hero">
         <div className="pd-herosplit">
           <div>
-            <h1 className="pd-h1" style={{ margin: 0, fontSize: 'clamp(40px, 5vw, 78px)' }}>
+            <h1 className="pd-h1" style={{ margin: 0 }}>
               We'll build and run your business acquisition strategy tailored to your&nbsp;goals.
             </h1>
-            <div className="pd-sub" style={{ margin: '26px 0 0', maxWidth: '30em', fontSize: 'clamp(17px, 1.4vw, 19px)' }}>
+            <div className="pd-sub" style={{ margin: '26px 0 0', maxWidth: '30em' }}>
               Our acquisition engine helps you define and build your strategy in minutes. When
               you're ready to move, our senior advisors execute it — so you can stay focused on
               running your business.
@@ -202,7 +202,7 @@ export default function Landing() {
           </div>
           <div>
             <YuliaIntake />
-            <div style={{ marginTop: 16, fontSize: 14.5, color: 'var(--pd-tert)' }}>
+            <div className="pd-caption" style={{ marginTop: 16 }}>
               Prefer to speak with our team first?{' '}
               <a
                 href={bookHref()}
@@ -240,8 +240,8 @@ export default function Landing() {
           </div>
           <div className="off">
             <div className="pd-seclabel">The first read</div>
-            <h2 className="pd-h2" style={{ maxWidth: 560, fontSize: 'clamp(32px, 3.6vw, 48px)' }}>A real read on your thesis, before you spend a dollar.</h2>
-            <div style={{ marginTop: 24, fontSize: 17.5, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '30em' }}>
+            <h2 className="pd-h2">A real read on your thesis, before you spend a dollar.</h2>
+            <div className="pd-body" style={{ marginTop: 24, maxWidth: '30em' }}>
               Tell us what you're looking for. The acquisition engine returns a preliminary
               market map — the universe, the economics, the competitive picture, and the risks —
               in about a minute. Our team sends the full version within 24 hours.
@@ -281,10 +281,10 @@ export default function Landing() {
             </div>
           </div>
           <div className="off">
-            <div style={{ fontSize: 'clamp(24px, 2.5vw, 33px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.22 }}>
+            <div className="pd-statement">
               <Mark /> is that function, without the permanent overhead.
             </div>
-            <div style={{ marginTop: 14, fontSize: 18, lineHeight: 1.6, color: 'var(--pd-body)' }}>
+            <div className="pd-body" style={{ marginTop: 14 }}>
               Structured for your specific mandate — engaged for the deal, with economics tied
               directly to a successful close.
             </div>
@@ -298,7 +298,7 @@ export default function Landing() {
         <div className="pd-wrap pd-dark-pad">
           <div className="pd-seclabel">Track record</div>
           <h2 className="pd-h2" data-rv style={{ maxWidth: 820 }}>We've done this more than 150 times.</h2>
-          <div data-rv style={{ marginTop: 24, fontSize: 18, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '46em' }}>
+          <div data-rv className="pd-body" style={{ marginTop: 24, maxWidth: '46em' }}>
             Two decades driving the deal from inside the buyer — sourcing, negotiating, closing,
             and integrating acquisitions at platform scale.
           </div>
@@ -333,7 +333,7 @@ export default function Landing() {
           <div>
             <div className="pd-seclabel">The firm</div>
             <h2 className="pd-h2">A corporate development function. Yours when you need it.</h2>
-            <div style={{ marginTop: 32, display: 'flex', flexDirection: 'column', gap: 18, fontSize: 18, lineHeight: 1.7, color: 'var(--pd-body)' }}>
+            <div style={{ marginTop: 32, display: 'flex', flexDirection: 'column', gap: 18, fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
               <div>
                 Large acquirers run corporate development in-house — a permanent team that finds
                 targets, evaluates them, closes them, and integrates them. Almost nobody buying
@@ -374,8 +374,8 @@ export default function Landing() {
               />
             </div>
             <div className="pd-advisor-card">
-              <div style={{ fontWeight: 700, fontSize: 19 }}>Firm leadership</div>
-              <div style={{ marginTop: 10, fontSize: 16, lineHeight: 1.65, color: 'var(--pd-body)' }}>
+              <div style={{ fontWeight: 700, fontSize: 21, letterSpacing: '-0.012em' }}>Firm leadership</div>
+              <div style={{ marginTop: 10, fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
                 <b style={{ color: 'var(--pd-ink)' }}>Paul Baker, Founder.</b> Twenty years as a deal captain — Director of
                 Corporate Development at Wrench Group, where he built the M&amp;A engine that took a
                 startup platform to a national leader through 36 acquisitions, and Director of
@@ -444,10 +444,10 @@ export default function Landing() {
               <div className="pd-bignum-label">DAYS</div>
             </div>
             <div>
-              <h2 className="pd-h2" style={{ maxWidth: 720, fontSize: 'clamp(30px, 3.4vw, 44px)' }}>
+              <h2 className="pd-h2">
                 Closing is just the beginning. Value is realized in the first 180 days.
               </h2>
-              <div style={{ marginTop: 22, fontSize: 17.5, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '44em' }}>
+              <div className="pd-body" style={{ marginTop: 22, maxWidth: '44em' }}>
                 Most middle-market acquirers don't have a dedicated Integration Management Office
                 (IMO). When a deal closes, the transition is often handed to executives who are
                 already stretched thin running the core business. We stay engaged through the
@@ -480,7 +480,7 @@ export default function Landing() {
       <section id="industries" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
         <div className="pd-seclabel">Industries</div>
         <h2 className="pd-h2" data-rv style={{ maxWidth: 820 }}>We know these markets cold. And we'll learn yours.</h2>
-        <div data-rv style={{ marginTop: 24, fontSize: 18, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: '46em' }}>
+        <div data-rv className="pd-body" style={{ marginTop: 24, maxWidth: '46em' }}>
           Deep operating history in the essential-service trades — plus active theses in the
           fragmented, recurring-revenue niches where a disciplined buyer can still buy well.
           Already have a market? We'll work yours.
@@ -493,7 +493,7 @@ export default function Landing() {
             seller's broker will try.
           </div>
         </div>
-        <div data-rv style={{ marginTop: 56, fontSize: 15, fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase' as const, color: 'var(--pd-ink)' }}>
+        <div data-rv className="pd-seclabel" style={{ marginTop: 56 }}>
           Where we're actively hunting
         </div>
         <div className="pd-huntboard rv-stagger" data-rv>
@@ -505,9 +505,9 @@ export default function Landing() {
             </div>
           ))}
         </div>
-        <div data-rv style={{ marginTop: 26, fontSize: 15.5, lineHeight: 1.65, color: 'var(--pd-body)', maxWidth: '52em' }}>
+        <div data-rv className="pd-body-sm" style={{ marginTop: 26, maxWidth: '52em' }}>
           These are theses, not limits. If you're buying in a market we haven't named,{' '}
-          <a className="pd-link" href="#yulia" style={{ fontSize: 15 }}>tell us</a> — we've built acquisition
+          <a className="pd-link" href="#yulia">tell us</a> — we've built acquisition
           programs from a blank sheet before.
         </div>
       </section>
@@ -555,10 +555,10 @@ export default function Landing() {
               The seller has a broker. Who is working for you?
             </h2>
             <div className="off">
-              <div style={{ fontSize: 'clamp(28px, 3vw, 40px)', fontWeight: 800, letterSpacing: '-0.025em', lineHeight: 1.05 }}>
+              <div className="pd-statement">
                 We are. Start to <span style={{ color: 'var(--pd-coral)' }}>finish.</span>
               </div>
-              <div style={{ marginTop: 22, fontSize: 17, lineHeight: 1.65, color: 'var(--pd-body)', maxWidth: 460 }}>
+              <div style={{ marginTop: 22, fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: 460 }}>
                 We represent buyers, and only buyers — one client per target. You get our full
                 attention, unfiltered analysis, and a proprietary deal that stays yours.
               </div>
@@ -594,7 +594,7 @@ export default function Landing() {
           <div className="pd-cta-grid rv-stagger" data-rv>
             <div>
               <h2 className="pd-cta-h">Let's go find the right fit.</h2>
-              <div style={{ marginTop: 24, fontSize: 18, lineHeight: 1.65, color: 'var(--pd-body)', maxWidth: 480 }}>
+              <div className="pd-body" style={{ marginTop: 24, maxWidth: 480 }}>
                 Take two minutes with our acquisition engine to outline your thesis — or speak
                 with our team directly. It's confidential either way, and there's no retainer to
                 find out if we're a match.

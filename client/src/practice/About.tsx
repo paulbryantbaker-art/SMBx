@@ -47,7 +47,7 @@ export default function About() {
       {/* ── Why we built it ── */}
       <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(70px, 8vw, 120px)' }}>
         <div className="pd-seclabel">Why we built it</div>
-        <h2 className="pd-h2" style={{ maxWidth: 820 }}>We spent twenty years as the buyer.</h2>
+        <h2 className="pd-h2">We spent twenty years as the buyer.</h2>
         <div style={{ marginTop: 28, maxWidth: '46em', display: 'flex', flexDirection: 'column', gap: 18 }}>
           <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
             Inside a platform acquirer and inside a global bank, our founder saw the same imbalance
@@ -127,7 +127,7 @@ export default function About() {
       <section className="pd-dark bl-creed" style={{ marginTop: 'clamp(80px, 9vw, 130px)' }}>
         <div className="pd-wrap pd-dark-pad">
           <div className="pd-seclabel">What we believe</div>
-          <h2 className="pd-h2" data-rv style={{ maxWidth: 780 }}>Four convictions run the practice.</h2>
+          <h2 className="pd-h2" data-rv>Four convictions run the practice.</h2>
           <div className="pd-creed rv-stagger" data-rv>
             {BELIEFS.map(b => (
               <div className="pd-tenet" key={b.k}>

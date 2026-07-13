@@ -127,7 +127,7 @@ function DealSheet() {
         })}
       </div>
       {filtered.length === 0 && (
-        <div style={{ marginTop: 20, fontSize: 15, color: 'var(--pd-body)' }}>
+        <div className="pd-body-sm" style={{ marginTop: 20 }}>
           Nothing by that name on the sheet — try a shorter fragment.
         </div>
       )}
@@ -172,8 +172,8 @@ export default function TrackRecord() {
 
       {/* ── The deal sheet ── */}
       <section className="pd-wrap" style={{ paddingTop: 'clamp(50px, 6vw, 80px)' }}>
-        <h2 className="pd-h2" style={{ fontSize: 'clamp(28px, 3.2vw, 40px)' }}>The deal sheet.</h2>
-        <div style={{ marginTop: 14, fontSize: 16.5, lineHeight: 1.65, color: 'var(--pd-body)', maxWidth: '44em' }}>
+        <h2 className="pd-h2">The deal sheet.</h2>
+        <div className="pd-body" style={{ marginTop: 14, maxWidth: '44em' }}>
           Filter it, search it, hover any entry for what it was. Deal-level terms stay
           confidential — the pattern doesn't.
         </div>
@@ -192,7 +192,7 @@ export default function TrackRecord() {
 
       {/* ── Closer ── */}
       <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(70px, 8vw, 120px)', paddingBottom: 'clamp(30px, 4vw, 60px)' }}>
-        <div style={{ fontSize: 18, lineHeight: 1.6, color: 'var(--pd-body)' }}>
+        <div className="pd-body" style={{ lineHeight: 1.7 }}>
           Thirty minutes with our team. Confidential, no retainer.
         </div>
         <div style={{ marginTop: 28 }}>
