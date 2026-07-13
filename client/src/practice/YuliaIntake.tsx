@@ -36,7 +36,7 @@ export type PartialMap = Partial<Omit<MapData, 'funnel'>> & { funnel: FunnelStep
 interface Msg { from: 'y' | 'u'; text?: string; map?: MapData; }
 
 const OPENING =
-  "Let's outline your acquisition thesis to generate a preliminary market map. Our engine takes about two minutes to process your criteria. Ready?";
+  "Tell us a bit about what you're looking for. Our mapping engine takes just a couple of minutes to process your criteria and build a preliminary market map. Ready to start?";
 
 const HINTS = [
   'Sector & Strategy (e.g., "HVAC roll-up in the Southeast")',
@@ -62,17 +62,17 @@ const TYPE_SAMPLES = [
  *  streams, so the work is legible without pretending anything. System
  *  voice (Target Mapping Engine), not a persona. */
 const NARRATE: Record<string, string> = {
-  TITLE: 'Processing your thesis…',
-  THESIS: 'Processing your thesis…',
-  VERDICT: 'Running the verdict…',
-  ANSWER: 'Writing the straight answer…',
-  U1: 'Mapping the universe…',
-  U2: 'Filtering for your size band…',
-  U3: 'Screening for fit…',
-  ECON: 'Compiling the economics…',
-  COMP: 'Reading the competitive field…',
-  INSIGHT: 'Isolating what most buyers miss…',
-  KILL: 'Stress-testing the thesis…',
+  TITLE: 'Reviewing your criteria…',
+  THESIS: 'Reviewing your criteria…',
+  VERDICT: 'Analyzing the market…',
+  ANSWER: 'Crafting our honest take…',
+  U1: 'Mapping the available universe…',
+  U2: 'Finding your size fit…',
+  U3: 'Screening for quality…',
+  ECON: 'Pulling the financial data…',
+  COMP: 'Evaluating the competition…',
+  INSIGHT: 'Highlighting potential blind spots…',
+  KILL: 'Stress-testing the strategy…',
 };
 
 const FIELD_RE = /(?:^|\n)\s*(TITLE|THESIS|VERDICT|ANSWER|U1|U2|U3|ECON|COMP|INSIGHT|KILL):/g;
@@ -130,7 +130,7 @@ function parseStreaming(acc: string): StreamView {
     kill: vals.KILL,
   };
   const current = !closed && found.length > 0 ? found[found.length - 1].name : null;
-  const narration = closed ? null : (current ? NARRATE[current] : 'Assembling your market read…');
+  const narration = closed ? null : (current ? NARRATE[current] : 'Finalizing your market read…');
   return { inMap: true, preText, partial, narration };
 }
 

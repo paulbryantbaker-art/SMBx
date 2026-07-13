@@ -111,7 +111,7 @@ function mapHtml(map: IntakeMap, generatedAt: string): string {
   ${section('WHAT AN ENGAGEMENT PRODUCES', map.produces)}
   <div class="next">
     <div class="k">NEXT STEP</div>
-    <div class="v">A confidential consultation with our senior deal team. Thirty minutes, no retainer, and a straight answer on whether this thesis is worth your capital. Book at smbx.ai.</div>
+    <div class="v">A confidential consultation with our senior deal team. Thirty minutes, no retainer, and an honest answer on whether this thesis is worth your capital. Book at smbx.ai.</div>
   </div>
   <div class="foot">
     ${esc(map.sources)}<br>

@@ -47,7 +47,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
       {/* ── How smbX answers it ── */}
       <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(80px, 9vw, 130px)' }}>
         <div className="pd-seclabel">How smbX answers it</div>
-        <h2 className="pd-h2" style={{ maxWidth: 780 }}>The grind, handled. The judgment, yours.</h2>
+        <h2 className="pd-h2" style={{ maxWidth: 780 }}>The heavy lifting, handled. The final judgment, yours.</h2>
         <div className="pd-drows" style={{ marginTop: 56, maxWidth: 900 }}>
           {seg.answers.map(a => (
             <div className="pd-drow" key={a.k}>
