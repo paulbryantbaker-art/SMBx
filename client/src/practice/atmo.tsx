@@ -184,3 +184,24 @@ export function Mesh() {
 export function BandArt({ children }: { children: ReactNode }) {
   return <div className="pd-bandart" aria-hidden="true">{children}</div>;
 }
+
+/** Curved bleed dividers into/out of a dark band (Slack signature). `dir` "in"
+ *  enters a band (place it before the band); "up" exits one (place it after).
+ *  The arc fill comes from the shared --pd-dark-top/-bot tokens via CSS, so it
+ *  always matches the band edge it meets; the light side of the box stays
+ *  transparent so the curve bleeds into the ambient wash with no flat seam. */
+export function Swoosh({ dir = 'in' }: { dir?: 'in' | 'up' }) {
+  return dir === 'in' ? (
+    <div className="pd-swoosh" aria-hidden="true">
+      <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+        <path d="M0,120 L1440,120 L1440,44 C1040,96 400,96 0,44 Z" />
+      </svg>
+    </div>
+  ) : (
+    <div className="pd-swoosh-up" aria-hidden="true">
+      <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+        <path d="M0,0 L1440,0 L1440,60 C1040,12 400,12 0,60 Z" />
+      </svg>
+    </div>
+  );
+}

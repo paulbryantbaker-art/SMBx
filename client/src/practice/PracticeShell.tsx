@@ -111,6 +111,11 @@ export default function PracticeShell({ home = false, children }: { home?: boole
 
   return (
     <div className="pd">
+      {/* Full-page ambient coral wash — the Slack gradient, Safari-safe (an
+          absolute negative-z layer inside the relative .pd, never a fixed
+          colored div). Must stay the first child and outside any overflow
+          wrapper so it spans the whole scroll. */}
+      <div className="pd-ambient" aria-hidden="true" />
       <header className="pd-navwrap">
         <div className="pd-nav">
           <a href="/" aria-label="smbX.ai home">

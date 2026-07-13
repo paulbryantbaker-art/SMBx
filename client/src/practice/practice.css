@@ -24,13 +24,26 @@
   --pd-coral-link: #E61E4D;
   --pd-cta: #E61E4D;
   --pd-cta-hover: #D70466;
+  /* Dark-band depth tokens — the band bg gradient and BOTH swoosh fills read
+     from these, so the curve can never drift from the band edge it meets.
+     All near-black (max channel 21/255 ≈ 8% L, R≥B so warm, never purple). */
+  --pd-dark-bg: #141414;
+  --pd-dark-top: #151312;
+  --pd-dark-bot: #131313;
   --pd-font: 'Schibsted Grotesk', system-ui, sans-serif;
   --pd-mono: 'IBM Plex Mono', monospace;
   --pd-pad-x: clamp(28px, 4.5vw, 64px);
   --pd-max: 1440px;
 
   margin: 0;
-  background: #ffffff;
+  /* Warm-white base so even un-bloomed regions feel alive, not clinical (the
+     Slack move). The full-page ambient coral wash (.pd-ambient) rides above
+     this. position:relative + isolation:isolate make .pd a stacking context so
+     a single negative-z wash layer spans the whole scroll behind all content
+     — Safari-safe (absolute in a relative parent, NEVER a fixed colored div). */
+  position: relative;
+  isolation: isolate;
+  background: #FFFDFC;
   color: var(--pd-ink);
   font-family: var(--pd-font);
   font-size: 16px;
@@ -39,6 +52,35 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* ─── Full-page ambient coral wash (2026-07-13, Paul: the Slack gradient —
+   "accent the page text, don't take it over"). ONE absolute layer at z-index:-1
+   inside the isolated .pd stacking context: it paints above the warm-white base
+   and below every in-flow section, so light sections show it and opaque dark
+   bands occlude it for free — no need to promote/position any child (which
+   would clobber the sticky nav/CTA z-index). Distributed no-repeat radials →
+   whole-page breath with no tiling seam. Every stop ≤0.050 alpha and strictly
+   coral→rose→peach (Slack's lavender/green re-cast to our palette) so the tint
+   is felt, never nameable, and body text holds AA (~5.0:1 at the densest tile).
+   PERF LAW — never add will-change/transform/filter/backdrop-filter here: that
+   promotes a ~1440×10000 backing store (~57MB 1×, far more at mobile DPR) and
+   janks/OOMs. Un-promoted, the compositor rasterizes only viewport-adjacent
+   tiles, so a 10000px page paints like a 2000px one. NEVER convert to fixed. */
+.pd-ambient {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  background-repeat: no-repeat;
+  background:
+    radial-gradient(46% 18% at 10% 3%,  rgba(255, 56, 92, 0.050), rgba(255, 56, 92, 0) 62%),
+    radial-gradient(40% 15% at 95% 12%, rgba(255, 138, 96, 0.038), rgba(255, 138, 96, 0) 60%),
+    radial-gradient(52% 18% at 3% 40%,  rgba(255, 92, 122, 0.042), rgba(255, 92, 122, 0) 62%),
+    radial-gradient(46% 16% at 99% 58%, rgba(255, 56, 92, 0.036), rgba(255, 56, 92, 0) 62%),
+    radial-gradient(50% 18% at 7% 82%,  rgba(255, 122, 96, 0.040), rgba(255, 122, 96, 0) 62%),
+    radial-gradient(44% 16% at 96% 98%, rgba(255, 72, 108, 0.038), rgba(255, 72, 108, 0) 62%);
 }
 .pd *, .pd *::before, .pd *::after { box-sizing: border-box; }
 .pd a { color: var(--pd-ink); text-decoration: none; transition: color 160ms ease; }
@@ -117,10 +159,17 @@
   --pd-hair: rgba(255, 255, 255, 0.13);
   --pd-coral-link: #FF7A8F;
   width: 100%;
-  background: #141414;
+  /* Depth without leaving our near-black: a top coral halo (the Slack "lit
+     crown") over a whisper-warm vertical gradient whose top/bottom edges are
+     the shared --pd-dark-top/-bot tokens, so the bracketing swoosh arcs
+     fill-match the band exactly. The halo does the richness; the base stays
+     unmistakably #141414-near-black, never aubergine. */
+  background:
+    radial-gradient(90% 55% at 50% -6%, rgba(255, 56, 92, 0.055), rgba(255, 56, 92, 0) 60%),
+    linear-gradient(180deg, var(--pd-dark-top) 0%, var(--pd-dark-bg) 46%, var(--pd-dark-bot) 100%);
   color: var(--pd-ink);
 }
-.pd-dark-pad { padding-top: clamp(90px, 11vw, 160px); padding-bottom: clamp(90px, 11vw, 160px); }
+.pd-dark-pad { padding-top: clamp(104px, 12vw, 184px); padding-bottom: clamp(104px, 12vw, 184px); }
 .pd-dark a.pd-pill, .pd-dark a.pd-pill:hover { color: var(--pd-ink); }
 .pd-dark .pd-pill:hover { border-color: #f5f5f5; }
 
@@ -133,8 +182,8 @@
    body · body-sm · caption · mono. */
 .pd-h1 {
   margin: 0;
-  font-size: clamp(40px, 5.2vw, 80px);
-  line-height: 0.97;
+  font-size: clamp(46px, 6vw, 92px);
+  line-height: 0.95;
   font-weight: 800;
   letter-spacing: -0.04em;
   max-width: 18em;
@@ -148,16 +197,16 @@
    stays harmless in markup. */
 .pd-h2 {
   margin: 0;
-  font-size: clamp(34px, 4.4vw, 54px);
+  font-size: clamp(38px, 4.8vw, 62px);
   font-weight: 800;
   letter-spacing: -0.03em;
-  line-height: 1.05;
+  line-height: 1.04;
   max-width: 18em;
 }
 /* Minor header — card / list-row / FAQ / step / tenet / form titles. NOTE:
    the intake card head deliberately stays at label scale (17/800), never
-   here, so it doesn't match the 21px opening line in its compact card. */
-.pd-h3 { margin: 0; font-size: 21px; font-weight: 700; line-height: 1.25; letter-spacing: -0.012em; }
+   here, so it doesn't match the opening line in its compact card. */
+.pd-h3 { margin: 0; font-size: 22px; font-weight: 700; line-height: 1.28; letter-spacing: -0.012em; }
 .pd-mono { font-family: var(--pd-mono); font-size: 13.5px; color: var(--pd-body); letter-spacing: 0.09em; }
 /* Section labels are real headers, not eyebrow micro-text (Paul, 2026-07-11
    copy update: "section headings should look like headers"). */
@@ -171,16 +220,17 @@
 }
 .pd-seclabel.right { flex: none; margin-bottom: 0; text-align: right; }
 /* Lede — the single deck paragraph under a hero or an H2. */
-.pd-sub { font-size: 21px; line-height: 1.6; color: var(--pd-body); max-width: 34em; }
-/* Body — THE default reading paragraph, everywhere. */
-.pd-body { font-size: 17px; line-height: 1.7; color: var(--pd-body); max-width: 46em; }
+.pd-sub { font-size: 22px; line-height: 1.55; color: var(--pd-body); max-width: 34em; }
+/* Body — THE default reading paragraph, everywhere. 18px at #6A6A6A holds AA
+   (~5.3:1 on the warm-white base, ~5.0:1 over the densest ambient tile). */
+.pd-body { font-size: 18px; line-height: 1.7; color: var(--pd-body); max-width: 44em; }
 /* Small supporting prose (dense lists, footer, captions-with-length). */
 .pd-body-sm { font-size: 15px; line-height: 1.6; color: var(--pd-body); max-width: 38em; }
 /* Non-mono readability floor — legal, hover rationale, micro-captions. */
 .pd-caption { font-size: 13.5px; line-height: 1.6; color: var(--pd-tert); }
 /* Statement device — in-flow rhetorical line with a coral accent word;
    emphatic but below H2 so it reads as a spoken line, not a heading. */
-.pd-statement { margin: 0; font-size: clamp(26px, 2.8vw, 40px); font-weight: 800; letter-spacing: -0.025em; line-height: 1.15; max-width: 14em; }
+.pd-statement { margin: 0; font-size: clamp(28px, 3vw, 46px); font-weight: 800; letter-spacing: -0.025em; line-height: 1.14; max-width: 14em; }
 /* Editorial pull-quote — drama through typography, zero decoration. */
 .pd-quote {
   margin: 0;
@@ -255,9 +305,11 @@
    hero, never position:fixed (Safari toolbar rule). */
 .pd-hero::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
+  /* Softened from the pre-wash intensities so the hero bloom stays additive
+     over the global .pd-ambient wash rather than compounding past AA. */
   background:
-    radial-gradient(52% 64% at 72% 44%, rgba(255, 56, 92, 0.09), rgba(255, 56, 92, 0) 70%),
-    radial-gradient(44% 54% at 18% 26%, rgba(34, 34, 34, 0.05), rgba(34, 34, 34, 0) 72%);
+    radial-gradient(52% 64% at 72% 44%, rgba(255, 56, 92, 0.055), rgba(255, 56, 92, 0) 70%),
+    radial-gradient(44% 54% at 18% 26%, rgba(34, 34, 34, 0.04), rgba(34, 34, 34, 0) 72%);
 }
 .pd-herosplit { position: relative; }
 .pd-herosplit {
@@ -284,15 +336,31 @@
   mask-image: linear-gradient(180deg, transparent, #000 16%, #000 84%, transparent);
 }
 .pd-accent.ar::before {
-  background: radial-gradient(56% 88% at 103% 30%, rgba(255, 56, 92, 0.05), rgba(255, 56, 92, 0) 72%);
+  background: radial-gradient(56% 88% at 103% 30%, rgba(255, 56, 92, 0.032), rgba(255, 56, 92, 0) 72%);
 }
 .pd-accent.al::before {
-  background: radial-gradient(56% 88% at -3% 34%, rgba(255, 56, 92, 0.045), rgba(255, 56, 92, 0) 72%);
+  background: radial-gradient(56% 88% at -3% 34%, rgba(255, 56, 92, 0.03), rgba(255, 56, 92, 0) 72%);
 }
 
 .pd-dark { position: relative; }
-.pd-dark > .pd-wrap { position: relative; }
+.pd-dark > .pd-wrap { position: relative; z-index: 1; }
 .pd-dark::before { content: ''; position: absolute; inset: 0; pointer-events: none; }
+/* Optional corner sparkle (the Slack "stars") — opt-in per band via an inner
+   <span class="pd-spark"> (the band's ::before is already the coral bloom, so a
+   second pseudo-element isn't available). Masked to one corner, static,
+   low-alpha — a whisper, not a starfield; appropriate for an M&A advisory. */
+.pd-dark .pd-spark {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.6;
+  -webkit-mask-image: radial-gradient(58% 58% at 88% 6%, #000, transparent 70%);
+          mask-image: radial-gradient(58% 58% at 88% 6%, #000, transparent 70%);
+  background-repeat: no-repeat;
+  background-image:
+    radial-gradient(1.5px 1.5px at 82% 12%, rgba(255, 255, 255, 0.60), transparent 60%),
+    radial-gradient(1.5px 1.5px at 91% 24%, rgba(255, 180, 190, 0.55), transparent 60%),
+    radial-gradient(1px 1px at 74% 20%, rgba(255, 255, 255, 0.42), transparent 60%),
+    radial-gradient(1px 1px at 95% 9%, rgba(255, 255, 255, 0.40), transparent 60%),
+    radial-gradient(1.5px 1.5px at 86% 33%, rgba(255, 140, 160, 0.45), transparent 60%);
+}
 .pd-dark.bl-tr::before { background: radial-gradient(48% 72% at 72% 44%, rgba(255, 56, 92, 0.08), rgba(255, 56, 92, 0) 72%); }
 .pd-dark.bl-val::before { background: radial-gradient(42% 64% at 16% 32%, rgba(255, 56, 92, 0.11), rgba(255, 56, 92, 0) 70%); }
 .pd-dark.bl-side::before { background: radial-gradient(42% 64% at 78% 60%, rgba(255, 56, 92, 0.09), rgba(255, 56, 92, 0) 72%); }
@@ -351,9 +419,26 @@
 .pd-showtabs button:hover { color: var(--pd-ink); }
 .pd-showtabs button.on { background: var(--pd-ink); color: #fff; }
 
-/* swoosh — a soft curved divider into a deep-color band */
-.pd-swoosh { display: block; width: 100%; height: clamp(44px, 5.5vw, 90px); margin-bottom: -1px; overflow: hidden; line-height: 0; }
-.pd-swoosh svg { display: block; width: 100%; height: 100%; }
+/* ─── curved bleed dividers — a generous shallow arc bracketing each dark
+   band (Slack's "cool" section transitions). Standalone flow-level siblings
+   (the band's ::before is taken by its bloom). One arc ENTERS a band
+   (.pd-swoosh, placed before it), one EXITS (.pd-swoosh-up, placed after).
+   The light side of each SVG box is transparent so the arc bleeds into the
+   ambient wash with no flat seam; only the dark side is filled — from the
+   shared band tokens, so the curve reads as the band itself curving. ─── */
+.pd-swoosh, .pd-swoosh-up {
+  display: block; width: 100%;
+  height: clamp(52px, 6vw, 112px);
+  overflow: hidden; line-height: 0; pointer-events: none;
+}
+.pd-swoosh { margin-bottom: -1px; }
+.pd-swoosh-up { margin-top: -1px; }
+.pd-swoosh svg, .pd-swoosh-up svg { display: block; width: 100%; height: 100%; }
+.pd-swoosh path { fill: var(--pd-dark-top); }
+.pd-swoosh-up path { fill: var(--pd-dark-bot); }
+@media (max-width: 760px) {
+  .pd-swoosh, .pd-swoosh-up { height: clamp(40px, 9vw, 68px); }
+}
 
 /* centered section header helper (Slack sections are center-aligned) */
 .pd-sec-c { text-align: center; }
@@ -654,7 +739,7 @@
 
 /* ─── final CTA ─── */
 .pd-cta-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(44px, 7vw, 100px); align-items: center; }
-.pd-cta-h { margin: 0; font-size: clamp(34px, 4.4vw, 54px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; max-width: 18em; }
+.pd-cta-h { margin: 0; font-size: clamp(38px, 4.8vw, 62px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.04; max-width: 18em; }
 .pd-form { background: var(--pd-card); border-radius: 24px; padding: 44px; }
 .pd-form .t { font-weight: 700; font-size: 21px; letter-spacing: -0.012em; }
 .pd-input {

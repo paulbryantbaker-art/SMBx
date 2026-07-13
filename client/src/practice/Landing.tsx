@@ -14,7 +14,7 @@ import PracticeShell from './PracticeShell';
 import YuliaIntake, { MapDoc, type PartialMap } from './YuliaIntake';
 import Mark from './Mark';
 import { AttributionLine } from './TrackRecord';
-import { BandArt, FootprintMap, Mesh } from './atmo';
+import { BandArt, FootprintMap, Mesh, Swoosh } from './atmo';
 import { postPracticeLead, bookHref, bookTarget } from './leads';
 import { SEGMENTS } from './segmentData';
 import { trackEvent } from '../lib/analytics';
@@ -216,17 +216,6 @@ function HeroShowcase() {
   );
 }
 
-/** A soft curved divider into a deep-color band (Slack signature). */
-function Swoosh({ color = '#141414' }: { color?: string }) {
-  return (
-    <div className="pd-swoosh" aria-hidden="true">
-      <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
-        <path d="M0,100 L1440,100 L1440,46 C1040,86 400,86 0,46 Z" fill={color} />
-      </svg>
-    </div>
-  );
-}
-
 /** A Slack-style centered section intro: eyebrow label, heading, optional
  *  lede — the consistent rhythm the mid-page now reads on. */
 function SectionHead({
@@ -342,8 +331,8 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Track record — the first dark movement, entered on a swoosh ── */}
-      <div style={{ marginTop: 'clamp(80px, 10vw, 150px)' }}><Swoosh color="#141414" /></div>
+      {/* ── Track record — the first dark movement, bracketed by bleed arcs ── */}
+      <div style={{ marginTop: 'clamp(80px, 10vw, 150px)' }}><Swoosh dir="in" /></div>
       <section className="pd-dark bl-tr">
         <BandArt><FootprintMap /></BandArt>
         <div className="pd-wrap pd-dark-pad">
@@ -379,6 +368,7 @@ export default function Landing() {
           </div>
         </div>
       </section>
+      <Swoosh dir="up" />
 
       {/* ── The firm ── */}
       <section id="why" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
@@ -480,8 +470,10 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Value creation — the third dark movement; the number is the hero ── */}
-      <section className="pd-dark bl-val" style={{ marginTop: 'clamp(110px, 12.5vw, 180px)' }}>
+      {/* ── Value creation — a dark movement; the number is the hero ── */}
+      <div style={{ marginTop: 'clamp(96px, 11vw, 168px)' }}><Swoosh dir="in" /></div>
+      <section className="pd-dark bl-val">
+        <span className="pd-spark" aria-hidden="true" />
         <div className="pd-wrap pd-dark-pad">
           <div className="pd-seclabel">Value creation</div>
           <div className="pd-valgrid rv-stagger" data-rv style={{ marginTop: 24 }}>
@@ -512,6 +504,7 @@ export default function Landing() {
           </div>
         </div>
       </section>
+      <Swoosh dir="up" />
 
       {/* ── Who it's for — centered intro, then the interactive segment nav ── */}
       <section id="who" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
@@ -589,8 +582,9 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Whose side — the second dark movement ── */}
-      <section className="pd-dark bl-side" style={{ marginTop: 'clamp(110px, 12.5vw, 180px)' }}>
+      {/* ── Whose side — a dark movement ── */}
+      <div style={{ marginTop: 'clamp(96px, 11vw, 168px)' }}><Swoosh dir="in" /></div>
+      <section className="pd-dark bl-side">
         <BandArt><Mesh /></BandArt>
         <div className="pd-wrap pd-dark-pad">
           <div className="pd-seclabel">Whose side we're on</div>
@@ -610,6 +604,7 @@ export default function Landing() {
           </div>
         </div>
       </section>
+      <Swoosh dir="up" />
 
       {/* ── Pull-quote — one statement, centered, nothing else ── */}
       <section className="pd-wrap pd-section-lg">
@@ -631,8 +626,10 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Final CTA — the third dark movement ── */}
-      <section id="book" className="pd-dark bl-cta" style={{ marginTop: 'clamp(110px, 12.5vw, 180px)', scrollMarginTop: 90 }}>
+      {/* ── Final CTA — the closing dark movement ── */}
+      <div style={{ marginTop: 'clamp(96px, 11vw, 168px)' }}><Swoosh dir="in" /></div>
+      <section id="book" className="pd-dark bl-cta" style={{ scrollMarginTop: 90 }}>
+        <span className="pd-spark" aria-hidden="true" />
         <div className="pd-wrap pd-dark-pad">
           <div className="pd-cta-grid rv-stagger" data-rv>
             <div>
@@ -659,6 +656,7 @@ export default function Landing() {
           </div>
         </div>
       </section>
+      <Swoosh dir="up" />
     </PracticeShell>
   );
 }
