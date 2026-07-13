@@ -62,8 +62,8 @@ export default function About() {
           </div>
           <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
             <Mark /> exists to be that team: a complete corporate development function — sourcing,
-            evaluation, negotiation, integration — led by senior dealmakers who have closed 150+
-            acquisitions, and pointed at one side of the table. Yours.
+            evaluation, negotiation, integration — led by senior dealmakers who have led or co-led
+            150+ acquisitions, and pointed at one side of the table. Yours.
           </div>
         </div>
       </section>
@@ -83,7 +83,7 @@ export default function About() {
                 For nearly a decade he was Director of Corporate Development and M&amp;A Integration
                 at <b style={{ color: 'var(--pd-ink)' }}>Wrench Group</b>, building the acquisition engine that turned four
                 founding companies into a premier national home-services platform. He oversaw the
-                process from LOI to definitive agreement, and closed{' '}
+                process from LOI to definitive agreement, and led or co-led{' '}
                 <b style={{ color: 'var(--pd-ink)' }}>36 acquisitions across roughly $2.9 billion in enterprise value</b> —
                 then owned the integration playbook that made them functional. He has sat across
                 from founders, brokers, bankers, and private equity sponsors on every one.

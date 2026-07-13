@@ -13,6 +13,7 @@ import { Link } from 'wouter';
 import PracticeShell from './PracticeShell';
 import YuliaIntake, { MapDoc, type PartialMap } from './YuliaIntake';
 import Mark from './Mark';
+import { AttributionLine } from './TrackRecord';
 import { BandArt, FootprintMap, Mesh } from './atmo';
 import { postPracticeLead, bookHref, bookTarget } from './leads';
 import { SEGMENTS } from './segmentData';
@@ -222,10 +223,10 @@ export default function Landing() {
       <section className="pd-statband">
         <div className="pd-wrap">
           <div className="pd-stats rv-stagger" data-rv>
-            <div className="pd-stat"><div className="n">150+</div><div className="l">Acquisitions closed</div></div>
-            <div className="pd-stat"><div className="n">$5B+</div><div className="l">In revenue added to buyers</div></div>
-            <div className="pd-stat"><div className="n">20</div><div className="l">Years of buy-side execution</div></div>
-            <div className="pd-stat accent"><div className="n">1</div><div className="l">Side of the table — always the buyer's</div></div>
+            <div className="pd-stat"><div className="n">150+</div><div className="l">Acquisitions</div></div>
+            <div className="pd-stat"><div className="n">$5B+</div><div className="l">Revenue added</div></div>
+            <div className="pd-stat"><div className="n">20</div><div className="l">Years in corporate development</div></div>
+            <div className="pd-stat accent"><div className="n">0</div><div className="l">Sell-side transactions. Ever.</div></div>
           </div>
         </div>
       </section>
@@ -296,12 +297,14 @@ export default function Landing() {
       <section className="pd-dark bl-tr" style={{ marginTop: 'clamp(100px, 12vw, 170px)' }}>
         <BandArt><FootprintMap /></BandArt>
         <div className="pd-wrap pd-dark-pad">
-          <div className="pd-seclabel">Track record</div>
-          <h2 className="pd-h2" data-rv style={{ maxWidth: 820 }}>We've done this more than 150 times.</h2>
+          <div className="pd-seclabel">Selected transaction experience</div>
+          <h2 className="pd-h2" data-rv>We've done this about 150 times.</h2>
           <div data-rv className="pd-body" style={{ marginTop: 24, maxWidth: '46em' }}>
-            Two decades driving the deal from inside the buyer — sourcing, negotiating, closing,
-            and integrating acquisitions at platform scale.
+            <Mark /> is a new firm. The dealmaker isn't. Paul Baker spent two decades in corporate
+            development — building the M&amp;A function inside a national platform and running
+            integration on some of the largest bank deals in the country.
           </div>
+          <AttributionLine style={{ marginTop: 24 }} />
           <div className="pd-tombs rv-stagger" data-rv>
             <div className="pd-tomb">
               <div className="t">Wrench Group</div>
@@ -322,7 +325,7 @@ export default function Landing() {
             </div>
           </div>
           <div data-rv style={{ marginTop: 36 }}>
-            <Link href="/track-record" className="pd-link">Explore the full deal sheet →</Link>
+            <Link href="/track-record" className="pd-link">Explore the full record →</Link>
           </div>
         </div>
       </section>
@@ -342,7 +345,7 @@ export default function Landing() {
               <div>
                 <Mark /> is that function, engaged deal by deal. We source off-market, run the
                 analysis, drive the diligence, and carry the negotiation to close. Led by Paul
-                Baker, who has closed more than 150 acquisitions doing exactly this work inside a
+                Baker, who has led or co-led more than 150 acquisitions doing exactly this work inside a
                 national platform and a global bank, our team brings institutional execution to
                 your thesis.
               </div>
