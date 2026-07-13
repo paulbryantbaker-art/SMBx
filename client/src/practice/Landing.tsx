@@ -191,14 +191,14 @@ export default function Landing() {
       <section className="pd-hero">
         <div className="pd-herosplit">
           <div>
-            <h1 className="pd-h1" style={{ margin: 0, fontSize: 'clamp(38px, 4.7vw, 74px)' }}>
-              Your dedicated corporate development team, ready when you&nbsp;are.
+            <h1 className="pd-h1" style={{ margin: 0, fontSize: 'clamp(34px, 4.1vw, 64px)' }}>
+              Whether buying your first business or add-on business, we make acquisition faster
+              and easier from day 1 to&nbsp;close.
             </h1>
             <div className="pd-sub" style={{ margin: '26px 0 0', maxWidth: '30em', fontSize: 'clamp(17px, 1.4vw, 19px)' }}>
-              <b style={{ color: 'var(--pd-ink)', fontWeight: 700 }}>Institutional-grade execution, on demand.</b>{' '}
-              We guide your M&amp;A vision from thesis to close, so you can focus on running your
-              business. Through a collaborative onboarding process, our senior buy-side team can
-              begin mapping targets and validating your thesis immediately.
+              Our ready-to-deploy acquisition Corp Dev agent can help you define and build your
+              strategy immediately and when ready, our advisors will execute so you can focus on
+              your business at hand.
             </div>
           </div>
           <div>
