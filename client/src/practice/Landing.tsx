@@ -13,6 +13,7 @@ import { Link } from 'wouter';
 import PracticeShell from './PracticeShell';
 import YuliaIntake, { MapDoc, type PartialMap } from './YuliaIntake';
 import Mark from './Mark';
+import { BandArt, FootprintMap, Mesh } from './atmo';
 import { postPracticeLead, bookHref, bookTarget } from './leads';
 import { SEGMENTS } from './segmentData';
 import { trackEvent } from '../lib/analytics';
@@ -261,7 +262,7 @@ export default function Landing() {
 
       {/* ── The gap — an observation about the buyer's situation, never a
              complaint about anyone else (confidence pass) ── */}
-      <section className="pd-wrap pd-section">
+      <section className="pd-wrap pd-section pd-accent ar">
         <div className="pd-ledger-head" data-rv style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 40, marginBottom: 64 }}>
           <h2 className="pd-h2" style={{ maxWidth: 960 }}>Most acquirers under $250M don't have a dedicated deal team.</h2>
           <div className="pd-seclabel right">The gap</div>
@@ -293,7 +294,8 @@ export default function Landing() {
       </section>
 
       {/* ── Track record — the first dark movement ── */}
-      <section className="pd-dark" style={{ marginTop: 'clamp(100px, 12vw, 170px)' }}>
+      <section className="pd-dark bl-tr" style={{ marginTop: 'clamp(100px, 12vw, 170px)' }}>
+        <BandArt><FootprintMap /></BandArt>
         <div className="pd-wrap pd-dark-pad">
           <div className="pd-seclabel">Track record</div>
           <h2 className="pd-h2" data-rv style={{ maxWidth: 820 }}>We've done this more than 150 times.</h2>
@@ -434,7 +436,7 @@ export default function Landing() {
       </section>
 
       {/* ── Value creation — the third dark movement; the number is the hero ── */}
-      <section className="pd-dark" style={{ marginTop: 'clamp(110px, 12.5vw, 180px)' }}>
+      <section className="pd-dark bl-val" style={{ marginTop: 'clamp(110px, 12.5vw, 180px)' }}>
         <div className="pd-wrap pd-dark-pad">
           <div className="pd-seclabel">Value creation</div>
           <div className="pd-valgrid rv-stagger" data-rv style={{ marginTop: 24 }}>
@@ -512,7 +514,7 @@ export default function Landing() {
       </section>
 
       {/* ── How we find them — statement + asymmetry ── */}
-      <section className="pd-wrap pd-section-lg">
+      <section className="pd-wrap pd-section-lg pd-accent al">
         <div className="pd-seclabel" data-rv>How we find them</div>
         <h2 className="pd-quote" data-rv style={{ maxWidth: '14em' }}>The best targets aren't for sale.</h2>
         <div className="pd-findgrid rv-stagger" data-rv>
@@ -545,7 +547,8 @@ export default function Landing() {
       </section>
 
       {/* ── Whose side — the second dark movement ── */}
-      <section className="pd-dark" style={{ marginTop: 'clamp(110px, 12.5vw, 180px)' }}>
+      <section className="pd-dark bl-side" style={{ marginTop: 'clamp(110px, 12.5vw, 180px)' }}>
+        <BandArt><Mesh /></BandArt>
         <div className="pd-wrap pd-dark-pad">
           <div className="pd-seclabel">Whose side we're on</div>
           <div className="pd-askew rv-stagger" data-rv style={{ alignItems: 'end' }}>
@@ -587,7 +590,7 @@ export default function Landing() {
       </section>
 
       {/* ── Final CTA — the third dark movement ── */}
-      <section id="book" className="pd-dark" style={{ marginTop: 'clamp(110px, 12.5vw, 180px)', scrollMarginTop: 90 }}>
+      <section id="book" className="pd-dark bl-cta" style={{ marginTop: 'clamp(110px, 12.5vw, 180px)', scrollMarginTop: 90 }}>
         <div className="pd-wrap pd-dark-pad">
           <div className="pd-cta-grid rv-stagger" data-rv>
             <div>
