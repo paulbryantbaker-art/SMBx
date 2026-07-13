@@ -4,6 +4,7 @@
  */
 import PracticeShell from './PracticeShell';
 import Mark from './Mark';
+import { Swoosh } from './atmo';
 import { bookHref, bookTarget } from './leads';
 
 const BELIEFS = [
@@ -124,7 +125,9 @@ export default function About() {
       </section>
 
       {/* ── What we believe — the creed, the page's one dark movement ── */}
-      <section className="pd-dark bl-creed" style={{ marginTop: 'clamp(80px, 9vw, 130px)' }}>
+      <div style={{ marginTop: 'clamp(72px, 8vw, 118px)' }}><Swoosh dir="in" /></div>
+      <section className="pd-dark bl-creed">
+        <span className="pd-spark" aria-hidden="true" />
         <div className="pd-wrap pd-dark-pad">
           <div className="pd-seclabel">What we believe</div>
           <h2 className="pd-h2" data-rv>Four convictions run the practice.</h2>
@@ -139,6 +142,7 @@ export default function About() {
           </div>
         </div>
       </section>
+      <Swoosh dir="up" />
     </PracticeShell>
   );
 }

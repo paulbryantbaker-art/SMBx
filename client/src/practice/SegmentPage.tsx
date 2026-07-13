@@ -12,7 +12,7 @@
 import { Link, Redirect } from 'wouter';
 import PracticeShell from './PracticeShell';
 import { getSegment } from './segmentData';
-import { BandArt, Mesh } from './atmo';
+import { BandArt, Mesh, Swoosh } from './atmo';
 
 export default function SegmentPage({ slug }: { slug: string }) {
   const seg = getSegment(slug);
@@ -40,7 +40,8 @@ export default function SegmentPage({ slug }: { slug: string }) {
       </section>
 
       {/* ── The bind — the one dark movement before the close ── */}
-      <section className="pd-dark bl-side" style={{ marginTop: 'clamp(30px, 4vw, 60px)' }}>
+      <div style={{ marginTop: 'clamp(24px, 3vw, 52px)' }}><Swoosh dir="in" /></div>
+      <section className="pd-dark bl-side">
         <BandArt><Mesh /></BandArt>
         <div className="pd-wrap pd-dark-pad">
           <div className="pd-seclabel">The problem</div>
@@ -56,6 +57,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
           </div>
         </div>
       </section>
+      <Swoosh dir="up" />
 
       {/* ── The turn — the answers, askew; loyalty carries the offset card ── */}
       <section className="pd-wrap pd-section pd-accent al">
@@ -99,7 +101,9 @@ export default function SegmentPage({ slug }: { slug: string }) {
       </section>
 
       {/* ── The ask — dark close ── */}
-      <section className="pd-dark bl-cta" style={{ marginTop: 'clamp(90px, 10vw, 150px)' }}>
+      <div style={{ marginTop: 'clamp(80px, 9vw, 140px)' }}><Swoosh dir="in" /></div>
+      <section className="pd-dark bl-cta">
+        <span className="pd-spark" aria-hidden="true" />
         <div className="pd-wrap pd-dark-pad">
           <h2 className="pd-cta-h" data-rv style={{ maxWidth: 640 }}>Ready to start looking?</h2>
           <div data-rv className="pd-body" style={{ marginTop: 22, maxWidth: 480 }}>
@@ -111,6 +115,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
           </div>
         </div>
       </section>
+      <Swoosh dir="up" />
     </PracticeShell>
   );
 }
