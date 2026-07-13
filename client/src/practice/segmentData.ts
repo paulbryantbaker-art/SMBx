@@ -14,6 +14,9 @@ export interface Segment {
   cardLink: string;
   h1: string;
   sub: string;
+  /** The segment's bind at display scale — always a restatement of an
+   *  approved copy line, never a new factual claim. */
+  stat: { n: string; l: string };
   painTitle: string;
   pains: SegmentPain[];
   answers: SegmentAnswer[];
@@ -28,6 +31,7 @@ export const SEGMENTS: Segment[] = [
     cardLink: 'For family offices →',
     h1: 'Direct-deal control. No deal-team build.',
     sub: 'Your thesis, our team on it — no blind pools, no club-deal compromises. Institutional-grade diligence and a disciplined price, on demand, deal by deal.',
+    stat: { n: '0', l: 'standing overhead — deal capacity that switches on when you need it, and costs nothing when you don\u2019t' },
     painTitle: 'Direct deals reward a standing team. You shouldn’t have to build one.',
     pains: [
       {
@@ -60,6 +64,7 @@ export const SEGMENTS: Segment[] = [
     cardLink: 'For sponsors →',
     h1: 'Control the deal before you raise a dollar.',
     sub: 'Investor-grade diligence and models that make capital partners say yes — without burning uncompensated months on deals that fade.',
+    stat: { n: '1', l: 'conversation — what a dead deal costs you here, instead of a quarter' },
     painTitle: 'The sponsor’s trap: prove the deal to raise the money, spend the money to prove the deal.',
     pains: [
       {
@@ -92,6 +97,7 @@ export const SEGMENTS: Segment[] = [
     cardLink: 'For PE firms →',
     h1: 'Proprietary add-on flow. No million-dollar BD build.',
     sub: 'Senior execution capacity that flexes with your pipeline — sourcing, triage, and models on demand, for the platform and every add-on after it.',
+    stat: { n: '~1/5', l: 'of its addressable market is all a typical LMM fund actually reaches. We map the rest.' },
     painTitle: 'The math of LMM coverage doesn’t work with people alone.',
     pains: [
       {
@@ -124,6 +130,7 @@ export const SEGMENTS: Segment[] = [
     cardLink: 'For searchers →',
     h1: 'Level the field against the seller’s broker.',
     sub: 'A senior deal team in your corner for your first — and biggest — acquisition. We run the diligence and the model so your SBA lender and your instincts both say go.',
+    stat: { n: '1st', l: 'your first deal is the other side\u2019s hundredth. We even the odds.' },
     painTitle: 'Your first deal is the other side’s hundredth.',
     pains: [
       {
@@ -156,6 +163,7 @@ export const SEGMENTS: Segment[] = [
     cardLink: 'For operators →',
     h1: 'Inorganic growth, without tipping your hand.',
     sub: 'Discreet third-party approaches that protect your position, objective pricing, and a repeatable playbook — run for you, deal by deal, while you run the business.',
+    stat: { n: '0', l: 'whispers reach your market before you decide otherwise' },
     painTitle: 'Buying a competitor is the deal you can’t be seen doing.',
     pains: [
       {
