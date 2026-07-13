@@ -124,7 +124,7 @@ export default function About() {
       </section>
 
       {/* ── What we believe — the creed, the page's one dark movement ── */}
-      <section className="pd-dark" style={{ marginTop: 'clamp(80px, 9vw, 130px)' }}>
+      <section className="pd-dark bl-creed" style={{ marginTop: 'clamp(80px, 9vw, 130px)' }}>
         <div className="pd-wrap pd-dark-pad">
           <div className="pd-seclabel">What we believe</div>
           <h2 className="pd-h2" data-rv style={{ maxWidth: 780 }}>Four convictions run the practice.</h2>
