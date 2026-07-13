@@ -192,7 +192,7 @@ export default function Landing() {
         <div className="pd-herosplit">
           <div>
             <h1 className="pd-h1" style={{ margin: 0, fontSize: 'clamp(40px, 5vw, 78px)' }}>
-              We'll build and run a business acquisition strategy tailored to your&nbsp;goals.
+              We'll build and run your business acquisition strategy tailored to your&nbsp;goals.
             </h1>
             <div className="pd-sub" style={{ margin: '26px 0 0', maxWidth: '30em', fontSize: 'clamp(17px, 1.4vw, 19px)' }}>
               Our acquisition engine helps you define and build your strategy in minutes. When
