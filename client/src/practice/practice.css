@@ -389,18 +389,39 @@
 .pd-send:disabled { opacity: 0.55; cursor: default; }
 
 /* ─── ledger rows (segment-page pain tables) ─── */
-.pd-ledger { border-top: 1.5px solid var(--pd-ink); }
-.pd-lrow {
-  display: grid;
-  grid-template-columns: clamp(140px, 16.5vw, 240px) minmax(0, 1fr) clamp(150px, 23.5vw, 340px);
-  gap: clamp(20px, 3.3vw, 48px);
-  padding: 44px 0; border-bottom: 1px solid var(--pd-hair); align-items: baseline;
-  transition: background-color 160ms ease;
+/* ─── segment pages — recognition / bind / turn / proof / ask ─── */
+.pd-seghero {
+  display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: clamp(48px, 6vw, 110px); align-items: end;
+  width: 100%; max-width: var(--pd-max); margin: 0 auto;
 }
-.pd-lrow:hover { background: #FAFAFA; }
-.pd-lname { font-weight: 700; font-size: 21px; }
-.pd-lbody { font-size: 17px; line-height: 1.6; color: var(--pd-body); }
-.pd-ltag { font-family: var(--pd-mono); font-size: 13px; color: var(--pd-tert); }
+.pd-segstat { justify-self: end; text-align: right; max-width: 400px; padding-bottom: 6px; }
+/* The bind as a ghost numeral — hairline-outlined, like the creed's Roman
+   numerals translated to the light canvas. */
+.pd-segstat .n {
+  font-size: clamp(140px, 16.5vw, 250px); font-weight: 800; line-height: 0.8;
+  letter-spacing: -0.04em; white-space: nowrap;
+  color: rgba(34, 34, 34, 0.03);
+  -webkit-text-stroke: 1.5px rgba(34, 34, 34, 0.42);
+}
+/* multi-glyph stats ('~1/5', '1st') scale down so they never leave the column */
+.pd-segstat .n.wide { font-size: clamp(84px, 9.5vw, 150px); }
+.pd-segstat .l { margin-top: 18px; font-size: 15.5px; line-height: 1.6; color: var(--pd-body); }
+@media (max-width: 1024px) {
+  .pd-seghero { grid-template-columns: minmax(0, 1fr); gap: 44px; }
+  .pd-segstat { justify-self: start; text-align: left; padding-bottom: 0; }
+  .pd-segstat .n { font-size: clamp(84px, 18vw, 150px); }
+}
+
+.pd-paingrid {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(28px, 3.4vw, 56px); margin-top: clamp(48px, 5.5vw, 80px);
+}
+.pd-paincol { border-top: 1px solid var(--pd-hair); padding-top: 20px; }
+.pd-paincol .tag { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.11em; color: var(--pd-coral-link); }
+.pd-paincol .nm { margin-top: 14px; font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
+.pd-paincol .bd { margin-top: 10px; font-size: 15.5px; line-height: 1.65; color: var(--pd-body); }
+@media (max-width: 900px) { .pd-paingrid { grid-template-columns: minmax(0, 1fr); gap: 36px; } }
 
 /* ─── pillar columns (value creation) — mono kicker + hairline top ─── */
 .pd-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(28px, 3.4vw, 56px); margin-top: 76px; }
@@ -675,8 +696,6 @@
   .pd-nav-links, .pd-nav-book { display: none; }
   .pd-indexrow { gap: 14px; padding: 28px 0; }
   .pd-stats { grid-template-columns: 1fr; gap: 52px; }
-  .pd-lrow { grid-template-columns: 1fr; gap: 10px; padding: 32px 0; }
-  .pd-ledger-cols { display: none; }
   .pd-ledger-head { flex-direction: column; align-items: flex-start !important; gap: 14px !important; }
   .pd-chat { margin-top: 48px; border-radius: 20px; }
   .pd-chat-head { padding: 18px 20px 0; }
