@@ -235,6 +235,56 @@ function SectionHead({
   );
 }
 
+/** Scenario steps rendered as the numbered index (reused by the landing
+ *  overview and — inline — by each segment page). */
+function ScenarioSteps({ steps }: { steps: { k: string; v: string }[] }) {
+  return (
+    <div className="pd-index rv-stagger" data-rv>
+      {steps.map((s, i) => (
+        <div className="pd-indexrow" key={s.k}>
+          <div className="no">{String(i + 1).padStart(2, '0')}</div>
+          <div className="t">{s.k}</div>
+          <div className="b">{s.v}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** How it works, per situation — centered pill tabs (the hero showcase's
+ *  language) swap the tailored scenario for each buyer type. The generic
+ *  three-step timeline is retired in favor of this: the same disciplined
+ *  process, shown as it actually runs for who you are. */
+function HowItWorks() {
+  const [active, setActive] = useState(0);
+  const seg = SEGMENTS[active];
+  return (
+    <div className="pd-howcase">
+      <div className="pd-showtabs" data-rv role="tablist" aria-label="Buyer situation">
+        {SEGMENTS.map((s, i) => (
+          <button
+            key={s.slug}
+            type="button"
+            role="tab"
+            aria-selected={i === active}
+            className={i === active ? 'on' : ''}
+            onClick={() => setActive(i)}
+          >
+            {s.footerLabel}
+          </button>
+        ))}
+      </div>
+      <div className="pd-howstage" aria-live="polite">
+        <p className="pd-sub pd-howlede">{seg.scenarioLede}</p>
+        <ScenarioSteps steps={seg.scenario} />
+        <Link href={`/buyers/${seg.slug}`} className="pd-link pd-howlink">
+          See the full walkthrough for {seg.footerLabel.toLowerCase()} →
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 /** The engagement as Slack's signature feature block: a vertical nav of the
  *  six phases on the left swaps a framed stage panel on the right. Honest —
  *  the stage is a clean description of the phase, not a fabricated screenshot. */
@@ -445,29 +495,15 @@ export default function Landing() {
         <EngagementShow />
       </section>
 
-      {/* ── Process — centered intro, then a timeline: one rule, three nodes ── */}
+      {/* ── How it works — the same disciplined process, shown as it runs for
+             each buyer type (per-situation scenario, pill-tab swapped) ── */}
       <section id="how" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
-        <SectionHead label="The process" title={<>A transparent, step-by-step process.</>} />
-        <div className="pd-timeline rv-stagger" data-rv>
-          <div className="pd-tstep">
-            <div className="no">01</div>
-            <div className="t">Conversation</div>
-            <div className="b">Provide your target criteria to our mapping engine. We map your market instantly and prepare the brief for your consultation.</div>
-            <a className="pd-link" href="#yulia">Build your market map →</a>
-          </div>
-          <div className="pd-tstep">
-            <div className="no">02</div>
-            <div className="t">Curated targets</div>
-            <div className="b">We cover a market in days — a full target landscape, screened and scored, typically inside a week of the mandate. Our team hand-picks the targets that closely meet your criteria.</div>
-            <a className="pd-link" href="#why">How we work →</a>
-          </div>
-          <div className="pd-tstep">
-            <div className="no">03</div>
-            <div className="t">Close with confidence</div>
-            <div className="b">Diligence run, price disciplined, negotiation carried to signing — and managed through the first 180 days after close.</div>
-            <a className="pd-link" href="#book">Book a call →</a>
-          </div>
-        </div>
+        <SectionHead
+          label="How it works"
+          title={<>How a deal runs — for your situation.</>}
+          sub={<>One disciplined process, adapted to how you buy. Fast enough to win the target worth owning — pick your situation.</>}
+        />
+        <HowItWorks />
       </section>
 
       {/* ── Value creation — a dark movement; the number is the hero ── */}

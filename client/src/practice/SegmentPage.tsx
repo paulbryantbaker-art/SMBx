@@ -85,6 +85,40 @@ export default function SegmentPage({ slug }: { slug: string }) {
         </div>
       </section>
 
+      {/* ── How a deal runs for you — the engagement, tailored to this buyer ── */}
+      <section className="pd-wrap pd-section-lg">
+        <div className="pd-sechead" data-rv>
+          <div className="pd-seclabel">How it works</div>
+          <h2 className="pd-h2">How a deal runs for you.</h2>
+          <p className="pd-sub">{seg.scenarioLede}</p>
+        </div>
+        <div className="pd-index rv-stagger" data-rv>
+          {seg.scenario.map((s, i) => (
+            <div className="pd-indexrow" key={s.k}>
+              <div className="no">{String(i + 1).padStart(2, '0')}</div>
+              <div className="t">{s.k}</div>
+              <div className="b">{s.v}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── What you walk away with — the deliverables ── */}
+      <section className="pd-wrap pd-section-lg">
+        <div className="pd-sechead" data-rv>
+          <div className="pd-seclabel">What you walk away with</div>
+          <h2 className="pd-h2">The deliverables, in your hands.</h2>
+        </div>
+        <div className="pd-gets rv-stagger" data-rv>
+          {seg.gets.map(g => (
+            <div className="pd-get" key={g}>
+              <div className="mk" aria-hidden="true">→</div>
+              <div className="t">{g}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ── The proof — the record behind every engagement ── */}
       <section className="pd-wrap" style={{ paddingTop: 'clamp(80px, 9vw, 130px)' }}>
         <div className="pd-statband">

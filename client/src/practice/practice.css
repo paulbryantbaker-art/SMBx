@@ -419,6 +419,30 @@
 .pd-showtabs button:hover { color: var(--pd-ink); }
 .pd-showtabs button.on { background: var(--pd-ink); color: #fff; }
 
+/* ─── how-it-works per-type scenario overview (landing) & the segment-page
+   scenario walkthrough — "how a deal actually runs for you", swapped by the
+   centered pill tabs on the landing, static per segment on the buyer page.
+   The step list reuses .pd-index; the tabs reuse .pd-showtabs. ─── */
+.pd-howcase { margin-top: clamp(40px, 5vw, 68px); }
+.pd-howstage { margin-top: clamp(30px, 3.6vw, 52px); }
+.pd-howstage .pd-howlede { max-width: 40em; margin: 0 auto; text-align: center; color: var(--pd-ink); font-weight: 600; }
+.pd-howstage .pd-index { margin-top: clamp(28px, 3.4vw, 48px); }
+.pd-howstage .pd-howlink { display: block; text-align: center; margin-top: clamp(28px, 3vw, 40px); }
+
+/* what you walk away with — the deliverables of an engagement, two-up */
+.pd-gets {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 clamp(32px, 5vw, 72px); margin-top: clamp(40px, 5vw, 68px);
+  border-top: 1px solid var(--pd-hair);
+}
+.pd-get {
+  display: grid; grid-template-columns: 24px 1fr; gap: 14px; align-items: baseline;
+  padding: 20px 2px; border-bottom: 1px solid var(--pd-hair);
+}
+.pd-get .mk { color: var(--pd-coral-link); font-weight: 800; font-size: 18px; line-height: 1.4; }
+.pd-get .t { font-size: 18px; line-height: 1.5; color: var(--pd-ink); }
+@media (max-width: 720px) { .pd-gets { grid-template-columns: 1fr; } }
+
 /* ─── curved bleed dividers — a generous shallow arc bracketing each dark
    band (Slack's "cool" section transitions). Standalone flow-level siblings
    (the band's ::before is taken by its bloom). One arc ENTERS a band
@@ -649,8 +673,8 @@
   color: var(--pd-faint); font-variant-numeric: tabular-nums; transition: color 160ms ease;
 }
 .pd-indexrow:hover .no { color: var(--pd-coral-link); }
-.pd-indexrow .t { font-size: 21px; font-weight: 700; letter-spacing: -0.012em; line-height: 1.25; }
-.pd-indexrow .b { font-size: 17px; line-height: 1.7; color: var(--pd-body); }
+.pd-indexrow .t { font-size: 22px; font-weight: 700; letter-spacing: -0.012em; line-height: 1.25; }
+.pd-indexrow .b { font-size: 18px; line-height: 1.7; color: var(--pd-body); }
 
 /* ─── process timeline — one continuous rule, three nodes, display numerals ─── */
 .pd-timeline {
