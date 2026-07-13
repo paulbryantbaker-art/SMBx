@@ -191,9 +191,8 @@ export default function Landing() {
       <section className="pd-hero">
         <div className="pd-herosplit">
           <div>
-            <h1 className="pd-h1" style={{ margin: 0, fontSize: 'clamp(34px, 4.1vw, 64px)' }}>
-              Whether buying your first business or add-on business, we make acquisition faster
-              and easier from day 1 to&nbsp;close.
+            <h1 className="pd-h1" style={{ margin: 0, fontSize: 'clamp(40px, 5vw, 78px)' }}>
+              We'll build and run a business acquisition strategy tailored to your&nbsp;goals.
             </h1>
             <div className="pd-sub" style={{ margin: '26px 0 0', maxWidth: '30em', fontSize: 'clamp(17px, 1.4vw, 19px)' }}>
               Our ready-to-deploy acquisition Corp Dev agent can help you define and build your
