@@ -1,5 +1,5 @@
 /**
- * The intake card — publicly the "smbX Target Mapping Engine" (Paul's copy
+ * The intake card — publicly the "smbX Acquisition Engine" (Paul's copy
  * update, 2026-07-12: the Yulia name stays app-side; this surface speaks as
  * the firm's system). The landing page's core conversion mechanism.
  *
@@ -36,7 +36,7 @@ export type PartialMap = Partial<Omit<MapData, 'funnel'>> & { funnel: FunnelStep
 interface Msg { from: 'y' | 'u'; text?: string; map?: MapData; }
 
 const OPENING =
-  "Tell us a bit about what you're looking for. Our mapping engine takes just a couple of minutes to process your criteria and build a preliminary market map. Ready to start?";
+  "Tell us a bit about what you're looking for. Our acquisition engine takes just a couple of minutes to process your criteria and build a preliminary market map. Ready to start?";
 
 const HINTS = [
   'Sector & Strategy (e.g., "HVAC roll-up in the Southeast")',
@@ -60,7 +60,7 @@ const TYPE_SAMPLES = [
 
 /** Narration for the block currently being written — shown while the map
  *  streams, so the work is legible without pretending anything. System
- *  voice (Target Mapping Engine), not a persona. */
+ *  voice (Acquisition Engine), not a persona. */
 const NARRATE: Record<string, string> = {
   TITLE: 'Reviewing your criteria…',
   THESIS: 'Reviewing your criteria…',
@@ -442,7 +442,7 @@ export default function YuliaIntake() {
     <div id="yulia" className="pd-chat">
       <div className="pd-chat-head">
         <img src="/logo-coral-x.png" alt="smbX.ai" style={{ height: 28, width: 'auto', display: 'block' }} />
-        <div style={{ fontWeight: 800, fontSize: 17 }}>Target Mapping Engine</div>
+        <div style={{ fontWeight: 800, fontSize: 17 }}>Acquisition Engine</div>
       </div>
       <div className="pd-msgs" ref={listRef}>
         {messages.map((m, i) => (
