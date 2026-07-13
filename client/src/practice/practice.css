@@ -324,6 +324,42 @@
   .pd-herosplit { grid-template-columns: minmax(0, 1fr); gap: 52px; }
 }
 
+/* ─── Slack-style homepage layout (2026-07-13, Paul: "mirror Slack, keep our
+   colors"). Centered heroes/headers, a framed product showcase with pill-tabs
+   that swap it, and curved "swoosh" dividers into deep-color bands. ─── */
+.pd-hero-c { flex-direction: column; text-align: center; padding-top: clamp(40px, 5vw, 84px); padding-bottom: clamp(20px, 3vw, 40px); }
+.pd-heroc-inner { position: relative; z-index: 1; width: 100%; max-width: var(--pd-max); margin: 0 auto; }
+.pd-hero-c .pd-h1 { max-width: 16em; margin: 0 auto; }
+.pd-sub-c { margin: 24px auto 0; max-width: 34em; }
+.pd-cta-row { margin-top: 36px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.pd-proofrow { margin-top: 34px; display: flex; gap: 10px 20px; justify-content: center; align-items: center; flex-wrap: wrap; }
+.pd-proofrow .lab { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--pd-tert); }
+.pd-proofrow .pf { font-size: 15px; color: var(--pd-body); }
+.pd-proofrow .pf b { color: var(--pd-ink); font-weight: 800; }
+.pd-proofrow .pf.hot b { color: var(--pd-coral); }
+.pd-proofrow .dot { color: var(--pd-faint); }
+
+/* product showcase — the framed product with pill-tabs below (Slack signature) */
+.pd-showcase { position: relative; z-index: 1; width: 100%; max-width: 900px; margin: clamp(40px, 5vw, 72px) auto 0; padding: 0 var(--pd-pad-x); }
+.pd-show-stage > * { margin-left: auto; margin-right: auto; }
+.pd-showtabs { margin-top: 24px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.pd-showtabs button {
+  border: none; background: transparent; border-radius: 99px;
+  padding: 11px 22px; font-size: 15px; font-weight: 700; color: var(--pd-body); cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.pd-showtabs button:hover { color: var(--pd-ink); }
+.pd-showtabs button.on { background: var(--pd-ink); color: #fff; }
+
+/* swoosh — a soft curved divider into a deep-color band */
+.pd-swoosh { display: block; width: 100%; height: clamp(44px, 5.5vw, 90px); margin-bottom: -1px; overflow: hidden; line-height: 0; }
+.pd-swoosh svg { display: block; width: 100%; height: 100%; }
+
+/* centered section header helper (Slack sections are center-aligned) */
+.pd-sec-c { text-align: center; }
+.pd-sec-c .pd-seclabel { margin-left: auto; margin-right: auto; }
+.pd-sec-c .pd-h2, .pd-sec-c .pd-sub, .pd-sec-c .pd-body { margin-left: auto; margin-right: auto; }
+
 /* ─── Yulia chat card ─── */
 /* Wide, flat conversation surface: Yulia speaks directly on the canvas — no
    assistant bubble — the visitor's turns sit in quiet gray pills, and the
