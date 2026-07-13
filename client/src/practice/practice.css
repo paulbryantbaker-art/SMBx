@@ -360,6 +360,62 @@
 .pd-sec-c .pd-seclabel { margin-left: auto; margin-right: auto; }
 .pd-sec-c .pd-h2, .pd-sec-c .pd-sub, .pd-sec-c .pd-body { margin-left: auto; margin-right: auto; }
 
+/* ─── Slack centered section intro — eyebrow + heading + optional lede,
+   center-stacked, then the section body flows beneath (the site's mid-page
+   rhythm after the 2026-07-13 Slack reflow). ─── */
+.pd-sechead { text-align: center; max-width: 46em; margin: 0 auto; }
+.pd-sechead .pd-seclabel { margin-left: auto; margin-right: auto; }
+.pd-sechead .pd-h2, .pd-sechead .pd-quote { margin-left: auto; margin-right: auto; }
+.pd-sechead .pd-sub { margin: 22px auto 0; }
+
+/* ─── Slack feature showcase — a vertical nav of steps on the left swaps a
+   framed stage panel on the right (Slack's signature mid-page block). Shares
+   the interaction with .pd-whosel; the stage is an honest framed description,
+   not a fabricated screenshot. ─── */
+.pd-feature {
+  display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: clamp(40px, 5.5vw, 90px); align-items: start;
+  margin-top: clamp(52px, 6vw, 84px);
+}
+.pd-feature .nav { display: flex; flex-direction: column; border-top: 1.5px solid var(--pd-ink); }
+.pd-feature button.fn {
+  display: grid; grid-template-columns: 2.4em 1fr; align-items: baseline; gap: 14px;
+  text-align: left; width: 100%; padding: 22px 4px 22px 0;
+  border: 0; border-bottom: 1px solid var(--pd-hair); background: none;
+  color: var(--pd-faint); transition: color 180ms ease, padding-left 180ms ease;
+}
+.pd-feature button.fn:hover { color: var(--pd-ink); }
+.pd-feature button.fn .no { font-family: var(--pd-mono); font-size: 13.5px; letter-spacing: 0.09em; font-variant-numeric: tabular-nums; }
+.pd-feature button.fn .nm { font-size: clamp(21px, 2.1vw, 27px); font-weight: 800; letter-spacing: -0.018em; line-height: 1.15; }
+.pd-feature button.fn.on { color: var(--pd-ink); padding-left: 10px; }
+.pd-feature button.fn.on .no { color: var(--pd-coral-link); }
+.pd-feature .stage {
+  position: sticky; top: 116px; border-radius: 24px;
+  background: var(--pd-card); border: 1px solid var(--pd-hair);
+  padding: clamp(30px, 3.6vw, 52px); min-height: 300px;
+}
+.pd-feature .stage .sno { font-size: clamp(48px, 6vw, 84px); font-weight: 800; letter-spacing: -0.04em; line-height: 0.9; color: var(--pd-faint); font-variant-numeric: tabular-nums; }
+.pd-feature .stage .st { margin-top: 20px; font-size: clamp(26px, 2.6vw, 34px); font-weight: 800; letter-spacing: -0.022em; line-height: 1.12; }
+.pd-feature .stage .sb { margin-top: 18px; font-size: 18px; line-height: 1.65; color: var(--pd-body); max-width: 30em; }
+@media (max-width: 980px) {
+  .pd-feature { grid-template-columns: 1fr; gap: 8px; }
+  .pd-feature .stage { display: none; }
+  .pd-feature button.fn { display: block; padding: 22px 0; cursor: default; color: var(--pd-ink); }
+  .pd-feature button.fn.on { padding-left: 0; }
+  .pd-feature .fn .fbody { margin-top: 10px; font-size: 16px; line-height: 1.65; color: var(--pd-body); }
+}
+/* the inline body under each nav item is desktop-hidden (the stage shows it) */
+.pd-feature .fn .fbody { display: none; }
+@media (max-width: 980px) { .pd-feature .fn .fbody { display: block; } }
+
+/* the gap section — centered head, symmetric two-column body, centered close */
+.pd-gapcols {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(32px, 5vw, 72px); max-width: 62em; margin: clamp(48px, 6vw, 80px) auto 0;
+}
+.pd-gapclose { text-align: center; margin-top: clamp(44px, 5.5vw, 76px); }
+@media (max-width: 760px) { .pd-gapcols { grid-template-columns: 1fr; gap: 22px; } }
+
 /* ─── Yulia chat card ─── */
 /* Wide, flat conversation surface: Yulia speaks directly on the canvas — no
    assistant bubble — the visitor's turns sit in quiet gray pills, and the

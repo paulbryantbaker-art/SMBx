@@ -227,6 +227,60 @@ function Swoosh({ color = '#141414' }: { color?: string }) {
   );
 }
 
+/** A Slack-style centered section intro: eyebrow label, heading, optional
+ *  lede — the consistent rhythm the mid-page now reads on. */
+function SectionHead({
+  label, title, sub, quote,
+}: {
+  label?: string;
+  title: React.ReactNode;
+  sub?: React.ReactNode;
+  quote?: boolean;
+}) {
+  return (
+    <div className="pd-sechead" data-rv>
+      {label && <div className="pd-seclabel">{label}</div>}
+      <h2 className={quote ? 'pd-quote' : 'pd-h2'}>{title}</h2>
+      {sub && <p className="pd-sub">{sub}</p>}
+    </div>
+  );
+}
+
+/** The engagement as Slack's signature feature block: a vertical nav of the
+ *  six phases on the left swaps a framed stage panel on the right. Honest —
+ *  the stage is a clean description of the phase, not a fabricated screenshot. */
+function EngagementShow() {
+  const [active, setActive] = useState(0);
+  return (
+    <div className="pd-feature" data-rv>
+      <div className="nav">
+        {ENGAGEMENT.map((e, i) => (
+          <button
+            key={e.k}
+            type="button"
+            className={`fn${i === active ? ' on' : ''}`}
+            onMouseEnter={() => setActive(i)}
+            onFocus={() => setActive(i)}
+            onClick={() => setActive(i)}
+            aria-pressed={i === active}
+          >
+            <span className="no">{String(i + 1).padStart(2, '0')}</span>
+            <span>
+              <span className="nm">{e.k}</span>
+              <span className="fbody">{e.v}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+      <div className="stage" aria-live="polite">
+        <div className="sno">{String(active + 1).padStart(2, '0')}</div>
+        <div className="st">{ENGAGEMENT[active].k}</div>
+        <div className="sb">{ENGAGEMENT[active].v}</div>
+      </div>
+    </div>
+  );
+}
+
 export default function Landing() {
   return (
     <PracticeShell home>
@@ -257,63 +311,33 @@ export default function Landing() {
         <HeroShowcase />
       </section>
 
-      {/* ── The first read — show the artifact itself (sample, clearly
-             labeled; content from the Market Map spec's worked example) ── */}
-      <section className="pd-wrap pd-section">
-        <div className="pd-askew rv-stagger" data-rv>
-          <div>
-            <MapDoc map={SAMPLE_MAP} headLabel="SAMPLE READ" />
-          </div>
-          <div className="off">
-            <div className="pd-seclabel">The first read</div>
-            <h2 className="pd-h2">A real read on your thesis, before you spend a dollar.</h2>
-            <div className="pd-body" style={{ marginTop: 24, maxWidth: '30em' }}>
-              Tell us what you're looking for. The acquisition engine returns a preliminary
-              market map — the universe, the economics, the competitive picture, and the risks —
-              in about a minute. Our team sends the full version within 24 hours.
-            </div>
-            <div style={{ marginTop: 36 }}>
-              <a
-                className="pd-pill-primary pd-pill-lg"
-                href="#yulia"
-                onClick={() => trackEvent('practice_cta_clicked', { placement: 'sample-showcase' })}
-              >
-                Build your market map →
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── The gap — an observation about the buyer's situation, never a
-             complaint about anyone else (confidence pass) ── */}
+      {/* ── The gap — centered Slack intro, then a symmetric two-column
+             explanation and a centered statement (confidence pass copy) ── */}
       <section className="pd-wrap pd-section pd-accent ar">
-        <div className="pd-ledger-head" data-rv style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 40, marginBottom: 64 }}>
-          <h2 className="pd-h2" style={{ maxWidth: 960 }}>Most acquirers under $250M don't have a dedicated deal team.</h2>
-          <div className="pd-seclabel right">The gap</div>
-        </div>
-        <div className="pd-askew rv-stagger" data-rv>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-              The companies that buy well have a corporate development function: a permanent team
-              whose entire job is finding the right targets, pricing them properly, and getting
-              them closed. At scale, it pays for itself many times over.
-            </div>
-            <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-              Below a certain size, however, the math gets difficult. A director of corp dev and an
-              analyst can run well past half a million dollars a year — for a function you may only
-              utilize twice a year. As a result, the acquisitions that would compound your business
-              get run off the side of a desk, against a seller who does this professionally.
-            </div>
+        <SectionHead
+          label="The gap"
+          title={<>Most acquirers under $250M don't have a dedicated deal team.</>}
+        />
+        <div className="pd-gapcols rv-stagger" data-rv>
+          <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
+            The companies that buy well have a corporate development function: a permanent team
+            whose entire job is finding the right targets, pricing them properly, and getting
+            them closed. At scale, it pays for itself many times over.
           </div>
-          <div className="off">
-            <div className="pd-statement">
-              <Mark /> is that function, without the permanent overhead.
-            </div>
-            <div className="pd-body" style={{ marginTop: 14 }}>
-              Structured for your specific mandate — engaged for the deal, with economics tied
-              directly to a successful close.
-            </div>
+          <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
+            Below a certain size, however, the math gets difficult. A director of corp dev and an
+            analyst can run well past half a million dollars a year — for a function you may only
+            utilize twice a year. As a result, the acquisitions that would compound your business
+            get run off the side of a desk, against a seller who does this professionally.
+          </div>
+        </div>
+        <div className="pd-gapclose" data-rv>
+          <div className="pd-statement" style={{ margin: '0 auto', maxWidth: '18em' }}>
+            <Mark /> is that function, without the permanent overhead.
+          </div>
+          <div className="pd-body" style={{ margin: '14px auto 0', maxWidth: '34em' }}>
+            Structured for your specific mandate — engaged for the deal, with economics tied
+            directly to a successful close.
           </div>
         </div>
       </section>
@@ -420,27 +444,20 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── The engagement — scope of service as an institutional index ── */}
+      {/* ── The engagement — Slack feature showcase: vertical nav swaps a
+             framed stage panel ── */}
       <section className="pd-wrap pd-section-lg">
-        <div className="pd-ledger-head" data-rv style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 40, marginBottom: 0 }}>
-          <h2 className="pd-h2" style={{ maxWidth: 760 }}>What we run for you.</h2>
-          <div className="pd-seclabel right">The engagement</div>
-        </div>
-        <div className="pd-index rv-stagger" data-rv>
-          {ENGAGEMENT.map((e, i) => (
-            <div className="pd-indexrow" key={e.k}>
-              <div className="no">{String(i + 1).padStart(2, '0')}</div>
-              <div className="t">{e.k}</div>
-              <div className="b">{e.v}</div>
-            </div>
-          ))}
-        </div>
+        <SectionHead
+          label="The engagement"
+          title={<>What we run for you.</>}
+          sub={<>The complete acquisition lifecycle — six phases, one accountable team.</>}
+        />
+        <EngagementShow />
       </section>
 
-      {/* ── Process — a timeline: one rule, three nodes ── */}
+      {/* ── Process — centered intro, then a timeline: one rule, three nodes ── */}
       <section id="how" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
-        <div className="pd-seclabel">The process</div>
-        <h2 className="pd-h2" data-rv style={{ maxWidth: 760 }}>A transparent, step-by-step process.</h2>
+        <SectionHead label="The process" title={<>A transparent, step-by-step process.</>} />
         <div className="pd-timeline rv-stagger" data-rv>
           <div className="pd-tstep">
             <div className="no">01</div>
@@ -496,25 +513,24 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Who it's for — segment rows, read like a ledger ── */}
+      {/* ── Who it's for — centered intro, then the interactive segment nav ── */}
       <section id="who" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
-        <div className="pd-ledger-head" data-rv style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 40, marginBottom: 0 }}>
-          <h2 className="pd-h2">You bring the thesis. We bring the team.</h2>
-          <div className="pd-seclabel right">Who it's for</div>
-        </div>
+        <SectionHead label="Who it's for" title={<>You bring the thesis. We bring the team.</>} />
         <WhoSelector />
       </section>
 
-      {/* ── Industries — a dense list, not cards ── */}
+      {/* ── Industries — centered intro, then the anchor market + hunt board ── */}
       <section id="industries" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
-        <div className="pd-seclabel">Industries</div>
-        <h2 className="pd-h2" data-rv style={{ maxWidth: 820 }}>We know these markets cold. And we'll learn yours.</h2>
-        <div data-rv className="pd-body" style={{ marginTop: 24, maxWidth: '46em' }}>
-          Deep operating history in the essential-service trades — plus active theses in the
-          fragmented, recurring-revenue niches where a disciplined buyer can still buy well.
-          Already have a market? We'll work yours.
-        </div>
-        <div className="pd-anchorcard" data-rv>
+        <SectionHead
+          label="Industries"
+          title={<>We know these markets cold. And we'll learn yours.</>}
+          sub={<>
+            Deep operating history in the essential-service trades — plus active theses in the
+            fragmented, recurring-revenue niches where a disciplined buyer can still buy well.
+            Already have a market? We'll work yours.
+          </>}
+        />
+        <div className="pd-anchorcard" data-rv style={{ marginTop: 'clamp(48px, 6vw, 80px)' }}>
           <div className="k">Home &amp; essential services</div>
           <div className="b">
             HVAC, plumbing, electrical. Our founder built a national platform here through 36
@@ -541,10 +557,9 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── How we find them — statement + asymmetry ── */}
+      {/* ── How we find them — centered statement intro, then a 3-up ── */}
       <section className="pd-wrap pd-section-lg pd-accent al">
-        <div className="pd-seclabel" data-rv>How we find them</div>
-        <h2 className="pd-quote" data-rv style={{ maxWidth: '14em' }}>The best targets aren't for sale.</h2>
+        <SectionHead label="How we find them" title={<>The best targets aren't for sale.</>} quote />
         <div className="pd-findgrid rv-stagger" data-rv>
           <div className="pd-findcol">
             <div className="k">THE OWNER</div>
@@ -596,17 +611,16 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Pull-quote — one statement, nothing else ── */}
+      {/* ── Pull-quote — one statement, centered, nothing else ── */}
       <section className="pd-wrap pd-section-lg">
-        <h2 className="pd-quote" data-rv style={{ maxWidth: '13em' }}>
+        <h2 className="pd-quote" data-rv style={{ maxWidth: '15em', margin: '0 auto', textAlign: 'center' }}>
           Your first deal is the other side's hundredth. Even the odds.
         </h2>
       </section>
 
-      {/* ── FAQ ── */}
+      {/* ── FAQ — centered intro, then the list ── */}
       <section className="pd-wrap pd-section-lg">
-        <div className="pd-seclabel">Straight answers</div>
-        <h2 className="pd-h2" data-rv style={{ maxWidth: 760 }}>Common pre-engagement questions.</h2>
+        <SectionHead label="Straight answers" title={<>Common pre-engagement questions.</>} />
         <div className="pd-faq rv-stagger" data-rv>
           {FAQ.map(f => (
             <div className="pd-faq-item" key={f.q}>
