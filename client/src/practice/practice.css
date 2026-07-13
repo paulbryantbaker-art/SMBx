@@ -145,7 +145,7 @@
   letter-spacing: -0.03em;
   line-height: 1.05;
 }
-.pd-mono { font-family: var(--pd-mono); font-size: 12px; color: var(--pd-tert); letter-spacing: 0.08em; }
+.pd-mono { font-family: var(--pd-mono); font-size: 13.5px; color: var(--pd-body); letter-spacing: 0.06em; }
 /* Section labels are real headers, not eyebrow micro-text (Paul, 2026-07-11
    copy update: "section headings should look like headers"). */
 .pd-seclabel {
@@ -321,7 +321,7 @@
 .pd-msgs .pd-msgrow:first-child .pd-bub-y { font-size: 21px; font-weight: 600; letter-spacing: -0.012em; line-height: 1.45; }
 .pd-bub-u { max-width: 72%; margin-left: auto; background: var(--pd-card); color: var(--pd-ink); padding: 12px 18px; border-radius: 16px; font-size: 16px; }
 /* Calm working note — no bouncing dots, no fake progress. */
-.pd-working { font-size: 14px; color: var(--pd-tert); padding: 4px 0; animation: pd-pulse 2.2s ease-in-out infinite; font-family: var(--pd-mono); letter-spacing: 0.04em; font-size: 12.5px; }
+.pd-working { color: var(--pd-tert); padding: 4px 0; animation: pd-pulse 2.2s ease-in-out infinite; font-family: var(--pd-mono); letter-spacing: 0.04em; font-size: 13.5px; }
 
 /* ─── the Market Map — institutional research, not chatbot output ───
    Assembles block by block as the model writes it. Numbers as heroes, the
@@ -339,26 +339,26 @@
 .pd-map > * { animation: pd-rise 260ms ease both; }
 .pd-map .map-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 12px; border-bottom: 1.5px solid var(--pd-ink); }
 .pd-map .map-mark { font-weight: 800; font-size: 15px; letter-spacing: -0.02em; color: var(--pd-ink); }
-.pd-map .map-label { font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.12em; color: var(--pd-body); text-align: right; }
+.pd-map .map-label { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-body); text-align: right; }
 .pd-map .map-title { margin-top: 18px; font-size: clamp(22px, 2.6vw, 30px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; color: var(--pd-ink); }
-.pd-map .map-thesis { margin-top: 8px; font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.05em; color: var(--pd-body); text-transform: uppercase; line-height: 1.6; }
+.pd-map .map-thesis { margin-top: 8px; font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.04em; color: var(--pd-body); text-transform: uppercase; line-height: 1.6; }
 .pd-map .map-answer { margin-top: 20px; border-left: 3px solid var(--pd-ink); padding: 4px 0 4px 16px; }
-.pd-map .map-answer .k { font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.11em; color: var(--pd-coral-link); }
+.pd-map .map-answer .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
 .pd-map .map-answer .v { margin-top: 6px; font-size: 17px; font-weight: 700; line-height: 1.5; color: var(--pd-ink); }
 .pd-map .map-funnel { margin-top: 22px; border-top: 1px solid var(--pd-hair); padding-top: 16px; }
-.pd-map .map-funnel .k { font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.11em; color: var(--pd-coral-link); }
+.pd-map .map-funnel .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
 .pd-map .map-step { display: flex; align-items: baseline; gap: 26px; padding: 8px 0 2px; animation: pd-rise 260ms ease both; }
 .pd-map .map-step .n { font-size: clamp(30px, 3.8vw, 46px); font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--pd-ink); min-width: clamp(96px, 13vw, 150px); white-space: nowrap; }
 .pd-map .map-step .l { font-size: 14.5px; line-height: 1.45; color: var(--pd-body); }
 .pd-map .map-sec { margin-top: 18px; }
-.pd-map .map-sec .k { font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.11em; color: var(--pd-coral-link); }
+.pd-map .map-sec .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
 .pd-map .map-sec .v { margin-top: 5px; font-size: 14.5px; line-height: 1.6; color: var(--pd-ink); }
 /* The punchline block — the one place a tint and a weight shift is earned. */
 .pd-map .map-insight { margin-top: 22px; background: var(--pd-card); border-radius: 10px; padding: 18px 20px; }
-.pd-map .map-insight .k { font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.11em; color: var(--pd-ink); }
+.pd-map .map-insight .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-ink); }
 .pd-map .map-insight .v { margin-top: 7px; font-size: 15.5px; font-weight: 600; line-height: 1.6; color: var(--pd-ink); }
 .pd-map .map-foot { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--pd-hair); display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap; }
-.pd-map .map-foot .src { font-family: var(--pd-mono); font-size: 10.5px; letter-spacing: 0.04em; line-height: 1.6; color: var(--pd-body); flex: 1 1 320px; }
+.pd-map .map-foot .src { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.02em; line-height: 1.6; color: var(--pd-body); flex: 1 1 320px; }
 .pd-map .map-pdf {
   border: 1.5px solid var(--pd-ink); background: transparent; color: var(--pd-ink);
   border-radius: 99px; padding: 10px 22px; font-size: 13.5px; font-weight: 700; white-space: nowrap;
@@ -418,7 +418,7 @@
   gap: clamp(28px, 3.4vw, 56px); margin-top: clamp(48px, 5.5vw, 80px);
 }
 .pd-paincol { border-top: 1px solid var(--pd-hair); padding-top: 20px; }
-.pd-paincol .tag { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.11em; color: var(--pd-coral-link); }
+.pd-paincol .tag { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
 .pd-paincol .nm { margin-top: 14px; font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
 .pd-paincol .bd { margin-top: 10px; font-size: 15.5px; line-height: 1.65; color: var(--pd-body); }
 @media (max-width: 900px) { .pd-paingrid { grid-template-columns: minmax(0, 1fr); gap: 36px; } }
@@ -426,7 +426,7 @@
 /* ─── pillar columns (value creation) — mono kicker + hairline top ─── */
 .pd-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(28px, 3.4vw, 56px); margin-top: 76px; }
 .pd-step { border-top: 1.5px solid var(--pd-ink); padding-top: 24px; }
-.pd-step .num { font-family: var(--pd-mono); font-size: 12.5px; letter-spacing: 0.12em; color: var(--pd-body); }
+.pd-step .num { font-family: var(--pd-mono); font-size: 13.5px; letter-spacing: 0.09em; color: var(--pd-body); }
 .pd-step .t { font-size: 25px; font-weight: 700; letter-spacing: -0.01em; margin-top: 18px; }
 .pd-step .b { font-size: 16px; line-height: 1.65; color: var(--pd-body); margin-top: 12px; }
 .pd-step .pd-link { display: inline-block; margin-top: 22px; }
@@ -468,7 +468,7 @@
 /* ─── value creation — the number is the hero of the band ─── */
 .pd-valgrid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: clamp(36px, 5.5vw, 96px); align-items: start; }
 .pd-bignum { font-size: clamp(140px, 17vw, 260px); font-weight: 800; letter-spacing: -0.055em; line-height: 0.8; color: var(--pd-ink); white-space: nowrap; }
-.pd-bignum-label { margin-top: 20px; font-family: var(--pd-mono); font-size: 12px; letter-spacing: 0.16em; color: var(--pd-body); }
+.pd-bignum-label { margin-top: 20px; font-family: var(--pd-mono); font-size: 13.5px; letter-spacing: 0.12em; color: var(--pd-body); }
 
 /* ─── who it's for — an interactive index: giant names, live side panel ─── */
 .pd-whosel {
@@ -513,7 +513,7 @@
   transition: background-color 160ms ease;
 }
 .pd-hunt:hover { background: #FAFAFA; }
-.pd-hunt .no { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.12em; color: var(--pd-body); }
+.pd-hunt .no { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.1em; color: var(--pd-body); }
 .pd-hunt .nm { font-size: 21px; font-weight: 700; letter-spacing: -0.012em; }
 .pd-hunt .th { font-size: 15px; line-height: 1.6; color: var(--pd-body); }
 @media (max-width: 860px) {
@@ -524,7 +524,7 @@
 /* ─── how we find them — a three-beat narrative under the statement ─── */
 .pd-findgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(28px, 3.4vw, 56px); margin-top: clamp(48px, 5.5vw, 80px); }
 .pd-findcol { border-top: 1px solid var(--pd-hair); padding-top: 20px; }
-.pd-findcol .k { font-family: var(--pd-mono); font-size: 12px; letter-spacing: 0.12em; color: var(--pd-body); }
+.pd-findcol .k { font-family: var(--pd-mono); font-size: 13.5px; letter-spacing: 0.09em; color: var(--pd-body); }
 .pd-findcol .v { margin-top: 14px; font-size: 16.5px; line-height: 1.7; color: var(--pd-body); }
 @media (max-width: 980px) { .pd-findgrid { grid-template-columns: 1fr; gap: 36px; } }
 
@@ -563,7 +563,7 @@
 .pd-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(28px, 4vw, 56px); }
 .pd-stat .n { font-size: clamp(44px, 5.4vw, 82px); font-weight: 800; letter-spacing: -0.05em; color: var(--pd-ink); line-height: 0.9; white-space: nowrap; }
 .pd-stat.accent .n { color: var(--pd-coral-link); }
-.pd-stat .l { margin-top: 14px; font-family: var(--pd-mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--pd-body); line-height: 1.7; }
+.pd-stat .l { margin-top: 14px; font-family: var(--pd-mono); font-size: 13.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--pd-body); line-height: 1.65; }
 .pd-statband { border-top: 1px solid var(--pd-hair); border-bottom: 1px solid var(--pd-hair); }
 .pd-statband .pd-stats { padding: clamp(36px, 4vw, 60px) 0; }
 @media (max-width: 1080px) {
@@ -575,7 +575,7 @@
 .pd-tombs { border-top: 1.5px solid var(--pd-ink); margin-top: 56px; }
 .pd-tomb { padding: 38px 0; border-bottom: 1px solid var(--pd-hair); }
 .pd-tomb .t { font-weight: 800; font-size: 24px; letter-spacing: -0.01em; }
-.pd-tomb .meta { font-family: var(--pd-mono); font-size: 12.5px; color: var(--pd-tert); letter-spacing: 0.08em; margin-top: 8px; }
+.pd-tomb .meta { font-family: var(--pd-mono); font-size: 13.5px; color: var(--pd-body); letter-spacing: 0.06em; margin-top: 8px; }
 .pd-tomb .b { margin-top: 16px; font-size: 16.5px; line-height: 1.65; color: var(--pd-body); max-width: 60em; }
 .pd-tomb .names { margin-top: 14px; font-size: 15px; line-height: 1.9; color: var(--pd-ink); }
 .pd-tomb .names .grp { color: var(--pd-tert); font-style: italic; }
@@ -596,7 +596,7 @@
   transition: border-color 160ms ease;
 }
 .pd-dealsearch:focus { border-color: var(--pd-ink); }
-.pd-dealcount { margin-top: 18px; font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.12em; color: var(--pd-tert); }
+.pd-dealcount { margin-top: 18px; font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-body); }
 .pd-dealgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; margin-top: 14px; }
 .pd-dealcard {
   border: 1px solid var(--pd-hair); border-radius: 10px; padding: 18px 20px;
@@ -604,9 +604,9 @@
 }
 .pd-dealcard:hover, .pd-dealcard:focus-visible { border-color: var(--pd-ink); transform: translateY(-1px); }
 .pd-dealcard .nm { font-weight: 700; font-size: 16px; letter-spacing: -0.01em; }
-.pd-dealcard .tag { margin-top: 6px; font-family: var(--pd-mono); font-size: 10.5px; letter-spacing: 0.11em; color: var(--pd-body); text-transform: uppercase; }
+.pd-dealcard .tag { margin-top: 6px; font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.07em; color: var(--pd-body); text-transform: uppercase; }
 .pd-dealcard .why {
-  font-size: 13px; line-height: 1.55; color: var(--pd-body);
+  font-size: 14px; line-height: 1.55; color: var(--pd-body);
   max-height: 0; opacity: 0; overflow: hidden; margin-top: 0;
   transition: max-height 200ms ease, opacity 200ms ease, margin-top 200ms ease;
 }
@@ -661,9 +661,9 @@
   max-width: var(--pd-max);
   margin: 0 auto;
   padding: 0 var(--pd-pad-x) 26px;
-  font-size: 12.5px;
+  font-size: 13.5px;
   line-height: 1.7;
-  color: var(--pd-faint);
+  color: var(--pd-tert);
   scroll-margin-top: 90px;
 }
 
@@ -675,8 +675,8 @@
 }
 .pd-footer-col { display: flex; flex-direction: column; gap: 12px; line-height: 1.4; font-size: 14.5px; }
 .pd-footer-col a { color: var(--pd-body); }
-.pd-footer-col .h { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.1em; color: var(--pd-tert); margin-bottom: 6px; }
-.pd-footer-legal { max-width: var(--pd-max); margin: 0 auto; padding: 0 var(--pd-pad-x) 40px; font-size: 13px; color: var(--pd-faint); }
+.pd-footer-col .h { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.08em; color: var(--pd-body); margin-bottom: 6px; }
+.pd-footer-legal { max-width: var(--pd-max); margin: 0 auto; padding: 0 var(--pd-pad-x) 40px; font-size: 13.5px; color: var(--pd-tert); }
 
 /* ─── responsive ─── */
 @media (max-width: 980px) {
@@ -705,7 +705,7 @@
   .pd-chat-inputrow { margin: 10px 14px 18px; padding: 6px 6px 6px 14px; }
   .pd-send { padding: 12px 18px; }
   .pd-map { padding: 20px 18px 18px; }
-  .pd-map .map-step { gap: 12px; }
+  .pd-map .map-step { gap: 18px; }
   .pd-map .map-step .n { min-width: 84px; }
   .pd-dealgrid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
   .pd-form { padding: 30px 24px; }
