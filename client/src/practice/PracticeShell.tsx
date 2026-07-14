@@ -7,11 +7,30 @@
  * within the page; subpages anchor back to the landing (`/#how` …).
  */
 import { useEffect, useState, type ReactNode } from 'react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import './practice.css';
 import { bookHref, bookTarget } from './leads';
 import { SEGMENTS } from './segmentData';
 import { trackEvent } from '../lib/analytics';
+
+/** Page locator — a breadcrumb in the site's coral label voice so a visitor
+ *  landing on a subpage immediately knows where they are (Paul, 2026-07-14:
+ *  "there needs to be some kind of page title on every page… so the user does
+ *  not get lost"). `parent` is the section/home the page lives under (a link
+ *  back); `here` is the current page. Sits at the top of the centered hero. */
+export function PageCrumb({ parent, here }: { parent?: { label: string; href: string }; here: string }) {
+  return (
+    <nav className="pd-crumb" aria-label="Breadcrumb">
+      {parent && (
+        <>
+          <a href={parent.href}>{parent.label}</a>
+          <span className="sep" aria-hidden="true">/</span>
+        </>
+      )}
+      <span className="here" aria-current="page">{here}</span>
+    </nav>
+  );
+}
 
 /** Persistent ask on the long home scroll: appears once the visitor is past
  *  the hero card, retires while the engine (#yulia) or the final CTA (#book)
@@ -55,6 +74,12 @@ function StickyCta() {
 
 export default function PracticeShell({ home = false, children }: { home?: boolean; children: ReactNode }) {
   const anchor = (hash: string) => (home ? hash : `/${hash}`);
+
+  // Highlight the nav item for the section the current page lives under, so the
+  // top bar also answers "where am I" (segment pages sit under Who it's for).
+  const [loc] = useLocation();
+  const onSegment = loc.startsWith('/buyers/');
+  const onTrackRecord = loc === '/track-record';
 
   // Scroll-reveal: elements marked data-rv rise in once when they enter the
   // viewport. Reduced-motion users get everything visible via the CSS guard;
@@ -124,8 +149,8 @@ export default function PracticeShell({ home = false, children }: { home?: boole
           <nav className="pd-nav-links" aria-label="Site">
             <a href={anchor('#how')}>How it works</a>
             <a href={anchor('#industries')}>Industries</a>
-            <Link href="/track-record">Track record</Link>
-            <a href={anchor('#who')}>Who it's for</a>
+            <Link href="/track-record" className={onTrackRecord ? 'pd-navon' : undefined} aria-current={onTrackRecord ? 'page' : undefined}>Track record</Link>
+            <a href={anchor('#who')} className={onSegment ? 'pd-navon' : undefined} aria-current={onSegment ? 'page' : undefined}>Who it's for</a>
           </nav>
           <div className="pd-nav-ctas">
             <a

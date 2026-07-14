@@ -2,7 +2,7 @@
  * /about — "New firm. Old hands." (Paul's copy additions, 2026-07-11).
  * Why we built it → Your advisor (Paul Baker bio + portrait) → What we believe.
  */
-import PracticeShell from './PracticeShell';
+import PracticeShell, { PageCrumb } from './PracticeShell';
 import Mark from './Mark';
 import { Swoosh } from './atmo';
 import { bookHref, bookTarget } from './leads';
@@ -36,6 +36,7 @@ export default function About() {
       {/* ── Hero ── */}
       <section className="pd-hero" style={{ paddingBottom: 'clamp(50px, 6vw, 90px)' }}>
         <div style={{ position: 'relative', maxWidth: 1080, margin: '0 auto', textAlign: 'center' }}>
+          <PageCrumb parent={{ label: 'smbX', href: '/' }} here="About" />
           <h1 className="pd-h1 pd-h1-seg" style={{ margin: 0 }}>A new firm. Decades of execution.</h1>
           <div className="pd-sub" style={{ margin: '38px auto 0', maxWidth: 680 }}>
             <Mark /> was built to give buyers in the lower middle market something they have
