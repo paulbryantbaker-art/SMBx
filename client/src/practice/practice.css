@@ -122,6 +122,7 @@
 .rv-stagger.rv-in > *:nth-child(n+8) { transition-delay: 490ms; }
 @media (prefers-reduced-motion: reduce) {
   [data-rv], .rv-stagger > * { opacity: 1 !important; translate: none !important; transition: none !important; }
+  .pd-chat.expanded { animation: none !important; }
 }
 
 /* ─── sticky CTA — persistent ask on a long page ─── */
@@ -662,8 +663,12 @@
 }
 .pd-chat-inputrow:focus-within { border-color: #222222; }
 .pd-chat-input {
-  flex: 1; min-width: 0; border: none; padding: 13px 0;
+  flex: 1; min-width: 0; padding: 13px 0;
   font-size: 16.5px; color: #222222; outline: none; background: transparent;
+  /* Kill iOS Safari's native field chrome — the inset rounded box that read as
+     a distracting second box inside the input bar (Paul, 2026-07-14). */
+  -webkit-appearance: none; appearance: none;
+  border: none; border-radius: 0; box-shadow: none;
 }
 .pd-chat-input:disabled { color: var(--pd-tert); background: transparent; }
 .pd-send {
@@ -673,6 +678,61 @@
 }
 .pd-send:hover { background: var(--pd-cta-hover); }
 .pd-send:disabled { opacity: 0.55; cursor: default; }
+
+/* ─── Expanded chat surface ─── After the first turn the chat lifts out of the
+   hero into a focused surface: on desktop a docked side panel (the site stays
+   fully visible and interactive to its left — never a blocking modal), on
+   mobile a full-screen chat-app layout. A flex column so the message list
+   fills the height and the input pins to the bottom. (Paul, 2026-07-14.) */
+.pd-chat.expanded {
+  display: flex; flex-direction: column;
+  position: fixed; top: 92px; right: 24px; bottom: 24px;
+  width: min(600px, 46vw); max-width: none; margin: 0;
+  z-index: 45;
+  box-shadow: 0 30px 90px -22px rgba(34, 34, 34, 0.44);
+  animation: pd-drawer-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.pd-chat.expanded .pd-chat-head { flex: 0 0 auto; }
+.pd-chat.expanded .pd-msgs { flex: 1 1 auto; max-height: none; min-height: 0; }
+.pd-chat.expanded .pd-chat-inputrow { flex: 0 0 auto; }
+@keyframes pd-drawer-in { from { opacity: 0; transform: translateX(26px); } to { opacity: 1; transform: none; } }
+/* Minimize control — head's right edge, expanded state only. */
+.pd-chat-min {
+  margin-left: auto; flex: 0 0 auto;
+  width: 38px; height: 38px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--pd-hair); background: #fff; color: var(--pd-body);
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.pd-chat-min:hover { background: var(--pd-card); color: var(--pd-ink); }
+/* Inline placeholder left in the hero while the chat is docked, so the layout
+   holds its place — and a way to pull the chat back inline. */
+.pd-chat-holder {
+  margin: 76px auto 0; max-width: 860px;
+  display: flex; align-items: center; gap: 16px;
+  padding: 22px 26px; background: #fff;
+  border: 1px solid var(--pd-hair); border-radius: 24px;
+  box-shadow: 0 40px 100px -40px rgba(34, 34, 34, 0.16);
+}
+.pd-chat-holder-txt { flex: 0 1 auto; min-width: 0; }
+.pd-chat-holder-txt .t { font-weight: 800; font-size: 17px; color: var(--pd-ink); }
+.pd-chat-holder-txt .s { font-size: 14px; color: var(--pd-tert); margin-top: 2px; }
+/* Phones + small tablets: the expanded chat takes the whole screen (chat-app
+   feel), input pinned to the bottom, safe-area aware. It must paint OVER the
+   sticky nav — the showcase's own stacking context (z-index:1) otherwise traps
+   the fixed panel below the nav (z-50), so lift the showcase above it here. */
+@media (max-width: 900px) {
+  .pd-showcase:has(.pd-chat.expanded) { z-index: 80; }
+  .pd-chat.expanded {
+    inset: 0; top: 0; right: 0; bottom: 0;
+    width: auto; border-radius: 0; z-index: 80;
+    animation: pd-sheet-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .pd-chat.expanded .pd-chat-head { padding-top: calc(20px + env(safe-area-inset-top)); }
+  .pd-chat.expanded .pd-chat-inputrow { margin-bottom: calc(16px + env(safe-area-inset-bottom)); }
+  .pd-chat-holder { display: none; }
+}
+@keyframes pd-sheet-in { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
 
 /* segment-page hero is now the shared centered hero (the off-axis ghost
    numeral .pd-seghero/.pd-segstat was retired 2026-07-14 — decorative, read
