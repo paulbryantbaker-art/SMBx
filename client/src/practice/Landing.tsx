@@ -14,7 +14,7 @@ import PracticeShell from './PracticeShell';
 import YuliaIntake, { MapDoc, type PartialMap } from './YuliaIntake';
 import Mark from './Mark';
 import { AttributionLine } from './TrackRecord';
-import { BandArt, FootprintMap, Mesh, Swoosh } from './atmo';
+import { Swoosh } from './atmo';
 import { postPracticeLead, bookHref, bookTarget } from './leads';
 import { SEGMENTS } from './segmentData';
 import { trackEvent } from '../lib/analytics';
@@ -384,7 +384,6 @@ export default function Landing() {
       {/* ── Track record — the first dark movement, bracketed by bleed arcs ── */}
       <div style={{ marginTop: 'clamp(80px, 10vw, 150px)' }}><Swoosh dir="in" /></div>
       <section className="pd-dark bl-tr">
-        <BandArt><FootprintMap /></BandArt>
         <div className="pd-wrap pd-dark-pad">
           <div className="pd-seclabel">Selected transaction experience</div>
           <h2 className="pd-h2" data-rv>We've done this about 150 times.</h2>
@@ -621,7 +620,6 @@ export default function Landing() {
       {/* ── Whose side — a dark movement ── */}
       <div style={{ marginTop: 'clamp(96px, 11vw, 168px)' }}><Swoosh dir="in" /></div>
       <section className="pd-dark bl-side">
-        <BandArt><Mesh /></BandArt>
         <div className="pd-wrap pd-dark-pad">
           <div className="pd-seclabel">Whose side we're on</div>
           <div className="pd-askew rv-stagger" data-rv style={{ alignItems: 'end' }}>
