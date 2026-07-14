@@ -323,22 +323,22 @@ function EngagementShow() {
 export default function Landing() {
   return (
     <PracticeShell home>
-      {/* ── Hero — centered (Slack layout): statement, two CTAs, an honest
-             proof row (no fabricated logos), then the product showcase ── */}
+      {/* ── Hero — the chat is the centerpiece (Grok/Gemini): a compact
+             statement, then the engine front-and-center, with the secondary
+             ask + honest proof row beneath it (Paul, 2026-07-14). ── */}
       <section className="pd-hero pd-hero-c">
         <div className="pd-heroc-inner">
           <h1 className="pd-h1">
             We'll build and run your business acquisition strategy tailored to your&nbsp;goals.
           </h1>
           <p className="pd-sub pd-sub-c">
-            Institutional-grade corporate development, on demand. The acquisition engine builds
-            your strategy in minutes; our senior advisors close the deal.
+            Institutional-grade corporate development, on demand.
           </p>
-          <div className="pd-cta-row">
-            <a className="pd-pill-primary pd-pill-lg" href="#yulia" onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero' })}>Build your market map →</a>
-            <a className="pd-pill pd-pill-lg-quiet" href={bookHref()} target={bookTarget()} rel={bookTarget() ? 'noreferrer' : undefined} onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero' })}>Book a call</a>
-          </div>
-          <div className="pd-proofrow" data-rv>
+        </div>
+        <HeroShowcase />
+        <div className="pd-hero-below" data-rv>
+          <a className="pd-pill pd-pill-lg-quiet" href={bookHref()} target={bookTarget()} rel={bookTarget() ? 'noreferrer' : undefined} onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero' })}>Or book a call instead</a>
+          <div className="pd-proofrow">
             <span className="lab">Two decades on the buy side</span>
             <span className="dot">·</span>
             <span className="pf"><b>150+</b> acquisitions</span>
@@ -347,7 +347,6 @@ export default function Landing() {
             <span className="pf hot"><b>0</b> sell-side. Ever.</span>
           </div>
         </div>
-        <HeroShowcase />
       </section>
 
       {/* ── The gap — centered Slack intro, then a symmetric two-column

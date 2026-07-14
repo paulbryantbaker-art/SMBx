@@ -269,7 +269,6 @@ export function MapDoc({
 export default function YuliaIntake() {
   const [messages, setMessages] = useState<Msg[]>([{ from: 'y', text: OPENING }]);
   const [draft, setDraft] = useState('');
-  const [expanded, setExpanded] = useState(false);
   const [pending, setPending] = useState(false);
   const [live, setLive] = useState<StreamView | null>(null);
   const [done, setDone] = useState(false);
@@ -313,14 +312,6 @@ export default function YuliaIntake() {
     }
     el.scrollTop = el.scrollHeight;
   }, [messages, pending, live]);
-
-  // Escape minimizes the expanded surface back into the page.
-  useEffect(() => {
-    if (!expanded) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setExpanded(false); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [expanded]);
 
   const userTurns = messages.filter(m => m.from === 'u').length;
   const step = done ? 3 : Math.min(userTurns, 2);
@@ -381,12 +372,7 @@ export default function YuliaIntake() {
   const send = async () => {
     const text = draft.trim();
     if (!text || done || pending) return;
-    if (userTurns === 0) {
-      trackEvent('practice_intake_started');
-      // First turn → lift into the focused chat surface (mobile: full-screen
-      // chat-app; desktop: a docked side panel that leaves the site usable).
-      setExpanded(true);
-    }
+    if (userTurns === 0) trackEvent('practice_intake_started');
     trackEvent('practice_intake_step', { step: userTurns + 1 });
     const next: Msg[] = [...messages, { from: 'u', text }];
     setMessages(next);
@@ -453,28 +439,11 @@ export default function YuliaIntake() {
   const liveMapVisible = pending && live?.inMap && live.partial;
 
   return (
-    <>
-      {/* When the chat lifts into the docked panel, this keeps its place in the
-          hero so the layout doesn't collapse — and offers a way back inline. */}
-      {expanded && (
-        <div className="pd-chat-holder">
-          <img src="/logo-coral-x.png" alt="" style={{ height: 26, width: 'auto', display: 'block' }} />
-          <div className="pd-chat-holder-txt">
-            <div className="t">Acquisition Engine</div>
-            <div className="s">Session open in the panel →</div>
-          </div>
-        </div>
-      )}
-      <div id="yulia" className={`pd-chat${expanded ? ' expanded' : ''}`}>
-        <div className="pd-chat-head">
-          <img src="/logo-coral-x.png" alt="smbX.ai" style={{ height: 28, width: 'auto', display: 'block' }} />
-          <div style={{ fontWeight: 800, fontSize: 17 }}>Acquisition Engine</div>
-          {expanded && (
-            <button type="button" className="pd-chat-min" onClick={() => setExpanded(false)} aria-label="Minimize chat">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            </button>
-          )}
-        </div>
+    <div id="yulia" className="pd-chat">
+      <div className="pd-chat-head">
+        <img src="/logo-coral-x.png" alt="smbX.ai" style={{ height: 28, width: 'auto', display: 'block' }} />
+        <div style={{ fontWeight: 800, fontSize: 17 }}>Acquisition Engine</div>
+      </div>
       <div className="pd-msgs" ref={listRef}>
         {messages.map((m, i) => (
           m.map ? (
@@ -533,7 +502,6 @@ export default function YuliaIntake() {
         />
         <button type="button" className="pd-send" onClick={send} disabled={done || pending}>{sendLabel}</button>
       </div>
-      </div>
-    </>
+    </div>
   );
 }
