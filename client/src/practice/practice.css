@@ -122,7 +122,6 @@
 .rv-stagger.rv-in > *:nth-child(n+8) { transition-delay: 490ms; }
 @media (prefers-reduced-motion: reduce) {
   [data-rv], .rv-stagger > * { opacity: 1 !important; translate: none !important; transition: none !important; }
-  .pd-chat.expanded { animation: none !important; }
 }
 
 /* ─── sticky CTA — persistent ask on a long page ─── */
@@ -474,10 +473,15 @@
 /* ─── Slack-style homepage layout (2026-07-13, Paul: "mirror Slack, keep our
    colors"). Centered heroes/headers, a framed product showcase with pill-tabs
    that swap it, and curved "swoosh" dividers into deep-color bands. ─── */
-.pd-hero-c { flex-direction: column; text-align: center; padding-top: clamp(40px, 5vw, 84px); padding-bottom: clamp(20px, 3vw, 40px); }
+.pd-hero-c { flex-direction: column; text-align: center; padding-top: clamp(26px, 3.4vw, 56px); padding-bottom: clamp(20px, 3vw, 40px); }
 .pd-heroc-inner { position: relative; z-index: 1; width: 100%; max-width: var(--pd-max); margin: 0 auto; }
-.pd-hero-c .pd-h1 { max-width: 16em; margin: 0 auto; }
-.pd-sub-c { margin: 24px auto 0; max-width: 34em; }
+/* The landing hero is now the chat's stage — the headline is a compact lead-in,
+   not a full-height wall, so the engine card sits front-and-center in the first
+   viewport (Paul, 2026-07-14: "more front and center, like Grok or Gemini"). */
+.pd-hero-c .pd-h1 { max-width: 15em; margin: 0 auto; font-size: clamp(30px, 4.4vw, 58px); }
+.pd-sub-c { margin: 20px auto 0; max-width: 33em; }
+/* Secondary ask + proof, beneath the front-and-center chat. */
+.pd-hero-below { position: relative; z-index: 1; width: 100%; margin: clamp(26px, 3.4vw, 44px) auto 0; display: flex; flex-direction: column; align-items: center; gap: clamp(18px, 2.4vw, 28px); }
 .pd-cta-row { margin-top: 36px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 .pd-proofrow { margin-top: 34px; display: flex; gap: 10px 20px; justify-content: center; align-items: center; flex-wrap: wrap; }
 .pd-proofrow .lab { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--pd-tert); }
@@ -485,9 +489,10 @@
 .pd-proofrow .pf b { color: var(--pd-ink); font-weight: 800; }
 .pd-proofrow .pf.hot b { color: var(--pd-coral); }
 .pd-proofrow .dot { color: var(--pd-faint); }
+.pd-hero-below .pd-proofrow { margin-top: 0; }
 
 /* product showcase — the framed product with pill-tabs below (Slack signature) */
-.pd-showcase { position: relative; z-index: 1; width: 100%; max-width: 900px; margin: clamp(40px, 5vw, 72px) auto 0; padding: 0 var(--pd-pad-x); }
+.pd-showcase { position: relative; z-index: 1; width: 100%; max-width: 900px; margin: clamp(20px, 2.6vw, 36px) auto 0; padding: 0 var(--pd-pad-x); }
 .pd-show-stage > * { margin-left: auto; margin-right: auto; }
 .pd-showtabs { margin-top: 24px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
 .pd-showtabs button {
@@ -678,61 +683,6 @@
 }
 .pd-send:hover { background: var(--pd-cta-hover); }
 .pd-send:disabled { opacity: 0.55; cursor: default; }
-
-/* ─── Expanded chat surface ─── After the first turn the chat lifts out of the
-   hero into a focused surface: on desktop a docked side panel (the site stays
-   fully visible and interactive to its left — never a blocking modal), on
-   mobile a full-screen chat-app layout. A flex column so the message list
-   fills the height and the input pins to the bottom. (Paul, 2026-07-14.) */
-.pd-chat.expanded {
-  display: flex; flex-direction: column;
-  position: fixed; top: 92px; right: 24px; bottom: 24px;
-  width: min(600px, 46vw); max-width: none; margin: 0;
-  z-index: 45;
-  box-shadow: 0 30px 90px -22px rgba(34, 34, 34, 0.44);
-  animation: pd-drawer-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.pd-chat.expanded .pd-chat-head { flex: 0 0 auto; }
-.pd-chat.expanded .pd-msgs { flex: 1 1 auto; max-height: none; min-height: 0; }
-.pd-chat.expanded .pd-chat-inputrow { flex: 0 0 auto; }
-@keyframes pd-drawer-in { from { opacity: 0; transform: translateX(26px); } to { opacity: 1; transform: none; } }
-/* Minimize control — head's right edge, expanded state only. */
-.pd-chat-min {
-  margin-left: auto; flex: 0 0 auto;
-  width: 38px; height: 38px; border-radius: 50%;
-  display: inline-flex; align-items: center; justify-content: center;
-  border: 1px solid var(--pd-hair); background: #fff; color: var(--pd-body);
-  transition: background-color 160ms ease, color 160ms ease;
-}
-.pd-chat-min:hover { background: var(--pd-card); color: var(--pd-ink); }
-/* Inline placeholder left in the hero while the chat is docked, so the layout
-   holds its place — and a way to pull the chat back inline. */
-.pd-chat-holder {
-  margin: 76px auto 0; max-width: 860px;
-  display: flex; align-items: center; gap: 16px;
-  padding: 22px 26px; background: #fff;
-  border: 1px solid var(--pd-hair); border-radius: 24px;
-  box-shadow: 0 40px 100px -40px rgba(34, 34, 34, 0.16);
-}
-.pd-chat-holder-txt { flex: 0 1 auto; min-width: 0; }
-.pd-chat-holder-txt .t { font-weight: 800; font-size: 17px; color: var(--pd-ink); }
-.pd-chat-holder-txt .s { font-size: 14px; color: var(--pd-tert); margin-top: 2px; }
-/* Phones + small tablets: the expanded chat takes the whole screen (chat-app
-   feel), input pinned to the bottom, safe-area aware. It must paint OVER the
-   sticky nav — the showcase's own stacking context (z-index:1) otherwise traps
-   the fixed panel below the nav (z-50), so lift the showcase above it here. */
-@media (max-width: 900px) {
-  .pd-showcase:has(.pd-chat.expanded) { z-index: 80; }
-  .pd-chat.expanded {
-    inset: 0; top: 0; right: 0; bottom: 0;
-    width: auto; border-radius: 0; z-index: 80;
-    animation: pd-sheet-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-  .pd-chat.expanded .pd-chat-head { padding-top: calc(20px + env(safe-area-inset-top)); }
-  .pd-chat.expanded .pd-chat-inputrow { margin-bottom: calc(16px + env(safe-area-inset-bottom)); }
-  .pd-chat-holder { display: none; }
-}
-@keyframes pd-sheet-in { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
 
 /* segment-page hero is now the shared centered hero (the off-axis ghost
    numeral .pd-seghero/.pd-segstat was retired 2026-07-14 — decorative, read
