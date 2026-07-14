@@ -38,6 +38,11 @@ interface Msg { from: 'y' | 'u'; text?: string; map?: MapData; }
 const OPENING =
   "Tell us a bit about what you're looking for. Our acquisition engine takes just a couple of minutes to process your criteria and build a preliminary market map. Ready to start?";
 
+/** sessionStorage key for the intake conversation — the session survives
+ *  anything that remounts this component (the sample-read tab swap, a reload,
+ *  minimize/reopen on mobile). Session-scoped: a fresh visit starts fresh. */
+const SS_KEY = 'smbx_intake_v1';
+
 const HINTS = [
   'Sector & Strategy (e.g., "HVAC roll-up in the Southeast")',
   'Size & Geography (e.g., "$2–5M EBITDA, within 4 hours of Atlanta")',
@@ -275,22 +280,43 @@ export function MapDoc({
 }
 
 export default function YuliaIntake() {
-  const [messages, setMessages] = useState<Msg[]>([{ from: 'y', text: OPENING }]);
-  const [draft, setDraft] = useState('');
+  // Conversation state hydrates from sessionStorage so minimizing the mobile
+  // drawer, toggling the sample-read tab, or reloading never wipes a session
+  // (Paul, 2026-07-14: "minimize it, the chat experience is gone and started
+  // over").
+  const [messages, setMessages] = useState<Msg[]>(() => {
+    try {
+      const s = JSON.parse(sessionStorage.getItem(SS_KEY) || 'null');
+      if (s && Array.isArray(s.messages) && s.messages.length > 0) return s.messages;
+    } catch { /* fresh session */ }
+    return [{ from: 'y', text: OPENING }];
+  });
+  const [done, setDone] = useState<boolean>(() => {
+    try { return JSON.parse(sessionStorage.getItem(SS_KEY) || 'null')?.done === true; } catch { return false; }
+  });
+  const [draft, setDraft] = useState<string>(() => {
+    try { return JSON.parse(sessionStorage.getItem(SS_KEY) || 'null')?.draft || ''; } catch { return ''; }
+  });
   const [pending, setPending] = useState(false);
   const [live, setLive] = useState<StreamView | null>(null);
-  const [done, setDone] = useState(false);
   const [pdfState, setPdfState] = useState<'idle' | 'busy' | 'error'>('idle');
   // On phones the chat lifts into a slide-up sheet so typing isn't buried in the
   // page under the keyboard (Paul, 2026-07-14: "a drawer that slides up and can
   // be minimized"). Desktop ignores this — the chat stays inline, front-and-center.
   const [open, setOpen] = useState(false);
-  const mapTracked = useRef(false);
+  const mapTracked = useRef(messages.some(m => m.map)); // never re-count a restored map
   const dwell = useRef<{ start: number; verdict: string } | null>(null);
   const dwellFired = useRef(false);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const scrimRef = useRef<HTMLDivElement>(null);
   const isMobile = () => typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches;
+
+  // Persist every turn (and the in-flight draft) for the life of the tab.
+  useEffect(() => {
+    try { sessionStorage.setItem(SS_KEY, JSON.stringify({ messages, done, draft })); } catch { /* quota/private mode */ }
+  }, [messages, done, draft]);
 
   const fireDwell = () => {
     if (!dwell.current || dwellFired.current) return;
@@ -396,11 +422,59 @@ export default function YuliaIntake() {
     };
   }, [open]);
 
+  // iOS ignores overflow CSS for touch panning — contain touches at the event
+  // level too: gestures on the sheet only scroll the message list; gestures on
+  // the scrim scroll nothing.
+  useEffect(() => {
+    if (!open || !isMobile()) return;
+    const sheet = sheetRef.current;
+    const scrim = scrimRef.current;
+    const onSheetMove = (e: TouchEvent) => {
+      if (!(e.target as Element | null)?.closest?.('.pd-msgs')) e.preventDefault();
+    };
+    const onScrimMove = (e: TouchEvent) => e.preventDefault();
+    sheet?.addEventListener('touchmove', onSheetMove, { passive: false });
+    scrim?.addEventListener('touchmove', onScrimMove, { passive: false });
+    return () => {
+      sheet?.removeEventListener('touchmove', onSheetMove);
+      scrim?.removeEventListener('touchmove', onScrimMove);
+    };
+  }, [open]);
+
+  // Keep the input above the on-screen keyboard: track the visual viewport and
+  // hand the keyboard's height to CSS (--pd-kb lifts the sheet's bottom edge).
+  useEffect(() => {
+    if (!open || !isMobile()) return;
+    const vv = window.visualViewport;
+    const el = sheetRef.current;
+    if (!vv || !el) return;
+    const apply = () => {
+      const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      el.style.setProperty('--pd-kb', `${Math.round(kb)}px`);
+    };
+    apply();
+    vv.addEventListener('resize', apply);
+    vv.addEventListener('scroll', apply);
+    return () => {
+      vv.removeEventListener('resize', apply);
+      vv.removeEventListener('scroll', apply);
+      el.style.removeProperty('--pd-kb');
+    };
+  }, [open]);
+
   // Opening the sheet: slide up, then try to land focus in the real field.
   const openSheet = () => {
     setOpen(true);
     requestAnimationFrame(() => inputRef.current?.focus());
   };
+
+  // Other components (the showcase's "Map your market" tab) can ask the drawer
+  // to open on phones without reaching into this component.
+  useEffect(() => {
+    const onAsk = () => { if (isMobile()) openSheet(); };
+    window.addEventListener('smbx:open-intake', onAsk);
+    return () => window.removeEventListener('smbx:open-intake', onAsk);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // On phones every "#yulia" ask (nav CTA, sticky CTA, hero pills) opens the
   // drawer directly instead of scrolling to an inline card the visitor then
@@ -551,8 +625,8 @@ export default function YuliaIntake() {
       </div>
 
       {/* Scrim behind the mobile sheet (CSS-hidden on desktop). */}
-      <div className={`pd-chat-scrim${open ? ' on' : ''}`} onClick={() => setOpen(false)} aria-hidden="true" />
-      <div className={`pd-chat${open ? ' open' : ''}`}>
+      <div ref={scrimRef} className={`pd-chat-scrim${open ? ' on' : ''}`} onClick={() => setOpen(false)} aria-hidden="true" />
+      <div ref={sheetRef} className={`pd-chat${open ? ' open' : ''}`}>
         <div className="pd-chat-head">
           {/* Grab handle — shown only in the mobile sheet. */}
           <span className="pd-chat-grab" aria-hidden="true" />

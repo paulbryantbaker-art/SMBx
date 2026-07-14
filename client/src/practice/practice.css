@@ -489,7 +489,10 @@
 .pd-hero-c .pd-h1 { max-width: 15em; margin: 0 auto; font-size: clamp(36px, 4.6vw, 64px); }
 .pd-sub-c { margin: 20px auto 0; max-width: 33em; }
 /* Secondary ask + proof, beneath the front-and-center chat. */
-.pd-hero-below { position: relative; z-index: 1; width: 100%; margin: clamp(26px, 3.4vw, 44px) auto 0; display: flex; flex-direction: column; align-items: center; gap: clamp(18px, 2.4vw, 28px); }
+/* One quiet meta line under the showcase — the secondary ask and the proof
+   row share a single row (stacking them read as clutter), wrapping on small
+   screens. */
+.pd-hero-below { position: relative; z-index: 1; width: 100%; margin: clamp(20px, 2.4vw, 30px) auto 0; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px 28px; }
 .pd-cta-row { margin-top: 36px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 .pd-proofrow { margin-top: 34px; display: flex; gap: 10px 20px; justify-content: center; align-items: center; flex-wrap: wrap; }
 .pd-proofrow .lab { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--pd-tert); }
@@ -503,9 +506,12 @@
 .pd-showcase { position: relative; z-index: 1; width: 100%; max-width: 960px; margin: clamp(22px, 2.8vw, 40px) auto 0; padding: 0 var(--pd-pad-x); }
 .pd-show-stage > * { margin-left: auto; margin-right: auto; }
 /* In the hero showcase the chat is the stage — drop the standalone card's top
-   margin so it sits tight under the lead-in, and give it real presence. */
+   margin so it sits tight under the lead-in. The resting card HUGS its content
+   (opening line, chips, input) — the old min-height put a dead hole in the
+   middle and unbalanced the fold (Paul, 2026-07-14: "too crowded… not
+   balanced"); once a conversation grows, max-height + internal scroll take
+   over as before. */
 .pd-show-stage .pd-chat { margin-top: 0; }
-.pd-show-stage .pd-msgs { min-height: clamp(150px, 20vh, 240px); }
 .pd-showtabs { margin-top: 24px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
 .pd-showtabs button {
   border: none; background: transparent; border-radius: 99px;
@@ -726,17 +732,22 @@
      own stacking context (z-index:1) would otherwise trap them. */
   .pd-showcase:has(.pd-chat.open) { z-index: 90; }
 
-  /* Launcher card — the doorway on the home page. */
+  /* Launcher card — the doorway on the home page. Compact on purpose so the
+     whole card (through its input bar) fits the first phone screen (Paul,
+     2026-07-14: "awkwardly spaced… needs to fit the mobile screen better"). */
   .pd-chat-launch {
     display: block; width: 100%; text-align: left;
-    margin: 48px auto 0; background: #fff;
+    margin: 26px auto 0; background: #fff;
     border: 1px solid var(--pd-hair); border-radius: 20px;
     box-shadow: 0 40px 100px -32px rgba(34, 34, 34, 0.28);
-    padding: 18px 20px 20px; cursor: pointer;
+    padding: 16px 18px 18px; cursor: pointer;
   }
   .pd-chat-launch .pd-chat-head { padding: 0; }
-  .pd-launch-body { margin-top: 12px; font-size: 16.5px; line-height: 1.6; color: var(--pd-ink); font-weight: 600; }
-  .pd-chat-launch .pd-chips { padding: 12px 0 0; }
+  .pd-launch-body { margin-top: 10px; font-size: 16px; line-height: 1.55; color: var(--pd-ink); font-weight: 600; }
+  .pd-chat-launch .pd-chips { padding: 10px 0 0; }
+  /* Two starter chips are an invitation; four are a wall — trim the tail so
+     the input bar stays on the first screen. */
+  .pd-chat-launch .pd-chip:nth-child(n + 3) { display: none; }
   .pd-launch-input {
     display: flex; width: 100%; align-items: center; gap: 10px;
     margin: 14px 0 0; padding: 6px 6px 6px 14px; background: #fff; text-align: left;
@@ -755,11 +766,14 @@
   }
   .pd-chat-scrim.on { opacity: 1; pointer-events: auto; }
 
-  /* The sheet — parked below the viewport, slides up on .open. */
+  /* The sheet — parked below the viewport, slides up on .open. --pd-kb is the
+     on-screen keyboard height (set from the visualViewport by the component):
+     it lifts the sheet's bottom edge and shortens it so the input row always
+     sits just above the keyboard instead of hiding behind it. */
   .pd-chat {
-    position: fixed; left: 0; right: 0; bottom: 0; top: auto;
+    position: fixed; left: 0; right: 0; bottom: var(--pd-kb, 0px); top: auto;
     width: auto; max-width: none; margin: 0;
-    height: 92vh; height: 92dvh; z-index: 90;
+    height: calc(92vh - var(--pd-kb, 0px)); height: calc(92dvh - var(--pd-kb, 0px)); z-index: 90;
     display: flex; flex-direction: column;
     border-radius: 22px 22px 0 0;
     box-shadow: 0 -18px 60px -18px rgba(0, 0, 0, 0.42);
@@ -1079,6 +1093,13 @@
   .pd-indexrow { gap: 14px; padding: 28px 0; }
   .pd-stats { grid-template-columns: 1fr; gap: 52px; }
   .pd-ledger-head { flex-direction: column; align-items: flex-start !important; gap: 14px !important; }
+  /* Phone fold: the lead-in stays a LEAD-IN — smaller statement, tighter sub —
+     so the launcher card (through its input bar) fits the first screen. */
+  .pd-hero-c { padding-top: 18px; }
+  .pd-hero-c .pd-h1 { font-size: clamp(28px, 8.6vw, 36px); }
+  .pd-sub { font-size: 18px; }
+  .pd-sub-c { margin-top: 12px; max-width: 26em; }
+  .pd-hero-below { margin-top: 18px; gap: 12px 20px; }
   /* (.pd-chat itself is the fixed bottom sheet on mobile — its geometry lives
      in the ≤900px block above; only inner paddings tighten here.) */
   .pd-msgs { padding: 12px 20px 4px; }
