@@ -150,14 +150,19 @@
    The rhythm device: 2–3 points in the scroll go dark. Everything inside
    re-reads its colors from these vars, so components adapt untouched. */
 .pd-dark {
-  --pd-ink: #F5F5F5;
-  --pd-body: #A9A9A9;
-  --pd-tert: #7E7E7E;
-  --pd-faint: #5E5E5E;
+  /* Over the textured bands ALL reading text is bright white for legibility
+     (Paul, 2026-07-14) — body, meta and the eyebrow labels/tags (which keyed
+     off coral and were the hardest to read on the coral waves). Hierarchy now
+     comes from size/weight, not color. Links keep a bright coral for
+     affordance (see .pd-dark a.pd-link below). */
+  --pd-ink: #FFFFFF;
+  --pd-body: #F4F4F4;
+  --pd-tert: #E6E6E6;
+  --pd-faint: #CFCFCF;
   --pd-card: #1E1E1E;
   --pd-border: #3D3D3D;
-  --pd-hair: rgba(255, 255, 255, 0.13);
-  --pd-coral-link: #FF7A8F;
+  --pd-hair: rgba(255, 255, 255, 0.16);
+  --pd-coral-link: #FFFFFF;
   width: 100%;
   /* Full-bleed texture (a dark coral-black flowing-wave surface): near-black on
      the left where the headline/body sit — a left legibility veil keeps text
@@ -174,6 +179,9 @@
 .pd-dark-pad { padding-top: clamp(104px, 12vw, 184px); padding-bottom: clamp(104px, 12vw, 184px); }
 .pd-dark a.pd-pill, .pd-dark a.pd-pill:hover { color: var(--pd-ink); }
 .pd-dark .pd-pill:hover { border-color: #f5f5f5; }
+/* text links stay a bright, legible coral so they still read as links even
+   with all other dark-band text white */
+.pd-dark a.pd-link, .pd-dark a.pd-link:hover { color: #FFB3BF; }
 
 /* ─── type ─── */
 /* ─── unified type scale (2026-07-13 consistency pass) ───
@@ -722,7 +730,7 @@
   margin-top: 48px;
 }
 .pd-anchorcard .k { font-size: 21px; font-weight: 700; letter-spacing: -0.012em; line-height: 1.25; }
-.pd-anchorcard .b { margin-top: 12px; font-size: 17px; line-height: 1.7; color: rgba(255, 255, 255, 0.72); max-width: 46em; }
+.pd-anchorcard .b { margin-top: 12px; font-size: 17px; line-height: 1.7; color: rgba(255, 255, 255, 0.92); max-width: 46em; }
 .pd-huntboard { border-top: 1px solid var(--pd-hair); margin-top: 22px; }
 .pd-hunt {
   display: grid; grid-template-columns: 56px minmax(0, 4fr) minmax(0, 7fr);
