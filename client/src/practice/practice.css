@@ -331,14 +331,30 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--pd-hair);
+  transition: box-shadow 0.28s ease, border-color 0.28s ease, background 0.28s ease;
 }
 .pd-nav {
   max-width: var(--pd-max); margin: 0 auto;
   display: flex; align-items: center; justify-content: space-between;
   padding: 20px var(--pd-pad-x);
   gap: 16px;
+  transition: padding 0.28s ease;
 }
-.pd-nav-logo { height: 44px; width: auto; display: block; margin: -6px 0; }
+.pd-nav-logo { height: 44px; width: auto; display: block; margin: -6px 0; transition: height 0.28s ease; }
+/* Condensed on scroll — the nav stays put (sticky) but shrinks to reclaim ~40%
+   of its height, so the user never scrolls back up yet it barely intrudes
+   (Paul, 2026-07-14). Tighter padding + smaller logo + smaller pills, and it
+   lifts onto a soft shadow so it reads as a slim floating bar. */
+.pd-navwrap.min {
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom-color: transparent;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.07);
+}
+.pd-navwrap.min .pd-nav { padding-top: 9px; padding-bottom: 9px; }
+.pd-navwrap.min .pd-nav-logo { height: 30px; }
+.pd-navwrap.min .pd-nav-ctas .pd-pill,
+.pd-navwrap.min .pd-nav-ctas .pd-pill-primary { padding-top: 9px; padding-bottom: 9px; }
+.pd-nav-ctas .pd-pill, .pd-nav-ctas .pd-pill-primary { transition: padding 0.28s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
 .pd-nav-links { display: flex; gap: clamp(24px, 3vw, 44px); font-size: 15px; font-weight: 600; }
 .pd-nav-links a { color: var(--pd-body); }
 .pd-nav-links a:hover { color: var(--pd-ink); }
