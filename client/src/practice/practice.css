@@ -90,6 +90,13 @@
 /* Micro-craft: a considered keyboard focus everywhere in the scope. */
 .pd :focus-visible { outline: 2px solid var(--pd-ink); outline-offset: 2px; border-radius: 4px; }
 .pd-dark :focus-visible { outline-color: #f5f5f5; }
+/* Text inputs match :focus-visible on ANY focus (spec), so the global ring drew
+   a second rectangle inside the chat bar the moment the field was active — the
+   "weird inner box" (Paul, ×3). The bar itself carries the focus state instead
+   (.pd-chat-inputrow:focus-within darkens to ink), so keep the ring off this
+   one borderless field. (Standalone .pd-input fields keep the ring — they own
+   their border, so the ring reads as focus, not a double box.) */
+.pd .pd-chat-input:focus-visible { outline: none; }
 
 /* Anchor-qualified color overrides — the `.pd a` base rules (0,1,1 / 0,2,1)
    outrank every single-class color rule (0,1,0), which silently rendered
@@ -122,7 +129,7 @@
 .rv-stagger.rv-in > *:nth-child(n+8) { transition-delay: 490ms; }
 @media (prefers-reduced-motion: reduce) {
   [data-rv], .rv-stagger > * { opacity: 1 !important; translate: none !important; transition: none !important; }
-  .pd-chat.sheet, .pd-chat-scrim.on { animation: none !important; }
+  .pd-chat, .pd-chat-scrim { transition: none !important; }
 }
 
 /* ─── sticky CTA — persistent ask on a long page ─── */
@@ -610,7 +617,7 @@
   text-align: left; overflow: hidden; scroll-margin-top: 120px;
 }
 .pd-chat-head { display: flex; align-items: center; gap: 12px; padding: 24px 32px 0; }
-.pd-msgs { padding: 14px 32px 4px; max-height: 540px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.pd-msgs { padding: 14px 32px 4px; max-height: 540px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; overscroll-behavior: contain; }
 .pd-msgrow { display: flex; padding: 9px 0; }
 .pd-bub { font-size: 17px; line-height: 1.7; }
 .pd-bub-y { max-width: 94%; margin-right: auto; color: var(--pd-ink); }
@@ -691,8 +698,11 @@
 
 /* Chat header title. */
 .pd-chat-title { font-weight: 800; font-size: 17px; color: var(--pd-ink); }
-/* Grab handle, minimize button, scrim — all mobile-sheet only, hidden here. */
-.pd-chat-grab, .pd-chat-min, .pd-chat-scrim { display: none; }
+/* Grab handle, minimize button, scrim, launcher — all mobile-only, hidden here. */
+.pd-chat-grab, .pd-chat-min, .pd-chat-scrim, .pd-chat-launch { display: none; }
+/* Zone wrapper — the #yulia anchor target that holds the inline card (desktop)
+   or the launcher (mobile), so hash-jumps land somewhere in-flow on both. */
+.pd-chat-zone { width: 100%; }
 
 /* ── Quick-start suggestion chips (Paul: "adding direction and input to the
    chat") — tappable thesis starters that drop into the field. ── */
@@ -704,46 +714,82 @@
 }
 .pd-chip:hover { border-color: var(--pd-ink); color: var(--pd-ink); background: var(--pd-card); }
 
-/* ── Mobile: the chat lifts into a slide-up sheet so typing sits above the
-   keyboard, not buried in the page (Paul, 2026-07-14). It must paint over the
-   sticky nav — the showcase's own stacking context (z-index:1) otherwise traps
-   the fixed sheet below it, so lift the showcase here. Desktop keeps the chat
-   inline and front-and-center (the .sheet class does nothing there). ── */
+/* ── Mobile: the home page keeps a chat-shaped LAUNCHER (never a real input);
+   the actual chat is a bottom sheet that is ALWAYS position:fixed — parked
+   off-screen below the viewport until opened. Because it never sits in the
+   page flow on mobile, opening it causes zero reflow (the old inline→fixed
+   jump read as awkward), and transform transitions animate the slide both up
+   AND down. The page behind is scroll-locked from the component while open.
+   Desktop is untouched: launcher/scrim/sheet rules live only in this query. ── */
 @media (max-width: 900px) {
-  .pd-showcase:has(.pd-chat.sheet) { z-index: 90; }
-  .pd-chat-scrim.on {
-    display: block; position: fixed; inset: 0; z-index: 88;
-    background: rgba(20, 18, 18, 0.5); animation: pd-fade-in 0.24s ease both;
+  /* The sheet + scrim must paint over the sticky nav (z 50); the showcase's
+     own stacking context (z-index:1) would otherwise trap them. */
+  .pd-showcase:has(.pd-chat.open) { z-index: 90; }
+
+  /* Launcher card — the doorway on the home page. */
+  .pd-chat-launch {
+    display: block; width: 100%; text-align: left;
+    margin: 48px auto 0; background: #fff;
+    border: 1px solid var(--pd-hair); border-radius: 20px;
+    box-shadow: 0 40px 100px -32px rgba(34, 34, 34, 0.28);
+    padding: 18px 20px 20px; cursor: pointer;
   }
-  .pd-chat.sheet {
+  .pd-chat-launch .pd-chat-head { padding: 0; }
+  .pd-launch-body { margin-top: 12px; font-size: 16.5px; line-height: 1.6; color: var(--pd-ink); font-weight: 600; }
+  .pd-chat-launch .pd-chips { padding: 12px 0 0; }
+  .pd-launch-input {
+    display: flex; width: 100%; align-items: center; gap: 10px;
+    margin: 14px 0 0; padding: 6px 6px 6px 14px; background: #fff; text-align: left;
+  }
+  .pd-launch-input .ph {
+    flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    font-size: 16px; color: var(--pd-tert); padding: 12px 0;
+  }
+  .pd-launch-input .pd-send { padding: 12px 18px; }
+
+  /* Scrim — always mounted so it can fade both ways. */
+  .pd-chat-scrim {
+    display: block; position: fixed; inset: 0; z-index: 88;
+    background: rgba(20, 18, 18, 0.5); touch-action: none;
+    opacity: 0; pointer-events: none; transition: opacity 0.28s ease;
+  }
+  .pd-chat-scrim.on { opacity: 1; pointer-events: auto; }
+
+  /* The sheet — parked below the viewport, slides up on .open. */
+  .pd-chat {
     position: fixed; left: 0; right: 0; bottom: 0; top: auto;
     width: auto; max-width: none; margin: 0;
-    height: 92vh; max-height: 92vh; z-index: 90;
+    height: 92vh; height: 92dvh; z-index: 90;
     display: flex; flex-direction: column;
     border-radius: 22px 22px 0 0;
     box-shadow: 0 -18px 60px -18px rgba(0, 0, 0, 0.42);
-    animation: pd-sheet-up 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+    transform: translateY(103%);
+    visibility: hidden;
+    transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.36s;
   }
-  .pd-chat.sheet .pd-chat-head {
+  .pd-chat.open {
+    transform: none;
+    visibility: visible;
+    transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .pd-chat .pd-chat-head {
     flex: 0 0 auto; position: relative;
-    padding: calc(24px + env(safe-area-inset-top, 0px)) 20px 14px;
+    padding: 24px 20px 14px;
     border-bottom: 1px solid var(--pd-hair);
   }
-  .pd-chat.sheet .pd-chat-grab {
+  .pd-chat .pd-chat-grab {
     display: block; position: absolute; top: 9px; left: 50%; transform: translateX(-50%);
     width: 42px; height: 5px; border-radius: 99px; background: var(--pd-border);
   }
-  .pd-chat.sheet .pd-chat-min {
+  .pd-chat .pd-chat-min {
     display: inline-flex; align-items: center; justify-content: center;
     margin-left: auto; flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%;
     border: 1px solid var(--pd-hair); background: #fff; color: var(--pd-body);
   }
-  .pd-chat.sheet .pd-msgs { flex: 1 1 auto; max-height: none; min-height: 0; }
-  .pd-chat.sheet .pd-chips { flex: 0 0 auto; }
-  .pd-chat.sheet .pd-chat-inputrow { flex: 0 0 auto; margin-bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
+  .pd-chat .pd-msgs { flex: 1 1 auto; max-height: none; min-height: 0; }
+  .pd-chat .pd-chips { flex: 0 0 auto; }
+  .pd-chat .pd-chat-inputrow { flex: 0 0 auto; margin-bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
 }
-@keyframes pd-sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
-@keyframes pd-fade-in { from { opacity: 0; } to { opacity: 1; } }
 
 /* segment-page hero is now the shared centered hero (the off-axis ghost
    numeral .pd-seghero/.pd-segstat was retired 2026-07-14 — decorative, read
@@ -1033,12 +1079,13 @@
   .pd-indexrow { gap: 14px; padding: 28px 0; }
   .pd-stats { grid-template-columns: 1fr; gap: 52px; }
   .pd-ledger-head { flex-direction: column; align-items: flex-start !important; gap: 14px !important; }
-  .pd-chat { margin-top: 48px; border-radius: 20px; }
-  .pd-chat-head { padding: 18px 20px 0; }
-  .pd-msgs { padding: 12px 20px 4px; max-height: 480px; }
+  /* (.pd-chat itself is the fixed bottom sheet on mobile — its geometry lives
+     in the ≤900px block above; only inner paddings tighten here.) */
+  .pd-msgs { padding: 12px 20px 4px; }
   .pd-msgs .pd-msgrow:first-child .pd-bub-y { font-size: 18px; }
   .pd-bub-u { max-width: 86%; }
-  .pd-chat-inputrow { margin: 10px 14px 18px; padding: 6px 6px 6px 14px; }
+  .pd-chips { padding-left: 20px; padding-right: 20px; }
+  .pd-chat .pd-chat-inputrow { margin: 10px 14px calc(14px + env(safe-area-inset-bottom, 0px)); padding: 6px 6px 6px 14px; }
   .pd-send { padding: 12px 18px; }
   .pd-map { padding: 20px 18px 18px; }
   .pd-map .map-step { gap: 18px; }
