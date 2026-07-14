@@ -122,6 +122,7 @@
 .rv-stagger.rv-in > *:nth-child(n+8) { transition-delay: 490ms; }
 @media (prefers-reduced-motion: reduce) {
   [data-rv], .rv-stagger > * { opacity: 1 !important; translate: none !important; transition: none !important; }
+  .pd-chat.sheet, .pd-chat-scrim.on { animation: none !important; }
 }
 
 /* ─── sticky CTA — persistent ask on a long page ─── */
@@ -473,12 +474,12 @@
 /* ─── Slack-style homepage layout (2026-07-13, Paul: "mirror Slack, keep our
    colors"). Centered heroes/headers, a framed product showcase with pill-tabs
    that swap it, and curved "swoosh" dividers into deep-color bands. ─── */
-.pd-hero-c { flex-direction: column; text-align: center; padding-top: clamp(26px, 3.4vw, 56px); padding-bottom: clamp(20px, 3vw, 40px); }
+.pd-hero-c { flex-direction: column; text-align: center; padding-top: clamp(34px, 4.2vw, 76px); padding-bottom: clamp(24px, 3.4vw, 52px); }
 .pd-heroc-inner { position: relative; z-index: 1; width: 100%; max-width: var(--pd-max); margin: 0 auto; }
 /* The landing hero is now the chat's stage — the headline is a compact lead-in,
    not a full-height wall, so the engine card sits front-and-center in the first
    viewport (Paul, 2026-07-14: "more front and center, like Grok or Gemini"). */
-.pd-hero-c .pd-h1 { max-width: 15em; margin: 0 auto; font-size: clamp(30px, 4.4vw, 58px); }
+.pd-hero-c .pd-h1 { max-width: 15em; margin: 0 auto; font-size: clamp(36px, 4.6vw, 64px); }
 .pd-sub-c { margin: 20px auto 0; max-width: 33em; }
 /* Secondary ask + proof, beneath the front-and-center chat. */
 .pd-hero-below { position: relative; z-index: 1; width: 100%; margin: clamp(26px, 3.4vw, 44px) auto 0; display: flex; flex-direction: column; align-items: center; gap: clamp(18px, 2.4vw, 28px); }
@@ -492,8 +493,12 @@
 .pd-hero-below .pd-proofrow { margin-top: 0; }
 
 /* product showcase — the framed product with pill-tabs below (Slack signature) */
-.pd-showcase { position: relative; z-index: 1; width: 100%; max-width: 900px; margin: clamp(20px, 2.6vw, 36px) auto 0; padding: 0 var(--pd-pad-x); }
+.pd-showcase { position: relative; z-index: 1; width: 100%; max-width: 960px; margin: clamp(22px, 2.8vw, 40px) auto 0; padding: 0 var(--pd-pad-x); }
 .pd-show-stage > * { margin-left: auto; margin-right: auto; }
+/* In the hero showcase the chat is the stage — drop the standalone card's top
+   margin so it sits tight under the lead-in, and give it real presence. */
+.pd-show-stage .pd-chat { margin-top: 0; }
+.pd-show-stage .pd-msgs { min-height: clamp(150px, 20vh, 240px); }
 .pd-showtabs { margin-top: 24px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
 .pd-showtabs button {
   border: none; background: transparent; border-radius: 99px;
@@ -683,6 +688,62 @@
 }
 .pd-send:hover { background: var(--pd-cta-hover); }
 .pd-send:disabled { opacity: 0.55; cursor: default; }
+
+/* Chat header title. */
+.pd-chat-title { font-weight: 800; font-size: 17px; color: var(--pd-ink); }
+/* Grab handle, minimize button, scrim — all mobile-sheet only, hidden here. */
+.pd-chat-grab, .pd-chat-min, .pd-chat-scrim { display: none; }
+
+/* ── Quick-start suggestion chips (Paul: "adding direction and input to the
+   chat") — tappable thesis starters that drop into the field. ── */
+.pd-chips { display: flex; flex-wrap: wrap; gap: 9px; padding: 6px 32px 4px; }
+.pd-chip {
+  border: 1px solid var(--pd-border); background: #fff; color: var(--pd-body);
+  border-radius: 99px; padding: 9px 16px; font-size: 14px; font-weight: 600; white-space: nowrap;
+  cursor: pointer; transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
+}
+.pd-chip:hover { border-color: var(--pd-ink); color: var(--pd-ink); background: var(--pd-card); }
+
+/* ── Mobile: the chat lifts into a slide-up sheet so typing sits above the
+   keyboard, not buried in the page (Paul, 2026-07-14). It must paint over the
+   sticky nav — the showcase's own stacking context (z-index:1) otherwise traps
+   the fixed sheet below it, so lift the showcase here. Desktop keeps the chat
+   inline and front-and-center (the .sheet class does nothing there). ── */
+@media (max-width: 900px) {
+  .pd-showcase:has(.pd-chat.sheet) { z-index: 90; }
+  .pd-chat-scrim.on {
+    display: block; position: fixed; inset: 0; z-index: 88;
+    background: rgba(20, 18, 18, 0.5); animation: pd-fade-in 0.24s ease both;
+  }
+  .pd-chat.sheet {
+    position: fixed; left: 0; right: 0; bottom: 0; top: auto;
+    width: auto; max-width: none; margin: 0;
+    height: 92vh; max-height: 92vh; z-index: 90;
+    display: flex; flex-direction: column;
+    border-radius: 22px 22px 0 0;
+    box-shadow: 0 -18px 60px -18px rgba(0, 0, 0, 0.42);
+    animation: pd-sheet-up 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .pd-chat.sheet .pd-chat-head {
+    flex: 0 0 auto; position: relative;
+    padding: calc(24px + env(safe-area-inset-top, 0px)) 20px 14px;
+    border-bottom: 1px solid var(--pd-hair);
+  }
+  .pd-chat.sheet .pd-chat-grab {
+    display: block; position: absolute; top: 9px; left: 50%; transform: translateX(-50%);
+    width: 42px; height: 5px; border-radius: 99px; background: var(--pd-border);
+  }
+  .pd-chat.sheet .pd-chat-min {
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-left: auto; flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%;
+    border: 1px solid var(--pd-hair); background: #fff; color: var(--pd-body);
+  }
+  .pd-chat.sheet .pd-msgs { flex: 1 1 auto; max-height: none; min-height: 0; }
+  .pd-chat.sheet .pd-chips { flex: 0 0 auto; }
+  .pd-chat.sheet .pd-chat-inputrow { flex: 0 0 auto; margin-bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
+}
+@keyframes pd-sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes pd-fade-in { from { opacity: 0; } to { opacity: 1; } }
 
 /* segment-page hero is now the shared centered hero (the off-axis ghost
    numeral .pd-seghero/.pd-segstat was retired 2026-07-14 — decorative, read

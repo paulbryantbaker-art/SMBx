@@ -58,6 +58,14 @@ const TYPE_SAMPLES = [
   'Managed IT tuck-ins under $10M revenue',
 ];
 
+/** Quick-start chips — a short label to tap, the fuller thesis it drops in. */
+const CHIPS: { label: string; value: string }[] = [
+  { label: 'HVAC roll-up', value: 'HVAC roll-up in the Southeast' },
+  { label: 'Fire & life safety', value: 'Fire & life safety platform, Texas metros' },
+  { label: 'Managed IT tuck-ins', value: 'Managed IT tuck-ins under $10M revenue' },
+  { label: 'Commercial landscaping', value: 'Commercial landscaping, GA and the Carolinas' },
+];
+
 /** Narration for the block currently being written — shown while the map
  *  streams, so the work is legible without pretending anything. System
  *  voice (Acquisition Engine), not a persona. */
@@ -273,10 +281,16 @@ export default function YuliaIntake() {
   const [live, setLive] = useState<StreamView | null>(null);
   const [done, setDone] = useState(false);
   const [pdfState, setPdfState] = useState<'idle' | 'busy' | 'error'>('idle');
+  // On phones the chat lifts into a slide-up sheet so typing isn't buried in the
+  // page under the keyboard (Paul, 2026-07-14: "a drawer that slides up and can
+  // be minimized"). Desktop ignores this — the chat stays inline, front-and-center.
+  const [open, setOpen] = useState(false);
   const mapTracked = useRef(false);
   const dwell = useRef<{ start: number; verdict: string } | null>(null);
   const dwellFired = useRef(false);
   const listRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const isMobile = () => typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches;
 
   const fireDwell = () => {
     if (!dwell.current || dwellFired.current) return;
@@ -346,6 +360,24 @@ export default function YuliaIntake() {
   }, [done, userTurns]);
 
   const hint = step === 0 && ghost ? `Sector & Strategy — "${ghost}▏"` : HINTS[step];
+
+  // Esc / scrim / chevron all minimize the mobile sheet.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  // Focusing the field on a phone lifts the chat into the slide-up sheet.
+  const onInputFocus = () => { if (!open && isMobile()) setOpen(true); };
+  // Suggestion chips give the visitor a starting point (Paul: "adding direction
+  // and input to the chat"). Clicking one drops it in the field, ready to send.
+  const useChip = (text: string) => {
+    setDraft(text);
+    if (isMobile()) setOpen(true);
+    requestAnimationFrame(() => inputRef.current?.focus());
+  };
 
   const trackMap = (verdict: string) => {
     if (mapTracked.current) return;
@@ -439,11 +471,20 @@ export default function YuliaIntake() {
   const liveMapVisible = pending && live?.inMap && live.partial;
 
   return (
-    <div id="yulia" className="pd-chat">
-      <div className="pd-chat-head">
-        <img src="/logo-coral-x.png" alt="smbX.ai" style={{ height: 28, width: 'auto', display: 'block' }} />
-        <div style={{ fontWeight: 800, fontSize: 17 }}>Acquisition Engine</div>
-      </div>
+    <>
+      {/* Scrim behind the mobile sheet (CSS-hidden on desktop). */}
+      <div className={`pd-chat-scrim${open ? ' on' : ''}`} onClick={() => setOpen(false)} aria-hidden="true" />
+      <div id="yulia" className={`pd-chat${open ? ' sheet' : ''}`}>
+        <div className="pd-chat-head">
+          {/* Grab handle — shown only in the mobile sheet. */}
+          <span className="pd-chat-grab" aria-hidden="true" />
+          <img src="/logo-coral-x.png" alt="smbX.ai" style={{ height: 28, width: 'auto', display: 'block' }} />
+          <div className="pd-chat-title">Acquisition Engine</div>
+          {/* Minimize — shown only in the mobile sheet. */}
+          <button type="button" className="pd-chat-min" onClick={() => setOpen(false)} aria-label="Minimize chat">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </button>
+        </div>
       <div className="pd-msgs" ref={listRef}>
         {messages.map((m, i) => (
           m.map ? (
@@ -490,18 +531,28 @@ export default function YuliaIntake() {
           </div>
         )}
       </div>
+      {userTurns === 0 && !done && (
+        <div className="pd-chips">
+          {CHIPS.map(c => (
+            <button type="button" key={c.value} className="pd-chip" onClick={() => useChip(c.value)}>{c.label}</button>
+          ))}
+        </div>
+      )}
       <div className="pd-chat-inputrow">
         <input
+          ref={inputRef}
           className="pd-chat-input"
           value={draft}
           onChange={e => setDraft(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') send(); }}
+          onFocus={onInputFocus}
           placeholder={hint}
           disabled={done}
           aria-label="Describe your acquisition criteria"
         />
         <button type="button" className="pd-send" onClick={send} disabled={done || pending}>{sendLabel}</button>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
