@@ -612,30 +612,9 @@
 .pd-send:hover { background: var(--pd-cta-hover); }
 .pd-send:disabled { opacity: 0.55; cursor: default; }
 
-/* ─── ledger rows (segment-page pain tables) ─── */
-/* ─── segment pages — recognition / bind / turn / proof / ask ─── */
-.pd-seghero {
-  display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  gap: clamp(48px, 6vw, 110px); align-items: end;
-  width: 100%; max-width: var(--pd-max); margin: 0 auto;
-}
-.pd-segstat { justify-self: end; text-align: right; max-width: 400px; padding-bottom: 6px; }
-/* The bind as a ghost numeral — hairline-outlined, like the creed's Roman
-   numerals translated to the light canvas. */
-.pd-segstat .n {
-  font-size: clamp(140px, 16.5vw, 250px); font-weight: 800; line-height: 0.8;
-  letter-spacing: -0.04em; white-space: nowrap;
-  color: rgba(34, 34, 34, 0.03);
-  -webkit-text-stroke: 1.5px rgba(34, 34, 34, 0.42);
-}
-/* multi-glyph stats ('~1/5', '1st') scale down so they never leave the column */
-.pd-segstat .n.wide { font-size: clamp(84px, 9.5vw, 150px); }
-.pd-segstat .l { margin-top: 18px; font-size: 15px; line-height: 1.6; color: var(--pd-body); }
-@media (max-width: 1024px) {
-  .pd-seghero { grid-template-columns: minmax(0, 1fr); gap: 44px; }
-  .pd-segstat { justify-self: start; text-align: left; padding-bottom: 0; }
-  .pd-segstat .n { font-size: clamp(84px, 18vw, 150px); }
-}
+/* segment-page hero is now the shared centered hero (the off-axis ghost
+   numeral .pd-seghero/.pd-segstat was retired 2026-07-14 — decorative, read
+   as meaningless). */
 
 .pd-paingrid {
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
