@@ -159,13 +159,15 @@
   --pd-hair: rgba(255, 255, 255, 0.13);
   --pd-coral-link: #FF7A8F;
   width: 100%;
-  /* Depth without leaving our near-black: a top coral halo (the Slack "lit
-     crown") over a whisper-warm vertical gradient whose top/bottom edges are
-     the shared --pd-dark-top/-bot tokens, so the bracketing swoosh arcs
-     fill-match the band exactly. The halo does the richness; the base stays
-     unmistakably #141414-near-black, never aubergine. */
+  /* Full-bleed texture (a dark coral-black flowing-wave surface): near-black on
+     the left where the headline/body sit — a left legibility veil keeps text
+     AA — flowing into visible coral waves on the right. A top coral halo adds
+     the lit crown; the base gradient is the fallback if the image fails. The
+     bracketing swooshes carry the same texture so it flows over the divider. */
   background:
-    radial-gradient(90% 55% at 50% -6%, rgba(255, 56, 92, 0.055), rgba(255, 56, 92, 0) 60%),
+    radial-gradient(90% 55% at 50% -6%, rgba(255, 56, 92, 0.06), rgba(255, 56, 92, 0) 60%),
+    linear-gradient(90deg, rgba(17, 13, 13, 0.74) 0%, rgba(17, 13, 13, 0.2) 52%, rgba(17, 13, 13, 0) 100%),
+    url('/textures/band-coral.webp') center / cover no-repeat,
     linear-gradient(180deg, var(--pd-dark-top) 0%, var(--pd-dark-bg) 46%, var(--pd-dark-bot) 100%);
   color: var(--pd-ink);
 }
@@ -453,13 +455,26 @@
 .pd-swoosh, .pd-swoosh-up {
   display: block; width: 100%;
   height: clamp(52px, 6vw, 112px);
-  overflow: hidden; line-height: 0; pointer-events: none;
+  pointer-events: none;
+  /* Same textured surface as the band, horizontally aligned (center) so the
+     dark-left / coral-right pattern is continuous across the curve. The curve
+     itself is a stretched SVG mask (white path = shown), so the texture flows
+     over the divider instead of a flat-colour arc. */
+  background:
+    linear-gradient(90deg, rgba(17, 13, 13, 0.6) 0%, rgba(17, 13, 13, 0.12) 52%, rgba(17, 13, 13, 0) 100%),
+    url('/textures/band-coral.webp') center / cover no-repeat,
+    var(--pd-dark-bg);
 }
-.pd-swoosh { margin-bottom: -1px; }
-.pd-swoosh-up { margin-top: -1px; }
-.pd-swoosh svg, .pd-swoosh-up svg { display: block; width: 100%; height: 100%; }
-.pd-swoosh path { fill: var(--pd-dark-top); }
-.pd-swoosh-up path { fill: var(--pd-dark-bot); }
+.pd-swoosh {
+  margin-bottom: -1px;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,120 L1440,120 L1440,44 C1040,96 400,96 0,44 Z' fill='%23fff'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,120 L1440,120 L1440,44 C1040,96 400,96 0,44 Z' fill='%23fff'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
+}
+.pd-swoosh-up {
+  margin-top: -1px;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1440,0 L1440,60 C1040,12 400,12 0,60 Z' fill='%23fff'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1440,0 L1440,60 C1040,12 400,12 0,60 Z' fill='%23fff'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
+}
 @media (max-width: 760px) {
   .pd-swoosh, .pd-swoosh-up { height: clamp(40px, 9vw, 68px); }
 }

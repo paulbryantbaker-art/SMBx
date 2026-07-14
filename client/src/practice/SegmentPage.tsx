@@ -12,7 +12,7 @@
 import { Link, Redirect } from 'wouter';
 import PracticeShell from './PracticeShell';
 import { getSegment } from './segmentData';
-import { BandArt, Mesh, Swoosh } from './atmo';
+import { Swoosh } from './atmo';
 
 export default function SegmentPage({ slug }: { slug: string }) {
   const seg = getSegment(slug);
@@ -37,7 +37,6 @@ export default function SegmentPage({ slug }: { slug: string }) {
       {/* ── The bind — the one dark movement before the close ── */}
       <div style={{ marginTop: 'clamp(24px, 3vw, 52px)' }}><Swoosh dir="in" /></div>
       <section className="pd-dark bl-side">
-        <BandArt><Mesh /></BandArt>
         <div className="pd-wrap pd-dark-pad">
           <div className="pd-seclabel">The problem</div>
           <h2 className="pd-h2" data-rv>{seg.painTitle}</h2>
