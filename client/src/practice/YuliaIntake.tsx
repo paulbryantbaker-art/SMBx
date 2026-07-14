@@ -369,10 +369,54 @@ export default function YuliaIntake() {
     return () => window.removeEventListener('keydown', onKey);
   }, [open]);
 
-  // Focusing the field on a phone lifts the chat into the slide-up sheet.
-  const onInputFocus = () => { if (!open && isMobile()) setOpen(true); };
+  // While the sheet is up, the page behind must not scroll (Paul: "the
+  // background can be scrolled through the drawer"). `overflow:hidden` alone
+  // does NOT stop iOS Safari touch-scrolling the body — the reliable lock is
+  // pinning the body in place (position:fixed at the current scroll offset)
+  // and restoring the offset on close. Temporary while open, so it doesn't
+  // trip the Safari fixed-background rule.
+  useEffect(() => {
+    if (!open || !isMobile()) return;
+    const y = window.scrollY;
+    const body = document.body.style;
+    const prev = {
+      position: body.position, top: body.top, left: body.left,
+      right: body.right, width: body.width, overflow: body.overflow,
+    };
+    body.position = 'fixed';
+    body.top = `-${y}px`;
+    body.left = '0';
+    body.right = '0';
+    body.width = '100%';
+    body.overflow = 'hidden';
+    return () => {
+      body.position = prev.position; body.top = prev.top; body.left = prev.left;
+      body.right = prev.right; body.width = prev.width; body.overflow = prev.overflow;
+      window.scrollTo(0, y);
+    };
+  }, [open]);
+
+  // Opening the sheet: slide up, then try to land focus in the real field.
+  const openSheet = () => {
+    setOpen(true);
+    requestAnimationFrame(() => inputRef.current?.focus());
+  };
+
+  // On phones every "#yulia" ask (nav CTA, sticky CTA, hero pills) opens the
+  // drawer directly instead of scrolling to an inline card the visitor then
+  // has to tap again. Desktop keeps the anchor scroll.
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      const a = (e.target as Element | null)?.closest?.('a[href="#yulia"]');
+      if (a && isMobile()) { e.preventDefault(); openSheet(); }
+    };
+    document.addEventListener('click', onClick);
+    return () => document.removeEventListener('click', onClick);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Suggestion chips give the visitor a starting point (Paul: "adding direction
-  // and input to the chat"). Clicking one drops it in the field, ready to send.
+  // and input to the chat"). Clicking one drops it in the field, ready to send;
+  // on a phone it also lifts straight into the sheet.
   const useChip = (text: string) => {
     setDraft(text);
     if (isMobile()) setOpen(true);
@@ -471,10 +515,44 @@ export default function YuliaIntake() {
   const liveMapVisible = pending && live?.inMap && live.partial;
 
   return (
-    <>
+    <div id="yulia" className="pd-chat-zone">
+      {/* ── Mobile launcher — the home page keeps a chat-input-shaped doorway,
+             but typing NEVER happens here: any tap slides the real chat up as
+             a bottom sheet (Paul, 2026-07-14: "as soon as the user activates
+             the box just go into the slide up view"). Hidden on desktop. ── */}
+      <div className="pd-chat-launch" onClick={openSheet}>
+        <div className="pd-chat-head">
+          <img src="/logo-coral-x.png" alt="smbX.ai" style={{ height: 28, width: 'auto', display: 'block' }} />
+          <div className="pd-chat-title">Acquisition Engine</div>
+        </div>
+        <div className="pd-launch-body">
+          {userTurns > 0
+            ? 'Your session is in progress.'
+            : 'Tell us a bit about what you’re looking for — we’ll build a preliminary market map in minutes.'}
+        </div>
+        {userTurns === 0 && !done && (
+          <div className="pd-chips">
+            {CHIPS.map(c => (
+              <button
+                type="button"
+                key={c.value}
+                className="pd-chip"
+                onClick={e => { e.stopPropagation(); useChip(c.value); }}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+        )}
+        <button type="button" className="pd-chat-inputrow pd-launch-input" onClick={openSheet}>
+          <span className="ph">{done ? 'Your map is ready — reopen it' : userTurns > 0 ? 'Tap to continue your session' : hint}</span>
+          <span className="pd-send" aria-hidden="true">{userTurns > 0 || done ? 'Reopen' : sendLabel}</span>
+        </button>
+      </div>
+
       {/* Scrim behind the mobile sheet (CSS-hidden on desktop). */}
       <div className={`pd-chat-scrim${open ? ' on' : ''}`} onClick={() => setOpen(false)} aria-hidden="true" />
-      <div id="yulia" className={`pd-chat${open ? ' sheet' : ''}`}>
+      <div className={`pd-chat${open ? ' open' : ''}`}>
         <div className="pd-chat-head">
           {/* Grab handle — shown only in the mobile sheet. */}
           <span className="pd-chat-grab" aria-hidden="true" />
@@ -545,7 +623,6 @@ export default function YuliaIntake() {
           value={draft}
           onChange={e => setDraft(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') send(); }}
-          onFocus={onInputFocus}
           placeholder={hint}
           disabled={done}
           aria-label="Describe your acquisition criteria"
@@ -553,6 +630,6 @@ export default function YuliaIntake() {
         <button type="button" className="pd-send" onClick={send} disabled={done || pending}>{sendLabel}</button>
       </div>
       </div>
-    </>
+    </div>
   );
 }
