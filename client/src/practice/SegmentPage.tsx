@@ -21,20 +21,15 @@ export default function SegmentPage({ slug }: { slug: string }) {
 
   return (
     <PracticeShell>
-      {/* ── Recognition — the hero, composed off-axis ── */}
+      {/* ── Hero — centered, matching every other page (the old off-axis ghost
+             numeral was decorative and read as meaningless; removed) ── */}
       <section className="pd-hero" style={{ paddingBottom: 'clamp(56px, 7vw, 110px)' }}>
-        <div className="pd-seghero">
-          <div>
-            <h1 className="pd-h1 pd-h1-seg" style={{ margin: 0 }}>{seg.h1}</h1>
-            <div className="pd-sub" style={{ margin: '30px 0 0', maxWidth: '30em' }}>{seg.sub}</div>
-            <div style={{ marginTop: 44, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <a className="pd-pill-primary pd-pill-lg" href="/#yulia">Build your market map →</a>
-              <a className="pd-pill pd-pill-lg-quiet" href="/#book">Book a call</a>
-            </div>
-          </div>
-          <div className="pd-segstat" data-rv>
-            <div className={`n${seg.stat.n.length > 1 ? ' wide' : ''}`}>{seg.stat.n}</div>
-            <div className="l">{seg.stat.l}</div>
+        <div style={{ position: 'relative', maxWidth: 1080, margin: '0 auto', textAlign: 'center' }}>
+          <h1 className="pd-h1" style={{ margin: '0 auto' }}>{seg.h1}</h1>
+          <div className="pd-sub" style={{ margin: '30px auto 0', maxWidth: '36em' }}>{seg.sub}</div>
+          <div style={{ marginTop: 44, display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+            <a className="pd-pill-primary pd-pill-lg" href="/#yulia">Build your market map →</a>
+            <a className="pd-pill pd-pill-lg-quiet" href="/#book">Book a call</a>
           </div>
         </div>
       </section>
