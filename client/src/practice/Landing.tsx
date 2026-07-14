@@ -201,7 +201,17 @@ function HeroShowcase() {
         )}
       </div>
       <div className="pd-showtabs">
-        <button type="button" className={tab === 'engine' ? 'on' : ''} onClick={() => setTab('engine')}>
+        <button
+          type="button"
+          className={tab === 'engine' ? 'on' : ''}
+          onClick={() => {
+            setTab('engine');
+            // On phones this pill reads as a CTA, not a tab — open the drawer.
+            // Deferred so the engine (and its listener) is mounted even when
+            // switching back from the sample tab.
+            setTimeout(() => window.dispatchEvent(new Event('smbx:open-intake')), 60);
+          }}
+        >
           Map your market
         </button>
         <button
