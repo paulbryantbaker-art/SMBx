@@ -81,6 +81,17 @@ export default function PracticeShell({ home = false, children }: { home?: boole
   const onSegment = loc.startsWith('/buyers/');
   const onTrackRecord = loc === '/track-record';
 
+  // Condense the sticky nav once the user scrolls off the top — it stays
+  // visible (no scroll-back-to-top) but shrinks to reclaim ~40% of its height
+  // (Paul, 2026-07-14: "creatively minimize it but keep it still visible").
+  const [navMin, setNavMin] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setNavMin(window.scrollY > 64);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   // Scroll-reveal: elements marked data-rv rise in once when they enter the
   // viewport. Reduced-motion users get everything visible via the CSS guard;
   // the observer still runs harmlessly.
@@ -104,11 +115,16 @@ export default function PracticeShell({ home = false, children }: { home?: boole
 
   // index.css scroll-locks html/body at ≥901px for the app workspace shells
   // (`html, body { height: 100%; overflow: hidden; }`) — without this release
-  // the practice site cannot scroll on desktop at all. Height must be
-  // released along with overflow: leaving height:100% makes BODY the scroll
-  // container (a 100vh-tall document), which breaks native fragment jumps,
-  // full-page capture, and print. Same pattern the retired MarketingShell
-  // used; smooth behavior covers the anchor links.
+  // the practice site cannot scroll on desktop at all. Two things must be
+  // released carefully:
+  //  • height → auto on both (leaving height:100% makes BODY a 100vh scroll
+  //    container, breaking native fragment jumps, full-page capture, print).
+  //  • BODY overflow must be `visible`, NOT `auto`. `overflow:auto` on body
+  //    makes body a scroll container too, so `position:sticky` descendants
+  //    (the nav, the sidebar cards) stick to the TOP OF BODY — which itself
+  //    scrolls up inside html — instead of the viewport, and the sticky nav
+  //    scrolls off screen (Paul, 2026-07-14: "it does not stay sticky").
+  //    html carries the scroll (`overflow:auto`); body just flows.
   useEffect(() => {
     const html = document.documentElement.style;
     const body = document.body.style;
@@ -118,7 +134,7 @@ export default function PracticeShell({ home = false, children }: { home?: boole
       behavior: html.scrollBehavior,
     };
     html.overflow = 'auto';
-    body.overflow = 'auto';
+    body.overflow = 'visible';
     html.height = 'auto';
     body.height = 'auto';
     html.scrollBehavior = 'smooth';
@@ -141,7 +157,7 @@ export default function PracticeShell({ home = false, children }: { home?: boole
           colored div). Must stay the first child and outside any overflow
           wrapper so it spans the whole scroll. */}
       <div className="pd-ambient" aria-hidden="true" />
-      <header className="pd-navwrap">
+      <header className={`pd-navwrap${navMin ? ' min' : ''}`}>
         <div className="pd-nav">
           <a href="/" aria-label="smbX.ai home">
             <img src="/logo-coral-x.png" alt="smbX.ai" className="pd-nav-logo" />
