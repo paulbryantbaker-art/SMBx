@@ -139,9 +139,9 @@ export default function SegmentPage({ slug }: { slug: string }) {
       <section className="pd-dark bl-cta">
         <span className="pd-spark" aria-hidden="true" />
         <div className="pd-wrap pd-dark-pad">
-          <h2 className="pd-cta-h" data-rv style={{ maxWidth: 640 }}>Ready to start looking?</h2>
-          <div data-rv className="pd-body" style={{ marginTop: 22, maxWidth: 480 }}>
-            Process your thesis in our acquisition engine. No retainer to find out if we're a fit.
+          <h2 className="pd-cta-h" data-rv style={{ maxWidth: 640 }}>{seg.ctaH}</h2>
+          <div data-rv className="pd-body" style={{ marginTop: 22, maxWidth: 520 }}>
+            {seg.ctaBody}
           </div>
           <div data-rv style={{ marginTop: 40, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <a className="pd-pill-primary pd-pill-lg" href="/#yulia">Build your market map →</a>

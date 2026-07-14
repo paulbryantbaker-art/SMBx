@@ -67,13 +67,13 @@ const VALUE_PILLARS = [
 ];
 
 const HUNTING = [
-  { k: 'Elevator & escalator service', v: 'Code-mandated recurring revenue, 90%+ retention, still mostly independent.' },
-  { k: 'Water & wastewater services', v: 'Multi-year municipal contracts and a decade of infrastructure funding behind it.' },
-  { k: 'Commercial landscaping & grounds', v: 'Route-based recurring contracts, a vast fragmented base, sane pricing.' },
-  { k: 'Fire & life safety', v: 'Mandated inspection revenue; still no dominant player in most regions.' },
-  { k: 'Specialty & industrial distribution', v: 'Non-discretionary demand, recurring MRO revenue, real enterprise value.' },
-  { k: 'Healthcare RCM & non-clinical', v: 'Recurring, tech-enabled, and free of the regulatory tangle of physician practices.' },
-  { k: 'Managed IT / MSP', v: "Contracted recurring revenue in secondary metros the consolidators haven't reached." },
+  { k: 'Elevator & escalator service', v: 'Code-mandated compliance creates highly sticky recurring revenue with 90%+ retention. The market remains heavily fragmented with independent, family-owned operators, offering massive consolidation opportunities and multiple arbitrage before the major OEMs sweep the market.' },
+  { k: 'Water & wastewater services', v: 'Driven by multi-year municipal contracts, aging infrastructure, and massive federal funding tailwinds. We target regional operators with locked-in maintenance agreements that provide strict downside protection and highly predictable cash flow during economic downturns.' },
+  { k: 'Commercial landscaping & grounds', v: 'Route-based recurring contracts with a vast, fragmented base. The key here is route density — we underwrite the drive time, not just the EBITDA, identifying targets that will immediately drop operational synergies to your bottom line.' },
+  { k: 'Fire & life safety', v: 'Non-discretionary, mandated inspection and repair revenue. There is still no dominant national player in most regions, allowing disciplined buyers to acquire highly technical, licensed workforces at sane multiples.' },
+  { k: 'Specialty & industrial distribution', v: 'Non-discretionary demand with recurring MRO (Maintenance, Repair, and Operations) revenue. We look for distributors with deep, entrenched customer relationships and proprietary product lines that create real, defensible enterprise value.' },
+  { k: 'Healthcare RCM & non-clinical', v: 'Recurring, tech-enabled business services that remain completely free of the regulatory tangle and burnout risks associated with clinical physician practices. High switching costs make these assets incredibly durable.' },
+  { k: 'Managed IT / MSP', v: 'Contracted recurring revenue in secondary and tertiary metros that the major consolidators haven’t reached yet. We focus on MSPs with high cloud-migration capabilities and sticky, multi-year SLA contracts.' },
 ];
 
 const FAQ = [
