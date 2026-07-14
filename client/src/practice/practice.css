@@ -195,7 +195,12 @@
 /* content clears the curved edges: curve height + breathing room */
 .pd-dark-pad { padding-top: calc(var(--pd-curve, 0px) + clamp(40px, 5vw, 84px)); padding-bottom: calc(var(--pd-curve, 0px) + clamp(40px, 5vw, 84px)); }
 .pd-dark a.pd-pill, .pd-dark a.pd-pill:hover { color: var(--pd-ink); }
-.pd-dark .pd-pill:hover { border-color: #f5f5f5; }
+/* Secondary (outline) buttons on dark bands: the default #3D3D3D border is
+   near-invisible on the texture (Paul, 2026-07-14: "secondary buttons on dark
+   panels need a white outline") — give them a clear white outline, brightening
+   to solid with a faint fill on hover. */
+.pd-dark .pd-pill { border-color: rgba(255, 255, 255, 0.9); }
+.pd-dark .pd-pill:hover { border-color: #ffffff; background: rgba(255, 255, 255, 0.10); }
 /* text links stay a bright, legible coral so they still read as links even
    with all other dark-band text white */
 .pd-dark a.pd-link, .pd-dark a.pd-link:hover { color: #FFB3BF; }
@@ -252,6 +257,18 @@
   margin-bottom: 22px;
 }
 .pd-seclabel.right { flex: none; margin-bottom: 0; text-align: right; }
+/* Page locator — a breadcrumb in the coral label voice, top of each subpage
+   hero, so a visitor always knows which page they're on (Paul, 2026-07-14).
+   Parent is a link back to its section/home; the current page reads in ink. */
+.pd-crumb {
+  display: inline-flex; align-items: center; gap: 11px;
+  font-size: 15px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  margin: 0 0 22px;
+}
+.pd-crumb a { color: var(--pd-coral-link); text-decoration: none; }
+.pd-crumb a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.pd-crumb .sep { color: var(--pd-tert); font-weight: 500; }
+.pd-crumb .here { color: var(--pd-ink); }
 /* Lede — the single deck paragraph under a hero or an H2. */
 .pd-sub { font-size: 22px; line-height: 1.55; color: var(--pd-body); max-width: 34em; }
 /* Body — THE default reading paragraph, everywhere. 18px at #6A6A6A holds AA
@@ -325,6 +342,12 @@
 .pd-nav-links { display: flex; gap: clamp(24px, 3vw, 44px); font-size: 15px; font-weight: 600; }
 .pd-nav-links a { color: var(--pd-body); }
 .pd-nav-links a:hover { color: var(--pd-ink); }
+/* Active section — the nav reflects where you are (segment pages → Who it's
+   for; the deal sheet → Track record). Coral, with a coral underline. */
+.pd-nav-links a.pd-navon, .pd-nav-links a.pd-navon:hover {
+  color: var(--pd-coral-link);
+  text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 7px;
+}
 .pd-nav-ctas { display: flex; gap: 10px; }
 
 /* ─── hero — split: statement left, the engine right (the pattern the

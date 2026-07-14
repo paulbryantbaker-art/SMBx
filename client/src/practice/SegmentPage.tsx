@@ -10,7 +10,7 @@
  * each hero stat restates an approved line at display scale.
  */
 import { Link, Redirect } from 'wouter';
-import PracticeShell from './PracticeShell';
+import PracticeShell, { PageCrumb } from './PracticeShell';
 import { getSegment } from './segmentData';
 import { Swoosh } from './atmo';
 
@@ -25,6 +25,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
              numeral was decorative and read as meaningless; removed) ── */}
       <section className="pd-hero" style={{ paddingBottom: 'clamp(56px, 7vw, 110px)' }}>
         <div style={{ position: 'relative', maxWidth: 1080, margin: '0 auto', textAlign: 'center' }}>
+          <PageCrumb parent={{ label: "Who it's for", href: '/#who' }} here={seg.footerLabel} />
           <h1 className="pd-h1" style={{ margin: '0 auto' }}>{seg.h1}</h1>
           <div className="pd-sub" style={{ margin: '30px auto 0', maxWidth: '36em' }}>{seg.sub}</div>
           <div style={{ marginTop: 44, display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
