@@ -38,6 +38,11 @@ export interface Segment {
   scenario: ScenarioStep[];
   /** What you walk away with — the concrete deliverables of an engagement. */
   gets: string[];
+  /** Tailored close (Paul's clean master, 2026-07-13) — replaces the generic
+   *  segment CTA. The engine is named "acquisition engine" per the standing
+   *  naming law (Paul's master said "Target Mapping Engine"; retired name). */
+  ctaH: string;
+  ctaBody: string;
 }
 
 export const SEGMENTS: Segment[] = [
@@ -69,7 +74,7 @@ export const SEGMENTS: Segment[] = [
       },
     ],
     answers: [
-      { k: 'The work', v: 'Market maps and off-market sourcing on your thesis, with models and diligence checklists in days — deal capacity that switches on when you need it and costs nothing when you don’t.' },
+      { k: 'The work', v: 'We generate comprehensive market maps and execute off-market sourcing specifically tailored to your family’s investment mandate. Within days, we deliver actionable CIM triage, financial recasts, and diligence checklists — giving your family office the execution capacity of a top-tier PE firm, switching on exactly when you need it, and costing nothing when you don’t.' },
       { k: 'The practitioner', v: 'A senior deal captain runs the process — the analysis, the seller conversations, and the negotiation — while maintaining strict price discipline.' },
       { k: 'Your side', v: 'Buy-side is all we do, and we take one client per target — so your thesis is never resold or shared, and your deal has our full attention.' },
     ],
@@ -89,6 +94,8 @@ export const SEGMENTS: Segment[] = [
       'The offer and financing structure',
       'A 100-day integration plan',
     ],
+    ctaH: 'Ready to map your direct-deal mandate?',
+    ctaBody: 'Enter your family office’s investment criteria into our acquisition engine. Within two minutes, we will generate a preliminary market read on your thesis.',
   },
   {
     slug: 'independent-sponsors',
@@ -118,7 +125,7 @@ export const SEGMENTS: Segment[] = [
       },
     ],
     answers: [
-      { k: 'The work', v: 'CIM triage, models, and diligence checklists produced in days, not weeks — so a dead deal costs you a conversation, not a quarter.' },
+      { k: 'The work', v: 'We compress the research and packaging timeline. We deliver rapid CIM triage, highly defensible financial models, and comprehensive diligence checklists in days, not weeks. We provide the institutional-grade collateral required to confidently lock up the target with an LOI and immediately satisfy your capital partners.' },
       { k: 'The practitioner', v: 'A senior deal team packages the deal exactly how capital partners expect to see it — and keeps the seller engaged while you finalize funding.' },
       { k: 'Your side', v: 'We take one client per target — so the deal you worked to find stays yours to close, never shopped to another sponsor.' },
     ],
@@ -138,6 +145,8 @@ export const SEGMENTS: Segment[] = [
       'The deal structure and financing model',
       'Negotiation support to signing',
     ],
+    ctaH: 'Let’s build your investor-ready target profile.',
+    ctaBody: 'Run your thesis through our acquisition engine. Get a preliminary read on the universe, the economics, and the risks in two minutes so you can pitch capital partners with confidence.',
   },
   {
     slug: 'pe-firms',
@@ -167,7 +176,7 @@ export const SEGMENTS: Segment[] = [
       },
     ],
     answers: [
-      { k: 'The work', v: 'Off-market maps of the whole segment — not the brokered slice — with triage, models, and memos generated as fast as your pipeline moves.' },
+      { k: 'The work', v: 'We build complete, off-market maps of your entire target segment — capturing the operators who will never hire a broker. We deliver rapid target triage, detailed financial models, and Investment Committee-ready memos generated at the exact pace of your pipeline. Your partners stop sourcing, and start closing.' },
       { k: 'The practitioner', v: 'Senior execution capacity that flexes deal by deal — outreach, process, and negotiation managed at the pace of your pipeline.' },
       { k: 'Your side', v: 'One client per target — your add-on pipeline is yours alone, never shared with a competing buyer.' },
     ],
@@ -187,6 +196,8 @@ export const SEGMENTS: Segment[] = [
       'The deal structure',
       'Integration support',
     ],
+    ctaH: 'Ready to map your next platform add-on?',
+    ctaBody: 'Feed your add-on criteria into our acquisition engine. Bypass the brokered auctions and get a preliminary read on the off-market landscape in about two minutes.',
   },
   {
     slug: 'searchers',
@@ -216,7 +227,7 @@ export const SEGMENTS: Segment[] = [
       },
     ],
     answers: [
-      { k: 'The work', v: 'The recast, the model, the diligence checklist, and the lender package — built in days and checked against what the market actually pays.' },
+      { k: 'The work', v: 'We level the information asymmetry. We deliver precise financial recasts, bulletproof valuation models, comprehensive diligence checklists, and highly structured SBA lender packages. We verify every number against what the market actually pays, and we explicitly tell you when it’s time to walk away.' },
       { k: 'The practitioner', v: 'A senior deal team that has seen the broker playbook, tells you when the price is wrong, and explicitly advises you to walk when the numbers demand it.' },
       { k: 'Your side', v: 'We work for you, and only you — your interests are the only ones we’re paid to look after, start to finish.' },
     ],
@@ -236,6 +247,8 @@ export const SEGMENTS: Segment[] = [
       'A diligence checklist with attorney and CPA coordinated',
       'A straight answer on when to walk',
     ],
+    ctaH: 'Let’s stress-test your first acquisition thesis.',
+    ctaBody: 'Put your criteria into our acquisition engine. In two minutes, we’ll show you the real market economics, competitive landscape, and potential blind spots to protect your capital.',
   },
   {
     slug: 'operators',
@@ -265,7 +278,7 @@ export const SEGMENTS: Segment[] = [
       },
     ],
     answers: [
-      { k: 'The work', v: 'Quiet market mapping and target reads without a whisper reaching your competitors — plus models that price the business as it is, not as you’ll make it.' },
+      { k: 'The work', v: 'Total operational discretion. We execute quiet market mapping and target reads without a whisper reaching your competitors. We deliver objective valuation models that price the business exactly as it is today — ensuring you never pay the seller a premium for the operational synergies your team will create post-close.' },
       { k: 'The practitioner', v: 'Discreet third-party approaches made in our firm’s name, maintaining a disciplined process and a repeatable playbook — while your executive team stays focused on the core business.' },
       { k: 'Your side', v: 'Total discretion — your interest stays private until you decide otherwise — and one client per target, so your strategy is never shared.' },
     ],
@@ -285,6 +298,8 @@ export const SEGMENTS: Segment[] = [
       'Diligence run with specialists coordinated',
       'An integration plan',
     ],
+    ctaH: 'Ready to quietly map your competitors?',
+    ctaBody: 'Tell our acquisition engine what kind of regional operator you want to absorb. We will generate a confidential preliminary market read in two minutes, without tipping your hand.',
   },
 ];
 

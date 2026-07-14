@@ -738,8 +738,8 @@
 }
 .pd-hunt:hover { background: #FAFAFA; }
 .pd-hunt .no { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.1em; color: var(--pd-body); }
-.pd-hunt .nm { font-size: 21px; font-weight: 700; letter-spacing: -0.012em; }
-.pd-hunt .th { font-size: 15px; line-height: 1.6; color: var(--pd-body); }
+.pd-hunt .nm { font-size: 22px; font-weight: 700; letter-spacing: -0.012em; }
+.pd-hunt .th { font-size: 16px; line-height: 1.65; color: var(--pd-body); }
 @media (max-width: 860px) {
   .pd-hunt { grid-template-columns: 40px minmax(0, 1fr); }
   .pd-hunt .th { grid-column: 2; }
