@@ -228,16 +228,40 @@ export default function App() {
     trackEvent('page_view', { path: location, referrer: document.referrer });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Scroll to the top of the document on a pathname change. wouter's location
-  // ignores the hash, so in-page anchor links (e.g. /#how, #book) still jump
-  // correctly — this only fires on real page changes. Without it, clicking a
-  // link deep in one page — like the landing's "Who it's for" selector, which
-  // sits far down the scroll — kept the old scroll position and dropped you
-  // into the MIDDLE of the next page, past its distinct hero and onto the
-  // shared section headers, so every buyer page looked like the same page.
+  // On a pathname change: no hash → scroll to top (so a link deep in one page,
+  // like the landing's "Who it's for" selector, doesn't drop you into the
+  // middle of the next page). With a hash → scroll to that section. On a
+  // cross-page jump (e.g. /#who or /#industries clicked from a buyer page) the
+  // target isn't in the DOM yet — the destination page is still mounting and
+  // lazy-loading — so the browser's native anchor scroll misses and you land
+  // at the top (needing a second click). Retry until it renders, then scroll.
   useEffect(() => {
-    if (window.location.hash) return; // let the browser resolve #anchor targets
-    window.scrollTo(0, 0);
+    const hash = window.location.hash;
+    if (!hash) { window.scrollTo(0, 0); return; }
+    let cancelled = false;
+    let tries = 0;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const scrollToTarget = () => {
+      let el: Element | null = null;
+      try { el = document.querySelector(hash); } catch { return false; } // not a valid selector
+      if (!el) return false;
+      el.scrollIntoView({ block: 'start' }); // scroll-margin-top on the section clears the sticky nav
+      return true;
+    };
+    const jump = () => {
+      if (cancelled) return;
+      if (scrollToTarget()) {
+        // Rendered and scrolled — but late content (webfont swap, scroll-reveal,
+        // the hero showcase image) can still shift the target after this first
+        // scroll, leaving the section slightly off. Re-align a few times as the
+        // layout settles, then stop so we never fight the user's own scrolling.
+        [120, 350, 800].forEach(d => timers.push(setTimeout(() => { if (!cancelled) scrollToTarget(); }, d)));
+        return;
+      }
+      if (tries++ < 60) timers.push(setTimeout(jump, 50)); // up to ~3s for the lazy page to render
+    };
+    jump();
+    return () => { cancelled = true; timers.forEach(clearTimeout); };
   }, [location]);
 
   if (loading) return <PageLoader />;

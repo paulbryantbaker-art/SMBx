@@ -164,18 +164,36 @@
   --pd-hair: rgba(255, 255, 255, 0.16);
   --pd-coral-link: #FFFFFF;
   width: 100%;
+  --pd-curve: clamp(52px, 6vw, 112px);
   /* Full-bleed dark texture — Paul's blackBleedBG slate/plaster surface, shown
      in full (all band text is bright white, so no legibility veil needed). A
      subtle top coral halo keeps a whisper of brand; the base gradient is the
-     fallback if the image fails. The bracketing swooshes carry the same
-     texture at the same crop, so it flows over the divider. */
+     fallback if the image fails. ONE continuous texture crop — the curved
+     divider edges are masked OUT of this same element (no separate swoosh to
+     seam against). */
   background:
     radial-gradient(90% 52% at 50% -8%, rgba(255, 56, 92, 0.05), rgba(255, 56, 92, 0) 58%),
     url('/textures/blackbleed.webp') center / cover no-repeat,
     linear-gradient(180deg, var(--pd-dark-top) 0%, var(--pd-dark-bg) 46%, var(--pd-dark-bot) 100%);
   color: var(--pd-ink);
+  /* Curved top + bottom cut from the band itself: a fixed-height curve mask at
+     top and at bottom, a solid fill between them (union of the three). The
+     curves keep their proportion at any band height because only the middle
+     stretches. Transparent corners reveal the ambient wash behind the band, so
+     the light section appears to curve into it — seamlessly, since the band is
+     a single texture. */
+  -webkit-mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,120 L1440,120 L1440,44 C1040,96 400,96 0,44 Z' fill='%23fff'/%3E%3C/svg%3E") top / 100% var(--pd-curve) no-repeat,
+    linear-gradient(#fff, #fff) center / 100% calc(100% - 2 * var(--pd-curve) + 2px) no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1440,0 L1440,60 C1040,12 400,12 0,60 Z' fill='%23fff'/%3E%3C/svg%3E") bottom / 100% var(--pd-curve) no-repeat;
+  mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,120 L1440,120 L1440,44 C1040,96 400,96 0,44 Z' fill='%23fff'/%3E%3C/svg%3E") top / 100% var(--pd-curve) no-repeat,
+    linear-gradient(#fff, #fff) center / 100% calc(100% - 2 * var(--pd-curve) + 2px) no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1440,0 L1440,60 C1040,12 400,12 0,60 Z' fill='%23fff'/%3E%3C/svg%3E") bottom / 100% var(--pd-curve) no-repeat;
 }
-.pd-dark-pad { padding-top: clamp(104px, 12vw, 184px); padding-bottom: clamp(104px, 12vw, 184px); }
+@media (max-width: 760px) { .pd-dark { --pd-curve: clamp(40px, 9vw, 68px); } }
+/* content clears the curved edges: curve height + breathing room */
+.pd-dark-pad { padding-top: calc(var(--pd-curve, 0px) + clamp(40px, 5vw, 84px)); padding-bottom: calc(var(--pd-curve, 0px) + clamp(40px, 5vw, 84px)); }
 .pd-dark a.pd-pill, .pd-dark a.pd-pill:hover { color: var(--pd-ink); }
 .pd-dark .pd-pill:hover { border-color: #f5f5f5; }
 /* text links stay a bright, legible coral so they still read as links even
@@ -202,8 +220,13 @@
    released on small screens where the whole compound can't fit a line. */
 .pd-nb { white-space: nowrap; }
 @media (max-width: 600px) { .pd-nb { white-space: normal; } }
-/* .pd-h1-seg is retired — subpage heroes use the one .pd-h1. The class name
-   stays harmless in markup. */
+/* Subpage / segment heroes carry a full-sentence headline (not the landing's
+   short statement), so the one h1 role scales DOWN a step here — enough that
+   the longest sentence pair ("Proprietary add-on flow. No million-dollar BD
+   build.") lands as two clean lines instead of breaking to three. Scoped to
+   .pd-hero WITHOUT .pd-hero-c so the centered landing hero keeps the full 92px.
+   (.pd-h1-seg the class is retired; this is the size that replaced it.) */
+.pd-hero:not(.pd-hero-c) .pd-h1 { font-size: clamp(40px, 5.2vw, 72px); letter-spacing: -0.035em; }
 .pd-h2 {
   margin: 0;
   font-size: clamp(38px, 4.8vw, 62px);
@@ -211,6 +234,7 @@
   letter-spacing: -0.03em;
   line-height: 1.04;
   max-width: 18em;
+  text-wrap: balance;
 }
 /* Minor header — card / list-row / FAQ / step / tenet / form titles. NOTE:
    the intake card head deliberately stays at label scale (17/800), never
@@ -239,7 +263,7 @@
 .pd-caption { font-size: 13.5px; line-height: 1.6; color: var(--pd-tert); }
 /* Statement device — in-flow rhetorical line with a coral accent word;
    emphatic but below H2 so it reads as a spoken line, not a heading. */
-.pd-statement { margin: 0; font-size: clamp(28px, 3vw, 46px); font-weight: 800; letter-spacing: -0.025em; line-height: 1.14; max-width: 14em; }
+.pd-statement { margin: 0; font-size: clamp(28px, 3vw, 46px); font-weight: 800; letter-spacing: -0.025em; line-height: 1.14; max-width: 14em; text-wrap: balance; }
 /* Editorial pull-quote — drama through typography, zero decoration. */
 .pd-quote {
   margin: 0;
@@ -249,6 +273,12 @@
   line-height: 1.02;
   text-wrap: balance;
 }
+/* The whose-side pull-quote lives in the askew's ~7fr column (~700px), far too
+   narrow for the full .pd-quote scale — it broke mid-clause to 3 lines. Step it
+   down so each sentence fits one line and balance splits cleanly at the period
+   (two lines, not three). Scoped to the whose-side band only. */
+.pd-dark.bl-side .pd-quote { font-size: clamp(30px, 4vw, 54px); }
+
 /* Asymmetric two-column composition: statement hard left, mass of text right,
    offset downward — tension, not placidity. */
 .pd-askew { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(40px, 6vw, 96px); align-items: start; }
@@ -452,37 +482,10 @@
 .pd-get .t { font-size: 18px; line-height: 1.5; color: var(--pd-ink); }
 @media (max-width: 720px) { .pd-gets { grid-template-columns: 1fr; } }
 
-/* ─── curved bleed dividers — a generous shallow arc bracketing each dark
-   band (Slack's "cool" section transitions). Standalone flow-level siblings
-   (the band's ::before is taken by its bloom). One arc ENTERS a band
-   (.pd-swoosh, placed before it), one EXITS (.pd-swoosh-up, placed after).
-   The light side of each SVG box is transparent so the arc bleeds into the
-   ambient wash with no flat seam; only the dark side is filled — from the
-   shared band tokens, so the curve reads as the band itself curving. ─── */
-.pd-swoosh, .pd-swoosh-up {
-  display: block; width: 100%;
-  height: clamp(52px, 6vw, 112px);
-  pointer-events: none;
-  /* Same textured surface as the band, same horizontal crop (center), so it's
-     continuous across the curve. The curve itself is a stretched SVG mask
-     (white path = shown), so the texture flows over the divider. */
-  background:
-    url('/textures/blackbleed.webp') center / cover no-repeat,
-    var(--pd-dark-bg);
-}
-.pd-swoosh {
-  margin-bottom: -1px;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,120 L1440,120 L1440,44 C1040,96 400,96 0,44 Z' fill='%23fff'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
-          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,120 L1440,120 L1440,44 C1040,96 400,96 0,44 Z' fill='%23fff'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
-}
-.pd-swoosh-up {
-  margin-top: -1px;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1440,0 L1440,60 C1040,12 400,12 0,60 Z' fill='%23fff'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
-          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1440,0 L1440,60 C1040,12 400,12 0,60 Z' fill='%23fff'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
-}
-@media (max-width: 760px) {
-  .pd-swoosh, .pd-swoosh-up { height: clamp(40px, 9vw, 68px); }
-}
+/* The curved bleed dividers are now cut from the .pd-dark band itself (see the
+   -webkit-mask on .pd-dark) so the texture is one continuous crop with no
+   seam; the old standalone .pd-swoosh element is retired (Swoosh() is a
+   no-op). */
 
 /* centered section header helper (Slack sections are center-aligned) */
 .pd-sec-c { text-align: center; }
@@ -762,7 +765,7 @@
 
 /* ─── final CTA ─── */
 .pd-cta-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(44px, 7vw, 100px); align-items: center; }
-.pd-cta-h { margin: 0; font-size: clamp(38px, 4.8vw, 62px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.04; max-width: 18em; }
+.pd-cta-h { margin: 0; font-size: clamp(38px, 4.8vw, 62px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.04; max-width: 18em; text-wrap: balance; }
 .pd-form { background: var(--pd-card); border-radius: 24px; padding: 44px; }
 .pd-form .t { font-weight: 700; font-size: 21px; letter-spacing: -0.012em; }
 .pd-input {

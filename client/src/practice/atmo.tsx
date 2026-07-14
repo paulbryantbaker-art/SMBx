@@ -185,11 +185,10 @@ export function BandArt({ children }: { children: ReactNode }) {
   return <div className="pd-bandart" aria-hidden="true">{children}</div>;
 }
 
-/** Curved bleed dividers into/out of a dark band (Slack signature). `dir` "in"
- *  enters a band (place it before the band); "up" exits one (place it after).
- *  The curve is a stretched SVG mask in CSS and the box carries the same
- *  coral-black band texture, so the texture flows over the divider; the light
- *  side of the box is masked away so it bleeds into the ambient wash cleanly. */
-export function Swoosh({ dir = 'in' }: { dir?: 'in' | 'up' }) {
-  return <div className={dir === 'in' ? 'pd-swoosh' : 'pd-swoosh-up'} aria-hidden="true" />;
+/** Bleed-band dividers are now cut from the `.pd-dark` band itself (a curved
+ *  top/bottom mask in practice.css) so the texture is one continuous crop with
+ *  no seam — the separate swoosh element is retired. Kept as a no-op so the
+ *  existing `<Swoosh/>` placements stay valid without touching every page. */
+export function Swoosh(_props: { dir?: 'in' | 'up' }) {
+  return null;
 }

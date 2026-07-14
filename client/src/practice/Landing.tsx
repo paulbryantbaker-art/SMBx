@@ -623,7 +623,7 @@ export default function Landing() {
         <div className="pd-wrap pd-dark-pad">
           <div className="pd-seclabel">Whose side we're on</div>
           <div className="pd-askew rv-stagger" data-rv style={{ alignItems: 'end' }}>
-            <h2 className="pd-quote" style={{ maxWidth: '11em' }}>
+            <h2 className="pd-quote" style={{ maxWidth: '13em' }}>
               The seller has a broker. Who is working for you?
             </h2>
             <div className="off">
