@@ -228,6 +228,18 @@ export default function App() {
     trackEvent('page_view', { path: location, referrer: document.referrer });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Scroll to the top of the document on a pathname change. wouter's location
+  // ignores the hash, so in-page anchor links (e.g. /#how, #book) still jump
+  // correctly — this only fires on real page changes. Without it, clicking a
+  // link deep in one page — like the landing's "Who it's for" selector, which
+  // sits far down the scroll — kept the old scroll position and dropped you
+  // into the MIDDLE of the next page, past its distinct hero and onto the
+  // shared section headers, so every buyer page looked like the same page.
+  useEffect(() => {
+    if (window.location.hash) return; // let the browser resolve #anchor targets
+    window.scrollTo(0, 0);
+  }, [location]);
+
   if (loading) return <PageLoader />;
 
   // Surface decision for a marketing path: render the marketing page when the
