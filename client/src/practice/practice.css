@@ -481,18 +481,21 @@
 /* ─── Slack-style homepage layout (2026-07-13, Paul: "mirror Slack, keep our
    colors"). Centered heroes/headers, a framed product showcase with pill-tabs
    that swap it, and curved "swoosh" dividers into deep-color bands. ─── */
-.pd-hero-c { flex-direction: column; text-align: center; padding-top: clamp(34px, 4.2vw, 76px); padding-bottom: clamp(24px, 3.4vw, 52px); }
+/* The chat-first fold is CALM (Paul, 2026-07-14 ×2: "too crowded… everything
+   is too crowded… unbalanced"): the lead-in is a modest Gemini-scale
+   statement — two lines, nowhere near display size — with real air above and
+   below, so the fold reads nav → breath → statement → breath → the engine
+   card → clear space. The tabs and the meta row sit at the fold edge and
+   arrive with the scroll. */
+.pd-hero-c { flex-direction: column; text-align: center; padding-top: clamp(44px, 5.4vw, 92px); padding-bottom: clamp(40px, 5vw, 76px); }
 .pd-heroc-inner { position: relative; z-index: 1; width: 100%; max-width: var(--pd-max); margin: 0 auto; }
-/* The landing hero is now the chat's stage — the headline is a compact lead-in,
-   not a full-height wall, so the engine card sits front-and-center in the first
-   viewport (Paul, 2026-07-14: "more front and center, like Grok or Gemini"). */
-.pd-hero-c .pd-h1 { max-width: 15em; margin: 0 auto; font-size: clamp(36px, 4.6vw, 64px); }
-.pd-sub-c { margin: 20px auto 0; max-width: 33em; }
-/* Secondary ask + proof, beneath the front-and-center chat. */
+.pd-hero-c .pd-h1 { max-width: 24em; margin: 0 auto; font-size: clamp(30px, 3.4vw, 46px); letter-spacing: -0.03em; line-height: 1.06; }
+.pd-hero-c .pd-sub { font-size: 19px; }
+.pd-sub-c { margin: 16px auto 0; max-width: 33em; }
 /* One quiet meta line under the showcase — the secondary ask and the proof
    row share a single row (stacking them read as clutter), wrapping on small
    screens. */
-.pd-hero-below { position: relative; z-index: 1; width: 100%; margin: clamp(20px, 2.4vw, 30px) auto 0; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px 28px; }
+.pd-hero-below { position: relative; z-index: 1; width: 100%; margin: clamp(30px, 3.6vw, 52px) auto 0; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px 28px; }
 .pd-cta-row { margin-top: 36px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 .pd-proofrow { margin-top: 34px; display: flex; gap: 10px 20px; justify-content: center; align-items: center; flex-wrap: wrap; }
 .pd-proofrow .lab { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--pd-tert); }
@@ -503,7 +506,7 @@
 .pd-hero-below .pd-proofrow { margin-top: 0; }
 
 /* product showcase — the framed product with pill-tabs below (Slack signature) */
-.pd-showcase { position: relative; z-index: 1; width: 100%; max-width: 960px; margin: clamp(22px, 2.8vw, 40px) auto 0; padding: 0 var(--pd-pad-x); }
+.pd-showcase { position: relative; z-index: 1; width: 100%; max-width: 960px; margin: clamp(30px, 3.8vw, 56px) auto 0; padding: 0 var(--pd-pad-x); }
 .pd-show-stage > * { margin-left: auto; margin-right: auto; }
 /* In the hero showcase the chat is the stage — drop the standalone card's top
    margin so it sits tight under the lead-in. The resting card HUGS its content
@@ -512,7 +515,7 @@
    balanced"); once a conversation grows, max-height + internal scroll take
    over as before. */
 .pd-show-stage .pd-chat { margin-top: 0; }
-.pd-showtabs { margin-top: 24px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.pd-showtabs { margin-top: 30px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
 .pd-showtabs button {
   border: none; background: transparent; border-radius: 99px;
   padding: 11px 22px; font-size: 15px; font-weight: 700; color: var(--pd-body); cursor: pointer;

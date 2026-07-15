@@ -422,22 +422,69 @@ export default function YuliaIntake() {
     };
   }, [open]);
 
-  // iOS ignores overflow CSS for touch panning — contain touches at the event
-  // level too: gestures on the sheet only scroll the message list; gestures on
-  // the scrim scroll nothing.
+  // Bottom-sheet touch behavior (Paul, 2026-07-14: "when I swipe down the
+  // drawer should minimize, not swipe down the whole screen… I can still drag
+  // through the drawer"). One handler owns every touch on the sheet:
+  //  • Drag starting on the header/grabber = direct-manipulation drag-to-close:
+  //    the sheet follows the finger; past the threshold it minimizes, otherwise
+  //    it springs back.
+  //  • Drag inside .pd-msgs scrolls the list, EXCEPT at its edges (top+down or
+  //    bottom+up), where it's blocked — otherwise iOS chains the gesture into
+  //    the page rubber-band / pull-to-refresh (the "drag through the drawer").
+  //  • Any other touch on the sheet or scrim moves nothing.
   useEffect(() => {
     if (!open || !isMobile()) return;
     const sheet = sheetRef.current;
     const scrim = scrimRef.current;
-    const onSheetMove = (e: TouchEvent) => {
-      if (!(e.target as Element | null)?.closest?.('.pd-msgs')) e.preventDefault();
+    if (!sheet) return;
+    let startY = 0;
+    let draggingSheet = false;
+    let dy = 0;
+    const onStart = (e: TouchEvent) => {
+      startY = e.touches[0].clientY;
+      dy = 0;
+      draggingSheet = !!(e.target as Element | null)?.closest?.('.pd-chat-head');
+      if (draggingSheet) sheet.style.transition = 'none';
+    };
+    const onMove = (e: TouchEvent) => {
+      const t = e.target as Element | null;
+      if (draggingSheet) {
+        dy = Math.max(0, e.touches[0].clientY - startY);
+        sheet.style.transform = `translateY(${dy}px)`;
+        e.preventDefault();
+        return;
+      }
+      const msgs = t?.closest?.('.pd-msgs') as HTMLElement | null;
+      if (!msgs) { e.preventDefault(); return; }
+      const delta = e.touches[0].clientY - startY;
+      const atTop = msgs.scrollTop <= 0;
+      const atBottom = msgs.scrollTop + msgs.clientHeight >= msgs.scrollHeight - 1;
+      if ((atTop && delta > 0) || (atBottom && delta < 0)) e.preventDefault();
+    };
+    const onEnd = () => {
+      if (!draggingSheet) return;
+      draggingSheet = false;
+      sheet.style.transition = '';
+      sheet.style.transform = '';
+      if (dy > 110) setOpen(false); // past the threshold — let the close transition take it from here
     };
     const onScrimMove = (e: TouchEvent) => e.preventDefault();
-    sheet?.addEventListener('touchmove', onSheetMove, { passive: false });
+    sheet.addEventListener('touchstart', onStart, { passive: true });
+    sheet.addEventListener('touchmove', onMove, { passive: false });
+    sheet.addEventListener('touchend', onEnd);
+    sheet.addEventListener('touchcancel', onEnd);
     scrim?.addEventListener('touchmove', onScrimMove, { passive: false });
+    // Belt and braces against pull-to-refresh while the drawer owns the screen.
+    const html = document.documentElement.style;
+    const prevOB = html.overscrollBehaviorY;
+    html.overscrollBehaviorY = 'none';
     return () => {
-      sheet?.removeEventListener('touchmove', onSheetMove);
+      sheet.removeEventListener('touchstart', onStart);
+      sheet.removeEventListener('touchmove', onMove);
+      sheet.removeEventListener('touchend', onEnd);
+      sheet.removeEventListener('touchcancel', onEnd);
       scrim?.removeEventListener('touchmove', onScrimMove);
+      html.overscrollBehaviorY = prevOB;
     };
   }, [open]);
 
