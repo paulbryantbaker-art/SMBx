@@ -496,6 +496,14 @@
    row share a single row (stacking them read as clutter), wrapping on small
    screens. */
 .pd-hero-below { position: relative; z-index: 1; width: 100%; margin: clamp(30px, 3.6vw, 52px) auto 0; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px 28px; }
+/* Quiet sample-read toggle in the meta row (replaced the heavy pill-tab row). */
+.pd-samplelink {
+  border: none; background: transparent; padding: 0;
+  font-size: 15px; font-weight: 700; color: var(--pd-body); cursor: pointer;
+  text-decoration: underline; text-decoration-color: var(--pd-border); text-underline-offset: 4px;
+  transition: color 150ms ease;
+}
+.pd-samplelink:hover { color: var(--pd-ink); text-decoration-color: var(--pd-ink); }
 .pd-cta-row { margin-top: 36px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 .pd-proofrow { margin-top: 34px; display: flex; gap: 10px 20px; justify-content: center; align-items: center; flex-wrap: wrap; }
 .pd-proofrow .lab { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--pd-tert); }
@@ -707,11 +715,41 @@
 
 /* Chat header title. */
 .pd-chat-title { font-weight: 800; font-size: 17px; color: var(--pd-ink); }
-/* Grab handle, minimize button, scrim, launcher — all mobile-only, hidden here. */
-.pd-chat-grab, .pd-chat-min, .pd-chat-scrim, .pd-chat-launch { display: none; }
-/* Zone wrapper — the #yulia anchor target that holds the inline card (desktop)
-   or the launcher (mobile), so hash-jumps land somewhere in-flow on both. */
+/* Grab handle, minimize button, scrim — all mobile-only, hidden here. */
+.pd-chat-grab, .pd-chat-min, .pd-chat-scrim { display: none; }
+/* Zone wrapper — the #yulia anchor target that holds the hero bar / the
+   conversation card, so hash-jumps land somewhere in-flow on both breakpoints. */
 .pd-chat-zone { width: 100%; }
+
+/* ── The hero bar — the resting engine (Gemini's move): ONE big inviting input
+   with starter chips beneath it, no card chrome, no opening paragraph (the
+   page headline/sub already carry it). On desktop it swaps for the
+   conversation card the moment the visitor engages; on phones it is always the
+   doorway to the slide-up sheet (typing never happens in-page). ── */
+.pd-chat-hero { width: 100%; max-width: 780px; margin: 0 auto; }
+.pd-herobar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 9px 9px 28px;
+  background: #fff;
+  border: 1.5px solid var(--pd-border);
+  border-radius: 999px;
+  box-shadow: 0 26px 80px -30px rgba(34, 34, 34, 0.38);
+  transition: border-color 160ms ease;
+}
+.pd-herobar:focus-within { border-color: #222222; }
+.pd-herobar input {
+  flex: 1; min-width: 0; padding: 16px 0;
+  font-size: 17.5px; color: var(--pd-ink); background: transparent;
+  -webkit-appearance: none; appearance: none; border: none; border-radius: 0; box-shadow: none; outline: none;
+}
+.pd .pd-herobar input:focus-visible { outline: none; }
+.pd-herobar .pd-send { border-radius: 999px; padding: 15px 28px; }
+.pd-chat-hero .pd-chips { justify-content: center; padding: 18px 0 0; }
+@media (min-width: 901px) {
+  /* Resting desktop = hero bar only; engaged desktop = the card only. */
+  .pd-chat-zone:not(.resting) .pd-chat-hero { display: none; }
+  .pd-chat-zone.resting .pd-chat { display: none; }
+}
 
 /* ── Quick-start suggestion chips (Paul: "adding direction and input to the
    chat") — tappable thesis starters that drop into the field. ── */
@@ -723,43 +761,23 @@
 }
 .pd-chip:hover { border-color: var(--pd-ink); color: var(--pd-ink); background: var(--pd-card); }
 
-/* ── Mobile: the home page keeps a chat-shaped LAUNCHER (never a real input);
-   the actual chat is a bottom sheet that is ALWAYS position:fixed — parked
-   off-screen below the viewport until opened. Because it never sits in the
-   page flow on mobile, opening it causes zero reflow (the old inline→fixed
-   jump read as awkward), and transform transitions animate the slide both up
-   AND down. The page behind is scroll-locked from the component while open.
-   Desktop is untouched: launcher/scrim/sheet rules live only in this query. ── */
+/* ── Mobile: the hero bar stays in the page as the doorway (typing never
+   happens in-page); the actual chat is a bottom sheet that is ALWAYS
+   position:fixed — parked off-screen below the viewport until opened. Because
+   it never sits in the page flow on mobile, opening it causes zero reflow, and
+   transform transitions animate the slide both up AND down. The page behind is
+   scroll-locked from the component while open. ── */
 @media (max-width: 900px) {
   /* The sheet + scrim must paint over the sticky nav (z 50); the showcase's
      own stacking context (z-index:1) would otherwise trap them. */
   .pd-showcase:has(.pd-chat.open) { z-index: 90; }
 
-  /* Launcher card — the doorway on the home page. Compact on purpose so the
-     whole card (through its input bar) fits the first phone screen (Paul,
-     2026-07-14: "awkwardly spaced… needs to fit the mobile screen better"). */
-  .pd-chat-launch {
-    display: block; width: 100%; text-align: left;
-    margin: 26px auto 0; background: #fff;
-    border: 1px solid var(--pd-hair); border-radius: 20px;
-    box-shadow: 0 40px 100px -32px rgba(34, 34, 34, 0.28);
-    padding: 16px 18px 18px; cursor: pointer;
-  }
-  .pd-chat-launch .pd-chat-head { padding: 0; }
-  .pd-launch-body { margin-top: 10px; font-size: 16px; line-height: 1.55; color: var(--pd-ink); font-weight: 600; }
-  .pd-chat-launch .pd-chips { padding: 10px 0 0; }
-  /* Two starter chips are an invitation; four are a wall — trim the tail so
-     the input bar stays on the first screen. */
-  .pd-chat-launch .pd-chip:nth-child(n + 3) { display: none; }
-  .pd-launch-input {
-    display: flex; width: 100%; align-items: center; gap: 10px;
-    margin: 14px 0 0; padding: 6px 6px 6px 14px; background: #fff; text-align: left;
-  }
-  .pd-launch-input .ph {
-    flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
-    font-size: 16px; color: var(--pd-tert); padding: 12px 0;
-  }
-  .pd-launch-input .pd-send { padding: 12px 18px; }
+  /* Hero bar tightens on phones; two starter chips are an invitation, four
+     are a wall. */
+  .pd-herobar { padding-left: 20px; }
+  .pd-herobar input { font-size: 16px; padding: 13px 0; }
+  .pd-herobar .pd-send { padding: 13px 20px; }
+  .pd-chat-hero .pd-chip:nth-child(n + 3) { display: none; }
 
   /* Scrim — always mounted so it can fade both ways. */
   .pd-chat-scrim {
