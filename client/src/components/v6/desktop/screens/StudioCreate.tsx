@@ -17,6 +17,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AtlasScreenProps } from "../atlasNav";
 import { useAtlasNav, useAtlasChat } from "../atlasNav";
+import StudioResearch from "./StudioResearch";
 import { useMobileDeals } from "../../../../hooks/useMobileDeals";
 import {
   useV6WorkspaceData,
@@ -100,7 +101,24 @@ interface Building {
 
 /* ─── root ─────────────────────────────────────────────────── */
 
+type StudioMode = "collateral" | "research";
+
 export default function StudioCreate({ user }: AtlasScreenProps) {
+  // Studio wears two hats: the deal-collateral workbench, and Paul's research
+  // agent + LinkedIn campaign manager (2026-07-15). Mode survives tab hops.
+  const [mode, setMode] = useState<StudioMode>(() => {
+    try {
+      return sessionStorage.getItem("smbx_studio_mode") === "research" ? "research" : "collateral";
+    } catch {
+      return "collateral";
+    }
+  });
+  useEffect(() => {
+    try {
+      sessionStorage.setItem("smbx_studio_mode", mode);
+    } catch { /* private browsing */ }
+  }, [mode]);
+
   const nav = useAtlasNav();
   const chat = useAtlasChat();
   const { items: catalog, loading: catalogLoading } = useDeliverableCatalog();
@@ -185,10 +203,34 @@ export default function StudioCreate({ user }: AtlasScreenProps) {
   return (
     <div style={S.root}>
       <div style={S.pane}>
-        {/* header */}
-        <div style={S.h1}>Studio</div>
-        <div style={S.sub}>Build custom collateral for a deal. Finished work is saved to Files.</div>
+        {/* header + mode switch */}
+        <div style={S.headRow}>
+          <div>
+            <div style={S.h1}>Studio</div>
+            <div style={S.sub}>
+              {mode === "research"
+                ? "Deep research on demand — cited reports, LinkedIn cards, and campaigns on a cadence."
+                : "Build custom collateral for a deal. Finished work is saved to Files."}
+            </div>
+          </div>
+          <div style={S.modeRow}>
+            {([["collateral", "Deal collateral"], ["research", "Research & campaigns"]] as const).map(([k, label]) => (
+              <button
+                key={k}
+                type="button"
+                onClick={() => setMode(k)}
+                style={{ ...S.modeBtn, ...(mode === k ? S.modeBtnOn : null) }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
 
+        {mode === "research" ? (
+          <StudioResearch user={user} />
+        ) : (
+          <>
         {/* tell-Yulia prompt + deal picker */}
         <div style={S.promptRow}>
           <Sparkle size={17} />
@@ -314,6 +356,8 @@ export default function StudioCreate({ user }: AtlasScreenProps) {
             ))}
           </div>
         )}
+          </>
+        )}
       </div>
     </div>
   );
@@ -343,6 +387,10 @@ const S: Record<string, React.CSSProperties> = {
   pane: { padding: "22px 26px 40px", maxWidth: 1000, width: "100%" },
   h1: { fontSize: 22, fontWeight: 600, color: T.ink, letterSpacing: "-.01em" },
   sub: { fontSize: 13, color: T.muted, marginTop: 4 },
+  headRow: { display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap" },
+  modeRow: { display: "flex", gap: 6, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: 4, flex: "none" },
+  modeBtn: { height: 32, padding: "0 13px", borderRadius: 9, border: "none", background: "transparent", fontSize: 12.5, fontWeight: 600, color: T.muted, cursor: "pointer", fontFamily: T.font },
+  modeBtnOn: { background: T.white, color: T.ink, boxShadow: T.shCard },
 
   promptRow: {
     display: "flex", alignItems: "center", gap: 10, marginTop: 16,
