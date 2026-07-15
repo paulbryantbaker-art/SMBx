@@ -40,6 +40,8 @@ import { analysisRunsRouter } from './routes/analysisRuns.js';
 import { modelExecutionsRouter } from './routes/modelExecutions.js';
 import { portfolioBriefRouter } from './routes/portfolioBrief.js';
 import { studioRouter } from './routes/studio.js';
+import { researchRouter } from './routes/research.js';
+import { startResearchScheduler } from './services/researchAgent.js';
 import { v19ResourcesRouter } from './routes/v19Resources.js';
 import { createSql, getDatabaseUrl, getPostgresOptions } from './dbConfig.js';
 
@@ -929,6 +931,7 @@ app.use('/api', portfolioBriefRouter);
 app.use('/api', canvasTabsRouter);
 app.use('/api', docViewsRouter);
 app.use('/api', studioRouter);
+app.use('/api', researchRouter);
 app.use('/api', pmiPlanRouter);
 app.use('/api', v19ResourcesRouter);
 
@@ -1114,5 +1117,10 @@ runMigrations().then(async () => {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     startWorker().catch(err => console.warn('[worker] Init skipped:', err.message));
+    try {
+      startResearchScheduler();
+    } catch (err: any) {
+      console.warn('[research] Scheduler init skipped:', err?.message);
+    }
   });
 });

@@ -143,6 +143,10 @@ Valuation Explorer, LBO, SBA Financing, DCF, Tax Impact, Cap Table, Sensitivity 
 | server/constants/v19Regulatory.ts | V19 regulatory constants for HSR, SBA, OBBBA, §382, CFIUS, RWI |
 | server/constants/v19Leagues.ts | V19 L1-L10 league classification constants |
 | server/services/sourcingPipelineService.ts | 5-stage sourcing engine |
+| server/services/researchAgent.ts | Internal research agent (2026-07-15): 6 research types × 3 depths, server-side web_search/web_fetch via Sonnet 4.6 (pause_turn resume loop), cited md report + STUDIO FEED, cents-tracked spend vs monthly cap, in-process campaign scheduler (weekly Sun 22:00 UTC / biweekly / monthly, completion email) |
+| server/services/researchComposer.ts | Research artifacts in the CORAL language (not terra premium-PDF skin): letter report PDF + 1080×1350 LinkedIn card PNG, rendered on demand via shared Puppeteer |
+| server/routes/research.ts | Research runs/schedules CRUD + pdf/card.png/md downloads (behind blanket /api auth + practice perimeter) |
+| client/src/components/v6/desktop/screens/StudioResearch.tsx | Studio "Research & campaigns" mode — Paul's control panel (topic/type/depth/output + cadence campaigns); StudioCreate.tsx carries the mode toggle |
 | server/services/tools.ts | 35 agentic tools |
 | server/services/definitiveConnectorDistribution.ts | Claude-first connector launch package and marketplace evidence pack |
 | server/services/definitiveAssistantDistributionReadiness.ts | Claude/ChatGPT/MCP launch readiness and revenue blocker map |
@@ -174,6 +178,7 @@ Valuation Explorer, LBO, SBA Financing, DCF, Tax Impact, Cap Table, Sensitivity 
 | Intelligence Brief | Claude Sonnet 4.6 (sourcing Stage 1) |
 | Website Enrichment | Claude Haiku 4.5 |
 | Gate Summarization | Claude Haiku 4.5 |
+| Internal Research Agent | Claude Sonnet 4.6 + server web_search/web_fetch (20260209 tools) |
 
 ## Commands
 ```bash
@@ -190,4 +195,6 @@ PRACTICE_MODE (default true), TEAM_ALLOWLIST (comma-separated emails),
 ENGAGED_LANES (comma-separated keyword groups, e.g. "hvac phoenix, plumbing dallas" —
   the honest register behind Yulia's "this lane is open" close; empty = all lanes open),
 RESEND_API_KEY + EMAIL_FROM (lead pings + transactional email; console-log fallback),
+RESEARCH_MONTHLY_CAP_CENTS (research agent monthly budget, default 15000 = $150),
+RESEARCH_SCHEDULES_DISABLED (set "true" to stop the in-process campaign scheduler),
 STRIPE_* (dormant: SECRET_KEY, PUBLISHABLE_KEY, WEBHOOK_SECRET, PRICE_SOLO/PRO/TEAM/ENTERPRISE)
