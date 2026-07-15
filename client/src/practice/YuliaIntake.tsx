@@ -304,11 +304,22 @@ export default function YuliaIntake() {
   // page under the keyboard (Paul, 2026-07-14: "a drawer that slides up and can
   // be minimized"). Desktop ignores this — the chat stays inline, front-and-center.
   const [open, setOpen] = useState(false);
+  // Viewport class as state so the hero bar can render readOnly on phones
+  // (readOnly = no keyboard; the tap opens the sheet, whose field then takes
+  // focus and summons the keyboard where it belongs).
+  const [mobileVP, setMobileVP] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 900px)');
+    const f = () => setMobileVP(mq.matches);
+    mq.addEventListener('change', f);
+    return () => mq.removeEventListener('change', f);
+  }, []);
   const mapTracked = useRef(messages.some(m => m.map)); // never re-count a restored map
   const dwell = useRef<{ start: number; verdict: string } | null>(null);
   const dwellFired = useRef(false);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const heroInputRef = useRef<HTMLInputElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const scrimRef = useRef<HTMLDivElement>(null);
   const isMobile = () => typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches;
@@ -515,6 +526,16 @@ export default function YuliaIntake() {
     requestAnimationFrame(() => inputRef.current?.focus());
   };
 
+  // Focus whichever input is actually visible (the hero bar in the resting
+  // hero, the card/sheet field once engaged) — focusing a display:none input
+  // is a silent no-op.
+  const focusActive = () => {
+    requestAnimationFrame(() => {
+      const el = [inputRef.current, heroInputRef.current].find(n => n && n.offsetParent !== null);
+      el?.focus();
+    });
+  };
+
   // Other components (the showcase's "Map your market" tab) can ask the drawer
   // to open on phones without reaching into this component.
   useEffect(() => {
@@ -541,7 +562,7 @@ export default function YuliaIntake() {
   const useChip = (text: string) => {
     setDraft(text);
     if (isMobile()) setOpen(true);
-    requestAnimationFrame(() => inputRef.current?.focus());
+    focusActive();
   };
 
   const trackMap = (verdict: string) => {
@@ -576,6 +597,9 @@ export default function YuliaIntake() {
     setDraft('');
     setPending(true);
     setLive(null);
+    // On desktop the first send morphs the resting hero bar into the
+    // conversation card — carry focus into the card's field.
+    focusActive();
     const payload = next
       .filter(m => m.text)
       .map(m => ({ role: m.from === 'y' ? 'assistant' : 'user', content: m.text as string }));
@@ -635,40 +659,51 @@ export default function YuliaIntake() {
   // delivery from the first fully-assembled streaming render too.
   const liveMapVisible = pending && live?.inMap && live.partial;
 
+  // Resting = nothing has happened yet. On desktop the resting state is a
+  // Gemini-style hero: ONE big input bar with starter chips beneath it — no
+  // card chrome, no opening paragraph (the page headline/sub already say it).
+  // The conversation card only materializes once the visitor engages (Paul,
+  // 2026-07-14 ×3: "too crowded… results are not what I wanted"). On phones
+  // the bar is always the doorway — typing happens in the slide-up sheet.
+  const resting = userTurns === 0 && !pending && !done;
+
   return (
-    <div id="yulia" className="pd-chat-zone">
-      {/* ── Mobile launcher — the home page keeps a chat-input-shaped doorway,
-             but typing NEVER happens here: any tap slides the real chat up as
-             a bottom sheet (Paul, 2026-07-14: "as soon as the user activates
-             the box just go into the slide up view"). Hidden on desktop. ── */}
-      <div className="pd-chat-launch" onClick={openSheet}>
-        <div className="pd-chat-head">
-          <img src="/logo-coral-x.png" alt="smbX.ai" style={{ height: 28, width: 'auto', display: 'block' }} />
-          <div className="pd-chat-title">Acquisition Engine</div>
+    <div id="yulia" className={`pd-chat-zone${resting ? ' resting' : ''}`}>
+      {/* ── The hero bar — desktop resting state AND the mobile doorway. On a
+             phone, pointerdown opens the sheet before focus (no keyboard
+             behind the sheet); on desktop it's the real input. ── */}
+      <div className="pd-chat-hero">
+        <div
+          className="pd-herobar"
+          onClick={() => { if (isMobile()) openSheet(); }}
+        >
+          <input
+            ref={heroInputRef}
+            readOnly={mobileVP}
+            value={draft}
+            onChange={e => setDraft(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') send(); }}
+            placeholder={done ? 'Your map is ready — reopen it' : userTurns > 0 ? 'Tap to continue your session' : hint}
+            aria-label="Describe your acquisition criteria"
+          />
+          <button
+            type="button"
+            className="pd-send"
+            onClick={() => { if (isMobile()) openSheet(); else send(); }}
+            disabled={pending}
+          >
+            {userTurns > 0 || done ? 'Reopen' : sendLabel}
+          </button>
         </div>
-        <div className="pd-launch-body">
-          {userTurns > 0
-            ? 'Your session is in progress.'
-            : 'Tell us a bit about what you’re looking for — we’ll build a preliminary market map in minutes.'}
-        </div>
-        {userTurns === 0 && !done && (
+        {resting && (
           <div className="pd-chips">
             {CHIPS.map(c => (
-              <button
-                type="button"
-                key={c.value}
-                className="pd-chip"
-                onClick={e => { e.stopPropagation(); useChip(c.value); }}
-              >
+              <button type="button" key={c.value} className="pd-chip" onClick={() => useChip(c.value)}>
                 {c.label}
               </button>
             ))}
           </div>
         )}
-        <button type="button" className="pd-chat-inputrow pd-launch-input" onClick={openSheet}>
-          <span className="ph">{done ? 'Your map is ready — reopen it' : userTurns > 0 ? 'Tap to continue your session' : hint}</span>
-          <span className="pd-send" aria-hidden="true">{userTurns > 0 || done ? 'Reopen' : sendLabel}</span>
-        </button>
       </div>
 
       {/* Scrim behind the mobile sheet (CSS-hidden on desktop). */}

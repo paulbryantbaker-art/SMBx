@@ -184,11 +184,11 @@ function LeadForm() {
   );
 }
 
-/** The product showcase — Slack's signature move: a big framed product with a
- *  pill-tab row below that swaps what's shown. Ours toggles the live engine and
- *  a sample market read. */
-function HeroShowcase() {
-  const [tab, setTab] = useState<'engine' | 'sample'>('engine');
+/** The hero stage: the live engine, or — toggled from the quiet meta-row link
+ *  below — a sample market read. No pill-tab row: the resting engine is a
+ *  single inviting input bar, and extra chrome around it read as clutter
+ *  (Paul, 2026-07-14). */
+function HeroShowcase({ tab }: { tab: 'engine' | 'sample' }) {
   return (
     <div className="pd-showcase">
       <div className="pd-show-stage">
@@ -199,28 +199,6 @@ function HeroShowcase() {
             <MapDoc map={SAMPLE_MAP} final headLabel="SAMPLE READ" />
           </div>
         )}
-      </div>
-      <div className="pd-showtabs">
-        <button
-          type="button"
-          className={tab === 'engine' ? 'on' : ''}
-          onClick={() => {
-            setTab('engine');
-            // On phones this pill reads as a CTA, not a tab — open the drawer.
-            // Deferred so the engine (and its listener) is mounted even when
-            // switching back from the sample tab.
-            setTimeout(() => window.dispatchEvent(new Event('smbx:open-intake')), 60);
-          }}
-        >
-          Map your market
-        </button>
-        <button
-          type="button"
-          className={tab === 'sample' ? 'on' : ''}
-          onClick={() => { setTab('sample'); trackEvent('practice_cta_clicked', { placement: 'showcase-sample' }); }}
-        >
-          See a sample read
-        </button>
       </div>
     </div>
   );
@@ -331,11 +309,14 @@ function EngagementShow() {
 }
 
 export default function Landing() {
+  // The hero stage: the live engine, or the sample market read (toggled from
+  // the quiet link in the meta row).
+  const [stage, setStage] = useState<'engine' | 'sample'>('engine');
   return (
     <PracticeShell home>
       {/* ── Hero — the chat is the centerpiece (Grok/Gemini): a compact
-             statement, then the engine front-and-center, with the secondary
-             ask + honest proof row beneath it (Paul, 2026-07-14). ── */}
+             statement, one big inviting input, chips, and a single quiet meta
+             row (Paul, 2026-07-14). ── */}
       <section className="pd-hero pd-hero-c">
         <div className="pd-heroc-inner">
           <h1 className="pd-h1">
@@ -345,7 +326,7 @@ export default function Landing() {
             Institutional-grade corporate development, on demand.
           </p>
         </div>
-        <HeroShowcase />
+        <HeroShowcase tab={stage} />
         <div className="pd-hero-below" data-rv>
           <a className="pd-pill pd-pill-lg-quiet" href={bookHref()} target={bookTarget()} rel={bookTarget() ? 'noreferrer' : undefined} onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero' })}>Or book a call instead</a>
           <div className="pd-proofrow">
@@ -356,6 +337,17 @@ export default function Landing() {
             <span className="pf"><b>~$21B</b> touched</span>
             <span className="pf hot"><b>0</b> sell-side. Ever.</span>
           </div>
+          <button
+            type="button"
+            className="pd-samplelink"
+            onClick={() => {
+              const next = stage === 'engine' ? 'sample' : 'engine';
+              setStage(next);
+              if (next === 'sample') trackEvent('practice_cta_clicked', { placement: 'showcase-sample' });
+            }}
+          >
+            {stage === 'engine' ? 'See a sample read →' : '← Back to the engine'}
+          </button>
         </div>
       </section>
 
