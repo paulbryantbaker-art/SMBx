@@ -31,9 +31,15 @@
   --pd-dark-top: #151312;
   --pd-dark-bot: #131313;
   --pd-font: 'Schibsted Grotesk', system-ui, sans-serif;
-  --pd-mono: 'IBM Plex Mono', monospace;
+  --pd-mono: 'IBM Plex Mono', monospace; /* @kind font */
   --pd-pad-x: clamp(28px, 4.5vw, 64px);
-  --pd-max: 1440px;
+  /* Two-width system (Paul, 2026-07-15: sections each had their own width and
+     the page read imbalanced). Every section rail is --pd-max; every centered
+     artifact (cards, showcase, accordion, two-col prose) is --pd-mid. No other
+     section widths allowed — text measure caps (em-based) are typographic and
+     don't count. */
+  --pd-max: 1360px;
+  --pd-mid: 1040px;
 
   margin: 0;
   /* Warm-white base so even un-bloomed regions feel alive, not clinical (the
@@ -151,8 +157,8 @@
    when its only children are absolutely positioned). Centered wrappers must
    therefore carry an explicit width: 100%. */
 .pd-wrap { width: 100%; max-width: var(--pd-max); margin: 0 auto; padding-left: var(--pd-pad-x); padding-right: var(--pd-pad-x); }
-.pd-section { padding-top: clamp(100px, 12vw, 170px); }
-.pd-section-lg { padding-top: clamp(110px, 12.5vw, 180px); }
+.pd-section { padding-top: clamp(130px, 15vw, 220px); }
+.pd-section-lg { padding-top: clamp(140px, 16vw, 240px); }
 
 /* ─── dark sections — near-black, full-bleed ───
    The rhythm device: 2–3 points in the scroll go dark. Everything inside
@@ -172,7 +178,7 @@
   --pd-hair: rgba(255, 255, 255, 0.16);
   --pd-coral-link: #FFFFFF;
   width: 100%;
-  --pd-curve: clamp(52px, 6vw, 112px);
+  --pd-curve: clamp(52px, 6vw, 112px); /* @kind spacing */
   /* Full-bleed dark texture — Paul's blackBleedBG slate/plaster surface, shown
      in full (all band text is bright white, so no legibility veil needed). A
      subtle top coral halo keeps a whisper of brand; the base gradient is the
@@ -199,9 +205,9 @@
     linear-gradient(#fff, #fff) center / 100% calc(100% - 2 * var(--pd-curve) + 2px) no-repeat,
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1440,0 L1440,60 C1040,12 400,12 0,60 Z' fill='%23fff'/%3E%3C/svg%3E") bottom / 100% var(--pd-curve) no-repeat;
 }
-@media (max-width: 760px) { .pd-dark { --pd-curve: clamp(40px, 9vw, 68px); } }
+@media (max-width: 760px) { .pd-dark { --pd-curve: clamp(40px, 9vw, 68px); /* @kind spacing */ } }
 /* content clears the curved edges: curve height + breathing room */
-.pd-dark-pad { padding-top: calc(var(--pd-curve, 0px) + clamp(40px, 5vw, 84px)); padding-bottom: calc(var(--pd-curve, 0px) + clamp(40px, 5vw, 84px)); }
+.pd-dark-pad { padding-top: calc(var(--pd-curve, 0px) + clamp(56px, 6.5vw, 110px)); padding-bottom: calc(var(--pd-curve, 0px) + clamp(56px, 6.5vw, 110px)); }
 .pd-dark a.pd-pill, .pd-dark a.pd-pill:hover { color: var(--pd-ink); }
 /* Secondary (outline) buttons on dark bands: the default #3D3D3D border is
    near-invisible on the texture (Paul, 2026-07-14: "secondary buttons on dark
@@ -246,8 +252,12 @@
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.04;
-  max-width: 18em;
-  text-wrap: balance;
+  /* One shared header width across ALL sections (Paul, 2026-07-15): cap sits
+     past the content rail so the rail — not the heading — sets the width, and
+     `pretty` (not `balance`) lets line 1 run full width instead of splitting
+     a two-line heading into two equal narrow lines. */
+  max-width: 24em;
+  text-wrap: pretty;
 }
 /* Minor header — card / list-row / FAQ / step / tenet / form titles. NOTE:
    the intake card head deliberately stays at label scale (17/800), never
@@ -397,6 +407,30 @@
     radial-gradient(52% 64% at 72% 44%, rgba(255, 56, 92, 0.055), rgba(255, 56, 92, 0) 70%),
     radial-gradient(44% 54% at 18% 26%, rgba(34, 34, 34, 0.04), rgba(34, 34, 34, 0) 72%);
 }
+/* ─── hero mesh — a faint dot-matrix field behind the engine (2026-07-14,
+   Paul: "needs some graphic or texture… not selling the app, selling the
+   service"). Pure CSS — an ink micro-grid with sparse coral points riding on
+   it, radially masked so it blooms behind the input bar and dissolves before
+   the headline and the fold edges. Reads as quiet market-data atmosphere
+   (the Grok note) without a single screenshot. Static, absolute, no-promote. */
+.pd-heromesh {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    radial-gradient(rgba(255, 56, 92, 0.20) 1.2px, rgba(255, 56, 92, 0) 1.7px),
+    radial-gradient(rgba(34, 34, 34, 0.13) 1px, rgba(34, 34, 34, 0) 1.4px);
+  background-size: 96px 96px, 24px 24px;
+  background-position: 11px 13px, 0 0;
+  -webkit-mask-image: radial-gradient(54% 58% at 50% 64%, #000, transparent 74%);
+  mask-image: radial-gradient(54% 58% at 50% 64%, #000, transparent 74%);
+}
+/* Anchor-styled quiet meta links share the samplelink voice (the `.pd a`
+   base color rule outranks the bare class). */
+.pd a.pd-samplelink { color: var(--pd-body); }
+.pd a.pd-samplelink:hover { color: var(--pd-ink); }
+/* On the dark proof band the accent stat keeps a BRIGHT coral (the band
+   remaps --pd-coral-link to white for text legibility, which silently turned
+   the "0" white too). */
+.pd-dark .pd-stat.accent .n { color: #FF8298; }
 .pd-herosplit { position: relative; }
 .pd-herosplit {
   display: grid; grid-template-columns: minmax(0, 6.5fr) minmax(0, 5.5fr);
@@ -488,8 +522,14 @@
    card → clear space. The tabs and the meta row sit at the fold edge and
    arrive with the scroll. */
 .pd-hero-c { flex-direction: column; text-align: center; padding-top: clamp(44px, 5.4vw, 92px); padding-bottom: clamp(40px, 5vw, 76px); }
+/* Fold-height hero: fills the first screen under the 86px nav. On desktop it
+   gives back the height of the dark band's swoosh curve so the curve's crest
+   sits flush with the viewport bottom — the next band visibly "peeks" at the
+   fold (Paul, 2026-07-15). Mobile keeps the full chat-app fold, no peek. */
+.pd-hero-fold { min-height: calc(100svh - 86px); }
+@media (min-width: 761px) { .pd-hero-fold { min-height: calc(100svh - 86px - clamp(52px, 6vw, 112px)); } }
 .pd-heroc-inner { position: relative; z-index: 1; width: 100%; max-width: var(--pd-max); margin: 0 auto; }
-.pd-hero-c .pd-h1 { max-width: 24em; margin: 0 auto; font-size: clamp(30px, 3.4vw, 46px); letter-spacing: -0.03em; line-height: 1.06; }
+.pd-hero-c .pd-h1 { max-width: 24em; margin: 0 auto; font-size: clamp(42px, 5.2vw, 68px); letter-spacing: -0.03em; line-height: 1.04; }
 .pd-hero-c .pd-sub { font-size: 19px; }
 .pd-sub-c { margin: 16px auto 0; max-width: 33em; }
 /* One quiet meta line under the showcase — the secondary ask and the proof
@@ -514,7 +554,7 @@
 .pd-hero-below .pd-proofrow { margin-top: 0; }
 
 /* product showcase — the framed product with pill-tabs below (Slack signature) */
-.pd-showcase { position: relative; z-index: 1; width: 100%; max-width: 960px; margin: clamp(30px, 3.8vw, 56px) auto 0; padding: 0 var(--pd-pad-x); }
+.pd-showcase { position: relative; z-index: 1; width: 100%; max-width: calc(var(--pd-mid) + 2 * var(--pd-pad-x)); margin: clamp(30px, 3.8vw, 56px) auto 0; padding: 0 var(--pd-pad-x); }
 .pd-show-stage > * { margin-left: auto; margin-right: auto; }
 /* In the hero showcase the chat is the stage — drop the standalone card's top
    margin so it sits tight under the lead-in. The resting card HUGS its content
@@ -569,7 +609,9 @@
 /* ─── Slack centered section intro — eyebrow + heading + optional lede,
    center-stacked, then the section body flows beneath (the site's mid-page
    rhythm after the 2026-07-13 Slack reflow). ─── */
-.pd-sechead { text-align: center; max-width: 46em; margin: 0 auto; }
+/* No width cap on the wrapper — the H2 (18em at its own size) and lede (34em)
+   carry their own caps, so big headings can run to two full lines. */
+.pd-sechead { text-align: center; margin: 0 auto; }
 .pd-sechead .pd-seclabel { margin-left: auto; margin-right: auto; }
 .pd-sechead .pd-h2, .pd-sechead .pd-quote { margin-left: auto; margin-right: auto; }
 .pd-sechead .pd-sub { margin: 22px auto 0; }
@@ -617,7 +659,7 @@
 /* the gap section — centered head, symmetric two-column body, centered close */
 .pd-gapcols {
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(32px, 5vw, 72px); max-width: 62em; margin: clamp(48px, 6vw, 80px) auto 0;
+  gap: clamp(32px, 5vw, 72px); max-width: var(--pd-mid); margin: clamp(48px, 6vw, 80px) auto 0;
 }
 .pd-gapclose { text-align: center; margin-top: clamp(44px, 5.5vw, 76px); }
 @media (max-width: 760px) { .pd-gapcols { grid-template-columns: 1fr; gap: 22px; } }
@@ -628,7 +670,7 @@
    opening renders as a large statement. No status micro-text, no avatar
    cartoon — clean, typographic, calm. */
 .pd-chat {
-  margin: 76px auto 0; max-width: 860px; background: #fff;
+  margin: 76px auto 0; max-width: var(--pd-mid); background: #fff;
   border: 1px solid var(--pd-hair); border-radius: 24px;
   box-shadow: 0 40px 100px -32px rgba(34, 34, 34, 0.28);
   text-align: left; overflow: hidden; scroll-margin-top: 120px;
@@ -681,20 +723,53 @@
 .pd-map .map-foot { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--pd-hair); display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap; }
 .pd-map .map-foot .src { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.02em; line-height: 1.6; color: var(--pd-body); flex: 1 1 320px; }
 .pd-map .map-pdf {
-  border: 1.5px solid var(--pd-ink); background: transparent; color: var(--pd-ink);
-  border-radius: 99px; padding: 10px 22px; font-size: 13.5px; font-weight: 700; white-space: nowrap;
-  transition: background-color 160ms ease, color 160ms ease;
+  /* Same voice as every other primary CTA (was a one-off outlined pill). */
+  border: none; background: var(--pd-cta); color: #fff;
+  border-radius: 99px; padding: 11px 24px; font-size: 13.5px; font-weight: 700; white-space: nowrap;
+  transition: background-color 160ms ease;
 }
-.pd-map .map-pdf:hover { background: var(--pd-ink); color: #fff; }
+.pd-map .map-pdf:hover { background: var(--pd-cta-hover); color: #fff; }
 .pd-map .map-pdf:disabled { opacity: 0.55; cursor: default; }
+/* Rebuilt sample read (Paul, 2026-07-15): counts compress to one setup strip;
+   the payoff is judgment — the 9, the screens, the dollar swing, the verdict. */
+.pd-map .map-flow { margin-top: 22px; border-top: 1px solid var(--pd-hair); padding-top: 18px; display: flex; align-items: baseline; gap: 10px 14px; flex-wrap: wrap; }
+.pd-map .map-flow .k { flex-basis: 100%; font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
+.pd-map .map-flow .f { display: flex; align-items: baseline; gap: 8px; }
+.pd-map .map-flow .f .n { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; color: var(--pd-ink); white-space: nowrap; }
+.pd-map .map-flow .f .l { font-size: 13.5px; line-height: 1.4; color: var(--pd-body); }
+.pd-map .map-flow .arr { color: var(--pd-faint); font-weight: 700; }
+.pd-map .map-nine { margin-top: 16px; display: flex; align-items: center; gap: 22px; }
+.pd-map .map-nine .n { font-size: clamp(60px, 7.5vw, 96px); font-weight: 800; letter-spacing: -0.04em; line-height: 0.85; color: var(--pd-coral-link); }
+.pd-map .map-nine .l { font-size: 16.5px; font-weight: 600; line-height: 1.5; color: var(--pd-ink); max-width: 24em; }
+.pd-map .map-screens { margin-top: 28px; }
+.pd-map .map-screens .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
+.pd-map .map-scr { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 4px 14px; padding: 15px 0; }
+.pd-map .map-scr + .map-scr { border-top: 1px solid var(--pd-hair); }
+.pd-map .map-scr .i { grid-row: 1 / 3; font-family: var(--pd-mono); font-size: 13px; color: var(--pd-tert); padding-top: 3px; }
+.pd-map .map-scr .t { font-size: 16px; font-weight: 700; color: var(--pd-ink); }
+.pd-map .map-scr .b { font-size: 14.5px; line-height: 1.6; color: var(--pd-body); }
+.pd-map .map-number { margin-top: 24px; background: var(--pd-ink); border-radius: 12px; padding: 24px 26px; }
+.pd-map .map-number .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral); }
+.pd-map .map-number .big { margin-top: 10px; font-size: clamp(40px, 5vw, 60px); font-weight: 800; letter-spacing: -0.035em; line-height: 1; color: #fff; }
+.pd-map .map-number .v { margin-top: 12px; font-size: 15px; line-height: 1.65; color: rgba(255, 255, 255, 0.85); }
+.pd-map .map-number .v strong { color: #fff; }
+.pd-map .map-verdict { margin-top: 24px; border-left: 3px solid var(--pd-coral-link); padding: 4px 0 4px 18px; }
+.pd-map .map-verdict .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
+.pd-map .map-verdict .v { margin-top: 7px; font-size: 16px; font-weight: 600; line-height: 1.6; color: var(--pd-ink); }
+@media (max-width: 640px) { .pd-map .map-nine { gap: 16px; } .pd-map .map-nine .l { font-size: 15px; } }
 
-/* One unified input bar — borderless field + send inside a single container. */
+
+/* One unified input bar — borderless field + send inside a single container.
+   Pill geometry MATCHES .pd-herobar (2026-07-14, Paul: the resting bar and the
+   engaged card should read as the same element) — the bar visually "becomes"
+   the card's input row when the conversation opens. */
 .pd-chat-inputrow {
   display: flex; align-items: center; gap: 10px;
-  margin: 14px 32px 28px; padding: 8px 8px 8px 20px;
-  border: 1.5px solid var(--pd-border); border-radius: 16px; background: #fff;
+  margin: 14px 32px 28px; padding: 8px 8px 8px 22px;
+  border: 1.5px solid var(--pd-border); border-radius: 999px; background: #fff;
   transition: border-color 160ms ease;
 }
+.pd-chat-inputrow .pd-send { border-radius: 999px; }
 .pd-chat-inputrow:focus-within { border-color: #222222; }
 .pd-chat-input {
   flex: 1; min-width: 0; padding: 13px 0;
@@ -712,6 +787,16 @@
 }
 .pd-send:hover { background: var(--pd-cta-hover); }
 .pd-send:disabled { opacity: 0.55; cursor: default; }
+
+/* Engaged-card entrance — played once when the hero bar swaps for the card
+   (add .enter on mount): the card rises in and the opening turns cascade.
+   transform/opacity only; killed under prefers-reduced-motion with the rest. */
+.pd-chat.enter { animation: pd-rise 300ms ease both; }
+.pd-chat.enter .pd-msgrow:nth-child(1) { animation: pd-rise 280ms ease 90ms both; }
+.pd-chat.enter .pd-msgrow:nth-child(2) { animation: pd-rise 280ms ease 210ms both; }
+.pd-chat.enter .pd-msgrow:nth-child(3) { animation: pd-rise 280ms ease 330ms both; }
+.pd-chat.enter .pd-msgrow:nth-child(n+4) { animation: pd-rise 280ms ease 450ms both; }
+@media (prefers-reduced-motion: reduce) { .pd-chat.enter, .pd-chat.enter .pd-msgrow { animation: none !important; } }
 
 /* Chat header title. */
 .pd-chat-title { font-weight: 800; font-size: 17px; color: var(--pd-ink); }
@@ -880,6 +965,30 @@
 .pd-tstep .no { font-size: clamp(40px, 4.4vw, 62px); font-weight: 800; letter-spacing: -0.035em; line-height: 1; color: var(--pd-ink); font-variant-numeric: tabular-nums; }
 .pd-tstep .t { font-size: 21px; font-weight: 700; letter-spacing: -0.012em; line-height: 1.25; margin-top: 18px; }
 .pd-tstep .b { font-size: 17px; line-height: 1.7; color: var(--pd-body); margin-top: 12px; }
+/* ─── How-it-works phases (Paul rewrite, 2026-07-15: "show the whole mountain,
+   then make clear we carry it"). Six numbered rows in a vertical sequence —
+   vertical reads as PROCESS, an icon grid reads as marketing. The summary line
+   is the whole section for a skimmer; the <details> depth is optional and
+   never open by default. ─── */
+.pd-phases { max-width: var(--pd-mid); margin: clamp(48px, 6vw, 80px) auto 0; border-top: 1.5px solid var(--pd-ink); }
+.pd-phase { border-bottom: 1px solid rgba(0, 0, 0, 0.12); }
+.pd-phase summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 92px 1fr auto; gap: 8px 24px; align-items: start; padding: 28px 4px; }
+.pd-phase summary::-webkit-details-marker { display: none; }
+.pd-phase .no { font-size: clamp(30px, 3vw, 42px); font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--pd-ink); font-variant-numeric: tabular-nums; padding-top: 2px; }
+.pd-phase .ph { font-family: var(--pd-mono, monospace); font-size: 12px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--pd-tert, #8A8A8A); }
+.pd-phase .t { font-size: clamp(19px, 2vw, 23px); font-weight: 700; letter-spacing: -0.015em; line-height: 1.3; margin-top: 7px; color: var(--pd-ink); }
+.pd-phase .tog { width: 34px; height: 34px; border: 1.5px solid var(--pd-ink); border-radius: 50%; display: grid; place-items: center; font-size: 19px; font-weight: 500; line-height: 1; color: var(--pd-ink); transition: transform 0.25s ease, background 0.2s ease, color 0.2s ease; margin-top: 4px; }
+.pd-phase summary:hover .tog { background: var(--pd-ink); color: #fff; }
+.pd-phase[open] .tog { transform: rotate(45deg); background: var(--pd-ink); color: #fff; }
+.pd-phase .bd { padding: 0 60px 32px 116px; font-size: 17px; line-height: 1.7; color: var(--pd-body); max-width: 44em; }
+/* Closing block — the weight lands on smbX, then the CTA. */
+.pd-phases-close { max-width: 760px; margin: clamp(56px, 7vw, 88px) auto 0; text-align: center; }
+.pd-phases-close .strong { font-size: clamp(20px, 2.2vw, 26px); font-weight: 700; letter-spacing: -0.015em; line-height: 1.35; color: var(--pd-ink); margin: 26px auto 0; max-width: 24em; }
+@media (max-width: 760px) {
+  .pd-phase summary { grid-template-columns: 1fr auto; padding: 22px 2px; }
+  .pd-phase .no { display: none; }
+  .pd-phase .bd { padding: 0 2px 26px; }
+}
 .pd-tstep .pd-link { display: inline-block; margin-top: 22px; }
 
 /* ─── value creation — the number is the hero of the band ─── */
@@ -924,19 +1033,70 @@
 .pd-anchorcard .b { margin-top: 12px; font-size: 17px; line-height: 1.7; color: rgba(255, 255, 255, 0.92); max-width: 46em; }
 .pd-huntboard { border-top: 1px solid var(--pd-hair); margin-top: 22px; }
 .pd-hunt {
-  display: grid; grid-template-columns: 56px minmax(0, 4fr) minmax(0, 7fr);
+  display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
   gap: clamp(16px, 2.5vw, 44px); padding: 21px 0;
   border-bottom: 1px solid var(--pd-hair); align-items: baseline;
   transition: background-color 160ms ease;
 }
 .pd-hunt:hover { background: #FAFAFA; }
-.pd-hunt .no { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.1em; color: var(--pd-body); }
 .pd-hunt .nm { font-size: 22px; font-weight: 700; letter-spacing: -0.012em; }
 .pd-hunt .th { font-size: 16px; line-height: 1.65; color: var(--pd-body); }
 @media (max-width: 860px) {
-  .pd-hunt { grid-template-columns: 40px minmax(0, 1fr); }
-  .pd-hunt .th { grid-column: 2; }
+  .pd-hunt { grid-template-columns: minmax(0, 1fr); gap: 8px; }
 }
+
+/* ─── Why us — pillar ledger (3×2 hairline grid, research-desk voice) ─── */
+.pd-whygrid { margin-top: clamp(44px, 5vw, 68px); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--pd-hair); border-left: 1px solid var(--pd-hair); }
+.pd-why { padding: clamp(28px, 3vw, 42px) clamp(24px, 2.6vw, 38px) clamp(32px, 3.4vw, 46px); border-right: 1px solid var(--pd-hair); border-bottom: 1px solid var(--pd-hair); transition: background 0.25s; }
+.pd-why:hover, .pd-why[open] { background: rgba(255, 56, 92, 0.024); }
+.pd-why summary { list-style: none; cursor: pointer; }
+.pd-why summary::-webkit-details-marker { display: none; }
+.pd-why .more { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; font-family: var(--pd-mono); font-size: 12.5px; letter-spacing: 0.08em; color: var(--pd-tert); transition: color 0.2s; }
+.pd-why .more::before { content: '+'; display: grid; place-items: center; width: 22px; height: 22px; border: 1.5px solid currentColor; border-radius: 50%; font-size: 14px; line-height: 1; transition: transform 0.25s ease; }
+.pd-why summary:hover .more { color: var(--pd-coral-link); }
+.pd-why[open] .more { color: var(--pd-coral-link); }
+.pd-why[open] .more::before { content: '−'; transform: rotate(180deg); }
+.pd-why[open] .more .lb-more, .pd-why:not([open]) .more .lb-less { display: none; }
+.pd-why .xp { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--pd-hair); font-size: 15px; line-height: 1.7; color: var(--pd-body); }
+.pd-why .xp p + p { margin-top: 12px; }
+.pd-why .xp strong { color: var(--pd-ink); font-weight: 700; }
+.pd-why .ix { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
+.pd-why .nm { margin-top: 16px; font-size: 21px; font-weight: 700; letter-spacing: -0.012em; line-height: 1.3; }
+.pd-why .bd { margin-top: 12px; font-size: 15.5px; line-height: 1.65; color: var(--pd-body); }
+.pd-why-close { text-align: center; margin-top: clamp(40px, 4.5vw, 60px); }
+.pd-why-close .pd-body { margin: 0 auto; max-width: 38em; }
+@media (max-width: 1080px) { .pd-whygrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 680px) { .pd-whygrid { grid-template-columns: minmax(0, 1fr); } }
+/* Hunt rows as links (landing sector teaser) — row text stays ink, not link coral. */
+.pd a.pd-hunt, .pd a.pd-hunt:hover { color: var(--pd-ink); }
+/* ─── sector blocks — "why us" pattern: know / who for / on our desk.
+   Zig-zag split, ghost serial, desk card carries the credibility line. ─── */
+.pd-sector { border-top: 1.5px solid var(--pd-ink); margin-top: clamp(64px, 7vw, 96px); padding-top: clamp(28px, 3.5vw, 44px); position: relative; }
+.pd-sector .nm { font-size: clamp(28px, 3vw, 42px); font-weight: 800; letter-spacing: -0.022em; line-height: 1.1; max-width: 14em; }
+.pd-sector .split { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(32px, 4.5vw, 80px); margin-top: clamp(24px, 3vw, 40px); align-items: start; }
+.pd-sector:nth-of-type(even) .split { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+.pd-sector:nth-of-type(even) .know { order: 2; }
+.pd-sector .know .lead { font-size: clamp(22px, 2.3vw, 30px); font-weight: 800; letter-spacing: -0.018em; line-height: 1.25; color: var(--pd-ink); }
+.pd-sector .know .lead .fs { color: var(--pd-coral-link); }
+.pd-sector .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.pd-sector .tag { border: 1.5px solid var(--pd-border); border-radius: 99px; padding: 7px 15px; font-size: 13.5px; font-weight: 600; color: var(--pd-ink); background: #fff; white-space: nowrap; }
+.pd-sector .know .b { margin-top: 22px; font-size: 17px; line-height: 1.75; color: var(--pd-body); }
+.pd-sector .aside { display: flex; flex-direction: column; gap: 20px; }
+.pd-sector .who { border-left: 3px solid var(--pd-coral-link); padding: 6px 0 6px 20px; }
+.pd-sector .who .k { font-size: 16px; font-weight: 800; letter-spacing: -0.01em; color: var(--pd-coral-link); }
+.pd-sector .who .v { margin-top: 8px; font-size: 16px; line-height: 1.65; color: var(--pd-ink); }
+.pd-sector .desk { background: var(--pd-ink); border-radius: 16px; padding: 24px 26px; }
+.pd-sector .desk .k { font-size: 16px; font-weight: 800; letter-spacing: -0.01em; color: var(--pd-coral); }
+.pd-sector .desk .v { margin-top: 8px; font-size: 16px; font-weight: 600; line-height: 1.65; color: #fff; }
+@media (max-width: 900px) {
+  .pd-sector .split, .pd-sector:nth-of-type(even) .split { grid-template-columns: 1fr; gap: 26px; }
+  .pd-sector:nth-of-type(even) .know { order: 0; }
+}
+/* Heritage block — carries the personal narrative; styled apart from the five
+   focus lanes (card surface, no rule, prose measure). */
+.pd-sector.her { border-top: none; background: var(--pd-card); border-radius: 20px; padding: clamp(28px, 3.5vw, 48px); }
+.pd-sector.her .b { max-width: 46em; }
+.pd-sector.her .attr { margin-top: 18px; font-size: 13.5px; line-height: 1.6; color: var(--pd-tert); max-width: 46em; }
 
 /* ─── how we find them — a three-beat narrative under the statement ─── */
 .pd-findgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(28px, 3.4vw, 56px); margin-top: clamp(48px, 5.5vw, 80px); }
@@ -1085,7 +1245,20 @@
 }
 
 /* ─── footer ─── */
-.pd-footer { border-top: 1px solid var(--pd-hair); margin-top: clamp(100px, 11vw, 160px); }
+/* Dark footer (Paul, 2026-07-15): darker than the page, but a FLAT warm
+   charcoal — no texture, no curve, no coral halo — so it never reads as a
+   third bleed band. Text vars remap; the wordmark flips to white via filter. */
+.pd-footer {
+  margin-top: clamp(130px, 15vw, 210px);
+  background: #2B2A27;
+  --pd-ink: #FFFFFF; --pd-body: rgba(255, 255, 255, 0.75); --pd-tert: rgba(255, 255, 255, 0.52);
+  --pd-faint: rgba(255, 255, 255, 0.35); --pd-hair: rgba(255, 255, 255, 0.12);
+  color: var(--pd-body);
+  padding-top: clamp(16px, 2vw, 28px);
+}
+.pd-footer img { filter: brightness(0) invert(1); }
+.pd .pd-footer a { color: var(--pd-body); }
+.pd .pd-footer a:hover { color: #fff; }
 .pd-footer-inner {
   max-width: var(--pd-max); margin: 0 auto; padding: clamp(36px, 4.5vw, 64px) var(--pd-pad-x);
   display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 60px;

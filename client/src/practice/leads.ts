@@ -21,14 +21,16 @@ export function postPracticeLead(lead: PracticeLead): Promise<boolean> {
     .catch(() => false);
 }
 
-/** The founder's scheduling link (Calendly or similar). Until it's configured,
- *  every "Book a call" affordance falls back to the on-page form (#book). */
-export const BOOKING_URL: string = (import.meta as any).env?.VITE_BOOKING_URL || '';
+/** The founder's scheduling link — Paul's Google Calendar booking page,
+ *  shipped with the v3 design (2026-07-16). VITE_BOOKING_URL still wins when
+ *  set, so the link can rotate without a deploy. */
+const DEFAULT_BOOKING_URL = 'https://calendar.app.google/rA9vC7RRdR2wLJbV6';
+export const BOOKING_URL: string = (import.meta as any).env?.VITE_BOOKING_URL || DEFAULT_BOOKING_URL;
 
 export function bookHref(): string {
-  return BOOKING_URL || '#book';
+  return BOOKING_URL;
 }
 
 export function bookTarget(): string | undefined {
-  return BOOKING_URL ? '_blank' : undefined;
+  return '_blank';
 }

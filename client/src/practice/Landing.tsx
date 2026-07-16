@@ -1,697 +1,475 @@
 /**
- * Practice-site landing — corpdevservices layout + Paul's copy deck
- * (2026-07-11) + the intensity pass (2026-07-12): restraint with drama.
- * Scroll: nav · hero + Acquisition Engine · stat band (numbers as the largest
- * objects on the page) · problem table · track record (dark) · the firm
- * (#why) · process as a horizontal sequence (#how) · who it's for (#who) ·
- * industries as a dense list (#industries) · how we find them (statement +
- * asymmetry) · whose-side (dark) · pull-quote · FAQ · final CTA (dark,
- * #book) · footer.
+ * Practice-site landing — v3, the Claude Design handoff (practiceSite/
+ * bundle, implemented 2026-07-16). Section order: nav · hero (chat engine,
+ * `.pd-hero-fold` so the proof band's curve crests at the fold, `.pd-heromesh`
+ * dot-matrix behind the input) · dark proof band with count-up (#proof) ·
+ * Why us evidence grid (#why) · 7-phase accordion (#how) · sample read
+ * (#sample) · who-it's-for index (#who) · 12-sector teaser (#sectors) ·
+ * whose-side band · booking CTA (#cta) · footer. Copy is Paul's approved
+ * deck from the bundle — verbatim, do not rewrite here.
+ *
+ * The chat engine is the REAL intake (YuliaIntake — SSE market map, lead
+ * capture, mobile sheet); the prototype's scripted demo only illustrated it.
  */
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'wouter';
 import PracticeShell from './PracticeShell';
-import YuliaIntake, { MapDoc, type PartialMap } from './YuliaIntake';
-import Mark from './Mark';
-import { AttributionLine } from './TrackRecord';
-import { Swoosh } from './atmo';
-import { postPracticeLead, bookHref, bookTarget } from './leads';
-import { SEGMENTS } from './segmentData';
+import YuliaIntake from './YuliaIntake';
+import { bookHref, bookTarget } from './leads';
 import { trackEvent } from '../lib/analytics';
 
-/** The showcase artifact — show the work product, not a claim about it
- *  (Stripe lesson). Content is the Market Map spec's own worked example,
- *  clearly labeled a sample. */
-const SAMPLE_MAP: PartialMap = {
-  title: 'Commercial Landscaping — Southeast',
-  thesis: 'Commercial landscaping · GA, NC, SC, TN · $2–8M EBITDA · commercial-contract mix',
-  verdict: 'PROCEED',
-  funnel: [
-    { n: '~2,400', label: 'landscaping operators in the four-state footprint' },
-    { n: '~180', label: 'in your size band' },
-    { n: '~55', label: 'with commercial-contract mix above 60% — the ones actually worth your time' },
-  ],
-  insight: 'Route density is everything here, and almost nobody underwrites it. Two companies with identical EBITDA can be worth very different multiples depending on how tight the routes are. Most buyers underwrite the EBITDA and ignore the drive time — then wonder why margins compress after close.',
-};
-
-/** The engagement — what we run, stated as scope, never as comparison
- *  (confidence pass, 2026-07-12: "Never describe a competitor. Describe the
- *  work."). */
-const ENGAGEMENT = [
-  { k: 'Thesis', v: "What you're really trying to build, translated into a target profile a search can run against." },
-  { k: 'Sourcing', v: "Direct, discreet outreach to owners who aren't formally for sale. Most of our deals are never listed." },
-  { k: 'Evaluation', v: "The real multiple, the earnings that hold up versus the ones that don't, and the number a lender will actually finance." },
-  { k: 'Structure', v: 'The offer, the deal structure, and the financing model your capital partners will underwrite.' },
-  { k: 'Diligence & close', v: 'We run the process, coordinate the attorneys, CPAs, and lenders, and drive the negotiation to signing.' },
-  { k: 'Integration', v: 'The first 180 days, where a good purchase becomes a functional business.' },
-];
-
-/** Value creation, pre & post close (Paul's copy update, 2026-07-12 —
- *  the L-VAL section: the IMO function is part of the pitch). */
-const VALUE_PILLARS = [
+/* ── Who it's for — the interactive index (copy verbatim from the bundle) ── */
+const WHO = [
   {
-    num: 'PRE-CLOSE',
-    t: 'Diligence for integration',
-    b: 'Financial diligence confirms the price; integration diligence secures the value. Before you sign, our team maps the operational gaps, system overlaps, and cultural risks, building a 100-day execution plan while you still have leverage.',
+    label: 'Family offices',
+    body: 'Direct ownership without the fund overhead. We run the search and the process; you keep the asset, the control, and the relationship — no blind pool, no committee, no clock.',
+    link: 'Talk to us about direct deals →',
   },
   {
-    num: 'POST-CLOSE',
-    t: 'The IMO function',
-    b: "You don't need standing integration overhead. Our team acts as your on-demand IMO, helping to drive the transition. We manage vendor consolidation, employee onboarding, and operational alignment so your team can focus on the business.",
+    label: 'Independent sponsors',
+    body: 'Control the deal before you raise a dollar. We help you find it, lock it, and build the numbers your capital partners will actually back — so you walk into that room with a deal, not a pitch.',
+    link: 'Talk to us about a live deal →',
   },
   {
-    num: 'EXECUTION',
-    t: 'Synergy capture',
-    b: 'The model promised cost savings and cross-sell revenue. We track and execute against those specific targets through the first six months, ensuring the deal you modeled becomes the business you actually get.',
+    label: 'Search funds & solo acquirers',
+    body: "Your first acquisition is the other side's hundredth. We put a senior deal team in your corner — sourcing, diligence, and the negotiation — so you're not learning the hardest lessons with your own money on the line.",
+    link: 'Talk to us about your search →',
+  },
+  {
+    label: 'Operators & strategics',
+    body: 'Grow by acquisition without standing up a corp-dev team. We source the tuck-ins and adjacencies, price them, and run the process quietly — so you can move on a competitor without tipping the market.',
+    link: 'Talk to us about an add-on →',
+  },
+  {
+    label: 'PE firms',
+    body: "Add-on sourcing and execution capacity that flexes with your pipeline. For lower-middle-market funds without deep in-house origination — we find and work the proprietary deals your team doesn't have the bandwidth to chase.",
+    link: 'Talk to us about origination →',
   },
 ];
 
-const HUNTING = [
-  { k: 'Elevator & escalator service', v: 'Code-mandated compliance creates highly sticky recurring revenue with 90%+ retention. The market remains heavily fragmented with independent, family-owned operators, offering massive consolidation opportunities and multiple arbitrage before the major OEMs sweep the market.' },
-  { k: 'Water & wastewater services', v: 'Driven by multi-year municipal contracts, aging infrastructure, and massive federal funding tailwinds. We target regional operators with locked-in maintenance agreements that provide strict downside protection and highly predictable cash flow during economic downturns.' },
-  { k: 'Commercial landscaping & grounds', v: 'Route-based recurring contracts with a vast, fragmented base. The key here is route density — we underwrite the drive time, not just the EBITDA, identifying targets that will immediately drop operational synergies to your bottom line.' },
-  { k: 'Fire & life safety', v: 'Non-discretionary, mandated inspection and repair revenue. There is still no dominant national player in most regions, allowing disciplined buyers to acquire highly technical, licensed workforces at sane multiples.' },
-  { k: 'Specialty & industrial distribution', v: 'Non-discretionary demand with recurring MRO (Maintenance, Repair, and Operations) revenue. We look for distributors with deep, entrenched customer relationships and proprietary product lines that create real, defensible enterprise value.' },
-  { k: 'Healthcare RCM & non-clinical', v: 'Recurring, tech-enabled business services that remain completely free of the regulatory tangle and burnout risks associated with clinical physician practices. High switching costs make these assets incredibly durable.' },
-  { k: 'Managed IT / MSP', v: 'Contracted recurring revenue in secondary and tertiary metros that the major consolidators haven’t reached yet. We focus on MSPs with high cloud-migration capabilities and sticky, multi-year SLA contracts.' },
+/* ── Why us — six evidence cards ── */
+const WHY: { nm: string; bd: string; more: string; xp: React.ReactNode }[] = [
+  {
+    nm: 'An acquisition machine, not a broker',
+    bd: 'The buyers who outperform treat acquisition as a repeatable capability, not an event. We stand that capability up for you — thesis, pipeline, cadence, close — and run it end to end.',
+    more: 'THE EVIDENCE',
+    xp: (
+      <>
+        <p>McKinsey's two-decade study of the Global 2,000 finds <strong>programmatic acquirers — two or more deals a year — outperform their peers by roughly 20% in total shareholder return over ten years</strong>, with the lowest variance of any strategy. Bain's parallel finding: frequent acquirers now beat inactive peers by about 130%.</p>
+        <p>The edge isn't a golden deal. It's the system — a thesis tied to strategy, a governed pipeline with stage gates, a weekly cadence, and integration planned before close. That's what we install and run under your name.</p>
+      </>
+    ),
+  },
+  {
+    nm: 'A target universe in days, not weeks',
+    bd: 'Our AI stack compresses an analyst pod’s month of market mapping into days of a senior operator’s supervised work. You see the whole market before most teams finish staffing.',
+    more: 'HOW',
+    xp: (
+      <>
+        <p>A market map that took an analyst pod two to four weeks now takes hours: AI search across <strong>12M+ private companies</strong>, scored against your buy box. In one McKinsey-documented case, a corp-dev team scored <strong>500+ targets in under a day</strong> — and closed three acquisitions within months.</p>
+        <p>Across the industry, executives using these tools report roughly 20% lower deal costs, and 40% report cycles running 30–50% faster. Same class of stack here — every output reviewed by the operator before it reaches you.</p>
+      </>
+    ),
+  },
+  {
+    nm: 'Off-market deals, at better prices',
+    bd: 'We reach owners who were never for sale — directly, quietly, under your name. Proprietary deals skip the auction, and they price like it.',
+    more: 'THE MATH',
+    xp: (
+      <>
+        <p>We run the outreach engine top-quartile buyers run: multi-channel, five to twelve touches per owner over months, under your brand — so the owner sees a serious buyer, not a campaign. Most of the deals we work were never listed anywhere.</p>
+        <p>The industry rule of thumb — corroborated across sources, and honest as a rule of thumb — is that <strong>owner-direct deals price half a turn to two turns of EBITDA below auctioned ones</strong>. Proprietary sourcing widens the funnel and lowers the entry price at the same time.</p>
+      </>
+    ),
+  },
+  {
+    nm: 'Senior-only. No junior hand-off.',
+    bd: 'At a bank, a senior wins the mandate and juniors execute. Here, every deal is worked by the operator who closed the 150. The AI replaces the analyst pod — never the judgment.',
+    more: 'WHAT THAT MEANS',
+    xp: (
+      <>
+        <p>Corp-dev teams have always farmed the grunt work out to junior pods. AI now does that layer faster and more thoroughly — market maps, first-pass models, CIM triage, diligence extraction, memo drafts.</p>
+        <p>What can't be automated — the thesis, the negotiation, reading a seller across the table — is exactly what you're hiring. Every call, every model review, every LOI: the same senior operator, on every deal.</p>
+      </>
+    ),
+  },
+  {
+    nm: 'Buy-side only. One client per target.',
+    bd: 'No sell-side conflicts, no target shopped to two buyers, no success-fee incentive to push a bad deal across the line. Structurally on your side.',
+    more: 'WHY IT MATTERS',
+    xp: (
+      <>
+        <p>Most advisors work both sides of the market, and a success fee pays the same whether the deal was good for you or merely closed. Those incentives leak into every recommendation.</p>
+        <p>We've never taken a sell-side engagement, and while we hunt a lane for you we don't hunt it for anyone else. <strong>When we tell you to walk, walking costs us.</strong> That's the point.</p>
+      </>
+    ),
+  },
+  {
+    nm: 'A fraction of the cost of in-house',
+    bd: 'An in-house corp-dev function runs $500K–$1M a year and takes a year to build. We deliver the whole function for a fraction of that — buy-side focused, where most banks live on the sell side.',
+    more: 'THE COMPARISON',
+    xp: (
+      <>
+        <p>In-house corp dev runs <strong>$500K–$1M+ a year fully loaded</strong> — before the year it takes to hire and ramp. And most banks are built for the sell side; running a buy-side search is a different job, and rarely their first love.</p>
+        <p>The modern tooling that replaces the junior pod costs less than one analyst's salary. Those unit economics are the engine of this model — and they're priced into what you pay us.</p>
+      </>
+    ),
+  },
 ];
 
-const FAQ = [
-  {
-    q: 'What size deals do you work on?',
-    a: "Acquisitions of privately held companies with under $250M in annual revenue. That's the ceiling. Below it, we're comfortable anywhere the deal is real — most of our work lands between $5M and $75M in enterprise value.",
-  },
-  {
-    q: 'Do you replace an investment bank?',
-    a: "Different function. A bank runs a sale process — it markets a company and manages an auction, usually for the seller. Corporate development is the buyer's side of the table: finding targets that aren't for sale, pricing them, and closing them. Some of our clients use both, at different moments in a deal. If you need a banker, we'll tell you, and we'll work alongside them.",
-  },
-  {
-    q: "How do you find targets that aren't for sale?",
-    a: "Direct, discreet outreach to owners on your behalf — the ones who'd never hire a broker. See How we find them above.",
-  },
-  {
-    q: 'Who actually does the work?',
-    a: 'Every mandate is led by a senior deal captain with decades of buy-side experience — the analysis, the seller conversations, and the negotiation.',
-  },
-  {
-    q: 'Do you negotiate for us?',
-    a: 'We run the process and drive the negotiation at your direction — but you are the acquirer. You set the limits, you approve the strategy, and you sign. When your deal requires a licensed attorney, a transaction CPA, or a lender, we bring in the right specialists and manage the workflow.',
-  },
-  {
-    q: 'What does it cost?',
-    a: 'A retainer for the engagement, and a success fee when we close the deal you wanted — paid by you, for work we did for you. We never take a dollar from the seller or the middle of the transaction. We will scope the economics in our first conversation.',
-  },
-  {
-    q: 'Will you work with a competitor of mine?',
-    a: 'Not in your target market. We take one client per target lane, ensuring your thesis and your pipeline remain strictly yours.',
-  },
+/* ── How it works — seven phases ── */
+const PHASES = [
+  { ph: 'Thesis', t: 'We turn "I want to buy something" into a plan you can act on.', bd: 'We turn "I want to buy something" into a plan you can act on — the sector, size, and economics worth your time, and the deal-breakers that aren’t. If the thing you’re chasing isn’t buyable in today’s market, we’ll say so early, and point you somewhere better.' },
+  { ph: 'Sourcing', t: 'We find the owners who aren’t looking to sell.', bd: 'We map the market, narrow it to the companies worth a call, and reach them directly and quietly, under your name. Most of the deals we work were never listed anywhere.' },
+  { ph: 'Evaluation', t: 'We tell you what a business is really worth, and whether to walk.', bd: 'We rebuild the financials, test the add-backs the seller’s advisor put in, and find the things that don’t show up in a pitch — customer concentration, owner dependence, the maintenance nobody mentioned.' },
+  { ph: 'Structure & offer', t: 'We shape the deal and take it to the seller.', bd: 'Price is one piece of it; so are seller notes, earnouts, rollover, and escrows. We build the financing a lender will actually back, write the LOI, and run the negotiation for you.' },
+  { ph: 'Diligence & close', t: 'This is where most deals come apart, and where we do the heaviest work.', bd: 'We run diligence across the financials, legal, tax, and operations, keep the accountants and lawyers and lenders on schedule, and hold every thread together through to a signed deal.' },
+  { ph: 'Integration', t: 'The price is set at close. The value comes in the six months after.', bd: 'We plan the first hundred days — keeping the people and customers you just paid for — the part most buyers underestimate and most advisors skip.' },
+  { ph: 'Value creation · add-on service', t: 'After the close, we can stay on to help the thesis come true.', bd: 'For clients who want it, we stay engaged past the hundred days — tracking performance against the original thesis, building the pricing and operating levers into a plan, and sourcing the add-on acquisitions that turn one deal into a platform. Optional, and scoped separately.' },
 ];
 
-/** Who it's for — an interactive index: giant segment names; the hovered or
- *  focused one swaps its brief into the side panel. Names always navigate. */
-function WhoSelector() {
+/* ── Key industry verticals — the 12-row teaser to /industries ── */
+const HUNTS = [
+  { nm: 'Fire & life safety', th: 'NFPA 25 and 72 make inspection the law — every install becomes an annuity.' },
+  { nm: 'Elevator & escalator service', th: 'Mandated inspections, sticky contract books, light capex, aging owners.' },
+  { nm: 'Power & grid infrastructure services', th: 'Transformer refurb, substations, certified testing — the layer electrification runs on.' },
+  { nm: 'Building automation & critical power', th: 'Controls, commissioning, cooling and backup power — recurring service where downtime isn’t an option.' },
+  { nm: 'Testing, inspection & certification / NDT', th: 'Demand written into code, behind a certification moat — and succession in almost every shop.' },
+  { nm: 'Environmental & industrial cleaning', th: 'Permit-gated, regulation-driven, and rarely brokered.' },
+  { nm: 'Water & wastewater contract O&M', th: 'Multi-year municipal contracts — the most durable revenue in the services economy.' },
+  { nm: 'Specialty & MRO distribution', th: 'Vendor authorizations and VMI programs that underwrite like contracts.' },
+  { nm: 'Machine shops & precision manufacturing', th: 'AS9100 and ISO 13485 qualification cycles make revenue stick; reshoring is the tailwind.' },
+  { nm: 'Food contract manufacturing & co-packing', th: 'Multi-year supply agreements, with real density in our backyard.' },
+  { nm: 'Non-emergency medical transport', th: 'Recurring, reimbursement-funded trips — underwritten with eyes open.' },
+  { nm: 'Revenue cycle management & medical billing', th: 'Fragmented and clean to diligence — we underwrite the niche before the number.' },
+];
+
+/** Roll a stat's number up to its value (1300ms cubic ease-out), preserving
+ *  prefix/suffix text ("~$21B" counts the 21). Zero stays zero by design. */
+function countUp(el: HTMLElement) {
+  const orig = el.textContent || '';
+  const m = orig.match(/\d[\d,]*/);
+  if (!m || !parseInt(m[0].replace(/,/g, ''), 10)) return;
+  const target = parseInt(m[0].replace(/,/g, ''), 10);
+  const pre = orig.slice(0, m.index), post = orig.slice((m.index ?? 0) + m[0].length);
+  const t0 = performance.now(), dur = 1300;
+  const tick = (now: number) => {
+    const p = Math.min(1, (now - t0) / dur), e2 = 1 - Math.pow(1 - p, 3);
+    el.textContent = pre + Math.round(target * e2).toLocaleString('en-US') + post;
+    if (p < 1) requestAnimationFrame(tick); else el.textContent = orig;
+  };
+  requestAnimationFrame(tick);
+}
+
+/** The dark proof band — stats roll up when the band enters the viewport. */
+function ProofBand() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const host = ref.current;
+    if (!host) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      if (!reduce) host.querySelectorAll<HTMLElement>('.pd-stat .n').forEach(countUp);
+    }), { threshold: 0.35 });
+    io.observe(host);
+    return () => io.disconnect();
+  }, []);
+  return (
+    <section className="pd-dark bl-tr" id="proof">
+      <span className="pd-spark" aria-hidden="true" />
+      <div className="pd-wrap pd-dark-pad">
+        <div className="pd-mono" data-rv style={{ letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--pd-tert)', textAlign: 'center' }}>
+          Two decades on the buy side
+        </div>
+        <div className="pd-stats rv-stagger" data-rv ref={ref} style={{ marginTop: 'clamp(32px, 3.8vw, 54px)' }}>
+          <div className="pd-stat"><div className="n">150+</div><div className="l">Acquisitions closed</div></div>
+          <div className="pd-stat"><div className="n">$5B+</div><div className="l">Enterprise value added</div></div>
+          <div className="pd-stat"><div className="n">~$21B</div><div className="l">Transactions touched</div></div>
+          <div className="pd-stat accent"><div className="n">0</div><div className="l">Sell-side engagements. Ever.</div></div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** Who it's for — five giant names; the active one swaps the side panel. */
+function WhoIndex() {
   const [active, setActive] = useState(0);
   return (
     <div className="pd-whosel" data-rv>
-      <div className="names">
-        {SEGMENTS.map((s, i) => (
-          <Link
-            key={s.slug}
-            href={`/buyers/${s.slug}`}
+      <div className="names rv-stagger" data-rv>
+        {WHO.map((w, i) => (
+          <a
+            key={w.label}
+            href="#who"
             className={`name${i === active ? ' on' : ''}`}
-            onMouseEnter={() => setActive(i)}
-            onFocus={() => setActive(i)}
+            onClick={e => { e.preventDefault(); setActive(i); }}
           >
-            <span>{s.cardTitle}</span>
+            <span>{w.label}</span>
             <span className="arr" aria-hidden>→</span>
-          </Link>
+          </a>
         ))}
       </div>
       <div className="panel" aria-live="polite">
-        <div className="pbody">{SEGMENTS[active].cardBody}</div>
-        <Link className="pd-link" href={`/buyers/${SEGMENTS[active].slug}`}>{SEGMENTS[active].cardLink}</Link>
-      </div>
-    </div>
-  );
-}
-
-function LeadForm() {
-  const [persona, setPersona] = useState('');
-  const [thesis, setThesis] = useState('');
-  const [email, setEmail] = useState('');
-  const [state, setState] = useState<'idle' | 'busy' | 'done'>('idle');
-
-  const submit = async () => {
-    if (state !== 'idle') return;
-    if (!email.includes('@') || !thesis.trim()) return;
-    setState('busy');
-    trackEvent('practice_form_submitted');
-    await postPracticeLead({ persona, thesis, email, source: 'landing-form' });
-    setState('done');
-  };
-
-  if (state === 'done') {
-    return (
-      <div className="pd-form">
-        <div className="t">Got it — you're on the map.</div>
-        <div style={{ marginTop: 14, fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-          We'll come back within 24 hours with a first read on your thesis. Prefer not to wait?{' '}
-          <a className="pd-link" href={bookHref()} target={bookTarget()} rel={bookTarget() ? 'noreferrer' : undefined}>Book the call now →</a>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="pd-form">
-      <div className="t">Or leave your details.</div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 22 }}>
-        <input className="pd-input" placeholder="I'm a… (family office, sponsor…)" value={persona} onChange={e => setPersona(e.target.value)} aria-label="Who you are" />
-        <input className="pd-input" placeholder="What are you buying?" value={thesis} onChange={e => setThesis(e.target.value)} aria-label="What you are buying" />
-      </div>
-      <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
-        <input className="pd-input" style={{ flex: 1 }} placeholder="Email" type="email" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') submit(); }} aria-label="Email" />
-        <button
-          type="button"
-          className="pd-pill-primary"
-          style={{ borderRadius: 99, padding: '15px 28px', opacity: state === 'busy' ? 0.7 : 1 }}
-          onClick={submit}
-        >
-          Get started
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/** The hero stage: the live engine, or — toggled from the quiet meta-row link
- *  below — a sample market read. No pill-tab row: the resting engine is a
- *  single inviting input bar, and extra chrome around it read as clutter
- *  (Paul, 2026-07-14). */
-function HeroShowcase({ tab }: { tab: 'engine' | 'sample' }) {
-  return (
-    <div className="pd-showcase">
-      <div className="pd-show-stage">
-        {tab === 'engine' ? (
-          <YuliaIntake />
-        ) : (
-          <div style={{ maxWidth: 680 }}>
-            <MapDoc map={SAMPLE_MAP} final headLabel="SAMPLE READ" />
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/** A Slack-style centered section intro: eyebrow label, heading, optional
- *  lede — the consistent rhythm the mid-page now reads on. */
-function SectionHead({
-  label, title, sub, quote,
-}: {
-  label?: string;
-  title: React.ReactNode;
-  sub?: React.ReactNode;
-  quote?: boolean;
-}) {
-  return (
-    <div className="pd-sechead" data-rv>
-      {label && <div className="pd-seclabel">{label}</div>}
-      <h2 className={quote ? 'pd-quote' : 'pd-h2'}>{title}</h2>
-      {sub && <p className="pd-sub">{sub}</p>}
-    </div>
-  );
-}
-
-/** Scenario steps rendered as the numbered index (reused by the landing
- *  overview and — inline — by each segment page). */
-function ScenarioSteps({ steps }: { steps: { k: string; v: string }[] }) {
-  return (
-    <div className="pd-index rv-stagger" data-rv>
-      {steps.map((s, i) => (
-        <div className="pd-indexrow" key={s.k}>
-          <div className="no">{String(i + 1).padStart(2, '0')}</div>
-          <div className="t">{s.k}</div>
-          <div className="b">{s.v}</div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/** How it works, per situation — centered pill tabs (the hero showcase's
- *  language) swap the tailored scenario for each buyer type. The generic
- *  three-step timeline is retired in favor of this: the same disciplined
- *  process, shown as it actually runs for who you are. */
-function HowItWorks() {
-  const [active, setActive] = useState(0);
-  const seg = SEGMENTS[active];
-  return (
-    <div className="pd-howcase">
-      <div className="pd-showtabs" data-rv role="tablist" aria-label="Buyer situation">
-        {SEGMENTS.map((s, i) => (
-          <button
-            key={s.slug}
-            type="button"
-            role="tab"
-            aria-selected={i === active}
-            className={i === active ? 'on' : ''}
-            onClick={() => setActive(i)}
-          >
-            {s.footerLabel}
-          </button>
-        ))}
-      </div>
-      <div className="pd-howstage" aria-live="polite">
-        <p className="pd-sub pd-howlede">{seg.scenarioLede}</p>
-        <ScenarioSteps steps={seg.scenario} />
-        <Link href={`/buyers/${seg.slug}`} className="pd-link pd-howlink">
-          See the full walkthrough for {seg.footerLabel.toLowerCase()} →
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-/** The engagement as Slack's signature feature block: a vertical nav of the
- *  six phases on the left swaps a framed stage panel on the right. Honest —
- *  the stage is a clean description of the phase, not a fabricated screenshot. */
-function EngagementShow() {
-  const [active, setActive] = useState(0);
-  return (
-    <div className="pd-feature" data-rv>
-      <div className="nav">
-        {ENGAGEMENT.map((e, i) => (
-          <button
-            key={e.k}
-            type="button"
-            className={`fn${i === active ? ' on' : ''}`}
-            onMouseEnter={() => setActive(i)}
-            onFocus={() => setActive(i)}
-            onClick={() => setActive(i)}
-            aria-pressed={i === active}
-          >
-            <span className="no">{String(i + 1).padStart(2, '0')}</span>
-            <span>
-              <span className="nm">{e.k}</span>
-              <span className="fbody">{e.v}</span>
-            </span>
-          </button>
-        ))}
-      </div>
-      <div className="stage" aria-live="polite">
-        <div className="sno">{String(active + 1).padStart(2, '0')}</div>
-        <div className="st">{ENGAGEMENT[active].k}</div>
-        <div className="sb">{ENGAGEMENT[active].v}</div>
+        <div className="pbody">{WHO[active].body}</div>
+        <a className="pd-link" href="#cta">{WHO[active].link}</a>
       </div>
     </div>
   );
 }
 
 export default function Landing() {
-  // The hero stage: the live engine, or the sample market read (toggled from
-  // the quiet link in the meta row).
-  const [stage, setStage] = useState<'engine' | 'sample'>('engine');
   return (
     <PracticeShell home>
-      {/* ── Hero — the chat is the centerpiece (Grok/Gemini): a compact
-             statement, one big inviting input, chips, and a single quiet meta
-             row (Paul, 2026-07-14). ── */}
-      <section className="pd-hero pd-hero-c">
+      {/* ── Hero — the chat engine front and center; the section height leaves
+             room for the proof band's curve to crest at the fold ── */}
+      <section className="pd-hero pd-hero-c pd-hero-fold" id="top" style={{ justifyContent: 'center' }}>
+        <div className="pd-heromesh" aria-hidden="true" />
         <div className="pd-heroc-inner">
-          <h1 className="pd-h1">
-            We'll build and run your business acquisition strategy tailored to your&nbsp;goals.
-          </h1>
-          <p className="pd-sub pd-sub-c">
-            Institutional-grade corporate development, on demand.
-          </p>
+          <h1 className="pd-h1">We'll build and run your business acquisition strategy tailored to your&nbsp;goals.</h1>
+          <p className="pd-sub pd-sub-c">Institutional-grade corporate development, on demand.</p>
         </div>
-        <HeroShowcase tab={stage} />
-        <div className="pd-hero-below" data-rv>
-          <a className="pd-pill pd-pill-lg-quiet" href={bookHref()} target={bookTarget()} rel={bookTarget() ? 'noreferrer' : undefined} onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero' })}>Or book a call instead</a>
-          <div className="pd-proofrow">
-            <span className="lab">Two decades on the buy side</span>
-            <span className="dot">·</span>
-            <span className="pf"><b>150+</b> acquisitions</span>
-            <span className="pf"><b>$5B+</b> added</span>
-            <span className="pf"><b>~$21B</b> touched</span>
-            <span className="pf hot"><b>0</b> sell-side. Ever.</span>
+        <div className="pd-showcase">
+          <div className="pd-show-stage">
+            <YuliaIntake />
           </div>
-          <button
-            type="button"
-            className="pd-samplelink"
-            onClick={() => {
-              const next = stage === 'engine' ? 'sample' : 'engine';
-              setStage(next);
-              if (next === 'sample') trackEvent('practice_cta_clicked', { placement: 'showcase-sample' });
-            }}
-          >
-            {stage === 'engine' ? 'See a sample read →' : '← Back to the engine'}
-          </button>
+        </div>
+        <div className="pd-hero-below">
+          <a className="pd-samplelink" href="#cta" onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero' })}>Or book a call instead</a>
+          <span style={{ color: 'var(--pd-faint)' }}>·</span>
+          <a className="pd-samplelink" href="#sample" onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero-sample' })}>See a sample read →</a>
         </div>
       </section>
 
-      {/* ── The gap — centered Slack intro, then a symmetric two-column
-             explanation and a centered statement (confidence pass copy) ── */}
-      <section className="pd-wrap pd-section pd-accent ar">
-        <SectionHead
-          label="The gap"
-          title={<>Most acquirers under $250M don't have a dedicated deal team.</>}
-        />
-        <div className="pd-gapcols rv-stagger" data-rv>
-          <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-            The companies that buy well have a corporate development function: a permanent team
-            whose entire job is finding the right targets, pricing them properly, and getting
-            them closed. At scale, it pays for itself many times over.
-          </div>
-          <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-            Below a certain size, however, the math gets difficult. A director of corp dev and an
-            analyst can run well past half a million dollars a year — for a function you may only
-            utilize twice a year. As a result, the acquisitions that would compound your business
-            get run off the side of a desk, against a seller who does this professionally.
-          </div>
-        </div>
-        <div className="pd-gapclose" data-rv>
-          <div className="pd-statement" style={{ margin: '0 auto', maxWidth: '18em' }}>
-            <Mark /> is that function, without the permanent overhead.
-          </div>
-          <div className="pd-body" style={{ margin: '14px auto 0', maxWidth: '34em' }}>
-            Structured for your specific mandate — engaged for the deal, with economics tied
-            directly to a successful close.
-          </div>
-        </div>
-      </section>
+      <ProofBand />
 
-      {/* ── Track record — the first dark movement, bracketed by bleed arcs ── */}
-      <div style={{ marginTop: 'clamp(80px, 10vw, 150px)' }}><Swoosh dir="in" /></div>
-      <section className="pd-dark bl-tr">
-        <div className="pd-wrap pd-dark-pad">
-          <div className="pd-seclabel">Selected transaction experience</div>
-          <h2 className="pd-h2" data-rv>We've done this about 150 times.</h2>
-          <div data-rv className="pd-body" style={{ marginTop: 24, maxWidth: '46em' }}>
-            <Mark /> is a new firm. The dealmaker isn't. Paul Baker spent two decades in corporate
-            development — building the M&amp;A function inside a national platform and running
-            integration on some of the largest bank deals in the country.
+      {/* ── Why us — six evidence cards in a hairline grid ── */}
+      <section className="pd-section pd-accent al" id="why">
+        <div className="pd-wrap">
+          <div className="pd-sechead" data-rv>
+            <div className="pd-seclabel">Why us</div>
+            <h2 className="pd-h2">The machine serial acquirers build in-house. Yours, without the headcount.</h2>
+            <p className="pd-sub" style={{ margin: '22px auto 0' }}>
+              You already know what you want to buy. The question is who runs the hunt — a team you'd
+              spend a year hiring, a bank with a seller's habits, or us. Here's the case.
+            </p>
           </div>
-          <AttributionLine style={{ marginTop: 24 }} />
-          <div className="pd-tombs rv-stagger" data-rv>
-            <div className="pd-tomb">
-              <div className="t">Wrench Group</div>
-              <div className="meta">2016–2025 · FOUNDING PLATFORM THROUGH 36 ACQUISITIONS · ~$2.9B ENTERPRISE VALUE</div>
-              <div className="names">
-                Coolray · Parker &amp; Sons · Morris-Jenkins · NexGen · Service Champions · Williams
-                Comfort Air · Abacus · Berkeys · CoolToday · Lindstrom · Baker Brothers · Boothe's ·
-                Mountain Air · Plumbline <span className="grp">— and two dozen more.</span>
-              </div>
-            </div>
-            <div className="pd-tomb">
-              <div className="t">JPMorgan Chase</div>
-              <div className="meta">2005–2015 · INTEGRATION LEAD ON MULTI-BILLION-DOLLAR BANK AND FINTECH ACQUISITIONS</div>
-              <div className="names">
-                Bank One · Washington Mutual · Chase Paymentech · Collegiate Funding Services ·
-                Neovest · Vastera · clearXchange.
-              </div>
-            </div>
-          </div>
-          <div data-rv style={{ marginTop: 36 }}>
-            <Link href="/track-record" className="pd-link">Explore the full record →</Link>
-          </div>
-        </div>
-      </section>
-      <Swoosh dir="up" />
-
-      {/* ── The firm ── */}
-      <section id="why" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
-        <div className="pd-firm-grid rv-stagger" data-rv>
-          <div>
-            <div className="pd-seclabel">The firm</div>
-            <h2 className="pd-h2">A corporate development function. Yours when you need it.</h2>
-            <div style={{ marginTop: 32, display: 'flex', flexDirection: 'column', gap: 18, fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-              <div>
-                Large acquirers run corporate development in-house — a permanent team that finds
-                targets, evaluates them, closes them, and integrates them. Almost nobody buying
-                companies under $250M can justify the standing cost of that infrastructure.
-              </div>
-              <div>
-                <Mark /> is that function, engaged deal by deal. We source off-market, run the
-                analysis, drive the diligence, and carry the negotiation to close. Led by Paul
-                Baker, who has led or co-led more than 150 acquisitions doing exactly this work inside a
-                national platform and a global bank, our team brings institutional execution to
-                your thesis.
-              </div>
-              <div>
-                We work exclusively on the buy side, and we take one client per target.
-              </div>
-            </div>
-            <div className="pd-drows" style={{ marginTop: 56 }}>
-              <div className="pd-drow">
-                <div className="k">The function</div>
-                <div className="v">Sourcing, valuation, modeling, diligence, negotiation, and the first 180 days after close. The whole acquisition lifecycle, run for you.</div>
-              </div>
-              <div className="pd-drow">
-                <div className="k">The record</div>
-                <div className="v">150+ acquisitions closed. $5B+ in revenue added to buyers. Two decades on the buy side.</div>
-              </div>
-              <div className="pd-drow">
-                <div className="k">The focus</div>
-                <div className="v">Buyers only, one client per target. It's a narrower practice than most firms run, which ensures our clients get our full strategic bandwidth.</div>
-              </div>
-            </div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            <div className="pd-founder-photo">
-              <img
-                src="/founder-portrait.jpg"
-                alt="Paul Baker, founder of smbX"
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 20%' }}
-              />
-            </div>
-            <div className="pd-advisor-card">
-              <div style={{ fontWeight: 700, fontSize: 21, letterSpacing: '-0.012em' }}>Firm leadership</div>
-              <div style={{ marginTop: 10, fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-                <b style={{ color: 'var(--pd-ink)' }}>Paul Baker, Founder.</b> Twenty years as a deal captain — Director of
-                Corporate Development at Wrench Group, where he built the M&amp;A engine that took a
-                startup platform to a national leader through 36 acquisitions, and Director of
-                Acquisition Integration at JPMorgan Chase, integrating the bank's largest fintech
-                and banking deals. He has sat on the buyer's side of the table for 150+
-                acquisitions. Now he anchors the team sitting on yours.
-              </div>
-              <div style={{ marginTop: 16 }}>
-                <Link href="/about" className="pd-link">More about the firm →</Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── The engagement — Slack feature showcase: vertical nav swaps a
-             framed stage panel ── */}
-      <section className="pd-wrap pd-section-lg">
-        <SectionHead
-          label="The engagement"
-          title={<>What we run for you.</>}
-          sub={<>The complete acquisition lifecycle — six phases, one accountable team.</>}
-        />
-        <EngagementShow />
-      </section>
-
-      {/* ── How it works — the same disciplined process, shown as it runs for
-             each buyer type (per-situation scenario, pill-tab swapped) ── */}
-      <section id="how" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
-        <SectionHead
-          label="How it works"
-          title={<>How a deal runs — for your situation.</>}
-          sub={<>One disciplined process, adapted to how you buy. Fast enough to win the target worth owning — pick your situation.</>}
-        />
-        <HowItWorks />
-      </section>
-
-      {/* ── Value creation — a dark movement; the number is the hero ── */}
-      <div style={{ marginTop: 'clamp(96px, 11vw, 168px)' }}><Swoosh dir="in" /></div>
-      <section className="pd-dark bl-val">
-        <span className="pd-spark" aria-hidden="true" />
-        <div className="pd-wrap pd-dark-pad">
-          <div className="pd-seclabel">Value creation</div>
-          <div className="pd-valgrid rv-stagger" data-rv style={{ marginTop: 24 }}>
-            <div>
-              <div className="pd-bignum">180</div>
-              <div className="pd-bignum-label">DAYS</div>
-            </div>
-            <div>
-              <h2 className="pd-h2">
-                Closing is just the beginning. Value is realized in the first 180 days.
-              </h2>
-              <div className="pd-body" style={{ marginTop: 22, maxWidth: '44em' }}>
-                Most middle-market acquirers don't have a dedicated Integration Management Office
-                (IMO). When a deal closes, the transition is often handed to executives who are
-                already stretched thin running the core business. We stay engaged through the
-                transition to help execute the integration playbook.
-              </div>
-            </div>
-          </div>
-          <div className="pd-steps rv-stagger" data-rv style={{ marginTop: 'clamp(64px, 7vw, 100px)' }}>
-            {VALUE_PILLARS.map(p => (
-              <div className="pd-step" key={p.num}>
-                <div className="num">{p.num}</div>
-                <div className="t">{p.t}</div>
-                <div className="b">{p.b}</div>
-              </div>
+          <div className="pd-whygrid rv-stagger" data-rv>
+            {WHY.map((w, i) => (
+              <details className="pd-why" key={w.nm}>
+                <summary>
+                  <div className="ix">{String(i + 1).padStart(2, '0')}</div>
+                  <div className="nm">{w.nm}</div>
+                  <div className="bd">{w.bd}</div>
+                  <span className="more"><span className="lb-more">{w.more}</span><span className="lb-less">CLOSE</span></span>
+                </summary>
+                <div className="xp">{w.xp}</div>
+              </details>
             ))}
           </div>
-        </div>
-      </section>
-      <Swoosh dir="up" />
-
-      {/* ── Who it's for — centered intro, then the interactive segment nav ── */}
-      <section id="who" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
-        <SectionHead label="Who it's for" title={<>You bring the thesis. We bring the team.</>} />
-        <WhoSelector />
-      </section>
-
-      {/* ── Industries — centered intro, then the anchor market + hunt board ── */}
-      <section id="industries" className="pd-wrap pd-section-lg" style={{ scrollMarginTop: 90 }}>
-        <SectionHead
-          label="Industries"
-          title={<>We know these markets cold. And we'll learn yours.</>}
-          sub={<>
-            Deep operating history in the essential-service trades — plus active theses in the
-            fragmented, recurring-revenue niches where a disciplined buyer can still buy well.
-            Already have a market? We'll work yours.
-          </>}
-        />
-        <div className="pd-anchorcard" data-rv style={{ marginTop: 'clamp(48px, 6vw, 80px)' }}>
-          <div className="k">Home &amp; essential services</div>
-          <div className="b">
-            HVAC, plumbing, electrical. Our founder built a national platform here through 36
-            acquisitions. We know what these businesses are worth, who's consolidating, and what a
-            seller's broker will try.
-          </div>
-        </div>
-        <div data-rv className="pd-seclabel" style={{ marginTop: 56 }}>
-          Where we're actively hunting
-        </div>
-        <div className="pd-huntboard rv-stagger" data-rv>
-          {HUNTING.map((h, i) => (
-            <div className="pd-hunt" key={h.k}>
-              <span className="no">{String(i + 1).padStart(2, '0')}</span>
-              <span className="nm">{h.k}</span>
-              <span className="th">{h.v}</span>
-            </div>
-          ))}
-        </div>
-        <div data-rv className="pd-body-sm" style={{ marginTop: 26, maxWidth: '52em' }}>
-          These are theses, not limits. If you're buying in a market we haven't named,{' '}
-          <a className="pd-link" href="#yulia">tell us</a> — we've built acquisition
-          programs from a blank sheet before.
-        </div>
-      </section>
-
-      {/* ── How we find them — centered statement intro, then a 3-up ── */}
-      <section className="pd-wrap pd-section-lg pd-accent al">
-        <SectionHead label="How we find them" title={<>The best targets aren't for sale.</>} quote />
-        <div className="pd-findgrid rv-stagger" data-rv>
-          <div className="pd-findcol">
-            <div className="k">THE OWNER</div>
-            <div className="v">
-              The owner you want to buy is rarely on a broker's list. They don't want their
-              employees to find out, their competitors to know, or to sit through a dozen showings
-              with tire-kickers. And they certainly don't want to pay a broker 10% to make it
-              happen.
-            </div>
-          </div>
-          <div className="pd-findcol">
-            <div className="k">THE WAIT</div>
-            <div className="v">
-              So they wait. Most will only take a call when someone arrives with a specific buyer,
-              a defined thesis, and a serious reason to talk.
-            </div>
-          </div>
-          <div className="pd-findcol">
-            <div className="k">THE CALL</div>
-            <div className="v" style={{ color: 'var(--pd-ink)' }}>
-              <b>That is the call our team makes on your behalf.</b> No auction, no bidding war, no
-              thirty other buyers who have already seen the book. Just a direct conversation with an
-              owner who hasn't been shopped — where price is a strategic discussion, not a
-              competition.
-            </div>
+          <div className="pd-why-close" data-rv>
+            <p className="pd-body">And it compounds — every engagement sharpens the thesis, the scorecards, and the playbook the next one runs on.</p>
+            <a className="pd-link" href="#how" style={{ display: 'inline-block', marginTop: 22 }}>See how the machine runs →</a>
           </div>
         </div>
       </section>
 
-      {/* ── Whose side — a dark movement ── */}
-      <div style={{ marginTop: 'clamp(96px, 11vw, 168px)' }}><Swoosh dir="in" /></div>
-      <section className="pd-dark bl-side">
-        <div className="pd-wrap pd-dark-pad">
-          <div className="pd-seclabel">Whose side we're on</div>
-          <div className="pd-askew rv-stagger" data-rv style={{ alignItems: 'end' }}>
-            <h2 className="pd-quote" style={{ maxWidth: '13em' }}>
-              The seller has a broker. Who is working for you?
-            </h2>
-            <div className="off">
-              <div className="pd-statement">
-                We are. Start to <span style={{ color: 'var(--pd-coral)' }}>finish.</span>
+      {/* ── How it works — the seven phases as a vertical accordion ── */}
+      <section className="pd-section pd-accent ar" id="how">
+        <div className="pd-wrap">
+          <div className="pd-sechead" data-rv>
+            <div className="pd-seclabel">How it works</div>
+            <h2 className="pd-h2">Buying a company is a hundred small decisions. We handle the ones that don't need you.</h2>
+            <p className="pd-sub" style={{ margin: '22px auto 0' }}>
+              A good acquisition isn't a single moment — it's months of work, in the right order,
+              usually against someone who does this for a living. Here's what the job actually
+              involves. You make the calls that matter. We do the rest.
+            </p>
+          </div>
+          <div className="pd-phases rv-stagger" data-rv>
+            {PHASES.map((p, i) => (
+              <details className="pd-phase" key={p.ph}>
+                <summary>
+                  <div className="no">{String(i + 1).padStart(2, '0')}</div>
+                  <div>
+                    <div className="ph">{p.ph}</div>
+                    <div className="t">{p.t}</div>
+                  </div>
+                  <div className="tog">+</div>
+                </summary>
+                <div className="bd">{p.bd}</div>
+              </details>
+            ))}
+          </div>
+          <div className="pd-phases-close" data-rv>
+            <p className="pd-body">
+              That's the work. Most acquisitions fall apart somewhere in the middle — an add-back
+              that doesn't hold up, a diligence problem caught too late, a negotiation run by the
+              more experienced side of the table.
+            </p>
+            <p className="strong">You make the decisions. We handle the rest, and we get you to the closing table.</p>
+            <a className="pd-pill-primary pd-pill-lg" href="#yulia" style={{ marginTop: 34 }} onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-close' })}>Bring us your idea →</a>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Sample read — the flagship artifact, static and clearly labeled ── */}
+      <section className="pd-section" id="sample">
+        <div className="pd-wrap">
+          <div className="pd-sechead" data-rv>
+            <div className="pd-seclabel">Getting started</div>
+            <h2 className="pd-h2">Every engagement starts with a read like this.</h2>
+            <p className="pd-sub" style={{ margin: '22px auto 0' }}>
+              Not a chatbot answer — an institutional market map: the universe, the short list, and
+              the thing most buyers miss.
+            </p>
+          </div>
+          <div data-rv style={{ marginTop: 'clamp(44px, 5.5vw, 72px)' }}>
+            <div className="pd-map" style={{ maxWidth: 760, margin: '0 auto' }}>
+              <div className="map-head">
+                <img src="/logo-coral-x.png" alt="smbX.ai" style={{ height: 22, width: 'auto', display: 'block' }} />
+                <span className="map-label">SAMPLE READ</span>
               </div>
-              <div style={{ marginTop: 22, fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)', maxWidth: 460 }}>
+              <div className="map-title">Commercial Landscaping — Southeast</div>
+              <div className="map-thesis">Commercial landscaping · GA, NC, SC, TN · $2–8M EBITDA · commercial-contract mix</div>
+              <div className="map-flow rv-stagger" data-rv>
+                <div className="k">THE FUNNEL</div>
+                <div className="f"><span className="n">~2,400</span><span className="l">operators in-footprint</span></div>
+                <span className="arr">→</span>
+                <div className="f"><span className="n">~180</span><span className="l">in your size band</span></div>
+                <span className="arr">→</span>
+                <div className="f"><span className="n">~55</span><span className="l">above 60% commercial-contract mix</span></div>
+              </div>
+              <div className="map-nine" data-rv>
+                <div className="n">9</div>
+                <div className="l">Of those 55, the number we'd tell you to spend real time on. The drop from 55 to 9 is the part you can't Google.</div>
+              </div>
+              <div className="map-screens rv-stagger" data-rv>
+                <div className="k">WHAT SEPARATES THE 9</div>
+                <div className="map-scr"><div className="i">01</div><div className="t">Route density.</div><div className="b">A crew running 8 stops in 4 miles is a different business than 8 stops across 40. It never shows in EBITDA, and it's the single biggest driver of margin after close. We'd rank the 55 by drive-time density before anything else.</div></div>
+                <div className="map-scr"><div className="i">02</div><div className="t">Contract tenure.</div><div className="b">Month-to-month "commercial" revenue is worth a fraction of 3-year contracted revenue, even at identical margin. A third of the 55 won't survive this test.</div></div>
+                <div className="map-scr"><div className="i">03</div><div className="t">Crew that stays without the owner.</div><div className="b">In this trade, the crews often leave with the seller. The ones where they don't are worth a full turn more — and you can check it in diligence before you're committed.</div></div>
+              </div>
+              <div className="map-insight" data-rv>
+                <div className="k">WHAT MOST BUYERS MISS</div>
+                <div className="v">Two companies here with identical EBITDA can be worth two turns apart on route density alone. Most buyers underwrite the earnings, ignore the drive time, and wonder why margins compress the quarter after close. We price the routes first, the EBITDA second.</div>
+              </div>
+              <div className="map-number" data-rv>
+                <div className="k">THE NUMBER</div>
+                <div className="big">$6–8M</div>
+                <div className="v">On a $4M-EBITDA target at this size, getting the route-density read wrong is roughly a <strong>1.5–2.0x swing in EBITDA multiple</strong> — call it $6–8M of purchase price on a single deal, decided by one variable most buyers never model.</div>
+              </div>
+              <div className="map-verdict" data-rv>
+                <div className="k">OUR READ</div>
+                <div className="v">This is one of the last genuinely fragmented service niches in the region, and the window is open — but only for a buyer disciplined enough to pay for route quality and walk from the pretty-EBITDA traps. That discipline is the whole game here.</div>
+              </div>
+              <div className="map-foot">
+                <div className="src">Preliminary sample — illustrative of the deliverable format.</div>
+                <a className="map-pdf" href="#yulia" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} onClick={() => trackEvent('practice_cta_clicked', { placement: 'sample-run-yours' })}>Run yours →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Who it's for ── */}
+      <section className="pd-section pd-accent al" id="who">
+        <div className="pd-wrap">
+          <div className="pd-sechead" data-rv>
+            <div className="pd-seclabel">Who it's for</div>
+            <h2 className="pd-h2">Built for serious buyers.</h2>
+          </div>
+          <WhoIndex />
+        </div>
+      </section>
+
+      {/* ── Key industry verticals — teaser rows into /industries ── */}
+      <section className="pd-section pd-accent ar" id="sectors">
+        <div className="pd-wrap">
+          <div className="pd-sechead" data-rv>
+            <div className="pd-seclabel">Key industry verticals</div>
+            <h2 className="pd-h2">We go deep in a handful of markets. Yours may be one of them.</h2>
+            <p className="pd-sub" style={{ margin: '22px auto 0' }}>
+              The sectors we know cold — the operators, the multiples, the diligence traps, and the
+              targets already on our desk. Focus, not limits.
+            </p>
+          </div>
+          <div className="pd-huntboard rv-stagger" data-rv style={{ marginTop: 'clamp(40px, 5vw, 64px)' }}>
+            {HUNTS.map(h => (
+              <Link className="pd-hunt" href="/industries" key={h.nm} onClick={() => trackEvent('practice_sector_clicked', { sector: h.nm })}>
+                <div className="nm">{h.nm}</div>
+                <div className="th">{h.th}</div>
+              </Link>
+            ))}
+          </div>
+          <div style={{ textAlign: 'center', marginTop: 'clamp(32px, 4vw, 48px)' }} data-rv>
+            <Link className="pd-link" href="/industries">Read the full sector theses →</Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Whose side — the second dark movement ── */}
+      <section className="pd-dark bl-side" style={{ marginTop: 'clamp(130px, 15vw, 220px)' }}>
+        <div className="pd-wrap pd-dark-pad">
+          <div className="pd-askew">
+            <div data-rv>
+              <div className="pd-seclabel">Whose side we're on</div>
+              <p className="pd-quote">The seller has a broker. Who is working for you?</p>
+            </div>
+            <div className="off" data-rv>
+              <p className="pd-body">
                 We represent buyers, and only buyers — one client per target. You get our full
                 attention, unfiltered analysis, and a proprietary deal that stays yours.
+              </p>
+              <div style={{ marginTop: 34, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                <a className="pd-pill-primary pd-pill-lg" href="#yulia" onClick={() => trackEvent('practice_cta_clicked', { placement: 'whose-side' })}>Build your market map →</a>
+                <a className="pd-pill pd-pill-lg-quiet" href="#cta" onClick={() => trackEvent('practice_booking_clicked', { placement: 'whose-side' })}>Book a call</a>
               </div>
             </div>
           </div>
         </div>
       </section>
-      <Swoosh dir="up" />
 
-      {/* ── Pull-quote — one statement, centered, nothing else ── */}
-      <section className="pd-wrap pd-section-lg">
-        <h2 className="pd-quote" data-rv style={{ maxWidth: '15em', margin: '0 auto', textAlign: 'center' }}>
-          Your first deal is the other side's hundredth. Even the odds.
-        </h2>
-      </section>
-
-      {/* ── FAQ — centered intro, then the list ── */}
-      <section className="pd-wrap pd-section-lg">
-        <SectionHead label="Straight answers" title={<>Common pre-engagement questions.</>} />
-        <div className="pd-faq rv-stagger" data-rv>
-          {FAQ.map(f => (
-            <div className="pd-faq-item" key={f.q}>
-              <div className="q">{f.q}</div>
-              <div className="a">{f.a}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Final CTA — the closing dark movement ── */}
-      <div style={{ marginTop: 'clamp(96px, 11vw, 168px)' }}><Swoosh dir="in" /></div>
-      <section id="book" className="pd-dark bl-cta" style={{ scrollMarginTop: 90 }}>
-        <span className="pd-spark" aria-hidden="true" />
-        <div className="pd-wrap pd-dark-pad">
-          <div className="pd-cta-grid rv-stagger" data-rv>
+      {/* ── CTA — the booking card, no form ── */}
+      <section className="pd-section" id="cta">
+        <div className="pd-wrap">
+          <div className="pd-cta-grid" data-rv>
             <div>
-              <h2 className="pd-cta-h">Let's go find the right fit.</h2>
-              <div className="pd-body" style={{ marginTop: 24, maxWidth: 480 }}>
-                Take two minutes with our acquisition engine to outline your thesis — or speak
-                with our team directly. It's confidential either way, and there's no retainer to
-                find out if we're a match.
-              </div>
-              <div style={{ marginTop: 44, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                <a className="pd-pill-primary pd-pill-lg" href="#yulia" onClick={() => trackEvent('practice_cta_clicked', { placement: 'cta-yulia' })}>Build your market map →</a>
-                <a
-                  className="pd-pill pd-pill-lg-quiet"
-                  href={bookHref()}
-                  target={bookTarget()}
-                  rel={bookTarget() ? 'noreferrer' : undefined}
-                  onClick={() => trackEvent('practice_booking_clicked', { placement: 'cta' })}
-                >
-                  Confidential consultation
-                </a>
-              </div>
+              <h2 className="pd-cta-h">Start with a confidential conversation.</h2>
+              <p className="pd-body" style={{ marginTop: 22 }}>
+                Thirty minutes. Your ideas, our read on the market, and a straight answer on whether
+                we're the right team to run it.
+              </p>
             </div>
-            <LeadForm />
+            <div className="pd-form">
+              <div className="t">Book 30 minutes</div>
+              <p style={{ margin: '14px 0 0', fontSize: 15, lineHeight: 1.6, color: 'var(--pd-body)' }}>
+                A personal conversation, not a sales call — pick a time that works and come with
+                your ideas — you don't need a finished thesis. Building one together is part of the
+                work.
+              </p>
+              <div style={{ marginTop: 18, fontFamily: 'var(--pd-mono)', fontSize: 13, letterSpacing: '0.06em', color: 'var(--pd-tert)' }}>
+                30 MIN · VIDEO CALL · CONFIDENTIAL
+              </div>
+              <a
+                className="pd-pill-primary"
+                href={bookHref()}
+                target={bookTarget()}
+                rel="noopener noreferrer"
+                style={{ marginTop: 24, display: 'flex', justifyContent: 'center', padding: '15px 26px' }}
+                onClick={() => trackEvent('practice_booking_clicked', { placement: 'cta-card' })}
+              >
+                Pick a time →
+              </a>
+              <p className="pd-caption" style={{ marginTop: 14 }}>
+                Scheduling opens in Google Calendar. No lists sold, no sellers represented.
+              </p>
+            </div>
           </div>
         </div>
       </section>
-      <Swoosh dir="up" />
     </PracticeShell>
   );
 }

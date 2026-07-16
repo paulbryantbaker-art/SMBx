@@ -44,7 +44,7 @@ const OPENING =
 const SS_KEY = 'smbx_intake_v1';
 
 const HINTS = [
-  'Sector & Strategy (e.g., "HVAC roll-up in the Southeast")',
+  'Sector & Strategy — "HVAC roll-up in the Southeast"',
   'Size & Geography (e.g., "$2–5M EBITDA, within 4 hours of Atlanta")',
   'Delivery Email (e.g., "director@fund.com")',
   'Generation complete. Your map is being compiled. Book your consultation above.',
@@ -53,22 +53,14 @@ const HINTS = [
 /** The send button rotates with the step (Paul's copy update, Y-4). */
 const SEND_LABELS = ['Continue', 'Generate Map', 'Send', 'Send'];
 
-/** Before the first message, the input types example theses to itself — the
- *  card visibly wants to be talked to. Honest life: these are placeholder
- *  examples, clearly quoted, never pre-filled input. */
-const TYPE_SAMPLES = [
-  'HVAC roll-up in the Southeast',
-  'Fire & life safety platform, Texas metros',
-  'Commercial landscaping, GA and the Carolinas',
-  'Managed IT tuck-ins under $10M revenue',
-];
-
-/** Quick-start chips — a short label to tap, the fuller thesis it drops in. */
-const CHIPS: { label: string; value: string }[] = [
-  { label: 'HVAC roll-up', value: 'HVAC roll-up in the Southeast' },
-  { label: 'Fire & life safety', value: 'Fire & life safety platform, Texas metros' },
-  { label: 'Managed IT tuck-ins', value: 'Managed IT tuck-ins under $10M revenue' },
-  { label: 'Commercial landscaping', value: 'Commercial landscaping, GA and the Carolinas' },
+/** Quick-start chips (v3 design set — the five hunting lanes). A tap sends
+ *  the lane straight to the engine, per the prototype's behavior. */
+const CHIPS: string[] = [
+  'Fire & life safety',
+  'Elevator service',
+  'NDT & inspection',
+  'Environmental services',
+  'MRO distribution',
 ];
 
 /** Narration for the block currently being written — shown while the map
@@ -368,35 +360,9 @@ export default function YuliaIntake() {
   const step = done ? 3 : Math.min(userTurns, 2);
   const sendLabel = SEND_LABELS[step];
 
-  // Self-typing placeholder until the first message is sent.
-  const [ghost, setGhost] = useState<string | null>(null);
-  useEffect(() => {
-    if (done || userTurns > 0 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setGhost(null);
-      return;
-    }
-    let alive = true;
-    let timer: number;
-    let i = 0, pos = 0, deleting = false;
-    const tick = () => {
-      if (!alive) return;
-      const s = TYPE_SAMPLES[i % TYPE_SAMPLES.length];
-      let delay = deleting ? 16 : 46;
-      if (!deleting) {
-        pos++;
-        if (pos >= s.length) { deleting = true; delay = 1700; }
-      } else {
-        pos--;
-        if (pos <= 0) { deleting = false; i++; delay = 420; }
-      }
-      setGhost(s.slice(0, Math.max(0, pos)));
-      timer = window.setTimeout(tick, delay);
-    };
-    timer = window.setTimeout(tick, 900);
-    return () => { alive = false; clearTimeout(timer); };
-  }, [done, userTurns]);
-
-  const hint = step === 0 && ghost ? `Sector & Strategy — "${ghost}▏"` : HINTS[step];
+  // Static staged placeholder (v3 design: the self-typing ghost is retired —
+  // the bar reads as one calm, quoted example).
+  const hint = HINTS[step];
 
   // Esc / scrim / chevron all minimize the mobile sheet.
   useEffect(() => {
@@ -556,13 +522,12 @@ export default function YuliaIntake() {
     return () => document.removeEventListener('click', onClick);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Suggestion chips give the visitor a starting point (Paul: "adding direction
-  // and input to the chat"). Clicking one drops it in the field, ready to send;
-  // on a phone it also lifts straight into the sheet.
+  // Suggestion chips give the visitor a starting point. A tap SENDS the lane
+  // to the engine (v3 design behavior); on a phone it also lifts the sheet so
+  // the reply arrives in view.
   const useChip = (text: string) => {
-    setDraft(text);
     if (isMobile()) setOpen(true);
-    focusActive();
+    void send(text);
   };
 
   const trackMap = (verdict: string) => {
@@ -587,8 +552,8 @@ export default function YuliaIntake() {
     void streamed;
   };
 
-  const send = async () => {
-    const text = draft.trim();
+  const send = async (given?: string) => {
+    const text = (given ?? draft).trim();
     if (!text || done || pending) return;
     if (userTurns === 0) trackEvent('practice_intake_started');
     trackEvent('practice_intake_step', { step: userTurns + 1 });
@@ -698,8 +663,8 @@ export default function YuliaIntake() {
         {resting && (
           <div className="pd-chips">
             {CHIPS.map(c => (
-              <button type="button" key={c.value} className="pd-chip" onClick={() => useChip(c.value)}>
-                {c.label}
+              <button type="button" key={c} className="pd-chip" onClick={() => useChip(c)}>
+                {c}
               </button>
             ))}
           </div>
@@ -708,7 +673,7 @@ export default function YuliaIntake() {
 
       {/* Scrim behind the mobile sheet (CSS-hidden on desktop). */}
       <div ref={scrimRef} className={`pd-chat-scrim${open ? ' on' : ''}`} onClick={() => setOpen(false)} aria-hidden="true" />
-      <div ref={sheetRef} className={`pd-chat${open ? ' open' : ''}`}>
+      <div ref={sheetRef} className={`pd-chat enter${open ? ' open' : ''}`}>
         <div className="pd-chat-head">
           {/* Grab handle — shown only in the mobile sheet. */}
           <span className="pd-chat-grab" aria-hidden="true" />
@@ -768,7 +733,7 @@ export default function YuliaIntake() {
       {userTurns === 0 && !done && (
         <div className="pd-chips">
           {CHIPS.map(c => (
-            <button type="button" key={c.value} className="pd-chip" onClick={() => useChip(c.value)}>{c.label}</button>
+            <button type="button" key={c} className="pd-chip" onClick={() => useChip(c)}>{c}</button>
           ))}
         </div>
       )}
@@ -783,7 +748,7 @@ export default function YuliaIntake() {
           disabled={done}
           aria-label="Describe your acquisition criteria"
         />
-        <button type="button" className="pd-send" onClick={send} disabled={done || pending}>{sendLabel}</button>
+        <button type="button" className="pd-send" onClick={() => send()} disabled={done || pending}>{sendLabel}</button>
       </div>
       </div>
     </div>

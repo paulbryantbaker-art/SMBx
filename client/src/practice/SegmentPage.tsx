@@ -30,7 +30,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
           <div className="pd-sub" style={{ margin: '30px auto 0', maxWidth: '36em' }}>{seg.sub}</div>
           <div style={{ marginTop: 44, display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
             <a className="pd-pill-primary pd-pill-lg" href="/#yulia">Build your market map →</a>
-            <a className="pd-pill pd-pill-lg-quiet" href="/#book">Book a call</a>
+            <a className="pd-pill pd-pill-lg-quiet" href="/#cta">Book a call</a>
           </div>
         </div>
       </section>
@@ -140,7 +140,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
           </div>
           <div data-rv style={{ marginTop: 40, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <a className="pd-pill-primary pd-pill-lg" href="/#yulia">Build your market map →</a>
-            <a className="pd-pill pd-pill-lg-quiet" href="/#book">Book a call</a>
+            <a className="pd-pill pd-pill-lg-quiet" href="/#cta">Book a call</a>
           </div>
         </div>
       </section>
