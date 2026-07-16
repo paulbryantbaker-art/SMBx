@@ -1,6 +1,6 @@
 export const DEFINITIVE_DEAL_MECHANICS_VERSION = 'DEFINITIVE.v1.1';
 export const DEFINITIVE_DEAL_MECHANICS_URI = 'definitive://v1.1/deal-mechanics';
-export const DEFINITIVE_DEAL_MECHANICS_MODEL_SLOT_COUNT = 123;
+export const DEFINITIVE_DEAL_MECHANICS_MODEL_SLOT_COUNT = 134;
 export const DEFINITIVE_DEAL_MECHANICS_GATE_COUNT = 30;
 export const DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET = 800;
 
@@ -8,6 +8,7 @@ export type DefinitiveModelStatus =
   | 'v1_0_core'
   | 'v1_1'
   | 'v1_1_research'
+  | 'v1_2'
   | 'v1_2_research'
   | 'reserved';
 
@@ -225,6 +226,23 @@ export const DEFINITIVE_DEAL_MECHANICS_CATALOG: DefinitiveModelCatalogEntry[] = 
   entry('M221', 'OSS exposure diligence process', 'v1_0_core', 'professional_handoff', ['G10'], ['software M&A', 'OSS diligence'], ['GPL', 'AGPL', 'LGPL', 'MIT', 'Apache', 'BSD', 'Morgan Lewis OSS guidance', 'Nixon Peabody OSS guidance', 'Morse OSS guidance'], 'SCA pass-through, permissive/weak/strong copyleft classification, AGPL SaaS flag, indemnity carve-out, and escrow sizing.', undefined, 'MODEL.IP.OSS.EXPOSURE.v1'),
   entry('M222', 'IP-specific 1060 allocation', 'v1_0_core', 'deterministic', ['G2', 'G10'], ['IP-heavy acquisition'], ['IRC 1060', 'Treas. Reg. 1.338-6(b)', 'Treas. Reg. 1.1060-1', 'IRS Form 8594'], 'Class V/VI/VII sub-allocation and residual-method cap ordering for IP-heavy deals.', undefined, 'MODEL.IP.1060.ALLOCATION.v1'),
   entry('M223', 'Domain and trademark transfer mechanics', 'v1_0_core', 'deterministic', ['G10'], ['domain transfer', 'trademark transfer'], ['ICANN transfer rules', 'USPTO Form PTO-1594'], 'Registrar auth-code, 60-day lock, trademark assignment recording, state trademark, social-handle, and SSL transfer steps.', undefined, 'MODEL.IP.DOMAIN_TM.TRANSFER.v1'),
+  // ── V18c real property & contract law pass (2026-07-16). The pass's working
+  // numbering M154–M164 collided with the shipped restructuring/LME slots, so
+  // the models land at M224–M234 (mapping recorded in
+  // methodology/DEFINITIVE_V18C_REAL_PROPERTY_PASS.md). Issue-spotting and
+  // routing only — anchor-state variation lives in constants/realPropertyLaw.ts
+  // as data; every model carries defer_to_counsel routing per the DTC catalog.
+  entry('M224', 'Recording-act and priority engine', 'v1_2', 'deterministic', ['G30'], ['real estate M&A', 'title diligence'], ['N.Y. Real Prop. Law 291', 'Cal. Civ. Code 1214', 'Tex. Prop. Code 13.001', '25 Del. C. 153'], 'State-typed race/notice/race-notice priority ordering from recording and notice facts; DE pure race, NY/CA race-notice, TX notice; unknown states defer with a table-gap flag.', 'V18c #1 (was M154 in the pass).', 'MODEL.RE.RECORDING_PRIORITY.v1'),
+  entry('M225', 'Title-covenant and estate/signatory model', 'v1_2', 'deterministic', ['G30'], ['real estate M&A', 'title diligence'], ['Common-law deed covenants', 'Tex. Prop. Code 5.023'], 'Deed-type to covenant-set map (six covenants; after-acquired title), TX seisin narrowing, and the concurrent-ownership signatory matrix incl. tenancy-by-entirety both-spouses rule.', 'V18c #2 (was M155).', 'MODEL.RE.TITLE_COVENANT_SIGNATORY.v1'),
+  entry('M226', 'Marketability triage', 'v1_2', 'professional_handoff', ['G30'], ['title diligence'], ['Marketable-title common law', 'ALTA title practice'], 'Curable / insurable-over / deal-killing bucketing of title exceptions; insurable-only contract-standard flag; any deal-killer is a hard defer — the marketability judgment is never emitted.', 'V18c #3 (was M156).', 'MODEL.RE.MARKETABILITY_TRIAGE.v1'),
+  entry('M227', 'Risk-of-loss allocator', 'v1_2', 'deterministic', ['G30'], ['real estate purchase agreement'], ['N.Y. Gen. Oblig. Law 5-1311', 'Tex. Prop. Code 5.007', 'Cal. Civ. Code 1662', 'equitable conversion'], 'Contract-override detection plus state default lookup: NY Risk Act seller-risk, CA/TX UVPRA, common-law equitable-conversion buyer-risk.', 'V18c #4 (was M157).', 'MODEL.RE.RISK_OF_LOSS.v1'),
+  entry('M228', 'Survival and merger tracker', 'v1_2', 'deterministic', ['G30'], ['real estate purchase agreement', 'M&A closing'], ['merger doctrine (common law)'], 'Flags every relied-on rep/indemnity/covenant lacking an express survival hook or collateral character — merger extinguishes it at closing; fraud exception noted.', 'V18c #5 (was M158).', 'MODEL.RE.SURVIVAL_MERGER.v1'),
+  entry('M229', 'Lease anti-assignment and change-of-control parser', 'v1_2', 'professional_handoff', ['G30'], ['OpCo/PropCo', 'entity deal with leases'], ['Kendall v. Ernest Pestana 40 Cal.3d 488', 'NY assignment common law'], 'Deemed-assignment detection for control transfers, consent-standard classification against the state table (CA Kendall reasonableness vs. NY as-written), recapture interplay; enforceability always routes.', 'V18c #6 (was M159); ground-lease financeability lives in M198/MODEL.RE.GROUND_LEASE.MECHANICS.v1.', 'MODEL.RE.LEASE_COC_ASSIGNMENT.v1'),
+  entry('M230', 'Due-on-sale screener', 'v1_2', 'deterministic', ['G30'], ['real estate financing', 'entity deal with property debt'], ['12 U.S.C. 1701j-3'], 'Garn-St. Germain residential-under-5-units exception filter; commercial and entity transfers get no consumer protection — lender consent flagged as closing critical path.', 'V18c #7 (was M160).', 'MODEL.RE.DUE_ON_SALE.v1'),
+  entry('M231', 'Option/ROFR/ROFO trigger detector', 'v1_2', 'professional_handoff', ['G30'], ['real estate M&A', 'entity deal'], ['ROFR/option common law', 'TX strict-match construction'], 'Sale vs. entity-transfer trigger analysis in both directions — the sale that triggers the right and the entity structure that may avoid it; the legal conclusion always routes to counsel.', 'V18c #8 (was M161).', 'MODEL.RE.PREEMPTIVE_RIGHT_TRIGGER.v1'),
+  entry('M232', 'Controlling-interest transfer-tax and reassessment screener', 'v1_2', 'deterministic', ['G30', 'G19'], ['entity deal', 'merger with real property'], ['NYC Admin. Code 11-2101', 'NY Tax Law 1405(b)(6)', 'Cal. Rev. & Tax. Code 60-64', 'Tex. Const. art. VIII 29', 'Matter of 105-02 Forest Hills (2025)'], 'The 50-percent entity screen: NY controlling-interest tax with 3-year aggregation, CA Prop 13 change-in-control 100-percent reassessment, TX constitutional prohibition, DE deed tax; step-transaction flag on mere-change claims.', 'V18c #9 (was M162); complements M191.', 'MODEL.RE.CITT_REASSESSMENT_SCREEN.v1'),
+  entry('M233', 'Permit/CO transferability and bulk-sales screener', 'v1_2', 'deterministic', ['G30', 'G19'], ['asset deal', 'entity deal'], ['municipal CO ordinances', 'UCC Art. 6 (as retained)', 'CERCLA 107', '72 P.S. 1403'], 'CO-on-transfer and use-change screens, non-transferable permit flags by deal form, CA/NY/NJ/PA bulk-sales tax-notification applicability, CERCLA successor flag.', 'V18c #10 (was M163).', 'MODEL.RE.PERMIT_CO_BULK_SALES.v1'),
+  entry('M234', 'Fixture classification and UCC 9-334 priority', 'v1_2', 'deterministic', ['G30', 'G2'], ['asset deal with fixtures', 'equipment-heavy real estate'], ['UCC 9-334'], 'Subsection (c) real-property default, the (d) PMSI 20-day fixture-filing exception, and the (h) construction-mortgage override, with PPA reconciliation note.', 'V18c #11 (was M164).', 'MODEL.RE.FIXTURE_9334.v1'),
 ];
 
 export const DEFINITIVE_GATE_EXPANSIONS: DefinitiveGateExpansion[] = [
@@ -257,11 +275,12 @@ export const DEFINITIVE_GATE_EXPANSIONS: DefinitiveGateExpansion[] = [
     gateId: 'G30',
     name: 'Real Estate & Asset-Class Overlays',
     purpose: 'Runs real estate, project-finance, digital-asset, LP-secondary, strip-sale, NAV-facility, and real-estate pass-through overlays.',
-    primaryModels: ['M169', 'M170', 'M171', 'M172', 'M173', 'M174', 'M175', 'M176', 'M177', 'M178', 'M179', 'M187', 'M188', 'M189', 'M190', 'M191', 'M192', 'M193', 'M194', 'M195', 'M196', 'M197', 'M198', 'M199'],
+    primaryModels: ['M169', 'M170', 'M171', 'M172', 'M173', 'M174', 'M175', 'M176', 'M177', 'M178', 'M179', 'M187', 'M188', 'M189', 'M190', 'M191', 'M192', 'M193', 'M194', 'M195', 'M196', 'M197', 'M198', 'M199', 'M224', 'M225', 'M226', 'M227', 'M228', 'M229', 'M230', 'M231', 'M232', 'M233', 'M234'],
     triggerSummary: [
       'real estate equals or exceeds 25 percent of enterprise value',
       'digital assets equal or exceed 10 percent of enterprise value',
       'infrastructure/project-finance, REIT, LP/GP secondary, strip sale, NAV facility, title, survey, lease, CITT, FIRPTA, 1031, OpCo/PropCo, or PCA appears',
+      'a deed, lease assignment, change of control with property, preemptive right, due-on-transfer loan, or title exception appears (V18c property/contract-law layer)',
     ],
     lineNotes: 'Digital-asset and industry-regulated overlays remain research-only until rulemaking and counsel templates are stable.',
   },
@@ -505,7 +524,7 @@ export function getDefinitiveDealMechanicsSummary() {
     stagedRanges: {
       core: 'M101-M158, M160, M165-M167, M169-M172, M180, M182-M186, M187-M190, M192-M193, M195-M196, M198-M204, M206-M208, M210-M212, M214-M217, M219-M223',
       v1_1: 'M143, M159, M161-M164, M168, M177-M179, M181, M191, M194, M197, M205, M209, M213, M218',
-      v1_2: 'M173-M176 and industry-regulated overlays',
+      v1_2: 'M173-M176 and industry-regulated overlays; M224-M234 (V18c real property and contract law pass)',
     },
   };
 }

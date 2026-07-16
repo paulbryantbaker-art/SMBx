@@ -5,7 +5,7 @@ import {
   DEFINITIVE_SPEC_VERSION,
 } from '../constants/definitive.js';
 
-export const DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT = 202;
+export const DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT = 385;
 export const DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT = 60;
 export const DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT = 104;
 export const DEFINITIVE_CONFORMANCE_ROUTE_TRIGGER_CASE_COUNT = 30;
@@ -27,6 +27,7 @@ export const DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CATEGORIES = [
   'tax_structure',
   'real_estate_mechanics',
   'real_estate_gap_closure',
+  'real_property_contract_law_v18c',
   'agreement_economics',
   'connected_tax',
   'tax_allocation',

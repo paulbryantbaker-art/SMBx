@@ -6,8 +6,12 @@
     "methodologyUri": "methodology://v19",
     "kind": "empty_yulia_brief",
     "expect": {
-      "textIncludes": ["Ask for journey, league, deal type, industry, jurisdiction, and G28/G29/G30 signals"],
-      "textExcludes": ["applicable DEFINITIVE mechanics surfaced"]
+      "textIncludes": [
+        "Ask for journey, league, deal type, industry, jurisdiction, and G28/G29/G30 signals"
+      ],
+      "textExcludes": [
+        "applicable DEFINITIVE mechanics surfaced"
+      ]
     }
   },
   {
@@ -21,15 +25,33 @@
       "league": "L4",
       "dealType": "real estate sale-leaseback title survey rent roll NOI 1031 FIRPTA ground lease CITT",
       "industry": "property services",
-      "triggeredGates": ["G30"]
+      "triggeredGates": [
+        "G30"
+      ]
     },
     "expect": {
-      "textIncludes": ["Pass-through mechanics require outside data/software inputs", "cost-plus-fixed margin", "must not route paid human-service referrals"],
+      "textIncludes": [
+        "Pass-through mechanics require outside data/software inputs",
+        "cost-plus-fixed margin",
+        "must not route paid human-service referrals"
+      ],
       "fields": [
-        { "path": "summary.executable", "min": 1 },
-        { "path": "slots", "includes": "M190" },
-        { "path": "slots", "includes": "M196" },
-        { "path": "surfaces", "includes": "pass_through_catalog" }
+        {
+          "path": "summary.executable",
+          "min": 1
+        },
+        {
+          "path": "slots",
+          "includes": "M190"
+        },
+        {
+          "path": "slots",
+          "includes": "M196"
+        },
+        {
+          "path": "surfaces",
+          "includes": "pass_through_catalog"
+        }
       ]
     }
   },
@@ -44,14 +66,29 @@
       "league": "L6",
       "dealType": "Chapter 11 plan DIP feasibility best interests cramdown 1111b absolute priority fulcrum",
       "industry": "industrial services",
-      "triggeredGates": ["G28"]
+      "triggeredGates": [
+        "G28"
+      ]
     },
     "expect": {
-      "textIncludes": ["Professional-handoff mechanics may compute", "court determinations", "THE LINE"],
+      "textIncludes": [
+        "Professional-handoff mechanics may compute",
+        "court determinations",
+        "THE LINE"
+      ],
       "fields": [
-        { "path": "professionalSlots", "includes": "M152" },
-        { "path": "slots", "includes": "M152" },
-        { "path": "slots", "includes": "M155" }
+        {
+          "path": "professionalSlots",
+          "includes": "M152"
+        },
+        {
+          "path": "slots",
+          "includes": "M152"
+        },
+        {
+          "path": "slots",
+          "includes": "M155"
+        }
       ]
     }
   },
@@ -66,14 +103,28 @@
       "league": "L7",
       "dealType": "uptier drop-down double-dip pari-plus Serta Mitel covenant baskets exchange offer",
       "industry": "consumer products",
-      "triggeredGates": ["G29"]
+      "triggeredGates": [
+        "G29"
+      ]
     },
     "expect": {
-      "textIncludes": ["Research-only mechanics", "authority, jurisdiction, or counsel-reviewed templates"],
+      "textIncludes": [
+        "Research-only mechanics",
+        "authority, jurisdiction, or counsel-reviewed templates"
+      ],
       "fields": [
-        { "path": "summary.researchOnly", "min": 1 },
-        { "path": "slots", "includes": "M161" },
-        { "path": "slots", "includes": "M163" }
+        {
+          "path": "summary.researchOnly",
+          "min": 1
+        },
+        {
+          "path": "slots",
+          "includes": "M161"
+        },
+        {
+          "path": "slots",
+          "includes": "M163"
+        }
       ]
     }
   },
@@ -87,14 +138,28 @@
       "journey": "sell",
       "league": "L4",
       "dealType": "asset deal stock deal S-corp 338 336 built in gain transaction cost seller note earnout installment SALT",
-      "triggeredGates": ["G2"]
+      "triggeredGates": [
+        "G2"
+      ]
     },
     "expect": {
-      "textIncludes": ["applicable DEFINITIVE mechanics surfaced", "THE LINE"],
+      "textIncludes": [
+        "applicable DEFINITIVE mechanics surfaced",
+        "THE LINE"
+      ],
       "fields": [
-        { "path": "slots", "includes": "M200" },
-        { "path": "slots", "includes": "M201" },
-        { "path": "slots", "includes": "M204" }
+        {
+          "path": "slots",
+          "includes": "M200"
+        },
+        {
+          "path": "slots",
+          "includes": "M201"
+        },
+        {
+          "path": "slots",
+          "includes": "M204"
+        }
       ]
     }
   },
@@ -109,14 +174,28 @@
       "league": "L5",
       "dealType": "software IP OSS source code escrow domain trademark license chain of title lien search",
       "industry": "software",
-      "triggeredGates": ["G10"]
+      "triggeredGates": [
+        "G10"
+      ]
     },
     "expect": {
-      "textIncludes": ["Pass-through mechanics require outside data/software inputs", "human-service referrals"],
+      "textIncludes": [
+        "Pass-through mechanics require outside data/software inputs",
+        "human-service referrals"
+      ],
       "fields": [
-        { "path": "slots", "includes": "M214" },
-        { "path": "slots", "includes": "M221" },
-        { "path": "surfaces", "includes": "files" }
+        {
+          "path": "slots",
+          "includes": "M214"
+        },
+        {
+          "path": "slots",
+          "includes": "M221"
+        },
+        {
+          "path": "surfaces",
+          "includes": "files"
+        }
       ]
     }
   },
@@ -126,13 +205,26 @@
     "specVersion": "DEFINITIVE.v1.0",
     "methodologyUri": "methodology://v19",
     "kind": "surface_summary",
-    "input": { "surface": "today" },
+    "input": {
+      "surface": "today"
+    },
     "expect": {
-      "textIncludes": ["Today should prioritize the few mechanics that change the next action"],
+      "textIncludes": [
+        "Today should prioritize the few mechanics that change the next action"
+      ],
       "fields": [
-        { "path": "title", "equals": "Today" },
-        { "path": "readiness.executable", "min": 1 },
-        { "path": "needs.passThrough", "includes": "M190" }
+        {
+          "path": "title",
+          "equals": "Today"
+        },
+        {
+          "path": "readiness.executable",
+          "min": 1
+        },
+        {
+          "path": "needs.passThrough",
+          "includes": "M190"
+        }
       ]
     }
   },
@@ -142,13 +234,26 @@
     "specVersion": "DEFINITIVE.v1.0",
     "methodologyUri": "methodology://v19",
     "kind": "surface_summary",
-    "input": { "surface": "pipeline" },
+    "input": {
+      "surface": "pipeline"
+    },
     "expect": {
-      "textIncludes": ["Pipeline movement should cite gate, model slot, source gap, and handoff state"],
+      "textIncludes": [
+        "Pipeline movement should cite gate, model slot, source gap, and handoff state"
+      ],
       "fields": [
-        { "path": "title", "equals": "Pipeline" },
-        { "path": "needs.professionalHandoff", "lengthAtLeast": 1 },
-        { "path": "visibleModelSlots", "includes": "M206" }
+        {
+          "path": "title",
+          "equals": "Pipeline"
+        },
+        {
+          "path": "needs.professionalHandoff",
+          "lengthAtLeast": 1
+        },
+        {
+          "path": "visibleModelSlots",
+          "includes": "M206"
+        }
       ]
     }
   },
@@ -158,13 +263,26 @@
     "specVersion": "DEFINITIVE.v1.0",
     "methodologyUri": "methodology://v19",
     "kind": "surface_summary",
-    "input": { "surface": "files" },
+    "input": {
+      "surface": "files"
+    },
     "expect": {
-      "textIncludes": ["Files should show which source or pass-through input unblocks each mechanic"],
+      "textIncludes": [
+        "Files should show which source or pass-through input unblocks each mechanic"
+      ],
       "fields": [
-        { "path": "title", "equals": "Files" },
-        { "path": "needs.passThrough", "includes": "M214" },
-        { "path": "needs.passThrough", "includes": "M221" }
+        {
+          "path": "title",
+          "equals": "Files"
+        },
+        {
+          "path": "needs.passThrough",
+          "includes": "M214"
+        },
+        {
+          "path": "needs.passThrough",
+          "includes": "M221"
+        }
       ]
     }
   },
@@ -174,13 +292,26 @@
     "specVersion": "DEFINITIVE.v1.0",
     "methodologyUri": "methodology://v19",
     "kind": "surface_summary",
-    "input": { "surface": "studio" },
+    "input": {
+      "surface": "studio"
+    },
     "expect": {
-      "textIncludes": ["Studio exports should carry only sourced, model-backed, or explicitly caveated mechanics"],
+      "textIncludes": [
+        "Studio exports should carry only sourced, model-backed, or explicitly caveated mechanics"
+      ],
       "fields": [
-        { "path": "title", "equals": "Studio" },
-        { "path": "visibleModelSlots", "includes": "M206" },
-        { "path": "visibleModelSlots", "includes": "M208" }
+        {
+          "path": "title",
+          "equals": "Studio"
+        },
+        {
+          "path": "visibleModelSlots",
+          "includes": "M206"
+        },
+        {
+          "path": "visibleModelSlots",
+          "includes": "M208"
+        }
       ]
     }
   },
@@ -192,7 +323,10 @@
     "kind": "manifest",
     "expect": {
       "fields": [
-        { "path": "doctrine.pricing", "includes": "No wallet or success fees" }
+        {
+          "path": "doctrine.pricing",
+          "includes": "No wallet or success fees"
+        }
       ]
     }
   },
@@ -204,21 +338,66 @@
     "kind": "manifest",
     "expect": {
       "fields": [
-        { "path": "access.publicDiscovery", "includes": "/.well-known/mcp" },
-        { "path": "access.publicDiscovery", "includes": "/.well-known/mcp/server-card.json" },
-        { "path": "access.publicDiscovery", "includes": "/.well-known/definitive-schemas.json" },
-        { "path": "access.publicDiscovery", "includes": "/api/definitive/schemas" },
-        { "path": "access.publicDiscovery", "includes": "/api/definitive/pass-through-catalog" },
-        { "path": "access.publicDiscovery", "includes": "/api/definitive/authority-seed-plan" },
-        { "path": "access.publicDiscovery", "includes": "/api/definitive/deal-runbooks" },
-        { "path": "access.publicDiscovery", "includes": "/api/definitive/deal-runbooks/{journey}" },
-        { "path": "access.publicDiscovery", "includes": "/api/definitive/model-catalog" },
-        { "path": "access.publicDiscovery", "includes": "/api/definitive/model-catalog/{slotId}" },
-        { "path": "access.publicDiscovery", "includes": "/api/definitive/deal-mechanics/models/{slotId}" },
-        { "path": "access.publicDiscovery", "includes": "/api/definitive/registry-package" },
-        { "path": "access.publicDiscovery", "includes": "/api/definitive/enterprise-allow-lists" },
-        { "path": "access.publicDiscovery", "notIncludes": "/api/definitive/tools/{toolName}/call" },
-        { "path": "access.authenticatedExecution", "includes": "/api/definitive/tools/{toolName}/call" }
+        {
+          "path": "access.publicDiscovery",
+          "includes": "/.well-known/mcp"
+        },
+        {
+          "path": "access.publicDiscovery",
+          "includes": "/.well-known/mcp/server-card.json"
+        },
+        {
+          "path": "access.publicDiscovery",
+          "includes": "/.well-known/definitive-schemas.json"
+        },
+        {
+          "path": "access.publicDiscovery",
+          "includes": "/api/definitive/schemas"
+        },
+        {
+          "path": "access.publicDiscovery",
+          "includes": "/api/definitive/pass-through-catalog"
+        },
+        {
+          "path": "access.publicDiscovery",
+          "includes": "/api/definitive/authority-seed-plan"
+        },
+        {
+          "path": "access.publicDiscovery",
+          "includes": "/api/definitive/deal-runbooks"
+        },
+        {
+          "path": "access.publicDiscovery",
+          "includes": "/api/definitive/deal-runbooks/{journey}"
+        },
+        {
+          "path": "access.publicDiscovery",
+          "includes": "/api/definitive/model-catalog"
+        },
+        {
+          "path": "access.publicDiscovery",
+          "includes": "/api/definitive/model-catalog/{slotId}"
+        },
+        {
+          "path": "access.publicDiscovery",
+          "includes": "/api/definitive/deal-mechanics/models/{slotId}"
+        },
+        {
+          "path": "access.publicDiscovery",
+          "includes": "/api/definitive/registry-package"
+        },
+        {
+          "path": "access.publicDiscovery",
+          "includes": "/api/definitive/enterprise-allow-lists"
+        },
+        {
+          "path": "access.publicDiscovery",
+          "notIncludes": "/api/definitive/tools/{toolName}/call"
+        },
+        {
+          "path": "access.authenticatedExecution",
+          "includes": "/api/definitive/tools/{toolName}/call"
+        }
       ]
     }
   },
@@ -230,11 +409,26 @@
     "kind": "manifest",
     "expect": {
       "fields": [
-        { "path": "lineSurface.statuses", "includes": "human_approval_required" },
-        { "path": "lineSurface.statuses", "includes": "counsel_review_required" },
-        { "path": "lineSurface.statuses", "includes": "enterprise_scope_required" },
-        { "path": "lineSurface.statuses", "includes": "credit_budget_required" },
-        { "path": "lineSurface.statuses", "includes": "LINE_VIOLATION" }
+        {
+          "path": "lineSurface.statuses",
+          "includes": "human_approval_required"
+        },
+        {
+          "path": "lineSurface.statuses",
+          "includes": "counsel_review_required"
+        },
+        {
+          "path": "lineSurface.statuses",
+          "includes": "enterprise_scope_required"
+        },
+        {
+          "path": "lineSurface.statuses",
+          "includes": "credit_budget_required"
+        },
+        {
+          "path": "lineSurface.statuses",
+          "includes": "LINE_VIOLATION"
+        }
       ]
     }
   },
@@ -246,10 +440,22 @@
     "kind": "manifest",
     "expect": {
       "fields": [
-        { "path": "conformanceSurface.modelRuntimeCases", "equals": 202 },
-        { "path": "conformanceSurface.dealMechanicsRouteCases", "equals": 60 },
-        { "path": "conformanceSurface.promptMetaCases", "equals": 104 },
-        { "path": "conformanceSurface.totalCases", "equals": 472 }
+        {
+          "path": "conformanceSurface.modelRuntimeCases",
+          "equals": 385
+        },
+        {
+          "path": "conformanceSurface.dealMechanicsRouteCases",
+          "equals": 60
+        },
+        {
+          "path": "conformanceSurface.promptMetaCases",
+          "equals": 104
+        },
+        {
+          "path": "conformanceSurface.totalCases",
+          "equals": 655
+        }
       ]
     }
   },
@@ -261,8 +467,14 @@
     "kind": "manifest",
     "expect": {
       "fields": [
-        { "path": "dealMechanicsSurface.lineDoctrine", "includes": "DEFINITIVE computes deterministic figures" },
-        { "path": "dealMechanicsSurface.lineDoctrine", "includes": "users, professionals, or courts make advice/opinion/legal determinations" }
+        {
+          "path": "dealMechanicsSurface.lineDoctrine",
+          "includes": "DEFINITIVE computes deterministic figures"
+        },
+        {
+          "path": "dealMechanicsSurface.lineDoctrine",
+          "includes": "users, professionals, or courts make advice/opinion/legal determinations"
+        }
       ]
     }
   },
@@ -274,21 +486,66 @@
     "kind": "manifest",
     "expect": {
       "fields": [
-        { "path": "authoritySurface.targetEntries", "equals": 800 },
-        { "path": "authoritySurface.plannedEntries", "min": 800 },
-        { "path": "authoritySurface.requiredCoverageSatisfied", "equals": true },
-        { "path": "authoritySurface.categoryIds", "includes": "bankruptcy_code" },
-        { "path": "authoritySurface.categoryIds", "includes": "restructuring_lme" },
-        { "path": "authoritySurface.categoryIds", "includes": "irc_sections" },
-        { "path": "authoritySurface.categoryIds", "includes": "treasury_regulations" },
-        { "path": "authoritySurface.categoryIds", "includes": "real_estate" },
-        { "path": "authoritySurface.categoryIds", "includes": "connected_tax" },
-        { "path": "authoritySurface.categoryIds", "includes": "agreement_architecture" },
-        { "path": "authoritySurface.categoryIds", "includes": "ip_authorities" },
-        { "path": "authoritySurface.categoryIds", "includes": "pass_through_pricing_boundary" },
-        { "path": "authoritySurface.categoryIds", "includes": "recovery_data" },
-        { "path": "authoritySurface.categoryIds", "includes": "digital_assets" },
-        { "path": "authoritySurface.categoryIds", "includes": "regulated_industries" }
+        {
+          "path": "authoritySurface.targetEntries",
+          "equals": 800
+        },
+        {
+          "path": "authoritySurface.plannedEntries",
+          "min": 800
+        },
+        {
+          "path": "authoritySurface.requiredCoverageSatisfied",
+          "equals": true
+        },
+        {
+          "path": "authoritySurface.categoryIds",
+          "includes": "bankruptcy_code"
+        },
+        {
+          "path": "authoritySurface.categoryIds",
+          "includes": "restructuring_lme"
+        },
+        {
+          "path": "authoritySurface.categoryIds",
+          "includes": "irc_sections"
+        },
+        {
+          "path": "authoritySurface.categoryIds",
+          "includes": "treasury_regulations"
+        },
+        {
+          "path": "authoritySurface.categoryIds",
+          "includes": "real_estate"
+        },
+        {
+          "path": "authoritySurface.categoryIds",
+          "includes": "connected_tax"
+        },
+        {
+          "path": "authoritySurface.categoryIds",
+          "includes": "agreement_architecture"
+        },
+        {
+          "path": "authoritySurface.categoryIds",
+          "includes": "ip_authorities"
+        },
+        {
+          "path": "authoritySurface.categoryIds",
+          "includes": "pass_through_pricing_boundary"
+        },
+        {
+          "path": "authoritySurface.categoryIds",
+          "includes": "recovery_data"
+        },
+        {
+          "path": "authoritySurface.categoryIds",
+          "includes": "digital_assets"
+        },
+        {
+          "path": "authoritySurface.categoryIds",
+          "includes": "regulated_industries"
+        }
       ]
     }
   },
@@ -300,9 +557,18 @@
     "kind": "manifest",
     "expect": {
       "fields": [
-        { "path": "passThroughSurface.marginPolicy.dealOutcomeTied", "equals": false },
-        { "path": "passThroughSurface.marginPolicy.humanReferralCompensationAllowed", "equals": false },
-        { "path": "passThroughSurface.pricingRule", "includes": "per call" }
+        {
+          "path": "passThroughSurface.marginPolicy.dealOutcomeTied",
+          "equals": false
+        },
+        {
+          "path": "passThroughSurface.marginPolicy.humanReferralCompensationAllowed",
+          "equals": false
+        },
+        {
+          "path": "passThroughSurface.pricingRule",
+          "includes": "per call"
+        }
       ]
     }
   },
@@ -314,10 +580,22 @@
     "kind": "authority_seed_plan",
     "expect": {
       "fields": [
-        { "path": "categoriesById.bankruptcy_code.targetEntries", "min": 40 },
-        { "path": "categoriesById.bankruptcy_code.gates", "includes": "G28" },
-        { "path": "categoriesById.bankruptcy_code.modelSlots", "includes": "M153" },
-        { "path": "categoriesById.bankruptcy_code.sourceTypes", "includes": "statute" }
+        {
+          "path": "categoriesById.bankruptcy_code.targetEntries",
+          "min": 40
+        },
+        {
+          "path": "categoriesById.bankruptcy_code.gates",
+          "includes": "G28"
+        },
+        {
+          "path": "categoriesById.bankruptcy_code.modelSlots",
+          "includes": "M153"
+        },
+        {
+          "path": "categoriesById.bankruptcy_code.sourceTypes",
+          "includes": "statute"
+        }
       ]
     }
   },
@@ -329,10 +607,22 @@
     "kind": "authority_seed_plan",
     "expect": {
       "fields": [
-        { "path": "categoriesById.bankruptcy_case_law.targetEntries", "min": 55 },
-        { "path": "categoriesById.bankruptcy_case_law.gates", "includes": "G28" },
-        { "path": "categoriesById.bankruptcy_case_law.modelSlots", "includes": "M155" },
-        { "path": "categoriesById.bankruptcy_case_law.examples", "includes": "Till" }
+        {
+          "path": "categoriesById.bankruptcy_case_law.targetEntries",
+          "min": 55
+        },
+        {
+          "path": "categoriesById.bankruptcy_case_law.gates",
+          "includes": "G28"
+        },
+        {
+          "path": "categoriesById.bankruptcy_case_law.modelSlots",
+          "includes": "M155"
+        },
+        {
+          "path": "categoriesById.bankruptcy_case_law.examples",
+          "includes": "Till"
+        }
       ]
     }
   },
@@ -344,10 +634,22 @@
     "kind": "authority_seed_plan",
     "expect": {
       "fields": [
-        { "path": "categoriesById.restructuring_lme.targetEntries", "min": 45 },
-        { "path": "categoriesById.restructuring_lme.status", "equals": "research_queue" },
-        { "path": "categoriesById.restructuring_lme.gates", "includes": "G29" },
-        { "path": "categoriesById.restructuring_lme.modelSlots", "includes": "M161" }
+        {
+          "path": "categoriesById.restructuring_lme.targetEntries",
+          "min": 45
+        },
+        {
+          "path": "categoriesById.restructuring_lme.status",
+          "equals": "research_queue"
+        },
+        {
+          "path": "categoriesById.restructuring_lme.gates",
+          "includes": "G29"
+        },
+        {
+          "path": "categoriesById.restructuring_lme.modelSlots",
+          "includes": "M161"
+        }
       ]
     }
   },
@@ -359,10 +661,22 @@
     "kind": "authority_seed_plan",
     "expect": {
       "fields": [
-        { "path": "categoriesById.irc_sections.targetEntries", "min": 55 },
-        { "path": "categoriesById.irc_sections.gates", "includes": "G15" },
-        { "path": "categoriesById.irc_sections.modelSlots", "includes": "M200" },
-        { "path": "categoriesById.irc_sections.sourceTypes", "includes": "statute" }
+        {
+          "path": "categoriesById.irc_sections.targetEntries",
+          "min": 55
+        },
+        {
+          "path": "categoriesById.irc_sections.gates",
+          "includes": "G15"
+        },
+        {
+          "path": "categoriesById.irc_sections.modelSlots",
+          "includes": "M200"
+        },
+        {
+          "path": "categoriesById.irc_sections.sourceTypes",
+          "includes": "statute"
+        }
       ]
     }
   },
@@ -374,10 +688,22 @@
     "kind": "authority_seed_plan",
     "expect": {
       "fields": [
-        { "path": "categoriesById.treasury_regulations.targetEntries", "min": 60 },
-        { "path": "categoriesById.treasury_regulations.sourceTypes", "includes": "treasury_regulation" },
-        { "path": "categoriesById.treasury_regulations.modelSlots", "includes": "M203" },
-        { "path": "categoriesById.treasury_regulations.modelSlots", "includes": "M222" }
+        {
+          "path": "categoriesById.treasury_regulations.targetEntries",
+          "min": 60
+        },
+        {
+          "path": "categoriesById.treasury_regulations.sourceTypes",
+          "includes": "treasury_regulation"
+        },
+        {
+          "path": "categoriesById.treasury_regulations.modelSlots",
+          "includes": "M203"
+        },
+        {
+          "path": "categoriesById.treasury_regulations.modelSlots",
+          "includes": "M222"
+        }
       ]
     }
   },
@@ -389,10 +715,22 @@
     "kind": "authority_seed_plan",
     "expect": {
       "fields": [
-        { "path": "categoriesById.real_estate.targetEntries", "min": 60 },
-        { "path": "categoriesById.real_estate.gates", "includes": "G30" },
-        { "path": "categoriesById.real_estate.modelSlots", "includes": "M190" },
-        { "path": "categoriesById.real_estate.modelSlots", "includes": "M196" }
+        {
+          "path": "categoriesById.real_estate.targetEntries",
+          "min": 60
+        },
+        {
+          "path": "categoriesById.real_estate.gates",
+          "includes": "G30"
+        },
+        {
+          "path": "categoriesById.real_estate.modelSlots",
+          "includes": "M190"
+        },
+        {
+          "path": "categoriesById.real_estate.modelSlots",
+          "includes": "M196"
+        }
       ]
     }
   },
@@ -404,10 +742,22 @@
     "kind": "authority_seed_plan",
     "expect": {
       "fields": [
-        { "path": "categoriesById.connected_tax.targetEntries", "min": 60 },
-        { "path": "categoriesById.connected_tax.gates", "includes": "G2" },
-        { "path": "categoriesById.connected_tax.modelSlots", "includes": "M200" },
-        { "path": "categoriesById.connected_tax.modelSlots", "includes": "M205" }
+        {
+          "path": "categoriesById.connected_tax.targetEntries",
+          "min": 60
+        },
+        {
+          "path": "categoriesById.connected_tax.gates",
+          "includes": "G2"
+        },
+        {
+          "path": "categoriesById.connected_tax.modelSlots",
+          "includes": "M200"
+        },
+        {
+          "path": "categoriesById.connected_tax.modelSlots",
+          "includes": "M205"
+        }
       ]
     }
   },
@@ -419,10 +769,22 @@
     "kind": "authority_seed_plan",
     "expect": {
       "fields": [
-        { "path": "categoriesById.agreement_architecture.targetEntries", "min": 60 },
-        { "path": "categoriesById.agreement_architecture.gates", "includes": "G8" },
-        { "path": "categoriesById.agreement_architecture.modelSlots", "includes": "M206" },
-        { "path": "categoriesById.agreement_architecture.modelSlots", "includes": "M212" }
+        {
+          "path": "categoriesById.agreement_architecture.targetEntries",
+          "min": 60
+        },
+        {
+          "path": "categoriesById.agreement_architecture.gates",
+          "includes": "G8"
+        },
+        {
+          "path": "categoriesById.agreement_architecture.modelSlots",
+          "includes": "M206"
+        },
+        {
+          "path": "categoriesById.agreement_architecture.modelSlots",
+          "includes": "M212"
+        }
       ]
     }
   },
@@ -434,10 +796,22 @@
     "kind": "authority_seed_plan",
     "expect": {
       "fields": [
-        { "path": "categoriesById.ip_authorities.targetEntries", "min": 65 },
-        { "path": "categoriesById.ip_authorities.gates", "includes": "G10" },
-        { "path": "categoriesById.ip_authorities.modelSlots", "includes": "M214" },
-        { "path": "categoriesById.ip_authorities.modelSlots", "includes": "M221" }
+        {
+          "path": "categoriesById.ip_authorities.targetEntries",
+          "min": 65
+        },
+        {
+          "path": "categoriesById.ip_authorities.gates",
+          "includes": "G10"
+        },
+        {
+          "path": "categoriesById.ip_authorities.modelSlots",
+          "includes": "M214"
+        },
+        {
+          "path": "categoriesById.ip_authorities.modelSlots",
+          "includes": "M221"
+        }
       ]
     }
   },
@@ -449,10 +823,22 @@
     "kind": "authority_seed_plan",
     "expect": {
       "fields": [
-        { "path": "categoriesById.pass_through_pricing_boundary.targetEntries", "min": 35 },
-        { "path": "categoriesById.pass_through_pricing_boundary.modelSlots", "includes": "M221" },
-        { "path": "categoriesById.pass_through_pricing_boundary.lineBoundary", "includes": "success" },
-        { "path": "categoriesById.pass_through_pricing_boundary.lineBoundary", "includes": "prohibited" }
+        {
+          "path": "categoriesById.pass_through_pricing_boundary.targetEntries",
+          "min": 35
+        },
+        {
+          "path": "categoriesById.pass_through_pricing_boundary.modelSlots",
+          "includes": "M221"
+        },
+        {
+          "path": "categoriesById.pass_through_pricing_boundary.lineBoundary",
+          "includes": "success"
+        },
+        {
+          "path": "categoriesById.pass_through_pricing_boundary.lineBoundary",
+          "includes": "prohibited"
+        }
       ]
     }
   },
@@ -464,10 +850,22 @@
     "kind": "authority_seed_plan",
     "expect": {
       "fields": [
-        { "path": "categoriesById.recovery_data.targetEntries", "min": 35 },
-        { "path": "categoriesById.recovery_data.status", "equals": "requires_subscription_or_vendor_source" },
-        { "path": "categoriesById.recovery_data.gates", "includes": "G28" },
-        { "path": "categoriesById.recovery_data.modelSlots", "includes": "M166" }
+        {
+          "path": "categoriesById.recovery_data.targetEntries",
+          "min": 35
+        },
+        {
+          "path": "categoriesById.recovery_data.status",
+          "equals": "requires_subscription_or_vendor_source"
+        },
+        {
+          "path": "categoriesById.recovery_data.gates",
+          "includes": "G28"
+        },
+        {
+          "path": "categoriesById.recovery_data.modelSlots",
+          "includes": "M166"
+        }
       ]
     }
   },
@@ -479,10 +877,22 @@
     "kind": "authority_seed_plan",
     "expect": {
       "fields": [
-        { "path": "categoriesById.digital_assets.targetEntries", "min": 45 },
-        { "path": "categoriesById.digital_assets.status", "equals": "research_queue" },
-        { "path": "categoriesById.digital_assets.gates", "includes": "G30" },
-        { "path": "categoriesById.digital_assets.modelSlots", "includes": "M174" }
+        {
+          "path": "categoriesById.digital_assets.targetEntries",
+          "min": 45
+        },
+        {
+          "path": "categoriesById.digital_assets.status",
+          "equals": "research_queue"
+        },
+        {
+          "path": "categoriesById.digital_assets.gates",
+          "includes": "G30"
+        },
+        {
+          "path": "categoriesById.digital_assets.modelSlots",
+          "includes": "M174"
+        }
       ]
     }
   },
@@ -494,10 +904,22 @@
     "kind": "authority_seed_plan",
     "expect": {
       "fields": [
-        { "path": "categoriesById.regulated_industries.targetEntries", "min": 65 },
-        { "path": "categoriesById.regulated_industries.gates", "includes": "G24" },
-        { "path": "categoriesById.regulated_industries.modelSlots", "includes": "M130" },
-        { "path": "categoriesById.regulated_industries.sourceTypes", "includes": "regulation" }
+        {
+          "path": "categoriesById.regulated_industries.targetEntries",
+          "min": 65
+        },
+        {
+          "path": "categoriesById.regulated_industries.gates",
+          "includes": "G24"
+        },
+        {
+          "path": "categoriesById.regulated_industries.modelSlots",
+          "includes": "M130"
+        },
+        {
+          "path": "categoriesById.regulated_industries.sourceTypes",
+          "includes": "regulation"
+        }
       ]
     }
   },
@@ -509,12 +931,30 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "rowCount", "min": 220 },
-        { "path": "uniqueAuthorityIdCount", "min": 220 },
-        { "path": "files", "includes": "073_definitive_authority_register.sql" },
-        { "path": "files", "includes": "078_definitive_authority_register_batch2.sql" },
-        { "path": "files", "includes": "080_definitive_authority_register_batch4.sql" },
-        { "path": "files", "includes": "081_definitive_authority_register_batch5.sql" }
+        {
+          "path": "rowCount",
+          "min": 220
+        },
+        {
+          "path": "uniqueAuthorityIdCount",
+          "min": 220
+        },
+        {
+          "path": "files",
+          "includes": "073_definitive_authority_register.sql"
+        },
+        {
+          "path": "files",
+          "includes": "078_definitive_authority_register_batch2.sql"
+        },
+        {
+          "path": "files",
+          "includes": "080_definitive_authority_register_batch4.sql"
+        },
+        {
+          "path": "files",
+          "includes": "081_definitive_authority_register_batch5.sql"
+        }
       ]
     }
   },
@@ -526,11 +966,26 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.BK.1129" },
-        { "path": "authorityIds", "includes": "AUTH.CASE.TILL_2004" },
-        { "path": "sourceFamilies", "includes": "bankruptcy_code" },
-        { "path": "gates", "includes": "G28" },
-        { "path": "modelSlots", "includes": "M155" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.BK.1129"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.CASE.TILL_2004"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "bankruptcy_code"
+        },
+        {
+          "path": "gates",
+          "includes": "G28"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M155"
+        }
       ]
     }
   },
@@ -542,11 +997,26 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.CASE.SERTA_2024" },
-        { "path": "authorityIds", "includes": "AUTH.CASE.MITEL_2024" },
-        { "path": "sourceFamilies", "includes": "lme_case_law" },
-        { "path": "gates", "includes": "G29" },
-        { "path": "modelSlots", "includes": "M161" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.CASE.SERTA_2024"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.CASE.MITEL_2024"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "lme_case_law"
+        },
+        {
+          "path": "gates",
+          "includes": "G29"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M161"
+        }
       ]
     }
   },
@@ -558,12 +1028,30 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.IRC.1374" },
-        { "path": "authorityIds", "includes": "AUTH.TREAS.1_263A_5" },
-        { "path": "authorityIds", "includes": "AUTH.TREAS.1_1445_1" },
-        { "path": "sourceFamilies", "includes": "treasury_regulation" },
-        { "path": "modelSlots", "includes": "M203" },
-        { "path": "modelSlots", "includes": "M199" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.IRC.1374"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.TREAS.1_263A_5"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.TREAS.1_1445_1"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "treasury_regulation"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M203"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M199"
+        }
       ]
     }
   },
@@ -575,13 +1063,34 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.IP.35USC261" },
-        { "path": "authorityIds", "includes": "AUTH.UCC.9_310" },
-        { "path": "authorityIds", "includes": "AUTH.CASE.PEREGRINE" },
-        { "path": "sourceFamilies", "includes": "ip_statute" },
-        { "path": "gates", "includes": "G10" },
-        { "path": "modelSlots", "includes": "M214" },
-        { "path": "modelSlots", "includes": "M215" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.IP.35USC261"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.UCC.9_310"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.CASE.PEREGRINE"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "ip_statute"
+        },
+        {
+          "path": "gates",
+          "includes": "G10"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M214"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M215"
+        }
       ]
     }
   },
@@ -593,11 +1102,26 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.FTC.HSR.2026.SIZE_TRANSACTION" },
-        { "path": "authorityIds", "includes": "AUTH.FTC.HSR.2026.AUTO_REPORTABLE" },
-        { "path": "authorityIds", "includes": "AUTH.HSR.ACT.15_USC_18A" },
-        { "path": "sourceFamilies", "includes": "hsr" },
-        { "path": "sourceFamilies", "includes": "antitrust" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.FTC.HSR.2026.SIZE_TRANSACTION"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.FTC.HSR.2026.AUTO_REPORTABLE"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.HSR.ACT.15_USC_18A"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "hsr"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "antitrust"
+        }
       ]
     }
   },
@@ -609,11 +1133,26 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.OBBBA.70301" },
-        { "path": "authorityIds", "includes": "AUTH.OBBBA.70425" },
-        { "path": "authorityIds", "includes": "AUTH.OBBBA.70505" },
-        { "path": "categories", "includes": "OBBBA" },
-        { "path": "sourceFamilies", "includes": "tax" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.OBBBA.70301"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.OBBBA.70425"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.OBBBA.70505"
+        },
+        {
+          "path": "categories",
+          "includes": "OBBBA"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "tax"
+        }
       ]
     }
   },
@@ -625,11 +1164,26 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.IRS.REVRUL.2026_09" },
-        { "path": "authorityIds", "includes": "AUTH.IRS.REVRUL.2026_03" },
-        { "path": "authorityIds", "includes": "AUTH.SBA.SOP_50_10_8" },
-        { "path": "sourceFamilies", "includes": "tax_rate" },
-        { "path": "sourceFamilies", "includes": "financing" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.IRS.REVRUL.2026_09"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.IRS.REVRUL.2026_03"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.SBA.SOP_50_10_8"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "tax_rate"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "financing"
+        }
       ]
     }
   },
@@ -641,10 +1195,22 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.DAMODARAN.2026" },
-        { "path": "authorityIds", "includes": "AUTH.KROLL.2024" },
-        { "path": "authorityIds", "includes": "AUTH.PEPPERDINE.PCAP.2025" },
-        { "path": "sourceFamilies", "includes": "market_study" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.DAMODARAN.2026"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.KROLL.2024"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.PEPPERDINE.PCAP.2025"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "market_study"
+        }
       ]
     }
   },
@@ -656,11 +1222,26 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.ABA.2025.PRIVATE_TARGET" },
-        { "path": "authorityIds", "includes": "AUTH.SRS.2025.DEAL_TERMS" },
-        { "path": "authorityIds", "includes": "AUTH.MARSH.TRI.2025" },
-        { "path": "sourceFamilies", "includes": "deal_terms" },
-        { "path": "sourceFamilies", "includes": "rwi" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.ABA.2025.PRIVATE_TARGET"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.SRS.2025.DEAL_TERMS"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.MARSH.TRI.2025"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "deal_terms"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "rwi"
+        }
       ]
     }
   },
@@ -672,10 +1253,22 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.DE.AKORN.2018" },
-        { "path": "authorityIds", "includes": "AUTH.DE.AB_STABLE.2020" },
-        { "path": "authorityIds", "includes": "AUTH.DE.SNOW_PHIPPS.2021" },
-        { "path": "sourceFamilies", "includes": "delaware_case_law" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.DE.AKORN.2018"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.DE.AB_STABLE.2020"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.DE.SNOW_PHIPPS.2021"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "delaware_case_law"
+        }
       ]
     }
   },
@@ -687,11 +1280,26 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.DE.DGCL_144_SB21_2025" },
-        { "path": "authorityIds", "includes": "AUTH.DE.MFW.2014" },
-        { "path": "authorityIds", "includes": "AUTH.DE.MATCH_GROUP.2024" },
-        { "path": "sourceFamilies", "includes": "delaware_statute" },
-        { "path": "sourceFamilies", "includes": "delaware_case_law" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.DE.DGCL_144_SB21_2025"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.DE.MFW.2014"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.DE.MATCH_GROUP.2024"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "delaware_statute"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "delaware_case_law"
+        }
       ]
     }
   },
@@ -703,10 +1311,22 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.IRC.1202" },
-        { "path": "authorityIds", "includes": "AUTH.IRC.338H10" },
-        { "path": "authorityIds", "includes": "AUTH.IRC.382" },
-        { "path": "authorityIds", "includes": "AUTH.IRC.1060" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.IRC.1202"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.IRC.338H10"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.IRC.382"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.IRC.1060"
+        }
       ]
     }
   },
@@ -718,11 +1338,26 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.SEC.AI_WASHING.2024_36" },
-        { "path": "authorityIds", "includes": "AUTH.HSR.ACT.15_USC_18A" },
-        { "path": "authorityIds", "includes": "AUTH.CFIUS.31_CFR_800" },
-        { "path": "sourceFamilies", "includes": "compliance" },
-        { "path": "sourceFamilies", "includes": "national_security" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.SEC.AI_WASHING.2024_36"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.HSR.ACT.15_USC_18A"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.CFIUS.31_CFR_800"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "compliance"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "national_security"
+        }
       ]
     }
   },
@@ -734,11 +1369,26 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.BK.507" },
-        { "path": "authorityIds", "includes": "AUTH.BK.726" },
-        { "path": "authorityIds", "includes": "AUTH.BK.1129" },
-        { "path": "modelSlots", "includes": "M153" },
-        { "path": "modelSlots", "includes": "M157" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.BK.507"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.BK.726"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.BK.1129"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M153"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M157"
+        }
       ]
     }
   },
@@ -750,11 +1400,26 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.BK.364" },
-        { "path": "authorityIds", "includes": "AUTH.CASE.RADLAX_2012" },
-        { "path": "authorityIds", "includes": "AUTH.CASE.FISKER_2014" },
-        { "path": "modelSlots", "includes": "M151" },
-        { "path": "modelSlots", "includes": "M158" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.BK.364"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.CASE.RADLAX_2012"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.CASE.FISKER_2014"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M151"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M158"
+        }
       ]
     }
   },
@@ -766,9 +1431,18 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.BK.1181" },
-        { "path": "authorityIds", "includes": "AUTH.BK.1195" },
-        { "path": "modelSlots", "includes": "M167" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.BK.1181"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.BK.1195"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M167"
+        }
       ]
     }
   },
@@ -780,12 +1454,30 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.IRC.721" },
-        { "path": "authorityIds", "includes": "AUTH.IRC.704C" },
-        { "path": "authorityIds", "includes": "AUTH.IRC.754" },
-        { "path": "authorityIds", "includes": "AUTH.IRC.743B" },
-        { "path": "modelSlots", "includes": "M145" },
-        { "path": "modelSlots", "includes": "M200" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.IRC.721"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.IRC.704C"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.IRC.754"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.IRC.743B"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M145"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M200"
+        }
       ]
     }
   },
@@ -797,12 +1489,30 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.IRC.897" },
-        { "path": "authorityIds", "includes": "AUTH.IRC.1031" },
-        { "path": "authorityIds", "includes": "AUTH.IRC.1445" },
-        { "path": "modelSlots", "includes": "M169" },
-        { "path": "modelSlots", "includes": "M170" },
-        { "path": "modelSlots", "includes": "M199" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.IRC.897"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.IRC.1031"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.IRC.1445"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M169"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M170"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M199"
+        }
       ]
     }
   },
@@ -814,10 +1524,22 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.TREAS.1_338_6" },
-        { "path": "authorityIds", "includes": "AUTH.TREAS.1_1060_1" },
-        { "path": "modelSlots", "includes": "M139" },
-        { "path": "modelSlots", "includes": "M222" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.TREAS.1_338_6"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.TREAS.1_1060_1"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M139"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M222"
+        }
       ]
     }
   },
@@ -829,10 +1551,22 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.IP.LANHAM_10" },
-        { "path": "authorityIds", "includes": "AUTH.CASE.CLOROX_CHEMICAL_BANK" },
-        { "path": "sourceFamilies", "includes": "ip_case_law" },
-        { "path": "modelSlots", "includes": "M223" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.IP.LANHAM_10"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.CASE.CLOROX_CHEMICAL_BANK"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "ip_case_law"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M223"
+        }
       ]
     }
   },
@@ -844,13 +1578,34 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.ABA.2023.PRIVATE_TARGET" },
-        { "path": "authorityIds", "includes": "AUTH.HOULIHAN.2023.TERMINATION_FEE" },
-        { "path": "authorityIds", "includes": "AUTH.ABA.MODEL_SPA" },
-        { "path": "sourceFamilies", "includes": "deal_terms" },
-        { "path": "sourceFamilies", "includes": "model_form" },
-        { "path": "modelSlots", "includes": "M206" },
-        { "path": "modelSlots", "includes": "M212" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.ABA.2023.PRIVATE_TARGET"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.HOULIHAN.2023.TERMINATION_FEE"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.ABA.MODEL_SPA"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "deal_terms"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "model_form"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M206"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M212"
+        }
       ]
     }
   },
@@ -862,13 +1617,34 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.EXCHANGE_ACT.15A" },
-        { "path": "authorityIds", "includes": "AUTH.EXCHANGE_ACT.15B13" },
-        { "path": "authorityIds", "includes": "AUTH.SEC.RANIERI_2013" },
-        { "path": "authorityIds", "includes": "AUTH.ABA.MODEL_RULE_7_2B" },
-        { "path": "sourceFamilies", "includes": "securities_law" },
-        { "path": "sourceFamilies", "includes": "sec_order" },
-        { "path": "sourceFamilies", "includes": "professional_responsibility" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.EXCHANGE_ACT.15A"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.EXCHANGE_ACT.15B13"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.SEC.RANIERI_2013"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.ABA.MODEL_RULE_7_2B"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "securities_law"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "sec_order"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "professional_responsibility"
+        }
       ]
     }
   },
@@ -880,13 +1656,34 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.MOODYS.URD_2006" },
-        { "path": "authorityIds", "includes": "AUTH.SP.LOSSSTATS" },
-        { "path": "authorityIds", "includes": "AUTH.FRBP.3001" },
-        { "path": "sourceFamilies", "includes": "recovery_data" },
-        { "path": "sourceFamilies", "includes": "bankruptcy_rule" },
-        { "path": "modelSlots", "includes": "M166" },
-        { "path": "modelSlots", "includes": "M168" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.MOODYS.URD_2006"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.SP.LOSSSTATS"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.FRBP.3001"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "recovery_data"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "bankruptcy_rule"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M166"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M168"
+        }
       ]
     }
   },
@@ -898,14 +1695,38 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.GENIUS.ACT_2025" },
-        { "path": "authorityIds", "includes": "AUTH.CLARITY.HR3633_2025" },
-        { "path": "authorityIds", "includes": "AUTH.TD_10000.DIGITAL_ASSET_REPORTING" },
-        { "path": "sourceFamilies", "includes": "digital_asset_statute" },
-        { "path": "sourceFamilies", "includes": "digital_asset_tax_guidance" },
-        { "path": "modelSlots", "includes": "M174" },
-        { "path": "modelSlots", "includes": "M175" },
-        { "path": "modelSlots", "includes": "M176" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.GENIUS.ACT_2025"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.CLARITY.HR3633_2025"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.TD_10000.DIGITAL_ASSET_REPORTING"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "digital_asset_statute"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "digital_asset_tax_guidance"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M174"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M175"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M176"
+        }
       ]
     }
   },
@@ -917,17 +1738,50 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.HIPAA.45_CFR_160_164" },
-        { "path": "authorityIds", "includes": "AUTH.FERC.203" },
-        { "path": "authorityIds", "includes": "AUTH.ASC.842" },
-        { "path": "authorityIds", "includes": "AUTH.ASTM.E2018" },
-        { "path": "sourceFamilies", "includes": "regulated_industry_healthcare" },
-        { "path": "sourceFamilies", "includes": "regulated_industry_energy" },
-        { "path": "sourceFamilies", "includes": "accounting_standard" },
-        { "path": "sourceFamilies", "includes": "real_estate_standard" },
-        { "path": "modelSlots", "includes": "M130" },
-        { "path": "modelSlots", "includes": "M173" },
-        { "path": "modelSlots", "includes": "M198" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.HIPAA.45_CFR_160_164"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.FERC.203"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.ASC.842"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.ASTM.E2018"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "regulated_industry_healthcare"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "regulated_industry_energy"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "accounting_standard"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "real_estate_standard"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M130"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M173"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M198"
+        }
       ]
     }
   },
@@ -939,12 +1793,30 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.CITT.CT_12_638" },
-        { "path": "authorityIds", "includes": "AUTH.CITT.MD_TP_12_117" },
-        { "path": "authorityIds", "includes": "AUTH.CITT.WA_82_45" },
-        { "path": "authorityIds", "includes": "AUTH.CITT.NY_PUB_576" },
-        { "path": "sourceFamilies", "includes": "real_estate_transfer_tax" },
-        { "path": "modelSlots", "includes": "M191" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.CITT.CT_12_638"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.CITT.MD_TP_12_117"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.CITT.WA_82_45"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.CITT.NY_PUB_576"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "real_estate_transfer_tax"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M191"
+        }
       ]
     }
   },
@@ -956,15 +1828,42 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.IRC.453A" },
-        { "path": "authorityIds", "includes": "AUTH.IRS.REVPROC_2011_29" },
-        { "path": "authorityIds", "includes": "AUTH.CASE.INDOPCO_1992" },
-        { "path": "authorityIds", "includes": "AUTH.TREAS.1_336_2" },
-        { "path": "sourceFamilies", "includes": "tax_guidance" },
-        { "path": "sourceFamilies", "includes": "tax_case_law" },
-        { "path": "modelSlots", "includes": "M201" },
-        { "path": "modelSlots", "includes": "M203" },
-        { "path": "modelSlots", "includes": "M204" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.IRC.453A"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.IRS.REVPROC_2011_29"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.CASE.INDOPCO_1992"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.TREAS.1_336_2"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "tax_guidance"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "tax_case_law"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M201"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M203"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M204"
+        }
       ]
     }
   },
@@ -976,13 +1875,34 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.OSS.AGPL_3_0" },
-        { "path": "authorityIds", "includes": "AUTH.OSS.APACHE_2_0" },
-        { "path": "authorityIds", "includes": "AUTH.BLACK_DUCK.SCA" },
-        { "path": "authorityIds", "includes": "AUTH.FOSSA.SCA" },
-        { "path": "sourceFamilies", "includes": "oss_license" },
-        { "path": "sourceFamilies", "includes": "software_pass_through" },
-        { "path": "modelSlots", "includes": "M221" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.OSS.AGPL_3_0"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.OSS.APACHE_2_0"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.BLACK_DUCK.SCA"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.FOSSA.SCA"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "oss_license"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "software_pass_through"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M221"
+        }
       ]
     }
   },
@@ -994,15 +1914,42 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.CSC.UCC_SEARCH" },
-        { "path": "authorityIds", "includes": "AUTH.COSTAR.DATA" },
-        { "path": "authorityIds", "includes": "AUTH.GREEN_STREET.DATA" },
-        { "path": "authorityIds", "includes": "AUTH.ALTA.ENDORSEMENTS" },
-        { "path": "sourceFamilies", "includes": "software_pass_through" },
-        { "path": "sourceFamilies", "includes": "real_estate_standard" },
-        { "path": "modelSlots", "includes": "M190" },
-        { "path": "modelSlots", "includes": "M196" },
-        { "path": "modelSlots", "includes": "M215" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.CSC.UCC_SEARCH"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.COSTAR.DATA"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.GREEN_STREET.DATA"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.ALTA.ENDORSEMENTS"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "software_pass_through"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "real_estate_standard"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M190"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M196"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M215"
+        }
       ]
     }
   },
@@ -1014,15 +1961,42 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "files", "includes": "081_definitive_authority_register_batch5.sql" },
-        { "path": "authorityIds", "includes": "AUTH.BK.1121" },
-        { "path": "authorityIds", "includes": "AUTH.BK.1125" },
-        { "path": "authorityIds", "includes": "AUTH.FRBP.3001" },
-        { "path": "authorityIds", "includes": "AUTH.FRBP.9019" },
-        { "path": "sourceFamilies", "includes": "bankruptcy_code" },
-        { "path": "sourceFamilies", "includes": "bankruptcy_rule" },
-        { "path": "modelSlots", "includes": "M164" },
-        { "path": "modelSlots", "includes": "M166" }
+        {
+          "path": "files",
+          "includes": "081_definitive_authority_register_batch5.sql"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.BK.1121"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.BK.1125"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.FRBP.3001"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.FRBP.9019"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "bankruptcy_code"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "bankruptcy_rule"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M164"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M166"
+        }
       ]
     }
   },
@@ -1034,13 +2008,34 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.CASE.TEXAS_GRAND_PRAIRIE_2013" },
-        { "path": "authorityIds", "includes": "AUTH.CASE.AMERICAN_HOMEPATIENT_2005" },
-        { "path": "authorityIds", "includes": "AUTH.CASE.TOPP_2023" },
-        { "path": "authorityIds", "includes": "AUTH.CASE.BODY_TRANSIT_2020" },
-        { "path": "sourceFamilies", "includes": "bankruptcy_case_law" },
-        { "path": "modelSlots", "includes": "M155" },
-        { "path": "modelSlots", "includes": "M156" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.CASE.TEXAS_GRAND_PRAIRIE_2013"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.CASE.AMERICAN_HOMEPATIENT_2005"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.CASE.TOPP_2023"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.CASE.BODY_TRANSIT_2020"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "bankruptcy_case_law"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M155"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M156"
+        }
       ]
     }
   },
@@ -1052,15 +2047,42 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.IRC.1274A" },
-        { "path": "authorityIds", "includes": "AUTH.TREAS.1_483_1" },
-        { "path": "authorityIds", "includes": "AUTH.TREAS.1_1274_2" },
-        { "path": "authorityIds", "includes": "AUTH.IRS.FORM_8288_B" },
-        { "path": "sourceFamilies", "includes": "tax" },
-        { "path": "sourceFamilies", "includes": "treasury_regulation" },
-        { "path": "sourceFamilies", "includes": "tax_form" },
-        { "path": "modelSlots", "includes": "M204" },
-        { "path": "modelSlots", "includes": "M199" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.IRC.1274A"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.TREAS.1_483_1"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.TREAS.1_1274_2"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.IRS.FORM_8288_B"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "tax"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "treasury_regulation"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "tax_form"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M204"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M199"
+        }
       ]
     }
   },
@@ -1072,21 +2094,66 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "authorityIds", "includes": "AUTH.ASC.842" },
-        { "path": "authorityIds", "includes": "AUTH.ASTM.E2018" },
-        { "path": "authorityIds", "includes": "AUTH.REIT.IRC_856" },
-        { "path": "authorityIds", "includes": "AUTH.UCC.9_610" },
-        { "path": "authorityIds", "includes": "AUTH.UCC.9_307" },
-        { "path": "sourceFamilies", "includes": "accounting_standard" },
-        { "path": "sourceFamilies", "includes": "real_estate_standard" },
-        { "path": "sourceFamilies", "includes": "ucc_article_9" },
-        { "path": "gates", "includes": "G30" },
-        { "path": "gates", "includes": "G28" },
-        { "path": "gates", "includes": "G10" },
-        { "path": "modelSlots", "includes": "M171" },
-        { "path": "modelSlots", "includes": "M198" },
-        { "path": "modelSlots", "includes": "M165" },
-        { "path": "modelSlots", "includes": "M215" }
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.ASC.842"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.ASTM.E2018"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.REIT.IRC_856"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.UCC.9_610"
+        },
+        {
+          "path": "authorityIds",
+          "includes": "AUTH.UCC.9_307"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "accounting_standard"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "real_estate_standard"
+        },
+        {
+          "path": "sourceFamilies",
+          "includes": "ucc_article_9"
+        },
+        {
+          "path": "gates",
+          "includes": "G30"
+        },
+        {
+          "path": "gates",
+          "includes": "G28"
+        },
+        {
+          "path": "gates",
+          "includes": "G10"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M171"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M198"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M165"
+        },
+        {
+          "path": "modelSlots",
+          "includes": "M215"
+        }
       ]
     }
   },
@@ -1098,10 +2165,22 @@
     "kind": "agent_card",
     "expect": {
       "fields": [
-        { "path": "publicEndpoints", "includes": "/.well-known/definitive.json" },
-        { "path": "publicEndpoints", "notIncludes": "/api/definitive/tools/{toolName}/call" },
-        { "path": "authenticatedEndpoints", "includes": "/api/definitive/tools/{toolName}/call" },
-        { "path": "endpointAccess.executionRequiresGovernedToolContract", "equals": true }
+        {
+          "path": "publicEndpoints",
+          "includes": "/.well-known/definitive.json"
+        },
+        {
+          "path": "publicEndpoints",
+          "notIncludes": "/api/definitive/tools/{toolName}/call"
+        },
+        {
+          "path": "authenticatedEndpoints",
+          "includes": "/api/definitive/tools/{toolName}/call"
+        },
+        {
+          "path": "endpointAccess.executionRequiresGovernedToolContract",
+          "equals": true
+        }
       ]
     }
   },
@@ -1112,12 +2191,28 @@
     "methodologyUri": "methodology://v19",
     "kind": "agent_card",
     "expect": {
-      "textIncludes": ["definitive_conformance_status", "\"caseCount\":472", "definitive_deal_mechanics_v1_1"],
+      "textIncludes": [
+        "definitive_conformance_status",
+        "\"caseCount\":655",
+        "definitive_deal_mechanics_v1_1"
+      ],
       "fields": [
-        { "path": "definitive.dealMechanicsModelSlots", "equals": 123 },
-        { "path": "definitive.dealMechanicsGates", "equals": 30 },
-        { "path": "definitive.authoritySeedPlanEntries", "min": 800 },
-        { "path": "definitive.passThroughPricingRule", "includes": "cost-plus-fixed" }
+        {
+          "path": "definitive.dealMechanicsModelSlots",
+          "equals": 134
+        },
+        {
+          "path": "definitive.dealMechanicsGates",
+          "equals": 30
+        },
+        {
+          "path": "definitive.authoritySeedPlanEntries",
+          "min": 800
+        },
+        {
+          "path": "definitive.passThroughPricingRule",
+          "includes": "cost-plus-fixed"
+        }
       ]
     }
   },
@@ -1128,13 +2223,33 @@
     "methodologyUri": "methodology://v19",
     "kind": "registry_package",
     "expect": {
-      "textIncludes": ["smbx-ai/diligence", "THE LINE-safe agent access", "M101-M223", "Deal OS"],
+      "textIncludes": [
+        "smbx-ai/diligence",
+        "THE LINE-safe agent access",
+        "M101-M223",
+        "Deal OS"
+      ],
       "fields": [
-        { "path": "registrySubmissionPackages.canonicalNamespace", "equals": "smbx-ai/diligence" },
-        { "path": "registrySubmissionPackages.canonicalMcpRegistry.surfaceId", "equals": "linux_foundation_mcp_registry" },
-        { "path": "registrySubmissionPackages.canonicalMcpRegistry.serverJson.name", "equals": "smbx-ai/diligence" },
-        { "path": "registrySubmissionPackages.canonicalMcpRegistry.serverJson.tags", "includes": "working capital peg" },
-        { "path": "registryReadinessChecks", "includes": "structured-output-schemas" }
+        {
+          "path": "registrySubmissionPackages.canonicalNamespace",
+          "equals": "smbx-ai/diligence"
+        },
+        {
+          "path": "registrySubmissionPackages.canonicalMcpRegistry.surfaceId",
+          "equals": "linux_foundation_mcp_registry"
+        },
+        {
+          "path": "registrySubmissionPackages.canonicalMcpRegistry.serverJson.name",
+          "equals": "smbx-ai/diligence"
+        },
+        {
+          "path": "registrySubmissionPackages.canonicalMcpRegistry.serverJson.tags",
+          "includes": "working capital peg"
+        },
+        {
+          "path": "registryReadinessChecks",
+          "includes": "structured-output-schemas"
+        }
       ]
     }
   },
@@ -1146,12 +2261,30 @@
     "kind": "registry_package",
     "expect": {
       "fields": [
-        { "path": "thirdPartyDirectoryIds", "includes": "pulsemcp" },
-        { "path": "thirdPartyDirectoryIds", "includes": "glama" },
-        { "path": "thirdPartyDirectoryIds", "includes": "mcp_so" },
-        { "path": "thirdPartyDirectoryIds", "includes": "smithery" },
-        { "path": "thirdPartyDirectoryIds", "includes": "docker_mcp_catalog" },
-        { "path": "thirdPartyDirectoryIds", "includes": "awesome_mcp_servers" }
+        {
+          "path": "thirdPartyDirectoryIds",
+          "includes": "pulsemcp"
+        },
+        {
+          "path": "thirdPartyDirectoryIds",
+          "includes": "glama"
+        },
+        {
+          "path": "thirdPartyDirectoryIds",
+          "includes": "mcp_so"
+        },
+        {
+          "path": "thirdPartyDirectoryIds",
+          "includes": "smithery"
+        },
+        {
+          "path": "thirdPartyDirectoryIds",
+          "includes": "docker_mcp_catalog"
+        },
+        {
+          "path": "thirdPartyDirectoryIds",
+          "includes": "awesome_mcp_servers"
+        }
       ]
     }
   },
@@ -1162,13 +2295,30 @@
     "methodologyUri": "methodology://v19",
     "kind": "registry_package",
     "expect": {
-      "textIncludes": ["neutral_substrate_available_to_claude_chatgpt_copilot_gemini_agentforce_and_direct_agents"],
+      "textIncludes": [
+        "neutral_substrate_available_to_claude_chatgpt_copilot_gemini_agentforce_and_direct_agents"
+      ],
       "fields": [
-        { "path": "clientStorePackageIds", "includes": "claude_connector_directory" },
-        { "path": "clientStorePackageIds", "includes": "chatgpt_apps_directory" },
-        { "path": "clientStorePackageIds", "includes": "microsoft_agent_store" },
-        { "path": "clientStorePackageIds", "includes": "salesforce_agentexchange" },
-        { "path": "clientStorePackageIds", "includes": "google_agent_gallery" }
+        {
+          "path": "clientStorePackageIds",
+          "includes": "claude_connector_directory"
+        },
+        {
+          "path": "clientStorePackageIds",
+          "includes": "chatgpt_apps_directory"
+        },
+        {
+          "path": "clientStorePackageIds",
+          "includes": "microsoft_agent_store"
+        },
+        {
+          "path": "clientStorePackageIds",
+          "includes": "salesforce_agentexchange"
+        },
+        {
+          "path": "clientStorePackageIds",
+          "includes": "google_agent_gallery"
+        }
       ]
     }
   },
@@ -1179,14 +2329,36 @@
     "methodologyUri": "methodology://v19",
     "kind": "registry_package",
     "expect": {
-      "textIncludes": ["outputSchema", "recurring Deal OS", "no wallet, success fee, deal-value fee, or paid human-service referral"],
+      "textIncludes": [
+        "outputSchema",
+        "recurring Deal OS",
+        "no wallet, success fee, deal-value fee, or paid human-service referral"
+      ],
       "fields": [
-        { "path": "semanticToolMetadataChecklist.0", "includes": "working capital peg" },
-        { "path": "semanticToolMetadataChecklist.1", "includes": "The Diligence Standard" },
-        { "path": "semanticToolMetadataChecklist.2", "includes": "outputSchema" },
-        { "path": "semanticToolMetadataChecklist.3", "includes": "no-success-fee" },
-        { "path": "semanticToolMetadataChecklist.4", "includes": "recurring Deal OS" },
-        { "path": "submissionOrder", "includes": "enterprise_allow_lists" }
+        {
+          "path": "semanticToolMetadataChecklist.0",
+          "includes": "working capital peg"
+        },
+        {
+          "path": "semanticToolMetadataChecklist.1",
+          "includes": "The Diligence Standard"
+        },
+        {
+          "path": "semanticToolMetadataChecklist.2",
+          "includes": "outputSchema"
+        },
+        {
+          "path": "semanticToolMetadataChecklist.3",
+          "includes": "no-success-fee"
+        },
+        {
+          "path": "semanticToolMetadataChecklist.4",
+          "includes": "recurring Deal OS"
+        },
+        {
+          "path": "submissionOrder",
+          "includes": "enterprise_allow_lists"
+        }
       ]
     }
   },
@@ -1198,9 +2370,18 @@
     "kind": "line_inventory",
     "expect": {
       "fields": [
-        { "path": "statusCounts.human_approval_required", "min": 1 },
-        { "path": "tools.close_deal.lineStatus", "equals": "human_approval_required" },
-        { "path": "tools.close_deal.refusalBehavior", "equals": "stage_for_approval" }
+        {
+          "path": "statusCounts.human_approval_required",
+          "min": 1
+        },
+        {
+          "path": "tools.close_deal.lineStatus",
+          "equals": "human_approval_required"
+        },
+        {
+          "path": "tools.close_deal.refusalBehavior",
+          "equals": "stage_for_approval"
+        }
       ]
     }
   },
@@ -1212,9 +2393,18 @@
     "kind": "line_inventory",
     "expect": {
       "fields": [
-        { "path": "statusCounts.counsel_review_required", "min": 1 },
-        { "path": "tools.update_tax_position.lineStatus", "equals": "counsel_review_required" },
-        { "path": "tools.update_tax_position.refusalBehavior", "equals": "route_to_counsel" }
+        {
+          "path": "statusCounts.counsel_review_required",
+          "min": 1
+        },
+        {
+          "path": "tools.update_tax_position.lineStatus",
+          "equals": "counsel_review_required"
+        },
+        {
+          "path": "tools.update_tax_position.refusalBehavior",
+          "equals": "route_to_counsel"
+        }
       ]
     }
   },
@@ -1226,9 +2416,18 @@
     "kind": "line_inventory",
     "expect": {
       "fields": [
-        { "path": "statusCounts.enterprise_scope_required", "min": 1 },
-        { "path": "tools.query_admin_data.lineStatus", "equals": "enterprise_scope_required" },
-        { "path": "tools.query_admin_data.refusalBehavior", "equals": "require_enterprise_scope" }
+        {
+          "path": "statusCounts.enterprise_scope_required",
+          "min": 1
+        },
+        {
+          "path": "tools.query_admin_data.lineStatus",
+          "equals": "enterprise_scope_required"
+        },
+        {
+          "path": "tools.query_admin_data.refusalBehavior",
+          "equals": "require_enterprise_scope"
+        }
       ]
     }
   },
@@ -1240,71 +2439,266 @@
     "kind": "mcp_inventory",
     "expect": {
       "fields": [
-        { "path": "toolNames", "includes": "ingest_deal_payload" },
-        { "path": "toolNames", "includes": "update_deal_payload" },
-        { "path": "toolNames", "includes": "check_completeness" },
-        { "path": "toolNames", "includes": "get_definition_of_done" },
-        { "path": "toolNames", "includes": "assess_deal_entry" },
-        { "path": "toolNames", "includes": "introspect_capabilities" },
-        { "path": "toolNames", "includes": "describe_methodology" },
-        { "path": "toolNames", "includes": "estimate_deal_cost" },
-        { "path": "toolNames", "includes": "get_deal_runbook" },
-        { "path": "toolNames", "includes": "lookup_model_slot" },
-        { "path": "toolNames", "includes": "compose_deal_plan" },
-        { "path": "toolNames", "includes": "diff_deal_state" },
-        { "path": "toolNames", "includes": "compose_deal_package" },
-        { "path": "toolNames", "includes": "resume_deal" },
-        { "path": "toolNames", "includes": "compose_lifecycle_trace" },
-        { "path": "toolNames", "includes": "prepare_ioi_packet" },
-        { "path": "toolNames", "includes": "prepare_loi_packet" },
-        { "path": "toolNames", "includes": "compose_data_room_index" },
-        { "path": "toolNames", "includes": "prepare_diligence_request" },
-        { "path": "toolNames", "includes": "disclose_subset" },
-        { "path": "toolNames", "includes": "compose_document_draft" },
-        { "path": "toolNames", "includes": "prepare_negotiation_brief" },
-        { "path": "toolNames", "includes": "compose_close_readiness" },
-        { "path": "toolNames", "includes": "generate_funds_flow" },
-        { "path": "toolNames", "includes": "compose_pmi_plan" },
-        { "path": "toolsByName.ingest_deal_payload.description", "includes": "DealPayload" },
-        { "path": "toolsByName.ingest_deal_payload.description", "includes": "MissingInputContract" },
-        { "path": "toolsByName.ingest_deal_payload.description", "includes": "next_suggested_calls" },
-        { "path": "toolsByName.update_deal_payload.description", "includes": "recursive M&A lifecycle" },
-        { "path": "toolsByName.check_completeness.description", "includes": "definitions of done" },
-        { "path": "toolsByName.assess_deal_entry.description", "includes": "EV-only" },
-        { "path": "toolsByName.introspect_capabilities.description", "includes": "CapabilityCatalog" },
-        { "path": "toolsByName.introspect_capabilities.description", "includes": "next_suggested_calls" },
-        { "path": "toolsByName.describe_methodology.description", "includes": "The Diligence Standard" },
-        { "path": "toolsByName.estimate_deal_cost.description", "includes": "no success fee" },
-        { "path": "toolsByName.get_deal_runbook.description", "includes": "Deal OS runbook" },
-        { "path": "toolsByName.lookup_model_slot.description", "includes": "M101-M223" },
-        { "path": "toolsByName.compose_deal_plan.description", "includes": "full M&A lifecycle" },
-        { "path": "toolsByName.diff_deal_state.description", "includes": "DealStateDiff" },
-        { "path": "toolsByName.compose_deal_package.description", "includes": "DealPackage" },
-        { "path": "toolsByName.resume_deal.description", "includes": "iterative Deal OS work" },
-        { "path": "toolsByName.compose_lifecycle_trace.description", "includes": "LifecycleTrace" },
-        { "path": "toolsByName.prepare_ioi_packet.description", "includes": "IOIPacket" },
-        { "path": "toolsByName.prepare_loi_packet.description", "includes": "LOIPacket" },
-        { "path": "toolsByName.compose_data_room_index.description", "includes": "DataRoomIndex" },
-        { "path": "toolsByName.prepare_diligence_request.description", "includes": "DiligenceRequest" },
-        { "path": "toolsByName.disclose_subset.description", "includes": "DisclosureSubset" },
-        { "path": "toolsByName.compose_document_draft.description", "includes": "DocumentDraft" },
-        { "path": "toolsByName.prepare_negotiation_brief.description", "includes": "NegotiationBrief" },
-        { "path": "toolsByName.compose_close_readiness.description", "includes": "CloseReadiness" },
-        { "path": "toolsByName.generate_funds_flow.description", "includes": "FundsFlow" },
-        { "path": "toolsByName.compose_pmi_plan.description", "includes": "PMIPlan" },
-        { "path": "toolNames", "includes": "compose_model_stack" },
-        { "path": "toolsByName.compose_model_stack.description", "includes": "G28" },
-        { "path": "toolsByName.compose_model_stack.description", "includes": "G29" },
-        { "path": "toolsByName.compose_model_stack.description", "includes": "G30" },
-        { "path": "toolsByName.compose_model_stack.description", "includes": "M101-M223" },
-        { "path": "toolNames", "includes": "run_model_iteration" },
-        { "path": "toolNames", "includes": "list_model_executions" },
-        { "path": "toolNames", "includes": "generate_output_doc" },
-        { "path": "toolsByName.run_model_iteration.description", "includes": "Iteratively run" },
-        { "path": "toolsByName.run_model_iteration.description", "includes": "parent output hash" },
-        { "path": "toolsByName.list_model_executions.description", "includes": "freshness" },
-        { "path": "toolsByName.generate_output_doc.description", "includes": "Term Sheet" },
-        { "path": "toolsByName.generate_output_doc.description", "includes": "current deal state and model lineage" }
+        {
+          "path": "toolNames",
+          "includes": "ingest_deal_payload"
+        },
+        {
+          "path": "toolNames",
+          "includes": "update_deal_payload"
+        },
+        {
+          "path": "toolNames",
+          "includes": "check_completeness"
+        },
+        {
+          "path": "toolNames",
+          "includes": "get_definition_of_done"
+        },
+        {
+          "path": "toolNames",
+          "includes": "assess_deal_entry"
+        },
+        {
+          "path": "toolNames",
+          "includes": "introspect_capabilities"
+        },
+        {
+          "path": "toolNames",
+          "includes": "describe_methodology"
+        },
+        {
+          "path": "toolNames",
+          "includes": "estimate_deal_cost"
+        },
+        {
+          "path": "toolNames",
+          "includes": "get_deal_runbook"
+        },
+        {
+          "path": "toolNames",
+          "includes": "lookup_model_slot"
+        },
+        {
+          "path": "toolNames",
+          "includes": "compose_deal_plan"
+        },
+        {
+          "path": "toolNames",
+          "includes": "diff_deal_state"
+        },
+        {
+          "path": "toolNames",
+          "includes": "compose_deal_package"
+        },
+        {
+          "path": "toolNames",
+          "includes": "resume_deal"
+        },
+        {
+          "path": "toolNames",
+          "includes": "compose_lifecycle_trace"
+        },
+        {
+          "path": "toolNames",
+          "includes": "prepare_ioi_packet"
+        },
+        {
+          "path": "toolNames",
+          "includes": "prepare_loi_packet"
+        },
+        {
+          "path": "toolNames",
+          "includes": "compose_data_room_index"
+        },
+        {
+          "path": "toolNames",
+          "includes": "prepare_diligence_request"
+        },
+        {
+          "path": "toolNames",
+          "includes": "disclose_subset"
+        },
+        {
+          "path": "toolNames",
+          "includes": "compose_document_draft"
+        },
+        {
+          "path": "toolNames",
+          "includes": "prepare_negotiation_brief"
+        },
+        {
+          "path": "toolNames",
+          "includes": "compose_close_readiness"
+        },
+        {
+          "path": "toolNames",
+          "includes": "generate_funds_flow"
+        },
+        {
+          "path": "toolNames",
+          "includes": "compose_pmi_plan"
+        },
+        {
+          "path": "toolsByName.ingest_deal_payload.description",
+          "includes": "DealPayload"
+        },
+        {
+          "path": "toolsByName.ingest_deal_payload.description",
+          "includes": "MissingInputContract"
+        },
+        {
+          "path": "toolsByName.ingest_deal_payload.description",
+          "includes": "next_suggested_calls"
+        },
+        {
+          "path": "toolsByName.update_deal_payload.description",
+          "includes": "recursive M&A lifecycle"
+        },
+        {
+          "path": "toolsByName.check_completeness.description",
+          "includes": "definitions of done"
+        },
+        {
+          "path": "toolsByName.assess_deal_entry.description",
+          "includes": "EV-only"
+        },
+        {
+          "path": "toolsByName.introspect_capabilities.description",
+          "includes": "CapabilityCatalog"
+        },
+        {
+          "path": "toolsByName.introspect_capabilities.description",
+          "includes": "next_suggested_calls"
+        },
+        {
+          "path": "toolsByName.describe_methodology.description",
+          "includes": "The Diligence Standard"
+        },
+        {
+          "path": "toolsByName.estimate_deal_cost.description",
+          "includes": "no success fee"
+        },
+        {
+          "path": "toolsByName.get_deal_runbook.description",
+          "includes": "Deal OS runbook"
+        },
+        {
+          "path": "toolsByName.lookup_model_slot.description",
+          "includes": "M101-M223"
+        },
+        {
+          "path": "toolsByName.compose_deal_plan.description",
+          "includes": "full M&A lifecycle"
+        },
+        {
+          "path": "toolsByName.diff_deal_state.description",
+          "includes": "DealStateDiff"
+        },
+        {
+          "path": "toolsByName.compose_deal_package.description",
+          "includes": "DealPackage"
+        },
+        {
+          "path": "toolsByName.resume_deal.description",
+          "includes": "iterative Deal OS work"
+        },
+        {
+          "path": "toolsByName.compose_lifecycle_trace.description",
+          "includes": "LifecycleTrace"
+        },
+        {
+          "path": "toolsByName.prepare_ioi_packet.description",
+          "includes": "IOIPacket"
+        },
+        {
+          "path": "toolsByName.prepare_loi_packet.description",
+          "includes": "LOIPacket"
+        },
+        {
+          "path": "toolsByName.compose_data_room_index.description",
+          "includes": "DataRoomIndex"
+        },
+        {
+          "path": "toolsByName.prepare_diligence_request.description",
+          "includes": "DiligenceRequest"
+        },
+        {
+          "path": "toolsByName.disclose_subset.description",
+          "includes": "DisclosureSubset"
+        },
+        {
+          "path": "toolsByName.compose_document_draft.description",
+          "includes": "DocumentDraft"
+        },
+        {
+          "path": "toolsByName.prepare_negotiation_brief.description",
+          "includes": "NegotiationBrief"
+        },
+        {
+          "path": "toolsByName.compose_close_readiness.description",
+          "includes": "CloseReadiness"
+        },
+        {
+          "path": "toolsByName.generate_funds_flow.description",
+          "includes": "FundsFlow"
+        },
+        {
+          "path": "toolsByName.compose_pmi_plan.description",
+          "includes": "PMIPlan"
+        },
+        {
+          "path": "toolNames",
+          "includes": "compose_model_stack"
+        },
+        {
+          "path": "toolsByName.compose_model_stack.description",
+          "includes": "G28"
+        },
+        {
+          "path": "toolsByName.compose_model_stack.description",
+          "includes": "G29"
+        },
+        {
+          "path": "toolsByName.compose_model_stack.description",
+          "includes": "G30"
+        },
+        {
+          "path": "toolsByName.compose_model_stack.description",
+          "includes": "M101-M223"
+        },
+        {
+          "path": "toolNames",
+          "includes": "run_model_iteration"
+        },
+        {
+          "path": "toolNames",
+          "includes": "list_model_executions"
+        },
+        {
+          "path": "toolNames",
+          "includes": "generate_output_doc"
+        },
+        {
+          "path": "toolsByName.run_model_iteration.description",
+          "includes": "Iteratively run"
+        },
+        {
+          "path": "toolsByName.run_model_iteration.description",
+          "includes": "parent output hash"
+        },
+        {
+          "path": "toolsByName.list_model_executions.description",
+          "includes": "freshness"
+        },
+        {
+          "path": "toolsByName.generate_output_doc.description",
+          "includes": "Term Sheet"
+        },
+        {
+          "path": "toolsByName.generate_output_doc.description",
+          "includes": "current deal state and model lineage"
+        }
       ]
     }
   },
@@ -1316,9 +2710,18 @@
     "kind": "mcp_inventory",
     "expect": {
       "fields": [
-        { "path": "toolNames", "includes": "record_corpus_observation" },
-        { "path": "toolsByName.record_corpus_observation.description", "includes": "structured anonymized" },
-        { "path": "toolsByName.record_corpus_observation.description", "includes": "Raw document text and party identifiers are stripped" }
+        {
+          "path": "toolNames",
+          "includes": "record_corpus_observation"
+        },
+        {
+          "path": "toolsByName.record_corpus_observation.description",
+          "includes": "structured anonymized"
+        },
+        {
+          "path": "toolsByName.record_corpus_observation.description",
+          "includes": "Raw document text and party identifiers are stripped"
+        }
       ]
     }
   },
@@ -1329,10 +2732,19 @@
     "methodologyUri": "methodology://v19",
     "kind": "pass_through_surface",
     "expect": {
-      "textIncludes": ["PASS.HUMAN_SPECIALIST_DIRECTORY", "free_editorial_directory"],
+      "textIncludes": [
+        "PASS.HUMAN_SPECIALIST_DIRECTORY",
+        "free_editorial_directory"
+      ],
       "fields": [
-        { "path": "marginPolicy.humanReferralCompensationAllowed", "equals": false },
-        { "path": "prohibited", "includes": "Success fee for routing a user or deal to a human service provider" }
+        {
+          "path": "marginPolicy.humanReferralCompensationAllowed",
+          "equals": false
+        },
+        {
+          "path": "prohibited",
+          "includes": "Success fee for routing a user or deal to a human service provider"
+        }
       ]
     }
   },
@@ -1344,10 +2756,22 @@
     "kind": "pass_through_surface",
     "expect": {
       "fields": [
-        { "path": "marginPolicy.mode", "equals": "cost_plus_fixed" },
-        { "path": "marginPolicy.dealOutcomeTied", "equals": false },
-        { "path": "allowed", "includes": "Data/software API calls billed per call regardless of outcome" },
-        { "path": "dependentModelSlots", "includes": "M221" }
+        {
+          "path": "marginPolicy.mode",
+          "equals": "cost_plus_fixed"
+        },
+        {
+          "path": "marginPolicy.dealOutcomeTied",
+          "equals": false
+        },
+        {
+          "path": "allowed",
+          "includes": "Data/software API calls billed per call regardless of outcome"
+        },
+        {
+          "path": "dependentModelSlots",
+          "includes": "M221"
+        }
       ]
     }
   },
@@ -1358,21 +2782,65 @@
     "methodologyUri": "methodology://v19",
     "kind": "substrate_architecture",
     "expect": {
-      "textIncludes": ["DealPayload", "CompletenessSpec", "DealPackage", "BestVehicleBlock"],
+      "textIncludes": [
+        "DealPayload",
+        "CompletenessSpec",
+        "DealPackage",
+        "BestVehicleBlock"
+      ],
       "fields": [
-        { "path": "primitiveCount", "equals": 8 },
-        { "path": "newMcpToolCount", "equals": 36 },
-        { "path": "newMcpTools", "includes": "compose_deal_package" },
-        { "path": "newMcpTools", "includes": "disclose_subset" },
-        { "path": "newMcpTools", "includes": "compose_data_room_index" },
-        { "path": "newMcpTools", "includes": "compose_document_draft" },
-        { "path": "newMcpTools", "includes": "compose_close_readiness" },
-        { "path": "workstreamsById.WS1.mcpTools", "includes": "ingest_deal_payload" },
-        { "path": "workstreamsById.WS4.mcpTools", "includes": "compose_deal_package" },
-        { "path": "workstreamsById.WS4.mcpTools", "includes": "finalize_deal_package" },
-        { "path": "workstreamsById.WS6.mcpTools", "includes": "compose_data_room_index" },
-        { "path": "workstreamsById.WS6.mcpTools", "includes": "compose_document_draft" },
-        { "path": "workstreamsById.WS5.mcpTools", "includes": "compute_best_vehicle" }
+        {
+          "path": "primitiveCount",
+          "equals": 8
+        },
+        {
+          "path": "newMcpToolCount",
+          "equals": 36
+        },
+        {
+          "path": "newMcpTools",
+          "includes": "compose_deal_package"
+        },
+        {
+          "path": "newMcpTools",
+          "includes": "disclose_subset"
+        },
+        {
+          "path": "newMcpTools",
+          "includes": "compose_data_room_index"
+        },
+        {
+          "path": "newMcpTools",
+          "includes": "compose_document_draft"
+        },
+        {
+          "path": "newMcpTools",
+          "includes": "compose_close_readiness"
+        },
+        {
+          "path": "workstreamsById.WS1.mcpTools",
+          "includes": "ingest_deal_payload"
+        },
+        {
+          "path": "workstreamsById.WS4.mcpTools",
+          "includes": "compose_deal_package"
+        },
+        {
+          "path": "workstreamsById.WS4.mcpTools",
+          "includes": "finalize_deal_package"
+        },
+        {
+          "path": "workstreamsById.WS6.mcpTools",
+          "includes": "compose_data_room_index"
+        },
+        {
+          "path": "workstreamsById.WS6.mcpTools",
+          "includes": "compose_document_draft"
+        },
+        {
+          "path": "workstreamsById.WS5.mcpTools",
+          "includes": "compute_best_vehicle"
+        }
       ]
     }
   },
@@ -1384,11 +2852,26 @@
     "kind": "substrate_architecture",
     "expect": {
       "fields": [
-        { "path": "routingAxes", "includes": "journey" },
-        { "path": "routingAxes", "includes": "distress_posture" },
-        { "path": "routingAxes", "includes": "asset_class" },
-        { "path": "routingAxes", "includes": "tax_classification" },
-        { "path": "workstreamsById.WS1.doneCondition", "includes": "activated gates/models" }
+        {
+          "path": "routingAxes",
+          "includes": "journey"
+        },
+        {
+          "path": "routingAxes",
+          "includes": "distress_posture"
+        },
+        {
+          "path": "routingAxes",
+          "includes": "asset_class"
+        },
+        {
+          "path": "routingAxes",
+          "includes": "tax_classification"
+        },
+        {
+          "path": "workstreamsById.WS1.doneCondition",
+          "includes": "activated gates/models"
+        }
       ]
     }
   },
@@ -1400,12 +2883,30 @@
     "kind": "substrate_architecture",
     "expect": {
       "fields": [
-        { "path": "universalResponseFields", "includes": "next_suggested_calls" },
-        { "path": "universalResponseFields", "includes": "state_hash_after" },
-        { "path": "universalResponseFields", "includes": "the_line_invariant" },
-        { "path": "workstreamsById.WS7.objectTypes", "includes": "MCPCallHint" },
-        { "path": "workstreamsById.WS7.mcpTools", "includes": "get_deal_runbook" },
-        { "path": "workstreamsById.WS7.mcpTools", "includes": "lookup_model_slot" }
+        {
+          "path": "universalResponseFields",
+          "includes": "next_suggested_calls"
+        },
+        {
+          "path": "universalResponseFields",
+          "includes": "state_hash_after"
+        },
+        {
+          "path": "universalResponseFields",
+          "includes": "the_line_invariant"
+        },
+        {
+          "path": "workstreamsById.WS7.objectTypes",
+          "includes": "MCPCallHint"
+        },
+        {
+          "path": "workstreamsById.WS7.mcpTools",
+          "includes": "get_deal_runbook"
+        },
+        {
+          "path": "workstreamsById.WS7.mcpTools",
+          "includes": "lookup_model_slot"
+        }
       ]
     }
   },
@@ -1416,26 +2917,84 @@
     "methodologyUri": "methodology://v19",
     "kind": "manifest",
     "expect": {
-      "textIncludes": ["substrateArchitectureSurface", "DealPayload", "next_suggested_calls"],
+      "textIncludes": [
+        "substrateArchitectureSurface",
+        "DealPayload",
+        "next_suggested_calls"
+      ],
       "fields": [
-        { "path": "endpoints.substrateArchitecture", "equals": "/api/definitive/substrate-architecture" },
-        { "path": "access.publicDiscovery", "includes": "/api/definitive/substrate-architecture" },
-        { "path": "substrateArchitectureSurface.primitiveCount", "equals": 8 },
-        { "path": "substrateArchitectureSurface.newMcpToolCount", "equals": 36 },
-        { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DealState" },
-        { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DealStateDiff" },
-        { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "LifecycleTrace" },
-        { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "IOIPacket" },
-        { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "LOIPacket" },
-        { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DataRoomIndex" },
-        { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DiligenceRequest" },
-        { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DisclosureSubset" },
-        { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DocumentDraft" },
-        { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "NegotiationBrief" },
-        { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "CloseReadiness" },
-        { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "FundsFlow" },
-        { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "PMIPlan" },
-        { "path": "substrateArchitectureSurface.schemaRegistry.toolSchemaMap.ingest_deal_payload.output", "includes": "MissingInputContract" }
+        {
+          "path": "endpoints.substrateArchitecture",
+          "equals": "/api/definitive/substrate-architecture"
+        },
+        {
+          "path": "access.publicDiscovery",
+          "includes": "/api/definitive/substrate-architecture"
+        },
+        {
+          "path": "substrateArchitectureSurface.primitiveCount",
+          "equals": 8
+        },
+        {
+          "path": "substrateArchitectureSurface.newMcpToolCount",
+          "equals": 36
+        },
+        {
+          "path": "substrateArchitectureSurface.schemaRegistry.schemaNames",
+          "includes": "DealState"
+        },
+        {
+          "path": "substrateArchitectureSurface.schemaRegistry.schemaNames",
+          "includes": "DealStateDiff"
+        },
+        {
+          "path": "substrateArchitectureSurface.schemaRegistry.schemaNames",
+          "includes": "LifecycleTrace"
+        },
+        {
+          "path": "substrateArchitectureSurface.schemaRegistry.schemaNames",
+          "includes": "IOIPacket"
+        },
+        {
+          "path": "substrateArchitectureSurface.schemaRegistry.schemaNames",
+          "includes": "LOIPacket"
+        },
+        {
+          "path": "substrateArchitectureSurface.schemaRegistry.schemaNames",
+          "includes": "DataRoomIndex"
+        },
+        {
+          "path": "substrateArchitectureSurface.schemaRegistry.schemaNames",
+          "includes": "DiligenceRequest"
+        },
+        {
+          "path": "substrateArchitectureSurface.schemaRegistry.schemaNames",
+          "includes": "DisclosureSubset"
+        },
+        {
+          "path": "substrateArchitectureSurface.schemaRegistry.schemaNames",
+          "includes": "DocumentDraft"
+        },
+        {
+          "path": "substrateArchitectureSurface.schemaRegistry.schemaNames",
+          "includes": "NegotiationBrief"
+        },
+        {
+          "path": "substrateArchitectureSurface.schemaRegistry.schemaNames",
+          "includes": "CloseReadiness"
+        },
+        {
+          "path": "substrateArchitectureSurface.schemaRegistry.schemaNames",
+          "includes": "FundsFlow"
+        },
+        {
+          "path": "substrateArchitectureSurface.schemaRegistry.schemaNames",
+          "includes": "PMIPlan"
+        },
+        {
+          "path": "substrateArchitectureSurface.schemaRegistry.toolSchemaMap.ingest_deal_payload.output",
+          "includes": "MissingInputContract"
+        }
       ]
     }
   },
@@ -1446,11 +3005,24 @@
     "methodologyUri": "methodology://v19",
     "kind": "substrate_architecture",
     "expect": {
-      "textIncludes": ["Deal OS", "humans and agents", "same methodology-pinned DealState"],
+      "textIncludes": [
+        "Deal OS",
+        "humans and agents",
+        "same methodology-pinned DealState"
+      ],
       "fields": [
-        { "path": "agentOperatingDoctrine.productDoctrine", "includes": "Deal OS" },
-        { "path": "agentOperatingDoctrine.productDoctrine", "includes": "same methodology-pinned DealState" },
-        { "path": "agentOperatingDoctrine.valuePreservation", "includes": "Every recursive step should add reusable DealState" }
+        {
+          "path": "agentOperatingDoctrine.productDoctrine",
+          "includes": "Deal OS"
+        },
+        {
+          "path": "agentOperatingDoctrine.productDoctrine",
+          "includes": "same methodology-pinned DealState"
+        },
+        {
+          "path": "agentOperatingDoctrine.valuePreservation",
+          "includes": "Every recursive step should add reusable DealState"
+        }
       ]
     }
   },
@@ -1461,12 +3033,28 @@
     "methodologyUri": "methodology://v19",
     "kind": "substrate_architecture",
     "expect": {
-      "textIncludes": ["Agents are not rejected because they lack complete information", "MissingInputContract", "next_suggested_calls"],
+      "textIncludes": [
+        "Agents are not rejected because they lack complete information",
+        "MissingInputContract",
+        "next_suggested_calls"
+      ],
       "fields": [
-        { "path": "agentOperatingDoctrine.noRejectionContract", "includes": "Agents are not rejected" },
-        { "path": "agentOperatingDoctrine.noRejectionContract", "includes": "MissingInputContract" },
-        { "path": "agentOperatingDoctrine.recursiveWorkLoop", "includes": "update DealState" },
-        { "path": "workstreamsById.WS1.doneCondition", "includes": "without choosing a menu mode or being rejected for incompleteness" }
+        {
+          "path": "agentOperatingDoctrine.noRejectionContract",
+          "includes": "Agents are not rejected"
+        },
+        {
+          "path": "agentOperatingDoctrine.noRejectionContract",
+          "includes": "MissingInputContract"
+        },
+        {
+          "path": "agentOperatingDoctrine.recursiveWorkLoop",
+          "includes": "update DealState"
+        },
+        {
+          "path": "workstreamsById.WS1.doneCondition",
+          "includes": "without choosing a menu mode or being rejected for incompleteness"
+        }
       ]
     }
   },
@@ -1478,13 +3066,34 @@
     "kind": "substrate_architecture",
     "expect": {
       "fields": [
-        { "path": "dealOsLifecycleStageIds", "includes": "intake" },
-        { "path": "dealOsLifecycleStageIds", "includes": "ioi" },
-        { "path": "dealOsLifecycleStageIds", "includes": "loi" },
-        { "path": "dealOsLifecycleStageIds", "includes": "confirmatory_diligence" },
-        { "path": "dealOsLifecycleStageIds", "includes": "model_negotiation" },
-        { "path": "dealOsLifecycleStageIds", "includes": "close_pmi" },
-        { "path": "agentOperatingDoctrine.recursiveWorkLoop", "includes": "IOI, LOI, diligence, modeling, negotiation prep, close, and PMI" }
+        {
+          "path": "dealOsLifecycleStageIds",
+          "includes": "intake"
+        },
+        {
+          "path": "dealOsLifecycleStageIds",
+          "includes": "ioi"
+        },
+        {
+          "path": "dealOsLifecycleStageIds",
+          "includes": "loi"
+        },
+        {
+          "path": "dealOsLifecycleStageIds",
+          "includes": "confirmatory_diligence"
+        },
+        {
+          "path": "dealOsLifecycleStageIds",
+          "includes": "model_negotiation"
+        },
+        {
+          "path": "dealOsLifecycleStageIds",
+          "includes": "close_pmi"
+        },
+        {
+          "path": "agentOperatingDoctrine.recursiveWorkLoop",
+          "includes": "IOI, LOI, diligence, modeling, negotiation prep, close, and PMI"
+        }
       ]
     }
   },
@@ -1495,12 +3104,29 @@
     "methodologyUri": "methodology://v19",
     "kind": "substrate_architecture",
     "expect": {
-      "textIncludes": ["home for iterative deal work", "documents", "data rooms", "same DealState"],
+      "textIncludes": [
+        "home for iterative deal work",
+        "documents",
+        "data rooms",
+        "same DealState"
+      ],
       "fields": [
-        { "path": "agentOperatingDoctrine.homeContract", "includes": "home for iterative deal work" },
-        { "path": "agentOperatingDoctrine.homeContract", "includes": "data rooms" },
-        { "path": "agentOperatingDoctrine.homeContract", "includes": "documents" },
-        { "path": "agentOperatingDoctrine.bidirectionalHandoff", "includes": "At each iteration the agent can take portable information back" }
+        {
+          "path": "agentOperatingDoctrine.homeContract",
+          "includes": "home for iterative deal work"
+        },
+        {
+          "path": "agentOperatingDoctrine.homeContract",
+          "includes": "data rooms"
+        },
+        {
+          "path": "agentOperatingDoctrine.homeContract",
+          "includes": "documents"
+        },
+        {
+          "path": "agentOperatingDoctrine.bidirectionalHandoff",
+          "includes": "At each iteration the agent can take portable information back"
+        }
       ]
     }
   },
@@ -1512,14 +3138,38 @@
     "kind": "substrate_architecture",
     "expect": {
       "fields": [
-        { "path": "dealOsWorkSurfaceIds", "includes": "today" },
-        { "path": "dealOsWorkSurfaceIds", "includes": "pipeline" },
-        { "path": "dealOsWorkSurfaceIds", "includes": "files" },
-        { "path": "dealOsWorkSurfaceIds", "includes": "data_room" },
-        { "path": "dealOsWorkSurfaceIds", "includes": "studio" },
-        { "path": "dealOsWorkSurfacesById.data_room.portableOutputs", "includes": "DataRoomIndex" },
-        { "path": "dealOsWorkSurfacesById.data_room.portableOutputs", "includes": "DisclosureSubset" },
-        { "path": "dealOsWorkSurfacesById.studio.portableOutputs", "includes": "DocumentDraft" }
+        {
+          "path": "dealOsWorkSurfaceIds",
+          "includes": "today"
+        },
+        {
+          "path": "dealOsWorkSurfaceIds",
+          "includes": "pipeline"
+        },
+        {
+          "path": "dealOsWorkSurfaceIds",
+          "includes": "files"
+        },
+        {
+          "path": "dealOsWorkSurfaceIds",
+          "includes": "data_room"
+        },
+        {
+          "path": "dealOsWorkSurfaceIds",
+          "includes": "studio"
+        },
+        {
+          "path": "dealOsWorkSurfacesById.data_room.portableOutputs",
+          "includes": "DataRoomIndex"
+        },
+        {
+          "path": "dealOsWorkSurfacesById.data_room.portableOutputs",
+          "includes": "DisclosureSubset"
+        },
+        {
+          "path": "dealOsWorkSurfacesById.studio.portableOutputs",
+          "includes": "DocumentDraft"
+        }
       ]
     }
   },
@@ -1531,14 +3181,38 @@
     "kind": "substrate_architecture",
     "expect": {
       "fields": [
-        { "path": "agentTakeBackArtifacts", "includes": "DealStateDiff" },
-        { "path": "agentTakeBackArtifacts", "includes": "CompletenessReport" },
-        { "path": "agentTakeBackArtifacts", "includes": "DataRoomIndex" },
-        { "path": "agentTakeBackArtifacts", "includes": "DisclosureSubset" },
-        { "path": "agentTakeBackArtifacts", "includes": "DocumentDraft" },
-        { "path": "agentTakeBackArtifacts", "includes": "AuditPacket" },
-        { "path": "workstreamsById.WS6.primitives", "includes": "DocumentDraft" },
-        { "path": "workstreamsById.WS6.primitives", "includes": "DataRoomIndex" }
+        {
+          "path": "agentTakeBackArtifacts",
+          "includes": "DealStateDiff"
+        },
+        {
+          "path": "agentTakeBackArtifacts",
+          "includes": "CompletenessReport"
+        },
+        {
+          "path": "agentTakeBackArtifacts",
+          "includes": "DataRoomIndex"
+        },
+        {
+          "path": "agentTakeBackArtifacts",
+          "includes": "DisclosureSubset"
+        },
+        {
+          "path": "agentTakeBackArtifacts",
+          "includes": "DocumentDraft"
+        },
+        {
+          "path": "agentTakeBackArtifacts",
+          "includes": "AuditPacket"
+        },
+        {
+          "path": "workstreamsById.WS6.primitives",
+          "includes": "DocumentDraft"
+        },
+        {
+          "path": "workstreamsById.WS6.primitives",
+          "includes": "DataRoomIndex"
+        }
       ]
     }
   },
@@ -1549,14 +3223,36 @@
     "methodologyUri": "methodology://v19",
     "kind": "substrate_architecture",
     "expect": {
-      "textIncludes": ["well-known", "canonical smbx-ai/diligence namespace", "enterprise allow-list"],
+      "textIncludes": [
+        "well-known",
+        "canonical smbx-ai/diligence namespace",
+        "enterprise allow-list"
+      ],
       "fields": [
-        { "path": "agentDiscoverabilityLayerIds", "includes": "canonical_registry" },
-        { "path": "agentDiscoverabilityLayerIds", "includes": "directory_layer" },
-        { "path": "agentDiscoverabilityLayerIds", "includes": "well_known_discovery" },
-        { "path": "agentDiscoverabilityLayerIds", "includes": "client_app_stores" },
-        { "path": "agentDiscoverabilityLayerIds", "includes": "enterprise_allow_lists" },
-        { "path": "agentDiscoverabilityLayersById.well_known_discovery.requiredSurface", "includes": "/.well-known/mcp/server-card.json" }
+        {
+          "path": "agentDiscoverabilityLayerIds",
+          "includes": "canonical_registry"
+        },
+        {
+          "path": "agentDiscoverabilityLayerIds",
+          "includes": "directory_layer"
+        },
+        {
+          "path": "agentDiscoverabilityLayerIds",
+          "includes": "well_known_discovery"
+        },
+        {
+          "path": "agentDiscoverabilityLayerIds",
+          "includes": "client_app_stores"
+        },
+        {
+          "path": "agentDiscoverabilityLayerIds",
+          "includes": "enterprise_allow_lists"
+        },
+        {
+          "path": "agentDiscoverabilityLayersById.well_known_discovery.requiredSurface",
+          "includes": "/.well-known/mcp/server-card.json"
+        }
       ]
     }
   },
@@ -1567,15 +3263,41 @@
     "methodologyUri": "methodology://v19",
     "kind": "substrate_architecture",
     "expect": {
-      "textIncludes": ["working capital peg", "Section 1060 allocation", "outputSchema", "THE LINE"],
+      "textIncludes": [
+        "working capital peg",
+        "Section 1060 allocation",
+        "outputSchema",
+        "THE LINE"
+      ],
       "fields": [
-        { "path": "agentDesirabilitySignalIds", "includes": "deterministic_outputs" },
-        { "path": "agentDesirabilitySignalIds", "includes": "structured_outputs" },
-        { "path": "agentDesirabilitySignalIds", "includes": "citation_provenance" },
-        { "path": "agentDesirabilitySignalIds", "includes": "semantic_tool_metadata" },
-        { "path": "agentDesirabilitySignalIds", "includes": "regulatory_neutrality" },
-        { "path": "toolMetadataDoctrine.namingConvention", "equals": "diligence_<phase>_<artifact>" },
-        { "path": "toolMetadataDoctrine.semanticKeywords", "includes": "indemnification cap and basket" }
+        {
+          "path": "agentDesirabilitySignalIds",
+          "includes": "deterministic_outputs"
+        },
+        {
+          "path": "agentDesirabilitySignalIds",
+          "includes": "structured_outputs"
+        },
+        {
+          "path": "agentDesirabilitySignalIds",
+          "includes": "citation_provenance"
+        },
+        {
+          "path": "agentDesirabilitySignalIds",
+          "includes": "semantic_tool_metadata"
+        },
+        {
+          "path": "agentDesirabilitySignalIds",
+          "includes": "regulatory_neutrality"
+        },
+        {
+          "path": "toolMetadataDoctrine.namingConvention",
+          "equals": "diligence_<phase>_<artifact>"
+        },
+        {
+          "path": "toolMetadataDoctrine.semanticKeywords",
+          "includes": "indemnification cap and basket"
+        }
       ]
     }
   },
@@ -1586,13 +3308,32 @@
     "methodologyUri": "methodology://v19",
     "kind": "substrate_architecture",
     "expect": {
-      "textIncludes": ["The Diligence Standard", "DEFINITIVE-conformant", "open conformance suite"],
+      "textIncludes": [
+        "The Diligence Standard",
+        "DEFINITIVE-conformant",
+        "open conformance suite"
+      ],
       "fields": [
-        { "path": "publishedStandardDoctrine.name", "equals": "The Diligence Standard" },
-        { "path": "publishedStandardDoctrine.methodology", "equals": "DEFINITIVE" },
-        { "path": "publishedStandardDoctrine.requiredPublicArtifacts", "includes": "server-card metadata" },
-        { "path": "publishedStandardDoctrine.requiredPublicArtifacts", "includes": "THE LINE declaration" },
-        { "path": "marketplaceBuildOrder", "includes": "Build /.well-known/mcp/server-card.json and /.well-known/mcp over the same DEFINITIVE manifest, not a parallel metadata file." }
+        {
+          "path": "publishedStandardDoctrine.name",
+          "equals": "The Diligence Standard"
+        },
+        {
+          "path": "publishedStandardDoctrine.methodology",
+          "equals": "DEFINITIVE"
+        },
+        {
+          "path": "publishedStandardDoctrine.requiredPublicArtifacts",
+          "includes": "server-card metadata"
+        },
+        {
+          "path": "publishedStandardDoctrine.requiredPublicArtifacts",
+          "includes": "THE LINE declaration"
+        },
+        {
+          "path": "marketplaceBuildOrder",
+          "includes": "Build /.well-known/mcp/server-card.json and /.well-known/mcp over the same DEFINITIVE manifest, not a parallel metadata file."
+        }
       ]
     }
   },
@@ -1603,17 +3344,48 @@
     "methodologyUri": "methodology://v19",
     "kind": "mcp_server_card",
     "expect": {
-      "textIncludes": ["working capital peg", "recursive deal-state work", "The Diligence Standard"],
+      "textIncludes": [
+        "working capital peg",
+        "recursive deal-state work",
+        "The Diligence Standard"
+      ],
       "fields": [
-        { "path": "name", "equals": "smbx-ai/diligence" },
-        { "path": "protocolVersion", "equals": "2025-11-25" },
-        { "path": "serverUrl", "equals": "https://smbx.ai/mcp" },
-        { "path": "serverInfo.canonicalStandard", "equals": "The Diligence Standard" },
-        { "path": "transport.type", "equals": "streamable-http" },
-        { "path": "transport.endpoints.mcp", "equals": "https://smbx.ai/mcp" },
-        { "path": "transport.endpoints.serverCard", "equals": "https://smbx.ai/.well-known/mcp/server-card.json" },
-        { "path": "transport.endpoints.schemaRegistry", "equals": "https://smbx.ai/api/definitive/schemas" },
-        { "path": "definitive.registryPackage", "equals": "https://smbx.ai/api/definitive/registry-package" }
+        {
+          "path": "name",
+          "equals": "smbx-ai/diligence"
+        },
+        {
+          "path": "protocolVersion",
+          "equals": "2025-11-25"
+        },
+        {
+          "path": "serverUrl",
+          "equals": "https://smbx.ai/mcp"
+        },
+        {
+          "path": "serverInfo.canonicalStandard",
+          "equals": "The Diligence Standard"
+        },
+        {
+          "path": "transport.type",
+          "equals": "streamable-http"
+        },
+        {
+          "path": "transport.endpoints.mcp",
+          "equals": "https://smbx.ai/mcp"
+        },
+        {
+          "path": "transport.endpoints.serverCard",
+          "equals": "https://smbx.ai/.well-known/mcp/server-card.json"
+        },
+        {
+          "path": "transport.endpoints.schemaRegistry",
+          "equals": "https://smbx.ai/api/definitive/schemas"
+        },
+        {
+          "path": "definitive.registryPackage",
+          "equals": "https://smbx.ai/api/definitive/registry-package"
+        }
       ]
     }
   },
@@ -1625,20 +3397,62 @@
     "kind": "mcp_server_card",
     "expect": {
       "fields": [
-        { "path": "toolNames", "includes": "ingest_deal_payload" },
-        { "path": "toolNames", "includes": "resume_deal" },
-        { "path": "toolNames", "includes": "compose_document_draft" },
-        { "path": "toolNames", "includes": "run_model_iteration" },
-        { "path": "toolNames", "includes": "generate_output_doc" },
-        { "path": "toolsByName.ingest_deal_payload.structuredContentSchemas.output", "includes": "DealState" },
-        { "path": "toolsByName.resume_deal.structuredContentSchemas.takeBack", "includes": "DealPackage" },
-        { "path": "toolsByName.compose_document_draft.structuredContentSchemas.output", "includes": "DocumentDraft" },
-        { "path": "toolsByName.run_model_iteration.structuredContentSchemas.output", "includes": "ModelOutput" },
-        { "path": "toolsByName.run_model_iteration.structuredContentSchemas.takeBack", "includes": "OutputHash" },
-        { "path": "toolsByName.generate_output_doc.structuredContentSchemas.output", "includes": "DocumentDraft" },
-        { "path": "toolsByName.generate_output_doc.structuredContentSchemas.takeBack", "includes": "ModelOutput" },
-        { "path": "toolsByName.compose_close_readiness.structuredContentSchemas.takeBack", "includes": "PMIPlan" },
-        { "path": "toolsByName.ingest_deal_payload.outputSchema.required", "includes": "methodologyVersion" }
+        {
+          "path": "toolNames",
+          "includes": "ingest_deal_payload"
+        },
+        {
+          "path": "toolNames",
+          "includes": "resume_deal"
+        },
+        {
+          "path": "toolNames",
+          "includes": "compose_document_draft"
+        },
+        {
+          "path": "toolNames",
+          "includes": "run_model_iteration"
+        },
+        {
+          "path": "toolNames",
+          "includes": "generate_output_doc"
+        },
+        {
+          "path": "toolsByName.ingest_deal_payload.structuredContentSchemas.output",
+          "includes": "DealState"
+        },
+        {
+          "path": "toolsByName.resume_deal.structuredContentSchemas.takeBack",
+          "includes": "DealPackage"
+        },
+        {
+          "path": "toolsByName.compose_document_draft.structuredContentSchemas.output",
+          "includes": "DocumentDraft"
+        },
+        {
+          "path": "toolsByName.run_model_iteration.structuredContentSchemas.output",
+          "includes": "ModelOutput"
+        },
+        {
+          "path": "toolsByName.run_model_iteration.structuredContentSchemas.takeBack",
+          "includes": "OutputHash"
+        },
+        {
+          "path": "toolsByName.generate_output_doc.structuredContentSchemas.output",
+          "includes": "DocumentDraft"
+        },
+        {
+          "path": "toolsByName.generate_output_doc.structuredContentSchemas.takeBack",
+          "includes": "ModelOutput"
+        },
+        {
+          "path": "toolsByName.compose_close_readiness.structuredContentSchemas.takeBack",
+          "includes": "PMIPlan"
+        },
+        {
+          "path": "toolsByName.ingest_deal_payload.outputSchema.required",
+          "includes": "methodologyVersion"
+        }
       ]
     }
   },
@@ -1649,16 +3463,45 @@
     "methodologyUri": "methodology://v19",
     "kind": "mcp_server_card",
     "expect": {
-      "textIncludes": ["noSuccessFees", "noReferralCompensation", "human_approval_required", "counsel_review_required"],
+      "textIncludes": [
+        "noSuccessFees",
+        "noReferralCompensation",
+        "human_approval_required",
+        "counsel_review_required"
+      ],
       "fields": [
-        { "path": "security.executionRequiresAuthentication", "equals": true },
-        { "path": "security.noSuccessFees", "equals": true },
-        { "path": "security.noReferralCompensation", "equals": true },
-        { "path": "security.lineDeclaration", "includes": "does not advise" },
-        { "path": "toolsByName.close_deal.annotations.destructiveHint", "equals": true },
-        { "path": "toolsByName.close_deal.lineStatus", "equals": "human_approval_required" },
-        { "path": "toolsByName.update_tax_position.lineStatus", "equals": "counsel_review_required" },
-        { "path": "toolsByName.query_admin_data.lineStatus", "equals": "enterprise_scope_required" }
+        {
+          "path": "security.executionRequiresAuthentication",
+          "equals": true
+        },
+        {
+          "path": "security.noSuccessFees",
+          "equals": true
+        },
+        {
+          "path": "security.noReferralCompensation",
+          "equals": true
+        },
+        {
+          "path": "security.lineDeclaration",
+          "includes": "does not advise"
+        },
+        {
+          "path": "toolsByName.close_deal.annotations.destructiveHint",
+          "equals": true
+        },
+        {
+          "path": "toolsByName.close_deal.lineStatus",
+          "equals": "human_approval_required"
+        },
+        {
+          "path": "toolsByName.update_tax_position.lineStatus",
+          "equals": "counsel_review_required"
+        },
+        {
+          "path": "toolsByName.query_admin_data.lineStatus",
+          "equals": "enterprise_scope_required"
+        }
       ]
     }
   },
@@ -1670,13 +3513,34 @@
     "kind": "mcp_server_card",
     "expect": {
       "fields": [
-        { "path": "definitive.toolMetadataDoctrine.namingConvention", "equals": "diligence_<phase>_<artifact>" },
-        { "path": "definitive.toolMetadataDoctrine.semanticKeywords", "includes": "working capital peg" },
-        { "path": "definitive.toolMetadataDoctrine.semanticKeywords", "includes": "indemnification cap and basket" },
-        { "path": "definitive.agentDiscoverabilityLayers", "includes": "enterprise_allow_lists" },
-        { "path": "definitive.agentDesirabilitySignals", "includes": "semantic_tool_metadata" },
-        { "path": "definitive.agentDesirabilitySignals", "includes": "regulatory_neutrality" },
-        { "path": "definitive.publishedStandardDoctrine.name", "equals": "The Diligence Standard" }
+        {
+          "path": "definitive.toolMetadataDoctrine.namingConvention",
+          "equals": "diligence_<phase>_<artifact>"
+        },
+        {
+          "path": "definitive.toolMetadataDoctrine.semanticKeywords",
+          "includes": "working capital peg"
+        },
+        {
+          "path": "definitive.toolMetadataDoctrine.semanticKeywords",
+          "includes": "indemnification cap and basket"
+        },
+        {
+          "path": "definitive.agentDiscoverabilityLayers",
+          "includes": "enterprise_allow_lists"
+        },
+        {
+          "path": "definitive.agentDesirabilitySignals",
+          "includes": "semantic_tool_metadata"
+        },
+        {
+          "path": "definitive.agentDesirabilitySignals",
+          "includes": "regulatory_neutrality"
+        },
+        {
+          "path": "definitive.publishedStandardDoctrine.name",
+          "equals": "The Diligence Standard"
+        }
       ]
     }
   },
@@ -1688,18 +3552,54 @@
     "kind": "mcp_well_known",
     "expect": {
       "fields": [
-        { "path": "mcp_version", "equals": "2025-11-25" },
-        { "path": "server_card", "equals": "https://smbx.ai/.well-known/mcp/server-card.json" },
-        { "path": "publicEndpointTypes", "includes": "server-card" },
-        { "path": "publicEndpointTypes", "includes": "definitive-schema-registry" },
-        { "path": "publicEndpointTypes", "includes": "definitive-deal-runbooks" },
-        { "path": "publicEndpointTypes", "includes": "definitive-model-catalog" },
-        { "path": "bearerEndpointTypes", "includes": "mcp-streamable-http" },
-        { "path": "bearerEndpointTypes", "includes": "tools-list" },
-        { "path": "bearerEndpointTypes", "includes": "tool-call" },
-        { "path": "capabilities.outputSchema", "equals": true },
-        { "path": "capabilities.structuredContent", "equals": true },
-        { "path": "doctrine.namingConvention", "equals": "diligence_<phase>_<artifact>" }
+        {
+          "path": "mcp_version",
+          "equals": "2025-11-25"
+        },
+        {
+          "path": "server_card",
+          "equals": "https://smbx.ai/.well-known/mcp/server-card.json"
+        },
+        {
+          "path": "publicEndpointTypes",
+          "includes": "server-card"
+        },
+        {
+          "path": "publicEndpointTypes",
+          "includes": "definitive-schema-registry"
+        },
+        {
+          "path": "publicEndpointTypes",
+          "includes": "definitive-deal-runbooks"
+        },
+        {
+          "path": "publicEndpointTypes",
+          "includes": "definitive-model-catalog"
+        },
+        {
+          "path": "bearerEndpointTypes",
+          "includes": "mcp-streamable-http"
+        },
+        {
+          "path": "bearerEndpointTypes",
+          "includes": "tools-list"
+        },
+        {
+          "path": "bearerEndpointTypes",
+          "includes": "tool-call"
+        },
+        {
+          "path": "capabilities.outputSchema",
+          "equals": true
+        },
+        {
+          "path": "capabilities.structuredContent",
+          "equals": true
+        },
+        {
+          "path": "doctrine.namingConvention",
+          "equals": "diligence_<phase>_<artifact>"
+        }
       ]
     }
   },
@@ -1711,15 +3611,42 @@
     "kind": "registry_package",
     "expect": {
       "fields": [
-        { "path": "registryEntry.namespace", "equals": "smbx-ai/diligence" },
-        { "path": "registryEntry.categories", "includes": "deal-os" },
-        { "path": "registryEntry.tags", "includes": "working capital peg" },
-        { "path": "registryEntry.trustSignals.deterministicOutputs", "equals": true },
-        { "path": "registryEntry.trustSignals.citationProvenanceRequired", "equals": true },
-        { "path": "registryEntry.trustSignals.noSuccessFees", "equals": true },
-        { "path": "registryEntry.trustSignals.noReferralCompensation", "equals": true },
-        { "path": "registryReadinessChecks", "includes": "structured-output-schemas" },
-        { "path": "registryReadinessChecks", "includes": "THE-LINE-declaration" }
+        {
+          "path": "registryEntry.namespace",
+          "equals": "smbx-ai/diligence"
+        },
+        {
+          "path": "registryEntry.categories",
+          "includes": "deal-os"
+        },
+        {
+          "path": "registryEntry.tags",
+          "includes": "working capital peg"
+        },
+        {
+          "path": "registryEntry.trustSignals.deterministicOutputs",
+          "equals": true
+        },
+        {
+          "path": "registryEntry.trustSignals.citationProvenanceRequired",
+          "equals": true
+        },
+        {
+          "path": "registryEntry.trustSignals.noSuccessFees",
+          "equals": true
+        },
+        {
+          "path": "registryEntry.trustSignals.noReferralCompensation",
+          "equals": true
+        },
+        {
+          "path": "registryReadinessChecks",
+          "includes": "structured-output-schemas"
+        },
+        {
+          "path": "registryReadinessChecks",
+          "includes": "THE-LINE-declaration"
+        }
       ]
     }
   },
@@ -1731,16 +3658,46 @@
     "kind": "registry_package",
     "expect": {
       "fields": [
-        { "path": "thirdPartyDirectoryIds", "includes": "pulsemcp" },
-        { "path": "thirdPartyDirectoryIds", "includes": "mcp_so" },
-        { "path": "thirdPartyDirectoryIds", "includes": "awesome_mcp_servers" },
-        { "path": "clientStorePackageIds", "includes": "claude_connector_directory" },
-        { "path": "clientStorePackageIds", "includes": "chatgpt_apps_directory" },
-        { "path": "clientStorePackageIds", "includes": "microsoft_agent_store" },
-        { "path": "clientStorePackageIds", "includes": "salesforce_agentexchange" },
-        { "path": "clientStorePackageIds", "includes": "google_agent_gallery" },
-        { "path": "submissionOrder", "includes": "enterprise_allow_lists" },
-        { "path": "submissionOrder", "includes": "partner_connector_outreach" }
+        {
+          "path": "thirdPartyDirectoryIds",
+          "includes": "pulsemcp"
+        },
+        {
+          "path": "thirdPartyDirectoryIds",
+          "includes": "mcp_so"
+        },
+        {
+          "path": "thirdPartyDirectoryIds",
+          "includes": "awesome_mcp_servers"
+        },
+        {
+          "path": "clientStorePackageIds",
+          "includes": "claude_connector_directory"
+        },
+        {
+          "path": "clientStorePackageIds",
+          "includes": "chatgpt_apps_directory"
+        },
+        {
+          "path": "clientStorePackageIds",
+          "includes": "microsoft_agent_store"
+        },
+        {
+          "path": "clientStorePackageIds",
+          "includes": "salesforce_agentexchange"
+        },
+        {
+          "path": "clientStorePackageIds",
+          "includes": "google_agent_gallery"
+        },
+        {
+          "path": "submissionOrder",
+          "includes": "enterprise_allow_lists"
+        },
+        {
+          "path": "submissionOrder",
+          "includes": "partner_connector_outreach"
+        }
       ]
     }
   },
@@ -1751,24 +3708,76 @@
     "methodologyUri": "methodology://v19",
     "kind": "registry_package",
     "expect": {
-      "textIncludes": ["registry_only", "context.noSuccessFee == true", "requestedToolLineStatus"],
+      "textIncludes": [
+        "registry_only",
+        "context.noSuccessFee == true",
+        "requestedToolLineStatus"
+      ],
       "fields": [
-        { "path": "enterpriseAllowListTemplates.githubCopilotRegistry.policyMode", "equals": "registry_only" },
-        { "path": "enterpriseAllowListTemplates.githubCopilotRegistry.registry.servers.0.id", "equals": "smbx-ai/diligence" },
-        { "path": "enterpriseAllowListTemplates.githubCopilotRegistry.registry.servers.0.allowedTools", "includes": "introspect_capabilities" },
-        { "path": "enterpriseAllowListTemplates.githubCopilotRegistry.registry.servers.0.allowedTools", "includes": "resume_deal" },
-        { "path": "enterpriseAllowListTemplates.githubCopilotRegistry.registry.servers.0.allowedTools", "includes": "run_model_iteration" },
-        { "path": "enterpriseAllowListTemplates.githubCopilotRegistry.registry.servers.0.allowedTools", "includes": "generate_output_doc" },
-        { "path": "enterpriseAllowListTemplates.kiroAwsQRegistry.servers.0.allowTools", "includes": "describe_methodology" },
-        { "path": "enterpriseAllowListTemplates.azureApiCenterBlueprint.auth.productionTarget", "includes": "OAuth 2.1" },
-        { "path": "enterpriseAllowListTemplates.bedrockAgentCoreCedarPolicyTemplate.policy", "includes": "context.noSuccessFee == true" },
-        { "path": "agentExecutionExamples.0.id", "equals": "agent_example_ev_only_entry" },
-        { "path": "agentExecutionExamples.0.sequence.0.toolName", "equals": "assess_deal_entry" },
-        { "path": "agentExecutionExamples.1.sequence.1.toolName", "equals": "run_model_iteration" },
-        { "path": "agentExecutionExamples.1.sequence.2.toolName", "equals": "generate_output_doc" },
-        { "path": "managedAgentTemplates.0.id", "equals": "managed_agent_acquisition_analyst" },
-        { "path": "managedAgentTemplates.0.starterRunbook", "includes": "run_model_iteration" },
-        { "path": "managedAgentTemplates.2.starterRunbook", "includes": "generate_output_doc" }
+        {
+          "path": "enterpriseAllowListTemplates.githubCopilotRegistry.policyMode",
+          "equals": "registry_only"
+        },
+        {
+          "path": "enterpriseAllowListTemplates.githubCopilotRegistry.registry.servers.0.id",
+          "equals": "smbx-ai/diligence"
+        },
+        {
+          "path": "enterpriseAllowListTemplates.githubCopilotRegistry.registry.servers.0.allowedTools",
+          "includes": "introspect_capabilities"
+        },
+        {
+          "path": "enterpriseAllowListTemplates.githubCopilotRegistry.registry.servers.0.allowedTools",
+          "includes": "resume_deal"
+        },
+        {
+          "path": "enterpriseAllowListTemplates.githubCopilotRegistry.registry.servers.0.allowedTools",
+          "includes": "run_model_iteration"
+        },
+        {
+          "path": "enterpriseAllowListTemplates.githubCopilotRegistry.registry.servers.0.allowedTools",
+          "includes": "generate_output_doc"
+        },
+        {
+          "path": "enterpriseAllowListTemplates.kiroAwsQRegistry.servers.0.allowTools",
+          "includes": "describe_methodology"
+        },
+        {
+          "path": "enterpriseAllowListTemplates.azureApiCenterBlueprint.auth.productionTarget",
+          "includes": "OAuth 2.1"
+        },
+        {
+          "path": "enterpriseAllowListTemplates.bedrockAgentCoreCedarPolicyTemplate.policy",
+          "includes": "context.noSuccessFee == true"
+        },
+        {
+          "path": "agentExecutionExamples.0.id",
+          "equals": "agent_example_ev_only_entry"
+        },
+        {
+          "path": "agentExecutionExamples.0.sequence.0.toolName",
+          "equals": "assess_deal_entry"
+        },
+        {
+          "path": "agentExecutionExamples.1.sequence.1.toolName",
+          "equals": "run_model_iteration"
+        },
+        {
+          "path": "agentExecutionExamples.1.sequence.2.toolName",
+          "equals": "generate_output_doc"
+        },
+        {
+          "path": "managedAgentTemplates.0.id",
+          "equals": "managed_agent_acquisition_analyst"
+        },
+        {
+          "path": "managedAgentTemplates.0.starterRunbook",
+          "includes": "run_model_iteration"
+        },
+        {
+          "path": "managedAgentTemplates.2.starterRunbook",
+          "includes": "generate_output_doc"
+        }
       ]
     }
   },
@@ -1779,19 +3788,56 @@
     "methodologyUri": "methodology://v19",
     "kind": "schema_registry",
     "expect": {
-      "textIncludes": ["DealPayload", "CompletenessSpec", "DealPackage"],
+      "textIncludes": [
+        "DealPayload",
+        "CompletenessSpec",
+        "DealPackage"
+      ],
       "fields": [
-        { "path": "schemaNames", "includes": "DealPayload" },
-        { "path": "schemaNames", "includes": "ClassificationKey" },
-        { "path": "schemaNames", "includes": "MissingInputContract" },
-        { "path": "schemaNames", "includes": "DealState" },
-        { "path": "schemaNames", "includes": "CompletenessSpec" },
-        { "path": "schemaNames", "includes": "DealReadinessLevel" },
-        { "path": "schemaNames", "includes": "CompletenessReport" },
-        { "path": "schemaNames", "includes": "DealPackage" },
-        { "path": "terminalSubstrateSchemas", "includes": "DealPayload" },
-        { "path": "terminalSubstrateSchemas", "includes": "CompletenessSpec" },
-        { "path": "terminalSubstrateSchemas", "includes": "DealPackage" }
+        {
+          "path": "schemaNames",
+          "includes": "DealPayload"
+        },
+        {
+          "path": "schemaNames",
+          "includes": "ClassificationKey"
+        },
+        {
+          "path": "schemaNames",
+          "includes": "MissingInputContract"
+        },
+        {
+          "path": "schemaNames",
+          "includes": "DealState"
+        },
+        {
+          "path": "schemaNames",
+          "includes": "CompletenessSpec"
+        },
+        {
+          "path": "schemaNames",
+          "includes": "DealReadinessLevel"
+        },
+        {
+          "path": "schemaNames",
+          "includes": "CompletenessReport"
+        },
+        {
+          "path": "schemaNames",
+          "includes": "DealPackage"
+        },
+        {
+          "path": "terminalSubstrateSchemas",
+          "includes": "DealPayload"
+        },
+        {
+          "path": "terminalSubstrateSchemas",
+          "includes": "CompletenessSpec"
+        },
+        {
+          "path": "terminalSubstrateSchemas",
+          "includes": "DealPackage"
+        }
       ]
     }
   },
@@ -1802,18 +3848,52 @@
     "methodologyUri": "methodology://v19",
     "kind": "schema_registry",
     "expect": {
-      "textIncludes": ["SourceGapList", "SelectiveDisclosureProof", "ModelOutput"],
+      "textIncludes": [
+        "SourceGapList",
+        "SelectiveDisclosureProof",
+        "ModelOutput"
+      ],
       "fields": [
-        { "path": "portableTakeBackSchemas", "includes": "SourceIndex" },
-        { "path": "portableTakeBackSchemas", "includes": "SourceGapList" },
-        { "path": "portableTakeBackSchemas", "includes": "SelectiveDisclosureProof" },
-        { "path": "portableTakeBackSchemas", "includes": "DocumentDraft" },
-        { "path": "portableTakeBackSchemas", "includes": "StudioBook" },
-        { "path": "portableTakeBackSchemas", "includes": "ModelOutput" },
-        { "path": "portableTakeBackSchemas", "includes": "AssumptionLog" },
-        { "path": "portableTakeBackSchemas", "includes": "OutputHash" },
-        { "path": "portableTakeBackSchemas", "includes": "AuditPacket" },
-        { "path": "portableTakeBackSchemas", "includes": "MerkleInclusionProof" }
+        {
+          "path": "portableTakeBackSchemas",
+          "includes": "SourceIndex"
+        },
+        {
+          "path": "portableTakeBackSchemas",
+          "includes": "SourceGapList"
+        },
+        {
+          "path": "portableTakeBackSchemas",
+          "includes": "SelectiveDisclosureProof"
+        },
+        {
+          "path": "portableTakeBackSchemas",
+          "includes": "DocumentDraft"
+        },
+        {
+          "path": "portableTakeBackSchemas",
+          "includes": "StudioBook"
+        },
+        {
+          "path": "portableTakeBackSchemas",
+          "includes": "ModelOutput"
+        },
+        {
+          "path": "portableTakeBackSchemas",
+          "includes": "AssumptionLog"
+        },
+        {
+          "path": "portableTakeBackSchemas",
+          "includes": "OutputHash"
+        },
+        {
+          "path": "portableTakeBackSchemas",
+          "includes": "AuditPacket"
+        },
+        {
+          "path": "portableTakeBackSchemas",
+          "includes": "MerkleInclusionProof"
+        }
       ]
     }
   },
@@ -1825,17 +3905,50 @@
     "kind": "schema_registry",
     "expect": {
       "fields": [
-        { "path": "toolSchemaMap.assess_deal_entry.output", "includes": "CapabilityCatalog" },
-        { "path": "toolSchemaMap.introspect_capabilities.output", "includes": "CapabilityCatalog" },
-        { "path": "toolSchemaMap.describe_methodology.output", "includes": "MethodologyDescription" },
-        { "path": "toolSchemaMap.estimate_deal_cost.output", "includes": "DealCostEstimate" },
-        { "path": "toolSchemaMap.lookup_model_slot.output", "includes": "ModelOutput" },
-        { "path": "toolSchemaMap.run_model_iteration.output", "includes": "ModelOutput" },
-        { "path": "toolSchemaMap.run_model_iteration.takeBack", "includes": "OutputHash" },
-        { "path": "toolSchemaMap.generate_output_doc.output", "includes": "DocumentDraft" },
-        { "path": "toolSchemaMap.generate_output_doc.takeBack", "includes": "ModelOutput" },
-        { "path": "toolSchemaMap.disclose_subset.takeBack", "includes": "SelectiveDisclosureProof" },
-        { "path": "toolSchemaMap.prepare_negotiation_brief.takeBack", "includes": "SourceGapList" }
+        {
+          "path": "toolSchemaMap.assess_deal_entry.output",
+          "includes": "CapabilityCatalog"
+        },
+        {
+          "path": "toolSchemaMap.introspect_capabilities.output",
+          "includes": "CapabilityCatalog"
+        },
+        {
+          "path": "toolSchemaMap.describe_methodology.output",
+          "includes": "MethodologyDescription"
+        },
+        {
+          "path": "toolSchemaMap.estimate_deal_cost.output",
+          "includes": "DealCostEstimate"
+        },
+        {
+          "path": "toolSchemaMap.lookup_model_slot.output",
+          "includes": "ModelOutput"
+        },
+        {
+          "path": "toolSchemaMap.run_model_iteration.output",
+          "includes": "ModelOutput"
+        },
+        {
+          "path": "toolSchemaMap.run_model_iteration.takeBack",
+          "includes": "OutputHash"
+        },
+        {
+          "path": "toolSchemaMap.generate_output_doc.output",
+          "includes": "DocumentDraft"
+        },
+        {
+          "path": "toolSchemaMap.generate_output_doc.takeBack",
+          "includes": "ModelOutput"
+        },
+        {
+          "path": "toolSchemaMap.disclose_subset.takeBack",
+          "includes": "SelectiveDisclosureProof"
+        },
+        {
+          "path": "toolSchemaMap.prepare_negotiation_brief.takeBack",
+          "includes": "SourceGapList"
+        }
       ]
     }
   },
@@ -1847,11 +3960,26 @@
     "kind": "schema_registry",
     "expect": {
       "fields": [
-        { "path": "schemas.ModelOutput.properties.modelId.pattern", "equals": "^M[0-9]{3}$" },
-        { "path": "schemas.ModelOutput.required", "includes": "modelId" },
-        { "path": "schemas.ModelOutput.required", "includes": "outputHash" },
-        { "path": "schemas.ModelOutput.required", "includes": "lineBoundary" },
-        { "path": "schemas.OutputHash.properties.algorithm.enum", "includes": "sha256" }
+        {
+          "path": "schemas.ModelOutput.properties.modelId.pattern",
+          "equals": "^M[0-9]{3}$"
+        },
+        {
+          "path": "schemas.ModelOutput.required",
+          "includes": "modelId"
+        },
+        {
+          "path": "schemas.ModelOutput.required",
+          "includes": "outputHash"
+        },
+        {
+          "path": "schemas.ModelOutput.required",
+          "includes": "lineBoundary"
+        },
+        {
+          "path": "schemas.OutputHash.properties.algorithm.enum",
+          "includes": "sha256"
+        }
       ]
     }
   },
@@ -1861,14 +3989,32 @@
     "specVersion": "DEFINITIVE.v1.0",
     "methodologyUri": "methodology://v19",
     "kind": "definition_of_done",
-    "input": { "objective": "loi" },
+    "input": {
+      "objective": "loi"
+    },
     "expect": {
-      "textIncludes": ["DEFINITIVE.completeness-spec.v0.1", "DRL2_INDICATION_READY", "source_trail_present"],
+      "textIncludes": [
+        "DEFINITIVE.completeness-spec.v0.1",
+        "DRL2_INDICATION_READY",
+        "source_trail_present"
+      ],
       "fields": [
-        { "path": "completenessSpec.version", "equals": "DEFINITIVE.completeness-spec.v0.1" },
-        { "path": "completenessSpec.levels.2.id", "equals": "DRL2_INDICATION_READY" },
-        { "path": "completenessSpec.levels.4.id", "equals": "DRL4_DILIGENCE_READY" },
-        { "path": "completenessSpec.checks", "lengthAtLeast": 6 }
+        {
+          "path": "completenessSpec.version",
+          "equals": "DEFINITIVE.completeness-spec.v0.1"
+        },
+        {
+          "path": "completenessSpec.levels.2.id",
+          "equals": "DRL2_INDICATION_READY"
+        },
+        {
+          "path": "completenessSpec.levels.4.id",
+          "equals": "DRL4_DILIGENCE_READY"
+        },
+        {
+          "path": "completenessSpec.checks",
+          "lengthAtLeast": 6
+        }
       ]
     }
   },
@@ -1879,11 +4025,24 @@
     "methodologyUri": "methodology://v19",
     "kind": "definition_of_done",
     "expect": {
-      "textIncludes": ["partial payload is accepted", "MissingInputContract", "next_suggested_calls"],
+      "textIncludes": [
+        "partial payload is accepted",
+        "MissingInputContract",
+        "next_suggested_calls"
+      ],
       "fields": [
-        { "path": "noRejectionContract", "includes": "partial payload is accepted" },
-        { "path": "definitionOfDone.completenessSpec.noRejectionContract", "includes": "MissingInputContract" },
-        { "path": "definitionOfDone.completenessSpec.noRejectionContract", "includes": "next_suggested_calls" }
+        {
+          "path": "noRejectionContract",
+          "includes": "partial payload is accepted"
+        },
+        {
+          "path": "definitionOfDone.completenessSpec.noRejectionContract",
+          "includes": "MissingInputContract"
+        },
+        {
+          "path": "definitionOfDone.completenessSpec.noRejectionContract",
+          "includes": "next_suggested_calls"
+        }
       ]
     }
   }

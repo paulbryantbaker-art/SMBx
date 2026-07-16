@@ -80,13 +80,13 @@ Top-level product journeys remain SELL, BUY, RAISE, and PMI. SELL/BUY/RAISE expo
 - **RAISE:** R0 Intake → R1 Financial Package → R2 Investor Materials → R3 Outreach → R4 Terms → R5 Closing
 - **PMI:** PMI0 Day 0 → PMI1 Stabilization → PMI2 Assessment → PMI3 Optimization
 
-The current DEFINITIVE substrate is broader than those stage labels. `server/services/definitiveDealMechanicsCatalog.ts` defines the active v1.1 deal-mechanics catalog: 30 gates and 123 model slots (M101-M223), including G28 Distressed / Restructuring, G29 Capital Structure & Liability Management, and G30 Real Estate & Asset-Class Overlays. Agents should route through `compose_model_stack`, the route map, and DealState rather than hard-coding only the four journey stage lists.
+The current DEFINITIVE substrate is broader than those stage labels. `server/services/definitiveDealMechanicsCatalog.ts` defines the active v1.1 deal-mechanics catalog: 30 gates and 134 model slots (M101-M234), including G28 Distressed / Restructuring, G29 Capital Structure & Liability Management, and G30 Real Estate & Asset-Class Overlays (which carries the V18c real property & contract law layer, M224-M234 — see methodology/DEFINITIVE_V18C_REAL_PROPERTY_PASS.md; anchor-state law tables live in server/constants/realPropertyLaw.ts). Agents should route through `compose_model_stack`, the route map, and DealState rather than hard-coding only the four journey stage lists.
 
 ## Calculation and Model Runtime
 There are two layers:
 
 - **Client canvas calculation helpers:** `client/src/lib/calculations/core.ts` contains legacy pure JS helpers for the human interactive canvas: SDE, EBITDA, valuation, DSCR/debt service, SBA financing/amortization, IRR/MOIC, LBO/pro forma, sensitivity, FCF, working capital peg, covenant compliance, tax impact, cap table dilution, exit waterfall, earnout, installment sale, and DCF. This is not the complete substrate catalog.
-- **Server V19/DEFINITIVE runtime:** `server/services/v19ModelRuntime.ts` contains the model-backed runtime used by Yulia/agents, currently covering 100+ `MODEL.*.v1` definitions across valuation, QoE, financing, structure, tax, legal economics, real estate, IP, restructuring, capital structure, secondaries, PMI, and research-only overlays. `npm run test:definitive-conformance` currently covers 202 model-runtime cases.
+- **Server V19/DEFINITIVE runtime:** `server/services/v19ModelRuntime.ts` contains the model-backed runtime used by Yulia/agents, currently covering 100+ `MODEL.*.v1` definitions across valuation, QoE, financing, structure, tax, legal economics, real estate, IP, restructuring, capital structure, secondaries, PMI, and research-only overlays. `npm run test:definitive-conformance` currently covers 385 model-runtime cases (655 total), including the 183-case V18c real-property battery.
 - **DEFINITIVE deal-mechanics catalog:** `server/services/definitiveDealMechanicsCatalog.ts` is the broader route/discovery catalog with 123 M-slots and 30 gates. Some slots are executable now, some are professional-handoff or research-only, and some are reserved.
 
 ## 11 Interactive Canvas Models (client/src/components/models/)
@@ -132,7 +132,7 @@ Valuation Explorer, LBO, SBA Financing, DCF, Tax Impact, Cap Table, Sensitivity 
 | client/src/components/models/ | 11 interactive financial model components for the human canvas |
 | client/src/lib/calculations/core.ts | Legacy pure calculation helpers for canvas models |
 | server/services/v19ModelRuntime.ts | Server-side V19 model runtime for executable/research `MODEL.*.v1` definitions |
-| server/services/definitiveDealMechanicsCatalog.ts | DEFINITIVE v1.1 123-slot / 30-gate deal-mechanics catalog |
+| server/services/definitiveDealMechanicsCatalog.ts | DEFINITIVE v1.1 134-slot / 30-gate deal-mechanics catalog (M224-M234 = V18c real property law) |
 | client/src/lib/modelStore.ts | Zustand store for model tab state |
 | client/src/components/shared/ChatDock.tsx | THE chat input — used everywhere |
 | client/src/components/v6/desktop/screens/Sourcing.tsx (+ atlasmobile twin) | Sourcing portfolio UI |
