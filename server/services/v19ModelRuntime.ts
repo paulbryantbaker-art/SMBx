@@ -169,7 +169,7 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
     return {
       outputs: {
         buyer_equity_pct: round(equityPct, 4),
-        dscr: round(dscr, 2),
+        dscr: round(dscr, 4),
         meets_sba_equity_floor: equityPct >= SBA_SOP_50_10_8.EQUITY_INJECTION_PCT,
         meets_sba_dscr_floor: dscr >= SBA_SOP_50_10_8.DSCR_SBA_FLOOR,
         max_7a_loan_cents: SBA_SOP_50_10_8.LOAN_7A_MAX * 100,
@@ -3710,9 +3710,24 @@ function sanitizeInputs(input: Record<string, any>): Record<string, any> {
   return JSON.parse(JSON.stringify(input ?? {}));
 }
 
+/**
+ * DEFINITIVE global output-boundary rounding (public spec §Conventions):
+ * round half to even (banker's rounding) to `places` decimals. Applied at the
+ * output boundary only; intermediate values carry full precision. Half-up
+ * (Math.round) and half-even differ only when the scaled value lands exactly
+ * on .5, which these computed ratios effectively never do — so this preserves
+ * existing conformance while giving the spec one portable, stateable rule.
+ */
 function round(value: number, places: number): number {
   const factor = 10 ** places;
-  return Math.round(value * factor) / factor;
+  const scaled = value * factor;
+  const floor = Math.floor(scaled);
+  const diff = scaled - floor;
+  const EPS = 1e-9;
+  let rounded: number;
+  if (Math.abs(diff - 0.5) < EPS) rounded = (floor % 2 === 0) ? floor : floor + 1;
+  else rounded = Math.round(scaled);
+  return rounded / factor;
 }
 
 function hash(value: unknown): string {
