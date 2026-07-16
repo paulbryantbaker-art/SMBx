@@ -384,6 +384,56 @@
 }
 .pd-nav-ctas { display: flex; gap: 10px; }
 
+/* ── Mobile nav: hamburger + slide-down menu (Paul, 2026-07-16: "there is no
+   nav hamburger on mobile"). The panel is fixed and transform-parked above
+   the viewport (same sanctioned pattern as the chat sheet — transient,
+   transform-transitioned, never a persistent fixed background). It slides
+   down BENEATH the sticky nav (z 49 < 50) so the burger stays tappable to
+   close; the burger morphs to an X via aria-expanded. ── */
+.pd-nav-burger { display: none; }
+.pd-mmenu, .pd-mmenu-scrim { display: none; }
+@media (max-width: 760px) {
+  .pd-nav-burger {
+    display: grid; place-items: center; width: 40px; height: 40px; flex: none;
+    margin-right: -6px; border: none; background: transparent; color: var(--pd-ink);
+    cursor: pointer; border-radius: 50%;
+  }
+  .pd-nav-burger .b1, .pd-nav-burger .b2, .pd-nav-burger .b3 {
+    transition: transform 0.24s ease, opacity 0.2s ease;
+    transform-origin: 12px 12px;
+  }
+  .pd-nav-burger[aria-expanded="true"] .b1 { transform: translateY(5.5px) rotate(45deg); }
+  .pd-nav-burger[aria-expanded="true"] .b2 { opacity: 0; }
+  .pd-nav-burger[aria-expanded="true"] .b3 { transform: translateY(-5.5px) rotate(-45deg); }
+
+  .pd-mmenu {
+    display: block; position: fixed; top: 0; left: 0; right: 0; z-index: 49;
+    background: #fff; border-bottom: 1px solid var(--pd-hair);
+    box-shadow: 0 28px 56px -26px rgba(34, 34, 34, 0.22);
+    border-radius: 0 0 22px 22px;
+    padding: 82px var(--pd-pad-x) 20px;
+    transform: translateY(-106%); visibility: hidden;
+    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.32s;
+  }
+  .pd-mmenu.open {
+    transform: none; visibility: visible;
+    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .pd .pd-mmenu a {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 2px; font-size: 21px; font-weight: 800; letter-spacing: -0.015em;
+    color: var(--pd-ink); border-bottom: 1px solid var(--pd-hair);
+  }
+  .pd .pd-mmenu a .arr { color: var(--pd-coral-link); font-weight: 700; }
+  .pd .pd-mmenu a.quiet { font-size: 16px; font-weight: 600; color: var(--pd-body); border-bottom: none; padding-bottom: 8px; }
+  .pd-mmenu-scrim {
+    display: block; position: fixed; inset: 0; z-index: 48;
+    background: rgba(20, 18, 17, 0.32);
+    opacity: 0; pointer-events: none; transition: opacity 0.26s ease;
+  }
+  .pd-mmenu-scrim.on { opacity: 1; pointer-events: auto; }
+}
+
 /* ─── hero — split: statement left, the engine right (the pattern the
    high-converting pages share: benefit copy beside the live product).
    The hero owns the whole first viewport: nothing else above the fold. ─── */
@@ -829,6 +879,13 @@
 }
 .pd .pd-herobar input:focus-visible { outline: none; }
 .pd-herobar .pd-send { border-radius: 999px; padding: 15px 28px; }
+/* The + inside the pill — hidden on desktop (chips live under the bar there),
+   shown ≤900px where it stands in for the starter chips. */
+.pd-herobar .pd-plus {
+  display: none; place-items: center; width: 42px; height: 42px; flex: none;
+  border: none; background: transparent; color: var(--pd-ink); cursor: pointer;
+  border-radius: 50%;
+}
 .pd-chat-hero .pd-chips { justify-content: center; padding: 18px 0 0; }
 @media (min-width: 901px) {
   /* Resting desktop = hero bar only; engaged desktop = the card only. */
@@ -857,12 +914,20 @@
      own stacking context (z-index:1) would otherwise trap them. */
   .pd-showcase:has(.pd-chat.open) { z-index: 90; }
 
-  /* Hero bar tightens on phones; two starter chips are an invitation, four
-     are a wall. */
-  .pd-herobar { padding-left: 20px; }
+  /* Phone bar = ONE confident pill, Grok-grammar (Paul, 2026-07-16: "the
+     chat bar does not have the same confident look… the suggestion chips
+     could be a + symbol on the side of the chat pill"): a bare + glyph sits
+     left INSIDE the pill (it opens the sheet, where the starter chips live),
+     the send affordance is a compact coral circle, and the in-page chips are
+     gone entirely. */
+  .pd-herobar { padding: 7px 7px 7px 6px; gap: 2px; }
+  .pd-herobar .pd-plus { display: grid; }
   .pd-herobar input { font-size: 16px; padding: 13px 0; }
-  .pd-herobar .pd-send { padding: 13px 20px; }
-  .pd-chat-hero .pd-chip:nth-child(n + 3) { display: none; }
+  .pd-herobar .pd-send {
+    width: 46px; height: 46px; padding: 0; border-radius: 50%;
+    display: grid; place-items: center;
+  }
+  .pd-chat-hero .pd-chips { display: none; }
 
   /* Scrim — always mounted so it can fade both ways. */
   .pd-chat-scrim {
@@ -1284,12 +1349,23 @@
 }
 @media (max-width: 760px) {
   .pd-nav-links, .pd-nav-book { display: none; }
+  /* The nav must fit logo + primary pill + hamburger on a 390px screen. */
+  .pd-nav-logo { height: 34px; }
+  .pd-nav-ctas { gap: 6px; }
+  .pd-nav-ctas .pd-pill-primary { padding: 10px 14px; font-size: 12.5px; }
   .pd-indexrow { gap: 14px; padding: 28px 0; }
   .pd-stats { grid-template-columns: 1fr; gap: 52px; }
   .pd-ledger-head { flex-direction: column; align-items: flex-start !important; gap: 14px !important; }
-  /* Phone fold: the lead-in stays a LEAD-IN — smaller statement, tighter sub —
-     so the launcher card (through its input bar) fits the first screen. */
+  /* Phone fold, Grok-grammar (Paul, 2026-07-16): the statement floats in the
+     upper-middle air, the ONE pill bar anchors near the bottom of the
+     viewport, and the quiet book/sample links sit at the fold's bottom edge.
+     margin:auto pairs distribute the free space; the section is already a
+     flex column. */
   .pd-hero-c { padding-top: 18px; }
+  .pd-hero-c.pd-hero-fold { padding-bottom: 16px; }
+  .pd-hero-c.pd-hero-fold .pd-heroc-inner { margin-top: auto; margin-bottom: auto; }
+  .pd-hero-c.pd-hero-fold .pd-showcase { margin-top: auto; }
+  .pd-hero-c.pd-hero-fold .pd-hero-below { margin-top: 18px; }
   .pd-hero-c .pd-h1 { font-size: clamp(28px, 8.6vw, 36px); }
   .pd-sub { font-size: 18px; }
   .pd-sub-c { margin-top: 12px; max-width: 26em; }
