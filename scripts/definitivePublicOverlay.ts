@@ -48,6 +48,11 @@ export const ENUMS: Record<string, EnumSpec> = {
   trigger_status: { values: ['triggered_property_sale', 'triggered_entity_capture_language', 'likely_not_triggered_structural'], description: 'Whether and why the transaction form implicates the preemptive right.' },
   fixture_priority: { values: ['fixture_secured_party', 'first_to_perfect', 'real_property_interest'], description: 'Which competing interest holds priority in the fixture under UCC § 9-334.' },
   triage_bucket: { values: ['curable', 'insurable_over', 'deal_killing'], description: 'The disposition bucket for a single title exception.' },
+  // Legal / agreement-economics family
+  basket_type: { values: ['deductible', 'tipping', 'deductible_or_tipping_to_confirm'], description: 'How the indemnification basket operates: a true deductible (recovery only above the threshold), a tipping basket (first-dollar recovery once the threshold is crossed), or unresolved pending confirmation.' },
+  condition_type: { values: ['general', 'regulatory', 'mae', 'financing', 'consent', 'cfius', 'hsr', 'legal'], description: 'The category of a closing condition; regulatory/MAE/financing/consent/CFIUS/HSR/legal types route to specialist review.' },
+  dispute_forum: { values: ['accounting_arbitrator', 'expert_determination', 'arbitration', 'courts'], description: 'The forum designated to resolve an earnout or true-up dispute.' },
+  tax_characterization: { values: ['requires_tax_review', 'installment_sale', 'imputed_interest', 'compensation'], description: 'The earnout\'s tax-characterization selector; the binding treatment is a tax-advisor determination.' },
 };
 
 /* ── Authority de-duplication + hand-tagged types (§7) ─────────────────────
@@ -939,6 +944,368 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     golden: {
       narrative: 'A target worth $50M undergoes an ownership change when the long-term tax-exempt rate is 4.35%; roughly $2.175M of the pre-change NOL becomes usable each year, absorbing a $10M carryforward over five years.',
       input: { loss_corporation_value_cents: 5_000_000_000, long_term_tax_exempt_rate: 0.0435, nol_carryforward_cents: 1_000_000_000 },
+    },
+  },
+
+  /* ══ LEGAL FAMILY — agreement economics (M206–M213) ══════════════════ */
+
+  /* ══ M206 — Indemnification ladder engine ════════════════════════════ */
+  M206: {
+    purpose:
+      'Sizes the indemnification ladder of a private acquisition agreement — the general cap, the basket, and the fundamental-representation cap — from the transaction value and either supplied percentages or cited-median market defaults. It answers, for a buyer or seller negotiating recourse, "how large is the indemnity backstop, and where does the basket sit?" It computes the magnitudes and surfaces the standard toggles (materiality scrape, sandbagging); the terms themselves are the parties\' negotiation.',
+    algorithm: [
+      'Given `transaction_value_cents` and optional `rwi_present` (default false), `general_cap_pct`, `basket_pct`, `basket_type`:',
+      '1. If `transaction_value_cents` is missing, the implementation SHALL return `status: "needs_inputs"`.',
+      '2. `general_cap_pct` SHALL be the supplied value, else the cited-median default for the RWI posture — the RWI-present cap or the no-RWI cap (constants: general indemnity cap medians).',
+      '3. `basket_pct` SHALL be the supplied value, else the cited-median basket default (constants: indemnity basket median).',
+      '4. `general_cap_cents` and `basket_cents` SHALL be the transaction value times the respective percentage, rounded to the nearest cent.',
+      '5. `fundamental_reps_cap_cents` SHALL be the full transaction value; the fraud/tax carve-out SHALL be reported as uncapped or counsel-defined.',
+      '6. The model SHALL report the default posture of the materiality scrape and sandbagging toggles as market-standard flags, not determinations.',
+    ],
+    constants: [
+      { name: 'General indemnity cap — no RWI', value: '10.5% of transaction value', kind: 'cited_median_should', citation: 'ABA Private Target Deal Points Study 2023', pin: 'median general indemnity cap, private targets without RWI', effective: '2023 study', nextCheck: 'on next ABA study (biennial)', traceValues: [0.105] },
+      { name: 'General indemnity cap — RWI present', value: '0.5% of transaction value', kind: 'cited_median_should', citation: 'ABA Private Target Deal Points Study 2023', pin: 'median general indemnity cap, RWI-backed deals', effective: '2023 study', nextCheck: 'on next ABA study (biennial)', traceValues: [0.005] },
+      { name: 'Indemnity basket', value: '0.5% of transaction value', kind: 'cited_median_should', citation: 'ABA Private Target Deal Points Study 2023', pin: 'median basket/deductible threshold', effective: '2023 study', nextCheck: 'on next ABA study (biennial)', traceValues: [0.005] },
+    ],
+    precisionRule: 'Percentages are 4-decimal fractions; cap and basket amounts are exact integer cents (see the Conventions chapter).',
+    inputs: {
+      transaction_value_cents: { type: 'integer (cents)', desc: 'Total transaction value the ladder is sized against.', unit: 'cents' },
+      rwi_present: { type: 'boolean', desc: 'Whether representation-and-warranty insurance backs the deal (default false); shifts the cited-median cap default.' },
+      general_cap_pct: { type: 'number', desc: 'Override for the general indemnity cap as a fraction of value; defaults to the cited median.', precision: 4 },
+      basket_pct: { type: 'number', desc: 'Override for the basket as a fraction of value; defaults to the cited median.', precision: 4 },
+      basket_type: { type: 'enum', enum: 'basket_type', desc: 'Override for how the basket operates; defaults by RWI posture.' },
+    },
+    outputs: {
+      transaction_value_cents: { type: 'integer (cents)', desc: 'The transaction value, echoed.', unit: 'cents' },
+      rwi_present: { type: 'boolean', desc: 'The RWI posture used.' },
+      general_cap_pct: { type: 'number', desc: 'The general indemnity cap as a fraction of value.', precision: 4 },
+      general_cap_cents: { type: 'integer (cents)', desc: 'The general indemnity cap in cents.', unit: 'cents' },
+      basket_pct: { type: 'number', desc: 'The basket as a fraction of value.', precision: 4 },
+      basket_cents: { type: 'integer (cents)', desc: 'The basket threshold in cents.', unit: 'cents' },
+      basket_type: { type: 'enum', enum: 'basket_type', desc: 'How the basket operates.' },
+      fundamental_reps_cap_cents: { type: 'integer (cents)', desc: 'The cap on fundamental-representation claims (the full transaction value).', unit: 'cents' },
+      fraud_tax_carveout: { type: 'string', desc: 'The fraud and tax carve-out posture — uncapped or counsel-defined.' },
+      materiality_scrape_default: { type: 'boolean', desc: 'Whether a materiality scrape is the market-standard default here.' },
+      sandbagging_default: { type: 'string', desc: 'The default sandbagging posture — silent or governed by state default.' },
+    },
+    derivedOutputs: ['transaction_value_cents', 'general_cap_cents', 'basket_cents', 'fundamental_reps_cap_cents'],
+    boundary:
+      'This model sizes the indemnification ladder — cap, basket, fundamental-rep cap — from the transaction value and either supplied or cited-median default percentages. The default percentages are market medians (SHOULD), not law; whether a given cap, basket type (deductible vs. tipping), materiality scrape, or sandbagging posture is right for this deal is a negotiation and drafting judgment for deal counsel, which the model does not make.',
+    golden: {
+      narrative: 'An $80M private deal without RWI carries a 10.5%-of-value indemnity cap ($8.4M) over a 0.5% basket ($400k), with fundamental representations capped at the full price.',
+      input: { transaction_value_cents: 8_000_000_000, rwi_present: false },
+    },
+  },
+
+  /* ══ M207 — Survival period engine ═══════════════════════════════════ */
+  M207: {
+    purpose:
+      'Builds the survival schedule of a purchase agreement — when the general, fundamental, and tax representations expire — from the closing date and either supplied periods or cited-median defaults, and dates each expiry. It answers, for the parties papering recourse, "how long is each class of representation on the hook?" It schedules the dates and flags the governing-law and fraud interactions for counsel.',
+    algorithm: [
+      'Given `closing_date` and optional `rwi_present` (default false), `general_reps_months`, `fundamental_reps_years`, `tax_reps_years`, `fraud_carveout`:',
+      '1. If `closing_date` is missing or not a valid ISO date, the implementation SHALL return `status: "needs_inputs"`.',
+      '2. `general_reps_months` SHALL be the supplied value, else the cited-median default — zero when RWI is present, otherwise the no-RWI general survival period (constants: general survival medians).',
+      '3. `fundamental_reps_years` and `tax_reps_years` SHALL be the supplied values, else the cited-median fundamental and tax survival periods (constants: fundamental/tax survival medians).',
+      '4. Each expiry SHALL be the closing date advanced by the corresponding period (general in months; fundamental and tax in years × 12 months); a zero general period yields a null expiry.',
+      '5. It SHALL carry a counsel-review flag to confirm the governing-law statute of limitations, the fraud definition, and the RWI-policy interaction.',
+    ],
+    constants: [
+      { name: 'General survival — no RWI', value: '12 months', kind: 'cited_median_should', citation: 'SRS Acquiom Deal Terms Study 2024; 2025', pin: 'median general representation survival, non-RWI deals', effective: '2024–2025 studies', nextCheck: 'on next SRS Acquiom study (annual)', traceValues: [12] },
+      { name: 'General survival — RWI present', value: '0 months (reps do not survive to the seller)', kind: 'cited_median_should', citation: 'SRS Acquiom Deal Terms Study 2024; 2025', pin: 'median general survival, RWI-backed deals', effective: '2024–2025 studies', nextCheck: 'on next SRS Acquiom study (annual)', traceValues: [0] },
+      { name: 'Fundamental representation survival', value: '6 years', kind: 'cited_median_should', citation: 'ABA Private Target Deal Points Study 2023', pin: 'median fundamental-rep survival', effective: '2023 study', nextCheck: 'on next ABA study (biennial)', traceValues: [6] },
+      { name: 'Tax representation survival', value: '6 years', kind: 'cited_median_should', citation: 'ABA Private Target Deal Points Study 2023', pin: 'median tax-rep survival (statute-of-limitations linked)', effective: '2023 study', nextCheck: 'on next ABA study (biennial)', traceValues: [6] },
+    ],
+    precisionRule: 'Periods are whole months or years; expiries are ISO-8601 dates (see the Conventions chapter).',
+    inputs: {
+      closing_date: { type: 'string (ISO date)', desc: 'The closing date from which survival periods run.' },
+      rwi_present: { type: 'boolean', desc: 'Whether RWI backs the deal (default false); zeroes the general survival default.' },
+      general_reps_months: { type: 'integer', desc: 'Override for general-representation survival in months; defaults to the cited median.', unit: 'months' },
+      fundamental_reps_years: { type: 'integer', desc: 'Override for fundamental-representation survival in years; defaults to the cited median.', unit: 'years' },
+      tax_reps_years: { type: 'integer', desc: 'Override for tax-representation survival in years; defaults to the cited median.', unit: 'years' },
+      fraud_carveout: { type: 'boolean', desc: 'Whether fraud is carved out of the exclusive-remedy provision (default true).' },
+    },
+    outputs: {
+      closing_date: { type: 'string (ISO date)', desc: 'The closing date, echoed.' },
+      rwi_present: { type: 'boolean', desc: 'The RWI posture used.' },
+      general_reps_months: { type: 'integer', desc: 'General-representation survival in months.', unit: 'months' },
+      general_reps_expiry: { type: 'string (ISO date) | null', desc: 'General-representation expiry date, or null when the period is zero.' },
+      fundamental_reps_years: { type: 'integer', desc: 'Fundamental-representation survival in years.', unit: 'years' },
+      fundamental_reps_expiry: { type: 'string (ISO date)', desc: 'Fundamental-representation expiry date.' },
+      tax_reps_years: { type: 'integer', desc: 'Tax-representation survival in years.', unit: 'years' },
+      tax_reps_expiry: { type: 'string (ISO date)', desc: 'Tax-representation expiry date.' },
+      fraud_carveout_from_exclusive_remedy: { type: 'boolean', desc: 'Whether fraud is carved out of the exclusive remedy.' },
+      counsel_review_flags: { type: 'string[]', desc: 'Items counsel must confirm (limitations period, fraud definition, RWI interaction).' },
+    },
+    derivedOutputs: ['general_reps_months', 'fundamental_reps_years', 'tax_reps_years'],
+    boundary:
+      'This model builds the survival schedule — general, fundamental, tax — from the closing date and cited-median or supplied periods. The governing-law statute of limitations, the fraud definition, and the exclusive-remedy/RWI interaction are legal determinations for counsel; the model schedules the dates and flags the review, and renders no enforceability conclusion.',
+    golden: {
+      narrative: 'A deal closing March 31, 2026 without RWI runs general representations 12 months (to March 31, 2027) and fundamental and tax representations six years (to March 31, 2032).',
+      input: { closing_date: '2026-03-31', rwi_present: false },
+    },
+  },
+
+  /* ══ M208 — Escrow and holdback sizing ═══════════════════════════════ */
+  M208: {
+    purpose:
+      'Sizes the escrows a purchase agreement holds back — the general indemnity escrow, the purchase-price-adjustment escrow, and any special escrows — from the transaction value and either supplied percentages or cited-median defaults, and totals them. It answers, for the parties funding the closing, "how much cash is held back, and in which buckets?" The default percentages are market medians; the protective amount is a negotiation.',
+    algorithm: [
+      'Given `transaction_value_cents` and optional `rwi_present` (default false), `general_escrow_pct`, `ppa_escrow_pct`, `special_escrows_cents`:',
+      '1. If `transaction_value_cents` is missing, the implementation SHALL return `status: "needs_inputs"`.',
+      '2. `general_escrow_pct` SHALL be the supplied value, else the cited-median default for the RWI posture (constants: general escrow medians).',
+      '3. `ppa_escrow_pct` SHALL be the supplied value, else the cited-median PPA escrow default (constants: PPA escrow median).',
+      '4. `general_escrow_cents` and `ppa_escrow_cents` SHALL be the transaction value times the respective percentage, rounded to the nearest cent; `special_escrow_cents` SHALL be the sum of any supplied special-escrow amounts.',
+      '5. `aggregate_escrow_cents` SHALL be the sum of the three.',
+    ],
+    constants: [
+      { name: 'General escrow — no RWI', value: '10% of transaction value', kind: 'cited_median_should', citation: 'SRS Acquiom Deal Terms Study 2024; 2025', pin: 'median general indemnity escrow, non-RWI', effective: '2024–2025 studies', nextCheck: 'on next SRS Acquiom study (annual)', traceValues: [0.1] },
+      { name: 'General escrow — RWI present', value: '0.5% of transaction value', kind: 'cited_median_should', citation: 'SRS Acquiom Deal Terms Study 2024; 2025', pin: 'median general escrow, RWI-backed', effective: '2024–2025 studies', nextCheck: 'on next SRS Acquiom study (annual)', traceValues: [0.005] },
+      { name: 'Purchase-price-adjustment escrow', value: '1% of transaction value', kind: 'cited_median_should', citation: 'SRS Acquiom Deal Terms Study 2024; 2025', pin: 'median working-capital/PPA escrow', effective: '2024–2025 studies', nextCheck: 'on next SRS Acquiom study (annual)', traceValues: [0.01] },
+    ],
+    precisionRule: 'Percentages are 4-decimal fractions; escrow amounts are exact integer cents (see the Conventions chapter).',
+    inputs: {
+      transaction_value_cents: { type: 'integer (cents)', desc: 'Total transaction value the escrows are sized against.', unit: 'cents' },
+      rwi_present: { type: 'boolean', desc: 'Whether RWI backs the deal (default false); shifts the general escrow default.' },
+      general_escrow_pct: { type: 'number', desc: 'Override for the general escrow as a fraction of value; defaults to the cited median.', precision: 4 },
+      ppa_escrow_pct: { type: 'number', desc: 'Override for the PPA escrow as a fraction of value; defaults to the cited median.', precision: 4 },
+      special_escrows_cents: { type: 'integer (cents)[]', desc: 'Any special-purpose escrow amounts (environmental, litigation, etc.) to add to the aggregate.', unit: 'cents' },
+    },
+    outputs: {
+      transaction_value_cents: { type: 'integer (cents)', desc: 'The transaction value, echoed.', unit: 'cents' },
+      rwi_present: { type: 'boolean', desc: 'The RWI posture used.' },
+      general_escrow_pct: { type: 'number', desc: 'The general escrow as a fraction of value.', precision: 4 },
+      general_escrow_cents: { type: 'integer (cents)', desc: 'The general indemnity escrow in cents.', unit: 'cents' },
+      ppa_escrow_pct: { type: 'number', desc: 'The PPA escrow as a fraction of value.', precision: 4 },
+      ppa_escrow_cents: { type: 'integer (cents)', desc: 'The purchase-price-adjustment escrow in cents.', unit: 'cents' },
+      special_escrow_cents: { type: 'integer (cents)', desc: 'The sum of special-purpose escrows.', unit: 'cents' },
+      aggregate_escrow_cents: { type: 'integer (cents)', desc: 'Total cash held back across all escrows.', unit: 'cents' },
+    },
+    derivedOutputs: ['transaction_value_cents', 'general_escrow_cents', 'ppa_escrow_cents', 'special_escrow_cents', 'aggregate_escrow_cents'],
+    boundary:
+      'This model sizes general, PPA, and special escrows from the transaction value and cited-median or supplied percentages. The default percentages are market medians (SHOULD); the escrow that actually protects this buyer, and the release mechanics, are negotiation and drafting judgments for counsel.',
+    golden: {
+      narrative: 'An $80M deal without RWI holds a 10% general escrow ($8M) plus a 1% PPA escrow ($800k), $8.8M held back in aggregate.',
+      input: { transaction_value_cents: 8_000_000_000, rwi_present: false },
+    },
+  },
+
+  /* ══ M209 — RWI stack architecture ═══════════════════════════════════ */
+  M209: {
+    purpose:
+      'Lays out the representation-and-warranty-insurance stack — the retention, the primary policy tower, any excess layers, and the interaction with the seller indemnity cap — from the enterprise value and either supplied or cited-median terms. It answers, for a deal team pricing insured recourse, "how big is the tower, where does the retention sit, and how much seller indemnity remains behind it?" Binding terms belong to the broker and underwriter.',
+    algorithm: [
+      'Given `enterprise_value_cents` and optional `retention_pct`, `policy_tower_pct`, `seller_indemnity_cap_pct`, `exclusions`, `excess_layers`:',
+      '1. If `enterprise_value_cents` is missing, the implementation SHALL return `status: "needs_inputs"`.',
+      '2. `retention_cents` SHALL be the enterprise value times the retention percentage (supplied or cited median — constants: RWI retention median), rounded to the nearest cent.',
+      '3. `primary_policy_limit_cents` SHALL be the enterprise value times the tower percentage (supplied or cited median — constants: RWI tower median).',
+      '4. `excess_policy_limit_cents` SHALL be the sum of any supplied excess-layer limits; `excess_layer_count` SHALL be their number; `total_policy_limit_cents` SHALL be primary plus excess.',
+      '5. `seller_indemnity_cap_cents` SHALL be the enterprise value times the seller-indemnity-cap percentage (supplied or cited median — constants: seller indemnity cap median).',
+      '6. It SHALL count exclusions and set `broker_handoff_required` true — binding terms route to the broker and underwriter.',
+    ],
+    constants: [
+      { name: 'RWI retention', value: '0.75% of enterprise value', kind: 'cited_median_should', citation: 'Marsh, Aon, Lockton RWI market reports 2023–2024', pin: 'median retention (dropping to ~0.5% at higher EV)', effective: '2023–2024 market reports', nextCheck: 'on next annual broker reports', traceValues: [0.0075] },
+      { name: 'RWI primary tower', value: '10% of enterprise value', kind: 'cited_median_should', citation: 'ABA Private Target Deal Points Study 2023; Marsh/Aon/Lockton reports 2023–2024', pin: 'median primary policy limit', effective: '2023–2024', nextCheck: 'on next annual broker reports', traceValues: [0.1] },
+      { name: 'Seller indemnity cap behind RWI', value: '0.5% of enterprise value', kind: 'cited_median_should', citation: 'ABA Private Target Deal Points Study 2023', pin: 'median seller indemnity cap, RWI deals', effective: '2023 study', nextCheck: 'on next ABA study (biennial)', traceValues: [0.005] },
+    ],
+    precisionRule: 'Percentages are 4-decimal fractions; retention and policy limits are exact integer cents (see the Conventions chapter).',
+    inputs: {
+      enterprise_value_cents: { type: 'integer (cents)', desc: 'Enterprise value the RWI stack is sized against.', unit: 'cents' },
+      retention_pct: { type: 'number', desc: 'Override for the retention as a fraction of EV; defaults to the cited median.', precision: 4 },
+      policy_tower_pct: { type: 'number', desc: 'Override for the primary tower as a fraction of EV; defaults to the cited median.', precision: 4 },
+      seller_indemnity_cap_pct: { type: 'number', desc: 'Override for the seller indemnity cap as a fraction of EV; defaults to the cited median.', precision: 4 },
+      exclusions: { type: 'string[]', desc: 'Named policy exclusions being tracked.' },
+      excess_layers: { type: 'object[]', desc: 'Excess layers above the primary tower; each object carries `limit_cents` (integer cents).' },
+    },
+    outputs: {
+      enterprise_value_cents: { type: 'integer (cents)', desc: 'The enterprise value, echoed.', unit: 'cents' },
+      retention_pct: { type: 'number', desc: 'The retention as a fraction of EV.', precision: 4 },
+      retention_cents: { type: 'integer (cents)', desc: 'The retention (deductible) in cents.', unit: 'cents' },
+      primary_policy_limit_cents: { type: 'integer (cents)', desc: 'The primary RWI tower limit in cents.', unit: 'cents' },
+      excess_layer_count: { type: 'integer', desc: 'Number of excess layers supplied.' },
+      excess_policy_limit_cents: { type: 'integer (cents)', desc: 'Total excess-layer limit in cents.', unit: 'cents' },
+      total_policy_limit_cents: { type: 'integer (cents)', desc: 'Primary plus excess policy limit.', unit: 'cents' },
+      seller_indemnity_cap_pct: { type: 'number', desc: 'The seller indemnity cap as a fraction of EV.', precision: 4 },
+      seller_indemnity_cap_cents: { type: 'integer (cents)', desc: 'The seller indemnity cap in cents.', unit: 'cents' },
+      exclusion_count: { type: 'integer', desc: 'Number of tracked exclusions.' },
+      broker_handoff_required: { type: 'boolean', desc: 'Always true — binding terms route to the broker/underwriter.' },
+    },
+    derivedOutputs: ['enterprise_value_cents', 'retention_cents', 'primary_policy_limit_cents', 'excess_layer_count', 'excess_policy_limit_cents', 'total_policy_limit_cents', 'seller_indemnity_cap_cents', 'exclusion_count'],
+    boundary:
+      'This model lays out the RWI stack — retention, primary tower, excess layers, seller-indemnity interaction — from cited-median or supplied terms. Binding pricing, the retention the underwriter will actually offer, the exclusions, and the policy wording are the broker\'s and underwriter\'s; the model produces the architecture and routes to them (broker_handoff_required), and quotes no policy.',
+    golden: {
+      narrative: 'A $150M insured deal sets a 0.75% retention ($1.125M) beneath a $15M primary RWI tower, with the seller indemnity capped at 0.5% ($750k) behind the policy.',
+      input: { enterprise_value_cents: 15_000_000_000 },
+    },
+  },
+
+  /* ══ M210 — Closing-statement true-up sequence ═══════════════════════ */
+  M210: {
+    purpose:
+      'Computes the working-capital true-up that follows closing — the estimated and final purchase-price adjustments against the peg, which party owes the receivable — and dates the estimated-statement, dispute-notice, and negotiation deadlines. It answers, after closing, "how much does the price move on the true-up, who pays, and by when must each step happen?" It owns the true-up that M109 (the peg) deliberately does not.',
+    algorithm: [
+      'Given `closing_date`, `peg_cents`, `actual_nwc_cents`, and optional `estimated_nwc_cents`, `actual_statement_due_days`, `dispute_notice_days`, `good_faith_negotiation_days`:',
+      '1. If `closing_date`, `peg_cents`, or `actual_nwc_cents` is missing, the implementation SHALL return `status: "needs_inputs"`.',
+      '2. `final_purchase_price_adjustment_cents` SHALL be `actual_nwc_cents − peg_cents`; `estimated_adjustment_cents` SHALL be `estimated_nwc_cents − peg_cents` when an estimate is supplied, else null.',
+      '3. `buyer_receivable_cents` SHALL be `max(0, −adjustment)` (working capital delivered below the peg); `seller_receivable_cents` SHALL be `max(0, adjustment)` (above the peg).',
+      '4. `actual_statement_due_date` SHALL be the closing date advanced by the statement-due days (supplied or cited median — constants: true-up timeline medians).',
+      '5. `dispute_notice_due_date` SHALL be the statement-due date advanced by the dispute-notice days; `good_faith_negotiation_end_date` SHALL be that date advanced by the negotiation days.',
+    ],
+    constants: [
+      { name: 'Actual-statement due window', value: '90 days after closing', kind: 'cited_median_should', citation: 'SRS Acquiom Working Capital PPA Study 2024', pin: 'median days to deliver the closing statement', effective: '2024 study', nextCheck: 'on next SRS Acquiom study', traceValues: [90] },
+      { name: 'Dispute-notice window', value: '30 days after the statement', kind: 'cited_median_should', citation: 'SRS Acquiom Working Capital PPA Study 2024', pin: 'median dispute-notice period', effective: '2024 study', nextCheck: 'on next SRS Acquiom study', traceValues: [30] },
+      { name: 'Good-faith negotiation window', value: '30 days after the dispute notice', kind: 'cited_median_should', citation: 'SRS Acquiom Working Capital PPA Study 2024', pin: 'median good-faith negotiation period before arbitrator', effective: '2024 study', nextCheck: 'on next SRS Acquiom study', traceValues: [30] },
+    ],
+    precisionRule: 'Adjustments and receivables are exact integer cents; timeline outputs are ISO-8601 dates (see the Conventions chapter).',
+    inputs: {
+      closing_date: { type: 'string (ISO date)', desc: 'The closing date the timeline runs from.' },
+      peg_cents: { type: 'integer (cents)', desc: 'The working-capital peg (see M109).', unit: 'cents' },
+      actual_nwc_cents: { type: 'integer (cents)', desc: 'Actual net working capital per the final closing statement.', unit: 'cents' },
+      estimated_nwc_cents: { type: 'integer (cents)', desc: 'Estimated net working capital per the estimated statement; optional.', unit: 'cents' },
+      actual_statement_due_days: { type: 'integer', desc: 'Days after closing to deliver the actual statement; defaults to the cited median.', unit: 'days' },
+      dispute_notice_days: { type: 'integer', desc: 'Days after the statement to notice a dispute; defaults to the cited median.', unit: 'days' },
+      good_faith_negotiation_days: { type: 'integer', desc: 'Days of good-faith negotiation before the arbitrator; defaults to the cited median.', unit: 'days' },
+    },
+    outputs: {
+      closing_date: { type: 'string (ISO date)', desc: 'The closing date, echoed.' },
+      peg_cents: { type: 'integer (cents)', desc: 'The peg, echoed.', unit: 'cents' },
+      estimated_nwc_cents: { type: 'integer (cents) | null', desc: 'The estimated NWC, echoed, or null.', unit: 'cents' },
+      actual_nwc_cents: { type: 'integer (cents)', desc: 'The actual NWC, echoed.', unit: 'cents' },
+      estimated_adjustment_cents: { type: 'integer (cents) | null', desc: 'Estimated adjustment against the peg, or null.', unit: 'cents' },
+      final_purchase_price_adjustment_cents: { type: 'integer (cents)', desc: 'Final adjustment: actual NWC minus peg (positive = above peg).', unit: 'cents' },
+      buyer_receivable_cents: { type: 'integer (cents)', desc: 'Amount owed to the buyer when NWC lands below the peg.', unit: 'cents' },
+      seller_receivable_cents: { type: 'integer (cents)', desc: 'Amount owed to the seller when NWC lands above the peg.', unit: 'cents' },
+      actual_statement_due_date: { type: 'string (ISO date)', desc: 'Deadline to deliver the actual closing statement.' },
+      dispute_notice_due_date: { type: 'string (ISO date)', desc: 'Deadline to notice a dispute.' },
+      good_faith_negotiation_end_date: { type: 'string (ISO date)', desc: 'End of the good-faith negotiation window before the accounting arbitrator.' },
+    },
+    derivedOutputs: ['peg_cents', 'estimated_nwc_cents', 'actual_nwc_cents', 'estimated_adjustment_cents', 'final_purchase_price_adjustment_cents', 'buyer_receivable_cents', 'seller_receivable_cents'],
+    boundary:
+      'This model computes the working-capital true-up — estimated vs. actual adjustment and the buyer/seller receivable — and the dispute-timeline dates from the peg and cited-median or supplied day counts. Whether the actual statement is correct, and the accounting judgments inside it, are for the parties\' accountants and the neutral accounting arbitrator; the model computes the arithmetic and the schedule.',
+    golden: {
+      narrative: 'Actual working capital of $4.6M lands $400k below the $5.0M peg, creating a $400k buyer receivable, with the dispute clock running from a closing-plus-90-day statement.',
+      input: { closing_date: '2026-03-31', peg_cents: 500_000_000, actual_nwc_cents: 460_000_000, estimated_nwc_cents: 480_000_000 },
+    },
+  },
+
+  /* ══ M211 — Conditions-to-close logic engine ═════════════════════════ */
+  M211: {
+    purpose:
+      'Tallies the conditions to closing — which are satisfied, which are waived, which still block — and flags the ones that need specialist review (regulatory, MAE, financing, consent, CFIUS, HSR). It answers, in the signing-to-closing window, "is the deal closing-ready, and what is still open?" It tracks the node logic; whether a condition is truly met or waivable is counsel\'s call.',
+    algorithm: [
+      'Given `conditions` (a list of objects, each with `name`, `type`, `satisfied`, `waived`):',
+      '1. If `conditions` is empty, the implementation SHALL return `status: "needs_inputs"`.',
+      '2. For each condition, `blocks_closing` SHALL be true iff it is neither satisfied nor waived; `professional_review_required` SHALL be true iff its type matches a specialist category (regulatory, legal, counsel, MAE, financing, consent, CFIUS, HSR).',
+      '3. It SHALL count conditions, satisfied, waived, and open (blocking) conditions.',
+      '4. `closing_ready` SHALL be true iff no condition blocks closing; `professional_review_required` (aggregate) SHALL be true iff any node requires specialist review.',
+      '5. It SHALL list the open conditions by name and return the full node detail.',
+    ],
+    constants: [],
+    inputs: {
+      conditions: { type: 'object[]', desc: 'Closing conditions; each object carries `name` (string), `type` (a condition_type value), `satisfied` (boolean), and `waived` (boolean).' },
+    },
+    outputs: {
+      condition_count: { type: 'integer', desc: 'Total number of conditions.' },
+      satisfied_count: { type: 'integer', desc: 'Number satisfied.' },
+      waived_count: { type: 'integer', desc: 'Number waived.' },
+      open_condition_count: { type: 'integer', desc: 'Number still blocking closing.' },
+      closing_ready: { type: 'boolean', desc: 'Whether no condition blocks closing.' },
+      professional_review_required: { type: 'boolean', desc: 'Whether any condition needs specialist review.' },
+      open_conditions: { type: 'string[]', desc: 'Names of the conditions still blocking closing.' },
+      condition_nodes: { type: 'object[]', desc: 'Per-condition detail: `{ name, type, satisfied, waived, blocks_closing, professional_review_required }`.' },
+    },
+    derivedOutputs: ['condition_count', 'satisfied_count', 'waived_count', 'open_condition_count'],
+    boundary:
+      'This model tallies conditions to close and flags which block closing and which need specialist review (regulatory, MAE, financing, consent, CFIUS, HSR). Whether a condition is in fact satisfied or waivable, and the MAE and regulatory judgments, are determinations for counsel; the model tracks the node logic and routes the flagged conditions, and clears none of them itself.',
+    golden: {
+      narrative: 'Of four conditions, the reps bring-down and the no-MAE condition are met, but HSR clearance and financing remain open — the deal is not closing-ready and needs specialist review.',
+      input: { conditions: [ { name: 'HSR clearance', type: 'hsr', satisfied: false, waived: false }, { name: 'Bring-down of representations', type: 'general', satisfied: true, waived: false }, { name: 'No material adverse effect', type: 'mae', satisfied: true, waived: false }, { name: 'Debt financing funded', type: 'financing', satisfied: false, waived: false } ] },
+    },
+  },
+
+  /* ══ M212 — Termination and break/reverse-break fee engine ═══════════ */
+  M212: {
+    purpose:
+      'Sizes the termination-fee package — the target break-up fee (and its go-shop discount), the reverse termination fee, and the antitrust reverse fee — from the transaction value and either supplied percentages or cited-median study defaults. It answers, for deal counsel and bankers, "what do the exit fees cost on each side of this deal?" It computes the magnitudes; enforceability and the fiduciary-out architecture are counsel\'s.',
+    algorithm: [
+      'Given `transaction_value_cents` and optional `target_break_fee_pct`, `reverse_termination_fee_pct`, `antitrust_reverse_fee_pct`, `go_shop_discount_pct`:',
+      '1. If `transaction_value_cents` is missing, the implementation SHALL return `status: "needs_inputs"`.',
+      '2. `target_break_fee_cents` SHALL be the transaction value times the target break-fee percentage (supplied or cited median — constants: break-fee median).',
+      '3. `go_shop_break_fee_cents` SHALL be the target break fee times the go-shop discount (supplied or cited median — constants: go-shop discount median).',
+      '4. `reverse_termination_fee_cents` and `antitrust_reverse_fee_cents` SHALL be the transaction value times the respective percentages (supplied or cited medians — constants: reverse and antitrust reverse fee medians).',
+      '5. It SHALL carry counsel-review flags for the fiduciary-out, go-shop/no-shop, regulatory covenant, and liquidated-damages enforceability framing.',
+    ],
+    constants: [
+      { name: 'Target break-up fee', value: '2.7% of transaction value', kind: 'cited_median_should', citation: 'Houlihan Lokey 2023 Transaction Termination Fee Study', pin: 'median target break-up fee, %-of-equity-value', effective: '2023 study', nextCheck: 'on next Houlihan Lokey study', traceValues: [0.027] },
+      { name: 'Reverse termination fee', value: '4.2% of transaction value', kind: 'cited_median_should', citation: 'Houlihan Lokey 2023 Transaction Termination Fee Study', pin: 'median reverse termination fee', effective: '2023 study', nextCheck: 'on next Houlihan Lokey study', traceValues: [0.042] },
+      { name: 'Antitrust reverse termination fee', value: '5.0% of transaction value', kind: 'cited_median_should', citation: 'Fenwick 2023 antitrust reverse-break-fee (ARBF) analysis', pin: 'median antitrust reverse break fee', effective: '2023 analysis', nextCheck: 'on next Fenwick analysis', traceValues: [0.05] },
+      { name: 'Go-shop break-fee discount', value: '50% of the base break fee', kind: 'cited_median_should', citation: 'Houlihan Lokey 2023 Transaction Termination Fee Study', pin: 'typical go-shop period fee reduction', effective: '2023 study', nextCheck: 'on next Houlihan Lokey study', traceValues: [0.5] },
+    ],
+    precisionRule: 'Percentages are 4-decimal fractions; fee amounts are exact integer cents (see the Conventions chapter).',
+    inputs: {
+      transaction_value_cents: { type: 'integer (cents)', desc: 'Transaction (equity) value the fees are sized against.', unit: 'cents' },
+      target_break_fee_pct: { type: 'number', desc: 'Override for the target break-up fee as a fraction of value; defaults to the cited median.', precision: 4 },
+      reverse_termination_fee_pct: { type: 'number', desc: 'Override for the reverse termination fee as a fraction of value; defaults to the cited median.', precision: 4 },
+      antitrust_reverse_fee_pct: { type: 'number', desc: 'Override for the antitrust reverse fee as a fraction of value; defaults to the cited median.', precision: 4 },
+      go_shop_discount_pct: { type: 'number', desc: 'Override for the go-shop fee discount as a fraction of the base fee; defaults to the cited median.', precision: 4 },
+    },
+    outputs: {
+      transaction_value_cents: { type: 'integer (cents)', desc: 'The transaction value, echoed.', unit: 'cents' },
+      target_break_fee_pct: { type: 'number', desc: 'The target break-up fee as a fraction of value.', precision: 4 },
+      target_break_fee_cents: { type: 'integer (cents)', desc: 'The target break-up fee in cents.', unit: 'cents' },
+      go_shop_break_fee_cents: { type: 'integer (cents)', desc: 'The reduced break fee during a go-shop period.', unit: 'cents' },
+      reverse_termination_fee_pct: { type: 'number', desc: 'The reverse termination fee as a fraction of value.', precision: 4 },
+      reverse_termination_fee_cents: { type: 'integer (cents)', desc: 'The reverse termination fee in cents.', unit: 'cents' },
+      antitrust_reverse_fee_pct: { type: 'number', desc: 'The antitrust reverse fee as a fraction of value.', precision: 4 },
+      antitrust_reverse_fee_cents: { type: 'integer (cents)', desc: 'The antitrust reverse fee in cents.', unit: 'cents' },
+      counsel_review_flags: { type: 'string[]', desc: 'Items counsel must confirm (fiduciary-out, go-shop, regulatory covenant, enforceability).' },
+    },
+    derivedOutputs: ['transaction_value_cents', 'target_break_fee_cents', 'go_shop_break_fee_cents', 'reverse_termination_fee_cents', 'antitrust_reverse_fee_cents'],
+    boundary:
+      'This model sizes break-up, reverse-break-up, and antitrust reverse-termination fees from the transaction value and cited-median or supplied percentages (Houlihan Lokey / Fenwick study medians — SHOULD, not law). Enforceability (the Brazen liquidated-damages framing), the fiduciary-out, and the go-shop/no-shop architecture are legal determinations for counsel; the model computes the fee magnitudes and flags the review.',
+    golden: {
+      narrative: 'On an $80M deal the target break fee runs 2.7% ($2.16M), halved in a go-shop ($1.08M), against a 4.2% reverse fee ($3.36M) and a 5% antitrust reverse fee ($4.0M).',
+      input: { transaction_value_cents: 8_000_000_000 },
+    },
+  },
+
+  /* ══ M213 — Earnout architecture and dispute ═════════════════════════ */
+  M213: {
+    purpose:
+      'Structures the earnout — how many metrics gate it, the acceleration triggers, the post-closing covenants, the dispute forum, and the tax-characterization selector — from supplied facts, and routes the binding legal and tax calls to the specialists. It answers, for parties designing contingent consideration, "how is this earnout built and where does it go for review?" It organizes the architecture; it decides no enforceable term or tax treatment.',
+    algorithm: [
+      'Given `earnout_value_cents` and `metrics`, and optional `acceleration_triggers`, `post_closing_covenants`, `dispute_forum`, `tax_characterization`:',
+      '1. If `earnout_value_cents` is missing or `metrics` is empty, the implementation SHALL return `status: "needs_inputs"`.',
+      '2. `metric_count` SHALL be the number of metrics; `multiple_metric_earnout` SHALL be true iff more than one.',
+      '3. `acceleration_trigger_count` and `post_closing_covenant_count` SHALL be the counts of the supplied lists.',
+      '4. `dispute_forum` SHALL default to the accounting arbitrator when not supplied; `accounting_arbitrator_selected` SHALL be true iff the forum names an accounting arbitrator.',
+      '5. `tax_characterization` SHALL default to "requires_tax_review"; `counsel_and_tax_handoff_required` SHALL be true — the EBITDA-definition lock and the §453/§483/§1274 characterization route to counsel and the tax advisor.',
+    ],
+    constants: [],
+    inputs: {
+      earnout_value_cents: { type: 'integer (cents)', desc: 'Maximum contingent consideration payable under the earnout.', unit: 'cents' },
+      metrics: { type: 'string[]', desc: 'The performance metrics that gate the earnout (e.g., EBITDA, revenue).' },
+      acceleration_triggers: { type: 'string[]', desc: 'Events that accelerate the earnout (e.g., change of control, termination without cause).' },
+      post_closing_covenants: { type: 'string[]', desc: 'Covenants governing the buyer\'s post-closing operation of the business.' },
+      dispute_forum: { type: 'enum', enum: 'dispute_forum', desc: 'The forum designated to resolve earnout disputes; defaults to the accounting arbitrator.' },
+      tax_characterization: { type: 'enum', enum: 'tax_characterization', desc: 'The earnout tax-characterization selector; defaults to requires_tax_review.' },
+    },
+    outputs: {
+      earnout_value_cents: { type: 'integer (cents)', desc: 'The earnout value, echoed.', unit: 'cents' },
+      metric_count: { type: 'integer', desc: 'Number of performance metrics.' },
+      multiple_metric_earnout: { type: 'boolean', desc: 'Whether more than one metric gates the earnout.' },
+      acceleration_trigger_count: { type: 'integer', desc: 'Number of acceleration triggers.' },
+      post_closing_covenant_count: { type: 'integer', desc: 'Number of post-closing covenants.' },
+      dispute_forum: { type: 'enum', enum: 'dispute_forum', desc: 'The designated dispute forum.' },
+      accounting_arbitrator_selected: { type: 'boolean', desc: 'Whether the forum is an accounting arbitrator.' },
+      tax_characterization: { type: 'enum', enum: 'tax_characterization', desc: 'The tax-characterization selector.' },
+      counsel_and_tax_handoff_required: { type: 'boolean', desc: 'Always true — binding legal and tax calls route to the specialists.' },
+    },
+    derivedOutputs: ['earnout_value_cents', 'metric_count', 'acceleration_trigger_count', 'post_closing_covenant_count'],
+    boundary:
+      'This model structures the earnout — metric count, acceleration triggers, post-closing covenants, dispute forum, tax-characterization selector — from supplied facts. The EBITDA-definition lock, the enforceable covenant set, and the §453/§483/§1274 tax characterization are legal and tax determinations for counsel and the tax advisor; the model organizes the architecture and routes (counsel_and_tax_handoff_required), and selects no binding treatment.',
+    golden: {
+      narrative: 'A $20M two-metric earnout (EBITDA and revenue) with a change-of-control accelerator routes disputes to an accounting arbitrator and both counsel and tax review.',
+      input: { earnout_value_cents: 2_000_000_000, metrics: ['EBITDA', 'revenue'], acceleration_triggers: ['change_of_control'], post_closing_covenants: ['operate_in_ordinary_course'] },
     },
   },
 };
