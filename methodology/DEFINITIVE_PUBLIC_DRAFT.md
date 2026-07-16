@@ -1,6 +1,5 @@
-<!-- GENERATED review draft (generator v4, DEPTH pass: publish gate + Conventions/precision + honest counts + gate registry + first tax family) —
-     built by scripts/build-definitive-public.ts over scripts/definitivePublicOverlay.ts. Do not hand-edit; regenerate instead.
-     Governance + publish gate: dist/definitive-internal/GOVERNANCE.md. Burndown: dist/definitive-internal/GAP_LEDGER.md.
+<!-- GENERATED review draft (generator v4, DEPTH pass) — built by scripts/build-definitive-public.ts over scripts/definitivePublicOverlay.ts.
+     Do not hand-edit; regenerate instead. Governance/publish gate: dist/definitive-internal/GOVERNANCE.md. Burndown: dist/definitive-internal/GAP_LEDGER.md.
      Founder actions: dist/definitive-internal/GATE_REGISTRY_FOR_FOUNDER_APPROVAL.md -->
 
 # DEFINITIVE M&A Specification — v1.0.0 (DRAFT — internal review build)
@@ -1424,10 +1423,10 @@ Conventions: monetary values are integer cents; dates are ISO-8601 strings; juri
 
 | Field | Type | Required | Description |
 |---|---|---|---|
+| `annual_debt_service_cents` | integer (cents) | MUST | Annual principal-and-interest debt service on the acquisition debt. |
 | `buyer_equity_cents` | integer (cents) | MUST | Buyer equity injection into the transaction. |
 | `cash_flow_cents` | integer (cents) | MUST | Post-acquisition annual free cash flow available for debt service. |
 | `purchase_price_cents` | integer (cents) | MUST | Total acquisition purchase price. |
-| `annual_debt_service_cents` | integer (cents) | MAY | Annual principal-and-interest debt service on the acquisition debt. |
 
 ## 3. Output contract
 
