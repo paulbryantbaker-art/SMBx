@@ -358,6 +358,30 @@ function checkConstants(constants: ConstantSpec[], mg: (s: string) => void, slot
     if (c.kind === 'cited_median_should' && !/\b(19|20)\d{2}\b/.test(c.citation)) mg(`${slot}: cited-median constant "${c.name}" must name the study year in its citation`);
   }
 }
+/** §Item 4 — structural instance check: a worked example MUST satisfy its
+ *  emitted schema (required present, no undocumented fields, types agree). This
+ *  bakes in the drift the ajv pass caught so it can never regress. */
+function jsType(v: unknown): string {
+  if (v === null) return 'null';
+  if (Array.isArray(v)) return 'array';
+  if (typeof v === 'boolean') return 'boolean';
+  if (typeof v === 'number') return Number.isInteger(v) ? 'integer' : 'number';
+  if (typeof v === 'string') return 'string';
+  if (typeof v === 'object') return 'object';
+  return 'unknown';
+}
+function checkInstance(schema: any, instance: Record<string, any>, report: (s: string) => void, label: string): void {
+  const props = schema.properties || {};
+  for (const r of (schema.required || [])) if (!(r in instance)) report(`${label}: required field \`${r}\` missing from the worked example`);
+  for (const [k, v] of Object.entries(instance)) {
+    const p = props[k];
+    if (!p) { report(`${label}: field \`${k}\` present but not in the schema (contract drift)`); continue; }
+    const types: string[] = Array.isArray(p.type) ? p.type : [p.type];
+    const jt = jsType(v);
+    const ok = types.some(t => t === jt || (t === 'number' && jt === 'integer') || (t === 'integer' && jt === 'number' && Number.isInteger(v)));
+    if (!ok) report(`${label}: field \`${k}\` is ${jt} but the schema declares ${types.join('|')}`);
+  }
+}
 function collectNumbers(v: unknown, out: number[] = []): number[] {
   if (typeof v === 'number' && Number.isFinite(v)) out.push(v);
   else if (Array.isArray(v)) for (const x of v) collectNumbers(x, out);
@@ -417,7 +441,11 @@ async function modelPage(e: DefinitiveModelCatalogEntry): Promise<string> {
 
   // Tier 1 — Normative, ten sections
   const ex = extractions.get(e.implementedRuntimeModelId!)!;
-  const requiredSet = new Set([...ex.inputs.entries()].filter(([, s]) => s.required).map(([k]) => k));
+  // Ground truth for "required" is the runtime's own missing-input behavior on an
+  // empty record — not the registry's (sometimes over-broad) requiredInputs list.
+  const requiredSet = new Set(ex.missingInputFormat);
+  // The authored contract MUST declare every input the runtime actually requires.
+  if (overlay) for (const rk of ex.missingInputFormat) if (!overlay.inputs[rk]) mg(`${e.slotId}: runtime requires input \`${rk}\` but the authored input contract omits it`);
 
   L.push(`## 2. Input contract\n`);
   L.push(`Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [\`${e.slotId}.schema.json\`](${e.slotId}.schema.json).\n`);
@@ -899,10 +927,6 @@ licensed professionals.
   for (const e of catalog) {
     const before = gaps.length;
     const page = await modelPage(e);
-    // §Item 5 guard: a slot counted "implementable today" MUST render gap-free.
-    if (tierOf(e) === 'normative' && overlayOf(e) && gaps.length > before) {
-      gap(`${e.slotId}: counted implementable-today but rendered ${gaps.length - before} gap(s) — the count block would overstate; fix the overlay`);
-    }
     modelPages.set(e.slotId, page);
     write(`spec/models/${e.slotId}.md`, page);
     if (tierOf(e) === 'normative') {
@@ -911,7 +935,8 @@ licensed professionals.
       const jsonTypeOf = (t: string): any => {
         const nullable = / \| null$/.test(t);
         const base = t.replace(/ \| null$/, '');
-        let jt: any = base.startsWith('integer') ? 'integer' : base === 'number' ? 'number' : base === 'boolean' ? 'boolean' : base.endsWith('[]') ? 'array' : base === 'object' ? 'object' : 'string';
+        // NB: check array (`[]`) BEFORE scalar keywords, or "integer (cents)[]" mis-types as integer.
+        let jt: any = base.endsWith('[]') ? 'array' : base.startsWith('integer') ? 'integer' : base === 'number' ? 'number' : base === 'boolean' ? 'boolean' : base === 'object' ? 'object' : 'string';
         return nullable ? [jt, 'null'] : jt;
       };
       const authoredSchema = (fields: Record<string, OverlayFieldSpec>, requiredKeys: string[]) => ({
@@ -938,11 +963,21 @@ licensed professionals.
         })),
         ...(isInput ? { required: [...m.entries()].filter(([, v]: [string, any]) => v.required).map(([k]) => k) } : {}),
       });
-      const requiredKeys = [...ex.inputs.entries()].filter(([, s]) => s.required).map(([k]) => k);
+      // Required = runtime ground truth ∩ authored inputs (empiricalSchema derives its own).
+      const requiredKeys = overlay ? ex.missingInputFormat.filter(k => overlay.inputs[k]) : [];
       const schema = overlay
         ? { input: authoredSchema(overlay.inputs, requiredKeys), output: authoredSchema(overlay.outputs, []) }
         : { input: empiricalSchema(ex.inputs, true), output: empiricalSchema(ex.outputs as any, false) };
       write(`spec/models/${e.slotId}.schema.json`, JSON.stringify(schema, null, 2) + '\n');
+      // §Item 4 — the worked example MUST validate against the emitted schema (no drift).
+      if (overlay) {
+        const run = await executeV19Model({ modelId: e.implementedRuntimeModelId!, input: overlay.golden.input });
+        if (run.status === 'complete') { checkInstance(schema.input, overlay.golden.input, gap, `${e.slotId} golden input`); checkInstance(schema.output, run.outputs, gap, `${e.slotId} golden output`); }
+      }
+    }
+    // §Item 5 guard: a slot counted "implementable today" MUST render gap-free (page + schema).
+    if (tierOf(e) === 'normative' && overlayOf(e) && gaps.length > before) {
+      gap(`${e.slotId}: counted implementable-today but produced ${gaps.length - before} gap(s) — the count block would overstate; fix the overlay`);
     }
   }
 

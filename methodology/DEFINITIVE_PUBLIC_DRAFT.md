@@ -1,6 +1,5 @@
-<!-- GENERATED review draft (generator v4, DEPTH pass: publish gate + Conventions/precision + honest counts + gate registry + first tax family) —
-     built by scripts/build-definitive-public.ts over scripts/definitivePublicOverlay.ts. Do not hand-edit; regenerate instead.
-     Governance + publish gate: dist/definitive-internal/GOVERNANCE.md. Burndown: dist/definitive-internal/GAP_LEDGER.md.
+<!-- GENERATED review draft (generator v4, DEPTH pass) — built by scripts/build-definitive-public.ts over scripts/definitivePublicOverlay.ts.
+     Do not hand-edit; regenerate instead. Governance/publish gate: dist/definitive-internal/GOVERNANCE.md. Burndown: dist/definitive-internal/GAP_LEDGER.md.
      Founder actions: dist/definitive-internal/GATE_REGISTRY_FOR_FOUNDER_APPROVAL.md -->
 
 # DEFINITIVE M&A Specification — v1.0.0 (DRAFT — internal review build)
@@ -21,7 +20,7 @@ reorganization structure, distressed and restructuring waterfalls, capital
 structure and liability management, IP transfer mechanics, and a real
 property & contract law layer with anchor-state law encoded as data.
 
-**At a glance:** **134 model slots mapped** · **17 implementable from this document today** · 68 normative scheduled (authoring by family) · 47 catalog · 2 reserved · **30-gate routing framework** (17 routed; 3 specified) · **262 authority anchors** (as referenced) · **655-case conformance suite** (385 model-runtime).
+**At a glance:** **134 model slots mapped** · **25 implementable from this document today** · 60 normative scheduled (authoring by family) · 47 catalog · 2 reserved · **30-gate routing framework** (17 routed; 3 specified) · **262 authority anchors** (as referenced) · **655-case conformance suite** (385 model-runtime).
 
 The specification publishes at two maturity tiers, labeled on every entry and
 in the index. **Normative** entries carry the full contract — input and output
@@ -29,7 +28,7 @@ schemas, algorithm, worked example, error semantics, and conformance
 bindings — and each carries its contract in full; entries marked **implementable from this document alone** have a complete authored contract today, while the remainder are being authored family by family (see the changelog). **Catalog** entries
 are informative maps of scope, boundary, routing, and authorities whose
 normative contracts are scheduled. The breadth claim (134 slots
-mapped) and the rigor claim (17 implementable from
+mapped) and the rigor claim (25 implementable from
 this document today) are distinct claims, made separately and never blurred —
 the second number leads, and it climbs family by family in public.
 
@@ -187,24 +186,38 @@ The designed field vocabulary used by model input and output contracts and by ga
 | Field | Type | Description |
 |---|---|---|
 | `acceleration_risk` | enum(acceleration_risk) | The lender's acceleration posture. |
+| `acceleration_trigger_count` | integer | Number of acceleration triggers. |
+| `acceleration_triggers` | string[] | Events that accelerate the earnout (e.g., change of control, termination without cause). |
+| `accounting_arbitrator_selected` | boolean | Whether the forum is an accounting arbitrator. |
 | `act_type` | enum(recording_act_type) | The recording-act family applied. |
+| `actual_nwc_cents` | integer (cents) | Actual net working capital per the final closing statement. |
+| `actual_statement_due_date` | string (ISO date) | Deadline to deliver the actual closing statement. |
+| `actual_statement_due_days` | integer | Days after closing to deliver the actual statement; defaults to the cited median. |
 | `after_acquired_title_applies` | boolean | Whether estoppel-by-deed vests later-acquired title in the grantee. |
+| `aggregate_escrow_cents` | integer (cents) | Total cash held back across all escrows. |
 | `aggregation_years` | integer | null | The acting-in-concert aggregation window in years, or null. |
 | `all_required_signers_present` | boolean | Whether every party the vesting form requires is on the signature page; explicit false raises a signatory gap. |
 | `allocated_cents` | integer (cents) | Total amount allocated across the classes. |
 | `allocations` | object[] | Per-class schedule: `{ class_number, class_name, fair_market_value_cents, allocated_cents, capped_at_fmv }`. |
 | `annual_debt_service_cents` | integer (cents) | Annual principal-and-interest debt service on the acquisition debt. |
 | `annual_section_382_limitation_cents` | integer (cents) | The annual §382 limitation on pre-change NOL use. |
+| `antitrust_reverse_fee_cents` | integer (cents) | The antitrust reverse fee in cents. |
+| `antitrust_reverse_fee_pct` | number | Override for the antitrust reverse fee as a fraction of value; defaults to the cited median. |
 | `asset_classes` | object[] | The asset classes with fair market values; each object carries `class_number` (1–7), `class_name` (string), and `fair_market_value_cents` (integer cents). |
 | `auto_reportable_cents` | integer (cents) | The current HSR auto-reportable ceiling, in cents. |
 | `base_amount_cents` | integer (cents) | The executive's §280G base amount (five-year average W-2 compensation). |
 | `basis` | enum(risk_basis) | The basis for the allocation. |
+| `basket_cents` | integer (cents) | The basket threshold in cents. |
+| `basket_pct` | number | Override for the basket as a fraction of value; defaults to the cited median. |
+| `basket_type` | enum(basket_type) | Override for how the basket operates; defaults by RWI posture. |
 | `bfp_protected` | boolean | Whether the later purchaser takes free of the prior interest as a protected bona-fide purchaser. |
+| `broker_handoff_required` | boolean | Always true — binding terms route to the broker/underwriter. |
 | `bulk_sales_citations` | string[] | Per-state bulk-sales citations for the applicable states. |
 | `bulk_sales_notification_states` | string[] | Applicable bulk-sales notification states. |
 | `buyer_equity_cents` | integer (cents) | Buyer equity injection into the transaction. |
 | `buyer_equity_pct` | number | Buyer equity as a fraction of purchase price (0–1). |
 | `buyer_expects_warranty` | boolean | Whether the buyer is negotiating for title warranties (default true); drives the warranty-gap flag. |
+| `buyer_receivable_cents` | integer (cents) | Amount owed to the buyer when NWC lands below the peg. |
 | `cash_flow_cents` | integer (cents) | Post-acquisition annual free cash flow available for debt service. |
 | `cercla_linked_property` | boolean | Whether the property has a CERCLA/environmental linkage (default false). |
 | `cercla_successor_flag` | boolean | Whether CERCLA successor liability is flagged. |
@@ -216,8 +229,13 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `classification` | enum(lease_classification) | How the transfer classifies against the restriction. |
 | `cleansing_vote_passed` | boolean | null | Whether the supplied vote exceeds the threshold, or null when no vote is supplied. |
 | `cleansing_vote_threshold_pct` | number | The disinterested-shareholder approval threshold (0.75). |
+| `closing_date` | string (ISO date) | The closing date from which survival periods run. |
+| `closing_ready` | boolean | Whether no condition blocks closing. |
 | `co_required_on_transfer` | boolean | Whether a certificate of occupancy must be re-issued on this transfer. |
 | `coc_default_note` | string | null | The change-of-control default note when a control transfer is not deemed an assignment, else null. |
+| `condition_count` | integer | Total number of conditions. |
+| `condition_nodes` | object[] | Per-condition detail: `{ name, type, satisfied, waived, blocks_closing, professional_review_required }`. |
+| `conditions` | object[] | Closing conditions; each object carries `name` (string), `type` (a condition_type value), `satisfied` (boolean), and `waived` (boolean). |
 | `consent_clause` | enum(consent_clause) | The lease consent provision as parsed. |
 | `consent_required` | boolean | Whether landlord consent is required for the transfer. |
 | `consent_standard` | enum(consent_standard) | The governing consent standard when consent is required, else null. |
@@ -228,7 +246,9 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `contract_risk_on` | enum(contract_risk_on) | The party the contract places risk on, when it allocates. |
 | `contract_title_standard` | enum(contract_title_standard) | The title standard the purchase contract promises (default marketable). |
 | `controlling_interest_threshold_pct` | number | null | The controlling-interest threshold for the state, or null. |
+| `counsel_and_tax_handoff_required` | boolean | Always true — binding legal and tax calls route to the specialists. |
 | `counsel_handoff` | string | null | The routing sentence when a signatory gap defers, else null. |
+| `counsel_review_flags` | string[] | Items counsel must confirm (limitations period, fraud definition, RWI interaction). |
 | `covenant_scope` | string | Whether covenants reach all defects or only the grantor's own acts, or none. |
 | `covenants_present` | string[] | The title covenants this deed conveys (empty for bargain-and-sale and quitclaim). |
 | `cumulative_related_transfers_pct` | number | Cumulative percentage transferred across related steps within the aggregation window (0–100); defaults to transfer_pct. |
@@ -239,15 +259,43 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `deed_type` | enum(deed_type) | The deed instrument type being conveyed. |
 | `default_regime` | enum(risk_basis) | The state default regime that would govern absent a contract term. |
 | `defer_to_counsel` | boolean | True only when the state is untabled; the ordering then defers. |
+| `dispute_forum` | enum(dispute_forum) | The forum designated to resolve earnout disputes; defaults to the accounting arbitrator. |
+| `dispute_notice_days` | integer | Days after the statement to notice a dispute; defaults to the cited median. |
+| `dispute_notice_due_date` | string (ISO date) | Deadline to notice a dispute. |
 | `dscr` | number | Debt-service coverage ratio: cash flow ÷ annual debt service. |
+| `earnout_value_cents` | integer (cents) | Maximum contingent consideration payable under the earnout. |
 | `enterprise_value_cents` | integer (cents) | The size of the transaction being tested against the HSR thresholds. |
+| `estimated_adjustment_cents` | integer (cents) | null | Estimated adjustment against the peg, or null. |
+| `estimated_nwc_cents` | integer (cents) | Estimated net working capital per the estimated statement; optional. |
 | `estimated_years_to_use_nol` | integer | null | Whole-year ceiling to absorb the NOL at the annual limitation, or null. |
 | `exceptions` | object[] | Title-commitment exceptions; each object carries `label` (string), `curable` (boolean), and `insurer_will_insure_over` (boolean). |
+| `excess_layer_count` | integer | Number of excess layers supplied. |
+| `excess_layers` | object[] | Excess layers above the primary tower; each object carries `limit_cents` (integer cents). |
 | `excess_parachute_payment_cents` | integer (cents) | The excess parachute payment (payments over one times base) when triggered, else 0. |
+| `excess_policy_limit_cents` | integer (cents) | Total excess-layer limit in cents. |
 | `excise_tax_20pct_cents` | integer (cents) | The §4999 excise tax on the excess (20%). |
+| `exclusion_count` | integer | Number of tracked exclusions. |
+| `exclusions` | string[] | Named policy exclusions being tracked. |
 | `filing_days_after_affixation` | integer | Days between affixation and the fixture filing; decisive for the 20-day PMSI window. |
+| `final_purchase_price_adjustment_cents` | integer (cents) | Final adjustment: actual NWC minus peg (positive = above peg). |
 | `fixture_filing_made` | boolean | Whether a fixture filing was made in the real-property records (a UCC-1 alone does not suffice). |
+| `fraud_carveout` | boolean | Whether fraud is carved out of the exclusive-remedy provision (default true). |
+| `fraud_carveout_from_exclusive_remedy` | boolean | Whether fraud is carved out of the exclusive remedy. |
 | `fraud_exception_note` | string | Standing note that fraud claims survive merger regardless of survival language. |
+| `fraud_tax_carveout` | string | The fraud and tax carve-out posture — uncapped or counsel-defined. |
+| `fundamental_reps_cap_cents` | integer (cents) | The cap on fundamental-representation claims (the full transaction value). |
+| `fundamental_reps_expiry` | string (ISO date) | Fundamental-representation expiry date. |
+| `fundamental_reps_years` | integer | Override for fundamental-representation survival in years; defaults to the cited median. |
+| `general_cap_cents` | integer (cents) | The general indemnity cap in cents. |
+| `general_cap_pct` | number | Override for the general indemnity cap as a fraction of value; defaults to the cited median. |
+| `general_escrow_cents` | integer (cents) | The general indemnity escrow in cents. |
+| `general_escrow_pct` | number | Override for the general escrow as a fraction of value; defaults to the cited median. |
+| `general_reps_expiry` | string (ISO date) | null | General-representation expiry date, or null when the period is zero. |
+| `general_reps_months` | integer | Override for general-representation survival in months; defaults to the cited median. |
+| `go_shop_break_fee_cents` | integer (cents) | The reduced break fee during a go-shop period. |
+| `go_shop_discount_pct` | number | Override for the go-shop fee discount as a fraction of the base fee; defaults to the cited median. |
+| `good_faith_negotiation_days` | integer | Days of good-faith negotiation before the arbitrator; defaults to the cited median. |
+| `good_faith_negotiation_end_date` | string (ISO date) | End of the good-faith negotiation window before the accounting arbitrator. |
 | `high_cents` | integer (cents) | Maximum observed monthly net working capital. |
 | `hsr_size_triggered` | boolean | Whether the transaction meets or exceeds the size-of-transaction threshold. |
 | `insurable_over_count` | integer | Number triaged insurable-over. |
@@ -267,23 +315,36 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `lost_employer_deduction_cents` | integer (cents) | The employer deduction disallowed under §280G (equal to the excess). |
 | `low_cents` | integer (cents) | Minimum observed monthly net working capital. |
 | `material_casualty_or_condemnation_pending` | boolean | Whether a material casualty or condemnation is pending (default false); drives the silent-contract red flag. |
+| `materiality_scrape_default` | boolean | Whether a materiality scrape is the market-standard default here. |
 | `max_7a_loan_cents` | integer (cents) | The statutory 7(a) maximum loan amount, in cents. |
 | `meets_sba_dscr_floor` | boolean | Whether the coverage ratio meets or exceeds the SBA 7(a) DSCR floor. |
 | `meets_sba_equity_floor` | boolean | Whether buyer equity meets or exceeds the SBA 7(a) minimum equity injection. |
 | `mere_change_exemption_claimed` | boolean | Whether a mere-change-of-identity exemption is being claimed (default false). |
 | `merged_away_count` | integer | Number that merge into the deed at closing. |
+| `metric_count` | integer | Number of performance metrics. |
+| `metrics` | string[] | The performance metrics that gate the earnout (e.g., EBITDA, revenue). |
 | `monthly_nwc_cents` | integer (cents)[] | Trailing monthly net-working-capital observations, one integer-cents value per month; order is immaterial to the peg. |
+| `multiple_metric_earnout` | boolean | Whether more than one metric gates the earnout. |
 | `nol_carryforward_cents` | integer (cents) | The pre-change NOL carryforward balance; optional, drives the years-to-absorb estimate. |
 | `non_transferable_permits` | string[] | Labels of permits that do not travel with the transfer. |
 | `observed_months` | integer | Number of monthly observations the peg was computed over. |
+| `open_condition_count` | integer | Number still blocking closing. |
+| `open_conditions` | string[] | Names of the conditions still blocking closing. |
 | `parachute_payments_cents` | integer (cents) | Aggregate contingent-on-change-in-control payments to the executive. |
 | `peg_cents` | integer (cents) | The working-capital peg: the trailing arithmetic mean of the observations, to the nearest cent. |
 | `permits` | object[] | Operating permits; each object carries `label` (string) and `transferable` (boolean). |
 | `pmsi` | boolean | Whether the fixture interest is a purchase-money security interest. |
+| `policy_tower_pct` | number | Override for the primary tower as a fraction of EV; defaults to the cited median. |
+| `post_closing_covenant_count` | integer | Number of post-closing covenants. |
+| `post_closing_covenants` | string[] | Covenants governing the buyer's post-closing operation of the business. |
+| `ppa_escrow_cents` | integer (cents) | The purchase-price-adjustment escrow in cents. |
+| `ppa_escrow_pct` | number | Override for the PPA escrow as a fraction of value; defaults to the cited median. |
 | `ppa_note` | string | Standing note that the fixture-versus-personalty line shifts purchase-price allocation, transfer-tax base, and depreciation. |
 | `prevailing_interest` | enum(prevailing_interest) | Which competing interest the act favors on the facts. |
+| `primary_policy_limit_cents` | integer (cents) | The primary RWI tower limit in cents. |
 | `prior_recorded_real_property_interest` | boolean | Whether a conflicting real-property interest (e.g., a mortgage) was recorded first. |
 | `priority` | enum(fixture_priority) | Which interest holds priority in the fixture. |
+| `professional_review_required` | boolean | Whether any condition needs specialist review. |
 | `purchase_price_cents` | integer (cents) | Total acquisition purchase price. |
 | `reassessment_screen_triggered` | boolean | Whether the property-tax reassessment screen fires. |
 | `red_flags` | string[] | Priority-hygiene warnings (unrecorded interests; race-state notice anomaly). |
@@ -291,20 +352,39 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `related_steps_planned` | boolean | Whether related transfer steps are planned (default false); with a mere-change claim this drives step-transaction risk. |
 | `required_signatories` | string | Who must sign for a conveyance of the whole. |
 | `residential_under_5_units` | boolean | Whether the collateral is residential real property of fewer than five dwelling units. |
+| `retention_cents` | integer (cents) | The retention (deductible) in cents. |
+| `retention_pct` | number | Override for the retention as a fraction of EV; defaults to the cited median. |
+| `reverse_termination_fee_cents` | integer (cents) | The reverse termination fee in cents. |
+| `reverse_termination_fee_pct` | number | Override for the reverse termination fee as a fraction of value; defaults to the cited median. |
 | `right_captures_entity_transfers` | boolean | Whether the right's language expressly captures entity-level (indirect) transfers. |
 | `right_type` | enum(right_type) | The preemptive right at issue. |
 | `risk_on` | enum(risk_on) | The party bearing pre-closing casualty risk. |
+| `rwi_present` | boolean | Whether representation-and-warranty insurance backs the deal (default false); shifts the cited-median cap default. |
+| `sandbagging_default` | string | The default sandbagging posture — silent or governed by state default. |
+| `satisfied_count` | integer | Number satisfied. |
 | `section_280g_triggered` | boolean | Whether the payments meet or exceed three times the base amount. |
+| `seller_indemnity_cap_cents` | integer (cents) | The seller indemnity cap in cents. |
+| `seller_indemnity_cap_pct` | number | Override for the seller indemnity cap as a fraction of EV; defaults to the cited median. |
+| `seller_receivable_cents` | integer (cents) | Amount owed to the seller when NWC lands above the peg. |
 | `shareholder_cleansing_vote_pct` | number | Fraction of disinterested shareholders approving the payments (0–1); optional. |
 | `signatory_gap` | boolean | Whether a required signatory is missing. |
 | `size_of_transaction_cents` | integer (cents) | The transaction size under test, in cents. |
+| `special_escrow_cents` | integer (cents) | The sum of special-purpose escrows. |
+| `special_escrows_cents` | integer (cents)[] | Any special-purpose escrow amounts (environmental, litigation, etc.) to add to the aggregate. |
 | `state` | string (US state code) | Two-letter code of the situs state, used to select the recording act. |
 | `states_involved` | string[] | Two-letter state codes touched by the deal, screened against the bulk-sales table. |
 | `step_transaction_risk` | boolean | Whether a mere-change claim plus related steps raises step-transaction risk. |
 | `surviving_count` | integer | Number of items that survive closing. |
+| `target_break_fee_cents` | integer (cents) | The target break-up fee in cents. |
+| `target_break_fee_pct` | number | Override for the target break-up fee as a fraction of value; defaults to the cited median. |
+| `tax_characterization` | enum(tax_characterization) | The earnout tax-characterization selector; defaults to requires_tax_review. |
+| `tax_reps_expiry` | string (ISO date) | Tax-representation expiry date. |
+| `tax_reps_years` | integer | Override for tax-representation survival in years; defaults to the cited median. |
 | `three_times_base_threshold_cents` | integer (cents) | The three-times-base-amount safe-harbor threshold. |
 | `threshold_cents` | integer (cents) | The current HSR size-of-transaction threshold, in cents. |
+| `total_policy_limit_cents` | integer (cents) | Primary plus excess policy limit. |
 | `transaction_form` | enum(preemptive_transaction_form) | The transaction form being tested. |
+| `transaction_value_cents` | integer (cents) | Total transaction value the ladder is sized against. |
 | `transfer_kind` | enum(transfer_kind) | The nature of the transfer (default deed_sale); the last six enum values are the Garn-protected consumer transfers. |
 | `transfer_pct` | number | Percentage of entity interests transferred in this step (0–100). |
 | `transfer_type` | enum(lease_transfer_type) | The form of the transfer being tested. |
@@ -315,6 +395,7 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `unallocated_cents` | integer (cents) | Non-negative residual when supplied fair market values exceed the price (normally zero). |
 | `use_change` | boolean | Whether the transaction involves a change of use (default false); can require a CO even in an entity deal. |
 | `vesting_form` | enum(vesting_form) | How record title is held. |
+| `waived_count` | integer | Number waived. |
 | `within_20_day_window` | boolean | Whether the fixture filing fell within the 20-day PMSI window. |
 
 ## Enumerations
@@ -323,6 +404,10 @@ Enumerated values are part of the normative contract — a conforming implementa
 
 - **`acceleration_risk`** — The lender's acceleration posture on the transfer.
   - Values: `none_no_clause`, `barred_by_garn_exception`, `lender_option_on_transfer`
+- **`basket_type`** — How the indemnification basket operates: a true deductible (recovery only above the threshold), a tipping basket (first-dollar recovery once the threshold is crossed), or unresolved pending confirmation.
+  - Values: `deductible`, `tipping`, `deductible_or_tipping_to_confirm`
+- **`condition_type`** — The category of a closing condition; regulatory/MAE/financing/consent/CFIUS/HSR/legal types route to specialist review.
+  - Values: `general`, `regulatory`, `mae`, `financing`, `consent`, `cfius`, `hsr`, `legal`
 - **`consent_clause`** — The lease consent provision as parsed: silent, consent required with no stated standard, express reasonableness, or express sole discretion.
   - Values: `none_silent`, `consent_no_standard`, `reasonableness`, `sole_discretion`
 - **`consent_standard`** — The consent standard that governs, resolved from the clause and the state consent-standard table.
@@ -333,6 +418,8 @@ Enumerated values are part of the normative contract — a conforming implementa
   - Values: `marketable`, `insurable`
 - **`deed_type`** — The deed instrument type, which fixes the title-covenant set conveyed.
   - Values: `general_warranty`, `special_warranty`, `bargain_and_sale`, `quitclaim`
+- **`dispute_forum`** — The forum designated to resolve an earnout or true-up dispute.
+  - Values: `accounting_arbitrator`, `expert_determination`, `arbitration`, `courts`
 - **`fixture_priority`** — Which competing interest holds priority in the fixture under UCC § 9-334.
   - Values: `fixture_secured_party`, `first_to_perfect`, `real_property_interest`
 - **`lease_classification`** — How the transfer classifies against the lease transfer-restriction terms.
@@ -355,6 +442,8 @@ Enumerated values are part of the normative contract — a conforming implementa
   - Values: `buyer`, `seller`, `per_contract_terms`
 - **`survival_item_type`** — The kind of relied-on obligation being tracked for survival past closing.
   - Values: `representation`, `warranty`, `covenant`, `indemnity`
+- **`tax_characterization`** — The earnout's tax-characterization selector; the binding treatment is a tax-advisor determination.
+  - Values: `requires_tax_review`, `installment_sale`, `imputed_interest`, `compensation`
 - **`transfer_kind`** — The nature of the transfer being screened against the loan's due-on-transfer clause; the last six are the Garn-St. Germain § 1701j-3(d) protected consumer transfers.
   - Values: `deed_sale`, `entity_transfer`, `transfer_to_spouse_or_child`, `transfer_on_death_to_relative`, `divorce_decree_transfer_to_spouse`, `inter_vivos_trust_borrower_beneficiary`, `junior_lien_creation`, `leasehold_under_3y_no_option`
 - **`triage_bucket`** — The disposition bucket for a single title exception.
@@ -368,7 +457,7 @@ Enumerated values are part of the normative contract — a conforming implementa
 
 These field names appear in models whose normative contracts are still being authored; they are listed for completeness and are **not** yet part of the designed vocabulary. Their types and descriptions land as each model's overlay is authored.
 
-`acceleration_triggers` · `actual_nwc_cents` · `afr_rate` · `aggregate_noncontingent_liquidated_debt_cents` · `allowed_claim_cents` · `alta_endorsements_requested` · `amount_realized_cents` · `annual_ground_rent_cents` · `annual_rent_cents` · `assets` · `assignee_fee_cents` · `available_capital_cents` · `base_rate` · `basis_at_conversion_cents` · `basket_pct` · `baskets` · `boot_received_cents` · `breakup_fee_cents` · `bright_line_date` · `bulk_sale_clearance_required` · `buyer_step_up_pv_benefit_cents` · `buyer_will_use_as_residence` · `call_price_pct` · `cap_rate` · `cash_interest_rate` · `circuit` · `claims` · `class_vi_intangibles_cents` · `class_vote_amount_pct` · `class_vote_number_pct` · `classes` · `closing_date` · `closing_day_of_period` · `collateral_value_cents` · `commitment_cents` · `components` · `conditions` · `consideration_mix` · `contributors` · `conversion_date` · `corporate_tax_rate` · `coupon_rate` · `credit_bid_claim_cents` · `creditor_classes` · `curative_items` · `deal_type` · `debt_assumable` · `debts_due_cents` · `deposit_verification_tier` · `discount_pct` · `discount_rate` · `disposition_months` · `disposition_pct` · `dispute_forum` · `distributions_cents` · `earnout_targets` · `earnout_value_cents` · `ebitda_growth_pct` · `economic_life_years` · `effective_gross_income_cents` · `efficient_market_exists` · `efficient_market_rate` · `eligible_ar_cents` · `eligible_inventory_cents` · `engaged_in_commercial_activity` · `entity_carried_basis_cents` · `estate_value_cents` · `estimated_nwc_cents` · `excess_layers` · `exclusions` · `exercise_price_cents` · `exit_leverage` · `face_amount_cents` · `fair_value_assets_cents` · `fair_value_share_price_cents` · `federal_tax_rate` · `fiduciary_out_present` · `fmv_at_conversion_cents` · `fmv_real_property_cents` · `forecast_periods` · `form_8288_b_reduced_withholding_requested` · `fund_nav_cents` · `gain_cents` · `general_buffer_rate` · `general_cap_pct` · `general_reps_months` · `ground_lease_expiry_date` · `guc_recovery_pct` · `installment_receivable_cents` · `interest_inconsequential` · `interest_transferred_pct` · `investment_cents` · `ip_assets` · `ip_intangibles_cents` · `issues` · `jurisdiction` · `last_deposit_date` · `lease_term_years` · `leases` · `lender_policy_required` · `lender_recognition_agreement` · `liabilities_cents` · `licenses` · `lien_amount_cents` · `liquidation_value_cents` · `liquidity_months` · `loan_amount_cents` · `loan_maturity_date` · `market_cap_rate_from_pass_through_source` · `material_ip_categories` · `metrics` · `milestones` · `minimum_dscr` · `minimum_liquidity_cents` · `minimum_participation_pct` · `new_money_minimum_cents` · `new_security_value_cents` · `new_value` · `noi_cents` · `notice_days` · `old_security_value_cents` · `opco_ebitda_cents` · `opening_cash_cents` · `operating_expenses_cents` · `option_pool_pct` · `outstanding_debt_cents` · `participating_debt_cents` · `pca_items` · `pe_owned_target` · `period_days` · `plan_payment_stream_cents` · `policy_tower_pct` · `post_closing_covenants` · `post_default_trading_price` · `pre_money_cents` · `pre_money_share_count` · `priced_round_share_price_cents` · `priming_requested` · `principal_cents` · `prior_bankruptcy_count` · `probabilities` · `professional_fee_carveout_cents` · `projected_cash_flow_cents` · `property_sold_under_363_or_plan` · `pv_lease_payments_cents` · `real_estate_assets_cents` · `real_estate_income_cents` · `real_property_value_cents` · `recognized_gain_cents` · `recourse` · `recoverable_expenses_cents` · `release_triggers` · `relinquished_property_value_cents` · `remaining_years` · `rent_roll` · `replacement_property_value_cents` · `replacement_reserve_cents` · `required_capital_cents` · `required_cushion_pct` · `reserves_cents` · `residual_value_pct` · `retention_pct` · `rev_proc_2011_29_safe_harbor_elected` · `risk_premium` · `rollup_amount_cents` · `round_size_cents` · `rwi_present` · `sale_costs_cents` · `sale_date` · `sale_price_cents` · `sales_use_tax_base_cents` · `sales_use_tax_rate` · `schedule_b_exceptions` · `searches` · `section_1031_exchange` · `section_363f_prongs` · `security_terms` · `seller_entity_type` · `seller_foreign_person` · `seller_indemnity_cap_pct` · `seller_marginal_tax_rate` · `seller_structure_tax_delta_cents` · `seller_tax_basis_cents` · `seller_tax_delta_cents` · `special_escrows_cents` · `spread_bps` · `state_apportionment_pct` · `state_tax_rate` · `stated_interest_rate` · `step_up_benefit_rate` · `strip_percentage` · `survey_received` · `tangible_assets_cents` · `target_cap_rate` · `tax_characterization` · `taxable_income_cents` · `tenant_payments_cents` · `tenant_pro_rata_pct` · `term_months` · `term_years` · `termination_events` · `thirteen_week_cash_need_cents` · `time_to_recovery_years` · `title_commitment_received` · `toggle_type` · `total_assets_cents` · `total_income_cents` · `tranches` · `transaction_costs` · `transaction_value_cents` · `transfer_assets` · `transfer_date` · `transfer_tax_rate` · `treasury_rate` · `trustee_fee_cents` · `update_frequency_months` · `valuation_cap_cents` · `warrant_coverage_pct`
+`afr_rate` · `aggregate_noncontingent_liquidated_debt_cents` · `allowed_claim_cents` · `alta_endorsements_requested` · `amount_realized_cents` · `annual_ground_rent_cents` · `annual_rent_cents` · `assets` · `assignee_fee_cents` · `available_capital_cents` · `base_rate` · `basis_at_conversion_cents` · `baskets` · `boot_received_cents` · `breakup_fee_cents` · `bright_line_date` · `bulk_sale_clearance_required` · `buyer_step_up_pv_benefit_cents` · `buyer_will_use_as_residence` · `call_price_pct` · `cap_rate` · `cash_interest_rate` · `circuit` · `claims` · `class_vi_intangibles_cents` · `class_vote_amount_pct` · `class_vote_number_pct` · `classes` · `closing_day_of_period` · `collateral_value_cents` · `commitment_cents` · `components` · `consideration_mix` · `contributors` · `conversion_date` · `corporate_tax_rate` · `coupon_rate` · `credit_bid_claim_cents` · `creditor_classes` · `curative_items` · `deal_type` · `debt_assumable` · `debts_due_cents` · `deposit_verification_tier` · `discount_pct` · `discount_rate` · `disposition_months` · `disposition_pct` · `distributions_cents` · `earnout_targets` · `ebitda_growth_pct` · `economic_life_years` · `effective_gross_income_cents` · `efficient_market_exists` · `efficient_market_rate` · `eligible_ar_cents` · `eligible_inventory_cents` · `engaged_in_commercial_activity` · `entity_carried_basis_cents` · `estate_value_cents` · `exercise_price_cents` · `exit_leverage` · `face_amount_cents` · `fair_value_assets_cents` · `fair_value_share_price_cents` · `federal_tax_rate` · `fiduciary_out_present` · `fmv_at_conversion_cents` · `fmv_real_property_cents` · `forecast_periods` · `form_8288_b_reduced_withholding_requested` · `fund_nav_cents` · `gain_cents` · `general_buffer_rate` · `ground_lease_expiry_date` · `guc_recovery_pct` · `installment_receivable_cents` · `interest_inconsequential` · `interest_transferred_pct` · `investment_cents` · `ip_assets` · `ip_intangibles_cents` · `issues` · `jurisdiction` · `last_deposit_date` · `lease_term_years` · `leases` · `lender_policy_required` · `lender_recognition_agreement` · `liabilities_cents` · `licenses` · `lien_amount_cents` · `liquidation_value_cents` · `liquidity_months` · `loan_amount_cents` · `loan_maturity_date` · `market_cap_rate_from_pass_through_source` · `material_ip_categories` · `milestones` · `minimum_dscr` · `minimum_liquidity_cents` · `minimum_participation_pct` · `new_money_minimum_cents` · `new_security_value_cents` · `new_value` · `noi_cents` · `notice_days` · `old_security_value_cents` · `opco_ebitda_cents` · `opening_cash_cents` · `operating_expenses_cents` · `option_pool_pct` · `outstanding_debt_cents` · `participating_debt_cents` · `pca_items` · `pe_owned_target` · `period_days` · `plan_payment_stream_cents` · `post_default_trading_price` · `pre_money_cents` · `pre_money_share_count` · `priced_round_share_price_cents` · `priming_requested` · `principal_cents` · `prior_bankruptcy_count` · `probabilities` · `professional_fee_carveout_cents` · `projected_cash_flow_cents` · `property_sold_under_363_or_plan` · `pv_lease_payments_cents` · `real_estate_assets_cents` · `real_estate_income_cents` · `real_property_value_cents` · `recognized_gain_cents` · `recourse` · `recoverable_expenses_cents` · `release_triggers` · `relinquished_property_value_cents` · `remaining_years` · `rent_roll` · `replacement_property_value_cents` · `replacement_reserve_cents` · `required_capital_cents` · `required_cushion_pct` · `reserves_cents` · `residual_value_pct` · `rev_proc_2011_29_safe_harbor_elected` · `risk_premium` · `rollup_amount_cents` · `round_size_cents` · `sale_costs_cents` · `sale_date` · `sale_price_cents` · `sales_use_tax_base_cents` · `sales_use_tax_rate` · `schedule_b_exceptions` · `searches` · `section_1031_exchange` · `section_363f_prongs` · `security_terms` · `seller_entity_type` · `seller_foreign_person` · `seller_marginal_tax_rate` · `seller_structure_tax_delta_cents` · `seller_tax_basis_cents` · `seller_tax_delta_cents` · `spread_bps` · `state_apportionment_pct` · `state_tax_rate` · `stated_interest_rate` · `step_up_benefit_rate` · `strip_percentage` · `survey_received` · `tangible_assets_cents` · `target_cap_rate` · `taxable_income_cents` · `tenant_payments_cents` · `tenant_pro_rata_pct` · `term_months` · `term_years` · `termination_events` · `thirteen_week_cash_need_cents` · `time_to_recovery_years` · `title_commitment_received` · `toggle_type` · `total_assets_cents` · `total_income_cents` · `tranches` · `transaction_costs` · `transfer_assets` · `transfer_date` · `transfer_tax_rate` · `treasury_rate` · `trustee_fee_cents` · `update_frequency_months` · `valuation_cap_cents` · `warrant_coverage_pct`
 
 
 ---
@@ -1424,10 +1513,10 @@ Conventions: monetary values are integer cents; dates are ISO-8601 strings; juri
 
 | Field | Type | Required | Description |
 |---|---|---|---|
+| `annual_debt_service_cents` | integer (cents) | MUST | Annual principal-and-interest debt service on the acquisition debt. |
 | `buyer_equity_cents` | integer (cents) | MUST | Buyer equity injection into the transaction. |
 | `cash_flow_cents` | integer (cents) | MUST | Post-acquisition annual free cash flow available for debt service. |
 | `purchase_price_cents` | integer (cents) | MUST | Total acquisition purchase price. |
-| `annual_debt_service_cents` | integer (cents) | MAY | Annual principal-and-interest debt service on the acquisition debt. |
 
 ## 3. Output contract
 
@@ -8367,48 +8456,57 @@ Reference binding `MODEL.TAX.SALT_TRANSACTION.v1` · entered the specification a
 **Gates:** G1, G8
 **Deal contexts:** purchase agreement economics
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Cap, basket, materiality scrape, sandbagging, carve-out, and deal-size-band math.
+Sizes the indemnification ladder of a private acquisition agreement — the general cap, the basket, and the fundamental-representation cap — from the transaction value and either supplied percentages or cited-median market defaults. It answers, for a buyer or seller negotiating recourse, "how large is the indemnity backstop, and where does the basket sit?" It computes the magnitudes and surfaces the standard toggles (materiality scrape, sandbagging); the terms themselves are the parties' negotiation.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M206.schema.json`](M206.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `transaction_value_cents` | integer (cents) | MUST |
-| `basket_pct` | number | MAY |
-| `general_cap_pct` | number | MAY |
-| `rwi_present` | boolean | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `transaction_value_cents` | integer (cents) | MUST | Total transaction value the ladder is sized against. |
+| `basket_pct` | number | MAY | Override for the basket as a fraction of value; defaults to the cited median. |
+| `basket_type` | enum(basket_type) | MAY | Override for how the basket operates; defaults by RWI posture. One of `deductible`, `tipping`, `deductible_or_tipping_to_confirm`. |
+| `general_cap_pct` | number | MAY | Override for the general indemnity cap as a fraction of value; defaults to the cited median. |
+| `rwi_present` | boolean | MAY | Whether representation-and-warranty insurance backs the deal (default false); shifts the cited-median cap default. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `basket_cents` | integer (cents) |
-| `basket_pct` | number |
-| `basket_type` | string |
-| `fraud_tax_carveout` | string |
-| `fundamental_reps_cap_cents` | integer (cents) |
-| `general_cap_cents` | integer (cents) |
-| `general_cap_pct` | number |
-| `materiality_scrape_default` | boolean |
-| `rwi_present` | boolean |
-| `sandbagging_default` | string |
-| `transaction_value_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `transaction_value_cents` | integer (cents) | The transaction value, echoed. |
+| `rwi_present` | boolean | The RWI posture used. |
+| `general_cap_pct` | number | The general indemnity cap as a fraction of value. |
+| `general_cap_cents` | integer (cents) | The general indemnity cap in cents. |
+| `basket_pct` | number | The basket as a fraction of value. |
+| `basket_cents` | integer (cents) | The basket threshold in cents. |
+| `basket_type` | enum(basket_type) | How the basket operates. One of `deductible`, `tipping`, `deductible_or_tipping_to_confirm`. |
+| `fundamental_reps_cap_cents` | integer (cents) | The cap on fundamental-representation claims (the full transaction value). |
+| `fraud_tax_carveout` | string | The fraud and tax carve-out posture — uncapped or counsel-defined. |
+| `materiality_scrape_default` | boolean | Whether a materiality scrape is the market-standard default here. |
+| `sandbagging_default` | string | The default sandbagging posture — silent or governed by state default. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Cap, basket, materiality scrape, sandbagging, carve-out, and deal-size-band math.
-
-Computes indemnity cap, basket, fundamental cap, scrape default, and carve-out framing from deal value and RWI facts.
+Given `transaction_value_cents` and optional `rwi_present` (default false), `general_cap_pct`, `basket_pct`, `basket_type`:
+1. If `transaction_value_cents` is missing, the implementation SHALL return `status: "needs_inputs"`.
+2. `general_cap_pct` SHALL be the supplied value, else the cited-median default for the RWI posture — the RWI-present cap or the no-RWI cap (constants: general indemnity cap medians).
+3. `basket_pct` SHALL be the supplied value, else the cited-median basket default (constants: indemnity basket median).
+4. `general_cap_cents` and `basket_cents` SHALL be the transaction value times the respective percentage, rounded to the nearest cent.
+5. `fundamental_reps_cap_cents` SHALL be the full transaction value; the fraud/tax carve-out SHALL be reported as uncapped or counsel-defined.
+6. The model SHALL report the default posture of the materiality scrape and sandbagging toggles as market-standard flags, not determinations.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| General indemnity cap — no RWI | 10.5% of transaction value | SHOULD (cited median) | ABA Private Target Deal Points Study 2023 | median general indemnity cap, private targets without RWI | 2023 study | on next ABA study (biennial) |
+| General indemnity cap — RWI present | 0.5% of transaction value | SHOULD (cited median) | ABA Private Target Deal Points Study 2023 | median general indemnity cap, RWI-backed deals | 2023 study | on next ABA study (biennial) |
+| Indemnity basket | 0.5% of transaction value | SHOULD (cited median) | ABA Private Target Deal Points Study 2023 | median basket/deductible threshold | 2023 study | on next ABA study (biennial) |
 
 
 **Authorities**
@@ -8420,36 +8518,36 @@ Computes indemnity cap, basket, fundamental cap, scrape default, and carve-out f
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.LEGAL.INDEMNITY.001` — *Indemnity ladder computes cap and basket economics*.
+*An $80M private deal without RWI carries a 10.5%-of-value indemnity cap ($8.4M) over a 0.5% basket ($400k), with fundamental representations capped at the full price.*
 
 **Inputs**
 
 ```json
 {
-  "transaction_value_cents": 500000000,
-  "general_cap_pct": 0.105,
-  "basket_pct": 0.005,
+  "transaction_value_cents": 8000000000,
   "rwi_present": false
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.LEGAL.INDEMNITY.LADDER.v1`)**
 
 ```json
 {
-  "transaction_value_cents": 500000000,
+  "transaction_value_cents": 8000000000,
   "rwi_present": false,
   "general_cap_pct": 0.105,
-  "general_cap_cents": 52500000,
+  "general_cap_cents": 840000000,
   "basket_pct": 0.005,
-  "basket_cents": 2500000,
+  "basket_cents": 40000000,
   "basket_type": "deductible_or_tipping_to_confirm",
-  "fundamental_reps_cap_cents": 500000000,
+  "fundamental_reps_cap_cents": 8000000000,
   "fraud_tax_carveout": "uncapped_or_counsel_defined",
   "materiality_scrape_default": true,
   "sandbagging_default": "silent_or_state_default"
 }
 ```
+
+Precision: Percentages are 4-decimal fractions; cap and basket amounts are exact integer cents (see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -8458,7 +8556,7 @@ Conformance case `CONF.MODEL.LEGAL.INDEMNITY.001` — *Indemnity ladder computes
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model sizes the indemnification ladder — cap, basket, fundamental-rep cap — from the transaction value and either supplied or cited-median default percentages. The default percentages are market medians (SHOULD), not law; whether a given cap, basket type (deductible vs. tipping), materiality scrape, or sandbagging posture is right for this deal is a negotiation and drafting judgment for deal counsel, which the model does not make.
 
 ## 9. Conformance bindings
 
@@ -8476,46 +8574,57 @@ Reference binding `MODEL.LEGAL.INDEMNITY.LADDER.v1` · entered the specification
 **Gates:** G1, G8
 **Deal contexts:** purchase agreement economics
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-General, fundamental, tax, fraud, and exclusive-remedy survival schedule.
+Builds the survival schedule of a purchase agreement — when the general, fundamental, and tax representations expire — from the closing date and either supplied periods or cited-median defaults, and dates each expiry. It answers, for the parties papering recourse, "how long is each class of representation on the hook?" It schedules the dates and flags the governing-law and fraud interactions for counsel.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M207.schema.json`](M207.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `closing_date` | string (ISO date) | MUST |
-| `general_reps_months` | integer | MAY |
-| `rwi_present` | boolean | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `closing_date` | string (ISO date) | MUST | The closing date from which survival periods run. |
+| `fraud_carveout` | boolean | MAY | Whether fraud is carved out of the exclusive-remedy provision (default true). |
+| `fundamental_reps_years` | integer | MAY | Override for fundamental-representation survival in years; defaults to the cited median. |
+| `general_reps_months` | integer | MAY | Override for general-representation survival in months; defaults to the cited median. |
+| `rwi_present` | boolean | MAY | Whether RWI backs the deal (default false); zeroes the general survival default. |
+| `tax_reps_years` | integer | MAY | Override for tax-representation survival in years; defaults to the cited median. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `closing_date` | string (ISO date) |
-| `counsel_review_flags` | string[] |
-| `fraud_carveout_from_exclusive_remedy` | boolean |
-| `fundamental_reps_expiry` | string |
-| `fundamental_reps_years` | integer |
-| `general_reps_expiry` | string |
-| `general_reps_months` | integer |
-| `rwi_present` | boolean |
-| `tax_reps_expiry` | string |
-| `tax_reps_years` | integer |
+| Field | Type | Description |
+|---|---|---|
+| `closing_date` | string (ISO date) | The closing date, echoed. |
+| `rwi_present` | boolean | The RWI posture used. |
+| `general_reps_months` | integer | General-representation survival in months. |
+| `general_reps_expiry` | string (ISO date) | null | General-representation expiry date, or null when the period is zero. |
+| `fundamental_reps_years` | integer | Fundamental-representation survival in years. |
+| `fundamental_reps_expiry` | string (ISO date) | Fundamental-representation expiry date. |
+| `tax_reps_years` | integer | Tax-representation survival in years. |
+| `tax_reps_expiry` | string (ISO date) | Tax-representation expiry date. |
+| `fraud_carveout_from_exclusive_remedy` | boolean | Whether fraud is carved out of the exclusive remedy. |
+| `counsel_review_flags` | string[] | Items counsel must confirm (limitations period, fraud definition, RWI interaction). |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-General, fundamental, tax, fraud, and exclusive-remedy survival schedule.
-
-Computes general, fundamental, tax, and fraud survival period dates from closing date and RWI facts.
+Given `closing_date` and optional `rwi_present` (default false), `general_reps_months`, `fundamental_reps_years`, `tax_reps_years`, `fraud_carveout`:
+1. If `closing_date` is missing or not a valid ISO date, the implementation SHALL return `status: "needs_inputs"`.
+2. `general_reps_months` SHALL be the supplied value, else the cited-median default — zero when RWI is present, otherwise the no-RWI general survival period (constants: general survival medians).
+3. `fundamental_reps_years` and `tax_reps_years` SHALL be the supplied values, else the cited-median fundamental and tax survival periods (constants: fundamental/tax survival medians).
+4. Each expiry SHALL be the closing date advanced by the corresponding period (general in months; fundamental and tax in years × 12 months); a zero general period yields a null expiry.
+5. It SHALL carry a counsel-review flag to confirm the governing-law statute of limitations, the fraud definition, and the RWI-policy interaction.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| General survival — no RWI | 12 months | SHOULD (cited median) | SRS Acquiom Deal Terms Study 2024; 2025 | median general representation survival, non-RWI deals | 2024–2025 studies | on next SRS Acquiom study (annual) |
+| General survival — RWI present | 0 months (reps do not survive to the seller) | SHOULD (cited median) | SRS Acquiom Deal Terms Study 2024; 2025 | median general survival, RWI-backed deals | 2024–2025 studies | on next SRS Acquiom study (annual) |
+| Fundamental representation survival | 6 years | SHOULD (cited median) | ABA Private Target Deal Points Study 2023 | median fundamental-rep survival | 2023 study | on next ABA study (biennial) |
+| Tax representation survival | 6 years | SHOULD (cited median) | ABA Private Target Deal Points Study 2023 | median tax-rep survival (statute-of-limitations linked) | 2023 study | on next ABA study (biennial) |
 
 
 **Authorities**
@@ -8528,36 +8637,37 @@ Computes general, fundamental, tax, and fraud survival period dates from closing
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.LEGAL.SURVIVAL.001` — *Survival period engine computes rep expiry dates*.
+*A deal closing March 31, 2026 without RWI runs general representations 12 months (to March 31, 2027) and fundamental and tax representations six years (to March 31, 2032).*
 
 **Inputs**
 
 ```json
 {
-  "closing_date": "2026-05-21",
-  "rwi_present": false,
-  "general_reps_months": 12
+  "closing_date": "2026-03-31",
+  "rwi_present": false
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.LEGAL.SURVIVAL.PERIODS.v1`)**
 
 ```json
 {
-  "closing_date": "2026-05-21",
+  "closing_date": "2026-03-31",
   "rwi_present": false,
   "general_reps_months": 12,
-  "general_reps_expiry": "2027-05-21",
+  "general_reps_expiry": "2027-03-31",
   "fundamental_reps_years": 6,
-  "fundamental_reps_expiry": "2032-05-21",
+  "fundamental_reps_expiry": "2032-03-31",
   "tax_reps_years": 6,
-  "tax_reps_expiry": "2032-05-21",
+  "tax_reps_expiry": "2032-03-31",
   "fraud_carveout_from_exclusive_remedy": true,
   "counsel_review_flags": [
     "Confirm governing-law statute of limitations, fraud definition, and RWI policy interaction."
   ]
 }
 ```
+
+Precision: Periods are whole months or years; expiries are ISO-8601 dates (see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -8566,7 +8676,7 @@ Conformance case `CONF.MODEL.LEGAL.SURVIVAL.001` — *Survival period engine com
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model builds the survival schedule — general, fundamental, tax — from the closing date and cited-median or supplied periods. The governing-law statute of limitations, the fraud definition, and the exclusive-remedy/RWI interaction are legal determinations for counsel; the model schedules the dates and flags the review, and renders no enforceability conclusion.
 
 ## 9. Conformance bindings
 
@@ -8584,44 +8694,53 @@ Reference binding `MODEL.LEGAL.SURVIVAL.PERIODS.v1` · entered the specification
 **Gates:** G8
 **Deal contexts:** purchase agreement economics
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-General indemnity, RWI, PPA, special-purpose, and aggregate escrow sizing.
+Sizes the escrows a purchase agreement holds back — the general indemnity escrow, the purchase-price-adjustment escrow, and any special escrows — from the transaction value and either supplied percentages or cited-median defaults, and totals them. It answers, for the parties funding the closing, "how much cash is held back, and in which buckets?" The default percentages are market medians; the protective amount is a negotiation.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M208.schema.json`](M208.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `transaction_value_cents` | integer (cents) | MUST |
-| `rwi_present` | boolean | MAY |
-| `special_escrows_cents` | number[] | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `transaction_value_cents` | integer (cents) | MUST | Total transaction value the escrows are sized against. |
+| `general_escrow_pct` | number | MAY | Override for the general escrow as a fraction of value; defaults to the cited median. |
+| `ppa_escrow_pct` | number | MAY | Override for the PPA escrow as a fraction of value; defaults to the cited median. |
+| `rwi_present` | boolean | MAY | Whether RWI backs the deal (default false); shifts the general escrow default. |
+| `special_escrows_cents` | integer (cents)[] | MAY | Any special-purpose escrow amounts (environmental, litigation, etc.) to add to the aggregate. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `aggregate_escrow_cents` | integer (cents) |
-| `general_escrow_cents` | integer (cents) |
-| `general_escrow_pct` | number |
-| `ppa_escrow_cents` | integer (cents) |
-| `ppa_escrow_pct` | number |
-| `rwi_present` | boolean |
-| `special_escrow_cents` | integer (cents) |
-| `transaction_value_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `transaction_value_cents` | integer (cents) | The transaction value, echoed. |
+| `rwi_present` | boolean | The RWI posture used. |
+| `general_escrow_pct` | number | The general escrow as a fraction of value. |
+| `general_escrow_cents` | integer (cents) | The general indemnity escrow in cents. |
+| `ppa_escrow_pct` | number | The PPA escrow as a fraction of value. |
+| `ppa_escrow_cents` | integer (cents) | The purchase-price-adjustment escrow in cents. |
+| `special_escrow_cents` | integer (cents) | The sum of special-purpose escrows. |
+| `aggregate_escrow_cents` | integer (cents) | Total cash held back across all escrows. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-General indemnity, RWI, PPA, special-purpose, and aggregate escrow sizing.
-
-Computes general indemnity escrow, PPA escrow, special escrows, and aggregate holdback sizing.
+Given `transaction_value_cents` and optional `rwi_present` (default false), `general_escrow_pct`, `ppa_escrow_pct`, `special_escrows_cents`:
+1. If `transaction_value_cents` is missing, the implementation SHALL return `status: "needs_inputs"`.
+2. `general_escrow_pct` SHALL be the supplied value, else the cited-median default for the RWI posture (constants: general escrow medians).
+3. `ppa_escrow_pct` SHALL be the supplied value, else the cited-median PPA escrow default (constants: PPA escrow median).
+4. `general_escrow_cents` and `ppa_escrow_cents` SHALL be the transaction value times the respective percentage, rounded to the nearest cent; `special_escrow_cents` SHALL be the sum of any supplied special-escrow amounts.
+5. `aggregate_escrow_cents` SHALL be the sum of the three.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| General escrow — no RWI | 10% of transaction value | SHOULD (cited median) | SRS Acquiom Deal Terms Study 2024; 2025 | median general indemnity escrow, non-RWI | 2024–2025 studies | on next SRS Acquiom study (annual) |
+| General escrow — RWI present | 0.5% of transaction value | SHOULD (cited median) | SRS Acquiom Deal Terms Study 2024; 2025 | median general escrow, RWI-backed | 2024–2025 studies | on next SRS Acquiom study (annual) |
+| Purchase-price-adjustment escrow | 1% of transaction value | SHOULD (cited median) | SRS Acquiom Deal Terms Study 2024; 2025 | median working-capital/PPA escrow | 2024–2025 studies | on next SRS Acquiom study (annual) |
 
 
 **Authorities**
@@ -8634,35 +8753,33 @@ Computes general indemnity escrow, PPA escrow, special escrows, and aggregate ho
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.LEGAL.ESCROW.001` — *Escrow sizing computes RWI, PPA, and special escrows*.
+*An $80M deal without RWI holds a 10% general escrow ($8M) plus a 1% PPA escrow ($800k), $8.8M held back in aggregate.*
 
 **Inputs**
 
 ```json
 {
-  "transaction_value_cents": 500000000,
-  "rwi_present": true,
-  "special_escrows_cents": [
-    5000000,
-    3000000
-  ]
+  "transaction_value_cents": 8000000000,
+  "rwi_present": false
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.LEGAL.ESCROW.HOLDBACK.v1`)**
 
 ```json
 {
-  "transaction_value_cents": 500000000,
-  "rwi_present": true,
-  "general_escrow_pct": 0.005,
-  "general_escrow_cents": 2500000,
+  "transaction_value_cents": 8000000000,
+  "rwi_present": false,
+  "general_escrow_pct": 0.1,
+  "general_escrow_cents": 800000000,
   "ppa_escrow_pct": 0.01,
-  "ppa_escrow_cents": 5000000,
-  "special_escrow_cents": 8000000,
-  "aggregate_escrow_cents": 15500000
+  "ppa_escrow_cents": 80000000,
+  "special_escrow_cents": 0,
+  "aggregate_escrow_cents": 880000000
 }
 ```
+
+Precision: Percentages are 4-decimal fractions; escrow amounts are exact integer cents (see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -8671,7 +8788,7 @@ Conformance case `CONF.MODEL.LEGAL.ESCROW.001` — *Escrow sizing computes RWI, 
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model sizes general, PPA, and special escrows from the transaction value and cited-median or supplied percentages. The default percentages are market medians (SHOULD); the escrow that actually protects this buyer, and the release mechanics, are negotiation and drafting judgments for counsel.
 
 ## 9. Conformance bindings
 
@@ -8689,50 +8806,58 @@ Reference binding `MODEL.LEGAL.ESCROW.HOLDBACK.v1` · entered the specification 
 **Gates:** G8
 **Deal contexts:** insured M&A
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Retention, tower size, excess layers, exclusions, and seller-indemnity interaction.
+Lays out the representation-and-warranty-insurance stack — the retention, the primary policy tower, any excess layers, and the interaction with the seller indemnity cap — from the enterprise value and either supplied or cited-median terms. It answers, for a deal team pricing insured recourse, "how big is the tower, where does the retention sit, and how much seller indemnity remains behind it?" Binding terms belong to the broker and underwriter.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M209.schema.json`](M209.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `enterprise_value_cents` | integer (cents) | MUST |
-| `excess_layers` | object[] | MAY |
-| `exclusions` | string[] | MAY |
-| `policy_tower_pct` | number | MAY |
-| `retention_pct` | number | MAY |
-| `seller_indemnity_cap_pct` | number | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `enterprise_value_cents` | integer (cents) | MUST | Enterprise value the RWI stack is sized against. |
+| `excess_layers` | object[] | MAY | Excess layers above the primary tower; each object carries `limit_cents` (integer cents). |
+| `exclusions` | string[] | MAY | Named policy exclusions being tracked. |
+| `policy_tower_pct` | number | MAY | Override for the primary tower as a fraction of EV; defaults to the cited median. |
+| `retention_pct` | number | MAY | Override for the retention as a fraction of EV; defaults to the cited median. |
+| `seller_indemnity_cap_pct` | number | MAY | Override for the seller indemnity cap as a fraction of EV; defaults to the cited median. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `broker_handoff_required` | boolean |
-| `enterprise_value_cents` | integer (cents) |
-| `excess_layer_count` | integer |
-| `excess_policy_limit_cents` | integer (cents) |
-| `exclusion_count` | integer |
-| `primary_policy_limit_cents` | integer (cents) |
-| `retention_cents` | integer (cents) |
-| `retention_pct` | number |
-| `seller_indemnity_cap_cents` | integer (cents) |
-| `seller_indemnity_cap_pct` | number |
-| `total_policy_limit_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `enterprise_value_cents` | integer (cents) | The enterprise value, echoed. |
+| `retention_pct` | number | The retention as a fraction of EV. |
+| `retention_cents` | integer (cents) | The retention (deductible) in cents. |
+| `primary_policy_limit_cents` | integer (cents) | The primary RWI tower limit in cents. |
+| `excess_layer_count` | integer | Number of excess layers supplied. |
+| `excess_policy_limit_cents` | integer (cents) | Total excess-layer limit in cents. |
+| `total_policy_limit_cents` | integer (cents) | Primary plus excess policy limit. |
+| `seller_indemnity_cap_pct` | number | The seller indemnity cap as a fraction of EV. |
+| `seller_indemnity_cap_cents` | integer (cents) | The seller indemnity cap in cents. |
+| `exclusion_count` | integer | Number of tracked exclusions. |
+| `broker_handoff_required` | boolean | Always true — binding terms route to the broker/underwriter. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Retention, tower size, excess layers, exclusions, and seller-indemnity interaction.
-
-Computes retention, primary and excess tower limit, seller indemnity cap, exclusion count, and broker handoff flag.
+Given `enterprise_value_cents` and optional `retention_pct`, `policy_tower_pct`, `seller_indemnity_cap_pct`, `exclusions`, `excess_layers`:
+1. If `enterprise_value_cents` is missing, the implementation SHALL return `status: "needs_inputs"`.
+2. `retention_cents` SHALL be the enterprise value times the retention percentage (supplied or cited median — constants: RWI retention median), rounded to the nearest cent.
+3. `primary_policy_limit_cents` SHALL be the enterprise value times the tower percentage (supplied or cited median — constants: RWI tower median).
+4. `excess_policy_limit_cents` SHALL be the sum of any supplied excess-layer limits; `excess_layer_count` SHALL be their number; `total_policy_limit_cents` SHALL be primary plus excess.
+5. `seller_indemnity_cap_cents` SHALL be the enterprise value times the seller-indemnity-cap percentage (supplied or cited median — constants: seller indemnity cap median).
+6. It SHALL count exclusions and set `broker_handoff_required` true — binding terms route to the broker and underwriter.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| RWI retention | 0.75% of enterprise value | SHOULD (cited median) | Marsh, Aon, Lockton RWI market reports 2023–2024 | median retention (dropping to ~0.5% at higher EV) | 2023–2024 market reports | on next annual broker reports |
+| RWI primary tower | 10% of enterprise value | SHOULD (cited median) | ABA Private Target Deal Points Study 2023; Marsh/Aon/Lockton reports 2023–2024 | median primary policy limit | 2023–2024 | on next annual broker reports |
+| Seller indemnity cap behind RWI | 0.5% of enterprise value | SHOULD (cited median) | ABA Private Target Deal Points Study 2023 | median seller indemnity cap, RWI deals | 2023 study | on next ABA study (biennial) |
 
 
 **Authorities**
@@ -8746,45 +8871,35 @@ Computes retention, primary and excess tower limit, seller indemnity cap, exclus
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.LEGAL.RWI_STACK.001` — *RWI stack model computes retention, tower, and seller indemnity cap*.
+*A $150M insured deal sets a 0.75% retention ($1.125M) beneath a $15M primary RWI tower, with the seller indemnity capped at 0.5% ($750k) behind the policy.*
 
 **Inputs**
 
 ```json
 {
-  "enterprise_value_cents": 1000000,
-  "retention_pct": 0.005,
-  "policy_tower_pct": 0.1,
-  "seller_indemnity_cap_pct": 0.01,
-  "exclusions": [
-    "known tax",
-    "forward-looking"
-  ],
-  "excess_layers": [
-    {
-      "limit_cents": 50000
-    }
-  ]
+  "enterprise_value_cents": 15000000000
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.LEGAL.RWI_STACK.v1`)**
 
 ```json
 {
-  "enterprise_value_cents": 1000000,
-  "retention_pct": 0.005,
-  "retention_cents": 5000,
-  "primary_policy_limit_cents": 100000,
-  "excess_layer_count": 1,
-  "excess_policy_limit_cents": 50000,
-  "total_policy_limit_cents": 150000,
-  "seller_indemnity_cap_pct": 0.01,
-  "seller_indemnity_cap_cents": 10000,
-  "exclusion_count": 2,
+  "enterprise_value_cents": 15000000000,
+  "retention_pct": 0.0075,
+  "retention_cents": 112500000,
+  "primary_policy_limit_cents": 1500000000,
+  "excess_layer_count": 0,
+  "excess_policy_limit_cents": 0,
+  "total_policy_limit_cents": 1500000000,
+  "seller_indemnity_cap_pct": 0.005,
+  "seller_indemnity_cap_cents": 75000000,
+  "exclusion_count": 0,
   "broker_handoff_required": true
 }
 ```
+
+Precision: Percentages are 4-decimal fractions; retention and policy limits are exact integer cents (see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -8793,7 +8908,7 @@ Conformance case `CONF.MODEL.LEGAL.RWI_STACK.001` — *RWI stack model computes 
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for rwi stack architecture is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model lays out the RWI stack — retention, primary tower, excess layers, seller-indemnity interaction — from cited-median or supplied terms. Binding pricing, the retention the underwriter will actually offer, the exclusions, and the policy wording are the broker's and underwriter's; the model produces the architecture and routes to them (broker_handoff_required), and quotes no policy.
 
 ## 9. Conformance bindings
 
@@ -8811,48 +8926,58 @@ Reference binding `MODEL.LEGAL.RWI_STACK.v1` · entered the specification at int
 **Gates:** G7
 **Deal contexts:** working capital true-up
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Estimated statement, buyer approval, actual statement, dispute notice, negotiation, and accounting-arbitrator timeline.
+Computes the working-capital true-up that follows closing — the estimated and final purchase-price adjustments against the peg, which party owes the receivable — and dates the estimated-statement, dispute-notice, and negotiation deadlines. It answers, after closing, "how much does the price move on the true-up, who pays, and by when must each step happen?" It owns the true-up that M109 (the peg) deliberately does not.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M210.schema.json`](M210.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `actual_nwc_cents` | integer (cents) | MUST |
-| `closing_date` | string (ISO date) | MUST |
-| `peg_cents` | integer (cents) | MUST |
-| `estimated_nwc_cents` | integer (cents) | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `actual_nwc_cents` | integer (cents) | MUST | Actual net working capital per the final closing statement. |
+| `closing_date` | string (ISO date) | MUST | The closing date the timeline runs from. |
+| `peg_cents` | integer (cents) | MUST | The working-capital peg (see M109). |
+| `actual_statement_due_days` | integer | MAY | Days after closing to deliver the actual statement; defaults to the cited median. |
+| `dispute_notice_days` | integer | MAY | Days after the statement to notice a dispute; defaults to the cited median. |
+| `estimated_nwc_cents` | integer (cents) | MAY | Estimated net working capital per the estimated statement; optional. |
+| `good_faith_negotiation_days` | integer | MAY | Days of good-faith negotiation before the arbitrator; defaults to the cited median. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `actual_nwc_cents` | integer (cents) |
-| `actual_statement_due_date` | string (ISO date) |
-| `buyer_receivable_cents` | integer (cents) |
-| `closing_date` | string (ISO date) |
-| `dispute_notice_due_date` | string (ISO date) |
-| `estimated_adjustment_cents` | integer (cents) |
-| `estimated_nwc_cents` | integer (cents) |
-| `final_purchase_price_adjustment_cents` | integer (cents) |
-| `good_faith_negotiation_end_date` | string (ISO date) |
-| `peg_cents` | integer (cents) |
-| `seller_receivable_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `closing_date` | string (ISO date) | The closing date, echoed. |
+| `peg_cents` | integer (cents) | The peg, echoed. |
+| `estimated_nwc_cents` | integer (cents) | null | The estimated NWC, echoed, or null. |
+| `actual_nwc_cents` | integer (cents) | The actual NWC, echoed. |
+| `estimated_adjustment_cents` | integer (cents) | null | Estimated adjustment against the peg, or null. |
+| `final_purchase_price_adjustment_cents` | integer (cents) | Final adjustment: actual NWC minus peg (positive = above peg). |
+| `buyer_receivable_cents` | integer (cents) | Amount owed to the buyer when NWC lands below the peg. |
+| `seller_receivable_cents` | integer (cents) | Amount owed to the seller when NWC lands above the peg. |
+| `actual_statement_due_date` | string (ISO date) | Deadline to deliver the actual closing statement. |
+| `dispute_notice_due_date` | string (ISO date) | Deadline to notice a dispute. |
+| `good_faith_negotiation_end_date` | string (ISO date) | End of the good-faith negotiation window before the accounting arbitrator. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Estimated statement, buyer approval, actual statement, dispute notice, negotiation, and accounting-arbitrator timeline.
-
-Computes working-capital true-up economics and the actual statement, dispute notice, and negotiation timeline.
+Given `closing_date`, `peg_cents`, `actual_nwc_cents`, and optional `estimated_nwc_cents`, `actual_statement_due_days`, `dispute_notice_days`, `good_faith_negotiation_days`:
+1. If `closing_date`, `peg_cents`, or `actual_nwc_cents` is missing, the implementation SHALL return `status: "needs_inputs"`.
+2. `final_purchase_price_adjustment_cents` SHALL be `actual_nwc_cents − peg_cents`; `estimated_adjustment_cents` SHALL be `estimated_nwc_cents − peg_cents` when an estimate is supplied, else null.
+3. `buyer_receivable_cents` SHALL be `max(0, −adjustment)` (working capital delivered below the peg); `seller_receivable_cents` SHALL be `max(0, adjustment)` (above the peg).
+4. `actual_statement_due_date` SHALL be the closing date advanced by the statement-due days (supplied or cited median — constants: true-up timeline medians).
+5. `dispute_notice_due_date` SHALL be the statement-due date advanced by the dispute-notice days; `good_faith_negotiation_end_date` SHALL be that date advanced by the negotiation days.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| Actual-statement due window | 90 days after closing | SHOULD (cited median) | SRS Acquiom Working Capital PPA Study 2024 | median days to deliver the closing statement | 2024 study | on next SRS Acquiom study |
+| Dispute-notice window | 30 days after the statement | SHOULD (cited median) | SRS Acquiom Working Capital PPA Study 2024 | median dispute-notice period | 2024 study | on next SRS Acquiom study |
+| Good-faith negotiation window | 30 days after the dispute notice | SHOULD (cited median) | SRS Acquiom Working Capital PPA Study 2024 | median good-faith negotiation period before arbitrator | 2024 study | on next SRS Acquiom study |
 
 
 **Authorities**
@@ -8864,36 +8989,38 @@ Computes working-capital true-up economics and the actual statement, dispute not
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.LEGAL.TRUEUP.001` — *Closing statement true-up computes adjustment and dispute timeline*.
+*Actual working capital of $4.6M lands $400k below the $5.0M peg, creating a $400k buyer receivable, with the dispute clock running from a closing-plus-90-day statement.*
 
 **Inputs**
 
 ```json
 {
-  "closing_date": "2026-05-21",
-  "peg_cents": 1000000,
-  "estimated_nwc_cents": 900000,
-  "actual_nwc_cents": 800000
+  "closing_date": "2026-03-31",
+  "peg_cents": 500000000,
+  "actual_nwc_cents": 460000000,
+  "estimated_nwc_cents": 480000000
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.LEGAL.CLOSING_TRUEUP.SEQUENCE.v1`)**
 
 ```json
 {
-  "closing_date": "2026-05-21",
-  "peg_cents": 1000000,
-  "estimated_nwc_cents": 900000,
-  "actual_nwc_cents": 800000,
-  "estimated_adjustment_cents": -100000,
-  "final_purchase_price_adjustment_cents": -200000,
-  "buyer_receivable_cents": 200000,
+  "closing_date": "2026-03-31",
+  "peg_cents": 500000000,
+  "estimated_nwc_cents": 480000000,
+  "actual_nwc_cents": 460000000,
+  "estimated_adjustment_cents": -20000000,
+  "final_purchase_price_adjustment_cents": -40000000,
+  "buyer_receivable_cents": 40000000,
   "seller_receivable_cents": 0,
-  "actual_statement_due_date": "2026-08-19",
-  "dispute_notice_due_date": "2026-09-18",
-  "good_faith_negotiation_end_date": "2026-10-18"
+  "actual_statement_due_date": "2026-06-29",
+  "dispute_notice_due_date": "2026-07-29",
+  "good_faith_negotiation_end_date": "2026-08-28"
 }
 ```
+
+Precision: Adjustments and receivables are exact integer cents; timeline outputs are ISO-8601 dates (see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -8902,7 +9029,7 @@ Conformance case `CONF.MODEL.LEGAL.TRUEUP.001` — *Closing statement true-up co
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model computes the working-capital true-up — estimated vs. actual adjustment and the buyer/seller receivable — and the dispute-timeline dates from the peg and cited-median or supplied day counts. Whether the actual statement is correct, and the accounting judgments inside it, are for the parties' accountants and the neutral accounting arbitrator; the model computes the arithmetic and the schedule.
 
 ## 9. Conformance bindings
 
@@ -8920,42 +9047,45 @@ Reference binding `MODEL.LEGAL.CLOSING_TRUEUP.SEQUENCE.v1` · entered the specif
 **Gates:** G6, G7
 **Deal contexts:** purchase agreement conditions
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Bring-down, MAE, financing, marketing-period, regulatory approval, third-party consent, and condition node logic.
+Tallies the conditions to closing — which are satisfied, which are waived, which still block — and flags the ones that need specialist review (regulatory, MAE, financing, consent, CFIUS, HSR). It answers, in the signing-to-closing window, "is the deal closing-ready, and what is still open?" It tracks the node logic; whether a condition is truly met or waivable is counsel's call.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M211.schema.json`](M211.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `conditions` | object[] | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `conditions` | object[] | MUST | Closing conditions; each object carries `name` (string), `type` (a condition_type value), `satisfied` (boolean), and `waived` (boolean). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `closing_ready` | boolean |
-| `condition_count` | integer |
-| `condition_nodes` | object[] |
-| `open_condition_count` | integer |
-| `open_conditions` | string[] |
-| `professional_review_required` | boolean |
-| `satisfied_count` | integer |
-| `waived_count` | integer |
+| Field | Type | Description |
+|---|---|---|
+| `condition_count` | integer | Total number of conditions. |
+| `satisfied_count` | integer | Number satisfied. |
+| `waived_count` | integer | Number waived. |
+| `open_condition_count` | integer | Number still blocking closing. |
+| `closing_ready` | boolean | Whether no condition blocks closing. |
+| `professional_review_required` | boolean | Whether any condition needs specialist review. |
+| `open_conditions` | string[] | Names of the conditions still blocking closing. |
+| `condition_nodes` | object[] | Per-condition detail: `{ name, type, satisfied, waived, blocks_closing, professional_review_required }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Bring-down, MAE, financing, marketing-period, regulatory approval, third-party consent, and condition node logic.
-
-Computes condition-node satisfaction, waiver, open blockers, closing readiness, and professional-review flags.
+Given `conditions` (a list of objects, each with `name`, `type`, `satisfied`, `waived`):
+1. If `conditions` is empty, the implementation SHALL return `status: "needs_inputs"`.
+2. For each condition, `blocks_closing` SHALL be true iff it is neither satisfied nor waived; `professional_review_required` SHALL be true iff its type matches a specialist category (regulatory, legal, counsel, MAE, financing, consent, CFIUS, HSR).
+3. It SHALL count conditions, satisfied, waived, and open (blocking) conditions.
+4. `closing_ready` SHALL be true iff no condition blocks closing; `professional_review_required` (aggregate) SHALL be true iff any node requires specialist review.
+5. It SHALL list the open conditions by name and return the full node detail.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -8968,7 +9098,7 @@ Computes condition-node satisfaction, waiver, open blockers, closing readiness, 
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.LEGAL.CONDITIONS.001` — *Conditions logic identifies open closing blockers and professional-review flags*.
+*Of four conditions, the reps bring-down and the no-MAE condition are met, but HSR clearance and financing remain open — the deal is not closing-ready and needs specialist review.*
 
 **Inputs**
 
@@ -8976,40 +9106,58 @@ Conformance case `CONF.MODEL.LEGAL.CONDITIONS.001` — *Conditions logic identif
 {
   "conditions": [
     {
-      "name": "Bring-down reps",
+      "name": "HSR clearance",
+      "type": "hsr",
+      "satisfied": false,
+      "waived": false
+    },
+    {
+      "name": "Bring-down of representations",
       "type": "general",
-      "satisfied": true
+      "satisfied": true,
+      "waived": false
     },
     {
-      "name": "HSR approval",
-      "type": "regulatory",
-      "satisfied": false
+      "name": "No material adverse effect",
+      "type": "mae",
+      "satisfied": true,
+      "waived": false
     },
     {
-      "name": "Key customer consent",
-      "type": "consent",
-      "waived": true
+      "name": "Debt financing funded",
+      "type": "financing",
+      "satisfied": false,
+      "waived": false
     }
   ]
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.LEGAL.CONDITIONS.LOGIC.v1`)**
 
 ```json
 {
-  "condition_count": 3,
-  "satisfied_count": 1,
-  "waived_count": 1,
-  "open_condition_count": 1,
+  "condition_count": 4,
+  "satisfied_count": 2,
+  "waived_count": 0,
+  "open_condition_count": 2,
   "closing_ready": false,
   "professional_review_required": true,
   "open_conditions": [
-    "HSR approval"
+    "HSR clearance",
+    "Debt financing funded"
   ],
   "condition_nodes": [
     {
-      "name": "Bring-down reps",
+      "name": "HSR clearance",
+      "type": "hsr",
+      "satisfied": false,
+      "waived": false,
+      "blocks_closing": true,
+      "professional_review_required": true
+    },
+    {
+      "name": "Bring-down of representations",
       "type": "general",
       "satisfied": true,
       "waived": false,
@@ -9017,19 +9165,19 @@ Conformance case `CONF.MODEL.LEGAL.CONDITIONS.001` — *Conditions logic identif
       "professional_review_required": false
     },
     {
-      "name": "HSR approval",
-      "type": "regulatory",
-      "satisfied": false,
+      "name": "No material adverse effect",
+      "type": "mae",
+      "satisfied": true,
       "waived": false,
-      "blocks_closing": true,
+      "blocks_closing": false,
       "professional_review_required": true
     },
     {
-      "name": "Key customer consent",
-      "type": "consent",
+      "name": "Debt financing funded",
+      "type": "financing",
       "satisfied": false,
-      "waived": true,
-      "blocks_closing": false,
+      "waived": false,
+      "blocks_closing": true,
       "professional_review_required": true
     }
   ]
@@ -9043,7 +9191,7 @@ Conformance case `CONF.MODEL.LEGAL.CONDITIONS.001` — *Conditions logic identif
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for conditions-to-close logic engine is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model tallies conditions to close and flags which block closing and which need specialist review (regulatory, MAE, financing, consent, CFIUS, HSR). Whether a condition is in fact satisfied or waivable, and the MAE and regulatory judgments, are determinations for counsel; the model tracks the node logic and routes the flagged conditions, and clears none of them itself.
 
 ## 9. Conformance bindings
 
@@ -9061,43 +9209,55 @@ Reference binding `MODEL.LEGAL.CONDITIONS.LOGIC.v1` · entered the specification
 **Gates:** G7
 **Deal contexts:** public M&A · private M&A termination
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Break-up, reverse break-up, antitrust reverse break-up, fiduciary-out, go-shop, ticking-fee, drag, and tag economics.
+Sizes the termination-fee package — the target break-up fee (and its go-shop discount), the reverse termination fee, and the antitrust reverse fee — from the transaction value and either supplied percentages or cited-median study defaults. It answers, for deal counsel and bankers, "what do the exit fees cost on each side of this deal?" It computes the magnitudes; enforceability and the fiduciary-out architecture are counsel's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M212.schema.json`](M212.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `transaction_value_cents` | integer (cents) | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `transaction_value_cents` | integer (cents) | MUST | Transaction (equity) value the fees are sized against. |
+| `antitrust_reverse_fee_pct` | number | MAY | Override for the antitrust reverse fee as a fraction of value; defaults to the cited median. |
+| `go_shop_discount_pct` | number | MAY | Override for the go-shop fee discount as a fraction of the base fee; defaults to the cited median. |
+| `reverse_termination_fee_pct` | number | MAY | Override for the reverse termination fee as a fraction of value; defaults to the cited median. |
+| `target_break_fee_pct` | number | MAY | Override for the target break-up fee as a fraction of value; defaults to the cited median. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `antitrust_reverse_fee_cents` | integer (cents) |
-| `antitrust_reverse_fee_pct` | number |
-| `counsel_review_flags` | string[] |
-| `go_shop_break_fee_cents` | integer (cents) |
-| `reverse_termination_fee_cents` | integer (cents) |
-| `reverse_termination_fee_pct` | number |
-| `target_break_fee_cents` | integer (cents) |
-| `target_break_fee_pct` | number |
-| `transaction_value_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `transaction_value_cents` | integer (cents) | The transaction value, echoed. |
+| `target_break_fee_pct` | number | The target break-up fee as a fraction of value. |
+| `target_break_fee_cents` | integer (cents) | The target break-up fee in cents. |
+| `go_shop_break_fee_cents` | integer (cents) | The reduced break fee during a go-shop period. |
+| `reverse_termination_fee_pct` | number | The reverse termination fee as a fraction of value. |
+| `reverse_termination_fee_cents` | integer (cents) | The reverse termination fee in cents. |
+| `antitrust_reverse_fee_pct` | number | The antitrust reverse fee as a fraction of value. |
+| `antitrust_reverse_fee_cents` | integer (cents) | The antitrust reverse fee in cents. |
+| `counsel_review_flags` | string[] | Items counsel must confirm (fiduciary-out, go-shop, regulatory covenant, enforceability). |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Break-up, reverse break-up, antitrust reverse break-up, fiduciary-out, go-shop, ticking-fee, drag, and tag economics.
-
-Computes target break-up fee, go-shop discounted fee, reverse termination fee, and antitrust reverse fee from transaction value.
+Given `transaction_value_cents` and optional `target_break_fee_pct`, `reverse_termination_fee_pct`, `antitrust_reverse_fee_pct`, `go_shop_discount_pct`:
+1. If `transaction_value_cents` is missing, the implementation SHALL return `status: "needs_inputs"`.
+2. `target_break_fee_cents` SHALL be the transaction value times the target break-fee percentage (supplied or cited median — constants: break-fee median).
+3. `go_shop_break_fee_cents` SHALL be the target break fee times the go-shop discount (supplied or cited median — constants: go-shop discount median).
+4. `reverse_termination_fee_cents` and `antitrust_reverse_fee_cents` SHALL be the transaction value times the respective percentages (supplied or cited medians — constants: reverse and antitrust reverse fee medians).
+5. It SHALL carry counsel-review flags for the fiduciary-out, go-shop/no-shop, regulatory covenant, and liquidated-damages enforceability framing.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| Target break-up fee | 2.7% of transaction value | SHOULD (cited median) | Houlihan Lokey 2023 Transaction Termination Fee Study | median target break-up fee, %-of-equity-value | 2023 study | on next Houlihan Lokey study |
+| Reverse termination fee | 4.2% of transaction value | SHOULD (cited median) | Houlihan Lokey 2023 Transaction Termination Fee Study | median reverse termination fee | 2023 study | on next Houlihan Lokey study |
+| Antitrust reverse termination fee | 5.0% of transaction value | SHOULD (cited median) | Fenwick 2023 antitrust reverse-break-fee (ARBF) analysis | median antitrust reverse break fee | 2023 analysis | on next Fenwick analysis |
+| Go-shop break-fee discount | 50% of the base break fee | SHOULD (cited median) | Houlihan Lokey 2023 Transaction Termination Fee Study | typical go-shop period fee reduction | 2023 study | on next Houlihan Lokey study |
 
 
 **Authorities**
@@ -9111,33 +9271,35 @@ Computes target break-up fee, go-shop discounted fee, reverse termination fee, a
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.LEGAL.TERMINATION.001` — *Termination fee engine computes break, reverse, antitrust, and go-shop fees*.
+*On an $80M deal the target break fee runs 2.7% ($2.16M), halved in a go-shop ($1.08M), against a 4.2% reverse fee ($3.36M) and a 5% antitrust reverse fee ($4.0M).*
 
 **Inputs**
 
 ```json
 {
-  "transaction_value_cents": 100000000
+  "transaction_value_cents": 8000000000
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.LEGAL.TERMINATION.FEES.v1`)**
 
 ```json
 {
-  "transaction_value_cents": 100000000,
+  "transaction_value_cents": 8000000000,
   "target_break_fee_pct": 0.027,
-  "target_break_fee_cents": 2700000,
-  "go_shop_break_fee_cents": 1350000,
+  "target_break_fee_cents": 216000000,
+  "go_shop_break_fee_cents": 108000000,
   "reverse_termination_fee_pct": 0.042,
-  "reverse_termination_fee_cents": 4200000,
+  "reverse_termination_fee_cents": 336000000,
   "antitrust_reverse_fee_pct": 0.05,
-  "antitrust_reverse_fee_cents": 5000000,
+  "antitrust_reverse_fee_cents": 400000000,
   "counsel_review_flags": [
     "Confirm fiduciary-out, go-shop/no-shop, regulatory covenant, and enforceability framing with counsel."
   ]
 }
 ```
+
+Precision: Percentages are 4-decimal fractions; fee amounts are exact integer cents (see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -9146,7 +9308,7 @@ Conformance case `CONF.MODEL.LEGAL.TERMINATION.001` — *Termination fee engine 
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model sizes break-up, reverse-break-up, and antitrust reverse-termination fees from the transaction value and cited-median or supplied percentages (Houlihan Lokey / Fenwick study medians — SHOULD, not law). Enforceability (the Brazen liquidated-damages framing), the fiduciary-out, and the go-shop/no-shop architecture are legal determinations for counsel; the model computes the fee magnitudes and flags the review.
 
 ## 9. Conformance bindings
 
@@ -9164,48 +9326,51 @@ Reference binding `MODEL.LEGAL.TERMINATION.FEES.v1` · entered the specification
 **Gates:** G9
 **Deal contexts:** earnout
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-EBITDA-definition lock, acceleration triggers, post-closing covenants, dispute forum, and tax-characterization selector.
+Structures the earnout — how many metrics gate it, the acceleration triggers, the post-closing covenants, the dispute forum, and the tax-characterization selector — from supplied facts, and routes the binding legal and tax calls to the specialists. It answers, for parties designing contingent consideration, "how is this earnout built and where does it go for review?" It organizes the architecture; it decides no enforceable term or tax treatment.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M213.schema.json`](M213.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `earnout_value_cents` | integer (cents) | MUST |
-| `metrics` | string[] | MUST |
-| `acceleration_triggers` | string[] | MAY |
-| `dispute_forum` | string | MAY |
-| `post_closing_covenants` | string[] | MAY |
-| `tax_characterization` | string | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `earnout_value_cents` | integer (cents) | MUST | Maximum contingent consideration payable under the earnout. |
+| `metrics` | string[] | MUST | The performance metrics that gate the earnout (e.g., EBITDA, revenue). |
+| `acceleration_triggers` | string[] | MAY | Events that accelerate the earnout (e.g., change of control, termination without cause). |
+| `dispute_forum` | enum(dispute_forum) | MAY | The forum designated to resolve earnout disputes; defaults to the accounting arbitrator. One of `accounting_arbitrator`, `expert_determination`, `arbitration`, `courts`. |
+| `post_closing_covenants` | string[] | MAY | Covenants governing the buyer's post-closing operation of the business. |
+| `tax_characterization` | enum(tax_characterization) | MAY | The earnout tax-characterization selector; defaults to requires_tax_review. One of `requires_tax_review`, `installment_sale`, `imputed_interest`, `compensation`. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `acceleration_trigger_count` | integer |
-| `accounting_arbitrator_selected` | boolean |
-| `counsel_and_tax_handoff_required` | boolean |
-| `dispute_forum` | string |
-| `earnout_value_cents` | integer (cents) |
-| `metric_count` | integer |
-| `multiple_metric_earnout` | boolean |
-| `post_closing_covenant_count` | integer |
-| `tax_characterization` | string |
+| Field | Type | Description |
+|---|---|---|
+| `earnout_value_cents` | integer (cents) | The earnout value, echoed. |
+| `metric_count` | integer | Number of performance metrics. |
+| `multiple_metric_earnout` | boolean | Whether more than one metric gates the earnout. |
+| `acceleration_trigger_count` | integer | Number of acceleration triggers. |
+| `post_closing_covenant_count` | integer | Number of post-closing covenants. |
+| `dispute_forum` | enum(dispute_forum) | The designated dispute forum. One of `accounting_arbitrator`, `expert_determination`, `arbitration`, `courts`. |
+| `accounting_arbitrator_selected` | boolean | Whether the forum is an accounting arbitrator. |
+| `tax_characterization` | enum(tax_characterization) | The tax-characterization selector. One of `requires_tax_review`, `installment_sale`, `imputed_interest`, `compensation`. |
+| `counsel_and_tax_handoff_required` | boolean | Always true — binding legal and tax calls route to the specialists. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-EBITDA-definition lock, acceleration triggers, post-closing covenants, dispute forum, and tax-characterization selector.
-
-Computes earnout metrics, acceleration triggers, covenant count, dispute forum, and tax/counsel handoff.
+Given `earnout_value_cents` and `metrics`, and optional `acceleration_triggers`, `post_closing_covenants`, `dispute_forum`, `tax_characterization`:
+1. If `earnout_value_cents` is missing or `metrics` is empty, the implementation SHALL return `status: "needs_inputs"`.
+2. `metric_count` SHALL be the number of metrics; `multiple_metric_earnout` SHALL be true iff more than one.
+3. `acceleration_trigger_count` and `post_closing_covenant_count` SHALL be the counts of the supplied lists.
+4. `dispute_forum` SHALL default to the accounting arbitrator when not supplied; `accounting_arbitrator_selected` SHALL be true iff the forum names an accounting arbitrator.
+5. `tax_characterization` SHALL default to "requires_tax_review"; `counsel_and_tax_handoff_required` SHALL be true — the EBITDA-definition lock and the §453/§483/§1274 characterization route to counsel and the tax advisor.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -9220,41 +9385,38 @@ Computes earnout metrics, acceleration triggers, covenant count, dispute forum, 
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.LEGAL.EARNOUT_ARCH.001` — *Earnout architecture model computes metrics, triggers, dispute forum, and tax handoff*.
+*A $20M two-metric earnout (EBITDA and revenue) with a change-of-control accelerator routes disputes to an accounting arbitrator and both counsel and tax review.*
 
 **Inputs**
 
 ```json
 {
-  "earnout_value_cents": 500000,
+  "earnout_value_cents": 2000000000,
   "metrics": [
     "EBITDA",
     "revenue"
   ],
   "acceleration_triggers": [
-    "sale",
-    "termination"
+    "change_of_control"
   ],
   "post_closing_covenants": [
-    "commercially reasonable efforts"
-  ],
-  "dispute_forum": "accounting_arbitrator",
-  "tax_characterization": "section_453_installment"
+    "operate_in_ordinary_course"
+  ]
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.LEGAL.EARNOUT_ARCHITECTURE.v1`)**
 
 ```json
 {
-  "earnout_value_cents": 500000,
+  "earnout_value_cents": 2000000000,
   "metric_count": 2,
   "multiple_metric_earnout": true,
-  "acceleration_trigger_count": 2,
+  "acceleration_trigger_count": 1,
   "post_closing_covenant_count": 1,
   "dispute_forum": "accounting_arbitrator",
   "accounting_arbitrator_selected": true,
-  "tax_characterization": "section_453_installment",
+  "tax_characterization": "requires_tax_review",
   "counsel_and_tax_handoff_required": true
 }
 ```
@@ -9266,7 +9428,7 @@ Conformance case `CONF.MODEL.LEGAL.EARNOUT_ARCH.001` — *Earnout architecture m
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for earnout architecture and dispute is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model structures the earnout — metric count, acceleration triggers, post-closing covenants, dispute forum, tax-characterization selector — from supplied facts. The EBITDA-definition lock, the enforceable covenant set, and the §453/§483/§1274 tax characterization are legal and tax determinations for counsel and the tax advisor; the model organizes the architecture and routes (counsel_and_tax_handoff_required), and selects no binding treatment.
 
 ## 9. Conformance bindings
 
