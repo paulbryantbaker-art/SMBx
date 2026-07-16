@@ -7,6 +7,23 @@ import {
   definitiveVersionPayload,
 } from '../constants/definitive.js';
 import { HSR_2026, SBA_SOP_50_10_8 } from '../constants/v19Regulatory.js';
+import {
+  BULK_SALES_NOTIFICATION_STATES,
+  COC_NOT_ASSIGNMENT_DEFAULT_NOTE,
+  DEED_COVENANTS,
+  GARN_ST_GERMAIN,
+  LEASE_CONSENT_DEFAULTS,
+  LEASE_CONSENT_FALLBACK,
+  RECORDING_ACTS,
+  RISK_OF_LOSS,
+  RISK_OF_LOSS_DEFAULT,
+  SIGNATORY_MATRIX,
+  TRANSFER_TAX_REGIMES,
+  TX_SEISIN_NOTE,
+  counselHandoff,
+  type DeedType,
+  type VestingForm,
+} from '../constants/realPropertyLaw.js';
 import { resolveDefinitiveMandateContext } from './definitiveMandateService.js';
 import { canonicalizeModelId, getRegisteredModel } from './modelRegistry.js';
 
@@ -2304,6 +2321,471 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
       },
     };
   }),
+
+  /* ── V18c real property & contract law pass (M224–M234) ─────────────────
+     Issue-spotting and routing ONLY: these models classify facts against the
+     per-state tables in constants/realPropertyLaw.ts and emit red flags plus
+     defer_to_counsel routing. They never judge enforceability, opine on
+     marketability, or draft instruments (THE LINE; DTC catalog E.3). */
+
+  // M224 — Recording-act & priority engine. Deterministic priority ordering
+  // between a prior unrecorded interest and a later purchaser, by state type.
+  'MODEL.RE.RECORDING_PRIORITY.v1': defineModel('MODEL.RE.RECORDING_PRIORITY.v1', ['state', 'later_purchaser_for_value', 'later_took_without_notice', 'later_recorded_first'], ['[N.Y. Real Prop. Law 291]', '[Cal. Civ. Code 1214]', '[Tex. Prop. Code 13.001]', '[25 Del. C. 153]'], input => {
+    const state = (text(input.state) || '').toUpperCase();
+    const forValue = booleanInput(input.later_purchaser_for_value);
+    const withoutNotice = booleanInput(input.later_took_without_notice);
+    const recordedFirst = booleanInput(input.later_recorded_first);
+    const missing = requireInputs({ state: state || null, later_purchaser_for_value: forValue, later_took_without_notice: withoutNotice, later_recorded_first: recordedFirst });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rule = RECORDING_ACTS[state];
+    if (!rule) {
+      return {
+        outputs: {
+          state,
+          act_type: 'unknown',
+          prevailing_interest: 'undetermined',
+          defer_to_counsel: true,
+          counsel_handoff: counselHandoff('recording-act priority', `the recording-act type of ${state}, which is not yet in the state table`),
+          red_flags: [`Recording-act type for ${state} not in the V18c state table — add the state as data before relying on priority ordering.`],
+        },
+      };
+    }
+    let laterPrevails = false;
+    if (rule.type === 'race') laterPrevails = forValue! && recordedFirst!;
+    else if (rule.type === 'notice') laterPrevails = forValue! && withoutNotice!;
+    else laterPrevails = forValue! && withoutNotice! && recordedFirst!;
+    const redFlags: string[] = [];
+    if (!laterPrevails && !recordedFirst) redFlags.push('Prior interest unrecorded and later interest not yet recorded — record immediately to fix priority.');
+    if (rule.type === 'race' && withoutNotice === false && laterPrevails) redFlags.push('Race state: the later purchaser prevails by recording first even WITH actual notice of the prior conveyance.');
+    return {
+      outputs: {
+        state,
+        act_type: rule.type,
+        citation: rule.citation,
+        prevailing_interest: laterPrevails ? 'later_purchaser' : 'prior_interest',
+        bfp_protected: laterPrevails,
+        defer_to_counsel: false,
+        red_flags: redFlags,
+      },
+    };
+  }),
+
+  // M225 — Title-covenant & estate/signatory model. Deed-type → covenant map
+  // plus the concurrent-ownership signature matrix.
+  'MODEL.RE.TITLE_COVENANT_SIGNATORY.v1': defineModel('MODEL.RE.TITLE_COVENANT_SIGNATORY.v1', ['deed_type', 'vesting_form'], ['[Tex. Prop. Code 5.023]', '[Common-law deed covenants]'], input => {
+    const deedType = (text(input.deed_type) || '') as DeedType;
+    const vesting = (text(input.vesting_form) || '') as VestingForm;
+    const state = (text(input.state) || '').toUpperCase();
+    const buyerExpectsWarranty = booleanInput(input.buyer_expects_warranty) ?? true;
+    const allRequiredSignersPresent = booleanInput(input.all_required_signers_present);
+    const missing = requireInputs({ deed_type: DEED_COVENANTS[deedType] ? deedType : null, vesting_form: SIGNATORY_MATRIX[vesting] ? vesting : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const covenantRule = DEED_COVENANTS[deedType];
+    const signatoryRule = SIGNATORY_MATRIX[vesting];
+    const redFlags: string[] = [];
+    if (buyerExpectsWarranty && covenantRule.covenants.length === 0) {
+      redFlags.push(`Buyer expects title warranties but the ${deedType.replace(/_/g, ' ')} deed carries none — a first-class deal term to renegotiate.`);
+    }
+    if (allRequiredSignersPresent === false) {
+      redFlags.push(`Signatory gap under ${vesting.replace(/_/g, ' ')}: ${signatoryRule.gapRisk}`);
+    }
+    return {
+      outputs: {
+        deed_type: deedType,
+        covenants_present: covenantRule.covenants,
+        covenant_scope: covenantRule.scope,
+        after_acquired_title_applies: covenantRule.afterAcquiredTitle,
+        deed_note: covenantRule.note,
+        tx_seisin_note: state === 'TX' ? TX_SEISIN_NOTE : null,
+        vesting_form: vesting,
+        required_signatories: signatoryRule.required,
+        signatory_gap: allRequiredSignersPresent === false,
+        defer_to_counsel: allRequiredSignersPresent === false,
+        counsel_handoff: allRequiredSignersPresent === false
+          ? counselHandoff('conveyance-authority', 'who must join the conveyance under the vesting and marital-property facts')
+          : null,
+        red_flags: redFlags,
+      },
+    };
+  }),
+
+  // M226 — Marketability triage. Buckets title exceptions curable /
+  // insurable-over / deal-killing; any deal-killer is a hard defer.
+  'MODEL.RE.MARKETABILITY_TRIAGE.v1': defineModel('MODEL.RE.MARKETABILITY_TRIAGE.v1', ['exceptions'], ['[Marketable-title common law]', '[ALTA title practice]'], input => {
+    const exceptions = objectArray(input.exceptions);
+    const contractStandard = text(input.contract_title_standard) ?? 'marketable';
+    const missing = requireInputs({ exceptions: exceptions.length ? exceptions : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rows = exceptions.map((e, i) => {
+      const curable = booleanInput(e.curable) ?? false;
+      const insurable = booleanInput(e.insurer_will_insure_over) ?? false;
+      const bucket = curable ? 'curable' : insurable ? 'insurable_over' : 'deal_killing';
+      return { label: String(e.label || `Exception ${i + 1}`), bucket };
+    });
+    const dealKillers = rows.filter(r => r.bucket === 'deal_killing');
+    const insurableOnly = rows.filter(r => r.bucket === 'insurable_over');
+    const redFlags: string[] = [];
+    if (dealKillers.length) redFlags.push(`${dealKillers.length} exception(s) triaged deal-killing (unmarketable AND uninsurable): ${dealKillers.map(r => r.label).join('; ')}.`);
+    if (contractStandard === 'insurable' && insurableOnly.length) {
+      redFlags.push('Contract promises only INSURABLE title — the buyer can be forced to accept insured-over defects that impair resale.');
+    }
+    return {
+      outputs: {
+        contract_title_standard: contractStandard,
+        triage: rows,
+        curable_count: rows.filter(r => r.bucket === 'curable').length,
+        insurable_over_count: insurableOnly.length,
+        deal_killing_count: dealKillers.length,
+        defer_to_counsel: dealKillers.length > 0,
+        counsel_handoff: dealKillers.length > 0
+          ? counselHandoff('title-marketability', 'whether the flagged defect is fatal and what cure path exists — the marketability judgment itself belongs to counsel/title')
+          : null,
+        red_flags: redFlags,
+      },
+    };
+  }),
+
+  // M227 — Risk-of-loss allocator. Contract override first; else the state
+  // default (NY Risk Act / UVPRA / equitable conversion).
+  'MODEL.RE.RISK_OF_LOSS.v1': defineModel('MODEL.RE.RISK_OF_LOSS.v1', ['state', 'contract_allocates_risk'], ['[N.Y. Gen. Oblig. Law 5-1311]', '[Tex. Prop. Code 5.007]', '[Cal. Civ. Code 1662]', '[Equitable conversion]'], input => {
+    const state = (text(input.state) || '').toUpperCase();
+    const contractAllocates = booleanInput(input.contract_allocates_risk);
+    const contractRiskOn = text(input.contract_risk_on);
+    const titleOrPossessionPassed = booleanInput(input.legal_title_or_possession_passed) ?? false;
+    const casualtyPending = booleanInput(input.material_casualty_or_condemnation_pending) ?? false;
+    const missing = requireInputs({ state: state || null, contract_allocates_risk: contractAllocates });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rule = RISK_OF_LOSS[state] ?? RISK_OF_LOSS_DEFAULT;
+    let riskOn: string;
+    let basis: string;
+    if (contractAllocates) {
+      riskOn = contractRiskOn === 'seller' ? 'seller' : contractRiskOn === 'buyer' ? 'buyer' : 'per_contract_terms';
+      basis = 'contract_override';
+    } else if (rule.regime === 'equitable_conversion_buyer') {
+      riskOn = 'buyer';
+      basis = 'equitable_conversion_default';
+    } else {
+      riskOn = titleOrPossessionPassed ? 'buyer' : 'seller';
+      basis = rule.regime;
+    }
+    const redFlags: string[] = [];
+    if (!contractAllocates && casualtyPending) {
+      redFlags.push('Contract is silent on risk of loss and a material casualty/condemnation is pending — the state default controls; allocate expressly before signing.');
+    }
+    return {
+      outputs: {
+        state,
+        default_regime: rule.regime,
+        citation: rule.citation,
+        contract_override_applied: contractAllocates === true,
+        risk_on: riskOn,
+        basis,
+        defer_to_counsel: false,
+        red_flags: redFlags,
+      },
+    };
+  }),
+
+  // M228 — Survival/merger tracker. Every relied-on rep/indemnity/covenant
+  // without an express survival hook (or collateral character) is flagged:
+  // merger extinguishes it at closing.
+  'MODEL.RE.SURVIVAL_MERGER.v1': defineModel('MODEL.RE.SURVIVAL_MERGER.v1', ['items'], ['[Merger doctrine (common law)]'], input => {
+    const items = objectArray(input.items);
+    const missing = requireInputs({ items: items.length ? items : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rows = items.map((item, i) => {
+      const expressSurvival = booleanInput(item.express_survival) ?? false;
+      const collateral = booleanInput(item.collateral_obligation) ?? false;
+      const survives = expressSurvival || collateral;
+      return {
+        label: String(item.label || `Item ${i + 1}`),
+        type: String(item.type || 'rep'),
+        express_survival: expressSurvival,
+        collateral_obligation: collateral,
+        survives_closing: survives,
+        basis: expressSurvival ? 'express_survival_clause' : collateral ? 'collateral_obligation' : 'merges_into_deed_at_closing',
+      };
+    });
+    const atRisk = rows.filter(r => !r.survives_closing);
+    return {
+      outputs: {
+        items: rows,
+        surviving_count: rows.length - atRisk.length,
+        merged_away_count: atRisk.length,
+        fraud_exception_note: 'Fraud claims survive merger independent of contract survival language.',
+        defer_to_counsel: false,
+        red_flags: atRisk.length
+          ? [`${atRisk.length} relied-on item(s) lack an express survival hook and will merge into the deed at closing: ${atRisk.map(r => r.label).join('; ')}. Add survival language before signing.`]
+          : [],
+      },
+    };
+  }),
+
+  // M229 — Lease anti-assignment / change-of-control parser. Classifies the
+  // consent path from parsed clause facts + the state consent-standard table.
+  'MODEL.RE.LEASE_COC_ASSIGNMENT.v1': defineModel('MODEL.RE.LEASE_COC_ASSIGNMENT.v1', ['transfer_type', 'consent_clause'], ['[Kendall v. Ernest Pestana, 40 Cal.3d 488]', '[NY assignment common law]'], input => {
+    const transferType = text(input.transfer_type) || '';
+    const consentClause = text(input.consent_clause) || '';
+    const state = (text(input.state) || '').toUpperCase();
+    const deemsCocAssignment = booleanInput(input.lease_deems_change_of_control_assignment) ?? false;
+    const recaptureRight = booleanInput(input.landlord_recapture_right) ?? false;
+    const validTransfer = ['asset_assignment', 'sublease', 'change_of_control', 'merger'].includes(transferType);
+    const validClause = ['none_silent', 'consent_no_standard', 'reasonableness', 'sole_discretion'].includes(consentClause);
+    const missing = requireInputs({ transfer_type: validTransfer ? transferType : null, consent_clause: validClause ? consentClause : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+
+    let restrictionApplies: boolean;
+    let classification: string;
+    if (transferType === 'change_of_control' || transferType === 'merger') {
+      restrictionApplies = deemsCocAssignment;
+      classification = deemsCocAssignment
+        ? 'deemed_assignment_consent_path_applies'
+        : 'generally_not_assignment_by_operation_of_law';
+    } else {
+      restrictionApplies = consentClause !== 'none_silent';
+      classification = restrictionApplies ? 'assignment_restriction_applies' : 'no_restriction_freely_assignable';
+    }
+    const consentRule = LEASE_CONSENT_DEFAULTS[state] ?? LEASE_CONSENT_FALLBACK;
+    let consentStandard: string | null = null;
+    if (restrictionApplies) {
+      if (consentClause === 'reasonableness') consentStandard = 'reasonableness_express';
+      else if (consentClause === 'sole_discretion') consentStandard = state === 'CA' ? 'sole_discretion_written_verify_ca_limits' : 'sole_discretion_as_written';
+      else consentStandard = consentRule.whenConsentRequiredNoStandard;
+    }
+    const redFlags: string[] = [];
+    if (restrictionApplies && consentStandard === 'sole_discretion_as_written') redFlags.push('Consent in landlord\'s sole discretion — a discretionary consent on the critical path is a deal-timing and repricing risk.');
+    if ((transferType === 'change_of_control' || transferType === 'merger') && deemsCocAssignment) redFlags.push('Lease expressly deems a control transfer an assignment — entity structure does NOT avoid the consent requirement.');
+    if (restrictionApplies && recaptureRight) redFlags.push('Landlord recapture right: the consent request itself can surrender the space.');
+    return {
+      outputs: {
+        transfer_type: transferType,
+        state: state || null,
+        classification,
+        coc_default_note: (transferType === 'change_of_control' || transferType === 'merger') && !deemsCocAssignment ? COC_NOT_ASSIGNMENT_DEFAULT_NOTE : null,
+        consent_required: restrictionApplies,
+        consent_standard: consentStandard,
+        consent_standard_citation: restrictionApplies && consentClause === 'consent_no_standard' ? consentRule.citation : null,
+        landlord_recapture_right: recaptureRight,
+        defer_to_counsel: restrictionApplies,
+        counsel_handoff: restrictionApplies
+          ? counselHandoff('lease anti-assignment/consent', 'whether this transfer triggers the clause and how the consent standard applies — the enforceability judgment belongs to counsel')
+          : null,
+        red_flags: redFlags,
+      },
+    };
+  }),
+
+  // M230 — Due-on-sale screener. Garn-St. Germain consumer exceptions apply
+  // only to residential <5 units; commercial/entity transfers get none.
+  'MODEL.RE.DUE_ON_SALE.v1': defineModel('MODEL.RE.DUE_ON_SALE.v1', ['loan_has_due_on_transfer_clause', 'residential_under_5_units'], ['[12 U.S.C. 1701j-3]'], input => {
+    const hasClause = booleanInput(input.loan_has_due_on_transfer_clause);
+    const residentialUnder5 = booleanInput(input.residential_under_5_units);
+    const transferKind = text(input.transfer_kind) || 'deed_sale';
+    const missing = requireInputs({ loan_has_due_on_transfer_clause: hasClause, residential_under_5_units: residentialUnder5 });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    let accelerationRisk: string;
+    let basis: string;
+    if (!hasClause) {
+      accelerationRisk = 'none_no_clause';
+      basis = 'loan_documents_carry_no_due_on_transfer_clause';
+    } else if (residentialUnder5 && (GARN_ST_GERMAIN.protectedTransferKinds as readonly string[]).includes(transferKind)) {
+      accelerationRisk = 'barred_by_garn_exception';
+      basis = `Protected consumer transfer under ${GARN_ST_GERMAIN.citation}(d) — residential under ${GARN_ST_GERMAIN.residentialUnitCeiling} units`;
+    } else {
+      accelerationRisk = 'lender_option_on_transfer';
+      basis = residentialUnder5
+        ? 'Transfer kind is not within the § 1701j-3(d) protected list'
+        : 'Commercial/entity collateral — Garn-St. Germain consumer exceptions do not apply';
+    }
+    const consentCriticalPath = accelerationRisk === 'lender_option_on_transfer';
+    return {
+      outputs: {
+        transfer_kind: transferKind,
+        acceleration_risk: accelerationRisk,
+        basis,
+        citation: GARN_ST_GERMAIN.citation,
+        lender_consent_critical_path: consentCriticalPath,
+        defer_to_counsel: consentCriticalPath,
+        counsel_handoff: consentCriticalPath
+          ? counselHandoff('due-on-transfer', 'the loan\'s transfer definitions and whether this structure trips them — obtain lender consent or a payoff plan before signing')
+          : null,
+        red_flags: consentCriticalPath ? ['Due-on-transfer clause + no Garn protection: lender consent (or payoff/refinance) is a closing-condition critical path.'] : [],
+      },
+    };
+  }),
+
+  // M231 — Option/ROFR/ROFO trigger detector. Flags BOTH directions: a sale
+  // that triggers the right, and an entity structure that may avoid it.
+  'MODEL.RE.PREEMPTIVE_RIGHT_TRIGGER.v1': defineModel('MODEL.RE.PREEMPTIVE_RIGHT_TRIGGER.v1', ['right_type', 'transaction_form', 'right_captures_entity_transfers'], ['[ROFR/option common law]', '[TX strict-match ROFR construction]'], input => {
+    const rightType = text(input.right_type) || '';
+    const txForm = text(input.transaction_form) || '';
+    const capturesEntity = booleanInput(input.right_captures_entity_transfers);
+    const state = (text(input.state) || '').toUpperCase();
+    const validRight = ['option', 'rofr', 'rofo'].includes(rightType);
+    const validForm = ['asset_sale', 'entity_transfer', 'merger'].includes(txForm);
+    const missing = requireInputs({ right_type: validRight ? rightType : null, transaction_form: validForm ? txForm : null, right_captures_entity_transfers: capturesEntity });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    let triggerStatus: string;
+    const redFlags: string[] = [];
+    if (txForm === 'asset_sale') {
+      triggerStatus = 'triggered_property_sale';
+      redFlags.push(`A property sale is squarely within a ${rightType.toUpperCase()} — run the notice/matching mechanics before signing with a third party.`);
+    } else if (capturesEntity) {
+      triggerStatus = 'triggered_entity_capture_language';
+      redFlags.push(`The ${rightType.toUpperCase()} expressly captures entity transfers — the ${txForm.replace('_', ' ')} does not avoid it.`);
+    } else {
+      triggerStatus = 'likely_not_triggered_structural';
+      redFlags.push(`Double-edged: the ${txForm.replace('_', ' ')} may avoid a property-level ${rightType.toUpperCase()} — but a court can look through form, and the counterparty will argue trigger. Both directions need counsel.`);
+    }
+    return {
+      outputs: {
+        right_type: rightType,
+        transaction_form: txForm,
+        trigger_status: triggerStatus,
+        tx_strict_match_note: state === 'TX' && rightType === 'rofr' ? 'Texas courts construe ROFR matching strictly — exact-match of third-party terms.' : null,
+        defer_to_counsel: true,
+        counsel_handoff: counselHandoff('preemptive-right trigger', 'whether this specific transaction legally triggers the right — the legal conclusion belongs to counsel'),
+        red_flags: redFlags,
+      },
+    };
+  }),
+
+  // M232 — Controlling-interest transfer-tax & reassessment screener.
+  // Complements M191 (jurisdictional CITT schedule) with the ≥50% screen,
+  // Prop 13 § 64 change-in-control, and the step-transaction flag.
+  'MODEL.RE.CITT_REASSESSMENT_SCREEN.v1': defineModel('MODEL.RE.CITT_REASSESSMENT_SCREEN.v1', ['state', 'is_entity_transfer', 'transfer_pct'], ['[NYC Admin. Code 11-2101]', '[NY Tax Law 1405(b)(6)]', '[Cal. Rev. & Tax. Code 60-64]', '[Tex. Const. art. VIII 29]', '[Matter of 105-02 Forest Hills (NYC Tax App. Trib. 2025)]'], input => {
+    const state = (text(input.state) || '').toUpperCase();
+    const isEntity = booleanInput(input.is_entity_transfer);
+    const transferPct = number(input.transfer_pct);
+    const cumulativePct = number(input.cumulative_related_transfers_pct) ?? transferPct ?? 0;
+    const mereChangeClaimed = booleanInput(input.mere_change_exemption_claimed) ?? false;
+    const relatedStepsPlanned = booleanInput(input.related_steps_planned) ?? false;
+    const missing = requireInputs({ state: state || null, is_entity_transfer: isEntity, transfer_pct: transferPct });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const regime = TRANSFER_TAX_REGIMES[state];
+    if (!regime) {
+      return {
+        outputs: {
+          state,
+          regime_known: false,
+          defer_to_counsel: true,
+          counsel_handoff: counselHandoff('transfer-tax regime', `${state}'s transfer-tax and reassessment rules, which are not yet in the state table`),
+          red_flags: [`Transfer-tax regime for ${state} not in the V18c state table — add the state as data.`],
+        },
+      };
+    }
+    const threshold = regime.controllingInterestThresholdPct;
+    const cittTriggered = !!(regime.controllingInterestTax && isEntity && threshold !== null && Math.max(transferPct!, cumulativePct) >= threshold);
+    const reassessmentTriggered = !!(regime.reassessmentOnControlChange && isEntity && (transferPct! > 50 || cumulativePct > 50));
+    const stepTransactionRisk = mereChangeClaimed && relatedStepsPlanned;
+    const redFlags: string[] = [];
+    if (cittTriggered) redFlags.push(`Controlling-interest transfer tax screen: ${Math.max(transferPct!, cumulativePct)}% entity transfer meets the ${threshold}% threshold in ${state} — no deed does not mean no transfer tax.`);
+    if (reassessmentTriggered) redFlags.push('CA Prop 13 change-in-control: >50% entity control change triggers 100% property-tax reassessment (R&T Code § 64) — independent of documentary transfer tax.');
+    if (stepTransactionRisk) redFlags.push('Mere-change exemption claimed with related steps planned: the step-transaction doctrine can collapse the steps and defeat the exemption (Forest Hills, 2025).');
+    if (state === 'TX') redFlags.length || redFlags.push('Texas imposes no real estate transfer tax (Tex. Const. art. VIII § 29) — verify no local overlays on the specific asset class.');
+    return {
+      outputs: {
+        state,
+        regime_known: true,
+        citation: regime.citation,
+        controlling_interest_threshold_pct: threshold,
+        citt_screen_triggered: cittTriggered,
+        reassessment_screen_triggered: reassessmentTriggered,
+        aggregation_years: regime.aggregationYears,
+        step_transaction_risk: stepTransactionRisk,
+        defer_to_counsel: cittTriggered || reassessmentTriggered || stepTransactionRisk,
+        counsel_handoff: cittTriggered || reassessmentTriggered || stepTransactionRisk
+          ? counselHandoff('controlling-interest tax/reassessment', 'whether this specific transfer is taxable or reassessable and how to structure — a determination for tax counsel')
+          : null,
+        red_flags: redFlags,
+      },
+    };
+  }),
+
+  // M233 — Permit/CO/license transferability & bulk-sales screener.
+  'MODEL.RE.PERMIT_CO_BULK_SALES.v1': defineModel('MODEL.RE.PERMIT_CO_BULK_SALES.v1', ['deal_form', 'jurisdiction_requires_co_on_transfer'], ['[Municipal CO ordinances]', '[UCC Art. 6 (as retained)]', '[CERCLA 107]', '[72 P.S. 1403]'], input => {
+    const dealForm = text(input.deal_form) || '';
+    const coOnTransfer = booleanInput(input.jurisdiction_requires_co_on_transfer);
+    const useChange = booleanInput(input.use_change) ?? false;
+    const permits = objectArray(input.permits);
+    const statesInvolved = stringArray(input.states_involved).map(s => s.toUpperCase());
+    const cerclaLinked = booleanInput(input.cercla_linked_property) ?? false;
+    const validForm = ['asset', 'entity', 'merger'].includes(dealForm);
+    const missing = requireInputs({ deal_form: validForm ? dealForm : null, jurisdiction_requires_co_on_transfer: coOnTransfer });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const coRequired = !!(coOnTransfer && (dealForm === 'asset' || useChange));
+    const nonTransferable = permits
+      .filter(p => booleanInput(p.transferable) === false)
+      .map((p, i) => String(p.label || `Permit ${i + 1}`));
+    const bulkSalesStates = statesInvolved.filter(s => BULK_SALES_NOTIFICATION_STATES[s]);
+    const redFlags: string[] = [];
+    if (coRequired) redFlags.push('Certificate-of-occupancy requirement on transfer/use change — re-permitting and code-compliance upgrades can gate closing.');
+    if (nonTransferable.length && dealForm === 'asset') redFlags.push(`Non-transferable permits in an asset deal: ${nonTransferable.join('; ')} — re-application timelines belong on the critical path.`);
+    if (nonTransferable.length && dealForm !== 'asset') redFlags.push(`Permits flagged non-transferable — an entity/merger form may preserve them, but change-of-control provisions in the permits themselves must be checked: ${nonTransferable.join('; ')}.`);
+    if (bulkSalesStates.length && dealForm === 'asset') redFlags.push(`Bulk-sales/tax-clearance notification applies in: ${bulkSalesStates.join(', ')} — failure to notify makes the buyer liable for the seller's tax.`);
+    if (cerclaLinked) redFlags.push('CERCLA-linked property: environmental successor liability survives regardless of deal form or bulk-sales repeal.');
+    return {
+      outputs: {
+        deal_form: dealForm,
+        co_required_on_transfer: coRequired,
+        non_transferable_permits: nonTransferable,
+        bulk_sales_notification_states: bulkSalesStates,
+        bulk_sales_citations: bulkSalesStates.map(s => BULK_SALES_NOTIFICATION_STATES[s]),
+        cercla_successor_flag: cerclaLinked,
+        defer_to_counsel: cerclaLinked || (dealForm === 'asset' && bulkSalesStates.length > 0),
+        counsel_handoff: cerclaLinked || (dealForm === 'asset' && bulkSalesStates.length > 0)
+          ? counselHandoff('successor-liability/bulk-sales', 'the clearance filings and successor-liability exposure for the states involved')
+          : null,
+        red_flags: redFlags,
+      },
+    };
+  }),
+
+  // M234 — Fixture classification & UCC § 9-334 priority. The 20-day PMSI
+  // fixture-filing window is the load-bearing deterministic rule.
+  'MODEL.RE.FIXTURE_9334.v1': defineModel('MODEL.RE.FIXTURE_9334.v1', ['pmsi', 'fixture_filing_made', 'prior_recorded_real_property_interest'], ['[UCC 9-334]', '[UCC 9-334(d) 20-day window]'], input => {
+    const pmsi = booleanInput(input.pmsi);
+    const filingMade = booleanInput(input.fixture_filing_made);
+    const priorRecordedRealProperty = booleanInput(input.prior_recorded_real_property_interest);
+    const filingDays = number(input.filing_days_after_affixation);
+    const constructionMortgage = booleanInput(input.construction_mortgage) ?? false;
+    const missing = requireInputs({ pmsi, fixture_filing_made: filingMade, prior_recorded_real_property_interest: priorRecordedRealProperty });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const withinWindow = filingMade! && filingDays !== null && filingDays <= 20;
+    let priority: string;
+    let basis: string;
+    if (!priorRecordedRealProperty) {
+      priority = filingMade ? 'fixture_secured_party' : 'first_to_perfect';
+      basis = 'No conflicting recorded real-property interest; fixture filing perfects against later interests.';
+    } else if (constructionMortgage) {
+      priority = 'real_property_interest';
+      basis = 'UCC § 9-334(h): a construction mortgage has priority over a fixture security interest arising during construction — the PMSI exception yields.';
+    } else if (pmsi! && withinWindow) {
+      priority = 'fixture_secured_party';
+      basis = 'UCC § 9-334(d): PMSI perfected by fixture filing before affixation or within 20 days thereafter primes the prior recorded real-property interest.';
+    } else {
+      priority = 'real_property_interest';
+      basis = 'UCC § 9-334(c) default: the conflicting real-property interest prevails; the PMSI exception requires a timely fixture filing.';
+    }
+    const redFlags: string[] = [];
+    if (pmsi! && filingMade! && !withinWindow && priorRecordedRealProperty) redFlags.push('PMSI fixture filing outside the 20-day § 9-334(d) window — priority lost to the recorded real-property interest.');
+    if (pmsi! && !filingMade) redFlags.push('No fixture filing made — a UCC-1 alone does not reach the real-property records for § 9-334(d) priority.');
+    return {
+      outputs: {
+        priority,
+        basis,
+        pmsi: pmsi,
+        fixture_filing_made: filingMade,
+        filing_days_after_affixation: filingDays,
+        within_20_day_window: withinWindow,
+        construction_mortgage: constructionMortgage,
+        ppa_note: 'Fixture vs. personal-property classification shifts purchase-price allocation, transfer-tax base, and depreciation — reconcile with the 1060 allocation models.',
+        defer_to_counsel: false,
+        red_flags: redFlags,
+      },
+    };
+  }),
+
   'MODEL.IP.CHAIN_OF_TITLE.v1': defineModel('MODEL.IP.CHAIN_OF_TITLE.v1', ['assets'], ['[35 U.S.C. 261]', '[Lanham Act 10]', '[17 U.S.C. 205]', '[Clorox v. Chemical Bank]'], input => {
     const assets = objectArray(input.assets);
     const missing = requireInputs({ assets: assets.length ? assets : null });

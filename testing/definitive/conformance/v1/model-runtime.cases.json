@@ -23,7 +23,11 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.STRUCT.NWC.PEG.v1",
     "input": {
-      "monthly_nwc_cents": [100000, 200000, 300000]
+      "monthly_nwc_cents": [
+        100000,
+        200000,
+        300000
+      ]
     },
     "expect": {
       "status": "complete",
@@ -56,10 +60,17 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.QOE.LITE.v1",
     "input": {
-      "financial_facts": ["Revenue tied to 2025 P&L"],
+      "financial_facts": [
+        "Revenue tied to 2025 P&L"
+      ],
       "adjustments": [
-        { "label": "Owner comp", "source_id": "file-1" },
-        { "label": "Travel" }
+        {
+          "label": "Owner comp",
+          "source_id": "file-1"
+        },
+        {
+          "label": "Travel"
+        }
       ]
     },
     "expect": {
@@ -80,7 +91,9 @@
       "entity_type": "C-Corp",
       "purchase_price_cents": 25000000,
       "rollover_pct": 0.15,
-      "tax_facts": { "loss_carryforwards": true }
+      "tax_facts": {
+        "loss_carryforwards": true
+      }
     },
     "expect": {
       "status": "complete",
@@ -133,8 +146,13 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.SOURCES.USES.v1",
     "input": {
-      "sources_cents": [100000, 200000],
-      "uses_cents": [250000]
+      "sources_cents": [
+        100000,
+        200000
+      ],
+      "uses_cents": [
+        250000
+      ]
     },
     "expect": {
       "status": "complete",
@@ -217,8 +235,14 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.STRUCT.EARNOUT.MC.v1",
     "input": {
-      "earnout_targets": [100000, 200000],
-      "probabilities": [0.5, 0.25],
+      "earnout_targets": [
+        100000,
+        200000
+      ],
+      "probabilities": [
+        0.5,
+        0.25
+      ],
       "discount_rate": 0.1,
       "term_years": 1
     },
@@ -282,7 +306,10 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.VAL.DCF.TWOSTAGE.v1",
     "input": {
-      "free_cash_flows_cents": [100000, 110000],
+      "free_cash_flows_cents": [
+        100000,
+        110000
+      ],
       "discount_rate": 0.1,
       "terminal_growth_rate": 0.03
     },
@@ -402,7 +429,10 @@
       "location": "Austin",
       "deal_size_cents": 500000000,
       "buyer_thesis": "HVAC platforms around Austin with route density",
-      "operating_needs": ["manager transition", "field tech retention"],
+      "operating_needs": [
+        "manager transition",
+        "field tech retention"
+      ],
       "buyer_criteria": {
         "min_deal_size_cents": 100000000,
         "max_deal_size_cents": 800000000
@@ -424,7 +454,10 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.MARKET.CONTEXT.v1",
     "input": {
-      "series_ids": ["SOFR", "DGS10"],
+      "series_ids": [
+        "SOFR",
+        "DGS10"
+      ],
       "as_of_date": "2026-05-20",
       "series_values": {
         "SOFR": 3.6,
@@ -447,15 +480,39 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.SENSITIVITY.MATRIX.v1",
     "input": {
-      "base_case": { "value": 100 },
-      "x_axis": { "values": [-0.1, 0, 0.1] },
-      "y_axis": { "values": [-0.2, 0.2] },
+      "base_case": {
+        "value": 100
+      },
+      "x_axis": {
+        "values": [
+          -0.1,
+          0,
+          0.1
+        ]
+      },
+      "y_axis": {
+        "values": [
+          -0.2,
+          0.2
+        ]
+      },
       "output_metric": "enterprise_value"
     },
     "expect": {
       "status": "complete",
       "outputs": {
-        "matrix": [[72, 80, 88], [108, 120, 132]],
+        "matrix": [
+          [
+            72,
+            80,
+            88
+          ],
+          [
+            108,
+            120,
+            132
+          ]
+        ],
         "low_case": 72,
         "high_case": 132
       }
@@ -468,19 +525,37 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.DEAL.COMPARISON.v1",
     "input": {
-      "deal_ids": ["a", "b"],
+      "deal_ids": [
+        "a",
+        "b"
+      ],
       "comparison_lens": "quality",
       "assumption_scope": "same leverage",
       "deals": [
-        { "id": "a", "name": "A", "score": 70, "purchase_price_cents": 1000000, "ebitda_cents": 200000 },
-        { "id": "b", "name": "B", "score": 85, "purchase_price_cents": 1200000, "ebitda_cents": 300000 }
+        {
+          "id": "a",
+          "name": "A",
+          "score": 70,
+          "purchase_price_cents": 1000000,
+          "ebitda_cents": 200000
+        },
+        {
+          "id": "b",
+          "name": "B",
+          "score": 85,
+          "purchase_price_cents": 1200000,
+          "ebitda_cents": 300000
+        }
       ]
     },
     "expect": {
       "status": "complete",
       "outputs": {
         "deal_count": 2,
-        "ranked_ids": ["b", "a"],
+        "ranked_ids": [
+          "b",
+          "a"
+        ],
         "top_deal_id": "b"
       }
     }
@@ -493,8 +568,22 @@
     "modelId": "MODEL.COVENANT.COMPLIANCE.v1",
     "input": {
       "forecast_periods": [
-        { "period": "2027", "ebitda_cents": 100000, "total_debt_cents": 350000, "cash_flow_cents": 120000, "debt_service_cents": 80000, "liquidity_cents": 50000 },
-        { "period": "2028", "ebitda_cents": 100000, "total_debt_cents": 250000, "cash_flow_cents": 100000, "debt_service_cents": 90000, "liquidity_cents": 20000 }
+        {
+          "period": "2027",
+          "ebitda_cents": 100000,
+          "total_debt_cents": 350000,
+          "cash_flow_cents": 120000,
+          "debt_service_cents": 80000,
+          "liquidity_cents": 50000
+        },
+        {
+          "period": "2028",
+          "ebitda_cents": 100000,
+          "total_debt_cents": 250000,
+          "cash_flow_cents": 100000,
+          "debt_service_cents": 90000,
+          "liquidity_cents": 20000
+        }
       ],
       "covenant_terms": {
         "max_leverage": 3,
@@ -502,8 +591,14 @@
         "min_liquidity_cents": 30000
       },
       "debt_schedule": [
-        { "total_debt_cents": 350000, "debt_service_cents": 80000 },
-        { "total_debt_cents": 250000, "debt_service_cents": 90000 }
+        {
+          "total_debt_cents": 350000,
+          "debt_service_cents": 80000
+        },
+        {
+          "total_debt_cents": 250000,
+          "debt_service_cents": 90000
+        }
       ]
     },
     "expect": {
@@ -521,11 +616,23 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.PMI.VALUE.CREATION.v1",
     "input": {
-      "deal_findings": ["customer concentration", "manual dispatch"],
-      "integration_risks": ["key manager", "billing migration"],
+      "deal_findings": [
+        "customer concentration",
+        "manual dispatch"
+      ],
+      "integration_risks": [
+        "key manager",
+        "billing migration"
+      ],
       "value_levers": [
-        { "name": "pricing cleanup", "value_cents": 50000 },
-        { "name": "routing efficiency", "value_cents": 75000 }
+        {
+          "name": "pricing cleanup",
+          "value_cents": 50000
+        },
+        {
+          "name": "routing efficiency",
+          "value_cents": 75000
+        }
       ]
     },
     "expect": {
@@ -545,8 +652,16 @@
     "modelId": "MODEL.DEALKILL.PROB.v1",
     "input": {
       "risk_factors": [
-        { "label": "financing gap", "severity": 80, "probability": 0.5 },
-        { "label": "seller retrade", "severity": 60, "probability": 0.25 }
+        {
+          "label": "financing gap",
+          "severity": 80,
+          "probability": 0.5
+        },
+        {
+          "label": "seller retrade",
+          "severity": 60,
+          "probability": 0.25
+        }
       ]
     },
     "expect": {
@@ -565,8 +680,18 @@
     "modelId": "MODEL.TIMELINE.MC.v1",
     "input": {
       "milestones": [
-        { "name": "LOI", "optimistic_days": 5, "base_days": 7, "downside_days": 14 },
-        { "name": "QoE", "optimistic_days": 21, "base_days": 35, "downside_days": 60 }
+        {
+          "name": "LOI",
+          "optimistic_days": 5,
+          "base_days": 7,
+          "downside_days": 14
+        },
+        {
+          "name": "QoE",
+          "optimistic_days": 21,
+          "base_days": 35,
+          "downside_days": 60
+        }
       ]
     },
     "expect": {
@@ -584,13 +709,17 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.VAL.DCF.TWOSTAGE.v1",
     "input": {
-      "free_cash_flows_cents": [100000],
+      "free_cash_flows_cents": [
+        100000
+      ],
       "discount_rate": 0.03,
       "terminal_growth_rate": 0.04
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["discount_rate_above_terminal_growth_rate"]
+      "missingInputsIncludes": [
+        "discount_rate_above_terminal_growth_rate"
+      ]
     }
   },
   {
@@ -604,7 +733,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["seller_discretionary_earnings_cents"]
+      "missingInputsIncludes": [
+        "seller_discretionary_earnings_cents"
+      ]
     }
   },
   {
@@ -618,7 +749,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["ebitda_cents"]
+      "missingInputsIncludes": [
+        "ebitda_cents"
+      ]
     }
   },
   {
@@ -632,7 +765,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["annual_debt_service_cents"]
+      "missingInputsIncludes": [
+        "annual_debt_service_cents"
+      ]
     }
   },
   {
@@ -646,7 +781,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["monthly_nwc_cents"]
+      "missingInputsIncludes": [
+        "monthly_nwc_cents"
+      ]
     }
   },
   {
@@ -656,11 +793,15 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.SOURCES.USES.v1",
     "input": {
-      "sources_cents": [100000]
+      "sources_cents": [
+        100000
+      ]
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["uses_cents"]
+      "missingInputsIncludes": [
+        "uses_cents"
+      ]
     }
   },
   {
@@ -709,11 +850,18 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.QOE.LITE.v1",
     "input": {
-      "adjustments": [{ "label": "Owner comp", "source_id": "file-1" }]
+      "adjustments": [
+        {
+          "label": "Owner comp",
+          "source_id": "file-1"
+        }
+      ]
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["financial_facts"]
+      "missingInputsIncludes": [
+        "financial_facts"
+      ]
     }
   },
   {
@@ -728,7 +876,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["purchase_price_cents"]
+      "missingInputsIncludes": [
+        "purchase_price_cents"
+      ]
     }
   },
   {
@@ -767,7 +917,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["exit_multiple"]
+      "missingInputsIncludes": [
+        "exit_multiple"
+      ]
     }
   },
   {
@@ -781,7 +933,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["asset_classes"]
+      "missingInputsIncludes": [
+        "asset_classes"
+      ]
     }
   },
   {
@@ -815,7 +969,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["structure_facts"]
+      "missingInputsIncludes": [
+        "structure_facts"
+      ]
     }
   },
   {
@@ -832,7 +988,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["operating_needs"]
+      "missingInputsIncludes": [
+        "operating_needs"
+      ]
     }
   },
   {
@@ -842,7 +1000,10 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.MARKET.CONTEXT.v1",
     "input": {
-      "series_ids": ["SOFR", "DGS10"],
+      "series_ids": [
+        "SOFR",
+        "DGS10"
+      ],
       "as_of_date": "2026-05-20",
       "series_values": {
         "SOFR": 3.6
@@ -852,7 +1013,9 @@
       "status": "complete",
       "outputs": {
         "series_count": 2,
-        "missing_value_series": ["DGS10"]
+        "missing_value_series": [
+          "DGS10"
+        ]
       }
     }
   },
@@ -863,13 +1026,22 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.SENSITIVITY.MATRIX.v1",
     "input": {
-      "base_case": { "value": 100 },
-      "y_axis": { "values": [0, 0.1] },
+      "base_case": {
+        "value": 100
+      },
+      "y_axis": {
+        "values": [
+          0,
+          0.1
+        ]
+      },
       "output_metric": "enterprise_value"
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["x_axis"]
+      "missingInputsIncludes": [
+        "x_axis"
+      ]
     }
   },
   {
@@ -879,12 +1051,17 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.DEAL.COMPARISON.v1",
     "input": {
-      "deal_ids": ["a", "b"],
+      "deal_ids": [
+        "a",
+        "b"
+      ],
       "comparison_lens": "quality"
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["assumption_scope"]
+      "missingInputsIncludes": [
+        "assumption_scope"
+      ]
     }
   },
   {
@@ -895,7 +1072,14 @@
     "modelId": "MODEL.COVENANT.COMPLIANCE.v1",
     "input": {
       "forecast_periods": [
-        { "period": "2027", "ebitda_cents": 200000, "total_debt_cents": 300000, "cash_flow_cents": 220000, "debt_service_cents": 100000, "liquidity_cents": 90000 }
+        {
+          "period": "2027",
+          "ebitda_cents": 200000,
+          "total_debt_cents": 300000,
+          "cash_flow_cents": 220000,
+          "debt_service_cents": 100000,
+          "liquidity_cents": 90000
+        }
       ],
       "covenant_terms": {
         "max_leverage": 2,
@@ -903,7 +1087,10 @@
         "min_liquidity_cents": 50000
       },
       "debt_schedule": [
-        { "total_debt_cents": 300000, "debt_service_cents": 100000 }
+        {
+          "total_debt_cents": 300000,
+          "debt_service_cents": 100000
+        }
       ]
     },
     "expect": {
@@ -921,12 +1108,18 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.PMI.VALUE.CREATION.v1",
     "input": {
-      "deal_findings": ["customer concentration"],
-      "integration_risks": ["key manager"]
+      "deal_findings": [
+        "customer concentration"
+      ],
+      "integration_risks": [
+        "key manager"
+      ]
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["value_levers"]
+      "missingInputsIncludes": [
+        "value_levers"
+      ]
     }
   },
   {
@@ -938,7 +1131,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["risk_factors"]
+      "missingInputsIncludes": [
+        "risk_factors"
+      ]
     }
   },
   {
@@ -950,7 +1145,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["milestones"]
+      "missingInputsIncludes": [
+        "milestones"
+      ]
     }
   },
   {
@@ -985,7 +1182,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["amount_realized_cents"]
+      "missingInputsIncludes": [
+        "amount_realized_cents"
+      ]
     }
   },
   {
@@ -1022,7 +1221,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["replacement_property_value_cents"]
+      "missingInputsIncludes": [
+        "replacement_property_value_cents"
+      ]
     }
   },
   {
@@ -1033,9 +1234,27 @@
     "modelId": "MODEL.RE.RENT_ROLL.NORMALIZE.v1",
     "input": {
       "rent_roll": [
-        { "tenant": "A", "annual_rent_cents": 6000000, "square_feet": 6000, "lease_months_remaining": 36, "occupied": true },
-        { "tenant": "B", "annual_rent_cents": 3000000, "square_feet": 3000, "lease_months_remaining": 24, "occupied": true },
-        { "tenant": "Vacant", "annual_rent_cents": 0, "square_feet": 1000, "lease_months_remaining": 0, "occupied": false }
+        {
+          "tenant": "A",
+          "annual_rent_cents": 6000000,
+          "square_feet": 6000,
+          "lease_months_remaining": 36,
+          "occupied": true
+        },
+        {
+          "tenant": "B",
+          "annual_rent_cents": 3000000,
+          "square_feet": 3000,
+          "lease_months_remaining": 24,
+          "occupied": true
+        },
+        {
+          "tenant": "Vacant",
+          "annual_rent_cents": 0,
+          "square_feet": 1000,
+          "lease_months_remaining": 0,
+          "occupied": false
+        }
       ]
     },
     "expect": {
@@ -1061,7 +1280,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["rent_roll"]
+      "missingInputsIncludes": [
+        "rent_roll"
+      ]
     }
   },
   {
@@ -1098,7 +1319,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["tenant_pro_rata_pct"]
+      "missingInputsIncludes": [
+        "tenant_pro_rata_pct"
+      ]
     }
   },
   {
@@ -1134,7 +1357,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["transaction_value_cents"]
+      "missingInputsIncludes": [
+        "transaction_value_cents"
+      ]
     }
   },
   {
@@ -1146,7 +1371,10 @@
     "input": {
       "transaction_value_cents": 500000000,
       "rwi_present": true,
-      "special_escrows_cents": [5000000, 3000000]
+      "special_escrows_cents": [
+        5000000,
+        3000000
+      ]
     },
     "expect": {
       "status": "complete",
@@ -1167,7 +1395,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["transaction_value_cents"]
+      "missingInputsIncludes": [
+        "transaction_value_cents"
+      ]
     }
   },
   {
@@ -1198,7 +1428,11 @@
         "seller_tax_cents": 12500000,
         "seller_after_tax_proceeds_cents": 87500000,
         "gross_up_gap_cents": 6666667,
-        "fired_sub_models": ["M139", "M145", "M201"]
+        "fired_sub_models": [
+          "M139",
+          "M145",
+          "M201"
+        ]
       }
     }
   },
@@ -1214,7 +1448,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["deal_form"]
+      "missingInputsIncludes": [
+        "deal_form"
+      ]
     }
   },
   {
@@ -1250,7 +1486,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["seller_tax_delta_cents"]
+      "missingInputsIncludes": [
+        "seller_tax_delta_cents"
+      ]
     }
   },
   {
@@ -1293,7 +1531,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["sale_date"]
+      "missingInputsIncludes": [
+        "sale_date"
+      ]
     }
   },
   {
@@ -1307,9 +1547,23 @@
       "rev_proc_2011_29_safe_harbor_elected": true,
       "pe_owned_target": true,
       "transaction_costs": [
-        { "label": "Banker success fee", "amount_cents": 10000000, "success_based": true, "incurred_date": "2026-04-01" },
-        { "label": "Legal drafting", "amount_cents": 2000000, "inherently_facilitative": true, "incurred_date": "2026-02-15" },
-        { "label": "Market study", "amount_cents": 1000000, "incurred_date": "2026-01-15" }
+        {
+          "label": "Banker success fee",
+          "amount_cents": 10000000,
+          "success_based": true,
+          "incurred_date": "2026-04-01"
+        },
+        {
+          "label": "Legal drafting",
+          "amount_cents": 2000000,
+          "inherently_facilitative": true,
+          "incurred_date": "2026-02-15"
+        },
+        {
+          "label": "Market study",
+          "amount_cents": 1000000,
+          "incurred_date": "2026-01-15"
+        }
       ]
     },
     "expect": {
@@ -1333,7 +1587,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["transaction_costs"]
+      "missingInputsIncludes": [
+        "transaction_costs"
+      ]
     }
   },
   {
@@ -1373,7 +1629,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["afr_rate"]
+      "missingInputsIncludes": [
+        "afr_rate"
+      ]
     }
   },
   {
@@ -1408,7 +1666,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["closing_date"]
+      "missingInputsIncludes": [
+        "closing_date"
+      ]
     }
   },
   {
@@ -1448,7 +1708,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["peg_cents"]
+      "missingInputsIncludes": [
+        "peg_cents"
+      ]
     }
   },
   {
@@ -1459,9 +1721,21 @@
     "modelId": "MODEL.LEGAL.CONDITIONS.LOGIC.v1",
     "input": {
       "conditions": [
-        { "name": "Bring-down reps", "type": "general", "satisfied": true },
-        { "name": "HSR approval", "type": "regulatory", "satisfied": false },
-        { "name": "Key customer consent", "type": "consent", "waived": true }
+        {
+          "name": "Bring-down reps",
+          "type": "general",
+          "satisfied": true
+        },
+        {
+          "name": "HSR approval",
+          "type": "regulatory",
+          "satisfied": false
+        },
+        {
+          "name": "Key customer consent",
+          "type": "consent",
+          "waived": true
+        }
       ]
     },
     "expect": {
@@ -1473,7 +1747,9 @@
         "open_condition_count": 1,
         "closing_ready": false,
         "professional_review_required": true,
-        "open_conditions": ["HSR approval"]
+        "open_conditions": [
+          "HSR approval"
+        ]
       }
     }
   },
@@ -1486,7 +1762,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["conditions"]
+      "missingInputsIncludes": [
+        "conditions"
+      ]
     }
   },
   {
@@ -1517,7 +1795,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["transaction_value_cents"]
+      "missingInputsIncludes": [
+        "transaction_value_cents"
+      ]
     }
   },
   {
@@ -1529,9 +1809,18 @@
     "input": {
       "purchase_price_cents": 1000000,
       "asset_classes": [
-        { "class_name": "Class V real property and equipment", "fair_market_value_cents": 600000 },
-        { "class_name": "Class VI customer intangibles", "fair_market_value_cents": 300000 },
-        { "class_name": "Class VII goodwill", "fair_market_value_cents": 0 }
+        {
+          "class_name": "Class V real property and equipment",
+          "fair_market_value_cents": 600000
+        },
+        {
+          "class_name": "Class VI customer intangibles",
+          "fair_market_value_cents": 300000
+        },
+        {
+          "class_name": "Class VII goodwill",
+          "fair_market_value_cents": 0
+        }
       ]
     },
     "expect": {
@@ -1552,11 +1841,18 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.TAX.1060.ALLOCATION.v1",
     "input": {
-      "asset_classes": [{ "class_name": "Class V", "fair_market_value_cents": 600000 }]
+      "asset_classes": [
+        {
+          "class_name": "Class V",
+          "fair_market_value_cents": 600000
+        }
+      ]
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["purchase_price_cents"]
+      "missingInputsIncludes": [
+        "purchase_price_cents"
+      ]
     }
   },
   {
@@ -1595,7 +1891,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["annual_rent_cents"]
+      "missingInputsIncludes": [
+        "annual_rent_cents"
+      ]
     }
   },
   {
@@ -1640,7 +1938,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["total_assets_cents"]
+      "missingInputsIncludes": [
+        "total_assets_cents"
+      ]
     }
   },
   {
@@ -1678,7 +1978,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["investment_cents"]
+      "missingInputsIncludes": [
+        "investment_cents"
+      ]
     }
   },
   {
@@ -1713,7 +2015,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["eligible_inventory_cents"]
+      "missingInputsIncludes": [
+        "eligible_inventory_cents"
+      ]
     }
   },
   {
@@ -1755,7 +2059,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["spread_bps"]
+      "missingInputsIncludes": [
+        "spread_bps"
+      ]
     }
   },
   {
@@ -1766,8 +2072,20 @@
     "modelId": "MODEL.FINANCE.COVENANT_BASKETS.v1",
     "input": {
       "baskets": [
-        { "name": "Investment basket", "fixed_capacity_cents": 1000000, "grower_basis_cents": 10000000, "grower_pct": 0.1, "used_cents": 500000, "proposed_use_cents": 1000000 },
-        { "name": "Restricted payment basket", "fixed_capacity_cents": 500000, "used_cents": 400000, "proposed_use_cents": 200000 }
+        {
+          "name": "Investment basket",
+          "fixed_capacity_cents": 1000000,
+          "grower_basis_cents": 10000000,
+          "grower_pct": 0.1,
+          "used_cents": 500000,
+          "proposed_use_cents": 1000000
+        },
+        {
+          "name": "Restricted payment basket",
+          "fixed_capacity_cents": 500000,
+          "used_cents": 400000,
+          "proposed_use_cents": 200000
+        }
       ]
     },
     "expect": {
@@ -1788,7 +2106,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["baskets"]
+      "missingInputsIncludes": [
+        "baskets"
+      ]
     }
   },
   {
@@ -1825,7 +2145,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["parachute_payments_cents"]
+      "missingInputsIncludes": [
+        "parachute_payments_cents"
+      ]
     }
   },
   {
@@ -1858,7 +2180,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["loss_corporation_value_cents"]
+      "missingInputsIncludes": [
+        "loss_corporation_value_cents"
+      ]
     }
   },
   {
@@ -1898,7 +2222,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["enterprise_value_cents"]
+      "missingInputsIncludes": [
+        "enterprise_value_cents"
+      ]
     }
   },
   {
@@ -1937,7 +2263,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["cap_rate"]
+      "missingInputsIncludes": [
+        "cap_rate"
+      ]
     }
   },
   {
@@ -1976,7 +2304,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["operating_expenses_cents"]
+      "missingInputsIncludes": [
+        "operating_expenses_cents"
+      ]
     }
   },
   {
@@ -1987,8 +2317,21 @@
     "modelId": "MODEL.RE.LEASE_ABSTRACTION.v1",
     "input": {
       "leases": [
-        { "tenant": "A", "annual_rent_cents": 600000, "months_remaining": 24, "assignment_consent_required": true, "exclusive_use": true },
-        { "tenant": "B", "annual_rent_cents": 400000, "months_remaining": 12, "change_of_control_consent_required": true, "co_tenancy": true, "go_dark": true }
+        {
+          "tenant": "A",
+          "annual_rent_cents": 600000,
+          "months_remaining": 24,
+          "assignment_consent_required": true,
+          "exclusive_use": true
+        },
+        {
+          "tenant": "B",
+          "annual_rent_cents": 400000,
+          "months_remaining": 12,
+          "change_of_control_consent_required": true,
+          "co_tenancy": true,
+          "go_dark": true
+        }
       ]
     },
     "expect": {
@@ -2014,7 +2357,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["leases"]
+      "missingInputsIncludes": [
+        "leases"
+      ]
     }
   },
   {
@@ -2025,8 +2370,16 @@
     "modelId": "MODEL.RE.PCA.RESERVES.v1",
     "input": {
       "pca_items": [
-        { "item": "Roof", "immediate_repair_cents": 100000, "year_1_3_cents": 200000 },
-        { "item": "HVAC", "year_4_5_cents": 300000, "year_6_12_cents": 400000 }
+        {
+          "item": "Roof",
+          "immediate_repair_cents": 100000,
+          "year_1_3_cents": 200000
+        },
+        {
+          "item": "HVAC",
+          "year_4_5_cents": 300000,
+          "year_6_12_cents": 400000
+        }
       ]
     },
     "expect": {
@@ -2051,7 +2404,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["pca_items"]
+      "missingInputsIncludes": [
+        "pca_items"
+      ]
     }
   },
   {
@@ -2091,7 +2446,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["seller_foreign_person"]
+      "missingInputsIncludes": [
+        "seller_foreign_person"
+      ]
     }
   },
   {
@@ -2102,8 +2459,19 @@
     "modelId": "MODEL.IP.LICENSE.DEPENDENCY.v1",
     "input": {
       "licenses": [
-        { "name": "Core SDK", "direction": "inbound", "annual_royalty_cents": 100000, "terminates_on_change_of_control": true, "sublicensing_allowed": false },
-        { "name": "OEM grant", "direction": "outbound", "annual_royalty_cents": 50000, "change_of_control_consent_required": true }
+        {
+          "name": "Core SDK",
+          "direction": "inbound",
+          "annual_royalty_cents": 100000,
+          "terminates_on_change_of_control": true,
+          "sublicensing_allowed": false
+        },
+        {
+          "name": "OEM grant",
+          "direction": "outbound",
+          "annual_royalty_cents": 50000,
+          "change_of_control_consent_required": true
+        }
       ]
     },
     "expect": {
@@ -2128,7 +2496,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["licenses"]
+      "missingInputsIncludes": [
+        "licenses"
+      ]
     }
   },
   {
@@ -2138,7 +2508,11 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.IP.SOURCE_CODE_ESCROW.v1",
     "input": {
-      "release_triggers": ["insolvency", "support discontinuation", "material breach"],
+      "release_triggers": [
+        "insolvency",
+        "support discontinuation",
+        "material breach"
+      ],
       "deposit_verification_tier": "build verified",
       "last_deposit_date": "2026-05-21",
       "update_frequency_months": 3
@@ -2161,11 +2535,15 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.IP.SOURCE_CODE_ESCROW.v1",
     "input": {
-      "release_triggers": ["insolvency"]
+      "release_triggers": [
+        "insolvency"
+      ]
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["deposit_verification_tier"]
+      "missingInputsIncludes": [
+        "deposit_verification_tier"
+      ]
     }
   },
   {
@@ -2201,7 +2579,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["ip_intangibles_cents"]
+      "missingInputsIncludes": [
+        "ip_intangibles_cents"
+      ]
     }
   },
   {
@@ -2212,9 +2592,21 @@
     "modelId": "MODEL.IP.DOMAIN_TM.TRANSFER.v1",
     "input": {
       "transfer_assets": [
-        { "type": "domain", "name": "example.com", "transfer_lock_days_remaining": 45, "ssl_certificate_attached": true },
-        { "type": "trademark", "name": "EXAMPLE", "state_registered": true },
-        { "type": "social", "name": "@example" }
+        {
+          "type": "domain",
+          "name": "example.com",
+          "transfer_lock_days_remaining": 45,
+          "ssl_certificate_attached": true
+        },
+        {
+          "type": "trademark",
+          "name": "EXAMPLE",
+          "state_registered": true
+        },
+        {
+          "type": "social",
+          "name": "@example"
+        }
       ]
     },
     "expect": {
@@ -2241,7 +2633,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["transfer_assets"]
+      "missingInputsIncludes": [
+        "transfer_assets"
+      ]
     }
   },
   {
@@ -2253,9 +2647,20 @@
     "input": {
       "general_buffer_rate": 0.1,
       "issues": [
-        { "type": "environmental", "amount_cents": 100000, "holdback_pct": 1 },
-        { "type": "PCA deferred maintenance", "estimated_cost_cents": 200000, "holdback_pct": 0.5 },
-        { "type": "title exception", "cost_to_cure_cents": 50000 }
+        {
+          "type": "environmental",
+          "amount_cents": 100000,
+          "holdback_pct": 1
+        },
+        {
+          "type": "PCA deferred maintenance",
+          "estimated_cost_cents": 200000,
+          "holdback_pct": 0.5
+        },
+        {
+          "type": "title exception",
+          "cost_to_cure_cents": 50000
+        }
       ]
     },
     "expect": {
@@ -2279,7 +2684,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["issues"]
+      "missingInputsIncludes": [
+        "issues"
+      ]
     }
   },
   {
@@ -2292,11 +2699,29 @@
       "title_commitment_received": true,
       "survey_received": true,
       "lender_policy_required": true,
-      "schedule_b_exceptions": [{ "name": "utility easement" }, { "name": "old lien" }],
-      "alta_endorsements_requested": ["9", "3.1"],
+      "schedule_b_exceptions": [
+        {
+          "name": "utility easement"
+        },
+        {
+          "name": "old lien"
+        }
+      ],
+      "alta_endorsements_requested": [
+        "9",
+        "3.1"
+      ],
       "curative_items": [
-        { "item": "Release old lien", "status": "open", "cost_to_cure_cents": 25000 },
-        { "item": "Survey update", "status": "resolved", "cost_to_cure_cents": 5000 }
+        {
+          "item": "Release old lien",
+          "status": "open",
+          "cost_to_cure_cents": 25000
+        },
+        {
+          "item": "Survey update",
+          "status": "resolved",
+          "cost_to_cure_cents": 5000
+        }
       ]
     },
     "expect": {
@@ -2326,7 +2751,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["survey_received"]
+      "missingInputsIncludes": [
+        "survey_received"
+      ]
     }
   },
   {
@@ -2337,8 +2764,23 @@
     "modelId": "MODEL.IP.CHAIN_OF_TITLE.v1",
     "input": {
       "assets": [
-        { "type": "patent", "name": "HVAC sensor", "assignment_count": 2, "current_owner_matches": true, "recorded_within_three_months": true, "contributor_assignments_complete": true },
-        { "type": "trademark", "name": "BRAND", "assignment_count": 1, "current_owner_matches": false, "recorded_within_three_months": false, "contributor_assignments_complete": false, "itu_assigned_after_allegation_of_use": false }
+        {
+          "type": "patent",
+          "name": "HVAC sensor",
+          "assignment_count": 2,
+          "current_owner_matches": true,
+          "recorded_within_three_months": true,
+          "contributor_assignments_complete": true
+        },
+        {
+          "type": "trademark",
+          "name": "BRAND",
+          "assignment_count": 1,
+          "current_owner_matches": false,
+          "recorded_within_three_months": false,
+          "contributor_assignments_complete": false,
+          "itu_assigned_after_allegation_of_use": false
+        }
       ]
     },
     "expect": {
@@ -2364,7 +2806,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["assets"]
+      "missingInputsIncludes": [
+        "assets"
+      ]
     }
   },
   {
@@ -2375,9 +2819,22 @@
     "modelId": "MODEL.IP.ENCUMBRANCE_LIEN_SEARCH.v1",
     "input": {
       "searches": [
-        { "track": "ucc", "jurisdiction": "DE", "hit_count": 2, "release_obtained": false },
-        { "track": "uspto patent security", "hit_count": 1, "release_obtained": true },
-        { "track": "copyright", "hit_count": 1, "release_obtained": false }
+        {
+          "track": "ucc",
+          "jurisdiction": "DE",
+          "hit_count": 2,
+          "release_obtained": false
+        },
+        {
+          "track": "uspto patent security",
+          "hit_count": 1,
+          "release_obtained": true
+        },
+        {
+          "track": "copyright",
+          "hit_count": 1,
+          "release_obtained": false
+        }
       ]
     },
     "expect": {
@@ -2402,7 +2859,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["searches"]
+      "missingInputsIncludes": [
+        "searches"
+      ]
     }
   },
   {
@@ -2413,7 +2872,10 @@
     "modelId": "MODEL.IP.REPRESENTATION_SET.v1",
     "input": {
       "deal_type": "software acquisition",
-      "material_ip_categories": ["software", "trademark"]
+      "material_ip_categories": [
+        "software",
+        "trademark"
+      ]
     },
     "expect": {
       "status": "complete",
@@ -2440,7 +2902,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["material_ip_categories"]
+      "missingInputsIncludes": [
+        "material_ip_categories"
+      ]
     }
   },
   {
@@ -2451,8 +2915,19 @@
     "modelId": "MODEL.IP.EMPLOYEE_ASSIGNMENT.VERIFICATION.v1",
     "input": {
       "contributors": [
-        { "name": "Founder", "state": "CA", "ip_assignment_executed": true, "work_for_hire_executed": true, "outside_scope_invention": true },
-        { "name": "Contractor", "state": "TX", "ip_assignment_executed": false, "work_for_hire_executed": false }
+        {
+          "name": "Founder",
+          "state": "CA",
+          "ip_assignment_executed": true,
+          "work_for_hire_executed": true,
+          "outside_scope_invention": true
+        },
+        {
+          "name": "Contractor",
+          "state": "TX",
+          "ip_assignment_executed": false,
+          "work_for_hire_executed": false
+        }
       ]
     },
     "expect": {
@@ -2477,7 +2952,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["contributors"]
+      "missingInputsIncludes": [
+        "contributors"
+      ]
     }
   },
   {
@@ -2488,9 +2965,23 @@
     "modelId": "MODEL.IP.OSS.EXPOSURE.v1",
     "input": {
       "components": [
-        { "name": "React", "license": "MIT", "remediation_cost_cents": 0 },
-        { "name": "Report lib", "license": "LGPL-3.0", "remediation_cost_cents": 50000 },
-        { "name": "Network tool", "license": "AGPL-3.0", "network_use": true, "proprietary_linking": true, "remediation_cost_cents": 250000 }
+        {
+          "name": "React",
+          "license": "MIT",
+          "remediation_cost_cents": 0
+        },
+        {
+          "name": "Report lib",
+          "license": "LGPL-3.0",
+          "remediation_cost_cents": 50000
+        },
+        {
+          "name": "Network tool",
+          "license": "AGPL-3.0",
+          "network_use": true,
+          "proprietary_linking": true,
+          "remediation_cost_cents": 250000
+        }
       ]
     },
     "expect": {
@@ -2518,7 +3009,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["components"]
+      "missingInputsIncludes": [
+        "components"
+      ]
     }
   },
   {
@@ -2564,7 +3057,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["required_capital_cents"]
+      "missingInputsIncludes": [
+        "required_capital_cents"
+      ]
     }
   },
   {
@@ -2606,7 +3101,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["lien_amount_cents"]
+      "missingInputsIncludes": [
+        "lien_amount_cents"
+      ]
     }
   },
   {
@@ -2619,9 +3116,21 @@
       "estate_value_cents": 1000000,
       "trustee_fee_cents": 50000,
       "claims": [
-        { "class_name": "Admin", "priority_rank": 1, "allowed_claim_cents": 200000 },
-        { "class_name": "Priority tax", "priority_rank": 2, "allowed_claim_cents": 300000 },
-        { "class_name": "GUC", "priority_rank": 3, "allowed_claim_cents": 600000 }
+        {
+          "class_name": "Admin",
+          "priority_rank": 1,
+          "allowed_claim_cents": 200000
+        },
+        {
+          "class_name": "Priority tax",
+          "priority_rank": 2,
+          "allowed_claim_cents": 300000
+        },
+        {
+          "class_name": "GUC",
+          "priority_rank": 3,
+          "allowed_claim_cents": 600000
+        }
       ]
     },
     "expect": {
@@ -2645,7 +3154,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["claims"]
+      "missingInputsIncludes": [
+        "claims"
+      ]
     }
   },
   {
@@ -2686,7 +3197,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["minimum_liquidity_cents"]
+      "missingInputsIncludes": [
+        "minimum_liquidity_cents"
+      ]
     }
   },
   {
@@ -2726,7 +3239,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["new_security_value_cents"]
+      "missingInputsIncludes": [
+        "new_security_value_cents"
+      ]
     }
   },
   {
@@ -2739,8 +3254,22 @@
       "minimum_dscr": 1.1,
       "minimum_liquidity_cents": 100000,
       "forecast_periods": [
-        { "year": "2026", "cash_flow_cents": 1000000, "capex_cents": 100000, "working_capital_need_cents": 50000, "debt_service_cents": 600000, "ending_liquidity_cents": 200000 },
-        { "year": "2027", "cash_flow_cents": 900000, "capex_cents": 100000, "working_capital_need_cents": 50000, "debt_service_cents": 650000, "ending_liquidity_cents": 75000 }
+        {
+          "year": "2026",
+          "cash_flow_cents": 1000000,
+          "capex_cents": 100000,
+          "working_capital_need_cents": 50000,
+          "debt_service_cents": 600000,
+          "ending_liquidity_cents": 200000
+        },
+        {
+          "year": "2027",
+          "cash_flow_cents": 900000,
+          "capex_cents": 100000,
+          "working_capital_need_cents": 50000,
+          "debt_service_cents": 650000,
+          "ending_liquidity_cents": 75000
+        }
       ]
     },
     "expect": {
@@ -2767,7 +3296,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["forecast_periods"]
+      "missingInputsIncludes": [
+        "forecast_periods"
+      ]
     }
   },
   {
@@ -2778,8 +3309,18 @@
     "modelId": "MODEL.RESTRUCTURING.BIOC.v1",
     "input": {
       "creditor_classes": [
-        { "class_name": "Secured", "allowed_claim_cents": 1000000, "plan_distribution_cents": 1000000, "chapter7_distribution_cents": 900000 },
-        { "class_name": "GUC", "allowed_claim_cents": 500000, "plan_distribution_cents": 200000, "chapter7_distribution_cents": 250000 }
+        {
+          "class_name": "Secured",
+          "allowed_claim_cents": 1000000,
+          "plan_distribution_cents": 1000000,
+          "chapter7_distribution_cents": 900000
+        },
+        {
+          "class_name": "GUC",
+          "allowed_claim_cents": 500000,
+          "plan_distribution_cents": 200000,
+          "chapter7_distribution_cents": 250000
+        }
       ]
     },
     "expect": {
@@ -2804,7 +3345,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["creditor_classes"]
+      "missingInputsIncludes": [
+        "creditor_classes"
+      ]
     }
   },
   {
@@ -2815,8 +3358,20 @@
     "modelId": "MODEL.RESTRUCTURING.APR_NEW_VALUE.v1",
     "input": {
       "classes": [
-        { "class_name": "Senior secured", "priority_rank": 1, "allowed_claim_cents": 1000000, "plan_distribution_cents": 800000, "impaired": true, "accepted": false },
-        { "class_name": "Equity", "priority_rank": 3, "allowed_claim_cents": 0, "plan_distribution_cents": 100000 }
+        {
+          "class_name": "Senior secured",
+          "priority_rank": 1,
+          "allowed_claim_cents": 1000000,
+          "plan_distribution_cents": 800000,
+          "impaired": true,
+          "accepted": false
+        },
+        {
+          "class_name": "Equity",
+          "priority_rank": 3,
+          "allowed_claim_cents": 0,
+          "plan_distribution_cents": 100000
+        }
       ],
       "new_value": {
         "contribution_cents": 150000,
@@ -2846,7 +3401,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["classes"]
+      "missingInputsIncludes": [
+        "classes"
+      ]
     }
   },
   {
@@ -2885,7 +3442,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["risk_premium"]
+      "missingInputsIncludes": [
+        "risk_premium"
+      ]
     }
   },
   {
@@ -2897,7 +3456,13 @@
     "input": {
       "allowed_claim_cents": 1000000,
       "collateral_value_cents": 600000,
-      "plan_payment_stream_cents": [250000, 250000, 250000, 250000, 250000],
+      "plan_payment_stream_cents": [
+        250000,
+        250000,
+        250000,
+        250000,
+        250000
+      ],
       "discount_rate": 0.1,
       "guc_recovery_pct": 0.2,
       "recourse": true,
@@ -2935,7 +3500,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["plan_payment_stream_cents"]
+      "missingInputsIncludes": [
+        "plan_payment_stream_cents"
+      ]
     }
   },
   {
@@ -2947,8 +3514,16 @@
     "input": {
       "enterprise_value_cents": 1200000,
       "tranches": [
-        { "tranche_name": "First lien", "priority_rank": 1, "claim_cents": 800000 },
-        { "tranche_name": "Second lien", "priority_rank": 2, "claim_cents": 700000 }
+        {
+          "tranche_name": "First lien",
+          "priority_rank": 1,
+          "claim_cents": 800000
+        },
+        {
+          "tranche_name": "Second lien",
+          "priority_rank": 2,
+          "claim_cents": 700000
+        }
       ]
     },
     "expect": {
@@ -2973,7 +3548,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["tranches"]
+      "missingInputsIncludes": [
+        "tranches"
+      ]
     }
   },
   {
@@ -2984,14 +3561,30 @@
     "modelId": "MODEL.RESTRUCTURING.RSA_ECONOMICS.v1",
     "input": {
       "classes": [
-        { "class_name": "Secured", "support_amount_pct": 0.7, "support_number_pct": 0.55 },
-        { "class_name": "GUC", "support_amount_pct": 0.6, "support_number_pct": 0.4 }
+        {
+          "class_name": "Secured",
+          "support_amount_pct": 0.7,
+          "support_number_pct": 0.55
+        },
+        {
+          "class_name": "GUC",
+          "support_amount_pct": 0.6,
+          "support_number_pct": 0.4
+        }
       ],
       "milestones": [
-        { "name": "petition", "completed": true },
-        { "name": "confirmation" }
+        {
+          "name": "petition",
+          "completed": true
+        },
+        {
+          "name": "confirmation"
+        }
       ],
-      "termination_events": ["missed milestone", "fiduciary out"],
+      "termination_events": [
+        "missed milestone",
+        "fiduciary out"
+      ],
       "fiduciary_out_present": true,
       "toggle_type": "specified_plan"
     },
@@ -3019,7 +3612,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["classes"]
+      "missingInputsIncludes": [
+        "classes"
+      ]
     }
   },
   {
@@ -3034,8 +3629,16 @@
       "sale_costs_cents": 50000,
       "notice_days": 9,
       "claims": [
-        { "class_name": "Secured", "priority_rank": 1, "claim_cents": 300000 },
-        { "class_name": "Unsecured", "priority_rank": 2, "claim_cents": 700000 }
+        {
+          "class_name": "Secured",
+          "priority_rank": 1,
+          "claim_cents": 300000
+        },
+        {
+          "class_name": "Unsecured",
+          "priority_rank": 2,
+          "claim_cents": 700000
+        }
       ]
     },
     "expect": {
@@ -3060,7 +3663,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["claims"]
+      "missingInputsIncludes": [
+        "claims"
+      ]
     }
   },
   {
@@ -3099,7 +3704,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["expected_recovery_rate"]
+      "missingInputsIncludes": [
+        "expected_recovery_rate"
+      ]
     }
   },
   {
@@ -3134,7 +3741,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["engaged_in_commercial_activity"]
+      "missingInputsIncludes": [
+        "engaged_in_commercial_activity"
+      ]
     }
   },
   {
@@ -3170,7 +3779,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["liquidity_months"]
+      "missingInputsIncludes": [
+        "liquidity_months"
+      ]
     }
   },
   {
@@ -3204,7 +3815,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["seller_foreign_person"]
+      "missingInputsIncludes": [
+        "seller_foreign_person"
+      ]
     }
   },
   {
@@ -3240,7 +3853,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["strip_percentage"]
+      "missingInputsIncludes": [
+        "strip_percentage"
+      ]
     }
   },
   {
@@ -3276,7 +3891,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["loan_amount_cents"]
+      "missingInputsIncludes": [
+        "loan_amount_cents"
+      ]
     }
   },
   {
@@ -3318,7 +3935,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["exercise_price_cents"]
+      "missingInputsIncludes": [
+        "exercise_price_cents"
+      ]
     }
   },
   {
@@ -3357,7 +3976,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["interest_transferred_pct"]
+      "missingInputsIncludes": [
+        "interest_transferred_pct"
+      ]
     }
   },
   {
@@ -3397,7 +4018,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["opco_ebitda_cents"]
+      "missingInputsIncludes": [
+        "opco_ebitda_cents"
+      ]
     }
   },
   {
@@ -3436,7 +4059,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["annual_ground_rent_cents"]
+      "missingInputsIncludes": [
+        "annual_ground_rent_cents"
+      ]
     }
   },
   {
@@ -3476,7 +4101,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["state_apportionment_pct"]
+      "missingInputsIncludes": [
+        "state_apportionment_pct"
+      ]
     }
   },
   {
@@ -3490,8 +4117,15 @@
       "retention_pct": 0.005,
       "policy_tower_pct": 0.1,
       "seller_indemnity_cap_pct": 0.01,
-      "exclusions": ["known tax", "forward-looking"],
-      "excess_layers": [{ "limit_cents": 50000 }]
+      "exclusions": [
+        "known tax",
+        "forward-looking"
+      ],
+      "excess_layers": [
+        {
+          "limit_cents": 50000
+        }
+      ]
     },
     "expect": {
       "status": "complete",
@@ -3518,7 +4152,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["enterprise_value_cents"]
+      "missingInputsIncludes": [
+        "enterprise_value_cents"
+      ]
     }
   },
   {
@@ -3529,9 +4165,17 @@
     "modelId": "MODEL.LEGAL.EARNOUT_ARCHITECTURE.v1",
     "input": {
       "earnout_value_cents": 500000,
-      "metrics": ["EBITDA", "revenue"],
-      "acceleration_triggers": ["sale", "termination"],
-      "post_closing_covenants": ["commercially reasonable efforts"],
+      "metrics": [
+        "EBITDA",
+        "revenue"
+      ],
+      "acceleration_triggers": [
+        "sale",
+        "termination"
+      ],
+      "post_closing_covenants": [
+        "commercially reasonable efforts"
+      ],
       "dispute_forum": "accounting_arbitrator",
       "tax_characterization": "section_453_installment"
     },
@@ -3559,7 +4203,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["metrics"]
+      "missingInputsIncludes": [
+        "metrics"
+      ]
     }
   },
   {
@@ -3570,9 +4216,19 @@
     "modelId": "MODEL.IP.CARVEOUT_LICENSE_BACK.v1",
     "input": {
       "ip_assets": [
-        { "asset_name": "Brand", "disposition": "assigned_to_buyer" },
-        { "asset_name": "Platform", "disposition": "licensed_to_buyer", "transition_license_months": 12 },
-        { "asset_name": "Shared mark", "disposition": "license_back_to_seller" }
+        {
+          "asset_name": "Brand",
+          "disposition": "assigned_to_buyer"
+        },
+        {
+          "asset_name": "Platform",
+          "disposition": "licensed_to_buyer",
+          "transition_license_months": 12
+        },
+        {
+          "asset_name": "Shared mark",
+          "disposition": "license_back_to_seller"
+        }
       ]
     },
     "expect": {
@@ -3597,7 +4253,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["ip_assets"]
+      "missingInputsIncludes": [
+        "ip_assets"
+      ]
     }
   },
   {
@@ -3610,8 +4268,13 @@
       "distributing_atb_years": 5,
       "controlled_atb_years": 5,
       "acquisition_pct_within_two_years": 0.4,
-      "device_indicators": ["cash rich", "planned sale"],
-      "business_purposes": ["strategic separation"]
+      "device_indicators": [
+        "cash rich",
+        "planned sale"
+      ],
+      "business_purposes": [
+        "strategic separation"
+      ]
     },
     "expect": {
       "status": "complete",
@@ -3638,7 +4301,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["acquisition_pct_within_two_years"]
+      "missingInputsIncludes": [
+        "acquisition_pct_within_two_years"
+      ]
     }
   },
   {
@@ -3652,7 +4317,10 @@
       "participating_lender_pct": 0.7,
       "new_money_cents": 100000,
       "purchase_language": "open market purchase by assignment",
-      "sacred_rights_implicated": ["pro rata sharing", "payment waterfall"]
+      "sacred_rights_implicated": [
+        "pro rata sharing",
+        "payment waterfall"
+      ]
     },
     "expect": {
       "status": "complete",
@@ -3678,7 +4346,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["participating_lender_pct"]
+      "missingInputsIncludes": [
+        "participating_lender_pct"
+      ]
     }
   },
   {
@@ -3720,7 +4390,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["investment_basket_cents"]
+      "missingInputsIncludes": [
+        "investment_basket_cents"
+      ]
     }
   },
   {
@@ -3756,7 +4428,9 @@
     "input": {},
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["new_money_cents"]
+      "missingInputsIncludes": [
+        "new_money_cents"
+      ]
     }
   },
   {
@@ -3766,8 +4440,14 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.PROJECT_FINANCE.COVERAGE_RESEARCH.v1",
     "input": {
-      "cfads_periods_cents": [150000, 160000],
-      "debt_service_periods_cents": [100000, 120000],
+      "cfads_periods_cents": [
+        150000,
+        160000
+      ],
+      "debt_service_periods_cents": [
+        100000,
+        120000
+      ],
       "debt_balance_cents": 1000000,
       "remaining_project_cash_flow_cents": 1300000,
       "debt_service_reserve_cents": 100000
@@ -3791,13 +4471,17 @@
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.PROJECT_FINANCE.COVERAGE_RESEARCH.v1",
     "input": {
-      "cfads_periods_cents": [150000],
+      "cfads_periods_cents": [
+        150000
+      ],
       "debt_balance_cents": 1000000,
       "remaining_project_cash_flow_cents": 1300000
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["debt_service_periods_cents"]
+      "missingInputsIncludes": [
+        "debt_service_periods_cents"
+      ]
     }
   },
   {
@@ -3836,7 +4520,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["efforts_of_others"]
+      "missingInputsIncludes": [
+        "efforts_of_others"
+      ]
     }
   },
   {
@@ -3873,7 +4559,9 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["reserves_cents"]
+      "missingInputsIncludes": [
+        "reserves_cents"
+      ]
     }
   },
   {
@@ -3912,7 +4600,3784 @@
     },
     "expect": {
       "status": "needs_inputs",
-      "missingInputsIncludes": ["customer_tin_collected"]
+      "missingInputsIncludes": [
+        "customer_tin_collected"
+      ]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.001",
+    "title": "DE (race): value=true noNotice=true recordedFirst=true → later_purchaser",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "DE",
+      "later_purchaser_for_value": true,
+      "later_took_without_notice": true,
+      "later_recorded_first": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "race",
+        "prevailing_interest": "later_purchaser",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.002",
+    "title": "DE (race): value=true noNotice=true recordedFirst=false → prior_interest",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "DE",
+      "later_purchaser_for_value": true,
+      "later_took_without_notice": true,
+      "later_recorded_first": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "race",
+        "prevailing_interest": "prior_interest",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.003",
+    "title": "DE (race): value=true noNotice=false recordedFirst=true → later_purchaser",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "DE",
+      "later_purchaser_for_value": true,
+      "later_took_without_notice": false,
+      "later_recorded_first": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "race",
+        "prevailing_interest": "later_purchaser",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.004",
+    "title": "DE (race): value=true noNotice=false recordedFirst=false → prior_interest",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "DE",
+      "later_purchaser_for_value": true,
+      "later_took_without_notice": false,
+      "later_recorded_first": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "race",
+        "prevailing_interest": "prior_interest",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.005",
+    "title": "DE (race): value=false noNotice=true recordedFirst=true → prior_interest",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "DE",
+      "later_purchaser_for_value": false,
+      "later_took_without_notice": true,
+      "later_recorded_first": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "race",
+        "prevailing_interest": "prior_interest",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.006",
+    "title": "DE (race): value=false noNotice=false recordedFirst=true → prior_interest",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "DE",
+      "later_purchaser_for_value": false,
+      "later_took_without_notice": false,
+      "later_recorded_first": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "race",
+        "prevailing_interest": "prior_interest",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.007",
+    "title": "TX (notice): value=true noNotice=true recordedFirst=true → later_purchaser",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "TX",
+      "later_purchaser_for_value": true,
+      "later_took_without_notice": true,
+      "later_recorded_first": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "notice",
+        "prevailing_interest": "later_purchaser",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.008",
+    "title": "TX (notice): value=true noNotice=true recordedFirst=false → later_purchaser",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "TX",
+      "later_purchaser_for_value": true,
+      "later_took_without_notice": true,
+      "later_recorded_first": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "notice",
+        "prevailing_interest": "later_purchaser",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.009",
+    "title": "TX (notice): value=true noNotice=false recordedFirst=true → prior_interest",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "TX",
+      "later_purchaser_for_value": true,
+      "later_took_without_notice": false,
+      "later_recorded_first": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "notice",
+        "prevailing_interest": "prior_interest",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.010",
+    "title": "TX (notice): value=true noNotice=false recordedFirst=false → prior_interest",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "TX",
+      "later_purchaser_for_value": true,
+      "later_took_without_notice": false,
+      "later_recorded_first": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "notice",
+        "prevailing_interest": "prior_interest",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.011",
+    "title": "TX (notice): value=false noNotice=true recordedFirst=true → prior_interest",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "TX",
+      "later_purchaser_for_value": false,
+      "later_took_without_notice": true,
+      "later_recorded_first": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "notice",
+        "prevailing_interest": "prior_interest",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.012",
+    "title": "NY (race_notice): value=true noNotice=true recordedFirst=true → later_purchaser",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "NY",
+      "later_purchaser_for_value": true,
+      "later_took_without_notice": true,
+      "later_recorded_first": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "race_notice",
+        "prevailing_interest": "later_purchaser",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.013",
+    "title": "NY (race_notice): value=true noNotice=true recordedFirst=false → prior_interest",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "NY",
+      "later_purchaser_for_value": true,
+      "later_took_without_notice": true,
+      "later_recorded_first": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "race_notice",
+        "prevailing_interest": "prior_interest",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.014",
+    "title": "NY (race_notice): value=true noNotice=false recordedFirst=true → prior_interest",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "NY",
+      "later_purchaser_for_value": true,
+      "later_took_without_notice": false,
+      "later_recorded_first": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "race_notice",
+        "prevailing_interest": "prior_interest",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.015",
+    "title": "NY (race_notice): value=true noNotice=false recordedFirst=false → prior_interest",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "NY",
+      "later_purchaser_for_value": true,
+      "later_took_without_notice": false,
+      "later_recorded_first": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "race_notice",
+        "prevailing_interest": "prior_interest",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.016",
+    "title": "NY (race_notice): value=false noNotice=true recordedFirst=true → prior_interest",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "NY",
+      "later_purchaser_for_value": false,
+      "later_took_without_notice": true,
+      "later_recorded_first": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "race_notice",
+        "prevailing_interest": "prior_interest",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.017",
+    "title": "CA (race_notice): value=true noNotice=true recordedFirst=true → later_purchaser",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "CA",
+      "later_purchaser_for_value": true,
+      "later_took_without_notice": true,
+      "later_recorded_first": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "race_notice",
+        "prevailing_interest": "later_purchaser",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.018",
+    "title": "CA (race_notice): value=true noNotice=true recordedFirst=false → prior_interest",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "CA",
+      "later_purchaser_for_value": true,
+      "later_took_without_notice": true,
+      "later_recorded_first": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "race_notice",
+        "prevailing_interest": "prior_interest",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.019",
+    "title": "CA (race_notice): value=true noNotice=false recordedFirst=true → prior_interest",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "CA",
+      "later_purchaser_for_value": true,
+      "later_took_without_notice": false,
+      "later_recorded_first": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "race_notice",
+        "prevailing_interest": "prior_interest",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.020",
+    "title": "CA (race_notice): value=false noNotice=true recordedFirst=true → prior_interest",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "CA",
+      "later_purchaser_for_value": false,
+      "later_took_without_notice": true,
+      "later_recorded_first": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "race_notice",
+        "prevailing_interest": "prior_interest",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.021",
+    "title": "NC (race): value=true noNotice=true recordedFirst=true → later_purchaser",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "NC",
+      "later_purchaser_for_value": true,
+      "later_took_without_notice": true,
+      "later_recorded_first": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "race",
+        "prevailing_interest": "later_purchaser",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.022",
+    "title": "LA (race): value=true noNotice=false recordedFirst=true → later_purchaser",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "LA",
+      "later_purchaser_for_value": true,
+      "later_took_without_notice": false,
+      "later_recorded_first": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "race",
+        "prevailing_interest": "later_purchaser",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.023",
+    "title": "Unknown state defers with table-gap flag",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "OH",
+      "later_purchaser_for_value": true,
+      "later_took_without_notice": true,
+      "later_recorded_first": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "act_type": "unknown",
+        "prevailing_interest": "undetermined",
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.024",
+    "title": "Unknown state never emits a priority winner",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "FL",
+      "later_purchaser_for_value": true,
+      "later_took_without_notice": false,
+      "later_recorded_first": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "prevailing_interest": "undetermined",
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RECORDING.025",
+    "title": "Missing notice fact → needs_inputs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RECORDING_PRIORITY.v1",
+    "input": {
+      "state": "NY",
+      "later_purchaser_for_value": true,
+      "later_recorded_first": true
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": [
+        "later_took_without_notice"
+      ]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.026",
+    "title": "general_warranty → scope all_defects, after-acquired true",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "general_warranty",
+      "vesting_form": "sole",
+      "all_required_signers_present": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "covenant_scope": "all_defects",
+        "after_acquired_title_applies": true,
+        "signatory_gap": false,
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.027",
+    "title": "special_warranty → scope grantor_acts_only, after-acquired true",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "special_warranty",
+      "vesting_form": "sole",
+      "all_required_signers_present": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "covenant_scope": "grantor_acts_only",
+        "after_acquired_title_applies": true,
+        "signatory_gap": false,
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.028",
+    "title": "bargain_and_sale → scope none, after-acquired false",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "bargain_and_sale",
+      "vesting_form": "sole",
+      "all_required_signers_present": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "covenant_scope": "none",
+        "after_acquired_title_applies": false,
+        "signatory_gap": false,
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.029",
+    "title": "quitclaim → scope none, after-acquired false",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "quitclaim",
+      "vesting_form": "sole",
+      "all_required_signers_present": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "covenant_scope": "none",
+        "after_acquired_title_applies": false,
+        "signatory_gap": false,
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.030",
+    "title": "TX seisin note attaches in Texas",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "general_warranty",
+      "vesting_form": "sole",
+      "state": "TX",
+      "all_required_signers_present": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "tx_seisin_note": "Tex. Prop. Code § 5.023 narrows the statutory seisin covenant to a \"grantor has not previously conveyed\" formulation."
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.031",
+    "title": "No TX note outside Texas",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "general_warranty",
+      "vesting_form": "sole",
+      "state": "NY",
+      "all_required_signers_present": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "tx_seisin_note": null
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.032",
+    "title": "tenancy_by_entirety signers=false → gap true",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "general_warranty",
+      "vesting_form": "tenancy_by_entirety",
+      "all_required_signers_present": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "signatory_gap": true,
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.033",
+    "title": "tenancy_by_entirety signers=true → gap false",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "general_warranty",
+      "vesting_form": "tenancy_by_entirety",
+      "all_required_signers_present": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "signatory_gap": false,
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.034",
+    "title": "tenancy_in_common signers=false → gap true",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "general_warranty",
+      "vesting_form": "tenancy_in_common",
+      "all_required_signers_present": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "signatory_gap": true,
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.035",
+    "title": "joint_tenancy signers=true → gap false",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "general_warranty",
+      "vesting_form": "joint_tenancy",
+      "all_required_signers_present": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "signatory_gap": false,
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.036",
+    "title": "community_property signers=false → gap true",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "general_warranty",
+      "vesting_form": "community_property",
+      "all_required_signers_present": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "signatory_gap": true,
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.037",
+    "title": "entity signers=true → gap false",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "general_warranty",
+      "vesting_form": "entity",
+      "all_required_signers_present": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "signatory_gap": false,
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.038",
+    "title": "sole signers=true → gap false",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "general_warranty",
+      "vesting_form": "sole",
+      "all_required_signers_present": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "signatory_gap": false,
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.039",
+    "title": "general_warranty × tenancy_in_common completes with both mappings",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "general_warranty",
+      "vesting_form": "tenancy_in_common",
+      "all_required_signers_present": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "deed_type": "general_warranty",
+        "vesting_form": "tenancy_in_common"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.040",
+    "title": "special_warranty × tenancy_by_entirety completes with both mappings",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "special_warranty",
+      "vesting_form": "tenancy_by_entirety",
+      "all_required_signers_present": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "deed_type": "special_warranty",
+        "vesting_form": "tenancy_by_entirety"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.041",
+    "title": "bargain_and_sale × entity completes with both mappings",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "bargain_and_sale",
+      "vesting_form": "entity",
+      "all_required_signers_present": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "deed_type": "bargain_and_sale",
+        "vesting_form": "entity"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.042",
+    "title": "quitclaim × sole completes with both mappings",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "quitclaim",
+      "vesting_form": "sole",
+      "all_required_signers_present": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "deed_type": "quitclaim",
+        "vesting_form": "sole"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.043",
+    "title": "general_warranty × community_property completes with both mappings",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "general_warranty",
+      "vesting_form": "community_property",
+      "all_required_signers_present": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "deed_type": "general_warranty",
+        "vesting_form": "community_property"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.044",
+    "title": "special_warranty × joint_tenancy completes with both mappings",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "special_warranty",
+      "vesting_form": "joint_tenancy",
+      "all_required_signers_present": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "deed_type": "special_warranty",
+        "vesting_form": "joint_tenancy"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.045",
+    "title": "Unknown deed type → needs_inputs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "grant_deed_x",
+      "vesting_form": "sole"
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": [
+        "deed_type"
+      ]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.046",
+    "title": "Unknown vesting → needs_inputs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "quitclaim",
+      "vesting_form": "timeshare"
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": [
+        "vesting_form"
+      ]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.COVENANT.047",
+    "title": "General warranty carries all six covenants",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_COVENANT_SIGNATORY.v1",
+    "input": {
+      "deed_type": "general_warranty",
+      "vesting_form": "sole",
+      "all_required_signers_present": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "covenants_present": [
+          "seisin",
+          "right_to_convey",
+          "against_encumbrances",
+          "quiet_enjoyment",
+          "warranty",
+          "further_assurances"
+        ]
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.MARKET.048",
+    "title": "All curable → no defer",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.MARKETABILITY_TRIAGE.v1",
+    "input": {
+      "exceptions": [
+        {
+          "label": "Old mortgage payoff",
+          "curable": true,
+          "insurer_will_insure_over": true
+        },
+        {
+          "label": "Tax lien payoff",
+          "curable": true,
+          "insurer_will_insure_over": false
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "curable_count": 2,
+        "insurable_over_count": 0,
+        "deal_killing_count": 0,
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.MARKET.049",
+    "title": "Insurable-over bucket",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.MARKETABILITY_TRIAGE.v1",
+    "input": {
+      "exceptions": [
+        {
+          "label": "Unreleased 1988 mortgage",
+          "curable": false,
+          "insurer_will_insure_over": true
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "insurable_over_count": 1,
+        "deal_killing_count": 0,
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.MARKET.050",
+    "title": "Deal-killer defers",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.MARKETABILITY_TRIAGE.v1",
+    "input": {
+      "exceptions": [
+        {
+          "label": "Break in chain of title",
+          "curable": false,
+          "insurer_will_insure_over": false
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "deal_killing_count": 1,
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.MARKET.051",
+    "title": "Mixed three buckets",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.MARKETABILITY_TRIAGE.v1",
+    "input": {
+      "exceptions": [
+        {
+          "label": "Payoff lien",
+          "curable": true,
+          "insurer_will_insure_over": true
+        },
+        {
+          "label": "Old gap",
+          "curable": false,
+          "insurer_will_insure_over": true
+        },
+        {
+          "label": "Adverse claim",
+          "curable": false,
+          "insurer_will_insure_over": false
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "curable_count": 1,
+        "insurable_over_count": 1,
+        "deal_killing_count": 1,
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.MARKET.052",
+    "title": "Insurable-only contract standard flags but does not defer alone",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.MARKETABILITY_TRIAGE.v1",
+    "input": {
+      "contract_title_standard": "insurable",
+      "exceptions": [
+        {
+          "label": "Insured-over encroachment",
+          "curable": false,
+          "insurer_will_insure_over": true
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "contract_title_standard": "insurable",
+        "insurable_over_count": 1,
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.MARKET.053",
+    "title": "Insurable standard + deal killer still defers",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.MARKETABILITY_TRIAGE.v1",
+    "input": {
+      "contract_title_standard": "insurable",
+      "exceptions": [
+        {
+          "label": "Unlocatable boundary",
+          "curable": false,
+          "insurer_will_insure_over": false
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "deal_killing_count": 1,
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.MARKET.054",
+    "title": "Two deal killers counted",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.MARKETABILITY_TRIAGE.v1",
+    "input": {
+      "exceptions": [
+        {
+          "label": "Chain break",
+          "curable": false,
+          "insurer_will_insure_over": false
+        },
+        {
+          "label": "Ownership claim",
+          "curable": false,
+          "insurer_will_insure_over": false
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "deal_killing_count": 2,
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.MARKET.055",
+    "title": "Curable wins over insurable in bucketing",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.MARKETABILITY_TRIAGE.v1",
+    "input": {
+      "exceptions": [
+        {
+          "label": "Satisfiable lien",
+          "curable": true,
+          "insurer_will_insure_over": true
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "curable_count": 1,
+        "insurable_over_count": 0
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.MARKET.056",
+    "title": "Not curable + insurable → insurable_over",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.MARKETABILITY_TRIAGE.v1",
+    "input": {
+      "exceptions": [
+        {
+          "label": "Minor gap",
+          "curable": false,
+          "insurer_will_insure_over": true
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "insurable_over_count": 1
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.MARKET.057",
+    "title": "Not curable + not insurable → deal_killing",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.MARKETABILITY_TRIAGE.v1",
+    "input": {
+      "exceptions": [
+        {
+          "label": "Hostile possession claim",
+          "curable": false,
+          "insurer_will_insure_over": false
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "deal_killing_count": 1
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.MARKET.058",
+    "title": "Ten exceptions bucket correctly",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.MARKETABILITY_TRIAGE.v1",
+    "input": {
+      "exceptions": [
+        {
+          "label": "a",
+          "curable": true,
+          "insurer_will_insure_over": false
+        },
+        {
+          "label": "b",
+          "curable": true,
+          "insurer_will_insure_over": false
+        },
+        {
+          "label": "c",
+          "curable": true,
+          "insurer_will_insure_over": false
+        },
+        {
+          "label": "d",
+          "curable": true,
+          "insurer_will_insure_over": false
+        },
+        {
+          "label": "e",
+          "curable": false,
+          "insurer_will_insure_over": true
+        },
+        {
+          "label": "f",
+          "curable": false,
+          "insurer_will_insure_over": true
+        },
+        {
+          "label": "g",
+          "curable": false,
+          "insurer_will_insure_over": true
+        },
+        {
+          "label": "h",
+          "curable": false,
+          "insurer_will_insure_over": false
+        },
+        {
+          "label": "i",
+          "curable": false,
+          "insurer_will_insure_over": false
+        },
+        {
+          "label": "j",
+          "curable": false,
+          "insurer_will_insure_over": false
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "curable_count": 4,
+        "insurable_over_count": 3,
+        "deal_killing_count": 3,
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.MARKET.059",
+    "title": "Default contract standard is marketable",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.MARKETABILITY_TRIAGE.v1",
+    "input": {
+      "exceptions": [
+        {
+          "label": "Payoff",
+          "curable": true,
+          "insurer_will_insure_over": true
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "contract_title_standard": "marketable"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.MARKET.060",
+    "title": "Flags default false → deal_killing (conservative)",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.MARKETABILITY_TRIAGE.v1",
+    "input": {
+      "exceptions": [
+        {
+          "label": "Unclassified exception"
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "deal_killing_count": 1,
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.MARKET.061",
+    "title": "Empty exceptions → needs_inputs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.MARKETABILITY_TRIAGE.v1",
+    "input": {
+      "exceptions": []
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": [
+        "exceptions"
+      ]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.MARKET.062",
+    "title": "Mixed with insurable standard defers on the killer only",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.MARKETABILITY_TRIAGE.v1",
+    "input": {
+      "contract_title_standard": "insurable",
+      "exceptions": [
+        {
+          "label": "Gap",
+          "curable": false,
+          "insurer_will_insure_over": true
+        },
+        {
+          "label": "Chain break",
+          "curable": false,
+          "insurer_will_insure_over": false
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "insurable_over_count": 1,
+        "deal_killing_count": 1,
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RISKLOSS.063",
+    "title": "NY silent contract → seller (Risk Act)",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RISK_OF_LOSS.v1",
+    "input": {
+      "state": "NY",
+      "contract_allocates_risk": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "default_regime": "ny_risk_act_seller",
+        "risk_on": "seller",
+        "basis": "ny_risk_act_seller",
+        "contract_override_applied": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RISKLOSS.064",
+    "title": "NY silent + title passed → buyer",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RISK_OF_LOSS.v1",
+    "input": {
+      "state": "NY",
+      "contract_allocates_risk": false,
+      "legal_title_or_possession_passed": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "risk_on": "buyer"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RISKLOSS.065",
+    "title": "CA silent → seller (UVPRA)",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RISK_OF_LOSS.v1",
+    "input": {
+      "state": "CA",
+      "contract_allocates_risk": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "default_regime": "uvpra_seller",
+        "risk_on": "seller"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RISKLOSS.066",
+    "title": "CA silent + possession passed → buyer",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RISK_OF_LOSS.v1",
+    "input": {
+      "state": "CA",
+      "contract_allocates_risk": false,
+      "legal_title_or_possession_passed": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "risk_on": "buyer"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RISKLOSS.067",
+    "title": "TX silent → seller (Tex. Prop. Code 5.007)",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RISK_OF_LOSS.v1",
+    "input": {
+      "state": "TX",
+      "contract_allocates_risk": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "default_regime": "uvpra_seller",
+        "risk_on": "seller"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RISKLOSS.068",
+    "title": "DE silent → buyer (equitable conversion default)",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RISK_OF_LOSS.v1",
+    "input": {
+      "state": "DE",
+      "contract_allocates_risk": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "default_regime": "equitable_conversion_buyer",
+        "risk_on": "buyer",
+        "basis": "equitable_conversion_default"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RISKLOSS.069",
+    "title": "GA (untabled) silent → buyer default",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RISK_OF_LOSS.v1",
+    "input": {
+      "state": "GA",
+      "contract_allocates_risk": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "risk_on": "buyer"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RISKLOSS.070",
+    "title": "Contract puts risk on buyer → override",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RISK_OF_LOSS.v1",
+    "input": {
+      "state": "NY",
+      "contract_allocates_risk": true,
+      "contract_risk_on": "buyer"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "risk_on": "buyer",
+        "basis": "contract_override",
+        "contract_override_applied": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RISKLOSS.071",
+    "title": "Contract puts risk on seller → override",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RISK_OF_LOSS.v1",
+    "input": {
+      "state": "DE",
+      "contract_allocates_risk": true,
+      "contract_risk_on": "seller"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "risk_on": "seller",
+        "basis": "contract_override"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RISKLOSS.072",
+    "title": "Contract allocates without stating side → per contract terms",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RISK_OF_LOSS.v1",
+    "input": {
+      "state": "CA",
+      "contract_allocates_risk": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "risk_on": "per_contract_terms",
+        "basis": "contract_override"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RISKLOSS.073",
+    "title": "Silent + casualty pending completes with default (flag advisory)",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RISK_OF_LOSS.v1",
+    "input": {
+      "state": "TX",
+      "contract_allocates_risk": false,
+      "material_casualty_or_condemnation_pending": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "risk_on": "seller",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.RISKLOSS.074",
+    "title": "Missing state → needs_inputs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RISK_OF_LOSS.v1",
+    "input": {
+      "contract_allocates_risk": false
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": [
+        "state"
+      ]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.SURVIVAL.075",
+    "title": "Rep without survival merges away",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.SURVIVAL_MERGER.v1",
+    "input": {
+      "items": [
+        {
+          "label": "Title rep",
+          "type": "rep",
+          "express_survival": false,
+          "collateral_obligation": false
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "surviving_count": 0,
+        "merged_away_count": 1
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.SURVIVAL.076",
+    "title": "Express survival survives",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.SURVIVAL_MERGER.v1",
+    "input": {
+      "items": [
+        {
+          "label": "Environmental rep",
+          "type": "rep",
+          "express_survival": true,
+          "collateral_obligation": false
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "surviving_count": 1,
+        "merged_away_count": 0
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.SURVIVAL.077",
+    "title": "Collateral obligation survives",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.SURVIVAL_MERGER.v1",
+    "input": {
+      "items": [
+        {
+          "label": "Seller post-closing repair",
+          "type": "covenant",
+          "express_survival": false,
+          "collateral_obligation": true
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "surviving_count": 1,
+        "merged_away_count": 0
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.SURVIVAL.078",
+    "title": "Covenant with no hooks merges",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.SURVIVAL_MERGER.v1",
+    "input": {
+      "items": [
+        {
+          "label": "Title covenant in PSA",
+          "type": "covenant",
+          "express_survival": false,
+          "collateral_obligation": false
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "merged_away_count": 1
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.SURVIVAL.079",
+    "title": "Mixed three items count correctly",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.SURVIVAL_MERGER.v1",
+    "input": {
+      "items": [
+        {
+          "label": "A",
+          "type": "rep",
+          "express_survival": true,
+          "collateral_obligation": false
+        },
+        {
+          "label": "B",
+          "type": "indemnity",
+          "express_survival": false,
+          "collateral_obligation": false
+        },
+        {
+          "label": "C",
+          "type": "covenant",
+          "express_survival": false,
+          "collateral_obligation": true
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "surviving_count": 2,
+        "merged_away_count": 1
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.SURVIVAL.080",
+    "title": "All survive → zero merged",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.SURVIVAL_MERGER.v1",
+    "input": {
+      "items": [
+        {
+          "label": "A",
+          "type": "rep",
+          "express_survival": true,
+          "collateral_obligation": false
+        },
+        {
+          "label": "B",
+          "type": "rep",
+          "express_survival": true,
+          "collateral_obligation": false
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "merged_away_count": 0
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.SURVIVAL.081",
+    "title": "All merge → zero surviving",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.SURVIVAL_MERGER.v1",
+    "input": {
+      "items": [
+        {
+          "label": "A",
+          "type": "rep",
+          "express_survival": false,
+          "collateral_obligation": false
+        },
+        {
+          "label": "B",
+          "type": "indemnity",
+          "express_survival": false,
+          "collateral_obligation": false
+        },
+        {
+          "label": "C",
+          "type": "covenant",
+          "express_survival": false,
+          "collateral_obligation": false
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "surviving_count": 0,
+        "merged_away_count": 3
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.SURVIVAL.082",
+    "title": "Express + collateral both → survives once",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.SURVIVAL_MERGER.v1",
+    "input": {
+      "items": [
+        {
+          "label": "Holdback indemnity",
+          "type": "indemnity",
+          "express_survival": true,
+          "collateral_obligation": true
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "surviving_count": 1
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.SURVIVAL.083",
+    "title": "Five-item mixed battery",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.SURVIVAL_MERGER.v1",
+    "input": {
+      "items": [
+        {
+          "label": "a",
+          "type": "rep",
+          "express_survival": false,
+          "collateral_obligation": false
+        },
+        {
+          "label": "b",
+          "type": "rep",
+          "express_survival": true,
+          "collateral_obligation": false
+        },
+        {
+          "label": "c",
+          "type": "indemnity",
+          "express_survival": false,
+          "collateral_obligation": true
+        },
+        {
+          "label": "d",
+          "type": "covenant",
+          "express_survival": false,
+          "collateral_obligation": false
+        },
+        {
+          "label": "e",
+          "type": "rep",
+          "express_survival": false,
+          "collateral_obligation": false
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "surviving_count": 2,
+        "merged_away_count": 3
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.SURVIVAL.084",
+    "title": "Fraud exception note always present",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.SURVIVAL_MERGER.v1",
+    "input": {
+      "items": [
+        {
+          "label": "Any",
+          "type": "rep",
+          "express_survival": false,
+          "collateral_obligation": false
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "fraud_exception_note": "Fraud claims survive merger independent of contract survival language."
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.SURVIVAL.085",
+    "title": "Tracker itself never defers (deterministic catch)",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.SURVIVAL_MERGER.v1",
+    "input": {
+      "items": [
+        {
+          "label": "Any",
+          "type": "rep",
+          "express_survival": false,
+          "collateral_obligation": false
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.SURVIVAL.086",
+    "title": "Merge basis labeled",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.SURVIVAL_MERGER.v1",
+    "input": {
+      "items": [
+        {
+          "label": "Zoning rep",
+          "type": "rep",
+          "express_survival": false,
+          "collateral_obligation": false
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "items": [
+          {
+            "label": "Zoning rep",
+            "type": "rep",
+            "express_survival": false,
+            "collateral_obligation": false,
+            "survives_closing": false,
+            "basis": "merges_into_deed_at_closing"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.SURVIVAL.087",
+    "title": "Express basis labeled",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.SURVIVAL_MERGER.v1",
+    "input": {
+      "items": [
+        {
+          "label": "Lease rep",
+          "type": "rep",
+          "express_survival": true,
+          "collateral_obligation": false
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "items": [
+          {
+            "label": "Lease rep",
+            "type": "rep",
+            "express_survival": true,
+            "collateral_obligation": false,
+            "survives_closing": true,
+            "basis": "express_survival_clause"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.SURVIVAL.088",
+    "title": "Collateral basis labeled",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.SURVIVAL_MERGER.v1",
+    "input": {
+      "items": [
+        {
+          "label": "Escrow duty",
+          "type": "covenant",
+          "express_survival": false,
+          "collateral_obligation": true
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "items": [
+          {
+            "label": "Escrow duty",
+            "type": "covenant",
+            "express_survival": false,
+            "collateral_obligation": true,
+            "survives_closing": true,
+            "basis": "collateral_obligation"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.SURVIVAL.089",
+    "title": "Empty items → needs_inputs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.SURVIVAL_MERGER.v1",
+    "input": {
+      "items": []
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": [
+        "items"
+      ]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.090",
+    "title": "Silent lease → freely assignable",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "asset_assignment",
+      "consent_clause": "none_silent"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "consent_required": false,
+        "classification": "no_restriction_freely_assignable",
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.091",
+    "title": "Express reasonableness standard",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "asset_assignment",
+      "consent_clause": "reasonableness"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "consent_required": true,
+        "consent_standard": "reasonableness_express",
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.092",
+    "title": "Sole discretion in NY enforced as written",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "asset_assignment",
+      "consent_clause": "sole_discretion",
+      "state": "NY"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "consent_standard": "sole_discretion_as_written"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.093",
+    "title": "Sole discretion in CA carries verify flag",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "asset_assignment",
+      "consent_clause": "sole_discretion",
+      "state": "CA"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "consent_standard": "sole_discretion_written_verify_ca_limits"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.094",
+    "title": "CA consent-no-standard → Kendall implied reasonableness",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "asset_assignment",
+      "consent_clause": "consent_no_standard",
+      "state": "CA"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "consent_standard": "implied_reasonableness",
+        "consent_standard_citation": "Kendall v. Ernest Pestana, Inc., 40 Cal.3d 488 (1985)"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.095",
+    "title": "NY consent-no-standard → as written",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "asset_assignment",
+      "consent_clause": "consent_no_standard",
+      "state": "NY"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "consent_standard": "as_written_sole_discretion_enforced"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.096",
+    "title": "TX consent-no-standard → unsettled, check state",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "asset_assignment",
+      "consent_clause": "consent_no_standard",
+      "state": "TX"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "consent_standard": "unsettled_check_state"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.097",
+    "title": "CoC not deemed → not an assignment by operation of law",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "change_of_control",
+      "consent_clause": "sole_discretion",
+      "lease_deems_change_of_control_assignment": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "classification": "generally_not_assignment_by_operation_of_law",
+        "consent_required": false,
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.098",
+    "title": "CoC deemed → consent path applies",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "change_of_control",
+      "consent_clause": "sole_discretion",
+      "lease_deems_change_of_control_assignment": true,
+      "state": "NY"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "classification": "deemed_assignment_consent_path_applies",
+        "consent_required": true,
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.099",
+    "title": "CoC deemed + CA no-standard → Kendall applies",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "change_of_control",
+      "consent_clause": "consent_no_standard",
+      "lease_deems_change_of_control_assignment": true,
+      "state": "CA"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "consent_standard": "implied_reasonableness"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.100",
+    "title": "Merger not deemed → no assignment",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "merger",
+      "consent_clause": "reasonableness",
+      "lease_deems_change_of_control_assignment": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "classification": "generally_not_assignment_by_operation_of_law",
+        "consent_required": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.101",
+    "title": "Merger deemed → consent path",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "merger",
+      "consent_clause": "reasonableness",
+      "lease_deems_change_of_control_assignment": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "consent_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.102",
+    "title": "Sublease with silent lease → unrestricted",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "sublease",
+      "consent_clause": "none_silent"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "consent_required": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.103",
+    "title": "Sublease with reasonableness consent",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "sublease",
+      "consent_clause": "reasonableness"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "consent_required": true,
+        "consent_standard": "reasonableness_express"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.104",
+    "title": "Recapture right surfaces with consent",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "asset_assignment",
+      "consent_clause": "sole_discretion",
+      "state": "NY",
+      "landlord_recapture_right": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "landlord_recapture_right": true,
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.105",
+    "title": "Recapture without restriction is inert",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "asset_assignment",
+      "consent_clause": "none_silent",
+      "landlord_recapture_right": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "consent_required": false,
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.106",
+    "title": "No restriction → no defer",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "sublease",
+      "consent_clause": "none_silent",
+      "state": "CA"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.107",
+    "title": "CoC deemed + reasonableness express",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "change_of_control",
+      "consent_clause": "reasonableness",
+      "lease_deems_change_of_control_assignment": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "consent_standard": "reasonableness_express"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.108",
+    "title": "CoC not deemed under sole discretion still no consent",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "change_of_control",
+      "consent_clause": "sole_discretion",
+      "lease_deems_change_of_control_assignment": false,
+      "state": "NY"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "consent_required": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.109",
+    "title": "Sole discretion with no state → as written",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "asset_assignment",
+      "consent_clause": "sole_discretion"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "consent_standard": "sole_discretion_as_written"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.110",
+    "title": "Consent-no-standard with untabled state → unsettled",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "sublease",
+      "consent_clause": "consent_no_standard",
+      "state": "IL"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "consent_standard": "unsettled_check_state"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.111",
+    "title": "CoC classification notes the NY operation-of-law default",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "change_of_control",
+      "consent_clause": "consent_no_standard",
+      "lease_deems_change_of_control_assignment": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "coc_default_note": "Absent express lease language, a change of control of a corporate/LLC tenant is generally not an assignment \"by operation of law\" — the lease must expressly deem a control transfer an assignment (NY rule; verify per state)."
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.112",
+    "title": "Missing transfer type → needs_inputs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "consent_clause": "reasonableness"
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": [
+        "transfer_type"
+      ]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.LEASE.113",
+    "title": "Missing consent clause → needs_inputs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_COC_ASSIGNMENT.v1",
+    "input": {
+      "transfer_type": "asset_assignment"
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": [
+        "consent_clause"
+      ]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.DUEONSALE.114",
+    "title": "No clause → no acceleration risk",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.DUE_ON_SALE.v1",
+    "input": {
+      "loan_has_due_on_transfer_clause": false,
+      "residential_under_5_units": false,
+      "transfer_kind": "deed_sale"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "acceleration_risk": "none_no_clause",
+        "lender_consent_critical_path": false,
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.DUEONSALE.115",
+    "title": "Commercial deed sale → lender option, critical path",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.DUE_ON_SALE.v1",
+    "input": {
+      "loan_has_due_on_transfer_clause": true,
+      "residential_under_5_units": false,
+      "transfer_kind": "deed_sale"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "acceleration_risk": "lender_option_on_transfer",
+        "lender_consent_critical_path": true,
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.DUEONSALE.116",
+    "title": "Commercial entity transfer → lender option",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.DUE_ON_SALE.v1",
+    "input": {
+      "loan_has_due_on_transfer_clause": true,
+      "residential_under_5_units": false,
+      "transfer_kind": "entity_transfer"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "acceleration_risk": "lender_option_on_transfer"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.DUEONSALE.117",
+    "title": "Residential spouse transfer → barred by Garn",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.DUE_ON_SALE.v1",
+    "input": {
+      "loan_has_due_on_transfer_clause": true,
+      "residential_under_5_units": true,
+      "transfer_kind": "transfer_to_spouse_or_child"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "acceleration_risk": "barred_by_garn_exception",
+        "lender_consent_critical_path": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.DUEONSALE.118",
+    "title": "Residential inter vivos trust → barred",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.DUE_ON_SALE.v1",
+    "input": {
+      "loan_has_due_on_transfer_clause": true,
+      "residential_under_5_units": true,
+      "transfer_kind": "inter_vivos_trust_borrower_beneficiary"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "acceleration_risk": "barred_by_garn_exception"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.DUEONSALE.119",
+    "title": "Residential ARMS-LENGTH sale is NOT protected",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.DUE_ON_SALE.v1",
+    "input": {
+      "loan_has_due_on_transfer_clause": true,
+      "residential_under_5_units": true,
+      "transfer_kind": "deed_sale"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "acceleration_risk": "lender_option_on_transfer",
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.DUEONSALE.120",
+    "title": "Residential junior lien → barred",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.DUE_ON_SALE.v1",
+    "input": {
+      "loan_has_due_on_transfer_clause": true,
+      "residential_under_5_units": true,
+      "transfer_kind": "junior_lien_creation"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "acceleration_risk": "barred_by_garn_exception"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.DUEONSALE.121",
+    "title": "Residential entity transfer is NOT protected",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.DUE_ON_SALE.v1",
+    "input": {
+      "loan_has_due_on_transfer_clause": true,
+      "residential_under_5_units": true,
+      "transfer_kind": "entity_transfer"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "acceleration_risk": "lender_option_on_transfer"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.DUEONSALE.122",
+    "title": "Residential divorce decree → barred",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.DUE_ON_SALE.v1",
+    "input": {
+      "loan_has_due_on_transfer_clause": true,
+      "residential_under_5_units": true,
+      "transfer_kind": "divorce_decree_transfer_to_spouse"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "acceleration_risk": "barred_by_garn_exception"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.DUEONSALE.123",
+    "title": "Residential short leasehold → barred",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.DUE_ON_SALE.v1",
+    "input": {
+      "loan_has_due_on_transfer_clause": true,
+      "residential_under_5_units": true,
+      "transfer_kind": "leasehold_under_3y_no_option"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "acceleration_risk": "barred_by_garn_exception"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.DUEONSALE.124",
+    "title": "Missing clause flag → needs_inputs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.DUE_ON_SALE.v1",
+    "input": {
+      "residential_under_5_units": true
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": [
+        "loan_has_due_on_transfer_clause"
+      ]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.DUEONSALE.125",
+    "title": "Missing residential flag → needs_inputs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.DUE_ON_SALE.v1",
+    "input": {
+      "loan_has_due_on_transfer_clause": true
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": [
+        "residential_under_5_units"
+      ]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.ROFR.126",
+    "title": "ROFR + asset sale → triggered",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PREEMPTIVE_RIGHT_TRIGGER.v1",
+    "input": {
+      "right_type": "rofr",
+      "transaction_form": "asset_sale",
+      "right_captures_entity_transfers": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "trigger_status": "triggered_property_sale",
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.ROFR.127",
+    "title": "ROFR + asset sale with entity capture → still triggered",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PREEMPTIVE_RIGHT_TRIGGER.v1",
+    "input": {
+      "right_type": "rofr",
+      "transaction_form": "asset_sale",
+      "right_captures_entity_transfers": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "trigger_status": "triggered_property_sale"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.ROFR.128",
+    "title": "ROFR + entity transfer, no capture → likely avoided (double-edged)",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PREEMPTIVE_RIGHT_TRIGGER.v1",
+    "input": {
+      "right_type": "rofr",
+      "transaction_form": "entity_transfer",
+      "right_captures_entity_transfers": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "trigger_status": "likely_not_triggered_structural",
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.ROFR.129",
+    "title": "ROFR + entity transfer with capture language → triggered",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PREEMPTIVE_RIGHT_TRIGGER.v1",
+    "input": {
+      "right_type": "rofr",
+      "transaction_form": "entity_transfer",
+      "right_captures_entity_transfers": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "trigger_status": "triggered_entity_capture_language"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.ROFR.130",
+    "title": "ROFR + merger, no capture → likely avoided",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PREEMPTIVE_RIGHT_TRIGGER.v1",
+    "input": {
+      "right_type": "rofr",
+      "transaction_form": "merger",
+      "right_captures_entity_transfers": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "trigger_status": "likely_not_triggered_structural"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.ROFR.131",
+    "title": "ROFR + merger with capture → triggered",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PREEMPTIVE_RIGHT_TRIGGER.v1",
+    "input": {
+      "right_type": "rofr",
+      "transaction_form": "merger",
+      "right_captures_entity_transfers": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "trigger_status": "triggered_entity_capture_language"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.ROFR.132",
+    "title": "ROFO + asset sale → triggered",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PREEMPTIVE_RIGHT_TRIGGER.v1",
+    "input": {
+      "right_type": "rofo",
+      "transaction_form": "asset_sale",
+      "right_captures_entity_transfers": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "trigger_status": "triggered_property_sale"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.ROFR.133",
+    "title": "ROFO + entity, no capture → likely avoided",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PREEMPTIVE_RIGHT_TRIGGER.v1",
+    "input": {
+      "right_type": "rofo",
+      "transaction_form": "entity_transfer",
+      "right_captures_entity_transfers": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "trigger_status": "likely_not_triggered_structural"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.ROFR.134",
+    "title": "Option + asset sale → triggered",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PREEMPTIVE_RIGHT_TRIGGER.v1",
+    "input": {
+      "right_type": "option",
+      "transaction_form": "asset_sale",
+      "right_captures_entity_transfers": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "trigger_status": "triggered_property_sale"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.ROFR.135",
+    "title": "Option + entity with capture → triggered",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PREEMPTIVE_RIGHT_TRIGGER.v1",
+    "input": {
+      "right_type": "option",
+      "transaction_form": "entity_transfer",
+      "right_captures_entity_transfers": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "trigger_status": "triggered_entity_capture_language"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.ROFR.136",
+    "title": "TX ROFR carries strict-match note",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PREEMPTIVE_RIGHT_TRIGGER.v1",
+    "input": {
+      "right_type": "rofr",
+      "transaction_form": "asset_sale",
+      "right_captures_entity_transfers": false,
+      "state": "TX"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "tx_strict_match_note": "Texas courts construe ROFR matching strictly — exact-match of third-party terms."
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.ROFR.137",
+    "title": "Non-TX ROFR carries no strict-match note",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PREEMPTIVE_RIGHT_TRIGGER.v1",
+    "input": {
+      "right_type": "rofr",
+      "transaction_form": "asset_sale",
+      "right_captures_entity_transfers": false,
+      "state": "NY"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "tx_strict_match_note": null
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.ROFR.138",
+    "title": "The legal conclusion ALWAYS routes to counsel",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PREEMPTIVE_RIGHT_TRIGGER.v1",
+    "input": {
+      "right_type": "rofo",
+      "transaction_form": "merger",
+      "right_captures_entity_transfers": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.ROFR.139",
+    "title": "Missing right type → needs_inputs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PREEMPTIVE_RIGHT_TRIGGER.v1",
+    "input": {
+      "transaction_form": "asset_sale",
+      "right_captures_entity_transfers": false
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": [
+        "right_type"
+      ]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.ROFR.140",
+    "title": "Missing capture flag → needs_inputs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PREEMPTIVE_RIGHT_TRIGGER.v1",
+    "input": {
+      "right_type": "rofr",
+      "transaction_form": "entity_transfer"
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": [
+        "right_captures_entity_transfers"
+      ]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.CITT.141",
+    "title": "NY entity 50% → controlling-interest screen fires",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CITT_REASSESSMENT_SCREEN.v1",
+    "input": {
+      "state": "NY",
+      "is_entity_transfer": true,
+      "transfer_pct": 50
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "citt_screen_triggered": true,
+        "defer_to_counsel": true,
+        "regime_known": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.CITT.142",
+    "title": "NY entity 49% → no screen",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CITT_REASSESSMENT_SCREEN.v1",
+    "input": {
+      "state": "NY",
+      "is_entity_transfer": true,
+      "transfer_pct": 49
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "citt_screen_triggered": false,
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.CITT.143",
+    "title": "NY 30% + 55% cumulative (3-yr aggregation) → fires",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CITT_REASSESSMENT_SCREEN.v1",
+    "input": {
+      "state": "NY",
+      "is_entity_transfer": true,
+      "transfer_pct": 30,
+      "cumulative_related_transfers_pct": 55
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "citt_screen_triggered": true,
+        "aggregation_years": 3
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.CITT.144",
+    "title": "NY deed transfer (non-entity) → entity screen silent",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CITT_REASSESSMENT_SCREEN.v1",
+    "input": {
+      "state": "NY",
+      "is_entity_transfer": false,
+      "transfer_pct": 100
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "citt_screen_triggered": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.CITT.145",
+    "title": "CA entity 51% → CITT + Prop 13 reassessment",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CITT_REASSESSMENT_SCREEN.v1",
+    "input": {
+      "state": "CA",
+      "is_entity_transfer": true,
+      "transfer_pct": 51
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "citt_screen_triggered": true,
+        "reassessment_screen_triggered": true,
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.CITT.146",
+    "title": "CA entity exactly 50% → CITT fires, Prop 13 (>50) does not",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CITT_REASSESSMENT_SCREEN.v1",
+    "input": {
+      "state": "CA",
+      "is_entity_transfer": true,
+      "transfer_pct": 50
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "citt_screen_triggered": true,
+        "reassessment_screen_triggered": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.CITT.147",
+    "title": "CA 49% + cumulative 51% original co-owner → reassessment trap",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CITT_REASSESSMENT_SCREEN.v1",
+    "input": {
+      "state": "CA",
+      "is_entity_transfer": true,
+      "transfer_pct": 49,
+      "cumulative_related_transfers_pct": 51
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "citt_screen_triggered": true,
+        "reassessment_screen_triggered": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.CITT.148",
+    "title": "TX entity 100% → constitutionally no transfer tax",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CITT_REASSESSMENT_SCREEN.v1",
+    "input": {
+      "state": "TX",
+      "is_entity_transfer": true,
+      "transfer_pct": 100
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "citt_screen_triggered": false,
+        "reassessment_screen_triggered": false,
+        "regime_known": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.CITT.149",
+    "title": "DE entity 60% → no CITT (deed tax regime only)",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CITT_REASSESSMENT_SCREEN.v1",
+    "input": {
+      "state": "DE",
+      "is_entity_transfer": true,
+      "transfer_pct": 60
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "citt_screen_triggered": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.CITT.150",
+    "title": "Mere-change claim + related steps → step-transaction risk",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CITT_REASSESSMENT_SCREEN.v1",
+    "input": {
+      "state": "NY",
+      "is_entity_transfer": true,
+      "transfer_pct": 10,
+      "mere_change_exemption_claimed": true,
+      "related_steps_planned": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "step_transaction_risk": true,
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.CITT.151",
+    "title": "Mere-change claim without related steps → no step risk",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CITT_REASSESSMENT_SCREEN.v1",
+    "input": {
+      "state": "NY",
+      "is_entity_transfer": true,
+      "transfer_pct": 10,
+      "mere_change_exemption_claimed": true,
+      "related_steps_planned": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "step_transaction_risk": false,
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.CITT.152",
+    "title": "Untabled state → regime unknown, defer with table gap",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CITT_REASSESSMENT_SCREEN.v1",
+    "input": {
+      "state": "FL",
+      "is_entity_transfer": true,
+      "transfer_pct": 80
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "regime_known": false,
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.CITT.153",
+    "title": "NY threshold is 50, encoded as data",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CITT_REASSESSMENT_SCREEN.v1",
+    "input": {
+      "state": "NY",
+      "is_entity_transfer": true,
+      "transfer_pct": 75
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "controlling_interest_threshold_pct": 50,
+        "citt_screen_triggered": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.CITT.154",
+    "title": "CA 75% → both screens fire",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CITT_REASSESSMENT_SCREEN.v1",
+    "input": {
+      "state": "CA",
+      "is_entity_transfer": true,
+      "transfer_pct": 75
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "citt_screen_triggered": true,
+        "reassessment_screen_triggered": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.CITT.155",
+    "title": "NY small minority transfer → clean",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CITT_REASSESSMENT_SCREEN.v1",
+    "input": {
+      "state": "NY",
+      "is_entity_transfer": true,
+      "transfer_pct": 10
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "citt_screen_triggered": false,
+        "reassessment_screen_triggered": false,
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.CITT.156",
+    "title": "Missing state → needs_inputs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CITT_REASSESSMENT_SCREEN.v1",
+    "input": {
+      "is_entity_transfer": true,
+      "transfer_pct": 50
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": [
+        "state"
+      ]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.CITT.157",
+    "title": "Missing transfer pct → needs_inputs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CITT_REASSESSMENT_SCREEN.v1",
+    "input": {
+      "state": "NY",
+      "is_entity_transfer": true
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": [
+        "transfer_pct"
+      ]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.CITT.158",
+    "title": "Missing entity flag → needs_inputs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CITT_REASSESSMENT_SCREEN.v1",
+    "input": {
+      "state": "CA",
+      "transfer_pct": 51
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": [
+        "is_entity_transfer"
+      ]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.PERMIT.159",
+    "title": "Asset deal in CO-on-transfer town → CO required",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PERMIT_CO_BULK_SALES.v1",
+    "input": {
+      "deal_form": "asset",
+      "jurisdiction_requires_co_on_transfer": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "co_required_on_transfer": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.PERMIT.160",
+    "title": "Entity deal, no use change → no CO trigger",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PERMIT_CO_BULK_SALES.v1",
+    "input": {
+      "deal_form": "entity",
+      "jurisdiction_requires_co_on_transfer": true,
+      "use_change": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "co_required_on_transfer": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.PERMIT.161",
+    "title": "Entity deal WITH use change → CO required",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PERMIT_CO_BULK_SALES.v1",
+    "input": {
+      "deal_form": "entity",
+      "jurisdiction_requires_co_on_transfer": true,
+      "use_change": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "co_required_on_transfer": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.PERMIT.162",
+    "title": "Non-transferable permit surfaces in asset deal",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PERMIT_CO_BULK_SALES.v1",
+    "input": {
+      "deal_form": "asset",
+      "jurisdiction_requires_co_on_transfer": false,
+      "permits": [
+        {
+          "label": "Liquor license",
+          "transferable": false
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "non_transferable_permits": [
+          "Liquor license"
+        ]
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.PERMIT.163",
+    "title": "Non-transferable permit surfaces in entity deal too",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PERMIT_CO_BULK_SALES.v1",
+    "input": {
+      "deal_form": "entity",
+      "jurisdiction_requires_co_on_transfer": false,
+      "permits": [
+        {
+          "label": "RCRA authorization",
+          "transferable": false
+        }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "non_transferable_permits": [
+          "RCRA authorization"
+        ]
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.PERMIT.164",
+    "title": "Asset deal touching CA → bulk-sales notification + defer",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PERMIT_CO_BULK_SALES.v1",
+    "input": {
+      "deal_form": "asset",
+      "jurisdiction_requires_co_on_transfer": false,
+      "states_involved": [
+        "CA"
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "bulk_sales_notification_states": [
+          "CA"
+        ],
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.PERMIT.165",
+    "title": "PA reached, TX not → only PA flagged",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PERMIT_CO_BULK_SALES.v1",
+    "input": {
+      "deal_form": "asset",
+      "jurisdiction_requires_co_on_transfer": false,
+      "states_involved": [
+        "PA",
+        "TX"
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "bulk_sales_notification_states": [
+          "PA"
+        ]
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.PERMIT.166",
+    "title": "Entity deal in a bulk-sales state → no bulk-sales defer",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PERMIT_CO_BULK_SALES.v1",
+    "input": {
+      "deal_form": "entity",
+      "jurisdiction_requires_co_on_transfer": false,
+      "states_involved": [
+        "CA"
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.PERMIT.167",
+    "title": "CERCLA-linked property defers regardless of form",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PERMIT_CO_BULK_SALES.v1",
+    "input": {
+      "deal_form": "entity",
+      "jurisdiction_requires_co_on_transfer": false,
+      "cercla_linked_property": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "cercla_successor_flag": true,
+        "defer_to_counsel": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.PERMIT.168",
+    "title": "Clean asset deal → no flags, no defer",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PERMIT_CO_BULK_SALES.v1",
+    "input": {
+      "deal_form": "asset",
+      "jurisdiction_requires_co_on_transfer": false,
+      "states_involved": [
+        "TX"
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "co_required_on_transfer": false,
+        "defer_to_counsel": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.PERMIT.169",
+    "title": "NJ + NY both flagged",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PERMIT_CO_BULK_SALES.v1",
+    "input": {
+      "deal_form": "asset",
+      "jurisdiction_requires_co_on_transfer": false,
+      "states_involved": [
+        "NJ",
+        "NY"
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "bulk_sales_notification_states": [
+          "NJ",
+          "NY"
+        ]
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.PERMIT.170",
+    "title": "Missing deal form → needs_inputs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PERMIT_CO_BULK_SALES.v1",
+    "input": {
+      "jurisdiction_requires_co_on_transfer": true
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": [
+        "deal_form"
+      ]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.PERMIT.171",
+    "title": "Missing CO flag → needs_inputs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PERMIT_CO_BULK_SALES.v1",
+    "input": {
+      "deal_form": "asset"
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": [
+        "jurisdiction_requires_co_on_transfer"
+      ]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.FIXTURE.172",
+    "title": "No conflicting recorded interest + filing → fixture party",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.FIXTURE_9334.v1",
+    "input": {
+      "pmsi": true,
+      "fixture_filing_made": true,
+      "prior_recorded_real_property_interest": false,
+      "filing_days_after_affixation": 5
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "priority": "fixture_secured_party"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.FIXTURE.173",
+    "title": "No conflict + no filing → first to perfect",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.FIXTURE_9334.v1",
+    "input": {
+      "pmsi": false,
+      "fixture_filing_made": false,
+      "prior_recorded_real_property_interest": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "priority": "first_to_perfect"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.FIXTURE.174",
+    "title": "PMSI filed day 10 → primes prior mortgage (9-334(d))",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.FIXTURE_9334.v1",
+    "input": {
+      "pmsi": true,
+      "fixture_filing_made": true,
+      "prior_recorded_real_property_interest": true,
+      "filing_days_after_affixation": 10
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "priority": "fixture_secured_party",
+        "within_20_day_window": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.FIXTURE.175",
+    "title": "PMSI filed day 20 exactly → within window",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.FIXTURE_9334.v1",
+    "input": {
+      "pmsi": true,
+      "fixture_filing_made": true,
+      "prior_recorded_real_property_interest": true,
+      "filing_days_after_affixation": 20
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "priority": "fixture_secured_party",
+        "within_20_day_window": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.FIXTURE.176",
+    "title": "PMSI filed day 21 → window missed, real property wins",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.FIXTURE_9334.v1",
+    "input": {
+      "pmsi": true,
+      "fixture_filing_made": true,
+      "prior_recorded_real_property_interest": true,
+      "filing_days_after_affixation": 21
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "priority": "real_property_interest",
+        "within_20_day_window": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.FIXTURE.177",
+    "title": "PMSI filed before affixation → within window",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.FIXTURE_9334.v1",
+    "input": {
+      "pmsi": true,
+      "fixture_filing_made": true,
+      "prior_recorded_real_property_interest": true,
+      "filing_days_after_affixation": 0
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "priority": "fixture_secured_party"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.FIXTURE.178",
+    "title": "PMSI without fixture filing → real property wins",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.FIXTURE_9334.v1",
+    "input": {
+      "pmsi": true,
+      "fixture_filing_made": false,
+      "prior_recorded_real_property_interest": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "priority": "real_property_interest"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.FIXTURE.179",
+    "title": "Non-PMSI timely filing → (c) default, real property wins",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.FIXTURE_9334.v1",
+    "input": {
+      "pmsi": false,
+      "fixture_filing_made": true,
+      "prior_recorded_real_property_interest": true,
+      "filing_days_after_affixation": 5
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "priority": "real_property_interest"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.FIXTURE.180",
+    "title": "Construction mortgage overrides the PMSI exception (9-334(h))",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.FIXTURE_9334.v1",
+    "input": {
+      "pmsi": true,
+      "fixture_filing_made": true,
+      "prior_recorded_real_property_interest": true,
+      "filing_days_after_affixation": 15,
+      "construction_mortgage": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "priority": "real_property_interest"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.FIXTURE.181",
+    "title": "Construction mortgage with no prior conflict is inert",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.FIXTURE_9334.v1",
+    "input": {
+      "pmsi": true,
+      "fixture_filing_made": true,
+      "prior_recorded_real_property_interest": false,
+      "filing_days_after_affixation": 15,
+      "construction_mortgage": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "priority": "fixture_secured_party"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.FIXTURE.182",
+    "title": "Missing pmsi flag → needs_inputs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.FIXTURE_9334.v1",
+    "input": {
+      "fixture_filing_made": true,
+      "prior_recorded_real_property_interest": true
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": [
+        "pmsi"
+      ]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.V18C.FIXTURE.183",
+    "title": "Missing filing flag → needs_inputs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.FIXTURE_9334.v1",
+    "input": {
+      "pmsi": true,
+      "prior_recorded_real_property_interest": true
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": [
+        "fixture_filing_made"
+      ]
     }
   }
 ]
