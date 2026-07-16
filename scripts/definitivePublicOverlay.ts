@@ -164,6 +164,42 @@ export const AUTHORITY_TYPES: Record<string, string> = {
   'Matter of 105-02 Forest Hills (2025)': 'case',
 };
 
+/* ── Gate registry drafts (Item 7 — FOUNDER-GATED) ─────────────────────────
+ * CC drafts candidate names, purpose narratives, and machine-evaluable trigger
+ * predicates over data-dictionary fields for every routed-but-unnamed gate;
+ * unrouted IDs are Reserved. These are NOT published and NOT merged into the
+ * spec's DEFINITIVE_GATE_EXPANSIONS — the generator emits them only to
+ * dist/definitive-internal/GATE_REGISTRY_FOR_FOUNDER_APPROVAL.md. The publish
+ * gate blocks on any unnamed routed gate, so the spec cannot ship until the
+ * founder approves these and they are merged deliberately.
+ */
+export interface GateDraft {
+  gate: string; name: string; purpose: string; predicate: string;
+  reserved?: boolean; note?: string;
+}
+export const GATE_REGISTRY_DRAFTS: GateDraft[] = [
+  { gate: 'G1', name: 'Reps, Warranties & Indemnification', purpose: 'Activates the representation and warranty architecture and the indemnification-ladder mechanics of the definitive agreement once the deal reaches definitive-agreement drafting.', predicate: 'definitive_agreement_stage == true' },
+  { gate: 'G2', name: 'Transaction Form & Purchase-Price Allocation', purpose: 'Activates the asset/stock/merger form fork and the purchase-price-allocation mechanics that follow from the chosen form.', predicate: 'deal_form in {asset, stock, merger} AND purchase_price_cents > 0' },
+  { gate: 'G6', name: 'Closing Conditions', purpose: 'Activates condition-precedent tracking for the period between signing and closing.', predicate: 'signed == true AND closed == false' },
+  { gate: 'G7', name: 'Execution & Closing Certainty', purpose: 'Activates the execution-risk stack — regulatory reportability, MAE durational significance, insurance architecture, transition services, and closing mechanics.', predicate: 'signed == true OR loi_executed == true' },
+  { gate: 'G8', name: 'Post-Closing Recourse', purpose: 'Activates escrow, holdback, survival, and insurance-backed recourse sizing after closing.', predicate: 'indemnity_structure_required == true' },
+  { gate: 'G9', name: 'Contingent Consideration', purpose: 'Activates earnout design, measurement, and dispute mechanics when part of the price is contingent.', predicate: 'contingent_consideration == true' },
+  { gate: 'G10', name: 'Intellectual Property Mechanics', purpose: 'Activates IP diligence, chain-of-title, transfer, and allocation mechanics when IP is material to value.', predicate: 'ip_material_to_value == true' },
+  { gate: 'G14', name: 'Seller Proceeds & Price Adjustment', purpose: 'Activates seller-side proceeds tax treatment (e.g., QSBS) and price-adjustment pegs on the sell side.', predicate: 'sell_side_context == true', note: 'LOW CONFIDENCE — QSBS + working-capital-peg pairing is odd; founder option to re-route QSBS to G15 only and rename this "Price Adjustment Mechanics".' },
+  { gate: 'G15', name: 'Tax & Corporate Structure', purpose: 'The master structuring gate: tax elections, reorganization qualification, corporate-law mechanics, and equity-structure math. Runs whenever a deal form is set (structure analysis always applies).', predicate: 'deal_form is set' },
+  { gate: 'G19', name: 'State & Local Transaction Tax', purpose: 'Activates state/local transfer-tax, controlling-interest, SALT, and clearance mechanics when US state jurisdictions are involved.', predicate: 'us_state_jurisdictions.length > 0' },
+  { gate: 'G23', name: 'Cross-Border Deal Terms', purpose: 'Activates non-US deal-term and merger-control overlays when a non-US jurisdiction is in play.', predicate: 'non_us_jurisdiction == true' },
+  { gate: 'G24', name: 'Regulatory & Compliance Diligence Overlays', purpose: 'Activates the regulatory-diligence overlay family (privacy, cyber, sanctions, ESG, sector regulation) for regulated data or operations.', predicate: 'regulated_data_or_operations == true' },
+  { gate: 'G26', name: 'Fund Secondaries & GP-Led Transactions', purpose: 'Activates fund-level and secondaries mechanics (continuation funds, LP secondaries, strip sales, NAV facilities).', predicate: 'counterparty_type in {fund_lp, fund_gp} OR transaction_type in {secondary, continuation, strip, nav}' },
+  { gate: 'G27', name: 'Sponsor, Search & Employee-Ownership Economics', purpose: 'Activates acquirer-archetype economics — independent-sponsor promotes, search-fund step-ups, and ESOP structures.', predicate: 'buyer_archetype in {independent_sponsor, search_fund, esop}' },
+  // Unrouted IDs — Reserved (no models route through them; no activation criteria fabricated)
+  ...['G3', 'G4', 'G5', 'G11', 'G12', 'G13', 'G16', 'G17', 'G18', 'G20', 'G21', 'G22', 'G25'].map(g => ({
+    gate: g, name: 'Reserved', reserved: true,
+    purpose: 'Reserved gate ID — family and activation criteria to be specified; no models route here yet.',
+    predicate: 'n/a (reserved)',
+  })),
+];
+
 /* ── Model overlay contract ────────────────────────────────────────────────
  * `kind` on a constant:
  *   statutory_must     — a binding value from a governing authority (statute,
@@ -173,12 +209,15 @@ export const AUTHORITY_TYPES: Record<string, string> = {
  *                        SHOULD-strength default, distinct from a MUST.
  *   table_data         — a jurisdictional lookup value (the state-law tables);
  *                        selected by the deal's facts, cited to its source.
+ *   pass_through       — L5 live data supplied at runtime with an asof
+ *                        timestamp (HSR thresholds, AFRs, FRED series, the
+ *                        IRS §382 rate); carries no static value.
  * traceValues: raw numeric forms that may legitimately appear in a worked
  * example's OUTPUT (e.g. a dollar cap and its cents scaling), so the
  * untraceable-literal gate can prove every output number is a constant, an
  * input, or an algorithm-derived value.
  */
-export type ConstantKind = 'statutory_must' | 'cited_median_should' | 'table_data';
+export type ConstantKind = 'statutory_must' | 'cited_median_should' | 'table_data' | 'pass_through';
 export interface ConstantSpec {
   name: string; value: string; kind: ConstantKind;
   citation: string; pin?: string; effective?: string; nextCheck?: string;
@@ -197,6 +236,7 @@ export interface ModelOverlay {
   derivedOutputs?: string[];  // output fields whose numeric values are algorithm-derived
   precisionRule?: string;     // §4 — the rounding rule stated for this model
   scopeFlag?: string;         // §1 — scope-honesty note when contract < purpose
+  founderReview?: boolean;    // tax/legal-sensitive — awaits founder algorithm verification
 }
 
 const CENTS_RULE = 'Monetary values are exact integer cents. Ratios and percentages are rounded half-up to the per-field precision noted in the output contract; a single global half-even rule is scheduled (delta §4). Dates are ISO-8601.';
@@ -218,7 +258,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       '5. The model SHALL NOT emit a target, a true-up, or a collar; those are out of scope for this slot (see scope note; M210 owns the true-up).',
     ],
     constants: [],
-    precisionRule: 'peg_cents rounds half-up to the nearest integer cent; low/high/observed_months are exact.',
+    precisionRule: 'All outputs are exact integer cents or counts (see the Conventions chapter); peg_cents is the mean rounded to the nearest integer cent.',
     inputs: {
       monthly_nwc_cents: { type: 'integer (cents)[]', desc: 'Trailing monthly net-working-capital observations, one integer-cents value per month; order is immaterial to the peg.', unit: 'cents' },
     },
@@ -255,7 +295,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       { name: 'SBA 7(a) minimum equity injection', value: '10% (0.10)', kind: 'statutory_must', citation: 'SBA SOP 50 10 8', pin: 'Subpart B — minimum equity injection for change-of-ownership', effective: '2025-06-01', nextCheck: 'on next SOP revision', traceValues: [0.1, 10] },
       { name: 'SBA 7(a) DSCR floor', value: '1.15×', kind: 'statutory_must', citation: 'SBA SOP 50 10 8', pin: 'Subpart B — business-acquisition debt-service-coverage floor', effective: '2025-06-01', nextCheck: 'on next SOP revision', traceValues: [1.15] },
     ],
-    precisionRule: 'buyer_equity_pct rounds half-up to 4 decimals; dscr rounds half-up to 2 decimals; max_7a_loan_cents is exact integer cents.',
+    precisionRule: 'Rates and ratios follow the global precision rule (half-even to 4 decimals at the output boundary — see the Conventions chapter): buyer_equity_pct and dscr are 4-decimal; max_7a_loan_cents is exact integer cents.',
     inputs: {
       purchase_price_cents: { type: 'integer (cents)', desc: 'Total acquisition purchase price.', unit: 'cents' },
       cash_flow_cents: { type: 'integer (cents)', desc: 'Post-acquisition annual free cash flow available for debt service.', unit: 'cents' },
@@ -264,7 +304,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     },
     outputs: {
       buyer_equity_pct: { type: 'number', desc: 'Buyer equity as a fraction of purchase price (0–1).', precision: 4 },
-      dscr: { type: 'number', desc: 'Debt-service coverage ratio: cash flow ÷ annual debt service.', precision: 2 },
+      dscr: { type: 'number', desc: 'Debt-service coverage ratio: cash flow ÷ annual debt service.', precision: 4 },
       meets_sba_equity_floor: { type: 'boolean', desc: 'Whether buyer equity meets or exceeds the SBA 7(a) minimum equity injection.' },
       meets_sba_dscr_floor: { type: 'boolean', desc: 'Whether the coverage ratio meets or exceeds the SBA 7(a) DSCR floor.' },
       max_7a_loan_cents: { type: 'integer (cents)', desc: 'The statutory 7(a) maximum loan amount, in cents.', unit: 'cents' },
@@ -294,7 +334,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       { name: 'HSR size-of-transaction threshold', value: '$133,900,000', kind: 'statutory_must', citation: '15 U.S.C. § 18a; 16 C.F.R. § 801.1', pin: 'FTC 2026 annual threshold revision (eff. 2026-02-17)', effective: '2026-02-17', nextCheck: '2027-Q1 (FTC revises annually, typically January–February)', traceValues: [133_900_000, 13_390_000_000] },
       { name: 'HSR auto-reportable ceiling', value: '$535,500,000', kind: 'statutory_must', citation: '15 U.S.C. § 18a; 16 C.F.R. § 801.1', pin: 'FTC 2026 annual threshold revision (eff. 2026-02-17)', effective: '2026-02-17', nextCheck: '2027-Q1 (FTC revises annually)', traceValues: [535_500_000, 53_550_000_000] },
     ],
-    precisionRule: 'All values are exact integer cents; no rounding.',
+    precisionRule: 'All values are exact integer cents (see the Conventions chapter); no rounding.',
     inputs: {
       enterprise_value_cents: { type: 'integer (cents)', desc: 'The size of the transaction being tested against the HSR thresholds.', unit: 'cents' },
     },
@@ -746,9 +786,9 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       '7. It SHALL raise red flags for a PMSI filed outside the 20-day window against a prior interest, and for a PMSI with no fixture filing.',
     ],
     constants: [
-      { name: 'UCC § 9-334(d) 20-day window', value: '20 days after affixation', kind: 'statutory_must', citation: 'U.C.C. § 9-334(d)', pin: '§ 9-334(d)', traceValues: [20] },
-      { name: 'UCC § 9-334(h) construction-mortgage override', value: 'construction mortgage primes a fixture interest arising during construction', kind: 'statutory_must', citation: 'U.C.C. § 9-334(h)', pin: '§ 9-334(h)' },
-      { name: 'UCC § 9-334(c) default', value: 'the conflicting real-property interest prevails absent a qualifying exception', kind: 'statutory_must', citation: 'U.C.C. § 9-334(c)', pin: '§ 9-334(c)' },
+      { name: 'UCC § 9-334(d) 20-day window', value: '20 days after affixation', kind: 'statutory_must', citation: 'U.C.C. § 9-334(d)', pin: '§ 9-334(d)', effective: 'U.C.C. Article 9 (2010 revision), current', nextCheck: 'on uniform-act amendment', traceValues: [20] },
+      { name: 'UCC § 9-334(h) construction-mortgage override', value: 'construction mortgage primes a fixture interest arising during construction', kind: 'statutory_must', citation: 'U.C.C. § 9-334(h)', pin: '§ 9-334(h)', effective: 'U.C.C. Article 9 (2010 revision), current', nextCheck: 'on uniform-act amendment' },
+      { name: 'UCC § 9-334(c) default', value: 'the conflicting real-property interest prevails absent a qualifying exception', kind: 'statutory_must', citation: 'U.C.C. § 9-334(c)', pin: '§ 9-334(c)', effective: 'U.C.C. Article 9 (2010 revision), current', nextCheck: 'on uniform-act amendment' },
     ],
     inputs: {
       pmsi: { type: 'boolean', desc: 'Whether the fixture interest is a purchase-money security interest.' },
@@ -774,6 +814,131 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     golden: {
       narrative: 'A lender takes a purchase-money security interest in rooftop HVAC units and perfects by fixture filing 15 days after installation; within the 20-day window, the PMSI primes the recorded mortgage.',
       input: { pmsi: true, fixture_filing_made: true, prior_recorded_real_property_interest: true, filing_days_after_affixation: 15, construction_mortgage: false },
+    },
+  },
+
+  /* ══ TAX FAMILY — sensitive batch (AWAITING FOUNDER REVIEW) ═══════════ */
+
+  /* ══ M139 — §1060 seven-class allocation ═════════════════════════════ */
+  M139: {
+    founderReview: true,
+    purpose:
+      'Computes the residual-method allocation of an asset-deal purchase price across the seven asset classes of §1060, cascading each dollar down the class ordering and dropping the residual into Class VII goodwill. It answers, for a buyer and seller papering an asset purchase, "how does this price split across the classes that drive the buyer\'s depreciation and amortization and the parties\' consistent Form 8594?" It allocates from supplied fair market values only; the values themselves and their class assignments are the advisors\' calls.',
+    algorithm: [
+      'Given `purchase_price_cents` and `asset_classes` (a list of `{ class_number, class_name, fair_market_value_cents }`):',
+      '1. If either is missing or `asset_classes` is empty, the implementation SHALL return `status: "needs_inputs"` naming the missing fields.',
+      '2. It SHALL sort the asset classes by class number ascending (Class I → Class VII), per the residual-method ordering (constants: §1060 seven-class ordering).',
+      '3. It SHALL initialize a running remainder equal to `purchase_price_cents` and, for each class in order, allocate: for Classes I–VI, the lesser of the remainder and that class\'s fair market value (capped at FMV); for Class VII, the entire remaining amount (the residual). It SHALL subtract each allocation from the remainder.',
+      '4. `allocated_cents` SHALL be the sum of all class allocations; `unallocated_cents` SHALL be the non-negative remainder (nonzero only when supplied FMVs exceed the price).',
+      '5. It SHALL report the Class V (tangible), Class VI (§197 intangibles), and Class VII (goodwill and going concern) subtotals and the full per-class allocation schedule.',
+    ],
+    constants: [
+      { name: '§1060 seven-class ordering', value: 'Classes I (cash) → II (marketable securities) → III (A/R and mark-to-market) → IV (inventory) → V (other tangible/§1231) → VI (§197 intangibles ex-goodwill) → VII (goodwill and going-concern value)', kind: 'table_data', citation: 'Treas. Reg. § 1.1060-1(c); § 1.338-6(b)', pin: '§ 1.338-6(b)(2) (seven-class residual method)', effective: 'current (Treas. Reg. as amended)', nextCheck: 'on Treasury amendment' },
+    ],
+    precisionRule: 'All allocations are exact integer cents (see the Conventions chapter); no rounding.',
+    inputs: {
+      purchase_price_cents: { type: 'integer (cents)', desc: 'Total consideration to be allocated across the asset classes.', unit: 'cents' },
+      asset_classes: { type: 'object[]', desc: 'The asset classes with fair market values; each object carries `class_number` (1–7), `class_name` (string), and `fair_market_value_cents` (integer cents).' },
+    },
+    outputs: {
+      purchase_price_cents: { type: 'integer (cents)', desc: 'The price allocated, echoed.', unit: 'cents' },
+      allocated_cents: { type: 'integer (cents)', desc: 'Total amount allocated across the classes.', unit: 'cents' },
+      unallocated_cents: { type: 'integer (cents)', desc: 'Non-negative residual when supplied fair market values exceed the price (normally zero).', unit: 'cents' },
+      class_v_tangible_cents: { type: 'integer (cents)', desc: 'Amount allocated to Class V tangible/§1231 assets.', unit: 'cents' },
+      class_vi_section_197_intangibles_cents: { type: 'integer (cents)', desc: 'Amount allocated to Class VI §197 intangibles (excluding goodwill).', unit: 'cents' },
+      class_vii_goodwill_cents: { type: 'integer (cents)', desc: 'Residual allocated to Class VII goodwill and going-concern value.', unit: 'cents' },
+      allocations: { type: 'object[]', desc: 'Per-class schedule: `{ class_number, class_name, fair_market_value_cents, allocated_cents, capped_at_fmv }`.' },
+    },
+    derivedOutputs: ['purchase_price_cents', 'allocated_cents', 'unallocated_cents', 'class_v_tangible_cents', 'class_vi_section_197_intangibles_cents', 'class_vii_goodwill_cents', 'allocations'],
+    boundary:
+      'This model computes the residual-method allocation of purchase price across the seven asset classes from supplied fair market values. Whether a given asset belongs in a given class, whether the supplied fair market values are supportable, and the binding Form 8594 positions the parties will file are determinations for the parties\' tax advisors; the model computes the allocation the supplied values imply and renders no valuation or classification opinion.',
+    golden: {
+      narrative: 'A $10M asset purchase carries $500k of cash, $2M of equipment, and $1.5M of identified customer relationships; the residual method drops the remaining $6M into Class VII goodwill.',
+      input: { purchase_price_cents: 1_000_000_000, asset_classes: [ { class_number: 1, class_name: 'Cash', fair_market_value_cents: 50_000_000 }, { class_number: 5, class_name: 'Equipment', fair_market_value_cents: 200_000_000 }, { class_number: 6, class_name: 'Customer relationships (§197)', fair_market_value_cents: 150_000_000 }, { class_number: 7, class_name: 'Goodwill', fair_market_value_cents: 0 } ] },
+    },
+  },
+
+  /* ══ M185 — §280G golden parachute ═══════════════════════════════════ */
+  M185: {
+    founderReview: true,
+    purpose:
+      'Computes the §280G golden-parachute analysis for a change-in-control payment: the three-times-base-amount threshold, whether it is crossed, the excess parachute payment, the 20% §4999 excise tax, the employer\'s lost deduction, and whether a shareholder cleansing vote clears the disinterested-holder bar. It answers, for a deal team sizing executive change-in-control cost, "does this package trip §280G, and what does it cost if it does?" It computes the arithmetic from supplied figures; the parachute-payment characterization and the vote mechanics are counsel\'s.',
+    algorithm: [
+      'Given `base_amount_cents`, `parachute_payments_cents`, and optional `shareholder_cleansing_vote_pct`:',
+      '1. If either required cents input is missing, the implementation SHALL return `status: "needs_inputs"`.',
+      '2. `three_times_base_threshold_cents` SHALL be `base_amount_cents × 3` (constants: §280G three-times-base multiple).',
+      '3. `section_280g_triggered` SHALL be true iff `parachute_payments_cents ≥ three_times_base_threshold_cents`.',
+      '4. `excess_parachute_payment_cents` SHALL be `max(0, parachute_payments_cents − base_amount_cents)` when triggered, else 0 (the excess is measured against one times base, not three).',
+      '5. `excise_tax_20pct_cents` SHALL be the excess times the §4999 excise rate, rounded to the nearest cent (constants: §4999 excise-tax rate); `lost_employer_deduction_cents` SHALL equal the excess (§280G disallows the employer deduction for the excess).',
+      '6. When a cleansing-vote percentage is supplied, `cleansing_vote_passed` SHALL be true iff it exceeds the disinterested-shareholder threshold (constants: §280G cleansing-vote threshold); when absent it SHALL be null.',
+    ],
+    constants: [
+      { name: '§280G three-times-base multiple', value: '3×', kind: 'statutory_must', citation: 'IRC § 280G(b)(2)(A)(ii)', pin: '§ 280G(b)(2)(A)(ii)', effective: 'current (IRC as amended)', nextCheck: 'on IRC amendment', traceValues: [3] },
+      { name: '§4999 excise-tax rate', value: '20%', kind: 'statutory_must', citation: 'IRC § 4999(a)', pin: '§ 4999(a)', effective: 'current (IRC as amended)', nextCheck: 'on IRC amendment', traceValues: [0.2] },
+      { name: '§280G cleansing-vote threshold', value: 'more than 75% of disinterested shareholders', kind: 'statutory_must', citation: 'IRC § 280G(b)(5); Treas. Reg. § 1.280G-1', pin: 'Q&A-7 (more-than-75% disinterested approval)', effective: 'current (Treas. Reg. as amended)', nextCheck: 'on Treasury amendment', traceValues: [0.75] },
+    ],
+    precisionRule: 'Monetary values are exact integer cents (see the Conventions chapter); the excise tax is the excess times 20% rounded to the nearest cent; vote percentages are fractions on a 0–1 scale.',
+    inputs: {
+      base_amount_cents: { type: 'integer (cents)', desc: 'The executive\'s §280G base amount (five-year average W-2 compensation).', unit: 'cents' },
+      parachute_payments_cents: { type: 'integer (cents)', desc: 'Aggregate contingent-on-change-in-control payments to the executive.', unit: 'cents' },
+      shareholder_cleansing_vote_pct: { type: 'number', desc: 'Fraction of disinterested shareholders approving the payments (0–1); optional.', precision: 4 },
+    },
+    outputs: {
+      base_amount_cents: { type: 'integer (cents)', desc: 'The base amount, echoed.', unit: 'cents' },
+      parachute_payments_cents: { type: 'integer (cents)', desc: 'The parachute payments, echoed.', unit: 'cents' },
+      three_times_base_threshold_cents: { type: 'integer (cents)', desc: 'The three-times-base-amount safe-harbor threshold.', unit: 'cents' },
+      section_280g_triggered: { type: 'boolean', desc: 'Whether the payments meet or exceed three times the base amount.' },
+      excess_parachute_payment_cents: { type: 'integer (cents)', desc: 'The excess parachute payment (payments over one times base) when triggered, else 0.', unit: 'cents' },
+      excise_tax_20pct_cents: { type: 'integer (cents)', desc: 'The §4999 excise tax on the excess (20%).', unit: 'cents' },
+      lost_employer_deduction_cents: { type: 'integer (cents)', desc: 'The employer deduction disallowed under §280G (equal to the excess).', unit: 'cents' },
+      shareholder_cleansing_vote_pct: { type: 'number | null', desc: 'The supplied cleansing-vote fraction, echoed, or null.', precision: 4 },
+      cleansing_vote_threshold_pct: { type: 'number', desc: 'The disinterested-shareholder approval threshold (0.75).', precision: 4 },
+      cleansing_vote_passed: { type: 'boolean | null', desc: 'Whether the supplied vote exceeds the threshold, or null when no vote is supplied.' },
+    },
+    derivedOutputs: ['base_amount_cents', 'parachute_payments_cents', 'three_times_base_threshold_cents', 'excess_parachute_payment_cents', 'excise_tax_20pct_cents', 'lost_employer_deduction_cents', 'shareholder_cleansing_vote_pct'],
+    boundary:
+      'This model computes the §280G three-times-base threshold, the excess parachute payment, the §4999 excise tax, and the lost employer deduction from supplied figures, and screens the cleansing-vote percentage. Whether a payment is a parachute payment, the reasonable-compensation offset that can reduce the excess, and the availability and mechanics of the shareholder cleansing vote are determinations for tax counsel; the model computes the arithmetic and renders no §280G opinion.',
+    golden: {
+      narrative: 'An executive with an $800k base amount is set to receive $3.0M on the sale; the package clears three times base, creating a $2.2M excess parachute payment and a $440k excise tax.',
+      input: { base_amount_cents: 80_000_000, parachute_payments_cents: 300_000_000, shareholder_cleansing_vote_pct: 0.9 },
+    },
+  },
+
+  /* ══ M186 — §382 NOL limitation ══════════════════════════════════════ */
+  M186: {
+    founderReview: true,
+    purpose:
+      'Computes the annual §382 limitation on a loss corporation\'s pre-change net operating losses — the loss-corporation equity value times the IRS long-term tax-exempt rate — and, given an NOL balance, the approximate number of years to absorb it. It answers, for a buyer valuing a target\'s carryforwards, "after the ownership change, how much of the NOL can be used each year?" It computes the base limitation from supplied figures; whether an ownership change occurred and the value and adjustments that feed the limitation are counsel\'s.',
+    algorithm: [
+      'Given `loss_corporation_value_cents` and `long_term_tax_exempt_rate`, and optional `nol_carryforward_cents`:',
+      '1. If either required input is missing, the implementation SHALL return `status: "needs_inputs"`.',
+      '2. `annual_section_382_limitation_cents` SHALL be `loss_corporation_value_cents × long_term_tax_exempt_rate`, rounded to the nearest cent (the §382(b)(1) base limitation).',
+      '3. `long_term_tax_exempt_rate` SHALL be echoed rounded to four decimals (see the Conventions chapter); the rate is a supplied pass-through value (the IRS publishes it monthly).',
+      '4. When `nol_carryforward_cents` is supplied and the annual limitation is positive, `estimated_years_to_use_nol` SHALL be the NOL balance divided by the annual limitation, rounded up to the next whole year; otherwise null.',
+      '5. The model computes the base limitation only; it SHALL NOT determine whether a §382 ownership change occurred, nor apply built-in gain/loss (§382(h)) or continuity-of-business adjustments.',
+    ],
+    constants: [
+      { name: 'IRS long-term tax-exempt rate', value: 'supplied at runtime (IRS publishes monthly under §382(f))', kind: 'pass_through', citation: 'IRC § 382(f); IRS monthly §382 rate release', pin: '§ 382(f)', effective: 'monthly', nextCheck: 'monthly (per IRS release)' },
+    ],
+    precisionRule: 'The limitation is exact integer cents; the long-term tax-exempt rate echoes at four decimals; years-to-absorb is a whole-year ceiling (see the Conventions chapter).',
+    inputs: {
+      loss_corporation_value_cents: { type: 'integer (cents)', desc: 'The equity value of the loss corporation immediately before the ownership change (§382(e)).', unit: 'cents' },
+      long_term_tax_exempt_rate: { type: 'number', desc: 'The IRS long-term tax-exempt rate for the change month (a fraction, e.g. 0.0435); supplied at runtime.', precision: 4 },
+      nol_carryforward_cents: { type: 'integer (cents)', desc: 'The pre-change NOL carryforward balance; optional, drives the years-to-absorb estimate.', unit: 'cents' },
+    },
+    outputs: {
+      loss_corporation_value_cents: { type: 'integer (cents)', desc: 'The loss-corporation value, echoed.', unit: 'cents' },
+      long_term_tax_exempt_rate: { type: 'number', desc: 'The long-term tax-exempt rate used, at four decimals.', precision: 4 },
+      annual_section_382_limitation_cents: { type: 'integer (cents)', desc: 'The annual §382 limitation on pre-change NOL use.', unit: 'cents' },
+      nol_carryforward_cents: { type: 'integer (cents) | null', desc: 'The NOL balance, echoed, or null when not supplied.', unit: 'cents' },
+      estimated_years_to_use_nol: { type: 'integer | null', desc: 'Whole-year ceiling to absorb the NOL at the annual limitation, or null.', unit: 'years' },
+    },
+    derivedOutputs: ['loss_corporation_value_cents', 'long_term_tax_exempt_rate', 'annual_section_382_limitation_cents', 'nol_carryforward_cents', 'estimated_years_to_use_nol'],
+    boundary:
+      'This model computes the annual §382 limitation as the loss-corporation value times the supplied long-term tax-exempt rate. Whether an ownership change has in fact occurred under §382(g), the correct loss-corporation value, the §382(h) built-in gain/loss adjustments, and the continuity-of-business-enterprise requirement are determinations for tax counsel; the model computes the base limitation and renders no §382 opinion.',
+    golden: {
+      narrative: 'A target worth $50M undergoes an ownership change when the long-term tax-exempt rate is 4.35%; roughly $2.175M of the pre-change NOL becomes usable each year, absorbing a $10M carryforward over five years.',
+      input: { loss_corporation_value_cents: 5_000_000_000, long_term_tax_exempt_rate: 0.0435, nol_carryforward_cents: 1_000_000_000 },
     },
   },
 };

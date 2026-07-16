@@ -179,7 +179,7 @@
       "status": "complete",
       "outputs": {
         "buyer_equity_pct": 0.1,
-        "dscr": 1.33,
+        "dscr": 1.3333,
         "meets_sba_equity_floor": true,
         "meets_sba_dscr_floor": true,
         "max_7a_loan_cents": 500000000
@@ -4456,7 +4456,7 @@
       "status": "complete",
       "outputs": {
         "min_dscr": 1.3333,
-        "average_dscr": 1.4167,
+        "average_dscr": 1.4166,
         "llcr": 1.4,
         "plcr": 5.9091,
         "research_only": true,

@@ -1,6 +1,7 @@
-<!-- GENERATED review draft (generator v3, delta punch-list build) — built by scripts/build-definitive-public.ts
-     over the authored overlay scripts/definitivePublicOverlay.ts. Do not hand-edit; regenerate instead.
-     Governing rule + publish-gate: dist/definitive-internal/GOVERNANCE.md. Gap ledger: dist/definitive-internal/GAP_LEDGER.md -->
+<!-- GENERATED review draft (generator v4, DEPTH pass: publish gate + Conventions/precision + honest counts + gate registry + first tax family) —
+     built by scripts/build-definitive-public.ts over scripts/definitivePublicOverlay.ts. Do not hand-edit; regenerate instead.
+     Governance + publish gate: dist/definitive-internal/GOVERNANCE.md. Burndown: dist/definitive-internal/GAP_LEDGER.md.
+     Founder actions: dist/definitive-internal/GATE_REGISTRY_FOR_FOUNDER_APPROVAL.md -->
 
 # DEFINITIVE M&A Specification — v1.0.0 (DRAFT — internal review build)
 
@@ -20,7 +21,7 @@ reorganization structure, distressed and restructuring waterfalls, capital
 structure and liability management, IP transfer mechanics, and a real
 property & contract law layer with anchor-state law encoded as data.
 
-**At a glance:** **134 model slots** (85 Normative · 47 Catalog · 2 Reserved) · **30-gate routing framework** (17 gates carry routed models; 3 fully specified) · **262 authority anchors** (as referenced) · **655-case conformance suite** (385 model-runtime).
+**At a glance:** **134 model slots mapped** · **17 implementable from this document today** · 68 normative scheduled (authoring by family) · 47 catalog · 2 reserved · **30-gate routing framework** (17 routed; 3 specified) · **262 authority anchors** (as referenced) · **655-case conformance suite** (385 model-runtime).
 
 The specification publishes at two maturity tiers, labeled on every entry and
 in the index. **Normative** entries carry the full contract — input and output
@@ -28,8 +29,9 @@ schemas, algorithm, worked example, error semantics, and conformance
 bindings — and each carries its contract in full; entries marked **implementable from this document alone** have a complete authored contract today, while the remainder are being authored family by family (see the changelog). **Catalog** entries
 are informative maps of scope, boundary, routing, and authorities whose
 normative contracts are scheduled. The breadth claim (134 slots
-mapped) and the rigor claim (85 slots normative) are distinct
-claims, made separately and never blurred.
+mapped) and the rigor claim (17 implementable from
+this document today) are distinct claims, made separately and never blurred —
+the second number leads, and it climbs family by family in public.
 
 Three design rules run through everything. **Determinism**: a model computes
 from supplied facts and cited constants — same inputs, same outputs, no
@@ -52,6 +54,60 @@ This specification is an educational and engineering reference. It is not
 legal, tax, accounting, investment, or appraisal advice; it renders no
 opinions; and nothing in it creates a professional relationship. Questions it
 classifies as specialist determinations belong to licensed professionals.
+
+
+---
+
+# Conventions
+
+These conventions are normative and global. Every model contract in this
+specification is read subject to them; per-entry notes reference this chapter
+rather than restating divergent rules.
+
+## Monetary values
+
+All monetary values are integer cents — a whole number of United States cents.
+Implementations MUST represent money as integers, never floating-point dollars.
+A field whose name ends in `_cents` carries integer cents.
+
+## Dates
+
+All dates are ISO-8601 strings (`YYYY-MM-DD`).
+
+## Jurisdictions
+
+United States jurisdictions are two-letter state codes (`NY`, `CA`, `TX`,
+`DE`). Where a model reads a jurisdictional data table and the supplied
+jurisdiction is not tabled, the implementation MUST surface an explicit
+table-gap and route to the appropriate professional — it MUST NOT guess a rule.
+
+## Numeric precision
+
+This is the single global rounding rule; every "see the Conventions chapter"
+precision note refers here.
+
+- **Monetary outputs** are exact integer cents.
+- **Rates and ratios** — coverage ratios (DSCR), returns (IRR, MOIC),
+  ownership and equity percentages, cap rates, and the like — are rounded
+  **half to even** (banker's rounding) to **four (4) decimal places**, at the
+  **output boundary only**. Intermediate values are carried at full precision;
+  rounding is applied once, when the output is produced.
+- **Dates** are ISO-8601 as above.
+
+Half-to-even means a value exactly halfway between two representable results
+rounds to the one whose last retained digit is even (0.00005 → 0.0000;
+0.00015 → 0.0002). This single rule lets an independent implementation
+reproduce every published expected value from the rule alone, with no shared
+rounding code — which is the property the conformance suite depends on.
+
+## Live (pass-through) constants
+
+Some constants are live data supplied at runtime with an `asof` timestamp
+rather than fixed in the specification — HSR thresholds, applicable federal
+rates, the IRS long-term tax-exempt rate, published market-data series. These
+are marked `pass-through (live data)` in a model's constants table and carry
+no static value; a conforming implementation supplies the current figure and
+records the `asof` date in its audit payload.
 
 
 ---
@@ -135,8 +191,13 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `after_acquired_title_applies` | boolean | Whether estoppel-by-deed vests later-acquired title in the grantee. |
 | `aggregation_years` | integer | null | The acting-in-concert aggregation window in years, or null. |
 | `all_required_signers_present` | boolean | Whether every party the vesting form requires is on the signature page; explicit false raises a signatory gap. |
+| `allocated_cents` | integer (cents) | Total amount allocated across the classes. |
+| `allocations` | object[] | Per-class schedule: `{ class_number, class_name, fair_market_value_cents, allocated_cents, capped_at_fmv }`. |
 | `annual_debt_service_cents` | integer (cents) | Annual principal-and-interest debt service on the acquisition debt. |
+| `annual_section_382_limitation_cents` | integer (cents) | The annual §382 limitation on pre-change NOL use. |
+| `asset_classes` | object[] | The asset classes with fair market values; each object carries `class_number` (1–7), `class_name` (string), and `fair_market_value_cents` (integer cents). |
 | `auto_reportable_cents` | integer (cents) | The current HSR auto-reportable ceiling, in cents. |
+| `base_amount_cents` | integer (cents) | The executive's §280G base amount (five-year average W-2 compensation). |
 | `basis` | enum(risk_basis) | The basis for the allocation. |
 | `bfp_protected` | boolean | Whether the later purchaser takes free of the prior interest as a protected bona-fide purchaser. |
 | `bulk_sales_citations` | string[] | Per-state bulk-sales citations for the applicable states. |
@@ -149,7 +210,12 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `cercla_successor_flag` | boolean | Whether CERCLA successor liability is flagged. |
 | `citation` | string | The statutory citation for the state's recording act. |
 | `citt_screen_triggered` | boolean | Whether the controlling-interest transfer-tax screen fires. |
+| `class_v_tangible_cents` | integer (cents) | Amount allocated to Class V tangible/§1231 assets. |
+| `class_vi_section_197_intangibles_cents` | integer (cents) | Amount allocated to Class VI §197 intangibles (excluding goodwill). |
+| `class_vii_goodwill_cents` | integer (cents) | Residual allocated to Class VII goodwill and going-concern value. |
 | `classification` | enum(lease_classification) | How the transfer classifies against the restriction. |
+| `cleansing_vote_passed` | boolean | null | Whether the supplied vote exceeds the threshold, or null when no vote is supplied. |
+| `cleansing_vote_threshold_pct` | number | The disinterested-shareholder approval threshold (0.75). |
 | `co_required_on_transfer` | boolean | Whether a certificate of occupancy must be re-issued on this transfer. |
 | `coc_default_note` | string | null | The change-of-control default note when a control transfer is not deemed an assignment, else null. |
 | `consent_clause` | enum(consent_clause) | The lease consent provision as parsed. |
@@ -175,7 +241,10 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `defer_to_counsel` | boolean | True only when the state is untabled; the ordering then defers. |
 | `dscr` | number | Debt-service coverage ratio: cash flow ÷ annual debt service. |
 | `enterprise_value_cents` | integer (cents) | The size of the transaction being tested against the HSR thresholds. |
+| `estimated_years_to_use_nol` | integer | null | Whole-year ceiling to absorb the NOL at the annual limitation, or null. |
 | `exceptions` | object[] | Title-commitment exceptions; each object carries `label` (string), `curable` (boolean), and `insurer_will_insure_over` (boolean). |
+| `excess_parachute_payment_cents` | integer (cents) | The excess parachute payment (payments over one times base) when triggered, else 0. |
+| `excise_tax_20pct_cents` | integer (cents) | The §4999 excise tax on the excess (20%). |
 | `filing_days_after_affixation` | integer | Days between affixation and the fixture filing; decisive for the 20-day PMSI window. |
 | `fixture_filing_made` | boolean | Whether a fixture filing was made in the real-property records (a UCC-1 alone does not suffice). |
 | `fraud_exception_note` | string | Standing note that fraud claims survive merger regardless of survival language. |
@@ -193,6 +262,9 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `legal_title_or_possession_passed` | boolean | Whether legal title or possession has passed to the buyer (default false); decisive under UVPRA/NY regimes. |
 | `lender_consent_critical_path` | boolean | Whether lender consent (or payoff/refinance) is a closing-condition critical path. |
 | `loan_has_due_on_transfer_clause` | boolean | Whether the loan documents contain a due-on-sale/due-on-transfer clause. |
+| `long_term_tax_exempt_rate` | number | The IRS long-term tax-exempt rate for the change month (a fraction, e.g. 0.0435); supplied at runtime. |
+| `loss_corporation_value_cents` | integer (cents) | The equity value of the loss corporation immediately before the ownership change (§382(e)). |
+| `lost_employer_deduction_cents` | integer (cents) | The employer deduction disallowed under §280G (equal to the excess). |
 | `low_cents` | integer (cents) | Minimum observed monthly net working capital. |
 | `material_casualty_or_condemnation_pending` | boolean | Whether a material casualty or condemnation is pending (default false); drives the silent-contract red flag. |
 | `max_7a_loan_cents` | integer (cents) | The statutory 7(a) maximum loan amount, in cents. |
@@ -201,8 +273,10 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `mere_change_exemption_claimed` | boolean | Whether a mere-change-of-identity exemption is being claimed (default false). |
 | `merged_away_count` | integer | Number that merge into the deed at closing. |
 | `monthly_nwc_cents` | integer (cents)[] | Trailing monthly net-working-capital observations, one integer-cents value per month; order is immaterial to the peg. |
+| `nol_carryforward_cents` | integer (cents) | The pre-change NOL carryforward balance; optional, drives the years-to-absorb estimate. |
 | `non_transferable_permits` | string[] | Labels of permits that do not travel with the transfer. |
 | `observed_months` | integer | Number of monthly observations the peg was computed over. |
+| `parachute_payments_cents` | integer (cents) | Aggregate contingent-on-change-in-control payments to the executive. |
 | `peg_cents` | integer (cents) | The working-capital peg: the trailing arithmetic mean of the observations, to the nearest cent. |
 | `permits` | object[] | Operating permits; each object carries `label` (string) and `transferable` (boolean). |
 | `pmsi` | boolean | Whether the fixture interest is a purchase-money security interest. |
@@ -220,12 +294,15 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `right_captures_entity_transfers` | boolean | Whether the right's language expressly captures entity-level (indirect) transfers. |
 | `right_type` | enum(right_type) | The preemptive right at issue. |
 | `risk_on` | enum(risk_on) | The party bearing pre-closing casualty risk. |
+| `section_280g_triggered` | boolean | Whether the payments meet or exceed three times the base amount. |
+| `shareholder_cleansing_vote_pct` | number | Fraction of disinterested shareholders approving the payments (0–1); optional. |
 | `signatory_gap` | boolean | Whether a required signatory is missing. |
 | `size_of_transaction_cents` | integer (cents) | The transaction size under test, in cents. |
 | `state` | string (US state code) | Two-letter code of the situs state, used to select the recording act. |
 | `states_involved` | string[] | Two-letter state codes touched by the deal, screened against the bulk-sales table. |
 | `step_transaction_risk` | boolean | Whether a mere-change claim plus related steps raises step-transaction risk. |
 | `surviving_count` | integer | Number of items that survive closing. |
+| `three_times_base_threshold_cents` | integer (cents) | The three-times-base-amount safe-harbor threshold. |
 | `threshold_cents` | integer (cents) | The current HSR size-of-transaction threshold, in cents. |
 | `transaction_form` | enum(preemptive_transaction_form) | The transaction form being tested. |
 | `transfer_kind` | enum(transfer_kind) | The nature of the transfer (default deed_sale); the last six enum values are the Garn-protected consumer transfers. |
@@ -235,6 +312,7 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `trigger_status` | enum(trigger_status) | Whether and why the transaction implicates the right. |
 | `tx_seisin_note` | string | null | The Texas seisin-narrowing note when the state is TX, else null. |
 | `tx_strict_match_note` | string | null | The Texas strict-match note when applicable, else null. |
+| `unallocated_cents` | integer (cents) | Non-negative residual when supplied fair market values exceed the price (normally zero). |
 | `use_change` | boolean | Whether the transaction involves a change of use (default false); can require a CO even in an entity deal. |
 | `vesting_form` | enum(vesting_form) | How record title is held. |
 | `within_20_day_window` | boolean | Whether the fixture filing fell within the 20-day PMSI window. |
@@ -290,7 +368,7 @@ Enumerated values are part of the normative contract — a conforming implementa
 
 These field names appear in models whose normative contracts are still being authored; they are listed for completeness and are **not** yet part of the designed vocabulary. Their types and descriptions land as each model's overlay is authored.
 
-`acceleration_triggers` · `actual_nwc_cents` · `afr_rate` · `aggregate_noncontingent_liquidated_debt_cents` · `allowed_claim_cents` · `alta_endorsements_requested` · `amount_realized_cents` · `annual_ground_rent_cents` · `annual_rent_cents` · `asset_classes` · `assets` · `assignee_fee_cents` · `available_capital_cents` · `base_amount_cents` · `base_rate` · `basis_at_conversion_cents` · `basket_pct` · `baskets` · `boot_received_cents` · `breakup_fee_cents` · `bright_line_date` · `bulk_sale_clearance_required` · `buyer_step_up_pv_benefit_cents` · `buyer_will_use_as_residence` · `call_price_pct` · `cap_rate` · `cash_interest_rate` · `circuit` · `claims` · `class_vi_intangibles_cents` · `class_vote_amount_pct` · `class_vote_number_pct` · `classes` · `closing_date` · `closing_day_of_period` · `collateral_value_cents` · `commitment_cents` · `components` · `conditions` · `consideration_mix` · `contributors` · `conversion_date` · `corporate_tax_rate` · `coupon_rate` · `credit_bid_claim_cents` · `creditor_classes` · `curative_items` · `deal_type` · `debt_assumable` · `debts_due_cents` · `deposit_verification_tier` · `discount_pct` · `discount_rate` · `disposition_months` · `disposition_pct` · `dispute_forum` · `distributions_cents` · `earnout_targets` · `earnout_value_cents` · `ebitda_growth_pct` · `economic_life_years` · `effective_gross_income_cents` · `efficient_market_exists` · `efficient_market_rate` · `eligible_ar_cents` · `eligible_inventory_cents` · `engaged_in_commercial_activity` · `entity_carried_basis_cents` · `estate_value_cents` · `estimated_nwc_cents` · `excess_layers` · `exclusions` · `exercise_price_cents` · `exit_leverage` · `face_amount_cents` · `fair_value_assets_cents` · `fair_value_share_price_cents` · `federal_tax_rate` · `fiduciary_out_present` · `fmv_at_conversion_cents` · `fmv_real_property_cents` · `forecast_periods` · `form_8288_b_reduced_withholding_requested` · `fund_nav_cents` · `gain_cents` · `general_buffer_rate` · `general_cap_pct` · `general_reps_months` · `ground_lease_expiry_date` · `guc_recovery_pct` · `installment_receivable_cents` · `interest_inconsequential` · `interest_transferred_pct` · `investment_cents` · `ip_assets` · `ip_intangibles_cents` · `issues` · `jurisdiction` · `last_deposit_date` · `lease_term_years` · `leases` · `lender_policy_required` · `lender_recognition_agreement` · `liabilities_cents` · `licenses` · `lien_amount_cents` · `liquidation_value_cents` · `liquidity_months` · `loan_amount_cents` · `loan_maturity_date` · `long_term_tax_exempt_rate` · `loss_corporation_value_cents` · `market_cap_rate_from_pass_through_source` · `material_ip_categories` · `metrics` · `milestones` · `minimum_dscr` · `minimum_liquidity_cents` · `minimum_participation_pct` · `new_money_minimum_cents` · `new_security_value_cents` · `new_value` · `noi_cents` · `nol_carryforward_cents` · `notice_days` · `old_security_value_cents` · `opco_ebitda_cents` · `opening_cash_cents` · `operating_expenses_cents` · `option_pool_pct` · `outstanding_debt_cents` · `parachute_payments_cents` · `participating_debt_cents` · `pca_items` · `pe_owned_target` · `period_days` · `plan_payment_stream_cents` · `policy_tower_pct` · `post_closing_covenants` · `post_default_trading_price` · `pre_money_cents` · `pre_money_share_count` · `priced_round_share_price_cents` · `priming_requested` · `principal_cents` · `prior_bankruptcy_count` · `probabilities` · `professional_fee_carveout_cents` · `projected_cash_flow_cents` · `property_sold_under_363_or_plan` · `pv_lease_payments_cents` · `real_estate_assets_cents` · `real_estate_income_cents` · `real_property_value_cents` · `recognized_gain_cents` · `recourse` · `recoverable_expenses_cents` · `release_triggers` · `relinquished_property_value_cents` · `remaining_years` · `rent_roll` · `replacement_property_value_cents` · `replacement_reserve_cents` · `required_capital_cents` · `required_cushion_pct` · `reserves_cents` · `residual_value_pct` · `retention_pct` · `rev_proc_2011_29_safe_harbor_elected` · `risk_premium` · `rollup_amount_cents` · `round_size_cents` · `rwi_present` · `sale_costs_cents` · `sale_date` · `sale_price_cents` · `sales_use_tax_base_cents` · `sales_use_tax_rate` · `schedule_b_exceptions` · `searches` · `section_1031_exchange` · `section_363f_prongs` · `security_terms` · `seller_entity_type` · `seller_foreign_person` · `seller_indemnity_cap_pct` · `seller_marginal_tax_rate` · `seller_structure_tax_delta_cents` · `seller_tax_basis_cents` · `seller_tax_delta_cents` · `shareholder_cleansing_vote_pct` · `special_escrows_cents` · `spread_bps` · `state_apportionment_pct` · `state_tax_rate` · `stated_interest_rate` · `step_up_benefit_rate` · `strip_percentage` · `survey_received` · `tangible_assets_cents` · `target_cap_rate` · `tax_characterization` · `taxable_income_cents` · `tenant_payments_cents` · `tenant_pro_rata_pct` · `term_months` · `term_years` · `termination_events` · `thirteen_week_cash_need_cents` · `time_to_recovery_years` · `title_commitment_received` · `toggle_type` · `total_assets_cents` · `total_income_cents` · `tranches` · `transaction_costs` · `transaction_value_cents` · `transfer_assets` · `transfer_date` · `transfer_tax_rate` · `treasury_rate` · `trustee_fee_cents` · `update_frequency_months` · `valuation_cap_cents` · `warrant_coverage_pct`
+`acceleration_triggers` · `actual_nwc_cents` · `afr_rate` · `aggregate_noncontingent_liquidated_debt_cents` · `allowed_claim_cents` · `alta_endorsements_requested` · `amount_realized_cents` · `annual_ground_rent_cents` · `annual_rent_cents` · `assets` · `assignee_fee_cents` · `available_capital_cents` · `base_rate` · `basis_at_conversion_cents` · `basket_pct` · `baskets` · `boot_received_cents` · `breakup_fee_cents` · `bright_line_date` · `bulk_sale_clearance_required` · `buyer_step_up_pv_benefit_cents` · `buyer_will_use_as_residence` · `call_price_pct` · `cap_rate` · `cash_interest_rate` · `circuit` · `claims` · `class_vi_intangibles_cents` · `class_vote_amount_pct` · `class_vote_number_pct` · `classes` · `closing_date` · `closing_day_of_period` · `collateral_value_cents` · `commitment_cents` · `components` · `conditions` · `consideration_mix` · `contributors` · `conversion_date` · `corporate_tax_rate` · `coupon_rate` · `credit_bid_claim_cents` · `creditor_classes` · `curative_items` · `deal_type` · `debt_assumable` · `debts_due_cents` · `deposit_verification_tier` · `discount_pct` · `discount_rate` · `disposition_months` · `disposition_pct` · `dispute_forum` · `distributions_cents` · `earnout_targets` · `earnout_value_cents` · `ebitda_growth_pct` · `economic_life_years` · `effective_gross_income_cents` · `efficient_market_exists` · `efficient_market_rate` · `eligible_ar_cents` · `eligible_inventory_cents` · `engaged_in_commercial_activity` · `entity_carried_basis_cents` · `estate_value_cents` · `estimated_nwc_cents` · `excess_layers` · `exclusions` · `exercise_price_cents` · `exit_leverage` · `face_amount_cents` · `fair_value_assets_cents` · `fair_value_share_price_cents` · `federal_tax_rate` · `fiduciary_out_present` · `fmv_at_conversion_cents` · `fmv_real_property_cents` · `forecast_periods` · `form_8288_b_reduced_withholding_requested` · `fund_nav_cents` · `gain_cents` · `general_buffer_rate` · `general_cap_pct` · `general_reps_months` · `ground_lease_expiry_date` · `guc_recovery_pct` · `installment_receivable_cents` · `interest_inconsequential` · `interest_transferred_pct` · `investment_cents` · `ip_assets` · `ip_intangibles_cents` · `issues` · `jurisdiction` · `last_deposit_date` · `lease_term_years` · `leases` · `lender_policy_required` · `lender_recognition_agreement` · `liabilities_cents` · `licenses` · `lien_amount_cents` · `liquidation_value_cents` · `liquidity_months` · `loan_amount_cents` · `loan_maturity_date` · `market_cap_rate_from_pass_through_source` · `material_ip_categories` · `metrics` · `milestones` · `minimum_dscr` · `minimum_liquidity_cents` · `minimum_participation_pct` · `new_money_minimum_cents` · `new_security_value_cents` · `new_value` · `noi_cents` · `notice_days` · `old_security_value_cents` · `opco_ebitda_cents` · `opening_cash_cents` · `operating_expenses_cents` · `option_pool_pct` · `outstanding_debt_cents` · `participating_debt_cents` · `pca_items` · `pe_owned_target` · `period_days` · `plan_payment_stream_cents` · `policy_tower_pct` · `post_closing_covenants` · `post_default_trading_price` · `pre_money_cents` · `pre_money_share_count` · `priced_round_share_price_cents` · `priming_requested` · `principal_cents` · `prior_bankruptcy_count` · `probabilities` · `professional_fee_carveout_cents` · `projected_cash_flow_cents` · `property_sold_under_363_or_plan` · `pv_lease_payments_cents` · `real_estate_assets_cents` · `real_estate_income_cents` · `real_property_value_cents` · `recognized_gain_cents` · `recourse` · `recoverable_expenses_cents` · `release_triggers` · `relinquished_property_value_cents` · `remaining_years` · `rent_roll` · `replacement_property_value_cents` · `replacement_reserve_cents` · `required_capital_cents` · `required_cushion_pct` · `reserves_cents` · `residual_value_pct` · `retention_pct` · `rev_proc_2011_29_safe_harbor_elected` · `risk_premium` · `rollup_amount_cents` · `round_size_cents` · `rwi_present` · `sale_costs_cents` · `sale_date` · `sale_price_cents` · `sales_use_tax_base_cents` · `sales_use_tax_rate` · `schedule_b_exceptions` · `searches` · `section_1031_exchange` · `section_363f_prongs` · `security_terms` · `seller_entity_type` · `seller_foreign_person` · `seller_indemnity_cap_pct` · `seller_marginal_tax_rate` · `seller_structure_tax_delta_cents` · `seller_tax_basis_cents` · `seller_tax_delta_cents` · `special_escrows_cents` · `spread_bps` · `state_apportionment_pct` · `state_tax_rate` · `stated_interest_rate` · `step_up_benefit_rate` · `strip_percentage` · `survey_received` · `tangible_assets_cents` · `target_cap_rate` · `tax_characterization` · `taxable_income_cents` · `tenant_payments_cents` · `tenant_pro_rata_pct` · `term_months` · `term_years` · `termination_events` · `thirteen_week_cash_need_cents` · `time_to_recovery_years` · `title_commitment_received` · `toggle_type` · `total_assets_cents` · `total_income_cents` · `tranches` · `transaction_costs` · `transaction_value_cents` · `transfer_assets` · `transfer_date` · `transfer_tax_rate` · `treasury_rate` · `trustee_fee_cents` · `update_frequency_months` · `valuation_cap_cents` · `warrant_coverage_pct`
 
 
 ---
@@ -934,7 +1012,7 @@ _No numeric constants — this model computes from supplied facts and cited rule
 }
 ```
 
-Precision: peg_cents rounds half-up to the nearest integer cent; low/high/observed_months are exact.
+Precision: All outputs are exact integer cents or counts (see the Conventions chapter); peg_cents is the mean rounded to the nearest integer cent.
 
 ## 7. Error semantics
 
@@ -1406,14 +1484,14 @@ Given `purchase_price_cents`, `cash_flow_cents` (post-acquisition free cash flow
 ```json
 {
   "buyer_equity_pct": 0.125,
-  "dscr": 1.67,
+  "dscr": 1.6667,
   "meets_sba_equity_floor": true,
   "meets_sba_dscr_floor": true,
   "max_7a_loan_cents": 500000000
 }
 ```
 
-Precision: buyer_equity_pct rounds half-up to 4 decimals; dscr rounds half-up to 2 decimals; max_7a_loan_cents is exact integer cents.
+Precision: Rates and ratios follow the global precision rule (half-even to 4 decimals at the output boundary — see the Conventions chapter): buyer_equity_pct and dscr are 4-decimal; max_7a_loan_cents is exact integer cents.
 
 ## 7. Error semantics
 
@@ -1690,7 +1768,7 @@ Given `enterprise_value_cents` (the size of the transaction being tested):
 }
 ```
 
-Precision: All values are exact integer cents; no rounding.
+Precision: All values are exact integer cents (see the Conventions chapter); no rounding.
 
 ## 7. Error semantics
 
@@ -1915,42 +1993,47 @@ Reserved slot — allocated in the specification's numbering; contents to be spe
 **Gates:** G15
 **Deal contexts:** asset purchase
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Class I through VII residual allocation.
+Computes the residual-method allocation of an asset-deal purchase price across the seven asset classes of §1060, cascading each dollar down the class ordering and dropping the residual into Class VII goodwill. It answers, for a buyer and seller papering an asset purchase, "how does this price split across the classes that drive the buyer's depreciation and amortization and the parties' consistent Form 8594?" It allocates from supplied fair market values only; the values themselves and their class assignments are the advisors' calls.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M139.schema.json`](M139.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `asset_classes` | object[] | MUST |
-| `purchase_price_cents` | integer (cents) | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `asset_classes` | object[] | MUST | The asset classes with fair market values; each object carries `class_number` (1–7), `class_name` (string), and `fair_market_value_cents` (integer cents). |
+| `purchase_price_cents` | integer (cents) | MUST | Total consideration to be allocated across the asset classes. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `allocated_cents` | integer (cents) |
-| `allocations` | object[] |
-| `class_v_tangible_cents` | integer (cents) |
-| `class_vi_section_197_intangibles_cents` | integer (cents) |
-| `class_vii_goodwill_cents` | integer (cents) |
-| `purchase_price_cents` | integer (cents) |
-| `unallocated_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `purchase_price_cents` | integer (cents) | The price allocated, echoed. |
+| `allocated_cents` | integer (cents) | Total amount allocated across the classes. |
+| `unallocated_cents` | integer (cents) | Non-negative residual when supplied fair market values exceed the price (normally zero). |
+| `class_v_tangible_cents` | integer (cents) | Amount allocated to Class V tangible/§1231 assets. |
+| `class_vi_section_197_intangibles_cents` | integer (cents) | Amount allocated to Class VI §197 intangibles (excluding goodwill). |
+| `class_vii_goodwill_cents` | integer (cents) | Residual allocated to Class VII goodwill and going-concern value. |
+| `allocations` | object[] | Per-class schedule: `{ class_number, class_name, fair_market_value_cents, allocated_cents, capped_at_fmv }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Class I through VII residual allocation.
-
-Allocates purchase price across Class I through VII using residual-method ordering and Form 8594-ready class output.
+Given `purchase_price_cents` and `asset_classes` (a list of `{ class_number, class_name, fair_market_value_cents }`):
+1. If either is missing or `asset_classes` is empty, the implementation SHALL return `status: "needs_inputs"` naming the missing fields.
+2. It SHALL sort the asset classes by class number ascending (Class I → Class VII), per the residual-method ordering (constants: §1060 seven-class ordering).
+3. It SHALL initialize a running remainder equal to `purchase_price_cents` and, for each class in order, allocate: for Classes I–VI, the lesser of the remainder and that class's fair market value (capped at FMV); for Class VII, the entire remaining amount (the residual). It SHALL subtract each allocation from the remainder.
+4. `allocated_cents` SHALL be the sum of all class allocations; `unallocated_cents` SHALL be the non-negative remainder (nonzero only when supplied FMVs exceed the price).
+5. It SHALL report the Class V (tangible), Class VI (§197 intangibles), and Class VII (goodwill and going concern) subtotals and the full per-class allocation schedule.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| §1060 seven-class ordering | Classes I (cash) → II (marketable securities) → III (A/R and mark-to-market) → IV (inventory) → V (other tangible/§1231) → VI (§197 intangibles ex-goodwill) → VII (goodwill and going-concern value) | table (jurisdictional) | Treas. Reg. § 1.1060-1(c); § 1.338-6(b) | § 1.338-6(b)(2) (seven-class residual method) | current (Treas. Reg. as amended) | on Treasury amendment |
 
 
 **Authorities**
@@ -1962,65 +2045,82 @@ Allocates purchase price across Class I through VII using residual-method orderi
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.TAX.1060.001` — *1060 allocation applies residual method through Class VII*.
+*A $10M asset purchase carries $500k of cash, $2M of equipment, and $1.5M of identified customer relationships; the residual method drops the remaining $6M into Class VII goodwill.*
 
 **Inputs**
 
 ```json
 {
-  "purchase_price_cents": 1000000,
+  "purchase_price_cents": 1000000000,
   "asset_classes": [
     {
-      "class_name": "Class V real property and equipment",
-      "fair_market_value_cents": 600000
+      "class_number": 1,
+      "class_name": "Cash",
+      "fair_market_value_cents": 50000000
     },
     {
-      "class_name": "Class VI customer intangibles",
-      "fair_market_value_cents": 300000
+      "class_number": 5,
+      "class_name": "Equipment",
+      "fair_market_value_cents": 200000000
     },
     {
-      "class_name": "Class VII goodwill",
+      "class_number": 6,
+      "class_name": "Customer relationships (§197)",
+      "fair_market_value_cents": 150000000
+    },
+    {
+      "class_number": 7,
+      "class_name": "Goodwill",
       "fair_market_value_cents": 0
     }
   ]
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.TAX.1060.ALLOCATION.v1`)**
 
 ```json
 {
-  "purchase_price_cents": 1000000,
-  "allocated_cents": 1000000,
+  "purchase_price_cents": 1000000000,
+  "allocated_cents": 1000000000,
   "unallocated_cents": 0,
-  "class_v_tangible_cents": 600000,
-  "class_vi_section_197_intangibles_cents": 300000,
-  "class_vii_goodwill_cents": 100000,
+  "class_v_tangible_cents": 200000000,
+  "class_vi_section_197_intangibles_cents": 150000000,
+  "class_vii_goodwill_cents": 600000000,
   "allocations": [
     {
+      "class_number": 1,
+      "class_name": "Cash",
+      "fair_market_value_cents": 50000000,
+      "allocated_cents": 50000000,
+      "capped_at_fmv": true
+    },
+    {
       "class_number": 5,
-      "class_name": "Class V real property and equipment",
-      "fair_market_value_cents": 600000,
-      "allocated_cents": 600000,
+      "class_name": "Equipment",
+      "fair_market_value_cents": 200000000,
+      "allocated_cents": 200000000,
       "capped_at_fmv": true
     },
     {
       "class_number": 6,
-      "class_name": "Class VI customer intangibles",
-      "fair_market_value_cents": 300000,
-      "allocated_cents": 300000,
+      "class_name": "Customer relationships (§197)",
+      "fair_market_value_cents": 150000000,
+      "allocated_cents": 150000000,
       "capped_at_fmv": true
     },
     {
       "class_number": 7,
-      "class_name": "Class VII goodwill",
+      "class_name": "Goodwill",
       "fair_market_value_cents": 0,
-      "allocated_cents": 100000,
+      "allocated_cents": 600000000,
       "capped_at_fmv": false
     }
   ]
 }
 ```
+
+Precision: All allocations are exact integer cents (see the Conventions chapter); no rounding.
 
 ## 7. Error semantics
 
@@ -2029,7 +2129,7 @@ Conformance case `CONF.MODEL.TAX.1060.001` — *1060 allocation applies residual
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model computes the residual-method allocation of purchase price across the seven asset classes from supplied fair market values. Whether a given asset belongs in a given class, whether the supplied fair market values are supportable, and the binding Form 8594 positions the parties will file are determinations for the parties' tax advisors; the model computes the allocation the supplied values imply and renders no valuation or classification opinion.
 
 ## 9. Conformance bindings
 
@@ -5761,46 +5861,54 @@ Reference binding `MODEL.FINANCE.COVENANT_BASKETS.v1` · entered the specificati
 **Gates:** G15
 **Deal contexts:** M&A executive compensation
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Three-times base amount, excise-tax, deduction, and cleansing-vote math.
+Computes the §280G golden-parachute analysis for a change-in-control payment: the three-times-base-amount threshold, whether it is crossed, the excess parachute payment, the 20% §4999 excise tax, the employer's lost deduction, and whether a shareholder cleansing vote clears the disinterested-holder bar. It answers, for a deal team sizing executive change-in-control cost, "does this package trip §280G, and what does it cost if it does?" It computes the arithmetic from supplied figures; the parachute-payment characterization and the vote mechanics are counsel's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M185.schema.json`](M185.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `base_amount_cents` | integer (cents) | MUST |
-| `parachute_payments_cents` | integer (cents) | MUST |
-| `shareholder_cleansing_vote_pct` | number | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `base_amount_cents` | integer (cents) | MUST | The executive's §280G base amount (five-year average W-2 compensation). |
+| `parachute_payments_cents` | integer (cents) | MUST | Aggregate contingent-on-change-in-control payments to the executive. |
+| `shareholder_cleansing_vote_pct` | number | MAY | Fraction of disinterested shareholders approving the payments (0–1); optional. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `base_amount_cents` | integer (cents) |
-| `cleansing_vote_passed` | boolean |
-| `cleansing_vote_threshold_pct` | number |
-| `excess_parachute_payment_cents` | integer (cents) |
-| `excise_tax_20pct_cents` | integer (cents) |
-| `lost_employer_deduction_cents` | integer (cents) |
-| `parachute_payments_cents` | integer (cents) |
-| `section_280g_triggered` | boolean |
-| `shareholder_cleansing_vote_pct` | number |
-| `three_times_base_threshold_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `base_amount_cents` | integer (cents) | The base amount, echoed. |
+| `parachute_payments_cents` | integer (cents) | The parachute payments, echoed. |
+| `three_times_base_threshold_cents` | integer (cents) | The three-times-base-amount safe-harbor threshold. |
+| `section_280g_triggered` | boolean | Whether the payments meet or exceed three times the base amount. |
+| `excess_parachute_payment_cents` | integer (cents) | The excess parachute payment (payments over one times base) when triggered, else 0. |
+| `excise_tax_20pct_cents` | integer (cents) | The §4999 excise tax on the excess (20%). |
+| `lost_employer_deduction_cents` | integer (cents) | The employer deduction disallowed under §280G (equal to the excess). |
+| `shareholder_cleansing_vote_pct` | number | null | The supplied cleansing-vote fraction, echoed, or null. |
+| `cleansing_vote_threshold_pct` | number | The disinterested-shareholder approval threshold (0.75). |
+| `cleansing_vote_passed` | boolean | null | Whether the supplied vote exceeds the threshold, or null when no vote is supplied. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Three-times base amount, excise-tax, deduction, and cleansing-vote math.
-
-Computes three-times-base trigger, excess parachute payment, 20 percent excise tax, lost deduction, and shareholder-cleansing threshold.
+Given `base_amount_cents`, `parachute_payments_cents`, and optional `shareholder_cleansing_vote_pct`:
+1. If either required cents input is missing, the implementation SHALL return `status: "needs_inputs"`.
+2. `three_times_base_threshold_cents` SHALL be `base_amount_cents × 3` (constants: §280G three-times-base multiple).
+3. `section_280g_triggered` SHALL be true iff `parachute_payments_cents ≥ three_times_base_threshold_cents`.
+4. `excess_parachute_payment_cents` SHALL be `max(0, parachute_payments_cents − base_amount_cents)` when triggered, else 0 (the excess is measured against one times base, not three).
+5. `excise_tax_20pct_cents` SHALL be the excess times the §4999 excise rate, rounded to the nearest cent (constants: §4999 excise-tax rate); `lost_employer_deduction_cents` SHALL equal the excess (§280G disallows the employer deduction for the excess).
+6. When a cleansing-vote percentage is supplied, `cleansing_vote_passed` SHALL be true iff it exceeds the disinterested-shareholder threshold (constants: §280G cleansing-vote threshold); when absent it SHALL be null.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| §280G three-times-base multiple | 3× | MUST (binding) | IRC § 280G(b)(2)(A)(ii) | § 280G(b)(2)(A)(ii) | current (IRC as amended) | on IRC amendment |
+| §4999 excise-tax rate | 20% | MUST (binding) | IRC § 4999(a) | § 4999(a) | current (IRC as amended) | on IRC amendment |
+| §280G cleansing-vote threshold | more than 75% of disinterested shareholders | MUST (binding) | IRC § 280G(b)(5); Treas. Reg. § 1.280G-1 | Q&A-7 (more-than-75% disinterested approval) | current (Treas. Reg. as amended) | on Treasury amendment |
 
 
 **Authorities**
@@ -5811,34 +5919,36 @@ Computes three-times-base trigger, excess parachute payment, 20 percent excise t
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.TAX.280G.001` — *280G model computes trigger, excess payment, excise tax, and cleansing vote*.
+*An executive with an $800k base amount is set to receive $3.0M on the sale; the package clears three times base, creating a $2.2M excess parachute payment and a $440k excise tax.*
 
 **Inputs**
 
 ```json
 {
-  "base_amount_cents": 1000000,
-  "parachute_payments_cents": 3500000,
-  "shareholder_cleansing_vote_pct": 0.8
+  "base_amount_cents": 80000000,
+  "parachute_payments_cents": 300000000,
+  "shareholder_cleansing_vote_pct": 0.9
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.TAX.280G.PARACHUTE.v1`)**
 
 ```json
 {
-  "base_amount_cents": 1000000,
-  "parachute_payments_cents": 3500000,
-  "three_times_base_threshold_cents": 3000000,
+  "base_amount_cents": 80000000,
+  "parachute_payments_cents": 300000000,
+  "three_times_base_threshold_cents": 240000000,
   "section_280g_triggered": true,
-  "excess_parachute_payment_cents": 2500000,
-  "excise_tax_20pct_cents": 500000,
-  "lost_employer_deduction_cents": 2500000,
-  "shareholder_cleansing_vote_pct": 0.8,
+  "excess_parachute_payment_cents": 220000000,
+  "excise_tax_20pct_cents": 44000000,
+  "lost_employer_deduction_cents": 220000000,
+  "shareholder_cleansing_vote_pct": 0.9,
   "cleansing_vote_threshold_pct": 0.75,
   "cleansing_vote_passed": true
 }
 ```
+
+Precision: Monetary values are exact integer cents (see the Conventions chapter); the excise tax is the excess times 20% rounded to the nearest cent; vote percentages are fractions on a 0–1 scale.
 
 ## 7. Error semantics
 
@@ -5847,7 +5957,7 @@ Conformance case `CONF.MODEL.TAX.280G.001` — *280G model computes trigger, exc
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model computes the §280G three-times-base threshold, the excess parachute payment, the §4999 excise tax, and the lost employer deduction from supplied figures, and screens the cleansing-vote percentage. Whether a payment is a parachute payment, the reasonable-compensation offset that can reduce the excess, and the availability and mechanics of the shareholder cleansing vote are determinations for tax counsel; the model computes the arithmetic and renders no §280G opinion.
 
 ## 9. Conformance bindings
 
@@ -5865,41 +5975,46 @@ Reference binding `MODEL.TAX.280G.PARACHUTE.v1` · entered the specification at 
 **Gates:** G15
 **Deal contexts:** NOL target
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Long-term tax-exempt rate times loss-corporation value.
+Computes the annual §382 limitation on a loss corporation's pre-change net operating losses — the loss-corporation equity value times the IRS long-term tax-exempt rate — and, given an NOL balance, the approximate number of years to absorb it. It answers, for a buyer valuing a target's carryforwards, "after the ownership change, how much of the NOL can be used each year?" It computes the base limitation from supplied figures; whether an ownership change occurred and the value and adjustments that feed the limitation are counsel's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M186.schema.json`](M186.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `long_term_tax_exempt_rate` | number | MUST |
-| `loss_corporation_value_cents` | integer (cents) | MUST |
-| `nol_carryforward_cents` | integer (cents) | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `long_term_tax_exempt_rate` | number | MUST | The IRS long-term tax-exempt rate for the change month (a fraction, e.g. 0.0435); supplied at runtime. |
+| `loss_corporation_value_cents` | integer (cents) | MUST | The equity value of the loss corporation immediately before the ownership change (§382(e)). |
+| `nol_carryforward_cents` | integer (cents) | MAY | The pre-change NOL carryforward balance; optional, drives the years-to-absorb estimate. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `annual_section_382_limitation_cents` | integer (cents) |
-| `estimated_years_to_use_nol` | integer |
-| `long_term_tax_exempt_rate` | number |
-| `loss_corporation_value_cents` | integer (cents) |
-| `nol_carryforward_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `loss_corporation_value_cents` | integer (cents) | The loss-corporation value, echoed. |
+| `long_term_tax_exempt_rate` | number | The long-term tax-exempt rate used, at four decimals. |
+| `annual_section_382_limitation_cents` | integer (cents) | The annual §382 limitation on pre-change NOL use. |
+| `nol_carryforward_cents` | integer (cents) | null | The NOL balance, echoed, or null when not supplied. |
+| `estimated_years_to_use_nol` | integer | null | Whole-year ceiling to absorb the NOL at the annual limitation, or null. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Long-term tax-exempt rate times loss-corporation value.
-
-Computes annual Section 382 limitation as loss-corporation value times the long-term tax-exempt rate.
+Given `loss_corporation_value_cents` and `long_term_tax_exempt_rate`, and optional `nol_carryforward_cents`:
+1. If either required input is missing, the implementation SHALL return `status: "needs_inputs"`.
+2. `annual_section_382_limitation_cents` SHALL be `loss_corporation_value_cents × long_term_tax_exempt_rate`, rounded to the nearest cent (the §382(b)(1) base limitation).
+3. `long_term_tax_exempt_rate` SHALL be echoed rounded to four decimals (see the Conventions chapter); the rate is a supplied pass-through value (the IRS publishes it monthly).
+4. When `nol_carryforward_cents` is supplied and the annual limitation is positive, `estimated_years_to_use_nol` SHALL be the NOL balance divided by the annual limitation, rounded up to the next whole year; otherwise null.
+5. The model computes the base limitation only; it SHALL NOT determine whether a §382 ownership change occurred, nor apply built-in gain/loss (§382(h)) or continuity-of-business adjustments.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| IRS long-term tax-exempt rate | supplied at runtime (IRS publishes monthly under §382(f)) | pass-through (live data) | IRC § 382(f); IRS monthly §382 rate release | § 382(f) | monthly | monthly (per IRS release) |
 
 
 **Authorities**
@@ -5910,29 +6025,31 @@ Computes annual Section 382 limitation as loss-corporation value times the long-
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.TAX.382.001` — *382 model computes annual NOL limitation and estimated use period*.
+*A target worth $50M undergoes an ownership change when the long-term tax-exempt rate is 4.35%; roughly $2.175M of the pre-change NOL becomes usable each year, absorbing a $10M carryforward over five years.*
 
 **Inputs**
 
 ```json
 {
-  "loss_corporation_value_cents": 100000000,
-  "long_term_tax_exempt_rate": 0.04,
-  "nol_carryforward_cents": 10000000
+  "loss_corporation_value_cents": 5000000000,
+  "long_term_tax_exempt_rate": 0.0435,
+  "nol_carryforward_cents": 1000000000
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.TAX.382.NOL_LIMIT.v1`)**
 
 ```json
 {
-  "loss_corporation_value_cents": 100000000,
-  "long_term_tax_exempt_rate": 0.04,
-  "annual_section_382_limitation_cents": 4000000,
-  "nol_carryforward_cents": 10000000,
-  "estimated_years_to_use_nol": 3
+  "loss_corporation_value_cents": 5000000000,
+  "long_term_tax_exempt_rate": 0.0435,
+  "annual_section_382_limitation_cents": 217500000,
+  "nol_carryforward_cents": 1000000000,
+  "estimated_years_to_use_nol": 5
 }
 ```
+
+Precision: The limitation is exact integer cents; the long-term tax-exempt rate echoes at four decimals; years-to-absorb is a whole-year ceiling (see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -5941,7 +6058,7 @@ Conformance case `CONF.MODEL.TAX.382.001` — *382 model computes annual NOL lim
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model computes the annual §382 limitation as the loss-corporation value times the supplied long-term tax-exempt rate. Whether an ownership change has in fact occurred under §382(g), the correct loss-corporation value, the §382(h) built-in gain/loss adjustments, and the continuity-of-business-enterprise requirement are determinations for tax counsel; the model computes the base limitation and renders no §382 opinion.
 
 ## 9. Conformance bindings
 
@@ -11768,9 +11885,9 @@ Given `pmsi`, `fixture_filing_made`, and `prior_recorded_real_property_interest`
 
 | Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
 |---|---|---|---|---|---|---|
-| UCC § 9-334(d) 20-day window | 20 days after affixation | MUST (binding) | U.C.C. § 9-334(d) | § 9-334(d) | — | — |
-| UCC § 9-334(h) construction-mortgage override | construction mortgage primes a fixture interest arising during construction | MUST (binding) | U.C.C. § 9-334(h) | § 9-334(h) | — | — |
-| UCC § 9-334(c) default | the conflicting real-property interest prevails absent a qualifying exception | MUST (binding) | U.C.C. § 9-334(c) | § 9-334(c) | — | — |
+| UCC § 9-334(d) 20-day window | 20 days after affixation | MUST (binding) | U.C.C. § 9-334(d) | § 9-334(d) | U.C.C. Article 9 (2010 revision), current | on uniform-act amendment |
+| UCC § 9-334(h) construction-mortgage override | construction mortgage primes a fixture interest arising during construction | MUST (binding) | U.C.C. § 9-334(h) | § 9-334(h) | U.C.C. Article 9 (2010 revision), current | on uniform-act amendment |
+| UCC § 9-334(c) default | the conflicting real-property interest prevails absent a qualifying exception | MUST (binding) | U.C.C. § 9-334(c) | § 9-334(c) | U.C.C. Article 9 (2010 revision), current | on uniform-act amendment |
 
 
 **Authorities**
