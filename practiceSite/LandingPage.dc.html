@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Landing page" description="Full smbX landing — hero engine, dark proof band, how it works, sample read, who it's for, whose-side band, CTA, footer" -->
+<helmet>
+<script src="./ds-base.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>html,body{margin:0;padding:0}button{font:inherit;cursor:pointer}img{max-width:100%}</style>
+</helmet>
+<div class="pd"><div class="pd-ambient" aria-hidden="true"></div>
+<header class="pd-navwrap {{ navCls }}"><div class="pd-nav">
+  <a href="#top"><img src="../../assets/logo-coral-x.png" alt="smbX.ai" class="pd-nav-logo"></a>
+  <nav class="pd-nav-links"><a href="#why">Why us</a><a href="#how">How it works</a><a href="#sectors">Industries</a><a href="#who">Who it's for</a></nav>
+  <div class="pd-nav-ctas"><a class="pd-pill pd-nav-book" href="#cta">Confidential consultation</a><a class="pd-pill-primary" href="#yulia">Build your market map</a></div>
+</div></header>
+<section class="pd-hero pd-hero-c pd-hero-fold" id="top" style="justify-content:center">
+  <sc-if value="{{ meshOn }}" hint-placeholder-val="{{ true }}"><div class="pd-heromesh" aria-hidden="true"></div></sc-if>
+  <div class="pd-heroc-inner">
+    <h1 class="pd-h1">We'll build and run your business acquisition strategy tailored to your&nbsp;goals.</h1>
+    <p class="pd-sub pd-sub-c">Institutional-grade corporate development, on demand.</p>
+  </div>
+  <div class="pd-showcase"><div class="pd-show-stage"><div class="pd-chat-zone {{ zoneCls }}" id="yulia">
+    <div class="pd-chat-hero">
+      <div class="pd-herobar">
+        <input placeholder="Sector &amp; Strategy — &quot;HVAC roll-up in the Southeast&quot;" aria-label="Describe your acquisition criteria" value="{{ draft }}" onChange="{{ onDraft }}" onKeyDown="{{ onKey }}">
+        <button type="button" class="pd-send" onClick="{{ onSend }}">Continue</button>
+      </div>
+      <div class="pd-chips">
+        <sc-for list="{{ chips }}" as="chip" hint-placeholder-count="4">
+          <button type="button" class="pd-chip" onClick="{{ chip.go }}">{{ chip.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+    <div class="pd-chat-scrim {{ scrimCls }}" onClick="{{ onClose }}"></div>
+    <div class="pd-chat enter {{ chatCls }}">
+      <div class="pd-chat-head"><span class="pd-chat-grab"></span><img src="../../assets/logo-coral-x.png" alt="smbX.ai" style="height:28px;width:auto;display:block"><div class="pd-chat-title">Acquisition Engine</div><button type="button" class="pd-chat-min" onClick="{{ onClose }}" aria-label="Minimize">–</button></div>
+      <div class="pd-msgs">
+        <sc-for list="{{ turns }}" as="turn" hint-placeholder-count="1">
+          <div class="pd-msgrow"><div class="{{ turn.cls }}">{{ turn.text }}</div></div>
+        </sc-for>
+        <sc-if value="{{ working }}" hint-placeholder-val="{{ false }}"><div class="pd-msgrow"><div class="pd-working">{{ workingText }}</div></div></sc-if>
+        <sc-if value="{{ showMap }}" hint-placeholder-val="{{ false }}">
+          <div class="pd-map">
+            <div class="map-head"><img src="../../assets/logo-coral-x.png" alt="smbX.ai" style="height:22px;width:auto;display:block"><span class="map-label">PRELIMINARY READ</span></div>
+            <div class="map-title">HVAC — Southeast roll-up</div>
+            <div class="map-thesis">HVAC services · GA, NC, SC, TN · $2–5M EBITDA · commercial mix</div>
+            <div class="map-funnel"><div class="k">THE UNIVERSE</div>
+              <div class="map-step"><div class="n">~3,100</div><div class="l">HVAC operators in the four-state footprint</div></div>
+              <div class="map-step"><div class="n">~220</div><div class="l">in your size band</div></div>
+              <div class="map-step"><div class="n">~60</div><div class="l">with service-contract mix above 50% — the ones actually worth your time</div></div>
+            </div>
+            <div class="map-insight"><div class="k">WHAT MOST BUYERS MISS</div>
+              <div class="v">Maintenance-agreement density predicts retention better than revenue does. Most buyers underwrite trailing EBITDA and ignore the contract book — then overpay for install-heavy shops that reset to zero every January.</div>
+            </div>
+            <div class="map-foot"><div class="src">Preliminary sample — the full read covers ownership age, consolidation activity, and entry paths.</div>
+              <button type="button" class="map-pdf">Book the walkthrough</button></div>
+          </div>
+        </sc-if>
+      </div>
+      <div class="pd-chat-inputrow">
+        <input class="pd-chat-input" placeholder="Add detail — or ask the engine anything" value="{{ draft }}" onChange="{{ onDraft }}" onKeyDown="{{ onKey }}">
+        <button type="button" class="pd-send" onClick="{{ onSend }}">Continue</button>
+      </div>
+    </div>
+  </div></div></div>
+  <div class="pd-hero-below">
+    <a class="pd-samplelink" href="#cta">Or book a call instead</a>
+    <span style="color:var(--pd-faint)">·</span>
+    <a class="pd-samplelink" href="#sample">See a sample read →</a>
+  </div>
+</section>
+<section class="pd-dark bl-tr" id="proof">
+  <span class="pd-spark" aria-hidden="true"></span>
+  <div class="pd-wrap pd-dark-pad">
+    <div class="pd-mono" data-rv="" style="letter-spacing:0.1em;text-transform:uppercase;color:var(--pd-tert);text-align:center">Two decades on the buy side</div>
+    <div class="pd-stats rv-stagger" data-rv="" data-countup="" style="margin-top:clamp(32px,3.8vw,54px)">
+      <div class="pd-stat"><div class="n">150+</div><div class="l">Acquisitions closed</div></div>
+      <div class="pd-stat"><div class="n">$5B+</div><div class="l">Enterprise value added</div></div>
+      <div class="pd-stat"><div class="n">~$21B</div><div class="l">Transactions touched</div></div>
+      <div class="pd-stat accent"><div class="n">0</div><div class="l">Sell-side engagements. Ever.</div></div>
+    </div>
+  </div>
+</section>
+<section class="pd-section pd-accent al" id="why" data-screen-label="Why us"><div class="pd-wrap">
+  <div class="pd-sechead" data-rv="">
+    <div class="pd-seclabel">Why us</div>
+    <h2 class="pd-h2">The machine serial acquirers build in-house. Yours, without the headcount.</h2>
+    <p class="pd-sub" style="margin:22px auto 0">You already know what you want to buy. The question is who runs the hunt — a team you'd spend a year hiring, a bank with a seller's habits, or us. Here's the case.</p>
+  </div>
+  <div class="pd-whygrid rv-stagger" data-rv="">
+    <details class="pd-why"><summary><div class="ix">01</div><div class="nm">An acquisition machine, not a broker</div><div class="bd">The buyers who outperform treat acquisition as a repeatable capability, not an event. We stand that capability up for you — thesis, pipeline, cadence, close — and run it end to end.</div><span class="more"><span class="lb-more">THE EVIDENCE</span><span class="lb-less">CLOSE</span></span></summary>
+      <div class="xp"><p>McKinsey's two-decade study of the Global 2,000 finds <strong>programmatic acquirers — two or more deals a year — outperform their peers by roughly 20% in total shareholder return over ten years</strong>, with the lowest variance of any strategy. Bain's parallel finding: frequent acquirers now beat inactive peers by about 130%.</p><p>The edge isn't a golden deal. It's the system — a thesis tied to strategy, a governed pipeline with stage gates, a weekly cadence, and integration planned before close. That's what we install and run under your name.</p></div>
+    </details>
+    <details class="pd-why"><summary><div class="ix">02</div><div class="nm">A target universe in days, not weeks</div><div class="bd">Our AI stack compresses an analyst pod's month of market mapping into days of a senior operator's supervised work. You see the whole market before most teams finish staffing.</div><span class="more"><span class="lb-more">HOW</span><span class="lb-less">CLOSE</span></span></summary>
+      <div class="xp"><p>A market map that took an analyst pod two to four weeks now takes hours: AI search across <strong>12M+ private companies</strong>, scored against your buy box. In one McKinsey-documented case, a corp-dev team scored <strong>500+ targets in under a day</strong> — and closed three acquisitions within months.</p><p>Across the industry, executives using these tools report roughly 20% lower deal costs, and 40% report cycles running 30–50% faster. Same class of stack here — every output reviewed by the operator before it reaches you.</p></div>
+    </details>
+    <details class="pd-why"><summary><div class="ix">03</div><div class="nm">Off-market deals, at better prices</div><div class="bd">We reach owners who were never for sale — directly, quietly, under your name. Proprietary deals skip the auction, and they price like it.</div><span class="more"><span class="lb-more">THE MATH</span><span class="lb-less">CLOSE</span></span></summary>
+      <div class="xp"><p>We run the outreach engine top-quartile buyers run: multi-channel, five to twelve touches per owner over months, under your brand — so the owner sees a serious buyer, not a campaign. Most of the deals we work were never listed anywhere.</p><p>The industry rule of thumb — corroborated across sources, and honest as a rule of thumb — is that <strong>owner-direct deals price half a turn to two turns of EBITDA below auctioned ones</strong>. Proprietary sourcing widens the funnel and lowers the entry price at the same time.</p></div>
+    </details>
+    <details class="pd-why"><summary><div class="ix">04</div><div class="nm">Senior-only. No junior hand-off.</div><div class="bd">At a bank, a senior wins the mandate and juniors execute. Here, every deal is worked by the operator who closed the 150. The AI replaces the analyst pod — never the judgment.</div><span class="more"><span class="lb-more">WHAT THAT MEANS</span><span class="lb-less">CLOSE</span></span></summary>
+      <div class="xp"><p>Corp-dev teams have always farmed the grunt work out to junior pods. AI now does that layer faster and more thoroughly — market maps, first-pass models, CIM triage, diligence extraction, memo drafts.</p><p>What can't be automated — the thesis, the negotiation, reading a seller across the table — is exactly what you're hiring. Every call, every model review, every LOI: the same senior operator, on every deal.</p></div>
+    </details>
+    <details class="pd-why"><summary><div class="ix">05</div><div class="nm">Buy-side only. One client per target.</div><div class="bd">No sell-side conflicts, no target shopped to two buyers, no success-fee incentive to push a bad deal across the line. Structurally on your side.</div><span class="more"><span class="lb-more">WHY IT MATTERS</span><span class="lb-less">CLOSE</span></span></summary>
+      <div class="xp"><p>Most advisors work both sides of the market, and a success fee pays the same whether the deal was good for you or merely closed. Those incentives leak into every recommendation.</p><p>We've never taken a sell-side engagement, and while we hunt a lane for you we don't hunt it for anyone else. <strong>When we tell you to walk, walking costs us.</strong> That's the point.</p></div>
+    </details>
+    <details class="pd-why"><summary><div class="ix">06</div><div class="nm">A fraction of the cost of in-house</div><div class="bd">An in-house corp-dev function runs $500K–$1M a year and takes a year to build. We deliver the whole function for a fraction of that — buy-side focused, where most banks live on the sell side.</div><span class="more"><span class="lb-more">THE COMPARISON</span><span class="lb-less">CLOSE</span></span></summary>
+      <div class="xp"><p>In-house corp dev runs <strong>$500K–$1M+ a year fully loaded</strong> — before the year it takes to hire and ramp. And most banks are built for the sell side; running a buy-side search is a different job, and rarely their first love.</p><p>The modern tooling that replaces the junior pod costs less than one analyst's salary. Those unit economics are the engine of this model — and they're priced into what you pay us.</p></div>
+    </details>
+  </div>
+  <div class="pd-why-close" data-rv="">
+    <p class="pd-body">And it compounds — every engagement sharpens the thesis, the scorecards, and the playbook the next one runs on.</p>
+    <a class="pd-link" href="#how" style="display:inline-block;margin-top:22px">See how the machine runs →</a>
+  </div>
+</div></section>
+<section class="pd-section pd-accent ar" id="how"><div class="pd-wrap">
+  <div class="pd-sechead" data-rv="">
+    <div class="pd-seclabel">How it works</div>
+    <h2 class="pd-h2">Buying a company is a hundred small decisions. We handle the ones that don't need you.</h2>
+    <p class="pd-sub" style="margin:22px auto 0">A good acquisition isn't a single moment — it's months of work, in the right order, usually against someone who does this for a living. Here's what the job actually involves. You make the calls that matter. We do the rest.</p>
+  </div>
+  <div class="pd-phases rv-stagger" data-rv="">
+    <details class="pd-phase"><summary><div class="no">01</div><div><div class="ph">Thesis</div><div class="t">We turn "I want to buy something" into a plan you can act on.</div></div><div class="tog">+</div></summary>
+      <div class="bd">We turn "I want to buy something" into a plan you can act on — the sector, size, and economics worth your time, and the deal-breakers that aren't. If the thing you're chasing isn't buyable in today's market, we'll say so early, and point you somewhere better.</div>
+    </details>
+    <details class="pd-phase"><summary><div class="no">02</div><div><div class="ph">Sourcing</div><div class="t">We find the owners who aren't looking to sell.</div></div><div class="tog">+</div></summary>
+      <div class="bd">We map the market, narrow it to the companies worth a call, and reach them directly and quietly, under your name. Most of the deals we work were never listed anywhere.</div>
+    </details>
+    <details class="pd-phase"><summary><div class="no">03</div><div><div class="ph">Evaluation</div><div class="t">We tell you what a business is really worth, and whether to walk.</div></div><div class="tog">+</div></summary>
+      <div class="bd">We rebuild the financials, test the add-backs the seller's advisor put in, and find the things that don't show up in a pitch — customer concentration, owner dependence, the maintenance nobody mentioned.</div>
+    </details>
+    <details class="pd-phase"><summary><div class="no">04</div><div><div class="ph">Structure &amp; offer</div><div class="t">We shape the deal and take it to the seller.</div></div><div class="tog">+</div></summary>
+      <div class="bd">Price is one piece of it; so are seller notes, earnouts, rollover, and escrows. We build the financing a lender will actually back, write the LOI, and run the negotiation for you.</div>
+    </details>
+    <details class="pd-phase"><summary><div class="no">05</div><div><div class="ph">Diligence &amp; close</div><div class="t">This is where most deals come apart, and where we do the heaviest work.</div></div><div class="tog">+</div></summary>
+      <div class="bd">We run diligence across the financials, legal, tax, and operations, keep the accountants and lawyers and lenders on schedule, and hold every thread together through to a signed deal.</div>
+    </details>
+    <details class="pd-phase"><summary><div class="no">06</div><div><div class="ph">Integration</div><div class="t">The price is set at close. The value comes in the six months after.</div></div><div class="tog">+</div></summary>
+      <div class="bd">We plan the first hundred days — keeping the people and customers you just paid for — the part most buyers underestimate and most advisors skip.</div>
+    </details>
+    <details class="pd-phase"><summary><div class="no">07</div><div><div class="ph">Value creation &middot; add-on service</div><div class="t">After the close, we can stay on to help the thesis come true.</div></div><div class="tog">+</div></summary>
+      <div class="bd">For clients who want it, we stay engaged past the hundred days — tracking performance against the original thesis, building the pricing and operating levers into a plan, and sourcing the add-on acquisitions that turn one deal into a platform. Optional, and scoped separately.</div>
+    </details>
+  </div>
+  <div class="pd-phases-close" data-rv="">
+    <p class="pd-body">That's the work. Most acquisitions fall apart somewhere in the middle — an add-back that doesn't hold up, a diligence problem caught too late, a negotiation run by the more experienced side of the table.</p>
+    <p class="strong">You make the decisions. We handle the rest, and we get you to the closing table.</p>
+    <a class="pd-pill-primary pd-pill-lg" href="#yulia" style="margin-top:34px">Bring us your idea →</a>
+  </div>
+</div></section>
+<section class="pd-section" id="sample"><div class="pd-wrap">
+  <div class="pd-sechead" data-rv="">
+    <div class="pd-seclabel">Getting started</div>
+    <h2 class="pd-h2">Every engagement starts with a read like this.</h2>
+    <p class="pd-sub" style="margin:22px auto 0">Not a chatbot answer — an institutional market map: the universe, the short list, and the thing most buyers miss.</p>
+  </div>
+  <div data-rv="" style="margin-top:clamp(44px,5.5vw,72px)"><div class="pd-map" style="max-width:760px;margin:0 auto">
+    <div class="map-head"><img src="../../assets/logo-coral-x.png" alt="smbX.ai" style="height:22px;width:auto;display:block"><span class="map-label">SAMPLE READ</span></div>
+    <div class="map-title">Commercial Landscaping — Southeast</div>
+    <div class="map-thesis">Commercial landscaping · GA, NC, SC, TN · $2–8M EBITDA · commercial-contract mix</div>
+    <div class="map-flow rv-stagger" data-rv="">
+      <div class="k">THE FUNNEL</div>
+      <div class="f"><span class="n">~2,400</span><span class="l">operators in-footprint</span></div>
+      <span class="arr">→</span>
+      <div class="f"><span class="n">~180</span><span class="l">in your size band</span></div>
+      <span class="arr">→</span>
+      <div class="f"><span class="n">~55</span><span class="l">above 60% commercial-contract mix</span></div>
+    </div>
+    <div class="map-nine" data-rv=""><div class="n">9</div><div class="l">Of those 55, the number we'd tell you to spend real time on. The drop from 55 to 9 is the part you can't Google.</div></div>
+    <div class="map-screens rv-stagger" data-rv="">
+      <div class="k">WHAT SEPARATES THE 9</div>
+      <div class="map-scr"><div class="i">01</div><div class="t">Route density.</div><div class="b">A crew running 8 stops in 4 miles is a different business than 8 stops across 40. It never shows in EBITDA, and it's the single biggest driver of margin after close. We'd rank the 55 by drive-time density before anything else.</div></div>
+      <div class="map-scr"><div class="i">02</div><div class="t">Contract tenure.</div><div class="b">Month-to-month "commercial" revenue is worth a fraction of 3-year contracted revenue, even at identical margin. A third of the 55 won't survive this test.</div></div>
+      <div class="map-scr"><div class="i">03</div><div class="t">Crew that stays without the owner.</div><div class="b">In this trade, the crews often leave with the seller. The ones where they don't are worth a full turn more — and you can check it in diligence before you're committed.</div></div>
+    </div>
+    <div class="map-insight" data-rv=""><div class="k">WHAT MOST BUYERS MISS</div>
+      <div class="v">Two companies here with identical EBITDA can be worth two turns apart on route density alone. Most buyers underwrite the earnings, ignore the drive time, and wonder why margins compress the quarter after close. We price the routes first, the EBITDA second.</div>
+    </div>
+    <div class="map-number" data-rv="">
+      <div class="k">THE NUMBER</div>
+      <div class="big">$6–8M</div>
+      <div class="v">On a $4M-EBITDA target at this size, getting the route-density read wrong is roughly a <strong>1.5–2.0x swing in EBITDA multiple</strong> — call it $6–8M of purchase price on a single deal, decided by one variable most buyers never model.</div>
+    </div>
+    <div class="map-verdict" data-rv="">
+      <div class="k">OUR READ</div>
+      <div class="v">This is one of the last genuinely fragmented service niches in the region, and the window is open — but only for a buyer disciplined enough to pay for route quality and walk from the pretty-EBITDA traps. That discipline is the whole game here.</div>
+    </div>
+    <div class="map-foot"><div class="src">Preliminary sample — illustrative of the deliverable format.</div>
+      <a class="map-pdf" href="#yulia" style="display:inline-flex;align-items:center;text-decoration:none">Run yours →</a></div>
+  </div></div>
+</div></section>
+<section class="pd-section pd-accent al" id="who"><div class="pd-wrap">
+  <div class="pd-sechead" data-rv="">
+    <div class="pd-seclabel">Who it's for</div>
+    <h2 class="pd-h2">Built for serious buyers.</h2>
+  </div>
+  <div class="pd-whosel" data-rv="">
+    <div class="names rv-stagger" data-rv="">
+      <sc-for list="{{ whoNames }}" as="w" hint-placeholder-count="5">
+        <a href="#who" class="name {{ w.cls }}" onClick="{{ w.go }}"><span>{{ w.label }}</span><span class="arr">→</span></a>
+      </sc-for>
+    </div>
+    <div class="panel">
+      <div class="pbody">{{ whoBody }}</div>
+      <a class="pd-link" href="#cta">{{ whoLink }}</a>
+    </div>
+  </div>
+</div></section>
+<section class="pd-section pd-accent ar" id="sectors" data-screen-label="Where we're hunting"><div class="pd-wrap">
+  <div class="pd-sechead" data-rv="">
+    <div class="pd-seclabel">Key industry verticals</div>
+    <h2 class="pd-h2">We go deep in a handful of markets. Yours may be one of them.</h2>
+    <p class="pd-sub" style="margin:22px auto 0">The sectors we know cold — the operators, the multiples, the diligence traps, and the targets already on our desk. Focus, not limits.</p>
+  </div>
+  <div class="pd-huntboard rv-stagger" data-rv="" style="margin-top:clamp(40px,5vw,64px)">
+    <a class="pd-hunt" href="../sectors-page/SectorsPage.dc.html"><div class="nm">Fire &amp; life safety</div><div class="th">NFPA 25 and 72 make inspection the law — every install becomes an annuity.</div></a>
+    <a class="pd-hunt" href="../sectors-page/SectorsPage.dc.html"><div class="nm">Elevator &amp; escalator service</div><div class="th">Mandated inspections, sticky contract books, light capex, aging owners.</div></a>
+    <a class="pd-hunt" href="../sectors-page/SectorsPage.dc.html"><div class="nm">Power &amp; grid infrastructure services</div><div class="th">Transformer refurb, substations, certified testing — the layer electrification runs on.</div></a>
+    <a class="pd-hunt" href="../sectors-page/SectorsPage.dc.html"><div class="nm">Building automation &amp; critical power</div><div class="th">Controls, commissioning, cooling and backup power — recurring service where downtime isn't an option.</div></a>
+    <a class="pd-hunt" href="../sectors-page/SectorsPage.dc.html"><div class="nm">Testing, inspection &amp; certification / NDT</div><div class="th">Demand written into code, behind a certification moat — and succession in almost every shop.</div></a>
+    <a class="pd-hunt" href="../sectors-page/SectorsPage.dc.html"><div class="nm">Environmental &amp; industrial cleaning</div><div class="th">Permit-gated, regulation-driven, and rarely brokered.</div></a>
+    <a class="pd-hunt" href="../sectors-page/SectorsPage.dc.html"><div class="nm">Water &amp; wastewater contract O&amp;M</div><div class="th">Multi-year municipal contracts — the most durable revenue in the services economy.</div></a>
+    <a class="pd-hunt" href="../sectors-page/SectorsPage.dc.html"><div class="nm">Specialty &amp; MRO distribution</div><div class="th">Vendor authorizations and VMI programs that underwrite like contracts.</div></a>
+    <a class="pd-hunt" href="../sectors-page/SectorsPage.dc.html"><div class="nm">Machine shops &amp; precision manufacturing</div><div class="th">AS9100 and ISO 13485 qualification cycles make revenue stick; reshoring is the tailwind.</div></a>
+    <a class="pd-hunt" href="../sectors-page/SectorsPage.dc.html"><div class="nm">Food contract manufacturing &amp; co-packing</div><div class="th">Multi-year supply agreements, with real density in our backyard.</div></a>
+    <a class="pd-hunt" href="../sectors-page/SectorsPage.dc.html"><div class="nm">Non-emergency medical transport</div><div class="th">Recurring, reimbursement-funded trips — underwritten with eyes open.</div></a>
+    <a class="pd-hunt" href="../sectors-page/SectorsPage.dc.html"><div class="nm">Revenue cycle management &amp; medical billing</div><div class="th">Fragmented and clean to diligence — we underwrite the niche before the number.</div></a>
+  </div>
+  <div style="text-align:center;margin-top:clamp(32px,4vw,48px)" data-rv=""><a class="pd-link" href="../sectors-page/SectorsPage.dc.html">Read the full sector theses →</a></div>
+</div></section>
+<section class="pd-dark bl-side" style="margin-top:clamp(130px,15vw,220px)">
+  <div class="pd-wrap pd-dark-pad"><div class="pd-askew">
+    <div data-rv="">
+      <div class="pd-seclabel">Whose side we're on</div>
+      <p class="pd-quote">The seller has a broker. Who is working for you?</p>
+    </div>
+    <div class="off" data-rv="">
+      <p class="pd-body">We represent buyers, and only buyers — one client per target. You get our full attention, unfiltered analysis, and a proprietary deal that stays yours.</p>
+      <div style="margin-top:34px;display:flex;gap:12px;flex-wrap:wrap">
+        <a class="pd-pill-primary pd-pill-lg" href="#yulia">Build your market map →</a>
+        <a class="pd-pill pd-pill-lg-quiet" href="#cta">Book a call</a>
+      </div>
+    </div>
+  </div></div>
+</section>
+<section class="pd-section" id="cta"><div class="pd-wrap"><div class="pd-cta-grid" data-rv="">
+  <div>
+    <h2 class="pd-cta-h">Start with a confidential conversation.</h2>
+    <p class="pd-body" style="margin-top:22px">Thirty minutes. Your ideas, our read on the market, and a straight answer on whether we're the right team to run it.</p>
+  </div>
+  <div class="pd-form">
+    <div class="t">Book 30 minutes</div>
+    <p style="margin:14px 0 0;font-size:15px;line-height:1.6;color:var(--pd-body)">A personal conversation, not a sales call — pick a time that works and come with your ideas — you don't need a finished thesis. Building one together is part of the work.</p>
+    <div style="margin-top:18px;font-family:var(--pd-mono);font-size:13px;letter-spacing:0.06em;color:var(--pd-tert)">30 MIN · VIDEO CALL · CONFIDENTIAL</div>
+    <a class="pd-pill-primary" href="{{ calendlyUrl }}" target="_blank" rel="noopener" style="margin-top:24px;display:flex;justify-content:center;padding:15px 26px">Pick a time →</a>
+    <p class="pd-caption" style="margin-top:14px">Scheduling opens in Google Calendar. No lists sold, no sellers represented.</p>
+  </div>
+</div></div></section>
+<footer class="pd-footer"><div class="pd-footer-inner" data-rv="">
+  <div><img src="../../assets/logo-coral-x.png" alt="smbX.ai" style="height:40px;margin:-5px 0 0 -8px">
+    <div style="margin-top:14px;font-size:15px;line-height:1.6;color:var(--pd-tert);max-width:340px">Buy-side corporate development for acquirers in the lower middle market. A senior operator and a full team's output, exclusively on your side of the table.</div>
+  </div>
+  <div style="display:flex;gap:56px;flex-wrap:wrap">
+    <div class="pd-footer-col"><div class="h">FIRM</div><a href="#why">Why us</a><a href="#how">How it works</a><a href="#sample">Sample read</a><a href="#proof">Track record</a><a href="#cta">Confidential consultation</a></div>
+    <div class="pd-footer-col"><div class="h">BUYERS</div><a href="#who">Family offices</a><a href="#who">Independent sponsors</a><a href="#who">Search funds</a><a href="#who">Operators &amp; strategics</a><a href="#who">PE firms</a></div>
+    <div class="pd-footer-col" style="max-width:200px"><div class="h">WHERE WE WORK</div><div style="color:var(--pd-body);font-size:15px;line-height:1.6">Nationwide, from Dallas–Fort Worth, Texas.</div></div>
+  </div>
+</div>
+<div class="pd-disclosure">smbX advises buyers only. We work exclusively on acquisitions of privately held companies with under $250M in annual revenue, and we do not represent sellers or act for both sides of a transaction. smbX is not a registered broker-dealer or investment adviser, does not offer securities, does not take custody of client funds, and does not provide legal, tax, or accounting advice — we coordinate the licensed specialists your deal requires. Nothing here is an offer to buy or sell any security.</div>
+<div class="pd-footer-legal">© 2026 smbX. Buy-side only, by design. · Terms · Privacy · Disclosures</div>
+</footer>
+<sc-if value="{{ stickyEnabled }}" hint-placeholder-val="{{ false }}"><a class="pd-pill-primary pd-sticky {{ stickyCls }}" href="#yulia">Build your market map</a></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;heroMesh&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Hero&quot;},&quot;stickyCta&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Page&quot;},&quot;calendlyUrl&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;https://calendar.app.google/rA9vC7RRdR2wLJbV6&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Page&quot;}}">
+class Component extends DCLogic {
+  state = { navMin: false, sticky: false, engaged: false, open: false, draft: '', turns: [], working: false, workingText: '', showMap: false, who: 0 };
+  whoData = [
+    { label: 'Family offices', body: 'Direct ownership without the fund overhead. We run the search and the process; you keep the asset, the control, and the relationship — no blind pool, no committee, no clock.', link: 'Talk to us about direct deals →' },
+    { label: 'Independent sponsors', body: 'Control the deal before you raise a dollar. We help you find it, lock it, and build the numbers your capital partners will actually back — so you walk into that room with a deal, not a pitch.', link: 'Talk to us about a live deal →' },
+    { label: 'Search funds & solo acquirers', body: "Your first acquisition is the other side's hundredth. We put a senior deal team in your corner — sourcing, diligence, and the negotiation — so you're not learning the hardest lessons with your own money on the line.", link: 'Talk to us about your search →' },
+    { label: 'Operators & strategics', body: 'Grow by acquisition without standing up a corp-dev team. We source the tuck-ins and adjacencies, price them, and run the process quietly — so you can move on a competitor without tipping the market.', link: 'Talk to us about an add-on →' },
+    { label: 'PE firms', body: "Add-on sourcing and execution capacity that flexes with your pipeline. For lower-middle-market funds without deep in-house origination — we find and work the proprietary deals your team doesn't have the bandwidth to chase.", link: 'Talk to us about origination →' }
+  ];
+  componentDidMount() {
+    this._scroll = () => {
+      const y = window.scrollY;
+      const navMin = y > 40, sticky = y > window.innerHeight * 0.9;
+      if (navMin !== this.state.navMin || sticky !== this.state.sticky) this.setState({ navMin, sticky });
+    };
+    window.addEventListener('scroll', this._scroll, { passive: true });
+    this._io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('rv-in'); this._io.unobserve(e.target); } }), { threshold: 0.12 });
+    // Re-scan (not just once at mount): re-rendered/replaced nodes lose rv-in
+    // and were never re-observed — they held layout space at opacity 0.
+    // Anything already at/above the viewport reveals immediately.
+    this._rvScan = () => document.querySelectorAll('[data-rv]:not(.rv-in)').forEach(el => {
+      if (el.getBoundingClientRect().top < window.innerHeight * 0.92) el.classList.add('rv-in');
+      else this._io.observe(el);
+    });
+    this._rvScan();
+    this._mo = new MutationObserver(() => this._rvScan());
+    this._mo.observe(document.body, { childList: true, subtree: true });
+    // Stat count-up — numbers roll to their value when the proof band enters.
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this._ioCount = new IntersectionObserver(es => es.forEach(e => {
+      if (!e.isIntersecting) return;
+      this._ioCount.unobserve(e.target);
+      if (!reduce) e.target.querySelectorAll('.pd-stat .n').forEach(n => this.countUp(n));
+    }), { threshold: 0.35 });
+    document.querySelectorAll('[data-countup]').forEach(el => this._ioCount.observe(el));
+  }
+  countUp(el) {
+    const orig = el.textContent, m = orig.match(/\d[\d,]*/);
+    if (!m || !parseInt(m[0].replace(/,/g, ''), 10)) return;
+    const target = parseInt(m[0].replace(/,/g, ''), 10);
+    const pre = orig.slice(0, m.index), post = orig.slice(m.index + m[0].length);
+    const t0 = performance.now(), dur = 1300;
+    const tick = now => {
+      const p = Math.min(1, (now - t0) / dur), e2 = 1 - Math.pow(1 - p, 3);
+      el.textContent = pre + Math.round(target * e2).toLocaleString('en-US') + post;
+      if (p < 1) requestAnimationFrame(tick); else el.textContent = orig;
+    };
+    requestAnimationFrame(tick);
+  }
+  componentDidUpdate() { this._rvScan && this._rvScan(); }
+  componentWillUnmount() { window.removeEventListener('scroll', this._scroll); if (this._io) this._io.disconnect(); if (this._mo) this._mo.disconnect(); if (this._ioCount) this._ioCount.disconnect(); this._timers && this._timers.forEach(clearTimeout); }
+  later(ms, fn) { (this._timers = this._timers || []).push(setTimeout(fn, ms)); }
+  send(text) {
+    const t = (text || '').trim();
+    if (!t) return;
+    this._step = (this._step || 0) + 1;
+    const turns = this.state.turns.concat([{ who: 'u', text: t }]);
+    this.setState({ turns, engaged: true, open: true, draft: '', working: true, workingText: this._step === 1 ? 'Reading your idea…' : 'Compiling market data…' });
+    if (this._step === 1) {
+      this.later(1100, () => this.setState({
+        working: false,
+        turns: this.state.turns.concat([{ who: 'y', text: 'A strong starting point — there is real supply behind that idea. What size band are you targeting, and how far from your base can an operation sit?' }])
+      }));
+    } else {
+      this.later(1600, () => this.setState({ working: false, showMap: true, turns: this.state.turns.concat([{ who: 'y', text: 'Here is the preliminary read. The full map goes several layers deeper — ownership age, consolidation activity, and the entry paths worth taking.' }]) }));
+    }
+  }
+  renderVals() {
+    const s = this.state;
+    return {
+      meshOn: this.props.heroMesh ?? true,
+      calendlyUrl: this.props.calendlyUrl ?? 'https://calendar.app.google/rA9vC7RRdR2wLJbV6',
+      stickyEnabled: this.props.stickyCta ?? true,
+      navCls: s.navMin ? 'min' : '',
+      stickyCls: s.sticky ? 'on' : '',
+      zoneCls: s.engaged ? '' : 'resting',
+      chatCls: s.open ? 'open' : '',
+      scrimCls: s.open ? 'on' : '',
+      draft: s.draft,
+      turns: s.turns.map(t => ({ text: t.text, cls: t.who === 'u' ? 'pd-bub pd-bub-u' : 'pd-bub pd-bub-y' })),
+      working: s.working, workingText: s.workingText, showMap: s.showMap,
+      chips: ['Fire & life safety', 'Elevator service', 'NDT & inspection', 'Environmental services', 'MRO distribution'].map(label => ({ label, go: () => this.send(label) })),
+      onDraft: e => this.setState({ draft: e.target.value }),
+      onKey: e => { if (e.key === 'Enter') this.send(this.state.draft); },
+      onSend: () => this.send(this.state.draft),
+      onClose: () => this.setState({ open: false }),
+      whoNames: this.whoData.map((w, i) => ({ label: w.label, cls: i === s.who ? 'on' : '', go: e => { e.preventDefault(); this.setState({ who: i }); } })),
+      whoBody: this.whoData[s.who].body,
+      whoLink: this.whoData[s.who].link
+    };
+  }
+}
+</script>
+</body>
+</html>
