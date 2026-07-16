@@ -139,51 +139,67 @@ function parseStreaming(acc: string): StreamView {
   return { inMap: true, preText, partial, narration };
 }
 
-/** Consume the SSE intake stream. Returns the authoritative final payload,
- *  or null if the transport failed before any content arrived (safe to fall
- *  back to the JSON endpoint). Throws after partial content. */
+/** Consume the SSE intake stream. Returns the authoritative final payload;
+ *  throws on ANY transport/server failure (the caller retries once over the
+ *  plain JSON endpoint). A watchdog aborts the fetch if the stream goes quiet
+ *  (no bytes — heartbeats count — for 30s) or runs past 150s total, so a
+ *  half-dead connection can never strand the turn in `pending` forever
+ *  (Paul, 2026-07-16: "the turn gets stuck and won't continue"). */
 async function streamIntake(
   payload: { role: string; content: string }[],
   onAccum: (acc: string) => void,
 ): Promise<{ reply: string; done: boolean; map: MapData | null }> {
-  const res = await fetch('/api/practice/intake/stream', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages: payload }),
-  });
-  if (!res.ok || !res.body) throw Object.assign(new Error('transport'), { clean: true });
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = '';
-  let acc = '';
-  let gotContent = false;
-  let final: { reply: string; done: boolean; map: MapData | null } | null = null;
-  for (;;) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const frames = buffer.split('\n\n');
-    buffer = frames.pop() || '';
-    for (const frame of frames) {
-      const eventLine = frame.split('\n').find(l => l.startsWith('event:'));
-      const dataLine = frame.split('\n').find(l => l.startsWith('data:'));
-      if (!eventLine || !dataLine) continue;
-      const event = eventLine.slice(6).trim();
-      let data: any;
-      try { data = JSON.parse(dataLine.slice(5)); } catch { continue; }
-      if (event === 'delta' && typeof data.t === 'string') {
-        gotContent = true;
-        acc += data.t;
-        onAccum(acc);
-      } else if (event === 'final') {
-        final = data;
-      } else if (event === 'error') {
-        throw Object.assign(new Error('server'), { clean: !gotContent });
+  const ctrl = new AbortController();
+  let idleTimer = 0;
+  const armIdle = () => {
+    clearTimeout(idleTimer);
+    idleTimer = window.setTimeout(() => ctrl.abort(), 30_000);
+  };
+  const totalTimer = window.setTimeout(() => ctrl.abort(), 150_000);
+  try {
+    armIdle();
+    const res = await fetch('/api/practice/intake/stream', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: payload }),
+      signal: ctrl.signal,
+    });
+    if (!res.ok || !res.body) throw new Error('transport');
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let acc = '';
+    let final: { reply: string; done: boolean; map: MapData | null } | null = null;
+    for (;;) {
+      const { value, done } = await reader.read();
+      armIdle();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const frames = buffer.split('\n\n');
+      buffer = frames.pop() || '';
+      for (const frame of frames) {
+        const eventLine = frame.split('\n').find(l => l.startsWith('event:'));
+        const dataLine = frame.split('\n').find(l => l.startsWith('data:'));
+        if (!eventLine || !dataLine) continue; // heartbeat comments land here
+        const event = eventLine.slice(6).trim();
+        let data: any;
+        try { data = JSON.parse(dataLine.slice(5)); } catch { continue; }
+        if (event === 'delta' && typeof data.t === 'string') {
+          acc += data.t;
+          onAccum(acc);
+        } else if (event === 'final') {
+          final = data;
+        } else if (event === 'error') {
+          throw new Error('server');
+        }
       }
     }
+    if (!final) throw new Error('incomplete');
+    return final;
+  } finally {
+    clearTimeout(idleTimer);
+    clearTimeout(totalTimer);
   }
-  if (!final) throw Object.assign(new Error('incomplete'), { clean: !gotContent });
-  return final;
 }
 
 const DOC_DATE = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -554,7 +570,10 @@ export default function YuliaIntake() {
 
   const send = async (given?: string) => {
     const text = (given ?? draft).trim();
-    if (!text || done || pending) return;
+    // A tap on the send button with an empty field must never be a silent
+    // no-op ("the button doesn't work") — hand focus to the field instead.
+    if (!text) { focusActive(); return; }
+    if (done || pending) return;
     if (userTurns === 0) trackEvent('practice_intake_started');
     trackEvent('practice_intake_step', { step: userTurns + 1 });
     const next: Msg[] = [...messages, { from: 'u', text }];
@@ -571,21 +590,21 @@ export default function YuliaIntake() {
     try {
       const data = await streamIntake(payload, acc => setLive(parseStreaming(acc)));
       applyFinal(data, true);
-    } catch (err: any) {
-      if (err?.clean) {
-        // Transport failed before content — the plain JSON endpoint still works.
-        try {
-          const res = await fetch('/api/practice/intake', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages: payload }),
-          });
-          if (!res.ok) throw new Error(String(res.status));
-          applyFinal(await res.json(), false);
-        } catch {
-          setMessages(m => [...m, { from: 'y', text: 'Connection interrupted — please submit your criteria once more.' }]);
-        }
-      } else {
+    } catch {
+      // The stream broke (idle timeout, dropped connection, server hiccup) —
+      // ONE retry over the plain JSON endpoint re-runs the whole turn
+      // server-side with the identical payload and an authoritative result.
+      // Only if THAT also fails does the visitor see the retry message.
+      try {
+        setLive(null); // retire any partial streamed render; the JSON turn replaces it
+        const res = await fetch('/api/practice/intake', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: payload }),
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        applyFinal(await res.json(), false);
+      } catch {
         setMessages(m => [...m, { from: 'y', text: 'Connection interrupted — please submit your criteria once more.' }]);
       }
     } finally {

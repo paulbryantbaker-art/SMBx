@@ -354,6 +354,13 @@ app.post('/api/practice/intake/stream', intakeLimiter, async (req, res) => {
   const send = (event: string, data: unknown) => {
     if (!res.writableEnded) res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
   };
+  // Heartbeat comments keep the connection visibly alive through proxies while
+  // the model thinks between tokens — without them, an idle SSE connection can
+  // be reaped mid-turn and the visitor's turn dies silently (Paul, 2026-07-16:
+  // "the turn gets stuck"). The client's frame parser skips comment frames.
+  const heartbeat = setInterval(() => {
+    if (!res.writableEnded) res.write(': hb\n\n');
+  }, 10_000);
   try {
     const { runPracticeIntakeStream } = await import('./services/practiceIntake.js');
     const result = await runPracticeIntakeStream(req.body?.messages, chunk => send('delta', { t: chunk }));
@@ -369,6 +376,8 @@ app.post('/api/practice/intake/stream', intakeLimiter, async (req, res) => {
   } catch (err: any) {
     console.error('[practice-intake] stream failed:', err.message);
     send('error', { error: 'Intake unavailable' });
+  } finally {
+    clearInterval(heartbeat);
   }
   res.end();
 });
