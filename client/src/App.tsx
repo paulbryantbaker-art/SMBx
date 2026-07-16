@@ -86,6 +86,7 @@ const V6App = lazy(() => import('./components/v6/V6App'));
 // product-marketing pages (marketing/pages/, marketing/legacy/) stay in the
 // tree unrouted as a repurposing pool.
 const PracticeLanding = lazy(() => import('./practice/Landing'));
+const PracticeIndustries = lazy(() => import('./practice/Industries'));
 const PracticeSegment = lazy(() => import('./practice/SegmentPage'));
 const PracticeAbout = lazy(() => import('./practice/About'));
 const PracticeTrackRecord = lazy(() => import('./practice/TrackRecord'));
@@ -369,6 +370,7 @@ export default function App() {
           {(params) => marketingOrApp(<PracticeSegment slug={params.slug} />)}
         </Route>
         <Route path="/about">{marketingOrApp(<PracticeAbout />)}</Route>
+        <Route path="/industries">{marketingOrApp(<PracticeIndustries />)}</Route>
         <Route path="/track-record">{marketingOrApp(<PracticeTrackRecord />)}</Route>
         <Route path="/buy"><Redirect to="/" /></Route>
         <Route path="/sell"><Redirect to="/" /></Route>
