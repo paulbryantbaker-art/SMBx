@@ -57,6 +57,16 @@ import {
   SIGNATORY_MATRIX,
   TRANSFER_TAX_REGIMES,
 } from '../server/constants/realPropertyLaw.js';
+import {
+  AUTHORITY_MERGES,
+  AUTHORITY_TYPES,
+  ENUMS,
+  GOVERNING_RULE,
+  MODEL_OVERLAYS,
+  type ConstantSpec,
+  type FieldSpec as OverlayFieldSpec,
+  type ModelOverlay,
+} from './definitivePublicOverlay.js';
 
 /* ── Release identity ─────────────────────────────────────────────────── */
 const PUBLISH = process.argv.includes('--publish');
@@ -194,16 +204,18 @@ const AUTH_CANON: Record<string, string> = {
   'Kendall v. Ernest Pestana, Inc., 40 Cal.3d 488 (1985)': 'Kendall v. Ernest Pestana, Inc., 40 Cal.3d 488 (1985)',
   'ABA Deal Points': 'ABA Private Target Deal Points Study',
   'ABA Private Target Deal Points Study 2023': 'ABA Private Target Deal Points Study',
-  'market practice': 'practice-norm (unanchored)',
-  'real estate industry practice': 'practice-norm: real estate industry (unanchored)',
-  'lease abstraction industry practice': 'practice-norm: lease abstraction (unanchored)',
 };
 function canonAuthority(raw: string): string {
   const s = raw.replace(/^\[|\]$/g, '').trim();
-  return AUTH_CANON[s] ?? s;
+  const first = AUTH_CANON[s] ?? s;
+  // Authored de-dup map (§7): collapse case-variant twins + shorthand/containment.
+  return AUTHORITY_MERGES[first] ?? first;
 }
 function classifyAuthority(a: string): string {
+  // Hand-tagged overrides (§7) win over the heuristic classifier.
+  if (AUTHORITY_TYPES[a]) return AUTHORITY_TYPES[a];
   if (/practice-norm/.test(a)) return 'practice-norm';
+  if (/Rev\. Proc|Rev\. Rul|IRS Notice|Priv\. Ltr|PLR/i.test(a)) return 'guidance';
   if (/v\.|In re|Matter of|\d+ Cal\.|\d+ F\.|Trib\./i.test(a)) return 'case';
   if (/Treas\. Reg|C\.F\.R|Reg\./i.test(a)) return 'regulation';
   if (/IRC|U\.S\.C|Code|Stat|DGCL|UCC|Law §|§|Act\b|Const/i.test(a)) return 'statute';
@@ -216,6 +228,19 @@ for (const e of catalog) for (const a of e.authorityAnchors) authoritySet.add(ca
 for (const m of registry.values()) for (const t of m.citationTags ?? []) authoritySet.add(canonAuthority(String(t)));
 const authorities = [...authoritySet].filter(Boolean).sort((a, b) => a.localeCompare(b));
 const authId = new Map(authorities.map((a, i) => [a, `AUTH-${String(i + 1).padStart(4, '0')}`]));
+// §7 acceptance: build FAILS on two register rows with identical normalized names.
+{
+  const normKey = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const byNorm = new Map<string, string[]>();
+  for (const a of authorities) {
+    const k = normKey(a);
+    if (!byNorm.has(k)) byNorm.set(k, []);
+    byNorm.get(k)!.push(a);
+  }
+  for (const [, variants] of byNorm) {
+    if (variants.length > 1) gap(`Authority Register: duplicate normalized rows — ${variants.map(v => `"${v}"`).join(' / ')} — add a merge to AUTHORITY_MERGES`);
+  }
+}
 
 /* ── Canonical counts (§9) ────────────────────────────────────────────── */
 const tierCounts = { normative: 0, catalog: 0, reserved: 0 } as Record<Tier, number>;
@@ -253,9 +278,87 @@ function jsonBlock(v: unknown): string {
   return '```json\n' + JSON.stringify(v, null, 2) + '\n```';
 }
 
+/* ── Authored-overlay rendering (§§1–6, 8) ────────────────────────────── */
+function overlayOf(e: DefinitiveModelCatalogEntry): ModelOverlay | undefined {
+  return MODEL_OVERLAYS[e.slotId];
+}
+const BANNED_TYPE = /(^|\b)(any|any\[\]|—|unknown|undefined)($|\b)/;
+function enumInline(name: string | undefined, mg: (s: string) => void, slot: string): string {
+  if (!name) return '';
+  const spec = ENUMS[name];
+  if (!spec || !spec.values.length) { mg(`${slot}: enum \`${name}\` referenced but not defined with values`); return ''; }
+  return ` One of ${spec.values.map(v => `\`${v}\``).join(', ')}.`;
+}
+function fieldType(f: OverlayFieldSpec): string {
+  if (f.enum) return `enum(${f.enum})`;
+  return f.type;
+}
+function renderAuthoredInputs(inputs: Record<string, OverlayFieldSpec>, requiredSet: Set<string>, mg: (s: string) => void, slot: string): string {
+  const L = ['| Field | Type | Required | Description |', '|---|---|---|---|'];
+  const keys = Object.keys(inputs).sort((a, b) => (requiredSet.has(b) ? 1 : 0) - (requiredSet.has(a) ? 1 : 0) || a.localeCompare(b));
+  for (const k of keys) {
+    const f = inputs[k];
+    if (!f.desc) mg(`${slot}: input \`${k}\` lacks a description`);
+    if (BANNED_TYPE.test(f.type)) mg(`${slot}: input \`${k}\` has an inferred/banned type \`${f.type}\``);
+    const desc = (f.desc || '—') + enumInline(f.enum, mg, slot);
+    L.push(`| \`${k}\` | ${fieldType(f)} | ${requiredSet.has(k) ? 'MUST' : 'MAY'} | ${desc} |`);
+  }
+  return L.join('\n');
+}
+function renderAuthoredOutputs(outputs: Record<string, OverlayFieldSpec>, mg: (s: string) => void, slot: string): string {
+  const L = ['| Field | Type | Description |', '|---|---|---|'];
+  for (const k of Object.keys(outputs)) {
+    const f = outputs[k];
+    if (!f.desc) mg(`${slot}: output \`${k}\` lacks a description`);
+    if (BANNED_TYPE.test(f.type)) mg(`${slot}: output \`${k}\` has an inferred/banned type \`${f.type}\``);
+    const desc = (f.desc || '—') + enumInline(f.enum, mg, slot);
+    L.push(`| \`${k}\` | ${fieldType(f)} | ${desc} |`);
+  }
+  return L.join('\n');
+}
+const KIND_LABEL: Record<ConstantSpec['kind'], string> = {
+  statutory_must: 'MUST (binding)',
+  cited_median_should: 'SHOULD (cited median)',
+  table_data: 'table (jurisdictional)',
+};
+function renderConstants(constants: ConstantSpec[]): string {
+  if (!constants.length) return '_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._';
+  const L = ['| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |', '|---|---|---|---|---|---|---|'];
+  for (const c of constants) {
+    L.push(`| ${c.name} | ${c.value} | ${KIND_LABEL[c.kind]} | ${c.citation} | ${c.pin ?? '—'} | ${c.effective ?? '—'} | ${c.nextCheck ?? '—'} |`);
+  }
+  return L.join('\n');
+}
+function collectNumbers(v: unknown, out: number[] = []): number[] {
+  if (typeof v === 'number' && Number.isFinite(v)) out.push(v);
+  else if (Array.isArray(v)) for (const x of v) collectNumbers(x, out);
+  else if (v && typeof v === 'object') for (const x of Object.values(v)) collectNumbers(x, out);
+  return out;
+}
+/** §2 acceptance: every numeric literal in a worked-example OUTPUT traces to a
+ *  constant, a supplied input, or an algorithm-derived field. */
+function traceGoldenLiterals(overlay: ModelOverlay, input: Record<string, any>, outputs: Record<string, any>, mg: (s: string) => void, slot: string): void {
+  const inputNums = new Set(collectNumbers(input));
+  const constNums = new Set<number>();
+  for (const c of overlay.constants) for (const t of c.traceValues ?? []) constNums.add(t);
+  const derived = new Set(overlay.derivedOutputs ?? []);
+  for (const [key, val] of Object.entries(outputs)) {
+    if (derived.has(key)) continue; // author-attested algorithm-derived
+    for (const n of collectNumbers(val)) {
+      if (inputNums.has(n) || constNums.has(n)) continue;
+      mg(`${slot}: worked-example output \`${key}\` carries untraceable literal ${n} — add it as a constant traceValue, a supplied input, or mark the field derived`);
+    }
+  }
+}
+
 async function modelPage(e: DefinitiveModelCatalogEntry): Promise<string> {
   const tier = tierOf(e);
   const reg = e.implementedRuntimeModelId ? registry.get(e.implementedRuntimeModelId) : null;
+  const overlay = overlayOf(e);
+  // Per-model gap capture so we can render the conditional "implementable" note.
+  const localGaps: string[] = [];
+  const mg = (s: string) => { localGaps.push(s); gap(s); };
+
   const L: string[] = [fm(`${e.slotId} — ${e.name}`, `§${e.slotId}`)];
   L.push(`# ${e.slotId} — ${e.name}\n`);
   L.push(`**Status:** ${TIER_LABEL[tier]}`);
@@ -267,8 +370,14 @@ async function modelPage(e: DefinitiveModelCatalogEntry): Promise<string> {
     return L.join('\n');
   }
 
-  // §2.1 Purpose
-  L.push(`## 1. Purpose\n\n${e.deterministicComputation}\n`);
+  // §1 Purpose
+  if (overlay) {
+    L.push(`## 1. Purpose\n\n${overlay.purpose}\n`);
+    if (overlay.scopeFlag) L.push(`> **Scope note.** ${overlay.scopeFlag}\n`);
+  } else {
+    L.push(`## 1. Purpose\n\n${e.deterministicComputation}\n`);
+    if (tier === 'normative') mg(`${e.slotId}: purpose is a one-line fragment (needs 2–3 authored sentences)`);
+  }
 
   if (tier === 'catalog') {
     L.push(`> **Catalog status.** This entry is informative: it maps the slot's purpose, boundary, routing, and authorities. It is NOT implementable from this document alone — the normative contract (I/O schemas, algorithm, worked example, conformance bindings) is scheduled for a future spec version.\n`);
@@ -279,51 +388,82 @@ async function modelPage(e: DefinitiveModelCatalogEntry): Promise<string> {
 
   // Tier 1 — Normative, ten sections
   const ex = extractions.get(e.implementedRuntimeModelId!)!;
+  const requiredSet = new Set([...ex.inputs.entries()].filter(([, s]) => s.required).map(([k]) => k));
 
   L.push(`## 2. Input contract\n`);
   L.push(`Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [\`${e.slotId}.schema.json\`](${e.slotId}.schema.json).\n`);
-  L.push(renderFieldTable(ex.inputs) + '\n');
+  if (overlay) L.push(renderAuthoredInputs(overlay.inputs, requiredSet, mg, e.slotId) + '\n');
+  else { L.push(renderFieldTable(ex.inputs) + '\n'); mg(`${e.slotId}: input types inferred, not authored; fields lack descriptions/enums`); }
 
   L.push(`## 3. Output contract\n`);
-  if (ex.outputs.size) L.push(renderOutputTable(ex.outputs) + '\n');
-  else { L.push(`*(extraction produced no complete runs — see gap ledger)*\n`); gap(`${e.slotId}: no output contract extracted`); }
+  if (overlay) L.push(renderAuthoredOutputs(overlay.outputs, mg, e.slotId) + '\n');
+  else if (ex.outputs.size) { L.push(renderOutputTable(ex.outputs) + '\n'); mg(`${e.slotId}: output types inferred, not authored; fields lack descriptions/enums`); }
+  else { L.push(`*(extraction produced no complete runs — see gap ledger)*\n`); mg(`${e.slotId}: no output contract extracted`); }
 
   L.push(`## 4. Algorithm\n`);
-  L.push(`> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.\n`);
-  L.push(`${e.deterministicComputation}\n`);
-  if (reg?.description) L.push(`${reg.description}\n`);
-  gap(`${e.slotId}: algorithm not yet formalized (RFC-2119 steps)`);
+  if (overlay) {
+    for (const step of overlay.algorithm) L.push(step);
+    L.push('');
+  } else {
+    L.push(`> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.\n`);
+    L.push(`${e.deterministicComputation}\n`);
+    if (reg?.description) L.push(`${reg.description}\n`);
+    mg(`${e.slotId}: algorithm not yet formalized (RFC-2119 steps)`);
+  }
 
   L.push(`## 5. Constants & authorities\n`);
+  if (overlay) {
+    L.push(renderConstants(overlay.constants) + '\n');
+  } else {
+    L.push(`> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and \`next_check_due\` land with the Authority Register export.\n`);
+    mg(`${e.slotId}: constants table lacks pin-cites/effective dates`);
+  }
   if (e.authorityAnchors.length) {
+    L.push(`\n**Authorities**\n`);
     L.push(`| Authority | ID | Type |`);
     L.push(`|---|---|---|`);
     for (const a of e.authorityAnchors) { const c = canonAuthority(a); L.push(`| ${c} | ${authId.get(c)} | ${classifyAuthority(c)} |`); }
     L.push('');
   }
-  L.push(`> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and \`next_check_due\` land with the Authority Register export.\n`);
-  gap(`${e.slotId}: constants table lacks pin-cites/effective dates`);
 
   L.push(`## 6. Worked example\n`);
-  if (ex.workedExample) {
+  if (overlay) {
+    const run = await executeV19Model({ modelId: e.implementedRuntimeModelId!, input: overlay.golden.input });
+    if (run.status === 'complete') {
+      L.push(`*${overlay.golden.narrative}*\n`);
+      L.push(`**Inputs**\n\n${jsonBlock(overlay.golden.input)}\n`);
+      L.push(`**Outputs (executed against the reference implementation \`${e.implementedRuntimeModelId}\`)**\n\n${jsonBlock(run.outputs)}\n`);
+      if (overlay.precisionRule) L.push(`Precision: ${overlay.precisionRule}\n`);
+      traceGoldenLiterals(overlay, overlay.golden.input, run.outputs, mg, e.slotId);
+    } else {
+      L.push(`*(authored golden example did not execute to completion — see gap ledger)*\n`);
+      mg(`${e.slotId}: golden example returned status ${run.status} (missing: ${JSON.stringify(run.missingInputs)})`);
+    }
+  } else if (ex.workedExample) {
     const w = ex.workedExample;
     L.push(`Conformance case \`${w.fixture.id}\` — *${w.fixture.title}*.\n`);
     L.push(`**Inputs**\n\n${jsonBlock(w.fixture.input)}\n`);
     L.push(`**Outputs (reference implementation, verified by the suite)**\n\n${jsonBlock(w.actualOutputs)}\n`);
-  } else { L.push(`*(no complete fixture available — see gap ledger)*\n`); gap(`${e.slotId}: no worked example`); }
+  } else { L.push(`*(no complete fixture available — see gap ledger)*\n`); mg(`${e.slotId}: no worked example`); }
 
   L.push(`## 7. Error semantics\n`);
   L.push(`- **Missing inputs:** the model returns \`status: "needs_inputs"\` with \`missingInputs\` as a field-name list${ex.missingInputFormat.length ? ` — for an empty input record: \`${JSON.stringify(ex.missingInputFormat)}\`` : ''}. No partial outputs are emitted.`);
   if (ex.deferCapable) L.push(`- **Specialist boundary:** outputs include \`defer_to_counsel\` (boolean) and, when true, \`counsel_handoff\` (string) — a conforming implementation MUST surface the routing and MUST NOT convert it into an answer.`);
   L.push(`- **Jurisdiction table gaps** (state-tabled models): untabled jurisdictions return an explicit table-gap flag with \`defer_to_counsel: true\`, never a guessed rule.\n`);
 
-  L.push(`## 8. Boundary statement\n\n${boundaryStatement(e)}\n`);
+  L.push(`## 8. Boundary statement\n\n${overlay ? overlay.boundary : boundaryStatement(e)}\n`);
+  if (!overlay) mg(`${e.slotId}: boundary statement is the mail-merged template (needs an authored, specific statement)`);
 
   L.push(`## 9. Conformance bindings\n`);
   if (ex.caseIds.length) L.push(`Requirement \`REQ-${e.slotId}\` is verified by ${ex.caseIds.length} published case(s): ${ex.caseIds.map(c => `\`${c}\``).join(', ')}.\n`);
-  else { L.push(`*(no published cases — see gap ledger)*\n`); gap(`${e.slotId}: normative model has zero conformance cases`); }
+  else { L.push(`*(no published cases — see gap ledger)*\n`); mg(`${e.slotId}: normative model has zero conformance cases`); }
 
   L.push(`## 10. Version\n\nReference binding \`${e.implementedRuntimeModelId}\` · entered the specification at internal lineage stage \`${e.status}\` · spec v${PUBLIC_VERSION}.\n`);
+
+  // Conditional "implementable from this document alone" (§9) — per-model.
+  if (overlay && localGaps.length === 0) {
+    L.splice(5, 0, `> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.\n`);
+  }
   return L.join('\n');
 }
 
@@ -408,7 +548,11 @@ function statLawPage(): string {
 
 /* ── Narrative chapters ───────────────────────────────────────────────── */
 
-const OVERVIEW = `${fm('Overview', '§Overview')}# ${TITLE} — Overview
+function overviewDoc(clean: boolean): string {
+  const implementableClause = clean
+    ? 'and are implementable from this document alone'
+    : 'and each carries its contract in full; entries marked **implementable from this document alone** have a complete authored contract today, while the remainder are being authored family by family (see the changelog)';
+  return `${fm('Overview', '§Overview')}# ${TITLE} — Overview
 
 DEFINITIVE is an open, versioned specification for the deterministic mechanics
 of mergers and acquisitions: the computations, classifications, routing gates,
@@ -424,7 +568,7 @@ property & contract law layer with anchor-state law encoded as data.
 The specification publishes at two maturity tiers, labeled on every entry and
 in the index. **Normative** entries carry the full contract — input and output
 schemas, algorithm, worked example, error semantics, and conformance
-bindings — and are implementable from this document alone. **Catalog** entries
+bindings — ${implementableClause}. **Catalog** entries
 are informative maps of scope, boundary, routing, and authorities whose
 normative contracts are scheduled. The breadth claim (${COUNTS.slots} slots
 mapped) and the rigor claim (${COUNTS.normative} slots normative) are distinct
@@ -452,6 +596,7 @@ legal, tax, accounting, investment, or appraisal advice; it renders no
 opinions; and nothing in it creates a professional relationship. Questions it
 classifies as specialist determinations belong to licensed professionals.
 `;
+}
 
 const BOUNDARIES = `${fm('Professional Boundaries', '§Boundaries')}# Professional-Boundary Classification
 
@@ -615,41 +760,56 @@ licensed professionals.
   write('reference/python/README.md', `# DEFINITIVE reference implementation — Python\n\nReference implementation of the ${TITLE} (v${PUBLIC_VERSION}). Scaffold — lands with the conformance harness. License: MIT.\n`);
   write('reference/python/pyproject.toml', `[project]\nname = "definitive-spec-reference"\nversion = "${PUBLIC_VERSION}"\nlicense = { text = "MIT" }\n`);
 
-  /* narrative */
-  write('spec/overview.md', OVERVIEW);
+  /* narrative (overview deferred until gaps are known — §9 conditional claim) */
   write('spec/professional-boundaries.md', BOUNDARIES);
   write('spec/methodology.md', METHODOLOGY);
   write('spec/state-law/real-property.md', statLawPage());
 
-  /* data dictionary (§4) */
+  /* data dictionary (§3/§4) — a DESIGNED vocabulary, not a telemetry report */
   {
-    const fields = new Map<string, { types: Set<string>; usedBy: Set<string>; requiredBy: Set<string> }>();
+    // Authored fields: type + description + enum, from the overlays (union).
+    const authored = new Map<string, OverlayFieldSpec>();
     for (const e of catalog) {
-      if (tierOf(e) !== 'normative') continue;
-      const ex = extractions.get(e.implementedRuntimeModelId!)!;
-      for (const [k, spec] of ex.inputs) {
-        if (!fields.has(k)) fields.set(k, { types: new Set(), usedBy: new Set(), requiredBy: new Set() });
-        const f = fields.get(k)!;
-        for (const t of spec.type) f.types.add(t);
-        f.usedBy.add(e.slotId);
-        if (spec.required) f.requiredBy.add(e.slotId);
-      }
+      const overlay = overlayOf(e);
+      if (!overlay) continue;
+      for (const [k, spec] of Object.entries(overlay.inputs)) if (!authored.has(k)) authored.set(k, spec);
+      for (const [k, spec] of Object.entries(overlay.outputs)) if (!authored.has(k)) authored.set(k, spec);
+    }
+    // Fields observed in models still pending normative authoring (no contract yet).
+    const pending = new Set<string>();
+    for (const e of catalog) {
+      if (tierOf(e) !== 'normative' || overlayOf(e)) continue;
+      for (const k of extractions.get(e.implementedRuntimeModelId!)!.inputs.keys()) if (!authored.has(k)) pending.add(k);
     }
     const L: string[] = [fm('Deal-Fact Data Dictionary', '§Data-Dictionary')];
     L.push(`# Deal-Fact Data Dictionary\n`);
-    L.push(`The common field vocabulary used by model input contracts and gate predicates, unioned from the Normative models' observed contracts.\n`);
-    L.push(`**Conventions (normative):** monetary values are integer cents; percentages are numbers on a 0–100 scale unless the field name says \\_rate (0–1); dates are ISO-8601 strings; US jurisdictions are two-letter state codes; fields observed only in fixtures are typed empirically and marked MAY.\n`);
-    L.push('| Field | Type(s) | Used by | Required by |');
-    L.push('|---|---|---|---|');
-    for (const [k, f] of [...fields.entries()].sort(([a], [b]) => a.localeCompare(b))) {
-      L.push(`| \`${k}\` | ${[...f.types].join(' \\| ') || '—'} | ${f.usedBy.size} model(s) | ${f.requiredBy.size} |`);
+    L.push(`The designed field vocabulary used by model input and output contracts and by gate predicates. Each field carries an authored type and description; enumerated fields carry their values (below). This is the specification's vocabulary, not a usage report.\n`);
+    L.push(`**Conventions (normative):** monetary values are integer cents; percentages are numbers on a 0–100 scale unless the field name ends in \\_pct as a fraction; rates are 0–1; dates are ISO-8601 strings; US jurisdictions are two-letter state codes.\n`);
+    L.push('| Field | Type | Description |');
+    L.push('|---|---|---|');
+    for (const [k, f] of [...authored.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+      const t = f.enum ? `enum(${f.enum})` : f.type;
+      L.push(`| \`${k}\` | ${t} | ${f.desc} |`);
     }
     L.push('');
+    L.push(`## Enumerations\n`);
+    L.push(`Enumerated values are part of the normative contract — a conforming implementation accepts and emits only these values for the field types below.\n`);
+    for (const [name, spec] of Object.entries(ENUMS).sort(([a], [b]) => a.localeCompare(b))) {
+      L.push(`- **\`${name}\`** — ${spec.description}\n  - Values: ${spec.values.map(v => `\`${v}\``).join(', ')}`);
+    }
+    L.push('');
+    if (pending.size) {
+      L.push(`## Fields pending normative authoring\n`);
+      L.push(`These field names appear in models whose normative contracts are still being authored; they are listed for completeness and are **not** yet part of the designed vocabulary. Their types and descriptions land as each model's overlay is authored.\n`);
+      L.push([...pending].sort().map(k => `\`${k}\``).join(' · ') + '\n');
+    }
     write('spec/data-dictionary.md', L.join('\n'));
   }
 
   /* gates + models */
-  for (const g of gateIds) write(`spec/gates/${g.length === 2 ? g[0] + '0' + g[1] : g}.md`, gatePage(g));
+  const gatePages = new Map<string, string>();
+  for (const g of gateIds) { const p = gatePage(g); gatePages.set(g, p); write(`spec/gates/${g.length === 2 ? g[0] + '0' + g[1] : g}.md`, p); }
+  const statLaw = statLawPage();
   const modelPages = new Map<string, string>();
   for (const e of catalog) {
     const page = await modelPage(e);
@@ -657,7 +817,26 @@ licensed professionals.
     write(`spec/models/${e.slotId}.md`, page);
     if (tierOf(e) === 'normative') {
       const ex = extractions.get(e.implementedRuntimeModelId!)!;
-      const toSchema = (m: Map<string, any>, isInput: boolean) => ({
+      const overlay = overlayOf(e);
+      const jsonTypeOf = (t: string): any => {
+        const nullable = / \| null$/.test(t);
+        const base = t.replace(/ \| null$/, '');
+        let jt: any = base.startsWith('integer') ? 'integer' : base === 'number' ? 'number' : base === 'boolean' ? 'boolean' : base.endsWith('[]') ? 'array' : base === 'object' ? 'object' : 'string';
+        return nullable ? [jt, 'null'] : jt;
+      };
+      const authoredSchema = (fields: Record<string, OverlayFieldSpec>, requiredKeys: string[]) => ({
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        title: `${e.slotId} contract`,
+        type: 'object',
+        properties: Object.fromEntries(Object.entries(fields).map(([k, f]) => {
+          const prop: any = { type: f.enum ? 'string' : jsonTypeOf(f.type), description: f.desc };
+          if (f.enum && ENUMS[f.enum]) prop.enum = ENUMS[f.enum].values;
+          if (f.unit) prop.unit = f.unit;
+          return [k, prop];
+        })),
+        ...(requiredKeys.length ? { required: requiredKeys } : {}),
+      });
+      const empiricalSchema = (m: Map<string, any>, isInput: boolean) => ({
         $schema: 'https://json-schema.org/draft/2020-12/schema',
         title: `${e.slotId} ${isInput ? 'input' : 'output'} contract`,
         type: 'object',
@@ -669,7 +848,11 @@ licensed professionals.
         })),
         ...(isInput ? { required: [...m.entries()].filter(([, v]: [string, any]) => v.required).map(([k]) => k) } : {}),
       });
-      write(`spec/models/${e.slotId}.schema.json`, JSON.stringify({ input: toSchema(ex.inputs, true), output: toSchema(ex.outputs as any, false) }, null, 2) + '\n');
+      const requiredKeys = [...ex.inputs.entries()].filter(([, s]) => s.required).map(([k]) => k);
+      const schema = overlay
+        ? { input: authoredSchema(overlay.inputs, requiredKeys), output: authoredSchema(overlay.outputs, []) }
+        : { input: empiricalSchema(ex.inputs, true), output: empiricalSchema(ex.outputs as any, false) };
+      write(`spec/models/${e.slotId}.schema.json`, JSON.stringify(schema, null, 2) + '\n');
     }
   }
 
@@ -749,6 +932,11 @@ licensed professionals.
     write('machine/spec.json', JSON.stringify(spec, null, 2) + '\n');
   }
 
+  /* overview — written now that the full gap state is known (§9 conditional) */
+  const cleanBuild = gaps.length === 0;
+  const overviewMd = overviewDoc(cleanBuild);
+  write('spec/overview.md', overviewMd);
+
   /* single volume + llms */
   {
     const strip = (s: string) => s.replace(/^---[\s\S]*?---\n\n/, '');
@@ -756,12 +944,12 @@ licensed professionals.
     vol.push(`# ${TITLE} — v${PUBLIC_VERSION}${DRAFT ? ' (DRAFT — internal review build)' : ''}\n`);
     vol.push(`Released ${RELEASE_DATE} · ${CANONICAL_HOME} · License: CC BY 4.0 (text) / MIT (code)\n`);
     if (DRAFT) vol.push(BANNER);
-    vol.push(strip(OVERVIEW), '\n---\n', strip(BOUNDARIES), '\n---\n', strip(METHODOLOGY), '\n---\n');
+    vol.push(strip(overviewMd), '\n---\n', strip(BOUNDARIES), '\n---\n', strip(METHODOLOGY), '\n---\n');
     vol.push(strip(readFileSync(path.join(OUT, 'spec/data-dictionary.md'), 'utf8')), '\n---\n\n# Gates\n');
-    for (const g of gateIds) vol.push(strip(gatePage(g)));
+    for (const g of gateIds) vol.push(strip(gatePages.get(g)!));
     vol.push('\n---\n\n# Model Catalog\n');
     for (const e of catalog) vol.push(strip(modelPages.get(e.slotId)!));
-    vol.push('\n---\n', strip(statLawPage()));
+    vol.push('\n---\n', strip(statLaw));
     vol.push('\n---\n', strip(readFileSync(path.join(OUT, 'spec/authorities.md'), 'utf8')));
     vol.push('\n---\n', strip(readFileSync(path.join(OUT, 'spec/conformance.md'), 'utf8')));
     const volume = vol.join('\n');
@@ -779,16 +967,24 @@ licensed professionals.
     writeFileSync(path.join(OUT_INTERNAL, 'INTERNAL_SLOT_CROSSWALK.md'), L.join('\n') + '\n');
   }
 
-  /* gap ledger / publish enforcement (§8) */
+  /* governing rule (delta preamble) — printed atop the build + shipped internal */
+  {
+    const overlaid = catalog.filter(e => tierOf(e) === 'normative' && overlayOf(e)).map(e => e.slotId);
+    writeFileSync(path.join(OUT_INTERNAL, 'GOVERNANCE.md'), `# Governing rule\n\n> ${GOVERNING_RULE}\n\nThis rule governs the public-edition build. The generator MERGES an authored\noverlay (\`scripts/definitivePublicOverlay.ts\`) over the empirical extraction:\nRFC-2119 algorithms, typed contracts with enums and descriptions, constants\nwith pin-cites, golden examples, de-boilerplated boundary statements, purpose\nprose, and authority de-duplication are AUTHORED, not extracted. Where the\ncode's behavior is narrower than the M&A concept, the entry is scoped\nhonestly and cross-referenced (see the scope notes), never silently narrowed.\n\n**Normative models carrying a complete authored overlay (${overlaid.length}):** ${overlaid.join(', ') || '(none yet)'}\n\n**Publish gate (\`--publish\`) fails on any of:** pending-formalization banner;\ninferred/\`any\` type; field without description; enum-like field without\nenumerated values; untraceable numeric literal in a worked example; duplicate\nnormalized Authority Register rows; pin-cite-pending banner in a Normative\nconstants table; a golden example that does not execute; a gate pending\nfounder approval. Draft mode carries these in the gap ledger.\n`);
+  }
+
+  /* gap ledger / publish enforcement (§8/§9) */
   if (DRAFT) {
-    writeFileSync(path.join(OUT_INTERNAL, 'GAP_LEDGER.md'), `# Gap ledger — ${gaps.length} open\n\n${gaps.map(g => `- ${g}`).join('\n')}\n`);
+    writeFileSync(path.join(OUT_INTERNAL, 'GAP_LEDGER.md'), `# Gap ledger — ${gaps.length} open\n\n> Governing rule: ${GOVERNING_RULE}\n\n${gaps.map(g => `- ${g}`).join('\n')}\n`);
   } else if (gaps.length) {
     console.error(`PUBLISH BLOCKED — ${gaps.length} editorial gaps:\n${gaps.map(g => `  ✗ ${g}`).join('\n')}`);
     process.exit(1);
   }
 
+  console.log(`\n${GOVERNING_RULE}\n`);
   console.log(`DEFINITIVE public tree built at ${OUT} ${PUBLISH ? '(PUBLISH mode)' : '(draft mode)'}`);
   console.log(`  slots: ${COUNTS.slots} (normative ${COUNTS.normative} / catalog ${COUNTS.catalogTier} / reserved ${COUNTS.reserved})`);
+  console.log(`  normative overlays authored: ${catalog.filter(e => tierOf(e) === 'normative' && overlayOf(e)).length} · clean build: ${cleanBuild}`);
   console.log(`  gates routed: ${COUNTS.gatesRouted} · authorities: ${COUNTS.authorities} · gaps: ${gaps.length}`);
 }
 
