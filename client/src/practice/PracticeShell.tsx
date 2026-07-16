@@ -97,6 +97,25 @@ export default function PracticeShell({
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Mobile menu (Paul, 2026-07-16: "there is no nav hamburger on mobile").
+  // Closes on route change, Esc, scrim, or any link tap; the page behind is
+  // scroll-held while it's open (restored to the shell's 'auto').
+  const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => { setMenuOpen(false); }, [loc]);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };
+    window.addEventListener('keydown', onKey);
+    const html = document.documentElement.style;
+    const prev = html.overflow;
+    html.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      html.overflow = prev || 'auto';
+    };
+  }, [menuOpen]);
+  const closeMenu = () => setMenuOpen(false);
+
   // Scroll-reveal (v3 logic from the design bundle): elements already at or
   // above the viewport reveal immediately (a deep-link or restored scroll must
   // never leave opacity-0 holes), the rest reveal via the observer — and a
@@ -185,9 +204,32 @@ export default function PracticeShell({
               Confidential consultation
             </a>
             <a className="pd-pill-primary" href={anchor('#yulia')} onClick={() => trackEvent('practice_cta_clicked', { placement: 'nav-yulia' })}>Build your market map</a>
+            <button
+              type="button"
+              className="pd-nav-burger"
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen(o => !o)}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path className="b1" d="M4 6.5h16" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" />
+                <path className="b2" d="M4 12h16" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" />
+                <path className="b3" d="M4 17.5h16" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" />
+              </svg>
+            </button>
           </div>
         </div>
       </header>
+
+      {/* Mobile slide-down menu + scrim (CSS-hidden ≥761px). */}
+      <div className={`pd-mmenu-scrim${menuOpen ? ' on' : ''}`} onClick={closeMenu} aria-hidden="true" />
+      <nav className={`pd-mmenu${menuOpen ? ' open' : ''}`} aria-label="Site menu" aria-hidden={!menuOpen}>
+        <a href={anchor('#why')} onClick={closeMenu}>Why us <span className="arr" aria-hidden>→</span></a>
+        <a href={anchor('#how')} onClick={closeMenu}>How it works <span className="arr" aria-hidden>→</span></a>
+        <Link href="/industries" onClick={closeMenu}>Industries <span className="arr" aria-hidden>→</span></Link>
+        <a href={anchor('#who')} onClick={closeMenu}>Who it's for <span className="arr" aria-hidden>→</span></a>
+        <a className="quiet" href={anchor('#cta')} onClick={() => { closeMenu(); trackEvent('practice_booking_clicked', { placement: 'mobile-menu' }); }}>Confidential consultation</a>
+      </nav>
 
       {children}
 

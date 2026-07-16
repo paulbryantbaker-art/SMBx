@@ -642,13 +642,24 @@ export default function YuliaIntake() {
           className="pd-herobar"
           onClick={() => { if (isMobile()) openSheet(); }}
         >
+          {/* The + stands in for the starter chips on phones (Grok grammar,
+              Paul 2026-07-16) — it lifts the sheet, where the chips live.
+              CSS hides it on desktop, where the chips sit under the bar. */}
+          <button
+            type="button"
+            className="pd-plus"
+            aria-label="See starting points"
+            onClick={() => { if (isMobile()) openSheet(); }}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" /></svg>
+          </button>
           <input
             ref={heroInputRef}
             readOnly={mobileVP}
             value={draft}
             onChange={e => setDraft(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') send(); }}
-            placeholder={done ? 'Your map is ready — reopen it' : userTurns > 0 ? 'Tap to continue your session' : hint}
+            placeholder={done ? 'Your map is ready — reopen it' : userTurns > 0 ? 'Tap to continue your session' : mobileVP ? 'What are you buying?' : hint}
             aria-label="Describe your acquisition criteria"
           />
           <button
@@ -656,8 +667,11 @@ export default function YuliaIntake() {
             className="pd-send"
             onClick={() => { if (isMobile()) openSheet(); else send(); }}
             disabled={pending}
+            aria-label={userTurns > 0 || done ? 'Reopen the conversation' : sendLabel}
           >
-            {userTurns > 0 || done ? 'Reopen' : sendLabel}
+            {mobileVP ? (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            ) : (userTurns > 0 || done ? 'Reopen' : sendLabel)}
           </button>
         </div>
         {resting && (
