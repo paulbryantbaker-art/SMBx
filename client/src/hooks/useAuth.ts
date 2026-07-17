@@ -237,6 +237,12 @@ export function useAuth() {
     }
     clearToken();
     setUser(null);
+    // Several components hold their own useAuth() user state (App.tsx gates the
+    // two-surface rule; V6App feeds the shells) and production has no
+    // cross-instance sync — clearing one instance leaves the app shell mounted
+    // and the user apparently still signed in. A full reload re-initializes
+    // every instance from the now-empty storage and lands on the public site.
+    window.location.replace('/');
   };
 
   return { user, loading, login, register, loginWithGoogle, migrateSession, logout, devSignIn };
