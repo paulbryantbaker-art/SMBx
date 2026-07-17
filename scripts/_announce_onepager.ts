@@ -48,24 +48,36 @@ const statRow = (dark: boolean) => STATS.map(([n, l]) => `
   </div>`).join('');
 
 /* VARIANT A — warm-white panel left, full-height photo right, dark footer */
+const BULLETS = [
+  'What a business is worth to <i>them</i> — before the broker names a price.',
+  'Which diligence findings are noise, and which are deal-breakers.',
+  'The first 90 days after close decide more value than the last 90 of negotiation.',
+];
+const bulletList = (dark: boolean) => BULLETS.map(b => `
+  <div style="display:flex;gap:18px;align-items:flex-start">
+    <span style="width:11px;height:11px;border-radius:50%;background:${CORAL};flex:none;margin-top:11px"></span>
+    <span style="font-size:22.5px;line-height:1.45;color:${dark ? '#F4F4F4' : INK};font-weight:500">${b}</span>
+  </div>`).join('');
+
 const A = `<!doctype html><meta charset="utf-8"><style>*{margin:0;padding:0;box-sizing:border-box}</style>
 <div style="width:1080px;height:1350px;position:relative;background:${WARM};overflow:hidden;font-family:${SANS}">
   <div style="position:absolute;inset:0;background:
     radial-gradient(1200px 800px at 8% 0%, rgba(255,56,92,0.05), transparent 60%),
     radial-gradient(900px 700px at 100% 100%, rgba(255,116,119,0.04), transparent 55%)"></div>
-  <div style="position:absolute;left:0;top:0;bottom:128px;width:492px;padding:64px 52px 0 64px;display:flex;flex-direction:column">
-    <img src="${LOGO}" style="height:44px;width:auto;display:block">
-    <div style="margin-top:88px;font-weight:800;font-size:88px;line-height:0.98;letter-spacing:-0.03em;color:${INK}">Open<br>for<br>business.</div>
-    <div style="width:76px;height:7px;background:${CORAL};border-radius:99px;margin:44px 0 36px"></div>
-    <div style="font-size:25px;line-height:1.5;color:${INK};font-weight:600">Buy-side corporate development for acquirers — retained, conflict-free, through close.</div>
-    <div style="margin-top:auto;padding-bottom:56px;display:grid;grid-template-columns:1fr 1fr;gap:40px 28px">${statRow(false)}</div>
+  <div style="position:absolute;left:0;top:0;bottom:128px;width:512px;padding:60px 46px 0 60px;display:flex;flex-direction:column">
+    <img src="${LOGO}" style="height:42px;width:auto;display:block">
+    <div style="margin-top:64px;font-weight:800;font-size:52px;line-height:1.06;letter-spacing:-0.025em;color:${INK}">The acquirers who win don\u2019t have better deal flow.<br><span style="color:${CORAL_DEEP}">They have better process.</span></div>
+    <div style="width:70px;height:6px;background:${CORAL};border-radius:99px;margin:34px 0 30px"></div>
+    <div style="font-size:22px;line-height:1.5;color:${BODY};font-weight:500">Twenty years as the internal deal captain for major platforms — now running that same playbook for independent buyers.</div>
+    <div style="margin-top:36px;display:flex;flex-direction:column;gap:22px">${bulletList(false)}</div>
+    <div style="margin-top:auto;padding-bottom:48px;font-size:23.5px;line-height:1.45;color:${INK};font-weight:700">Now taking new mandates — outsourced deal captain for a select number of active buyers.</div>
   </div>
-  <div style="position:absolute;left:516px;top:0;bottom:128px;right:0">${photoBlock(0)}
+  <div style="position:absolute;left:536px;top:0;bottom:128px;right:0">${photoBlock(0)}
     <div style="position:absolute;inset:0;background:linear-gradient(90deg, ${WARM} 0%, transparent 9%)"></div>
   </div>
-  <div style="position:absolute;left:0;right:0;bottom:0;height:128px;background:${DARK};display:flex;align-items:center;justify-content:space-between;padding:0 64px">
-    <img src="${LOGO}" style="height:50px;width:auto;filter:brightness(0) invert(1)">
-    <div style="font-family:${MONO};font-size:20px;letter-spacing:0.1em;color:#FFB3BF;text-transform:uppercase">smbx.ai · Book a call</div>
+  <div style="position:absolute;left:0;right:0;bottom:0;height:128px;background:${DARK};display:flex;align-items:center;justify-content:space-between;padding:0 60px">
+    <img src="${LOGO}" style="height:48px;width:auto;filter:brightness(0) invert(1)">
+    <div style="font-family:${MONO};font-size:19px;letter-spacing:0.1em;color:#FFB3BF;text-transform:uppercase">Buy-side only · Lower middle market · smbx.ai</div>
   </div>
 </div>`;
 
@@ -75,23 +87,24 @@ const B = `<!doctype html><meta charset="utf-8"><style>*{margin:0;padding:0;box-
   <div style="position:absolute;inset:0;background:
     radial-gradient(900px 480px at 50% 0%, rgba(255,56,92,0.16), transparent 60%),
     linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.34))"></div>
-  <div style="position:relative;height:100%;padding:64px 72px 60px;display:flex;flex-direction:column">
+  <div style="position:relative;height:100%;padding:60px 66px 56px;display:flex;flex-direction:column">
     <div style="display:flex;align-items:center;justify-content:space-between">
-      <img src="${LOGO}" style="height:44px;width:auto;filter:brightness(0) invert(1)">
-      <div style="font-family:${MONO};font-size:19px;letter-spacing:0.1em;color:#C9C9C9;text-transform:uppercase">Announcement</div>
+      <img src="${LOGO}" style="height:42px;width:auto;filter:brightness(0) invert(1)">
+      <div style="font-family:${MONO};font-size:18px;letter-spacing:0.1em;color:#C9C9C9;text-transform:uppercase">Announcement</div>
     </div>
-    <div style="margin-top:52px;display:flex;gap:52px;align-items:stretch">
-      <div style="width:400px;height:500px;flex:none;box-shadow:0 30px 80px rgba(0,0,0,0.5)">${photoBlock(24)}</div>
-      <div style="display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:8px">
-        <div style="font-weight:800;font-size:92px;line-height:0.97;letter-spacing:-0.03em;color:#fff">Open<br>for<br>business.</div>
-        <div style="width:76px;height:7px;background:${CORAL};border-radius:99px;margin-top:36px"></div>
+    <div style="margin-top:46px;display:flex;gap:48px;align-items:stretch">
+      <div style="width:400px;height:560px;flex:none;box-shadow:0 30px 80px rgba(0,0,0,0.5)">${photoBlock(24)}</div>
+      <div style="display:flex;flex-direction:column;justify-content:center">
+        <div style="font-weight:800;font-size:54px;line-height:1.06;letter-spacing:-0.025em;color:#fff">The acquirers who win don\u2019t have better deal flow.<br><span style="color:${CORAL}">They have better process.</span></div>
+        <div style="width:70px;height:6px;background:${CORAL};border-radius:99px;margin-top:30px"></div>
+        <div style="margin-top:26px;font-size:21.5px;line-height:1.5;color:#C9C9C9;font-weight:500">Twenty years as the internal deal captain for major platforms — now running that same playbook for independent buyers.</div>
       </div>
     </div>
-    <div style="margin-top:48px;font-size:26px;line-height:1.5;color:#F4F4F4;font-weight:600;max-width:820px">Buy-side corporate development for acquirers — retained, conflict-free, through close.</div>
-    <div style="margin-top:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:24px">${statRow(true)}</div>
-    <div style="margin-top:44px;border-top:1px solid rgba(255,255,255,0.14);padding-top:30px;display:flex;align-items:center;justify-content:space-between">
-      <div style="font-family:${MONO};font-size:20px;letter-spacing:0.1em;color:#FFB3BF;text-transform:uppercase">smbx.ai · Book a call</div>
-      <div style="font-size:19px;color:#C9C9C9;font-weight:500">Two decades on the buy side</div>
+    <div style="margin-top:auto;display:flex;flex-direction:column;gap:26px;max-width:920px">${bulletList(true)}</div>
+    <div style="margin-top:auto;font-size:25px;line-height:1.45;color:#fff;font-weight:700;max-width:880px;padding-bottom:6px">Now taking new mandates — outsourced deal captain for a select number of active buyers.</div>
+    <div style="margin-top:34px;border-top:1px solid rgba(255,255,255,0.14);padding-top:26px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-family:${MONO};font-size:19px;letter-spacing:0.1em;color:#FFB3BF;text-transform:uppercase">smbx.ai · Book a call</div>
+      <div style="font-size:18px;color:#C9C9C9;font-weight:500">Buy-side only · Lower middle market only</div>
     </div>
   </div>
 </div>`;
