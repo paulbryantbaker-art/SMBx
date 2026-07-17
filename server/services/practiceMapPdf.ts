@@ -19,8 +19,8 @@ const esc = (v: string): string =>
  *  self-contained. Falls back to a typographic mark if the file is missing. */
 function logoDataUri(): string | null {
   const candidates = [
-    path.join(process.cwd(), 'dist', 'client', 'logo-coral-x.png'),
-    path.join(process.cwd(), 'client', 'public', 'logo-coral-x.png'),
+    path.join(process.cwd(), 'dist', 'client', 'logo-blue-x.png'),
+    path.join(process.cwd(), 'client', 'public', 'logo-blue-x.png'),
   ];
   for (const p of candidates) {
     try {
@@ -66,19 +66,19 @@ function mapHtml(map: IntakeMap, generatedAt: string): string {
   .mono { font-family: 'SF Mono', 'Cascadia Mono', Consolas, Menlo, monospace; }
   .head { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 2px solid #222222; }
   .mark { font-weight: 800; font-size: 17px; letter-spacing: -0.02em; }
-  .mark .x { color: #E61E4D; }
+  .mark .x { color: #1656B4; }
   .headmeta { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: #9A9A9A; text-align: right; }
   .title { margin-top: 26px; font-size: 27px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.08; }
   .thesis { margin-top: 9px; font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 9.5px; letter-spacing: 0.05em; color: #6A6A6A; }
   .answer { margin-top: 20px; border-left: 3px solid #222222; padding: 10px 0 10px 16px; font-size: 13.5px; font-weight: 700; line-height: 1.45; }
   .funnel { margin-top: 26px; border-top: 1px solid #EBEBEB; border-bottom: 1px solid #EBEBEB; padding: 18px 0; }
-  .funnel .fk { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: #E61E4D; margin-bottom: 12px; }
+  .funnel .fk { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: #1656B4; margin-bottom: 12px; }
   .step { display: flex; align-items: baseline; gap: 16px; }
   .step .n { font-size: 34px; font-weight: 800; letter-spacing: -0.03em; min-width: 128px; }
   .step .l { font-size: 11.5px; color: #6A6A6A; }
   .arrow { color: #BBBBBB; font-size: 13px; padding: 2px 0 2px 4px; }
   .sec { margin-top: 20px; }
-  .sec .k { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: #E61E4D; }
+  .sec .k { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: #1656B4; }
   .sec .v { margin-top: 5px; font-size: 11.5px; line-height: 1.6; }
   .insight { margin-top: 24px; background: #F7F7F7; padding: 18px 20px; }
   .insight .k { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: #222222; }

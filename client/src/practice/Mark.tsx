@@ -17,7 +17,7 @@ export default function Mark() {
       smb
       <span style={{ position: 'relative', display: 'inline-block', width: '0.9em', height: 0 }}>
         <img
-          src="/logo-x.png"
+          src="/logo-x-blue.png"
           alt="X"
           style={{
             position: 'absolute',
