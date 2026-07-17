@@ -1,11 +1,8 @@
-<!-- GENERATED — do not hand-edit; regenerate via scripts/build-definitive-public.ts. Governance/gate: dist/definitive-internal/. -->
+<!-- GENERATED — do not hand-edit; regenerate via scripts/build-definitive-public.ts. -->
 
-# DEFINITIVE M&A Specification — v1.0.0 (DRAFT — internal review build)
+# DEFINITIVE M&A Specification — v1.0.0
 
 Released 2026-07-16 · https://definitive.smbx.ai · License: CC BY 4.0 (text) / MIT (code)
-
-> **DRAFT — internal review build. Not yet published; do not cite.**
-
 
 # DEFINITIVE M&A Specification — Overview
 
@@ -18,12 +15,12 @@ reorganization structure, distressed and restructuring waterfalls, capital
 structure and liability management, IP transfer mechanics, and a real
 property & contract law layer with anchor-state law encoded as data.
 
-**At a glance:** **134 model slots mapped** · **85 implementable from this document today** · 0 normative scheduled (authoring by family) · 47 catalog · 2 reserved · **30-gate routing framework** (17 routed; 3 specified) · **262 authority anchors** (as referenced) · **655-case conformance suite** (385 model-runtime).
+**At a glance:** **134 model slots mapped** · **85 implementable from this document today** · 0 normative scheduled (authoring by family) · 47 catalog · 2 reserved · **30-gate routing framework** (17 routed; 17 specified) · **262 authority anchors** (as referenced) · **655-case conformance suite** (385 model-runtime).
 
 The specification publishes at two maturity tiers, labeled on every entry and
 in the index. **Normative** entries carry the full contract — input and output
 schemas, algorithm, worked example, error semantics, and conformance
-bindings — and each carries its contract in full; entries marked **implementable from this document alone** have a complete authored contract today, while the remainder are being authored family by family (see the changelog). **Catalog** entries
+bindings — and are implementable from this document alone. **Catalog** entries
 are informative maps of scope, boundary, routing, and authorities whose
 normative contracts are scheduled. The breadth claim (134 slots
 mapped) and the rigor claim (85 implementable from
@@ -1055,9 +1052,18 @@ Enumerated values are part of the normative contract — a conforming implementa
 # Gates
 
 
-# G1 — Gate G1
+# G1 — Reps, Warranties & Indemnification
 
-> **Registry narrative pending founder approval** — drafted name, purpose, and formal trigger predicate are in review (see the gate-registry draft). The routed models below are authoritative.
+Activates the representation-and-warranty architecture and the indemnification-ladder mechanics of the definitive agreement once the deal reaches definitive-agreement drafting.
+
+## Trigger conditions
+
+- the deal reaches definitive-agreement drafting
+- Machine predicate: `definitive_agreement_stage == true`
+
+## Boundary notes
+
+DEFINITIVE sizes the indemnity, survival, and standard-representation architecture; drafting, negotiating, and the enforceability of the reps and remedies are counsel's.
 
 ## Models routed through G1
 
@@ -1068,9 +1074,18 @@ Enumerated values are part of the normative contract — a conforming implementa
 | [M217](../models/M217.md) | Standard IP representation set | Normative |
 
 
-# G2 — Gate G2
+# G2 — Transaction Form & Purchase-Price Allocation
 
-> **Registry narrative pending founder approval** — drafted name, purpose, and formal trigger predicate are in review (see the gate-registry draft). The routed models below are authoritative.
+Activates the asset/stock/merger form fork and the purchase-price-allocation mechanics that follow from the chosen form.
+
+## Trigger conditions
+
+- an asset, stock, or merger form is chosen for a priced deal
+- Machine predicate: `deal_form in {asset, stock, merger} AND purchase_price_cents > 0`
+
+## Boundary notes
+
+DEFINITIVE computes the form-driven allocation and structure math; the binding tax and legal positions belong to the tax advisor and counsel.
 
 ## Models routed through G2
 
@@ -1089,9 +1104,18 @@ Enumerated values are part of the normative contract — a conforming implementa
 | [M234](../models/M234.md) | Fixture classification and UCC 9-334 priority | Normative |
 
 
-# G6 — Gate G6
+# G6 — Closing Conditions
 
-> **Registry narrative pending founder approval** — drafted name, purpose, and formal trigger predicate are in review (see the gate-registry draft). The routed models below are authoritative.
+Activates condition-precedent tracking for the period between signing and closing.
+
+## Trigger conditions
+
+- the deal is signed but not yet closed
+- Machine predicate: `signed == true AND closed == false`
+
+## Boundary notes
+
+DEFINITIVE tracks the condition nodes and what blocks closing; whether a condition is satisfied or waivable is a legal determination for counsel.
 
 ## Models routed through G6
 
@@ -1100,9 +1124,18 @@ Enumerated values are part of the normative contract — a conforming implementa
 | [M211](../models/M211.md) | Conditions-to-close logic engine | Normative |
 
 
-# G7 — Gate G7
+# G7 — Execution & Closing Certainty
 
-> **Registry narrative pending founder approval** — drafted name, purpose, and formal trigger predicate are in review (see the gate-registry draft). The routed models below are authoritative.
+Activates the execution-risk stack — regulatory reportability, MAE durational significance, insurance architecture, transition services, and closing mechanics.
+
+## Trigger conditions
+
+- the deal is signed or an LOI is executed
+- Machine predicate: `signed == true OR loi_executed == true`
+
+## Boundary notes
+
+DEFINITIVE computes reportability, MAE, insurance, true-up, and fee mechanics; regulatory and enforceability determinations belong to counsel.
 
 ## Models routed through G7
 
@@ -1117,9 +1150,18 @@ Enumerated values are part of the normative contract — a conforming implementa
 | [M212](../models/M212.md) | Termination and break/reverse-break fee engine | Normative |
 
 
-# G8 — Gate G8
+# G8 — Post-Closing Recourse
 
-> **Registry narrative pending founder approval** — drafted name, purpose, and formal trigger predicate are in review (see the gate-registry draft). The routed models below are authoritative.
+Activates escrow, holdback, survival, and insurance-backed recourse sizing after closing.
+
+## Trigger conditions
+
+- an indemnity/escrow recourse structure is required
+- Machine predicate: `indemnity_structure_required == true`
+
+## Boundary notes
+
+DEFINITIVE sizes escrow, holdback, survival, and RWI recourse; the binding terms and policy wording belong to counsel and the broker/underwriter.
 
 ## Models routed through G8
 
@@ -1131,9 +1173,18 @@ Enumerated values are part of the normative contract — a conforming implementa
 | [M209](../models/M209.md) | RWI stack architecture | Normative |
 
 
-# G9 — Gate G9
+# G9 — Contingent Consideration
 
-> **Registry narrative pending founder approval** — drafted name, purpose, and formal trigger predicate are in review (see the gate-registry draft). The routed models below are authoritative.
+Activates earnout design, measurement, and dispute mechanics when part of the price is contingent.
+
+## Trigger conditions
+
+- part of the price is contingent (an earnout)
+- Machine predicate: `contingent_consideration == true`
+
+## Boundary notes
+
+DEFINITIVE structures the earnout architecture and dispute path; the enforceable covenant set and the §453/§483/§1274 tax characterization route to counsel and the tax advisor.
 
 ## Models routed through G9
 
@@ -1142,9 +1193,18 @@ Enumerated values are part of the normative contract — a conforming implementa
 | [M213](../models/M213.md) | Earnout architecture and dispute | Normative |
 
 
-# G10 — Gate G10
+# G10 — Intellectual Property Mechanics
 
-> **Registry narrative pending founder approval** — drafted name, purpose, and formal trigger predicate are in review (see the gate-registry draft). The routed models below are authoritative.
+Activates IP diligence, chain-of-title, transfer, and allocation mechanics when IP is material to value.
+
+## Trigger conditions
+
+- IP is material to value
+- Machine predicate: `ip_material_to_value == true`
+
+## Boundary notes
+
+DEFINITIVE runs IP chain-of-title, encumbrance, license-dependency, and transfer mechanics; enforceability and freedom-to-operate opinions belong to IP counsel.
 
 ## Models routed through G10
 
@@ -1162,9 +1222,18 @@ Enumerated values are part of the normative contract — a conforming implementa
 | [M223](../models/M223.md) | Domain and trademark transfer mechanics | Normative |
 
 
-# G14 — Gate G14
+# G14 — Seller Proceeds & Price Adjustment
 
-> **Registry narrative pending founder approval** — drafted name, purpose, and formal trigger predicate are in review (see the gate-registry draft). The routed models below are authoritative.
+Activates seller-side proceeds tax treatment (e.g., QSBS) and price-adjustment pegs on the sell side.
+
+## Trigger conditions
+
+- a sell-side context: seller proceeds treatment and price-adjustment pegs
+- Machine predicate: `sell_side_context == true`
+
+## Boundary notes
+
+DEFINITIVE computes the QSBS proceeds screen and the working-capital peg; the binding tax position and the negotiated adjustment belong to the tax advisor, counsel, and the accountants. QSBS (M101) also routes through G15 Tax & Corporate Structure.
 
 ## Models routed through G14
 
@@ -1174,9 +1243,18 @@ Enumerated values are part of the normative contract — a conforming implementa
 | [M109](../models/M109.md) | Working capital peg | Normative |
 
 
-# G15 — Gate G15
+# G15 — Tax & Corporate Structure
 
-> **Registry narrative pending founder approval** — drafted name, purpose, and formal trigger predicate are in review (see the gate-registry draft). The routed models below are authoritative.
+The master structuring gate: tax elections, reorganization qualification, corporate-law mechanics, and equity-structure math. Runs whenever a deal form is set — structure analysis always applies.
+
+## Trigger conditions
+
+- any deal form is set
+- Machine predicate: `deal_form is set`
+
+## Boundary notes
+
+DEFINITIVE computes tax elections, reorganization qualification, and equity-structure math; the return positions and legal opinions belong to the tax advisor and counsel.
 
 ## Models routed through G15
 
@@ -1226,9 +1304,18 @@ Enumerated values are part of the normative contract — a conforming implementa
 | [M199](../models/M199.md) | FIRPTA withholding v1.1 | Normative |
 
 
-# G19 — Gate G19
+# G19 — State & Local Transaction Tax
 
-> **Registry narrative pending founder approval** — drafted name, purpose, and formal trigger predicate are in review (see the gate-registry draft). The routed models below are authoritative.
+Activates state/local transfer-tax, controlling-interest, SALT, and clearance mechanics when US state jurisdictions are involved.
+
+## Trigger conditions
+
+- one or more US state jurisdictions are involved
+- Machine predicate: `us_state_jurisdictions.length > 0`
+
+## Boundary notes
+
+DEFINITIVE screens transfer, controlling-interest, and SALT mechanics against the state tables; whether a transfer is taxable belongs to tax counsel.
 
 ## Models routed through G19
 
@@ -1241,9 +1328,18 @@ Enumerated values are part of the normative contract — a conforming implementa
 | [M233](../models/M233.md) | Permit/CO transferability and bulk-sales screener | Normative |
 
 
-# G23 — Gate G23
+# G23 — Cross-Border Deal Terms
 
-> **Registry narrative pending founder approval** — drafted name, purpose, and formal trigger predicate are in review (see the gate-registry draft). The routed models below are authoritative.
+Activates non-US deal-term and merger-control overlays when a non-US jurisdiction is in play.
+
+## Trigger conditions
+
+- a non-US jurisdiction is in play
+- Machine predicate: `non_us_jurisdiction == true`
+
+## Boundary notes
+
+DEFINITIVE overlays non-US deal-term and merger-control considerations; local-law determinations belong to local counsel.
 
 ## Models routed through G23
 
@@ -1254,9 +1350,18 @@ Enumerated values are part of the normative contract — a conforming implementa
 | [M110](../models/M110.md) | English MAC | Catalog |
 
 
-# G24 — Gate G24
+# G24 — Regulatory & Compliance Diligence Overlays
 
-> **Registry narrative pending founder approval** — drafted name, purpose, and formal trigger predicate are in review (see the gate-registry draft). The routed models below are authoritative.
+Activates the regulatory-diligence overlay family (privacy, cyber, sanctions, ESG, sector regulation) for regulated data or operations.
+
+## Trigger conditions
+
+- regulated data or operations are present
+- Machine predicate: `regulated_data_or_operations == true`
+
+## Boundary notes
+
+DEFINITIVE organizes the regulatory-diligence overlays; compliance and enforcement determinations belong to regulatory counsel.
 
 ## Models routed through G24
 
@@ -1270,9 +1375,18 @@ Enumerated values are part of the normative contract — a conforming implementa
 | [M134](../models/M134.md) | Climate diligence | Catalog |
 
 
-# G26 — Gate G26
+# G26 — Fund Secondaries & GP-Led Transactions
 
-> **Registry narrative pending founder approval** — drafted name, purpose, and formal trigger predicate are in review (see the gate-registry draft). The routed models below are authoritative.
+Activates fund-level and secondaries mechanics (continuation funds, LP secondaries, strip sales, NAV facilities).
+
+## Trigger conditions
+
+- a fund counterparty or a secondary/continuation/strip/NAV transaction
+- Machine predicate: `counterparty_type in {fund_lp, fund_gp} OR transaction_type in {secondary, continuation, strip, nav}`
+
+## Boundary notes
+
+DEFINITIVE computes fund-level and secondaries mechanics; fund-document and tax determinations belong to fund counsel and the tax advisor.
 
 ## Models routed through G26
 
@@ -1284,9 +1398,18 @@ Enumerated values are part of the normative contract — a conforming implementa
 | [M179](../models/M179.md) | NAV facility LTV | Normative |
 
 
-# G27 — Gate G27
+# G27 — Sponsor, Search & Employee-Ownership Economics
 
-> **Registry narrative pending founder approval** — drafted name, purpose, and formal trigger predicate are in review (see the gate-registry draft). The routed models below are authoritative.
+Activates acquirer-archetype economics — independent-sponsor promotes, search-fund step-ups, and ESOP structures.
+
+## Trigger conditions
+
+- the acquirer is an independent sponsor, search fund, or ESOP
+- Machine predicate: `buyer_archetype in {independent_sponsor, search_fund, esop}`
+
+## Boundary notes
+
+DEFINITIVE computes acquirer-archetype economics; ESOP fiduciary and valuation determinations belong to the trustee and the appraiser.
 
 ## Models routed through G27
 
