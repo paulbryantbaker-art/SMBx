@@ -1,6 +1,4 @@
-<!-- GENERATED review draft (generator v4, DEPTH pass) — built by scripts/build-definitive-public.ts over scripts/definitivePublicOverlay.ts.
-     Do not hand-edit; regenerate instead. Governance/publish gate: dist/definitive-internal/GOVERNANCE.md. Burndown: dist/definitive-internal/GAP_LEDGER.md.
-     Founder actions: dist/definitive-internal/GATE_REGISTRY_FOR_FOUNDER_APPROVAL.md -->
+<!-- GENERATED — do not hand-edit; regenerate via scripts/build-definitive-public.ts. Governance/gate: dist/definitive-internal/. -->
 
 # DEFINITIVE M&A Specification — v1.0.0 (DRAFT — internal review build)
 
@@ -20,7 +18,7 @@ reorganization structure, distressed and restructuring waterfalls, capital
 structure and liability management, IP transfer mechanics, and a real
 property & contract law layer with anchor-state law encoded as data.
 
-**At a glance:** **134 model slots mapped** · **25 implementable from this document today** · 60 normative scheduled (authoring by family) · 47 catalog · 2 reserved · **30-gate routing framework** (17 routed; 3 specified) · **262 authority anchors** (as referenced) · **655-case conformance suite** (385 model-runtime).
+**At a glance:** **134 model slots mapped** · **85 implementable from this document today** · 0 normative scheduled (authoring by family) · 47 catalog · 2 reserved · **30-gate routing framework** (17 routed; 3 specified) · **262 authority anchors** (as referenced) · **655-case conformance suite** (385 model-runtime).
 
 The specification publishes at two maturity tiers, labeled on every entry and
 in the index. **Normative** entries carry the full contract — input and output
@@ -28,7 +26,7 @@ schemas, algorithm, worked example, error semantics, and conformance
 bindings — and each carries its contract in full; entries marked **implementable from this document alone** have a complete authored contract today, while the remainder are being authored family by family (see the changelog). **Catalog** entries
 are informative maps of scope, boundary, routing, and authorities whose
 normative contracts are scheduled. The breadth claim (134 slots
-mapped) and the rigor claim (25 implementable from
+mapped) and the rigor claim (85 implementable from
 this document today) are distinct claims, made separately and never blurred —
 the second number leads, and it climbs family by family in public.
 
@@ -185,54 +183,160 @@ The designed field vocabulary used by model input and output contracts and by ga
 
 | Field | Type | Description |
 |---|---|---|
+| `absolute_priority_issue_count` | integer | Number of absolute-priority issues found. |
+| `absolute_priority_issues` | object[] | Per-issue detail: `{ senior_class_name, senior_recovery_pct, junior_value_cents }`. |
+| `abstraction_rows` | object[] | Per-lease detail: `{ tenant, annual_rent_cents, expiry_date, months_remaining, assignment_consent_required, change_of_control_consent_required, renewal_options_count, exclusive_use, co_tenancy, go_dark }`. |
 | `acceleration_risk` | enum(acceleration_risk) | The lender's acceleration posture. |
 | `acceleration_trigger_count` | integer | Number of acceleration triggers. |
 | `acceleration_triggers` | string[] | Events that accelerate the earnout (e.g., change of control, termination without cause). |
 | `accounting_arbitrator_selected` | boolean | Whether the forum is an accounting arbitrator. |
+| `accounting_review_flags` | string[] | Standing accountant-review note on ASC 842 sale and lease classification. |
 | `act_type` | enum(recording_act_type) | The recording-act family applied. |
 | `actual_nwc_cents` | integer (cents) | Actual net working capital per the final closing statement. |
 | `actual_statement_due_date` | string (ISO date) | Deadline to deliver the actual closing statement. |
 | `actual_statement_due_days` | integer | Days after closing to deliver the actual statement; defaults to the cited median. |
+| `affiliate_of_public_issuer` | boolean | Whether the debtor is an affiliate of an SEC issuer (default false); a disqualifier. |
+| `afr_rate` | number | The applicable federal rate for the term, as a fraction; supplied at runtime. |
 | `after_acquired_title_applies` | boolean | Whether estoppel-by-deed vests later-acquired title in the grantee. |
 | `aggregate_escrow_cents` | integer (cents) | Total cash held back across all escrows. |
+| `aggregate_face_test_passed` | boolean | Whether aggregate payments meet or exceed the allowed claim. |
+| `aggregate_noncontingent_liquidated_debt_cents` | integer (cents) | Aggregate noncontingent, liquidated debt. |
+| `aggregate_remaining_capacity_cents` | integer (cents) | Sum of remaining capacity across all baskets. |
+| `aggregation_window_months` | integer | null | The controlling-interest aggregation window in months, or null. |
 | `aggregation_years` | integer | null | The acting-in-concert aggregation window in years, or null. |
+| `agpl_network_count` | integer | Number of AGPL components used over a network. |
+| `all_classes_meet_support_thresholds` | boolean | Whether every class clears the thresholds. |
+| `all_classes_pass_best_interests` | boolean | Whether every class passes the best-interests test. |
+| `all_contributors_papered` | boolean | Whether every contributor has both the assignment and the work-for-hire. |
+| `all_prongs_passed` | boolean | Whether all three prongs pass. |
 | `all_required_signers_present` | boolean | Whether every party the vesting form requires is on the signature page; explicit false raises a signatory gap. |
+| `all_tests_passed` | boolean | Whether all three tests pass. |
 | `allocated_cents` | integer (cents) | Total amount allocated across the classes. |
 | `allocations` | object[] | Per-class schedule: `{ class_number, class_name, fair_market_value_cents, allocated_cents, capped_at_fmv }`. |
+| `allowed_claim_cents` | integer (cents) | The creditor's total allowed claim. |
+| `alta_endorsements_requested` | string[] | ALTA endorsements requested (counted). |
+| `alta_endorsements_requested_count` | integer | Number of ALTA endorsements requested. |
+| `amortizable_195_cents` | integer (cents) | Total §195-amortizable. |
+| `amount_realized_cents` | integer (cents) | The amount realized by the seller (the FIRPTA withholding base). |
 | `annual_debt_service_cents` | integer (cents) | Annual principal-and-interest debt service on the acquisition debt. |
+| `annual_ground_rent_cents` | integer (cents) | Annual ground rent. |
+| `annual_master_lease_rent_cents` | integer (cents) | Override master-lease rent; defaults to value × cap rate. |
+| `annual_rent_cents` | integer (cents) | Annual leaseback rent. |
+| `annual_royalty_cents` | integer (cents) | Total annual royalty across all licenses. |
 | `annual_section_382_limitation_cents` | integer (cents) | The annual §382 limitation on pre-change NOL use. |
+| `annual_tenant_share_cents` | integer (cents) | The tenant's full-period share. |
 | `antitrust_reverse_fee_cents` | integer (cents) | The antitrust reverse fee in cents. |
 | `antitrust_reverse_fee_pct` | number | Override for the antitrust reverse fee as a fraction of value; defaults to the cited median. |
+| `apportioned_gain_cents` | integer (cents) | Gain apportioned to the state. |
+| `apr_clear_under_inputs` | boolean | Whether the plan clears the absolute priority rule under the inputs. |
+| `ar_advance_rate` | number | Advance rate against eligible A/R as a fraction; defaults to the market-standard rate. |
+| `area_occupancy_pct` | number | null | Occupied area ÷ total area, or null. |
+| `article9_notice_floor_days` | integer | The Article 9 notice floor. |
+| `as_of_date` | string (ISO date) | The as-of date used to compute months remaining from lease-expiry dates. |
+| `asc842_indicator_classification` | enum(asc842_classification) | Whether any finance-lease indicator is present. |
+| `asset_75_pct` | number | Real-estate assets as a fraction of total assets. |
+| `asset_75_test_passed` | boolean | Whether the 75% asset test passes. |
 | `asset_classes` | object[] | The asset classes with fair market values; each object carries `class_number` (1–7), `class_name` (string), and `fair_market_value_cents` (integer cents). |
+| `asset_count` | integer | Number of IP assets in the carve-out. |
+| `asset_deal_buyer_basis_cents` | integer (cents) | Buyer basis in an asset deal (the enterprise value). |
+| `asset_rows` | object[] | Per-asset detail: `{ asset_name, disposition, assigned_to_buyer, licensed_to_buyer, licensed_back_to_seller, transition_license_months }`. |
+| `assets` | object[] | IP assets under diligence; each object carries `name` (string), `type` (string, e.g. patent/trademark/copyright), `assignment_count` (integer), `current_owner_matches` (boolean), `recorded_within_three_months` (boolean), `contributor_assignments_complete` (boolean), and, for trademarks, `itu_assigned_after_allegation_of_use` (boolean). |
+| `assigned_to_buyer_count` | integer | Number assigned outright to the buyer. |
+| `assignee_fee_cents` | integer (cents) | Assignee/foreclosure fee (default 0). |
+| `assignment_consent_required_count` | integer | Number requiring assignment consent. |
+| `assignment_gap_count` | integer | Number with a broken or unmatched assignment chain. |
+| `auth_code_required_count` | integer | Number of assets needing a registrar auth code. |
 | `auto_reportable_cents` | integer (cents) | The current HSR auto-reportable ceiling, in cents. |
+| `availability_cents` | integer (cents) | Drawable availability after the commitment cap. |
+| `available_capital_cents` | integer (cents) | Capital available to the business. |
+| `balance_sheet_prong_passed` | boolean | Whether the balance-sheet prong passes. |
+| `balance_sheet_surplus_cents` | integer (cents) | Assets less liabilities. |
+| `bargain_purchase_option` | boolean | Whether the lessee holds a bargain purchase option (default false). |
 | `base_amount_cents` | integer (cents) | The executive's §280G base amount (five-year average W-2 compensation). |
+| `base_rate` | number | The Till base rate (e.g., prime), as a fraction. |
 | `basis` | enum(risk_basis) | The basis for the allocation. |
+| `basis_at_conversion_cents` | integer (cents) | Tax basis of assets at conversion. |
 | `basket_cents` | integer (cents) | The basket threshold in cents. |
+| `basket_count` | integer | Number of baskets evaluated. |
 | `basket_pct` | number | Override for the basket as a fraction of value; defaults to the cited median. |
 | `basket_type` | enum(basket_type) | Override for how the basket operates; defaults by RWI posture. |
+| `baskets` | object[] | Covenant baskets; each object carries `name`/`type` (strings) and integer-cents `fixed_capacity_cents` (or `opening_capacity_cents`), `grower_basis_cents`, `builder_amount_cents`, `ratio_capacity_cents`, `used_cents`, and `proposed_use_cents`, plus a `grower_pct` (number). |
 | `bfp_protected` | boolean | Whether the later purchaser takes free of the prior interest as a protected bona-fide purchaser. |
+| `blocked_basket_count` | integer | Number of baskets whose proposed use exceeds remaining capacity. |
+| `boot_received_cents` | integer (cents) | Non-like-kind consideration received (default 0). |
+| `breakeven_gross_up_cents` | integer (cents) | null | The grossed-up amount that makes the seller whole, or null. |
+| `breakup_fee_cents` | integer (cents) | Stalking-horse break-up fee (default 0). |
+| `breakup_fee_pct_of_purchase_price` | number | null | Break-up fee as a fraction of price, or null. |
+| `bright_line_date` | string (ISO date) | The bright-line date (the earlier of the LOI and board approval); costs on or after it are facilitative. |
 | `broker_handoff_required` | boolean | Always true — binding terms route to the broker/underwriter. |
+| `build_verified` | boolean | Whether the deposit was at least build-verified. |
+| `bulk_sale_clearance_required` | boolean | Whether a bulk-sale tax clearance is required (default false). |
 | `bulk_sales_citations` | string[] | Per-state bulk-sales citations for the applicable states. |
 | `bulk_sales_notification_states` | string[] | Applicable bulk-sales notification states. |
+| `buyer_asset_basis_cents` | integer (cents) | null | Buyer asset basis for asset/deemed-asset forms, else null. |
 | `buyer_equity_cents` | integer (cents) | Buyer equity injection into the transaction. |
 | `buyer_equity_pct` | number | Buyer equity as a fraction of purchase price (0–1). |
 | `buyer_expects_warranty` | boolean | Whether the buyer is negotiating for title warranties (default true); drives the warranty-gap flag. |
+| `buyer_net_benefit_after_gross_up_cents` | integer (cents) | null | Buyer benefit net of the gross-up, or null. |
 | `buyer_receivable_cents` | integer (cents) | Amount owed to the buyer when NWC lands below the peg. |
+| `buyer_step_up_cents` | integer (cents) | Step-up an asset deal delivers over the carried basis. |
+| `buyer_step_up_pv_benefit_cents` | integer (cents) | Present-value benefit of the step-up at the supplied rate. |
+| `buyer_will_use_as_residence` | boolean | Whether the buyer will use the property as a residence (default false); opens the exemption and reduced-rate paths. |
+| `california_2870_carveout_count` | integer | Number with a California §2870 outside-scope carve-out flag. |
+| `call_price_pct` | number | Stated call price as a fraction of par (default 1 = par). |
+| `cap_price_cents` | integer (cents) | null | The cap-implied per-share price, or null when the cap or share count is absent. |
+| `cap_rate` | number | Implied cap rate: annual rent ÷ sale price. |
+| `capital_adequacy_prong_passed` | boolean | Whether the capital-adequacy prong passes. |
+| `capital_adequacy_surplus_cents` | integer (cents) | Available less required capital. |
+| `capitalized_cents` | integer (cents) | Total capitalized. |
 | `cash_flow_cents` | integer (cents) | Post-acquisition annual free cash flow available for debt service. |
+| `cash_flow_prong_passed` | boolean | Whether the cash-flow prong passes. |
+| `cash_flow_sensitivity_cases` | object[] | Downside cases: `{ cash_flow_change_pct, minimum_dscr, dscr_floor_passed }` for −10% and −20%. |
+| `cash_flow_surplus_cents` | integer (cents) | Projected cash flow less debts due. |
+| `cash_interest_rate` | number | Annual cash coupon as a fraction (default 0). |
+| `cause_to_deny_credit_bid` | boolean | Whether cause exists to deny the credit bid (default false). |
 | `cercla_linked_property` | boolean | Whether the property has a CERCLA/environmental linkage (default false). |
 | `cercla_successor_flag` | boolean | Whether CERCLA successor liability is flagged. |
+| `chain_rows` | object[] | Per-asset detail: `{ name, type, assignment_count, current_owner_matches, recorded_within_three_months, contributor_assignments_complete, assignment_gap, late_recording_flag, contributor_gap, itu_assignment_risk }`. |
+| `change_of_control_consent_required_count` | integer | Number requiring change-of-control consent. |
+| `chapter22_recidivism_score` | integer | The 0–100 recidivism score. |
+| `characterization` | enum(imputed_interest_characterization) | Which imputed-interest regime the term routes to. |
+| `circuit` | string | The federal circuit (e.g., 2d, 5th, 6th, 8th); selects the framework. |
 | `citation` | string | The statutory citation for the state's recording act. |
 | `citt_screen_triggered` | boolean | Whether the controlling-interest transfer-tax screen fires. |
+| `claims` | object[] | Claim classes; each carries `class_name` (string), `priority_rank` (integer), and `allowed_claim_cents` (integer cents). |
+| `class_count` | integer | Number of creditor classes. |
+| `class_rows` | object[] | Per-class detail: `{ class_name, allowed_claim_cents, plan_distribution_cents, chapter7_distribution_cents, plan_recovery_pct, chapter7_recovery_pct, best_interests_shortfall_cents, best_interests_passed }`. |
+| `class_v_real_property_and_tangible_cents` | integer (cents) | Class V real property and tangible allocation. |
+| `class_v_tangible_assets_cents` | integer (cents) | Amount allocated to Class V tangible assets. |
 | `class_v_tangible_cents` | integer (cents) | Amount allocated to Class V tangible/§1231 assets. |
+| `class_vi_intangibles_cents` | integer (cents) | Identified Class VI §197 intangible value (default 0). |
+| `class_vi_ip_section_197_intangibles_cents` | integer (cents) | Amount allocated to Class VI §197 IP intangibles. |
 | `class_vi_section_197_intangibles_cents` | integer (cents) | Amount allocated to Class VI §197 intangibles (excluding goodwill). |
 | `class_vii_goodwill_cents` | integer (cents) | Residual allocated to Class VII goodwill and going-concern value. |
+| `class_vii_goodwill_going_concern_cents` | integer (cents) | Class VII goodwill/going-concern residual. |
+| `class_vote_amount_pct` | number | Class support by amount, as a fraction; optional. |
+| `class_vote_number_pct` | number | Class support by number, as a fraction; optional. |
+| `classes` | object[] | Plan classes; each carries `class_name` (string), `priority_rank` (integer), `allowed_claim_cents`, `plan_distribution_cents` (integer cents), `impaired` (boolean), and `accepted` (boolean). |
 | `classification` | enum(lease_classification) | How the transfer classifies against the restriction. |
 | `cleansing_vote_passed` | boolean | null | Whether the supplied vote exceeds the threshold, or null when no vote is supplied. |
 | `cleansing_vote_threshold_pct` | number | The disinterested-shareholder approval threshold (0.75). |
-| `closing_date` | string (ISO date) | The closing date from which survival periods run. |
+| `closing_date` | string (ISO date) | The closing date; dates the Form 8288 deadline. |
+| `closing_day_of_period` | number | Day of the period at closing, for proration (default 0). |
+| `closing_protection_letter_required` | boolean | Whether a closing-protection letter is required (default true). |
 | `closing_ready` | boolean | Whether no condition blocks closing. |
+| `closing_true_up_cents` | integer (cents) | Prorated share less payments (positive = owed by tenant; negative = credit). |
 | `co_required_on_transfer` | boolean | Whether a certificate of occupancy must be re-issued on this transfer. |
+| `co_tenancy_count` | integer | Number with a co-tenancy clause. |
 | `coc_default_note` | string | null | The change-of-control default note when a control transfer is not deemed an assignment, else null. |
+| `codi_exposure_cents` | integer (cents) | Cancellation-of-debt income exposure. |
+| `collateral_npv_test_passed` | boolean | Whether the payment-stream NPV meets or exceeds the collateral value. |
+| `collateral_value_cents` | integer (cents) | Value of the collateral (the secured portion). |
+| `combined_seller_tax_rate` | number | Combined federal-plus-state seller rate. |
+| `commercially_reasonable_sale` | boolean | Whether the sale is asserted commercially reasonable; echoed for counsel. |
+| `commitment_cents` | integer (cents) | Facility commitment cap; when supplied, availability is capped at it. |
+| `component_count` | integer | Number of OSS components. |
+| `components` | object[] | OSS components; each object carries `name` (string), `license` (string, e.g. MIT/LGPL-2.1/AGPL-3.0), `network_use` (boolean), `proprietary_linking` (boolean), and `remediation_cost_cents` (integer cents). |
 | `condition_count` | integer | Total number of conditions. |
 | `condition_nodes` | object[] | Per-condition detail: `{ name, type, satisfied, waived, blocks_closing, professional_review_required }`. |
 | `conditions` | object[] | Closing conditions; each object carries `name` (string), `type` (a condition_type value), `satisfied` (boolean), and `waived` (boolean). |
@@ -240,32 +344,115 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `consent_required` | boolean | Whether landlord consent is required for the transfer. |
 | `consent_standard` | enum(consent_standard) | The governing consent standard when consent is required, else null. |
 | `consent_standard_citation` | string | null | Citation for the state default when the clause states no standard, else null. |
+| `consideration_mix` | object | The consideration split: integer-cents `cash_cents`, `seller_note_cents`, `stock_cents`, `earnout_cents`, `rollover_cents`. |
 | `construction_mortgage` | boolean | Whether the prior interest is a construction mortgage (default false); triggers the § 9-334(h) override. |
+| `contested_nexus_position` | boolean | Whether a contested nexus position is present (default false). |
+| `contested_state_position_handoff_required` | boolean | True when the state is untabled and no rate was supplied. |
 | `contract_allocates_risk` | boolean | Whether the purchase contract expressly allocates pre-closing casualty risk. |
 | `contract_override_applied` | boolean | Whether an express contract allocation controls. |
 | `contract_risk_on` | enum(contract_risk_on) | The party the contract places risk on, when it allocates. |
 | `contract_title_standard` | enum(contract_title_standard) | The title standard the purchase contract promises (default marketable). |
+| `contributor_assignment_gap_count` | integer | Number with incomplete contributor assignments. |
+| `contributor_count` | integer | Number of contributors verified. |
+| `contributor_rows` | object[] | Per-contributor detail: `{ contributor, role, state, ip_assignment_executed, work_for_hire_executed, missing_assignment, missing_work_for_hire, california_2870_carveout_flag }`. |
+| `contributors` | object[] | IP contributors; each object carries `name` (string), `role` (string), `state`/`work_state` (US state code), `ip_assignment_executed` (boolean), `work_for_hire_executed` (boolean), and `outside_scope_invention` (boolean). |
 | `controlling_interest_threshold_pct` | number | null | The controlling-interest threshold for the state, or null. |
+| `conversion_date` | string (ISO date) | The S-election conversion date. |
+| `conversion_driver` | enum(conversion_driver) | Which term produced the governing conversion price. |
+| `conversion_price_cents` | integer (cents) | The governing (lowest) conversion price per share. |
+| `converted_share_count` | number | Shares the investment converts into at the conversion price. |
+| `copyright_asset_count` | integer | Number typed as copyrights. |
+| `copyright_security_hit_count` | integer | Total Copyright-Office-track hits. |
+| `corporate_tax_rate` | number | Corporate tax rate as a fraction; defaults to the federal corporate rate. |
+| `cost_count` | integer | Number of costs classified. |
+| `cost_to_cure_escrow_cents` | integer (cents) | Total cost-to-cure escrow. |
 | `counsel_and_tax_handoff_required` | boolean | Always true — binding legal and tax calls route to the specialists. |
+| `counsel_drafting_handoff_required` | boolean | Always true — the assignment and license documents are drafted by counsel. |
+| `counsel_drafting_required` | boolean | Always true — the reps are drafted by counsel. |
 | `counsel_handoff` | string | null | The routing sentence when a signatory gap defers, else null. |
 | `counsel_review_flags` | string[] | Items counsel must confirm (limitations period, fraud definition, RWI interaction). |
+| `counsel_review_required` | boolean | Always true — the CODI and holdout analysis routes to counsel. |
+| `coupon_rate` | number | Annual coupon rate as a fraction (e.g., 0.08). |
+| `court_approval_required` | boolean | Always true — the sale requires court approval. |
+| `court_determination_required` | boolean | Always true — APR compliance is a court determination. |
+| `court_sets_final_rate` | boolean | Always true — the court sets the final rate. |
 | `covenant_scope` | string | Whether covenants reach all defects or only the grantor's own acts, or none. |
 | `covenants_present` | string[] | The title covenants this deed conveys (empty for bargain-and-sale and quitclaim). |
+| `credit_bid_claim_cents` | integer (cents) | Secured claim available to credit bid (default 0). |
+| `credit_bid_eligible` | boolean | Whether the secured creditor may credit bid. |
+| `creditor_classes` | object[] | Creditor classes; each carries `class_name` (string), `allowed_claim_cents`, `plan_distribution_cents`, and `chapter7_distribution_cents` (integer cents). |
 | `cumulative_related_transfers_pct` | number | Cumulative percentage transferred across related steps within the aggregation window (0–100); defaults to transfer_pct. |
 | `curable_count` | integer | Number of exceptions triaged curable. |
-| `deal_form` | enum(permit_deal_form) | The acquisition form. |
+| `curative_cost_to_cure_cents` | integer (cents) | Total cost to cure the curative items. |
+| `curative_item_count` | integer | Number of curative items. |
+| `curative_items` | object[] | Curative items; each carries `item` (string), `status` (string), and `cost_to_cure_cents` (integer cents). |
+| `curative_rows` | object[] | Per-curative-item detail: `{ item, status, cost_to_cure_cents, open }`. |
+| `current_threshold_handoff_note` | string | Note that the reverted limit is used unless overridden. |
+| `cushion_pct` | number | Equity cushion: 1 − LTV. |
+| `cushion_requirement_satisfied` | boolean | Whether the cushion meets or exceeds the required minimum. |
+| `deal_form` | string | The transaction form (e.g., asset_sale, stock_sale, merger, 338h10); drives basis and sub-model routing. |
 | `deal_killing_count` | integer | Number triaged deal-killing (unmarketable and uninsurable). |
+| `deal_type` | string | The transaction type (e.g., asset_purchase, stock_purchase, merger). |
+| `debt_assumability` | enum(debt_assumability) | Whether property debt is assumable, needs consent/refinance, or was not supplied. |
+| `debt_assumable` | boolean | Whether existing property debt is assumable; drives debt_assumability. |
+| `debt_limit_cents` | integer (cents) | Override for the debt limit; defaults to the reverted statutory limit. |
+| `debt_limit_satisfied` | boolean | Whether the debt is within the limit. |
+| `debts_due_cents` | integer (cents) | Debts coming due over the projection. |
+| `deductible_cents` | integer (cents) | Total currently deductible. |
 | `deed_note` | string | Plain-language description of the deed's covenant coverage. |
 | `deed_type` | enum(deed_type) | The deed instrument type being conveyed. |
 | `default_regime` | enum(risk_basis) | The state default regime that would govern absent a contract term. |
 | `defer_to_counsel` | boolean | True only when the state is untabled; the ordering then defers. |
+| `deferred_or_rollover_consideration_cents` | integer (cents) | Rollover/deferred consideration. |
+| `deficiency_claim_cents` | integer (cents) | The deficiency (claim over collateral). |
+| `deposit_verification_tier` | string | How deeply the deposit was verified (e.g., inventory-only, build-verified, build-and-run-tested). |
+| `disclosure_statement_exhibit_handoff_required` | boolean | Always true — the liquidation-analysis exhibit routes to counsel. |
+| `discount_pct` | number | The conversion discount as a fraction (0–1); default 0 (no discount). |
+| `discount_price_cents` | integer (cents) | The discounted per-share price. |
+| `discount_rate` | number | The annual discount rate applied to the expected value (a fraction, e.g. 0.12). |
+| `discount_to_nav_pct` | number | null | Discount (positive) or premium (negative) to NAV, or null when NAV is non-positive. |
+| `disposition_months` | number | Length of the disposition window in months; drives the §336(e) test. |
+| `disposition_pct` | number | Fraction of stock disposed; drives the §336(e) test. |
 | `dispute_forum` | enum(dispute_forum) | The forum designated to resolve earnout disputes; defaults to the accounting arbitrator. |
 | `dispute_notice_days` | integer | Days after the statement to notice a dispute; defaults to the cited median. |
 | `dispute_notice_due_date` | string (ISO date) | Deadline to notice a dispute. |
+| `distributable_estate_cents` | integer (cents) | Estate net of the trustee fee. |
+| `distributable_value_cents` | integer (cents) | Proceeds net of fee and costs. |
+| `distribution_90_pct` | number | Distributions as a fraction of taxable income. |
+| `distribution_90_test_passed` | boolean | Whether the 90% distribution test passes. |
+| `distribution_rows` | object[] | Per-class detail (rank-sorted): `{ class_name, priority_rank, claim_cents, distribution_cents, recovery_pct }`. |
+| `distributions_cents` | integer (cents) | Distributions made to shareholders. |
+| `domain_count` | integer | Number of domains. |
 | `dscr` | number | Debt-service coverage ratio: cash flow ÷ annual debt service. |
+| `dscr_floor_breached` | boolean | Whether any period breaches the DSCR floor. |
+| `earnout_targets` | integer (cents)[] | The scenario payout amounts, one integer-cents value per scenario. |
 | `earnout_value_cents` | integer (cents) | Maximum contingent consideration payable under the earnout. |
+| `ebitda_growth_pct` | number | Projected EBITDA growth as a fraction (negative = decline). |
+| `eci_gain_cents` | integer (cents) | Estimated effectively-connected gain on the transfer; optional context. |
+| `economic_life_years` | number | Remaining economic life of the asset; enables the lease-term indicator. |
+| `effective_gross_income_cents` | integer (cents) | Effective gross income (gross potential less vacancy/credit loss). |
+| `efficient_market_exists` | boolean | Whether an efficient market exists (defaults to whether a rate is supplied). |
+| `efficient_market_framework_supported` | boolean | Whether the circuit applies the efficient-market framework. |
+| `efficient_market_rate` | number | An observed efficient-market rate, as a fraction; optional. |
+| `election_aggregate_payments_cents` | integer (cents) | Aggregate face of the payment stream. |
+| `election_eligible` | boolean | Whether the §1111(b) election is available. |
+| `election_filing_handoff_required` | boolean | Always true — the election filing routes to counsel. |
+| `election_npv_cents` | integer (cents) | Present value of the payment stream. |
+| `election_review_flags` | string[] | Standing tax-counsel review note on eligibility and mechanics. |
+| `election_vote_passed` | boolean | null | Whether the class vote clears §1126(c), or null when votes are not supplied. |
+| `eligible_ar_cents` | integer (cents) | Eligible accounts receivable in the borrowing base. |
+| `eligible_inventory_cents` | integer (cents) | Eligible inventory in the borrowing base. |
+| `enforceability_opinion_pass_through` | boolean | Always true — any enforceability opinion is a pass-through to counsel. |
+| `engaged_in_commercial_activity` | boolean | Whether the debtor is engaged in commercial or business activity. |
 | `enterprise_value_cents` | integer (cents) | The size of the transaction being tested against the HSR thresholds. |
+| `entity_carried_basis_cents` | integer (cents) | The target's carried (inside) tax basis in an entity deal (default 0). |
+| `entity_deal_buyer_outside_basis_cents` | integer (cents) | Buyer outside basis in an entity deal (the enterprise value). |
+| `environmental_escrow_cents` | integer (cents) | Total environmental escrow. |
+| `escrow_rows` | object[] | Per-issue detail: `{ issue, category (a property_escrow_category value), source, amount_cents, holdback_pct, escrow_cents, pass_through_source_required }`. |
+| `estate_value_cents` | integer (cents) | The gross Chapter 7 estate value. |
 | `estimated_adjustment_cents` | integer (cents) | null | Estimated adjustment against the peg, or null. |
+| `estimated_irr` | number | null | Annualized IRR to resolution, or null. |
+| `estimated_lender_irr` | number | null | Estimated annualized lender IRR, or null when the term is non-positive. |
 | `estimated_nwc_cents` | integer (cents) | Estimated net working capital per the estimated statement; optional. |
 | `estimated_years_to_use_nol` | integer | null | Whole-year ceiling to absorb the NOL at the annual limitation, or null. |
 | `exceptions` | object[] | Title-commitment exceptions; each object carries `label` (string), `curable` (boolean), and `insurer_will_insure_over` (boolean). |
@@ -273,48 +460,163 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `excess_layers` | object[] | Excess layers above the primary tower; each object carries `limit_cents` (integer cents). |
 | `excess_parachute_payment_cents` | integer (cents) | The excess parachute payment (payments over one times base) when triggered, else 0. |
 | `excess_policy_limit_cents` | integer (cents) | Total excess-layer limit in cents. |
+| `exchange_deadline` | string (ISO date) | The 180-day exchange deadline. |
+| `exchange_discount_cents` | integer (cents) | Old-security value over new-security value. |
 | `excise_tax_20pct_cents` | integer (cents) | The §4999 excise tax on the excess (20%). |
 | `exclusion_count` | integer | Number of tracked exclusions. |
 | `exclusions` | string[] | Named policy exclusions being tracked. |
+| `exclusives_count` | integer | Number with an exclusive-use clause. |
+| `executed_assignment_count` | integer | Number with an executed IP assignment. |
+| `exemption_applies` | boolean | Whether a transfer-tax exemption applies (default false); zeroes the tax. |
+| `exercise_price_cents` | integer (cents) | The warrant exercise (strike) price per share. |
+| `exit_leverage` | number | Net debt / EBITDA at emergence. |
+| `expected_gross_cents` | integer (cents) | Probability-weighted expected earnout payout, undiscounted. |
+| `expected_present_value_cents` | integer (cents) | The expected payout discounted to present value over the term. |
+| `expected_recovery_cents` | integer (cents) | Expected ultimate recovery on the face. |
+| `expected_recovery_rate` | number | Expected ultimate recovery as a fraction of face; if omitted, implied from a post-default trading price. |
+| `face_amount_cents` | integer (cents) | Face amount of the claim. |
+| `failing_class_count` | integer | Number of classes that fail. |
+| `fair_value_assets_cents` | integer (cents) | Fair value of assets. |
+| `fair_value_share_price_cents` | integer (cents) | Assumed fair-value price per share used to value the warrants. |
+| `feasibility_opinion_handoff_required` | boolean | Always true — the feasibility opinion routes to the financial advisor. |
+| `feasible_under_inputs` | boolean | Whether every period clears both floors. |
+| `federal_tax_rate` | number | Seller federal tax rate as a fraction (default 0). |
+| `fiduciary_out_present` | boolean | Whether the RSA contains a fiduciary out (default false). |
 | `filing_days_after_affixation` | integer | Days between affixation and the fixture filing; decisive for the 20-day PMSI window. |
 | `final_purchase_price_adjustment_cents` | integer (cents) | Final adjustment: actual NWC minus peg (positive = above peg). |
+| `finance_lease_indicators` | string[] | The finance-lease indicators that fired (empty when none). |
+| `financial_advisor_ev_handoff_required` | boolean | Always true — the enterprise valuation routes to the financial advisor. |
+| `financial_advisor_handoff_required` | boolean | Always true — the judgment routes to the financial advisor. |
+| `fired_sub_models` | string[] | Model IDs of the sub-analyses the facts trigger. |
 | `fixture_filing_made` | boolean | Whether a fixture filing was made in the real-property records (a UCC-1 alone does not suffice). |
+| `fmv_at_conversion_cents` | integer (cents) | Fair market value of assets at S-election conversion. |
+| `fmv_real_property_cents` | integer (cents) | Fair market value of the real property. |
+| `forecast_periods` | object[] | Forecast periods; each carries `period`/`year` (string), and integer-cents `cash_flow_cents` (or `ebitda_cents`), `capex_cents`, `working_capital_need_cents`, `debt_service_cents`, and `ending_liquidity_cents`. |
+| `forecast_rows` | object[] | Per-period detail: `{ period, cash_flow_cents, capex_cents, working_capital_need_cents, available_for_debt_service_cents, debt_service_cents, dscr, ending_liquidity_cents, dscr_floor_passed, liquidity_floor_passed }`. |
+| `form_8288_b_reduced_withholding_requested` | boolean | Whether a Form 8288-B reduced-withholding certificate is requested (default false). |
+| `form_8594_reconciliation_total_cents` | integer (cents) | Sum of the three classes (reconciles to the price). |
+| `forms_8288_due_date` | string (ISO date) | null | The Form 8288 filing/remittance deadline, or null. |
+| `forms_due_within_days` | integer | null | Days within which Form 8288/8288-A must be filed and the tax remitted, or null when no withholding applies. |
+| `founder_ownership_pct` | number | Residual founder/existing-holder ownership as a fraction. |
 | `fraud_carveout` | boolean | Whether fraud is carved out of the exclusive-remedy provision (default true). |
 | `fraud_carveout_from_exclusive_remedy` | boolean | Whether fraud is carved out of the exclusive remedy. |
 | `fraud_exception_note` | string | Standing note that fraud claims survive merger regardless of survival language. |
 | `fraud_tax_carveout` | string | The fraud and tax carve-out posture — uncapped or counsel-defined. |
+| `frbp_transfer_review_required` | boolean | Always true — the Rule 3001 transfer routes to counsel. |
+| `free_and_clear_path_available` | boolean | Whether any §363(f) prong is satisfied. |
+| `free_and_clear_prong_count` | integer | Number of §363(f) prongs satisfied. |
+| `fulcrum_tranche` | string | null | The fulcrum tranche name, or null. |
+| `fund_nav_cents` | integer (cents) | Total net asset value of the fund or portfolio. |
 | `fundamental_reps_cap_cents` | integer (cents) | The cap on fundamental-representation claims (the full transaction value). |
 | `fundamental_reps_expiry` | string (ISO date) | Fundamental-representation expiry date. |
 | `fundamental_reps_years` | integer | Override for fundamental-representation survival in years; defaults to the cited median. |
+| `g30_real_estate_overlay_triggered` | boolean | Whether the G30 real-estate overlay applies. |
+| `gain_cents` | integer (cents) | The gain subject to state income tax. |
+| `general_buffer_rate` | number | A general buffer added to every escrow as a fraction (default 0). |
 | `general_cap_cents` | integer (cents) | The general indemnity cap in cents. |
 | `general_cap_pct` | number | Override for the general indemnity cap as a fraction of value; defaults to the cited median. |
 | `general_escrow_cents` | integer (cents) | The general indemnity escrow in cents. |
 | `general_escrow_pct` | number | Override for the general escrow as a fraction of value; defaults to the cited median. |
 | `general_reps_expiry` | string (ISO date) | null | General-representation expiry date, or null when the period is zero. |
 | `general_reps_months` | integer | Override for general-representation survival in months; defaults to the cited median. |
+| `go_dark_count` | integer | Number with a go-dark right. |
 | `go_shop_break_fee_cents` | integer (cents) | The reduced break fee during a go-shop period. |
 | `go_shop_discount_pct` | number | Override for the go-shop fee discount as a fraction of the base fee; defaults to the cited median. |
 | `good_faith_negotiation_days` | integer | Days of good-faith negotiation before the arbitrator; defaults to the cited median. |
 | `good_faith_negotiation_end_date` | string (ISO date) | End of the good-faith negotiation window before the accounting arbitrator. |
+| `gross_borrowing_base_cents` | integer (cents) | Advance-rate value of eligible collateral before reserves. |
+| `gross_profit_cents` | integer (cents) | Expected recovery less purchase price. |
+| `gross_up_gap_cents` | integer (cents) | null | Gross-up needed to offset the structure tax delta, or null. |
+| `ground_lease_expiry_date` | string (ISO date) | When the ground lease expires. |
+| `guc_recovery_pct` | number | General-unsecured recovery on the deficiency, as a fraction (default 0). |
 | `high_cents` | integer (cents) | Maximum observed monthly net working capital. |
+| `holdout_debt_cents` | integer (cents) | Debt that does not tender. |
 | `hsr_size_triggered` | boolean | Whether the transaction meets or exceeds the size-of-transaction threshold. |
+| `identification_deadline` | string (ISO date) | The 45-day identification deadline. |
+| `immediate_repair_escrow_cents` | integer (cents) | Immediate-repair escrow at the lender reserve percentage. |
+| `implied_cap_rate` | number | null | Cap rate implied by the purchase price, or null. |
+| `implied_rent_yield` | number | null | Rent ÷ property value, or null. |
+| `implied_total_value_cents` | integer (cents) | Total fund value the strip price implies (price ÷ strip). |
+| `imputed_interest_cents` | integer (cents) | Imputed interest over the term. |
+| `imputed_rate_delta` | number | AFR shortfall (AFR less stated rate, floored at zero). |
+| `in_place_lease_treatment` | string | How in-place leases are treated on transfer (default: assumption/assignment to confirm). |
+| `inbound_license_count` | integer | Number of inbound (taken-in) licenses. |
+| `includes_oss_rep` | boolean | Whether the set includes the OSS-compliance rep. |
+| `includes_sufficiency_rep` | boolean | Whether the set includes the IP-sufficiency rep. |
+| `income_75_pct` | number | Real-estate income as a fraction of total income. |
+| `income_75_test_passed` | boolean | Whether the 75% income test passes. |
+| `indemnity_carveout_review_required` | boolean | Whether any strong-copyleft or unknown component warrants an indemnity carve-out review. |
+| `indicated_cramdown_rate` | number | The rate the selected framework indicates. |
+| `installment_453a_threshold_cents` | integer (cents) | The §453A threshold applied. |
+| `installment_receivable_cents` | integer (cents) | Aggregate face of installment receivables (default 0); drives the §453A test. |
+| `installment_receivable_threshold_cents` | integer (cents) | Override for the §453A threshold; defaults to the statutory $5M. |
 | `insurable_over_count` | integer | Number triaged insurable-over. |
+| `interest_inconsequential` | boolean | Whether the secured interest is of inconsequential value (default false); defeats eligibility. |
+| `interest_transferred_pct` | number | Fraction of the interest transferred (0–1). |
+| `intrinsic_warrant_value_cents` | integer (cents) | Intrinsic value of the warrants at the assumed fair value. |
+| `inventory_advance_rate` | number | Advance rate against eligible inventory as a fraction; defaults to the market-standard rate. |
+| `investment_cents` | integer (cents) | Principal (or SAFE amount) converting into the round. |
+| `investor_ownership_pct` | number | New-investor ownership as a fraction of the post-money cap table. |
+| `ip_asset_count` | integer | Number of IP assets examined. |
+| `ip_assets` | object[] | Carve-out IP assets; each object carries `asset_name` (string), `disposition` (string, e.g. assigned_to_buyer/licensed_to_buyer/license_back_to_seller), `licensed_back_to_seller` (boolean), and `transition_license_months` (integer). |
+| `ip_intangibles_cents` | integer (cents) | Class VI §197 IP-intangible value. |
+| `ip_value_excess_over_purchase_price_cents` | integer (cents) | IP value that exceeds the price available after Class V (normally zero). |
 | `is_entity_transfer` | boolean | Whether the transaction moves interests in an entity that owns the property (rather than a deed). |
+| `issues` | object[] | Property issues; each carries `name` (string), `type`/`category` (string), `amount_cents`/`cost_to_cure_cents` (integer cents), `holdback_pct` (number, default 1), `source` (string), and `pass_through_source_required` (boolean). |
 | `items` | object[] | Relied-on obligations; each object carries `label` (string), `type` (a survival_item_type value), `express_survival` (boolean), and `collateral_obligation` (boolean). |
+| `itu_assignment_risk_count` | integer | Number of trademarks with intent-to-use assignment risk. |
+| `jurisdiction` | string (US state code) | The taxing jurisdiction (state/DC code). |
 | `jurisdiction_requires_co_on_transfer` | boolean | Whether the jurisdiction requires a certificate of occupancy to be re-issued on transfer. |
 | `landlord_recapture_right` | boolean | Whether the landlord holds a recapture right triggered by a consent request (default false). |
+| `last_deposit_date` | string (ISO date) | Date of the most recent deposit; drives the next-due date. |
+| `late_recording_count` | integer | Number with an assignment not recorded within three months. |
 | `later_purchaser_for_value` | boolean | Whether the later-in-time purchaser gave value (a threshold for bona-fide-purchaser protection in every act). |
 | `later_recorded_first` | boolean | Whether the later purchaser recorded before the prior interest (decisive in race and race-notice states). |
 | `later_took_without_notice` | boolean | Whether the later purchaser took without actual or constructive notice of the prior interest (decisive in notice and race-notice states). |
+| `lease_count` | integer | Number of leases abstracted. |
 | `lease_deems_change_of_control_assignment` | boolean | Whether the lease expressly deems a control transfer an assignment (default false). |
+| `lease_term_pct_of_economic_life` | number | null | Lease term as a fraction of economic life, or null. |
+| `lease_term_years` | number | The leaseback term in years. |
+| `leasehold_mortgageability_flag` | boolean | Whether the leasehold is mortgageable on these facts. |
+| `leases` | object[] | Leases to abstract; each carries `tenant` (string), `annual_rent_cents` (integer cents), `expiry_date` (ISO date), `months_remaining` (number), `assignment_consent_required` (boolean), `change_of_control_consent_required` (boolean), `renewal_options_count` (integer), `exclusive_use` (boolean), `co_tenancy` (boolean), and `go_dark` (boolean). |
 | `legal_title_or_possession_passed` | boolean | Whether legal title or possession has passed to the buyer (default false); decisive under UVPRA/NY regimes. |
 | `lender_consent_critical_path` | boolean | Whether lender consent (or payoff/refinance) is a closing-condition critical path. |
+| `lender_gross_return_cents` | integer (cents) | Principal plus interest plus warrant intrinsic value. |
+| `lender_handoff_required` | boolean | Always true — binding facility terms route to the lender. |
+| `lender_policy_required` | boolean | Whether a lender's policy is required (default false). |
+| `lender_recognition_agreement` | boolean | Whether a lender recognition (SNDA-style) agreement is in place (default false). |
+| `lender_reserve_pct` | number | Fraction of immediate-repair cost the lender escrows (default 1 = 100%). |
+| `lender_tail_requirement_satisfied` | boolean | Whether the tail meets the requirement. |
+| `liabilities_cents` | integer (cents) | Total liabilities. |
+| `license_count` | integer | Number of licenses mapped. |
+| `license_rows` | object[] | Per-license detail: `{ name, direction (a license_direction value), scope, exclusive, annual_royalty_cents, change_of_control_consent_required, terminates_on_change_of_control, sublicensing_allowed, material_dependency_flag }`. |
+| `licensed_back_to_seller_count` | integer | Number licensed back to the seller. |
+| `licensed_to_buyer_count` | integer | Number licensed to the buyer. |
+| `licenses` | object[] | Material licenses; each object carries `name` (string), `direction` (a license_direction value), `scope` (string), `exclusive` (boolean), `annual_royalty_cents` (integer cents), `change_of_control_consent_required` (boolean), `terminates_on_change_of_control` (boolean), and `sublicensing_allowed` (boolean). |
+| `lien_amount_cents` | integer (cents) | Aggregate liens on the assets. |
+| `lien_search_rows` | object[] | Per-search detail: `{ search, track (a lien_search_track value), hit_count, release_obtained, release_required, pass_through_search_source }`. |
+| `liquidation_preference_cents` | integer (cents) | The round's liquidation preference (round size × multiple). |
+| `liquidation_value_cents` | integer (cents) | Gross liquidation proceeds. |
+| `liquidity_floor_breached` | boolean | Whether any period breaches the liquidity floor. |
+| `liquidity_months` | number | Months of liquidity runway at emergence. |
+| `liquidity_need_cents` | integer (cents) | New liquidity the DIP must supply. |
+| `loan_amount_cents` | integer (cents) | Drawn (or committed) loan amount under the facility. |
 | `loan_has_due_on_transfer_clause` | boolean | Whether the loan documents contain a due-on-sale/due-on-transfer clause. |
+| `loan_maturity_date` | string (ISO date) | When the leasehold loan matures. |
+| `locked_domain_count` | integer | Number of domains still within a transfer lock. |
 | `long_term_tax_exempt_rate` | number | The IRS long-term tax-exempt rate for the change month (a fraction, e.g. 0.0435); supplied at runtime. |
 | `loss_corporation_value_cents` | integer (cents) | The equity value of the loss corporation immediately before the ownership change (§382(e)). |
 | `lost_employer_deduction_cents` | integer (cents) | The employer deduction disallowed under §280G (equal to the excess). |
 | `low_cents` | integer (cents) | Minimum observed monthly net working capital. |
+| `lower_cost_redemption_path` | enum(redemption_path) | The cheaper redemption route. |
+| `make_whole_discount_rate` | number | Treasury rate plus the spread, as a decimal. |
+| `make_whole_premium_cents` | integer (cents) | The make-whole premium over par. |
+| `make_whole_price_cents` | integer (cents) | The make-whole redemption price (PV of coupons and principal, floored at par). |
+| `market_cap_rate_from_pass_through_source` | boolean | Whether the cap rate came from a pass-through market-data source; suppresses the pass-through-required flag. |
 | `material_casualty_or_condemnation_pending` | boolean | Whether a material casualty or condemnation is pending (default false); drives the silent-contract red flag. |
+| `material_dependency_count` | integer | Number of inbound licenses flagged deal-critical. |
+| `material_ip_categories` | string[] | The IP categories material to the deal (e.g., software, patents, trademarks); drive the category-specific reps. |
+| `material_ip_category_count` | integer | Number of material IP categories supplied. |
 | `materiality_scrape_default` | boolean | Whether a materiality scrape is the market-standard default here. |
 | `max_7a_loan_cents` | integer (cents) | The statutory 7(a) maximum loan amount, in cents. |
 | `meets_sba_dscr_floor` | boolean | Whether the coverage ratio meets or exceeds the SBA 7(a) DSCR floor. |
@@ -323,80 +625,348 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `merged_away_count` | integer | Number that merge into the deed at closing. |
 | `metric_count` | integer | Number of performance metrics. |
 | `metrics` | string[] | The performance metrics that gate the earnout (e.g., EBITDA, revenue). |
+| `milestone_count` | integer | Number of milestones. |
+| `milestones` | object[] | RSA milestones; each carries a `name` (string) and `completed` (boolean). |
+| `minimum_dscr` | number | The DSCR floor the plan must clear each period (default 1.0). |
+| `minimum_dscr_floor` | number | The DSCR floor applied. |
+| `minimum_liquidity_cents` | integer (cents) | The ending-liquidity floor each period (default 0). |
+| `minimum_liquidity_floor_cents` | integer (cents) | The liquidity floor applied. |
+| `minimum_participation_pct` | number | Minimum participation condition, as a fraction (default 0). |
+| `minimum_participation_satisfied` | boolean | Whether participation meets the minimum. |
+| `minimum_projected_dscr` | number | null | The lowest DSCR across periods, or null. |
+| `minimum_projected_liquidity_cents` | integer (cents) | The lowest ending liquidity across periods. |
+| `missing_assignment_count` | integer | Number missing an IP assignment. |
+| `missing_work_for_hire_count` | integer | Number missing a work-for-hire. |
 | `monthly_nwc_cents` | integer (cents)[] | Trailing monthly net-working-capital observations, one integer-cents value per month; order is immaterial to the peg. |
 | `multiple_metric_earnout` | boolean | Whether more than one metric gates the earnout. |
+| `nav_ltv` | number | Loan-to-value: loan ÷ NAV. |
+| `net_borrowing_base_cents` | integer (cents) | Gross base less reserves, floored at zero. |
+| `net_unrealized_built_in_gain_cents` | integer (cents) | NUBIG at conversion (FMV over basis). |
+| `new_money_component_cents` | integer (cents) | The new-money portion of the facility. |
+| `new_money_minimum_cents` | integer (cents) | A floor on the new-money component (default 0). |
+| `new_security_value_cents` | integer (cents) | Value of the new securities issued. |
+| `new_value` | object | The new-value exception scaffold: `contribution_cents` (integer cents) and the booleans `new_money_or_money_worth`, `necessary_to_reorganization`, `market_test_completed`, `reasonably_equivalent_value`. |
+| `new_value_scaffold` | object | The new-value elements: `{ contribution_cents, new_money_or_money_worth, necessary_to_reorganization, market_test_completed, reasonably_equivalent_value }`. |
+| `new_value_scaffold_complete` | boolean | Whether all five new-value elements are affirmatively present. |
+| `next_deposit_due_date` | string (ISO date) | null | The next deposit due date, or null when no last-deposit date is supplied. |
+| `no_election_value_cents` | integer (cents) | Value without electing (collateral plus deficiency recovery). |
+| `noi_cents` | integer (cents) | Stabilized net operating income of the real property. |
 | `nol_carryforward_cents` | integer (cents) | The pre-change NOL carryforward balance; optional, drives the years-to-absorb estimate. |
 | `non_transferable_permits` | string[] | Labels of permits that do not travel with the transfer. |
+| `normalized_noi_cents` | integer (cents) | Normalized NOI (EGI less expenses and reserve). |
+| `notice_days` | number | Days of disposition notice given (default 10). |
+| `notice_floor_satisfied` | boolean | Whether the notice clears the Article 9 floor. |
 | `observed_months` | integer | Number of monthly observations the peg was computed over. |
+| `occupancy_pct` | number | null | Occupied tenants ÷ total tenants. |
+| `occupied_annual_rent_cents` | integer (cents) | Annual rent from occupied tenants. |
+| `occupied_tenant_count` | integer | Number of occupied tenants. |
+| `oid_floor_cents` | integer (cents) | The OID floor (equal to the imputed interest). |
+| `old_security_value_cents` | integer (cents) | Market value of the old securities; defaults to participating debt. |
+| `opco_ebitda_after_rent_cents` | integer (cents) | OpCo EBITDA after the master-lease rent. |
+| `opco_ebitda_before_rent_cents` | integer (cents) | OpCo EBITDA before rent, echoed. |
+| `opco_ebitda_cents` | integer (cents) | OpCo EBITDA before rent. |
 | `open_condition_count` | integer | Number still blocking closing. |
 | `open_conditions` | string[] | Names of the conditions still blocking closing. |
+| `open_curative_item_count` | integer | Number of open curative items. |
+| `open_lien_count` | integer | Total hits still lacking a release. |
+| `open_milestone_count` | integer | Number of incomplete milestones. |
+| `opening_cash_cents` | integer (cents) | Cash on hand at filing (default 0). |
+| `operating_business_residual_value_cents` | integer (cents) | Price remaining after the real estate. |
+| `operating_expenses_cents` | integer (cents) | Operating expenses. |
+| `option_pool_pct` | number | The post-round option-pool ownership as a fraction (0–1). |
+| `oss_rows` | object[] | Per-component detail: `{ component, license, license_class (an oss_license_class value), network_use, proprietary_linking, agpl_network_flag, strong_copyleft_embedded_flag, remediation_cost_cents }`. |
+| `oss_specific_rep_required` | boolean | Always true — an OSS-specific representation is required. |
+| `other_property_escrow_cents` | integer (cents) | Total other-category escrow. |
+| `outbound_license_count` | integer | Number of outbound (granted-out) licenses. |
+| `outstanding_debt_cents` | integer (cents) | Total outstanding debt eligible to exchange. |
+| `owner_policy_required` | boolean | Whether an owner's policy is required (default true). |
 | `parachute_payments_cents` | integer (cents) | Aggregate contingent-on-change-in-control payments to the executive. |
+| `participating_debt_cents` | integer (cents) | Debt tendered into the exchange. |
+| `participation_pct` | number | Participating over outstanding debt. |
+| `pass_through_market_rate_required` | boolean | Whether a pass-through market cap rate is still required. |
+| `pass_through_search_source_required` | boolean | Always true — the search itself is a pass-through record pull. |
+| `pass_through_source_required_count` | integer | Number of issues needing a pass-through specialist report. |
+| `patent_asset_count` | integer | Number typed as patents. |
+| `path` | enum(firpta_path) | The withholding path taken. |
+| `pca_item_count` | integer | Number of PCA items. |
+| `pca_items` | object[] | PCA items; each carries `item` (string) and integer-cents `immediate_repair_cents`, `year_1_3_cents` (or `near_term_cents`), `year_4_5_cents`, and `year_6_12_cents`, plus a `source` string. |
+| `pca_pass_through_source_required` | boolean | Always true — the PCA report is a pass-through source. |
+| `pca_reserve_escrow_cents` | integer (cents) | Total PCA/physical-condition escrow. |
+| `pe_owned_target` | boolean | Whether the target is PE-owned (default false); drives the success-fee documentation-risk flag. |
+| `pe_owned_target_success_fee_risk_flag` | boolean | Whether a PE-owned-target success-fee documentation risk is flagged. |
 | `peg_cents` | integer (cents) | The working-capital peg: the trailing arithmetic mean of the observations, to the nearest cent. |
+| `period_count` | integer | Number of forecast periods. |
+| `period_days` | number | Days in the reconciliation period (default 365). |
+| `permissive_count` | integer | Number classified permissive. |
 | `permits` | object[] | Operating permits; each object carries `label` (string) and `transferable` (boolean). |
+| `plan_payment_stream_cents` | integer (cents)[] | The plan's payment stream, one integer-cents payment per period. |
 | `pmsi` | boolean | Whether the fixture interest is a purchase-money security interest. |
 | `policy_tower_pct` | number | Override for the primary tower as a fraction of EV; defaults to the cited median. |
 | `post_closing_covenant_count` | integer | Number of post-closing covenants. |
 | `post_closing_covenants` | string[] | Covenants governing the buyer's post-closing operation of the business. |
+| `post_default_trading_price` | number | Post-default trading price (fraction of face); drives the regression when no rate is supplied. |
+| `post_money_cents` | integer (cents) | Post-money valuation (pre-money plus round size). |
 | `ppa_escrow_cents` | integer (cents) | The purchase-price-adjustment escrow in cents. |
 | `ppa_escrow_pct` | number | Override for the PPA escrow as a fraction of value; defaults to the cited median. |
 | `ppa_note` | string | Standing note that the fixture-versus-personalty line shifts purchase-price allocation, transfer-tax base, and depreciation. |
+| `pre_money_cents` | integer (cents) | Pre-money valuation of the round. |
+| `pre_money_share_count` | number | Fully-diluted pre-money share count used to convert the cap into a per-share price; optional. |
 | `prevailing_interest` | enum(prevailing_interest) | Which competing interest the act favors on the facts. |
+| `price_exceeds_aggregate_liens` | boolean | Whether the price exceeds the liens. |
+| `priced_round_share_price_cents` | integer (cents) | The new priced-round price per share. |
 | `primary_policy_limit_cents` | integer (cents) | The primary RWI tower limit in cents. |
+| `priming_requested` | boolean | Whether the DIP primes existing liens (default false). |
+| `principal_cents` | integer (cents) | Outstanding principal being redeemed. |
+| `prior_bankruptcy_count` | number | Number of prior bankruptcy filings (default 0). |
 | `prior_recorded_real_property_interest` | boolean | Whether a conflicting real-property interest (e.g., a mortgage) was recorded first. |
 | `priority` | enum(fixture_priority) | Which interest holds priority in the fixture. |
+| `probabilities` | number[] | The probability of each scenario (0–1), positionally aligned to earnout_targets. |
+| `process_steps` | string[] | The ordered title/survey process steps. |
+| `professional_fee_carveout_cents` | integer (cents) | Professional-fee carve-out (default 0). |
+| `professional_review_flags` | string[] | Standing tax-counsel review note. |
 | `professional_review_required` | boolean | Whether any condition needs specialist review. |
+| `projected_cash_flow_cents` | integer (cents) | Projected cash flow available to service debt. |
+| `property_issue_count` | integer | Number of property issues. |
+| `property_sold_under_363_or_plan` | boolean | Whether the property is sold under §363 or the plan (default false); with recourse, defeats eligibility. |
+| `proprietary_strong_copyleft_count` | integer | Number of strong-copyleft components linked into proprietary code. |
+| `prorated_tenant_share_through_closing_cents` | integer (cents) | The share prorated through the closing day. |
+| `psa_required` | boolean | Always true — a purchase-and-sale agreement papers the transfer. |
 | `purchase_price_cents` | integer (cents) | Total acquisition purchase price. |
+| `pv_lease_payments_cents` | integer (cents) | Present value of the lease payments; enables the fair-value indicator. |
+| `pv_payments_pct_of_fair_value` | number | null | PV of payments as a fraction of fair value, or null. |
+| `real_estate_assets_cents` | integer (cents) | Qualifying real-estate assets. |
+| `real_estate_income_cents` | integer (cents) | Qualifying real-estate gross income. |
+| `real_estate_pct_of_ev` | number | Real property as a fraction of enterprise value. |
+| `real_estate_value_cents` | integer (cents) | Real-estate value after the price cap (Class V). |
+| `real_property_value_cents` | integer (cents) | Value of the real property inside the target. |
 | `reassessment_screen_triggered` | boolean | Whether the property-tax reassessment screen fires. |
+| `recharacterization_review_required` | boolean | Whether the lease term or residual trips a true-lease recharacterization review. |
+| `recognition_period_years` | integer | The §1374 recognition period. |
+| `recognized_big_tax_base_cents` | integer (cents) | The built-in-gains tax base after the caps. |
+| `recognized_gain_cents` | integer (cents) | Gain recognized on the sale. |
+| `recognized_gain_floor_cents` | integer (cents) | The greater of boot and shortfall — gain that cannot be deferred. |
+| `recourse` | boolean | Whether the claim is recourse (default true). |
+| `recoverable_expenses_cents` | integer (cents) | Total recoverable CAM expenses for the period. |
 | `red_flags` | string[] | Priority-hygiene warnings (unrecorded interests; race-state notice anomaly). |
+| `reduced_certificate_processing_days_estimate` | integer | null | IRS Form 8288-B processing estimate in days (a planning estimate), or null. |
 | `regime_known` | boolean | Whether the state is in the transfer-tax regime table. |
 | `related_steps_planned` | boolean | Whether related transfer steps are planned (default false); with a mere-change claim this drives step-transaction risk. |
+| `release_required_count` | integer | Number of searches whose hits require a release. |
+| `release_trigger_count` | integer | Number of release triggers. |
+| `release_triggers` | string[] | The events that release the deposit (e.g., bankruptcy, material breach, support discontinuation). |
+| `relinquished_property_value_cents` | integer (cents) | Value of the relinquished property. |
+| `relinquished_value_cents` | integer (cents) | The relinquished-property value, echoed. |
+| `remaining_years` | number | Years remaining to maturity (may be fractional). |
+| `rent_reset_type` | string | How the ground rent resets (e.g., CPI, fair-market, fixed); echoed. |
+| `rent_roll` | object[] | Tenant rows; each carries `tenant` (string), `annual_rent_cents` (integer cents), `square_feet`/`area` (number), `lease_months_remaining` (number) or `lease_expiry_date` (ISO date), and `occupied` (boolean). |
+| `rent_to_ebitda_pct` | number | null | Rent as a fraction of OpCo EBITDA, or null. |
+| `replacement_property_value_cents` | integer (cents) | Value of the replacement property. |
+| `replacement_reserve_cents` | integer (cents) | Replacement reserve deducted from NOI (default 0). |
+| `replacement_value_cents` | integer (cents) | The replacement-property value, echoed. |
+| `representation_count` | integer | Number of representations in the assembled set. |
+| `representation_set` | string[] | The assembled representation identifiers. |
+| `required_capital_cents` | integer (cents) | Capital the business reasonably requires. |
+| `required_cushion_pct` | number | Minimum equity cushion the covenant requires as a fraction; defaults to the cited market minimum. |
+| `required_dip_commitment_cents` | integer (cents) | Total required DIP commitment. |
 | `required_signatories` | string | Who must sign for a conveyance of the whole. |
+| `required_tail_years` | number | The lender's minimum tail beyond loan maturity in years; defaults to the market minimum. |
+| `reserve_rows` | object[] | Per-item detail: `{ item, immediate_repair_cents, year_1_3_cents, year_4_5_cents, year_6_12_cents, total_reserve_cents, source }`. |
+| `reserves_cents` | integer (cents) | Lender reserves deducted from the gross base (default 0). |
 | `residential_under_5_units` | boolean | Whether the collateral is residential real property of fewer than five dwelling units. |
+| `residual_to_equity_cents` | integer (cents) | Remainder to equity after all claims. |
+| `residual_value_cents` | integer (cents) | Value remaining after all tranches. |
+| `residual_value_pct` | number | Projected residual value as a fraction; drives the recharacterization residual test. |
+| `retained_nav_cents` | integer (cents) | NAV retained after the strip. |
 | `retention_cents` | integer (cents) | The retention (deductible) in cents. |
 | `retention_pct` | number | Override for the retention as a fraction of EV; defaults to the cited median. |
+| `rev_proc_2011_29_safe_harbor_elected` | boolean | Whether the 70/30 success-based-fee safe harbor is elected (default true). |
 | `reverse_termination_fee_cents` | integer (cents) | The reverse termination fee in cents. |
 | `reverse_termination_fee_pct` | number | Override for the reverse termination fee as a fraction of value; defaults to the cited median. |
 | `right_captures_entity_transfers` | boolean | Whether the right's language expressly captures entity-level (indirect) transfers. |
 | `right_type` | enum(right_type) | The preemptive right at issue. |
+| `risk_band` | enum(chapter22_risk_band) | The risk band the score falls into. |
 | `risk_on` | enum(risk_on) | The party bearing pre-closing casualty risk. |
+| `risk_premium` | number | The Till risk premium, as a fraction. |
+| `rollup_amount_cents` | integer (cents) | Prepetition debt rolled into the DIP (default 0). |
+| `rollup_pct_of_commitment` | number | null | Roll-up as a fraction of the commitment, or null. |
+| `round_size_cents` | integer (cents) | New money raised in the round. |
+| `rows` | object[] | Per-cost detail: `{ label, amount_cents, incurred_date, classification (a transaction_cost_classification value), deductible_cents, capitalized_cents, amortizable_195_cents }`. |
+| `run_tested` | boolean | Whether the deposit was run-tested. |
 | `rwi_present` | boolean | Whether representation-and-warranty insurance backs the deal (default false); shifts the cited-median cap default. |
+| `sale_costs_cents` | integer (cents) | Sale costs (default 0). |
+| `sale_date` | string (ISO date) | The asset-sale date. |
+| `sale_price_cents` | integer (cents) | The sale-leaseback sale price. |
+| `sales_use_tax_base_cents` | integer (cents) | Base subject to sales/use tax (default 0). |
+| `sales_use_tax_cents` | integer (cents) | Sales/use tax on the base. |
+| `sales_use_tax_rate` | number | Sales/use tax rate as a fraction (default 0). |
+| `salt_specialist_handoff_required` | boolean | True on a contested nexus position or a bulk-sale clearance. |
 | `sandbagging_default` | string | The default sandbagging posture — silent or governed by state default. |
 | `satisfied_count` | integer | Number satisfied. |
+| `sca_pass_through_source_required` | boolean | Always true — the software-composition-analysis scan is a pass-through source. |
+| `scenarios` | object[] | Per-scenario echo: `{ target_cents (integer cents), probability (number, 0–1) }`. |
+| `schedule_b_exception_count` | integer | Number of Schedule B-II exceptions. |
+| `schedule_b_exceptions` | object[] | Schedule B-II exception rows (counted). |
+| `schedule_count` | integer | Number of reps that carry a disclosure schedule. |
+| `search_track_count` | integer | Number of search rows. |
+| `searches` | object[] | Lien-search results; each object carries `name`/`jurisdiction` (string), `track` (a lien_search_track value), `hit_count` (integer) or `hit_found` (boolean), `release_obtained` (boolean), and `source` (string). |
+| `section_1031_exchange` | boolean | Whether the disposition is part of a §1031 exchange (default false); drives the timing-gap flag. |
+| `section_1031_timing_gap_flag` | boolean | Whether a §1031 exchange collides with FIRPTA withholding timing. |
+| `section_1374_tax_cents` | integer (cents) | The §1374 built-in-gains tax. |
+| `section_1446f_default_withholding_cents` | integer (cents) | The default 10% §1446(f) withholding, or 0 when not triggered. |
 | `section_280g_triggered` | boolean | Whether the payments meet or exceed three times the base amount. |
+| `section_336e_80pct_12mo_test_passed` | boolean | null | Whether the §336(e) disposition test passes, or null. |
+| `section_363f_prongs` | object | Booleans for the §363(f) prongs: `applicable_non_bankruptcy_law_permits`, `consent`, `price_exceeds_liens`, `bona_fide_dispute`, `could_be_compelled_to_accept_money_satisfaction`. |
+| `section_453a_applies` | boolean | Whether the §453A interest charge applies. |
+| `section_453a_excess_receivable_cents` | integer (cents) | Receivable in excess of the threshold. |
+| `security_terms` | object | Security economics for the round; recognizes `liquidation_pref_multiple` (number, default 1×). |
+| `selected_framework` | enum(cramdown_framework) | Which framework governs. |
+| `seller_after_tax_proceeds_cents` | integer (cents) | Seller proceeds after tax, including rollover. |
+| `seller_entity_type` | string | The seller's entity type (e.g., S-corp, C-corp, partnership, individual). |
+| `seller_foreign_person` | boolean | Whether the seller is a foreign person (the FIRPTA trigger). |
 | `seller_indemnity_cap_cents` | integer (cents) | The seller indemnity cap in cents. |
 | `seller_indemnity_cap_pct` | number | Override for the seller indemnity cap as a fraction of EV; defaults to the cited median. |
+| `seller_marginal_tax_rate` | number | The seller's marginal tax rate as a fraction. |
 | `seller_receivable_cents` | integer (cents) | Amount owed to the seller when NWC lands above the peg. |
+| `seller_structure_tax_delta_cents` | integer (cents) | Incremental seller tax from the buyer's preferred structure (default 0); drives the gross-up gap. |
+| `seller_tax_basis_cents` | integer (cents) | Seller's tax basis in what is sold (default 0). |
+| `seller_tax_cents` | integer (cents) | Seller tax on the gain. |
+| `seller_tax_delta_cents` | integer (cents) | The seller's incremental tax from the deemed-asset-sale treatment. |
+| `seller_taxable_gain_cents` | integer (cents) | Seller taxable gain. |
 | `shareholder_cleansing_vote_pct` | number | Fraction of disinterested shareholders approving the payments (0–1); optional. |
 | `signatory_gap` | boolean | Whether a required signatory is missing. |
+| `simple_interest_cents` | integer (cents) | Total simple cash interest over the term. |
 | `size_of_transaction_cents` | integer (cents) | The transaction size under test, in cents. |
+| `social_handle_transfer_count` | integer | Number of social handles to transfer. |
+| `sold_nav_cents` | integer (cents) | NAV sold in the strip. |
+| `solvency_opinion_handoff_required` | boolean | Always true — the solvency opinion routes to the financial advisor. |
 | `special_escrow_cents` | integer (cents) | The sum of special-purpose escrows. |
+| `special_escrow_sizing_cents` | integer (cents) | Sum of supplied remediation costs for special escrow sizing. |
 | `special_escrows_cents` | integer (cents)[] | Any special-purpose escrow amounts (environmental, litigation, etc.) to add to the aggregate. |
+| `specialized_asset` | boolean | Whether the asset is so specialized it has no alternative use to the lessor (default false). |
+| `spread_bps` | number | Make-whole spread over Treasury in basis points. |
+| `ssl_reissue_count` | integer | Number of SSL certificates to reissue. |
 | `state` | string (US state code) | Two-letter code of the situs state, used to select the recording act. |
+| `state_apportionment_pct` | number | The state apportionment factor as a fraction. |
+| `state_assignment_required_count` | integer | Number needing a state trademark assignment. |
+| `state_income_tax_cents` | integer (cents) | State income tax on the apportioned gain. |
+| `state_nonconformity_review_required` | boolean | Whether state nonconformity to §1374 needs review. |
+| `state_tax_rate` | number | Seller state tax rate as a fraction (default 0). |
+| `stated_call_price_cents` | integer (cents) | The stated call price (principal × call price). |
+| `stated_interest_rate` | number | The obligation's stated interest rate, as a fraction. |
 | `states_involved` | string[] | Two-letter state codes touched by the deal, screened against the bulk-sales table. |
 | `step_transaction_risk` | boolean | Whether a mere-change claim plus related steps raises step-transaction risk. |
+| `step_up_benefit_rate` | number | The present-value benefit rate applied to the step-up (default 0). |
+| `strip_percentage` | number | Fraction of the NAV sold in the strip (0–1). |
+| `strong_copyleft_count` | integer | Number classified strong copyleft. |
+| `subchapter_v_eligible_under_inputs` | boolean | Whether the debtor is eligible under the inputs. |
+| `support_threshold_class_count` | integer | Classes clearing the §1126(c) thresholds. |
+| `survey_received` | boolean | Whether the survey is in hand. |
+| `survey_review_required` | boolean | Whether survey review is required. |
 | `surviving_count` | integer | Number of items that survive closing. |
+| `tail_years_after_loan_maturity` | number | Years the lease runs past loan maturity. |
+| `tangible_assets_cents` | integer (cents) | Class V tangible/§1231 asset value. |
 | `target_break_fee_cents` | integer (cents) | The target break-up fee in cents. |
 | `target_break_fee_pct` | number | Override for the target break-up fee as a fraction of value; defaults to the cited median. |
+| `target_cap_rate` | number | Target cap rate used to set the master-lease rent (a fraction). |
+| `tax_accounting_handoff_required` | boolean | Always true — the characterization routes to specialists. |
+| `tax_base_cents` | integer (cents) | The tax base (value times interest transferred). |
 | `tax_characterization` | enum(tax_characterization) | The earnout tax-characterization selector; defaults to requires_tax_review. |
+| `tax_facts` | object | Flags that fire sub-models: `loss_carryforwards`, `qsbs` (booleans). |
 | `tax_reps_expiry` | string (ISO date) | Tax-representation expiry date. |
 | `tax_reps_years` | integer | Override for tax-representation survival in years; defaults to the cited median. |
+| `tax_specialist_handoff_required` | boolean | True when the seller is a foreign person. |
+| `taxable_consideration_cents` | integer (cents) | Taxable (non-rollover) consideration. |
+| `taxable_income_cents` | integer (cents) | REIT taxable income (the distribution-test denominator). |
+| `tenant_area` | number | The tenant's leased area (used with total_area when the share is omitted). |
+| `tenant_concentration_flag` | boolean | Whether one tenant exceeds the concentration threshold. |
+| `tenant_count` | integer | Number of tenant rows. |
+| `tenant_dispute_escrow_cents` | integer (cents) | Total tenant-dispute escrow. |
+| `tenant_payments_cents` | integer (cents) | CAM the tenant has already paid for the period (default 0). |
+| `tenant_pro_rata_pct` | number | The tenant's pro-rata share as a fraction; if omitted, computed from tenant_area ÷ total_area. |
+| `term_months` | number | Term of the obligation in months. |
+| `term_years` | number | The earnout term in years over which the expected value is discounted (default 1). |
+| `terminates_on_change_of_control_count` | integer | Number that terminate on change of control. |
+| `termination_event_count` | integer | Number of termination events. |
+| `termination_events` | string[] | Named termination events. |
+| `thirteen_week_cash_need_cents` | integer (cents) | Net cash need over the 13-week budget. |
 | `three_times_base_threshold_cents` | integer (cents) | The three-times-base-amount safe-harbor threshold. |
 | `threshold_cents` | integer (cents) | The current HSR size-of-transaction threshold, in cents. |
+| `till_formula_rate` | number | Base rate plus risk premium. |
+| `time_to_recovery_years` | number | Years to expected resolution. |
+| `title_commitment_received` | boolean | Whether the title commitment is in hand. |
+| `title_exception_escrow_cents` | integer (cents) | Total title-exception escrow. |
+| `title_pass_through_source_required` | boolean | Always true — the title work is a pass-through source. |
+| `toggle_type` | string | The plan-toggle structure (e.g., free-fall, prearranged); echoed. |
+| `top_tenant_rent_pct` | number | null | Largest tenant's rent ÷ total rent, or null. |
+| `total_allowed_claims_cents` | integer (cents) | Total allowed claims. |
+| `total_area` | number | Total leasable area (used with tenant_area when the share is omitted). |
+| `total_assets_cents` | integer (cents) | Total assets. |
+| `total_chapter7_distribution_cents` | integer (cents) | Total hypothetical Chapter 7 distributions. |
+| `total_claims_cents` | integer (cents) | Total allowed claims. |
+| `total_consideration_cents` | integer (cents) | Total consideration (the purchase price). |
+| `total_distributed_cents` | integer (cents) | Total distributed across all classes. |
+| `total_income_cents` | integer (cents) | Total gross income. |
+| `total_nominal_rent_cents` | integer (cents) | Total undiscounted rent over the term. |
+| `total_plan_distribution_cents` | integer (cents) | Total plan distributions. |
 | `total_policy_limit_cents` | integer (cents) | Primary plus excess policy limit. |
+| `total_property_escrow_cents` | integer (cents) | Aggregate property escrow. |
+| `total_replacement_reserve_cents` | integer (cents) | Total replacement reserve across all items and horizons. |
+| `total_state_transaction_tax_cents` | integer (cents) | Total state transaction tax. |
+| `trademark_asset_count` | integer | Number typed as trademarks. |
+| `trademark_count` | integer | Number of trademarks. |
+| `tranche_rows` | object[] | Per-tranche detail (rank-sorted): `{ tranche_name, priority_rank, claim_cents, value_allocated_cents, recovery_pct }`. |
+| `tranches` | object[] | Capital-stack tranches; each carries `tranche_name` (string), `priority_rank` (integer), and `claim_cents` (integer cents). |
+| `transaction_costs` | object[] | Transaction-cost rows; a non-empty list fires the transaction-cost sub-model. |
 | `transaction_form` | enum(preemptive_transaction_form) | The transaction form being tested. |
 | `transaction_value_cents` | integer (cents) | Total transaction value the ladder is sized against. |
+| `transfer_asset_count` | integer | Number of transfer assets. |
+| `transfer_assets` | object[] | Digital/brand assets to transfer; each object carries `name` (string), `type` (string, e.g. domain/trademark/social/ssl), `transfer_lock_days_remaining` (integer), `state_registered` (boolean), and `ssl_certificate_attached` (boolean). |
+| `transfer_date` | string (ISO date) | The date the relinquished property was transferred; the clock start. |
 | `transfer_kind` | enum(transfer_kind) | The nature of the transfer (default deed_sale); the last six enum values are the Garn-protected consumer transfers. |
 | `transfer_pct` | number | Percentage of entity interests transferred in this step (0–100). |
+| `transfer_rows` | object[] | Per-asset detail: `{ name, type, auth_code_required, transfer_lock_days_remaining, uspto_assignment_recording_required, state_assignment_required, social_handle_transfer_required, ssl_reissue_required }`. |
+| `transfer_tax_cents` | integer (cents) | Transfer tax on the real property in an asset deal. |
+| `transfer_tax_rate` | number | The real-estate transfer-tax rate applied in an asset deal, as a fraction (default 0). |
 | `transfer_type` | enum(lease_transfer_type) | The form of the transfer being tested. |
+| `transfers_ownership` | boolean | Whether the lease transfers ownership at term end (default false). |
+| `transition_license_count` | integer | Number carrying a transition license (positive term). |
+| `treasury_rate` | number | Reference Treasury yield as a fraction. |
+| `tri_party_transfer_required` | boolean | Always true — the transfer is executed tri-party with the fund. |
 | `triage` | object[] | One row per exception: `{ label, bucket }` where bucket is a triage_bucket value. |
 | `trigger_status` | enum(trigger_status) | Whether and why the transaction implicates the right. |
+| `trustee_fee_cents` | integer (cents) | Trustee fee deducted before distribution (default 0). |
+| `tsa_ip_overlay_required` | boolean | Whether a TSA-IP overlay is already required (default false); the model also sets it true on any transition license. |
 | `tx_seisin_note` | string | null | The Texas seisin-narrowing note when the state is TX, else null. |
 | `tx_strict_match_note` | string | null | The Texas strict-match note when applicable, else null. |
+| `ucc_lien_hit_count` | integer | Total UCC-track hits. |
 | `unallocated_cents` | integer (cents) | Non-negative residual when supplied fair market values exceed the price (normally zero). |
+| `uncapped_real_estate_value_cents` | integer (cents) | NOI capitalized at the cap rate, before the price cap. |
+| `unknown_license_count` | integer | Number whose license could not be classified. |
+| `update_frequency_months` | integer | Deposit-update cadence in months (default 3, i.e. quarterly). |
 | `use_change` | boolean | Whether the transaction involves a change of use (default false); can require a CO even in an entity deal. |
+| `uspto_assignment_recording_count` | integer | Number needing USPTO assignment recording. |
+| `uspto_security_hit_count` | integer | Total USPTO-track security hits. |
+| `valuation_cap_cents` | integer (cents) | The instrument's valuation cap; optional, drives the cap price. |
+| `value_delta_election_vs_no_election_cents` | integer (cents) | Election NPV less no-election value (positive favors electing). |
+| `value_from_cap_rate_cents` | integer (cents) | null | Value the NOI supports at the cap rate, or null. |
+| `value_shortfall_cents` | integer (cents) | Shortfall from trading down (relinquished over replacement). |
 | `vesting_form` | enum(vesting_form) | How record title is held. |
 | `waived_count` | integer | Number waived. |
+| `walt_months` | number | null | Rent-weighted average lease term in months, or null. |
+| `warrant_coverage_amount_cents` | integer (cents) | Dollar coverage: loan × coverage. |
+| `warrant_coverage_pct` | number | Warrant coverage as a fraction of the loan (e.g., 0.10 for 10% coverage). |
+| `warrant_shares` | integer | Warrant shares: coverage amount ÷ exercise price. |
+| `waterfall_rows` | object[] | Per-class detail (rank-sorted): `{ class_name, priority_rank, allowed_claim_cents, distribution_cents, recovery_pct }`. |
+| `weak_copyleft_count` | integer | Number classified weak copyleft. |
+| `withholding_amount_cents` | integer (cents) | The withholding the buyer must remit. |
+| `withholding_certificate_provided` | boolean | Whether a §1446(f) withholding certificate/exception is provided (default false). |
+| `withholding_rate` | number | The FIRPTA withholding rate applied (0, 0.10, or 0.15). |
 | `within_20_day_window` | boolean | Whether the fixture filing fell within the 20-day PMSI window. |
+| `within_recognition_period` | boolean | Whether the sale is within the recognition period. |
+| `year_1_3_reserve_cents` | integer (cents) | Year-1–3 replacement reserve. |
+| `year_4_5_reserve_cents` | integer (cents) | Year-4–5 replacement reserve. |
+| `year_6_12_reserve_cents` | integer (cents) | Year-6–12 replacement reserve. |
+| `years_since_conversion` | number | Years between conversion and sale. |
 
 ## Enumerations
 
@@ -404,8 +974,12 @@ Enumerated values are part of the normative contract — a conforming implementa
 
 - **`acceleration_risk`** — The lender's acceleration posture on the transfer.
   - Values: `none_no_clause`, `barred_by_garn_exception`, `lender_option_on_transfer`
+- **`asc842_classification`** — Whether at least one ASC 842 finance-lease indicator is present on the supplied facts, or none is (pointing to operating-lease/sale accounting) — an indicator screen, not a classification opinion.
+  - Values: `finance_lease_indicator_present`, `operating_lease_indicator_on_supplied_facts`
 - **`basket_type`** — How the indemnification basket operates: a true deductible (recovery only above the threshold), a tipping basket (first-dollar recovery once the threshold is crossed), or unresolved pending confirmation.
   - Values: `deductible`, `tipping`, `deductible_or_tipping_to_confirm`
+- **`chapter22_risk_band`** — The Chapter 22 (repeat-filing) recidivism-risk band a computed score falls into.
+  - Values: `high`, `watch`, `lower`
 - **`condition_type`** — The category of a closing condition; regulatory/MAE/financing/consent/CFIUS/HSR/legal types route to specialist review.
   - Values: `general`, `regulatory`, `mae`, `financing`, `consent`, `cfius`, `hsr`, `legal`
 - **`consent_clause`** — The lease consent provision as parsed: silent, consent required with no stated standard, express reasonableness, or express sole discretion.
@@ -416,24 +990,44 @@ Enumerated values are part of the normative contract — a conforming implementa
   - Values: `seller`, `buyer`
 - **`contract_title_standard`** — The title standard the purchase contract promises the buyer.
   - Values: `marketable`, `insurable`
+- **`conversion_driver`** — Which term set the lowest (governing) conversion price for a convertible/SAFE: the valuation cap, the discount, or the priced-round share price itself.
+  - Values: `valuation_cap`, `discount`, `priced_round_price`
+- **`cramdown_framework`** — Which cramdown-rate framework governs: the efficient-market rate (where a market exists and the circuit applies it) or the Till formula (prime plus a risk premium).
+  - Values: `efficient_market`, `till_formula`
+- **`debt_assumability`** — Whether existing property debt is assumable on the supplied facts, requires lender consent or a refinance, or was not supplied.
+  - Values: `not_supplied`, `assumable_on_supplied_facts`, `consent_or_refinance_required`
 - **`deed_type`** — The deed instrument type, which fixes the title-covenant set conveyed.
   - Values: `general_warranty`, `special_warranty`, `bargain_and_sale`, `quitclaim`
 - **`dispute_forum`** — The forum designated to resolve an earnout or true-up dispute.
   - Values: `accounting_arbitrator`, `expert_determination`, `arbitration`, `courts`
+- **`firpta_path`** — The FIRPTA withholding path taken: not a foreign seller (no withholding), the $300k-or-less personal-residence exemption, the $300k–$1M reduced-rate residence path, or the default 15% withholding.
+  - Values: `not_foreign_seller`, `personal_residence_300k_or_less_exemption`, `personal_residence_300k_to_1m_reduced_rate`, `default_firpta_withholding`
 - **`fixture_priority`** — Which competing interest holds priority in the fixture under UCC § 9-334.
   - Values: `fixture_secured_party`, `first_to_perfect`, `real_property_interest`
+- **`imputed_interest_characterization`** — Which imputed-interest regime a deferred-payment obligation routes to: the §483/§1274 review for terms over a year, or the short-term adequate-stated-interest check.
+  - Values: `section_483_or_1274_review`, `adequate_stated_interest_short_term_check`
 - **`lease_classification`** — How the transfer classifies against the lease transfer-restriction terms.
   - Values: `deemed_assignment_consent_path_applies`, `generally_not_assignment_by_operation_of_law`, `assignment_restriction_applies`, `no_restriction_freely_assignable`
 - **`lease_transfer_type`** — The form of the transfer being tested against the lease transfer-restriction terms.
   - Values: `asset_assignment`, `sublease`, `change_of_control`, `merger`
+- **`license_direction`** — Whether a license is taken in (inbound — a dependency of the target) or granted out (outbound).
+  - Values: `inbound`, `outbound`
+- **`lien_search_track`** — The lien-search record system a search row runs against: UCC filing office, USPTO assignment/security record, or the U.S. Copyright Office.
+  - Values: `ucc`, `uspto`, `copyright`
+- **`oss_license_class`** — The copyleft class of an open-source component: permissive (MIT/BSD/Apache), weak copyleft (LGPL/MPL/EPL), strong copyleft (GPL/AGPL), or unknown/unclassified.
+  - Values: `permissive`, `weak_copyleft`, `strong_copyleft`, `unknown`
 - **`permit_deal_form`** — The acquisition form, which governs whether permits and certificates re-issue and whether bulk-sales notification applies.
   - Values: `asset`, `entity`, `merger`
 - **`preemptive_transaction_form`** — The transaction form tested for whether it triggers the preemptive right.
   - Values: `asset_sale`, `entity_transfer`, `merger`
 - **`prevailing_interest`** — Which competing interest the recording act favors on the supplied facts.
   - Values: `later_purchaser`, `prior_interest`, `undetermined`
+- **`property_escrow_category`** — The category a property-level escrow issue is bucketed into for sizing: environmental, physical-condition (PCA), title, tenant, cost-to-cure, or other.
+  - Values: `environmental`, `pca`, `title`, `tenant`, `cost_to_cure`, `other`
 - **`recording_act_type`** — The recording-act family the state applies; unknown means the state is not in the table and the result defers.
   - Values: `race`, `notice`, `race_notice`, `unknown`
+- **`redemption_path`** — The cheaper of the two redemption routes: the make-whole (Treasury-plus-spread present value) or the stated call price.
+  - Values: `make_whole`, `stated_call`
 - **`right_type`** — The preemptive right at issue: a purchase option, a right of first refusal, or a right of first offer.
   - Values: `option`, `rofr`, `rofo`
 - **`risk_basis`** — The legal basis for the risk allocation: an express contract term, or a named state default regime.
@@ -444,6 +1038,8 @@ Enumerated values are part of the normative contract — a conforming implementa
   - Values: `representation`, `warranty`, `covenant`, `indemnity`
 - **`tax_characterization`** — The earnout's tax-characterization selector; the binding treatment is a tax-advisor determination.
   - Values: `requires_tax_review`, `installment_sale`, `imputed_interest`, `compensation`
+- **`transaction_cost_classification`** — How a transaction cost is classified for tax: pre-bright-line §195 investigatory (amortizable), a success-based fee under the Rev. Proc. 2011-29 70/30 safe harbor, an inherently facilitative cost (capitalized), or a post-bright-line facilitative cost (capitalized).
+  - Values: `pre_bright_line_investigatory_195`, `success_based_fee_70_30_safe_harbor`, `inherently_facilitative_capitalized`, `post_bright_line_facilitative_capitalized`
 - **`transfer_kind`** — The nature of the transfer being screened against the loan's due-on-transfer clause; the last six are the Garn-St. Germain § 1701j-3(d) protected consumer transfers.
   - Values: `deed_sale`, `entity_transfer`, `transfer_to_spouse_or_child`, `transfer_on_death_to_relative`, `divorce_decree_transfer_to_spouse`, `inter_vivos_trust_borrower_beneficiary`, `junior_lien_creation`, `leasehold_under_3y_no_option`
 - **`triage_bucket`** — The disposition bucket for a single title exception.
@@ -452,12 +1048,6 @@ Enumerated values are part of the normative contract — a conforming implementa
   - Values: `triggered_property_sale`, `triggered_entity_capture_language`, `likely_not_triggered_structural`
 - **`vesting_form`** — How record title is held, which fixes whose signature a conveyance of the whole requires.
   - Values: `sole`, `tenancy_in_common`, `joint_tenancy`, `tenancy_by_entirety`, `community_property`, `entity`
-
-## Fields pending normative authoring
-
-These field names appear in models whose normative contracts are still being authored; they are listed for completeness and are **not** yet part of the designed vocabulary. Their types and descriptions land as each model's overlay is authored.
-
-`afr_rate` · `aggregate_noncontingent_liquidated_debt_cents` · `allowed_claim_cents` · `alta_endorsements_requested` · `amount_realized_cents` · `annual_ground_rent_cents` · `annual_rent_cents` · `assets` · `assignee_fee_cents` · `available_capital_cents` · `base_rate` · `basis_at_conversion_cents` · `baskets` · `boot_received_cents` · `breakup_fee_cents` · `bright_line_date` · `bulk_sale_clearance_required` · `buyer_step_up_pv_benefit_cents` · `buyer_will_use_as_residence` · `call_price_pct` · `cap_rate` · `cash_interest_rate` · `circuit` · `claims` · `class_vi_intangibles_cents` · `class_vote_amount_pct` · `class_vote_number_pct` · `classes` · `closing_day_of_period` · `collateral_value_cents` · `commitment_cents` · `components` · `consideration_mix` · `contributors` · `conversion_date` · `corporate_tax_rate` · `coupon_rate` · `credit_bid_claim_cents` · `creditor_classes` · `curative_items` · `deal_type` · `debt_assumable` · `debts_due_cents` · `deposit_verification_tier` · `discount_pct` · `discount_rate` · `disposition_months` · `disposition_pct` · `distributions_cents` · `earnout_targets` · `ebitda_growth_pct` · `economic_life_years` · `effective_gross_income_cents` · `efficient_market_exists` · `efficient_market_rate` · `eligible_ar_cents` · `eligible_inventory_cents` · `engaged_in_commercial_activity` · `entity_carried_basis_cents` · `estate_value_cents` · `exercise_price_cents` · `exit_leverage` · `face_amount_cents` · `fair_value_assets_cents` · `fair_value_share_price_cents` · `federal_tax_rate` · `fiduciary_out_present` · `fmv_at_conversion_cents` · `fmv_real_property_cents` · `forecast_periods` · `form_8288_b_reduced_withholding_requested` · `fund_nav_cents` · `gain_cents` · `general_buffer_rate` · `ground_lease_expiry_date` · `guc_recovery_pct` · `installment_receivable_cents` · `interest_inconsequential` · `interest_transferred_pct` · `investment_cents` · `ip_assets` · `ip_intangibles_cents` · `issues` · `jurisdiction` · `last_deposit_date` · `lease_term_years` · `leases` · `lender_policy_required` · `lender_recognition_agreement` · `liabilities_cents` · `licenses` · `lien_amount_cents` · `liquidation_value_cents` · `liquidity_months` · `loan_amount_cents` · `loan_maturity_date` · `market_cap_rate_from_pass_through_source` · `material_ip_categories` · `milestones` · `minimum_dscr` · `minimum_liquidity_cents` · `minimum_participation_pct` · `new_money_minimum_cents` · `new_security_value_cents` · `new_value` · `noi_cents` · `notice_days` · `old_security_value_cents` · `opco_ebitda_cents` · `opening_cash_cents` · `operating_expenses_cents` · `option_pool_pct` · `outstanding_debt_cents` · `participating_debt_cents` · `pca_items` · `pe_owned_target` · `period_days` · `plan_payment_stream_cents` · `post_default_trading_price` · `pre_money_cents` · `pre_money_share_count` · `priced_round_share_price_cents` · `priming_requested` · `principal_cents` · `prior_bankruptcy_count` · `probabilities` · `professional_fee_carveout_cents` · `projected_cash_flow_cents` · `property_sold_under_363_or_plan` · `pv_lease_payments_cents` · `real_estate_assets_cents` · `real_estate_income_cents` · `real_property_value_cents` · `recognized_gain_cents` · `recourse` · `recoverable_expenses_cents` · `release_triggers` · `relinquished_property_value_cents` · `remaining_years` · `rent_roll` · `replacement_property_value_cents` · `replacement_reserve_cents` · `required_capital_cents` · `required_cushion_pct` · `reserves_cents` · `residual_value_pct` · `rev_proc_2011_29_safe_harbor_elected` · `risk_premium` · `rollup_amount_cents` · `round_size_cents` · `sale_costs_cents` · `sale_date` · `sale_price_cents` · `sales_use_tax_base_cents` · `sales_use_tax_rate` · `schedule_b_exceptions` · `searches` · `section_1031_exchange` · `section_363f_prongs` · `security_terms` · `seller_entity_type` · `seller_foreign_person` · `seller_marginal_tax_rate` · `seller_structure_tax_delta_cents` · `seller_tax_basis_cents` · `seller_tax_delta_cents` · `spread_bps` · `state_apportionment_pct` · `state_tax_rate` · `stated_interest_rate` · `step_up_benefit_rate` · `strip_percentage` · `survey_received` · `tangible_assets_cents` · `target_cap_rate` · `taxable_income_cents` · `tenant_payments_cents` · `tenant_pro_rata_pct` · `term_months` · `term_years` · `termination_events` · `thirteen_week_cash_need_cents` · `time_to_recovery_years` · `title_commitment_received` · `toggle_type` · `total_assets_cents` · `total_income_cents` · `tranches` · `transaction_costs` · `transfer_assets` · `transfer_date` · `transfer_tax_rate` · `treasury_rate` · `trustee_fee_cents` · `update_frequency_months` · `valuation_cap_cents` · `warrant_coverage_pct`
 
 
 ---
@@ -1150,40 +1740,45 @@ Research scaffold: organizes authorities and considerations. Produces oriented r
 **Gates:** G15
 **Deal contexts:** earnout
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Metric threshold, period, probability, and expected-value schedule.
+Computes the expected value of a revenue-metric earnout as the probability-weighted sum of its supplied payout scenarios, and discounts that expected value to present value over the earnout term. It answers, for a buyer and seller pricing contingent consideration, "what is this revenue earnout worth today, and what does each scenario contribute?" It values the earnout from supplied scenario payouts and their probabilities; it does not itself model the revenue thresholds that generate those payouts.
+
+> **Scope note.** SCOPE (governing rule): the catalog purpose reads "Metric threshold, period, probability, and expected-value schedule," but the reference implementation (MODEL.STRUCT.EARNOUT.MC.v1 — shared with M112) is a metric-agnostic probability-weighted expected-value + present-value engine. It consumes already-quantified payout scenarios and their probabilities; it does NOT gate payouts off a revenue metric and a threshold, nor build a period-by-period schedule beyond a single-term discount. Founder decision: (a) rescope the published contract to the expected-value engine it is (recommended — one binding serves M111 and M112), or (b) extend the code with a revenue-threshold payout front-end. Recorded pending founder sign-off.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M111.schema.json`](M111.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `discount_rate` | number | MUST |
-| `earnout_targets` | number[] | MUST |
-| `probabilities` | number[] | MUST |
-| `term_years` | integer | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `discount_rate` | number | MUST | The annual discount rate applied to the expected value (a fraction, e.g. 0.12). |
+| `earnout_targets` | integer (cents)[] | MUST | The scenario payout amounts, one integer-cents value per scenario. |
+| `probabilities` | number[] | MUST | The probability of each scenario (0–1), positionally aligned to earnout_targets. |
+| `term_years` | number | MAY | The earnout term in years over which the expected value is discounted (default 1). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `expected_gross_cents` | integer (cents) |
-| `expected_present_value_cents` | integer (cents) |
-| `scenarios` | object[] |
+| Field | Type | Description |
+|---|---|---|
+| `expected_gross_cents` | integer (cents) | Probability-weighted expected earnout payout, undiscounted. |
+| `expected_present_value_cents` | integer (cents) | The expected payout discounted to present value over the term. |
+| `scenarios` | object[] | Per-scenario echo: `{ target_cents (integer cents), probability (number, 0–1) }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Metric threshold, period, probability, and expected-value schedule.
-
-Calculates probability-weighted earnout value and negotiation sensitivity.
+Given `earnout_targets` (a list of integer-cents scenario payouts), `probabilities` (a parallel list of scenario probabilities), and `discount_rate`, plus optional `term_years` (default 1):
+1. The implementation SHALL coerce `earnout_targets` to integer cents and `probabilities` to numbers; if either list is empty or `discount_rate` is missing, it SHALL return `status: "needs_inputs"` naming the missing fields and emit no outputs.
+2. For each scenario it SHALL clamp the probability to the closed interval [0, 1] and weight the scenario payout by it.
+3. `expected_gross_cents` SHALL be the sum of the probability-weighted payouts, rounded to the nearest integer cent.
+4. `expected_present_value_cents` SHALL be `expected_gross_cents ÷ (1 + discount_rate)^term_years`, rounded to the nearest integer cent.
+5. `scenarios` SHALL echo each scenario as `{ target_cents, probability }` with the probability at the global 4-decimal precision.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -1195,43 +1790,51 @@ Calculates probability-weighted earnout value and negotiation sensitivity.
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.STRUCT.EARNOUT.MC.001` — *Earnout model computes probability-weighted present value*.
+*A revenue earnout with three payout scenarios — $2.0M at 50%, $3.5M at 30%, $5.0M at 20% — carries a $3.05M probability-weighted expected value, discounted three years at 12% to about $2.17M today.*
 
 **Inputs**
 
 ```json
 {
   "earnout_targets": [
-    100000,
-    200000
+    200000000,
+    350000000,
+    500000000
   ],
   "probabilities": [
     0.5,
-    0.25
+    0.3,
+    0.2
   ],
-  "discount_rate": 0.1,
-  "term_years": 1
+  "discount_rate": 0.12,
+  "term_years": 3
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.STRUCT.EARNOUT.MC.v1`)**
 
 ```json
 {
-  "expected_gross_cents": 100000,
-  "expected_present_value_cents": 90909,
+  "expected_gross_cents": 305000000,
+  "expected_present_value_cents": 217092976,
   "scenarios": [
     {
-      "target_cents": 100000,
+      "target_cents": 200000000,
       "probability": 0.5
     },
     {
-      "target_cents": 200000,
-      "probability": 0.25
+      "target_cents": 350000000,
+      "probability": 0.3
+    },
+    {
+      "target_cents": 500000000,
+      "probability": 0.2
     }
   ]
 }
 ```
+
+Precision: Monetary outputs are exact integer cents; scenario probabilities are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -1240,7 +1843,7 @@ Conformance case `CONF.MODEL.STRUCT.EARNOUT.MC.001` — *Earnout model computes 
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model values a revenue earnout as the probability-weighted, discounted expected value of supplied scenario payouts. Whether the scenario payouts and probabilities are reasonable, how the revenue metric is defined and measured, and the earnout's enforceability and tax characterization are determinations for the parties, their accountants, and counsel (see M213); the model computes the expected value and renders no view on the assumptions behind it.
 
 ## 9. Conformance bindings
 
@@ -1258,40 +1861,45 @@ Reference binding `MODEL.STRUCT.EARNOUT.MC.v1` · entered the specification at i
 **Gates:** G15
 **Deal contexts:** earnout
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-EBITDA target, add-back policy, and expected-value schedule.
+Computes the expected value of an EBITDA-metric earnout as the probability-weighted sum of its supplied payout scenarios, and discounts that expected value to present value over the earnout term. It answers, for parties pricing contingent consideration tied to EBITDA, "what is this EBITDA earnout worth today?" It values the earnout from supplied scenario payouts and probabilities; it does not itself define the EBITDA target or apply an add-back policy.
+
+> **Scope note.** SCOPE (governing rule): the catalog purpose reads "EBITDA target, add-back policy, and expected-value schedule," but the reference implementation (MODEL.STRUCT.EARNOUT.MC.v1 — shared with M111) is a metric-agnostic probability-weighted expected-value + present-value engine. It consumes already-quantified payout scenarios and probabilities; it does NOT compute an EBITDA target, and it applies NO add-back/normalization policy — that normalization is baked into the supplied scenario payouts and is a QoE and accounting matter. Founder decision: (a) rescope the published contract to the expected-value engine it is (recommended — one binding serves M111 and M112), or (b) extend the code with an EBITDA add-back front-end. Recorded pending founder sign-off.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M112.schema.json`](M112.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `discount_rate` | number | MUST |
-| `earnout_targets` | number[] | MUST |
-| `probabilities` | number[] | MUST |
-| `term_years` | integer | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `discount_rate` | number | MUST | The annual discount rate applied to the expected value (a fraction, e.g. 0.15). |
+| `earnout_targets` | integer (cents)[] | MUST | The scenario payout amounts, one integer-cents value per EBITDA scenario. |
+| `probabilities` | number[] | MUST | The probability of each scenario (0–1), positionally aligned to earnout_targets. |
+| `term_years` | number | MAY | The earnout term in years over which the expected value is discounted (default 1). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `expected_gross_cents` | integer (cents) |
-| `expected_present_value_cents` | integer (cents) |
-| `scenarios` | object[] |
+| Field | Type | Description |
+|---|---|---|
+| `expected_gross_cents` | integer (cents) | Probability-weighted expected earnout payout, undiscounted. |
+| `expected_present_value_cents` | integer (cents) | The expected payout discounted to present value over the term. |
+| `scenarios` | object[] | Per-scenario echo: `{ target_cents (integer cents), probability (number, 0–1) }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-EBITDA target, add-back policy, and expected-value schedule.
-
-Calculates probability-weighted earnout value and negotiation sensitivity.
+Given `earnout_targets` (a list of integer-cents scenario payouts), `probabilities` (a parallel list of scenario probabilities), and `discount_rate`, plus optional `term_years` (default 1):
+1. The implementation SHALL coerce `earnout_targets` to integer cents and `probabilities` to numbers; if either list is empty or `discount_rate` is missing, it SHALL return `status: "needs_inputs"` naming the missing fields and emit no outputs.
+2. For each scenario it SHALL clamp the probability to the closed interval [0, 1] and weight the scenario payout by it.
+3. `expected_gross_cents` SHALL be the sum of the probability-weighted payouts, rounded to the nearest integer cent.
+4. `expected_present_value_cents` SHALL be `expected_gross_cents ÷ (1 + discount_rate)^term_years`, rounded to the nearest integer cent.
+5. `scenarios` SHALL echo each scenario as `{ target_cents, probability }` with the probability at the global 4-decimal precision.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -1303,43 +1911,45 @@ Calculates probability-weighted earnout value and negotiation sensitivity.
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.STRUCT.EARNOUT.MC.001` — *Earnout model computes probability-weighted present value*.
+*An EBITDA earnout with two payout scenarios — $2.5M if EBITDA hits the base target (60%) and $4.0M at the stretch target (40%) — carries a $3.1M expected value, discounted two years at 15% to about $2.34M today.*
 
 **Inputs**
 
 ```json
 {
   "earnout_targets": [
-    100000,
-    200000
+    250000000,
+    400000000
   ],
   "probabilities": [
-    0.5,
-    0.25
+    0.6,
+    0.4
   ],
-  "discount_rate": 0.1,
-  "term_years": 1
+  "discount_rate": 0.15,
+  "term_years": 2
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.STRUCT.EARNOUT.MC.v1`)**
 
 ```json
 {
-  "expected_gross_cents": 100000,
-  "expected_present_value_cents": 90909,
+  "expected_gross_cents": 310000000,
+  "expected_present_value_cents": 234404537,
   "scenarios": [
     {
-      "target_cents": 100000,
-      "probability": 0.5
+      "target_cents": 250000000,
+      "probability": 0.6
     },
     {
-      "target_cents": 200000,
-      "probability": 0.25
+      "target_cents": 400000000,
+      "probability": 0.4
     }
   ]
 }
 ```
+
+Precision: Monetary outputs are exact integer cents; scenario probabilities are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -1348,7 +1958,7 @@ Conformance case `CONF.MODEL.STRUCT.EARNOUT.MC.001` — *Earnout model computes 
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model values an EBITDA earnout as the probability-weighted, discounted expected value of supplied scenario payouts. The EBITDA definition, the add-back policy that normalizes it, and the earnout's enforceability and tax characterization are determinations for the parties' accountants and counsel (see M213); the model computes the expected value and renders no view on the normalization behind the scenario payouts.
 
 ## 9. Conformance bindings
 
@@ -2373,42 +2983,48 @@ This model answers its computational question from supplied facts and cited cons
 **Gates:** G15
 **Deal contexts:** growth equity · venture
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Liquidation preference, participation, seniority, and anti-dilution waterfall.
+Computes the ownership split a single priced financing round produces — post-money valuation, and the investor, option-pool, and founder ownership percentages — and the round's liquidation preference at the supplied multiple. It answers, for a founder or investor sizing a round, "after this round and pool, who owns what, and how large is the preference stack on the new money?" It models one round's dilution and its preference; it is not a multi-class exit waterfall.
+
+> **Scope note.** SCOPE (governing rule): the catalog purpose reads "Liquidation preference, participation, seniority, and anti-dilution waterfall," but the reference implementation (MODEL.CAPTABLE.DILUTION.v1) computes only a single-round post-money dilution split (investor / option-pool / founder) and a single-security liquidation preference (round size × preference multiple). It does NOT model participation rights, multi-class seniority ordering, anti-dilution adjustments, or a full exit-proceeds waterfall. Founder decision: (a) rescope the published contract to the single-round dilution + preference model it is (recommended for v1.0), or (b) extend the code to a multi-class exit waterfall. Recorded pending founder sign-off.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M146.schema.json`](M146.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `option_pool_pct` | number | MUST |
-| `pre_money_cents` | integer (cents) | MUST |
-| `round_size_cents` | integer (cents) | MUST |
-| `security_terms` | object | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `option_pool_pct` | number | MUST | The post-round option-pool ownership as a fraction (0–1). |
+| `pre_money_cents` | integer (cents) | MUST | Pre-money valuation of the round. |
+| `round_size_cents` | integer (cents) | MUST | New money raised in the round. |
+| `security_terms` | object | MUST | Security economics for the round; recognizes `liquidation_pref_multiple` (number, default 1×). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `founder_ownership_pct` | number |
-| `investor_ownership_pct` | number |
-| `liquidation_preference_cents` | integer (cents) |
-| `option_pool_pct` | number |
-| `post_money_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `post_money_cents` | integer (cents) | Post-money valuation (pre-money plus round size). |
+| `investor_ownership_pct` | number | New-investor ownership as a fraction of the post-money cap table. |
+| `option_pool_pct` | number | Option-pool ownership as a fraction, clamped to [0, 1]. |
+| `founder_ownership_pct` | number | Residual founder/existing-holder ownership as a fraction. |
+| `liquidation_preference_cents` | integer (cents) | The round's liquidation preference (round size × multiple). |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Liquidation preference, participation, seniority, and anti-dilution waterfall.
-
-Models dilution, option pool, convertible securities, and exit waterfall economics.
+Given `pre_money_cents`, `round_size_cents`, `option_pool_pct` (as a fraction), and `security_terms` (an object):
+1. If any of the four is missing or non-numeric (or `security_terms` is empty), the implementation SHALL return `status: "needs_inputs"` naming the missing fields and emit no outputs.
+2. `post_money_cents` SHALL be `pre_money_cents + round_size_cents`.
+3. `investor_ownership_pct` SHALL be `round_size_cents ÷ post_money_cents` at full precision, reported at the global 4-decimal precision.
+4. `option_pool_pct` SHALL be the supplied option-pool fraction clamped to [0, 1], reported at 4 decimals.
+5. `founder_ownership_pct` SHALL be `max(0, 1 − investor_ownership − option_pool)` (computed from the full-precision investor share), reported at 4 decimals.
+6. `liquidation_preference_cents` SHALL be `round_size_cents × liquidation_pref_multiple` (from `security_terms`, default 1×), rounded to the nearest cent.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -2419,32 +3035,34 @@ Models dilution, option pool, convertible securities, and exit waterfall economi
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.CAPTABLE.DILUTION.001` — *Cap table dilution computes post-money ownership*.
+*A $20M pre-money Series A raising $8M with a 15% option pool leaves founders at 56.4%; the new investors take 28.6% with a 1× liquidation preference of $8M.*
 
 **Inputs**
 
 ```json
 {
-  "pre_money_cents": 1000000,
-  "round_size_cents": 250000,
-  "option_pool_pct": 0.1,
+  "pre_money_cents": 2000000000,
+  "round_size_cents": 800000000,
+  "option_pool_pct": 0.15,
   "security_terms": {
     "liquidation_pref_multiple": 1
   }
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.CAPTABLE.DILUTION.v1`)**
 
 ```json
 {
-  "post_money_cents": 1250000,
-  "investor_ownership_pct": 0.2,
-  "option_pool_pct": 0.1,
-  "founder_ownership_pct": 0.7,
-  "liquidation_preference_cents": 250000
+  "post_money_cents": 2800000000,
+  "investor_ownership_pct": 0.2857,
+  "option_pool_pct": 0.15,
+  "founder_ownership_pct": 0.5643,
+  "liquidation_preference_cents": 800000000
 }
 ```
+
+Precision: Monetary outputs are exact integer cents; ownership fractions are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -2453,7 +3071,7 @@ Conformance case `CONF.MODEL.CAPTABLE.DILUTION.001` — *Cap table dilution comp
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model computes one round's dilution split and its liquidation preference from supplied round economics. Participation, multi-class seniority, anti-dilution mechanics, and the exit-proceeds waterfall across the full cap table are not modeled here; the terms that govern them, and their enforceability, are determinations for the parties and counsel drafting the financing documents.
 
 ## 9. Conformance bindings
 
@@ -2493,47 +3111,50 @@ This model answers its computational question from supplied facts and cited cons
 **Gates:** G15, G28, G29
 **Deal contexts:** recap · LBO · fraudulent transfer
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Balance-sheet, cash-flow, and capital-adequacy tests at user inputs.
+Runs the three-prong solvency test that underlies fraudulent-transfer analysis — the balance-sheet (assets over liabilities), cash-flow (projected cash flow over debts due), and capital-adequacy (available over required capital) prongs — from supplied figures, reporting each surplus and pass/fail. It answers, before a leveraged recap or dividend, "does the company clear all three solvency prongs at these numbers?" It computes the prongs; the solvency opinion itself is the financial advisor's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M148.schema.json`](M148.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `available_capital_cents` | integer (cents) | MUST |
-| `debts_due_cents` | integer (cents) | MUST |
-| `fair_value_assets_cents` | integer (cents) | MUST |
-| `liabilities_cents` | integer (cents) | MUST |
-| `projected_cash_flow_cents` | integer (cents) | MUST |
-| `required_capital_cents` | integer (cents) | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `available_capital_cents` | integer (cents) | MUST | Capital available to the business. |
+| `debts_due_cents` | integer (cents) | MUST | Debts coming due over the projection. |
+| `fair_value_assets_cents` | integer (cents) | MUST | Fair value of assets. |
+| `liabilities_cents` | integer (cents) | MUST | Total liabilities. |
+| `projected_cash_flow_cents` | integer (cents) | MUST | Projected cash flow available to service debt. |
+| `required_capital_cents` | integer (cents) | MUST | Capital the business reasonably requires. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `all_prongs_passed` | boolean |
-| `balance_sheet_prong_passed` | boolean |
-| `balance_sheet_surplus_cents` | integer (cents) |
-| `capital_adequacy_prong_passed` | boolean |
-| `capital_adequacy_surplus_cents` | integer (cents) |
-| `cash_flow_prong_passed` | boolean |
-| `cash_flow_surplus_cents` | integer (cents) |
-| `solvency_opinion_handoff_required` | boolean |
+| Field | Type | Description |
+|---|---|---|
+| `balance_sheet_surplus_cents` | integer (cents) | Assets less liabilities. |
+| `balance_sheet_prong_passed` | boolean | Whether the balance-sheet prong passes. |
+| `cash_flow_surplus_cents` | integer (cents) | Projected cash flow less debts due. |
+| `cash_flow_prong_passed` | boolean | Whether the cash-flow prong passes. |
+| `capital_adequacy_surplus_cents` | integer (cents) | Available less required capital. |
+| `capital_adequacy_prong_passed` | boolean | Whether the capital-adequacy prong passes. |
+| `all_prongs_passed` | boolean | Whether all three prongs pass. |
+| `solvency_opinion_handoff_required` | boolean | Always true — the solvency opinion routes to the financial advisor. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Balance-sheet, cash-flow, and capital-adequacy tests at user inputs.
-
-Computes balance-sheet, cash-flow, and capital-adequacy prongs from user-supplied valuation and liquidity inputs.
+Given `fair_value_assets_cents`, `liabilities_cents`, `projected_cash_flow_cents`, `debts_due_cents`, `available_capital_cents`, and `required_capital_cents`:
+1. If any of the six is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `balance_sheet_surplus_cents` SHALL be `fair_value_assets_cents − liabilities_cents`; `balance_sheet_prong_passed` SHALL be true iff it is non-negative.
+3. `cash_flow_surplus_cents` SHALL be `projected_cash_flow_cents − debts_due_cents`; `cash_flow_prong_passed` SHALL be true iff it is non-negative.
+4. `capital_adequacy_surplus_cents` SHALL be `available_capital_cents − required_capital_cents`; `capital_adequacy_prong_passed` SHALL be true iff it is non-negative.
+5. `all_prongs_passed` SHALL be true iff all three prongs pass; `solvency_opinion_handoff_required` SHALL always be true.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -2546,35 +3167,37 @@ Computes balance-sheet, cash-flow, and capital-adequacy prongs from user-supplie
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RESTRUCT.SOLVENCY.001` — *Three-prong solvency computes balance sheet, cash flow, and capital adequacy*.
+*A company weighing a recap clears all three solvency prongs: $50M of assets over $45M of liabilities, $8M of projected cash flow over $7M of debts due, and $10M of available capital over $8M required.*
 
 **Inputs**
 
 ```json
 {
-  "fair_value_assets_cents": 1000000,
-  "liabilities_cents": 800000,
-  "projected_cash_flow_cents": 250000,
-  "debts_due_cents": 200000,
-  "available_capital_cents": 150000,
-  "required_capital_cents": 175000
+  "fair_value_assets_cents": 5000000000,
+  "liabilities_cents": 4500000000,
+  "projected_cash_flow_cents": 800000000,
+  "debts_due_cents": 700000000,
+  "available_capital_cents": 1000000000,
+  "required_capital_cents": 800000000
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RESTRUCTURING.SOLVENCY.THREE_PRONG.v1`)**
 
 ```json
 {
-  "balance_sheet_surplus_cents": 200000,
+  "balance_sheet_surplus_cents": 500000000,
   "balance_sheet_prong_passed": true,
-  "cash_flow_surplus_cents": 50000,
+  "cash_flow_surplus_cents": 100000000,
   "cash_flow_prong_passed": true,
-  "capital_adequacy_surplus_cents": -25000,
-  "capital_adequacy_prong_passed": false,
-  "all_prongs_passed": false,
+  "capital_adequacy_surplus_cents": 200000000,
+  "capital_adequacy_prong_passed": true,
+  "all_prongs_passed": true,
   "solvency_opinion_handoff_required": true
 }
 ```
+
+Precision: All surpluses are exact integer cents (see the Conventions chapter); no rounding.
 
 ## 7. Error semantics
 
@@ -2583,7 +3206,7 @@ Conformance case `CONF.MODEL.RESTRUCT.SOLVENCY.001` — *Three-prong solvency co
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for three-prong solvency is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model runs the three solvency prongs from supplied figures. The fair-value determinations, the reasonableness of the capital and cash-flow assumptions, and the binding solvency opinion are the financial advisor's and counsel's; the model computes the prongs and always routes the opinion, rendering no solvency conclusion.
 
 ## 9. Conformance bindings
 
@@ -2647,49 +3270,53 @@ This model answers its computational question from supplied facts and cited cons
 **Gates:** G28
 **Deal contexts:** distressed sale · 363 sale
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Sale timeline, bid-protection cost, free-and-clear prongs, and credit-bid eligibility.
+Screens a §363 bankruptcy sale — whether a free-and-clear path is available under any of the five §363(f) prongs, whether the price exceeds the aggregate liens, whether the secured creditor is credit-bid eligible, and the break-up fee as a percentage of price. It answers, in a distressed sale, "can this sell free and clear, is the stalking horse's credit bid allowed, and is the bid protection in range?" It screens the prongs; court approval and the legal conclusions are for the court and counsel.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M151.schema.json`](M151.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `lien_amount_cents` | integer (cents) | MUST |
-| `purchase_price_cents` | integer (cents) | MUST |
-| `breakup_fee_cents` | integer (cents) | MAY |
-| `credit_bid_claim_cents` | integer (cents) | MAY |
-| `section_363f_prongs` | object | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `lien_amount_cents` | integer (cents) | MUST | Aggregate liens on the assets. |
+| `purchase_price_cents` | integer (cents) | MUST | The §363 sale price. |
+| `breakup_fee_cents` | integer (cents) | MAY | Stalking-horse break-up fee (default 0). |
+| `cause_to_deny_credit_bid` | boolean | MAY | Whether cause exists to deny the credit bid (default false). |
+| `credit_bid_claim_cents` | integer (cents) | MAY | Secured claim available to credit bid (default 0). |
+| `section_363f_prongs` | object | MAY | Booleans for the §363(f) prongs: `applicable_non_bankruptcy_law_permits`, `consent`, `price_exceeds_liens`, `bona_fide_dispute`, `could_be_compelled_to_accept_money_satisfaction`. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `breakup_fee_cents` | integer (cents) |
-| `breakup_fee_pct_of_purchase_price` | number |
-| `court_approval_required` | boolean |
-| `credit_bid_claim_cents` | integer (cents) |
-| `credit_bid_eligible` | boolean |
-| `free_and_clear_path_available` | boolean |
-| `free_and_clear_prong_count` | integer |
-| `lien_amount_cents` | integer (cents) |
-| `price_exceeds_aggregate_liens` | boolean |
-| `purchase_price_cents` | integer (cents) |
-| `section_363f_prongs` | object[] |
+| Field | Type | Description |
+|---|---|---|
+| `purchase_price_cents` | integer (cents) | The sale price, echoed. |
+| `lien_amount_cents` | integer (cents) | Aggregate liens, echoed. |
+| `breakup_fee_cents` | integer (cents) | Break-up fee, echoed. |
+| `breakup_fee_pct_of_purchase_price` | number | null | Break-up fee as a fraction of price, or null. |
+| `free_and_clear_prong_count` | integer | Number of §363(f) prongs satisfied. |
+| `free_and_clear_path_available` | boolean | Whether any §363(f) prong is satisfied. |
+| `price_exceeds_aggregate_liens` | boolean | Whether the price exceeds the liens. |
+| `credit_bid_claim_cents` | integer (cents) | Credit-bid claim, echoed. |
+| `credit_bid_eligible` | boolean | Whether the secured creditor may credit bid. |
+| `court_approval_required` | boolean | Always true — the sale requires court approval. |
+| `section_363f_prongs` | object[] | Per-prong result: `{ prong, passed }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Sale timeline, bid-protection cost, free-and-clear prongs, and credit-bid eligibility.
-
-Computes bid-protection economics, free-and-clear prongs, lien coverage, and credit-bid eligibility from supplied sale facts.
+Given `purchase_price_cents` and `lien_amount_cents`, plus optional `breakup_fee_cents` (default 0), `credit_bid_claim_cents` (default 0), `cause_to_deny_credit_bid` (default false), `section_363f_prongs`:
+1. If either required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `price_exceeds_aggregate_liens` SHALL be true iff `purchase_price_cents > lien_amount_cents`.
+3. It SHALL evaluate the five §363(f) prongs (non-bankruptcy law permits; consent; price exceeds liens — defaulting to the computed comparison; bona-fide dispute; could be compelled to accept a money satisfaction); `free_and_clear_prong_count` SHALL be the number satisfied and `free_and_clear_path_available` SHALL be true iff any is satisfied.
+4. `credit_bid_eligible` SHALL be true iff a positive credit-bid claim exists and there is no cause to deny it.
+5. `breakup_fee_pct_of_purchase_price` SHALL be `breakup_fee_cents ÷ purchase_price_cents`; `court_approval_required` SHALL always be true.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -2703,35 +3330,35 @@ Computes bid-protection economics, free-and-clear prongs, lien coverage, and cre
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RESTRUCT.363.001` — *363 sale mechanics computes bid protection and free-and-clear path*.
+*A $30M stalking-horse §363 bid over $25M of liens: the price exceeds the liens and the debtor consents, so a free-and-clear path is available; the $20M secured claim is credit-bid eligible and the 3% break-up fee is in range — all subject to court approval.*
 
 **Inputs**
 
 ```json
 {
-  "purchase_price_cents": 1000000,
-  "lien_amount_cents": 900000,
-  "breakup_fee_cents": 25000,
-  "credit_bid_claim_cents": 500000,
+  "purchase_price_cents": 3000000000,
+  "lien_amount_cents": 2500000000,
+  "breakup_fee_cents": 90000000,
+  "credit_bid_claim_cents": 2000000000,
+  "cause_to_deny_credit_bid": false,
   "section_363f_prongs": {
-    "consent": true,
-    "bona_fide_dispute": false
+    "consent": true
   }
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RESTRUCTURING.363_SALE.v1`)**
 
 ```json
 {
-  "purchase_price_cents": 1000000,
-  "lien_amount_cents": 900000,
-  "breakup_fee_cents": 25000,
-  "breakup_fee_pct_of_purchase_price": 0.025,
+  "purchase_price_cents": 3000000000,
+  "lien_amount_cents": 2500000000,
+  "breakup_fee_cents": 90000000,
+  "breakup_fee_pct_of_purchase_price": 0.03,
   "free_and_clear_prong_count": 2,
   "free_and_clear_path_available": true,
   "price_exceeds_aggregate_liens": true,
-  "credit_bid_claim_cents": 500000,
+  "credit_bid_claim_cents": 2000000000,
   "credit_bid_eligible": true,
   "court_approval_required": true,
   "section_363f_prongs": [
@@ -2759,6 +3386,8 @@ Conformance case `CONF.MODEL.RESTRUCT.363.001` — *363 sale mechanics computes 
 }
 ```
 
+Precision: The break-up-fee percentage rounds per the global rule (half-even to 4 decimals — see the Conventions chapter); amounts are exact integer cents.
+
 ## 7. Error semantics
 
 - **Missing inputs:** the model returns `status: "needs_inputs"` with `missingInputs` as a field-name list — for an empty input record: `["purchase_price_cents","lien_amount_cents"]`. No partial outputs are emitted.
@@ -2766,7 +3395,7 @@ Conformance case `CONF.MODEL.RESTRUCT.363.001` — *363 sale mechanics computes 
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for 363 asset sale mechanics is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model screens the §363(f) prongs, the credit-bid eligibility, and the bid protection from supplied facts. Whether a prong is in fact met, whether cause exists to deny a credit bid, and whether the sale should be approved are determinations for the court and counsel; the model screens the prongs and always routes court approval, rendering no legal conclusion.
 
 ## 9. Conformance bindings
 
@@ -2784,47 +3413,50 @@ Reference binding `MODEL.RESTRUCTURING.363_SALE.v1` · entered the specification
 **Gates:** G28
 **Deal contexts:** Chapter 11 plan
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Cash flow, DSCR, liquidity, covenant, and EBITDA-sensitivity table.
+Tests a Chapter 11 plan's feasibility across a multi-period forecast — the DSCR and ending-liquidity floors each period, the minimum projected DSCR and liquidity, and a downside cash-flow sensitivity — from supplied projections. It answers, for a plan proponent, "does the plan service its debt and hold liquidity every period, and how much cushion is there against a downturn?" It computes the floors and sensitivity; the §1129(a)(11) feasibility opinion is the financial advisor's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M152.schema.json`](M152.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `forecast_periods` | object[] | MUST |
-| `minimum_dscr` | number | MAY |
-| `minimum_liquidity_cents` | integer (cents) | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `forecast_periods` | object[] | MUST | Forecast periods; each carries `period`/`year` (string), and integer-cents `cash_flow_cents` (or `ebitda_cents`), `capex_cents`, `working_capital_need_cents`, `debt_service_cents`, and `ending_liquidity_cents`. |
+| `minimum_dscr` | number | MAY | The DSCR floor the plan must clear each period (default 1.0). |
+| `minimum_liquidity_cents` | integer (cents) | MAY | The ending-liquidity floor each period (default 0). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `cash_flow_sensitivity_cases` | object[] |
-| `dscr_floor_breached` | boolean |
-| `feasibility_opinion_handoff_required` | boolean |
-| `feasible_under_inputs` | boolean |
-| `forecast_rows` | object[] |
-| `liquidity_floor_breached` | boolean |
-| `minimum_dscr_floor` | number |
-| `minimum_liquidity_floor_cents` | integer (cents) |
-| `minimum_projected_dscr` | number |
-| `minimum_projected_liquidity_cents` | integer (cents) |
-| `period_count` | integer |
+| Field | Type | Description |
+|---|---|---|
+| `period_count` | integer | Number of forecast periods. |
+| `minimum_dscr_floor` | number | The DSCR floor applied. |
+| `minimum_liquidity_floor_cents` | integer (cents) | The liquidity floor applied. |
+| `minimum_projected_dscr` | number | null | The lowest DSCR across periods, or null. |
+| `minimum_projected_liquidity_cents` | integer (cents) | The lowest ending liquidity across periods. |
+| `dscr_floor_breached` | boolean | Whether any period breaches the DSCR floor. |
+| `liquidity_floor_breached` | boolean | Whether any period breaches the liquidity floor. |
+| `feasible_under_inputs` | boolean | Whether every period clears both floors. |
+| `feasibility_opinion_handoff_required` | boolean | Always true — the feasibility opinion routes to the financial advisor. |
+| `forecast_rows` | object[] | Per-period detail: `{ period, cash_flow_cents, capex_cents, working_capital_need_cents, available_for_debt_service_cents, debt_service_cents, dscr, ending_liquidity_cents, dscr_floor_passed, liquidity_floor_passed }`. |
+| `cash_flow_sensitivity_cases` | object[] | Downside cases: `{ cash_flow_change_pct, minimum_dscr, dscr_floor_passed }` for −10% and −20%. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Cash flow, DSCR, liquidity, covenant, and EBITDA-sensitivity table.
-
-Computes forecast-period DSCR, liquidity-floor compliance, and downside cash-flow sensitivity for Chapter 11 plan feasibility.
+Given `forecast_periods` (a list of period objects), plus optional `minimum_dscr` (default 1.0) and `minimum_liquidity_cents` (default 0):
+1. If `forecast_periods` is empty, the implementation SHALL return `status: "needs_inputs"` naming `forecast_periods`.
+2. For each period, cash available for debt service SHALL be `cash_flow − capex − working_capital_need`; `dscr` SHALL be that over debt service (or null when debt service is zero); `dscr_floor_passed` and `liquidity_floor_passed` SHALL test the period against the DSCR and liquidity floors.
+3. `minimum_projected_dscr` and `minimum_projected_liquidity_cents` SHALL be the minima across periods; `dscr_floor_breached` and `liquidity_floor_breached` SHALL be true iff any period fails; `feasible_under_inputs` SHALL be true iff every period clears both floors.
+4. It SHALL compute a −10% and a −20% cash-flow downside sensitivity, reporting each case's minimum DSCR and whether it still clears the floor.
+5. `feasibility_opinion_handoff_required` SHALL always be true; it SHALL return the full per-period and sensitivity detail.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -2835,44 +3467,44 @@ Computes forecast-period DSCR, liquidity-floor compliance, and downside cash-flo
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RESTRUCT.FEASIBILITY.001` — *Plan feasibility computes DSCR, liquidity floors, and sensitivity*.
+*A two-year plan forecast holds DSCR above the 1.1× floor (1.42× then 1.15×), but year-two ending liquidity of $750k breaches the $1.0M floor, so the plan is not feasible under the inputs — the feasibility opinion routes out, with −10%/−20% downside cases computed.*
 
 **Inputs**
 
 ```json
 {
   "minimum_dscr": 1.1,
-  "minimum_liquidity_cents": 100000,
+  "minimum_liquidity_cents": 100000000,
   "forecast_periods": [
     {
       "year": "2026",
-      "cash_flow_cents": 1000000,
-      "capex_cents": 100000,
-      "working_capital_need_cents": 50000,
-      "debt_service_cents": 600000,
-      "ending_liquidity_cents": 200000
+      "cash_flow_cents": 1000000000,
+      "capex_cents": 100000000,
+      "working_capital_need_cents": 50000000,
+      "debt_service_cents": 600000000,
+      "ending_liquidity_cents": 200000000
     },
     {
       "year": "2027",
-      "cash_flow_cents": 900000,
-      "capex_cents": 100000,
-      "working_capital_need_cents": 50000,
-      "debt_service_cents": 650000,
-      "ending_liquidity_cents": 75000
+      "cash_flow_cents": 900000000,
+      "capex_cents": 100000000,
+      "working_capital_need_cents": 50000000,
+      "debt_service_cents": 650000000,
+      "ending_liquidity_cents": 75000000
     }
   ]
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RESTRUCTURING.PLAN_FEASIBILITY.v1`)**
 
 ```json
 {
   "period_count": 2,
   "minimum_dscr_floor": 1.1,
-  "minimum_liquidity_floor_cents": 100000,
-  "minimum_projected_dscr": 1.15,
-  "minimum_projected_liquidity_cents": 75000,
+  "minimum_liquidity_floor_cents": 100000000,
+  "minimum_projected_dscr": 1.1538,
+  "minimum_projected_liquidity_cents": 75000000,
   "dscr_floor_breached": false,
   "liquidity_floor_breached": true,
   "feasible_under_inputs": false,
@@ -2880,25 +3512,25 @@ Conformance case `CONF.MODEL.RESTRUCT.FEASIBILITY.001` — *Plan feasibility com
   "forecast_rows": [
     {
       "period": "2026",
-      "cash_flow_cents": 1000000,
-      "capex_cents": 100000,
-      "working_capital_need_cents": 50000,
-      "available_for_debt_service_cents": 850000,
-      "debt_service_cents": 600000,
-      "dscr": 1.42,
-      "ending_liquidity_cents": 200000,
+      "cash_flow_cents": 1000000000,
+      "capex_cents": 100000000,
+      "working_capital_need_cents": 50000000,
+      "available_for_debt_service_cents": 850000000,
+      "debt_service_cents": 600000000,
+      "dscr": 1.4167,
+      "ending_liquidity_cents": 200000000,
       "dscr_floor_passed": true,
       "liquidity_floor_passed": true
     },
     {
       "period": "2027",
-      "cash_flow_cents": 900000,
-      "capex_cents": 100000,
-      "working_capital_need_cents": 50000,
-      "available_for_debt_service_cents": 750000,
-      "debt_service_cents": 650000,
-      "dscr": 1.15,
-      "ending_liquidity_cents": 75000,
+      "cash_flow_cents": 900000000,
+      "capex_cents": 100000000,
+      "working_capital_need_cents": 50000000,
+      "available_for_debt_service_cents": 750000000,
+      "debt_service_cents": 650000000,
+      "dscr": 1.1538,
+      "ending_liquidity_cents": 75000000,
       "dscr_floor_passed": true,
       "liquidity_floor_passed": false
     }
@@ -2906,17 +3538,19 @@ Conformance case `CONF.MODEL.RESTRUCT.FEASIBILITY.001` — *Plan feasibility com
   "cash_flow_sensitivity_cases": [
     {
       "cash_flow_change_pct": -0.1,
-      "minimum_dscr": 1.02,
+      "minimum_dscr": 1.0154,
       "dscr_floor_passed": false
     },
     {
       "cash_flow_change_pct": -0.2,
-      "minimum_dscr": 0.88,
+      "minimum_dscr": 0.8769,
       "dscr_floor_passed": false
     }
   ]
 }
 ```
+
+Precision: DSCRs round per the global rule (half-even to 4 decimals — see the Conventions chapter); liquidity is exact integer cents.
 
 ## 7. Error semantics
 
@@ -2925,7 +3559,7 @@ Conformance case `CONF.MODEL.RESTRUCT.FEASIBILITY.001` — *Plan feasibility com
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for plan feasibility is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model tests the DSCR and liquidity floors and the downside sensitivity from supplied projections. Whether the projections are reasonable and whether the plan is feasible under §1129(a)(11) are determinations for the financial advisor and the court; the model computes the floors and always routes the feasibility opinion, rendering no conclusion.
 
 ## 9. Conformance bindings
 
@@ -2943,42 +3577,45 @@ Reference binding `MODEL.RESTRUCTURING.PLAN_FEASIBILITY.v1` · entered the speci
 **Gates:** G28
 **Deal contexts:** Chapter 11 plan
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Per-class plan recovery versus hypothetical Chapter 7 recovery.
+Runs the §1129(a)(7) best-interests test class by class — each class's plan recovery versus its hypothetical Chapter 7 liquidation recovery — and flags any class that would do better in liquidation. It answers, for a plan proponent, "does every class get at least as much under the plan as it would in a Chapter 7?" It computes the per-class comparison and the shortfall; the liquidation valuation and the legal conclusion are the advisor's and counsel's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M153.schema.json`](M153.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `creditor_classes` | object[] | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `creditor_classes` | object[] | MUST | Creditor classes; each carries `class_name` (string), `allowed_claim_cents`, `plan_distribution_cents`, and `chapter7_distribution_cents` (integer cents). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `all_classes_pass_best_interests` | boolean |
-| `class_count` | integer |
-| `class_rows` | object[] |
-| `disclosure_statement_exhibit_handoff_required` | boolean |
-| `failing_class_count` | integer |
-| `total_allowed_claims_cents` | integer (cents) |
-| `total_chapter7_distribution_cents` | integer (cents) |
-| `total_plan_distribution_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `class_count` | integer | Number of creditor classes. |
+| `total_allowed_claims_cents` | integer (cents) | Total allowed claims. |
+| `total_plan_distribution_cents` | integer (cents) | Total plan distributions. |
+| `total_chapter7_distribution_cents` | integer (cents) | Total hypothetical Chapter 7 distributions. |
+| `all_classes_pass_best_interests` | boolean | Whether every class passes the best-interests test. |
+| `failing_class_count` | integer | Number of classes that fail. |
+| `disclosure_statement_exhibit_handoff_required` | boolean | Always true — the liquidation-analysis exhibit routes to counsel. |
+| `class_rows` | object[] | Per-class detail: `{ class_name, allowed_claim_cents, plan_distribution_cents, chapter7_distribution_cents, plan_recovery_pct, chapter7_recovery_pct, best_interests_shortfall_cents, best_interests_passed }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Per-class plan recovery versus hypothetical Chapter 7 recovery.
-
-Compares per-class plan distributions against Chapter 7 liquidation distributions and flags shortfalls.
+Given `creditor_classes` (a list of class objects, each with an allowed claim, a plan distribution, and a Chapter 7 distribution):
+1. If `creditor_classes` is empty, the implementation SHALL return `status: "needs_inputs"` naming `creditor_classes`.
+2. For each class, `plan_recovery_pct` and `chapter7_recovery_pct` SHALL be the plan and Chapter 7 distributions over the allowed claim; `best_interests_shortfall_cents` SHALL be `max(0, chapter7_distribution − plan_distribution)`; `best_interests_passed` SHALL be true iff the plan distribution is at or above the Chapter 7 distribution.
+3. It SHALL total allowed claims, plan distributions, and Chapter 7 distributions.
+4. `all_classes_pass_best_interests` SHALL be true iff every class passes; `failing_class_count` SHALL count the failures.
+5. `disclosure_statement_exhibit_handoff_required` SHALL always be true; it SHALL return the full per-class detail.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -2990,7 +3627,7 @@ Compares per-class plan distributions against Chapter 7 liquidation distribution
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RESTRUCT.BIOC.001` — *Best-interests model flags class-level liquidation shortfall*.
+*Two classes tested against a hypothetical Chapter 7: the secured class recovers 100% under the plan versus 90% in liquidation and passes, but the unsecured class's 25% plan recovery falls below its 30% liquidation recovery — a $1M best-interests shortfall — so one class fails and the exhibit routes out.*
 
 **Inputs**
 
@@ -2999,55 +3636,57 @@ Conformance case `CONF.MODEL.RESTRUCT.BIOC.001` — *Best-interests model flags 
   "creditor_classes": [
     {
       "class_name": "Secured",
-      "allowed_claim_cents": 1000000,
-      "plan_distribution_cents": 1000000,
-      "chapter7_distribution_cents": 900000
+      "allowed_claim_cents": 1000000000,
+      "plan_distribution_cents": 1000000000,
+      "chapter7_distribution_cents": 900000000
     },
     {
-      "class_name": "GUC",
-      "allowed_claim_cents": 500000,
-      "plan_distribution_cents": 200000,
-      "chapter7_distribution_cents": 250000
+      "class_name": "Unsecured",
+      "allowed_claim_cents": 2000000000,
+      "plan_distribution_cents": 500000000,
+      "chapter7_distribution_cents": 600000000
     }
   ]
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RESTRUCTURING.BIOC.v1`)**
 
 ```json
 {
   "class_count": 2,
-  "total_allowed_claims_cents": 1500000,
-  "total_plan_distribution_cents": 1200000,
-  "total_chapter7_distribution_cents": 1150000,
+  "total_allowed_claims_cents": 3000000000,
+  "total_plan_distribution_cents": 1500000000,
+  "total_chapter7_distribution_cents": 1500000000,
   "all_classes_pass_best_interests": false,
   "failing_class_count": 1,
   "disclosure_statement_exhibit_handoff_required": true,
   "class_rows": [
     {
       "class_name": "Secured",
-      "allowed_claim_cents": 1000000,
-      "plan_distribution_cents": 1000000,
-      "chapter7_distribution_cents": 900000,
+      "allowed_claim_cents": 1000000000,
+      "plan_distribution_cents": 1000000000,
+      "chapter7_distribution_cents": 900000000,
       "plan_recovery_pct": 1,
       "chapter7_recovery_pct": 0.9,
       "best_interests_shortfall_cents": 0,
       "best_interests_passed": true
     },
     {
-      "class_name": "GUC",
-      "allowed_claim_cents": 500000,
-      "plan_distribution_cents": 200000,
-      "chapter7_distribution_cents": 250000,
-      "plan_recovery_pct": 0.4,
-      "chapter7_recovery_pct": 0.5,
-      "best_interests_shortfall_cents": 50000,
+      "class_name": "Unsecured",
+      "allowed_claim_cents": 2000000000,
+      "plan_distribution_cents": 500000000,
+      "chapter7_distribution_cents": 600000000,
+      "plan_recovery_pct": 0.25,
+      "chapter7_recovery_pct": 0.3,
+      "best_interests_shortfall_cents": 100000000,
       "best_interests_passed": false
     }
   ]
 }
 ```
+
+Precision: Recovery percentages round per the global rule (half-even to 4 decimals — see the Conventions chapter); amounts are exact integer cents.
 
 ## 7. Error semantics
 
@@ -3056,7 +3695,7 @@ Conformance case `CONF.MODEL.RESTRUCT.BIOC.001` — *Best-interests model flags 
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for best-interests-of-creditors is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model runs the best-interests comparison from supplied plan and liquidation figures. The hypothetical Chapter 7 valuation, and whether the plan satisfies §1129(a)(7), are determinations for the financial advisor and the court; the model computes the comparison and always routes the exhibit, rendering no legal conclusion.
 
 ## 9. Conformance bindings
 
@@ -3074,43 +3713,46 @@ Reference binding `MODEL.RESTRUCTURING.BIOC.v1` · entered the specification at 
 **Gates:** G28
 **Deal contexts:** Chapter 11 cramdown
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Priority waterfall and new-value decision tree.
+Tests a cramdown plan against the absolute priority rule — for each impaired, non-accepting class not paid in full, whether any junior class receives value — and scaffolds the new-value exception (contribution, new money, necessity, market test, reasonable equivalence). It answers, in a cramdown, "does any junior class get value over the head of a senior class that isn't paid in full?" It flags the APR issues and organizes the new-value elements; the court determines APR compliance.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M154.schema.json`](M154.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `classes` | object[] | MUST |
-| `new_value` | object | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `classes` | object[] | MUST | Plan classes; each carries `class_name` (string), `priority_rank` (integer), `allowed_claim_cents`, `plan_distribution_cents` (integer cents), `impaired` (boolean), and `accepted` (boolean). |
+| `new_value` | object | MAY | The new-value exception scaffold: `contribution_cents` (integer cents) and the booleans `new_money_or_money_worth`, `necessary_to_reorganization`, `market_test_completed`, `reasonably_equivalent_value`. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `absolute_priority_issue_count` | integer |
-| `absolute_priority_issues` | object[] |
-| `apr_clear_under_inputs` | boolean |
-| `class_count` | integer |
-| `class_rows` | object[] |
-| `court_determination_required` | boolean |
-| `new_value_scaffold` | object |
-| `new_value_scaffold_complete` | boolean |
+| Field | Type | Description |
+|---|---|---|
+| `class_count` | integer | Number of classes. |
+| `absolute_priority_issue_count` | integer | Number of absolute-priority issues found. |
+| `absolute_priority_issues` | object[] | Per-issue detail: `{ senior_class_name, senior_recovery_pct, junior_value_cents }`. |
+| `apr_clear_under_inputs` | boolean | Whether the plan clears the absolute priority rule under the inputs. |
+| `new_value_scaffold` | object | The new-value elements: `{ contribution_cents, new_money_or_money_worth, necessary_to_reorganization, market_test_completed, reasonably_equivalent_value }`. |
+| `new_value_scaffold_complete` | boolean | Whether all five new-value elements are affirmatively present. |
+| `court_determination_required` | boolean | Always true — APR compliance is a court determination. |
+| `class_rows` | object[] | Per-class detail (rank-sorted): `{ class_name, priority_rank, allowed_claim_cents, plan_distribution_cents, recovery_pct, impaired, accepted }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Priority waterfall and new-value decision tree.
-
-Computes impaired dissenting senior-class recovery, junior-value leakage, and a new-value scaffold for court/counsel review.
+Given `classes` (a list of class objects) and optional `new_value` (an object):
+1. If `classes` is empty, the implementation SHALL return `status: "needs_inputs"` naming `classes`.
+2. It SHALL sort classes by priority rank and, for each impaired class that has not accepted, is not paid in full, and has a positive claim, sum the plan distributions to all junior classes; a positive junior value SHALL raise an absolute-priority issue naming the senior class, its recovery, and the junior value.
+3. `absolute_priority_issue_count` SHALL be the number of issues; `apr_clear_under_inputs` SHALL be true iff there are none.
+4. It SHALL assemble the new-value scaffold from the supplied contribution and the four qualitative elements; `new_value_scaffold_complete` SHALL be true iff all five elements are affirmatively present.
+5. `court_determination_required` SHALL always be true; it SHALL return the full ranked class detail.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -3123,7 +3765,7 @@ Computes impaired dissenting senior-class recovery, junior-value leakage, and a 
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RESTRUCT.APR.001` — *APR model flags junior value below dissenting impaired senior class*.
+*A three-class plan: the senior secured class is unimpaired, but the unsecured class is crammed down to 20% while the equity class beneath it keeps $1M — an absolute-priority violation the plan must cure — so the court determination is required.*
 
 **Inputs**
 
@@ -3133,8 +3775,15 @@ Conformance case `CONF.MODEL.RESTRUCT.APR.001` — *APR model flags junior value
     {
       "class_name": "Senior secured",
       "priority_rank": 1,
-      "allowed_claim_cents": 1000000,
-      "plan_distribution_cents": 800000,
+      "allowed_claim_cents": 1500000000,
+      "plan_distribution_cents": 1500000000,
+      "accepted": true
+    },
+    {
+      "class_name": "Unsecured",
+      "priority_rank": 2,
+      "allowed_claim_cents": 1000000000,
+      "plan_distribution_cents": 200000000,
       "impaired": true,
       "accepted": false
     },
@@ -3142,49 +3791,51 @@ Conformance case `CONF.MODEL.RESTRUCT.APR.001` — *APR model flags junior value
       "class_name": "Equity",
       "priority_rank": 3,
       "allowed_claim_cents": 0,
-      "plan_distribution_cents": 100000
+      "plan_distribution_cents": 100000000
     }
-  ],
-  "new_value": {
-    "contribution_cents": 150000,
-    "new_money_or_money_worth": true,
-    "necessary_to_reorganization": true,
-    "market_test_completed": true,
-    "reasonably_equivalent_value": true
-  }
+  ]
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RESTRUCTURING.APR_NEW_VALUE.v1`)**
 
 ```json
 {
-  "class_count": 2,
+  "class_count": 3,
   "absolute_priority_issue_count": 1,
   "absolute_priority_issues": [
     {
-      "senior_class_name": "Senior secured",
-      "senior_recovery_pct": 0.8,
-      "junior_value_cents": 100000
+      "senior_class_name": "Unsecured",
+      "senior_recovery_pct": 0.2,
+      "junior_value_cents": 100000000
     }
   ],
   "apr_clear_under_inputs": false,
   "new_value_scaffold": {
-    "contribution_cents": 150000,
-    "new_money_or_money_worth": true,
-    "necessary_to_reorganization": true,
-    "market_test_completed": true,
-    "reasonably_equivalent_value": true
+    "contribution_cents": 0,
+    "new_money_or_money_worth": null,
+    "necessary_to_reorganization": null,
+    "market_test_completed": null,
+    "reasonably_equivalent_value": null
   },
-  "new_value_scaffold_complete": true,
+  "new_value_scaffold_complete": false,
   "court_determination_required": true,
   "class_rows": [
     {
       "class_name": "Senior secured",
       "priority_rank": 1,
-      "allowed_claim_cents": 1000000,
-      "plan_distribution_cents": 800000,
-      "recovery_pct": 0.8,
+      "allowed_claim_cents": 1500000000,
+      "plan_distribution_cents": 1500000000,
+      "recovery_pct": 1,
+      "impaired": false,
+      "accepted": true
+    },
+    {
+      "class_name": "Unsecured",
+      "priority_rank": 2,
+      "allowed_claim_cents": 1000000000,
+      "plan_distribution_cents": 200000000,
+      "recovery_pct": 0.2,
       "impaired": true,
       "accepted": false
     },
@@ -3192,7 +3843,7 @@ Conformance case `CONF.MODEL.RESTRUCT.APR.001` — *APR model flags junior value
       "class_name": "Equity",
       "priority_rank": 3,
       "allowed_claim_cents": 0,
-      "plan_distribution_cents": 100000,
+      "plan_distribution_cents": 100000000,
       "recovery_pct": 0,
       "impaired": false,
       "accepted": false
@@ -3201,6 +3852,8 @@ Conformance case `CONF.MODEL.RESTRUCT.APR.001` — *APR model flags junior value
 }
 ```
 
+Precision: Recovery percentages round per the global rule (half-even to 4 decimals — see the Conventions chapter); amounts are exact integer cents.
+
 ## 7. Error semantics
 
 - **Missing inputs:** the model returns `status: "needs_inputs"` with `missingInputs` as a field-name list — for an empty input record: `["classes"]`. No partial outputs are emitted.
@@ -3208,7 +3861,7 @@ Conformance case `CONF.MODEL.RESTRUCT.APR.001` — *APR model flags junior value
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for absolute priority rule and new value is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model flags absolute-priority issues and organizes the new-value elements from supplied class facts. Whether the absolute priority rule is in fact violated and whether the new-value exception is available are determinations for the court; the model surfaces the issues and always routes the determination, rendering no legal conclusion.
 
 ## 9. Conformance bindings
 
@@ -3226,47 +3879,50 @@ Reference binding `MODEL.RESTRUCTURING.APR_NEW_VALUE.v1` · entered the specific
 **Gates:** G28
 **Deal contexts:** Chapter 11 cramdown
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Efficient-market/Till formula range and circuit flag.
+Computes the cramdown interest rate under both frameworks — the Till formula (a base rate plus a risk premium) and, where the circuit applies it and a market exists, the efficient-market rate — and selects which governs, reporting the indicated rate. It answers, in a cramdown, "what rate does the plan owe a crammed-down secured creditor, and which framework does this circuit use?" It computes both and selects per the circuit; the court sets the final rate.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M155.schema.json`](M155.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `base_rate` | number | MUST |
-| `risk_premium` | number | MUST |
-| `circuit` | string | MAY |
-| `efficient_market_exists` | boolean | MAY |
-| `efficient_market_rate` | number | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `base_rate` | number | MUST | The Till base rate (e.g., prime), as a fraction. |
+| `risk_premium` | number | MUST | The Till risk premium, as a fraction. |
+| `circuit` | string | MAY | The federal circuit (e.g., 2d, 5th, 6th, 8th); selects the framework. |
+| `efficient_market_exists` | boolean | MAY | Whether an efficient market exists (defaults to whether a rate is supplied). |
+| `efficient_market_rate` | number | MAY | An observed efficient-market rate, as a fraction; optional. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `base_rate` | number |
-| `circuit` | string |
-| `court_sets_final_rate` | boolean |
-| `efficient_market_framework_supported` | boolean |
-| `efficient_market_rate` | number |
-| `indicated_cramdown_rate` | number |
-| `risk_premium` | number |
-| `selected_framework` | string |
-| `till_formula_rate` | number |
+| Field | Type | Description |
+|---|---|---|
+| `base_rate` | number | The base rate, echoed. |
+| `risk_premium` | number | The risk premium, echoed. |
+| `till_formula_rate` | number | Base rate plus risk premium. |
+| `efficient_market_rate` | number | null | The efficient-market rate, or null. |
+| `circuit` | string | null | The circuit, echoed, or null. |
+| `efficient_market_framework_supported` | boolean | Whether the circuit applies the efficient-market framework. |
+| `selected_framework` | enum(cramdown_framework) | Which framework governs. One of `efficient_market`, `till_formula`. |
+| `indicated_cramdown_rate` | number | The rate the selected framework indicates. |
+| `court_sets_final_rate` | boolean | Always true — the court sets the final rate. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Efficient-market/Till formula range and circuit flag.
-
-Computes Till formula and efficient-market framework outputs, with circuit support and court-rate handoff flags.
+Given `base_rate` and `risk_premium`, plus optional `efficient_market_rate`, `efficient_market_exists`, `circuit`:
+1. If either required rate is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `till_formula_rate` SHALL be `base_rate + risk_premium`.
+3. `efficient_market_framework_supported` SHALL be true iff the circuit is one that applies the efficient-market framework (2d, 5th, 6th, 8th).
+4. The efficient-market rate SHALL govern iff a market exists, an efficient-market rate is supplied, and the circuit supports the framework; `selected_framework` SHALL be `efficient_market` or `till_formula` accordingly.
+5. `indicated_cramdown_rate` SHALL be the selected framework's rate (all rates at the global 4-decimal precision); `court_sets_final_rate` SHALL always be true.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -3280,35 +3936,37 @@ Computes Till formula and efficient-market framework outputs, with circuit suppo
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RESTRUCT.CRAMDOWN.001` — *Cramdown rate model applies efficient-market framework in supported circuit*.
+*A Sixth Circuit cramdown with an available 10% efficient-market rate: because the circuit applies the efficient-market framework and a market exists, the 10% market rate governs over the 11% Till formula rate (8% base plus a 3% risk premium) — the court sets the final rate.*
 
 **Inputs**
 
 ```json
 {
   "base_rate": 0.08,
-  "risk_premium": 0.015,
-  "efficient_market_rate": 0.1025,
+  "risk_premium": 0.03,
+  "efficient_market_rate": 0.1,
   "efficient_market_exists": true,
-  "circuit": "2d"
+  "circuit": "6th"
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RESTRUCTURING.CRAMDOWN_RATE.v1`)**
 
 ```json
 {
   "base_rate": 0.08,
-  "risk_premium": 0.015,
-  "till_formula_rate": 0.095,
-  "efficient_market_rate": 0.1025,
-  "circuit": "2d",
+  "risk_premium": 0.03,
+  "till_formula_rate": 0.11,
+  "efficient_market_rate": 0.1,
+  "circuit": "6th",
   "efficient_market_framework_supported": true,
   "selected_framework": "efficient_market",
-  "indicated_cramdown_rate": 0.1025,
+  "indicated_cramdown_rate": 0.1,
   "court_sets_final_rate": true
 }
 ```
+
+Precision: All rates round per the global rule (half-even to 4 decimals — see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -3317,7 +3975,7 @@ Conformance case `CONF.MODEL.RESTRUCT.CRAMDOWN.001` — *Cramdown rate model app
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for cramdown interest rate is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model computes the Till and efficient-market rates and selects per the circuit from supplied inputs. Whether an efficient market in fact exists, the correct risk premium, and the final cramdown rate are determinations for the court; the model computes both frameworks and always defers the final rate, rendering no rate determination.
 
 ## 9. Conformance bindings
 
@@ -3335,56 +3993,61 @@ Reference binding `MODEL.RESTRUCTURING.CRAMDOWN_RATE.v1` · entered the specific
 **Gates:** G28
 **Deal contexts:** undersecured Chapter 11 creditor
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Election eligibility and no-election versus election value comparison.
+Evaluates an undersecured creditor's §1111(b) election — the no-election value (collateral value plus deficiency recovery) against the election value (the plan payment stream's aggregate and present value) — and screens eligibility, the two election tests, and the class vote. It answers, for an undersecured creditor, "am I better off electing §1111(b) to keep my full-claim lien, or taking the deficiency recovery?" It computes the trade-off; the election filing is counsel's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M156.schema.json`](M156.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `allowed_claim_cents` | integer (cents) | MUST |
-| `collateral_value_cents` | integer (cents) | MUST |
-| `discount_rate` | number | MUST |
-| `plan_payment_stream_cents` | number[] | MUST |
-| `class_vote_amount_pct` | number | MAY |
-| `class_vote_number_pct` | number | MAY |
-| `guc_recovery_pct` | number | MAY |
-| `interest_inconsequential` | boolean | MAY |
-| `property_sold_under_363_or_plan` | boolean | MAY |
-| `recourse` | boolean | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `allowed_claim_cents` | integer (cents) | MUST | The creditor's total allowed claim. |
+| `collateral_value_cents` | integer (cents) | MUST | Value of the collateral (the secured portion). |
+| `discount_rate` | number | MUST | The discount rate for the payment-stream NPV (a fraction). |
+| `plan_payment_stream_cents` | integer (cents)[] | MUST | The plan's payment stream, one integer-cents payment per period. |
+| `class_vote_amount_pct` | number | MAY | Class support by amount, as a fraction; optional. |
+| `class_vote_number_pct` | number | MAY | Class support by number, as a fraction; optional. |
+| `guc_recovery_pct` | number | MAY | General-unsecured recovery on the deficiency, as a fraction (default 0). |
+| `interest_inconsequential` | boolean | MAY | Whether the secured interest is of inconsequential value (default false); defeats eligibility. |
+| `property_sold_under_363_or_plan` | boolean | MAY | Whether the property is sold under §363 or the plan (default false); with recourse, defeats eligibility. |
+| `recourse` | boolean | MAY | Whether the claim is recourse (default true). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `aggregate_face_test_passed` | boolean |
-| `allowed_claim_cents` | integer (cents) |
-| `collateral_npv_test_passed` | boolean |
-| `collateral_value_cents` | integer (cents) |
-| `deficiency_claim_cents` | integer (cents) |
-| `election_aggregate_payments_cents` | integer (cents) |
-| `election_eligible` | boolean |
-| `election_filing_handoff_required` | boolean |
-| `election_npv_cents` | integer (cents) |
-| `election_vote_passed` | boolean |
-| `guc_recovery_pct` | number |
-| `no_election_value_cents` | integer (cents) |
-| `value_delta_election_vs_no_election_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `allowed_claim_cents` | integer (cents) | The allowed claim, echoed. |
+| `collateral_value_cents` | integer (cents) | The collateral value, echoed. |
+| `deficiency_claim_cents` | integer (cents) | The deficiency (claim over collateral). |
+| `guc_recovery_pct` | number | The deficiency recovery rate applied. |
+| `no_election_value_cents` | integer (cents) | Value without electing (collateral plus deficiency recovery). |
+| `election_aggregate_payments_cents` | integer (cents) | Aggregate face of the payment stream. |
+| `election_npv_cents` | integer (cents) | Present value of the payment stream. |
+| `election_eligible` | boolean | Whether the §1111(b) election is available. |
+| `election_vote_passed` | boolean | null | Whether the class vote clears §1126(c), or null when votes are not supplied. |
+| `aggregate_face_test_passed` | boolean | Whether aggregate payments meet or exceed the allowed claim. |
+| `collateral_npv_test_passed` | boolean | Whether the payment-stream NPV meets or exceeds the collateral value. |
+| `value_delta_election_vs_no_election_cents` | integer (cents) | Election NPV less no-election value (positive favors electing). |
+| `election_filing_handoff_required` | boolean | Always true — the election filing routes to counsel. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Election eligibility and no-election versus election value comparison.
-
-Computes no-election value, election NPV, aggregate face test, collateral NPV test, eligibility, and vote threshold flags.
+Given `allowed_claim_cents`, `collateral_value_cents`, `plan_payment_stream_cents` (a list), and `discount_rate`, plus optional `guc_recovery_pct` (default 0), `recourse` (default true), `property_sold_under_363_or_plan` (default false), `interest_inconsequential` (default false), the class-vote percentages:
+1. If any required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `deficiency_claim_cents` SHALL be `max(0, allowed_claim_cents − collateral_value_cents)`; `no_election_value_cents` SHALL be `collateral_value_cents + round(deficiency × guc_recovery_pct)`.
+3. `election_aggregate_payments_cents` SHALL be the sum of the payment stream; `election_npv_cents` SHALL be its present value at the discount rate.
+4. `election_eligible` SHALL be false when the interest is inconsequential or the claim is recourse and the property is sold; `aggregate_face_test_passed` (aggregate ≥ claim) and `collateral_npv_test_passed` (NPV ≥ collateral value) SHALL be reported; the class vote passes iff it clears the §1126(c) acceptance thresholds (constants: §1126(c) class-acceptance thresholds).
+5. `value_delta_election_vs_no_election_cents` SHALL be `election_npv_cents − no_election_value_cents`; `election_filing_handoff_required` SHALL always be true.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| §1126(c) class-acceptance thresholds | at least two-thirds in amount and more than one-half in number of claims actually voting | MUST (binding) | 11 U.S.C. § 1126(c) | § 1126(c) | current (Bankruptcy Code as amended) | on statutory amendment |
 
 
 **Authorities**
@@ -3395,50 +4058,49 @@ Computes no-election value, election NPV, aggregate face test, collateral NPV te
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RESTRUCT.1111B.001` — *1111(b) model computes election value trade-off and statutory vote flags*.
+*An undersecured creditor with a $10M claim against $6M collateral weighs the election: without electing it recovers $6.4M (collateral plus a 10% deficiency recovery); electing gives up the deficiency, but the $7.5M payment stream's ~$5.69M present value falls short of the collateral value, so the election destroys value here — the filing routes to counsel.*
 
 **Inputs**
 
 ```json
 {
-  "allowed_claim_cents": 1000000,
-  "collateral_value_cents": 600000,
+  "allowed_claim_cents": 1000000000,
+  "collateral_value_cents": 600000000,
   "plan_payment_stream_cents": [
-    250000,
-    250000,
-    250000,
-    250000,
-    250000
+    150000000,
+    150000000,
+    150000000,
+    150000000,
+    150000000
   ],
   "discount_rate": 0.1,
-  "guc_recovery_pct": 0.2,
-  "recourse": true,
-  "property_sold_under_363_or_plan": false,
-  "interest_inconsequential": false,
-  "class_vote_amount_pct": 0.7,
-  "class_vote_number_pct": 0.55
+  "guc_recovery_pct": 0.1,
+  "class_vote_amount_pct": 0.75,
+  "class_vote_number_pct": 0.6
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RESTRUCTURING.1111B_ELECTION.v1`)**
 
 ```json
 {
-  "allowed_claim_cents": 1000000,
-  "collateral_value_cents": 600000,
-  "deficiency_claim_cents": 400000,
-  "guc_recovery_pct": 0.2,
-  "no_election_value_cents": 680000,
-  "election_aggregate_payments_cents": 1250000,
-  "election_npv_cents": 947697,
+  "allowed_claim_cents": 1000000000,
+  "collateral_value_cents": 600000000,
+  "deficiency_claim_cents": 400000000,
+  "guc_recovery_pct": 0.1,
+  "no_election_value_cents": 640000000,
+  "election_aggregate_payments_cents": 750000000,
+  "election_npv_cents": 568618015,
   "election_eligible": true,
   "election_vote_passed": true,
-  "aggregate_face_test_passed": true,
-  "collateral_npv_test_passed": true,
-  "value_delta_election_vs_no_election_cents": 267697,
+  "aggregate_face_test_passed": false,
+  "collateral_npv_test_passed": false,
+  "value_delta_election_vs_no_election_cents": -71381985,
   "election_filing_handoff_required": true
 }
 ```
+
+Precision: Values and NPV are exact integer cents; the deficiency-recovery percentage rounds per the global rule (half-even to 4 decimals — see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -3447,7 +4109,7 @@ Conformance case `CONF.MODEL.RESTRUCT.1111B.001` — *1111(b) model computes ele
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for 1111(b) election trade-off is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model computes the §1111(b) trade-off from supplied figures. Whether the election is available on the facts, the correct collateral valuation and discount rate, and the filing decision are determinations for counsel and the financial advisor; the model computes the comparison and always routes the filing, rendering no election recommendation.
 
 ## 9. Conformance bindings
 
@@ -3465,43 +4127,46 @@ Reference binding `MODEL.RESTRUCTURING.1111B_ELECTION.v1` · entered the specifi
 **Gates:** G28
 **Deal contexts:** Chapter 7 · liquidation analysis
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Distribution by statutory priority and trustee-fee schedule.
+Distributes a Chapter 7 estate down the §507/§726 priority ladder — net of the trustee fee, paying each priority rank in turn until the estate is exhausted — and reports each class's distribution and recovery and any residual to equity. It answers, in a liquidation, "how far down the priority waterfall does the estate reach, and what does each class recover?" It computes the waterfall; the claim allowances and priorities are legal determinations.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M157.schema.json`](M157.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `claims` | object[] | MUST |
-| `estate_value_cents` | integer (cents) | MUST |
-| `trustee_fee_cents` | integer (cents) | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `claims` | object[] | MUST | Claim classes; each carries `class_name` (string), `priority_rank` (integer), and `allowed_claim_cents` (integer cents). |
+| `estate_value_cents` | integer (cents) | MUST | The gross Chapter 7 estate value. |
+| `trustee_fee_cents` | integer (cents) | MAY | Trustee fee deducted before distribution (default 0). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `distributable_estate_cents` | integer (cents) |
-| `estate_value_cents` | integer (cents) |
-| `residual_to_equity_cents` | integer (cents) |
-| `total_claims_cents` | integer (cents) |
-| `total_distributed_cents` | integer (cents) |
-| `trustee_fee_cents` | integer (cents) |
-| `waterfall_rows` | object[] |
+| Field | Type | Description |
+|---|---|---|
+| `estate_value_cents` | integer (cents) | The estate value, echoed. |
+| `trustee_fee_cents` | integer (cents) | The trustee fee, echoed. |
+| `distributable_estate_cents` | integer (cents) | Estate net of the trustee fee. |
+| `total_claims_cents` | integer (cents) | Total allowed claims. |
+| `total_distributed_cents` | integer (cents) | Total distributed across all classes. |
+| `residual_to_equity_cents` | integer (cents) | Remainder to equity after all claims. |
+| `waterfall_rows` | object[] | Per-class detail (rank-sorted): `{ class_name, priority_rank, allowed_claim_cents, distribution_cents, recovery_pct }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Distribution by statutory priority and trustee-fee schedule.
-
-Computes a priority-ranked liquidation distribution and recovery schedule under supplied claim classes.
+Given `estate_value_cents` and `claims` (a list of class objects), plus optional `trustee_fee_cents` (default 0):
+1. If either required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `distributable_estate_cents` SHALL be `max(0, estate_value_cents − trustee_fee_cents)`.
+3. It SHALL sort claims by priority rank and, for each in turn, distribute `min(remaining, allowed_claim)` and reduce the remainder; `recovery_pct` SHALL be the distribution over the allowed claim.
+4. `total_claims_cents` and `total_distributed_cents` SHALL be the sums; `residual_to_equity_cents` SHALL be the remainder after all claims.
+5. It SHALL return the full per-class waterfall detail.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -3513,69 +4178,71 @@ Computes a priority-ranked liquidation distribution and recovery schedule under 
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RESTRUCT.CH7.001` — *Chapter 7 waterfall distributes estate by priority*.
+*A $10M Chapter 7 estate, net of a $500k trustee fee, distributes $9.5M by statutory priority: the $6M secured and $1M priority claims are paid in full and the $8M unsecured class recovers about 31%, with nothing left for equity.*
 
 **Inputs**
 
 ```json
 {
-  "estate_value_cents": 1000000,
-  "trustee_fee_cents": 50000,
+  "estate_value_cents": 1000000000,
+  "trustee_fee_cents": 50000000,
   "claims": [
     {
-      "class_name": "Admin",
+      "class_name": "Secured",
       "priority_rank": 1,
-      "allowed_claim_cents": 200000
+      "allowed_claim_cents": 600000000
     },
     {
-      "class_name": "Priority tax",
+      "class_name": "Priority",
       "priority_rank": 2,
-      "allowed_claim_cents": 300000
+      "allowed_claim_cents": 100000000
     },
     {
-      "class_name": "GUC",
+      "class_name": "Unsecured",
       "priority_rank": 3,
-      "allowed_claim_cents": 600000
+      "allowed_claim_cents": 800000000
     }
   ]
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RESTRUCTURING.CH7_WATERFALL.v1`)**
 
 ```json
 {
-  "estate_value_cents": 1000000,
-  "trustee_fee_cents": 50000,
-  "distributable_estate_cents": 950000,
-  "total_claims_cents": 1100000,
-  "total_distributed_cents": 950000,
+  "estate_value_cents": 1000000000,
+  "trustee_fee_cents": 50000000,
+  "distributable_estate_cents": 950000000,
+  "total_claims_cents": 1500000000,
+  "total_distributed_cents": 950000000,
   "residual_to_equity_cents": 0,
   "waterfall_rows": [
     {
-      "class_name": "Admin",
+      "class_name": "Secured",
       "priority_rank": 1,
-      "allowed_claim_cents": 200000,
-      "distribution_cents": 200000,
+      "allowed_claim_cents": 600000000,
+      "distribution_cents": 600000000,
       "recovery_pct": 1
     },
     {
-      "class_name": "Priority tax",
+      "class_name": "Priority",
       "priority_rank": 2,
-      "allowed_claim_cents": 300000,
-      "distribution_cents": 300000,
+      "allowed_claim_cents": 100000000,
+      "distribution_cents": 100000000,
       "recovery_pct": 1
     },
     {
-      "class_name": "GUC",
+      "class_name": "Unsecured",
       "priority_rank": 3,
-      "allowed_claim_cents": 600000,
-      "distribution_cents": 450000,
-      "recovery_pct": 0.75
+      "allowed_claim_cents": 800000000,
+      "distribution_cents": 250000000,
+      "recovery_pct": 0.3125
     }
   ]
 }
 ```
+
+Precision: Recovery percentages round per the global rule (half-even to 4 decimals — see the Conventions chapter); amounts are exact integer cents.
 
 ## 7. Error semantics
 
@@ -3584,7 +4251,7 @@ Conformance case `CONF.MODEL.RESTRUCT.CH7.001` — *Chapter 7 waterfall distribu
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model computes the Chapter 7 distribution waterfall from supplied estate and claim figures. The allowance and priority ranking of claims, and the trustee-fee determination, are legal and court determinations; the model computes the waterfall the supplied ranks and amounts imply and renders no allowance or priority conclusion.
 
 ## 9. Conformance bindings
 
@@ -3602,51 +4269,54 @@ Reference binding `MODEL.RESTRUCTURING.CH7_WATERFALL.v1` · entered the specific
 **Gates:** G28, G29
 **Deal contexts:** DIP financing
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-13-week cash, minimum liquidity, roll-up, carve-out, and priming schedule.
+Sizes a debtor-in-possession facility — the new liquidity need (13-week cash need plus the minimum-liquidity cushion, net of opening cash), the required commitment including any roll-up and professional-fee carve-out, the new-money component, and the roll-up as a percentage of the facility. It answers, at the front of a Chapter 11, "how big does the DIP need to be, and how much of it is new money versus a roll-up?" It sizes the facility; court approval and the priming fight are for the court and counsel.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M158.schema.json`](M158.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `minimum_liquidity_cents` | integer (cents) | MUST |
-| `thirteen_week_cash_need_cents` | integer (cents) | MUST |
-| `new_money_minimum_cents` | integer (cents) | MAY |
-| `opening_cash_cents` | integer (cents) | MAY |
-| `priming_requested` | boolean | MAY |
-| `professional_fee_carveout_cents` | integer (cents) | MAY |
-| `rollup_amount_cents` | integer (cents) | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `minimum_liquidity_cents` | integer (cents) | MUST | Minimum-liquidity cushion the facility must maintain. |
+| `thirteen_week_cash_need_cents` | integer (cents) | MUST | Net cash need over the 13-week budget. |
+| `new_money_minimum_cents` | integer (cents) | MAY | A floor on the new-money component (default 0). |
+| `opening_cash_cents` | integer (cents) | MAY | Cash on hand at filing (default 0). |
+| `priming_requested` | boolean | MAY | Whether the DIP primes existing liens (default false). |
+| `professional_fee_carveout_cents` | integer (cents) | MAY | Professional-fee carve-out (default 0). |
+| `rollup_amount_cents` | integer (cents) | MAY | Prepetition debt rolled into the DIP (default 0). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `court_approval_required` | boolean |
-| `liquidity_need_cents` | integer (cents) |
-| `minimum_liquidity_cents` | integer (cents) |
-| `new_money_component_cents` | integer (cents) |
-| `opening_cash_cents` | integer (cents) |
-| `priming_requested` | boolean |
-| `professional_fee_carveout_cents` | integer (cents) |
-| `required_dip_commitment_cents` | integer (cents) |
-| `rollup_amount_cents` | integer (cents) |
-| `rollup_pct_of_commitment` | number |
-| `thirteen_week_cash_need_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `thirteen_week_cash_need_cents` | integer (cents) | The 13-week cash need, echoed. |
+| `opening_cash_cents` | integer (cents) | Opening cash, echoed. |
+| `minimum_liquidity_cents` | integer (cents) | Minimum liquidity, echoed. |
+| `liquidity_need_cents` | integer (cents) | New liquidity the DIP must supply. |
+| `rollup_amount_cents` | integer (cents) | Roll-up amount, echoed. |
+| `professional_fee_carveout_cents` | integer (cents) | Professional-fee carve-out, echoed. |
+| `required_dip_commitment_cents` | integer (cents) | Total required DIP commitment. |
+| `new_money_component_cents` | integer (cents) | The new-money portion of the facility. |
+| `rollup_pct_of_commitment` | number | null | Roll-up as a fraction of the commitment, or null. |
+| `priming_requested` | boolean | Whether priming is requested. |
+| `court_approval_required` | boolean | Always true — the DIP requires court approval. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-13-week cash, minimum liquidity, roll-up, carve-out, and priming schedule.
-
-Computes required DIP commitment from 13-week need, minimum liquidity, opening cash, roll-up, carve-out, and new-money inputs.
+Given `thirteen_week_cash_need_cents` and `minimum_liquidity_cents`, plus optional `opening_cash_cents` (default 0), `rollup_amount_cents` (default 0), `professional_fee_carveout_cents` (default 0), `new_money_minimum_cents` (default 0), `priming_requested` (default false):
+1. If either required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `liquidity_need_cents` SHALL be `max(0, thirteen_week_cash_need_cents + minimum_liquidity_cents − opening_cash_cents)`.
+3. `required_dip_commitment_cents` SHALL be the greater of (`liquidity_need + rollup + carveout`) and (`new_money_minimum + rollup + carveout`).
+4. `new_money_component_cents` SHALL be `max(new_money_minimum_cents, liquidity_need_cents)`; `rollup_pct_of_commitment` SHALL be `rollup ÷ required_commitment` (or null).
+5. `court_approval_required` SHALL always be true.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -3658,39 +4328,41 @@ Computes required DIP commitment from 13-week need, minimum liquidity, opening c
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RESTRUCT.DIP.001` — *DIP sizing computes liquidity need, roll-up, and carve-out*.
+*A DIP for an $8M 13-week cash need plus a $2M liquidity cushion against $1M of opening cash needs $9M of new liquidity; with a $10M roll-up and a $1.5M professional-fee carve-out the facility totals $20.5M (about 49% roll-up), and priming is requested — subject to court approval.*
 
 **Inputs**
 
 ```json
 {
-  "thirteen_week_cash_need_cents": 500000,
-  "minimum_liquidity_cents": 200000,
-  "opening_cash_cents": 100000,
-  "rollup_amount_cents": 150000,
-  "professional_fee_carveout_cents": 50000,
-  "new_money_minimum_cents": 650000,
+  "thirteen_week_cash_need_cents": 800000000,
+  "minimum_liquidity_cents": 200000000,
+  "opening_cash_cents": 100000000,
+  "rollup_amount_cents": 1000000000,
+  "professional_fee_carveout_cents": 150000000,
+  "new_money_minimum_cents": 500000000,
   "priming_requested": true
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RESTRUCTURING.DIP_SIZING.v1`)**
 
 ```json
 {
-  "thirteen_week_cash_need_cents": 500000,
-  "opening_cash_cents": 100000,
-  "minimum_liquidity_cents": 200000,
-  "liquidity_need_cents": 600000,
-  "rollup_amount_cents": 150000,
-  "professional_fee_carveout_cents": 50000,
-  "required_dip_commitment_cents": 850000,
-  "new_money_component_cents": 650000,
-  "rollup_pct_of_commitment": 0.1765,
+  "thirteen_week_cash_need_cents": 800000000,
+  "opening_cash_cents": 100000000,
+  "minimum_liquidity_cents": 200000000,
+  "liquidity_need_cents": 900000000,
+  "rollup_amount_cents": 1000000000,
+  "professional_fee_carveout_cents": 150000000,
+  "required_dip_commitment_cents": 2050000000,
+  "new_money_component_cents": 900000000,
+  "rollup_pct_of_commitment": 0.4878,
   "priming_requested": true,
   "court_approval_required": true
 }
 ```
+
+Precision: The roll-up percentage rounds per the global rule (half-even to 4 decimals — see the Conventions chapter); amounts are exact integer cents.
 
 ## 7. Error semantics
 
@@ -3699,7 +4371,7 @@ Conformance case `CONF.MODEL.RESTRUCT.DIP.001` — *DIP sizing computes liquidit
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for 364 dip sizing is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model sizes the DIP facility from supplied budget and structure figures. The adequacy of the budget, whether priming is warranted, and the approval of the facility are determinations for the court and the parties; the model computes the sizing and always routes court approval, rendering no approval conclusion.
 
 ## 9. Conformance bindings
 
@@ -3717,41 +4389,44 @@ Reference binding `MODEL.RESTRUCTURING.DIP_SIZING.v1` · entered the specificati
 **Gates:** G28
 **Deal contexts:** distressed-for-control
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Enterprise value through capital stack and recovery by tranche.
+Allocates enterprise value down the capital stack by priority to find the fulcrum security — the tranche where value breaks, recovering more than zero but less than par — reporting each tranche's recovery and any residual value. It answers, in a distressed-for-control situation, "at this enterprise value, which tranche is the fulcrum that converts to the equity?" It computes the break from supplied tranches; the enterprise valuation is the financial advisor's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M159.schema.json`](M159.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `enterprise_value_cents` | integer (cents) | MUST |
-| `tranches` | object[] | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `enterprise_value_cents` | integer (cents) | MUST | The enterprise value to distribute. |
+| `tranches` | object[] | MUST | Capital-stack tranches; each carries `tranche_name` (string), `priority_rank` (integer), and `claim_cents` (integer cents). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `enterprise_value_cents` | integer (cents) |
-| `financial_advisor_ev_handoff_required` | boolean |
-| `fulcrum_tranche` | string |
-| `residual_value_cents` | integer (cents) |
-| `total_claims_cents` | integer (cents) |
-| `tranche_rows` | object[] |
+| Field | Type | Description |
+|---|---|---|
+| `enterprise_value_cents` | integer (cents) | The enterprise value, echoed. |
+| `total_claims_cents` | integer (cents) | Total claims across the stack. |
+| `residual_value_cents` | integer (cents) | Value remaining after all tranches. |
+| `fulcrum_tranche` | string | null | The fulcrum tranche name, or null. |
+| `financial_advisor_ev_handoff_required` | boolean | Always true — the enterprise valuation routes to the financial advisor. |
+| `tranche_rows` | object[] | Per-tranche detail (rank-sorted): `{ tranche_name, priority_rank, claim_cents, value_allocated_cents, recovery_pct }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Enterprise value through capital stack and recovery by tranche.
-
-Applies enterprise value down the capital stack and identifies the fulcrum tranche at supplied EV.
+Given `enterprise_value_cents` and `tranches` (a list of tranche objects):
+1. If either required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. It SHALL sort tranches by priority rank and, for each in turn, allocate `min(remaining_value, claim)` and reduce the remaining value; `recovery_pct` SHALL be the allocation over the claim.
+3. `fulcrum_tranche` SHALL be the first tranche whose recovery is strictly between zero and par; if none, it SHALL fall back to the first fully-unpaid tranche, else the last fully-paid tranche.
+4. `total_claims_cents` SHALL be the sum of claims; `residual_value_cents` SHALL be the value left after all tranches.
+5. `financial_advisor_ev_handoff_required` SHALL always be true; it SHALL return the full per-tranche detail.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -3762,55 +4437,81 @@ Applies enterprise value down the capital stack and identifies the fulcrum tranc
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RESTRUCT.FULCRUM.001` — *Fulcrum model identifies the partially impaired tranche*.
+*At a $50M enterprise value across an $80M capital stack, the revolver and term loan recover in full, the senior notes recover 40% — the fulcrum security where value breaks — and the sub notes are out of the money; the valuation routes to the financial advisor.*
 
 **Inputs**
 
 ```json
 {
-  "enterprise_value_cents": 1200000,
+  "enterprise_value_cents": 5000000000,
   "tranches": [
     {
-      "tranche_name": "First lien",
+      "tranche_name": "Revolver",
       "priority_rank": 1,
-      "claim_cents": 800000
+      "claim_cents": 1000000000
     },
     {
-      "tranche_name": "Second lien",
+      "tranche_name": "Term Loan",
       "priority_rank": 2,
-      "claim_cents": 700000
+      "claim_cents": 3000000000
+    },
+    {
+      "tranche_name": "Senior Notes",
+      "priority_rank": 3,
+      "claim_cents": 2500000000
+    },
+    {
+      "tranche_name": "Sub Notes",
+      "priority_rank": 4,
+      "claim_cents": 1500000000
     }
   ]
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RESTRUCTURING.FULCRUM_SECURITY.v1`)**
 
 ```json
 {
-  "enterprise_value_cents": 1200000,
-  "total_claims_cents": 1500000,
+  "enterprise_value_cents": 5000000000,
+  "total_claims_cents": 8000000000,
   "residual_value_cents": 0,
-  "fulcrum_tranche": "Second lien",
+  "fulcrum_tranche": "Senior Notes",
   "financial_advisor_ev_handoff_required": true,
   "tranche_rows": [
     {
-      "tranche_name": "First lien",
+      "tranche_name": "Revolver",
       "priority_rank": 1,
-      "claim_cents": 800000,
-      "value_allocated_cents": 800000,
+      "claim_cents": 1000000000,
+      "value_allocated_cents": 1000000000,
       "recovery_pct": 1
     },
     {
-      "tranche_name": "Second lien",
+      "tranche_name": "Term Loan",
       "priority_rank": 2,
-      "claim_cents": 700000,
-      "value_allocated_cents": 400000,
-      "recovery_pct": 0.5714
+      "claim_cents": 3000000000,
+      "value_allocated_cents": 3000000000,
+      "recovery_pct": 1
+    },
+    {
+      "tranche_name": "Senior Notes",
+      "priority_rank": 3,
+      "claim_cents": 2500000000,
+      "value_allocated_cents": 1000000000,
+      "recovery_pct": 0.4
+    },
+    {
+      "tranche_name": "Sub Notes",
+      "priority_rank": 4,
+      "claim_cents": 1500000000,
+      "value_allocated_cents": 0,
+      "recovery_pct": 0
     }
   ]
 }
 ```
+
+Precision: Recovery percentages round per the global rule (half-even to 4 decimals — see the Conventions chapter); amounts are exact integer cents.
 
 ## 7. Error semantics
 
@@ -3819,7 +4520,7 @@ Conformance case `CONF.MODEL.RESTRUCT.FULCRUM.001` — *Fulcrum model identifies
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for fulcrum security is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model finds the fulcrum security by allocating a supplied enterprise value down the stack. The enterprise valuation itself — the hardest and most contested input — is the financial advisor's determination, not the model's; the model computes the break the supplied value implies and always routes the valuation.
 
 ## 9. Conformance bindings
 
@@ -3837,49 +4538,52 @@ Reference binding `MODEL.RESTRUCTURING.FULCRUM_SECURITY.v1` · entered the speci
 **Gates:** G29
 **Deal contexts:** out-of-court restructuring
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Participation threshold, holdout economics, and CODI exposure.
+Sizes a distressed-debt exchange — the participation rate against any minimum, the holdout debt, the exchange discount (old over new security value), and the CODI exposure (participating debt over new security value). It answers, in an out-of-court restructuring, "does the exchange clear its minimum participation, how much debt holds out, and what cancellation-of-debt income does it create?" It computes the economics; the CODI and holdout treatment are counsel's and the tax advisor's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M160.schema.json`](M160.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `new_security_value_cents` | integer (cents) | MUST |
-| `outstanding_debt_cents` | integer (cents) | MUST |
-| `participating_debt_cents` | integer (cents) | MUST |
-| `minimum_participation_pct` | number | MAY |
-| `old_security_value_cents` | integer (cents) | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `new_security_value_cents` | integer (cents) | MUST | Value of the new securities issued. |
+| `outstanding_debt_cents` | integer (cents) | MUST | Total outstanding debt eligible to exchange. |
+| `participating_debt_cents` | integer (cents) | MUST | Debt tendered into the exchange. |
+| `minimum_participation_pct` | number | MAY | Minimum participation condition, as a fraction (default 0). |
+| `old_security_value_cents` | integer (cents) | MAY | Market value of the old securities; defaults to participating debt. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `codi_exposure_cents` | integer (cents) |
-| `counsel_review_required` | boolean |
-| `exchange_discount_cents` | integer (cents) |
-| `holdout_debt_cents` | integer (cents) |
-| `minimum_participation_pct` | number |
-| `minimum_participation_satisfied` | boolean |
-| `new_security_value_cents` | integer (cents) |
-| `old_security_value_cents` | integer (cents) |
-| `outstanding_debt_cents` | integer (cents) |
-| `participating_debt_cents` | integer (cents) |
-| `participation_pct` | number |
+| Field | Type | Description |
+|---|---|---|
+| `outstanding_debt_cents` | integer (cents) | Outstanding debt, echoed. |
+| `participating_debt_cents` | integer (cents) | Participating debt, echoed. |
+| `holdout_debt_cents` | integer (cents) | Debt that does not tender. |
+| `participation_pct` | number | Participating over outstanding debt. |
+| `minimum_participation_pct` | number | The minimum participation condition applied. |
+| `minimum_participation_satisfied` | boolean | Whether participation meets the minimum. |
+| `old_security_value_cents` | integer (cents) | Old-security value used. |
+| `new_security_value_cents` | integer (cents) | New-security value, echoed. |
+| `exchange_discount_cents` | integer (cents) | Old-security value over new-security value. |
+| `codi_exposure_cents` | integer (cents) | Cancellation-of-debt income exposure. |
+| `counsel_review_required` | boolean | Always true — the CODI and holdout analysis routes to counsel. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Participation threshold, holdout economics, and CODI exposure.
-
-Computes participation, holdout debt, exchange discount, CODI exposure, and minimum-participation satisfaction.
+Given `outstanding_debt_cents`, `participating_debt_cents`, and `new_security_value_cents`, plus optional `minimum_participation_pct` (default 0), `old_security_value_cents` (default: participating debt):
+1. If any required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `participation_pct` SHALL be `participating_debt_cents ÷ outstanding_debt_cents`; `minimum_participation_satisfied` SHALL be true iff it meets or exceeds the minimum.
+3. `holdout_debt_cents` SHALL be `max(0, outstanding_debt_cents − participating_debt_cents)`.
+4. `exchange_discount_cents` SHALL be `max(0, old_security_value_cents − new_security_value_cents)`.
+5. `codi_exposure_cents` SHALL be `max(0, participating_debt_cents − new_security_value_cents)`; `counsel_review_required` SHALL always be true.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -3891,37 +4595,38 @@ Computes participation, holdout debt, exchange discount, CODI exposure, and mini
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RESTRUCT.EXCHANGE.001` — *Exchange offer computes participation, holdout, and CODI exposure*.
+*A distressed exchange: $85M of $100M notes tender (85%, short of the 90% minimum), leaving $15M of holdouts; swapping $85M of old debt for $70M of new securities creates a $15M exchange discount and $15M of CODI exposure — the tax and holdout analysis routes to counsel.*
 
 **Inputs**
 
 ```json
 {
-  "outstanding_debt_cents": 1000000,
-  "participating_debt_cents": 700000,
-  "old_security_value_cents": 700000,
-  "new_security_value_cents": 500000,
-  "minimum_participation_pct": 0.66
+  "outstanding_debt_cents": 10000000000,
+  "participating_debt_cents": 8500000000,
+  "new_security_value_cents": 7000000000,
+  "minimum_participation_pct": 0.9
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RESTRUCTURING.EXCHANGE_OFFER.v1`)**
 
 ```json
 {
-  "outstanding_debt_cents": 1000000,
-  "participating_debt_cents": 700000,
-  "holdout_debt_cents": 300000,
-  "participation_pct": 0.7,
-  "minimum_participation_pct": 0.66,
-  "minimum_participation_satisfied": true,
-  "old_security_value_cents": 700000,
-  "new_security_value_cents": 500000,
-  "exchange_discount_cents": 200000,
-  "codi_exposure_cents": 200000,
+  "outstanding_debt_cents": 10000000000,
+  "participating_debt_cents": 8500000000,
+  "holdout_debt_cents": 1500000000,
+  "participation_pct": 0.85,
+  "minimum_participation_pct": 0.9,
+  "minimum_participation_satisfied": false,
+  "old_security_value_cents": 8500000000,
+  "new_security_value_cents": 7000000000,
+  "exchange_discount_cents": 1500000000,
+  "codi_exposure_cents": 1500000000,
   "counsel_review_required": true
 }
 ```
+
+Precision: The participation percentage rounds per the global rule (half-even to 4 decimals — see the Conventions chapter); amounts are exact integer cents.
 
 ## 7. Error semantics
 
@@ -3930,7 +4635,7 @@ Conformance case `CONF.MODEL.RESTRUCT.EXCHANGE.001` — *Exchange offer computes
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for exchange offer and distressed-debt exchange is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model sizes the exchange economics from supplied figures. The CODI computation and its exclusions, the §3(a)(9) and TIA §316(b) analysis, and the holdout strategy are determinations for the tax advisor and counsel; the model computes the participation, discount, and CODI exposure and always routes the review, rendering no tax or legal conclusion.
 
 ## 9. Conformance bindings
 
@@ -4020,48 +4725,53 @@ Research scaffold: organizes authorities and considerations. Produces oriented r
 **Gates:** G28, G29
 **Deal contexts:** restructuring support agreement
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Class support, milestones, termination, fiduciary-out, and toggle schedule.
+Reads a restructuring support agreement's class support against the §1126(c) acceptance thresholds, and tallies the milestone schedule, termination events, fiduciary-out, and toggle structure. It answers, before signing an RSA, "which classes already clear the confirmation thresholds, and what are the milestone and termination terms?" It computes the support screen and the counts; the enforceability and adequacy of the RSA are counsel's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M164.schema.json`](M164.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `classes` | object[] | MUST |
-| `fiduciary_out_present` | boolean | MAY |
-| `milestones` | object[] | MAY |
-| `termination_events` | string[] | MAY |
-| `toggle_type` | string | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `classes` | object[] | MUST | Supporting classes; each carries `class_name` (string) and `support_amount_pct` and `support_number_pct` (numbers, fractions). |
+| `fiduciary_out_present` | boolean | MAY | Whether the RSA contains a fiduciary out (default false). |
+| `milestones` | object[] | MAY | RSA milestones; each carries a `name` (string) and `completed` (boolean). |
+| `termination_events` | string[] | MAY | Named termination events. |
+| `toggle_type` | string | MAY | The plan-toggle structure (e.g., free-fall, prearranged); echoed. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `all_classes_meet_support_thresholds` | boolean |
-| `class_count` | integer |
-| `class_rows` | object[] |
-| `counsel_review_required` | boolean |
-| `fiduciary_out_present` | boolean |
-| `milestone_count` | integer |
-| `open_milestone_count` | integer |
-| `support_threshold_class_count` | integer |
-| `termination_event_count` | integer |
-| `toggle_type` | string |
+| Field | Type | Description |
+|---|---|---|
+| `class_count` | integer | Number of supporting classes. |
+| `support_threshold_class_count` | integer | Classes clearing the §1126(c) thresholds. |
+| `all_classes_meet_support_thresholds` | boolean | Whether every class clears the thresholds. |
+| `milestone_count` | integer | Number of milestones. |
+| `open_milestone_count` | integer | Number of incomplete milestones. |
+| `termination_event_count` | integer | Number of termination events. |
+| `fiduciary_out_present` | boolean | Whether a fiduciary out is present. |
+| `toggle_type` | string | The toggle structure, echoed. |
+| `counsel_review_required` | boolean | Always true — the RSA routes to counsel. |
+| `class_rows` | object[] | Per-class detail: `{ class_name, support_amount_pct, support_number_pct, section_1126c_threshold_met }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Class support, milestones, termination, fiduciary-out, and toggle schedule.
-
-Computes class support thresholds, milestone status, termination-event count, fiduciary-out flag, and toggle type.
+Given `classes` (a list of class objects), plus optional `milestones`, `termination_events`, `fiduciary_out_present` (default false), `toggle_type`:
+1. If `classes` is empty, the implementation SHALL return `status: "needs_inputs"` naming `classes`.
+2. For each class, `section_1126c_threshold_met` SHALL be true iff support by amount and by number clears the §1126(c) acceptance thresholds (constants: §1126(c) class-acceptance thresholds).
+3. `support_threshold_class_count` SHALL count the classes clearing the thresholds; `all_classes_meet_support_thresholds` SHALL be true iff every class clears them.
+4. `milestone_count` and `open_milestone_count` (incomplete milestones) and `termination_event_count` SHALL be counted.
+5. `counsel_review_required` SHALL always be true; it SHALL return the full per-class support detail.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| §1126(c) class-acceptance thresholds | at least two-thirds in amount and more than one-half in number of claims actually voting | MUST (binding) | 11 U.S.C. § 1126(c) | § 1126(c) | current (Bankruptcy Code as amended) | on statutory amendment |
 
 
 **Authorities**
@@ -4073,7 +4783,7 @@ Computes class support thresholds, milestone status, termination-event count, fi
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RESTRUCT.RSA.001` — *RSA economics computes class support, milestones, and fiduciary-out status*.
+*An RSA with two classes: the secured class clears the §1126(c) thresholds (85% by amount, 75% by number) but the unsecured class does not (60% by amount); two milestones (one open), two termination events, a fiduciary out, and a free-fall toggle — counsel reviews.*
 
 **Inputs**
 
@@ -4082,34 +4792,35 @@ Conformance case `CONF.MODEL.RESTRUCT.RSA.001` — *RSA economics computes class
   "classes": [
     {
       "class_name": "Secured",
-      "support_amount_pct": 0.7,
-      "support_number_pct": 0.55
+      "support_amount_pct": 0.85,
+      "support_number_pct": 0.75
     },
     {
-      "class_name": "GUC",
+      "class_name": "Unsecured",
       "support_amount_pct": 0.6,
-      "support_number_pct": 0.4
+      "support_number_pct": 0.55
     }
   ],
   "milestones": [
     {
-      "name": "petition",
+      "name": "File plan",
       "completed": true
     },
     {
-      "name": "confirmation"
+      "name": "Confirmation",
+      "completed": false
     }
   ],
   "termination_events": [
-    "missed milestone",
-    "fiduciary out"
+    "missed_milestone",
+    "material_adverse_change"
   ],
   "fiduciary_out_present": true,
-  "toggle_type": "specified_plan"
+  "toggle_type": "free_fall"
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RESTRUCTURING.RSA_ECONOMICS.v1`)**
 
 ```json
 {
@@ -4120,24 +4831,26 @@ Conformance case `CONF.MODEL.RESTRUCT.RSA.001` — *RSA economics computes class
   "open_milestone_count": 1,
   "termination_event_count": 2,
   "fiduciary_out_present": true,
-  "toggle_type": "specified_plan",
+  "toggle_type": "free_fall",
   "counsel_review_required": true,
   "class_rows": [
     {
       "class_name": "Secured",
-      "support_amount_pct": 0.7,
-      "support_number_pct": 0.55,
+      "support_amount_pct": 0.85,
+      "support_number_pct": 0.75,
       "section_1126c_threshold_met": true
     },
     {
-      "class_name": "GUC",
+      "class_name": "Unsecured",
       "support_amount_pct": 0.6,
-      "support_number_pct": 0.4,
+      "support_number_pct": 0.55,
       "section_1126c_threshold_met": false
     }
   ]
 }
 ```
+
+Precision: Support percentages round per the global rule (half-even to 4 decimals — see the Conventions chapter); the rest are counts and booleans.
 
 ## 7. Error semantics
 
@@ -4146,7 +4859,7 @@ Conformance case `CONF.MODEL.RESTRUCT.RSA.001` — *RSA economics computes class
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for rsa economics is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model screens RSA class support against §1126(c) and tallies the milestone and termination terms. Whether the RSA is enforceable, whether the solicitation complies with §1125, and the adequacy of the fiduciary out are determinations for counsel; the model computes the support screen and always routes the review, rendering no enforceability conclusion.
 
 ## 9. Conformance bindings
 
@@ -4164,50 +4877,56 @@ Reference binding `MODEL.RESTRUCTURING.RSA_ECONOMICS.v1` · entered the specific
 **Gates:** G28
 **Deal contexts:** out-of-court liquidation
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Notice, sale, waterfall, assignee fee, and recovery schedule.
+Distributes an out-of-court liquidation — an assignment for the benefit of creditors or an Article 9 foreclosure — down the priority ladder net of the assignee fee and sale costs, and checks the disposition notice against the Article 9 floor. It answers, in an out-of-court wind-down, "what does each creditor class recover, and does the sale notice satisfy Article 9?" It computes the waterfall and the notice screen; commercial reasonableness and the legal conclusions are counsel's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M165.schema.json`](M165.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `claims` | object[] | MUST |
-| `liquidation_value_cents` | integer (cents) | MUST |
-| `assignee_fee_cents` | integer (cents) | MAY |
-| `notice_days` | integer | MAY |
-| `sale_costs_cents` | integer (cents) | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `claims` | object[] | MUST | Claim classes; each carries `class_name` (string), `priority_rank` (integer), and `claim_cents` (integer cents). |
+| `liquidation_value_cents` | integer (cents) | MUST | Gross liquidation proceeds. |
+| `assignee_fee_cents` | integer (cents) | MAY | Assignee/foreclosure fee (default 0). |
+| `commercially_reasonable_sale` | boolean | MAY | Whether the sale is asserted commercially reasonable; echoed for counsel. |
+| `notice_days` | number | MAY | Days of disposition notice given (default 10). |
+| `sale_costs_cents` | integer (cents) | MAY | Sale costs (default 0). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `article9_notice_floor_days` | integer |
-| `assignee_fee_cents` | integer (cents) |
-| `commercially_reasonable_sale` | null |
-| `counsel_review_required` | boolean |
-| `distributable_value_cents` | integer (cents) |
-| `distribution_rows` | object[] |
-| `liquidation_value_cents` | integer (cents) |
-| `notice_days` | integer |
-| `notice_floor_satisfied` | boolean |
-| `residual_value_cents` | integer (cents) |
-| `sale_costs_cents` | integer (cents) |
-| `total_distributed_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `liquidation_value_cents` | integer (cents) | Liquidation value, echoed. |
+| `assignee_fee_cents` | integer (cents) | Assignee fee, echoed. |
+| `sale_costs_cents` | integer (cents) | Sale costs, echoed. |
+| `distributable_value_cents` | integer (cents) | Proceeds net of fee and costs. |
+| `notice_days` | integer | Notice days given, echoed. |
+| `article9_notice_floor_days` | integer | The Article 9 notice floor. |
+| `notice_floor_satisfied` | boolean | Whether the notice clears the Article 9 floor. |
+| `commercially_reasonable_sale` | boolean | null | The commercial-reasonableness assertion, echoed, or null. |
+| `total_distributed_cents` | integer (cents) | Total distributed across classes. |
+| `residual_value_cents` | integer (cents) | Value remaining after all claims. |
+| `counsel_review_required` | boolean | Always true — the disposition routes to counsel. |
+| `distribution_rows` | object[] | Per-class detail (rank-sorted): `{ class_name, priority_rank, claim_cents, distribution_cents, recovery_pct }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Notice, sale, waterfall, assignee fee, and recovery schedule.
-
-Computes liquidation value after sale costs, Article 9 notice-floor compliance, and priority recovery waterfall.
+Given `liquidation_value_cents` and `claims` (a list of class objects), plus optional `assignee_fee_cents` (default 0), `sale_costs_cents` (default 0), `notice_days` (default 10), `commercially_reasonable_sale`:
+1. If either required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `distributable_value_cents` SHALL be `max(0, liquidation_value_cents − assignee_fee_cents − sale_costs_cents)`.
+3. It SHALL sort claims by priority rank and distribute `min(remaining, claim)` down the ladder; `recovery_pct` SHALL be the distribution over the claim.
+4. `notice_floor_satisfied` SHALL be true iff `notice_days` meets or exceeds the Article 9 notice floor (constants: Article 9 disposition-notice floor).
+5. `total_distributed_cents` and `residual_value_cents` SHALL be reported; `counsel_review_required` SHALL always be true.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| Article 9 disposition-notice floor | 10 days | MUST (binding) | U.C.C. § 9-612(b) | § 9-612(b) (non-consumer 10-day safe harbor) | U.C.C. Article 9 (2010 revision), current | on uniform-act amendment |
 
 
 **Authorities**
@@ -4221,64 +4940,67 @@ Computes liquidation value after sale costs, Article 9 notice-floor compliance, 
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RESTRUCT.ABC_ARTICLE9.001` — *ABC and Article 9 model computes liquidation waterfall and notice floor*.
+*An out-of-court Article 9 / ABC liquidation of an $8M estate, net of a $400k assignee fee and $200k of sale costs, distributes $7.4M: the $5M secured claim is paid in full and the $6M unsecured class recovers 40%; the 15-day notice clears the 10-day Article 9 floor — counsel confirms commercial reasonableness.*
 
 **Inputs**
 
 ```json
 {
-  "liquidation_value_cents": 1000000,
-  "assignee_fee_cents": 50000,
-  "sale_costs_cents": 50000,
-  "notice_days": 9,
+  "liquidation_value_cents": 800000000,
+  "assignee_fee_cents": 40000000,
+  "sale_costs_cents": 20000000,
+  "notice_days": 15,
+  "commercially_reasonable_sale": true,
   "claims": [
     {
       "class_name": "Secured",
       "priority_rank": 1,
-      "claim_cents": 300000
+      "claim_cents": 500000000
     },
     {
       "class_name": "Unsecured",
       "priority_rank": 2,
-      "claim_cents": 700000
+      "claim_cents": 600000000
     }
   ]
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RESTRUCTURING.ABC_ARTICLE9.v1`)**
 
 ```json
 {
-  "liquidation_value_cents": 1000000,
-  "assignee_fee_cents": 50000,
-  "sale_costs_cents": 50000,
-  "distributable_value_cents": 900000,
-  "notice_days": 9,
+  "liquidation_value_cents": 800000000,
+  "assignee_fee_cents": 40000000,
+  "sale_costs_cents": 20000000,
+  "distributable_value_cents": 740000000,
+  "notice_days": 15,
   "article9_notice_floor_days": 10,
-  "notice_floor_satisfied": false,
-  "commercially_reasonable_sale": null,
-  "total_distributed_cents": 900000,
+  "notice_floor_satisfied": true,
+  "commercially_reasonable_sale": true,
+  "total_distributed_cents": 740000000,
   "residual_value_cents": 0,
   "counsel_review_required": true,
   "distribution_rows": [
     {
       "class_name": "Secured",
       "priority_rank": 1,
-      "claim_cents": 300000,
-      "distribution_cents": 300000,
+      "claim_cents": 500000000,
+      "distribution_cents": 500000000,
       "recovery_pct": 1
     },
     {
       "class_name": "Unsecured",
       "priority_rank": 2,
-      "claim_cents": 700000,
-      "distribution_cents": 600000,
-      "recovery_pct": 0.8571
+      "claim_cents": 600000000,
+      "distribution_cents": 240000000,
+      "recovery_pct": 0.4
     }
   ]
 }
 ```
+
+Precision: Recovery percentages round per the global rule (half-even to 4 decimals — see the Conventions chapter); amounts are exact integer cents.
 
 ## 7. Error semantics
 
@@ -4287,7 +5009,7 @@ Conformance case `CONF.MODEL.RESTRUCT.ABC_ARTICLE9.001` — *ABC and Article 9 m
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for abc and article 9 foreclosure recovery is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model computes the out-of-court recovery waterfall and the notice screen from supplied figures. Whether the disposition is commercially reasonable, the validity of the assignment or foreclosure, and the priority of claims are legal determinations for counsel; the model computes the waterfall and the notice screen and always routes the review, rendering no legal conclusion.
 
 ## 9. Conformance bindings
 
@@ -4305,45 +5027,51 @@ Reference binding `MODEL.RESTRUCTURING.ABC_ARTICLE9.v1` · entered the specifica
 **Gates:** G28
 **Deal contexts:** claims trading
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Claim-purchase IRR and ultimate-recovery regression.
+Prices a bankruptcy-claim purchase — the expected ultimate recovery on the face amount, the gross profit over the purchase price, and the annualized IRR over the time to resolution. It answers, for a claims trader, "what does this claim return if it recovers as expected, and by when?" It computes the return from a supplied (or regression-implied) recovery rate; the Rule 3001 transfer mechanics are for counsel.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M166.schema.json`](M166.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `face_amount_cents` | integer (cents) | MUST |
-| `purchase_price_cents` | integer (cents) | MUST |
-| `time_to_recovery_years` | integer | MUST |
-| `post_default_trading_price` | number | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `expected_recovery_rate` | number | MUST | Expected ultimate recovery as a fraction of face; if omitted, implied from a post-default trading price. |
+| `face_amount_cents` | integer (cents) | MUST | Face amount of the claim. |
+| `purchase_price_cents` | integer (cents) | MUST | Price paid for the claim. |
+| `time_to_recovery_years` | number | MUST | Years to expected resolution. |
+| `post_default_trading_price` | number | MAY | Post-default trading price (fraction of face); drives the regression when no rate is supplied. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `estimated_irr` | number |
-| `expected_recovery_cents` | integer (cents) |
-| `expected_recovery_rate` | number |
-| `face_amount_cents` | integer (cents) |
-| `frbp_transfer_review_required` | boolean |
-| `gross_profit_cents` | integer (cents) |
-| `post_default_trading_price` | number |
-| `purchase_price_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `face_amount_cents` | integer (cents) | Face amount, echoed. |
+| `purchase_price_cents` | integer (cents) | Purchase price, echoed. |
+| `post_default_trading_price` | number | null | The post-default trading price, echoed, or null. |
+| `expected_recovery_rate` | number | The expected recovery rate applied. |
+| `expected_recovery_cents` | integer (cents) | Expected ultimate recovery on the face. |
+| `gross_profit_cents` | integer (cents) | Expected recovery less purchase price. |
+| `estimated_irr` | number | null | Annualized IRR to resolution, or null. |
+| `frbp_transfer_review_required` | boolean | Always true — the Rule 3001 transfer routes to counsel. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Claim-purchase IRR and ultimate-recovery regression.
-
-Computes expected recovery from post-default trading price or supplied recovery rate, gross profit, and estimated IRR.
+Given `face_amount_cents`, `purchase_price_cents`, `time_to_recovery_years`, and `expected_recovery_rate` (supplied, or implied from a post-default trading price via the recovery regression — constants: Moody's ultimate-recovery regression):
+1. If any of the four is missing (and no recovery rate can be resolved), the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `expected_recovery_cents` SHALL be `round(face_amount_cents × expected_recovery_rate)`.
+3. `gross_profit_cents` SHALL be `expected_recovery_cents − purchase_price_cents`.
+4. `estimated_irr` SHALL be `(expected_recovery_cents ÷ purchase_price_cents)^(1 ÷ time_to_recovery_years) − 1` when the price and horizon are positive, else null.
+5. `frbp_transfer_review_required` SHALL always be true; rates and the IRR are at the global 4-decimal precision.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| Moody's ultimate-recovery regression | expected recovery ≈ 0.90 × post-default trading price + 0.06 (fallback when no recovery rate is supplied) | SHOULD (cited median) | Moody's Ultimate Recovery Database (2024) | post-default-price-to-ultimate-recovery regression | 2024 dataset | on dataset update |
 
 
 **Authorities**
@@ -4355,33 +5083,35 @@ Computes expected recovery from post-default trading price or supplied recovery 
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RESTRUCT.CLAIMS.001` — *Claims trading model applies URD regression and computes IRR*.
+*Buying a $10M defaulted claim for $4M with an expected 55% ultimate recovery ($5.5M) over two years to resolution: the $1.5M gross profit implies about a 17% annualized IRR — the Rule 3001 transfer review is required.*
 
 **Inputs**
 
 ```json
 {
-  "face_amount_cents": 1000000,
-  "purchase_price_cents": 400000,
-  "post_default_trading_price": 0.4,
-  "time_to_recovery_years": 2
+  "face_amount_cents": 1000000000,
+  "purchase_price_cents": 400000000,
+  "time_to_recovery_years": 2,
+  "expected_recovery_rate": 0.55
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RESTRUCTURING.CLAIMS_TRADING.v1`)**
 
 ```json
 {
-  "face_amount_cents": 1000000,
-  "purchase_price_cents": 400000,
-  "post_default_trading_price": 0.4,
-  "expected_recovery_rate": 0.42,
-  "expected_recovery_cents": 420000,
-  "gross_profit_cents": 20000,
-  "estimated_irr": 0.0247,
+  "face_amount_cents": 1000000000,
+  "purchase_price_cents": 400000000,
+  "post_default_trading_price": null,
+  "expected_recovery_rate": 0.55,
+  "expected_recovery_cents": 550000000,
+  "gross_profit_cents": 150000000,
+  "estimated_irr": 0.1726,
   "frbp_transfer_review_required": true
 }
 ```
+
+Precision: The recovery rate and IRR round per the global rule (half-even to 4 decimals — see the Conventions chapter); amounts are exact integer cents.
 
 ## 7. Error semantics
 
@@ -4390,7 +5120,7 @@ Conformance case `CONF.MODEL.RESTRUCT.CLAIMS.001` — *Claims trading model appl
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model prices a claim purchase from a supplied or regression-implied recovery rate. The actual ultimate recovery, the resolution timing, and the Rule 3001 transfer-of-claim mechanics are uncertain and legal; the model computes the return the assumptions imply and always routes the transfer review, rendering no recovery guarantee.
 
 ## 9. Conformance bindings
 
@@ -4408,42 +5138,49 @@ Reference binding `MODEL.RESTRUCTURING.CLAIMS_TRADING.v1` · entered the specifi
 **Gates:** G28
 **Deal contexts:** small business Chapter 11
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Debt-limit and small-business engagement checks.
+Screens Subchapter V small-business eligibility — whether aggregate noncontingent, liquidated debt is at or below the debt limit, whether the debtor is engaged in commercial activity, and whether it is disqualified as an affiliate of a public issuer. It answers, for a small business considering Subchapter V, "do we fit under the debt limit and the eligibility gates?" It runs the screen; the current debt limit and the eligibility conclusion are the debtor's counsel's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M167.schema.json`](M167.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `aggregate_noncontingent_liquidated_debt_cents` | integer (cents) | MUST |
-| `engaged_in_commercial_activity` | boolean | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `aggregate_noncontingent_liquidated_debt_cents` | integer (cents) | MUST | Aggregate noncontingent, liquidated debt. |
+| `engaged_in_commercial_activity` | boolean | MUST | Whether the debtor is engaged in commercial or business activity. |
+| `affiliate_of_public_issuer` | boolean | MAY | Whether the debtor is an affiliate of an SEC issuer (default false); a disqualifier. |
+| `debt_limit_cents` | integer (cents) | MAY | Override for the debt limit; defaults to the reverted statutory limit. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `affiliate_of_public_issuer` | boolean |
-| `aggregate_noncontingent_liquidated_debt_cents` | integer (cents) |
-| `current_threshold_handoff_note` | string |
-| `debt_limit_cents` | integer (cents) |
-| `debt_limit_satisfied` | boolean |
-| `engaged_in_commercial_activity` | boolean |
-| `subchapter_v_eligible_under_inputs` | boolean |
+| Field | Type | Description |
+|---|---|---|
+| `aggregate_noncontingent_liquidated_debt_cents` | integer (cents) | The aggregate debt, echoed. |
+| `debt_limit_cents` | integer (cents) | The debt limit applied. |
+| `debt_limit_satisfied` | boolean | Whether the debt is within the limit. |
+| `engaged_in_commercial_activity` | boolean | The commercial-activity flag, echoed. |
+| `affiliate_of_public_issuer` | boolean | The public-issuer-affiliate flag, echoed. |
+| `subchapter_v_eligible_under_inputs` | boolean | Whether the debtor is eligible under the inputs. |
+| `current_threshold_handoff_note` | string | Note that the reverted limit is used unless overridden. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Debt-limit and small-business engagement checks.
-
-Checks supplied debt, commercial-activity, and public-issuer affiliate facts against the current Subchapter V threshold.
+Given `aggregate_noncontingent_liquidated_debt_cents` and `engaged_in_commercial_activity`, plus optional `affiliate_of_public_issuer` (default false), `debt_limit_cents` (default: the Subchapter V debt limit):
+1. If either required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `debt_limit_cents` SHALL be the supplied override, else the Subchapter V debt limit (constants: Subchapter V debt limit).
+3. `debt_limit_satisfied` SHALL be true iff the aggregate debt is at or below the limit.
+4. `subchapter_v_eligible_under_inputs` SHALL be true iff the debt limit is satisfied AND the debtor is engaged in commercial activity AND it is not an affiliate of a public issuer.
+5. It SHALL emit a note that the reverted debt limit is used unless overridden.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| Subchapter V debt limit | $3,024,725 (302,472,500 cents) | MUST (binding) | 11 U.S.C. § 1182(1) | § 1182(1) (reverted debt limit after the SBRA increase lapsed) | current (post-2024 sunset) | on Congressional reauthorization |
 
 
 **Authorities**
@@ -4454,18 +5191,19 @@ Checks supplied debt, commercial-activity, and public-issuer affiliate facts aga
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RESTRUCT.SUBV.001` — *Subchapter V eligibility uses current reverted debt threshold*.
+*A small business with $2.5M of noncontingent, liquidated debt, engaged in commercial activity and not an affiliate of a public issuer, sits under the reverted $3,024,725 Subchapter V debt limit and is eligible under the inputs.*
 
 **Inputs**
 
 ```json
 {
   "aggregate_noncontingent_liquidated_debt_cents": 250000000,
-  "engaged_in_commercial_activity": true
+  "engaged_in_commercial_activity": true,
+  "affiliate_of_public_issuer": false
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RESTRUCTURING.SUBCHAPTER_V_ELIGIBILITY.v1`)**
 
 ```json
 {
@@ -4479,6 +5217,8 @@ Conformance case `CONF.MODEL.RESTRUCT.SUBV.001` — *Subchapter V eligibility us
 }
 ```
 
+Precision: All amounts are exact integer cents (see the Conventions chapter); no rounding.
+
 ## 7. Error semantics
 
 - **Missing inputs:** the model returns `status: "needs_inputs"` with `missingInputs` as a field-name list — for an empty input record: `["aggregate_noncontingent_liquidated_debt_cents","engaged_in_commercial_activity"]`. No partial outputs are emitted.
@@ -4486,7 +5226,7 @@ Conformance case `CONF.MODEL.RESTRUCT.SUBV.001` — *Subchapter V eligibility us
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model screens Subchapter V eligibility against the debt limit and the eligibility gates. The current debt limit (which has shifted with legislation), whether debts are noncontingent and liquidated, and the ultimate eligibility conclusion are determinations for the debtor's counsel; the model runs the screen and renders no eligibility opinion.
 
 ## 9. Conformance bindings
 
@@ -4504,44 +5244,49 @@ Reference binding `MODEL.RESTRUCTURING.SUBCHAPTER_V_ELIGIBILITY.v1` · entered t
 **Gates:** G28
 **Deal contexts:** post-emergence
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Recidivism-risk score from supplied operating and capital-structure inputs.
+Scores a reorganized company's risk of a repeat filing (a "Chapter 22") from four post-emergence drivers — exit leverage, months of liquidity, EBITDA growth, and prior-bankruptcy history — into a 0–100 recidivism score and a risk band. It answers, at emergence, "how likely is this company to be back in bankruptcy, on these post-emergence fundamentals?" It computes a calibrated heuristic score; the underlying judgment is the financial advisor's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M168.schema.json`](M168.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `ebitda_growth_pct` | number | MUST |
-| `exit_leverage` | integer | MUST |
-| `liquidity_months` | integer | MUST |
-| `prior_bankruptcy_count` | integer | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `ebitda_growth_pct` | number | MUST | Projected EBITDA growth as a fraction (negative = decline). |
+| `exit_leverage` | number | MUST | Net debt / EBITDA at emergence. |
+| `liquidity_months` | number | MUST | Months of liquidity runway at emergence. |
+| `prior_bankruptcy_count` | number | MAY | Number of prior bankruptcy filings (default 0). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `chapter22_recidivism_score` | integer |
-| `ebitda_growth_pct` | number |
-| `exit_leverage` | integer |
-| `financial_advisor_handoff_required` | boolean |
-| `liquidity_months` | integer |
-| `prior_bankruptcy_count` | integer |
-| `risk_band` | string |
+| Field | Type | Description |
+|---|---|---|
+| `exit_leverage` | number | Exit leverage, echoed. |
+| `liquidity_months` | number | Liquidity months, echoed. |
+| `ebitda_growth_pct` | number | EBITDA growth, echoed. |
+| `prior_bankruptcy_count` | number | Prior-bankruptcy count, echoed. |
+| `chapter22_recidivism_score` | integer | The 0–100 recidivism score. |
+| `risk_band` | enum(chapter22_risk_band) | The risk band the score falls into. One of `high`, `watch`, `lower`. |
+| `financial_advisor_handoff_required` | boolean | Always true — the judgment routes to the financial advisor. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Recidivism-risk score from supplied operating and capital-structure inputs.
-
-Scores post-emergence repeat-filing risk from exit leverage, liquidity runway, EBITDA growth, and prior bankruptcy count.
+Given `exit_leverage`, `liquidity_months`, and `ebitda_growth_pct`, plus optional `prior_bankruptcy_count` (default 0):
+1. If any required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. It SHALL compute four risk components from the recidivism scoring calibration (constants: Chapter 22 recidivism scoring calibration): a leverage component rising with exit leverage above the baseline, a liquidity component rising as liquidity falls below a year, a growth component rising with negative EBITDA growth, and a repeat component rising with prior-filing count — each capped.
+3. `chapter22_recidivism_score` SHALL be the base plus the four components, clamped to 0–100 and rounded to the nearest whole number.
+4. `risk_band` SHALL be `high` at or above the high threshold, `watch` at or above the watch threshold, else `lower` (constants: Chapter 22 recidivism scoring calibration).
+5. `financial_advisor_handoff_required` SHALL always be true; the driver inputs are echoed at the global 4-decimal precision.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| Chapter 22 recidivism scoring calibration | base 20; leverage = clamp((exit_leverage − 3) × 12, 0, 35); liquidity = clamp((12 − liquidity_months) × 2.5, 0, 30); growth = clamp(−ebitda_growth_pct × 100, 0, 20); repeat = clamp(prior_bankruptcy_count × 10, 0, 15); score = round(clamp(sum, 0, 100)); bands high ≥ 70, watch ≥ 45 | SHOULD (cited median) | DEFINITIVE Chapter 22 recidivism scoring calibration (heuristic; LoPucki Bankruptcy Research Database is the empirical reference, 2024) | scoring weights, caps, and band thresholds | 2024 calibration | on recalibration |
 
 
 **Authorities**
@@ -4552,7 +5297,7 @@ Scores post-emergence repeat-filing risk from exit leverage, liquidity runway, E
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RESTRUCT.CH22.001` — *Chapter 22 model scores recidivism from leverage, liquidity, growth, and history*.
+*A company emerging at 5.0× leverage with six months of liquidity, −5% EBITDA growth, and one prior bankruptcy scores 74 on the Chapter 22 recidivism model — a high repeat-filing risk that routes to the financial advisor.*
 
 **Inputs**
 
@@ -4565,7 +5310,7 @@ Conformance case `CONF.MODEL.RESTRUCT.CH22.001` — *Chapter 22 model scores rec
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RESTRUCTURING.CHAPTER22.RECIDIVISM.v1`)**
 
 ```json
 {
@@ -4579,6 +5324,8 @@ Conformance case `CONF.MODEL.RESTRUCT.CH22.001` — *Chapter 22 model scores rec
 }
 ```
 
+Precision: The score is a whole number 0–100; the driver echoes round per the global rule (half-even to 4 decimals — see the Conventions chapter).
+
 ## 7. Error semantics
 
 - **Missing inputs:** the model returns `status: "needs_inputs"` with `missingInputs` as a field-name list — for an empty input record: `["exit_leverage","liquidity_months","ebitda_growth_pct"]`. No partial outputs are emitted.
@@ -4586,7 +5333,7 @@ Conformance case `CONF.MODEL.RESTRUCT.CH22.001` — *Chapter 22 model scores rec
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for chapter 22 recidivism score is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model computes a calibrated recidivism heuristic from supplied post-emergence drivers. It is a screening score, not a prediction; the reorganized company's actual prospects, the reasonableness of the exit capital structure, and the going-concern judgment are the financial advisor's and the board's determinations, which the model routes and does not replace.
 
 ## 9. Conformance bindings
 
@@ -4604,43 +5351,53 @@ Reference binding `MODEL.RESTRUCTURING.CHAPTER22.RECIDIVISM.v1` · entered the s
 **Gates:** G30
 **Deal contexts:** real estate M&A
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-15 percent, 10 percent, or exemption withholding path.
+Determines the FIRPTA withholding a buyer must remit on a purchase of U.S. real property from a foreign seller — the 15% default, the reduced 10% and zero residence paths, or none for a domestic seller — and the amount and filing deadline. It answers, at a real-estate closing, "must the buyer withhold on this seller, how much, and by when?" It computes the withholding from supplied facts; whether the seller is in fact a foreign person and whether an exemption or certificate applies are the tax advisor's calls.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M169.schema.json`](M169.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `amount_realized_cents` | integer (cents) | MUST |
-| `seller_foreign_person` | boolean | MUST |
-| `buyer_will_use_as_residence` | boolean | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `amount_realized_cents` | integer (cents) | MUST | The amount realized by the seller (the FIRPTA withholding base). |
+| `seller_foreign_person` | boolean | MUST | Whether the seller is a foreign person (the FIRPTA trigger). |
+| `buyer_will_use_as_residence` | boolean | MAY | Whether the buyer will use the property as a residence (default false); opens the exemption and reduced-rate paths. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `amount_realized_cents` | integer (cents) |
-| `buyer_will_use_as_residence` | boolean |
-| `forms_due_within_days` | integer |
-| `path` | string |
-| `seller_foreign_person` | boolean |
-| `withholding_amount_cents` | integer (cents) |
-| `withholding_rate` | number |
+| Field | Type | Description |
+|---|---|---|
+| `amount_realized_cents` | integer (cents) | The amount realized, echoed. |
+| `seller_foreign_person` | boolean | The foreign-person flag, echoed. |
+| `buyer_will_use_as_residence` | boolean | The residence-use flag, echoed. |
+| `withholding_rate` | number | The FIRPTA withholding rate applied (0, 0.10, or 0.15). |
+| `withholding_amount_cents` | integer (cents) | The withholding the buyer must remit. |
+| `path` | enum(firpta_path) | The withholding path taken. One of `not_foreign_seller`, `personal_residence_300k_or_less_exemption`, `personal_residence_300k_to_1m_reduced_rate`, `default_firpta_withholding`. |
+| `forms_due_within_days` | integer | null | Days within which Form 8288/8288-A must be filed and the tax remitted, or null when no withholding applies. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-15 percent, 10 percent, or exemption withholding path.
-
-Computes FIRPTA withholding rate, amount, residence exception path, and form timing from supplied transaction facts.
+Given `amount_realized_cents` and `seller_foreign_person`, plus optional `buyer_will_use_as_residence` (default false):
+1. If either required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. If the seller is not a foreign person, `withholding_rate` SHALL be 0 and `path` SHALL be `not_foreign_seller`.
+3. Else if the buyer will use the property as a residence and the amount realized is at or below the personal-residence exemption ceiling (constants: FIRPTA personal-residence exemption ceiling), `withholding_rate` SHALL be 0 (`personal_residence_300k_or_less_exemption`).
+4. Else if the buyer will use it as a residence and the amount realized is at or below the reduced-rate ceiling (constants: FIRPTA reduced-rate residence ceiling), `withholding_rate` SHALL be the reduced residence rate (constants: FIRPTA reduced residence rate) with path `personal_residence_300k_to_1m_reduced_rate`.
+5. Otherwise `withholding_rate` SHALL be the default FIRPTA rate (constants: FIRPTA default withholding rate) with path `default_firpta_withholding`.
+6. `withholding_amount_cents` SHALL be `round(amount_realized_cents × withholding_rate)`; `forms_due_within_days` SHALL be the Form 8288 filing/remittance deadline when a foreign seller is withheld upon, else null (constants: FIRPTA Form 8288 filing deadline).
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| FIRPTA default withholding rate | 15% (0.15) | MUST (binding) | IRC § 1445(a) | § 1445(a) | current (IRC as amended) | on IRC amendment |
+| FIRPTA reduced residence rate | 10% (0.10) | MUST (binding) | IRC § 1445 | § 1445(c)(4) reduced-rate residence path | current (IRC as amended) | on IRC amendment |
+| FIRPTA personal-residence exemption ceiling | $300,000 (30,000,000 cents) | MUST (binding) | IRC § 1445(b)(5) | § 1445(b)(5) | current (IRC as amended) | on IRC amendment |
+| FIRPTA reduced-rate residence ceiling | $1,000,000 (100,000,000 cents) | MUST (binding) | IRC § 1445; Treas. Reg. § 1.1445-1 | reduced-rate residence ceiling | current (Treas. Reg. as amended) | on Treasury amendment |
+| FIRPTA Form 8288 filing deadline | 20 days | MUST (binding) | IRC § 1445; Treas. Reg. § 1.1445-1 | remit and file by the 20th day after transfer | current (Treas. Reg. as amended) | on Treasury amendment |
 
 
 **Authorities**
@@ -4652,31 +5409,33 @@ Computes FIRPTA withholding rate, amount, residence exception path, and form tim
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RE.FIRPTA.001` — *FIRPTA computes reduced personal-residence withholding*.
+*A foreign seller disposes of a $2.5M commercial property that the buyer will not occupy as a residence: FIRPTA requires 15% withholding — $375,000 — remitted with Form 8288 within 20 days of closing.*
 
 **Inputs**
 
 ```json
 {
-  "amount_realized_cents": 80000000,
+  "amount_realized_cents": 250000000,
   "seller_foreign_person": true,
-  "buyer_will_use_as_residence": true
+  "buyer_will_use_as_residence": false
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RE.FIRPTA.WITHHOLDING.v1`)**
 
 ```json
 {
-  "amount_realized_cents": 80000000,
+  "amount_realized_cents": 250000000,
   "seller_foreign_person": true,
-  "buyer_will_use_as_residence": true,
-  "withholding_rate": 0.1,
-  "withholding_amount_cents": 8000000,
-  "path": "personal_residence_300k_to_1m_reduced_rate",
+  "buyer_will_use_as_residence": false,
+  "withholding_rate": 0.15,
+  "withholding_amount_cents": 37500000,
+  "path": "default_firpta_withholding",
   "forms_due_within_days": 20
 }
 ```
+
+Precision: The withholding amount is exact integer cents (see the Conventions chapter); the rate is an exact statutory fraction.
 
 ## 7. Error semantics
 
@@ -4685,7 +5444,7 @@ Conformance case `CONF.MODEL.RE.FIRPTA.001` — *FIRPTA computes reduced persona
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model computes FIRPTA withholding and the filing deadline from supplied facts. Whether the seller is in fact a foreign person, whether the residence exemption or a withholding certificate applies, and the seller's ultimate tax liability are determinations for the parties' tax advisors; the model computes the buyer's withholding obligation and renders no opinion on the seller's tax.
 
 ## 9. Conformance bindings
 
@@ -4703,45 +5462,51 @@ Reference binding `MODEL.RE.FIRPTA.WITHHOLDING.v1` · entered the specification 
 **Gates:** G30
 **Deal contexts:** real estate exchange
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-45-day/180-day timing, identification rules, and boot recognition.
+Dates the two hard §1031 deadlines from the relinquished-property transfer — the 45-day identification window and the 180-day exchange window — and computes the recognized-gain floor from any boot received and any value shortfall in the replacement property. It answers, for a taxpayer running a like-kind exchange, "by when must I identify and close, and how much gain can I not defer?" It computes the timing and the gain floor; whether the properties are like-kind and the exchange qualifies is the tax advisor's call.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M170.schema.json`](M170.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `relinquished_property_value_cents` | integer (cents) | MUST |
-| `replacement_property_value_cents` | integer (cents) | MUST |
-| `transfer_date` | string (ISO date) | MUST |
-| `boot_received_cents` | integer (cents) | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `relinquished_property_value_cents` | integer (cents) | MUST | Value of the relinquished property. |
+| `replacement_property_value_cents` | integer (cents) | MUST | Value of the replacement property. |
+| `transfer_date` | string (ISO date) | MUST | The date the relinquished property was transferred; the clock start. |
+| `boot_received_cents` | integer (cents) | MAY | Non-like-kind consideration received (default 0). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `boot_received_cents` | integer (cents) |
-| `exchange_deadline` | string |
-| `identification_deadline` | string |
-| `recognized_gain_floor_cents` | integer (cents) |
-| `relinquished_value_cents` | integer (cents) |
-| `replacement_value_cents` | integer (cents) |
-| `transfer_date` | string (ISO date) |
-| `value_shortfall_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `transfer_date` | string (ISO date) | The transfer date, echoed. |
+| `identification_deadline` | string (ISO date) | The 45-day identification deadline. |
+| `exchange_deadline` | string (ISO date) | The 180-day exchange deadline. |
+| `replacement_value_cents` | integer (cents) | The replacement-property value, echoed. |
+| `relinquished_value_cents` | integer (cents) | The relinquished-property value, echoed. |
+| `boot_received_cents` | integer (cents) | Boot received, echoed. |
+| `value_shortfall_cents` | integer (cents) | Shortfall from trading down (relinquished over replacement). |
+| `recognized_gain_floor_cents` | integer (cents) | The greater of boot and shortfall — gain that cannot be deferred. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-45-day/180-day timing, identification rules, and boot recognition.
-
-Computes 45-day identification and 180-day exchange deadlines plus boot/value-shortfall recognition floor.
+Given `transfer_date`, `relinquished_property_value_cents`, and `replacement_property_value_cents`, plus optional `boot_received_cents` (default 0):
+1. If any required input is missing (or the date is invalid), the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `identification_deadline` SHALL be the transfer date advanced by the §1031 identification period (constants: §1031 identification period).
+3. `exchange_deadline` SHALL be the transfer date advanced by the §1031 exchange period (constants: §1031 exchange period).
+4. `value_shortfall_cents` SHALL be `max(0, relinquished_property_value_cents − replacement_property_value_cents)` (trading down).
+5. `recognized_gain_floor_cents` SHALL be `max(boot_received_cents, value_shortfall_cents)` — the gain that cannot be deferred.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| §1031 identification period | 45 days | MUST (binding) | IRC § 1031(a)(3)(A) | § 1031(a)(3)(A) | current (IRC as amended) | on IRC amendment |
+| §1031 exchange period | 180 days | MUST (binding) | IRC § 1031(a)(3)(B) | § 1031(a)(3)(B) | current (IRC as amended) | on IRC amendment |
 
 
 **Authorities**
@@ -4752,33 +5517,35 @@ Computes 45-day identification and 180-day exchange deadlines plus boot/value-sh
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RE.1031.001` — *1031 timing computes statutory deadlines and boot floor*.
+*A $5M relinquished property is exchanged for $4.5M of replacement plus $200k of boot: the $500k trade-down shortfall exceeds the boot, so at least $500k of gain is recognized; identification closes 45 days out and the exchange 180 days out.*
 
 **Inputs**
 
 ```json
 {
-  "transfer_date": "2026-05-21",
-  "relinquished_property_value_cents": 100000000,
-  "replacement_property_value_cents": 90000000,
-  "boot_received_cents": 5000000
+  "transfer_date": "2026-03-01",
+  "relinquished_property_value_cents": 500000000,
+  "replacement_property_value_cents": 450000000,
+  "boot_received_cents": 20000000
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RE.1031.TIMING.v1`)**
 
 ```json
 {
-  "transfer_date": "2026-05-21",
-  "identification_deadline": "2026-07-05",
-  "exchange_deadline": "2026-11-17",
-  "replacement_value_cents": 90000000,
-  "relinquished_value_cents": 100000000,
-  "boot_received_cents": 5000000,
-  "value_shortfall_cents": 10000000,
-  "recognized_gain_floor_cents": 10000000
+  "transfer_date": "2026-03-01",
+  "identification_deadline": "2026-04-15",
+  "exchange_deadline": "2026-08-28",
+  "replacement_value_cents": 450000000,
+  "relinquished_value_cents": 500000000,
+  "boot_received_cents": 20000000,
+  "value_shortfall_cents": 50000000,
+  "recognized_gain_floor_cents": 50000000
 }
 ```
+
+Precision: Monetary outputs are exact integer cents; deadlines are ISO-8601 dates (see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -4787,7 +5554,7 @@ Conformance case `CONF.MODEL.RE.1031.001` — *1031 timing computes statutory de
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model dates the §1031 windows and computes the recognized-gain floor from supplied values. Whether the properties are like-kind, whether the exchange structure (qualified intermediary, identification rules) qualifies, and the taxpayer's actual gain and basis are determinations for the tax advisor; the model computes the deadlines and the floor and renders no qualification opinion.
 
 ## 9. Conformance bindings
 
@@ -4805,48 +5572,57 @@ Reference binding `MODEL.RE.1031.TIMING.v1` · entered the specification at inte
 **Gates:** G30
 **Deal contexts:** OpCo/PropCo · sale-leaseback
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Cap rate, residual value, and finance-versus-operating classification scaffold.
+Screens a sale-leaseback against the ASC 842 finance-lease indicators — ownership transfer, a bargain purchase option, a lease term covering substantially all the economic life, present value covering substantially all the fair value, and a specialized asset — and reports the implied cap rate and nominal rent. It answers, in an OpCo/PropCo or sale-leaseback deal, "do any finance-lease indicators show up, or does this look like a true sale and operating lease?" It screens the indicators; the binding sale and lease-classification accounting is the accountant's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M171.schema.json`](M171.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `annual_rent_cents` | integer (cents) | MUST |
-| `lease_term_years` | integer | MUST |
-| `sale_price_cents` | integer (cents) | MUST |
-| `economic_life_years` | integer | MAY |
-| `pv_lease_payments_cents` | integer (cents) | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `annual_rent_cents` | integer (cents) | MUST | Annual leaseback rent. |
+| `lease_term_years` | number | MUST | The leaseback term in years. |
+| `sale_price_cents` | integer (cents) | MUST | The sale-leaseback sale price. |
+| `bargain_purchase_option` | boolean | MAY | Whether the lessee holds a bargain purchase option (default false). |
+| `economic_life_years` | number | MAY | Remaining economic life of the asset; enables the lease-term indicator. |
+| `pv_lease_payments_cents` | integer (cents) | MAY | Present value of the lease payments; enables the fair-value indicator. |
+| `specialized_asset` | boolean | MAY | Whether the asset is so specialized it has no alternative use to the lessor (default false). |
+| `transfers_ownership` | boolean | MAY | Whether the lease transfers ownership at term end (default false). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `accounting_review_flags` | string[] |
-| `annual_rent_cents` | integer (cents) |
-| `asc842_indicator_classification` | string |
-| `cap_rate` | number |
-| `finance_lease_indicators` | any[] |
-| `lease_term_pct_of_economic_life` | number |
-| `lease_term_years` | integer |
-| `pv_payments_pct_of_fair_value` | number |
-| `sale_price_cents` | integer (cents) |
-| `total_nominal_rent_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `sale_price_cents` | integer (cents) | The sale price, echoed. |
+| `annual_rent_cents` | integer (cents) | The annual rent, echoed. |
+| `cap_rate` | number | Implied cap rate: annual rent ÷ sale price. |
+| `lease_term_years` | number | The lease term, echoed. |
+| `total_nominal_rent_cents` | integer (cents) | Total undiscounted rent over the term. |
+| `lease_term_pct_of_economic_life` | number | null | Lease term as a fraction of economic life, or null. |
+| `pv_payments_pct_of_fair_value` | number | null | PV of payments as a fraction of fair value, or null. |
+| `asc842_indicator_classification` | enum(asc842_classification) | Whether any finance-lease indicator is present. One of `finance_lease_indicator_present`, `operating_lease_indicator_on_supplied_facts`. |
+| `finance_lease_indicators` | string[] | The finance-lease indicators that fired (empty when none). |
+| `accounting_review_flags` | string[] | Standing accountant-review note on ASC 842 sale and lease classification. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Cap rate, residual value, and finance-versus-operating classification scaffold.
-
-Computes sale-leaseback cap rate, nominal rent burden, and ASC 842 finance-lease indicator flags from supplied facts.
+Given `sale_price_cents`, `annual_rent_cents`, and `lease_term_years`, plus optional `economic_life_years`, `pv_lease_payments_cents`, `transfers_ownership` (default false), `bargain_purchase_option` (default false), `specialized_asset` (default false):
+1. If any required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `cap_rate` SHALL be `annual_rent_cents ÷ sale_price_cents` at the global 4-decimal precision; `total_nominal_rent_cents` SHALL be `round(annual_rent_cents × lease_term_years)`.
+3. `lease_term_pct_of_economic_life` SHALL be `lease_term_years ÷ economic_life_years` (or null); `pv_payments_pct_of_fair_value` SHALL be `pv_lease_payments_cents ÷ sale_price_cents` (or null).
+4. A finance-lease indicator SHALL be flagged for: ownership transfer; a bargain purchase option; a lease term at or above the economic-life threshold (constants: ASC 842 lease-term indicator); PV at or above the fair-value threshold (constants: ASC 842 PV indicator); or a specialized asset.
+5. `asc842_indicator_classification` SHALL be `finance_lease_indicator_present` iff any indicator fired, else `operating_lease_indicator_on_supplied_facts`; an accountant-review flag SHALL always attach.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| ASC 842 lease-term indicator | 75% of economic life (0.75) | MUST (binding) | ASC 842-10-25 | lease term is a major part (customary 75%) of remaining economic life | ASC 842 (current) | on standard amendment |
+| ASC 842 PV indicator | 90% of fair value (0.90) | MUST (binding) | ASC 842-10-25 | PV of payments is substantially all (customary 90%) of fair value | ASC 842 (current) | on standard amendment |
 
 
 **Authorities**
@@ -4857,31 +5633,31 @@ Computes sale-leaseback cap rate, nominal rent burden, and ASC 842 finance-lease
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RE.SALELEASEBACK.001` — *Sale-leaseback computes cap rate and ASC 842 indicators*.
+*A $20M sale-leaseback at $1.6M annual rent (an 8% cap) on a 15-year lease of a 40-year-life asset with $12M PV of payments: none of the ASC 842 finance-lease indicators fires on these facts, pointing toward sale and operating-lease accounting subject to accountant review.*
 
 **Inputs**
 
 ```json
 {
-  "sale_price_cents": 100000000,
-  "annual_rent_cents": 7500000,
-  "lease_term_years": 10,
-  "economic_life_years": 20,
-  "pv_lease_payments_cents": 80000000
+  "sale_price_cents": 2000000000,
+  "annual_rent_cents": 160000000,
+  "lease_term_years": 15,
+  "economic_life_years": 40,
+  "pv_lease_payments_cents": 1200000000
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RE.SALE_LEASEBACK.ASC842.v1`)**
 
 ```json
 {
-  "sale_price_cents": 100000000,
-  "annual_rent_cents": 7500000,
-  "cap_rate": 0.075,
-  "lease_term_years": 10,
-  "total_nominal_rent_cents": 75000000,
-  "lease_term_pct_of_economic_life": 0.5,
-  "pv_payments_pct_of_fair_value": 0.8,
+  "sale_price_cents": 2000000000,
+  "annual_rent_cents": 160000000,
+  "cap_rate": 0.08,
+  "lease_term_years": 15,
+  "total_nominal_rent_cents": 2400000000,
+  "lease_term_pct_of_economic_life": 0.375,
+  "pv_payments_pct_of_fair_value": 0.6,
   "asc842_indicator_classification": "operating_lease_indicator_on_supplied_facts",
   "finance_lease_indicators": [],
   "accounting_review_flags": [
@@ -4890,6 +5666,8 @@ Conformance case `CONF.MODEL.RE.SALELEASEBACK.001` — *Sale-leaseback computes 
 }
 ```
 
+Precision: Cap rate and percentages are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter); nominal rent is exact integer cents.
+
 ## 7. Error semantics
 
 - **Missing inputs:** the model returns `status: "needs_inputs"` with `missingInputs` as a field-name list — for an empty input record: `["sale_price_cents","annual_rent_cents","lease_term_years"]`. No partial outputs are emitted.
@@ -4897,7 +5675,7 @@ Conformance case `CONF.MODEL.RE.SALELEASEBACK.001` — *Sale-leaseback computes 
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for sale-leaseback and asc 842 is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model screens the ASC 842 finance-lease indicators and computes the implied cap rate from supplied facts. Whether the sale qualifies for sale accounting and whether the leaseback is a finance or operating lease are accounting determinations for the accountant on the final facts; the model produces the indicator screen and always routes the classification, rendering no accounting conclusion.
 
 ## 9. Conformance bindings
 
@@ -4915,46 +5693,53 @@ Reference binding `MODEL.RE.SALE_LEASEBACK.ASC842.v1` · entered the specificati
 **Gates:** G30
 **Deal contexts:** REIT M&A
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Income, asset, and distribution compliance tests.
+Runs the three REIT qualification gates from supplied figures — the 75% gross-income test, the 75% asset test, and the 90% distribution test — and reports each ratio, each pass/fail, and whether all three clear. It answers, for a REIT (or a target being tested for REIT status), "do the income, asset, and distribution numbers keep it qualified?" It computes the ratios and the pass/fail; the underlying income and asset characterizations are the tax advisor's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M172.schema.json`](M172.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `distributions_cents` | integer (cents) | MUST |
-| `real_estate_assets_cents` | integer (cents) | MUST |
-| `real_estate_income_cents` | integer (cents) | MUST |
-| `taxable_income_cents` | integer (cents) | MUST |
-| `total_assets_cents` | integer (cents) | MUST |
-| `total_income_cents` | integer (cents) | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `distributions_cents` | integer (cents) | MUST | Distributions made to shareholders. |
+| `real_estate_assets_cents` | integer (cents) | MUST | Qualifying real-estate assets. |
+| `real_estate_income_cents` | integer (cents) | MUST | Qualifying real-estate gross income. |
+| `taxable_income_cents` | integer (cents) | MUST | REIT taxable income (the distribution-test denominator). |
+| `total_assets_cents` | integer (cents) | MUST | Total assets. |
+| `total_income_cents` | integer (cents) | MUST | Total gross income. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `all_tests_passed` | boolean |
-| `asset_75_pct` | number |
-| `asset_75_test_passed` | boolean |
-| `distribution_90_pct` | number |
-| `distribution_90_test_passed` | boolean |
-| `income_75_pct` | number |
-| `income_75_test_passed` | boolean |
+| Field | Type | Description |
+|---|---|---|
+| `income_75_pct` | number | Real-estate income as a fraction of total income. |
+| `income_75_test_passed` | boolean | Whether the 75% income test passes. |
+| `asset_75_pct` | number | Real-estate assets as a fraction of total assets. |
+| `asset_75_test_passed` | boolean | Whether the 75% asset test passes. |
+| `distribution_90_pct` | number | Distributions as a fraction of taxable income. |
+| `distribution_90_test_passed` | boolean | Whether the 90% distribution test passes. |
+| `all_tests_passed` | boolean | Whether all three tests pass. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Income, asset, and distribution compliance tests.
-
-Checks REIT income, asset, and distribution percentages against 75/75/90 threshold mechanics.
+Given `real_estate_income_cents`, `total_income_cents`, `real_estate_assets_cents`, `total_assets_cents`, `distributions_cents`, and `taxable_income_cents`:
+1. If any of the six is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `income_75_pct` SHALL be `real_estate_income_cents ÷ total_income_cents`; `income_75_test_passed` SHALL be true iff it is at or above the income-test threshold (constants: REIT 75% income test).
+3. `asset_75_pct` SHALL be `real_estate_assets_cents ÷ total_assets_cents`; `asset_75_test_passed` SHALL be true iff it is at or above the asset-test threshold (constants: REIT 75% asset test).
+4. `distribution_90_pct` SHALL be `distributions_cents ÷ taxable_income_cents`; `distribution_90_test_passed` SHALL be true iff it is at or above the distribution-test threshold (constants: REIT 90% distribution test).
+5. `all_tests_passed` SHALL be true iff all three tests pass; the ratios are reported at the global 4-decimal precision.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| REIT 75% income test | 75% (0.75) | MUST (binding) | IRC § 856(c)(3) | § 856(c)(3) | current (IRC as amended) | on IRC amendment |
+| REIT 75% asset test | 75% (0.75) | MUST (binding) | IRC § 856(c)(4) | § 856(c)(4) | current (IRC as amended) | on IRC amendment |
+| REIT 90% distribution test | 90% (0.90) | MUST (binding) | IRC § 857(a)(1) | § 857(a)(1) | current (IRC as amended) | on IRC amendment |
 
 
 **Authorities**
@@ -4965,34 +5750,36 @@ Checks REIT income, asset, and distribution percentages against 75/75/90 thresho
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RE.REIT.001` — *REIT compliance triad passes 75/75/90 tests*.
+*A REIT with 95% of income and 95% of assets in real estate and a 90% distribution of taxable income clears all three §856/§857 tests.*
 
 **Inputs**
 
 ```json
 {
-  "real_estate_income_cents": 800000,
-  "total_income_cents": 1000000,
-  "real_estate_assets_cents": 900000,
-  "total_assets_cents": 1000000,
-  "distributions_cents": 950000,
-  "taxable_income_cents": 1000000
+  "real_estate_income_cents": 950000000,
+  "total_income_cents": 1000000000,
+  "real_estate_assets_cents": 9500000000,
+  "total_assets_cents": 10000000000,
+  "distributions_cents": 900000000,
+  "taxable_income_cents": 1000000000
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RE.REIT.COMPLIANCE.v1`)**
 
 ```json
 {
-  "income_75_pct": 0.8,
+  "income_75_pct": 0.95,
   "income_75_test_passed": true,
-  "asset_75_pct": 0.9,
+  "asset_75_pct": 0.95,
   "asset_75_test_passed": true,
-  "distribution_90_pct": 0.95,
+  "distribution_90_pct": 0.9,
   "distribution_90_test_passed": true,
   "all_tests_passed": true
 }
 ```
+
+Precision: Ratios are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -5001,7 +5788,7 @@ Conformance case `CONF.MODEL.RE.REIT.001` — *REIT compliance triad passes 75/7
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model runs the three REIT ratio tests from supplied figures. Which income and assets qualify as real-estate for §856, the many other REIT requirements, and the ultimate qualification conclusion are determinations for the tax advisor; the model computes the ratios and pass/fail and renders no qualification opinion.
 
 ## 9. Conformance bindings
 
@@ -5110,43 +5897,50 @@ Research scaffold: organizes authorities and considerations. Produces oriented r
 **Gates:** G26, G30
 **Deal contexts:** LP secondary
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-PSA, tri-party transfer, and withholding scaffold.
+Screens a limited-partnership secondary sale for the §1446(f) 10% withholding that applies when a foreign partner transfers a partnership interest, computes the default withholding, and flags the purchase-and-sale-agreement and tri-party transfer mechanics. It answers, for a secondary buyer or seller, "does this LP transfer trigger ECI withholding, and how much?" It computes the default withholding from the price; the withholding-certificate exception and the ECI determination are the tax specialist's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M177.schema.json`](M177.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `purchase_price_cents` | integer (cents) | MUST |
-| `seller_foreign_person` | boolean | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `purchase_price_cents` | integer (cents) | MUST | The price paid for the transferred partnership interest. |
+| `seller_foreign_person` | boolean | MUST | Whether the transferring partner is a foreign person (the §1446(f) trigger). |
+| `eci_gain_cents` | integer (cents) | MAY | Estimated effectively-connected gain on the transfer; optional context. |
+| `withholding_certificate_provided` | boolean | MAY | Whether a §1446(f) withholding certificate/exception is provided (default false). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `eci_gain_cents` | null |
-| `psa_required` | boolean |
-| `purchase_price_cents` | integer (cents) |
-| `section_1446f_default_withholding_cents` | integer (cents) |
-| `seller_foreign_person` | boolean |
-| `tax_specialist_handoff_required` | boolean |
-| `tri_party_transfer_required` | boolean |
-| `withholding_certificate_provided` | boolean |
+| Field | Type | Description |
+|---|---|---|
+| `purchase_price_cents` | integer (cents) | The purchase price, echoed. |
+| `seller_foreign_person` | boolean | The foreign-person flag, echoed. |
+| `withholding_certificate_provided` | boolean | The certificate flag, echoed. |
+| `section_1446f_default_withholding_cents` | integer (cents) | The default 10% §1446(f) withholding, or 0 when not triggered. |
+| `eci_gain_cents` | integer (cents) | null | The supplied ECI gain, echoed, or null. |
+| `psa_required` | boolean | Always true — a purchase-and-sale agreement papers the transfer. |
+| `tri_party_transfer_required` | boolean | Always true — the transfer is executed tri-party with the fund. |
+| `tax_specialist_handoff_required` | boolean | True when the seller is a foreign person. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-PSA, tri-party transfer, and withholding scaffold.
-
-Computes 1446(f) default withholding, PSA requirement, tri-party transfer requirement, and tax specialist handoff flag.
+Given `purchase_price_cents` and `seller_foreign_person`, plus optional `withholding_certificate_provided` (default false) and `eci_gain_cents`:
+1. If either required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `section_1446f_default_withholding_cents` SHALL be `round(purchase_price_cents × the §1446(f) default withholding rate)` when the seller is a foreign person and no withholding certificate is provided, else 0 (constants: §1446(f) default withholding rate).
+3. `psa_required` and `tri_party_transfer_required` SHALL always be true — the transfer runs through a purchase-and-sale agreement and a tri-party (buyer, seller, fund) transfer.
+4. `tax_specialist_handoff_required` SHALL be true iff the seller is a foreign person.
+5. The model SHALL echo the price, the foreign-person flag, the certificate flag, and any supplied ECI gain.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| §1446(f) default withholding rate | 10% | MUST (binding) | IRC § 1446(f) | § 1446(f)(1) (10% of amount realized) | current (IRC as amended) | on IRC amendment |
 
 
 **Authorities**
@@ -5158,31 +5952,35 @@ Computes 1446(f) default withholding, PSA requirement, tri-party transfer requir
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.SECONDARIES.LP_ECI.001` — *LP secondary model computes 1446(f) withholding and transfer documents*.
+*A foreign LP sells its fund interest for $20M with no withholding certificate on file; §1446(f) requires the buyer to withhold 10% — $2M — pending the tax specialist's ECI analysis.*
 
 **Inputs**
 
 ```json
 {
-  "purchase_price_cents": 1000000,
-  "seller_foreign_person": true
+  "purchase_price_cents": 2000000000,
+  "seller_foreign_person": true,
+  "withholding_certificate_provided": false,
+  "eci_gain_cents": 300000000
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.SECONDARIES.LP_ECI.v1`)**
 
 ```json
 {
-  "purchase_price_cents": 1000000,
+  "purchase_price_cents": 2000000000,
   "seller_foreign_person": true,
   "withholding_certificate_provided": false,
-  "section_1446f_default_withholding_cents": 100000,
-  "eci_gain_cents": null,
+  "section_1446f_default_withholding_cents": 200000000,
+  "eci_gain_cents": 300000000,
   "psa_required": true,
   "tri_party_transfer_required": true,
   "tax_specialist_handoff_required": true
 }
 ```
+
+Precision: The withholding amount is exact integer cents (see the Conventions chapter); no rounding of ratios.
 
 ## 7. Error semantics
 
@@ -5191,7 +5989,7 @@ Conformance case `CONF.MODEL.SECONDARIES.LP_ECI.001` — *LP secondary model com
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for lp-secondary plus eci withholding is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model screens an LP secondary for §1446(f) withholding and computes the 10% default from the price. Whether the seller is in fact a foreign person, whether a withholding certificate or exception applies, and the effectively-connected-income determination are tax determinations for a tax specialist; on a foreign-seller transfer the model routes them (tax_specialist_handoff_required) and renders no withholding opinion beyond the default arithmetic.
 
 ## 9. Conformance bindings
 
@@ -5209,43 +6007,46 @@ Reference binding `MODEL.SECONDARIES.LP_ECI.v1` · entered the specification at 
 **Gates:** G26, G30
 **Deal contexts:** strip sale
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Proportionate interest pricing and retained-exposure schedule.
+Prices a strip sale of a fund or portfolio — the NAV sold and retained at the strip percentage, the total value implied by the strip price, and the discount or premium to NAV. It answers, for a GP or LP running a strip sale, "how much NAV are we selling, what total value does the strip price imply, and at what discount to NAV?" It computes the pricing arithmetic from the supplied NAV, strip percentage, and sale price.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M178.schema.json`](M178.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `fund_nav_cents` | integer (cents) | MUST |
-| `sale_price_cents` | integer (cents) | MUST |
-| `strip_percentage` | number | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `fund_nav_cents` | integer (cents) | MUST | Total net asset value of the fund or portfolio. |
+| `sale_price_cents` | integer (cents) | MUST | Price paid for the strip. |
+| `strip_percentage` | number | MUST | Fraction of the NAV sold in the strip (0–1). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `discount_to_nav_pct` | number |
-| `fund_nav_cents` | integer (cents) |
-| `implied_total_value_cents` | integer (cents) |
-| `retained_nav_cents` | integer (cents) |
-| `sale_price_cents` | integer (cents) |
-| `sold_nav_cents` | integer (cents) |
-| `strip_percentage` | number |
+| Field | Type | Description |
+|---|---|---|
+| `fund_nav_cents` | integer (cents) | The fund NAV, echoed. |
+| `strip_percentage` | number | The strip percentage applied. |
+| `sold_nav_cents` | integer (cents) | NAV sold in the strip. |
+| `retained_nav_cents` | integer (cents) | NAV retained after the strip. |
+| `sale_price_cents` | integer (cents) | The strip sale price, echoed. |
+| `implied_total_value_cents` | integer (cents) | Total fund value the strip price implies (price ÷ strip). |
+| `discount_to_nav_pct` | number | null | Discount (positive) or premium (negative) to NAV, or null when NAV is non-positive. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Proportionate interest pricing and retained-exposure schedule.
-
-Computes sold NAV, retained NAV, implied total value, and discount or premium to fund NAV.
+Given `fund_nav_cents`, `strip_percentage` (a fraction), and `sale_price_cents`:
+1. If any of the three is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `sold_nav_cents` SHALL be `round(fund_nav_cents × strip_percentage)`; `retained_nav_cents` SHALL be `fund_nav_cents − sold_nav_cents`.
+3. `implied_total_value_cents` SHALL be `round(sale_price_cents ÷ strip_percentage)` when the strip percentage is positive, else 0.
+4. `discount_to_nav_pct` SHALL be `1 − (implied_total_value_cents ÷ fund_nav_cents)` when NAV is positive, else null, at the global 4-decimal precision (a positive value is a discount, a negative value a premium).
+5. `strip_percentage` SHALL echo at 4 decimals.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -5256,31 +6057,33 @@ Computes sold NAV, retained NAV, implied total value, and discount or premium to
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.SECONDARIES.STRIP.001` — *Strip-sale model computes implied value and retained NAV*.
+*A 30% strip of a $100M-NAV fund sells for $27M, implying a $90M total value — a 10% discount to NAV; $30M of NAV is sold and $70M retained.*
 
 **Inputs**
 
 ```json
 {
-  "fund_nav_cents": 1000000,
-  "strip_percentage": 0.25,
-  "sale_price_cents": 220000
+  "fund_nav_cents": 10000000000,
+  "strip_percentage": 0.3,
+  "sale_price_cents": 2700000000
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.SECONDARIES.STRIP_SALE.v1`)**
 
 ```json
 {
-  "fund_nav_cents": 1000000,
-  "strip_percentage": 0.25,
-  "sold_nav_cents": 250000,
-  "retained_nav_cents": 750000,
-  "sale_price_cents": 220000,
-  "implied_total_value_cents": 880000,
-  "discount_to_nav_pct": 0.12
+  "fund_nav_cents": 10000000000,
+  "strip_percentage": 0.3,
+  "sold_nav_cents": 3000000000,
+  "retained_nav_cents": 7000000000,
+  "sale_price_cents": 2700000000,
+  "implied_total_value_cents": 9000000000,
+  "discount_to_nav_pct": 0.1
 }
 ```
+
+Precision: Monetary outputs are exact integer cents; the strip percentage and discount are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -5289,7 +6092,7 @@ Conformance case `CONF.MODEL.SECONDARIES.STRIP.001` — *Strip-sale model comput
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model prices a strip sale from supplied NAV, strip percentage, and sale price. Whether the NAV is correctly struck, the fairness of the strip price, and the LP/GP consent and tax mechanics are determinations for the fund's valuation process, its advisers, and counsel; the model computes the implied value and discount and renders no valuation.
 
 ## 9. Conformance bindings
 
@@ -5307,43 +6110,49 @@ Reference binding `MODEL.SECONDARIES.STRIP_SALE.v1` · entered the specification
 **Gates:** G26, G30
 **Deal contexts:** NAV financing
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Loan-to-value, cushion, and collateral pool schedule.
+Computes a fund-level NAV facility's loan-to-value and equity cushion from the fund NAV and drawn loan amount, and tests the cushion against the required minimum. It answers, for a GP or lender sizing a NAV loan, "where does LTV sit, how much cushion remains, and does it clear the covenant floor?" It performs the ratio screen; the binding facility terms and collateral-pool eligibility are the lender's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M179.schema.json`](M179.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `fund_nav_cents` | integer (cents) | MUST |
-| `loan_amount_cents` | integer (cents) | MUST |
-| `required_cushion_pct` | number | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `fund_nav_cents` | integer (cents) | MUST | Net asset value of the fund pledged to the facility. |
+| `loan_amount_cents` | integer (cents) | MUST | Drawn (or committed) loan amount under the facility. |
+| `required_cushion_pct` | number | MAY | Minimum equity cushion the covenant requires as a fraction; defaults to the cited market minimum. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `cushion_pct` | number |
-| `cushion_requirement_satisfied` | boolean |
-| `fund_nav_cents` | integer (cents) |
-| `lender_handoff_required` | boolean |
-| `loan_amount_cents` | integer (cents) |
-| `nav_ltv` | number |
-| `required_cushion_pct` | number |
+| Field | Type | Description |
+|---|---|---|
+| `fund_nav_cents` | integer (cents) | The fund NAV, echoed. |
+| `loan_amount_cents` | integer (cents) | The loan amount, echoed. |
+| `nav_ltv` | number | Loan-to-value: loan ÷ NAV. |
+| `cushion_pct` | number | Equity cushion: 1 − LTV. |
+| `required_cushion_pct` | number | The required minimum cushion applied. |
+| `cushion_requirement_satisfied` | boolean | Whether the cushion meets or exceeds the required minimum. |
+| `lender_handoff_required` | boolean | Always true — binding facility terms route to the lender. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Loan-to-value, cushion, and collateral pool schedule.
-
-Computes fund NAV LTV, cushion, required cushion, and lender-handoff flag.
+Given `fund_nav_cents` and `loan_amount_cents`, plus optional `required_cushion_pct` (default: the NAV facility minimum cushion constant):
+1. If either required input is missing or non-numeric, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `nav_ltv` SHALL be `loan_amount_cents ÷ fund_nav_cents` (zero when NAV is non-positive), at the global 4-decimal precision.
+3. `cushion_pct` SHALL be `1 − nav_ltv`, at 4 decimals.
+4. `required_cushion_pct` SHALL be the supplied value, else the NAV facility minimum cushion (constants: NAV facility minimum cushion), at 4 decimals.
+5. `cushion_requirement_satisfied` SHALL be true iff `cushion_pct ≥ required_cushion_pct`.
+6. `lender_handoff_required` SHALL always be true — binding facility terms route to the lender.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| NAV facility minimum cushion | 25% (0.25) | SHOULD (cited median) | NAV facility market practice — conventional minimum equity cushion (2024) | conventional minimum cushion (LTV ceiling near 75%) | 2024 market practice | on next NAV-facility market review |
 
 
 **Authorities**
@@ -5354,31 +6163,33 @@ Computes fund NAV LTV, cushion, required cushion, and lender-handoff flag.
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.FINANCE.NAV.001` — *NAV facility model computes LTV and cushion*.
+*A $500M-NAV fund draws a $150M NAV facility: LTV lands at 30%, leaving a 70% cushion that clears the 25% minimum comfortably.*
 
 **Inputs**
 
 ```json
 {
-  "fund_nav_cents": 1000000,
-  "loan_amount_cents": 700000,
+  "fund_nav_cents": 50000000000,
+  "loan_amount_cents": 15000000000,
   "required_cushion_pct": 0.25
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.FINANCE.NAV_FACILITY.v1`)**
 
 ```json
 {
-  "fund_nav_cents": 1000000,
-  "loan_amount_cents": 700000,
-  "nav_ltv": 0.7,
-  "cushion_pct": 0.3,
+  "fund_nav_cents": 50000000000,
+  "loan_amount_cents": 15000000000,
+  "nav_ltv": 0.3,
+  "cushion_pct": 0.7,
   "required_cushion_pct": 0.25,
   "cushion_requirement_satisfied": true,
   "lender_handoff_required": true
 }
 ```
+
+Precision: Ratios are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter); monetary echoes are exact integer cents.
 
 ## 7. Error semantics
 
@@ -5387,7 +6198,7 @@ Conformance case `CONF.MODEL.FINANCE.NAV.001` — *NAV facility model computes L
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for nav facility ltv is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model computes NAV-facility LTV and cushion and screens them against a required minimum. The binding advance rate, collateral-pool eligibility, concentration limits, and cure mechanics are the lender's and are set in the facility agreement; the model produces the ratio screen and routes the binding terms to the lender (lender_handoff_required), quoting no facility.
 
 ## 9. Conformance bindings
 
@@ -5405,47 +6216,51 @@ Reference binding `MODEL.FINANCE.NAV_FACILITY.v1` · entered the specification a
 **Gates:** G15, G29
 **Deal contexts:** convertible · SAFE
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Cap, discount, pre/post-money, and if-converted math.
+Computes the price at which a convertible note or SAFE converts in a priced round — the lower of the discount price, the valuation-cap price, and the round's own share price — and the resulting share count, and reports which term governed. It answers, for a founder or investor modeling a conversion, "at what price does this instrument convert, and does the cap or the discount win?" It computes the conversion arithmetic from supplied terms; it renders no view on the fairness of the cap or discount.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M180.schema.json`](M180.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `investment_cents` | integer (cents) | MUST |
-| `priced_round_share_price_cents` | integer (cents) | MUST |
-| `discount_pct` | number | MAY |
-| `pre_money_share_count` | integer | MAY |
-| `valuation_cap_cents` | integer (cents) | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `investment_cents` | integer (cents) | MUST | Principal (or SAFE amount) converting into the round. |
+| `priced_round_share_price_cents` | integer (cents) | MUST | The new priced-round price per share. |
+| `discount_pct` | number | MAY | The conversion discount as a fraction (0–1); default 0 (no discount). |
+| `pre_money_share_count` | number | MAY | Fully-diluted pre-money share count used to convert the cap into a per-share price; optional. |
+| `valuation_cap_cents` | integer (cents) | MAY | The instrument's valuation cap; optional, drives the cap price. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `cap_price_cents` | integer (cents) |
-| `conversion_driver` | string |
-| `conversion_price_cents` | integer (cents) |
-| `converted_share_count` | integer |
-| `discount_pct` | number |
-| `discount_price_cents` | integer (cents) |
-| `investment_cents` | integer (cents) |
-| `priced_round_share_price_cents` | integer (cents) |
-| `valuation_cap_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `investment_cents` | integer (cents) | The converting investment, echoed. |
+| `priced_round_share_price_cents` | integer (cents) | The priced-round share price, echoed. |
+| `discount_pct` | number | The discount fraction applied. |
+| `discount_price_cents` | integer (cents) | The discounted per-share price. |
+| `valuation_cap_cents` | integer (cents) | null | The valuation cap, echoed, or null. |
+| `cap_price_cents` | integer (cents) | null | The cap-implied per-share price, or null when the cap or share count is absent. |
+| `conversion_price_cents` | integer (cents) | The governing (lowest) conversion price per share. |
+| `converted_share_count` | number | Shares the investment converts into at the conversion price. |
+| `conversion_driver` | enum(conversion_driver) | Which term produced the governing conversion price. One of `valuation_cap`, `discount`, `priced_round_price`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Cap, discount, pre/post-money, and if-converted math.
-
-Computes conversion price and converted shares using priced-round price, discount, and valuation-cap mechanics.
+Given `investment_cents` and `priced_round_share_price_cents`, plus optional `valuation_cap_cents`, `pre_money_share_count`, and `discount_pct` (default 0):
+1. If either required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `discount_price_cents` SHALL be `priced_round_share_price_cents × (1 − discount_pct)` (the discount clamped to [0, 1]), rounded to the nearest cent.
+3. `cap_price_cents` SHALL be `valuation_cap_cents ÷ pre_money_share_count`, rounded to the nearest cent, when both are supplied and positive; otherwise null.
+4. `conversion_price_cents` SHALL be the minimum of the priced-round price, the discount price, and (when present) the cap price, among the positive candidates.
+5. `converted_share_count` SHALL be `investment_cents ÷ conversion_price_cents`, at the global 4-decimal precision.
+6. `conversion_driver` SHALL name which term produced the governing price: the valuation cap, the discount, or the priced-round price.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -5457,35 +6272,37 @@ Computes conversion price and converted shares using priced-round price, discoun
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.FINANCE.SAFE.001` — *Convertible SAFE selects the best conversion price*.
+*A $500k SAFE with a $10M cap and a 20% discount converts into an $5.00 priced round on 8,000,000 pre-money shares: the $1.25 cap price beats the $4.00 discount price, so the cap governs and the SAFE takes 400,000 shares.*
 
 **Inputs**
 
 ```json
 {
-  "investment_cents": 1000000,
-  "priced_round_share_price_cents": 1000,
-  "discount_pct": 0.2,
-  "valuation_cap_cents": 80000000,
-  "pre_money_share_count": 100000
+  "investment_cents": 50000000,
+  "priced_round_share_price_cents": 500,
+  "valuation_cap_cents": 1000000000,
+  "pre_money_share_count": 8000000,
+  "discount_pct": 0.2
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.FINANCE.CONVERTIBLE_SAFE.v1`)**
 
 ```json
 {
-  "investment_cents": 1000000,
-  "priced_round_share_price_cents": 1000,
+  "investment_cents": 50000000,
+  "priced_round_share_price_cents": 500,
   "discount_pct": 0.2,
-  "discount_price_cents": 800,
-  "valuation_cap_cents": 80000000,
-  "cap_price_cents": 800,
-  "conversion_price_cents": 800,
-  "converted_share_count": 1250,
+  "discount_price_cents": 400,
+  "valuation_cap_cents": 1000000000,
+  "cap_price_cents": 125,
+  "conversion_price_cents": 125,
+  "converted_share_count": 400000,
   "conversion_driver": "valuation_cap"
 }
 ```
+
+Precision: Monetary outputs are exact integer cents; the discount fraction and the share count are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -5494,7 +6311,7 @@ Conformance case `CONF.MODEL.FINANCE.SAFE.001` — *Convertible SAFE selects the
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model computes a convertible/SAFE conversion price and share count from supplied cap, discount, and priced-round terms. Whether the cap or discount is market, how the fully-diluted share count is defined, and the instrument's enforceability and tax treatment are determinations for the parties and counsel; the model computes the conversion the supplied terms imply and renders no view on them.
 
 ## 9. Conformance bindings
 
@@ -5512,47 +6329,51 @@ Reference binding `MODEL.FINANCE.CONVERTIBLE_SAFE.v1` · entered the specificati
 **Gates:** G15, G29
 **Deal contexts:** venture debt
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Warrant coverage, exercise price, and lender IRR.
+Sizes a venture-debt warrant package — the warrant coverage amount, the implied share count, and the warrants' intrinsic value — and estimates the lender's all-in IRR including cash interest and the warrant upside. It answers, for a lender or borrower pricing venture debt, "how many warrant shares does this coverage buy, what are they worth, and what return does the package imply for the lender?" It computes the arithmetic from supplied terms; the fair-value share price and IRR are estimates, not a valuation.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M181.schema.json`](M181.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `exercise_price_cents` | integer (cents) | MUST |
-| `fair_value_share_price_cents` | integer (cents) | MUST |
-| `loan_amount_cents` | integer (cents) | MUST |
-| `warrant_coverage_pct` | number | MUST |
-| `cash_interest_rate` | number | MAY |
-| `term_years` | integer | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `exercise_price_cents` | integer (cents) | MUST | The warrant exercise (strike) price per share. |
+| `fair_value_share_price_cents` | integer (cents) | MUST | Assumed fair-value price per share used to value the warrants. |
+| `loan_amount_cents` | integer (cents) | MUST | The venture-debt principal. |
+| `warrant_coverage_pct` | number | MUST | Warrant coverage as a fraction of the loan (e.g., 0.10 for 10% coverage). |
+| `cash_interest_rate` | number | MAY | Annual cash coupon as a fraction (default 0). |
+| `term_years` | number | MAY | Loan term in years used for interest and IRR (default 3). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `estimated_lender_irr` | number |
-| `intrinsic_warrant_value_cents` | integer (cents) |
-| `lender_gross_return_cents` | integer (cents) |
-| `loan_amount_cents` | integer (cents) |
-| `simple_interest_cents` | integer (cents) |
-| `warrant_coverage_amount_cents` | integer (cents) |
-| `warrant_coverage_pct` | number |
-| `warrant_shares` | integer |
+| Field | Type | Description |
+|---|---|---|
+| `loan_amount_cents` | integer (cents) | The loan principal, echoed. |
+| `warrant_coverage_pct` | number | The warrant coverage fraction applied. |
+| `warrant_coverage_amount_cents` | integer (cents) | Dollar coverage: loan × coverage. |
+| `warrant_shares` | integer | Warrant shares: coverage amount ÷ exercise price. |
+| `intrinsic_warrant_value_cents` | integer (cents) | Intrinsic value of the warrants at the assumed fair value. |
+| `simple_interest_cents` | integer (cents) | Total simple cash interest over the term. |
+| `lender_gross_return_cents` | integer (cents) | Principal plus interest plus warrant intrinsic value. |
+| `estimated_lender_irr` | number | null | Estimated annualized lender IRR, or null when the term is non-positive. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Warrant coverage, exercise price, and lender IRR.
-
-Computes warrant coverage amount, shares, intrinsic warrant value, simple interest, gross return, and estimated lender IRR.
+Given `loan_amount_cents`, `warrant_coverage_pct`, `exercise_price_cents`, and `fair_value_share_price_cents`, plus optional `term_years` (default 3) and `cash_interest_rate` (default 0):
+1. If any of the four required inputs is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `warrant_coverage_amount_cents` SHALL be `loan_amount_cents × warrant_coverage_pct`, rounded to the nearest cent.
+3. `warrant_shares` SHALL be `warrant_coverage_amount_cents ÷ exercise_price_cents` (zero if the exercise price is non-positive), rounded to the nearest whole share.
+4. `intrinsic_warrant_value_cents` SHALL be `max(0, warrant_shares × (fair_value_share_price_cents − exercise_price_cents))`, rounded to the nearest cent.
+5. `simple_interest_cents` SHALL be `loan_amount_cents × cash_interest_rate × term_years`, rounded to the nearest cent; `lender_gross_return_cents` SHALL be `loan_amount_cents + simple_interest_cents + intrinsic_warrant_value_cents`.
+6. `estimated_lender_irr` SHALL be `(lender_gross_return_cents ÷ loan_amount_cents)^(1 ÷ term_years) − 1` when the term is positive, else null, at the global 4-decimal precision.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -5563,35 +6384,37 @@ Computes warrant coverage amount, shares, intrinsic warrant value, simple intere
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.FINANCE.VD_WARRANT.001` — *Venture-debt warrant model computes coverage, value, and lender return*.
+*A $10M venture loan with 10% warrant coverage, a $2.00 strike, and an assumed $5.00 fair value buys 500,000 warrant shares worth $1.5M intrinsic; with an 11% cash coupon over three years the lender's estimated IRR runs about 21%.*
 
 **Inputs**
 
 ```json
 {
-  "loan_amount_cents": 1000000,
+  "loan_amount_cents": 1000000000,
   "warrant_coverage_pct": 0.1,
   "exercise_price_cents": 200,
-  "fair_value_share_price_cents": 300,
+  "fair_value_share_price_cents": 500,
   "term_years": 3,
-  "cash_interest_rate": 0.1
+  "cash_interest_rate": 0.11
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.FINANCE.VENTURE_DEBT_WARRANT.v1`)**
 
 ```json
 {
-  "loan_amount_cents": 1000000,
+  "loan_amount_cents": 1000000000,
   "warrant_coverage_pct": 0.1,
-  "warrant_coverage_amount_cents": 100000,
-  "warrant_shares": 500,
-  "intrinsic_warrant_value_cents": 50000,
-  "simple_interest_cents": 300000,
-  "lender_gross_return_cents": 1350000,
-  "estimated_lender_irr": 0.1052
+  "warrant_coverage_amount_cents": 100000000,
+  "warrant_shares": 500000,
+  "intrinsic_warrant_value_cents": 150000000,
+  "simple_interest_cents": 330000000,
+  "lender_gross_return_cents": 1480000000,
+  "estimated_lender_irr": 0.1396
 }
 ```
+
+Precision: Monetary outputs are exact integer cents; the coverage fraction and the IRR are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter); warrant shares are whole shares.
 
 ## 7. Error semantics
 
@@ -5600,7 +6423,7 @@ Conformance case `CONF.MODEL.FINANCE.VD_WARRANT.001` — *Venture-debt warrant m
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model sizes a venture-debt warrant package and estimates the lender's IRR from supplied loan, coverage, and price assumptions. The fair-value share price is an assumption, not a valuation, and the IRR is an estimate; the enforceable warrant terms, the true share count on a fully-diluted basis, and the instrument's tax treatment are determinations for the parties and counsel.
 
 ## 9. Conformance bindings
 
@@ -5618,45 +6441,53 @@ Reference binding `MODEL.FINANCE.VENTURE_DEBT_WARRANT.v1` · entered the specifi
 **Gates:** G15, G29
 **Deal contexts:** ABL
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Eligible A/R and inventory advance-rate calculation.
+Computes an asset-based lending borrowing base — advance-rate value against eligible accounts receivable and eligible inventory, less reserves — and the availability under any commitment cap. It answers, for a borrower or lender monitoring an ABL line, "how much can be drawn against the current collateral after reserves and the commitment?" It applies supplied or market-standard advance rates to supplied eligible balances; eligibility itself is the lender's determination.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M182.schema.json`](M182.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `eligible_ar_cents` | integer (cents) | MUST |
-| `eligible_inventory_cents` | integer (cents) | MUST |
-| `commitment_cents` | integer (cents) | MAY |
-| `reserves_cents` | integer (cents) | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `eligible_ar_cents` | integer (cents) | MUST | Eligible accounts receivable in the borrowing base. |
+| `eligible_inventory_cents` | integer (cents) | MUST | Eligible inventory in the borrowing base. |
+| `ar_advance_rate` | number | MAY | Advance rate against eligible A/R as a fraction; defaults to the market-standard rate. |
+| `commitment_cents` | integer (cents) | MAY | Facility commitment cap; when supplied, availability is capped at it. |
+| `inventory_advance_rate` | number | MAY | Advance rate against eligible inventory as a fraction; defaults to the market-standard rate. |
+| `reserves_cents` | integer (cents) | MAY | Lender reserves deducted from the gross base (default 0). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `ar_advance_rate` | number |
-| `availability_cents` | integer (cents) |
-| `eligible_ar_cents` | integer (cents) |
-| `eligible_inventory_cents` | integer (cents) |
-| `gross_borrowing_base_cents` | integer (cents) |
-| `inventory_advance_rate` | number |
-| `net_borrowing_base_cents` | integer (cents) |
-| `reserves_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `eligible_ar_cents` | integer (cents) | Eligible A/R, echoed. |
+| `eligible_inventory_cents` | integer (cents) | Eligible inventory, echoed. |
+| `ar_advance_rate` | number | The A/R advance rate applied. |
+| `inventory_advance_rate` | number | The inventory advance rate applied. |
+| `gross_borrowing_base_cents` | integer (cents) | Advance-rate value of eligible collateral before reserves. |
+| `reserves_cents` | integer (cents) | Reserves applied, echoed. |
+| `net_borrowing_base_cents` | integer (cents) | Gross base less reserves, floored at zero. |
+| `availability_cents` | integer (cents) | Drawable availability after the commitment cap. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Eligible A/R and inventory advance-rate calculation.
-
-Computes eligible A/R and inventory advance amounts, reserves, and net borrowing-base availability.
+Given `eligible_ar_cents` and `eligible_inventory_cents`, plus optional `ar_advance_rate` (default: the eligible-A/R advance-rate constant), `inventory_advance_rate` (default: the eligible-inventory advance-rate constant), `reserves_cents` (default 0), and `commitment_cents`:
+1. If either required eligible balance is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `gross_borrowing_base_cents` SHALL be `round(eligible_ar_cents × ar_advance_rate) + round(eligible_inventory_cents × inventory_advance_rate)`.
+3. `net_borrowing_base_cents` SHALL be `max(0, gross_borrowing_base_cents − reserves_cents)`.
+4. `availability_cents` SHALL be `net_borrowing_base_cents` when no commitment is supplied, else `min(net_borrowing_base_cents, commitment_cents)`.
+5. `ar_advance_rate` and `inventory_advance_rate` SHALL echo the applied rates (supplied or the constants) at the global 4-decimal precision.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| ABL eligible-A/R advance rate | 85% (0.85) | SHOULD (cited median) | ABL market practice — conventional advance rate on eligible accounts receivable (2024) | eligible-A/R advance-rate convention | 2024 market practice | on next annual ABL market survey |
+| ABL eligible-inventory advance rate | 50% (0.50) | SHOULD (cited median) | ABL market practice — conventional advance rate on eligible inventory (2024) | eligible-inventory advance-rate convention | 2024 market practice | on next annual ABL market survey |
 
 
 **Authorities**
@@ -5667,33 +6498,37 @@ Computes eligible A/R and inventory advance amounts, reserves, and net borrowing
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.FINANCE.ABL.001` — *ABL borrowing base computes advance rates, reserves, and commitment cap*.
+*A borrower with $10M eligible A/R and $4M eligible inventory, at standard 85% and 50% advance rates less a $500k reserve, has a $10M net borrowing base — capped to a $9M commitment.*
 
 **Inputs**
 
 ```json
 {
-  "eligible_ar_cents": 10000000,
-  "eligible_inventory_cents": 4000000,
-  "reserves_cents": 500000,
-  "commitment_cents": 9000000
+  "eligible_ar_cents": 1000000000,
+  "eligible_inventory_cents": 400000000,
+  "ar_advance_rate": 0.85,
+  "inventory_advance_rate": 0.5,
+  "reserves_cents": 50000000,
+  "commitment_cents": 900000000
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.FINANCE.ABL.BORROWING_BASE.v1`)**
 
 ```json
 {
-  "eligible_ar_cents": 10000000,
-  "eligible_inventory_cents": 4000000,
+  "eligible_ar_cents": 1000000000,
+  "eligible_inventory_cents": 400000000,
   "ar_advance_rate": 0.85,
   "inventory_advance_rate": 0.5,
-  "gross_borrowing_base_cents": 10500000,
-  "reserves_cents": 500000,
-  "net_borrowing_base_cents": 10000000,
-  "availability_cents": 9000000
+  "gross_borrowing_base_cents": 1050000000,
+  "reserves_cents": 50000000,
+  "net_borrowing_base_cents": 1000000000,
+  "availability_cents": 900000000
 }
 ```
+
+Precision: Advance rates are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter); all dollar outputs are exact integer cents.
 
 ## 7. Error semantics
 
@@ -5702,7 +6537,7 @@ Conformance case `CONF.MODEL.FINANCE.ABL.001` — *ABL borrowing base computes a
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model computes an ABL borrowing base and availability from supplied eligible balances and advance rates. Which receivables and inventory are eligible, the reserves the lender imposes, and the definitions in the credit agreement are the lender's determinations; the model applies the arithmetic to the supplied eligible figures and renders no eligibility conclusion.
 
 ## 9. Conformance bindings
 
@@ -5720,48 +6555,52 @@ Reference binding `MODEL.FINANCE.ABL.BORROWING_BASE.v1` · entered the specifica
 **Gates:** G15, G29
 **Deal contexts:** high-yield bonds · term loans
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Treasury-plus-spread make-whole and call schedule.
+Computes a bond or term-loan make-whole redemption price — the present value of remaining coupons and principal discounted at the Treasury rate plus the make-whole spread, floored at par — and compares it to the stated call price to identify the cheaper redemption route. It answers, for an issuer weighing an early redemption, "what does calling this cost under the make-whole versus the stated call, and which is cheaper?" It computes the make-whole arithmetic from supplied terms; the governing indenture language controls.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M183.schema.json`](M183.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `coupon_rate` | number | MUST |
-| `principal_cents` | integer (cents) | MUST |
-| `remaining_years` | integer | MUST |
-| `spread_bps` | integer | MUST |
-| `treasury_rate` | number | MUST |
-| `call_price_pct` | number | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `coupon_rate` | number | MUST | Annual coupon rate as a fraction (e.g., 0.08). |
+| `principal_cents` | integer (cents) | MUST | Outstanding principal being redeemed. |
+| `remaining_years` | number | MUST | Years remaining to maturity (may be fractional). |
+| `spread_bps` | number | MUST | Make-whole spread over Treasury in basis points. |
+| `treasury_rate` | number | MUST | Reference Treasury yield as a fraction. |
+| `call_price_pct` | number | MAY | Stated call price as a fraction of par (default 1 = par). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `coupon_rate` | number |
-| `lower_cost_redemption_path` | string |
-| `make_whole_discount_rate` | number |
-| `make_whole_premium_cents` | integer (cents) |
-| `make_whole_price_cents` | integer (cents) |
-| `principal_cents` | integer (cents) |
-| `spread_bps` | integer |
-| `stated_call_price_cents` | integer (cents) |
-| `treasury_rate` | number |
+| Field | Type | Description |
+|---|---|---|
+| `principal_cents` | integer (cents) | The principal, echoed. |
+| `coupon_rate` | number | The coupon rate applied. |
+| `treasury_rate` | number | The Treasury rate applied. |
+| `spread_bps` | number | The make-whole spread in basis points, echoed. |
+| `make_whole_discount_rate` | number | Treasury rate plus the spread, as a decimal. |
+| `make_whole_price_cents` | integer (cents) | The make-whole redemption price (PV of coupons and principal, floored at par). |
+| `make_whole_premium_cents` | integer (cents) | The make-whole premium over par. |
+| `stated_call_price_cents` | integer (cents) | The stated call price (principal × call price). |
+| `lower_cost_redemption_path` | enum(redemption_path) | The cheaper redemption route. One of `make_whole`, `stated_call`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Treasury-plus-spread make-whole and call schedule.
-
-Computes a treasury-plus-spread make-whole amount and compares it to stated call-price economics.
+Given `principal_cents`, `coupon_rate`, `treasury_rate`, `spread_bps`, and `remaining_years`, plus optional `call_price_pct` (default 1 = par):
+1. If any of the five required inputs is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. The `make_whole_discount_rate` SHALL be `treasury_rate + spread_bps ÷ 10,000` (basis points to a decimal), at the global 4-decimal precision.
+3. It SHALL present-value each remaining annual coupon (`principal_cents × coupon_rate`, the final period pro-rated for a fractional year) at the make-whole discount rate, and present-value the principal at that rate over the remaining years.
+4. `make_whole_price_cents` SHALL be `max(principal_cents, round(PV of coupons + PV of principal))`; `make_whole_premium_cents` SHALL be `max(0, make_whole_price_cents − principal_cents)`.
+5. `stated_call_price_cents` SHALL be `round(principal_cents × call_price_pct)`.
+6. `lower_cost_redemption_path` SHALL be `make_whole` when the make-whole price is at or below the stated call price, else `stated_call`.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -5772,36 +6611,38 @@ Computes a treasury-plus-spread make-whole amount and compares it to stated call
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.FINANCE.MAKEWHOLE.001` — *Make-whole engine compares treasury-plus-spread and stated call economics*.
+*A $50M 8% note five years from maturity, redeemed against a 4% Treasury plus 50 basis points: the make-whole price of roughly $57.7M exceeds the 103 stated call ($51.5M), so the stated call is the cheaper route.*
 
 **Inputs**
 
 ```json
 {
-  "principal_cents": 100000000,
+  "principal_cents": 5000000000,
   "coupon_rate": 0.08,
-  "treasury_rate": 0.05,
-  "spread_bps": 300,
-  "remaining_years": 1,
-  "call_price_pct": 1.02
+  "treasury_rate": 0.04,
+  "spread_bps": 50,
+  "remaining_years": 5,
+  "call_price_pct": 1.03
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.FINANCE.MAKE_WHOLE_CALL.v1`)**
 
 ```json
 {
-  "principal_cents": 100000000,
+  "principal_cents": 5000000000,
   "coupon_rate": 0.08,
-  "treasury_rate": 0.05,
-  "spread_bps": 300,
-  "make_whole_discount_rate": 0.08,
-  "make_whole_price_cents": 100000000,
-  "make_whole_premium_cents": 0,
-  "stated_call_price_cents": 102000000,
-  "lower_cost_redemption_path": "make_whole"
+  "treasury_rate": 0.04,
+  "spread_bps": 50,
+  "make_whole_discount_rate": 0.045,
+  "make_whole_price_cents": 5768245930,
+  "make_whole_premium_cents": 768245930,
+  "stated_call_price_cents": 5150000000,
+  "lower_cost_redemption_path": "stated_call"
 }
 ```
+
+Precision: The discount rate and input rates are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter); all dollar outputs are exact integer cents.
 
 ## 7. Error semantics
 
@@ -5810,7 +6651,7 @@ Conformance case `CONF.MODEL.FINANCE.MAKEWHOLE.001` — *Make-whole engine compa
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model computes a make-whole redemption price and compares it to the stated call from supplied rate and maturity facts. The exact make-whole formula, the reference security, the day-count, and the redemption conditions are set by the indenture or credit agreement and control over this approximation; the model produces the comparison and the drafting language remains counsel's.
 
 ## 9. Conformance bindings
 
@@ -5828,38 +6669,41 @@ Reference binding `MODEL.FINANCE.MAKE_WHOLE_CALL.v1` · entered the specificatio
 **Gates:** G15, G29
 **Deal contexts:** credit agreement
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Restricted payment, debt, lien, and investment basket capacity.
+Computes the capacity of each negotiated covenant basket — fixed plus grower plus builder plus ratio capacity, less amounts used — and tests whether a proposed use fits, aggregating remaining capacity and counting blocked baskets. It answers, for a borrower or lender working a credit agreement, "how much restricted-payment, debt, lien, or investment capacity is left, and does the proposed action fit?" It totals capacity from supplied basket terms; whether a specific action qualifies under a basket is a credit-agreement construction question.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M184.schema.json`](M184.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `baskets` | object[] | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `baskets` | object[] | MUST | Covenant baskets; each object carries `name`/`type` (strings) and integer-cents `fixed_capacity_cents` (or `opening_capacity_cents`), `grower_basis_cents`, `builder_amount_cents`, `ratio_capacity_cents`, `used_cents`, and `proposed_use_cents`, plus a `grower_pct` (number). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `aggregate_remaining_capacity_cents` | integer (cents) |
-| `basket_count` | integer |
-| `baskets` | object[] |
-| `blocked_basket_count` | integer |
+| Field | Type | Description |
+|---|---|---|
+| `basket_count` | integer | Number of baskets evaluated. |
+| `aggregate_remaining_capacity_cents` | integer (cents) | Sum of remaining capacity across all baskets. |
+| `blocked_basket_count` | integer | Number of baskets whose proposed use exceeds remaining capacity. |
+| `baskets` | object[] | Per-basket result: `{ name, basket_type, total_capacity_cents, used_cents, remaining_capacity_cents, proposed_use_cents, proposed_use_fits }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Restricted payment, debt, lien, and investment basket capacity.
-
-Computes fixed, grower, builder, ratio, used, and remaining basket capacity across credit-agreement baskets.
+Given `baskets` (a list of basket objects, each with fixed/grower/builder/ratio capacity, amount used, and a proposed use):
+1. If `baskets` is empty, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. For each basket, `total_capacity_cents` SHALL be `fixed_capacity + round(grower_basis × grower_pct) + builder_amount + ratio_capacity` (each defaulting to zero when omitted).
+3. `remaining_capacity_cents` SHALL be `total_capacity_cents − used_cents`; `proposed_use_fits` SHALL be true iff `proposed_use_cents ≤ remaining_capacity_cents`.
+4. `basket_count` SHALL be the number of baskets; `aggregate_remaining_capacity_cents` SHALL be the sum of the per-basket remaining capacities.
+5. `blocked_basket_count` SHALL be the number of baskets whose proposed use does not fit.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -5870,7 +6714,7 @@ Computes fixed, grower, builder, ratio, used, and remaining basket capacity acro
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.FINANCE.BASKETS.001` — *Covenant basket engine computes remaining capacity and blocked proposed uses*.
+*Two baskets: a restricted-payments basket with $1.8M of capacity ($1.6M free) that accommodates a $1.0M dividend, and a permitted-debt basket with $1.1M free that cannot absorb a proposed $2.0M draw — one basket blocked, $2.7M free in aggregate.*
 
 **Inputs**
 
@@ -5878,52 +6722,58 @@ Conformance case `CONF.MODEL.FINANCE.BASKETS.001` — *Covenant basket engine co
 {
   "baskets": [
     {
-      "name": "Investment basket",
-      "fixed_capacity_cents": 1000000,
-      "grower_basis_cents": 10000000,
-      "grower_pct": 0.1,
-      "used_cents": 500000,
-      "proposed_use_cents": 1000000
+      "name": "Restricted Payments",
+      "type": "restricted_payments",
+      "fixed_capacity_cents": 500000000,
+      "grower_basis_cents": 2000000000,
+      "grower_pct": 0.5,
+      "builder_amount_cents": 300000000,
+      "used_cents": 200000000,
+      "proposed_use_cents": 1000000000
     },
     {
-      "name": "Restricted payment basket",
-      "fixed_capacity_cents": 500000,
-      "used_cents": 400000,
-      "proposed_use_cents": 200000
+      "name": "Permitted Debt",
+      "type": "debt",
+      "fixed_capacity_cents": 1000000000,
+      "ratio_capacity_cents": 500000000,
+      "used_cents": 400000000,
+      "proposed_use_cents": 2000000000
     }
   ]
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.FINANCE.COVENANT_BASKETS.v1`)**
 
 ```json
 {
   "basket_count": 2,
-  "aggregate_remaining_capacity_cents": 1600000,
+  "aggregate_remaining_capacity_cents": 2700000000,
   "blocked_basket_count": 1,
   "baskets": [
     {
-      "name": "Investment basket",
-      "basket_type": "general",
-      "total_capacity_cents": 2000000,
-      "used_cents": 500000,
-      "remaining_capacity_cents": 1500000,
-      "proposed_use_cents": 1000000,
+      "name": "Restricted Payments",
+      "basket_type": "restricted_payments",
+      "total_capacity_cents": 1800000000,
+      "used_cents": 200000000,
+      "remaining_capacity_cents": 1600000000,
+      "proposed_use_cents": 1000000000,
       "proposed_use_fits": true
     },
     {
-      "name": "Restricted payment basket",
-      "basket_type": "general",
-      "total_capacity_cents": 500000,
-      "used_cents": 400000,
-      "remaining_capacity_cents": 100000,
-      "proposed_use_cents": 200000,
+      "name": "Permitted Debt",
+      "basket_type": "debt",
+      "total_capacity_cents": 1500000000,
+      "used_cents": 400000000,
+      "remaining_capacity_cents": 1100000000,
+      "proposed_use_cents": 2000000000,
       "proposed_use_fits": false
     }
   ]
 }
 ```
+
+Precision: All capacity outputs are exact integer cents (see the Conventions chapter); no rounding beyond the grower-capacity product.
 
 ## 7. Error semantics
 
@@ -5932,7 +6782,7 @@ Conformance case `CONF.MODEL.FINANCE.BASKETS.001` — *Covenant basket engine co
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model totals covenant-basket capacity and tests proposed uses from supplied basket terms. Whether a specific payment, debt, lien, or investment qualifies under a given basket, how the grower and builder amounts are defined, and the ratio-capacity mechanics are credit-agreement construction questions for counsel; the model computes the capacity arithmetic and renders no qualification opinion.
 
 ## 9. Conformance bindings
 
@@ -6165,52 +7015,58 @@ Reference binding `MODEL.TAX.382.NOL_LIMIT.v1` · entered the specification at i
 **Gates:** G30, G2
 **Deal contexts:** real estate M&A
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Asset-deal step-up, entity-deal basis, transfer-tax incidence, debt assumability, and in-place lease treatment.
+Compares the asset-deal and entity-deal consequences for a real-estate-heavy target — the buyer basis and step-up each form delivers, the transfer-tax cost the asset form triggers, and whether the G30 real-estate overlay applies — and reports debt-assumability and in-place-lease treatment. It answers, when a target is real-estate-heavy, "what does each deal form do to basis, step-up value, and transfer tax?" It computes the comparison from supplied values and rates; the binding tax structuring is the advisor's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M187.schema.json`](M187.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `enterprise_value_cents` | integer (cents) | MUST |
-| `real_property_value_cents` | integer (cents) | MUST |
-| `debt_assumable` | boolean | MAY |
-| `entity_carried_basis_cents` | integer (cents) | MAY |
-| `step_up_benefit_rate` | number | MAY |
-| `transfer_tax_rate` | number | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `enterprise_value_cents` | integer (cents) | MUST | Total enterprise value of the target. |
+| `real_property_value_cents` | integer (cents) | MUST | Value of the real property inside the target. |
+| `debt_assumable` | boolean | MAY | Whether existing property debt is assumable; drives debt_assumability. |
+| `entity_carried_basis_cents` | integer (cents) | MAY | The target's carried (inside) tax basis in an entity deal (default 0). |
+| `in_place_lease_treatment` | string | MAY | How in-place leases are treated on transfer (default: assumption/assignment to confirm). |
+| `step_up_benefit_rate` | number | MAY | The present-value benefit rate applied to the step-up (default 0). |
+| `transfer_tax_rate` | number | MAY | The real-estate transfer-tax rate applied in an asset deal, as a fraction (default 0). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `asset_deal_buyer_basis_cents` | integer (cents) |
-| `buyer_step_up_cents` | integer (cents) |
-| `buyer_step_up_pv_benefit_cents` | integer (cents) |
-| `debt_assumability` | string |
-| `enterprise_value_cents` | integer (cents) |
-| `entity_carried_basis_cents` | integer (cents) |
-| `entity_deal_buyer_outside_basis_cents` | integer (cents) |
-| `g30_real_estate_overlay_triggered` | boolean |
-| `in_place_lease_treatment` | string |
-| `real_estate_pct_of_ev` | number |
-| `real_property_value_cents` | integer (cents) |
-| `transfer_tax_cents` | integer (cents) |
-| `transfer_tax_rate` | number |
+| Field | Type | Description |
+|---|---|---|
+| `enterprise_value_cents` | integer (cents) | Enterprise value, echoed. |
+| `real_property_value_cents` | integer (cents) | Real-property value, echoed. |
+| `real_estate_pct_of_ev` | number | Real property as a fraction of enterprise value. |
+| `g30_real_estate_overlay_triggered` | boolean | Whether the G30 real-estate overlay applies. |
+| `asset_deal_buyer_basis_cents` | integer (cents) | Buyer basis in an asset deal (the enterprise value). |
+| `entity_deal_buyer_outside_basis_cents` | integer (cents) | Buyer outside basis in an entity deal (the enterprise value). |
+| `entity_carried_basis_cents` | integer (cents) | The entity's carried inside basis, echoed. |
+| `buyer_step_up_cents` | integer (cents) | Step-up an asset deal delivers over the carried basis. |
+| `buyer_step_up_pv_benefit_cents` | integer (cents) | Present-value benefit of the step-up at the supplied rate. |
+| `transfer_tax_rate` | number | The transfer-tax rate applied. |
+| `transfer_tax_cents` | integer (cents) | Transfer tax on the real property in an asset deal. |
+| `debt_assumability` | enum(debt_assumability) | Whether property debt is assumable, needs consent/refinance, or was not supplied. One of `not_supplied`, `assumable_on_supplied_facts`, `consent_or_refinance_required`. |
+| `in_place_lease_treatment` | string | The in-place-lease treatment on transfer. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Asset-deal step-up, entity-deal basis, transfer-tax incidence, debt assumability, and in-place lease treatment.
-
-Computes real-estate percentage of EV, asset/entity basis paths, step-up, transfer tax, debt assumability, and lease treatment flags.
+Given `enterprise_value_cents` and `real_property_value_cents`, plus optional `entity_carried_basis_cents` (default 0), `transfer_tax_rate` (default 0), `step_up_benefit_rate` (default 0), `debt_assumable`, `in_place_lease_treatment`:
+1. If either required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `real_estate_pct_of_ev` SHALL be `real_property_value_cents ÷ enterprise_value_cents`; `g30_real_estate_overlay_triggered` SHALL be true iff it is at or above the overlay threshold (constants: G30 real-estate overlay trigger).
+3. `asset_deal_buyer_basis_cents` and `entity_deal_buyer_outside_basis_cents` SHALL both echo the enterprise value; `buyer_step_up_cents` SHALL be `max(0, enterprise_value_cents − entity_carried_basis_cents)`; `buyer_step_up_pv_benefit_cents` SHALL be `round(buyer_step_up_cents × step_up_benefit_rate)`.
+4. `transfer_tax_cents` SHALL be `round(real_property_value_cents × transfer_tax_rate)` (the asset-form transfer-tax cost).
+5. `debt_assumability` and `in_place_lease_treatment` SHALL report the supplied posture (or `not_supplied` / a default note).
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| G30 real-estate overlay trigger | 25% of enterprise value (0.25) | table (jurisdictional) | DEFINITIVE G30 gate — Real Estate & Asset-Class Overlays trigger | real estate ≥ 25% of enterprise value | DEFINITIVE v1.1 | on gate-framework revision |
 
 
 **Authorities**
@@ -6223,40 +7079,42 @@ Computes real-estate percentage of EV, asset/entity basis paths, step-up, transf
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RE.ASSETENTITY.001` — *RE-heavy asset-vs-entity election computes overlay, tax, and step-up mechanics*.
+*A $30M target with $12M of real property (40% of value, tripping the G30 overlay): an asset deal gives the buyer a $10M step-up worth ~$2.5M in present-value benefit but costs $168k in transfer tax on the real property, versus a carryover-basis entity deal.*
 
 **Inputs**
 
 ```json
 {
-  "enterprise_value_cents": 100000000,
-  "real_property_value_cents": 30000000,
-  "entity_carried_basis_cents": 60000000,
-  "transfer_tax_rate": 0.01,
-  "step_up_benefit_rate": 0.12,
-  "debt_assumable": false
+  "enterprise_value_cents": 3000000000,
+  "real_property_value_cents": 1200000000,
+  "entity_carried_basis_cents": 2000000000,
+  "transfer_tax_rate": 0.014,
+  "step_up_benefit_rate": 0.25,
+  "debt_assumable": true
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RE.ASSET_ENTITY.ELECTION.v1`)**
 
 ```json
 {
-  "enterprise_value_cents": 100000000,
-  "real_property_value_cents": 30000000,
-  "real_estate_pct_of_ev": 0.3,
+  "enterprise_value_cents": 3000000000,
+  "real_property_value_cents": 1200000000,
+  "real_estate_pct_of_ev": 0.4,
   "g30_real_estate_overlay_triggered": true,
-  "asset_deal_buyer_basis_cents": 100000000,
-  "entity_deal_buyer_outside_basis_cents": 100000000,
-  "entity_carried_basis_cents": 60000000,
-  "buyer_step_up_cents": 40000000,
-  "buyer_step_up_pv_benefit_cents": 4800000,
-  "transfer_tax_rate": 0.01,
-  "transfer_tax_cents": 300000,
-  "debt_assumability": "consent_or_refinance_required",
+  "asset_deal_buyer_basis_cents": 3000000000,
+  "entity_deal_buyer_outside_basis_cents": 3000000000,
+  "entity_carried_basis_cents": 2000000000,
+  "buyer_step_up_cents": 1000000000,
+  "buyer_step_up_pv_benefit_cents": 250000000,
+  "transfer_tax_rate": 0.014,
+  "transfer_tax_cents": 16800000,
+  "debt_assumability": "assumable_on_supplied_facts",
   "in_place_lease_treatment": "assumption_or_assignment_to_confirm"
 }
 ```
+
+Precision: Monetary outputs are exact integer cents; the real-estate share and transfer-tax rate are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -6265,7 +7123,7 @@ Conformance case `CONF.MODEL.RE.ASSETENTITY.001` — *RE-heavy asset-vs-entity e
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model compares the asset- and entity-deal consequences from supplied values and rates. The binding transfer-tax incidence, the availability and value of a step-up, the debt-assumption terms, and the lease treatment are legal and tax determinations for the parties' advisors; the model computes the comparison and renders no structuring opinion.
 
 ## 9. Conformance bindings
 
@@ -6283,47 +7141,52 @@ Reference binding `MODEL.RE.ASSET_ENTITY.ELECTION.v1` · entered the specificati
 **Gates:** G30, G2
 **Deal contexts:** real estate M&A · operating business with real property
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-NOI/cap-rate real-estate value, residual operating-business value, and 1060 Class V/VI/VII reconciliation.
+Splits a mixed real-estate-and-operating-business purchase price into its real-estate value (NOI capitalized at the supplied cap rate, capped at the price) and the residual operating-business value, then reconciles the split into §1060 Class V, VI, and VII. It answers, for a deal with both a building and a business inside it, "how much of the price is the real estate versus the operating business, and how does that map to the tax classes?" It computes the bifurcation from supplied values; the valuations and classifications are the advisors' calls.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M188.schema.json`](M188.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `cap_rate` | number | MUST |
-| `enterprise_value_cents` | integer (cents) | MUST |
-| `noi_cents` | integer (cents) | MUST |
-| `class_vi_intangibles_cents` | integer (cents) | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `cap_rate` | number | MUST | The capitalization rate applied to NOI (a fraction, e.g. 0.08). |
+| `enterprise_value_cents` | integer (cents) | MUST | Total purchase price to be bifurcated. |
+| `noi_cents` | integer (cents) | MUST | Stabilized net operating income of the real property. |
+| `class_vi_intangibles_cents` | integer (cents) | MAY | Identified Class VI §197 intangible value (default 0). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `cap_rate` | number |
-| `class_v_real_property_and_tangible_cents` | integer (cents) |
-| `class_vi_section_197_intangibles_cents` | integer (cents) |
-| `class_vii_goodwill_going_concern_cents` | integer (cents) |
-| `enterprise_value_cents` | integer (cents) |
-| `form_8594_reconciliation_total_cents` | integer (cents) |
-| `noi_cents` | integer (cents) |
-| `operating_business_residual_value_cents` | integer (cents) |
-| `real_estate_value_cents` | integer (cents) |
-| `uncapped_real_estate_value_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `enterprise_value_cents` | integer (cents) | The price, echoed. |
+| `noi_cents` | integer (cents) | The NOI, echoed. |
+| `cap_rate` | number | The cap rate applied. |
+| `uncapped_real_estate_value_cents` | integer (cents) | NOI capitalized at the cap rate, before the price cap. |
+| `real_estate_value_cents` | integer (cents) | Real-estate value after the price cap (Class V). |
+| `operating_business_residual_value_cents` | integer (cents) | Price remaining after the real estate. |
+| `class_v_real_property_and_tangible_cents` | integer (cents) | Class V real property and tangible allocation. |
+| `class_vi_section_197_intangibles_cents` | integer (cents) | Class VI §197 intangibles allocation. |
+| `class_vii_goodwill_going_concern_cents` | integer (cents) | Class VII goodwill/going-concern residual. |
+| `form_8594_reconciliation_total_cents` | integer (cents) | Sum of the three classes (reconciles to the price). |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-NOI/cap-rate real-estate value, residual operating-business value, and 1060 Class V/VI/VII reconciliation.
-
-Bifurcates enterprise value into NOI/cap-rate real estate value, operating-business residual, and Form 8594 Class V/VI/VII reconciliation.
+Given `enterprise_value_cents`, `noi_cents`, and `cap_rate`, plus optional `class_vi_intangibles_cents` (default 0):
+1. If any required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `uncapped_real_estate_value_cents` SHALL be `round(noi_cents ÷ cap_rate)`; `real_estate_value_cents` SHALL be `min(enterprise_value_cents, uncapped_real_estate_value_cents)` and fills Class V.
+3. `operating_business_residual_value_cents` SHALL be `max(0, enterprise_value_cents − real_estate_value_cents)`.
+4. `class_vi_section_197_intangibles_cents` SHALL be `min(class_vi_intangibles_cents, residual)`; `class_vii_goodwill_going_concern_cents` SHALL be the remaining residual, following the residual-method ordering (constants: §1060 residual-method class ordering).
+5. `form_8594_reconciliation_total_cents` SHALL be the sum of Class V, VI, and VII.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| §1060 residual-method class ordering | Class V (real property/tangible) → Class VI (§197 intangibles) → Class VII (goodwill and going-concern value) | table (jurisdictional) | Treas. Reg. § 1.1060-1(c); § 1.338-6(b) | § 1.338-6(b)(2) (residual-method ordering) | current (Treas. Reg. as amended) | on Treasury amendment |
 
 
 **Authorities**
@@ -6335,35 +7198,37 @@ Bifurcates enterprise value into NOI/cap-rate real estate value, operating-busin
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RE.BIFURCATION.001` — *RE operating-business bifurcation reconciles NOI value to Class V/VI/VII*.
+*A $40M operating-business-with-real-estate deal: $2.4M of NOI at an 8% cap values the real property at $30M (Class V), $5M of identified intangibles fills Class VI, and the $5M residual becomes Class VII goodwill — Form 8594 reconciles to $40M.*
 
 **Inputs**
 
 ```json
 {
-  "enterprise_value_cents": 100000000,
-  "noi_cents": 6000000,
-  "cap_rate": 0.075,
-  "class_vi_intangibles_cents": 15000000
+  "enterprise_value_cents": 4000000000,
+  "noi_cents": 240000000,
+  "cap_rate": 0.08,
+  "class_vi_intangibles_cents": 500000000
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RE.OPBUS.BIFURCATION.v1`)**
 
 ```json
 {
-  "enterprise_value_cents": 100000000,
-  "noi_cents": 6000000,
-  "cap_rate": 0.075,
-  "uncapped_real_estate_value_cents": 80000000,
-  "real_estate_value_cents": 80000000,
-  "operating_business_residual_value_cents": 20000000,
-  "class_v_real_property_and_tangible_cents": 80000000,
-  "class_vi_section_197_intangibles_cents": 15000000,
-  "class_vii_goodwill_going_concern_cents": 5000000,
-  "form_8594_reconciliation_total_cents": 100000000
+  "enterprise_value_cents": 4000000000,
+  "noi_cents": 240000000,
+  "cap_rate": 0.08,
+  "uncapped_real_estate_value_cents": 3000000000,
+  "real_estate_value_cents": 3000000000,
+  "operating_business_residual_value_cents": 1000000000,
+  "class_v_real_property_and_tangible_cents": 3000000000,
+  "class_vi_section_197_intangibles_cents": 500000000,
+  "class_vii_goodwill_going_concern_cents": 500000000,
+  "form_8594_reconciliation_total_cents": 4000000000
 }
 ```
+
+Precision: All values are exact integer cents; the cap rate echoes at the global 4-decimal precision (see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -6372,7 +7237,7 @@ Conformance case `CONF.MODEL.RE.BIFURCATION.001` — *RE operating-business bifu
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model bifurcates a mixed price into real-estate and operating-business value and reconciles it to the §1060 classes from supplied figures. Whether the NOI, cap rate, and intangible values are supportable, and the binding Form 8594 positions, are determinations for the parties' appraisers and tax advisors; the model computes the split and renders no valuation or classification opinion.
 
 ## 9. Conformance bindings
 
@@ -6390,43 +7255,49 @@ Reference binding `MODEL.RE.OPBUS.BIFURCATION.v1` · entered the specification a
 **Gates:** G30
 **Deal contexts:** real estate diligence
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Occupancy, WALT, expiry buckets, tenant concentration, market-rent delta, and stabilized rent.
+Normalizes a rent roll into the metrics that drive an income-property read — occupancy by count and by area, total and occupied rent, weighted-average lease term (WALT), and top-tenant concentration — and flags single-tenant concentration above the market threshold. It answers, in real-estate diligence, "how full is the property, how long is the income locked in, and how exposed is it to one tenant?" It computes the metrics from a supplied rent roll.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M189.schema.json`](M189.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `rent_roll` | object[] | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `rent_roll` | object[] | MUST | Tenant rows; each carries `tenant` (string), `annual_rent_cents` (integer cents), `square_feet`/`area` (number), `lease_months_remaining` (number) or `lease_expiry_date` (ISO date), and `occupied` (boolean). |
+| `as_of_date` | string (ISO date) | MAY | The as-of date used to compute months remaining from lease-expiry dates. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `annual_rent_cents` | integer (cents) |
-| `area_occupancy_pct` | number |
-| `occupancy_pct` | number |
-| `occupied_annual_rent_cents` | integer (cents) |
-| `occupied_tenant_count` | integer |
-| `tenant_concentration_flag` | boolean |
-| `tenant_count` | integer |
-| `top_tenant_rent_pct` | number |
-| `walt_months` | integer |
+| Field | Type | Description |
+|---|---|---|
+| `tenant_count` | integer | Number of tenant rows. |
+| `occupied_tenant_count` | integer | Number of occupied tenants. |
+| `annual_rent_cents` | integer (cents) | Total annual rent across all rows. |
+| `occupied_annual_rent_cents` | integer (cents) | Annual rent from occupied tenants. |
+| `occupancy_pct` | number | null | Occupied tenants ÷ total tenants. |
+| `area_occupancy_pct` | number | null | Occupied area ÷ total area, or null. |
+| `walt_months` | number | null | Rent-weighted average lease term in months, or null. |
+| `top_tenant_rent_pct` | number | null | Largest tenant's rent ÷ total rent, or null. |
+| `tenant_concentration_flag` | boolean | Whether one tenant exceeds the concentration threshold. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Occupancy, WALT, expiry buckets, tenant concentration, market-rent delta, and stabilized rent.
-
-Normalizes rent roll into occupancy, WALT, rent, and tenant-concentration metrics.
+Given `rent_roll` (a list of tenant rows) and optional `as_of_date`:
+1. If `rent_roll` is empty, the implementation SHALL return `status: "needs_inputs"` naming `rent_roll`.
+2. For each tenant it SHALL read annual rent, area, and months remaining (from the field or computed from a lease-expiry date and the as-of date), and treat a tenant as occupied when marked so or when annual rent is positive.
+3. `occupancy_pct` SHALL be occupied tenants ÷ tenants; `area_occupancy_pct` SHALL be occupied area ÷ total area (or null).
+4. `walt_months` SHALL be the rent-weighted average of the occupied tenants' months remaining (occupied-rent-weighted), or null.
+5. `top_tenant_rent_pct` SHALL be the largest single tenant's rent ÷ total rent; `tenant_concentration_flag` SHALL be true iff it exceeds the single-tenant concentration threshold (constants: single-tenant concentration threshold).
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| Single-tenant concentration threshold | 20% of total rent (0.20) | SHOULD (cited median) | Real estate industry practice — single-tenant concentration flag (2024) | single tenant > 20% of total rent | 2024 industry practice | on industry-practice review |
 
 
 **Authorities**
@@ -6437,7 +7308,7 @@ Normalizes rent roll into occupancy, WALT, rent, and tenant-concentration metric
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RE.RENT_ROLL.001` — *Rent roll normalizes occupancy, WALT, and concentration*.
+*A four-tenant office rent roll: three tenants occupied and one vacant suite, $1.20M in occupied rent, an anchor tenant at 50% of rent (over the concentration threshold), and a WALT weighted by the occupied rent.*
 
 **Inputs**
 
@@ -6445,45 +7316,53 @@ Conformance case `CONF.MODEL.RE.RENT_ROLL.001` — *Rent roll normalizes occupan
 {
   "rent_roll": [
     {
-      "tenant": "A",
-      "annual_rent_cents": 6000000,
-      "square_feet": 6000,
+      "tenant": "Anchor Corp",
+      "annual_rent_cents": 60000000,
+      "square_feet": 20000,
+      "lease_months_remaining": 72,
+      "occupied": true
+    },
+    {
+      "tenant": "Suite 200",
+      "annual_rent_cents": 36000000,
+      "square_feet": 12000,
       "lease_months_remaining": 36,
       "occupied": true
     },
     {
-      "tenant": "B",
-      "annual_rent_cents": 3000000,
-      "square_feet": 3000,
+      "tenant": "Suite 300",
+      "annual_rent_cents": 24000000,
+      "square_feet": 8000,
       "lease_months_remaining": 24,
       "occupied": true
     },
     {
-      "tenant": "Vacant",
+      "tenant": "Suite 400 (vacant)",
       "annual_rent_cents": 0,
-      "square_feet": 1000,
-      "lease_months_remaining": 0,
+      "square_feet": 8000,
       "occupied": false
     }
   ]
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RE.RENT_ROLL.NORMALIZE.v1`)**
 
 ```json
 {
-  "tenant_count": 3,
-  "occupied_tenant_count": 2,
-  "annual_rent_cents": 9000000,
-  "occupied_annual_rent_cents": 9000000,
-  "occupancy_pct": 0.6667,
-  "area_occupancy_pct": 0.9,
-  "walt_months": 32,
-  "top_tenant_rent_pct": 0.6667,
+  "tenant_count": 4,
+  "occupied_tenant_count": 3,
+  "annual_rent_cents": 120000000,
+  "occupied_annual_rent_cents": 120000000,
+  "occupancy_pct": 0.75,
+  "area_occupancy_pct": 0.8333,
+  "walt_months": 51.6,
+  "top_tenant_rent_pct": 0.5,
   "tenant_concentration_flag": true
 }
 ```
+
+Precision: Occupancy and concentration ratios round per the global rule (half-even to 4 decimals — see the Conventions chapter); WALT is in months at 4 decimals; rents are exact integer cents.
 
 ## 7. Error semantics
 
@@ -6492,7 +7371,7 @@ Conformance case `CONF.MODEL.RE.RENT_ROLL.001` — *Rent roll normalizes occupan
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model normalizes a rent roll into occupancy, WALT, and concentration metrics from supplied rows. The creditworthiness of the tenants, the collectability of the rent, and the market-rent read are underwriting judgments for the buyer and its advisers; the model computes the metrics and flags concentration and renders no underwriting conclusion.
 
 ## 9. Conformance bindings
 
@@ -6510,48 +7389,51 @@ Reference binding `MODEL.RE.RENT_ROLL.NORMALIZE.v1` · entered the specification
 **Gates:** G30
 **Deal contexts:** real estate valuation
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Effective gross income less operating expenses to NOI, value equals NOI divided by cap rate, and implied cap rate. Market cap rate is pass-through input.
+Bridges from a property's income to value and back — normalized NOI (effective gross income less operating expenses and a replacement reserve), the value that NOI supports at the market cap rate, and the cap rate a supplied purchase price implies. It answers, in a property valuation, "what NOI does this property produce, what value does the market cap rate put on it, and what cap rate is the ask really at?" The market cap rate is a pass-through input, not a model output.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M190.schema.json`](M190.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `cap_rate` | number | MUST |
-| `effective_gross_income_cents` | integer (cents) | MUST |
-| `operating_expenses_cents` | integer (cents) | MUST |
-| `market_cap_rate_from_pass_through_source` | boolean | MAY |
-| `purchase_price_cents` | integer (cents) | MAY |
-| `replacement_reserve_cents` | integer (cents) | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `cap_rate` | number | MUST | The market capitalization rate (a fraction); a pass-through input. |
+| `effective_gross_income_cents` | integer (cents) | MUST | Effective gross income (gross potential less vacancy/credit loss). |
+| `operating_expenses_cents` | integer (cents) | MUST | Operating expenses. |
+| `market_cap_rate_from_pass_through_source` | boolean | MAY | Whether the cap rate came from a pass-through market-data source; suppresses the pass-through-required flag. |
+| `purchase_price_cents` | integer (cents) | MAY | A purchase price to test; enables the implied cap rate. |
+| `replacement_reserve_cents` | integer (cents) | MAY | Replacement reserve deducted from NOI (default 0). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `cap_rate` | number |
-| `effective_gross_income_cents` | integer (cents) |
-| `implied_cap_rate` | number |
-| `normalized_noi_cents` | integer (cents) |
-| `operating_expenses_cents` | integer (cents) |
-| `pass_through_market_rate_required` | boolean |
-| `purchase_price_cents` | integer (cents) |
-| `replacement_reserve_cents` | integer (cents) |
-| `value_from_cap_rate_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `effective_gross_income_cents` | integer (cents) | EGI, echoed. |
+| `operating_expenses_cents` | integer (cents) | Operating expenses, echoed. |
+| `replacement_reserve_cents` | integer (cents) | Replacement reserve, echoed. |
+| `normalized_noi_cents` | integer (cents) | Normalized NOI (EGI less expenses and reserve). |
+| `cap_rate` | number | The market cap rate applied. |
+| `value_from_cap_rate_cents` | integer (cents) | null | Value the NOI supports at the cap rate, or null. |
+| `purchase_price_cents` | integer (cents) | null | The purchase price tested, echoed, or null. |
+| `implied_cap_rate` | number | null | Cap rate implied by the purchase price, or null. |
+| `pass_through_market_rate_required` | boolean | Whether a pass-through market cap rate is still required. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Effective gross income less operating expenses to NOI, value equals NOI divided by cap rate, and implied cap rate. Market cap rate is pass-through input.
-
-Computes normalized NOI, cap-rate value, implied cap rate, and pass-through market-rate dependency from supplied inputs.
+Given `effective_gross_income_cents`, `operating_expenses_cents`, and `cap_rate`, plus optional `purchase_price_cents`, `replacement_reserve_cents` (default 0), `market_cap_rate_from_pass_through_source`:
+1. If any required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `normalized_noi_cents` SHALL be `effective_gross_income_cents − operating_expenses_cents − replacement_reserve_cents`.
+3. `value_from_cap_rate_cents` SHALL be `round(normalized_noi_cents ÷ cap_rate)` when the cap rate is positive, else null.
+4. `implied_cap_rate` SHALL be `normalized_noi_cents ÷ purchase_price_cents` at the global 4-decimal precision when a purchase price is supplied, else null.
+5. `pass_through_market_rate_required` SHALL be true unless the market cap rate is explicitly flagged as sourced from a pass-through provider.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -6562,36 +7444,38 @@ Computes normalized NOI, cap-rate value, implied cap rate, and pass-through mark
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RE.NOI.001` — *NOI and cap-rate bridge computes normalized NOI, value, and implied cap*.
+*A property with $5M of effective gross income, $1.8M of operating expenses, and a $200k replacement reserve normalizes to $3M NOI; at a 6.5% market cap rate that supports about a $46.2M value, and against a $48M asking price the implied cap rate is 6.25%.*
 
 **Inputs**
 
 ```json
 {
-  "effective_gross_income_cents": 10000000,
-  "operating_expenses_cents": 3500000,
-  "replacement_reserve_cents": 500000,
-  "cap_rate": 0.08,
-  "purchase_price_cents": 80000000,
+  "effective_gross_income_cents": 500000000,
+  "operating_expenses_cents": 180000000,
+  "cap_rate": 0.065,
+  "purchase_price_cents": 4800000000,
+  "replacement_reserve_cents": 20000000,
   "market_cap_rate_from_pass_through_source": true
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RE.NOI.CAP_RATE_BRIDGE.v1`)**
 
 ```json
 {
-  "effective_gross_income_cents": 10000000,
-  "operating_expenses_cents": 3500000,
-  "replacement_reserve_cents": 500000,
-  "normalized_noi_cents": 6000000,
-  "cap_rate": 0.08,
-  "value_from_cap_rate_cents": 75000000,
-  "purchase_price_cents": 80000000,
-  "implied_cap_rate": 0.075,
+  "effective_gross_income_cents": 500000000,
+  "operating_expenses_cents": 180000000,
+  "replacement_reserve_cents": 20000000,
+  "normalized_noi_cents": 300000000,
+  "cap_rate": 0.065,
+  "value_from_cap_rate_cents": 4615384615,
+  "purchase_price_cents": 4800000000,
+  "implied_cap_rate": 0.0625,
   "pass_through_market_rate_required": false
 }
 ```
+
+Precision: NOI and value are exact integer cents; cap rates round per the global rule (half-even to 4 decimals — see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -6600,7 +7484,7 @@ Conformance case `CONF.MODEL.RE.NOI.001` — *NOI and cap-rate bridge computes n
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model bridges NOI to value and back from supplied income and a cap rate. The market cap rate itself is a pass-through input the model does not produce, and the appraised value and expense normalization are the appraiser's and accountant's determinations; the model computes the arithmetic bridge and renders no value opinion.
 
 ## 9. Conformance bindings
 
@@ -6618,45 +7502,54 @@ Reference binding `MODEL.RE.NOI.CAP_RATE_BRIDGE.v1` · entered the specification
 **Gates:** G30, G19
 **Deal contexts:** real estate M&A
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Jurisdictional CITT tax base, rate, aggregation window, and exemption checks. Contested state positions route to specialist review.
+Computes the state real-estate transfer / controlling-interest transfer tax for a jurisdiction with a tabled rate — the tax base (fair value times the interest transferred), the tax at the state rate, and any controlling-interest aggregation window — and routes a contested state position when no rate is tabled. It answers, in a real-estate or entity deal, "what transfer tax does this state charge on this transfer, and over what aggregation window?" It computes the tax from the state table; contested or untabled positions route to a specialist.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M191.schema.json`](M191.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `fmv_real_property_cents` | integer (cents) | MUST |
-| `interest_transferred_pct` | number | MUST |
-| `jurisdiction` | string | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `fmv_real_property_cents` | integer (cents) | MUST | Fair market value of the real property. |
+| `interest_transferred_pct` | number | MUST | Fraction of the interest transferred (0–1). |
+| `jurisdiction` | string (US state code) | MUST | The taxing jurisdiction (state/DC code). |
+| `exemption_applies` | boolean | MAY | Whether a transfer-tax exemption applies (default false); zeroes the tax. |
+| `transfer_tax_rate` | number | MAY | An override transfer-tax rate as a fraction; defaults to the state table. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `aggregation_window_months` | null |
-| `contested_state_position_handoff_required` | boolean |
-| `exemption_applies` | boolean |
-| `fmv_real_property_cents` | integer (cents) |
-| `interest_transferred_pct` | number |
-| `jurisdiction` | string |
-| `tax_base_cents` | integer (cents) |
-| `transfer_tax_cents` | integer (cents) |
-| `transfer_tax_rate` | number |
+| Field | Type | Description |
+|---|---|---|
+| `jurisdiction` | string (US state code) | The jurisdiction, upper-cased. |
+| `fmv_real_property_cents` | integer (cents) | The fair market value, echoed. |
+| `interest_transferred_pct` | number | The interest transferred, as a fraction. |
+| `transfer_tax_rate` | number | The transfer-tax rate applied. |
+| `tax_base_cents` | integer (cents) | The tax base (value times interest transferred). |
+| `transfer_tax_cents` | integer (cents) | The transfer tax (zero when exempt). |
+| `exemption_applies` | boolean | Whether an exemption applied. |
+| `aggregation_window_months` | integer | null | The controlling-interest aggregation window in months, or null. |
+| `contested_state_position_handoff_required` | boolean | True when the state is untabled and no rate was supplied. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Jurisdictional CITT tax base, rate, aggregation window, and exemption checks. Contested state positions route to specialist review.
-
-Computes real-property transfer or controlling-interest tax base, rate, aggregation window, exemption, and specialist handoff flag.
+Given `jurisdiction`, `fmv_real_property_cents`, and `interest_transferred_pct` (a fraction), plus optional `transfer_tax_rate`, `exemption_applies` (default false):
+1. If any required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. It SHALL upper-case the jurisdiction and select the transfer-tax rate: the supplied rate, else the tabled state rate (constants: state transfer-tax rate table), else zero.
+3. `tax_base_cents` SHALL be `round(fmv_real_property_cents × interest_transferred_pct)`.
+4. `transfer_tax_cents` SHALL be 0 when an exemption applies, else `round(tax_base_cents × transfer_tax_rate)`.
+5. `aggregation_window_months` SHALL be the tabled controlling-interest aggregation window for the state, or null (constants: controlling-interest aggregation windows).
+6. `contested_state_position_handoff_required` SHALL be true iff no rate was supplied and the state is not in the rate table.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| State transfer-tax rate table | CT 1.11%, ME 0.44%, WA 1.78%, DC 1.45%, MD 1.00%, NY 0.65% (default rates) | table (jurisdictional) | CT § 12-638; WA RCW 82.45; MD Tax-Prop § 12-117; NY Publication 576; DC/ME transfer-tax statutes | per-state default controlling-interest/deed transfer-tax rates | 2024 rate table | on state-rate review |
+| Controlling-interest aggregation windows | MD 12 months, WA 36 months | table (jurisdictional) | MD Tax-Prop § 12-117; WA RCW 82.45 | controlling-interest acting-in-concert aggregation windows | 2024 table | on state-rate review |
 
 
 **Authorities**
@@ -6670,33 +7563,36 @@ Computes real-property transfer or controlling-interest tax base, rate, aggregat
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RE.CITT.001` — *CITT model computes jurisdictional transfer tax*.
+*A 100% controlling-interest transfer of a $10M Washington property: at Washington's default 1.78% REET rate the base is the full $10M and the transfer tax is $178,000, with a 36-month controlling-interest aggregation window.*
 
 **Inputs**
 
 ```json
 {
-  "jurisdiction": "CT",
-  "fmv_real_property_cents": 1000000,
-  "interest_transferred_pct": 0.8
+  "jurisdiction": "WA",
+  "fmv_real_property_cents": 1000000000,
+  "interest_transferred_pct": 1,
+  "exemption_applies": false
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RE.CITT.TRANSFER_TAX.v1`)**
 
 ```json
 {
-  "jurisdiction": "CT",
-  "fmv_real_property_cents": 1000000,
-  "interest_transferred_pct": 0.8,
-  "transfer_tax_rate": 0.0111,
-  "tax_base_cents": 800000,
-  "transfer_tax_cents": 8880,
+  "jurisdiction": "WA",
+  "fmv_real_property_cents": 1000000000,
+  "interest_transferred_pct": 1,
+  "transfer_tax_rate": 0.0178,
+  "tax_base_cents": 1000000000,
+  "transfer_tax_cents": 17800000,
   "exemption_applies": false,
-  "aggregation_window_months": null,
+  "aggregation_window_months": 36,
   "contested_state_position_handoff_required": false
 }
 ```
+
+Precision: Tax base and tax are exact integer cents; the rate and interest percentage round per the global rule (half-even to 4 decimals — see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -6705,7 +7601,7 @@ Conformance case `CONF.MODEL.RE.CITT.001` — *CITT model computes jurisdictiona
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for real estate transfer and controlling-interest tax is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model computes state transfer / controlling-interest tax from a tabled rate and supplied values. Whether a transfer is taxable, whether an exemption applies, and the contested state positions (especially controlling-interest aggregation) are tax determinations for a state-tax specialist; on an untabled state the model routes the position and renders no taxability opinion.
 
 ## 9. Conformance bindings
 
@@ -6723,44 +7619,49 @@ Reference binding `MODEL.RE.CITT.TRANSFER_TAX.v1` · entered the specification a
 **Gates:** G30
 **Deal contexts:** commercial real estate diligence
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Gross-up, base-year, expense-stop, pro-rata share, and closing-date true-up.
+Computes a tenant's CAM (common-area maintenance) reconciliation — the tenant's annual pro-rata share of recoverable expenses, the share prorated through a mid-period closing, and the true-up against what the tenant already paid. It answers, at a closing or year-end, "what does this tenant owe on CAM through the closing date, and is there a credit or a bill?" It computes the reconciliation from supplied figures.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M192.schema.json`](M192.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `recoverable_expenses_cents` | integer (cents) | MUST |
-| `closing_day_of_period` | integer | MAY |
-| `period_days` | integer | MAY |
-| `tenant_payments_cents` | integer (cents) | MAY |
-| `tenant_pro_rata_pct` | number | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `recoverable_expenses_cents` | integer (cents) | MUST | Total recoverable CAM expenses for the period. |
+| `tenant_pro_rata_pct` | number | MUST | The tenant's pro-rata share as a fraction; if omitted, computed from tenant_area ÷ total_area. |
+| `closing_day_of_period` | number | MAY | Day of the period at closing, for proration (default 0). |
+| `period_days` | number | MAY | Days in the reconciliation period (default 365). |
+| `tenant_area` | number | MAY | The tenant's leased area (used with total_area when the share is omitted). |
+| `tenant_payments_cents` | integer (cents) | MAY | CAM the tenant has already paid for the period (default 0). |
+| `total_area` | number | MAY | Total leasable area (used with tenant_area when the share is omitted). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `annual_tenant_share_cents` | integer (cents) |
-| `closing_true_up_cents` | integer (cents) |
-| `prorated_tenant_share_through_closing_cents` | integer (cents) |
-| `recoverable_expenses_cents` | integer (cents) |
-| `tenant_payments_cents` | integer (cents) |
-| `tenant_pro_rata_pct` | number |
+| Field | Type | Description |
+|---|---|---|
+| `recoverable_expenses_cents` | integer (cents) | Recoverable expenses, echoed. |
+| `tenant_pro_rata_pct` | number | The pro-rata share applied. |
+| `annual_tenant_share_cents` | integer (cents) | The tenant's full-period share. |
+| `prorated_tenant_share_through_closing_cents` | integer (cents) | The share prorated through the closing day. |
+| `tenant_payments_cents` | integer (cents) | Payments already made, echoed. |
+| `closing_true_up_cents` | integer (cents) | Prorated share less payments (positive = owed by tenant; negative = credit). |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Gross-up, base-year, expense-stop, pro-rata share, and closing-date true-up.
-
-Computes tenant pro-rata recoverable expense share and closing-date CAM true-up.
+Given `recoverable_expenses_cents` and `tenant_pro_rata_pct` (supplied or computed from `tenant_area ÷ total_area`), plus optional `tenant_payments_cents` (default 0), `closing_day_of_period` (default 0), `period_days` (default 365):
+1. If recoverable expenses are missing and no pro-rata share can be resolved, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `annual_tenant_share_cents` SHALL be `round(recoverable_expenses_cents × tenant_pro_rata_pct)`.
+3. `prorated_tenant_share_through_closing_cents` SHALL be `round(annual_tenant_share_cents × clamp(closing_day_of_period ÷ period_days, 0, 1))`.
+4. `closing_true_up_cents` SHALL be `prorated_tenant_share_through_closing_cents − tenant_payments_cents` (positive = tenant owes; negative = credit to tenant).
+5. `tenant_pro_rata_pct` SHALL echo at the global 4-decimal precision.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -6772,32 +7673,34 @@ Computes tenant pro-rata recoverable expense share and closing-date CAM true-up.
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RE.CAM.001` — *CAM true-up computes prorated recoverable share*.
+*A tenant with an 8% pro-rata share of $1.2M in recoverable expenses owes $96,000 for the year; prorated to about $47,342 through a mid-year (day-180) closing against $60,000 already paid, the closing true-up is a ~$12,658 credit back to the tenant.*
 
 **Inputs**
 
 ```json
 {
-  "recoverable_expenses_cents": 12000000,
-  "tenant_pro_rata_pct": 0.25,
-  "tenant_payments_cents": 2000000,
+  "recoverable_expenses_cents": 120000000,
+  "tenant_pro_rata_pct": 0.08,
+  "tenant_payments_cents": 6000000,
   "closing_day_of_period": 180,
-  "period_days": 360
+  "period_days": 365
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RE.CAM.TRUEUP.v1`)**
 
 ```json
 {
-  "recoverable_expenses_cents": 12000000,
-  "tenant_pro_rata_pct": 0.25,
-  "annual_tenant_share_cents": 3000000,
-  "prorated_tenant_share_through_closing_cents": 1500000,
-  "tenant_payments_cents": 2000000,
-  "closing_true_up_cents": -500000
+  "recoverable_expenses_cents": 120000000,
+  "tenant_pro_rata_pct": 0.08,
+  "annual_tenant_share_cents": 9600000,
+  "prorated_tenant_share_through_closing_cents": 4734247,
+  "tenant_payments_cents": 6000000,
+  "closing_true_up_cents": -1265753
 }
 ```
+
+Precision: Shares and true-up are exact integer cents; the pro-rata share rounds per the global rule (half-even to 4 decimals — see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -6806,7 +7709,7 @@ Conformance case `CONF.MODEL.RE.CAM.001` — *CAM true-up computes prorated reco
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model computes the CAM reconciliation from supplied figures. Which expenses are recoverable, the gross-up and base-year mechanics in the lease, and any dispute over the calculation are lease-interpretation questions for the parties and counsel; the model computes the arithmetic and renders no interpretation of the CAM clause.
 
 ## 9. Conformance bindings
 
@@ -6824,43 +7727,47 @@ Reference binding `MODEL.RE.CAM.TRUEUP.v1` · entered the specification at inter
 **Gates:** G30
 **Deal contexts:** lease diligence
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Structured capture of critical lease fields without interpreting legal enforceability.
+Abstracts a set of leases into a structured schema — tenant, rent, expiry, months remaining, assignment and change-of-control consent, renewal options, and the exclusive-use / co-tenancy / go-dark flags — and rolls up total rent, WALT, and the counts of each restriction. It answers, in lease diligence, "what do these leases actually say on the fields that matter, and where are the restrictions?" It captures the fields without interpreting enforceability.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M193.schema.json`](M193.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `leases` | object[] | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `leases` | object[] | MUST | Leases to abstract; each carries `tenant` (string), `annual_rent_cents` (integer cents), `expiry_date` (ISO date), `months_remaining` (number), `assignment_consent_required` (boolean), `change_of_control_consent_required` (boolean), `renewal_options_count` (integer), `exclusive_use` (boolean), `co_tenancy` (boolean), and `go_dark` (boolean). |
+| `as_of_date` | string (ISO date) | MAY | As-of date to compute months remaining from expiry dates. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `abstraction_rows` | object[] |
-| `annual_rent_cents` | integer (cents) |
-| `assignment_consent_required_count` | integer |
-| `change_of_control_consent_required_count` | integer |
-| `co_tenancy_count` | integer |
-| `exclusives_count` | integer |
-| `go_dark_count` | integer |
-| `lease_count` | integer |
-| `walt_months` | number |
+| Field | Type | Description |
+|---|---|---|
+| `lease_count` | integer | Number of leases abstracted. |
+| `annual_rent_cents` | integer (cents) | Total annual rent across all leases. |
+| `walt_months` | number | null | Rent-weighted average lease term in months, or null. |
+| `assignment_consent_required_count` | integer | Number requiring assignment consent. |
+| `change_of_control_consent_required_count` | integer | Number requiring change-of-control consent. |
+| `exclusives_count` | integer | Number with an exclusive-use clause. |
+| `co_tenancy_count` | integer | Number with a co-tenancy clause. |
+| `go_dark_count` | integer | Number with a go-dark right. |
+| `abstraction_rows` | object[] | Per-lease detail: `{ tenant, annual_rent_cents, expiry_date, months_remaining, assignment_consent_required, change_of_control_consent_required, renewal_options_count, exclusive_use, co_tenancy, go_dark }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Structured capture of critical lease fields without interpreting legal enforceability.
-
-Normalizes supplied lease facts into WALT, rent, consent, option, exclusive-use, co-tenancy, and go-dark fields without legal interpretation.
+Given `leases` (a list of lease objects) and optional `as_of_date`:
+1. If `leases` is empty, the implementation SHALL return `status: "needs_inputs"` naming `leases`.
+2. For each lease it SHALL capture annual rent, expiry date, months remaining (from the field or computed from the expiry and the as-of date), the assignment and change-of-control consent flags, the renewal-option count, and the exclusive-use, co-tenancy, and go-dark flags.
+3. `annual_rent_cents` SHALL be the sum of the per-lease rents.
+4. `walt_months` SHALL be the rent-weighted average of months remaining, or null.
+5. It SHALL count leases and the assignment-consent, change-of-control-consent, exclusive-use, co-tenancy, and go-dark leases, and return the full abstraction detail.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -6871,7 +7778,7 @@ Normalizes supplied lease facts into WALT, rent, consent, option, exclusive-use,
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RE.LEASES.001` — *Lease abstraction computes WALT, rent, and consent counts*.
+*Three retail leases abstracted: $2.4M of total rent, two requiring change-of-control consent, one exclusive-use and one co-tenancy clause, and a rent-weighted lease term rolled up across the three.*
 
 **Inputs**
 
@@ -6879,64 +7786,85 @@ Conformance case `CONF.MODEL.RE.LEASES.001` — *Lease abstraction computes WALT
 {
   "leases": [
     {
-      "tenant": "A",
-      "annual_rent_cents": 600000,
-      "months_remaining": 24,
+      "tenant": "Anchor",
+      "annual_rent_cents": 120000000,
+      "months_remaining": 96,
       "assignment_consent_required": true,
+      "change_of_control_consent_required": true,
+      "renewal_options_count": 2,
       "exclusive_use": true
     },
     {
-      "tenant": "B",
-      "annual_rent_cents": 400000,
-      "months_remaining": 12,
+      "tenant": "Inline A",
+      "annual_rent_cents": 72000000,
+      "months_remaining": 48,
       "change_of_control_consent_required": true,
-      "co_tenancy": true,
+      "co_tenancy": true
+    },
+    {
+      "tenant": "Inline B",
+      "annual_rent_cents": 48000000,
+      "months_remaining": 24,
       "go_dark": true
     }
   ]
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RE.LEASE_ABSTRACTION.v1`)**
 
 ```json
 {
-  "lease_count": 2,
-  "annual_rent_cents": 1000000,
-  "walt_months": 19.2,
+  "lease_count": 3,
+  "annual_rent_cents": 240000000,
+  "walt_months": 67.2,
   "assignment_consent_required_count": 1,
-  "change_of_control_consent_required_count": 1,
+  "change_of_control_consent_required_count": 2,
   "exclusives_count": 1,
   "co_tenancy_count": 1,
   "go_dark_count": 1,
   "abstraction_rows": [
     {
-      "tenant": "A",
-      "annual_rent_cents": 600000,
+      "tenant": "Anchor",
+      "annual_rent_cents": 120000000,
       "expiry_date": null,
-      "months_remaining": 24,
+      "months_remaining": 96,
       "assignment_consent_required": true,
-      "change_of_control_consent_required": false,
-      "renewal_options_count": 0,
+      "change_of_control_consent_required": true,
+      "renewal_options_count": 2,
       "exclusive_use": true,
       "co_tenancy": false,
       "go_dark": false
     },
     {
-      "tenant": "B",
-      "annual_rent_cents": 400000,
+      "tenant": "Inline A",
+      "annual_rent_cents": 72000000,
       "expiry_date": null,
-      "months_remaining": 12,
+      "months_remaining": 48,
       "assignment_consent_required": false,
       "change_of_control_consent_required": true,
       "renewal_options_count": 0,
       "exclusive_use": false,
       "co_tenancy": true,
+      "go_dark": false
+    },
+    {
+      "tenant": "Inline B",
+      "annual_rent_cents": 48000000,
+      "expiry_date": null,
+      "months_remaining": 24,
+      "assignment_consent_required": false,
+      "change_of_control_consent_required": false,
+      "renewal_options_count": 0,
+      "exclusive_use": false,
+      "co_tenancy": false,
       "go_dark": true
     }
   ]
 }
 ```
+
+Precision: Rents are exact integer cents; WALT is in months at the global 4-decimal precision (see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -6945,7 +7873,7 @@ Conformance case `CONF.MODEL.RE.LEASES.001` — *Lease abstraction computes WALT
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model captures lease fields into a structured schema without interpreting them. Whether a consent clause is triggered, how an exclusive-use or co-tenancy provision operates, and the enforceability of any term are legal determinations for counsel; the model abstracts the fields and rolls up the counts and renders no interpretation.
 
 ## 9. Conformance bindings
 
@@ -6963,48 +7891,55 @@ Reference binding `MODEL.RE.LEASE_ABSTRACTION.v1` · entered the specification a
 **Gates:** G30, G2
 **Deal contexts:** OpCo/PropCo · sale-leaseback
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Bifurcated balance sheet, intercompany lease, interest limitation, and recharacterization-risk threshold schedule.
+Sizes an OpCo/PropCo separation — the arm's-length master-lease rent (property value at the target cap rate, or supplied), the OpCo EBITDA before and after rent, the rent coverage, and whether the lease term or residual value trips a true-lease recharacterization review. It answers, in a sale-leaseback or OpCo/PropCo split, "what rent does the property carry, can the operating business cover it, and does the lease risk being recharacterized?" It computes the mechanics; the tax and accounting characterization is the specialist's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M194.schema.json`](M194.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `opco_ebitda_cents` | integer (cents) | MUST |
-| `real_property_value_cents` | integer (cents) | MUST |
-| `target_cap_rate` | number | MUST |
-| `lease_term_years` | integer | MAY |
-| `residual_value_pct` | number | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `opco_ebitda_cents` | integer (cents) | MUST | OpCo EBITDA before rent. |
+| `real_property_value_cents` | integer (cents) | MUST | Value of the property held in PropCo. |
+| `target_cap_rate` | number | MUST | Target cap rate used to set the master-lease rent (a fraction). |
+| `annual_master_lease_rent_cents` | integer (cents) | MAY | Override master-lease rent; defaults to value × cap rate. |
+| `lease_term_years` | number | MAY | Master-lease term in years; drives the recharacterization term test. |
+| `residual_value_pct` | number | MAY | Projected residual value as a fraction; drives the recharacterization residual test. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `annual_master_lease_rent_cents` | integer (cents) |
-| `implied_rent_yield` | number |
-| `lease_term_years` | integer |
-| `opco_ebitda_after_rent_cents` | integer (cents) |
-| `opco_ebitda_before_rent_cents` | integer (cents) |
-| `real_property_value_cents` | integer (cents) |
-| `recharacterization_review_required` | boolean |
-| `rent_to_ebitda_pct` | number |
-| `residual_value_pct` | number |
-| `tax_accounting_handoff_required` | boolean |
+| Field | Type | Description |
+|---|---|---|
+| `real_property_value_cents` | integer (cents) | Property value, echoed. |
+| `annual_master_lease_rent_cents` | integer (cents) | The master-lease rent (supplied or computed). |
+| `implied_rent_yield` | number | null | Rent ÷ property value, or null. |
+| `opco_ebitda_before_rent_cents` | integer (cents) | OpCo EBITDA before rent, echoed. |
+| `opco_ebitda_after_rent_cents` | integer (cents) | OpCo EBITDA after the master-lease rent. |
+| `rent_to_ebitda_pct` | number | null | Rent as a fraction of OpCo EBITDA, or null. |
+| `lease_term_years` | number | null | The lease term, echoed, or null. |
+| `residual_value_pct` | number | null | The residual-value fraction, echoed, or null. |
+| `recharacterization_review_required` | boolean | Whether the lease term or residual trips a true-lease recharacterization review. |
+| `tax_accounting_handoff_required` | boolean | Always true — the characterization routes to specialists. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Bifurcated balance sheet, intercompany lease, interest limitation, and recharacterization-risk threshold schedule.
-
-Computes master lease rent, rent yield, OpCo EBITDA after rent, and tax/accounting review flags.
+Given `real_property_value_cents`, `target_cap_rate`, and `opco_ebitda_cents`, plus optional `annual_master_lease_rent_cents`, `lease_term_years`, `residual_value_pct`:
+1. If any required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `annual_master_lease_rent_cents` SHALL be the supplied rent, else `round(real_property_value_cents × target_cap_rate)`.
+3. `implied_rent_yield` SHALL be `rent ÷ real_property_value_cents`; `opco_ebitda_after_rent_cents` SHALL be `opco_ebitda_cents − rent`; `rent_to_ebitda_pct` SHALL be `rent ÷ opco_ebitda_cents` (both at the global 4-decimal precision, or null).
+4. `recharacterization_review_required` SHALL be true iff the lease term is at or above the recharacterization term threshold (constants: true-lease term threshold) OR the residual value is below the residual threshold (constants: true-lease residual threshold).
+5. `tax_accounting_handoff_required` SHALL always be true.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| True-lease term threshold | 30 years | SHOULD (cited median) | OpCo/PropCo master-lease characterization market practice (2024) | lease term ≥ 30 years triggers recharacterization review | 2024 market practice | on practice review |
+| True-lease residual threshold | 20% residual value (0.20) | SHOULD (cited median) | True-lease residual-value convention; cf. Rev. Proc. 2001-28 (2001) | residual value < 20% triggers recharacterization review | 2024 market practice | on practice review |
 
 
 **Authorities**
@@ -7017,36 +7952,38 @@ Computes master lease rent, rent yield, OpCo EBITDA after rent, and tax/accounti
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RE.OPCO_PROPCO.001` — *OpCo/PropCo model computes lease economics and recharacterization flag*.
+*A $50M property master-leased to the OpCo at a 7% yield ($3.5M rent) leaves $4.5M of OpCo EBITDA after rent (a 44% rent-to-EBITDA); a 20-year term with 25% residual value stays clear of the true-lease recharacterization thresholds — the characterization still routes to specialists.*
 
 **Inputs**
 
 ```json
 {
-  "real_property_value_cents": 1000000,
-  "target_cap_rate": 0.08,
-  "opco_ebitda_cents": 300000,
-  "lease_term_years": 35,
-  "residual_value_pct": 0.15
+  "real_property_value_cents": 5000000000,
+  "target_cap_rate": 0.07,
+  "opco_ebitda_cents": 800000000,
+  "lease_term_years": 20,
+  "residual_value_pct": 0.25
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RE.OPCO_PROPCO.SEPARATION.v1`)**
 
 ```json
 {
-  "real_property_value_cents": 1000000,
-  "annual_master_lease_rent_cents": 80000,
-  "implied_rent_yield": 0.08,
-  "opco_ebitda_before_rent_cents": 300000,
-  "opco_ebitda_after_rent_cents": 220000,
-  "rent_to_ebitda_pct": 0.2667,
-  "lease_term_years": 35,
-  "residual_value_pct": 0.15,
-  "recharacterization_review_required": true,
+  "real_property_value_cents": 5000000000,
+  "annual_master_lease_rent_cents": 350000000,
+  "implied_rent_yield": 0.07,
+  "opco_ebitda_before_rent_cents": 800000000,
+  "opco_ebitda_after_rent_cents": 450000000,
+  "rent_to_ebitda_pct": 0.4375,
+  "lease_term_years": 20,
+  "residual_value_pct": 0.25,
+  "recharacterization_review_required": false,
   "tax_accounting_handoff_required": true
 }
 ```
+
+Precision: Monetary outputs are exact integer cents; yields and coverage round per the global rule (half-even to 4 decimals — see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -7055,7 +7992,7 @@ Conformance case `CONF.MODEL.RE.OPCO_PROPCO.001` — *OpCo/PropCo model computes
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for opco/propco separation mechanics is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model sizes the OpCo/PropCo master lease and screens the recharacterization thresholds from supplied facts. Whether the lease is a true lease or a financing for tax and accounting, the §163(j) interest consequences, and any REIT interaction are determinations for tax and accounting specialists; the model computes the mechanics and always routes the characterization, rendering no conclusion.
 
 ## 9. Conformance bindings
 
@@ -7073,46 +8010,49 @@ Reference binding `MODEL.RE.OPCO_PROPCO.SEPARATION.v1` · entered the specificat
 **Gates:** G30
 **Deal contexts:** real estate diligence
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Issue-specific escrow sizing for environmental, PCA, title, tenant, and cost-to-cure inputs.
+Sizes the property-level escrows a deal holds back — bucketing each supplied issue into environmental, PCA, title, tenant, cost-to-cure, or other, applying its holdback percentage and a general buffer, and totaling each bucket and the aggregate. It answers, at a real-estate closing, "how much do we hold back for each open property issue, and where do specialist reports back the number?" It sizes the escrows from supplied issues; the underlying cost estimates are the specialists'.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M195.schema.json`](M195.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `issues` | object[] | MUST |
-| `general_buffer_rate` | number | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `issues` | object[] | MUST | Property issues; each carries `name` (string), `type`/`category` (string), `amount_cents`/`cost_to_cure_cents` (integer cents), `holdback_pct` (number, default 1), `source` (string), and `pass_through_source_required` (boolean). |
+| `general_buffer_rate` | number | MAY | A general buffer added to every escrow as a fraction (default 0). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `cost_to_cure_escrow_cents` | integer (cents) |
-| `environmental_escrow_cents` | integer (cents) |
-| `escrow_rows` | object[] |
-| `general_buffer_rate` | number |
-| `other_property_escrow_cents` | integer (cents) |
-| `pass_through_source_required_count` | integer |
-| `pca_reserve_escrow_cents` | integer (cents) |
-| `property_issue_count` | integer |
-| `tenant_dispute_escrow_cents` | integer (cents) |
-| `title_exception_escrow_cents` | integer (cents) |
-| `total_property_escrow_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `property_issue_count` | integer | Number of property issues. |
+| `general_buffer_rate` | number | The general buffer applied. |
+| `environmental_escrow_cents` | integer (cents) | Total environmental escrow. |
+| `pca_reserve_escrow_cents` | integer (cents) | Total PCA/physical-condition escrow. |
+| `title_exception_escrow_cents` | integer (cents) | Total title-exception escrow. |
+| `tenant_dispute_escrow_cents` | integer (cents) | Total tenant-dispute escrow. |
+| `cost_to_cure_escrow_cents` | integer (cents) | Total cost-to-cure escrow. |
+| `other_property_escrow_cents` | integer (cents) | Total other-category escrow. |
+| `total_property_escrow_cents` | integer (cents) | Aggregate property escrow. |
+| `pass_through_source_required_count` | integer | Number of issues needing a pass-through specialist report. |
+| `escrow_rows` | object[] | Per-issue detail: `{ issue, category (a property_escrow_category value), source, amount_cents, holdback_pct, escrow_cents, pass_through_source_required }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Issue-specific escrow sizing for environmental, PCA, title, tenant, and cost-to-cure inputs.
-
-Computes environmental, PCA, title, tenant, cost-to-cure, and other property-specific escrow buckets from supplied issue costs.
+Given `issues` (a list of issue objects) and optional `general_buffer_rate` (default 0):
+1. If `issues` is empty, the implementation SHALL return `status: "needs_inputs"` naming `issues`.
+2. For each issue it SHALL classify the category (environmental, pca, title, tenant, cost_to_cure, or other) from the type, take the amount, and compute `escrow_cents = round(amount × holdback_pct × (1 + general_buffer_rate))` (holdback defaulting to 1).
+3. It SHALL total the escrow by category into the environmental, PCA, title, tenant, cost-to-cure, and other bucket outputs, and sum the aggregate.
+4. `pass_through_source_required` SHALL default true for environmental, PCA, and title issues (report-backed); `pass_through_source_required_count` SHALL count them.
+5. It SHALL return the full per-issue escrow detail.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -7124,77 +8064,83 @@ Computes environmental, PCA, title, tenant, cost-to-cure, and other property-spe
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RE.PROPERTY_ESCROW.001` — *Property escrow sizing computes issue-specific holdbacks*.
+*Three property issues escrowed at closing: a $500k Phase II environmental holdback, a $200k roof reserve, and a $100k title exception held back at 50% — $750k in aggregate, three of them backed by pass-through specialist reports.*
 
 **Inputs**
 
 ```json
 {
-  "general_buffer_rate": 0.1,
   "issues": [
     {
+      "name": "Phase II environmental",
       "type": "environmental",
-      "amount_cents": 100000,
+      "amount_cents": 50000000,
       "holdback_pct": 1
     },
     {
-      "type": "PCA deferred maintenance",
-      "estimated_cost_cents": 200000,
-      "holdback_pct": 0.5
+      "name": "Roof replacement",
+      "type": "pca",
+      "amount_cents": 20000000,
+      "holdback_pct": 1
     },
     {
-      "type": "title exception",
-      "cost_to_cure_cents": 50000
+      "name": "Title exception",
+      "type": "title",
+      "amount_cents": 10000000,
+      "holdback_pct": 0.5
     }
-  ]
+  ],
+  "general_buffer_rate": 0
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RE.PROPERTY_ESCROW.HOLDBACK.v1`)**
 
 ```json
 {
   "property_issue_count": 3,
-  "general_buffer_rate": 0.1,
-  "environmental_escrow_cents": 110000,
-  "pca_reserve_escrow_cents": 110000,
-  "title_exception_escrow_cents": 55000,
+  "general_buffer_rate": 0,
+  "environmental_escrow_cents": 50000000,
+  "pca_reserve_escrow_cents": 20000000,
+  "title_exception_escrow_cents": 5000000,
   "tenant_dispute_escrow_cents": 0,
   "cost_to_cure_escrow_cents": 0,
   "other_property_escrow_cents": 0,
-  "total_property_escrow_cents": 275000,
+  "total_property_escrow_cents": 75000000,
   "pass_through_source_required_count": 3,
   "escrow_rows": [
     {
-      "issue": "Property issue 1",
+      "issue": "Phase II environmental",
       "category": "environmental",
       "source": "pass_through_report",
-      "amount_cents": 100000,
+      "amount_cents": 50000000,
       "holdback_pct": 1,
-      "escrow_cents": 110000,
+      "escrow_cents": 50000000,
       "pass_through_source_required": true
     },
     {
-      "issue": "Property issue 2",
+      "issue": "Roof replacement",
       "category": "pca",
       "source": "pass_through_report",
-      "amount_cents": 200000,
-      "holdback_pct": 0.5,
-      "escrow_cents": 110000,
+      "amount_cents": 20000000,
+      "holdback_pct": 1,
+      "escrow_cents": 20000000,
       "pass_through_source_required": true
     },
     {
-      "issue": "Property issue 3",
+      "issue": "Title exception",
       "category": "title",
       "source": "pass_through_report",
-      "amount_cents": 50000,
-      "holdback_pct": 1,
-      "escrow_cents": 55000,
+      "amount_cents": 10000000,
+      "holdback_pct": 0.5,
+      "escrow_cents": 5000000,
       "pass_through_source_required": true
     }
   ]
 }
 ```
+
+Precision: Escrow amounts are exact integer cents; the holdback and buffer round per the global rule (half-even to 4 decimals — see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -7203,7 +8149,7 @@ Conformance case `CONF.MODEL.RE.PROPERTY_ESCROW.001` — *Property escrow sizing
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for property-level escrow and holdback sizing is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model sizes property escrows by category from supplied issues and holdback percentages. The underlying cost estimates (Phase II, PCA, cure costs) are the specialists' work, and the escrow that actually protects the buyer is a negotiation for the parties and counsel; the model applies the arithmetic and routes the report-backed issues, and sets no binding escrow.
 
 ## 9. Conformance bindings
 
@@ -7221,53 +8167,58 @@ Reference binding `MODEL.RE.PROPERTY_ESCROW.HOLDBACK.v1` · entered the specific
 **Gates:** G30
 **Deal contexts:** real estate closing
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Title commitment, Schedule B-II, survey, policy, endorsement, curative-plan, and closing-protection sequencing.
+Sequences the title-and-survey workstream — commitment and survey receipt, Schedule B-II exception count, policy and endorsement selection, the curative work plan with its open items and cost-to-cure, and the closing-protection letter — into a checklist with the counts that show where the work stands. It answers, in a real-estate closing, "what title and survey steps remain, how many exceptions and curative items are open, and what will cure cost?" It sequences the process from supplied facts.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M196.schema.json`](M196.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `survey_received` | boolean | MUST |
-| `title_commitment_received` | boolean | MUST |
-| `alta_endorsements_requested` | string[] | MAY |
-| `curative_items` | object[] | MAY |
-| `lender_policy_required` | boolean | MAY |
-| `schedule_b_exceptions` | object[] | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `survey_received` | boolean | MUST | Whether the survey is in hand. |
+| `title_commitment_received` | boolean | MUST | Whether the title commitment is in hand. |
+| `alta_endorsements_requested` | string[] | MAY | ALTA endorsements requested (counted). |
+| `closing_protection_letter_required` | boolean | MAY | Whether a closing-protection letter is required (default true). |
+| `curative_items` | object[] | MAY | Curative items; each carries `item` (string), `status` (string), and `cost_to_cure_cents` (integer cents). |
+| `lender_policy_required` | boolean | MAY | Whether a lender's policy is required (default false). |
+| `owner_policy_required` | boolean | MAY | Whether an owner's policy is required (default true). |
+| `schedule_b_exceptions` | object[] | MAY | Schedule B-II exception rows (counted). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `alta_endorsements_requested_count` | integer |
-| `closing_protection_letter_required` | boolean |
-| `curative_cost_to_cure_cents` | integer (cents) |
-| `curative_item_count` | integer |
-| `curative_rows` | object[] |
-| `lender_policy_required` | boolean |
-| `open_curative_item_count` | integer |
-| `owner_policy_required` | boolean |
-| `process_steps` | string[] |
-| `schedule_b_exception_count` | integer |
-| `survey_received` | boolean |
-| `survey_review_required` | boolean |
-| `title_commitment_received` | boolean |
-| `title_pass_through_source_required` | boolean |
+| Field | Type | Description |
+|---|---|---|
+| `title_commitment_received` | boolean | The commitment-received flag, echoed. |
+| `survey_received` | boolean | The survey-received flag, echoed. |
+| `schedule_b_exception_count` | integer | Number of Schedule B-II exceptions. |
+| `survey_review_required` | boolean | Whether survey review is required. |
+| `owner_policy_required` | boolean | Whether an owner's policy is required. |
+| `lender_policy_required` | boolean | Whether a lender's policy is required. |
+| `alta_endorsements_requested_count` | integer | Number of ALTA endorsements requested. |
+| `curative_item_count` | integer | Number of curative items. |
+| `open_curative_item_count` | integer | Number of open curative items. |
+| `curative_cost_to_cure_cents` | integer (cents) | Total cost to cure the curative items. |
+| `closing_protection_letter_required` | boolean | Whether a closing-protection letter is required. |
+| `title_pass_through_source_required` | boolean | Always true — the title work is a pass-through source. |
+| `process_steps` | string[] | The ordered title/survey process steps. |
+| `curative_rows` | object[] | Per-curative-item detail: `{ item, status, cost_to_cure_cents, open }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Title commitment, Schedule B-II, survey, policy, endorsement, curative-plan, and closing-protection sequencing.
-
-Computes title/survey process status, Schedule B exception counts, endorsements, curative items, and closing-protection requirements.
+Given `title_commitment_received` and `survey_received`, plus optional `schedule_b_exceptions`, `curative_items`, `alta_endorsements_requested`, and the policy/closing-protection flags:
+1. If either required boolean is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. It SHALL count Schedule B-II exceptions and requested ALTA endorsements.
+3. For each curative item it SHALL take a status and cost-to-cure and mark it open unless closed/resolved/waived; it SHALL count items and open items and sum the cost-to-cure.
+4. `survey_review_required` SHALL be true iff a survey was received; the owner-policy, lender-policy, and closing-protection-letter flags SHALL default per practice.
+5. It SHALL return the ordered process steps and the full curative detail; `title_pass_through_source_required` SHALL always be true.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -7279,7 +8230,7 @@ Computes title/survey process status, Schedule B exception counts, endorsements,
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RE.TITLE_SURVEY.001` — *Title and survey checklist computes exception and curative status*.
+*Title commitment and survey both in hand: three Schedule B-II exceptions, three ALTA endorsements requested, and two curative items — one open $300k mortgage payoff — with the owner policy and closing-protection letter required.*
 
 **Inputs**
 
@@ -7287,48 +8238,51 @@ Conformance case `CONF.MODEL.RE.TITLE_SURVEY.001` — *Title and survey checklis
 {
   "title_commitment_received": true,
   "survey_received": true,
-  "lender_policy_required": true,
   "schedule_b_exceptions": [
     {
-      "name": "utility easement"
+      "exception": "Utility easement"
     },
     {
-      "name": "old lien"
+      "exception": "Setback line"
+    },
+    {
+      "exception": "CC&Rs"
     }
   ],
   "alta_endorsements_requested": [
-    "9",
-    "3.1"
+    "zoning",
+    "access",
+    "survey"
   ],
   "curative_items": [
     {
-      "item": "Release old lien",
+      "item": "Old mortgage payoff",
       "status": "open",
-      "cost_to_cure_cents": 25000
+      "cost_to_cure_cents": 30000000
     },
     {
-      "item": "Survey update",
+      "item": "Mechanic lien release",
       "status": "resolved",
-      "cost_to_cure_cents": 5000
+      "cost_to_cure_cents": 0
     }
   ]
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RE.TITLE_SURVEY.CHECKLIST.v1`)**
 
 ```json
 {
   "title_commitment_received": true,
   "survey_received": true,
-  "schedule_b_exception_count": 2,
+  "schedule_b_exception_count": 3,
   "survey_review_required": true,
   "owner_policy_required": true,
-  "lender_policy_required": true,
-  "alta_endorsements_requested_count": 2,
+  "lender_policy_required": false,
+  "alta_endorsements_requested_count": 3,
   "curative_item_count": 2,
   "open_curative_item_count": 1,
-  "curative_cost_to_cure_cents": 30000,
+  "curative_cost_to_cure_cents": 30000000,
   "closing_protection_letter_required": true,
   "title_pass_through_source_required": true,
   "process_steps": [
@@ -7341,20 +8295,22 @@ Conformance case `CONF.MODEL.RE.TITLE_SURVEY.001` — *Title and survey checklis
   ],
   "curative_rows": [
     {
-      "item": "Release old lien",
+      "item": "Old mortgage payoff",
       "status": "open",
-      "cost_to_cure_cents": 25000,
+      "cost_to_cure_cents": 30000000,
       "open": true
     },
     {
-      "item": "Survey update",
+      "item": "Mechanic lien release",
       "status": "resolved",
-      "cost_to_cure_cents": 5000,
+      "cost_to_cure_cents": 0,
       "open": false
     }
   ]
 }
 ```
+
+Precision: Cost-to-cure is exact integer cents; the rest are counts and booleans (see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -7363,7 +8319,7 @@ Conformance case `CONF.MODEL.RE.TITLE_SURVEY.001` — *Title and survey checklis
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for title and survey process checklist is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model sequences the title and survey process and counts the open items from supplied facts. Whether a Schedule B-II exception is acceptable, how to cure it, and the legal effect of the survey are determinations for title counsel and the title insurer; the model organizes the workstream and totals the cost-to-cure and renders no title conclusion.
 
 ## 9. Conformance bindings
 
@@ -7381,47 +8337,54 @@ Reference binding `MODEL.RE.TITLE_SURVEY.CHECKLIST.v1` · entered the specificat
 **Gates:** G30
 **Deal contexts:** ground lease · real estate financing
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Remaining term, rent reset, reversion, leasehold mortgageability, cure rights, and financeability flag.
+Computes the financeability tail on a ground lease — the years remaining after loan maturity — and tests it against the lender's minimum, then combines it with a lender recognition agreement to flag leasehold mortgageability. It answers, for a leasehold acquisition or financing, "does the ground lease run long enough past the loan, and are the lender protections in place to make the leasehold mortgageable?" It computes the tail and the flags; the financeability judgment routes to counsel.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M197.schema.json`](M197.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `annual_ground_rent_cents` | integer (cents) | MUST |
-| `ground_lease_expiry_date` | string (ISO date) | MUST |
-| `loan_maturity_date` | string (ISO date) | MUST |
-| `lender_recognition_agreement` | boolean | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `annual_ground_rent_cents` | integer (cents) | MUST | Annual ground rent. |
+| `ground_lease_expiry_date` | string (ISO date) | MUST | When the ground lease expires. |
+| `loan_maturity_date` | string (ISO date) | MUST | When the leasehold loan matures. |
+| `lender_recognition_agreement` | boolean | MAY | Whether a lender recognition (SNDA-style) agreement is in place (default false). |
+| `rent_reset_type` | string | MAY | How the ground rent resets (e.g., CPI, fair-market, fixed); echoed. |
+| `required_tail_years` | number | MAY | The lender's minimum tail beyond loan maturity in years; defaults to the market minimum. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `annual_ground_rent_cents` | integer (cents) |
-| `counsel_review_required` | boolean |
-| `ground_lease_expiry_date` | string (ISO date) |
-| `leasehold_mortgageability_flag` | boolean |
-| `lender_recognition_agreement` | boolean |
-| `lender_tail_requirement_satisfied` | boolean |
-| `loan_maturity_date` | string (ISO date) |
-| `rent_reset_type` | string |
-| `required_tail_years` | integer |
-| `tail_years_after_loan_maturity` | integer |
+| Field | Type | Description |
+|---|---|---|
+| `ground_lease_expiry_date` | string (ISO date) | The lease expiry, echoed. |
+| `loan_maturity_date` | string (ISO date) | The loan maturity, echoed. |
+| `annual_ground_rent_cents` | integer (cents) | The annual ground rent, echoed. |
+| `rent_reset_type` | string | The rent-reset type, echoed. |
+| `tail_years_after_loan_maturity` | number | Years the lease runs past loan maturity. |
+| `required_tail_years` | number | The required minimum tail applied. |
+| `lender_tail_requirement_satisfied` | boolean | Whether the tail meets the requirement. |
+| `lender_recognition_agreement` | boolean | Whether a lender recognition agreement is in place. |
+| `leasehold_mortgageability_flag` | boolean | Whether the leasehold is mortgageable on these facts. |
+| `counsel_review_required` | boolean | Always true — the financeability judgment routes to counsel. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Remaining term, rent reset, reversion, leasehold mortgageability, cure rights, and financeability flag.
-
-Computes remaining ground-lease tail after loan maturity, lender tail requirement, and leasehold mortgageability flag.
+Given `ground_lease_expiry_date`, `loan_maturity_date`, and `annual_ground_rent_cents`, plus optional `required_tail_years` (default: the minimum-tail constant), `rent_reset_type`, `lender_recognition_agreement` (default false):
+1. If any required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `tail_years_after_loan_maturity` SHALL be the years between loan maturity and lease expiry, at the global 4-decimal precision.
+3. `required_tail_years` SHALL be the supplied value, else the minimum financeable tail (constants: minimum financeable ground-lease tail).
+4. `lender_tail_requirement_satisfied` SHALL be true iff the tail meets or exceeds the required tail.
+5. `leasehold_mortgageability_flag` SHALL be true iff the tail requirement is satisfied AND a lender recognition agreement is in place; `counsel_review_required` SHALL always be true.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| Minimum financeable ground-lease tail | 25 years | SHOULD (cited median) | Ground-lease lender financeability practice — minimum tail beyond loan maturity (2024) | institutional minimum tail beyond loan maturity (20–25 years) | 2024 lender practice | on lender-practice review |
 
 
 **Authorities**
@@ -7432,28 +8395,30 @@ Computes remaining ground-lease tail after loan maturity, lender tail requiremen
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RE.GROUND_LEASE.001` — *Ground lease model computes lender tail and mortgageability*.
+*A ground lease running to 2075 against a loan maturing in 2036 leaves roughly a 39-year tail — well beyond the 25-year minimum — and with a lender recognition agreement in place the leasehold reads as mortgageable, subject to counsel review.*
 
 **Inputs**
 
 ```json
 {
-  "ground_lease_expiry_date": "2060-01-01",
-  "loan_maturity_date": "2030-01-01",
-  "annual_ground_rent_cents": 120000,
+  "ground_lease_expiry_date": "2075-01-01",
+  "loan_maturity_date": "2036-01-01",
+  "annual_ground_rent_cents": 50000000,
+  "required_tail_years": 25,
+  "rent_reset_type": "cpi",
   "lender_recognition_agreement": true
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RE.GROUND_LEASE.MECHANICS.v1`)**
 
 ```json
 {
-  "ground_lease_expiry_date": "2060-01-01",
-  "loan_maturity_date": "2030-01-01",
-  "annual_ground_rent_cents": 120000,
-  "rent_reset_type": "unspecified",
-  "tail_years_after_loan_maturity": 30,
+  "ground_lease_expiry_date": "2075-01-01",
+  "loan_maturity_date": "2036-01-01",
+  "annual_ground_rent_cents": 50000000,
+  "rent_reset_type": "cpi",
+  "tail_years_after_loan_maturity": 39.0007,
   "required_tail_years": 25,
   "lender_tail_requirement_satisfied": true,
   "lender_recognition_agreement": true,
@@ -7462,6 +8427,8 @@ Conformance case `CONF.MODEL.RE.GROUND_LEASE.001` — *Ground lease model comput
 }
 ```
 
+Precision: The tail is in years at the global 4-decimal precision (see the Conventions chapter); rent is exact integer cents.
+
 ## 7. Error semantics
 
 - **Missing inputs:** the model returns `status: "needs_inputs"` with `missingInputs` as a field-name list — for an empty input record: `["ground_lease_expiry_date","loan_maturity_date","annual_ground_rent_cents"]`. No partial outputs are emitted.
@@ -7469,7 +8436,7 @@ Conformance case `CONF.MODEL.RE.GROUND_LEASE.001` — *Ground lease model comput
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for ground lease vs. fee simple mechanics is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model computes the ground-lease financeability tail and the mortgageability flag from supplied dates and facts. Whether the lease is in fact financeable — the estoppel, cure, and recognition provisions, and the leasehold-mortgagee protections — is a legal determination for counsel and the leasehold lender; the model computes the tail and always routes the judgment, rendering no financeability conclusion.
 
 ## 9. Conformance bindings
 
@@ -7487,42 +8454,46 @@ Reference binding `MODEL.RE.GROUND_LEASE.MECHANICS.v1` · entered the specificat
 **Gates:** G30
 **Deal contexts:** property condition assessment
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-PCA-driven one-, five-, and twelve-year reserves plus immediate-repair escrow from pass-through report inputs.
+Rolls a property-condition-assessment item list into the reserve schedule a lender underwrites — the immediate-repair escrow (scaled by the lender reserve percentage) and the year-1–3, year-4–5, and year-6–12 replacement reserves — plus the total per item. It answers, from a PCA report, "what immediate-repair escrow and multi-year replacement reserves does this property need?" It rolls up the reserves from supplied PCA figures; the condition findings are the engineer's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M198.schema.json`](M198.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `pca_items` | object[] | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `pca_items` | object[] | MUST | PCA items; each carries `item` (string) and integer-cents `immediate_repair_cents`, `year_1_3_cents` (or `near_term_cents`), `year_4_5_cents`, and `year_6_12_cents`, plus a `source` string. |
+| `lender_reserve_pct` | number | MAY | Fraction of immediate-repair cost the lender escrows (default 1 = 100%). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `immediate_repair_escrow_cents` | integer (cents) |
-| `pca_item_count` | integer |
-| `pca_pass_through_source_required` | boolean |
-| `reserve_rows` | object[] |
-| `total_replacement_reserve_cents` | integer (cents) |
-| `year_1_3_reserve_cents` | integer (cents) |
-| `year_4_5_reserve_cents` | integer (cents) |
-| `year_6_12_reserve_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `pca_item_count` | integer | Number of PCA items. |
+| `immediate_repair_escrow_cents` | integer (cents) | Immediate-repair escrow at the lender reserve percentage. |
+| `year_1_3_reserve_cents` | integer (cents) | Year-1–3 replacement reserve. |
+| `year_4_5_reserve_cents` | integer (cents) | Year-4–5 replacement reserve. |
+| `year_6_12_reserve_cents` | integer (cents) | Year-6–12 replacement reserve. |
+| `total_replacement_reserve_cents` | integer (cents) | Total replacement reserve across all items and horizons. |
+| `pca_pass_through_source_required` | boolean | Always true — the PCA report is a pass-through source. |
+| `reserve_rows` | object[] | Per-item detail: `{ item, immediate_repair_cents, year_1_3_cents, year_4_5_cents, year_6_12_cents, total_reserve_cents, source }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-PCA-driven one-, five-, and twelve-year reserves plus immediate-repair escrow from pass-through report inputs.
-
-Structures pass-through PCA report items into immediate repair escrow and 1/3, 4/5, and 6/12-year reserve buckets.
+Given `pca_items` (a list of PCA item objects) and optional `lender_reserve_pct` (default 1):
+1. If `pca_items` is empty, the implementation SHALL return `status: "needs_inputs"` naming `pca_items`.
+2. For each item it SHALL take the immediate-repair, year-1–3, year-4–5, and year-6–12 amounts, and set `total_reserve_cents` to their sum.
+3. `immediate_repair_escrow_cents` SHALL be `round(total immediate repair × lender_reserve_pct)`.
+4. The `year_1_3_reserve_cents`, `year_4_5_reserve_cents`, and `year_6_12_reserve_cents` SHALL be the sums of the respective per-item amounts; `total_replacement_reserve_cents` SHALL be the sum of all item totals.
+5. `pca_pass_through_source_required` SHALL always be true; it SHALL return the full per-item detail.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -7534,7 +8505,7 @@ Structures pass-through PCA report items into immediate repair escrow and 1/3, 4
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RE.PCA.001` — *PCA reserve modeling structures immediate and replacement reserve buckets*.
+*A PCA with two items — a $150k immediate roof repair and a $400k year-4–5 HVAC replacement, plus $80k of near-term parking work — yields a $150k immediate-repair escrow at full lender reserve and a $630k total replacement reserve.*
 
 **Inputs**
 
@@ -7542,52 +8513,54 @@ Conformance case `CONF.MODEL.RE.PCA.001` — *PCA reserve modeling structures im
 {
   "pca_items": [
     {
-      "item": "Roof",
-      "immediate_repair_cents": 100000,
-      "year_1_3_cents": 200000
+      "item": "Roof repair",
+      "immediate_repair_cents": 15000000,
+      "year_1_3_cents": 8000000
     },
     {
-      "item": "HVAC",
-      "year_4_5_cents": 300000,
-      "year_6_12_cents": 400000
+      "item": "HVAC replacement",
+      "year_4_5_cents": 40000000
     }
-  ]
+  ],
+  "lender_reserve_pct": 1
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RE.PCA.RESERVES.v1`)**
 
 ```json
 {
   "pca_item_count": 2,
-  "immediate_repair_escrow_cents": 100000,
-  "year_1_3_reserve_cents": 200000,
-  "year_4_5_reserve_cents": 300000,
-  "year_6_12_reserve_cents": 400000,
-  "total_replacement_reserve_cents": 1000000,
+  "immediate_repair_escrow_cents": 15000000,
+  "year_1_3_reserve_cents": 8000000,
+  "year_4_5_reserve_cents": 40000000,
+  "year_6_12_reserve_cents": 0,
+  "total_replacement_reserve_cents": 63000000,
   "pca_pass_through_source_required": true,
   "reserve_rows": [
     {
-      "item": "Roof",
-      "immediate_repair_cents": 100000,
-      "year_1_3_cents": 200000,
+      "item": "Roof repair",
+      "immediate_repair_cents": 15000000,
+      "year_1_3_cents": 8000000,
       "year_4_5_cents": 0,
       "year_6_12_cents": 0,
-      "total_reserve_cents": 300000,
+      "total_reserve_cents": 23000000,
       "source": "pass_through_pca_report"
     },
     {
-      "item": "HVAC",
+      "item": "HVAC replacement",
       "immediate_repair_cents": 0,
       "year_1_3_cents": 0,
-      "year_4_5_cents": 300000,
-      "year_6_12_cents": 400000,
-      "total_reserve_cents": 700000,
+      "year_4_5_cents": 40000000,
+      "year_6_12_cents": 0,
+      "total_reserve_cents": 40000000,
       "source": "pass_through_pca_report"
     }
   ]
 }
 ```
+
+Precision: All reserves are exact integer cents; the lender reserve percentage rounds per the global rule (half-even to 4 decimals — see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -7596,7 +8569,7 @@ Conformance case `CONF.MODEL.RE.PCA.001` — *PCA reserve modeling structures im
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for pca reserve modeling is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model rolls PCA figures into an immediate-repair escrow and multi-year reserves from supplied amounts. The condition findings, the useful-life estimates, and the repair scope are the engineer's determinations, and the reserve the lender actually requires is its underwriting call; the model totals the reserves and renders no engineering or underwriting conclusion.
 
 ## 9. Conformance bindings
 
@@ -7614,49 +8587,58 @@ Reference binding `MODEL.RE.PCA.RESERVES.v1` · entered the specification at int
 **Gates:** G15, G30
 **Deal contexts:** real estate M&A · foreign seller
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-FIRPTA 15 percent default, residence exemption/reduced rate, 20-day filing, reduced-withholding certificate, and 1031 timing interaction.
+Determines FIRPTA withholding on a foreign seller's disposition with the v1.1 refinements — the 15% default, the reduced 10% and zero residence paths, the dated Form 8288 deadline, the reduced-withholding-certificate path, and a §1031 timing-gap flag when an exchange collides with the withholding. It answers, at a closing with a foreign seller, "how much must the buyer withhold, by what date, and does a certificate or a 1031 exchange change the timing?" It computes the withholding and the timing flags; the certificate and exchange determinations are the tax advisor's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M199.schema.json`](M199.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `amount_realized_cents` | integer (cents) | MUST |
-| `seller_foreign_person` | boolean | MUST |
-| `buyer_will_use_as_residence` | boolean | MAY |
-| `closing_date` | string (ISO date) | MAY |
-| `form_8288_b_reduced_withholding_requested` | boolean | MAY |
-| `section_1031_exchange` | boolean | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `amount_realized_cents` | integer (cents) | MUST | The amount realized (the withholding base). |
+| `seller_foreign_person` | boolean | MUST | Whether the seller is a foreign person. |
+| `buyer_will_use_as_residence` | boolean | MAY | Whether the buyer will use the property as a residence (default false). |
+| `closing_date` | string (ISO date) | MAY | The closing date; dates the Form 8288 deadline. |
+| `form_8288_b_reduced_withholding_requested` | boolean | MAY | Whether a Form 8288-B reduced-withholding certificate is requested (default false). |
+| `section_1031_exchange` | boolean | MAY | Whether the disposition is part of a §1031 exchange (default false); drives the timing-gap flag. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `amount_realized_cents` | integer (cents) |
-| `buyer_will_use_as_residence` | boolean |
-| `form_8288_b_reduced_withholding_requested` | boolean |
-| `forms_8288_due_date` | string (ISO date) |
-| `path` | string |
-| `reduced_certificate_processing_days_estimate` | integer |
-| `section_1031_timing_gap_flag` | boolean |
-| `seller_foreign_person` | boolean |
-| `withholding_amount_cents` | integer (cents) |
-| `withholding_rate` | number |
+| Field | Type | Description |
+|---|---|---|
+| `amount_realized_cents` | integer (cents) | The amount realized, echoed. |
+| `seller_foreign_person` | boolean | The foreign-person flag, echoed. |
+| `buyer_will_use_as_residence` | boolean | The residence-use flag, echoed. |
+| `withholding_rate` | number | The FIRPTA withholding rate applied (0, 0.10, or 0.15). |
+| `withholding_amount_cents` | integer (cents) | The withholding the buyer must remit. |
+| `path` | enum(firpta_path) | The withholding path taken. One of `not_foreign_seller`, `personal_residence_300k_or_less_exemption`, `personal_residence_300k_to_1m_reduced_rate`, `default_firpta_withholding`. |
+| `forms_8288_due_date` | string (ISO date) | null | The Form 8288 filing/remittance deadline, or null. |
+| `form_8288_b_reduced_withholding_requested` | boolean | The reduced-certificate-requested flag, echoed. |
+| `reduced_certificate_processing_days_estimate` | integer | null | IRS Form 8288-B processing estimate in days (a planning estimate), or null. |
+| `section_1031_timing_gap_flag` | boolean | Whether a §1031 exchange collides with FIRPTA withholding timing. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-FIRPTA 15 percent default, residence exemption/reduced rate, 20-day filing, reduced-withholding certificate, and 1031 timing interaction.
-
-Computes FIRPTA withholding ladder, 8288 due date, 8288-B reduced certificate timing, and 1031 timing-gap flag.
+Given `amount_realized_cents` and `seller_foreign_person`, plus optional `buyer_will_use_as_residence` (default false), `closing_date`, `form_8288_b_reduced_withholding_requested` (default false), `section_1031_exchange` (default false):
+1. If either required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. It SHALL resolve `withholding_rate` and `path` exactly as in M169: zero for a domestic seller; the residence exemption at or below the exemption ceiling; the reduced residence rate at or below the reduced-rate ceiling; else the default rate (constants: FIRPTA default withholding rate, FIRPTA reduced residence rate, FIRPTA residence ceilings).
+3. `withholding_amount_cents` SHALL be `round(amount_realized_cents × withholding_rate)`.
+4. `forms_8288_due_date` SHALL be the closing date advanced by the Form 8288 deadline when a foreign seller is withheld upon and a closing date is supplied, else null (constants: FIRPTA Form 8288 filing deadline).
+5. `reduced_certificate_processing_days_estimate` SHALL be the IRS Form 8288-B processing estimate when a reduced-withholding certificate is requested, else null (a planning estimate, not a statutory period); `section_1031_timing_gap_flag` SHALL be true iff a §1031 exchange coincides with withholding on a foreign seller.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| FIRPTA default withholding rate | 15% (0.15) | MUST (binding) | IRC § 1445(a); IRC § 897 | § 1445(a) | current (IRC as amended) | on IRC amendment |
+| FIRPTA reduced residence rate | 10% (0.10) | MUST (binding) | IRC § 1445 | § 1445(c)(4) reduced-rate residence path | current (IRC as amended) | on IRC amendment |
+| FIRPTA personal-residence exemption ceiling | $300,000 (30,000,000 cents) | MUST (binding) | IRC § 1445(b)(5) | § 1445(b)(5) | current (IRC as amended) | on IRC amendment |
+| FIRPTA reduced-rate residence ceiling | $1,000,000 (100,000,000 cents) | MUST (binding) | IRC § 1445; Treas. Reg. § 1.1445-1 | reduced-rate residence ceiling | current (Treas. Reg. as amended) | on Treasury amendment |
+| FIRPTA Form 8288 filing deadline | 20 days | MUST (binding) | IRC § 1445; Treas. Reg. § 1.1445-1 | remit and file by the 20th day after transfer | current (Treas. Reg. as amended) | on Treasury amendment |
 
 
 **Authorities**
@@ -7671,37 +8653,39 @@ Computes FIRPTA withholding ladder, 8288 due date, 8288-B reduced certificate ti
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.RE.FIRPTA11.001` — *FIRPTA v1.1 computes default withholding, form deadline, and 1031 gap flag*.
+*A foreign seller closes a $2.5M non-residence disposition on May 1: FIRPTA requires 15% withholding — $375,000 — with Form 8288 due May 21, no reduced-withholding certificate requested and no §1031 timing gap.*
 
 **Inputs**
 
 ```json
 {
-  "amount_realized_cents": 100000000,
+  "amount_realized_cents": 250000000,
   "seller_foreign_person": true,
   "buyer_will_use_as_residence": false,
-  "closing_date": "2026-05-21",
-  "form_8288_b_reduced_withholding_requested": true,
-  "section_1031_exchange": true
+  "closing_date": "2026-05-01",
+  "form_8288_b_reduced_withholding_requested": false,
+  "section_1031_exchange": false
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.RE.FIRPTA.WITHHOLDING.V11.v1`)**
 
 ```json
 {
-  "amount_realized_cents": 100000000,
+  "amount_realized_cents": 250000000,
   "seller_foreign_person": true,
   "buyer_will_use_as_residence": false,
   "withholding_rate": 0.15,
-  "withholding_amount_cents": 15000000,
+  "withholding_amount_cents": 37500000,
   "path": "default_firpta_withholding",
-  "forms_8288_due_date": "2026-06-10",
-  "form_8288_b_reduced_withholding_requested": true,
-  "reduced_certificate_processing_days_estimate": 90,
-  "section_1031_timing_gap_flag": true
+  "forms_8288_due_date": "2026-05-21",
+  "form_8288_b_reduced_withholding_requested": false,
+  "reduced_certificate_processing_days_estimate": null,
+  "section_1031_timing_gap_flag": false
 }
 ```
+
+Precision: The withholding amount is exact integer cents; the deadline is an ISO-8601 date (see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -7710,7 +8694,7 @@ Conformance case `CONF.MODEL.RE.FIRPTA11.001` — *FIRPTA v1.1 computes default 
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model computes FIRPTA withholding, the dated deadline, and the certificate/1031 timing flags from supplied facts. Whether the seller is a foreign person, whether the residence exemption or a reduced-withholding certificate applies, and how a §1031 exchange interacts with withholding are determinations for the tax advisor; the model computes the buyer's obligation and the timing and renders no opinion on the seller's tax.
 
 ## 9. Conformance bindings
 
@@ -7728,55 +8712,60 @@ Reference binding `MODEL.RE.FIRPTA.WITHHOLDING.V11.v1` · entered the specificat
 **Gates:** G2, G19
 **Deal contexts:** asset deal · stock deal · merger · rollover
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Integrated buyer basis, seller tax, seller after-tax proceeds, gross-up gap, and fired sub-model schedule.
+Computes the integrated transaction-tax picture from the deal form and consideration mix — the taxable consideration, the seller's gain and tax at the combined rate, the seller's after-tax proceeds including any rollover, the buyer's asset basis, and any gross-up gap — and fires the applicable sub-models (allocation, elections, imputed interest, and others) that the facts trigger. It answers, for a deal team pricing the tax cost, "what does the seller net after tax, what basis does the buyer get, and which tax sub-analyses does this deal require?" It orchestrates the arithmetic and the routing; the entity classification, elections, and state treatment are tax counsel's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M200.schema.json`](M200.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `deal_form` | string | MUST |
-| `purchase_price_cents` | integer (cents) | MUST |
-| `seller_entity_type` | string | MUST |
-| `consideration_mix` | object | MAY |
-| `federal_tax_rate` | number | MAY |
-| `seller_structure_tax_delta_cents` | integer (cents) | MAY |
-| `seller_tax_basis_cents` | integer (cents) | MAY |
-| `state_tax_rate` | number | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `deal_form` | string | MUST | The transaction form (e.g., asset_sale, stock_sale, merger, 338h10); drives basis and sub-model routing. |
+| `purchase_price_cents` | integer (cents) | MUST | Total purchase price. |
+| `seller_entity_type` | string | MUST | The seller's entity type (e.g., S-corp, C-corp, partnership, individual). |
+| `consideration_mix` | object | MAY | The consideration split: integer-cents `cash_cents`, `seller_note_cents`, `stock_cents`, `earnout_cents`, `rollover_cents`. |
+| `federal_tax_rate` | number | MAY | Seller federal tax rate as a fraction (default 0). |
+| `seller_structure_tax_delta_cents` | integer (cents) | MAY | Incremental seller tax from the buyer's preferred structure (default 0); drives the gross-up gap. |
+| `seller_tax_basis_cents` | integer (cents) | MAY | Seller's tax basis in what is sold (default 0). |
+| `state_tax_rate` | number | MAY | Seller state tax rate as a fraction (default 0). |
+| `tax_facts` | object | MAY | Flags that fire sub-models: `loss_carryforwards`, `qsbs` (booleans). |
+| `transaction_costs` | object[] | MAY | Transaction-cost rows; a non-empty list fires the transaction-cost sub-model. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `buyer_asset_basis_cents` | integer (cents) |
-| `combined_seller_tax_rate` | number |
-| `deal_form` | string |
-| `deferred_or_rollover_consideration_cents` | integer (cents) |
-| `fired_sub_models` | string[] |
-| `gross_up_gap_cents` | integer (cents) |
-| `professional_review_flags` | string[] |
-| `seller_after_tax_proceeds_cents` | integer (cents) |
-| `seller_entity_type` | string |
-| `seller_tax_basis_cents` | integer (cents) |
-| `seller_tax_cents` | integer (cents) |
-| `seller_taxable_gain_cents` | integer (cents) |
-| `taxable_consideration_cents` | integer (cents) |
-| `total_consideration_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `seller_entity_type` | string | The seller entity type, echoed. |
+| `deal_form` | string | The deal form, echoed. |
+| `total_consideration_cents` | integer (cents) | Total consideration (the purchase price). |
+| `taxable_consideration_cents` | integer (cents) | Taxable (non-rollover) consideration. |
+| `deferred_or_rollover_consideration_cents` | integer (cents) | Rollover/deferred consideration. |
+| `buyer_asset_basis_cents` | integer (cents) | null | Buyer asset basis for asset/deemed-asset forms, else null. |
+| `seller_tax_basis_cents` | integer (cents) | Seller tax basis, echoed. |
+| `seller_taxable_gain_cents` | integer (cents) | Seller taxable gain. |
+| `combined_seller_tax_rate` | number | Combined federal-plus-state seller rate. |
+| `seller_tax_cents` | integer (cents) | Seller tax on the gain. |
+| `seller_after_tax_proceeds_cents` | integer (cents) | Seller proceeds after tax, including rollover. |
+| `gross_up_gap_cents` | integer (cents) | null | Gross-up needed to offset the structure tax delta, or null. |
+| `fired_sub_models` | string[] | Model IDs of the sub-analyses the facts trigger. |
+| `professional_review_flags` | string[] | Standing tax-counsel review note. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Integrated buyer basis, seller tax, seller after-tax proceeds, gross-up gap, and fired sub-model schedule.
-
-Integrates entity type, deal form, consideration mix, basis, tax rates, buyer basis, seller tax, after-tax proceeds, gross-up gap, and fired tax sub-models.
+Given `seller_entity_type`, `deal_form`, and `purchase_price_cents`, plus optional `seller_tax_basis_cents` (default 0), `consideration_mix`, `federal_tax_rate` (default 0), `state_tax_rate` (default 0), `seller_structure_tax_delta_cents` (default 0), `tax_facts`, `transaction_costs`:
+1. If any required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `taxable_consideration_cents` SHALL be `max(0, cash + seller_note + stock + earnout)` from the consideration mix (cash defaulting to the full price); `deferred_or_rollover_consideration_cents` SHALL be the rollover amount.
+3. `combined_seller_tax_rate` SHALL be `clamp(federal_tax_rate + state_tax_rate, 0, 1)`; `seller_taxable_gain_cents` SHALL be `max(0, taxable_consideration − seller_tax_basis)`; `seller_tax_cents` SHALL be `round(gain × combined_rate)`.
+4. `seller_after_tax_proceeds_cents` SHALL be `taxable_consideration − seller_tax + rollover`; `buyer_asset_basis_cents` SHALL be the purchase price for asset/338/336/deemed forms, else null; `gross_up_gap_cents` SHALL be `round(seller_structure_tax_delta ÷ (1 − combined_rate))` when the rate is below one, else null.
+5. `fired_sub_models` SHALL list the sub-models the facts trigger (e.g., §1060 allocation, the §338/§336 gross-up, reorganization qualification, contribution, imputed interest, NOL limitation, QSBS, transaction costs) by their model IDs.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -7793,52 +8782,53 @@ Integrates entity type, deal form, consideration mix, basis, tax rates, buyer ba
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.TAX.MASTER.001` — *Transaction tax master computes proceeds, tax, gross-up gap, and fired models*.
+*An asset sale of an S-corp for $10M ($8M cash, $1M seller note, $1M earnout) over a $3M basis: the $7M gain at a combined 26% rate is $1.82M of tax, leaving $8.18M after-tax; the buyer takes a $10M asset basis, and the §1060 allocation and imputed-interest sub-models fire.*
 
 **Inputs**
 
 ```json
 {
-  "seller_entity_type": "S-Corp",
+  "seller_entity_type": "S-corp",
   "deal_form": "asset_sale",
-  "purchase_price_cents": 100000000,
-  "seller_tax_basis_cents": 40000000,
-  "federal_tax_rate": 0.2,
-  "state_tax_rate": 0.05,
-  "seller_structure_tax_delta_cents": 5000000,
+  "purchase_price_cents": 1000000000,
+  "seller_tax_basis_cents": 300000000,
   "consideration_mix": {
-    "cash_cents": 90000000,
-    "rollover_cents": 10000000
-  }
+    "cash_cents": 800000000,
+    "seller_note_cents": 100000000,
+    "earnout_cents": 100000000
+  },
+  "federal_tax_rate": 0.21,
+  "state_tax_rate": 0.05
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.TAX.TRANSACTION.MASTER.v1`)**
 
 ```json
 {
-  "seller_entity_type": "S-Corp",
+  "seller_entity_type": "S-corp",
   "deal_form": "asset_sale",
-  "total_consideration_cents": 100000000,
-  "taxable_consideration_cents": 90000000,
-  "deferred_or_rollover_consideration_cents": 10000000,
-  "buyer_asset_basis_cents": 100000000,
-  "seller_tax_basis_cents": 40000000,
-  "seller_taxable_gain_cents": 50000000,
-  "combined_seller_tax_rate": 0.25,
-  "seller_tax_cents": 12500000,
-  "seller_after_tax_proceeds_cents": 87500000,
-  "gross_up_gap_cents": 6666667,
+  "total_consideration_cents": 1000000000,
+  "taxable_consideration_cents": 1000000000,
+  "deferred_or_rollover_consideration_cents": 0,
+  "buyer_asset_basis_cents": 1000000000,
+  "seller_tax_basis_cents": 300000000,
+  "seller_taxable_gain_cents": 700000000,
+  "combined_seller_tax_rate": 0.26,
+  "seller_tax_cents": 182000000,
+  "seller_after_tax_proceeds_cents": 818000000,
+  "gross_up_gap_cents": 0,
   "fired_sub_models": [
     "M139",
-    "M145",
-    "M201"
+    "M204"
   ],
   "professional_review_flags": [
     "Tax counsel confirms entity classification, elections, state treatment, and facts."
   ]
 }
 ```
+
+Precision: The combined rate rounds per the global rule (half-even to 4 decimals — see the Conventions chapter); all monetary outputs are exact integer cents.
 
 ## 7. Error semantics
 
@@ -7847,7 +8837,7 @@ Conformance case `CONF.MODEL.TAX.MASTER.001` — *Transaction tax master compute
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model computes the integrated transaction-tax picture and routes the sub-analyses from supplied facts and rates. The entity classification, the availability and mechanics of every election, the state treatment, and the binding tax positions are determinations for tax counsel; the model orchestrates the arithmetic and the routing and renders no tax opinion.
 
 ## 9. Conformance bindings
 
@@ -7865,45 +8855,50 @@ Reference binding `MODEL.TAX.TRANSACTION.MASTER.v1` · entered the specification
 **Gates:** G2
 **Deal contexts:** S-corp sale · deemed asset sale
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Seller asset-treatment tax delta, buyer step-up benefit, and breakeven gross-up.
+Computes the gross-up a buyer must pay to make a seller whole for the extra tax of a deemed-asset-sale election, and nets it against the buyer's step-up benefit, while screening the §336(e) 80%/12-month disposition test. It answers, in a §338(h)(10) or §336(e) deal, "how much gross-up does the seller need, and is the step-up still worth it to the buyer after paying it?" It computes the trade-off; target/shareholder eligibility and the election mechanics are tax counsel's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M201.schema.json`](M201.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `seller_marginal_tax_rate` | number | MUST |
-| `seller_tax_delta_cents` | integer (cents) | MUST |
-| `buyer_step_up_pv_benefit_cents` | integer (cents) | MAY |
-| `disposition_months` | integer | MAY |
-| `disposition_pct` | number | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `seller_marginal_tax_rate` | number | MUST | The seller's marginal tax rate as a fraction. |
+| `seller_tax_delta_cents` | integer (cents) | MUST | The seller's incremental tax from the deemed-asset-sale treatment. |
+| `buyer_step_up_pv_benefit_cents` | integer (cents) | MAY | Present-value benefit of the buyer's step-up (default 0). |
+| `disposition_months` | number | MAY | Length of the disposition window in months; drives the §336(e) test. |
+| `disposition_pct` | number | MAY | Fraction of stock disposed; drives the §336(e) test. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `breakeven_gross_up_cents` | integer (cents) |
-| `buyer_net_benefit_after_gross_up_cents` | integer (cents) |
-| `buyer_step_up_pv_benefit_cents` | integer (cents) |
-| `election_review_flags` | string[] |
-| `section_336e_80pct_12mo_test_passed` | boolean |
-| `seller_marginal_tax_rate` | number |
-| `seller_tax_delta_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `seller_tax_delta_cents` | integer (cents) | The seller tax delta, echoed. |
+| `seller_marginal_tax_rate` | number | The seller marginal rate applied. |
+| `breakeven_gross_up_cents` | integer (cents) | null | The grossed-up amount that makes the seller whole, or null. |
+| `buyer_step_up_pv_benefit_cents` | integer (cents) | The buyer step-up benefit, echoed. |
+| `buyer_net_benefit_after_gross_up_cents` | integer (cents) | null | Buyer benefit net of the gross-up, or null. |
+| `section_336e_80pct_12mo_test_passed` | boolean | null | Whether the §336(e) disposition test passes, or null. |
+| `election_review_flags` | string[] | Standing tax-counsel review note on eligibility and mechanics. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Seller asset-treatment tax delta, buyer step-up benefit, and breakeven gross-up.
-
-Computes seller tax delta, breakeven gross-up, buyer step-up PV benefit, and 336(e) 80%-within-12-month window flag.
+Given `seller_tax_delta_cents` and `seller_marginal_tax_rate`, plus optional `buyer_step_up_pv_benefit_cents` (default 0), `disposition_pct`, `disposition_months`:
+1. If either required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `breakeven_gross_up_cents` SHALL be `round(seller_tax_delta_cents ÷ (1 − seller_marginal_tax_rate))` when the rate is below one, else null (the gross-up is itself taxable, so it is grossed up).
+3. `buyer_net_benefit_after_gross_up_cents` SHALL be `buyer_step_up_pv_benefit_cents − breakeven_gross_up_cents`, or null.
+4. `section_336e_80pct_12mo_test_passed` SHALL be true iff the disposition percentage and window clear the §336(e) qualified-stock-disposition thresholds (constants: §336(e) qualified-stock-disposition test), or null when not supplied.
+5. The seller rate SHALL echo at the global 4-decimal precision.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| §336(e) qualified-stock-disposition test | 80% of stock disposed within a 12-month window | MUST (binding) | IRC § 336(e); Treas. Reg. § 1.336-2 | § 1.336-1(b) (80% vote-and-value within 12 months) | current (Treas. Reg. as amended) | on Treasury amendment |
 
 
 **Authorities**
@@ -7916,35 +8911,37 @@ Computes seller tax delta, breakeven gross-up, buyer step-up PV benefit, and 336
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.TAX.GROSSUP.001` — *338 and 336 gross-up computes breakeven and buyer net benefit*.
+*A §338(h)(10) gross-up: a $500k seller tax delta at a 30% marginal rate needs a $714k gross-up to make the seller whole, leaving the buyer about $86k of net step-up benefit after paying it; the 85%/10-month disposition clears the §336(e) 80%/12-month test.*
 
 **Inputs**
 
 ```json
 {
-  "seller_tax_delta_cents": 8000000,
-  "seller_marginal_tax_rate": 0.25,
-  "buyer_step_up_pv_benefit_cents": 15000000,
+  "seller_tax_delta_cents": 50000000,
+  "seller_marginal_tax_rate": 0.3,
+  "buyer_step_up_pv_benefit_cents": 80000000,
   "disposition_pct": 0.85,
   "disposition_months": 10
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.TAX.GROSSUP.338_336.v1`)**
 
 ```json
 {
-  "seller_tax_delta_cents": 8000000,
-  "seller_marginal_tax_rate": 0.25,
-  "breakeven_gross_up_cents": 10666667,
-  "buyer_step_up_pv_benefit_cents": 15000000,
-  "buyer_net_benefit_after_gross_up_cents": 4333333,
+  "seller_tax_delta_cents": 50000000,
+  "seller_marginal_tax_rate": 0.3,
+  "breakeven_gross_up_cents": 71428571,
+  "buyer_step_up_pv_benefit_cents": 80000000,
+  "buyer_net_benefit_after_gross_up_cents": 8571429,
   "section_336e_80pct_12mo_test_passed": true,
   "election_review_flags": [
     "Confirm target/shareholder eligibility and election mechanics with tax counsel."
   ]
 }
 ```
+
+Precision: The gross-up and net benefit are exact integer cents; the seller rate rounds per the global rule (half-even to 4 decimals — see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -7953,7 +8950,7 @@ Conformance case `CONF.MODEL.TAX.GROSSUP.001` — *338 and 336 gross-up computes
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model computes the gross-up and the buyer's net benefit and screens the §336(e) test from supplied figures. Whether the target and shareholders are eligible, the election mechanics and filings, and the binding tax positions are determinations for tax counsel; the model computes the trade-off and renders no election opinion.
 
 ## 9. Conformance bindings
 
@@ -7971,48 +8968,54 @@ Reference binding `MODEL.TAX.GROSSUP.338_336.v1` · entered the specification at
 **Gates:** G2
 **Deal contexts:** S-corp former C-corp
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Net unrealized built-in gain, five-year recognition-period cap, corporate tax, taxable-income limitation, and installment-sale treatment.
+Computes the §1374 built-in-gains tax on an S-corporation that converted from C-corporation status — the net unrealized built-in gain, whether the sale falls within the five-year recognition period, the recognized tax base (capped at the NUBIG, the recognized gain, and the taxable-income limitation), and the corporate-level tax. It answers, for a former C-corp selling appreciated assets, "does the built-in-gains tax bite, and how much?" It computes the tax; the recognition-period facts and state nonconformity are tax counsel's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M202.schema.json`](M202.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `basis_at_conversion_cents` | integer (cents) | MUST |
-| `conversion_date` | string (ISO date) | MUST |
-| `fmv_at_conversion_cents` | integer (cents) | MUST |
-| `recognized_gain_cents` | integer (cents) | MUST |
-| `sale_date` | string (ISO date) | MUST |
-| `corporate_tax_rate` | number | MAY |
-| `taxable_income_cents` | integer (cents) | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `basis_at_conversion_cents` | integer (cents) | MUST | Tax basis of assets at conversion. |
+| `conversion_date` | string (ISO date) | MUST | The S-election conversion date. |
+| `fmv_at_conversion_cents` | integer (cents) | MUST | Fair market value of assets at S-election conversion. |
+| `recognized_gain_cents` | integer (cents) | MUST | Gain recognized on the sale. |
+| `sale_date` | string (ISO date) | MUST | The asset-sale date. |
+| `corporate_tax_rate` | number | MAY | Corporate tax rate as a fraction; defaults to the federal corporate rate. |
+| `taxable_income_cents` | integer (cents) | MAY | Taxable income for the §1374 limitation; defaults to the recognized gain. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `corporate_tax_rate` | number |
-| `net_unrealized_built_in_gain_cents` | integer (cents) |
-| `recognition_period_years` | integer |
-| `recognized_big_tax_base_cents` | integer (cents) |
-| `section_1374_tax_cents` | integer (cents) |
-| `state_nonconformity_review_required` | boolean |
-| `within_recognition_period` | boolean |
-| `years_since_conversion` | integer |
+| Field | Type | Description |
+|---|---|---|
+| `net_unrealized_built_in_gain_cents` | integer (cents) | NUBIG at conversion (FMV over basis). |
+| `years_since_conversion` | number | Years between conversion and sale. |
+| `recognition_period_years` | integer | The §1374 recognition period. |
+| `within_recognition_period` | boolean | Whether the sale is within the recognition period. |
+| `recognized_big_tax_base_cents` | integer (cents) | The built-in-gains tax base after the caps. |
+| `corporate_tax_rate` | number | The corporate rate applied. |
+| `section_1374_tax_cents` | integer (cents) | The §1374 built-in-gains tax. |
+| `state_nonconformity_review_required` | boolean | Whether state nonconformity to §1374 needs review. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Net unrealized built-in gain, five-year recognition-period cap, corporate tax, taxable-income limitation, and installment-sale treatment.
-
-Computes NUBIG, five-year recognition-period status, recognized BIG tax base, and federal corporate-level tax.
+Given `fmv_at_conversion_cents`, `basis_at_conversion_cents`, `conversion_date`, `sale_date`, and `recognized_gain_cents`, plus optional `taxable_income_cents`, `corporate_tax_rate` (default: the federal corporate rate):
+1. If any required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `net_unrealized_built_in_gain_cents` SHALL be `max(0, fmv_at_conversion_cents − basis_at_conversion_cents)`; `years_since_conversion` SHALL be the years between conversion and sale.
+3. `within_recognition_period` SHALL be true iff `years_since_conversion` is below the recognition period (constants: §1374 recognition period).
+4. `recognized_big_tax_base_cents` SHALL be `min(NUBIG, recognized_gain, taxable-income limitation)` when within the period, else 0 (the taxable-income limitation defaults to the recognized gain).
+5. `section_1374_tax_cents` SHALL be `round(recognized_big_tax_base × corporate_tax_rate)` (constants: federal corporate tax rate).
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| §1374 recognition period | 5 years | MUST (binding) | IRC § 1374(d)(7); PATH Act 2015 | § 1374(d)(7) (5-year recognition period, made permanent by the PATH Act) | current (IRC as amended) | on IRC amendment |
+| Federal corporate tax rate | 21% (0.21) | MUST (binding) | IRC § 11(b) | § 11(b) | current (IRC as amended) | on IRC amendment |
 
 
 **Authorities**
@@ -8024,36 +9027,36 @@ Computes NUBIG, five-year recognition-period status, recognized BIG tax base, an
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.TAX.BIG1374.001` — *1374 BIG tax computes recognition-period tax base and tax*.
+*An S-corp that converted from C-corp status on Jan 1, 2023 sells assets in June 2026, inside the five-year recognition period: with $3M of net unrealized built-in gain and $4M of recognized gain, the §1374 tax base is $3M and the built-in-gains tax at 21% is $630,000.*
 
 **Inputs**
 
 ```json
 {
-  "fmv_at_conversion_cents": 100000000,
-  "basis_at_conversion_cents": 60000000,
+  "fmv_at_conversion_cents": 800000000,
+  "basis_at_conversion_cents": 500000000,
   "conversion_date": "2023-01-01",
-  "sale_date": "2026-01-01",
-  "recognized_gain_cents": 50000000,
-  "taxable_income_cents": 30000000,
-  "corporate_tax_rate": 0.21
+  "sale_date": "2026-06-01",
+  "recognized_gain_cents": 400000000
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.TAX.BIG.1374.v1`)**
 
 ```json
 {
-  "net_unrealized_built_in_gain_cents": 40000000,
-  "years_since_conversion": 3,
+  "net_unrealized_built_in_gain_cents": 300000000,
+  "years_since_conversion": 3.4141,
   "recognition_period_years": 5,
   "within_recognition_period": true,
-  "recognized_big_tax_base_cents": 30000000,
+  "recognized_big_tax_base_cents": 300000000,
   "corporate_tax_rate": 0.21,
-  "section_1374_tax_cents": 6300000,
+  "section_1374_tax_cents": 63000000,
   "state_nonconformity_review_required": false
 }
 ```
+
+Precision: Years and the corporate rate round per the global rule (half-even to 4 decimals — see the Conventions chapter); the tax and gain are exact integer cents.
 
 ## 7. Error semantics
 
@@ -8062,7 +9065,7 @@ Conformance case `CONF.MODEL.TAX.BIG1374.001` — *1374 BIG tax computes recogni
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model computes the §1374 built-in-gains tax from supplied conversion and sale figures. Whether the recognition period is correctly measured, the asset-by-asset NUBIG determination, the taxable-income limitation and its carryover, and state nonconformity are determinations for tax counsel; the model computes the tax and renders no §1374 opinion.
 
 ## 9. Conformance bindings
 
@@ -8080,43 +9083,48 @@ Reference binding `MODEL.TAX.BIG.1374.v1` · entered the specification at intern
 **Gates:** G2
 **Deal contexts:** transaction tax
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Bright-line date, inherently facilitative costs, success-based fee 70/30 safe harbor, and PE-owned target risk flag.
+Classifies each transaction cost for tax — deductible now, capitalized, or §195 amortizable — using the bright-line date, the inherently-facilitative rule, and the Rev. Proc. 2011-29 70/30 success-based-fee safe harbor, and totals each bucket. It answers, for a deal's tax accounting, "how does each cost split between deduction, capitalization, and amortization, and where is the documentation risk?" It classifies from supplied cost facts; the binding characterization and the documentation are tax counsel's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M203.schema.json`](M203.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `bright_line_date` | string (ISO date) | MUST |
-| `transaction_costs` | object[] | MUST |
-| `pe_owned_target` | boolean | MAY |
-| `rev_proc_2011_29_safe_harbor_elected` | boolean | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `bright_line_date` | string (ISO date) | MUST | The bright-line date (the earlier of the LOI and board approval); costs on or after it are facilitative. |
+| `transaction_costs` | object[] | MUST | Transaction costs; each carries `label` (string), `amount_cents` (integer cents), `incurred_date` (ISO date), `success_based` (boolean), and `inherently_facilitative` (boolean). |
+| `pe_owned_target` | boolean | MAY | Whether the target is PE-owned (default false); drives the success-fee documentation-risk flag. |
+| `rev_proc_2011_29_safe_harbor_elected` | boolean | MAY | Whether the 70/30 success-based-fee safe harbor is elected (default true). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `amortizable_195_cents` | integer (cents) |
-| `capitalized_cents` | integer (cents) |
-| `cost_count` | integer |
-| `deductible_cents` | integer (cents) |
-| `pe_owned_target_success_fee_risk_flag` | boolean |
-| `rows` | object[] |
+| Field | Type | Description |
+|---|---|---|
+| `cost_count` | integer | Number of costs classified. |
+| `deductible_cents` | integer (cents) | Total currently deductible. |
+| `capitalized_cents` | integer (cents) | Total capitalized. |
+| `amortizable_195_cents` | integer (cents) | Total §195-amortizable. |
+| `pe_owned_target_success_fee_risk_flag` | boolean | Whether a PE-owned-target success-fee documentation risk is flagged. |
+| `rows` | object[] | Per-cost detail: `{ label, amount_cents, incurred_date, classification (a transaction_cost_classification value), deductible_cents, capitalized_cents, amortizable_195_cents }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Bright-line date, inherently facilitative costs, success-based fee 70/30 safe harbor, and PE-owned target risk flag.
-
-Classifies transaction costs under bright-line, inherently facilitative, success-based fee safe harbor, capitalization, deduction, and Section 195 amortization buckets.
+Given `transaction_costs` (a list of cost objects) and `bright_line_date`, plus optional `rev_proc_2011_29_safe_harbor_elected` (default true), `pe_owned_target` (default false):
+1. If `transaction_costs` is empty or the bright-line date is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. For each cost: a success-based fee with the safe harbor elected splits under the Rev. Proc. 2011-29 70/30 safe harbor (constants: Rev. Proc. 2011-29 success-based-fee safe harbor) — the deductible share and the capitalized remainder; an inherently facilitative cost, or one incurred on or after the bright-line date, is fully capitalized; otherwise the cost is pre-bright-line §195 investigatory and fully amortizable.
+3. It SHALL total the deductible, capitalized, and §195-amortizable amounts across all costs.
+4. `pe_owned_target_success_fee_risk_flag` SHALL be true iff the target is PE-owned and any cost took the success-based safe harbor (a documentation-risk flag).
+5. It SHALL return the full per-cost classification detail.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| Rev. Proc. 2011-29 success-based-fee safe harbor | 70% deductible / 30% capitalized | MUST (binding) | Rev. Proc. 2011-29 | § 3.01 (70/30 success-based-fee safe harbor) | current | on IRS guidance update |
 
 
 **Authorities**
@@ -8132,77 +9140,78 @@ Classifies transaction costs under bright-line, inherently facilitative, success
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.TAX.COSTS.001` — *Transaction cost capitalization classifies safe-harbor, facilitative, and investigatory costs*.
+*Three costs against an April 1 bright-line date: a $3M success-based banker fee splits 70/30 under the Rev. Proc. 2011-29 safe harbor ($2.1M deductible, $900k capitalized), $500k of pre-bright-line diligence is §195 investigatory, and $1M of inherently facilitative legal is capitalized — with a PE-owned-target success-fee documentation flag.*
 
 **Inputs**
 
 ```json
 {
-  "bright_line_date": "2026-03-01",
-  "rev_proc_2011_29_safe_harbor_elected": true,
-  "pe_owned_target": true,
   "transaction_costs": [
     {
-      "label": "Banker success fee",
-      "amount_cents": 10000000,
-      "success_based": true,
-      "incurred_date": "2026-04-01"
+      "label": "Success-based banker fee",
+      "amount_cents": 300000000,
+      "success_based": true
     },
     {
-      "label": "Legal drafting",
-      "amount_cents": 2000000,
-      "inherently_facilitative": true,
-      "incurred_date": "2026-02-15"
-    },
-    {
-      "label": "Market study",
-      "amount_cents": 1000000,
+      "label": "Pre-LOI diligence",
+      "amount_cents": 50000000,
       "incurred_date": "2026-01-15"
+    },
+    {
+      "label": "Facilitative legal",
+      "amount_cents": 100000000,
+      "incurred_date": "2026-06-01",
+      "inherently_facilitative": true
     }
-  ]
+  ],
+  "bright_line_date": "2026-04-01",
+  "rev_proc_2011_29_safe_harbor_elected": true,
+  "pe_owned_target": true
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.TAX.TRANSACTION_COSTS.v1`)**
 
 ```json
 {
   "cost_count": 3,
-  "deductible_cents": 7000000,
-  "capitalized_cents": 5000000,
-  "amortizable_195_cents": 1000000,
+  "deductible_cents": 210000000,
+  "capitalized_cents": 190000000,
+  "amortizable_195_cents": 50000000,
   "pe_owned_target_success_fee_risk_flag": true,
   "rows": [
     {
-      "label": "Banker success fee",
-      "amount_cents": 10000000,
-      "incurred_date": "2026-04-01",
+      "label": "Success-based banker fee",
+      "amount_cents": 300000000,
+      "incurred_date": null,
       "classification": "success_based_fee_70_30_safe_harbor",
-      "deductible_cents": 7000000,
-      "capitalized_cents": 3000000,
+      "deductible_cents": 210000000,
+      "capitalized_cents": 90000000,
       "amortizable_195_cents": 0
     },
     {
-      "label": "Legal drafting",
-      "amount_cents": 2000000,
-      "incurred_date": "2026-02-15",
-      "classification": "inherently_facilitative_capitalized",
-      "deductible_cents": 0,
-      "capitalized_cents": 2000000,
-      "amortizable_195_cents": 0
-    },
-    {
-      "label": "Market study",
-      "amount_cents": 1000000,
+      "label": "Pre-LOI diligence",
+      "amount_cents": 50000000,
       "incurred_date": "2026-01-15",
       "classification": "pre_bright_line_investigatory_195",
       "deductible_cents": 0,
       "capitalized_cents": 0,
-      "amortizable_195_cents": 1000000
+      "amortizable_195_cents": 50000000
+    },
+    {
+      "label": "Facilitative legal",
+      "amount_cents": 100000000,
+      "incurred_date": "2026-06-01",
+      "classification": "inherently_facilitative_capitalized",
+      "deductible_cents": 0,
+      "capitalized_cents": 100000000,
+      "amortizable_195_cents": 0
     }
   ]
 }
 ```
+
+Precision: All amounts are exact integer cents (see the Conventions chapter); the safe-harbor split is applied at the cost level and rounded to the nearest cent.
 
 ## 7. Error semantics
 
@@ -8211,7 +9220,7 @@ Conformance case `CONF.MODEL.TAX.COSTS.001` — *Transaction cost capitalization
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for transaction cost capitalization is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model classifies transaction costs into the deduction, capitalization, and §195 buckets from supplied facts. Whether a cost is in fact facilitative, whether the safe harbor is properly elected and documented, and the binding characterization are determinations for tax counsel; the model computes the split and flags the documentation risk and renders no characterization opinion.
 
 ## 9. Conformance bindings
 
@@ -8229,49 +9238,56 @@ Reference binding `MODEL.TAX.TRANSACTION_COSTS.v1` · entered the specification 
 **Gates:** G2
 **Deal contexts:** seller note · installment sale · earnout
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-AFR-based imputed interest, OID, contingent-payment characterization, and installment receivable interest charge.
+Screens a deferred-payment obligation for imputed interest and OID — the shortfall of the stated rate below the applicable federal rate, the imputed interest that shortfall generates, and the §483/§1274 routing — and tests whether a large installment receivable triggers the §453A interest charge. It answers, for a seller note or installment sale, "does the note carry adequate stated interest, and does §453A bite?" It computes the imputed interest and the §453A screen; the AFR is live data and the characterization is tax counsel's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M204.schema.json`](M204.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `afr_rate` | number | MUST |
-| `principal_cents` | integer (cents) | MUST |
-| `stated_interest_rate` | number | MUST |
-| `term_months` | integer | MUST |
-| `installment_receivable_cents` | integer (cents) | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `afr_rate` | number | MUST | The applicable federal rate for the term, as a fraction; supplied at runtime. |
+| `principal_cents` | integer (cents) | MUST | Principal of the deferred-payment obligation. |
+| `stated_interest_rate` | number | MUST | The obligation's stated interest rate, as a fraction. |
+| `term_months` | number | MUST | Term of the obligation in months. |
+| `installment_receivable_cents` | integer (cents) | MAY | Aggregate face of installment receivables (default 0); drives the §453A test. |
+| `installment_receivable_threshold_cents` | integer (cents) | MAY | Override for the §453A threshold; defaults to the statutory $5M. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `afr_rate` | number |
-| `characterization` | string |
-| `imputed_interest_cents` | integer (cents) |
-| `imputed_rate_delta` | number |
-| `installment_453a_threshold_cents` | integer (cents) |
-| `installment_receivable_cents` | integer (cents) |
-| `oid_floor_cents` | integer (cents) |
-| `principal_cents` | integer (cents) |
-| `section_453a_applies` | boolean |
-| `section_453a_excess_receivable_cents` | integer (cents) |
-| `stated_interest_rate` | number |
+| Field | Type | Description |
+|---|---|---|
+| `principal_cents` | integer (cents) | The principal, echoed. |
+| `stated_interest_rate` | number | The stated rate, echoed. |
+| `afr_rate` | number | The AFR used. |
+| `imputed_rate_delta` | number | AFR shortfall (AFR less stated rate, floored at zero). |
+| `imputed_interest_cents` | integer (cents) | Imputed interest over the term. |
+| `oid_floor_cents` | integer (cents) | The OID floor (equal to the imputed interest). |
+| `characterization` | enum(imputed_interest_characterization) | Which imputed-interest regime the term routes to. One of `section_483_or_1274_review`, `adequate_stated_interest_short_term_check`. |
+| `installment_453a_threshold_cents` | integer (cents) | The §453A threshold applied. |
+| `installment_receivable_cents` | integer (cents) | The installment receivable, echoed. |
+| `section_453a_applies` | boolean | Whether the §453A interest charge applies. |
+| `section_453a_excess_receivable_cents` | integer (cents) | Receivable in excess of the threshold. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-AFR-based imputed interest, OID, contingent-payment characterization, and installment receivable interest charge.
-
-Computes AFR shortfall, imputed interest/OID floor, and Section 453A installment receivable threshold exposure.
+Given `principal_cents`, `stated_interest_rate`, `afr_rate`, and `term_months`, plus optional `installment_receivable_cents` (default 0), `installment_receivable_threshold_cents` (default: the §453A threshold):
+1. If any required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `imputed_rate_delta` SHALL be `max(0, afr_rate − stated_interest_rate)` (constants: Applicable Federal Rate); `imputed_interest_cents` SHALL be `round(principal_cents × imputed_rate_delta × (term_months ÷ 12))`, and `oid_floor_cents` SHALL equal it.
+3. `characterization` SHALL route to the §483/§1274 review for terms over twelve months, else to the short-term adequate-stated-interest check.
+4. `section_453a_applies` SHALL be true iff `installment_receivable_cents` exceeds the §453A threshold (constants: §453A installment-receivable threshold).
+5. `section_453a_excess_receivable_cents` SHALL be `max(0, installment_receivable_cents − threshold)`.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| §453A installment-receivable threshold | $5,000,000 (500,000,000 cents) | MUST (binding) | IRC § 453A(b) | § 453A(b)(2)(B) ($5M aggregate face threshold) | current (IRC as amended) | on IRC amendment |
+| Applicable Federal Rate | supplied at runtime (IRS publishes AFRs monthly) | pass-through (live data) | IRC § 1274(d); IRS monthly AFR release | § 1274(d) | monthly | monthly (per IRS release) |
 
 
 **Authorities**
@@ -8285,30 +9301,30 @@ Computes AFR shortfall, imputed interest/OID floor, and Section 453A installment
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.TAX.INTEREST.001` — *Imputed interest and OID computes AFR shortfall and 453A threshold exposure*.
+*A $2M seller note at a 3% stated rate against a 5% AFR over 36 months imputes a 2% rate delta and about $120,000 of imputed interest (the OID floor); the over-12-month term routes to §483/§1274 review, and the $6M installment receivable exceeds the $5M §453A threshold by $1M.*
 
 **Inputs**
 
 ```json
 {
-  "principal_cents": 10000000,
-  "stated_interest_rate": 0.02,
+  "principal_cents": 200000000,
+  "stated_interest_rate": 0.03,
   "afr_rate": 0.05,
-  "term_months": 24,
+  "term_months": 36,
   "installment_receivable_cents": 600000000
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.TAX.IMPUTED_INTEREST_OID.v1`)**
 
 ```json
 {
-  "principal_cents": 10000000,
-  "stated_interest_rate": 0.02,
+  "principal_cents": 200000000,
+  "stated_interest_rate": 0.03,
   "afr_rate": 0.05,
-  "imputed_rate_delta": 0.03,
-  "imputed_interest_cents": 600000,
-  "oid_floor_cents": 600000,
+  "imputed_rate_delta": 0.02,
+  "imputed_interest_cents": 12000000,
+  "oid_floor_cents": 12000000,
   "characterization": "section_483_or_1274_review",
   "installment_453a_threshold_cents": 500000000,
   "installment_receivable_cents": 600000000,
@@ -8317,6 +9333,8 @@ Conformance case `CONF.MODEL.TAX.INTEREST.001` — *Imputed interest and OID com
 }
 ```
 
+Precision: Rates round per the global rule (half-even to 4 decimals — see the Conventions chapter); interest and receivable amounts are exact integer cents.
+
 ## 7. Error semantics
 
 - **Missing inputs:** the model returns `status: "needs_inputs"` with `missingInputs` as a field-name list — for an empty input record: `["principal_cents","stated_interest_rate","afr_rate","term_months"]`. No partial outputs are emitted.
@@ -8324,7 +9342,7 @@ Conformance case `CONF.MODEL.TAX.INTEREST.001` — *Imputed interest and OID com
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model computes imputed interest and the §453A screen from supplied rates and figures. The correct AFR, whether the obligation carries adequate stated interest, the contingent-payment characterization, and the §453A computation are determinations for tax counsel; the model computes the shortfall and the screen and renders no characterization opinion.
 
 ## 9. Conformance bindings
 
@@ -8342,50 +9360,54 @@ Reference binding `MODEL.TAX.IMPUTED_INTEREST_OID.v1` · entered the specificati
 **Gates:** G2, G19
 **Deal contexts:** transaction tax · state tax
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-State apportionment, bulk-sale compliance, successor-liability clearances, sales/use tax, and payroll-tax successor elections.
+Computes the state-and-local transaction tax on a deal — the apportioned gain and state income tax, any sales/use tax on the transferred base, and the total — and flags when a contested nexus position or a bulk-sale clearance routes the deal to a SALT specialist. It answers, for a multistate deal, "what state income and sales/use tax does this transaction carry, and where does it need specialist clearance?" It computes the tax from supplied apportionment and rates; the nexus and clearance positions are the specialist's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M205.schema.json`](M205.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `gain_cents` | integer (cents) | MUST |
-| `state_apportionment_pct` | number | MUST |
-| `bulk_sale_clearance_required` | boolean | MAY |
-| `sales_use_tax_base_cents` | integer (cents) | MAY |
-| `sales_use_tax_rate` | number | MAY |
-| `state_tax_rate` | number | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `gain_cents` | integer (cents) | MUST | The gain subject to state income tax. |
+| `state_apportionment_pct` | number | MUST | The state apportionment factor as a fraction. |
+| `bulk_sale_clearance_required` | boolean | MAY | Whether a bulk-sale tax clearance is required (default false). |
+| `contested_nexus_position` | boolean | MAY | Whether a contested nexus position is present (default false). |
+| `sales_use_tax_base_cents` | integer (cents) | MAY | Base subject to sales/use tax (default 0). |
+| `sales_use_tax_rate` | number | MAY | Sales/use tax rate as a fraction (default 0). |
+| `state_tax_rate` | number | MAY | The state income tax rate as a fraction (default 0). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `apportioned_gain_cents` | integer (cents) |
-| `bulk_sale_clearance_required` | boolean |
-| `contested_nexus_position` | boolean |
-| `gain_cents` | integer (cents) |
-| `sales_use_tax_base_cents` | integer (cents) |
-| `sales_use_tax_cents` | integer (cents) |
-| `salt_specialist_handoff_required` | boolean |
-| `state_apportionment_pct` | number |
-| `state_income_tax_cents` | integer (cents) |
-| `state_tax_rate` | number |
-| `total_state_transaction_tax_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `gain_cents` | integer (cents) | The gain, echoed. |
+| `state_apportionment_pct` | number | The apportionment factor applied. |
+| `apportioned_gain_cents` | integer (cents) | Gain apportioned to the state. |
+| `state_tax_rate` | number | The state income tax rate applied. |
+| `state_income_tax_cents` | integer (cents) | State income tax on the apportioned gain. |
+| `sales_use_tax_base_cents` | integer (cents) | The sales/use tax base, echoed. |
+| `sales_use_tax_cents` | integer (cents) | Sales/use tax on the base. |
+| `total_state_transaction_tax_cents` | integer (cents) | Total state transaction tax. |
+| `bulk_sale_clearance_required` | boolean | Whether a bulk-sale clearance is required. |
+| `contested_nexus_position` | boolean | Whether a contested nexus position is present. |
+| `salt_specialist_handoff_required` | boolean | True on a contested nexus position or a bulk-sale clearance. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-State apportionment, bulk-sale compliance, successor-liability clearances, sales/use tax, and payroll-tax successor elections.
-
-Computes apportioned gain, state income tax, sales/use tax, bulk-sale clearance flag, and SALT specialist handoff.
+Given `gain_cents` and `state_apportionment_pct`, plus optional `state_tax_rate` (default 0), `sales_use_tax_base_cents` (default 0), `sales_use_tax_rate` (default 0), `bulk_sale_clearance_required` (default false), `contested_nexus_position` (default false):
+1. If either required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
+2. `apportioned_gain_cents` SHALL be `round(gain_cents × state_apportionment_pct)`; `state_income_tax_cents` SHALL be `round(apportioned_gain × state_tax_rate)`.
+3. `sales_use_tax_cents` SHALL be `round(sales_use_tax_base_cents × sales_use_tax_rate)`.
+4. `total_state_transaction_tax_cents` SHALL be the sum of the state income and sales/use tax.
+5. `salt_specialist_handoff_required` SHALL be true iff a contested nexus position or a bulk-sale clearance is present.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -8398,38 +9420,41 @@ Computes apportioned gain, state income tax, sales/use tax, bulk-sale clearance 
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.TAX.SALT.001` — *SALT transaction model computes state income and sales tax*.
+*A $10M gain apportioned 40% to a state at a 6% rate is $240,000 of state income tax, plus $140,000 of sales/use tax on a $2M taxable base — $380,000 of state transaction tax; a required bulk-sale clearance routes the deal to a SALT specialist.*
 
 **Inputs**
 
 ```json
 {
-  "gain_cents": 1000000,
+  "gain_cents": 1000000000,
   "state_apportionment_pct": 0.4,
   "state_tax_rate": 0.06,
-  "sales_use_tax_base_cents": 200000,
-  "sales_use_tax_rate": 0.08,
-  "bulk_sale_clearance_required": true
+  "sales_use_tax_base_cents": 200000000,
+  "sales_use_tax_rate": 0.07,
+  "bulk_sale_clearance_required": true,
+  "contested_nexus_position": false
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.TAX.SALT_TRANSACTION.v1`)**
 
 ```json
 {
-  "gain_cents": 1000000,
+  "gain_cents": 1000000000,
   "state_apportionment_pct": 0.4,
-  "apportioned_gain_cents": 400000,
+  "apportioned_gain_cents": 400000000,
   "state_tax_rate": 0.06,
-  "state_income_tax_cents": 24000,
-  "sales_use_tax_base_cents": 200000,
-  "sales_use_tax_cents": 16000,
-  "total_state_transaction_tax_cents": 40000,
+  "state_income_tax_cents": 24000000,
+  "sales_use_tax_base_cents": 200000000,
+  "sales_use_tax_cents": 14000000,
+  "total_state_transaction_tax_cents": 38000000,
   "bulk_sale_clearance_required": true,
   "contested_nexus_position": false,
   "salt_specialist_handoff_required": true
 }
 ```
+
+Precision: Apportionment and rates round per the global rule (half-even to 4 decimals — see the Conventions chapter); all tax amounts are exact integer cents.
 
 ## 7. Error semantics
 
@@ -8438,7 +9463,7 @@ Conformance case `CONF.MODEL.TAX.SALT.001` — *SALT transaction model computes 
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for salt transaction engine is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model computes state income and sales/use transaction tax from supplied apportionment and rates. The correct apportionment factor, whether nexus exists, the taxability of the transfer, and the bulk-sale clearance requirements are determinations for a SALT specialist; on a contested position or a required clearance the model routes them and renders no state-tax opinion.
 
 ## 9. Conformance bindings
 
@@ -9446,44 +10471,47 @@ Reference binding `MODEL.LEGAL.EARNOUT_ARCHITECTURE.v1` · entered the specifica
 **Gates:** G10
 **Deal contexts:** IP diligence
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-USPTO, trademark, copyright, employee, contractor, and intervening assignment sequence.
+Walks each supplied IP asset's assignment chain and flags the four failure modes that break clean title — a broken or unmatched assignment, a late-recorded assignment, incomplete contributor assignments, and an intent-to-use trademark assigned before an allegation of use. It answers, in IP diligence, "does the target actually own what it says it owns, and where are the gaps?" It spots and counts the issues from supplied chain facts; the ownership and validity conclusions are counsel's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M214.schema.json`](M214.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `assets` | object[] | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `assets` | object[] | MUST | IP assets under diligence; each object carries `name` (string), `type` (string, e.g. patent/trademark/copyright), `assignment_count` (integer), `current_owner_matches` (boolean), `recorded_within_three_months` (boolean), `contributor_assignments_complete` (boolean), and, for trademarks, `itu_assigned_after_allegation_of_use` (boolean). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `assignment_gap_count` | integer |
-| `chain_rows` | object[] |
-| `contributor_assignment_gap_count` | integer |
-| `copyright_asset_count` | integer |
-| `counsel_review_required` | boolean |
-| `ip_asset_count` | integer |
-| `itu_assignment_risk_count` | integer |
-| `late_recording_count` | integer |
-| `patent_asset_count` | integer |
-| `trademark_asset_count` | integer |
+| Field | Type | Description |
+|---|---|---|
+| `ip_asset_count` | integer | Number of IP assets examined. |
+| `patent_asset_count` | integer | Number typed as patents. |
+| `trademark_asset_count` | integer | Number typed as trademarks. |
+| `copyright_asset_count` | integer | Number typed as copyrights. |
+| `assignment_gap_count` | integer | Number with a broken or unmatched assignment chain. |
+| `late_recording_count` | integer | Number with an assignment not recorded within three months. |
+| `contributor_assignment_gap_count` | integer | Number with incomplete contributor assignments. |
+| `itu_assignment_risk_count` | integer | Number of trademarks with intent-to-use assignment risk. |
+| `counsel_review_required` | boolean | Whether any asset raises a chain-of-title flag. |
+| `chain_rows` | object[] | Per-asset detail: `{ name, type, assignment_count, current_owner_matches, recorded_within_three_months, contributor_assignments_complete, assignment_gap, late_recording_flag, contributor_gap, itu_assignment_risk }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-USPTO, trademark, copyright, employee, contractor, and intervening assignment sequence.
-
-Computes assignment-chain, recording, contributor-assignment, and ITU-assignment risk counts from supplied IP asset facts.
+Given `assets` (a list of IP-asset objects, each carrying a type, an assignment count, and the chain booleans):
+1. If `assets` is empty, the implementation SHALL return `status: "needs_inputs"` naming `assets`.
+2. For each asset it SHALL set `assignment_gap` true iff the assignment count is not positive OR the current owner does not match; `late_recording_flag` true iff there is at least one assignment but it was not recorded within three months; `contributor_gap` true iff contributor assignments are not complete; and `itu_assignment_risk` true iff the asset is a trademark and an intent-to-use mark was assigned before an allegation of use.
+3. It SHALL count assets by type (patent, trademark, copyright) and count each flag across the assets.
+4. `counsel_review_required` SHALL be true iff any asset raises any of the four flags.
+5. It SHALL return the full per-asset chain detail.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -9497,7 +10525,7 @@ Computes assignment-chain, recording, contributor-assignment, and ITU-assignment
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.IP.CHAIN.001` — *IP chain-of-title computes assignment and recording gaps*.
+*Three IP assets in a software deal: the core patent's chain is clean, the wordmark was recorded late, and the source-code copyrights are missing contributor assignments — two flags plus the trademark route to counsel.*
 
 **Inputs**
 
@@ -9505,42 +10533,50 @@ Conformance case `CONF.MODEL.IP.CHAIN.001` — *IP chain-of-title computes assig
 {
   "assets": [
     {
+      "name": "Core platform patent",
       "type": "patent",
-      "name": "HVAC sensor",
       "assignment_count": 2,
       "current_owner_matches": true,
       "recorded_within_three_months": true,
       "contributor_assignments_complete": true
     },
     {
+      "name": "Company wordmark",
       "type": "trademark",
-      "name": "BRAND",
       "assignment_count": 1,
-      "current_owner_matches": false,
+      "current_owner_matches": true,
       "recorded_within_three_months": false,
-      "contributor_assignments_complete": false,
+      "contributor_assignments_complete": true,
       "itu_assigned_after_allegation_of_use": false
+    },
+    {
+      "name": "Product source code",
+      "type": "copyright",
+      "assignment_count": 1,
+      "current_owner_matches": true,
+      "recorded_within_three_months": true,
+      "contributor_assignments_complete": false
     }
   ]
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.IP.CHAIN_OF_TITLE.v1`)**
 
 ```json
 {
-  "ip_asset_count": 2,
+  "ip_asset_count": 3,
   "patent_asset_count": 1,
   "trademark_asset_count": 1,
-  "copyright_asset_count": 0,
-  "assignment_gap_count": 1,
+  "copyright_asset_count": 1,
+  "assignment_gap_count": 0,
   "late_recording_count": 1,
   "contributor_assignment_gap_count": 1,
   "itu_assignment_risk_count": 1,
   "counsel_review_required": true,
   "chain_rows": [
     {
-      "name": "HVAC sensor",
+      "name": "Core platform patent",
       "type": "patent",
       "assignment_count": 2,
       "current_owner_matches": true,
@@ -9552,20 +10588,34 @@ Conformance case `CONF.MODEL.IP.CHAIN.001` — *IP chain-of-title computes assig
       "itu_assignment_risk": false
     },
     {
-      "name": "BRAND",
+      "name": "Company wordmark",
       "type": "trademark",
       "assignment_count": 1,
-      "current_owner_matches": false,
+      "current_owner_matches": true,
       "recorded_within_three_months": false,
-      "contributor_assignments_complete": false,
-      "assignment_gap": true,
+      "contributor_assignments_complete": true,
+      "assignment_gap": false,
       "late_recording_flag": true,
-      "contributor_gap": true,
+      "contributor_gap": false,
       "itu_assignment_risk": true
+    },
+    {
+      "name": "Product source code",
+      "type": "copyright",
+      "assignment_count": 1,
+      "current_owner_matches": true,
+      "recorded_within_three_months": true,
+      "contributor_assignments_complete": false,
+      "assignment_gap": false,
+      "late_recording_flag": false,
+      "contributor_gap": true,
+      "itu_assignment_risk": false
     }
   ]
 }
 ```
+
+Precision: All outputs are counts and booleans (see the Conventions chapter); no rounding.
 
 ## 7. Error semantics
 
@@ -9574,7 +10624,7 @@ Conformance case `CONF.MODEL.IP.CHAIN.001` — *IP chain-of-title computes assig
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for ip chain-of-title verification is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model spots and counts chain-of-title gaps from supplied assignment facts. Whether title in fact passed, whether a late recording is curable, and whether an intent-to-use assignment is void are legal determinations for IP counsel; the model surfaces the gaps and routes them (counsel_review_required) and renders no ownership conclusion.
 
 ## 9. Conformance bindings
 
@@ -9592,42 +10642,45 @@ Reference binding `MODEL.IP.CHAIN_OF_TITLE.v1` · entered the specification at i
 **Gates:** G10
 **Deal contexts:** IP diligence · secured financing
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-UCC, USPTO security agreement, and copyright office lien-search tracks.
+Tallies the hits across the three IP lien-search tracks — UCC financing statements, USPTO patent/trademark security records, and Copyright Office recordations — and flags which hits still need a release before closing. It answers, in secured-financing and acquisition diligence, "is the IP pledged anywhere, and what has to be released to deliver clean collateral?" It counts hits and release requirements from supplied search results; the priority and enforceability conclusions are counsel's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M215.schema.json`](M215.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `searches` | object[] | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `searches` | object[] | MUST | Lien-search results; each object carries `name`/`jurisdiction` (string), `track` (a lien_search_track value), `hit_count` (integer) or `hit_found` (boolean), `release_obtained` (boolean), and `source` (string). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `copyright_security_hit_count` | integer |
-| `lien_search_rows` | object[] |
-| `open_lien_count` | integer |
-| `pass_through_search_source_required` | boolean |
-| `release_required_count` | integer |
-| `search_track_count` | integer |
-| `ucc_lien_hit_count` | integer |
-| `uspto_security_hit_count` | integer |
+| Field | Type | Description |
+|---|---|---|
+| `search_track_count` | integer | Number of search rows. |
+| `ucc_lien_hit_count` | integer | Total UCC-track hits. |
+| `uspto_security_hit_count` | integer | Total USPTO-track security hits. |
+| `copyright_security_hit_count` | integer | Total Copyright-Office-track hits. |
+| `open_lien_count` | integer | Total hits still lacking a release. |
+| `release_required_count` | integer | Number of searches whose hits require a release. |
+| `pass_through_search_source_required` | boolean | Always true — the search itself is a pass-through record pull. |
+| `lien_search_rows` | object[] | Per-search detail: `{ search, track (a lien_search_track value), hit_count, release_obtained, release_required, pass_through_search_source }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-UCC, USPTO security agreement, and copyright office lien-search tracks.
-
-Computes UCC, USPTO, and Copyright Office hit counts and release requirements from pass-through lien-search outputs.
+Given `searches` (a list of search-result objects, each with a track, a hit count, and whether a release was obtained):
+1. If `searches` is empty, the implementation SHALL return `status: "needs_inputs"` naming `searches`.
+2. For each search it SHALL normalize the track to `ucc`, `uspto`, or `copyright` (constants: none — track vocabulary), take the hit count (a boolean hit counting as one), and set `release_required` true iff there is at least one hit and no release was obtained.
+3. It SHALL sum hits per track and sum the open (release-required) hits across all searches.
+4. `release_required_count` SHALL be the number of searches needing a release; `pass_through_search_source_required` SHALL always be true — the underlying search is a pass-through record pull.
+5. It SHALL return the full per-search detail.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -9641,7 +10694,7 @@ Computes UCC, USPTO, and Copyright Office hit counts and release requirements fr
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.IP.LIENS.001` — *IP lien search computes open lien and release requirements*.
+*Three lien-search tracks: a Delaware UCC financing statement with an open lien needs a release, the USPTO patent-security search is clean, and the Copyright Office hit already has a recorded release.*
 
 **Inputs**
 
@@ -9649,64 +10702,70 @@ Conformance case `CONF.MODEL.IP.LIENS.001` — *IP lien search computes open lie
 {
   "searches": [
     {
+      "name": "DE UCC search",
       "track": "ucc",
-      "jurisdiction": "DE",
-      "hit_count": 2,
-      "release_obtained": false
-    },
-    {
-      "track": "uspto patent security",
       "hit_count": 1,
-      "release_obtained": true
+      "release_obtained": false,
+      "source": "CSC"
     },
     {
+      "name": "USPTO patent security",
+      "track": "uspto",
+      "hit_count": 0,
+      "source": "USPTO Assignment Search"
+    },
+    {
+      "name": "Copyright Office recordation",
       "track": "copyright",
       "hit_count": 1,
-      "release_obtained": false
+      "release_obtained": true,
+      "source": "US Copyright Office"
     }
   ]
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.IP.ENCUMBRANCE_LIEN_SEARCH.v1`)**
 
 ```json
 {
   "search_track_count": 3,
-  "ucc_lien_hit_count": 2,
-  "uspto_security_hit_count": 1,
+  "ucc_lien_hit_count": 1,
+  "uspto_security_hit_count": 0,
   "copyright_security_hit_count": 1,
-  "open_lien_count": 3,
-  "release_required_count": 2,
+  "open_lien_count": 1,
+  "release_required_count": 1,
   "pass_through_search_source_required": true,
   "lien_search_rows": [
     {
-      "search": "DE",
+      "search": "DE UCC search",
       "track": "ucc",
-      "hit_count": 2,
+      "hit_count": 1,
       "release_obtained": false,
       "release_required": true,
-      "pass_through_search_source": "pass_through_lien_search"
+      "pass_through_search_source": "CSC"
     },
     {
-      "search": "Search 2",
+      "search": "USPTO patent security",
       "track": "uspto",
+      "hit_count": 0,
+      "release_obtained": false,
+      "release_required": false,
+      "pass_through_search_source": "USPTO Assignment Search"
+    },
+    {
+      "search": "Copyright Office recordation",
+      "track": "copyright",
       "hit_count": 1,
       "release_obtained": true,
       "release_required": false,
-      "pass_through_search_source": "pass_through_lien_search"
-    },
-    {
-      "search": "Search 3",
-      "track": "copyright",
-      "hit_count": 1,
-      "release_obtained": false,
-      "release_required": true,
-      "pass_through_search_source": "pass_through_lien_search"
+      "pass_through_search_source": "US Copyright Office"
     }
   ]
 }
 ```
+
+Precision: All outputs are counts and booleans (see the Conventions chapter); no rounding.
 
 ## 7. Error semantics
 
@@ -9715,7 +10774,7 @@ Conformance case `CONF.MODEL.IP.LIENS.001` — *IP lien search computes open lie
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for ip encumbrance and lien search is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model tallies IP lien-search hits and release requirements from supplied results. Lien priority, whether a filing in fact encumbers the IP, and whether a release is legally effective are determinations for counsel and the searcher; the model normalizes the hit counts and routes the release requirements and renders no priority opinion.
 
 ## 9. Conformance bindings
 
@@ -9733,42 +10792,45 @@ Reference binding `MODEL.IP.ENCUMBRANCE_LIEN_SEARCH.v1` · entered the specifica
 **Gates:** G10
 **Deal contexts:** IP diligence
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Material license parties, scope, exclusivity, royalty, term, termination, change-of-control, sublicensing, and consent dependencies.
+Maps the target's material in- and out-bound license portfolio — direction, scope, exclusivity, royalty, change-of-control consent and termination, and sublicensing — and flags inbound licenses whose terms make them a deal-critical dependency. It answers, in IP diligence, "which licenses does the business depend on, and which of those could a change of control break?" It captures and flags from supplied license terms; whether a clause is in fact triggered is counsel's call.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M216.schema.json`](M216.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `licenses` | object[] | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `licenses` | object[] | MUST | Material licenses; each object carries `name` (string), `direction` (a license_direction value), `scope` (string), `exclusive` (boolean), `annual_royalty_cents` (integer cents), `change_of_control_consent_required` (boolean), `terminates_on_change_of_control` (boolean), and `sublicensing_allowed` (boolean). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `annual_royalty_cents` | integer (cents) |
-| `change_of_control_consent_required_count` | integer |
-| `inbound_license_count` | integer |
-| `license_count` | integer |
-| `license_rows` | object[] |
-| `material_dependency_count` | integer |
-| `outbound_license_count` | integer |
-| `terminates_on_change_of_control_count` | integer |
+| Field | Type | Description |
+|---|---|---|
+| `license_count` | integer | Number of licenses mapped. |
+| `inbound_license_count` | integer | Number of inbound (taken-in) licenses. |
+| `outbound_license_count` | integer | Number of outbound (granted-out) licenses. |
+| `annual_royalty_cents` | integer (cents) | Total annual royalty across all licenses. |
+| `change_of_control_consent_required_count` | integer | Number requiring change-of-control consent. |
+| `terminates_on_change_of_control_count` | integer | Number that terminate on change of control. |
+| `material_dependency_count` | integer | Number of inbound licenses flagged deal-critical. |
+| `license_rows` | object[] | Per-license detail: `{ name, direction (a license_direction value), scope, exclusive, annual_royalty_cents, change_of_control_consent_required, terminates_on_change_of_control, sublicensing_allowed, material_dependency_flag }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Material license parties, scope, exclusivity, royalty, term, termination, change-of-control, sublicensing, and consent dependencies.
-
-Computes inbound/outbound license counts, annual royalty, change-of-control consent, termination, sublicensing, and dependency flags.
+Given `licenses` (a list of license objects, each with direction, scope, exclusivity, royalty, and the change-of-control/sublicensing booleans):
+1. If `licenses` is empty, the implementation SHALL return `status: "needs_inputs"` naming `licenses`.
+2. For each license it SHALL normalize direction to `inbound` or `outbound`, take the annual royalty in cents, and set `material_dependency_flag` true iff the license is inbound AND (change-of-control consent is required OR it terminates on change of control OR sublicensing is not allowed).
+3. It SHALL count licenses, inbound and outbound licenses, change-of-control-consent and termination licenses, and material dependencies.
+4. `annual_royalty_cents` SHALL be the sum of the per-license annual royalties.
+5. It SHALL return the full per-license detail.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -9779,7 +10841,7 @@ Computes inbound/outbound license counts, annual royalty, change-of-control cons
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.IP.LICENSES.001` — *License dependency map computes inbound, outbound, consent, and dependency counts*.
+*Two licenses: an inbound database-engine license that requires consent and terminates on change of control is a material dependency; the outbound reseller license is not.*
 
 **Inputs**
 
@@ -9787,59 +10849,66 @@ Conformance case `CONF.MODEL.IP.LICENSES.001` — *License dependency map comput
 {
   "licenses": [
     {
-      "name": "Core SDK",
+      "name": "Core DB engine license",
       "direction": "inbound",
-      "annual_royalty_cents": 100000,
+      "scope": "worldwide",
+      "exclusive": false,
+      "annual_royalty_cents": 12000000,
+      "change_of_control_consent_required": true,
       "terminates_on_change_of_control": true,
       "sublicensing_allowed": false
     },
     {
-      "name": "OEM grant",
+      "name": "Reseller OEM license",
       "direction": "outbound",
-      "annual_royalty_cents": 50000,
-      "change_of_control_consent_required": true
+      "scope": "north_america",
+      "exclusive": false,
+      "annual_royalty_cents": 5000000,
+      "sublicensing_allowed": true
     }
   ]
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.IP.LICENSE.DEPENDENCY.v1`)**
 
 ```json
 {
   "license_count": 2,
   "inbound_license_count": 1,
   "outbound_license_count": 1,
-  "annual_royalty_cents": 150000,
+  "annual_royalty_cents": 17000000,
   "change_of_control_consent_required_count": 1,
   "terminates_on_change_of_control_count": 1,
   "material_dependency_count": 1,
   "license_rows": [
     {
-      "name": "Core SDK",
+      "name": "Core DB engine license",
       "direction": "inbound",
-      "scope": "not_supplied",
+      "scope": "worldwide",
       "exclusive": false,
-      "annual_royalty_cents": 100000,
-      "change_of_control_consent_required": false,
+      "annual_royalty_cents": 12000000,
+      "change_of_control_consent_required": true,
       "terminates_on_change_of_control": true,
       "sublicensing_allowed": false,
       "material_dependency_flag": true
     },
     {
-      "name": "OEM grant",
+      "name": "Reseller OEM license",
       "direction": "outbound",
-      "scope": "not_supplied",
+      "scope": "north_america",
       "exclusive": false,
-      "annual_royalty_cents": 50000,
-      "change_of_control_consent_required": true,
+      "annual_royalty_cents": 5000000,
+      "change_of_control_consent_required": false,
       "terminates_on_change_of_control": false,
-      "sublicensing_allowed": false,
+      "sublicensing_allowed": true,
       "material_dependency_flag": false
     }
   ]
 }
 ```
+
+Precision: Royalties are exact integer cents; the rest are counts and booleans (see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -9848,7 +10917,7 @@ Conformance case `CONF.MODEL.IP.LICENSES.001` — *License dependency map comput
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model maps the license portfolio and flags material inbound dependencies from supplied terms. Whether a change-of-control clause is in fact triggered by the deal structure, and how a consent or termination right applies, are determinations for counsel; the model captures the terms and flags the dependencies and renders no enforceability conclusion.
 
 ## 9. Conformance bindings
 
@@ -9866,44 +10935,47 @@ Reference binding `MODEL.IP.LICENSE.DEPENDENCY.v1` · entered the specification 
 **Gates:** G1, G10
 **Deal contexts:** IP purchase agreement
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Industry-scaled IP rep checklist and schedule structure for counsel drafting.
+Assembles the IP representation-and-warranty set a purchase agreement needs, scaling the base reps (ownership, no-encumbrances, sufficiency, registered-IP and license schedules) with patent-, trademark-, and software-specific reps when those categories are material. It answers, for counsel drafting the agreement, "which IP reps and schedules does this deal require given what IP is material?" It builds the checklist; the drafting and the enforceability opinion are counsel's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M217.schema.json`](M217.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `deal_type` | string | MUST |
-| `material_ip_categories` | string[] | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `deal_type` | string | MUST | The transaction type (e.g., asset_purchase, stock_purchase, merger). |
+| `material_ip_categories` | string[] | MUST | The IP categories material to the deal (e.g., software, patents, trademarks); drive the category-specific reps. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `counsel_drafting_required` | boolean |
-| `deal_type` | string |
-| `enforceability_opinion_pass_through` | boolean |
-| `includes_oss_rep` | boolean |
-| `includes_sufficiency_rep` | boolean |
-| `material_ip_category_count` | integer |
-| `representation_count` | integer |
-| `representation_set` | string[] |
-| `schedule_count` | integer |
+| Field | Type | Description |
+|---|---|---|
+| `deal_type` | string | The deal type, echoed. |
+| `material_ip_category_count` | integer | Number of material IP categories supplied. |
+| `representation_count` | integer | Number of representations in the assembled set. |
+| `schedule_count` | integer | Number of reps that carry a disclosure schedule. |
+| `includes_oss_rep` | boolean | Whether the set includes the OSS-compliance rep. |
+| `includes_sufficiency_rep` | boolean | Whether the set includes the IP-sufficiency rep. |
+| `enforceability_opinion_pass_through` | boolean | Always true — any enforceability opinion is a pass-through to counsel. |
+| `counsel_drafting_required` | boolean | Always true — the reps are drafted by counsel. |
+| `representation_set` | string[] | The assembled representation identifiers. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Industry-scaled IP rep checklist and schedule structure for counsel drafting.
-
-Computes an industry-scaled IP representation and schedule set for counsel drafting without drafting clause language.
+Given `deal_type` and `material_ip_categories` (a list of category strings):
+1. If `deal_type` is missing or `material_ip_categories` is empty, the implementation SHALL return `status: "needs_inputs"` naming the missing fields.
+2. It SHALL detect software (source/code/oss/saas), patent (patent/life-science/device), and trademark (trademark/brand/domain) materiality from the categories.
+3. It SHALL start from the five base reps (ownership, no-encumbrances, sufficiency, registered-IP schedule, license schedule) and append a limited-validity patent schedule when patents are material, a trademark/domain schedule when trademarks are material, and OSS-compliance and source-code-control reps when software is material.
+4. `representation_count` and `schedule_count` (reps whose name includes "schedule") SHALL be counted; `includes_oss_rep` and `includes_sufficiency_rep` SHALL be reported.
+5. `enforceability_opinion_pass_through` and `counsel_drafting_required` SHALL always be true.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -9914,28 +10986,29 @@ Computes an industry-scaled IP representation and schedule set for counsel draft
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.IP.REPS.001` — *IP representation set computes software and trademark rep scaffold*.
+*An asset purchase covering software, patents, and trademarks generates a nine-representation IP set with four schedules, including the OSS-compliance and source-code-control reps software deals require.*
 
 **Inputs**
 
 ```json
 {
-  "deal_type": "software acquisition",
+  "deal_type": "asset_purchase",
   "material_ip_categories": [
     "software",
-    "trademark"
+    "patents",
+    "trademarks"
   ]
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.IP.REPRESENTATION_SET.v1`)**
 
 ```json
 {
-  "deal_type": "software acquisition",
-  "material_ip_category_count": 2,
-  "representation_count": 8,
-  "schedule_count": 3,
+  "deal_type": "asset_purchase",
+  "material_ip_category_count": 3,
+  "representation_count": 9,
+  "schedule_count": 4,
   "includes_oss_rep": true,
   "includes_sufficiency_rep": true,
   "enforceability_opinion_pass_through": true,
@@ -9946,12 +11019,15 @@ Conformance case `CONF.MODEL.IP.REPS.001` — *IP representation set computes so
     "sufficiency",
     "registered_ip_schedule",
     "license_schedule",
+    "limited_validity_patent_schedule",
     "trademark_domain_schedule",
     "oss_compliance",
     "source_code_control"
   ]
 }
 ```
+
+Precision: All outputs are counts, booleans, and a rep-name list (see the Conventions chapter); no rounding.
 
 ## 7. Error semantics
 
@@ -9960,7 +11036,7 @@ Conformance case `CONF.MODEL.IP.REPS.001` — *IP representation set computes so
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for standard ip representation set is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model assembles the IP representation checklist scaled to the material IP categories. The drafting of each representation, the disclosure schedules, and any enforceability or non-infringement opinion are counsel's work; the model produces the checklist and routes the drafting (counsel_drafting_required) and drafts no operative language.
 
 ## 9. Conformance bindings
 
@@ -9978,42 +11054,46 @@ Reference binding `MODEL.IP.REPRESENTATION_SET.v1` · entered the specification 
 **Gates:** G10
 **Deal contexts:** carve-out · IP license-back
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Assigned IP, transition license, perpetual license-back, and TSA-IP overlay.
+Organizes the IP disposition map of a carve-out — which assets are assigned to the buyer, which are licensed to the buyer, and which are licensed back to the seller — and flags when a transition license triggers a TSA-IP overlay. It answers, in a carve-out, "who ends up owning or licensing each IP asset, and does the separation need a transition-services IP schedule?" It organizes the dispositions; the drafting is counsel's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M218.schema.json`](M218.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `ip_assets` | object[] | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `ip_assets` | object[] | MUST | Carve-out IP assets; each object carries `asset_name` (string), `disposition` (string, e.g. assigned_to_buyer/licensed_to_buyer/license_back_to_seller), `licensed_back_to_seller` (boolean), and `transition_license_months` (integer). |
+| `tsa_ip_overlay_required` | boolean | MAY | Whether a TSA-IP overlay is already required (default false); the model also sets it true on any transition license. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `asset_count` | integer |
-| `asset_rows` | object[] |
-| `assigned_to_buyer_count` | integer |
-| `counsel_drafting_handoff_required` | boolean |
-| `licensed_back_to_seller_count` | integer |
-| `licensed_to_buyer_count` | integer |
-| `transition_license_count` | integer |
-| `tsa_ip_overlay_required` | boolean |
+| Field | Type | Description |
+|---|---|---|
+| `asset_count` | integer | Number of IP assets in the carve-out. |
+| `assigned_to_buyer_count` | integer | Number assigned outright to the buyer. |
+| `licensed_to_buyer_count` | integer | Number licensed to the buyer. |
+| `licensed_back_to_seller_count` | integer | Number licensed back to the seller. |
+| `transition_license_count` | integer | Number carrying a transition license (positive term). |
+| `tsa_ip_overlay_required` | boolean | Whether a transition-services IP overlay is required. |
+| `counsel_drafting_handoff_required` | boolean | Always true — the assignment and license documents are drafted by counsel. |
+| `asset_rows` | object[] | Per-asset detail: `{ asset_name, disposition, assigned_to_buyer, licensed_to_buyer, licensed_back_to_seller, transition_license_months }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Assigned IP, transition license, perpetual license-back, and TSA-IP overlay.
-
-Computes assigned, licensed-to-buyer, licensed-back-to-seller, transition-license, and TSA-IP overlay counts.
+Given `ip_assets` (a list of asset objects, each with a disposition and an optional transition-license term) and optional `tsa_ip_overlay_required` (default false):
+1. If `ip_assets` is empty, the implementation SHALL return `status: "needs_inputs"` naming `ip_assets`.
+2. For each asset it SHALL read the disposition (default `assigned_to_buyer`), set `assigned_to_buyer`/`licensed_to_buyer` from it, set `licensed_back_to_seller` from the explicit flag or a `license_back_to_seller` disposition, and take the transition-license months.
+3. It SHALL count assets, assigned-to-buyer, licensed-to-buyer, licensed-back-to-seller, and transition-license assets (months > 0).
+4. `tsa_ip_overlay_required` SHALL be true iff the input flag is set OR any asset carries a positive transition-license term.
+5. `counsel_drafting_handoff_required` SHALL always be true.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -10024,7 +11104,7 @@ Computes assigned, licensed-to-buyer, licensed-back-to-seller, transition-licens
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.IP.CARVEOUT_LICENSE_BACK.001` — *IP carve-out model counts assigned, licensed, and license-back assets*.
+*A carve-out assigning the divested product IP to the buyer with a six-month transition license, licensing shared platform IP, and licensing the parent brand back to the seller — the transition license triggers the TSA-IP overlay.*
 
 **Inputs**
 
@@ -10032,23 +11112,25 @@ Conformance case `CONF.MODEL.IP.CARVEOUT_LICENSE_BACK.001` — *IP carve-out mod
 {
   "ip_assets": [
     {
-      "asset_name": "Brand",
-      "disposition": "assigned_to_buyer"
+      "asset_name": "Divested product IP",
+      "disposition": "assigned_to_buyer",
+      "transition_license_months": 6
     },
     {
-      "asset_name": "Platform",
-      "disposition": "licensed_to_buyer",
-      "transition_license_months": 12
+      "asset_name": "Shared platform IP",
+      "disposition": "licensed_to_buyer"
     },
     {
-      "asset_name": "Shared mark",
-      "disposition": "license_back_to_seller"
+      "asset_name": "Parent brand",
+      "disposition": "license_back_to_seller",
+      "licensed_back_to_seller": true
     }
-  ]
+  ],
+  "tsa_ip_overlay_required": false
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.IP.CARVEOUT_LICENSE_BACK.v1`)**
 
 ```json
 {
@@ -10061,23 +11143,23 @@ Conformance case `CONF.MODEL.IP.CARVEOUT_LICENSE_BACK.001` — *IP carve-out mod
   "counsel_drafting_handoff_required": true,
   "asset_rows": [
     {
-      "asset_name": "Brand",
+      "asset_name": "Divested product IP",
       "disposition": "assigned_to_buyer",
       "assigned_to_buyer": true,
       "licensed_to_buyer": false,
       "licensed_back_to_seller": false,
-      "transition_license_months": 0
+      "transition_license_months": 6
     },
     {
-      "asset_name": "Platform",
+      "asset_name": "Shared platform IP",
       "disposition": "licensed_to_buyer",
       "assigned_to_buyer": false,
       "licensed_to_buyer": true,
       "licensed_back_to_seller": false,
-      "transition_license_months": 12
+      "transition_license_months": 0
     },
     {
-      "asset_name": "Shared mark",
+      "asset_name": "Parent brand",
       "disposition": "license_back_to_seller",
       "assigned_to_buyer": false,
       "licensed_to_buyer": false,
@@ -10088,6 +11170,8 @@ Conformance case `CONF.MODEL.IP.CARVEOUT_LICENSE_BACK.001` — *IP carve-out mod
 }
 ```
 
+Precision: Outputs are counts, month terms, and booleans (see the Conventions chapter); no rounding.
+
 ## 7. Error semantics
 
 - **Missing inputs:** the model returns `status: "needs_inputs"` with `missingInputs` as a field-name list — for an empty input record: `["ip_assets"]`. No partial outputs are emitted.
@@ -10095,7 +11179,7 @@ Conformance case `CONF.MODEL.IP.CARVEOUT_LICENSE_BACK.001` — *IP carve-out mod
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for carve-out and license-back mechanics is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model organizes the carve-out IP disposition map and flags the TSA-IP overlay from supplied dispositions. The assignment and license agreements, the license-back scope, and the transition-services terms are drafted by counsel; the model organizes the map and routes the drafting (counsel_drafting_handoff_required) and drafts no operative language.
 
 ## 9. Conformance bindings
 
@@ -10113,45 +11197,48 @@ Reference binding `MODEL.IP.CARVEOUT_LICENSE_BACK.v1` · entered the specificati
 **Gates:** G10
 **Deal contexts:** software M&A
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Release triggers, deposit verification tier, and update schedule.
+Structures a source-code escrow — the release triggers, the deposit-verification tier, and the deposit-update cadence — and dates the next deposit from the last one. It answers, in software diligence, "on what events does the code release, how deeply was the deposit verified, and when is the next update due?" It organizes the escrow schedule from supplied facts; the escrow agreement itself is counsel's and the escrow agent's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M219.schema.json`](M219.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `deposit_verification_tier` | string | MUST |
-| `release_triggers` | string[] | MUST |
-| `last_deposit_date` | string (ISO date) | MAY |
-| `update_frequency_months` | integer | MAY |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `deposit_verification_tier` | string | MUST | How deeply the deposit was verified (e.g., inventory-only, build-verified, build-and-run-tested). |
+| `release_triggers` | string[] | MUST | The events that release the deposit (e.g., bankruptcy, material breach, support discontinuation). |
+| `last_deposit_date` | string (ISO date) | MAY | Date of the most recent deposit; drives the next-due date. |
+| `update_frequency_months` | integer | MAY | Deposit-update cadence in months (default 3, i.e. quarterly). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `build_verified` | boolean |
-| `deposit_verification_tier` | string |
-| `last_deposit_date` | string (ISO date) |
-| `next_deposit_due_date` | string (ISO date) |
-| `release_trigger_count` | integer |
-| `release_triggers` | string[] |
-| `run_tested` | boolean |
-| `update_frequency_months` | integer |
+| Field | Type | Description |
+|---|---|---|
+| `release_trigger_count` | integer | Number of release triggers. |
+| `release_triggers` | string[] | The release triggers, echoed. |
+| `deposit_verification_tier` | string | The normalized verification tier. |
+| `build_verified` | boolean | Whether the deposit was at least build-verified. |
+| `run_tested` | boolean | Whether the deposit was run-tested. |
+| `update_frequency_months` | integer | The deposit-update cadence in months. |
+| `last_deposit_date` | string (ISO date) | null | The last-deposit date, echoed, or null. |
+| `next_deposit_due_date` | string (ISO date) | null | The next deposit due date, or null when no last-deposit date is supplied. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Release triggers, deposit verification tier, and update schedule.
-
-Computes release trigger count, deposit verification tier, build/run-test flags, and next deposit due date.
+Given `release_triggers` (a list of trigger strings) and `deposit_verification_tier`, plus optional `last_deposit_date` and `update_frequency_months` (default 3):
+1. If `release_triggers` is empty or `deposit_verification_tier` is missing, the implementation SHALL return `status: "needs_inputs"` naming the missing fields.
+2. It SHALL normalize the verification tier to a lower-case token and set `build_verified` iff the tier mentions build/run/tested and `run_tested` iff it mentions run/tested.
+3. `release_trigger_count` SHALL be the number of triggers.
+4. When a last-deposit date is supplied, `next_deposit_due_date` SHALL be that date advanced by the update frequency in months; otherwise null.
+5. It SHALL echo the triggers, the normalized tier, the update frequency, and the last-deposit date.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -10164,41 +11251,43 @@ Computes release trigger count, deposit verification tier, build/run-test flags,
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.IP.ESCROW.001` — *Source-code escrow computes trigger count, verification tier, and next deposit*.
+*A source-code escrow with three release triggers, verified at the build-and-run-tested tier, with quarterly deposits — the January 15 deposit sets the next due date at April 15.*
 
 **Inputs**
 
 ```json
 {
   "release_triggers": [
-    "insolvency",
-    "support discontinuation",
-    "material breach"
+    "bankruptcy",
+    "material_breach",
+    "support_discontinuation"
   ],
-  "deposit_verification_tier": "build verified",
-  "last_deposit_date": "2026-05-21",
+  "deposit_verification_tier": "build and run tested",
+  "last_deposit_date": "2026-01-15",
   "update_frequency_months": 3
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.IP.SOURCE_CODE_ESCROW.v1`)**
 
 ```json
 {
   "release_trigger_count": 3,
   "release_triggers": [
-    "insolvency",
-    "support discontinuation",
-    "material breach"
+    "bankruptcy",
+    "material_breach",
+    "support_discontinuation"
   ],
-  "deposit_verification_tier": "build_verified",
+  "deposit_verification_tier": "build_and_run_tested",
   "build_verified": true,
-  "run_tested": false,
+  "run_tested": true,
   "update_frequency_months": 3,
-  "last_deposit_date": "2026-05-21",
-  "next_deposit_due_date": "2026-08-21"
+  "last_deposit_date": "2026-01-15",
+  "next_deposit_due_date": "2026-04-15"
 }
 ```
+
+Precision: The update cadence is whole months; dates are ISO-8601 (see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -10207,7 +11296,7 @@ Conformance case `CONF.MODEL.IP.ESCROW.001` — *Source-code escrow computes tri
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model structures the source-code escrow schedule from supplied triggers, tier, and cadence. The enforceability of the release conditions, the adequacy of the verification, and the escrow-agreement terms are for counsel and the escrow agent; the model organizes the schedule and dates the next deposit and renders no enforceability conclusion.
 
 ## 9. Conformance bindings
 
@@ -10225,42 +11314,47 @@ Reference binding `MODEL.IP.SOURCE_CODE_ESCROW.v1` · entered the specification 
 **Gates:** G10
 **Deal contexts:** IP diligence
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Contributor-by-contributor assignment and work-for-hire verification with state enforceability flag.
+Verifies, contributor by contributor, that every person who touched the IP executed an assignment and a work-for-hire, and flags California §2870 outside-scope carve-outs and any missing paper. It answers, in IP diligence, "is the IP actually assigned in from everyone who built it, and where are the enforceability wrinkles?" It counts and flags from supplied contributor facts; the enforceability conclusion, including the §2870 carve-out, is counsel's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M220.schema.json`](M220.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `contributors` | object[] | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `contributors` | object[] | MUST | IP contributors; each object carries `name` (string), `role` (string), `state`/`work_state` (US state code), `ip_assignment_executed` (boolean), `work_for_hire_executed` (boolean), and `outside_scope_invention` (boolean). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `all_contributors_papered` | boolean |
-| `california_2870_carveout_count` | integer |
-| `contributor_count` | integer |
-| `contributor_rows` | object[] |
-| `counsel_review_required` | boolean |
-| `executed_assignment_count` | integer |
-| `missing_assignment_count` | integer |
-| `missing_work_for_hire_count` | integer |
+| Field | Type | Description |
+|---|---|---|
+| `contributor_count` | integer | Number of contributors verified. |
+| `executed_assignment_count` | integer | Number with an executed IP assignment. |
+| `missing_assignment_count` | integer | Number missing an IP assignment. |
+| `missing_work_for_hire_count` | integer | Number missing a work-for-hire. |
+| `california_2870_carveout_count` | integer | Number with a California §2870 outside-scope carve-out flag. |
+| `all_contributors_papered` | boolean | Whether every contributor has both the assignment and the work-for-hire. |
+| `counsel_review_required` | boolean | Whether any contributor raises a gap or §2870 flag. |
+| `contributor_rows` | object[] | Per-contributor detail: `{ contributor, role, state, ip_assignment_executed, work_for_hire_executed, missing_assignment, missing_work_for_hire, california_2870_carveout_flag }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Contributor-by-contributor assignment and work-for-hire verification with state enforceability flag.
-
-Computes contributor assignment, work-for-hire, and state carve-out flags from supplied contributor records.
+Given `contributors` (a list of contributor objects, each with a state and the assignment/work-for-hire booleans):
+1. If `contributors` is empty, the implementation SHALL return `status: "needs_inputs"` naming `contributors`.
+2. For each contributor it SHALL set `missing_assignment` iff no IP assignment was executed, `missing_work_for_hire` iff no work-for-hire was executed, and `california_2870_carveout_flag` iff the work state is CA and the contributor claims an outside-scope invention (constants: California Labor Code § 2870).
+3. It SHALL count contributors, executed assignments, missing assignments, missing work-for-hires, and California §2870 carve-outs.
+4. `all_contributors_papered` SHALL be true iff no contributor is missing either the assignment or the work-for-hire.
+5. `counsel_review_required` SHALL be true iff any contributor has a missing assignment, a missing work-for-hire, or a §2870 carve-out flag.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| California Labor Code § 2870 | employee inventions developed entirely on own time without employer resources and unrelated to employer business are not assignable | MUST (binding) | Cal. Lab. Code § 2870 | § 2870(a) | current (Cal. Lab. Code as amended) | on statutory amendment |
 
 
 **Authorities**
@@ -10272,7 +11366,7 @@ Computes contributor assignment, work-for-hire, and state carve-out flags from s
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.IP.EMPLOYEE_ASSIGN.001` — *Employee IP assignment verification computes contributor gaps*.
+*Three contributors: one California engineer fully papered, a California contractor missing both the assignment and the work-for-hire with a §2870 outside-scope flag, and a New York designer missing the work-for-hire — one §2870 carve-out and open assignments route to counsel.*
 
 **Inputs**
 
@@ -10280,57 +11374,79 @@ Conformance case `CONF.MODEL.IP.EMPLOYEE_ASSIGN.001` — *Employee IP assignment
 {
   "contributors": [
     {
-      "name": "Founder",
+      "name": "Engineer A",
+      "role": "senior_engineer",
       "state": "CA",
       "ip_assignment_executed": true,
       "work_for_hire_executed": true,
+      "outside_scope_invention": false
+    },
+    {
+      "name": "Engineer B",
+      "role": "contractor",
+      "state": "CA",
+      "ip_assignment_executed": false,
+      "work_for_hire_executed": false,
       "outside_scope_invention": true
     },
     {
-      "name": "Contractor",
-      "state": "TX",
-      "ip_assignment_executed": false,
+      "name": "Designer C",
+      "role": "designer",
+      "state": "NY",
+      "ip_assignment_executed": true,
       "work_for_hire_executed": false
     }
   ]
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.IP.EMPLOYEE_ASSIGNMENT.VERIFICATION.v1`)**
 
 ```json
 {
-  "contributor_count": 2,
-  "executed_assignment_count": 1,
+  "contributor_count": 3,
+  "executed_assignment_count": 2,
   "missing_assignment_count": 1,
-  "missing_work_for_hire_count": 1,
+  "missing_work_for_hire_count": 2,
   "california_2870_carveout_count": 1,
   "all_contributors_papered": false,
   "counsel_review_required": true,
   "contributor_rows": [
     {
-      "contributor": "Founder",
-      "role": "not_supplied",
+      "contributor": "Engineer A",
+      "role": "senior_engineer",
       "state": "CA",
       "ip_assignment_executed": true,
       "work_for_hire_executed": true,
       "missing_assignment": false,
       "missing_work_for_hire": false,
-      "california_2870_carveout_flag": true
+      "california_2870_carveout_flag": false
     },
     {
-      "contributor": "Contractor",
-      "role": "not_supplied",
-      "state": "TX",
+      "contributor": "Engineer B",
+      "role": "contractor",
+      "state": "CA",
       "ip_assignment_executed": false,
       "work_for_hire_executed": false,
       "missing_assignment": true,
+      "missing_work_for_hire": true,
+      "california_2870_carveout_flag": true
+    },
+    {
+      "contributor": "Designer C",
+      "role": "designer",
+      "state": "NY",
+      "ip_assignment_executed": true,
+      "work_for_hire_executed": false,
+      "missing_assignment": false,
       "missing_work_for_hire": true,
       "california_2870_carveout_flag": false
     }
   ]
 }
 ```
+
+Precision: All outputs are counts and booleans (see the Conventions chapter); no rounding.
 
 ## 7. Error semantics
 
@@ -10339,7 +11455,7 @@ Conformance case `CONF.MODEL.IP.EMPLOYEE_ASSIGN.001` — *Employee IP assignment
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for employee ip assignment verification is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model verifies contributor IP assignments and flags §2870 carve-outs from supplied facts. Whether an assignment is enforceable, whether the §2870 carve-out in fact applies, and whether a work-for-hire is valid for the work type are legal determinations for counsel; the model counts the gaps and routes them (counsel_review_required) and renders no enforceability conclusion.
 
 ## 9. Conformance bindings
 
@@ -10357,46 +11473,49 @@ Reference binding `MODEL.IP.EMPLOYEE_ASSIGNMENT.VERIFICATION.v1` · entered the 
 **Gates:** G10
 **Deal contexts:** software M&A · OSS diligence
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-SCA pass-through, permissive/weak/strong copyleft classification, AGPL SaaS flag, indemnity carve-out, and escrow sizing.
+Classifies each open-source component by copyleft strength (permissive, weak, strong, unknown), flags AGPL components used over a network and strong-copyleft code linked into proprietary software, and sizes the special escrow from supplied remediation costs. It answers, in software diligence, "what OSS obligations does this codebase carry, and where is the copyleft exposure?" It classifies and sizes from a supplied component list; the copyleft-trigger opinion is IP counsel's.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M221.schema.json`](M221.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `components` | object[] | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `components` | object[] | MUST | OSS components; each object carries `name` (string), `license` (string, e.g. MIT/LGPL-2.1/AGPL-3.0), `network_use` (boolean), `proprietary_linking` (boolean), and `remediation_cost_cents` (integer cents). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `agpl_network_count` | integer |
-| `component_count` | integer |
-| `indemnity_carveout_review_required` | boolean |
-| `oss_rows` | object[] |
-| `oss_specific_rep_required` | boolean |
-| `permissive_count` | integer |
-| `proprietary_strong_copyleft_count` | integer |
-| `sca_pass_through_source_required` | boolean |
-| `special_escrow_sizing_cents` | integer (cents) |
-| `strong_copyleft_count` | integer |
-| `unknown_license_count` | integer |
-| `weak_copyleft_count` | integer |
+| Field | Type | Description |
+|---|---|---|
+| `component_count` | integer | Number of OSS components. |
+| `permissive_count` | integer | Number classified permissive. |
+| `weak_copyleft_count` | integer | Number classified weak copyleft. |
+| `strong_copyleft_count` | integer | Number classified strong copyleft. |
+| `unknown_license_count` | integer | Number whose license could not be classified. |
+| `agpl_network_count` | integer | Number of AGPL components used over a network. |
+| `proprietary_strong_copyleft_count` | integer | Number of strong-copyleft components linked into proprietary code. |
+| `oss_specific_rep_required` | boolean | Always true — an OSS-specific representation is required. |
+| `indemnity_carveout_review_required` | boolean | Whether any strong-copyleft or unknown component warrants an indemnity carve-out review. |
+| `special_escrow_sizing_cents` | integer (cents) | Sum of supplied remediation costs for special escrow sizing. |
+| `sca_pass_through_source_required` | boolean | Always true — the software-composition-analysis scan is a pass-through source. |
+| `oss_rows` | object[] | Per-component detail: `{ component, license, license_class (an oss_license_class value), network_use, proprietary_linking, agpl_network_flag, strong_copyleft_embedded_flag, remediation_cost_cents }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-SCA pass-through, permissive/weak/strong copyleft classification, AGPL SaaS flag, indemnity carve-out, and escrow sizing.
-
-Classifies OSS components by license family and computes AGPL, strong-copyleft, indemnity, and remediation escrow flags.
+Given `components` (a list of component objects, each with a license and use booleans):
+1. If `components` is empty, the implementation SHALL return `status: "needs_inputs"` naming `components`.
+2. For each component it SHALL classify the license into `permissive`, `weak_copyleft`, `strong_copyleft`, or `unknown` (constants: OSS license classification), set `agpl_network_flag` iff the license is AGPL and used over a network, and set `strong_copyleft_embedded_flag` iff a strong-copyleft component is linked into proprietary code.
+3. It SHALL count components in each class, AGPL-network components, and proprietary-strong-copyleft components.
+4. `special_escrow_sizing_cents` SHALL be the sum of the supplied per-component remediation costs.
+5. `oss_specific_rep_required`, `sca_pass_through_source_required` SHALL always be true; `indemnity_carveout_review_required` SHALL be true iff any component is strong-copyleft or unknown.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -10415,7 +11534,7 @@ Classifies OSS components by license family and computes AGPL, strong-copyleft, 
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.IP.OSS.001` — *OSS exposure process classifies copyleft and escrow exposure*.
+*Three OSS components: a permissive MIT library, a weak-copyleft LGPL library linked into proprietary code, and an AGPL analytics package used over the network — the AGPL network flag and a $250k remediation reserve drive an indemnity carve-out review.*
 
 **Inputs**
 
@@ -10423,27 +11542,25 @@ Conformance case `CONF.MODEL.IP.OSS.001` — *OSS exposure process classifies co
 {
   "components": [
     {
-      "name": "React",
-      "license": "MIT",
-      "remediation_cost_cents": 0
+      "name": "libfoo",
+      "license": "MIT"
     },
     {
-      "name": "Report lib",
-      "license": "LGPL-3.0",
-      "remediation_cost_cents": 50000
+      "name": "barlib",
+      "license": "LGPL-2.1",
+      "proprietary_linking": true
     },
     {
-      "name": "Network tool",
+      "name": "analytics",
       "license": "AGPL-3.0",
       "network_use": true,
-      "proprietary_linking": true,
-      "remediation_cost_cents": 250000
+      "remediation_cost_cents": 25000000
     }
   ]
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.IP.OSS.EXPOSURE.v1`)**
 
 ```json
 {
@@ -10453,14 +11570,14 @@ Conformance case `CONF.MODEL.IP.OSS.001` — *OSS exposure process classifies co
   "strong_copyleft_count": 1,
   "unknown_license_count": 0,
   "agpl_network_count": 1,
-  "proprietary_strong_copyleft_count": 1,
+  "proprietary_strong_copyleft_count": 0,
   "oss_specific_rep_required": true,
   "indemnity_carveout_review_required": true,
-  "special_escrow_sizing_cents": 300000,
+  "special_escrow_sizing_cents": 25000000,
   "sca_pass_through_source_required": true,
   "oss_rows": [
     {
-      "component": "React",
+      "component": "libfoo",
       "license": "mit",
       "license_class": "permissive",
       "network_use": false,
@@ -10470,28 +11587,30 @@ Conformance case `CONF.MODEL.IP.OSS.001` — *OSS exposure process classifies co
       "remediation_cost_cents": 0
     },
     {
-      "component": "Report lib",
-      "license": "lgpl-3.0",
+      "component": "barlib",
+      "license": "lgpl-2.1",
       "license_class": "weak_copyleft",
       "network_use": false,
-      "proprietary_linking": false,
+      "proprietary_linking": true,
       "agpl_network_flag": false,
       "strong_copyleft_embedded_flag": false,
-      "remediation_cost_cents": 50000
+      "remediation_cost_cents": 0
     },
     {
-      "component": "Network tool",
+      "component": "analytics",
       "license": "agpl-3.0",
       "license_class": "strong_copyleft",
       "network_use": true,
-      "proprietary_linking": true,
+      "proprietary_linking": false,
       "agpl_network_flag": true,
-      "strong_copyleft_embedded_flag": true,
-      "remediation_cost_cents": 250000
+      "strong_copyleft_embedded_flag": false,
+      "remediation_cost_cents": 25000000
     }
   ]
 }
 ```
+
+Precision: Escrow sizing is exact integer cents; the rest are counts and booleans (see the Conventions chapter).
 
 ## 7. Error semantics
 
@@ -10500,7 +11619,7 @@ Conformance case `CONF.MODEL.IP.OSS.001` — *OSS exposure process classifies co
 
 ## 8. Boundary statement
 
-This model produces deterministic schedules and routing only. The governing determination for oss exposure diligence process is a licensed-professional conclusion; a conforming implementation MUST route that determination (with the model's workpapers) and MUST NOT emit it.
+This model classifies OSS copyleft exposure and sizes the escrow from supplied component facts. Whether a copyleft obligation is in fact triggered by the way the code is combined and distributed, and the remediation required, are determinations for IP counsel; the model classifies the components and routes the review (indemnity_carveout_review_required) and renders no copyleft-trigger opinion.
 
 ## 9. Conformance bindings
 
@@ -10518,42 +11637,47 @@ Reference binding `MODEL.IP.OSS.EXPOSURE.v1` · entered the specification at int
 **Gates:** G2, G10
 **Deal contexts:** IP-heavy acquisition
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Class V/VI/VII sub-allocation and residual-method cap ordering for IP-heavy deals.
+Allocates an IP-heavy asset-deal purchase price down the residual-method class ordering — Class V tangible, then Class VI §197 intangibles (the IP), then Class VII goodwill — capping each class at its supplied value and dropping the residual into goodwill. It answers, for a buyer and seller papering an IP-heavy asset purchase, "how does the price split across the tangible, IP-intangible, and goodwill classes for the buyer's amortization and the parties' Form 8594?" It allocates from supplied values; the values and classifications are the advisors' calls.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M222.schema.json`](M222.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `ip_intangibles_cents` | integer (cents) | MUST |
-| `purchase_price_cents` | integer (cents) | MUST |
-| `tangible_assets_cents` | integer (cents) | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `ip_intangibles_cents` | integer (cents) | MUST | Class VI §197 IP-intangible value. |
+| `purchase_price_cents` | integer (cents) | MUST | Total consideration to be allocated. |
+| `tangible_assets_cents` | integer (cents) | MUST | Class V tangible/§1231 asset value. |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `class_v_tangible_assets_cents` | integer (cents) |
-| `class_vi_ip_section_197_intangibles_cents` | integer (cents) |
-| `class_vii_goodwill_going_concern_cents` | integer (cents) |
-| `form_8594_reconciliation_total_cents` | integer (cents) |
-| `ip_value_excess_over_purchase_price_cents` | integer (cents) |
-| `purchase_price_cents` | integer (cents) |
+| Field | Type | Description |
+|---|---|---|
+| `purchase_price_cents` | integer (cents) | The price allocated, echoed. |
+| `class_v_tangible_assets_cents` | integer (cents) | Amount allocated to Class V tangible assets. |
+| `class_vi_ip_section_197_intangibles_cents` | integer (cents) | Amount allocated to Class VI §197 IP intangibles. |
+| `class_vii_goodwill_going_concern_cents` | integer (cents) | Residual allocated to Class VII goodwill and going-concern value. |
+| `ip_value_excess_over_purchase_price_cents` | integer (cents) | IP value that exceeds the price available after Class V (normally zero). |
+| `form_8594_reconciliation_total_cents` | integer (cents) | Sum of the three classes (should reconcile to the price). |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Class V/VI/VII sub-allocation and residual-method cap ordering for IP-heavy deals.
-
-Allocates IP-heavy purchase price across Class V tangible assets, Class VI IP intangibles, and Class VII goodwill/going concern.
+Given `purchase_price_cents`, `tangible_assets_cents` (Class V), and `ip_intangibles_cents` (Class VI §197 intangibles):
+1. If any of the three is missing, the implementation SHALL return `status: "needs_inputs"` naming the missing fields.
+2. Following the residual-method ordering (constants: §1060 residual-method class ordering), `class_v_tangible_assets_cents` SHALL be `min(purchase_price_cents, tangible_assets_cents)`.
+3. The remainder after Class V SHALL be `max(0, purchase_price_cents − class_v)`; `class_vi_ip_section_197_intangibles_cents` SHALL be `min(remainder, ip_intangibles_cents)`.
+4. `class_vii_goodwill_going_concern_cents` SHALL be the residual `max(0, purchase_price_cents − class_v − class_vi)`.
+5. `ip_value_excess_over_purchase_price_cents` SHALL be `max(0, ip_intangibles_cents − remainder)` (IP value that does not fit under the price); `form_8594_reconciliation_total_cents` SHALL be the sum of the three classes.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| §1060 residual-method class ordering | Class V (tangible/§1231) → Class VI (§197 intangibles ex-goodwill, incl. IP) → Class VII (goodwill and going-concern value) | table (jurisdictional) | Treas. Reg. § 1.1060-1(c); § 1.338-6(b) | § 1.338-6(b)(2) (residual-method ordering) | current (Treas. Reg. as amended) | on Treasury amendment |
 
 
 **Authorities**
@@ -10567,30 +11691,32 @@ Allocates IP-heavy purchase price across Class V tangible assets, Class VI IP in
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.IP.1060.001` — *IP-specific 1060 allocation maps Class V, VI, and VII*.
+*A $50M IP-heavy asset deal with $8M of tangible assets and $30M of identified IP intangibles allocates $8M to Class V, $30M to Class VI, and the $12M residual to Class VII goodwill.*
 
 **Inputs**
 
 ```json
 {
-  "purchase_price_cents": 1000000,
-  "tangible_assets_cents": 200000,
-  "ip_intangibles_cents": 600000
+  "purchase_price_cents": 5000000000,
+  "tangible_assets_cents": 800000000,
+  "ip_intangibles_cents": 3000000000
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.IP.1060.ALLOCATION.v1`)**
 
 ```json
 {
-  "purchase_price_cents": 1000000,
-  "class_v_tangible_assets_cents": 200000,
-  "class_vi_ip_section_197_intangibles_cents": 600000,
-  "class_vii_goodwill_going_concern_cents": 200000,
+  "purchase_price_cents": 5000000000,
+  "class_v_tangible_assets_cents": 800000000,
+  "class_vi_ip_section_197_intangibles_cents": 3000000000,
+  "class_vii_goodwill_going_concern_cents": 1200000000,
   "ip_value_excess_over_purchase_price_cents": 0,
-  "form_8594_reconciliation_total_cents": 1000000
+  "form_8594_reconciliation_total_cents": 5000000000
 }
 ```
+
+Precision: All allocations are exact integer cents (see the Conventions chapter); no rounding.
 
 ## 7. Error semantics
 
@@ -10599,7 +11725,7 @@ Conformance case `CONF.MODEL.IP.1060.001` — *IP-specific 1060 allocation maps 
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model computes the Class V/VI/VII residual allocation for an IP-heavy deal from supplied values. Whether an asset belongs in a given class, whether the supplied fair market values are supportable, and the binding Form 8594 positions are determinations for the parties' tax advisors; the model computes the allocation the supplied values imply and renders no valuation or classification opinion.
 
 ## 9. Conformance bindings
 
@@ -10617,44 +11743,46 @@ Reference binding `MODEL.IP.1060.ALLOCATION.v1` · entered the specification at 
 **Gates:** G10
 **Deal contexts:** domain transfer · trademark transfer
 
+> **Implementable from this document alone.** This entry carries the full authored contract — typed inputs and outputs, an RFC-2119 algorithm, constants with pin-cites, and a worked example whose every output literal traces to a constant, an input, or a derived field.
+
 ## 1. Purpose
 
-Registrar auth-code, 60-day lock, trademark assignment recording, state trademark, social-handle, and SSL transfer steps.
+Builds the transfer task list for domains, trademarks, social handles, and SSL certificates — registrar auth codes and transfer locks for domains, USPTO and state assignment recordings for trademarks, handle transfers, and certificate reissuance — and counts what each asset type needs. It answers, at closing of a deal with digital assets, "what are the concrete steps to move each domain, mark, and handle, and which domains are still locked?" It sequences the mechanical steps from supplied asset facts.
 
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M223.schema.json`](M223.schema.json).
 
-| Field | Type | Required |
-|---|---|---|
-| `transfer_assets` | object[] | MUST |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `transfer_assets` | object[] | MUST | Digital/brand assets to transfer; each object carries `name` (string), `type` (string, e.g. domain/trademark/social/ssl), `transfer_lock_days_remaining` (integer), `state_registered` (boolean), and `ssl_certificate_attached` (boolean). |
 
 ## 3. Output contract
 
-| Field | Type |
-|---|---|
-| `auth_code_required_count` | integer |
-| `domain_count` | integer |
-| `locked_domain_count` | integer |
-| `social_handle_transfer_count` | integer |
-| `ssl_reissue_count` | integer |
-| `state_assignment_required_count` | integer |
-| `trademark_count` | integer |
-| `transfer_asset_count` | integer |
-| `transfer_rows` | object[] |
-| `uspto_assignment_recording_count` | integer |
+| Field | Type | Description |
+|---|---|---|
+| `transfer_asset_count` | integer | Number of transfer assets. |
+| `domain_count` | integer | Number of domains. |
+| `trademark_count` | integer | Number of trademarks. |
+| `auth_code_required_count` | integer | Number of assets needing a registrar auth code. |
+| `locked_domain_count` | integer | Number of domains still within a transfer lock. |
+| `uspto_assignment_recording_count` | integer | Number needing USPTO assignment recording. |
+| `state_assignment_required_count` | integer | Number needing a state trademark assignment. |
+| `social_handle_transfer_count` | integer | Number of social handles to transfer. |
+| `ssl_reissue_count` | integer | Number of SSL certificates to reissue. |
+| `transfer_rows` | object[] | Per-asset detail: `{ name, type, auth_code_required, transfer_lock_days_remaining, uspto_assignment_recording_required, state_assignment_required, social_handle_transfer_required, ssl_reissue_required }`. |
 
 ## 4. Algorithm
 
-> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.
-
-Registrar auth-code, 60-day lock, trademark assignment recording, state trademark, social-handle, and SSL transfer steps.
-
-Computes domain auth-code, ICANN lock, USPTO assignment, state trademark, social-handle, and SSL transfer counts.
+Given `transfer_assets` (a list of asset objects, each with a type and transfer facts):
+1. If `transfer_assets` is empty, the implementation SHALL return `status: "needs_inputs"` naming `transfer_assets`.
+2. For each asset it SHALL set `auth_code_required` iff it is a domain, `uspto_assignment_recording_required` iff it is a trademark, `state_assignment_required` from the state-registered flag, `social_handle_transfer_required` iff it is a social handle, and `ssl_reissue_required` iff it is an SSL asset or a certificate is attached; it SHALL take the transfer-lock days remaining (the ICANN 60-day post-transfer lock is the governing window).
+3. It SHALL count assets, domains, trademarks, auth-code-required assets, locked domains (lock days > 0), USPTO recordings, state assignments, social-handle transfers, and SSL reissuances.
+4. It SHALL return the full per-asset transfer detail.
 
 ## 5. Constants & authorities
 
-> **Pin-cite pass pending (draft gap):** section-level pin-cites, effective dates, and `next_check_due` land with the Authority Register export.
+_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
 
 
 **Authorities**
@@ -10666,7 +11794,7 @@ Computes domain auth-code, ICANN lock, USPTO assignment, state trademark, social
 
 ## 6. Worked example
 
-Conformance case `CONF.MODEL.IP.DOMAIN_TM.001` — *Domain and trademark transfer mechanics compute transfer requirements*.
+*Four transfer assets: a domain still 15 days inside its ICANN transfer lock needs an auth code, a state-registered trademark needs USPTO and state assignment recording, a social handle needs manual transfer, and an SSL certificate needs reissuance.*
 
 **Inputs**
 
@@ -10674,29 +11802,32 @@ Conformance case `CONF.MODEL.IP.DOMAIN_TM.001` — *Domain and trademark transfe
 {
   "transfer_assets": [
     {
-      "type": "domain",
       "name": "example.com",
-      "transfer_lock_days_remaining": 45,
-      "ssl_certificate_attached": true
+      "type": "domain",
+      "transfer_lock_days_remaining": 15
     },
     {
+      "name": "Company wordmark",
       "type": "trademark",
-      "name": "EXAMPLE",
       "state_registered": true
     },
     {
-      "type": "social",
-      "name": "@example"
+      "name": "@company",
+      "type": "social_handle"
+    },
+    {
+      "name": "wildcard SSL",
+      "type": "ssl"
     }
   ]
 }
 ```
 
-**Outputs (reference implementation, verified by the suite)**
+**Outputs (executed against the reference implementation `MODEL.IP.DOMAIN_TM.TRANSFER.v1`)**
 
 ```json
 {
-  "transfer_asset_count": 3,
+  "transfer_asset_count": 4,
   "domain_count": 1,
   "trademark_count": 1,
   "auth_code_required_count": 1,
@@ -10710,14 +11841,14 @@ Conformance case `CONF.MODEL.IP.DOMAIN_TM.001` — *Domain and trademark transfe
       "name": "example.com",
       "type": "domain",
       "auth_code_required": true,
-      "transfer_lock_days_remaining": 45,
+      "transfer_lock_days_remaining": 15,
       "uspto_assignment_recording_required": false,
       "state_assignment_required": false,
       "social_handle_transfer_required": false,
-      "ssl_reissue_required": true
+      "ssl_reissue_required": false
     },
     {
-      "name": "EXAMPLE",
+      "name": "Company wordmark",
       "type": "trademark",
       "auth_code_required": false,
       "transfer_lock_days_remaining": 0,
@@ -10727,18 +11858,30 @@ Conformance case `CONF.MODEL.IP.DOMAIN_TM.001` — *Domain and trademark transfe
       "ssl_reissue_required": false
     },
     {
-      "name": "@example",
-      "type": "social",
+      "name": "@company",
+      "type": "social_handle",
       "auth_code_required": false,
       "transfer_lock_days_remaining": 0,
       "uspto_assignment_recording_required": false,
       "state_assignment_required": false,
       "social_handle_transfer_required": true,
       "ssl_reissue_required": false
+    },
+    {
+      "name": "wildcard SSL",
+      "type": "ssl",
+      "auth_code_required": false,
+      "transfer_lock_days_remaining": 0,
+      "uspto_assignment_recording_required": false,
+      "state_assignment_required": false,
+      "social_handle_transfer_required": false,
+      "ssl_reissue_required": true
     }
   ]
 }
 ```
+
+Precision: All outputs are counts and day terms (see the Conventions chapter); no rounding.
 
 ## 7. Error semantics
 
@@ -10747,7 +11890,7 @@ Conformance case `CONF.MODEL.IP.DOMAIN_TM.001` — *Domain and trademark transfe
 
 ## 8. Boundary statement
 
-This model answers its computational question from supplied facts and cited constants. It renders no legal, tax, accounting, investment, or appraisal opinion; classifications it emits (flags, routings) are inputs to professional judgment, not substitutes for it.
+This model sequences the mechanical transfer steps for domains, marks, handles, and certificates from supplied asset facts. Whether a trademark assignment is valid without the associated goodwill, and the enforceability of any transfer, are legal determinations for counsel; the model builds the task list and the counts and renders no validity conclusion.
 
 ## 9. Conformance bindings
 

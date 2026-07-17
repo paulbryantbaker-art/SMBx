@@ -775,7 +775,7 @@ records the \`asof\` date in its audit payload.
 async function main() {
   rmSync(OUT, { recursive: true, force: true });
   rmSync(OUT_INTERNAL, { recursive: true, force: true });
-  for (const dir of ['', 'spec', 'spec/gates', 'spec/models', 'spec/state-law', 'spec/conformance', 'spec/conformance/cases', 'reference/ts', 'reference/python', 'machine']) {
+  for (const dir of ['', 'spec', 'spec/gates', 'spec/models', 'spec/state-law', 'spec/conformance', 'spec/conformance/cases', 'reference/ts', 'reference/ts/conformance', 'reference/ts/conformance/cases', 'reference/python', 'machine']) {
     mkdirSync(path.join(OUT, dir), { recursive: true });
   }
   mkdirSync(OUT_INTERNAL, { recursive: true });
@@ -867,8 +867,24 @@ legal, tax, accounting, investment, or appraisal advice, and it renders no
 opinions. Questions it classifies as specialist determinations belong to
 licensed professionals.
 `);
-  write('reference/ts/README.md', `# DEFINITIVE reference implementation — TypeScript\n\nReference implementation of the ${TITLE} (v${PUBLIC_VERSION}). Scaffold — lands with the conformance harness. License: MIT.\n`);
-  write('reference/ts/package.json', JSON.stringify({ name: '@definitive-spec/reference', version: PUBLIC_VERSION, private: true, license: 'MIT' }, null, 2) + '\n');
+  // §Item 6 — emit the SELF-CONTAINED, externally-runnable TS reference package
+  // (independent implementation + conformance harness). `npm install && npm test`
+  // runs the published suite + boundary-refusal cases with no private code.
+  {
+    const refSrc = path.resolve(__dirname, '../reference/definitive-ts/conformance');
+    for (const f of ['spec-models.ts', 'run.ts', 'boundary-refusal.cases.json']) {
+      write(`reference/ts/conformance/${f}`, readFileSync(path.join(refSrc, f), 'utf8'));
+    }
+    // Bundle the published cases INTO the package so an external clone is self-contained.
+    write('reference/ts/conformance/cases/model-runtime.cases.json', JSON.stringify(fixtures, null, 2) + '\n');
+    write('reference/ts/package.json', JSON.stringify({
+      name: '@definitive-spec/reference-ts', version: PUBLIC_VERSION, private: false, type: 'module',
+      description: `Independent TypeScript reference implementation + conformance harness for the ${TITLE}.`,
+      scripts: { test: 'tsx conformance/run.ts' }, devDependencies: { tsx: '^4.0.0' }, license: 'MIT',
+    }, null, 2) + '\n');
+    write('reference/ts/LICENSE', readFileSync(path.join(OUT, 'LICENSE'), 'utf8'));
+    write('reference/ts/README.md',`# ${TITLE} — TypeScript reference implementation\n\n${BANNER}An **independent** implementation of the published model contract, plus a\nconformance harness that runs the published suite against it. It shares no code\nwith the smbX runtime: two independent implementations agreeing is what proves\nthe specification is unambiguous. License: MIT.\n\n## Run\n\n\`\`\`bash\nnpm install\nnpm test\n\`\`\`\n\n\`npm test\` executes every published model-runtime case that targets a covered\nmodel against the reference implementation (exact output match; monetary\ninteger cents; rates half-to-even to 4 decimals per the Conventions chapter),\nthen runs the boundary-refusal (\`REQ-DTC\`) cases — a conforming implementation\nMUST route a specialist determination (\`defer_to_counsel: true\`), not answer it.\nA green run means an independent implementation reproduced the published suite\nfrom the specification alone.\n\nThe contract: \`execute(modelId, input) -> { status, outputs, missingInputs }\`.\nCoverage extends by adding one function plus its slot→binding entry; the harness\nreports how many models are covered. This is an educational/engineering\nreference — not legal, tax, accounting, investment, or appraisal advice.\n`);
+  }
   write('reference/python/README.md', `# DEFINITIVE reference implementation — Python\n\nReference implementation of the ${TITLE} (v${PUBLIC_VERSION}). Scaffold — lands with the conformance harness. License: MIT.\n`);
   write('reference/python/pyproject.toml', `[project]\nname = "definitive-spec-reference"\nversion = "${PUBLIC_VERSION}"\nlicense = { text = "MIT" }\n`);
 

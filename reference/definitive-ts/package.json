@@ -3,11 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Internal TypeScript reference proof for DEFINITIVE deterministic deal mechanics.",
+  "description": "TypeScript reference implementation + conformance harness for the DEFINITIVE M&A specification.",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./conformance": "./conformance/spec-models.ts"
   },
   "scripts": {
-    "test": "tsx ../../scripts/definitive-reference-smoke.ts"
-  }
+    "test": "tsx conformance/run.ts",
+    "test:legacy-smoke": "tsx ../../scripts/definitive-reference-smoke.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0"
+  },
+  "license": "MIT"
 }

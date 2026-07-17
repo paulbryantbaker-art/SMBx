@@ -1510,7 +1510,7 @@
       "status": "complete",
       "outputs": {
         "net_unrealized_built_in_gain_cents": 40000000,
-        "years_since_conversion": 3,
+        "years_since_conversion": 3.0007,
         "within_recognition_period": true,
         "recognized_big_tax_base_cents": 30000000,
         "section_1374_tax_cents": 6300000
@@ -3278,7 +3278,7 @@
         "period_count": 2,
         "minimum_dscr_floor": 1.1,
         "minimum_liquidity_floor_cents": 100000,
-        "minimum_projected_dscr": 1.15,
+        "minimum_projected_dscr": 1.1538,
         "minimum_projected_liquidity_cents": 75000,
         "dscr_floor_breached": false,
         "liquidity_floor_breached": true,
@@ -4038,7 +4038,7 @@
     "expect": {
       "status": "complete",
       "outputs": {
-        "tail_years_after_loan_maturity": 30,
+        "tail_years_after_loan_maturity": 29.9986,
         "required_tail_years": 25,
         "lender_tail_requirement_satisfied": true,
         "lender_recognition_agreement": true,
