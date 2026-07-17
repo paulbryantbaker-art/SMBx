@@ -244,6 +244,14 @@ export default function PracticeShell({
                 ? 'Buy-side corporate development for acquirers in the lower middle market.'
                 : "Buy-side corporate development for acquirers in the lower middle market. A senior operator and a full team's output, exclusively on your side of the table."}
             </div>
+            <div className="pd-footer-founder">
+              <img src="/founder-portrait.jpg" alt="Paul Baker" loading="lazy" />
+              <div>
+                <div className="fname">Paul Baker</div>
+                <div className="frole">Founder · two decades on the buy side</div>
+                <a className="fmeet" href="/about">Meet Paul →</a>
+              </div>
+            </div>
           </div>
           <div style={{ display: 'flex', gap: 56, flexWrap: 'wrap' }}>
             {footerCompact ? (
@@ -252,6 +260,7 @@ export default function PracticeShell({
                 <a href="/#how">How it works</a>
                 <a href="/#sample">Sample read</a>
                 <a href="/#cta">Confidential consultation</a>
+                <a href="/login">Team sign in</a>
               </div>
             ) : (
               <>
@@ -262,6 +271,7 @@ export default function PracticeShell({
                   <a href={anchor('#sample')}>Sample read</a>
                   <a href={anchor('#proof')}>Track record</a>
                   <a href={anchor('#cta')}>Confidential consultation</a>
+                  <a href="/login">Team sign in</a>
                 </div>
                 <div className="pd-footer-col">
                   <div className="h">BUYERS</div>
