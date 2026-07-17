@@ -7,7 +7,7 @@
  * canvas → Deals (keeps the prior app tab feel), pipeline alias → Deals,
  * settings → none.
  */
-import type { CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useAtlasNav, type AtlasScreen } from "./atlasNav";
 import { Sparkle, Avatar } from "./primitives";
 import { SearchIcon, HelpIcon, BellIcon } from "./icons";
@@ -39,13 +39,34 @@ function activeTabFor(screen: AtlasScreen): AtlasScreen | null {
 
 export function AtlasHeader({
   initials,
+  email = null,
+  onSignOut,
   hasNotifications = false,
 }: {
   initials: string;
+  email?: string | null;
+  onSignOut?: () => void;
   hasNotifications?: boolean;
 }) {
   const nav = useAtlasNav();
   const active = activeTabFor(nav.view.screen);
+
+  // Account menu (avatar → identity · Settings · Sign out).
+  const [menuOpen, setMenuOpen] = useState(false);
+  const acctRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      if (!acctRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMenuOpen(false); };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
 
   return (
     <header style={S.header}>
@@ -177,16 +198,44 @@ export function AtlasHeader({
         Upgrade
       </button>
 
-      <button
-        type="button"
-        aria-label="Account"
-        onClick={() => nav.openSettings("profile")}
-        style={S.avatarBtn}
-        onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
-        onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-      >
-        <Avatar initials={initials} size={32} gradient />
-      </button>
+      <div ref={acctRef} style={S.acctWrap}>
+        <button
+          type="button"
+          aria-label="Account"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((o) => !o)}
+          style={S.avatarBtn}
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
+          onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+        >
+          <Avatar initials={initials} size={32} gradient />
+        </button>
+        {menuOpen && (
+          <div style={S.acctMenu} role="menu" aria-label="Account">
+            {email && <div style={S.acctId}>{email}</div>}
+            <button
+              type="button"
+              role="menuitem"
+              style={S.acctItem}
+              onClick={() => { setMenuOpen(false); nav.openSettings("profile"); }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = T.tabHover)}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+            >
+              Settings
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              style={S.acctItem}
+              onClick={() => { setMenuOpen(false); onSignOut?.(); }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = T.tabHover)}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+            >
+              Sign out
+            </button>
+          </div>
+        )}
+      </div>
     </header>
   );
 }
@@ -334,6 +383,44 @@ const S: Record<string, CSSProperties> = {
     padding: 0,
     flex: "none",
     transition: "opacity .12s ease",
+  },
+  acctWrap: { position: "relative", flex: "none", display: "flex", alignItems: "center" },
+  acctMenu: {
+    position: "absolute",
+    top: 42,
+    right: 0,
+    minWidth: 224,
+    background: T.white,
+    border: `1px solid ${T.border}`,
+    borderRadius: 14,
+    boxShadow: "0 12px 32px rgba(0,0,0,0.10)",
+    padding: 6,
+    zIndex: 60,
+  },
+  acctId: {
+    padding: "8px 12px 7px",
+    fontSize: 13,
+    color: T.muted,
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    borderBottom: `1px solid ${T.hair}`,
+    marginBottom: 4,
+    maxWidth: 280,
+  },
+  acctItem: {
+    display: "block",
+    width: "100%",
+    textAlign: "left",
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    fontFamily: T.font,
+    fontSize: 14,
+    color: T.ink,
+    padding: "8px 12px",
+    borderRadius: 9,
+    transition: "background .12s ease",
   },
 };
 

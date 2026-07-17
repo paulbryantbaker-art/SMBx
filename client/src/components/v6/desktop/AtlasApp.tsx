@@ -195,7 +195,7 @@ interface ShellProps {
   onDevSignIn?: () => void;
 }
 
-function AtlasShell({ user, chat }: ShellProps) {
+function AtlasShell({ user, chat, onSignOut }: ShellProps) {
   const [view, setView] = useState<AtlasView>({ screen: "today" });
   // Latest view for the canvas_action listener (it subscribes once).
   const viewRef = useRef(view);
@@ -429,7 +429,7 @@ function AtlasShell({ user, chat }: ShellProps) {
         {/* Window frame — fills the viewport in production (not a fixed
             1440×908 centered card). Normal flow, not position:fixed. */}
         <div className="atlas-root" style={S.window}>
-          <AtlasHeader initials={initials} />
+          <AtlasHeader initials={initials} email={user?.email ?? null} onSignOut={onSignOut} />
           {body}
         </div>
       </AtlasChatContext.Provider>
