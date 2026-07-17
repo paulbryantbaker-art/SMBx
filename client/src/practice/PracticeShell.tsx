@@ -186,9 +186,26 @@ export default function PracticeShell({
       <div className="pd-ambient" aria-hidden="true" />
       <header className={`pd-navwrap${navMin ? ' min' : ''}`}>
         <div className="pd-nav">
-          <a href="/" aria-label="smbX.ai home">
+          {/* SPA Link, not a plain anchor: a full reload from down-page races
+              the browser's scroll restoration against the still-mounting page
+              and strands the user a screen below the top. Same-path clicks
+              (already home) never re-fire the router, so handle them here. */}
+          <Link
+            href="/"
+            aria-label="smbX.ai home"
+            onClick={(e) => {
+              if (window.location.pathname === '/') {
+                e.preventDefault();
+                if (window.location.hash) history.replaceState(null, '', '/');
+                window.scrollTo(0, 0);
+                // Re-assert through the settle window — late images/fonts can
+                // nudge the page a few px off zero as the layout settles.
+                [120, 350, 800, 1500, 2400].forEach(d => setTimeout(() => window.scrollTo(0, 0), d));
+              }
+            }}
+          >
             <img src="/logo-coral-x.png" alt="smbX.ai" className="pd-nav-logo" />
-          </a>
+          </Link>
           <nav className="pd-nav-links" aria-label="Site">
             <a href={anchor('#why')}>Why us</a>
             <a href={anchor('#how')}>How it works</a>

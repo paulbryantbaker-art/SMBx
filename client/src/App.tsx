@@ -5,6 +5,21 @@ import { ChatProvider } from './context/ChatContext';
 import { isSuperAdminUser } from './lib/superAdmin';
 import { trackEvent } from './lib/analytics';
 
+// ─── Scroll memory for back/forward ──────────────────────────
+// Module scope, registered before wouter loads: the router flushes its state
+// update synchronously inside the popstate dispatch, so a listener added later
+// (e.g. in a component effect) runs AFTER the route effect has already read
+// its flags. restoringNav gates save() — on back/forward the browser fires its
+// own (clamped) restore scroll on the NEW pathname before our effect runs,
+// which would otherwise overwrite the very position we're about to restore.
+const scrollMemory = new Map<string, number>();
+let lastPopTs = 0;
+let restoringNav = false;
+window.addEventListener('popstate', () => { lastPopTs = performance.now(); restoringNav = true; });
+window.addEventListener('scroll', () => {
+  if (!restoringNav) scrollMemory.set(window.location.pathname, window.scrollY);
+}, { passive: true });
+
 /** Transfer anonymous conversations to the newly-authenticated user */
 async function migrateSessionConversations() {
   const sessionId = localStorage.getItem('smbx_session_id');
@@ -236,9 +251,52 @@ export default function App() {
   // target isn't in the DOM yet — the destination page is still mounting and
   // lazy-loading — so the browser's native anchor scroll misses and you land
   // at the top (needing a second click). Retry until it renders, then scroll.
+  // Back/forward must restore the reader's old position — but the browser's
+  // native restore fires once against the still-mounting (short) lazy page and
+  // clamps, stranding the reader near the top. So we remember scroll per path
+  // ourselves and restore once the page has grown back to size.
+  const firstRoute = useRef(true);
   useEffect(() => {
+    const pop = lastPopTs > 0 && performance.now() - lastPopTs < 800;
+    lastPopTs = 0;
+    const first = firstRoute.current;
+    firstRoute.current = false;
+    if (!pop) restoringNav = false;
     const hash = window.location.hash;
-    if (!hash) { window.scrollTo(0, 0); return; }
+    if (!hash) {
+      if (pop) {
+        // In-app back/forward: restore the remembered position once the lazy
+        // page is tall enough to hold it (up to ~4s), else settle for max.
+        const saved = scrollMemory.get(window.location.pathname);
+        if (saved == null || saved === 0) { restoringNav = false; window.scrollTo(0, 0); return; }
+        let tries = 0;
+        const timers: ReturnType<typeof setTimeout>[] = [];
+        const attempt = () => {
+          const max = document.documentElement.scrollHeight - window.innerHeight;
+          if (max >= saved || tries >= 80) {
+            window.scrollTo(0, Math.max(0, Math.min(saved, max)));
+            restoringNav = false;
+            return;
+          }
+          tries++; timers.push(setTimeout(attempt, 50));
+        };
+        attempt();
+        return () => timers.forEach(clearTimeout);
+      }
+      if (first) {
+        // First run = full page load. Only a fresh link/typed navigation gets
+        // forced to top; reload and history traversal restore natively.
+        const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+        if (nav && nav.type !== 'navigate') return;
+      }
+      // Land at the true top, then re-assert while the lazy page mounts and the
+      // layout settles (scroll anchoring against late images/fonts can strand
+      // the page a nudge below zero). Same settle windows as the hash path,
+      // with a longer tail for slow mounts.
+      window.scrollTo(0, 0);
+      const timers = [120, 350, 800, 1500, 2400].map(d => setTimeout(() => window.scrollTo(0, 0), d));
+      return () => timers.forEach(clearTimeout);
+    }
     let cancelled = false;
     let tries = 0;
     const timers: ReturnType<typeof setTimeout>[] = [];
