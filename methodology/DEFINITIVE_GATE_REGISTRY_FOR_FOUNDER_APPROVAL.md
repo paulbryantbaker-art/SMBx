@@ -1,3 +1,8 @@
+> **STATUS: APPROVED (Paul, 2026-07-17) and merged into `DEFINITIVE_GATE_EXPANSIONS`** in
+> `server/services/definitiveDealMechanicsCatalog.ts`. G14 kept as drafted (option A); the
+> optional QSBS→G15 re-route was declined. `--publish` now passes. This file is retained as
+> the approval record.
+
 # Gate Registry — FOR FOUNDER APPROVAL (do not publish; do not merge without sign-off)
 
 > The publish gate blocks any build with an unnamed routed gate, so the specification CANNOT ship until these names, purposes, and predicates are approved and merged into DEFINITIVE_GATE_EXPANSIONS. CC drafts; founder approves. Predicates are machine-evaluable over the deal-fact data-dictionary vocabulary.
