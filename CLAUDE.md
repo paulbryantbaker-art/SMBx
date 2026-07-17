@@ -144,8 +144,10 @@ Valuation Explorer, LBO, SBA Financing, DCF, Tax Impact, Cap Table, Sensitivity 
 | server/constants/v19Leagues.ts | V19 L1-L10 league classification constants |
 | server/services/sourcingPipelineService.ts | 5-stage sourcing engine |
 | server/services/researchAgent.ts | Internal research agent (2026-07-15): 6 research types × 3 depths, server-side web_search/web_fetch via Sonnet 4.6 (pause_turn resume loop), cited md report + STUDIO FEED, cents-tracked spend vs monthly cap, in-process campaign scheduler (weekly Sun 22:00 UTC / biweekly / monthly, completion email) |
-| server/services/researchComposer.ts | Research artifacts in the CORAL language (not terra premium-PDF skin): letter report PDF + 1080×1350 LinkedIn card PNG, rendered on demand via shared Puppeteer |
-| server/routes/research.ts | Research runs/schedules CRUD + pdf/card.png/md downloads (behind blanket /api auth + practice perimeter) |
+| server/services/researchComposer.ts | Research + announcement artifacts in the CORAL language (not terra premium-PDF skin): letter report PDF, 1080×1350 LinkedIn card PNG, LinkedIn doc-post PDF, and the announcement card (light/dark, media-library photo + focal crop) — rendered on demand via shared Puppeteer; real logo in the site's two treatments (coral as-is / white-inverted on dark) |
+| server/services/studioAssets.ts | Studio media library (migration 099 studio_assets, bytea in PG): upload/list/serve/patch/delete + per-asset focal point that drives object-position framing in every composer; lazy-seeds the two founder photos |
+| server/routes/research.ts | Research runs/schedules CRUD + pdf/card.png/doc.pdf/post.txt downloads + /studio/assets CRUD + /studio/announcement.png compose (behind blanket /api auth + practice perimeter) |
+| client/src/components/v6/desktop/screens/StudioAnnouncement.tsx | Studio Media + Announcement section (mounted in StudioResearch): photo upload, focal sliders, announcement copy form, render/download/preview |
 | client/src/components/v6/desktop/screens/StudioResearch.tsx | Studio "Research & campaigns" mode — Paul's control panel (topic/type/depth/output + cadence campaigns); StudioCreate.tsx carries the mode toggle |
 | server/services/tools.ts | 35 agentic tools |
 | server/services/definitiveConnectorDistribution.ts | Claude-first connector launch package and marketplace evidence pack |

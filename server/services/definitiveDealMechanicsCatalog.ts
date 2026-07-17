@@ -237,7 +237,7 @@ export const DEFINITIVE_DEAL_MECHANICS_CATALOG: DefinitiveModelCatalogEntry[] = 
   entry('M226', 'Marketability triage', 'v1_2', 'professional_handoff', ['G30'], ['title diligence'], ['Marketable-title common law', 'ALTA title practice'], 'Curable / insurable-over / deal-killing bucketing of title exceptions; insurable-only contract-standard flag; any deal-killer is a hard defer — the marketability judgment is never emitted.', 'V18c #3 (was M156).', 'MODEL.RE.MARKETABILITY_TRIAGE.v1'),
   entry('M227', 'Risk-of-loss allocator', 'v1_2', 'deterministic', ['G30'], ['real estate purchase agreement'], ['N.Y. Gen. Oblig. Law 5-1311', 'Tex. Prop. Code 5.007', 'Cal. Civ. Code 1662', 'equitable conversion'], 'Contract-override detection plus state default lookup: NY Risk Act seller-risk, CA/TX UVPRA, common-law equitable-conversion buyer-risk.', 'V18c #4 (was M157).', 'MODEL.RE.RISK_OF_LOSS.v1'),
   entry('M228', 'Survival and merger tracker', 'v1_2', 'deterministic', ['G30'], ['real estate purchase agreement', 'M&A closing'], ['merger doctrine (common law)'], 'Flags every relied-on rep/indemnity/covenant lacking an express survival hook or collateral character — merger extinguishes it at closing; fraud exception noted.', 'V18c #5 (was M158).', 'MODEL.RE.SURVIVAL_MERGER.v1'),
-  entry('M229', 'Lease anti-assignment and change-of-control parser', 'v1_2', 'professional_handoff', ['G30'], ['OpCo/PropCo', 'entity deal with leases'], ['Kendall v. Ernest Pestana 40 Cal.3d 488', 'NY assignment common law'], 'Deemed-assignment detection for control transfers, consent-standard classification against the state table (CA Kendall reasonableness vs. NY as-written), recapture interplay; enforceability always routes.', 'V18c #6 (was M159); ground-lease financeability lives in M198/MODEL.RE.GROUND_LEASE.MECHANICS.v1.', 'MODEL.RE.LEASE_COC_ASSIGNMENT.v1'),
+  entry('M229', 'Lease anti-assignment and change-of-control parser', 'v1_2', 'professional_handoff', ['G30'], ['OpCo/PropCo', 'entity deal with leases'], ['Kendall v. Ernest Pestana, Inc., 40 Cal.3d 488 (1985)', 'NY assignment common law'], 'Deemed-assignment detection for control transfers, consent-standard classification against the state table (CA Kendall reasonableness vs. NY as-written), recapture interplay; enforceability always routes.', 'V18c #6 (was M159); ground-lease financeability lives in M198/MODEL.RE.GROUND_LEASE.MECHANICS.v1.', 'MODEL.RE.LEASE_COC_ASSIGNMENT.v1'),
   entry('M230', 'Due-on-sale screener', 'v1_2', 'deterministic', ['G30'], ['real estate financing', 'entity deal with property debt'], ['12 U.S.C. 1701j-3'], 'Garn-St. Germain residential-under-5-units exception filter; commercial and entity transfers get no consumer protection — lender consent flagged as closing critical path.', 'V18c #7 (was M160).', 'MODEL.RE.DUE_ON_SALE.v1'),
   entry('M231', 'Option/ROFR/ROFO trigger detector', 'v1_2', 'professional_handoff', ['G30'], ['real estate M&A', 'entity deal'], ['ROFR/option common law', 'TX strict-match construction'], 'Sale vs. entity-transfer trigger analysis in both directions — the sale that triggers the right and the entity structure that may avoid it; the legal conclusion always routes to counsel.', 'V18c #8 (was M161).', 'MODEL.RE.PREEMPTIVE_RIGHT_TRIGGER.v1'),
   entry('M232', 'Controlling-interest transfer-tax and reassessment screener', 'v1_2', 'deterministic', ['G30', 'G19'], ['entity deal', 'merger with real property'], ['NYC Admin. Code 11-2101', 'NY Tax Law 1405(b)(6)', 'Cal. Rev. & Tax. Code 60-64', 'Tex. Const. art. VIII 29', 'Matter of 105-02 Forest Hills (2025)'], 'The 50-percent entity screen: NY controlling-interest tax with 3-year aggregation, CA Prop 13 change-in-control 100-percent reassessment, TX constitutional prohibition, DE deed tax; step-transaction flag on mere-change claims.', 'V18c #9 (was M162); complements M191.', 'MODEL.RE.CITT_REASSESSMENT_SCREEN.v1'),
@@ -279,7 +279,7 @@ export const DEFINITIVE_GATE_EXPANSIONS: DefinitiveGateExpansion[] = [
     purpose: 'Activates the execution-risk stack — regulatory reportability, MAE durational significance, insurance architecture, transition services, and closing mechanics.',
     primaryModels: ['M108', 'M123', 'M128', 'M144', 'M210', 'M211', 'M212'],
     triggerSummary: ['the deal is signed or an LOI is executed', 'Machine predicate: `signed == true OR loi_executed == true`'],
-    lineNotes: 'DEFINITIVE computes reportability, MAE, insurance, true-up, and fee mechanics; regulatory and enforceability determinations belong to counsel.',
+    lineNotes: 'DEFINITIVE computes the implemented mechanics (reportability, true-up, and closing/fee math) and maps the scheduled ones (MAE durational significance, insurance architecture — Catalog slots); regulatory and enforceability determinations belong to counsel.',
   },
   {
     gateId: 'G8',
@@ -311,7 +311,7 @@ export const DEFINITIVE_GATE_EXPANSIONS: DefinitiveGateExpansion[] = [
     purpose: 'Activates seller-side proceeds tax treatment (e.g., QSBS) and price-adjustment pegs on the sell side.',
     primaryModels: ['M101', 'M109'],
     triggerSummary: ['a sell-side context: seller proceeds treatment and price-adjustment pegs', 'Machine predicate: `sell_side_context == true`'],
-    lineNotes: 'DEFINITIVE computes the QSBS proceeds screen and the working-capital peg; the binding tax position and the negotiated adjustment belong to the tax advisor, counsel, and the accountants. QSBS (M101) also routes through G15 Tax & Corporate Structure.',
+    lineNotes: 'DEFINITIVE computes the working-capital peg (Normative) and maps the QSBS proceeds screen (M101 — Catalog, scheduled); the binding tax position and the negotiated adjustment belong to the tax advisor, counsel, and the accountants. QSBS (M101) also routes through G15 Tax & Corporate Structure.',
   },
   {
     gateId: 'G15',
@@ -319,14 +319,14 @@ export const DEFINITIVE_GATE_EXPANSIONS: DefinitiveGateExpansion[] = [
     purpose: 'The master structuring gate: tax elections, reorganization qualification, corporate-law mechanics, and equity-structure math. Runs whenever a deal form is set — structure analysis always applies.',
     primaryModels: ['M101', 'M102', 'M103', 'M104', 'M105', 'M108', 'M109', 'M111', 'M112', 'M113', 'M114', 'M115', 'M119', 'M121', 'M122', 'M123', 'M124', 'M125', 'M126', 'M127', 'M135', 'M136', 'M139', 'M140', 'M141', 'M142', 'M143', 'M144', 'M145', 'M146', 'M147', 'M148', 'M149', 'M150', 'M180', 'M181', 'M182', 'M183', 'M184', 'M185', 'M186', 'M199'],
     triggerSummary: ['any deal form is set', 'Machine predicate: `deal_form is set`'],
-    lineNotes: 'DEFINITIVE computes tax elections, reorganization qualification, and equity-structure math; the return positions and legal opinions belong to the tax advisor and counsel.',
+    lineNotes: 'DEFINITIVE computes the implemented equity-structure and elections math (Normative slots) and maps the scheduled structuring mechanics — reorganization qualification (M140), 338(h)(10) (M105), 355 spin (M143) are Catalog; the return positions and legal opinions belong to the tax advisor and counsel.',
   },
   {
     gateId: 'G19',
     name: 'State & Local Transaction Tax',
     purpose: 'Activates state/local transfer-tax, controlling-interest, SALT, and clearance mechanics when US state jurisdictions are involved.',
     primaryModels: ['M191', 'M200', 'M205', 'M232', 'M233'],
-    triggerSummary: ['one or more US state jurisdictions are involved', 'Machine predicate: `us_state_jurisdictions.length > 0`'],
+    triggerSummary: ['one or more US state jurisdictions are involved', 'Machine predicate: `states_involved.length > 0`'],
     lineNotes: 'DEFINITIVE screens transfer, controlling-interest, and SALT mechanics against the state tables; whether a transfer is taxable belongs to tax counsel.',
   },
   {
@@ -350,7 +350,7 @@ export const DEFINITIVE_GATE_EXPANSIONS: DefinitiveGateExpansion[] = [
     name: 'Fund Secondaries & GP-Led Transactions',
     purpose: 'Activates fund-level and secondaries mechanics (continuation funds, LP secondaries, strip sales, NAV facilities).',
     primaryModels: ['M120', 'M177', 'M178', 'M179'],
-    triggerSummary: ['a fund counterparty or a secondary/continuation/strip/NAV transaction', 'Machine predicate: `counterparty_type in {fund_lp, fund_gp} OR transaction_type in {secondary, continuation, strip, nav}`'],
+    triggerSummary: ['a fund counterparty or a secondary/continuation/strip/NAV transaction', 'Machine predicate: `counterparty_type in {fund_lp, fund_gp} OR deal_type in {secondary, continuation, strip, nav}`'],
     lineNotes: 'DEFINITIVE computes fund-level and secondaries mechanics; fund-document and tax determinations belong to fund counsel and the tax advisor.',
   },
   {

@@ -75,9 +75,13 @@ for (const c of covered) {
 }
 
 /* ── Boundary-refusal suite (REQ-DTC — route, do not answer) ───────────── */
+// The published suite ships boundary cases for every model-backed DTC category;
+// this reference implementation runs the ones whose model it covers (coverage
+// extends model-by-model, exactly like the model-runtime suite above).
 const boundaryFile = path.resolve(__dirname, 'boundary-refusal.cases.json');
-const boundaryCases: BoundaryCase[] = JSON.parse(readFileSync(boundaryFile, 'utf8'));
-console.log(`\nBoundary-refusal suite: ${boundaryCases.length} case(s) — a conforming implementation MUST route, not answer.`);
+const allBoundary: BoundaryCase[] = JSON.parse(readFileSync(boundaryFile, 'utf8'));
+const boundaryCases = allBoundary.filter(c => COVERED_MODELS.includes(c.slot));
+console.log(`\nBoundary-refusal suite: ${boundaryCases.length} of ${allBoundary.length} case(s) target covered models — a conforming implementation MUST route, not answer.`);
 for (const c of boundaryCases) {
   try {
     const r = execute(c.slot, c.input);

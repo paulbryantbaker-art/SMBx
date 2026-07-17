@@ -19,9 +19,20 @@ import {
   getMonthlyCapCents,
   nextRunAt,
 } from '../services/researchAgent.js';
-import { renderResearchPdf, renderResearchCardPng, type ResearchRunRow } from '../services/researchComposer.js';
+import { renderResearchPdf, renderResearchCardPng, renderLinkedInDocPdf, researchPostText, renderAnnouncementCardPng, type ResearchRunRow, type AnnouncementSpec } from '../services/researchComposer.js';
+import { listStudioAssets, getStudioAsset, createStudioAsset, updateStudioAsset, deleteStudioAsset } from '../services/studioAssets.js';
+import multer from 'multer';
 
 export const researchRouter = Router();
+
+/* Media uploads: images only, memory storage (bytes land in Postgres). */
+const assetUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 12 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    cb(null, ['image/png', 'image/jpeg', 'image/webp'].includes(file.mimetype));
+  },
+});
 
 function userIdFromReq(req: any): number | null {
   const id = Number(req.userId);
@@ -180,6 +191,41 @@ researchRouter.get('/research/runs/:id/card.png', async (req, res) => {
   }
 });
 
+// LinkedIn document post — swipeable 1080×1350 PDF in the practice brand.
+researchRouter.get('/research/runs/:id/linkedin.pdf', async (req, res) => {
+  const userId = userIdFromReq(req);
+  const id = parseId(req.params.id);
+  if (!userId || !id) return res.status(400).json({ error: 'Bad request' });
+  try {
+    const run = await loadCompleteRun(id, userId);
+    if (!run) return res.status(404).json({ error: 'No completed run' });
+    if (!run.studio_feed) return res.status(404).json({ error: 'This run has no studio feed to build a document post from' });
+    const pdf = await renderLinkedInDocPdf(run);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="smbx-linkedin-${slugify(run.report_title || run.topic)}.pdf"`);
+    return res.send(pdf);
+  } catch (err: any) {
+    console.error('[research] linkedin pdf render failed:', err.message);
+    return res.status(500).json({ error: 'LinkedIn PDF render failed' });
+  }
+});
+
+// The ready-to-paste post text that ships with either LinkedIn artifact.
+researchRouter.get('/research/runs/:id/post.txt', async (req, res) => {
+  const userId = userIdFromReq(req);
+  const id = parseId(req.params.id);
+  if (!userId || !id) return res.status(400).json({ error: 'Bad request' });
+  try {
+    const run = await loadCompleteRun(id, userId);
+    if (!run) return res.status(404).json({ error: 'No completed run' });
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    return res.send(researchPostText(run));
+  } catch (err: any) {
+    console.error('[research] post text failed:', err.message);
+    return res.status(500).json({ error: 'Post text failed' });
+  }
+});
+
 researchRouter.get('/research/runs/:id/md', async (req, res) => {
   const userId = userIdFromReq(req);
   const id = parseId(req.params.id);
@@ -301,5 +347,126 @@ researchRouter.delete('/research/schedules/:id', async (req, res) => {
   } catch (err: any) {
     console.error('[research] delete schedule failed:', err.message);
     return res.status(500).json({ error: 'Failed to delete the campaign' });
+  }
+});
+
+/* ─── Studio media library (2026-07-17) ───────────────────────────────────
+ * Photos the composers pull into artifacts. Each asset carries a focal point
+ * (0–1 fractions) so any layout crops it correctly. Served bytes are private
+ * (behind auth); the client fetches with authHeaders and object-URLs them.
+ */
+
+researchRouter.get('/studio/assets', async (req, res) => {
+  if (!userIdFromReq(req)) return res.status(401).json({ error: 'Not authenticated' });
+  try {
+    return res.json({ assets: await listStudioAssets() });
+  } catch (err) {
+    console.error('[studio] list assets failed', err);
+    return res.status(500).json({ error: 'Failed to load media' });
+  }
+});
+
+researchRouter.post('/studio/assets', assetUpload.single('file'), async (req, res) => {
+  if (!userIdFromReq(req)) return res.status(401).json({ error: 'Not authenticated' });
+  const file = (req as any).file as { buffer: Buffer; mimetype: string; originalname: string } | undefined;
+  if (!file) return res.status(400).json({ error: 'Attach an image file (png, jpeg, or webp, ≤12MB)' });
+  try {
+    const label = String(req.body?.label || '').trim() || file.originalname.replace(/\.[a-z0-9]+$/i, '');
+    const id = await createStudioAsset({ label, mime: file.mimetype, data: file.buffer });
+    return res.json({ id });
+  } catch (err) {
+    console.error('[studio] upload failed', err);
+    return res.status(500).json({ error: 'Upload failed' });
+  }
+});
+
+researchRouter.get('/studio/assets/:id/raw', async (req, res) => {
+  if (!userIdFromReq(req)) return res.status(401).json({ error: 'Not authenticated' });
+  const id = parseId(req.params.id);
+  if (!id) return res.status(400).json({ error: 'Bad asset id' });
+  try {
+    const asset = await getStudioAsset(id);
+    if (!asset) return res.status(404).json({ error: 'Not found' });
+    res.setHeader('Content-Type', asset.mime);
+    res.setHeader('Cache-Control', 'private, max-age=3600');
+    return res.send(asset.data);
+  } catch (err) {
+    console.error('[studio] asset raw failed', err);
+    return res.status(500).json({ error: 'Failed to load asset' });
+  }
+});
+
+researchRouter.patch('/studio/assets/:id', async (req, res) => {
+  if (!userIdFromReq(req)) return res.status(401).json({ error: 'Not authenticated' });
+  const id = parseId(req.params.id);
+  if (!id) return res.status(400).json({ error: 'Bad asset id' });
+  try {
+    const ok = await updateStudioAsset(id, {
+      label: typeof req.body?.label === 'string' ? req.body.label : undefined,
+      focalX: req.body?.focalX != null ? Number(req.body.focalX) : undefined,
+      focalY: req.body?.focalY != null ? Number(req.body.focalY) : undefined,
+    });
+    if (!ok) return res.status(404).json({ error: 'Not found' });
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('[studio] asset patch failed', err);
+    return res.status(500).json({ error: 'Update failed' });
+  }
+});
+
+researchRouter.delete('/studio/assets/:id', async (req, res) => {
+  if (!userIdFromReq(req)) return res.status(401).json({ error: 'Not authenticated' });
+  const id = parseId(req.params.id);
+  if (!id) return res.status(400).json({ error: 'Bad asset id' });
+  try {
+    const ok = await deleteStudioAsset(id);
+    if (!ok) return res.status(404).json({ error: 'Not found' });
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('[studio] asset delete failed', err);
+    return res.status(500).json({ error: 'Delete failed' });
+  }
+});
+
+/* ─── Announcement card compose (2026-07-17) ──────────────────────────────
+ * The approved 1080×1350 announcement layouts (light split · dark textured),
+ * rendered on demand with the caller's copy and a library photo. Returns PNG.
+ */
+researchRouter.post('/studio/announcement.png', async (req, res) => {
+  if (!userIdFromReq(req)) return res.status(401).json({ error: 'Not authenticated' });
+  const b = req.body ?? {};
+  const variant = b.variant === 'dark' ? 'dark' : 'light';
+  const str = (v: unknown, max: number) => String(v ?? '').slice(0, max).trim();
+  const spec: AnnouncementSpec = {
+    variant,
+    headline: str(b.headline, 140),
+    accent: str(b.accent, 90),
+    sub: str(b.sub, 320),
+    bullets: Array.isArray(b.bullets) ? b.bullets.map((x: unknown) => str(x, 200)).filter(Boolean).slice(0, 4) : [],
+    mandate: str(b.mandate, 220),
+    kicker: str(b.kicker, 40) || undefined,
+    footerTag: str(b.footerTag, 90) || 'smbx.ai · Book a call',
+    footerNote: str(b.footerNote, 90) || undefined,
+    photo: null,
+  };
+  if (!spec.headline) return res.status(400).json({ error: 'Headline is required' });
+  try {
+    const assetId = b.assetId != null ? Number(b.assetId) : null;
+    if (assetId && Number.isFinite(assetId)) {
+      const asset = await getStudioAsset(assetId);
+      if (!asset) return res.status(404).json({ error: 'Photo not found in the media library' });
+      spec.photo = {
+        dataUri: `data:${asset.mime};base64,${asset.data.toString('base64')}`,
+        focalX: asset.focal_x,
+        focalY: asset.focal_y,
+      };
+    }
+    const png = await renderAnnouncementCardPng(spec);
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Content-Disposition', `attachment; filename="smbx-announcement-${variant}.png"`);
+    return res.send(png);
+  } catch (err) {
+    console.error('[studio] announcement compose failed', err);
+    return res.status(500).json({ error: 'Render failed' });
   }
 });

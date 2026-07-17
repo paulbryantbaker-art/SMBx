@@ -6063,7 +6063,7 @@
   },
   {
     "id": "CONF.MODEL.RE.V18C.RISKLOSS.068",
-    "title": "DE silent → buyer (equitable conversion default)",
+    "title": "DE (untabled) silent → common-law baseline shown but flagged unverified and routed (never guess)",
     "specVersion": "DEFINITIVE.v1.0",
     "methodologyUri": "methodology://v19",
     "modelId": "MODEL.RE.RISK_OF_LOSS.v1",
@@ -6076,7 +6076,9 @@
       "outputs": {
         "default_regime": "equitable_conversion_buyer",
         "risk_on": "buyer",
-        "basis": "equitable_conversion_default"
+        "basis": "equitable_conversion_common_law_baseline_unverified",
+        "state_table_gap": true,
+        "defer_to_counsel": true
       }
     }
   },

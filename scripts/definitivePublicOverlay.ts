@@ -25,8 +25,13 @@ export const GOVERNING_RULE =
  */
 export interface EnumSpec { values: string[]; description: string }
 export const ENUMS: Record<string, EnumSpec> = {
+  // Gate-predicate vocabulary (B5) — the deal-fact enums the routing gates evaluate.
+  counterparty_type: { values: ['strategic', 'financial_sponsor', 'individual', 'fund_lp', 'fund_gp', 'esop_trust'], description: 'The counterparty archetype. A fund counterparty (fund_lp/fund_gp) activates the secondaries gate (G26).' },
+  buyer_archetype: { values: ['strategic', 'financial_sponsor', 'independent_sponsor', 'search_fund', 'esop', 'family_office'], description: 'The acquirer archetype. Independent-sponsor, search-fund, and ESOP archetypes activate the acquirer-economics gate (G27).' },
+  deal_type: { values: ['asset_purchase', 'stock_purchase', 'merger', 'secondary', 'continuation', 'strip', 'nav'], description: 'The transaction type. The secondary/continuation/strip/nav values activate the secondaries gate (G26). Canonical name for the transaction-type deal fact.' },
+  deal_form: { values: ['asset', 'stock', 'merger', 'asset_sale', 'stock_sale', '338h10'], description: 'The transaction form. The gate predicates test membership in {asset, stock, merger} (G2) and set-ness (G15); model contracts may carry the finer forms (asset_sale/stock_sale/338h10). Unifying deal_form and deal_type onto one canonical granularity is a scheduled cleanup.' },
   // Inputs
-  deed_type: { values: ['general_warranty', 'special_warranty', 'bargain_and_sale', 'quitclaim'], description: 'The deed instrument type, which fixes the title-covenant set conveyed.' },
+  deed_type: { values: ['general_warranty', 'special_warranty', 'bargain_and_sale', 'quitclaim', 'grant_deed', 'bargain_and_sale_with_covenant'], description: 'The deed instrument type, which fixes the title-covenant set conveyed. Includes the two dominant anchor-state instruments: the California grant deed (Cal. Civ. Code § 1113, two implied covenants) and the New York bargain-and-sale deed with covenant against grantor\'s acts (N.Y. RPL § 258, one covenant).' },
   vesting_form: { values: ['sole', 'tenancy_in_common', 'joint_tenancy', 'tenancy_by_entirety', 'community_property', 'entity'], description: 'How record title is held, which fixes whose signature a conveyance of the whole requires.' },
   contract_title_standard: { values: ['marketable', 'insurable'], description: 'The title standard the purchase contract promises the buyer.' },
   lease_transfer_type: { values: ['asset_assignment', 'sublease', 'change_of_control', 'merger'], description: 'The form of the transfer being tested against the lease transfer-restriction terms.' },
@@ -185,6 +190,46 @@ export const AUTHORITY_TYPES: Record<string, string> = {
   '15 U.S.C. 18a': 'statute', 'Tex. Prop. Code 5.007 (UVPRA)': 'statute',
   'SBA SOP 50 10 8': 'guidance', 'FRED:DPRIME': 'study/dataset',
   'Matter of 105-02 Forest Hills (2025)': 'case',
+  // ── B8 retype pass (2026-07-17): every row the heuristic dropped into the
+  // non-vocabulary `practice-or-guidance` bucket, hand-tagged to the stated
+  // vocabulary. Short case names (no "v."/reporter) and §-less statutes are the
+  // two families the classifier could not see.
+  // Controlling decisions → case
+  '203 N. LaSalle': 'case', 'AB Stable': 'case', 'Akorn': 'case', 'At Home': 'case',
+  'Castleton Plaza': 'case', 'Channel Medsystems': 'case', 'Delaware equitable-remedy case law': 'case',
+  'English MAC case law': 'case', 'Envision': 'case', 'fairness opinion case law': 'case',
+  'Fisker': 'case', 'Frontier': 'case', 'Howey': 'case', 'Indianapolis Downs': 'case',
+  'INDOPCO': 'case', 'Klang': 'case', 'Match Group': 'case', 'MFW': 'case', 'Mitel': 'case',
+  'MPM Silicones': 'case', 'Pluralsight': 'case', 'RadLAX': 'case', 'Sabre': 'case', 'Serta Simmons': 'case',
+  'Texas Grand Prairie': 'case', 'Till': 'case', 'Topp': 'case', 'Tribune': 'case', 'Trinseo': 'case',
+  // Statutes / promulgated law → statute
+  'CT 12-638': 'statute', 'MD Tax-Prop 12-117': 'statute', 'WA RCW 82.45': 'statute',
+  'OBBBA 2025': 'statute', 'OBBBA Sec. 70301': 'statute', 'OBBBA Sec. 70302': 'statute',
+  'OBBBA Sec. 70425': 'statute', 'OBBBA Sec. 70505': 'statute', 'TIA 316(b)': 'statute',
+  'UDITPA': 'statute', 'UFTA': 'statute', 'UVTA': 'statute', 'CPRA': 'statute', 'FRBP 3001': 'statute',
+  // Regulations (federal/EU/SRO) → regulation
+  'Regulation (EU) 2024/1689': 'regulation', 'CFIUS regulations': 'regulation', 'GDPR': 'regulation',
+  'Rule 14d-10': 'regulation', 'Rule 14e-1': 'regulation', 'Nasdaq Rule 5635': 'regulation',
+  'OFAC': 'regulation', 'T.D. 10000': 'regulation',
+  // Agency guidance / treatises / accounting standards → guidance
+  'Letter Ruling 202308010': 'guidance', 'DOL ESOP guidance': 'guidance',
+  'ILPA continuation-fund guidance': 'guidance', 'SEC climate and ESG references': 'guidance',
+  'SEC climate disclosure references': 'guidance', 'SEC Project Crypto': 'guidance', 'NIST CSF': 'guidance',
+  'Collier 364.06': 'guidance', 'ASC 842': 'guidance',
+  'FTC 2026 HSR - Auto-Reportable': 'guidance', 'FTC 2026 HSR - Size of Transaction': 'guidance',
+  // Named studies / datasets → study/dataset
+  'LoPucki Bankruptcy Research Database': 'study/dataset', 'Moody\'s Ultimate Recovery Database': 'study/dataset',
+  'Fenwick 2023 ARBF analysis': 'study/dataset', 'RWI market studies': 'study/dataset',
+  // Market conventions / standard instruments (no controlling citation) → practice-norm
+  'ABA Business Law Today': 'practice-norm', 'Convertible Financing Market Practice': 'practice-norm',
+  'Credit Agreement Market Practice': 'practice-norm', 'ETA market norms': 'practice-norm',
+  'market practice': 'practice-norm', 'Restructuring Market Practice': 'practice-norm',
+  'Secondary Market Practice': 'practice-norm', 'TRA market practice': 'practice-norm',
+  'UK market practice': 'practice-norm', 'LSTA model AAL': 'practice-norm', 'NVCA term sheet': 'practice-norm',
+  'YC SAFE': 'practice-norm', 'BOMA': 'practice-norm', 'ASTM E2018': 'practice-norm', 'J. Crew': 'practice-norm',
+  // Standardized OSS license instruments (the M221 license→class authorities) → practice-norm
+  'AGPL': 'practice-norm', 'Apache': 'practice-norm', 'BSD': 'practice-norm',
+  'GPL': 'practice-norm', 'LGPL': 'practice-norm', 'MIT': 'practice-norm',
 };
 
 /* ── Gate registry drafts (Item 7 — FOUNDER-GATED) ─────────────────────────
@@ -210,10 +255,10 @@ export const GATE_REGISTRY_DRAFTS: GateDraft[] = [
   { gate: 'G10', name: 'Intellectual Property Mechanics', purpose: 'Activates IP diligence, chain-of-title, transfer, and allocation mechanics when IP is material to value.', predicate: 'ip_material_to_value == true' },
   { gate: 'G14', name: 'Seller Proceeds & Price Adjustment', purpose: 'Activates seller-side proceeds tax treatment (e.g., QSBS) and price-adjustment pegs on the sell side.', predicate: 'sell_side_context == true', note: 'LOW CONFIDENCE — QSBS + working-capital-peg pairing is odd; founder option to re-route QSBS to G15 only and rename this "Price Adjustment Mechanics".' },
   { gate: 'G15', name: 'Tax & Corporate Structure', purpose: 'The master structuring gate: tax elections, reorganization qualification, corporate-law mechanics, and equity-structure math. Runs whenever a deal form is set (structure analysis always applies).', predicate: 'deal_form is set' },
-  { gate: 'G19', name: 'State & Local Transaction Tax', purpose: 'Activates state/local transfer-tax, controlling-interest, SALT, and clearance mechanics when US state jurisdictions are involved.', predicate: 'us_state_jurisdictions.length > 0' },
+  { gate: 'G19', name: 'State & Local Transaction Tax', purpose: 'Activates state/local transfer-tax, controlling-interest, SALT, and clearance mechanics when US state jurisdictions are involved.', predicate: 'states_involved.length > 0' },
   { gate: 'G23', name: 'Cross-Border Deal Terms', purpose: 'Activates non-US deal-term and merger-control overlays when a non-US jurisdiction is in play.', predicate: 'non_us_jurisdiction == true' },
   { gate: 'G24', name: 'Regulatory & Compliance Diligence Overlays', purpose: 'Activates the regulatory-diligence overlay family (privacy, cyber, sanctions, ESG, sector regulation) for regulated data or operations.', predicate: 'regulated_data_or_operations == true' },
-  { gate: 'G26', name: 'Fund Secondaries & GP-Led Transactions', purpose: 'Activates fund-level and secondaries mechanics (continuation funds, LP secondaries, strip sales, NAV facilities).', predicate: 'counterparty_type in {fund_lp, fund_gp} OR transaction_type in {secondary, continuation, strip, nav}' },
+  { gate: 'G26', name: 'Fund Secondaries & GP-Led Transactions', purpose: 'Activates fund-level and secondaries mechanics (continuation funds, LP secondaries, strip sales, NAV facilities).', predicate: 'counterparty_type in {fund_lp, fund_gp} OR deal_type in {secondary, continuation, strip, nav}' },
   { gate: 'G27', name: 'Sponsor, Search & Employee-Ownership Economics', purpose: 'Activates acquirer-archetype economics — independent-sponsor promotes, search-fund step-ups, and ESOP structures.', predicate: 'buyer_archetype in {independent_sponsor, search_fund, esop}' },
   // Unrouted IDs — Reserved (no models route through them; no activation criteria fabricated)
   ...['G3', 'G4', 'G5', 'G11', 'G12', 'G13', 'G16', 'G17', 'G18', 'G20', 'G21', 'G22', 'G25'].map(g => ({
@@ -240,7 +285,7 @@ export const GATE_REGISTRY_DRAFTS: GateDraft[] = [
  * untraceable-literal gate can prove every output number is a constant, an
  * input, or an algorithm-derived value.
  */
-export type ConstantKind = 'statutory_must' | 'cited_median_should' | 'table_data' | 'pass_through';
+export type ConstantKind = 'statutory_must' | 'cited_median_should' | 'interpretive_should' | 'market_convention' | 'table_data' | 'pass_through';
 export interface ConstantSpec {
   name: string; value: string; kind: ConstantKind;
   citation: string; pin?: string; effective?: string; nextCheck?: string;
@@ -260,9 +305,8 @@ export interface ModelOverlay {
   precisionRule?: string;     // §4 — the rounding rule stated for this model
   scopeFlag?: string;         // §1 — scope-honesty note when contract < purpose
   founderReview?: boolean;    // tax/legal-sensitive — awaits founder algorithm verification
+  staticOutputs?: string[];   // P0.5 — output fields that are echoes/static, not computed by a step
 }
-
-const CENTS_RULE = 'Monetary values are exact integer cents. Ratios and percentages are rounded half-up to the per-field precision noted in the output contract; a single global half-even rule is scheduled (delta §4). Dates are ISO-8601.';
 
 export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
 
@@ -271,7 +315,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     purpose:
       'Computes the working-capital peg — the reference net-working-capital level a purchase agreement locks in at signing — as the trailing arithmetic mean of a company\'s supplied monthly NWC observations, and reports the observed low–high range around it. The peg answers, for the buyer and seller negotiating the price adjustment, "what normalized level of working capital should be delivered at close?" It establishes the peg and its dispersion only; the post-closing estimated-versus-actual true-up sequence and any collar are specified separately by M210.',
     scopeFlag:
-      'SCOPE (delta §1, option (a) — rescope for v1.0): the catalog purpose read "Target, peg, true-up, and collar math," but the reference implementation computes only the trailing-mean peg and the observed min/max. It does NOT compute a negotiated target, a post-closing true-up, or a collar. Per the governing rule the published contract is scoped to what the model specifies; the closing-statement true-up sequence is owned by M210 (Closing-statement true-up sequence), cross-referenced here. Founder decision recorded: rescope (a), not extend the code, for v1.0.',
+      'Scope: this model computes the working-capital peg as the trailing-mean of the supplied observations and reports the observed minimum and maximum. It does not compute a negotiated target, a post-closing true-up, or a collar; the closing-statement true-up sequence is specified by M210 (Closing-statement true-up sequence), cross-referenced here.',
     algorithm: [
       'Given `monthly_nwc_cents`, a list of integer-cents net-working-capital observations, one per trailing month:',
       '1. The implementation SHALL coerce each element to integer cents and discard non-numeric elements. If no numeric observation remains, it SHALL return `status: "needs_inputs"` with `monthly_nwc_cents` in `missingInputs` and emit no outputs.',
@@ -304,11 +348,12 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
   M119: {
     purpose:
       'Checks whether an SBA 7(a) change-of-ownership acquisition clears the program\'s two hard financing floors — the minimum equity injection and the debt-service-coverage minimum — and reports the buyer\'s equity percentage, the coverage ratio, and the 7(a) loan ceiling. It answers, for a searcher or SMB buyer structuring an SBA-backed acquisition, "does this capital stack meet the SOP\'s gating requirements before we take it to a lender?" It performs the arithmetic screen only; the eligibility and credit decisions remain the lender\'s and the SBA\'s.',
+    scopeFlag: 'Scope: the equity-injection floor is measured here against `purchase_price_cents`. SOP 50 10 8 measures the 10% minimum against **total project cost** (purchase price plus financed closing costs, working capital, and the guaranty fee). Where project cost exceeds the price, this screen reports a higher equity percentage than the program test and can pass a deal the real test fails — supply a project-cost figure as the denominator (or treat a marginal pass as a lender question).',
     algorithm: [
       'Given `purchase_price_cents`, `cash_flow_cents` (post-acquisition free cash flow available for debt service), `buyer_equity_cents`, and `annual_debt_service_cents`:',
       '1. If any of the four is missing or non-numeric, the implementation SHALL return `status: "needs_inputs"` naming the missing fields and emit no outputs.',
-      '2. `buyer_equity_pct` SHALL be `buyer_equity_cents ÷ purchase_price_cents`, rounded half-up to 4 decimals.',
-      '3. `dscr` SHALL be `cash_flow_cents ÷ annual_debt_service_cents`, rounded half-up to 2 decimals.',
+      '2. `buyer_equity_pct` SHALL be `buyer_equity_cents ÷ purchase_price_cents`, rounded half to even to 4 decimals (the global precision rule — see the Conventions chapter).',
+      '3. `dscr` SHALL be `cash_flow_cents ÷ annual_debt_service_cents`, rounded half to even to 4 decimals (the global precision rule — see the Conventions chapter).',
       '4. `meets_sba_equity_floor` SHALL be true iff `buyer_equity_pct ≥ SBA equity-injection floor` (constants: SBA 7(a) minimum equity injection).',
       '5. `meets_sba_dscr_floor` SHALL be true iff `dscr ≥ SBA debt-service-coverage floor` (constants: SBA 7(a) DSCR floor).',
       '6. `max_7a_loan_cents` SHALL be the 7(a) maximum loan amount in cents (constants: SBA 7(a) maximum loan amount).',
@@ -429,17 +474,18 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       '2. It SHALL map the deed type to its covenant set, covenant scope, and after-acquired-title flag (constants: deed-covenant table).',
       '3. It SHALL map the vesting form to the required signatories and the gap risk (constants: signatory matrix).',
       '4. If `state = "TX"`, it SHALL attach the Texas seisin-narrowing note (constants: TX seisin narrowing).',
-      '5. It SHALL raise a warranty red flag if `buyer_expects_warranty` is true but the deed carries no covenants; and if `all_required_signers_present` is explicitly false it SHALL set `signatory_gap: true`, `defer_to_counsel: true`, and emit a counsel-handoff.',
+      '5. **Validity guard:** if `vesting_form = tenancy_by_entirety` and `state` is a community-property state (which does not recognize the entirety estate), it SHALL set `vesting_state_validity_gap: true`, `defer_to_counsel: true`, and raise a red flag — the vesting cannot legally exist in that state and is likely miscoded, so the model routes rather than answering a covenant/signatory question on an impossible fact pattern.',
+      '6. It SHALL raise a warranty red flag if `buyer_expects_warranty` is true but the deed carries no covenants; and if `all_required_signers_present` is explicitly false OR the validity guard fired it SHALL set `defer_to_counsel: true` and emit a counsel-handoff.',
     ],
     constants: [
-      { name: 'Deed-covenant table', value: 'general/special warranty → six covenants (scope all-defects vs grantor-acts-only); bargain-and-sale and quitclaim → none', kind: 'table_data', citation: 'Common-law deed covenants', pin: 'present covenants (seisin, right-to-convey, against-encumbrances) + future covenants (quiet enjoyment, warranty, further assurances)' },
+      { name: 'Deed-covenant table', value: 'general/special warranty → six covenants (all-defects vs grantor-acts-only); CA grant deed (§1113) → two implied covenants; NY bargain-and-sale with covenant (RPL §258) → one covenant; bargain-and-sale and quitclaim → none', kind: 'table_data', citation: 'Common-law deed covenants; Cal. Civ. Code § 1113; N.Y. Real Prop. Law § 258', pin: 'present covenants (seisin, right-to-convey, against-encumbrances) + future covenants (quiet enjoyment, warranty, further assurances); anchor-state grant deed / §258 covenant sets' },
       { name: 'TX seisin narrowing', value: 'seisin narrowed to "grantor has not previously conveyed"', kind: 'table_data', citation: 'Tex. Prop. Code § 5.023', pin: '§ 5.023' },
       { name: 'Signatory matrix', value: 'tenancy-by-entirety and community property → both spouses; tenancy-in-common/joint tenancy → all cotenants for the whole; entity → per organizational documents', kind: 'table_data', citation: 'Common-law concurrent-ownership rules; e.g., Cal. Fam. Code § 1102, Tex. Fam. Code § 5.001', pin: 'both-spouses rule for entireties' },
     ],
     inputs: {
-      deed_type: { type: 'enum', enum: 'deed_type', desc: 'The deed instrument type being conveyed.' },
+      deed_type: { type: 'enum', enum: 'deed_type', desc: 'The deed instrument type being conveyed, including the CA grant deed (§1113) and NY §258 bargain-and-sale-with-covenant.' },
       vesting_form: { type: 'enum', enum: 'vesting_form', desc: 'How record title is held.' },
-      state: { type: 'string (US state code)', desc: 'Optional situs state; enables the Texas seisin-narrowing note.' },
+      state: { type: 'string (US state code)', desc: 'Optional situs state; enables the Texas seisin-narrowing note and the tenancy-by-entirety validity guard.' },
       buyer_expects_warranty: { type: 'boolean', desc: 'Whether the buyer is negotiating for title warranties (default true); drives the warranty-gap flag.' },
       all_required_signers_present: { type: 'boolean', desc: 'Whether every party the vesting form requires is on the signature page; explicit false raises a signatory gap.' },
     },
@@ -451,17 +497,18 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       deed_note: { type: 'string', desc: 'Plain-language description of the deed\'s covenant coverage.' },
       tx_seisin_note: { type: 'string | null', desc: 'The Texas seisin-narrowing note when the state is TX, else null.' },
       vesting_form: { type: 'enum', enum: 'vesting_form', desc: 'The vesting form, echoed.' },
+      vesting_state_validity_gap: { type: 'boolean', desc: 'True when the vesting form is tenancy by the entirety in a community-property state that does not recognize it — an impossible pairing that routes to counsel.' },
       required_signatories: { type: 'string', desc: 'Who must sign for a conveyance of the whole.' },
       signatory_gap: { type: 'boolean', desc: 'Whether a required signatory is missing.' },
-      defer_to_counsel: { type: 'boolean', desc: 'True on a signatory gap; the joinder question routes to counsel.' },
+      defer_to_counsel: { type: 'boolean', desc: 'True on a signatory gap or an impossible vesting/state pairing; the question routes to counsel.' },
       counsel_handoff: { type: 'string | null', desc: 'The routing sentence when a signatory gap defers, else null.' },
       red_flags: { type: 'string[]', desc: 'Warranty-gap and signatory-gap warnings.' },
     },
     boundary:
       'This model maps a deed type to its covenant set and a vesting form to the parties whose signatures a conveyance of the whole requires. Whether a specific person must join a specific deed — homestead, marital, or entity-authority questions — and whether a covenant has been breached are legal determinations for real-estate counsel; on a signatory gap the model routes them and does not resolve them.',
     golden: {
-      narrative: 'A Texas property held by a married couple as tenants by the entirety is being conveyed by special-warranty deed, but only one spouse is on the signature page — and a one-spouse signature conveys nothing in an entireties state.',
-      input: { deed_type: 'special_warranty', vesting_form: 'tenancy_by_entirety', state: 'TX', buyer_expects_warranty: true, all_required_signers_present: false },
+      narrative: 'A New York property held by a married couple as tenants by the entirety — a valid entireties state — is conveyed by a bargain-and-sale deed with covenant against grantor\'s acts (the dominant NY commercial instrument, one covenant under RPL §258), but only one spouse is on the signature page, and in an entireties state a one-spouse signature conveys nothing.',
+      input: { deed_type: 'bargain_and_sale_with_covenant', vesting_form: 'tenancy_by_entirety', state: 'NY', buyer_expects_warranty: true, all_required_signers_present: false },
     },
   },
 
@@ -510,15 +557,16 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       '1. The implementation SHALL require `state` and `contract_allocates_risk`; otherwise `status: "needs_inputs"`.',
       '2. It SHALL look up the state regime (constants: risk-of-loss table), defaulting to equitable conversion.',
       '3. If `contract_allocates_risk` is true, `basis` SHALL be `contract_override` and `risk_on` SHALL follow `contract_risk_on` (`seller`, `buyer`, or `per_contract_terms`).',
-      '4. Else if the regime is equitable conversion, `risk_on` SHALL be `buyer` with basis `equitable_conversion_default`.',
+      '4. Else if the regime is equitable conversion, `risk_on` SHALL be `buyer` with basis `equitable_conversion_default` (for a tabled state) or `equitable_conversion_common_law_baseline_unverified` (for an untabled state).',
       '5. Else (a seller-protective statutory regime), `risk_on` SHALL be `buyer` if legal title or possession has passed, otherwise `seller`, with basis equal to the regime name.',
-      '6. If the contract is silent and a casualty or condemnation is pending, it SHALL raise a red flag to allocate expressly before signing.',
+      '6. **Untabled state (never guess):** if the contract is silent AND the state is not in the anchor-state table, the implementation SHALL set `state_table_gap: true`, `defer_to_counsel: true`, and emit a `counsel_handoff` and a red flag. The equitable-conversion baseline is the common-law DEFAULT only — roughly twenty UVPRA states and the Massachusetts rule place pre-closing casualty risk on the SELLER — so the allocation for an untabled state routes to counsel rather than being asserted. For a tabled state, `defer_to_counsel` SHALL be false.',
+      '7. If the contract is silent and a casualty or condemnation is pending, it SHALL raise a red flag to allocate expressly before signing.',
     ],
     constants: [
       { name: 'NY risk-of-loss regime', value: 'seller bears risk until title/possession (NY Risk Act)', kind: 'table_data', citation: 'N.Y. Gen. Oblig. Law § 5-1311', pin: '§ 5-1311' },
       { name: 'CA risk-of-loss regime', value: 'seller bears risk until title/possession (UVPRA)', kind: 'table_data', citation: 'Cal. Civ. Code § 1662', pin: '§ 1662 (UVPRA)' },
       { name: 'TX risk-of-loss regime', value: 'seller bears risk until title/possession (UVPRA)', kind: 'table_data', citation: 'Tex. Prop. Code § 5.007', pin: '§ 5.007 (UVPRA)' },
-      { name: 'Default risk-of-loss regime', value: 'buyer bears risk at signing (equitable conversion)', kind: 'table_data', citation: 'Equitable conversion (common-law majority rule)', pin: 'majority rule' },
+      { name: 'Default risk-of-loss regime', value: 'buyer bears risk at signing (equitable conversion) — the common-law baseline, displaced by UVPRA (~20 states) and the Massachusetts rule', kind: 'table_data', citation: 'Equitable conversion (common-law baseline)', pin: 'common-law baseline (not a nationwide majority — verify the situs state)' },
     ],
     inputs: {
       state: { type: 'string (US state code)', desc: 'Situs state, used to select the default risk regime.' },
@@ -533,9 +581,11 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       citation: { type: 'string', desc: 'The citation for the governing regime.' },
       contract_override_applied: { type: 'boolean', desc: 'Whether an express contract allocation controls.' },
       risk_on: { type: 'enum', enum: 'risk_on', desc: 'The party bearing pre-closing casualty risk.' },
-      basis: { type: 'enum', enum: 'risk_basis', desc: 'The basis for the allocation.' },
-      defer_to_counsel: { type: 'boolean', desc: 'False; this model computes the allocation deterministically.' },
-      red_flags: { type: 'string[]', desc: 'Silent-contract-with-pending-casualty warning.' },
+      basis: { type: 'string', desc: 'The basis for the allocation: contract_override, equitable_conversion_default, a statutory regime name, or equitable_conversion_common_law_baseline_unverified for an untabled state.' },
+      state_table_gap: { type: 'boolean', desc: 'True when the contract is silent and the state is not in the anchor-state risk-of-loss table — the baseline is unverified and the allocation routes to counsel.' },
+      defer_to_counsel: { type: 'boolean', desc: 'True on an untabled-state gap (the allocation routes to counsel); false for a tabled state, where the model computes the allocation deterministically.' },
+      counsel_handoff: { type: 'string | null', desc: 'The routing sentence when an untabled-state gap defers, else null.' },
+      red_flags: { type: 'string[]', desc: 'Untabled-state and silent-contract-with-pending-casualty warnings.' },
     },
     boundary:
       'This model allocates casualty risk between signing and closing by detecting a contract override and otherwise applying the state\'s default regime. It does not opine on whether a casualty is material, whether the contract\'s allocation is enforceable, or what remedy a party holds — those are determinations for real-estate counsel.',
@@ -549,6 +599,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
   M228: {
     purpose:
       'Flags every relied-on representation, covenant, or indemnity that will merge into the deed at closing for lack of an express survival hook or collateral character, so nothing the buyer is counting on quietly disappears at the closing table. It answers, before signing a real-estate or M&A deal that closes by deed, "which of these promises survive closing, and which need survival language added?" The fraud exception is noted independently.',
+    scopeFlag: 'Scope: the merger-by-deed doctrine reaches the contract\'s TITLE and conveyance terms — it is those that merge into the deed at closing. Business representations and warranties and other collateral/independent obligations are generally NOT extinguished by delivery of the deed, and in an entity deal that closes without a deed the doctrine does not apply at all. Read a "merges into deed" result as applying to title-related covenants; a flagged business rep is a prompt to add express survival language, not a statement that the doctrine actually cuts it off.',
     algorithm: [
       'Given `items` (a list of objects, each with `label`, `type`, `express_survival`, `collateral_obligation`):',
       '1. The implementation SHALL require a non-empty `items` list; otherwise `status: "needs_inputs"`.',
@@ -582,6 +633,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
   M229: {
     purpose:
       'Classifies the consent path a transfer must clear under a lease\'s anti-assignment and change-of-control terms, resolving the governing consent standard against the state table (CA Kendall implied reasonableness vs. NY as-written enforcement). It answers, in an OpCo/PropCo or leased-asset deal, "does this transfer trip the lease\'s transfer restriction, and how hard is the consent to get?" The enforceability judgment always routes to counsel.',
+    scopeFlag: 'Scope: a merger or change-of-control is classified as an assignment only when the supplied `lease_deems_change_of_control_assignment` fact is set. But anti-assignment clauses routinely reach "assignment by merger or by operation of law" INDEPENDENTLY of any change-of-control-deeming language, and whether a merger effects an assignment is itself unsettled — so a merger the lease is silent on can still trip the restriction. Treat a "not an assignment" result on a merger as provisional and route it to counsel when the clause reaches operation-of-law transfers.',
     algorithm: [
       'Given `transfer_type` and `consent_clause` (and optional `state`, `lease_deems_change_of_control_assignment` (default false), `landlord_recapture_right` (default false)):',
       '1. The implementation SHALL require `transfer_type ∈ lease_transfer_type enum` and `consent_clause ∈ consent_clause enum`; otherwise `status: "needs_inputs"`.',
@@ -866,7 +918,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     outputs: {
       purchase_price_cents: { type: 'integer (cents)', desc: 'The price allocated, echoed.', unit: 'cents' },
       allocated_cents: { type: 'integer (cents)', desc: 'Total amount allocated across the classes.', unit: 'cents' },
-      unallocated_cents: { type: 'integer (cents)', desc: 'Non-negative residual when supplied fair market values exceed the price (normally zero).', unit: 'cents' },
+      unallocated_cents: { type: 'integer (cents)', desc: 'Supplied fair market value that the purchase price does not cover — nonzero only when the aggregate supplied FMVs EXCEED the price (an over-allocation to reconcile). When the price exceeds aggregate FMV the excess drops into Class VII goodwill (the residual method), not here, so this is normally zero.', unit: 'cents' },
       class_v_tangible_cents: { type: 'integer (cents)', desc: 'Amount allocated to Class V tangible/§1231 assets.', unit: 'cents' },
       class_vi_section_197_intangibles_cents: { type: 'integer (cents)', desc: 'Amount allocated to Class VI §197 intangibles (excluding goodwill).', unit: 'cents' },
       class_vii_goodwill_cents: { type: 'integer (cents)', desc: 'Residual allocated to Class VII goodwill and going-concern value.', unit: 'cents' },
@@ -886,6 +938,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     founderReview: true,
     purpose:
       'Computes the §280G golden-parachute analysis for a change-in-control payment: the three-times-base-amount threshold, whether it is crossed, the excess parachute payment, the 20% §4999 excise tax, the employer\'s lost deduction, and whether a shareholder cleansing vote clears the disinterested-holder bar. It answers, for a deal team sizing executive change-in-control cost, "does this package trip §280G, and what does it cost if it does?" It computes the arithmetic from supplied figures; the parachute-payment characterization and the vote mechanics are counsel\'s.',
+    scopeFlag: 'Scope: the cleansing-vote screen and the excise/deduction computation are INDEPENDENT here — a supplied "passed" vote does not feed back to zero the excise tax and lost deduction. But a valid §280G(b)(5) shareholder cleansing vote (available only to NON-publicly-traded companies) cleanses the payments entirely: no §4999 excise, no disallowance. So a result showing `cleansing_vote_passed: true` alongside a live excise/lost-deduction is a prompt for counsel to reconcile, not a computed outcome — a genuine passed vote in a private company would zero both.',
     algorithm: [
       'Given `base_amount_cents`, `parachute_payments_cents`, and optional `shareholder_cleansing_vote_pct`:',
       '1. If either required cents input is missing, the implementation SHALL return `status: "needs_inputs"`.',
@@ -1248,7 +1301,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       'Given `transaction_value_cents` and optional `target_break_fee_pct`, `reverse_termination_fee_pct`, `antitrust_reverse_fee_pct`, `go_shop_discount_pct`:',
       '1. If `transaction_value_cents` is missing, the implementation SHALL return `status: "needs_inputs"`.',
       '2. `target_break_fee_cents` SHALL be the transaction value times the target break-fee percentage (supplied or cited median — constants: break-fee median).',
-      '3. `go_shop_break_fee_cents` SHALL be the target break fee times the go-shop discount (supplied or cited median — constants: go-shop discount median).',
+      '3. `go_shop_break_fee_cents` SHALL be the target break fee times `go_shop_discount_pct` — which is the **retained** fraction of the base fee, not the reduction (so 0.5 means the go-shop fee is HALF the base fee; 0.3 would mean 30% of the base, i.e. a 70% reduction), supplied or cited median (constants: go-shop fee fraction).',
       '4. `reverse_termination_fee_cents` and `antitrust_reverse_fee_cents` SHALL be the transaction value times the respective percentages (supplied or cited medians — constants: reverse and antitrust reverse fee medians).',
       '5. It SHALL carry counsel-review flags for the fiduciary-out, go-shop/no-shop, regulatory covenant, and liquidated-damages enforceability framing.',
     ],
@@ -1256,7 +1309,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       { name: 'Target break-up fee', value: '2.7% of transaction value', kind: 'cited_median_should', citation: 'Houlihan Lokey 2023 Transaction Termination Fee Study', pin: 'median target break-up fee, %-of-equity-value', effective: '2023 study', nextCheck: 'on next Houlihan Lokey study', traceValues: [0.027] },
       { name: 'Reverse termination fee', value: '4.2% of transaction value', kind: 'cited_median_should', citation: 'Houlihan Lokey 2023 Transaction Termination Fee Study', pin: 'median reverse termination fee', effective: '2023 study', nextCheck: 'on next Houlihan Lokey study', traceValues: [0.042] },
       { name: 'Antitrust reverse termination fee', value: '5.0% of transaction value', kind: 'cited_median_should', citation: 'Fenwick 2023 antitrust reverse-break-fee (ARBF) analysis', pin: 'median antitrust reverse break fee', effective: '2023 analysis', nextCheck: 'on next Fenwick analysis', traceValues: [0.05] },
-      { name: 'Go-shop break-fee discount', value: '50% of the base break fee', kind: 'cited_median_should', citation: 'Houlihan Lokey 2023 Transaction Termination Fee Study', pin: 'typical go-shop period fee reduction', effective: '2023 study', nextCheck: 'on next Houlihan Lokey study', traceValues: [0.5] },
+      { name: 'Go-shop fee fraction (of the base break fee)', value: '0.5 — the go-shop fee is half the base break fee (a 50% reduction at the median)', kind: 'cited_median_should', citation: 'Houlihan Lokey 2023 Transaction Termination Fee Study', pin: 'typical go-shop period fee — retained fraction of the base fee', effective: '2023 study', nextCheck: 'on next Houlihan Lokey study', traceValues: [0.5] },
     ],
     precisionRule: 'Percentages are 4-decimal fractions; fee amounts are exact integer cents (see the Conventions chapter).',
     inputs: {
@@ -1264,13 +1317,13 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       target_break_fee_pct: { type: 'number', desc: 'Override for the target break-up fee as a fraction of value; defaults to the cited median.', precision: 4 },
       reverse_termination_fee_pct: { type: 'number', desc: 'Override for the reverse termination fee as a fraction of value; defaults to the cited median.', precision: 4 },
       antitrust_reverse_fee_pct: { type: 'number', desc: 'Override for the antitrust reverse fee as a fraction of value; defaults to the cited median.', precision: 4 },
-      go_shop_discount_pct: { type: 'number', desc: 'Override for the go-shop fee discount as a fraction of the base fee; defaults to the cited median.', precision: 4 },
+      go_shop_discount_pct: { type: 'number', desc: 'The go-shop fee as the RETAINED fraction of the base break fee (not the reduction): 0.5 → the go-shop fee is half the base fee. Defaults to the cited median (0.5).', precision: 4 },
     },
     outputs: {
       transaction_value_cents: { type: 'integer (cents)', desc: 'The transaction value, echoed.', unit: 'cents' },
       target_break_fee_pct: { type: 'number', desc: 'The target break-up fee as a fraction of value.', precision: 4 },
       target_break_fee_cents: { type: 'integer (cents)', desc: 'The target break-up fee in cents.', unit: 'cents' },
-      go_shop_break_fee_cents: { type: 'integer (cents)', desc: 'The reduced break fee during a go-shop period.', unit: 'cents' },
+      go_shop_break_fee_cents: { type: 'integer (cents)', desc: 'The go-shop-period break fee (base fee × the retained go-shop fraction).', unit: 'cents' },
       reverse_termination_fee_pct: { type: 'number', desc: 'The reverse termination fee as a fraction of value.', precision: 4 },
       reverse_termination_fee_cents: { type: 'integer (cents)', desc: 'The reverse termination fee in cents.', unit: 'cents' },
       antitrust_reverse_fee_pct: { type: 'number', desc: 'The antitrust reverse fee as a fraction of value.', precision: 4 },
@@ -1334,14 +1387,15 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     purpose:
       'Computes the expected value of a revenue-metric earnout as the probability-weighted sum of its supplied payout scenarios, and discounts that expected value to present value over the earnout term. It answers, for a buyer and seller pricing contingent consideration, "what is this revenue earnout worth today, and what does each scenario contribute?" It values the earnout from supplied scenario payouts and their probabilities; it does not itself model the revenue thresholds that generate those payouts.',
     scopeFlag:
-      'SCOPE (governing rule): the catalog purpose reads "Metric threshold, period, probability, and expected-value schedule," but the reference implementation (MODEL.STRUCT.EARNOUT.MC.v1 — shared with M112) is a metric-agnostic probability-weighted expected-value + present-value engine. It consumes already-quantified payout scenarios and their probabilities; it does NOT gate payouts off a revenue metric and a threshold, nor build a period-by-period schedule beyond a single-term discount. Founder decision: (a) rescope the published contract to the expected-value engine it is (recommended — one binding serves M111 and M112), or (b) extend the code with a revenue-threshold payout front-end. Recorded pending founder sign-off.',
+      'Scope: this model computes a probability-weighted expected value and present value over already-quantified payout scenarios and their probabilities (the reference binding MODEL.STRUCT.EARNOUT.MC.v1 is shared with M112). It does not gate payouts off a revenue metric and threshold, and does not build a period-by-period schedule beyond a single-term discount — the revenue-metric measurement is the caller\'s input, not a computation of this model.',
     algorithm: [
       'Given `earnout_targets` (a list of integer-cents scenario payouts), `probabilities` (a parallel list of scenario probabilities), and `discount_rate`, plus optional `term_years` (default 1):',
       '1. The implementation SHALL coerce `earnout_targets` to integer cents and `probabilities` to numbers; if either list is empty or `discount_rate` is missing, it SHALL return `status: "needs_inputs"` naming the missing fields and emit no outputs.',
       '2. For each scenario it SHALL clamp the probability to the closed interval [0, 1] and weight the scenario payout by it.',
       '3. `expected_gross_cents` SHALL be the sum of the probability-weighted payouts, rounded to the nearest integer cent.',
       '4. `expected_present_value_cents` SHALL be `expected_gross_cents ÷ (1 + discount_rate)^term_years`, rounded to the nearest integer cent.',
-      '5. `scenarios` SHALL echo each scenario as `{ target_cents, probability }` with the probability at the global 4-decimal precision.',
+      '5. `probabilities_sum` SHALL be the sum of the supplied probabilities; `probabilities_sum_is_unity` SHALL be true iff that sum is within 0.0001 of 1. A false value signals a probability set that does not sum to 1 — a meaningless expected value for mutually-exclusive scenarios — or a deliberate independent-tranche interpretation; clamping each probability to [0, 1] does not cure a bad sum.',
+      '6. `scenarios` SHALL echo each scenario as `{ target_cents, probability }` with the probability at the global 4-decimal precision.',
     ],
     constants: [],
     precisionRule: 'Monetary outputs are exact integer cents; scenario probabilities are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter).',
@@ -1354,9 +1408,11 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     outputs: {
       expected_gross_cents: { type: 'integer (cents)', desc: 'Probability-weighted expected earnout payout, undiscounted.', unit: 'cents' },
       expected_present_value_cents: { type: 'integer (cents)', desc: 'The expected payout discounted to present value over the term.', unit: 'cents' },
+      probabilities_sum: { type: 'number', desc: 'The sum of the supplied scenario probabilities. For mutually-exclusive scenarios this should be 1.', precision: 4 },
+      probabilities_sum_is_unity: { type: 'boolean', desc: 'Whether the probabilities sum to 1 (within tolerance). False signals either a probability set that does not sum to 1 — making the expected value meaningless for mutually-exclusive scenarios — or a deliberate independent-tranche interpretation.' },
       scenarios: { type: 'object[]', desc: 'Per-scenario echo: `{ target_cents (integer cents), probability (number, 0–1) }`.' },
     },
-    derivedOutputs: ['expected_gross_cents', 'expected_present_value_cents', 'scenarios'],
+    derivedOutputs: ['expected_gross_cents', 'expected_present_value_cents', 'probabilities_sum', 'scenarios'],
     boundary:
       'This model values a revenue earnout as the probability-weighted, discounted expected value of supplied scenario payouts. Whether the scenario payouts and probabilities are reasonable, how the revenue metric is defined and measured, and the earnout\'s enforceability and tax characterization are determinations for the parties, their accountants, and counsel (see M213); the model computes the expected value and renders no view on the assumptions behind it.',
     golden: {
@@ -1370,14 +1426,15 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     purpose:
       'Computes the expected value of an EBITDA-metric earnout as the probability-weighted sum of its supplied payout scenarios, and discounts that expected value to present value over the earnout term. It answers, for parties pricing contingent consideration tied to EBITDA, "what is this EBITDA earnout worth today?" It values the earnout from supplied scenario payouts and probabilities; it does not itself define the EBITDA target or apply an add-back policy.',
     scopeFlag:
-      'SCOPE (governing rule): the catalog purpose reads "EBITDA target, add-back policy, and expected-value schedule," but the reference implementation (MODEL.STRUCT.EARNOUT.MC.v1 — shared with M111) is a metric-agnostic probability-weighted expected-value + present-value engine. It consumes already-quantified payout scenarios and probabilities; it does NOT compute an EBITDA target, and it applies NO add-back/normalization policy — that normalization is baked into the supplied scenario payouts and is a QoE and accounting matter. Founder decision: (a) rescope the published contract to the expected-value engine it is (recommended — one binding serves M111 and M112), or (b) extend the code with an EBITDA add-back front-end. Recorded pending founder sign-off.',
+      'Scope: this model computes a probability-weighted expected value and present value over already-quantified payout scenarios and their probabilities (the reference binding MODEL.STRUCT.EARNOUT.MC.v1 is shared with M111). It does not compute an EBITDA target and applies no add-back or normalization policy — that normalization is a QoE and accounting matter, baked into the supplied scenario payouts before they reach this model.',
     algorithm: [
       'Given `earnout_targets` (a list of integer-cents scenario payouts), `probabilities` (a parallel list of scenario probabilities), and `discount_rate`, plus optional `term_years` (default 1):',
       '1. The implementation SHALL coerce `earnout_targets` to integer cents and `probabilities` to numbers; if either list is empty or `discount_rate` is missing, it SHALL return `status: "needs_inputs"` naming the missing fields and emit no outputs.',
       '2. For each scenario it SHALL clamp the probability to the closed interval [0, 1] and weight the scenario payout by it.',
       '3. `expected_gross_cents` SHALL be the sum of the probability-weighted payouts, rounded to the nearest integer cent.',
       '4. `expected_present_value_cents` SHALL be `expected_gross_cents ÷ (1 + discount_rate)^term_years`, rounded to the nearest integer cent.',
-      '5. `scenarios` SHALL echo each scenario as `{ target_cents, probability }` with the probability at the global 4-decimal precision.',
+      '5. `probabilities_sum` SHALL be the sum of the supplied probabilities; `probabilities_sum_is_unity` SHALL be true iff that sum is within 0.0001 of 1. A false value signals a probability set that does not sum to 1 — a meaningless expected value for mutually-exclusive scenarios — or a deliberate independent-tranche interpretation; clamping each probability to [0, 1] does not cure a bad sum.',
+      '6. `scenarios` SHALL echo each scenario as `{ target_cents, probability }` with the probability at the global 4-decimal precision.',
     ],
     constants: [],
     precisionRule: 'Monetary outputs are exact integer cents; scenario probabilities are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter).',
@@ -1390,9 +1447,11 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     outputs: {
       expected_gross_cents: { type: 'integer (cents)', desc: 'Probability-weighted expected earnout payout, undiscounted.', unit: 'cents' },
       expected_present_value_cents: { type: 'integer (cents)', desc: 'The expected payout discounted to present value over the term.', unit: 'cents' },
+      probabilities_sum: { type: 'number', desc: 'The sum of the supplied scenario probabilities. For mutually-exclusive scenarios this should be 1.', precision: 4 },
+      probabilities_sum_is_unity: { type: 'boolean', desc: 'Whether the probabilities sum to 1 (within tolerance). False signals either a probability set that does not sum to 1 — making the expected value meaningless for mutually-exclusive scenarios — or a deliberate independent-tranche interpretation.' },
       scenarios: { type: 'object[]', desc: 'Per-scenario echo: `{ target_cents (integer cents), probability (number, 0–1) }`.' },
     },
-    derivedOutputs: ['expected_gross_cents', 'expected_present_value_cents', 'scenarios'],
+    derivedOutputs: ['expected_gross_cents', 'expected_present_value_cents', 'probabilities_sum', 'scenarios'],
     boundary:
       'This model values an EBITDA earnout as the probability-weighted, discounted expected value of supplied scenario payouts. The EBITDA definition, the add-back policy that normalizes it, and the earnout\'s enforceability and tax characterization are determinations for the parties\' accountants and counsel (see M213); the model computes the expected value and renders no view on the normalization behind the scenario payouts.',
     golden: {
@@ -1408,7 +1467,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     purpose:
       'Computes the ownership split a single priced financing round produces — post-money valuation, and the investor, option-pool, and founder ownership percentages — and the round\'s liquidation preference at the supplied multiple. It answers, for a founder or investor sizing a round, "after this round and pool, who owns what, and how large is the preference stack on the new money?" It models one round\'s dilution and its preference; it is not a multi-class exit waterfall.',
     scopeFlag:
-      'SCOPE (governing rule): the catalog purpose reads "Liquidation preference, participation, seniority, and anti-dilution waterfall," but the reference implementation (MODEL.CAPTABLE.DILUTION.v1) computes only a single-round post-money dilution split (investor / option-pool / founder) and a single-security liquidation preference (round size × preference multiple). It does NOT model participation rights, multi-class seniority ordering, anti-dilution adjustments, or a full exit-proceeds waterfall. Founder decision: (a) rescope the published contract to the single-round dilution + preference model it is (recommended for v1.0), or (b) extend the code to a multi-class exit waterfall. Recorded pending founder sign-off.',
+      'Scope: this model computes a single-round post-money dilution split (investor / option-pool / founder) and a single-security liquidation preference (round size × preference multiple). It does not model participation rights, multi-class seniority ordering, anti-dilution adjustments, or a full exit-proceeds waterfall — those are outside the single-round dilution-and-preference view specified here.',
     algorithm: [
       'Given `pre_money_cents`, `round_size_cents`, `option_pool_pct` (as a fraction), and `security_terms` (an object):',
       '1. If any of the four is missing or non-numeric (or `security_terms` is empty), the implementation SHALL return `status: "needs_inputs"` naming the missing fields and emit no outputs.',
@@ -1458,7 +1517,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       '6. `lender_handoff_required` SHALL always be true — binding facility terms route to the lender.',
     ],
     constants: [
-      { name: 'NAV facility minimum cushion', value: '25% (0.25)', kind: 'cited_median_should', citation: 'NAV facility market practice — conventional minimum equity cushion (2024)', pin: 'conventional minimum cushion (LTV ceiling near 75%)', effective: '2024 market practice', nextCheck: 'on next NAV-facility market review', traceValues: [0.25] },
+      { name: 'NAV facility minimum cushion', value: '25% (0.25)', kind: 'market_convention', citation: 'NAV facility market practice — conventional minimum equity cushion (2024)', pin: 'conventional minimum cushion (LTV ceiling near 75%)', effective: '2024 market practice', nextCheck: 'on next NAV-facility market review', traceValues: [0.25] },
     ],
     precisionRule: 'Ratios are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter); monetary echoes are exact integer cents.',
     inputs: {
@@ -1488,6 +1547,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
   M180: {
     purpose:
       'Computes the price at which a convertible note or SAFE converts in a priced round — the lower of the discount price, the valuation-cap price, and the round\'s own share price — and the resulting share count, and reports which term governed. It answers, for a founder or investor modeling a conversion, "at what price does this instrument convert, and does the cap or the discount win?" It computes the conversion arithmetic from supplied terms; it renders no view on the fairness of the cap or discount.',
+    scopeFlag: 'Scope: the cap price is computed as `valuation_cap ÷ pre_money_share_count` — the legacy **pre-money** SAFE mechanic. It does not implement the post-2018 YC **post-money** SAFE (which sizes the cap on a post-money basis), convertible-note interest accrual, or interaction across multiple instruments converting together; it prices one instrument in isolation on the pre-money cap.',
     algorithm: [
       'Given `investment_cents` and `priced_round_share_price_cents`, plus optional `valuation_cap_cents`, `pre_money_share_count`, and `discount_pct` (default 0):',
       '1. If either required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.',
@@ -1521,7 +1581,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     boundary:
       'This model computes a convertible/SAFE conversion price and share count from supplied cap, discount, and priced-round terms. Whether the cap or discount is market, how the fully-diluted share count is defined, and the instrument\'s enforceability and tax treatment are determinations for the parties and counsel; the model computes the conversion the supplied terms imply and renders no view on them.',
     golden: {
-      narrative: 'A $500k SAFE with a $10M cap and a 20% discount converts into an $5.00 priced round on 8,000,000 pre-money shares: the $1.25 cap price beats the $4.00 discount price, so the cap governs and the SAFE takes 400,000 shares.',
+      narrative: 'A $500k SAFE with a $10M cap and a 20% discount converts into a $5.00 priced round on 8,000,000 pre-money shares: the $1.25 cap price beats the $4.00 discount price, so the cap governs and the SAFE takes 400,000 shares.',
       input: { investment_cents: 50_000_000, priced_round_share_price_cents: 500, valuation_cap_cents: 1_000_000_000, pre_money_share_count: 8_000_000, discount_pct: 0.20 },
     },
   },
@@ -1537,7 +1597,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       '3. `warrant_shares` SHALL be `warrant_coverage_amount_cents ÷ exercise_price_cents` (zero if the exercise price is non-positive), rounded to the nearest whole share.',
       '4. `intrinsic_warrant_value_cents` SHALL be `max(0, warrant_shares × (fair_value_share_price_cents − exercise_price_cents))`, rounded to the nearest cent.',
       '5. `simple_interest_cents` SHALL be `loan_amount_cents × cash_interest_rate × term_years`, rounded to the nearest cent; `lender_gross_return_cents` SHALL be `loan_amount_cents + simple_interest_cents + intrinsic_warrant_value_cents`.',
-      '6. `estimated_lender_irr` SHALL be `(lender_gross_return_cents ÷ loan_amount_cents)^(1 ÷ term_years) − 1` when the term is positive, else null, at the global 4-decimal precision.',
+      '6. `estimated_lender_irr` SHALL be `(lender_gross_return_cents ÷ loan_amount_cents)^(1 ÷ term_years) − 1` when the term is positive, else null, at the global 4-decimal precision. This is a money-multiple CAGR (annualized return on the total return multiple); it does NOT discount the interim coupon timing, so it is an annualized-return proxy, not a cash-flow IRR.',
     ],
     constants: [],
     precisionRule: 'Monetary outputs are exact integer cents; the coverage fraction and the IRR are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter); warrant shares are whole shares.',
@@ -1557,13 +1617,13 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       intrinsic_warrant_value_cents: { type: 'integer (cents)', desc: 'Intrinsic value of the warrants at the assumed fair value.', unit: 'cents' },
       simple_interest_cents: { type: 'integer (cents)', desc: 'Total simple cash interest over the term.', unit: 'cents' },
       lender_gross_return_cents: { type: 'integer (cents)', desc: 'Principal plus interest plus warrant intrinsic value.', unit: 'cents' },
-      estimated_lender_irr: { type: 'number | null', desc: 'Estimated annualized lender IRR, or null when the term is non-positive.', precision: 4 },
+      estimated_lender_irr: { type: 'number | null', desc: 'Estimated annualized lender return — a money-multiple CAGR ((gross return ÷ principal)^(1/term) − 1); it does not time the interim coupons, so it is an annualized-return proxy, not a cash-flow IRR. Null when the term is non-positive.', precision: 4 },
     },
     derivedOutputs: ['warrant_coverage_amount_cents', 'warrant_shares', 'intrinsic_warrant_value_cents', 'simple_interest_cents', 'lender_gross_return_cents', 'estimated_lender_irr'],
     boundary:
       'This model sizes a venture-debt warrant package and estimates the lender\'s IRR from supplied loan, coverage, and price assumptions. The fair-value share price is an assumption, not a valuation, and the IRR is an estimate; the enforceable warrant terms, the true share count on a fully-diluted basis, and the instrument\'s tax treatment are determinations for the parties and counsel.',
     golden: {
-      narrative: 'A $10M venture loan with 10% warrant coverage, a $2.00 strike, and an assumed $5.00 fair value buys 500,000 warrant shares worth $1.5M intrinsic; with an 11% cash coupon over three years the lender\'s estimated IRR runs about 21%.',
+      narrative: 'A $10M venture loan with 10% warrant coverage, a $2.00 strike, and an assumed $5.00 fair value buys 500,000 warrant shares worth $1.5M intrinsic; with an 11% cash coupon over three years the lender\'s estimated annualized all-in return runs about 14% (a money-multiple CAGR over the three-year term).',
       input: { loan_amount_cents: 1_000_000_000, warrant_coverage_pct: 0.10, exercise_price_cents: 200, fair_value_share_price_cents: 500, term_years: 3, cash_interest_rate: 0.11 },
     },
   },
@@ -1581,8 +1641,8 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       '5. `ar_advance_rate` and `inventory_advance_rate` SHALL echo the applied rates (supplied or the constants) at the global 4-decimal precision.',
     ],
     constants: [
-      { name: 'ABL eligible-A/R advance rate', value: '85% (0.85)', kind: 'cited_median_should', citation: 'ABL market practice — conventional advance rate on eligible accounts receivable (2024)', pin: 'eligible-A/R advance-rate convention', effective: '2024 market practice', nextCheck: 'on next annual ABL market survey', traceValues: [0.85] },
-      { name: 'ABL eligible-inventory advance rate', value: '50% (0.50)', kind: 'cited_median_should', citation: 'ABL market practice — conventional advance rate on eligible inventory (2024)', pin: 'eligible-inventory advance-rate convention', effective: '2024 market practice', nextCheck: 'on next annual ABL market survey', traceValues: [0.5] },
+      { name: 'ABL eligible-A/R advance rate', value: '85% (0.85)', kind: 'market_convention', citation: 'ABL market practice — conventional advance rate on eligible accounts receivable (2024)', pin: 'eligible-A/R advance-rate convention', effective: '2024 market practice', nextCheck: 'on next annual ABL market survey', traceValues: [0.85] },
+      { name: 'ABL eligible-inventory advance rate', value: '50% (0.50)', kind: 'market_convention', citation: 'ABL market practice — conventional advance rate on eligible inventory (2024)', pin: 'eligible-inventory advance-rate convention', effective: '2024 market practice', nextCheck: 'on next annual ABL market survey', traceValues: [0.5] },
     ],
     precisionRule: 'Advance rates are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter); all dollar outputs are exact integer cents.',
     inputs: {
@@ -1682,7 +1742,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     boundary:
       'This model totals covenant-basket capacity and tests proposed uses from supplied basket terms. Whether a specific payment, debt, lien, or investment qualifies under a given basket, how the grower and builder amounts are defined, and the ratio-capacity mechanics are credit-agreement construction questions for counsel; the model computes the capacity arithmetic and renders no qualification opinion.',
     golden: {
-      narrative: 'Two baskets: a restricted-payments basket with $1.8M of capacity ($1.6M free) that accommodates a $1.0M dividend, and a permitted-debt basket with $1.1M free that cannot absorb a proposed $2.0M draw — one basket blocked, $2.7M free in aggregate.',
+      narrative: 'Two baskets: a restricted-payments basket with $18M of capacity ($16M free) that accommodates a $10M dividend, and a permitted-debt basket with $11M free that cannot absorb a proposed $20M draw — one basket blocked, $27M free in aggregate.',
       input: { baskets: [ { name: 'Restricted Payments', type: 'restricted_payments', fixed_capacity_cents: 500_000_000, grower_basis_cents: 2_000_000_000, grower_pct: 0.5, builder_amount_cents: 300_000_000, used_cents: 200_000_000, proposed_use_cents: 1_000_000_000 }, { name: 'Permitted Debt', type: 'debt', fixed_capacity_cents: 1_000_000_000, ratio_capacity_cents: 500_000_000, used_cents: 400_000_000, proposed_use_cents: 2_000_000_000 } ] },
     },
   },
@@ -1696,7 +1756,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     algorithm: [
       'Given `purchase_price_cents` and `seller_foreign_person`, plus optional `withholding_certificate_provided` (default false) and `eci_gain_cents`:',
       '1. If either required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.',
-      '2. `section_1446f_default_withholding_cents` SHALL be `round(purchase_price_cents × the §1446(f) default withholding rate)` when the seller is a foreign person and no withholding certificate is provided, else 0 (constants: §1446(f) default withholding rate).',
+      '2. `withholding_base_cents` SHALL be `amount_realized_cents` when supplied, else `purchase_price_cents` (with `amount_realized_supplied` recording which). `section_1446f_default_withholding_cents` SHALL be `round(withholding_base_cents × the §1446(f) default withholding rate)` when the seller is a foreign person and no withholding certificate is provided, else 0. §1446(f) withholds on the **amount realized** — which on a leveraged fund includes the seller\'s §752 share of partnership liabilities and can exceed the cash price — so the price is only a floor when the amount realized is not supplied (constants: §1446(f) default withholding rate).',
       '3. `psa_required` and `tri_party_transfer_required` SHALL always be true — the transfer runs through a purchase-and-sale agreement and a tri-party (buyer, seller, fund) transfer.',
       '4. `tax_specialist_handoff_required` SHALL be true iff the seller is a foreign person.',
       '5. The model SHALL echo the price, the foreign-person flag, the certificate flag, and any supplied ECI gain.',
@@ -1706,7 +1766,8 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     ],
     precisionRule: 'The withholding amount is exact integer cents (see the Conventions chapter); no rounding of ratios.',
     inputs: {
-      purchase_price_cents: { type: 'integer (cents)', desc: 'The price paid for the transferred partnership interest.', unit: 'cents' },
+      purchase_price_cents: { type: 'integer (cents)', desc: 'The cash price paid for the transferred partnership interest (used as the withholding base only when amount realized is not supplied).', unit: 'cents' },
+      amount_realized_cents: { type: 'integer (cents)', desc: 'The transferor\'s §1446(f) amount realized (cash plus the seller\'s §752 share of partnership liabilities); overrides the price as the withholding base when supplied.', unit: 'cents' },
       seller_foreign_person: { type: 'boolean', desc: 'Whether the transferring partner is a foreign person (the §1446(f) trigger).' },
       withholding_certificate_provided: { type: 'boolean', desc: 'Whether a §1446(f) withholding certificate/exception is provided (default false).' },
       eci_gain_cents: { type: 'integer (cents)', desc: 'Estimated effectively-connected gain on the transfer; optional context.', unit: 'cents' },
@@ -1715,6 +1776,8 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       purchase_price_cents: { type: 'integer (cents)', desc: 'The purchase price, echoed.', unit: 'cents' },
       seller_foreign_person: { type: 'boolean', desc: 'The foreign-person flag, echoed.' },
       withholding_certificate_provided: { type: 'boolean', desc: 'The certificate flag, echoed.' },
+      withholding_base_cents: { type: 'integer (cents)', desc: 'The base the 10% withholding is applied to: amount realized when supplied, else the cash price.', unit: 'cents' },
+      amount_realized_supplied: { type: 'boolean', desc: 'Whether an explicit amount-realized figure was supplied (false means the price was used as the base and may understate it).' },
       section_1446f_default_withholding_cents: { type: 'integer (cents)', desc: 'The default 10% §1446(f) withholding, or 0 when not triggered.', unit: 'cents' },
       eci_gain_cents: { type: 'integer (cents) | null', desc: 'The supplied ECI gain, echoed, or null.', unit: 'cents' },
       psa_required: { type: 'boolean', desc: 'Always true — a purchase-and-sale agreement papers the transfer.' },
@@ -1773,6 +1836,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
   M214: {
     purpose:
       'Walks each supplied IP asset\'s assignment chain and flags the four failure modes that break clean title — a broken or unmatched assignment, a late-recorded assignment, incomplete contributor assignments, and an intent-to-use trademark assigned before an allegation of use. It answers, in IP diligence, "does the target actually own what it says it owns, and where are the gaps?" It spots and counts the issues from supplied chain facts; the ownership and validity conclusions are counsel\'s.',
+    scopeFlag: 'Scope: two known simplifications. (1) The recording-timeliness test uses a single window applied to all asset types; the priority windows actually differ — patents/trademarks run on the §261 / Lanham §10 three-month window, but copyright transfers run on the shorter 17 U.S.C. §205 one-month (domestic) / two-month (foreign) window, so a copyright recorded in month 2–3 reads "not late" here yet is already outside §205. (2) The intent-to-use (ITU) trademark flag has tri-state meaning — an absent value is "no opinion," not "clean" — so treat a non-ITU mark\'s silent pass accordingly.',
     algorithm: [
       'Given `assets` (a list of IP-asset objects, each carrying a type, an assignment count, and the chain booleans):',
       '1. If `assets` is empty, the implementation SHALL return `status: "needs_inputs"` naming `assets`.',
@@ -1997,6 +2061,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
   M220: {
     purpose:
       'Verifies, contributor by contributor, that every person who touched the IP executed an assignment and a work-for-hire, and flags California §2870 outside-scope carve-outs and any missing paper. It answers, in IP diligence, "is the IP actually assigned in from everyone who built it, and where are the enforceability wrinkles?" It counts and flags from supplied contributor facts; the enforceability conclusion, including the §2870 carve-out, is counsel\'s.',
+    scopeFlag: 'Scope: two known limits. (1) Only California\'s §2870 invention-assignment carve-out is flagged; Washington (RCW 49.44.140), Illinois (765 ILCS 1060/2), and ~6 other states have equivalent statutes, so an out-of-scope contributor in those states returns a false "clean" signal — confirm the contributor\'s state. (2) "Work-for-hire" is a COPYRIGHT doctrine (17 U.S.C. §101/§201(b)) with no patent analog; for inventions the operative instrument post-Stanford v. Roche is a present assignment ("hereby assigns"), which a single work-for-hire boolean cannot distinguish from a mere agreement to assign. Scope the work-for-hire flag to copyrightable works.',
     algorithm: [
       'Given `contributors` (a list of contributor objects, each with a state and the assignment/work-for-hire booleans):',
       '1. If `contributors` is empty, the implementation SHALL return `status: "needs_inputs"` naming `contributors`.',
@@ -2038,12 +2103,14 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     algorithm: [
       'Given `components` (a list of component objects, each with a license and use booleans):',
       '1. If `components` is empty, the implementation SHALL return `status: "needs_inputs"` naming `components`.',
-      '2. For each component it SHALL classify the license into `permissive`, `weak_copyleft`, `strong_copyleft`, or `unknown` (constants: OSS license classification), set `agpl_network_flag` iff the license is AGPL and used over a network, and set `strong_copyleft_embedded_flag` iff a strong-copyleft component is linked into proprietary code.',
+      '2. For each component it SHALL classify the license into `permissive`, `weak_copyleft`, `strong_copyleft`, or `unknown` per the OSS license classification table (constants), evaluated in table order — the license family is matched against weak-copyleft first, then strong-copyleft, then permissive, else unknown (so an LGPL license classifies weak before the GPL rule can reach it). It SHALL set `agpl_network_flag` iff the license is AGPL and used over a network, and `strong_copyleft_embedded_flag` iff a strong-copyleft component is linked into proprietary code.',
       '3. It SHALL count components in each class, AGPL-network components, and proprietary-strong-copyleft components.',
       '4. `special_escrow_sizing_cents` SHALL be the sum of the supplied per-component remediation costs.',
       '5. `oss_specific_rep_required`, `sca_pass_through_source_required` SHALL always be true; `indemnity_carveout_review_required` SHALL be true iff any component is strong-copyleft or unknown.',
     ],
-    constants: [],
+    constants: [
+      { name: 'OSS license classification', value: 'weak_copyleft: LGPL, MPL, EPL · strong_copyleft: AGPL, GPL, CC-BY-SA · permissive: MIT, BSD, Apache, ISC, Unlicense · anything unmatched: unknown. Evaluated in that order (weak → strong → permissive → unknown), so LGPL — though it contains "GPL" — classifies weak_copyleft, not strong.', kind: 'table_data', citation: 'SPDX license identifiers and the underlying license texts; Morgan Lewis / Nixon Peabody / Morse OSS diligence guidance', pin: 'copyleft-strength classification by SPDX license family, in table order' },
+    ],
     precisionRule: 'Escrow sizing is exact integer cents; the rest are counts and booleans (see the Conventions chapter).',
     inputs: {
       components: { type: 'object[]', desc: 'OSS components; each object carries `name` (string), `license` (string, e.g. MIT/LGPL-2.1/AGPL-3.0), `network_use` (boolean), `proprietary_linking` (boolean), and `remediation_cost_cents` (integer cents).' },
@@ -2076,6 +2143,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     founderReview: true,
     purpose:
       'Allocates an IP-heavy asset-deal purchase price down the residual-method class ordering — Class V tangible, then Class VI §197 intangibles (the IP), then Class VII goodwill — capping each class at its supplied value and dropping the residual into goodwill. It answers, for a buyer and seller papering an IP-heavy asset purchase, "how does the price split across the tangible, IP-intangible, and goodwill classes for the buyer\'s amortization and the parties\' Form 8594?" It allocates from supplied values; the values and classifications are the advisors\' calls.',
+    scopeFlag: 'Scope: the residual waterfall starts at Class V and allocates the FULL purchase price from there down, so it assumes the price is already net of Classes I–IV (cash, actively-traded securities, accounts receivable, inventory) — those classes are not modeled here. A deal with material cash/AR/inventory must net them out first, or the excess is over-attributed to Class VI/VII; use M139 for a complete seven-class allocation. Also note off-the-shelf software in Class VI is §167(f) 36-month, not §197 15-year.',
     algorithm: [
       'Given `purchase_price_cents`, `tangible_assets_cents` (Class V), and `ip_intangibles_cents` (Class VI §197 intangibles):',
       '1. If any of the three is missing, the implementation SHALL return `status: "needs_inputs"` naming the missing fields.',
@@ -2199,6 +2267,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     founderReview: true,
     purpose:
       'Dates the two hard §1031 deadlines from the relinquished-property transfer — the 45-day identification window and the 180-day exchange window — and computes the recognized-gain floor from any boot received and any value shortfall in the replacement property. It answers, for a taxpayer running a like-kind exchange, "by when must I identify and close, and how much gain can I not defer?" It computes the timing and the gain floor; whether the properties are like-kind and the exchange qualifies is the tax advisor\'s call.',
+    scopeFlag: 'Scope, two caveats. (1) The output labeled a recognized-gain "floor" is really an upper-bound ESTIMATE: true recognized gain is min(realized gain, boot), and with no basis input the model cannot cap by realized gain, so on high-basis property with a small gain the figure can exceed the actual recognized gain. It also treats cash boot and value shortfall as alternatives, whereas NET DEBT RELIEF is separately boot. (2) The 180-day window is the maximum; §1031(a)(3)(B) makes the replacement period the EARLIER of 180 days or the taxpayer\'s return due date (with extensions), so a Q4 relinquishment can have materially fewer than 180 days.',
     algorithm: [
       'Given `transfer_date`, `relinquished_property_value_cents`, and `replacement_property_value_cents`, plus optional `boot_received_cents` (default 0):',
       '1. If any required input is missing (or the date is invalid), the implementation SHALL return `status: "needs_inputs"` and emit no outputs.',
@@ -2246,12 +2315,12 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       '1. If any required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.',
       '2. `cap_rate` SHALL be `annual_rent_cents ÷ sale_price_cents` at the global 4-decimal precision; `total_nominal_rent_cents` SHALL be `round(annual_rent_cents × lease_term_years)`.',
       '3. `lease_term_pct_of_economic_life` SHALL be `lease_term_years ÷ economic_life_years` (or null); `pv_payments_pct_of_fair_value` SHALL be `pv_lease_payments_cents ÷ sale_price_cents` (or null).',
-      '4. A finance-lease indicator SHALL be flagged for: ownership transfer; a bargain purchase option; a lease term at or above the economic-life threshold (constants: ASC 842 lease-term indicator); PV at or above the fair-value threshold (constants: ASC 842 PV indicator); or a specialized asset.',
+      '4. A finance-lease indicator SHALL be flagged for: ownership transfer; a purchase option the lessee is reasonably certain to exercise (ASC 842-10-25-2(b) — the input is named `bargain_purchase_option` for compatibility, but the ASC 842 test is *reasonable certainty*, not the old ASC 840 "bargain" standard); a lease term at or above the economic-life threshold (constants: ASC 842 lease-term indicator, interpretive); PV at or above the fair-value threshold (constants: ASC 842 PV indicator, interpretive); or a specialized asset. The 75%/90% figures are ONE reasonable interpretation of "major part" / "substantially all," not bright lines — the binding classification is the accountant\'s.',
       '5. `asc842_indicator_classification` SHALL be `finance_lease_indicator_present` iff any indicator fired, else `operating_lease_indicator_on_supplied_facts`; an accountant-review flag SHALL always attach.',
     ],
     constants: [
-      { name: 'ASC 842 lease-term indicator', value: '75% of economic life (0.75)', kind: 'statutory_must', citation: 'ASC 842-10-25', pin: 'lease term is a major part (customary 75%) of remaining economic life', effective: 'ASC 842 (current)', nextCheck: 'on standard amendment', traceValues: [0.75] },
-      { name: 'ASC 842 PV indicator', value: '90% of fair value (0.90)', kind: 'statutory_must', citation: 'ASC 842-10-25', pin: 'PV of payments is substantially all (customary 90%) of fair value', effective: 'ASC 842 (current)', nextCheck: 'on standard amendment', traceValues: [0.9] },
+      { name: 'ASC 842 lease-term indicator', value: '75% of economic life (0.75) — one reasonable approach, NOT a bright line', kind: 'interpretive_should', citation: 'ASC 842-10-55-2', pin: 'ASC 842 removed the ASC 840 bright lines; the standard is "a major part" of the economic life, and 75% is offered as one reasonable interpretation', effective: 'ASC 842 (current)', nextCheck: 'on standard amendment', traceValues: [0.75] },
+      { name: 'ASC 842 PV indicator', value: '90% of fair value (0.90) — one reasonable approach, NOT a bright line', kind: 'interpretive_should', citation: 'ASC 842-10-55-2', pin: 'the standard is "substantially all" of the fair value; 90% is offered as one reasonable interpretation, not a binding threshold', effective: 'ASC 842 (current)', nextCheck: 'on standard amendment', traceValues: [0.9] },
     ],
     precisionRule: 'Cap rate and percentages are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter); nominal rent is exact integer cents.',
     inputs: {
@@ -2290,6 +2359,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     founderReview: true,
     purpose:
       'Runs the three REIT qualification gates from supplied figures — the 75% gross-income test, the 75% asset test, and the 90% distribution test — and reports each ratio, each pass/fail, and whether all three clear. It answers, for a REIT (or a target being tested for REIT status), "do the income, asset, and distribution numbers keep it qualified?" It computes the ratios and the pass/fail; the underlying income and asset characterizations are the tax advisor\'s.',
+    scopeFlag: 'Scope: this is the 75/75/90 triad only. It does NOT run the separate **§856(c)(2) 95%-of-gross-income test**, the quarterly asset-test timing, or the ownership tests — a REIT can clear all three tabled tests here and still fail qualification on the 95% test. The distribution-test denominator is REIT taxable income before the dividends-paid deduction and excluding net capital gain. Treat a clean pass as necessary, not sufficient.',
     algorithm: [
       'Given `real_estate_income_cents`, `total_income_cents`, `real_estate_assets_cents`, `total_assets_cents`, `distributions_cents`, and `taxable_income_cents`:',
       '1. If any of the six is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.',
@@ -2385,6 +2455,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     founderReview: true,
     purpose:
       'Splits a mixed real-estate-and-operating-business purchase price into its real-estate value (NOI capitalized at the supplied cap rate, capped at the price) and the residual operating-business value, then reconciles the split into §1060 Class V, VI, and VII. It answers, for a deal with both a building and a business inside it, "how much of the price is the real estate versus the operating business, and how does that map to the tax classes?" It computes the bifurcation from supplied values; the valuations and classifications are the advisors\' calls.',
+    scopeFlag: 'Scope: the split is a simplified real-estate-vs-goodwill bifurcation. The operating-business residual is reconciled into Class V/VI/VII only; it does not carve out the opco\'s Class III (receivables), Class IV (inventory), or non-RE Class V (equipment/FF&E), which in a full §1060 allocation absorb value AHEAD of goodwill — so this model overstates Class VII goodwill for an opco with those assets. Use M139 for a complete seven-class allocation.',
     algorithm: [
       'Given `enterprise_value_cents`, `noi_cents`, and `cap_rate`, plus optional `class_vi_intangibles_cents` (default 0):',
       '1. If any required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.',
@@ -2521,8 +2592,8 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       '6. `contested_state_position_handoff_required` SHALL be true iff no rate was supplied and the state is not in the rate table.',
     ],
     constants: [
-      { name: 'State transfer-tax rate table', value: 'CT 1.11%, ME 0.44%, WA 1.78%, DC 1.45%, MD 1.00%, NY 0.65% (default rates)', kind: 'table_data', citation: 'CT § 12-638; WA RCW 82.45; MD Tax-Prop § 12-117; NY Publication 576; DC/ME transfer-tax statutes', pin: 'per-state default controlling-interest/deed transfer-tax rates', effective: '2024 rate table', nextCheck: 'on state-rate review', traceValues: [0.0111, 0.0044, 0.0178, 0.0145, 0.01, 0.0065] },
-      { name: 'Controlling-interest aggregation windows', value: 'MD 12 months, WA 36 months', kind: 'table_data', citation: 'MD Tax-Prop § 12-117; WA RCW 82.45', pin: 'controlling-interest acting-in-concert aggregation windows', effective: '2024 table', nextCheck: 'on state-rate review', traceValues: [12, 36] },
+      { name: 'State transfer-tax rate table', value: 'CT 1.11%, ME 0.44%, DC 1.45%, MD 1.00%, NY 0.65% (single-point default rates). WA is NOT tabled as a flat rate — its REET has been graduated since 2020 (state bands 1.10/1.28/2.75/3.00% + local), so a WA transfer routes to the state-tax specialist. DC/MD/NY are single-point simplifications of bracketed/combined levies — verify the specific bracket before relying on them.', kind: 'table_data', citation: 'CT § 12-638; MD Tax-Prop § 12-117; NY Publication 576; DC/ME transfer-tax statutes; WA RCW 82.45 (graduated — routes)', pin: 'per-state default controlling-interest/deed transfer-tax rates (single-point; WA graduated/routes)', effective: '2024 rate table', nextCheck: 'on state-rate review', traceValues: [0.0111, 0.0044, 0.0145, 0.01, 0.0065] },
+      { name: 'Controlling-interest aggregation windows', value: 'MD 12 months, WA 12 months (RCW 82.45.033)', kind: 'table_data', citation: 'MD Tax-Prop § 12-117; WA RCW 82.45.033', pin: 'controlling-interest acting-in-concert aggregation windows', effective: '2024 table', nextCheck: 'on state-rate review', traceValues: [12] },
     ],
     precisionRule: 'Tax base and tax are exact integer cents; the rate and interest percentage round per the global rule (half-even to 4 decimals — see the Conventions chapter).',
     inputs: {
@@ -2547,8 +2618,8 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     boundary:
       'This model computes state transfer / controlling-interest tax from a tabled rate and supplied values. Whether a transfer is taxable, whether an exemption applies, and the contested state positions (especially controlling-interest aggregation) are tax determinations for a state-tax specialist; on an untabled state the model routes the position and renders no taxability opinion.',
     golden: {
-      narrative: 'A 100% controlling-interest transfer of a $10M Washington property: at Washington\'s default 1.78% REET rate the base is the full $10M and the transfer tax is $178,000, with a 36-month controlling-interest aggregation window.',
-      input: { jurisdiction: 'WA', fmv_real_property_cents: 1_000_000_000, interest_transferred_pct: 1, exemption_applies: false },
+      narrative: 'A 100% controlling-interest transfer of a $10M Connecticut property: at Connecticut\'s 1.11% controlling-interest rate the base is the full $10M and the transfer tax is $111,000. (A Washington transfer, by contrast, routes to the specialist — WA\'s REET has been graduated since 2020, so no flat rate applies.)',
+      input: { jurisdiction: 'CT', fmv_real_property_cents: 1_000_000_000, interest_transferred_pct: 1, exemption_applies: false },
     },
   },
 
@@ -2644,8 +2715,8 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       '5. `tax_accounting_handoff_required` SHALL always be true.',
     ],
     constants: [
-      { name: 'True-lease term threshold', value: '30 years', kind: 'cited_median_should', citation: 'OpCo/PropCo master-lease characterization market practice (2024)', pin: 'lease term ≥ 30 years triggers recharacterization review', effective: '2024 market practice', nextCheck: 'on practice review', traceValues: [30] },
-      { name: 'True-lease residual threshold', value: '20% residual value (0.20)', kind: 'cited_median_should', citation: 'True-lease residual-value convention; cf. Rev. Proc. 2001-28 (2001)', pin: 'residual value < 20% triggers recharacterization review', effective: '2024 market practice', nextCheck: 'on practice review', traceValues: [0.2] },
+      { name: 'True-lease term threshold', value: '30 years', kind: 'market_convention', citation: 'OpCo/PropCo master-lease characterization market practice (2024)', pin: 'lease term ≥ 30 years triggers recharacterization review', effective: '2024 market practice', nextCheck: 'on practice review', traceValues: [30] },
+      { name: 'True-lease residual threshold', value: '20% residual value (0.20)', kind: 'market_convention', citation: 'True-lease residual-value convention; cf. Rev. Proc. 2001-28 (2001)', pin: 'residual value < 20% triggers recharacterization review', effective: '2024 market practice', nextCheck: 'on practice review', traceValues: [0.2] },
     ],
     precisionRule: 'Monetary outputs are exact integer cents; yields and coverage round per the global rule (half-even to 4 decimals — see the Conventions chapter).',
     inputs: {
@@ -3546,7 +3617,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       '5. `financial_advisor_handoff_required` SHALL always be true; the driver inputs are echoed at the global 4-decimal precision.',
     ],
     constants: [
-      { name: 'Chapter 22 recidivism scoring calibration', value: 'base 20; leverage = clamp((exit_leverage − 3) × 12, 0, 35); liquidity = clamp((12 − liquidity_months) × 2.5, 0, 30); growth = clamp(−ebitda_growth_pct × 100, 0, 20); repeat = clamp(prior_bankruptcy_count × 10, 0, 15); score = round(clamp(sum, 0, 100)); bands high ≥ 70, watch ≥ 45', kind: 'cited_median_should', citation: 'DEFINITIVE Chapter 22 recidivism scoring calibration (heuristic; LoPucki Bankruptcy Research Database is the empirical reference, 2024)', pin: 'scoring weights, caps, and band thresholds', effective: '2024 calibration', nextCheck: 'on recalibration' },
+      { name: 'Chapter 22 recidivism scoring calibration', value: 'base 20; leverage = clamp((exit_leverage − 3) × 12, 0, 35); liquidity = clamp((12 − liquidity_months) × 2.5, 0, 30); growth = clamp(−ebitda_growth_pct × 100, 0, 20); repeat = clamp(prior_bankruptcy_count × 10, 0, 15); score = round(clamp(sum, 0, 100)); bands high ≥ 70, watch ≥ 45', kind: 'interpretive_should', citation: 'DEFINITIVE Chapter 22 recidivism scoring calibration (heuristic; LoPucki Bankruptcy Research Database is the empirical reference, 2024)', pin: 'scoring weights, caps, and band thresholds', effective: '2024 calibration', nextCheck: 'on recalibration' },
     ],
     precisionRule: 'The score is a whole number 0–100; the driver echoes round per the global rule (half-even to 4 decimals — see the Conventions chapter).',
     inputs: {
@@ -3681,6 +3752,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       '3. `within_recognition_period` SHALL be true iff `years_since_conversion` is below the recognition period (constants: §1374 recognition period).',
       '4. `recognized_big_tax_base_cents` SHALL be `min(NUBIG, recognized_gain, taxable-income limitation)` when within the period, else 0 (the taxable-income limitation defaults to the recognized gain).',
       '5. `section_1374_tax_cents` SHALL be `round(recognized_big_tax_base × corporate_tax_rate)` (constants: federal corporate tax rate).',
+      '6. `recognition_period_years` SHALL be the §1374 recognition period (constants). `state_nonconformity_review_required` SHALL default to `within_recognition_period` — true while §1374 is live, because many states do not conform to §1374 or run their own built-in-gains/entity-level regime; it is never silently false. A caller with confirmed state conformity MAY supply `state_nonconformity_possible: false` to suppress it.',
     ],
     constants: [
       { name: '§1374 recognition period', value: '5 years', kind: 'statutory_must', citation: 'IRC § 1374(d)(7); PATH Act 2015', pin: '§ 1374(d)(7) (5-year recognition period, made permanent by the PATH Act)', effective: 'current (IRC as amended)', nextCheck: 'on IRC amendment', traceValues: [5] },
@@ -3695,6 +3767,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       recognized_gain_cents: { type: 'integer (cents)', desc: 'Gain recognized on the sale.', unit: 'cents' },
       taxable_income_cents: { type: 'integer (cents)', desc: 'Taxable income for the §1374 limitation; defaults to the recognized gain.', unit: 'cents' },
       corporate_tax_rate: { type: 'number', desc: 'Corporate tax rate as a fraction; defaults to the federal corporate rate.', precision: 4 },
+      state_nonconformity_possible: { type: 'boolean', desc: 'Optional override for the state-nonconformity flag. Omitted, the flag defaults to `within_recognition_period` (never silently false); supply `false` only with confirmed state conformity.' },
     },
     outputs: {
       net_unrealized_built_in_gain_cents: { type: 'integer (cents)', desc: 'NUBIG at conversion (FMV over basis).', unit: 'cents' },

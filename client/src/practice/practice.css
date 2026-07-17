@@ -1324,6 +1324,19 @@
 .pd-footer img { filter: brightness(0) invert(1); }
 .pd .pd-footer a { color: var(--pd-body); }
 .pd .pd-footer a:hover { color: #fff; }
+/* Founder block (2026-07-17): the one photographic element in the footer — the
+ * headshot keeps its real colors (exempt from the white-invert logo treatment)
+ * with a soft ring so it sits calmly on the warm charcoal. */
+.pd-footer-founder { display: flex; align-items: center; gap: 16px; margin-top: 26px; }
+.pd-footer-founder img {
+  filter: none; width: 64px; height: 64px; border-radius: 50%;
+  object-fit: cover; object-position: 50% 24%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18), 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.pd-footer-founder .fname { font-size: 15.5px; font-weight: 700; color: var(--pd-ink); line-height: 1.3; }
+.pd-footer-founder .frole { font-size: 14px; color: var(--pd-tert); margin-top: 3px; line-height: 1.4; }
+.pd .pd-footer-founder a.fmeet { font-size: 14px; color: #FFB3BF; margin-top: 5px; display: inline-block; }
+.pd .pd-footer-founder a.fmeet:hover { color: #fff; }
 .pd-footer-inner {
   max-width: var(--pd-max); margin: 0 auto; padding: clamp(36px, 4.5vw, 64px) var(--pd-pad-x);
   display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 60px;

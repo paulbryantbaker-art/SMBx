@@ -13,6 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { authHeaders, type User } from "../../../../hooks/useAuth";
 import { T } from "../atlasTokens";
 import { CheckIcon } from "../icons";
+import { StudioAnnouncement } from "./StudioAnnouncement";
 
 /* ─── API types ────────────────────────────────────────────── */
 
@@ -216,17 +217,36 @@ export default function StudioResearch({ user }: { user: User | null }) {
     }
   }, [refresh]);
 
-  const grab = useCallback(async (r: RunRow, kind: "pdf" | "card" | "md") => {
+  const grab = useCallback(async (r: RunRow, kind: "pdf" | "card" | "md" | "lipdf") => {
     const key = `${r.id}:${kind}`;
     setDl(key);
     setNote(null);
     const base = slugify(r.report_title || r.topic);
     try {
       if (kind === "pdf") await download(`/research/runs/${r.id}/pdf`, `smbx-research-${base}.pdf`);
-      else if (kind === "card") await download(`/research/runs/${r.id}/card.png`, `smbx-card-${base}.png`);
+      else if (kind === "card") await download(`/research/runs/${r.id}/card.png`, `smbx-onepager-${base}.png`);
+      else if (kind === "lipdf") await download(`/research/runs/${r.id}/linkedin.pdf`, `smbx-linkedin-${base}.pdf`);
       else await download(`/research/runs/${r.id}/md`, `smbx-research-${base}.md`);
     } catch (e: any) {
       setNote({ kind: "err", text: e?.message || "Download failed." });
+    } finally {
+      setDl(null);
+    }
+  }, []);
+
+  /** Fetch the ready-to-paste post text and put it on the clipboard. */
+  const copyPost = useCallback(async (r: RunRow) => {
+    const key = `${r.id}:post`;
+    setDl(key);
+    setNote(null);
+    try {
+      const resp = await fetch(`/api/research/runs/${r.id}/post.txt`, { headers: authHeaders() });
+      if (!resp.ok) throw new Error(`Post text failed (${resp.status})`);
+      const text = await resp.text();
+      await navigator.clipboard.writeText(text);
+      setNote({ kind: "ok", text: "Post text copied — paste it straight into LinkedIn." });
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Copy failed." });
     } finally {
       setDl(null);
     }
@@ -266,13 +286,18 @@ export default function StudioResearch({ user }: { user: User | null }) {
           <div style={R.knob}>
             <span style={R.knobLabel}>Output</span>
             <div style={R.segRow}>
-              {([["report", "Report PDF"], ["card", "LinkedIn card"], ["both", "Both"]] as const).map(([k, label]) => (
+              {([["report", "Report PDF"], ["post_pdf", "LI post — PDF doc"], ["post_image", "LI post — 1-pager"], ["both", "Everything"]] as const).map(([k, label]) => (
                 <button key={k} type="button" onClick={() => setOutput(k)} style={{ ...R.seg, ...(output === k ? R.segOn : null) }}>
                   {label}
                 </button>
               ))}
             </div>
-            <span style={R.knobHint}>{output === "card" ? "One-pager image built from the run’s best data points." : output === "both" ? "Letter report + the one-pager card." : "Cited letter-format report."}</span>
+            <span style={R.knobHint}>{
+              output === "post_pdf" ? "Swipeable LinkedIn document post (branded PDF pages) + ready-to-paste post text."
+              : output === "post_image" ? "One branded 1080×1350 image + ready-to-paste post text."
+              : output === "both" ? "The report plus both LinkedIn post formats."
+              : "Cited letter-format report for internal use."
+            }</span>
           </div>
         </div>
 
@@ -360,8 +385,13 @@ export default function StudioResearch({ user }: { user: User | null }) {
             {runs.map((r) => {
               const done = r.status === "complete";
               const failed = r.status === "failed";
-              const showPdf = done && (r.output_format === "report" || r.output_format === "both");
-              const showCard = done && r.has_feed && (r.output_format === "card" || r.output_format === "both");
+              // Everything renders on demand from the stored run, so a completed
+              // run with a feed can produce ANY artifact — the chosen format is
+              // intent, not a limit.
+              const showPdf = done;
+              const showLiPdf = done && r.has_feed;
+              const showCard = done && r.has_feed;
+              const showPost = done && r.has_feed;
               return (
                 <div key={r.id} style={R.row}>
                   <span style={R.statusIcon}>
@@ -379,7 +409,9 @@ export default function StudioResearch({ user }: { user: User | null }) {
                     {failed && r.error && <div style={R.rowErr}>{r.error}</div>}
                   </div>
                   {showPdf && <button type="button" style={R.tinyBtn} disabled={dl === `${r.id}:pdf`} onClick={() => grab(r, "pdf")}>{dl === `${r.id}:pdf` ? "…" : "Report PDF"}</button>}
-                  {showCard && <button type="button" style={R.tinyBtn} disabled={dl === `${r.id}:card`} onClick={() => grab(r, "card")}>{dl === `${r.id}:card` ? "…" : "Card PNG"}</button>}
+                  {showLiPdf && <button type="button" style={R.tinyBtn} disabled={dl === `${r.id}:lipdf`} onClick={() => grab(r, "lipdf")}>{dl === `${r.id}:lipdf` ? "…" : "LI doc PDF"}</button>}
+                  {showCard && <button type="button" style={R.tinyBtn} disabled={dl === `${r.id}:card`} onClick={() => grab(r, "card")}>{dl === `${r.id}:card` ? "…" : "1-pager PNG"}</button>}
+                  {showPost && <button type="button" style={R.tinyBtn} disabled={dl === `${r.id}:post`} onClick={() => copyPost(r)}>{dl === `${r.id}:post` ? "…" : "Copy post"}</button>}
                   {done && <button type="button" style={{ ...R.tinyBtn, color: T.muted }} disabled={dl === `${r.id}:md`} onClick={() => grab(r, "md")}>{dl === `${r.id}:md` ? "…" : "MD"}</button>}
                   {(done || failed) && <button type="button" style={{ ...R.tinyBtn, color: T.muted }} onClick={() => deleteRun(r)}>Delete</button>}
                 </div>
@@ -388,6 +420,8 @@ export default function StudioResearch({ user }: { user: User | null }) {
           </div>
         )}
       </div>
+
+      <StudioAnnouncement />
     </div>
   );
 }
