@@ -514,3 +514,109 @@ export async function renderLinkedInDocPdf(run: ResearchRunRow): Promise<Buffer>
     await page.close().catch(() => {});
   }
 }
+
+/* ═══ Announcement card (2026-07-17) ═══════════════════════════════════════
+ * The approved "open for business" 1-pager, productized: two compositions
+ * (light editorial split · dark textured) with parametrized copy and a photo
+ * from the Studio media library. The photo's focal point drives the crop
+ * (object-position) so faces stay framed in any slot. Same brand system as
+ * every other artifact: real logo in the site's two treatments, coral accents,
+ * blackbleed texture on dark.
+ */
+export interface AnnouncementPhoto { dataUri: string; focalX: number; focalY: number }
+export interface AnnouncementSpec {
+  variant: 'light' | 'dark';
+  headline: string;   // ink (light) / white (dark) opening line(s)
+  accent: string;     // the coral continuation line
+  sub: string;        // muted paragraph under the rule
+  bullets: string[];  // 0–4 coral-dot bullets; *word* renders italic
+  mandate: string;    // bold closing line
+  kicker?: string;    // dark variant's top-right mono label (default "Announcement")
+  footerTag: string;  // mono coral-pink footer line
+  footerNote?: string; // dark variant's plain right-side footer text
+  photo?: AnnouncementPhoto | null;
+}
+
+const annEsc = (s: string) => esc(s).replace(/\*([^*]+)\*/g, '<i>$1</i>');
+const annPos = (p?: AnnouncementPhoto | null) => p ? `${Math.round(p.focalX * 100)}% ${Math.round(p.focalY * 100)}%` : '50% 25%';
+
+function annPhotoBlock(radius: number, photo?: AnnouncementPhoto | null): string {
+  if (photo?.dataUri) {
+    return `<img src="${photo.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${annPos(photo)};display:block;border-radius:${radius}px">`;
+  }
+  return `<div style="width:100%;height:100%;border-radius:${radius}px;background:repeating-linear-gradient(45deg,#ECE9E6 0 26px,#F5F2EF 26px 52px);display:flex;align-items:center;justify-content:center;text-align:center;padding:40px"><div style="font-family:${MONO};font-size:19px;letter-spacing:0.08em;color:#8A8A8A;text-transform:uppercase;line-height:2">Photo slot<br>upload media in Studio</div></div>`;
+}
+
+function annBullets(spec: AnnouncementSpec, dark: boolean): string {
+  return spec.bullets.filter(b => b.trim()).slice(0, 4).map(b => `
+  <div style="display:flex;gap:18px;align-items:flex-start">
+    <span style="width:11px;height:11px;border-radius:50%;background:${CORAL};flex:none;margin-top:11px"></span>
+    <span style="font-size:${dark ? '25.5px' : '22.5px'};line-height:1.55;color:${dark ? '#F4F4F4' : INK};font-weight:500">${annEsc(b)}</span>
+  </div>`).join('');
+}
+
+export function announcementCardHtml(spec: AnnouncementSpec): string {
+  if (spec.variant === 'dark') {
+    return `<!doctype html><meta charset="utf-8"><style>*{margin:0;padding:0;box-sizing:border-box}</style>
+<div style="width:1080px;height:1350px;position:relative;background:#141414 ${DARK_TEXTURE_URI ? `url('${DARK_TEXTURE_URI}') center/cover` : ''};overflow:hidden;font-family:${SANS}">
+  <div style="position:absolute;inset:0;background:
+    radial-gradient(900px 480px at 50% 0%, rgba(255,56,92,0.16), transparent 60%),
+    linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.34))"></div>
+  <div style="position:relative;height:100%;padding:60px 66px 56px;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      ${logoImg(42, { white: true })}
+      <div style="font-family:${MONO};font-size:18px;letter-spacing:0.1em;color:#C9C9C9;text-transform:uppercase">${annEsc(spec.kicker || 'Announcement')}</div>
+    </div>
+    <div style="margin-top:46px;display:flex;gap:48px;align-items:stretch">
+      <div style="width:432px;height:544px;flex:none;box-shadow:0 30px 80px rgba(0,0,0,0.5)">${annPhotoBlock(24, spec.photo)}</div>
+      <div style="display:flex;flex-direction:column;justify-content:center">
+        <div style="font-weight:800;font-size:58px;line-height:1.06;letter-spacing:-0.025em;color:#fff">${annEsc(spec.headline)}<br><span style="color:${CORAL}">${annEsc(spec.accent)}</span></div>
+        <div style="width:70px;height:6px;background:${CORAL};border-radius:99px;margin-top:30px"></div>
+        <div style="margin-top:28px;font-size:22.5px;line-height:1.55;color:#C9C9C9;font-weight:500">${annEsc(spec.sub)}</div>
+      </div>
+    </div>
+    <div style="margin-top:auto;display:flex;flex-direction:column;gap:36px;max-width:940px">${annBullets(spec, true)}</div>
+    <div style="margin-top:auto;font-size:28px;line-height:1.45;color:#fff;font-weight:700;max-width:920px;padding-bottom:4px">${annEsc(spec.mandate)}</div>
+    <div style="margin-top:34px;border-top:1px solid rgba(255,255,255,0.14);padding-top:26px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-family:${MONO};font-size:19px;letter-spacing:0.1em;color:#FFB3BF;text-transform:uppercase">${annEsc(spec.footerTag)}</div>
+      <div style="font-size:18px;color:#C9C9C9;font-weight:500">${annEsc(spec.footerNote || '')}</div>
+    </div>
+  </div>
+</div>`;
+  }
+  return `<!doctype html><meta charset="utf-8"><style>*{margin:0;padding:0;box-sizing:border-box}</style>
+<div style="width:1080px;height:1350px;position:relative;background:${WARM};overflow:hidden;font-family:${SANS}">
+  <div style="position:absolute;inset:0;background:
+    radial-gradient(1200px 800px at 8% 0%, rgba(255,56,92,0.05), transparent 60%),
+    radial-gradient(900px 700px at 100% 100%, rgba(255,116,119,0.04), transparent 55%)"></div>
+  <div style="position:absolute;left:0;top:0;bottom:128px;width:512px;padding:60px 46px 0 60px;display:flex;flex-direction:column">
+    <div style="align-self:flex-start">${logoImg(42)}</div>
+    <div style="margin-top:64px;font-weight:800;font-size:52px;line-height:1.06;letter-spacing:-0.025em;color:${INK}">${annEsc(spec.headline)}<br><span style="color:${CORAL_DEEP}">${annEsc(spec.accent)}</span></div>
+    <div style="width:70px;height:6px;background:${CORAL};border-radius:99px;margin:34px 0 30px"></div>
+    <div style="font-size:22px;line-height:1.5;color:${TERT};font-weight:500">${annEsc(spec.sub)}</div>
+    <div style="margin-top:36px;display:flex;flex-direction:column;gap:22px">${annBullets(spec, false)}</div>
+    <div style="margin-top:auto;padding-bottom:48px;font-size:23.5px;line-height:1.45;color:${INK};font-weight:700">${annEsc(spec.mandate)}</div>
+  </div>
+  <div style="position:absolute;left:536px;top:0;bottom:128px;right:0">${annPhotoBlock(0, spec.photo)}
+    <div style="position:absolute;inset:0;background:linear-gradient(90deg, ${WARM} 0%, transparent 9%)"></div>
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:0;height:128px;background:${DARK};display:flex;align-items:center;justify-content:space-between;padding:0 60px">
+    ${logoImg(48, { white: true })}
+    <div style="font-family:${MONO};font-size:19px;letter-spacing:0.1em;color:#FFB3BF;text-transform:uppercase">${annEsc(spec.footerTag)}</div>
+  </div>
+</div>`;
+}
+
+export async function renderAnnouncementCardPng(spec: AnnouncementSpec): Promise<Buffer> {
+  const browser = await getBrowser();
+  const page = await browser.newPage();
+  try {
+    await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 2 });
+    await page.setContent(announcementCardHtml(spec), { waitUntil: 'networkidle0', timeout: 60000 });
+    await page.evaluateHandle('document.fonts.ready').catch(() => {});
+    await new Promise(r => setTimeout(r, 150));
+    return Buffer.from(await page.screenshot({ type: 'png' }));
+  } finally {
+    await page.close().catch(() => {});
+  }
+}
