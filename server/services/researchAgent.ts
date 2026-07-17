@@ -134,7 +134,12 @@ export const DEPTHS: DepthDef[] = [
   { key: 'deep', label: 'Deep', blurb: '~10 min · 40 searches', searches: 40, fetches: 25, maxTokens: 16000, words: '2,500–4,000' },
 ];
 
-export const OUTPUT_FORMATS = ['report', 'card', 'both'] as const;
+// 'report' = internal letter report · 'post_pdf' = LinkedIn document-post PDF
+// (swipeable pages + ready-to-paste post text) · 'post_image' = LinkedIn
+// 1-pager (branded image + post text). 'card'/'both' are the legacy values —
+// still valid on old rows; every artifact renders on demand from any
+// completed run, so the format mostly records intent.
+export const OUTPUT_FORMATS = ['report', 'post_pdf', 'post_image', 'card', 'both'] as const;
 export const CADENCES = ['weekly', 'biweekly', 'monthly'] as const;
 
 function typeDef(key: string): ResearchTypeDef {
@@ -214,8 +219,19 @@ Return ONLY a JSON object, no prose, no code fence, exactly this shape:
   "dataPoints": [{ "stat": "the number + what it is", "source": "domain or publication", "freshness": "date or period", "confidence": "high|medium|low" }],
   "angles": [{ "title": "post angle name", "body": "2–3 sentence sketch of the post" }],
   "visual": "one sentence describing the strongest single-image visual for this material",
-  "accounts": ["3–6 named companies/publications worth following on this lane"]
+  "accounts": ["3–6 named companies/publications worth following on this lane"],
+  "post": {
+    "text": "the READY-TO-PASTE LinkedIn post. First line = the strongest hook (stands alone before 'see more'). Then 2–4 short paragraphs separated by blank lines — factual, senior-operator voice, each number carrying its source name inline in parentheses. 120–220 words. End with 3–5 relevant hashtags on the last line. No emojis, no 'excited to share', no rhetorical-question spam.",
+    "altText": "one plain sentence describing the post image for accessibility"
+  },
+  "docPages": [
+    { "kind": "cover", "heading": "the hook, ≤90 chars", "body": "one-line setup, ≤120 chars" },
+    { "kind": "stat|story|takeaway", "heading": "≤70 chars", "body": "1–3 sentences", "stat": "stat pages only: the number EXACTLY as cited, short form (e.g. '$4.2B', '38%', '1,900')", "source": "stat pages only: domain or publication" }
+  ],
+  "chart": { "title": "≤60 chars", "unit": "what the values measure", "labels": ["3–8 category/period labels"], "values": [numbers matching labels], "source": "domain or publication" }
 }
+docPages: 6–9 pages telling ONE story arc for a swipeable LinkedIn document post — a cover, then alternating stat and story pages (lead with the strongest stat), one takeaway page near the end stating what this means for an acquirer. Do NOT include a closing/brand page (the renderer adds it). Every stat page's number must appear in the report with a citation.
+chart: ONLY when the report contains a genuine comparable numeric series (3–8 values of the same measure with a citation) — otherwise null. Never fabricate, interpolate, or mix units to force a chart.
 Include 4–8 dataPoints and exactly 3 angles.`;
 }
 
@@ -398,7 +414,7 @@ export async function executeResearchRun(runId: number): Promise<void> {
     try {
       const feedResp = await anthropic.messages.create({
         model: MODEL,
-        max_tokens: 3000,
+        max_tokens: 6000,
         system: feedSystemPrompt(),
         messages: [{ role: 'user', content: `The report:\n\n${reportMd.slice(0, 60000)}` }],
       });

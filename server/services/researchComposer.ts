@@ -15,7 +15,21 @@
  * Chromium has network — Google Fonts CDN, same dependency base.ts takes).
  */
 import { marked } from 'marked';
+import { readFileSync } from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { getBrowser } from './premiumPdfRenderer.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+/* The practice site's dark-band texture (blackbleed), inlined so Puppeteer
+ * needs no asset server. ~530KB as base64 — fine for a render page. Falls back
+ * to the plain dark gradient if the file is ever missing. */
+let DARK_TEXTURE_URI = '';
+try {
+  const buf = readFileSync(path.resolve(__dirname, '../../client/public/textures/blackbleed.webp'));
+  DARK_TEXTURE_URI = `data:image/webp;base64,${buf.toString('base64')}`;
+} catch { /* gradient fallback */ }
 
 /* ─── palette (practice .pd language) ─────────────────────────────────── */
 const INK = '#222222';
@@ -247,6 +261,237 @@ export async function renderResearchCardPng(run: ResearchRunRow, hookIndex = 0):
     await page.evaluateHandle('document.fonts.ready').catch(() => {});
     const png = await page.screenshot({ type: 'png' });
     return Buffer.from(png);
+  } finally {
+    await page.close().catch(() => {});
+  }
+}
+
+/* ─── the ready-to-paste LinkedIn post text ────────────────────────────── */
+
+/**
+ * The post text the 1-pager image (or doc PDF) ships with. Prefers the
+ * synthesized feed.post.text; older runs without one get an honest assembly
+ * from the hook + top cited data points — never invented copy.
+ */
+export function researchPostText(run: ResearchRunRow): string {
+  const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
+  const post = feed.post;
+  if (post && typeof post.text === 'string' && post.text.trim().length > 40) return post.text.trim();
+
+  const hooks: string[] = Array.isArray(feed.hooks) ? feed.hooks : [];
+  const hook = hooks[0] || run.report_title || run.topic;
+  const points: any[] = (Array.isArray(feed.dataPoints) ? feed.dataPoints : []).slice(0, 3);
+  const lines: string[] = [hook, ''];
+  for (const p of points) lines.push(`— ${p.stat}${p.source ? ` (${p.source})` : ''}`);
+  if (points.length) lines.push('');
+  lines.push('From our latest research read on this market.');
+  lines.push('');
+  lines.push('#MergersAndAcquisitions #CorporateDevelopment #LowerMiddleMarket');
+  return lines.join('\n');
+}
+
+/* ─── the LinkedIn document post (swipeable 1080×1350 PDF) ─────────────── */
+
+interface DocPage { kind: string; heading?: string; body?: string; stat?: string; source?: string }
+
+/** Normalize the synthesized deck; older runs fall back to hook + data points. */
+function docPages(run: ResearchRunRow): DocPage[] {
+  const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
+  const raw: any[] = Array.isArray(feed.docPages) ? feed.docPages : [];
+  const KINDS = new Set(['cover', 'stat', 'story', 'takeaway']);
+  let pages = raw
+    .filter(p => p && KINDS.has(p.kind) && typeof p.heading === 'string' && p.heading.trim())
+    .slice(0, 10);
+  if (!pages.some(p => p.kind === 'cover')) pages = [];  // a deck without a cover is malformed — rebuild
+  if (!pages.length) {
+    const hooks: string[] = Array.isArray(feed.hooks) ? feed.hooks : [];
+    const points: any[] = (Array.isArray(feed.dataPoints) ? feed.dataPoints : []).slice(0, 5);
+    const angles: any[] = Array.isArray(feed.angles) ? feed.angles : [];
+    pages = [
+      { kind: 'cover', heading: hooks[0] || run.report_title || run.topic, body: 'What the sourced numbers actually say.' },
+      ...points.map(p => ({ kind: 'stat', stat: firstNumberToken(p.stat), heading: p.stat, body: '', source: [p.source, p.freshness].filter(Boolean).join(' · ') })),
+      ...(angles[0]?.body ? [{ kind: 'takeaway', heading: 'What this means for an acquirer', body: angles[0].body }] : []),
+    ];
+  }
+  return pages;
+}
+
+/** Pull a short display numeral ("$4.2B", "38%", "1,900") off a stat sentence. */
+function firstNumberToken(stat: string): string {
+  const m = /(?:[$€£]\s?)?\d[\d,.]*(?:\s?[%xX×]|\s?(?:billion|million|bn|mm|M|B|K|k))?/.exec(String(stat ?? ''));
+  return (m ? m[0] : '').trim();
+}
+
+export function linkedInDocHtml(run: ResearchRunRow): string {
+  const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
+  const typeLabel = TYPE_LABELS[run.research_type] ?? 'Research';
+  const pages = docPages(run);
+  const chart = feed.chart && Array.isArray(feed.chart.labels) && Array.isArray(feed.chart.values)
+    && feed.chart.labels.length >= 3 && feed.chart.labels.length === feed.chart.values.length
+    && feed.chart.values.every((v: any) => typeof v === 'number' && Number.isFinite(v))
+    ? feed.chart : null;
+
+  const kicker = (n: number, total: number) => `
+    <div class="kick"><span><b>smbX</b> · ${esc(typeLabel.toUpperCase())}</span><span>${n} / ${total}</span></div>`;
+
+  // Total = content pages + optional chart page + closer.
+  const total = pages.length + (chart ? 1 : 0) + 1;
+  let n = 0;
+  const pageHtml: string[] = [];
+
+  for (const p of pages) {
+    n++;
+    if (p.kind === 'cover') {
+      const h = String(p.heading ?? '');
+      const size = h.length > 120 ? 62 : h.length > 80 ? 72 : h.length > 50 ? 84 : 96;
+      pageHtml.push(`<div class="pg">
+        <div class="wash"></div>
+        <div class="in">
+          <div class="kick"><span><b>smbX</b> · ${esc(typeLabel.toUpperCase())}</span><span>${esc(fmtDate(run.completed_at))}</span></div>
+          <div class="cover-h" style="font-size:${size}px">${esc(h)}</div>
+          <div class="rule"></div>
+          ${p.body ? `<div class="cover-sub">${esc(p.body)}</div>` : ''}
+          <div class="swipe">SWIPE&nbsp;&nbsp;→</div>
+        </div>
+      </div>`);
+    } else if (p.kind === 'stat') {
+      const numeral = String(p.stat ?? '').trim() || firstNumberToken(p.heading ?? '');
+      const numSize = numeral.length > 8 ? 120 : numeral.length > 5 ? 150 : 184;
+      pageHtml.push(`<div class="pg">
+        <div class="wash"></div>
+        <div class="in">
+          ${kicker(n, total)}
+          <div class="grow">
+            <div class="numeral" style="font-size:${numSize}px">${esc(numeral)}</div>
+            <div class="rule"></div>
+            <div class="stat-h">${esc(p.heading ?? '')}</div>
+            ${p.body ? `<div class="stat-b">${esc(p.body)}</div>` : ''}
+          </div>
+          ${p.source ? `<div class="src-line">${esc(p.source)}</div>` : ''}
+        </div>
+      </div>`);
+    } else { // story | takeaway
+      const isTake = p.kind === 'takeaway';
+      pageHtml.push(`<div class="pg${isTake ? ' take' : ''}">
+        <div class="wash"></div>
+        <div class="in">
+          ${kicker(n, total)}
+          <div class="grow">
+            ${isTake ? `<div class="take-tag">FOR THE ACQUIRER</div>` : ''}
+            <div class="story-h">${esc(p.heading ?? '')}</div>
+            <div class="rule"></div>
+            ${p.body ? `<div class="story-b">${esc(p.body)}</div>` : ''}
+          </div>
+        </div>
+      </div>`);
+    }
+  }
+
+  if (chart) {
+    n++;
+    pageHtml.push(`<div class="pg">
+      <div class="wash"></div>
+      <div class="in">
+        ${kicker(n, total)}
+        <div class="grow">
+          <div class="story-h" style="font-size:52px">${esc(chart.title ?? 'The numbers')}</div>
+          <div class="rule"></div>
+          <div class="chart-panel"><canvas id="c1" width="880" height="720"></canvas></div>
+          ${chart.unit ? `<div class="chart-unit">${esc(chart.unit)}</div>` : ''}
+        </div>
+        ${chart.source ? `<div class="src-line">${esc(chart.source)}</div>` : ''}
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+      new Chart(document.getElementById('c1'), {
+        type: 'bar',
+        data: { labels: ${JSON.stringify(chart.labels.map((l: any) => String(l)))},
+                datasets: [{ data: ${JSON.stringify(chart.values)}, backgroundColor: '${CORAL}', borderRadius: 8, maxBarThickness: 88 }] },
+        options: { responsive: false, animation: false, devicePixelRatio: 2,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { family: 'IBM Plex Mono', size: 17 }, color: '${TERT}' } },
+            y: { grid: { color: '${HAIR}' }, ticks: { font: { family: 'IBM Plex Mono', size: 17 }, color: '${TERT}' } }
+          } }
+      });
+    </script>`);
+  }
+
+  // Closer — the site's dark textured band with the coral halo.
+  pageHtml.push(`<div class="pg dark">
+    <div class="halo"></div>
+    <div class="in closer">
+      <div class="close-line">Research with sources, not takes.</div>
+      <div class="brand-big"><span class="bd"></span>smbx.ai</div>
+      <div class="close-sub">Buy-side corporate development for lower-middle-market acquirers.</div>
+      <div class="follow">Follow for the next read.</div>
+    </div>
+  </div>`);
+
+  return `<!DOCTYPE html><html><head><meta charset="utf-8">${FONTS}
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 1080px; }
+    body { font-family: ${SANS}; color: ${INK}; }
+    .pg { width: 1080px; height: 1350px; position: relative; overflow: hidden; background: ${WARM}; page-break-after: always; }
+    .pg:last-child { page-break-after: auto; }
+    .wash { position: absolute; inset: 0; background:
+      radial-gradient(720px 560px at 88% -6%, rgba(255,56,92,0.075), transparent 62%),
+      radial-gradient(640px 520px at -8% 44%, rgba(255,116,140,0.055), transparent 60%); }
+    .in { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 76px 88px 84px; }
+    .kick { display: flex; justify-content: space-between; align-items: baseline; font-family: ${MONO};
+      font-size: 21px; letter-spacing: 0.1em; color: ${TERT}; text-transform: uppercase; }
+    .kick b { color: ${CORAL_DEEP}; font-weight: 600; }
+    .rule { height: 6px; width: 96px; background: ${CORAL}; border-radius: 3px; }
+    .grow { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 34px; }
+    /* cover */
+    .cover-h { margin-top: 150px; font-weight: 800; letter-spacing: -0.022em; line-height: 1.04; max-width: 900px; }
+    .cover-h + .rule { margin-top: 52px; }
+    .cover-sub { margin-top: 40px; font-size: 34px; color: ${BODY}; line-height: 1.4; max-width: 820px; }
+    .swipe { position: absolute; right: 88px; bottom: 84px; font-family: ${MONO}; font-size: 22px; letter-spacing: 0.14em; color: ${CORAL_DEEP}; font-weight: 600; }
+    /* stat */
+    .numeral { font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: ${INK}; }
+    .stat-h { font-size: 40px; font-weight: 700; letter-spacing: -0.014em; line-height: 1.22; max-width: 880px; }
+    .stat-b { font-size: 29px; color: ${BODY}; line-height: 1.45; max-width: 860px; }
+    .src-line { font-family: ${MONO}; font-size: 19px; color: ${TERT}; letter-spacing: 0.02em; }
+    /* story / takeaway */
+    .story-h { font-size: 58px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; max-width: 890px; }
+    .story-b { font-size: 32px; color: ${BODY}; line-height: 1.5; max-width: 860px; }
+    .take .in { background: linear-gradient(180deg, rgba(247,247,247,0.0), rgba(247,247,247,0.85)); }
+    .take-tag { font-family: ${MONO}; font-size: 20px; letter-spacing: 0.12em; color: ${CORAL_DEEP}; font-weight: 600; }
+    /* chart */
+    .chart-panel { background: #fff; border: 1px solid ${HAIR}; border-radius: 20px; padding: 34px; width: 904px; }
+    .chart-unit { font-size: 24px; color: ${BODY}; }
+    /* closer */
+    .pg.dark { background: ${DARK}; ${DARK_TEXTURE_URI ? `background-image: url('${DARK_TEXTURE_URI}'); background-size: cover; background-position: center;` : ''} }
+    .halo { position: absolute; inset: 0; background:
+      radial-gradient(900px 500px at 50% -10%, rgba(255,56,92,0.28), transparent 65%),
+      linear-gradient(180deg, rgba(20,19,18,0.25), rgba(20,20,20,0.55)); }
+    .closer { justify-content: center; align-items: center; text-align: center; gap: 0; }
+    .close-line { font-size: 40px; font-weight: 700; color: #F4F4F4; letter-spacing: -0.014em; }
+    .brand-big { margin-top: 46px; display: flex; align-items: center; gap: 22px; color: #fff; font-size: 88px; font-weight: 800; letter-spacing: -0.02em; }
+    .brand-big .bd { width: 30px; height: 30px; border-radius: 50%; background: ${CORAL}; }
+    .close-sub { margin-top: 30px; font-size: 30px; color: #DEDEDE; max-width: 760px; line-height: 1.45; }
+    .follow { margin-top: 64px; font-family: ${MONO}; font-size: 22px; letter-spacing: 0.12em; color: #FFB3BF; font-weight: 600; text-transform: uppercase; }
+  </style></head><body>${pageHtml.join('\n')}</body></html>`;
+}
+
+export async function renderLinkedInDocPdf(run: ResearchRunRow): Promise<Buffer> {
+  const html = linkedInDocHtml(run);
+  const browser = await getBrowser();
+  const page = await browser.newPage();
+  try {
+    await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 1 });
+    await page.setContent(html, { waitUntil: 'networkidle0', timeout: 60000 });
+    await page.evaluateHandle('document.fonts.ready').catch(() => {});
+    // Chart.js renders synchronously with animation:false; a beat for raster.
+    await new Promise(r => setTimeout(r, 150));
+    const pdf = await page.pdf({
+      width: '1080px', height: '1350px', printBackground: true,
+      margin: { top: 0, bottom: 0, left: 0, right: 0 },
+    });
+    return Buffer.from(pdf);
   } finally {
     await page.close().catch(() => {});
   }

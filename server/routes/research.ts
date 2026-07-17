@@ -19,7 +19,7 @@ import {
   getMonthlyCapCents,
   nextRunAt,
 } from '../services/researchAgent.js';
-import { renderResearchPdf, renderResearchCardPng, type ResearchRunRow } from '../services/researchComposer.js';
+import { renderResearchPdf, renderResearchCardPng, renderLinkedInDocPdf, researchPostText, type ResearchRunRow } from '../services/researchComposer.js';
 
 export const researchRouter = Router();
 
@@ -177,6 +177,41 @@ researchRouter.get('/research/runs/:id/card.png', async (req, res) => {
   } catch (err: any) {
     console.error('[research] card render failed:', err.message);
     return res.status(500).json({ error: 'Card render failed' });
+  }
+});
+
+// LinkedIn document post — swipeable 1080×1350 PDF in the practice brand.
+researchRouter.get('/research/runs/:id/linkedin.pdf', async (req, res) => {
+  const userId = userIdFromReq(req);
+  const id = parseId(req.params.id);
+  if (!userId || !id) return res.status(400).json({ error: 'Bad request' });
+  try {
+    const run = await loadCompleteRun(id, userId);
+    if (!run) return res.status(404).json({ error: 'No completed run' });
+    if (!run.studio_feed) return res.status(404).json({ error: 'This run has no studio feed to build a document post from' });
+    const pdf = await renderLinkedInDocPdf(run);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="smbx-linkedin-${slugify(run.report_title || run.topic)}.pdf"`);
+    return res.send(pdf);
+  } catch (err: any) {
+    console.error('[research] linkedin pdf render failed:', err.message);
+    return res.status(500).json({ error: 'LinkedIn PDF render failed' });
+  }
+});
+
+// The ready-to-paste post text that ships with either LinkedIn artifact.
+researchRouter.get('/research/runs/:id/post.txt', async (req, res) => {
+  const userId = userIdFromReq(req);
+  const id = parseId(req.params.id);
+  if (!userId || !id) return res.status(400).json({ error: 'Bad request' });
+  try {
+    const run = await loadCompleteRun(id, userId);
+    if (!run) return res.status(404).json({ error: 'No completed run' });
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    return res.send(researchPostText(run));
+  } catch (err: any) {
+    console.error('[research] post text failed:', err.message);
+    return res.status(500).json({ error: 'Post text failed' });
   }
 });
 
