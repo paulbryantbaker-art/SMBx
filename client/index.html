@@ -20,7 +20,7 @@
     <meta property="og:description" content="An on-demand corporate development team that guides your acquisition from thesis to close. We build value by applying operator instincts to the buy-side." />
     <meta property="og:type" content="website" />
     <meta name="color-scheme" content="light" />
-    <meta name="theme-color" content="#F6F7F9" />
+    <meta name="theme-color" content="#FDF8F3" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <script>
@@ -40,7 +40,11 @@
         // (in rootGradient, see V6Mobile.tsx) so chrome reads white and
         // the warm depth lives in the page itself, just below the chrome.
         // No body-bg mutation, no per-route reloads, no SPA quirks.
-        var bg = isMobile ? '#FFFFFF' : '#F6F7F9';
+        // Warm paper everywhere (2026-07-17): the logged-out practice site is
+        // the first paint most visitors get, and a cool slate/white flash (or
+        // slate overscroll edges) read cold against its warm canvas. The app
+        // shells paint their own surfaces over this immediately.
+        var bg = '#FDF8F3';
         document.documentElement.style.backgroundColor = bg;
         if (document.body) document.body.style.backgroundColor = bg;
         else document.addEventListener('DOMContentLoaded', function() {
