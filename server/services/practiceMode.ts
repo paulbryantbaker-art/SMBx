@@ -17,7 +17,7 @@ import jwt from 'jsonwebtoken';
 import { createSql } from '../dbConfig.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || process.env.SESSION_SECRET || 'dev-secret-change-me';
-const DEFAULT_TEAM = ['paulbryantbaker@gmail.com'];
+const DEFAULT_TEAM = ['paulbryantbaker@gmail.com', 'pbaker@smbx.ai'];
 
 export function practiceModeEnabled(): boolean {
   return process.env.PRACTICE_MODE !== 'false';
