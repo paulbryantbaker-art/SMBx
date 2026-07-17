@@ -31,9 +31,10 @@ for (const dir of [ROOT, path.join(ROOT, 'assets'), PUB, SCRATCH]) {
     if (existsSync(p)) { PHOTO = b64(p, c.endsWith('png') ? 'image/png' : 'image/jpeg'); break outer; }
   }
 }
-const photoBlock = (radius: number) => PHOTO
-  ? `<img src="${PHOTO}" style="width:100%;height:100%;object-fit:cover;object-position:50% 18%;display:block;border-radius:${radius}px">`
-  : `<div style="width:100%;height:100%;border-radius:${radius}px;background:repeating-linear-gradient(45deg,#ECE9E6 0 26px,#F5F2EF 26px 52px);display:flex;align-items:center;justify-content:center;text-align:center;padding:40px"><div style="font-family:${MONO};font-size:19px;letter-spacing:0.08em;color:#8A8A8A;text-transform:uppercase;line-height:2">Photo slot<br>drop client/public/founder.jpg<br>and re-render</div></div>`;
+const PORTRAIT = existsSync(path.join(PUB, 'founder-portrait.jpg')) ? b64(path.join(PUB, 'founder-portrait.jpg'), 'image/jpeg') : '';
+const photoBlock = (radius: number, src = PHOTO, pos = '50% 18%') => src
+  ? `<img src="${src}" style="width:100%;height:100%;object-fit:cover;object-position:${pos};display:block;border-radius:${radius}px">`
+  : `<div style="width:100%;height:100%;border-radius:${radius}px;background:repeating-linear-gradient(45deg,#ECE9E6 0 26px,#F5F2EF 26px 52px);display:flex;align-items:center;justify-content:center;text-align:center;padding:40px"><div style="font-family:${MONO};font-size:19px;letter-spacing:0.08em;color:#8A8A8A;text-transform:uppercase;line-height:2">Photo slot<br>drop founder.jpg<br>and re-render</div></div>`;
 
 const STATS = [
   ['150+', 'Acquisitions closed'],
@@ -56,7 +57,7 @@ const BULLETS = [
 const bulletList = (dark: boolean) => BULLETS.map(b => `
   <div style="display:flex;gap:18px;align-items:flex-start">
     <span style="width:11px;height:11px;border-radius:50%;background:${CORAL};flex:none;margin-top:11px"></span>
-    <span style="font-size:22.5px;line-height:1.45;color:${dark ? '#F4F4F4' : INK};font-weight:500">${b}</span>
+    <span style="font-size:${dark ? '25.5px' : '22.5px'};line-height:1.55;color:${dark ? '#F4F4F4' : INK};font-weight:500">${b}</span>
   </div>`).join('');
 
 const A = `<!doctype html><meta charset="utf-8"><style>*{margin:0;padding:0;box-sizing:border-box}</style>
@@ -93,15 +94,15 @@ const B = `<!doctype html><meta charset="utf-8"><style>*{margin:0;padding:0;box-
       <div style="font-family:${MONO};font-size:18px;letter-spacing:0.1em;color:#C9C9C9;text-transform:uppercase">Announcement</div>
     </div>
     <div style="margin-top:46px;display:flex;gap:48px;align-items:stretch">
-      <div style="width:400px;height:560px;flex:none;box-shadow:0 30px 80px rgba(0,0,0,0.5)">${photoBlock(24)}</div>
+      <div style="width:432px;height:544px;flex:none;box-shadow:0 30px 80px rgba(0,0,0,0.5)">${photoBlock(24, PORTRAIT || PHOTO, '50% 24%')}</div>
       <div style="display:flex;flex-direction:column;justify-content:center">
-        <div style="font-weight:800;font-size:54px;line-height:1.06;letter-spacing:-0.025em;color:#fff">The acquirers who win don\u2019t have better deal flow.<br><span style="color:${CORAL}">They have better process.</span></div>
+        <div style="font-weight:800;font-size:58px;line-height:1.06;letter-spacing:-0.025em;color:#fff">The acquirers who win don\u2019t have better deal flow.<br><span style="color:${CORAL}">They have better process.</span></div>
         <div style="width:70px;height:6px;background:${CORAL};border-radius:99px;margin-top:30px"></div>
-        <div style="margin-top:26px;font-size:21.5px;line-height:1.5;color:#C9C9C9;font-weight:500">Twenty years as the internal deal captain for major platforms — now running that same playbook for independent buyers.</div>
+        <div style="margin-top:28px;font-size:22.5px;line-height:1.55;color:#C9C9C9;font-weight:500">Twenty years as the internal deal captain for major platforms — now running that same playbook for independent buyers.</div>
       </div>
     </div>
-    <div style="margin-top:auto;display:flex;flex-direction:column;gap:26px;max-width:920px">${bulletList(true)}</div>
-    <div style="margin-top:auto;font-size:25px;line-height:1.45;color:#fff;font-weight:700;max-width:880px;padding-bottom:6px">Now taking new mandates — outsourced deal captain for a select number of active buyers.</div>
+    <div style="margin-top:auto;display:flex;flex-direction:column;gap:36px;max-width:940px">${bulletList(true)}</div>
+    <div style="margin-top:auto;font-size:28px;line-height:1.45;color:#fff;font-weight:700;max-width:920px;padding-bottom:4px">Now taking new mandates — outsourced deal captain for a select number of active buyers.</div>
     <div style="margin-top:34px;border-top:1px solid rgba(255,255,255,0.14);padding-top:26px;display:flex;align-items:center;justify-content:space-between">
       <div style="font-family:${MONO};font-size:19px;letter-spacing:0.1em;color:#FFB3BF;text-transform:uppercase">smbx.ai · Book a call</div>
       <div style="font-size:18px;color:#C9C9C9;font-weight:500">Buy-side only · Lower middle market only</div>
