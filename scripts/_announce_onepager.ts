@@ -66,7 +66,7 @@ const A = `<!doctype html><meta charset="utf-8"><style>*{margin:0;padding:0;box-
     radial-gradient(1200px 800px at 8% 0%, rgba(255,56,92,0.05), transparent 60%),
     radial-gradient(900px 700px at 100% 100%, rgba(255,116,119,0.04), transparent 55%)"></div>
   <div style="position:absolute;left:0;top:0;bottom:128px;width:512px;padding:60px 46px 0 60px;display:flex;flex-direction:column">
-    <img src="${LOGO}" style="height:42px;width:auto;display:block">
+    <img src="${LOGO}" style="height:42px;width:auto;display:block;align-self:flex-start">
     <div style="margin-top:64px;font-weight:800;font-size:52px;line-height:1.06;letter-spacing:-0.025em;color:${INK}">The acquirers who win don\u2019t have better deal flow.<br><span style="color:${CORAL_DEEP}">They have better process.</span></div>
     <div style="width:70px;height:6px;background:${CORAL};border-radius:99px;margin:34px 0 30px"></div>
     <div style="font-size:22px;line-height:1.5;color:${BODY};font-weight:500">Twenty years as the internal deal captain for major platforms — now running that same playbook for independent buyers.</div>
