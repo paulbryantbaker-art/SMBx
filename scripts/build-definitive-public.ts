@@ -368,6 +368,8 @@ function renderAuthoredOutputs(outputs: Record<string, OverlayFieldSpec>, mg: (s
 const KIND_LABEL: Record<ConstantSpec['kind'], string> = {
   statutory_must: 'MUST (binding)',
   cited_median_should: 'SHOULD (cited median)',
+  interpretive_should: 'SHOULD (interpretive)',
+  market_convention: 'SHOULD (market convention)',
   table_data: 'table (jurisdictional)',
   pass_through: 'pass-through (live data)',
 };

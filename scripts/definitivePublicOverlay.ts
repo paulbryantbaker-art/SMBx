@@ -285,7 +285,7 @@ export const GATE_REGISTRY_DRAFTS: GateDraft[] = [
  * untraceable-literal gate can prove every output number is a constant, an
  * input, or an algorithm-derived value.
  */
-export type ConstantKind = 'statutory_must' | 'cited_median_should' | 'table_data' | 'pass_through';
+export type ConstantKind = 'statutory_must' | 'cited_median_should' | 'interpretive_should' | 'market_convention' | 'table_data' | 'pass_through';
 export interface ConstantSpec {
   name: string; value: string; kind: ConstantKind;
   citation: string; pin?: string; effective?: string; nextCheck?: string;
@@ -599,6 +599,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
   M228: {
     purpose:
       'Flags every relied-on representation, covenant, or indemnity that will merge into the deed at closing for lack of an express survival hook or collateral character, so nothing the buyer is counting on quietly disappears at the closing table. It answers, before signing a real-estate or M&A deal that closes by deed, "which of these promises survive closing, and which need survival language added?" The fraud exception is noted independently.',
+    scopeFlag: 'Scope: the merger-by-deed doctrine reaches the contract\'s TITLE and conveyance terms — it is those that merge into the deed at closing. Business representations and warranties and other collateral/independent obligations are generally NOT extinguished by delivery of the deed, and in an entity deal that closes without a deed the doctrine does not apply at all. Read a "merges into deed" result as applying to title-related covenants; a flagged business rep is a prompt to add express survival language, not a statement that the doctrine actually cuts it off.',
     algorithm: [
       'Given `items` (a list of objects, each with `label`, `type`, `express_survival`, `collateral_obligation`):',
       '1. The implementation SHALL require a non-empty `items` list; otherwise `status: "needs_inputs"`.',
@@ -632,6 +633,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
   M229: {
     purpose:
       'Classifies the consent path a transfer must clear under a lease\'s anti-assignment and change-of-control terms, resolving the governing consent standard against the state table (CA Kendall implied reasonableness vs. NY as-written enforcement). It answers, in an OpCo/PropCo or leased-asset deal, "does this transfer trip the lease\'s transfer restriction, and how hard is the consent to get?" The enforceability judgment always routes to counsel.',
+    scopeFlag: 'Scope: a merger or change-of-control is classified as an assignment only when the supplied `lease_deems_change_of_control_assignment` fact is set. But anti-assignment clauses routinely reach "assignment by merger or by operation of law" INDEPENDENTLY of any change-of-control-deeming language, and whether a merger effects an assignment is itself unsettled — so a merger the lease is silent on can still trip the restriction. Treat a "not an assignment" result on a merger as provisional and route it to counsel when the clause reaches operation-of-law transfers.',
     algorithm: [
       'Given `transfer_type` and `consent_clause` (and optional `state`, `lease_deems_change_of_control_assignment` (default false), `landlord_recapture_right` (default false)):',
       '1. The implementation SHALL require `transfer_type ∈ lease_transfer_type enum` and `consent_clause ∈ consent_clause enum`; otherwise `status: "needs_inputs"`.',
@@ -916,7 +918,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     outputs: {
       purchase_price_cents: { type: 'integer (cents)', desc: 'The price allocated, echoed.', unit: 'cents' },
       allocated_cents: { type: 'integer (cents)', desc: 'Total amount allocated across the classes.', unit: 'cents' },
-      unallocated_cents: { type: 'integer (cents)', desc: 'Non-negative residual when supplied fair market values exceed the price (normally zero).', unit: 'cents' },
+      unallocated_cents: { type: 'integer (cents)', desc: 'Supplied fair market value that the purchase price does not cover — nonzero only when the aggregate supplied FMVs EXCEED the price (an over-allocation to reconcile). When the price exceeds aggregate FMV the excess drops into Class VII goodwill (the residual method), not here, so this is normally zero.', unit: 'cents' },
       class_v_tangible_cents: { type: 'integer (cents)', desc: 'Amount allocated to Class V tangible/§1231 assets.', unit: 'cents' },
       class_vi_section_197_intangibles_cents: { type: 'integer (cents)', desc: 'Amount allocated to Class VI §197 intangibles (excluding goodwill).', unit: 'cents' },
       class_vii_goodwill_cents: { type: 'integer (cents)', desc: 'Residual allocated to Class VII goodwill and going-concern value.', unit: 'cents' },
@@ -1298,7 +1300,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       'Given `transaction_value_cents` and optional `target_break_fee_pct`, `reverse_termination_fee_pct`, `antitrust_reverse_fee_pct`, `go_shop_discount_pct`:',
       '1. If `transaction_value_cents` is missing, the implementation SHALL return `status: "needs_inputs"`.',
       '2. `target_break_fee_cents` SHALL be the transaction value times the target break-fee percentage (supplied or cited median — constants: break-fee median).',
-      '3. `go_shop_break_fee_cents` SHALL be the target break fee times the go-shop discount (supplied or cited median — constants: go-shop discount median).',
+      '3. `go_shop_break_fee_cents` SHALL be the target break fee times `go_shop_discount_pct` — which is the **retained** fraction of the base fee, not the reduction (so 0.5 means the go-shop fee is HALF the base fee; 0.3 would mean 30% of the base, i.e. a 70% reduction), supplied or cited median (constants: go-shop fee fraction).',
       '4. `reverse_termination_fee_cents` and `antitrust_reverse_fee_cents` SHALL be the transaction value times the respective percentages (supplied or cited medians — constants: reverse and antitrust reverse fee medians).',
       '5. It SHALL carry counsel-review flags for the fiduciary-out, go-shop/no-shop, regulatory covenant, and liquidated-damages enforceability framing.',
     ],
@@ -1306,7 +1308,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       { name: 'Target break-up fee', value: '2.7% of transaction value', kind: 'cited_median_should', citation: 'Houlihan Lokey 2023 Transaction Termination Fee Study', pin: 'median target break-up fee, %-of-equity-value', effective: '2023 study', nextCheck: 'on next Houlihan Lokey study', traceValues: [0.027] },
       { name: 'Reverse termination fee', value: '4.2% of transaction value', kind: 'cited_median_should', citation: 'Houlihan Lokey 2023 Transaction Termination Fee Study', pin: 'median reverse termination fee', effective: '2023 study', nextCheck: 'on next Houlihan Lokey study', traceValues: [0.042] },
       { name: 'Antitrust reverse termination fee', value: '5.0% of transaction value', kind: 'cited_median_should', citation: 'Fenwick 2023 antitrust reverse-break-fee (ARBF) analysis', pin: 'median antitrust reverse break fee', effective: '2023 analysis', nextCheck: 'on next Fenwick analysis', traceValues: [0.05] },
-      { name: 'Go-shop break-fee discount', value: '50% of the base break fee', kind: 'cited_median_should', citation: 'Houlihan Lokey 2023 Transaction Termination Fee Study', pin: 'typical go-shop period fee reduction', effective: '2023 study', nextCheck: 'on next Houlihan Lokey study', traceValues: [0.5] },
+      { name: 'Go-shop fee fraction (of the base break fee)', value: '0.5 — the go-shop fee is half the base break fee (a 50% reduction at the median)', kind: 'cited_median_should', citation: 'Houlihan Lokey 2023 Transaction Termination Fee Study', pin: 'typical go-shop period fee — retained fraction of the base fee', effective: '2023 study', nextCheck: 'on next Houlihan Lokey study', traceValues: [0.5] },
     ],
     precisionRule: 'Percentages are 4-decimal fractions; fee amounts are exact integer cents (see the Conventions chapter).',
     inputs: {
@@ -1314,13 +1316,13 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       target_break_fee_pct: { type: 'number', desc: 'Override for the target break-up fee as a fraction of value; defaults to the cited median.', precision: 4 },
       reverse_termination_fee_pct: { type: 'number', desc: 'Override for the reverse termination fee as a fraction of value; defaults to the cited median.', precision: 4 },
       antitrust_reverse_fee_pct: { type: 'number', desc: 'Override for the antitrust reverse fee as a fraction of value; defaults to the cited median.', precision: 4 },
-      go_shop_discount_pct: { type: 'number', desc: 'Override for the go-shop fee discount as a fraction of the base fee; defaults to the cited median.', precision: 4 },
+      go_shop_discount_pct: { type: 'number', desc: 'The go-shop fee as the RETAINED fraction of the base break fee (not the reduction): 0.5 → the go-shop fee is half the base fee. Defaults to the cited median (0.5).', precision: 4 },
     },
     outputs: {
       transaction_value_cents: { type: 'integer (cents)', desc: 'The transaction value, echoed.', unit: 'cents' },
       target_break_fee_pct: { type: 'number', desc: 'The target break-up fee as a fraction of value.', precision: 4 },
       target_break_fee_cents: { type: 'integer (cents)', desc: 'The target break-up fee in cents.', unit: 'cents' },
-      go_shop_break_fee_cents: { type: 'integer (cents)', desc: 'The reduced break fee during a go-shop period.', unit: 'cents' },
+      go_shop_break_fee_cents: { type: 'integer (cents)', desc: 'The go-shop-period break fee (base fee × the retained go-shop fraction).', unit: 'cents' },
       reverse_termination_fee_pct: { type: 'number', desc: 'The reverse termination fee as a fraction of value.', precision: 4 },
       reverse_termination_fee_cents: { type: 'integer (cents)', desc: 'The reverse termination fee in cents.', unit: 'cents' },
       antitrust_reverse_fee_pct: { type: 'number', desc: 'The antitrust reverse fee as a fraction of value.', precision: 4 },
@@ -1391,7 +1393,8 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       '2. For each scenario it SHALL clamp the probability to the closed interval [0, 1] and weight the scenario payout by it.',
       '3. `expected_gross_cents` SHALL be the sum of the probability-weighted payouts, rounded to the nearest integer cent.',
       '4. `expected_present_value_cents` SHALL be `expected_gross_cents ÷ (1 + discount_rate)^term_years`, rounded to the nearest integer cent.',
-      '5. `scenarios` SHALL echo each scenario as `{ target_cents, probability }` with the probability at the global 4-decimal precision.',
+      '5. `probabilities_sum` SHALL be the sum of the supplied probabilities; `probabilities_sum_is_unity` SHALL be true iff that sum is within 0.0001 of 1. A false value signals a probability set that does not sum to 1 — a meaningless expected value for mutually-exclusive scenarios — or a deliberate independent-tranche interpretation; clamping each probability to [0, 1] does not cure a bad sum.',
+      '6. `scenarios` SHALL echo each scenario as `{ target_cents, probability }` with the probability at the global 4-decimal precision.',
     ],
     constants: [],
     precisionRule: 'Monetary outputs are exact integer cents; scenario probabilities are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter).',
@@ -1404,9 +1407,11 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     outputs: {
       expected_gross_cents: { type: 'integer (cents)', desc: 'Probability-weighted expected earnout payout, undiscounted.', unit: 'cents' },
       expected_present_value_cents: { type: 'integer (cents)', desc: 'The expected payout discounted to present value over the term.', unit: 'cents' },
+      probabilities_sum: { type: 'number', desc: 'The sum of the supplied scenario probabilities. For mutually-exclusive scenarios this should be 1.', precision: 4 },
+      probabilities_sum_is_unity: { type: 'boolean', desc: 'Whether the probabilities sum to 1 (within tolerance). False signals either a probability set that does not sum to 1 — making the expected value meaningless for mutually-exclusive scenarios — or a deliberate independent-tranche interpretation.' },
       scenarios: { type: 'object[]', desc: 'Per-scenario echo: `{ target_cents (integer cents), probability (number, 0–1) }`.' },
     },
-    derivedOutputs: ['expected_gross_cents', 'expected_present_value_cents', 'scenarios'],
+    derivedOutputs: ['expected_gross_cents', 'expected_present_value_cents', 'probabilities_sum', 'scenarios'],
     boundary:
       'This model values a revenue earnout as the probability-weighted, discounted expected value of supplied scenario payouts. Whether the scenario payouts and probabilities are reasonable, how the revenue metric is defined and measured, and the earnout\'s enforceability and tax characterization are determinations for the parties, their accountants, and counsel (see M213); the model computes the expected value and renders no view on the assumptions behind it.',
     golden: {
@@ -1427,7 +1432,8 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       '2. For each scenario it SHALL clamp the probability to the closed interval [0, 1] and weight the scenario payout by it.',
       '3. `expected_gross_cents` SHALL be the sum of the probability-weighted payouts, rounded to the nearest integer cent.',
       '4. `expected_present_value_cents` SHALL be `expected_gross_cents ÷ (1 + discount_rate)^term_years`, rounded to the nearest integer cent.',
-      '5. `scenarios` SHALL echo each scenario as `{ target_cents, probability }` with the probability at the global 4-decimal precision.',
+      '5. `probabilities_sum` SHALL be the sum of the supplied probabilities; `probabilities_sum_is_unity` SHALL be true iff that sum is within 0.0001 of 1. A false value signals a probability set that does not sum to 1 — a meaningless expected value for mutually-exclusive scenarios — or a deliberate independent-tranche interpretation; clamping each probability to [0, 1] does not cure a bad sum.',
+      '6. `scenarios` SHALL echo each scenario as `{ target_cents, probability }` with the probability at the global 4-decimal precision.',
     ],
     constants: [],
     precisionRule: 'Monetary outputs are exact integer cents; scenario probabilities are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter).',
@@ -1440,9 +1446,11 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     outputs: {
       expected_gross_cents: { type: 'integer (cents)', desc: 'Probability-weighted expected earnout payout, undiscounted.', unit: 'cents' },
       expected_present_value_cents: { type: 'integer (cents)', desc: 'The expected payout discounted to present value over the term.', unit: 'cents' },
+      probabilities_sum: { type: 'number', desc: 'The sum of the supplied scenario probabilities. For mutually-exclusive scenarios this should be 1.', precision: 4 },
+      probabilities_sum_is_unity: { type: 'boolean', desc: 'Whether the probabilities sum to 1 (within tolerance). False signals either a probability set that does not sum to 1 — making the expected value meaningless for mutually-exclusive scenarios — or a deliberate independent-tranche interpretation.' },
       scenarios: { type: 'object[]', desc: 'Per-scenario echo: `{ target_cents (integer cents), probability (number, 0–1) }`.' },
     },
-    derivedOutputs: ['expected_gross_cents', 'expected_present_value_cents', 'scenarios'],
+    derivedOutputs: ['expected_gross_cents', 'expected_present_value_cents', 'probabilities_sum', 'scenarios'],
     boundary:
       'This model values an EBITDA earnout as the probability-weighted, discounted expected value of supplied scenario payouts. The EBITDA definition, the add-back policy that normalizes it, and the earnout\'s enforceability and tax characterization are determinations for the parties\' accountants and counsel (see M213); the model computes the expected value and renders no view on the normalization behind the scenario payouts.',
     golden: {
@@ -1508,7 +1516,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       '6. `lender_handoff_required` SHALL always be true — binding facility terms route to the lender.',
     ],
     constants: [
-      { name: 'NAV facility minimum cushion', value: '25% (0.25)', kind: 'cited_median_should', citation: 'NAV facility market practice — conventional minimum equity cushion (2024)', pin: 'conventional minimum cushion (LTV ceiling near 75%)', effective: '2024 market practice', nextCheck: 'on next NAV-facility market review', traceValues: [0.25] },
+      { name: 'NAV facility minimum cushion', value: '25% (0.25)', kind: 'market_convention', citation: 'NAV facility market practice — conventional minimum equity cushion (2024)', pin: 'conventional minimum cushion (LTV ceiling near 75%)', effective: '2024 market practice', nextCheck: 'on next NAV-facility market review', traceValues: [0.25] },
     ],
     precisionRule: 'Ratios are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter); monetary echoes are exact integer cents.',
     inputs: {
@@ -1632,8 +1640,8 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       '5. `ar_advance_rate` and `inventory_advance_rate` SHALL echo the applied rates (supplied or the constants) at the global 4-decimal precision.',
     ],
     constants: [
-      { name: 'ABL eligible-A/R advance rate', value: '85% (0.85)', kind: 'cited_median_should', citation: 'ABL market practice — conventional advance rate on eligible accounts receivable (2024)', pin: 'eligible-A/R advance-rate convention', effective: '2024 market practice', nextCheck: 'on next annual ABL market survey', traceValues: [0.85] },
-      { name: 'ABL eligible-inventory advance rate', value: '50% (0.50)', kind: 'cited_median_should', citation: 'ABL market practice — conventional advance rate on eligible inventory (2024)', pin: 'eligible-inventory advance-rate convention', effective: '2024 market practice', nextCheck: 'on next annual ABL market survey', traceValues: [0.5] },
+      { name: 'ABL eligible-A/R advance rate', value: '85% (0.85)', kind: 'market_convention', citation: 'ABL market practice — conventional advance rate on eligible accounts receivable (2024)', pin: 'eligible-A/R advance-rate convention', effective: '2024 market practice', nextCheck: 'on next annual ABL market survey', traceValues: [0.85] },
+      { name: 'ABL eligible-inventory advance rate', value: '50% (0.50)', kind: 'market_convention', citation: 'ABL market practice — conventional advance rate on eligible inventory (2024)', pin: 'eligible-inventory advance-rate convention', effective: '2024 market practice', nextCheck: 'on next annual ABL market survey', traceValues: [0.5] },
     ],
     precisionRule: 'Advance rates are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter); all dollar outputs are exact integer cents.',
     inputs: {
@@ -1747,7 +1755,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     algorithm: [
       'Given `purchase_price_cents` and `seller_foreign_person`, plus optional `withholding_certificate_provided` (default false) and `eci_gain_cents`:',
       '1. If either required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.',
-      '2. `section_1446f_default_withholding_cents` SHALL be `round(purchase_price_cents × the §1446(f) default withholding rate)` when the seller is a foreign person and no withholding certificate is provided, else 0 (constants: §1446(f) default withholding rate).',
+      '2. `withholding_base_cents` SHALL be `amount_realized_cents` when supplied, else `purchase_price_cents` (with `amount_realized_supplied` recording which). `section_1446f_default_withholding_cents` SHALL be `round(withholding_base_cents × the §1446(f) default withholding rate)` when the seller is a foreign person and no withholding certificate is provided, else 0. §1446(f) withholds on the **amount realized** — which on a leveraged fund includes the seller\'s §752 share of partnership liabilities and can exceed the cash price — so the price is only a floor when the amount realized is not supplied (constants: §1446(f) default withholding rate).',
       '3. `psa_required` and `tri_party_transfer_required` SHALL always be true — the transfer runs through a purchase-and-sale agreement and a tri-party (buyer, seller, fund) transfer.',
       '4. `tax_specialist_handoff_required` SHALL be true iff the seller is a foreign person.',
       '5. The model SHALL echo the price, the foreign-person flag, the certificate flag, and any supplied ECI gain.',
@@ -1757,7 +1765,8 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     ],
     precisionRule: 'The withholding amount is exact integer cents (see the Conventions chapter); no rounding of ratios.',
     inputs: {
-      purchase_price_cents: { type: 'integer (cents)', desc: 'The price paid for the transferred partnership interest.', unit: 'cents' },
+      purchase_price_cents: { type: 'integer (cents)', desc: 'The cash price paid for the transferred partnership interest (used as the withholding base only when amount realized is not supplied).', unit: 'cents' },
+      amount_realized_cents: { type: 'integer (cents)', desc: 'The transferor\'s §1446(f) amount realized (cash plus the seller\'s §752 share of partnership liabilities); overrides the price as the withholding base when supplied.', unit: 'cents' },
       seller_foreign_person: { type: 'boolean', desc: 'Whether the transferring partner is a foreign person (the §1446(f) trigger).' },
       withholding_certificate_provided: { type: 'boolean', desc: 'Whether a §1446(f) withholding certificate/exception is provided (default false).' },
       eci_gain_cents: { type: 'integer (cents)', desc: 'Estimated effectively-connected gain on the transfer; optional context.', unit: 'cents' },
@@ -1766,6 +1775,8 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       purchase_price_cents: { type: 'integer (cents)', desc: 'The purchase price, echoed.', unit: 'cents' },
       seller_foreign_person: { type: 'boolean', desc: 'The foreign-person flag, echoed.' },
       withholding_certificate_provided: { type: 'boolean', desc: 'The certificate flag, echoed.' },
+      withholding_base_cents: { type: 'integer (cents)', desc: 'The base the 10% withholding is applied to: amount realized when supplied, else the cash price.', unit: 'cents' },
+      amount_realized_supplied: { type: 'boolean', desc: 'Whether an explicit amount-realized figure was supplied (false means the price was used as the base and may understate it).' },
       section_1446f_default_withholding_cents: { type: 'integer (cents)', desc: 'The default 10% §1446(f) withholding, or 0 when not triggered.', unit: 'cents' },
       eci_gain_cents: { type: 'integer (cents) | null', desc: 'The supplied ECI gain, echoed, or null.', unit: 'cents' },
       psa_required: { type: 'boolean', desc: 'Always true — a purchase-and-sale agreement papers the transfer.' },
@@ -1824,6 +1835,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
   M214: {
     purpose:
       'Walks each supplied IP asset\'s assignment chain and flags the four failure modes that break clean title — a broken or unmatched assignment, a late-recorded assignment, incomplete contributor assignments, and an intent-to-use trademark assigned before an allegation of use. It answers, in IP diligence, "does the target actually own what it says it owns, and where are the gaps?" It spots and counts the issues from supplied chain facts; the ownership and validity conclusions are counsel\'s.',
+    scopeFlag: 'Scope: two known simplifications. (1) The recording-timeliness test uses a single window applied to all asset types; the priority windows actually differ — patents/trademarks run on the §261 / Lanham §10 three-month window, but copyright transfers run on the shorter 17 U.S.C. §205 one-month (domestic) / two-month (foreign) window, so a copyright recorded in month 2–3 reads "not late" here yet is already outside §205. (2) The intent-to-use (ITU) trademark flag has tri-state meaning — an absent value is "no opinion," not "clean" — so treat a non-ITU mark\'s silent pass accordingly.',
     algorithm: [
       'Given `assets` (a list of IP-asset objects, each carrying a type, an assignment count, and the chain booleans):',
       '1. If `assets` is empty, the implementation SHALL return `status: "needs_inputs"` naming `assets`.',
@@ -2048,6 +2060,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
   M220: {
     purpose:
       'Verifies, contributor by contributor, that every person who touched the IP executed an assignment and a work-for-hire, and flags California §2870 outside-scope carve-outs and any missing paper. It answers, in IP diligence, "is the IP actually assigned in from everyone who built it, and where are the enforceability wrinkles?" It counts and flags from supplied contributor facts; the enforceability conclusion, including the §2870 carve-out, is counsel\'s.',
+    scopeFlag: 'Scope: two known limits. (1) Only California\'s §2870 invention-assignment carve-out is flagged; Washington (RCW 49.44.140), Illinois (765 ILCS 1060/2), and ~6 other states have equivalent statutes, so an out-of-scope contributor in those states returns a false "clean" signal — confirm the contributor\'s state. (2) "Work-for-hire" is a COPYRIGHT doctrine (17 U.S.C. §101/§201(b)) with no patent analog; for inventions the operative instrument post-Stanford v. Roche is a present assignment ("hereby assigns"), which a single work-for-hire boolean cannot distinguish from a mere agreement to assign. Scope the work-for-hire flag to copyrightable works.',
     algorithm: [
       'Given `contributors` (a list of contributor objects, each with a state and the assignment/work-for-hire booleans):',
       '1. If `contributors` is empty, the implementation SHALL return `status: "needs_inputs"` naming `contributors`.',
@@ -2299,12 +2312,12 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       '1. If any required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.',
       '2. `cap_rate` SHALL be `annual_rent_cents ÷ sale_price_cents` at the global 4-decimal precision; `total_nominal_rent_cents` SHALL be `round(annual_rent_cents × lease_term_years)`.',
       '3. `lease_term_pct_of_economic_life` SHALL be `lease_term_years ÷ economic_life_years` (or null); `pv_payments_pct_of_fair_value` SHALL be `pv_lease_payments_cents ÷ sale_price_cents` (or null).',
-      '4. A finance-lease indicator SHALL be flagged for: ownership transfer; a bargain purchase option; a lease term at or above the economic-life threshold (constants: ASC 842 lease-term indicator); PV at or above the fair-value threshold (constants: ASC 842 PV indicator); or a specialized asset.',
+      '4. A finance-lease indicator SHALL be flagged for: ownership transfer; a purchase option the lessee is reasonably certain to exercise (ASC 842-10-25-2(b) — the input is named `bargain_purchase_option` for compatibility, but the ASC 842 test is *reasonable certainty*, not the old ASC 840 "bargain" standard); a lease term at or above the economic-life threshold (constants: ASC 842 lease-term indicator, interpretive); PV at or above the fair-value threshold (constants: ASC 842 PV indicator, interpretive); or a specialized asset. The 75%/90% figures are ONE reasonable interpretation of "major part" / "substantially all," not bright lines — the binding classification is the accountant\'s.',
       '5. `asc842_indicator_classification` SHALL be `finance_lease_indicator_present` iff any indicator fired, else `operating_lease_indicator_on_supplied_facts`; an accountant-review flag SHALL always attach.',
     ],
     constants: [
-      { name: 'ASC 842 lease-term indicator', value: '75% of economic life (0.75)', kind: 'statutory_must', citation: 'ASC 842-10-25', pin: 'lease term is a major part (customary 75%) of remaining economic life', effective: 'ASC 842 (current)', nextCheck: 'on standard amendment', traceValues: [0.75] },
-      { name: 'ASC 842 PV indicator', value: '90% of fair value (0.90)', kind: 'statutory_must', citation: 'ASC 842-10-25', pin: 'PV of payments is substantially all (customary 90%) of fair value', effective: 'ASC 842 (current)', nextCheck: 'on standard amendment', traceValues: [0.9] },
+      { name: 'ASC 842 lease-term indicator', value: '75% of economic life (0.75) — one reasonable approach, NOT a bright line', kind: 'interpretive_should', citation: 'ASC 842-10-55-2', pin: 'ASC 842 removed the ASC 840 bright lines; the standard is "a major part" of the economic life, and 75% is offered as one reasonable interpretation', effective: 'ASC 842 (current)', nextCheck: 'on standard amendment', traceValues: [0.75] },
+      { name: 'ASC 842 PV indicator', value: '90% of fair value (0.90) — one reasonable approach, NOT a bright line', kind: 'interpretive_should', citation: 'ASC 842-10-55-2', pin: 'the standard is "substantially all" of the fair value; 90% is offered as one reasonable interpretation, not a binding threshold', effective: 'ASC 842 (current)', nextCheck: 'on standard amendment', traceValues: [0.9] },
     ],
     precisionRule: 'Cap rate and percentages are rounded per the global rule (half-even to 4 decimals — see the Conventions chapter); nominal rent is exact integer cents.',
     inputs: {
@@ -2699,8 +2712,8 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       '5. `tax_accounting_handoff_required` SHALL always be true.',
     ],
     constants: [
-      { name: 'True-lease term threshold', value: '30 years', kind: 'cited_median_should', citation: 'OpCo/PropCo master-lease characterization market practice (2024)', pin: 'lease term ≥ 30 years triggers recharacterization review', effective: '2024 market practice', nextCheck: 'on practice review', traceValues: [30] },
-      { name: 'True-lease residual threshold', value: '20% residual value (0.20)', kind: 'cited_median_should', citation: 'True-lease residual-value convention; cf. Rev. Proc. 2001-28 (2001)', pin: 'residual value < 20% triggers recharacterization review', effective: '2024 market practice', nextCheck: 'on practice review', traceValues: [0.2] },
+      { name: 'True-lease term threshold', value: '30 years', kind: 'market_convention', citation: 'OpCo/PropCo master-lease characterization market practice (2024)', pin: 'lease term ≥ 30 years triggers recharacterization review', effective: '2024 market practice', nextCheck: 'on practice review', traceValues: [30] },
+      { name: 'True-lease residual threshold', value: '20% residual value (0.20)', kind: 'market_convention', citation: 'True-lease residual-value convention; cf. Rev. Proc. 2001-28 (2001)', pin: 'residual value < 20% triggers recharacterization review', effective: '2024 market practice', nextCheck: 'on practice review', traceValues: [0.2] },
     ],
     precisionRule: 'Monetary outputs are exact integer cents; yields and coverage round per the global rule (half-even to 4 decimals — see the Conventions chapter).',
     inputs: {
@@ -3601,7 +3614,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
       '5. `financial_advisor_handoff_required` SHALL always be true; the driver inputs are echoed at the global 4-decimal precision.',
     ],
     constants: [
-      { name: 'Chapter 22 recidivism scoring calibration', value: 'base 20; leverage = clamp((exit_leverage − 3) × 12, 0, 35); liquidity = clamp((12 − liquidity_months) × 2.5, 0, 30); growth = clamp(−ebitda_growth_pct × 100, 0, 20); repeat = clamp(prior_bankruptcy_count × 10, 0, 15); score = round(clamp(sum, 0, 100)); bands high ≥ 70, watch ≥ 45', kind: 'cited_median_should', citation: 'DEFINITIVE Chapter 22 recidivism scoring calibration (heuristic; LoPucki Bankruptcy Research Database is the empirical reference, 2024)', pin: 'scoring weights, caps, and band thresholds', effective: '2024 calibration', nextCheck: 'on recalibration' },
+      { name: 'Chapter 22 recidivism scoring calibration', value: 'base 20; leverage = clamp((exit_leverage − 3) × 12, 0, 35); liquidity = clamp((12 − liquidity_months) × 2.5, 0, 30); growth = clamp(−ebitda_growth_pct × 100, 0, 20); repeat = clamp(prior_bankruptcy_count × 10, 0, 15); score = round(clamp(sum, 0, 100)); bands high ≥ 70, watch ≥ 45', kind: 'interpretive_should', citation: 'DEFINITIVE Chapter 22 recidivism scoring calibration (heuristic; LoPucki Bankruptcy Research Database is the empirical reference, 2024)', pin: 'scoring weights, caps, and band thresholds', effective: '2024 calibration', nextCheck: 'on recalibration' },
     ],
     precisionRule: 'The score is a whole number 0–100; the driver echoes round per the global rule (half-even to 4 decimals — see the Conventions chapter).',
     inputs: {

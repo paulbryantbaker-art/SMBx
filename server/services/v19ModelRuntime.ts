@@ -328,10 +328,18 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
     if (missing.length) return { missingInputs: missing, outputs: {} };
     const expectedGross = targets.reduce((sum, target, index) => sum + target * clamp(probabilities[index] ?? 0, 0, 1), 0);
     const termYears = number(input.term_years) ?? 1;
+    // The scenario probabilities are surfaced, not silently trusted: for a set of
+    // MUTUALLY-EXCLUSIVE scenarios they should sum to 1, and a set that does not
+    // yields a meaningless expected value. probabilities_sum_is_unity lets a
+    // caller distinguish that from a deliberate independent-tranche (dot-product)
+    // interpretation. clamp only bounds each to [0,1]; it does not cure the sum.
+    const probabilitiesSum = probabilities.reduce((sum, p) => sum + (Number.isFinite(p) ? p : 0), 0);
     return {
       outputs: {
         expected_gross_cents: Math.round(expectedGross),
         expected_present_value_cents: Math.round(expectedGross / ((1 + discountRate!) ** termYears)),
+        probabilities_sum: round(probabilitiesSum, 4),
+        probabilities_sum_is_unity: Math.abs(probabilitiesSum - 1) <= 0.0001,
         scenarios: targets.map((target, index) => ({ target_cents: target, probability: round(clamp(probabilities[index] ?? 0, 0, 1), 4) })),
       },
     };
@@ -1898,12 +1906,21 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
     const eciGain = cents(input.eci_gain_cents);
     const missing = requireInputs({ purchase_price_cents: purchasePrice, seller_foreign_person: foreignSeller });
     if (missing.length) return { missingInputs: missing, outputs: {} };
-    const defaultWithholding = foreignSeller && !withholdingCertificateProvided ? Math.round(purchasePrice! * 0.10) : 0;
+    // §1446(f) withholds 10% of the transferor's AMOUNT REALIZED, which on a
+    // leveraged fund includes the seller's share of partnership liabilities
+    // (§752) and can exceed the cash price. Use a supplied amount-realized figure
+    // as the base when available; otherwise fall back to the cash price and flag
+    // that the base may be understated.
+    const amountRealized = cents(input.amount_realized_cents);
+    const withholdingBase = amountRealized ?? purchasePrice!;
+    const defaultWithholding = foreignSeller && !withholdingCertificateProvided ? Math.round(withholdingBase * 0.10) : 0;
     return {
       outputs: {
         purchase_price_cents: purchasePrice,
         seller_foreign_person: foreignSeller,
         withholding_certificate_provided: withholdingCertificateProvided,
+        withholding_base_cents: withholdingBase,
+        amount_realized_supplied: amountRealized != null,
         section_1446f_default_withholding_cents: defaultWithholding,
         eci_gain_cents: eciGain,
         psa_required: true,

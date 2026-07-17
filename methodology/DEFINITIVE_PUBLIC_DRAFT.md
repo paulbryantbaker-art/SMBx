@@ -235,6 +235,7 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `alta_endorsements_requested_count` | integer | Number of ALTA endorsements requested. |
 | `amortizable_195_cents` | integer (cents) | Total §195-amortizable. |
 | `amount_realized_cents` | integer (cents) | The amount realized by the seller (the FIRPTA withholding base). |
+| `amount_realized_supplied` | boolean | Whether an explicit amount-realized figure was supplied (false means the price was used as the base and may understate it). |
 | `annual_debt_service_cents` | integer (cents) | Annual principal-and-interest debt service on the acquisition debt. |
 | `annual_ground_rent_cents` | integer (cents) | Annual ground rent. |
 | `annual_master_lease_rent_cents` | integer (cents) | Override master-lease rent; defaults to value × cap rate. |
@@ -542,8 +543,8 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `general_reps_expiry` | string (ISO date) | null | General-representation expiry date, or null when the period is zero. |
 | `general_reps_months` | integer | Override for general-representation survival in months; defaults to the cited median. |
 | `go_dark_count` | integer | Number with a go-dark right. |
-| `go_shop_break_fee_cents` | integer (cents) | The reduced break fee during a go-shop period. |
-| `go_shop_discount_pct` | number | Override for the go-shop fee discount as a fraction of the base fee; defaults to the cited median. |
+| `go_shop_break_fee_cents` | integer (cents) | The go-shop-period break fee (base fee × the retained go-shop fraction). |
+| `go_shop_discount_pct` | number | The go-shop fee as the RETAINED fraction of the base break fee (not the reduction): 0.5 → the go-shop fee is half the base fee. Defaults to the cited median (0.5). |
 | `good_faith_negotiation_days` | integer | Days of good-faith negotiation before the arbitrator; defaults to the cited median. |
 | `good_faith_negotiation_end_date` | string (ISO date) | End of the good-faith negotiation window before the accounting arbitrator. |
 | `gross_borrowing_base_cents` | integer (cents) | Advance-rate value of eligible collateral before reserves. |
@@ -747,6 +748,8 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `prior_recorded_real_property_interest` | boolean | Whether a conflicting real-property interest (e.g., a mortgage) was recorded first. |
 | `priority` | enum(fixture_priority) | Which interest holds priority in the fixture. |
 | `probabilities` | number[] | The probability of each scenario (0–1), positionally aligned to earnout_targets. |
+| `probabilities_sum` | number | The sum of the supplied scenario probabilities. For mutually-exclusive scenarios this should be 1. |
+| `probabilities_sum_is_unity` | boolean | Whether the probabilities sum to 1 (within tolerance). False signals either a probability set that does not sum to 1 — making the expected value meaningless for mutually-exclusive scenarios — or a deliberate independent-tranche interpretation. |
 | `process_steps` | string[] | The ordered title/survey process steps. |
 | `professional_fee_carveout_cents` | integer (cents) | Professional-fee carve-out (default 0). |
 | `professional_review_flags` | string[] | Standing tax-counsel review note. |
@@ -970,7 +973,7 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `tx_seisin_note` | string | null | The Texas seisin-narrowing note when the state is TX, else null. |
 | `tx_strict_match_note` | string | null | The Texas strict-match note when applicable, else null. |
 | `ucc_lien_hit_count` | integer | Total UCC-track hits. |
-| `unallocated_cents` | integer (cents) | Non-negative residual when supplied fair market values exceed the price (normally zero). |
+| `unallocated_cents` | integer (cents) | Supplied fair market value that the purchase price does not cover — nonzero only when the aggregate supplied FMVs EXCEED the price (an over-allocation to reconcile). When the price exceeds aggregate FMV the excess drops into Class VII goodwill (the residual method), not here, so this is normally zero. |
 | `uncapped_real_estate_value_cents` | integer (cents) | NOI capitalized at the cap rate, before the price cap. |
 | `unknown_license_count` | integer | Number whose license could not be classified. |
 | `update_frequency_months` | integer | Deposit-update cadence in months (default 3, i.e. quarterly). |
@@ -991,6 +994,7 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `waterfall_rows` | object[] | Per-class detail (rank-sorted): `{ class_name, priority_rank, allowed_claim_cents, distribution_cents, recovery_pct }`. |
 | `weak_copyleft_count` | integer | Number classified weak copyleft. |
 | `withholding_amount_cents` | integer (cents) | The withholding the buyer must remit. |
+| `withholding_base_cents` | integer (cents) | The base the 10% withholding is applied to: amount realized when supplied, else the cash price. |
 | `withholding_certificate_provided` | boolean | Whether a §1446(f) withholding certificate/exception is provided (default false). |
 | `withholding_rate` | number | The FIRPTA withholding rate applied (0, 0.10, or 0.15). |
 | `within_20_day_window` | boolean | Whether the fixture filing fell within the 20-day PMSI window. |
@@ -1931,6 +1935,8 @@ Conventions: monetary values are integer cents; dates are ISO-8601 strings; juri
 |---|---|---|
 | `expected_gross_cents` | integer (cents) | Probability-weighted expected earnout payout, undiscounted. |
 | `expected_present_value_cents` | integer (cents) | The expected payout discounted to present value over the term. |
+| `probabilities_sum` | number | The sum of the supplied scenario probabilities. For mutually-exclusive scenarios this should be 1. |
+| `probabilities_sum_is_unity` | boolean | Whether the probabilities sum to 1 (within tolerance). False signals either a probability set that does not sum to 1 — making the expected value meaningless for mutually-exclusive scenarios — or a deliberate independent-tranche interpretation. |
 | `scenarios` | object[] | Per-scenario echo: `{ target_cents (integer cents), probability (number, 0–1) }`. |
 
 ## 4. Algorithm
@@ -1940,7 +1946,8 @@ Given `earnout_targets` (a list of integer-cents scenario payouts), `probabiliti
 2. For each scenario it SHALL clamp the probability to the closed interval [0, 1] and weight the scenario payout by it.
 3. `expected_gross_cents` SHALL be the sum of the probability-weighted payouts, rounded to the nearest integer cent.
 4. `expected_present_value_cents` SHALL be `expected_gross_cents ÷ (1 + discount_rate)^term_years`, rounded to the nearest integer cent.
-5. `scenarios` SHALL echo each scenario as `{ target_cents, probability }` with the probability at the global 4-decimal precision.
+5. `probabilities_sum` SHALL be the sum of the supplied probabilities; `probabilities_sum_is_unity` SHALL be true iff that sum is within 0.0001 of 1. A false value signals a probability set that does not sum to 1 — a meaningless expected value for mutually-exclusive scenarios — or a deliberate independent-tranche interpretation; clamping each probability to [0, 1] does not cure a bad sum.
+6. `scenarios` SHALL echo each scenario as `{ target_cents, probability }` with the probability at the global 4-decimal precision.
 
 ## 5. Constants & authorities
 
@@ -1983,6 +1990,8 @@ _No numeric constants — this model computes from supplied facts and cited rule
 {
   "expected_gross_cents": 305000000,
   "expected_present_value_cents": 217092976,
+  "probabilities_sum": 1,
+  "probabilities_sum_is_unity": true,
   "scenarios": [
     {
       "target_cents": 200000000,
@@ -2052,6 +2061,8 @@ Conventions: monetary values are integer cents; dates are ISO-8601 strings; juri
 |---|---|---|
 | `expected_gross_cents` | integer (cents) | Probability-weighted expected earnout payout, undiscounted. |
 | `expected_present_value_cents` | integer (cents) | The expected payout discounted to present value over the term. |
+| `probabilities_sum` | number | The sum of the supplied scenario probabilities. For mutually-exclusive scenarios this should be 1. |
+| `probabilities_sum_is_unity` | boolean | Whether the probabilities sum to 1 (within tolerance). False signals either a probability set that does not sum to 1 — making the expected value meaningless for mutually-exclusive scenarios — or a deliberate independent-tranche interpretation. |
 | `scenarios` | object[] | Per-scenario echo: `{ target_cents (integer cents), probability (number, 0–1) }`. |
 
 ## 4. Algorithm
@@ -2061,7 +2072,8 @@ Given `earnout_targets` (a list of integer-cents scenario payouts), `probabiliti
 2. For each scenario it SHALL clamp the probability to the closed interval [0, 1] and weight the scenario payout by it.
 3. `expected_gross_cents` SHALL be the sum of the probability-weighted payouts, rounded to the nearest integer cent.
 4. `expected_present_value_cents` SHALL be `expected_gross_cents ÷ (1 + discount_rate)^term_years`, rounded to the nearest integer cent.
-5. `scenarios` SHALL echo each scenario as `{ target_cents, probability }` with the probability at the global 4-decimal precision.
+5. `probabilities_sum` SHALL be the sum of the supplied probabilities; `probabilities_sum_is_unity` SHALL be true iff that sum is within 0.0001 of 1. A false value signals a probability set that does not sum to 1 — a meaningless expected value for mutually-exclusive scenarios — or a deliberate independent-tranche interpretation; clamping each probability to [0, 1] does not cure a bad sum.
+6. `scenarios` SHALL echo each scenario as `{ target_cents, probability }` with the probability at the global 4-decimal precision.
 
 ## 5. Constants & authorities
 
@@ -2102,6 +2114,8 @@ _No numeric constants — this model computes from supplied facts and cited rule
 {
   "expected_gross_cents": 310000000,
   "expected_present_value_cents": 234404537,
+  "probabilities_sum": 1,
+  "probabilities_sum_is_unity": true,
   "scenarios": [
     {
       "target_cents": 250000000,
@@ -2881,7 +2895,7 @@ Conventions: monetary values are integer cents; dates are ISO-8601 strings; juri
 |---|---|---|
 | `purchase_price_cents` | integer (cents) | The price allocated, echoed. |
 | `allocated_cents` | integer (cents) | Total amount allocated across the classes. |
-| `unallocated_cents` | integer (cents) | Non-negative residual when supplied fair market values exceed the price (normally zero). |
+| `unallocated_cents` | integer (cents) | Supplied fair market value that the purchase price does not cover — nonzero only when the aggregate supplied FMVs EXCEED the price (an over-allocation to reconcile). When the price exceeds aggregate FMV the excess drops into Class VII goodwill (the residual method), not here, so this is normally zero. |
 | `class_v_tangible_cents` | integer (cents) | Amount allocated to Class V tangible/§1231 assets. |
 | `class_vi_section_197_intangibles_cents` | integer (cents) | Amount allocated to Class VI §197 intangibles (excluding goodwill). |
 | `class_vii_goodwill_cents` | integer (cents) | Residual allocated to Class VII goodwill and going-concern value. |
@@ -5454,7 +5468,7 @@ Given `exit_leverage`, `liquidity_months`, and `ebitda_growth_pct`, plus optiona
 
 | Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
 |---|---|---|---|---|---|---|
-| Chapter 22 recidivism scoring calibration | base 20; leverage = clamp((exit_leverage − 3) × 12, 0, 35); liquidity = clamp((12 − liquidity_months) × 2.5, 0, 30); growth = clamp(−ebitda_growth_pct × 100, 0, 20); repeat = clamp(prior_bankruptcy_count × 10, 0, 15); score = round(clamp(sum, 0, 100)); bands high ≥ 70, watch ≥ 45 | SHOULD (cited median) | DEFINITIVE Chapter 22 recidivism scoring calibration (heuristic; LoPucki Bankruptcy Research Database is the empirical reference, 2024) | scoring weights, caps, and band thresholds | 2024 calibration | on recalibration |
+| Chapter 22 recidivism scoring calibration | base 20; leverage = clamp((exit_leverage − 3) × 12, 0, 35); liquidity = clamp((12 − liquidity_months) × 2.5, 0, 30); growth = clamp(−ebitda_growth_pct × 100, 0, 20); repeat = clamp(prior_bankruptcy_count × 10, 0, 15); score = round(clamp(sum, 0, 100)); bands high ≥ 70, watch ≥ 45 | SHOULD (interpretive) | DEFINITIVE Chapter 22 recidivism scoring calibration (heuristic; LoPucki Bankruptcy Research Database is the empirical reference, 2024) | scoring weights, caps, and band thresholds | 2024 calibration | on recalibration |
 
 
 **Authorities**
@@ -5782,15 +5796,15 @@ Given `sale_price_cents`, `annual_rent_cents`, and `lease_term_years`, plus opti
 1. If any required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
 2. `cap_rate` SHALL be `annual_rent_cents ÷ sale_price_cents` at the global 4-decimal precision; `total_nominal_rent_cents` SHALL be `round(annual_rent_cents × lease_term_years)`.
 3. `lease_term_pct_of_economic_life` SHALL be `lease_term_years ÷ economic_life_years` (or null); `pv_payments_pct_of_fair_value` SHALL be `pv_lease_payments_cents ÷ sale_price_cents` (or null).
-4. A finance-lease indicator SHALL be flagged for: ownership transfer; a bargain purchase option; a lease term at or above the economic-life threshold (constants: ASC 842 lease-term indicator); PV at or above the fair-value threshold (constants: ASC 842 PV indicator); or a specialized asset.
+4. A finance-lease indicator SHALL be flagged for: ownership transfer; a purchase option the lessee is reasonably certain to exercise (ASC 842-10-25-2(b) — the input is named `bargain_purchase_option` for compatibility, but the ASC 842 test is *reasonable certainty*, not the old ASC 840 "bargain" standard); a lease term at or above the economic-life threshold (constants: ASC 842 lease-term indicator, interpretive); PV at or above the fair-value threshold (constants: ASC 842 PV indicator, interpretive); or a specialized asset. The 75%/90% figures are ONE reasonable interpretation of "major part" / "substantially all," not bright lines — the binding classification is the accountant's.
 5. `asc842_indicator_classification` SHALL be `finance_lease_indicator_present` iff any indicator fired, else `operating_lease_indicator_on_supplied_facts`; an accountant-review flag SHALL always attach.
 
 ## 5. Constants & authorities
 
 | Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
 |---|---|---|---|---|---|---|
-| ASC 842 lease-term indicator | 75% of economic life (0.75) | MUST (binding) | ASC 842-10-25 | lease term is a major part (customary 75%) of remaining economic life | ASC 842 (current) | on standard amendment |
-| ASC 842 PV indicator | 90% of fair value (0.90) | MUST (binding) | ASC 842-10-25 | PV of payments is substantially all (customary 90%) of fair value | ASC 842 (current) | on standard amendment |
+| ASC 842 lease-term indicator | 75% of economic life (0.75) — one reasonable approach, NOT a bright line | SHOULD (interpretive) | ASC 842-10-55-2 | ASC 842 removed the ASC 840 bright lines; the standard is "a major part" of the economic life, and 75% is offered as one reasonable interpretation | ASC 842 (current) | on standard amendment |
+| ASC 842 PV indicator | 90% of fair value (0.90) — one reasonable approach, NOT a bright line | SHOULD (interpretive) | ASC 842-10-55-2 | the standard is "substantially all" of the fair value; 90% is offered as one reasonable interpretation, not a binding threshold | ASC 842 (current) | on standard amendment |
 
 
 **Authorities**
@@ -6079,8 +6093,9 @@ Conventions: monetary values are integer cents; dates are ISO-8601 strings; juri
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `purchase_price_cents` | integer (cents) | MUST | The price paid for the transferred partnership interest. |
+| `purchase_price_cents` | integer (cents) | MUST | The cash price paid for the transferred partnership interest (used as the withholding base only when amount realized is not supplied). |
 | `seller_foreign_person` | boolean | MUST | Whether the transferring partner is a foreign person (the §1446(f) trigger). |
+| `amount_realized_cents` | integer (cents) | MAY | The transferor's §1446(f) amount realized (cash plus the seller's §752 share of partnership liabilities); overrides the price as the withholding base when supplied. |
 | `eci_gain_cents` | integer (cents) | MAY | Estimated effectively-connected gain on the transfer; optional context. |
 | `withholding_certificate_provided` | boolean | MAY | Whether a §1446(f) withholding certificate/exception is provided (default false). |
 
@@ -6091,6 +6106,8 @@ Conventions: monetary values are integer cents; dates are ISO-8601 strings; juri
 | `purchase_price_cents` | integer (cents) | The purchase price, echoed. |
 | `seller_foreign_person` | boolean | The foreign-person flag, echoed. |
 | `withholding_certificate_provided` | boolean | The certificate flag, echoed. |
+| `withholding_base_cents` | integer (cents) | The base the 10% withholding is applied to: amount realized when supplied, else the cash price. |
+| `amount_realized_supplied` | boolean | Whether an explicit amount-realized figure was supplied (false means the price was used as the base and may understate it). |
 | `section_1446f_default_withholding_cents` | integer (cents) | The default 10% §1446(f) withholding, or 0 when not triggered. |
 | `eci_gain_cents` | integer (cents) | null | The supplied ECI gain, echoed, or null. |
 | `psa_required` | boolean | Always true — a purchase-and-sale agreement papers the transfer. |
@@ -6101,7 +6118,7 @@ Conventions: monetary values are integer cents; dates are ISO-8601 strings; juri
 
 Given `purchase_price_cents` and `seller_foreign_person`, plus optional `withholding_certificate_provided` (default false) and `eci_gain_cents`:
 1. If either required input is missing, the implementation SHALL return `status: "needs_inputs"` and emit no outputs.
-2. `section_1446f_default_withholding_cents` SHALL be `round(purchase_price_cents × the §1446(f) default withholding rate)` when the seller is a foreign person and no withholding certificate is provided, else 0 (constants: §1446(f) default withholding rate).
+2. `withholding_base_cents` SHALL be `amount_realized_cents` when supplied, else `purchase_price_cents` (with `amount_realized_supplied` recording which). `section_1446f_default_withholding_cents` SHALL be `round(withholding_base_cents × the §1446(f) default withholding rate)` when the seller is a foreign person and no withholding certificate is provided, else 0. §1446(f) withholds on the **amount realized** — which on a leveraged fund includes the seller's §752 share of partnership liabilities and can exceed the cash price — so the price is only a floor when the amount realized is not supplied (constants: §1446(f) default withholding rate).
 3. `psa_required` and `tri_party_transfer_required` SHALL always be true — the transfer runs through a purchase-and-sale agreement and a tri-party (buyer, seller, fund) transfer.
 4. `tax_specialist_handoff_required` SHALL be true iff the seller is a foreign person.
 5. The model SHALL echo the price, the foreign-person flag, the certificate flag, and any supplied ECI gain.
@@ -6142,6 +6159,8 @@ Given `purchase_price_cents` and `seller_foreign_person`, plus optional `withhol
   "purchase_price_cents": 2000000000,
   "seller_foreign_person": true,
   "withholding_certificate_provided": false,
+  "withholding_base_cents": 2000000000,
+  "amount_realized_supplied": false,
   "section_1446f_default_withholding_cents": 200000000,
   "eci_gain_cents": 300000000,
   "psa_required": true,
@@ -6322,7 +6341,7 @@ Given `fund_nav_cents` and `loan_amount_cents`, plus optional `required_cushion_
 
 | Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
 |---|---|---|---|---|---|---|
-| NAV facility minimum cushion | 25% (0.25) | SHOULD (cited median) | NAV facility market practice — conventional minimum equity cushion (2024) | conventional minimum cushion (LTV ceiling near 75%) | 2024 market practice | on next NAV-facility market review |
+| NAV facility minimum cushion | 25% (0.25) | SHOULD (market convention) | NAV facility market practice — conventional minimum equity cushion (2024) | conventional minimum cushion (LTV ceiling near 75%) | 2024 market practice | on next NAV-facility market review |
 
 
 **Authorities**
@@ -6658,8 +6677,8 @@ Given `eligible_ar_cents` and `eligible_inventory_cents`, plus optional `ar_adva
 
 | Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
 |---|---|---|---|---|---|---|
-| ABL eligible-A/R advance rate | 85% (0.85) | SHOULD (cited median) | ABL market practice — conventional advance rate on eligible accounts receivable (2024) | eligible-A/R advance-rate convention | 2024 market practice | on next annual ABL market survey |
-| ABL eligible-inventory advance rate | 50% (0.50) | SHOULD (cited median) | ABL market practice — conventional advance rate on eligible inventory (2024) | eligible-inventory advance-rate convention | 2024 market practice | on next annual ABL market survey |
+| ABL eligible-A/R advance rate | 85% (0.85) | SHOULD (market convention) | ABL market practice — conventional advance rate on eligible accounts receivable (2024) | eligible-A/R advance-rate convention | 2024 market practice | on next annual ABL market survey |
+| ABL eligible-inventory advance rate | 50% (0.50) | SHOULD (market convention) | ABL market practice — conventional advance rate on eligible inventory (2024) | eligible-inventory advance-rate convention | 2024 market practice | on next annual ABL market survey |
 
 
 **Authorities**
@@ -8112,8 +8131,8 @@ Given `real_property_value_cents`, `target_cap_rate`, and `opco_ebitda_cents`, p
 
 | Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
 |---|---|---|---|---|---|---|
-| True-lease term threshold | 30 years | SHOULD (cited median) | OpCo/PropCo master-lease characterization market practice (2024) | lease term ≥ 30 years triggers recharacterization review | 2024 market practice | on practice review |
-| True-lease residual threshold | 20% residual value (0.20) | SHOULD (cited median) | True-lease residual-value convention; cf. Rev. Proc. 2001-28 (2001) | residual value < 20% triggers recharacterization review | 2024 market practice | on practice review |
+| True-lease term threshold | 30 years | SHOULD (market convention) | OpCo/PropCo master-lease characterization market practice (2024) | lease term ≥ 30 years triggers recharacterization review | 2024 market practice | on practice review |
+| True-lease residual threshold | 20% residual value (0.20) | SHOULD (market convention) | True-lease residual-value convention; cf. Rev. Proc. 2001-28 (2001) | residual value < 20% triggers recharacterization review | 2024 market practice | on practice review |
 
 
 **Authorities**
@@ -10424,7 +10443,7 @@ Conventions: monetary values are integer cents; dates are ISO-8601 strings; juri
 |---|---|---|---|
 | `transaction_value_cents` | integer (cents) | MUST | Transaction (equity) value the fees are sized against. |
 | `antitrust_reverse_fee_pct` | number | MAY | Override for the antitrust reverse fee as a fraction of value; defaults to the cited median. |
-| `go_shop_discount_pct` | number | MAY | Override for the go-shop fee discount as a fraction of the base fee; defaults to the cited median. |
+| `go_shop_discount_pct` | number | MAY | The go-shop fee as the RETAINED fraction of the base break fee (not the reduction): 0.5 → the go-shop fee is half the base fee. Defaults to the cited median (0.5). |
 | `reverse_termination_fee_pct` | number | MAY | Override for the reverse termination fee as a fraction of value; defaults to the cited median. |
 | `target_break_fee_pct` | number | MAY | Override for the target break-up fee as a fraction of value; defaults to the cited median. |
 
@@ -10435,7 +10454,7 @@ Conventions: monetary values are integer cents; dates are ISO-8601 strings; juri
 | `transaction_value_cents` | integer (cents) | The transaction value, echoed. |
 | `target_break_fee_pct` | number | The target break-up fee as a fraction of value. |
 | `target_break_fee_cents` | integer (cents) | The target break-up fee in cents. |
-| `go_shop_break_fee_cents` | integer (cents) | The reduced break fee during a go-shop period. |
+| `go_shop_break_fee_cents` | integer (cents) | The go-shop-period break fee (base fee × the retained go-shop fraction). |
 | `reverse_termination_fee_pct` | number | The reverse termination fee as a fraction of value. |
 | `reverse_termination_fee_cents` | integer (cents) | The reverse termination fee in cents. |
 | `antitrust_reverse_fee_pct` | number | The antitrust reverse fee as a fraction of value. |
@@ -10447,7 +10466,7 @@ Conventions: monetary values are integer cents; dates are ISO-8601 strings; juri
 Given `transaction_value_cents` and optional `target_break_fee_pct`, `reverse_termination_fee_pct`, `antitrust_reverse_fee_pct`, `go_shop_discount_pct`:
 1. If `transaction_value_cents` is missing, the implementation SHALL return `status: "needs_inputs"`.
 2. `target_break_fee_cents` SHALL be the transaction value times the target break-fee percentage (supplied or cited median — constants: break-fee median).
-3. `go_shop_break_fee_cents` SHALL be the target break fee times the go-shop discount (supplied or cited median — constants: go-shop discount median).
+3. `go_shop_break_fee_cents` SHALL be the target break fee times `go_shop_discount_pct` — which is the **retained** fraction of the base fee, not the reduction (so 0.5 means the go-shop fee is HALF the base fee; 0.3 would mean 30% of the base, i.e. a 70% reduction), supplied or cited median (constants: go-shop fee fraction).
 4. `reverse_termination_fee_cents` and `antitrust_reverse_fee_cents` SHALL be the transaction value times the respective percentages (supplied or cited medians — constants: reverse and antitrust reverse fee medians).
 5. It SHALL carry counsel-review flags for the fiduciary-out, go-shop/no-shop, regulatory covenant, and liquidated-damages enforceability framing.
 
@@ -10458,7 +10477,7 @@ Given `transaction_value_cents` and optional `target_break_fee_pct`, `reverse_te
 | Target break-up fee | 2.7% of transaction value | SHOULD (cited median) | Houlihan Lokey 2023 Transaction Termination Fee Study | median target break-up fee, %-of-equity-value | 2023 study | on next Houlihan Lokey study |
 | Reverse termination fee | 4.2% of transaction value | SHOULD (cited median) | Houlihan Lokey 2023 Transaction Termination Fee Study | median reverse termination fee | 2023 study | on next Houlihan Lokey study |
 | Antitrust reverse termination fee | 5.0% of transaction value | SHOULD (cited median) | Fenwick 2023 antitrust reverse-break-fee (ARBF) analysis | median antitrust reverse break fee | 2023 analysis | on next Fenwick analysis |
-| Go-shop break-fee discount | 50% of the base break fee | SHOULD (cited median) | Houlihan Lokey 2023 Transaction Termination Fee Study | typical go-shop period fee reduction | 2023 study | on next Houlihan Lokey study |
+| Go-shop fee fraction (of the base break fee) | 0.5 — the go-shop fee is half the base break fee (a 50% reduction at the median) | SHOULD (cited median) | Houlihan Lokey 2023 Transaction Termination Fee Study | typical go-shop period fee — retained fraction of the base fee | 2023 study | on next Houlihan Lokey study |
 
 
 **Authorities**
@@ -10652,6 +10671,8 @@ Reference binding `MODEL.LEGAL.EARNOUT_ARCHITECTURE.v1` · entered the specifica
 ## 1. Purpose
 
 Walks each supplied IP asset's assignment chain and flags the four failure modes that break clean title — a broken or unmatched assignment, a late-recorded assignment, incomplete contributor assignments, and an intent-to-use trademark assigned before an allegation of use. It answers, in IP diligence, "does the target actually own what it says it owns, and where are the gaps?" It spots and counts the issues from supplied chain facts; the ownership and validity conclusions are counsel's.
+
+> **Scope note.** Scope: two known simplifications. (1) The recording-timeliness test uses a single window applied to all asset types; the priority windows actually differ — patents/trademarks run on the §261 / Lanham §10 three-month window, but copyright transfers run on the shorter 17 U.S.C. §205 one-month (domestic) / two-month (foreign) window, so a copyright recorded in month 2–3 reads "not late" here yet is already outside §205. (2) The intent-to-use (ITU) trademark flag has tri-state meaning — an absent value is "no opinion," not "clean" — so treat a non-ITU mark's silent pass accordingly.
 
 ## 2. Input contract
 
@@ -11495,6 +11516,8 @@ Reference binding `MODEL.IP.SOURCE_CODE_ESCROW.v1` · entered the specification 
 ## 1. Purpose
 
 Verifies, contributor by contributor, that every person who touched the IP executed an assignment and a work-for-hire, and flags California §2870 outside-scope carve-outs and any missing paper. It answers, in IP diligence, "is the IP actually assigned in from everyone who built it, and where are the enforceability wrinkles?" It counts and flags from supplied contributor facts; the enforceability conclusion, including the §2870 carve-out, is counsel's.
+
+> **Scope note.** Scope: two known limits. (1) Only California's §2870 invention-assignment carve-out is flagged; Washington (RCW 49.44.140), Illinois (765 ILCS 1060/2), and ~6 other states have equivalent statutes, so an out-of-scope contributor in those states returns a false "clean" signal — confirm the contributor's state. (2) "Work-for-hire" is a COPYRIGHT doctrine (17 U.S.C. §101/§201(b)) with no patent analog; for inventions the operative instrument post-Stanford v. Roche is a present assignment ("hereby assigns"), which a single work-for-hire boolean cannot distinguish from a mere agreement to assign. Scope the work-for-hire flag to copyrightable works.
 
 ## 2. Input contract
 
@@ -12582,6 +12605,8 @@ Reference binding `MODEL.RE.RISK_OF_LOSS.v1` · entered the specification at int
 
 Flags every relied-on representation, covenant, or indemnity that will merge into the deed at closing for lack of an express survival hook or collateral character, so nothing the buyer is counting on quietly disappears at the closing table. It answers, before signing a real-estate or M&A deal that closes by deed, "which of these promises survive closing, and which need survival language added?" The fraud exception is noted independently.
 
+> **Scope note.** Scope: the merger-by-deed doctrine reaches the contract's TITLE and conveyance terms — it is those that merge into the deed at closing. Business representations and warranties and other collateral/independent obligations are generally NOT extinguished by delivery of the deed, and in an entity deal that closes without a deed the doctrine does not apply at all. Read a "merges into deed" result as applying to title-related covenants; a flagged business rep is a prompt to add express survival language, not a statement that the doctrine actually cuts it off.
+
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M228.schema.json`](M228.schema.json).
@@ -12723,6 +12748,8 @@ Reference binding `MODEL.RE.SURVIVAL_MERGER.v1` · entered the specification at 
 ## 1. Purpose
 
 Classifies the consent path a transfer must clear under a lease's anti-assignment and change-of-control terms, resolving the governing consent standard against the state table (CA Kendall implied reasonableness vs. NY as-written enforcement). It answers, in an OpCo/PropCo or leased-asset deal, "does this transfer trip the lease's transfer restriction, and how hard is the consent to get?" The enforceability judgment always routes to counsel.
+
+> **Scope note.** Scope: a merger or change-of-control is classified as an assignment only when the supplied `lease_deems_change_of_control_assignment` fact is set. But anti-assignment clauses routinely reach "assignment by merger or by operation of law" INDEPENDENTLY of any change-of-control-deeming language, and whether a merger effects an assignment is itself unsettled — so a merger the lease is silent on can still trip the restriction. Treat a "not an assignment" result on a merger as provisional and route it to counsel when the clause reaches operation-of-law transfers.
 
 ## 2. Input contract
 
