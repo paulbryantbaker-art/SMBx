@@ -329,7 +329,7 @@ export default function Landing() {
           <div data-rv style={{ marginTop: 'clamp(44px, 5.5vw, 72px)' }}>
             <div className="pd-map" style={{ maxWidth: 760, margin: '0 auto' }}>
               <div className="map-head">
-                <img src="/logo-coral-x.png" alt="smbX.ai" style={{ height: 22, width: 'auto', display: 'block' }} />
+                <img src="/logo-blue-x.png" alt="smbX.ai" style={{ height: 22, width: 'auto', display: 'block' }} />
                 <span className="map-label">SAMPLE READ</span>
               </div>
               <div className="map-title">Commercial Landscaping — Southeast</div>

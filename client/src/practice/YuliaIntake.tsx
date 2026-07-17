@@ -221,7 +221,7 @@ export function MapDoc({
   return (
     <div className="pd-map">
       <div className="map-head" style={rise()}>
-        <img src="/logo-coral-x.png" alt="smbX.ai" style={{ height: 22, width: 'auto', display: 'block' }} />
+        <img src="/logo-blue-x.png" alt="smbX.ai" style={{ height: 22, width: 'auto', display: 'block' }} />
         <span className="map-label">{headLabel || `PRELIMINARY MARKET READ · ${DOC_DATE.toUpperCase()}`}</span>
       </div>
       {map.title && <div className="map-title" style={rise()}>{map.title}</div>}
@@ -710,7 +710,7 @@ export default function YuliaIntake() {
         <div className="pd-chat-head">
           {/* Grab handle — shown only in the mobile sheet. */}
           <span className="pd-chat-grab" aria-hidden="true" />
-          <img src="/logo-coral-x.png" alt="smbX.ai" style={{ height: 28, width: 'auto', display: 'block' }} />
+          <img src="/logo-blue-x.png" alt="smbX.ai" style={{ height: 28, width: 'auto', display: 'block' }} />
           <div className="pd-chat-title">Acquisition Engine</div>
           {/* Minimize — shown only in the mobile sheet. */}
           <button type="button" className="pd-chat-min" onClick={() => setOpen(false)} aria-label="Minimize chat">
