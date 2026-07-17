@@ -2143,6 +2143,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     founderReview: true,
     purpose:
       'Allocates an IP-heavy asset-deal purchase price down the residual-method class ordering — Class V tangible, then Class VI §197 intangibles (the IP), then Class VII goodwill — capping each class at its supplied value and dropping the residual into goodwill. It answers, for a buyer and seller papering an IP-heavy asset purchase, "how does the price split across the tangible, IP-intangible, and goodwill classes for the buyer\'s amortization and the parties\' Form 8594?" It allocates from supplied values; the values and classifications are the advisors\' calls.',
+    scopeFlag: 'Scope: the residual waterfall starts at Class V and allocates the FULL purchase price from there down, so it assumes the price is already net of Classes I–IV (cash, actively-traded securities, accounts receivable, inventory) — those classes are not modeled here. A deal with material cash/AR/inventory must net them out first, or the excess is over-attributed to Class VI/VII; use M139 for a complete seven-class allocation. Also note off-the-shelf software in Class VI is §167(f) 36-month, not §197 15-year.',
     algorithm: [
       'Given `purchase_price_cents`, `tangible_assets_cents` (Class V), and `ip_intangibles_cents` (Class VI §197 intangibles):',
       '1. If any of the three is missing, the implementation SHALL return `status: "needs_inputs"` naming the missing fields.',
