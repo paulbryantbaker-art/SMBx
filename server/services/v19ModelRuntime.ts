@@ -649,7 +649,11 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
         recognized_big_tax_base_cents: bigBase,
         corporate_tax_rate: round(corporateRate, 4),
         section_1374_tax_cents: Math.round(bigBase * corporateRate),
-        state_nonconformity_review_required: booleanInput(input.state_nonconformity_possible) ?? false,
+        // Default true within the recognition period (when §1374 is live and
+        // many states do NOT conform, or run their own BIG/entity-level regime):
+        // never silently false. A caller with confirmed state conformity may pass
+        // state_nonconformity_possible=false to suppress it.
+        state_nonconformity_review_required: booleanInput(input.state_nonconformity_possible) ?? withinRecognitionPeriod,
       },
     };
   }),
@@ -2252,8 +2256,15 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
     const missing = requireInputs({ jurisdiction, fmv_real_property_cents: fmv, interest_transferred_pct: interestPct });
     if (missing.length) return { missingInputs: missing, outputs: {} };
     const normalizedJurisdiction = jurisdiction!.toUpperCase();
-    const defaultRates: Record<string, number> = { CT: 0.0111, ME: 0.0044, WA: 0.0178, DC: 0.0145, MD: 0.01, NY: 0.0065 };
-    const defaultAggregationMonths: Record<string, number> = { MD: 12, WA: 36 };
+    // B16 — WA REET has been GRADUATED since 2020-01-01 (state bands
+    // 1.10/1.28/2.75/3.00% plus local), so a single flat rate is structurally
+    // wrong. WA is not tabled as a flat rate; with no supplied rate it routes to
+    // the state-tax specialist via the untabled-position handoff below. (The
+    // graduated band thresholds are indexed and pending counsel confirmation —
+    // see the founder/counsel queue.) The WA controlling-interest aggregation
+    // window is 12 months (RCW 82.45.033); the prior 36 was New York's.
+    const defaultRates: Record<string, number> = { CT: 0.0111, ME: 0.0044, DC: 0.0145, MD: 0.01, NY: 0.0065 };
+    const defaultAggregationMonths: Record<string, number> = { MD: 12, WA: 12 };
     const rate = userRate ?? defaultRates[normalizedJurisdiction] ?? 0;
     const taxBase = Math.round(fmv! * interestPct!);
     return {
@@ -2383,12 +2394,23 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
     const covenantRule = DEED_COVENANTS[deedType];
     const signatoryRule = SIGNATORY_MATRIX[vesting];
     const redFlags: string[] = [];
+    // B14 — validity guard: tenancy by the entirety does not exist in the
+    // community-property states, so a `tenancy_by_entirety` + community-property
+    // state pairing is an impossible fact combination. Surface it and route
+    // rather than answering a covenant/signatory question on a vesting that
+    // cannot legally exist in that state.
+    const NO_TBE_STATES = new Set(['TX', 'CA', 'WA', 'WI', 'NM', 'LA', 'ID', 'AZ', 'NV']);
+    const vestingStateInvalid = vesting === 'tenancy_by_entirety' && NO_TBE_STATES.has(state);
+    if (vestingStateInvalid) {
+      redFlags.push(`Impossible vesting/state pairing: ${state} is a community-property state and does not recognize tenancy by the entirety. The vesting is likely miscoded (community property or joint tenancy) — confirm how title is actually held before relying on the signatory rule.`);
+    }
     if (buyerExpectsWarranty && covenantRule.covenants.length === 0) {
       redFlags.push(`Buyer expects title warranties but the ${deedType.replace(/_/g, ' ')} deed carries none — a first-class deal term to renegotiate.`);
     }
     if (allRequiredSignersPresent === false) {
       redFlags.push(`Signatory gap under ${vesting.replace(/_/g, ' ')}: ${signatoryRule.gapRisk}`);
     }
+    const routes = allRequiredSignersPresent === false || vestingStateInvalid;
     return {
       outputs: {
         deed_type: deedType,
@@ -2398,11 +2420,12 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
         deed_note: covenantRule.note,
         tx_seisin_note: state === 'TX' ? TX_SEISIN_NOTE : null,
         vesting_form: vesting,
+        vesting_state_validity_gap: vestingStateInvalid,
         required_signatories: signatoryRule.required,
         signatory_gap: allRequiredSignersPresent === false,
-        defer_to_counsel: allRequiredSignersPresent === false,
-        counsel_handoff: allRequiredSignersPresent === false
-          ? counselHandoff('conveyance-authority', 'who must join the conveyance under the vesting and marital-property facts')
+        defer_to_counsel: routes,
+        counsel_handoff: routes
+          ? counselHandoff('conveyance-authority', vestingStateInvalid ? `how title is actually held in ${state}, since tenancy by the entirety is unavailable there` : 'who must join the conveyance under the vesting and marital-property facts')
           : null,
         red_flags: redFlags,
       },
@@ -2455,7 +2478,14 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
     const casualtyPending = booleanInput(input.material_casualty_or_condemnation_pending) ?? false;
     const missing = requireInputs({ state: state || null, contract_allocates_risk: contractAllocates });
     if (missing.length) return { missingInputs: missing, outputs: {} };
+    const tabled = Object.prototype.hasOwnProperty.call(RISK_OF_LOSS, state);
     const rule = RISK_OF_LOSS[state] ?? RISK_OF_LOSS_DEFAULT;
+    // B17 — never guess for an untabled state. The equitable-conversion baseline
+    // is only the common-law DEFAULT; ~20+ UVPRA states and the Massachusetts
+    // rule displace it (seller bears risk). When the state is untabled and the
+    // contract is silent, surface a table gap and route to counsel rather than
+    // asserting a rule — the same discipline M224/M232 apply.
+    const stateTableGap = !contractAllocates && !tabled;
     let riskOn: string;
     let basis: string;
     if (contractAllocates) {
@@ -2463,12 +2493,15 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
       basis = 'contract_override';
     } else if (rule.regime === 'equitable_conversion_buyer') {
       riskOn = 'buyer';
-      basis = 'equitable_conversion_default';
+      basis = tabled ? 'equitable_conversion_default' : 'equitable_conversion_common_law_baseline_unverified';
     } else {
       riskOn = titleOrPossessionPassed ? 'buyer' : 'seller';
       basis = rule.regime;
     }
     const redFlags: string[] = [];
+    if (stateTableGap) {
+      redFlags.push(`Risk-of-loss regime for ${state} is not in the anchor-state table. The equitable-conversion (buyer-at-signing) baseline shown is the common-law default only — ~20+ UVPRA states and the Massachusetts rule place pre-closing casualty risk on the SELLER. This allocation is a legal determination for counsel; do not rely on the baseline, and allocate risk expressly in the contract.`);
+    }
     if (!contractAllocates && casualtyPending) {
       redFlags.push('Contract is silent on risk of loss and a material casualty/condemnation is pending — the state default controls; allocate expressly before signing.');
     }
@@ -2480,7 +2513,11 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
         contract_override_applied: contractAllocates === true,
         risk_on: riskOn,
         basis,
-        defer_to_counsel: false,
+        state_table_gap: stateTableGap,
+        defer_to_counsel: stateTableGap,
+        counsel_handoff: stateTableGap
+          ? counselHandoff('risk-of-loss allocation', `whether ${state} has displaced the common-law equitable-conversion rule (UVPRA / Massachusetts rule) and who bears pre-closing casualty risk`)
+          : null,
         red_flags: redFlags,
       },
     };

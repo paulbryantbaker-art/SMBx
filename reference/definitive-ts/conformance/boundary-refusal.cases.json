@@ -1,5 +1,21 @@
 [
   {
+    "id": "REQ-DTC.M226.DEAL-KILLING-DEFECT",
+    "req": "REQ-DTC-RE-01",
+    "slot": "M226",
+    "title": "An uncurable, uninsurable title exception is triaged deal-killing and MUST route the marketability judgment to counsel/title, never answer it",
+    "input": { "exceptions": [{ "label": "Unreleased mortgage of record", "curable": false, "insurer_will_insure_over": false }] },
+    "expect": { "deal_killing_count": 1, "defer_to_counsel": true }
+  },
+  {
+    "id": "REQ-DTC.M229.ASSIGNMENT-RESTRICTION-ENFORCEABILITY",
+    "req": "REQ-DTC-RE-02",
+    "slot": "M229",
+    "title": "An assignment that trips a consent clause routes the enforceability of the clause to counsel, never opines on it",
+    "input": { "transfer_type": "asset_assignment", "consent_clause": "consent_no_standard", "state": "NY" },
+    "expect": { "consent_required": true, "defer_to_counsel": true }
+  },
+  {
     "id": "REQ-DTC.M232.NY-CITT-TRIGGER",
     "req": "REQ-DTC-RE-04",
     "slot": "M232",
@@ -30,5 +46,29 @@
     "title": "Texas imposes no real-estate transfer tax, so the screen answers cleanly and does NOT over-route",
     "input": { "state": "TX", "is_entity_transfer": true, "transfer_pct": 100 },
     "expect": { "citt_screen_triggered": false, "reassessment_screen_triggered": false, "defer_to_counsel": false }
+  },
+  {
+    "id": "REQ-DTC.M230.DUE-ON-SALE-ACCELERATION",
+    "req": "REQ-DTC-RE-04",
+    "slot": "M230",
+    "title": "A commercial transfer under a loan with a due-on-transfer clause routes the acceleration/consent conclusion to counsel",
+    "input": { "loan_has_due_on_transfer_clause": true, "residential_under_5_units": false },
+    "expect": { "defer_to_counsel": true }
+  },
+  {
+    "id": "REQ-DTC.M225.SIGNATORY-GAP",
+    "req": "REQ-DTC-RE-05",
+    "slot": "M225",
+    "title": "A one-spouse conveyance of entireties property leaves a signatory gap and routes the joinder/covenant question to counsel",
+    "input": { "deed_type": "special_warranty", "vesting_form": "tenancy_by_entirety", "state": "NY", "all_required_signers_present": false },
+    "expect": { "signatory_gap": true, "defer_to_counsel": true }
+  },
+  {
+    "id": "REQ-DTC.M233.CERCLA-SUCCESSOR",
+    "req": "REQ-DTC-RE-08",
+    "slot": "M233",
+    "title": "A CERCLA-linked asset deal carries environmental successor liability and routes the successor-liability determination to counsel",
+    "input": { "deal_form": "asset", "jurisdiction_requires_co_on_transfer": true, "cercla_linked_property": true },
+    "expect": { "cercla_successor_flag": true, "defer_to_counsel": true }
   }
 ]

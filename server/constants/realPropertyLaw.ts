@@ -71,7 +71,7 @@ export const RISK_OF_LOSS_DEFAULT: RiskOfLossRule = {
 
 /* ── Deed types → title covenants ──────────────────────────────────────── */
 
-export type DeedType = 'general_warranty' | 'special_warranty' | 'bargain_and_sale' | 'quitclaim';
+export type DeedType = 'general_warranty' | 'special_warranty' | 'bargain_and_sale' | 'quitclaim' | 'grant_deed' | 'bargain_and_sale_with_covenant';
 
 export const PRESENT_COVENANTS = ['seisin', 'right_to_convey', 'against_encumbrances'] as const;
 export const FUTURE_COVENANTS = ['quiet_enjoyment', 'warranty', 'further_assurances'] as const;
@@ -107,6 +107,24 @@ export const DEED_COVENANTS: Record<DeedType, DeedCovenantRule> = {
     scope: 'none',
     afterAcquiredTitle: false,
     note: 'Releases whatever interest the grantor holds, if any; no covenants, no after-acquired title.',
+  },
+  // CA grant deed (Cal. Civ. Code § 1113) — implies exactly TWO covenants: the
+  // grantor has not conveyed to another, and the estate is free of encumbrances
+  // made by the grantor. After-acquired title passes (§ 1106). The dominant CA
+  // instrument; forcing it into special_warranty would over-state six covenants.
+  grant_deed: {
+    covenants: ['seisin', 'against_encumbrances'],
+    scope: 'grantor_acts_only',
+    afterAcquiredTitle: true,
+    note: 'California grant deed (Cal. Civ. Code § 1113): two implied covenants — the grantor has not previously conveyed the estate, and it is free from encumbrances made by the grantor. After-acquired title passes (§ 1106).',
+  },
+  // NY bargain-and-sale deed WITH covenant against grantor's acts (N.Y. RPL
+  // § 258, Schedule B) — ONE covenant. The dominant NY commercial instrument.
+  bargain_and_sale_with_covenant: {
+    covenants: ['against_encumbrances'],
+    scope: 'grantor_acts_only',
+    afterAcquiredTitle: false,
+    note: 'New York bargain-and-sale deed with covenant against grantor\'s acts (N.Y. Real Prop. Law § 258): a single covenant that the grantor has done nothing to encumber the estate.',
   },
 };
 

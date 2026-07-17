@@ -135,6 +135,20 @@ const BOUNDARY: Record<string, string> = {
 /* ── Conformance fixtures + empirical extraction (§2) ─────────────────── */
 interface Fixture { id: string; title: string; modelId: string; input: Record<string, any>; expect: { status: string; outputs?: Record<string, any>; missingInputsIncludes?: string[] } }
 const fixtures: Fixture[] = JSON.parse(readFileSync(path.resolve(__dirname, '../testing/definitive/conformance/v1/model-runtime.cases.json'), 'utf8'));
+// B1 — the PUBLISHED conformance suite is what actually ships in this tree: the
+// model-runtime cases (about the published model contracts) plus the DTC
+// boundary-refusal cases. The internal 655-case figure counted five further
+// internal suites (route/artifact/stack/prompt-meta/trigger) that are not part
+// of the public model-contract obligation and are not shipped — advertising it
+// overstated what a reader can run. We advertise exactly what we ship.
+interface BoundaryCase { id: string; req: string; slot: string; title: string; input: Record<string, any>; expect: Record<string, any> }
+const boundaryCases: BoundaryCase[] = JSON.parse(readFileSync(path.resolve(__dirname, '../reference/definitive-ts/conformance/boundary-refusal.cases.json'), 'utf8'));
+// DTC categories with no computational model in the specification (drafting,
+// structuring for a legal result, adverse-possession/boundary disputes, zoning
+// opinions, ambiguous-language interpretation): conformance is the STRUCTURAL
+// refusal — no model computes here — so they carry a policy marker, not a
+// fabricated executable case. Every other DTC category is case-backed.
+const POLICY_ONLY_DTC = new Set(['DTC.RE.03', 'DTC.RE.06', 'DTC.RE.07', 'DTC.RE.09', 'DTC.RE.10']);
 const fixturesByModel = new Map<string, Fixture[]>();
 for (const f of fixtures) {
   if (!fixturesByModel.has(f.modelId)) fixturesByModel.set(f.modelId, []);
@@ -222,8 +236,13 @@ function classifyAuthority(a: string): string {
   if (/IRC|U\.S\.C|Code|Stat|DGCL|UCC|Law §|§|Act\b|Const/i.test(a)) return 'statute';
   if (/Form|Schedule/i.test(a)) return 'form';
   if (/Study|Survey|Damodaran|Kroll|Pepperdine|FRED|Publication|Pub\./i.test(a)) return 'study/dataset';
+  // Out-of-vocabulary sentinel: anything reaching here is untyped and MUST be
+  // hand-tagged in AUTHORITY_TYPES — the P0.1 gate fails the build on it.
   return 'practice-or-guidance';
 }
+// P0.1 — the published authority-type vocabulary. classifyAuthority returning
+// anything outside this set is a publish-gate failure (see the authority loop).
+const ALLOWED_AUTHORITY_TYPES = new Set(['case', 'statute', 'regulation', 'guidance', 'practice-norm', 'study/dataset', 'form']);
 const authoritySet = new Set<string>();
 for (const e of catalog) for (const a of e.authorityAnchors) authoritySet.add(canonAuthority(a));
 for (const m of registry.values()) for (const t of m.citationTags ?? []) authoritySet.add(canonAuthority(String(t)));
@@ -242,8 +261,13 @@ const authId = new Map(authorities.map((a, i) => [a, `AUTH-${String(i + 1).padSt
     if (variants.length > 1) gap(`Authority Register: duplicate normalized rows — ${variants.map(v => `"${v}"`).join(' / ')} — add a merge to AUTHORITY_MERGES`);
   }
   // §Item 0.7 — a type tag that contradicts the citation form is a publish fail.
+  // P0.1 (2026-07-17): a type OUTSIDE the published vocabulary is a publish fail
+  // too — this is how `practice-or-guidance` (a non-vocabulary bucket) slipped
+  // in for 87 rows (B8). The existing check caught same-authority contradictions;
+  // this catches consistent mislabeling into an out-of-vocabulary bucket.
   for (const a of authorities) {
     const t = classifyAuthority(a);
+    if (!ALLOWED_AUTHORITY_TYPES.has(t)) gap(`P0.1 Authority Register: "${a}" typed \`${t}\` is not in the published type vocabulary (${[...ALLOWED_AUTHORITY_TYPES].join(' / ')}) — hand-tag it in AUTHORITY_TYPES`);
     const contradiction =
       (t === 'practice-norm' && /U\.S\.C\.|C\.F\.R\.|Treas\. Reg\.|Del\. C\.|Prop\. Code|Civ\. Code|Gen\. (Oblig|Stat)|Tax Law| Const\b/.test(a)) ||
       (t === 'case' && /Rev\. Proc|Rev\. Rul|U\.S\.C|Treas\. Reg|C\.F\.R|SOP|Form \d/.test(a)) ||
@@ -267,14 +291,22 @@ const COUNTS = {
   normativeScheduled: tierCounts.normative - implementableToday,
   catalogTier: tierCounts.catalog,
   reserved: tierCounts.reserved,
-  gatesFramework: 30,
   gatesRouted: gateIds.length,
   gatesSpecified: DEFINITIVE_GATE_EXPANSIONS.length,
+  gatesReserved: GATE_REGISTRY_DRAFTS.filter(g => g.reserved).length,
   authorities: authorities.length,
-  conformanceTotal: DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT,
-  conformanceRuntime: DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT,
+  // B1 — advertised == shipped: model-runtime cases + boundary-refusal cases.
+  conformanceTotal: fixtures.length + boundaryCases.length,
+  conformanceRuntime: fixtures.length,
+  conformanceBoundary: boundaryCases.length,
 };
-const countBlock = `**${COUNTS.slots} model slots mapped** · **${COUNTS.implementableToday} implementable from this document today** · ${COUNTS.normativeScheduled} normative scheduled (authoring by family) · ${COUNTS.catalogTier} catalog · ${COUNTS.reserved} reserved · **30-gate routing framework** (${COUNTS.gatesRouted} routed; ${COUNTS.gatesSpecified} specified) · **${COUNTS.authorities} authority anchors** (as referenced) · **${COUNTS.conformanceTotal}-case conformance suite** (${COUNTS.conformanceRuntime} model-runtime)`;
+// Sanity: the internal aggregate (imported) must not be re-advertised as the
+// public suite — the public suite is exactly what ships here.
+void DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT; void DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT;
+// B-framing — lead with the honest gate count (17 routed and specified); the 13
+// reserved IDs are allocated but unpublished, so "30-gate framework" overstated
+// what a reader can find. Scoped (85) vs implementable-today are already distinct.
+const countBlock = `**${COUNTS.slots} model slots mapped** · **${COUNTS.implementableToday} implementable from this document today** · ${COUNTS.normativeScheduled} normative scheduled (authoring by family) · ${COUNTS.catalogTier} catalog · ${COUNTS.reserved} reserved · **${COUNTS.gatesSpecified}-gate routing framework** (${COUNTS.gatesRouted} routed and specified; ${COUNTS.gatesReserved} reserved IDs unpublished) · **${COUNTS.authorities} authority anchors** (as referenced) · **${COUNTS.conformanceTotal}-case published conformance suite** (${COUNTS.conformanceRuntime} model-runtime · ${COUNTS.conformanceBoundary} boundary-refusal)`;
 
 /* ── Page builders ────────────────────────────────────────────────────── */
 
@@ -404,6 +436,98 @@ function traceGoldenLiterals(overlay: ModelOverlay, input: Record<string, any>, 
   }
 }
 
+// P0.5 — every declared output field must be assigned by an algorithm step (or be
+// an input echo, or be author-attested static). Catches B7 / M202, where an output
+// appears in the contract + example but no step computes it (unreproducible).
+// P0.5 author attestations — outputs the runtime genuinely computes (table
+// lookups selected with the rule, routing flags, rollup counts, handoff notes)
+// but that the RFC-2119 prose describes without repeating the literal field
+// name. Listed centrally so the attestation is auditable in one place. This is
+// the sanctioned "per-model attestation" escape; a field is added here only
+// after confirming the runtime computes it (never to paper over an uncomputed
+// output — that is the M202 class, which was fixed by adding the step).
+const ATTESTED_STATIC_OUTPUTS: Record<string, string[]> = {
+  M167: ['current_threshold_handoff_note'],
+  M193: ['exclusives_count'],
+  M200: ['professional_review_flags'],
+  M201: ['election_review_flags'],
+  M203: ['rows'],
+  M224: ['citation'],
+  M226: ['triage'],
+  M227: ['citation'],
+  M228: ['defer_to_counsel'],
+  M230: ['basis', 'citation'],
+  M232: ['citation', 'aggregation_years'],
+  M234: ['basis', 'ppa_note', 'defer_to_counsel'],
+};
+function checkOutputsComputed(overlay: ModelOverlay, mg: (s: string) => void, slot: string): void {
+  const algoText = overlay.algorithm.join('\n').toLowerCase();
+  const inputKeys = new Set(Object.keys(overlay.inputs));
+  const attested = new Set([...(overlay.staticOutputs ?? []), ...(ATTESTED_STATIC_OUTPUTS[slot] ?? [])]);
+  // Generic tokens carry no computational signal (they appear in most field
+  // names); a field is "computed" if its exact name or a MEANINGFUL token of it
+  // is named in an algorithm step. This clears rollups/allocations described in
+  // prose while still catching a field the algorithm never touches (B7/M202).
+  const GENERIC = new Set(['cents', 'count', 'rows', 'row', 'pct', 'flag', 'flags', 'note', 'notes', 'required', 'cases', 'case', 'total', 'value', 'values', 'amount', 'list', 'pass', 'passed', 'applies', 'status', 'per', 'the', 'and']);
+  for (const key of Object.keys(overlay.outputs)) {
+    if (inputKeys.has(key)) continue;              // echo of a supplied input
+    if (attested.has(key)) continue;               // author-attested static/echo
+    if (algoText.includes(key.toLowerCase())) continue;  // exact field name in a step
+    const tokens = key.toLowerCase().split(/_+/).filter(t => t.length > 2 && !GENERIC.has(t));
+    if (tokens.some(t => algoText.includes(t))) continue; // a meaningful token is computed
+    mg(`P0.5 ${slot}: output \`${key}\` is assigned by no algorithm step (no field-name or meaningful-token match; not an input echo or attested) — add the computing step, or list it in staticOutputs`);
+  }
+}
+
+// P0.2 — worked-example prose magnitudes must agree with the JSON they narrate.
+// Parses $ figures (→ cents) and % figures from the golden narrative and asserts
+// each has a same-magnitude match in the executed input/output JSON. Catches a
+// 10× decimal slip in prose (B11/M184) or a prose metric contradicting its
+// output (B12/M181), which structural validation never reads.
+function checkGoldenProseMagnitude(overlay: ModelOverlay, input: Record<string, any>, outputs: Record<string, any>, mg: (s: string) => void, slot: string): void {
+  const narrative = overlay.golden.narrative;
+  // Pool = every number in the executed input/output JSON, plus the model's own
+  // constants (a statutory rate like §1446(f)'s 10% is narrated but lands in the
+  // JSON only as a derived amount, not as 0.10 — the constant closes that gap).
+  const constNums: number[] = [];
+  for (const c of overlay.constants) {
+    for (const t of c.traceValues ?? []) constNums.push(Math.abs(t));
+    const lead = /(-?[\d,]+(?:\.\d+)?)/.exec(c.value);
+    if (lead) { const n = Math.abs(parseFloat(lead[1].replace(/,/g, ''))); if (n > 0) { constNums.push(n); if (/%/.test(c.value)) constNums.push(n / 100); } }
+  }
+  const jsonNums = [...collectNumbers(input), ...collectNumbers(outputs), ...constNums].map(Math.abs).filter(n => n > 0);
+  if (!jsonNums.length) return;
+  const near = (target: number, ratio: number) => jsonNums.some(j => { const r = j / target; return r >= 1 / ratio && r <= ratio; });
+  // Dollar figures — narrated dollars map to cents in the JSON. Flag only clear
+  // scale errors (≥4×) so rounding/derived magnitudes pass.
+  for (const m of narrative.matchAll(/\$\s?([\d,]+(?:\.\d+)?)\s?(M|MM|million|bn|B|billion|k|K)?/gi)) {
+    let v = parseFloat(m[1].replace(/,/g, ''));
+    const u = (m[2] || '').toLowerCase();
+    if (u === 'm' || u === 'mm' || u === 'million') v *= 1e6;
+    else if (u === 'k') v *= 1e3;
+    else if (u === 'b' || u === 'bn' || u === 'billion') v *= 1e9;
+    const cents = Math.round(v * 100);
+    // A prose dollar should match some JSON value as cents (usual) or as dollars.
+    // 2.5× tolerates rounding/derived magnitudes but still catches a 10× slip
+    // even when several JSON values cluster within a decade (B11/M184).
+    if (!near(cents, 2.5) && !near(Math.round(v), 2.5)) {
+      mg(`P0.2 ${slot}: worked-example prose says $${m[1]}${m[2] ?? ''} but no input/output value is within 2.5× of ${cents} cents — prose magnitude disagrees with the JSON it narrates`);
+    }
+  }
+  // Percentage figures — a narrated rate should match some fraction in the JSON
+  // within 25% relative. Skips values ≤1 (sub-1% figures) to avoid noise. No
+  // trailing \b: "21%." has no word boundary after % (both non-word chars).
+  for (const m of narrative.matchAll(/([\d]+(?:\.\d+)?)\s?(?:%|percent)/gi)) {
+    const pct = parseFloat(m[1]);
+    if (pct <= 1) continue;
+    const frac = pct / 100;
+    const bestRel = Math.min(...jsonNums.map(j => Math.min(Math.abs(j - frac) / frac, Math.abs(j - pct) / pct)));
+    if (bestRel > 0.25) {
+      mg(`P0.2 ${slot}: worked-example prose says ${m[1]}% but no input/output value is within 25% of it (closest relative error ${bestRel.toFixed(2)}) — prose metric disagrees with its output`);
+    }
+  }
+}
+
 async function modelPage(e: DefinitiveModelCatalogEntry): Promise<string> {
   const tier = tierOf(e);
   const reg = e.implementedRuntimeModelId ? registry.get(e.implementedRuntimeModelId) : null;
@@ -461,6 +585,7 @@ async function modelPage(e: DefinitiveModelCatalogEntry): Promise<string> {
   if (overlay) {
     for (const step of overlay.algorithm) L.push(step);
     L.push('');
+    checkOutputsComputed(overlay, mg, e.slotId);
   } else {
     L.push(`> **Formalization pending (draft gap).** The informative computation description follows; the numbered RFC-2119 normative steps are being formalized from the reference implementation and will replace this note.\n`);
     L.push(`${e.deterministicComputation}\n`);
@@ -493,6 +618,7 @@ async function modelPage(e: DefinitiveModelCatalogEntry): Promise<string> {
       L.push(`**Outputs (executed against the reference implementation \`${e.implementedRuntimeModelId}\`)**\n\n${jsonBlock(run.outputs)}\n`);
       if (overlay.precisionRule) L.push(`Precision: ${overlay.precisionRule}\n`);
       traceGoldenLiterals(overlay, overlay.golden.input, run.outputs, mg, e.slotId);
+      checkGoldenProseMagnitude(overlay, overlay.golden.input, run.outputs, mg, e.slotId);
     } else {
       L.push(`*(authored golden example did not execute to completion — see gap ledger)*\n`);
       mg(`${e.slotId}: golden example returned status ${run.status} (missing: ${JSON.stringify(run.missingInputs)})`);
@@ -746,19 +872,39 @@ table-gap and route to the appropriate professional — it MUST NOT guess a rule
 This is the single global rounding rule; every "see the Conventions chapter"
 precision note refers here.
 
-- **Monetary outputs** are exact integer cents.
+- **Monetary outputs that are exact** are integer cents.
+- **Monetary outputs produced by division or allocation** — a trailing-mean
+  working-capital peg, a proration, a class allocation — are rounded **half to
+  even to the nearest cent**. "To the nearest cent" alone is under-specified;
+  the tie-break is half-to-even, so two independent implementations cannot
+  differ by a cent at a half-cent tie.
 - **Rates and ratios** — coverage ratios (DSCR), returns (IRR, MOIC),
   ownership and equity percentages, cap rates, and the like — are rounded
   **half to even** (banker's rounding) to **four (4) decimal places**, at the
-  **output boundary only**. Intermediate values are carried at full precision;
-  rounding is applied once, when the output is produced.
+  **output boundary only**. Intermediate values are carried in **exact decimal**
+  (see the exact-decimal requirement below); rounding is applied once, when the
+  output is produced.
+- **Iterative (root-found) outputs** — an internal rate of return, a cramdown
+  interest rate, a make-whole present-value root — have no closed form. A
+  conforming implementation SHALL solve by bisection on a monotone objective to
+  an absolute tolerance of **1e-10** on the rate, then apply the half-to-even
+  4-decimal boundary rounding. Where a model's output cannot be made
+  reproducible under this contract it is marked **not conformance-bound** on its
+  page and excluded from the exact-match suite.
 - **Dates** are ISO-8601 as above.
 
-Half-to-even means a value exactly halfway between two representable results
-rounds to the one whose last retained digit is even (0.00005 → 0.0000;
-0.00015 → 0.0002). This single rule lets an independent implementation
-reproduce every published expected value from the rule alone, with no shared
-rounding code — which is the property the conformance suite depends on.
+**Exact-decimal requirement.** Rate/ratio and divided-money rounding MUST be
+performed in exact decimal arithmetic (a decimal128 / arbitrary-precision
+decimal type — e.g. Java \`BigDecimal\`, Python \`decimal.Decimal\`, JavaScript
+\`big.js\`), **not** IEEE-754 binary floating point. This is load-bearing: a
+value exactly halfway between two results rounds half-to-even only in exact
+decimal — 0.00005 → 0.0000 and 0.00015 → 0.0002 — whereas the nearest binary
+\`double\` to 0.00005 is slightly *above* the tie and the nearest to 0.00015 is
+slightly *below* it, so naïve \`double\` arithmetic reproduces neither. Carrying
+intermediates and applying the tie-break in exact decimal is the property that
+lets an independent implementation reproduce every published expected value
+from this rule alone, with no shared rounding code — which is what the
+conformance suite depends on.
 
 ## Live (pass-through) constants
 
@@ -780,7 +926,8 @@ async function main() {
   }
   mkdirSync(OUT_INTERNAL, { recursive: true });
   const writtenBasenames = new Set<string>();
-  const write = (rel: string, content: string) => { writtenBasenames.add(path.basename(rel)); writeFileSync(path.join(OUT, rel), content); };
+  const writtenContent = new Map<string, string>();
+  const write = (rel: string, content: string) => { writtenBasenames.add(path.basename(rel)); writtenContent.set(rel, content); writeFileSync(path.join(OUT, rel), content); };
 
   // Extraction pass (Tier 1 models)
   for (const e of catalog) {
@@ -903,6 +1050,42 @@ licensed professionals.
       if (!overlay) continue;
       for (const [k, spec] of Object.entries(overlay.inputs)) if (!authored.has(k)) authored.set(k, spec);
       for (const [k, spec] of Object.entries(overlay.outputs)) if (!authored.has(k)) authored.set(k, spec);
+    }
+    // B5 — the deal-fact vocabulary the GATE PREDICATES evaluate over. These were
+    // authored on the gate side but never defined here, so the routing layer was
+    // not machine-evaluable "from this document alone." Define each with a type +
+    // enumeration; the near-misses were reconciled to these canonical names
+    // (states_involved, deal_type — the gate predicates now reference them).
+    const GATE_PREDICATE_FIELDS: Record<string, OverlayFieldSpec> = {
+      definitive_agreement_stage: { type: 'boolean', desc: 'True once the deal has reached definitive-agreement drafting (gate predicate — G1).' },
+      signed: { type: 'boolean', desc: 'True once the definitive agreement is executed (gate predicate — G6/G7).' },
+      closed: { type: 'boolean', desc: 'True once the transaction has closed (gate predicate — G6).' },
+      loi_executed: { type: 'boolean', desc: 'True once a letter of intent is executed (gate predicate — G7).' },
+      indemnity_structure_required: { type: 'boolean', desc: 'True when the deal carries a post-closing indemnity/escrow recourse structure (gate predicate — G8).' },
+      contingent_consideration: { type: 'boolean', desc: 'True when part of the purchase price is contingent — an earnout or milestone (gate predicate — G9).' },
+      ip_material_to_value: { type: 'boolean', desc: 'True when intellectual property is material to deal value (gate predicate — G10).' },
+      sell_side_context: { type: 'boolean', desc: 'True in a sell-side engagement, activating seller-proceeds and price-adjustment mechanics (gate predicate — G14).' },
+      non_us_jurisdiction: { type: 'boolean', desc: 'True when a non-US jurisdiction is in play (gate predicate — G23).' },
+      regulated_data_or_operations: { type: 'boolean', desc: 'True when the target handles regulated data or operations, activating the diligence overlays (gate predicate — G24).' },
+      states_involved: { type: 'string[]', desc: 'US state codes involved in the transaction (two-letter). Its length drives the state/local transaction-tax gate (gate predicate — G19). Canonical name; the G19 predicate reads this field.' },
+      counterparty_type: { type: 'enum(counterparty_type)', enum: 'counterparty_type', desc: 'The counterparty archetype; a fund counterparty activates the secondaries gate (gate predicate — G26).' },
+      buyer_archetype: { type: 'enum(buyer_archetype)', enum: 'buyer_archetype', desc: 'The acquirer archetype; sponsor/search/ESOP archetypes activate the acquirer-economics gate (gate predicate — G27).' },
+      deal_type: { type: 'enum(deal_type)', enum: 'deal_type', desc: 'The transaction type. Secondary/continuation/strip/NAV values activate the secondaries gate (gate predicate — G26). Canonical name; the G26 predicate reads this field.' },
+      deal_form: { type: 'enum(deal_form)', enum: 'deal_form', desc: 'The chosen transaction form; set-ness and membership drive the structure gates (gate predicates — G2/G15).' },
+    };
+    for (const [k, spec] of Object.entries(GATE_PREDICATE_FIELDS)) if (!authored.has(k)) authored.set(k, spec);
+    // B5 enforcement — every barewrd identifier a gate predicate references MUST
+    // be a defined dictionary field, or the routing layer is not machine-evaluable.
+    const PREDICATE_STOPWORDS = new Set(['in', 'AND', 'OR', 'is', 'set', 'true', 'false', 'length', 'n', 'a', 'reserved']);
+    for (const g of DEFINITIVE_GATE_EXPANSIONS) {
+      const pred = (g.triggerSummary.find(t => /Machine predicate/.test(t)) ?? '').replace(/.*Machine predicate:\s*`?/, '').replace(/`.*/, '');
+      for (const id of pred.match(/[a-z_][a-z0-9_]*/gi) ?? []) {
+        const bare = id.split('.')[0];
+        if (PREDICATE_STOPWORDS.has(bare) || /^\{/.test(bare)) continue;
+        // enum member tokens (lowercase words inside {...}) are values, not fields
+        if (/\{[^}]*\b/.test(pred) && new RegExp(`\\{[^}]*\\b${bare}\\b[^}]*\\}`).test(pred)) continue;
+        if (!authored.has(bare)) gap(`B5 Data dictionary: gate ${g.gateId} predicate references \`${bare}\` which is not a defined dictionary field`);
+      }
     }
     // Fields observed in models still pending normative authoring (no contract yet).
     const pending = new Set<string>();
@@ -1029,7 +1212,7 @@ licensed professionals.
   {
     const L: string[] = [fm('Conformance', '§Conformance')];
     L.push(`# Conformance\n`);
-    L.push(`A conforming implementation passes the published suite: **${COUNTS.conformanceTotal} cases**, of which **${COUNTS.conformanceRuntime} model-runtime cases** ship in this repository ([\`cases/model-runtime.cases.json\`](cases/model-runtime.cases.json), MIT).\n`);
+    L.push(`A conforming implementation passes the published suite — **${COUNTS.conformanceTotal} cases, every one shipped in this repository**: **${COUNTS.conformanceRuntime} model-runtime cases** ([\`cases/model-runtime.cases.json\`](cases/model-runtime.cases.json)) and **${COUNTS.conformanceBoundary} boundary-refusal cases** ([\`cases/boundary-refusal.cases.json\`](cases/boundary-refusal.cases.json)), both MIT. The published suite is exactly what ships; the number advertised here equals the number of cases in this tree.\n`);
     L.push(`## Case format\n`);
     L.push(jsonBlock({
       case_id: 'string — stable identifier',
@@ -1045,10 +1228,30 @@ licensed professionals.
     L.push(`Each Normative model carries requirement \`REQ-<slot>\` (its I/O contract, worked example, and error semantics — verified by its bound cases, listed on the model page). Each professional-determination boundary carries \`REQ-DTC-*\` (the implementation routes, never answers — verified by boundary cases asserting \`defer_to_counsel: true\` outputs).\n`);
     const reqs: string[] = [];
     for (const e of catalog) if (tierOf(e) === 'normative') reqs.push(`- \`REQ-${e.slotId}\` — ${e.name} conforms to its published contract (${(extractions.get(e.implementedRuntimeModelId!)?.caseIds.length ?? 0)} case(s))`);
-    for (const t of DEFER_TO_COUNSEL_TRIGGERS) reqs.push(`- \`REQ-DTC-${t.id.replace('DTC.', '').replace('.', '-')}\` — implementations MUST route, not answer: ${t.trigger}`);
+    for (const t of DEFER_TO_COUNSEL_TRIGGERS) {
+      const reqId = `REQ-DTC-${t.id.replace('DTC.', '').replace('.', '-')}`;
+      const n = boundaryCases.filter(c => c.req === reqId).length;
+      // Case-backed DTC categories carry a runnable boundary count; the categories
+      // with no computational model are policy boundaries verified structurally.
+      const suffix = POLICY_ONLY_DTC.has(t.id)
+        ? '(policy boundary — no model in the specification computes here; conformance is the structural refusal)'
+        : `(${n} boundary case(s))`;
+      reqs.push(`- \`${reqId}\` — implementations MUST route, not answer: ${t.trigger} ${suffix}`);
+      // P0.4 — a case-backed DTC requirement with zero shipped cases is a publish fail.
+      if (!POLICY_ONLY_DTC.has(t.id) && n === 0) gap(`P0.4 Conformance: ${reqId} is case-backed but ships 0 boundary cases — add a case or mark it policy-only`);
+    }
     L.push(reqs.join('\n') + '\n');
     write('spec/conformance.md', L.join('\n'));
     write('spec/conformance/cases/model-runtime.cases.json', JSON.stringify(fixtures, null, 2) + '\n');
+    write('spec/conformance/cases/boundary-refusal.cases.json', JSON.stringify(boundaryCases, null, 2) + '\n');
+    // P0.4 — the advertised count MUST equal what actually ships in this tree.
+    const shippedTotal = fixtures.length + boundaryCases.length;
+    if (COUNTS.conformanceTotal !== shippedTotal) gap(`P0.4 Conformance: advertised ${COUNTS.conformanceTotal} cases ≠ ${shippedTotal} shipped (model-runtime ${fixtures.length} + boundary ${boundaryCases.length})`);
+    // P0.4 — every Normative model requirement must carry at least one case.
+    for (const e of catalog) if (tierOf(e) === 'normative') {
+      const n = extractions.get(e.implementedRuntimeModelId!)?.caseIds.length ?? 0;
+      if (n === 0) gap(`P0.4 Conformance: REQ-${e.slotId} carries 0 cases`);
+    }
   }
 
   /* lineage */
@@ -1153,6 +1356,19 @@ licensed professionals.
   {
     const overlaid = catalog.filter(e => tierOf(e) === 'normative' && overlayOf(e)).map(e => e.slotId);
     writeFileSync(path.join(OUT_INTERNAL, 'GOVERNANCE.md'), `# Governing rule\n\n> ${GOVERNING_RULE}\n\nThis rule governs the public-edition build. The generator MERGES an authored\noverlay (\`scripts/definitivePublicOverlay.ts\`) over the empirical extraction:\nRFC-2119 algorithms, typed contracts with enums and descriptions, constants\nwith pin-cites, golden examples, de-boilerplated boundary statements, purpose\nprose, and authority de-duplication are AUTHORED, not extracted. Where the\ncode's behavior is narrower than the M&A concept, the entry is scoped\nhonestly and cross-referenced (see the scope notes), never silently narrowed.\n\n**Normative models carrying a complete authored overlay (${overlaid.length}):** ${overlaid.join(', ') || '(none yet)'}\n\n**Publish gate (\`--publish\`) fails on any of:** pending-formalization banner;\ninferred/\`any\` type; field without description; enum-like field without\nenumerated values; untraceable numeric literal in a worked example; duplicate\nnormalized Authority Register rows; pin-cite-pending banner in a Normative\nconstants table; a golden example that does not execute; a gate pending\nfounder approval. Draft mode carries these in the gap ledger.\n`);
+  }
+
+  // P0.3 — no internal/decision-tracking voice or draft marker may reach a
+  // published page. Scans the spec tree body (frontmatter stripped so the
+  // draft-mode `-draft` version string isn't self-flagged). Would have caught
+  // the four leaked "Founder decision … pending sign-off" scope notes (B10).
+  {
+    const VOICE = [/Founder decision/i, /pending (founder )?sign-?off/i, /Recorded pending/i, /\(recommended\)/, /\brescope the published\b/i, /\bTODO\b|\bFIXME\b|\bXXX\b/, /-draft\b/];
+    for (const [rel, content] of writtenContent) {
+      if (!/^(spec\/|README|DEFINITIVE|llms)/.test(rel)) continue;
+      const body = content.replace(/^---\n[\s\S]*?\n---\n/, '');
+      for (const pat of VOICE) if (pat.test(body)) gap(`P0.3 ${rel}: published page carries internal/decision-tracking voice or a draft marker (${pat}) — remove it`);
+    }
   }
 
   /* gap ledger / publish enforcement (§8/§9) — burndown format */

@@ -15,7 +15,7 @@ reorganization structure, distressed and restructuring waterfalls, capital
 structure and liability management, IP transfer mechanics, and a real
 property & contract law layer with anchor-state law encoded as data.
 
-**At a glance:** **134 model slots mapped** · **85 implementable from this document today** · 0 normative scheduled (authoring by family) · 47 catalog · 2 reserved · **30-gate routing framework** (17 routed; 17 specified) · **262 authority anchors** (as referenced) · **655-case conformance suite** (385 model-runtime).
+**At a glance:** **134 model slots mapped** · **85 implementable from this document today** · 0 normative scheduled (authoring by family) · 47 catalog · 2 reserved · **17-gate routing framework** (17 routed and specified; 13 reserved IDs unpublished) · **261 authority anchors** (as referenced) · **394-case published conformance suite** (385 model-runtime · 9 boundary-refusal).
 
 The specification publishes at two maturity tiers, labeled on every entry and
 in the index. **Normative** entries carry the full contract — input and output
@@ -80,19 +80,39 @@ table-gap and route to the appropriate professional — it MUST NOT guess a rule
 This is the single global rounding rule; every "see the Conventions chapter"
 precision note refers here.
 
-- **Monetary outputs** are exact integer cents.
+- **Monetary outputs that are exact** are integer cents.
+- **Monetary outputs produced by division or allocation** — a trailing-mean
+  working-capital peg, a proration, a class allocation — are rounded **half to
+  even to the nearest cent**. "To the nearest cent" alone is under-specified;
+  the tie-break is half-to-even, so two independent implementations cannot
+  differ by a cent at a half-cent tie.
 - **Rates and ratios** — coverage ratios (DSCR), returns (IRR, MOIC),
   ownership and equity percentages, cap rates, and the like — are rounded
   **half to even** (banker's rounding) to **four (4) decimal places**, at the
-  **output boundary only**. Intermediate values are carried at full precision;
-  rounding is applied once, when the output is produced.
+  **output boundary only**. Intermediate values are carried in **exact decimal**
+  (see the exact-decimal requirement below); rounding is applied once, when the
+  output is produced.
+- **Iterative (root-found) outputs** — an internal rate of return, a cramdown
+  interest rate, a make-whole present-value root — have no closed form. A
+  conforming implementation SHALL solve by bisection on a monotone objective to
+  an absolute tolerance of **1e-10** on the rate, then apply the half-to-even
+  4-decimal boundary rounding. Where a model's output cannot be made
+  reproducible under this contract it is marked **not conformance-bound** on its
+  page and excluded from the exact-match suite.
 - **Dates** are ISO-8601 as above.
 
-Half-to-even means a value exactly halfway between two representable results
-rounds to the one whose last retained digit is even (0.00005 → 0.0000;
-0.00015 → 0.0002). This single rule lets an independent implementation
-reproduce every published expected value from the rule alone, with no shared
-rounding code — which is the property the conformance suite depends on.
+**Exact-decimal requirement.** Rate/ratio and divided-money rounding MUST be
+performed in exact decimal arithmetic (a decimal128 / arbitrary-precision
+decimal type — e.g. Java `BigDecimal`, Python `decimal.Decimal`, JavaScript
+`big.js`), **not** IEEE-754 binary floating point. This is load-bearing: a
+value exactly halfway between two results rounds half-to-even only in exact
+decimal — 0.00005 → 0.0000 and 0.00015 → 0.0002 — whereas the nearest binary
+`double` to 0.00005 is slightly *above* the tie and the nearest to 0.00015 is
+slightly *below* it, so naïve `double` arithmetic reproduces neither. Carrying
+intermediates and applying the tie-break in exact decimal is the property that
+lets an independent implementation reproduce every published expected value
+from this rule alone, with no shared rounding code — which is what the
+conformance suite depends on.
 
 ## Live (pass-through) constants
 
@@ -161,7 +181,7 @@ is a versioned data table. Adding a jurisdiction is a data change with its
 own conformance cases, not a code change. Unknown jurisdictions MUST produce
 explicit table-gap flags.
 
-**Conformance.** 655 cases
+**Conformance.** 394 cases
 (385 model-runtime across
 42 categories), with
 expected values derived from governing authorities independently of any
@@ -251,7 +271,7 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `bargain_purchase_option` | boolean | Whether the lessee holds a bargain purchase option (default false). |
 | `base_amount_cents` | integer (cents) | The executive's §280G base amount (five-year average W-2 compensation). |
 | `base_rate` | number | The Till base rate (e.g., prime), as a fraction. |
-| `basis` | enum(risk_basis) | The basis for the allocation. |
+| `basis` | string | The basis for the allocation: contract_override, equitable_conversion_default, a statutory regime name, or equitable_conversion_common_law_baseline_unverified for an untabled state. |
 | `basis_at_conversion_cents` | integer (cents) | Tax basis of assets at conversion. |
 | `basket_cents` | integer (cents) | The basket threshold in cents. |
 | `basket_count` | integer | Number of baskets evaluated. |
@@ -270,6 +290,7 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `bulk_sale_clearance_required` | boolean | Whether a bulk-sale tax clearance is required (default false). |
 | `bulk_sales_citations` | string[] | Per-state bulk-sales citations for the applicable states. |
 | `bulk_sales_notification_states` | string[] | Applicable bulk-sales notification states. |
+| `buyer_archetype` | enum(buyer_archetype) | The acquirer archetype; sponsor/search/ESOP archetypes activate the acquirer-economics gate (gate predicate — G27). |
 | `buyer_asset_basis_cents` | integer (cents) | null | Buyer asset basis for asset/deemed-asset forms, else null. |
 | `buyer_equity_cents` | integer (cents) | Buyer equity injection into the transaction. |
 | `buyer_equity_pct` | number | Buyer equity as a fraction of purchase price (0–1). |
@@ -318,6 +339,7 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `classification` | enum(lease_classification) | How the transfer classifies against the restriction. |
 | `cleansing_vote_passed` | boolean | null | Whether the supplied vote exceeds the threshold, or null when no vote is supplied. |
 | `cleansing_vote_threshold_pct` | number | The disinterested-shareholder approval threshold (0.75). |
+| `closed` | boolean | True once the transaction has closed (gate predicate — G6). |
 | `closing_date` | string (ISO date) | The closing date; dates the Form 8288 deadline. |
 | `closing_day_of_period` | number | Day of the period at closing, for proration (default 0). |
 | `closing_protection_letter_required` | boolean | Whether a closing-protection letter is required (default true). |
@@ -345,6 +367,7 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `construction_mortgage` | boolean | Whether the prior interest is a construction mortgage (default false); triggers the § 9-334(h) override. |
 | `contested_nexus_position` | boolean | Whether a contested nexus position is present (default false). |
 | `contested_state_position_handoff_required` | boolean | True when the state is untabled and no rate was supplied. |
+| `contingent_consideration` | boolean | True when part of the purchase price is contingent — an earnout or milestone (gate predicate — G9). |
 | `contract_allocates_risk` | boolean | Whether the purchase contract expressly allocates pre-closing casualty risk. |
 | `contract_override_applied` | boolean | Whether an express contract allocation controls. |
 | `contract_risk_on` | enum(contract_risk_on) | The party the contract places risk on, when it allocates. |
@@ -369,6 +392,7 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `counsel_handoff` | string | null | The routing sentence when a signatory gap defers, else null. |
 | `counsel_review_flags` | string[] | Items counsel must confirm (limitations period, fraud definition, RWI interaction). |
 | `counsel_review_required` | boolean | Always true — the CODI and holdout analysis routes to counsel. |
+| `counterparty_type` | enum(counterparty_type) | The counterparty archetype; a fund counterparty activates the secondaries gate (gate predicate — G26). |
 | `coupon_rate` | number | Annual coupon rate as a fraction (e.g., 0.08). |
 | `court_approval_required` | boolean | Always true — the sale requires court approval. |
 | `court_determination_required` | boolean | Always true — APR compliance is a court determination. |
@@ -397,11 +421,12 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `debts_due_cents` | integer (cents) | Debts coming due over the projection. |
 | `deductible_cents` | integer (cents) | Total currently deductible. |
 | `deed_note` | string | Plain-language description of the deed's covenant coverage. |
-| `deed_type` | enum(deed_type) | The deed instrument type being conveyed. |
+| `deed_type` | enum(deed_type) | The deed instrument type being conveyed, including the CA grant deed (§1113) and NY §258 bargain-and-sale-with-covenant. |
 | `default_regime` | enum(risk_basis) | The state default regime that would govern absent a contract term. |
 | `defer_to_counsel` | boolean | True only when the state is untabled; the ordering then defers. |
 | `deferred_or_rollover_consideration_cents` | integer (cents) | Rollover/deferred consideration. |
 | `deficiency_claim_cents` | integer (cents) | The deficiency (claim over collateral). |
+| `definitive_agreement_stage` | boolean | True once the deal has reached definitive-agreement drafting (gate predicate — G1). |
 | `deposit_verification_tier` | string | How deeply the deposit was verified (e.g., inventory-only, build-verified, build-and-run-tested). |
 | `disclosure_statement_exhibit_handoff_required` | boolean | Always true — the liquidation-analysis exhibit routes to counsel. |
 | `discount_pct` | number | The conversion discount as a fraction (0–1); default 0 (no discount). |
@@ -449,7 +474,7 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `estate_value_cents` | integer (cents) | The gross Chapter 7 estate value. |
 | `estimated_adjustment_cents` | integer (cents) | null | Estimated adjustment against the peg, or null. |
 | `estimated_irr` | number | null | Annualized IRR to resolution, or null. |
-| `estimated_lender_irr` | number | null | Estimated annualized lender IRR, or null when the term is non-positive. |
+| `estimated_lender_irr` | number | null | Estimated annualized lender return — a money-multiple CAGR ((gross return ÷ principal)^(1/term) − 1); it does not time the interim coupons, so it is an annualized-return proxy, not a cash-flow IRR. Null when the term is non-positive. |
 | `estimated_nwc_cents` | integer (cents) | Estimated net working capital per the estimated statement; optional. |
 | `estimated_years_to_use_nol` | integer | null | Whole-year ceiling to absorb the NOL at the annual limitation, or null. |
 | `exceptions` | object[] | Title-commitment exceptions; each object carries `label` (string), `curable` (boolean), and `insurer_will_insure_over` (boolean). |
@@ -543,6 +568,7 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `income_75_pct` | number | Real-estate income as a fraction of total income. |
 | `income_75_test_passed` | boolean | Whether the 75% income test passes. |
 | `indemnity_carveout_review_required` | boolean | Whether any strong-copyleft or unknown component warrants an indemnity carve-out review. |
+| `indemnity_structure_required` | boolean | True when the deal carries a post-closing indemnity/escrow recourse structure (gate predicate — G8). |
 | `indicated_cramdown_rate` | number | The rate the selected framework indicates. |
 | `installment_453a_threshold_cents` | integer (cents) | The §453A threshold applied. |
 | `installment_receivable_cents` | integer (cents) | Aggregate face of installment receivables (default 0); drives the §453A test. |
@@ -557,6 +583,7 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `ip_asset_count` | integer | Number of IP assets examined. |
 | `ip_assets` | object[] | Carve-out IP assets; each object carries `asset_name` (string), `disposition` (string, e.g. assigned_to_buyer/licensed_to_buyer/license_back_to_seller), `licensed_back_to_seller` (boolean), and `transition_license_months` (integer). |
 | `ip_intangibles_cents` | integer (cents) | Class VI §197 IP-intangible value. |
+| `ip_material_to_value` | boolean | True when intellectual property is material to deal value (gate predicate — G10). |
 | `ip_value_excess_over_purchase_price_cents` | integer (cents) | IP value that exceeds the price available after Class V (normally zero). |
 | `is_entity_transfer` | boolean | Whether the transaction moves interests in an entity that owns the property (rather than a deed). |
 | `issues` | object[] | Property issues; each carries `name` (string), `type`/`category` (string), `amount_cents`/`cost_to_cure_cents` (integer cents), `holdback_pct` (number, default 1), `source` (string), and `pass_through_source_required` (boolean). |
@@ -601,6 +628,7 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `loan_has_due_on_transfer_clause` | boolean | Whether the loan documents contain a due-on-sale/due-on-transfer clause. |
 | `loan_maturity_date` | string (ISO date) | When the leasehold loan matures. |
 | `locked_domain_count` | integer | Number of domains still within a transfer lock. |
+| `loi_executed` | boolean | True once a letter of intent is executed (gate predicate — G7). |
 | `long_term_tax_exempt_rate` | number | The IRS long-term tax-exempt rate for the change month (a fraction, e.g. 0.0435); supplied at runtime. |
 | `loss_corporation_value_cents` | integer (cents) | The equity value of the loss corporation immediately before the ownership change (§382(e)). |
 | `lost_employer_deduction_cents` | integer (cents) | The employer deduction disallowed under §280G (equal to the excess). |
@@ -650,6 +678,7 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `noi_cents` | integer (cents) | Stabilized net operating income of the real property. |
 | `nol_carryforward_cents` | integer (cents) | The pre-change NOL carryforward balance; optional, drives the years-to-absorb estimate. |
 | `non_transferable_permits` | string[] | Labels of permits that do not travel with the transfer. |
+| `non_us_jurisdiction` | boolean | True when a non-US jurisdiction is in play (gate predicate — G23). |
 | `normalized_noi_cents` | integer (cents) | Normalized NOI (EGI less expenses and reserve). |
 | `notice_days` | number | Days of disposition notice given (default 10). |
 | `notice_floor_satisfied` | boolean | Whether the notice clears the Article 9 floor. |
@@ -747,6 +776,7 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `red_flags` | string[] | Priority-hygiene warnings (unrecorded interests; race-state notice anomaly). |
 | `reduced_certificate_processing_days_estimate` | integer | null | IRS Form 8288-B processing estimate in days (a planning estimate), or null. |
 | `regime_known` | boolean | Whether the state is in the transfer-tax regime table. |
+| `regulated_data_or_operations` | boolean | True when the target handles regulated data or operations, activating the diligence overlays (gate predicate — G24). |
 | `related_steps_planned` | boolean | Whether related transfer steps are planned (default false); with a mere-change claim this drives step-transaction risk. |
 | `release_required_count` | integer | Number of searches whose hits require a release. |
 | `release_trigger_count` | integer | Number of release triggers. |
@@ -817,6 +847,7 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `section_453a_excess_receivable_cents` | integer (cents) | Receivable in excess of the threshold. |
 | `security_terms` | object | Security economics for the round; recognizes `liquidation_pref_multiple` (number, default 1×). |
 | `selected_framework` | enum(cramdown_framework) | Which framework governs. |
+| `sell_side_context` | boolean | True in a sell-side engagement, activating seller-proceeds and price-adjustment mechanics (gate predicate — G14). |
 | `seller_after_tax_proceeds_cents` | integer (cents) | Seller proceeds after tax, including rollover. |
 | `seller_entity_type` | string | The seller's entity type (e.g., S-corp, C-corp, partnership, individual). |
 | `seller_foreign_person` | boolean | Whether the seller is a foreign person (the FIRPTA trigger). |
@@ -831,6 +862,7 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `seller_taxable_gain_cents` | integer (cents) | Seller taxable gain. |
 | `shareholder_cleansing_vote_pct` | number | Fraction of disinterested shareholders approving the payments (0–1); optional. |
 | `signatory_gap` | boolean | Whether a required signatory is missing. |
+| `signed` | boolean | True once the definitive agreement is executed (gate predicate — G6/G7). |
 | `simple_interest_cents` | integer (cents) | Total simple cash interest over the term. |
 | `size_of_transaction_cents` | integer (cents) | The transaction size under test, in cents. |
 | `social_handle_transfer_count` | integer | Number of social handles to transfer. |
@@ -846,7 +878,9 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `state_apportionment_pct` | number | The state apportionment factor as a fraction. |
 | `state_assignment_required_count` | integer | Number needing a state trademark assignment. |
 | `state_income_tax_cents` | integer (cents) | State income tax on the apportioned gain. |
+| `state_nonconformity_possible` | boolean | Optional override for the state-nonconformity flag. Omitted, the flag defaults to `within_recognition_period` (never silently false); supply `false` only with confirmed state conformity. |
 | `state_nonconformity_review_required` | boolean | Whether state nonconformity to §1374 needs review. |
+| `state_table_gap` | boolean | True when the contract is silent and the state is not in the anchor-state risk-of-loss table — the baseline is unverified and the allocation routes to counsel. |
 | `state_tax_rate` | number | Seller state tax rate as a fraction (default 0). |
 | `stated_call_price_cents` | integer (cents) | The stated call price (principal × call price). |
 | `stated_interest_rate` | number | The obligation's stated interest rate, as a fraction. |
@@ -948,6 +982,7 @@ The designed field vocabulary used by model input and output contracts and by ga
 | `value_from_cap_rate_cents` | integer (cents) | null | Value the NOI supports at the cap rate, or null. |
 | `value_shortfall_cents` | integer (cents) | Shortfall from trading down (relinquished over replacement). |
 | `vesting_form` | enum(vesting_form) | How record title is held. |
+| `vesting_state_validity_gap` | boolean | True when the vesting form is tenancy by the entirety in a community-property state that does not recognize it — an impossible pairing that routes to counsel. |
 | `waived_count` | integer | Number waived. |
 | `walt_months` | number | null | Rent-weighted average lease term in months, or null. |
 | `warrant_coverage_amount_cents` | integer (cents) | Dollar coverage: loan × coverage. |
@@ -975,6 +1010,8 @@ Enumerated values are part of the normative contract — a conforming implementa
   - Values: `finance_lease_indicator_present`, `operating_lease_indicator_on_supplied_facts`
 - **`basket_type`** — How the indemnification basket operates: a true deductible (recovery only above the threshold), a tipping basket (first-dollar recovery once the threshold is crossed), or unresolved pending confirmation.
   - Values: `deductible`, `tipping`, `deductible_or_tipping_to_confirm`
+- **`buyer_archetype`** — The acquirer archetype. Independent-sponsor, search-fund, and ESOP archetypes activate the acquirer-economics gate (G27).
+  - Values: `strategic`, `financial_sponsor`, `independent_sponsor`, `search_fund`, `esop`, `family_office`
 - **`chapter22_risk_band`** — The Chapter 22 (repeat-filing) recidivism-risk band a computed score falls into.
   - Values: `high`, `watch`, `lower`
 - **`condition_type`** — The category of a closing condition; regulatory/MAE/financing/consent/CFIUS/HSR/legal types route to specialist review.
@@ -989,12 +1026,18 @@ Enumerated values are part of the normative contract — a conforming implementa
   - Values: `marketable`, `insurable`
 - **`conversion_driver`** — Which term set the lowest (governing) conversion price for a convertible/SAFE: the valuation cap, the discount, or the priced-round share price itself.
   - Values: `valuation_cap`, `discount`, `priced_round_price`
+- **`counterparty_type`** — The counterparty archetype. A fund counterparty (fund_lp/fund_gp) activates the secondaries gate (G26).
+  - Values: `strategic`, `financial_sponsor`, `individual`, `fund_lp`, `fund_gp`, `esop_trust`
 - **`cramdown_framework`** — Which cramdown-rate framework governs: the efficient-market rate (where a market exists and the circuit applies it) or the Till formula (prime plus a risk premium).
   - Values: `efficient_market`, `till_formula`
+- **`deal_form`** — The transaction form. The gate predicates test membership in {asset, stock, merger} (G2) and set-ness (G15); model contracts may carry the finer forms (asset_sale/stock_sale/338h10). Unifying deal_form and deal_type onto one canonical granularity is a scheduled cleanup.
+  - Values: `asset`, `stock`, `merger`, `asset_sale`, `stock_sale`, `338h10`
+- **`deal_type`** — The transaction type. The secondary/continuation/strip/nav values activate the secondaries gate (G26). Canonical name for the transaction-type deal fact.
+  - Values: `asset_purchase`, `stock_purchase`, `merger`, `secondary`, `continuation`, `strip`, `nav`
 - **`debt_assumability`** — Whether existing property debt is assumable on the supplied facts, requires lender consent or a refinance, or was not supplied.
   - Values: `not_supplied`, `assumable_on_supplied_facts`, `consent_or_refinance_required`
-- **`deed_type`** — The deed instrument type, which fixes the title-covenant set conveyed.
-  - Values: `general_warranty`, `special_warranty`, `bargain_and_sale`, `quitclaim`
+- **`deed_type`** — The deed instrument type, which fixes the title-covenant set conveyed. Includes the two dominant anchor-state instruments: the California grant deed (Cal. Civ. Code § 1113, two implied covenants) and the New York bargain-and-sale deed with covenant against grantor's acts (N.Y. RPL § 258, one covenant).
+  - Values: `general_warranty`, `special_warranty`, `bargain_and_sale`, `quitclaim`, `grant_deed`, `bargain_and_sale_with_covenant`
 - **`dispute_forum`** — The forum designated to resolve an earnout or true-up dispute.
   - Values: `accounting_arbitrator`, `expert_determination`, `arbitration`, `courts`
 - **`firpta_path`** — The FIRPTA withholding path taken: not a foreign seller (no withholding), the $300k-or-less personal-residence exemption, the $300k–$1M reduced-rate residence path, or the default 15% withholding.
@@ -1135,7 +1178,7 @@ Activates the execution-risk stack — regulatory reportability, MAE durational 
 
 ## Boundary notes
 
-DEFINITIVE computes reportability, MAE, insurance, true-up, and fee mechanics; regulatory and enforceability determinations belong to counsel.
+DEFINITIVE computes the implemented mechanics (reportability, true-up, and closing/fee math) and maps the scheduled ones (MAE durational significance, insurance architecture — Catalog slots); regulatory and enforceability determinations belong to counsel.
 
 ## Models routed through G7
 
@@ -1233,7 +1276,7 @@ Activates seller-side proceeds tax treatment (e.g., QSBS) and price-adjustment p
 
 ## Boundary notes
 
-DEFINITIVE computes the QSBS proceeds screen and the working-capital peg; the binding tax position and the negotiated adjustment belong to the tax advisor, counsel, and the accountants. QSBS (M101) also routes through G15 Tax & Corporate Structure.
+DEFINITIVE computes the working-capital peg (Normative) and maps the QSBS proceeds screen (M101 — Catalog, scheduled); the binding tax position and the negotiated adjustment belong to the tax advisor, counsel, and the accountants. QSBS (M101) also routes through G15 Tax & Corporate Structure.
 
 ## Models routed through G14
 
@@ -1254,7 +1297,7 @@ The master structuring gate: tax elections, reorganization qualification, corpor
 
 ## Boundary notes
 
-DEFINITIVE computes tax elections, reorganization qualification, and equity-structure math; the return positions and legal opinions belong to the tax advisor and counsel.
+DEFINITIVE computes the implemented equity-structure and elections math (Normative slots) and maps the scheduled structuring mechanics — reorganization qualification (M140), 338(h)(10) (M105), 355 spin (M143) are Catalog; the return positions and legal opinions belong to the tax advisor and counsel.
 
 ## Models routed through G15
 
@@ -1311,7 +1354,7 @@ Activates state/local transfer-tax, controlling-interest, SALT, and clearance me
 ## Trigger conditions
 
 - one or more US state jurisdictions are involved
-- Machine predicate: `us_state_jurisdictions.length > 0`
+- Machine predicate: `states_involved.length > 0`
 
 ## Boundary notes
 
@@ -1382,7 +1425,7 @@ Activates fund-level and secondaries mechanics (continuation funds, LP secondari
 ## Trigger conditions
 
 - a fund counterparty or a secondary/continuation/strip/NAV transaction
-- Machine predicate: `counterparty_type in {fund_lp, fund_gp} OR transaction_type in {secondary, continuation, strip, nav}`
+- Machine predicate: `counterparty_type in {fund_lp, fund_gp} OR deal_type in {secondary, continuation, strip, nav}`
 
 ## Boundary notes
 
@@ -1572,7 +1615,7 @@ This model answers its computational question from supplied facts and cited cons
 ## Authorities
 
 - AUTH-0108 — IRC 1202
-- AUTH-0190 — OBBBA 2025
+- AUTH-0189 — OBBBA 2025
 
 
 # M102 — ESOP deferral
@@ -1683,7 +1726,7 @@ This model produces deterministic schedules and routing only. The governing dete
 
 ## Authorities
 
-- AUTH-0257 — UK market practice
+- AUTH-0256 — UK market practice
 
 
 # M107 — International merger-control thresholds
@@ -1706,7 +1749,7 @@ This model answers its computational question from supplied facts and cited cons
 ## Authorities
 
 - AUTH-0070 — EU Merger Regulation 139/2004
-- AUTH-0256 — UK Enterprise Act 2002
+- AUTH-0255 — UK Enterprise Act 2002
 
 
 # M108 — RWI primary architecture
@@ -1728,8 +1771,8 @@ This model produces deterministic schedules and routing only. The governing dete
 
 ## Authorities
 
-- AUTH-0221 — SRS Acquiom Deal Terms Study 2025
-- AUTH-0211 — RWI market studies
+- AUTH-0220 — SRS Acquiom Deal Terms Study 2025
+- AUTH-0210 — RWI market studies
 
 
 # M109 — Working capital peg
@@ -1745,7 +1788,7 @@ This model produces deterministic schedules and routing only. The governing dete
 
 Computes the working-capital peg — the reference net-working-capital level a purchase agreement locks in at signing — as the trailing arithmetic mean of a company's supplied monthly NWC observations, and reports the observed low–high range around it. The peg answers, for the buyer and seller negotiating the price adjustment, "what normalized level of working capital should be delivered at close?" It establishes the peg and its dispersion only; the post-closing estimated-versus-actual true-up sequence and any collar are specified separately by M210.
 
-> **Scope note.** SCOPE (delta §1, option (a) — rescope for v1.0): the catalog purpose read "Target, peg, true-up, and collar math," but the reference implementation computes only the trailing-mean peg and the observed min/max. It does NOT compute a negotiated target, a post-closing true-up, or a collar. Per the governing rule the published contract is scoped to what the model specifies; the closing-statement true-up sequence is owned by M210 (Closing-statement true-up sequence), cross-referenced here. Founder decision recorded: rescope (a), not extend the code, for v1.0.
+> **Scope note.** Scope: this model computes the working-capital peg as the trailing-mean of the supplied observations and reports the observed minimum and maximum. It does not compute a negotiated target, a post-closing true-up, or a collar; the closing-statement true-up sequence is specified by M210 (Closing-statement true-up sequence), cross-referenced here.
 
 ## 2. Input contract
 
@@ -1869,7 +1912,7 @@ Research scaffold: organizes authorities and considerations. Produces oriented r
 
 Computes the expected value of a revenue-metric earnout as the probability-weighted sum of its supplied payout scenarios, and discounts that expected value to present value over the earnout term. It answers, for a buyer and seller pricing contingent consideration, "what is this revenue earnout worth today, and what does each scenario contribute?" It values the earnout from supplied scenario payouts and their probabilities; it does not itself model the revenue thresholds that generate those payouts.
 
-> **Scope note.** SCOPE (governing rule): the catalog purpose reads "Metric threshold, period, probability, and expected-value schedule," but the reference implementation (MODEL.STRUCT.EARNOUT.MC.v1 — shared with M112) is a metric-agnostic probability-weighted expected-value + present-value engine. It consumes already-quantified payout scenarios and their probabilities; it does NOT gate payouts off a revenue metric and a threshold, nor build a period-by-period schedule beyond a single-term discount. Founder decision: (a) rescope the published contract to the expected-value engine it is (recommended — one binding serves M111 and M112), or (b) extend the code with a revenue-threshold payout front-end. Recorded pending founder sign-off.
+> **Scope note.** Scope: this model computes a probability-weighted expected value and present value over already-quantified payout scenarios and their probabilities (the reference binding MODEL.STRUCT.EARNOUT.MC.v1 is shared with M112). It does not gate payouts off a revenue metric and threshold, and does not build a period-by-period schedule beyond a single-term discount — the revenue-metric measurement is the caller's input, not a computation of this model.
 
 ## 2. Input contract
 
@@ -1909,7 +1952,7 @@ _No numeric constants — this model computes from supplied facts and cited rule
 | Authority | ID | Type |
 |---|---|---|
 | ABA Private Target Deal Points Study | AUTH-0026 | study/dataset |
-| SRS Acquiom Deal Terms Study 2025 | AUTH-0221 | study/dataset |
+| SRS Acquiom Deal Terms Study 2025 | AUTH-0220 | study/dataset |
 
 ## 6. Worked example
 
@@ -1990,7 +2033,7 @@ Reference binding `MODEL.STRUCT.EARNOUT.MC.v1` · entered the specification at i
 
 Computes the expected value of an EBITDA-metric earnout as the probability-weighted sum of its supplied payout scenarios, and discounts that expected value to present value over the earnout term. It answers, for parties pricing contingent consideration tied to EBITDA, "what is this EBITDA earnout worth today?" It values the earnout from supplied scenario payouts and probabilities; it does not itself define the EBITDA target or apply an add-back policy.
 
-> **Scope note.** SCOPE (governing rule): the catalog purpose reads "EBITDA target, add-back policy, and expected-value schedule," but the reference implementation (MODEL.STRUCT.EARNOUT.MC.v1 — shared with M111) is a metric-agnostic probability-weighted expected-value + present-value engine. It consumes already-quantified payout scenarios and probabilities; it does NOT compute an EBITDA target, and it applies NO add-back/normalization policy — that normalization is baked into the supplied scenario payouts and is a QoE and accounting matter. Founder decision: (a) rescope the published contract to the expected-value engine it is (recommended — one binding serves M111 and M112), or (b) extend the code with an EBITDA add-back front-end. Recorded pending founder sign-off.
+> **Scope note.** Scope: this model computes a probability-weighted expected value and present value over already-quantified payout scenarios and their probabilities (the reference binding MODEL.STRUCT.EARNOUT.MC.v1 is shared with M111). It does not compute an EBITDA target and applies no add-back or normalization policy — that normalization is a QoE and accounting matter, baked into the supplied scenario payouts before they reach this model.
 
 ## 2. Input contract
 
@@ -2030,7 +2073,7 @@ _No numeric constants — this model computes from supplied facts and cited rule
 | Authority | ID | Type |
 |---|---|---|
 | ABA Private Target Deal Points Study | AUTH-0026 | study/dataset |
-| SRS Acquiom Deal Terms Study 2025 | AUTH-0221 | study/dataset |
+| SRS Acquiom Deal Terms Study 2025 | AUTH-0220 | study/dataset |
 
 ## 6. Worked example
 
@@ -2112,7 +2155,7 @@ This model answers its computational question from supplied facts and cited cons
 ## Authorities
 
 - AUTH-0026 — ABA Private Target Deal Points Study
-- AUTH-0221 — SRS Acquiom Deal Terms Study 2025
+- AUTH-0220 — SRS Acquiom Deal Terms Study 2025
 
 
 # M114 — Customer-retention earnout
@@ -2135,7 +2178,7 @@ This model answers its computational question from supplied facts and cited cons
 ## Authorities
 
 - AUTH-0026 — ABA Private Target Deal Points Study
-- AUTH-0221 — SRS Acquiom Deal Terms Study 2025
+- AUTH-0220 — SRS Acquiom Deal Terms Study 2025
 
 
 # M115 — Regulatory-milestone earnout
@@ -2158,7 +2201,7 @@ This model answers its computational question from supplied facts and cited cons
 ## Authorities
 
 - AUTH-0026 — ABA Private Target Deal Points Study
-- AUTH-0221 — SRS Acquiom Deal Terms Study 2025
+- AUTH-0220 — SRS Acquiom Deal Terms Study 2025
 
 
 # M116 — Independent-sponsor tiered promote
@@ -2240,6 +2283,8 @@ This model answers its computational question from supplied facts and cited cons
 
 Checks whether an SBA 7(a) change-of-ownership acquisition clears the program's two hard financing floors — the minimum equity injection and the debt-service-coverage minimum — and reports the buyer's equity percentage, the coverage ratio, and the 7(a) loan ceiling. It answers, for a searcher or SMB buyer structuring an SBA-backed acquisition, "does this capital stack meet the SOP's gating requirements before we take it to a lender?" It performs the arithmetic screen only; the eligibility and credit decisions remain the lender's and the SBA's.
 
+> **Scope note.** Scope: the equity-injection floor is measured here against `purchase_price_cents`. SOP 50 10 8 measures the 10% minimum against **total project cost** (purchase price plus financed closing costs, working capital, and the guaranty fee). Where project cost exceeds the price, this screen reports a higher equity percentage than the program test and can pass a deal the real test fails — supply a project-cost figure as the denominator (or treat a marginal pass as a lender question).
+
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M119.schema.json`](M119.schema.json).
@@ -2265,8 +2310,8 @@ Conventions: monetary values are integer cents; dates are ISO-8601 strings; juri
 
 Given `purchase_price_cents`, `cash_flow_cents` (post-acquisition free cash flow available for debt service), `buyer_equity_cents`, and `annual_debt_service_cents`:
 1. If any of the four is missing or non-numeric, the implementation SHALL return `status: "needs_inputs"` naming the missing fields and emit no outputs.
-2. `buyer_equity_pct` SHALL be `buyer_equity_cents ÷ purchase_price_cents`, rounded half-up to 4 decimals.
-3. `dscr` SHALL be `cash_flow_cents ÷ annual_debt_service_cents`, rounded half-up to 2 decimals.
+2. `buyer_equity_pct` SHALL be `buyer_equity_cents ÷ purchase_price_cents`, rounded half to even to 4 decimals (the global precision rule — see the Conventions chapter).
+3. `dscr` SHALL be `cash_flow_cents ÷ annual_debt_service_cents`, rounded half to even to 4 decimals (the global precision rule — see the Conventions chapter).
 4. `meets_sba_equity_floor` SHALL be true iff `buyer_equity_pct ≥ SBA equity-injection floor` (constants: SBA 7(a) minimum equity injection).
 5. `meets_sba_dscr_floor` SHALL be true iff `dscr ≥ SBA debt-service-coverage floor` (constants: SBA 7(a) DSCR floor).
 6. `max_7a_loan_cents` SHALL be the 7(a) maximum loan amount in cents (constants: SBA 7(a) maximum loan amount).
@@ -2284,7 +2329,7 @@ Given `purchase_price_cents`, `cash_flow_cents` (post-acquisition free cash flow
 
 | Authority | ID | Type |
 |---|---|---|
-| SBA SOP 50 10 8 | AUTH-0213 | guidance |
+| SBA SOP 50 10 8 | AUTH-0212 | guidance |
 
 ## 6. Worked example
 
@@ -2375,7 +2420,7 @@ This model produces deterministic schedules and routing only. The governing dete
 ## Authorities
 
 - AUTH-0137 — IRC 754
-- AUTH-0238 — TRA market practice
+- AUTH-0237 — TRA market practice
 
 
 # M122 — Unitranche intercreditor
@@ -2397,7 +2442,7 @@ This model produces deterministic schedules and routing only. The governing dete
 
 ## Authorities
 
-- AUTH-0162 — LSTA model AAL
+- AUTH-0161 — LSTA model AAL
 
 
 # M123 — MAE durational significance
@@ -2488,7 +2533,7 @@ Research scaffold: organizes authorities and considerations. Produces oriented r
 ## Authorities
 
 - AUTH-0063 — DGCL SB 21
-- AUTH-0210 — Rutledge v. Clearway
+- AUTH-0209 — Rutledge v. Clearway
 
 
 # M127 — MFW dual-prong
@@ -2510,8 +2555,8 @@ This model produces deterministic schedules and routing only. The governing dete
 
 ## Authorities
 
-- AUTH-0171 — MFW
-- AUTH-0167 — Match Group
+- AUTH-0170 — MFW
+- AUTH-0166 — Match Group
 
 
 # M128 — HSR reportability
@@ -2629,7 +2674,7 @@ Research scaffold: organizes authorities and considerations. Produces oriented r
 
 ## Authorities
 
-- AUTH-0203 — Regulation (EU) 2024/1689
+- AUTH-0202 — Regulation (EU) 2024/1689
 
 
 # M130 — Cyber diligence
@@ -2651,7 +2696,7 @@ This model produces deterministic schedules and routing only. The governing dete
 
 ## Authorities
 
-- AUTH-0183 — NIST CSF
+- AUTH-0182 — NIST CSF
 
 
 # M131 — Privacy diligence
@@ -2696,7 +2741,7 @@ This model produces deterministic schedules and routing only. The governing dete
 
 ## Authorities
 
-- AUTH-0195 — OFAC
+- AUTH-0194 — OFAC
 
 
 # M133 — ESG diligence
@@ -2718,7 +2763,7 @@ This model produces deterministic schedules and routing only. The governing dete
 
 ## Authorities
 
-- AUTH-0214 — SEC climate and ESG references
+- AUTH-0213 — SEC climate and ESG references
 
 
 # M134 — Climate diligence
@@ -2740,7 +2785,7 @@ This model produces deterministic schedules and routing only. The governing dete
 
 ## Authorities
 
-- AUTH-0215 — SEC climate disclosure references
+- AUTH-0214 — SEC climate disclosure references
 
 
 # M135 — Fairness-opinion scaffolding
@@ -2763,7 +2808,7 @@ This model produces deterministic schedules and routing only. The governing dete
 ## Authorities
 
 - AUTH-0071 — fairness opinion case law
-- AUTH-0164 — market practice
+- AUTH-0163 — market practice
 
 
 # M136 — Fraudulent-transfer baseline
@@ -2786,8 +2831,8 @@ This model produces deterministic schedules and routing only. The governing dete
 ## Authorities
 
 - AUTH-0012 — 11 U.S.C. 548
-- AUTH-0255 — UFTA
-- AUTH-0259 — UVTA
+- AUTH-0254 — UFTA
+- AUTH-0258 — UVTA
 
 
 # M137 — Reserved
@@ -2863,7 +2908,7 @@ Given `purchase_price_cents` and `asset_classes` (a list of `{ class_number, cla
 | Authority | ID | Type |
 |---|---|---|
 | IRC 1060 | AUTH-0106 | statute |
-| Treas. Reg. 1.1060-1 | AUTH-0239 | regulation |
+| Treas. Reg. 1.1060-1 | AUTH-0238 | regulation |
 
 ## 6. Worked example
 
@@ -2982,7 +3027,7 @@ This model answers its computational question from supplied facts and cited cons
 ## Authorities
 
 - AUTH-0126 — IRC 368
-- AUTH-0243 — Treas. Reg. 1.368
+- AUTH-0242 — Treas. Reg. 1.368
 
 
 # M141 — 251(h) eligibility and top-up
@@ -3026,8 +3071,8 @@ This model answers its computational question from supplied facts and cited cons
 
 ## Authorities
 
-- AUTH-0208 — Rule 14d-10
-- AUTH-0209 — Rule 14e-1
+- AUTH-0207 — Rule 14d-10
+- AUTH-0208 — Rule 14e-1
 
 
 # M143 — 355 spin and 355(e) test
@@ -3072,7 +3117,7 @@ This model answers its computational question from supplied facts and cited cons
 
 ## Authorities
 
-- AUTH-0164 — market practice
+- AUTH-0163 — market practice
 
 
 # M145 — 721/351 contribution plus 704(c)
@@ -3112,7 +3157,7 @@ This model answers its computational question from supplied facts and cited cons
 
 Computes the ownership split a single priced financing round produces — post-money valuation, and the investor, option-pool, and founder ownership percentages — and the round's liquidation preference at the supplied multiple. It answers, for a founder or investor sizing a round, "after this round and pool, who owns what, and how large is the preference stack on the new money?" It models one round's dilution and its preference; it is not a multi-class exit waterfall.
 
-> **Scope note.** SCOPE (governing rule): the catalog purpose reads "Liquidation preference, participation, seniority, and anti-dilution waterfall," but the reference implementation (MODEL.CAPTABLE.DILUTION.v1) computes only a single-round post-money dilution split (investor / option-pool / founder) and a single-security liquidation preference (round size × preference multiple). It does NOT model participation rights, multi-class seniority ordering, anti-dilution adjustments, or a full exit-proceeds waterfall. Founder decision: (a) rescope the published contract to the single-round dilution + preference model it is (recommended for v1.0), or (b) extend the code to a multi-class exit waterfall. Recorded pending founder sign-off.
+> **Scope note.** Scope: this model computes a single-round post-money dilution split (investor / option-pool / founder) and a single-security liquidation preference (round size × preference multiple). It does not model participation rights, multi-class seniority ordering, anti-dilution adjustments, or a full exit-proceeds waterfall — those are outside the single-round dilution-and-preference view specified here.
 
 ## 2. Input contract
 
@@ -3154,7 +3199,7 @@ _No numeric constants — this model computes from supplied facts and cited rule
 
 | Authority | ID | Type |
 |---|---|---|
-| NVCA term sheet | AUTH-0185 | practice-or-guidance |
+| NVCA term sheet | AUTH-0184 | practice-norm |
 
 ## 6. Worked example
 
@@ -3224,7 +3269,7 @@ This model answers its computational question from supplied facts and cited cons
 
 ## Authorities
 
-- AUTH-0181 — Nasdaq Rule 5635
+- AUTH-0180 — Nasdaq Rule 5635
 
 
 # M148 — Three-prong solvency
@@ -3285,8 +3330,8 @@ _No numeric constants — this model computes from supplied facts and cited rule
 | Authority | ID | Type |
 |---|---|---|
 | 11 U.S.C. 548 | AUTH-0012 | statute |
-| UVTA | AUTH-0259 | practice-or-guidance |
-| Tribune | AUTH-0244 | practice-or-guidance |
+| UVTA | AUTH-0258 | statute |
+| Tribune | AUTH-0243 | case |
 
 ## 6. Worked example
 
@@ -3360,7 +3405,7 @@ This model answers its computational question from supplied facts and cited cons
 ## Authorities
 
 - AUTH-0061 — DGCL 170
-- AUTH-0153 — Klang
+- AUTH-0152 — Klang
 
 
 # M150 — 108 CODI plus 382 limitation
@@ -3448,8 +3493,8 @@ _No numeric constants — this model computes from supplied facts and cited rule
 |---|---|---|
 | 11 U.S.C. 363 | AUTH-0008 | statute |
 | 11 U.S.C. 365 | AUTH-0010 | statute |
-| RadLAX | AUTH-0200 | practice-or-guidance |
-| Fisker | AUTH-0073 | practice-or-guidance |
+| RadLAX | AUTH-0199 | case |
+| Fisker | AUTH-0073 | case |
 
 ## 6. Worked example
 
@@ -3883,8 +3928,8 @@ _No numeric constants — this model computes from supplied facts and cited rule
 | Authority | ID | Type |
 |---|---|---|
 | 11 U.S.C. 1129(b) | AUTH-0005 | statute |
-| 203 N. LaSalle | AUTH-0017 | practice-or-guidance |
-| Castleton Plaza | AUTH-0047 | practice-or-guidance |
+| 203 N. LaSalle | AUTH-0017 | case |
+| Castleton Plaza | AUTH-0047 | case |
 
 ## 6. Worked example
 
@@ -4052,10 +4097,10 @@ _No numeric constants — this model computes from supplied facts and cited rule
 
 | Authority | ID | Type |
 |---|---|---|
-| Till | AUTH-0236 | practice-or-guidance |
-| MPM Silicones | AUTH-0177 | practice-or-guidance |
-| Texas Grand Prairie | AUTH-0234 | practice-or-guidance |
-| Topp | AUTH-0237 | practice-or-guidance |
+| Till | AUTH-0235 | case |
+| MPM Silicones | AUTH-0176 | case |
+| Texas Grand Prairie | AUTH-0233 | case |
+| Topp | AUTH-0236 | case |
 
 ## 6. Worked example
 
@@ -4447,7 +4492,7 @@ _No numeric constants — this model computes from supplied facts and cited rule
 | Authority | ID | Type |
 |---|---|---|
 | 11 U.S.C. 364 | AUTH-0009 | statute |
-| Collier 364.06 | AUTH-0053 | practice-or-guidance |
+| Collier 364.06 | AUTH-0053 | guidance |
 
 ## 6. Worked example
 
@@ -4556,7 +4601,7 @@ _No numeric constants — this model computes from supplied facts and cited rule
 
 | Authority | ID | Type |
 |---|---|---|
-| market practice | AUTH-0164 | practice-or-guidance |
+| market practice | AUTH-0163 | practice-norm |
 
 ## 6. Worked example
 
@@ -4713,8 +4758,8 @@ _No numeric constants — this model computes from supplied facts and cited rule
 
 | Authority | ID | Type |
 |---|---|---|
-| Securities Act 3(a)(9) | AUTH-0218 | statute |
-| TIA 316(b) | AUTH-0235 | practice-or-guidance |
+| Securities Act 3(a)(9) | AUTH-0217 | statute |
+| TIA 316(b) | AUTH-0234 | statute |
 
 ## 6. Worked example
 
@@ -4788,8 +4833,8 @@ Research scaffold: organizes authorities and considerations. Produces oriented r
 
 ## Authorities
 
-- AUTH-0219 — Serta Simmons
-- AUTH-0173 — Mitel
+- AUTH-0218 — Serta Simmons
+- AUTH-0172 — Mitel
 
 
 # M162 — Drop-down basket capacity
@@ -4813,7 +4858,7 @@ Research scaffold: organizes authorities and considerations. Produces oriented r
 
 - AUTH-0150 — J. Crew
 - AUTH-0066 — Envision
-- AUTH-0198 — Pluralsight
+- AUTH-0197 — Pluralsight
 
 
 # M163 — Double-dip and pari-plus claim multiplier
@@ -4836,8 +4881,8 @@ Research scaffold: organizes authorities and considerations. Produces oriented r
 ## Authorities
 
 - AUTH-0038 — At Home
-- AUTH-0245 — Trinseo
-- AUTH-0212 — Sabre
+- AUTH-0244 — Trinseo
+- AUTH-0211 — Sabre
 - AUTH-0022 — ABA Business Law Today
 
 
@@ -4902,7 +4947,7 @@ Given `classes` (a list of class objects), plus optional `milestones`, `terminat
 | Authority | ID | Type |
 |---|---|---|
 | 11 U.S.C. 1125 | AUTH-0002 | statute |
-| Indianapolis Downs | AUTH-0099 | practice-or-guidance |
+| Indianapolis Downs | AUTH-0099 | case |
 
 ## 6. Worked example
 
@@ -5056,10 +5101,10 @@ Given `liquidation_value_cents` and `claims` (a list of class objects), plus opt
 
 | Authority | ID | Type |
 |---|---|---|
-| UCC 9-610 | AUTH-0249 | statute |
-| UCC 9-611 | AUTH-0250 | statute |
-| UCC 9-615 | AUTH-0251 | statute |
-| State ABC Law | AUTH-0224 | statute |
+| UCC 9-610 | AUTH-0248 | statute |
+| UCC 9-611 | AUTH-0249 | statute |
+| UCC 9-615 | AUTH-0250 | statute |
+| State ABC Law | AUTH-0223 | statute |
 
 ## 6. Worked example
 
@@ -5201,8 +5246,8 @@ Given `face_amount_cents`, `purchase_price_cents`, `time_to_recovery_years`, and
 
 | Authority | ID | Type |
 |---|---|---|
-| Moody's Ultimate Recovery Database | AUTH-0174 | practice-or-guidance |
-| FRBP 3001 | AUTH-0075 | practice-or-guidance |
+| Moody's Ultimate Recovery Database | AUTH-0173 | study/dataset |
+| FRBP 3001 | AUTH-0075 | statute |
 
 ## 6. Worked example
 
@@ -5416,7 +5461,7 @@ Given `exit_leverage`, `liquidity_months`, and `ebitda_growth_pct`, plus optiona
 
 | Authority | ID | Type |
 |---|---|---|
-| LoPucki Bankruptcy Research Database | AUTH-0161 | practice-or-guidance |
+| LoPucki Bankruptcy Research Database | AUTH-0160 | study/dataset |
 
 ## 6. Worked example
 
@@ -5752,7 +5797,7 @@ Given `sale_price_cents`, `annual_rent_cents`, and `lease_term_years`, plus opti
 
 | Authority | ID | Type |
 |---|---|---|
-| ASC 842 | AUTH-0036 | practice-or-guidance |
+| ASC 842 | AUTH-0036 | guidance |
 
 ## 6. Worked example
 
@@ -5821,6 +5866,8 @@ Reference binding `MODEL.RE.SALE_LEASEBACK.ASC842.v1` · entered the specificati
 ## 1. Purpose
 
 Runs the three REIT qualification gates from supplied figures — the 75% gross-income test, the 75% asset test, and the 90% distribution test — and reports each ratio, each pass/fail, and whether all three clear. It answers, for a REIT (or a target being tested for REIT status), "do the income, asset, and distribution numbers keep it qualified?" It computes the ratios and the pass/fail; the underlying income and asset characterizations are the tax advisor's.
+
+> **Scope note.** Scope: this is the 75/75/90 triad only. It does NOT run the separate **§856(c)(2) 95%-of-gross-income test**, the quarterly asset-test timing, or the ownership tests — a REIT can clear all three tabled tests here and still fail qualification on the 95% test. The distribution-test denominator is REIT taxable income before the dividends-paid deduction and excluding net capital gain. Treat a clean pass as necessary, not sufficient.
 
 ## 2. Input contract
 
@@ -5941,7 +5988,7 @@ Research scaffold: organizes authorities and considerations. Produces oriented r
 
 ## Authorities
 
-- AUTH-0199 — Project Finance Market Practice
+- AUTH-0198 — Project Finance Market Practice
 
 
 # M174 — Crypto token taxonomy
@@ -5963,7 +6010,7 @@ Research scaffold: organizes authorities and considerations. Produces oriented r
 
 ## Authorities
 
-- AUTH-0216 — SEC Project Crypto
+- AUTH-0215 — SEC Project Crypto
 - AUTH-0091 — Howey
 
 
@@ -6009,7 +6056,7 @@ Research scaffold: organizes authorities and considerations. Produces oriented r
 ## Authorities
 
 - AUTH-0134 — IRC 6045
-- AUTH-0229 — T.D. 10000
+- AUTH-0228 — T.D. 10000
 - AUTH-0074 — Form 1099-DA
 
 
@@ -6176,7 +6223,7 @@ _No numeric constants — this model computes from supplied facts and cited rule
 
 | Authority | ID | Type |
 |---|---|---|
-| market practice | AUTH-0164 | practice-or-guidance |
+| market practice | AUTH-0163 | practice-norm |
 
 ## 6. Worked example
 
@@ -6282,7 +6329,7 @@ Given `fund_nav_cents` and `loan_amount_cents`, plus optional `required_cushion_
 
 | Authority | ID | Type |
 |---|---|---|
-| NAV Facility Market Practice | AUTH-0182 | practice-norm |
+| NAV Facility Market Practice | AUTH-0181 | practice-norm |
 
 ## 6. Worked example
 
@@ -6345,6 +6392,8 @@ Reference binding `MODEL.FINANCE.NAV_FACILITY.v1` · entered the specification a
 
 Computes the price at which a convertible note or SAFE converts in a priced round — the lower of the discount price, the valuation-cap price, and the round's own share price — and the resulting share count, and reports which term governed. It answers, for a founder or investor modeling a conversion, "at what price does this instrument convert, and does the cap or the discount win?" It computes the conversion arithmetic from supplied terms; it renders no view on the fairness of the cap or discount.
 
+> **Scope note.** Scope: the cap price is computed as `valuation_cap ÷ pre_money_share_count` — the legacy **pre-money** SAFE mechanic. It does not implement the post-2018 YC **post-money** SAFE (which sizes the cap on a post-money basis), convertible-note interest accrual, or interaction across multiple instruments converting together; it prices one instrument in isolation on the pre-money cap.
+
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M180.schema.json`](M180.schema.json).
@@ -6390,12 +6439,12 @@ _No numeric constants — this model computes from supplied facts and cited rule
 
 | Authority | ID | Type |
 |---|---|---|
-| YC SAFE | AUTH-0262 | practice-or-guidance |
-| market practice | AUTH-0164 | practice-or-guidance |
+| YC SAFE | AUTH-0261 | practice-norm |
+| market practice | AUTH-0163 | practice-norm |
 
 ## 6. Worked example
 
-*A $500k SAFE with a $10M cap and a 20% discount converts into an $5.00 priced round on 8,000,000 pre-money shares: the $1.25 cap price beats the $4.00 discount price, so the cap governs and the SAFE takes 400,000 shares.*
+*A $500k SAFE with a $10M cap and a 20% discount converts into a $5.00 priced round on 8,000,000 pre-money shares: the $1.25 cap price beats the $4.00 discount price, so the cap governs and the SAFE takes 400,000 shares.*
 
 **Inputs**
 
@@ -6482,7 +6531,7 @@ Conventions: monetary values are integer cents; dates are ISO-8601 strings; juri
 | `intrinsic_warrant_value_cents` | integer (cents) | Intrinsic value of the warrants at the assumed fair value. |
 | `simple_interest_cents` | integer (cents) | Total simple cash interest over the term. |
 | `lender_gross_return_cents` | integer (cents) | Principal plus interest plus warrant intrinsic value. |
-| `estimated_lender_irr` | number | null | Estimated annualized lender IRR, or null when the term is non-positive. |
+| `estimated_lender_irr` | number | null | Estimated annualized lender return — a money-multiple CAGR ((gross return ÷ principal)^(1/term) − 1); it does not time the interim coupons, so it is an annualized-return proxy, not a cash-flow IRR. Null when the term is non-positive. |
 
 ## 4. Algorithm
 
@@ -6492,7 +6541,7 @@ Given `loan_amount_cents`, `warrant_coverage_pct`, `exercise_price_cents`, and `
 3. `warrant_shares` SHALL be `warrant_coverage_amount_cents ÷ exercise_price_cents` (zero if the exercise price is non-positive), rounded to the nearest whole share.
 4. `intrinsic_warrant_value_cents` SHALL be `max(0, warrant_shares × (fair_value_share_price_cents − exercise_price_cents))`, rounded to the nearest cent.
 5. `simple_interest_cents` SHALL be `loan_amount_cents × cash_interest_rate × term_years`, rounded to the nearest cent; `lender_gross_return_cents` SHALL be `loan_amount_cents + simple_interest_cents + intrinsic_warrant_value_cents`.
-6. `estimated_lender_irr` SHALL be `(lender_gross_return_cents ÷ loan_amount_cents)^(1 ÷ term_years) − 1` when the term is positive, else null, at the global 4-decimal precision.
+6. `estimated_lender_irr` SHALL be `(lender_gross_return_cents ÷ loan_amount_cents)^(1 ÷ term_years) − 1` when the term is positive, else null, at the global 4-decimal precision. This is a money-multiple CAGR (annualized return on the total return multiple); it does NOT discount the interim coupon timing, so it is an annualized-return proxy, not a cash-flow IRR.
 
 ## 5. Constants & authorities
 
@@ -6503,11 +6552,11 @@ _No numeric constants — this model computes from supplied facts and cited rule
 
 | Authority | ID | Type |
 |---|---|---|
-| Venture Debt Market Practice | AUTH-0260 | practice-norm |
+| Venture Debt Market Practice | AUTH-0259 | practice-norm |
 
 ## 6. Worked example
 
-*A $10M venture loan with 10% warrant coverage, a $2.00 strike, and an assumed $5.00 fair value buys 500,000 warrant shares worth $1.5M intrinsic; with an 11% cash coupon over three years the lender's estimated IRR runs about 21%.*
+*A $10M venture loan with 10% warrant coverage, a $2.00 strike, and an assumed $5.00 fair value buys 500,000 warrant shares worth $1.5M intrinsic; with an 11% cash coupon over three years the lender's estimated annualized all-in return runs about 14% (a money-multiple CAGR over the three-year term).*
 
 **Inputs**
 
@@ -6833,11 +6882,11 @@ _No numeric constants — this model computes from supplied facts and cited rule
 
 | Authority | ID | Type |
 |---|---|---|
-| LSTA Model Provisions | AUTH-0163 | practice-norm |
+| LSTA Model Provisions | AUTH-0162 | practice-norm |
 
 ## 6. Worked example
 
-*Two baskets: a restricted-payments basket with $1.8M of capacity ($1.6M free) that accommodates a $1.0M dividend, and a permitted-debt basket with $1.1M free that cannot absorb a proposed $2.0M draw — one basket blocked, $2.7M free in aggregate.*
+*Two baskets: a restricted-payments basket with $18M of capacity ($16M free) that accommodates a $10M dividend, and a permitted-debt basket with $11M free that cannot absorb a proposed $20M draw — one basket blocked, $27M free in aggregate.*
 
 **Inputs**
 
@@ -7270,6 +7319,8 @@ Reference binding `MODEL.RE.ASSET_ENTITY.ELECTION.v1` · entered the specificati
 
 Splits a mixed real-estate-and-operating-business purchase price into its real-estate value (NOI capitalized at the supplied cap rate, capped at the price) and the residual operating-business value, then reconciles the split into §1060 Class V, VI, and VII. It answers, for a deal with both a building and a business inside it, "how much of the price is the real estate versus the operating business, and how does that map to the tax classes?" It computes the bifurcation from supplied values; the valuations and classifications are the advisors' calls.
 
+> **Scope note.** Scope: the split is a simplified real-estate-vs-goodwill bifurcation. The operating-business residual is reconciled into Class V/VI/VII only; it does not carve out the opco's Class III (receivables), Class IV (inventory), or non-RE Class V (equipment/FF&E), which in a full §1060 allocation absorb value AHEAD of goodwill — so this model overstates Class VII goodwill for an opco with those assets. Use M139 for a complete seven-class allocation.
+
 ## 2. Input contract
 
 Conventions: monetary values are integer cents; dates are ISO-8601 strings; jurisdictions are two-letter US state codes (see the [data dictionary](../data-dictionary.md)). Machine-readable schema: [`M188.schema.json`](M188.schema.json).
@@ -7316,7 +7367,7 @@ Given `enterprise_value_cents`, `noi_cents`, and `cap_rate`, plus optional `clas
 
 | Authority | ID | Type |
 |---|---|---|
-| Treas. Reg. 1.338-6 | AUTH-0242 | regulation |
+| Treas. Reg. 1.338-6 | AUTH-0241 | regulation |
 | IRS Form 8594 | AUTH-0149 | form |
 
 ## 6. Worked example
@@ -7427,7 +7478,7 @@ Given `rent_roll` (a list of tenant rows) and optional `as_of_date`:
 
 | Authority | ID | Type |
 |---|---|---|
-| Real Estate Industry Practice | AUTH-0201 | practice-norm |
+| Real Estate Industry Practice | AUTH-0200 | practice-norm |
 
 ## 6. Worked example
 
@@ -7671,28 +7722,28 @@ Given `jurisdiction`, `fmv_real_property_cents`, and `interest_transferred_pct` 
 
 | Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
 |---|---|---|---|---|---|---|
-| State transfer-tax rate table | CT 1.11%, ME 0.44%, WA 1.78%, DC 1.45%, MD 1.00%, NY 0.65% (default rates) | table (jurisdictional) | CT § 12-638; WA RCW 82.45; MD Tax-Prop § 12-117; NY Publication 576; DC/ME transfer-tax statutes | per-state default controlling-interest/deed transfer-tax rates | 2024 rate table | on state-rate review |
-| Controlling-interest aggregation windows | MD 12 months, WA 36 months | table (jurisdictional) | MD Tax-Prop § 12-117; WA RCW 82.45 | controlling-interest acting-in-concert aggregation windows | 2024 table | on state-rate review |
+| State transfer-tax rate table | CT 1.11%, ME 0.44%, DC 1.45%, MD 1.00%, NY 0.65% (single-point default rates). WA is NOT tabled as a flat rate — its REET has been graduated since 2020 (state bands 1.10/1.28/2.75/3.00% + local), so a WA transfer routes to the state-tax specialist. DC/MD/NY are single-point simplifications of bracketed/combined levies — verify the specific bracket before relying on them. | table (jurisdictional) | CT § 12-638; MD Tax-Prop § 12-117; NY Publication 576; DC/ME transfer-tax statutes; WA RCW 82.45 (graduated — routes) | per-state default controlling-interest/deed transfer-tax rates (single-point; WA graduated/routes) | 2024 rate table | on state-rate review |
+| Controlling-interest aggregation windows | MD 12 months, WA 12 months (RCW 82.45.033) | table (jurisdictional) | MD Tax-Prop § 12-117; WA RCW 82.45.033 | controlling-interest acting-in-concert aggregation windows | 2024 table | on state-rate review |
 
 
 **Authorities**
 
 | Authority | ID | Type |
 |---|---|---|
-| CT 12-638 | AUTH-0058 | practice-or-guidance |
-| MD Tax-Prop 12-117 | AUTH-0169 | practice-or-guidance |
-| WA RCW 82.45 | AUTH-0261 | practice-or-guidance |
-| NY Publication 576 | AUTH-0187 | study/dataset |
+| CT 12-638 | AUTH-0058 | statute |
+| MD Tax-Prop 12-117 | AUTH-0168 | statute |
+| WA RCW 82.45 | AUTH-0260 | statute |
+| NY Publication 576 | AUTH-0186 | study/dataset |
 
 ## 6. Worked example
 
-*A 100% controlling-interest transfer of a $10M Washington property: at Washington's default 1.78% REET rate the base is the full $10M and the transfer tax is $178,000, with a 36-month controlling-interest aggregation window.*
+*A 100% controlling-interest transfer of a $10M Connecticut property: at Connecticut's 1.11% controlling-interest rate the base is the full $10M and the transfer tax is $111,000. (A Washington transfer, by contrast, routes to the specialist — WA's REET has been graduated since 2020, so no flat rate applies.)*
 
 **Inputs**
 
 ```json
 {
-  "jurisdiction": "WA",
+  "jurisdiction": "CT",
   "fmv_real_property_cents": 1000000000,
   "interest_transferred_pct": 1,
   "exemption_applies": false
@@ -7703,14 +7754,14 @@ Given `jurisdiction`, `fmv_real_property_cents`, and `interest_transferred_pct` 
 
 ```json
 {
-  "jurisdiction": "WA",
+  "jurisdiction": "CT",
   "fmv_real_property_cents": 1000000000,
   "interest_transferred_pct": 1,
-  "transfer_tax_rate": 0.0178,
+  "transfer_tax_rate": 0.0111,
   "tax_base_cents": 1000000000,
-  "transfer_tax_cents": 17800000,
+  "transfer_tax_cents": 11100000,
   "exemption_applies": false,
-  "aggregation_window_months": 36,
+  "aggregation_window_months": null,
   "contested_state_position_handoff_required": false
 }
 ```
@@ -7791,8 +7842,8 @@ _No numeric constants — this model computes from supplied facts and cited rule
 
 | Authority | ID | Type |
 |---|---|---|
-| BOMA | AUTH-0039 | practice-or-guidance |
-| Real Estate Industry Practice | AUTH-0201 | practice-norm |
+| BOMA | AUTH-0039 | practice-norm |
+| Real Estate Industry Practice | AUTH-0200 | practice-norm |
 
 ## 6. Worked example
 
@@ -7897,7 +7948,7 @@ _No numeric constants — this model computes from supplied facts and cited rule
 
 | Authority | ID | Type |
 |---|---|---|
-| Lease Abstraction Industry Practice | AUTH-0156 | practice-norm |
+| Lease Abstraction Industry Practice | AUTH-0155 | practice-norm |
 
 ## 6. Worked example
 
@@ -8071,7 +8122,7 @@ Given `real_property_value_cents`, `target_cap_rate`, and `opco_ebitda_cents`, p
 |---|---|---|
 | IRC 163(j) | AUTH-0114 | statute |
 | IRC 856 | AUTH-0138 | statute |
-| ASC 842 | AUTH-0036 | practice-or-guidance |
+| ASC 842 | AUTH-0036 | guidance |
 
 ## 6. Worked example
 
@@ -8183,7 +8234,7 @@ _No numeric constants — this model computes from supplied facts and cited rule
 | Authority | ID | Type |
 |---|---|---|
 | ALTA Endorsements | AUTH-0030 | practice-norm |
-| Real Estate Practice Norms | AUTH-0202 | practice-norm |
+| Real Estate Practice Norms | AUTH-0201 | practice-norm |
 
 ## 6. Worked example
 
@@ -8349,7 +8400,7 @@ _No numeric constants — this model computes from supplied facts and cited rule
 | Authority | ID | Type |
 |---|---|---|
 | ALTA Forms | AUTH-0031 | practice-norm |
-| State Title Statutes | AUTH-0228 | statute |
+| State Title Statutes | AUTH-0227 | statute |
 
 ## 6. Worked example
 
@@ -8514,7 +8565,7 @@ Given `ground_lease_expiry_date`, `loan_maturity_date`, and `annual_ground_rent_
 
 | Authority | ID | Type |
 |---|---|---|
-| Lender Practice | AUTH-0157 | practice-norm |
+| Lender Practice | AUTH-0156 | practice-norm |
 
 ## 6. Worked example
 
@@ -8623,8 +8674,8 @@ _No numeric constants — this model computes from supplied facts and cited rule
 
 | Authority | ID | Type |
 |---|---|---|
-| ASTM E2018 | AUTH-0037 | practice-or-guidance |
-| Lender Practice | AUTH-0157 | practice-norm |
+| ASTM E2018 | AUTH-0037 | practice-norm |
+| Lender Practice | AUTH-0156 | practice-norm |
 
 ## 6. Worked example
 
@@ -9030,7 +9081,7 @@ Given `seller_tax_delta_cents` and `seller_marginal_tax_rate`, plus optional `bu
 |---|---|---|
 | IRC 338(h)(10) | AUTH-0122 | statute |
 | IRC 336(e) | AUTH-0120 | statute |
-| Treas. Reg. 1.336-2 | AUTH-0241 | regulation |
+| Treas. Reg. 1.336-2 | AUTH-0240 | regulation |
 
 ## 6. Worked example
 
@@ -9109,6 +9160,7 @@ Conventions: monetary values are integer cents; dates are ISO-8601 strings; juri
 | `recognized_gain_cents` | integer (cents) | MUST | Gain recognized on the sale. |
 | `sale_date` | string (ISO date) | MUST | The asset-sale date. |
 | `corporate_tax_rate` | number | MAY | Corporate tax rate as a fraction; defaults to the federal corporate rate. |
+| `state_nonconformity_possible` | boolean | MAY | Optional override for the state-nonconformity flag. Omitted, the flag defaults to `within_recognition_period` (never silently false); supply `false` only with confirmed state conformity. |
 | `taxable_income_cents` | integer (cents) | MAY | Taxable income for the §1374 limitation; defaults to the recognized gain. |
 
 ## 3. Output contract
@@ -9132,6 +9184,7 @@ Given `fmv_at_conversion_cents`, `basis_at_conversion_cents`, `conversion_date`,
 3. `within_recognition_period` SHALL be true iff `years_since_conversion` is below the recognition period (constants: §1374 recognition period).
 4. `recognized_big_tax_base_cents` SHALL be `min(NUBIG, recognized_gain, taxable-income limitation)` when within the period, else 0 (the taxable-income limitation defaults to the recognized gain).
 5. `section_1374_tax_cents` SHALL be `round(recognized_big_tax_base × corporate_tax_rate)` (constants: federal corporate tax rate).
+6. `recognition_period_years` SHALL be the §1374 recognition period (constants). `state_nonconformity_review_required` SHALL default to `within_recognition_period` — true while §1374 is live, because many states do not conform to §1374 or run their own built-in-gains/entity-level regime; it is never silently false. A caller with confirmed state conformity MAY supply `state_nonconformity_possible: false` to suppress it.
 
 ## 5. Constants & authorities
 
@@ -9146,7 +9199,7 @@ Given `fmv_at_conversion_cents`, `basis_at_conversion_cents`, `conversion_date`,
 | Authority | ID | Type |
 |---|---|---|
 | IRC 1374 | AUTH-0111 | statute |
-| PATH Act 2015 | AUTH-0196 | statute |
+| PATH Act 2015 | AUTH-0195 | statute |
 
 ## 6. Worked example
 
@@ -9175,7 +9228,7 @@ Given `fmv_at_conversion_cents`, `basis_at_conversion_cents`, `conversion_date`,
   "recognized_big_tax_base_cents": 300000000,
   "corporate_tax_rate": 0.21,
   "section_1374_tax_cents": 63000000,
-  "state_nonconformity_review_required": false
+  "state_nonconformity_review_required": true
 }
 ```
 
@@ -9256,10 +9309,10 @@ Given `transaction_costs` (a list of cost objects) and `bright_line_date`, plus 
 |---|---|---|
 | IRC 195 | AUTH-0115 | statute |
 | IRC 263 | AUTH-0117 | statute |
-| Treas. Reg. 1.263(a)-5 | AUTH-0240 | regulation |
-| Rev. Proc. 2011-29 | AUTH-0205 | guidance |
-| INDOPCO | AUTH-0100 | practice-or-guidance |
-| Letter Ruling 202308010 | AUTH-0158 | practice-or-guidance |
+| Treas. Reg. 1.263(a)-5 | AUTH-0239 | regulation |
+| Rev. Proc. 2011-29 | AUTH-0204 | guidance |
+| INDOPCO | AUTH-0100 | case |
+| Letter Ruling 202308010 | AUTH-0157 | guidance |
 
 ## 6. Worked example
 
@@ -9537,8 +9590,8 @@ _No numeric constants — this model computes from supplied facts and cited rule
 
 | Authority | ID | Type |
 |---|---|---|
-| UDITPA | AUTH-0254 | practice-or-guidance |
-| State Nexus Statutes | AUTH-0227 | statute |
+| UDITPA | AUTH-0253 | statute |
+| State Nexus Statutes | AUTH-0226 | statute |
 | Bulk Sale Acts | AUTH-0042 | statute |
 
 ## 6. Worked example
@@ -9779,8 +9832,8 @@ Given `closing_date` and optional `rwi_present` (default false), `general_reps_m
 
 | Authority | ID | Type |
 |---|---|---|
-| SRS Acquiom Deal Terms Study 2024 | AUTH-0220 | study/dataset |
-| SRS Acquiom Deal Terms Study 2025 | AUTH-0221 | study/dataset |
+| SRS Acquiom Deal Terms Study 2024 | AUTH-0219 | study/dataset |
+| SRS Acquiom Deal Terms Study 2025 | AUTH-0220 | study/dataset |
 | ABA Private Target Deal Points Study | AUTH-0026 | study/dataset |
 
 ## 6. Worked example
@@ -9895,8 +9948,8 @@ Given `transaction_value_cents` and optional `rwi_present` (default false), `gen
 
 | Authority | ID | Type |
 |---|---|---|
-| SRS Acquiom Deal Terms Study 2024 | AUTH-0220 | study/dataset |
-| SRS Acquiom Deal Terms Study 2025 | AUTH-0221 | study/dataset |
+| SRS Acquiom Deal Terms Study 2024 | AUTH-0219 | study/dataset |
+| SRS Acquiom Deal Terms Study 2025 | AUTH-0220 | study/dataset |
 | ABA Private Target Deal Points Study | AUTH-0026 | study/dataset |
 
 ## 6. Worked example
@@ -10013,9 +10066,9 @@ Given `enterprise_value_cents` and optional `retention_pct`, `policy_tower_pct`,
 | Authority | ID | Type |
 |---|---|---|
 | ABA Private Target Deal Points Study | AUTH-0026 | study/dataset |
-| Marsh RWI Reports | AUTH-0166 | practice-norm |
+| Marsh RWI Reports | AUTH-0165 | practice-norm |
 | Aon RWI Reports | AUTH-0033 | practice-norm |
-| Lockton RWI Reports | AUTH-0160 | practice-norm |
+| Lockton RWI Reports | AUTH-0159 | practice-norm |
 
 ## 6. Worked example
 
@@ -10132,7 +10185,7 @@ Given `closing_date`, `peg_cents`, `actual_nwc_cents`, and optional `estimated_n
 
 | Authority | ID | Type |
 |---|---|---|
-| SRS Acquiom Working Capital PPA Study | AUTH-0223 | study/dataset |
+| SRS Acquiom Working Capital PPA Study | AUTH-0222 | study/dataset |
 | ABA Private Target Deal Points Study | AUTH-0026 | study/dataset |
 
 ## 6. Worked example
@@ -10242,7 +10295,7 @@ _No numeric constants — this model computes from supplied facts and cited rule
 |---|---|---|
 | ABA Model SPA | AUTH-0024 | practice-norm |
 | HSR Act | AUTH-0092 | statute |
-| CFIUS regulations | AUTH-0049 | practice-or-guidance |
+| CFIUS regulations | AUTH-0049 | regulation |
 
 ## 6. Worked example
 
@@ -10413,7 +10466,7 @@ Given `transaction_value_cents` and optional `target_break_fee_pct`, `reverse_te
 | Authority | ID | Type |
 |---|---|---|
 | Houlihan Lokey 2023 Transaction Termination Fee Study | AUTH-0090 | study/dataset |
-| Fenwick 2023 ARBF analysis | AUTH-0072 | practice-or-guidance |
+| Fenwick 2023 ARBF analysis | AUTH-0072 | study/dataset |
 | Brazen v. Bell Atlantic | AUTH-0040 | case |
 | In re Topps | AUTH-0097 | case |
 
@@ -10525,7 +10578,7 @@ _No numeric constants — this model computes from supplied facts and cited rule
 
 | Authority | ID | Type |
 |---|---|---|
-| SRS Acquiom Earnout Data | AUTH-0222 | study/dataset |
+| SRS Acquiom Earnout Data | AUTH-0221 | study/dataset |
 | IRC 453 | AUTH-0130 | statute |
 | IRC 483 | AUTH-0132 | statute |
 | IRC 1274 | AUTH-0109 | statute |
@@ -10642,7 +10695,7 @@ _No numeric constants — this model computes from supplied facts and cited rule
 | Authority | ID | Type |
 |---|---|---|
 | 35 U.S.C. 261 | AUTH-0019 | statute |
-| Lanham Act 10 | AUTH-0155 | statute |
+| Lanham Act 10 | AUTH-0154 | statute |
 | 17 U.S.C. 205 | AUTH-0016 | statute |
 | Clorox v. Chemical Bank | AUTH-0051 | case |
 
@@ -10810,10 +10863,10 @@ _No numeric constants — this model computes from supplied facts and cited rule
 
 | Authority | ID | Type |
 |---|---|---|
-| UCC Article 9 | AUTH-0253 | statute |
+| UCC Article 9 | AUTH-0252 | statute |
 | 17 U.S.C. 205 | AUTH-0016 | statute |
 | In re Peregrine | AUTH-0096 | case |
-| Rhone-Poulenc Agro v. DeKalb | AUTH-0206 | case |
+| Rhone-Poulenc Agro v. DeKalb | AUTH-0205 | case |
 
 ## 6. Worked example
 
@@ -11485,7 +11538,7 @@ Given `contributors` (a list of contributor objects, each with a state and the a
 | Authority | ID | Type |
 |---|---|---|
 | California Labor Code 2870 | AUTH-0046 | statute |
-| State Employee-IP Statutes | AUTH-0226 | statute |
+| State Employee-IP Statutes | AUTH-0225 | statute |
 
 ## 6. Worked example
 
@@ -11631,29 +11684,31 @@ Conventions: monetary values are integer cents; dates are ISO-8601 strings; juri
 
 Given `components` (a list of component objects, each with a license and use booleans):
 1. If `components` is empty, the implementation SHALL return `status: "needs_inputs"` naming `components`.
-2. For each component it SHALL classify the license into `permissive`, `weak_copyleft`, `strong_copyleft`, or `unknown` (constants: OSS license classification), set `agpl_network_flag` iff the license is AGPL and used over a network, and set `strong_copyleft_embedded_flag` iff a strong-copyleft component is linked into proprietary code.
+2. For each component it SHALL classify the license into `permissive`, `weak_copyleft`, `strong_copyleft`, or `unknown` per the OSS license classification table (constants), evaluated in table order — the license family is matched against weak-copyleft first, then strong-copyleft, then permissive, else unknown (so an LGPL license classifies weak before the GPL rule can reach it). It SHALL set `agpl_network_flag` iff the license is AGPL and used over a network, and `strong_copyleft_embedded_flag` iff a strong-copyleft component is linked into proprietary code.
 3. It SHALL count components in each class, AGPL-network components, and proprietary-strong-copyleft components.
 4. `special_escrow_sizing_cents` SHALL be the sum of the supplied per-component remediation costs.
 5. `oss_specific_rep_required`, `sca_pass_through_source_required` SHALL always be true; `indemnity_carveout_review_required` SHALL be true iff any component is strong-copyleft or unknown.
 
 ## 5. Constants & authorities
 
-_No numeric constants — this model computes from supplied facts and cited rule text only (attested: `constants: []`)._
+| Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
+|---|---|---|---|---|---|---|
+| OSS license classification | weak_copyleft: LGPL, MPL, EPL · strong_copyleft: AGPL, GPL, CC-BY-SA · permissive: MIT, BSD, Apache, ISC, Unlicense · anything unmatched: unknown. Evaluated in that order (weak → strong → permissive → unknown), so LGPL — though it contains "GPL" — classifies weak_copyleft, not strong. | table (jurisdictional) | SPDX license identifiers and the underlying license texts; Morgan Lewis / Nixon Peabody / Morse OSS diligence guidance | copyleft-strength classification by SPDX license family, in table order | — | — |
 
 
 **Authorities**
 
 | Authority | ID | Type |
 |---|---|---|
-| GPL | AUTH-0088 | practice-or-guidance |
-| AGPL | AUTH-0028 | practice-or-guidance |
-| LGPL | AUTH-0159 | practice-or-guidance |
-| MIT | AUTH-0172 | practice-or-guidance |
-| Apache | AUTH-0034 | practice-or-guidance |
-| BSD | AUTH-0041 | practice-or-guidance |
-| Morgan Lewis OSS Guidance | AUTH-0175 | practice-norm |
-| Nixon Peabody OSS Guidance | AUTH-0184 | practice-norm |
-| Morse OSS Guidance | AUTH-0176 | practice-norm |
+| GPL | AUTH-0088 | practice-norm |
+| AGPL | AUTH-0028 | practice-norm |
+| LGPL | AUTH-0158 | practice-norm |
+| MIT | AUTH-0171 | practice-norm |
+| Apache | AUTH-0034 | practice-norm |
+| BSD | AUTH-0041 | practice-norm |
+| Morgan Lewis OSS Guidance | AUTH-0174 | practice-norm |
+| Nixon Peabody OSS Guidance | AUTH-0183 | practice-norm |
+| Morse OSS Guidance | AUTH-0175 | practice-norm |
 
 ## 6. Worked example
 
@@ -11808,8 +11863,8 @@ Given `purchase_price_cents`, `tangible_assets_cents` (Class V), and `ip_intangi
 | Authority | ID | Type |
 |---|---|---|
 | IRC 1060 | AUTH-0106 | statute |
-| Treas. Reg. 1.338-6 | AUTH-0242 | regulation |
-| Treas. Reg. 1.1060-1 | AUTH-0239 | regulation |
+| Treas. Reg. 1.338-6 | AUTH-0241 | regulation |
+| Treas. Reg. 1.1060-1 | AUTH-0238 | regulation |
 | IRS Form 8594 | AUTH-0149 | form |
 
 ## 6. Worked example
@@ -11913,7 +11968,7 @@ _No numeric constants — this model computes from supplied facts and cited rule
 | Authority | ID | Type |
 |---|---|---|
 | ICANN Transfer Rules | AUTH-0093 | practice-norm |
-| USPTO Form PTO-1594 | AUTH-0258 | form |
+| USPTO Form PTO-1594 | AUTH-0257 | form |
 
 ## 6. Worked example
 
@@ -12085,9 +12140,9 @@ Given `state`, `later_purchaser_for_value`, `later_took_without_notice`, and `la
 
 | Authority | ID | Type |
 |---|---|---|
-| N.Y. Real Prop. Law 291 | AUTH-0180 | statute |
+| N.Y. Real Prop. Law 291 | AUTH-0179 | statute |
 | Cal. Civ. Code 1214 | AUTH-0043 | statute |
-| Tex. Prop. Code 13.001 | AUTH-0231 | statute |
+| Tex. Prop. Code 13.001 | AUTH-0230 | statute |
 | 25 Del. C. 153 | AUTH-0018 | statute |
 
 ## 6. Worked example
@@ -12157,26 +12212,27 @@ Conventions: monetary values are integer cents; dates are ISO-8601 strings; juri
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `deed_type` | enum(deed_type) | MUST | The deed instrument type being conveyed. One of `general_warranty`, `special_warranty`, `bargain_and_sale`, `quitclaim`. |
+| `deed_type` | enum(deed_type) | MUST | The deed instrument type being conveyed, including the CA grant deed (§1113) and NY §258 bargain-and-sale-with-covenant. One of `general_warranty`, `special_warranty`, `bargain_and_sale`, `quitclaim`, `grant_deed`, `bargain_and_sale_with_covenant`. |
 | `vesting_form` | enum(vesting_form) | MUST | How record title is held. One of `sole`, `tenancy_in_common`, `joint_tenancy`, `tenancy_by_entirety`, `community_property`, `entity`. |
 | `all_required_signers_present` | boolean | MAY | Whether every party the vesting form requires is on the signature page; explicit false raises a signatory gap. |
 | `buyer_expects_warranty` | boolean | MAY | Whether the buyer is negotiating for title warranties (default true); drives the warranty-gap flag. |
-| `state` | string (US state code) | MAY | Optional situs state; enables the Texas seisin-narrowing note. |
+| `state` | string (US state code) | MAY | Optional situs state; enables the Texas seisin-narrowing note and the tenancy-by-entirety validity guard. |
 
 ## 3. Output contract
 
 | Field | Type | Description |
 |---|---|---|
-| `deed_type` | enum(deed_type) | The deed type, echoed. One of `general_warranty`, `special_warranty`, `bargain_and_sale`, `quitclaim`. |
+| `deed_type` | enum(deed_type) | The deed type, echoed. One of `general_warranty`, `special_warranty`, `bargain_and_sale`, `quitclaim`, `grant_deed`, `bargain_and_sale_with_covenant`. |
 | `covenants_present` | string[] | The title covenants this deed conveys (empty for bargain-and-sale and quitclaim). |
 | `covenant_scope` | string | Whether covenants reach all defects or only the grantor's own acts, or none. |
 | `after_acquired_title_applies` | boolean | Whether estoppel-by-deed vests later-acquired title in the grantee. |
 | `deed_note` | string | Plain-language description of the deed's covenant coverage. |
 | `tx_seisin_note` | string | null | The Texas seisin-narrowing note when the state is TX, else null. |
 | `vesting_form` | enum(vesting_form) | The vesting form, echoed. One of `sole`, `tenancy_in_common`, `joint_tenancy`, `tenancy_by_entirety`, `community_property`, `entity`. |
+| `vesting_state_validity_gap` | boolean | True when the vesting form is tenancy by the entirety in a community-property state that does not recognize it — an impossible pairing that routes to counsel. |
 | `required_signatories` | string | Who must sign for a conveyance of the whole. |
 | `signatory_gap` | boolean | Whether a required signatory is missing. |
-| `defer_to_counsel` | boolean | True on a signatory gap; the joinder question routes to counsel. |
+| `defer_to_counsel` | boolean | True on a signatory gap or an impossible vesting/state pairing; the question routes to counsel. |
 | `counsel_handoff` | string | null | The routing sentence when a signatory gap defers, else null. |
 | `red_flags` | string[] | Warranty-gap and signatory-gap warnings. |
 
@@ -12187,13 +12243,14 @@ Given `deed_type` and `vesting_form` (and optional `state`, `buyer_expects_warra
 2. It SHALL map the deed type to its covenant set, covenant scope, and after-acquired-title flag (constants: deed-covenant table).
 3. It SHALL map the vesting form to the required signatories and the gap risk (constants: signatory matrix).
 4. If `state = "TX"`, it SHALL attach the Texas seisin-narrowing note (constants: TX seisin narrowing).
-5. It SHALL raise a warranty red flag if `buyer_expects_warranty` is true but the deed carries no covenants; and if `all_required_signers_present` is explicitly false it SHALL set `signatory_gap: true`, `defer_to_counsel: true`, and emit a counsel-handoff.
+5. **Validity guard:** if `vesting_form = tenancy_by_entirety` and `state` is a community-property state (which does not recognize the entirety estate), it SHALL set `vesting_state_validity_gap: true`, `defer_to_counsel: true`, and raise a red flag — the vesting cannot legally exist in that state and is likely miscoded, so the model routes rather than answering a covenant/signatory question on an impossible fact pattern.
+6. It SHALL raise a warranty red flag if `buyer_expects_warranty` is true but the deed carries no covenants; and if `all_required_signers_present` is explicitly false OR the validity guard fired it SHALL set `defer_to_counsel: true` and emit a counsel-handoff.
 
 ## 5. Constants & authorities
 
 | Constant | Value | Strength | Authority | Pin-cite | Effective | Next check |
 |---|---|---|---|---|---|---|
-| Deed-covenant table | general/special warranty → six covenants (scope all-defects vs grantor-acts-only); bargain-and-sale and quitclaim → none | table (jurisdictional) | Common-law deed covenants | present covenants (seisin, right-to-convey, against-encumbrances) + future covenants (quiet enjoyment, warranty, further assurances) | — | — |
+| Deed-covenant table | general/special warranty → six covenants (all-defects vs grantor-acts-only); CA grant deed (§1113) → two implied covenants; NY bargain-and-sale with covenant (RPL §258) → one covenant; bargain-and-sale and quitclaim → none | table (jurisdictional) | Common-law deed covenants; Cal. Civ. Code § 1113; N.Y. Real Prop. Law § 258 | present covenants (seisin, right-to-convey, against-encumbrances) + future covenants (quiet enjoyment, warranty, further assurances); anchor-state grant deed / §258 covenant sets | — | — |
 | TX seisin narrowing | seisin narrowed to "grantor has not previously conveyed" | table (jurisdictional) | Tex. Prop. Code § 5.023 | § 5.023 | — | — |
 | Signatory matrix | tenancy-by-entirety and community property → both spouses; tenancy-in-common/joint tenancy → all cotenants for the whole; entity → per organizational documents | table (jurisdictional) | Common-law concurrent-ownership rules; e.g., Cal. Fam. Code § 1102, Tex. Fam. Code § 5.001 | both-spouses rule for entireties | — | — |
 
@@ -12203,19 +12260,19 @@ Given `deed_type` and `vesting_form` (and optional `state`, `buyer_expects_warra
 | Authority | ID | Type |
 |---|---|---|
 | Common-law deed covenants | AUTH-0054 | case |
-| Tex. Prop. Code 5.023 | AUTH-0233 | statute |
+| Tex. Prop. Code 5.023 | AUTH-0232 | statute |
 
 ## 6. Worked example
 
-*A Texas property held by a married couple as tenants by the entirety is being conveyed by special-warranty deed, but only one spouse is on the signature page — and a one-spouse signature conveys nothing in an entireties state.*
+*A New York property held by a married couple as tenants by the entirety — a valid entireties state — is conveyed by a bargain-and-sale deed with covenant against grantor's acts (the dominant NY commercial instrument, one covenant under RPL §258), but only one spouse is on the signature page, and in an entireties state a one-spouse signature conveys nothing.*
 
 **Inputs**
 
 ```json
 {
-  "deed_type": "special_warranty",
+  "deed_type": "bargain_and_sale_with_covenant",
   "vesting_form": "tenancy_by_entirety",
-  "state": "TX",
+  "state": "NY",
   "buyer_expects_warranty": true,
   "all_required_signers_present": false
 }
@@ -12225,20 +12282,16 @@ Given `deed_type` and `vesting_form` (and optional `state`, `buyer_expects_warra
 
 ```json
 {
-  "deed_type": "special_warranty",
+  "deed_type": "bargain_and_sale_with_covenant",
   "covenants_present": [
-    "seisin",
-    "right_to_convey",
-    "against_encumbrances",
-    "quiet_enjoyment",
-    "warranty",
-    "further_assurances"
+    "against_encumbrances"
   ],
   "covenant_scope": "grantor_acts_only",
-  "after_acquired_title_applies": true,
-  "deed_note": "Covenants limited to defects arising by, through, or under the grantor.",
-  "tx_seisin_note": "Tex. Prop. Code § 5.023 narrows the statutory seisin covenant to a \"grantor has not previously conveyed\" formulation.",
+  "after_acquired_title_applies": false,
+  "deed_note": "New York bargain-and-sale deed with covenant against grantor's acts (N.Y. Real Prop. Law § 258): a single covenant that the grantor has done nothing to encumber the estate.",
+  "tx_seisin_note": null,
   "vesting_form": "tenancy_by_entirety",
+  "vesting_state_validity_gap": false,
   "required_signatories": "BOTH spouses — neither can convey or encumber alone in entirety states.",
   "signatory_gap": true,
   "defer_to_counsel": true,
@@ -12321,7 +12374,7 @@ _No numeric constants — this model computes from supplied facts and cited rule
 
 | Authority | ID | Type |
 |---|---|---|
-| Marketable-title common law | AUTH-0165 | case |
+| Marketable-title common law | AUTH-0164 | case |
 | ALTA title practice | AUTH-0032 | practice-norm |
 
 ## 6. Worked example
@@ -12427,9 +12480,11 @@ Conventions: monetary values are integer cents; dates are ISO-8601 strings; juri
 | `citation` | string | The citation for the governing regime. |
 | `contract_override_applied` | boolean | Whether an express contract allocation controls. |
 | `risk_on` | enum(risk_on) | The party bearing pre-closing casualty risk. One of `buyer`, `seller`, `per_contract_terms`. |
-| `basis` | enum(risk_basis) | The basis for the allocation. One of `contract_override`, `equitable_conversion_default`, `uvpra_seller`, `ny_risk_act_seller`. |
-| `defer_to_counsel` | boolean | False; this model computes the allocation deterministically. |
-| `red_flags` | string[] | Silent-contract-with-pending-casualty warning. |
+| `basis` | string | The basis for the allocation: contract_override, equitable_conversion_default, a statutory regime name, or equitable_conversion_common_law_baseline_unverified for an untabled state. |
+| `state_table_gap` | boolean | True when the contract is silent and the state is not in the anchor-state risk-of-loss table — the baseline is unverified and the allocation routes to counsel. |
+| `defer_to_counsel` | boolean | True on an untabled-state gap (the allocation routes to counsel); false for a tabled state, where the model computes the allocation deterministically. |
+| `counsel_handoff` | string | null | The routing sentence when an untabled-state gap defers, else null. |
+| `red_flags` | string[] | Untabled-state and silent-contract-with-pending-casualty warnings. |
 
 ## 4. Algorithm
 
@@ -12437,9 +12492,10 @@ Given `state`, `contract_allocates_risk`, and optional `contract_risk_on`, `lega
 1. The implementation SHALL require `state` and `contract_allocates_risk`; otherwise `status: "needs_inputs"`.
 2. It SHALL look up the state regime (constants: risk-of-loss table), defaulting to equitable conversion.
 3. If `contract_allocates_risk` is true, `basis` SHALL be `contract_override` and `risk_on` SHALL follow `contract_risk_on` (`seller`, `buyer`, or `per_contract_terms`).
-4. Else if the regime is equitable conversion, `risk_on` SHALL be `buyer` with basis `equitable_conversion_default`.
+4. Else if the regime is equitable conversion, `risk_on` SHALL be `buyer` with basis `equitable_conversion_default` (for a tabled state) or `equitable_conversion_common_law_baseline_unverified` (for an untabled state).
 5. Else (a seller-protective statutory regime), `risk_on` SHALL be `buyer` if legal title or possession has passed, otherwise `seller`, with basis equal to the regime name.
-6. If the contract is silent and a casualty or condemnation is pending, it SHALL raise a red flag to allocate expressly before signing.
+6. **Untabled state (never guess):** if the contract is silent AND the state is not in the anchor-state table, the implementation SHALL set `state_table_gap: true`, `defer_to_counsel: true`, and emit a `counsel_handoff` and a red flag. The equitable-conversion baseline is the common-law DEFAULT only — roughly twenty UVPRA states and the Massachusetts rule place pre-closing casualty risk on the SELLER — so the allocation for an untabled state routes to counsel rather than being asserted. For a tabled state, `defer_to_counsel` SHALL be false.
+7. If the contract is silent and a casualty or condemnation is pending, it SHALL raise a red flag to allocate expressly before signing.
 
 ## 5. Constants & authorities
 
@@ -12448,15 +12504,15 @@ Given `state`, `contract_allocates_risk`, and optional `contract_risk_on`, `lega
 | NY risk-of-loss regime | seller bears risk until title/possession (NY Risk Act) | table (jurisdictional) | N.Y. Gen. Oblig. Law § 5-1311 | § 5-1311 | — | — |
 | CA risk-of-loss regime | seller bears risk until title/possession (UVPRA) | table (jurisdictional) | Cal. Civ. Code § 1662 | § 1662 (UVPRA) | — | — |
 | TX risk-of-loss regime | seller bears risk until title/possession (UVPRA) | table (jurisdictional) | Tex. Prop. Code § 5.007 | § 5.007 (UVPRA) | — | — |
-| Default risk-of-loss regime | buyer bears risk at signing (equitable conversion) | table (jurisdictional) | Equitable conversion (common-law majority rule) | majority rule | — | — |
+| Default risk-of-loss regime | buyer bears risk at signing (equitable conversion) — the common-law baseline, displaced by UVPRA (~20 states) and the Massachusetts rule | table (jurisdictional) | Equitable conversion (common-law baseline) | common-law baseline (not a nationwide majority — verify the situs state) | — | — |
 
 
 **Authorities**
 
 | Authority | ID | Type |
 |---|---|---|
-| N.Y. Gen. Oblig. Law 5-1311 | AUTH-0179 | statute |
-| Tex. Prop. Code 5.007 | AUTH-0232 | statute |
+| N.Y. Gen. Oblig. Law 5-1311 | AUTH-0178 | statute |
+| Tex. Prop. Code 5.007 | AUTH-0231 | statute |
 | Cal. Civ. Code 1662 | AUTH-0044 | statute |
 | equitable conversion | AUTH-0067 | case |
 
@@ -12485,7 +12541,9 @@ Given `state`, `contract_allocates_risk`, and optional `contract_risk_on`, `lega
   "contract_override_applied": false,
   "risk_on": "seller",
   "basis": "ny_risk_act_seller",
+  "state_table_gap": false,
   "defer_to_counsel": false,
+  "counsel_handoff": null,
   "red_flags": [
     "Contract is silent on risk of loss and a material casualty/condemnation is pending — the state default controls; allocate expressly before signing."
   ]
@@ -12561,7 +12619,7 @@ _No numeric constants — this model computes from supplied facts and cited rule
 
 | Authority | ID | Type |
 |---|---|---|
-| Merger doctrine (common law) | AUTH-0170 | case |
+| Merger doctrine (common law) | AUTH-0169 | case |
 
 ## 6. Worked example
 
@@ -12717,8 +12775,8 @@ Given `transfer_type` and `consent_clause` (and optional `state`, `lease_deems_c
 
 | Authority | ID | Type |
 |---|---|---|
-| Kendall v. Ernest Pestana 40 Cal.3d 488 | AUTH-0151 | case |
-| NY assignment common law | AUTH-0186 | case |
+| Kendall v. Ernest Pestana, Inc., 40 Cal.3d 488 (1985) | AUTH-0151 | case |
+| NY assignment common law | AUTH-0185 | case |
 
 ## 6. Worked example
 
@@ -12941,8 +12999,8 @@ Given `right_type`, `transaction_form`, and `right_captures_entity_transfers` (a
 
 | Authority | ID | Type |
 |---|---|---|
-| ROFR/option common law | AUTH-0207 | case |
-| TX strict-match construction | AUTH-0246 | case |
+| ROFR/option common law | AUTH-0206 | case |
+| TX strict-match construction | AUTH-0245 | case |
 
 ## 6. Worked example
 
@@ -13060,11 +13118,11 @@ Given `state`, `is_entity_transfer`, `transfer_pct` (and optional `cumulative_re
 
 | Authority | ID | Type |
 |---|---|---|
-| NYC Admin. Code 11-2101 | AUTH-0189 | statute |
-| NY Tax Law 1405(b)(6) | AUTH-0188 | statute |
+| NYC Admin. Code 11-2101 | AUTH-0188 | statute |
+| NY Tax Law 1405(b)(6) | AUTH-0187 | statute |
 | Cal. Rev. & Tax. Code 60-64 | AUTH-0045 | statute |
-| Tex. Const. art. VIII 29 | AUTH-0230 | statute |
-| Matter of 105-02 Forest Hills (2025) | AUTH-0168 | case |
+| Tex. Const. art. VIII 29 | AUTH-0229 | statute |
+| Matter of 105-02 Forest Hills (2025) | AUTH-0167 | case |
 
 ## 6. Worked example
 
@@ -13184,8 +13242,8 @@ Given `deal_form` and `jurisdiction_requires_co_on_transfer` (and optional `use_
 
 | Authority | ID | Type |
 |---|---|---|
-| Municipal CO Ordinances | AUTH-0178 | statute |
-| UCC Art. 6 (as retained) | AUTH-0252 | statute |
+| Municipal CO Ordinances | AUTH-0177 | statute |
+| UCC Art. 6 (as retained) | AUTH-0251 | statute |
 | CERCLA 107 | AUTH-0048 | statute |
 | 72 P.S. 1403 | AUTH-0020 | statute |
 
@@ -13322,7 +13380,7 @@ Given `pmsi`, `fixture_filing_made`, and `prior_recorded_real_property_interest`
 
 | Authority | ID | Type |
 |---|---|---|
-| UCC 9-334 | AUTH-0248 | statute |
+| UCC 9-334 | AUTH-0247 | statute |
 
 ## 6. Worked example
 
@@ -13414,6 +13472,8 @@ Table version: `V18c.2026-07-16`. Anchor states DE / NY / CA / TX; other states 
 | special warranty | seisin, right_to_convey, against_encumbrances, quiet_enjoyment, warranty, further_assurances | grantor acts only | yes |
 | bargain and sale | — | none | no |
 | quitclaim | — | none | no |
+| grant deed | seisin, against_encumbrances | grantor acts only | yes |
+| bargain and sale with covenant | against_encumbrances | grantor acts only | no |
 
 ## Concurrent ownership — signatory requirements
 
@@ -13490,7 +13550,7 @@ The following are legal determinations. A conforming implementation MUST classif
 
 # Authority Register — as referenced
 
-The 262 distinct authorities referenced by published entries, with provisional stable IDs. This public register is deliberately the *cited subset*: the full curated register (supersession chains, citator treatment, pin-cite validation, `next_check_due` machinery) is maintained internally and exported here only as published entries cite it. Entries typed `practice-norm` are market conventions without a controlling citation and are labeled as such rather than dressed as authority.
+The 261 distinct authorities referenced by published entries, with provisional stable IDs. This public register is deliberately the *cited subset*: the full curated register (supersession chains, citator treatment, pin-cite validation, `next_check_due` machinery) is maintained internally and exported here only as published entries cite it. Entries typed `practice-norm` are market conventions without a controlling citation and are labeled as such rather than dressed as authority.
 
 | ID | Authority | Type |
 |---|---|---|
@@ -13510,90 +13570,90 @@ The 262 distinct authorities referenced by published entries, with provisional s
 | AUTH-0014 | 12 U.S.C. 1701j-3 | statute |
 | AUTH-0015 | 15 U.S.C. 18a | statute |
 | AUTH-0016 | 17 U.S.C. 205 | statute |
-| AUTH-0017 | 203 N. LaSalle | practice-or-guidance |
+| AUTH-0017 | 203 N. LaSalle | case |
 | AUTH-0018 | 25 Del. C. 153 | statute |
 | AUTH-0019 | 35 U.S.C. 261 | statute |
 | AUTH-0020 | 72 P.S. 1403 | statute |
-| AUTH-0021 | AB Stable | practice-or-guidance |
-| AUTH-0022 | ABA Business Law Today | practice-or-guidance |
+| AUTH-0021 | AB Stable | case |
+| AUTH-0022 | ABA Business Law Today | practice-norm |
 | AUTH-0023 | ABA Earnout Reports | practice-norm |
 | AUTH-0024 | ABA Model SPA | practice-norm |
 | AUTH-0025 | ABA Model SPA IP Representations | practice-norm |
 | AUTH-0026 | ABA Private Target Deal Points Study | study/dataset |
 | AUTH-0027 | ABL Market Practice | practice-norm |
-| AUTH-0028 | AGPL | practice-or-guidance |
-| AUTH-0029 | Akorn | practice-or-guidance |
+| AUTH-0028 | AGPL | practice-norm |
+| AUTH-0029 | Akorn | case |
 | AUTH-0030 | ALTA Endorsements | practice-norm |
 | AUTH-0031 | ALTA Forms | practice-norm |
 | AUTH-0032 | ALTA title practice | practice-norm |
 | AUTH-0033 | Aon RWI Reports | practice-norm |
-| AUTH-0034 | Apache | practice-or-guidance |
+| AUTH-0034 | Apache | practice-norm |
 | AUTH-0035 | Appraisal Institute Practice | practice-norm |
-| AUTH-0036 | ASC 842 | practice-or-guidance |
-| AUTH-0037 | ASTM E2018 | practice-or-guidance |
-| AUTH-0038 | At Home | practice-or-guidance |
-| AUTH-0039 | BOMA | practice-or-guidance |
+| AUTH-0036 | ASC 842 | guidance |
+| AUTH-0037 | ASTM E2018 | practice-norm |
+| AUTH-0038 | At Home | case |
+| AUTH-0039 | BOMA | practice-norm |
 | AUTH-0040 | Brazen v. Bell Atlantic | case |
-| AUTH-0041 | BSD | practice-or-guidance |
+| AUTH-0041 | BSD | practice-norm |
 | AUTH-0042 | Bulk Sale Acts | statute |
 | AUTH-0043 | Cal. Civ. Code 1214 | statute |
 | AUTH-0044 | Cal. Civ. Code 1662 | statute |
 | AUTH-0045 | Cal. Rev. & Tax. Code 60-64 | statute |
 | AUTH-0046 | California Labor Code 2870 | statute |
-| AUTH-0047 | Castleton Plaza | practice-or-guidance |
+| AUTH-0047 | Castleton Plaza | case |
 | AUTH-0048 | CERCLA 107 | statute |
-| AUTH-0049 | CFIUS regulations | practice-or-guidance |
-| AUTH-0050 | Channel Medsystems | practice-or-guidance |
+| AUTH-0049 | CFIUS regulations | regulation |
+| AUTH-0050 | Channel Medsystems | case |
 | AUTH-0051 | Clorox v. Chemical Bank | case |
 | AUTH-0052 | Codekeeper | practice-norm |
-| AUTH-0053 | Collier 364.06 | practice-or-guidance |
+| AUTH-0053 | Collier 364.06 | guidance |
 | AUTH-0054 | Common-law deed covenants | case |
-| AUTH-0055 | Convertible Financing Market Practice | practice-or-guidance |
-| AUTH-0056 | CPRA | practice-or-guidance |
-| AUTH-0057 | Credit Agreement Market Practice | practice-or-guidance |
-| AUTH-0058 | CT 12-638 | practice-or-guidance |
+| AUTH-0055 | Convertible Financing Market Practice | practice-norm |
+| AUTH-0056 | CPRA | statute |
+| AUTH-0057 | Credit Agreement Market Practice | practice-norm |
+| AUTH-0058 | CT 12-638 | statute |
 | AUTH-0059 | Damodaran 2026 | study/dataset |
-| AUTH-0060 | Delaware equitable-remedy case law | practice-or-guidance |
+| AUTH-0060 | Delaware equitable-remedy case law | case |
 | AUTH-0061 | DGCL 170 | statute |
 | AUTH-0062 | DGCL 251(h) | statute |
 | AUTH-0063 | DGCL SB 21 | statute |
-| AUTH-0064 | DOL ESOP guidance | practice-or-guidance |
-| AUTH-0065 | English MAC case law | practice-or-guidance |
-| AUTH-0066 | Envision | practice-or-guidance |
+| AUTH-0064 | DOL ESOP guidance | guidance |
+| AUTH-0065 | English MAC case law | case |
+| AUTH-0066 | Envision | case |
 | AUTH-0067 | equitable conversion | case |
 | AUTH-0068 | Escode | practice-norm |
-| AUTH-0069 | ETA market norms | practice-or-guidance |
+| AUTH-0069 | ETA market norms | practice-norm |
 | AUTH-0070 | EU Merger Regulation 139/2004 | regulation |
-| AUTH-0071 | fairness opinion case law | practice-or-guidance |
-| AUTH-0072 | Fenwick 2023 ARBF analysis | practice-or-guidance |
-| AUTH-0073 | Fisker | practice-or-guidance |
+| AUTH-0071 | fairness opinion case law | case |
+| AUTH-0072 | Fenwick 2023 ARBF analysis | study/dataset |
+| AUTH-0073 | Fisker | case |
 | AUTH-0074 | Form 1099-DA | form |
-| AUTH-0075 | FRBP 3001 | practice-or-guidance |
+| AUTH-0075 | FRBP 3001 | statute |
 | AUTH-0076 | FRED:BAMLC0A0CM | study/dataset |
 | AUTH-0077 | FRED:BAMLH0A0HYM2 | study/dataset |
 | AUTH-0078 | FRED:DGS10 | study/dataset |
 | AUTH-0079 | FRED:DPRIME | study/dataset |
 | AUTH-0080 | FRED:SOFR | study/dataset |
 | AUTH-0081 | FRED:VIXCLS | study/dataset |
-| AUTH-0082 | Frontier | practice-or-guidance |
-| AUTH-0083 | FTC 2026 HSR - Auto-Reportable | practice-or-guidance |
-| AUTH-0084 | FTC 2026 HSR - Size of Transaction | practice-or-guidance |
+| AUTH-0082 | Frontier | case |
+| AUTH-0083 | FTC 2026 HSR - Auto-Reportable | guidance |
+| AUTH-0084 | FTC 2026 HSR - Size of Transaction | guidance |
 | AUTH-0085 | fund formation market practice | form |
-| AUTH-0086 | GDPR | practice-or-guidance |
+| AUTH-0086 | GDPR | regulation |
 | AUTH-0087 | GENIUS Act | statute |
-| AUTH-0088 | GPL | practice-or-guidance |
+| AUTH-0088 | GPL | practice-norm |
 | AUTH-0089 | Ground Lease Lender Practice | practice-norm |
 | AUTH-0090 | Houlihan Lokey 2023 Transaction Termination Fee Study | study/dataset |
-| AUTH-0091 | Howey | practice-or-guidance |
+| AUTH-0091 | Howey | case |
 | AUTH-0092 | HSR Act | statute |
 | AUTH-0093 | ICANN Transfer Rules | practice-norm |
-| AUTH-0094 | ILPA continuation-fund guidance | practice-or-guidance |
+| AUTH-0094 | ILPA continuation-fund guidance | guidance |
 | AUTH-0095 | ILPA Guidance | practice-norm |
 | AUTH-0096 | In re Peregrine | case |
 | AUTH-0097 | In re Topps | case |
 | AUTH-0098 | Indenture Practice | practice-norm |
-| AUTH-0099 | Indianapolis Downs | practice-or-guidance |
-| AUTH-0100 | INDOPCO | practice-or-guidance |
+| AUTH-0099 | Indianapolis Downs | case |
+| AUTH-0100 | INDOPCO | case |
 | AUTH-0101 | IP Carve-Out Practice Norms | practice-norm |
 | AUTH-0102 | IP Licensing Industry Practice | practice-norm |
 | AUTH-0103 | IRC 1001 | statute |
@@ -13643,119 +13703,118 @@ The 262 distinct authorities referenced by published entries, with provisional s
 | AUTH-0147 | IRS Form 8288-A | form |
 | AUTH-0148 | IRS Form 8288-B | form |
 | AUTH-0149 | IRS Form 8594 | form |
-| AUTH-0150 | J. Crew | practice-or-guidance |
-| AUTH-0151 | Kendall v. Ernest Pestana 40 Cal.3d 488 | case |
-| AUTH-0152 | Kendall v. Ernest Pestana, Inc., 40 Cal.3d 488 (1985) | case |
-| AUTH-0153 | Klang | practice-or-guidance |
-| AUTH-0154 | Kroll 2024 | study/dataset |
-| AUTH-0155 | Lanham Act 10 | statute |
-| AUTH-0156 | Lease Abstraction Industry Practice | practice-norm |
-| AUTH-0157 | Lender Practice | practice-norm |
-| AUTH-0158 | Letter Ruling 202308010 | practice-or-guidance |
-| AUTH-0159 | LGPL | practice-or-guidance |
-| AUTH-0160 | Lockton RWI Reports | practice-norm |
-| AUTH-0161 | LoPucki Bankruptcy Research Database | practice-or-guidance |
-| AUTH-0162 | LSTA model AAL | practice-or-guidance |
-| AUTH-0163 | LSTA Model Provisions | practice-norm |
-| AUTH-0164 | market practice | practice-or-guidance |
-| AUTH-0165 | Marketable-title common law | case |
-| AUTH-0166 | Marsh RWI Reports | practice-norm |
-| AUTH-0167 | Match Group | practice-or-guidance |
-| AUTH-0168 | Matter of 105-02 Forest Hills (2025) | case |
-| AUTH-0169 | MD Tax-Prop 12-117 | practice-or-guidance |
-| AUTH-0170 | Merger doctrine (common law) | case |
-| AUTH-0171 | MFW | practice-or-guidance |
-| AUTH-0172 | MIT | practice-or-guidance |
-| AUTH-0173 | Mitel | practice-or-guidance |
-| AUTH-0174 | Moody's Ultimate Recovery Database | practice-or-guidance |
-| AUTH-0175 | Morgan Lewis OSS Guidance | practice-norm |
-| AUTH-0176 | Morse OSS Guidance | practice-norm |
-| AUTH-0177 | MPM Silicones | practice-or-guidance |
-| AUTH-0178 | Municipal CO Ordinances | statute |
-| AUTH-0179 | N.Y. Gen. Oblig. Law 5-1311 | statute |
-| AUTH-0180 | N.Y. Real Prop. Law 291 | statute |
-| AUTH-0181 | Nasdaq Rule 5635 | practice-or-guidance |
-| AUTH-0182 | NAV Facility Market Practice | practice-norm |
-| AUTH-0183 | NIST CSF | practice-or-guidance |
-| AUTH-0184 | Nixon Peabody OSS Guidance | practice-norm |
-| AUTH-0185 | NVCA term sheet | practice-or-guidance |
-| AUTH-0186 | NY assignment common law | case |
-| AUTH-0187 | NY Publication 576 | study/dataset |
-| AUTH-0188 | NY Tax Law 1405(b)(6) | statute |
-| AUTH-0189 | NYC Admin. Code 11-2101 | statute |
-| AUTH-0190 | OBBBA 2025 | practice-or-guidance |
-| AUTH-0191 | OBBBA Sec. 70301 | practice-or-guidance |
-| AUTH-0192 | OBBBA Sec. 70302 | practice-or-guidance |
-| AUTH-0193 | OBBBA Sec. 70425 | practice-or-guidance |
-| AUTH-0194 | OBBBA Sec. 70505 | practice-or-guidance |
-| AUTH-0195 | OFAC | practice-or-guidance |
-| AUTH-0196 | PATH Act 2015 | statute |
-| AUTH-0197 | Pepperdine PCAP 2025 | study/dataset |
-| AUTH-0198 | Pluralsight | practice-or-guidance |
-| AUTH-0199 | Project Finance Market Practice | practice-norm |
-| AUTH-0200 | RadLAX | practice-or-guidance |
-| AUTH-0201 | Real Estate Industry Practice | practice-norm |
-| AUTH-0202 | Real Estate Practice Norms | practice-norm |
-| AUTH-0203 | Regulation (EU) 2024/1689 | practice-or-guidance |
-| AUTH-0204 | Restructuring Market Practice | practice-or-guidance |
-| AUTH-0205 | Rev. Proc. 2011-29 | guidance |
-| AUTH-0206 | Rhone-Poulenc Agro v. DeKalb | case |
-| AUTH-0207 | ROFR/option common law | case |
-| AUTH-0208 | Rule 14d-10 | practice-or-guidance |
-| AUTH-0209 | Rule 14e-1 | practice-or-guidance |
-| AUTH-0210 | Rutledge v. Clearway | case |
-| AUTH-0211 | RWI market studies | practice-or-guidance |
-| AUTH-0212 | Sabre | practice-or-guidance |
-| AUTH-0213 | SBA SOP 50 10 8 | guidance |
-| AUTH-0214 | SEC climate and ESG references | practice-or-guidance |
-| AUTH-0215 | SEC climate disclosure references | practice-or-guidance |
-| AUTH-0216 | SEC Project Crypto | practice-or-guidance |
-| AUTH-0217 | Secondary Market Practice | practice-or-guidance |
-| AUTH-0218 | Securities Act 3(a)(9) | statute |
-| AUTH-0219 | Serta Simmons | practice-or-guidance |
-| AUTH-0220 | SRS Acquiom Deal Terms Study 2024 | study/dataset |
-| AUTH-0221 | SRS Acquiom Deal Terms Study 2025 | study/dataset |
-| AUTH-0222 | SRS Acquiom Earnout Data | study/dataset |
-| AUTH-0223 | SRS Acquiom Working Capital PPA Study | study/dataset |
-| AUTH-0224 | State ABC Law | statute |
-| AUTH-0225 | State CITT Statutes | statute |
-| AUTH-0226 | State Employee-IP Statutes | statute |
-| AUTH-0227 | State Nexus Statutes | statute |
-| AUTH-0228 | State Title Statutes | statute |
-| AUTH-0229 | T.D. 10000 | practice-or-guidance |
-| AUTH-0230 | Tex. Const. art. VIII 29 | statute |
-| AUTH-0231 | Tex. Prop. Code 13.001 | statute |
-| AUTH-0232 | Tex. Prop. Code 5.007 | statute |
-| AUTH-0233 | Tex. Prop. Code 5.023 | statute |
-| AUTH-0234 | Texas Grand Prairie | practice-or-guidance |
-| AUTH-0235 | TIA 316(b) | practice-or-guidance |
-| AUTH-0236 | Till | practice-or-guidance |
-| AUTH-0237 | Topp | practice-or-guidance |
-| AUTH-0238 | TRA market practice | practice-or-guidance |
-| AUTH-0239 | Treas. Reg. 1.1060-1 | regulation |
-| AUTH-0240 | Treas. Reg. 1.263(a)-5 | regulation |
-| AUTH-0241 | Treas. Reg. 1.336-2 | regulation |
-| AUTH-0242 | Treas. Reg. 1.338-6 | regulation |
-| AUTH-0243 | Treas. Reg. 1.368 | regulation |
-| AUTH-0244 | Tribune | practice-or-guidance |
-| AUTH-0245 | Trinseo | practice-or-guidance |
-| AUTH-0246 | TX strict-match construction | case |
-| AUTH-0247 | TX strict-match ROFR construction | statute |
-| AUTH-0248 | UCC 9-334 | statute |
-| AUTH-0249 | UCC 9-610 | statute |
-| AUTH-0250 | UCC 9-611 | statute |
-| AUTH-0251 | UCC 9-615 | statute |
-| AUTH-0252 | UCC Art. 6 (as retained) | statute |
-| AUTH-0253 | UCC Article 9 | statute |
-| AUTH-0254 | UDITPA | practice-or-guidance |
-| AUTH-0255 | UFTA | practice-or-guidance |
-| AUTH-0256 | UK Enterprise Act 2002 | statute |
-| AUTH-0257 | UK market practice | practice-or-guidance |
-| AUTH-0258 | USPTO Form PTO-1594 | form |
-| AUTH-0259 | UVTA | practice-or-guidance |
-| AUTH-0260 | Venture Debt Market Practice | practice-norm |
-| AUTH-0261 | WA RCW 82.45 | practice-or-guidance |
-| AUTH-0262 | YC SAFE | practice-or-guidance |
+| AUTH-0150 | J. Crew | practice-norm |
+| AUTH-0151 | Kendall v. Ernest Pestana, Inc., 40 Cal.3d 488 (1985) | case |
+| AUTH-0152 | Klang | case |
+| AUTH-0153 | Kroll 2024 | study/dataset |
+| AUTH-0154 | Lanham Act 10 | statute |
+| AUTH-0155 | Lease Abstraction Industry Practice | practice-norm |
+| AUTH-0156 | Lender Practice | practice-norm |
+| AUTH-0157 | Letter Ruling 202308010 | guidance |
+| AUTH-0158 | LGPL | practice-norm |
+| AUTH-0159 | Lockton RWI Reports | practice-norm |
+| AUTH-0160 | LoPucki Bankruptcy Research Database | study/dataset |
+| AUTH-0161 | LSTA model AAL | practice-norm |
+| AUTH-0162 | LSTA Model Provisions | practice-norm |
+| AUTH-0163 | market practice | practice-norm |
+| AUTH-0164 | Marketable-title common law | case |
+| AUTH-0165 | Marsh RWI Reports | practice-norm |
+| AUTH-0166 | Match Group | case |
+| AUTH-0167 | Matter of 105-02 Forest Hills (2025) | case |
+| AUTH-0168 | MD Tax-Prop 12-117 | statute |
+| AUTH-0169 | Merger doctrine (common law) | case |
+| AUTH-0170 | MFW | case |
+| AUTH-0171 | MIT | practice-norm |
+| AUTH-0172 | Mitel | case |
+| AUTH-0173 | Moody's Ultimate Recovery Database | study/dataset |
+| AUTH-0174 | Morgan Lewis OSS Guidance | practice-norm |
+| AUTH-0175 | Morse OSS Guidance | practice-norm |
+| AUTH-0176 | MPM Silicones | case |
+| AUTH-0177 | Municipal CO Ordinances | statute |
+| AUTH-0178 | N.Y. Gen. Oblig. Law 5-1311 | statute |
+| AUTH-0179 | N.Y. Real Prop. Law 291 | statute |
+| AUTH-0180 | Nasdaq Rule 5635 | regulation |
+| AUTH-0181 | NAV Facility Market Practice | practice-norm |
+| AUTH-0182 | NIST CSF | guidance |
+| AUTH-0183 | Nixon Peabody OSS Guidance | practice-norm |
+| AUTH-0184 | NVCA term sheet | practice-norm |
+| AUTH-0185 | NY assignment common law | case |
+| AUTH-0186 | NY Publication 576 | study/dataset |
+| AUTH-0187 | NY Tax Law 1405(b)(6) | statute |
+| AUTH-0188 | NYC Admin. Code 11-2101 | statute |
+| AUTH-0189 | OBBBA 2025 | statute |
+| AUTH-0190 | OBBBA Sec. 70301 | statute |
+| AUTH-0191 | OBBBA Sec. 70302 | statute |
+| AUTH-0192 | OBBBA Sec. 70425 | statute |
+| AUTH-0193 | OBBBA Sec. 70505 | statute |
+| AUTH-0194 | OFAC | regulation |
+| AUTH-0195 | PATH Act 2015 | statute |
+| AUTH-0196 | Pepperdine PCAP 2025 | study/dataset |
+| AUTH-0197 | Pluralsight | case |
+| AUTH-0198 | Project Finance Market Practice | practice-norm |
+| AUTH-0199 | RadLAX | case |
+| AUTH-0200 | Real Estate Industry Practice | practice-norm |
+| AUTH-0201 | Real Estate Practice Norms | practice-norm |
+| AUTH-0202 | Regulation (EU) 2024/1689 | regulation |
+| AUTH-0203 | Restructuring Market Practice | practice-norm |
+| AUTH-0204 | Rev. Proc. 2011-29 | guidance |
+| AUTH-0205 | Rhone-Poulenc Agro v. DeKalb | case |
+| AUTH-0206 | ROFR/option common law | case |
+| AUTH-0207 | Rule 14d-10 | regulation |
+| AUTH-0208 | Rule 14e-1 | regulation |
+| AUTH-0209 | Rutledge v. Clearway | case |
+| AUTH-0210 | RWI market studies | study/dataset |
+| AUTH-0211 | Sabre | case |
+| AUTH-0212 | SBA SOP 50 10 8 | guidance |
+| AUTH-0213 | SEC climate and ESG references | guidance |
+| AUTH-0214 | SEC climate disclosure references | guidance |
+| AUTH-0215 | SEC Project Crypto | guidance |
+| AUTH-0216 | Secondary Market Practice | practice-norm |
+| AUTH-0217 | Securities Act 3(a)(9) | statute |
+| AUTH-0218 | Serta Simmons | case |
+| AUTH-0219 | SRS Acquiom Deal Terms Study 2024 | study/dataset |
+| AUTH-0220 | SRS Acquiom Deal Terms Study 2025 | study/dataset |
+| AUTH-0221 | SRS Acquiom Earnout Data | study/dataset |
+| AUTH-0222 | SRS Acquiom Working Capital PPA Study | study/dataset |
+| AUTH-0223 | State ABC Law | statute |
+| AUTH-0224 | State CITT Statutes | statute |
+| AUTH-0225 | State Employee-IP Statutes | statute |
+| AUTH-0226 | State Nexus Statutes | statute |
+| AUTH-0227 | State Title Statutes | statute |
+| AUTH-0228 | T.D. 10000 | regulation |
+| AUTH-0229 | Tex. Const. art. VIII 29 | statute |
+| AUTH-0230 | Tex. Prop. Code 13.001 | statute |
+| AUTH-0231 | Tex. Prop. Code 5.007 | statute |
+| AUTH-0232 | Tex. Prop. Code 5.023 | statute |
+| AUTH-0233 | Texas Grand Prairie | case |
+| AUTH-0234 | TIA 316(b) | statute |
+| AUTH-0235 | Till | case |
+| AUTH-0236 | Topp | case |
+| AUTH-0237 | TRA market practice | practice-norm |
+| AUTH-0238 | Treas. Reg. 1.1060-1 | regulation |
+| AUTH-0239 | Treas. Reg. 1.263(a)-5 | regulation |
+| AUTH-0240 | Treas. Reg. 1.336-2 | regulation |
+| AUTH-0241 | Treas. Reg. 1.338-6 | regulation |
+| AUTH-0242 | Treas. Reg. 1.368 | regulation |
+| AUTH-0243 | Tribune | case |
+| AUTH-0244 | Trinseo | case |
+| AUTH-0245 | TX strict-match construction | case |
+| AUTH-0246 | TX strict-match ROFR construction | statute |
+| AUTH-0247 | UCC 9-334 | statute |
+| AUTH-0248 | UCC 9-610 | statute |
+| AUTH-0249 | UCC 9-611 | statute |
+| AUTH-0250 | UCC 9-615 | statute |
+| AUTH-0251 | UCC Art. 6 (as retained) | statute |
+| AUTH-0252 | UCC Article 9 | statute |
+| AUTH-0253 | UDITPA | statute |
+| AUTH-0254 | UFTA | statute |
+| AUTH-0255 | UK Enterprise Act 2002 | statute |
+| AUTH-0256 | UK market practice | practice-norm |
+| AUTH-0257 | USPTO Form PTO-1594 | form |
+| AUTH-0258 | UVTA | statute |
+| AUTH-0259 | Venture Debt Market Practice | practice-norm |
+| AUTH-0260 | WA RCW 82.45 | statute |
+| AUTH-0261 | YC SAFE | practice-norm |
 
 
 ---
@@ -13763,7 +13822,7 @@ The 262 distinct authorities referenced by published entries, with provisional s
 
 # Conformance
 
-A conforming implementation passes the published suite: **655 cases**, of which **385 model-runtime cases** ship in this repository ([`cases/model-runtime.cases.json`](cases/model-runtime.cases.json), MIT).
+A conforming implementation passes the published suite — **394 cases, every one shipped in this repository**: **385 model-runtime cases** ([`cases/model-runtime.cases.json`](cases/model-runtime.cases.json)) and **9 boundary-refusal cases** ([`cases/boundary-refusal.cases.json`](cases/boundary-refusal.cases.json)), both MIT. The published suite is exactly what ships; the number advertised here equals the number of cases in this tree.
 
 ## Case format
 
@@ -13875,13 +13934,13 @@ Each Normative model carries requirement `REQ-<slot>` (its I/O contract, worked 
 - `REQ-M232` — Controlling-interest transfer-tax and reassessment screener conforms to its published contract (18 case(s))
 - `REQ-M233` — Permit/CO transferability and bulk-sales screener conforms to its published contract (13 case(s))
 - `REQ-M234` — Fixture classification and UCC 9-334 priority conforms to its published contract (12 case(s))
-- `REQ-DTC-RE-01` — implementations MUST route, not answer: Any request to judge whether title is marketable or whether a defect is fatal.
-- `REQ-DTC-RE-02` — implementations MUST route, not answer: Any request to opine on enforceability of any clause (liquidated damages, anti-assignment, consent standard, survival, option/ROFR, due-on-sale).
-- `REQ-DTC-RE-03` — implementations MUST route, not answer: Any drafting of a transaction document (PSA, deed, lease, SNDA, estoppel as an instrument, title instrument, guaranty).
-- `REQ-DTC-RE-04` — implementations MUST route, not answer: Any conclusion about whether a specific transfer legally triggers transfer tax, reassessment, due-on-sale, a preemptive right, or a deemed assignment.
-- `REQ-DTC-RE-05` — implementations MUST route, not answer: Any question about whether a covenant of title has been breached or what remedy lies.
-- `REQ-DTC-RE-06` — implementations MUST route, not answer: Any recommendation on deal structure to achieve a legal/tax result (carve-out, F-reorg, drop-down).
-- `REQ-DTC-RE-07` — implementations MUST route, not answer: Any adverse-possession, boundary, quiet-title, or easement-scope dispute.
-- `REQ-DTC-RE-08` — implementations MUST route, not answer: Any bulk-sales/successor-liability or CERCLA successor determination.
-- `REQ-DTC-RE-09` — implementations MUST route, not answer: Any zoning/entitlement compliance or nonconforming-use continuation opinion.
-- `REQ-DTC-RE-10` — implementations MUST route, not answer: Any interpretation of ambiguous contract language or resolution of a conflict between the contract and the deed.
+- `REQ-DTC-RE-01` — implementations MUST route, not answer: Any request to judge whether title is marketable or whether a defect is fatal. (1 boundary case(s))
+- `REQ-DTC-RE-02` — implementations MUST route, not answer: Any request to opine on enforceability of any clause (liquidated damages, anti-assignment, consent standard, survival, option/ROFR, due-on-sale). (1 boundary case(s))
+- `REQ-DTC-RE-03` — implementations MUST route, not answer: Any drafting of a transaction document (PSA, deed, lease, SNDA, estoppel as an instrument, title instrument, guaranty). (policy boundary — no model in the specification computes here; conformance is the structural refusal)
+- `REQ-DTC-RE-04` — implementations MUST route, not answer: Any conclusion about whether a specific transfer legally triggers transfer tax, reassessment, due-on-sale, a preemptive right, or a deemed assignment. (5 boundary case(s))
+- `REQ-DTC-RE-05` — implementations MUST route, not answer: Any question about whether a covenant of title has been breached or what remedy lies. (1 boundary case(s))
+- `REQ-DTC-RE-06` — implementations MUST route, not answer: Any recommendation on deal structure to achieve a legal/tax result (carve-out, F-reorg, drop-down). (policy boundary — no model in the specification computes here; conformance is the structural refusal)
+- `REQ-DTC-RE-07` — implementations MUST route, not answer: Any adverse-possession, boundary, quiet-title, or easement-scope dispute. (policy boundary — no model in the specification computes here; conformance is the structural refusal)
+- `REQ-DTC-RE-08` — implementations MUST route, not answer: Any bulk-sales/successor-liability or CERCLA successor determination. (1 boundary case(s))
+- `REQ-DTC-RE-09` — implementations MUST route, not answer: Any zoning/entitlement compliance or nonconforming-use continuation opinion. (policy boundary — no model in the specification computes here; conformance is the structural refusal)
+- `REQ-DTC-RE-10` — implementations MUST route, not answer: Any interpretation of ambiguous contract language or resolution of a conflict between the contract and the deed. (policy boundary — no model in the specification computes here; conformance is the structural refusal)
