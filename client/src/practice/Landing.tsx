@@ -432,6 +432,28 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── Founder — the human behind the booking card (warmth pass
+          2026-07-17: reviewers read the page as cold; a real photo, never
+          stock — photography law). Copy is Paul's sanctioned announcement
+          line; role line matches the footer. ── */}
+      <section className="pd-section">
+        <div className="pd-wrap">
+          <div className="pd-fndband" data-rv>
+            <img src="/founder-walking.webp" alt="Paul Baker" loading="lazy" />
+            <div>
+              <div className="pd-seclabel">Who you'll talk to</div>
+              <p className="pd-statement">
+                Twenty years as the internal deal captain for major platforms.
+                Now running that same playbook for independent buyers.
+              </p>
+              <div className="fname">Paul Baker</div>
+              <div className="frole">Founder · two decades on the buy side</div>
+              <Link className="pd-link" href="/about">Meet Paul →</Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── CTA — the booking card, no form ── */}
       <section className="pd-section" id="cta">
         <div className="pd-wrap">

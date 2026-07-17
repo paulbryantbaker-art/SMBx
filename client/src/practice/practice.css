@@ -13,24 +13,33 @@
    ──────────────────────────────────────────────────────────────────────────── */
 
 .pd {
-  --pd-ink: #222222;
-  --pd-body: #6A6A6A;
-  --pd-tert: #9A9A9A;
-  --pd-faint: #BBBBBB;
-  --pd-card: #F7F7F7;
-  --pd-border: #DDDDDD;
-  --pd-hair: #EBEBEB;
+  /* Warmth pass (2026-07-17, reviewer feedback: "cold, boring… warm it up"):
+     every neutral moved off pure gray onto the warm axis (R≥G≥B) — ink, body,
+     tert, cards, borders — so the page reads paper-and-ink, not template-gray.
+     Coral accents unchanged. */
+  --pd-ink: #23201D;
+  --pd-body: #5D5651;
+  --pd-tert: #8A7E76;
+  --pd-faint: #BDB2A9;
+  --pd-card: #F8F1EA;
+  --pd-border: #E0D5CC;
+  --pd-hair: #EFE6DE;
   --pd-coral: #FF385C;
   --pd-coral-link: #E61E4D;
   --pd-cta: #E61E4D;
   --pd-cta-hover: #D70466;
   /* Dark-band depth tokens — the band bg gradient and BOTH swoosh fills read
      from these, so the curve can never drift from the band edge it meets.
-     All near-black (max channel 21/255 ≈ 8% L, R≥B so warm, never purple). */
-  --pd-dark-bg: #141414;
-  --pd-dark-top: #151312;
-  --pd-dark-bot: #131313;
+     All warm near-black (R>G>B, max channel 24/255 ≈ 9% L — ember-warm like
+     Harvey's canvas, never neutral charcoal, never purple). */
+  --pd-dark-bg: #161210;
+  --pd-dark-top: #181412;
+  --pd-dark-bot: #151110;
   --pd-font: 'Schibsted Grotesk', system-ui, sans-serif;
+  /* Editorial serif for the display ladder (H1/H2/quote/statement) — the
+     gravitas voice; Schibsted stays for working type (h3, body, UI, numerals).
+     Fraunces is already in the font payload (index.html). */
+  --pd-display: 'Fraunces', Georgia, 'Times New Roman', serif;
   --pd-mono: 'IBM Plex Mono', monospace; /* @kind font */
   --pd-pad-x: clamp(28px, 4.5vw, 64px);
   /* Two-width system (Paul, 2026-07-15: sections each had their own width and
@@ -49,7 +58,7 @@
      — Safari-safe (absolute in a relative parent, NEVER a fixed colored div). */
   position: relative;
   isolation: isolate;
-  background: #FFFDFC;
+  background: #FDF8F3;
   color: var(--pd-ink);
   font-family: var(--pd-font);
   font-size: 16px;
@@ -66,9 +75,10 @@
    and below every in-flow section, so light sections show it and opaque dark
    bands occlude it for free — no need to promote/position any child (which
    would clobber the sticky nav/CTA z-index). Distributed no-repeat radials →
-   whole-page breath with no tiling seam. Every stop ≤0.050 alpha and strictly
-   coral→rose→peach (Slack's lavender/green re-cast to our palette) so the tint
-   is felt, never nameable, and body text holds AA (~5.0:1 at the densest tile).
+   whole-page breath with no tiling seam. Warmth pass 2026-07-17 (reviewers:
+   "cold") raised every stop — now ≤0.085 alpha, coral→rose→peach→apricot, so
+   the warmth is unmistakable on a phone yet body text holds AA (body #5D5651
+   ≥5.5:1 at the densest tile).
    PERF LAW — never add will-change/transform/filter/backdrop-filter here: that
    promotes a ~1440×10000 backing store (~57MB 1×, far more at mobile DPR) and
    janks/OOMs. Un-promoted, the compositor rasterizes only viewport-adjacent
@@ -81,12 +91,12 @@
   overflow: hidden;
   background-repeat: no-repeat;
   background:
-    radial-gradient(46% 18% at 10% 3%,  rgba(255, 56, 92, 0.050), rgba(255, 56, 92, 0) 62%),
-    radial-gradient(40% 15% at 95% 12%, rgba(255, 138, 96, 0.038), rgba(255, 138, 96, 0) 60%),
-    radial-gradient(52% 18% at 3% 40%,  rgba(255, 92, 122, 0.042), rgba(255, 92, 122, 0) 62%),
-    radial-gradient(46% 16% at 99% 58%, rgba(255, 56, 92, 0.036), rgba(255, 56, 92, 0) 62%),
-    radial-gradient(50% 18% at 7% 82%,  rgba(255, 122, 96, 0.040), rgba(255, 122, 96, 0) 62%),
-    radial-gradient(44% 16% at 96% 98%, rgba(255, 72, 108, 0.038), rgba(255, 72, 108, 0) 62%);
+    radial-gradient(46% 18% at 10% 3%,  rgba(255, 56, 92, 0.085), rgba(255, 56, 92, 0) 62%),
+    radial-gradient(40% 15% at 95% 12%, rgba(255, 138, 96, 0.070), rgba(255, 138, 96, 0) 60%),
+    radial-gradient(52% 18% at 3% 40%,  rgba(255, 92, 122, 0.075), rgba(255, 92, 122, 0) 62%),
+    radial-gradient(46% 16% at 99% 58%, rgba(255, 166, 106, 0.064), rgba(255, 166, 106, 0) 62%),
+    radial-gradient(50% 18% at 7% 82%,  rgba(255, 122, 96, 0.072), rgba(255, 122, 96, 0) 62%),
+    radial-gradient(44% 16% at 96% 98%, rgba(255, 72, 108, 0.066), rgba(255, 72, 108, 0) 62%);
 }
 .pd *, .pd *::before, .pd *::after { box-sizing: border-box; }
 .pd a { color: var(--pd-ink); text-decoration: none; transition: color 160ms ease; }
@@ -185,8 +195,14 @@
      fallback if the image fails. ONE continuous texture crop — the curved
      divider edges are masked OUT of this same element (no separate swoosh to
      seam against). */
+  /* Warmth pass 2026-07-17: the neutral charcoal read cold — a stronger coral
+     halo up top, a low ember glow at the base, and a whisper-warm glaze across
+     the whole texture (low alpha so the plaster detail stays fully visible;
+     white band text keeps ~15:1). */
   background:
-    radial-gradient(90% 52% at 50% -8%, rgba(255, 56, 92, 0.05), rgba(255, 56, 92, 0) 58%),
+    radial-gradient(90% 52% at 50% -8%, rgba(255, 66, 92, 0.11), rgba(255, 66, 92, 0) 58%),
+    radial-gradient(78% 46% at 50% 110%, rgba(255, 122, 66, 0.075), rgba(255, 122, 66, 0) 62%),
+    linear-gradient(rgba(255, 116, 72, 0.05), rgba(255, 96, 84, 0.05)),
     url('/textures/blackbleed.webp') center / cover no-repeat,
     linear-gradient(180deg, var(--pd-dark-top) 0%, var(--pd-dark-bg) 46%, var(--pd-dark-bot) 100%);
   color: var(--pd-ink);
@@ -226,12 +242,18 @@
    drama roles (.pd-quote, .pd-statement, .pd-num*, the Market Map document)
    keep their own scales. Ladder: h1 hero · h2 section · h3 minor · sub lede ·
    body · body-sm · caption · mono. */
+/* Display ladder is the editorial serif (warmth pass 2026-07-17): Fraunces at
+   600, near-normal tracking, and a touch more leading than the grotesque took
+   (a serif at 0.95 clips its own descenders). Working type below h2 stays
+   Schibsted. Sizes are unchanged — the ladder's one-size-per-role law holds. */
 .pd-h1 {
   margin: 0;
+  font-family: var(--pd-display);
+  font-optical-sizing: auto;
   font-size: clamp(46px, 6vw, 92px);
-  line-height: 0.95;
-  font-weight: 800;
-  letter-spacing: -0.04em;
+  line-height: 1.02;
+  font-weight: 600;
+  letter-spacing: -0.014em;
   max-width: 18em;
   text-wrap: balance;
 }
@@ -245,13 +267,15 @@
    build.") lands as two clean lines instead of breaking to three. Scoped to
    .pd-hero WITHOUT .pd-hero-c so the centered landing hero keeps the full 92px.
    (.pd-h1-seg the class is retired; this is the size that replaced it.) */
-.pd-hero:not(.pd-hero-c) .pd-h1 { font-size: clamp(40px, 5.2vw, 72px); letter-spacing: -0.035em; }
+.pd-hero:not(.pd-hero-c) .pd-h1 { font-size: clamp(40px, 5.2vw, 72px); letter-spacing: -0.012em; }
 .pd-h2 {
   margin: 0;
+  font-family: var(--pd-display);
+  font-optical-sizing: auto;
   font-size: clamp(38px, 4.8vw, 62px);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.04;
+  font-weight: 600;
+  letter-spacing: -0.014em;
+  line-height: 1.1;
   /* One shared header width across ALL sections (Paul, 2026-07-15): cap sits
      past the content rail so the rail — not the heading — sets the width, and
      `pretty` (not `balance`) lets line 1 run full width instead of splitting
@@ -298,14 +322,16 @@
 .pd-caption { font-size: 13.5px; line-height: 1.6; color: var(--pd-tert); }
 /* Statement device — in-flow rhetorical line with a coral accent word;
    emphatic but below H2 so it reads as a spoken line, not a heading. */
-.pd-statement { margin: 0; font-size: clamp(28px, 3vw, 46px); font-weight: 800; letter-spacing: -0.025em; line-height: 1.14; max-width: 14em; text-wrap: balance; }
+.pd-statement { margin: 0; font-family: var(--pd-display); font-optical-sizing: auto; font-size: clamp(28px, 3vw, 46px); font-weight: 600; letter-spacing: -0.01em; line-height: 1.18; max-width: 14em; text-wrap: balance; }
 /* Editorial pull-quote — drama through typography, zero decoration. */
 .pd-quote {
   margin: 0;
+  font-family: var(--pd-display);
+  font-optical-sizing: auto;
   font-size: clamp(44px, 5.8vw, 78px);
-  font-weight: 800;
-  letter-spacing: -0.035em;
-  line-height: 1.02;
+  font-weight: 560;
+  letter-spacing: -0.014em;
+  line-height: 1.06;
   text-wrap: balance;
 }
 /* The whose-side pull-quote lives in the askew's ~7fr column (~700px), far too
@@ -579,7 +605,7 @@
 .pd-hero-fold { min-height: calc(100svh - 86px); }
 @media (min-width: 761px) { .pd-hero-fold { min-height: calc(100svh - 86px - clamp(52px, 6vw, 112px)); } }
 .pd-heroc-inner { position: relative; z-index: 1; width: 100%; max-width: var(--pd-max); margin: 0 auto; }
-.pd-hero-c .pd-h1 { max-width: 24em; margin: 0 auto; font-size: clamp(42px, 5.2vw, 68px); letter-spacing: -0.03em; line-height: 1.04; }
+.pd-hero-c .pd-h1 { max-width: 24em; margin: 0 auto; font-size: clamp(42px, 5.2vw, 68px); letter-spacing: -0.012em; line-height: 1.08; }
 .pd-hero-c .pd-sub { font-size: 19px; }
 .pd-sub-c { margin: 16px auto 0; max-width: 33em; }
 /* One quiet meta line under the showcase — the secondary ask and the proof
@@ -897,11 +923,11 @@
    chat") — tappable thesis starters that drop into the field. ── */
 .pd-chips { display: flex; flex-wrap: wrap; gap: 9px; padding: 6px 32px 4px; }
 .pd-chip {
-  border: 1px solid var(--pd-border); background: #fff; color: var(--pd-body);
+  border: 1px solid rgba(230, 30, 77, 0.22); background: #FFF3EE; color: #B5314A;
   border-radius: 99px; padding: 9px 16px; font-size: 14px; font-weight: 600; white-space: nowrap;
   cursor: pointer; transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
 }
-.pd-chip:hover { border-color: var(--pd-ink); color: var(--pd-ink); background: var(--pd-card); }
+.pd-chip:hover { border-color: var(--pd-cta); color: var(--pd-cta); background: #FFEBE4; }
 
 /* ── Mobile: the hero bar stays in the page as the doorway (typing never
    happens in-page); the actual chat is a bottom sheet that is ALWAYS
@@ -1181,7 +1207,28 @@
 
 /* ─── final CTA ─── */
 .pd-cta-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(44px, 7vw, 100px); align-items: center; }
-.pd-cta-h { margin: 0; font-size: clamp(38px, 4.8vw, 62px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.04; max-width: 18em; text-wrap: balance; }
+.pd-cta-h { margin: 0; font-family: var(--pd-display); font-optical-sizing: auto; font-size: clamp(38px, 4.8vw, 62px); font-weight: 600; letter-spacing: -0.014em; line-height: 1.1; max-width: 18em; text-wrap: balance; }
+
+/* ── Founder band — the human at the CTA threshold (warmth pass 2026-07-17:
+   a real photo, never stock). Cream card, portrait crop framed on the face. ── */
+.pd-fndband {
+  display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+  gap: clamp(30px, 4.5vw, 70px); align-items: center;
+  max-width: var(--pd-mid); margin: 0 auto;
+  background: var(--pd-card); border: 1px solid var(--pd-hair);
+  border-radius: 28px; padding: clamp(24px, 3.5vw, 48px);
+}
+.pd-fndband img {
+  width: 100%; height: clamp(320px, 36vw, 440px); object-fit: cover; object-position: 50% 18%;
+  border-radius: 20px; display: block;
+}
+.pd-fndband .fname { margin-top: 26px; font-size: 17px; font-weight: 800; color: var(--pd-ink); }
+.pd-fndband .frole { margin-top: 4px; font-size: 15px; color: var(--pd-body); }
+.pd-fndband .pd-link { display: inline-block; margin-top: 14px; font-weight: 700; }
+@media (max-width: 860px) {
+  .pd-fndband { grid-template-columns: 1fr; }
+  .pd-fndband img { height: min(430px, 96vw); }
+}
 .pd-form { background: var(--pd-card); border-radius: 24px; padding: 44px; }
 .pd-form .t { font-weight: 700; font-size: 21px; letter-spacing: -0.012em; }
 .pd-input {
