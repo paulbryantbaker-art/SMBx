@@ -31,6 +31,27 @@ try {
   DARK_TEXTURE_URI = `data:image/webp;base64,${buf.toString('base64')}`;
 } catch { /* gradient fallback */ }
 
+/* The canonical logo — the SAME asset and treatment the practice site uses:
+ * /logo-coral-x.png (1584×396 wordmark) as-is on light surfaces, and inverted
+ * to pure white on dark surfaces exactly like the site footer
+ * (`.pd-footer img { filter: brightness(0) invert(1) }`). Never redrawn,
+ * never recolored beyond that inversion, aspect ratio always preserved. */
+let LOGO_URI = '';
+try {
+  const buf = readFileSync(path.resolve(__dirname, '../../client/public/logo-coral-x.png'));
+  LOGO_URI = `data:image/png;base64,${buf.toString('base64')}`;
+} catch { /* text fallback */ }
+
+/** The logo <img>, sized by height (aspect preserved); white=true applies the
+ *  site's dark-surface inversion. Falls back to the text wordmark if the asset
+ *  is ever missing so artifacts never render brandless. */
+function logoImg(heightPx: number, opts: { white?: boolean } = {}): string {
+  if (!LOGO_URI) {
+    return `<span style="font-family:${SANS};font-weight:800;letter-spacing:-0.01em;font-size:${Math.round(heightPx * 0.72)}px;color:${opts.white ? '#fff' : INK}">smb<span style="color:${CORAL}">X</span>.ai</span>`;
+  }
+  return `<img src="${LOGO_URI}" alt="smbX.ai" style="height:${heightPx}px;width:auto;display:block;${opts.white ? 'filter:brightness(0) invert(1);' : ''}">`;
+}
+
 /* ─── palette (practice .pd language) ─────────────────────────────────── */
 const INK = '#222222';
 const BODY = '#4A4A4A';
@@ -123,9 +144,9 @@ export async function researchReportHtml(run: ResearchRunRow): Promise<string> {
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: ${SANS}; color: ${INK}; background: #fff; font-size: 10.5pt; line-height: 1.62; }
-    .kicker { display: flex; justify-content: space-between; align-items: baseline; font-family: ${MONO};
+    .kicker { display: flex; justify-content: space-between; align-items: center; font-family: ${MONO};
       font-size: 8pt; letter-spacing: 0.09em; color: ${TERT}; text-transform: uppercase; }
-    .kicker b { color: ${CORAL_DEEP}; font-weight: 600; }
+    .kicker .kl { display: flex; align-items: center; gap: 12px; }
     .rule { height: 3px; width: 64px; background: ${CORAL}; margin: 14px 0 22px; border-radius: 2px; }
     h1.title { font-size: 25pt; font-weight: 800; letter-spacing: -0.02em; line-height: 1.08; max-width: 9in; }
     .meta { margin-top: 10px; font-size: 9pt; color: ${TERT}; }
@@ -162,7 +183,7 @@ export async function researchReportHtml(run: ResearchRunRow): Promise<string> {
     .feed p { font-size: 9.5pt; color: ${BODY}; margin: 0 0 8px; }
     .disc { margin-top: 26px; padding-top: 12px; border-top: 1px solid ${HAIR}; font-size: 7.5pt; color: ${TERT}; line-height: 1.5; }
   </style></head><body>
-    <div class="kicker"><span><b>smbX</b> · RESEARCH BRIEF · ${esc(typeLabel.toUpperCase())}</span><span>${esc(fmtDate(run.completed_at))}</span></div>
+    <div class="kicker"><span class="kl">${logoImg(24)}<span>RESEARCH BRIEF · ${esc(typeLabel.toUpperCase())}</span></span><span>${esc(fmtDate(run.completed_at))}</span></div>
     <div class="rule"></div>
     <h1 class="title">${esc(title)}</h1>
     <div class="meta">${esc(typeLabel)} · ${esc(run.depth)} depth · ${Number(u.searches ?? 0)} searches · ${sources.length} sources</div>
@@ -217,9 +238,9 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0): string {
       radial-gradient(720px 560px at 88% -6%, rgba(255,56,92,0.075), transparent 62%),
       radial-gradient(640px 520px at -8% 44%, rgba(255,116,140,0.055), transparent 60%); }
     .frame { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 84px 88px 0; }
-    .tag { display: flex; justify-content: space-between; align-items: baseline; font-family: ${MONO};
+    .tag { display: flex; justify-content: space-between; align-items: center; font-family: ${MONO};
       font-size: 21px; letter-spacing: 0.1em; color: ${TERT}; text-transform: uppercase; }
-    .tag b { color: ${CORAL_DEEP}; font-weight: 600; }
+    .tag .tl { display: flex; align-items: center; gap: 22px; }
     .hook { margin-top: 92px; font-size: ${hookSize}px; font-weight: 800; letter-spacing: -0.022em; line-height: 1.06; max-width: 880px; }
     .rule { height: 6px; width: 96px; background: ${CORAL}; border-radius: 3px; margin: 56px 0 0; }
     .pts { margin-top: 58px; display: flex; flex-direction: column; gap: 40px; }
@@ -229,13 +250,11 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0): string {
     .src { margin-top: 8px; font-family: ${MONO}; font-size: 18px; color: ${TERT}; letter-spacing: 0.02em; }
     .foot { position: absolute; left: 0; right: 0; bottom: 0; height: 128px; background: ${DARK};
       display: flex; align-items: center; justify-content: space-between; padding: 0 88px; }
-    .brand { display: flex; align-items: center; gap: 16px; color: #fff; font-size: 30px; font-weight: 800; letter-spacing: -0.01em; }
-    .brand .bd { width: 13px; height: 13px; border-radius: 50%; background: ${CORAL}; }
     .foot .r { color: #C9C9C9; font-size: 19px; font-weight: 500; }
   </style></head><body>
     <div class="wash"></div>
     <div class="frame">
-      <div class="tag"><span><b>smbX</b> · ${esc(typeLabel.toUpperCase())}</span><span>${esc(fmtDate(run.completed_at))}</span></div>
+      <div class="tag"><span class="tl">${logoImg(38)}<span>${esc(typeLabel.toUpperCase())}</span></span><span>${esc(fmtDate(run.completed_at))}</span></div>
       <div class="hook">${esc(hook)}</div>
       <div class="rule"></div>
       ${points.length ? `<div class="pts">${points.map(p => `
@@ -245,7 +264,7 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0): string {
         </div></div>`).join('')}</div>` : ''}
     </div>
     <div class="foot">
-      <div class="brand"><span class="bd"></span>smbx.ai</div>
+      ${logoImg(52, { white: true })}
       <div class="r">Buy-side corporate development</div>
     </div>
   </body></html>`;
@@ -332,7 +351,7 @@ export function linkedInDocHtml(run: ResearchRunRow): string {
     ? feed.chart : null;
 
   const kicker = (n: number, total: number) => `
-    <div class="kick"><span><b>smbX</b> · ${esc(typeLabel.toUpperCase())}</span><span>${n} / ${total}</span></div>`;
+    <div class="kick"><span class="kl">${logoImg(30)}<span>${esc(typeLabel.toUpperCase())}</span></span><span>${n} / ${total}</span></div>`;
 
   // Total = content pages + optional chart page + closer.
   const total = pages.length + (chart ? 1 : 0) + 1;
@@ -347,7 +366,7 @@ export function linkedInDocHtml(run: ResearchRunRow): string {
       pageHtml.push(`<div class="pg">
         <div class="wash"></div>
         <div class="in">
-          <div class="kick"><span><b>smbX</b> · ${esc(typeLabel.toUpperCase())}</span><span>${esc(fmtDate(run.completed_at))}</span></div>
+          <div class="kick"><span class="kl">${logoImg(40)}<span>${esc(typeLabel.toUpperCase())}</span></span><span>${esc(fmtDate(run.completed_at))}</span></div>
           <div class="cover-h" style="font-size:${size}px">${esc(h)}</div>
           <div class="rule"></div>
           ${p.body ? `<div class="cover-sub">${esc(p.body)}</div>` : ''}
@@ -423,7 +442,7 @@ export function linkedInDocHtml(run: ResearchRunRow): string {
     <div class="halo"></div>
     <div class="in closer">
       <div class="close-line">Research with sources, not takes.</div>
-      <div class="brand-big"><span class="bd"></span>smbx.ai</div>
+      <div class="brand-big">${logoImg(110, { white: true })}</div>
       <div class="close-sub">Buy-side corporate development for lower-middle-market acquirers.</div>
       <div class="follow">Follow for the next read.</div>
     </div>
@@ -440,9 +459,9 @@ export function linkedInDocHtml(run: ResearchRunRow): string {
       radial-gradient(720px 560px at 88% -6%, rgba(255,56,92,0.075), transparent 62%),
       radial-gradient(640px 520px at -8% 44%, rgba(255,116,140,0.055), transparent 60%); }
     .in { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 76px 88px 84px; }
-    .kick { display: flex; justify-content: space-between; align-items: baseline; font-family: ${MONO};
+    .kick { display: flex; justify-content: space-between; align-items: center; font-family: ${MONO};
       font-size: 21px; letter-spacing: 0.1em; color: ${TERT}; text-transform: uppercase; }
-    .kick b { color: ${CORAL_DEEP}; font-weight: 600; }
+    .kick .kl { display: flex; align-items: center; gap: 24px; }
     .rule { height: 6px; width: 96px; background: ${CORAL}; border-radius: 3px; }
     .grow { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 34px; }
     /* cover */
@@ -470,8 +489,7 @@ export function linkedInDocHtml(run: ResearchRunRow): string {
       linear-gradient(180deg, rgba(20,19,18,0.25), rgba(20,20,20,0.55)); }
     .closer { justify-content: center; align-items: center; text-align: center; gap: 0; }
     .close-line { font-size: 40px; font-weight: 700; color: #F4F4F4; letter-spacing: -0.014em; }
-    .brand-big { margin-top: 46px; display: flex; align-items: center; gap: 22px; color: #fff; font-size: 88px; font-weight: 800; letter-spacing: -0.02em; }
-    .brand-big .bd { width: 30px; height: 30px; border-radius: 50%; background: ${CORAL}; }
+    .brand-big { margin-top: 46px; display: flex; align-items: center; justify-content: center; }
     .close-sub { margin-top: 30px; font-size: 30px; color: #DEDEDE; max-width: 760px; line-height: 1.45; }
     .follow { margin-top: 64px; font-family: ${MONO}; font-size: 22px; letter-spacing: 0.12em; color: #FFB3BF; font-weight: 600; text-transform: uppercase; }
   </style></head><body>${pageHtml.join('\n')}</body></html>`;
