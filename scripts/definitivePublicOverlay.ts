@@ -938,6 +938,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     founderReview: true,
     purpose:
       'Computes the §280G golden-parachute analysis for a change-in-control payment: the three-times-base-amount threshold, whether it is crossed, the excess parachute payment, the 20% §4999 excise tax, the employer\'s lost deduction, and whether a shareholder cleansing vote clears the disinterested-holder bar. It answers, for a deal team sizing executive change-in-control cost, "does this package trip §280G, and what does it cost if it does?" It computes the arithmetic from supplied figures; the parachute-payment characterization and the vote mechanics are counsel\'s.',
+    scopeFlag: 'Scope: the cleansing-vote screen and the excise/deduction computation are INDEPENDENT here — a supplied "passed" vote does not feed back to zero the excise tax and lost deduction. But a valid §280G(b)(5) shareholder cleansing vote (available only to NON-publicly-traded companies) cleanses the payments entirely: no §4999 excise, no disallowance. So a result showing `cleansing_vote_passed: true` alongside a live excise/lost-deduction is a prompt for counsel to reconcile, not a computed outcome — a genuine passed vote in a private company would zero both.',
     algorithm: [
       'Given `base_amount_cents`, `parachute_payments_cents`, and optional `shareholder_cleansing_vote_pct`:',
       '1. If either required cents input is missing, the implementation SHALL return `status: "needs_inputs"`.',
@@ -2265,6 +2266,7 @@ export const MODEL_OVERLAYS: Record<string, ModelOverlay> = {
     founderReview: true,
     purpose:
       'Dates the two hard §1031 deadlines from the relinquished-property transfer — the 45-day identification window and the 180-day exchange window — and computes the recognized-gain floor from any boot received and any value shortfall in the replacement property. It answers, for a taxpayer running a like-kind exchange, "by when must I identify and close, and how much gain can I not defer?" It computes the timing and the gain floor; whether the properties are like-kind and the exchange qualifies is the tax advisor\'s call.',
+    scopeFlag: 'Scope, two caveats. (1) The output labeled a recognized-gain "floor" is really an upper-bound ESTIMATE: true recognized gain is min(realized gain, boot), and with no basis input the model cannot cap by realized gain, so on high-basis property with a small gain the figure can exceed the actual recognized gain. It also treats cash boot and value shortfall as alternatives, whereas NET DEBT RELIEF is separately boot. (2) The 180-day window is the maximum; §1031(a)(3)(B) makes the replacement period the EARLIER of 180 days or the taxpayer\'s return due date (with extensions), so a Q4 relinquishment can have materially fewer than 180 days.',
     algorithm: [
       'Given `transfer_date`, `relinquished_property_value_cents`, and `replacement_property_value_cents`, plus optional `boot_received_cents` (default 0):',
       '1. If any required input is missing (or the date is invalid), the implementation SHALL return `status: "needs_inputs"` and emit no outputs.',
