@@ -442,7 +442,7 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
         occupied_annual_rent_cents: occupiedRent,
         occupancy_pct: rows.length ? round(occupiedRows.length / rows.length, 4) : null,
         area_occupancy_pct: totalArea > 0 ? round(occupiedArea / totalArea, 4) : null,
-        walt_months: occupiedRent > 0 ? round(waltNumerator / occupiedRent, 1) : null,
+        walt_months: occupiedRent > 0 ? round(waltNumerator / occupiedRent, 4) : null,
         top_tenant_rent_pct: totalRent > 0 ? round(topTenantRent / totalRent, 4) : null,
         tenant_concentration_flag: totalRent > 0 ? topTenantRent / totalRent > 0.2 : false,
       },
@@ -643,7 +643,7 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
     return {
       outputs: {
         net_unrealized_built_in_gain_cents: nubig,
-        years_since_conversion: round(years, 2),
+        years_since_conversion: round(years, 4),
         recognition_period_years: 5,
         within_recognition_period: withinRecognitionPeriod,
         recognized_big_tax_base_cents: bigBase,
@@ -1420,7 +1420,7 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
         working_capital_need_cents: workingCapitalNeed,
         available_for_debt_service_cents: availableForDebtService,
         debt_service_cents: debtService,
-        dscr: dscr == null ? null : round(dscr, 2),
+        dscr: dscr == null ? null : round(dscr, 4),
         ending_liquidity_cents: endingLiquidity,
         dscr_floor_passed: dscr == null ? debtService === 0 : dscr >= minimumDscr,
         liquidity_floor_passed: endingLiquidity >= minimumLiquidity,
@@ -1435,7 +1435,7 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
       }).filter((value): value is number => value !== null);
       return {
         cash_flow_change_pct: change,
-        minimum_dscr: stressedDscrs.length ? round(Math.min(...stressedDscrs), 2) : null,
+        minimum_dscr: stressedDscrs.length ? round(Math.min(...stressedDscrs), 4) : null,
         dscr_floor_passed: stressedDscrs.length ? Math.min(...stressedDscrs) >= minimumDscr : true,
       };
     });
@@ -1444,7 +1444,7 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
         period_count: rows.length,
         minimum_dscr_floor: minimumDscr,
         minimum_liquidity_floor_cents: minimumLiquidity,
-        minimum_projected_dscr: dscrValues.length ? round(Math.min(...dscrValues), 2) : null,
+        minimum_projected_dscr: dscrValues.length ? round(Math.min(...dscrValues), 4) : null,
         minimum_projected_liquidity_cents: Math.min(...rows.map(row => row.ending_liquidity_cents)),
         dscr_floor_breached: rows.some(row => !row.dscr_floor_passed),
         liquidity_floor_breached: rows.some(row => !row.liquidity_floor_passed),
@@ -1877,8 +1877,8 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
     const recidivismScore = Math.round(clamp(20 + leverageRisk + liquidityRisk + growthRisk + repeatRisk, 0, 100));
     return {
       outputs: {
-        exit_leverage: round(exitLeverage!, 2),
-        liquidity_months: round(liquidityMonths!, 1),
+        exit_leverage: round(exitLeverage!, 4),
+        liquidity_months: round(liquidityMonths!, 4),
         ebitda_growth_pct: round(ebitdaGrowthPct!, 4),
         prior_bankruptcy_count: priorBankruptcyCount,
         chapter22_recidivism_score: recidivismScore,
@@ -2084,7 +2084,7 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
       outputs: {
         lease_count: rows.length,
         annual_rent_cents: totalRent,
-        walt_months: totalRent > 0 ? round(waltNumerator / totalRent, 1) : null,
+        walt_months: totalRent > 0 ? round(waltNumerator / totalRent, 4) : null,
         assignment_consent_required_count: rows.filter(row => row.assignment_consent_required).length,
         change_of_control_consent_required_count: rows.filter(row => row.change_of_control_consent_required).length,
         exclusives_count: rows.filter(row => row.exclusive_use).length,
@@ -2312,7 +2312,7 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
         loan_maturity_date: maturityDate,
         annual_ground_rent_cents: annualRent,
         rent_reset_type: rentResetType,
-        tail_years_after_loan_maturity: round(tailYears, 1),
+        tail_years_after_loan_maturity: round(tailYears, 4),
         required_tail_years: requiredTailYears,
         lender_tail_requirement_satisfied: tailYears >= requiredTailYears,
         lender_recognition_agreement: lenderRecognitionAgreement,

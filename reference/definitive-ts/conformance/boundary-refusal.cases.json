@@ -1,0 +1,34 @@
+[
+  {
+    "id": "REQ-DTC.M232.NY-CITT-TRIGGER",
+    "req": "REQ-DTC-RE-04",
+    "slot": "M232",
+    "title": "A 100% NY entity transfer trips the controlling-interest screen and MUST route the taxability conclusion to counsel",
+    "input": { "state": "NY", "is_entity_transfer": true, "transfer_pct": 100 },
+    "expect": { "citt_screen_triggered": true, "defer_to_counsel": true }
+  },
+  {
+    "id": "REQ-DTC.M232.CA-REASSESSMENT-TRIGGER",
+    "req": "REQ-DTC-RE-04",
+    "slot": "M232",
+    "title": "A >50% CA entity transfer trips Prop 13 reassessment and MUST route to counsel",
+    "input": { "state": "CA", "is_entity_transfer": true, "transfer_pct": 60 },
+    "expect": { "reassessment_screen_triggered": true, "defer_to_counsel": true }
+  },
+  {
+    "id": "REQ-DTC.M232.STEP-TRANSACTION",
+    "req": "REQ-DTC-RE-04",
+    "slot": "M232",
+    "title": "A mere-change claim with related steps raises step-transaction risk and MUST route to counsel even below the threshold",
+    "input": { "state": "NY", "is_entity_transfer": true, "transfer_pct": 40, "mere_change_exemption_claimed": true, "related_steps_planned": true },
+    "expect": { "citt_screen_triggered": false, "step_transaction_risk": true, "defer_to_counsel": true }
+  },
+  {
+    "id": "REQ-DTC.M232.TX-NO-TAX-ANSWERS",
+    "req": "REQ-DTC-RE-04",
+    "slot": "M232",
+    "title": "Texas imposes no real-estate transfer tax, so the screen answers cleanly and does NOT over-route",
+    "input": { "state": "TX", "is_entity_transfer": true, "transfer_pct": 100 },
+    "expect": { "citt_screen_triggered": false, "reassessment_screen_triggered": false, "defer_to_counsel": false }
+  }
+]
