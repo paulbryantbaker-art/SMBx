@@ -1,8 +1,9 @@
 /**
  * Research Composer — turns a completed research run into shareable artifacts
- * in the PRACTICE-SITE coral language (NOT the retired terra-pink premium PDF
- * skin): Schibsted Grotesk + IBM Plex Mono, ink #222, Deal Green #16624C (Ledger trial 2026-07-17; was coral, then blue), warm
- * white, generous air.
+ * in the PRACTICE-SITE Ledger language (2026-07-18): bone paper, ink #14181C,
+ * Fraunces display over Inter working type + IBM Plex Mono, one Deal Green
+ * accent #16624C, brass jewelry on labels, green-black boardroom dark
+ * surfaces. Historical const names (CORAL = the accent slot).
  *
  * Two outputs, rendered on demand from the stored run row (nothing cached on
  * disk):
@@ -53,22 +54,26 @@ function logoImg(heightPx: number, opts: { white?: boolean } = {}): string {
 }
 
 /* ─── palette (practice .pd language) ─────────────────────────────────── */
-const INK = '#222222';
-const BODY = '#4A4A4A';
-const TERT = '#6A6A6A';
+const INK = '#14181C';
+const BODY = '#5C6670';
+const TERT = '#8A9099';
 const CORAL = '#16624C'; // Ledger Deal Green 2026-07-17 (historical const name)
 const CORAL_DEEP = '#0F4E3C';
-const CARD = '#F7F7F7';
-const HAIR = '#EBEBEB';
-const WARM = '#FFFDFC';
-const DARK = '#141414';
+const CARD = '#FFFFFF';
+const HAIR = '#E4E1D9';
+const WARM = '#F6F4EF';
+const DARK = '#0F1A16';
+const IVORY = '#F3F1EA';
+const IVORY_SUB = '#D8D5CA';
+const BRASS = '#B08637';
 
 const FONTS = `
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400..900;1,400..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400..600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 `;
-const SANS = `'Schibsted Grotesk', -apple-system, 'Segoe UI', sans-serif`;
+const SANS = `'Inter', -apple-system, 'Segoe UI', sans-serif`;
+const DISPLAY = `'Fraunces', Georgia, 'Times New Roman', serif`;
 const MONO = `'IBM Plex Mono', ui-monospace, 'SF Mono', monospace`;
 
 function esc(s: string): string {
@@ -148,7 +153,7 @@ export async function researchReportHtml(run: ResearchRunRow): Promise<string> {
       font-size: 8pt; letter-spacing: 0.09em; color: ${TERT}; text-transform: uppercase; }
     .kicker .kl { display: flex; align-items: center; gap: 12px; }
     .rule { height: 3px; width: 64px; background: ${CORAL}; margin: 14px 0 22px; border-radius: 2px; }
-    h1.title { font-size: 25pt; font-weight: 800; letter-spacing: -0.02em; line-height: 1.08; max-width: 9in; }
+    h1.title { font-family: ${DISPLAY}; font-size: 25pt; font-weight: 545; letter-spacing: -0.012em; line-height: 1.14; max-width: 9in; }
     .meta { margin-top: 10px; font-size: 9pt; color: ${TERT}; }
     .doc { margin-top: 26px; }
     .doc h2 { font-size: 13.5pt; font-weight: 800; letter-spacing: -0.01em; margin: 26px 0 10px; padding-top: 14px;
@@ -241,7 +246,7 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0): string {
     .tag { display: flex; justify-content: space-between; align-items: center; font-family: ${MONO};
       font-size: 21px; letter-spacing: 0.1em; color: ${TERT}; text-transform: uppercase; }
     .tag .tl { display: flex; align-items: center; gap: 22px; }
-    .hook { margin-top: 92px; font-size: ${hookSize}px; font-weight: 800; letter-spacing: -0.022em; line-height: 1.06; max-width: 880px; }
+    .hook { margin-top: 92px; font-family: ${DISPLAY}; font-size: ${hookSize}px; font-weight: 545; letter-spacing: -0.012em; line-height: 1.12; max-width: 880px; }
     .rule { height: 6px; width: 96px; background: ${CORAL}; border-radius: 3px; margin: 56px 0 0; }
     .pts { margin-top: 58px; display: flex; flex-direction: column; gap: 40px; }
     .pt { display: flex; gap: 26px; align-items: flex-start; }
@@ -250,7 +255,7 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0): string {
     .src { margin-top: 8px; font-family: ${MONO}; font-size: 18px; color: ${TERT}; letter-spacing: 0.02em; }
     .foot { position: absolute; left: 0; right: 0; bottom: 0; height: 128px; background: ${DARK};
       display: flex; align-items: center; justify-content: space-between; padding: 0 88px; }
-    .foot .r { color: #C9C9C9; font-size: 19px; font-weight: 500; }
+    .foot .r { color: ${IVORY_SUB}; font-size: 19px; font-weight: 500; }
   </style></head><body>
     <div class="wash"></div>
     <div class="frame">
@@ -465,7 +470,7 @@ export function linkedInDocHtml(run: ResearchRunRow): string {
     .rule { height: 6px; width: 96px; background: ${CORAL}; border-radius: 3px; }
     .grow { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 34px; }
     /* cover */
-    .cover-h { margin-top: 150px; font-weight: 800; letter-spacing: -0.022em; line-height: 1.04; max-width: 900px; }
+    .cover-h { margin-top: 150px; font-family: ${DISPLAY}; font-weight: 545; letter-spacing: -0.012em; line-height: 1.12; max-width: 900px; }
     .cover-h + .rule { margin-top: 52px; }
     .cover-sub { margin-top: 40px; font-size: 34px; color: ${BODY}; line-height: 1.4; max-width: 820px; }
     .swipe { position: absolute; right: 88px; bottom: 84px; font-family: ${MONO}; font-size: 22px; letter-spacing: 0.14em; color: ${CORAL_DEEP}; font-weight: 600; }
@@ -475,7 +480,7 @@ export function linkedInDocHtml(run: ResearchRunRow): string {
     .stat-b { font-size: 29px; color: ${BODY}; line-height: 1.45; max-width: 860px; }
     .src-line { font-family: ${MONO}; font-size: 19px; color: ${TERT}; letter-spacing: 0.02em; }
     /* story / takeaway */
-    .story-h { font-size: 58px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; max-width: 890px; }
+    .story-h { font-family: ${DISPLAY}; font-size: 58px; font-weight: 545; letter-spacing: -0.012em; line-height: 1.16; max-width: 890px; }
     .story-b { font-size: 32px; color: ${BODY}; line-height: 1.5; max-width: 860px; }
     .take .in { background: linear-gradient(180deg, rgba(247,247,247,0.0), rgba(247,247,247,0.85)); }
     .take-tag { font-family: ${MONO}; font-size: 20px; letter-spacing: 0.12em; color: ${CORAL_DEEP}; font-weight: 600; }
@@ -488,9 +493,9 @@ export function linkedInDocHtml(run: ResearchRunRow): string {
       radial-gradient(900px 500px at 50% -10%, rgba(22,98,76,0.28), transparent 65%),
       linear-gradient(180deg, rgba(20,19,18,0.25), rgba(20,20,20,0.55)); }
     .closer { justify-content: center; align-items: center; text-align: center; gap: 0; }
-    .close-line { font-size: 40px; font-weight: 700; color: #F4F4F4; letter-spacing: -0.014em; }
+    .close-line { font-family: ${DISPLAY}; font-size: 40px; font-weight: 545; color: ${IVORY}; letter-spacing: -0.01em; }
     .brand-big { margin-top: 46px; display: flex; align-items: center; justify-content: center; }
-    .close-sub { margin-top: 30px; font-size: 30px; color: #DEDEDE; max-width: 760px; line-height: 1.45; }
+    .close-sub { margin-top: 30px; font-size: 30px; color: ${IVORY_SUB}; max-width: 760px; line-height: 1.45; }
     .follow { margin-top: 64px; font-family: ${MONO}; font-size: 22px; letter-spacing: 0.12em; color: #8FD0AE; font-weight: 600; text-transform: uppercase; }
   </style></head><body>${pageHtml.join('\n')}</body></html>`;
 }
@@ -558,40 +563,40 @@ function annBullets(spec: AnnouncementSpec, dark: boolean): string {
 export function announcementCardHtml(spec: AnnouncementSpec): string {
   if (spec.variant === 'dark') {
     return `<!doctype html><meta charset="utf-8"><style>*{margin:0;padding:0;box-sizing:border-box}</style>
-<div style="width:1080px;height:1350px;position:relative;background:#141414 ${DARK_TEXTURE_URI ? `url('${DARK_TEXTURE_URI}') center/cover` : ''};overflow:hidden;font-family:${SANS}">
+<div style="width:1080px;height:1350px;position:relative;background:${DARK} ${DARK_TEXTURE_URI ? `url('${DARK_TEXTURE_URI}') center/cover` : ''};overflow:hidden;font-family:${SANS};font-variant-numeric:tabular-nums">
   <div style="position:absolute;inset:0;background:
-    radial-gradient(900px 480px at 50% 0%, rgba(22,98,76,0.16), transparent 60%),
-    linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.34))"></div>
+    radial-gradient(900px 480px at 50% 0%, rgba(84,150,118,0.16), transparent 60%),
+    linear-gradient(180deg, rgba(15,26,22,0.24), rgba(13,23,19,0.44))"></div>
   <div style="position:relative;height:100%;padding:60px 66px 56px;display:flex;flex-direction:column">
     <div style="display:flex;align-items:center;justify-content:space-between">
       ${logoImg(42, { white: true })}
-      <div style="font-family:${MONO};font-size:18px;letter-spacing:0.1em;color:#C9C9C9;text-transform:uppercase">${annEsc(spec.kicker || 'Announcement')}</div>
+      <div style="font-family:${MONO};font-size:18px;letter-spacing:0.1em;color:${BRASS};text-transform:uppercase">${annEsc(spec.kicker || 'Announcement')}</div>
     </div>
     <div style="margin-top:46px;display:flex;gap:48px;align-items:stretch">
       <div style="width:432px;height:544px;flex:none;box-shadow:0 30px 80px rgba(0,0,0,0.5)">${annPhotoBlock(24, spec.photo)}</div>
       <div style="display:flex;flex-direction:column;justify-content:center">
-        <div style="font-weight:800;font-size:58px;line-height:1.06;letter-spacing:-0.025em;color:#fff">${annEsc(spec.headline)}<br><span style="color:${CORAL}">${annEsc(spec.accent)}</span></div>
+        <div style="font-family:${DISPLAY};font-weight:545;font-size:58px;line-height:1.12;letter-spacing:-0.012em;color:${IVORY}">${annEsc(spec.headline)}<br><span style="color:#8FD0AE">${annEsc(spec.accent)}</span></div>
         <div style="width:70px;height:6px;background:${CORAL};border-radius:99px;margin-top:30px"></div>
-        <div style="margin-top:28px;font-size:22.5px;line-height:1.55;color:#C9C9C9;font-weight:500">${annEsc(spec.sub)}</div>
+        <div style="margin-top:28px;font-size:22.5px;line-height:1.55;color:${IVORY_SUB};font-weight:500">${annEsc(spec.sub)}</div>
       </div>
     </div>
     <div style="margin-top:auto;display:flex;flex-direction:column;gap:36px;max-width:940px">${annBullets(spec, true)}</div>
-    <div style="margin-top:auto;font-size:28px;line-height:1.45;color:#fff;font-weight:700;max-width:920px;padding-bottom:4px">${annEsc(spec.mandate)}</div>
-    <div style="margin-top:34px;border-top:1px solid rgba(255,255,255,0.14);padding-top:26px;display:flex;align-items:center;justify-content:space-between">
+    <div style="margin-top:auto;font-size:28px;line-height:1.45;color:${IVORY};font-weight:700;max-width:920px;padding-bottom:4px">${annEsc(spec.mandate)}</div>
+    <div style="margin-top:34px;border-top:1px solid rgba(243,241,234,0.14);padding-top:26px;display:flex;align-items:center;justify-content:space-between">
       <div style="font-family:${MONO};font-size:19px;letter-spacing:0.1em;color:#8FD0AE;text-transform:uppercase">${annEsc(spec.footerTag)}</div>
-      <div style="font-size:18px;color:#C9C9C9;font-weight:500">${annEsc(spec.footerNote || '')}</div>
+      <div style="font-size:18px;color:${IVORY_SUB};font-weight:500">${annEsc(spec.footerNote || '')}</div>
     </div>
   </div>
 </div>`;
   }
   return `<!doctype html><meta charset="utf-8"><style>*{margin:0;padding:0;box-sizing:border-box}</style>
-<div style="width:1080px;height:1350px;position:relative;background:${WARM};overflow:hidden;font-family:${SANS}">
+<div style="width:1080px;height:1350px;position:relative;background:${WARM};overflow:hidden;font-family:${SANS};font-variant-numeric:tabular-nums">
   <div style="position:absolute;inset:0;background:
-    radial-gradient(1200px 800px at 8% 0%, rgba(22,98,76,0.05), transparent 60%),
-    radial-gradient(900px 700px at 100% 100%, rgba(255,116,119,0.04), transparent 55%)"></div>
+    radial-gradient(1200px 800px at 8% 0%, rgba(22,98,76,0.045), transparent 60%),
+    radial-gradient(900px 700px at 100% 100%, rgba(203,193,170,0.16), transparent 55%)"></div>
   <div style="position:absolute;left:0;top:0;bottom:128px;width:512px;padding:60px 46px 0 60px;display:flex;flex-direction:column">
     <div style="align-self:flex-start">${logoImg(42)}</div>
-    <div style="margin-top:64px;font-weight:800;font-size:52px;line-height:1.06;letter-spacing:-0.025em;color:${INK}">${annEsc(spec.headline)}<br><span style="color:${CORAL_DEEP}">${annEsc(spec.accent)}</span></div>
+    <div style="margin-top:64px;font-family:${DISPLAY};font-weight:545;font-size:52px;line-height:1.12;letter-spacing:-0.012em;color:${INK}">${annEsc(spec.headline)}<br><span style="color:${CORAL_DEEP}">${annEsc(spec.accent)}</span></div>
     <div style="width:70px;height:6px;background:${CORAL};border-radius:99px;margin:34px 0 30px"></div>
     <div style="font-size:22px;line-height:1.5;color:${TERT};font-weight:500">${annEsc(spec.sub)}</div>
     <div style="margin-top:36px;display:flex;flex-direction:column;gap:22px">${annBullets(spec, false)}</div>

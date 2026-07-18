@@ -60,33 +60,33 @@ function mapHtml(map: IntakeMap, generatedAt: string): string {
   html, body { background: #ffffff; }
   body {
     font-family: -apple-system, 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    color: #222222; font-size: 11.5px; line-height: 1.55;
+    color: #14181C; font-size: 11.5px; font-variant-numeric: tabular-nums; line-height: 1.55;
     padding: 52px 56px 40px;
   }
   .mono { font-family: 'SF Mono', 'Cascadia Mono', Consolas, Menlo, monospace; }
-  .head { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 2px solid #222222; }
+  .head { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 2px solid #14181C; }
   .mark { font-weight: 800; font-size: 17px; letter-spacing: -0.02em; }
   .mark .x { color: #0F4E3C; }
-  .headmeta { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: #9A9A9A; text-align: right; }
-  .title { margin-top: 26px; font-size: 27px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.08; }
-  .thesis { margin-top: 9px; font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 9.5px; letter-spacing: 0.05em; color: #6A6A6A; }
-  .answer { margin-top: 20px; border-left: 3px solid #222222; padding: 10px 0 10px 16px; font-size: 13.5px; font-weight: 700; line-height: 1.45; }
-  .funnel { margin-top: 26px; border-top: 1px solid #EBEBEB; border-bottom: 1px solid #EBEBEB; padding: 18px 0; }
+  .headmeta { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: #8A9099; text-align: right; }
+  .title { margin-top: 26px; font-family: Georgia, 'Times New Roman', serif; font-size: 27px; font-weight: 600; letter-spacing: -0.008em; line-height: 1.16; }
+  .thesis { margin-top: 9px; font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 9.5px; letter-spacing: 0.05em; color: #5C6670; }
+  .answer { margin-top: 20px; border-left: 3px solid #14181C; padding: 10px 0 10px 16px; font-size: 13.5px; font-weight: 700; line-height: 1.45; }
+  .funnel { margin-top: 26px; border-top: 1px solid #E4E1D9; border-bottom: 1px solid #E4E1D9; padding: 18px 0; }
   .funnel .fk { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: #0F4E3C; margin-bottom: 12px; }
   .step { display: flex; align-items: baseline; gap: 16px; }
   .step .n { font-size: 34px; font-weight: 800; letter-spacing: -0.03em; min-width: 128px; }
-  .step .l { font-size: 11.5px; color: #6A6A6A; }
-  .arrow { color: #BBBBBB; font-size: 13px; padding: 2px 0 2px 4px; }
+  .step .l { font-size: 11.5px; color: #5C6670; }
+  .arrow { color: #AEB4BA; font-size: 13px; padding: 2px 0 2px 4px; }
   .sec { margin-top: 20px; }
   .sec .k { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: #0F4E3C; }
   .sec .v { margin-top: 5px; font-size: 11.5px; line-height: 1.6; }
-  .insight { margin-top: 24px; background: #F7F7F7; padding: 18px 20px; }
-  .insight .k { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: #222222; }
+  .insight { margin-top: 24px; background: #F6F4EF; padding: 18px 20px; }
+  .insight .k { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: #14181C; }
   .insight .v { margin-top: 7px; font-size: 12.5px; font-weight: 600; line-height: 1.6; }
-  .next { margin-top: 26px; border: 1px solid #222222; padding: 16px 20px; }
-  .next .k { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: #222222; }
+  .next { margin-top: 26px; border: 1px solid #14181C; padding: 16px 20px; }
+  .next .k { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: #14181C; }
   .next .v { margin-top: 6px; font-size: 11.5px; line-height: 1.6; }
-  .foot { margin-top: 24px; padding-top: 12px; border-top: 1px solid #EBEBEB; font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 7.8px; letter-spacing: 0.06em; line-height: 1.7; color: #9A9A9A; }
+  .foot { margin-top: 24px; padding-top: 12px; border-top: 1px solid #E4E1D9; font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 7.8px; letter-spacing: 0.06em; line-height: 1.7; color: #8A9099; }
 </style>
 </head>
 <body>
