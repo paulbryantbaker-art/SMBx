@@ -13,6 +13,7 @@ import {
   DEPTHS,
   OUTPUT_FORMATS,
   CADENCES,
+  POST_ANGLES,
   validateRunInput,
   createResearchRun,
   executeResearchRun,
@@ -55,6 +56,7 @@ researchRouter.get('/research/catalog', (_req, res) => {
   res.json({
     types: RESEARCH_TYPES.map(t => ({ key: t.key, label: t.label, blurb: t.blurb })),
     depths: DEPTHS.map(d => ({ key: d.key, label: d.label, blurb: d.blurb })),
+    angles: POST_ANGLES.map(a => ({ key: a.key, label: a.label, blurb: a.blurb })),
     formats: OUTPUT_FORMATS,
     cadences: CADENCES,
   });
@@ -81,6 +83,7 @@ researchRouter.post('/research/runs', async (req, res) => {
     topic: String(req.body?.topic ?? ''),
     depth: String(req.body?.depth ?? 'standard'),
     outputFormat: String(req.body?.outputFormat ?? 'report'),
+    postAngle: String(req.body?.postAngle ?? 'auto'),
   };
   const invalid = validateRunInput(input);
   if (invalid) return res.status(400).json({ error: invalid });
@@ -325,6 +328,7 @@ researchRouter.post('/research/schedules', async (req, res) => {
     topic: String(req.body?.topic ?? ''),
     depth: String(req.body?.depth ?? 'standard'),
     outputFormat: String(req.body?.outputFormat ?? 'report'),
+    postAngle: String(req.body?.postAngle ?? 'auto'),
   };
   if (!name) return res.status(400).json({ error: 'Campaign name is required' });
   if (!CADENCES.includes(cadence as any)) return res.status(400).json({ error: 'Unknown cadence' });
@@ -333,9 +337,9 @@ researchRouter.post('/research/schedules', async (req, res) => {
   try {
     const next = nextRunAt(cadence, new Date(), true);
     const [row] = await sql`
-      INSERT INTO research_schedules (user_id, name, research_type, topic, depth, output_format, cadence, active, next_run_at)
+      INSERT INTO research_schedules (user_id, name, research_type, topic, depth, output_format, post_angle, cadence, active, next_run_at)
       VALUES (${userId}, ${name.slice(0, 120)}, ${input.researchType}, ${input.topic.trim()}, ${input.depth},
-              ${input.outputFormat}, ${cadence}, TRUE, ${next})
+              ${input.outputFormat}, ${input.postAngle ?? 'auto'}, ${cadence}, TRUE, ${next})
       RETURNING *
     `;
     // "Run the first one now" — kick an immediate run tied to the campaign.

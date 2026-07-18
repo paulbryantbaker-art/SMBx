@@ -20,6 +20,7 @@ import { StudioAnnouncement, StudioPostCards } from "./StudioAnnouncement";
 interface Catalog {
   types: { key: string; label: string; blurb: string }[];
   depths: { key: string; label: string; blurb: string }[];
+  angles?: { key: string; label: string; blurb: string }[];
   formats: string[];
   cadences: string[];
 }
@@ -112,6 +113,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
   const [topic, setTopic] = useState("");
   const [depth, setDepth] = useState("standard");
   const [output, setOutput] = useState("both");
+  const [angle, setAngle] = useState("auto");
   // Campaign extras.
   const [asCampaign, setAsCampaign] = useState(false);
   const [campName, setCampName] = useState("");
@@ -169,7 +171,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
         if (!campName.trim()) throw new Error("Give the campaign a name.");
         await api("/research/schedules", {
           method: "POST",
-          body: JSON.stringify({ name: campName.trim(), researchType: typeKey, topic: topic.trim(), depth, outputFormat: output, cadence, runNow }),
+          body: JSON.stringify({ name: campName.trim(), researchType: typeKey, topic: topic.trim(), depth, outputFormat: output, postAngle: angle, cadence, runNow }),
         });
         setNote({ kind: "ok", text: runNow ? "Campaign created — the first run is going now." : "Campaign created." });
         setCampName("");
@@ -177,7 +179,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
       } else {
         await api("/research/runs", {
           method: "POST",
-          body: JSON.stringify({ researchType: typeKey, topic: topic.trim(), depth, outputFormat: output }),
+          body: JSON.stringify({ researchType: typeKey, topic: topic.trim(), depth, outputFormat: output, postAngle: angle }),
         });
         setNote({ kind: "ok", text: "Run started — reports land below when done." });
       }
@@ -188,7 +190,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
     } finally {
       setBusy(false);
     }
-  }, [topic, busy, asCampaign, campName, typeKey, depth, output, cadence, runNow, refresh]);
+  }, [topic, busy, asCampaign, campName, typeKey, depth, output, angle, cadence, runNow, refresh]);
 
   const toggleSchedule = useCallback(async (s: ScheduleRow) => {
     try {
@@ -302,6 +304,18 @@ export default function StudioResearch({ user }: { user: User | null }) {
               </button>
             ))}
           </div>
+        </div>
+
+        <div style={{ marginTop: 16 }}>
+          <span style={R.knobLabel}>Post angle — how the LinkedIn collateral is framed</span>
+          <div style={{ ...R.segRow, marginTop: 8, flexWrap: "wrap" }}>
+            {(catalog?.angles ?? []).map((a) => (
+              <button key={a.key} type="button" title={a.blurb} onClick={() => setAngle(a.key)} style={{ ...R.seg, ...(angle === a.key ? R.segOn : null) }}>
+                {a.label}
+              </button>
+            ))}
+          </div>
+          <span style={{ ...R.knobHint, display: "block", marginTop: 6 }}>{(catalog?.angles ?? []).find((a) => a.key === angle)?.blurb ?? ""}</span>
         </div>
 
         <textarea
