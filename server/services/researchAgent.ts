@@ -39,8 +39,10 @@ let client: Anthropic | null = null;
 function getClient(): Anthropic {
   if (!client) {
     if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY is not set');
-    // Research turns run long (server-side search rounds) — generous timeout.
-    client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 300_000, maxRetries: 2 });
+    // Research rounds run long (server-side search rounds + long writes).
+    // Rounds STREAM (see streamRound) so there is no single-response wall;
+    // this timeout only bounds connect/first-byte and the SDK's retries.
+    client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 600_000, maxRetries: 2 });
   }
   return client;
 }
@@ -427,16 +429,49 @@ export async function executeResearchRun(runId: number): Promise<void> {
     // One agentic turn, resumed across pause_turn boundaries. If the fetch
     // tool is rejected in this environment, degrade to search-only once.
     let toolset = tools;
+
+    // STREAMING (2026-07-18): a research round (server-side searches + a
+    // long write) can outlive any single-response window — Paul's runs died
+    // with "Request timed out." at the old 5-minute non-streaming ceiling.
+    // A stream keeps the connection moving for the whole round, and each
+    // completed tool-use block lands in the activity trail AS IT HAPPENS,
+    // so the library feed narrates mid-round instead of between rounds.
+    const streamRound = async (msgs: MessageParam[]): Promise<any> => {
+      const stream = anthropic.messages.stream({
+        model: MODEL,
+        max_tokens: depth.maxTokens,
+        system: researchSystemPrompt(type, depth),
+        messages: msgs,
+        tools: toolset,
+      });
+      stream.on('contentBlock', (block: any) => {
+        const calls = harvestToolCalls([block]);
+        if (calls.length) {
+          for (const c of calls) pushAct(c.kind, c.text);
+          void flushAct();
+        }
+      });
+      return await stream.finalMessage();
+    };
+
+    // One manual mid-stream retry per round — the SDK's own retries only
+    // cover the window before streaming begins. 400s won't heal; rethrow.
+    const runRound = async (msgs: MessageParam[]): Promise<any> => {
+      try {
+        return await streamRound(msgs);
+      } catch (err: any) {
+        if (err?.status === 400) throw err;
+        console.warn(`[research] Run ${runId} round dropped mid-stream — retrying once:`, err?.message);
+        pushAct('phase', 'Connection dropped mid-round — retrying');
+        await flushAct();
+        return await streamRound(msgs);
+      }
+    };
+
     let resp: any = null;
     for (let attempt = 0; attempt < 2 && !resp; attempt++) {
       try {
-        resp = await anthropic.messages.create({
-          model: MODEL,
-          max_tokens: depth.maxTokens,
-          system: researchSystemPrompt(type, depth),
-          messages,
-          tools: toolset,
-        });
+        resp = await runRound(messages);
       } catch (err: any) {
         const msg = String(err?.message || '');
         if (attempt === 0 && err?.status === 400 && /web_fetch/i.test(msg)) {
@@ -456,20 +491,15 @@ export async function executeResearchRun(runId: number): Promise<void> {
       usage.fetches += resp.usage?.server_tool_use?.web_fetch_requests ?? 0;
       harvestSources(resp.content ?? [], sources);
       reportMd += harvestText(resp.content ?? []);
-      for (const call of harvestToolCalls(resp.content ?? [])) pushAct(call.kind, call.text);
+      // Tool calls hit the trail live via the contentBlock handler — no
+      // post-round harvest here (it would double-log).
 
       if (resp.stop_reason !== 'pause_turn' || rounds >= 12) break;
       rounds++;
       await setProgress(runId, `researching — ${usage.searches} searches so far`);
       await flushAct();
       messages = [...messages, { role: 'assistant', content: resp.content }];
-      resp = await anthropic.messages.create({
-        model: MODEL,
-        max_tokens: depth.maxTokens,
-        system: researchSystemPrompt(type, depth),
-        messages,
-        tools: toolset,
-      });
+      resp = await runRound(messages);
     }
 
     reportMd = reportMd.trim();
@@ -489,12 +519,15 @@ export async function executeResearchRun(runId: number): Promise<void> {
     let title: string = run.topic.slice(0, 80);
     let feed: any = null;
     try {
-      const feedResp = await anthropic.messages.create({
-        model: MODEL,
-        max_tokens: 6000,
-        system: feedSystemPrompt((run as any).post_angle),
-        messages: [{ role: 'user', content: `The report:\n\n${reportMd.slice(0, 60000)}` }],
-      });
+      // Streamed for the same reason as the rounds — no single-response wall.
+      const feedResp = await anthropic.messages
+        .stream({
+          model: MODEL,
+          max_tokens: 6000,
+          system: feedSystemPrompt((run as any).post_angle),
+          messages: [{ role: 'user', content: `The report:\n\n${reportMd.slice(0, 60000)}` }],
+        })
+        .finalMessage();
       usage.inputTokens += feedResp.usage?.input_tokens ?? 0;
       usage.outputTokens += feedResp.usage?.output_tokens ?? 0;
       const parsed = extractJson(harvestText(feedResp.content as any[]));
