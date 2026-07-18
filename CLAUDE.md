@@ -152,7 +152,7 @@ Valuation Explorer, LBO, SBA Financing, DCF, Tax Impact, Cap Table, Sensitivity 
 | server/services/studioAssets.ts | Studio media library (migration 099 studio_assets, bytea in PG): upload/list/serve/patch/delete + per-asset focal point that drives object-position framing in every composer; lazy-seeds the two founder photos |
 | server/routes/research.ts | Research runs/schedules CRUD + pdf/card.png/doc.pdf/post.txt downloads + /studio/assets CRUD + /studio/announcement.png compose (behind blanket /api auth + practice perimeter) |
 | client/src/components/v6/desktop/screens/StudioAnnouncement.tsx | Studio Media + Announcement section (mounted in StudioResearch): photo upload, focal sliders, announcement copy form, render/download/preview |
-| client/src/components/v6/desktop/screens/StudioResearch.tsx | Studio "Research & campaigns" mode — Paul's control panel (topic/type/depth/output + cadence campaigns); StudioCreate.tsx carries the mode toggle |
+| client/src/components/v6/desktop/screens/StudioResearch.tsx | Studio "Research & campaigns" mode — Paul's control panel, FORMAT-FIRST (2026-07-18): the primary picker is his weekly posting plan's own vocabulary (Teardown · Contrarian Take · How Buyers Think · Practitioner Note · Human Thread · Hand-Raiser = POST_ANGLES), the research lens auto-matches via FORMAT_LENS and stays overridable; then topic/depth/output + cadence campaigns + draft→review→approve. StudioCreate.tsx carries the mode toggle |
 | server/services/tools.ts | 35 agentic tools |
 | server/services/definitiveConnectorDistribution.ts | Claude-first connector launch package and marketplace evidence pack |
 | server/services/definitiveAssistantDistributionReadiness.ts | Claude/ChatGPT/MCP launch readiness and revenue blocker map |

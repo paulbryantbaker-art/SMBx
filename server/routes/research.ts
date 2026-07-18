@@ -109,7 +109,7 @@ researchRouter.get('/research/runs', async (req, res) => {
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
   try {
     const runs = await sql`
-      SELECT id, schedule_id, research_type, topic, depth, output_format, status, progress,
+      SELECT id, schedule_id, research_type, topic, depth, output_format, post_angle, status, progress,
              report_title, (studio_feed IS NOT NULL) AS has_feed, review_status, error, usage, created_at, completed_at
       FROM research_runs
       WHERE user_id = ${userId}
@@ -384,10 +384,11 @@ researchRouter.patch('/research/schedules/:id', async (req, res) => {
       research_type: typeof b.researchType === 'string' ? b.researchType : existing.research_type,
       depth: typeof b.depth === 'string' ? b.depth : existing.depth,
       output_format: typeof b.outputFormat === 'string' ? b.outputFormat : existing.output_format,
+      post_angle: typeof b.postAngle === 'string' ? b.postAngle : ((existing as any).post_angle ?? 'auto'),
       cadence: typeof b.cadence === 'string' ? b.cadence : existing.cadence,
       active: typeof b.active === 'boolean' ? b.active : existing.active,
     };
-    const invalid = validateRunInput({ userId, researchType: next.research_type, topic: next.topic, depth: next.depth, outputFormat: next.output_format });
+    const invalid = validateRunInput({ userId, researchType: next.research_type, topic: next.topic, depth: next.depth, outputFormat: next.output_format, postAngle: next.post_angle });
     if (invalid) return res.status(400).json({ error: invalid });
     if (!CADENCES.includes(next.cadence)) return res.status(400).json({ error: 'Unknown cadence' });
 
@@ -398,8 +399,8 @@ researchRouter.patch('/research/schedules/:id', async (req, res) => {
     const [row] = await sql`
       UPDATE research_schedules
       SET name = ${next.name}, topic = ${next.topic}, research_type = ${next.research_type},
-          depth = ${next.depth}, output_format = ${next.output_format}, cadence = ${next.cadence},
-          active = ${next.active}, next_run_at = ${nextRun}
+          depth = ${next.depth}, output_format = ${next.output_format}, post_angle = ${next.post_angle},
+          cadence = ${next.cadence}, active = ${next.active}, next_run_at = ${nextRun}
       WHERE id = ${id} AND user_id = ${userId}
       RETURNING *
     `;
