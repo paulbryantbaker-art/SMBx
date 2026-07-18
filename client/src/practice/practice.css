@@ -358,13 +358,13 @@
 .pd-askew .off { padding-top: clamp(16px, 5vw, 84px); }
 
 /* ─── pills / buttons ─── */
-/* Ledger buttons: 8px radius (institutional-modern — not a consumer pill),
-   ghost secondary with an ink hairline, one filled CTA per band. Class names
-   keep "pill" historically. */
+/* Buttons: PILLS by founder law (Paul, 2026-07-18: "i dont like any squared
+   buttons make them all pills" — overrides Ledger's 8px). The Ledger ghost
+   treatment stays: ink hairline secondary, one filled CTA per band. */
 .pd-pill {
   display: inline-flex; align-items: center; justify-content: center;
   border: 1px solid var(--pd-ink);
-  padding: 11px 24px; border-radius: 8px;
+  padding: 11px 24px; border-radius: 99px;
   font-size: 15px; font-weight: 600; color: var(--pd-ink);
   white-space: nowrap; background: transparent;
   transition: border-color 160ms ease, background-color 160ms ease;
@@ -373,7 +373,7 @@
 .pd-pill-primary {
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--pd-cta); color: #fff; border: none;
-  padding: 12px 26px; border-radius: 8px;
+  padding: 12px 26px; border-radius: 99px;
   font-size: 15px; font-weight: 700; white-space: nowrap;
   transition: background-color 160ms ease;
 }

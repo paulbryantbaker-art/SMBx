@@ -199,8 +199,8 @@ export default function Industries() {
                 applies them one wave earlier.
               </div>
               <div className="attr">
-                Selected transactions led or co-led in the course of employment at Wrench Group and
-                JPMorgan Chase.
+                Selected transactions led or co-led in the course of employment at a world-class
+                PE-backed aggregator and a global investment bank.
               </div>
             </div>
           </div>
