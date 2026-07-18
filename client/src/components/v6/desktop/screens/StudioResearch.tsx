@@ -160,7 +160,8 @@ export default function StudioResearch({ user }: { user: User | null }) {
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<{ kind: "err" | "ok"; text: string } | null>(null);
   const [dl, setDl] = useState<string | null>(null); // "runId:kind" while downloading
-  const [reviewId, setReviewId] = useState<number | null>(null); // open review panel
+  const [reviewId, setReviewId] = useState<number | null>(null); // review sheet
+  const [sheet, setSheet] = useState<null | "collateral">(null); // composer sheet
 
   const refresh = useCallback(async () => {
     try {
@@ -286,6 +287,23 @@ export default function StudioResearch({ user }: { user: User | null }) {
     }
   }, [refresh]);
 
+  const uploadPhoto = useCallback(async (f: File) => {
+    const fd = new FormData();
+    fd.append("file", f);
+    fd.append("label", f.name.replace(/\.[a-z0-9]+$/i, ""));
+    try {
+      const r = await fetch("/api/studio/assets", { method: "POST", headers: authHeaders(), body: fd });
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        throw new Error((j as any)?.error || `Upload failed (${r.status})`);
+      }
+      setNote({ kind: "ok", text: "Photo uploaded — it's in Media." });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Upload failed." });
+    }
+  }, [refresh]);
+
   const downloadAsset = useCallback(async (a: AssetRow) => {
     const ext = a.mime === "image/png" ? "png" : a.mime === "image/webp" ? "webp" : "jpg";
     try {
@@ -361,11 +379,8 @@ export default function StudioResearch({ user }: { user: User | null }) {
   const depthDef = catalog?.depths.find((d) => d.key === depth);
   const reviewRun = runs.find((r) => r.id === reviewId) ?? null;
 
-  return (
-    <div>
-      <div style={R.workRow}>
-      {/* ── the control panel (left column) ── */}
-      <div style={R.formCol}>
+  // ── the creation form — lives in the manager's inspector pane ──
+  const createForm = (
       <div style={R.form}>
         <div>
           <span style={R.knobLabel}>Post format — your slot in the posting week</span>
@@ -468,45 +483,69 @@ export default function StudioResearch({ user }: { user: User | null }) {
         {note && <div style={{ ...R.note, color: note.kind === "err" ? "#B3261E" : T.green }}>{note.text}</div>}
       </div>
 
-      </div>{/* formCol */}
+  );
 
-      {/* ── the campaign manager — fills the right side of the page ── */}
-      <div style={R.mgrCol}>
-        <Library
-          loaded={loaded}
-          runs={runs}
-          schedules={schedules}
-          assets={assets}
-          typeLabel={typeLabel}
-          angleLabel={angleLabel}
-          dl={dl}
-          reviewId={reviewId}
-          onReview={(id) => setReviewId(reviewId === id ? null : id)}
-          onGrab={grab}
-          onCopyPost={copyPost}
-          onRerunRun={rerunRun}
-          onMoveRun={moveRun}
-          onArchiveRun={archiveRun}
-          onDeleteRun={deleteRun}
-          onToggleSchedule={toggleSchedule}
-          onDeleteSchedule={deleteSchedule}
-          onDeleteAsset={deleteAsset}
-          onDownloadAsset={downloadAsset}
-        />
-      </div>
-      </div>{/* workRow */}
+  // ── the canvas app: the manager owns the whole content area ──
+  return (
+    <div style={A.frame}>
+      <Library
+        loaded={loaded}
+        runs={runs}
+        schedules={schedules}
+        assets={assets}
+        typeLabel={typeLabel}
+        angleLabel={angleLabel}
+        dl={dl}
+        reviewId={reviewId}
+        createForm={createForm}
+        onReview={(id) => setReviewId(reviewId === id ? null : id)}
+        onGrab={grab}
+        onCopyPost={copyPost}
+        onRerunRun={rerunRun}
+        onMoveRun={moveRun}
+        onArchiveRun={archiveRun}
+        onDeleteRun={deleteRun}
+        onToggleSchedule={toggleSchedule}
+        onDeleteSchedule={deleteSchedule}
+        onDeleteAsset={deleteAsset}
+        onDownloadAsset={downloadAsset}
+        onUploadPhoto={uploadPhoto}
+        onNewCard={() => setSheet("collateral")}
+      />
 
-      {reviewRun && (
-        <ReviewPanel
-          run={reviewRun}
-          onStatus={() => void refresh()}
-          onCopyPost={() => copyPost(reviewRun)}
-          onGrab={(kind) => grab(reviewRun, kind)}
-        />
+      {sheet === "collateral" && (
+        <Sheet title="Media & collateral studio" onClose={() => { setSheet(null); void refresh(); }}>
+          <StudioAnnouncement />
+          <StudioPostCards />
+        </Sheet>
       )}
+      {reviewRun && (
+        <Sheet title="Review & approve" onClose={() => setReviewId(null)}>
+          <ReviewPanel
+            run={reviewRun}
+            onStatus={() => void refresh()}
+            onCopyPost={() => copyPost(reviewRun)}
+            onGrab={(kind) => grab(reviewRun, kind)}
+          />
+        </Sheet>
+      )}
+    </div>
+  );
+}
 
-      <StudioAnnouncement />
-      <StudioPostCards />
+/** Right-side slide-over inside the app frame (absolute, never fixed —
+ *  the Safari toolbar rule). Hosts the composers and the review panel. */
+function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+  return (
+    <div style={A.sheetWrap}>
+      <div style={A.scrim} onClick={onClose} />
+      <div style={A.sheet}>
+        <div style={A.sheetHead}>
+          <div style={A.sheetTitle}>{title}</div>
+          <button type="button" style={A.sheetClose} onClick={onClose}>Close</button>
+        </div>
+        <div style={A.sheetBody}>{children}</div>
+      </div>
     </div>
   );
 }
@@ -566,7 +605,7 @@ function SideRow({ label, count, on, onClick, tint, dim }: {
   );
 }
 
-function Library({ loaded, runs, schedules, assets, typeLabel, angleLabel, dl, reviewId, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onArchiveRun, onDeleteRun, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset }: {
+function Library({ loaded, runs, schedules, assets, typeLabel, angleLabel, dl, reviewId, createForm, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onArchiveRun, onDeleteRun, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard }: {
   loaded: boolean;
   runs: RunRow[];
   schedules: ScheduleRow[];
@@ -575,6 +614,7 @@ function Library({ loaded, runs, schedules, assets, typeLabel, angleLabel, dl, r
   angleLabel: (k?: string | null) => string | null;
   dl: string | null;
   reviewId: number | null;
+  createForm: React.ReactNode;
   onReview: (id: number) => void;
   onGrab: (r: RunRow, kind: "pdf" | "card" | "md" | "lipdf") => void;
   onCopyPost: (r: RunRow) => void;
@@ -586,12 +626,17 @@ function Library({ loaded, runs, schedules, assets, typeLabel, angleLabel, dl, r
   onDeleteSchedule: (s: ScheduleRow) => void;
   onDeleteAsset: (a: AssetRow) => void;
   onDownloadAsset: (a: AssetRow) => void;
+  onUploadPhoto: (f: File) => void;
+  onNewCard: () => void;
 }) {
   const [sel, setSel] = useState<FolderSel>({ kind: "all" });
   const [selRunId, setSelRunId] = useState<number | null>(null);
   const [selAssetId, setSelAssetId] = useState<number | null>(null);
+  // The inspector shows the CREATE form or the selected item.
+  const [insp, setInsp] = useState<"create" | "item">("item");
   const [filter, setFilter] = useState("");
   const lastAutoRef = useRef<number | null>(null);
+  const fileRef = useRef<HTMLInputElement | null>(null);
 
   // Archived runs leave the working folders; they live in their own folder.
   const activeRuns = useMemo(() => runs.filter((r) => !r.archived), [runs]);
@@ -630,6 +675,7 @@ function Library({ loaded, runs, schedules, assets, typeLabel, angleLabel, dl, r
       lastAutoRef.current = newest.id;
       setSel(newest.schedule_id != null ? { kind: "camp", id: newest.schedule_id } : { kind: "all" });
       setSelRunId(newest.id);
+      setInsp("item"); // flip the inspector to the live trail
     }
   }, [runs]);
 
@@ -654,6 +700,9 @@ function Library({ loaded, runs, schedules, assets, typeLabel, angleLabel, dl, r
     <div style={F.wrap}>
       {/* folders */}
       <div style={F.side}>
+        <button type="button" style={{ ...F.newBtn, ...(insp === "create" ? F.newBtnOn : null) }} onClick={() => setInsp("create")}>
+          + New research
+        </button>
         <div style={F.sideHead}>Library</div>
         <SideRow label="All research" count={activeRuns.length} on={sel.kind === "all"} onClick={() => setSel({ kind: "all" })} tint="#6E9BE0" />
         <SideRow label="One-off runs" count={oneoffs.length} on={sel.kind === "oneoff"} onClick={() => setSel({ kind: "oneoff" })} tint="#A8AEB8" />
@@ -692,6 +741,22 @@ function Library({ loaded, runs, schedules, assets, typeLabel, angleLabel, dl, r
         )}
         <div style={F.listHead}>
           <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter…" style={F.filter} />
+          {sel.kind === "media" && (
+            <>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                style={{ display: "none" }}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) onUploadPhoto(f); e.currentTarget.value = ""; }}
+              />
+              <button type="button" style={F.toolBtn} onClick={() => fileRef.current?.click()}>Upload photo</button>
+              <button type="button" style={{ ...F.toolBtn, color: T.ink3 }} onClick={onNewCard}>Focal points</button>
+            </>
+          )}
+          {sel.kind === "collateral" && (
+            <button type="button" style={F.toolBtn} onClick={onNewCard}>New card</button>
+          )}
         </div>
         <div style={F.cols}>
           <span style={{ flex: 1 }}>Name</span>
@@ -711,7 +776,7 @@ function Library({ loaded, runs, schedules, assets, typeLabel, angleLabel, dl, r
             ? assetItems.map((a) => {
                 const on = a.id === selAssetId;
                 return (
-                  <button key={a.id} type="button" onClick={() => setSelAssetId(a.id)} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
+                  <button key={a.id} type="button" onClick={() => { setSelAssetId(a.id); setInsp("item"); }} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
                     <span style={F.rowIcon}><DocGlyph c={on ? T.blue : T.muted} /></span>
                     <span style={F.rowName}>{a.label}</span>
                     <span style={F.rowCol}>{(a.mime.split("/")[1] ?? a.mime).toUpperCase()}{a.width && a.height ? ` · ${a.width}×${a.height}` : ""}</span>
@@ -725,7 +790,7 @@ function Library({ loaded, runs, schedules, assets, typeLabel, angleLabel, dl, r
                 const failed = r.status === "failed";
                 const running = r.status === "queued" || r.status === "running";
                 return (
-                  <button key={r.id} type="button" onClick={() => setSelRunId(r.id)} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
+                  <button key={r.id} type="button" onClick={() => { setSelRunId(r.id); setInsp("item"); }} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
                     <span style={F.rowIcon}>{running ? <Spinner /> : failed ? <span style={{ color: "#B3261E", fontWeight: 700 }}>!</span> : <DocGlyph c={on ? T.blue : T.muted} />}</span>
                     <span style={F.rowName}>{r.report_title || r.topic}</span>
                     <span style={F.rowCol}>{angleLabel(r.post_angle) ?? typeLabel(r.research_type)}</span>
@@ -742,13 +807,15 @@ function Library({ loaded, runs, schedules, assets, typeLabel, angleLabel, dl, r
         </div>
       </div>
 
-      {/* preview */}
+      {/* inspector — the create form or the selected item */}
       <div style={F.prev}>
-        {assetMode ? (
+        {insp === "create" ? (
+          <div style={F.createWrap}>{createForm}</div>
+        ) : assetMode ? (
           selAsset ? (
             <AssetPreview asset={selAsset} onDownload={() => onDownloadAsset(selAsset)} onDelete={() => onDeleteAsset(selAsset)} />
           ) : (
-            <div style={F.prevEmpty}>Select a file.</div>
+            <div style={F.createWrap}>{createForm}</div>
           )
         ) : selRun ? (
           <RunPreview
@@ -767,7 +834,7 @@ function Library({ loaded, runs, schedules, assets, typeLabel, angleLabel, dl, r
             onDelete={() => onDeleteRun(selRun)}
           />
         ) : (
-          <div style={F.prevEmpty}>Select a run to see its documents.</div>
+          <div style={F.createWrap}>{createForm}</div>
         )}
       </div>
     </div>
@@ -1084,13 +1151,8 @@ function Spinner() {
 const R: Record<string, React.CSSProperties> = {
   signin: { marginTop: 24, fontSize: 13, color: T.muted },
 
-  // The workspace: compact creation form on the left, the campaign manager
-  // filling the rest of the page on the right. Wraps on narrow windows.
-  workRow: { marginTop: 16, display: "flex", gap: 18, alignItems: "stretch", flexWrap: "wrap" },
-  formCol: { width: 440, flex: "1 1 400px", maxWidth: 520, minWidth: 360 },
-  mgrCol: { flex: "10 1 620px", minWidth: 560, display: "flex", flexDirection: "column" },
-
-  form: { background: T.white, border: `1px solid ${T.border}`, borderRadius: 16, boxShadow: T.shCard, padding: "18px 20px" },
+  // The create form lives inside the manager's inspector pane.
+  form: { background: T.white, border: `1px solid ${T.border}`, borderRadius: 14, boxShadow: T.shCard, padding: "16px 16px 18px" },
   knobRow: { display: "flex", gap: 22, flexWrap: "wrap" },
   knob: { display: "flex", flexDirection: "column", gap: 6, minWidth: 200, flex: 1 },
   knobLabel: { fontSize: 12, fontWeight: 600, color: T.muted },
@@ -1118,7 +1180,7 @@ const R: Record<string, React.CSSProperties> = {
 
   empty: { fontSize: 13, color: T.muted, padding: "14px 2px" },
 
-  outGrid: { marginTop: 8, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 8 },
+  outGrid: { marginTop: 8, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8 },
   outCard: { display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4, textAlign: "left", padding: "11px 13px", borderRadius: 12, border: `1px solid ${T.inputBd}`, background: T.white, cursor: "pointer", fontFamily: T.font },
   outCardOn: { borderColor: T.blue, background: T.blueBg3, boxShadow: `0 0 0 1px ${T.blue} inset` },
   outCardTitle: { fontSize: 13.5, fontWeight: 700 },
@@ -1129,9 +1191,9 @@ const R: Record<string, React.CSSProperties> = {
   chipOk: { background: "#E7F0EC", color: "#0F4E3C", border: "1px solid #BFD8CD" },
 };
 
-/* Finder library styles. */
+/* Finder library styles — the manager fills the app frame. */
 const F: Record<string, React.CSSProperties> = {
-  wrap: { display: "flex", alignItems: "stretch", flex: 1, height: "max(680px, calc(100vh - 300px))", background: T.white, border: `1px solid ${T.border}`, borderRadius: 16, boxShadow: T.shCard, overflow: "hidden" },
+  wrap: { display: "flex", alignItems: "stretch", flex: 1, minHeight: 0, background: T.white, border: `1px solid ${T.border}`, borderRadius: 16, boxShadow: T.shCard, overflow: "hidden" },
 
   side: { width: 188, flex: "none", background: T.surface, borderRight: `1px solid ${T.border}`, padding: "12px 8px", overflowY: "auto" },
   sideHead: { fontSize: 11, fontWeight: 700, color: T.muted2, letterSpacing: "0.05em", textTransform: "uppercase", padding: "0 8px", marginBottom: 6 },
@@ -1144,8 +1206,12 @@ const F: Record<string, React.CSSProperties> = {
   campBar: { display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", borderBottom: `1px solid ${T.border}`, background: T.surface },
   campName: { fontSize: 13, fontWeight: 700, color: T.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
   campMeta: { fontSize: 11.5, color: T.muted, marginTop: 1 },
-  listHead: { padding: "10px 12px 6px" },
-  filter: { width: "100%", height: 30, borderRadius: 8, border: `1px solid ${T.inputBd}`, background: T.white, padding: "0 10px", fontSize: 12.5, color: T.ink, fontFamily: T.font, outline: "none", boxSizing: "border-box" },
+  listHead: { padding: "10px 12px 6px", display: "flex", gap: 8, alignItems: "center" },
+  filter: { flex: 1, minWidth: 0, height: 30, borderRadius: 8, border: `1px solid ${T.inputBd}`, background: T.white, padding: "0 10px", fontSize: 12.5, color: T.ink, fontFamily: T.font, outline: "none", boxSizing: "border-box" },
+  toolBtn: { flex: "none", height: 30, background: T.white, border: `1px solid ${T.border}`, borderRadius: 8, padding: "0 12px", fontSize: 12, fontWeight: 700, color: T.blue, cursor: "pointer", fontFamily: T.font },
+  newBtn: { display: "block", width: "100%", marginBottom: 12, background: T.blue, color: "#fff", border: "none", borderRadius: T.rPill, padding: "9px 12px", fontSize: 12.5, fontWeight: 700, cursor: "pointer", fontFamily: T.font, textAlign: "center" },
+  newBtnOn: { boxShadow: `0 0 0 2px ${T.white}, 0 0 0 4px ${T.blue}` },
+  createWrap: { padding: "12px 12px 18px" },
   cols: { display: "flex", gap: 6, padding: "4px 16px 6px", fontSize: 11, fontWeight: 700, color: T.muted2, letterSpacing: "0.04em", textTransform: "uppercase", borderBottom: `1px solid ${T.border}` },
   rows: { flex: 1, overflowY: "auto", padding: "4px 6px 8px" },
   row: { display: "flex", alignItems: "center", gap: 6, width: "100%", textAlign: "left", background: "transparent", border: "none", borderRadius: 8, padding: "8px 8px", cursor: "pointer", fontFamily: T.font },
@@ -1155,7 +1221,7 @@ const F: Record<string, React.CSSProperties> = {
   rowCol: { width: 96, flex: "none", fontSize: 11.5, color: T.muted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
   emptyList: { padding: "18px 12px", fontSize: 12.5, color: T.muted },
 
-  prev: { width: 280, flex: "none", overflowY: "auto", background: T.white },
+  prev: { width: 400, flex: "none", overflowY: "auto", background: T.white },
   prevInner: { display: "flex", flexDirection: "column", padding: "14px 14px 16px" },
   prevEmpty: { padding: 18, fontSize: 12.5, color: T.muted },
   prevTitle: { fontSize: 13.5, fontWeight: 700, color: T.ink, lineHeight: 1.35 },
@@ -1175,6 +1241,19 @@ const F: Record<string, React.CSSProperties> = {
   smallBtn: { background: T.white, border: `1px solid ${T.border}`, borderRadius: 8, padding: "6px 11px", fontSize: 12, fontWeight: 600, color: T.blue, cursor: "pointer", fontFamily: T.font },
   moveSel: { marginTop: 8, height: 32, borderRadius: 8, border: `1px solid ${T.inputBd}`, background: T.white, padding: "0 8px", fontSize: 12.5, color: T.ink, fontFamily: T.font, maxWidth: "100%" },
   prevImg: { marginTop: 12, width: "100%", display: "block", borderRadius: 10, border: `1px solid ${T.border}`, boxShadow: T.shCard },
+};
+
+/* The canvas-app frame + slide-over sheets (absolute inside the frame —
+   never position:fixed, the Safari toolbar rule). */
+const A: Record<string, React.CSSProperties> = {
+  frame: { flex: 1, minHeight: 0, position: "relative", display: "flex", flexDirection: "column", padding: "0 26px 18px" },
+  sheetWrap: { position: "absolute", inset: 0, zIndex: 40, display: "flex", justifyContent: "flex-end" },
+  scrim: { position: "absolute", inset: 0, background: "rgba(15,20,26,0.32)" },
+  sheet: { position: "relative", width: "min(1080px, 94%)", height: "100%", background: T.surface, borderLeft: `1px solid ${T.border}`, borderRadius: "14px 0 0 14px", boxShadow: "0 12px 40px rgba(15,20,26,0.28)", display: "flex", flexDirection: "column", overflow: "hidden" },
+  sheetHead: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 22px", borderBottom: `1px solid ${T.border}`, background: T.white, flex: "none" },
+  sheetTitle: { fontSize: 15, fontWeight: 700, color: T.ink },
+  sheetClose: { background: T.white, border: `1px solid ${T.border}`, borderRadius: 99, padding: "7px 16px", fontSize: 12.5, fontWeight: 600, color: T.ink3, cursor: "pointer", fontFamily: T.font },
+  sheetBody: { flex: 1, minHeight: 0, overflowY: "auto", padding: "2px 26px 34px" },
 };
 
 const RV: Record<string, React.CSSProperties> = {

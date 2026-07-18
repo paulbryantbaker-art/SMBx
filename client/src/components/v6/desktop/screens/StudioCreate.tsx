@@ -200,38 +200,47 @@ export default function StudioCreate({ user }: AtlasScreenProps) {
     [deal, refresh],
   );
 
+  const headRow = (
+    <div style={S.headRow}>
+      <div>
+        <div style={S.h1}>Studio</div>
+        <div style={S.sub}>
+          {mode === "research"
+            ? "Deep research on demand — cited reports, LinkedIn cards, and campaigns on a cadence."
+            : "Build custom collateral for a deal. Finished work is saved to Files."}
+        </div>
+      </div>
+      <div style={S.modeRow}>
+        {([["collateral", "Deal collateral"], ["research", "Research & campaigns"]] as const).map(([k, label]) => (
+          <button
+            key={k}
+            type="button"
+            onClick={() => setMode(k)}
+            style={{ ...S.modeBtn, ...(mode === k ? S.modeBtnOn : null) }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  // Research mode is a CANVAS APP: the frame owns the full content area
+  // (no page scroll) and the campaign manager fills it — Paul, 2026-07-18.
+  if (mode === "research") {
+    return (
+      <div style={{ ...S.root, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+        <div style={{ ...S.pane, maxWidth: "none", flex: "none", paddingBottom: 4 }}>{headRow}</div>
+        <StudioResearch user={user} />
+      </div>
+    );
+  }
+
   return (
     <div style={S.root}>
-      {/* Research mode is a full-page workspace (form + campaign manager) —
-          the 1000px collateral-mode cap boxed it into a corner. */}
-      <div style={{ ...S.pane, ...(mode === "research" ? { maxWidth: 1720 } : null) }}>
-        {/* header + mode switch */}
-        <div style={S.headRow}>
-          <div>
-            <div style={S.h1}>Studio</div>
-            <div style={S.sub}>
-              {mode === "research"
-                ? "Deep research on demand — cited reports, LinkedIn cards, and campaigns on a cadence."
-                : "Build custom collateral for a deal. Finished work is saved to Files."}
-            </div>
-          </div>
-          <div style={S.modeRow}>
-            {([["collateral", "Deal collateral"], ["research", "Research & campaigns"]] as const).map(([k, label]) => (
-              <button
-                key={k}
-                type="button"
-                onClick={() => setMode(k)}
-                style={{ ...S.modeBtn, ...(mode === k ? S.modeBtnOn : null) }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {mode === "research" ? (
-          <StudioResearch user={user} />
-        ) : (
+      <div style={S.pane}>
+        {headRow}
+        {(
           <>
         {/* tell-Yulia prompt + deal picker */}
         <div style={S.promptRow}>

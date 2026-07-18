@@ -66,7 +66,10 @@ export function StudioAnnouncement() {
 
   const loadAssets = useCallback(async () => {
     try {
-      const { assets } = await jsonApi<{ assets: AssetMeta[] }>("/studio/assets");
+      const { assets: all } = await jsonApi<{ assets: AssetMeta[] }>("/studio/assets");
+      // Rendered collateral lives in the same table — the photo picker only
+      // offers actual photos.
+      const assets = all.filter(a => (a as any).kind !== "collateral");
       setAssets(assets);
       if (assets.length && assetId == null) setAssetId(assets[0].id);
       // Thumbnails: authed fetch → blob URLs, only for ones we don't have yet.
@@ -328,7 +331,7 @@ export function StudioPostCards() {
   const [preview, setPreview] = useState<string | null>(null);
 
   useEffect(() => {
-    jsonApi<{ assets: AssetMeta[] }>("/studio/assets").then(j => setAssets(j.assets)).catch(() => setAssets([]));
+    jsonApi<{ assets: AssetMeta[] }>("/studio/assets").then(j => setAssets(j.assets.filter(a => (a as any).kind !== "collateral"))).catch(() => setAssets([]));
   }, []);
 
   const smartFill = async () => {
