@@ -272,6 +272,33 @@ function harvestText(content: any[]): string {
   return out;
 }
 
+/** One line of the live activity trail shown in the Studio library. */
+export interface ActivityEntry {
+  t: string;
+  kind: 'phase' | 'search' | 'read' | 'done' | 'error';
+  text: string;
+}
+
+/** Pull the round's tool calls out of the response content so the trail can
+ *  say what was actually searched and read, Claude-style. */
+function harvestToolCalls(content: any[]): { kind: 'search' | 'read'; text: string }[] {
+  const out: { kind: 'search' | 'read'; text: string }[] = [];
+  for (const block of content ?? []) {
+    if (block?.type !== 'server_tool_use') continue;
+    if (block.name === 'web_search' && typeof block.input?.query === 'string') {
+      out.push({ kind: 'search', text: block.input.query.slice(0, 180) });
+    } else if (block.name === 'web_fetch' && typeof block.input?.url === 'string') {
+      try {
+        const u = new URL(block.input.url);
+        out.push({ kind: 'read', text: `${u.hostname}${u.pathname.length > 1 ? u.pathname : ''}`.slice(0, 180) });
+      } catch {
+        out.push({ kind: 'read', text: String(block.input.url).slice(0, 180) });
+      }
+    }
+  }
+  return out;
+}
+
 function harvestSources(content: any[], into: Map<string, SourceRef>) {
   for (const block of content) {
     // Search results: content is a list of web_search_result; on tool errors
@@ -350,13 +377,26 @@ export async function executeResearchRun(runId: number): Promise<void> {
   const depth = depthDef(run.depth);
   const usage: RunUsage = { searches: 0, fetches: 0, inputTokens: 0, outputTokens: 0, costCents: 0 };
 
+  // The live trail. Pushed locally, flushed to the row so the Studio library
+  // can show what the researcher is doing while it works — and keep the
+  // record afterward. The cap is a runaway backstop, far above a deep run.
+  const activity: ActivityEntry[] = [];
+  const pushAct = (kind: ActivityEntry['kind'], text: string) => {
+    activity.push({ t: new Date().toISOString(), kind, text: text.slice(0, 200) });
+    if (activity.length > 160) activity.splice(0, activity.length - 160);
+  };
+  const flushAct = async () => {
+    await sql`UPDATE research_runs SET activity = ${sql.json(activity as any)}::jsonb WHERE id = ${runId}`.catch(() => {});
+  };
+
   const fail = async (message: string) => {
     console.error(`[research] Run ${runId} failed: ${message}`);
     usage.costCents = computeCostCents(usage);
+    pushAct('error', message.slice(0, 200));
     await sql`
       UPDATE research_runs
       SET status = 'failed', error = ${message.slice(0, 800)}, usage = ${sql.json(usage as any)}::jsonb,
-          completed_at = NOW()
+          activity = ${sql.json(activity as any)}::jsonb, completed_at = NOW()
       WHERE id = ${runId}
     `.catch(() => {});
   };
@@ -370,6 +410,8 @@ export async function executeResearchRun(runId: number): Promise<void> {
     }
 
     await sql`UPDATE research_runs SET status = 'running', progress = 'planning searches', started_at = NOW() WHERE id = ${runId}`;
+    pushAct('phase', `Planning the research — ${type.label.toLowerCase()}, ${depth.label.toLowerCase()} depth`);
+    await flushAct();
     const anthropic = getClient();
 
     const tools: any[] = [
@@ -414,10 +456,12 @@ export async function executeResearchRun(runId: number): Promise<void> {
       usage.fetches += resp.usage?.server_tool_use?.web_fetch_requests ?? 0;
       harvestSources(resp.content ?? [], sources);
       reportMd += harvestText(resp.content ?? []);
+      for (const call of harvestToolCalls(resp.content ?? [])) pushAct(call.kind, call.text);
 
       if (resp.stop_reason !== 'pause_turn' || rounds >= 12) break;
       rounds++;
       await setProgress(runId, `researching — ${usage.searches} searches so far`);
+      await flushAct();
       messages = [...messages, { role: 'assistant', content: resp.content }];
       resp = await anthropic.messages.create({
         model: MODEL,
@@ -433,9 +477,15 @@ export async function executeResearchRun(runId: number): Promise<void> {
       await fail('The research turn returned no usable report text.');
       return;
     }
+    pushAct('phase', `Report drafted — ~${reportMd.split(/\s+/).length.toLocaleString('en-US')} words from ${sources.size} sources`);
 
     // Finalize: title + STUDIO FEED. A feed failure must not sink the report.
     await setProgress(runId, 'composing studio feed');
+    const angleDef = POST_ANGLES.find(a => a.key === (run as any).post_angle);
+    pushAct('phase', angleDef && angleDef.key !== 'auto'
+      ? `Writing the LinkedIn collateral — ${angleDef.label}`
+      : 'Writing the LinkedIn collateral');
+    await flushAct();
     let title: string = run.topic.slice(0, 80);
     let feed: any = null;
     try {
@@ -462,12 +512,14 @@ export async function executeResearchRun(runId: number): Promise<void> {
     }
 
     usage.costCents = computeCostCents(usage);
+    pushAct('done', `Done — ${usage.searches} searches · ${usage.fetches} pages read · ~$${(usage.costCents / 100).toFixed(2)}`);
     await sql`
       UPDATE research_runs
       SET status = 'complete', progress = 'complete', report_title = ${title}, report_md = ${reportMd},
           studio_feed = ${feed ? sql.json(feed) : null}::jsonb,
           sources = ${sql.json([...sources.values()].slice(0, 60) as any)}::jsonb,
-          usage = ${sql.json(usage as any)}::jsonb, completed_at = NOW(), error = NULL
+          usage = ${sql.json(usage as any)}::jsonb, activity = ${sql.json(activity as any)}::jsonb,
+          completed_at = NOW(), error = NULL
       WHERE id = ${runId}
     `;
     console.log(`[research] Run ${runId} complete — "${title}" (${usage.searches} searches, ${usage.fetches} fetches, ~$${(usage.costCents / 100).toFixed(2)})`);
