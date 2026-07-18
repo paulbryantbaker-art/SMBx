@@ -22,6 +22,8 @@ export interface StudioAssetMeta {
   id: number;
   label: string;
   mime: string;
+  /** 'photo' = uploaded imagery; 'collateral' = rendered outputs (cards). */
+  kind: string;
   width: number | null;
   height: number | null;
   focal_x: number;
@@ -61,23 +63,24 @@ const clamp01 = (v: number, fallback: number) => (Number.isFinite(v) ? Math.min(
 export async function listStudioAssets(): Promise<StudioAssetMeta[]> {
   await seedIfEmpty();
   const rows = await sql`
-    SELECT id, label, mime, width, height, focal_x, focal_y, created_at, octet_length(data) AS bytes
+    SELECT id, label, mime, kind, width, height, focal_x, focal_y, created_at, octet_length(data) AS bytes
     FROM studio_assets ORDER BY created_at DESC, id DESC`;
   return rows as unknown as StudioAssetMeta[];
 }
 
 export async function getStudioAsset(id: number): Promise<(StudioAssetMeta & { data: Buffer }) | null> {
   const rows = await sql`
-    SELECT id, label, mime, width, height, focal_x, focal_y, created_at, octet_length(data) AS bytes, data
+    SELECT id, label, mime, kind, width, height, focal_x, focal_y, created_at, octet_length(data) AS bytes, data
     FROM studio_assets WHERE id = ${id}`;
   return (rows[0] as any) ?? null;
 }
 
-export async function createStudioAsset(input: { label: string; mime: string; data: Buffer; focalX?: number; focalY?: number }): Promise<number> {
+export async function createStudioAsset(input: { label: string; mime: string; data: Buffer; focalX?: number; focalY?: number; kind?: string }): Promise<number> {
   const dims = imageDimensions(input.data, input.mime);
   const rows = await sql`
-    INSERT INTO studio_assets (label, mime, data, width, height, focal_x, focal_y)
-    VALUES (${input.label}, ${input.mime}, ${input.data}, ${dims?.width ?? null}, ${dims?.height ?? null},
+    INSERT INTO studio_assets (label, mime, kind, data, width, height, focal_x, focal_y)
+    VALUES (${input.label}, ${input.mime}, ${input.kind === 'collateral' ? 'collateral' : 'photo'}, ${input.data},
+            ${dims?.width ?? null}, ${dims?.height ?? null},
             ${clamp01(input.focalX ?? 0.5, 0.5)}, ${clamp01(input.focalY ?? 0.25, 0.25)})
     RETURNING id`;
   return Number((rows[0] as any).id);

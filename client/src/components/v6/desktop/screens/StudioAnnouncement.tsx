@@ -122,6 +122,7 @@ export function StudioAnnouncement() {
       const body = {
         variant,
         assetId,
+        save: true, // rendered output lands in the library's Collateral folder
         headline: copy.headline,
         accent: copy.accent,
         sub: copy.sub,
@@ -376,6 +377,7 @@ export function StudioPostCards() {
         }).filter(Boolean),
         steps: fields.steps.split("\n").map(l => l.trim()).filter(Boolean),
         assetId,
+        save: true, // rendered output lands in the library's Collateral folder
       };
       const r = await fetch("/api/studio/postcard.png", {
         method: "POST",

@@ -110,7 +110,7 @@ researchRouter.get('/research/runs', async (req, res) => {
   try {
     const runs = await sql`
       SELECT id, schedule_id, research_type, topic, depth, output_format, post_angle, status, progress,
-             report_title, (studio_feed IS NOT NULL) AS has_feed, review_status, error, usage, created_at, completed_at
+             report_title, (studio_feed IS NOT NULL) AS has_feed, review_status, archived, error, usage, created_at, completed_at
       FROM research_runs
       WHERE user_id = ${userId}
       ORDER BY created_at DESC
@@ -149,6 +149,40 @@ researchRouter.delete('/research/runs/:id', async (req, res) => {
   } catch (err: any) {
     console.error('[research] delete run failed:', err.message);
     return res.status(500).json({ error: 'Failed to delete run' });
+  }
+});
+
+/** Campaign-manager verbs (2026-07-18): archive/unarchive a run, and move it
+ *  between campaigns (schedule_id) or out to one-offs — the library's
+ *  organize actions. Only the fields present in the body change. */
+researchRouter.patch('/research/runs/:id', async (req, res) => {
+  const userId = userIdFromReq(req);
+  const id = parseId(req.params.id);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  if (!id) return res.status(400).json({ error: 'Bad run id' });
+  try {
+    const [run] = await sql`SELECT id, schedule_id, archived FROM research_runs WHERE id = ${id} AND user_id = ${userId}`;
+    if (!run) return res.status(404).json({ error: 'Run not found' });
+
+    const b = req.body ?? {};
+    let scheduleId: number | null = (run as any).schedule_id ?? null;
+    if ('scheduleId' in b) {
+      if (b.scheduleId === null || b.scheduleId === '') {
+        scheduleId = null;
+      } else {
+        const sid = Number(b.scheduleId);
+        if (!Number.isInteger(sid) || sid <= 0) return res.status(400).json({ error: 'Bad campaign id' });
+        const [sched] = await sql`SELECT id FROM research_schedules WHERE id = ${sid} AND user_id = ${userId}`;
+        if (!sched) return res.status(404).json({ error: 'Campaign not found' });
+        scheduleId = sid;
+      }
+    }
+    const archived = typeof b.archived === 'boolean' ? b.archived : (run as any).archived === true;
+    await sql`UPDATE research_runs SET schedule_id = ${scheduleId}, archived = ${archived} WHERE id = ${id} AND user_id = ${userId}`;
+    return res.json({ ok: true });
+  } catch (err: any) {
+    console.error('[research] update run failed:', err.message);
+    return res.status(500).json({ error: 'Failed to update the run' });
   }
 });
 
@@ -537,6 +571,17 @@ researchRouter.post('/studio/announcement.png', async (req, res) => {
       };
     }
     const png = await renderAnnouncementCardPng(spec);
+    // Rendered output is collateral — keep it in the managed library so it
+    // can be browsed/re-downloaded/archived later. Never fail the download
+    // over a save hiccup.
+    if (b.save === true) {
+      await createStudioAsset({
+        label: `Announcement — ${spec.headline.slice(0, 60)} (${variant})`,
+        mime: 'image/png',
+        data: Buffer.from(png),
+        kind: 'collateral',
+      }).catch(err => console.warn('[studio] collateral save failed:', (err as any)?.message));
+    }
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Content-Disposition', `attachment; filename="smbx-announcement-${variant}.png"`);
     return res.send(png);
@@ -605,6 +650,15 @@ researchRouter.post('/studio/postcard.png', async (req, res) => {
       };
     }
     const png = await renderPostCardPng(spec);
+    if (b.save === true) {
+      const tag = spec.title || spec.claim || spec.quote || spec.kicker || template;
+      await createStudioAsset({
+        label: `Post card — ${String(tag).slice(0, 60)} (${template}, ${spec.variant})`,
+        mime: 'image/png',
+        data: Buffer.from(png),
+        kind: 'collateral',
+      }).catch(err => console.warn('[studio] collateral save failed:', (err as any)?.message));
+    }
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Content-Disposition', `attachment; filename="smbx-card-${template}-${spec.variant}.png"`);
     return res.send(png);
