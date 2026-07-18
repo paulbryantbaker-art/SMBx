@@ -588,24 +588,58 @@ async function sendCompletionEmail(run: any, title: string, usage: RunUsage) {
 let schedulerStarted = false;
 
 /**
+ * Runs execute IN THIS PROCESS (fire-and-forget, no worker) — so any row
+ * still marked in-flight when the process boots is dead: a deploy or crash
+ * killed it mid-run. Fail it immediately with a plain message instead of
+ * letting it spin as "Running" forever (the old sweep only caught orphans
+ * older than 30 minutes, which left fresh deploy-killed runs stuck). If a
+ * blue-green overlap means the OLD container is in fact still finishing the
+ * run, its final UPDATE lands afterward and the row heals to complete on
+ * its own — the work is never lost by this sweep.
+ */
+async function failOrphanedRuns(): Promise<void> {
+  const rows = await sql`
+    UPDATE research_runs
+    SET status = 'failed', error = 'The server restarted (a deploy) while this was in flight — press Run again.',
+        completed_at = NOW()
+    WHERE status IN ('queued', 'running')
+    RETURNING id
+  `.catch(() => [] as any[]);
+  if (rows.length) console.log(`[research] Boot sweep: marked ${rows.length} deploy-orphaned run(s) failed`);
+}
+
+/** Belt + braces for orphans that appear WITHOUT a restart (should not
+ *  happen — every failure path writes status='failed' — but a stuck row
+ *  also blocks the two-in-flight gate, so sweep on every tick). A deep run
+ *  finishes in ~10–15 minutes; 45 is generous. */
+async function failStaleRuns(): Promise<void> {
+  await sql`
+    UPDATE research_runs
+    SET status = 'failed', error = 'The run stalled and was cleaned up — press Run again.', completed_at = NOW()
+    WHERE status IN ('queued', 'running') AND COALESCE(started_at, created_at) < NOW() - INTERVAL '45 minutes'
+  `.catch(() => {});
+}
+
+/**
  * In-process campaign scheduler — no separate worker deployment to trust.
- * Boot: mark runs orphaned by a restart as failed. Then every 10 minutes,
- * fire due schedules (advancing next_run_at BEFORE executing so a crash
- * can't double-fire).
+ * Boot: sweep deploy-orphaned runs (always, even when schedules are
+ * disabled). Then every 10 minutes, fire due schedules (advancing
+ * next_run_at BEFORE executing so a crash can't double-fire).
  */
 export function startResearchScheduler() {
-  if (schedulerStarted || process.env.RESEARCH_SCHEDULES_DISABLED === 'true') return;
+  if (schedulerStarted) return;
   schedulerStarted = true;
 
-  const cleanup = async () => {
-    await sql`
-      UPDATE research_runs SET status = 'failed', error = 'Interrupted by a server restart', completed_at = NOW()
-      WHERE status IN ('queued', 'running') AND created_at < NOW() - INTERVAL '30 minutes'
-    `.catch(() => {});
-  };
+  failOrphanedRuns().catch(() => {});
+
+  if (process.env.RESEARCH_SCHEDULES_DISABLED === 'true') {
+    console.log('[research] Campaign scheduler disabled (RESEARCH_SCHEDULES_DISABLED) — boot sweep still ran');
+    return;
+  }
 
   const tick = async () => {
     try {
+      await failStaleRuns();
       const due = await sql`
         SELECT * FROM research_schedules
         WHERE active = TRUE AND next_run_at IS NOT NULL AND next_run_at <= NOW()
@@ -634,7 +668,6 @@ export function startResearchScheduler() {
     }
   };
 
-  cleanup().catch(() => {});
   setTimeout(tick, 60_000); // first check a minute after boot
   setInterval(tick, 10 * 60_000);
   console.log('[research] Campaign scheduler started (10-minute tick)');

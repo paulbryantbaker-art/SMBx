@@ -247,6 +247,20 @@ export default function StudioResearch({ user }: { user: User | null }) {
     }
   }, [refresh]);
 
+  /** One-click restart of a failed (or any) run — same knobs, new run. */
+  const rerunRun = useCallback(async (r: RunRow) => {
+    try {
+      await api("/research/runs", {
+        method: "POST",
+        body: JSON.stringify({ researchType: r.research_type, topic: r.topic, depth: r.depth, outputFormat: r.output_format, postAngle: r.post_angle ?? "auto" }),
+      });
+      setNote({ kind: "ok", text: "Run restarted — watch it work in the library." });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Couldn’t restart the run." });
+    }
+  }, [refresh]);
+
   const deleteRun = useCallback(async (r: RunRow) => {
     if (!window.confirm("Delete this run and its report?")) return;
     try {
@@ -423,6 +437,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
               onReview={(id) => setReviewId(reviewId === id ? null : id)}
               onGrab={grab}
               onCopyPost={copyPost}
+              onRerunRun={rerunRun}
               onDeleteRun={deleteRun}
               onToggleSchedule={toggleSchedule}
               onDeleteSchedule={deleteSchedule}
@@ -486,7 +501,7 @@ function SideRow({ label, count, on, onClick, tint, dim }: {
   );
 }
 
-function Library({ runs, schedules, typeLabel, angleLabel, dl, reviewId, onReview, onGrab, onCopyPost, onDeleteRun, onToggleSchedule, onDeleteSchedule }: {
+function Library({ runs, schedules, typeLabel, angleLabel, dl, reviewId, onReview, onGrab, onCopyPost, onRerunRun, onDeleteRun, onToggleSchedule, onDeleteSchedule }: {
   runs: RunRow[];
   schedules: ScheduleRow[];
   typeLabel: (k: string) => string;
@@ -496,6 +511,7 @@ function Library({ runs, schedules, typeLabel, angleLabel, dl, reviewId, onRevie
   onReview: (id: number) => void;
   onGrab: (r: RunRow, kind: "pdf" | "card" | "md" | "lipdf") => void;
   onCopyPost: (r: RunRow) => void;
+  onRerunRun: (r: RunRow) => void;
   onDeleteRun: (r: RunRow) => void;
   onToggleSchedule: (s: ScheduleRow) => void;
   onDeleteSchedule: (s: ScheduleRow) => void;
@@ -623,6 +639,7 @@ function Library({ runs, schedules, typeLabel, angleLabel, dl, reviewId, onRevie
             onReview={() => onReview(selRun.id)}
             onGrab={(k) => onGrab(selRun, k)}
             onCopyPost={() => onCopyPost(selRun)}
+            onRerun={() => onRerunRun(selRun)}
             onDelete={() => onDeleteRun(selRun)}
           />
         ) : (
@@ -643,7 +660,7 @@ function DocRow({ label, onClick, busy, muted }: { label: string; onClick: () =>
   );
 }
 
-function RunPreview({ run, typeLabel, angleLabel, dl, reviewOpen, onReview, onGrab, onCopyPost, onDelete }: {
+function RunPreview({ run, typeLabel, angleLabel, dl, reviewOpen, onReview, onGrab, onCopyPost, onRerun, onDelete }: {
   run: RunRow;
   typeLabel: (k: string) => string;
   angleLabel: (k?: string | null) => string | null;
@@ -652,6 +669,7 @@ function RunPreview({ run, typeLabel, angleLabel, dl, reviewOpen, onReview, onGr
   onReview: () => void;
   onGrab: (kind: "pdf" | "card" | "md" | "lipdf") => void;
   onCopyPost: () => void;
+  onRerun: () => void;
   onDelete: () => void;
 }) {
   const done = run.status === "complete";
@@ -673,6 +691,9 @@ function RunPreview({ run, typeLabel, angleLabel, dl, reviewOpen, onReview, onGr
         </span>
       )}
       {failed && run.error && <div style={{ ...R.rowErr, marginTop: 8 }}>{run.error}</div>}
+      {failed && (
+        <button type="button" style={{ ...F.reviewBtn, marginTop: 12 }} onClick={onRerun}>Run again</button>
+      )}
 
       {done && (
         <>
