@@ -107,7 +107,7 @@ researchRouter.get('/research/runs', async (req, res) => {
   try {
     const runs = await sql`
       SELECT id, schedule_id, research_type, topic, depth, output_format, status, progress,
-             report_title, (studio_feed IS NOT NULL) AS has_feed, error, usage, created_at, completed_at
+             report_title, (studio_feed IS NOT NULL) AS has_feed, review_status, error, usage, created_at, completed_at
       FROM research_runs
       WHERE user_id = ${userId}
       ORDER BY created_at DESC
@@ -153,8 +153,77 @@ researchRouter.delete('/research/runs/:id', async (req, res) => {
 
 async function loadCompleteRun(id: number, userId: number): Promise<ResearchRunRow | null> {
   const [run] = await sql`SELECT * FROM research_runs WHERE id = ${id} AND user_id = ${userId} AND status = 'complete'`;
-  return (run as any) ?? null;
+  if (!run) return null;
+  // Review edits ride in feed_override; every artifact renders the edited feed.
+  if ((run as any).feed_override) (run as any).studio_feed = (run as any).feed_override;
+  return run as any;
 }
+
+
+/* ─── review workflow (2026-07-18) ────────────────────────────────────────
+ * Runs land as DRAFTS. The practitioner edits the studio feed (hook + data
+ * points — stored as feed_override, the agent's original stays untouched),
+ * re-previews, then approves. Artifact routes render the edited feed via
+ * loadCompleteRun.
+ */
+researchRouter.get('/research/runs/:id/feed', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const id = Number(req.params.id);
+  const run = await loadCompleteRun(id, userId);
+  if (!run) return res.status(404).json({ error: 'Run not found' });
+  if (!run.studio_feed) return res.status(404).json({ error: 'This run has no studio feed' });
+  return res.json({ feed: run.studio_feed, reviewStatus: (run as any).review_status ?? 'draft' });
+});
+
+researchRouter.patch('/research/runs/:id/feed', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const id = Number(req.params.id);
+  const b = req.body?.feed ?? {};
+  const str = (v: unknown, max: number) => String(v ?? '').slice(0, max).trim();
+  const hooks = Array.isArray(b.hooks) ? b.hooks.map((h: unknown) => str(h, 240)).filter(Boolean).slice(0, 5) : [];
+  const dataPoints = Array.isArray(b.dataPoints)
+    ? b.dataPoints.slice(0, 4).map((p: any) => ({
+        stat: str(p?.stat, 120),
+        source: str(p?.source, 140),
+        note: str(p?.note, 240) || undefined,
+        freshness: str(p?.freshness, 40) || undefined,
+        confidence: str(p?.confidence, 24) || undefined,
+      })).filter((p: any) => p.stat)
+    : [];
+  if (!hooks.length) return res.status(400).json({ error: 'Keep at least one hook' });
+  try {
+    const [row] = await sql`
+      UPDATE research_runs
+         SET feed_override = ${sql.json({ hooks, dataPoints })}::jsonb, review_status = 'draft'
+       WHERE id = ${id} AND user_id = ${userId} AND status = 'complete'
+       RETURNING id`;
+    if (!row) return res.status(404).json({ error: 'Run not found' });
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('[research] feed save failed', err);
+    return res.status(500).json({ error: 'Save failed' });
+  }
+});
+
+researchRouter.post('/research/runs/:id/review', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const id = Number(req.params.id);
+  const status = req.body?.status === 'approved' ? 'approved' : 'draft';
+  try {
+    const [row] = await sql`
+      UPDATE research_runs SET review_status = ${status}
+       WHERE id = ${id} AND user_id = ${userId} AND status = 'complete'
+       RETURNING id`;
+    if (!row) return res.status(404).json({ error: 'Run not found' });
+    return res.json({ ok: true, reviewStatus: status });
+  } catch (err) {
+    console.error('[research] review update failed', err);
+    return res.status(500).json({ error: 'Update failed' });
+  }
+});
 
 researchRouter.get('/research/runs/:id/pdf', async (req, res) => {
   const userId = userIdFromReq(req);
