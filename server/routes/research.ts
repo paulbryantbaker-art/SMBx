@@ -5,6 +5,7 @@
  * (research_schedules) put a topic on a cadence. Artifacts (letter PDF,
  * LinkedIn card PNG, raw markdown) render on demand from the stored run.
  */
+import { fillPostCard } from '../services/postcardFiller.js';
 import { Router } from 'express';
 import { sql } from '../db.js';
 import {
@@ -19,7 +20,7 @@ import {
   getMonthlyCapCents,
   nextRunAt,
 } from '../services/researchAgent.js';
-import { renderResearchPdf, renderResearchCardPng, renderLinkedInDocPdf, researchPostText, renderAnnouncementCardPng, type ResearchRunRow, type AnnouncementSpec } from '../services/researchComposer.js';
+import { renderResearchPdf, renderResearchCardPng, renderLinkedInDocPdf, researchPostText, renderAnnouncementCardPng, type ResearchRunRow, type AnnouncementSpec, renderPostCardPng, type PostCardSpec } from '../services/researchComposer.js';
 import { listStudioAssets, getStudioAsset, createStudioAsset, updateStudioAsset, deleteStudioAsset } from '../services/studioAssets.js';
 import multer from 'multer';
 
@@ -467,6 +468,74 @@ researchRouter.post('/studio/announcement.png', async (req, res) => {
     return res.send(png);
   } catch (err) {
     console.error('[studio] announcement compose failed', err);
+    return res.status(500).json({ error: 'Render failed' });
+  }
+});
+
+/* ─── Post cards — daily-campaign templates (2026-07-18) ──────────────────
+ * compose: Haiku fills a template from a pasted brief (never renders).
+ * postcard.png: renders a (possibly hand-edited) spec. Photo only on quote.
+ */
+researchRouter.post('/studio/postcard/compose', async (req, res) => {
+  if (!userIdFromReq(req)) return res.status(401).json({ error: 'Not authenticated' });
+  const brief = String(req.body?.brief ?? '').trim();
+  if (brief.length < 20) return res.status(400).json({ error: 'Give the brief at least a sentence or two' });
+  const template = ['stat', 'quote', 'thesis', 'playbook', 'auto'].includes(req.body?.template) ? req.body.template : 'auto';
+  const variant = req.body?.variant === 'dark' ? 'dark' : 'light';
+  try {
+    const spec = await fillPostCard(brief, { template, variant });
+    return res.json({ spec });
+  } catch (err) {
+    console.error('[studio] postcard compose failed', err);
+    return res.status(500).json({ error: 'Smart fill failed — try again or fill the fields by hand' });
+  }
+});
+
+researchRouter.post('/studio/postcard.png', async (req, res) => {
+  if (!userIdFromReq(req)) return res.status(401).json({ error: 'Not authenticated' });
+  const b = req.body ?? {};
+  const str = (v: unknown, max: number) => String(v ?? '').slice(0, max).trim();
+  const template = ['stat', 'quote', 'thesis', 'playbook'].includes(b.template) ? b.template : null;
+  if (!template) return res.status(400).json({ error: 'Unknown template' });
+  const spec: PostCardSpec = {
+    template,
+    variant: b.variant === 'dark' ? 'dark' : 'light',
+    kicker: str(b.kicker, 40) || undefined,
+    value: str(b.value, 16) || undefined,
+    claim: str(b.claim, 180) || undefined,
+    source: str(b.source, 110) || undefined,
+    quote: str(b.quote, 300) || undefined,
+    name: str(b.name, 60) || undefined,
+    role: str(b.role, 80) || undefined,
+    title: str(b.title, 120) || undefined,
+    rows: Array.isArray(b.rows)
+      ? b.rows.slice(0, 4).map((r: any) => ({ k: str(r?.k, 40), v: str(r?.v, 170) })).filter((r: any) => r.k && r.v)
+      : undefined,
+    insight: str(b.insight, 190) || undefined,
+    steps: Array.isArray(b.steps) ? b.steps.map((x: unknown) => str(x, 150)).filter(Boolean).slice(0, 5) : undefined,
+    footerTag: str(b.footerTag, 90) || 'smbx.ai · Book a call',
+    photo: null,
+  };
+  if (template === 'stat' && !spec.value) return res.status(400).json({ error: 'Stat cards need a value' });
+  if (template === 'quote' && !spec.quote) return res.status(400).json({ error: 'Quote cards need a quote' });
+  if ((template === 'thesis' || template === 'playbook') && !spec.title) return res.status(400).json({ error: 'This template needs a title' });
+  try {
+    const assetId = b.assetId != null ? Number(b.assetId) : null;
+    if (template === 'quote' && assetId && Number.isFinite(assetId)) {
+      const asset = await getStudioAsset(assetId);
+      if (!asset) return res.status(404).json({ error: 'Photo not found in the media library' });
+      spec.photo = {
+        dataUri: `data:${asset.mime};base64,${asset.data.toString('base64')}`,
+        focalX: asset.focal_x,
+        focalY: asset.focal_y,
+      };
+    }
+    const png = await renderPostCardPng(spec);
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Content-Disposition', `attachment; filename="smbx-card-${template}-${spec.variant}.png"`);
+    return res.send(png);
+  } catch (err) {
+    console.error('[studio] postcard render failed', err);
     return res.status(500).json({ error: 'Render failed' });
   }
 });

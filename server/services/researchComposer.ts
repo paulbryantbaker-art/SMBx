@@ -43,12 +43,24 @@ try {
   LOGO_URI = `data:image/png;base64,${buf.toString('base64')}`;
 } catch { /* text fallback */ }
 
+/* Dark-surface logo — white wordmark with the X in luminous mint (Paul,
+ * 2026-07-18: the flat white inversion lost the green X on dark artifacts).
+ * Falls back to the white-inverted light logo if the asset is missing. */
+let DARK_LOGO_URI = '';
+try {
+  const buf = readFileSync(path.resolve(__dirname, '../../client/public/logo-green-x-dark.png'));
+  DARK_LOGO_URI = `data:image/png;base64,${buf.toString('base64')}`;
+} catch { /* inversion fallback */ }
+
 /** The logo <img>, sized by height (aspect preserved); white=true applies the
  *  site's dark-surface inversion. Falls back to the text wordmark if the asset
  *  is ever missing so artifacts never render brandless. */
 function logoImg(heightPx: number, opts: { white?: boolean } = {}): string {
+  if (opts.white && DARK_LOGO_URI) {
+    return `<img src="${DARK_LOGO_URI}" alt="smbX.ai" style="height:${heightPx}px;width:auto;display:block;">`;
+  }
   if (!LOGO_URI) {
-    return `<span style="font-family:${SANS};font-weight:800;letter-spacing:-0.01em;font-size:${Math.round(heightPx * 0.72)}px;color:${opts.white ? '#fff' : INK}">smb<span style="color:${CORAL}">X</span>.ai</span>`;
+    return `<span style="font-family:${SANS};font-weight:800;letter-spacing:-0.01em;font-size:${Math.round(heightPx * 0.72)}px;color:${opts.white ? '#fff' : INK}">smb<span style="color:${opts.white ? '#8FD0AE' : CORAL}">X</span>.ai</span>`;
   }
   return `<img src="${LOGO_URI}" alt="smbX.ai" style="height:${heightPx}px;width:auto;display:block;${opts.white ? 'filter:brightness(0) invert(1);' : ''}">`;
 }
@@ -562,7 +574,7 @@ function annBullets(spec: AnnouncementSpec, dark: boolean): string {
 
 export function announcementCardHtml(spec: AnnouncementSpec): string {
   if (spec.variant === 'dark') {
-    return `<!doctype html><meta charset="utf-8"><style>*{margin:0;padding:0;box-sizing:border-box}</style>
+    return `<!doctype html><meta charset="utf-8">${FONTS}<style>*{margin:0;padding:0;box-sizing:border-box}</style>
 <div style="width:1080px;height:1350px;position:relative;background:${DARK} ${DARK_TEXTURE_URI ? `url('${DARK_TEXTURE_URI}') center/cover` : ''};overflow:hidden;font-family:${SANS};font-variant-numeric:tabular-nums">
   <div style="position:absolute;inset:0;background:
     radial-gradient(900px 480px at 50% 0%, rgba(84,150,118,0.16), transparent 60%),
@@ -589,7 +601,7 @@ export function announcementCardHtml(spec: AnnouncementSpec): string {
   </div>
 </div>`;
   }
-  return `<!doctype html><meta charset="utf-8"><style>*{margin:0;padding:0;box-sizing:border-box}</style>
+  return `<!doctype html><meta charset="utf-8">${FONTS}<style>*{margin:0;padding:0;box-sizing:border-box}</style>
 <div style="width:1080px;height:1350px;position:relative;background:${WARM};overflow:hidden;font-family:${SANS};font-variant-numeric:tabular-nums">
   <div style="position:absolute;inset:0;background:
     radial-gradient(1200px 800px at 8% 0%, rgba(22,98,76,0.045), transparent 60%),
@@ -618,6 +630,175 @@ export async function renderAnnouncementCardPng(spec: AnnouncementSpec): Promise
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 2 });
     await page.setContent(announcementCardHtml(spec), { waitUntil: 'networkidle0', timeout: 60000 });
+    await page.evaluateHandle('document.fonts.ready').catch(() => {});
+    await new Promise(r => setTimeout(r, 150));
+    return Buffer.from(await page.screenshot({ type: 'png' }));
+  } finally {
+    await page.close().catch(() => {});
+  }
+}
+
+
+/* ─── Post cards — the daily-campaign template rack (2026-07-18) ──────────
+ * Four 1080×1350 layouts in the Ledger system, one per content kind:
+ *   stat     — one big brass number + serif claim + source (light/dark)
+ *   quote    — serif pull-quote + attribution photo chip (light/dark)
+ *   thesis   — sector teardown: title + mono-labeled rows + THE READ box
+ *   playbook — numbered steps
+ * All share the brand shell: logo header + mono kicker, green-black footer.
+ */
+
+export type PostCardTemplate = 'stat' | 'quote' | 'thesis' | 'playbook';
+
+export interface PostCardSpec {
+  template: PostCardTemplate;
+  variant?: 'light' | 'dark';
+  kicker?: string;
+  value?: string;
+  claim?: string;
+  source?: string;
+  quote?: string;
+  name?: string;
+  role?: string;
+  title?: string;
+  rows?: Array<{ k: string; v: string }>;
+  insight?: string;
+  steps?: string[];
+  footerTag: string;
+  photo?: AnnouncementPhoto | null;
+}
+
+const cardHead = (dark: boolean, kicker: string) => `
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    ${logoImg(42, { white: dark })}
+    <div style="font-family:${MONO};font-size:18px;letter-spacing:0.1em;color:${dark ? BRASS : TERT};text-transform:uppercase">${annEsc(kicker)}</div>
+  </div>`;
+
+/** Light cards end on the 128px boardroom footer band; dark cards close with
+ *  a hairline row (the whole canvas is already the boardroom). */
+const cardFootLight = (footerTag: string) => `
+  <div style="position:absolute;left:0;right:0;bottom:0;height:128px;background:${DARK};display:flex;align-items:center;justify-content:space-between;padding:0 60px">
+    ${logoImg(48, { white: true })}
+    <div style="font-family:${MONO};font-size:19px;letter-spacing:0.1em;color:#8FD0AE;text-transform:uppercase">${annEsc(footerTag)}</div>
+  </div>`;
+const cardFootDark = (footerTag: string) => `
+  <div style="margin-top:auto;border-top:1px solid rgba(243,241,234,0.14);padding-top:26px;display:flex;align-items:center;justify-content:space-between">
+    <div style="font-family:${MONO};font-size:19px;letter-spacing:0.1em;color:#8FD0AE;text-transform:uppercase">${annEsc(footerTag)}</div>
+  </div>`;
+
+const cardShell = (dark: boolean, kicker: string, footerTag: string, body: string) => dark
+  ? `<!doctype html><meta charset="utf-8">${FONTS}<style>*{margin:0;padding:0;box-sizing:border-box}</style>
+<div style="width:1080px;height:1350px;position:relative;background:${DARK} ${DARK_TEXTURE_URI ? `url('${DARK_TEXTURE_URI}') center/cover` : ''};overflow:hidden;font-family:${SANS};font-variant-numeric:tabular-nums">
+  <div style="position:absolute;inset:0;background:
+    radial-gradient(900px 480px at 50% 0%, rgba(84,150,118,0.16), transparent 60%),
+    linear-gradient(180deg, rgba(15,26,22,0.24), rgba(13,23,19,0.44))"></div>
+  <div style="position:relative;height:100%;padding:60px 66px 56px;display:flex;flex-direction:column">
+    ${cardHead(true, kicker)}
+    ${body}
+    ${cardFootDark(footerTag)}
+  </div>
+</div>`
+  : `<!doctype html><meta charset="utf-8">${FONTS}<style>*{margin:0;padding:0;box-sizing:border-box}</style>
+<div style="width:1080px;height:1350px;position:relative;background:${WARM};overflow:hidden;font-family:${SANS};font-variant-numeric:tabular-nums">
+  <div style="position:absolute;inset:0;background:
+    radial-gradient(1200px 800px at 8% 0%, rgba(22,98,76,0.045), transparent 60%),
+    radial-gradient(900px 700px at 100% 100%, rgba(203,193,170,0.16), transparent 55%)"></div>
+  <div style="position:absolute;inset:0 0 128px 0;padding:60px 66px 48px;display:flex;flex-direction:column">
+    ${cardHead(false, kicker)}
+    ${body}
+  </div>
+  ${cardFootLight(footerTag)}
+</div>`;
+
+function statSize(v: string): number {
+  const n = v.length;
+  if (n <= 4) return 300;
+  if (n <= 6) return 250;
+  if (n <= 9) return 190;
+  return 140;
+}
+
+function quoteSize(q: string): number {
+  const n = q.length;
+  if (n <= 120) return 56;
+  if (n <= 200) return 48;
+  if (n <= 300) return 42;
+  return 36;
+}
+
+export function postCardHtml(spec: PostCardSpec): string {
+  const dark = spec.variant === 'dark';
+
+  if (spec.template === 'stat') {
+    const v = spec.value || '—';
+    const body = `
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+      <div style="font-size:${statSize(v)}px;font-weight:800;letter-spacing:-0.03em;line-height:0.95;color:${BRASS}">${annEsc(v)}</div>
+      <div style="margin-top:38px;font-family:${DISPLAY};font-weight:545;font-size:46px;line-height:1.18;letter-spacing:-0.01em;color:${dark ? IVORY : INK};max-width:900px">${annEsc(spec.claim || '')}</div>
+      ${spec.source ? `<div style="margin-top:30px;font-family:${MONO};font-size:17px;letter-spacing:0.07em;color:${dark ? IVORY_SUB : TERT};text-transform:uppercase">${annEsc(spec.source)}</div>` : ''}
+    </div>`;
+    return cardShell(dark, spec.kicker || 'The number', spec.footerTag, body);
+  }
+
+  if (spec.template === 'quote') {
+    const q = spec.quote || '';
+    const photoChip = spec.photo
+      ? `<img src="${spec.photo.dataUri}" style="width:88px;height:88px;border-radius:50%;object-fit:cover;object-position:${annPos(spec.photo)};flex:none;box-shadow:0 8px 24px rgba(0,0,0,${dark ? '0.45' : '0.18'})">`
+      : '';
+    const body = `
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+      <div style="font-family:${DISPLAY};font-size:120px;line-height:0.6;color:${dark ? '#8FD0AE' : CORAL};margin-bottom:8px">“</div>
+      <div style="font-family:${DISPLAY};font-weight:545;font-size:${quoteSize(q)}px;line-height:1.2;letter-spacing:-0.01em;color:${dark ? IVORY : INK};max-width:920px">${annEsc(q)}</div>
+      <div style="margin-top:52px;display:flex;align-items:center;gap:22px">
+        ${photoChip}
+        <div>
+          <div style="font-size:21px;font-weight:800;color:${dark ? IVORY : INK}">${annEsc(spec.name || '')}</div>
+          <div style="margin-top:4px;font-size:17.5px;font-weight:500;color:${dark ? IVORY_SUB : BODY}">${annEsc(spec.role || '')}</div>
+        </div>
+      </div>
+    </div>`;
+    return cardShell(dark, spec.kicker || 'On the record', spec.footerTag, body);
+  }
+
+  if (spec.template === 'thesis') {
+    const rows = (spec.rows || []).slice(0, 4).map(r => `
+      <div style="padding:24px 0;border-top:1px solid ${HAIR}">
+        <div style="font-family:${MONO};font-size:15.5px;letter-spacing:0.09em;color:${CORAL_DEEP};text-transform:uppercase">${annEsc(r.k)}</div>
+        <div style="margin-top:8px;font-size:22px;line-height:1.5;color:${BODY};font-weight:500">${annEsc(r.v)}</div>
+      </div>`).join('');
+    const body = `
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-start">
+      <div style="margin-top:52px;font-family:${DISPLAY};font-weight:545;font-size:54px;line-height:1.12;letter-spacing:-0.012em;color:${INK};max-width:900px">${annEsc(spec.title || '')}</div>
+      <div style="margin-top:40px">${rows}</div>
+      ${spec.insight ? `
+      <div style="margin-top:auto;background:#E7F0EC;border-left:5px solid ${CORAL};padding:26px 30px;margin-bottom:8px">
+        <div style="font-family:${MONO};font-size:15px;letter-spacing:0.1em;color:${CORAL_DEEP};text-transform:uppercase">The read</div>
+        <div style="margin-top:9px;font-size:23px;line-height:1.5;color:${INK};font-weight:600">${annEsc(spec.insight)}</div>
+      </div>` : ''}
+    </div>`;
+    return cardShell(false, spec.kicker || 'Sector teardown', spec.footerTag, body);
+  }
+
+  // playbook
+  const steps = (spec.steps || []).slice(0, 5).map((t, i) => `
+    <div style="display:flex;gap:30px;align-items:baseline;padding:26px 0;border-top:1px solid ${HAIR}">
+      <div style="font-size:46px;font-weight:800;letter-spacing:-0.02em;color:${CORAL};min-width:92px">${String(i + 1).padStart(2, '0')}</div>
+      <div style="font-size:23px;line-height:1.5;color:${INK};font-weight:500">${annEsc(t)}</div>
+    </div>`).join('');
+  const body = `
+    <div style="flex:1;display:flex;flex-direction:column">
+      <div style="margin-top:52px;font-family:${DISPLAY};font-weight:545;font-size:54px;line-height:1.12;letter-spacing:-0.012em;color:${INK};max-width:900px">${annEsc(spec.title || '')}</div>
+      <div style="margin-top:44px">${steps}</div>
+    </div>`;
+  return cardShell(false, spec.kicker || 'The playbook', spec.footerTag, body);
+}
+
+export async function renderPostCardPng(spec: PostCardSpec): Promise<Buffer> {
+  const browser = await getBrowser();
+  const page = await browser.newPage();
+  try {
+    await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 2 });
+    await page.setContent(postCardHtml(spec), { waitUntil: 'networkidle0', timeout: 60000 });
     await page.evaluateHandle('document.fonts.ready').catch(() => {});
     await new Promise(r => setTimeout(r, 150));
     return Buffer.from(await page.screenshot({ type: 'png' }));

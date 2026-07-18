@@ -13,7 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { authHeaders, type User } from "../../../../hooks/useAuth";
 import { T } from "../atlasTokens";
 import { CheckIcon } from "../icons";
-import { StudioAnnouncement } from "./StudioAnnouncement";
+import { StudioAnnouncement, StudioPostCards } from "./StudioAnnouncement";
 
 /* ─── API types ────────────────────────────────────────────── */
 
@@ -422,6 +422,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
       </div>
 
       <StudioAnnouncement />
+      <StudioPostCards />
     </div>
   );
 }
