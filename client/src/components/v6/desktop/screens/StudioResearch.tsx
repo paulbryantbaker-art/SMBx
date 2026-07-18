@@ -34,6 +34,7 @@ interface RunRow {
   progress: string | null;
   report_title: string | null;
   has_feed: boolean;
+  review_status?: string;
   error: string | null;
   usage: { searches?: number; costCents?: number } | null;
   created_at: string;
@@ -120,6 +121,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<{ kind: "err" | "ok"; text: string } | null>(null);
   const [dl, setDl] = useState<string | null>(null); // "runId:kind" while downloading
+  const [reviewId, setReviewId] = useState<number | null>(null); // open review panel
 
   const refresh = useCallback(async () => {
     try {
@@ -283,21 +285,22 @@ export default function StudioResearch({ user }: { user: User | null }) {
             </div>
             <span style={R.knobHint}>{depthDef?.blurb ?? ""}</span>
           </div>
-          <div style={R.knob}>
-            <span style={R.knobLabel}>Output</span>
-            <div style={R.segRow}>
-              {([["report", "Report PDF"], ["post_pdf", "LI post — PDF doc"], ["post_image", "LI post — 1-pager"], ["both", "Everything"]] as const).map(([k, label]) => (
-                <button key={k} type="button" onClick={() => setOutput(k)} style={{ ...R.seg, ...(output === k ? R.segOn : null) }}>
-                  {label}
-                </button>
-              ))}
-            </div>
-            <span style={R.knobHint}>{
-              output === "post_pdf" ? "Swipeable LinkedIn document post (branded PDF pages) + ready-to-paste post text."
-              : output === "post_image" ? "One branded 1080×1350 image + ready-to-paste post text."
-              : output === "both" ? "The report plus both LinkedIn post formats."
-              : "Cited letter-format report for internal use."
-            }</span>
+        </div>
+
+        <div style={{ marginTop: 16 }}>
+          <span style={R.knobLabel}>Output</span>
+          <div style={R.outGrid}>
+            {([
+              ["post_image", "LinkedIn 1-pager", "One branded 1080×1350 image + post text."],
+              ["post_pdf", "LinkedIn carousel", "Pages stitched into a swipeable PDF + post text."],
+              ["report", "Report PDF", "Cited letter report for internal use."],
+              ["both", "Everything", "The report plus both LinkedIn formats."],
+            ] as const).map(([k, label, blurb]) => (
+              <button key={k} type="button" onClick={() => setOutput(k)} style={{ ...R.outCard, ...(output === k ? R.outCardOn : null) }}>
+                <span style={{ ...R.outCardTitle, color: output === k ? T.blue : T.ink }}>{label}</span>
+                <span style={R.outCardBlurb}>{blurb}</span>
+              </button>
+            ))}
           </div>
         </div>
 
@@ -393,7 +396,8 @@ export default function StudioResearch({ user }: { user: User | null }) {
               const showCard = done && r.has_feed;
               const showPost = done && r.has_feed;
               return (
-                <div key={r.id} style={R.row}>
+                <div key={r.id} style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                <div style={R.row}>
                   <span style={R.statusIcon}>
                     {done ? <CheckIcon size={15} c={T.green} /> : failed ? <span style={{ color: "#B3261E", fontWeight: 700 }}>!</span> : <Spinner />}
                   </span>
@@ -408,12 +412,27 @@ export default function StudioResearch({ user }: { user: User | null }) {
                     </div>
                     {failed && r.error && <div style={R.rowErr}>{r.error}</div>}
                   </div>
-                  {showPdf && <button type="button" style={R.tinyBtn} disabled={dl === `${r.id}:pdf`} onClick={() => grab(r, "pdf")}>{dl === `${r.id}:pdf` ? "…" : "Report PDF"}</button>}
-                  {showLiPdf && <button type="button" style={R.tinyBtn} disabled={dl === `${r.id}:lipdf`} onClick={() => grab(r, "lipdf")}>{dl === `${r.id}:lipdf` ? "…" : "LI doc PDF"}</button>}
-                  {showCard && <button type="button" style={R.tinyBtn} disabled={dl === `${r.id}:card`} onClick={() => grab(r, "card")}>{dl === `${r.id}:card` ? "…" : "1-pager PNG"}</button>}
-                  {showPost && <button type="button" style={R.tinyBtn} disabled={dl === `${r.id}:post`} onClick={() => copyPost(r)}>{dl === `${r.id}:post` ? "…" : "Copy post"}</button>}
-                  {done && <button type="button" style={{ ...R.tinyBtn, color: T.muted }} disabled={dl === `${r.id}:md`} onClick={() => grab(r, "md")}>{dl === `${r.id}:md` ? "…" : "MD"}</button>}
+                  {done && r.has_feed && (
+                    <span style={{ ...R.chip, ...(r.review_status === "approved" ? R.chipOk : R.chipDraft) }}>
+                      {r.review_status === "approved" ? "Approved" : "Draft"}
+                    </span>
+                  )}
+                  {done && r.has_feed && (
+                    <button type="button" style={{ ...R.tinyBtn, fontWeight: 700 }} onClick={() => setReviewId(reviewId === r.id ? null : r.id)}>
+                      {reviewId === r.id ? "Close" : "Review"}
+                    </button>
+                  )}
+                  {showPdf && <button type="button" style={{ ...R.tinyBtn, color: T.muted }} disabled={dl === `${r.id}:pdf`} onClick={() => grab(r, "pdf")}>{dl === `${r.id}:pdf` ? "…" : "Report"}</button>}
                   {(done || failed) && <button type="button" style={{ ...R.tinyBtn, color: T.muted }} onClick={() => deleteRun(r)}>Delete</button>}
+                </div>
+                {reviewId === r.id && (
+                  <ReviewPanel
+                    run={r}
+                    onStatus={() => void refresh()}
+                    onCopyPost={() => copyPost(r)}
+                    onGrab={(kind) => grab(r, kind)}
+                  />
+                )}
                 </div>
               );
             })}
@@ -423,6 +442,115 @@ export default function StudioResearch({ user }: { user: User | null }) {
 
       <StudioAnnouncement />
       <StudioPostCards />
+    </div>
+  );
+}
+
+
+/* ─── Review panel — draft → edit → approve → export ───────────────────── */
+
+interface FeedPoint { stat: string; source?: string; note?: string; freshness?: string; confidence?: string }
+interface Feed { hooks: string[]; dataPoints: FeedPoint[] }
+
+function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
+  run: RunRow;
+  onStatus: () => void;
+  onCopyPost: () => void;
+  onGrab: (kind: "pdf" | "card" | "md" | "lipdf") => void;
+}) {
+  const [feed, setFeed] = useState<Feed | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [saving, setSaving] = useState<"save" | "approve" | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const approved = run.review_status === "approved";
+
+  const loadPreview = useCallback(async () => {
+    try {
+      const r = await fetch(`/api/research/runs/${run.id}/card.png?t=${Date.now()}`, { headers: authHeaders() });
+      if (!r.ok) return;
+      const url = URL.createObjectURL(await r.blob());
+      setPreview(prev => { if (prev) URL.revokeObjectURL(prev); return url; });
+    } catch { /* preview is best-effort */ }
+  }, [run.id]);
+
+  useEffect(() => {
+    api<{ feed: Feed }>(`/research/runs/${run.id}/feed`)
+      .then(j => setFeed({
+        hooks: Array.isArray(j.feed?.hooks) && j.feed.hooks.length ? j.feed.hooks : [run.report_title || run.topic],
+        dataPoints: Array.isArray(j.feed?.dataPoints) ? j.feed.dataPoints : [],
+      }))
+      .catch(e => setErr(e instanceof Error ? e.message : "Couldn't load the draft"));
+    void loadPreview();
+    return () => setPreview(prev => { if (prev) URL.revokeObjectURL(prev); return null; });
+  }, [run.id, run.report_title, run.topic, loadPreview]);
+
+  const save = async () => {
+    if (!feed) return;
+    setSaving("save"); setErr(null);
+    try {
+      await api(`/research/runs/${run.id}/feed`, { method: "PATCH", body: JSON.stringify({ feed }) });
+      await loadPreview();
+      onStatus();
+    } catch (e) { setErr(e instanceof Error ? e.message : "Save failed"); }
+    finally { setSaving(null); }
+  };
+
+  const setReview = async (status: "approved" | "draft") => {
+    setSaving("approve"); setErr(null);
+    try {
+      await api(`/research/runs/${run.id}/review`, { method: "POST", body: JSON.stringify({ status }) });
+      onStatus();
+    } catch (e) { setErr(e instanceof Error ? e.message : "Update failed"); }
+    finally { setSaving(null); }
+  };
+
+  const input = (v: string, on: (x: string) => void, ph = "") => (
+    <input value={v} placeholder={ph} onChange={e => on(e.target.value)} style={RV.input} />
+  );
+
+  return (
+    <div style={RV.panel}>
+      <div style={RV.cols}>
+        <div style={RV.editCol}>
+          <div style={RV.label}>Hook — the card headline</div>
+          <textarea
+            value={feed?.hooks[0] ?? ""}
+            onChange={e => setFeed(f => f ? { ...f, hooks: [e.target.value, ...f.hooks.slice(1)] } : f)}
+            rows={2}
+            style={RV.textarea}
+          />
+          <div style={{ ...RV.label, marginTop: 14 }}>Data points — shown on the card and carousel</div>
+          {(feed?.dataPoints ?? []).map((pt, i) => (
+            <div key={i} style={RV.point}>
+              {input(pt.stat, x => setFeed(f => { if (!f) return f; const d = [...f.dataPoints]; d[i] = { ...d[i], stat: x }; return { ...f, dataPoints: d }; }), "The stat")}
+              {input(pt.source ?? "", x => setFeed(f => { if (!f) return f; const d = [...f.dataPoints]; d[i] = { ...d[i], source: x }; return { ...f, dataPoints: d }; }), "Source")}
+              <button type="button" style={RV.ptDel} onClick={() => setFeed(f => f ? { ...f, dataPoints: f.dataPoints.filter((_, j) => j !== i) } : f)}>×</button>
+            </div>
+          ))}
+          {(feed?.dataPoints.length ?? 0) < 4 && (
+            <button type="button" style={RV.addPt} onClick={() => setFeed(f => f ? { ...f, dataPoints: [...f.dataPoints, { stat: "", source: "" }] } : f)}>+ Add data point</button>
+          )}
+          <div style={RV.btnRow}>
+            <button type="button" style={RV.saveBtn} disabled={saving !== null} onClick={save}>{saving === "save" ? "Saving…" : "Save & re-preview"}</button>
+            {approved
+              ? <button type="button" style={RV.reopenBtn} disabled={saving !== null} onClick={() => setReview("draft")}>Reopen draft</button>
+              : <button type="button" style={RV.approveBtn} disabled={saving !== null} onClick={() => setReview("approved")}>{saving === "approve" ? "…" : "Approve"}</button>}
+          </div>
+          {err && <div style={{ marginTop: 8, fontSize: 12.5, color: "#B3261E" }}>{err}</div>}
+          <div style={{ ...RV.label, marginTop: 18 }}>Export</div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 6 }}>
+            <button type="button" style={RV.exportBtn} onClick={() => onGrab("card")}>1-pager PNG</button>
+            <button type="button" style={RV.exportBtn} onClick={() => onGrab("lipdf")}>Carousel PDF</button>
+            <button type="button" style={RV.exportBtn} onClick={onCopyPost}>Copy post text</button>
+            <button type="button" style={{ ...RV.exportBtn, color: T.muted }} onClick={() => onGrab("md")}>Markdown</button>
+          </div>
+        </div>
+        <div style={RV.previewCol}>
+          {preview
+            ? <img src={preview} alt="1-pager preview" style={RV.previewImg} />
+            : <div style={RV.previewEmpty}>Preview…</div>}
+        </div>
+      </div>
     </div>
   );
 }
@@ -478,4 +606,34 @@ const R: Record<string, React.CSSProperties> = {
   tinyBtn: { flex: "none", background: "transparent", border: `1px solid ${T.border}`, borderRadius: 8, padding: "6px 10px", fontSize: 12, fontWeight: 600, color: T.blue, cursor: "pointer", fontFamily: T.font },
 
   empty: { fontSize: 13, color: T.muted, padding: "14px 2px" },
+
+  outGrid: { marginTop: 8, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 8 },
+  outCard: { display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4, textAlign: "left", padding: "11px 13px", borderRadius: 12, border: `1px solid ${T.inputBd}`, background: T.white, cursor: "pointer", fontFamily: T.font },
+  outCardOn: { borderColor: T.blue, background: T.blueBg3, boxShadow: `0 0 0 1px ${T.blue} inset` },
+  outCardTitle: { fontSize: 13.5, fontWeight: 700 },
+  outCardBlurb: { fontSize: 12, color: T.muted, lineHeight: 1.45 },
+
+  chip: { flex: "none", fontSize: 11.5, fontWeight: 700, borderRadius: 99, padding: "3px 10px", letterSpacing: "0.02em" },
+  chipDraft: { background: "#FBF3E2", color: "#8A6A2B", border: "1px solid #E7D5AC" },
+  chipOk: { background: "#E7F0EC", color: "#0F4E3C", border: "1px solid #BFD8CD" },
+};
+
+const RV: Record<string, React.CSSProperties> = {
+  panel: { border: `1px solid ${T.border}`, borderTop: "none", borderRadius: "0 0 12px 12px", background: T.surface, padding: "16px 18px", marginTop: -6, paddingTop: 20 },
+  cols: { display: "flex", gap: 22, flexWrap: "wrap" },
+  editCol: { flex: 1, minWidth: 300 },
+  previewCol: { width: 280, flex: "none" },
+  previewImg: { width: "100%", display: "block", borderRadius: 10, border: `1px solid ${T.border}`, boxShadow: T.shCard },
+  previewEmpty: { width: "100%", aspectRatio: "1080 / 1350", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12.5, color: T.muted, border: `1px dashed ${T.border}`, borderRadius: 10 },
+  label: { fontSize: 12, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.04em" },
+  textarea: { marginTop: 6, width: "100%", resize: "vertical", borderRadius: 10, border: `1px solid ${T.inputBd}`, padding: "9px 11px", fontSize: 13.5, lineHeight: 1.5, color: T.ink, fontFamily: T.font, background: T.white, boxSizing: "border-box" },
+  input: { flex: 1, minWidth: 0, height: 34, borderRadius: 9, border: `1px solid ${T.inputBd}`, padding: "0 10px", fontSize: 13, color: T.ink, fontFamily: T.font, background: T.white },
+  point: { display: "flex", gap: 7, marginTop: 7, alignItems: "center" },
+  ptDel: { flex: "none", width: 28, height: 28, borderRadius: 8, border: `1px solid ${T.border}`, background: T.white, color: T.muted, cursor: "pointer", fontSize: 15, lineHeight: 1 },
+  addPt: { marginTop: 8, background: "transparent", border: `1px dashed ${T.border}`, borderRadius: 9, padding: "7px 12px", fontSize: 12.5, fontWeight: 600, color: T.blue, cursor: "pointer", fontFamily: T.font },
+  btnRow: { marginTop: 14, display: "flex", gap: 9, flexWrap: "wrap" },
+  saveBtn: { background: T.blue, color: "#fff", border: "none", borderRadius: T.rPill, padding: "9px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: T.font },
+  approveBtn: { background: T.green, color: "#fff", border: "none", borderRadius: T.rPill, padding: "9px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: T.font },
+  reopenBtn: { background: "transparent", color: T.ink3, border: `1px solid ${T.border}`, borderRadius: T.rPill, padding: "9px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: T.font },
+  exportBtn: { background: T.white, border: `1px solid ${T.border}`, borderRadius: 9, padding: "7px 12px", fontSize: 12.5, fontWeight: 600, color: T.blue, cursor: "pointer", fontFamily: T.font },
 };
