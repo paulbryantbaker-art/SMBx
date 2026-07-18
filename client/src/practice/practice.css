@@ -9,37 +9,39 @@
    only: soft coral blooms accent section text and the dark bands carry
    procedural SVG art (.pd-accent / .pd-bandart in atmo.tsx) — CTAs and
    surfaces stay solid.
-   Scope: `.pd` root. Office blue #185ABD · Fraunces display + Schibsted
+   Scope: `.pd` root. Ledger trial: Deal Green #16624C · Fraunces display + Inter
    working type · IBM Plex Mono. (2026-07-17 pivot, Paul: "all of the pink,
    the red accents… think Microsoft Office" — the coral accent system is
    retired; the --pd-coral* var NAMES are historical and now hold the blue.)
    ──────────────────────────────────────────────────────────────────────────── */
 
 .pd {
-  /* Warmth pass (2026-07-17, reviewer feedback: "cold, boring… warm it up"):
-     every neutral moved off pure gray onto the warm axis (R≥G≥B) — ink, body,
-     tert, cards, borders — so the page reads paper-and-ink, not template-gray.
-     Coral accents unchanged. */
-  --pd-ink: #23201D;
-  --pd-body: #5D5651;
-  --pd-tert: #8A7E76;
-  --pd-faint: #BDB2A9;
-  --pd-card: #F8F1EA;
-  --pd-border: #E0D5CC;
-  --pd-hair: #EFE6DE;
-  /* Accent = professional Office blue (2026-07-17). Historical var names. */
-  --pd-coral: #185ABD;
-  --pd-coral-link: #1656B4;
-  --pd-cta: #185ABD;
-  --pd-cta-hover: #124A9E;
+  /* LEDGER TRIAL (2026-07-17 night, Paul: "let's do what the recommendation
+     says and see how we like it"): the fintech-DL research system, faithful —
+     bone canvas, ink #14181C, slate body, WHITE hairline cards, one Deal Green
+     accent, brass jewelry on key numbers, green-black boardroom dark bands,
+     Inter working type under the Fraunces display. Accent var names are
+     historical (coral → blue → green, same slots). */
+  --pd-ink: #14181C;
+  --pd-body: #5C6670;
+  --pd-tert: #8A9099;
+  --pd-faint: #AEB4BA;
+  --pd-card: #FFFFFF;
+  --pd-band: #EFECE4;
+  --pd-border: #D8D4C9;
+  --pd-hair: #E4E1D9;
+  --pd-coral: #16624C;
+  --pd-coral-link: #0F4E3C;
+  --pd-cta: #16624C;
+  --pd-cta-hover: #0F4E3C;
+  --pd-brass: #B08637;
   /* Dark-band depth tokens — the band bg gradient and BOTH swoosh fills read
      from these, so the curve can never drift from the band edge it meets.
-     All warm near-black (R>G>B, max channel 24/255 ≈ 9% L — ember-warm like
-     Harvey's canvas, never neutral charcoal, never purple). */
-  --pd-dark-bg: #161210;
-  --pd-dark-top: #181412;
-  --pd-dark-bot: #151110;
-  --pd-font: 'Schibsted Grotesk', system-ui, sans-serif;
+     Ledger "boardroom": near-black with a green undertone (ties the accent). */
+  --pd-dark-bg: #0F1A16;
+  --pd-dark-top: #111D18;
+  --pd-dark-bot: #0D1713;
+  --pd-font: 'Inter', system-ui, sans-serif;
   /* Editorial serif for the display ladder (H1/H2/quote/statement) — the
      gravitas voice; Schibsted stays for working type (h3, body, UI, numerals).
      Fraunces is already in the font payload (index.html). */
@@ -62,9 +64,12 @@
      — Safari-safe (absolute in a relative parent, NEVER a fixed colored div). */
   position: relative;
   isolation: isolate;
-  background: #FDF8F3;
+  background: #F6F4EF;
   color: var(--pd-ink);
   font-family: var(--pd-font);
+  /* Ledger: tabular figures everywhere money appears — set globally so every
+     stat, table, and count-up gets lining tabular digits. */
+  font-feature-settings: 'tnum' 1;
   font-size: 16px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
@@ -94,17 +99,16 @@
   pointer-events: none;
   overflow: hidden;
   background-repeat: no-repeat;
-  /* Hue law v2 (Paul, 2026-07-17: "all of the pink, the red accents… no more
-     terra cotta anything — think Microsoft Office"): the atmosphere is
-     CHAMPAGNE-GOLD only (hue ~42°, warm but nowhere near pink or clay). The
-     blue accent lives in UI elements, never in the air. */
+  /* Ledger restraint: no chromatic wash — depth comes from TONAL bone
+     variation (deeper paper, not colored light) plus two whispers of the
+     green accent so the canvas isn't clinically flat. */
   background:
-    radial-gradient(46% 18% at 10% 3%,  rgba(255, 206, 122, 0.080), rgba(255, 206, 122, 0) 62%),
-    radial-gradient(40% 15% at 95% 12%, rgba(250, 198, 112, 0.066), rgba(250, 198, 112, 0) 60%),
-    radial-gradient(52% 18% at 3% 40%,  rgba(255, 212, 138, 0.070), rgba(255, 212, 138, 0) 62%),
-    radial-gradient(46% 16% at 99% 58%, rgba(250, 218, 152, 0.058), rgba(250, 218, 152, 0) 62%),
-    radial-gradient(50% 18% at 7% 82%,  rgba(255, 206, 126, 0.066), rgba(255, 206, 126, 0) 62%),
-    radial-gradient(44% 16% at 96% 98%, rgba(252, 210, 134, 0.060), rgba(252, 210, 134, 0) 62%);
+    radial-gradient(46% 18% at 10% 3%,  rgba(203, 193, 170, 0.16), rgba(203, 193, 170, 0) 62%),
+    radial-gradient(40% 15% at 95% 12%, rgba(22, 98, 76, 0.030), rgba(22, 98, 76, 0) 60%),
+    radial-gradient(52% 18% at 3% 40%,  rgba(206, 196, 174, 0.13), rgba(206, 196, 174, 0) 62%),
+    radial-gradient(46% 16% at 99% 58%, rgba(210, 200, 178, 0.12), rgba(210, 200, 178, 0) 62%),
+    radial-gradient(50% 18% at 7% 82%,  rgba(203, 193, 170, 0.13), rgba(203, 193, 170, 0) 62%),
+    radial-gradient(44% 16% at 96% 98%, rgba(22, 98, 76, 0.024), rgba(22, 98, 76, 0) 62%);
 }
 .pd *, .pd *::before, .pd *::after { box-sizing: border-box; }
 .pd a { color: var(--pd-ink); text-decoration: none; transition: color 160ms ease; }
@@ -187,14 +191,14 @@
      off coral and were the hardest to read on the coral waves). Hierarchy now
      comes from size/weight, not color. Links keep a bright coral for
      affordance (see .pd-dark a.pd-link below). */
-  --pd-ink: #FFFFFF;
-  --pd-body: #F4F4F4;
-  --pd-tert: #E6E6E6;
-  --pd-faint: #CFCFCF;
-  --pd-card: #1E1E1E;
-  --pd-border: #3D3D3D;
-  --pd-hair: rgba(255, 255, 255, 0.16);
-  --pd-coral-link: #FFFFFF;
+  --pd-ink: #F3F1EA;
+  --pd-body: #EDEAE0;
+  --pd-tert: #D8D5CA;
+  --pd-faint: #B8B5AC;
+  --pd-card: #16221D;
+  --pd-border: #3A443E;
+  --pd-hair: rgba(243, 241, 234, 0.12);
+  --pd-coral-link: #F3F1EA;
   width: 100%;
   --pd-curve: clamp(52px, 6vw, 112px); /* @kind spacing */
   /* Full-bleed dark texture — Paul's blackBleedBG slate/plaster surface, shown
@@ -208,9 +212,9 @@
      the whole texture (low alpha so the plaster detail stays fully visible;
      white band text keeps ~15:1). */
   background:
-    radial-gradient(90% 52% at 50% -8%, rgba(112, 152, 220, 0.10), rgba(112, 152, 220, 0) 58%),
-    radial-gradient(78% 46% at 50% 110%, rgba(255, 206, 140, 0.06), rgba(255, 206, 140, 0) 62%),
-    linear-gradient(rgba(255, 210, 160, 0.04), rgba(255, 202, 150, 0.04)),
+    radial-gradient(90% 52% at 50% -8%, rgba(84, 150, 118, 0.11), rgba(84, 150, 118, 0) 58%),
+    radial-gradient(78% 46% at 50% 110%, rgba(176, 134, 55, 0.055), rgba(176, 134, 55, 0) 62%),
+    linear-gradient(rgba(15, 26, 22, 0.34), rgba(13, 23, 19, 0.34)),
     url('/textures/blackbleed.webp') center / cover no-repeat,
     linear-gradient(180deg, var(--pd-dark-top) 0%, var(--pd-dark-bg) 46%, var(--pd-dark-bot) 100%);
   color: var(--pd-ink);
@@ -237,11 +241,11 @@
    near-invisible on the texture (Paul, 2026-07-14: "secondary buttons on dark
    panels need a white outline") — give them a clear white outline, brightening
    to solid with a faint fill on hover. */
-.pd-dark .pd-pill { border-color: rgba(255, 255, 255, 0.9); }
-.pd-dark .pd-pill:hover { border-color: #ffffff; background: rgba(255, 255, 255, 0.10); }
+.pd-dark .pd-pill { border-color: rgba(243, 241, 234, 0.9); }
+.pd-dark .pd-pill:hover { border-color: #F3F1EA; background: rgba(243, 241, 234, 0.10); }
 /* text links stay a bright, legible coral so they still read as links even
    with all other dark-band text white */
-.pd-dark a.pd-link, .pd-dark a.pd-link:hover { color: #9EC1FF; }
+.pd-dark a.pd-link, .pd-dark a.pd-link:hover { color: #8FD0AE; }
 
 /* ─── type ─── */
 /* ─── unified type scale (2026-07-13 consistency pass) ───
@@ -260,7 +264,7 @@
   font-optical-sizing: auto;
   font-size: clamp(46px, 6vw, 92px);
   line-height: 1.02;
-  font-weight: 600;
+  font-weight: 545;
   letter-spacing: -0.014em;
   max-width: 18em;
   text-wrap: balance;
@@ -281,7 +285,7 @@
   font-family: var(--pd-display);
   font-optical-sizing: auto;
   font-size: clamp(38px, 4.8vw, 62px);
-  font-weight: 600;
+  font-weight: 545;
   letter-spacing: -0.014em;
   line-height: 1.1;
   /* One shared header width across ALL sections (Paul, 2026-07-15): cap sits
@@ -330,14 +334,14 @@
 .pd-caption { font-size: 13.5px; line-height: 1.6; color: var(--pd-tert); }
 /* Statement device — in-flow rhetorical line with a coral accent word;
    emphatic but below H2 so it reads as a spoken line, not a heading. */
-.pd-statement { margin: 0; font-family: var(--pd-display); font-optical-sizing: auto; font-size: clamp(28px, 3vw, 46px); font-weight: 600; letter-spacing: -0.01em; line-height: 1.18; max-width: 14em; text-wrap: balance; }
+.pd-statement { margin: 0; font-family: var(--pd-display); font-optical-sizing: auto; font-size: clamp(28px, 3vw, 46px); font-weight: 545; letter-spacing: -0.01em; line-height: 1.18; max-width: 14em; text-wrap: balance; }
 /* Editorial pull-quote — drama through typography, zero decoration. */
 .pd-quote {
   margin: 0;
   font-family: var(--pd-display);
   font-optical-sizing: auto;
   font-size: clamp(44px, 5.8vw, 78px);
-  font-weight: 560;
+  font-weight: 545;
   letter-spacing: -0.014em;
   line-height: 1.06;
   text-wrap: balance;
@@ -354,19 +358,22 @@
 .pd-askew .off { padding-top: clamp(16px, 5vw, 84px); }
 
 /* ─── pills / buttons ─── */
+/* Ledger buttons: 8px radius (institutional-modern — not a consumer pill),
+   ghost secondary with an ink hairline, one filled CTA per band. Class names
+   keep "pill" historically. */
 .pd-pill {
   display: inline-flex; align-items: center; justify-content: center;
-  border: 1.5px solid var(--pd-border);
-  padding: 11px 24px; border-radius: 99px;
+  border: 1px solid var(--pd-ink);
+  padding: 11px 24px; border-radius: 8px;
   font-size: 15px; font-weight: 600; color: var(--pd-ink);
   white-space: nowrap; background: transparent;
-  transition: border-color 160ms ease;
+  transition: border-color 160ms ease, background-color 160ms ease;
 }
-.pd-pill:hover { border-color: #222222; color: var(--pd-ink); }
+.pd-pill:hover { border-color: var(--pd-ink); background: rgba(20, 24, 28, 0.045); color: var(--pd-ink); }
 .pd-pill-primary {
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--pd-cta); color: #fff; border: none;
-  padding: 12px 26px; border-radius: 99px;
+  padding: 12px 26px; border-radius: 8px;
   font-size: 15px; font-weight: 700; white-space: nowrap;
   transition: background-color 160ms ease;
 }
@@ -379,9 +386,8 @@
 /* ─── nav ─── */
 .pd-navwrap {
   position: sticky; top: 0; z-index: 50;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* Ledger: no backdrop-blur anywhere — solid bone with a hairline. */
+  background: #F6F4EF;
   border-bottom: 1px solid var(--pd-hair);
   transition: box-shadow 0.28s ease, border-color 0.28s ease, background 0.28s ease;
 }
@@ -398,9 +404,9 @@
    (Paul, 2026-07-14). Tighter padding + smaller logo + smaller pills, and it
    lifts onto a soft shadow so it reads as a slim floating bar. */
 .pd-navwrap.min {
-  background: rgba(255, 255, 255, 0.96);
-  border-bottom-color: transparent;
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.07);
+  background: #F6F4EF;
+  border-bottom-color: var(--pd-hair);
+  box-shadow: 0 4px 18px rgba(20, 24, 28, 0.06);
 }
 .pd-navwrap.min .pd-nav { padding-top: 9px; padding-bottom: 9px; }
 .pd-navwrap.min .pd-nav-logo { height: 30px; }
@@ -488,8 +494,8 @@
   /* Softened from the pre-wash intensities so the hero bloom stays additive
      over the global .pd-ambient wash rather than compounding past AA. */
   background:
-    radial-gradient(52% 64% at 72% 44%, rgba(255, 206, 124, 0.058), rgba(255, 206, 124, 0) 70%),
-    radial-gradient(44% 54% at 18% 26%, rgba(34, 34, 34, 0.04), rgba(34, 34, 34, 0) 72%);
+    radial-gradient(52% 64% at 72% 44%, rgba(203, 193, 170, 0.14), rgba(203, 193, 170, 0) 70%),
+    radial-gradient(44% 54% at 18% 26%, rgba(20, 24, 28, 0.035), rgba(20, 24, 28, 0) 72%);
 }
 /* ─── hero mesh — a faint dot-matrix field behind the engine (2026-07-14,
    Paul: "needs some graphic or texture… not selling the app, selling the
@@ -500,8 +506,8 @@
 .pd-heromesh {
   position: absolute; inset: 0; pointer-events: none;
   background-image:
-    radial-gradient(rgba(24, 90, 189, 0.20) 1.2px, rgba(24, 90, 189, 0) 1.7px),
-    radial-gradient(rgba(34, 34, 34, 0.13) 1px, rgba(34, 34, 34, 0) 1.4px);
+    radial-gradient(rgba(22, 98, 76, 0.20) 1.2px, rgba(22, 98, 76, 0) 1.7px),
+    radial-gradient(rgba(20, 24, 28, 0.13) 1px, rgba(20, 24, 28, 0) 1.4px);
   background-size: 96px 96px, 24px 24px;
   background-position: 11px 13px, 0 0;
   -webkit-mask-image: radial-gradient(54% 58% at 50% 64%, #000, transparent 74%);
@@ -511,10 +517,9 @@
    base color rule outranks the bare class). */
 .pd a.pd-samplelink { color: var(--pd-body); }
 .pd a.pd-samplelink:hover { color: var(--pd-ink); }
-/* On the dark proof band the accent stat keeps a BRIGHT accent blue (the band
-   remaps --pd-coral-link to white for text legibility, which silently turned
-   the "0" white too). */
-.pd-dark .pd-stat.accent .n { color: #9EC1FF; }
+/* Ledger: brass is the jewelry on key figures — the signature "0 sell-side"
+   stat wears it (large numeral, ≥3:1 on the boardroom canvas). */
+.pd-dark .pd-stat.accent .n { color: var(--pd-brass); }
 .pd-herosplit { position: relative; }
 .pd-herosplit {
   display: grid; grid-template-columns: minmax(0, 6.5fr) minmax(0, 5.5fr);
@@ -559,17 +564,17 @@
           mask-image: radial-gradient(58% 58% at 88% 6%, #000, transparent 70%);
   background-repeat: no-repeat;
   background-image:
-    radial-gradient(1.5px 1.5px at 82% 12%, rgba(255, 255, 255, 0.60), transparent 60%),
-    radial-gradient(1.5px 1.5px at 91% 24%, rgba(158, 193, 255, 0.55), transparent 60%),
-    radial-gradient(1px 1px at 74% 20%, rgba(255, 255, 255, 0.42), transparent 60%),
-    radial-gradient(1px 1px at 95% 9%, rgba(255, 255, 255, 0.40), transparent 60%),
-    radial-gradient(1.5px 1.5px at 86% 33%, rgba(255, 214, 160, 0.45), transparent 60%);
+    radial-gradient(1.5px 1.5px at 82% 12%, rgba(243, 241, 234, 0.60), transparent 60%),
+    radial-gradient(1.5px 1.5px at 91% 24%, rgba(143, 208, 174, 0.50), transparent 60%),
+    radial-gradient(1px 1px at 74% 20%, rgba(243, 241, 234, 0.42), transparent 60%),
+    radial-gradient(1px 1px at 95% 9%, rgba(243, 241, 234, 0.40), transparent 60%),
+    radial-gradient(1.5px 1.5px at 86% 33%, rgba(176, 134, 55, 0.45), transparent 60%);
 }
-.pd-dark.bl-tr::before { background: radial-gradient(48% 72% at 72% 44%, rgba(112, 152, 220, 0.08), rgba(112, 152, 220, 0) 72%); }
-.pd-dark.bl-val::before { background: radial-gradient(42% 64% at 16% 32%, rgba(112, 152, 220, 0.11), rgba(112, 152, 220, 0) 70%); }
-.pd-dark.bl-side::before { background: radial-gradient(42% 64% at 78% 60%, rgba(112, 152, 220, 0.09), rgba(112, 152, 220, 0) 72%); }
-.pd-dark.bl-cta::before { background: radial-gradient(44% 66% at 16% 36%, rgba(112, 152, 220, 0.085), rgba(112, 152, 220, 0) 72%); }
-.pd-dark.bl-creed::before { background: radial-gradient(42% 58% at 82% 10%, rgba(112, 152, 220, 0.07), rgba(112, 152, 220, 0) 72%); }
+.pd-dark.bl-tr::before { background: radial-gradient(48% 72% at 72% 44%, rgba(84, 150, 118, 0.08), rgba(84, 150, 118, 0) 72%); }
+.pd-dark.bl-val::before { background: radial-gradient(42% 64% at 16% 32%, rgba(84, 150, 118, 0.11), rgba(84, 150, 118, 0) 70%); }
+.pd-dark.bl-side::before { background: radial-gradient(42% 64% at 78% 60%, rgba(84, 150, 118, 0.09), rgba(84, 150, 118, 0) 72%); }
+.pd-dark.bl-cta::before { background: radial-gradient(44% 66% at 16% 36%, rgba(84, 150, 118, 0.085), rgba(84, 150, 118, 0) 72%); }
+.pd-dark.bl-creed::before { background: radial-gradient(42% 58% at 82% 10%, rgba(84, 150, 118, 0.07), rgba(84, 150, 118, 0) 72%); }
 
 .pd-bandart { position: absolute; inset: 0; overflow: hidden; pointer-events: none; user-select: none; }
 .pd-mapart {
@@ -722,7 +727,7 @@
 .pd-feature button.fn.on { color: var(--pd-ink); padding-left: 10px; }
 .pd-feature button.fn.on .no { color: var(--pd-coral-link); }
 .pd-feature .stage {
-  position: sticky; top: 116px; border-radius: 24px;
+  position: sticky; top: 116px; border-radius: 16px;
   background: var(--pd-card); border: 1px solid var(--pd-hair);
   padding: clamp(30px, 3.6vw, 52px); min-height: 300px;
 }
@@ -755,7 +760,7 @@
    cartoon — clean, typographic, calm. */
 .pd-chat {
   margin: 76px auto 0; max-width: var(--pd-mid); background: #fff;
-  border: 1px solid var(--pd-hair); border-radius: 24px;
+  border: 1px solid var(--pd-hair); border-radius: 16px;
   box-shadow: 0 40px 100px -32px rgba(34, 34, 34, 0.28);
   text-align: left; overflow: hidden; scroll-margin-top: 120px;
 }
@@ -850,7 +855,8 @@
 .pd-chat-inputrow {
   display: flex; align-items: center; gap: 10px;
   margin: 14px 32px 28px; padding: 8px 8px 8px 22px;
-  border: 1.5px solid var(--pd-border); border-radius: 999px; background: #fff;
+  border: 1px solid var(--pd-hair); border-radius: 16px; background: #fff;
+  box-shadow: 0 2px 4px rgba(20, 24, 28, 0.06), 0 12px 32px rgba(20, 24, 28, 0.10);
   transition: border-color 160ms ease;
 }
 .pd-chat-inputrow .pd-send { border-radius: 999px; }
@@ -898,11 +904,11 @@
 .pd-chat-hero { width: 100%; max-width: 780px; margin: 0 auto; }
 .pd-herobar {
   display: flex; align-items: center; gap: 10px;
-  padding: 9px 9px 9px 28px;
+  padding: 12px 12px 12px 28px;
   background: #fff;
-  border: 1.5px solid var(--pd-border);
-  border-radius: 999px;
-  box-shadow: 0 26px 80px -30px rgba(34, 34, 34, 0.38);
+  border: 1px solid var(--pd-hair);
+  border-radius: 16px;
+  box-shadow: 0 2px 4px rgba(20, 24, 28, 0.06), 0 12px 32px rgba(20, 24, 28, 0.10);
   transition: border-color 160ms ease;
 }
 .pd-herobar:focus-within { border-color: #222222; }
@@ -931,11 +937,11 @@
    chat") — tappable thesis starters that drop into the field. ── */
 .pd-chips { display: flex; flex-wrap: wrap; gap: 9px; padding: 6px 32px 4px; }
 .pd-chip {
-  border: 1px solid rgba(24, 90, 189, 0.26); background: #EDF3FC; color: #1656B4;
+  border: 1px solid rgba(22, 98, 76, 0.26); background: #E7F0EC; color: #0F4E3C;
   border-radius: 99px; padding: 9px 16px; font-size: 14px; font-weight: 600; white-space: nowrap;
   cursor: pointer; transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
 }
-.pd-chip:hover { border-color: #185ABD; color: #12489C; background: #E1EBFA; }
+.pd-chip:hover { border-color: #16624C; color: #0B3E30; background: #DCEAE3; }
 
 /* ── Mobile: the hero bar stays in the page as the doorway (typing never
    happens in-page); the actual chat is a bottom sheet that is ALWAYS
@@ -1193,7 +1199,7 @@
 }
 /* Heritage block — carries the personal narrative; styled apart from the five
    focus lanes (card surface, no rule, prose measure). */
-.pd-sector.her { border-top: none; background: var(--pd-card); border-radius: 20px; padding: clamp(28px, 3.5vw, 48px); }
+.pd-sector.her { border-top: none; background: var(--pd-card); border-radius: 16px; padding: clamp(28px, 3.5vw, 48px); }
 .pd-sector.her .b { max-width: 46em; }
 .pd-sector.her .attr { margin-top: 18px; font-size: 13.5px; line-height: 1.6; color: var(--pd-tert); max-width: 46em; }
 
@@ -1215,7 +1221,7 @@
 
 /* ─── final CTA ─── */
 .pd-cta-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(44px, 7vw, 100px); align-items: center; }
-.pd-cta-h { margin: 0; font-family: var(--pd-display); font-optical-sizing: auto; font-size: clamp(38px, 4.8vw, 62px); font-weight: 600; letter-spacing: -0.014em; line-height: 1.1; max-width: 18em; text-wrap: balance; }
+.pd-cta-h { margin: 0; font-family: var(--pd-display); font-optical-sizing: auto; font-size: clamp(38px, 4.8vw, 62px); font-weight: 545; letter-spacing: -0.014em; line-height: 1.1; max-width: 18em; text-wrap: balance; }
 
 /* ── Founder band — the human at the CTA threshold (warmth pass 2026-07-17:
    a real photo, never stock). Cream card, portrait crop framed on the face. ── */
@@ -1224,11 +1230,12 @@
   gap: clamp(30px, 4.5vw, 70px); align-items: center;
   max-width: var(--pd-mid); margin: 0 auto;
   background: var(--pd-card); border: 1px solid var(--pd-hair);
-  border-radius: 28px; padding: clamp(24px, 3.5vw, 48px);
+  border-radius: 16px; padding: clamp(24px, 3.5vw, 48px);
+  box-shadow: 0 1px 2px rgba(20, 24, 28, 0.04), 0 4px 12px rgba(20, 24, 28, 0.05);
 }
 .pd-fndband img {
   width: 100%; height: clamp(320px, 36vw, 440px); object-fit: cover; object-position: 50% 18%;
-  border-radius: 20px; display: block;
+  border-radius: 12px; display: block;
 }
 .pd-fndband .fname { margin-top: 26px; font-size: 17px; font-weight: 800; color: var(--pd-ink); }
 .pd-fndband .frole { margin-top: 4px; font-size: 15px; color: var(--pd-body); }
@@ -1237,7 +1244,7 @@
   .pd-fndband { grid-template-columns: 1fr; }
   .pd-fndband img { height: min(430px, 96vw); }
 }
-.pd-form { background: var(--pd-card); border-radius: 24px; padding: 44px; }
+.pd-form { background: var(--pd-card); border: 1px solid var(--pd-hair); border-radius: 16px; padding: 44px; box-shadow: 0 1px 2px rgba(20, 24, 28, 0.04), 0 4px 12px rgba(20, 24, 28, 0.05); }
 .pd-form .t { font-weight: 700; font-size: 21px; letter-spacing: -0.012em; }
 .pd-input {
   min-width: 0; width: 100%; box-sizing: border-box;
@@ -1252,8 +1259,8 @@
 .pd-firm-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(44px, 7vw, 100px); align-items: start; }
 /* aspect-ratio (not a fixed 480px height) so the portrait shows head-to-chest
    instead of an over-zoomed face crop (Paul, 2026-07-11) */
-.pd-founder-photo { position: relative; border-radius: 24px; overflow: hidden; aspect-ratio: 4 / 5; }
-.pd-advisor-card { background: var(--pd-card); border-radius: 20px; padding: 36px 40px; }
+.pd-founder-photo { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 4 / 5; }
+.pd-advisor-card { background: var(--pd-card); border-radius: 16px; padding: 36px 40px; }
 
 /* ─── stat band — the proof is the pitch: one row of four, spread across
    the full width, display weight, tiny mono label. ─── */

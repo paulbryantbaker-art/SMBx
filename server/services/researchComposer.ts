@@ -1,7 +1,7 @@
 /**
  * Research Composer — turns a completed research run into shareable artifacts
  * in the PRACTICE-SITE coral language (NOT the retired terra-pink premium PDF
- * skin): Schibsted Grotesk + IBM Plex Mono, ink #222, Office blue #185ABD (2026-07-17 pivot; was coral), warm
+ * skin): Schibsted Grotesk + IBM Plex Mono, ink #222, Deal Green #16624C (Ledger trial 2026-07-17; was coral, then blue), warm
  * white, generous air.
  *
  * Two outputs, rendered on demand from the stored run row (nothing cached on
@@ -32,13 +32,13 @@ try {
 } catch { /* gradient fallback */ }
 
 /* The canonical logo — the SAME asset and treatment the practice site uses:
- * /logo-blue-x.png (1584×396 wordmark) as-is on light surfaces, and inverted
+ * /logo-green-x.png (1584×396 wordmark) as-is on light surfaces, and inverted
  * to pure white on dark surfaces exactly like the site footer
  * (`.pd-footer img { filter: brightness(0) invert(1) }`). Never redrawn,
  * never recolored beyond that inversion, aspect ratio always preserved. */
 let LOGO_URI = '';
 try {
-  const buf = readFileSync(path.resolve(__dirname, '../../client/public/logo-blue-x.png'));
+  const buf = readFileSync(path.resolve(__dirname, '../../client/public/logo-green-x.png'));
   LOGO_URI = `data:image/png;base64,${buf.toString('base64')}`;
 } catch { /* text fallback */ }
 
@@ -56,8 +56,8 @@ function logoImg(heightPx: number, opts: { white?: boolean } = {}): string {
 const INK = '#222222';
 const BODY = '#4A4A4A';
 const TERT = '#6A6A6A';
-const CORAL = '#185ABD'; // Office-blue pivot 2026-07-17 (historical const name)
-const CORAL_DEEP = '#124A9E';
+const CORAL = '#16624C'; // Ledger Deal Green 2026-07-17 (historical const name)
+const CORAL_DEEP = '#0F4E3C';
 const CARD = '#F7F7F7';
 const HAIR = '#EBEBEB';
 const WARM = '#FFFDFC';
@@ -235,7 +235,7 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0): string {
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { width: 1080px; height: 1350px; font-family: ${SANS}; color: ${INK}; background: ${WARM}; overflow: hidden; position: relative; }
     .wash { position: absolute; inset: 0; background:
-      radial-gradient(720px 560px at 88% -6%, rgba(24,90,189,0.075), transparent 62%),
+      radial-gradient(720px 560px at 88% -6%, rgba(22,98,76,0.075), transparent 62%),
       radial-gradient(640px 520px at -8% 44%, rgba(255,116,140,0.055), transparent 60%); }
     .frame { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 84px 88px 0; }
     .tag { display: flex; justify-content: space-between; align-items: center; font-family: ${MONO};
@@ -456,7 +456,7 @@ export function linkedInDocHtml(run: ResearchRunRow): string {
     .pg { width: 1080px; height: 1350px; position: relative; overflow: hidden; background: ${WARM}; page-break-after: always; }
     .pg:last-child { page-break-after: auto; }
     .wash { position: absolute; inset: 0; background:
-      radial-gradient(720px 560px at 88% -6%, rgba(24,90,189,0.075), transparent 62%),
+      radial-gradient(720px 560px at 88% -6%, rgba(22,98,76,0.075), transparent 62%),
       radial-gradient(640px 520px at -8% 44%, rgba(255,116,140,0.055), transparent 60%); }
     .in { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 76px 88px 84px; }
     .kick { display: flex; justify-content: space-between; align-items: center; font-family: ${MONO};
@@ -485,13 +485,13 @@ export function linkedInDocHtml(run: ResearchRunRow): string {
     /* closer */
     .pg.dark { background: ${DARK}; ${DARK_TEXTURE_URI ? `background-image: url('${DARK_TEXTURE_URI}'); background-size: cover; background-position: center;` : ''} }
     .halo { position: absolute; inset: 0; background:
-      radial-gradient(900px 500px at 50% -10%, rgba(24,90,189,0.28), transparent 65%),
+      radial-gradient(900px 500px at 50% -10%, rgba(22,98,76,0.28), transparent 65%),
       linear-gradient(180deg, rgba(20,19,18,0.25), rgba(20,20,20,0.55)); }
     .closer { justify-content: center; align-items: center; text-align: center; gap: 0; }
     .close-line { font-size: 40px; font-weight: 700; color: #F4F4F4; letter-spacing: -0.014em; }
     .brand-big { margin-top: 46px; display: flex; align-items: center; justify-content: center; }
     .close-sub { margin-top: 30px; font-size: 30px; color: #DEDEDE; max-width: 760px; line-height: 1.45; }
-    .follow { margin-top: 64px; font-family: ${MONO}; font-size: 22px; letter-spacing: 0.12em; color: #9EC1FF; font-weight: 600; text-transform: uppercase; }
+    .follow { margin-top: 64px; font-family: ${MONO}; font-size: 22px; letter-spacing: 0.12em; color: #8FD0AE; font-weight: 600; text-transform: uppercase; }
   </style></head><body>${pageHtml.join('\n')}</body></html>`;
 }
 
@@ -560,7 +560,7 @@ export function announcementCardHtml(spec: AnnouncementSpec): string {
     return `<!doctype html><meta charset="utf-8"><style>*{margin:0;padding:0;box-sizing:border-box}</style>
 <div style="width:1080px;height:1350px;position:relative;background:#141414 ${DARK_TEXTURE_URI ? `url('${DARK_TEXTURE_URI}') center/cover` : ''};overflow:hidden;font-family:${SANS}">
   <div style="position:absolute;inset:0;background:
-    radial-gradient(900px 480px at 50% 0%, rgba(24,90,189,0.16), transparent 60%),
+    radial-gradient(900px 480px at 50% 0%, rgba(22,98,76,0.16), transparent 60%),
     linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.34))"></div>
   <div style="position:relative;height:100%;padding:60px 66px 56px;display:flex;flex-direction:column">
     <div style="display:flex;align-items:center;justify-content:space-between">
@@ -578,7 +578,7 @@ export function announcementCardHtml(spec: AnnouncementSpec): string {
     <div style="margin-top:auto;display:flex;flex-direction:column;gap:36px;max-width:940px">${annBullets(spec, true)}</div>
     <div style="margin-top:auto;font-size:28px;line-height:1.45;color:#fff;font-weight:700;max-width:920px;padding-bottom:4px">${annEsc(spec.mandate)}</div>
     <div style="margin-top:34px;border-top:1px solid rgba(255,255,255,0.14);padding-top:26px;display:flex;align-items:center;justify-content:space-between">
-      <div style="font-family:${MONO};font-size:19px;letter-spacing:0.1em;color:#9EC1FF;text-transform:uppercase">${annEsc(spec.footerTag)}</div>
+      <div style="font-family:${MONO};font-size:19px;letter-spacing:0.1em;color:#8FD0AE;text-transform:uppercase">${annEsc(spec.footerTag)}</div>
       <div style="font-size:18px;color:#C9C9C9;font-weight:500">${annEsc(spec.footerNote || '')}</div>
     </div>
   </div>
@@ -587,7 +587,7 @@ export function announcementCardHtml(spec: AnnouncementSpec): string {
   return `<!doctype html><meta charset="utf-8"><style>*{margin:0;padding:0;box-sizing:border-box}</style>
 <div style="width:1080px;height:1350px;position:relative;background:${WARM};overflow:hidden;font-family:${SANS}">
   <div style="position:absolute;inset:0;background:
-    radial-gradient(1200px 800px at 8% 0%, rgba(24,90,189,0.05), transparent 60%),
+    radial-gradient(1200px 800px at 8% 0%, rgba(22,98,76,0.05), transparent 60%),
     radial-gradient(900px 700px at 100% 100%, rgba(255,116,119,0.04), transparent 55%)"></div>
   <div style="position:absolute;left:0;top:0;bottom:128px;width:512px;padding:60px 46px 0 60px;display:flex;flex-direction:column">
     <div style="align-self:flex-start">${logoImg(42)}</div>
@@ -602,7 +602,7 @@ export function announcementCardHtml(spec: AnnouncementSpec): string {
   </div>
   <div style="position:absolute;left:0;right:0;bottom:0;height:128px;background:${DARK};display:flex;align-items:center;justify-content:space-between;padding:0 60px">
     ${logoImg(48, { white: true })}
-    <div style="font-family:${MONO};font-size:19px;letter-spacing:0.1em;color:#9EC1FF;text-transform:uppercase">${annEsc(spec.footerTag)}</div>
+    <div style="font-family:${MONO};font-size:19px;letter-spacing:0.1em;color:#8FD0AE;text-transform:uppercase">${annEsc(spec.footerTag)}</div>
   </div>
 </div>`;
 }

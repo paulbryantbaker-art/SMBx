@@ -204,7 +204,7 @@ export default function PracticeShell({
               }
             }}
           >
-            <img src="/logo-blue-x.png" alt="smbX.ai" className="pd-nav-logo" />
+            <img src="/logo-green-x.png" alt="smbX.ai" className="pd-nav-logo" />
           </Link>
           <nav className="pd-nav-links" aria-label="Site">
             <a href={anchor('#why')}>Why us</a>
@@ -255,7 +255,7 @@ export default function PracticeShell({
       <footer className="pd-footer">
         <div className="pd-footer-inner" data-rv>
           <div>
-            <img src="/logo-blue-x.png" alt="smbX.ai" style={{ height: 40, margin: '-5px 0 0 -8px' }} />
+            <img src="/logo-green-x.png" alt="smbX.ai" style={{ height: 40, margin: '-5px 0 0 -8px' }} />
             <div style={{ marginTop: 14, fontSize: 15, lineHeight: 1.6, color: 'var(--pd-tert)', maxWidth: 340 }}>
               {footerCompact
                 ? 'Buy-side corporate development for acquirers in the lower middle market.'
