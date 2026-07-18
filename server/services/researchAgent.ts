@@ -203,7 +203,24 @@ ${type.killConditions ? '## Kill conditions — specific observable facts that w
 Use markdown tables where rows of comparable facts exist (participants, transactions, data points). Do not fabricate table rows to look complete — a short honest table beats a padded one.`;
 }
 
-function feedSystemPrompt(): string {
+export const POST_ANGLES = [
+  { key: 'auto', label: 'Auto', blurb: 'Let the writer pick the strongest frame from the material.' },
+  { key: 'teardown', label: 'Teardown', blurb: 'Buyer\u2019s-eye breakdown of a sector or deal \u2014 structure, economics, diligence traps.' },
+  { key: 'contrarian', label: 'Contrarian take', blurb: 'Challenge a consensus view with evidence. Never a strawman of any firm.' },
+  { key: 'how_buyers_think', label: 'How buyers think', blurb: 'Process education \u2014 what disciplined acquirers actually do and why.' },
+  { key: 'practitioner_note', label: 'Practitioner note', blurb: 'First-person lived-experience frame, anonymized employers, career total 150.' },
+] as const;
+export type PostAngleKey = typeof POST_ANGLES[number]['key'];
+
+const ANGLE_GUIDANCE: Record<string, string> = {
+  teardown: `POST ANGLE — TEARDOWN: frame hooks, angles, the post, and docPages as a buyer's-eye teardown. Lead with what makes the lane acquisition-attractive or not (fragmentation, revenue quality, succession, regulation), name the diligence traps, and close on what a disciplined buyer does with this. Curiosity-gap hooks work: "X looks boring. The buyer math is anything but."`,
+  contrarian: `POST ANGLE — CONTRARIAN TAKE: pick the consensus view the report actually undermines and lead with the challenge ("The 'Silver Tsunami' is the laziest thesis in lower-middle-market M&A" is the register). Every contrarian claim must be carried by a cited fact from the report. Challenge IDEAS and narratives, never a named firm or profession — advisors and brokers are allies.`,
+  how_buyers_think: `POST ANGLE — HOW BUYERS THINK: frame the material as process education for acquirers — what a disciplined buyer checks, in what order, and why, using the report's facts as the evidence. Teach one repeatable judgment, not a listicle. Insider-POV hooks work: "Here's what a corp-dev team sees in this market."`,
+  practitioner_note: `POST ANGLE — PRACTITIONER NOTE: first-person senior-operator voice — the report's facts framed through lived deal experience. HARD LAW: former employers are NEVER named — say "a global investment bank" and "a world-class PE-backed aggregator"; the career total is "150 acquisitions"; experience claims are "led or co-led", never unqualified "closed". These were employment transactions, never smbX engagements.`,
+};
+
+function feedSystemPrompt(postAngle?: string | null): string {
+  const angle = postAngle && ANGLE_GUIDANCE[postAngle] ? `\n\n${ANGLE_GUIDANCE[postAngle]}` : '';
   return `You turn an internal research report into a STUDIO FEED — raw material for the practice's LinkedIn presence. The practice is smbX: buy-side corporate development for lower-middle-market acquirers. Voice: senior operator, factual, confident, zero hype.
 
 Guardrails (marketing law — absolute):
@@ -232,7 +249,7 @@ Return ONLY a JSON object, no prose, no code fence, exactly this shape:
 }
 docPages: 6–9 pages telling ONE story arc for a swipeable LinkedIn document post — a cover, then alternating stat and story pages (lead with the strongest stat), one takeaway page near the end stating what this means for an acquirer. Do NOT include a closing/brand page (the renderer adds it). Every stat page's number must appear in the report with a citation.
 chart: ONLY when the report contains a genuine comparable numeric series (3–8 values of the same measure with a citation) — otherwise null. Never fabricate, interpolate, or mix units to force a chart.
-Include 4–8 dataPoints and exactly 3 angles.`;
+Include 4–8 dataPoints and exactly 3 angles.${angle}`;
 }
 
 /* ─── Content-block harvesting ────────────────────────────────────────── */
@@ -286,6 +303,7 @@ export interface CreateRunInput {
   topic: string;
   depth: string;
   outputFormat: string;
+  postAngle?: string;
 }
 
 export function validateRunInput(input: Partial<CreateRunInput>): string | null {
@@ -294,14 +312,15 @@ export function validateRunInput(input: Partial<CreateRunInput>): string | null 
   if (!RESEARCH_TYPES.some(t => t.key === input.researchType)) return 'Unknown research type';
   if (!DEPTHS.some(d => d.key === input.depth)) return 'Unknown depth';
   if (!OUTPUT_FORMATS.includes(input.outputFormat as any)) return 'Unknown output format';
+  if (input.postAngle && !POST_ANGLES.some(a => a.key === input.postAngle)) return 'Unknown post angle';
   return null;
 }
 
 export async function createResearchRun(input: CreateRunInput): Promise<number> {
   const [row] = await sql`
-    INSERT INTO research_runs (user_id, schedule_id, research_type, topic, depth, output_format, status, progress)
+    INSERT INTO research_runs (user_id, schedule_id, research_type, topic, depth, output_format, post_angle, status, progress)
     VALUES (${input.userId}, ${input.scheduleId ?? null}, ${input.researchType}, ${input.topic.trim()},
-            ${input.depth}, ${input.outputFormat}, 'queued', 'queued')
+            ${input.depth}, ${input.outputFormat}, ${input.postAngle ?? 'auto'}, 'queued', 'queued')
     RETURNING id
   `;
   return row.id as number;
@@ -415,7 +434,7 @@ export async function executeResearchRun(runId: number): Promise<void> {
       const feedResp = await anthropic.messages.create({
         model: MODEL,
         max_tokens: 6000,
-        system: feedSystemPrompt(),
+        system: feedSystemPrompt((run as any).post_angle),
         messages: [{ role: 'user', content: `The report:\n\n${reportMd.slice(0, 60000)}` }],
       });
       usage.inputTokens += feedResp.usage?.input_tokens ?? 0;
@@ -545,6 +564,7 @@ export function startResearchScheduler() {
           topic: s.topic,
           depth: s.depth,
           outputFormat: s.output_format,
+          postAngle: (s as any).post_angle ?? 'auto',
         });
         console.log(`[research] Campaign "${s.name}" fired → run ${runId} (next: ${next.toISOString()})`);
         executeResearchRun(runId).catch(err => console.error(`[research] Scheduled run ${runId} crashed:`, err?.message));
