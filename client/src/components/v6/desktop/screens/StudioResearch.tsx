@@ -41,6 +41,7 @@ interface RunRow {
   depth: string;
   output_format: string;
   post_angle?: string | null;
+  archived?: boolean;
   status: string;
   progress: string | null;
   report_title: string | null;
@@ -50,6 +51,16 @@ interface RunRow {
   usage: { searches?: number; costCents?: number } | null;
   created_at: string;
   completed_at: string | null;
+}
+interface AssetRow {
+  id: number;
+  label: string;
+  mime: string;
+  kind: string; // 'photo' | 'collateral'
+  width: number | null;
+  height: number | null;
+  created_at: string;
+  bytes: number;
 }
 interface ScheduleRow {
   id: number;
@@ -129,6 +140,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
   const [usage, setUsage] = useState<{ spentCents: number; capCents: number } | null>(null);
   const [runs, setRuns] = useState<RunRow[]>([]);
   const [schedules, setSchedules] = useState<ScheduleRow[]>([]);
+  const [assets, setAssets] = useState<AssetRow[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   // The knobs. `angle` is the POST FORMAT — the primary picker, named from
@@ -152,14 +164,16 @@ export default function StudioResearch({ user }: { user: User | null }) {
 
   const refresh = useCallback(async () => {
     try {
-      const [r, s, u] = await Promise.all([
+      const [r, s, u, a] = await Promise.all([
         api<{ runs: RunRow[] }>("/research/runs"),
         api<{ schedules: ScheduleRow[] }>("/research/schedules"),
         api<{ spentCents: number; capCents: number }>("/research/usage"),
+        api<{ assets: AssetRow[] }>("/studio/assets"),
       ]);
       setRuns(r.runs ?? []);
       setSchedules(s.schedules ?? []);
       setUsage(u);
+      setAssets(a.assets ?? []);
     } catch {
       /* transient — next poll retries */
     } finally {
@@ -247,6 +261,40 @@ export default function StudioResearch({ user }: { user: User | null }) {
     }
   }, [refresh]);
 
+  /** Manager verbs — archive/unarchive and move between campaigns. */
+  const patchRun = useCallback(async (r: RunRow, body: Record<string, unknown>, okText: string) => {
+    try {
+      await api(`/research/runs/${r.id}`, { method: "PATCH", body: JSON.stringify(body) });
+      setNote({ kind: "ok", text: okText });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Update failed." });
+    }
+  }, [refresh]);
+  const moveRun = useCallback((r: RunRow, scheduleId: number | null) =>
+    patchRun(r, { scheduleId }, scheduleId != null ? "Filed under the campaign." : "Moved to one-off runs."), [patchRun]);
+  const archiveRun = useCallback((r: RunRow, archived: boolean) =>
+    patchRun(r, { archived }, archived ? "Archived — it's in the Archived folder." : "Restored from the archive."), [patchRun]);
+
+  const deleteAsset = useCallback(async (a: AssetRow) => {
+    if (!window.confirm(`Delete “${a.label}”? This can't be undone.`)) return;
+    try {
+      await api(`/studio/assets/${a.id}`, { method: "DELETE" });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Delete failed." });
+    }
+  }, [refresh]);
+
+  const downloadAsset = useCallback(async (a: AssetRow) => {
+    const ext = a.mime === "image/png" ? "png" : a.mime === "image/webp" ? "webp" : "jpg";
+    try {
+      await download(`/studio/assets/${a.id}/raw`, `${slugify(a.label)}.${ext}`);
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Download failed." });
+    }
+  }, []);
+
   /** One-click restart of a failed (or any) run — same knobs, new run. */
   const rerunRun = useCallback(async (r: RunRow) => {
     try {
@@ -315,7 +363,9 @@ export default function StudioResearch({ user }: { user: User | null }) {
 
   return (
     <div>
-      {/* ── the control panel ── */}
+      <div style={R.workRow}>
+      {/* ── the control panel (left column) ── */}
+      <div style={R.formCol}>
       <div style={R.form}>
         <div>
           <span style={R.knobLabel}>Post format — your slot in the posting week</span>
@@ -418,41 +468,42 @@ export default function StudioResearch({ user }: { user: User | null }) {
         {note && <div style={{ ...R.note, color: note.kind === "err" ? "#B3261E" : T.green }}>{note.text}</div>}
       </div>
 
-      {/* ── the library — Finder-style: campaign folders, runs, documents ── */}
-      <div style={{ marginTop: 26 }}>
-        <div style={R.secLabel}>Library</div>
-        {!loaded ? (
-          <div style={R.empty}>Loading…</div>
-        ) : runs.length === 0 && schedules.length === 0 ? (
-          <div style={R.empty}>No research yet — set the knobs above and run your first one.</div>
-        ) : (
-          <>
-            <Library
-              runs={runs}
-              schedules={schedules}
-              typeLabel={typeLabel}
-              angleLabel={angleLabel}
-              dl={dl}
-              reviewId={reviewId}
-              onReview={(id) => setReviewId(reviewId === id ? null : id)}
-              onGrab={grab}
-              onCopyPost={copyPost}
-              onRerunRun={rerunRun}
-              onDeleteRun={deleteRun}
-              onToggleSchedule={toggleSchedule}
-              onDeleteSchedule={deleteSchedule}
-            />
-            {reviewRun && (
-              <ReviewPanel
-                run={reviewRun}
-                onStatus={() => void refresh()}
-                onCopyPost={() => copyPost(reviewRun)}
-                onGrab={(kind) => grab(reviewRun, kind)}
-              />
-            )}
-          </>
-        )}
+      </div>{/* formCol */}
+
+      {/* ── the campaign manager — fills the right side of the page ── */}
+      <div style={R.mgrCol}>
+        <Library
+          loaded={loaded}
+          runs={runs}
+          schedules={schedules}
+          assets={assets}
+          typeLabel={typeLabel}
+          angleLabel={angleLabel}
+          dl={dl}
+          reviewId={reviewId}
+          onReview={(id) => setReviewId(reviewId === id ? null : id)}
+          onGrab={grab}
+          onCopyPost={copyPost}
+          onRerunRun={rerunRun}
+          onMoveRun={moveRun}
+          onArchiveRun={archiveRun}
+          onDeleteRun={deleteRun}
+          onToggleSchedule={toggleSchedule}
+          onDeleteSchedule={deleteSchedule}
+          onDeleteAsset={deleteAsset}
+          onDownloadAsset={downloadAsset}
+        />
       </div>
+      </div>{/* workRow */}
+
+      {reviewRun && (
+        <ReviewPanel
+          run={reviewRun}
+          onStatus={() => void refresh()}
+          onCopyPost={() => copyPost(reviewRun)}
+          onGrab={(kind) => grab(reviewRun, kind)}
+        />
+      )}
 
       <StudioAnnouncement />
       <StudioPostCards />
@@ -466,10 +517,24 @@ export default function StudioResearch({ user }: { user: User | null }) {
    selected run's documents, review state, and its live activity trail —
    the Claude-style "what is it doing right now" feed). */
 
-type FolderSel = { kind: "all" } | { kind: "oneoff" } | { kind: "camp"; id: number };
+type FolderSel =
+  | { kind: "all" }
+  | { kind: "oneoff" }
+  | { kind: "archived" }
+  | { kind: "camp"; id: number }
+  | { kind: "media" }
+  | { kind: "collateral" };
+
+const ASSET_FOLDER = (s: FolderSel) => s.kind === "media" || s.kind === "collateral";
 
 function shortDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function fmtBytes(n: number): string {
+  if (!Number.isFinite(n)) return "";
+  if (n >= 1048576) return `${(n / 1048576).toFixed(1)} MB`;
+  return `${Math.max(1, Math.round(n / 1024))} KB`;
 }
 
 function FolderGlyph({ c }: { c: string }) {
@@ -501,9 +566,11 @@ function SideRow({ label, count, on, onClick, tint, dim }: {
   );
 }
 
-function Library({ runs, schedules, typeLabel, angleLabel, dl, reviewId, onReview, onGrab, onCopyPost, onRerunRun, onDeleteRun, onToggleSchedule, onDeleteSchedule }: {
+function Library({ loaded, runs, schedules, assets, typeLabel, angleLabel, dl, reviewId, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onArchiveRun, onDeleteRun, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset }: {
+  loaded: boolean;
   runs: RunRow[];
   schedules: ScheduleRow[];
+  assets: AssetRow[];
   typeLabel: (k: string) => string;
   angleLabel: (k?: string | null) => string | null;
   dl: string | null;
@@ -512,30 +579,48 @@ function Library({ runs, schedules, typeLabel, angleLabel, dl, reviewId, onRevie
   onGrab: (r: RunRow, kind: "pdf" | "card" | "md" | "lipdf") => void;
   onCopyPost: (r: RunRow) => void;
   onRerunRun: (r: RunRow) => void;
+  onMoveRun: (r: RunRow, scheduleId: number | null) => void;
+  onArchiveRun: (r: RunRow, archived: boolean) => void;
   onDeleteRun: (r: RunRow) => void;
   onToggleSchedule: (s: ScheduleRow) => void;
   onDeleteSchedule: (s: ScheduleRow) => void;
+  onDeleteAsset: (a: AssetRow) => void;
+  onDownloadAsset: (a: AssetRow) => void;
 }) {
   const [sel, setSel] = useState<FolderSel>({ kind: "all" });
   const [selRunId, setSelRunId] = useState<number | null>(null);
+  const [selAssetId, setSelAssetId] = useState<number | null>(null);
   const [filter, setFilter] = useState("");
   const lastAutoRef = useRef<number | null>(null);
 
-  const oneoffs = useMemo(() => runs.filter((r) => r.schedule_id == null), [runs]);
+  // Archived runs leave the working folders; they live in their own folder.
+  const activeRuns = useMemo(() => runs.filter((r) => !r.archived), [runs]);
+  const archivedRuns = useMemo(() => runs.filter((r) => r.archived), [runs]);
+  const oneoffs = useMemo(() => activeRuns.filter((r) => r.schedule_id == null), [activeRuns]);
   const byCamp = useMemo(() => {
     const m = new Map<number, RunRow[]>();
-    for (const r of runs) {
+    for (const r of activeRuns) {
       if (r.schedule_id == null) continue;
       const a = m.get(r.schedule_id) ?? [];
       a.push(r);
       m.set(r.schedule_id, a);
     }
     return m;
-  }, [runs]);
+  }, [activeRuns]);
+  const photos = useMemo(() => assets.filter((a) => a.kind !== "collateral"), [assets]);
+  const collateral = useMemo(() => assets.filter((a) => a.kind === "collateral"), [assets]);
 
-  const folderRuns = sel.kind === "all" ? runs : sel.kind === "oneoff" ? oneoffs : (byCamp.get(sel.id) ?? []);
   const q = filter.trim().toLowerCase();
+  const assetMode = ASSET_FOLDER(sel);
+  const folderRuns =
+    sel.kind === "all" ? activeRuns
+    : sel.kind === "oneoff" ? oneoffs
+    : sel.kind === "archived" ? archivedRuns
+    : sel.kind === "camp" ? (byCamp.get(sel.id) ?? [])
+    : [];
   const items = q ? folderRuns.filter((r) => `${r.report_title ?? ""} ${r.topic}`.toLowerCase().includes(q)) : folderRuns;
+  const folderAssets = sel.kind === "media" ? photos : sel.kind === "collateral" ? collateral : [];
+  const assetItems = q ? folderAssets.filter((a) => a.label.toLowerCase().includes(q)) : folderAssets;
 
   // A freshly started run selects itself so its live trail is on screen
   // immediately — once per run, so a later manual selection sticks.
@@ -548,23 +633,31 @@ function Library({ runs, schedules, typeLabel, angleLabel, dl, reviewId, onRevie
     }
   }, [runs]);
 
-  // Keep the selection inside the visible set.
+  // Keep the selection inside the visible set (per mode).
   useEffect(() => {
+    if (assetMode) {
+      if (selAssetId != null && assetItems.some((a) => a.id === selAssetId)) return;
+      const next = assetItems[0]?.id ?? null;
+      if (next !== selAssetId) setSelAssetId(next);
+      return;
+    }
     if (selRunId != null && items.some((r) => r.id === selRunId)) return;
     const next = items[0]?.id ?? null;
     if (next !== selRunId) setSelRunId(next);
-  }, [items, selRunId]);
+  }, [assetMode, items, selRunId, assetItems, selAssetId]);
 
   const selRun = items.find((r) => r.id === selRunId) ?? null;
+  const selAsset = assetItems.find((a) => a.id === selAssetId) ?? null;
   const selCamp = sel.kind === "camp" ? schedules.find((s) => s.id === sel.id) ?? null : null;
 
   return (
     <div style={F.wrap}>
       {/* folders */}
       <div style={F.side}>
-        <div style={F.sideHead}>Folders</div>
-        <SideRow label="All research" count={runs.length} on={sel.kind === "all"} onClick={() => setSel({ kind: "all" })} tint="#6E9BE0" />
+        <div style={F.sideHead}>Library</div>
+        <SideRow label="All research" count={activeRuns.length} on={sel.kind === "all"} onClick={() => setSel({ kind: "all" })} tint="#6E9BE0" />
         <SideRow label="One-off runs" count={oneoffs.length} on={sel.kind === "oneoff"} onClick={() => setSel({ kind: "oneoff" })} tint="#A8AEB8" />
+        <SideRow label="Archived" count={archivedRuns.length} on={sel.kind === "archived"} onClick={() => setSel({ kind: "archived" })} tint="#C9CDD3" />
         {schedules.length > 0 && <div style={{ ...F.sideHead, marginTop: 14 }}>Campaigns</div>}
         {schedules.map((s) => (
           <SideRow
@@ -577,6 +670,9 @@ function Library({ runs, schedules, typeLabel, angleLabel, dl, reviewId, onRevie
             dim={!s.active}
           />
         ))}
+        <div style={{ ...F.sideHead, marginTop: 14 }}>Assets</div>
+        <SideRow label="Media" count={photos.length} on={sel.kind === "media"} onClick={() => setSel({ kind: "media" })} tint="#D9A441" />
+        <SideRow label="Collateral" count={collateral.length} on={sel.kind === "collateral"} onClick={() => setSel({ kind: "collateral" })} tint="#8B7BD8" />
       </div>
 
       {/* file list */}
@@ -599,39 +695,65 @@ function Library({ runs, schedules, typeLabel, angleLabel, dl, reviewId, onRevie
         </div>
         <div style={F.cols}>
           <span style={{ flex: 1 }}>Name</span>
-          <span style={{ width: 96, flex: "none" }}>Format</span>
-          <span style={{ width: 66, flex: "none" }}>Status</span>
+          <span style={{ width: 96, flex: "none" }}>{assetMode ? "Type" : "Format"}</span>
+          <span style={{ width: 66, flex: "none" }}>{assetMode ? "Size" : "Status"}</span>
           <span style={{ width: 48, flex: "none", textAlign: "right" }}>Date</span>
         </div>
         <div style={F.rows}>
-          {items.length === 0 && <div style={F.emptyList}>{q ? "Nothing matches the filter." : "No runs in this folder yet."}</div>}
-          {items.map((r) => {
-            const on = r.id === selRunId;
-            const failed = r.status === "failed";
-            const running = r.status === "queued" || r.status === "running";
-            return (
-              <button key={r.id} type="button" onClick={() => setSelRunId(r.id)} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
-                <span style={F.rowIcon}>{running ? <Spinner /> : failed ? <span style={{ color: "#B3261E", fontWeight: 700 }}>!</span> : <DocGlyph c={on ? T.blue : T.muted} />}</span>
-                <span style={F.rowName}>{r.report_title || r.topic}</span>
-                <span style={F.rowCol}>{angleLabel(r.post_angle) ?? typeLabel(r.research_type)}</span>
-                <span style={{ ...F.rowCol, width: 66 }}>
-                  {running ? <span style={{ color: T.blue, fontWeight: 600 }}>Running</span>
-                    : failed ? <span style={{ color: "#B3261E", fontWeight: 600 }}>Failed</span>
-                    : r.review_status === "approved" ? <span style={{ color: "#0F4E3C", fontWeight: 600 }}>Approved</span>
-                    : <span style={{ color: "#8A6A2B", fontWeight: 600 }}>Draft</span>}
-                </span>
-                <span style={{ ...F.rowCol, width: 48, textAlign: "right" }}>{shortDate(r.created_at)}</span>
-              </button>
-            );
-          })}
+          {!loaded && <div style={F.emptyList}>Loading…</div>}
+          {loaded && assetMode && assetItems.length === 0 && (
+            <div style={F.emptyList}>{q ? "Nothing matches the filter." : sel.kind === "media" ? "No photos yet — upload below in Media." : "No collateral yet — every card you render lands here."}</div>
+          )}
+          {loaded && !assetMode && items.length === 0 && (
+            <div style={F.emptyList}>{q ? "Nothing matches the filter." : sel.kind === "archived" ? "Nothing archived." : "No runs in this folder yet."}</div>
+          )}
+          {assetMode
+            ? assetItems.map((a) => {
+                const on = a.id === selAssetId;
+                return (
+                  <button key={a.id} type="button" onClick={() => setSelAssetId(a.id)} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
+                    <span style={F.rowIcon}><DocGlyph c={on ? T.blue : T.muted} /></span>
+                    <span style={F.rowName}>{a.label}</span>
+                    <span style={F.rowCol}>{(a.mime.split("/")[1] ?? a.mime).toUpperCase()}{a.width && a.height ? ` · ${a.width}×${a.height}` : ""}</span>
+                    <span style={{ ...F.rowCol, width: 66 }}>{fmtBytes(a.bytes)}</span>
+                    <span style={{ ...F.rowCol, width: 48, textAlign: "right" }}>{shortDate(a.created_at)}</span>
+                  </button>
+                );
+              })
+            : items.map((r) => {
+                const on = r.id === selRunId;
+                const failed = r.status === "failed";
+                const running = r.status === "queued" || r.status === "running";
+                return (
+                  <button key={r.id} type="button" onClick={() => setSelRunId(r.id)} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
+                    <span style={F.rowIcon}>{running ? <Spinner /> : failed ? <span style={{ color: "#B3261E", fontWeight: 700 }}>!</span> : <DocGlyph c={on ? T.blue : T.muted} />}</span>
+                    <span style={F.rowName}>{r.report_title || r.topic}</span>
+                    <span style={F.rowCol}>{angleLabel(r.post_angle) ?? typeLabel(r.research_type)}</span>
+                    <span style={{ ...F.rowCol, width: 66 }}>
+                      {running ? <span style={{ color: T.blue, fontWeight: 600 }}>Running</span>
+                        : failed ? <span style={{ color: "#B3261E", fontWeight: 600 }}>Failed</span>
+                        : r.review_status === "approved" ? <span style={{ color: "#0F4E3C", fontWeight: 600 }}>Approved</span>
+                        : <span style={{ color: "#8A6A2B", fontWeight: 600 }}>Draft</span>}
+                    </span>
+                    <span style={{ ...F.rowCol, width: 48, textAlign: "right" }}>{shortDate(r.created_at)}</span>
+                  </button>
+                );
+              })}
         </div>
       </div>
 
       {/* preview */}
       <div style={F.prev}>
-        {selRun ? (
+        {assetMode ? (
+          selAsset ? (
+            <AssetPreview asset={selAsset} onDownload={() => onDownloadAsset(selAsset)} onDelete={() => onDeleteAsset(selAsset)} />
+          ) : (
+            <div style={F.prevEmpty}>Select a file.</div>
+          )
+        ) : selRun ? (
           <RunPreview
             run={selRun}
+            schedules={schedules}
             typeLabel={typeLabel}
             angleLabel={angleLabel}
             dl={dl}
@@ -640,6 +762,8 @@ function Library({ runs, schedules, typeLabel, angleLabel, dl, reviewId, onRevie
             onGrab={(k) => onGrab(selRun, k)}
             onCopyPost={() => onCopyPost(selRun)}
             onRerun={() => onRerunRun(selRun)}
+            onMove={(sid) => onMoveRun(selRun, sid)}
+            onArchive={(v) => onArchiveRun(selRun, v)}
             onDelete={() => onDeleteRun(selRun)}
           />
         ) : (
@@ -660,8 +784,9 @@ function DocRow({ label, onClick, busy, muted }: { label: string; onClick: () =>
   );
 }
 
-function RunPreview({ run, typeLabel, angleLabel, dl, reviewOpen, onReview, onGrab, onCopyPost, onRerun, onDelete }: {
+function RunPreview({ run, schedules, typeLabel, angleLabel, dl, reviewOpen, onReview, onGrab, onCopyPost, onRerun, onMove, onArchive, onDelete }: {
   run: RunRow;
+  schedules: ScheduleRow[];
   typeLabel: (k: string) => string;
   angleLabel: (k?: string | null) => string | null;
   dl: string | null;
@@ -670,6 +795,8 @@ function RunPreview({ run, typeLabel, angleLabel, dl, reviewOpen, onReview, onGr
   onGrab: (kind: "pdf" | "card" | "md" | "lipdf") => void;
   onCopyPost: () => void;
   onRerun: () => void;
+  onMove: (scheduleId: number | null) => void;
+  onArchive: (archived: boolean) => void;
   onDelete: () => void;
 }) {
   const done = run.status === "complete";
@@ -691,9 +818,6 @@ function RunPreview({ run, typeLabel, angleLabel, dl, reviewOpen, onReview, onGr
         </span>
       )}
       {failed && run.error && <div style={{ ...R.rowErr, marginTop: 8 }}>{run.error}</div>}
-      {failed && (
-        <button type="button" style={{ ...F.reviewBtn, marginTop: 12 }} onClick={onRerun}>Run again</button>
-      )}
 
       {done && (
         <>
@@ -712,7 +836,64 @@ function RunPreview({ run, typeLabel, angleLabel, dl, reviewOpen, onReview, onGr
       <div style={F.prevLabel}>{running ? "Working now" : "What it did"}</div>
       <ActivityFeed runId={run.id} running={running} />
 
-      <button type="button" style={F.delBtn} onClick={onDelete}>Delete run</button>
+      {/* the manager verbs — organize, copy (run again), archive, delete */}
+      <div style={F.prevLabel}>Manage</div>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        {!running && <button type="button" style={F.smallBtn} onClick={onRerun}>Run again</button>}
+        {!running && (
+          <button type="button" style={F.smallBtn} onClick={() => onArchive(!run.archived)}>
+            {run.archived ? "Unarchive" : "Archive"}
+          </button>
+        )}
+        {!running && <button type="button" style={{ ...F.smallBtn, color: T.muted }} onClick={onDelete}>Delete</button>}
+        {running && <span style={{ fontSize: 12, color: T.muted }}>Available when the run finishes.</span>}
+      </div>
+      {!running && (
+        <select
+          value={run.schedule_id ?? ""}
+          onChange={(e) => onMove(e.target.value ? Number(e.target.value) : null)}
+          style={F.moveSel}
+          title="File this run under a campaign"
+        >
+          <option value="">One-off (no campaign)</option>
+          {schedules.map((s) => (
+            <option key={s.id} value={s.id}>{s.name}</option>
+          ))}
+        </select>
+      )}
+    </div>
+  );
+}
+
+/** Asset preview — media photos and rendered collateral share it. */
+function AssetPreview({ asset, onDownload, onDelete }: { asset: AssetRow; onDownload: () => void; onDelete: () => void }) {
+  const [src, setSrc] = useState<string | null>(null);
+  useEffect(() => {
+    let url: string | null = null;
+    let alive = true;
+    setSrc(null);
+    fetch(`/api/studio/assets/${asset.id}/raw`, { headers: authHeaders() })
+      .then((r) => (r.ok ? r.blob() : Promise.reject(new Error(String(r.status)))))
+      .then((b) => { if (alive) { url = URL.createObjectURL(b); setSrc(url); } })
+      .catch(() => { if (alive) setSrc(null); });
+    return () => { alive = false; if (url) URL.revokeObjectURL(url); };
+  }, [asset.id]);
+
+  return (
+    <div style={F.prevInner}>
+      <div style={F.prevTitle}>{asset.label}</div>
+      <div style={F.prevMeta}>
+        {asset.kind === "collateral" ? "Rendered collateral" : "Media photo"} · {(asset.mime.split("/")[1] ?? asset.mime).toUpperCase()}
+        {asset.width && asset.height ? ` · ${asset.width}×${asset.height}` : ""} · {fmtBytes(asset.bytes)} · {shortDate(asset.created_at)}
+      </div>
+      {src
+        ? <img src={src} alt={asset.label} style={F.prevImg} />
+        : <div style={{ ...F.actEmpty, marginTop: 12 }}>Loading preview…</div>}
+      <div style={F.prevLabel}>Manage</div>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <button type="button" style={F.smallBtn} onClick={onDownload}>Download</button>
+        <button type="button" style={{ ...F.smallBtn, color: T.muted }} onClick={onDelete}>Delete</button>
+      </div>
     </div>
   );
 }
@@ -903,7 +1084,13 @@ function Spinner() {
 const R: Record<string, React.CSSProperties> = {
   signin: { marginTop: 24, fontSize: 13, color: T.muted },
 
-  form: { marginTop: 16, background: T.white, border: `1px solid ${T.border}`, borderRadius: 16, boxShadow: T.shCard, padding: "18px 20px" },
+  // The workspace: compact creation form on the left, the campaign manager
+  // filling the rest of the page on the right. Wraps on narrow windows.
+  workRow: { marginTop: 16, display: "flex", gap: 18, alignItems: "stretch", flexWrap: "wrap" },
+  formCol: { width: 440, flex: "1 1 400px", maxWidth: 520, minWidth: 360 },
+  mgrCol: { flex: "10 1 620px", minWidth: 560, display: "flex", flexDirection: "column" },
+
+  form: { background: T.white, border: `1px solid ${T.border}`, borderRadius: 16, boxShadow: T.shCard, padding: "18px 20px" },
   knobRow: { display: "flex", gap: 22, flexWrap: "wrap" },
   knob: { display: "flex", flexDirection: "column", gap: 6, minWidth: 200, flex: 1 },
   knobLabel: { fontSize: 12, fontWeight: 600, color: T.muted },
@@ -944,7 +1131,7 @@ const R: Record<string, React.CSSProperties> = {
 
 /* Finder library styles. */
 const F: Record<string, React.CSSProperties> = {
-  wrap: { display: "flex", alignItems: "stretch", height: 560, background: T.white, border: `1px solid ${T.border}`, borderRadius: 16, boxShadow: T.shCard, overflow: "hidden" },
+  wrap: { display: "flex", alignItems: "stretch", flex: 1, height: "max(680px, calc(100vh - 300px))", background: T.white, border: `1px solid ${T.border}`, borderRadius: 16, boxShadow: T.shCard, overflow: "hidden" },
 
   side: { width: 188, flex: "none", background: T.surface, borderRight: `1px solid ${T.border}`, padding: "12px 8px", overflowY: "auto" },
   sideHead: { fontSize: 11, fontWeight: 700, color: T.muted2, letterSpacing: "0.05em", textTransform: "uppercase", padding: "0 8px", marginBottom: 6 },
@@ -985,7 +1172,9 @@ const F: Record<string, React.CSSProperties> = {
   actText: { fontSize: 12, color: T.ink3, lineHeight: 1.45, minWidth: 0, overflowWrap: "anywhere" },
   actEmpty: { fontSize: 12, color: T.muted, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 10, padding: "10px 12px" },
 
-  delBtn: { marginTop: 14, alignSelf: "flex-start", background: "transparent", border: `1px solid ${T.border}`, borderRadius: 8, padding: "6px 10px", fontSize: 12, fontWeight: 600, color: T.muted, cursor: "pointer", fontFamily: T.font },
+  smallBtn: { background: T.white, border: `1px solid ${T.border}`, borderRadius: 8, padding: "6px 11px", fontSize: 12, fontWeight: 600, color: T.blue, cursor: "pointer", fontFamily: T.font },
+  moveSel: { marginTop: 8, height: 32, borderRadius: 8, border: `1px solid ${T.inputBd}`, background: T.white, padding: "0 8px", fontSize: 12.5, color: T.ink, fontFamily: T.font, maxWidth: "100%" },
+  prevImg: { marginTop: 12, width: "100%", display: "block", borderRadius: 10, border: `1px solid ${T.border}`, boxShadow: T.shCard },
 };
 
 const RV: Record<string, React.CSSProperties> = {

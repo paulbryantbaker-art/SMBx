@@ -202,7 +202,9 @@ export default function StudioCreate({ user }: AtlasScreenProps) {
 
   return (
     <div style={S.root}>
-      <div style={S.pane}>
+      {/* Research mode is a full-page workspace (form + campaign manager) —
+          the 1000px collateral-mode cap boxed it into a corner. */}
+      <div style={{ ...S.pane, ...(mode === "research" ? { maxWidth: 1720 } : null) }}>
         {/* header + mode switch */}
         <div style={S.headRow}>
           <div>
