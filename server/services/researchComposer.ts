@@ -731,45 +731,60 @@ export function postCardHtml(spec: PostCardSpec): string {
 
   if (spec.template === 'stat') {
     const v = spec.value || '—';
-    const body = `
-    <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
-      <div style="font-size:${statSize(v)}px;font-weight:800;letter-spacing:-0.03em;line-height:0.95;color:${BRASS}">${annEsc(v)}</div>
-      <div style="margin-top:38px;font-family:${DISPLAY};font-weight:545;font-size:46px;line-height:1.18;letter-spacing:-0.01em;color:${dark ? IVORY : INK};max-width:900px">${annEsc(spec.claim || '')}</div>
-      ${spec.source ? `<div style="margin-top:30px;font-family:${MONO};font-size:17px;letter-spacing:0.07em;color:${dark ? IVORY_SUB : TERT};text-transform:uppercase">${annEsc(spec.source)}</div>` : ''}
-    </div>`;
+    const size = spec.photo ? Math.min(statSize(v), 210) : statSize(v);
+    const claimSize = spec.photo ? 38 : 46;
+    const inner = `
+      <div style="font-size:${size}px;font-weight:800;letter-spacing:-0.03em;line-height:0.95;color:${BRASS}">${annEsc(v)}</div>
+      <div style="margin-top:${spec.photo ? 30 : 38}px;font-family:${DISPLAY};font-weight:545;font-size:${claimSize}px;line-height:1.18;letter-spacing:-0.01em;color:${dark ? IVORY : INK};max-width:900px">${annEsc(spec.claim || '')}</div>
+      ${spec.source ? `<div style="margin-top:${spec.photo ? 24 : 30}px;font-family:${MONO};font-size:17px;letter-spacing:0.07em;color:${dark ? IVORY_SUB : TERT};text-transform:uppercase">${annEsc(spec.source)}</div>` : ''}`;
+    const body = spec.photo
+      ? `
+    <div style="flex:1;display:flex;align-items:center;gap:52px;min-height:0">
+      <div style="flex:1;min-width:0">${inner}</div>
+      <div style="width:380px;height:640px;flex:none;box-shadow:0 30px 80px rgba(0,0,0,${dark ? '0.5' : '0.22'})">${annPhotoBlock(24, spec.photo)}</div>
+    </div>`
+      : `
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center">${inner}</div>`;
     return cardShell(dark, spec.kicker || 'The number', spec.footerTag, body);
   }
 
   if (spec.template === 'quote') {
     const q = spec.quote || '';
-    const photoChip = spec.photo
-      ? `<img src="${spec.photo.dataUri}" style="width:88px;height:88px;border-radius:50%;object-fit:cover;object-position:${annPos(spec.photo)};flex:none;box-shadow:0 8px 24px rgba(0,0,0,${dark ? '0.45' : '0.18'})">`
-      : '';
-    const body = `
+    const attribution = `
+      <div>
+        <div style="font-size:21px;font-weight:800;color:${dark ? IVORY : INK}">${annEsc(spec.name || '')}</div>
+        <div style="margin-top:4px;font-size:17.5px;font-weight:500;color:${dark ? IVORY_SUB : BODY}">${annEsc(spec.role || '')}</div>
+      </div>`;
+    const body = spec.photo
+      ? `
+    <div style="flex:1;display:flex;align-items:center;gap:50px;min-height:0">
+      <div style="width:400px;height:560px;flex:none;box-shadow:0 30px 80px rgba(0,0,0,${dark ? '0.5' : '0.22'})">${annPhotoBlock(24, spec.photo)}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-family:${DISPLAY};font-size:110px;line-height:0.6;color:${dark ? '#8FD0AE' : CORAL};margin-bottom:6px">“</div>
+        <div style="font-family:${DISPLAY};font-weight:545;font-size:${Math.min(quoteSize(q), 46)}px;line-height:1.22;letter-spacing:-0.01em;color:${dark ? IVORY : INK}">${annEsc(q)}</div>
+        <div style="margin-top:44px">${attribution}</div>
+      </div>
+    </div>`
+      : `
     <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
       <div style="font-family:${DISPLAY};font-size:120px;line-height:0.6;color:${dark ? '#8FD0AE' : CORAL};margin-bottom:8px">“</div>
       <div style="font-family:${DISPLAY};font-weight:545;font-size:${quoteSize(q)}px;line-height:1.2;letter-spacing:-0.01em;color:${dark ? IVORY : INK};max-width:920px">${annEsc(q)}</div>
-      <div style="margin-top:52px;display:flex;align-items:center;gap:22px">
-        ${photoChip}
-        <div>
-          <div style="font-size:21px;font-weight:800;color:${dark ? IVORY : INK}">${annEsc(spec.name || '')}</div>
-          <div style="margin-top:4px;font-size:17.5px;font-weight:500;color:${dark ? IVORY_SUB : BODY}">${annEsc(spec.role || '')}</div>
-        </div>
-      </div>
+      <div style="margin-top:52px">${attribution}</div>
     </div>`;
     return cardShell(dark, spec.kicker || 'On the record', spec.footerTag, body);
   }
 
   if (spec.template === 'thesis') {
-    const rows = (spec.rows || []).slice(0, 4).map(r => `
+    const rows = (spec.rows || []).slice(0, spec.photo ? 3 : 4).map(r => `
       <div style="padding:24px 0;border-top:1px solid ${HAIR}">
         <div style="font-family:${MONO};font-size:15.5px;letter-spacing:0.09em;color:${CORAL_DEEP};text-transform:uppercase">${annEsc(r.k)}</div>
         <div style="margin-top:8px;font-size:22px;line-height:1.5;color:${BODY};font-weight:500">${annEsc(r.v)}</div>
       </div>`).join('');
     const body = `
     <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-start">
-      <div style="margin-top:52px;font-family:${DISPLAY};font-weight:545;font-size:54px;line-height:1.12;letter-spacing:-0.012em;color:${INK};max-width:900px">${annEsc(spec.title || '')}</div>
-      <div style="margin-top:40px">${rows}</div>
+      <div style="margin-top:${spec.photo ? 40 : 52}px;font-family:${DISPLAY};font-weight:545;font-size:${spec.photo ? 48 : 54}px;line-height:1.12;letter-spacing:-0.012em;color:${INK};max-width:900px">${annEsc(spec.title || '')}</div>
+      ${spec.photo ? `<div style="margin-top:34px;height:290px;box-shadow:0 20px 60px rgba(0,0,0,0.16)">${annPhotoBlock(16, spec.photo)}</div>` : ''}
+      <div style="margin-top:${spec.photo ? 28 : 40}px">${rows}</div>
       ${spec.insight ? `
       <div style="margin-top:auto;background:#E7F0EC;border-left:5px solid ${CORAL};padding:26px 30px;margin-bottom:8px">
         <div style="font-family:${MONO};font-size:15px;letter-spacing:0.1em;color:${CORAL_DEEP};text-transform:uppercase">The read</div>
@@ -780,15 +795,16 @@ export function postCardHtml(spec: PostCardSpec): string {
   }
 
   // playbook
-  const steps = (spec.steps || []).slice(0, 5).map((t, i) => `
+  const steps = (spec.steps || []).slice(0, spec.photo ? 4 : 5).map((t, i) => `
     <div style="display:flex;gap:30px;align-items:baseline;padding:26px 0;border-top:1px solid ${HAIR}">
       <div style="font-size:46px;font-weight:800;letter-spacing:-0.02em;color:${CORAL};min-width:92px">${String(i + 1).padStart(2, '0')}</div>
       <div style="font-size:23px;line-height:1.5;color:${INK};font-weight:500">${annEsc(t)}</div>
     </div>`).join('');
   const body = `
     <div style="flex:1;display:flex;flex-direction:column">
-      <div style="margin-top:52px;font-family:${DISPLAY};font-weight:545;font-size:54px;line-height:1.12;letter-spacing:-0.012em;color:${INK};max-width:900px">${annEsc(spec.title || '')}</div>
-      <div style="margin-top:44px">${steps}</div>
+      <div style="margin-top:${spec.photo ? 40 : 52}px;font-family:${DISPLAY};font-weight:545;font-size:${spec.photo ? 48 : 54}px;line-height:1.12;letter-spacing:-0.012em;color:${INK};max-width:900px">${annEsc(spec.title || '')}</div>
+      ${spec.photo ? `<div style="margin-top:34px;height:270px;box-shadow:0 20px 60px rgba(0,0,0,0.16)">${annPhotoBlock(16, spec.photo)}</div>` : ''}
+      <div style="margin-top:${spec.photo ? 26 : 44}px">${steps}</div>
     </div>`;
   return cardShell(false, spec.kicker || 'The playbook', spec.footerTag, body);
 }
