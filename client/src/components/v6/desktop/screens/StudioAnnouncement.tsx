@@ -375,7 +375,7 @@ export function StudioPostCards() {
           return i > 0 ? { k: l.slice(0, i).trim(), v: l.slice(i + 1).trim() } : null;
         }).filter(Boolean),
         steps: fields.steps.split("\n").map(l => l.trim()).filter(Boolean),
-        assetId: template === "quote" ? assetId : null,
+        assetId,
       };
       const r = await fetch("/api/studio/postcard.png", {
         method: "POST",
@@ -464,9 +464,9 @@ export function StudioPostCards() {
             </div>
           ))}
 
-          {template === "quote" && (
+          {(
             <div style={{ marginTop: 12 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: T.ink }}>Photo chip (optional)</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: T.ink }}>Image from the media library (optional)</div>
               <div style={{ marginTop: 6, display: "flex", gap: 8, flexWrap: "wrap" }}>
                 <button type="button" style={seg(assetId === null)} onClick={() => setAssetId(null)}>None</button>
                 {(assets ?? []).map(a => (

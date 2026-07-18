@@ -521,7 +521,7 @@ researchRouter.post('/studio/postcard.png', async (req, res) => {
   if ((template === 'thesis' || template === 'playbook') && !spec.title) return res.status(400).json({ error: 'This template needs a title' });
   try {
     const assetId = b.assetId != null ? Number(b.assetId) : null;
-    if (template === 'quote' && assetId && Number.isFinite(assetId)) {
+    if (assetId && Number.isFinite(assetId)) {
       const asset = await getStudioAsset(assetId);
       if (!asset) return res.status(404).json({ error: 'Photo not found in the media library' });
       spec.photo = {
