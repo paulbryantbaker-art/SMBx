@@ -260,3 +260,241 @@ const S: Record<string, React.CSSProperties> = {
   previewWrap: { marginTop: 6, border: `1px solid ${T.border}`, borderRadius: 14, overflow: "hidden", maxWidth: 540 },
   preview: { width: "100%", display: "block" },
 };
+
+/* ─── Post cards — the daily-campaign template rack (2026-07-18) ──────────
+ * Paste the day's brief → Smart fill picks a template (stat · quote ·
+ * teardown · playbook) and drafts the fields from ONLY what's in the brief —
+ * then every field is editable before rendering the 1080×1350 card. Quote
+ * cards can carry a media-library photo chip.
+ */
+
+type CardTemplate = "stat" | "quote" | "thesis" | "playbook";
+interface CardFields {
+  kicker: string;
+  value: string;
+  claim: string;
+  source: string;
+  quote: string;
+  name: string;
+  role: string;
+  title: string;
+  rows: string;   // one per line, "LABEL | sentence"
+  insight: string;
+  steps: string;  // one per line
+  footerTag: string;
+}
+const EMPTY_FIELDS: CardFields = {
+  kicker: "", value: "", claim: "", source: "", quote: "",
+  name: "Paul Baker", role: "Founder · smbX.ai", title: "", rows: "", insight: "", steps: "",
+  footerTag: "smbx.ai · Book a call",
+};
+const TPL_LABEL: Record<CardTemplate, string> = {
+  stat: "Big stat", quote: "Pull-quote", thesis: "Sector teardown", playbook: "Playbook",
+};
+const TPL_FIELDS: Record<CardTemplate, Array<{ key: keyof CardFields; label: string; rows?: number }>> = {
+  stat: [
+    { key: "kicker", label: "Kicker" }, { key: "value", label: "The number" },
+    { key: "claim", label: "Claim", rows: 2 }, { key: "source", label: "Source" },
+    { key: "footerTag", label: "Footer tag" },
+  ],
+  quote: [
+    { key: "kicker", label: "Kicker" }, { key: "quote", label: "Quote", rows: 3 },
+    { key: "name", label: "Name" }, { key: "role", label: "Role" },
+    { key: "footerTag", label: "Footer tag" },
+  ],
+  thesis: [
+    { key: "kicker", label: "Kicker" }, { key: "title", label: "Title", rows: 2 },
+    { key: "rows", label: "Rows (one per line: LABEL | sentence)", rows: 4 },
+    { key: "insight", label: "The read", rows: 2 }, { key: "footerTag", label: "Footer tag" },
+  ],
+  playbook: [
+    { key: "kicker", label: "Kicker" }, { key: "title", label: "Title", rows: 2 },
+    { key: "steps", label: "Steps (one per line)", rows: 5 }, { key: "footerTag", label: "Footer tag" },
+  ],
+};
+
+export function StudioPostCards() {
+  const [assets, setAssets] = useState<AssetMeta[] | null>(null);
+  const [brief, setBrief] = useState("");
+  const [choice, setChoice] = useState<CardTemplate | "auto">("auto");
+  const [template, setTemplate] = useState<CardTemplate>("quote");
+  const [variant, setVariant] = useState<"light" | "dark">("light");
+  const [fields, setFields] = useState<CardFields>(EMPTY_FIELDS);
+  const [assetId, setAssetId] = useState<number | null>(null);
+  const [filled, setFilled] = useState(false);
+  const [busy, setBusy] = useState<"fill" | "render" | null>(null);
+  const [note, setNote] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    jsonApi<{ assets: AssetMeta[] }>("/studio/assets").then(j => setAssets(j.assets)).catch(() => setAssets([]));
+  }, []);
+
+  const smartFill = async () => {
+    setBusy("fill"); setNote(null);
+    try {
+      const j = await jsonApi<{ spec: Record<string, unknown> }>("/studio/postcard/compose", {
+        method: "POST",
+        body: JSON.stringify({ brief, template: choice, variant }),
+      });
+      const sp = j.spec as any;
+      const tpl: CardTemplate = (["stat", "quote", "thesis", "playbook"] as const).includes(sp.template) ? sp.template : "quote";
+      setTemplate(tpl);
+      setFields({
+        ...EMPTY_FIELDS,
+        kicker: sp.kicker || "",
+        value: sp.value || "",
+        claim: sp.claim || "",
+        source: sp.source || "",
+        quote: sp.quote || "",
+        name: sp.name || EMPTY_FIELDS.name,
+        role: sp.role || EMPTY_FIELDS.role,
+        title: sp.title || "",
+        rows: Array.isArray(sp.rows) ? sp.rows.map((r: any) => `${r.k} | ${r.v}`).join("\n") : "",
+        insight: sp.insight || "",
+        steps: Array.isArray(sp.steps) ? sp.steps.join("\n") : "",
+        footerTag: sp.footerTag || EMPTY_FIELDS.footerTag,
+      });
+      setFilled(true);
+      setNote({ kind: "ok", text: `Drafted as “${TPL_LABEL[tpl]}” — edit anything, then render.` });
+    } catch (e) {
+      setNote({ kind: "err", text: e instanceof Error ? e.message : "Smart fill failed" });
+    } finally { setBusy(null); }
+  };
+
+  const render = async () => {
+    setBusy("render"); setNote(null);
+    try {
+      const body: Record<string, unknown> = {
+        template, variant,
+        kicker: fields.kicker, value: fields.value, claim: fields.claim, source: fields.source,
+        quote: fields.quote, name: fields.name, role: fields.role, title: fields.title,
+        insight: fields.insight, footerTag: fields.footerTag,
+        rows: fields.rows.split("\n").map(l => {
+          const i = l.indexOf("|");
+          return i > 0 ? { k: l.slice(0, i).trim(), v: l.slice(i + 1).trim() } : null;
+        }).filter(Boolean),
+        steps: fields.steps.split("\n").map(l => l.trim()).filter(Boolean),
+        assetId: template === "quote" ? assetId : null,
+      };
+      const r = await fetch("/api/studio/postcard.png", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        body: JSON.stringify(body),
+      });
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        throw new Error((j as any)?.error || `Render failed (${r.status})`);
+      }
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      setPreview(prev => { if (prev) URL.revokeObjectURL(prev); return url; });
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `smbx-card-${template}-${variant}.png`;
+      a.click();
+      setNote({ kind: "ok", text: "Rendered and downloaded." });
+    } catch (e) {
+      setNote({ kind: "err", text: e instanceof Error ? e.message : "Render failed" });
+    } finally { setBusy(null); }
+  };
+
+  const seg = (on: boolean): React.CSSProperties => ({
+    padding: "7px 14px", borderRadius: 99, border: `1px solid ${on ? T.blue : T.border}`,
+    background: on ? T.blueBg : "transparent", color: on ? T.blue : T.muted,
+    fontSize: 13, fontWeight: 600, cursor: "pointer",
+  });
+
+  return (
+    <div style={{ marginTop: 34 }}>
+      <div style={{ fontSize: 17, fontWeight: 700, color: T.ink }}>Post cards</div>
+      <div style={{ marginTop: 6, fontSize: 13.5, color: T.muted, maxWidth: 620, lineHeight: 1.55 }}>
+        Paste the day’s brief. Smart fill picks the template and drafts the copy from only what’s in
+        your text — edit anything, then render the LinkedIn-ready card.
+      </div>
+
+      <textarea
+        value={brief}
+        onChange={e => setBrief(e.target.value)}
+        placeholder="Today’s brief — the point you want to make, any numbers with their sources, the sector, the take…"
+        rows={4}
+        style={{ marginTop: 14, width: "100%", maxWidth: 720, padding: "12px 14px", borderRadius: 12, border: `1px solid ${T.border}`, fontSize: 14, fontFamily: "inherit", resize: "vertical" }}
+      />
+
+      <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+        <button type="button" style={seg(choice === "auto")} onClick={() => setChoice("auto")}>Auto</button>
+        {(Object.keys(TPL_LABEL) as CardTemplate[]).map(t => (
+          <button key={t} type="button" style={seg(choice === t)} onClick={() => { setChoice(t); setTemplate(t); }}>{TPL_LABEL[t]}</button>
+        ))}
+        <span style={{ width: 14 }} />
+        <button type="button" style={seg(variant === "light")} onClick={() => setVariant("light")}>Light</button>
+        <button type="button" style={seg(variant === "dark")} onClick={() => setVariant("dark")}>Dark</button>
+        <button
+          type="button"
+          disabled={busy !== null || brief.trim().length < 20}
+          onClick={smartFill}
+          style={{ marginLeft: 10, padding: "9px 18px", borderRadius: 99, border: "none", background: T.blue, color: "#fff", fontSize: 13.5, fontWeight: 700, cursor: "pointer", opacity: busy || brief.trim().length < 20 ? 0.55 : 1 }}
+        >
+          {busy === "fill" ? "Drafting…" : "Smart fill"}
+        </button>
+      </div>
+
+      {(filled || fields.quote || fields.value || fields.title) && (
+        <div style={{ marginTop: 18, maxWidth: 720 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            {TPL_LABEL[template]} · fields
+          </div>
+          {TPL_FIELDS[template].map(f => (
+            <div key={f.key} style={{ marginTop: 10 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: T.ink }}>{f.label}</div>
+              {(f.rows ?? 1) > 1 ? (
+                <textarea
+                  value={fields[f.key]}
+                  onChange={e => setFields(prev => ({ ...prev, [f.key]: e.target.value }))}
+                  rows={f.rows}
+                  style={{ marginTop: 4, width: "100%", padding: "9px 12px", borderRadius: 10, border: `1px solid ${T.border}`, fontSize: 14, fontFamily: "inherit", resize: "vertical" }}
+                />
+              ) : (
+                <input
+                  value={fields[f.key]}
+                  onChange={e => setFields(prev => ({ ...prev, [f.key]: e.target.value }))}
+                  style={{ marginTop: 4, width: "100%", padding: "9px 12px", borderRadius: 10, border: `1px solid ${T.border}`, fontSize: 14, fontFamily: "inherit" }}
+                />
+              )}
+            </div>
+          ))}
+
+          {template === "quote" && (
+            <div style={{ marginTop: 12 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: T.ink }}>Photo chip (optional)</div>
+              <div style={{ marginTop: 6, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button type="button" style={seg(assetId === null)} onClick={() => setAssetId(null)}>None</button>
+                {(assets ?? []).map(a => (
+                  <button key={a.id} type="button" style={seg(assetId === a.id)} onClick={() => setAssetId(a.id)}>{a.label}</button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <button
+            type="button"
+            disabled={busy !== null}
+            onClick={render}
+            style={{ marginTop: 16, padding: "10px 22px", borderRadius: 99, border: "none", background: T.green, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", opacity: busy ? 0.55 : 1 }}
+          >
+            {busy === "render" ? "Rendering…" : "Render card"}
+          </button>
+        </div>
+      )}
+
+      {note && (
+        <div style={{ marginTop: 12, fontSize: 13.5, fontWeight: 600, color: note.kind === "ok" ? T.green : "#B4432E" }}>{note.text}</div>
+      )}
+      {preview && (
+        <div style={{ marginTop: 12, border: `1px solid ${T.border}`, borderRadius: 14, overflow: "hidden", maxWidth: 420 }}>
+          <img src={preview} alt="Card preview" style={{ width: "100%", display: "block" }} />
+        </div>
+      )}
+    </div>
+  );
+}
