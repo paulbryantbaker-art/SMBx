@@ -10,12 +10,18 @@
  * OUTPUT the artifact set. Any run can become a CAMPAIGN on a cadence
  * (weekly Sunday-night, biweekly, monthly). Runs execute server-side
  * (web-search-armed Claude, fully cited); artifacts download from here.
+ *
+ * Below the form sits the LIBRARY — a Finder-style browser (2026-07-18):
+ * campaigns are folders in the sidebar, runs are documents in a columned
+ * list, and the preview pane shows the selected run's artifacts, review
+ * state, and its ACTIVITY TRAIL — the Claude-style live feed of what the
+ * researcher is searching/reading right now (activity JSONB, 3s poll while
+ * running; kept afterward as the run's "what it did" record).
  * Internal-only: practice-mode auth covers the routes.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { authHeaders, type User } from "../../../../hooks/useAuth";
 import { T } from "../atlasTokens";
-import { CheckIcon } from "../icons";
 import { StudioAnnouncement, StudioPostCards } from "./StudioAnnouncement";
 
 /* ─── API types ────────────────────────────────────────────── */
@@ -291,6 +297,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
   }
 
   const depthDef = catalog?.depths.find((d) => d.key === depth);
+  const reviewRun = runs.find((r) => r.id === reviewId) ?? null;
 
   return (
     <div>
@@ -397,90 +404,38 @@ export default function StudioResearch({ user }: { user: User | null }) {
         {note && <div style={{ ...R.note, color: note.kind === "err" ? "#B3261E" : T.green }}>{note.text}</div>}
       </div>
 
-      {/* ── campaigns ── */}
-      {schedules.length > 0 && (
-        <div style={{ marginTop: 26 }}>
-          <div style={R.secLabel}>Campaigns</div>
-          <div style={R.list}>
-            {schedules.map((s) => (
-              <div key={s.id} style={{ ...R.row, opacity: s.active ? 1 : 0.6 }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={R.rowTitle}>{s.name}</div>
-                  <div style={R.rowMeta}>
-                    {angleLabel(s.post_angle) ? `${angleLabel(s.post_angle)} · ` : ""}{typeLabel(s.research_type)} · {CADENCE_LABELS[s.cadence] ?? s.cadence}
-                    {s.active && s.next_run_at ? ` · next ${new Date(s.next_run_at).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}` : s.active ? "" : " · paused"}
-                  </div>
-                  <div style={R.rowTopic}>{s.topic}</div>
-                </div>
-                <button type="button" style={R.tinyBtn} onClick={() => toggleSchedule(s)}>{s.active ? "Pause" : "Resume"}</button>
-                <button type="button" style={{ ...R.tinyBtn, color: T.muted }} onClick={() => deleteSchedule(s)}>Delete</button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── runs ── */}
+      {/* ── the library — Finder-style: campaign folders, runs, documents ── */}
       <div style={{ marginTop: 26 }}>
-        <div style={R.secLabel}>Runs</div>
+        <div style={R.secLabel}>Library</div>
         {!loaded ? (
           <div style={R.empty}>Loading…</div>
-        ) : runs.length === 0 ? (
+        ) : runs.length === 0 && schedules.length === 0 ? (
           <div style={R.empty}>No research yet — set the knobs above and run your first one.</div>
         ) : (
-          <div style={R.list}>
-            {runs.map((r) => {
-              const done = r.status === "complete";
-              const failed = r.status === "failed";
-              // Everything renders on demand from the stored run, so a completed
-              // run with a feed can produce ANY artifact — the chosen format is
-              // intent, not a limit.
-              const showPdf = done;
-              const showLiPdf = done && r.has_feed;
-              const showCard = done && r.has_feed;
-              const showPost = done && r.has_feed;
-              return (
-                <div key={r.id} style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-                <div style={R.row}>
-                  <span style={R.statusIcon}>
-                    {done ? <CheckIcon size={15} c={T.green} /> : failed ? <span style={{ color: "#B3261E", fontWeight: 700 }}>!</span> : <Spinner />}
-                  </span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={R.rowTitle}>{r.report_title || r.topic}</div>
-                    <div style={R.rowMeta}>
-                      {angleLabel(r.post_angle) ? `${angleLabel(r.post_angle)} · ` : ""}{typeLabel(r.research_type)} · {r.depth}
-                      {r.schedule_id ? " · campaign" : ""} · {timeAgo(r.created_at)}
-                      {done && r.usage?.searches != null ? ` · ${r.usage.searches} searches` : ""}
-                      {done && r.usage?.costCents != null ? ` · ~$${(r.usage.costCents / 100).toFixed(2)}` : ""}
-                      {!done && !failed && r.progress ? ` · ${r.progress}` : ""}
-                    </div>
-                    {failed && r.error && <div style={R.rowErr}>{r.error}</div>}
-                  </div>
-                  {done && r.has_feed && (
-                    <span style={{ ...R.chip, ...(r.review_status === "approved" ? R.chipOk : R.chipDraft) }}>
-                      {r.review_status === "approved" ? "Approved" : "Draft"}
-                    </span>
-                  )}
-                  {done && r.has_feed && (
-                    <button type="button" style={{ ...R.tinyBtn, fontWeight: 700 }} onClick={() => setReviewId(reviewId === r.id ? null : r.id)}>
-                      {reviewId === r.id ? "Close" : "Review"}
-                    </button>
-                  )}
-                  {showPdf && <button type="button" style={{ ...R.tinyBtn, color: T.muted }} disabled={dl === `${r.id}:pdf`} onClick={() => grab(r, "pdf")}>{dl === `${r.id}:pdf` ? "…" : "Report"}</button>}
-                  {(done || failed) && <button type="button" style={{ ...R.tinyBtn, color: T.muted }} onClick={() => deleteRun(r)}>Delete</button>}
-                </div>
-                {reviewId === r.id && (
-                  <ReviewPanel
-                    run={r}
-                    onStatus={() => void refresh()}
-                    onCopyPost={() => copyPost(r)}
-                    onGrab={(kind) => grab(r, kind)}
-                  />
-                )}
-                </div>
-              );
-            })}
-          </div>
+          <>
+            <Library
+              runs={runs}
+              schedules={schedules}
+              typeLabel={typeLabel}
+              angleLabel={angleLabel}
+              dl={dl}
+              reviewId={reviewId}
+              onReview={(id) => setReviewId(reviewId === id ? null : id)}
+              onGrab={grab}
+              onCopyPost={copyPost}
+              onDeleteRun={deleteRun}
+              onToggleSchedule={toggleSchedule}
+              onDeleteSchedule={deleteSchedule}
+            />
+            {reviewRun && (
+              <ReviewPanel
+                run={reviewRun}
+                onStatus={() => void refresh()}
+                onCopyPost={() => copyPost(reviewRun)}
+                onGrab={(kind) => grab(reviewRun, kind)}
+              />
+            )}
+          </>
         )}
       </div>
 
@@ -490,6 +445,316 @@ export default function StudioResearch({ user }: { user: User | null }) {
   );
 }
 
+
+/* ─── Library — Finder-style: campaigns are folders, runs are documents ───
+   Sidebar (folders) · file list (runs, with columns) · preview pane (the
+   selected run's documents, review state, and its live activity trail —
+   the Claude-style "what is it doing right now" feed). */
+
+type FolderSel = { kind: "all" } | { kind: "oneoff" } | { kind: "camp"; id: number };
+
+function shortDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function FolderGlyph({ c }: { c: string }) {
+  return (
+    <svg width="15" height="13" viewBox="0 0 15 13" aria-hidden style={{ flex: "none" }}>
+      <path d="M1 2.4C1 1.63 1.63 1 2.4 1h3.3l1.5 1.7h5.4c.77 0 1.4.63 1.4 1.4v6.5c0 .77-.63 1.4-1.4 1.4H2.4A1.4 1.4 0 0 1 1 10.6V2.4Z" fill={c} opacity="0.9" />
+    </svg>
+  );
+}
+
+function DocGlyph({ c }: { c: string }) {
+  return (
+    <svg width="12" height="14" viewBox="0 0 12 14" aria-hidden style={{ flex: "none" }}>
+      <path d="M1 2c0-.55.45-1 1-1h5.5L11 4.5V12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2Z" fill="none" stroke={c} strokeWidth="1.3" />
+      <path d="M7.5 1v3.5H11" fill="none" stroke={c} strokeWidth="1.3" />
+    </svg>
+  );
+}
+
+function SideRow({ label, count, on, onClick, tint, dim }: {
+  label: string; count: number; on: boolean; onClick: () => void; tint: string; dim?: boolean;
+}) {
+  return (
+    <button type="button" onClick={onClick} style={{ ...F.sideRow, ...(on ? F.sideRowOn : null), opacity: dim ? 0.62 : 1 }}>
+      <FolderGlyph c={on ? T.blue : tint} />
+      <span style={{ ...F.sideLabel, color: on ? T.blue : T.ink }}>{label}</span>
+      <span style={F.sideCount}>{count}</span>
+    </button>
+  );
+}
+
+function Library({ runs, schedules, typeLabel, angleLabel, dl, reviewId, onReview, onGrab, onCopyPost, onDeleteRun, onToggleSchedule, onDeleteSchedule }: {
+  runs: RunRow[];
+  schedules: ScheduleRow[];
+  typeLabel: (k: string) => string;
+  angleLabel: (k?: string | null) => string | null;
+  dl: string | null;
+  reviewId: number | null;
+  onReview: (id: number) => void;
+  onGrab: (r: RunRow, kind: "pdf" | "card" | "md" | "lipdf") => void;
+  onCopyPost: (r: RunRow) => void;
+  onDeleteRun: (r: RunRow) => void;
+  onToggleSchedule: (s: ScheduleRow) => void;
+  onDeleteSchedule: (s: ScheduleRow) => void;
+}) {
+  const [sel, setSel] = useState<FolderSel>({ kind: "all" });
+  const [selRunId, setSelRunId] = useState<number | null>(null);
+  const [filter, setFilter] = useState("");
+  const lastAutoRef = useRef<number | null>(null);
+
+  const oneoffs = useMemo(() => runs.filter((r) => r.schedule_id == null), [runs]);
+  const byCamp = useMemo(() => {
+    const m = new Map<number, RunRow[]>();
+    for (const r of runs) {
+      if (r.schedule_id == null) continue;
+      const a = m.get(r.schedule_id) ?? [];
+      a.push(r);
+      m.set(r.schedule_id, a);
+    }
+    return m;
+  }, [runs]);
+
+  const folderRuns = sel.kind === "all" ? runs : sel.kind === "oneoff" ? oneoffs : (byCamp.get(sel.id) ?? []);
+  const q = filter.trim().toLowerCase();
+  const items = q ? folderRuns.filter((r) => `${r.report_title ?? ""} ${r.topic}`.toLowerCase().includes(q)) : folderRuns;
+
+  // A freshly started run selects itself so its live trail is on screen
+  // immediately — once per run, so a later manual selection sticks.
+  useEffect(() => {
+    const newest = runs[0];
+    if (newest && (newest.status === "queued" || newest.status === "running") && lastAutoRef.current !== newest.id) {
+      lastAutoRef.current = newest.id;
+      setSel(newest.schedule_id != null ? { kind: "camp", id: newest.schedule_id } : { kind: "all" });
+      setSelRunId(newest.id);
+    }
+  }, [runs]);
+
+  // Keep the selection inside the visible set.
+  useEffect(() => {
+    if (selRunId != null && items.some((r) => r.id === selRunId)) return;
+    const next = items[0]?.id ?? null;
+    if (next !== selRunId) setSelRunId(next);
+  }, [items, selRunId]);
+
+  const selRun = items.find((r) => r.id === selRunId) ?? null;
+  const selCamp = sel.kind === "camp" ? schedules.find((s) => s.id === sel.id) ?? null : null;
+
+  return (
+    <div style={F.wrap}>
+      {/* folders */}
+      <div style={F.side}>
+        <div style={F.sideHead}>Folders</div>
+        <SideRow label="All research" count={runs.length} on={sel.kind === "all"} onClick={() => setSel({ kind: "all" })} tint="#6E9BE0" />
+        <SideRow label="One-off runs" count={oneoffs.length} on={sel.kind === "oneoff"} onClick={() => setSel({ kind: "oneoff" })} tint="#A8AEB8" />
+        {schedules.length > 0 && <div style={{ ...F.sideHead, marginTop: 14 }}>Campaigns</div>}
+        {schedules.map((s) => (
+          <SideRow
+            key={s.id}
+            label={s.name}
+            count={(byCamp.get(s.id) ?? []).length}
+            on={sel.kind === "camp" && sel.id === s.id}
+            onClick={() => setSel({ kind: "camp", id: s.id })}
+            tint={s.active ? "#63B98F" : "#A8AEB8"}
+            dim={!s.active}
+          />
+        ))}
+      </div>
+
+      {/* file list */}
+      <div style={F.main}>
+        {selCamp && (
+          <div style={F.campBar}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={F.campName}>{selCamp.name}{selCamp.active ? "" : " · paused"}</div>
+              <div style={F.campMeta}>
+                {angleLabel(selCamp.post_angle) ? `${angleLabel(selCamp.post_angle)} · ` : ""}{typeLabel(selCamp.research_type)} · {CADENCE_LABELS[selCamp.cadence] ?? selCamp.cadence}
+                {selCamp.active && selCamp.next_run_at ? ` · next ${new Date(selCamp.next_run_at).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}` : ""}
+              </div>
+            </div>
+            <button type="button" style={R.tinyBtn} onClick={() => onToggleSchedule(selCamp)}>{selCamp.active ? "Pause" : "Resume"}</button>
+            <button type="button" style={{ ...R.tinyBtn, color: T.muted }} onClick={() => onDeleteSchedule(selCamp)}>Delete</button>
+          </div>
+        )}
+        <div style={F.listHead}>
+          <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter…" style={F.filter} />
+        </div>
+        <div style={F.cols}>
+          <span style={{ flex: 1 }}>Name</span>
+          <span style={{ width: 96, flex: "none" }}>Format</span>
+          <span style={{ width: 66, flex: "none" }}>Status</span>
+          <span style={{ width: 48, flex: "none", textAlign: "right" }}>Date</span>
+        </div>
+        <div style={F.rows}>
+          {items.length === 0 && <div style={F.emptyList}>{q ? "Nothing matches the filter." : "No runs in this folder yet."}</div>}
+          {items.map((r) => {
+            const on = r.id === selRunId;
+            const failed = r.status === "failed";
+            const running = r.status === "queued" || r.status === "running";
+            return (
+              <button key={r.id} type="button" onClick={() => setSelRunId(r.id)} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
+                <span style={F.rowIcon}>{running ? <Spinner /> : failed ? <span style={{ color: "#B3261E", fontWeight: 700 }}>!</span> : <DocGlyph c={on ? T.blue : T.muted} />}</span>
+                <span style={F.rowName}>{r.report_title || r.topic}</span>
+                <span style={F.rowCol}>{angleLabel(r.post_angle) ?? typeLabel(r.research_type)}</span>
+                <span style={{ ...F.rowCol, width: 66 }}>
+                  {running ? <span style={{ color: T.blue, fontWeight: 600 }}>Running</span>
+                    : failed ? <span style={{ color: "#B3261E", fontWeight: 600 }}>Failed</span>
+                    : r.review_status === "approved" ? <span style={{ color: "#0F4E3C", fontWeight: 600 }}>Approved</span>
+                    : <span style={{ color: "#8A6A2B", fontWeight: 600 }}>Draft</span>}
+                </span>
+                <span style={{ ...F.rowCol, width: 48, textAlign: "right" }}>{shortDate(r.created_at)}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* preview */}
+      <div style={F.prev}>
+        {selRun ? (
+          <RunPreview
+            run={selRun}
+            typeLabel={typeLabel}
+            angleLabel={angleLabel}
+            dl={dl}
+            reviewOpen={reviewId === selRun.id}
+            onReview={() => onReview(selRun.id)}
+            onGrab={(k) => onGrab(selRun, k)}
+            onCopyPost={() => onCopyPost(selRun)}
+            onDelete={() => onDeleteRun(selRun)}
+          />
+        ) : (
+          <div style={F.prevEmpty}>Select a run to see its documents.</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DocRow({ label, onClick, busy, muted }: { label: string; onClick: () => void; busy?: boolean; muted?: boolean }) {
+  return (
+    <button type="button" style={F.docRow} onClick={onClick} disabled={busy}>
+      <DocGlyph c={muted ? T.muted : T.blue} />
+      <span style={{ ...F.docLabel, color: muted ? T.muted : T.ink }}>{label}</span>
+      <span style={F.docGet}>{busy ? "…" : "Get"}</span>
+    </button>
+  );
+}
+
+function RunPreview({ run, typeLabel, angleLabel, dl, reviewOpen, onReview, onGrab, onCopyPost, onDelete }: {
+  run: RunRow;
+  typeLabel: (k: string) => string;
+  angleLabel: (k?: string | null) => string | null;
+  dl: string | null;
+  reviewOpen: boolean;
+  onReview: () => void;
+  onGrab: (kind: "pdf" | "card" | "md" | "lipdf") => void;
+  onCopyPost: () => void;
+  onDelete: () => void;
+}) {
+  const done = run.status === "complete";
+  const failed = run.status === "failed";
+  const running = !done && !failed;
+  const fmt = angleLabel(run.post_angle);
+  return (
+    <div style={F.prevInner}>
+      <div style={F.prevTitle}>{run.report_title || run.topic}</div>
+      <div style={F.prevMeta}>
+        {fmt ? `${fmt} · ` : ""}{typeLabel(run.research_type)} · {run.depth}
+        {run.schedule_id != null ? " · campaign" : ""} · {timeAgo(run.created_at)}
+        {done && run.usage?.searches != null ? ` · ${run.usage.searches} searches` : ""}
+        {done && run.usage?.costCents != null ? ` · ~$${(run.usage.costCents / 100).toFixed(2)}` : ""}
+      </div>
+      {done && run.has_feed && (
+        <span style={{ ...R.chip, ...(run.review_status === "approved" ? R.chipOk : R.chipDraft), alignSelf: "flex-start", marginTop: 8 }}>
+          {run.review_status === "approved" ? "Approved" : "Draft"}
+        </span>
+      )}
+      {failed && run.error && <div style={{ ...R.rowErr, marginTop: 8 }}>{run.error}</div>}
+
+      {done && (
+        <>
+          <div style={F.prevLabel}>Documents</div>
+          <DocRow label="Report PDF" busy={dl === `${run.id}:pdf`} onClick={() => onGrab("pdf")} />
+          {run.has_feed && <DocRow label="LinkedIn 1-pager (PNG)" busy={dl === `${run.id}:card`} onClick={() => onGrab("card")} />}
+          {run.has_feed && <DocRow label="LinkedIn carousel (PDF)" busy={dl === `${run.id}:lipdf`} onClick={() => onGrab("lipdf")} />}
+          {run.has_feed && <DocRow label="Post text — copy" busy={dl === `${run.id}:post`} onClick={onCopyPost} />}
+          <DocRow label="Report markdown" busy={dl === `${run.id}:md`} onClick={() => onGrab("md")} muted />
+          {run.has_feed && (
+            <button type="button" style={F.reviewBtn} onClick={onReview}>{reviewOpen ? "Close review" : "Review & approve"}</button>
+          )}
+        </>
+      )}
+
+      <div style={F.prevLabel}>{running ? "Working now" : "What it did"}</div>
+      <ActivityFeed runId={run.id} running={running} />
+
+      <button type="button" style={F.delBtn} onClick={onDelete}>Delete run</button>
+    </div>
+  );
+}
+
+/* ─── Activity feed — the Claude-style live trail ───────────────────────── */
+
+interface ActLine { t: string; kind: string; text: string }
+
+function ActivityFeed({ runId, running }: { runId: number; running: boolean }) {
+  const [lines, setLines] = useState<ActLine[] | null>(null);
+  const boxRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    setLines(null);
+    const load = async () => {
+      try {
+        const j = await api<{ run: { activity?: ActLine[] } }>(`/research/runs/${runId}`);
+        if (alive) setLines(Array.isArray(j.run?.activity) ? j.run.activity : []);
+      } catch {
+        if (alive) setLines([]);
+      }
+    };
+    void load();
+    if (!running) return () => { alive = false; };
+    const t = setInterval(load, 3000);
+    return () => { alive = false; clearInterval(t); };
+  }, [runId, running]);
+
+  // Follow the tail while it works, like a terminal.
+  useEffect(() => {
+    if (running && boxRef.current) boxRef.current.scrollTop = boxRef.current.scrollHeight;
+  }, [lines, running]);
+
+  if (lines === null) return <div style={F.actEmpty}>Loading…</div>;
+  if (lines.length === 0 && !running) return <div style={F.actEmpty}>No activity was recorded for this run.</div>;
+
+  return (
+    <div ref={boxRef} style={F.act}>
+      {lines.map((l, i) => (
+        <div key={i} style={F.actLine}>
+          <span style={F.actTime}>{new Date(l.t).toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit" })}</span>
+          <span
+            style={{
+              ...F.actText,
+              ...(l.kind === "phase" ? { fontWeight: 700, color: T.ink } : null),
+              ...(l.kind === "done" ? { fontWeight: 700, color: T.green } : null),
+              ...(l.kind === "error" ? { fontWeight: 600, color: "#B3261E" } : null),
+            }}
+          >
+            {l.kind === "search" ? <>Searched — {l.text}</> : l.kind === "read" ? <>Read — {l.text}</> : l.text}
+          </span>
+        </div>
+      ))}
+      {running && (
+        <div style={{ ...F.actLine, alignItems: "center" }}>
+          <span style={F.actTime}><Spinner /></span>
+          <span style={{ ...F.actText, color: T.muted }}>{lines.length === 0 ? "Starting up…" : "Working…"}</span>
+        </div>
+      )}
+    </div>
+  );
+}
 
 /* ─── Review panel — draft → edit → approve → export ───────────────────── */
 
@@ -640,12 +905,6 @@ const R: Record<string, React.CSSProperties> = {
   note: { marginTop: 10, fontSize: 12.5, lineHeight: 1.5 },
 
   secLabel: { fontSize: 13, color: T.muted, marginBottom: 10, fontWeight: 600 },
-  list: { display: "flex", flexDirection: "column", gap: 8 },
-  row: { display: "flex", alignItems: "center", gap: 11, background: T.white, border: `1px solid ${T.border}`, borderRadius: 12, boxShadow: T.shCard, padding: "12px 14px" },
-  statusIcon: { width: 16, flex: "none", display: "flex", alignItems: "center", justifyContent: "center" },
-  rowTitle: { fontSize: 13.5, fontWeight: 600, color: T.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-  rowMeta: { fontSize: 12, color: T.muted, marginTop: 1 },
-  rowTopic: { fontSize: 12, color: T.muted2, marginTop: 3, display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" },
   rowErr: { fontSize: 12, color: "#B3261E", marginTop: 3, lineHeight: 1.4 },
   tinyBtn: { flex: "none", background: "transparent", border: `1px solid ${T.border}`, borderRadius: 8, padding: "6px 10px", fontSize: 12, fontWeight: 600, color: T.blue, cursor: "pointer", fontFamily: T.font },
 
@@ -662,8 +921,55 @@ const R: Record<string, React.CSSProperties> = {
   chipOk: { background: "#E7F0EC", color: "#0F4E3C", border: "1px solid #BFD8CD" },
 };
 
+/* Finder library styles. */
+const F: Record<string, React.CSSProperties> = {
+  wrap: { display: "flex", alignItems: "stretch", height: 560, background: T.white, border: `1px solid ${T.border}`, borderRadius: 16, boxShadow: T.shCard, overflow: "hidden" },
+
+  side: { width: 188, flex: "none", background: T.surface, borderRight: `1px solid ${T.border}`, padding: "12px 8px", overflowY: "auto" },
+  sideHead: { fontSize: 11, fontWeight: 700, color: T.muted2, letterSpacing: "0.05em", textTransform: "uppercase", padding: "0 8px", marginBottom: 6 },
+  sideRow: { display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", background: "transparent", border: "none", borderRadius: 8, padding: "7px 8px", cursor: "pointer", fontFamily: T.font },
+  sideRowOn: { background: T.blueBg3 },
+  sideLabel: { flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  sideCount: { flex: "none", fontSize: 11.5, color: T.muted, fontWeight: 600 },
+
+  main: { flex: 1, minWidth: 260, display: "flex", flexDirection: "column", borderRight: `1px solid ${T.border}`, background: T.white },
+  campBar: { display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", borderBottom: `1px solid ${T.border}`, background: T.surface },
+  campName: { fontSize: 13, fontWeight: 700, color: T.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  campMeta: { fontSize: 11.5, color: T.muted, marginTop: 1 },
+  listHead: { padding: "10px 12px 6px" },
+  filter: { width: "100%", height: 30, borderRadius: 8, border: `1px solid ${T.inputBd}`, background: T.white, padding: "0 10px", fontSize: 12.5, color: T.ink, fontFamily: T.font, outline: "none", boxSizing: "border-box" },
+  cols: { display: "flex", gap: 6, padding: "4px 16px 6px", fontSize: 11, fontWeight: 700, color: T.muted2, letterSpacing: "0.04em", textTransform: "uppercase", borderBottom: `1px solid ${T.border}` },
+  rows: { flex: 1, overflowY: "auto", padding: "4px 6px 8px" },
+  row: { display: "flex", alignItems: "center", gap: 6, width: "100%", textAlign: "left", background: "transparent", border: "none", borderRadius: 8, padding: "8px 8px", cursor: "pointer", fontFamily: T.font },
+  rowOn: { background: T.blueBg3 },
+  rowIcon: { width: 16, flex: "none", display: "flex", alignItems: "center", justifyContent: "center" },
+  rowName: { flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: 600, color: T.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  rowCol: { width: 96, flex: "none", fontSize: 11.5, color: T.muted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  emptyList: { padding: "18px 12px", fontSize: 12.5, color: T.muted },
+
+  prev: { width: 280, flex: "none", overflowY: "auto", background: T.white },
+  prevInner: { display: "flex", flexDirection: "column", padding: "14px 14px 16px" },
+  prevEmpty: { padding: 18, fontSize: 12.5, color: T.muted },
+  prevTitle: { fontSize: 13.5, fontWeight: 700, color: T.ink, lineHeight: 1.35 },
+  prevMeta: { fontSize: 11.5, color: T.muted, marginTop: 4, lineHeight: 1.5 },
+  prevLabel: { fontSize: 11, fontWeight: 700, color: T.muted2, letterSpacing: "0.05em", textTransform: "uppercase", marginTop: 16, marginBottom: 6 },
+  docRow: { display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", background: T.white, border: `1px solid ${T.border}`, borderRadius: 9, padding: "8px 10px", cursor: "pointer", fontFamily: T.font, marginTop: 5 },
+  docLabel: { flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: 600 },
+  docGet: { flex: "none", fontSize: 11.5, fontWeight: 700, color: T.blue },
+  reviewBtn: { marginTop: 10, background: T.blue, color: "#fff", border: "none", borderRadius: T.rPill, padding: "8px 14px", fontSize: 12.5, fontWeight: 700, cursor: "pointer", fontFamily: T.font, alignSelf: "flex-start" },
+
+  act: { maxHeight: 240, overflowY: "auto", background: T.surface, border: `1px solid ${T.border}`, borderRadius: 10, padding: "8px 10px" },
+  actLine: { display: "flex", gap: 8, padding: "2.5px 0", alignItems: "baseline" },
+  actTime: { flex: "none", width: 38, fontSize: 10.5, color: T.muted2, fontVariantNumeric: "tabular-nums" },
+  actText: { fontSize: 12, color: T.ink3, lineHeight: 1.45, minWidth: 0, overflowWrap: "anywhere" },
+  actEmpty: { fontSize: 12, color: T.muted, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 10, padding: "10px 12px" },
+
+  delBtn: { marginTop: 14, alignSelf: "flex-start", background: "transparent", border: `1px solid ${T.border}`, borderRadius: 8, padding: "6px 10px", fontSize: 12, fontWeight: 600, color: T.muted, cursor: "pointer", fontFamily: T.font },
+};
+
 const RV: Record<string, React.CSSProperties> = {
-  panel: { border: `1px solid ${T.border}`, borderTop: "none", borderRadius: "0 0 12px 12px", background: T.surface, padding: "16px 18px", marginTop: -6, paddingTop: 20 },
+  // Stands alone below the library (it used to attach under a run row).
+  panel: { border: `1px solid ${T.border}`, borderRadius: 12, background: T.surface, padding: "16px 18px", marginTop: 10 },
   cols: { display: "flex", gap: 22, flexWrap: "wrap" },
   editCol: { flex: 1, minWidth: 300 },
   previewCol: { width: 280, flex: "none" },
