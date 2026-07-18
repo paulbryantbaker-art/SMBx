@@ -8,8 +8,8 @@
  *
  * FootprintMap is honest imagery, not decoration-shaped data: ~50 US metros
  * plotted by real coordinates, with the markets the practice's leadership
- * has actually closed deals in glowing coral (the Wrench footprint, the
- * JPMC decade at New York). The US shape emerges from the node field alone.
+ * has actually closed deals in glowing coral (the aggregator footprint, the
+ * bank decade at New York). The US shape emerges from the node field alone.
  */
 import type { ReactNode } from 'react';
 
@@ -64,7 +64,7 @@ const METROS: Metro[] = [
   { k: 'dca', lon: -77.04, lat: 38.91, hot: true },    // F.H. Furr (NoVA)
   { k: 'bwi', lon: -76.61, lat: 39.29 },
   { k: 'phl', lon: -75.17, lat: 39.95 },
-  { k: 'nyc', lon: -74.01, lat: 40.71, hot: true },    // JPMorgan Chase decade
+  { k: 'nyc', lon: -74.01, lat: 40.71, hot: true },    // the bank decade
   { k: 'bdl', lon: -72.68, lat: 41.76 },
   { k: 'bos', lon: -71.06, lat: 42.36 },
   { k: 'buf', lon: -78.88, lat: 42.89 },

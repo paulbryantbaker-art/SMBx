@@ -83,7 +83,7 @@ export default function About() {
               </div>
               <div>
                 For nearly a decade he was Director of Corporate Development and M&amp;A Integration
-                at <b style={{ color: 'var(--pd-ink)' }}>Wrench Group</b>, building the acquisition engine that turned four
+                at <b style={{ color: 'var(--pd-ink)' }}>a world-class PE-backed aggregator</b>, building the acquisition engine that turned four
                 founding companies into a premier national home-services platform. He oversaw the
                 process from LOI to definitive agreement, and led or co-led{' '}
                 <b style={{ color: 'var(--pd-ink)' }}>36 acquisitions across roughly $2.9 billion in enterprise value</b> —
@@ -91,15 +91,13 @@ export default function About() {
                 from founders, brokers, bankers, and private equity sponsors on every one.
               </div>
               <div>
-                Before that, at <b style={{ color: 'var(--pd-ink)' }}>JPMorgan Chase's Investment Bank</b>, he led
-                acquisition integration on some of the largest deals in modern banking — Bank One,
-                Washington Mutual, and Chase Paymentech among them — delivering over $2B in
-                synergies, and integrating fintech acquisitions from Neovest to Collegiate Funding
-                Services to clearXchange. Earlier, he advised Fortune 500 clients on inorganic
+                Before that, at <b style={{ color: 'var(--pd-ink)' }}>a global investment bank</b>, he led
+                acquisition integration on some of the largest deals in modern banking — delivering
+                over $2B in synergies — and integrated a run of fintech acquisitions. Earlier, he advised Fortune 500 clients on inorganic
                 growth strategy at <b style={{ color: 'var(--pd-ink)' }}>Deloitte Consulting</b>.
               </div>
               <div>
-                All told: <b style={{ color: 'var(--pd-ink)' }}>150+ acquisitions, $5B+ in revenue added to the buyers he
+                All told: <b style={{ color: 'var(--pd-ink)' }}>150 acquisitions, $5B+ in revenue added to the buyers he
                 worked for.</b> Always on the buy side. Always the one accountable when the deal had
                 to close.
               </div>

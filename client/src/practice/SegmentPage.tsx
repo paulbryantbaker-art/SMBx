@@ -118,7 +118,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
       <section className="pd-wrap" style={{ paddingTop: 'clamp(80px, 9vw, 130px)' }}>
         <div className="pd-statband">
           <div className="pd-stats rv-stagger" data-rv>
-            <div className="pd-stat"><div className="n">150+</div><div className="l">Acquisitions closed</div></div>
+            <div className="pd-stat"><div className="n">150</div><div className="l">Acquisitions closed</div></div>
             <div className="pd-stat"><div className="n">$5B+</div><div className="l">In revenue added to buyers</div></div>
             <div className="pd-stat"><div className="n">20</div><div className="l">Years of buy-side execution</div></div>
             <div className="pd-stat accent"><div className="n">1</div><div className="l">Side of the table — always the buyer's</div></div>

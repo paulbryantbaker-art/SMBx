@@ -184,7 +184,7 @@ function ProofBand() {
           Two decades on the buy side
         </div>
         <div className="pd-stats rv-stagger" data-rv ref={ref} style={{ marginTop: 'clamp(32px, 3.8vw, 54px)' }}>
-          <div className="pd-stat"><div className="n">150+</div><div className="l">Acquisitions closed</div></div>
+          <div className="pd-stat"><div className="n">150</div><div className="l">Acquisitions closed</div></div>
           <div className="pd-stat"><div className="n">$5B+</div><div className="l">Enterprise value added</div></div>
           <div className="pd-stat"><div className="n">~$21B</div><div className="l">Transactions touched</div></div>
           <div className="pd-stat accent"><div className="n">0</div><div className="l">Sell-side engagements. Ever.</div></div>

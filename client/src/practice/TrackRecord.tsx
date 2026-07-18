@@ -10,8 +10,10 @@
  *  3. The attribution line appears WHEREVER the deal names appear (this page,
  *     the landing band, any deck/PDF).
  *  4. Names, not logos — logos imply a client relationship that never existed.
- *  5. Never "our clients" for any Wrench/JPMorgan transaction.
- *  6. JPMorgan is integration, not origination (Director of Acquisition
+ *  5. Never "our clients" for any employer transaction. (2026-07-18: employer
+ *     names are anonymized on all public surfaces — Paul: "a Global Investment
+ *     Bank and World Class PE Backed Aggregator".)
+ *  6. The bank role is integration, not origination (Director of Acquisition
  *     Integration) — do not stretch it.
  * Zero fabrication: every name is group-level fact from Paul's record.
  */
@@ -23,7 +25,7 @@ import { bookHref, bookTarget } from './leads';
  *  makes any accusation of misrepresentation impossible. Rendered wherever
  *  the deal names appear; never a footnote. */
 export const ATTRIBUTION =
-  'Selected transactions led or co-led by Paul Baker in the course of his employment at Wrench Group and JPMorgan Chase. These transactions were completed by those firms and were not smbX engagements.';
+  'Selected transactions led or co-led by Paul Baker in the course of his employment at a world-class PE-backed aggregator and a global investment bank. These transactions were completed by those firms and were not smbX engagements.';
 
 export function AttributionLine({ style }: { style?: React.CSSProperties }) {
   return (
@@ -103,16 +105,16 @@ export default function TrackRecord() {
       {/* ── Stat strip ── */}
       <section className="pd-wrap">
         <div className="pd-stats" style={{ marginTop: 'clamp(30px, 4vw, 60px)' }}>
-          <div className="pd-stat"><div className="n">150+</div><div className="l">Acquisitions</div></div>
+          <div className="pd-stat"><div className="n">150</div><div className="l">Acquisitions</div></div>
           <div className="pd-stat"><div className="n">$5B+</div><div className="l">Revenue added</div></div>
           <div className="pd-stat"><div className="n">~$21B</div><div className="l">In transaction value touched</div></div>
           <div className="pd-stat accent"><div className="n">0</div><div className="l">Sell-side transactions. Ever.</div></div>
         </div>
       </section>
 
-      {/* ── Wrench Group ── */}
+      {/* ── The aggregator (employer anonymized, Paul 2026-07-18) ── */}
       <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(90px, 10vw, 150px)' }}>
-        <div className="pd-seclabel">Wrench Group</div>
+        <div className="pd-seclabel">A World-Class PE-Backed Aggregator</div>
         <div className="pd-mono" style={{ marginTop: 2 }}>2016–2025 · DIRECTOR, CORPORATE DEVELOPMENT &amp; M&amp;A INTEGRATION</div>
         <div className="pd-body" style={{ marginTop: 22, maxWidth: '48em' }}>
           Recruited to build the M&amp;A pipeline and execution engine for a new essential-services
@@ -122,9 +124,9 @@ export default function TrackRecord() {
         <TransactionGroups groups={WRENCH_GROUPS} />
       </section>
 
-      {/* ── JPMorgan Chase ── */}
+      {/* ── The bank (employer anonymized, Paul 2026-07-18) ── */}
       <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(70px, 8vw, 120px)' }}>
-        <div className="pd-seclabel">JPMorgan Chase</div>
+        <div className="pd-seclabel">A Global Investment Bank</div>
         <div className="pd-mono" style={{ marginTop: 2 }}>2005–2015 · DIRECTOR, ACQUISITION INTEGRATION</div>
         <div className="pd-body" style={{ marginTop: 22, maxWidth: '48em' }}>
           Led integration on the bank's largest platform and fintech acquisitions, delivering over
