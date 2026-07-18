@@ -97,13 +97,16 @@ function fmtDate(d: Date | string | null | undefined): string {
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
 }
 
+// Document-register names for the RESEARCH_TYPES keys (researchAgent.ts) —
+// these stamp the report PDF header, where the Studio picker's conversational
+// labels ("Any topic — full research") would read oddly.
 const TYPE_LABELS: Record<string, string> = {
-  vertical_scan: 'Vertical Scan',
-  participant_map: 'Participant Map',
-  buyer_roster: 'Buyer Roster',
-  deal_monitor: 'Deal Monitor',
-  thesis_validation: 'Thesis Validation',
-  topic_brief: 'Topic Brief',
+  vertical_scan: 'Sector Scan',
+  participant_map: 'Market Map',
+  buyer_roster: 'Buyer Landscape',
+  deal_monitor: 'Recent Deals',
+  thesis_validation: 'Thesis Check',
+  topic_brief: 'Research Brief',
 };
 
 export interface ResearchRunRow {

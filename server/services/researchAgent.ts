@@ -59,7 +59,7 @@ export interface ResearchTypeDef {
 export const RESEARCH_TYPES: ResearchTypeDef[] = [
   {
     key: 'vertical_scan',
-    label: 'Vertical Scan',
+    label: 'Sector scan',
     blurb: 'Is this industry worth hunting in? Structure, fragmentation, buyer activity.',
     template: `## Market structure & size — how the vertical is organized, credible size/growth figures
 ## Fragmentation & ownership — operator count, size bands, consolidation state, who owns what
@@ -70,7 +70,7 @@ export const RESEARCH_TYPES: ResearchTypeDef[] = [
   },
   {
     key: 'participant_map',
-    label: 'Participant Map',
+    label: 'Market map',
     blurb: 'Who actually operates in this space, layer by layer.',
     template: `## Ecosystem layers — the value chain from upstream to end customer
 ## Named participants by tier — larger platforms, mid-size independents, notable specialists (names + one-line descriptors)
@@ -80,7 +80,7 @@ export const RESEARCH_TYPES: ResearchTypeDef[] = [
   },
   {
     key: 'buyer_roster',
-    label: 'Buyer Roster',
+    label: 'Who’s buying',
     blurb: 'Named likely acquirers for a segment, with rationale.',
     template: `## Active acquirers — named buyers with recent acquisition evidence, most active first
 ## Rationale per buyer — why each would want targets in this segment
@@ -90,7 +90,7 @@ export const RESEARCH_TYPES: ResearchTypeDef[] = [
   },
   {
     key: 'deal_monitor',
-    label: 'Deal Monitor',
+    label: 'Recent deals',
     blurb: 'What happened in this lane recently — transactions and signals.',
     template: `## Transactions in the window — announced deals with buyer, seller, date, and terms where published
 ## Signals — leadership changes, expansions, distress markers, fundraises that precede deals
@@ -100,8 +100,8 @@ export const RESEARCH_TYPES: ResearchTypeDef[] = [
   },
   {
     key: 'thesis_validation',
-    label: 'Thesis Validation',
-    blurb: 'Pressure-test an acquisition thesis against the evidence.',
+    label: 'Pressure-test a claim',
+    blurb: 'Test a thesis or a common belief against the evidence, both ways.',
     template: `## The thesis, restated — the claim being tested, in one tight paragraph
 ## Supporting evidence — findings that confirm, each cited
 ## Contradicting evidence — findings that cut against it, each cited (do not soften these)
@@ -110,8 +110,8 @@ export const RESEARCH_TYPES: ResearchTypeDef[] = [
   },
   {
     key: 'topic_brief',
-    label: 'Topic Brief',
-    blurb: 'A grounded brief on any M&A-adjacent topic.',
+    label: 'Any topic — full research',
+    blurb: 'A grounded, fully cited brief on whatever you type.',
     template: `## Findings — the substance, organized into 3–5 themed sections you choose
 ## Implications for buy-side work — what a lower-middle-market acquirer should do with this`,
     killConditions: false,
@@ -203,12 +203,18 @@ ${type.killConditions ? '## Kill conditions — specific observable facts that w
 Use markdown tables where rows of comparable facts exist (participants, transactions, data points). Do not fabricate table rows to look complete — a short honest table beats a padded one.`;
 }
 
+/** The post formats \u2014 named EXACTLY from Paul's weekly LinkedIn posting plan
+ *  (2026-07-18). These are the primary picker in Studio: he thinks "I need
+ *  Tuesday's Teardown", not in research-type taxonomy. Keys are stable;
+ *  labels are his words. */
 export const POST_ANGLES = [
-  { key: 'auto', label: 'Auto', blurb: 'Let the writer pick the strongest frame from the material.' },
-  { key: 'teardown', label: 'Teardown', blurb: 'Buyer\u2019s-eye breakdown of a sector or deal \u2014 structure, economics, diligence traps.' },
-  { key: 'contrarian', label: 'Contrarian take', blurb: 'Challenge a consensus view with evidence. Never a strawman of any firm.' },
-  { key: 'how_buyers_think', label: 'How buyers think', blurb: 'Process education \u2014 what disciplined acquirers actually do and why.' },
-  { key: 'practitioner_note', label: 'Practitioner note', blurb: 'First-person lived-experience frame, anonymized employers, career total 150.' },
+  { key: 'auto', label: 'Auto', blurb: 'Not a scheduled post \u2014 let the writer pick the strongest frame from the material.' },
+  { key: 'teardown', label: 'Teardown', blurb: 'Tuesday \u2014 buyer\u2019s-eye teardown of a sector or deal: structure, economics, diligence traps.' },
+  { key: 'contrarian', label: 'Contrarian Take', blurb: 'Wednesday \u2014 challenge a common belief with evidence. Ideas, never firms.' },
+  { key: 'how_buyers_think', label: 'How Buyers Think', blurb: 'Wednesday alt \u2014 process education: what disciplined acquirers actually do and why.' },
+  { key: 'practitioner_note', label: 'Practitioner Note', blurb: 'Thursday \u2014 first-person lived-experience note. Employers anonymized, career total 150.' },
+  { key: 'human_thread', label: 'Human Thread', blurb: 'Friday \u2014 a human story or lesson, no pitch. Personal specifics stay yours to fill in.' },
+  { key: 'hand_raiser', label: 'Hand-Raiser', blurb: 'Saturday \u2014 the direct offer: who we serve, what we do, one ask.' },
 ] as const;
 export type PostAngleKey = typeof POST_ANGLES[number]['key'];
 
@@ -217,6 +223,8 @@ const ANGLE_GUIDANCE: Record<string, string> = {
   contrarian: `POST ANGLE — CONTRARIAN TAKE: pick the consensus view the report actually undermines and lead with the challenge ("The 'Silver Tsunami' is the laziest thesis in lower-middle-market M&A" is the register). Every contrarian claim must be carried by a cited fact from the report. Challenge IDEAS and narratives, never a named firm or profession — advisors and brokers are allies.`,
   how_buyers_think: `POST ANGLE — HOW BUYERS THINK: frame the material as process education for acquirers — what a disciplined buyer checks, in what order, and why, using the report's facts as the evidence. Teach one repeatable judgment, not a listicle. Insider-POV hooks work: "Here's what a corp-dev team sees in this market."`,
   practitioner_note: `POST ANGLE — PRACTITIONER NOTE: first-person senior-operator voice — the report's facts framed through lived deal experience. HARD LAW: former employers are NEVER named — say "a global investment bank" and "a world-class PE-backed aggregator"; the career total is "150 acquisitions"; experience claims are "led or co-led", never unqualified "closed". These were employment transactions, never smbX engagements.`,
+  human_thread: `POST ANGLE — HUMAN THREAD: a human story or lesson, warm and plain — NO pitch, NO call-to-action, no "book a call". Build the post on a real pattern from the report (an owner's situation, a market moment) framed as observation from practice. ZERO FABRICATED AUTOBIOGRAPHY: never invent a personal anecdote, a named person, or a conversation that is not in the report. Where a lived specific belongs, write a bracketed placeholder for the author to fill — e.g. "[YOURS: the owner conversation this brings back]" — one or two at most, never more. First person is fine; the employer-anonymization law still applies ("a global investment bank" / "a world-class PE-backed aggregator", "150 acquisitions", "led or co-led"). Keep it short: 90–160 words, 0–2 hashtags.`,
+  hand_raiser: `POST ANGLE — HAND-RAISER: the direct offer, stated plainly. Structure: one concrete cited market fact from the report (why now) → who we work for (acquirers in the lower middle market, buy-side only) → what an engagement produces (a mapped market, qualified owner conversations, a process run through close) → ONE ask: book a call at smbx.ai. HARD LAW: never name, quote, or hint at fees; no "raise capital" or securities language; no invented scarcity or urgency ("two spots left" is banned); no competitor mention. 80–140 words, direct senior voice, 1–3 hashtags.`,
 };
 
 function feedSystemPrompt(postAngle?: string | null): string {

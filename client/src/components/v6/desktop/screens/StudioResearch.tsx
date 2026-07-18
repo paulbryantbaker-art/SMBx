@@ -1,13 +1,16 @@
 /**
- * Atlas — Studio / Research & campaigns (2026-07-15).
+ * Atlas — Studio / Research & campaigns (2026-07-15; format-first 2026-07-18).
  *
  * Paul's internal research agent control panel + LinkedIn campaign manager.
- * He controls the four knobs per run — TOPIC (free text), TYPE (six research
- * types), DEPTH (quick/standard/deep = search budget), OUTPUT (letter PDF
- * report, 1080×1350 LinkedIn card, or both) — and can save any run as a
- * CAMPAIGN on a cadence (weekly Sunday-night, biweekly, monthly). Runs
- * execute server-side (web-search-armed Claude, fully cited); artifacts
- * download from here. Internal-only: practice-mode auth covers the routes.
+ * The form leads with POST FORMAT — the slots of his weekly posting plan, in
+ * his exact vocabulary (Teardown · Contrarian Take · How Buyers Think ·
+ * Practitioner Note · Human Thread · Hand-Raiser) — then TOPIC (free text).
+ * The RESEARCH LENS (six report skeletons) auto-matches the chosen format
+ * via FORMAT_LENS and stays overridable; DEPTH sets the search budget and
+ * OUTPUT the artifact set. Any run can become a CAMPAIGN on a cadence
+ * (weekly Sunday-night, biweekly, monthly). Runs execute server-side
+ * (web-search-armed Claude, fully cited); artifacts download from here.
+ * Internal-only: practice-mode auth covers the routes.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { authHeaders, type User } from "../../../../hooks/useAuth";
@@ -31,6 +34,7 @@ interface RunRow {
   topic: string;
   depth: string;
   output_format: string;
+  post_angle?: string | null;
   status: string;
   progress: string | null;
   report_title: string | null;
@@ -48,6 +52,7 @@ interface ScheduleRow {
   topic: string;
   depth: string;
   output_format: string;
+  post_angle?: string | null;
   cadence: string;
   active: boolean;
   next_run_at: string | null;
@@ -91,6 +96,18 @@ const CADENCE_LABELS: Record<string, string> = {
   monthly: "Monthly",
 };
 
+/** Post format → the research lens that best feeds it. Applied when a format
+ *  is picked, unless the user has overridden the lens by hand (their choice
+ *  then sticks for the session). */
+const FORMAT_LENS: Record<string, string> = {
+  teardown: "vertical_scan",
+  contrarian: "thesis_validation",
+  how_buyers_think: "topic_brief",
+  practitioner_note: "topic_brief",
+  human_thread: "topic_brief",
+  hand_raiser: "deal_monitor",
+};
+
 function timeAgo(iso: string): string {
   const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
   if (s < 90) return "just now";
@@ -108,12 +125,14 @@ export default function StudioResearch({ user }: { user: User | null }) {
   const [schedules, setSchedules] = useState<ScheduleRow[]>([]);
   const [loaded, setLoaded] = useState(false);
 
-  // The four knobs.
+  // The knobs. `angle` is the POST FORMAT — the primary picker, named from
+  // Paul's weekly posting plan; `typeKey` is the research lens behind it.
+  const [angle, setAngle] = useState("auto");
   const [typeKey, setTypeKey] = useState("vertical_scan");
+  const typeTouched = useRef(false); // manual lens override wins over FORMAT_LENS
   const [topic, setTopic] = useState("");
   const [depth, setDepth] = useState("standard");
   const [output, setOutput] = useState("both");
-  const [angle, setAngle] = useState("auto");
   // Campaign extras.
   const [asCampaign, setAsCampaign] = useState(false);
   const [campName, setCampName] = useState("");
@@ -161,6 +180,17 @@ export default function StudioResearch({ user }: { user: User | null }) {
     const m = new Map((catalog?.types ?? []).map((t) => [t.key, t.label]));
     return (key: string) => m.get(key) ?? key;
   }, [catalog]);
+
+  /** Format label for run/campaign rows — null for 'auto' (nothing to show). */
+  const angleLabel = useMemo(() => {
+    const m = new Map((catalog?.angles ?? []).map((a) => [a.key, a.label]));
+    return (key?: string | null) => (key && key !== "auto" ? m.get(key) ?? null : null);
+  }, [catalog]);
+
+  const pickFormat = useCallback((key: string) => {
+    setAngle(key);
+    if (!typeTouched.current && FORMAT_LENS[key]) setTypeKey(FORMAT_LENS[key]);
+  }, []);
 
   const submit = useCallback(async () => {
     if (!topic.trim() || busy) return;
@@ -266,10 +296,30 @@ export default function StudioResearch({ user }: { user: User | null }) {
     <div>
       {/* ── the control panel ── */}
       <div style={R.form}>
-        <div style={R.knobRow}>
+        <div>
+          <span style={R.knobLabel}>Post format — your slot in the posting week</span>
+          <div style={{ ...R.segRow, marginTop: 8, flexWrap: "wrap" }}>
+            {(catalog?.angles ?? []).map((a) => (
+              <button key={a.key} type="button" title={a.blurb} onClick={() => pickFormat(a.key)} style={{ ...R.seg, ...(angle === a.key ? R.segOn : null) }}>
+                {a.label}
+              </button>
+            ))}
+          </div>
+          <span style={{ ...R.knobHint, display: "block", marginTop: 6 }}>{(catalog?.angles ?? []).find((a) => a.key === angle)?.blurb ?? ""}</span>
+        </div>
+
+        <textarea
+          value={topic}
+          onChange={(e) => setTopic(e.target.value)}
+          placeholder="The topic — e.g. “Independent fire & life safety contractors in Texas: who operates, who is acquiring, and whether the lane is worth a buy-side push.”"
+          rows={3}
+          style={R.topic}
+        />
+
+        <div style={{ ...R.knobRow, marginTop: 16 }}>
           <label style={R.knob}>
-            <span style={R.knobLabel}>Research type</span>
-            <select value={typeKey} onChange={(e) => setTypeKey(e.target.value)} style={R.select}>
+            <span style={R.knobLabel}>Research lens — follows the format unless you change it</span>
+            <select value={typeKey} onChange={(e) => { typeTouched.current = true; setTypeKey(e.target.value); }} style={R.select}>
               {(catalog?.types ?? []).map((t) => (
                 <option key={t.key} value={t.key}>{t.label}</option>
               ))}
@@ -305,26 +355,6 @@ export default function StudioResearch({ user }: { user: User | null }) {
             ))}
           </div>
         </div>
-
-        <div style={{ marginTop: 16 }}>
-          <span style={R.knobLabel}>Post angle — how the LinkedIn collateral is framed</span>
-          <div style={{ ...R.segRow, marginTop: 8, flexWrap: "wrap" }}>
-            {(catalog?.angles ?? []).map((a) => (
-              <button key={a.key} type="button" title={a.blurb} onClick={() => setAngle(a.key)} style={{ ...R.seg, ...(angle === a.key ? R.segOn : null) }}>
-                {a.label}
-              </button>
-            ))}
-          </div>
-          <span style={{ ...R.knobHint, display: "block", marginTop: 6 }}>{(catalog?.angles ?? []).find((a) => a.key === angle)?.blurb ?? ""}</span>
-        </div>
-
-        <textarea
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          placeholder="The research mandate — e.g. “Independent fire & life safety contractors in Texas: who operates, who is acquiring, and whether the lane is worth a buy-side push.”"
-          rows={3}
-          style={R.topic}
-        />
 
         <label style={R.campToggle}>
           <input type="checkbox" checked={asCampaign} onChange={(e) => setAsCampaign(e.target.checked)} style={{ accentColor: T.blue }} />
@@ -377,7 +407,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={R.rowTitle}>{s.name}</div>
                   <div style={R.rowMeta}>
-                    {typeLabel(s.research_type)} · {CADENCE_LABELS[s.cadence] ?? s.cadence}
+                    {angleLabel(s.post_angle) ? `${angleLabel(s.post_angle)} · ` : ""}{typeLabel(s.research_type)} · {CADENCE_LABELS[s.cadence] ?? s.cadence}
                     {s.active && s.next_run_at ? ` · next ${new Date(s.next_run_at).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}` : s.active ? "" : " · paused"}
                   </div>
                   <div style={R.rowTopic}>{s.topic}</div>
@@ -418,7 +448,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={R.rowTitle}>{r.report_title || r.topic}</div>
                     <div style={R.rowMeta}>
-                      {typeLabel(r.research_type)} · {r.depth}
+                      {angleLabel(r.post_angle) ? `${angleLabel(r.post_angle)} · ` : ""}{typeLabel(r.research_type)} · {r.depth}
                       {r.schedule_id ? " · campaign" : ""} · {timeAgo(r.created_at)}
                       {done && r.usage?.searches != null ? ` · ${r.usage.searches} searches` : ""}
                       {done && r.usage?.costCents != null ? ` · ~$${(r.usage.costCents / 100).toFixed(2)}` : ""}
