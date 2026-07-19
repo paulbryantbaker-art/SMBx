@@ -24,6 +24,7 @@ import {
 } from '../services/researchAgent.js';
 import { renderResearchPdf, renderResearchCardPng, renderLinkedInDocPdf, researchPostText, renderAnnouncementCardPng, type ResearchRunRow, type AnnouncementSpec, renderPostCardPng, type PostCardSpec } from '../services/researchComposer.js';
 import { listStudioAssets, getStudioAsset, createStudioAsset, updateStudioAsset, deleteStudioAsset } from '../services/studioAssets.js';
+import { importLinkedInWorkbook, analyzeLinkedInImport } from '../services/linkedinAnalytics.js';
 import multer from 'multer';
 
 export const researchRouter = Router();
@@ -44,6 +45,17 @@ const planUpload = multer({
   limits: { fileSize: 20 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     cb(null, file.mimetype === 'application/pdf' || file.mimetype.startsWith('text/') || file.mimetype === 'application/octet-stream');
+  },
+});
+
+/* Analytics imports: LinkedIn's .xlsx export (parsed mechanically server-side). */
+const xlsxUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 15 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    cb(null, /\.xlsx?$/i.test(file.originalname) ||
+      file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+      file.mimetype === 'application/octet-stream');
   },
 });
 
@@ -192,6 +204,90 @@ researchRouter.post('/research/import-plan', planUpload.single('file'), async (r
     console.error('[research] import-plan failed:', err?.message);
     const apiMsg = err?.error?.error?.message;
     return res.status(500).json({ error: apiMsg ? String(apiMsg) : (err?.message || 'Import failed') });
+  }
+});
+
+/* ─── Performance: LinkedIn analytics imports + Yulia's read ──────────────
+   The workbook is parsed MECHANICALLY (zero hallucination — the stored data
+   is exactly what LinkedIn exported); the analysis is a separate on-demand
+   Claude pass with no web tools that may only cite the stored numbers. */
+
+researchRouter.post('/research/analytics', xlsxUpload.single('workbook'), async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const file = (req as any).file as { buffer: Buffer; originalname: string } | undefined;
+  if (!file) return res.status(400).json({ error: 'Attach the LinkedIn analytics .xlsx export' });
+  try {
+    const id = await importLinkedInWorkbook(userId, file.originalname, file.buffer);
+    return res.json({ id });
+  } catch (err: any) {
+    console.error('[research] analytics import failed:', err?.message);
+    return res.status(400).json({ error: err?.message || 'Could not read the workbook' });
+  }
+});
+
+researchRouter.get('/research/analytics', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  try {
+    const items = await sql`
+      SELECT id, label, source, period_start, period_end, analysis_status, analysis_error,
+             (analysis IS NOT NULL) AS has_analysis, created_at
+      FROM studio_analytics WHERE user_id = ${userId}
+      ORDER BY created_at DESC LIMIT 40`;
+    return res.json({ items });
+  } catch (err: any) {
+    console.error('[research] analytics list failed:', err.message);
+    return res.status(500).json({ error: 'Failed to load analytics' });
+  }
+});
+
+researchRouter.get('/research/analytics/:id', async (req, res) => {
+  const userId = userIdFromReq(req);
+  const id = parseId(req.params.id);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  if (!id) return res.status(400).json({ error: 'Bad import id' });
+  try {
+    const [row] = await sql`
+      SELECT id, label, source, period_start, period_end, analysis, analysis_status, analysis_error,
+             data->'summary' AS summary, created_at
+      FROM studio_analytics WHERE id = ${id} AND user_id = ${userId}`;
+    if (!row) return res.status(404).json({ error: 'Import not found' });
+    return res.json({ item: row });
+  } catch (err: any) {
+    console.error('[research] analytics get failed:', err.message);
+    return res.status(500).json({ error: 'Failed to load the import' });
+  }
+});
+
+researchRouter.post('/research/analytics/:id/analyze', async (req, res) => {
+  const userId = userIdFromReq(req);
+  const id = parseId(req.params.id);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  if (!id) return res.status(400).json({ error: 'Bad import id' });
+  try {
+    const [row] = await sql`SELECT id, analysis_status FROM studio_analytics WHERE id = ${id} AND user_id = ${userId}`;
+    if (!row) return res.status(404).json({ error: 'Import not found' });
+    if ((row as any).analysis_status === 'running') return res.status(429).json({ error: 'The analysis is already running.' });
+    analyzeLinkedInImport(id, userId).catch(err => console.error(`[research] analytics ${id} analysis crashed:`, err?.message));
+    return res.json({ ok: true });
+  } catch (err: any) {
+    console.error('[research] analytics analyze failed:', err.message);
+    return res.status(500).json({ error: 'Failed to start the analysis' });
+  }
+});
+
+researchRouter.delete('/research/analytics/:id', async (req, res) => {
+  const userId = userIdFromReq(req);
+  const id = parseId(req.params.id);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  if (!id) return res.status(400).json({ error: 'Bad import id' });
+  try {
+    await sql`DELETE FROM studio_analytics WHERE id = ${id} AND user_id = ${userId}`;
+    return res.json({ ok: true });
+  } catch (err: any) {
+    console.error('[research] analytics delete failed:', err.message);
+    return res.status(500).json({ error: 'Failed to delete the import' });
   }
 });
 
