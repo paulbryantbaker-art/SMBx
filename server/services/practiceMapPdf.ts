@@ -9,7 +9,7 @@
  */
 import fs from 'fs';
 import path from 'path';
-import { getBrowser } from './premiumPdfRenderer.js';
+import { newRenderPage } from './premiumPdfRenderer.js';
 import type { IntakeMap } from './practiceIntake.js';
 
 const esc = (v: string): string =>
@@ -122,8 +122,7 @@ function mapHtml(map: IntakeMap, generatedAt: string): string {
 }
 
 export async function renderPracticeMapPdf(map: IntakeMap, generatedAt: string): Promise<Buffer> {
-  const browser = await getBrowser();
-  const page = await browser.newPage();
+  const page = await newRenderPage();
   try {
     await page.setContent(mapHtml(map, generatedAt), { waitUntil: 'load', timeout: 15000 });
     const pdf = await page.pdf({
