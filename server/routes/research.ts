@@ -231,6 +231,23 @@ researchRouter.patch('/research/runs/:id', async (req, res) => {
 
 /* ─── artifacts (rendered on demand) ──────────────────────────────────── */
 
+/** File an exported artifact into the Collateral folder, linked to its run
+ *  and campaign. A save hiccup must never fail the export itself. */
+async function saveCollateral(run: any, label: string, mime: string, data: Buffer): Promise<void> {
+  try {
+    await createStudioAsset({
+      label: label.slice(0, 140),
+      mime,
+      data,
+      kind: 'collateral',
+      runId: run.id ?? null,
+      scheduleId: run.schedule_id ?? null,
+    });
+  } catch (err: any) {
+    console.warn('[studio] collateral save failed:', err?.message);
+  }
+}
+
 async function loadCompleteRun(id: number, userId: number): Promise<ResearchRunRow | null> {
   const [run] = await sql`SELECT * FROM research_runs WHERE id = ${id} AND user_id = ${userId} AND status = 'complete'`;
   if (!run) return null;
@@ -313,6 +330,7 @@ researchRouter.get('/research/runs/:id/pdf', async (req, res) => {
     const run = await loadCompleteRun(id, userId);
     if (!run || !run.report_md) return res.status(404).json({ error: 'No completed report for this run' });
     const pdf = await renderResearchPdf(run);
+    if (req.query.save === '1') await saveCollateral(run, `Report — ${run.report_title || run.topic}`, 'application/pdf', Buffer.from(pdf));
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="smbx-research-${slugify(run.report_title || run.topic)}.pdf"`);
     return res.send(pdf);
@@ -332,6 +350,7 @@ researchRouter.get('/research/runs/:id/card.png', async (req, res) => {
     if (!run.studio_feed) return res.status(404).json({ error: 'This run has no studio feed to build a card from' });
     const hook = Number(req.query.hook);
     const png = await renderResearchCardPng(run, Number.isFinite(hook) && hook >= 0 ? hook : 0);
+    if (req.query.save === '1') await saveCollateral(run, `1-pager — ${run.report_title || run.topic}`, 'image/png', Buffer.from(png));
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Content-Disposition', `attachment; filename="smbx-card-${slugify(run.report_title || run.topic)}.png"`);
     return res.send(png);
@@ -351,6 +370,7 @@ researchRouter.get('/research/runs/:id/linkedin.pdf', async (req, res) => {
     if (!run) return res.status(404).json({ error: 'No completed run' });
     if (!run.studio_feed) return res.status(404).json({ error: 'This run has no studio feed to build a document post from' });
     const pdf = await renderLinkedInDocPdf(run);
+    if (req.query.save === '1') await saveCollateral(run, `Carousel — ${run.report_title || run.topic}`, 'application/pdf', Buffer.from(pdf));
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="smbx-linkedin-${slugify(run.report_title || run.topic)}.pdf"`);
     return res.send(pdf);
