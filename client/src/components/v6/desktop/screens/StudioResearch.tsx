@@ -78,6 +78,17 @@ interface ScheduleRow {
   folder?: string | null;
   next_run_at: string | null;
 }
+interface AnalyticsRow {
+  id: number;
+  label: string;
+  source: string;
+  period_start: string | null;
+  period_end: string | null;
+  analysis_status: string; // none | running | complete | failed
+  analysis_error: string | null;
+  has_analysis: boolean;
+  created_at: string;
+}
 
 async function api<J>(path: string, init?: RequestInit): Promise<J> {
   const r = await fetch(`/api${path}`, {
@@ -145,6 +156,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
   const [runs, setRuns] = useState<RunRow[]>([]);
   const [schedules, setSchedules] = useState<ScheduleRow[]>([]);
   const [assets, setAssets] = useState<AssetRow[]>([]);
+  const [analytics, setAnalytics] = useState<AnalyticsRow[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   // The knobs. `angle` is the POST FORMAT — the primary picker, named from
@@ -181,16 +193,18 @@ export default function StudioResearch({ user }: { user: User | null }) {
   const [connErr, setConnErr] = useState(false);
   const refresh = useCallback(async () => {
     try {
-      const [r, s, u, a] = await Promise.all([
+      const [r, s, u, a, an] = await Promise.all([
         api<{ runs: RunRow[] }>("/research/runs"),
         api<{ schedules: ScheduleRow[] }>("/research/schedules"),
         api<{ spentCents: number; capCents: number }>("/research/usage"),
         api<{ assets: AssetRow[] }>("/studio/assets"),
+        api<{ items: AnalyticsRow[] }>("/research/analytics"),
       ]);
       setRuns(r.runs ?? []);
       setSchedules(s.schedules ?? []);
       setUsage(u);
       setAssets(a.assets ?? []);
+      setAnalytics(an.items ?? []);
       setConnErr(false);
     } catch {
       setConnErr(true); // banner + fast retry below
@@ -206,7 +220,8 @@ export default function StudioResearch({ user }: { user: User | null }) {
 
   // Always-on poll: fast while a run is in flight or the last load failed,
   // slow but alive when idle (so the library can never go permanently stale).
-  const inFlight = runs.some((r) => r.status === "queued" || r.status === "running");
+  const inFlight = runs.some((r) => r.status === "queued" || r.status === "running")
+    || analytics.some((a) => a.analysis_status === "running");
   const refreshRef = useRef(refresh);
   refreshRef.current = refresh;
   useEffect(() => {
@@ -335,6 +350,42 @@ export default function StudioResearch({ user }: { user: User | null }) {
       setNote({ kind: "err", text: e?.message || "Download failed." });
     }
   }, []);
+
+  /* ── Performance: LinkedIn analytics imports + Yulia's read ── */
+
+  const uploadAnalytics = useCallback(async (f: File) => {
+    const fd = new FormData();
+    fd.append("workbook", f);
+    try {
+      const r = await fetch("/api/research/analytics", { method: "POST", headers: authHeaders(), body: fd });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error((j as any)?.error || `Import failed (${r.status})`);
+      setNote({ kind: "ok", text: "Analytics imported — open it and press “Analyze with Yulia”." });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Import failed." });
+    }
+  }, [refresh]);
+
+  const analyzeAnalytics = useCallback(async (a: AnalyticsRow) => {
+    try {
+      await api(`/research/analytics/${a.id}/analyze`, { method: "POST" });
+      setNote({ kind: "ok", text: "Yulia is reading the week — the analysis lands here in under a minute." });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Couldn’t start the analysis." });
+    }
+  }, [refresh]);
+
+  const deleteAnalytics = useCallback(async (a: AnalyticsRow) => {
+    if (!window.confirm(`Delete “${a.label}” and its analysis?`)) return;
+    try {
+      await api(`/research/analytics/${a.id}`, { method: "DELETE" });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Delete failed." });
+    }
+  }, [refresh]);
 
   /** Edit/organize a campaign (rename, mandate, format, cadence, archive). */
   const patchSchedule = useCallback(async (s: ScheduleRow, body: Record<string, unknown>, okText: string) => {
@@ -600,6 +651,10 @@ export default function StudioResearch({ user }: { user: User | null }) {
         onUploadPhoto={uploadPhoto}
         onNewCard={() => setSheet("collateral")}
         onImportPlan={() => setSheet("import")}
+        analytics={analytics}
+        onUploadAnalytics={uploadAnalytics}
+        onAnalyzeAnalytics={analyzeAnalytics}
+        onDeleteAnalytics={deleteAnalytics}
       />
 
       {sheet === "collateral" && (
@@ -667,7 +722,8 @@ type FolderSel =
   | { kind: "archived" }
   | { kind: "camp"; id: number }
   | { kind: "media" }
-  | { kind: "collateral" };
+  | { kind: "collateral" }
+  | { kind: "perf" };
 
 const ASSET_FOLDER = (s: FolderSel) => s.kind === "media" || s.kind === "collateral";
 
@@ -796,7 +852,7 @@ function GroupHead({ label, onDropCampaign, action }: { label: string; onDropCam
   );
 }
 
-function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLabel, dl, reviewId, createForm, angles, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onMoveAsset, onMakeCampaign, onArchiveRun, onDeleteRun, onRunCampaignNow, onPatchSchedule, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard, onImportPlan }: {
+function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabel, angleLabel, dl, reviewId, createForm, angles, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onMoveAsset, onMakeCampaign, onArchiveRun, onDeleteRun, onRunCampaignNow, onPatchSchedule, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard, onImportPlan, onUploadAnalytics, onAnalyzeAnalytics, onDeleteAnalytics }: {
   loaded: boolean;
   connErr: boolean;
   runs: RunRow[];
@@ -826,10 +882,15 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
   onUploadPhoto: (f: File) => void;
   onNewCard: () => void;
   onImportPlan: () => void;
+  analytics: AnalyticsRow[];
+  onUploadAnalytics: (f: File) => void;
+  onAnalyzeAnalytics: (a: AnalyticsRow) => void;
+  onDeleteAnalytics: (a: AnalyticsRow) => void;
 }) {
   const [sel, setSel] = useState<FolderSel>({ kind: "all" });
   const [selRunId, setSelRunId] = useState<number | null>(null);
   const [selAssetId, setSelAssetId] = useState<number | null>(null);
+  const [selPerfId, setSelPerfId] = useState<number | null>(null);
   // The inspector shows the CREATE form, the selected item, or — when a
   // campaign folder is picked — the CAMPAIGN itself (rename, mandate,
   // cadence, archive, delete). That's where campaigns are managed.
@@ -837,6 +898,7 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
   const [filter, setFilter] = useState("");
   const lastAutoRef = useRef<number | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const perfFileRef = useRef<HTMLInputElement | null>(null);
 
   // Resizable panes (drag the dividers; double-click to fit). Widths persist.
   const [sideW, setSideW] = useState<number>(() => {
@@ -854,7 +916,7 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
 
   /** Fit the sidebar to the longest folder name (glyph + gaps + count + pads ≈ 86px). */
   const autoFitSide = useCallback(() => {
-    const labels = ["All research", "One-off runs", "Archived", "Media", "Collateral", "+ New research", ...schedules.map((s) => s.name)];
+    const labels = ["All research", "One-off runs", "Archived", "Media", "Collateral", "LinkedIn analytics", "+ New research", ...schedules.map((s) => s.name)];
     const w = widestLabel(labels, `600 12.5px ${T.font}`);
     if (w > 0) setSideW(clampW(w + 86, 150, 380));
   }, [schedules]);
@@ -900,6 +962,8 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
   const campAssetsAll = sel.kind === "camp" ? collateral.filter((a) => a.schedule_id === sel.id) : [];
   const campAssets = q ? campAssetsAll.filter((a) => a.label.toLowerCase().includes(q)) : campAssetsAll;
   const assetPool = assetMode ? assetItems : campAssets;
+  const perfMode = sel.kind === "perf";
+  const perfItems = perfMode ? (q ? analytics.filter((a) => a.label.toLowerCase().includes(q)) : analytics) : [];
 
   // A freshly started run selects itself so its live trail is on screen
   // immediately — once per run, so a later manual selection sticks.
@@ -916,6 +980,12 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
 
   // Keep the selection inside the visible set (per mode).
   useEffect(() => {
+    if (perfMode) {
+      if (selPerfId != null && perfItems.some((a) => a.id === selPerfId)) return;
+      const next = perfItems[0]?.id ?? null;
+      if (next !== selPerfId) setSelPerfId(next);
+      return;
+    }
     if (assetMode) {
       if (selAssetId != null && assetItems.some((a) => a.id === selAssetId)) return;
       const next = assetItems[0]?.id ?? null;
@@ -927,11 +997,12 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
     if (selRunId != null && items.some((r) => r.id === selRunId)) return;
     const next = items[0]?.id ?? null;
     if (next !== selRunId) setSelRunId(next);
-  }, [assetMode, items, selRunId, assetItems, campAssets, selAssetId]);
+  }, [assetMode, perfMode, items, selRunId, assetItems, campAssets, selAssetId, perfItems, selPerfId]);
 
   const selRun = selRunId != null ? items.find((r) => r.id === selRunId) ?? null : null;
   const selAsset = assetPool.find((a) => a.id === selAssetId) ?? null;
   const selCamp = sel.kind === "camp" ? schedules.find((s) => s.id === sel.id) ?? null : null;
+  const selPerf = perfMode ? perfItems.find((a) => a.id === selPerfId) ?? null : null;
 
   // ── drag & drop routing ──
   const [pendingGroups, setPendingGroups] = useState<string[]>([]);
@@ -1055,6 +1126,8 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
         <div style={{ ...F.sideHead, marginTop: 14 }}>Assets</div>
         <SideRow label="Media" count={photos.length} on={sel.kind === "media"} onClick={() => setSel({ kind: "media" })} tint="#D9A441" />
         <SideRow label="Collateral" count={collateral.length} on={sel.kind === "collateral"} onClick={() => setSel({ kind: "collateral" })} tint="#8B7BD8" onDropPayload={dropUnfile} />
+        <div style={{ ...F.sideHead, marginTop: 14 }}>Performance</div>
+        <SideRow label="LinkedIn analytics" count={analytics.length} on={sel.kind === "perf"} onClick={() => setSel({ kind: "perf" })} tint="#4F9ED9" />
       </div>
 
       <PaneDivider onDrag={(dx) => setSideW((w) => clampW((w > 0 ? w : effSideW) + dx, 150, 380))} onAuto={autoFitSide} />
@@ -1095,22 +1168,57 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
           {sel.kind === "collateral" && (
             <button type="button" style={F.toolBtn} onClick={onNewCard}>New card</button>
           )}
+          {perfMode && (
+            <>
+              <input
+                ref={perfFileRef}
+                type="file"
+                accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                style={{ display: "none" }}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) onUploadAnalytics(f); e.currentTarget.value = ""; }}
+              />
+              <button type="button" style={F.toolBtn} onClick={() => perfFileRef.current?.click()}>Import LinkedIn export</button>
+            </>
+          )}
         </div>
         <div style={F.cols}>
           <span style={{ flex: 1 }}>Name</span>
-          <span style={{ width: 104, flex: "none" }}>{assetMode ? "Type" : "Format"}</span>
+          <span style={{ width: 104, flex: "none" }}>{perfMode ? "Period" : assetMode ? "Type" : "Format"}</span>
           <span style={{ width: 66, flex: "none" }}>{assetMode ? "Size" : "Status"}</span>
           <span style={{ width: 48, flex: "none", textAlign: "right" }}>Date</span>
         </div>
         <div style={F.rows}>
           {!loaded && <div style={F.emptyList}>Loading…</div>}
-          {loaded && assetMode && assetItems.length === 0 && (
+          {loaded && perfMode && perfItems.length === 0 && (
+            <div style={F.emptyList}>{q ? "Nothing matches the filter." : "No analytics yet — export the .xlsx from LinkedIn (Analytics → Post impressions → Export) and import it here."}</div>
+          )}
+          {loaded && !perfMode && assetMode && assetItems.length === 0 && (
             <div style={F.emptyList}>{q ? "Nothing matches the filter." : sel.kind === "media" ? "No photos yet — upload below in Media." : "No collateral yet — every card you render lands here."}</div>
           )}
-          {loaded && !assetMode && items.length === 0 && campAssets.length === 0 && (
+          {loaded && !assetMode && !perfMode && items.length === 0 && campAssets.length === 0 && (
             <div style={F.emptyList}>{q ? "Nothing matches the filter." : sel.kind === "archived" ? "Nothing archived." : "No runs in this folder yet."}</div>
           )}
-          {assetMode
+          {perfMode
+            ? perfItems.map((a) => {
+                const on = a.id === selPerfId;
+                const running = a.analysis_status === "running";
+                const failed = a.analysis_status === "failed";
+                return (
+                  <button key={`pf-${a.id}`} type="button" onClick={() => { setSelPerfId(a.id); setInsp("item"); }} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
+                    <span style={F.rowIcon}>{running ? <Spinner /> : <DocGlyph c={on ? T.blue : "#4F9ED9"} />}</span>
+                    <span style={F.rowName}>{a.label}</span>
+                    <span style={F.rowCol}>{a.period_start && a.period_end ? `${shortDate(a.period_start)} – ${shortDate(a.period_end)}` : "—"}</span>
+                    <span style={{ ...F.rowCol, width: 66 }}>
+                      {running ? <span style={{ color: T.blue, fontWeight: 600 }}>Analyzing</span>
+                        : failed ? <span style={{ color: "#B3261E", fontWeight: 600 }}>Failed</span>
+                        : a.has_analysis ? <span style={{ color: "#0F4E3C", fontWeight: 600 }}>Analyzed</span>
+                        : <span style={{ color: T.muted, fontWeight: 600 }}>Imported</span>}
+                    </span>
+                    <span style={{ ...F.rowCol, width: 48, textAlign: "right" }}>{shortDate(a.created_at)}</span>
+                  </button>
+                );
+              })
+            : assetMode
             ? assetItems.map((a) => {
                 const on = a.id === selAssetId;
                 return (
@@ -1178,6 +1286,12 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
         ) : assetMode ? (
           selAsset ? (
             <AssetPreview asset={selAsset} campName={schedules.find((sc) => sc.id === selAsset.schedule_id)?.name ?? null} onDownload={() => onDownloadAsset(selAsset)} onDelete={() => onDeleteAsset(selAsset)} />
+          ) : (
+            <div style={F.createWrap}>{createForm}</div>
+          )
+        ) : perfMode ? (
+          selPerf ? (
+            <PerfPreview item={selPerf} onAnalyze={() => onAnalyzeAnalytics(selPerf)} onDelete={() => onDeleteAnalytics(selPerf)} />
           ) : (
             <div style={F.createWrap}>{createForm}</div>
           )
@@ -1411,6 +1525,141 @@ function AssetPreview({ asset, campName, onDownload, onDelete }: { asset: AssetR
       <div style={F.prevLabel}>Manage</div>
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
         <button type="button" style={F.smallBtn} onClick={onDownload}>Download</button>
+        <button type="button" style={{ ...F.smallBtn, color: T.muted }} onClick={onDelete}>Delete</button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Performance inspector — the import's real numbers + Yulia's read ─── */
+
+interface PerfSummary {
+  periodStart?: string | null;
+  periodEnd?: string | null;
+  impressions?: number | null;
+  membersReached?: number | null;
+  totalEngagements?: number | null;
+  newFollowers?: number | null;
+  totalFollowers?: number | null;
+  daily?: { date: string; impressions: number; engagements: number }[];
+  topByImpressions?: { url: string; publishedAt: string; impressions: number }[];
+  topByEngagements?: { url: string; publishedAt: string; engagements: number }[];
+  demographics?: { category: string; value: string; percentage: string }[];
+}
+
+/** Inline **bold** only — the analysis is house markdown, not arbitrary. */
+function mdInline(s: string): React.ReactNode {
+  const parts = s.split(/\*\*(.+?)\*\*/g);
+  return parts.map((p, i) => (i % 2 ? <strong key={i}>{p}</strong> : p));
+}
+
+/** Tiny renderer for Yulia's analysis markdown (headings, bullets, paras). */
+function MdLite({ text }: { text: string }) {
+  const out: React.ReactNode[] = [];
+  let key = 0;
+  for (const raw of text.split(/\r?\n/)) {
+    const t = raw.trim();
+    if (!t) continue;
+    if (t.startsWith("### ")) out.push(<div key={key++} style={F.mdH3}>{mdInline(t.slice(4))}</div>);
+    else if (t.startsWith("## ")) out.push(<div key={key++} style={F.mdH2}>{mdInline(t.slice(3))}</div>);
+    else if (t.startsWith("# ")) out.push(<div key={key++} style={F.mdH1}>{mdInline(t.slice(2))}</div>);
+    else if (/^[-*] /.test(t)) out.push(<div key={key++} style={F.mdLi}>•&nbsp; {mdInline(t.slice(2))}</div>);
+    else out.push(<div key={key++} style={F.mdP}>{mdInline(t)}</div>);
+  }
+  return <div>{out}</div>;
+}
+
+const nfmt = (n: number | null | undefined) => (n == null ? "—" : n.toLocaleString("en-US"));
+
+function PerfPreview({ item, onAnalyze, onDelete }: { item: AnalyticsRow; onAnalyze: () => void; onDelete: () => void }) {
+  const [detail, setDetail] = useState<{ summary: PerfSummary | null; analysis: string | null; analysis_status: string; analysis_error: string | null } | null>(null);
+  const status = detail?.analysis_status ?? item.analysis_status;
+  const running = status === "running" || item.analysis_status === "running";
+  useEffect(() => {
+    let alive = true;
+    const load = () =>
+      api<{ item: any }>(`/research/analytics/${item.id}`)
+        .then((j) => { if (alive) setDetail(j.item); })
+        .catch(() => {});
+    void load();
+    const t = running ? setInterval(load, 4000) : null;
+    return () => { alive = false; if (t) clearInterval(t); };
+  }, [item.id, running]);
+
+  const s = detail?.summary ?? null;
+  const top = (s?.topByImpressions ?? []).slice(0, 3);
+  const dlMd = () => {
+    const blob = new Blob([detail?.analysis ?? ""], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${slugify(item.label)}-analysis.md`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  };
+
+  return (
+    <div style={F.prevInner}>
+      <div style={F.prevTitle}>{item.label}</div>
+      <div style={F.prevMeta}>
+        LinkedIn analytics · imported {timeAgo(item.created_at)}
+        {item.period_start && item.period_end ? ` · ${shortDate(item.period_start)} – ${shortDate(item.period_end)}` : ""}
+      </div>
+
+      <div style={F.prevLabel}>The week, verbatim</div>
+      <div style={F.statGrid}>
+        <div style={F.statBox}><div style={F.statNum}>{nfmt(s?.impressions)}</div><div style={F.statLbl}>Impressions</div></div>
+        <div style={F.statBox}><div style={F.statNum}>{nfmt(s?.membersReached)}</div><div style={F.statLbl}>Members reached</div></div>
+        <div style={F.statBox}><div style={F.statNum}>{nfmt(s?.totalEngagements)}</div><div style={F.statLbl}>Engagements</div></div>
+        <div style={F.statBox}><div style={F.statNum}>{nfmt(s?.newFollowers)}</div><div style={F.statLbl}>New followers</div></div>
+        <div style={F.statBox}><div style={F.statNum}>{nfmt(s?.totalFollowers)}</div><div style={F.statLbl}>Total followers</div></div>
+      </div>
+      {top.length > 0 && (
+        <>
+          <div style={F.prevLabel}>Top posts by impressions</div>
+          {top.map((p, i) => (
+            <a key={i} href={p.url} target="_blank" rel="noreferrer" style={F.topPost}>
+              <DocGlyph c={T.blue} />
+              <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {p.publishedAt ? shortDate(p.publishedAt) : "Post"} · {p.url.includes("groupPost") ? "group share" : "post"}
+              </span>
+              <span style={{ fontWeight: 700, color: T.ink }}>{nfmt(p.impressions)}</span>
+            </a>
+          ))}
+        </>
+      )}
+
+      <div style={F.prevLabel}>Yulia’s read</div>
+      {running ? (
+        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5, color: T.ink3 }}>
+          <Spinner /> Reading the week — the analysis lands here in under a minute.
+        </div>
+      ) : status === "failed" ? (
+        <>
+          <div style={R.rowErr}>{detail?.analysis_error || item.analysis_error || "The analysis failed."}</div>
+          <button type="button" style={{ ...F.reviewBtn, marginTop: 8 }} onClick={onAnalyze}>Try again</button>
+        </>
+      ) : detail?.analysis ? (
+        <>
+          <div style={F.mdWrap}><MdLite text={detail.analysis} /></div>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
+            <button type="button" style={F.smallBtn} onClick={dlMd}>Download (.md)</button>
+            <button type="button" style={F.smallBtn} onClick={onAnalyze}>Re-analyze</button>
+          </div>
+        </>
+      ) : (
+        <>
+          <div style={{ fontSize: 12.5, color: T.ink3, lineHeight: 1.55 }}>
+            Yulia reads the real numbers above against what Studio has been producing, then writes the performance read: what worked, what didn’t, who’s watching, and a per-slot plan for next week — content, hooks, and the visual to pair with each post.
+          </div>
+          <button type="button" style={{ ...F.reviewBtn, marginTop: 10 }} onClick={onAnalyze}>Analyze with Yulia</button>
+        </>
+      )}
+
+      <div style={F.prevLabel}>Manage</div>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
         <button type="button" style={{ ...F.smallBtn, color: T.muted }} onClick={onDelete}>Delete</button>
       </div>
     </div>
@@ -1894,6 +2143,18 @@ const F: Record<string, React.CSSProperties> = {
   moveSel: { marginTop: 8, height: 32, borderRadius: 8, border: `1px solid ${T.inputBd}`, background: T.white, padding: "0 8px", fontSize: 12.5, color: T.ink, fontFamily: T.font, maxWidth: "100%" },
   prevImg: { marginTop: 12, width: "100%", display: "block", borderRadius: 10, border: `1px solid ${T.border}`, boxShadow: T.shCard },
   prevPdf: { marginTop: 12, width: "100%", height: 460, display: "block", border: `1px solid ${T.border}`, borderRadius: 10, background: "#fff" },
+  // Performance inspector — the import's verbatim stats + Yulia's read.
+  statGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(108px, 1fr))", gap: 8 },
+  statBox: { background: T.white, border: `1px solid ${T.border}`, borderRadius: 10, padding: "10px 12px" },
+  statNum: { fontSize: 20, fontWeight: 800, color: T.ink, letterSpacing: "-0.01em", fontVariantNumeric: "tabular-nums" as const },
+  statLbl: { fontSize: 11.5, color: T.muted, marginTop: 2 },
+  topPost: { display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.white, fontSize: 12.5, color: T.ink3, textDecoration: "none", marginBottom: 6 },
+  mdWrap: { background: T.white, border: `1px solid ${T.border}`, borderRadius: 10, padding: "12px 14px", maxHeight: 520, overflowY: "auto" as const },
+  mdH1: { fontSize: 15, fontWeight: 800, color: T.ink, margin: "2px 0 6px" },
+  mdH2: { fontSize: 13.5, fontWeight: 800, color: T.ink, margin: "12px 0 4px" },
+  mdH3: { fontSize: 12.5, fontWeight: 700, color: T.ink, margin: "10px 0 3px" },
+  mdP: { fontSize: 12.5, color: T.ink3, lineHeight: 1.6, margin: "4px 0" },
+  mdLi: { fontSize: 12.5, color: T.ink3, lineHeight: 1.55, margin: "2px 0 2px 6px" },
 };
 
 /* The canvas-app frame + slide-over sheets (absolute inside the frame —

@@ -648,7 +648,7 @@ export async function parseCampaignPlan(input: { pdf?: Buffer; text?: string }):
       outputFormat: clampKey(c?.outputFormat, [...OUTPUT_FORMATS], 'post_image'),
       note: typeof c?.note === 'string' && c.note.trim() ? c.note.trim().slice(0, 120) : undefined,
     }))
-    .filter(c => c.topic.length >= 10);
+    .filter((c: ImportedCampaign) => c.topic.length >= 10);
   if (!campaigns.length) throw new Error('The document did not yield any recurring campaigns');
 
   return { summary: typeof parsed.summary === 'string' ? parsed.summary.slice(0, 200) : 'Imported plan', campaigns };
