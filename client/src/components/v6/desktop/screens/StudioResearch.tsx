@@ -72,6 +72,7 @@ interface ScheduleRow {
   post_angle?: string | null;
   cadence: string;
   active: boolean;
+  archived?: boolean;
   next_run_at: string | null;
 }
 
@@ -332,6 +333,17 @@ export default function StudioResearch({ user }: { user: User | null }) {
     }
   }, []);
 
+  /** Edit/organize a campaign (rename, mandate, format, cadence, archive). */
+  const patchSchedule = useCallback(async (s: ScheduleRow, body: Record<string, unknown>, okText: string) => {
+    try {
+      await api(`/research/schedules/${s.id}`, { method: "PATCH", body: JSON.stringify(body) });
+      setNote({ kind: "ok", text: okText });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Update failed." });
+    }
+  }, [refresh]);
+
   /** Fire a campaign immediately, outside its cadence ("Run now"). */
   const runCampaignNow = useCallback(async (s: ScheduleRow) => {
     try {
@@ -532,6 +544,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
         dl={dl}
         reviewId={reviewId}
         createForm={createForm}
+        angles={catalog?.angles ?? []}
         onReview={(id) => setReviewId(reviewId === id ? null : id)}
         onGrab={grab}
         onCopyPost={copyPost}
@@ -540,6 +553,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
         onArchiveRun={archiveRun}
         onDeleteRun={deleteRun}
         onRunCampaignNow={runCampaignNow}
+        onPatchSchedule={patchSchedule}
         onToggleSchedule={toggleSchedule}
         onDeleteSchedule={deleteSchedule}
         onDeleteAsset={deleteAsset}
@@ -645,6 +659,42 @@ function DocGlyph({ c }: { c: string }) {
   );
 }
 
+const clampW = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, Math.round(v)));
+
+/** Measure the widest label at the sidebar's font so auto-fit is exact. */
+function widestLabel(labels: string[], font: string): number {
+  const ctx = document.createElement("canvas").getContext("2d");
+  if (!ctx) return 0;
+  ctx.font = font;
+  let w = 0;
+  for (const l of labels) w = Math.max(w, ctx.measureText(l).width);
+  return Math.ceil(w);
+}
+
+/** Finder-style pane divider: drag to resize, double-click to auto-fit. */
+function PaneDivider({ onDrag, onAuto }: { onDrag: (dx: number) => void; onAuto?: () => void }) {
+  return (
+    <div
+      style={F.divider}
+      title="Drag to resize · double-click to fit"
+      onDoubleClick={onAuto}
+      onPointerDown={(e) => {
+        e.preventDefault();
+        let last = e.clientX;
+        const move = (ev: PointerEvent) => { onDrag(ev.clientX - last); last = ev.clientX; };
+        const stop = () => {
+          window.removeEventListener("pointermove", move);
+          window.removeEventListener("pointerup", stop);
+          window.removeEventListener("pointercancel", stop);
+        };
+        window.addEventListener("pointermove", move);
+        window.addEventListener("pointerup", stop);
+        window.addEventListener("pointercancel", stop);
+      }}
+    />
+  );
+}
+
 function SideRow({ label, count, on, onClick, tint, dim }: {
   label: string; count: number; on: boolean; onClick: () => void; tint: string; dim?: boolean;
 }) {
@@ -657,7 +707,7 @@ function SideRow({ label, count, on, onClick, tint, dim }: {
   );
 }
 
-function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLabel, dl, reviewId, createForm, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onArchiveRun, onDeleteRun, onRunCampaignNow, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard, onImportPlan }: {
+function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLabel, dl, reviewId, createForm, angles, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onArchiveRun, onDeleteRun, onRunCampaignNow, onPatchSchedule, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard, onImportPlan }: {
   loaded: boolean;
   connErr: boolean;
   runs: RunRow[];
@@ -668,6 +718,7 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
   dl: string | null;
   reviewId: number | null;
   createForm: React.ReactNode;
+  angles: { key: string; label: string; blurb?: string }[];
   onReview: (id: number) => void;
   onGrab: (r: RunRow, kind: "pdf" | "card" | "md" | "lipdf") => void;
   onCopyPost: (r: RunRow) => void;
@@ -676,6 +727,7 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
   onArchiveRun: (r: RunRow, archived: boolean) => void;
   onDeleteRun: (r: RunRow) => void;
   onRunCampaignNow: (s: ScheduleRow) => void;
+  onPatchSchedule: (s: ScheduleRow, body: Record<string, unknown>, okText: string) => void;
   onToggleSchedule: (s: ScheduleRow) => void;
   onDeleteSchedule: (s: ScheduleRow) => void;
   onDeleteAsset: (a: AssetRow) => void;
@@ -687,11 +739,43 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
   const [sel, setSel] = useState<FolderSel>({ kind: "all" });
   const [selRunId, setSelRunId] = useState<number | null>(null);
   const [selAssetId, setSelAssetId] = useState<number | null>(null);
-  // The inspector shows the CREATE form or the selected item.
-  const [insp, setInsp] = useState<"create" | "item">("item");
+  // The inspector shows the CREATE form, the selected item, or — when a
+  // campaign folder is picked — the CAMPAIGN itself (rename, mandate,
+  // cadence, archive, delete). That's where campaigns are managed.
+  const [insp, setInsp] = useState<"create" | "item" | "camp">("item");
   const [filter, setFilter] = useState("");
   const lastAutoRef = useRef<number | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
+
+  // Resizable panes (drag the dividers; double-click to fit). Widths persist.
+  const [sideW, setSideW] = useState<number>(() => {
+    const v = Number(localStorage.getItem("smbx_mgr_sidew"));
+    return Number.isFinite(v) && v >= 150 ? clampW(v, 150, 380) : 0; // 0 = auto-fit once data arrives
+  });
+  const [prevW, setPrevW] = useState<number>(() => {
+    const v = Number(localStorage.getItem("smbx_mgr_prevw"));
+    return Number.isFinite(v) && v >= 280 ? clampW(v, 280, 620) : 400;
+  });
+  useEffect(() => {
+    if (sideW > 0) localStorage.setItem("smbx_mgr_sidew", String(sideW));
+  }, [sideW]);
+  useEffect(() => { localStorage.setItem("smbx_mgr_prevw", String(prevW)); }, [prevW]);
+
+  /** Fit the sidebar to the longest folder name (glyph + gaps + count + pads ≈ 86px). */
+  const autoFitSide = useCallback(() => {
+    const labels = ["All research", "One-off runs", "Archived", "Media", "Collateral", "+ New research", ...schedules.map((s) => s.name)];
+    const w = widestLabel(labels, `600 12.5px ${T.font}`);
+    if (w > 0) setSideW(clampW(w + 86, 150, 380));
+  }, [schedules]);
+
+  // First load with no saved width: auto-size to the campaign names.
+  const autoFitDoneRef = useRef(false);
+  useEffect(() => {
+    if (sideW > 0 || autoFitDoneRef.current || !loaded) return;
+    autoFitDoneRef.current = true;
+    autoFitSide();
+  }, [sideW, loaded, autoFitSide]);
+  const effSideW = sideW > 0 ? sideW : 176;
 
   // Archived runs leave the working folders; they live in their own folder.
   const activeRuns = useMemo(() => runs.filter((r) => !r.archived), [runs]);
@@ -754,7 +838,7 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
   return (
     <div style={F.wrap}>
       {/* folders */}
-      <div style={F.side}>
+      <div style={{ ...F.side, width: effSideW }}>
         <button type="button" style={{ ...F.newBtn, ...(insp === "create" ? F.newBtnOn : null) }} onClick={() => setInsp("create")}>
           + New research
         </button>
@@ -763,22 +847,36 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
         <SideRow label="All research" count={activeRuns.length} on={sel.kind === "all"} onClick={() => setSel({ kind: "all" })} tint="#6E9BE0" />
         <SideRow label="One-off runs" count={oneoffs.length} on={sel.kind === "oneoff"} onClick={() => setSel({ kind: "oneoff" })} tint="#A8AEB8" />
         <SideRow label="Archived" count={archivedRuns.length} on={sel.kind === "archived"} onClick={() => setSel({ kind: "archived" })} tint="#C9CDD3" />
-        {schedules.length > 0 && <div style={{ ...F.sideHead, marginTop: 14 }}>Campaigns</div>}
-        {schedules.map((s) => (
+        {schedules.some((s) => !s.archived) && <div style={{ ...F.sideHead, marginTop: 14 }}>Campaigns</div>}
+        {schedules.filter((s) => !s.archived).map((s) => (
           <SideRow
             key={s.id}
             label={s.name}
             count={(byCamp.get(s.id) ?? []).length}
             on={sel.kind === "camp" && sel.id === s.id}
-            onClick={() => setSel({ kind: "camp", id: s.id })}
+            onClick={() => { setSel({ kind: "camp", id: s.id }); setInsp("camp"); }}
             tint={s.active ? "#63B98F" : "#A8AEB8"}
             dim={!s.active}
+          />
+        ))}
+        {schedules.some((s) => s.archived) && <div style={{ ...F.sideHead, marginTop: 14 }}>Archived campaigns</div>}
+        {schedules.filter((s) => s.archived).map((s) => (
+          <SideRow
+            key={s.id}
+            label={s.name}
+            count={(byCamp.get(s.id) ?? []).length}
+            on={sel.kind === "camp" && sel.id === s.id}
+            onClick={() => { setSel({ kind: "camp", id: s.id }); setInsp("camp"); }}
+            tint="#C9CDD3"
+            dim
           />
         ))}
         <div style={{ ...F.sideHead, marginTop: 14 }}>Assets</div>
         <SideRow label="Media" count={photos.length} on={sel.kind === "media"} onClick={() => setSel({ kind: "media" })} tint="#D9A441" />
         <SideRow label="Collateral" count={collateral.length} on={sel.kind === "collateral"} onClick={() => setSel({ kind: "collateral" })} tint="#8B7BD8" />
       </div>
+
+      <PaneDivider onDrag={(dx) => setSideW((w) => clampW((w > 0 ? w : effSideW) + dx, 150, 380))} onAuto={autoFitSide} />
 
       {/* file list */}
       <div style={F.main}>
@@ -795,8 +893,7 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
               </div>
             </div>
             <button type="button" style={{ ...R.tinyBtn, background: T.blue, color: "#fff", borderColor: T.blue, fontWeight: 700 }} onClick={() => onRunCampaignNow(selCamp)}>Run now</button>
-            <button type="button" style={R.tinyBtn} onClick={() => onToggleSchedule(selCamp)}>{selCamp.active ? "Pause" : "Resume"}</button>
-            <button type="button" style={{ ...R.tinyBtn, color: T.muted }} onClick={() => onDeleteSchedule(selCamp)}>Delete</button>
+            <button type="button" style={R.tinyBtn} onClick={() => setInsp("camp")}>Manage</button>
           </div>
         )}
         <div style={F.listHead}>
@@ -820,7 +917,7 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
         </div>
         <div style={F.cols}>
           <span style={{ flex: 1 }}>Name</span>
-          <span style={{ width: 96, flex: "none" }}>{assetMode ? "Type" : "Format"}</span>
+          <span style={{ width: 104, flex: "none" }}>{assetMode ? "Type" : "Format"}</span>
           <span style={{ width: 66, flex: "none" }}>{assetMode ? "Size" : "Status"}</span>
           <span style={{ width: 48, flex: "none", textAlign: "right" }}>Date</span>
         </div>
@@ -867,10 +964,23 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
         </div>
       </div>
 
-      {/* inspector — the create form or the selected item */}
-      <div style={F.prev}>
+      <PaneDivider onDrag={(dx) => setPrevW((w) => clampW(w - dx, 280, 620))} onAuto={() => setPrevW(400)} />
+
+      {/* inspector — the create form, the campaign, or the selected item */}
+      <div style={{ ...F.prev, width: prevW, minWidth: 0 }}>
         {insp === "create" ? (
           <div style={F.createWrap}>{createForm}</div>
+        ) : insp === "camp" && selCamp ? (
+          <CampaignPreview
+            s={selCamp}
+            count={(byCamp.get(selCamp.id) ?? []).length}
+            angles={angles}
+            onSave={(body) => onPatchSchedule(selCamp, body, "Campaign updated.")}
+            onRunNow={() => onRunCampaignNow(selCamp)}
+            onToggle={() => onToggleSchedule(selCamp)}
+            onArchive={(v) => onPatchSchedule(selCamp, { archived: v }, v ? "Campaign archived — it's under Archived campaigns." : "Campaign restored.")}
+            onDelete={() => onDeleteSchedule(selCamp)}
+          />
         ) : assetMode ? (
           selAsset ? (
             <AssetPreview asset={selAsset} onDownload={() => onDownloadAsset(selAsset)} onDelete={() => onDeleteAsset(selAsset)} />
@@ -988,6 +1098,69 @@ function RunPreview({ run, schedules, typeLabel, angleLabel, dl, reviewOpen, onR
           ))}
         </select>
       )}
+    </div>
+  );
+}
+
+/** Campaign inspector — rename, edit the mandate, change format/cadence,
+ *  and the manager verbs: Run now · Pause/Resume · Archive · Delete. */
+function CampaignPreview({ s, count, angles, onSave, onRunNow, onToggle, onArchive, onDelete }: {
+  s: ScheduleRow;
+  count: number;
+  angles: { key: string; label: string }[];
+  onSave: (body: Record<string, unknown>) => void;
+  onRunNow: () => void;
+  onToggle: () => void;
+  onArchive: (v: boolean) => void;
+  onDelete: () => void;
+}) {
+  const [name, setName] = useState(s.name);
+  const [topic, setTopic] = useState(s.topic);
+  const [angle, setAngle] = useState(s.post_angle ?? "auto");
+  const [cadence, setCadence] = useState(s.cadence);
+  useEffect(() => {
+    setName(s.name);
+    setTopic(s.topic);
+    setAngle(s.post_angle ?? "auto");
+    setCadence(s.cadence);
+  }, [s.id, s.name, s.topic, s.post_angle, s.cadence]);
+  const dirty = name !== s.name || topic !== s.topic || angle !== (s.post_angle ?? "auto") || cadence !== s.cadence;
+
+  return (
+    <div style={F.prevInner}>
+      <div style={F.prevLabel}>Campaign</div>
+      <input value={name} onChange={(e) => setName(e.target.value)} style={{ ...IP.name, width: "100%", boxSizing: "border-box" }} />
+      <div style={F.prevMeta}>
+        {count} run{count === 1 ? "" : "s"} · {s.archived ? "archived" : s.active ? "active" : "paused"}
+        {!s.archived && s.active && s.next_run_at ? ` · next ${new Date(s.next_run_at).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}` : ""}
+      </div>
+
+      <div style={F.prevLabel}>Standing mandate</div>
+      <textarea value={topic} onChange={(e) => setTopic(e.target.value)} rows={5} style={{ ...IP.topic, marginTop: 0 }} />
+      <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+        <select value={angle} onChange={(e) => setAngle(e.target.value)} style={{ ...IP.sel, flex: 1, minWidth: 0 }} title="Post format">
+          {angles.map((a) => <option key={a.key} value={a.key}>{a.label}</option>)}
+        </select>
+        <select value={cadence} onChange={(e) => setCadence(e.target.value)} style={{ ...IP.sel, flex: 1, minWidth: 0 }} title="Cadence">
+          {["weekly", "biweekly", "monthly"].map((c) => <option key={c} value={c}>{CADENCE_LABELS[c] ?? c}</option>)}
+        </select>
+      </div>
+      {dirty && (
+        <button type="button" style={{ ...F.reviewBtn, marginTop: 10 }} onClick={() => onSave({ name: name.trim(), topic: topic.trim(), postAngle: angle, cadence })}>
+          Save changes
+        </button>
+      )}
+
+      <div style={F.prevLabel}>Manage</div>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <button type="button" style={{ ...F.smallBtn, background: T.blue, color: "#fff", borderColor: T.blue }} onClick={onRunNow}>Run now</button>
+        <button type="button" style={F.smallBtn} onClick={onToggle}>{s.active ? "Pause" : "Resume"}</button>
+        <button type="button" style={F.smallBtn} onClick={() => onArchive(!s.archived)}>{s.archived ? "Unarchive" : "Archive"}</button>
+        <button type="button" style={{ ...F.smallBtn, color: T.muted }} onClick={onDelete}>Delete campaign</button>
+      </div>
+      <div style={{ marginTop: 10, fontSize: 11.5, color: T.muted, lineHeight: 1.5 }}>
+        Archiving hides it from the working sidebar and stops the cadence; its runs stay in the library. Delete keeps past runs too.
+      </div>
     </div>
   );
 }
@@ -1418,6 +1591,7 @@ const F: Record<string, React.CSSProperties> = {
   wrap: { display: "flex", alignItems: "stretch", flex: 1, minHeight: 0, background: T.white, border: `1px solid ${T.border}`, borderRadius: 16, boxShadow: T.shCard, overflow: "hidden" },
 
   side: { width: 176, flex: "none", background: T.surface, borderRight: `1px solid ${T.border}`, padding: "12px 8px", overflowY: "auto" },
+  divider: { flex: "none", width: 7, margin: "0 -3px", cursor: "col-resize", zIndex: 5, position: "relative", touchAction: "none" },
   connBar: { flex: "none", padding: "7px 12px", background: "#FDF1E4", borderBottom: "1px solid #EBD7BC", color: "#8A5A1E", fontSize: 12, fontWeight: 600, lineHeight: 1.45 },
   sideHead: { fontSize: 11, fontWeight: 700, color: T.muted2, letterSpacing: "0.05em", textTransform: "uppercase", padding: "0 8px", marginBottom: 6 },
   sideRow: { display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", background: "transparent", border: "none", borderRadius: 8, padding: "7px 8px", cursor: "pointer", fontFamily: T.font },
@@ -1442,7 +1616,7 @@ const F: Record<string, React.CSSProperties> = {
   rowOn: { background: T.blueBg3 },
   rowIcon: { width: 16, flex: "none", display: "flex", alignItems: "center", justifyContent: "center" },
   rowName: { flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: 600, color: T.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-  rowCol: { width: 96, flex: "none", fontSize: 11.5, color: T.muted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  rowCol: { width: 104, flex: "none", fontSize: 11.5, color: T.muted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
   emptyList: { padding: "18px 12px", fontSize: 12.5, color: T.muted },
 
   // Responsive: gives the list room on narrow windows instead of clipping.

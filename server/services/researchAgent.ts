@@ -766,7 +766,8 @@ export function startResearchScheduler() {
       await failStaleRuns();
       const due = await sql`
         SELECT * FROM research_schedules
-        WHERE active = TRUE AND next_run_at IS NOT NULL AND next_run_at <= NOW()
+        WHERE active = TRUE AND COALESCE(archived, FALSE) = FALSE
+          AND next_run_at IS NOT NULL AND next_run_at <= NOW()
         ORDER BY next_run_at ASC
         LIMIT 3
       `;

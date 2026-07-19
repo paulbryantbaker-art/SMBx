@@ -464,6 +464,7 @@ researchRouter.patch('/research/schedules/:id', async (req, res) => {
       post_angle: typeof b.postAngle === 'string' ? b.postAngle : ((existing as any).post_angle ?? 'auto'),
       cadence: typeof b.cadence === 'string' ? b.cadence : existing.cadence,
       active: typeof b.active === 'boolean' ? b.active : existing.active,
+      archived: typeof b.archived === 'boolean' ? b.archived : ((existing as any).archived === true),
     };
     const invalid = validateRunInput({ userId, researchType: next.research_type, topic: next.topic, depth: next.depth, outputFormat: next.output_format, postAngle: next.post_angle });
     if (invalid) return res.status(400).json({ error: invalid });
@@ -477,7 +478,7 @@ researchRouter.patch('/research/schedules/:id', async (req, res) => {
       UPDATE research_schedules
       SET name = ${next.name}, topic = ${next.topic}, research_type = ${next.research_type},
           depth = ${next.depth}, output_format = ${next.output_format}, post_angle = ${next.post_angle},
-          cadence = ${next.cadence}, active = ${next.active}, next_run_at = ${nextRun}
+          cadence = ${next.cadence}, active = ${next.active}, archived = ${next.archived}, next_run_at = ${nextRun}
       WHERE id = ${id} AND user_id = ${userId}
       RETURNING *
     `;
