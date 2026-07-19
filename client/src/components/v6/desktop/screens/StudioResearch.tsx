@@ -161,7 +161,15 @@ export default function StudioResearch({ user }: { user: User | null }) {
   const [note, setNote] = useState<{ kind: "err" | "ok"; text: string } | null>(null);
   const [dl, setDl] = useState<string | null>(null); // "runId:kind" while downloading
   const [reviewId, setReviewId] = useState<number | null>(null); // review sheet
-  const [sheet, setSheet] = useState<null | "collateral">(null); // composer sheet
+  const [sheet, setSheet] = useState<null | "collateral" | "import">(null); // slide-over sheets
+
+  // Notes surface as a frame-level toast (the create form isn't always on
+  // screen); they auto-dismiss.
+  useEffect(() => {
+    if (!note) return;
+    const t = setTimeout(() => setNote(null), 7000);
+    return () => clearTimeout(t);
+  }, [note]);
 
   // When a load fails (a deploy restarting the server, a network blip) the
   // manager must SAY so and keep retrying — a silently empty library reads
@@ -538,12 +546,29 @@ export default function StudioResearch({ user }: { user: User | null }) {
         onDownloadAsset={downloadAsset}
         onUploadPhoto={uploadPhoto}
         onNewCard={() => setSheet("collateral")}
+        onImportPlan={() => setSheet("import")}
       />
 
       {sheet === "collateral" && (
         <Sheet title="Media & collateral studio" onClose={() => { setSheet(null); void refresh(); }}>
           <StudioAnnouncement />
           <StudioPostCards />
+        </Sheet>
+      )}
+      {note && (
+        <div style={{ ...A.toast, color: note.kind === "err" ? "#B3261E" : "#0F4E3C" }}>{note.text}</div>
+      )}
+
+      {sheet === "import" && (
+        <Sheet title="Import a campaign plan" onClose={() => setSheet(null)}>
+          <ImportPlanSheet
+            catalog={catalog}
+            onDone={(n) => {
+              setSheet(null);
+              setNote({ kind: "ok", text: `${n} campaign${n === 1 ? "" : "s"} created from the plan — they're in the sidebar. Use Run now on any of them to fire the first run immediately.` });
+              void refresh();
+            }}
+          />
         </Sheet>
       )}
       {reviewRun && (
@@ -632,7 +657,7 @@ function SideRow({ label, count, on, onClick, tint, dim }: {
   );
 }
 
-function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLabel, dl, reviewId, createForm, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onArchiveRun, onDeleteRun, onRunCampaignNow, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard }: {
+function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLabel, dl, reviewId, createForm, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onArchiveRun, onDeleteRun, onRunCampaignNow, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard, onImportPlan }: {
   loaded: boolean;
   connErr: boolean;
   runs: RunRow[];
@@ -657,6 +682,7 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
   onDownloadAsset: (a: AssetRow) => void;
   onUploadPhoto: (f: File) => void;
   onNewCard: () => void;
+  onImportPlan: () => void;
 }) {
   const [sel, setSel] = useState<FolderSel>({ kind: "all" });
   const [selRunId, setSelRunId] = useState<number | null>(null);
@@ -732,6 +758,7 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
         <button type="button" style={{ ...F.newBtn, ...(insp === "create" ? F.newBtnOn : null) }} onClick={() => setInsp("create")}>
           + New research
         </button>
+        <button type="button" style={F.importBtn} onClick={onImportPlan}>Import a plan</button>
         <div style={F.sideHead}>Library</div>
         <SideRow label="All research" count={activeRuns.length} on={sel.kind === "all"} onClick={() => setSel({ kind: "all" })} tint="#6E9BE0" />
         <SideRow label="One-off runs" count={oneoffs.length} on={sel.kind === "oneoff"} onClick={() => setSel({ kind: "oneoff" })} tint="#A8AEB8" />
@@ -998,6 +1025,168 @@ function AssetPreview({ asset, onDownload, onDelete }: { asset: AssetRow; onDown
   );
 }
 
+/* ─── Import a campaign plan — PDF/text → proposed campaigns → create ──── */
+
+interface ImportedRow {
+  name: string;
+  postAngle: string;
+  researchType: string;
+  topic: string;
+  cadence: string;
+  depth: string;
+  outputFormat: string;
+  note?: string;
+  on: boolean;
+}
+
+function ImportPlanSheet({ catalog, onDone }: { catalog: Catalog | null; onDone: (created: number) => void }) {
+  const [file, setFile] = useState<File | null>(null);
+  const [text, setText] = useState("");
+  const [busy, setBusy] = useState<"parse" | "create" | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [summary, setSummary] = useState("");
+  const [rows, setRows] = useState<ImportedRow[] | null>(null);
+  const fileRef = useRef<HTMLInputElement | null>(null);
+
+  const angleLabel = (k: string) => catalog?.angles?.find((a) => a.key === k)?.label ?? k;
+  const typeLabel = (k: string) => catalog?.types.find((t) => t.key === k)?.label ?? k;
+
+  const parse = async () => {
+    setBusy("parse");
+    setErr(null);
+    try {
+      const fd = new FormData();
+      if (file) fd.append("file", file);
+      if (text.trim()) fd.append("text", text.trim());
+      const r = await fetch("/api/research/import-plan", { method: "POST", headers: authHeaders(), body: fd });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error((j as any)?.error || `Import failed (${r.status})`);
+      setSummary(j.summary || "");
+      setRows((j.campaigns ?? []).map((c: any) => ({ ...c, on: true })));
+    } catch (e: any) {
+      setErr(e?.message || "Import failed");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const create = async () => {
+    if (!rows) return;
+    setBusy("create");
+    setErr(null);
+    let ok = 0;
+    const fails: string[] = [];
+    for (const c of rows.filter((r) => r.on)) {
+      try {
+        await api("/research/schedules", {
+          method: "POST",
+          body: JSON.stringify({ name: c.name, researchType: c.researchType, topic: c.topic, depth: c.depth, outputFormat: c.outputFormat, postAngle: c.postAngle, cadence: c.cadence, runNow: false }),
+        });
+        ok++;
+      } catch (e: any) {
+        fails.push(`${c.name}: ${e?.message || "failed"}`);
+      }
+    }
+    setBusy(null);
+    if (fails.length) setErr(`Created ${ok} — the rest failed: ${fails.join(" · ")}`);
+    else onDone(ok);
+  };
+
+  const upd = (i: number, patch: Partial<ImportedRow>) =>
+    setRows((rs) => (rs ? rs.map((r, j) => (j === i ? { ...r, ...patch } : r)) : rs));
+
+  const selCount = rows?.filter((r) => r.on).length ?? 0;
+
+  return (
+    <div style={{ marginTop: 22, maxWidth: 860 }}>
+      {!rows ? (
+        <>
+          <div style={IP.lede}>
+            Drop in a plan written by Claude (or anyone) — the strategy PDF or the pasted text. It's read as-is
+            and turned into ready-to-create campaigns in your posting vocabulary. Nothing is created until you approve the list.
+          </div>
+          <div style={{ display: "flex", gap: 10, alignItems: "center", marginTop: 16, flexWrap: "wrap" }}>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="application/pdf,text/plain,text/markdown"
+              style={{ display: "none" }}
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+            <button type="button" style={IP.fileBtn} onClick={() => fileRef.current?.click()}>
+              {file ? `📄 ${file.name}` : "Attach the plan (PDF)"}
+            </button>
+            {file && <button type="button" style={IP.clearBtn} onClick={() => { setFile(null); if (fileRef.current) fileRef.current.value = ""; }}>×</button>}
+            <span style={{ fontSize: 12.5, color: T.muted }}>or paste it:</span>
+          </div>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Paste the plan text here (optional if you attached the PDF)…"
+            rows={7}
+            style={IP.paste}
+          />
+          <div style={{ marginTop: 14, display: "flex", gap: 10, alignItems: "center" }}>
+            <button type="button" style={{ ...IP.primary, opacity: !file && !text.trim() ? 0.5 : 1 }} disabled={(!file && !text.trim()) || busy === "parse"} onClick={parse}>
+              {busy === "parse" ? "Reading the plan…" : "Read the plan"}
+            </button>
+            {busy === "parse" && <Spinner />}
+          </div>
+        </>
+      ) : (
+        <>
+          <div style={IP.lede}>{summary}</div>
+          <div style={{ marginTop: 6, fontSize: 12.5, color: T.muted }}>
+            Untick anything you don't want. Campaigns are created on their cadence without running immediately — use Run now on any campaign to fire its first run.
+          </div>
+          <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+            {rows.map((c, i) => (
+              <div key={i} style={{ ...IP.row, opacity: c.on ? 1 : 0.55 }}>
+                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                  <input type="checkbox" checked={c.on} onChange={(e) => upd(i, { on: e.target.checked })} style={{ accentColor: T.blue }} />
+                  <input value={c.name} onChange={(e) => upd(i, { name: e.target.value })} style={IP.name} />
+                  <select value={c.postAngle} onChange={(e) => upd(i, { postAngle: e.target.value })} style={IP.sel} title="Post format">
+                    {(catalog?.angles ?? []).map((a) => <option key={a.key} value={a.key}>{a.label}</option>)}
+                  </select>
+                  <select value={c.cadence} onChange={(e) => upd(i, { cadence: e.target.value })} style={IP.sel} title="Cadence">
+                    {(catalog?.cadences ?? ["weekly", "biweekly", "monthly"]).map((cd) => <option key={cd} value={cd}>{CADENCE_LABELS[cd] ?? cd}</option>)}
+                  </select>
+                </div>
+                <textarea value={c.topic} onChange={(e) => upd(i, { topic: e.target.value })} rows={2} style={IP.topic} />
+                <div style={IP.meta}>
+                  {typeLabel(c.researchType)} · {c.depth} · {c.outputFormat === "post_image" ? "LinkedIn 1-pager" : c.outputFormat === "post_pdf" ? "LinkedIn carousel" : c.outputFormat === "both" ? "everything" : "report"}
+                  {c.note ? ` — ${c.note}` : ""}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 16, display: "flex", gap: 10, alignItems: "center" }}>
+            <button type="button" style={{ ...IP.primary, opacity: selCount === 0 || busy === "create" ? 0.5 : 1 }} disabled={selCount === 0 || busy === "create"} onClick={create}>
+              {busy === "create" ? "Creating…" : `Create ${selCount} campaign${selCount === 1 ? "" : "s"}`}
+            </button>
+            <button type="button" style={IP.ghost} onClick={() => { setRows(null); setErr(null); }}>Start over</button>
+          </div>
+        </>
+      )}
+      {err && <div style={{ marginTop: 12, fontSize: 12.5, color: "#B3261E", lineHeight: 1.5 }}>{err}</div>}
+    </div>
+  );
+}
+
+const IP: Record<string, React.CSSProperties> = {
+  lede: { fontSize: 13.5, color: T.ink3, lineHeight: 1.6, maxWidth: 640 },
+  fileBtn: { background: T.white, border: `1px solid ${T.border}`, borderRadius: 9, padding: "9px 14px", fontSize: 13, fontWeight: 600, color: T.blue, cursor: "pointer", fontFamily: T.font, maxWidth: 380, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  clearBtn: { background: T.white, border: `1px solid ${T.border}`, borderRadius: 8, width: 30, height: 30, fontSize: 15, color: T.muted, cursor: "pointer" },
+  paste: { marginTop: 10, width: "100%", resize: "vertical", borderRadius: 10, border: `1px solid ${T.inputBd}`, padding: "10px 12px", fontSize: 13, lineHeight: 1.55, color: T.ink, fontFamily: T.font, background: T.white, boxSizing: "border-box" },
+  primary: { background: T.blue, color: "#fff", border: "none", borderRadius: T.rPill, padding: "10px 20px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: T.font },
+  ghost: { background: "transparent", border: `1px solid ${T.border}`, borderRadius: T.rPill, padding: "10px 16px", fontSize: 13, fontWeight: 600, color: T.ink3, cursor: "pointer", fontFamily: T.font },
+  row: { background: T.white, border: `1px solid ${T.border}`, borderRadius: 12, padding: "12px 14px", boxShadow: T.shCard },
+  name: { flex: 1, minWidth: 160, height: 32, borderRadius: 8, border: `1px solid ${T.inputBd}`, padding: "0 10px", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: T.font },
+  sel: { height: 32, borderRadius: 8, border: `1px solid ${T.inputBd}`, background: T.white, padding: "0 6px", fontSize: 12.5, color: T.ink, fontFamily: T.font },
+  topic: { marginTop: 8, width: "100%", resize: "vertical", borderRadius: 8, border: `1px solid ${T.inputBd}`, padding: "8px 10px", fontSize: 12.5, lineHeight: 1.5, color: T.ink3, fontFamily: T.font, background: T.white, boxSizing: "border-box" },
+  meta: { marginTop: 6, fontSize: 11.5, color: T.muted },
+};
+
 /* ─── Activity feed — the Claude-style live trail ───────────────────────── */
 
 interface ActLine { t: string; kind: string; text: string }
@@ -1243,8 +1432,9 @@ const F: Record<string, React.CSSProperties> = {
   listHead: { padding: "10px 12px 6px", display: "flex", gap: 8, alignItems: "center" },
   filter: { flex: 1, minWidth: 0, height: 30, borderRadius: 8, border: `1px solid ${T.inputBd}`, background: T.white, padding: "0 10px", fontSize: 12.5, color: T.ink, fontFamily: T.font, outline: "none", boxSizing: "border-box" },
   toolBtn: { flex: "none", height: 30, background: T.white, border: `1px solid ${T.border}`, borderRadius: 8, padding: "0 12px", fontSize: 12, fontWeight: 700, color: T.blue, cursor: "pointer", fontFamily: T.font },
-  newBtn: { display: "block", width: "100%", marginBottom: 12, background: T.blue, color: "#fff", border: "none", borderRadius: T.rPill, padding: "9px 12px", fontSize: 12.5, fontWeight: 700, cursor: "pointer", fontFamily: T.font, textAlign: "center" },
+  newBtn: { display: "block", width: "100%", marginBottom: 6, background: T.blue, color: "#fff", border: "none", borderRadius: T.rPill, padding: "9px 12px", fontSize: 12.5, fontWeight: 700, cursor: "pointer", fontFamily: T.font, textAlign: "center" },
   newBtnOn: { boxShadow: `0 0 0 2px ${T.white}, 0 0 0 4px ${T.blue}` },
+  importBtn: { display: "block", width: "100%", marginBottom: 12, background: T.white, color: T.blue, border: `1px solid ${T.border}`, borderRadius: T.rPill, padding: "8px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: T.font, textAlign: "center" },
   createWrap: { padding: "12px 12px 18px" },
   cols: { display: "flex", gap: 6, padding: "4px 16px 6px", fontSize: 11, fontWeight: 700, color: T.muted2, letterSpacing: "0.04em", textTransform: "uppercase", borderBottom: `1px solid ${T.border}` },
   rows: { flex: 1, overflowY: "auto", padding: "4px 6px 8px" },
@@ -1289,6 +1479,7 @@ const A: Record<string, React.CSSProperties> = {
   sheetTitle: { fontSize: 15, fontWeight: 700, color: T.ink },
   sheetClose: { background: T.white, border: `1px solid ${T.border}`, borderRadius: 99, padding: "7px 16px", fontSize: 12.5, fontWeight: 600, color: T.ink3, cursor: "pointer", fontFamily: T.font },
   sheetBody: { flex: 1, minHeight: 0, overflowY: "auto", padding: "2px 26px 34px" },
+  toast: { position: "absolute", left: "50%", transform: "translateX(-50%)", bottom: 30, zIndex: 30, background: T.white, border: `1px solid ${T.border}`, borderRadius: 99, boxShadow: "0 6px 24px rgba(15,20,26,0.16)", padding: "10px 20px", fontSize: 12.5, fontWeight: 600, maxWidth: "72%", lineHeight: 1.45 },
 };
 
 const RV: Record<string, React.CSSProperties> = {

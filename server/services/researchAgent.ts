@@ -573,6 +573,87 @@ export async function executeResearchRun(runId: number): Promise<void> {
   }
 }
 
+/* ─── Campaign-plan import (2026-07-19) ───────────────────────────────────
+ * Paul plans campaigns in Claude (strategy PDFs, pasted docs). The app
+ * ingests the plan — the PDF goes to the API as a native document block, so
+ * Claude reads exactly what the other Claude wrote — and proposes
+ * ready-to-create campaigns in the app's own vocabulary. Parse-only:
+ * creating them stays a human click in the review sheet. */
+
+export interface ImportedCampaign {
+  name: string;
+  postAngle: string;
+  researchType: string;
+  topic: string;
+  cadence: string;
+  depth: string;
+  outputFormat: string;
+  note?: string;
+}
+
+function importSystemPrompt(): string {
+  const angles = POST_ANGLES.map(a => `- ${a.key}: ${a.label} — ${a.blurb}`).join('\n');
+  const types = RESEARCH_TYPES.map(t => `- ${t.key}: ${t.label} — ${t.blurb}`).join('\n');
+  return `You convert a marketing/posting plan document into CAMPAIGNS for smbX Studio — a buy-side corp-dev practice's research-to-LinkedIn pipeline. Each campaign runs cited web research on a cadence and drafts collateral in one of the plan's post formats.
+
+POST FORMATS (postAngle keys):
+${angles}
+
+RESEARCH LENSES (researchType keys):
+${types}
+
+CADENCES: weekly | biweekly | monthly. DEPTHS: quick | standard | deep. OUTPUT FORMATS: post_image (LinkedIn 1-pager) | post_pdf (carousel PDF) | report (internal letter PDF) | both.
+
+RULES:
+- Extract every RECURRING posting slot / campaign the document actually defines — one campaign per slot. Ignore one-off tasks, profile checklists, DM scripts, engagement tactics, and metrics advice.
+- topic is the run's standing research mandate: write it FROM THE DOCUMENT's own description of that slot — what to research each time, the angle to take, and any tie-back the document asks for (e.g. relating findings to buy-side corporate development for lower-middle-market companies). Self-contained, 1–4 sentences. Never invent subject matter the document does not contain.
+- name: short, in the document's own slot naming (e.g. "Tuesday Teardown").
+- Choose the closest postAngle; when none fits use "auto". Choose the lens that best feeds the slot (sector teardowns → vertical_scan; claim-testing → thesis_validation; news/recap slots → deal_monitor or topic_brief; offer posts → deal_monitor). depth: standard unless the document implies a deep flagship piece. outputFormat: post_image unless the document asks for carousels/documents (post_pdf) or both.
+- note: ≤90 chars — where in the plan this came from (day/section).
+Return ONLY JSON, no prose, no code fence: {"summary":"one line describing the plan","campaigns":[{"name":"…","postAngle":"…","researchType":"…","topic":"…","cadence":"…","depth":"…","outputFormat":"…","note":"…"}]} with at most 12 campaigns.`;
+}
+
+export async function parseCampaignPlan(input: { pdf?: Buffer; text?: string }): Promise<{ summary: string; campaigns: ImportedCampaign[] }> {
+  if (!input.pdf && !input.text?.trim()) throw new Error('Nothing to import — attach a PDF or paste the plan text');
+  const anthropic = getClient();
+
+  const content: any[] = [];
+  if (input.pdf) {
+    content.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: input.pdf.toString('base64') } });
+  }
+  content.push({
+    type: 'text',
+    text: input.text?.trim()
+      ? `The plan:\n\n${input.text.trim().slice(0, 60000)}\n\nExtract the campaigns now.`
+      : 'Extract the campaigns from the attached plan document now.',
+  });
+
+  const resp = await anthropic.messages
+    .stream({ model: MODEL, max_tokens: 4000, system: importSystemPrompt(), messages: [{ role: 'user', content }] })
+    .finalMessage();
+
+  const parsed = extractJson(harvestText(resp.content as any[]));
+  if (!parsed || !Array.isArray(parsed.campaigns)) throw new Error('Could not read a campaign plan out of that document');
+
+  const clampKey = (v: unknown, ok: string[], fb: string) => (typeof v === 'string' && ok.includes(v) ? v : fb);
+  const campaigns: ImportedCampaign[] = parsed.campaigns
+    .slice(0, 12)
+    .map((c: any): ImportedCampaign => ({
+      name: String(c?.name ?? '').trim().slice(0, 120) || 'Imported campaign',
+      postAngle: clampKey(c?.postAngle, POST_ANGLES.map(a => a.key), 'auto'),
+      researchType: clampKey(c?.researchType, RESEARCH_TYPES.map(t => t.key), 'topic_brief'),
+      topic: String(c?.topic ?? '').trim().slice(0, 2000),
+      cadence: clampKey(c?.cadence, [...CADENCES], 'weekly'),
+      depth: clampKey(c?.depth, DEPTHS.map(d => d.key), 'standard'),
+      outputFormat: clampKey(c?.outputFormat, [...OUTPUT_FORMATS], 'post_image'),
+      note: typeof c?.note === 'string' && c.note.trim() ? c.note.trim().slice(0, 120) : undefined,
+    }))
+    .filter(c => c.topic.length >= 10);
+  if (!campaigns.length) throw new Error('The document did not yield any recurring campaigns');
+
+  return { summary: typeof parsed.summary === 'string' ? parsed.summary.slice(0, 200) : 'Imported plan', campaigns };
+}
+
 /* ─── Scheduled campaigns ─────────────────────────────────────────────── */
 
 /**

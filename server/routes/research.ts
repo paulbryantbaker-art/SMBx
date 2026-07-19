@@ -20,6 +20,7 @@ import {
   getMonthSpendCents,
   getMonthlyCapCents,
   nextRunAt,
+  parseCampaignPlan,
 } from '../services/researchAgent.js';
 import { renderResearchPdf, renderResearchCardPng, renderLinkedInDocPdf, researchPostText, renderAnnouncementCardPng, type ResearchRunRow, type AnnouncementSpec, renderPostCardPng, type PostCardSpec } from '../services/researchComposer.js';
 import { listStudioAssets, getStudioAsset, createStudioAsset, updateStudioAsset, deleteStudioAsset } from '../services/studioAssets.js';
@@ -33,6 +34,16 @@ const assetUpload = multer({
   limits: { fileSize: 12 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     cb(null, ['image/png', 'image/jpeg', 'image/webp'].includes(file.mimetype));
+  },
+});
+
+/* Plan imports: a strategy PDF (sent to Claude as a native document block)
+ * or a text/markdown file. */
+const planUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 20 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    cb(null, file.mimetype === 'application/pdf' || file.mimetype.startsWith('text/') || file.mimetype === 'application/octet-stream');
   },
 });
 
@@ -158,6 +169,29 @@ researchRouter.delete('/research/runs/:id', async (req, res) => {
   } catch (err: any) {
     console.error('[research] delete run failed:', err.message);
     return res.status(500).json({ error: 'Failed to delete run' });
+  }
+});
+
+/** Import a campaign plan (2026-07-19): a Claude-written strategy PDF or
+ *  pasted text goes to Claude as-is; back come proposed campaigns in the
+ *  app's vocabulary. Parse-only — creation happens from the review sheet
+ *  via the normal POST /research/schedules. */
+researchRouter.post('/research/import-plan', planUpload.single('file'), async (req, res) => {
+  if (!userIdFromReq(req)) return res.status(401).json({ error: 'Not authenticated' });
+  const file = (req as any).file as { buffer: Buffer; mimetype: string; originalname: string } | undefined;
+  const text = typeof req.body?.text === 'string' ? req.body.text : '';
+  if (!file && !text.trim()) return res.status(400).json({ error: 'Attach the plan (PDF) or paste its text' });
+  try {
+    const isPdf = !!file && (file.mimetype === 'application/pdf' || /\.pdf$/i.test(file.originalname));
+    const out = await parseCampaignPlan({
+      pdf: isPdf ? file!.buffer : undefined,
+      text: !isPdf && file ? file.buffer.toString('utf8') : text,
+    });
+    return res.json(out);
+  } catch (err: any) {
+    console.error('[research] import-plan failed:', err?.message);
+    const apiMsg = err?.error?.error?.message;
+    return res.status(500).json({ error: apiMsg ? String(apiMsg) : (err?.message || 'Import failed') });
   }
 });
 
