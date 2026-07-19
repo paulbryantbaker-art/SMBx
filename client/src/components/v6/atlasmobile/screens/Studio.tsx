@@ -43,6 +43,7 @@ import {
   PlusIcon,
 } from "../../desktop/icons";
 import { DetailSection } from "../redesign/kit";
+import StudioResearchM from "./StudioResearchM";
 
 /* ─── badge tone for artifact kind / tier ─────────────────── */
 
@@ -487,7 +488,7 @@ function renderBlock(b: MdBlock, i: number) {
   }
 }
 
-function MarkdownBody({ md }: { md: string }) {
+export function MarkdownBody({ md }: { md: string }) {
   const blocks = useMemo(() => splitBlocks(md), [md]);
   return (
     <div style={{ fontSize: 13, lineHeight: 1.7, color: RT.ink2 }}>
@@ -748,6 +749,19 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
   const chat = useAtlasChat();
   const { deliverables, loading, error, refresh } = useV6WorkspaceData(user);
 
+  // Two Studio modes, same as desktop StudioCreate: deal collateral vs the
+  // research/campaign manager. The choice persists per-tab (same key).
+  const [mode, setMode] = useState<"collateral" | "research">(() => {
+    try {
+      return sessionStorage.getItem("smbx_studio_mode") === "research" ? "research" : "collateral";
+    } catch {
+      return "collateral";
+    }
+  });
+  useEffect(() => {
+    try { sessionStorage.setItem("smbx_studio_mode", mode); } catch { /* private mode */ }
+  }, [mode]);
+
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [format, setFormat] = useState<StudioFormat>("slides");
   const [activeSlide, setActiveSlide] = useState(0);
@@ -820,34 +834,72 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
     }
   }, [selectedId, exporting, format]);
 
+  /* ── RESEARCH MODE — the campaign manager, phone-native ── */
+  if (mode === "research") {
+    return (
+      <div>
+        <div style={{ padding: "10px 18px 0" }}>
+          <Segmented
+            options={[{ id: "collateral" as const, label: "Collateral" }, { id: "research" as const, label: "Research" }]}
+            value={mode}
+            onChange={(m) => setMode(m)}
+          />
+        </div>
+        <StudioResearchM user={user} />
+      </div>
+    );
+  }
+
   /* ── LIST VIEW (no selection) ── */
+  const modeSeg = (
+    <div style={{ padding: "10px 18px 0" }}>
+      <Segmented
+        options={[{ id: "collateral" as const, label: "Collateral" }, { id: "research" as const, label: "Research" }]}
+        value={mode}
+        onChange={(m) => setMode(m)}
+      />
+    </div>
+  );
   if (selected == null) {
     if (loading && deliverables.length === 0) {
-      return <LoadingState label="Loading collateral…" />;
+      return <div>{modeSeg}<LoadingState label="Loading collateral…" /></div>;
     }
     if (error) {
       return (
-        <EmptyState accent={RT.accent} onAccent={RT.onAccent}
-          title="Couldn't load Studio"
-          hint={error}
-          cta="Try again"
-          onCta={() => void refresh()}
-        />
+        <div>
+          {modeSeg}
+          <EmptyState accent={RT.accent} onAccent={RT.onAccent}
+            title="Couldn't load Studio"
+            hint={error}
+            cta="Try again"
+            onCta={() => void refresh()}
+          />
+        </div>
       );
     }
     if (deliverables.length === 0) {
       return (
-        <EmptyState accent={RT.accent} onAccent={RT.onAccent}
-          title="No collateral yet"
-          hint="Decks, memos, teasers, and one-pagers you draft with Yulia show up here. Ask Yulia to draft one for a deal to get started."
-          cta="Ask Yulia to draft"
-          onCta={() => askYulia("Draft a pitch deck for one of my deals.")}
-        />
+        <div>
+          {modeSeg}
+          <EmptyState accent={RT.accent} onAccent={RT.onAccent}
+            title="No collateral yet"
+            hint="Decks, memos, teasers, and one-pagers you draft with Yulia show up here. Ask Yulia to draft one for a deal to get started."
+            cta="Ask Yulia to draft"
+            onCta={() => askYulia("Draft a pitch deck for one of my deals.")}
+          />
+        </div>
       );
     }
 
     return (
       <div style={{ padding: "10px 18px 4px" }}>
+        <div style={{ marginBottom: 12 }}>
+          <Segmented
+            options={[{ id: "collateral" as const, label: "Collateral" }, { id: "research" as const, label: "Research" }]}
+            value={mode}
+            onChange={(m) => setMode(m)}
+          />
+        </div>
         <div
           style={{
             display: "flex",
