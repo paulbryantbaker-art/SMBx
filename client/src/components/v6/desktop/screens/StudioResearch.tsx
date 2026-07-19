@@ -57,6 +57,8 @@ interface AssetRow {
   label: string;
   mime: string;
   kind: string; // 'photo' | 'collateral'
+  run_id?: number | null;
+  schedule_id?: number | null;
   width: number | null;
   height: number | null;
   created_at: string;
@@ -388,16 +390,22 @@ export default function StudioResearch({ user }: { user: User | null }) {
     setNote(null);
     const base = slugify(r.report_title || r.topic);
     try {
-      if (kind === "pdf") await download(`/research/runs/${r.id}/pdf`, `smbx-research-${base}.pdf`);
-      else if (kind === "card") await download(`/research/runs/${r.id}/card.png`, `smbx-onepager-${base}.png`);
-      else if (kind === "lipdf") await download(`/research/runs/${r.id}/linkedin.pdf`, `smbx-linkedin-${base}.pdf`);
+      // Exports both download AND file themselves into the Collateral
+      // folder, linked to the run's campaign (save=1).
+      if (kind === "pdf") await download(`/research/runs/${r.id}/pdf?save=1`, `smbx-research-${base}.pdf`);
+      else if (kind === "card") await download(`/research/runs/${r.id}/card.png?save=1`, `smbx-onepager-${base}.png`);
+      else if (kind === "lipdf") await download(`/research/runs/${r.id}/linkedin.pdf?save=1`, `smbx-linkedin-${base}.pdf`);
       else await download(`/research/runs/${r.id}/md`, `smbx-research-${base}.md`);
+      if (kind !== "md") {
+        setNote({ kind: "ok", text: "Exported — downloaded, and filed in Collateral under its campaign." });
+        void refresh();
+      }
     } catch (e: any) {
       setNote({ kind: "err", text: e?.message || "Download failed." });
     } finally {
       setDl(null);
     }
-  }, []);
+  }, [refresh]);
 
   /** Fetch the ready-to-paste post text and put it on the clipboard. */
   const copyPost = useCallback(async (r: RunRow) => {
@@ -805,6 +813,10 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
   const items = q ? folderRuns.filter((r) => `${r.report_title ?? ""} ${r.topic}`.toLowerCase().includes(q)) : folderRuns;
   const folderAssets = sel.kind === "media" ? photos : sel.kind === "collateral" ? collateral : [];
   const assetItems = q ? folderAssets.filter((a) => a.label.toLowerCase().includes(q)) : folderAssets;
+  // A campaign's exported collateral lists inside its folder, after the runs.
+  const campAssetsAll = sel.kind === "camp" ? collateral.filter((a) => a.schedule_id === sel.id) : [];
+  const campAssets = q ? campAssetsAll.filter((a) => a.label.toLowerCase().includes(q)) : campAssetsAll;
+  const assetPool = assetMode ? assetItems : campAssets;
 
   // A freshly started run selects itself so its live trail is on screen
   // immediately — once per run, so a later manual selection sticks.
@@ -814,6 +826,7 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
       lastAutoRef.current = newest.id;
       setSel(newest.schedule_id != null ? { kind: "camp", id: newest.schedule_id } : { kind: "all" });
       setSelRunId(newest.id);
+      setSelAssetId(null);
       setInsp("item"); // flip the inspector to the live trail
     }
   }, [runs]);
@@ -826,13 +839,15 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
       if (next !== selAssetId) setSelAssetId(next);
       return;
     }
+    // A collateral row selected inside a campaign folder holds the pane.
+    if (selAssetId != null && campAssets.some((a) => a.id === selAssetId)) return;
     if (selRunId != null && items.some((r) => r.id === selRunId)) return;
     const next = items[0]?.id ?? null;
     if (next !== selRunId) setSelRunId(next);
-  }, [assetMode, items, selRunId, assetItems, selAssetId]);
+  }, [assetMode, items, selRunId, assetItems, campAssets, selAssetId]);
 
-  const selRun = items.find((r) => r.id === selRunId) ?? null;
-  const selAsset = assetItems.find((a) => a.id === selAssetId) ?? null;
+  const selRun = selRunId != null ? items.find((r) => r.id === selRunId) ?? null : null;
+  const selAsset = assetPool.find((a) => a.id === selAssetId) ?? null;
   const selCamp = sel.kind === "camp" ? schedules.find((s) => s.id === sel.id) ?? null : null;
 
   return (
@@ -926,7 +941,7 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
           {loaded && assetMode && assetItems.length === 0 && (
             <div style={F.emptyList}>{q ? "Nothing matches the filter." : sel.kind === "media" ? "No photos yet — upload below in Media." : "No collateral yet — every card you render lands here."}</div>
           )}
-          {loaded && !assetMode && items.length === 0 && (
+          {loaded && !assetMode && items.length === 0 && campAssets.length === 0 && (
             <div style={F.emptyList}>{q ? "Nothing matches the filter." : sel.kind === "archived" ? "Nothing archived." : "No runs in this folder yet."}</div>
           )}
           {assetMode
@@ -947,7 +962,7 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
                 const failed = r.status === "failed";
                 const running = r.status === "queued" || r.status === "running";
                 return (
-                  <button key={r.id} type="button" onClick={() => { setSelRunId(r.id); setInsp("item"); }} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
+                  <button key={r.id} type="button" onClick={() => { setSelRunId(r.id); setSelAssetId(null); setInsp("item"); }} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
                     <span style={F.rowIcon}>{running ? <Spinner /> : failed ? <span style={{ color: "#B3261E", fontWeight: 700 }}>!</span> : <DocGlyph c={on ? T.blue : T.muted} />}</span>
                     <span style={F.rowName}>{r.report_title || r.topic}</span>
                     <span style={F.rowCol}>{angleLabel(r.post_angle) ?? typeLabel(r.research_type)}</span>
@@ -961,6 +976,19 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
                   </button>
                 );
               })}
+          {/* the campaign's exported collateral, after its runs */}
+          {!assetMode && campAssets.map((a) => {
+            const on = a.id === selAssetId && selRunId == null;
+            return (
+              <button key={`ca-${a.id}`} type="button" onClick={() => { setSelAssetId(a.id); setSelRunId(null); setInsp("item"); }} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
+                <span style={F.rowIcon}><DocGlyph c={on ? T.blue : "#8B7BD8"} /></span>
+                <span style={F.rowName}>{a.label}</span>
+                <span style={F.rowCol}>{(a.mime.split("/")[1] ?? a.mime).toUpperCase()}</span>
+                <span style={{ ...F.rowCol, width: 66 }}>{fmtBytes(a.bytes)}</span>
+                <span style={{ ...F.rowCol, width: 48, textAlign: "right" }}>{shortDate(a.created_at)}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -983,7 +1011,7 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
           />
         ) : assetMode ? (
           selAsset ? (
-            <AssetPreview asset={selAsset} onDownload={() => onDownloadAsset(selAsset)} onDelete={() => onDeleteAsset(selAsset)} />
+            <AssetPreview asset={selAsset} campName={schedules.find((sc) => sc.id === selAsset.schedule_id)?.name ?? null} onDownload={() => onDownloadAsset(selAsset)} onDelete={() => onDeleteAsset(selAsset)} />
           ) : (
             <div style={F.createWrap}>{createForm}</div>
           )
@@ -1003,6 +1031,8 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
             onArchive={(v) => onArchiveRun(selRun, v)}
             onDelete={() => onDeleteRun(selRun)}
           />
+        ) : selAsset ? (
+          <AssetPreview asset={selAsset} campName={schedules.find((sc) => sc.id === selAsset.schedule_id)?.name ?? null} onDownload={() => onDownloadAsset(selAsset)} onDelete={() => onDeleteAsset(selAsset)} />
         ) : (
           <div style={F.createWrap}>{createForm}</div>
         )}
@@ -1166,9 +1196,11 @@ function CampaignPreview({ s, count, angles, onSave, onRunNow, onToggle, onArchi
 }
 
 /** Asset preview — media photos and rendered collateral share it. */
-function AssetPreview({ asset, onDownload, onDelete }: { asset: AssetRow; onDownload: () => void; onDelete: () => void }) {
+function AssetPreview({ asset, campName, onDownload, onDelete }: { asset: AssetRow; campName?: string | null; onDownload: () => void; onDelete: () => void }) {
   const [src, setSrc] = useState<string | null>(null);
+  const isImage = asset.mime.startsWith("image/");
   useEffect(() => {
+    if (!isImage) { setSrc(null); return; }
     let url: string | null = null;
     let alive = true;
     setSrc(null);
@@ -1177,7 +1209,7 @@ function AssetPreview({ asset, onDownload, onDelete }: { asset: AssetRow; onDown
       .then((b) => { if (alive) { url = URL.createObjectURL(b); setSrc(url); } })
       .catch(() => { if (alive) setSrc(null); });
     return () => { alive = false; if (url) URL.revokeObjectURL(url); };
-  }, [asset.id]);
+  }, [asset.id, isImage]);
 
   return (
     <div style={F.prevInner}>
@@ -1185,10 +1217,13 @@ function AssetPreview({ asset, onDownload, onDelete }: { asset: AssetRow; onDown
       <div style={F.prevMeta}>
         {asset.kind === "collateral" ? "Rendered collateral" : "Media photo"} · {(asset.mime.split("/")[1] ?? asset.mime).toUpperCase()}
         {asset.width && asset.height ? ` · ${asset.width}×${asset.height}` : ""} · {fmtBytes(asset.bytes)} · {shortDate(asset.created_at)}
+        {campName ? ` · ${campName}` : ""}
       </div>
-      {src
-        ? <img src={src} alt={asset.label} style={F.prevImg} />
-        : <div style={{ ...F.actEmpty, marginTop: 12 }}>Loading preview…</div>}
+      {isImage
+        ? (src
+            ? <img src={src} alt={asset.label} style={F.prevImg} />
+            : <div style={{ ...F.actEmpty, marginTop: 12 }}>Loading preview…</div>)
+        : <div style={{ ...F.actEmpty, marginTop: 12 }}>PDF document — use Download to open it.</div>}
       <div style={F.prevLabel}>Manage</div>
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
         <button type="button" style={F.smallBtn} onClick={onDownload}>Download</button>
@@ -1433,17 +1468,35 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
 }) {
   const [feed, setFeed] = useState<Feed | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [pvState, setPvState] = useState<"loading" | "ok" | "err">("loading");
+  const [pvErr, setPvErr] = useState<string>("");
+  const pvTriedRef = useRef(0);
   const [saving, setSaving] = useState<"save" | "approve" | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const approved = run.review_status === "approved";
 
+  // The preview IS the review — render it visibly, retry once on a hiccup,
+  // and say what went wrong instead of sitting on a blank placeholder.
   const loadPreview = useCallback(async () => {
+    setPvState("loading");
     try {
       const r = await fetch(`/api/research/runs/${run.id}/card.png?t=${Date.now()}`, { headers: authHeaders() });
-      if (!r.ok) return;
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        throw new Error((j as any)?.error || `Render failed (${r.status})`);
+      }
       const url = URL.createObjectURL(await r.blob());
       setPreview(prev => { if (prev) URL.revokeObjectURL(prev); return url; });
-    } catch { /* preview is best-effort */ }
+      setPvState("ok");
+    } catch (e: any) {
+      if (pvTriedRef.current < 1) {
+        pvTriedRef.current += 1;
+        setTimeout(() => { void loadPreview(); }, 2500); // renderer may be cold-starting
+        return;
+      }
+      setPvErr(e?.message || "Preview failed");
+      setPvState("err");
+    }
   }, [run.id]);
 
   useEffect(() => {
@@ -1462,6 +1515,7 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
     setSaving("save"); setErr(null);
     try {
       await api(`/research/runs/${run.id}/feed`, { method: "PATCH", body: JSON.stringify({ feed }) });
+      pvTriedRef.current = 0; // fresh retry budget for the re-render
       await loadPreview();
       onStatus();
     } catch (e) { setErr(e instanceof Error ? e.message : "Save failed"); }
@@ -1519,9 +1573,21 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
           </div>
         </div>
         <div style={RV.previewCol}>
-          {preview
-            ? <img src={preview} alt="1-pager preview" style={RV.previewImg} />
-            : <div style={RV.previewEmpty}>Preview…</div>}
+          {pvState === "ok" && preview ? (
+            <a href={preview} target="_blank" rel="noreferrer" title="Open full size">
+              <img src={preview} alt="1-pager preview" style={RV.previewImg} />
+            </a>
+          ) : pvState === "loading" ? (
+            <div style={{ ...RV.previewEmpty, gap: 10 }}>
+              <Spinner />
+              <span>Rendering the 1-pager — a few seconds…</span>
+            </div>
+          ) : (
+            <div style={{ ...RV.previewEmpty, flexDirection: "column", gap: 10, padding: "0 14px", textAlign: "center" }}>
+              <span style={{ color: "#B3261E", fontWeight: 600 }}>{pvErr}</span>
+              <button type="button" style={RV.exportBtn} onClick={() => { pvTriedRef.current = 0; void loadPreview(); }}>Try again</button>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -1653,7 +1719,8 @@ const A: Record<string, React.CSSProperties> = {
   sheetTitle: { fontSize: 15, fontWeight: 700, color: T.ink },
   sheetClose: { background: T.white, border: `1px solid ${T.border}`, borderRadius: 99, padding: "7px 16px", fontSize: 12.5, fontWeight: 600, color: T.ink3, cursor: "pointer", fontFamily: T.font },
   sheetBody: { flex: 1, minHeight: 0, overflowY: "auto", padding: "2px 26px 34px" },
-  toast: { position: "absolute", left: "50%", transform: "translateX(-50%)", bottom: 30, zIndex: 30, background: T.white, border: `1px solid ${T.border}`, borderRadius: 99, boxShadow: "0 6px 24px rgba(15,20,26,0.16)", padding: "10px 20px", fontSize: 12.5, fontWeight: 600, maxWidth: "72%", lineHeight: 1.45 },
+  // Above the sheets (z 40) so export/save feedback is never hidden.
+  toast: { position: "absolute", left: "50%", transform: "translateX(-50%)", bottom: 30, zIndex: 60, background: T.white, border: `1px solid ${T.border}`, borderRadius: 99, boxShadow: "0 6px 24px rgba(15,20,26,0.16)", padding: "10px 20px", fontSize: 12.5, fontWeight: 600, maxWidth: "72%", lineHeight: 1.45 },
 };
 
 const RV: Record<string, React.CSSProperties> = {
