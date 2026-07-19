@@ -77,7 +77,7 @@ researchRouter.get('/research/usage', async (_req, res) => {
 researchRouter.post('/research/runs', async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
-  const input = {
+  const input: any = {
     userId,
     researchType: String(req.body?.researchType ?? ''),
     topic: String(req.body?.topic ?? ''),
@@ -88,6 +88,15 @@ researchRouter.post('/research/runs', async (req, res) => {
   const invalid = validateRunInput(input);
   if (invalid) return res.status(400).json({ error: invalid });
   try {
+    // Optional: tie the run to a campaign ("Run now" from a campaign folder).
+    if (req.body?.scheduleId != null) {
+      const sid = Number(req.body.scheduleId);
+      if (Number.isInteger(sid) && sid > 0) {
+        const [sched] = await sql`SELECT id FROM research_schedules WHERE id = ${sid} AND user_id = ${userId}`;
+        if (!sched) return res.status(404).json({ error: 'Campaign not found' });
+        input.scheduleId = sid;
+      }
+    }
     const spent = await getMonthSpendCents();
     if (spent >= getMonthlyCapCents()) {
       return res.status(429).json({ error: `Monthly research budget reached ($${(spent / 100).toFixed(0)} of $${(getMonthlyCapCents() / 100).toFixed(0)}).` });

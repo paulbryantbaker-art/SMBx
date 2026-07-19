@@ -439,7 +439,7 @@ export default function Landing() {
       <section className="pd-section">
         <div className="pd-wrap">
           <div className="pd-fndband" data-rv>
-            <img src="/founder-walking.webp" alt="Paul Baker" loading="lazy" />
+            <img src="/founder-portrait.jpg" alt="Paul Baker" loading="lazy" />
             <div>
               <div className="pd-seclabel">Who you'll talk to</div>
               <p className="pd-statement">
