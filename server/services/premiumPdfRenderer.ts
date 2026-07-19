@@ -17,9 +17,7 @@ import { valueLensTemplate } from '../templates/pdf/valueLens.js';
 
 let browser: Browser | null = null;
 
-export async function getBrowser(): Promise<Browser> {
-  if (browser && browser.connected) return browser;
-
+async function launchBrowser(): Promise<Browser> {
   const execPath = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser';
 
   // In dev on macOS, try common Chrome paths
@@ -36,13 +34,40 @@ export async function getBrowser(): Promise<Browser> {
     }
   }
 
-  browser = await puppeteer.launch({
+  const b = await puppeteer.launch({
     executablePath: finalPath,
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--single-process'],
+    // NOTE (2026-07-19): --single-process removed. Under container memory
+    // pressure it let one renderer crash turn the whole browser into a
+    // zombie — CDP socket still "connected", every newPage() dying with
+    // "Protocol error (Target.setAutoAttach): Target closed".
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
   });
+  b.on('disconnected', () => {
+    if (browser === b) browser = null; // next call relaunches
+  });
+  return b;
+}
 
+export async function getBrowser(): Promise<Browser> {
+  if (browser && browser.connected) return browser;
+  browser = await launchBrowser();
   return browser;
+}
+
+/** New page with zombie recovery: if the browser accepts the connection but
+ *  can't mint targets (the Target-closed failure mode), kill it and relaunch
+ *  once. Every renderer opens pages through this. */
+export async function newRenderPage() {
+  try {
+    return await (await getBrowser()).newPage();
+  } catch (err: any) {
+    console.warn('[pdf] newPage failed — relaunching Chromium:', err?.message);
+    const dead = browser;
+    browser = null;
+    if (dead) { try { await dead.close(); } catch { /* already gone */ } }
+    return await (await getBrowser()).newPage();
+  }
 }
 
 // ─── Template Registry ──────────────────────────────────────────────
@@ -131,8 +156,7 @@ export async function renderPremiumPdf(options: PremiumPdfOptions): Promise<Buff
     charts,
   );
 
-  const b = await getBrowser();
-  const page = await b.newPage();
+  const page = await newRenderPage();
 
   try {
     // ── 1. Viewport: Letter at 3x for crisp text and charts ──

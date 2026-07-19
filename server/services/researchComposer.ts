@@ -19,7 +19,7 @@ import { marked } from 'marked';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { getBrowser } from './premiumPdfRenderer.js';
+import { newRenderPage } from './premiumPdfRenderer.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -216,8 +216,7 @@ export async function researchReportHtml(run: ResearchRunRow): Promise<string> {
 
 export async function renderResearchPdf(run: ResearchRunRow): Promise<Buffer> {
   const html = await researchReportHtml(run);
-  const browser = await getBrowser();
-  const page = await browser.newPage();
+  const page = await newRenderPage();
   try {
     await page.setContent(html, { waitUntil: 'networkidle0', timeout: 45000 });
     await page.evaluateHandle('document.fonts.ready').catch(() => {});
@@ -292,8 +291,7 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0): string {
 
 export async function renderResearchCardPng(run: ResearchRunRow, hookIndex = 0): Promise<Buffer> {
   const html = researchCardHtml(run, hookIndex);
-  const browser = await getBrowser();
-  const page = await browser.newPage();
+  const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 2 });
     await page.setContent(html, { waitUntil: 'networkidle0', timeout: 45000 });
@@ -517,8 +515,7 @@ export function linkedInDocHtml(run: ResearchRunRow): string {
 
 export async function renderLinkedInDocPdf(run: ResearchRunRow): Promise<Buffer> {
   const html = linkedInDocHtml(run);
-  const browser = await getBrowser();
-  const page = await browser.newPage();
+  const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 1 });
     await page.setContent(html, { waitUntil: 'networkidle0', timeout: 60000 });
@@ -628,8 +625,7 @@ export function announcementCardHtml(spec: AnnouncementSpec): string {
 }
 
 export async function renderAnnouncementCardPng(spec: AnnouncementSpec): Promise<Buffer> {
-  const browser = await getBrowser();
-  const page = await browser.newPage();
+  const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 2 });
     await page.setContent(announcementCardHtml(spec), { waitUntil: 'networkidle0', timeout: 60000 });
@@ -813,8 +809,7 @@ export function postCardHtml(spec: PostCardSpec): string {
 }
 
 export async function renderPostCardPng(spec: PostCardSpec): Promise<Buffer> {
-  const browser = await getBrowser();
-  const page = await browser.newPage();
+  const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 2 });
     await page.setContent(postCardHtml(spec), { waitUntil: 'networkidle0', timeout: 60000 });
