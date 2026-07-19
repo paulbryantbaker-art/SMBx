@@ -499,6 +499,9 @@ researchRouter.patch('/research/schedules/:id', async (req, res) => {
       cadence: typeof b.cadence === 'string' ? b.cadence : existing.cadence,
       active: typeof b.active === 'boolean' ? b.active : existing.active,
       archived: typeof b.archived === 'boolean' ? b.archived : ((existing as any).archived === true),
+      folder: 'folder' in b
+        ? (typeof b.folder === 'string' && b.folder.trim() ? b.folder.trim().slice(0, 80) : null)
+        : ((existing as any).folder ?? null),
     };
     const invalid = validateRunInput({ userId, researchType: next.research_type, topic: next.topic, depth: next.depth, outputFormat: next.output_format, postAngle: next.post_angle });
     if (invalid) return res.status(400).json({ error: invalid });
@@ -512,7 +515,8 @@ researchRouter.patch('/research/schedules/:id', async (req, res) => {
       UPDATE research_schedules
       SET name = ${next.name}, topic = ${next.topic}, research_type = ${next.research_type},
           depth = ${next.depth}, output_format = ${next.output_format}, post_angle = ${next.post_angle},
-          cadence = ${next.cadence}, active = ${next.active}, archived = ${next.archived}, next_run_at = ${nextRun}
+          cadence = ${next.cadence}, active = ${next.active}, archived = ${next.archived},
+          folder = ${next.folder}, next_run_at = ${nextRun}
       WHERE id = ${id} AND user_id = ${userId}
       RETURNING *
     `;
@@ -584,14 +588,29 @@ researchRouter.get('/studio/assets/:id/raw', async (req, res) => {
 });
 
 researchRouter.patch('/studio/assets/:id', async (req, res) => {
-  if (!userIdFromReq(req)) return res.status(401).json({ error: 'Not authenticated' });
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
   const id = parseId(req.params.id);
   if (!id) return res.status(400).json({ error: 'Bad asset id' });
   try {
+    // Drag-to-file: move a collateral piece under a campaign (or out of one).
+    let scheduleId: number | null | undefined = undefined;
+    if ('scheduleId' in (req.body ?? {})) {
+      if (req.body.scheduleId === null || req.body.scheduleId === '') {
+        scheduleId = null;
+      } else {
+        const sid = Number(req.body.scheduleId);
+        if (!Number.isInteger(sid) || sid <= 0) return res.status(400).json({ error: 'Bad campaign id' });
+        const [sched] = await sql`SELECT id FROM research_schedules WHERE id = ${sid} AND user_id = ${userId}`;
+        if (!sched) return res.status(404).json({ error: 'Campaign not found' });
+        scheduleId = sid;
+      }
+    }
     const ok = await updateStudioAsset(id, {
       label: typeof req.body?.label === 'string' ? req.body.label : undefined,
       focalX: req.body?.focalX != null ? Number(req.body.focalX) : undefined,
       focalY: req.body?.focalY != null ? Number(req.body.focalY) : undefined,
+      scheduleId,
     });
     if (!ok) return res.status(404).json({ error: 'Not found' });
     return res.json({ ok: true });

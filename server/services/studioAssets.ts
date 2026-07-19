@@ -90,15 +90,16 @@ export async function createStudioAsset(input: { label: string; mime: string; da
   return Number((rows[0] as any).id);
 }
 
-export async function updateStudioAsset(id: number, patch: { label?: string; focalX?: number; focalY?: number }): Promise<boolean> {
-  const cur = await sql`SELECT id, label, focal_x, focal_y FROM studio_assets WHERE id = ${id}`;
+export async function updateStudioAsset(id: number, patch: { label?: string; focalX?: number; focalY?: number; scheduleId?: number | null }): Promise<boolean> {
+  const cur = await sql`SELECT id, label, focal_x, focal_y, schedule_id FROM studio_assets WHERE id = ${id}`;
   if (!cur[0]) return false;
   const c = cur[0] as any;
   await sql`
     UPDATE studio_assets SET
       label = ${patch.label?.trim() || c.label},
       focal_x = ${clamp01(patch.focalX ?? c.focal_x, c.focal_x)},
-      focal_y = ${clamp01(patch.focalY ?? c.focal_y, c.focal_y)}
+      focal_y = ${clamp01(patch.focalY ?? c.focal_y, c.focal_y)},
+      schedule_id = ${patch.scheduleId === undefined ? c.schedule_id : patch.scheduleId}
     WHERE id = ${id}`;
   return true;
 }

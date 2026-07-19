@@ -19,7 +19,7 @@
  * running; kept afterward as the run's "what it did" record).
  * Internal-only: practice-mode auth covers the routes.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { authHeaders, type User } from "../../../../hooks/useAuth";
 import { T } from "../atlasTokens";
 import { StudioAnnouncement, StudioPostCards } from "./StudioAnnouncement";
@@ -75,6 +75,7 @@ interface ScheduleRow {
   cadence: string;
   active: boolean;
   archived?: boolean;
+  folder?: string | null;
   next_run_at: string | null;
 }
 
@@ -360,6 +361,34 @@ export default function StudioResearch({ user }: { user: User | null }) {
     }
   }, [refresh]);
 
+  /** Drag-to-file: move a collateral piece under a campaign (or out). */
+  const moveAsset = useCallback(async (a: AssetRow, scheduleId: number | null) => {
+    try {
+      await api(`/studio/assets/${a.id}`, { method: "PATCH", body: JSON.stringify({ scheduleId }) });
+      setNote({ kind: "ok", text: scheduleId != null ? "Collateral filed under the campaign." : "Collateral removed from its campaign." });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Move failed." });
+    }
+  }, [refresh]);
+
+  /** Promote a one-off run into a campaign and file the run under it. */
+  const makeCampaignFromRun = useCallback(async (r: RunRow) => {
+    const name = window.prompt("Name the campaign:", (r.report_title || r.topic).slice(0, 60));
+    if (!name || !name.trim()) return;
+    try {
+      const j = await api<{ schedule: { id: number } }>("/research/schedules", {
+        method: "POST",
+        body: JSON.stringify({ name: name.trim(), researchType: r.research_type, topic: r.topic, depth: r.depth, outputFormat: r.output_format, postAngle: r.post_angle ?? "auto", cadence: "weekly", runNow: false }),
+      });
+      await api(`/research/runs/${r.id}`, { method: "PATCH", body: JSON.stringify({ scheduleId: j.schedule.id }) });
+      setNote({ kind: "ok", text: `Campaign “${name.trim()}” created — this run is filed under it; next fire Sunday night.` });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Couldn’t create the campaign." });
+    }
+  }, [refresh]);
+
   /** One-click restart of a failed (or any) run — same knobs, new run. */
   const rerunRun = useCallback(async (r: RunRow) => {
     try {
@@ -558,6 +587,8 @@ export default function StudioResearch({ user }: { user: User | null }) {
         onCopyPost={copyPost}
         onRerunRun={rerunRun}
         onMoveRun={moveRun}
+        onMoveAsset={moveAsset}
+        onMakeCampaign={makeCampaignFromRun}
         onArchiveRun={archiveRun}
         onDeleteRun={deleteRun}
         onRunCampaignNow={runCampaignNow}
@@ -679,11 +710,30 @@ function widestLabel(labels: string[], font: string): number {
   return Math.ceil(w);
 }
 
+/* ── Drag & drop: rows carry {t, id}; folders accept them. ── */
+type DragPayload = { t: "run" | "asset" | "camp"; id: number };
+
+function setDrag(e: React.DragEvent, t: DragPayload["t"], id: number) {
+  e.dataTransfer.setData("application/json", JSON.stringify({ t, id }));
+  e.dataTransfer.effectAllowed = "move";
+}
+function readDrag(e: React.DragEvent): DragPayload | null {
+  try {
+    const j = JSON.parse(e.dataTransfer.getData("application/json"));
+    return j && typeof j.id === "number" && typeof j.t === "string" ? j : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Finder-style pane divider: drag to resize, double-click to auto-fit. */
 function PaneDivider({ onDrag, onAuto }: { onDrag: (dx: number) => void; onAuto?: () => void }) {
+  const [hot, setHot] = useState(false);
   return (
     <div
-      style={F.divider}
+      style={{ ...F.divider, background: hot ? "rgba(11,87,208,0.30)" : "transparent" }}
+      onPointerEnter={() => setHot(true)}
+      onPointerLeave={() => setHot(false)}
       title="Drag to resize · double-click to fit"
       onDoubleClick={onAuto}
       onPointerDown={(e) => {
@@ -703,11 +753,26 @@ function PaneDivider({ onDrag, onAuto }: { onDrag: (dx: number) => void; onAuto?
   );
 }
 
-function SideRow({ label, count, on, onClick, tint, dim }: {
+function SideRow({ label, count, on, onClick, tint, dim, indent, dragStart, onDropPayload }: {
   label: string; count: number; on: boolean; onClick: () => void; tint: string; dim?: boolean;
+  indent?: boolean;
+  /** Makes the folder row itself draggable (campaigns → groups). */
+  dragStart?: (e: React.DragEvent) => void;
+  /** Makes the folder a drop target for run/asset/campaign payloads. */
+  onDropPayload?: (p: DragPayload) => void;
 }) {
+  const [hot, setHot] = useState(false);
   return (
-    <button type="button" onClick={onClick} style={{ ...F.sideRow, ...(on ? F.sideRowOn : null), opacity: dim ? 0.62 : 1 }}>
+    <button
+      type="button"
+      onClick={onClick}
+      draggable={!!dragStart}
+      onDragStart={dragStart}
+      onDragOver={onDropPayload ? (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; setHot(true); } : undefined}
+      onDragLeave={onDropPayload ? () => setHot(false) : undefined}
+      onDrop={onDropPayload ? (e) => { e.preventDefault(); setHot(false); const p = readDrag(e); if (p) onDropPayload(p); } : undefined}
+      style={{ ...F.sideRow, ...(on ? F.sideRowOn : null), ...(hot ? F.sideRowHot : null), opacity: dim ? 0.62 : 1, ...(indent ? { paddingLeft: 20 } : null) }}
+    >
       <FolderGlyph c={on ? T.blue : tint} />
       <span style={{ ...F.sideLabel, color: on ? T.blue : T.ink }}>{label}</span>
       <span style={F.sideCount}>{count}</span>
@@ -715,7 +780,23 @@ function SideRow({ label, count, on, onClick, tint, dim }: {
   );
 }
 
-function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLabel, dl, reviewId, createForm, angles, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onArchiveRun, onDeleteRun, onRunCampaignNow, onPatchSchedule, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard, onImportPlan }: {
+/** A group header in the campaigns section — a drop target for campaigns. */
+function GroupHead({ label, onDropCampaign, action }: { label: string; onDropCampaign: (campId: number) => void; action?: React.ReactNode }) {
+  const [hot, setHot] = useState(false);
+  return (
+    <div
+      style={{ ...F.sideHead, marginTop: 14, display: "flex", alignItems: "center", gap: 6, borderRadius: 6, ...(hot ? F.sideRowHot : null) }}
+      onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; setHot(true); }}
+      onDragLeave={() => setHot(false)}
+      onDrop={(e) => { e.preventDefault(); setHot(false); const p = readDrag(e); if (p && p.t === "camp") onDropCampaign(p.id); }}
+    >
+      <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
+      {action}
+    </div>
+  );
+}
+
+function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLabel, dl, reviewId, createForm, angles, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onMoveAsset, onMakeCampaign, onArchiveRun, onDeleteRun, onRunCampaignNow, onPatchSchedule, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard, onImportPlan }: {
   loaded: boolean;
   connErr: boolean;
   runs: RunRow[];
@@ -732,6 +813,8 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
   onCopyPost: (r: RunRow) => void;
   onRerunRun: (r: RunRow) => void;
   onMoveRun: (r: RunRow, scheduleId: number | null) => void;
+  onMoveAsset: (a: AssetRow, scheduleId: number | null) => void;
+  onMakeCampaign: (r: RunRow) => void;
   onArchiveRun: (r: RunRow, archived: boolean) => void;
   onDeleteRun: (r: RunRow) => void;
   onRunCampaignNow: (s: ScheduleRow) => void;
@@ -762,7 +845,7 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
   });
   const [prevW, setPrevW] = useState<number>(() => {
     const v = Number(localStorage.getItem("smbx_mgr_prevw"));
-    return Number.isFinite(v) && v >= 280 ? clampW(v, 280, 620) : 400;
+    return Number.isFinite(v) && v >= 280 ? clampW(v, 280, 680) : 400;
   });
   useEffect(() => {
     if (sideW > 0) localStorage.setItem("smbx_mgr_sidew", String(sideW));
@@ -850,6 +933,46 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
   const selAsset = assetPool.find((a) => a.id === selAssetId) ?? null;
   const selCamp = sel.kind === "camp" ? schedules.find((s) => s.id === sel.id) ?? null : null;
 
+  // ── drag & drop routing ──
+  const [pendingGroups, setPendingGroups] = useState<string[]>([]);
+  const groupNames = useMemo(() => {
+    const names = new Set<string>();
+    for (const s of schedules) if (!s.archived && s.folder) names.add(s.folder);
+    for (const g of pendingGroups) names.add(g);
+    return [...names].sort((a, b) => a.localeCompare(b));
+  }, [schedules, pendingGroups]);
+
+  const dropOnCampaign = (sid: number) => (p: DragPayload) => {
+    if (p.t === "run") {
+      const r = runs.find((x) => x.id === p.id);
+      if (r && r.schedule_id !== sid) onMoveRun(r, sid);
+    } else if (p.t === "asset") {
+      const a = assets.find((x) => x.id === p.id);
+      if (a && a.kind === "collateral" && a.schedule_id !== sid) onMoveAsset(a, sid);
+    }
+  };
+  const dropUnfile = (p: DragPayload) => {
+    if (p.t === "run") {
+      const r = runs.find((x) => x.id === p.id);
+      if (r && r.schedule_id != null) onMoveRun(r, null);
+    } else if (p.t === "asset") {
+      const a = assets.find((x) => x.id === p.id);
+      if (a && a.kind === "collateral" && a.schedule_id != null) onMoveAsset(a, null);
+    }
+  };
+  const dropOnArchived = (p: DragPayload) => {
+    if (p.t === "run") {
+      const r = runs.find((x) => x.id === p.id);
+      if (r && !r.archived) onArchiveRun(r, true);
+    }
+  };
+  const dropCampaignToGroup = (folder: string | null) => (campId: number) => {
+    const s = schedules.find((x) => x.id === campId);
+    if (s && (s.folder ?? null) !== folder) {
+      onPatchSchedule(s, { folder }, folder ? `Moved “${s.name}” into “${folder}”.` : `Moved “${s.name}” out of its group.`);
+    }
+  };
+
   return (
     <div style={F.wrap}>
       {/* folders */}
@@ -860,10 +983,28 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
         <button type="button" style={F.importBtn} onClick={onImportPlan}>Import a plan</button>
         <div style={F.sideHead}>Library</div>
         <SideRow label="All research" count={activeRuns.length} on={sel.kind === "all"} onClick={() => setSel({ kind: "all" })} tint="#6E9BE0" />
-        <SideRow label="One-off runs" count={oneoffs.length} on={sel.kind === "oneoff"} onClick={() => setSel({ kind: "oneoff" })} tint="#A8AEB8" />
-        <SideRow label="Archived" count={archivedRuns.length} on={sel.kind === "archived"} onClick={() => setSel({ kind: "archived" })} tint="#C9CDD3" />
-        {schedules.some((s) => !s.archived) && <div style={{ ...F.sideHead, marginTop: 14 }}>Campaigns</div>}
-        {schedules.filter((s) => !s.archived).map((s) => (
+        <SideRow label="One-off runs" count={oneoffs.length} on={sel.kind === "oneoff"} onClick={() => setSel({ kind: "oneoff" })} tint="#A8AEB8" onDropPayload={dropUnfile} />
+        <SideRow label="Archived" count={archivedRuns.length} on={sel.kind === "archived"} onClick={() => setSel({ kind: "archived" })} tint="#C9CDD3" onDropPayload={dropOnArchived} />
+        {(schedules.some((s) => !s.archived) || groupNames.length > 0) && (
+          <GroupHead
+            label="Campaigns"
+            onDropCampaign={dropCampaignToGroup(null)}
+            action={
+              <button
+                type="button"
+                style={F.groupAdd}
+                title="New group — then drag campaigns into it"
+                onClick={() => {
+                  const name = window.prompt("Name the campaign group:")?.trim();
+                  if (name) setPendingGroups((g) => (g.includes(name) ? g : [...g, name]));
+                }}
+              >
+                + Group
+              </button>
+            }
+          />
+        )}
+        {schedules.filter((s) => !s.archived && !s.folder).map((s) => (
           <SideRow
             key={s.id}
             label={s.name}
@@ -872,8 +1013,33 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
             onClick={() => { setSel({ kind: "camp", id: s.id }); setInsp("camp"); }}
             tint={s.active ? "#63B98F" : "#A8AEB8"}
             dim={!s.active}
+            dragStart={(e) => setDrag(e, "camp", s.id)}
+            onDropPayload={dropOnCampaign(s.id)}
           />
         ))}
+        {groupNames.map((g) => {
+          const members = schedules.filter((s) => !s.archived && s.folder === g);
+          return (
+            <Fragment key={g}>
+              <GroupHead label={g} onDropCampaign={dropCampaignToGroup(g)} />
+              {members.length === 0 && <div style={F.groupEmpty}>Drag campaigns here</div>}
+              {members.map((s) => (
+                <SideRow
+                  key={s.id}
+                  label={s.name}
+                  count={(byCamp.get(s.id) ?? []).length}
+                  on={sel.kind === "camp" && sel.id === s.id}
+                  onClick={() => { setSel({ kind: "camp", id: s.id }); setInsp("camp"); }}
+                  tint={s.active ? "#63B98F" : "#A8AEB8"}
+                  dim={!s.active}
+                  indent
+                  dragStart={(e) => setDrag(e, "camp", s.id)}
+                  onDropPayload={dropOnCampaign(s.id)}
+                />
+              ))}
+            </Fragment>
+          );
+        })}
         {schedules.some((s) => s.archived) && <div style={{ ...F.sideHead, marginTop: 14 }}>Archived campaigns</div>}
         {schedules.filter((s) => s.archived).map((s) => (
           <SideRow
@@ -888,7 +1054,7 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
         ))}
         <div style={{ ...F.sideHead, marginTop: 14 }}>Assets</div>
         <SideRow label="Media" count={photos.length} on={sel.kind === "media"} onClick={() => setSel({ kind: "media" })} tint="#D9A441" />
-        <SideRow label="Collateral" count={collateral.length} on={sel.kind === "collateral"} onClick={() => setSel({ kind: "collateral" })} tint="#8B7BD8" />
+        <SideRow label="Collateral" count={collateral.length} on={sel.kind === "collateral"} onClick={() => setSel({ kind: "collateral" })} tint="#8B7BD8" onDropPayload={dropUnfile} />
       </div>
 
       <PaneDivider onDrag={(dx) => setSideW((w) => clampW((w > 0 ? w : effSideW) + dx, 150, 380))} onAuto={autoFitSide} />
@@ -948,7 +1114,7 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
             ? assetItems.map((a) => {
                 const on = a.id === selAssetId;
                 return (
-                  <button key={a.id} type="button" onClick={() => { setSelAssetId(a.id); setInsp("item"); }} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
+                  <button key={a.id} type="button" draggable onDragStart={(e) => setDrag(e, "asset", a.id)} onClick={() => { setSelAssetId(a.id); setInsp("item"); }} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
                     <span style={F.rowIcon}><DocGlyph c={on ? T.blue : T.muted} /></span>
                     <span style={F.rowName}>{a.label}</span>
                     <span style={F.rowCol}>{(a.mime.split("/")[1] ?? a.mime).toUpperCase()}{a.width && a.height ? ` · ${a.width}×${a.height}` : ""}</span>
@@ -962,7 +1128,7 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
                 const failed = r.status === "failed";
                 const running = r.status === "queued" || r.status === "running";
                 return (
-                  <button key={r.id} type="button" onClick={() => { setSelRunId(r.id); setSelAssetId(null); setInsp("item"); }} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
+                  <button key={r.id} type="button" draggable onDragStart={(e) => setDrag(e, "run", r.id)} onClick={() => { setSelRunId(r.id); setSelAssetId(null); setInsp("item"); }} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
                     <span style={F.rowIcon}>{running ? <Spinner /> : failed ? <span style={{ color: "#B3261E", fontWeight: 700 }}>!</span> : <DocGlyph c={on ? T.blue : T.muted} />}</span>
                     <span style={F.rowName}>{r.report_title || r.topic}</span>
                     <span style={F.rowCol}>{angleLabel(r.post_angle) ?? typeLabel(r.research_type)}</span>
@@ -980,7 +1146,7 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
           {!assetMode && campAssets.map((a) => {
             const on = a.id === selAssetId && selRunId == null;
             return (
-              <button key={`ca-${a.id}`} type="button" onClick={() => { setSelAssetId(a.id); setSelRunId(null); setInsp("item"); }} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
+              <button key={`ca-${a.id}`} type="button" draggable onDragStart={(e) => setDrag(e, "asset", a.id)} onClick={() => { setSelAssetId(a.id); setSelRunId(null); setInsp("item"); }} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
                 <span style={F.rowIcon}><DocGlyph c={on ? T.blue : "#8B7BD8"} /></span>
                 <span style={F.rowName}>{a.label}</span>
                 <span style={F.rowCol}>{(a.mime.split("/")[1] ?? a.mime).toUpperCase()}</span>
@@ -992,7 +1158,7 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
         </div>
       </div>
 
-      <PaneDivider onDrag={(dx) => setPrevW((w) => clampW(w - dx, 280, 620))} onAuto={() => setPrevW(400)} />
+      <PaneDivider onDrag={(dx) => setPrevW((w) => clampW(w - dx, 280, 680))} onAuto={() => setPrevW(400)} />
 
       {/* inspector — the create form, the campaign, or the selected item */}
       <div style={{ ...F.prev, width: prevW, minWidth: 0 }}>
@@ -1028,6 +1194,7 @@ function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLab
             onCopyPost={() => onCopyPost(selRun)}
             onRerun={() => onRerunRun(selRun)}
             onMove={(sid) => onMoveRun(selRun, sid)}
+            onMakeCampaign={() => onMakeCampaign(selRun)}
             onArchive={(v) => onArchiveRun(selRun, v)}
             onDelete={() => onDeleteRun(selRun)}
           />
@@ -1051,7 +1218,7 @@ function DocRow({ label, onClick, busy, muted }: { label: string; onClick: () =>
   );
 }
 
-function RunPreview({ run, schedules, typeLabel, angleLabel, dl, reviewOpen, onReview, onGrab, onCopyPost, onRerun, onMove, onArchive, onDelete }: {
+function RunPreview({ run, schedules, typeLabel, angleLabel, dl, reviewOpen, onReview, onGrab, onCopyPost, onRerun, onMove, onMakeCampaign, onArchive, onDelete }: {
   run: RunRow;
   schedules: ScheduleRow[];
   typeLabel: (k: string) => string;
@@ -1063,6 +1230,7 @@ function RunPreview({ run, schedules, typeLabel, angleLabel, dl, reviewOpen, onR
   onCopyPost: () => void;
   onRerun: () => void;
   onMove: (scheduleId: number | null) => void;
+  onMakeCampaign: () => void;
   onArchive: (archived: boolean) => void;
   onDelete: () => void;
 }) {
@@ -1107,6 +1275,11 @@ function RunPreview({ run, schedules, typeLabel, angleLabel, dl, reviewOpen, onR
       <div style={F.prevLabel}>Manage</div>
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
         {!running && <button type="button" style={F.smallBtn} onClick={onRerun}>Run again</button>}
+        {!running && run.schedule_id == null && (
+          <button type="button" style={F.smallBtn} onClick={onMakeCampaign} title="Turn this run into a recurring campaign — it becomes the campaign's first run">
+            Make a campaign
+          </button>
+        )}
         {!running && (
           <button type="button" style={F.smallBtn} onClick={() => onArchive(!run.archived)}>
             {run.archived ? "Unarchive" : "Archive"}
@@ -1199,8 +1372,9 @@ function CampaignPreview({ s, count, angles, onSave, onRunNow, onToggle, onArchi
 function AssetPreview({ asset, campName, onDownload, onDelete }: { asset: AssetRow; campName?: string | null; onDownload: () => void; onDelete: () => void }) {
   const [src, setSrc] = useState<string | null>(null);
   const isImage = asset.mime.startsWith("image/");
+  const isPdf = asset.mime === "application/pdf";
   useEffect(() => {
-    if (!isImage) { setSrc(null); return; }
+    if (!isImage && !isPdf) { setSrc(null); return; }
     let url: string | null = null;
     let alive = true;
     setSrc(null);
@@ -1209,7 +1383,7 @@ function AssetPreview({ asset, campName, onDownload, onDelete }: { asset: AssetR
       .then((b) => { if (alive) { url = URL.createObjectURL(b); setSrc(url); } })
       .catch(() => { if (alive) setSrc(null); });
     return () => { alive = false; if (url) URL.revokeObjectURL(url); };
-  }, [asset.id, isImage]);
+  }, [asset.id, isImage, isPdf]);
 
   return (
     <div style={F.prevInner}>
@@ -1219,11 +1393,21 @@ function AssetPreview({ asset, campName, onDownload, onDelete }: { asset: AssetR
         {asset.width && asset.height ? ` · ${asset.width}×${asset.height}` : ""} · {fmtBytes(asset.bytes)} · {shortDate(asset.created_at)}
         {campName ? ` · ${campName}` : ""}
       </div>
-      {isImage
-        ? (src
-            ? <img src={src} alt={asset.label} style={F.prevImg} />
-            : <div style={{ ...F.actEmpty, marginTop: 12 }}>Loading preview…</div>)
-        : <div style={{ ...F.actEmpty, marginTop: 12 }}>PDF document — use Download to open it.</div>}
+      {isImage ? (
+        src
+          ? <img src={src} alt={asset.label} style={F.prevImg} />
+          : <div style={{ ...F.actEmpty, marginTop: 12 }}>Loading preview…</div>
+      ) : isPdf ? (
+        src
+          ? (
+            <object data={src} type="application/pdf" style={F.prevPdf}>
+              <div style={{ ...F.actEmpty, margin: 12 }}>This browser can’t show PDFs inline — use Download.</div>
+            </object>
+          )
+          : <div style={{ ...F.actEmpty, marginTop: 12 }}>Loading preview…</div>
+      ) : (
+        <div style={{ ...F.actEmpty, marginTop: 12 }}>No inline preview for this file — use Download.</div>
+      )}
       <div style={F.prevLabel}>Manage</div>
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
         <button type="button" style={F.smallBtn} onClick={onDownload}>Download</button>
@@ -1662,6 +1846,9 @@ const F: Record<string, React.CSSProperties> = {
   sideHead: { fontSize: 11, fontWeight: 700, color: T.muted2, letterSpacing: "0.05em", textTransform: "uppercase", padding: "0 8px", marginBottom: 6 },
   sideRow: { display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", background: "transparent", border: "none", borderRadius: 8, padding: "7px 8px", cursor: "pointer", fontFamily: T.font },
   sideRowOn: { background: T.blueBg3 },
+  sideRowHot: { background: "#E3EEFF", boxShadow: `inset 0 0 0 1.5px ${T.blue}` },
+  groupAdd: { marginLeft: "auto", background: "transparent", border: "none", color: T.blue, fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: T.font, padding: "0 2px", letterSpacing: "0.02em", textTransform: "none" as const },
+  groupEmpty: { fontSize: 11.5, color: T.muted2, padding: "2px 8px 6px 20px" },
   sideLabel: { flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
   sideCount: { flex: "none", fontSize: 11.5, color: T.muted, fontWeight: 600 },
 
@@ -1706,6 +1893,7 @@ const F: Record<string, React.CSSProperties> = {
   smallBtn: { background: T.white, border: `1px solid ${T.border}`, borderRadius: 8, padding: "6px 11px", fontSize: 12, fontWeight: 600, color: T.blue, cursor: "pointer", fontFamily: T.font },
   moveSel: { marginTop: 8, height: 32, borderRadius: 8, border: `1px solid ${T.inputBd}`, background: T.white, padding: "0 8px", fontSize: 12.5, color: T.ink, fontFamily: T.font, maxWidth: "100%" },
   prevImg: { marginTop: 12, width: "100%", display: "block", borderRadius: 10, border: `1px solid ${T.border}`, boxShadow: T.shCard },
+  prevPdf: { marginTop: 12, width: "100%", height: 460, display: "block", border: `1px solid ${T.border}`, borderRadius: 10, background: "#fff" },
 };
 
 /* The canvas-app frame + slide-over sheets (absolute inside the frame —
