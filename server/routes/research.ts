@@ -251,8 +251,13 @@ async function saveCollateral(run: any, label: string, mime: string, data: Buffe
 async function loadCompleteRun(id: number, userId: number): Promise<ResearchRunRow | null> {
   const [run] = await sql`SELECT * FROM research_runs WHERE id = ${id} AND user_id = ${userId} AND status = 'complete'`;
   if (!run) return null;
-  // Review edits ride in feed_override; every artifact renders the edited feed.
-  if ((run as any).feed_override) (run as any).studio_feed = (run as any).feed_override;
+  // Review edits ride in feed_override; every artifact renders the edited
+  // feed. MERGE over the original (never replace): overrides saved before
+  // 2026-07-19 carried only {hooks, dataPoints}, and replacing wholesale
+  // stripped post/docPages/chart — this read-time merge heals those rows.
+  if ((run as any).feed_override) {
+    (run as any).studio_feed = { ...((run as any).studio_feed ?? {}), ...((run as any).feed_override ?? {}) };
+  }
   return run as any;
 }
 
@@ -291,9 +296,18 @@ researchRouter.patch('/research/runs/:id/feed', async (req, res) => {
     : [];
   if (!hooks.length) return res.status(400).json({ error: 'Keep at least one hook' });
   try {
+    // MERGE the edits over the full generated feed — storing only
+    // {hooks, dataPoints} used to wipe post/docPages/chart out of the
+    // effective feed and broke every artifact render after a review save.
+    const [existing] = await sql`
+      SELECT studio_feed, feed_override FROM research_runs
+       WHERE id = ${id} AND user_id = ${userId} AND status = 'complete'`;
+    if (!existing) return res.status(404).json({ error: 'Run not found' });
+    const base = { ...((existing as any).studio_feed ?? {}), ...((existing as any).feed_override ?? {}) };
+    const merged = { ...base, hooks, dataPoints };
     const [row] = await sql`
       UPDATE research_runs
-         SET feed_override = ${sql.json({ hooks, dataPoints })}::jsonb, review_status = 'draft'
+         SET feed_override = ${sql.json(merged)}::jsonb, review_status = 'draft'
        WHERE id = ${id} AND user_id = ${userId} AND status = 'complete'
        RETURNING id`;
     if (!row) return res.status(404).json({ error: 'Run not found' });
@@ -336,7 +350,7 @@ researchRouter.get('/research/runs/:id/pdf', async (req, res) => {
     return res.send(pdf);
   } catch (err: any) {
     console.error('[research] pdf render failed:', err.message);
-    return res.status(500).json({ error: 'PDF render failed' });
+    return res.status(500).json({ error: `PDF render failed — ${err?.message || 'unknown error'}` });
   }
 });
 
@@ -356,7 +370,7 @@ researchRouter.get('/research/runs/:id/card.png', async (req, res) => {
     return res.send(png);
   } catch (err: any) {
     console.error('[research] card render failed:', err.message);
-    return res.status(500).json({ error: 'Card render failed' });
+    return res.status(500).json({ error: `Card render failed — ${err?.message || 'unknown error'}` });
   }
 });
 
@@ -376,7 +390,7 @@ researchRouter.get('/research/runs/:id/linkedin.pdf', async (req, res) => {
     return res.send(pdf);
   } catch (err: any) {
     console.error('[research] linkedin pdf render failed:', err.message);
-    return res.status(500).json({ error: 'LinkedIn PDF render failed' });
+    return res.status(500).json({ error: `LinkedIn PDF render failed — ${err?.message || 'unknown error'}` });
   }
 });
 
