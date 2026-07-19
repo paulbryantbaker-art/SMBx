@@ -1234,7 +1234,9 @@
   box-shadow: 0 1px 2px rgba(20, 24, 28, 0.04), 0 4px 12px rgba(20, 24, 28, 0.05);
 }
 .pd-fndband img {
-  width: 100%; height: clamp(320px, 36vw, 440px); object-fit: cover; object-position: 50% 18%;
+  /* Headshot (Paul, 2026-07-18 — replaced the Times Square walking shot);
+     24% matches the studio focal for this photo so the face stays framed. */
+  width: 100%; height: clamp(320px, 36vw, 440px); object-fit: cover; object-position: 50% 24%;
   border-radius: 12px; display: block;
 }
 .pd-fndband .fname { margin-top: 26px; font-size: 17px; font-weight: 800; color: var(--pd-ink); }

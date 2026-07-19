@@ -163,6 +163,10 @@ export default function StudioResearch({ user }: { user: User | null }) {
   const [reviewId, setReviewId] = useState<number | null>(null); // review sheet
   const [sheet, setSheet] = useState<null | "collateral">(null); // composer sheet
 
+  // When a load fails (a deploy restarting the server, a network blip) the
+  // manager must SAY so and keep retrying — a silently empty library reads
+  // as "nothing is happening" even while a run is executing server-side.
+  const [connErr, setConnErr] = useState(false);
   const refresh = useCallback(async () => {
     try {
       const [r, s, u, a] = await Promise.all([
@@ -175,8 +179,9 @@ export default function StudioResearch({ user }: { user: User | null }) {
       setSchedules(s.schedules ?? []);
       setUsage(u);
       setAssets(a.assets ?? []);
+      setConnErr(false);
     } catch {
-      /* transient — next poll retries */
+      setConnErr(true); // banner + fast retry below
     } finally {
       setLoaded(true);
     }
@@ -187,15 +192,15 @@ export default function StudioResearch({ user }: { user: User | null }) {
     void refresh();
   }, [refresh]);
 
-  // Poll while anything is in flight.
+  // Always-on poll: fast while a run is in flight or the last load failed,
+  // slow but alive when idle (so the library can never go permanently stale).
   const inFlight = runs.some((r) => r.status === "queued" || r.status === "running");
   const refreshRef = useRef(refresh);
   refreshRef.current = refresh;
   useEffect(() => {
-    if (!inFlight) return;
-    const t = setInterval(() => refreshRef.current(), 5000);
+    const t = setInterval(() => refreshRef.current(), inFlight || connErr ? 5000 : 30000);
     return () => clearInterval(t);
-  }, [inFlight]);
+  }, [inFlight, connErr]);
 
   const typeLabel = useMemo(() => {
     const m = new Map((catalog?.types ?? []).map((t) => [t.key, t.label]));
@@ -224,7 +229,13 @@ export default function StudioResearch({ user }: { user: User | null }) {
           method: "POST",
           body: JSON.stringify({ name: campName.trim(), researchType: typeKey, topic: topic.trim(), depth, outputFormat: output, postAngle: angle, cadence, runNow }),
         });
-        setNote({ kind: "ok", text: runNow ? "Campaign created — the first run is going now." : "Campaign created." });
+        // Be unmistakable about whether anything is actually running.
+        setNote({
+          kind: "ok",
+          text: runNow
+            ? "Campaign created — the first run is starting now. Its live trail appears in the library."
+            : `Campaign created — NOTHING runs right now. The first run fires ${cadence === "monthly" ? "on the 1st, 13:00 UTC" : "Sunday night"}; tick “Run the first one now” to start one immediately.`,
+        });
         setCampName("");
         setAsCampaign(false);
       } else {
@@ -232,7 +243,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
           method: "POST",
           body: JSON.stringify({ researchType: typeKey, topic: topic.trim(), depth, outputFormat: output, postAngle: angle }),
         });
-        setNote({ kind: "ok", text: "Run started — reports land below when done." });
+        setNote({ kind: "ok", text: "Run started — its live trail appears in the inspector in a few seconds." });
       }
       setTopic("");
       void refresh();
@@ -312,6 +323,20 @@ export default function StudioResearch({ user }: { user: User | null }) {
       setNote({ kind: "err", text: e?.message || "Download failed." });
     }
   }, []);
+
+  /** Fire a campaign immediately, outside its cadence ("Run now"). */
+  const runCampaignNow = useCallback(async (s: ScheduleRow) => {
+    try {
+      await api("/research/runs", {
+        method: "POST",
+        body: JSON.stringify({ researchType: s.research_type, topic: s.topic, depth: s.depth, outputFormat: s.output_format, postAngle: s.post_angle ?? "auto", scheduleId: s.id }),
+      });
+      setNote({ kind: "ok", text: `“${s.name}” is running now — the live trail is in the inspector.` });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Couldn’t start the run." });
+    }
+  }, [refresh]);
 
   /** One-click restart of a failed (or any) run — same knobs, new run. */
   const rerunRun = useCallback(async (r: RunRow) => {
@@ -490,6 +515,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
     <div style={A.frame}>
       <Library
         loaded={loaded}
+        connErr={connErr}
         runs={runs}
         schedules={schedules}
         assets={assets}
@@ -505,6 +531,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
         onMoveRun={moveRun}
         onArchiveRun={archiveRun}
         onDeleteRun={deleteRun}
+        onRunCampaignNow={runCampaignNow}
         onToggleSchedule={toggleSchedule}
         onDeleteSchedule={deleteSchedule}
         onDeleteAsset={deleteAsset}
@@ -605,8 +632,9 @@ function SideRow({ label, count, on, onClick, tint, dim }: {
   );
 }
 
-function Library({ loaded, runs, schedules, assets, typeLabel, angleLabel, dl, reviewId, createForm, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onArchiveRun, onDeleteRun, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard }: {
+function Library({ loaded, connErr, runs, schedules, assets, typeLabel, angleLabel, dl, reviewId, createForm, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onArchiveRun, onDeleteRun, onRunCampaignNow, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard }: {
   loaded: boolean;
+  connErr: boolean;
   runs: RunRow[];
   schedules: ScheduleRow[];
   assets: AssetRow[];
@@ -622,6 +650,7 @@ function Library({ loaded, runs, schedules, assets, typeLabel, angleLabel, dl, r
   onMoveRun: (r: RunRow, scheduleId: number | null) => void;
   onArchiveRun: (r: RunRow, archived: boolean) => void;
   onDeleteRun: (r: RunRow) => void;
+  onRunCampaignNow: (s: ScheduleRow) => void;
   onToggleSchedule: (s: ScheduleRow) => void;
   onDeleteSchedule: (s: ScheduleRow) => void;
   onDeleteAsset: (a: AssetRow) => void;
@@ -726,6 +755,9 @@ function Library({ loaded, runs, schedules, assets, typeLabel, angleLabel, dl, r
 
       {/* file list */}
       <div style={F.main}>
+        {connErr && (
+          <div style={F.connBar}>Can’t reach the server right now — retrying every few seconds. Runs in flight keep executing server-side.</div>
+        )}
         {selCamp && (
           <div style={F.campBar}>
             <div style={{ flex: 1, minWidth: 0 }}>
@@ -735,6 +767,7 @@ function Library({ loaded, runs, schedules, assets, typeLabel, angleLabel, dl, r
                 {selCamp.active && selCamp.next_run_at ? ` · next ${new Date(selCamp.next_run_at).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}` : ""}
               </div>
             </div>
+            <button type="button" style={{ ...R.tinyBtn, background: T.blue, color: "#fff", borderColor: T.blue, fontWeight: 700 }} onClick={() => onRunCampaignNow(selCamp)}>Run now</button>
             <button type="button" style={R.tinyBtn} onClick={() => onToggleSchedule(selCamp)}>{selCamp.active ? "Pause" : "Resume"}</button>
             <button type="button" style={{ ...R.tinyBtn, color: T.muted }} onClick={() => onDeleteSchedule(selCamp)}>Delete</button>
           </div>
@@ -1195,7 +1228,8 @@ const R: Record<string, React.CSSProperties> = {
 const F: Record<string, React.CSSProperties> = {
   wrap: { display: "flex", alignItems: "stretch", flex: 1, minHeight: 0, background: T.white, border: `1px solid ${T.border}`, borderRadius: 16, boxShadow: T.shCard, overflow: "hidden" },
 
-  side: { width: 188, flex: "none", background: T.surface, borderRight: `1px solid ${T.border}`, padding: "12px 8px", overflowY: "auto" },
+  side: { width: 176, flex: "none", background: T.surface, borderRight: `1px solid ${T.border}`, padding: "12px 8px", overflowY: "auto" },
+  connBar: { flex: "none", padding: "7px 12px", background: "#FDF1E4", borderBottom: "1px solid #EBD7BC", color: "#8A5A1E", fontSize: 12, fontWeight: 600, lineHeight: 1.45 },
   sideHead: { fontSize: 11, fontWeight: 700, color: T.muted2, letterSpacing: "0.05em", textTransform: "uppercase", padding: "0 8px", marginBottom: 6 },
   sideRow: { display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", background: "transparent", border: "none", borderRadius: 8, padding: "7px 8px", cursor: "pointer", fontFamily: T.font },
   sideRowOn: { background: T.blueBg3 },
@@ -1221,7 +1255,8 @@ const F: Record<string, React.CSSProperties> = {
   rowCol: { width: 96, flex: "none", fontSize: 11.5, color: T.muted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
   emptyList: { padding: "18px 12px", fontSize: 12.5, color: T.muted },
 
-  prev: { width: 400, flex: "none", overflowY: "auto", background: T.white },
+  // Responsive: gives the list room on narrow windows instead of clipping.
+  prev: { width: "min(400px, 38%)", minWidth: 300, flex: "none", overflowY: "auto", background: T.white },
   prevInner: { display: "flex", flexDirection: "column", padding: "14px 14px 16px" },
   prevEmpty: { padding: 18, fontSize: 12.5, color: T.muted },
   prevTitle: { fontSize: 13.5, fontWeight: 700, color: T.ink, lineHeight: 1.35 },
