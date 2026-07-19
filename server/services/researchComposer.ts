@@ -20,6 +20,7 @@ import { readFileSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { newRenderPage } from './premiumPdfRenderer.js';
+import { listStudioAssets, getStudioAsset } from './studioAssets.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -51,6 +52,47 @@ try {
   const buf = readFileSync(path.resolve(__dirname, '../../client/public/logo-green-x-dark.png'));
   DARK_LOGO_URI = `data:image/png;base64,${buf.toString('base64')}`;
 } catch { /* inversion fallback */ }
+
+/* ─── The author photo (Paul, 2026-07-19: "I need my headshot on anything
+ * produced") — pulled from the Studio media library so the focal point Paul
+ * sets there drives the crop everywhere. Prefers a photo labeled "headshot",
+ * falls back to any library photo, then to the shipped site portrait; a
+ * missing photo renders a clean initial disc, never an empty box. */
+export interface AuthorPhoto { dataUri: string; focalX: number; focalY: number }
+
+let authorCache: { at: number; photo: AuthorPhoto | null } | null = null;
+
+export async function authorPhoto(): Promise<AuthorPhoto | null> {
+  if (authorCache && Date.now() - authorCache.at < 60_000) return authorCache.photo;
+  let photo: AuthorPhoto | null = null;
+  try {
+    const assets = await listStudioAssets();
+    const pick = assets.find(a => a.kind !== 'collateral' && /headshot/i.test(a.label))
+      ?? assets.find(a => a.kind !== 'collateral' && a.mime.startsWith('image/'));
+    if (pick) {
+      const full = await getStudioAsset(pick.id);
+      if (full) photo = { dataUri: `data:${full.mime};base64,${full.data.toString('base64')}`, focalX: full.focal_x, focalY: full.focal_y };
+    }
+  } catch { /* library unavailable — fall through to the shipped portrait */ }
+  if (!photo) {
+    try {
+      const buf = readFileSync(path.resolve(__dirname, '../../client/public/founder-portrait.jpg'));
+      photo = { dataUri: `data:image/jpeg;base64,${buf.toString('base64')}`, focalX: 0.5, focalY: 0.24 };
+    } catch { photo = null; }
+  }
+  authorCache = { at: Date.now(), photo };
+  return photo;
+}
+
+/** Round byline face: the headshot cropped to a circle by its focal point;
+ *  falls back to an ink disc with the initials so the block never breaks. */
+function faceImg(sizePx: number, photo: AuthorPhoto | null, opts: { ring?: string } = {}): string {
+  const ring = opts.ring ? `border:3px solid ${opts.ring};` : '';
+  if (photo?.dataUri) {
+    return `<img src="${photo.dataUri}" alt="Paul Baker" style="width:${sizePx}px;height:${sizePx}px;border-radius:50%;object-fit:cover;object-position:${Math.round(photo.focalX * 100)}% ${Math.round(photo.focalY * 100)}%;display:block;flex:none;${ring}">`;
+  }
+  return `<div style="width:${sizePx}px;height:${sizePx}px;border-radius:50%;background:${INK};color:#fff;display:flex;align-items:center;justify-content:center;font-family:${SANS};font-weight:800;font-size:${Math.round(sizePx * 0.38)}px;flex:none;${ring}">PB</div>`;
+}
 
 /** The logo <img>, sized by height (aspect preserved); white=true applies the
  *  site's dark-surface inversion. Falls back to the text wordmark if the asset
@@ -136,6 +178,7 @@ export async function researchReportHtml(run: ResearchRunRow): Promise<string> {
   const body = await reportBodyHtml(run.report_md || '');
   const sources = Array.isArray(run.sources) ? run.sources : [];
   const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : null;
+  const photo = await authorPhoto();
 
   const sourcesHtml = sources.length
     ? `<section class="appendix">
@@ -146,16 +189,19 @@ export async function researchReportHtml(run: ResearchRunRow): Promise<string> {
       </section>`
     : '';
 
-  const feedHtml = feed
-    ? `<section class="appendix feed">
-        <div class="feedtag">STUDIO FEED · INTERNAL MARKETING MATERIAL</div>
-        ${Array.isArray(feed.hooks) && feed.hooks.length ? `<h2>Hooks</h2><ul>${feed.hooks.map((h: string) => `<li>${esc(h)}</li>`).join('')}</ul>` : ''}
-        ${Array.isArray(feed.dataPoints) && feed.dataPoints.length ? `<h2>Data points</h2>
-          <table><thead><tr><th>Stat</th><th>Source</th><th>Freshness</th><th>Confidence</th></tr></thead>
-          <tbody>${feed.dataPoints.map((p: any) => `<tr><td>${esc(p.stat)}</td><td>${esc(p.source)}</td><td>${esc(p.freshness)}</td><td>${esc(p.confidence)}</td></tr>`).join('')}</tbody></table>` : ''}
-        ${Array.isArray(feed.angles) && feed.angles.length ? `<h2>Post angles</h2>${feed.angles.map((a: any) => `<p class="angle"><b>${esc(a.title)}.</b> ${esc(a.body)}</p>`).join('')}` : ''}
-        ${feed.visual ? `<h2>Suggested visual</h2><p>${esc(feed.visual)}</p>` : ''}
-        ${Array.isArray(feed.accounts) && feed.accounts.length ? `<h2>Accounts to watch</h2><p>${feed.accounts.map((a: string) => esc(a)).join(' · ')}</p>` : ''}
+  // FINDINGS-FIRST (Paul, 2026-07-19: the report must lead with what we FOUND,
+  // as a document he can post). The cited data points open the document as a
+  // Key-findings block; the internal Studio-feed appendix (hooks/angles —
+  // marketing scaffolding) no longer ships in this PDF at all. It lives in the
+  // review sheet, where it belongs.
+  const points: any[] = feed && Array.isArray(feed.dataPoints) ? feed.dataPoints.slice(0, 4) : [];
+  const findingsHtml = points.length
+    ? `<section class="findings">
+        <div class="ftag">KEY FINDINGS</div>
+        ${points.map(p => `<div class="frow">
+          <div class="fstat">${esc(p.stat)}</div>
+          <div class="fsrc">${esc([p.source, p.freshness].filter(Boolean).join(' · '))}</div>
+        </div>`).join('')}
       </section>`
     : '';
 
@@ -193,24 +239,31 @@ export async function researchReportHtml(run: ResearchRunRow): Promise<string> {
     .srcs li { margin-bottom: 7px; }
     .srcs .st { font-weight: 600; color: ${INK}; }
     .srcs a { color: ${CORAL_DEEP}; text-decoration: none; word-break: break-all; }
-    .feed { background: ${CARD}; border-radius: 14px; padding: 22px 24px; }
-    .feedtag { font-family: ${MONO}; font-size: 7.5pt; letter-spacing: 0.1em; color: ${CORAL_DEEP}; font-weight: 600; margin-bottom: 4px; }
-    .feed ul { margin: 0 0 10px 1.2em; color: ${BODY}; font-size: 9.5pt; }
-    .feed table { width: 100%; border-collapse: collapse; font-size: 8.5pt; margin: 8px 0 14px; }
-    .feed th { text-align: left; font-family: ${MONO}; font-size: 7pt; letter-spacing: 0.07em; text-transform: uppercase; color: ${TERT}; padding: 5px 8px; border-bottom: 2px solid ${INK}; }
-    .feed td { padding: 6px 8px; border-bottom: 1px solid #E2E2E2; color: ${BODY}; vertical-align: top; }
-    .feed .angle { font-size: 9.5pt; color: ${BODY}; margin: 0 0 8px; }
-    .feed p { font-size: 9.5pt; color: ${BODY}; margin: 0 0 8px; }
+    .byline { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+    .byline .bn { font-size: 9.5pt; font-weight: 700; color: ${INK}; }
+    .byline .bt { font-size: 8.5pt; color: ${TERT}; }
+    .findings { margin-top: 22px; background: ${WARM}; border: 1px solid ${HAIR}; border-radius: 14px; padding: 18px 22px 8px; break-inside: avoid; }
+    .ftag { font-family: ${MONO}; font-size: 7.5pt; letter-spacing: 0.1em; color: ${BRASS}; font-weight: 600; margin-bottom: 10px; }
+    .frow { padding: 8px 0 10px; border-top: 1px solid ${HAIR}; }
+    .frow:first-of-type { border-top: none; padding-top: 0; }
+    .fstat { font-size: 11.5pt; font-weight: 700; color: ${INK}; letter-spacing: -0.008em; line-height: 1.35; }
+    .fsrc { margin-top: 3px; font-family: ${MONO}; font-size: 7.5pt; color: ${TERT}; letter-spacing: 0.03em; }
     .disc { margin-top: 26px; padding-top: 12px; border-top: 1px solid ${HAIR}; font-size: 7.5pt; color: ${TERT}; line-height: 1.5; }
   </style></head><body>
-    <div class="kicker"><span class="kl">${logoImg(24)}<span>RESEARCH BRIEF · ${esc(typeLabel.toUpperCase())}</span></span><span>${esc(fmtDate(run.completed_at))}</span></div>
+    <div class="kicker"><span class="kl">${logoImg(24)}<span>RESEARCH FINDINGS · ${esc(typeLabel.toUpperCase())}</span></span><span>${esc(fmtDate(run.completed_at))}</span></div>
     <div class="rule"></div>
     <h1 class="title">${esc(title)}</h1>
-    <div class="meta">${esc(typeLabel)} · ${esc(run.depth)} depth · ${Number(u.searches ?? 0)} searches · ${sources.length} sources</div>
+    <div class="byline">
+      ${faceImg(34, photo)}
+      <div>
+        <div class="bn">Paul Baker</div>
+        <div class="bt">smbX — buy-side corporate development · ${esc(typeLabel)} · ${sources.length} sources</div>
+      </div>
+    </div>
+    ${findingsHtml}
     <div class="doc">${body}</div>
     ${sourcesHtml}
-    ${feedHtml}
-    <div class="disc">Internal research prepared by smbX for its own use. Figures are as reported by the cited sources; items marked (directional) are estimates. This document is not investment, legal, tax, or accounting advice and contains no opinion of value on any specific company.</div>
+    <div class="disc">Research by smbX. Figures are as reported by the cited sources; items marked (directional) are estimates. This document is not investment, legal, tax, or accounting advice and contains no opinion of value on any specific company. · ${esc(run.depth)} depth · ${Number(u.searches ?? 0)} searches</div>
   </body></html>`;
 }
 
@@ -227,7 +280,7 @@ export async function renderResearchPdf(run: ResearchRunRow): Promise<Buffer> {
       displayHeaderFooter: true,
       headerTemplate: '<span></span>',
       footerTemplate: `<div style="width:100%;display:flex;justify-content:space-between;padding:0 0.85in;font-family:'IBM Plex Mono',monospace;font-size:7px;color:#9A9A9A;">
-        <span>smbX — internal research</span>
+        <span>smbX — research, with sources</span>
         <span><span class="pageNumber"></span> / <span class="totalPages"></span></span>
       </div>`,
     });
@@ -239,58 +292,93 @@ export async function renderResearchPdf(run: ResearchRunRow): Promise<Buffer> {
 
 /* ─── the LinkedIn card (1080×1350) ───────────────────────────────────── */
 
-export function researchCardHtml(run: ResearchRunRow, hookIndex = 0): string {
+export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: AuthorPhoto | null = null): string {
   const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
   const hooks: string[] = Array.isArray(feed.hooks) ? feed.hooks : [];
   const hook = hooks[Math.min(Math.max(hookIndex, 0), Math.max(hooks.length - 1, 0))] || run.report_title || run.topic;
-  const points: any[] = (Array.isArray(feed.dataPoints) ? feed.dataPoints : []).slice(0, 3);
+  const allPoints: any[] = (Array.isArray(feed.dataPoints) ? feed.dataPoints : []).slice(0, 3);
   const typeLabel = TYPE_LABELS[run.research_type] ?? 'Research';
 
+  // The story motif (2026-07-19, Paul: graphics that carry the story): the
+  // LEAD data point becomes the site's signature giant numeral — the number IS
+  // the graphic, brass-jewelled, always from a cited stat, never decoration.
+  const lead = allPoints[0] ?? null;
+  const leadNum = lead ? firstNumberToken(lead.stat) : '';
+  const heroStat = leadNum.length >= 2 ? lead : null;
+  const rest = heroStat ? allPoints.slice(1) : allPoints;
+  const heroCaption = heroStat ? String(heroStat.stat).replace(leadNum, '').replace(/^\s*[—–\-:,]\s*/, '').trim() : '';
+  const numSize = leadNum.length > 9 ? 128 : leadNum.length > 6 ? 158 : 190;
+
   // Long hooks step the display size down so nothing clips at 1080 wide.
-  const hookSize = hook.length > 150 ? 52 : hook.length > 100 ? 60 : hook.length > 60 ? 70 : 80;
+  const hookSize = hook.length > 150 ? 46 : hook.length > 100 ? 54 : hook.length > 60 ? 62 : 72;
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8">${FONTS}
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { width: 1080px; height: 1350px; font-family: ${SANS}; color: ${INK}; background: ${WARM}; overflow: hidden; position: relative; }
+    body { width: 1080px; height: 1350px; font-family: ${SANS}; color: ${INK}; background: ${WARM}; overflow: hidden; position: relative; font-variant-numeric: tabular-nums; }
     .wash { position: absolute; inset: 0; background:
-      radial-gradient(720px 560px at 88% -6%, rgba(22,98,76,0.075), transparent 62%),
-      radial-gradient(640px 520px at -8% 44%, rgba(255,116,140,0.055), transparent 60%); }
-    .frame { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 84px 88px 0; }
+      radial-gradient(820px 620px at 88% -6%, rgba(22,98,76,0.10), transparent 62%),
+      radial-gradient(700px 560px at -8% 52%, rgba(176,134,55,0.07), transparent 60%); }
+    .frame { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 76px 88px 0; }
     .tag { display: flex; justify-content: space-between; align-items: center; font-family: ${MONO};
       font-size: 21px; letter-spacing: 0.1em; color: ${TERT}; text-transform: uppercase; }
     .tag .tl { display: flex; align-items: center; gap: 22px; }
-    .hook { margin-top: 92px; font-family: ${DISPLAY}; font-size: ${hookSize}px; font-weight: 545; letter-spacing: -0.012em; line-height: 1.12; max-width: 880px; }
-    .rule { height: 6px; width: 96px; background: ${CORAL}; border-radius: 3px; margin: 56px 0 0; }
-    .pts { margin-top: 58px; display: flex; flex-direction: column; gap: 40px; }
-    .pt { display: flex; gap: 26px; align-items: flex-start; }
-    .dot { width: 14px; height: 14px; border-radius: 50%; background: ${CORAL}; margin-top: 14px; flex: none; }
-    .stat { font-size: 33px; font-weight: 700; letter-spacing: -0.012em; line-height: 1.28; color: ${INK}; }
-    .src { margin-top: 8px; font-family: ${MONO}; font-size: 18px; color: ${TERT}; letter-spacing: 0.02em; }
-    .foot { position: absolute; left: 0; right: 0; bottom: 0; height: 128px; background: ${DARK};
+    .hook { margin-top: 66px; font-family: ${DISPLAY}; font-size: ${hookSize}px; font-weight: 545; letter-spacing: -0.012em; line-height: 1.12; max-width: 900px; }
+    .rule { height: 6px; width: 96px; background: ${CORAL}; border-radius: 3px; margin: 44px 0 0; }
+    .hero { margin-top: 48px; }
+    .hero .num { font-weight: 800; font-size: ${numSize}px; letter-spacing: -0.03em; line-height: 0.98; color: ${INK}; }
+    .hero .bar { height: 8px; width: 132px; background: ${BRASS}; border-radius: 4px; margin: 26px 0 22px; }
+    .hero .cap { font-size: 33px; font-weight: 700; letter-spacing: -0.012em; line-height: 1.3; color: ${INK}; max-width: 880px; }
+    .hero .src { margin-top: 10px; font-family: ${MONO}; font-size: 18px; color: ${TERT}; letter-spacing: 0.02em; }
+    .pts { margin-top: 44px; display: flex; flex-direction: column; gap: 30px; }
+    .pt { display: flex; gap: 24px; align-items: flex-start; }
+    .dot { width: 13px; height: 13px; border-radius: 50%; background: ${CORAL}; margin-top: 12px; flex: none; }
+    .stat { font-size: 29px; font-weight: 700; letter-spacing: -0.012em; line-height: 1.3; color: ${INK}; }
+    .src { margin-top: 7px; font-family: ${MONO}; font-size: 17px; color: ${TERT}; letter-spacing: 0.02em; }
+    .foot { position: absolute; left: 0; right: 0; bottom: 0; height: 150px; background: ${DARK};
+      ${DARK_TEXTURE_URI ? `background-image: url('${DARK_TEXTURE_URI}'); background-size: cover; background-position: center;` : ''}
       display: flex; align-items: center; justify-content: space-between; padding: 0 88px; }
-    .foot .r { color: ${IVORY_SUB}; font-size: 19px; font-weight: 500; }
+    .foot::before { content: ''; position: absolute; inset: 0; background:
+      radial-gradient(700px 220px at 30% 0%, rgba(84,150,118,0.20), transparent 70%),
+      linear-gradient(180deg, rgba(15,26,22,0.30), rgba(13,23,19,0.45)); }
+    .who { position: relative; display: flex; align-items: center; gap: 22px; }
+    .who .wn { color: ${IVORY}; font-size: 24px; font-weight: 700; letter-spacing: -0.01em; }
+    .who .wt { margin-top: 4px; color: ${IVORY_SUB}; font-size: 18px; font-weight: 500; }
+    .foot .br { position: relative; }
   </style></head><body>
     <div class="wash"></div>
     <div class="frame">
       <div class="tag"><span class="tl">${logoImg(38)}<span>${esc(typeLabel.toUpperCase())}</span></span><span>${esc(fmtDate(run.completed_at))}</span></div>
       <div class="hook">${esc(hook)}</div>
       <div class="rule"></div>
-      ${points.length ? `<div class="pts">${points.map(p => `
+      ${heroStat ? `<div class="hero">
+        <div class="num">${esc(leadNum)}</div>
+        <div class="bar"></div>
+        ${heroCaption ? `<div class="cap">${esc(heroCaption)}</div>` : ''}
+        <div class="src">${esc([heroStat.source, heroStat.freshness].filter(Boolean).join(' · '))}</div>
+      </div>` : ''}
+      ${rest.length ? `<div class="pts">${rest.map(p => `
         <div class="pt"><div class="dot"></div><div>
           <div class="stat">${esc(p.stat)}</div>
           <div class="src">${esc([p.source, p.freshness].filter(Boolean).join(' · '))}</div>
         </div></div>`).join('')}</div>` : ''}
     </div>
     <div class="foot">
-      ${logoImg(52, { white: true })}
-      <div class="r">Buy-side corporate development</div>
+      <div class="who">
+        ${faceImg(96, photo, { ring: 'rgba(143,208,174,0.65)' })}
+        <div>
+          <div class="wn">Paul Baker</div>
+          <div class="wt">Buy-side corporate development</div>
+        </div>
+      </div>
+      <div class="br">${logoImg(50, { white: true })}</div>
     </div>
   </body></html>`;
 }
 
 export async function renderResearchCardPng(run: ResearchRunRow, hookIndex = 0): Promise<Buffer> {
-  const html = researchCardHtml(run, hookIndex);
+  const photo = await authorPhoto();
+  const html = researchCardHtml(run, hookIndex, photo);
   const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 2 });
@@ -359,7 +447,7 @@ function firstNumberToken(stat: string): string {
   return (m ? m[0] : '').trim();
 }
 
-export function linkedInDocHtml(run: ResearchRunRow): string {
+export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null = null): string {
   const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
   const typeLabel = TYPE_LABELS[run.research_type] ?? 'Research';
   const pages = docPages(run);
@@ -388,6 +476,13 @@ export function linkedInDocHtml(run: ResearchRunRow): string {
           <div class="cover-h" style="font-size:${size}px">${esc(h)}</div>
           <div class="rule"></div>
           ${p.body ? `<div class="cover-sub">${esc(p.body)}</div>` : ''}
+          <div class="cover-by">
+            ${faceImg(88, photo, { ring: 'rgba(22,98,76,0.35)' })}
+            <div>
+              <div class="cby-n">Paul Baker</div>
+              <div class="cby-t">Buy-side corporate development</div>
+            </div>
+          </div>
           <div class="swipe">SWIPE&nbsp;&nbsp;→</div>
         </div>
       </div>`);
@@ -455,12 +550,15 @@ export function linkedInDocHtml(run: ResearchRunRow): string {
     </script>`);
   }
 
-  // Closer — the site's dark textured band with the coral halo.
+  // Closer — the site's dark textured band; the FACE closes the doc (that's
+  // what makes a follow card work), brand beneath it.
   pageHtml.push(`<div class="pg dark">
     <div class="halo"></div>
     <div class="in closer">
+      <div class="close-face">${faceImg(148, photo, { ring: 'rgba(143,208,174,0.7)' })}</div>
+      <div class="close-name">Paul Baker</div>
       <div class="close-line">Research with sources, not takes.</div>
-      <div class="brand-big">${logoImg(110, { white: true })}</div>
+      <div class="brand-big">${logoImg(96, { white: true })}</div>
       <div class="close-sub">Buy-side corporate development for lower-middle-market acquirers.</div>
       <div class="follow">Follow for the next read.</div>
     </div>
@@ -486,7 +584,10 @@ export function linkedInDocHtml(run: ResearchRunRow): string {
     .cover-h { margin-top: 150px; font-family: ${DISPLAY}; font-weight: 545; letter-spacing: -0.012em; line-height: 1.12; max-width: 900px; }
     .cover-h + .rule { margin-top: 52px; }
     .cover-sub { margin-top: 40px; font-size: 34px; color: ${BODY}; line-height: 1.4; max-width: 820px; }
-    .swipe { position: absolute; right: 88px; bottom: 84px; font-family: ${MONO}; font-size: 22px; letter-spacing: 0.14em; color: ${CORAL_DEEP}; font-weight: 600; }
+    .cover-by { position: absolute; left: 88px; bottom: 76px; display: flex; align-items: center; gap: 24px; }
+    .cby-n { font-size: 26px; font-weight: 700; color: ${INK}; letter-spacing: -0.01em; }
+    .cby-t { margin-top: 4px; font-size: 19px; color: ${TERT}; font-weight: 500; }
+    .swipe { position: absolute; right: 88px; bottom: 96px; font-family: ${MONO}; font-size: 22px; letter-spacing: 0.14em; color: ${CORAL_DEEP}; font-weight: 600; }
     /* stat */
     .numeral { font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: ${INK}; }
     .stat-h { font-size: 40px; font-weight: 700; letter-spacing: -0.014em; line-height: 1.22; max-width: 880px; }
@@ -506,15 +607,18 @@ export function linkedInDocHtml(run: ResearchRunRow): string {
       radial-gradient(900px 500px at 50% -10%, rgba(22,98,76,0.28), transparent 65%),
       linear-gradient(180deg, rgba(20,19,18,0.25), rgba(20,20,20,0.55)); }
     .closer { justify-content: center; align-items: center; text-align: center; gap: 0; }
-    .close-line { font-family: ${DISPLAY}; font-size: 40px; font-weight: 545; color: ${IVORY}; letter-spacing: -0.01em; }
-    .brand-big { margin-top: 46px; display: flex; align-items: center; justify-content: center; }
-    .close-sub { margin-top: 30px; font-size: 30px; color: ${IVORY_SUB}; max-width: 760px; line-height: 1.45; }
-    .follow { margin-top: 64px; font-family: ${MONO}; font-size: 22px; letter-spacing: 0.12em; color: #8FD0AE; font-weight: 600; text-transform: uppercase; }
+    .close-face { display: flex; justify-content: center; }
+    .close-name { margin-top: 26px; font-size: 30px; font-weight: 700; color: ${IVORY}; letter-spacing: -0.01em; }
+    .close-line { margin-top: 14px; font-family: ${DISPLAY}; font-size: 40px; font-weight: 545; color: ${IVORY}; letter-spacing: -0.01em; }
+    .brand-big { margin-top: 42px; display: flex; align-items: center; justify-content: center; }
+    .close-sub { margin-top: 28px; font-size: 30px; color: ${IVORY_SUB}; max-width: 760px; line-height: 1.45; }
+    .follow { margin-top: 54px; font-family: ${MONO}; font-size: 22px; letter-spacing: 0.12em; color: #8FD0AE; font-weight: 600; text-transform: uppercase; }
   </style></head><body>${pageHtml.join('\n')}</body></html>`;
 }
 
 export async function renderLinkedInDocPdf(run: ResearchRunRow): Promise<Buffer> {
-  const html = linkedInDocHtml(run);
+  const photo = await authorPhoto();
+  const html = linkedInDocHtml(run, photo);
   const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 1 });
