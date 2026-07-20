@@ -461,10 +461,11 @@ export function researchPostText(run: ResearchRunRow): string {
 
 /* ─── the LinkedIn document post (swipeable 1080×1350 PDF) ─────────────── */
 
-interface DocPage { kind: string; heading?: string; body?: string; stat?: string; source?: string }
+interface DocPage { kind: string; heading?: string; body?: string; stat?: string; source?: string; artAssetId?: number }
 
-/** Normalize the synthesized deck; older runs fall back to hook + data points. */
-function docPages(run: ResearchRunRow): DocPage[] {
+/** Normalize the synthesized deck; older runs fall back to hook + data points.
+ *  Exported for the review sheet's page tiles (final rendered order). */
+export function docPages(run: ResearchRunRow): DocPage[] {
   const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
   const raw: any[] = Array.isArray(feed.docPages) ? feed.docPages : [];
   const KINDS = new Set(['cover', 'stat', 'story', 'takeaway']);
@@ -488,7 +489,21 @@ function docPages(run: ResearchRunRow): DocPage[] {
   // emitted — cover, light content, then takeaway(s), then the dark closer.
   const takeaways = pages.filter(p => p.kind === 'takeaway');
   const rest = pages.filter(p => p.kind !== 'takeaway');
-  return [...rest, ...takeaways];
+  const ordered = [...rest, ...takeaways];
+  // Per-page artwork (Paul, 2026-07-20: "drag and drop from the media list
+  // onto which page i want that image"): feed.pageArt maps FINAL page index
+  // → media asset id (null = none). The cover ignores it — feed.artAssetId
+  // governs the cover pick.
+  const pa = feed.pageArt && typeof feed.pageArt === 'object' ? feed.pageArt : null;
+  if (pa) {
+    return ordered.map((p, i) => {
+      const v = (pa as any)[String(i)];
+      if (p.kind === 'cover' || v === undefined || v === null) return p;
+      const aid = Number(v);
+      return Number.isInteger(aid) && aid > 0 ? { ...p, artAssetId: aid } : p;
+    });
+  }
+  return ordered;
 }
 
 /** Pull a short display numeral ("$4.2B", "38%", "1,900") off a stat sentence. */
@@ -532,7 +547,7 @@ export async function runArtwork(run: Pick<ResearchRunRow, 'id' | 'studio_feed'>
 }
 
 
-export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null = null, art: AuthorPhoto | null = null, brand: AuthorPhoto | null = null): string {
+export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null = null, art: AuthorPhoto | null = null, brand: AuthorPhoto | null = null, pageImgs: Record<number, AuthorPhoto> = {}): string {
   const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
   const typeLabel = TYPE_LABELS[run.research_type] ?? 'Research';
   const pages = docPages(run);
@@ -595,17 +610,22 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
       </div>`);
     } else if (p.kind === 'stat') {
       const numeral = String(p.stat ?? '').trim() || firstNumberToken(p.heading ?? '');
-      const numSize = numeral.length > 8 ? 120 : numeral.length > 5 ? 150 : 184;
+      const img = pageImgs[n - 1];
+      // With a dropped image the page splits — numbers left, image card
+      // right (the announcement grammar); without one it stays typographic.
+      const numSize = img ? (numeral.length > 8 ? 96 : 120) : (numeral.length > 8 ? 120 : numeral.length > 5 ? 150 : 184);
+      const body = `
+            <div class="numeral" style="font-size:${numSize}px">${esc(numeral)}</div>
+            <div class="brassbar"></div>
+            <div class="stat-h"${img ? ' style="font-size:34px"' : ''}>${esc(p.heading ?? '')}</div>
+            ${p.body ? `<div class="stat-b"${img ? ' style="font-size:25px"' : ''}>${esc(p.body)}</div>` : ''}`;
       pageHtml.push(`<div class="pg">
         <div class="wash"></div>
         <div class="in">
           ${kicker(n, total)}
-          <div class="grow">
-            <div class="numeral" style="font-size:${numSize}px">${esc(numeral)}</div>
-            <div class="brassbar"></div>
-            <div class="stat-h">${esc(p.heading ?? '')}</div>
-            ${p.body ? `<div class="stat-b">${esc(p.body)}</div>` : ''}
-          </div>
+          ${img
+            ? `<div class="split"><div class="split-l">${body}</div><div class="split-r"><img src="${img.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(img.focalX * 100)}% ${Math.round(img.focalY * 100)}%;display:block"></div></div>`
+            : `<div class="grow">${body}</div>`}
           ${p.source ? `<div class="src-line">${esc(p.source)}</div>` : ''}
         </div>
         ${pageFoot(n, total)}
@@ -637,15 +657,18 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
         </div>
       </div>`);
     } else { // story
+      const img = pageImgs[n - 1];
+      const body = `
+            <div class="story-h"${img ? ' style="font-size:46px"' : ''}>${esc(p.heading ?? '')}</div>
+            <div class="rule"></div>
+            ${p.body ? `<div class="story-b"${img ? ' style="font-size:27px"' : ''}>${esc(p.body)}</div>` : ''}`;
       pageHtml.push(`<div class="pg">
         <div class="wash"></div>
         <div class="in">
           ${kicker(n, total)}
-          <div class="grow">
-            <div class="story-h">${esc(p.heading ?? '')}</div>
-            <div class="rule"></div>
-            ${p.body ? `<div class="story-b">${esc(p.body)}</div>` : ''}
-          </div>
+          ${img
+            ? `<div class="split"><div class="split-l">${body}</div><div class="split-r"><img src="${img.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(img.focalX * 100)}% ${Math.round(img.focalY * 100)}%;display:block"></div></div>`
+            : `<div class="grow">${body}</div>`}
         </div>
         ${pageFoot(n, total)}
       </div>`);
@@ -714,6 +737,11 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     .kick .kl { display: flex; align-items: center; gap: 24px; }
     .rule { height: 6px; width: 96px; background: ${CORAL}; border-radius: 3px; }
     .grow { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 34px; }
+    /* per-page artwork split — text left, image card right */
+    .split { flex: 1; display: flex; align-items: center; gap: 46px; min-height: 0; }
+    .split-l { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 30px; }
+    .split-r { width: 380px; height: 660px; flex: none; border-radius: 24px; overflow: hidden;
+      background: #fff; box-shadow: 0 24px 60px rgba(20,24,28,0.18); }
     /* editorial graphics layer */
     .ghost { position: absolute; top: 34px; right: 52px; font-family: ${DISPLAY}; font-weight: 545; font-size: 320px;
       line-height: 1; color: rgba(20,24,28,0.055); letter-spacing: -0.03em; }
@@ -822,6 +850,23 @@ async function ensureRunArtwork(run: ResearchRunRow): Promise<AuthorPhoto | null
   return art;
 }
 
+/** Load the per-page dropped images (docPages final order) for a render.
+ *  Each id comes from feed.pageArt; a missing/broken asset just renders the
+ *  page without its image — never an error. */
+async function loadPageArt(run: ResearchRunRow): Promise<Record<number, AuthorPhoto>> {
+  const out: Record<number, AuthorPhoto> = {};
+  for (const [i, p] of docPages(run).entries()) {
+    if (!p.artAssetId) continue;
+    try {
+      const full = await getStudioAsset(p.artAssetId);
+      if (full && full.mime.startsWith('image/')) {
+        out[i] = { dataUri: `data:${full.mime};base64,${full.data.toString('base64')}`, focalX: full.focal_x, focalY: full.focal_y };
+      }
+    } catch { /* asset gone — render the page typographic */ }
+  }
+  return out;
+}
+
 /** The carousel COVER alone as a PNG — the review sheet's cover preview. */
 export async function renderCoverPng(run: ResearchRunRow): Promise<Buffer> {
   const photo = await authorPhoto();
@@ -846,7 +891,8 @@ export async function renderLinkedInDocPdf(run: ResearchRunRow): Promise<Buffer>
   const photo = await authorPhoto();
   const art = await ensureRunArtwork(run);
   const brand = await brandPhoto();
-  const html = linkedInDocHtml(run, photo, art, brand);
+  const pageImgs = await loadPageArt(run);
+  const html = linkedInDocHtml(run, photo, art, brand, pageImgs);
   const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 1 });
