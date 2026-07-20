@@ -563,16 +563,28 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
         ${pageFoot(n, total)}
       </div>`);
     } else if (p.kind === 'takeaway') {
-      // The takeaway flips to the boardroom band — the deck's dark punctuation.
+      // The takeaway is the announcement DARK template: the boardroom band
+      // with Paul's PHOTO BLOCK beside the read (Paul, 2026-07-20: "where is
+      // my picture slot on the dark one?").
+      const takePhoto = photo?.dataUri
+        ? `<img src="${photo.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(photo.focalX * 100)}% ${Math.round(photo.focalY * 100)}%;display:block;border-radius:24px">`
+        : `<div style="width:100%;height:100%;border-radius:24px;background:rgba(243,241,234,0.08);display:flex;align-items:center;justify-content:center;font-family:${SANS};font-weight:800;font-size:120px;color:${IVORY_SUB}">PB</div>`;
       pageHtml.push(`<div class="pg dark">
         <div class="halo"></div>
         <div class="in">
           <div class="kick dark-kick"><span class="kl">${logoImg(30, { white: true })}<span>${esc(typeLabel.toUpperCase())}</span></span><span>${n} / ${total}</span></div>
-          <div class="grow">
-            <div class="take-tag">FOR THE ACQUIRER</div>
-            <div class="story-h dark-h">${esc(p.heading ?? '')}</div>
-            <div class="rule"></div>
-            ${p.body ? `<div class="story-b dark-b">${esc(p.body)}</div>` : ''}
+          <div class="take-row">
+            <div class="take-photo">${takePhoto}</div>
+            <div class="take-col">
+              <div class="take-tag">FOR THE ACQUIRER</div>
+              <div class="story-h dark-h" style="font-size:50px">${esc(p.heading ?? '')}</div>
+              <div class="rule"></div>
+              ${p.body ? `<div class="story-b dark-b" style="font-size:29px">${esc(p.body)}</div>` : ''}
+            </div>
+          </div>
+          <div class="take-by">
+            <div class="tby-n">Paul Baker</div>
+            <div class="tby-t">Buy-side corporate development</div>
           </div>
         </div>
       </div>`);
@@ -693,6 +705,12 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     /* story / takeaway */
     .story-h { font-family: ${DISPLAY}; font-size: 58px; font-weight: 545; letter-spacing: -0.012em; line-height: 1.16; max-width: 890px; }
     .story-b { font-size: 32px; color: ${BODY}; line-height: 1.5; max-width: 860px; }
+    .take-row { flex: 1; display: flex; align-items: center; gap: 52px; }
+    .take-photo { width: 400px; height: 520px; flex: none; border-radius: 24px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.5); }
+    .take-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 26px; }
+    .take-by { padding-bottom: 6px; }
+    .tby-n { color: ${IVORY}; font-size: 24px; font-weight: 700; letter-spacing: -0.01em; }
+    .tby-t { margin-top: 4px; color: ${IVORY_SUB}; font-size: 18px; font-weight: 500; }
     .dark-h { color: ${IVORY}; }
     .dark-b { color: ${IVORY_SUB}; }
     .dark-kick { color: ${IVORY_SUB}; }
