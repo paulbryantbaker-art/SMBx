@@ -1021,6 +1021,21 @@ function ReviewCard({ run, onApproved, onNote }: { run: RunRow; onApproved: () =
             ))}
           </div>
           <div style={{ fontSize: 12, color: RT.muted, marginTop: 2 }}>None = your photo fills the panel. Save to apply — the preview re-renders.</div>
+          <button type="button" style={{ ...S.btn, marginTop: 8 }} disabled={busy != null}
+            onClick={() => {
+              setBusy("prompt");
+              api<{ prompt: string }>(`/research/runs/${run.id}/artwork-prompt`)
+                .then(async (j) => {
+                  // Clipboard first; the share sheet is the fallback where
+                  // iOS denies programmatic clipboard access.
+                  try { await navigator.clipboard.writeText(j.prompt); onNote("ok", "Gemini prompt copied — paste it into the Gemini app."); }
+                  catch { if (navigator.share) await navigator.share({ text: j.prompt }); else throw new Error("Copy failed"); }
+                })
+                .catch((e) => onNote("err", e?.message || "Couldn’t get the prompt."))
+                .finally(() => setBusy(null));
+            }}>
+            {busy === "prompt" ? "…" : "Copy Gemini prompt"}
+          </button>
           <div style={S.label}>1-pager preview</div>
           <AuthImg path={`/research/runs/${run.id}/card.png`} alt="1-pager preview" reloadKey={prevKey} />
           <div style={S.btnRow}>
