@@ -381,7 +381,7 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: Auth
 
 export async function renderResearchCardPng(run: ResearchRunRow, hookIndex = 0): Promise<Buffer> {
   const photo = await authorPhoto();
-  const art = await runArtwork(run);
+  const art = await ensureRunArtwork(run);
   const html = researchCardHtml(run, hookIndex, photo, art);
   const page = await newRenderPage();
   try {
@@ -442,7 +442,13 @@ function docPages(run: ResearchRunRow): DocPage[] {
       ...(angles[0]?.body ? [{ kind: 'takeaway', heading: 'What this means for an acquirer', body: angles[0].body }] : []),
     ];
   }
-  return pages;
+  // BOOKEND LAW (Paul, 2026-07-20: "the dark pages look good, but they need
+  // to bookend the PDF — right now they are sporadic and it doesn't fit"):
+  // the dark takeaway pages always close the deck, whatever order the feed
+  // emitted — cover, light content, then takeaway(s), then the dark closer.
+  const takeaways = pages.filter(p => p.kind === 'takeaway');
+  const rest = pages.filter(p => p.kind !== 'takeaway');
+  return [...rest, ...takeaways];
 }
 
 /** Pull a short display numeral ("$4.2B", "38%", "1,900") off a stat sentence. */
@@ -733,10 +739,31 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
   </style></head><body>${pageHtml.join('\n')}</body></html>`;
 }
 
+/** Artwork for a render: the picked/generated image, and when a run has
+ *  NONE yet (and no explicit "no artwork" pick), generate it right now so
+ *  the first download already carries the Gemini image. Failure falls back
+ *  to the sector illustration silently — a download must never error on art. */
+async function ensureRunArtwork(run: ResearchRunRow): Promise<AuthorPhoto | null> {
+  let art = await runArtwork(run);
+  if (art) return art;
+  const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
+  if (feed.artAssetId === undefined && typeof feed.visual === 'string' && feed.visual.trim() && process.env.GOOGLE_AI_API_KEY) {
+    try {
+      const { generateRunArtwork } = await import('./artworkService.js');
+      const out = await generateRunArtwork({ runId: Number(run.id), scheduleId: (run as any).schedule_id ?? null, title: run.report_title || run.topic, visualBrief: feed.visual });
+      if (out.assetId != null) art = await runArtwork(run);
+      else console.warn(`[composer] on-demand artwork skipped for run ${run.id}: ${(out as any).reason}`);
+    } catch (err: any) {
+      console.warn(`[composer] on-demand artwork failed for run ${run.id}:`, err?.message);
+    }
+  }
+  return art;
+}
+
 /** The carousel COVER alone as a PNG — the review sheet's poster preview. */
 export async function renderCoverPng(run: ResearchRunRow): Promise<Buffer> {
   const photo = await authorPhoto();
-  const art = await runArtwork(run);
+  const art = await ensureRunArtwork(run);
   const html = linkedInDocHtml(run, photo, art);
   const page = await newRenderPage();
   try {
@@ -754,7 +781,7 @@ export async function renderCoverPng(run: ResearchRunRow): Promise<Buffer> {
 
 export async function renderLinkedInDocPdf(run: ResearchRunRow): Promise<Buffer> {
   const photo = await authorPhoto();
-  const art = await runArtwork(run);
+  const art = await ensureRunArtwork(run);
   const html = linkedInDocHtml(run, photo, art);
   const page = await newRenderPage();
   try {
