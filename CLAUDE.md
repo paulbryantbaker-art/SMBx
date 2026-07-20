@@ -205,4 +205,8 @@ ENGAGED_LANES (comma-separated keyword groups, e.g. "hvac phoenix, plumbing dall
 RESEND_API_KEY + EMAIL_FROM (lead pings + transactional email; console-log fallback),
 RESEARCH_MONTHLY_CAP_CENTS (research agent monthly budget, default 15000 = $150),
 RESEARCH_SCHEDULES_DISABLED (set "true" to stop the in-process campaign scheduler),
+RESEARCH_ARTWORK_AUTOGEN (set "true" to let runs auto-call the Gemini image API at
+  completion/first-download; DEFAULT OFF — Paul 2026-07-20: he generates images in
+  the Gemini app, uploads to Media, picks in the review sheet; the explicit
+  Generate buttons work regardless of this flag),
 STRIPE_* (dormant: SECRET_KEY, PUBLISHABLE_KEY, WEBHOOK_SECRET, PRICE_SOLO/PRO/TEAM/ENTERPRISE)
