@@ -63,6 +63,8 @@ export function StudioAnnouncement() {
   const [assetId, setAssetId] = useState<number | null>(null);
   const [copy, setCopy] = useState(DEFAULTS);
   const [preview, setPreview] = useState<string | null>(null);
+  const [artBrief, setArtBrief] = useState("");
+  const [artBusy, setArtBusy] = useState(false);
 
   const loadAssets = useCallback(async () => {
     try {
@@ -118,6 +120,23 @@ export function StudioAnnouncement() {
       setAssetId(cur => (cur === id ? null : cur));
     } catch (e: any) { setNote({ kind: "err", text: e.message }); }
   }, []);
+
+  // Story artwork on demand — same Gemini pipeline the research runs use.
+  // No brief typed = the server derives one from the card headline.
+  const generateArt = useCallback(async () => {
+    setArtBusy(true); setNote(null);
+    try {
+      const j = await jsonApi<{ assetId: number }>("/studio/artwork", {
+        method: "POST",
+        body: JSON.stringify({ brief: artBrief.trim() || undefined, title: copy.headline }),
+      });
+      await loadAssets();
+      setAssetId(j.assetId);
+      setNote({ kind: "ok", text: "Artwork generated — selected for the card and saved to Media." });
+    } catch (e: any) {
+      setNote({ kind: "err", text: e.message });
+    } finally { setArtBusy(false); }
+  }, [artBrief, copy.headline, loadAssets]);
 
   const render = useCallback(async () => {
     setBusy(true); setNote(null);
@@ -176,6 +195,19 @@ export function StudioAnnouncement() {
           onChange={e => { const f = e.target.files?.[0]; if (f) upload(f); e.currentTarget.value = ""; }} />
         <button style={S.btn} disabled={busy} onClick={() => fileRef.current?.click()}>Upload photo</button>
         <span style={S.hint}>png / jpeg / webp, up to 12MB. Set each photo’s focal point (where the face sits) — every layout crops around it.</span>
+      </div>
+      <div style={{ ...S.mediaBar, marginTop: 10 }}>
+        <input
+          style={{ ...S.input, flex: "1 1 320px", minWidth: 240 }}
+          placeholder="Describe the artwork — blank uses the card headline"
+          value={artBrief}
+          onChange={e => setArtBrief(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter" && !artBusy) void generateArt(); }}
+        />
+        <button style={S.btn} disabled={artBusy} onClick={() => void generateArt()}>
+          {artBusy ? "Generating…" : "Generate artwork"}
+        </button>
+        <span style={S.hint}>Flat editorial illustration in the site palette — lands in Media, selected automatically.</span>
       </div>
       <div style={S.grid}>
         {(assets ?? []).map(a => (
