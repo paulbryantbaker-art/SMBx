@@ -939,25 +939,38 @@ function ReviewCard({ run, onApproved, onNote }: { run: RunRow; onApproved: () =
   const [status, setStatus] = useState(run.review_status ?? "draft");
   const [busy, setBusy] = useState<string | null>(null);
   const [prevKey, setPrevKey] = useState(0);
+  // Cover artwork pick (2026-07-20, Paul uploads Gemini images to Media and
+  // points each run at one): undefined = untouched, null = "no artwork"
+  // (the photo panel), number = that Media image.
+  const [artId, setArtId] = useState<number | null | undefined>(undefined);
+  const [artCands, setArtCands] = useState<{ id: number; label: string }[]>([]);
 
   useEffect(() => {
     if (!open) return;
-    api<{ feed: { hooks?: string[]; dataPoints?: any[] } | null; reviewStatus?: string }>(`/research/runs/${run.id}/feed`)
+    api<{ feed: { hooks?: string[]; dataPoints?: any[]; artAssetId?: number | null } | null; reviewStatus?: string }>(`/research/runs/${run.id}/feed`)
       .then((j) => {
         setHooks((j.feed?.hooks ?? []).slice(0, 3));
         setDataPoints(j.feed?.dataPoints ?? []);
+        setArtId(j.feed?.artAssetId === undefined ? undefined : j.feed.artAssetId);
         if (j.reviewStatus) setStatus(j.reviewStatus);
       })
       .catch(() => onNote("err", "Couldn’t load the draft."));
+    api<{ assets: { id: number; label: string; kind?: string; mime: string }[] }>(`/studio/assets`)
+      .then((j) => setArtCands(j.assets.filter((a) => a.kind !== "collateral" && a.mime.startsWith("image/")).map((a) => ({ id: a.id, label: a.label }))))
+      .catch(() => {});
   }, [open, run.id, onNote]);
 
   const save = async () => {
     setBusy("save");
     try {
-      await api(`/research/runs/${run.id}/feed`, { method: "PATCH", body: JSON.stringify({ hooks, dataPoints }) });
+      // The server reads {feed: {...}} — the bare body this card used to
+      // send was silently rejected ("Keep at least one hook").
+      const feed: Record<string, unknown> = { hooks, dataPoints };
+      if (artId !== undefined) feed.artAssetId = artId;
+      await api(`/research/runs/${run.id}/feed`, { method: "PATCH", body: JSON.stringify({ feed }) });
       setStatus("draft");
       setPrevKey((k) => k + 1); // re-render the preview with the new hook
-      onNote("ok", "Saved — the preview re-renders with your hook.");
+      onNote("ok", "Saved — the preview re-renders with your edits.");
     } catch (e: any) {
       onNote("err", e?.message || "Save failed.");
     } finally {
@@ -994,6 +1007,20 @@ function ReviewCard({ run, onApproved, onNote }: { run: RunRow; onApproved: () =
             <input key={i} value={h} onChange={(e) => setHooks(hooks.map((x, j) => (j === i ? e.target.value : x)))} style={{ ...S.input, marginBottom: 6 }} />
           ))}
           {hooks.length === 0 && <div style={{ fontSize: 13, color: RT.muted }}>Loading the draft…</div>}
+          <div style={S.label}>Cover artwork — tap the image this deck should use</div>
+          <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4, WebkitOverflowScrolling: "touch" as const }}>
+            <button type="button" onClick={() => setArtId(null)}
+              style={{ flex: "none", width: 64, height: 80, borderRadius: 10, border: artId === null ? `2px solid ${RT.accentInk}` : `1px solid ${RT.line}`, background: RT.page, fontSize: 11, color: RT.muted, fontFamily: "inherit" }}>
+              None
+            </button>
+            {artCands.map((a) => (
+              <button key={a.id} type="button" onClick={() => setArtId(a.id)} title={a.label}
+                style={{ flex: "none", width: 64, height: 80, borderRadius: 10, overflow: "hidden", padding: 0, border: artId === a.id ? `2px solid ${RT.accentInk}` : `1px solid ${RT.line}`, background: RT.page }}>
+                <AuthImg path={`/studio/assets/${a.id}/raw`} alt={a.label} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+              </button>
+            ))}
+          </div>
+          <div style={{ fontSize: 12, color: RT.muted, marginTop: 2 }}>None = your photo fills the panel. Save to apply — the preview re-renders.</div>
           <div style={S.label}>1-pager preview</div>
           <AuthImg path={`/research/runs/${run.id}/card.png`} alt="1-pager preview" reloadKey={prevKey} />
           <div style={S.btnRow}>
