@@ -64,11 +64,13 @@ export function parseArtworkResponse(json: any): { mime: string; data: Buffer } 
 }
 
 /**
- * Generate the run's story artwork and file it in the media library.
+ * Generate story artwork and file it in the media library. runId null =
+ * standalone artwork (the announcement composer's Generate button) — same
+ * pipeline, no run provenance.
  * Returns the asset id, or null (soft-fail) with the reason in the message.
  */
 export async function generateRunArtwork(input: {
-  runId: number;
+  runId: number | null;
   scheduleId: number | null;
   title: string;
   visualBrief: string;

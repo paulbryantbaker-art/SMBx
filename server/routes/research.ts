@@ -791,6 +791,26 @@ researchRouter.delete('/studio/assets/:id', async (req, res) => {
   }
 });
 
+/** Standalone story artwork (2026-07-20) — the announcement composer's
+ *  Generate button. Same Gemini pipeline as run artwork, no run provenance;
+ *  the image lands in Media where every composer can pick it. */
+researchRouter.post('/studio/artwork', async (req, res) => {
+  if (!userIdFromReq(req)) return res.status(401).json({ error: 'Not authenticated' });
+  try {
+    if (!process.env.GOOGLE_AI_API_KEY) return res.status(400).json({ error: 'GOOGLE_AI_API_KEY is not configured on the server' });
+    const title = String(req.body?.title ?? '').trim();
+    const { generateRunArtwork, derivedVisualBrief } = await import('../services/artworkService.js');
+    const brief = String(req.body?.brief ?? '').trim() || (title ? derivedVisualBrief(title) : '');
+    if (!brief) return res.status(400).json({ error: 'Describe the artwork (or write the headline first)' });
+    const art = await generateRunArtwork({ runId: null, scheduleId: null, title: title || brief.slice(0, 90), visualBrief: brief });
+    if (art.assetId == null) return res.status(502).json({ error: `Artwork generation failed — ${(art as any).reason}` });
+    return res.json({ assetId: art.assetId });
+  } catch (err: any) {
+    console.error('[studio] artwork generation failed:', err?.message);
+    return res.status(500).json({ error: err?.message || 'Artwork generation failed' });
+  }
+});
+
 /* ─── Announcement card compose (2026-07-17) ──────────────────────────────
  * The approved 1080×1350 announcement layouts (light split · dark textured),
  * rendered on demand with the caller's copy and a library photo. Returns PNG.
