@@ -524,18 +524,20 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     n++;
     if (p.kind === 'cover') {
       const h = String(p.heading ?? '');
-      // ANNOUNCEMENT template cover (Paul, 2026-07-20): left editorial column,
-      // right image panel (picked artwork, else the sector illustration), flat
-      // dark footer with the byline — same body as the 1-pager, plus SWIPE.
+      // BOOKEND LAW v2 (Paul, 2026-07-20: "the dark pages don't bookend,
+      // they are together at the end"): the deck opens AND closes dark. The
+      // cover is the announcement DARK (style B) — boardroom band, ivory
+      // two-tone hook, and the artwork sitting in the light photo-card —
+      // then light content pages, then the dark takeaway + closer.
       const size = h.length > 130 ? 40 : h.length > 90 ? 45 : h.length > 60 ? 50 : 56;
       const panel = art?.dataUri
         ? `<img src="${art.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(art.focalX * 100)}% ${Math.round(art.focalY * 100)}%;display:block">`
         : `<div class="sector">${sectorArtSvg(sectorText, 380, 520).svg}</div>`;
       const coverPts: any[] = (Array.isArray(feed.dataPoints) ? feed.dataPoints : []).slice(0, 3);
-      pageHtml.push(`<div class="pg">
-        <div class="wash"></div>
+      pageHtml.push(`<div class="pg dark cover-dark">
+        <div class="halo"></div>
         <div class="cv-left">
-          <div class="cv-kick">${logoImg(42)}<span class="kt">${esc(typeLabel.toUpperCase())}</span></div>
+          <div class="cv-kick">${logoImg(42, { white: true })}<span class="kt">${esc(typeLabel.toUpperCase())}</span></div>
           <div class="cv-hook" style="font-size:${size}px">${twoToneHook(h)}</div>
           <div class="cv-rule"></div>
           ${p.body ? `<div class="cv-sub">${esc(p.body)}</div>` : ''}
@@ -545,7 +547,7 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
               <div class="cv-src">${esc([pt.source, pt.freshness].filter(Boolean).join(' · '))}</div>
             </div></div>`).join('')}</div>` : ''}
         </div>
-        <div class="cv-right">${panel}<div class="cv-fade"></div></div>
+        <div class="cv-right">${panel}</div>
         <div class="cv-foot">
           ${logoImg(48, { white: true })}
           <div class="cv-who">
@@ -706,6 +708,18 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     .cv-wn { color: ${IVORY}; font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
     .cv-wt { margin-top: 3px; color: ${IVORY_SUB}; font-size: 16.5px; font-weight: 500; }
     .cv-swipe { margin-left: auto; font-family: ${MONO}; font-size: 21px; letter-spacing: 0.14em; color: #8FD0AE; font-weight: 600; }
+    /* dark announcement cover — BOOKEND law v2: the deck opens dark */
+    .cover-dark .kt { color: #8FD0AE; }
+    .cover-dark .cv-hook { color: ${IVORY}; }
+    .cover-dark .turn { color: #8FD0AE; }
+    .cover-dark .cv-rule { background: #8FD0AE; }
+    .cover-dark .cv-sub { color: ${IVORY_SUB}; }
+    .cover-dark .cv-stat { color: ${IVORY}; }
+    .cover-dark .cv-src { color: rgba(216,213,202,0.75); }
+    .cover-dark .cv-dot { background: #8FD0AE; }
+    .cover-dark .cv-right { left: 560px; top: 92px; right: 64px; bottom: 224px; background: #fff;
+      border-radius: 28px; overflow: hidden; box-shadow: 0 40px 90px rgba(0,0,0,0.45); }
+    .cover-dark .cv-foot { border-top: 1px solid rgba(243,241,234,0.10); }
     /* slim announcement base on every light page */
     .pfoot { position: absolute; left: 0; right: 0; bottom: 0; height: 84px; background: ${DARK};
       display: flex; align-items: center; justify-content: space-between; padding: 0 60px; }
