@@ -85,9 +85,8 @@ Connector distribution is now a first-class discovery surface at `/api/definitiv
 - **`UI_RETOOL_READINESS.md` — read first for any UI work**: the incoming-bundle retool's surface map, token seams, preservation contract, and phased playbook
 - `ATLAS_BUILD_CONTRACT.md` + `MOBILE_REDESIGN.md` — the live app's build law (desktop `v6/desktop/` themed by `atlasTokens.ts`; mobile `v6/atlasmobile/` themed by `mobileTokens.ts`; cutover complete 2026-06-24)
 - `FRONTEND_DIRECTION.md` — Ramp (2026-05-29): superseded for the app; still describes the live marketing skin (`client/src/marketing/`, `.mkt`, neon green `#2BFF77`)
-- Historical, do not build against: `design_handoff_smbx_desktop_material/`, `design_handoff_smbx_app store/` (V6 bundles), `DESIGN_SOURCE.md` (V6 map), `DESIGN_TOKENS.md` (V6-era token dump)
-- `STYLE_GUIDE.md` — brand & UI style guide for marketing materials (pre-Ramp palette; treat visuals as stale, voice/structure still useful)
-- `CLAUDE_DESIGN_SOCIAL_BRIEF.md` — social marketing brief (V6-aware, May 2026)
+- **`DESIGN_LANGUAGE.md` — THE canonical current visual system (Ledger, 2026-07-19)**: tokens, type, logo law, graphics doctrine, voice laws, and the dead-systems hex list. Hand this file to any Claude or design tool; it supersedes every doc below.
+- Historical, retired with banners 2026-07-19 — do not design from: `design_handoff_smbx_desktop_material/`, `design_handoff_smbx_app store/` (V6 bundles), `DESIGN_SOURCE.md` (V6 map), `DESIGN_TOKENS.md` (V6-era token dump), `STYLE_GUIDE.md` (April-era logo/voice — logo section references deleted assets), `CLAUDE_DESIGN_BRIEF.md` (terra-cotta era), `CLAUDE_DESIGN_COPY.md` (Ramp-era product copy), `CLAUDE_DESIGN_SOCIAL_BRIEF.md` (V6 slate era), `AGENTS.md` (pre-pivot product facts), `SMBX_LINKEDIN_90DAY_CALENDAR_V2.md` (pre-pivot voice/visuals)
 
 ### Strategy & positioning (current)
 - `SMBX_FEATURE_AUDIENCE_VALUE_MATRIX.md` (May 3, 2026)

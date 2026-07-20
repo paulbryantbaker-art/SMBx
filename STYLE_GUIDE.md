@@ -2,11 +2,12 @@
 ## For logo rules, brand voice, and copy patterns
 ## Last updated: April 4, 2026
 
-> ⚠ **For the current visual system** (colors, type, spacing, motion, materials,
-> editorial primitives, anti-slop rules, LinkedIn document patterns), see
-> **`DESIGN_LANGUAGE.md`** in the same repo root. It supersedes this document for
-> anything visual. This doc remains authoritative for **logo asset rules, brand
-> voice, and written copy patterns** — those have not changed.
+> ⚠ **For the current visual system** (colors, type, spacing, materials, logo law,
+> graphics doctrine, voice laws), see **`DESIGN_LANGUAGE.md`** in the same repo
+> root. It supersedes this document ENTIRELY (updated 2026-07-19): the logo
+> section below references deleted assets (G3L/G3D, rose-gold) — the current
+> logo law is DESIGN_LANGUAGE.md §5 — and the voice sections predate THE LINE v2
+> practice pivot. Kept for history only.
 
 ---
 

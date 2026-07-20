@@ -1,3 +1,6 @@
+> ⚠️ **RETIRED — DO NOT DESIGN FROM THIS DOCUMENT (banner added 2026-07-19).** It describes the V6 handoff bundles, which is dead.
+> The current visual system is **`DESIGN_LANGUAGE.md`** at the repo root — hand THAT file to Claude or any design tool. Kept for history only.
+
 # Design Source of Truth
 
 **The V6 design language IS the two handoff bundles delivered by Claude Design (CD):**

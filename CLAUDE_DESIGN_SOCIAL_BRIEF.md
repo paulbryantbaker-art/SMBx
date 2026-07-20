@@ -1,3 +1,6 @@
+> ⚠️ **RETIRED — DO NOT DESIGN FROM THIS DOCUMENT (banner added 2026-07-19).** It describes the V6 slate-blue/Material era, which is dead.
+> The current visual system is **`DESIGN_LANGUAGE.md`** at the repo root — hand THAT file to Claude or any design tool. Kept for history only.
+
 # smbx.ai — Social Marketing Brief for Claude Design
 
 **Scope:** Social posts only (LinkedIn, Twitter/X, Instagram). Not a redesign.

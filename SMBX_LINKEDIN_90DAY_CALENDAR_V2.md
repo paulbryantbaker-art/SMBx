@@ -1,3 +1,6 @@
+> ⚠️ **RETIRED — DO NOT DESIGN FROM THIS DOCUMENT (banner added 2026-07-19).** It describes the pre-pivot product voice and old visual guidance, which is dead.
+> The current visual system is **`DESIGN_LANGUAGE.md`** at the repo root — hand THAT file to Claude or any design tool. Kept for history only.
+
 # smbX.ai — 90-Day LinkedIn Editorial Calendar V2
 **Hormozi-style voice. Results-first. $10M EBITDA and up. April–June 2026.**
 

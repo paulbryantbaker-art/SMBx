@@ -117,7 +117,7 @@ Valuation Explorer, LBO, SBA Financing, DCF, Tax Impact, Cap Table, Sensitivity 
   - V19 remains the current methodology/runtime baseline and rolls forward into DEFINITIVE v1.0.
   - V17/V18a/V18b are archived in `docs/_archive/methodology/` and should not be used as new-build source material.
   - Runtime still contains V18 tax/legal distillations in `server/prompts/taxEngine.ts` and `server/prompts/legalEngine.ts`; V19/DEFINITIVE prompt/runtime migration is tracked in `methodology/V19_BUILD_PLAN.md` and `methodology/DEFINITIVE_BUILD_PLAN.md`.
-- STYLE_GUIDE.md — Complete UI & brand style guide for marketing materials
+- **DESIGN_LANGUAGE.md** — THE canonical current visual system (Ledger): tokens, type, shape, logo law, graphics doctrine, voice laws, dead-systems list with hexes. Hand THIS file to any Claude/design tool; it supersedes every other design doc (STYLE_GUIDE.md, CLAUDE_DESIGN_*.md, DESIGN_TOKENS.md, DESIGN_SOURCE.md are all retired with banners, 2026-07-19).
 - TESTING.md — Testing tracker with issue template system
 - REPO_STATUS.md — Current-vs-stale map for the whole repo (read this when reviewing on GitHub)
 
