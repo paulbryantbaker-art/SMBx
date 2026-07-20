@@ -22,7 +22,7 @@ import {
   nextRunAt,
   parseCampaignPlan,
 } from '../services/researchAgent.js';
-import { renderResearchPdf, renderResearchCardPng, renderLinkedInDocPdf, researchPostText, renderAnnouncementCardPng, type ResearchRunRow, type AnnouncementSpec, renderPostCardPng, type PostCardSpec } from '../services/researchComposer.js';
+import { renderResearchPdf, renderResearchCardPng, renderLinkedInDocPdf, renderCoverPng, researchPostText, renderAnnouncementCardPng, type ResearchRunRow, type AnnouncementSpec, renderPostCardPng, type PostCardSpec } from '../services/researchComposer.js';
 import { listStudioAssets, getStudioAsset, createStudioAsset, updateStudioAsset, deleteStudioAsset } from '../services/studioAssets.js';
 import { importLinkedInWorkbook, analyzeLinkedInImport } from '../services/linkedinAnalytics.js';
 import multer from 'multer';
@@ -391,6 +391,19 @@ researchRouter.patch('/research/runs/:id/feed', async (req, res) => {
       })).filter((p: any) => p.stat)
     : [];
   if (!hooks.length) return res.status(400).json({ error: 'Keep at least one hook' });
+  // Cover artwork pick (2026-07-20): undefined = leave as-is, null = "no
+  // artwork" (split cover), number = that media asset (ownership-checked).
+  let artAssetId: number | null | undefined = undefined;
+  if ('artAssetId' in b) {
+    if (b.artAssetId === null || b.artAssetId === '') artAssetId = null;
+    else {
+      const aid = Number(b.artAssetId);
+      if (!Number.isInteger(aid) || aid <= 0) return res.status(400).json({ error: 'Bad artwork id' });
+      const asset = await getStudioAsset(aid);
+      if (!asset || !asset.mime.startsWith('image/')) return res.status(404).json({ error: 'Artwork not found' });
+      artAssetId = aid;
+    }
+  }
   try {
     // MERGE the edits over the full generated feed — storing only
     // {hooks, dataPoints} used to wipe post/docPages/chart out of the
@@ -400,7 +413,7 @@ researchRouter.patch('/research/runs/:id/feed', async (req, res) => {
        WHERE id = ${id} AND user_id = ${userId} AND status = 'complete'`;
     if (!existing) return res.status(404).json({ error: 'Run not found' });
     const base = { ...((existing as any).studio_feed ?? {}), ...((existing as any).feed_override ?? {}) };
-    const merged = { ...base, hooks, dataPoints };
+    const merged = { ...base, hooks, dataPoints, ...(artAssetId !== undefined ? { artAssetId } : {}) };
     const [row] = await sql`
       UPDATE research_runs
          SET feed_override = ${sql.json(merged)}::jsonb, review_status = 'draft'
@@ -411,6 +424,52 @@ researchRouter.patch('/research/runs/:id/feed', async (req, res) => {
   } catch (err) {
     console.error('[research] feed save failed', err);
     return res.status(500).json({ error: 'Save failed' });
+  }
+});
+
+/** Regenerate the run's story artwork on demand (review sheet). The fresh
+ *  asset becomes the cover pick immediately via feed_override.artAssetId. */
+researchRouter.post('/research/runs/:id/artwork', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const id = parseId(req.params.id);
+  if (!id) return res.status(400).json({ error: 'Bad run id' });
+  try {
+    const run = await loadCompleteRun(id, userId);
+    if (!run) return res.status(404).json({ error: 'Run not found' });
+    const feed = (run as any).studio_feed ?? {};
+    const brief = String(req.body?.brief ?? '').trim() || String(feed.visual ?? '').trim();
+    if (!brief) return res.status(400).json({ error: 'No visual brief — add one in the request or re-run the research' });
+    if (!process.env.GOOGLE_AI_API_KEY) return res.status(400).json({ error: 'GOOGLE_AI_API_KEY is not configured on the server' });
+    const { generateRunArtwork } = await import('../services/artworkService.js');
+    const art = await generateRunArtwork({ runId: id, scheduleId: (run as any).schedule_id ?? null, title: (run as any).report_title || (run as any).topic, visualBrief: brief });
+    if (art.assetId == null) return res.status(502).json({ error: `Artwork generation failed — ${(art as any).reason}` });
+    const [existing] = await sql`SELECT studio_feed, feed_override FROM research_runs WHERE id = ${id} AND user_id = ${userId}`;
+    const base = { ...((existing as any)?.studio_feed ?? {}), ...((existing as any)?.feed_override ?? {}) };
+    await sql`UPDATE research_runs SET feed_override = ${sql.json({ ...base, artAssetId: art.assetId })}::jsonb WHERE id = ${id} AND user_id = ${userId}`;
+    return res.json({ assetId: art.assetId });
+  } catch (err: any) {
+    console.error('[research] artwork regen failed:', err?.message);
+    return res.status(500).json({ error: err?.message || 'Artwork generation failed' });
+  }
+});
+
+/** The carousel cover alone, as PNG — the review sheet's poster preview. */
+researchRouter.get('/research/runs/:id/cover.png', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const id = Number(req.params.id);
+  const run = await loadCompleteRun(id, userId);
+  if (!run) return res.status(404).json({ error: 'Run not found' });
+  if (!run.studio_feed) return res.status(404).json({ error: 'This run has no studio feed' });
+  try {
+    const png = await renderCoverPng(run as any);
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'no-store');
+    return res.end(png);
+  } catch (err: any) {
+    console.error('[research] cover render failed:', err?.message);
+    return res.status(500).json({ error: `Cover render failed — ${err?.message}` });
   }
 });
 

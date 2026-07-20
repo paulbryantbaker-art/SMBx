@@ -471,10 +471,21 @@ function twoToneHook(hook: string): string {
 /** The run's generated story artwork (artworkService files it into the media
  *  library with run provenance). Null when none was generated — callers fall
  *  back to the procedural motif. */
-export async function runArtwork(runId: number): Promise<AuthorPhoto | null> {
+export async function runArtwork(run: Pick<ResearchRunRow, 'id' | 'studio_feed'>): Promise<AuthorPhoto | null> {
   try {
+    const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
+    // The review sheet's explicit pick wins: null = "no artwork", a number =
+    // that media asset; absent = auto (this run's generated illustration).
+    if (feed.artAssetId === null) return null;
+    if (typeof feed.artAssetId === 'number') {
+      const chosen = await getStudioAsset(feed.artAssetId);
+      if (chosen && chosen.mime.startsWith('image/')) {
+        return { dataUri: `data:${chosen.mime};base64,${chosen.data.toString('base64')}`, focalX: chosen.focal_x, focalY: chosen.focal_y };
+      }
+      return null;
+    }
     const assets = await listStudioAssets();
-    const pick = assets.find(a => a.kind !== 'collateral' && (a as any).run_id === runId && /^Artwork/i.test(a.label) && a.mime.startsWith('image/'));
+    const pick = assets.find(a => a.kind !== 'collateral' && (a as any).run_id === Number(run.id) && /^Artwork/i.test(a.label) && a.mime.startsWith('image/'));
     if (!pick) return null;
     const full = await getStudioAsset(pick.id);
     if (!full) return null;
@@ -521,8 +532,36 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
         ? `<div class="proof">${proofPts.map(pt => `<div class="pq">${esc(String(pt.stat).toUpperCase())}<span class="pa">${esc([pt.source, pt.freshness].filter(Boolean).join(' · ').toUpperCase())}</span></div>`).join('')}</div>`
         : '';
       const u = run.usage || {};
-      const credits = `<div class="credits">RESEARCHED & WRITTEN BY PAUL BAKER · SMBX — BUY-SIDE CORPORATE DEVELOPMENT · ${Number(u.searches ?? 0)} SEARCHES · ${Array.isArray(run.sources) ? run.sources.length : 0} SOURCES · EVERY NUMBER CITED</div>`;
-      pageHtml.push(`<div class="pg">
+      const creditsText = `RESEARCHED & WRITTEN BY PAUL BAKER · SMBX — BUY-SIDE CORPORATE DEVELOPMENT · ${Number(u.searches ?? 0)} SEARCHES · ${Array.isArray(run.sources) ? run.sources.length : 0} SOURCES · EVERY NUMBER CITED`;
+      const credits = `<div class="credits">${creditsText}</div>`;
+      if (art?.dataUri) {
+        // POSTER MODE (Paul, 2026-07-20: "every cover page needs to model what
+        // a movie poster would do"): the artwork IS the sheet — full bleed —
+        // with the proof stacked on a bone scrim up top and the two-tone title,
+        // tagline, credits, and byline on the green-black rise at the base.
+        pageHtml.push(`<div class="pg poster">
+          <img class="poster-art" src="${art.dataUri}" style="object-position:${Math.round(art.focalX * 100)}% ${Math.round(art.focalY * 100)}%">
+          <div class="scrim-top"></div>
+          <div class="scrim-bot"></div>
+          <div class="in">
+            <div class="kick"><span class="kl">${logoImg(40)}<span>${esc(typeLabel.toUpperCase())}</span></span><span>${esc(fmtDate(run.completed_at))}</span></div>
+            ${proofStrip}
+            <div style="flex:1"></div>
+            <div class="poster-h" style="font-size:${Math.min(size, 76)}px">${twoToneHook(h)}</div>
+            ${p.body ? `<div class="poster-sub">${esc(p.body)}</div>` : ''}
+            <div class="poster-credits">${creditsText}</div>
+            <div class="poster-by">
+              ${faceImg(84, photo, { ring: 'rgba(143,208,174,0.7)' })}
+              <div>
+                <div class="pby-n">Paul Baker</div>
+                <div class="pby-t">Buy-side corporate development</div>
+              </div>
+              <div class="poster-swipe">SWIPE&nbsp;&nbsp;→</div>
+            </div>
+          </div>
+        </div>`);
+      } else {
+        pageHtml.push(`<div class="pg">
         <div class="wash"></div>
         <div class="in">
           <div class="kick"><span class="kl">${logoImg(40)}<span>${esc(typeLabel.toUpperCase())}</span></span><span>${esc(fmtDate(run.completed_at))}</span></div>
@@ -546,6 +585,7 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
           <div class="swipe">SWIPE&nbsp;&nbsp;→</div>
         </div>
       </div>`);
+      }
     } else if (p.kind === 'stat') {
       const numeral = String(p.stat ?? '').trim() || firstNumberToken(p.heading ?? '');
       const numSize = numeral.length > 8 ? 120 : numeral.length > 5 ? 150 : 184;
@@ -661,6 +701,21 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
       line-height: 1; color: rgba(20,24,28,0.055); letter-spacing: -0.03em; }
     .motif { position: absolute; right: 64px; bottom: 150px; width: 300px; height: 300px; opacity: 0.16; }
     .brassbar { height: 8px; width: 132px; background: ${BRASS}; border-radius: 4px; }
+    /* poster mode — full-bleed artwork sheet */
+    .pg.poster { background: ${DARK}; }
+    .poster-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+    .scrim-top { position: absolute; left: 0; right: 0; top: 0; height: 460px;
+      background: linear-gradient(180deg, rgba(246,244,239,0.95) 0%, rgba(246,244,239,0.82) 52%, rgba(246,244,239,0) 100%); }
+    .scrim-bot { position: absolute; left: 0; right: 0; bottom: 0; height: 640px;
+      background: linear-gradient(0deg, rgba(11,19,16,0.94) 0%, rgba(11,19,16,0.82) 46%, rgba(11,19,16,0) 100%); }
+    .poster-h { font-family: ${DISPLAY}; font-weight: 545; letter-spacing: -0.012em; line-height: 1.1; color: ${IVORY}; max-width: 920px; }
+    .poster-h .turn { color: #8FD0AE; }
+    .poster-sub { margin-top: 26px; font-size: 30px; color: ${IVORY_SUB}; line-height: 1.4; max-width: 800px; }
+    .poster-credits { margin-top: 40px; font-family: ${MONO}; font-size: 14.5px; letter-spacing: 0.075em; color: rgba(216,213,202,0.85); line-height: 1.6; }
+    .poster-by { margin-top: 26px; display: flex; align-items: center; gap: 22px; }
+    .pby-n { color: ${IVORY}; font-size: 25px; font-weight: 700; letter-spacing: -0.01em; }
+    .pby-t { margin-top: 3px; color: ${IVORY_SUB}; font-size: 18px; font-weight: 500; }
+    .poster-swipe { margin-left: auto; font-family: ${MONO}; font-size: 22px; letter-spacing: 0.14em; color: #8FD0AE; font-weight: 600; }
     /* cover */
     .proof { margin-top: 44px; display: flex; flex-direction: column; gap: 20px; }
     .pq { font-size: 27px; font-weight: 800; letter-spacing: 0.005em; line-height: 1.25; color: ${CORAL_DEEP}; max-width: 920px; }
@@ -709,9 +764,28 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
   </style></head><body>${pageHtml.join('\n')}</body></html>`;
 }
 
+/** The carousel COVER alone as a PNG — the review sheet's poster preview. */
+export async function renderCoverPng(run: ResearchRunRow): Promise<Buffer> {
+  const photo = await authorPhoto();
+  const art = await runArtwork(run);
+  const html = linkedInDocHtml(run, photo, art);
+  const page = await newRenderPage();
+  try {
+    await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 2 });
+    await page.setContent(html, { waitUntil: 'networkidle0', timeout: 60000 });
+    await page.evaluateHandle('document.fonts.ready').catch(() => {});
+    await new Promise(r => setTimeout(r, 150));
+    const cover = await page.$('.pg');
+    const png = cover ? await cover.screenshot({ type: 'png' }) : await page.screenshot({ type: 'png' });
+    return Buffer.from(png);
+  } finally {
+    await page.close().catch(() => {});
+  }
+}
+
 export async function renderLinkedInDocPdf(run: ResearchRunRow): Promise<Buffer> {
   const photo = await authorPhoto();
-  const art = await runArtwork(Number(run.id));
+  const art = await runArtwork(run);
   const html = linkedInDocHtml(run, photo, art);
   const page = await newRenderPage();
   try {
