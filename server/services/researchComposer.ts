@@ -21,7 +21,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { newRenderPage } from './premiumPdfRenderer.js';
 import { listStudioAssets, getStudioAsset } from './studioAssets.js';
-import { sectorArtSvg } from './sectorArt.js';
 import { fontFaceCss } from './fontEmbeds.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -93,6 +92,37 @@ export async function authorPhoto(): Promise<AuthorPhoto | null> {
     } catch { photo = null; }
   }
   authorCache = { at: Date.now(), photo };
+  return photo;
+}
+
+/* The panel-fallback photo (Paul, 2026-07-20 evening: the line-art fallback
+ * "looks terrible" — RETIRED from artifacts). When a run has no artwork, the
+ * cover/1-pager panel carries what the ORIGINAL announcements carried: a real
+ * photo of Paul. Prefers a non-headshot library photo (the walking shot) so
+ * the panel and the byline face aren't the same crop; the shipped site
+ * walking photo is the disk fallback. */
+let brandCache: { at: number; photo: AuthorPhoto | null } | null = null;
+
+export async function brandPhoto(): Promise<AuthorPhoto | null> {
+  if (brandCache && Date.now() - brandCache.at < 60_000) return brandCache.photo;
+  let photo: AuthorPhoto | null = null;
+  try {
+    const assets = await listStudioAssets();
+    const photos = assets.filter(a => a.kind !== 'collateral' && a.mime.startsWith('image/')
+      && !/^Artwork — /.test(a.label) && !/headshot/i.test(a.label));
+    const pick = photos.find(a => /walking|founder|office|paul/i.test(a.label)) ?? photos[0];
+    if (pick) {
+      const full = await getStudioAsset(pick.id);
+      if (full) photo = { dataUri: `data:${full.mime};base64,${full.data.toString('base64')}`, focalX: full.focal_x, focalY: full.focal_y };
+    }
+  } catch { /* library unavailable — disk fallback */ }
+  if (!photo) {
+    try {
+      const buf = readFileSync(path.resolve(__dirname, '../../client/public/founder-walking.webp'));
+      photo = { dataUri: `data:image/webp;base64,${buf.toString('base64')}`, focalX: 0.5, focalY: 0.3 };
+    } catch { photo = null; }
+  }
+  brandCache = { at: Date.now(), photo };
   return photo;
 }
 
@@ -310,7 +340,7 @@ export async function renderResearchPdf(run: ResearchRunRow): Promise<Buffer> {
 
 /* ─── the LinkedIn card (1080×1350) ───────────────────────────────────── */
 
-export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: AuthorPhoto | null = null, art: AuthorPhoto | null = null): string {
+export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: AuthorPhoto | null = null, art: AuthorPhoto | null = null, brand: AuthorPhoto | null = null): string {
   const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
   const hooks: string[] = Array.isArray(feed.hooks) ? feed.hooks : [];
   const hook = hooks[Math.min(Math.max(hookIndex, 0), Math.max(hooks.length - 1, 0))] || run.report_title || run.topic;
@@ -320,15 +350,17 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: Auth
   // The ANNOUNCEMENT template is the law (Paul, 2026-07-20: "the original
   // announcements are great — let's keep those, as either single one-pager or
   // multiple page pdf"): left editorial column, right image panel, flat dark
-  // footer. Flat bone + the announcement wash — no paper texture.
+  // footer. Flat bone + the announcement wash — no paper texture. Panel
+  // priority: the story artwork, else the brand photo (the announcement
+  // original) — the line-art fallback is retired (Paul: "looks terrible").
   const pages = docPages(run);
   const sub = String(pages.find(pg => pg.kind === 'cover')?.body ?? '').trim();
   const mandate = String(pages.find(pg => pg.kind === 'takeaway')?.heading ?? '').trim();
-  const sectorText = `${run.topic} ${run.report_title ?? ''}`;
   const hookSize = hook.length > 130 ? 40 : hook.length > 90 ? 45 : hook.length > 60 ? 50 : 56;
-  const panel = art?.dataUri
-    ? `<img src="${art.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(art.focalX * 100)}% ${Math.round(art.focalY * 100)}%;display:block">`
-    : `<div class="sector">${sectorArtSvg(sectorText, 380, 520).svg}</div>`;
+  const pick = art?.dataUri ? art : brand?.dataUri ? brand : null;
+  const panel = pick
+    ? `<img src="${pick.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(pick.focalX * 100)}% ${Math.round(pick.focalY * 100)}%;display:block">`
+    : `<div class="panel-brand">${logoImg(64)}</div>`;
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8">${FONTS}
   <style>
@@ -352,7 +384,7 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: Auth
     .mandate { margin-top: auto; padding-bottom: 44px; font-size: 23.5px; line-height: 1.45; color: ${INK}; font-weight: 700; }
     .right { position: absolute; left: 536px; top: 0; bottom: 128px; right: 0; background: #fff; }
     .right .fade { position: absolute; inset: 0; background: linear-gradient(90deg, ${WARM} 0%, transparent 9%); }
-    .sector { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+    .panel-brand { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
     .foot { position: absolute; left: 0; right: 0; bottom: 0; height: 128px; background: ${DARK};
       display: flex; align-items: center; justify-content: space-between; padding: 0 60px; }
     .who { display: flex; align-items: center; gap: 20px; }
@@ -389,7 +421,8 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: Auth
 export async function renderResearchCardPng(run: ResearchRunRow, hookIndex = 0): Promise<Buffer> {
   const photo = await authorPhoto();
   const art = await ensureRunArtwork(run);
-  const html = researchCardHtml(run, hookIndex, photo, art);
+  const brand = await brandPhoto();
+  const html = researchCardHtml(run, hookIndex, photo, art, brand);
   const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 2 });
@@ -499,11 +532,10 @@ export async function runArtwork(run: Pick<ResearchRunRow, 'id' | 'studio_feed'>
 }
 
 
-export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null = null, art: AuthorPhoto | null = null): string {
+export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null = null, art: AuthorPhoto | null = null, brand: AuthorPhoto | null = null): string {
   const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
   const typeLabel = TYPE_LABELS[run.research_type] ?? 'Research';
   const pages = docPages(run);
-  const sectorText = `${run.topic} ${run.report_title ?? ''}`;
   // The announcement family's signature: every light page stands on a slim
   // flat dark base with the white logo and the page count.
   const pageFoot = (n: number, total: number) => `<div class="pfoot">${logoImg(34, { white: true })}<span class="pf-n">${n} / ${total}</span></div>`;
@@ -530,9 +562,10 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
       // two-tone hook, and the artwork sitting in the light photo-card —
       // then light content pages, then the dark takeaway + closer.
       const size = h.length > 130 ? 40 : h.length > 90 ? 45 : h.length > 60 ? 50 : 56;
-      const panel = art?.dataUri
-        ? `<img src="${art.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(art.focalX * 100)}% ${Math.round(art.focalY * 100)}%;display:block">`
-        : `<div class="sector">${sectorArtSvg(sectorText, 380, 520).svg}</div>`;
+      const pick = art?.dataUri ? art : brand?.dataUri ? brand : null;
+      const panel = pick
+        ? `<img src="${pick.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(pick.focalX * 100)}% ${Math.round(pick.focalY * 100)}%;display:block">`
+        : `<div class="panel-brand">${logoImg(64)}</div>`;
       const coverPts: any[] = (Array.isArray(feed.dataPoints) ? feed.dataPoints : []).slice(0, 3);
       pageHtml.push(`<div class="pg dark cover-dark">
         <div class="halo"></div>
@@ -701,7 +734,7 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     .cv-src { margin-top: 4px; font-family: ${MONO}; font-size: 14.5px; color: ${TERT}; letter-spacing: 0.03em; }
     .cv-right { position: absolute; left: 536px; top: 0; bottom: 128px; right: 0; background: #fff; }
     .cv-fade { position: absolute; inset: 0; background: linear-gradient(90deg, ${WARM} 0%, transparent 9%); }
-    .sector { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+    .panel-brand { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
     .cv-foot { position: absolute; left: 0; right: 0; bottom: 0; height: 128px; background: ${DARK};
       display: flex; align-items: center; gap: 26px; padding: 0 60px; z-index: 3; }
     .cv-who { display: flex; align-items: center; gap: 18px; }
@@ -763,7 +796,7 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
 /** Artwork for a render: the picked/generated image, and when a run has
  *  NONE yet (and no explicit "no artwork" pick), generate it right now so
  *  the first download already carries the Gemini image. Failure falls back
- *  to the sector illustration silently — a download must never error on art. */
+ *  to the brand photo silently — a download must never error on art. */
 async function ensureRunArtwork(run: ResearchRunRow): Promise<AuthorPhoto | null> {
   let art = await runArtwork(run);
   if (art) return art;
@@ -789,7 +822,8 @@ async function ensureRunArtwork(run: ResearchRunRow): Promise<AuthorPhoto | null
 export async function renderCoverPng(run: ResearchRunRow): Promise<Buffer> {
   const photo = await authorPhoto();
   const art = await ensureRunArtwork(run);
-  const html = linkedInDocHtml(run, photo, art);
+  const brand = await brandPhoto();
+  const html = linkedInDocHtml(run, photo, art, brand);
   const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 2 });
@@ -807,7 +841,8 @@ export async function renderCoverPng(run: ResearchRunRow): Promise<Buffer> {
 export async function renderLinkedInDocPdf(run: ResearchRunRow): Promise<Buffer> {
   const photo = await authorPhoto();
   const art = await ensureRunArtwork(run);
-  const html = linkedInDocHtml(run, photo, art);
+  const brand = await brandPhoto();
+  const html = linkedInDocHtml(run, photo, art, brand);
   const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 1 });
