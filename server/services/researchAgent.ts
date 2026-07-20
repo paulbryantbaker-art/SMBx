@@ -245,7 +245,7 @@ Return ONLY a JSON object, no prose, no code fence, exactly this shape:
   "hooks": ["5–8 one-line LinkedIn hooks drawn from the report's most surprising facts"],
   "dataPoints": [{ "stat": "the number + what it is", "source": "domain or publication", "freshness": "date or period", "confidence": "high|medium|low" }],
   "angles": [{ "title": "post angle name", "body": "2–3 sentence sketch of the post" }],
-  "visual": "one sentence describing the strongest single-image visual for this material",
+  "visual": "one sentence describing the strongest single-image EDITORIAL visual for this material — an abstract/illustrative scene or metaphor tied to the sector and thesis, suitable for a flat editorial illustration (no text in the image, no real people, no logos, no charts). If the mandate contains a 'Visual direction:' sentence, honor it here.",
   "accounts": ["3–6 named companies/publications worth following on this lane"],
   "post": {
     "text": "the READY-TO-PASTE LinkedIn post. First line = the strongest hook (stands alone before 'see more'). Then 2–4 short paragraphs separated by blank lines — factual, senior-operator voice, each number carrying its source name inline in parentheses. 120–220 words. End with 3–5 relevant hashtags on the last line. No emojis, no 'excited to share', no rhetorical-question spam.",
@@ -552,6 +552,19 @@ export async function executeResearchRun(runId: number): Promise<void> {
       if (h1) title = h1[1].trim().slice(0, 120);
     }
 
+    // Story artwork (2026-07-20): render the feed's visual brief into an
+    // editorial illustration for the carousel cover + media library. Strictly
+    // fail-soft — the run completes either way, and the trail says what
+    // happened. Only for runs that produce LinkedIn collateral.
+    if (feed?.visual && run.output_format !== 'report' && process.env.GOOGLE_AI_API_KEY) {
+      pushAct('phase', 'Illustrating the story — rendering the visual brief');
+      await flushAct();
+      const { generateRunArtwork } = await import('./artworkService.js');
+      const art = await generateRunArtwork({ runId, scheduleId: run.schedule_id ?? null, title, visualBrief: String(feed.visual) });
+      if (art.assetId != null) pushAct('phase', 'Story artwork ready — it’s in Media and on the carousel cover');
+      else pushAct('phase', `Artwork skipped — ${(art as any).reason}`);
+    }
+
     usage.costCents = computeCostCents(usage);
     pushAct('done', `Done — ${usage.searches} searches · ${usage.fetches} pages read · ~$${(usage.costCents / 100).toFixed(2)}`);
     await sql`
@@ -606,7 +619,7 @@ CADENCES: weekly | biweekly | monthly. DEPTHS: quick | standard | deep. OUTPUT F
 
 RULES:
 - Extract every RECURRING posting slot / campaign the document actually defines — one campaign per slot. Ignore one-off tasks, profile checklists, DM scripts, engagement tactics, and metrics advice.
-- topic is the run's standing research mandate: write it FROM THE DOCUMENT's own description of that slot — what to research each time, the angle to take, and any tie-back the document asks for (e.g. relating findings to buy-side corporate development for lower-middle-market companies). Self-contained, 1–4 sentences. Never invent subject matter the document does not contain.
+- topic is the run's standing research mandate: write it FROM THE DOCUMENT's own description of that slot — what to research each time, the angle to take, and any tie-back the document asks for (e.g. relating findings to buy-side corporate development for lower-middle-market companies). Self-contained, 1–4 sentences. Never invent subject matter the document does not contain. If the document specifies an accompanying visual or image idea for the slot, append it to the topic as one final sentence beginning "Visual direction:" (verbatim from the document's intent) so the researcher carries it into the artwork.
 - name: short, in the document's own slot naming (e.g. "Tuesday Teardown").
 - Choose the closest postAngle; when none fits use "auto". Choose the lens that best feeds the slot (sector teardowns → vertical_scan; claim-testing → thesis_validation; news/recap slots → deal_monitor or topic_brief; offer posts → deal_monitor). depth: standard unless the document implies a deep flagship piece. outputFormat: post_image unless the document asks for carousels/documents (post_pdf) or both.
 - note: ≤90 chars — where in the plan this came from (day/section).

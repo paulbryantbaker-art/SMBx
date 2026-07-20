@@ -447,10 +447,54 @@ function firstNumberToken(stat: string): string {
   return (m ? m[0] : '').trim();
 }
 
-export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null = null): string {
+/** The run's generated story artwork (artworkService files it into the media
+ *  library with run provenance). Null when none was generated — callers fall
+ *  back to the procedural motif. */
+export async function runArtwork(runId: number): Promise<AuthorPhoto | null> {
+  try {
+    const assets = await listStudioAssets();
+    const pick = assets.find(a => a.kind !== 'collateral' && (a as any).run_id === runId && /^Artwork/i.test(a.label) && a.mime.startsWith('image/'));
+    if (!pick) return null;
+    const full = await getStudioAsset(pick.id);
+    if (!full) return null;
+    return { dataUri: `data:${full.mime};base64,${full.data.toString('base64')}`, focalX: full.focal_x, focalY: full.focal_y };
+  } catch { return null; }
+}
+
+/* ─── Procedural editorial motif (2026-07-20) ──────────────────────────────
+ * When a run has no generated artwork, the pages still carry a graphic: a
+ * deterministic composition of arcs, a brass diagonal, dots, and (for
+ * structural lenses) grid lines — seeded by the run id so each deck is its
+ * own, in the Ledger palette, always abstract, never fake data. */
+function motifSvg(type: string, seed: number, w: number, h: number, dark = false): string {
+  let s = (seed >>> 0) || 1;
+  const rnd = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32);
+  const ink = dark ? 'rgba(243,241,234,0.10)' : 'rgba(20,24,28,0.07)';
+  const green = dark ? 'rgba(143,208,174,0.38)' : 'rgba(22,98,76,0.30)';
+  const brass = dark ? 'rgba(176,134,55,0.7)' : 'rgba(176,134,55,0.55)';
+  const cx = w * (0.62 + rnd() * 0.3);
+  const cy = h * (0.12 + rnd() * 0.22);
+  const rings = Array.from({ length: 5 }, (_, i) =>
+    `<circle cx="${cx.toFixed(0)}" cy="${cy.toFixed(0)}" r="${((i + 2) * (h / 8.5)).toFixed(0)}" fill="none" stroke="${i === 2 ? green : ink}" stroke-width="${i === 2 ? 3 : 2}"/>`).join('');
+  const diag = type === 'thesis_validation'
+    ? `<line x1="${w * 0.08}" y1="${h * 0.88}" x2="${w * 0.62}" y2="${h * 0.22}" stroke="${brass}" stroke-width="6" stroke-linecap="round"/>
+       <line x1="${w * 0.22}" y1="${h * 0.18}" x2="${w * 0.86}" y2="${h * 0.84}" stroke="${green}" stroke-width="3" stroke-linecap="round"/>`
+    : `<line x1="${w * 0.06}" y1="${h * 0.86}" x2="${w * 0.94}" y2="${h * 0.28}" stroke="${brass}" stroke-width="6" stroke-linecap="round"/>`;
+  const dots = Array.from({ length: 8 }, () =>
+    `<circle cx="${(w * rnd()).toFixed(0)}" cy="${(h * rnd()).toFixed(0)}" r="5" fill="${green}"/>`).join('');
+  const grid = (type === 'vertical_scan' || type === 'participant_map' || type === 'buyer_roster')
+    ? Array.from({ length: 4 }, (_, i) => `<line x1="${((w / 5) * (i + 1)).toFixed(0)}" y1="0" x2="${((w / 5) * (i + 1)).toFixed(0)}" y2="${h}" stroke="${ink}" stroke-width="1.5"/>`).join('')
+    : '';
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">${grid}${rings}${diag}${dots}</svg>`;
+}
+
+export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null = null, art: AuthorPhoto | null = null): string {
   const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
   const typeLabel = TYPE_LABELS[run.research_type] ?? 'Research';
   const pages = docPages(run);
+  const seed = Number(run.id) || 7;
+  const ghost = (n: number) => `<div class="ghost">${String(n).padStart(2, '0')}</div>`;
+  const sideMotif = `<div class="motif">${motifSvg(run.research_type, seed, 520, 520)}</div>`;
   const chart = feed.chart && Array.isArray(feed.chart.labels) && Array.isArray(feed.chart.values)
     && feed.chart.labels.length >= 3 && feed.chart.labels.length === feed.chart.values.length
     && feed.chart.values.every((v: any) => typeof v === 'number' && Number.isFinite(v))
@@ -468,14 +512,24 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     n++;
     if (p.kind === 'cover') {
       const h = String(p.heading ?? '');
-      const size = h.length > 120 ? 62 : h.length > 80 ? 72 : h.length > 50 ? 84 : 96;
+      // The cover carries the STORY VISUAL: the run's generated artwork when
+      // one exists, else the procedural motif — never a bare text page.
+      const size = h.length > 120 ? 54 : h.length > 80 ? 62 : h.length > 50 ? 72 : 84;
+      const artPanel = art?.dataUri
+        ? `<div class="cover-art"><img src="${art.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(art.focalX * 100)}% ${Math.round(art.focalY * 100)}%;display:block"></div>`
+        : `<div class="cover-art motifbox">${motifSvg(run.research_type, seed, 400, 760)}</div>`;
       pageHtml.push(`<div class="pg">
         <div class="wash"></div>
         <div class="in">
           <div class="kick"><span class="kl">${logoImg(40)}<span>${esc(typeLabel.toUpperCase())}</span></span><span>${esc(fmtDate(run.completed_at))}</span></div>
-          <div class="cover-h" style="font-size:${size}px">${esc(h)}</div>
-          <div class="rule"></div>
-          ${p.body ? `<div class="cover-sub">${esc(p.body)}</div>` : ''}
+          <div class="cover-row">
+            <div class="cover-txt">
+              <div class="cover-h" style="font-size:${size}px">${esc(h)}</div>
+              <div class="rule" style="margin-top:44px"></div>
+              ${p.body ? `<div class="cover-sub">${esc(p.body)}</div>` : ''}
+            </div>
+            ${artPanel}
+          </div>
           <div class="cover-by">
             ${faceImg(88, photo, { ring: 'rgba(22,98,76,0.35)' })}
             <div>
@@ -491,25 +545,42 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
       const numSize = numeral.length > 8 ? 120 : numeral.length > 5 ? 150 : 184;
       pageHtml.push(`<div class="pg">
         <div class="wash"></div>
+        ${ghost(n)}
+        ${sideMotif}
         <div class="in">
           ${kicker(n, total)}
           <div class="grow">
             <div class="numeral" style="font-size:${numSize}px">${esc(numeral)}</div>
-            <div class="rule"></div>
+            <div class="brassbar"></div>
             <div class="stat-h">${esc(p.heading ?? '')}</div>
             ${p.body ? `<div class="stat-b">${esc(p.body)}</div>` : ''}
           </div>
           ${p.source ? `<div class="src-line">${esc(p.source)}</div>` : ''}
         </div>
       </div>`);
-    } else { // story | takeaway
-      const isTake = p.kind === 'takeaway';
-      pageHtml.push(`<div class="pg${isTake ? ' take' : ''}">
+    } else if (p.kind === 'takeaway') {
+      // The takeaway flips to the boardroom band — the deck's dark punctuation.
+      pageHtml.push(`<div class="pg dark">
+        <div class="halo"></div>
+        <div class="motif dark-motif">${motifSvg(run.research_type, seed + 3, 520, 520, true)}</div>
+        <div class="in">
+          <div class="kick dark-kick"><span class="kl">${logoImg(30, { white: true })}<span>${esc(typeLabel.toUpperCase())}</span></span><span>${n} / ${total}</span></div>
+          <div class="grow">
+            <div class="take-tag">FOR THE ACQUIRER</div>
+            <div class="story-h dark-h">${esc(p.heading ?? '')}</div>
+            <div class="rule"></div>
+            ${p.body ? `<div class="story-b dark-b">${esc(p.body)}</div>` : ''}
+          </div>
+        </div>
+      </div>`);
+    } else { // story
+      pageHtml.push(`<div class="pg">
         <div class="wash"></div>
+        ${ghost(n)}
+        ${sideMotif}
         <div class="in">
           ${kicker(n, total)}
           <div class="grow">
-            ${isTake ? `<div class="take-tag">FOR THE ACQUIRER</div>` : ''}
             <div class="story-h">${esc(p.heading ?? '')}</div>
             <div class="rule"></div>
             ${p.body ? `<div class="story-b">${esc(p.body)}</div>` : ''}
@@ -580,10 +651,20 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     .kick .kl { display: flex; align-items: center; gap: 24px; }
     .rule { height: 6px; width: 96px; background: ${CORAL}; border-radius: 3px; }
     .grow { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 34px; }
+    /* editorial graphics layer */
+    .ghost { position: absolute; top: 34px; right: 52px; font-family: ${DISPLAY}; font-weight: 545; font-size: 320px;
+      line-height: 1; color: rgba(20,24,28,0.055); letter-spacing: -0.03em; }
+    .motif { position: absolute; right: -90px; bottom: -110px; width: 520px; height: 520px; }
+    .dark-motif { opacity: 0.9; }
+    .brassbar { height: 8px; width: 132px; background: ${BRASS}; border-radius: 4px; }
     /* cover */
-    .cover-h { margin-top: 150px; font-family: ${DISPLAY}; font-weight: 545; letter-spacing: -0.012em; line-height: 1.12; max-width: 900px; }
-    .cover-h + .rule { margin-top: 52px; }
-    .cover-sub { margin-top: 40px; font-size: 34px; color: ${BODY}; line-height: 1.4; max-width: 820px; }
+    .cover-row { margin-top: 96px; display: flex; gap: 52px; align-items: stretch; }
+    .cover-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .cover-art { width: 400px; height: 760px; flex: none; border-radius: 24px; overflow: hidden;
+      box-shadow: 0 30px 80px rgba(15,26,22,0.22); background: #fff; }
+    .cover-art.motifbox { background: #fff; border: 1px solid ${HAIR}; box-shadow: 0 20px 60px rgba(15,26,22,0.12); }
+    .cover-h { font-family: ${DISPLAY}; font-weight: 545; letter-spacing: -0.012em; line-height: 1.12; }
+    .cover-sub { margin-top: 36px; font-size: 31px; color: ${BODY}; line-height: 1.42; max-width: 560px; }
     .cover-by { position: absolute; left: 88px; bottom: 76px; display: flex; align-items: center; gap: 24px; }
     .cby-n { font-size: 26px; font-weight: 700; color: ${INK}; letter-spacing: -0.01em; }
     .cby-t { margin-top: 4px; font-size: 19px; color: ${TERT}; font-weight: 500; }
@@ -596,8 +677,10 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     /* story / takeaway */
     .story-h { font-family: ${DISPLAY}; font-size: 58px; font-weight: 545; letter-spacing: -0.012em; line-height: 1.16; max-width: 890px; }
     .story-b { font-size: 32px; color: ${BODY}; line-height: 1.5; max-width: 860px; }
-    .take .in { background: linear-gradient(180deg, rgba(247,247,247,0.0), rgba(247,247,247,0.85)); }
-    .take-tag { font-family: ${MONO}; font-size: 20px; letter-spacing: 0.12em; color: ${CORAL_DEEP}; font-weight: 600; }
+    .dark-h { color: ${IVORY}; }
+    .dark-b { color: ${IVORY_SUB}; }
+    .dark-kick { color: ${IVORY_SUB}; }
+    .take-tag { font-family: ${MONO}; font-size: 20px; letter-spacing: 0.12em; color: ${BRASS}; font-weight: 600; }
     /* chart */
     .chart-panel { background: #fff; border: 1px solid ${HAIR}; border-radius: 20px; padding: 34px; width: 904px; }
     .chart-unit { font-size: 24px; color: ${BODY}; }
@@ -618,7 +701,8 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
 
 export async function renderLinkedInDocPdf(run: ResearchRunRow): Promise<Buffer> {
   const photo = await authorPhoto();
-  const html = linkedInDocHtml(run, photo);
+  const art = await runArtwork(Number(run.id));
+  const html = linkedInDocHtml(run, photo, art);
   const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 1 });
