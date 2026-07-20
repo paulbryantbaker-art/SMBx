@@ -1891,7 +1891,7 @@ function ActivityFeed({ runId, running }: { runId: number; running: boolean }) {
 /* ─── Review panel — draft → edit → approve → export ───────────────────── */
 
 interface FeedPoint { stat: string; source?: string; note?: string; freshness?: string; confidence?: string }
-interface Feed { hooks: string[]; dataPoints: FeedPoint[] }
+interface Feed { hooks: string[]; dataPoints: FeedPoint[]; artAssetId?: number | null }
 
 function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
   run: RunRow;
@@ -1907,6 +1907,54 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
   const [saving, setSaving] = useState<"save" | "approve" | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const approved = run.review_status === "approved";
+  // Cover artwork: candidates from the media library (this run's generated
+  // art first, then photos), thumbnails blob-fetched with auth.
+  const [artCands, setArtCands] = useState<AssetRow[]>([]);
+  const [thumbs, setThumbs] = useState<Record<number, string>>({});
+  const [genBusy, setGenBusy] = useState(false);
+  const [coverPv, setCoverPv] = useState<string | null>(null);
+  const [coverState, setCoverState] = useState<"loading" | "ok" | "err">("loading");
+
+  const loadCover = useCallback(async () => {
+    setCoverState("loading");
+    try {
+      const r = await fetch(`/api/research/runs/${run.id}/cover.png?t=${Date.now()}`, { headers: authHeaders() });
+      if (!r.ok) throw new Error(String(r.status));
+      const url = URL.createObjectURL(await r.blob());
+      setCoverPv(prev => { if (prev) URL.revokeObjectURL(prev); return url; });
+      setCoverState("ok");
+    } catch { setCoverState("err"); }
+  }, [run.id]);
+
+  const loadArtCands = useCallback(async () => {
+    try {
+      const j = await api<{ assets: AssetRow[] }>("/studio/assets");
+      const all = (j.assets ?? []).filter(a => a.kind !== "collateral" && a.mime.startsWith("image/"));
+      const mine = all.filter(a => (a as any).run_id === run.id && /^Artwork/i.test(a.label));
+      const rest = all.filter(a => !mine.some(m => m.id === a.id)).slice(0, 8);
+      const cands = [...mine, ...rest];
+      setArtCands(cands);
+      for (const a of cands.slice(0, 12)) {
+        if (thumbs[a.id]) continue;
+        fetch(`/api/studio/assets/${a.id}/raw`, { headers: authHeaders() })
+          .then(r => (r.ok ? r.blob() : Promise.reject(new Error())))
+          .then(b => setThumbs(t => (t[a.id] ? t : { ...t, [a.id]: URL.createObjectURL(b) })))
+          .catch(() => {});
+      }
+    } catch { /* candidates are an enhancement — the pickers can stay empty */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [run.id]);
+
+  const regenerate = async () => {
+    setGenBusy(true); setErr(null);
+    try {
+      const j = await api<{ assetId: number }>(`/research/runs/${run.id}/artwork`, { method: "POST", body: JSON.stringify({}) });
+      setFeed(f => (f ? { ...f, artAssetId: j.assetId } : f));
+      await loadArtCands();
+      await loadCover();
+    } catch (e) { setErr(e instanceof Error ? e.message : "Artwork generation failed"); }
+    finally { setGenBusy(false); }
+  };
 
   // The preview IS the review — render it visibly, retry once on a hiccup,
   // and say what went wrong instead of sitting on a blank placeholder.
@@ -1937,11 +1985,14 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
       .then(j => setFeed({
         hooks: Array.isArray(j.feed?.hooks) && j.feed.hooks.length ? j.feed.hooks : [run.report_title || run.topic],
         dataPoints: Array.isArray(j.feed?.dataPoints) ? j.feed.dataPoints : [],
+        artAssetId: (j.feed as any)?.artAssetId,
       }))
       .catch(e => setErr(e instanceof Error ? e.message : "Couldn't load the draft"));
     void loadPreview();
+    void loadCover();
+    void loadArtCands();
     return () => setPreview(prev => { if (prev) URL.revokeObjectURL(prev); return null; });
-  }, [run.id, run.report_title, run.topic, loadPreview]);
+  }, [run.id, run.report_title, run.topic, loadPreview, loadCover, loadArtCands]);
 
   const save = async () => {
     if (!feed) return;
@@ -1949,7 +2000,7 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
     try {
       await api(`/research/runs/${run.id}/feed`, { method: "PATCH", body: JSON.stringify({ feed }) });
       pvTriedRef.current = 0; // fresh retry budget for the re-render
-      await loadPreview();
+      await Promise.all([loadPreview(), loadCover()]);
       onStatus();
     } catch (e) { setErr(e instanceof Error ? e.message : "Save failed"); }
     finally { setSaving(null); }
@@ -1990,6 +2041,32 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
           {(feed?.dataPoints.length ?? 0) < 4 && (
             <button type="button" style={RV.addPt} onClick={() => setFeed(f => f ? { ...f, dataPoints: [...f.dataPoints, { stat: "", source: "" }] } : f)}>+ Add data point</button>
           )}
+          <div style={{ ...RV.label, marginTop: 16 }}>Cover artwork — the poster image</div>
+          <div style={RV.artRow}>
+            <button
+              type="button"
+              title="No artwork — split cover with the sector illustration"
+              onClick={() => setFeed(f => (f ? { ...f, artAssetId: null } : f))}
+              style={{ ...RV.artThumb, ...(feed?.artAssetId === null ? RV.artThumbOn : null), display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10.5, color: T.muted, fontWeight: 700 }}
+            >
+              None
+            </button>
+            {artCands.map(a => (
+              <button
+                key={a.id}
+                type="button"
+                title={a.label}
+                onClick={() => setFeed(f => (f ? { ...f, artAssetId: a.id } : f))}
+                style={{ ...RV.artThumb, ...(feed?.artAssetId === a.id ? RV.artThumbOn : null) }}
+              >
+                {thumbs[a.id] ? <img src={thumbs[a.id]} alt={a.label} style={RV.artThumbImg} /> : <span style={{ fontSize: 9.5, color: T.muted2 }}>…</span>}
+              </button>
+            ))}
+            <button type="button" style={RV.genBtn} disabled={genBusy} onClick={() => void regenerate()}>
+              {genBusy ? "Generating…" : artCands.some(a => (a as any).run_id === run.id) ? "Regenerate" : "Generate artwork"}
+            </button>
+          </div>
+          <div style={{ fontSize: 11.5, color: T.muted2, marginTop: 4 }}>Pick an image, then Save & re-preview. The cover goes full poster when artwork is set.</div>
           <div style={RV.btnRow}>
             <button type="button" style={RV.saveBtn} disabled={saving !== null} onClick={save}>{saving === "save" ? "Saving…" : "Save & re-preview"}</button>
             {approved
@@ -2006,6 +2083,7 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
           </div>
         </div>
         <div style={RV.previewCol}>
+          <div style={RV.pvTag}>1-pager</div>
           {pvState === "ok" && preview ? (
             <a href={preview} target="_blank" rel="noreferrer" title="Open full size">
               <img src={preview} alt="1-pager preview" style={RV.previewImg} />
@@ -2019,6 +2097,21 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
             <div style={{ ...RV.previewEmpty, flexDirection: "column", gap: 10, padding: "0 14px", textAlign: "center" }}>
               <span style={{ color: "#B3261E", fontWeight: 600 }}>{pvErr}</span>
               <button type="button" style={RV.exportBtn} onClick={() => { pvTriedRef.current = 0; void loadPreview(); }}>Try again</button>
+            </div>
+          )}
+          <div style={{ ...RV.pvTag, marginTop: 14 }}>Carousel cover</div>
+          {coverState === "ok" && coverPv ? (
+            <a href={coverPv} target="_blank" rel="noreferrer" title="Open full size">
+              <img src={coverPv} alt="Carousel cover preview" style={RV.previewImg} />
+            </a>
+          ) : coverState === "loading" ? (
+            <div style={{ ...RV.previewEmpty, gap: 10, minHeight: 120 }}>
+              <Spinner />
+              <span>Rendering the cover…</span>
+            </div>
+          ) : (
+            <div style={{ ...RV.previewEmpty, minHeight: 80 }}>
+              <button type="button" style={RV.exportBtn} onClick={() => void loadCover()}>Retry cover preview</button>
             </div>
           )}
         </div>
@@ -2180,6 +2273,12 @@ const RV: Record<string, React.CSSProperties> = {
   previewCol: { width: 280, flex: "none" },
   previewImg: { width: "100%", display: "block", borderRadius: 10, border: `1px solid ${T.border}`, boxShadow: T.shCard },
   previewEmpty: { width: "100%", aspectRatio: "1080 / 1350", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12.5, color: T.muted, border: `1px dashed ${T.border}`, borderRadius: 10 },
+  pvTag: { fontSize: 11.5, fontWeight: 700, color: T.muted, marginBottom: 6 },
+  artRow: { display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginTop: 6 },
+  artThumb: { width: 56, height: 70, borderRadius: 8, border: `1.5px solid ${T.inputBd}`, background: T.white, padding: 0, overflow: "hidden", cursor: "pointer" },
+  artThumbOn: { borderColor: T.blue, boxShadow: `0 0 0 2px ${T.blueBg3}` },
+  artThumbImg: { width: "100%", height: "100%", objectFit: "cover", display: "block" },
+  genBtn: { height: 34, borderRadius: 999, border: `1px solid ${T.inputBd}`, background: T.white, padding: "0 14px", fontSize: 12.5, fontWeight: 700, color: T.blue, cursor: "pointer", fontFamily: T.font },
   label: { fontSize: 12, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.04em" },
   textarea: { marginTop: 6, width: "100%", resize: "vertical", borderRadius: 10, border: `1px solid ${T.inputBd}`, padding: "9px 11px", fontSize: 13.5, lineHeight: 1.5, color: T.ink, fontFamily: T.font, background: T.white, boxSizing: "border-box" },
   input: { flex: 1, minWidth: 0, height: 34, borderRadius: 9, border: `1px solid ${T.inputBd}`, padding: "0 10px", fontSize: 13, color: T.ink, fontFamily: T.font, background: T.white },
