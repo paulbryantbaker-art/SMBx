@@ -24,6 +24,17 @@ import { createStudioAsset } from './studioAssets.js';
 
 const IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
 
+/**
+ * Fallback brief for runs that predate the artwork pipeline (their feed has
+ * no `visual` field). Derived from the run's own title so Generate and the
+ * on-demand download path work on ANY run; artworkPrompt's style contract
+ * (no text, no people, no logos, no charts) keeps a derived brief safe.
+ */
+export function derivedVisualBrief(title: string): string {
+  const t = (title || '').trim().replace(/\s+/g, ' ').slice(0, 220);
+  return `an abstract editorial scene representing this market story: "${t}" — the industry it describes and its central dynamic, rendered as simple confident geometric forms`;
+}
+
 /** The generation prompt — exported for tests and future tuning. */
 export function artworkPrompt(visualBrief: string, title: string): string {
   return [

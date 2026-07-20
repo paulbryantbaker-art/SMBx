@@ -438,10 +438,12 @@ researchRouter.post('/research/runs/:id/artwork', async (req, res) => {
     const run = await loadCompleteRun(id, userId);
     if (!run) return res.status(404).json({ error: 'Run not found' });
     const feed = (run as any).studio_feed ?? {};
-    const brief = String(req.body?.brief ?? '').trim() || String(feed.visual ?? '').trim();
-    if (!brief) return res.status(400).json({ error: 'No visual brief — add one in the request or re-run the research' });
     if (!process.env.GOOGLE_AI_API_KEY) return res.status(400).json({ error: 'GOOGLE_AI_API_KEY is not configured on the server' });
-    const { generateRunArtwork } = await import('../services/artworkService.js');
+    const { generateRunArtwork, derivedVisualBrief } = await import('../services/artworkService.js');
+    // Priority: an explicit brief in the request, then the feed's own visual
+    // spec, then a brief derived from the title (pre-pipeline runs have none).
+    const brief = String(req.body?.brief ?? '').trim() || String(feed.visual ?? '').trim()
+      || derivedVisualBrief((run as any).report_title || (run as any).topic);
     const art = await generateRunArtwork({ runId: id, scheduleId: (run as any).schedule_id ?? null, title: (run as any).report_title || (run as any).topic, visualBrief: brief });
     if (art.assetId == null) return res.status(502).json({ error: `Artwork generation failed — ${(art as any).reason}` });
     const [existing] = await sql`SELECT studio_feed, feed_override FROM research_runs WHERE id = ${id} AND user_id = ${userId}`;
