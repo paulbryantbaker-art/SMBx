@@ -427,6 +427,30 @@ researchRouter.patch('/research/runs/:id/feed', async (req, res) => {
   }
 });
 
+/** The run's copy-ready Gemini prompt (2026-07-20, Paul generates images in
+ *  the Gemini app himself: "AFTER the research runs, it can generate the
+ *  right image prompt for Gemini, i'll import and assign"). Composed from
+ *  the feed's story-specific visual brief (else derived from the title)
+ *  through the same single-scene style contract the API path uses. */
+researchRouter.get('/research/runs/:id/artwork-prompt', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const id = parseId(req.params.id);
+  if (!id) return res.status(400).json({ error: 'Bad run id' });
+  try {
+    const run = await loadCompleteRun(id, userId);
+    if (!run) return res.status(404).json({ error: 'Run not found' });
+    const feed = (run as any).studio_feed ?? {};
+    const title = (run as any).report_title || (run as any).topic;
+    const { artworkPrompt, derivedVisualBrief } = await import('../services/artworkService.js');
+    const brief = String(feed.visual ?? '').trim() || derivedVisualBrief(title);
+    return res.json({ prompt: artworkPrompt(brief, title) });
+  } catch (err: any) {
+    console.error('[research] artwork prompt failed:', err?.message);
+    return res.status(500).json({ error: 'Couldn’t compose the prompt' });
+  }
+});
+
 /** Regenerate the run's story artwork on demand (review sheet). The fresh
  *  asset becomes the cover pick immediately via feed_override.artAssetId. */
 researchRouter.post('/research/runs/:id/artwork', async (req, res) => {

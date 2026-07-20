@@ -40,6 +40,8 @@ export function artworkPrompt(visualBrief: string, title: string): string {
   return [
     `Flat editorial illustration for a financial research publication. Subject: ${visualBrief.trim()}`,
     `Context (do not render as text): "${title.trim()}".`,
+    'ONE single cohesive scene with ONE focal subject — like a magazine cover illustration.',
+    'NOT a collage, NOT a sprite sheet, NOT a grid of vignettes, NOT multiple separate drawings on one page.',
     'Style: minimal flat vector-like editorial art, generous negative space, confident geometric shapes,',
     'subtle paper grain. Palette STRICTLY: bone off-white background #F6F4EF, deep green #16624C,',
     'near-black ink #14181C, one small brass-gold accent #B08637. Portrait 4:5 composition.',

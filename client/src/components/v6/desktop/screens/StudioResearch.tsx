@@ -1962,6 +1962,19 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
     finally { setGenBusy(false); }
   };
 
+  // Paul's Gemini-app workflow: copy the run's story-specific prompt, paste
+  // it into Gemini, upload the image to Media, pick it above.
+  const [promptCopied, setPromptCopied] = useState(false);
+  const copyPrompt = async () => {
+    setErr(null);
+    try {
+      const j = await api<{ prompt: string }>(`/research/runs/${run.id}/artwork-prompt`);
+      await navigator.clipboard.writeText(j.prompt);
+      setPromptCopied(true);
+      setTimeout(() => setPromptCopied(false), 2000);
+    } catch (e) { setErr(e instanceof Error ? e.message : "Couldn’t copy the prompt"); }
+  };
+
   // The preview IS the review — render it visibly, retry once on a hiccup,
   // and say what went wrong instead of sitting on a blank placeholder.
   const loadPreview = useCallback(async () => {
@@ -2071,8 +2084,11 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
             <button type="button" style={RV.genBtn} disabled={genBusy} onClick={() => void regenerate()}>
               {genBusy ? "Generating…" : artCands.some(a => (a as any).run_id === run.id) ? "Regenerate" : "Generate artwork"}
             </button>
+            <button type="button" style={RV.genBtn} onClick={() => void copyPrompt()}>
+              {promptCopied ? "Copied ✓" : "Copy Gemini prompt"}
+            </button>
           </div>
-          <div style={{ fontSize: 11.5, color: T.muted2, marginTop: 4 }}>Pick an image, then Save & re-preview — it fills the cover and 1-pager panel. No pick = the built-in industry illustration.</div>
+          <div style={{ fontSize: 11.5, color: T.muted2, marginTop: 4 }}>Copy the prompt into the Gemini app, upload the image to Media, then pick it here and Save. No pick = your photo fills the panel.</div>
           <div style={RV.btnRow}>
             <button type="button" style={RV.saveBtn} disabled={saving !== null} onClick={save}>{saving === "save" ? "Saving…" : "Save & re-preview"}</button>
             {approved
