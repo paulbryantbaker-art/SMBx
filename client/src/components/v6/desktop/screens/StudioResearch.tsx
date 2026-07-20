@@ -1920,6 +1920,12 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
   const [genBusy, setGenBusy] = useState(false);
   const [coverPv, setCoverPv] = useState<string | null>(null);
   const [coverState, setCoverState] = useState<"loading" | "ok" | "err">("loading");
+  // Per-page artwork (Paul: "drag and drop … onto which page i want that
+  // image"): final rendered page order from the server; pageArt maps page
+  // index → media asset id and saves with the review.
+  const [pages, setPages] = useState<{ i: number; kind: string; heading: string; artAssetId: number | null }[]>([]);
+  const [pageArt, setPageArt] = useState<Record<string, number>>({});
+  const [dragPage, setDragPage] = useState<number | null>(null);
 
   const loadCover = useCallback(async () => {
     setCoverState("loading");
@@ -2007,6 +2013,14 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
         artAssetId: (j.feed as any)?.artAssetId,
       }))
       .catch(e => setErr(e instanceof Error ? e.message : "Couldn't load the draft"));
+    api<{ pages: { i: number; kind: string; heading: string; artAssetId: number | null }[] }>(`/research/runs/${run.id}/pages`)
+      .then(j => {
+        setPages(j.pages ?? []);
+        const m: Record<string, number> = {};
+        for (const pg of j.pages ?? []) if (pg.kind !== "cover" && pg.artAssetId) m[String(pg.i)] = pg.artAssetId;
+        setPageArt(m);
+      })
+      .catch(() => {});
     void loadPreview();
     void loadCover();
     void loadArtCands();
@@ -2017,7 +2031,7 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
     if (!feed) return;
     setSaving("save"); setErr(null);
     try {
-      await api(`/research/runs/${run.id}/feed`, { method: "PATCH", body: JSON.stringify({ feed }) });
+      await api(`/research/runs/${run.id}/feed`, { method: "PATCH", body: JSON.stringify({ feed: { ...feed, pageArt } }) });
       pvTriedRef.current = 0; // fresh retry budget for the re-render
       await Promise.all([loadPreview(), loadCover()]);
       onStatus();
@@ -2074,7 +2088,9 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
               <button
                 key={a.id}
                 type="button"
-                title={a.label}
+                title={`${a.label} — click for the cover, or drag onto a page below`}
+                draggable
+                onDragStart={e => { e.dataTransfer.setData("application/json", JSON.stringify({ t: "asset", id: a.id })); e.dataTransfer.effectAllowed = "copy"; }}
                 onClick={() => setFeed(f => (f ? { ...f, artAssetId: a.id } : f))}
                 style={{ ...RV.artThumb, ...(feed?.artAssetId === a.id ? RV.artThumbOn : null) }}
               >
@@ -2089,6 +2105,57 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
             </button>
           </div>
           <div style={{ fontSize: 11.5, color: T.muted2, marginTop: 4 }}>Copy the prompt into the Gemini app, upload the image to Media, then pick it here and Save. No pick = your photo fills the panel.</div>
+          {pages.length > 0 && (
+            <>
+              <div style={{ ...RV.label, marginTop: 16 }}>Pages — drag an image onto the page it belongs on</div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 6 }}>
+                {pages.map(pg => {
+                  const isCover = pg.kind === "cover";
+                  const dark = pg.kind === "takeaway";
+                  const aid = isCover ? (feed?.artAssetId ?? null) : (pageArt[String(pg.i)] ?? null);
+                  const clear = () => {
+                    if (isCover) setFeed(f => (f ? { ...f, artAssetId: null } : f));
+                    else setPageArt(m => { const n = { ...m }; delete n[String(pg.i)]; return n; });
+                  };
+                  return (
+                    <div
+                      key={pg.i}
+                      onDragOver={dark ? undefined : e => { e.preventDefault(); setDragPage(pg.i); }}
+                      onDragLeave={() => setDragPage(v => (v === pg.i ? null : v))}
+                      onDrop={dark ? undefined : e => {
+                        e.preventDefault(); setDragPage(null);
+                        try {
+                          const d = JSON.parse(e.dataTransfer.getData("application/json"));
+                          const aid2 = Number(d?.id);
+                          if (d?.t === "asset" && Number.isInteger(aid2) && aid2 > 0) {
+                            if (isCover) setFeed(f => (f ? { ...f, artAssetId: aid2 } : f));
+                            else setPageArt(m => ({ ...m, [String(pg.i)]: aid2 }));
+                          }
+                        } catch { /* not an asset payload */ }
+                      }}
+                      style={{ width: 122, border: dragPage === pg.i ? `2px solid ${T.blue}` : `1px solid ${T.border}`, borderRadius: 10, padding: 8, background: dark ? "#0F1A16" : "#fff" }}
+                    >
+                      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.04em", color: dark ? "#D8D5CA" : T.muted, textTransform: "uppercase" }}>{pg.i + 1} · {pg.kind}</div>
+                      <div style={{ fontSize: 11, color: dark ? "#F3F1EA" : T.ink, lineHeight: 1.3, margin: "4px 0 6px", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const }}>{pg.heading}</div>
+                      {dark ? (
+                        <div style={{ fontSize: 10, color: "#8FD0AE" }}>your photo page</div>
+                      ) : aid ? (
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          {thumbs[aid]
+                            ? <img src={thumbs[aid]} alt="" style={{ width: 30, height: 38, objectFit: "cover", borderRadius: 5 }} />
+                            : <span style={{ fontSize: 10, color: T.muted }}>image set</span>}
+                          <button type="button" title="Remove the image" onClick={clear} style={{ border: "none", background: "none", color: T.muted, cursor: "pointer", fontSize: 14, padding: 0 }}>×</button>
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: 10, color: T.muted2 }}>drop image</div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ fontSize: 11.5, color: T.muted2, marginTop: 4 }}>Save to apply — page images show in the Carousel PDF.</div>
+            </>
+          )}
           <div style={RV.btnRow}>
             <button type="button" style={RV.saveBtn} disabled={saving !== null} onClick={save}>{saving === "save" ? "Saving…" : "Save & re-preview"}</button>
             {approved

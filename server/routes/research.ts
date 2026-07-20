@@ -22,7 +22,7 @@ import {
   nextRunAt,
   parseCampaignPlan,
 } from '../services/researchAgent.js';
-import { renderResearchPdf, renderResearchCardPng, renderLinkedInDocPdf, renderCoverPng, researchPostText, renderAnnouncementCardPng, type ResearchRunRow, type AnnouncementSpec, renderPostCardPng, type PostCardSpec } from '../services/researchComposer.js';
+import { renderResearchPdf, renderResearchCardPng, renderLinkedInDocPdf, renderCoverPng, researchPostText, renderAnnouncementCardPng, docPages, type ResearchRunRow, type AnnouncementSpec, renderPostCardPng, type PostCardSpec } from '../services/researchComposer.js';
 import { listStudioAssets, getStudioAsset, createStudioAsset, updateStudioAsset, deleteStudioAsset } from '../services/studioAssets.js';
 import { importLinkedInWorkbook, analyzeLinkedInImport } from '../services/linkedinAnalytics.js';
 import multer from 'multer';
@@ -404,6 +404,23 @@ researchRouter.patch('/research/runs/:id/feed', async (req, res) => {
       artAssetId = aid;
     }
   }
+  // Per-page artwork (2026-07-20, drag & drop): {finalPageIndex: assetId|null}.
+  // Full replace on every save; the client always sends the complete map.
+  let pageArt: Record<string, number> | undefined = undefined;
+  if ('pageArt' in b) {
+    pageArt = {};
+    const entries = Object.entries(b.pageArt && typeof b.pageArt === 'object' ? b.pageArt : {}).slice(0, 12);
+    for (const [k, v] of entries) {
+      const idx = Number(k);
+      if (!Number.isInteger(idx) || idx < 0 || idx > 11) continue;
+      if (v === null || v === '') continue; // dropped back off — omit
+      const aid = Number(v);
+      if (!Number.isInteger(aid) || aid <= 0) return res.status(400).json({ error: 'Bad page artwork id' });
+      const asset = await getStudioAsset(aid);
+      if (!asset || !asset.mime.startsWith('image/')) return res.status(404).json({ error: 'Page artwork not found' });
+      pageArt[String(idx)] = aid;
+    }
+  }
   try {
     // MERGE the edits over the full generated feed — storing only
     // {hooks, dataPoints} used to wipe post/docPages/chart out of the
@@ -413,7 +430,7 @@ researchRouter.patch('/research/runs/:id/feed', async (req, res) => {
        WHERE id = ${id} AND user_id = ${userId} AND status = 'complete'`;
     if (!existing) return res.status(404).json({ error: 'Run not found' });
     const base = { ...((existing as any).studio_feed ?? {}), ...((existing as any).feed_override ?? {}) };
-    const merged = { ...base, hooks, dataPoints, ...(artAssetId !== undefined ? { artAssetId } : {}) };
+    const merged = { ...base, hooks, dataPoints, ...(artAssetId !== undefined ? { artAssetId } : {}), ...(pageArt !== undefined ? { pageArt } : {}) };
     const [row] = await sql`
       UPDATE research_runs
          SET feed_override = ${sql.json(merged)}::jsonb, review_status = 'draft'
@@ -424,6 +441,27 @@ researchRouter.patch('/research/runs/:id/feed', async (req, res) => {
   } catch (err) {
     console.error('[research] feed save failed', err);
     return res.status(500).json({ error: 'Save failed' });
+  }
+});
+
+/** The carousel's pages in FINAL rendered order — the review sheet's
+ *  drop targets for per-page artwork. Cover art rides feed.artAssetId;
+ *  content pages ride feed.pageArt[index]. */
+researchRouter.get('/research/runs/:id/pages', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const id = parseId(req.params.id);
+  if (!id) return res.status(400).json({ error: 'Bad run id' });
+  try {
+    const run = await loadCompleteRun(id, userId);
+    if (!run || !run.studio_feed) return res.status(404).json({ error: 'Run not found' });
+    const pages = docPages(run as any).map((p: any, i: number) => ({
+      i, kind: p.kind, heading: String(p.heading ?? '').slice(0, 90), artAssetId: p.artAssetId ?? null,
+    }));
+    return res.json({ pages });
+  } catch (err: any) {
+    console.error('[research] pages failed:', err?.message);
+    return res.status(500).json({ error: 'Couldn’t list the pages' });
   }
 });
 
