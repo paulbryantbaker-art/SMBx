@@ -471,13 +471,16 @@ export default function StudioResearch({ user }: { user: User | null }) {
     const base = slugify(r.report_title || r.topic);
     try {
       // Exports both download AND file themselves into the Collateral
-      // folder, linked to the run's campaign (save=1).
-      if (kind === "pdf") await download(`/research/runs/${r.id}/pdf?save=1`, `smbx-research-${base}.pdf`);
-      else if (kind === "card") await download(`/research/runs/${r.id}/card.png?save=1`, `smbx-onepager-${base}.png`);
-      else if (kind === "lipdf") await download(`/research/runs/${r.id}/linkedin.pdf?save=1`, `smbx-linkedin-${base}.pdf`);
-      else await download(`/research/runs/${r.id}/md`, `smbx-research-${base}.md`);
+      // folder, linked to the run's campaign (save=1). The note names the
+      // exact file so a click is always traceable to what landed on disk.
+      const [url, file] =
+        kind === "pdf" ? [`/research/runs/${r.id}/pdf?save=1`, `smbx-research-${base}.pdf`]
+        : kind === "card" ? [`/research/runs/${r.id}/card.png?save=1`, `smbx-onepager-${base}.png`]
+        : kind === "lipdf" ? [`/research/runs/${r.id}/linkedin.pdf?save=1`, `smbx-linkedin-${base}.pdf`]
+        : [`/research/runs/${r.id}/md`, `smbx-research-${base}.md`];
+      await download(url, file);
       if (kind !== "md") {
-        setNote({ kind: "ok", text: "Exported — downloaded, and filed in Collateral under its campaign." });
+        setNote({ kind: "ok", text: `Exported ${file} — downloaded, and filed in Collateral under its campaign.` });
         void refresh();
       }
     } catch (e: any) {
@@ -1322,11 +1325,14 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
   );
 }
 
-function DocRow({ label, onClick, busy, muted }: { label: string; onClick: () => void; busy?: boolean; muted?: boolean }) {
+function DocRow({ label, sub, onClick, busy, muted }: { label: string; sub?: string; onClick: () => void; busy?: boolean; muted?: boolean }) {
   return (
     <button type="button" style={F.docRow} onClick={onClick} disabled={busy}>
       <DocGlyph c={muted ? T.muted : T.blue} />
-      <span style={{ ...F.docLabel, color: muted ? T.muted : T.ink }}>{label}</span>
+      <span style={{ display: "flex", flexDirection: "column", gap: 1, minWidth: 0, flex: 1, textAlign: "left" as const }}>
+        <span style={{ ...F.docLabel, color: muted ? T.muted : T.ink }}>{label}</span>
+        {sub && <span style={{ fontSize: 11.5, color: T.muted2, lineHeight: 1.35 }}>{sub}</span>}
+      </span>
       <span style={F.docGet}>{busy ? "…" : "Get"}</span>
     </button>
   );
@@ -1371,9 +1377,9 @@ function RunPreview({ run, schedules, typeLabel, angleLabel, dl, reviewOpen, onR
       {done && (
         <>
           <div style={F.prevLabel}>Documents</div>
-          <DocRow label="Report PDF" busy={dl === `${run.id}:pdf`} onClick={() => onGrab("pdf")} />
-          {run.has_feed && <DocRow label="LinkedIn 1-pager (PNG)" busy={dl === `${run.id}:card`} onClick={() => onGrab("card")} />}
-          {run.has_feed && <DocRow label="LinkedIn carousel (PDF)" busy={dl === `${run.id}:lipdf`} onClick={() => onGrab("lipdf")} />}
+          <DocRow label="Report PDF" sub="The long findings document — letter pages, downloads as smbx-research-…" busy={dl === `${run.id}:pdf`} onClick={() => onGrab("pdf")} />
+          {run.has_feed && <DocRow label="LinkedIn 1-pager (PNG)" sub="One square announcement-style image — smbx-onepager-…" busy={dl === `${run.id}:card`} onClick={() => onGrab("card")} />}
+          {run.has_feed && <DocRow label="LinkedIn carousel (PDF)" sub="Swipeable square pages — announcement cover, dark closer — smbx-linkedin-…" busy={dl === `${run.id}:lipdf`} onClick={() => onGrab("lipdf")} />}
           {run.has_feed && <DocRow label="Post text — copy" busy={dl === `${run.id}:post`} onClick={onCopyPost} />}
           <DocRow label="Report markdown" busy={dl === `${run.id}:md`} onClick={() => onGrab("md")} muted />
           {run.has_feed && (
