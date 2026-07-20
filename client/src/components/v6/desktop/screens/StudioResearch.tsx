@@ -2066,7 +2066,7 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
               {genBusy ? "Generating…" : artCands.some(a => (a as any).run_id === run.id) ? "Regenerate" : "Generate artwork"}
             </button>
           </div>
-          <div style={{ fontSize: 11.5, color: T.muted2, marginTop: 4 }}>Pick an image, then Save & re-preview. The cover goes full poster when artwork is set.</div>
+          <div style={{ fontSize: 11.5, color: T.muted2, marginTop: 4 }}>Pick an image, then Save & re-preview — it fills the cover and 1-pager panel. No pick = the built-in industry illustration.</div>
           <div style={RV.btnRow}>
             <button type="button" style={RV.saveBtn} disabled={saving !== null} onClick={save}>{saving === "save" ? "Saving…" : "Save & re-preview"}</button>
             {approved

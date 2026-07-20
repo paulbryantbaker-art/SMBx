@@ -747,10 +747,14 @@ async function ensureRunArtwork(run: ResearchRunRow): Promise<AuthorPhoto | null
   let art = await runArtwork(run);
   if (art) return art;
   const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
-  if (feed.artAssetId === undefined && typeof feed.visual === 'string' && feed.visual.trim() && process.env.GOOGLE_AI_API_KEY) {
+  if (feed.artAssetId === undefined && process.env.GOOGLE_AI_API_KEY) {
     try {
-      const { generateRunArtwork } = await import('./artworkService.js');
-      const out = await generateRunArtwork({ runId: Number(run.id), scheduleId: (run as any).schedule_id ?? null, title: run.report_title || run.topic, visualBrief: feed.visual });
+      const { generateRunArtwork, derivedVisualBrief } = await import('./artworkService.js');
+      const title = run.report_title || run.topic;
+      // Pre-pipeline runs have no feed.visual — derive a brief from the title
+      // so they self-heal on first download too.
+      const brief = (typeof feed.visual === 'string' && feed.visual.trim()) ? feed.visual : derivedVisualBrief(title);
+      const out = await generateRunArtwork({ runId: Number(run.id), scheduleId: (run as any).schedule_id ?? null, title, visualBrief: brief });
       if (out.assetId != null) art = await runArtwork(run);
       else console.warn(`[composer] on-demand artwork skipped for run ${run.id}: ${(out as any).reason}`);
     } catch (err: any) {
@@ -760,7 +764,7 @@ async function ensureRunArtwork(run: ResearchRunRow): Promise<AuthorPhoto | null
   return art;
 }
 
-/** The carousel COVER alone as a PNG — the review sheet's poster preview. */
+/** The carousel COVER alone as a PNG — the review sheet's cover preview. */
 export async function renderCoverPng(run: ResearchRunRow): Promise<Buffer> {
   const photo = await authorPhoto();
   const art = await ensureRunArtwork(run);
