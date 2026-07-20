@@ -303,94 +303,86 @@ export async function renderResearchPdf(run: ResearchRunRow): Promise<Buffer> {
 
 /* ─── the LinkedIn card (1080×1350) ───────────────────────────────────── */
 
-export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: AuthorPhoto | null = null): string {
+export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: AuthorPhoto | null = null, art: AuthorPhoto | null = null): string {
   const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
   const hooks: string[] = Array.isArray(feed.hooks) ? feed.hooks : [];
   const hook = hooks[Math.min(Math.max(hookIndex, 0), Math.max(hooks.length - 1, 0))] || run.report_title || run.topic;
-  const allPoints: any[] = (Array.isArray(feed.dataPoints) ? feed.dataPoints : []).slice(0, 3);
+  const points: any[] = (Array.isArray(feed.dataPoints) ? feed.dataPoints : []).slice(0, 3);
   const typeLabel = TYPE_LABELS[run.research_type] ?? 'Research';
 
-  // The story motif (2026-07-19, Paul: graphics that carry the story): the
-  // LEAD data point becomes the site's signature giant numeral — the number IS
-  // the graphic, brass-jewelled, always from a cited stat, never decoration.
-  const lead = allPoints[0] ?? null;
-  const leadNum = lead ? firstNumberToken(lead.stat) : '';
-  const heroStat = leadNum.length >= 2 ? lead : null;
-  const rest = heroStat ? allPoints.slice(1) : allPoints;
-  const heroCaption = heroStat ? String(heroStat.stat).replace(leadNum, '').replace(/^\s*[—–\-:,]\s*/, '').trim() : '';
-  const numSize = leadNum.length > 9 ? 128 : leadNum.length > 6 ? 158 : 190;
-
-  // Long hooks step the display size down so nothing clips at 1080 wide.
-  const hookSize = hook.length > 150 ? 46 : hook.length > 100 ? 54 : hook.length > 60 ? 62 : 72;
+  // The ANNOUNCEMENT template is the law (Paul, 2026-07-20: "the original
+  // announcements are great — let's keep those, as either single one-pager or
+  // multiple page pdf"): left editorial column, right image panel, flat dark
+  // footer. Flat bone + the announcement wash — no paper texture.
+  const pages = docPages(run);
+  const sub = String(pages.find(pg => pg.kind === 'cover')?.body ?? '').trim();
+  const mandate = String(pages.find(pg => pg.kind === 'takeaway')?.heading ?? '').trim();
+  const sectorText = `${run.topic} ${run.report_title ?? ''}`;
+  const hookSize = hook.length > 130 ? 40 : hook.length > 90 ? 45 : hook.length > 60 ? 50 : 56;
+  const panel = art?.dataUri
+    ? `<img src="${art.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(art.focalX * 100)}% ${Math.round(art.focalY * 100)}%;display:block">`
+    : `<div class="sector">${sectorArtSvg(sectorText, 380, 520).svg}</div>`;
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8">${FONTS}
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { width: 1080px; height: 1350px; font-family: ${SANS}; color: ${INK}; background: ${WARM}; ${LIGHT_TEXTURE_URI ? `background-image: url('${LIGHT_TEXTURE_URI}'); background-size: cover; background-position: center;` : ''} overflow: hidden; position: relative; font-variant-numeric: tabular-nums; }
+    body { width: 1080px; height: 1350px; font-family: ${SANS}; color: ${INK}; background: ${WARM}; overflow: hidden; position: relative; font-variant-numeric: tabular-nums; }
     .wash { position: absolute; inset: 0; background:
-      radial-gradient(820px 620px at 88% -6%, rgba(22,98,76,0.10), transparent 62%),
-      radial-gradient(700px 560px at -8% 52%, rgba(176,134,55,0.07), transparent 60%); }
-    .frame { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 76px 88px 0; }
-    .tag { display: flex; justify-content: space-between; align-items: center; font-family: ${MONO};
-      font-size: 21px; letter-spacing: 0.1em; color: ${TERT}; text-transform: uppercase; }
-    .tag .tl { display: flex; align-items: center; gap: 22px; }
-    .hook { margin-top: 66px; font-family: ${DISPLAY}; font-size: ${hookSize}px; font-weight: 545; letter-spacing: -0.012em; line-height: 1.12; max-width: 900px; }
+      radial-gradient(1200px 800px at 8% 0%, rgba(22,98,76,0.045), transparent 60%),
+      radial-gradient(900px 700px at 100% 100%, rgba(203,193,170,0.16), transparent 55%); }
+    .left { position: absolute; left: 0; top: 0; bottom: 128px; width: 512px; padding: 60px 46px 0 60px; display: flex; flex-direction: column; }
+    .kick { display: flex; align-items: center; justify-content: space-between; }
+    .kick .kt { font-family: ${MONO}; font-size: 18px; letter-spacing: 0.1em; color: ${TERT}; text-transform: uppercase; }
+    .hook { margin-top: 56px; font-family: ${DISPLAY}; font-weight: 545; font-size: ${hookSize}px; line-height: 1.12; letter-spacing: -0.012em; color: ${INK}; }
     .turn { color: ${CORAL_DEEP}; }
-    .rule { height: 6px; width: 96px; background: ${CORAL}; border-radius: 3px; margin: 44px 0 0; }
-    .hero { margin-top: 48px; }
-    .hero .num { font-weight: 800; font-size: ${numSize}px; letter-spacing: -0.03em; line-height: 0.98; color: ${INK}; }
-    .hero .bar { height: 8px; width: 132px; background: ${BRASS}; border-radius: 4px; margin: 26px 0 22px; }
-    .hero .cap { font-size: 33px; font-weight: 700; letter-spacing: -0.012em; line-height: 1.3; color: ${INK}; max-width: 880px; }
-    .hero .src { margin-top: 10px; font-family: ${MONO}; font-size: 18px; color: ${TERT}; letter-spacing: 0.02em; }
-    .pts { margin-top: 44px; display: flex; flex-direction: column; gap: 30px; }
-    .pt { display: flex; gap: 24px; align-items: flex-start; }
-    .dot { width: 13px; height: 13px; border-radius: 50%; background: ${CORAL}; margin-top: 12px; flex: none; }
-    .stat { font-size: 29px; font-weight: 700; letter-spacing: -0.012em; line-height: 1.3; color: ${INK}; }
-    .src { margin-top: 7px; font-family: ${MONO}; font-size: 17px; color: ${TERT}; letter-spacing: 0.02em; }
-    .foot { position: absolute; left: 0; right: 0; bottom: 0; height: 150px; background: ${DARK};
-      ${DARK_TEXTURE_URI ? `background-image: url('${DARK_TEXTURE_URI}'); background-size: cover; background-position: center;` : ''}
-      display: flex; align-items: center; justify-content: space-between; padding: 0 88px; }
-    .foot::before { content: ''; position: absolute; inset: 0; background:
-      radial-gradient(700px 220px at 30% 0%, rgba(84,150,118,0.20), transparent 70%),
-      linear-gradient(180deg, rgba(15,26,22,0.30), rgba(13,23,19,0.45)); }
-    .who { position: relative; display: flex; align-items: center; gap: 22px; }
-    .who .wn { color: ${IVORY}; font-size: 24px; font-weight: 700; letter-spacing: -0.01em; }
-    .who .wt { margin-top: 4px; color: ${IVORY_SUB}; font-size: 18px; font-weight: 500; }
-    .foot .br { position: relative; }
+    .rule { width: 70px; height: 6px; background: ${CORAL}; border-radius: 99px; margin: 32px 0 28px; }
+    .sub { font-size: 22px; line-height: 1.5; color: ${TERT}; font-weight: 500; }
+    .pts { margin-top: 34px; display: flex; flex-direction: column; gap: 24px; }
+    .pt { display: flex; gap: 18px; align-items: flex-start; }
+    .dot { width: 11px; height: 11px; border-radius: 50%; background: ${CORAL}; flex: none; margin-top: 11px; }
+    .stat { font-size: 22.5px; line-height: 1.4; color: ${INK}; font-weight: 700; }
+    .src { margin-top: 4px; font-family: ${MONO}; font-size: 14.5px; color: ${TERT}; letter-spacing: 0.03em; }
+    .mandate { margin-top: auto; padding-bottom: 44px; font-size: 23.5px; line-height: 1.45; color: ${INK}; font-weight: 700; }
+    .right { position: absolute; left: 536px; top: 0; bottom: 128px; right: 0; background: #fff; }
+    .right .fade { position: absolute; inset: 0; background: linear-gradient(90deg, ${WARM} 0%, transparent 9%); }
+    .sector { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+    .foot { position: absolute; left: 0; right: 0; bottom: 0; height: 128px; background: ${DARK};
+      display: flex; align-items: center; justify-content: space-between; padding: 0 60px; }
+    .who { display: flex; align-items: center; gap: 20px; }
+    .wn { color: ${IVORY}; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+    .wt { margin-top: 3px; color: ${IVORY_SUB}; font-size: 17px; font-weight: 500; }
   </style></head><body>
     <div class="wash"></div>
-    <div class="frame">
-      <div class="tag"><span class="tl">${logoImg(38)}<span>${esc(typeLabel.toUpperCase())}</span></span><span>${esc(fmtDate(run.completed_at))}</span></div>
+    <div class="left">
+      <div class="kick">${logoImg(42)}<span class="kt">${esc(typeLabel.toUpperCase())}</span></div>
       <div class="hook">${twoToneHook(hook)}</div>
       <div class="rule"></div>
-      ${heroStat ? `<div class="hero">
-        <div class="num">${esc(leadNum)}</div>
-        <div class="bar"></div>
-        ${heroCaption ? `<div class="cap">${esc(heroCaption)}</div>` : ''}
-        <div class="src">${esc([heroStat.source, heroStat.freshness].filter(Boolean).join(' · '))}</div>
-      </div>` : ''}
-      ${rest.length ? `<div class="pts">${rest.map(p => `
-        <div class="pt"><div class="dot"></div><div>
+      ${sub ? `<div class="sub">${esc(sub)}</div>` : ''}
+      ${points.length ? `<div class="pts">${points.map(p => `
+        <div class="pt"><span class="dot"></span><div>
           <div class="stat">${esc(p.stat)}</div>
           <div class="src">${esc([p.source, p.freshness].filter(Boolean).join(' · '))}</div>
         </div></div>`).join('')}</div>` : ''}
+      ${mandate ? `<div class="mandate">${esc(mandate)}</div>` : ''}
     </div>
+    <div class="right">${panel}<div class="fade"></div></div>
     <div class="foot">
+      ${logoImg(48, { white: true })}
       <div class="who">
-        ${faceImg(96, photo, { ring: 'rgba(143,208,174,0.65)' })}
+        ${faceImg(72, photo, { ring: 'rgba(143,208,174,0.65)' })}
         <div>
           <div class="wn">Paul Baker</div>
           <div class="wt">Buy-side corporate development</div>
         </div>
       </div>
-      <div class="br">${logoImg(50, { white: true })}</div>
     </div>
   </body></html>`;
 }
 
 export async function renderResearchCardPng(run: ResearchRunRow, hookIndex = 0): Promise<Buffer> {
   const photo = await authorPhoto();
-  const html = researchCardHtml(run, hookIndex, photo);
+  const art = await runArtwork(run);
+  const html = researchCardHtml(run, hookIndex, photo, art);
   const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 2 });
@@ -499,9 +491,9 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
   const typeLabel = TYPE_LABELS[run.research_type] ?? 'Research';
   const pages = docPages(run);
   const sectorText = `${run.topic} ${run.report_title ?? ''}`;
-  const ghost = (n: number) => `<div class="ghost">${String(n).padStart(2, '0')}</div>`;
-  // The industry's own object, echoed at low opacity — never abstract geometry.
-  const sideMotif = `<div class="motif">${sectorArtSvg(sectorText, 300, 300).svg}</div>`;
+  // The announcement family's signature: every light page stands on a slim
+  // flat dark base with the white logo and the page count.
+  const pageFoot = (n: number, total: number) => `<div class="pfoot">${logoImg(34, { white: true })}<span class="pf-n">${n} / ${total}</span></div>`;
   const chart = feed.chart && Array.isArray(feed.chart.labels) && Array.isArray(feed.chart.values)
     && feed.chart.labels.length >= 3 && feed.chart.labels.length === feed.chart.values.length
     && feed.chart.values.every((v: any) => typeof v === 'number' && Number.isFinite(v))
@@ -519,80 +511,45 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     n++;
     if (p.kind === 'cover') {
       const h = String(p.heading ?? '');
-      // The cover carries the STORY VISUAL: the run's generated artwork when
-      // one exists, else the procedural motif — never a bare text page.
-      const size = h.length > 120 ? 54 : h.length > 80 ? 62 : h.length > 50 ? 72 : 84;
-      const artPanel = art?.dataUri
-        ? `<div class="cover-art"><img src="${art.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(art.focalX * 100)}% ${Math.round(art.focalY * 100)}%;display:block"></div>`
-        : `<div class="cover-art sectorbox">${sectorArtSvg(sectorText, 360, 500).svg}</div>`;
-      // Poster lesson: stack the proof up top — the strongest CITED stats with
-      // their attributions, where a one-sheet stacks its review quotes.
-      const proofPts: any[] = (Array.isArray(feed.dataPoints) ? feed.dataPoints : []).slice(0, 2);
-      const proofStrip = proofPts.length
-        ? `<div class="proof">${proofPts.map(pt => `<div class="pq">${esc(String(pt.stat).toUpperCase())}<span class="pa">${esc([pt.source, pt.freshness].filter(Boolean).join(' · ').toUpperCase())}</span></div>`).join('')}</div>`
-        : '';
-      const u = run.usage || {};
-      const creditsText = `RESEARCHED & WRITTEN BY PAUL BAKER · SMBX — BUY-SIDE CORPORATE DEVELOPMENT · ${Number(u.searches ?? 0)} SEARCHES · ${Array.isArray(run.sources) ? run.sources.length : 0} SOURCES · EVERY NUMBER CITED`;
-      const credits = `<div class="credits">${creditsText}</div>`;
-      if (art?.dataUri) {
-        // POSTER MODE (Paul, 2026-07-20: "every cover page needs to model what
-        // a movie poster would do"): the artwork IS the sheet — full bleed —
-        // with the proof stacked on a bone scrim up top and the two-tone title,
-        // tagline, credits, and byline on the green-black rise at the base.
-        pageHtml.push(`<div class="pg poster">
-          <img class="poster-art" src="${art.dataUri}" style="object-position:${Math.round(art.focalX * 100)}% ${Math.round(art.focalY * 100)}%">
-          <div class="scrim-top"></div>
-          <div class="scrim-bot"></div>
-          <div class="in">
-            <div class="kick"><span class="kl">${logoImg(40)}<span>${esc(typeLabel.toUpperCase())}</span></span><span>${esc(fmtDate(run.completed_at))}</span></div>
-            ${proofStrip}
-            <div style="flex:1"></div>
-            <div class="poster-h" style="font-size:${Math.min(size, 76)}px">${twoToneHook(h)}</div>
-            ${p.body ? `<div class="poster-sub">${esc(p.body)}</div>` : ''}
-            <div class="poster-credits">${creditsText}</div>
-            <div class="poster-by">
-              ${faceImg(84, photo, { ring: 'rgba(143,208,174,0.7)' })}
-              <div>
-                <div class="pby-n">Paul Baker</div>
-                <div class="pby-t">Buy-side corporate development</div>
-              </div>
-              <div class="poster-swipe">SWIPE&nbsp;&nbsp;→</div>
-            </div>
-          </div>
-        </div>`);
-      } else {
-        pageHtml.push(`<div class="pg">
+      // ANNOUNCEMENT template cover (Paul, 2026-07-20): left editorial column,
+      // right image panel (picked artwork, else the sector illustration), flat
+      // dark footer with the byline — same body as the 1-pager, plus SWIPE.
+      const size = h.length > 130 ? 40 : h.length > 90 ? 45 : h.length > 60 ? 50 : 56;
+      const panel = art?.dataUri
+        ? `<img src="${art.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(art.focalX * 100)}% ${Math.round(art.focalY * 100)}%;display:block">`
+        : `<div class="sector">${sectorArtSvg(sectorText, 380, 520).svg}</div>`;
+      const coverPts: any[] = (Array.isArray(feed.dataPoints) ? feed.dataPoints : []).slice(0, 3);
+      pageHtml.push(`<div class="pg">
         <div class="wash"></div>
-        <div class="in">
-          <div class="kick"><span class="kl">${logoImg(40)}<span>${esc(typeLabel.toUpperCase())}</span></span><span>${esc(fmtDate(run.completed_at))}</span></div>
-          ${proofStrip}
-          <div class="cover-row">
-            <div class="cover-txt">
-              <div class="cover-h" style="font-size:${size}px">${twoToneHook(h)}</div>
-              <div class="rule" style="margin-top:40px"></div>
-              ${p.body ? `<div class="cover-sub">${esc(p.body)}</div>` : ''}
-            </div>
-            ${artPanel}
-          </div>
-          ${credits}
-          <div class="cover-by">
-            ${faceImg(88, photo, { ring: 'rgba(22,98,76,0.35)' })}
+        <div class="cv-left">
+          <div class="cv-kick">${logoImg(42)}<span class="kt">${esc(typeLabel.toUpperCase())}</span></div>
+          <div class="cv-hook" style="font-size:${size}px">${twoToneHook(h)}</div>
+          <div class="cv-rule"></div>
+          ${p.body ? `<div class="cv-sub">${esc(p.body)}</div>` : ''}
+          ${coverPts.length ? `<div class="cv-pts">${coverPts.map(pt => `
+            <div class="cv-pt"><span class="cv-dot"></span><div>
+              <div class="cv-stat">${esc(pt.stat)}</div>
+              <div class="cv-src">${esc([pt.source, pt.freshness].filter(Boolean).join(' · '))}</div>
+            </div></div>`).join('')}</div>` : ''}
+        </div>
+        <div class="cv-right">${panel}<div class="cv-fade"></div></div>
+        <div class="cv-foot">
+          ${logoImg(48, { white: true })}
+          <div class="cv-who">
+            ${faceImg(72, photo, { ring: 'rgba(143,208,174,0.65)' })}
             <div>
-              <div class="cby-n">Paul Baker</div>
-              <div class="cby-t">Buy-side corporate development</div>
+              <div class="cv-wn">Paul Baker</div>
+              <div class="cv-wt">Buy-side corporate development</div>
             </div>
           </div>
-          <div class="swipe">SWIPE&nbsp;&nbsp;→</div>
+          <div class="cv-swipe">SWIPE&nbsp;&nbsp;→</div>
         </div>
       </div>`);
-      }
     } else if (p.kind === 'stat') {
       const numeral = String(p.stat ?? '').trim() || firstNumberToken(p.heading ?? '');
       const numSize = numeral.length > 8 ? 120 : numeral.length > 5 ? 150 : 184;
       pageHtml.push(`<div class="pg">
         <div class="wash"></div>
-        ${ghost(n)}
-        ${sideMotif}
         <div class="in">
           ${kicker(n, total)}
           <div class="grow">
@@ -603,6 +560,7 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
           </div>
           ${p.source ? `<div class="src-line">${esc(p.source)}</div>` : ''}
         </div>
+        ${pageFoot(n, total)}
       </div>`);
     } else if (p.kind === 'takeaway') {
       // The takeaway flips to the boardroom band — the deck's dark punctuation.
@@ -621,8 +579,6 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     } else { // story
       pageHtml.push(`<div class="pg">
         <div class="wash"></div>
-        ${ghost(n)}
-        ${sideMotif}
         <div class="in">
           ${kicker(n, total)}
           <div class="grow">
@@ -631,6 +587,7 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
             ${p.body ? `<div class="story-b">${esc(p.body)}</div>` : ''}
           </div>
         </div>
+        ${pageFoot(n, total)}
       </div>`);
     }
   }
@@ -649,6 +606,7 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
         </div>
         ${chart.source ? `<div class="src-line">${esc(chart.source)}</div>` : ''}
       </div>
+      ${pageFoot(n, total)}
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script>
@@ -685,12 +643,12 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 1080px; }
     body { font-family: ${SANS}; color: ${INK}; }
-    .pg { width: 1080px; height: 1350px; position: relative; overflow: hidden; background: ${WARM}; ${LIGHT_TEXTURE_URI ? `background-image: url('${LIGHT_TEXTURE_URI}'); background-size: cover; background-position: center;` : ''} page-break-after: always; }
+    .pg { width: 1080px; height: 1350px; position: relative; overflow: hidden; background: ${WARM}; page-break-after: always; }
     .pg:last-child { page-break-after: auto; }
     .wash { position: absolute; inset: 0; background:
-      radial-gradient(720px 560px at 88% -6%, rgba(22,98,76,0.075), transparent 62%),
-      radial-gradient(640px 520px at -8% 44%, rgba(255,116,140,0.055), transparent 60%); }
-    .in { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 76px 88px 84px; }
+      radial-gradient(1200px 800px at 8% 0%, rgba(22,98,76,0.045), transparent 60%),
+      radial-gradient(900px 700px at 100% 100%, rgba(203,193,170,0.16), transparent 55%); }
+    .in { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 76px 88px 128px; }
     .kick { display: flex; justify-content: space-between; align-items: center; font-family: ${MONO};
       font-size: 21px; letter-spacing: 0.1em; color: ${TERT}; text-transform: uppercase; }
     .kick .kl { display: flex; align-items: center; gap: 24px; }
@@ -701,39 +659,32 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
       line-height: 1; color: rgba(20,24,28,0.055); letter-spacing: -0.03em; }
     .motif { position: absolute; right: 64px; bottom: 150px; width: 300px; height: 300px; opacity: 0.16; }
     .brassbar { height: 8px; width: 132px; background: ${BRASS}; border-radius: 4px; }
-    /* poster mode — full-bleed artwork sheet */
-    .pg.poster { background: ${DARK}; }
-    .poster-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
-    .scrim-top { position: absolute; left: 0; right: 0; top: 0; height: 460px;
-      background: linear-gradient(180deg, rgba(246,244,239,0.95) 0%, rgba(246,244,239,0.82) 52%, rgba(246,244,239,0) 100%); }
-    .scrim-bot { position: absolute; left: 0; right: 0; bottom: 0; height: 640px;
-      background: linear-gradient(0deg, rgba(11,19,16,0.94) 0%, rgba(11,19,16,0.82) 46%, rgba(11,19,16,0) 100%); }
-    .poster-h { font-family: ${DISPLAY}; font-weight: 545; letter-spacing: -0.012em; line-height: 1.1; color: ${IVORY}; max-width: 920px; }
-    .poster-h .turn { color: #8FD0AE; }
-    .poster-sub { margin-top: 26px; font-size: 30px; color: ${IVORY_SUB}; line-height: 1.4; max-width: 800px; }
-    .poster-credits { margin-top: 40px; font-family: ${MONO}; font-size: 14.5px; letter-spacing: 0.075em; color: rgba(216,213,202,0.85); line-height: 1.6; }
-    .poster-by { margin-top: 26px; display: flex; align-items: center; gap: 22px; }
-    .pby-n { color: ${IVORY}; font-size: 25px; font-weight: 700; letter-spacing: -0.01em; }
-    .pby-t { margin-top: 3px; color: ${IVORY_SUB}; font-size: 18px; font-weight: 500; }
-    .poster-swipe { margin-left: auto; font-family: ${MONO}; font-size: 22px; letter-spacing: 0.14em; color: #8FD0AE; font-weight: 600; }
-    /* cover */
-    .proof { margin-top: 44px; display: flex; flex-direction: column; gap: 20px; }
-    .pq { font-size: 27px; font-weight: 800; letter-spacing: 0.005em; line-height: 1.25; color: ${CORAL_DEEP}; max-width: 920px; }
-    .pq .pa { display: block; margin-top: 5px; font-family: ${MONO}; font-size: 15px; font-weight: 500; letter-spacing: 0.09em; color: ${TERT}; }
-    .credits { position: absolute; left: 88px; right: 88px; bottom: 178px; font-family: ${MONO}; font-size: 14.5px;
-      letter-spacing: 0.075em; color: ${TERT}; line-height: 1.6; }
+    /* cover — the announcement split */
+    .cv-left { position: absolute; left: 0; top: 0; bottom: 128px; width: 512px; padding: 60px 46px 0 60px; display: flex; flex-direction: column; z-index: 2; }
+    .cv-kick { display: flex; align-items: center; justify-content: space-between; }
+    .kt { font-family: ${MONO}; font-size: 18px; letter-spacing: 0.1em; color: ${TERT}; text-transform: uppercase; }
+    .cv-hook { margin-top: 52px; font-family: ${DISPLAY}; font-weight: 545; line-height: 1.12; letter-spacing: -0.012em; color: ${INK}; }
     .turn { color: ${CORAL_DEEP}; }
-    .cover-row { margin-top: 56px; display: flex; gap: 52px; align-items: stretch; }
-    .cover-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-    .cover-art { width: 400px; height: 600px; flex: none; border-radius: 24px; overflow: hidden;
-      box-shadow: 0 30px 80px rgba(15,26,22,0.22); background: #fff; }
-    .cover-art.sectorbox { background: #fff; ${LIGHT_TEXTURE_URI ? `background-image: url('${LIGHT_TEXTURE_URI}'); background-size: cover;` : ''} border: 1px solid ${HAIR}; box-shadow: 0 20px 60px rgba(15,26,22,0.12); display: flex; align-items: center; justify-content: center; }
-    .cover-h { font-family: ${DISPLAY}; font-weight: 545; letter-spacing: -0.012em; line-height: 1.12; }
-    .cover-sub { margin-top: 36px; font-size: 31px; color: ${BODY}; line-height: 1.42; max-width: 560px; }
-    .cover-by { position: absolute; left: 88px; bottom: 76px; display: flex; align-items: center; gap: 24px; }
-    .cby-n { font-size: 26px; font-weight: 700; color: ${INK}; letter-spacing: -0.01em; }
-    .cby-t { margin-top: 4px; font-size: 19px; color: ${TERT}; font-weight: 500; }
-    .swipe { position: absolute; right: 88px; bottom: 96px; font-family: ${MONO}; font-size: 22px; letter-spacing: 0.14em; color: ${CORAL_DEEP}; font-weight: 600; }
+    .cv-rule { width: 70px; height: 6px; background: ${CORAL}; border-radius: 99px; margin: 30px 0 26px; }
+    .cv-sub { font-size: 22px; line-height: 1.5; color: ${TERT}; font-weight: 500; }
+    .cv-pts { margin-top: 32px; display: flex; flex-direction: column; gap: 22px; }
+    .cv-pt { display: flex; gap: 18px; align-items: flex-start; }
+    .cv-dot { width: 11px; height: 11px; border-radius: 50%; background: ${CORAL}; flex: none; margin-top: 11px; }
+    .cv-stat { font-size: 22px; line-height: 1.4; color: ${INK}; font-weight: 700; }
+    .cv-src { margin-top: 4px; font-family: ${MONO}; font-size: 14.5px; color: ${TERT}; letter-spacing: 0.03em; }
+    .cv-right { position: absolute; left: 536px; top: 0; bottom: 128px; right: 0; background: #fff; }
+    .cv-fade { position: absolute; inset: 0; background: linear-gradient(90deg, ${WARM} 0%, transparent 9%); }
+    .sector { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+    .cv-foot { position: absolute; left: 0; right: 0; bottom: 0; height: 128px; background: ${DARK};
+      display: flex; align-items: center; gap: 26px; padding: 0 60px; z-index: 3; }
+    .cv-who { display: flex; align-items: center; gap: 18px; }
+    .cv-wn { color: ${IVORY}; font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
+    .cv-wt { margin-top: 3px; color: ${IVORY_SUB}; font-size: 16.5px; font-weight: 500; }
+    .cv-swipe { margin-left: auto; font-family: ${MONO}; font-size: 21px; letter-spacing: 0.14em; color: #8FD0AE; font-weight: 600; }
+    /* slim announcement base on every light page */
+    .pfoot { position: absolute; left: 0; right: 0; bottom: 0; height: 84px; background: ${DARK};
+      display: flex; align-items: center; justify-content: space-between; padding: 0 60px; }
+    .pf-n { font-family: ${MONO}; font-size: 19px; letter-spacing: 0.1em; color: ${IVORY_SUB}; }
     /* stat */
     .numeral { font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: ${INK}; }
     .stat-h { font-size: 40px; font-weight: 700; letter-spacing: -0.014em; line-height: 1.22; max-width: 880px; }
