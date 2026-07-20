@@ -22,6 +22,7 @@ import { fileURLToPath } from 'url';
 import { newRenderPage } from './premiumPdfRenderer.js';
 import { listStudioAssets, getStudioAsset } from './studioAssets.js';
 import { sectorArtSvg } from './sectorArt.js';
+import { fontFaceCss } from './fontEmbeds.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -132,7 +133,13 @@ const IVORY = '#F3F1EA';
 const IVORY_SUB = '#D8D5CA';
 const BRASS = '#B08637';
 
-const FONTS = `
+// Type ships EMBEDDED (fontEmbeds.ts): production render paths can't reach
+// the Google Fonts CDN, and the container has no brand fonts — the CDN link
+// survives only as the fallback when the woff2 files are missing.
+const EMBEDDED_FONTS = fontFaceCss();
+const FONTS = EMBEDDED_FONTS
+  ? `<style>${EMBEDDED_FONTS}</style>`
+  : `
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400..600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
