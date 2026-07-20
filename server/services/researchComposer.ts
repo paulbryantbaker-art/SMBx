@@ -801,7 +801,11 @@ async function ensureRunArtwork(run: ResearchRunRow): Promise<AuthorPhoto | null
   let art = await runArtwork(run);
   if (art) return art;
   const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
-  if (feed.artAssetId === undefined && process.env.GOOGLE_AI_API_KEY) {
+  // OPT-IN (Paul, 2026-07-20 evening): he generates images in the Gemini app
+  // and picks them in the review sheet — the app only auto-calls the image
+  // API when RESEARCH_ARTWORK_AUTOGEN=true. Keeps downloads instant too (a
+  // broken key would otherwise cost a timeout on every artless download).
+  if (process.env.RESEARCH_ARTWORK_AUTOGEN === 'true' && feed.artAssetId === undefined && process.env.GOOGLE_AI_API_KEY) {
     try {
       const { generateRunArtwork, derivedVisualBrief } = await import('./artworkService.js');
       const title = run.report_title || run.topic;

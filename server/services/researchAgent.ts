@@ -565,7 +565,11 @@ export async function executeResearchRun(runId: number): Promise<void> {
     // editorial illustration for the carousel cover + media library. Strictly
     // fail-soft — the run completes either way, and the trail says what
     // happened. Only for runs that produce LinkedIn collateral.
-    if (feed?.visual && run.output_format !== 'report' && process.env.GOOGLE_AI_API_KEY) {
+    // OPT-IN (Paul, 2026-07-20 evening: "I'll do this and not have Gemini try
+    // to api the images" — he generates in the Gemini app and picks in the
+    // review sheet): automatic generation runs ONLY with
+    // RESEARCH_ARTWORK_AUTOGEN=true; the explicit Generate buttons stay live.
+    if (process.env.RESEARCH_ARTWORK_AUTOGEN === 'true' && feed?.visual && run.output_format !== 'report' && process.env.GOOGLE_AI_API_KEY) {
       pushAct('phase', 'Illustrating the story — rendering the visual brief');
       await flushAct();
       const { generateRunArtwork } = await import('./artworkService.js');
