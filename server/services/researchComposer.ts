@@ -21,6 +21,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { newRenderPage } from './premiumPdfRenderer.js';
 import { listStudioAssets, getStudioAsset } from './studioAssets.js';
+import { sectorArtSvg } from './sectorArt.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -32,6 +33,16 @@ try {
   const buf = readFileSync(path.resolve(__dirname, '../../client/public/textures/blackbleed.webp'));
   DARK_TEXTURE_URI = `data:image/webp;base64,${buf.toString('base64')}`;
 } catch { /* gradient fallback */ }
+
+/* The LIGHT paper texture (2026-07-20, Paul: "the dark texture is cool, but
+ * we need a light version — the paper look is boring"): bonebleed.webp, the
+ * blackbleed master inverted and warmed to bone in a one-time bake. Light
+ * pages and cards carry it as material; falls back to flat bone. */
+let LIGHT_TEXTURE_URI = '';
+try {
+  const buf = readFileSync(path.resolve(__dirname, '../../client/public/textures/bonebleed.webp'));
+  LIGHT_TEXTURE_URI = `data:image/webp;base64,${buf.toString('base64')}`;
+} catch { /* flat bone fallback */ }
 
 /* The canonical logo — the SAME asset and treatment the practice site uses:
  * /logo-green-x.png (1584×396 wordmark) as-is on light surfaces, and inverted
@@ -315,7 +326,7 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: Auth
   return `<!DOCTYPE html><html><head><meta charset="utf-8">${FONTS}
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { width: 1080px; height: 1350px; font-family: ${SANS}; color: ${INK}; background: ${WARM}; overflow: hidden; position: relative; font-variant-numeric: tabular-nums; }
+    body { width: 1080px; height: 1350px; font-family: ${SANS}; color: ${INK}; background: ${WARM}; ${LIGHT_TEXTURE_URI ? `background-image: url('${LIGHT_TEXTURE_URI}'); background-size: cover; background-position: center;` : ''} overflow: hidden; position: relative; font-variant-numeric: tabular-nums; }
     .wash { position: absolute; inset: 0; background:
       radial-gradient(820px 620px at 88% -6%, rgba(22,98,76,0.10), transparent 62%),
       radial-gradient(700px 560px at -8% 52%, rgba(176,134,55,0.07), transparent 60%); }
@@ -324,6 +335,7 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: Auth
       font-size: 21px; letter-spacing: 0.1em; color: ${TERT}; text-transform: uppercase; }
     .tag .tl { display: flex; align-items: center; gap: 22px; }
     .hook { margin-top: 66px; font-family: ${DISPLAY}; font-size: ${hookSize}px; font-weight: 545; letter-spacing: -0.012em; line-height: 1.12; max-width: 900px; }
+    .turn { color: ${CORAL_DEEP}; }
     .rule { height: 6px; width: 96px; background: ${CORAL}; border-radius: 3px; margin: 44px 0 0; }
     .hero { margin-top: 48px; }
     .hero .num { font-weight: 800; font-size: ${numSize}px; letter-spacing: -0.03em; line-height: 0.98; color: ${INK}; }
@@ -349,7 +361,7 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: Auth
     <div class="wash"></div>
     <div class="frame">
       <div class="tag"><span class="tl">${logoImg(38)}<span>${esc(typeLabel.toUpperCase())}</span></span><span>${esc(fmtDate(run.completed_at))}</span></div>
-      <div class="hook">${esc(hook)}</div>
+      <div class="hook">${twoToneHook(hook)}</div>
       <div class="rule"></div>
       ${heroStat ? `<div class="hero">
         <div class="num">${esc(leadNum)}</div>
@@ -447,6 +459,15 @@ function firstNumberToken(stat: string): string {
   return (m ? m[0] : '').trim();
 }
 
+/** Poster lesson (Paul, 2026-07-20): a two-beat title where the second beat
+ *  changes color. Split the hook at its first sentence break; the turn renders
+ *  in deep Deal Green. Single-beat hooks pass through unchanged. */
+function twoToneHook(hook: string): string {
+  const m = /^(.*?[.!?…])\s+(.+)$/.exec(String(hook).trim());
+  if (!m) return esc(hook);
+  return `${esc(m[1])} <span class="turn">${esc(m[2])}</span>`;
+}
+
 /** The run's generated story artwork (artworkService files it into the media
  *  library with run provenance). Null when none was generated — callers fall
  *  back to the procedural motif. */
@@ -461,40 +482,15 @@ export async function runArtwork(runId: number): Promise<AuthorPhoto | null> {
   } catch { return null; }
 }
 
-/* ─── Procedural editorial motif (2026-07-20) ──────────────────────────────
- * When a run has no generated artwork, the pages still carry a graphic: a
- * deterministic composition of arcs, a brass diagonal, dots, and (for
- * structural lenses) grid lines — seeded by the run id so each deck is its
- * own, in the Ledger palette, always abstract, never fake data. */
-function motifSvg(type: string, seed: number, w: number, h: number, dark = false): string {
-  let s = (seed >>> 0) || 1;
-  const rnd = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32);
-  const ink = dark ? 'rgba(243,241,234,0.10)' : 'rgba(20,24,28,0.07)';
-  const green = dark ? 'rgba(143,208,174,0.38)' : 'rgba(22,98,76,0.30)';
-  const brass = dark ? 'rgba(176,134,55,0.7)' : 'rgba(176,134,55,0.55)';
-  const cx = w * (0.62 + rnd() * 0.3);
-  const cy = h * (0.12 + rnd() * 0.22);
-  const rings = Array.from({ length: 5 }, (_, i) =>
-    `<circle cx="${cx.toFixed(0)}" cy="${cy.toFixed(0)}" r="${((i + 2) * (h / 8.5)).toFixed(0)}" fill="none" stroke="${i === 2 ? green : ink}" stroke-width="${i === 2 ? 3 : 2}"/>`).join('');
-  const diag = type === 'thesis_validation'
-    ? `<line x1="${w * 0.08}" y1="${h * 0.88}" x2="${w * 0.62}" y2="${h * 0.22}" stroke="${brass}" stroke-width="6" stroke-linecap="round"/>
-       <line x1="${w * 0.22}" y1="${h * 0.18}" x2="${w * 0.86}" y2="${h * 0.84}" stroke="${green}" stroke-width="3" stroke-linecap="round"/>`
-    : `<line x1="${w * 0.06}" y1="${h * 0.86}" x2="${w * 0.94}" y2="${h * 0.28}" stroke="${brass}" stroke-width="6" stroke-linecap="round"/>`;
-  const dots = Array.from({ length: 8 }, () =>
-    `<circle cx="${(w * rnd()).toFixed(0)}" cy="${(h * rnd()).toFixed(0)}" r="5" fill="${green}"/>`).join('');
-  const grid = (type === 'vertical_scan' || type === 'participant_map' || type === 'buyer_roster')
-    ? Array.from({ length: 4 }, (_, i) => `<line x1="${((w / 5) * (i + 1)).toFixed(0)}" y1="0" x2="${((w / 5) * (i + 1)).toFixed(0)}" y2="${h}" stroke="${ink}" stroke-width="1.5"/>`).join('')
-    : '';
-  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">${grid}${rings}${diag}${dots}</svg>`;
-}
 
 export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null = null, art: AuthorPhoto | null = null): string {
   const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
   const typeLabel = TYPE_LABELS[run.research_type] ?? 'Research';
   const pages = docPages(run);
-  const seed = Number(run.id) || 7;
+  const sectorText = `${run.topic} ${run.report_title ?? ''}`;
   const ghost = (n: number) => `<div class="ghost">${String(n).padStart(2, '0')}</div>`;
-  const sideMotif = `<div class="motif">${motifSvg(run.research_type, seed, 520, 520)}</div>`;
+  // The industry's own object, echoed at low opacity — never abstract geometry.
+  const sideMotif = `<div class="motif">${sectorArtSvg(sectorText, 300, 300).svg}</div>`;
   const chart = feed.chart && Array.isArray(feed.chart.labels) && Array.isArray(feed.chart.values)
     && feed.chart.labels.length >= 3 && feed.chart.labels.length === feed.chart.values.length
     && feed.chart.values.every((v: any) => typeof v === 'number' && Number.isFinite(v))
@@ -517,19 +513,29 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
       const size = h.length > 120 ? 54 : h.length > 80 ? 62 : h.length > 50 ? 72 : 84;
       const artPanel = art?.dataUri
         ? `<div class="cover-art"><img src="${art.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(art.focalX * 100)}% ${Math.round(art.focalY * 100)}%;display:block"></div>`
-        : `<div class="cover-art motifbox">${motifSvg(run.research_type, seed, 400, 760)}</div>`;
+        : `<div class="cover-art sectorbox">${sectorArtSvg(sectorText, 360, 500).svg}</div>`;
+      // Poster lesson: stack the proof up top — the strongest CITED stats with
+      // their attributions, where a one-sheet stacks its review quotes.
+      const proofPts: any[] = (Array.isArray(feed.dataPoints) ? feed.dataPoints : []).slice(0, 2);
+      const proofStrip = proofPts.length
+        ? `<div class="proof">${proofPts.map(pt => `<div class="pq">${esc(String(pt.stat).toUpperCase())}<span class="pa">${esc([pt.source, pt.freshness].filter(Boolean).join(' · ').toUpperCase())}</span></div>`).join('')}</div>`
+        : '';
+      const u = run.usage || {};
+      const credits = `<div class="credits">RESEARCHED & WRITTEN BY PAUL BAKER · SMBX — BUY-SIDE CORPORATE DEVELOPMENT · ${Number(u.searches ?? 0)} SEARCHES · ${Array.isArray(run.sources) ? run.sources.length : 0} SOURCES · EVERY NUMBER CITED</div>`;
       pageHtml.push(`<div class="pg">
         <div class="wash"></div>
         <div class="in">
           <div class="kick"><span class="kl">${logoImg(40)}<span>${esc(typeLabel.toUpperCase())}</span></span><span>${esc(fmtDate(run.completed_at))}</span></div>
+          ${proofStrip}
           <div class="cover-row">
             <div class="cover-txt">
-              <div class="cover-h" style="font-size:${size}px">${esc(h)}</div>
-              <div class="rule" style="margin-top:44px"></div>
+              <div class="cover-h" style="font-size:${size}px">${twoToneHook(h)}</div>
+              <div class="rule" style="margin-top:40px"></div>
               ${p.body ? `<div class="cover-sub">${esc(p.body)}</div>` : ''}
             </div>
             ${artPanel}
           </div>
+          ${credits}
           <div class="cover-by">
             ${faceImg(88, photo, { ring: 'rgba(22,98,76,0.35)' })}
             <div>
@@ -562,7 +568,6 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
       // The takeaway flips to the boardroom band — the deck's dark punctuation.
       pageHtml.push(`<div class="pg dark">
         <div class="halo"></div>
-        <div class="motif dark-motif">${motifSvg(run.research_type, seed + 3, 520, 520, true)}</div>
         <div class="in">
           <div class="kick dark-kick"><span class="kl">${logoImg(30, { white: true })}<span>${esc(typeLabel.toUpperCase())}</span></span><span>${n} / ${total}</span></div>
           <div class="grow">
@@ -640,7 +645,7 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 1080px; }
     body { font-family: ${SANS}; color: ${INK}; }
-    .pg { width: 1080px; height: 1350px; position: relative; overflow: hidden; background: ${WARM}; page-break-after: always; }
+    .pg { width: 1080px; height: 1350px; position: relative; overflow: hidden; background: ${WARM}; ${LIGHT_TEXTURE_URI ? `background-image: url('${LIGHT_TEXTURE_URI}'); background-size: cover; background-position: center;` : ''} page-break-after: always; }
     .pg:last-child { page-break-after: auto; }
     .wash { position: absolute; inset: 0; background:
       radial-gradient(720px 560px at 88% -6%, rgba(22,98,76,0.075), transparent 62%),
@@ -654,15 +659,20 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     /* editorial graphics layer */
     .ghost { position: absolute; top: 34px; right: 52px; font-family: ${DISPLAY}; font-weight: 545; font-size: 320px;
       line-height: 1; color: rgba(20,24,28,0.055); letter-spacing: -0.03em; }
-    .motif { position: absolute; right: -90px; bottom: -110px; width: 520px; height: 520px; }
-    .dark-motif { opacity: 0.9; }
+    .motif { position: absolute; right: 64px; bottom: 150px; width: 300px; height: 300px; opacity: 0.16; }
     .brassbar { height: 8px; width: 132px; background: ${BRASS}; border-radius: 4px; }
     /* cover */
-    .cover-row { margin-top: 96px; display: flex; gap: 52px; align-items: stretch; }
+    .proof { margin-top: 44px; display: flex; flex-direction: column; gap: 20px; }
+    .pq { font-size: 27px; font-weight: 800; letter-spacing: 0.005em; line-height: 1.25; color: ${CORAL_DEEP}; max-width: 920px; }
+    .pq .pa { display: block; margin-top: 5px; font-family: ${MONO}; font-size: 15px; font-weight: 500; letter-spacing: 0.09em; color: ${TERT}; }
+    .credits { position: absolute; left: 88px; right: 88px; bottom: 178px; font-family: ${MONO}; font-size: 14.5px;
+      letter-spacing: 0.075em; color: ${TERT}; line-height: 1.6; }
+    .turn { color: ${CORAL_DEEP}; }
+    .cover-row { margin-top: 56px; display: flex; gap: 52px; align-items: stretch; }
     .cover-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-    .cover-art { width: 400px; height: 760px; flex: none; border-radius: 24px; overflow: hidden;
+    .cover-art { width: 400px; height: 600px; flex: none; border-radius: 24px; overflow: hidden;
       box-shadow: 0 30px 80px rgba(15,26,22,0.22); background: #fff; }
-    .cover-art.motifbox { background: #fff; border: 1px solid ${HAIR}; box-shadow: 0 20px 60px rgba(15,26,22,0.12); }
+    .cover-art.sectorbox { background: #fff; ${LIGHT_TEXTURE_URI ? `background-image: url('${LIGHT_TEXTURE_URI}'); background-size: cover;` : ''} border: 1px solid ${HAIR}; box-shadow: 0 20px 60px rgba(15,26,22,0.12); display: flex; align-items: center; justify-content: center; }
     .cover-h { font-family: ${DISPLAY}; font-weight: 545; letter-spacing: -0.012em; line-height: 1.12; }
     .cover-sub { margin-top: 36px; font-size: 31px; color: ${BODY}; line-height: 1.42; max-width: 560px; }
     .cover-by { position: absolute; left: 88px; bottom: 76px; display: flex; align-items: center; gap: 24px; }
