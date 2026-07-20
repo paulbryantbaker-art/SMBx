@@ -451,6 +451,15 @@ export async function executeResearchRun(runId: number): Promise<void> {
         tools: toolset,
         ...(containerId ? { container: containerId } : {}),
       });
+      // SDK 0.78's finalMessage() DROPS the container id on the streamed
+      // path (its accumulator copies only stop_reason/stop_sequence/usage
+      // out of message_delta, and delta.container is where the API delivers
+      // it) — so resp.container?.id below is never populated and the next
+      // resume 400s. Harvest it from the raw events, wherever it appears.
+      stream.on('streamEvent', (ev: any) => {
+        const cid = ev?.message?.container?.id ?? ev?.delta?.container?.id;
+        if (cid) containerId = cid;
+      });
       stream.on('contentBlock', (block: any) => {
         const calls = harvestToolCalls([block]);
         if (calls.length) {
