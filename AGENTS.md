@@ -1,3 +1,6 @@
+> ⚠️ **STALE (banner added 2026-07-19).** This file describes the PRE-PIVOT PRODUCT (2026-05-25) — public signup, pricing ladder, anonymous chat — all retired by THE LINE v2 practice pivot (2026-07-11).
+> For current facts read **`CLAUDE.md`**; for the current visual system read **`DESIGN_LANGUAGE.md`**. Kept for history only.
+
 AGENTS.md — smbx.ai
 Last updated: 2026-05-25
 

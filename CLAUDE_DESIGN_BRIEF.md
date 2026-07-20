@@ -1,3 +1,6 @@
+> ⚠️ **RETIRED — DO NOT DESIGN FROM THIS DOCUMENT (banner added 2026-07-19).** It describes the terra-cotta/pre-pivot era, which is dead.
+> The current visual system is **`DESIGN_LANGUAGE.md`** at the repo root — hand THAT file to Claude or any design tool. Kept for history only.
+
 # smbX — Design Brief for Claude Design (and any external design tool)
 
 **Purpose of this document:** a single self-contained brief that gives any
