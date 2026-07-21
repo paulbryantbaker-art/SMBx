@@ -2160,6 +2160,23 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
           )}
           <div style={RV.btnRow}>
             <button type="button" style={RV.saveBtn} disabled={saving !== null} onClick={save}>{saving === "save" ? "Saving…" : "Save & re-preview"}</button>
+            <button
+              type="button"
+              style={RV.exportBtn}
+              disabled={saving !== null}
+              title="Have Claude compose the deck again from your copy and image picks"
+              onClick={async () => {
+                setSaving("save"); setErr(null);
+                try {
+                  await api(`/research/runs/${run.id}/deck`, { method: "POST", body: JSON.stringify({}) });
+                  pvTriedRef.current = 0;
+                  await Promise.all([loadPreview(), loadCover()]);
+                } catch (e) { setErr(e instanceof Error ? e.message : "Redesign failed"); }
+                finally { setSaving(null); }
+              }}
+            >
+              Redesign deck
+            </button>
             {approved
               ? <button type="button" style={RV.reopenBtn} disabled={saving !== null} onClick={() => setReview("draft")}>Reopen draft</button>
               : <button type="button" style={RV.approveBtn} disabled={saving !== null} onClick={() => setReview("approved")}>{saving === "approve" ? "…" : "Approve"}</button>}

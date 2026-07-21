@@ -927,12 +927,77 @@ async function loadPageArt(run: ResearchRunRow): Promise<Record<number, AuthorPh
   return out;
 }
 
+/* ─── Claude-designed decks (2026-07-21) ─────────────────────────────────
+ * Paul assigns copy + which image goes on which page; CLAUDE composes the
+ * pages (deckDesigner.ts). The fixed template below survives ONLY as the
+ * fail-soft safety net. Cache lives on the run so previews match exports. */
+export async function designedDeckHtml(run: ResearchRunRow): Promise<string | null> {
+  if (process.env.RESEARCH_DECK_DESIGNER === 'off') return null;
+  if (!process.env.ANTHROPIC_API_KEY) return null;
+  try {
+    const dd = await import('./deckDesigner.js');
+    const photo = await authorPhoto();
+    const art = await ensureRunArtwork(run);
+    const brand = await brandPhoto();
+    const pageImgs = await loadPageArt(run);
+    const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
+    const pages = docPages(run);
+    const takeaway = pages.find(p => p.kind === 'takeaway') || null;
+    const bodyPages = pages.filter(p => p.kind !== 'takeaway');
+
+    const specs: import('./deckDesigner.js').DeckPageSpec[] = bodyPages.map(p => ({
+      kind: p.kind, heading: p.heading, body: p.body, stat: p.stat, source: p.source,
+    }));
+    specs.push({
+      kind: 'closer',
+      heading: takeaway?.heading || 'Research with sources, not takes.',
+      body: takeaway?.body || 'Buy-side corporate development for lower-middle-market acquirers.',
+    });
+
+    const images: import('./deckDesigner.js').DeckImage[] = [];
+    const coverPick = art?.dataUri ? art : brand?.dataUri ? brand : null;
+    if (coverPick) {
+      images.push({ token: '{{IMG_1}}', dataUri: coverPick.dataUri, focalX: coverPick.focalX, focalY: coverPick.focalY, role: art?.dataUri ? 'cover artwork Paul picked' : 'brand photo of Paul (cover fallback)', pageIndex: 0 });
+      specs[0].imageToken = '{{IMG_1}}';
+    }
+    for (const [idxStr, im] of Object.entries(pageImgs)) {
+      const idx = Number(idxStr);
+      const spec = specs[idx];
+      if (!spec || spec.kind === 'closer' || spec.imageToken) continue;
+      const token = `{{IMG_${images.length + 1}}}`;
+      images.push({ token, dataUri: im.dataUri, focalX: im.focalX, focalY: im.focalY, role: 'image Paul dropped on this page', pageIndex: idx });
+      spec.imageToken = token;
+    }
+
+    const inp: import('./deckDesigner.js').DesignInputs = {
+      runId: Number(run.id),
+      title: run.report_title || run.topic,
+      typeLabel: TYPE_LABELS[run.research_type] ?? 'Research',
+      pages: specs,
+      images,
+      logoUri: LOGO_URI || '',
+      logoWhiteUri: DARK_LOGO_URI || LOGO_URI || '',
+      headshotUri: photo?.dataUri || '',
+      textureUri: DARK_TEXTURE_URI || '',
+    };
+    const key = dd.deckKey(inp);
+    const cached = await dd.readDeckCache(Number(run.id));
+    if (cached && cached.key === key) return cached.html;
+    const html = await dd.dedupeDesign(Number(run.id), () => dd.generateDeckHtml(inp, FONTS));
+    if (html) await dd.writeDeckCache(Number(run.id), key, html);
+    return html;
+  } catch (err: any) {
+    console.warn(`[composer] deck design failed for run ${run.id} — template fallback:`, err?.message);
+    return null;
+  }
+}
+
 /** The carousel COVER alone as a PNG — the review sheet's cover preview. */
 export async function renderCoverPng(run: ResearchRunRow): Promise<Buffer> {
   const photo = await authorPhoto();
   const art = await ensureRunArtwork(run);
   const brand = await brandPhoto();
-  const html = linkedInDocHtml(run, photo, art, brand);
+  const html = (await designedDeckHtml(run)) ?? linkedInDocHtml(run, photo, art, brand);
   const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 2 });
@@ -952,7 +1017,7 @@ export async function renderLinkedInDocPdf(run: ResearchRunRow): Promise<Buffer>
   const art = await ensureRunArtwork(run);
   const brand = await brandPhoto();
   const pageImgs = await loadPageArt(run);
-  const html = linkedInDocHtml(run, photo, art, brand, pageImgs);
+  const html = (await designedDeckHtml(run)) ?? linkedInDocHtml(run, photo, art, brand, pageImgs);
   const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 1 });
@@ -980,7 +1045,7 @@ export async function renderCarouselStripPng(run: ResearchRunRow): Promise<Buffe
   const art = await ensureRunArtwork(run);
   const brand = await brandPhoto();
   const pageImgs = await loadPageArt(run);
-  const html = linkedInDocHtml(run, photo, art, brand, pageImgs);
+  const html = (await designedDeckHtml(run)) ?? linkedInDocHtml(run, photo, art, brand, pageImgs);
   const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 1 });

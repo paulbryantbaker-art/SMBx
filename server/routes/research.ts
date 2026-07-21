@@ -537,6 +537,26 @@ researchRouter.get('/research/runs/:id/cover.png', async (req, res) => {
   }
 });
 
+/** Force a fresh Claude design of the deck (review sheet's Redesign). The
+ *  next preview/export regenerates; a failed design falls back to the
+ *  template, never an error. */
+researchRouter.post('/research/runs/:id/deck', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const id = parseId(req.params.id);
+  if (!id) return res.status(400).json({ error: 'Bad run id' });
+  try {
+    const run = await loadCompleteRun(id, userId);
+    if (!run || !run.studio_feed) return res.status(404).json({ error: 'Run not found' });
+    const { clearDeckCache } = await import('../services/deckDesigner.js');
+    await clearDeckCache(id);
+    return res.json({ ok: true });
+  } catch (err: any) {
+    console.error('[research] deck redesign failed:', err?.message);
+    return res.status(500).json({ error: 'Couldn’t reset the design' });
+  }
+});
+
 /** EVERY carousel page stacked into one tall PNG — the review sheet's
  *  full-deck preview so Paul can see the whole carousel before saving. */
 researchRouter.get('/research/runs/:id/carousel.png', async (req, res) => {
