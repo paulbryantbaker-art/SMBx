@@ -31,7 +31,7 @@ import { sql } from '../db.js';
 import { newRenderPage } from './premiumPdfRenderer.js';
 
 const DECK_MODEL = process.env.RESEARCH_DECK_MODEL || 'claude-sonnet-4-6';
-const PROMPT_VERSION = 'v1';
+const PROMPT_VERSION = 'v2'; // v2 (2026-07-21): seam/edge law — Paul's LinkedIn cover showed a white band where the image met the dark column
 
 let client: Anthropic | null = null;
 function anthropic(): Anthropic {
@@ -42,12 +42,19 @@ function anthropic(): Anthropic {
 export interface DeckImage { token: string; dataUri: string; focalX: number; focalY: number; role: string; pageIndex: number | null }
 export interface DeckPageSpec { kind: string; heading?: string; body?: string; stat?: string; source?: string; imageToken?: string }
 
-/* ─── vision thumbnails ──────────────────────────────────────────────────
+/* ─── vision thumbnails + edge analysis ──────────────────────────────────
  * The model needs to SEE each image to design around it, but raw uploads
  * can be 12MB. Downscale through the shared Chromium (no native deps):
- * draw onto a canvas capped at 640px long side, return JPEG. Fail-soft to
- * the original if anything hiccups (the API caps images ~5MB). */
-export async function thumbDataUri(dataUri: string): Promise<string> {
+ * draw onto a canvas capped at 640px long side, return JPEG. While the
+ * pixels are on the canvas, also measure the image's EDGE color (average
+ * of a 3px border frame) — a white-background illustration on the dark
+ * cover needs a completely different treatment than a full-frame photo,
+ * and stating the measured color in the brief makes the seam law
+ * actionable instead of aspirational. Fail-soft to the original if
+ * anything hiccups (the API caps images ~5MB). */
+export interface ImageAnalysis { thumb: string; w: number; h: number; edgeHex: string | null; edgeLight: boolean | null }
+
+export async function analyzeImage(dataUri: string): Promise<ImageAnalysis> {
   try {
     const page = await newRenderPage();
     try {
@@ -59,16 +66,38 @@ export async function thumbDataUri(dataUri: string): Promise<string> {
         const c = document.createElement('canvas');
         c.width = Math.max(1, Math.round(img.width * s));
         c.height = Math.max(1, Math.round(img.height * s));
-        c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height);
-        return { thumb: c.toDataURL('image/jpeg', 0.8), w: img.width, h: img.height };
+        const ctx = c.getContext('2d')!;
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        let r = 0, g = 0, b = 0, n = 0;
+        const f = Math.min(3, c.width, c.height);
+        const grab = (x: number, y: number, w: number, h: number) => {
+          const d = ctx.getImageData(x, y, Math.max(1, w), Math.max(1, h)).data;
+          for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; n++; }
+        };
+        grab(0, 0, c.width, f);
+        grab(0, c.height - f, c.width, f);
+        grab(0, 0, f, c.height);
+        grab(c.width - f, 0, f, c.height);
+        let edgeHex: string | null = null, edgeLight: boolean | null = null;
+        if (n > 0) {
+          r = Math.round(r / n); g = Math.round(g / n); b = Math.round(b / n);
+          edgeHex = '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+          edgeLight = (0.2126 * r + 0.7152 * g + 0.0722 * b) >= 150;
+        }
+        return { thumb: c.toDataURL('image/jpeg', 0.8), w: img.width, h: img.height, edgeHex, edgeLight };
       }, dataUri);
-      return (out as any).thumb || dataUri;
+      const o = out as any;
+      return { thumb: o.thumb || dataUri, w: o.w || 0, h: o.h || 0, edgeHex: o.edgeHex ?? null, edgeLight: o.edgeLight ?? null };
     } finally {
       await page.close().catch(() => {});
     }
   } catch {
-    return dataUri.length < 3_500_000 ? dataUri : '';
+    return { thumb: dataUri.length < 3_500_000 ? dataUri : '', w: 0, h: 0, edgeHex: null, edgeLight: null };
   }
+}
+
+export async function thumbDataUri(dataUri: string): Promise<string> {
+  return (await analyzeImage(dataUri)).thumb;
 }
 
 /* ─── the design brief ─────────────────────────────────────────────────── */
@@ -90,18 +119,22 @@ export function deckSystemPrompt(): string {
     "- {{HEADSHOT}} — Paul's real face photo. Byline grammar: 44-104px circle, 3px rgba(143,208,174,0.65) ring, next to 'Paul Baker' + 'Buy-side corporate development'.",
     '- {{IMG_n}} — the images Paul assigned to specific pages. You are SHOWN each one. Design each placement around what the image actually is: its shape, background, and subject.',
     '',
-    'IMAGE LAW (this is where past decks failed — obey it):',
+    'IMAGE LAW (this is where past decks failed — obey every clause):',
     '- Text NEVER touches or overlaps an image, unless the image is a full-bleed background behind a real legibility scrim (dark gradient ≥55% under light text).',
-    '- An image must never look pasted on. Choose its treatment from what you SEE: (a) if it has a flat/solid background, set the page (or a generous panel) to THAT color so it floats seamlessly, or bleed it to the page edge; (b) photographic images: full-bleed to one or more edges with the exposed edges dissolved via layered linear-gradients toward the page background (the house fade), or a clean architectural column — never a small floating card with a drop shadow.',
+    '- SEAMS ARE THE #1 FAILURE MODE. An image fills its zone COMPLETELY: position:absolute, width AND height 100% of the zone, object-fit:cover (object-position from the stated focal point). NEVER object-fit:contain, never auto height — no letterbox bars, no margins, and no visible strip or band of page background between the image and any page edge it touches, or between the image and the neighboring text column. If a zone touches a page edge, the image bleeds flush to that edge.',
+    "- Each image's brief states its measured EDGE/BACKGROUND color — design with it: (a) light-edged image on a LIGHT page: set the surrounding panel or page background to that exact color so the image floats seamlessly, or bleed it to the edge; (b) light-edged image on a DARK page: the dark must own the page — bleed the image to the outer page edges and DISSOLVE every inner/exposed edge into #0F1A16 by stacking absolutely-positioned linear-gradient overlay DIVS ON TOP of the image (each ≥160px deep, e.g. background:linear-gradient(90deg,#0F1A16 0%,rgba(15,26,22,0) 100%); a gradient painted on a container BEHIND an <img> does nothing). A hard light-to-dark cut, a white band, or a gap at the seam is a DEFECT.",
+    '- Photographic full-bleed images: dissolve exposed edges toward the page background the same way (overlay gradients), or hold them in a clean architectural column — never a small floating card with a drop shadow.',
     '- Compose AROUND the image: give it a full column/half/band; cap the text column so a long headline wraps instead of spreading; balance the whitespace deliberately.',
     '',
-    'STRUCTURE LAW: EXACTLY two dark pages — page 1 (the cover) and the final page (the closer). Everything between is light bone. The cover leads with the hook set large in Fraunces (two-tone: the second sentence/beat in mint on dark) and, if the cover has an image, integrates it per the image law. The closer carries the takeaway payoff: a small brass mono tag "FOR THE ACQUIRER", the takeaway headline in Fraunces ivory, its body, then the byline (ringed headshot + name + title), {{LOGO_WHITE}}, and a mint mono line "FOLLOW FOR THE NEXT READ." Light pages carry a small header lockup ({{LOGO}} + a mono section label) and a footer strip: either a slim dark band (#0F1A16, {{LOGO_WHITE}} at 34px + mono page "n / N") or an equally consistent light grammar — but be CONSISTENT across all light pages.',
+    'STRUCTURE LAW: EXACTLY two dark pages — page 1 (the cover) and the final page (the closer). Everything between is light bone. The cover leads with the hook set large in Fraunces (two-tone: the second sentence/beat in mint on dark) and, if the cover has an image, uses the house cover grammar: the image bleeds FULL-HEIGHT to the top/right/bottom page edges as the right ~45% of the page, its left edge (and its top/bottom edges too when its background is light) dissolved into the dark with overlay gradients per the image law; the text column sits left, vertically centered, and never crosses into the image zone. The closer carries the takeaway payoff: a small brass mono tag "FOR THE ACQUIRER", the takeaway headline in Fraunces ivory, its body, then the byline (ringed headshot + name + title), {{LOGO_WHITE}}, and a mint mono line "FOLLOW FOR THE NEXT READ." Light pages carry a small header lockup ({{LOGO}} + a mono section label) and a footer strip: either a slim dark band (#0F1A16, {{LOGO_WHITE}} at 34px + mono page "n / N") or an equally consistent light grammar — but be CONSISTENT across all light pages.',
     '',
     'CONTENT LAW (zero hallucination — hard rule): use the provided headings, bodies, stats and sources VERBATIM. Never invent, round, extend, or reword a number, source, or claim. You may choose which provided element is the visual hero of a page (e.g., set the number huge in Inter 800 with a brass bar, or lead with the heading), but the words themselves are fixed. Every stat page must show its source line (mono, muted).',
     '',
     'LEGIBILITY: body text ≥24px, sources ≥17px, headlines 40-64px (Fraunces), hero numerals 110-190px (Inter 800, tabular). Generous margins (≥76px sides). No element within 40px of another element it does not relate to.',
     '',
     'BE CONCISE IN CODE: shared classes in the one <style> block, no repeated inline styles, no comments. The whole output should stay well under 8,000 tokens.',
+    '',
+    'FINAL SELF-CHECK before returning: exactly two dark pages; every image zone flush to its edges — zero gaps, zero letterbox strips, every seam dissolved or panel-matched; every heading/stat/source verbatim; section count exactly matches the brief.',
     '',
     'Return the <style> block + sections ONLY.',
   ].join('\n');
@@ -186,8 +219,10 @@ export function assembleDeckHtml(raw: string, inp: DesignInputs, fontsHead: stri
   for (const im of inp.images) html = html.replaceAll(im.token, im.dataUri);
   if (html.includes('{{')) return null;
 
+  // img is inline by default — the baseline descender gap paints a white
+  // hairline under every image (exactly the LinkedIn-cover seam Paul saw).
   return `<!DOCTYPE html><html><head><meta charset="utf-8">${fontsHead}
-  <style>* { margin: 0; padding: 0; box-sizing: border-box; } html, body { width: 1080px; }
+  <style>* { margin: 0; padding: 0; box-sizing: border-box; } img { vertical-align: middle; } html, body { width: 1080px; }
   .pg { width: 1080px; height: 1350px; position: relative; overflow: hidden; page-break-after: always; }
   .pg:last-child { page-break-after: auto; }</style>
   </head><body>${html}</body></html>`;
@@ -199,10 +234,14 @@ export async function generateDeckHtml(inp: DesignInputs, fontsHead: string): Pr
   if (!process.env.ANTHROPIC_API_KEY) return null;
   const content: any[] = [{ type: 'text', text: pagesBrief(inp.pages, inp.typeLabel, inp.title) }];
   for (const im of inp.images) {
-    const thumb = await thumbDataUri(im.dataUri);
-    const m = /^data:(image\/[a-z+]+);base64,(.+)$/i.exec(thumb);
+    const meta = await analyzeImage(im.dataUri);
+    const m = /^data:(image\/[a-z+]+);base64,(.+)$/i.exec(meta.thumb);
     if (!m) continue;
-    content.push({ type: 'text', text: `${im.token} — assigned to page ${im.pageIndex != null ? im.pageIndex + 1 : '?'} (${im.role}). Design its placement around what you see:` });
+    const dims = meta.w > 0 ? `${meta.w}×${meta.h}px` : 'dimensions unknown';
+    const edge = meta.edgeHex
+      ? `measured edge/background ≈ ${meta.edgeHex} (${meta.edgeLight ? 'LIGHT — on a dark page, bleed it to the page edges and dissolve its inner edges into #0F1A16 with overlay gradients, or panel-match; a white band or hard seam is a defect' : 'dark-toned'})`
+      : 'edge color unknown — judge from the image';
+    content.push({ type: 'text', text: `${im.token} — assigned to page ${im.pageIndex != null ? im.pageIndex + 1 : '?'} (${im.role}). ${dims}; ${edge}. Focal point ${Math.round(im.focalX * 100)}% ${Math.round(im.focalY * 100)}% (use as object-position). Design its placement around what you see:` });
     content.push({ type: 'image', source: { type: 'base64', media_type: m[1], data: m[2] } });
   }
   try {
