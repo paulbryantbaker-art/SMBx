@@ -41,8 +41,12 @@ const specArg = args.find(a => !a.startsWith('--'));
 if (!specArg) { console.error('Usage: build-deck.mts <spec.deck.mts> [--media <dir>] [--out <dir>]'); process.exit(1); }
 const flag = (name: string) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : undefined; };
 const specPath = path.resolve(specArg);
+// LOCAL-FIRST (Paul, 2026-07-22: "move from App to my computer… folders for
+// media, assets and collateral"): with no flags, read images from ./media and
+// ./assets in the CWD and write outputs to ./collateral — so from a studio
+// workspace folder you just run the builder with a spec and it Just Works.
 const mediaDir = flag('--media') ? path.resolve(flag('--media')!) : null;
-const outDir = flag('--out') ? path.resolve(flag('--out')!) : path.resolve('out');
+const outDir = flag('--out') ? path.resolve(flag('--out')!) : path.resolve('collateral');
 mkdirSync(outDir, { recursive: true });
 
 const { deck } = await import(pathToFileURL(specPath).href) as { deck: Deck };
@@ -68,9 +72,19 @@ const b64 = (p: string, mime?: string) => {
   const m = mime || (p.endsWith('.png') ? 'image/png' : p.endsWith('.webp') ? 'image/webp' : 'image/jpeg');
   return `data:${m};base64,${readFileSync(p).toString('base64')}`;
 };
+// Resolve an image path against, in order: absolute → --media dir → the CWD's
+// local media/ and assets/ folders → the spec's own folder → CWD. So a spec
+// can just name "tree.png" and drop it in ./media or ./assets.
 const resolveImg = (p?: string): string | null => {
   if (!p) return null;
-  const tries = [path.isAbsolute(p) ? p : null, mediaDir ? path.join(mediaDir, p) : null, path.join(path.dirname(specPath), p), path.resolve(p)].filter(Boolean) as string[];
+  const tries = [
+    path.isAbsolute(p) ? p : null,
+    mediaDir ? path.join(mediaDir, p) : null,
+    path.resolve('media', p),
+    path.resolve('assets', p),
+    path.join(path.dirname(specPath), p),
+    path.resolve(p),
+  ].filter(Boolean) as string[];
   const hit = tries.find(t => existsSync(t));
   if (!hit) { console.warn(`[deck] image not found: ${p} (looked in ${tries.join(', ')})`); return null; }
   return b64(hit);
@@ -257,4 +271,5 @@ try {
 
 if (deck.caption) writeFileSync(path.join(outDir, `${deck.slug}-caption.txt`), deck.caption.trim() + '\n');
 console.log(`✓ ${deck.slug}: ${html.length} pages → ${outDir}/${deck.slug}.pdf${deck.caption ? ' (+ caption)' : ''}`);
+console.log(`  media: ${mediaDir || './media, ./assets (local folders)'}  ·  collateral: ${outDir}`);
 process.exit(0);
