@@ -630,7 +630,6 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
           </div>
         </div>
         <div class="cv-right">${panel}</div>
-        <div class="cv-texfade"></div>
         <div class="cv-foot">
           ${logoImg(48, { white: true })}
           <div class="cv-who">
@@ -825,28 +824,23 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     .cover-dark .cv-stat { color: ${IVORY}; }
     .cover-dark .cv-src { color: rgba(216,213,202,0.75); }
     .cover-dark .cv-dot { background: #8FD0AE; }
-    /* the cover image bleeds full-height on the right and its edges DISSOLVE
-       into the dark boardroom — no hard card, no pasted-on look (Paul,
-       2026-07-21: "the picture is not formatted in or faded in nice") */
-    .cover-dark .cv-right { left: 540px; top: 0; right: 0; bottom: 128px; background: transparent;
-      border-radius: 0; overflow: hidden; box-shadow: none; }
-    /* THE DARK NEVER TURNS FLAT (Paul, 2026-07-21 round 3: a flat gradient
-       beside the textured field prints a visible cliff): the dissolve layer
-       is the SAME material as the page — a full-section replica of the
-       boardroom background (texture + halo), dissolved with a mask so the
-       weave itself melts across the picture. Pixel-aligned with the section
-       (same box, same cover sizing), so left of the melt it is invisible. */
-    .cv-texfade { position: absolute; inset: 0; pointer-events: none; z-index: 1;
-      background:
-        radial-gradient(900px 500px at 50% -10%, rgba(22,98,76,0.28), transparent 65%),
-        linear-gradient(180deg, rgba(20,19,18,0.25), rgba(20,20,20,0.55)),
-        ${DARK_TEXTURE_URI ? `url('${DARK_TEXTURE_URI}') center/cover ` : ''}${DARK};
-      -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 50%, rgba(0,0,0,0.45) 59%, rgba(0,0,0,0) 68%);
-      mask-image: linear-gradient(90deg, #000 0%, #000 50%, rgba(0,0,0,0.45) 59%, rgba(0,0,0,0) 68%); }
-    /* NARROW MELT (Paul, 2026-07-21 round 4: the wide veil was "bleeding
-       behind the image… making the whole page dark and unattractive"): the
-       dissolve ends ~195px past the image's edge and there is NO full-width
-       top veil — past the melt the image stays at full brightness. */
+    /* FRAMED IMAGE ON THE DARK (Paul, 2026-07-21 round 5: "we do need an
+       image border that makes the image pop more.. it is too subsued behind
+       the massive dark left panel" — supersedes the melt experiments): the
+       cover image sits in a crisp ivory-hairline card ON the boardroom
+       texture, bright and unfaded — the same framed grammar as the light
+       1-pager, so the family reads as one system. The frame IS the
+       deliberate edge; nothing melts, nothing butts, and the card clears
+       the footer band so there is no bright-to-dark cut above it. */
+    .cover-dark .cv-right { left: 544px; top: 60px; right: 60px; bottom: 188px; background: #fff;
+      border: 1px solid rgba(243,241,234,0.18); border-radius: 24px; overflow: hidden; box-shadow: none; }
+    /* QUIET GROUND (Paul, round 5: "make the left panel feel more
+       background"): on the cover the wrinkled texture gets a deep flat
+       glaze so it recedes — the framed image and the headline are the
+       figures, the dark is atmosphere. */
+    .cover-dark .halo { background:
+      radial-gradient(900px 500px at 50% -10%, rgba(22,98,76,0.22), transparent 65%),
+      linear-gradient(180deg, rgba(15,26,22,0.55), rgba(15,26,22,0.72)); }
     .cover-dark .cv-foot { border-top: 1px solid rgba(243,241,234,0.10); background: transparent; }
     /* merged dark CLOSER — the single back bookend: takeaway payoff + follow */
     .closer-take .ct-in { padding: 96px 96px 110px; justify-content: center; text-align: center; align-items: center; }
