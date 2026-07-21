@@ -570,6 +570,12 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
   const kicker = (_n: number, _total: number) => `
     <div class="kick"><span class="kl">${logoImg(30)}<span>${esc(typeLabel.toUpperCase())}</span></span></div>`;
 
+  // A per-page dropped image, SET INTO the page (Paul, 2026-07-21: "where it
+  // does not look misplaced and blended in correctly"): no hard card/shadow —
+  // the .split-fade dissolves every edge into the bone so it reads as printed
+  // into the paper, not pasted on.
+  const imgPanel = (im: AuthorPhoto) => `<div class="split-r"><img src="${im.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(im.focalX * 100)}% ${Math.round(im.focalY * 100)}%;display:block"><div class="split-fade"></div></div>`;
+
   // TRUE BOOKEND (Paul, 2026-07-21: "the darks are together and do not
   // actually bookend the story"): exactly TWO dark pages — the cover (front)
   // and ONE dark closer (back). The takeaway payoff is folded INTO the
@@ -634,21 +640,25 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     } else if (p.kind === 'stat') {
       const numeral = String(p.stat ?? '').trim() || firstNumberToken(p.heading ?? '');
       const img = pageImgs[n - 1];
-      // With a dropped image the page splits — numbers left, image card
-      // right (the announcement grammar); without one it stays typographic.
-      const numSize = img ? (numeral.length > 8 ? 92 : 116) : (numeral.length > 9 ? 118 : numeral.length > 5 ? 152 : 190);
-      const body = `
-            <div class="numeral" style="font-size:${numSize}px">${connNumeral(numeral)}</div>
-            <div class="brassbar"></div>
-            <div class="stat-h"${img ? ' style="font-size:36px"' : ''}>${esc(p.heading ?? '')}</div>
-            ${p.body ? `<div class="stat-b"${img ? ' style="font-size:25px"' : ''}>${esc(p.body)}</div>` : ''}`;
+      // No-image page: the giant numeral IS the hero. Image page: the heading
+      // (which already carries the number) leads and the image is the visual —
+      // a giant numeral there just overruns the column onto the picture.
+      const numSize = numeral.length > 9 ? 118 : numeral.length > 5 ? 152 : 190;
+      const body = img
+        ? `<div class="stat-h" style="font-size:40px">${esc(p.heading ?? '')}</div>
+           <div class="brassbar"></div>
+           ${p.body ? `<div class="stat-b" style="font-size:25px">${esc(p.body)}</div>` : ''}`
+        : `<div class="numeral" style="font-size:${numSize}px">${connNumeral(numeral)}</div>
+           <div class="brassbar"></div>
+           <div class="stat-h">${esc(p.heading ?? '')}</div>
+           ${p.body ? `<div class="stat-b">${esc(p.body)}</div>` : ''}`;
       pageHtml.push(`<div class="pg">
         <div class="wash"></div>
         ${img ? '' : `<div class="ghost">${String(n).padStart(2, '0')}</div>`}
         <div class="in">
           ${kicker(n, total)}
           ${img
-            ? `<div class="split"><div class="split-l">${body}</div><div class="split-r"><img src="${img.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(img.focalX * 100)}% ${Math.round(img.focalY * 100)}%;display:block"></div></div>${p.source ? `<div class="src-line">${esc(p.source)}</div>` : ''}`
+            ? `<div class="split"><div class="split-l">${body}</div>${imgPanel(img)}</div>${p.source ? `<div class="baserail"><span class="bl-rule"></span><span class="src-line">${esc(p.source)}</span></div>` : ''}`
             : `<div class="frame">${body}</div>${p.source ? `<div class="baserail"><span class="bl-rule"></span><span class="src-line">${esc(p.source)}</span></div>` : ''}`}
         </div>
         ${pageFoot(n, total)}
@@ -665,7 +675,7 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
         <div class="in">
           ${kicker(n, total)}
           ${img
-            ? `<div class="split"><div class="split-l">${body}</div><div class="split-r"><img src="${img.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(img.focalX * 100)}% ${Math.round(img.focalY * 100)}%;display:block"></div></div>`
+            ? `<div class="split"><div class="split-l">${body}</div>${imgPanel(img)}</div>`
             : `<div class="frame story-frame">${body}</div>`}
         </div>
         ${pageFoot(n, total)}
@@ -762,11 +772,17 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     .baserail { position: absolute; left: 88px; right: 88px; bottom: 128px; display: flex; flex-direction: column; gap: 16px; }
     .bl-rule { height: 1px; width: 100%; background: ${HAIR}; }
     .conn { font-weight: 500; color: ${TERT}; font-size: 0.5em; letter-spacing: 0.005em; }
-    /* per-page artwork split — text left, image card right */
-    .split { flex: 1; display: flex; align-items: center; gap: 46px; min-height: 0; }
-    .split-l { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 30px; }
-    .split-r { width: 380px; height: 660px; flex: none; border-radius: 24px; overflow: hidden;
-      background: #fff; box-shadow: 0 24px 60px rgba(20,24,28,0.18); }
+    /* per-page artwork split — text left, image SET INTO the page right */
+    .split { flex: 1; display: flex; align-items: center; gap: 54px; min-height: 0; }
+    .split-l { flex: 1; min-width: 0; max-width: 470px; overflow: hidden; display: flex; flex-direction: column; justify-content: center; gap: 28px; }
+    .split-l .stat-h, .split-l .story-h, .split-l .stat-b, .split-l .story-b { max-width: 100%; }
+    .split-r { position: relative; width: 452px; height: 748px; flex: none; border-radius: 18px; overflow: hidden; }
+    /* dissolve every edge into the bone — no card, no pasted-on look */
+    .split-fade { position: absolute; inset: 0; pointer-events: none; background:
+      linear-gradient(90deg, ${WARM} 0%, rgba(246,244,239,0) 13%),
+      linear-gradient(270deg, ${WARM} 0%, rgba(246,244,239,0) 7%),
+      linear-gradient(0deg, ${WARM} 0%, rgba(246,244,239,0) 9%),
+      linear-gradient(180deg, ${WARM} 0%, rgba(246,244,239,0) 9%); }
     /* editorial signature — a large faint index numeral anchoring the lower
        frame so a short page never reads as an empty template slide */
     .ghost { position: absolute; right: 60px; bottom: 150px; z-index: 0; font-family: ${DISPLAY}; font-weight: 545;
