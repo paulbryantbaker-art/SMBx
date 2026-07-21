@@ -69,7 +69,11 @@ writeFileSync(path.join(target, 'README.md'), [
   'STUDIO_COWORK.md in the SMBx repo.',
 ].join('\n'));
 
+const builder = path.join(ROOT, 'scripts/studio/build-deck.mts');
 console.log(`✓ studio workspace ready at ${target}`);
-console.log(`  ${dirs.join('/  ')}/  + decks/example.deck.mts + posting-plan.md`);
-console.log(`  build: npx tsx ${path.relative(target, path.join(ROOT, 'scripts/studio/build-deck.mts')) || '<repo>/scripts/studio/build-deck.mts'} decks/example.deck.mts`);
+console.log(`  folders: ${dirs.map(d => d + '/').join('  ')}  + posting-plan.md`);
+console.log(`  to build a deck:`);
+console.log(`    cd ${target}`);
+console.log(`    npx tsx ${builder} decks/example.deck.mts`);
+console.log(`  → outputs land in ${path.join(target, 'collateral')}/`);
 process.exit(0);
