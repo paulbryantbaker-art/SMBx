@@ -383,8 +383,12 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: Auth
     .stat { font-size: 22.5px; line-height: 1.4; color: ${INK}; font-weight: 700; }
     .src { margin-top: 4px; font-family: ${MONO}; font-size: 14.5px; color: ${TERT}; letter-spacing: 0.03em; }
     .mandate { margin-top: auto; padding-bottom: 44px; font-size: 23.5px; line-height: 1.45; color: ${INK}; font-weight: 700; }
-    .right { position: absolute; left: 536px; top: 0; bottom: 128px; right: 0; background: #fff; }
-    .right .fade { position: absolute; inset: 0; background: linear-gradient(90deg, ${WARM} 0%, transparent 9%); }
+    /* FRAMED PANEL (Paul, 2026-07-21: "maybe the image needs a border box
+       that can hide the rough edges?") — on light paper an edge fade reads
+       as a smudge, especially over uploads carrying their own baked-in
+       gradients. A crisp hairline frame with a clean crop is the grammar. */
+    .right { position: absolute; left: 536px; top: 56px; bottom: 184px; right: 56px; background: #fff;
+      border: 1px solid ${HAIR}; border-radius: 24px; overflow: hidden; }
     .panel-brand { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
     .foot { position: absolute; left: 0; right: 0; bottom: 0; height: 128px; background: ${DARK};
       display: flex; align-items: center; justify-content: space-between; padding: 0 60px; }
@@ -405,7 +409,7 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: Auth
         </div></div>`).join('')}</div>` : ''}
       ${mandate ? `<div class="mandate">${esc(mandate)}</div>` : ''}
     </div>
-    <div class="right">${panel}<div class="fade"></div></div>
+    <div class="right">${panel}</div>
     <div class="foot">
       ${logoImg(48, { white: true })}
       <div class="who">
@@ -572,11 +576,10 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
   const kicker = (_n: number, _total: number) => `
     <div class="kick"><span class="kl">${logoImg(30)}<span>${esc(typeLabel.toUpperCase())}</span></span></div>`;
 
-  // A per-page dropped image, SET INTO the page (Paul, 2026-07-21: "where it
-  // does not look misplaced and blended in correctly"): no hard card/shadow —
-  // the .split-fade dissolves every edge into the bone so it reads as printed
-  // into the paper, not pasted on.
-  const imgPanel = (im: AuthorPhoto) => `<div class="split-r"><img src="${im.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(im.focalX * 100)}% ${Math.round(im.focalY * 100)}%;display:block"><div class="split-fade"></div></div>`;
+  // A per-page dropped image in the FRAMED PANEL (Paul, 2026-07-21: "maybe
+  // the image needs a border box that can hide the rough edges?") — a crisp
+  // hairline frame with a clean crop; fades on light paper read as smudges.
+  const imgPanel = (im: AuthorPhoto) => `<div class="split-r"><img src="${im.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(im.focalX * 100)}% ${Math.round(im.focalY * 100)}%;display:block"></div>`;
 
   // TRUE BOOKEND (Paul, 2026-07-21: "the darks are together and do not
   // actually bookend the story"): exactly TWO dark pages — the cover (front)
@@ -626,7 +629,8 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
               </div></div>`).join('')}</div>` : ''}
           </div>
         </div>
-        <div class="cv-right">${panel}<div class="cv-imgfade"></div></div>
+        <div class="cv-right">${panel}</div>
+        <div class="cv-texfade"></div>
         <div class="cv-foot">
           ${logoImg(48, { white: true })}
           <div class="cv-who">
@@ -778,13 +782,11 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     .split { flex: 1; display: flex; align-items: center; gap: 54px; min-height: 0; }
     .split-l { flex: 1; min-width: 0; max-width: 470px; overflow: hidden; display: flex; flex-direction: column; justify-content: center; gap: 28px; }
     .split-l .stat-h, .split-l .story-h, .split-l .stat-b, .split-l .story-b { max-width: 100%; }
-    .split-r { position: relative; width: 452px; height: 748px; flex: none; border-radius: 18px; overflow: hidden; }
-    /* dissolve every edge into the bone — no card, no pasted-on look */
-    .split-fade { position: absolute; inset: 0; pointer-events: none; background:
-      linear-gradient(90deg, ${WARM} 0%, rgba(246,244,239,0) 13%),
-      linear-gradient(270deg, ${WARM} 0%, rgba(246,244,239,0) 7%),
-      linear-gradient(0deg, ${WARM} 0%, rgba(246,244,239,0) 9%),
-      linear-gradient(180deg, ${WARM} 0%, rgba(246,244,239,0) 9%); }
+    /* FRAMED PANEL (Paul, 2026-07-21: "maybe the image needs a border box
+       that can hide the rough edges?") — fades on light paper read as
+       smudges; the crisp hairline frame is the deliberate grammar. */
+    .split-r { position: relative; width: 452px; height: 748px; flex: none; border-radius: 24px; overflow: hidden;
+      border: 1px solid ${HAIR}; background: #fff; }
     /* editorial signature — a large faint index numeral anchoring the lower
        frame so a short page never reads as an empty template slide */
     .ghost { position: absolute; right: 60px; bottom: 150px; z-index: 0; font-family: ${DISPLAY}; font-weight: 545;
@@ -828,10 +830,21 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
        2026-07-21: "the picture is not formatted in or faded in nice") */
     .cover-dark .cv-right { left: 540px; top: 0; right: 0; bottom: 128px; background: transparent;
       border-radius: 0; overflow: hidden; box-shadow: none; }
-    .cv-imgfade { position: absolute; inset: 0; pointer-events: none; z-index: 1; background:
-      linear-gradient(90deg, ${DARK} 0.5%, rgba(15,26,22,0) 26%),
-      linear-gradient(0deg, ${DARK} 0%, rgba(15,26,22,0) 15%),
-      linear-gradient(180deg, rgba(15,26,22,0.55) 0%, rgba(15,26,22,0) 13%); }
+    /* THE DARK NEVER TURNS FLAT (Paul, 2026-07-21 round 3: a flat gradient
+       beside the textured field prints a visible cliff): the dissolve layer
+       is the SAME material as the page — a full-section replica of the
+       boardroom background (texture + halo), dissolved with a mask so the
+       weave itself melts across the picture. Pixel-aligned with the section
+       (same box, same cover sizing), so left of the melt it is invisible. */
+    .cv-texfade { position: absolute; inset: 0; pointer-events: none; z-index: 1;
+      background:
+        radial-gradient(900px 500px at 50% -10%, rgba(22,98,76,0.28), transparent 65%),
+        linear-gradient(180deg, rgba(20,19,18,0.25), rgba(20,20,20,0.55)),
+        ${DARK_TEXTURE_URI ? `url('${DARK_TEXTURE_URI}') center/cover ` : ''}${DARK};
+      -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 47%, rgba(0,0,0,0) 78%),
+        linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 15%);
+      mask-image: linear-gradient(90deg, #000 0%, #000 47%, rgba(0,0,0,0) 78%),
+        linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 15%); }
     .cover-dark .cv-foot { border-top: 1px solid rgba(243,241,234,0.10); background: transparent; }
     /* merged dark CLOSER — the single back bookend: takeaway payoff + follow */
     .closer-take .ct-in { padding: 96px 96px 110px; justify-content: center; text-align: center; align-items: center; }
@@ -1052,12 +1065,37 @@ export async function renderLinkedInDocPdf(run: ResearchRunRow): Promise<Buffer>
   const html = (await designedDeckHtml(run)) ?? linkedInDocHtml(run, photo, art, brand, pageImgs);
   const page = await newRenderPage();
   try {
-    await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 1 });
+    // RASTERIZED PDF (Paul, 2026-07-21: "the issue is the way the PDF is
+    // rendered when it is opened by Preview or when the LinkedIn previewer
+    // shows it — we need to work around that"). page.pdf() ships vector
+    // objects + soft-masked gradients; macOS Preview and LinkedIn's
+    // rasterizer anti-alias adjacent objects independently — a white
+    // hairline at every shared edge, banding across the fades. So:
+    // screenshot each finished page (Chromium's compositor is exactly what
+    // the in-app previews show) and build the PDF as ONE flat image per
+    // page — no object boundaries left for a viewer to mis-render.
+    await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 2 });
     await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 120000 });
     await page.evaluateHandle('document.fonts.ready').catch(() => {});
     await page.evaluate(() => Promise.all(Array.from(document.images).map((im: any) => im.decode().catch(() => {})))).catch(() => {});
     // Chart.js renders synchronously with animation:false; a beat for raster.
     await new Promise(r => setTimeout(r, 150));
+    const count = await page.evaluate(() => document.querySelectorAll('.pg').length);
+    const shots: string[] = [];
+    for (let i = 0; i < Math.max(1, count); i++) {
+      const shot = await page.screenshot({
+        type: 'jpeg', quality: 92,
+        clip: { x: 0, y: i * 1350, width: 1080, height: 1350 },
+      });
+      shots.push(`data:image/jpeg;base64,${Buffer.from(shot).toString('base64')}`);
+    }
+    const flat = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+      * { margin: 0; padding: 0; } html, body { width: 1080px; }
+      img { display: block; width: 1080px; height: 1350px; page-break-after: always; }
+      img:last-child { page-break-after: auto; }
+    </style></head><body>${shots.map(s => `<img src="${s}">`).join('')}</body></html>`;
+    await page.setContent(flat, { waitUntil: 'domcontentloaded', timeout: 120000 });
+    await page.evaluate(() => Promise.all(Array.from(document.images).map((im: any) => im.decode().catch(() => {})))).catch(() => {});
     const pdf = await page.pdf({
       width: '1080px', height: '1350px', printBackground: true,
       margin: { top: 0, bottom: 0, left: 0, right: 0 },
