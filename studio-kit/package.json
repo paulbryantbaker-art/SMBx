@@ -1,0 +1,21 @@
+{
+  "name": "smbx-studio-kit",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Local house-style LinkedIn carousel builder for smbX — no app, no API key. Renders on your own Chrome via Puppeteer.",
+  "scripts": {
+    "init": "tsx init-workspace.mts",
+    "build": "tsx build-deck.mts",
+    "example": "tsx build-deck.mts decks/example.deck.mts"
+  },
+  "dependencies": {
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "puppeteer-core": "^24.40.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.0"
+  }
+}
