@@ -18,14 +18,14 @@
 export const deck = {
   slug: 'elevator-teardown-1',
   kicker: 'LANE TEARDOWN Nº1',
-  // A real slot points cover.image at your artwork (a file you drop in ./media).
-  // This example names a bundled brand photo by bare filename so it renders
-  // standalone; swap it for your Gemini cover art (e.g. image: 'tree.png').
+  // Point cover.image at YOUR cover art — a file you drop in ./media (e.g.
+  // image: 'tree.png'). Left off here so the kit ships no photo of you; with
+  // no image the cover renders as a clean dark text card. Drop a
+  // headshot.jpg in ./media too and it becomes the byline photo automatically.
   cover: {
     hook: 'The buyer math on independent elevator service',
     sub: "Where the consolidation actually is — and the two traps in the book you'd be buying.",
-    image: 'founder-walking.webp',
-    imagePos: '50% 30%',
+    // image: 'your-cover.png', imagePos: '50% 45%',
   },
   pages: [
     { kind: 'numeral', numeral: '~10', unit: '%', head: 'of U.S. units are maintained by PE-backed platforms — early, not hot.', body: 'OEMs hold ~60%. Independents still hold ~30%. The lane has started moving; it has not moved.', source: 'elevatorworld.com · Dec 2025' },

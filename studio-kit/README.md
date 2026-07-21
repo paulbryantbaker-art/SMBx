@@ -81,7 +81,8 @@ build-deck.mts       the renderer (spec → carousel PDF + page JPGs + caption)
 init-workspace.mts   scaffolds a media/assets/collateral/decks workspace
 lib/render.mts       Puppeteer + local-Chrome launch (no download)
 lib/fonts.mts        embeds Fraunces/Inter/IBM Plex Mono (no CDN)
-brand/               logo (x2), boardroom texture, default headshot, walking photo
+brand/               logo (x2) + boardroom texture only — no photos of you
+                     (drop your own headshot.jpg in media/ for the byline)
 decks/example.deck.mts   worked example + field reference
 posting-plan.md      the format vocabulary + slot list
 ```
