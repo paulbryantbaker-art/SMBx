@@ -31,7 +31,7 @@ import { sql } from '../db.js';
 import { newRenderPage } from './premiumPdfRenderer.js';
 
 const DECK_MODEL = process.env.RESEARCH_DECK_MODEL || 'claude-sonnet-4-6';
-const PROMPT_VERSION = 'v2'; // v2 (2026-07-21): seam/edge law — Paul's LinkedIn cover showed a white band where the image met the dark column
+const PROMPT_VERSION = 'v3'; // v3 (2026-07-21): NO-ABUTMENT layering — v2's flush-edge law still butt-joined zones and PDF rounding printed a white line; now the image goes UNDER the neighbor and fades (Paul's call)
 
 let client: Anthropic | null = null;
 function anthropic(): Anthropic {
@@ -112,7 +112,7 @@ export function deckSystemPrompt(): string {
     '- Bone paper #F6F4EF; ink #14181C; body gray #5C6670; muted #8A9099; hairline #E4E1D9.',
     '- Deal Green #16624C (deep #0F4E3C); mint on dark #8FD0AE; brass #B08637 (jewelry only); boardroom dark #0F1A16; ivory #F3F1EA; ivory-sub #D8D5CA.',
     "- Type: 'Fraunces' (display serif, weight 545) for headlines and pull-lines; 'Inter' for everything else (numerals font-weight 800, letter-spacing -0.03em); 'IBM Plex Mono' ONLY for small labels/sources (13px+ equivalent, letter-spacing ≤0.12em). Fonts are already loaded — just use the family names.",
-    '- Dark pages: background #0F1A16 with the texture image url({{TEXTURE_DARK}}) (background-size:cover) + a soft green halo (radial-gradient, rgba(22,98,76,0.28) fading out) is the house look.',
+    '- Dark pages: background #0F1A16 with the texture image url({{TEXTURE_DARK}}) (background-size:cover) + a soft green halo (radial-gradient, rgba(22,98,76,0.28) fading out) is the house look. Paint it on the SECTION element itself — never only on an inner column div — so a sub-pixel gap between children can only ever reveal dark, never a light page beneath.',
     '',
     'ASSETS arrive as tokens — use them as literal src values and NEVER invent other URLs:',
     '- {{LOGO}} (ink wordmark img, use height 30-48px), {{LOGO_WHITE}} (for dark pages).',
@@ -121,12 +121,13 @@ export function deckSystemPrompt(): string {
     '',
     'IMAGE LAW (this is where past decks failed — obey every clause):',
     '- Text NEVER touches or overlaps an image, unless the image is a full-bleed background behind a real legibility scrim (dark gradient ≥55% under light text).',
-    '- SEAMS ARE THE #1 FAILURE MODE. An image fills its zone COMPLETELY: position:absolute, width AND height 100% of the zone, object-fit:cover (object-position from the stated focal point). NEVER object-fit:contain, never auto height — no letterbox bars, no margins, and no visible strip or band of page background between the image and any page edge it touches, or between the image and the neighboring text column. If a zone touches a page edge, the image bleeds flush to that edge.',
-    "- Each image's brief states its measured EDGE/BACKGROUND color — design with it: (a) light-edged image on a LIGHT page: set the surrounding panel or page background to that exact color so the image floats seamlessly, or bleed it to the edge; (b) light-edged image on a DARK page: the dark must own the page — bleed the image to the outer page edges and DISSOLVE every inner/exposed edge into #0F1A16 by stacking absolutely-positioned linear-gradient overlay DIVS ON TOP of the image (each ≥160px deep, e.g. background:linear-gradient(90deg,#0F1A16 0%,rgba(15,26,22,0) 100%); a gradient painted on a container BEHIND an <img> does nothing). A hard light-to-dark cut, a white band, or a gap at the seam is a DEFECT.",
+    '- NO ABUTMENT — LAYER, NEVER TILE. Two visual zones (image / text column / band) must NEVER meet at a shared hard edge: PDF rasterization rounds fractional pixels and prints a hairline of whatever lies beneath at every butt-joint (this exact defect shipped to LinkedIn as a white line — never again). The image always goes UNDERNEATH: extend its layer ≥120px PAST the boundary, under the neighboring zone, then paint that zone\'s field OVER it — solid where the text lives, dissolving to transparent across ≥200px of the image via absolutely-positioned linear-gradient overlay DIVS stacked ON TOP of the image (a gradient painted on a container BEHIND an <img> does nothing). Nothing ever butts; one layer always underlaps the other.',
+    '- An image fills its layer COMPLETELY: position:absolute, object-fit:cover (object-position from the stated focal point). NEVER object-fit:contain, never auto height — no letterbox bars, no margins, flush to every page edge its layer touches.',
+    "- Each image's brief states its measured EDGE/BACKGROUND color — design with it: (a) light-edged image on a LIGHT page: set the surrounding panel or page background to that exact color so the image floats seamlessly, or bleed it to the edge; (b) light-edged image on a DARK page: the dark must own the page — the image slides UNDER the dark field and every exposed edge (the inner edge, plus top/bottom when the background is light) fades out beneath #0F1A16 overlays. A hard light-to-dark cut, a white band, or any visible seam is a DEFECT.",
     '- Photographic full-bleed images: dissolve exposed edges toward the page background the same way (overlay gradients), or hold them in a clean architectural column — never a small floating card with a drop shadow.',
     '- Compose AROUND the image: give it a full column/half/band; cap the text column so a long headline wraps instead of spreading; balance the whitespace deliberately.',
     '',
-    'STRUCTURE LAW: EXACTLY two dark pages — page 1 (the cover) and the final page (the closer). Everything between is light bone. The cover leads with the hook set large in Fraunces (two-tone: the second sentence/beat in mint on dark) and, if the cover has an image, uses the house cover grammar: the image bleeds FULL-HEIGHT to the top/right/bottom page edges as the right ~45% of the page, its left edge (and its top/bottom edges too when its background is light) dissolved into the dark with overlay gradients per the image law; the text column sits left, vertically centered, and never crosses into the image zone. The closer carries the takeaway payoff: a small brass mono tag "FOR THE ACQUIRER", the takeaway headline in Fraunces ivory, its body, then the byline (ringed headshot + name + title), {{LOGO_WHITE}}, and a mint mono line "FOLLOW FOR THE NEXT READ." Light pages carry a small header lockup ({{LOGO}} + a mono section label) and a footer strip: either a slim dark band (#0F1A16, {{LOGO_WHITE}} at 34px + mono page "n / N") or an equally consistent light grammar — but be CONSISTENT across all light pages.',
+    'STRUCTURE LAW: EXACTLY two dark pages — page 1 (the cover) and the final page (the closer). Everything between is light bone. The cover leads with the hook set large in Fraunces (two-tone: the second sentence/beat in mint on dark) and, if the cover has an image, uses the house cover grammar — LAYERED, per the image law: the image is a full-height layer anchored to the top/right/bottom page edges, spanning roughly the right 55-65% of the page so it slides UNDER the text side; over it, one linear-gradient overlay runs from solid #0F1A16 on the left (fully covering the text column\'s field) to transparent toward the right, so the image emerges from the dark with no seam anywhere (add matching top/bottom fades when its background is light); the text column sits on the dark field, vertically centered, and never crosses onto the unfaded part of the image. The closer carries the takeaway payoff: a small brass mono tag "FOR THE ACQUIRER", the takeaway headline in Fraunces ivory, its body, then the byline (ringed headshot + name + title), {{LOGO_WHITE}}, and a mint mono line "FOLLOW FOR THE NEXT READ." Light pages carry a small header lockup ({{LOGO}} + a mono section label) and a footer strip: either a slim dark band (#0F1A16, {{LOGO_WHITE}} at 34px + mono page "n / N") or an equally consistent light grammar — but be CONSISTENT across all light pages.',
     '',
     'CONTENT LAW (zero hallucination — hard rule): use the provided headings, bodies, stats and sources VERBATIM. Never invent, round, extend, or reword a number, source, or claim. You may choose which provided element is the visual hero of a page (e.g., set the number huge in Inter 800 with a brass bar, or lead with the heading), but the words themselves are fixed. Every stat page must show its source line (mono, muted).',
     '',
@@ -134,7 +135,7 @@ export function deckSystemPrompt(): string {
     '',
     'BE CONCISE IN CODE: shared classes in the one <style> block, no repeated inline styles, no comments. The whole output should stay well under 8,000 tokens.',
     '',
-    'FINAL SELF-CHECK before returning: exactly two dark pages; every image zone flush to its edges — zero gaps, zero letterbox strips, every seam dissolved or panel-matched; every heading/stat/source verbatim; section count exactly matches the brief.',
+    'FINAL SELF-CHECK before returning: exactly two dark pages; NO butt-joints anywhere — every image underlaps its neighboring zone and fades beneath it, zero gaps, zero letterbox strips; dark backgrounds painted on the section itself; every heading/stat/source verbatim; section count exactly matches the brief.',
     '',
     'Return the <style> block + sections ONLY.',
   ].join('\n');
@@ -221,8 +222,13 @@ export function assembleDeckHtml(raw: string, inp: DesignInputs, fontsHead: stri
 
   // img is inline by default — the baseline descender gap paints a white
   // hairline under every image (exactly the LinkedIn-cover seam Paul saw).
+  // The @layer backstop paints every section the right register even when
+  // the model painted only an inner column div: layered rules lose to ANY
+  // unlayered model declaration, so this only fills sections the model left
+  // unset — a rounding gap then reveals dark/bone, never the white PDF page.
   return `<!DOCTYPE html><html><head><meta charset="utf-8">${fontsHead}
-  <style>* { margin: 0; padding: 0; box-sizing: border-box; } img { vertical-align: middle; } html, body { width: 1080px; }
+  <style>@layer pgbase { .pg { background: #F6F4EF; } section.pg:first-of-type, section.pg:last-of-type { background: #0F1A16; } }
+  * { margin: 0; padding: 0; box-sizing: border-box; } img { vertical-align: middle; } html, body { width: 1080px; }
   .pg { width: 1080px; height: 1350px; position: relative; overflow: hidden; page-break-after: always; }
   .pg:last-child { page-break-after: auto; }</style>
   </head><body>${html}</body></html>`;
@@ -239,7 +245,7 @@ export async function generateDeckHtml(inp: DesignInputs, fontsHead: string): Pr
     if (!m) continue;
     const dims = meta.w > 0 ? `${meta.w}×${meta.h}px` : 'dimensions unknown';
     const edge = meta.edgeHex
-      ? `measured edge/background ≈ ${meta.edgeHex} (${meta.edgeLight ? 'LIGHT — on a dark page, bleed it to the page edges and dissolve its inner edges into #0F1A16 with overlay gradients, or panel-match; a white band or hard seam is a defect' : 'dark-toned'})`
+      ? `measured edge/background ≈ ${meta.edgeHex} (${meta.edgeLight ? 'LIGHT — on a dark page, slide it UNDER the dark field and fade its exposed edges out beneath #0F1A16 overlays; never butt its edge against another zone; a white band or visible seam is a defect' : 'dark-toned'})`
       : 'edge color unknown — judge from the image';
     content.push({ type: 'text', text: `${im.token} — assigned to page ${im.pageIndex != null ? im.pageIndex + 1 : '?'} (${im.role}). ${dims}; ${edge}. Focal point ${Math.round(im.focalX * 100)}% ${Math.round(im.focalY * 100)}% (use as object-position). Design its placement around what you see:` });
     content.push({ type: 'image', source: { type: 'base64', media_type: m[1], data: m[2] } });
