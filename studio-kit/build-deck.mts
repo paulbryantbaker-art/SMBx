@@ -75,7 +75,7 @@ const b64 = (p: string, mime?: string) => {
 // local media/ and assets/ folders → the kit's bundled brand/ → the spec's own
 // folder → CWD. So a spec can name "tree.png" (drop it in ./media) or a bundled
 // brand image like "founder-walking.webp" by bare name from anywhere.
-const resolveImg = (p?: string): string | null => {
+const resolveImg = (p?: string, quiet = false): string | null => {
   if (!p) return null;
   const tries = [
     path.isAbsolute(p) ? p : null,
@@ -87,18 +87,26 @@ const resolveImg = (p?: string): string | null => {
     path.resolve(p),
   ].filter(Boolean) as string[];
   const hit = tries.find(t => existsSync(t));
-  if (!hit) { console.warn(`[deck] image not found: ${p} (looked in ${tries.join(', ')})`); return null; }
+  if (!hit) { if (!quiet) console.warn(`[deck] image not found: ${p} (looked in ${tries.join(', ')})`); return null; }
   return b64(hit);
 };
 
 const LOGO = b64(path.join(KIT, 'brand/logo-green-x.png'));
 const LOGO_W = b64(path.join(KIT, 'brand/logo-green-x-dark.png'));
 const TEXTURE = b64(path.join(KIT, 'brand/blackbleed.webp'));
-const HEAD = resolveImg(deck.headshot) || b64(path.join(KIT, 'brand/founder-portrait.jpg'));
+// The kit ships NO photo of you. The byline headshot comes from your own
+// image: the spec's `headshot` field, else a `headshot.{jpg,png,webp}` you
+// drop in ./media (or ./assets). If none is found, the byline shows a clean
+// "PB" badge — never a stock/placeholder face.
+const HEAD = resolveImg(deck.headshot)
+  || resolveImg('headshot.jpg', true) || resolveImg('headshot.png', true) || resolveImg('headshot.webp', true)
+  || null;
 const COVER_IMG = resolveImg(deck.cover.image);
 
 const esc = (s: string) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-const face = (s: number) => `<img src="${HEAD}" style="width:${s}px;height:${s}px;border-radius:50%;object-fit:cover;object-position:50% 22%;display:block;flex:none;border:3px solid rgba(143,208,174,0.65)">`;
+const face = (s: number) => HEAD
+  ? `<img src="${HEAD}" style="width:${s}px;height:${s}px;border-radius:50%;object-fit:cover;object-position:50% 22%;display:block;flex:none;border:3px solid rgba(143,208,174,0.65)">`
+  : `<div style="width:${s}px;height:${s}px;border-radius:50%;background:${INK};color:${IVORY};display:flex;align-items:center;justify-content:center;font-family:${SANS};font-weight:800;font-size:${Math.round(s * 0.38)}px;flex:none;border:3px solid rgba(143,208,174,0.65)">PB</div>`;
 const total = deck.pages.length + 2; // cover + middles + closer
 const kicker = `<div class="kick"><img src="${LOGO}" style="height:30px;width:auto;display:block"><span class="kt">${esc(deck.kicker)}</span></div>`;
 const pfoot = (n: number) => `<div class="pfoot"><img src="${LOGO_W}" style="height:34px;width:auto;display:block"><span class="pn">${n} / ${total}</span></div>`;
