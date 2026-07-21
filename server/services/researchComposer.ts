@@ -506,6 +506,12 @@ export function docPages(run: ResearchRunRow): DocPage[] {
   return ordered;
 }
 
+/** De-emphasize the connective words in a display numeral ("78 of 108" → the
+ *  "of" set small and gray) so the figures themselves carry the line. */
+function connNumeral(s: string): string {
+  return esc(s).replace(/ (of|to|in|per|vs|and) /gi, ' <span class="conn">$1</span> ');
+}
+
 /** Pull a short display numeral ("$4.2B", "38%", "1,900") off a stat sentence. */
 function firstNumberToken(stat: string): string {
   const m = /(?:[$€£]\s?)?\d[\d,.]*(?:\s?[%xX×]|\s?(?:billion|million|bn|mm|M|B|K|k))?/.exec(String(stat ?? ''));
@@ -559,8 +565,10 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     && feed.chart.values.every((v: any) => typeof v === 'number' && Number.isFinite(v))
     ? feed.chart : null;
 
-  const kicker = (n: number, total: number) => `
-    <div class="kick"><span class="kl">${logoImg(30)}<span>${esc(typeLabel.toUpperCase())}</span></span><span>${n} / ${total}</span></div>`;
+  // Header lockup — logo + section label on a hairline rule. The page number
+  // lives ONCE now, in the footer band (it was duplicated top and bottom).
+  const kicker = (_n: number, _total: number) => `
+    <div class="kick"><span class="kl">${logoImg(30)}<span>${esc(typeLabel.toUpperCase())}</span></span></div>`;
 
   // Total = content pages + optional chart page + closer.
   const total = pages.length + (chart ? 1 : 0) + 1;
@@ -576,12 +584,20 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
       // cover is the announcement DARK (style B) — boardroom band, ivory
       // two-tone hook, and the artwork sitting in the light photo-card —
       // then light content pages, then the dark takeaway + closer.
-      const size = h.length > 130 ? 40 : h.length > 90 ? 45 : h.length > 60 ? 50 : 56;
+      const size = h.length > 150 ? 36 : h.length > 115 ? 41 : h.length > 80 ? 46 : h.length > 55 ? 51 : 56;
       const pick = art?.dataUri ? art : brand?.dataUri ? brand : null;
       const panel = pick
         ? `<img src="${pick.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(pick.focalX * 100)}% ${Math.round(pick.focalY * 100)}%;display:block">`
         : `<div class="panel-brand">${logoImg(64)}</div>`;
-      const coverPts: any[] = (Array.isArray(feed.dataPoints) ? feed.dataPoints : []).slice(0, 3);
+      // Cover bullets are SUPPORT, not a repeat of the headline — drop any
+      // bullet whose lead number is already in the hook, then keep at most 2.
+      const hlow = h.toLowerCase();
+      const coverPts: any[] = (Array.isArray(feed.dataPoints) ? feed.dataPoints : [])
+        .filter((pt: any) => {
+          const num = (String(pt?.stat ?? '').match(/\d[\d,]*/) || [''])[0];
+          return !(num && num.length >= 2 && hlow.includes(num));
+        })
+        .slice(0, 2);
       pageHtml.push(`<div class="pg dark cover-dark">
         <div class="halo"></div>
         <div class="cv-left">
@@ -613,20 +629,20 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
       const img = pageImgs[n - 1];
       // With a dropped image the page splits — numbers left, image card
       // right (the announcement grammar); without one it stays typographic.
-      const numSize = img ? (numeral.length > 8 ? 96 : 120) : (numeral.length > 8 ? 120 : numeral.length > 5 ? 150 : 184);
+      const numSize = img ? (numeral.length > 8 ? 92 : 116) : (numeral.length > 9 ? 118 : numeral.length > 5 ? 152 : 190);
       const body = `
-            <div class="numeral" style="font-size:${numSize}px">${esc(numeral)}</div>
+            <div class="numeral" style="font-size:${numSize}px">${connNumeral(numeral)}</div>
             <div class="brassbar"></div>
-            <div class="stat-h"${img ? ' style="font-size:34px"' : ''}>${esc(p.heading ?? '')}</div>
+            <div class="stat-h"${img ? ' style="font-size:36px"' : ''}>${esc(p.heading ?? '')}</div>
             ${p.body ? `<div class="stat-b"${img ? ' style="font-size:25px"' : ''}>${esc(p.body)}</div>` : ''}`;
       pageHtml.push(`<div class="pg">
         <div class="wash"></div>
+        ${img ? '' : `<div class="ghost">${String(n).padStart(2, '0')}</div>`}
         <div class="in">
           ${kicker(n, total)}
           ${img
-            ? `<div class="split"><div class="split-l">${body}</div><div class="split-r"><img src="${img.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(img.focalX * 100)}% ${Math.round(img.focalY * 100)}%;display:block"></div></div>`
-            : `<div class="grow">${body}</div>`}
-          ${p.source ? `<div class="src-line">${esc(p.source)}</div>` : ''}
+            ? `<div class="split"><div class="split-l">${body}</div><div class="split-r"><img src="${img.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(img.focalX * 100)}% ${Math.round(img.focalY * 100)}%;display:block"></div></div>${p.source ? `<div class="src-line">${esc(p.source)}</div>` : ''}`
+            : `<div class="frame">${body}</div>${p.source ? `<div class="baserail"><span class="bl-rule"></span><span class="src-line">${esc(p.source)}</span></div>` : ''}`}
         </div>
         ${pageFoot(n, total)}
       </div>`);
@@ -664,11 +680,12 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
             ${p.body ? `<div class="story-b"${img ? ' style="font-size:27px"' : ''}>${esc(p.body)}</div>` : ''}`;
       pageHtml.push(`<div class="pg">
         <div class="wash"></div>
+        ${img ? '' : `<div class="ghost">${String(n).padStart(2, '0')}</div>`}
         <div class="in">
           ${kicker(n, total)}
           ${img
             ? `<div class="split"><div class="split-l">${body}</div><div class="split-r"><img src="${img.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(img.focalX * 100)}% ${Math.round(img.focalY * 100)}%;display:block"></div></div>`
-            : `<div class="grow">${body}</div>`}
+            : `<div class="frame story-frame">${body}</div>`}
         </div>
         ${pageFoot(n, total)}
       </div>`);
@@ -731,27 +748,37 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     .wash { position: absolute; inset: 0; background:
       radial-gradient(1200px 800px at 8% 0%, rgba(22,98,76,0.045), transparent 60%),
       radial-gradient(900px 700px at 100% 100%, rgba(203,193,170,0.16), transparent 55%); }
-    .in { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 76px 88px 128px; }
+    .in { position: absolute; inset: 0; z-index: 1; display: flex; flex-direction: column; padding: 76px 88px 128px; }
     .kick { display: flex; justify-content: space-between; align-items: center; font-family: ${MONO};
-      font-size: 21px; letter-spacing: 0.1em; color: ${TERT}; text-transform: uppercase; }
+      font-size: 21px; letter-spacing: 0.1em; color: ${TERT}; text-transform: uppercase;
+      padding-bottom: 26px; border-bottom: 1px solid ${HAIR}; }
+    .dark .kick { border-bottom-color: rgba(243,241,234,0.12); }
     .kick .kl { display: flex; align-items: center; gap: 24px; }
     .rule { height: 6px; width: 96px; background: ${CORAL}; border-radius: 3px; }
     .grow { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 34px; }
+    /* editorial frame — content TOP-anchored so no page floats half-empty;
+       the ghost index numeral + baseline source rail carry the lower frame */
+    .frame { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; gap: 30px; padding-top: 58px; }
+    .story-frame { justify-content: flex-start; padding-top: 72px; gap: 34px; }
+    .baserail { position: absolute; left: 88px; right: 88px; bottom: 128px; display: flex; flex-direction: column; gap: 16px; }
+    .bl-rule { height: 1px; width: 100%; background: ${HAIR}; }
+    .conn { font-weight: 500; color: ${TERT}; font-size: 0.5em; letter-spacing: 0.005em; }
     /* per-page artwork split — text left, image card right */
     .split { flex: 1; display: flex; align-items: center; gap: 46px; min-height: 0; }
     .split-l { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 30px; }
     .split-r { width: 380px; height: 660px; flex: none; border-radius: 24px; overflow: hidden;
       background: #fff; box-shadow: 0 24px 60px rgba(20,24,28,0.18); }
-    /* editorial graphics layer */
-    .ghost { position: absolute; top: 34px; right: 52px; font-family: ${DISPLAY}; font-weight: 545; font-size: 320px;
-      line-height: 1; color: rgba(20,24,28,0.055); letter-spacing: -0.03em; }
+    /* editorial signature — a large faint index numeral anchoring the lower
+       frame so a short page never reads as an empty template slide */
+    .ghost { position: absolute; right: 60px; bottom: 150px; z-index: 0; font-family: ${DISPLAY}; font-weight: 545;
+      font-size: 360px; line-height: 0.8; color: rgba(20,24,28,0.05); letter-spacing: -0.04em; pointer-events: none; }
     .motif { position: absolute; right: 64px; bottom: 150px; width: 300px; height: 300px; opacity: 0.16; }
     .brassbar { height: 8px; width: 132px; background: ${BRASS}; border-radius: 4px; }
     /* cover — the announcement split */
-    .cv-left { position: absolute; left: 0; top: 0; bottom: 128px; width: 512px; padding: 60px 46px 0 60px; display: flex; flex-direction: column; z-index: 2; }
+    .cv-left { position: absolute; left: 0; top: 0; bottom: 128px; width: 544px; padding: 66px 50px 0 66px; display: flex; flex-direction: column; z-index: 2; }
     .cv-kick { display: flex; align-items: center; justify-content: space-between; }
     .kt { font-family: ${MONO}; font-size: 18px; letter-spacing: 0.1em; color: ${TERT}; text-transform: uppercase; }
-    .cv-hook { margin-top: 52px; font-family: ${DISPLAY}; font-weight: 545; line-height: 1.12; letter-spacing: -0.012em; color: ${INK}; }
+    .cv-hook { margin-top: 46px; font-family: ${DISPLAY}; font-weight: 545; line-height: 1.08; letter-spacing: -0.014em; color: ${INK}; }
     .turn { color: ${CORAL_DEEP}; }
     .cv-rule { width: 70px; height: 6px; background: ${CORAL}; border-radius: 99px; margin: 30px 0 26px; }
     .cv-sub { font-size: 22px; line-height: 1.5; color: ${TERT}; font-weight: 500; }
@@ -787,7 +814,7 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     .pf-n { font-family: ${MONO}; font-size: 19px; letter-spacing: 0.1em; color: ${IVORY_SUB}; }
     /* stat */
     .numeral { font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: ${INK}; }
-    .stat-h { font-size: 40px; font-weight: 700; letter-spacing: -0.014em; line-height: 1.22; max-width: 880px; }
+    .stat-h { font-family: ${DISPLAY}; font-size: 44px; font-weight: 545; letter-spacing: -0.008em; line-height: 1.16; max-width: 900px; color: ${INK}; }
     .stat-b { font-size: 29px; color: ${BODY}; line-height: 1.45; max-width: 860px; }
     .src-line { font-family: ${MONO}; font-size: 19px; color: ${TERT}; letter-spacing: 0.02em; }
     /* story / takeaway */
