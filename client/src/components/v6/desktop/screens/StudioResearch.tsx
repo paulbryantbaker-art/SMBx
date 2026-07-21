@@ -464,7 +464,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
     }
   }, [refresh]);
 
-  const grab = useCallback(async (r: RunRow, kind: "pdf" | "card" | "md" | "lipdf") => {
+  const grab = useCallback(async (r: RunRow, kind: "pdf" | "card" | "cardDark" | "md" | "lipdf") => {
     const key = `${r.id}:${kind}`;
     setDl(key);
     setNote(null);
@@ -476,6 +476,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
       const [url, file] =
         kind === "pdf" ? [`/research/runs/${r.id}/pdf?save=1`, `smbx-research-${base}.pdf`]
         : kind === "card" ? [`/research/runs/${r.id}/card.png?save=1`, `smbx-onepager-${base}.png`]
+        : kind === "cardDark" ? [`/research/runs/${r.id}/card.png?save=1&variant=dark`, `smbx-onepager-dark-${base}.png`]
         : kind === "lipdf" ? [`/research/runs/${r.id}/linkedin.pdf?save=1`, `smbx-linkedin-${base}.pdf`]
         : [`/research/runs/${r.id}/md`, `smbx-research-${base}.md`];
       await download(url, file);
@@ -869,7 +870,7 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
   createForm: React.ReactNode;
   angles: { key: string; label: string; blurb?: string }[];
   onReview: (id: number) => void;
-  onGrab: (r: RunRow, kind: "pdf" | "card" | "md" | "lipdf") => void;
+  onGrab: (r: RunRow, kind: "pdf" | "card" | "cardDark" | "md" | "lipdf") => void;
   onCopyPost: (r: RunRow) => void;
   onRerunRun: (r: RunRow) => void;
   onMoveRun: (r: RunRow, scheduleId: number | null) => void;
@@ -1347,7 +1348,7 @@ function RunPreview({ run, schedules, typeLabel, angleLabel, dl, reviewOpen, onR
   dl: string | null;
   reviewOpen: boolean;
   onReview: () => void;
-  onGrab: (kind: "pdf" | "card" | "md" | "lipdf") => void;
+  onGrab: (kind: "pdf" | "card" | "cardDark" | "md" | "lipdf") => void;
   onCopyPost: () => void;
   onRerun: () => void;
   onMove: (scheduleId: number | null) => void;
@@ -1380,6 +1381,7 @@ function RunPreview({ run, schedules, typeLabel, angleLabel, dl, reviewOpen, onR
           <div style={F.prevLabel}>Documents</div>
           <DocRow label="Report PDF" sub="The long findings document — letter pages, downloads as smbx-research-…" busy={dl === `${run.id}:pdf`} onClick={() => onGrab("pdf")} />
           {run.has_feed && <DocRow label="LinkedIn 1-pager (PNG)" sub="One square announcement-style image — smbx-onepager-…" busy={dl === `${run.id}:card`} onClick={() => onGrab("card")} />}
+          {run.has_feed && <DocRow label="LinkedIn 1-pager · dark (PNG)" sub="The same card on the boardroom dark — smbx-onepager-dark-…" busy={dl === `${run.id}:cardDark`} onClick={() => onGrab("cardDark")} />}
           {run.has_feed && <DocRow label="LinkedIn carousel (PDF)" sub="Swipeable square pages — announcement cover, dark closer — smbx-linkedin-…" busy={dl === `${run.id}:lipdf`} onClick={() => onGrab("lipdf")} />}
           {run.has_feed && <DocRow label="Post text — copy" busy={dl === `${run.id}:post`} onClick={onCopyPost} />}
           <DocRow label="Report markdown" busy={dl === `${run.id}:md`} onClick={() => onGrab("md")} muted />
@@ -1904,12 +1906,13 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab, dl }: {
   run: RunRow;
   onStatus: () => void;
   onCopyPost: () => void;
-  onGrab: (kind: "pdf" | "card" | "md" | "lipdf") => void;
+  onGrab: (kind: "pdf" | "card" | "cardDark" | "md" | "lipdf") => void;
   dl: string | null;
 }) {
   const busyKind = dl && dl.startsWith(`${run.id}:`) ? dl.slice(String(run.id).length + 1) : null;
   const [feed, setFeed] = useState<Feed | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [pvVariant, setPvVariant] = useState<"light" | "dark">("light");
   const [pvState, setPvState] = useState<"loading" | "ok" | "err">("loading");
   const [pvErr, setPvErr] = useState<string>("");
   const pvTriedRef = useRef(0);
@@ -2006,7 +2009,7 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab, dl }: {
   const loadPreview = useCallback(async () => {
     setPvState("loading");
     try {
-      const r = await fetch(`/api/research/runs/${run.id}/card.png?t=${Date.now()}`, { headers: authHeaders() });
+      const r = await fetch(`/api/research/runs/${run.id}/card.png?variant=${pvVariant}&t=${Date.now()}`, { headers: authHeaders() });
       if (!r.ok) {
         const j = await r.json().catch(() => ({}));
         throw new Error((j as any)?.error || `Render failed (${r.status})`);
@@ -2023,7 +2026,10 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab, dl }: {
       setPvErr(e?.message || "Preview failed");
       setPvState("err");
     }
-  }, [run.id]);
+  }, [run.id, pvVariant]);
+
+  // Variant flip re-renders the preview (the retry counter starts fresh).
+  useEffect(() => { pvTriedRef.current = 0; void loadPreview(); }, [pvVariant]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     api<{ feed: Feed }>(`/research/runs/${run.id}/feed`)
@@ -2041,7 +2047,7 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab, dl }: {
         setPageArt(m);
       })
       .catch(() => {});
-    void loadPreview();
+    // (the pvVariant effect fires the initial 1-pager preview load)
     void loadCover();
     void loadArtCands();
     return () => setPreview(prev => { if (prev) URL.revokeObjectURL(prev); return null; });
@@ -2202,8 +2208,8 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab, dl }: {
           {err && <div style={{ marginTop: 8, fontSize: 12.5, color: "#B3261E" }}>{err}</div>}
           <div style={{ ...RV.label, marginTop: 18 }}>Export</div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 6 }}>
-            <button type="button" style={{ ...RV.exportBtn, ...(busyKind === "card" ? RV.exportBtnBusy : null) }} disabled={busyKind != null} onClick={() => onGrab("card")}>
-              {busyKind === "card" ? "Rendering…" : "1-pager PNG"}
+            <button type="button" style={{ ...RV.exportBtn, ...(busyKind === "card" || busyKind === "cardDark" ? RV.exportBtnBusy : null) }} disabled={busyKind != null} onClick={() => onGrab(pvVariant === "dark" ? "cardDark" : "card")}>
+              {busyKind === "card" || busyKind === "cardDark" ? "Rendering…" : `1-pager PNG · ${pvVariant}`}
             </button>
             <button type="button" style={{ ...RV.exportBtn, ...(busyKind === "lipdf" ? RV.exportBtnBusy : null) }} disabled={busyKind != null} onClick={() => onGrab("lipdf")}>
               {busyKind === "lipdf" ? "Rendering…" : "Carousel PDF"}
@@ -2218,7 +2224,20 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab, dl }: {
           {busyKind && <div style={{ fontSize: 11.5, color: T.muted2, marginTop: 6 }}>Rendering and filing into Collateral — the download starts when it's ready.</div>}
         </div>
         <div style={RV.previewCol}>
-          <div style={RV.pvTag}>1-pager · single-image post</div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+            <div style={RV.pvTag}>1-pager · single-image post</div>
+            <div style={{ display: "flex", gap: 4 }}>
+              {(["light", "dark"] as const).map((v) => (
+                <button key={v} type="button" onClick={() => setPvVariant(v)}
+                  style={{ fontSize: 11.5, fontWeight: 700, padding: "3px 12px", borderRadius: 999, cursor: "pointer",
+                    border: `1px solid ${pvVariant === v ? T.blue : "#D6DAE1"}`,
+                    background: pvVariant === v ? "#EDF3FC" : "#fff",
+                    color: pvVariant === v ? T.blue : T.muted }}>
+                  {v === "light" ? "Light" : "Dark"}
+                </button>
+              ))}
+            </div>
+          </div>
           {pvState === "ok" && preview ? (
             <a href={preview} target="_blank" rel="noreferrer" title="Open full size">
               <img src={preview} alt="1-pager preview" style={RV.previewImg} />

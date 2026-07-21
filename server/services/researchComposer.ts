@@ -341,12 +341,42 @@ export async function renderResearchPdf(run: ResearchRunRow): Promise<Buffer> {
 
 /* ─── the LinkedIn card (1080×1350) ───────────────────────────────────── */
 
-export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: AuthorPhoto | null = null, art: AuthorPhoto | null = null, brand: AuthorPhoto | null = null): string {
+export type CardVariant = 'light' | 'dark';
+
+export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: AuthorPhoto | null = null, art: AuthorPhoto | null = null, brand: AuthorPhoto | null = null, variant: CardVariant = 'light'): string {
   const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
   const hooks: string[] = Array.isArray(feed.hooks) ? feed.hooks : [];
   const hook = hooks[Math.min(Math.max(hookIndex, 0), Math.max(hooks.length - 1, 0))] || run.report_title || run.topic;
   const points: any[] = (Array.isArray(feed.dataPoints) ? feed.dataPoints : []).slice(0, 3);
   const typeLabel = TYPE_LABELS[run.research_type] ?? 'Research';
+
+  // DARK VARIANT (Paul, 2026-07-21: "for the one pager, can we have a choice
+  // of light or dark mode styles?") — the approved framed-cover grammar as a
+  // standalone card: quiet boardroom ground (texture + deep glaze), ivory
+  // type with mint accents, the SAME framed image panel. One template, two
+  // palettes — the layout never forks.
+  const dark = variant === 'dark';
+  const MINT = '#8FD0AE';
+  const pageBg = dark
+    ? `background: ${DARK}; ${DARK_TEXTURE_URI ? `background-image: url('${DARK_TEXTURE_URI}'); background-size: cover; background-position: center;` : ''}`
+    : `background: ${WARM};`;
+  const washBg = dark
+    ? `radial-gradient(900px 500px at 50% -10%, rgba(22,98,76,0.22), transparent 65%),
+      linear-gradient(180deg, rgba(15,26,22,0.55), rgba(15,26,22,0.72))`
+    : `radial-gradient(1200px 800px at 8% 0%, rgba(22,98,76,0.045), transparent 60%),
+      radial-gradient(900px 700px at 100% 100%, rgba(203,193,170,0.16), transparent 55%)`;
+  const inkC = dark ? IVORY : INK;
+  const ktC = dark ? MINT : TERT;
+  const turnC = dark ? MINT : CORAL_DEEP;
+  const ruleC = dark ? MINT : CORAL;
+  const subC = dark ? IVORY_SUB : TERT;
+  const statC = dark ? IVORY : INK;
+  const srcC = dark ? 'rgba(216,213,202,0.75)' : TERT;
+  const dotC = dark ? MINT : CORAL;
+  const frameB = dark ? 'rgba(243,241,234,0.18)' : HAIR;
+  const footCss = dark
+    ? `background: transparent; border-top: 1px solid rgba(243,241,234,0.10);`
+    : `background: ${DARK};`;
 
   // The ANNOUNCEMENT template is the law (Paul, 2026-07-20: "the original
   // announcements are great — let's keep those, as either single one-pager or
@@ -366,31 +396,29 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: Auth
   return `<!DOCTYPE html><html><head><meta charset="utf-8">${FONTS}
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { width: 1080px; height: 1350px; font-family: ${SANS}; color: ${INK}; background: ${WARM}; overflow: hidden; position: relative; font-variant-numeric: tabular-nums; }
-    .wash { position: absolute; inset: 0; background:
-      radial-gradient(1200px 800px at 8% 0%, rgba(22,98,76,0.045), transparent 60%),
-      radial-gradient(900px 700px at 100% 100%, rgba(203,193,170,0.16), transparent 55%); }
+    body { width: 1080px; height: 1350px; font-family: ${SANS}; color: ${inkC}; ${pageBg} overflow: hidden; position: relative; font-variant-numeric: tabular-nums; }
+    .wash { position: absolute; inset: 0; background: ${washBg}; }
     .left { position: absolute; left: 0; top: 0; bottom: 128px; width: 512px; padding: 60px 46px 0 60px; display: flex; flex-direction: column; }
     .kick { display: flex; align-items: center; justify-content: space-between; }
-    .kick .kt { font-family: ${MONO}; font-size: 18px; letter-spacing: 0.1em; color: ${TERT}; text-transform: uppercase; }
-    .hook { margin-top: 56px; font-family: ${DISPLAY}; font-weight: 545; font-size: ${hookSize}px; line-height: 1.12; letter-spacing: -0.012em; color: ${INK}; }
-    .turn { color: ${CORAL_DEEP}; }
-    .rule { width: 70px; height: 6px; background: ${CORAL}; border-radius: 99px; margin: 32px 0 28px; }
-    .sub { font-size: 22px; line-height: 1.5; color: ${TERT}; font-weight: 500; }
+    .kick .kt { font-family: ${MONO}; font-size: 18px; letter-spacing: 0.1em; color: ${ktC}; text-transform: uppercase; }
+    .hook { margin-top: 56px; font-family: ${DISPLAY}; font-weight: 545; font-size: ${hookSize}px; line-height: 1.12; letter-spacing: -0.012em; color: ${inkC}; }
+    .turn { color: ${turnC}; }
+    .rule { width: 70px; height: 6px; background: ${ruleC}; border-radius: 99px; margin: 32px 0 28px; }
+    .sub { font-size: 22px; line-height: 1.5; color: ${subC}; font-weight: 500; }
     .pts { margin-top: 34px; display: flex; flex-direction: column; gap: 24px; }
     .pt { display: flex; gap: 18px; align-items: flex-start; }
-    .dot { width: 11px; height: 11px; border-radius: 50%; background: ${CORAL}; flex: none; margin-top: 11px; }
-    .stat { font-size: 22.5px; line-height: 1.4; color: ${INK}; font-weight: 700; }
-    .src { margin-top: 4px; font-family: ${MONO}; font-size: 14.5px; color: ${TERT}; letter-spacing: 0.03em; }
-    .mandate { margin-top: auto; padding-bottom: 44px; font-size: 23.5px; line-height: 1.45; color: ${INK}; font-weight: 700; }
+    .dot { width: 11px; height: 11px; border-radius: 50%; background: ${dotC}; flex: none; margin-top: 11px; }
+    .stat { font-size: 22.5px; line-height: 1.4; color: ${statC}; font-weight: 700; }
+    .src { margin-top: 4px; font-family: ${MONO}; font-size: 14.5px; color: ${srcC}; letter-spacing: 0.03em; }
+    .mandate { margin-top: auto; padding-bottom: 44px; font-size: 23.5px; line-height: 1.45; color: ${inkC}; font-weight: 700; }
     /* FRAMED PANEL (Paul, 2026-07-21: "maybe the image needs a border box
        that can hide the rough edges?") — on light paper an edge fade reads
        as a smudge, especially over uploads carrying their own baked-in
        gradients. A crisp hairline frame with a clean crop is the grammar. */
     .right { position: absolute; left: 536px; top: 56px; bottom: 184px; right: 56px; background: #fff;
-      border: 1px solid ${HAIR}; border-radius: 24px; overflow: hidden; }
+      border: 1px solid ${frameB}; border-radius: 24px; overflow: hidden; }
     .panel-brand { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-    .foot { position: absolute; left: 0; right: 0; bottom: 0; height: 128px; background: ${DARK};
+    .foot { position: absolute; left: 0; right: 0; bottom: 0; height: 128px; ${footCss}
       display: flex; align-items: center; justify-content: space-between; padding: 0 60px; }
     .who { display: flex; align-items: center; gap: 20px; }
     .wn { color: ${IVORY}; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
@@ -398,7 +426,7 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: Auth
   </style></head><body>
     <div class="wash"></div>
     <div class="left">
-      <div class="kick">${logoImg(42)}<span class="kt">${esc(typeLabel.toUpperCase())}</span></div>
+      <div class="kick">${logoImg(42, { white: dark })}<span class="kt">${esc(typeLabel.toUpperCase())}</span></div>
       <div class="hook">${twoToneHook(hook)}</div>
       <div class="rule"></div>
       ${sub ? `<div class="sub">${esc(sub)}</div>` : ''}
@@ -423,11 +451,11 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: Auth
   </body></html>`;
 }
 
-export async function renderResearchCardPng(run: ResearchRunRow, hookIndex = 0): Promise<Buffer> {
+export async function renderResearchCardPng(run: ResearchRunRow, hookIndex = 0, variant: CardVariant = 'light'): Promise<Buffer> {
   const photo = await authorPhoto();
   const art = await ensureRunArtwork(run);
   const brand = await brandPhoto();
-  const html = researchCardHtml(run, hookIndex, photo, art, brand);
+  const html = researchCardHtml(run, hookIndex, photo, art, brand, variant);
   const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 2 });

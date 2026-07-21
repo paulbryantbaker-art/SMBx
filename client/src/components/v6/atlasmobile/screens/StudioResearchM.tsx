@@ -820,12 +820,13 @@ function RunDetail({ run, schedules, typeLabel, angleLabel, onShare, onRerun, on
   const running = !done && !failed;
   const [dl, setDl] = useState<string | null>(null);
 
-  const grab = async (kind: "pdf" | "card" | "lipdf" | "md") => {
+  const grab = async (kind: "pdf" | "card" | "cardDark" | "lipdf" | "md") => {
     setDl(kind);
     const base = slug(run.report_title || run.topic);
     try {
       if (kind === "pdf") await dlBlob(`/research/runs/${run.id}/pdf?save=1`, `${base}.pdf`);
       else if (kind === "card") await dlBlob(`/research/runs/${run.id}/card.png?save=1`, `${base}-1pager.png`);
+      else if (kind === "cardDark") await dlBlob(`/research/runs/${run.id}/card.png?save=1&variant=dark`, `${base}-1pager-dark.png`);
       else if (kind === "lipdf") await dlBlob(`/research/runs/${run.id}/linkedin.pdf?save=1`, `${base}-carousel.pdf`);
       else await dlBlob(`/research/runs/${run.id}/report.md`, `${base}.md`);
       if (kind !== "md") onNote("ok", "Downloaded — and filed in Collateral under its campaign.");
@@ -857,6 +858,7 @@ function RunDetail({ run, schedules, typeLabel, angleLabel, onShare, onRerun, on
           <div style={S.btnRow}>
             <button type="button" style={S.btn} onClick={() => void grab("pdf")}>{dl === "pdf" ? "…" : "Report PDF"}</button>
             {run.has_feed && <button type="button" style={S.btn} onClick={() => void grab("card")}>{dl === "card" ? "…" : "1-pager PNG"}</button>}
+            {run.has_feed && <button type="button" style={S.btn} onClick={() => void grab("cardDark")}>{dl === "cardDark" ? "…" : "1-pager dark"}</button>}
             {run.has_feed && <button type="button" style={S.btn} onClick={() => void grab("lipdf")}>{dl === "lipdf" ? "…" : "Carousel PDF"}</button>}
             {run.has_feed && <button type="button" style={S.btnAccent} onClick={onShare}>Share post text</button>}
             <button type="button" style={{ ...S.btn, color: RT.muted }} onClick={() => void grab("md")}>{dl === "md" ? "…" : "Markdown"}</button>
@@ -939,6 +941,7 @@ function ReviewCard({ run, onApproved, onNote }: { run: RunRow; onApproved: () =
   const [status, setStatus] = useState(run.review_status ?? "draft");
   const [busy, setBusy] = useState<string | null>(null);
   const [prevKey, setPrevKey] = useState(0);
+  const [pvVariant, setPvVariant] = useState<"light" | "dark">("light");
   // Cover artwork pick (2026-07-20, Paul uploads Gemini images to Media and
   // points each run at one): undefined = untouched, null = "no artwork"
   // (the photo panel), number = that Media image.
@@ -1036,8 +1039,21 @@ function ReviewCard({ run, onApproved, onNote }: { run: RunRow; onApproved: () =
             }}>
             {busy === "prompt" ? "…" : "Copy Gemini prompt"}
           </button>
-          <div style={S.label}>1-pager preview</div>
-          <AuthImg path={`/research/runs/${run.id}/card.png`} alt="1-pager preview" reloadKey={prevKey} />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={S.label}>1-pager preview</div>
+            <div style={{ display: "flex", gap: 4 }}>
+              {(["light", "dark"] as const).map((v) => (
+                <button key={v} type="button" onClick={() => setPvVariant(v)}
+                  style={{ fontSize: 11.5, fontWeight: 700, padding: "3px 12px", borderRadius: 999,
+                    border: `1px solid ${pvVariant === v ? RT.accentInk : RT.line}`,
+                    background: pvVariant === v ? RT.accentSoft : "transparent",
+                    color: pvVariant === v ? RT.accentInk : RT.muted }}>
+                  {v === "light" ? "Light" : "Dark"}
+                </button>
+              ))}
+            </div>
+          </div>
+          <AuthImg path={`/research/runs/${run.id}/card.png?variant=${pvVariant}`} alt="1-pager preview" reloadKey={prevKey} />
           <div style={S.btnRow}>
             <button type="button" style={S.btn} disabled={busy != null} onClick={() => void save()}>{busy === "save" ? "Saving…" : "Save changes"}</button>
             <button type="button" style={S.btnAccent} disabled={busy != null || status === "approved"} onClick={() => void approve()}>

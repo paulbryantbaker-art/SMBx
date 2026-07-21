@@ -632,10 +632,11 @@ researchRouter.get('/research/runs/:id/card.png', async (req, res) => {
     if (!run) return res.status(404).json({ error: 'No completed run' });
     if (!run.studio_feed) return res.status(404).json({ error: 'This run has no studio feed to build a card from' });
     const hook = Number(req.query.hook);
-    const png = await renderResearchCardPng(run, Number.isFinite(hook) && hook >= 0 ? hook : 0);
-    if (req.query.save === '1') await saveCollateral(run, `1-pager — ${run.report_title || run.topic}`, 'image/png', Buffer.from(png));
+    const variant = req.query.variant === 'dark' ? 'dark' as const : 'light' as const;
+    const png = await renderResearchCardPng(run, Number.isFinite(hook) && hook >= 0 ? hook : 0, variant);
+    if (req.query.save === '1') await saveCollateral(run, `1-pager${variant === 'dark' ? ' (dark)' : ''} — ${run.report_title || run.topic}`, 'image/png', Buffer.from(png));
     res.setHeader('Content-Type', 'image/png');
-    res.setHeader('Content-Disposition', `attachment; filename="smbx-card-${slugify(run.report_title || run.topic)}.png"`);
+    res.setHeader('Content-Disposition', `attachment; filename="smbx-card-${variant === 'dark' ? 'dark-' : ''}${slugify(run.report_title || run.topic)}.png"`);
     return res.send(png);
   } catch (err: any) {
     console.error('[research] card render failed:', err.message);
