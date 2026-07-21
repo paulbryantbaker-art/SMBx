@@ -6,6 +6,12 @@ the repo's house system — you just drive it from **local folders** (media,
 assets, collateral) in a Cowork session on your Claude subscription. No app,
 no app `ANTHROPIC_API_KEY`, no monthly-dollar cap.
 
+> **Prefer the lean kit.** `studio-kit/` is a self-contained copy of this whole
+> pipeline (~5 dependencies, installs in seconds, its own Chrome auto-detect and
+> bundled fonts/brand assets) — no need to clone the 471MB app. Copy that folder
+> out, `cd studio-kit && npm install`, and follow its `README.md`. The rest of
+> this doc applies verbatim; the kit just spares you the app baggage.
+
 ## The layout
 
 Two folders on your machine, that's it:
