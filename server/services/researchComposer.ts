@@ -82,7 +82,7 @@ export async function authorPhoto(): Promise<AuthorPhoto | null> {
       ?? assets.find(a => a.kind !== 'collateral' && a.mime.startsWith('image/'));
     if (pick) {
       const full = await getStudioAsset(pick.id);
-      if (full) photo = { dataUri: `data:${full.mime};base64,${full.data.toString('base64')}`, focalX: full.focal_x, focalY: full.focal_y };
+      if (full) photo = { dataUri: await scaleForRender(`data:${full.mime};base64,${full.data.toString('base64')}`), focalX: full.focal_x, focalY: full.focal_y };
     }
   } catch { /* library unavailable — fall through to the shipped portrait */ }
   if (!photo) {
@@ -113,7 +113,7 @@ export async function brandPhoto(): Promise<AuthorPhoto | null> {
     const pick = photos.find(a => /walking|founder|office|paul/i.test(a.label)) ?? photos[0];
     if (pick) {
       const full = await getStudioAsset(pick.id);
-      if (full) photo = { dataUri: `data:${full.mime};base64,${full.data.toString('base64')}`, focalX: full.focal_x, focalY: full.focal_y };
+      if (full) photo = { dataUri: await scaleForRender(`data:${full.mime};base64,${full.data.toString('base64')}`), focalX: full.focal_x, focalY: full.focal_y };
     }
   } catch { /* library unavailable — disk fallback */ }
   if (!photo) {
@@ -319,8 +319,9 @@ export async function renderResearchPdf(run: ResearchRunRow): Promise<Buffer> {
   const html = await researchReportHtml(run);
   const page = await newRenderPage();
   try {
-    await page.setContent(html, { waitUntil: 'networkidle0', timeout: 45000 });
+    await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 120000 });
     await page.evaluateHandle('document.fonts.ready').catch(() => {});
+    await page.evaluate(() => Promise.all(Array.from(document.images).map((im: any) => im.decode().catch(() => {})))).catch(() => {});
     const pdf = await page.pdf({
       format: 'letter',
       printBackground: true,
@@ -426,8 +427,9 @@ export async function renderResearchCardPng(run: ResearchRunRow, hookIndex = 0):
   const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 2 });
-    await page.setContent(html, { waitUntil: 'networkidle0', timeout: 45000 });
+    await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 120000 });
     await page.evaluateHandle('document.fonts.ready').catch(() => {});
+    await page.evaluate(() => Promise.all(Array.from(document.images).map((im: any) => im.decode().catch(() => {})))).catch(() => {});
     const png = await page.screenshot({ type: 'png' });
     return Buffer.from(png);
   } finally {
@@ -548,7 +550,7 @@ export async function runArtwork(run: Pick<ResearchRunRow, 'id' | 'studio_feed'>
     if (!pick) return null;
     const full = await getStudioAsset(pick.id);
     if (!full) return null;
-    return { dataUri: `data:${full.mime};base64,${full.data.toString('base64')}`, focalX: full.focal_x, focalY: full.focal_y };
+    return { dataUri: await scaleForRender(`data:${full.mime};base64,${full.data.toString('base64')}`), focalX: full.focal_x, focalY: full.focal_y };
   } catch { return null; }
 }
 
@@ -910,6 +912,35 @@ async function ensureRunArtwork(run: ResearchRunRow): Promise<AuthorPhoto | null
   return art;
 }
 
+/** Render-size guard (2026-07-21, "Navigation timeout of 60000 ms
+ *  exceeded"): Paul's Gemini uploads can be 8-12MB and may sit on several
+ *  pages — as inline base64 that's a 30MB+ document that chokes Chromium's
+ *  load. Anything over ~2.5M chars is redrawn at ≤1600px via the shared
+ *  Chromium canvas (JPEG 0.88). Small images pass through untouched (keeps
+ *  transparency where it exists). Fail-soft to the original. */
+async function scaleForRender(dataUri: string): Promise<string> {
+  if (!dataUri || dataUri.length < 2_500_000) return dataUri;
+  try {
+    const page = await newRenderPage();
+    try {
+      const out = await page.evaluate(async (src: string) => {
+        const img = new Image();
+        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = src; });
+        const long = Math.max(img.width, img.height) || 1;
+        const sc = Math.min(1, 1600 / long);
+        const c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(img.width * sc));
+        c.height = Math.max(1, Math.round(img.height * sc));
+        c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height);
+        return c.toDataURL('image/jpeg', 0.88);
+      }, dataUri);
+      return typeof out === 'string' && out.startsWith('data:image/') ? out : dataUri;
+    } finally {
+      await page.close().catch(() => {});
+    }
+  } catch { return dataUri; }
+}
+
 /** Load the per-page dropped images (docPages final order) for a render.
  *  Each id comes from feed.pageArt; a missing/broken asset just renders the
  *  page without its image — never an error. */
@@ -920,7 +951,7 @@ async function loadPageArt(run: ResearchRunRow): Promise<Record<number, AuthorPh
     try {
       const full = await getStudioAsset(p.artAssetId);
       if (full && full.mime.startsWith('image/')) {
-        out[i] = { dataUri: `data:${full.mime};base64,${full.data.toString('base64')}`, focalX: full.focal_x, focalY: full.focal_y };
+        out[i] = { dataUri: await scaleForRender(`data:${full.mime};base64,${full.data.toString('base64')}`), focalX: full.focal_x, focalY: full.focal_y };
       }
     } catch { /* asset gone — render the page typographic */ }
   }
@@ -1001,8 +1032,9 @@ export async function renderCoverPng(run: ResearchRunRow): Promise<Buffer> {
   const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 2 });
-    await page.setContent(html, { waitUntil: 'networkidle0', timeout: 60000 });
+    await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 120000 });
     await page.evaluateHandle('document.fonts.ready').catch(() => {});
+    await page.evaluate(() => Promise.all(Array.from(document.images).map((im: any) => im.decode().catch(() => {})))).catch(() => {});
     await new Promise(r => setTimeout(r, 150));
     const cover = await page.$('.pg');
     const png = cover ? await cover.screenshot({ type: 'png' }) : await page.screenshot({ type: 'png' });
@@ -1021,8 +1053,9 @@ export async function renderLinkedInDocPdf(run: ResearchRunRow): Promise<Buffer>
   const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 1 });
-    await page.setContent(html, { waitUntil: 'networkidle0', timeout: 60000 });
+    await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 120000 });
     await page.evaluateHandle('document.fonts.ready').catch(() => {});
+    await page.evaluate(() => Promise.all(Array.from(document.images).map((im: any) => im.decode().catch(() => {})))).catch(() => {});
     // Chart.js renders synchronously with animation:false; a beat for raster.
     await new Promise(r => setTimeout(r, 150));
     const pdf = await page.pdf({
@@ -1049,8 +1082,9 @@ export async function renderCarouselStripPng(run: ResearchRunRow): Promise<Buffe
   const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 1 });
-    await page.setContent(html, { waitUntil: 'networkidle0', timeout: 60000 });
+    await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 120000 });
     await page.evaluateHandle('document.fonts.ready').catch(() => {});
+    await page.evaluate(() => Promise.all(Array.from(document.images).map((im: any) => im.decode().catch(() => {})))).catch(() => {});
     await new Promise(r => setTimeout(r, 150));
     const png = await page.screenshot({ type: 'png', fullPage: true });
     return Buffer.from(png);
@@ -1155,8 +1189,9 @@ export async function renderAnnouncementCardPng(spec: AnnouncementSpec): Promise
   const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 2 });
-    await page.setContent(announcementCardHtml(spec), { waitUntil: 'networkidle0', timeout: 60000 });
+    await page.setContent(announcementCardHtml(spec), { waitUntil: 'domcontentloaded', timeout: 120000 });
     await page.evaluateHandle('document.fonts.ready').catch(() => {});
+    await page.evaluate(() => Promise.all(Array.from(document.images).map((im: any) => im.decode().catch(() => {})))).catch(() => {});
     await new Promise(r => setTimeout(r, 150));
     return Buffer.from(await page.screenshot({ type: 'png' }));
   } finally {
@@ -1339,8 +1374,9 @@ export async function renderPostCardPng(spec: PostCardSpec): Promise<Buffer> {
   const page = await newRenderPage();
   try {
     await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 2 });
-    await page.setContent(postCardHtml(spec), { waitUntil: 'networkidle0', timeout: 60000 });
+    await page.setContent(postCardHtml(spec), { waitUntil: 'domcontentloaded', timeout: 120000 });
     await page.evaluateHandle('document.fonts.ready').catch(() => {});
+    await page.evaluate(() => Promise.all(Array.from(document.images).map((im: any) => im.decode().catch(() => {})))).catch(() => {});
     await new Promise(r => setTimeout(r, 150));
     return Buffer.from(await page.screenshot({ type: 'png' }));
   } finally {
