@@ -689,6 +689,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
             onStatus={() => void refresh()}
             onCopyPost={() => copyPost(reviewRun)}
             onGrab={(kind) => grab(reviewRun, kind)}
+            dl={dl}
           />
         </Sheet>
       )}
@@ -1899,12 +1900,14 @@ function ActivityFeed({ runId, running }: { runId: number; running: boolean }) {
 interface FeedPoint { stat: string; source?: string; note?: string; freshness?: string; confidence?: string }
 interface Feed { hooks: string[]; dataPoints: FeedPoint[]; artAssetId?: number | null }
 
-function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
+function ReviewPanel({ run, onStatus, onCopyPost, onGrab, dl }: {
   run: RunRow;
   onStatus: () => void;
   onCopyPost: () => void;
   onGrab: (kind: "pdf" | "card" | "md" | "lipdf") => void;
+  dl: string | null;
 }) {
+  const busyKind = dl && dl.startsWith(`${run.id}:`) ? dl.slice(String(run.id).length + 1) : null;
   const [feed, setFeed] = useState<Feed | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [pvState, setPvState] = useState<"loading" | "ok" | "err">("loading");
@@ -2199,11 +2202,20 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
           {err && <div style={{ marginTop: 8, fontSize: 12.5, color: "#B3261E" }}>{err}</div>}
           <div style={{ ...RV.label, marginTop: 18 }}>Export</div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 6 }}>
-            <button type="button" style={RV.exportBtn} onClick={() => onGrab("card")}>1-pager PNG</button>
-            <button type="button" style={RV.exportBtn} onClick={() => onGrab("lipdf")}>Carousel PDF</button>
-            <button type="button" style={RV.exportBtn} onClick={onCopyPost}>Copy post text</button>
-            <button type="button" style={{ ...RV.exportBtn, color: T.muted }} onClick={() => onGrab("md")}>Markdown</button>
+            <button type="button" style={{ ...RV.exportBtn, ...(busyKind === "card" ? RV.exportBtnBusy : null) }} disabled={busyKind != null} onClick={() => onGrab("card")}>
+              {busyKind === "card" ? "Rendering…" : "1-pager PNG"}
+            </button>
+            <button type="button" style={{ ...RV.exportBtn, ...(busyKind === "lipdf" ? RV.exportBtnBusy : null) }} disabled={busyKind != null} onClick={() => onGrab("lipdf")}>
+              {busyKind === "lipdf" ? "Rendering…" : "Carousel PDF"}
+            </button>
+            <button type="button" style={{ ...RV.exportBtn, ...(busyKind === "post" ? RV.exportBtnBusy : null) }} disabled={busyKind != null} onClick={onCopyPost}>
+              {busyKind === "post" ? "Copying…" : "Copy post text"}
+            </button>
+            <button type="button" style={{ ...RV.exportBtn, color: T.muted, ...(busyKind === "md" ? RV.exportBtnBusy : null) }} disabled={busyKind != null} onClick={() => onGrab("md")}>
+              {busyKind === "md" ? "Downloading…" : "Markdown"}
+            </button>
           </div>
+          {busyKind && <div style={{ fontSize: 11.5, color: T.muted2, marginTop: 6 }}>Rendering and filing into Collateral — the download starts when it's ready.</div>}
         </div>
         <div style={RV.previewCol}>
           <div style={RV.pvTag}>1-pager · single-image post</div>
@@ -2414,4 +2426,5 @@ const RV: Record<string, React.CSSProperties> = {
   approveBtn: { background: T.green, color: "#fff", border: "none", borderRadius: T.rPill, padding: "9px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: T.font },
   reopenBtn: { background: "transparent", color: T.ink3, border: `1px solid ${T.border}`, borderRadius: T.rPill, padding: "9px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: T.font },
   exportBtn: { background: T.white, border: `1px solid ${T.border}`, borderRadius: 9, padding: "7px 12px", fontSize: 12.5, fontWeight: 600, color: T.blue, cursor: "pointer", fontFamily: T.font },
+  exportBtnBusy: { opacity: 0.65, borderStyle: "dashed" as const, cursor: "progress" as const },
 };
