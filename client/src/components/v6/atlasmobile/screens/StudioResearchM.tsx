@@ -193,7 +193,7 @@ type Folder = { k: "all" } | { k: "oneoff" } | { k: "archived" } | { k: "camp"; 
 
 export default function StudioResearchM({ user: _user }: { user: User | null }) {
   const [catalog, setCatalog] = useState<Catalog | null>(null);
-  const [usage, setUsage] = useState<{ spentCents: number; capCents: number } | null>(null);
+  const [usage, setUsage] = useState<{ spentCents: number; capCents: number | null } | null>(null);
   const [runs, setRuns] = useState<RunRow[]>([]);
   const [schedules, setSchedules] = useState<ScheduleRow[]>([]);
   const [assets, setAssets] = useState<AssetRow[]>([]);
@@ -218,7 +218,7 @@ export default function StudioResearchM({ user: _user }: { user: User | null }) 
       const [r, s, u, a, an] = await Promise.all([
         api<{ runs: RunRow[] }>("/research/runs"),
         api<{ schedules: ScheduleRow[] }>("/research/schedules"),
-        api<{ spentCents: number; capCents: number }>("/research/usage"),
+        api<{ spentCents: number; capCents: number | null }>("/research/usage"),
         api<{ assets: AssetRow[] }>("/studio/assets"),
         api<{ items: AnalyticsRow[] }>("/research/analytics"),
       ]);
@@ -665,7 +665,7 @@ export default function StudioResearchM({ user: _user }: { user: User | null }) 
 
       {usage && (
         <div style={{ fontSize: 12, color: RT.faint, padding: "2px 4px" }}>
-          Research spend this month: ${(usage.spentCents / 100).toFixed(2)} of ${(usage.capCents / 100).toFixed(0)}.
+          Research spend this month: ${(usage.spentCents / 100).toFixed(2)}{usage.capCents ? ` of $${(usage.capCents / 100).toFixed(0)}` : " — no cap"}.
         </div>
       )}
     </div>
@@ -676,7 +676,7 @@ export default function StudioResearchM({ user: _user }: { user: User | null }) 
 
 function NewRunForm({ catalog, usage, onDone, onErr }: {
   catalog: Catalog | null;
-  usage: { spentCents: number; capCents: number } | null;
+  usage: { spentCents: number; capCents: number | null } | null;
   onDone: (msg: string) => void;
   onErr: (msg: string) => void;
 }) {
@@ -793,7 +793,7 @@ function NewRunForm({ catalog, usage, onDone, onErr }: {
       </button>
       {usage && (
         <div style={{ fontSize: 12, color: RT.faint, marginTop: 8 }}>
-          ${(usage.spentCents / 100).toFixed(2)} of ${(usage.capCents / 100).toFixed(0)} used this month.
+          ${(usage.spentCents / 100).toFixed(2)}{usage.capCents ? ` of $${(usage.capCents / 100).toFixed(0)}` : ""} used this month.
         </div>
       )}
     </div>

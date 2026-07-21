@@ -204,7 +204,9 @@ PRACTICE_MODE (default true), TEAM_ALLOWLIST (comma-separated emails),
 ENGAGED_LANES (comma-separated keyword groups, e.g. "hvac phoenix, plumbing dallas" —
   the honest register behind Yulia's "this lane is open" close; empty = all lanes open),
 RESEND_API_KEY + EMAIL_FROM (lead pings + transactional email; console-log fallback),
-RESEARCH_MONTHLY_CAP_CENTS (research agent monthly budget, default 15000 = $150),
+RESEARCH_MONTHLY_CAP_CENTS (research agent monthly budget — UNSET/0 = NO LIMIT, the default
+  since 2026-07-21, Paul: "from the app perspective let's remove any limits" after the old
+  $150 default blocked his month; set a positive cents value to opt back into the gate),
 RESEARCH_SCHEDULES_DISABLED (set "true" to stop the in-process campaign scheduler),
 RESEARCH_DECK_MODEL (deck-designer model, default claude-sonnet-4-6) and
 RESEARCH_DECK_DESIGNER (set "off" to force the fixed template — Claude designs by default),

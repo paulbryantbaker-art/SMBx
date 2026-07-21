@@ -14,10 +14,12 @@
  * STUDIO FEED. No client-side search loop to babysit.
  *
  * Cost discipline: per-run search/fetch caps come from the depth tier via
- * max_uses; every run's spend is computed in CENTS (rule 10) and summed
- * against RESEARCH_MONTHLY_CAP_CENTS (default $150/mo). At the cap, new runs
- * refuse to start. Scheduled runs email on completion (Resend, console
- * fallback) with an 80%-of-cap warning when crossed.
+ * max_uses; every run's spend is computed in CENTS (rule 10) and tracked.
+ * NO monthly cap by default (Paul, 2026-07-21: "from the app perspective
+ * let's remove any limits" — the old $150 default blocked his month and
+ * read like a vendor quota). Set RESEARCH_MONTHLY_CAP_CENTS to a positive
+ * value to opt back into a gate; scheduled runs then email an 80%-of-cap
+ * warning when crossed.
  */
 import Anthropic from '@anthropic-ai/sdk';
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
@@ -32,7 +34,7 @@ const CENTS_PER_SEARCH = 1;
 
 const MONTHLY_CAP_CENTS = (() => {
   const v = Number(process.env.RESEARCH_MONTHLY_CAP_CENTS);
-  return Number.isFinite(v) && v > 0 ? Math.round(v) : 15000;
+  return Number.isFinite(v) && v > 0 ? Math.round(v) : Infinity; // unset = NO LIMIT
 })();
 
 let client: Anthropic | null = null;

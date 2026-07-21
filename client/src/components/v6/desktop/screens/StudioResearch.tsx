@@ -152,7 +152,7 @@ function timeAgo(iso: string): string {
 
 export default function StudioResearch({ user }: { user: User | null }) {
   const [catalog, setCatalog] = useState<Catalog | null>(null);
-  const [usage, setUsage] = useState<{ spentCents: number; capCents: number } | null>(null);
+  const [usage, setUsage] = useState<{ spentCents: number; capCents: number | null } | null>(null);
   const [runs, setRuns] = useState<RunRow[]>([]);
   const [schedules, setSchedules] = useState<ScheduleRow[]>([]);
   const [assets, setAssets] = useState<AssetRow[]>([]);
@@ -196,7 +196,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
       const [r, s, u, a, an] = await Promise.all([
         api<{ runs: RunRow[] }>("/research/runs"),
         api<{ schedules: ScheduleRow[] }>("/research/schedules"),
-        api<{ spentCents: number; capCents: number }>("/research/usage"),
+        api<{ spentCents: number; capCents: number | null }>("/research/usage"),
         api<{ assets: AssetRow[] }>("/studio/assets"),
         api<{ items: AnalyticsRow[] }>("/research/analytics"),
       ]);
@@ -606,7 +606,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
 
         <div style={R.formFoot}>
           <span style={R.budget}>
-            {usage ? `This month: $${(usage.spentCents / 100).toFixed(0)} of $${(usage.capCents / 100).toFixed(0)} research budget` : ""}
+            {usage ? `This month: $${(usage.spentCents / 100).toFixed(0)} research spend${usage.capCents ? ` of $${(usage.capCents / 100).toFixed(0)} budget` : " — no cap"}` : ""}
           </span>
           <button
             type="button"
