@@ -88,7 +88,7 @@ researchRouter.get('/research/catalog', (_req, res) => {
 researchRouter.get('/research/usage', async (_req, res) => {
   try {
     const spentCents = await getMonthSpendCents();
-    res.json({ spentCents, capCents: getMonthlyCapCents() });
+    res.json({ spentCents, capCents: Number.isFinite(getMonthlyCapCents()) ? getMonthlyCapCents() : null });
   } catch (err: any) {
     console.error('[research] usage failed:', err.message);
     res.status(500).json({ error: 'Failed to load usage' });
