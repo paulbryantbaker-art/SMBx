@@ -537,6 +537,27 @@ researchRouter.get('/research/runs/:id/cover.png', async (req, res) => {
   }
 });
 
+/** EVERY carousel page stacked into one tall PNG — the review sheet's
+ *  full-deck preview so Paul can see the whole carousel before saving. */
+researchRouter.get('/research/runs/:id/carousel.png', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const id = Number(req.params.id);
+  const run = await loadCompleteRun(id, userId);
+  if (!run) return res.status(404).json({ error: 'Run not found' });
+  if (!run.studio_feed) return res.status(404).json({ error: 'This run has no studio feed' });
+  try {
+    const { renderCarouselStripPng } = await import('../services/researchComposer.js');
+    const png = await renderCarouselStripPng(run as any);
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'no-store');
+    return res.end(png);
+  } catch (err: any) {
+    console.error('[research] carousel strip render failed:', err?.message);
+    return res.status(500).json({ error: `Carousel render failed — ${err?.message}` });
+  }
+});
+
 researchRouter.post('/research/runs/:id/review', async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });

@@ -570,12 +570,17 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
   const kicker = (_n: number, _total: number) => `
     <div class="kick"><span class="kl">${logoImg(30)}<span>${esc(typeLabel.toUpperCase())}</span></span></div>`;
 
-  // Total = content pages + optional chart page + closer.
-  const total = pages.length + (chart ? 1 : 0) + 1;
+  // TRUE BOOKEND (Paul, 2026-07-21: "the darks are together and do not
+  // actually bookend the story"): exactly TWO dark pages — the cover (front)
+  // and ONE dark closer (back). The takeaway payoff is folded INTO the
+  // closer, so it never renders as a second dark page stacked before it.
+  const takeaway = pages.find(p => p.kind === 'takeaway') || null;
+  const bodyPages = pages.filter(p => p.kind !== 'takeaway');
+  const total = bodyPages.length + (chart ? 1 : 0) + 1;
   let n = 0;
   const pageHtml: string[] = [];
 
-  for (const p of pages) {
+  for (const p of bodyPages) {
     n++;
     if (p.kind === 'cover') {
       const h = String(p.heading ?? '');
@@ -602,16 +607,18 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
         <div class="halo"></div>
         <div class="cv-left">
           <div class="cv-kick">${logoImg(42, { white: true })}<span class="kt">${esc(typeLabel.toUpperCase())}</span></div>
-          <div class="cv-hook" style="font-size:${size}px">${twoToneHook(h)}</div>
-          <div class="cv-rule"></div>
-          ${p.body ? `<div class="cv-sub">${esc(p.body)}</div>` : ''}
-          ${coverPts.length ? `<div class="cv-pts">${coverPts.map(pt => `
-            <div class="cv-pt"><span class="cv-dot"></span><div>
-              <div class="cv-stat">${esc(pt.stat)}</div>
-              <div class="cv-src">${esc([pt.source, pt.freshness].filter(Boolean).join(' · '))}</div>
-            </div></div>`).join('')}</div>` : ''}
+          <div class="cv-body">
+            <div class="cv-hook" style="font-size:${size}px">${twoToneHook(h)}</div>
+            <div class="cv-rule"></div>
+            ${p.body ? `<div class="cv-sub">${esc(p.body)}</div>` : ''}
+            ${coverPts.length ? `<div class="cv-pts">${coverPts.map(pt => `
+              <div class="cv-pt"><span class="cv-dot"></span><div>
+                <div class="cv-stat">${esc(pt.stat)}</div>
+                <div class="cv-src">${esc([pt.source, pt.freshness].filter(Boolean).join(' · '))}</div>
+              </div></div>`).join('')}</div>` : ''}
+          </div>
         </div>
-        <div class="cv-right">${panel}</div>
+        <div class="cv-right">${panel}<div class="cv-imgfade"></div></div>
         <div class="cv-foot">
           ${logoImg(48, { white: true })}
           <div class="cv-who">
@@ -645,32 +652,6 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
             : `<div class="frame">${body}</div>${p.source ? `<div class="baserail"><span class="bl-rule"></span><span class="src-line">${esc(p.source)}</span></div>` : ''}`}
         </div>
         ${pageFoot(n, total)}
-      </div>`);
-    } else if (p.kind === 'takeaway') {
-      // The takeaway is the announcement DARK template: the boardroom band
-      // with Paul's PHOTO BLOCK beside the read (Paul, 2026-07-20: "where is
-      // my picture slot on the dark one?").
-      const takePhoto = photo?.dataUri
-        ? `<img src="${photo.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(photo.focalX * 100)}% ${Math.round(photo.focalY * 100)}%;display:block;border-radius:24px">`
-        : `<div style="width:100%;height:100%;border-radius:24px;background:rgba(243,241,234,0.08);display:flex;align-items:center;justify-content:center;font-family:${SANS};font-weight:800;font-size:120px;color:${IVORY_SUB}">PB</div>`;
-      pageHtml.push(`<div class="pg dark">
-        <div class="halo"></div>
-        <div class="in">
-          <div class="kick dark-kick"><span class="kl">${logoImg(30, { white: true })}<span>${esc(typeLabel.toUpperCase())}</span></span><span>${n} / ${total}</span></div>
-          <div class="take-row">
-            <div class="take-photo">${takePhoto}</div>
-            <div class="take-col">
-              <div class="take-tag">FOR THE ACQUIRER</div>
-              <div class="story-h dark-h" style="font-size:50px">${esc(p.heading ?? '')}</div>
-              <div class="rule"></div>
-              ${p.body ? `<div class="story-b dark-b" style="font-size:29px">${esc(p.body)}</div>` : ''}
-            </div>
-          </div>
-          <div class="take-by">
-            <div class="tby-n">Paul Baker</div>
-            <div class="tby-t">Buy-side corporate development</div>
-          </div>
-        </div>
       </div>`);
     } else { // story
       const img = pageImgs[n - 1];
@@ -724,19 +705,37 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     </script>`);
   }
 
-  // Closer — the site's dark textured band; the FACE closes the doc (that's
-  // what makes a follow card work), brand beneath it.
-  pageHtml.push(`<div class="pg dark">
-    <div class="halo"></div>
-    <div class="in closer">
-      <div class="close-face">${faceImg(148, photo, { ring: 'rgba(143,208,174,0.7)' })}</div>
-      <div class="close-name">Paul Baker</div>
-      <div class="close-line">Research with sources, not takes.</div>
-      <div class="brand-big">${logoImg(96, { white: true })}</div>
-      <div class="close-sub">Buy-side corporate development for lower-middle-market acquirers.</div>
-      <div class="follow">Follow for the next read.</div>
-    </div>
-  </div>`);
+  // Closer — the single dark BACK bookend. When there's a takeaway, the
+  // payoff ("FOR THE ACQUIRER") closes the deck WITH the follow card, so the
+  // deck ends on one dark page (not a takeaway + closer pair).
+  if (takeaway) {
+    pageHtml.push(`<div class="pg dark closer-take">
+      <div class="halo"></div>
+      <div class="in ct-in">
+        <div class="take-tag">FOR THE ACQUIRER</div>
+        <div class="ct-head">${esc(takeaway.heading ?? '')}</div>
+        <div class="ct-rule"></div>
+        ${takeaway.body ? `<div class="ct-body">${esc(takeaway.body)}</div>` : ''}
+        <div class="ct-sign">
+          <div class="ct-face">${faceImg(104, photo, { ring: 'rgba(143,208,174,0.7)' })}</div>
+          <div class="ct-who"><div class="ct-name">Paul Baker</div><div class="ct-tag">Buy-side corporate development</div></div>
+        </div>
+        <div class="ct-brand">${logoImg(64, { white: true })}<span class="follow">Follow for the next read.</span></div>
+      </div>
+    </div>`);
+  } else {
+    pageHtml.push(`<div class="pg dark">
+      <div class="halo"></div>
+      <div class="in closer">
+        <div class="close-face">${faceImg(148, photo, { ring: 'rgba(143,208,174,0.7)' })}</div>
+        <div class="close-name">Paul Baker</div>
+        <div class="close-line">Research with sources, not takes.</div>
+        <div class="brand-big">${logoImg(96, { white: true })}</div>
+        <div class="close-sub">Buy-side corporate development for lower-middle-market acquirers.</div>
+        <div class="follow">Follow for the next read.</div>
+      </div>
+    </div>`);
+  }
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8">${FONTS}
   <style>
@@ -775,10 +774,11 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     .motif { position: absolute; right: 64px; bottom: 150px; width: 300px; height: 300px; opacity: 0.16; }
     .brassbar { height: 8px; width: 132px; background: ${BRASS}; border-radius: 4px; }
     /* cover — the announcement split */
-    .cv-left { position: absolute; left: 0; top: 0; bottom: 128px; width: 544px; padding: 66px 50px 0 66px; display: flex; flex-direction: column; z-index: 2; }
-    .cv-kick { display: flex; align-items: center; justify-content: space-between; }
+    .cv-left { position: absolute; left: 0; top: 0; bottom: 128px; width: 544px; padding: 66px 50px 40px 66px; display: flex; flex-direction: column; z-index: 2; }
+    .cv-kick { display: flex; align-items: center; justify-content: space-between; flex: none; }
+    .cv-body { flex: 1; display: flex; flex-direction: column; justify-content: center; }
     .kt { font-family: ${MONO}; font-size: 18px; letter-spacing: 0.1em; color: ${TERT}; text-transform: uppercase; }
-    .cv-hook { margin-top: 46px; font-family: ${DISPLAY}; font-weight: 545; line-height: 1.08; letter-spacing: -0.014em; color: ${INK}; }
+    .cv-hook { font-family: ${DISPLAY}; font-weight: 545; line-height: 1.08; letter-spacing: -0.014em; color: ${INK}; text-wrap: balance; }
     .turn { color: ${CORAL_DEEP}; }
     .cv-rule { width: 70px; height: 6px; background: ${CORAL}; border-radius: 99px; margin: 30px 0 26px; }
     .cv-sub { font-size: 22px; line-height: 1.5; color: ${TERT}; font-weight: 500; }
@@ -805,9 +805,26 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     .cover-dark .cv-stat { color: ${IVORY}; }
     .cover-dark .cv-src { color: rgba(216,213,202,0.75); }
     .cover-dark .cv-dot { background: #8FD0AE; }
-    .cover-dark .cv-right { left: 560px; top: 92px; right: 64px; bottom: 224px; background: #fff;
-      border-radius: 28px; overflow: hidden; box-shadow: 0 40px 90px rgba(0,0,0,0.45); }
-    .cover-dark .cv-foot { border-top: 1px solid rgba(243,241,234,0.10); }
+    /* the cover image bleeds full-height on the right and its edges DISSOLVE
+       into the dark boardroom — no hard card, no pasted-on look (Paul,
+       2026-07-21: "the picture is not formatted in or faded in nice") */
+    .cover-dark .cv-right { left: 540px; top: 0; right: 0; bottom: 128px; background: transparent;
+      border-radius: 0; overflow: hidden; box-shadow: none; }
+    .cv-imgfade { position: absolute; inset: 0; pointer-events: none; z-index: 1; background:
+      linear-gradient(90deg, ${DARK} 0.5%, rgba(15,26,22,0) 26%),
+      linear-gradient(0deg, ${DARK} 0%, rgba(15,26,22,0) 15%),
+      linear-gradient(180deg, rgba(15,26,22,0.55) 0%, rgba(15,26,22,0) 13%); }
+    .cover-dark .cv-foot { border-top: 1px solid rgba(243,241,234,0.10); background: transparent; }
+    /* merged dark CLOSER — the single back bookend: takeaway payoff + follow */
+    .closer-take .ct-in { padding: 96px 96px 110px; justify-content: center; text-align: center; align-items: center; }
+    .ct-head { margin-top: 22px; font-family: ${DISPLAY}; font-weight: 545; font-size: 56px; line-height: 1.1; letter-spacing: -0.012em; color: ${IVORY}; max-width: 820px; }
+    .ct-rule { margin: 30px 0 30px; height: 6px; width: 96px; background: #8FD0AE; border-radius: 99px; }
+    .ct-body { font-size: 30px; line-height: 1.5; color: ${IVORY_SUB}; max-width: 780px; }
+    .ct-sign { margin-top: 62px; display: flex; align-items: center; gap: 22px; }
+    .ct-who { text-align: left; }
+    .ct-name { font-size: 26px; font-weight: 700; color: ${IVORY}; letter-spacing: -0.01em; }
+    .ct-tag { margin-top: 3px; font-size: 19px; color: ${IVORY_SUB}; }
+    .ct-brand { margin-top: 48px; display: flex; flex-direction: column; align-items: center; gap: 22px; }
     /* slim announcement base on every light page */
     .pfoot { position: absolute; left: 0; right: 0; bottom: 0; height: 84px; background: ${DARK};
       display: flex; align-items: center; justify-content: space-between; padding: 0 60px; }
@@ -932,6 +949,30 @@ export async function renderLinkedInDocPdf(run: ResearchRunRow): Promise<Buffer>
       margin: { top: 0, bottom: 0, left: 0, right: 0 },
     });
     return Buffer.from(pdf);
+  } finally {
+    await page.close().catch(() => {});
+  }
+}
+
+/** EVERY carousel page stacked into one tall PNG — the review sheet's
+ *  full-deck preview (Paul, 2026-07-21: "I don't see how to preview the
+ *  carousel before I save… I see only the first and the last pages"). One
+ *  render; the pages already stack vertically in the doc, so a full-page
+ *  shot is the whole filmstrip. DSF 1 keeps the buffer sane for tall decks. */
+export async function renderCarouselStripPng(run: ResearchRunRow): Promise<Buffer> {
+  const photo = await authorPhoto();
+  const art = await ensureRunArtwork(run);
+  const brand = await brandPhoto();
+  const pageImgs = await loadPageArt(run);
+  const html = linkedInDocHtml(run, photo, art, brand, pageImgs);
+  const page = await newRenderPage();
+  try {
+    await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 1 });
+    await page.setContent(html, { waitUntil: 'networkidle0', timeout: 60000 });
+    await page.evaluateHandle('document.fonts.ready').catch(() => {});
+    await new Promise(r => setTimeout(r, 150));
+    const png = await page.screenshot({ type: 'png', fullPage: true });
+    return Buffer.from(png);
   } finally {
     await page.close().catch(() => {});
   }

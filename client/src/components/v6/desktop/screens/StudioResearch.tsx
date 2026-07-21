@@ -1927,10 +1927,12 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
   const [pageArt, setPageArt] = useState<Record<string, number>>({});
   const [dragPage, setDragPage] = useState<number | null>(null);
 
+  // The FULL carousel — every page stacked — so Paul sees the whole deck
+  // before saving (not just the cover). One tall PNG, shown in a scroll box.
   const loadCover = useCallback(async () => {
     setCoverState("loading");
     try {
-      const r = await fetch(`/api/research/runs/${run.id}/cover.png?t=${Date.now()}`, { headers: authHeaders() });
+      const r = await fetch(`/api/research/runs/${run.id}/carousel.png?t=${Date.now()}`, { headers: authHeaders() });
       if (!r.ok) throw new Error(String(r.status));
       const url = URL.createObjectURL(await r.blob());
       setCoverPv(prev => { if (prev) URL.revokeObjectURL(prev); return url; });
@@ -2172,7 +2174,7 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
           </div>
         </div>
         <div style={RV.previewCol}>
-          <div style={RV.pvTag}>1-pager</div>
+          <div style={RV.pvTag}>1-pager · single-image post</div>
           {pvState === "ok" && preview ? (
             <a href={preview} target="_blank" rel="noreferrer" title="Open full size">
               <img src={preview} alt="1-pager preview" style={RV.previewImg} />
@@ -2188,19 +2190,19 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
               <button type="button" style={RV.exportBtn} onClick={() => { pvTriedRef.current = 0; void loadPreview(); }}>Try again</button>
             </div>
           )}
-          <div style={{ ...RV.pvTag, marginTop: 14 }}>Carousel cover</div>
+          <div style={{ ...RV.pvTag, marginTop: 14 }}>Carousel · every page (scroll)</div>
           {coverState === "ok" && coverPv ? (
-            <a href={coverPv} target="_blank" rel="noreferrer" title="Open full size">
-              <img src={coverPv} alt="Carousel cover preview" style={RV.previewImg} />
+            <a href={coverPv} target="_blank" rel="noreferrer" title="Open full size" style={{ display: "block", maxHeight: 560, overflowY: "auto", borderRadius: 12, border: `1px solid ${T.border}` }}>
+              <img src={coverPv} alt="Full carousel — all pages" style={{ ...RV.previewImg, borderRadius: 0, border: "none", display: "block" }} />
             </a>
           ) : coverState === "loading" ? (
             <div style={{ ...RV.previewEmpty, gap: 10, minHeight: 120 }}>
               <Spinner />
-              <span>Rendering the cover…</span>
+              <span>Rendering all carousel pages…</span>
             </div>
           ) : (
             <div style={{ ...RV.previewEmpty, minHeight: 80 }}>
-              <button type="button" style={RV.exportBtn} onClick={() => void loadCover()}>Retry cover preview</button>
+              <button type="button" style={RV.exportBtn} onClick={() => void loadCover()}>Retry carousel preview</button>
             </div>
           )}
         </div>
