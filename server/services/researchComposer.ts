@@ -841,10 +841,12 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
         radial-gradient(900px 500px at 50% -10%, rgba(22,98,76,0.28), transparent 65%),
         linear-gradient(180deg, rgba(20,19,18,0.25), rgba(20,20,20,0.55)),
         ${DARK_TEXTURE_URI ? `url('${DARK_TEXTURE_URI}') center/cover ` : ''}${DARK};
-      -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 47%, rgba(0,0,0,0) 78%),
-        linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 15%);
-      mask-image: linear-gradient(90deg, #000 0%, #000 47%, rgba(0,0,0,0) 78%),
-        linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 15%); }
+      -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 50%, rgba(0,0,0,0.45) 59%, rgba(0,0,0,0) 68%);
+      mask-image: linear-gradient(90deg, #000 0%, #000 50%, rgba(0,0,0,0.45) 59%, rgba(0,0,0,0) 68%); }
+    /* NARROW MELT (Paul, 2026-07-21 round 4: the wide veil was "bleeding
+       behind the image… making the whole page dark and unattractive"): the
+       dissolve ends ~195px past the image's edge and there is NO full-width
+       top veil — past the melt the image stays at full brightness. */
     .cover-dark .cv-foot { border-top: 1px solid rgba(243,241,234,0.10); background: transparent; }
     /* merged dark CLOSER — the single back bookend: takeaway payoff + follow */
     .closer-take .ct-in { padding: 96px 96px 110px; justify-content: center; text-align: center; align-items: center; }
