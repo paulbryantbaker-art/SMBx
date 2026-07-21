@@ -45,6 +45,8 @@ export function artworkPrompt(visualBrief: string, title: string): string {
     'Style: minimal flat vector-like editorial art, generous negative space, confident geometric shapes,',
     'subtle paper grain. Palette STRICTLY: bone off-white background #F6F4EF, deep green #16624C,',
     'near-black ink #14181C, one small brass-gold accent #B08637. Portrait 4:5 composition.',
+    'The background must be ONE uniform flat color reaching all four edges — NO baked-in vignettes,',
+    'NO edge fades, NO gradient borders, NO dark side-panels (the page layout handles all blending).',
     'ABSOLUTELY NO: text, letters, numbers, words, logos, watermarks, charts, graphs, documents,',
     'photorealistic people, recognizable faces, company branding. Abstract human silhouettes are',
     'acceptable only as small flat shapes.',
