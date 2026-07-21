@@ -371,7 +371,8 @@ researchRouter.get('/research/runs/:id/feed', async (req, res) => {
   const run = await loadCompleteRun(id, userId);
   if (!run) return res.status(404).json({ error: 'Run not found' });
   if (!run.studio_feed) return res.status(404).json({ error: 'This run has no studio feed' });
-  return res.json({ feed: run.studio_feed, reviewStatus: (run as any).review_status ?? 'draft' });
+  const { deck: _deck, ...feedOut } = (run.studio_feed as any) ?? {};
+  return res.json({ feed: feedOut, reviewStatus: (run as any).review_status ?? 'draft' });
 });
 
 researchRouter.patch('/research/runs/:id/feed', async (req, res) => {
@@ -437,6 +438,11 @@ researchRouter.patch('/research/runs/:id/feed', async (req, res) => {
        WHERE id = ${id} AND user_id = ${userId} AND status = 'complete'
        RETURNING id`;
     if (!row) return res.status(404).json({ error: 'Run not found' });
+    // Warm the Claude-designed deck in the background so the re-preview and
+    // the exports hit the cache instead of sitting through the design call.
+    loadCompleteRun(id, userId)
+      .then(fresh => fresh ? import('../services/researchComposer.js').then(m => m.designedDeckHtml(fresh as any)) : null)
+      .catch(err => console.warn('[research] deck warm after save failed:', err?.message));
     return res.json({ ok: true });
   } catch (err) {
     console.error('[research] feed save failed', err);
@@ -550,7 +556,10 @@ researchRouter.post('/research/runs/:id/deck', async (req, res) => {
     if (!run || !run.studio_feed) return res.status(404).json({ error: 'Run not found' });
     const { clearDeckCache } = await import('../services/deckDesigner.js');
     await clearDeckCache(id);
-    return res.json({ ok: true });
+    const fresh = await loadCompleteRun(id, userId);
+    const { designedDeckHtml } = await import('../services/researchComposer.js');
+    const html = fresh ? await designedDeckHtml(fresh as any) : null;
+    return res.json({ ok: true, designed: !!html });
   } catch (err: any) {
     console.error('[research] deck redesign failed:', err?.message);
     return res.status(500).json({ error: 'Couldn’t reset the design' });

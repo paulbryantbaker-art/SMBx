@@ -1929,15 +1929,30 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
 
   // The FULL carousel — every page stacked — so Paul sees the whole deck
   // before saving (not just the cover). One tall PNG, shown in a scroll box.
+  // The first render after a change may include the Claude design pass —
+  // retry once automatically and show the server's actual reason on failure.
+  const [coverErr, setCoverErr] = useState("");
+  const coverTriedRef = useRef(0);
   const loadCover = useCallback(async () => {
     setCoverState("loading");
     try {
       const r = await fetch(`/api/research/runs/${run.id}/carousel.png?t=${Date.now()}`, { headers: authHeaders() });
-      if (!r.ok) throw new Error(String(r.status));
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        throw new Error((j as any)?.error || `Render failed (${r.status})`);
+      }
       const url = URL.createObjectURL(await r.blob());
       setCoverPv(prev => { if (prev) URL.revokeObjectURL(prev); return url; });
       setCoverState("ok");
-    } catch { setCoverState("err"); }
+    } catch (e: any) {
+      if (coverTriedRef.current < 1) {
+        coverTriedRef.current += 1;
+        setTimeout(() => { void loadCover(); }, 4000); // the design pass may still be finishing
+        return;
+      }
+      setCoverErr(e?.message || "Carousel render failed");
+      setCoverState("err");
+    }
   }, [run.id]);
 
   const loadArtCands = useCallback(async () => {
@@ -2215,11 +2230,12 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab }: {
           ) : coverState === "loading" ? (
             <div style={{ ...RV.previewEmpty, gap: 10, minHeight: 120 }}>
               <Spinner />
-              <span>Rendering all carousel pages…</span>
+              <span>Composing & rendering the deck — first pass can take a minute…</span>
             </div>
           ) : (
-            <div style={{ ...RV.previewEmpty, minHeight: 80 }}>
-              <button type="button" style={RV.exportBtn} onClick={() => void loadCover()}>Retry carousel preview</button>
+            <div style={{ ...RV.previewEmpty, flexDirection: "column", gap: 10, minHeight: 100, padding: "0 14px", textAlign: "center" }}>
+              {coverErr && <span style={{ color: "#B3261E", fontWeight: 600, fontSize: 12.5 }}>{coverErr}</span>}
+              <button type="button" style={RV.exportBtn} onClick={() => { coverTriedRef.current = 0; void loadCover(); }}>Retry carousel preview</button>
             </div>
           )}
         </div>

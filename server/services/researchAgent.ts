@@ -591,6 +591,16 @@ export async function executeResearchRun(runId: number): Promise<void> {
     `;
     console.log(`[research] Run ${runId} complete — "${title}" (${usage.searches} searches, ${usage.fetches} fetches, ~$${(usage.costCents / 100).toFixed(2)})`);
 
+    // Pre-design the carousel in the BACKGROUND (Paul's step D): by the time
+    // the review sheet opens, the Claude-designed deck is cached — previews
+    // and exports never sit through the design call interactively.
+    if (feed && run.output_format !== 'report') {
+      import('./researchComposer.js')
+        .then(rcMod => rcMod.designedDeckHtml({ ...(run as any), id: runId, studio_feed: feed, report_title: title, report_md: reportMd } as any))
+        .then(html => console.log(`[research] Run ${runId} deck ${html ? 'designed' : 'design skipped (template fallback)'}`))
+        .catch(err => console.warn(`[research] Run ${runId} deck pre-design failed:`, err?.message));
+    }
+
     if (run.schedule_id) await sendCompletionEmail(run, title, usage).catch(() => {});
   } catch (err: any) {
     // Prefer the API's own message over the SDK's "400 {raw json}" wrapper.

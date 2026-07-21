@@ -101,6 +101,8 @@ export function deckSystemPrompt(): string {
     '',
     'LEGIBILITY: body text ≥24px, sources ≥17px, headlines 40-64px (Fraunces), hero numerals 110-190px (Inter 800, tabular). Generous margins (≥76px sides). No element within 40px of another element it does not relate to.',
     '',
+    'BE CONCISE IN CODE: shared classes in the one <style> block, no repeated inline styles, no comments. The whole output should stay well under 8,000 tokens.',
+    '',
     'Return the <style> block + sections ONLY.',
   ].join('\n');
 }
@@ -205,7 +207,7 @@ export async function generateDeckHtml(inp: DesignInputs, fontsHead: string): Pr
   }
   try {
     const resp: any = await anthropic().messages
-      .stream({ model: DECK_MODEL, max_tokens: 20000, system: deckSystemPrompt(), messages: [{ role: 'user', content }] })
+      .stream({ model: DECK_MODEL, max_tokens: 14000, system: deckSystemPrompt(), messages: [{ role: 'user', content }] })
       .finalMessage();
     const raw = (resp.content ?? []).filter((b: any) => b.type === 'text').map((b: any) => b.text).join('');
     return assembleDeckHtml(raw, inp, fontsHead);
