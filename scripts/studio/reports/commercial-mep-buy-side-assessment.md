@@ -2,9 +2,10 @@
 byline: Paul Baker
 role: smbX.ai · Buy-side corporate development
 headshot: founder-portrait.jpg
-image: mep-cover.png
+image: mep-cover.jpg
 imagePos: 50% 50%
 footer: Commercial Mechanical & HVAC — Buy-Side Assessment
+accent: MAP: WHO | mep-accent-market.jpg | 50% 42%
 stat: ~$700B | U.S. commercial mechanical & electrical market
 stat: $50.7B | Data-center construction SAAR, +28% YoY
 stat: 4–8x → 10–13x | Add-on entry vs. service-led exit

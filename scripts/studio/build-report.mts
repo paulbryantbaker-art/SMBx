@@ -57,14 +57,15 @@ const bodyMd = splitIdx >= 0 ? rawMd.slice(splitIdx + 5).trim() : rawMd;
      stat: $600B+ | Combined U.S. revenue     (repeatable; VALUE | LABEL)
    -->
    Absent → a plain cover (byline defaults to the owner, no stat band).       */
-const coverCfg: { byline: string; role: string; headshot: string; image: string; imagePos: string; footer: string; eyebrow?: string; stats: { n: string; l: string }[] } =
-  { byline: 'Paul Baker', role: 'smbX.ai · Buy-side corporate development', headshot: '', image: '', imagePos: '50% 50%', footer: '', stats: [] };
+const coverCfg: { byline: string; role: string; headshot: string; image: string; imagePos: string; footer: string; eyebrow?: string; stats: { n: string; l: string }[]; accents: { match: string; img: string; pos: string }[] } =
+  { byline: 'Paul Baker', role: 'smbX.ai · Buy-side corporate development', headshot: '', image: '', imagePos: '50% 50%', footer: '', stats: [], accents: [] };
 const cfgMatch = coverMdRaw.match(/<!--\s*cover([\s\S]*?)-->/i);
 const coverMd = (cfgMatch ? coverMdRaw.replace(cfgMatch[0], '') : coverMdRaw).trim();
 if (cfgMatch) for (const line of cfgMatch[1].split('\n')) {
   const m = line.match(/^\s*(\w+)\s*:\s*(.+?)\s*$/); if (!m) continue;
   const [, k, v] = m;
   if (k === 'stat') { const bar = v.indexOf('|'); coverCfg.stats.push(bar >= 0 ? { n: v.slice(0, bar).trim(), l: v.slice(bar + 1).trim() } : { n: v.trim(), l: '' }); }
+  else if (k === 'accent') { const p = v.split('|').map(s => s.trim()); coverCfg.accents.push({ match: p[0] || '', img: p[1] || '', pos: p[2] || '50% 50%' }); }
   else if (k in coverCfg) (coverCfg as any)[k] = v;
 }
 const coverEyebrow = flag('--eyebrow') || coverCfg.eyebrow || eyebrow;
@@ -118,6 +119,17 @@ const bylineHtml = `<div class="cv-byline">${HEAD ? `<img class="cv-face" src="$
 const heroPath = resolveAsset(coverCfg.image);
 const heroHtml = heroPath ? `<img class="cv-hero" style="object-position:${coverCfg.imagePos}" src="${b64(heroPath, mimeOf(heroPath))}">` : '';
 
+/* inline section accents — a framed image dropped in right after a matching
+   `## ` header (match = any substring of the header text; case-insensitive). */
+let bodyOut = bodyHtml;
+for (const a of coverCfg.accents) {
+  const p = resolveAsset(a.img); if (!p || !a.match) continue;
+  const esc = a.match.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(`(<h2[^>]*>[^<]*${esc}[^<]*</h2>)`, 'i');
+  const tag = `<img class="rb-accent" style="object-position:${a.pos}" src="${b64(p, mimeOf(p))}">`;
+  bodyOut = bodyOut.replace(re, `$1${tag}`);
+}
+
 /* ── the document ─────────────────────────────────────────────────────── */
 const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceCss()}</style>
 <style>
@@ -170,6 +182,8 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
   /* reports that lead with ## (no # parts): promote ## to the page-breaking part header */
   .rbody.noh1 h2 { page-break-before: always; font-size: 17pt; margin: 0 0 0.11in; padding-top: 0.16in; border-top: 2.5px solid ${BRASS}; }
   .rbody.noh1 h2:first-child { page-break-before: avoid; border-top: none; padding-top: 0; }
+  /* inline section accent — framed photo band on the bone page (renderer-safe) */
+  .rb-accent { display: block; width: 100%; height: 2.2in; object-fit: cover; border-radius: 10px; border: 1px solid ${HAIR}; box-shadow: 0 6px 20px rgba(20,24,28,0.13); margin: 0.05in 0 0.22in; page-break-inside: avoid; }
   .rbody p { margin: 0 0 0.11in; }
   .rbody strong { color: ${INK}; font-weight: 600; }
   .rbody em { font-style: italic; }
@@ -199,7 +213,7 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
     ${restHtml}
     ${bylineHtml}
   </section>
-  <main class="rbody${bodyHasH1 ? '' : ' noh1'}">${bodyHtml}</main>
+  <main class="rbody${bodyHasH1 ? '' : ' noh1'}">${bodyOut}</main>
 </body></html>`;
 
 /* ── render: multi-page PDF with page numbers ─────────────────────────── */
