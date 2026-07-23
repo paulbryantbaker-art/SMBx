@@ -57,8 +57,8 @@ const bodyMd = splitIdx >= 0 ? rawMd.slice(splitIdx + 5).trim() : rawMd;
      stat: $600B+ | Combined U.S. revenue     (repeatable; VALUE | LABEL)
    -->
    Absent → a plain cover (byline defaults to the owner, no stat band).       */
-const coverCfg: { byline: string; role: string; headshot: string; eyebrow?: string; stats: { n: string; l: string }[] } =
-  { byline: 'Paul Baker', role: 'smbX.ai · Buy-side corporate development', headshot: '', stats: [] };
+const coverCfg: { byline: string; role: string; headshot: string; image: string; imagePos: string; footer: string; eyebrow?: string; stats: { n: string; l: string }[] } =
+  { byline: 'Paul Baker', role: 'smbX.ai · Buy-side corporate development', headshot: '', image: '', imagePos: '50% 50%', footer: '', stats: [] };
 const cfgMatch = coverMdRaw.match(/<!--\s*cover([\s\S]*?)-->/i);
 const coverMd = (cfgMatch ? coverMdRaw.replace(cfgMatch[0], '') : coverMdRaw).trim();
 if (cfgMatch) for (const line of cfgMatch[1].split('\n')) {
@@ -72,12 +72,22 @@ const coverEyebrow = flag('--eyebrow') || coverCfg.eyebrow || eyebrow;
 (marked as any).setOptions({ gfm: true, breaks: false });
 const coverHtmlRaw = coverMd ? (marked as any).parse(coverMd) : '';
 const bodyHtml = (marked as any).parse(bodyMd);
+/* pagination: break before `#` parts if the body has any, else before its
+   top-level `##` sections (some reports lead with ## and never use #). */
+const bodyHasH1 = /^# /m.test(bodyMd);
 
 /* title (+ brass rule) split off so a stat band can sit right under it; the
    cover's numbered list (e.g. the research workstreams) becomes framed cards. */
-const h1End = coverHtmlRaw.indexOf('</h1>');
-const titleHtml = h1End >= 0 ? coverHtmlRaw.slice(0, h1End + 5) + '<div class="rule"></div>' : coverHtmlRaw;
-const restHtml = (h1End >= 0 ? coverHtmlRaw.slice(h1End + 5) : '').replace(/<ol>([\s\S]*?)<\/ol>/i, (_m, inner) => {
+let titleHtml = '', rest = coverHtmlRaw;
+const h1m = rest.match(/<h1[\s\S]*?<\/h1>/i); if (h1m) { titleHtml += h1m[0]; rest = rest.replace(h1m[0], ''); }
+const h2m = rest.match(/<h2[\s\S]*?<\/h2>/i); if (h2m) { titleHtml += h2m[0]; rest = rest.replace(h2m[0], ''); }
+titleHtml += '<div class="rule"></div>';
+/* running-footer label: --footer / config, else the plain-text report title */
+const footerRaw = flag('--footer') || coverCfg.footer;
+const footerLabel = footerRaw
+  ? footerRaw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  : (h1m ? h1m[0].replace(/<[^>]+>/g, '').trim() : slug);
+const restHtml = rest.replace(/<ol>([\s\S]*?)<\/ol>/i, (_m, inner) => {
   let i = 0;
   const cards = inner.replace(/<li>([\s\S]*?)<\/li>/gi, (_x: string, li: string) => `<div class="cv-card"><span class="cv-cardno">${String(++i).padStart(2, '0')}</span><div class="cv-cardbody">${li.trim()}</div></div>`);
   return `<div class="cv-cards">${cards}</div>`;
@@ -90,15 +100,23 @@ const b64 = (p: string, m: string) => `data:${m};base64,${readFileSync(p).toStri
 const LOGO_W = b64(path.join(ROOT, 'client/public/logo-green-x-dark.png'), 'image/png');
 const TEXTURE = b64(path.join(ROOT, 'client/public/textures/blackbleed.webp'), 'image/webp');
 
-/* headshot for the owner byline — config path, else the repo founder portrait */
-const resolveHead = (h: string) => {
-  if (h) { const cands = path.isAbsolute(h) ? [h] : [path.dirname(mdPath), path.join(path.dirname(mdPath), 'media'), path.join(ROOT, 'client/public')].map(d => path.join(d, h)); const hit = cands.find(existsSync); if (hit) return hit; }
-  return path.join(ROOT, 'client/public/founder-portrait.jpg');
+/* resolve a config asset (bare name → beside the .md, ./media, or client/public;
+   abs path as-is) — returns '' if not found, so callers choose their fallback */
+const mimeOf = (p: string) => /\.png$/i.test(p) ? 'image/png' : /\.webp$/i.test(p) ? 'image/webp' : 'image/jpeg';
+const resolveAsset = (h: string) => {
+  if (!h) return '';
+  if (path.isAbsolute(h)) return existsSync(h) ? h : '';
+  return [path.dirname(mdPath), path.join(path.dirname(mdPath), 'media'), path.join(ROOT, 'client/public')].map(d => path.join(d, h)).find(existsSync) || '';
 };
-const headPath = resolveHead(coverCfg.headshot);
-const headMime = /\.png$/i.test(headPath) ? 'image/png' : /\.webp$/i.test(headPath) ? 'image/webp' : 'image/jpeg';
-const HEAD = existsSync(headPath) ? b64(headPath, headMime) : '';
+
+/* headshot for the owner byline — config path, else the repo founder portrait */
+const headPath = resolveAsset(coverCfg.headshot) || path.join(ROOT, 'client/public/founder-portrait.jpg');
+const HEAD = existsSync(headPath) ? b64(headPath, mimeOf(headPath)) : '';
 const bylineHtml = `<div class="cv-byline">${HEAD ? `<img class="cv-face" src="${HEAD}">` : ''}<div><div class="cv-by-name">${coverCfg.byline}</div><div class="cv-by-role">${coverCfg.role}</div></div></div>`;
+
+/* optional cover hero image (framed) — like the carousel cover carries */
+const heroPath = resolveAsset(coverCfg.image);
+const heroHtml = heroPath ? `<img class="cv-hero" style="object-position:${coverCfg.imagePos}" src="${b64(heroPath, mimeOf(heroPath))}">` : '';
 
 /* ── the document ─────────────────────────────────────────────────────── */
 const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceCss()}</style>
@@ -108,23 +126,26 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
   body { font-family: ${SANS}; color: ${BODY}; font-size: 10.5pt; line-height: 1.5; font-variant-numeric: tabular-nums; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
   /* cover (dark boardroom title card, fills page 1 within the print margins) */
-  .cover { position: relative; min-height: 9.35in; padding: 0.5in 0.58in 0.46in; background: ${DARK} url('${TEXTURE}') center/cover; color: ${IVORY}; border-radius: 12px; overflow: hidden; page-break-after: always; display: flex; flex-direction: column; }
+  .cover { position: relative; min-height: 9.35in; padding: 0.44in 0.58in 0.4in; background: ${DARK} url('${TEXTURE}') center/cover; color: ${IVORY}; border-radius: 12px; overflow: hidden; page-break-after: always; display: flex; flex-direction: column; }
   .cover::before { content: ''; position: absolute; inset: 0; background:
     radial-gradient(760px 420px at 26% 2%, rgba(22,98,76,0.30), transparent 60%),
     linear-gradient(180deg, rgba(15,26,22,0.42), rgba(15,26,22,0.74)); }
   .cover > * { position: relative; z-index: 1; }
   /* logo is 4:1 — align-self stops the column flexbox from stretching it wide */
   .cv-logo { height: 25px; width: auto; align-self: flex-start; display: block; }
-  .cv-eyebrow { font-family: ${MONO}; font-size: 9.5pt; letter-spacing: 0.2em; color: ${BRASS}; margin-top: 0.32in; }
-  .cover h1 { font-family: ${DISPLAY}; font-weight: 545; font-size: 27pt; line-height: 1.05; letter-spacing: -0.012em; color: ${IVORY}; margin: 0.1in 0 0.17in; max-width: 6.1in; text-wrap: balance; }
-  .cover .rule { width: 84px; height: 5px; background: ${BRASS}; border-radius: 99px; margin-bottom: 0.2in; }
+  .cv-eyebrow { font-family: ${MONO}; font-size: 9.5pt; letter-spacing: 0.2em; color: ${BRASS}; margin-top: 0.22in; }
+  .cover h1 { font-family: ${DISPLAY}; font-weight: 545; font-size: 26pt; line-height: 1.04; letter-spacing: -0.012em; color: ${IVORY}; margin: 0.1in 0 0.1in; max-width: 6.1in; text-wrap: balance; }
+  .cover h2 { font-family: ${SANS}; font-weight: 500; font-size: 12.5pt; line-height: 1.4; color: ${IVORY_SUB}; margin: 0 0 0.03in; max-width: 5.9in; }
+  .cover .rule { width: 84px; height: 5px; background: ${BRASS}; border-radius: 99px; margin: 0.06in 0 0.2in; }
+  /* optional framed hero image on the cover (like the carousel cover) */
+  .cv-hero { width: 100%; height: 2.05in; object-fit: cover; border-radius: 10px; border: 1px solid rgba(255,255,255,0.16); box-shadow: 0 10px 30px rgba(0,0,0,0.4); display: block; margin: 0 0 0.16in; }
   .cover p, .cover li { color: ${IVORY_SUB}; font-size: 10pt; line-height: 1.5; margin: 0 0 0.07in; }
   .cover strong { color: ${IVORY}; font-weight: 600; }
   .cover em { color: #8FD0AE; font-style: italic; }
   .cover ol { padding-left: 1.1em; margin: 0.06in 0; }
 
   /* "by the numbers" stat band — framed cards, brass Fraunces numerals */
-  .cv-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin: 0.02in 0 0.2in; }
+  .cv-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin: 0.02in 0 0.16in; }
   .cv-stat { border: 1px solid rgba(143,208,174,0.24); border-radius: 10px; padding: 11px 13px 12px; background: rgba(255,255,255,0.035); }
   .cv-stat .n { font-family: ${DISPLAY}; font-weight: 545; font-size: 19pt; line-height: 1; color: ${BRASS}; letter-spacing: -0.01em; }
   .cv-stat .l { font-family: ${MONO}; font-size: 6.6pt; letter-spacing: 0.05em; text-transform: uppercase; color: #A6BEB2; margin-top: 6px; line-height: 1.4; }
@@ -146,6 +167,9 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
   .rbody h1 { font-family: ${DISPLAY}; font-weight: 545; font-size: 21pt; line-height: 1.08; letter-spacing: -0.01em; color: ${INK}; page-break-before: always; margin: 0 0 0.12in; padding-top: 0.16in; border-top: 2.5px solid ${BRASS}; }
   .rbody h2 { font-family: ${DISPLAY}; font-weight: 545; font-size: 14.5pt; line-height: 1.15; color: ${INK}; margin: 0.26in 0 0.07in; page-break-after: avoid; }
   .rbody h3 { font-family: ${SANS}; font-weight: 700; font-size: 11.5pt; color: ${INK}; margin: 0.17in 0 0.04in; page-break-after: avoid; }
+  /* reports that lead with ## (no # parts): promote ## to the page-breaking part header */
+  .rbody.noh1 h2 { page-break-before: always; font-size: 17pt; margin: 0 0 0.11in; padding-top: 0.16in; border-top: 2.5px solid ${BRASS}; }
+  .rbody.noh1 h2:first-child { page-break-before: avoid; border-top: none; padding-top: 0; }
   .rbody p { margin: 0 0 0.11in; }
   .rbody strong { color: ${INK}; font-weight: 600; }
   .rbody em { font-style: italic; }
@@ -170,11 +194,12 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
     <img class="cv-logo" src="${LOGO_W}">
     <div class="cv-eyebrow">${coverEyebrow}</div>
     ${titleHtml}
+    ${heroHtml}
     ${statBand}
     ${restHtml}
     ${bylineHtml}
   </section>
-  <main class="rbody">${bodyHtml}</main>
+  <main class="rbody${bodyHasH1 ? '' : ' noh1'}">${bodyHtml}</main>
 </body></html>`;
 
 /* ── render: multi-page PDF with page numbers ─────────────────────────── */
@@ -190,7 +215,7 @@ try {
     margin: { top: '0.55in', bottom: '0.7in', left: '0.75in', right: '0.75in' },
     displayHeaderFooter: true,
     headerTemplate: '<div></div>',
-    footerTemplate: `<div style="width:100%;font-family:'IBM Plex Mono',monospace;font-size:7pt;color:#8A9099;padding:0 0.75in;display:flex;justify-content:space-between;"><span>smbX.ai&nbsp;&nbsp;·&nbsp;&nbsp;Home Services M&amp;A — Master Assessment</span><span>Page <span class="pageNumber"></span> / <span class="totalPages"></span></span></div>`,
+    footerTemplate: `<div style="width:100%;font-family:'IBM Plex Mono',monospace;font-size:7pt;color:#8A9099;padding:0 0.75in;display:flex;justify-content:space-between;"><span>smbX.ai&nbsp;&nbsp;·&nbsp;&nbsp;${footerLabel}</span><span>Page <span class="pageNumber"></span> / <span class="totalPages"></span></span></div>`,
   });
   writeFileSync(path.join(outDir, `${slug}.pdf`), Buffer.from(pdf));
   const kb = (pdf.length / 1024).toFixed(0);
