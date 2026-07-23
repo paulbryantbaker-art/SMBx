@@ -56,7 +56,8 @@ interface Bar { label: string; sub: string; style: 'ink' | 'green'; h: number }
 type Page =
   | { kind: 'numeral'; numeral: string; unit?: string; head: string; body?: string; source?: string }
   | { kind: 'statement'; tag: string; tagColor?: 'green' | 'brass'; head: string; body?: string; source?: string }
-  | { kind: 'diagram'; tag: string; head: string; body?: string; source?: string; bars: Bar[]; connector?: string };
+  | { kind: 'diagram'; tag: string; head: string; body?: string; source?: string; bars: Bar[]; connector?: string }
+  | { kind: 'trade'; name: string; image?: string; imagePos?: string; numeral?: string; unit?: string; head: string; body?: string; source?: string };
 interface Deck {
   slug: string;
   kicker: string;                                   // mono header label, e.g. 'MARKET MAP'
@@ -160,6 +161,21 @@ deck.pages.forEach((p, i) => {
         ${p.source ? `<div class="stmt-src">${esc(p.source)}</div>` : ''}
       </div>
       ${pfoot(n)}</section>`);
+  } else if (p.kind === 'trade') {
+    const img = resolveImg(p.image);
+    html.push(`<section class="pg light">${kicker}
+      <div class="tradewrap${img ? '' : ' noimg'}">
+        <div class="trade-txt">
+          <div class="tag green">${esc(p.name)}</div>
+          ${p.numeral ? `<div class="trade-num">${esc(p.numeral)}${p.unit ? `<span class="tunit">${esc(p.unit)}</span>` : ''}</div>` : ''}
+          <div class="brassbar tbar"></div>
+          <div class="trade-h">${esc(p.head)}</div>
+          ${p.body ? `<div class="trade-b">${esc(p.body)}</div>` : ''}
+          ${p.source ? `<div class="stmt-src">${esc(p.source)}</div>` : ''}
+        </div>
+        ${img ? `<div class="trade-img"><img src="${img}" style="object-position:${p.imagePos || '50% 50%'}"></div>` : ''}
+      </div>
+      ${pfoot(n)}</section>`);
   }
 });
 
@@ -246,6 +262,18 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
   .ct-tag2 { margin-top: 3px; font-size: 19px; color: ${IVORY_SUB}; }
   .ct-brand { margin-top: 44px; display: flex; flex-direction: column; align-items: center; gap: 22px; }
   .follow { font-family: ${MONO}; font-size: 18px; letter-spacing: 0.14em; color: ${MINT}; font-weight: 600; }
+  .tradewrap { position: absolute; left: 88px; right: 88px; top: 150px; bottom: 116px; display: flex; align-items: center; gap: 54px; z-index: 1; }
+  .trade-txt { flex: 1; min-width: 0; }
+  .trade-num { font-weight: 800; font-size: 100px; line-height: 0.92; letter-spacing: -0.03em; color: ${INK}; }
+  .trade-num .tunit { font-size: 58px; }
+  .tradewrap.noimg .trade-num { font-size: 224px; }
+  .brassbar.tbar { margin: 22px 0 22px; }
+  .trade-h { font-family: ${DISPLAY}; font-weight: 545; font-size: 40px; line-height: 1.15; letter-spacing: -0.01em; color: ${INK}; }
+  .tradewrap.noimg .trade-h { font-size: 50px; max-width: 900px; }
+  .trade-b { margin-top: 20px; font-size: 23px; line-height: 1.5; color: ${BODY}; }
+  .tradewrap.noimg .trade-b { font-size: 26px; max-width: 860px; }
+  .trade-img { width: 404px; height: 604px; flex: none; background: #fff; border: 1px solid ${HAIR}; border-radius: 24px; overflow: hidden; }
+  .trade-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
 </style></head><body>${html.join('')}</body></html>`;
 
 /* ── render: page JPGs + rasterized PDF (the renderer-proof law) ──────── */
