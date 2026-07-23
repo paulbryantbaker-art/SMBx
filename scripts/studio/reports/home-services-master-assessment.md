@@ -1,3 +1,14 @@
+<!--cover
+byline: Paul Baker
+role: smbX.ai · Buy-side corporate development
+headshot: founder-portrait.jpg
+stat: $600B+ | Combined U.S. revenue, six trades
+stat: 250,000+ | Home-services businesses
+stat: 8% → 50.6% | PE share of HVAC deals, 2023 → H1 '25
+stat: $20B+ | Five platform recaps in 18 months
+stat: 4–8x → 16–20x | Add-on vs. platform multiple
+stat: ~89% | Of HVAC/plumbing shops under 20 staff
+-->
 # HOME SERVICES M&A — MASTER MARKET ASSESSMENT (2025–2026)
 
 **Prepared for:** smbX.ai buy-side corporate development
