@@ -6,6 +6,8 @@ image: mep-cover.jpg
 imagePos: 50% 50%
 footer: Commercial Mechanical & HVAC — Buy-Side Assessment
 accent: MAP: WHO | mep-accent-market.jpg | 50% 42%
+accent: DATA CENTER SUPERCYCLE | mep-accent-plant.jpg | 50% 42%
+accent: INVESTMENT THESIS | mep-accent-thesis.jpg | 50% 35%
 stat: ~$700B | U.S. commercial mechanical & electrical market
 stat: $50.7B | Data-center construction SAAR, +28% YoY
 stat: 4–8x → 10–13x | Add-on entry vs. service-led exit
