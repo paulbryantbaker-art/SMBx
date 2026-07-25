@@ -29,6 +29,7 @@ import { createHash } from 'node:crypto';
 import Anthropic from '@anthropic-ai/sdk';
 import { sql } from '../db.js';
 import { newRenderPage } from './premiumPdfRenderer.js';
+import { LEDGER, brandPaletteLines, MINT_RING, GREEN_HALO } from '../../house/tokens.js';
 
 const DECK_MODEL = process.env.RESEARCH_DECK_MODEL || 'claude-sonnet-4-6';
 const PROMPT_VERSION = 'v6'; // v6 (2026-07-21): framed cover + quiet ground — Paul: "we do need an image border that makes the image pop… too subsued behind the massive dark left panel", "make the left panel feel more background"
@@ -109,14 +110,16 @@ export function deckSystemPrompt(): string {
     'CANVAS: each page is EXACTLY 1080×1350 (a <section class="pg">, position:relative, overflow:hidden). Output ONE <style> block followed by one <section class="pg" data-i="n"> per page, in order. NOTHING else — no markdown fences, no <html>/<head>/<body>, no comments outside CSS.',
     '',
     'BRAND (locked, no other values):',
-    '- Bone paper #F6F4EF; ink #14181C; body gray #5C6670; muted #8A9099; hairline #E4E1D9.',
-    '- Deal Green #16624C (deep #0F4E3C); mint on dark #8FD0AE; brass #B08637 (jewelry only); boardroom dark #0F1A16; ivory #F3F1EA; ivory-sub #D8D5CA.',
+    // Generated from house/tokens.ts — a palette change must never leave the
+    // model instructed in the old colours. Wording is byte-identical to the
+    // hand-written original so the deck cache key stays valid.
+    ...brandPaletteLines(),
     "- Type: 'Fraunces' (display serif, weight 545) for headlines and pull-lines; 'Inter' for everything else (numerals font-weight 800, letter-spacing -0.03em); 'IBM Plex Mono' ONLY for small labels/sources (13px+ equivalent, letter-spacing ≤0.12em). Fonts are already loaded — just use the family names.",
-    '- Dark pages: background #0F1A16 with the texture image url({{TEXTURE_DARK}}) (background-size:cover) + a soft green halo (radial-gradient, rgba(22,98,76,0.28) fading out) is the house look. Paint it on the SECTION element itself — never only on an inner column div — so a sub-pixel gap between children can only ever reveal dark, never a light page beneath.',
+    `- Dark pages: background ${LEDGER.dark} with the texture image url({{TEXTURE_DARK}}) (background-size:cover) + a soft green halo (radial-gradient, ${GREEN_HALO} fading out) is the house look. Paint it on the SECTION element itself — never only on an inner column div — so a sub-pixel gap between children can only ever reveal dark, never a light page beneath.`,
     '',
     'ASSETS arrive as tokens — use them as literal src values and NEVER invent other URLs:',
     '- {{LOGO}} (ink wordmark img, use height 30-48px), {{LOGO_WHITE}} (for dark pages).',
-    "- {{HEADSHOT}} — Paul's real face photo. Byline grammar: 44-104px circle, 3px rgba(143,208,174,0.65) ring, next to 'Paul Baker' + 'Buy-side corporate development'.",
+    `- {{HEADSHOT}} — Paul's real face photo. Byline grammar: 44-104px circle, 3px ${MINT_RING} ring, next to 'Paul Baker' + 'Buy-side corporate development'.`,
     '- {{IMG_n}} — the images Paul assigned to specific pages. You are SHOWN each one. Design each placement around what the image actually is: its shape, background, and subject.',
     '',
     'IMAGE LAW (this is where past decks failed — obey every clause):',

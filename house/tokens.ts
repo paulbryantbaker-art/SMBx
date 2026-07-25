@@ -63,3 +63,48 @@ export const TYPE = {
 
 /** Fraunces display weight — 545, not 600. */
 export const DISPLAY_WEIGHT = 545;
+
+/* ── derived forms ────────────────────────────────────────────────────── */
+
+/**
+ * `#RRGGBB` → `rgba(r,g,b,a)`.
+ *
+ * Halos, rings and glazes are all palette colours at low alpha. Deriving them
+ * keeps them from going stale when the palette moves — a hand-written
+ * `rgba(22,98,76,0.28)` is Deal Green today and a lie tomorrow.
+ */
+export function rgba(hex: string, alpha: number): string {
+  const n = parseInt(hex.replace('#', ''), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
+}
+
+/** The mint byline ring and the green halo on dark bands — house constants. */
+export const MINT_RING = rgba(LEDGER.mint, 0.65);
+export const GREEN_HALO = rgba(LEDGER.green, 0.28);
+
+/**
+ * The palette paragraph handed to MODELS — the deck designer's brand contract
+ * and the artwork prompt.
+ *
+ * This is the subtlest drift risk in the whole system, and the reason this
+ * function exists. When the palette lived as literal text inside a prompt, a
+ * brand change left the model instructed in the OLD colours — and the model
+ * complied faithfully. The output went off-brand with no code change to
+ * review and nothing visibly wrong in the diff. Generating it means the
+ * instructions cannot disagree with the renderer.
+ *
+ * Wording is deliberately byte-identical to the hand-written original: the
+ * deck cache key hashes the prompt, so changing a character would invalidate
+ * every cached deck.
+ */
+export function brandPaletteLines(): string[] {
+  return [
+    `- Bone paper ${LEDGER.bone}; ink ${LEDGER.ink}; body gray ${LEDGER.slate}; muted ${LEDGER.muted}; hairline ${LEDGER.hair}.`,
+    `- Deal Green ${LEDGER.green} (deep ${LEDGER.greenHover}); mint on dark ${LEDGER.mint}; brass ${LEDGER.brass} (jewelry only); boardroom dark ${LEDGER.dark}; ivory ${LEDGER.ivory}; ivory-sub ${LEDGER.rule}.`,
+  ];
+}
+
+/** The strict palette clause for image-generation prompts (Gemini artwork). */
+export function artworkPaletteClause(): string {
+  return `bone off-white background ${LEDGER.bone}, deep green ${LEDGER.green},`;
+}
