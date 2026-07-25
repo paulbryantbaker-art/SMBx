@@ -22,6 +22,7 @@ import { fileURLToPath } from 'url';
 import { newRenderPage } from './premiumPdfRenderer.js';
 import { listStudioAssets, getStudioAsset } from './studioAssets.js';
 import { fontFaceCss } from './fontEmbeds.js';
+import { LEDGER } from '../../house/tokens.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -149,19 +150,21 @@ function logoImg(heightPx: number, opts: { white?: boolean } = {}): string {
   return `<img src="${LOGO_URI}" alt="smbX.ai" style="height:${heightPx}px;width:auto;display:block;${opts.white ? 'filter:brightness(0) invert(1);' : ''}">`;
 }
 
-/* ─── palette (practice .pd language) ─────────────────────────────────── */
-const INK = '#14181C';
-const BODY = '#5C6670';
-const TERT = '#8A9099';
-const CORAL = '#16624C'; // Ledger Deal Green 2026-07-17 (historical const name)
-const CORAL_DEEP = '#0F4E3C';
+/* ─── palette — THE shared definition, see house/tokens.ts ─────────────
+   Local const names are kept (CORAL is historical — it holds Deal Green
+   since 2026-07-17) so this 1,400-line file needs no call-site churn. */
+const INK = LEDGER.ink;
+const BODY = LEDGER.slate;
+const TERT = LEDGER.muted;
+const CORAL = LEDGER.green; // Ledger Deal Green 2026-07-17 (historical const name)
+const CORAL_DEEP = LEDGER.greenHover;
 const CARD = '#FFFFFF';
-const HAIR = '#E4E1D9';
-const WARM = '#F6F4EF';
-const DARK = '#0F1A16';
-const IVORY = '#F3F1EA';
-const IVORY_SUB = '#D8D5CA';
-const BRASS = '#B08637';
+const HAIR = LEDGER.hair;
+const WARM = LEDGER.bone;
+const DARK = LEDGER.dark;
+const IVORY = LEDGER.ivory;
+const IVORY_SUB = LEDGER.rule;
+const BRASS = LEDGER.brass;
 
 // Type ships EMBEDDED (fontEmbeds.ts): production render paths can't reach
 // the Google Fonts CDN, and the container has no brand fonts — the CDN link
