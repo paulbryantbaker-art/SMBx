@@ -259,6 +259,35 @@ export function auditCitations(
   };
 }
 
+
+/** Turn audit violations into a specific correction instruction for the retry. */
+function auditCorrections(a: CitationAudit): string {
+  const lines = ['Your draft failed the mechanical audit that runs on every master. Fix ONLY the issues listed, change nothing else, and return the COMPLETE corrected document.', ''];
+  if (a.unexplained.length) {
+    lines.push(`These figures appear in NO source and have no Derivations entry: ${a.unexplained.join(', ')}.`);
+    lines.push('For each one: cite the source it came from if it exists, OR add a Derivations line starting with the figure exactly as written in the body and showing inputs, arithmetic and the assumption, OR remove the claim. Do not simply delete the Derivations requirement.');
+    lines.push('');
+  }
+  if (!a.hasDerivationRegister) {
+    lines.push('The document has no "## Derivations" section. Add one, listing every figure you inferred rather than took from a source.');
+    lines.push('');
+  }
+  if (a.sourcesMissing.length) {
+    lines.push(`These uploaded documents are never named in your "## Sources" register: ${a.sourcesMissing.join('; ')}. Add each one, with the underlying sources it contributed. If a document contributed little, say so rather than omitting it.`);
+    lines.push('');
+  }
+  if (!a.hasSourceRegister) {
+    lines.push('The document has no "## Sources" section. Add one naming every uploaded document.');
+    lines.push('');
+  }
+  if (a.urlsDropped.length) {
+    lines.push(`These URLs appear in the research but not in your document: ${a.urlsDropped.slice(0, 12).join(', ')}. Carry them through verbatim on the claims they support, or in the Sources register.`);
+    lines.push('');
+  }
+  lines.push('Reminder: reported values are never altered, averaged, or rounded toward each other. A range is fine when both endpoints are reported values and both sources are cited.');
+  return lines.join('\n');
+}
+
 /* ── synthesis ────────────────────────────────────────────────────────── */
 
 function systemPrompt(): string {
@@ -363,34 +392,63 @@ export async function synthesizeLane(userId: number, laneId: number, opts: { ful
       '\n\nReturn the complete master document as markdown. Begin with a single `# ` title line.',
     ].join('') });
 
-    const res = await anthropic().messages.create({
-      model: MODEL,
-      max_tokens: MAX_OUTPUT,
-      system: systemPrompt(),
-      messages: [{ role: 'user', content }],
-    });
+    const sourceTexts = pending.map((p: any) => p.text_content || '').filter(Boolean) as string[];
+    if (useMaster && lane.master_md) sourceTexts.push(lane.master_md);
+    const labels = pending.map((p: any) => p.label);
 
-    const md = res.content.filter((b: any) => b.type === 'text').map((b: any) => b.text).join('').trim();
-    if (!md) throw new Error('The synthesis returned nothing.');
+    const call = async (msgs: any[]) => {
+      const res = await anthropic().messages.create({
+        model: MODEL, max_tokens: MAX_OUTPUT, system: systemPrompt(), messages: msgs,
+      });
+      return {
+        md: res.content.filter((b: any) => b.type === 'text').map((b: any) => b.text).join('').trim(),
+        inputTokens: res.usage.input_tokens, outputTokens: res.usage.output_tokens,
+      };
+    };
+
+    // Pass 1.
+    let out = await call([{ role: 'user', content }]);
+    if (!out.md) throw new Error('The synthesis returned nothing.');
+    let audit = auditCitations(out.md, sourceTexts, labels);
+    let inTok = out.inputTokens, outTok = out.outputTokens, attempts = 1;
+
+    // Pass 2 — ONE retry, with the specific violations fed back. Paul,
+    // 2026-07-24: a master that loses a citation or states an unexplained
+    // inference should not be accepted quietly. In practice the model fixes
+    // its own gaps readily once told exactly which figures lack working.
+    if (!audit.ok) {
+      console.warn(`[lanes] lane ${laneId}: draft failed the audit — retrying. ${audit.note}`);
+      const fix = auditCorrections(audit);
+      const retry = await call([
+        { role: 'user', content },
+        { role: 'assistant', content: out.md },
+        { role: 'user', content: fix },
+      ]);
+      attempts = 2;
+      inTok += retry.inputTokens; outTok += retry.outputTokens;
+      if (retry.md) {
+        const audit2 = auditCitations(retry.md, sourceTexts, labels);
+        // Keep the retry when it is genuinely better, not merely different.
+        if (audit2.ok || audit2.unexplainedCount + audit2.sourcesMissing.length + audit2.urlsDropped.length
+                       < audit.unexplainedCount + audit.sourcesMissing.length + audit.urlsDropped.length) {
+          out = retry; audit = audit2;
+        }
+      }
+    }
+
+    const md = out.md;
     const title = (md.match(/^#\s+(.+)$/m)?.[1] || lane.label).trim();
     const version = lane.master_version + 1;
     const usage = {
-      inputTokens: res.usage.input_tokens,
-      outputTokens: res.usage.output_tokens,
-      costCents: Math.ceil((res.usage.input_tokens * 300 + res.usage.output_tokens * 1500) / 1_000_000),
+      inputTokens: inTok, outputTokens: outTok, attempts,
+      costCents: Math.ceil((inTok * 300 + outTok * 1500) / 1_000_000),
     };
 
-    // Mechanical citation audit — verify attribution survived rather than
-    // trusting the prompt (Paul: "we don't want to lose attribution").
-    const sourceTexts = pending.map((p: any) =>
-      p.text_content || '').filter(Boolean) as string[];
-    if (useMaster && lane.master_md) sourceTexts.push(lane.master_md);
-    const audit = auditCitations(md, sourceTexts, pending.map((p: any) => p.label));
-    if (audit.urlsDropped.length) {
-      console.warn(`[lanes] lane ${laneId} v${version}: ${audit.urlsDropped.length} source URL(s) did not carry through`);
-    }
-
     const changeNote = md.match(/##\s*What changed[^\n]*\n+([\s\S]{0,600}?)(?=\n##|\n#|$)/i)?.[1]?.trim() || null;
+    // A master that still fails after the retry is SAVED (never lose the work)
+    // but the lane is parked in needs_review so nothing bad becomes canonical
+    // silently. The audit rides on the version row either way.
+    const status = audit.ok ? 'idle' : 'needs_review';
 
     await sql.begin(async (tx: any) => {
       await tx`
@@ -400,13 +458,15 @@ export async function synthesizeLane(userId: number, laneId: number, opts: { ful
       await tx`
         UPDATE research_lanes
         SET master_md = ${md}, master_title = ${title}, master_version = ${version},
-            synthesized_at = NOW(), synthesis_status = 'idle', updated_at = NOW()
+            synthesized_at = NOW(), synthesis_status = ${status},
+            synthesis_error = ${audit.ok ? null : audit.note.slice(0, 500)}, updated_at = NOW()
         WHERE id = ${laneId}`;
       await tx`
         UPDATE research_sources SET incorporated_version = ${version}
         WHERE lane_id = ${laneId} AND id = ANY(${pending.map((p: any) => p.id)})`;
     });
 
+    if (!audit.ok) console.warn(`[lanes] lane ${laneId} v${version} saved as needs_review: ${audit.note}`);
     return { version, usage, audit };
   } catch (err: any) {
     await sql`UPDATE research_lanes SET synthesis_status = 'failed', synthesis_error = ${String(err?.message || err).slice(0, 500)}, updated_at = NOW() WHERE id = ${laneId}`;
