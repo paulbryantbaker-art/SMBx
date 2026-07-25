@@ -102,103 +102,140 @@ export async function deleteSource(laneId: number, id: number): Promise<boolean>
   return rows.length > 0;
 }
 
-/* ── citation audit ───────────────────────────────────────────────────────
- * Paul, 2026-07-24: "Carrying through attributes and citations is very
- * important… we don't want to lose attribution."
+/* ── citation & derivation audit ─────────────────────────────────────────
+ * Paul, 2026-07-24: "It needs to work correctly in all cases — we cannot lose
+ * citation, and if we infer a value, we need to be able to explain our
+ * inferred value."
  *
- * A prompt instruction is not a guarantee — a model can drop a citation and
- * nothing downstream would notice. So after every synthesis we MECHANICALLY
- * compare the master against its sources and report what happened:
+ * An earlier version matched derivation language by PROXIMITY (was the word
+ * "assumes" near the number?). That is a guess, not a check: it legitimised a
+ * figure merely for sitting next to unrelated prose. Replaced with an exact
+ * contract the synthesis must satisfy and this code can verify:
  *
- *   urlsDropped   — links present in the research that vanished from the master
- *   unsourced     — figures in the master that appear in NO source, verbatim
+ *   ## Sources      — every uploaded document acknowledged by name
+ *   ## Derivations  — every inferred figure listed with its working
  *
- * `unsourced` is the fabrication check. It over-reports by design: a DERIVED
- * figure is calculated here and legitimately won't appear in any source, so
- * these are flagged for review rather than treated as errors. A long list is
- * the signal worth acting on.
+ * Then the checks are exact set membership, not regex vibes:
+ *   sourcesMissing — an uploaded document the master never acknowledges
+ *   urlsDropped    — a link in the research that vanished
+ *   unexplained    — a figure in NO source and NOT in the derivation register.
+ *                    That is the violation: an inferred value we cannot explain.
  */
 export interface CitationAudit {
-  sourceUrls: number; masterUrls: number; urlsDropped: string[];
-  masterFigures: number;
-  /** TRUE totals. The string arrays below are capped samples for display. */
-  unsourcedCount: number; derivedLabelledCount: number; unlabelledCount: number;
-  unsourced: string[];
-  /** Unsourced figures that ARE labelled as derived/assumed — legitimate. */
-  derivedLabelled: string[];
-  /** Unsourced AND unlabelled — a calculated figure presented as if sourced.
-   *  Paul, 2026-07-24: any figure we arrive at by calculation "needs to be
-   *  stated as such". This list is the violation of that rule. */
-  unlabelledDerivations: string[];
+  ok: boolean;
+  /* citations */
   hasSourceRegister: boolean;
+  sourcesMissing: string[];
+  sourceUrls: number; masterUrls: number; urlsDropped: string[];
+  /* figures */
+  masterFigures: number;
+  citedCount: number;
+  hasDerivationRegister: boolean;
+  derivedRegistered: string[];
+  unexplained: string[];
+  unexplainedCount: number;
   note: string;
 }
 
 const URL_RE = /https?:\/\/[^\s)<>\]"']+/gi;
-/** Money, percentages, multiples and plain magnitudes — the figures that carry a claim. */
+/** Money, percentages, multiples and magnitudes — the figures that carry a claim. */
 const FIG_RE = /\$?\d[\d,]*\.?\d*\s?(?:billion|million|trillion|bn|mm?|k|%|x)\b|\$\d[\d,]*\.?\d*/gi;
-
-/** Markers that state a figure was calculated or assumed rather than sourced. */
-const DERIVED_MARKER = /\bderived\b|\bassum\w*|\bestimat\w*|\bimplie[sd]\b|\bcalculat\w*|\btriangulat\w*|\bapprox\w*|\bour (?:estimate|figure|math)\b|\bback[- ]of[- ]envelope\b|\bmidpoint\b|\bblended\b|~/;
 
 const normUrl = (u: string) => u.replace(/[.,;]+$/, '').replace(/\/$/, '').toLowerCase();
 const normFig = (f: string) => f.toLowerCase().replace(/,/g, '').replace(/\s+/g, '')
   .replace(/billion/, 'b').replace(/million/, 'm').replace(/trillion/, 't').replace(/bn/, 'b');
 
-export function auditCitations(masterMd: string, sourceTexts: string[]): CitationAudit {
+/** Pull a markdown section by heading pattern, up to the next heading. */
+function section(md: string, pattern: RegExp): string | null {
+  const lines = md.split('\n');
+  let i = lines.findIndex(l => /^#{1,4}\s/.test(l) && pattern.test(l));
+  if (i < 0) return null;
+  const level = (lines[i].match(/^#+/) || ['#'])[0].length;
+  const out: string[] = [];
+  for (let j = i + 1; j < lines.length; j++) {
+    const m = lines[j].match(/^#+/);
+    if (m && m[0].length <= level) break;
+    out.push(lines[j]);
+  }
+  return out.join('\n');
+}
+
+/** Distinctive words from a source label, for checking it is acknowledged. */
+const labelTokens = (label: string) =>
+  label.toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length > 3 &&
+    !['research', 'report', 'final', 'draft', 'deep', 'analysis', 'market', 'from', 'with', 'this', 'that'].includes(w));
+
+export function auditCitations(
+  masterMd: string,
+  sourceTexts: string[],
+  sourceLabels: string[] = [],
+): CitationAudit {
   const haystack = sourceTexts.join('\n');
+
+  /* citations ------------------------------------------------------------ */
   const srcUrls = new Set([...haystack.matchAll(URL_RE)].map(m => normUrl(m[0])));
   const mstUrls = new Set([...masterMd.matchAll(URL_RE)].map(m => normUrl(m[0])));
   const urlsDropped = [...srcUrls].filter(u => !mstUrls.has(u));
 
-  const srcFigs = new Set([...haystack.matchAll(FIG_RE)].map(m => normFig(m[0])));
-  const mstMatches = [...masterMd.matchAll(FIG_RE)];
-  const seen = new Set<string>();
-  const unsourced: string[] = [];
-  const derivedLabelled: string[] = [];
-  const unlabelledDerivations: string[] = [];
-  let mstFigCount = 0;
+  const sourcesSection = section(masterMd, /sources|references|method/i);
+  const hasSourceRegister = sourcesSection !== null;
 
-  for (const m of mstMatches) {
+  // A source counts as acknowledged only if it is named IN THE SOURCES
+  // REGISTER — not merely because its topic words show up in the body. An
+  // earlier version searched the whole document, so a label like "…commercial
+  // mechanical" matched the title and a genuinely dropped source passed.
+  const registerText = (sourcesSection || '').toLowerCase();
+  const sourcesMissing = sourceLabels.filter(label => {
+    const toks = labelTokens(label);
+    if (!toks.length) return false;              // nothing distinctive to match on
+    if (!hasSourceRegister) return true;         // no register at all → all missing
+    return !toks.some(t => registerText.includes(t));
+  });
+
+  /* figures -------------------------------------------------------------- */
+  const srcFigs = new Set([...haystack.matchAll(FIG_RE)].map(m => normFig(m[0])));
+
+  const derivSection = section(masterMd, /derivation|derived figure|assumption/i);
+  const hasDerivationRegister = derivSection !== null;
+  const registered = new Set(
+    derivSection ? [...derivSection.matchAll(FIG_RE)].map(m => normFig(m[0])) : []);
+
+  const bodyMd = derivSection ? masterMd.replace(derivSection, '') : masterMd;
+  const seen = new Set<string>();
+  const derivedRegistered: string[] = [];
+  const unexplained: string[] = [];
+  let cited = 0;
+
+  for (const m of bodyMd.matchAll(FIG_RE)) {
     const key = normFig(m[0]);
     if (seen.has(key)) continue;
-    seen.add(key); mstFigCount++;
-    if (srcFigs.has(key)) continue;           // cited verbatim — fine
-    unsourced.push(key);
-    // A figure that is in no source is either DERIVED or invented. The label
-    // is what separates them, so look for a derivation marker around it.
-    const at = m.index ?? 0;
-    const ctx = masterMd.slice(Math.max(0, at - 260), at + 260).toLowerCase();
-    (DERIVED_MARKER.test(ctx) ? derivedLabelled : unlabelledDerivations).push(key);
+    seen.add(key);
+    if (srcFigs.has(key)) { cited++; continue; }      // stated in a source
+    if (registered.has(key)) { derivedRegistered.push(key); continue; }  // explained
+    unexplained.push(key);                            // inferred, unexplained
   }
-  const mstFigs = [...seen];
 
-  // Much research cites by NAME ("U.S. Census Bureau", "Comfort Systems
-  // FY2025 10-K") rather than by URL, so a URL check alone would miss a
-  // dropped register entirely. This is the structural backstop.
-  const hasSourceRegister = /^#{1,3}\s*(sources|source register|references|method and sources|sources and method)/im.test(masterMd);
+  const ok = unexplained.length === 0 && sourcesMissing.length === 0 && urlsDropped.length === 0;
+  const note = ok
+    ? `Clean: ${cited} cited, ${derivedRegistered.length} derived with stated working, every source acknowledged.`
+    : [
+        unexplained.length ? `${unexplained.length} figure(s) appear in no source and are not explained in a Derivations section — an inferred value must state its working: ${unexplained.slice(0, 6).join(', ')}.` : '',
+        !hasDerivationRegister && unexplained.length ? 'The master has NO Derivations section at all.' : '',
+        sourcesMissing.length ? `${sourcesMissing.length} uploaded document(s) are never acknowledged: ${sourcesMissing.slice(0, 4).join('; ')}.` : '',
+        urlsDropped.length ? `${urlsDropped.length} source URL(s) did not carry through.` : '',
+        !hasSourceRegister ? 'No Sources section.' : '',
+      ].filter(Boolean).join(' ');
 
   return {
-    hasSourceRegister,
-    sourceUrls: srcUrls.size,
-    masterUrls: mstUrls.size,
-    urlsDropped: urlsDropped.slice(0, 40),
-    masterFigures: mstFigCount,
-    unsourcedCount: unsourced.length,
-    derivedLabelledCount: derivedLabelled.length,
-    unlabelledCount: unlabelledDerivations.length,
-    unsourced: unsourced.slice(0, 40),
-    derivedLabelled: derivedLabelled.slice(0, 40),
-    unlabelledDerivations: unlabelledDerivations.slice(0, 40),
-    note: [
-      unlabelledDerivations.length
-        ? `${unlabelledDerivations.length} figure(s) appear in no source AND carry no derivation label — a calculated figure must be stated as such: ${unlabelledDerivations.slice(0, 6).join(', ')}.`
-        : unsourced.length
-          ? `${unsourced.length} figure(s) are not in any source; all are labelled as derived/assumed.`
-          : 'Every figure in the master appears verbatim in a source.',
-      hasSourceRegister ? '' : 'NO SOURCES SECTION — the synthesis dropped its citation register.',
-      urlsDropped.length ? `${urlsDropped.length} source URL(s) did not carry through.` : '',
-    ].filter(Boolean).join(' '),
+    ok,
+    hasSourceRegister, sourcesMissing,
+    sourceUrls: srcUrls.size, masterUrls: mstUrls.size, urlsDropped: urlsDropped.slice(0, 40),
+    masterFigures: seen.size, citedCount: cited,
+    hasDerivationRegister,
+    derivedRegistered: derivedRegistered.slice(0, 40),
+    unexplained: unexplained.slice(0, 40),
+    unexplainedCount: unexplained.length,
+    note,
   };
 }
 
@@ -223,12 +260,22 @@ function systemPrompt(): string {
     '',
     'LABELLING: mark every material figure PRIMARY (government data or SEC filings), INSTITUTIONAL (a named forecaster or transaction database with published methodology), or DERIVED. A figure that fits none of those is not strong enough to state as fact.',
     '',
-    'DERIVED FIGURES — STATE THE ASSUMPTION, ALWAYS. Any number you arrive at by calculation, synthesis, triangulation or judgement — anything not stated outright in a source — must be labelled DERIVED and must show its working:',
+    'DERIVED FIGURES — STATE THE ASSUMPTION, ALWAYS. Any number you arrive at by calculation, synthesis, triangulation or judgement — anything not stated outright in a source — must be labelled DERIVED inline AND listed in the Derivations section (below) with its working:',
     '   • the inputs it came from, with their own citations;',
     '   • the arithmetic or method, in the open ("$207.9B × 1.65 ≈ $343B");',
     '   • the assumption it rests on, named as an assumption ("assumes a 50% nonresidential share");',
     '   • a sensitivity or range where the assumption materially moves the answer.',
     '   A calculated figure presented as though it were sourced is the single worst failure this document can contain — it is indistinguishable from a fabrication to anyone checking your work, and it is exactly what a partner will test first. If you cannot show the working, do not state the number.',
+    '',
+    'TWO REGISTERS ARE MANDATORY, both as top-level sections at the end. They are checked mechanically after you finish, and a missing entry is reported as a defect:',
+    '',
+    '## Sources',
+    '   Every uploaded document by its given name, and beneath each, the underlying sources it contributed (filings, government series, named analysts) with URLs where supplied. Every document handed to you must appear here, including any whose contribution you judged weak — say so rather than omitting it.',
+    '',
+    '## Derivations',
+    '   One line per figure you inferred rather than took from a source. Begin each line with the figure exactly as it appears in the body, then the working. For example:',
+    '   - **~$180B** — DERIVED. $355B total (Census NAICS 238220, grown to 2026) × 50% nonresidential share. The share is an assumption, not a measurement; at 45%/55% the answer moves to $160B/$195B.',
+    '   EVERY figure in the body that is not stated in a source must have a line here. If a figure is in neither a source nor this register, it will be flagged as an inferred value you cannot explain — the exact failure this document exists to prevent.',
     '',
     'PRACTICE LINE: buy-side only. No fee, pricing, or compensation content. Never state a valuation of a specific named target. Present analysis, options and implications — never advice to a client.',
     '',
@@ -314,7 +361,7 @@ export async function synthesizeLane(userId: number, laneId: number, opts: { ful
     const sourceTexts = pending.map((p: any) =>
       p.text_content || '').filter(Boolean) as string[];
     if (useMaster && lane.master_md) sourceTexts.push(lane.master_md);
-    const audit = auditCitations(md, sourceTexts);
+    const audit = auditCitations(md, sourceTexts, pending.map((p: any) => p.label));
     if (audit.urlsDropped.length) {
       console.warn(`[lanes] lane ${laneId} v${version}: ${audit.urlsDropped.length} source URL(s) did not carry through`);
     }
