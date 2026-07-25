@@ -26,11 +26,12 @@ const { fontFaceCss } = await import(pathToFileURL(path.join(ROOT, 'server/servi
 const { newRenderPage } = await import(pathToFileURL(path.join(ROOT, 'server/services/premiumPdfRenderer.ts')).href);
 const { marked } = await import('marked');
 
-/* ── house palette ────────────────────────────────────────────────────── */
-const INK = '#14181C', BODY = '#3F464C', TERT = '#8A9099', GREEN = '#16624C';
-const WARM = '#F6F4EF', DARK = '#0F1A16', IVORY = '#F3F1EA', IVORY_SUB = '#CBD1CB';
-const BRASS = '#B08637', HAIR = '#E4E1D9';
-const DISPLAY = `'Fraunces', Georgia, serif`, SANS = `'Inter', -apple-system, sans-serif`, MONO = `'IBM Plex Mono', monospace`;
+/* ── house palette — THE shared definition, see house/tokens.ts ───────── */
+const { LEDGER, REPORT, TYPE } = await import(pathToFileURL(path.join(ROOT, 'house/tokens.ts')).href);
+const INK = LEDGER.ink, BODY = REPORT.body, TERT = LEDGER.muted, GREEN = LEDGER.green;
+const WARM = LEDGER.bone, DARK = LEDGER.dark, IVORY = LEDGER.ivory, IVORY_SUB = REPORT.ivorySub;
+const BRASS = LEDGER.brass, HAIR = LEDGER.hair;
+const DISPLAY = TYPE.display, SANS = TYPE.sans, MONO = TYPE.mono;
 
 /* ── CLI ──────────────────────────────────────────────────────────────── */
 const args = process.argv.slice(2);
