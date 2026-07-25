@@ -141,6 +141,20 @@ const URL_RE = /https?:\/\/[^\s)<>\]"']+/gi;
 /** Money, percentages, multiples and magnitudes — the figures that carry a claim. */
 const FIG_RE = /\$?\d[\d,]*\.?\d*\s?(?:billion|million|trillion|bn|mm?|k|%|x)\b|\$\d[\d,]*\.?\d*/gi;
 
+/**
+ * Expand ranges so a shared unit attaches to BOTH endpoints.
+ *
+ * Paul, 2026-07-24, on conflicting sources: "one source says it's 700 million,
+ * the other says 600 million… we could say between 600 and 700 million and
+ * cite both." Written naturally that is "between $600 and $700 million", where
+ * $600 carries no unit of its own — so a naive extractor reads "$600", fails to
+ * match the source's "$600 million", and flags honest work as an unexplained
+ * inference. Normalising first makes both endpoints checkable.
+ */
+const expandRanges = (t: string) => t.replace(
+  /(\$?\d[\d,]*\.?\d*)\s*(?:–|—|-|\bto\b|\band\b)\s*(\$?\d[\d,]*\.?\d*)(\s?)(billion|million|trillion|bn|mm?|k)\b/gi,
+  (_m, a, b, sp, unit) => `${a}${sp || ' '}${unit} to ${b}${sp || ' '}${unit}`);
+
 const normUrl = (u: string) => u.replace(/[.,;]+$/, '').replace(/\/$/, '').toLowerCase();
 const normFig = (f: string) => f.toLowerCase().replace(/,/g, '').replace(/\s+/g, '')
   .replace(/billion/, 'b').replace(/million/, 'm').replace(/trillion/, 't').replace(/bn/, 'b');
@@ -166,11 +180,13 @@ const labelTokens = (label: string) =>
     !['research', 'report', 'final', 'draft', 'deep', 'analysis', 'market', 'from', 'with', 'this', 'that'].includes(w));
 
 export function auditCitations(
-  masterMd: string,
+  masterMdIn: string,
   sourceTexts: string[],
   sourceLabels: string[] = [],
 ): CitationAudit {
-  const haystack = sourceTexts.join('\n');
+  let masterMd = masterMdIn;
+  const haystack = expandRanges(sourceTexts.join('\n'));
+  masterMd = expandRanges(masterMd);
 
   /* citations ------------------------------------------------------------ */
   const srcUrls = new Set([...haystack.matchAll(URL_RE)].map(m => normUrl(m[0])));
@@ -256,7 +272,11 @@ function systemPrompt(): string {
     '   • Note which engine surfaced a figure only where it matters (e.g. only one engine found it). The underlying source always matters; the engine usually does not.',
     '   • A claim you cannot attribute to a specific source does not belong in the document. Drop it, or state plainly that it is unattributed and why it is still worth carrying.',
     '   • Close with a SOURCES register listing every document drawn on and, beneath each, the underlying sources it contributed. This is what makes the document defensible when a PE partner interrogates a number.',
-    '3. DISAGREEMENT IS A FINDING. When two sources give different numbers for the same thing, present BOTH with attribution and say plainly that they disagree. Never average them, never silently pick one. Note which is better-sourced and why.',
+    '3. DISAGREEMENT IS A FINDING — AND YOU MAY NOT CHANGE EITHER NUMBER. When two sources report different values for the same thing, both values stand exactly as reported. Say so plainly: "Source A reports $700 million; Source B reports $600 million; we cannot say which is right."',
+    '   • NEVER average them into a single figure. NEVER quietly adopt one and drop the other. NEVER round them toward each other.',
+    '   • You MAY state the spread as a range — "between $600 and $700 million" — provided BOTH endpoints are the reported values, unaltered, and BOTH sources are cited at that point.',
+    '   • A range built this way is not a derivation and needs no Derivations entry: its endpoints are cited figures. But a MIDPOINT, a weighted blend, or any number between the endpoints IS a derivation — label it and show the working.',
+    '   • Where one source is better-grounded (a filing beats an estimate), say which and why — but still report both numbers.',
     '',
     'LABELLING: mark every material figure PRIMARY (government data or SEC filings), INSTITUTIONAL (a named forecaster or transaction database with published methodology), or DERIVED. A figure that fits none of those is not strong enough to state as fact.',
     '',
