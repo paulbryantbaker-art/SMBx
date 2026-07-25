@@ -120,7 +120,16 @@ export async function deleteSource(laneId: number, id: number): Promise<boolean>
  */
 export interface CitationAudit {
   sourceUrls: number; masterUrls: number; urlsDropped: string[];
-  masterFigures: number; unsourced: string[];
+  masterFigures: number;
+  /** TRUE totals. The string arrays below are capped samples for display. */
+  unsourcedCount: number; derivedLabelledCount: number; unlabelledCount: number;
+  unsourced: string[];
+  /** Unsourced figures that ARE labelled as derived/assumed — legitimate. */
+  derivedLabelled: string[];
+  /** Unsourced AND unlabelled — a calculated figure presented as if sourced.
+   *  Paul, 2026-07-24: any figure we arrive at by calculation "needs to be
+   *  stated as such". This list is the violation of that rule. */
+  unlabelledDerivations: string[];
   hasSourceRegister: boolean;
   note: string;
 }
@@ -128,6 +137,9 @@ export interface CitationAudit {
 const URL_RE = /https?:\/\/[^\s)<>\]"']+/gi;
 /** Money, percentages, multiples and plain magnitudes — the figures that carry a claim. */
 const FIG_RE = /\$?\d[\d,]*\.?\d*\s?(?:billion|million|trillion|bn|mm?|k|%|x)\b|\$\d[\d,]*\.?\d*/gi;
+
+/** Markers that state a figure was calculated or assumed rather than sourced. */
+const DERIVED_MARKER = /\bderived\b|\bassum\w*|\bestimat\w*|\bimplie[sd]\b|\bcalculat\w*|\btriangulat\w*|\bapprox\w*|\bour (?:estimate|figure|math)\b|\bback[- ]of[- ]envelope\b|\bmidpoint\b|\bblended\b|~/;
 
 const normUrl = (u: string) => u.replace(/[.,;]+$/, '').replace(/\/$/, '').toLowerCase();
 const normFig = (f: string) => f.toLowerCase().replace(/,/g, '').replace(/\s+/g, '')
@@ -140,8 +152,26 @@ export function auditCitations(masterMd: string, sourceTexts: string[]): Citatio
   const urlsDropped = [...srcUrls].filter(u => !mstUrls.has(u));
 
   const srcFigs = new Set([...haystack.matchAll(FIG_RE)].map(m => normFig(m[0])));
-  const mstFigs = [...new Set([...masterMd.matchAll(FIG_RE)].map(m => normFig(m[0])))];
-  const unsourced = mstFigs.filter(f => !srcFigs.has(f));
+  const mstMatches = [...masterMd.matchAll(FIG_RE)];
+  const seen = new Set<string>();
+  const unsourced: string[] = [];
+  const derivedLabelled: string[] = [];
+  const unlabelledDerivations: string[] = [];
+  let mstFigCount = 0;
+
+  for (const m of mstMatches) {
+    const key = normFig(m[0]);
+    if (seen.has(key)) continue;
+    seen.add(key); mstFigCount++;
+    if (srcFigs.has(key)) continue;           // cited verbatim — fine
+    unsourced.push(key);
+    // A figure that is in no source is either DERIVED or invented. The label
+    // is what separates them, so look for a derivation marker around it.
+    const at = m.index ?? 0;
+    const ctx = masterMd.slice(Math.max(0, at - 260), at + 260).toLowerCase();
+    (DERIVED_MARKER.test(ctx) ? derivedLabelled : unlabelledDerivations).push(key);
+  }
+  const mstFigs = [...seen];
 
   // Much research cites by NAME ("U.S. Census Bureau", "Comfort Systems
   // FY2025 10-K") rather than by URL, so a URL check alone would miss a
@@ -153,12 +183,19 @@ export function auditCitations(masterMd: string, sourceTexts: string[]): Citatio
     sourceUrls: srcUrls.size,
     masterUrls: mstUrls.size,
     urlsDropped: urlsDropped.slice(0, 40),
-    masterFigures: mstFigs.length,
+    masterFigures: mstFigCount,
+    unsourcedCount: unsourced.length,
+    derivedLabelledCount: derivedLabelled.length,
+    unlabelledCount: unlabelledDerivations.length,
     unsourced: unsourced.slice(0, 40),
+    derivedLabelled: derivedLabelled.slice(0, 40),
+    unlabelledDerivations: unlabelledDerivations.slice(0, 40),
     note: [
-      unsourced.length
-        ? `${unsourced.length} figure(s) in the master do not appear verbatim in any source. Expected for DERIVED calculations — check the rest.`
-        : 'Every figure in the master appears verbatim in a source.',
+      unlabelledDerivations.length
+        ? `${unlabelledDerivations.length} figure(s) appear in no source AND carry no derivation label — a calculated figure must be stated as such: ${unlabelledDerivations.slice(0, 6).join(', ')}.`
+        : unsourced.length
+          ? `${unsourced.length} figure(s) are not in any source; all are labelled as derived/assumed.`
+          : 'Every figure in the master appears verbatim in a source.',
       hasSourceRegister ? '' : 'NO SOURCES SECTION — the synthesis dropped its citation register.',
       urlsDropped.length ? `${urlsDropped.length} source URL(s) did not carry through.` : '',
     ].filter(Boolean).join(' '),
@@ -184,7 +221,14 @@ function systemPrompt(): string {
     '   • Close with a SOURCES register listing every document drawn on and, beneath each, the underlying sources it contributed. This is what makes the document defensible when a PE partner interrogates a number.',
     '3. DISAGREEMENT IS A FINDING. When two sources give different numbers for the same thing, present BOTH with attribution and say plainly that they disagree. Never average them, never silently pick one. Note which is better-sourced and why.',
     '',
-    'LABELLING: mark every material figure PRIMARY (government data or SEC filings), INSTITUTIONAL (a named forecaster or transaction database with published methodology), or DERIVED (calculated here — show the arithmetic). A figure that fits none of those is not strong enough to state as fact.',
+    'LABELLING: mark every material figure PRIMARY (government data or SEC filings), INSTITUTIONAL (a named forecaster or transaction database with published methodology), or DERIVED. A figure that fits none of those is not strong enough to state as fact.',
+    '',
+    'DERIVED FIGURES — STATE THE ASSUMPTION, ALWAYS. Any number you arrive at by calculation, synthesis, triangulation or judgement — anything not stated outright in a source — must be labelled DERIVED and must show its working:',
+    '   • the inputs it came from, with their own citations;',
+    '   • the arithmetic or method, in the open ("$207.9B × 1.65 ≈ $343B");',
+    '   • the assumption it rests on, named as an assumption ("assumes a 50% nonresidential share");',
+    '   • a sensitivity or range where the assumption materially moves the answer.',
+    '   A calculated figure presented as though it were sourced is the single worst failure this document can contain — it is indistinguishable from a fabrication to anyone checking your work, and it is exactly what a partner will test first. If you cannot show the working, do not state the number.',
     '',
     'PRACTICE LINE: buy-side only. No fee, pricing, or compensation content. Never state a valuation of a specific named target. Present analysis, options and implications — never advice to a client.',
     '',
