@@ -293,6 +293,27 @@ researchRouter.delete('/studio/artifacts/:id', async (req, res) => {
   return ok ? res.json({ ok: true }) : res.status(404).json({ error: 'Artifact not found' });
 });
 
+/** File a run's report into the artifacts repository — the words a piece of
+ *  collateral gets built from, kept where they can be edited and reused. */
+researchRouter.post('/research/runs/:id/file-artifact', async (req, res) => {
+  const userId = userIdFromReq(req);
+  const id = parseId(req.params.id);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  if (!id) return res.status(400).json({ error: 'Bad run id' });
+  const [run] = await sql<{ report_md: string | null; report_title: string | null; topic: string; schedule_id: number | null }[]>`
+    SELECT report_md, report_title, topic, schedule_id FROM research_runs WHERE id = ${id} AND user_id = ${userId}`;
+  if (!run) return res.status(404).json({ error: 'Run not found' });
+  if (!run.report_md) return res.status(400).json({ error: 'This run has no report yet.' });
+  const artifactId = await createArtifact(userId, {
+    label: run.report_title || run.topic,
+    bodyMd: run.report_md,
+    kind: 'report',
+    runId: id,
+    scheduleId: run.schedule_id ?? undefined,
+  });
+  return res.json({ artifactId });
+});
+
 /** File a lane's synthesized master into the artifacts repository. */
 researchRouter.post('/research/lanes/:id/file-artifact', async (req, res) => {
   const userId = userIdFromReq(req);

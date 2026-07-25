@@ -156,6 +156,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
   const [runs, setRuns] = useState<RunRow[]>([]);
   const [schedules, setSchedules] = useState<ScheduleRow[]>([]);
   const [assets, setAssets] = useState<AssetRow[]>([]);
+  const [artifacts, setArtifacts] = useState<ArtifactRow[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsRow[]>([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -193,18 +194,20 @@ export default function StudioResearch({ user }: { user: User | null }) {
   const [connErr, setConnErr] = useState(false);
   const refresh = useCallback(async () => {
     try {
-      const [r, s, u, a, an] = await Promise.all([
+      const [r, s, u, a, an, ar] = await Promise.all([
         api<{ runs: RunRow[] }>("/research/runs"),
         api<{ schedules: ScheduleRow[] }>("/research/schedules"),
         api<{ spentCents: number; capCents: number | null }>("/research/usage"),
         api<{ assets: AssetRow[] }>("/studio/assets"),
         api<{ items: AnalyticsRow[] }>("/research/analytics"),
+        api<{ artifacts: ArtifactRow[] }>("/studio/artifacts"),
       ]);
       setRuns(r.runs ?? []);
       setSchedules(s.schedules ?? []);
       setUsage(u);
       setAssets(a.assets ?? []);
       setAnalytics(an.items ?? []);
+      setArtifacts(ar.artifacts ?? []);
       setConnErr(false);
     } catch {
       setConnErr(true); // banner + fast retry below
@@ -350,6 +353,73 @@ export default function StudioResearch({ user }: { user: User | null }) {
       setNote({ kind: "err", text: e?.message || "Download failed." });
     }
   }, []);
+
+  /* ── Artifacts: the words repository ──────────────────────────────────
+     Reports, post copy, research masters, specs — the text a piece of
+     collateral is built from. Paul, 2026-07-24: "artifacts are the reports,
+     LinkedIn post, copy, etcetera. Text documents that are used to generate
+     collateral." Written here, uploaded as .md/.txt, or filed from a run. */
+
+  const newArtifact = useCallback(async (kind: string) => {
+    const label = window.prompt("Name the artifact:")?.trim();
+    if (!label) return null;
+    try {
+      const { id } = await api<{ id: number }>("/studio/artifacts", {
+        method: "POST",
+        body: JSON.stringify({ label, kind, bodyMd: "" }),
+      });
+      await refresh();
+      return id;
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Couldn’t create the artifact." });
+      return null;
+    }
+  }, [refresh]);
+
+  const uploadArtifact = useCallback(async (f: File) => {
+    try {
+      const bodyMd = await f.text();
+      await api("/studio/artifacts", {
+        method: "POST",
+        body: JSON.stringify({
+          label: f.name.replace(/\.(md|markdown|txt)$/i, ""),
+          kind: /post|caption/i.test(f.name) ? "post_copy" : "document",
+          bodyMd,
+        }),
+      });
+      setNote({ kind: "ok", text: `“${f.name}” is in Artifacts.` });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Upload failed." });
+    }
+  }, [refresh]);
+
+  const saveArtifact = useCallback(async (id: number, patch: Record<string, unknown>) => {
+    await api(`/studio/artifacts/${id}`, { method: "PATCH", body: JSON.stringify(patch) });
+    void refresh();
+  }, [refresh]);
+
+  const deleteArtifact = useCallback(async (a: ArtifactRow) => {
+    if (!window.confirm(`Delete “${a.label}”? This can't be undone.`)) return;
+    try {
+      await api(`/studio/artifacts/${a.id}`, { method: "DELETE" });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Delete failed." });
+    }
+  }, [refresh]);
+
+  /** File a finished run's report into Artifacts — the chain the three
+   *  repositories form: artifact (words) + asset (pictures) → collateral. */
+  const fileRunAsArtifact = useCallback(async (r: RunRow) => {
+    try {
+      await api(`/research/runs/${r.id}/file-artifact`, { method: "POST" });
+      setNote({ kind: "ok", text: "Filed in Artifacts — edit it there and it stays linked to this run." });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Couldn’t file this run." });
+    }
+  }, [refresh]);
 
   /* ── Performance: LinkedIn analytics imports + Yulia's read ── */
 
@@ -631,6 +701,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
         runs={runs}
         schedules={schedules}
         assets={assets}
+        artifacts={artifacts}
         typeLabel={typeLabel}
         angleLabel={angleLabel}
         dl={dl}
@@ -655,6 +726,11 @@ export default function StudioResearch({ user }: { user: User | null }) {
         onUploadPhoto={uploadPhoto}
         onNewCard={() => setSheet("collateral")}
         onImportPlan={() => setSheet("import")}
+        onNewArtifact={newArtifact}
+        onUploadArtifact={uploadArtifact}
+        onSaveArtifact={saveArtifact}
+        onDeleteArtifact={deleteArtifact}
+        onFileRunAsArtifact={fileRunAsArtifact}
         analytics={analytics}
         onUploadAnalytics={uploadAnalytics}
         onAnalyzeAnalytics={analyzeAnalytics}
@@ -721,6 +797,13 @@ function Sheet({ title, onClose, children }: { title: string; onClose: () => voi
    selected run's documents, review state, and its live activity trail —
    the Claude-style "what is it doing right now" feed). */
 
+type ArtifactRow = {
+  id: number; kind: string; label: string; notes: string | null;
+  lane_id: number | null; lane_version: number | null;
+  run_id: number | null; schedule_id: number | null;
+  chars: number; preview: string; created_at: string; updated_at: string;
+};
+
 type FolderSel =
   | { kind: "all" }
   | { kind: "oneoff" }
@@ -728,9 +811,27 @@ type FolderSel =
   | { kind: "camp"; id: number }
   | { kind: "media" }
   | { kind: "collateral" }
+  | { kind: "artifacts" }
   | { kind: "perf" };
 
 const ASSET_FOLDER = (s: FolderSel) => s.kind === "media" || s.kind === "collateral";
+/* Artifacts are the WORDS (reports, post copy, research) — the third
+   repository alongside Assets (pictures) and Collateral (finished output).
+   Paul, 2026-07-24: "just like in Google Drive, we need repositories for
+   different types of data." Text, so it gets its own list + editor rather
+   than the image preview the asset folders use. */
+const ARTIFACT_FOLDER = (s: FolderSel) => s.kind === "artifacts";
+
+/** What kind of words this is — set on the artifact, shown in the Kind column. */
+const ARTIFACT_KINDS: { key: string; label: string }[] = [
+  { key: "report", label: "Report" },
+  { key: "research", label: "Research master" },
+  { key: "post_copy", label: "Post copy" },
+  { key: "caption", label: "Caption" },
+  { key: "spec", label: "Deck spec" },
+  { key: "document", label: "Document" },
+];
+const artifactKindLabel = (k: string) => ARTIFACT_KINDS.find((x) => x.key === k)?.label ?? k;
 
 function shortDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -857,12 +958,13 @@ function GroupHead({ label, onDropCampaign, action }: { label: string; onDropCam
   );
 }
 
-function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabel, angleLabel, dl, reviewId, createForm, angles, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onMoveAsset, onMakeCampaign, onArchiveRun, onDeleteRun, onRunCampaignNow, onPatchSchedule, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard, onImportPlan, onUploadAnalytics, onAnalyzeAnalytics, onDeleteAnalytics }: {
+function Library({ loaded, connErr, runs, schedules, assets, artifacts, analytics, typeLabel, angleLabel, dl, reviewId, createForm, angles, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onMoveAsset, onMakeCampaign, onArchiveRun, onDeleteRun, onRunCampaignNow, onPatchSchedule, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard, onImportPlan, onNewArtifact, onUploadArtifact, onSaveArtifact, onDeleteArtifact, onFileRunAsArtifact, onUploadAnalytics, onAnalyzeAnalytics, onDeleteAnalytics }: {
   loaded: boolean;
   connErr: boolean;
   runs: RunRow[];
   schedules: ScheduleRow[];
   assets: AssetRow[];
+  artifacts: ArtifactRow[];
   typeLabel: (k: string) => string;
   angleLabel: (k?: string | null) => string | null;
   dl: string | null;
@@ -887,6 +989,11 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
   onUploadPhoto: (f: File) => void;
   onNewCard: () => void;
   onImportPlan: () => void;
+  onNewArtifact: (kind: string) => Promise<number | null>;
+  onUploadArtifact: (f: File) => void;
+  onSaveArtifact: (id: number, patch: Record<string, unknown>) => Promise<void>;
+  onDeleteArtifact: (a: ArtifactRow) => void;
+  onFileRunAsArtifact: (r: RunRow) => void;
   analytics: AnalyticsRow[];
   onUploadAnalytics: (f: File) => void;
   onAnalyzeAnalytics: (a: AnalyticsRow) => void;
@@ -895,6 +1002,7 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
   const [sel, setSel] = useState<FolderSel>({ kind: "all" });
   const [selRunId, setSelRunId] = useState<number | null>(null);
   const [selAssetId, setSelAssetId] = useState<number | null>(null);
+  const [selArtifactId, setSelArtifactId] = useState<number | null>(null);
   const [selPerfId, setSelPerfId] = useState<number | null>(null);
   // The inspector shows the CREATE form, the selected item, or — when a
   // campaign folder is picked — the CAMPAIGN itself (rename, mandate,
@@ -903,6 +1011,7 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
   const [filter, setFilter] = useState("");
   const lastAutoRef = useRef<number | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const artFileRef = useRef<HTMLInputElement | null>(null);
   const perfFileRef = useRef<HTMLInputElement | null>(null);
 
   // Resizable panes (drag the dividers; double-click to fit). Widths persist.
@@ -921,7 +1030,7 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
 
   /** Fit the sidebar to the longest folder name (glyph + gaps + count + pads ≈ 86px). */
   const autoFitSide = useCallback(() => {
-    const labels = ["All research", "One-off runs", "Archived", "Media", "Collateral", "LinkedIn analytics", "+ New research", ...schedules.map((s) => s.name)];
+    const labels = ["All research", "One-off runs", "Archived", "Artifacts", "Assets", "Collateral", "LinkedIn analytics", "+ New research", ...schedules.map((s) => s.name)];
     const w = widestLabel(labels, `600 12.5px ${T.font}`);
     if (w > 0) setSideW(clampW(w + 86, 150, 380));
   }, [schedules]);
@@ -967,6 +1076,10 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
   const campAssetsAll = sel.kind === "camp" ? collateral.filter((a) => a.schedule_id === sel.id) : [];
   const campAssets = q ? campAssetsAll.filter((a) => a.label.toLowerCase().includes(q)) : campAssetsAll;
   const assetPool = assetMode ? assetItems : campAssets;
+  const artifactMode = ARTIFACT_FOLDER(sel);
+  const artifactItems = artifactMode
+    ? (q ? artifacts.filter((a) => `${a.label} ${a.kind} ${a.preview ?? ""}`.toLowerCase().includes(q)) : artifacts)
+    : [];
   const perfMode = sel.kind === "perf";
   const perfItems = perfMode ? (q ? analytics.filter((a) => a.label.toLowerCase().includes(q)) : analytics) : [];
 
@@ -991,6 +1104,12 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
       if (next !== selPerfId) setSelPerfId(next);
       return;
     }
+    if (artifactMode) {
+      if (selArtifactId != null && artifactItems.some((a) => a.id === selArtifactId)) return;
+      const next = artifactItems[0]?.id ?? null;
+      if (next !== selArtifactId) setSelArtifactId(next);
+      return;
+    }
     if (assetMode) {
       if (selAssetId != null && assetItems.some((a) => a.id === selAssetId)) return;
       const next = assetItems[0]?.id ?? null;
@@ -1002,10 +1121,11 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
     if (selRunId != null && items.some((r) => r.id === selRunId)) return;
     const next = items[0]?.id ?? null;
     if (next !== selRunId) setSelRunId(next);
-  }, [assetMode, perfMode, items, selRunId, assetItems, campAssets, selAssetId, perfItems, selPerfId]);
+  }, [assetMode, artifactMode, perfMode, items, selRunId, assetItems, artifactItems, selArtifactId, campAssets, selAssetId, perfItems, selPerfId]);
 
   const selRun = selRunId != null ? items.find((r) => r.id === selRunId) ?? null : null;
   const selAsset = assetPool.find((a) => a.id === selAssetId) ?? null;
+  const selArtifact = artifactItems.find((a) => a.id === selArtifactId) ?? null;
   const selCamp = sel.kind === "camp" ? schedules.find((s) => s.id === sel.id) ?? null : null;
   const selPerf = perfMode ? perfItems.find((a) => a.id === selPerfId) ?? null : null;
 
@@ -1128,8 +1248,12 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
             dim
           />
         ))}
-        <div style={{ ...F.sideHead, marginTop: 14 }}>Assets</div>
-        <SideRow label="Media" count={photos.length} on={sel.kind === "media"} onClick={() => setSel({ kind: "media" })} tint="#D9A441" />
+        {/* The three repositories, in the order the chain runs:
+            ARTIFACTS (the words) + ASSETS (the pictures) -> COLLATERAL (the
+            finished output posted or sent). Paul, 2026-07-24. */}
+        <div style={{ ...F.sideHead, marginTop: 14 }}>Repositories</div>
+        <SideRow label="Artifacts" count={artifacts.length} on={sel.kind === "artifacts"} onClick={() => setSel({ kind: "artifacts" })} tint="#4FA97E" />
+        <SideRow label="Assets" count={photos.length} on={sel.kind === "media"} onClick={() => setSel({ kind: "media" })} tint="#D9A441" />
         <SideRow label="Collateral" count={collateral.length} on={sel.kind === "collateral"} onClick={() => setSel({ kind: "collateral" })} tint="#8B7BD8" onDropPayload={dropUnfile} />
         <div style={{ ...F.sideHead, marginTop: 14 }}>Performance</div>
         <SideRow label="LinkedIn analytics" count={analytics.length} on={sel.kind === "perf"} onClick={() => setSel({ kind: "perf" })} tint="#4F9ED9" />
@@ -1173,6 +1297,25 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
           {sel.kind === "collateral" && (
             <button type="button" style={F.toolBtn} onClick={onNewCard}>New card</button>
           )}
+          {artifactMode && (
+            <>
+              <input
+                ref={artFileRef}
+                type="file"
+                accept=".md,.markdown,.txt,text/markdown,text/plain"
+                style={{ display: "none" }}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) onUploadArtifact(f); e.currentTarget.value = ""; }}
+              />
+              <button
+                type="button"
+                style={F.toolBtn}
+                onClick={async () => { const id = await onNewArtifact("document"); if (id) { setSelArtifactId(id); setInsp("item"); } }}
+              >
+                New artifact
+              </button>
+              <button type="button" style={{ ...F.toolBtn, color: T.ink3 }} onClick={() => artFileRef.current?.click()}>Upload .md</button>
+            </>
+          )}
           {perfMode && (
             <>
               <input
@@ -1188,8 +1331,8 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
         </div>
         <div style={F.cols}>
           <span style={{ flex: 1 }}>Name</span>
-          <span style={{ width: 104, flex: "none" }}>{perfMode ? "Period" : assetMode ? "Type" : "Format"}</span>
-          <span style={{ width: 66, flex: "none" }}>{assetMode ? "Size" : "Status"}</span>
+          <span style={{ width: 104, flex: "none" }}>{perfMode ? "Period" : artifactMode ? "Kind" : assetMode ? "Type" : "Format"}</span>
+          <span style={{ width: 66, flex: "none" }}>{assetMode || artifactMode ? "Size" : "Status"}</span>
           <span style={{ width: 48, flex: "none", textAlign: "right" }}>Date</span>
         </div>
         <div style={F.rows}>
@@ -1197,13 +1340,29 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
           {loaded && perfMode && perfItems.length === 0 && (
             <div style={F.emptyList}>{q ? "Nothing matches the filter." : "No analytics yet — export the .xlsx from LinkedIn (Analytics → Post impressions → Export) and import it here."}</div>
           )}
-          {loaded && !perfMode && assetMode && assetItems.length === 0 && (
-            <div style={F.emptyList}>{q ? "Nothing matches the filter." : sel.kind === "media" ? "No photos yet — upload below in Media." : "No collateral yet — every card you render lands here."}</div>
+          {loaded && artifactMode && artifactItems.length === 0 && (
+            <div style={F.emptyList}>{q ? "Nothing matches the filter." : "No artifacts yet — the words a piece of collateral is built from. Write one with “New artifact”, upload a .md, or file a finished run from its inspector."}</div>
           )}
-          {loaded && !assetMode && !perfMode && items.length === 0 && campAssets.length === 0 && (
+          {loaded && !perfMode && assetMode && assetItems.length === 0 && (
+            <div style={F.emptyList}>{q ? "Nothing matches the filter." : sel.kind === "media" ? "No photos yet — upload one with “Upload photo”." : "No collateral yet — every card you render lands here."}</div>
+          )}
+          {loaded && !assetMode && !artifactMode && !perfMode && items.length === 0 && campAssets.length === 0 && (
             <div style={F.emptyList}>{q ? "Nothing matches the filter." : sel.kind === "archived" ? "Nothing archived." : "No runs in this folder yet."}</div>
           )}
-          {perfMode
+          {artifactMode
+            ? artifactItems.map((a) => {
+                const on = a.id === selArtifactId;
+                return (
+                  <button key={`ar-${a.id}`} type="button" onClick={() => { setSelArtifactId(a.id); setInsp("item"); }} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
+                    <span style={F.rowIcon}><DocGlyph c={on ? T.blue : "#4FA97E"} /></span>
+                    <span style={F.rowName}>{a.label}</span>
+                    <span style={F.rowCol}>{artifactKindLabel(a.kind)}</span>
+                    <span style={{ ...F.rowCol, width: 66 }}>{a.chars ? `${Math.max(1, Math.round(a.chars / 1000))}k ch` : "empty"}</span>
+                    <span style={{ ...F.rowCol, width: 48, textAlign: "right" }}>{shortDate(a.updated_at)}</span>
+                  </button>
+                );
+              })
+            : perfMode
             ? perfItems.map((a) => {
                 const on = a.id === selPerfId;
                 const running = a.analysis_status === "running";
@@ -1288,6 +1447,18 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
             onArchive={(v) => onPatchSchedule(selCamp, { archived: v }, v ? "Campaign archived — it's under Archived campaigns." : "Campaign restored.")}
             onDelete={() => onDeleteSchedule(selCamp)}
           />
+        ) : artifactMode ? (
+          selArtifact ? (
+            <ArtifactPreview
+              key={selArtifact.id}
+              row={selArtifact}
+              campName={schedules.find((sc) => sc.id === selArtifact.schedule_id)?.name ?? null}
+              onSave={(patch) => onSaveArtifact(selArtifact.id, patch)}
+              onDelete={() => onDeleteArtifact(selArtifact)}
+            />
+          ) : (
+            <div style={F.createWrap}>{createForm}</div>
+          )
         ) : assetMode ? (
           selAsset ? (
             <AssetPreview asset={selAsset} campName={schedules.find((sc) => sc.id === selAsset.schedule_id)?.name ?? null} onDownload={() => onDownloadAsset(selAsset)} onDelete={() => onDeleteAsset(selAsset)} />
@@ -1314,6 +1485,7 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
             onRerun={() => onRerunRun(selRun)}
             onMove={(sid) => onMoveRun(selRun, sid)}
             onMakeCampaign={() => onMakeCampaign(selRun)}
+            onFileArtifact={() => onFileRunAsArtifact(selRun)}
             onArchive={(v) => onArchiveRun(selRun, v)}
             onDelete={() => onDeleteRun(selRun)}
           />
@@ -1340,7 +1512,7 @@ function DocRow({ label, sub, onClick, busy, muted }: { label: string; sub?: str
   );
 }
 
-function RunPreview({ run, schedules, typeLabel, angleLabel, dl, reviewOpen, onReview, onGrab, onCopyPost, onRerun, onMove, onMakeCampaign, onArchive, onDelete }: {
+function RunPreview({ run, schedules, typeLabel, angleLabel, dl, reviewOpen, onReview, onGrab, onCopyPost, onRerun, onMove, onMakeCampaign, onFileArtifact, onArchive, onDelete }: {
   run: RunRow;
   schedules: ScheduleRow[];
   typeLabel: (k: string) => string;
@@ -1353,6 +1525,7 @@ function RunPreview({ run, schedules, typeLabel, angleLabel, dl, reviewOpen, onR
   onRerun: () => void;
   onMove: (scheduleId: number | null) => void;
   onMakeCampaign: () => void;
+  onFileArtifact: () => void;
   onArchive: (archived: boolean) => void;
   onDelete: () => void;
 }) {
@@ -1401,6 +1574,11 @@ function RunPreview({ run, schedules, typeLabel, angleLabel, dl, reviewOpen, onR
         {!running && run.schedule_id == null && (
           <button type="button" style={F.smallBtn} onClick={onMakeCampaign} title="Turn this run into a recurring campaign — it becomes the campaign's first run">
             Make a campaign
+          </button>
+        )}
+        {done && (
+          <button type="button" style={F.smallBtn} onClick={onFileArtifact} title="Copy this report into the Artifacts repository, where you can edit and reuse the words">
+            File in Artifacts
           </button>
         )}
         {!running && (
@@ -1492,6 +1670,118 @@ function CampaignPreview({ s, count, angles, onSave, onRunNow, onToggle, onArchi
 }
 
 /** Asset preview — media photos and rendered collateral share it. */
+/* ─── Artifacts inspector — the words, editable ──────────────────────────
+   The list only carries a preview, so the full body loads on selection. The
+   editor is deliberately plain markdown: these documents are the source the
+   composers read, and what gets saved must be exactly what was typed. */
+
+function ArtifactPreview({ row, campName, onSave, onDelete }: {
+  row: ArtifactRow;
+  campName?: string | null;
+  onSave: (patch: Record<string, unknown>) => Promise<void>;
+  onDelete: () => void;
+}) {
+  const [label, setLabel] = useState(row.label);
+  const [kind, setKind] = useState(row.kind);
+  const [body, setBody] = useState<string | null>(null);
+  const [loadErr, setLoadErr] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const orig = useRef<string | null>(null); // what came back from the server
+
+  useEffect(() => {
+    let alive = true;
+    setBody(null);
+    setLoadErr(false);
+    orig.current = null;
+    api<{ body_md: string }>(`/studio/artifacts/${row.id}`)
+      .then((a) => { if (alive) { orig.current = a.body_md ?? ""; setBody(a.body_md ?? ""); } })
+      .catch(() => { if (alive) setLoadErr(true); });
+    return () => { alive = false; };
+  }, [row.id]);
+
+  const dirty = body != null && (label !== row.label || kind !== row.kind || body !== orig.current);
+
+  const save = async () => {
+    if (body == null || saving) return;
+    setSaving(true);
+    try {
+      await onSave({ label: label.trim() || row.label, kind, bodyMd: body });
+      orig.current = body;
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const grabMd = () => {
+    if (body == null) return;
+    const url = URL.createObjectURL(new Blob([body], { type: "text/markdown" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${slugify(label || row.label)}.md`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
+  return (
+    <div style={F.prevInner}>
+      <input value={label} onChange={(e) => setLabel(e.target.value)} style={F.artTitleInput} />
+      <div style={F.prevMeta}>
+        {artifactKindLabel(row.kind)} · {row.chars ? `${row.chars.toLocaleString()} characters` : "empty"} · edited {shortDate(row.updated_at)}
+        {campName ? ` · ${campName}` : ""}
+        {row.lane_id != null ? ` · research lane v${row.lane_version ?? "?"}` : row.run_id != null ? " · from a research run" : ""}
+      </div>
+
+      <div style={F.prevLabel}>Kind</div>
+      <select value={kind} onChange={(e) => setKind(e.target.value)} style={F.moveSel}>
+        {ARTIFACT_KINDS.map((k) => (
+          <option key={k.key} value={k.key}>{k.label}</option>
+        ))}
+      </select>
+
+      <div style={F.prevLabel}>Text</div>
+      {loadErr ? (
+        <div style={F.actEmpty}>Couldn’t load this artifact — reselect it to try again.</div>
+      ) : body == null ? (
+        <div style={F.actEmpty}>Loading…</div>
+      ) : (
+        <textarea
+          value={body}
+          onChange={(e) => { setBody(e.target.value); setSaved(false); }}
+          spellCheck={false}
+          style={F.artBody}
+          placeholder="Markdown — the words a report, carousel, or post is built from."
+        />
+      )}
+
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 10, alignItems: "center" }}>
+        <button
+          type="button"
+          style={{ ...F.reviewBtn, marginTop: 0, opacity: body == null || saving ? 0.5 : 1 }}
+          disabled={body == null || saving}
+          onClick={save}
+        >
+          {saving ? "Saving…" : "Save"}
+        </button>
+        <button type="button" style={F.smallBtn} disabled={body == null} onClick={grabMd}>Download .md</button>
+        <button
+          type="button"
+          style={F.smallBtn}
+          disabled={body == null}
+          onClick={() => { if (body != null) void navigator.clipboard.writeText(body); }}
+        >
+          Copy
+        </button>
+        <button type="button" style={{ ...F.smallBtn, color: T.muted }} onClick={onDelete}>Delete</button>
+        {saved && <span style={{ fontSize: 12, color: "#0F4E3C", fontWeight: 600 }}>Saved</span>}
+        {!saved && dirty && body != null && <span style={{ fontSize: 12, color: T.muted }}>Unsaved edits</span>}
+      </div>
+    </div>
+  );
+}
+
 function AssetPreview({ asset, campName, onDownload, onDelete }: { asset: AssetRow; campName?: string | null; onDownload: () => void; onDelete: () => void }) {
   const [src, setSrc] = useState<string | null>(null);
   const isImage = asset.mime.startsWith("image/");
@@ -2376,6 +2666,8 @@ const F: Record<string, React.CSSProperties> = {
   prevTitle: { fontSize: 13.5, fontWeight: 700, color: T.ink, lineHeight: 1.35 },
   prevMeta: { fontSize: 11.5, color: T.muted, marginTop: 4, lineHeight: 1.5 },
   prevLabel: { fontSize: 11, fontWeight: 700, color: T.muted2, letterSpacing: "0.05em", textTransform: "uppercase", marginTop: 16, marginBottom: 6 },
+  artTitleInput: { width: "100%", boxSizing: "border-box", fontSize: 13.5, fontWeight: 700, color: T.ink, lineHeight: 1.35, fontFamily: T.font, background: T.white, border: `1px solid transparent`, borderRadius: 7, padding: "4px 6px", margin: "-4px -6px 0", outline: "none" },
+  artBody: { width: "100%", boxSizing: "border-box", minHeight: 300, resize: "vertical", background: T.white, border: `1px solid ${T.inputBd}`, borderRadius: 10, padding: "10px 11px", fontSize: 12.5, lineHeight: 1.6, color: T.ink, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", outline: "none" },
   docRow: { display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", background: T.white, border: `1px solid ${T.border}`, borderRadius: 9, padding: "8px 10px", cursor: "pointer", fontFamily: T.font, marginTop: 5 },
   docLabel: { flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: 600 },
   docGet: { flex: "none", fontSize: 11.5, fontWeight: 700, color: T.blue },
