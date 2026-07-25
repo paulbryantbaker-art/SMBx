@@ -23,6 +23,7 @@ import { newRenderPage } from './premiumPdfRenderer.js';
 import { listStudioAssets, getStudioAsset } from './studioAssets.js';
 import { fontFaceCss } from './fontEmbeds.js';
 import { LEDGER } from '../../house/tokens.js';
+import { deckPages, deckCss } from '../../house/deck.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -500,6 +501,52 @@ export function researchPostText(run: ResearchRunRow): string {
 
 interface DocPage { kind: string; heading?: string; body?: string; stat?: string; source?: string; artAssetId?: number }
 
+/**
+ * Map a research run onto the CANONICAL house deck spec (`house/deck.ts`).
+ *
+ * Paul, 2026-07-24: "I want collateral to be produced the same as being done
+ * in Claude Code now." The local builders are the reference implementation, so
+ * the app translates its run model into their spec rather than carrying a
+ * parallel set of templates.
+ *
+ * Kind mapping — app model → house grammar:
+ *   cover     → the dark cover (hook + sub + picked artwork)
+ *   stat      → `numeral` (the giant cited figure with its brass bar)
+ *   story     → `statement` (tag + head + body)
+ *   takeaway  → the dark closer  (BOOKEND LAW: exactly two dark pages)
+ *
+ * `docPages()` has already applied the bookend ordering and per-page artwork,
+ * so this is a pure shape translation with no policy of its own.
+ */
+export function runToDeckSpec(run: ResearchRunRow, opts: { coverImagePos?: string } = {}): any {
+  const pages = docPages(run);
+  const cover = pages.find(p => p.kind === 'cover');
+  const takeaways = pages.filter(p => p.kind === 'takeaway');
+  const middles = pages.filter(p => p.kind !== 'cover' && p.kind !== 'takeaway');
+  const closer = takeaways[takeaways.length - 1];
+  const kicker = (run.report_title || run.topic || 'smbX.ai').toString().toUpperCase().slice(0, 42);
+
+  return {
+    slug: `run-${run.id}`,
+    kicker,
+    cover: {
+      hook: cover?.heading || run.report_title || run.topic || '',
+      sub: cover?.body || '',
+      imagePos: opts.coverImagePos || '50% 45%',
+    },
+    pages: middles.map((p, i) => (
+      p.kind === 'stat'
+        ? { kind: 'numeral', numeral: p.stat || '', unit: '', head: p.heading || '', body: p.body || '', source: p.source || '', _i: i }
+        : { kind: 'statement', tag: 'THE READ', tagColor: 'green', head: p.heading || '', body: p.body || '', source: p.source || '', _i: i }
+    )),
+    closer: {
+      tag: 'FOR THE ACQUIRER',
+      head: closer?.heading || 'What this means for an acquirer',
+      body: closer?.body || '',
+    },
+  };
+}
+
 /** Normalize the synthesized deck; older runs fall back to hook + data points.
  *  Exported for the review sheet's page tiles (final rendered order). */
 export function docPages(run: ResearchRunRow): DocPage[] {
@@ -590,7 +637,56 @@ export async function runArtwork(run: Pick<ResearchRunRow, 'id' | 'studio_feed'>
 }
 
 
+/**
+ * The carousel, rendered through the CANONICAL house grammar (`house/deck.ts`)
+ * — the same templates a Cowork `build-deck.mts` run uses.
+ *
+ * Paul, 2026-07-24: "I want collateral to be produced the same as being done
+ * in Claude Code now." This is that path. Set RESEARCH_DECK_HOUSE=false to
+ * fall back to the app's legacy templates.
+ *
+ * Fail-soft by construction, matching the deckDesigner pattern: any throw here
+ * returns null and the caller renders the legacy template instead. A brand
+ * consolidation must never be able to take down a download.
+ */
+export function houseDeckHtml(
+  run: ResearchRunRow,
+  photo: AuthorPhoto | null = null,
+  art: AuthorPhoto | null = null,
+  brand: AuthorPhoto | null = null,
+  pageImgs: Record<number, AuthorPhoto> = {},
+): string | null {
+  if (process.env.RESEARCH_DECK_HOUSE === 'false') return null;
+  try {
+    const spec = runToDeckSpec(run);
+    // Per-page artwork: docPages() indexes by FINAL page position; the house
+    // grammar asks per middle page, so offset by the cover.
+    const imageFor = (ref?: string): string | null => {
+      const i = Number(ref);
+      if (!Number.isInteger(i)) return null;
+      return pageImgs[i + 1]?.dataUri || null;
+    };
+    spec.pages = spec.pages.map((p: any) => ({ ...p, image: String(p._i) }));
+    const assets = {
+      logo: LOGO_URI || '',
+      logoWhite: DARK_LOGO_URI || LOGO_URI || '',
+      texture: DARK_TEXTURE_URI || '',
+      headshot: photo?.dataUri || '',
+      coverImage: art?.dataUri || brand?.dataUri || null,
+      image: imageFor,
+    };
+    if (!assets.logo || !assets.texture) return null; // brand assets missing → legacy
+    return `<!DOCTYPE html><html><head><meta charset="utf-8">${FONTS}
+<style>${deckCss(assets.texture)}</style></head><body>${deckPages(spec, assets).join('')}</body></html>`;
+  } catch (e) {
+    console.warn('[composer] house deck grammar failed, using legacy template:', (e as Error).message);
+    return null;
+  }
+}
+
 export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null = null, art: AuthorPhoto | null = null, brand: AuthorPhoto | null = null, pageImgs: Record<number, AuthorPhoto> = {}): string {
+  const house = houseDeckHtml(run, photo, art, brand, pageImgs);
+  if (house) return house;
   const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
   const typeLabel = TYPE_LABELS[run.research_type] ?? 'Research';
   const pages = docPages(run);
