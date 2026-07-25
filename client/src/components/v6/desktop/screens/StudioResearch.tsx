@@ -23,6 +23,7 @@ import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import { authHeaders, type User } from "../../../../hooks/useAuth";
 import { T } from "../atlasTokens";
 import { StudioAnnouncement, StudioPostCards } from "./StudioAnnouncement";
+import CollateralBuilder from "./CollateralBuilder";
 
 /* ─── API types ────────────────────────────────────────────── */
 
@@ -179,6 +180,8 @@ export default function StudioResearch({ user }: { user: User | null }) {
   const [dl, setDl] = useState<string | null>(null); // "runId:kind" while downloading
   const [reviewId, setReviewId] = useState<number | null>(null); // review sheet
   const [sheet, setSheet] = useState<null | "collateral" | "import">(null); // slide-over sheets
+  // The collateral builder takes over the whole frame — one screen, per Paul.
+  const [building, setBuilding] = useState<{ id: number; label: string } | null>(null);
 
   // Notes surface as a frame-level toast (the create form isn't always on
   // screen); they auto-dismiss.
@@ -726,6 +729,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
         onUploadPhoto={uploadPhoto}
         onNewCard={() => setSheet("collateral")}
         onImportPlan={() => setSheet("import")}
+        onBuildCollateral={(a) => setBuilding({ id: a.id, label: a.label })}
         onNewArtifact={newArtifact}
         onUploadArtifact={uploadArtifact}
         onSaveArtifact={saveArtifact}
@@ -736,6 +740,15 @@ export default function StudioResearch({ user }: { user: User | null }) {
         onAnalyzeAnalytics={analyzeAnalytics}
         onDeleteAnalytics={deleteAnalytics}
       />
+
+      {building && (
+        <CollateralBuilder
+          artifactId={building.id}
+          artifactLabel={building.label}
+          onClose={() => { setBuilding(null); void refresh(); }}
+          onExported={(text) => { setNote({ kind: "ok", text }); void refresh(); }}
+        />
+      )}
 
       {sheet === "collateral" && (
         <Sheet title="Media & collateral studio" onClose={() => { setSheet(null); void refresh(); }}>
@@ -958,7 +971,7 @@ function GroupHead({ label, onDropCampaign, action }: { label: string; onDropCam
   );
 }
 
-function Library({ loaded, connErr, runs, schedules, assets, artifacts, analytics, typeLabel, angleLabel, dl, reviewId, createForm, angles, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onMoveAsset, onMakeCampaign, onArchiveRun, onDeleteRun, onRunCampaignNow, onPatchSchedule, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard, onImportPlan, onNewArtifact, onUploadArtifact, onSaveArtifact, onDeleteArtifact, onFileRunAsArtifact, onUploadAnalytics, onAnalyzeAnalytics, onDeleteAnalytics }: {
+function Library({ loaded, connErr, runs, schedules, assets, artifacts, analytics, typeLabel, angleLabel, dl, reviewId, createForm, angles, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onMoveAsset, onMakeCampaign, onArchiveRun, onDeleteRun, onRunCampaignNow, onPatchSchedule, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard, onImportPlan, onBuildCollateral, onNewArtifact, onUploadArtifact, onSaveArtifact, onDeleteArtifact, onFileRunAsArtifact, onUploadAnalytics, onAnalyzeAnalytics, onDeleteAnalytics }: {
   loaded: boolean;
   connErr: boolean;
   runs: RunRow[];
@@ -989,6 +1002,7 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, analytic
   onUploadPhoto: (f: File) => void;
   onNewCard: () => void;
   onImportPlan: () => void;
+  onBuildCollateral: (a: ArtifactRow) => void;
   onNewArtifact: (kind: string) => Promise<number | null>;
   onUploadArtifact: (f: File) => void;
   onSaveArtifact: (id: number, patch: Record<string, unknown>) => Promise<void>;
@@ -1455,6 +1469,7 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, analytic
               campName={schedules.find((sc) => sc.id === selArtifact.schedule_id)?.name ?? null}
               onSave={(patch) => onSaveArtifact(selArtifact.id, patch)}
               onDelete={() => onDeleteArtifact(selArtifact)}
+              onBuild={() => onBuildCollateral(selArtifact)}
             />
           ) : (
             <div style={F.createWrap}>{createForm}</div>
@@ -1675,11 +1690,12 @@ function CampaignPreview({ s, count, angles, onSave, onRunNow, onToggle, onArchi
    editor is deliberately plain markdown: these documents are the source the
    composers read, and what gets saved must be exactly what was typed. */
 
-function ArtifactPreview({ row, campName, onSave, onDelete }: {
+function ArtifactPreview({ row, campName, onSave, onDelete, onBuild }: {
   row: ArtifactRow;
   campName?: string | null;
   onSave: (patch: Record<string, unknown>) => Promise<void>;
   onDelete: () => void;
+  onBuild: () => void;
 }) {
   const [label, setLabel] = useState(row.label);
   const [kind, setKind] = useState(row.kind);
@@ -1733,6 +1749,16 @@ function ArtifactPreview({ row, campName, onSave, onDelete }: {
         {campName ? ` · ${campName}` : ""}
         {row.lane_id != null ? ` · research lane v${row.lane_version ?? "?"}` : row.run_id != null ? " · from a research run" : ""}
       </div>
+
+      {/* The point of a master document: turn it into something to send. */}
+      <button
+        type="button"
+        style={{ ...F.reviewBtn, alignSelf: "stretch", marginTop: 14 }}
+        onClick={onBuild}
+        title="Pick an output type, place your images on the rendered pages, export"
+      >
+        Build collateral →
+      </button>
 
       <div style={F.prevLabel}>Kind</div>
       <select value={kind} onChange={(e) => setKind(e.target.value)} style={F.moveSel}>

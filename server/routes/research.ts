@@ -692,6 +692,107 @@ researchRouter.get('/research/runs/:id/pages', async (req, res) => {
   }
 });
 
+/* ─── The collateral builder (Paul, 2026-07-25) ───────────────────────────
+ * "From the master document I need to be able to select which output type I
+ * want — a one pager, a PDF carousel, or a full depth PDF report. And then
+ * once the pages are rendered in preview I need to be able to drag drop
+ * whichever images or assets on which pages, all on one screen."
+ *
+ * A composition is a run row with origin='composed', so every existing render,
+ * preview, per-page artwork and export endpoint applies to it unchanged.  */
+
+researchRouter.post('/studio/compose', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const artifactId = parseId(String(req.body?.artifactId ?? ''));
+  const outputType = String(req.body?.outputType || 'carousel');
+  if (!artifactId) return res.status(400).json({ error: 'Pick the master document' });
+  if (!['onepager', 'carousel', 'report'].includes(outputType)) {
+    return res.status(400).json({ error: 'Unknown output type' });
+  }
+  try {
+    const { composeFromArtifact } = await import('../services/collateralComposer.js');
+    const out = await composeFromArtifact({
+      userId, artifactId,
+      outputType: outputType as any,
+      postAngle: typeof req.body?.postAngle === 'string' ? req.body.postAngle : null,
+      scheduleId: req.body?.scheduleId ? Number(req.body.scheduleId) : null,
+    });
+    return res.json(out);
+  } catch (err: any) {
+    console.error('[collateral] compose failed:', err?.message);
+    return res.status(400).json({ error: err?.message || 'Couldn’t build the collateral' });
+  }
+});
+
+/**
+ * The board: every page of this composition, rendered, as an image.
+ *
+ * The existing /pages endpoint returns headings — enough to label a tile, not
+ * enough to see what you are dropping a photo onto. This returns the pages as
+ * they will actually print, paired with the same drop-target metadata, so one
+ * screen can show the deck and accept the images.
+ */
+researchRouter.get('/research/runs/:id/board', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const id = parseId(req.params.id);
+  if (!id) return res.status(400).json({ error: 'Bad run id' });
+  try {
+    const run = await loadCompleteRun(id, userId);
+    if (!run) return res.status(404).json({ error: 'Run not found' });
+    const fmt = (run as any).output_format;
+    const rc = await import('../services/researchComposer.js');
+
+    if (fmt === 'report') {
+      // Report images attach to SECTIONS — a printed page is Chromium's
+      // pagination, not a thing an image can hang off. feed.reportArt is
+      // keyed by the same section ordinal these tiles carry.
+      const art = ((run as any).studio_feed?.reportArt ?? {}) as Record<string, number>;
+      const sections = await rc.renderReportSectionThumbs(run as any);
+      return res.json({
+        kind: 'report',
+        slot: 'reportArt',
+        pages: sections.map((s, i) => ({
+          i, kind: 'section', heading: s.heading,
+          artAssetId: Number(art[String(i)]) || null,
+          droppable: true, src: s.src,
+        })),
+      });
+    }
+    if (!(run as any).studio_feed) return res.status(400).json({ error: 'This run has no composed pages.' });
+    if (fmt === 'card') {
+      const thumbs = await rc.renderCardThumb(run as any);
+      const feed = (run as any).studio_feed ?? {};
+      return res.json({
+        kind: 'onepager', slot: 'artAssetId',
+        pages: thumbs.map((src, i) => ({ i, kind: 'cover', heading: 'Single-image post', artAssetId: feed.artAssetId ?? null, droppable: true, src })),
+      });
+    }
+    const meta = docPages(run as any);
+    const thumbs = await rc.renderDeckPageThumbs(run as any);
+    // The designed deck can legitimately differ in page count from the feed's
+    // own page list; pair by index and let the shorter one govern labels.
+    const pages = thumbs.map((src, i) => {
+      const p: any = meta[i] ?? {};
+      return {
+        i,
+        kind: String(p.kind ?? (i === 0 ? 'cover' : i === thumbs.length - 1 ? 'closer' : 'page')),
+        heading: String(p.heading ?? `Page ${i + 1}`).slice(0, 90),
+        artAssetId: p.artAssetId ?? (i === 0 ? ((run as any).studio_feed?.artAssetId ?? null) : null),
+        // The dark takeaway/closer pages carry the headshot byline by law —
+        // they are not photo pages, and the board must not offer them as one.
+        droppable: p.kind !== 'takeaway' && i !== thumbs.length - 1,
+        src,
+      };
+    });
+    return res.json({ kind: 'carousel', slot: 'pageArt', pages });
+  } catch (err: any) {
+    console.error('[collateral] board failed:', err?.message);
+    return res.status(500).json({ error: 'Couldn’t render the pages' });
+  }
+});
+
 /** The run's copy-ready Gemini prompt (2026-07-20, Paul generates images in
  *  the Gemini app himself: "AFTER the research runs, it can generate the
  *  right image prompt for Gemini, i'll import and assign"). Composed from

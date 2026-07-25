@@ -260,6 +260,33 @@ export function auditCitations(
 }
 
 
+/**
+ * Which figures in `text` do not appear anywhere in `source`.
+ *
+ * The narrower half of the audit, for the one-way case: collateral derived
+ * from a master document (Paul, 2026-07-25). The full audit asks a master to
+ * account for its sources — a Sources register, surviving URLs, a Derivations
+ * section. A carousel page is none of those things; the only rule that
+ * survives the trip is the one that matters most: a number on the card must
+ * be a number in the document.
+ *
+ * Same FIG_RE, same range expansion, same normalisation as the master audit,
+ * deliberately — one notion of "a figure" in the codebase, and it is the one
+ * with a test suite behind it.
+ */
+export function figuresNotIn(text: string, source: string): string[] {
+  const have = new Set([...expandRanges(source).matchAll(FIG_RE)].map(m => normFig(m[0])));
+  const missing: string[] = [];
+  const seen = new Set<string>();
+  for (const m of expandRanges(text).matchAll(FIG_RE)) {
+    const key = normFig(m[0]);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    if (!have.has(key)) missing.push(m[0]);
+  }
+  return missing;
+}
+
 /** Turn audit violations into a specific correction instruction for the retry. */
 function auditCorrections(a: CitationAudit): string {
   const lines = ['Your draft failed the mechanical audit that runs on every master. Fix ONLY the issues listed, change nothing else, and return the COMPLETE corrected document.', ''];

@@ -19,7 +19,7 @@
  *   • an unacknowledged source passed because its topic words appeared in the
  *     body title rather than in the Sources register.
  */
-import { auditCitations } from '../researchLanes.js';
+import { auditCitations, figuresNotIn } from '../researchLanes.js';
 
 let pass = 0, total = 0;
 const T = (name: string, md: string, src: string[], lbl: string[], expectOk: boolean) => {
@@ -78,6 +78,31 @@ for (const [srcForm, mstForm] of [
     `# L\nValue is **${mstForm}**.\n\n## Sources\n- Doc A — the figure.\n`,
     [`Doc A reports ${srcForm} for the thing.`], ['Doc A'], true);
 }
+
+/* ── collateral from a master: a number on the card is a number in the doc ──
+   The one-way half of the audit, used when a carousel/1-pager/report is built
+   from a master document (Paul, 2026-07-25). The master's own registers don't
+   travel onto a LinkedIn page, but the figures must. */
+const F = (name: string, text: string, source: string, expect: string[]) => {
+  total++;
+  const got = figuresNotIn(text, source);
+  const ok = JSON.stringify(got.map(s => s.toLowerCase())) === JSON.stringify(expect.map(s => s.toLowerCase()));
+  pass += ok ? 1 : 0;
+  console.log(`${ok ? '  ok  ' : ' FAIL '}${got.length ? 'FLAG' : 'PASS'}  ${name}`);
+  if (!ok) console.log(`        expected [${expect.join(', ')}], got [${got.join(', ')}]`);
+};
+
+const MASTER = `Construction reached $50.7 billion SAAR, up 28% year over year.
+Backlog stands at $11.94 billion. Median multiple 9.7x. Pool is $600 million to $700 million.`;
+
+F('every card figure is in the master', 'Construction hit $50.7B. Backlog $11.94 billion.', MASTER, []);
+F('a figure invented for the card is flagged', 'The market is $63.2B and growing.', MASTER, ['$63.2B']);
+F('B-suffix on the card, spelled out in the master', 'Backlog $11.94B.', MASTER, []);
+F('percentage carried through', 'Up 28% year over year.', MASTER, []);
+F('multiple carried through', 'Clearing at 9.7x.', MASTER, []);
+F('range endpoints both present in the master', 'Between $600 and $700 million.', MASTER, []);
+F('a rounded-up figure is NOT the same figure', 'Construction hit $51B.', MASTER, ['$51B']);
+F('no figures at all is clean', 'The service book is the asset.', MASTER, []);
 
 console.log(`\n${pass}/${total} correct`);
 process.exit(pass === total ? 0 : 1);
