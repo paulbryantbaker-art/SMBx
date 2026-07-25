@@ -24,6 +24,7 @@ import {
 } from '../services/researchAgent.js';
 import { renderResearchPdf, renderResearchCardPng, renderLinkedInDocPdf, renderCoverPng, researchPostText, renderAnnouncementCardPng, docPages, type ResearchRunRow, type AnnouncementSpec, renderPostCardPng, type PostCardSpec } from '../services/researchComposer.js';
 import { listStudioAssets, getStudioAsset, createStudioAsset, updateStudioAsset, deleteStudioAsset } from '../services/studioAssets.js';
+import { createLane, listLanes, getLane, addSource, listSources, deleteSource, synthesizeLane, listVersions, getVersion } from '../services/researchLanes.js';
 import { importLinkedInWorkbook, analyzeLinkedInImport } from '../services/linkedinAnalytics.js';
 import multer from 'multer';
 
@@ -205,6 +206,110 @@ researchRouter.post('/research/import-plan', planUpload.single('file'), async (r
     const apiMsg = err?.error?.error?.message;
     return res.status(500).json({ error: apiMsg ? String(apiMsg) : (err?.message || 'Import failed') });
   }
+});
+
+/* ─── Research lanes: the living master document ──────────────────────────
+ * Paul, 2026-07-24: he runs deep research OUTSIDE the app (Claude web, Gemini,
+ * others — deliberately, for a variety of reads), uploads them all here, and
+ * the app folds them into ONE master it keeps updated, "maybe once a quarter."
+ * Sources are kept raw forever; every master is versioned, so a refresh never
+ * destroys the read it replaces. See server/services/researchLanes.ts.        */
+
+researchRouter.get('/research/lanes', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  try {
+    return res.json({ lanes: await listLanes(userId, req.query.archived === '1') });
+  } catch (err: any) {
+    console.error('[lanes] list failed:', err?.message);
+    return res.status(500).json({ error: 'Failed to load lanes' });
+  }
+});
+
+researchRouter.post('/research/lanes', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const label = String(req.body?.label || '').trim();
+  if (!label) return res.status(400).json({ error: 'Name the lane (e.g. "Commercial mechanical")' });
+  try {
+    return res.json(await createLane(userId, label, String(req.body?.notes || '').trim() || undefined));
+  } catch (err: any) {
+    console.error('[lanes] create failed:', err?.message);
+    return res.status(500).json({ error: 'Failed to create lane' });
+  }
+});
+
+researchRouter.get('/research/lanes/:id', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  try {
+    const lane = await getLane(userId, Number(req.params.id));
+    if (!lane) return res.status(404).json({ error: 'Lane not found' });
+    return res.json({ lane, sources: await listSources(lane.id), versions: await listVersions(lane.id) });
+  } catch (err: any) {
+    console.error('[lanes] get failed:', err?.message);
+    return res.status(500).json({ error: 'Failed to load lane' });
+  }
+});
+
+/** Upload one research document. PDF as a file, or markdown/text pasted. */
+researchRouter.post('/research/lanes/:id/sources', planUpload.single('file'), async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const lane = await getLane(userId, Number(req.params.id));
+  if (!lane) return res.status(404).json({ error: 'Lane not found' });
+  const file = (req as any).file as { buffer: Buffer; mimetype: string; originalname: string } | undefined;
+  const text = typeof req.body?.text === 'string' ? req.body.text : '';
+  if (!file && !text.trim()) return res.status(400).json({ error: 'Attach a research document (PDF) or paste its text' });
+  try {
+    const isPdf = !!file && (file.mimetype === 'application/pdf' || /\.pdf$/i.test(file.originalname));
+    const label = String(req.body?.label || '').trim()
+      || (file ? file.originalname.replace(/\.[a-z0-9]+$/i, '') : `Pasted research ${new Date().toISOString().slice(0, 10)}`);
+    const id = await addSource({
+      laneId: lane.id, label,
+      tool: String(req.body?.tool || '').trim() || undefined,
+      gatheredOn: String(req.body?.gatheredOn || '').trim() || undefined,
+      mime: isPdf ? 'application/pdf' : 'text/markdown',
+      data: isPdf ? file!.buffer : undefined,
+      text: isPdf ? undefined : (file ? file.buffer.toString('utf8') : text),
+    });
+    return res.json({ id });
+  } catch (err: any) {
+    console.error('[lanes] add source failed:', err?.message);
+    return res.status(500).json({ error: 'Upload failed' });
+  }
+});
+
+researchRouter.delete('/research/lanes/:id/sources/:sourceId', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const lane = await getLane(userId, Number(req.params.id));
+  if (!lane) return res.status(404).json({ error: 'Lane not found' });
+  const ok = await deleteSource(lane.id, Number(req.params.sourceId));
+  return ok ? res.json({ ok: true }) : res.status(404).json({ error: 'Source not found' });
+});
+
+/** Fold new research into the master. `full=1` re-synthesizes from every
+ *  source rather than only the ones not yet incorporated. */
+researchRouter.post('/research/lanes/:id/synthesize', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  try {
+    const out = await synthesizeLane(userId, Number(req.params.id), { full: req.body?.full === true || req.query.full === '1' });
+    return res.json(out);
+  } catch (err: any) {
+    console.error('[lanes] synthesis failed:', err?.message);
+    return res.status(500).json({ error: err?.message || 'Synthesis failed' });
+  }
+});
+
+researchRouter.get('/research/lanes/:id/versions/:version', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const lane = await getLane(userId, Number(req.params.id));
+  if (!lane) return res.status(404).json({ error: 'Lane not found' });
+  const v = await getVersion(lane.id, Number(req.params.version));
+  return v ? res.json(v) : res.status(404).json({ error: 'Version not found' });
 });
 
 /* ─── Performance: LinkedIn analytics imports + Yulia's read ──────────────

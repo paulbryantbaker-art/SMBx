@@ -68,7 +68,7 @@ export function deckPages(deck: any, a: DeckAssets): string[] {
   </section>`);
 
   // middles (light, pages 2..total-1)
-  deck.pages.forEach((p, i) => {
+  deck.pages.forEach((p: any, i: number) => {
     const n = i + 2;
     if (p.kind === 'numeral') {
       html.push(`<section class="pg light">${kicker}${ghost(n)}
@@ -91,7 +91,7 @@ export function deckPages(deck: any, a: DeckAssets): string[] {
         </div>
         ${pfoot(n)}</section>`);
     } else if (p.kind === 'diagram') {
-      const cols = p.bars.map(b => `<div class="col"><div class="bars"><div class="bar ${b.style}" style="height:${b.h}px"><span class="barnum">${esc(b.label)}</span></div></div><div class="collab ${b.style === 'green' ? 'strong' : ''}">${b.sub}</div></div>`);
+      const cols = p.bars.map((b: any) => `<div class="col"><div class="bars"><div class="bar ${b.style}" style="height:${b.h}px"><span class="barnum">${esc(b.label)}</span></div></div><div class="collab ${b.style === 'green' ? 'strong' : ''}">${b.sub}</div></div>`);
       const joined = cols.join(`<div class="vs">${esc(p.connector || '→')}</div>`);
       html.push(`<section class="pg light">${kicker}
         <div class="diagwrap">
