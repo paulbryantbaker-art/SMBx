@@ -431,7 +431,7 @@ export default function StudioResearchM({ user: _user }: { user: User | null }) 
     ...liveCamps.map((s) => ({ key: `c${s.id}`, label: s.name, f: { k: "camp", id: s.id } as Folder, on: folder.k === "camp" && folder.id === s.id })),
     { key: "archived", label: `Archived · ${archivedRuns.length}`, f: { k: "archived" }, on: folder.k === "archived" },
     { key: "artifacts", label: `Artifacts · ${artifacts.length}`, f: { k: "artifacts" }, on: folder.k === "artifacts" },
-    { key: "media", label: `Media · ${photos.length}`, f: { k: "media" }, on: folder.k === "media" },
+    { key: "media", label: `Assets · ${photos.length}`, f: { k: "media" }, on: folder.k === "media" },
     { key: "collateral", label: `Collateral · ${collateral.length}`, f: { k: "collateral" }, on: folder.k === "collateral" },
     { key: "perf", label: `Analytics · ${analytics.length}`, f: { k: "perf" }, on: folder.k === "perf" },
   ];
@@ -520,7 +520,7 @@ export default function StudioResearchM({ user: _user }: { user: User | null }) 
     const a = assets.find((x) => x.id === view.id) ?? null;
     return (
       <div style={S.wrap}>
-        {backRow(folder.k === "media" ? "Media" : "Collateral")}
+        {backRow(folder.k === "media" ? "Assets" : "Collateral")}
         {noteBanner}
         {a ? (
           <div style={S.card}>
