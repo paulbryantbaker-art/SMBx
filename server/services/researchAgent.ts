@@ -276,6 +276,41 @@ function harvestText(content: any[]): string {
   return out;
 }
 
+/**
+ * Turn a finished report into a STUDIO FEED — the same step a research run
+ * takes after it finishes writing, exposed so a MASTER DOCUMENT can take it
+ * too (Paul, 2026-07-25: build collateral from the master).
+ *
+ * Deliberately the identical prompt: a master document IS a report as far as
+ * this step is concerned, and running it through a second, drifting prompt is
+ * exactly how two surfaces stop producing the same collateral. No web tools —
+ * every number must already be in the document, carrying its citation.
+ */
+export async function composeFeedFromMarkdown(
+  md: string,
+  postAngle?: string | null,
+  correction?: string,
+): Promise<{ feed: any; usage: { inputTokens: number; outputTokens: number } }> {
+  const resp = await getClient().messages
+    .stream({
+      model: MODEL,
+      max_tokens: 6000,
+      system: feedSystemPrompt(postAngle ?? undefined),
+      messages: [{
+        role: 'user',
+        content: correction
+          ? `The report:\n\n${md.slice(0, 60000)}\n\nYour previous attempt broke the citation rule:\n${correction}\n\nRedo it. Every figure must appear in the report above with its citation, or not appear at all.`
+          : `The report:\n\n${md.slice(0, 60000)}`,
+      }],
+    })
+    .finalMessage();
+  const parsed = extractJson(harvestText(resp.content as any[]));
+  return {
+    feed: parsed && typeof parsed === 'object' ? parsed : null,
+    usage: { inputTokens: resp.usage?.input_tokens ?? 0, outputTokens: resp.usage?.output_tokens ?? 0 },
+  };
+}
+
 /** One line of the live activity trail shown in the Studio library. */
 export interface ActivityEntry {
   t: string;
