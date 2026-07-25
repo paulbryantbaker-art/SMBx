@@ -98,13 +98,13 @@ const statBand = coverCfg.stats.length
   ? `<div class="cv-stats">${coverCfg.stats.map(s => `<div class="cv-stat"><div class="n">${s.n}</div>${s.l ? `<div class="l">${s.l}</div>` : ''}</div>`).join('')}</div>`
   : '';
 
-const b64 = (p: string, m: string) => `data:${m};base64,${readFileSync(p).toString('base64')}`;
+const { b64, mimeOf } = await import(pathToFileURL(path.join(ROOT, 'house/assets.ts')).href);
 const LOGO_W = b64(path.join(ROOT, 'client/public/logo-green-x-dark.png'), 'image/png');
 const TEXTURE = b64(path.join(ROOT, 'client/public/textures/blackbleed.webp'), 'image/webp');
 
 /* resolve a config asset (bare name → beside the .md, ./media, or client/public;
    abs path as-is) — returns '' if not found, so callers choose their fallback */
-const mimeOf = (p: string) => /\.png$/i.test(p) ? 'image/png' : /\.webp$/i.test(p) ? 'image/webp' : 'image/jpeg';
+/* mimeOf now comes from house/assets.ts (imported above) */
 const resolveAsset = (h: string) => {
   if (!h) return '';
   if (path.isAbsolute(h)) return existsSync(h) ? h : '';

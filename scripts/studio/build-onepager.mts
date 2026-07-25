@@ -74,10 +74,7 @@ interface Post {
 }
 
 /* ── asset resolution (local-first, same order as build-deck.mts) ─────── */
-const b64 = (p: string, mime?: string) => {
-  const m = mime || (p.endsWith('.png') ? 'image/png' : p.endsWith('.webp') ? 'image/webp' : 'image/jpeg');
-  return `data:${m};base64,${readFileSync(p).toString('base64')}`;
-};
+const { b64, esc, logoImg } = await import(pathToFileURL(path.join(ROOT, 'house/assets.ts')).href);
 const resolveImg = (p?: string): string | null => {
   if (!p) return null;
   const tries = [
@@ -99,7 +96,6 @@ const LOGO_W = b64(path.join(ROOT, 'client/public/logo-green-x-dark.png'));
 const TEXTURE = b64(path.join(ROOT, 'client/public/textures/blackbleed.webp'));
 const PHOTO = resolveImg(post.image);
 
-const esc = (s: string) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const name = post.byline?.name ?? 'Paul Baker';
 const title = post.byline?.title ?? 'Buy-side corporate development';
 const COLW = PHOTO ? 610 : 1080;

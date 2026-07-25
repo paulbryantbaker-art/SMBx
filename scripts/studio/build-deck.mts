@@ -71,10 +71,7 @@ interface Deck {
 }
 
 /* ── asset resolution ─────────────────────────────────────────────────── */
-const b64 = (p: string, mime?: string) => {
-  const m = mime || (p.endsWith('.png') ? 'image/png' : p.endsWith('.webp') ? 'image/webp' : 'image/jpeg');
-  return `data:${m};base64,${readFileSync(p).toString('base64')}`;
-};
+const { b64, esc, faceDisc, logoImg } = await import(pathToFileURL(path.join(ROOT, 'house/assets.ts')).href);
 // Resolve an image path against, in order: absolute → --media dir → the CWD's
 // local media/ and assets/ folders → the spec's own folder → CWD. So a spec
 // can just name "tree.png" and drop it in ./media or ./assets.
@@ -99,11 +96,10 @@ const TEXTURE = b64(path.join(ROOT, 'client/public/textures/blackbleed.webp'));
 const HEAD = resolveImg(deck.headshot) || b64(path.join(ROOT, 'client/public/founder-portrait.jpg'));
 const COVER_IMG = resolveImg(deck.cover.image);
 
-const esc = (s: string) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-const face = (s: number) => `<img src="${HEAD}" style="width:${s}px;height:${s}px;border-radius:50%;object-fit:cover;object-position:50% 22%;display:block;flex:none;border:3px solid rgba(143,208,174,0.65)">`;
+const face = (s: number) => faceDisc(HEAD, s, { objectPosition: '50% 22%', ring: 'rgba(143,208,174,0.65)' });
 const total = deck.pages.length + 2; // cover + middles + closer
-const kicker = `<div class="kick"><img src="${LOGO}" style="height:30px;width:auto;display:block"><span class="kt">${esc(deck.kicker)}</span></div>`;
-const pfoot = (n: number) => `<div class="pfoot"><img src="${LOGO_W}" style="height:34px;width:auto;display:block"><span class="pn">${n} / ${total}</span></div>`;
+const kicker = `<div class="kick">${logoImg(LOGO, 30)}<span class="kt">${esc(deck.kicker)}</span></div>`;
+const pfoot = (n: number) => `<div class="pfoot">${logoImg(LOGO_W, 34)}<span class="pn">${n} / ${total}</span></div>`;
 const ghost = (n: number) => `<div class="ghost">${String(n).padStart(2, '0')}</div>`;
 
 /* ── page builders ────────────────────────────────────────────────────── */
