@@ -64,6 +64,10 @@ CREATE TABLE IF NOT EXISTS research_master_versions (
   change_note TEXT,                          -- what the refresh changed, in prose
   run_id INTEGER,                            -- the research_runs row it produced
   usage JSONB,
+  audit JSONB,                               -- mechanical citation audit for THIS version
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE UNIQUE INDEX IF NOT EXISTS research_master_versions_uniq ON research_master_versions (lane_id, version);
+
+-- Safe if 108 already ran before the audit column existed.
+ALTER TABLE research_master_versions ADD COLUMN IF NOT EXISTS audit JSONB;

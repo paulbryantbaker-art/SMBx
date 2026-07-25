@@ -102,6 +102,69 @@ export async function deleteSource(laneId: number, id: number): Promise<boolean>
   return rows.length > 0;
 }
 
+/* ── citation audit ───────────────────────────────────────────────────────
+ * Paul, 2026-07-24: "Carrying through attributes and citations is very
+ * important… we don't want to lose attribution."
+ *
+ * A prompt instruction is not a guarantee — a model can drop a citation and
+ * nothing downstream would notice. So after every synthesis we MECHANICALLY
+ * compare the master against its sources and report what happened:
+ *
+ *   urlsDropped   — links present in the research that vanished from the master
+ *   unsourced     — figures in the master that appear in NO source, verbatim
+ *
+ * `unsourced` is the fabrication check. It over-reports by design: a DERIVED
+ * figure is calculated here and legitimately won't appear in any source, so
+ * these are flagged for review rather than treated as errors. A long list is
+ * the signal worth acting on.
+ */
+export interface CitationAudit {
+  sourceUrls: number; masterUrls: number; urlsDropped: string[];
+  masterFigures: number; unsourced: string[];
+  hasSourceRegister: boolean;
+  note: string;
+}
+
+const URL_RE = /https?:\/\/[^\s)<>\]"']+/gi;
+/** Money, percentages, multiples and plain magnitudes — the figures that carry a claim. */
+const FIG_RE = /\$?\d[\d,]*\.?\d*\s?(?:billion|million|trillion|bn|mm?|k|%|x)\b|\$\d[\d,]*\.?\d*/gi;
+
+const normUrl = (u: string) => u.replace(/[.,;]+$/, '').replace(/\/$/, '').toLowerCase();
+const normFig = (f: string) => f.toLowerCase().replace(/,/g, '').replace(/\s+/g, '')
+  .replace(/billion/, 'b').replace(/million/, 'm').replace(/trillion/, 't').replace(/bn/, 'b');
+
+export function auditCitations(masterMd: string, sourceTexts: string[]): CitationAudit {
+  const haystack = sourceTexts.join('\n');
+  const srcUrls = new Set([...haystack.matchAll(URL_RE)].map(m => normUrl(m[0])));
+  const mstUrls = new Set([...masterMd.matchAll(URL_RE)].map(m => normUrl(m[0])));
+  const urlsDropped = [...srcUrls].filter(u => !mstUrls.has(u));
+
+  const srcFigs = new Set([...haystack.matchAll(FIG_RE)].map(m => normFig(m[0])));
+  const mstFigs = [...new Set([...masterMd.matchAll(FIG_RE)].map(m => normFig(m[0])))];
+  const unsourced = mstFigs.filter(f => !srcFigs.has(f));
+
+  // Much research cites by NAME ("U.S. Census Bureau", "Comfort Systems
+  // FY2025 10-K") rather than by URL, so a URL check alone would miss a
+  // dropped register entirely. This is the structural backstop.
+  const hasSourceRegister = /^#{1,3}\s*(sources|source register|references|method and sources|sources and method)/im.test(masterMd);
+
+  return {
+    hasSourceRegister,
+    sourceUrls: srcUrls.size,
+    masterUrls: mstUrls.size,
+    urlsDropped: urlsDropped.slice(0, 40),
+    masterFigures: mstFigs.length,
+    unsourced: unsourced.slice(0, 40),
+    note: [
+      unsourced.length
+        ? `${unsourced.length} figure(s) in the master do not appear verbatim in any source. Expected for DERIVED calculations — check the rest.`
+        : 'Every figure in the master appears verbatim in a source.',
+      hasSourceRegister ? '' : 'NO SOURCES SECTION — the synthesis dropped its citation register.',
+      urlsDropped.length ? `${urlsDropped.length} source URL(s) did not carry through.` : '',
+    ].filter(Boolean).join(' '),
+  };
+}
+
 /* ── synthesis ────────────────────────────────────────────────────────── */
 
 function systemPrompt(): string {
@@ -112,7 +175,13 @@ function systemPrompt(): string {
     '',
     'THREE RULES, in order of importance:',
     '1. ZERO FABRICATION. Every figure, claim, company name and date must appear in a supplied source. If something is not in the sources, it does not go in the document. Never fill a gap from your own knowledge — say the gap exists.',
-    '2. ATTRIBUTION SURVIVES. Each material figure keeps its origin: the underlying source (a 10-K, a Census series, a named analyst) and, where it matters, which engine surfaced it. Never blend numbers into an anonymous consensus.',
+    '2. ATTRIBUTION SURVIVES — THIS IS THE POINT OF THE EXERCISE. Paul is combining reads from several engines precisely so nothing is taken on one model\'s word. Losing a citation destroys that.',
+    '   • Every material figure carries its UNDERLYING source inline — the 10-K, the Census series, the named analyst, the dated filing — not merely which engine reported it. "Comfort Systems FY2025 10-K" is a citation; "per the research" is not.',
+    '   • Carry URLs through verbatim when a source supplies one. Never invent, shorten, or reconstruct a URL.',
+    '   • Where the engines differ in what they cite for the same fact, keep BOTH citations.',
+    '   • Note which engine surfaced a figure only where it matters (e.g. only one engine found it). The underlying source always matters; the engine usually does not.',
+    '   • A claim you cannot attribute to a specific source does not belong in the document. Drop it, or state plainly that it is unattributed and why it is still worth carrying.',
+    '   • Close with a SOURCES register listing every document drawn on and, beneath each, the underlying sources it contributed. This is what makes the document defensible when a PE partner interrogates a number.',
     '3. DISAGREEMENT IS A FINDING. When two sources give different numbers for the same thing, present BOTH with attribution and say plainly that they disagree. Never average them, never silently pick one. Note which is better-sourced and why.',
     '',
     'LABELLING: mark every material figure PRIMARY (government data or SEC filings), INSTITUTIONAL (a named forecaster or transaction database with published methodology), or DERIVED (calculated here — show the arithmetic). A figure that fits none of those is not strong enough to state as fact.',
@@ -143,7 +212,7 @@ function updateInstruction(currentVersion: number): string {
  * reads them directly rather than through a lossy extraction step. Runs
  * in-process and updates `synthesis_status` so the UI can poll.
  */
-export async function synthesizeLane(userId: number, laneId: number, opts: { full?: boolean } = {}): Promise<{ version: number; usage: any }> {
+export async function synthesizeLane(userId: number, laneId: number, opts: { full?: boolean } = {}): Promise<{ version: number; usage: any; audit: CitationAudit }> {
   const lane = await getLane(userId, laneId);
   if (!lane) throw new Error('Lane not found');
 
@@ -196,13 +265,23 @@ export async function synthesizeLane(userId: number, laneId: number, opts: { ful
       costCents: Math.ceil((res.usage.input_tokens * 300 + res.usage.output_tokens * 1500) / 1_000_000),
     };
 
+    // Mechanical citation audit — verify attribution survived rather than
+    // trusting the prompt (Paul: "we don't want to lose attribution").
+    const sourceTexts = pending.map((p: any) =>
+      p.text_content || '').filter(Boolean) as string[];
+    if (useMaster && lane.master_md) sourceTexts.push(lane.master_md);
+    const audit = auditCitations(md, sourceTexts);
+    if (audit.urlsDropped.length) {
+      console.warn(`[lanes] lane ${laneId} v${version}: ${audit.urlsDropped.length} source URL(s) did not carry through`);
+    }
+
     const changeNote = md.match(/##\s*What changed[^\n]*\n+([\s\S]{0,600}?)(?=\n##|\n#|$)/i)?.[1]?.trim() || null;
 
     await sql.begin(async (tx: any) => {
       await tx`
-        INSERT INTO research_master_versions (lane_id, version, title, master_md, source_ids, change_note, usage)
+        INSERT INTO research_master_versions (lane_id, version, title, master_md, source_ids, change_note, usage, audit)
         VALUES (${laneId}, ${version}, ${title}, ${md},
-                ${pending.map((p: any) => p.id)}, ${changeNote}, ${JSON.stringify(usage)}::jsonb)`;
+                ${pending.map((p: any) => p.id)}, ${changeNote}, ${JSON.stringify(usage)}::jsonb, ${JSON.stringify(audit)}::jsonb)`;
       await tx`
         UPDATE research_lanes
         SET master_md = ${md}, master_title = ${title}, master_version = ${version},
@@ -213,7 +292,7 @@ export async function synthesizeLane(userId: number, laneId: number, opts: { ful
         WHERE lane_id = ${laneId} AND id = ANY(${pending.map((p: any) => p.id)})`;
     });
 
-    return { version, usage };
+    return { version, usage, audit };
   } catch (err: any) {
     await sql`UPDATE research_lanes SET synthesis_status = 'failed', synthesis_error = ${String(err?.message || err).slice(0, 500)}, updated_at = NOW() WHERE id = ${laneId}`;
     throw err;
