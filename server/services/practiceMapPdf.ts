@@ -10,6 +10,7 @@
 import fs from 'fs';
 import path from 'path';
 import { newRenderPage } from './premiumPdfRenderer.js';
+import { LEDGER } from '../../house/tokens.js';
 import type { IntakeMap } from './practiceIntake.js';
 
 const esc = (v: string): string =>
@@ -60,33 +61,33 @@ function mapHtml(map: IntakeMap, generatedAt: string): string {
   html, body { background: #ffffff; }
   body {
     font-family: -apple-system, 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    color: #14181C; font-size: 11.5px; font-variant-numeric: tabular-nums; line-height: 1.55;
+    color: ${LEDGER.ink}; font-size: 11.5px; font-variant-numeric: tabular-nums; line-height: 1.55;
     padding: 52px 56px 40px;
   }
   .mono { font-family: 'SF Mono', 'Cascadia Mono', Consolas, Menlo, monospace; }
-  .head { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 2px solid #14181C; }
+  .head { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 2px solid ${LEDGER.ink}; }
   .mark { font-weight: 800; font-size: 17px; letter-spacing: -0.02em; }
-  .mark .x { color: #0F4E3C; }
-  .headmeta { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: #8A9099; text-align: right; }
+  .mark .x { color: ${LEDGER.greenHover}; }
+  .headmeta { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${LEDGER.muted}; text-align: right; }
   .title { margin-top: 26px; font-family: Georgia, 'Times New Roman', serif; font-size: 27px; font-weight: 600; letter-spacing: -0.008em; line-height: 1.16; }
-  .thesis { margin-top: 9px; font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 9.5px; letter-spacing: 0.05em; color: #5C6670; }
-  .answer { margin-top: 20px; border-left: 3px solid #14181C; padding: 10px 0 10px 16px; font-size: 13.5px; font-weight: 700; line-height: 1.45; }
-  .funnel { margin-top: 26px; border-top: 1px solid #E4E1D9; border-bottom: 1px solid #E4E1D9; padding: 18px 0; }
-  .funnel .fk { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: #0F4E3C; margin-bottom: 12px; }
+  .thesis { margin-top: 9px; font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 9.5px; letter-spacing: 0.05em; color: ${LEDGER.slate}; }
+  .answer { margin-top: 20px; border-left: 3px solid ${LEDGER.ink}; padding: 10px 0 10px 16px; font-size: 13.5px; font-weight: 700; line-height: 1.45; }
+  .funnel { margin-top: 26px; border-top: 1px solid ${LEDGER.hair}; border-bottom: 1px solid ${LEDGER.hair}; padding: 18px 0; }
+  .funnel .fk { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${LEDGER.greenHover}; margin-bottom: 12px; }
   .step { display: flex; align-items: baseline; gap: 16px; }
   .step .n { font-size: 34px; font-weight: 800; letter-spacing: -0.03em; min-width: 128px; }
-  .step .l { font-size: 11.5px; color: #5C6670; }
+  .step .l { font-size: 11.5px; color: ${LEDGER.slate}; }
   .arrow { color: #AEB4BA; font-size: 13px; padding: 2px 0 2px 4px; }
   .sec { margin-top: 20px; }
-  .sec .k { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: #0F4E3C; }
+  .sec .k { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${LEDGER.greenHover}; }
   .sec .v { margin-top: 5px; font-size: 11.5px; line-height: 1.6; }
-  .insight { margin-top: 24px; background: #F6F4EF; padding: 18px 20px; }
-  .insight .k { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: #14181C; }
+  .insight { margin-top: 24px; background: ${LEDGER.bone}; padding: 18px 20px; }
+  .insight .k { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${LEDGER.ink}; }
   .insight .v { margin-top: 7px; font-size: 12.5px; font-weight: 600; line-height: 1.6; }
-  .next { margin-top: 26px; border: 1px solid #14181C; padding: 16px 20px; }
-  .next .k { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: #14181C; }
+  .next { margin-top: 26px; border: 1px solid ${LEDGER.ink}; padding: 16px 20px; }
+  .next .k { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${LEDGER.ink}; }
   .next .v { margin-top: 6px; font-size: 11.5px; line-height: 1.6; }
-  .foot { margin-top: 24px; padding-top: 12px; border-top: 1px solid #E4E1D9; font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 7.8px; letter-spacing: 0.06em; line-height: 1.7; color: #8A9099; }
+  .foot { margin-top: 24px; padding-top: 12px; border-top: 1px solid ${LEDGER.hair}; font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 7.8px; letter-spacing: 0.06em; line-height: 1.7; color: ${LEDGER.muted}; }
 </style>
 </head>
 <body>
