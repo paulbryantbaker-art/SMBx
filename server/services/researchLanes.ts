@@ -139,7 +139,11 @@ export interface CitationAudit {
 
 const URL_RE = /https?:\/\/[^\s)<>\]"']+/gi;
 /** Money, percentages, multiples and magnitudes — the figures that carry a claim. */
-const FIG_RE = /\$?\d[\d,]*\.?\d*\s?(?:billion|million|trillion|bn|mm?|k|%|x)\b|\$\d[\d,]*\.?\d*/gi;
+// Suffixes ordered longest-first. Bare b/t/m matter: the reports write
+// "$180B" as often as "$180 billion", and missing that flagged honest
+// work as an unexplained inference. The trailing \b stops "$50 buyers"
+// from reading as 50 billion.
+const FIG_RE = /\$?\d[\d,]*\.?\d*\s?(?:billion|million|trillion|bn|mm|b|m|t|k|%|x)\b|\$\d[\d,]*\.?\d*/gi;
 
 /**
  * Expand ranges so a shared unit attaches to BOTH endpoints.
@@ -152,7 +156,7 @@ const FIG_RE = /\$?\d[\d,]*\.?\d*\s?(?:billion|million|trillion|bn|mm?|k|%|x)\b|
  * inference. Normalising first makes both endpoints checkable.
  */
 const expandRanges = (t: string) => t.replace(
-  /(\$?\d[\d,]*\.?\d*)\s*(?:–|—|-|\bto\b|\band\b)\s*(\$?\d[\d,]*\.?\d*)(\s?)(billion|million|trillion|bn|mm?|k)\b/gi,
+  /(\$?\d[\d,]*\.?\d*)\s*(?:–|—|-|\bto\b|\band\b)\s*(\$?\d[\d,]*\.?\d*)(\s?)(billion|million|trillion|bn|mm|b|m|t|k)\b/gi,
   (_m, a, b, sp, unit) => `${a}${sp || ' '}${unit} to ${b}${sp || ' '}${unit}`);
 
 const normUrl = (u: string) => u.replace(/[.,;]+$/, '').replace(/\/$/, '').toLowerCase();
