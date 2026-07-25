@@ -25,6 +25,7 @@ import {
 import { renderResearchPdf, renderResearchCardPng, renderLinkedInDocPdf, renderCoverPng, researchPostText, renderAnnouncementCardPng, docPages, type ResearchRunRow, type AnnouncementSpec, renderPostCardPng, type PostCardSpec } from '../services/researchComposer.js';
 import { listStudioAssets, getStudioAsset, createStudioAsset, updateStudioAsset, deleteStudioAsset } from '../services/studioAssets.js';
 import { createLane, listLanes, getLane, addSource, listSources, deleteSource, synthesizeLane, listVersions, getVersion } from '../services/researchLanes.js';
+import { listArtifacts, getArtifact, createArtifact, updateArtifact, deleteArtifact, fileLaneMaster, repoSummary } from '../services/studioRepos.js';
 import { importLinkedInWorkbook, analyzeLinkedInImport } from '../services/linkedinAnalytics.js';
 import multer from 'multer';
 
@@ -206,6 +207,100 @@ researchRouter.post('/research/import-plan', planUpload.single('file'), async (r
     const apiMsg = err?.error?.error?.message;
     return res.status(500).json({ error: apiMsg ? String(apiMsg) : (err?.message || 'Import failed') });
   }
+});
+
+/* ─── The three studio repositories ───────────────────────────────────────
+ * Paul, 2026-07-24: "Just like in Google Drive, we need repositories for
+ * different types of data" — ARTIFACTS (the words: reports, post copy,
+ * research), ASSETS (the pictures used in them), COLLATERAL (the finished
+ * output posted or sent). Assets and collateral already lived in
+ * studio_assets by `kind`; artifacts is new. See services/studioRepos.ts.  */
+
+researchRouter.get('/studio/repos', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  try {
+    return res.json(await repoSummary(userId));
+  } catch (err: any) {
+    console.error('[repos] summary failed:', err?.message);
+    return res.status(500).json({ error: 'Failed to load repositories' });
+  }
+});
+
+researchRouter.get('/studio/artifacts', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  try {
+    return res.json({
+      artifacts: await listArtifacts(userId, {
+        kind: typeof req.query.kind === 'string' ? req.query.kind : undefined,
+        laneId: req.query.laneId ? Number(req.query.laneId) : undefined,
+        archived: req.query.archived === '1',
+      }),
+    });
+  } catch (err: any) {
+    console.error('[repos] list artifacts failed:', err?.message);
+    return res.status(500).json({ error: 'Failed to load artifacts' });
+  }
+});
+
+researchRouter.get('/studio/artifacts/:id', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const a = await getArtifact(userId, Number(req.params.id));
+  return a ? res.json(a) : res.status(404).json({ error: 'Artifact not found' });
+});
+
+researchRouter.post('/studio/artifacts', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const label = String(req.body?.label || '').trim();
+  if (!label) return res.status(400).json({ error: 'Name the artifact' });
+  try {
+    const id = await createArtifact(userId, {
+      label,
+      bodyMd: typeof req.body?.bodyMd === 'string' ? req.body.bodyMd : '',
+      kind: String(req.body?.kind || '').trim() || undefined,
+      notes: String(req.body?.notes || '').trim() || undefined,
+      laneId: req.body?.laneId ? Number(req.body.laneId) : undefined,
+      runId: req.body?.runId ? Number(req.body.runId) : undefined,
+      scheduleId: req.body?.scheduleId ? Number(req.body.scheduleId) : undefined,
+    });
+    return res.json({ id });
+  } catch (err: any) {
+    console.error('[repos] create artifact failed:', err?.message);
+    return res.status(500).json({ error: 'Failed to create artifact' });
+  }
+});
+
+researchRouter.patch('/studio/artifacts/:id', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const ok = await updateArtifact(userId, Number(req.params.id), {
+    label: typeof req.body?.label === 'string' ? req.body.label : undefined,
+    bodyMd: typeof req.body?.bodyMd === 'string' ? req.body.bodyMd : undefined,
+    kind: typeof req.body?.kind === 'string' ? req.body.kind : undefined,
+    notes: typeof req.body?.notes === 'string' ? req.body.notes : undefined,
+    archived: typeof req.body?.archived === 'boolean' ? req.body.archived : undefined,
+  });
+  return ok ? res.json({ ok: true }) : res.status(404).json({ error: 'Artifact not found' });
+});
+
+researchRouter.delete('/studio/artifacts/:id', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const ok = await deleteArtifact(userId, Number(req.params.id));
+  return ok ? res.json({ ok: true }) : res.status(404).json({ error: 'Artifact not found' });
+});
+
+/** File a lane's synthesized master into the artifacts repository. */
+researchRouter.post('/research/lanes/:id/file-artifact', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const lane = await getLane(userId, Number(req.params.id));
+  if (!lane) return res.status(404).json({ error: 'Lane not found' });
+  const id = await fileLaneMaster(userId, lane as any);
+  return id ? res.json({ artifactId: id }) : res.status(400).json({ error: 'This lane has no master yet — synthesize first.' });
 });
 
 /* ─── Research lanes: the living master document ──────────────────────────
