@@ -185,6 +185,14 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
   .rbody.noh1 h2:first-child { page-break-before: avoid; border-top: none; padding-top: 0; }
   /* inline section accent — framed photo band on the bone page (renderer-safe) */
   .rb-accent { display: block; width: 100%; height: 2.2in; object-fit: cover; border-radius: 10px; border: 1px solid ${HAIR}; box-shadow: 0 6px 20px rgba(20,24,28,0.13); margin: 0.05in 0 0.22in; page-break-inside: avoid; }
+  /* A blockquote in a report is a NOTICE — a correction, a caveat, something
+     the reader must not skim past. Brass rail, not the decorative gray a
+     stock stylesheet would give it. */
+  blockquote { margin: 0.18in 0; padding: 0.14in 0.2in; border-left: 3px solid ${BRASS};
+    background: rgba(176,134,55,0.05); border-radius: 0 8px 8px 0; page-break-inside: avoid; }
+  blockquote p { margin: 0 0 0.08in; font-size: 9.5pt; line-height: 1.55; }
+  blockquote p:last-child, blockquote ol:last-child, blockquote ul:last-child { margin-bottom: 0; }
+  blockquote ol, blockquote li { font-size: 9.5pt; line-height: 1.55; }
   .rbody p { margin: 0 0 0.11in; }
   .rbody strong { color: ${INK}; font-weight: 600; }
   .rbody em { font-style: italic; }

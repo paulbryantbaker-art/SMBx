@@ -20,6 +20,13 @@ stat: ~89% | Of HVAC/plumbing shops under 20 staff
 
 Data conflicts between the three sources are reconciled inline and flagged in the Appendix.
 
+> **Corrections applied 2026-07-26, after a primary-source adjudication of this document's market sizing (*TAM Reconciliation: U.S. HVAC, Plumbing & Electrical Trades*).** Two figures carried here were wrong and are corrected in place:
+>
+> 1. **Electrical was stated as $347.5B.** That is IBISWorld's "Electricians" report (NAICS 23821), which by its own definition includes low-voltage, data cabling, telecom and fire/security work — out of scope for a trades TAM. The defensible figure is **~$235B (2022, Census-derived)** and **~$265–280B (2026)**. The correction moves the six-trade total from $835.5B to roughly $753–768B. **Any rendering of this report dated before 2026-07-26 carries the retired figure.**
+> 2. **The ~$392B combined 238220 revenue was attributed to County Business Patterns.** CBP publishes no revenue. The source is the **2022 Economic Census, table EC2223BASIC**.
+>
+> Two readings also changed: electrical's 21.6% large-enterprise share is commercial and data-center revenue, so **residential** electrical is *less* consolidated than "mid stage" implied; and plumbing's size lead over HVAC is a **total-market** lead that does not hold residentially. The consolidated successor to this document is the Home Services market master in Studio.
+
 ---
 
 ## EXECUTIVE SUMMARY
@@ -106,7 +113,7 @@ Residential customers are loyal to the **technician**, not the brand. Service ag
 **TAM.**
 - **HVAC contractors:** ~$158.4B (2025) / ~$159.4B (2026) per IBISWorld; 2.6% CAGR 2021–26.
 - **Plumbing:** figures diverge by definition — IBISWorld/ServiceTitan ~$121.5B (mid-2024); MRFR ~$120B (2024); Linxup and others ~$169.8B (2025); the Supercycle analysis projects **$191.4B (2026, 3.1% CAGR)**. Higher figures fold in more new-construction and commercial. Underwrite the range, not a point.
-- **Combined NAICS 238220 (Census):** ~$392B revenue, 111,200 establishments, 1.21M workers (2022 County Business Patterns).
+- **Combined NAICS 238220 (Census):** ~$392B revenue, 111,200 establishments, 1.21M workers (**2022 Economic Census, table EC2223BASIC** — corrected 2026-07-26; this was previously attributed to County Business Patterns, which publishes establishments, firms, employment and payroll but never receipts). Three scope labels travel with the figure: it is **combined** (one code, two trades), **employer-only**, and **total-market**, not residential.
 - **Residential slice:** HVAC splits roughly residential 40% / commercial 30% / other; nonresidential is >two-thirds of plumbing revenue. The residential HVAC service/repair segment alone is ~$28.2B (Mordor). Replacement & retrofit = 62.5% of the HVAC equipment market, growing 7.1% CAGR, with ~8M units replaced annually vs. 1–1.5M new-construction installs (~6:1).
 
 **SAM.** The privately held independent base: with no firm above 5% share and 76% of critical-trade operators still true independents (McKinsey), the acquirable universe is on the order of **~$100–150B of residential-weighted HVAC+plumbing service revenue across 100,000+ independent firms**.
@@ -119,7 +126,7 @@ Residential customers are loyal to the **technician**, not the brand. Service ag
 
 | Vertical | 2026 est. market | U.S. businesses | Demand catalyst | Institutional appeal | Consolidation maturity |
 |---|---|---|---|---|---|
-| Electrical | $347.5B | ~261,958 | Grid, EV, AI data centers | Multi-year commercial backlogs | Mid stage |
+| Electrical | **~$265–280B** (2026) | ~79,611 employer firms | Grid, EV, AI data centers | Multi-year commercial backlogs | **Residential: early** |
 | Plumbing | $191.4B | ~129,000 | Code compliance, emergencies | Margin-expansion arbitrage | Early-to-mid |
 | HVAC | $158.4B | ~118,433 | Climate control, unit lifecycle | Highest recurring-revenue attach | Late stage (most active) |
 | Roofing | $92.5B | ~101,679 | Storm damage, aging stock | Extreme fragmentation (CRS 88.6) | Early |
