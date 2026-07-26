@@ -1419,7 +1419,17 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, a
             + Lane
           </button>
         </div>
-        {lanes.length === 0 && <div style={F.groupEmpty}>Upload outside research here</div>}
+        {/* With no lanes, dim helper text is a dead end — it reads like a drop
+            zone that ignores you. Make the empty state the way in. */}
+        {lanes.length === 0 && (
+          <button
+            type="button"
+            style={F.laneStart}
+            onClick={async () => { const id = await onNewLane(); if (id) { setSel({ kind: "lane", id }); setInsp("item"); } }}
+          >
+            Start a lane to upload outside research →
+          </button>
+        )}
         {lanes.map((l) => (
           <SideRow
             key={l.id}
@@ -1551,7 +1561,17 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, a
             <div style={F.emptyList}>{q ? "Nothing matches the filter." : "No analytics yet — export the .xlsx from LinkedIn (Analytics → Post impressions → Export) and import it here."}</div>
           )}
           {loaded && artifactMode && artifactItems.length === 0 && (
-            <div style={F.emptyList}>{q ? "Nothing matches the filter." : "No artifacts yet — the words a piece of collateral is built from. Write one with “New artifact”, upload a .md, or file a finished run from its inspector."}</div>
+            <div style={F.emptyList}>
+              {q ? "Nothing matches the filter." : (
+                <>
+                  No artifacts yet. These are FINISHED words a piece of collateral gets built from — write one with “New artifact”,
+                  upload a .md, or file a research run or a synthesized master here from its inspector.
+                  <br /><br />
+                  Uploading outside research to be synthesized? That goes in a <b>Research lane</b>, not here — the master
+                  lands in Artifacts once you file it.
+                </>
+              )}
+            </div>
           )}
           {loaded && !perfMode && assetMode && assetItems.length === 0 && (
             <div style={F.emptyList}>{q ? "Nothing matches the filter." : sel.kind === "media" ? "No photos yet — upload one with “Upload photo”." : "No collateral yet — every card you render lands here."}</div>
@@ -3038,6 +3058,7 @@ const F: Record<string, React.CSSProperties> = {
   sideRowHot: { background: "#E3EEFF", boxShadow: `inset 0 0 0 1.5px ${T.blue}` },
   groupAdd: { marginLeft: "auto", background: "transparent", border: "none", color: T.blue, fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: T.font, padding: "0 2px", letterSpacing: "0.02em", textTransform: "none" as const },
   groupEmpty: { fontSize: 11.5, color: T.muted2, padding: "2px 8px 6px 20px" },
+  laneStart: { display: "block", width: "100%", textAlign: "left", background: "transparent", border: "none", padding: "2px 8px 7px 20px", fontSize: 11.5, lineHeight: 1.4, color: T.blue, fontWeight: 600, cursor: "pointer", fontFamily: T.font },
   sideLabel: { flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
   sideCount: { flex: "none", fontSize: 11.5, color: T.muted, fontWeight: 600 },
 
