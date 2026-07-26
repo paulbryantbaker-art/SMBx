@@ -70,6 +70,8 @@ import {
   extractAssumptionsFromModelExecution,
 } from '../../shared/modelStaleness.js';
 
+import { MARKET_KNOWLEDGE_TOOLS, MARKET_TOOL_NAMES, executeMarketKnowledgeTool } from './marketKnowledgeTools.js';
+
 const sql = createSql();
 
 // ─── Tool Definitions (for Claude API) ─────────────────────
@@ -900,6 +902,10 @@ export const TOOL_DEFINITIONS: Tool[] = [
       required: ['dealIds'],
     },
   },
+  // The practitioner's own research — the markets he keeps master documents
+  // for. Grounded answers about a trade come from HIS research, not from the
+  // model's general knowledge. See services/marketKnowledgeTools.ts.
+  ...MARKET_KNOWLEDGE_TOOLS,
 ];
 
 const CONFIRMATION_SCHEMA = {
@@ -937,6 +943,11 @@ export async function executeTool(
   conversationId: number,
 ): Promise<string> {
   try {
+    // Market knowledge reads the practitioner's own research masters; it takes
+    // no deal and no conversation, so it dispatches ahead of the deal tools.
+    if (MARKET_TOOL_NAMES.has(toolName)) {
+      return await executeMarketKnowledgeTool(toolName, input, userId);
+    }
     switch (toolName) {
       case 'create_deal':
         return await createDeal(input, userId, conversationId);

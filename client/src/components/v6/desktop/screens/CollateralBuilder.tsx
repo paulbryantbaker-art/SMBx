@@ -75,13 +75,20 @@ interface AssetRow {
   width: number | null; height: number | null; created_at: string; bytes: number;
 }
 
-export default function CollateralBuilder({ artifactId, artifactLabel, onClose, onExported }: {
-  artifactId: number;
+/** Where the words come from: a MARKET (its master, read live) or a derived
+ *  document. The master is never copied to be built from — one place, always
+ *  current (Paul, 2026-07-26). */
+export type BuildSource = { kind: "lane" | "artifact"; id: number };
+
+export default function CollateralBuilder({ source, artifactLabel, initialOutput, onClose, onExported }: {
+  source: BuildSource;
   artifactLabel: string;
+  /** Which output the market workspace asked for; defaults to the carousel. */
+  initialOutput?: OutputType;
   onClose: () => void;
   onExported: (msg: string) => void;
 }) {
-  const [output, setOutput] = useState<OutputType>("carousel");
+  const [output, setOutput] = useState<OutputType>(initialOutput ?? "carousel");
   const [runId, setRunId] = useState<number | null>(null);
   const [title, setTitle] = useState(artifactLabel);
   const [uncited, setUncited] = useState<string[]>([]);
@@ -148,7 +155,7 @@ export default function CollateralBuilder({ artifactId, artifactLabel, onClose, 
     try {
       const j = await api<{ runId: number; title: string; uncited: string[] }>("/studio/compose", {
         method: "POST",
-        body: JSON.stringify({ artifactId, outputType: type }),
+        body: JSON.stringify({ [source.kind === "lane" ? "laneId" : "artifactId"]: source.id, outputType: type }),
       });
       setRunId(j.runId);
       setTitle(j.title);
@@ -158,7 +165,7 @@ export default function CollateralBuilder({ artifactId, artifactLabel, onClose, 
       setErr(e?.message || "Couldn’t build this output from the master.");
       setPhase("error");
     }
-  }, [artifactId, loadBoard]);
+  }, [source.kind, source.id, loadBoard]);
 
   useEffect(() => { void compose(output); }, [output, compose]);
 

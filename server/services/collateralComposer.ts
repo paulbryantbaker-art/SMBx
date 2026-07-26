@@ -96,19 +96,46 @@ function titleOf(md: string, fallback: string): string {
  * artwork already placed survives, because that is Paul's layout work and it
  * is not the feed's to discard.
  */
-export async function composeFromArtifact(opts: {
+/**
+ * WHERE THE WORDS COME FROM (Paul, 2026-07-26: "when we complete a master
+ * research — that can be updated later — where does it go?").
+ *
+ * A market's master lives in ONE place: the lane. It used to be copied into
+ * Artifacts before collateral could be built from it, which made the copy a
+ * snapshot — fold in new research and the Artifacts copy still held the old
+ * version, with no answer to which one was real. So collateral reads the lane
+ * directly, exactly as the corp-dev documents already did.
+ *
+ * Artifacts still feeds this path, because a DERIVED document (a thesis, hand
+ * -written post copy) is a legitimate thing to render. It just isn't where the
+ * master lives.
+ */
+export type ComposeSource = { kind: 'lane'; id: number } | { kind: 'artifact'; id: number };
+
+async function loadSource(userId: number, source: ComposeSource): Promise<{ md: string; label: string }> {
+  if (source.kind === 'lane') {
+    const [lane] = await sql<{ label: string; master_md: string | null; master_title: string | null }[]>`
+      SELECT label, master_md, master_title FROM research_lanes WHERE id = ${source.id} AND user_id = ${userId}`;
+    if (!lane) throw new Error('Market not found');
+    if (!lane.master_md) throw new Error('This market has no master document yet — synthesize the research first.');
+    return { md: lane.master_md, label: lane.master_title || lane.label };
+  }
+  const artifact = await getArtifact(userId, source.id);
+  if (!artifact) throw new Error('Document not found');
+  return { md: artifact.body_md || '', label: artifact.label };
+}
+
+export async function composeFrom(opts: {
   userId: number;
-  artifactId: number;
+  source: ComposeSource;
   outputType: OutputType;
   postAngle?: string | null;
   scheduleId?: number | null;
 }): Promise<ComposeResult> {
-  const artifact = await getArtifact(opts.userId, opts.artifactId);
-  if (!artifact) throw new Error('Artifact not found');
-  const master = artifact.body_md || '';
-  if (master.trim().length < 200) throw new Error('This artifact is too short to build collateral from — it needs the master document text.');
+  const { md: master, label } = await loadSource(opts.userId, opts.source);
+  if (master.trim().length < 200) throw new Error('This document is too short to build collateral from.');
 
-  const title = titleOf(master, artifact.label);
+  const title = titleOf(master, label);
 
   // The feed carries every number that reaches a card, so it gets the audit.
   let feed: any = null;
@@ -142,11 +169,15 @@ export async function composeFromArtifact(opts: {
   const sources = extractSources(master);
   const outputFormat = OUTPUT_FORMAT[opts.outputType];
 
-  // Reuse this artifact's existing composition for this output type, keeping
+  const laneId = opts.source.kind === 'lane' ? opts.source.id : null;
+  const artifactId = opts.source.kind === 'artifact' ? opts.source.id : null;
+
+  // Reuse this source's existing composition for this output type, keeping
   // whatever page layout is already on it.
   const [existing] = await sql<{ id: number; studio_feed: any; feed_override: any }[]>`
     SELECT id, studio_feed, feed_override FROM research_runs
-    WHERE user_id = ${opts.userId} AND artifact_id = ${opts.artifactId}
+    WHERE user_id = ${opts.userId}
+      AND ${laneId != null ? sql`lane_id = ${laneId} AND artifact_id IS NULL` : sql`artifact_id = ${artifactId}`}
       AND origin = 'composed' AND output_format = ${outputFormat}
     ORDER BY id DESC LIMIT 1`;
 
@@ -182,12 +213,12 @@ export async function composeFromArtifact(opts: {
   const [row] = await sql<{ id: number }[]>`
     INSERT INTO research_runs
       (user_id, schedule_id, research_type, topic, depth, output_format, status, progress,
-       report_title, report_md, studio_feed, sources, origin, artifact_id, completed_at)
+       report_title, report_md, studio_feed, sources, origin, artifact_id, lane_id, completed_at)
     VALUES
       (${opts.userId}, ${opts.scheduleId ?? null}, 'topic_brief', ${title}, 'standard',
        ${outputFormat}, 'complete', 'complete', ${title}, ${master},
        ${feed ? sql.json(feed) : null}::jsonb, ${sql.json(sources as any)}::jsonb,
-       'composed', ${opts.artifactId}, NOW())
+       'composed', ${artifactId}, ${laneId}, NOW())
     RETURNING id`;
   if (opts.outputType !== 'report') void predesign(row.id, opts.userId);
   return { runId: row.id, title, uncited };
