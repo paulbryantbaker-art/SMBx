@@ -462,6 +462,31 @@ researchRouter.post('/research/lanes/:id/synthesize', async (req, res) => {
   }
 });
 
+/**
+ * Import a master synthesized outside the app.
+ *
+ * The app's API key can hit the org's spend ceiling (Paul, 2026-07-26), and
+ * the operating model already allows the expensive model work to run in a
+ * Cowork session on his own subscription. This is where that result lands.
+ * The citation audit still runs — it is mechanical, not a model call.
+ */
+researchRouter.post('/research/lanes/:id/master', planUpload.single('file'), async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const id = parseId(String(req.params.id));
+  if (!id) return res.status(400).json({ error: 'Bad market id' });
+  const file = (req as any).file as { buffer: Buffer; originalname: string } | undefined;
+  const md = file ? file.buffer.toString('utf8') : String(req.body?.md || '');
+  try {
+    const { importMaster } = await import('../services/researchLanes.js');
+    const out = await importMaster(userId, id, md, typeof req.body?.note === 'string' ? req.body.note : undefined);
+    return res.json(out);
+  } catch (err: any) {
+    console.error('[lanes] master import failed:', err?.message);
+    return res.status(400).json({ error: err?.message || 'Import failed' });
+  }
+});
+
 researchRouter.get('/research/lanes/:id/versions/:version', async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
