@@ -72,6 +72,7 @@ export default function MarketWorkspace({ lanes, onLanesChanged, onOpenBuilder, 
   const [docs, setDocs] = useState<CorpDoc[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const masterRef = useRef<HTMLInputElement | null>(null);
 
   const lane = lanes.find((l) => l.id === laneId) ?? null;
 
@@ -169,6 +170,28 @@ export default function MarketWorkspace({ lanes, onLanesChanged, onOpenBuilder, 
     } finally {
       setBusy(null);
       onLanesChanged();
+    }
+  };
+
+  /** A master synthesized elsewhere — in Cowork, on Paul's own subscription —
+   *  lands here. The citation audit still runs; it costs nothing. */
+  const importMaster = async (f: File) => {
+    if (!lane) return;
+    setBusy("import");
+    try {
+      const md = await f.text();
+      const out = await api<{ version: number; audit: { ok: boolean; note: string } }>(
+        `/research/lanes/${lane.id}/master`,
+        { method: "POST", body: JSON.stringify({ md, note: `Imported from ${f.name}` }) },
+      );
+      onLanesChanged();
+      onNote(out.audit?.ok ? "ok" : "err", out.audit?.ok
+        ? `Master v${out.version} imported — the citation audit passed.`
+        : `Master v${out.version} imported but parked for review: ${out.audit?.note?.slice(0, 220)}`);
+    } catch (e: any) {
+      onNote("err", e?.message || "Import failed.");
+    } finally {
+      setBusy(null);
     }
   };
 
@@ -299,6 +322,20 @@ export default function MarketWorkspace({ lanes, onLanesChanged, onOpenBuilder, 
                 Rebuild
               </button>
             )}
+            {/* Synthesis is the app's most expensive single call, so it is the
+                first thing to hit an API spend ceiling. The work can be done in
+                a Cowork session on Paul's own subscription and land here — the
+                citation audit still runs, because it is mechanical. */}
+            <input
+              ref={masterRef}
+              type="file"
+              accept=".md,.markdown,.txt,text/markdown,text/plain"
+              style={{ display: "none" }}
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) void importMaster(f); e.currentTarget.value = ""; }}
+            />
+            <button type="button" style={S.ghost} disabled={running || busy === "import"} onClick={() => masterRef.current?.click()}>
+              {busy === "import" ? "Importing…" : "Import a master"}
+            </button>
           </div>
 
           {running && <div style={S.working}>Reading the sources and auditing the figures…</div>}

@@ -386,6 +386,29 @@ function updateInstruction(currentVersion: number): string {
 /** How long a 'running' lane can sit before we treat the lock as abandoned. */
 const STALE_RUN_MINUTES = 30;
 
+/**
+ * Say what actually went wrong, in a sentence.
+ *
+ * The raw SDK error is a JSON blob with a request_id in it — accurate and
+ * useless on screen. The failure that matters most is the org's API spend
+ * ceiling, because the fix is a Console setting rather than anything in the
+ * app, and because the work can be done in Cowork and imported meanwhile.
+ */
+function explainFailure(err: any): string {
+  const raw = String(err?.message || err || '');
+  const until = /regain access on ([0-9-]+)/i.exec(raw)?.[1];
+  if (/usage limits?|credit balance|quota/i.test(raw)) {
+    return `The app's Anthropic API key has hit its usage limit${until ? `, resetting ${until}` : ''}. Raise the limit in the Anthropic Console (Settings → Limits), or synthesize this market in Cowork on your subscription and use “Import a master” here.`;
+  }
+  if (/rate.?limit|429/i.test(raw)) {
+    return 'The API rate-limited this request. Wait a minute and synthesize again — nothing was lost.';
+  }
+  if (/timed out|ETIMEDOUT|ECONNRESET|socket hang up/i.test(raw)) {
+    return 'The connection dropped mid-synthesis. Try again — sources already uploaded are still here.';
+  }
+  return raw.slice(0, 500);
+}
+
 export async function synthesizeLane(userId: number, laneId: number, opts: { full?: boolean } = {}): Promise<{ version: number; usage: any; audit: CitationAudit }> {
   const lane = await getLane(userId, laneId);
   if (!lane) throw new Error('Lane not found');
@@ -511,9 +534,93 @@ export async function synthesizeLane(userId: number, laneId: number, opts: { ful
     if (!audit.ok) console.warn(`[lanes] lane ${laneId} v${version} saved as needs_review: ${audit.note}`);
     return { version, usage, audit };
   } catch (err: any) {
-    await sql`UPDATE research_lanes SET synthesis_status = 'failed', synthesis_error = ${String(err?.message || err).slice(0, 500)}, updated_at = NOW() WHERE id = ${laneId}`;
+    await sql`UPDATE research_lanes SET synthesis_status = 'failed', synthesis_error = ${explainFailure(err)}, updated_at = NOW() WHERE id = ${laneId}`;
     throw err;
   }
+}
+
+/**
+ * Import a master synthesized OUTSIDE the app (Paul, 2026-07-26, blocked by
+ * the org's API spend ceiling mid-synthesis).
+ *
+ * The operating model already says the expensive model work can run in Cowork
+ * on his subscription while the app stores and renders. Until this, the app
+ * could only accept a master it had produced itself — so an API ceiling made
+ * the whole market workspace unusable, even though he can do the synthesis in
+ * a Cowork session for free.
+ *
+ * The citation guarantee is NOT relaxed for imports. The audit runs here
+ * exactly as it does after synthesis, against the sources already uploaded to
+ * the lane, and a failing import is saved but parked `needs_review`. Costs
+ * nothing — the audit is mechanical, not a model call — and keeps "every
+ * figure in this master is traceable" true regardless of where it was written.
+ */
+export async function importMaster(userId: number, laneId: number, md: string, note?: string): Promise<{ version: number; audit: CitationAudit }> {
+  const lane = await getLane(userId, laneId);
+  if (!lane) throw new Error('Lane not found');
+  if (!md || md.trim().length < 400) throw new Error('That does not look like a master document — paste the full synthesized text.');
+
+  const rows = await sql<any[]>`
+    SELECT id, label, tool, mime, text_content FROM research_sources
+    WHERE lane_id = ${laneId} ORDER BY created_at ASC`;
+  // PDFs have no extractable text on this side (the model reads them as
+  // document blocks during synthesis), so they can only be audited on the
+  // labels we hold. Say so rather than implying a clean bill.
+  //
+  // And drop any source that IS this master. Paul's first import was a master
+  // he had already uploaded to the lane as a source — auditing a document
+  // against itself matches every figure and returns a clean bill that means
+  // nothing. Identity only: a near-match is a judgement call this shouldn't make.
+  const norm = (s: string) => s.replace(/\s+/g, ' ').trim();
+  const self = norm(md);
+  const textSources = rows.filter((r: any) => r.text_content && norm(String(r.text_content)) !== self);
+  const pdfOnly = rows.filter((r: any) => !r.text_content).length;
+
+  // NOT AUDITED is a third state, and collapsing it into "failed" would be a
+  // lie in the more dangerous direction: running auditCitations with no source
+  // text flags EVERY figure as unexplained, which reads as "this master is
+  // full of invented numbers" when the truth is that nothing was checked.
+  const notAudited = textSources.length === 0;
+  const audit: CitationAudit = notAudited
+    ? {
+        ok: false,
+        hasSourceRegister: false, sourcesMissing: [],
+        sourceUrls: 0, masterUrls: 0, urlsDropped: [],
+        masterFigures: 0, citedCount: 0,
+        hasDerivationRegister: false, derivedRegistered: [],
+        unexplained: [], unexplainedCount: 0,
+        note: `NOT AUDITED — this market holds no machine-readable source text to check the figures against${pdfOnly ? ` (${pdfOnly} PDF source(s) are readable only by the synthesis model, not by this check)` : ''}. The document is saved and usable; its figures simply carry no mechanical verification. Paste the underlying research as text sources to have them checked.`,
+      }
+    : auditCitations(
+        md,
+        textSources.map((r: any) => String(r.text_content)),
+        textSources.map((r: any) => String(r.label)),
+      );
+
+  const title = (md.match(/^#\s+(.+)$/m)?.[1] || lane.label).trim().slice(0, 160);
+  const version = lane.master_version + 1;
+  const status = audit.ok ? 'idle' : 'needs_review';
+  const caveat = !notAudited && pdfOnly > 0
+    ? ` ${pdfOnly} PDF source(s) could not be text-audited here — their figures were not checked.`
+    : '';
+
+  await sql.begin(async (tx: any) => {
+    await tx`
+      INSERT INTO research_master_versions (lane_id, version, title, master_md, source_ids, change_note, usage, audit)
+      VALUES (${laneId}, ${version}, ${title}, ${md}, ${rows.map((r: any) => r.id)},
+              ${note || 'Imported — synthesized outside the app'},
+              ${JSON.stringify({ imported: true })}::jsonb, ${JSON.stringify(audit)}::jsonb)`;
+    await tx`
+      UPDATE research_lanes
+      SET master_md = ${md}, master_title = ${title}, master_version = ${version},
+          synthesized_at = NOW(), synthesis_status = ${status},
+          synthesis_error = ${audit.ok ? (caveat.trim() || null) : (audit.note + caveat).slice(0, 500)}, updated_at = NOW()
+      WHERE id = ${laneId}`;
+    await tx`
+      UPDATE research_sources SET incorporated_version = ${version}
+      WHERE lane_id = ${laneId} AND incorporated_version IS NULL`;
+  });
+  return { version, audit };
 }
 
 export async function listVersions(laneId: number) {
