@@ -100,9 +100,14 @@ export async function fileLaneMaster(userId: number, lane: {
   id: number; label: string; master_md: string | null; master_title: string | null; master_version: number;
 }): Promise<number | null> {
   if (!lane.master_md) return null;
+  // Match on kind too. Corp-dev documents (market maps, who's who, theses) are
+  // ALSO artifacts carrying this lane_id and the master version they were
+  // derived from — without the kind filter, re-filing a master would find one
+  // of those and overwrite it with the master's text.
   const [existing] = await sql<{ id: number }[]>`
     SELECT id FROM studio_artifacts
     WHERE user_id = ${userId} AND lane_id = ${lane.id} AND lane_version = ${lane.master_version}
+      AND kind = 'research'
     LIMIT 1`;
   const label = `${lane.master_title || lane.label} — v${lane.master_version}`;
   if (existing) {

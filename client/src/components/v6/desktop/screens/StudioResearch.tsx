@@ -24,6 +24,7 @@ import { authHeaders, type User } from "../../../../hooks/useAuth";
 import { T } from "../atlasTokens";
 import { StudioAnnouncement, StudioPostCards } from "./StudioAnnouncement";
 import CollateralBuilder from "./CollateralBuilder";
+import MarketWorkspace from "./MarketWorkspace";
 
 /* ─── API types ────────────────────────────────────────────── */
 
@@ -182,7 +183,13 @@ export default function StudioResearch({ user }: { user: User | null }) {
   const [reviewId, setReviewId] = useState<number | null>(null); // review sheet
   const [sheet, setSheet] = useState<null | "collateral" | "import">(null); // slide-over sheets
   // The collateral builder takes over the whole frame — one screen, per Paul.
-  const [building, setBuilding] = useState<{ id: number; label: string } | null>(null);
+  const [building, setBuilding] = useState<{ id: number; label: string; output?: "onepager" | "carousel" | "report" } | null>(null);
+  // Studio's two views: the market line of work, and the file manager behind it.
+  const [view, setView] = useState<"market" | "files">(() =>
+    (localStorage.getItem("smbx_studio_view") as "market" | "files") || "market");
+  useEffect(() => { localStorage.setItem("smbx_studio_view", view); }, [view]);
+  // "Read / edit" from the workspace deep-links into the Artifacts inspector.
+  const [openArtifactId, setOpenArtifactId] = useState<number | null>(null);
 
   // Notes surface as a frame-level toast (the create form isn't always on
   // screen); they auto-dismiss.
@@ -787,9 +794,31 @@ export default function StudioResearch({ user }: { user: User | null }) {
 
   );
 
-  // ── the canvas app: the manager owns the whole content area ──
+  // ── the canvas app ──
+  // Paul, 2026-07-26: Studio is a LINE OF WORK, not a filing cabinet. The
+  // market workspace — add research → synthesize → produce — is the screen.
+  // The Finder stays reachable for the machinery that isn't market-scoped
+  // (agent runs, campaigns, analytics, the shared asset library).
   return (
     <div style={A.frame}>
+      <div style={A.viewTabs}>
+        <button type="button" style={{ ...A.viewTab, ...(view === "market" ? A.viewTabOn : null) }} onClick={() => setView("market")}>
+          Markets
+        </button>
+        <button type="button" style={{ ...A.viewTab, ...(view === "files" ? A.viewTabOn : null) }} onClick={() => setView("files")}>
+          All files
+        </button>
+      </div>
+
+      {view === "market" ? (
+        <MarketWorkspace
+          lanes={lanes}
+          onLanesChanged={() => void refresh()}
+          onNote={(kind, text) => setNote({ kind, text })}
+          onOpenBuilder={(artifactId, label, output) => setBuilding({ id: artifactId, label, output })}
+          onOpenArtifact={(artifactId) => { setView("files"); setOpenArtifactId(artifactId); }}
+        />
+      ) : (
       <Library
         loaded={loaded}
         connErr={connErr}
@@ -838,12 +867,16 @@ export default function StudioResearch({ user }: { user: User | null }) {
         onUploadAnalytics={uploadAnalytics}
         onAnalyzeAnalytics={analyzeAnalytics}
         onDeleteAnalytics={deleteAnalytics}
+        openArtifactId={openArtifactId}
+        onArtifactOpened={() => setOpenArtifactId(null)}
       />
+      )}
 
       {building && (
         <CollateralBuilder
           artifactId={building.id}
           artifactLabel={building.label}
+          initialOutput={building.output}
           onClose={() => { setBuilding(null); void refresh(); }}
           onExported={(text) => { setNote({ kind: "ok", text }); void refresh(); }}
         />
@@ -1091,7 +1124,7 @@ function GroupHead({ label, onDropCampaign, action }: { label: string; onDropCam
   );
 }
 
-function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, analytics, typeLabel, angleLabel, dl, reviewId, createForm, angles, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onMoveAsset, onMakeCampaign, onArchiveRun, onDeleteRun, onRunCampaignNow, onPatchSchedule, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard, onImportPlan, onNewLane, onUploadSource, onPasteSource, onDeleteSource, onSynthesize, onFileLaneArtifact, onBuildCollateral, onNewArtifact, onUploadArtifact, onSaveArtifact, onDeleteArtifact, onFileRunAsArtifact, onUploadAnalytics, onAnalyzeAnalytics, onDeleteAnalytics }: {
+function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, analytics, typeLabel, angleLabel, dl, reviewId, createForm, angles, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onMoveAsset, onMakeCampaign, onArchiveRun, onDeleteRun, onRunCampaignNow, onPatchSchedule, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard, onImportPlan, onNewLane, onUploadSource, onPasteSource, onDeleteSource, onSynthesize, onFileLaneArtifact, onBuildCollateral, onNewArtifact, onUploadArtifact, onSaveArtifact, onDeleteArtifact, onFileRunAsArtifact, openArtifactId, onArtifactOpened, onUploadAnalytics, onAnalyzeAnalytics, onDeleteAnalytics }: {
   loaded: boolean;
   connErr: boolean;
   runs: RunRow[];
@@ -1135,6 +1168,9 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, a
   onSaveArtifact: (id: number, patch: Record<string, unknown>) => Promise<void>;
   onDeleteArtifact: (a: ArtifactRow) => void;
   onFileRunAsArtifact: (r: RunRow) => void;
+  /** Deep link from the market workspace: select this artifact on mount. */
+  openArtifactId: number | null;
+  onArtifactOpened: () => void;
   analytics: AnalyticsRow[];
   onUploadAnalytics: (f: File) => void;
   onAnalyzeAnalytics: (a: AnalyticsRow) => void;
@@ -1148,6 +1184,15 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, a
   // A lane's sources + versions aren't in the list payload — they load when
   // the lane is opened, and again whenever a synthesis lands.
   const [laneDetail, setLaneDetail] = useState<{ sources: LaneSource[]; versions: LaneVersion[] } | null>(null);
+
+  // Arriving from the market workspace: land on that artifact, in Artifacts.
+  useEffect(() => {
+    if (openArtifactId == null) return;
+    setSel({ kind: "artifacts" });
+    setSelArtifactId(openArtifactId);
+    setInsp("item");
+    onArtifactOpened();
+  }, [openArtifactId, onArtifactOpened]);
   // The inspector shows the CREATE form, the selected item, or — when a
   // campaign folder is picked — the CAMPAIGN itself (rename, mandate,
   // cadence, archive, delete). That's where campaigns are managed.
@@ -3124,6 +3169,9 @@ const F: Record<string, React.CSSProperties> = {
    never position:fixed, the Safari toolbar rule). */
 const A: Record<string, React.CSSProperties> = {
   frame: { flex: 1, minHeight: 0, position: "relative", display: "flex", flexDirection: "column", padding: "0 26px 18px" },
+  viewTabs: { flex: "none", display: "flex", gap: 4, padding: "0 0 12px" },
+  viewTab: { background: "transparent", border: "none", borderRadius: T.rPill, padding: "7px 15px", fontSize: 13, fontWeight: 700, color: T.muted, cursor: "pointer", fontFamily: T.font },
+  viewTabOn: { background: T.blueBg, color: T.blue },
   sheetWrap: { position: "absolute", inset: 0, zIndex: 40, display: "flex", justifyContent: "flex-end" },
   scrim: { position: "absolute", inset: 0, background: "rgba(15,20,26,0.32)" },
   sheet: { position: "relative", width: "min(1080px, 94%)", height: "100%", background: T.surface, borderLeft: `1px solid ${T.border}`, borderRadius: "14px 0 0 14px", boxShadow: "0 12px 40px rgba(15,20,26,0.28)", display: "flex", flexDirection: "column", overflow: "hidden" },

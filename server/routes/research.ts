@@ -314,6 +314,49 @@ researchRouter.post('/research/runs/:id/file-artifact', async (req, res) => {
   return res.json({ artifactId });
 });
 
+/* ─── Corp-dev documents from a market's master (Paul, 2026-07-26) ────────
+ * "do other work — market maps, who's who, thesis building or other corp dev
+ * beginning work." The practice work, not the marketing byproduct. Each one is
+ * an artifact derived from the master, so it edits, renders and seeds
+ * collateral like any other artifact. See services/corpDevDocs.ts.        */
+
+researchRouter.get('/research/corpdev/types', async (_req, res) => {
+  const { CORP_DEV_DOCS } = await import('../services/corpDevDocs.js');
+  return res.json({ types: CORP_DEV_DOCS.map(({ key, label, blurb }) => ({ key, label, blurb })) });
+});
+
+researchRouter.get('/research/lanes/:id/corpdev', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const id = parseId(req.params.id);
+  if (!id) return res.status(400).json({ error: 'Bad market id' });
+  try {
+    const { listCorpDevDocs } = await import('../services/corpDevDocs.js');
+    return res.json({ docs: await listCorpDevDocs(userId, id) });
+  } catch (err: any) {
+    console.error('[corpdev] list failed:', err?.message);
+    return res.status(500).json({ error: 'Couldn’t load the documents' });
+  }
+});
+
+researchRouter.post('/research/lanes/:id/corpdev', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const id = parseId(req.params.id);
+  if (!id) return res.status(400).json({ error: 'Bad market id' });
+  const type = String(req.body?.type || '');
+  if (!['market_map', 'who_who', 'thesis'].includes(type)) {
+    return res.status(400).json({ error: 'Unknown document type' });
+  }
+  try {
+    const { deriveCorpDevDoc } = await import('../services/corpDevDocs.js');
+    return res.json(await deriveCorpDevDoc({ userId, laneId: id, type: type as any }));
+  } catch (err: any) {
+    console.error('[corpdev] derive failed:', err?.message);
+    return res.status(400).json({ error: err?.message || 'Couldn’t write the document' });
+  }
+});
+
 /** File a lane's synthesized master into the artifacts repository. */
 researchRouter.post('/research/lanes/:id/file-artifact', async (req, res) => {
   const userId = userIdFromReq(req);

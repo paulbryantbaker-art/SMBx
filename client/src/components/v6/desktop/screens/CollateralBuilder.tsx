@@ -75,13 +75,15 @@ interface AssetRow {
   width: number | null; height: number | null; created_at: string; bytes: number;
 }
 
-export default function CollateralBuilder({ artifactId, artifactLabel, onClose, onExported }: {
+export default function CollateralBuilder({ artifactId, artifactLabel, initialOutput, onClose, onExported }: {
   artifactId: number;
   artifactLabel: string;
+  /** Which output the market workspace asked for; defaults to the carousel. */
+  initialOutput?: OutputType;
   onClose: () => void;
   onExported: (msg: string) => void;
 }) {
-  const [output, setOutput] = useState<OutputType>("carousel");
+  const [output, setOutput] = useState<OutputType>(initialOutput ?? "carousel");
   const [runId, setRunId] = useState<number | null>(null);
   const [title, setTitle] = useState(artifactLabel);
   const [uncited, setUncited] = useState<string[]>([]);
