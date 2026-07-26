@@ -158,6 +158,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
   const [schedules, setSchedules] = useState<ScheduleRow[]>([]);
   const [assets, setAssets] = useState<AssetRow[]>([]);
   const [artifacts, setArtifacts] = useState<ArtifactRow[]>([]);
+  const [lanes, setLanes] = useState<LaneRow[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsRow[]>([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -197,13 +198,14 @@ export default function StudioResearch({ user }: { user: User | null }) {
   const [connErr, setConnErr] = useState(false);
   const refresh = useCallback(async () => {
     try {
-      const [r, s, u, a, an, ar] = await Promise.all([
+      const [r, s, u, a, an, ar, ln] = await Promise.all([
         api<{ runs: RunRow[] }>("/research/runs"),
         api<{ schedules: ScheduleRow[] }>("/research/schedules"),
         api<{ spentCents: number; capCents: number | null }>("/research/usage"),
         api<{ assets: AssetRow[] }>("/studio/assets"),
         api<{ items: AnalyticsRow[] }>("/research/analytics"),
         api<{ artifacts: ArtifactRow[] }>("/studio/artifacts"),
+        api<{ lanes: LaneRow[] }>("/research/lanes"),
       ]);
       setRuns(r.runs ?? []);
       setSchedules(s.schedules ?? []);
@@ -211,6 +213,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
       setAssets(a.assets ?? []);
       setAnalytics(an.items ?? []);
       setArtifacts(ar.artifacts ?? []);
+      setLanes(ln.lanes ?? []);
       setConnErr(false);
     } catch {
       setConnErr(true); // banner + fast retry below
@@ -226,8 +229,12 @@ export default function StudioResearch({ user }: { user: User | null }) {
 
   // Always-on poll: fast while a run is in flight or the last load failed,
   // slow but alive when idle (so the library can never go permanently stale).
+  // Synthesis is a long Claude pass over PDFs — the POST can outlive the
+  // proxy, so the lane ROW is the source of truth and the poll is what tells
+  // us it finished. Same reason runs poll.
   const inFlight = runs.some((r) => r.status === "queued" || r.status === "running")
-    || analytics.some((a) => a.analysis_status === "running");
+    || analytics.some((a) => a.analysis_status === "running")
+    || lanes.some((l) => l.synthesis_status === "running");
   const refreshRef = useRef(refresh);
   refreshRef.current = refresh;
   useEffect(() => {
@@ -356,6 +363,91 @@ export default function StudioResearch({ user }: { user: User | null }) {
       setNote({ kind: "err", text: e?.message || "Download failed." });
     }
   }, []);
+
+  /* ── Research lanes: the living master document ───────────────────────
+     Paul, 2026-07-24: "I'm gonna run the research in Claude Web app, I will
+     run a research and Gemini probably or other tool just so we have a variety
+     of research… then I will upload all of the research for it to pass through
+     and calculate all the information into one final document. I want to do
+     this part in the app too so that I can keep all the research in the
+     database and keep it updated." */
+
+  const newLane = useCallback(async () => {
+    const label = window.prompt("Name the lane — the market this master document covers:\n(e.g. “Commercial mechanical”, “Elevator & escalator”)")?.trim();
+    if (!label) return null;
+    try {
+      const lane = await api<LaneRow>("/research/lanes", { method: "POST", body: JSON.stringify({ label }) });
+      await refresh();
+      return lane.id;
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Couldn’t create the lane." });
+      return null;
+    }
+  }, [refresh]);
+
+  const uploadSource = useCallback(async (laneId: number, f: File) => {
+    const fd = new FormData();
+    fd.append("file", f);
+    fd.append("label", f.name.replace(/\.[a-z0-9]+$/i, ""));
+    try {
+      const r = await fetch(`/api/research/lanes/${laneId}/sources`, { method: "POST", headers: authHeaders(), body: fd });
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        throw new Error((j as any)?.error || `Upload failed (${r.status})`);
+      }
+      setNote({ kind: "ok", text: `“${f.name}” added — press Synthesize to fold it into the master.` });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Upload failed." });
+    }
+  }, [refresh]);
+
+  const pasteSource = useCallback(async (laneId: number, text: string, label: string, tool: string) => {
+    await api(`/research/lanes/${laneId}/sources`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, label, tool }),
+    });
+    void refresh();
+  }, [refresh]);
+
+  const deleteSource = useCallback(async (laneId: number, s: LaneSource) => {
+    if (!window.confirm(`Remove “${s.label}” from this lane?`)) return;
+    try {
+      await api(`/research/lanes/${laneId}/sources/${s.id}`, { method: "DELETE" });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Couldn’t remove it." });
+    }
+  }, [refresh]);
+
+  /**
+   * Fold the new research in. The server writes `synthesis_status='running'`
+   * before it starts, so the ROW is what tells us the outcome — this POST can
+   * legitimately outlive the proxy on a multi-PDF pass, and a timeout here
+   * does NOT mean the synthesis failed.
+   */
+  const synthesizeLane = useCallback(async (laneId: number, full: boolean) => {
+    setNote({ kind: "ok", text: "Synthesizing — reading every source and auditing the figures. This takes a few minutes; the lane shows its state as it goes." });
+    setLanes((ls) => ls.map((l) => (l.id === laneId ? { ...l, synthesis_status: "running", synthesis_error: null } : l)));
+    try {
+      await api(`/research/lanes/${laneId}/synthesize`, { method: "POST", body: JSON.stringify({ full }) });
+    } catch {
+      /* The poll is the truth — a dropped response is not a failed run. */
+    } finally {
+      void refresh();
+    }
+  }, [refresh]);
+
+  const fileLaneArtifact = useCallback(async (laneId: number) => {
+    try {
+      await api(`/research/lanes/${laneId}/file-artifact`, { method: "POST" });
+      setNote({ kind: "ok", text: "Master filed in Artifacts — build collateral from it there." });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Couldn’t file the master." });
+    }
+  }, [refresh]);
 
   /* ── Artifacts: the words repository ──────────────────────────────────
      Reports, post copy, research masters, specs — the text a piece of
@@ -705,6 +797,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
         schedules={schedules}
         assets={assets}
         artifacts={artifacts}
+        lanes={lanes}
         typeLabel={typeLabel}
         angleLabel={angleLabel}
         dl={dl}
@@ -729,6 +822,12 @@ export default function StudioResearch({ user }: { user: User | null }) {
         onUploadPhoto={uploadPhoto}
         onNewCard={() => setSheet("collateral")}
         onImportPlan={() => setSheet("import")}
+        onNewLane={newLane}
+        onUploadSource={uploadSource}
+        onPasteSource={pasteSource}
+        onDeleteSource={deleteSource}
+        onSynthesize={synthesizeLane}
+        onFileLaneArtifact={fileLaneArtifact}
         onBuildCollateral={(a) => setBuilding({ id: a.id, label: a.label })}
         onNewArtifact={newArtifact}
         onUploadArtifact={uploadArtifact}
@@ -810,6 +909,26 @@ function Sheet({ title, onClose, children }: { title: string; onClose: () => voi
    selected run's documents, review state, and its live activity trail —
    the Claude-style "what is it doing right now" feed). */
 
+/* A RESEARCH LANE (Paul, 2026-07-24): he runs deep research OUTSIDE the app —
+   Claude web, Gemini, others, deliberately, for a variety of reads — uploads
+   them all here, and the app folds them into ONE master it keeps updated,
+   "maybe once a quarter." The lane is that living document plus its sources. */
+type LaneRow = {
+  id: number; slug: string; label: string; notes: string | null;
+  master_title: string | null; master_version: number; has_master?: boolean;
+  synthesized_at: string | null; synthesis_status: string; synthesis_error: string | null;
+  archived: boolean; created_at: string;
+};
+type LaneSource = {
+  id: number; label: string; tool: string | null; mime: string;
+  bytes: number | null; gathered_on: string | null;
+  incorporated_version: number | null; created_at: string;
+};
+type LaneVersion = {
+  id: number; version: number; title: string | null; change_note: string | null;
+  source_ids: number[] | null; usage: any; created_at: string;
+};
+
 type ArtifactRow = {
   id: number; kind: string; label: string; notes: string | null;
   lane_id: number | null; lane_version: number | null;
@@ -825,6 +944,7 @@ type FolderSel =
   | { kind: "media" }
   | { kind: "collateral" }
   | { kind: "artifacts" }
+  | { kind: "lane"; id: number }
   | { kind: "perf" };
 
 const ASSET_FOLDER = (s: FolderSel) => s.kind === "media" || s.kind === "collateral";
@@ -971,13 +1091,14 @@ function GroupHead({ label, onDropCampaign, action }: { label: string; onDropCam
   );
 }
 
-function Library({ loaded, connErr, runs, schedules, assets, artifacts, analytics, typeLabel, angleLabel, dl, reviewId, createForm, angles, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onMoveAsset, onMakeCampaign, onArchiveRun, onDeleteRun, onRunCampaignNow, onPatchSchedule, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard, onImportPlan, onBuildCollateral, onNewArtifact, onUploadArtifact, onSaveArtifact, onDeleteArtifact, onFileRunAsArtifact, onUploadAnalytics, onAnalyzeAnalytics, onDeleteAnalytics }: {
+function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, analytics, typeLabel, angleLabel, dl, reviewId, createForm, angles, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onMoveAsset, onMakeCampaign, onArchiveRun, onDeleteRun, onRunCampaignNow, onPatchSchedule, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard, onImportPlan, onNewLane, onUploadSource, onPasteSource, onDeleteSource, onSynthesize, onFileLaneArtifact, onBuildCollateral, onNewArtifact, onUploadArtifact, onSaveArtifact, onDeleteArtifact, onFileRunAsArtifact, onUploadAnalytics, onAnalyzeAnalytics, onDeleteAnalytics }: {
   loaded: boolean;
   connErr: boolean;
   runs: RunRow[];
   schedules: ScheduleRow[];
   assets: AssetRow[];
   artifacts: ArtifactRow[];
+  lanes: LaneRow[];
   typeLabel: (k: string) => string;
   angleLabel: (k?: string | null) => string | null;
   dl: string | null;
@@ -1002,6 +1123,12 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, analytic
   onUploadPhoto: (f: File) => void;
   onNewCard: () => void;
   onImportPlan: () => void;
+  onNewLane: () => Promise<number | null>;
+  onUploadSource: (laneId: number, f: File) => void;
+  onPasteSource: (laneId: number, text: string, label: string, tool: string) => Promise<void>;
+  onDeleteSource: (laneId: number, s: LaneSource) => void;
+  onSynthesize: (laneId: number, full: boolean) => void;
+  onFileLaneArtifact: (laneId: number) => void;
   onBuildCollateral: (a: ArtifactRow) => void;
   onNewArtifact: (kind: string) => Promise<number | null>;
   onUploadArtifact: (f: File) => void;
@@ -1018,6 +1145,9 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, analytic
   const [selAssetId, setSelAssetId] = useState<number | null>(null);
   const [selArtifactId, setSelArtifactId] = useState<number | null>(null);
   const [selPerfId, setSelPerfId] = useState<number | null>(null);
+  // A lane's sources + versions aren't in the list payload — they load when
+  // the lane is opened, and again whenever a synthesis lands.
+  const [laneDetail, setLaneDetail] = useState<{ sources: LaneSource[]; versions: LaneVersion[] } | null>(null);
   // The inspector shows the CREATE form, the selected item, or — when a
   // campaign folder is picked — the CAMPAIGN itself (rename, mandate,
   // cadence, archive, delete). That's where campaigns are managed.
@@ -1026,6 +1156,7 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, analytic
   const lastAutoRef = useRef<number | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const artFileRef = useRef<HTMLInputElement | null>(null);
+  const laneFileRef = useRef<HTMLInputElement | null>(null);
   const perfFileRef = useRef<HTMLInputElement | null>(null);
 
   // Resizable panes (drag the dividers; double-click to fit). Widths persist.
@@ -1044,10 +1175,10 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, analytic
 
   /** Fit the sidebar to the longest folder name (glyph + gaps + count + pads ≈ 86px). */
   const autoFitSide = useCallback(() => {
-    const labels = ["All research", "One-off runs", "Archived", "Artifacts", "Assets", "Collateral", "LinkedIn analytics", "+ New research", ...schedules.map((s) => s.name)];
+    const labels = ["All research", "One-off runs", "Archived", "Research lanes", "Artifacts", "Assets", "Collateral", "LinkedIn analytics", "+ New research", ...schedules.map((s) => s.name), ...lanes.map((l) => l.label)];
     const w = widestLabel(labels, `600 12.5px ${T.font}`);
     if (w > 0) setSideW(clampW(w + 86, 150, 380));
-  }, [schedules]);
+  }, [schedules, lanes]);
 
   // First load with no saved width: auto-size to the campaign names.
   const autoFitDoneRef = useRef(false);
@@ -1090,6 +1221,19 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, analytic
   const campAssetsAll = sel.kind === "camp" ? collateral.filter((a) => a.schedule_id === sel.id) : [];
   const campAssets = q ? campAssetsAll.filter((a) => a.label.toLowerCase().includes(q)) : campAssetsAll;
   const assetPool = assetMode ? assetItems : campAssets;
+  const laneMode = sel.kind === "lane";
+  const selLane = sel.kind === "lane" ? lanes.find((l) => l.id === sel.id) ?? null : null;
+  const laneKey = selLane ? `${selLane.id}:${selLane.master_version}:${selLane.synthesis_status}` : "";
+  useEffect(() => {
+    if (!selLane) { setLaneDetail(null); return; }
+    let alive = true;
+    api<{ sources: LaneSource[]; versions: LaneVersion[] }>(`/research/lanes/${selLane.id}`)
+      .then((j) => { if (alive) setLaneDetail({ sources: j.sources ?? [], versions: j.versions ?? [] }); })
+      .catch(() => { if (alive) setLaneDetail(null); });
+    return () => { alive = false; };
+    // laneKey changes when a synthesis lands, which is when the detail moves.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [laneKey]);
   const artifactMode = ARTIFACT_FOLDER(sel);
   const artifactItems = artifactMode
     ? (q ? artifacts.filter((a) => `${a.label} ${a.kind} ${a.preview ?? ""}`.toLowerCase().includes(q)) : artifacts)
@@ -1262,6 +1406,32 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, analytic
             dim
           />
         ))}
+        {/* Research lanes — the living master documents. Outside research goes
+            IN, one synthesized master comes out, refreshed every few months. */}
+        <div style={{ ...F.sideHead, marginTop: 14, display: "flex", alignItems: "center" }}>
+          <span style={{ flex: 1 }}>Research lanes</span>
+          <button
+            type="button"
+            style={F.groupAdd}
+            title="New lane — a market you keep a master document for"
+            onClick={async () => { const id = await onNewLane(); if (id) setSel({ kind: "lane", id }); }}
+          >
+            + Lane
+          </button>
+        </div>
+        {lanes.length === 0 && <div style={F.groupEmpty}>Upload outside research here</div>}
+        {lanes.map((l) => (
+          <SideRow
+            key={l.id}
+            label={l.label}
+            count={l.master_version || 0}
+            on={sel.kind === "lane" && sel.id === l.id}
+            onClick={() => { setSel({ kind: "lane", id: l.id }); setInsp("item"); }}
+            tint={l.synthesis_status === "running" ? T.blue : l.synthesis_status === "failed" ? "#C4574A" : l.master_version > 0 ? "#4FA97E" : "#A8AEB8"}
+            dim={l.master_version === 0 && l.synthesis_status !== "running"}
+          />
+        ))}
+
         {/* The three repositories, in the order the chain runs:
             ARTIFACTS (the words) + ASSETS (the pictures) -> COLLATERAL (the
             finished output posted or sent). Paul, 2026-07-24. */}
@@ -1311,6 +1481,32 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, analytic
           {sel.kind === "collateral" && (
             <button type="button" style={F.toolBtn} onClick={onNewCard}>New card</button>
           )}
+          {laneMode && selLane && (
+            <>
+              <input
+                ref={laneFileRef}
+                type="file"
+                accept=".pdf,.md,.markdown,.txt,application/pdf,text/markdown,text/plain"
+                style={{ display: "none" }}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) onUploadSource(selLane.id, f); e.currentTarget.value = ""; }}
+              />
+              <button type="button" style={F.toolBtn} onClick={() => laneFileRef.current?.click()}>Upload research</button>
+              <button
+                type="button"
+                style={{ ...F.toolBtn, color: T.ink3 }}
+                onClick={async () => {
+                  const text = window.prompt("Paste the research text (markdown is fine):");
+                  if (!text?.trim()) return;
+                  const label = window.prompt("Name it — where did this come from?", "Claude web research")?.trim() || "Pasted research";
+                  const tool = window.prompt("Which tool produced it? (Claude, Gemini, Perplexity…)", "Claude")?.trim() || "";
+                  try { await onPasteSource(selLane.id, text, label, tool); }
+                  catch { /* the handler surfaces its own error */ }
+                }}
+              >
+                Paste research
+              </button>
+            </>
+          )}
           {artifactMode && (
             <>
               <input
@@ -1345,8 +1541,8 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, analytic
         </div>
         <div style={F.cols}>
           <span style={{ flex: 1 }}>Name</span>
-          <span style={{ width: 104, flex: "none" }}>{perfMode ? "Period" : artifactMode ? "Kind" : assetMode ? "Type" : "Format"}</span>
-          <span style={{ width: 66, flex: "none" }}>{assetMode || artifactMode ? "Size" : "Status"}</span>
+          <span style={{ width: 104, flex: "none" }}>{laneMode ? "Tool" : perfMode ? "Period" : artifactMode ? "Kind" : assetMode ? "Type" : "Format"}</span>
+          <span style={{ width: 66, flex: "none" }}>{assetMode || artifactMode ? "Size" : laneMode ? "Folded in" : "Status"}</span>
           <span style={{ width: 48, flex: "none", textAlign: "right" }}>Date</span>
         </div>
         <div style={F.rows}>
@@ -1360,10 +1556,57 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, analytic
           {loaded && !perfMode && assetMode && assetItems.length === 0 && (
             <div style={F.emptyList}>{q ? "Nothing matches the filter." : sel.kind === "media" ? "No photos yet — upload one with “Upload photo”." : "No collateral yet — every card you render lands here."}</div>
           )}
-          {loaded && !assetMode && !artifactMode && !perfMode && items.length === 0 && campAssets.length === 0 && (
+          {loaded && !assetMode && !artifactMode && !perfMode && !laneMode && items.length === 0 && campAssets.length === 0 && (
             <div style={F.emptyList}>{q ? "Nothing matches the filter." : sel.kind === "archived" ? "Nothing archived." : "No runs in this folder yet."}</div>
           )}
-          {artifactMode
+          {laneMode && selLane && (
+            <>
+              {loaded && laneDetail && laneDetail.sources.length === 0 && (
+                <div style={F.emptyList}>
+                  No research uploaded yet. Run your deep research in Claude web, Gemini, or wherever you like,
+                  then Upload research (PDF or .md) or Paste research here. When the sources are in, press Synthesize —
+                  the app folds them into one master and audits every figure against them.
+                </div>
+              )}
+              {!laneDetail && <div style={F.emptyList}>Loading the lane…</div>}
+              {/* A row is not a button: removing a source is deliberate, via
+                  the ×, not something a stray click can do. */}
+              {(laneDetail?.sources ?? []).map((s) => (
+                <div key={`ls-${s.id}`} style={{ ...F.row, cursor: "default" }}>
+                  <span style={F.rowIcon}><DocGlyph c={s.incorporated_version ? "#4FA97E" : "#D9A441"} /></span>
+                  <span style={F.rowName} title={s.label}>{s.label}</span>
+                  <span style={F.rowCol}>{s.tool || (s.mime === "application/pdf" ? "PDF" : "Markdown")}</span>
+                  <span style={{ ...F.rowCol, width: 66 }}>
+                    {s.incorporated_version
+                      ? <span style={{ color: "#0F4E3C", fontWeight: 600 }}>v{s.incorporated_version}</span>
+                      : <span style={{ color: "#8A6A2B", fontWeight: 600 }}>pending</span>}
+                  </span>
+                  <span style={{ ...F.rowCol, width: 48, textAlign: "right" }}>{shortDate(s.created_at)}</span>
+                  <button
+                    type="button"
+                    title="Remove this source from the lane"
+                    onClick={() => onDeleteSource(selLane.id, s)}
+                    style={{ flex: "none", border: "none", background: "none", color: T.muted, cursor: "pointer", fontSize: 15, lineHeight: 1, padding: "0 2px" }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              {(laneDetail?.versions ?? []).length > 0 && (
+                <div style={{ ...F.sideHead, margin: "12px 8px 2px" }}>Master versions</div>
+              )}
+              {(laneDetail?.versions ?? []).map((v) => (
+                <div key={`lv-${v.id}`} style={{ ...F.row, cursor: "default" }}>
+                  <span style={F.rowIcon}><DocGlyph c={T.muted} /></span>
+                  <span style={F.rowName}>v{v.version} · {v.title || "Master"}</span>
+                  <span style={F.rowCol}>{(v.source_ids?.length ?? 0)} source{(v.source_ids?.length ?? 0) === 1 ? "" : "s"}</span>
+                  <span style={{ ...F.rowCol, width: 66 }} />
+                  <span style={{ ...F.rowCol, width: 48, textAlign: "right" }}>{shortDate(v.created_at)}</span>
+                </div>
+              ))}
+            </>
+          )}
+          {!laneMode && (artifactMode
             ? artifactItems.map((a) => {
                 const on = a.id === selArtifactId;
                 return (
@@ -1427,7 +1670,7 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, analytic
                     <span style={{ ...F.rowCol, width: 48, textAlign: "right" }}>{shortDate(r.created_at)}</span>
                   </button>
                 );
-              })}
+              }))}
           {/* the campaign's exported collateral, after its runs */}
           {!assetMode && campAssets.map((a) => {
             const on = a.id === selAssetId && selRunId == null;
@@ -1461,6 +1704,17 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, analytic
             onArchive={(v) => onPatchSchedule(selCamp, { archived: v }, v ? "Campaign archived — it's under Archived campaigns." : "Campaign restored.")}
             onDelete={() => onDeleteSchedule(selCamp)}
           />
+        ) : laneMode ? (
+          selLane ? (
+            <LanePreview
+              lane={selLane}
+              detail={laneDetail}
+              onSynthesize={(full) => onSynthesize(selLane.id, full)}
+              onFileArtifact={() => onFileLaneArtifact(selLane.id)}
+            />
+          ) : (
+            <div style={F.createWrap}>{createForm}</div>
+          )
         ) : artifactMode ? (
           selArtifact ? (
             <ArtifactPreview
@@ -1685,6 +1939,128 @@ function CampaignPreview({ s, count, angles, onSave, onRunNow, onToggle, onArchi
 }
 
 /** Asset preview — media photos and rendered collateral share it. */
+/* ─── Lane inspector — the master document and its synthesis ─────────────
+   The one screen that says what the lane holds, what hasn't been folded in
+   yet, and — when a synthesis fails its audit — exactly which figures broke
+   the citation rule. Paul, 2026-07-24: "we cannot lose citation, and if we
+   infer a value, we need to be able to explain our inferred value." A master
+   that fails is PARKED, not passed off as clean, so this pane has to say so. */
+
+function LanePreview({ lane, detail, onSynthesize, onFileArtifact }: {
+  lane: LaneRow;
+  detail: { sources: LaneSource[]; versions: LaneVersion[] } | null;
+  onSynthesize: (full: boolean) => void;
+  onFileArtifact: () => void;
+}) {
+  const running = lane.synthesis_status === "running";
+  const failed = lane.synthesis_status === "failed";
+  const needsReview = lane.synthesis_status === "needs_review";
+  const sources = detail?.sources ?? [];
+  const pending = sources.filter((s) => s.incorporated_version == null);
+  const hasMaster = lane.master_version > 0;
+
+  return (
+    <div style={F.prevInner}>
+      <div style={F.prevTitle}>{lane.label}</div>
+      <div style={F.prevMeta}>
+        {hasMaster ? `Master v${lane.master_version}` : "No master yet"}
+        {" · "}{sources.length} source{sources.length === 1 ? "" : "s"}
+        {pending.length ? ` · ${pending.length} not yet folded in` : ""}
+        {lane.synthesized_at ? ` · last synthesized ${shortDate(lane.synthesized_at)}` : ""}
+      </div>
+
+      {running && (
+        <div style={{ ...F.actEmpty, marginTop: 12, display: "flex", alignItems: "center", gap: 8 }}>
+          <Spinner />
+          <span>Reading every source and auditing the figures. This takes a few minutes — you can leave this screen.</span>
+        </div>
+      )}
+      {failed && lane.synthesis_error && (
+        <div style={{ ...R.rowErr, marginTop: 12 }}>{lane.synthesis_error}</div>
+      )}
+      {needsReview && (
+        <div style={{ ...F.actEmpty, marginTop: 12, background: "#FFF4E0", borderColor: "#E8D3A8", color: "#8A6A2B", lineHeight: 1.5 }}>
+          <b>Parked for review.</b> The master saved, but it still fails the citation audit after a retry —
+          {lane.synthesis_error ? ` ${lane.synthesis_error}` : " some figures appear in no source and carry no stated derivation."}
+          {" "}Read it before anything goes to a client.
+        </div>
+      )}
+
+      {/* the whole point of the lane */}
+      <div style={F.prevLabel}>Master document</div>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <button
+          type="button"
+          style={{ ...F.reviewBtn, marginTop: 0, opacity: running || sources.length === 0 ? 0.5 : 1 }}
+          disabled={running || sources.length === 0}
+          onClick={() => onSynthesize(false)}
+          title={hasMaster ? "Fold the new research into the existing master" : "Build the master from these sources"}
+        >
+          {running ? "Synthesizing…" : hasMaster ? `Fold in ${pending.length || "new"} research` : "Synthesize the master"}
+        </button>
+        {hasMaster && (
+          <button
+            type="button"
+            style={{ ...F.smallBtn, alignSelf: "center" }}
+            disabled={running}
+            onClick={() => { if (window.confirm("Rebuild the master from EVERY source, discarding the current text? The old version stays in the version list.")) onSynthesize(true); }}
+            title="Re-synthesize from every source rather than only the new ones"
+          >
+            Rebuild from all
+          </button>
+        )}
+      </div>
+      {sources.length === 0 && (
+        <div style={{ fontSize: 11.5, color: T.muted2, marginTop: 6, lineHeight: 1.45 }}>
+          Upload your Claude / Gemini research first — Synthesize needs something to read.
+        </div>
+      )}
+
+      {hasMaster && (
+        <>
+          <div style={F.prevLabel}>Use it</div>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            <button type="button" style={F.smallBtn} onClick={onFileArtifact} title="Put the master in Artifacts, where Build collateral can reach it">
+              File in Artifacts
+            </button>
+            <button
+              type="button"
+              style={F.smallBtn}
+              onClick={async () => {
+                // The endpoint returns the version row; what Paul wants is the
+                // document, so pull the markdown out and save that.
+                const v = await api<{ master_md: string }>(`/research/lanes/${lane.id}/versions/${lane.master_version}`);
+                const url = URL.createObjectURL(new Blob([v.master_md ?? ""], { type: "text/markdown" }));
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `${slugify(lane.label)}-master-v${lane.master_version}.md`;
+                a.click();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+              }}
+            >
+              Download master (.md)
+            </button>
+          </div>
+          <div style={{ fontSize: 11.5, color: T.muted2, marginTop: 6, lineHeight: 1.45 }}>
+            Filing it in Artifacts is how a master becomes a carousel, a 1-pager, or a report.
+          </div>
+        </>
+      )}
+
+      {pending.length > 0 && !running && (
+        <>
+          <div style={F.prevLabel}>Waiting to be folded in</div>
+          {pending.map((s) => (
+            <div key={s.id} style={{ fontSize: 12, color: T.ink, lineHeight: 1.6 }}>
+              · {s.label}{s.tool ? ` — ${s.tool}` : ""}
+            </div>
+          ))}
+        </>
+      )}
+    </div>
+  );
+}
+
 /* ─── Artifacts inspector — the words, editable ──────────────────────────
    The list only carries a preview, so the full body loads on selection. The
    editor is deliberately plain markdown: these documents are the source the
