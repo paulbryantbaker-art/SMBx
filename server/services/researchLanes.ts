@@ -383,9 +383,24 @@ function updateInstruction(currentVersion: number): string {
  * reads them directly rather than through a lossy extraction step. Runs
  * in-process and updates `synthesis_status` so the UI can poll.
  */
+/** How long a 'running' lane can sit before we treat the lock as abandoned. */
+const STALE_RUN_MINUTES = 30;
+
 export async function synthesizeLane(userId: number, laneId: number, opts: { full?: boolean } = {}): Promise<{ version: number; usage: any; audit: CitationAudit }> {
   const lane = await getLane(userId, laneId);
   if (!lane) throw new Error('Lane not found');
+
+  // Synthesis is a long in-process pass, so a deploy or an OOM mid-run leaves
+  // the row stuck at 'running' with nothing left to finish it — and no way for
+  // Paul to start another. Refuse while a run is plausibly alive; take the lock
+  // over once it clearly isn't.
+  if (lane.synthesis_status === 'running') {
+    const [{ stale }] = await sql<{ stale: boolean }[]>`
+      SELECT (updated_at < NOW() - ${`${STALE_RUN_MINUTES} minutes`}::interval) AS stale
+      FROM research_lanes WHERE id = ${laneId}`;
+    if (!stale) throw new Error('A synthesis is already running on this lane — give it a few minutes.');
+    console.warn(`[lanes] lane ${laneId} had a stale 'running' lock; taking it over.`);
+  }
 
   const pending = await sql<any[]>`
     SELECT id, label, tool, mime, data, text_content, gathered_on
