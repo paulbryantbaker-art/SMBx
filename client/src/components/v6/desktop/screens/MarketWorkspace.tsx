@@ -58,11 +58,12 @@ const CORPDEV: { key: "market_map" | "who_who" | "thesis"; label: string; blurb:
   { key: "thesis", label: "Investment thesis", blurb: "The buy-side case, stated so it can be wrong" },
 ];
 
-export default function MarketWorkspace({ lanes, onLanesChanged, onOpenBuilder, onOpenArtifact, onNote }: {
+export default function MarketWorkspace({ lanes, onLanesChanged, onOpenBuilder, onOpenArtifact, onReadMaster, onNote }: {
   lanes: Lane[];
   onLanesChanged: () => void;
-  onOpenBuilder: (artifactId: number, label: string, output: "onepager" | "carousel" | "report") => void;
+  onOpenBuilder: (source: { kind: "lane" | "artifact"; id: number }, label: string, output: "onepager" | "carousel" | "report") => void;
   onOpenArtifact: (artifactId: number) => void;
+  onReadMaster: (laneId: number, label: string) => void;
   onNote: (kind: "ok" | "err", text: string) => void;
 }) {
   const [laneId, setLaneId] = useState<number | null>(null);
@@ -171,18 +172,11 @@ export default function MarketWorkspace({ lanes, onLanesChanged, onOpenBuilder, 
     }
   };
 
-  /** Collateral needs the master as an artifact — file it, then open the board. */
-  const buildCollateral = async (output: "onepager" | "carousel" | "report") => {
+  /** The builder reads the market's master directly — no copy, no filing step,
+   *  so it is always the current version. */
+  const buildCollateral = (output: "onepager" | "carousel" | "report") => {
     if (!lane) return;
-    setBusy(`col:${output}`);
-    try {
-      const { artifactId } = await api<{ artifactId: number }>(`/research/lanes/${lane.id}/file-artifact`, { method: "POST" });
-      onOpenBuilder(artifactId, lane.master_title || lane.label, output);
-    } catch (e: any) {
-      onNote("err", e?.message || "Couldn’t open the builder.");
-    } finally {
-      setBusy(null);
-    }
+    onOpenBuilder({ kind: "lane", id: lane.id }, lane.master_title || lane.label, output);
   };
 
   const derive = async (type: string) => {
@@ -344,18 +338,12 @@ export default function MarketWorkspace({ lanes, onLanesChanged, onOpenBuilder, 
                 >
                   Download .md
                 </button>
-                <button
-                  type="button"
-                  style={S.ghost}
-                  onClick={async () => {
-                    if (!lane) return;
-                    try {
-                      const { artifactId } = await api<{ artifactId: number }>(`/research/lanes/${lane.id}/file-artifact`, { method: "POST" });
-                      onOpenArtifact(artifactId);
-                    } catch (e: any) { onNote("err", e?.message || "Couldn’t open it."); }
-                  }}
-                >
-                  Read / edit
+                {/* Read, not edit: the master is machine-built from the sources
+                    and audited against them, so a hand edit would quietly break
+                    what the audit claims. Tune the DERIVED documents instead —
+                    those are yours to rewrite. */}
+                <button type="button" style={S.ghost} onClick={() => onReadMaster(lane!.id, lane!.master_title || lane!.label)}>
+                  Read master
                 </button>
               </div>
             </>

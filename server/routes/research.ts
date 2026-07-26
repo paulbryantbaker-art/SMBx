@@ -747,16 +747,20 @@ researchRouter.get('/research/runs/:id/pages', async (req, res) => {
 researchRouter.post('/studio/compose', async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  // Either a MARKET (its master, read live — never a snapshot) or a derived
+  // document from Artifacts. laneId wins if both somehow arrive.
+  const laneId = parseId(String(req.body?.laneId ?? ''));
   const artifactId = parseId(String(req.body?.artifactId ?? ''));
   const outputType = String(req.body?.outputType || 'carousel');
-  if (!artifactId) return res.status(400).json({ error: 'Pick the master document' });
+  if (!laneId && !artifactId) return res.status(400).json({ error: 'Pick a market or a document' });
   if (!['onepager', 'carousel', 'report'].includes(outputType)) {
     return res.status(400).json({ error: 'Unknown output type' });
   }
   try {
-    const { composeFromArtifact } = await import('../services/collateralComposer.js');
-    const out = await composeFromArtifact({
-      userId, artifactId,
+    const { composeFrom } = await import('../services/collateralComposer.js');
+    const out = await composeFrom({
+      userId,
+      source: laneId ? { kind: 'lane', id: laneId } : { kind: 'artifact', id: artifactId! },
       outputType: outputType as any,
       postAngle: typeof req.body?.postAngle === 'string' ? req.body.postAngle : null,
       scheduleId: req.body?.scheduleId ? Number(req.body.scheduleId) : null,

@@ -183,7 +183,10 @@ export default function StudioResearch({ user }: { user: User | null }) {
   const [reviewId, setReviewId] = useState<number | null>(null); // review sheet
   const [sheet, setSheet] = useState<null | "collateral" | "import">(null); // slide-over sheets
   // The collateral builder takes over the whole frame — one screen, per Paul.
-  const [building, setBuilding] = useState<{ id: number; label: string; output?: "onepager" | "carousel" | "report" } | null>(null);
+  const [building, setBuilding] = useState<{ source: { kind: "lane" | "artifact"; id: number }; label: string; output?: "onepager" | "carousel" | "report" } | null>(null);
+  // Reading a market's master — it lives in the lane and is never copied, so
+  // this fetches it live rather than opening a snapshot.
+  const [reading, setReading] = useState<{ laneId: number; label: string } | null>(null);
   // Studio's two views: the market line of work, and the file manager behind it.
   const [view, setView] = useState<"market" | "files">(() =>
     (localStorage.getItem("smbx_studio_view") as "market" | "files") || "market");
@@ -446,15 +449,11 @@ export default function StudioResearch({ user }: { user: User | null }) {
     }
   }, [refresh]);
 
-  const fileLaneArtifact = useCallback(async (laneId: number) => {
-    try {
-      await api(`/research/lanes/${laneId}/file-artifact`, { method: "POST" });
-      setNote({ kind: "ok", text: "Master filed in Artifacts — build collateral from it there." });
-      void refresh();
-    } catch (e: any) {
-      setNote({ kind: "err", text: e?.message || "Couldn’t file the master." });
-    }
-  }, [refresh]);
+  /* A master is never filed into Artifacts. It lives in its market, and
+     everything that builds from it reads that row live — so there is no copy
+     to go stale and no question about which one is real (Paul, 2026-07-26:
+     "when we complete a master research — that can be updated later — where
+     does it go?"). The route survives for the run→artifact path. */
 
   /* ── Artifacts: the words repository ──────────────────────────────────
      Reports, post copy, research masters, specs — the text a piece of
@@ -815,8 +814,9 @@ export default function StudioResearch({ user }: { user: User | null }) {
           lanes={lanes}
           onLanesChanged={() => void refresh()}
           onNote={(kind, text) => setNote({ kind, text })}
-          onOpenBuilder={(artifactId, label, output) => setBuilding({ id: artifactId, label, output })}
+          onOpenBuilder={(source, label, output) => setBuilding({ source, label, output })}
           onOpenArtifact={(artifactId) => { setView("files"); setOpenArtifactId(artifactId); }}
+          onReadMaster={(laneId, label) => setReading({ laneId, label })}
         />
       ) : (
       <Library
@@ -856,8 +856,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
         onPasteSource={pasteSource}
         onDeleteSource={deleteSource}
         onSynthesize={synthesizeLane}
-        onFileLaneArtifact={fileLaneArtifact}
-        onBuildCollateral={(a) => setBuilding({ id: a.id, label: a.label })}
+        onBuildCollateral={(a) => setBuilding({ source: { kind: "artifact", id: a.id }, label: a.label })}
         onNewArtifact={newArtifact}
         onUploadArtifact={uploadArtifact}
         onSaveArtifact={saveArtifact}
@@ -874,12 +873,18 @@ export default function StudioResearch({ user }: { user: User | null }) {
 
       {building && (
         <CollateralBuilder
-          artifactId={building.id}
+          source={building.source}
           artifactLabel={building.label}
           initialOutput={building.output}
           onClose={() => { setBuilding(null); void refresh(); }}
           onExported={(text) => { setNote({ kind: "ok", text }); void refresh(); }}
         />
+      )}
+
+      {reading && (
+        <Sheet title={reading.label} onClose={() => setReading(null)}>
+          <MasterReader laneId={reading.laneId} />
+        </Sheet>
       )}
 
       {sheet === "collateral" && (
@@ -1124,7 +1129,7 @@ function GroupHead({ label, onDropCampaign, action }: { label: string; onDropCam
   );
 }
 
-function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, analytics, typeLabel, angleLabel, dl, reviewId, createForm, angles, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onMoveAsset, onMakeCampaign, onArchiveRun, onDeleteRun, onRunCampaignNow, onPatchSchedule, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard, onImportPlan, onNewLane, onUploadSource, onPasteSource, onDeleteSource, onSynthesize, onFileLaneArtifact, onBuildCollateral, onNewArtifact, onUploadArtifact, onSaveArtifact, onDeleteArtifact, onFileRunAsArtifact, openArtifactId, onArtifactOpened, onUploadAnalytics, onAnalyzeAnalytics, onDeleteAnalytics }: {
+function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, analytics, typeLabel, angleLabel, dl, reviewId, createForm, angles, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onMoveAsset, onMakeCampaign, onArchiveRun, onDeleteRun, onRunCampaignNow, onPatchSchedule, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard, onImportPlan, onNewLane, onUploadSource, onPasteSource, onDeleteSource, onSynthesize, onBuildCollateral, onNewArtifact, onUploadArtifact, onSaveArtifact, onDeleteArtifact, onFileRunAsArtifact, openArtifactId, onArtifactOpened, onUploadAnalytics, onAnalyzeAnalytics, onDeleteAnalytics }: {
   loaded: boolean;
   connErr: boolean;
   runs: RunRow[];
@@ -1161,7 +1166,6 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, a
   onPasteSource: (laneId: number, text: string, label: string, tool: string) => Promise<void>;
   onDeleteSource: (laneId: number, s: LaneSource) => void;
   onSynthesize: (laneId: number, full: boolean) => void;
-  onFileLaneArtifact: (laneId: number) => void;
   onBuildCollateral: (a: ArtifactRow) => void;
   onNewArtifact: (kind: string) => Promise<number | null>;
   onUploadArtifact: (f: File) => void;
@@ -1775,7 +1779,6 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, a
               lane={selLane}
               detail={laneDetail}
               onSynthesize={(full) => onSynthesize(selLane.id, full)}
-              onFileArtifact={() => onFileLaneArtifact(selLane.id)}
             />
           ) : (
             <div style={F.createWrap}>{createForm}</div>
@@ -2004,6 +2007,37 @@ function CampaignPreview({ s, count, angles, onSave, onRunNow, onToggle, onArchi
 }
 
 /** Asset preview — media photos and rendered collateral share it. */
+/** The market's master, read live from the lane.
+ *
+ *  Read-only on purpose: the master is machine-built from the sources and
+ *  mechanically audited against them, so a hand edit would quietly invalidate
+ *  what the audit claims about it. The derived documents are the editable
+ *  layer — those are Paul's to rewrite. */
+function MasterReader({ laneId }: { laneId: number }) {
+  const [md, setMd] = useState<string | null>(null);
+  const [err, setErr] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    api<{ lane: { master_md: string | null } }>(`/research/lanes/${laneId}`)
+      .then((j) => { if (alive) setMd(j.lane?.master_md ?? ""); })
+      .catch(() => { if (alive) setErr(true); });
+    return () => { alive = false; };
+  }, [laneId]);
+
+  if (err) return <div style={F.actEmpty}>Couldn’t load the master.</div>;
+  if (md === null) return <div style={F.actEmpty}>Loading…</div>;
+  if (!md) return <div style={F.actEmpty}>This market has no master yet.</div>;
+  return (
+    <>
+      <div style={{ fontSize: 11.5, color: T.muted2, marginBottom: 10, lineHeight: 1.5 }}>
+        Built from the sources and audited against them — read-only. To change what it says, fold in
+        new research or rebuild. The corp-dev documents derived from it are the editable layer.
+      </div>
+      <pre style={F.masterPre}>{md}</pre>
+    </>
+  );
+}
+
 /* ─── Lane inspector — the master document and its synthesis ─────────────
    The one screen that says what the lane holds, what hasn't been folded in
    yet, and — when a synthesis fails its audit — exactly which figures broke
@@ -2011,11 +2045,10 @@ function CampaignPreview({ s, count, angles, onSave, onRunNow, onToggle, onArchi
    infer a value, we need to be able to explain our inferred value." A master
    that fails is PARKED, not passed off as clean, so this pane has to say so. */
 
-function LanePreview({ lane, detail, onSynthesize, onFileArtifact }: {
+function LanePreview({ lane, detail, onSynthesize }: {
   lane: LaneRow;
   detail: { sources: LaneSource[]; versions: LaneVersion[] } | null;
   onSynthesize: (full: boolean) => void;
-  onFileArtifact: () => void;
 }) {
   const running = lane.synthesis_status === "running";
   const failed = lane.synthesis_status === "failed";
@@ -2085,9 +2118,9 @@ function LanePreview({ lane, detail, onSynthesize, onFileArtifact }: {
         <>
           <div style={F.prevLabel}>Use it</div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            <button type="button" style={F.smallBtn} onClick={onFileArtifact} title="Put the master in Artifacts, where Build collateral can reach it">
-              File in Artifacts
-            </button>
+            {/* No "File in Artifacts": the master lives here and nothing copies
+                it. Everything that builds from a market reads this row live, so
+                it is always the current version (Paul, 2026-07-26). */}
             <button
               type="button"
               style={F.smallBtn}
@@ -3134,6 +3167,7 @@ const F: Record<string, React.CSSProperties> = {
   prevTitle: { fontSize: 13.5, fontWeight: 700, color: T.ink, lineHeight: 1.35 },
   prevMeta: { fontSize: 11.5, color: T.muted, marginTop: 4, lineHeight: 1.5 },
   prevLabel: { fontSize: 11, fontWeight: 700, color: T.muted2, letterSpacing: "0.05em", textTransform: "uppercase", marginTop: 16, marginBottom: 6 },
+  masterPre: { whiteSpace: "pre-wrap", wordBreak: "break-word", fontSize: 12.5, lineHeight: 1.7, color: T.ink, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", margin: 0 },
   artTitleInput: { width: "100%", boxSizing: "border-box", fontSize: 13.5, fontWeight: 700, color: T.ink, lineHeight: 1.35, fontFamily: T.font, background: T.white, border: `1px solid transparent`, borderRadius: 7, padding: "4px 6px", margin: "-4px -6px 0", outline: "none" },
   artBody: { width: "100%", boxSizing: "border-box", minHeight: 300, resize: "vertical", background: T.white, border: `1px solid ${T.inputBd}`, borderRadius: 10, padding: "10px 11px", fontSize: 12.5, lineHeight: 1.6, color: T.ink, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", outline: "none" },
   docRow: { display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", background: T.white, border: `1px solid ${T.border}`, borderRadius: 9, padding: "8px 10px", cursor: "pointer", fontFamily: T.font, marginTop: 5 },
