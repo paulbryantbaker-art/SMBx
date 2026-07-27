@@ -59,7 +59,10 @@ const bodyMd = splitIdx >= 0 ? rawMd.slice(splitIdx + 5).trim() : rawMd;
    -->
    Absent → a plain cover (byline defaults to the owner, no stat band).       */
 const coverCfg: { byline: string; role: string; headshot: string; image: string; imagePos: string; footer: string; eyebrow?: string; stats: { n: string; l: string }[]; accents: { match: string; img: string; pos: string }[] } =
-  { byline: 'Paul Baker', role: 'smbX.ai · Buy-side corporate development', headshot: '', image: '', imagePos: '50% 50%', footer: '', stats: [], accents: [] };
+  // `eyebrow` must be present here, not just in the type: the parser below
+  // assigns with `k in coverCfg`, so an optional key left off the initializer
+  // is silently dropped — `eyebrow:` in a cover block did nothing.
+  { byline: 'Paul Baker', role: 'smbX.ai · Buy-side corporate development', headshot: '', image: '', imagePos: '50% 50%', footer: '', eyebrow: '', stats: [], accents: [] };
 const cfgMatch = coverMdRaw.match(/<!--\s*cover([\s\S]*?)-->/i);
 const coverMd = (cfgMatch ? coverMdRaw.replace(cfgMatch[0], '') : coverMdRaw).trim();
 if (cfgMatch) for (const line of cfgMatch[1].split('\n')) {
@@ -84,6 +87,11 @@ let titleHtml = '', rest = coverHtmlRaw;
 const h1m = rest.match(/<h1[\s\S]*?<\/h1>/i); if (h1m) { titleHtml += h1m[0]; rest = rest.replace(h1m[0], ''); }
 const h2m = rest.match(/<h2[\s\S]*?<\/h2>/i); if (h2m) { titleHtml += h2m[0]; rest = rest.replace(h2m[0], ''); }
 titleHtml += '<div class="rule"></div>';
+/* Fraunces's DEFAULT ampersand is a swash form — not an alternate a feature
+   setting can switch off — and at title size "M&A" reads as a glyph nobody
+   recognises. Set the ampersand in the sans face instead; it is the only
+   character that needs it. */
+titleHtml = titleHtml.replace(/&amp;/g, '<span class="amp">&amp;</span>');
 /* running-footer label: --footer / config, else the plain-text report title */
 const footerRaw = flag('--footer') || coverCfg.footer;
 const footerLabel = footerRaw
@@ -147,7 +155,12 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
   /* logo is 4:1 — align-self stops the column flexbox from stretching it wide */
   .cv-logo { height: 25px; width: auto; align-self: flex-start; display: block; }
   .cv-eyebrow { font-family: ${MONO}; font-size: 9.5pt; letter-spacing: 0.2em; color: ${BRASS}; margin-top: 0.22in; }
-  .cover h1 { font-family: ${DISPLAY}; font-weight: 545; font-size: 26pt; line-height: 1.04; letter-spacing: -0.012em; color: ${IVORY}; margin: 0.1in 0 0.1in; max-width: 6.1in; text-wrap: balance; }
+  /* Fraunces ships a swash ampersand as a discretionary ligature. In a title
+     like "Home Services M&A" it reads as a glyph nobody recognises, so the
+     alternates are switched off here. */
+  .cover h1 { font-family: ${DISPLAY}; font-weight: 545; font-size: 26pt; line-height: 1.04; letter-spacing: -0.012em; color: ${IVORY}; margin: 0.1in 0 0.1in; max-width: 6.1in; text-wrap: balance;
+    font-variant-ligatures: none; }
+  .cover h1 .amp { font-family: ${SANS}; font-weight: 500; font-size: 0.86em; }
   .cover h2 { font-family: ${SANS}; font-weight: 500; font-size: 12.5pt; line-height: 1.4; color: ${IVORY_SUB}; margin: 0 0 0.03in; max-width: 5.9in; }
   .cover .rule { width: 84px; height: 5px; background: ${BRASS}; border-radius: 99px; margin: 0.06in 0 0.2in; }
   /* optional framed hero image on the cover (like the carousel cover) */
@@ -171,6 +184,12 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
   .cv-cardbody em { color: ${IVORY}; font-style: italic; font-weight: 500; }
 
   /* owner byline — headshot disc pinned to the bottom of the cover */
+  /* The byline pins to the foot, so everything above it needs somewhere to
+     go. WITH a hero the block sits top-aligned and the image carries the
+     middle; WITHOUT one there is nothing to fill that space, and the cover
+     reads as a hole — so the block centres instead. */
+  .cv-body { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  .cover.nohero .cv-body { justify-content: center; padding-bottom: 0.3in; }
   .cv-byline { margin-top: auto; display: flex; align-items: center; gap: 13px; padding-top: 0.16in; border-top: 1px solid rgba(255,255,255,0.13); }
   .cv-face { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; object-position: 50% 20%; border: 2px solid rgba(143,208,174,0.5); flex: none; }
   .cv-by-name { font-family: ${SANS}; font-weight: 600; font-size: 11pt; color: ${IVORY}; }
@@ -213,13 +232,15 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
   .rbody em { color: ${TERT}; }
 </style></head>
 <body>
-  <section class="cover">
+  <section class="cover${heroHtml ? '' : ' nohero'}">
     <img class="cv-logo" src="${LOGO_W}">
-    <div class="cv-eyebrow">${coverEyebrow}</div>
-    ${titleHtml}
-    ${heroHtml}
-    ${statBand}
-    ${restHtml}
+    <div class="cv-body">
+      <div class="cv-eyebrow">${coverEyebrow}</div>
+      ${titleHtml}
+      ${heroHtml}
+      ${statBand}
+      ${restHtml}
+    </div>
     ${bylineHtml}
   </section>
   <main class="rbody${bodyHasH1 ? '' : ' noh1'}">${bodyOut}</main>

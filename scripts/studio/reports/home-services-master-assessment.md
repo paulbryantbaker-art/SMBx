@@ -2,36 +2,25 @@
 byline: Paul Baker
 role: smbX.ai · Buy-side corporate development
 headshot: founder-portrait.jpg
-stat: $600B+ | Combined U.S. revenue, six trades
-stat: 250,000+ | Home-services businesses
-stat: 8% → 50.6% | PE share of HVAC deals, 2023 → H1 '25
-stat: $20B+ | Five platform recaps in 18 months
-stat: 4–8x → 16–20x | Add-on vs. platform multiple
-stat: ~89% | Of HVAC/plumbing shops under 20 staff
+image: home-services-cover.jpg
+imagePos: 50% 50%
+footer: Home Services M&A — Master Market Assessment
+eyebrow: MARKET ASSESSMENT
+stat: $753–768B | Six trades, U.S. revenue
+stat: 50.6% | PE share of HVAC deals
+stat: $20B+ | Five recaps in 18 months
+stat: 4–8x → 16–20x | Add-on vs. platform
+stat: ~35–45K | Acquirable HVAC/plumbing
+stat: ~89% | Shops under 20 staff
 -->
-# HOME SERVICES M&A — MASTER MARKET ASSESSMENT (2025–2026)
-
-**Prepared for:** smbX.ai buy-side corporate development
-
-**Consolidated from three research workstreams:**
-1. *U.S. Residential HVAC & Plumbing Services: A PE Aggregator's Market Assessment* (TAM/SAM/SOM, consolidation state, labor, regulatory)
-2. *U.S. Residential Home Services Aggregator Landscape* (deep platform map, valuations, brand detail, regionality, operating challenges)
-3. *The Home Services Consolidation Supercycle* (macro capital environment, multiple arbitrage mechanics, six-trade teardown, integration playbook)
-
-Data conflicts between the three sources are reconciled inline and flagged in the Appendix.
-
-> **Corrections applied 2026-07-26, after a primary-source adjudication of this document's market sizing (*TAM Reconciliation: U.S. HVAC, Plumbing & Electrical Trades*).** Two figures carried here were wrong and are corrected in place:
->
-> 1. **Electrical was stated as $347.5B.** That is IBISWorld's "Electricians" report (NAICS 23821), which by its own definition includes low-voltage, data cabling, telecom and fire/security work — out of scope for a trades TAM. The defensible figure is **~$235B (2022, Census-derived)** and **~$265–280B (2026)**. The correction moves the six-trade total from $835.5B to roughly $753–768B. **Any rendering of this report dated before 2026-07-26 carries the retired figure.**
-> 2. **The ~$392B combined 238220 revenue was attributed to County Business Patterns.** CBP publishes no revenue. The source is the **2022 Economic Census, table EC2223BASIC**.
->
-> Two readings also changed: electrical's 21.6% large-enterprise share is commercial and data-center revenue, so **residential** electrical is *less* consolidated than "mid stage" implied; and plumbing's size lead over HVAC is a **total-market** lead that does not hold residentially. The consolidated successor to this document is the Home Services market master in Studio.
+# Home Services M&A
+## A Buy-Side Market Assessment for Acquirers, 2025–2026
 
 ---
 
 ## EXECUTIVE SUMMARY
 
-- **The market is enormous and still structurally fragmented.** The six primary home services trades (HVAC, plumbing, electrical, roofing, pest control, garage doors) exceed **$600B in combined U.S. revenue** across ~250,000+ businesses, with no single entity commanding 20% share in any major vertical. The HVAC + plumbing core sits inside a ~$328–392B contractor revenue base; ~89% of the ~111,000 combined NAICS 238220 establishments have fewer than 20 employees and remain independent.
+- **The market is large and structurally fragmented.** The six primary home services trades (HVAC, plumbing, electrical, roofing, pest control, garage doors) total roughly **$753–768B in combined U.S. revenue** across ~250,000+ businesses, with no single entity commanding 20% share in any major vertical. *(Corrected from a prior ">$600B" headline that sat against an $835.5B table total; see A.0 — the electrical component was overstated and the headline understated the table.)* The HVAC + plumbing core sits inside a ~$328–392B contractor revenue base; ~89% of the ~111,000 combined NAICS 238220 establishments have fewer than 20 employees and remain independent.
 
 - **PE now drives the majority of deal flow, and the top of the market re-priced hard in 2024–2026.** PE share of HVAC deals went from 8% (2023) to 50.6% (H1 2025). Five platform recaps between Nov 2024 and May 2026 totaled $20B+: **Apex $10B (~20x, Apollo minority, May 2026), Champions ~$2.5B (~18.5x, Blackstone, Feb 2026), Sila ~$1.7B (~17x, Goldman, Nov 2024), Redwood ~$1.1B (~17x, Altas, May 2025), Guild Garage >$800M (~16x, Oak Hill, Mar 2026)** — plus Service Logic to Bain/Mubadala (Dec 2025).
 
@@ -510,6 +499,30 @@ A historically high number of PE-backed platforms are seeking exits in 2026–20
 ---
 
 # APPENDIX — DATA CONFLICTS, CAVEATS & SOURCE NOTES
+
+## A.0 Provenance and corrections applied
+
+**Consolidated from three research workstreams:**
+
+1. *U.S. Residential HVAC & Plumbing Services: A PE Aggregator's Market Assessment* — TAM/SAM/SOM, consolidation state, labor, regulatory.
+2. *U.S. Residential Home Services Aggregator Landscape* — platform map, valuations, brand detail, regionality, operating challenges.
+3. *The Home Services Consolidation Supercycle* — macro capital environment, multiple arbitrage mechanics, six-trade teardown, integration playbook.
+
+Data conflicts between the three are reconciled inline and registered in A.1 below.
+
+**Corrections applied 2026-07-26.** A primary-source adjudication of this document's market sizing — *TAM Reconciliation: U.S. HVAC, Plumbing & Electrical Trades* — found two figures wrong. Both are corrected in the body above.
+
+| Figure | Was | Now | Why |
+|---|---|---|---|
+| Electrical trade size | $347.5B | ~$235B (2022) / **~$265–280B (2026)** | The old figure was IBISWorld's "Electricians" report (NAICS 23821), which by its own definition includes low-voltage, data cabling, telecom and fire/security work — the wrong scope for a trades TAM. The correction moves the six-trade total from $835.5B to ~$753–768B. |
+| Source of the ~$392B combined 238220 revenue | 2022 County Business Patterns | **2022 Economic Census, table EC2223BASIC** | CBP publishes establishments, firms, employment and payroll — never receipts. The value was right; the citation was not. |
+
+Two readings changed with them:
+
+- **Electrical's 21.6% large-enterprise share is commercial and data-center revenue**, not residential roll-ups — the EC&M Top 50 alone is roughly 22% of the market. Residential electrical is therefore *less* consolidated than a "mid stage" reading implied, which makes it better hunting ground rather than worse.
+- **Plumbing's size lead over HVAC is a total-market lead** driven by commercial, institutional and industrial work. On a residential-only basis HVAC is at least as large. The comparison now carries a scope label wherever it appears.
+
+*Any rendering of this report dated before 2026-07-26 carries the retired electrical figure.* The consolidated successor to this document is the Home Services market master in Studio.
 
 ## A.1 Reconciled data conflicts across the three source documents
 
