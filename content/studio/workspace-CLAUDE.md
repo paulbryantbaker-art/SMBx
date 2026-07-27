@@ -40,14 +40,28 @@ npx tsx $REPO/scripts/studio/audit.mts markets/<m>/master.md
 
 Copy the previous master to `versions/master-v<n>.md` before overwriting.
 
-### 2. Derive a document from the master
+### 2. Derive a corp-dev document from the master
 
-Market map · who's who · investment thesis. Read `master.md`, write to
-`documents/`. Audit it against the master:
+**Market map · who's who · target map · investment thesis.** These are the
+practice's work product — what a client is paying for. Collateral is the
+byproduct.
+
+**`PLAYBOOK.md` in this folder is the specification.** Read it before building
+any of them: it carries each document's section structure, THE LINE as it
+applies to client-facing work, and the per-target rules for the target map.
+
+They land in `markets/<m>/documents/`. Audit before sending:
 
 ```
 npx tsx $REPO/scripts/studio/audit.mts markets/<m>/documents/thesis.md --against markets/<m>/master.md
 ```
+
+**The target map is the one to be careful with.** A market master describes a
+market; it does not contain a list of acquisition targets, because the good
+independents are precisely the companies nobody wrote a report about. Building
+a target map from the master alone produces plausible companies that do not
+exist. If there is no target-level research in `research/`, build the SCREEN
+instead — PLAYBOOK.md has both shapes.
 
 ### 3. Produce collateral
 
