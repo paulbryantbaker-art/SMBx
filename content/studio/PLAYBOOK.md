@@ -8,7 +8,7 @@ Build them by asking, in a session opened on this workspace:
 
 > Build the market map for home-services.
 > Build the target map for home-services from the research in `research/`.
-> Build the investment thesis for home-services.
+> Build the home-services investment thesis for a family office.
 
 Each lands in `markets/<market>/documents/`. Audit it before it goes anywhere:
 
@@ -173,8 +173,59 @@ client exactly what to go find.
 A thesis that cannot be falsified is worthless. Make it specific enough to be
 wrong.
 
+## One market, several theses
+
+A thesis is not a description of a market — it is a **position**, and a position
+is held *for someone*. The same home-services research supports a different case
+for a family office holding forever than for an independent sponsor underwriting
+a five-year exit: different hold period, different leverage, different definition
+of a good business. So a market carries **one thesis per buyer profile**, named
+for that profile:
+
 ```
-# <the market>: investment thesis
+markets/home-services/documents/
+    thesis-family-office.md
+    thesis-independent-sponsor.md
+    thesis-strategic-platform.md
+```
+
+Scaffold one — this stamps it with the market's current master version, which is
+what makes staleness checkable later:
+
+```
+npx tsx $REPO/scripts/studio/thesis.mts new home-services family-office
+```
+
+Each thesis opens with front matter recording what it rests on:
+
+```
+---
+market: home-services
+profile: family-office
+master_version: 2        ← the master version this position was built from
+date: 2026-07-27
+status: draft            ← draft · active · retired
+---
+```
+
+**`master_version` is the load-bearing field.** When the master is re-synthesized
+to v3, every thesis still stamped v2 is resting on facts that have moved — and
+that is now a fact on disk rather than something to remember:
+
+```
+npx tsx $REPO/scripts/studio/thesis.mts list        # every thesis, with standing
+npx tsx $REPO/scripts/studio/thesis.mts check       # same, exits 1 if an ACTIVE one is behind
+npx tsx $REPO/scripts/studio/thesis.mts register    # rewrite THESES.md at the workspace root
+```
+
+Run `register` after writing or revising one. `THESES.md` is generated — edit the
+theses, never that file.
+
+When you bring a thesis current, re-read it against the new master, change what
+moved, and update `master_version` to the version you actually read.
+
+```
+# <the market>: investment thesis — <buyer profile>
 ## The thesis in one paragraph   the claim, plainly. What we believe and what
                                  follows.
 ## Why this market, now          the structural conditions, with figures and
@@ -188,7 +239,9 @@ wrong.
                                  back office" — what actually moves margin here.
 ## What has to be true           the load-bearing assumptions, each stated so
                                  it can be tested. If one is false, the thesis
-                                 fails.
+                                 fails. Mark each: [ ] untested · [?] testing ·
+                                 [~] partial · [x] confirmed — `register` pulls
+                                 these into THESES.md as the standing work list.
 ## What would kill it            the real risks specific to this trade, not a
                                  generic risk register
 ## How we would test it          the diligence that would confirm or break it,

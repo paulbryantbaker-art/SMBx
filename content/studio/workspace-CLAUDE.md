@@ -14,7 +14,8 @@ markets/<market>/     a knowledge base for one market
     research/         the reads gathered anywhere — Claude, Gemini, PDFs
     master.md         THE one synthesized document, built from all of research/
     versions/         master-v1.md, master-v2.md … the history
-    documents/        derived: market-map.md, whos-who.md, thesis.md
+    documents/        derived: market-map.md, whos-who.md, target-map.md,
+                      thesis-<buyer profile>.md (one per profile)
     collateral/       rendered output for this market
 deals/<deal>/
     documents/        what the seller sent
@@ -25,6 +26,7 @@ assets/               recurring images — headshot, brand shots
 collateral/           general rendered output
 decks/                deck specs
 posting-plan.md       what to build next
+THESES.md             every position we hold and what it rests on (generated)
 ```
 
 ## The four jobs
@@ -62,6 +64,22 @@ independents are precisely the companies nobody wrote a report about. Building
 a target map from the master alone produces plausible companies that do not
 exist. If there is no target-level research in `research/`, build the SCREEN
 instead — PLAYBOOK.md has both shapes.
+
+**A thesis belongs to a buyer, so a market carries several.** The same research
+makes a different case for a family office than for an independent sponsor. Each
+is stamped with the master version it was built from, which is what lets
+staleness be checked rather than remembered:
+
+```
+npx tsx $REPO/scripts/studio/thesis.mts new home-services family-office
+npx tsx $REPO/scripts/studio/thesis.mts list      # every thesis, with standing
+npx tsx $REPO/scripts/studio/thesis.mts check     # exits 1 if an ACTIVE one is behind its master
+npx tsx $REPO/scripts/studio/thesis.mts register  # rewrite THESES.md
+```
+
+**Run `register` after writing or revising a thesis**, and **run `check` after
+re-synthesizing a master** — that is the moment positions silently go stale.
+`THESES.md` is generated; edit the theses, not that file.
 
 ### 3. Produce collateral
 
