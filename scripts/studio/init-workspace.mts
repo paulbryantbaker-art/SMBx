@@ -63,6 +63,14 @@ const claudeSrc = path.join(ROOT, 'content/studio/workspace-CLAUDE.md');
 const claudeDst = path.join(target, 'CLAUDE.md');
 if (existsSync(claudeSrc) && !existsSync(claudeDst)) copyFileSync(claudeSrc, claudeDst);
 
+/* The corp-dev document specifications — market map, who's who, target map,
+   thesis. These used to live as prompts inside server/services/corpDevDocs.ts;
+   with the app out of the loop they have to travel with the workspace or the
+   documents lose their structure and their perimeter. */
+const playSrc = path.join(ROOT, 'content/studio/PLAYBOOK.md');
+const playDst = path.join(target, 'PLAYBOOK.md');
+if (existsSync(playSrc) && !existsSync(playDst)) copyFileSync(playSrc, playDst);
+
 // keep empty dirs in place + explain them
 const notes: Record<string, string> = {
   media: 'Drop per-slot artwork here (Gemini exports, photos). The builder reads this + assets/ for cover/page images.',
