@@ -1,0 +1,154 @@
+# smbX studio workspace
+
+This folder is Paul Baker's corp-dev practice, on his machine. Claude Code
+drives it. There is no app, no server, no database — the folders below are the
+system of record, and the SMBx repo is the engine you run against them.
+
+**Set `REPO` once per session** to wherever the SMBx repo is cloned, e.g.
+`~/code/SMBx`. Every command below uses it.
+
+## Layout
+
+```
+markets/<market>/     a knowledge base for one market
+    research/         the reads gathered anywhere — Claude, Gemini, PDFs
+    master.md         THE one synthesized document, built from all of research/
+    versions/         master-v1.md, master-v2.md … the history
+    documents/        derived: market-map.md, whos-who.md, thesis.md
+    collateral/       rendered output for this market
+deals/<deal>/
+    documents/        what the seller sent
+    analysis/         what we produced
+    notes.md          the running record
+media/                per-slot artwork (Gemini exports, photos)
+assets/               recurring images — headshot, brand shots
+collateral/           general rendered output
+decks/                deck specs
+posting-plan.md       what to build next
+```
+
+## The four jobs
+
+### 1. Fold new research into a market's master
+
+Read every file in `markets/<m>/research/`, plus the current `master.md` if one
+exists, and write a new master. Then **audit it before anything else happens**:
+
+```
+npx tsx $REPO/scripts/studio/audit.mts markets/<m>/master.md
+```
+
+Copy the previous master to `versions/master-v<n>.md` before overwriting.
+
+### 2. Derive a document from the master
+
+Market map · who's who · investment thesis. Read `master.md`, write to
+`documents/`. Audit it against the master:
+
+```
+npx tsx $REPO/scripts/studio/audit.mts markets/<m>/documents/thesis.md --against markets/<m>/master.md
+```
+
+### 3. Produce collateral
+
+```
+npx tsx $REPO/scripts/studio/build-report.mts    <doc.md>          # long report PDF
+npx tsx $REPO/scripts/studio/build-deck.mts      <spec.deck.mts>   # LinkedIn carousel
+npx tsx $REPO/scripts/studio/build-onepager.mts  <spec.post.mts>   # single-image post
+```
+
+Run these from the workspace root: they default to `./media` + `./assets` for
+images and `./collateral` for output.
+
+### 4. Deal analysis
+
+Read what's in `deals/<d>/documents/`, write to `analysis/`. Same citation
+discipline: a number in the analysis comes from a document in `documents/`, or
+it says where it came from.
+
+---
+
+# THE LAWS
+
+These are not style preferences. Each one exists because breaking it costs
+something real.
+
+## Citation law
+
+**Every figure must be traceable.** In a master: it appears in a source, or it
+is registered in a `## Derivations` section with its inputs, arithmetic and
+assumption. In a derived document: it appears in the master, or same.
+
+**A rounded figure is a different figure.** `$835B` is not `$835.5B`. Do not
+round, restate in different units, or approximate a number into a new one —
+`audit.mts` will flag it, correctly.
+
+**Conflicting sources keep BOTH values.** If one source says $700M and another
+says $600M, the document says exactly that and cites both. A range citing both
+endpoints is legitimate. **An invented midpoint is not** — never split the
+difference into a number no source reported.
+
+**Every source document is acknowledged** in a `## Sources` register, and
+source URLs carry through.
+
+**Run the audit before anything leaves this folder.** It is mechanical, free,
+and it is the whole reason these documents can be defended.
+
+**What the audit cannot do:** it checks NUMBERS, not prose. A fabricated
+qualitative claim carries no figure and passes clean. That part is on you.
+
+## THE LINE — the practice perimeter
+
+Full text in `THE_LINE_POLICY.md` in the repo. The parts that bind daily work:
+
+- **Buy-side only.** Never sell-side, never two-sided, never a neutral
+  intermediary. One buyer per target.
+- **No specific-target valuations.** Market-level multiples and ranges with
+  their sources, yes. A value on a named company, no.
+- **No unlicensed opinions** — securities, tax, legal, appraisal. Name the
+  specialist the client should engage and what to ask them. That is the correct
+  move, not a hedge.
+- **No fee talk** in any client-facing document.
+- Targets under $250M revenue.
+
+## Attribution law
+
+The track record is **employment** deals, not smbX engagements.
+
+- Always "**led or co-led**", never "closed" unqualified.
+- Always "**selected transactions**".
+- The attribution line appears **wherever the deal names appear** — never as a
+  footnote.
+- Employers are **never named**: "a global investment bank", "a world-class
+  PE-backed aggregator". The total is **150 acquisitions**, no "+".
+- Never "our clients" for an employment-era transaction.
+
+## Imagery
+
+**Real or none.** No stock photography, ever. Paul's real photos only — never
+AI-generate or alter a photo of Paul. The headshot is
+`$REPO/client/public/founder-portrait.jpg`; drop a copy in `assets/`.
+
+Generated *illustration* is fine where it is obviously illustration. A
+photograph that implies something happened is not.
+
+## Voice
+
+Senior operator writing for a principal. Factual, specific, unhurried. No hype,
+no consultant filler, **no AI self-reference of any kind**. Never criticize a
+named competitor — describe the work, not other people's work.
+
+Every client-facing document ends on **what we don't know yet**. A named gap is
+worth more than a confident guess.
+
+---
+
+## Why this is local
+
+The app's Anthropic key hit its organization spend ceiling mid-synthesis, and
+every authoring function stopped at once. The renderers, the model math and the
+audit never needed an API — only the writing did, and the writing is what a
+Claude Code session on this folder does for free.
+
+Keep this folder in git. You get version history on every master, readable
+without a database.
