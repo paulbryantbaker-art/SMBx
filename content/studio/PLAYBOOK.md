@@ -123,6 +123,46 @@ from it.
 says so in its own title. That is a genuinely useful deliverable: it tells the
 client exactly what to go find.
 
+## Building the list mechanically
+
+`screen.mts` produces the target-level data the draft board needs, without a
+model inventing a single company. Everything it lists came back from Google
+Places; everything it tags came out of a register you wrote.
+
+```
+npx tsx $REPO/scripts/studio/screen.mts init <market>   # seed the three config files
+npx tsx $REPO/scripts/studio/screen.mts pull <market>   # Places → screen/candidates.csv
+npx tsx $REPO/scripts/studio/screen.mts rank <market>   # classify, size, score — free, offline
+```
+
+Three files in `markets/<m>/screen/` drive it:
+
+- **`screen.md`** — the buy-box (NAICS, states, metros, revenue range) in front
+  matter, the search matrix as `## Queries` × `## Geographies`, and the
+  review-count→employee proxy that feeds the revenue band.
+- **`consolidators.md`** — **the register, and the load-bearing file.** `rank`
+  calls a business independent when it is *not in here*, so a thin register
+  produces a confident wrong answer. Write it from the master's who's-who:
+
+  > Write `markets/<m>/screen/consolidators.md` from the master's consolidating-
+  > platforms section — named entities only, with their brands and domains.
+
+- **`benchmarks.md`** — revenue-per-employee per NAICS. Pin the sources before
+  any figure reaches a client document; the seeds are honest placeholders.
+
+`rank` writes `revenue_basis` on every row as a complete derivation — employee
+range × revenue-per-employee, naming both assumptions — so a band you carry into
+the target map has its `## Derivations` entry already written.
+
+**The list lives in a Google Sheet.** Import `candidates.csv` (File → Import →
+Upload), sort and annotate it there, export back over the same file, and re-run
+`rank` — columns you added survive untouched.
+
+**Two things `rank` cannot do for you.** It only knows the consolidators you
+listed, so check the top of the board by hand before anyone acts on it. And a
+band is a screening estimate, never a valuation — the no-specific-target-
+valuation rule above still binds, whatever the CSV says.
+
 ```
 # <market> — target screen                    (when there is no target data)
 ## The buy-box                  size, revenue mix, contract structure,

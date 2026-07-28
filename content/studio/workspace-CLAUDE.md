@@ -16,6 +16,9 @@ markets/<market>/     a knowledge base for one market
     versions/         master-v1.md, master-v2.md … the history
     documents/        derived: market-map.md, whos-who.md, target-map.md,
                       thesis-<buyer profile>.md (one per profile)
+    screen/           the target board — screen.md (buy-box + queries),
+                      consolidators.md (who already owns what),
+                      benchmarks.md, candidates.csv
     collateral/       rendered output for this market
 deals/<deal>/
     documents/        what the seller sent
@@ -64,6 +67,27 @@ independents are precisely the companies nobody wrote a report about. Building
 a target map from the master alone produces plausible companies that do not
 exist. If there is no target-level research in `research/`, build the SCREEN
 instead — PLAYBOOK.md has both shapes.
+
+**To get real target data, run the screen.** It pulls the market from Google
+Places and tags who is already owned — no model, so nothing is invented:
+
+```
+npx tsx $REPO/scripts/studio/screen.mts init <market>   # seed screen/ config
+npx tsx $REPO/scripts/studio/screen.mts pull <market>   # Places → screen/candidates.csv
+npx tsx $REPO/scripts/studio/screen.mts rank <market>   # classify, size, score — free, offline
+```
+
+`pull` needs `GOOGLE_PLACES_API_KEY` — a different key from the Anthropic one,
+and the search itself is free. `rank` needs nothing.
+
+**`screen/consolidators.md` is the load-bearing file.** `rank` calls a business
+independent when it is *not in that register*, so write it from the master's
+who's-who before trusting a single row. An empty register tags everything
+`unknown` rather than declaring a market of franchises independent — that is
+deliberate, and it is the answer when you have not done the work yet.
+
+The list is meant to live in a Google Sheet: import `candidates.csv`, sort and
+annotate, export back over the same file, re-run `rank`. Columns you add survive.
 
 **A thesis belongs to a buyer, so a market carries several.** The same research
 makes a different case for a family office than for an independent sponsor. Each

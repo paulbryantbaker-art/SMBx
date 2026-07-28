@@ -100,6 +100,29 @@ get plausible companies that do not exist. Without target-level research in
 `research/`, build the **screen specification** instead — PLAYBOOK has both
 shapes, and the screen is a genuinely useful deliverable.
 
+*The target map.* To get the target-level data it needs, run the screen — a
+Google Places pull, tagged against a register of who is already consolidating:
+
+```
+npx tsx $REPO/scripts/studio/screen.mts init home-services   # seed screen/ config
+npx tsx $REPO/scripts/studio/screen.mts pull home-services   # Places → screen/candidates.csv
+npx tsx $REPO/scripts/studio/screen.mts rank home-services   # classify, size, score
+```
+
+`pull` uses `GOOGLE_PLACES_API_KEY` — a different key from the Anthropic one, so
+a spend cap there does not touch this. Text search is free; Place Details is
+$17/1k with the first 5,000 each month free, and the command tells you the count
+before it spends anything. `rank` is free, offline, and instant — re-run it
+after every edit to the register or the buy-box.
+
+`screen/consolidators.md` is the load-bearing file: `rank` calls a business
+independent when it is *not in that register*. Write it from the master's
+who's-who. Left empty, everything comes back `unknown` rather than a market of
+franchises being declared independent.
+
+The board is a CSV because it belongs in a Google Sheet — import it, sort and
+annotate, export back over the same file, re-run `rank`. Your columns survive.
+
 *The thesis.* It is a position, held for a particular buyer, and it ages as the
 master moves. So a market carries one per buyer profile, each stamped with the
 master version it was built from:
