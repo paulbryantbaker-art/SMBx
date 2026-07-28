@@ -414,9 +414,48 @@ export function toCsv(rows: Candidate[], lead: string[]): string {
 
 /** The columns this tool owns. Everything else in a row belongs to the user. */
 export const COLUMNS = [
-  'place_id', 'name', 'address', 'city', 'state', 'zip', 'phone', 'website',
+  'place_id', 'fetched_at', 'name', 'address', 'city', 'state', 'zip', 'phone', 'website',
   'rating', 'reviews', 'types', 'status',
   'affiliation', 'affiliated_to', 'affiliation_evidence',
   'revenue_low', 'revenue_high', 'revenue_basis',
   'score', 'tier', 'score_detail',
 ];
+
+/* ── what you may keep, and what you are only borrowing ──────────────── */
+
+/**
+ * Google's content — name, contact details, rating, review count.
+ *
+ * The Maps Platform terms let you keep PLACE IDS indefinitely (an explicit
+ * carve-out) but treat everything else as a temporary cache with a limited
+ * window. A CSV that sits in a Google Sheet for a year is not a cache. So the
+ * board separates the two: `place_id` and your own work persist, this list is
+ * refreshable and expirable.
+ *
+ * Confirm the current window against the terms before you lean on a number —
+ * they have changed before, and the app's own client header claims 24 hours
+ * while never enforcing anything at all.
+ */
+export const PLACES_CONTENT = [
+  'name', 'address', 'city', 'state', 'zip', 'phone', 'website',
+  'rating', 'reviews', 'types', 'status',
+];
+
+/** Days since this row's Places content was fetched; null if never stamped. */
+export function ageDays(row: Candidate, now: number): number | null {
+  const t = Date.parse(row.fetched_at || '');
+  if (!Number.isFinite(t)) return null;
+  return Math.floor((now - t) / 86_400_000);
+}
+
+/**
+ * Drop the vendor content, keep everything that is yours: the place ID, your
+ * own columns, and the judgements you derived (affiliation, score) — those are
+ * your analysis, not Google's data.
+ */
+export function forgetContent(row: Candidate): Candidate {
+  const out: Candidate = { ...row };
+  for (const k of PLACES_CONTENT) if (k in out) out[k] = '';
+  out.fetched_at = '';
+  return out;
+}

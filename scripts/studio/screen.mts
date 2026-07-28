@@ -26,9 +26,17 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
 import {
   parseRegister, parseBenchmarks, parseEmployeeRules, classify, revenueBand,
-  score, parseCsv, toCsv, COLUMNS,
+  score, parseCsv, toCsv, COLUMNS, ageDays, forgetContent,
   type Candidate, type Screen,
 } from '../../house/screen.js';
+
+/**
+ * How long Places content may sit in the board before it is refreshed or
+ * dropped. The Maps Platform terms permit keeping PLACE IDS indefinitely but
+ * treat the rest as a temporary cache; this is the local expression of that.
+ * Override per run with --days.
+ */
+const CACHE_DAYS = 30;
 
 const WS = process.cwd();
 const [cmd, marketArg, ...flags] = process.argv.slice(2);
@@ -233,6 +241,7 @@ async function detail(id: string, key: string): Promise<Candidate | null> {
       }
       return {
         place_id: p.id || id,
+        fetched_at: new Date().toISOString().slice(0, 10),
         name: p.displayName?.text || '',
         address: p.formattedAddress || '',
         city, state, zip,
@@ -303,6 +312,67 @@ if (cmd === 'pull') {
   process.exit(0);
 }
 
+/* ── refresh ─────────────────────────────────────────────────────────── */
+
+/**
+ * Re-pull the Places content on rows that have aged out, or drop it.
+ *
+ * This is the command that makes the board honest. Place IDs and your own work
+ * stay forever; name/phone/rating/reviews are Google's and are only borrowed.
+ * `--forget` skips the re-fetch and simply clears the borrowed columns, which
+ * is what you want on a market you have stopped hunting.
+ */
+if (cmd === 'refresh') {
+  if (!marketArg) die('Usage: screen.mts refresh <market> [--days 30] [--forget]');
+  const dir = marketDir(marketArg);
+  const csvPath = path.join(dir, 'screen', 'candidates.csv');
+  if (!existsSync(csvPath)) die(`No candidates yet. Run:  screen.mts pull ${marketArg}`);
+
+  const days = Number(flag('--days')) || CACHE_DAYS;
+  const now = Date.now();
+  const rows = parseCsv(readFileSync(csvPath, 'utf8'));
+  const stale = rows.filter(r => {
+    const a = ageDays(r, now);
+    return (a == null || a >= days) && (r.name || r.phone || r.rating);
+  });
+
+  console.log(`\n${rows.length} rows · ${stale.length} carrying Places content ${days}+ days old (or unstamped)`);
+  if (!stale.length) { console.log('Nothing to do.\n'); process.exit(0); }
+
+  if (has('--forget')) {
+    const out = rows.map(r => stale.includes(r) ? forgetContent(r) : r);
+    writeFileSync(csvPath, toCsv(out, COLUMNS));
+    console.log(`✓ cleared Places content on ${stale.length} row(s). Place IDs, your columns and`);
+    console.log(`  the affiliation/score judgements are untouched — re-pull any time.\n`);
+    process.exit(0);
+  }
+
+  const key = process.env.GOOGLE_PLACES_API_KEY;
+  if (!key) die('GOOGLE_PLACES_API_KEY not set. (Or run with --forget to just clear the stale content.)');
+  console.log(`Re-fetching — billed as Place Details ($17/1k, first 5,000/month free).`);
+  if (stale.length > 5000 && !has('--yes')) die(`  ${stale.length} exceeds the free allowance. Re-run with --yes.`);
+
+  const byId = new Map(rows.map(r => [r.place_id || '', r]));
+  let ok = 0, gone = 0;
+  for (let i = 0; i < stale.length; i += 25) {
+    const batch = await Promise.all(stale.slice(i, i + 25).map(async r => [r, await detail(r.place_id || '', key)] as const));
+    for (const [row, fresh] of batch) {
+      const prior = byId.get(row.place_id || '') || row;
+      // A place that no longer resolves has not just gone stale — it is gone.
+      // Keep the row and your work on it; drop what we can no longer stand behind.
+      if (fresh) { byId.set(row.place_id || '', { ...prior, ...fresh }); ok++; }
+      else { byId.set(row.place_id || '', forgetContent(prior)); gone++; }
+    }
+    process.stdout.write(`\r  refreshed ${Math.min(i + 25, stale.length)}/${stale.length}  `);
+    await sleep(200);
+  }
+  console.log('');
+  writeFileSync(csvPath, toCsv([...byId.values()], COLUMNS));
+  console.log(`\n✓ ${ok} refreshed · ${gone} no longer resolve (content cleared, row and your notes kept)`);
+  console.log(`  Re-run rank to re-score against the fresh data.\n`);
+  process.exit(0);
+}
+
 /* ── rank ────────────────────────────────────────────────────────────── */
 
 if (cmd === 'rank') {
@@ -353,19 +423,39 @@ if (cmd === 'rank') {
   console.log(`  affiliation  ${counts.independent} independent · ${counts.affiliated} affiliated · ${counts.unknown} unknown`);
   console.log(`  tier         A ${tiers.A} · B ${tiers.B} · C ${tiers.C} · D ${tiers.D}`);
   console.log(`  revenue band on ${banded}/${rows.length} (needs a NAICS benchmark + a review count)`);
+  const now = Date.now();
+  const old = rows.filter(r => { const a = ageDays(r, now); return a != null && a >= CACHE_DAYS; }).length;
+  const unstamped = rows.filter(r => ageDays(r, now) == null && r.name).length;
+  if (old || unstamped) {
+    console.log(`\n  ! ${old + unstamped} row(s) carry Places content older than ${CACHE_DAYS} days or unstamped.`);
+    console.log(`    Google's terms let you keep place IDs forever, not the rest:`);
+    console.log(`      screen.mts refresh ${marketArg}            re-pull it`);
+    console.log(`      screen.mts refresh ${marketArg} --forget   drop it, keep your work`);
+  }
+
   console.log(`\n  Open it in Google Sheets — File → Import → Upload. Columns you add`);
   console.log(`  survive a re-rank, so export back over the same file and run rank again.`);
   console.log(`\n  "independent" means NOT IN THE REGISTER. It is exactly as good as`);
-  console.log(`  consolidators.md is complete — check the top of the list by hand.\n`);
+  console.log(`  consolidators.md is complete — check the top of the list by hand.`);
+  console.log(`\n  Places is DISCOVERY, not evidence. Before a name reaches a client`);
+  console.log(`  document, verify it against a primary source — the licence registry,`);
+  console.log(`  the company's own site — and cite that instead.\n`);
   process.exit(0);
 }
 
-console.error(`Usage: screen.mts <init|pull|rank> <market> [flags]
+console.error(`Usage: screen.mts <init|pull|rank|refresh> <market> [flags]
 
-  init <market>    seed screen/screen.md + consolidators.md + benchmarks.md
-  pull <market>    Google Places → screen/candidates.csv   (needs GOOGLE_PLACES_API_KEY)
-                   --pages N   pages per query (default 3, ~20 results each)
-                   --max N     cap new detail fetches (default 2000)
-  rank <market>    classify against the register, size, score — offline and free
+  init <market>     seed screen/screen.md + consolidators.md + benchmarks.md
+  pull <market>     Google Places → screen/candidates.csv   (needs GOOGLE_PLACES_API_KEY)
+                    --pages N   pages per query (default 3, ~20 results each)
+                    --max N     cap new detail fetches (default 2000)
+  rank <market>     classify against the register, size, score — offline and free
+  refresh <market>  re-pull Places content that has aged out
+                    --days N    age threshold (default ${CACHE_DAYS})
+                    --forget    clear it instead of re-fetching (no API key needed)
+
+Google's terms let you keep PLACE IDS indefinitely; name, phone, rating and
+reviews are a temporary cache. Your own columns and the affiliation/score
+judgements are yours either way — refresh --forget keeps them all.
 `);
 process.exit(1);

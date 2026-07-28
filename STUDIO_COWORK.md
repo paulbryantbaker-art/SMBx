@@ -123,6 +123,21 @@ franchises being declared independent.
 The board is a CSV because it belongs in a Google Sheet — import it, sort and
 annotate, export back over the same file, re-run `rank`. Your columns survive.
 
+Google's terms let you keep **place IDs indefinitely** but treat name, phone,
+rating and review count as a **temporary cache**, so the board ages them out and
+`rank` says when rows are past the window:
+
+```
+npx tsx $REPO/scripts/studio/screen.mts refresh home-services            re-pull
+npx tsx $REPO/scripts/studio/screen.mts refresh home-services --forget   drop it
+```
+
+`--forget` clears only the borrowed columns; the place ID, your own columns and
+the affiliation/score judgements are your analysis and stay. And the rule that
+matters more than any of this: **Places is discovery, not evidence** — verify a
+name against the licence registry or the company's own site before it reaches a
+client document, and cite that instead.
+
 *The thesis.* It is a position, held for a particular buyer, and it ages as the
 master moves. So a market carries one per buyer profile, each stamped with the
 master version it was built from:

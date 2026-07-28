@@ -11,7 +11,7 @@
  */
 import {
   parseRegister, classify, normDomain, parseBenchmarks, parseEmployeeRules,
-  revenueBand, score, parseCsv, toCsv, COLUMNS,
+  revenueBand, score, parseCsv, toCsv, COLUMNS, ageDays, forgetContent, PLACES_CONTENT,
   type Candidate, type Screen,
 } from '../screen.js';
 
@@ -174,7 +174,7 @@ is('blank lines dropped', rows.length, 2);
 const out = toCsv(rows, COLUMNS);
 is('a column the user added in Sheets survives a re-rank', out.includes('Notes'), true);
 is('…with its content intact', parseCsv(out)[0].Notes, 'called 7/28 — owner said "not now"');
-is('tool columns lead', out.split('\n')[0].startsWith('place_id,name,'), true);
+is('tool columns lead, user columns follow', out.split('\n')[0], [...COLUMNS, 'Notes'].join(','));
 // toCsv emits the full canonical column set, so a re-read gains empty columns —
 // that is the point (a stable schema). What must not change is the content.
 const back = parseCsv(out);
@@ -182,6 +182,35 @@ is('round trip preserves every value that was set',
   back.map(r => [r.place_id, r.name, r.city, r.Notes]),
   rows.map(r => [r.place_id, r.name, r.city, r.Notes]));
 is('round trip is idempotent from there', toCsv(back, COLUMNS), out);
+
+/* ── retention: what you keep vs what you are borrowing ───────────────── */
+
+// Google's terms permit keeping place IDs indefinitely and treat the rest as a
+// temporary cache. A CSV that lives in a Sheet for a year is not a cache, so
+// the board has to be able to age its borrowed columns out.
+const NOW = Date.parse('2026-07-28T00:00:00Z');
+is('age measured from the fetch stamp',
+  ageDays(C({ fetched_at: '2026-06-28' }), NOW), 30);
+is('an unstamped row has unknown age, not zero',
+  ageDays(C({ name: 'X' }), NOW), null);
+is('a garbage stamp is unknown age too',
+  ageDays(C({ fetched_at: 'last tuesday' }), NOW), null);
+
+const aged = C({
+  place_id: 'p9', fetched_at: '2026-01-01', name: 'Bruno Air', phone: '602-555-0100',
+  rating: '4.8', reviews: '142', website: 'brunoac.com', city: 'Phoenix', state: 'AZ',
+  affiliation: 'independent', score: '88', tier: 'A', Notes: 'called 7/28 — owner open to a chat',
+});
+const kept = forgetContent(aged);
+
+is('forget clears every borrowed column',
+  PLACES_CONTENT.filter(k => kept[k]), []);
+is('…and the fetch stamp with them', kept.fetched_at, '');
+is('the place ID survives — that one is explicitly ours to keep', kept.place_id, 'p9');
+is('your own notes survive', kept.Notes, 'called 7/28 — owner open to a chat');
+// The affiliation call and the score are analysis, not vendor data.
+is('your derived judgements survive', [kept.affiliation, kept.score, kept.tier], ['independent', '88', 'A']);
+is('forget does not mutate the original', aged.name, 'Bruno Air');
 
 console.log(`\n${pass}/${total} correct`);
 process.exit(pass === total ? 0 : 1);

@@ -163,6 +163,27 @@ listed, so check the top of the board by hand before anyone acts on it. And a
 band is a screening estimate, never a valuation — the no-specific-target-
 valuation rule above still binds, whatever the CSV says.
 
+## What you may keep
+
+Google's terms let you store **place IDs indefinitely** — an explicit carve-out —
+but treat the rest (name, phone, rating, review count) as a **temporary cache**.
+A CSV parked in a Google Sheet for a year is not a cache. So the board ages:
+
+```
+npx tsx $REPO/scripts/studio/screen.mts refresh <market>            re-pull it
+npx tsx $REPO/scripts/studio/screen.mts refresh <market> --forget   drop it, keep your work
+```
+
+`--forget` clears only the borrowed columns. The place ID, your own columns, and
+the affiliation and score judgements are **yours** — those are your analysis, not
+Google's data — so they survive, and you can re-pull the rest any time.
+
+**The deeper point: Places is discovery, not evidence.** A target map that cites
+"Google rating 4.7" is weak work regardless of anyone's terms. Before a company
+name reaches a client document, verify it against a primary source — the state
+licence registry, the company's own site, the trade association directory — and
+cite *that*. The screen tells you who to go look at; it is not the look.
+
 ```
 # <market> — target screen                    (when there is no target data)
 ## The buy-box                  size, revenue mix, contract structure,

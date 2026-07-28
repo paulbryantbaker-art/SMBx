@@ -89,6 +89,16 @@ deliberate, and it is the answer when you have not done the work yet.
 The list is meant to live in a Google Sheet: import `candidates.csv`, sort and
 annotate, export back over the same file, re-run `rank`. Columns you add survive.
 
+**What you may keep.** Google's terms allow storing place IDs indefinitely but
+treat name/phone/rating/reviews as a temporary cache, so the board ages them out:
+`screen.mts refresh <market>` re-pulls them, `--forget` clears them. Your own
+columns and the affiliation/score judgements are yours and survive either way.
+
+**Places is discovery, not evidence.** Before a company name reaches a client
+document, verify it against a primary source — the state licence registry, the
+company's own site — and cite that. "Google rating 4.7" is weak work product
+whatever the terms say.
+
 **A thesis belongs to a buyer, so a market carries several.** The same research
 makes a different case for a family office than for an independent sponsor. Each
 is stamped with the master version it was built from, which is what lets
