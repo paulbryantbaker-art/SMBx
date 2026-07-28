@@ -224,6 +224,20 @@ theses, never that file.
 When you bring a thesis current, re-read it against the new master, change what
 moved, and update `master_version` to the version you actually read.
 
+## What the master cannot tell you
+
+The market research describes a market. It does not know your buyer's hold
+period, leverage tolerance, check size, operating bench, or what they consider a
+good business. Those inputs are what make this thesis different from the one
+held for the next buyer — and they decide two whole sections (*What we would buy*
+and *How value is created after close*).
+
+**So ask for them. Do not infer them from the research.** The scaffold opens with
+a `## The buyer` block for exactly this; fill it from the mandate before writing
+anything below it. A session that skips it will quietly invent a buyer's
+preferences, and unlike an invented figure, nothing mechanical will catch it —
+`audit.mts` checks numbers, not prose.
+
 ```
 # <the market>: investment thesis — <buyer profile>
 ## The thesis in one paragraph   the claim, plainly. What we believe and what

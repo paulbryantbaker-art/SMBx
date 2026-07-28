@@ -167,8 +167,21 @@ status: draft
 
 # ${market}: investment thesis — ${profile}
 
-> Scaffold. Fill each section from the master; every figure carries its source.
-> See PLAYBOOK.md for what belongs in each one, and THE LINE for what may not.
+> Scaffold. The buyer block below comes from Paul — the master cannot supply it.
+> Everything after it comes from the master, and every figure carries its source.
+> See PLAYBOOK.md for what belongs in each section, and THE LINE for what may not.
+
+## The buyer
+
+*What makes this position different from the one held for the next buyer. Ask
+for these; do not infer them from the market research.*
+
+- Hold period:
+- Leverage / capital structure:
+- Check size, and platform or add-on:
+- Operating capacity — can they install a GM, or must the owner stay?
+- Geography they will actually travel to:
+- What "good" means to them:
 
 ## The thesis in one paragraph
 
