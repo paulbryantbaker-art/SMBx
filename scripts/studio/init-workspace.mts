@@ -71,6 +71,40 @@ const playSrc = path.join(ROOT, 'content/studio/PLAYBOOK.md');
 const playDst = path.join(target, 'PLAYBOOK.md');
 if (existsSync(playSrc) && !existsSync(playDst)) copyFileSync(playSrc, playDst);
 
+/* The workspace is meant to live in git (that is how a master gets version
+   history without a database), so the one file that must never go up needs to
+   be excluded before anyone commits — a key put somewhere sensible should not
+   become a key in a repository. */
+const gitignore = path.join(target, '.gitignore');
+if (!existsSync(gitignore)) {
+  writeFileSync(gitignore, [
+    '# Secrets — never commit these.',
+    '.env',
+    '.env.local',
+    '',
+    '# OS noise',
+    '.DS_Store',
+    '',
+  ].join('\n'));
+}
+
+/* A .env stub so there is an obvious place for the key, with nothing in it. */
+const envFile = path.join(target, '.env');
+if (!existsSync(envFile)) {
+  writeFileSync(envFile, [
+    '# Local keys for the studio tools. Gitignored — keep it that way.',
+    '#',
+    '# The Places key drives scripts/studio/screen.mts (target screening).',
+    '# It is a DIFFERENT key from any Anthropic one: text search is free and',
+    '# Place Details carries its own monthly free allowance.',
+    '# Get one at https://console.cloud.google.com/ → APIs & Services →',
+    '# Credentials, with the Places API (New) enabled.',
+    '',
+    '# GOOGLE_PLACES_API_KEY=',
+    '',
+  ].join('\n'));
+}
+
 // keep empty dirs in place + explain them
 const notes: Record<string, string> = {
   media: 'Drop per-slot artwork here (Gemini exports, photos). The builder reads this + assets/ for cover/page images.',
@@ -85,11 +119,25 @@ writeFileSync(path.join(exampleMarket, 'README.txt'),
    'research/    the reads you gathered, however you gathered them (PDF, .md, pasted text)',
    'master.md    the one synthesized document, built from all of research/',
    'versions/    master-v1.md, master-v2.md … keep the history',
-   'documents/   what you derive from the master: market-map.md, whos-who.md, thesis.md',
+   'documents/   what you derive from the master: market-map.md, whos-who.md,',
+   '             target-map.md, and one thesis per buyer profile',
+   '             (thesis-family-office.md, thesis-independent-sponsor.md …)',
+   'screen/      the target board — buy-box, the consolidator register, and',
+   '             candidates.csv (open it in Google Sheets)',
    'collateral/  rendered output for this market',
    '',
    'Check any document against its research before it goes anywhere:',
    '  npx tsx <repo>/scripts/studio/audit.mts master.md',
+   '',
+   'A thesis is a position held for a particular buyer, and it ages as the',
+   'master moves. Scaffold and track them from the workspace root:',
+   '  npx tsx <repo>/scripts/studio/thesis.mts new <market> <buyer profile>',
+   '  npx tsx <repo>/scripts/studio/thesis.mts check      (which ones went stale)',
+   '',
+   'Build the target board — a Places pull, tagged against who already owns what:',
+   '  npx tsx <repo>/scripts/studio/screen.mts init <market>',
+   '  npx tsx <repo>/scripts/studio/screen.mts pull <market>   (needs GOOGLE_PLACES_API_KEY)',
+   '  npx tsx <repo>/scripts/studio/screen.mts rank <market>   (free, offline)',
    ''].join('\n'));
 writeFileSync(path.join(exampleDeal, 'README.txt'),
   ['A DEAL — one transaction.', '',
@@ -115,15 +163,26 @@ writeFileSync(path.join(target, 'README.md'), [
   'assets/       recurring images (headshots, brand shots)',
   'collateral/   rendered outputs — post the .pdf, paste the -caption.txt',
   'decks/        your deck specs (start from example.deck.mts)',
+  'markets/      one folder per market — research in, master out, documents derived',
+  'deals/        one folder per deal — what they sent, what we produced',
   'posting-plan.md   what to build next',
+  'THESES.md     every position we hold and what it rests on (generated)',
   '```',
   '',
   '## Build a deck',
   '```',
   'npx tsx <path-to-SMBx-repo>/scripts/studio/build-deck.mts decks/<name>.deck.mts',
   '```',
-  'Reads images from ./media + ./assets, writes to ./collateral. Full guide:',
-  'STUDIO_COWORK.md in the SMBx repo.',
+  'Reads images from ./media + ./assets, writes to ./collateral.',
+  '',
+  '## Track the theses',
+  '```',
+  'npx tsx <path-to-SMBx-repo>/scripts/studio/thesis.mts check',
+  '```',
+  'Tells you which positions rest on a master that has since moved.',
+  '',
+  'Full guide: STUDIO_COWORK.md in the SMBx repo; the laws and the document',
+  'specs are in CLAUDE.md and PLAYBOOK.md right here.',
 ].join('\n'));
 
 const builder = path.join(ROOT, 'scripts/studio/build-deck.mts');

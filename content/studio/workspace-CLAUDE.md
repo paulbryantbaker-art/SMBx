@@ -14,7 +14,11 @@ markets/<market>/     a knowledge base for one market
     research/         the reads gathered anywhere — Claude, Gemini, PDFs
     master.md         THE one synthesized document, built from all of research/
     versions/         master-v1.md, master-v2.md … the history
-    documents/        derived: market-map.md, whos-who.md, thesis.md
+    documents/        derived: market-map.md, whos-who.md, target-map.md,
+                      thesis-<buyer profile>.md (one per profile)
+    screen/           the target board — screen.md (buy-box + queries),
+                      consolidators.md (who already owns what),
+                      benchmarks.md, candidates.csv
     collateral/       rendered output for this market
 deals/<deal>/
     documents/        what the seller sent
@@ -25,6 +29,7 @@ assets/               recurring images — headshot, brand shots
 collateral/           general rendered output
 decks/                deck specs
 posting-plan.md       what to build next
+THESES.md             every position we hold and what it rests on (generated)
 ```
 
 ## The four jobs
@@ -62,6 +67,53 @@ independents are precisely the companies nobody wrote a report about. Building
 a target map from the master alone produces plausible companies that do not
 exist. If there is no target-level research in `research/`, build the SCREEN
 instead — PLAYBOOK.md has both shapes.
+
+**To get real target data, run the screen.** It pulls the market from Google
+Places and tags who is already owned — no model, so nothing is invented:
+
+```
+npx tsx $REPO/scripts/studio/screen.mts init <market>   # seed screen/ config
+npx tsx $REPO/scripts/studio/screen.mts pull <market>   # Places → screen/candidates.csv
+npx tsx $REPO/scripts/studio/screen.mts rank <market>   # classify, size, score — free, offline
+```
+
+`pull` needs `GOOGLE_PLACES_API_KEY` — a different key from the Anthropic one,
+and the search itself is free. `rank` needs nothing.
+
+**`screen/consolidators.md` is the load-bearing file.** `rank` calls a business
+independent when it is *not in that register*, so write it from the master's
+who's-who before trusting a single row. An empty register tags everything
+`unknown` rather than declaring a market of franchises independent — that is
+deliberate, and it is the answer when you have not done the work yet.
+
+The list is meant to live in a Google Sheet: import `candidates.csv`, sort and
+annotate, export back over the same file, re-run `rank`. Columns you add survive.
+
+**What you may keep.** Google's terms allow storing place IDs indefinitely but
+treat name/phone/rating/reviews as a temporary cache, so the board ages them out:
+`screen.mts refresh <market>` re-pulls them, `--forget` clears them. Your own
+columns and the affiliation/score judgements are yours and survive either way.
+
+**Places is discovery, not evidence.** Before a company name reaches a client
+document, verify it against a primary source — the state licence registry, the
+company's own site — and cite that. "Google rating 4.7" is weak work product
+whatever the terms say.
+
+**A thesis belongs to a buyer, so a market carries several.** The same research
+makes a different case for a family office than for an independent sponsor. Each
+is stamped with the master version it was built from, which is what lets
+staleness be checked rather than remembered:
+
+```
+npx tsx $REPO/scripts/studio/thesis.mts new home-services family-office
+npx tsx $REPO/scripts/studio/thesis.mts list      # every thesis, with standing
+npx tsx $REPO/scripts/studio/thesis.mts check     # exits 1 if an ACTIVE one is behind its master
+npx tsx $REPO/scripts/studio/thesis.mts register  # rewrite THESES.md
+```
+
+**Run `register` after writing or revising a thesis**, and **run `check` after
+re-synthesizing a master** — that is the moment positions silently go stale.
+`THESES.md` is generated; edit the theses, not that file.
 
 ### 3. Produce collateral
 

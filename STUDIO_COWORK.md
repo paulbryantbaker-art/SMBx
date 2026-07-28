@@ -1,100 +1,229 @@
-# Studio, local — run the content engine on your computer, not the app
+# The practice, local — run the work on your computer, not the app
 
-**The move (Paul, 2026-07-22):** retire the SMBX app as the content engine and
-run everything on your computer. All the design and build work is kept — it's
-the repo's house system — you just drive it from **local folders** (media,
-assets, collateral) in a Cowork session on your Claude subscription. No app,
-no app `ANTHROPIC_API_KEY`, no monthly-dollar cap.
+**The move (Paul, 2026-07-27):** *"I'm no longer using the app for anything but
+marketing. All work produced will be in Cowork from now on."*
 
-> **Prefer the lean kit.** `studio-kit/` is a self-contained copy of this whole
-> pipeline (~5 dependencies, installs in seconds, its own Chrome auto-detect and
-> bundled fonts/brand assets) — no need to clone the 471MB app. Copy that folder
-> out, `cd studio-kit && npm install`, and follow its `README.md`. The rest of
-> this doc applies verbatim; the kit just spares you the app baggage.
+Everything the practice produces — research masters, market maps, who's who,
+target maps, theses, deal analysis, and all collateral — is produced in a Cowork
+session against **folders on your own machine**. The app is marketing only.
+
+The trigger was concrete: the org's Anthropic key hit its spend ceiling
+mid-synthesis and *every* authoring function stopped at once, because the app
+routes all of them through that one metered key. But the renderers, the model
+math and the citation audit never needed an API — only the *writing* did, and
+the writing is what a Cowork session does on your own subscription.
 
 ## The layout
 
-Two folders on your machine, that's it:
+Two folders on your machine.
 
-**1. The repo** (clone of `paulbryantbaker-art/SMBx`) — holds the *engine*:
-the house design system (Ledger palette, Fraunces/Inter/Plex, textures, logo),
-the builder, the plan, and the brand assets (`client/public/`). You don't edit
-this to make posts; you run it.
+**1. The repo** (clone of `paulbryantbaker-art/SMBx`) — the **engine**. The house
+design system (Ledger palette, Fraunces/Inter/Plex, textures, logo), the
+builders, the audit, brand assets in `client/public/`. You run it; you don't edit
+it to do the work.
 
-**2. A studio workspace** (any folder, e.g. `~/smbx-studio/`) — holds *your*
-stuff:
+**2. A studio workspace** (e.g. `~/Documents/smbx-studio/`) — the **system of
+record**:
+
 ```
-media/        per-slot artwork you make (Gemini exports, photos)
-assets/       recurring images (headshots, brand shots you keep on disk)
-collateral/   rendered outputs land here — post the .pdf, paste the -caption.txt
-decks/        your deck specs (start from the example)
-posting-plan.md   what to build next
+markets/<market>/     a knowledge base for one market
+    research/         the reads you gathered anywhere — Claude, Gemini, PDFs
+    master.md         THE one synthesized document, built from all of research/
+    versions/         master-v1.md, master-v2.md … the history
+    documents/        derived: market-map.md, whos-who.md, target-map.md,
+                      thesis-<buyer profile>.md
+    collateral/       rendered output for this market
+deals/<deal>/
+    documents/        what the seller sent
+    analysis/         what we produced
+media/  assets/  collateral/  decks/     images in, renders out
+posting-plan.md       what to build next
+THESES.md             every position we hold and what it rests on (generated)
+CLAUDE.md             the laws  ┐ copied in by init-workspace, so a session
+PLAYBOOK.md           the specs ┘ opened here behaves correctly on its own
 ```
+
 Create it in one command (from the repo dir, target your workspace path):
+
 ```
-npx tsx scripts/studio/init-workspace.mts ~/smbx-studio
+npx tsx scripts/studio/init-workspace.mts ~/Documents/smbx-studio
 ```
 
-That mirrors what the app housed — its Media library is your `media/`+`assets/`,
-its Collateral folder is your `collateral/` — on disk, under your control.
+That last pair matters. With the app out of the loop, no server prompt enforces
+the citation law, THE LINE, or the document structures any more — so they travel
+*with the workspace* as its own `CLAUDE.md` and `PLAYBOOK.md`.
 
 ## One-time setup
 
-1. Clone the repo locally and `npm install` (installs Node deps + Chromium).
-2. Run `init-workspace.mts` (above) to make your studio folder.
-3. Open **Cowork** (Claude desktop app or claude.ai/code) on the repo. Done —
-   nothing from the app is required.
+1. Clone the repo locally and `npm install`.
+2. Run `init-workspace.mts` (above).
+3. Open **Cowork** on the workspace folder. Set `REPO` to wherever the repo is
+   cloned — every command below uses it.
 
-## The loop for one slot
+## The four jobs
 
-From your workspace folder, the whole thing is:
+### 1. Fold new research into a market's master
 
-1. **Say "build the next slot and research it out."** Cowork reads
-   `posting-plan.md`, takes the `next` slot, **verifies every number** (web
-   search), and writes a spec to `decks/<name>.deck.mts`.
-2. **Review render** (zero flags — it uses your local folders):
-   ```
-   cd ~/smbx-studio
-   npx tsx <repo>/scripts/studio/build-deck.mts decks/<name>.deck.mts
-   ```
-   Reads images from `./media` + `./assets`, writes the deck to `./collateral`.
-   You get the PDF + page JPGs to review.
-3. **Image.** Cowork hands you a copy-ready **Gemini prompt** for the cover art.
-   Generate it in the Gemini app, save the file into `~/smbx-studio/media/`.
-4. **Point the spec at it** (`cover: { image: 'yourfile.png' }` — a bare
-   filename resolves against `./media`) and re-run the same build command.
-5. **Post.** Upload `collateral/<slug>.pdf` as a LinkedIn document post, paste
-   `collateral/<slug>-caption.txt`. Mark the slot `posted` in `posting-plan.md`.
+Gather reads however you like — Claude, Gemini, a PDF someone sent — and drop
+them in `markets/<m>/research/`. Then, in a session on the workspace:
 
-## The spec shape
+> Fold the new research into the home-services master.
 
-Every deck is a small file that `export const deck = {...}`. See
-`scripts/studio/decks/elevator-teardown-1.deck.mts` in the repo for the full
-field reference and the page kinds (`numeral`, `statement`, `diagram`; cover +
-closer are the auto dark bookends). Copy it, change the copy, point the images.
+Copy the previous master to `versions/master-v<n>.md` first. Then **audit before
+anything else happens**:
+
+```
+npx tsx $REPO/scripts/studio/audit.mts markets/<m>/master.md
+```
+
+No flags needed — it finds the sibling `research/` folder. Exit `0` clean, `1`
+not clean, **`2` NOT AUDITED** (no machine-readable source to check against,
+which is not the same as passing).
+
+### 2. Derive a corp-dev document
+
+**Market map · who's who · target map · investment thesis** — the work product a
+client is paying for. `PLAYBOOK.md` in the workspace is the specification; read
+it before building any of them.
+
+```
+npx tsx $REPO/scripts/studio/audit.mts markets/<m>/documents/<doc>.md \
+  --against markets/<m>/master.md
+```
+
+**Two traps worth naming.**
+
+*The target map.* A market master describes a market; it does **not** contain a
+list of acquisition targets, because the good independents are precisely the
+companies nobody wrote a report about. Build one from the master alone and you
+get plausible companies that do not exist. Without target-level research in
+`research/`, build the **screen specification** instead — PLAYBOOK has both
+shapes, and the screen is a genuinely useful deliverable.
+
+*The target map.* To get the target-level data it needs, run the screen — a
+Google Places pull, tagged against a register of who is already consolidating:
+
+```
+npx tsx $REPO/scripts/studio/screen.mts init home-services   # seed screen/ config
+npx tsx $REPO/scripts/studio/screen.mts pull home-services   # Places → screen/candidates.csv
+npx tsx $REPO/scripts/studio/screen.mts rank home-services   # classify, size, score
+```
+
+`pull` uses `GOOGLE_PLACES_API_KEY` — a different key from the Anthropic one, so
+a spend cap there does not touch this. Text search is free; Place Details is
+$17/1k with the first 5,000 each month free, and the command tells you the count
+before it spends anything. `rank` is free, offline, and instant — re-run it
+after every edit to the register or the buy-box.
+
+`screen/consolidators.md` is the load-bearing file: `rank` calls a business
+independent when it is *not in that register*. Write it from the master's
+who's-who. Left empty, everything comes back `unknown` rather than a market of
+franchises being declared independent.
+
+The board is a CSV because it belongs in a Google Sheet — import it, sort and
+annotate, export back over the same file, re-run `rank`. Your columns survive.
+
+Google's terms let you keep **place IDs indefinitely** but treat name, phone,
+rating and review count as a **temporary cache**, so the board ages them out and
+`rank` says when rows are past the window:
+
+```
+npx tsx $REPO/scripts/studio/screen.mts refresh home-services            re-pull
+npx tsx $REPO/scripts/studio/screen.mts refresh home-services --forget   drop it
+```
+
+`--forget` clears only the borrowed columns; the place ID, your own columns and
+the affiliation/score judgements are your analysis and stay. And the rule that
+matters more than any of this: **Places is discovery, not evidence** — verify a
+name against the licence registry or the company's own site before it reaches a
+client document, and cite that instead.
+
+*The thesis.* It is a position, held for a particular buyer, and it ages as the
+master moves. So a market carries one per buyer profile, each stamped with the
+master version it was built from:
+
+```
+npx tsx $REPO/scripts/studio/thesis.mts new home-services family-office
+npx tsx $REPO/scripts/studio/thesis.mts check      # which positions went stale
+npx tsx $REPO/scripts/studio/thesis.mts register   # rewrite THESES.md
+```
+
+Run `check` after every re-synthesis — that is the moment a thesis silently
+starts resting on facts that have moved.
+
+### 3. Produce collateral
+
+```
+npx tsx $REPO/scripts/studio/build-report.mts    <doc.md>          # long report PDF
+npx tsx $REPO/scripts/studio/build-deck.mts      <spec.deck.mts>   # LinkedIn carousel
+npx tsx $REPO/scripts/studio/build-onepager.mts  <spec.post.mts>   # single-image post
+```
+
+Run from the workspace root: they default to `./media` + `./assets` for images
+and `./collateral` for output, so the common case takes no flags. A document
+going to a client is a **report PDF**; the carousel and one-pager are LinkedIn.
+
+Field references live beside the builders — `scripts/studio/decks/` for deck and
+post specs, `scripts/studio/reports/` for report cover blocks.
+
+### 4. Deal analysis
+
+What the seller sent goes in `deals/<d>/documents/`; what we produce goes in
+`analysis/`. Same discipline — a number in the analysis comes from a document in
+`documents/`, or it says where it came from.
+
+## The LinkedIn loop, specifically
+
+1. **"Build the next slot and research it out."** Cowork reads
+   `posting-plan.md`, takes the `next` slot, verifies every number, writes
+   `decks/<name>.deck.mts`.
+2. **Render** — `npx tsx $REPO/scripts/studio/build-deck.mts decks/<name>.deck.mts`
+   → PDF + page JPGs in `./collateral` to review.
+3. **Image.** Cowork hands you a copy-ready Gemini prompt for the cover art.
+   Generate it in the Gemini app, save into `media/`.
+4. **Point the spec at it** (`cover: { image: 'yourfile.png' }` — a bare filename
+   resolves against `./media`) and re-run the same command.
+5. **Post** the `.pdf`, paste the `-caption.txt`, mark the slot `posted`.
 
 ## Images — where they resolve
 
-The builder looks for a spec's image, in order: an absolute path → `--media`
-dir if you pass one → **`./media`** → **`./assets`** → the spec's folder → CWD.
-So just drop files in `media/` (per-slot art) or `assets/` (recurring), name
-them in the spec, and build. Brand assets (logo, headshots, textures) are
-already in the repo and used automatically.
+In order: absolute path → a `--media` dir if you pass one → `./media` →
+`./assets` → the spec's folder → CWD. Brand assets (logo, headshot, textures)
+are in the repo and used automatically.
+
+To move images between your machine and the app's media library without Google
+Drive in the middle: `npx tsx $REPO/scripts/studio/assets.mts push|pull|list`
+(needs `SMBX_API_URL` + `SMBX_TOKEN`).
+
+## What the audit cannot do
+
+It checks **numbers, not prose.** A fabricated qualitative claim carries no
+figure and passes clean. A rounded figure, though, is a *different* figure —
+`$835B` is not `$835.5B`, and it will be flagged, correctly. Conflicting sources
+keep **both** values; an invented midpoint is a fabrication.
 
 ## Why this dodges the limit (honest version)
 
-- The render step (`build-deck.mts`) is **pure local Chromium — zero model
-  cost.** It works with every API on earth capped.
-- The thinking steps (research, writing copy) run on **your Claude
-  subscription** via the Cowork session, not the app's metered key. That's a
-  much larger, faster-resetting allowance — not a hard monthly dollar ceiling.
-- Assisted, not unattended: this is a session with you in the loop. Truly
-  hands-off weekly automation is a later step (a scheduled Cowork routine).
+- Rendering, the model math, and the audit are **pure local — zero model cost.**
+  They work with every API on earth capped.
+- The thinking steps (research, synthesis, writing) run on **your Claude
+  subscription** in the Cowork session, not the app's metered key.
+- Assisted, not unattended: this is a session with you in the loop. Hands-off
+  weekly automation is a later step.
+
+## About `studio-kit/`
+
+`studio-kit/` is a self-contained **deck builder only** — its own `package.json`,
+vendored brand assets, Chrome auto-detect, ~5 dependencies, no clone of the
+471MB app. Good if all you want is a carousel on a machine without the repo.
+
+It does **not** carry the report or one-pager builders, the citation audit, the
+thesis register, or the markets/deals workspace — and its `init-workspace` is the
+older content-only version. **For the practice, use the repo.**
 
 ## Cloud fallback (only if you're not on your own machine)
 
-If you ever run this in a *remote* Cowork environment (a cloud session that
-can't see your disk), swap local folders for **Google Drive**: drop art in a
-Drive folder, and the session downloads it, then builds with
-`--media <download-dir>`. Same builder, same output. On your own computer you
-never need this — local folders are the default.
+In a *remote* Cowork session that can't see your disk, swap local folders for
+Google Drive: drop art in a Drive folder, the session downloads it, then build
+with `--media <download-dir>`. Same builder, same output. On your own computer
+you never need this.

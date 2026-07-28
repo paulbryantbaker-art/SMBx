@@ -8,7 +8,7 @@ Build them by asking, in a session opened on this workspace:
 
 > Build the market map for home-services.
 > Build the target map for home-services from the research in `research/`.
-> Build the investment thesis for home-services.
+> Build the home-services investment thesis for a family office.
 
 Each lands in `markets/<market>/documents/`. Audit it before it goes anywhere:
 
@@ -123,6 +123,67 @@ from it.
 says so in its own title. That is a genuinely useful deliverable: it tells the
 client exactly what to go find.
 
+## Building the list mechanically
+
+`screen.mts` produces the target-level data the draft board needs, without a
+model inventing a single company. Everything it lists came back from Google
+Places; everything it tags came out of a register you wrote.
+
+```
+npx tsx $REPO/scripts/studio/screen.mts init <market>   # seed the three config files
+npx tsx $REPO/scripts/studio/screen.mts pull <market>   # Places → screen/candidates.csv
+npx tsx $REPO/scripts/studio/screen.mts rank <market>   # classify, size, score — free, offline
+```
+
+Three files in `markets/<m>/screen/` drive it:
+
+- **`screen.md`** — the buy-box (NAICS, states, metros, revenue range) in front
+  matter, the search matrix as `## Queries` × `## Geographies`, and the
+  review-count→employee proxy that feeds the revenue band.
+- **`consolidators.md`** — **the register, and the load-bearing file.** `rank`
+  calls a business independent when it is *not in here*, so a thin register
+  produces a confident wrong answer. Write it from the master's who's-who:
+
+  > Write `markets/<m>/screen/consolidators.md` from the master's consolidating-
+  > platforms section — named entities only, with their brands and domains.
+
+- **`benchmarks.md`** — revenue-per-employee per NAICS. Pin the sources before
+  any figure reaches a client document; the seeds are honest placeholders.
+
+`rank` writes `revenue_basis` on every row as a complete derivation — employee
+range × revenue-per-employee, naming both assumptions — so a band you carry into
+the target map has its `## Derivations` entry already written.
+
+**The list lives in a Google Sheet.** Import `candidates.csv` (File → Import →
+Upload), sort and annotate it there, export back over the same file, and re-run
+`rank` — columns you added survive untouched.
+
+**Two things `rank` cannot do for you.** It only knows the consolidators you
+listed, so check the top of the board by hand before anyone acts on it. And a
+band is a screening estimate, never a valuation — the no-specific-target-
+valuation rule above still binds, whatever the CSV says.
+
+## What you may keep
+
+Google's terms let you store **place IDs indefinitely** — an explicit carve-out —
+but treat the rest (name, phone, rating, review count) as a **temporary cache**.
+A CSV parked in a Google Sheet for a year is not a cache. So the board ages:
+
+```
+npx tsx $REPO/scripts/studio/screen.mts refresh <market>            re-pull it
+npx tsx $REPO/scripts/studio/screen.mts refresh <market> --forget   drop it, keep your work
+```
+
+`--forget` clears only the borrowed columns. The place ID, your own columns, and
+the affiliation and score judgements are **yours** — those are your analysis, not
+Google's data — so they survive, and you can re-pull the rest any time.
+
+**The deeper point: Places is discovery, not evidence.** A target map that cites
+"Google rating 4.7" is weak work regardless of anyone's terms. Before a company
+name reaches a client document, verify it against a primary source — the state
+licence registry, the company's own site, the trade association directory — and
+cite *that*. The screen tells you who to go look at; it is not the look.
+
 ```
 # <market> — target screen                    (when there is no target data)
 ## The buy-box                  size, revenue mix, contract structure,
@@ -173,8 +234,73 @@ client exactly what to go find.
 A thesis that cannot be falsified is worthless. Make it specific enough to be
 wrong.
 
+## One market, several theses
+
+A thesis is not a description of a market — it is a **position**, and a position
+is held *for someone*. The same home-services research supports a different case
+for a family office holding forever than for an independent sponsor underwriting
+a five-year exit: different hold period, different leverage, different definition
+of a good business. So a market carries **one thesis per buyer profile**, named
+for that profile:
+
 ```
-# <the market>: investment thesis
+markets/home-services/documents/
+    thesis-family-office.md
+    thesis-independent-sponsor.md
+    thesis-strategic-platform.md
+```
+
+Scaffold one — this stamps it with the market's current master version, which is
+what makes staleness checkable later:
+
+```
+npx tsx $REPO/scripts/studio/thesis.mts new home-services family-office
+```
+
+Each thesis opens with front matter recording what it rests on:
+
+```
+---
+market: home-services
+profile: family-office
+master_version: 2        ← the master version this position was built from
+date: 2026-07-27
+status: draft            ← draft · active · retired
+---
+```
+
+**`master_version` is the load-bearing field.** When the master is re-synthesized
+to v3, every thesis still stamped v2 is resting on facts that have moved — and
+that is now a fact on disk rather than something to remember:
+
+```
+npx tsx $REPO/scripts/studio/thesis.mts list        # every thesis, with standing
+npx tsx $REPO/scripts/studio/thesis.mts check       # same, exits 1 if an ACTIVE one is behind
+npx tsx $REPO/scripts/studio/thesis.mts register    # rewrite THESES.md at the workspace root
+```
+
+Run `register` after writing or revising one. `THESES.md` is generated — edit the
+theses, never that file.
+
+When you bring a thesis current, re-read it against the new master, change what
+moved, and update `master_version` to the version you actually read.
+
+## What the master cannot tell you
+
+The market research describes a market. It does not know your buyer's hold
+period, leverage tolerance, check size, operating bench, or what they consider a
+good business. Those inputs are what make this thesis different from the one
+held for the next buyer — and they decide two whole sections (*What we would buy*
+and *How value is created after close*).
+
+**So ask for them. Do not infer them from the research.** The scaffold opens with
+a `## The buyer` block for exactly this; fill it from the mandate before writing
+anything below it. A session that skips it will quietly invent a buyer's
+preferences, and unlike an invented figure, nothing mechanical will catch it —
+`audit.mts` checks numbers, not prose.
+
+```
+# <the market>: investment thesis — <buyer profile>
 ## The thesis in one paragraph   the claim, plainly. What we believe and what
                                  follows.
 ## Why this market, now          the structural conditions, with figures and
@@ -188,7 +314,9 @@ wrong.
                                  back office" — what actually moves margin here.
 ## What has to be true           the load-bearing assumptions, each stated so
                                  it can be tested. If one is false, the thesis
-                                 fails.
+                                 fails. Mark each: [ ] untested · [?] testing ·
+                                 [~] partial · [x] confirmed — `register` pulls
+                                 these into THESES.md as the standing work list.
 ## What would kill it            the real risks specific to this trade, not a
                                  generic risk register
 ## How we would test it          the diligence that would confirm or break it,
