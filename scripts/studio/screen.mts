@@ -39,6 +39,28 @@ import {
 const CACHE_DAYS = 30;
 
 const WS = process.cwd();
+
+/**
+ * Read `KEY=value` out of a `.env` in the workspace root — no dependency, and
+ * no surprise: a variable already set in the shell always wins, so exporting
+ * one for a single run beats whatever the file says.
+ *
+ * This exists because the workspace is meant to be kept in git, and the obvious
+ * place someone puts a key is a file next to their work. `init-workspace`
+ * writes a `.gitignore` covering `.env` so that stays a local secret.
+ */
+for (const name of ['.env', '.env.local']) {
+  const p = path.join(WS, name);
+  if (!existsSync(p)) continue;
+  for (const line of readFileSync(p, 'utf8').split('\n')) {
+    const m = /^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/.exec(line);
+    if (!m) continue;
+    let v = m[2].trim().replace(/\s+#.*$/, '');
+    if (/^(".*"|'.*')$/s.test(v)) v = v.slice(1, -1);
+    if (!process.env[m[1]]) process.env[m[1]] = v;
+  }
+}
+
 const [cmd, marketArg, ...flags] = process.argv.slice(2);
 const flag = (n: string) => { const i = flags.indexOf(n); return i >= 0 ? flags[i + 1] : undefined; };
 const has = (n: string) => flags.includes(n);
@@ -262,7 +284,13 @@ if (cmd === 'pull') {
   const dir = marketDir(marketArg);
   const s = loadScreen(dir);
   const key = process.env.GOOGLE_PLACES_API_KEY;
-  if (!key) die('GOOGLE_PLACES_API_KEY not set.\n  export GOOGLE_PLACES_API_KEY=…   (a Places key — NOT the Anthropic one)');
+  if (!key) die(`GOOGLE_PLACES_API_KEY not set — it is a Places key, NOT the Anthropic one.
+
+  Put it in ${path.join(WS, '.env')} (gitignored):
+      GOOGLE_PLACES_API_KEY=AIza…
+
+  or export it for this shell:
+      export GOOGLE_PLACES_API_KEY=AIza…`);
   if (!s.queries.length) die('No search matrix — screen.md needs a ## Queries and a ## Geographies list.');
 
   const pages = Number(flag('--pages')) || 3;

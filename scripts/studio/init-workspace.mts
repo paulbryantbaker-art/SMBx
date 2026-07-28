@@ -71,6 +71,40 @@ const playSrc = path.join(ROOT, 'content/studio/PLAYBOOK.md');
 const playDst = path.join(target, 'PLAYBOOK.md');
 if (existsSync(playSrc) && !existsSync(playDst)) copyFileSync(playSrc, playDst);
 
+/* The workspace is meant to live in git (that is how a master gets version
+   history without a database), so the one file that must never go up needs to
+   be excluded before anyone commits — a key put somewhere sensible should not
+   become a key in a repository. */
+const gitignore = path.join(target, '.gitignore');
+if (!existsSync(gitignore)) {
+  writeFileSync(gitignore, [
+    '# Secrets — never commit these.',
+    '.env',
+    '.env.local',
+    '',
+    '# OS noise',
+    '.DS_Store',
+    '',
+  ].join('\n'));
+}
+
+/* A .env stub so there is an obvious place for the key, with nothing in it. */
+const envFile = path.join(target, '.env');
+if (!existsSync(envFile)) {
+  writeFileSync(envFile, [
+    '# Local keys for the studio tools. Gitignored — keep it that way.',
+    '#',
+    '# The Places key drives scripts/studio/screen.mts (target screening).',
+    '# It is a DIFFERENT key from any Anthropic one: text search is free and',
+    '# Place Details carries its own monthly free allowance.',
+    '# Get one at https://console.cloud.google.com/ → APIs & Services →',
+    '# Credentials, with the Places API (New) enabled.',
+    '',
+    '# GOOGLE_PLACES_API_KEY=',
+    '',
+  ].join('\n'));
+}
+
 // keep empty dirs in place + explain them
 const notes: Record<string, string> = {
   media: 'Drop per-slot artwork here (Gemini exports, photos). The builder reads this + assets/ for cover/page images.',
