@@ -15,7 +15,7 @@
 import { REPORTS, type ReportMeta } from '@shared/reports';
 
 import commercialMepMeta from '../../../../scripts/studio/reports/commercial-mep-buy-side-assessment.md?report-meta';
-import homeServicesMeta from '../../../../scripts/studio/reports/home-services-master-assessment.md?report-meta';
+import homeServicesMeta from '../../../../scripts/studio/reports/home-services-state-of-market.md?report-meta';
 
 /** Cover data + read time — everything except the body. */
 export type ReportSummary = typeof commercialMepMeta;
@@ -32,7 +32,7 @@ const SUMMARIES: Record<string, ReportSummary> = {
 
 const BODY_LOADERS = {
   'commercial-mep': () => import('../../../../scripts/studio/reports/commercial-mep-buy-side-assessment.md?report'),
-  'home-services': () => import('../../../../scripts/studio/reports/home-services-master-assessment.md?report'),
+  'home-services': () => import('../../../../scripts/studio/reports/home-services-state-of-market.md?report'),
 };
 
 export interface Report extends ReportMeta {

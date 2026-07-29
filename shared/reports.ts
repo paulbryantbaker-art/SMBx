@@ -56,11 +56,16 @@ export const REPORTS: ReportMeta[] = [
   },
   {
     slug: 'home-services',
-    kicker: 'Master assessment',
-    shortTitle: 'Home Services M&A',
+    kicker: 'Market assessment',
+    shortTitle: 'Home Services: State of the Market',
+    // Drawn from this edition's own executive summary. It deliberately states
+    // NO six-trade combined total: the 2026-07-27 verification pass retired
+    // that figure ("$753–768B", and "$835.5B" before it) because summing
+    // sources of differing definition, vintage and scope manufactures a number
+    // no source reports. The superseded July 23 edition led on it.
     abstract:
-      'Six trades, roughly $753–768B in combined U.S. revenue, and some 250,000 businesses — with no single entity commanding 20% share of any major vertical. This assessment maps the capital environment, the market\'s real size, the platform landscape, and what the 2024–2026 wave of recaps repriced.',
-    published: '2026-07-23',
+      'Fragmentation is the thesis, not market size: about 89% of the 112,088 firms in the combined NAICS 238220 code employ fewer than 20 people, and no single company commands 20% of any major vertical. The top of the market has re-rated — HVAC services cleared 9.5x EV/EBITDA across 2024–YTD 2026 against 13.3x across 2021–23, roughly four turns cheaper, while trophy platforms still clear 16–20x.',
+    published: '2026-07-29',
     publishedLabel: 'July 2026',
     ogImage: '/reports/home-services-cover.jpg',
   },
