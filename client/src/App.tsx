@@ -105,6 +105,10 @@ const PracticeIndustries = lazy(() => import('./practice/Industries'));
 const PracticeSegment = lazy(() => import('./practice/SegmentPage'));
 const PracticeAbout = lazy(() => import('./practice/About'));
 const PracticeTrackRecord = lazy(() => import('./practice/TrackRecord'));
+// Published research (2026-07-29). The report body and the downloadable PDF
+// both render from one markdown file in scripts/studio/reports/.
+const PracticeReports = lazy(() => import('./practice/ReportsIndex'));
+const PracticeReport = lazy(() => import('./practice/ReportPage'));
 const SharedDocument = lazy(() => import('./pages/public/SharedDocument'));
 const SharedDocumentView = lazy(() => import('./pages/SharedDocumentView'));
 const AcceptInvite = lazy(() => import('./pages/public/AcceptInvite'));
@@ -426,6 +430,17 @@ export default function App() {
             two-surface rule. */}
         <Route path="/buyers/:slug">
           {(params) => marketingOrApp(<PracticeSegment slug={params.slug} />)}
+        </Route>
+        {/* Published research — ALWAYS public, deliberately outside the
+            two-surface rule. These are the pages a LinkedIn post points at, so
+            they must render the same for a logged-in practitioner checking the
+            link as for a cold visitor (same exemption the token-gated share
+            surfaces above carry). */}
+        <Route path="/reports">
+          <Suspense fallback={<PageLoader />}><PracticeReports /></Suspense>
+        </Route>
+        <Route path="/reports/:slug">
+          {(params) => <Suspense fallback={<PageLoader />}><PracticeReport slug={params.slug} /></Suspense>}
         </Route>
         <Route path="/about">{marketingOrApp(<PracticeAbout />)}</Route>
         <Route path="/industries">{marketingOrApp(<PracticeIndustries />)}</Route>

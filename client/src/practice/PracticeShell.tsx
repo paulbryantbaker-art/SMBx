@@ -276,6 +276,7 @@ export default function PracticeShell({
                 <div className="h">FIRM</div>
                 <a href="/#how">How it works</a>
                 <a href="/#sample">Sample read</a>
+                <a href="/reports">Research</a>
                 <a href="/#cta">Confidential consultation</a>
                 <a href="/login">Team sign in</a>
               </div>
@@ -286,6 +287,7 @@ export default function PracticeShell({
                   <a href={anchor('#why')}>Why us</a>
                   <a href={anchor('#how')}>How it works</a>
                   <a href={anchor('#sample')}>Sample read</a>
+                  <a href="/reports">Research</a>
                   <a href={anchor('#proof')}>Track record</a>
                   <a href={anchor('#cta')}>Confidential consultation</a>
                   <a href="/login">Team sign in</a>

@@ -983,6 +983,71 @@ app.post('/api/support/client-error', express.json(), async (req, res) => {
   }
 });
 
+// ─── 5c. Report link previews ──────────────────────────────
+// Social crawlers (LinkedIn, Slack, X) do not run JS, so the client-side
+// <title>/OG tags on /reports/:slug are invisible to them — a posted link
+// would preview as the generic site card. Stamp the report's own title,
+// abstract and cover into index.html before serving it. Google reads the
+// client-side tags; the two come from the same shared/reports.ts entries.
+// Static files (/reports/<slug>.pdf, the cover jpg) are already resolved by
+// express.static above, so only real page routes reach this.
+const REPORT_META_CACHE = new Map<string, string>();
+
+app.get('/reports/:slug', async (req, res, next) => {
+  try {
+    const { findReport } = await import('../shared/reports.js');
+    const report = findReport(req.params.slug);
+    if (!report) return next();
+
+    const cached = REPORT_META_CACHE.get(report.slug);
+    if (cached) {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      return res.send(cached);
+    }
+
+    const { readFile } = await import('node:fs/promises');
+    const shell = await readFile(path.join(clientPath, 'index.html'), 'utf8');
+
+    const esc = (v: string) =>
+      v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const title = `${report.shortTitle} — ${report.kicker} | smbX.ai`;
+    const origin = `${req.protocol}://${req.get('host')}`;
+    const url = `${origin}/reports/${report.slug}`;
+
+    const tags = [
+      `<meta property="og:url" content="${esc(url)}" />`,
+      `<link rel="canonical" href="${esc(url)}" />`,
+      `<meta name="twitter:card" content="${report.ogImage ? 'summary_large_image' : 'summary'}" />`,
+      report.ogImage ? `<meta property="og:image" content="${esc(origin + report.ogImage)}" />` : '',
+    ].filter(Boolean).join('\n    ');
+
+    const html = shell
+      .replace(/<title>[\s\S]*?<\/title>/, `<title>${esc(title)}</title>`)
+      .replace(
+        /<meta name="description"[^>]*>/,
+        `<meta name="description" content="${esc(report.abstract)}" />`,
+      )
+      .replace(
+        /<meta property="og:title"[^>]*>/,
+        `<meta property="og:title" content="${esc(title)}" />`,
+      )
+      .replace(
+        /<meta property="og:description"[^>]*>/,
+        `<meta property="og:description" content="${esc(report.abstract)}" />`,
+      )
+      .replace(/<meta property="og:type"[^>]*>/, `<meta property="og:type" content="article" />\n    ${tags}`);
+
+    REPORT_META_CACHE.set(report.slug, html);
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    return res.send(html);
+  } catch (err: any) {
+    console.error('[reports] meta injection failed:', err.message);
+    return next(); // the SPA catch-all still serves a working page
+  }
+});
+
 // ─── 6. SPA catch-all (must be LAST) ──────────────────────
 app.get('*', (_req, res) => {
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
