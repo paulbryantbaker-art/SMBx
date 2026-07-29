@@ -232,9 +232,13 @@ export default function DownloadCard({
             {/* Says only what the code does: the address is confirmed by the
                 link, the lead lands in practice_leads and pings Paul. No list,
                 no sequence — do not promise a newsletter that doesn't exist. */}
+            {/* This wording is the CONSENT RECORD — `REPORT_CONSENT_NOTICE`
+                in server/services/reportAccess.ts stores it verbatim against
+                every lead. Keep the two in sync, and never promise "no list"
+                here while the addresses feed a campaign. */}
             <p className="rp-dl-fine">
-              We'll send the PDF straight to that address. Goes to Paul too —
-              no list, no sequence.
+              We'll send the PDF straight to that address, and occasional
+              research after that. Unsubscribe any time.
             </p>
           </form>
         ) : (

@@ -154,7 +154,8 @@ export async function issueAccess(input: {
   const emailed = await sendEmail({
     to: email,
     subject: `Your copy of ${report.shortTitle}`,
-    html: deliveryEmailHtml(report.shortTitle, report.kicker, link, !!attachments),
+    html: deliveryEmailHtml(report.shortTitle, report.kicker, link, !!attachments,
+      unsubscribeLink(input.appUrl, email)),
     attachments,
   });
 
@@ -208,15 +209,38 @@ export async function recordDownload(email: string, slug: string): Promise<void>
   }
 }
 
+/**
+ * The exact notice shown beneath the email field, stored verbatim with every
+ * lead. If this wording changes, existing rows keep the version THEY were
+ * shown — the only version that matters if anyone ever asks what they agreed
+ * to. Keep it in sync with DownloadCard's fine print.
+ */
+export const REPORT_CONSENT_NOTICE =
+  "We'll send the PDF straight to that address, and occasional research after that. Unsubscribe any time.";
+
 /** Persist through the existing practice-lead rail so report leads land in the
- *  same table as intake leads, tagged by report. */
+ *  same table as intake leads, tagged by report — now carrying the consent
+ *  record that makes a later campaign legitimate. Someone who previously
+ *  unsubscribed stays unsubscribed: asking for a report is a request for that
+ *  report, not a reversal of an opt-out. */
 async function recordLead(email: string, slug: string): Promise<void> {
   try {
     const sql = createSql();
     try {
+      const prior = await sql`
+        SELECT 1 FROM practice_leads
+        WHERE LOWER(email) = ${email.toLowerCase()} AND unsubscribed_at IS NOT NULL
+        LIMIT 1
+      `;
+      const optedOut = prior.length > 0;
       await sql`
-        INSERT INTO practice_leads (persona, thesis, size_geo, email, source)
-        VALUES (NULL, NULL, NULL, ${email}, ${`report:${slug}`})
+        INSERT INTO practice_leads
+          (persona, thesis, size_geo, email, source,
+           marketing_consent, consent_text, consent_at, unsubscribed_at)
+        VALUES
+          (NULL, NULL, NULL, ${email}, ${`report:${slug}`},
+           ${!optedOut}, ${REPORT_CONSENT_NOTICE}, NOW(),
+           ${optedOut ? new Date() : null})
       `;
     } finally {
       await sql.end();
@@ -226,9 +250,45 @@ async function recordLead(email: string, slug: string): Promise<void> {
   }
 }
 
+/* ── unsubscribe ────────────────────────────────────────────────────────── */
+
+/** Stable per-address token, derived not stored — one link works for every row
+ *  that address ever created, and old emails keep working forever. */
+export function unsubscribeToken(email: string): string {
+  return crypto.createHmac('sha256', secret())
+    .update(`unsub:${email.toLowerCase()}`)
+    .digest('base64url');
+}
+
+export function unsubscribeLink(appUrl: string, email: string): string {
+  return `${appUrl.replace(/\/$/, '')}/unsubscribe?e=${encodeURIComponent(email)}&t=${unsubscribeToken(email)}`;
+}
+
+/** Honour an opt-out across every row for that address. */
+export async function unsubscribeEmail(email: string, token: string): Promise<boolean> {
+  const clean = String(email || '').trim().toLowerCase();
+  if (!VALID_EMAIL.test(clean)) return false;
+  // Timing-safe compare so the token can't be probed byte by byte.
+  const expected = Buffer.from(unsubscribeToken(clean));
+  const given = Buffer.from(String(token || ''));
+  if (expected.length !== given.length || !crypto.timingSafeEqual(expected, given)) return false;
+
+  const sql = createSql();
+  try {
+    await sql`
+      UPDATE practice_leads
+      SET unsubscribed_at = NOW(), marketing_consent = FALSE
+      WHERE LOWER(email) = ${clean} AND unsubscribed_at IS NULL
+    `;
+    return true;
+  } finally {
+    await sql.end();
+  }
+}
+
 /* ── the email ──────────────────────────────────────────────────────────── */
 
-function deliveryEmailHtml(title: string, kicker: string, link: string, attached: boolean): string {
+function deliveryEmailHtml(title: string, kicker: string, link: string, attached: boolean, unsub: string): string {
   const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   return `<div style="font-family:-apple-system,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;color:#14181C">
   <div style="font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:#B08637;font-weight:600">${esc(kicker)}</div>
@@ -248,7 +308,8 @@ function deliveryEmailHtml(title: string, kicker: string, link: string, attached
   <hr style="border:0;border-top:1px solid #E4E1D9;margin:28px 0 16px">
   <p style="margin:0;font-size:13px;line-height:1.6;color:#8A9099">
     Paul Baker · smbX.ai — buy-side corporate development.<br>
-    You got this because someone asked for the report at smbx.ai. If that wasn't you, ignore it — nothing else will arrive.
+    You got this because someone asked for the report at smbx.ai. We'll send occasional research after this —
+    <a href="${esc(unsub)}" style="color:#5C6670">unsubscribe</a> any time.
   </p>
 </div>`;
 }

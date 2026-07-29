@@ -383,6 +383,33 @@ app.get('/api/practice/reports/:slug/file', async (req, res) => {
   }
 });
 
+// ─── Unsubscribe (public) ───────────────────────────────────
+// A campaign list is only usable if opting out actually works. The token is
+// derived from the address, so every link ever sent stays valid and one click
+// clears every row for that person.
+app.get('/unsubscribe', async (req, res) => {
+  try {
+    const { unsubscribeEmail } = await import('./services/reportAccess.js');
+    const ok = await unsubscribeEmail(String(req.query.e || ''), String(req.query.t || ''));
+    const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const msg = ok
+      ? { h: "You're unsubscribed.", p: `We won't send research to ${esc(String(req.query.e || ''))} again. Anything you already asked for still reaches you.` }
+      : { h: 'That link didn\'t work.', p: 'It may be malformed. Reply to any email from us and we\'ll remove you by hand.' };
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    return res.send(`<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Unsubscribe — smbX.ai</title></head>
+<body style="margin:0;background:#F6F4EF;color:#14181C;font-family:-apple-system,'Segoe UI',sans-serif">
+<div style="max-width:520px;margin:0 auto;padding:88px 24px">
+  <div style="font-family:Georgia,serif;font-size:28px;line-height:1.2;font-weight:600">${msg.h}</div>
+  <p style="margin:16px 0 28px;font-size:16px;line-height:1.65;color:#3F464C">${msg.p}</p>
+  <a href="/" style="display:inline-block;background:#16624C;color:#fff;text-decoration:none;padding:13px 26px;border-radius:999px;font-size:15px;font-weight:600">Back to smbX.ai</a>
+</div></body></html>`);
+  } catch (err: any) {
+    console.error('[unsubscribe] failed:', err.message);
+    return res.status(500).send('Something went wrong. Reply to any email from us and we will remove you by hand.');
+  }
+});
+
 // ─── Analytics event capture (public — sendBeacon, no auth) ─
 // Moved above the blanket `app.use('/api', requireAuth)` mount: it previously
 // sat below it, so ANONYMOUS visitors' events 401'd and were silently dropped
