@@ -236,7 +236,7 @@ export default function ReportPage({ slug }: { slug: string }) {
         <div className="pd-wrap rp-missing">
           <h1 className="pd-h2">That report isn't here.</h1>
           <p className="pd-body">
-            It may have moved. <Link href="/reports">See the published research</Link>.
+            It may have moved. <Link href="/research">See the published research</Link>.
           </p>
         </div>
       </PracticeShell>

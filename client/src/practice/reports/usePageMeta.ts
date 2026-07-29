@@ -45,7 +45,7 @@ export function usePageMeta(report?: ReportMeta) {
     // Canonical: the report lives at exactly one URL.
     const link = document.createElement('link');
     link.rel = 'canonical';
-    link.href = `${window.location.origin}/reports/${report.slug}`;
+    link.href = `${window.location.origin}/research/${report.slug}`;
     document.head.appendChild(link);
 
     return () => {

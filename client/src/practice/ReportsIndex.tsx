@@ -35,7 +35,7 @@ export default function ReportsIndex() {
               </div>
               <h2 className="rp-card-h">
                 <Link
-                  href={`/reports/${r.slug}`}
+                  href={`/research/${r.slug}`}
                   onClick={() => trackEvent('report_card_clicked', { slug: r.slug })}
                 >
                   {r.shortTitle}
@@ -55,7 +55,7 @@ export default function ReportsIndex() {
               )}
 
               <div className="rp-card-foot">
-                <Link className="pd-pill-primary rp-card-cta" href={`/reports/${r.slug}`}>
+                <Link className="pd-pill-primary rp-card-cta" href={`/research/${r.slug}`}>
                   Read the assessment
                 </Link>
                 <span className="rp-card-meta">

@@ -139,7 +139,9 @@ export async function issueAccess(input: {
     await sql.end();
   }
 
-  const link = `${input.appUrl.replace(/\/$/, '')}/reports/${report.slug}/unlock?t=${token}`;
+  // New mail points at /research. The server still answers /reports/:slug/unlock
+  // for every link already sitting in an inbox — see the handler in index.ts.
+  const link = `${input.appUrl.replace(/\/$/, '')}/research/${report.slug}/unlock?t=${token}`;
 
   // Attach the report itself — the point of the flow is that the PDF ARRIVES,
   // not that the reader is sent on an errand. The link in the body covers the
