@@ -352,6 +352,31 @@ const unlockReport: import('express').RequestHandler = async (req, res) => {
 app.get('/research/:slug/unlock', unlockReport);
 app.get('/reports/:slug/unlock', unlockReport);
 
+// 2b. "Ask about this report" — grounded question answering, public and
+//     ungated for the same reason the report body is: the read is the proof.
+//     Rate-limited on the intake limiter's shape because it is the same kind
+//     of surface (a stranger, a model call, money per turn). Mounted here,
+//     above the blanket `/api` auth, alongside the other two.
+app.post('/api/practice/reports/:slug/ask', intakeLimiter, async (req, res) => {
+  try {
+    const { askReport } = await import('./services/reportQA.js');
+    const out = await askReport({
+      slug: String(req.params.slug || ''),
+      question: req.body?.question,
+      history: Array.isArray(req.body?.history) ? req.body.history : [],
+    });
+    if (out.ok) return res.json({ ok: true, answer: out.answer });
+    if (out.reason === 'unknown_report') return res.status(404).json({ error: 'Unknown report' });
+    if (out.reason === 'empty') return res.status(400).json({ error: 'Ask a question first.' });
+    // no_source / unavailable are OUR failure, and the honest answer is to say
+    // so rather than let the panel imply the report has nothing on it.
+    return res.status(503).json({ error: "The agent can't reach the report just now." });
+  } catch (err: any) {
+    console.error('[report-qa] route failed:', err.message);
+    return res.status(503).json({ error: "The agent can't reach the report just now." });
+  }
+});
+
 // 3. The file itself. Released to a verified reader, or to a team member
 //    holding an app JWT (practicePerimeter above has already 403'd any
 //    non-team token, so a valid one here is the team).
