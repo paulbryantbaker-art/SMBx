@@ -23,7 +23,30 @@ async function getResend() {
   }
 }
 
-const FROM_EMAIL = process.env.EMAIL_FROM || 'SMBx <notifications@smbx.ai>';
+/**
+ * Who the practice writes as (Paul, 2026-07-29: "I don't want the email to be
+ * from Yulia anymore — it should be 'Paul at smbX.ai'").
+ *
+ * The DISPLAY NAME is brand copy, so it lives here rather than in an env var
+ * where it drifts silently. The ADDRESS is infrastructure — it has to match a
+ * domain verified with the mail provider — so that still comes from
+ * EMAIL_FROM. Setting EMAIL_FROM to a bare address or to a
+ * `Name <addr>` pair both work; only the address is taken from it, so the
+ * sender a reader sees can never go stale against a value in Railway.
+ */
+const FROM_NAME = 'Paul at smbX.ai';
+const DEFAULT_FROM_ADDRESS = 'notifications@smbx.ai';
+
+/** Pull the bare address out of `Name <addr>` or a plain `addr`. */
+function fromAddress(): string {
+  const raw = (process.env.EMAIL_FROM || '').trim();
+  if (!raw) return DEFAULT_FROM_ADDRESS;
+  const angled = raw.match(/<([^>]+)>/);
+  const addr = (angled ? angled[1] : raw).trim();
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(addr) ? addr : DEFAULT_FROM_ADDRESS;
+}
+
+const FROM_EMAIL = `${FROM_NAME} <${fromAddress()}>`;
 const BASE_URL = process.env.APP_URL || process.env.BASE_URL || 'https://smbx.ai';
 
 // ─── Branded email wrapper matching marketing materials ───

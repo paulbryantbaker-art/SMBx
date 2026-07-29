@@ -346,11 +346,14 @@
 /* ═══ index page ═════════════════════════════════════════════════════════ */
 .rp-idx-head { padding-top: clamp(46px, 6vw, 88px); }
 .rp-idx-sub { margin: 22px 0 0; max-width: 34em; }
+/* NO `align-items: start` — cards in a row are the same height, so the shelf
+   reads as a set rather than as two things that happen to sit side by side.
+   The abstract absorbs the slack (see .rp-card-p), which lands every card's
+   stat band and CTA on the same line across the row. */
 .rp-idx-list {
   display: grid; gap: clamp(26px, 3vw, 40px);
   padding-top: clamp(40px, 5vw, 66px);
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  align-items: start;
 }
 .rp-card {
   background: var(--pd-card); border: 1px solid var(--pd-hair);
@@ -373,7 +376,8 @@
 }
 .rp-card-h a { color: var(--pd-ink); text-decoration: none; }
 .rp-card-h a:hover { color: var(--pd-coral-link); }
-.rp-card-p { margin: 0 0 22px; font-size: 16px; line-height: 1.65; color: var(--pd-body); }
+/* flex: 1 — the abstract takes the leftover height so everything below it aligns. */
+.rp-card-p { flex: 1; margin: 0 0 22px; font-size: 16px; line-height: 1.65; color: var(--pd-body); }
 .rp-card-stats {
   display: flex; flex-wrap: wrap; gap: 20px 30px;
   padding: 20px 0; margin-bottom: 22px;
