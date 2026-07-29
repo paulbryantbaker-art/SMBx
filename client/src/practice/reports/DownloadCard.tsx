@@ -1,22 +1,25 @@
 /**
- * The takeaway card — read free, download with a verified email (2026-07-29).
+ * The takeaway card — read free, download for an email (2026-07-29).
  *
  * The report itself is never gated: the whole point of putting it on the site
  * is that a visitor can read it, that search can index it, and that the work
- * speaks without a wall in front of it. What the gate protects is the PORTABLE
+ * speaks without a wall in front of it. What the ask protects is the PORTABLE
  * artifact — the PDF that gets forwarded to a partner or dropped in an IC
  * packet.
  *
- * Paul asked for "must be signed in to download." Practice mode restricts real
- * accounts to the team allowlist, so a literal login would mean nobody but the
- * team could ever download it. This is the equivalent that works for an outside
- * acquirer: they give an address, we mail a one-click link, and clicking it
- * proves the address before the file is released. Verified once, the reader
- * cookie covers every report — nobody re-verifies per download.
+ * Paul: "they must PROVIDE an email if they want to download it." So the file
+ * is released the moment they submit — the server mints the reader cookie in
+ * that same response. An earlier pass made them click a link in their inbox
+ * first; that verifies the address but sends someone away mid-read, and the
+ * ones who don't come back are exactly the buyers worth having. A copy is
+ * still emailed (it's how they get it on another device, and a bounce tells
+ * Paul the address was junk), but mail never blocks the download.
  *
- * The credential is checked SERVER-side (`/api/practice/reports/:slug/file`);
- * the PDFs no longer sit under `client/public`, so there is no static URL to
- * type around the gate. A team member holding an app JWT skips the whole thing.
+ * Given once, the reader cookie covers every report — nobody re-enters an
+ * address per download. The credential is checked SERVER-side
+ * (`/api/practice/reports/:slug/file`); the PDFs no longer sit under
+ * `client/public`, so there is no static URL to type around the ask. A team
+ * member holding an app JWT skips the whole thing.
  */
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { trackEvent } from '../../lib/analytics';
@@ -40,7 +43,7 @@ let autoFired = false;
 
 const VALID = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-type Phase = 'idle' | 'form' | 'sending' | 'sent' | 'fetching' | 'done';
+type Phase = 'idle' | 'form' | 'sending' | 'fetching' | 'done';
 
 export default function DownloadCard({
   slug, pages, placement,
@@ -56,6 +59,8 @@ export default function DownloadCard({
   const [email, setEmail] = useState('');
   const [err, setErr] = useState('');
   const [note, setNote] = useState('');
+  /** Whether the emailed copy actually went out — decides the done-state line. */
+  const [emailed, setEmailed] = useState(true);
 
   /** Pull the file with whichever credential this visitor has. */
   const fetchPdf = useCallback(async () => {
@@ -68,10 +73,10 @@ export default function DownloadCard({
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
       if (res.status === 401) {
-        // The cookie lapsed (or was never really there) — ask again.
+        // The credential lapsed (180 days, or a cleared cookie jar) — ask again.
         setUnlocked(false);
         setPhase('form');
-        setErr('That link has expired. Send yourself a fresh one.');
+        setErr('Your access expired. Enter your email again to download.');
         return;
       }
       if (!res.ok) throw new Error(String(res.status));
@@ -104,8 +109,8 @@ export default function DownloadCard({
       const why = params.get('unlock');
       autoFired = true;
       setNote(why === 'expired'
-        ? 'That link has expired — links are good for 48 hours. Send yourself a new one.'
-        : 'That link is no longer valid. Send yourself a new one.');
+        ? 'That emailed link has expired — links are good for 48 hours. Enter your email to download it now.'
+        : 'That link is no longer valid. Enter your email to download it now.');
       setPhase('form');
       params.delete('unlock');
       cleanUrl(params);
@@ -143,20 +148,17 @@ export default function DownloadCard({
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setErr(data.error || 'Could not send the link just now.');
+        setErr(data.error || 'Could not start the download just now.');
         setPhase('form');
         return;
       }
-      // `emailed: false` means the mail transport isn't configured and the
-      // link was only logged server-side. Never tell someone to check an inbox
-      // nothing was sent to.
-      if (data.emailed === false) {
-        setErr('We couldn\'t send the email just now. Book a call and Paul will send the report directly.');
-        setPhase('form');
-        return;
-      }
-      setPhase('sent');
-      trackEvent('report_link_sent', { slug, placement });
+      // The server minted the reader cookie in that response, so the file is
+      // available right now — no inbox trip. `emailed` only decides whether we
+      // mention the copy we sent; a mail failure never blocks the download.
+      trackEvent('report_email_given', { slug, placement, emailed: data.emailed !== false });
+      setUnlocked(true);
+      setEmailed(data.emailed !== false);
+      await fetchPdf();
     } catch {
       setErr('Could not reach the server. Try again in a moment.');
       setPhase('form');
@@ -176,24 +178,15 @@ export default function DownloadCard({
 
         {note && <p className="rp-dl-note">{note}</p>}
 
-        {phase === 'sent' ? (
-          <div className="rp-dl-done">
-            <p className="rp-dl-thanks">Check your inbox.</p>
-            <p className="rp-dl-fine">
-              We sent a one-click link to <strong>{email}</strong>. It opens the PDF
-              and is good for 48 hours.
-            </p>
-            <button
-              type="button"
-              className="rp-dl-again"
-              onClick={() => { setPhase('form'); setErr(''); }}
-            >
-              Use a different address
-            </button>
-          </div>
-        ) : phase === 'done' ? (
+        {phase === 'done' ? (
           <div className="rp-dl-done">
             <p className="rp-dl-thanks">Downloading. Thank you.</p>
+            {email && emailed && (
+              <p className="rp-dl-fine">
+                We also sent a copy to <strong>{email}</strong>, so you have it on
+                any device.
+              </p>
+            )}
             <button type="button" className="rp-dl-again" onClick={() => void fetchPdf()}>
               Download again
             </button>
@@ -221,7 +214,7 @@ export default function DownloadCard({
                 autoFocus
               />
               <button className="pd-pill-primary rp-dl-go" type="submit" disabled={phase === 'sending'}>
-                {phase === 'sending' ? 'Sending…' : 'Send me the link'}
+                {phase === 'sending' ? 'One moment…' : 'Get the PDF'}
               </button>
             </div>
             {err && <p className="rp-dl-err" id={`err-${placement}`} role="alert">{err}</p>}
@@ -229,8 +222,8 @@ export default function DownloadCard({
                 link, the lead lands in practice_leads and pings Paul. No list,
                 no sequence — do not promise a newsletter that doesn't exist. */}
             <p className="rp-dl-fine">
-              We'll email the link to confirm the address. Goes straight to Paul —
-              no list, no sequence.
+              The download starts as soon as you send this, and we'll email you a
+              copy. Goes straight to Paul — no list, no sequence.
             </p>
           </form>
         ) : (

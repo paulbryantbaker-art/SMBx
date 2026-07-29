@@ -1,20 +1,22 @@
 /**
  * Verified-email access to the research PDFs (2026-07-29).
  *
- * Paul: "anybody can go to the site and read the blog, but you must be signed
- * in to download it." Practice mode restricts real accounts to the team
- * allowlist, so a literal login would mean nobody but the team could ever
- * download — useless as a lead source. What he wanted was a real identity
- * behind the download, so this is the equivalent that works for an outside
- * acquirer: prove the email, then the file is released.
+ * Paul: "anybody can go to the site and read the blog obviously but they must
+ * provide an email if they want to download it." PROVIDE, not verify — so the
+ * file is released on submit rather than after an inbox round trip. (Practice
+ * mode restricts real accounts to the team allowlist, so a literal login would
+ * have meant nobody but the team could ever download.)
  *
  * The flow:
- *   1. Reader asks for the PDF → `issueAccess` stores a single random token and
- *      mails a one-click link.
- *   2. They click it → `verifyToken` marks the address confirmed and the server
- *      sets a signed, HttpOnly reader cookie (180 days).
- *   3. That cookie releases the file from `/api/practice/reports/:slug/file`
- *      for that report and every later one — verify once, not per report.
+ *   1. Reader gives an address → `issueAccess` stores a token, saves the lead,
+ *      and mails a copy of the link. The route mints a signed HttpOnly reader
+ *      cookie (180 days) in the SAME response, so the download starts at once.
+ *   2. That cookie releases the file from `/api/practice/reports/:slug/file`
+ *      for that report and every later one — give an address once, not per
+ *      report.
+ *   3. The mailed link still works (`verifyToken` → same cookie), which is how
+ *      they open the report on another device. Mail failure never blocks the
+ *      download; a bounce simply tells Paul the address was junk.
  *
  * The PDFs live in `content/reports/`, deliberately OUTSIDE `client/public`:
  * anything under public is served statically by Express, so the old
@@ -212,7 +214,7 @@ function unlockEmailHtml(title: string, kicker: string, link: string): string {
   <div style="font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:#B08637;font-weight:600">${esc(kicker)}</div>
   <h1 style="margin:12px 0 16px;font-size:24px;line-height:1.25;font-weight:600;color:#14181C">${esc(title)}</h1>
   <p style="margin:0 0 24px;font-size:15px;line-height:1.65;color:#3F464C">
-    Here's your copy. The link below opens the full PDF — every figure attributed to its source.
+    Here's your copy, as promised. The link below opens the full PDF on any device — every figure attributed to its source.
   </p>
   <p style="margin:0 0 28px">
     <a href="${esc(link)}" style="display:inline-block;background:#16624C;color:#fff;text-decoration:none;padding:14px 28px;border-radius:999px;font-size:15px;font-weight:600">Download the report</a>
@@ -224,7 +226,7 @@ function unlockEmailHtml(title: string, kicker: string, link: string): string {
   <hr style="border:0;border-top:1px solid #E4E1D9;margin:28px 0 16px">
   <p style="margin:0;font-size:13px;line-height:1.6;color:#8A9099">
     Paul Baker · smbX.ai — buy-side corporate development.<br>
-    If you didn't ask for this, you can ignore it and nothing else will arrive.
+    You got this because you downloaded the report at smbx.ai. Nothing else will arrive.
   </p>
 </div>`;
 }
