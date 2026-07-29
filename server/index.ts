@@ -291,18 +291,15 @@ app.post('/api/practice/leads', leadLimiter, async (req, res) => {
 // equivalent that works for an outside acquirer. See services/reportAccess.ts.
 // All three routes sit above the blanket `app.use('/api', requireAuth)`.
 
-// 1. Give an email → the download is released on the spot (Paul, 2026-07-29:
-//    "they must provide an email if they want to download it" — PROVIDE, not
-//    verify; sending someone to their inbox mid-read loses the download). The
-//    reader cookie is minted here, so the client can fetch the file
-//    immediately. A copy of the link still goes out by email: it's how they
-//    get the report on another device, and a bounce tells Paul the address was
-//    junk. Mail failure never blocks the download.
+// 1. Ask for the file → a one-click link goes to the address given. NOTHING is
+//    released here (Paul, 2026-07-29: "we need to verify their email as a legit
+//    email before we let them download… they must confirm their email"). The
+//    credential is minted only in step 2, on the click — that click is the
+//    proof the address is real.
 app.post('/api/practice/reports/access', leadLimiter, async (req, res) => {
   try {
     const { email, slug } = req.body || {};
-    const { issueAccess, mintReaderToken, readerCookieOptions, READER_COOKIE, READER_HINT_COOKIE } =
-      await import('./services/reportAccess.js');
+    const { issueAccess } = await import('./services/reportAccess.js');
     const appUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
     const ip = req.ip || (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || null;
     const out = await issueAccess({ email, slug, appUrl, ip });
@@ -311,13 +308,13 @@ app.post('/api/practice/reports/access', leadLimiter, async (req, res) => {
         error: out.reason === 'invalid_email' ? 'That email looks incomplete.' : 'Unknown report.',
       });
     }
-    const opts = readerCookieOptions();
-    res.cookie(READER_COOKIE, mintReaderToken(String(email).trim().toLowerCase()), opts);
-    res.cookie(READER_HINT_COOKIE, '1', { ...opts, httpOnly: false });
+    // `emailed: false` means the mail transport is unconfigured and the link
+    // was only logged. Surfaced so the UI never points at an inbox nothing was
+    // sent to — with confirmation required, a silent mail failure is a dead end.
     return res.json({ ok: true, emailed: out.emailed !== false });
   } catch (err: any) {
     console.error('[report-access] issue failed:', err.message);
-    return res.status(500).json({ error: 'Could not start the download just now.' });
+    return res.status(500).json({ error: 'Could not send the link just now.' });
   }
 });
 
