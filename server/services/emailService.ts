@@ -139,6 +139,43 @@ export function brandedEmail({ headline, body, ctaLabel, ctaUrl, footnote }: {
 </html>`;
 }
 
+/**
+ * Paul's signature block — the one he uses in Gmail, so an email from the site
+ * and an email typed by hand sign off the same way (Paul, 2026-07-29: "I
+ * should have my signature applied like the second image").
+ *
+ * Built with a table and inline styles because that is what survives Outlook,
+ * and the logo is a hosted URL with real alt text: clients that block images
+ * still show the name, the role and the address, which is the part that
+ * matters. Height is set in the attribute as well as the style — Outlook
+ * ignores CSS dimensions on images.
+ *
+ * The mark sits on a bone chip rather than on nothing. The master is
+ * transparent RGBA with a near-black wordmark, so on a dark-mode client it
+ * would disappear into the background — email clients invert surfaces, not
+ * image pixels. Bone is the same pairing the favicons use, and against a white
+ * email body it reads as a quiet plate rather than a box.
+ */
+export function signatureHtml(): string {
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0">
+  <tr><td style="font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;line-height:1.5;color:#14181C;padding:0 0 2px">
+    <strong style="font-weight:600">Paul Baker</strong>
+  </td></tr>
+  <tr><td style="font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;line-height:1.5;color:#3F464C;padding:0 0 2px">
+    Founder &amp; Deal Captain
+  </td></tr>
+  <tr><td style="font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;line-height:1.5;padding:0 0 10px">
+    <a href="mailto:pbaker@smbx.ai" style="color:#16624C;text-decoration:none">pbaker@smbx.ai</a>
+  </td></tr>
+  <tr><td bgcolor="#F6F4EF" style="padding:8px 12px;background:#F6F4EF;border-radius:6px">
+    <a href="${BASE_URL}" style="text-decoration:none">
+      <img src="${BASE_URL}/logo-green-x.png" alt="smbX.ai" width="150" height="38"
+           style="display:block;width:150px;height:38px;border:0;outline:none;text-decoration:none">
+    </a>
+  </td></tr>
+</table>`;
+}
+
 /** A file to send with the message (the research reports ride this path). */
 export interface EmailAttachment {
   filename: string;

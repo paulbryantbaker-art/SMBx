@@ -38,7 +38,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import { createSql } from '../dbConfig.js';
-import { sendEmail } from './emailService.js';
+import { sendEmail, signatureHtml } from './emailService.js';
 import { findReport } from '../../shared/reports.js';
 
 /** How long a mailed link stays good. Long enough to survive an inbox triage,
@@ -371,11 +371,11 @@ function deliveryEmailHtml(title: string, kicker: string, link: string, attached
     The link works for ${LINK_TTL_HOURS} hours. If the button doesn't open, paste this into your browser:<br>
     <span style="color:#5C6670;word-break:break-all">${esc(link)}</span>
   </p>
-  <hr style="border:0;border-top:1px solid #E4E1D9;margin:28px 0 16px">
-  <p style="margin:0;font-size:13px;line-height:1.6;color:#8A9099">
-    Paul Baker · smbX.ai — buy-side corporate development.<br>
+  <hr style="border:0;border-top:1px solid #E4E1D9;margin:28px 0 20px">
+  ${signatureHtml()}
+  <p style="margin:20px 0 0;font-size:12px;line-height:1.6;color:#8A9099">
     You got this because someone asked for the report at smbx.ai. We'll send occasional research after this —
-    <a href="${esc(unsub)}" style="color:#5C6670">unsubscribe</a> any time.
+    <a href="${esc(unsub)}" style="color:#8A9099">unsubscribe</a> any time.
   </p>
 </div>`;
 }
