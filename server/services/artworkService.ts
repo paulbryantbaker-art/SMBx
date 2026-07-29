@@ -21,6 +21,7 @@
  * falls back to the procedural motif. Artwork must never sink a run.
  */
 import { createStudioAsset } from './studioAssets.js';
+import { LEDGER } from '../../house/tokens.js';
 
 const IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
 
@@ -43,8 +44,10 @@ export function artworkPrompt(visualBrief: string, title: string): string {
     'ONE single cohesive scene with ONE focal subject — like a magazine cover illustration.',
     'NOT a collage, NOT a sprite sheet, NOT a grid of vignettes, NOT multiple separate drawings on one page.',
     'Style: minimal flat vector-like editorial art, generous negative space, confident geometric shapes,',
-    'subtle paper grain. Palette STRICTLY: bone off-white background #F6F4EF, deep green #16624C,',
-    'near-black ink #14181C, one small brass-gold accent #B08637. Portrait 4:5 composition.',
+    // Palette generated from house/tokens.ts — a brand change must never leave
+    // the image model painting in the old colours (byte-identical wording).
+    `subtle paper grain. Palette STRICTLY: bone off-white background ${LEDGER.bone}, deep green ${LEDGER.green},`,
+    `near-black ink ${LEDGER.ink}, one small brass-gold accent ${LEDGER.brass}. Portrait 4:5 composition.`,
     'The background must be ONE uniform flat color reaching all four edges — NO baked-in vignettes,',
     'NO edge fades, NO gradient borders, NO dark side-panels (the page layout handles all blending).',
     'ABSOLUTELY NO: text, letters, numbers, words, logos, watermarks, charts, graphs, documents,',

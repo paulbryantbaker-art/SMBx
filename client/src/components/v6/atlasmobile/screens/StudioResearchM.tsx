@@ -187,9 +187,24 @@ type MView =
   | { t: "run"; id: number }
   | { t: "camp"; id: number }
   | { t: "asset"; id: number }
+  | { t: "artifact"; id: number }
   | { t: "perf"; id: number };
 
-type Folder = { k: "all" } | { k: "oneoff" } | { k: "archived" } | { k: "camp"; id: number } | { k: "media" } | { k: "collateral" } | { k: "perf" };
+type Folder = { k: "all" } | { k: "oneoff" } | { k: "archived" } | { k: "camp"; id: number } | { k: "artifacts" } | { k: "media" } | { k: "collateral" } | { k: "perf" };
+
+/* The third repository (Paul, 2026-07-24): ARTIFACTS are the WORDS — reports,
+   post copy, research masters — that ASSETS (pictures) and the composers turn
+   into COLLATERAL. The phone reads and edits them; it doesn't render. */
+type ArtifactRow = {
+  id: number; kind: string; label: string; notes: string | null;
+  lane_id: number | null; lane_version: number | null;
+  run_id: number | null; schedule_id: number | null;
+  chars: number; preview: string; created_at: string; updated_at: string;
+};
+const ARTIFACT_KIND_LABEL: Record<string, string> = {
+  report: "Report", research: "Research master", post_copy: "Post copy",
+  caption: "Caption", spec: "Deck spec", document: "Document",
+};
 
 export default function StudioResearchM({ user: _user }: { user: User | null }) {
   const [catalog, setCatalog] = useState<Catalog | null>(null);
@@ -197,6 +212,7 @@ export default function StudioResearchM({ user: _user }: { user: User | null }) 
   const [runs, setRuns] = useState<RunRow[]>([]);
   const [schedules, setSchedules] = useState<ScheduleRow[]>([]);
   const [assets, setAssets] = useState<AssetRow[]>([]);
+  const [artifacts, setArtifacts] = useState<ArtifactRow[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsRow[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [connErr, setConnErr] = useState(false);
@@ -215,18 +231,20 @@ export default function StudioResearchM({ user: _user }: { user: User | null }) 
 
   const refresh = useCallback(async () => {
     try {
-      const [r, s, u, a, an] = await Promise.all([
+      const [r, s, u, a, an, ar] = await Promise.all([
         api<{ runs: RunRow[] }>("/research/runs"),
         api<{ schedules: ScheduleRow[] }>("/research/schedules"),
         api<{ spentCents: number; capCents: number | null }>("/research/usage"),
         api<{ assets: AssetRow[] }>("/studio/assets"),
         api<{ items: AnalyticsRow[] }>("/research/analytics"),
+        api<{ artifacts: ArtifactRow[] }>("/studio/artifacts"),
       ]);
       setRuns(r.runs ?? []);
       setSchedules(s.schedules ?? []);
       setUsage(u);
       setAssets(a.assets ?? []);
       setAnalytics(an.items ?? []);
+      setArtifacts(ar.artifacts ?? []);
       setConnErr(false);
     } catch {
       setConnErr(true);
@@ -331,6 +349,19 @@ export default function StudioResearchM({ user: _user }: { user: User | null }) 
     catch (e: any) { setNote({ kind: "err", text: e?.message || "Delete failed." }); }
   }, [refresh]);
 
+  /* ── artifacts: the words repository ── */
+
+  const saveArtifact = useCallback(async (id: number, patch: Record<string, unknown>) => {
+    await api(`/studio/artifacts/${id}`, { method: "PATCH", body: JSON.stringify(patch) });
+    void refresh();
+  }, [refresh]);
+
+  const deleteArtifact = useCallback(async (a: ArtifactRow) => {
+    if (!window.confirm(`Delete “${a.label}”? This can't be undone.`)) return;
+    try { await api(`/studio/artifacts/${a.id}`, { method: "DELETE" }); setView({ t: "list" }); void refresh(); }
+    catch (e: any) { setNote({ kind: "err", text: e?.message || "Delete failed." }); }
+  }, [refresh]);
+
   const uploadAnalytics = useCallback(async (f: File) => {
     const fd = new FormData();
     fd.append("workbook", f);
@@ -390,12 +421,17 @@ export default function StudioResearchM({ user: _user }: { user: User | null }) 
   const folderCamp = folder.k === "camp" ? liveCamps.find((s) => s.id === folder.id) ?? null : null;
   const campCollateral = folder.k === "camp" ? collateral.filter((a) => a.schedule_id === folder.id) : [];
 
+  /** The run folders — everything that isn't one of the three repositories
+   *  or the performance imports. */
+  const runsMode = folder.k !== "artifacts" && folder.k !== "media" && folder.k !== "collateral" && folder.k !== "perf";
+
   const chips: { key: string; label: string; f: Folder; on: boolean }[] = [
     { key: "all", label: `All · ${activeRuns.length}`, f: { k: "all" }, on: folder.k === "all" },
     { key: "oneoff", label: `One-offs · ${oneoffs.length}`, f: { k: "oneoff" }, on: folder.k === "oneoff" },
     ...liveCamps.map((s) => ({ key: `c${s.id}`, label: s.name, f: { k: "camp", id: s.id } as Folder, on: folder.k === "camp" && folder.id === s.id })),
     { key: "archived", label: `Archived · ${archivedRuns.length}`, f: { k: "archived" }, on: folder.k === "archived" },
-    { key: "media", label: `Media · ${photos.length}`, f: { k: "media" }, on: folder.k === "media" },
+    { key: "artifacts", label: `Artifacts · ${artifacts.length}`, f: { k: "artifacts" }, on: folder.k === "artifacts" },
+    { key: "media", label: `Assets · ${photos.length}`, f: { k: "media" }, on: folder.k === "media" },
     { key: "collateral", label: `Collateral · ${collateral.length}`, f: { k: "collateral" }, on: folder.k === "collateral" },
     { key: "perf", label: `Analytics · ${analytics.length}`, f: { k: "perf" }, on: folder.k === "perf" },
   ];
@@ -484,7 +520,7 @@ export default function StudioResearchM({ user: _user }: { user: User | null }) 
     const a = assets.find((x) => x.id === view.id) ?? null;
     return (
       <div style={S.wrap}>
-        {backRow(folder.k === "media" ? "Media" : "Collateral")}
+        {backRow(folder.k === "media" ? "Assets" : "Collateral")}
         {noteBanner}
         {a ? (
           <div style={S.card}>
@@ -505,6 +541,27 @@ export default function StudioResearchM({ user: _user }: { user: User | null }) 
           </div>
         ) : (
           <div style={S.card}>File not found.</div>
+        )}
+      </div>
+    );
+  }
+
+  if (view.t === "artifact") {
+    const a = artifacts.find((x) => x.id === view.id) ?? null;
+    return (
+      <div style={S.wrap}>
+        {backRow("Artifacts")}
+        {noteBanner}
+        {a ? (
+          <ArtifactDetail
+            key={a.id}
+            row={a}
+            onSave={(patch) => saveArtifact(a.id, patch)}
+            onDelete={() => void deleteArtifact(a)}
+            onErr={(m) => setNote({ kind: "err", text: m })}
+          />
+        ) : (
+          <div style={S.card}>Artifact not found.</div>
         )}
       </div>
     );
@@ -585,13 +642,13 @@ export default function StudioResearchM({ user: _user }: { user: User | null }) 
 
       {/* rows */}
       {!loaded && <div style={S.card}>Loading…</div>}
-      {loaded && folder.k !== "media" && folder.k !== "collateral" && folder.k !== "perf" && folderRuns.length === 0 && campCollateral.length === 0 && (
+      {loaded && runsMode && folderRuns.length === 0 && campCollateral.length === 0 && (
         <div style={{ ...S.card, color: RT.muted, fontSize: 13.5 }}>
           {folder.k === "archived" ? "Nothing archived." : "No runs here yet — tap New to start one."}
         </div>
       )}
 
-      {folder.k !== "media" && folder.k !== "collateral" && folder.k !== "perf" && folderRuns.map((r) => {
+      {runsMode && folderRuns.map((r) => {
         const running = r.status === "queued" || r.status === "running";
         return (
           <button key={r.id} type="button" style={S.rowCard} onClick={() => setView({ t: "run", id: r.id })}>
@@ -618,6 +675,27 @@ export default function StudioResearchM({ user: _user }: { user: User | null }) 
           <div style={S.meta}>Collateral · {shortDate(a.created_at)}</div>
         </button>
       ))}
+
+      {folder.k === "artifacts" && (
+        <>
+          {loaded && artifacts.length === 0 && (
+            <div style={{ ...S.card, color: RT.muted, fontSize: 13.5 }}>
+              No artifacts yet — the words a piece of collateral is built from. File a finished run into Artifacts from its detail screen, or write one on desktop.
+            </div>
+          )}
+          {artifacts.map((a) => (
+            <button key={`ar${a.id}`} type="button" style={S.rowCard} onClick={() => setView({ t: "artifact", id: a.id })}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={S.rowTitle}>{a.label}</span>
+                <Pill text={ARTIFACT_KIND_LABEL[a.kind] ?? a.kind} bg={RT.line} fg={RT.muted} />
+              </div>
+              <div style={S.meta}>
+                {a.chars ? `${Math.max(1, Math.round(a.chars / 1000))}k characters · ` : ""}edited {shortDate(a.updated_at)}
+              </div>
+            </button>
+          ))}
+        </>
+      )}
 
       {(folder.k === "media" || folder.k === "collateral") && (
         <>
@@ -861,6 +939,15 @@ function RunDetail({ run, schedules, typeLabel, angleLabel, onShare, onRerun, on
             {run.has_feed && <button type="button" style={S.btn} onClick={() => void grab("cardDark")}>{dl === "cardDark" ? "…" : "1-pager dark"}</button>}
             {run.has_feed && <button type="button" style={S.btn} onClick={() => void grab("lipdf")}>{dl === "lipdf" ? "…" : "Carousel PDF"}</button>}
             {run.has_feed && <button type="button" style={S.btnAccent} onClick={onShare}>Share post text</button>}
+            <button
+              type="button"
+              style={S.btn}
+              onClick={() => void api(`/research/runs/${run.id}/file-artifact`, { method: "POST" })
+                .then(() => onNote("ok", "Filed in Artifacts — the words are editable there."))
+                .catch((e: any) => onNote("err", e?.message || "Couldn’t file this run."))}
+            >
+              File in Artifacts
+            </button>
             <button type="button" style={{ ...S.btn, color: RT.muted }} onClick={() => void grab("md")}>{dl === "md" ? "…" : "Markdown"}</button>
           </div>
         </div>
@@ -1119,6 +1206,93 @@ function CampaignEdit({ s, angles, cadences, onSave, onRunNow, onToggle, onArchi
 }
 
 /* ─── performance detail ───────────────────────────────────── */
+
+/* ─── Artifact detail — the words, editable on the phone ─────────────────
+   The list carries a preview only, so the full body loads on open. Plain
+   markdown, saved exactly as typed: these documents are the source the
+   composers read. */
+function ArtifactDetail({ row, onSave, onDelete, onErr }: {
+  row: ArtifactRow;
+  onSave: (patch: Record<string, unknown>) => Promise<void>;
+  onDelete: () => void;
+  onErr: (msg: string) => void;
+}) {
+  const [label, setLabel] = useState(row.label);
+  const [body, setBody] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const orig = useRef<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    api<{ body_md: string }>(`/studio/artifacts/${row.id}`)
+      .then((a) => { if (alive) { orig.current = a.body_md ?? ""; setBody(a.body_md ?? ""); } })
+      .catch(() => { if (alive) onErr("Couldn’t load this artifact."); });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [row.id]);
+
+  const save = async () => {
+    if (body == null || saving) return;
+    setSaving(true);
+    try {
+      await onSave({ label: label.trim() || row.label, bodyMd: body });
+      orig.current = body;
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (e: any) {
+      onErr(e?.message || "Save failed.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const share = async () => {
+    if (body == null) return;
+    try {
+      if (navigator.share) { await navigator.share({ text: body }); return; }
+      await navigator.clipboard.writeText(body);
+      onErr("Copied to the clipboard.");
+    } catch (e: any) {
+      if (e?.name !== "AbortError") onErr(e?.message || "Share failed.");
+    }
+  };
+
+  const dirty = body != null && (label !== row.label || body !== orig.current);
+
+  return (
+    <div style={S.card}>
+      <input value={label} onChange={(e) => setLabel(e.target.value)} style={{ ...S.input, fontWeight: 800, fontSize: 16 }} />
+      <div style={{ ...S.meta, marginTop: 8 }}>
+        {ARTIFACT_KIND_LABEL[row.kind] ?? row.kind} · {row.chars ? `${row.chars.toLocaleString()} characters` : "empty"} · edited {shortDate(row.updated_at)}
+        {row.lane_id != null ? ` · research lane v${row.lane_version ?? "?"}` : row.run_id != null ? " · from a research run" : ""}
+      </div>
+
+      <div style={S.label}>Text</div>
+      {body == null ? (
+        <div style={{ fontSize: 13, color: RT.muted }}>Loading…</div>
+      ) : (
+        <textarea
+          value={body}
+          onChange={(e) => { setBody(e.target.value); setSaved(false); }}
+          spellCheck={false}
+          rows={16}
+          style={{ ...S.textarea, fontSize: 13.5, lineHeight: 1.6 }}
+        />
+      )}
+
+      <div style={S.btnRow}>
+        <button type="button" style={{ ...S.btnAccent, opacity: body == null || saving ? 0.5 : 1 }} disabled={body == null || saving} onClick={() => void save()}>
+          {saving ? "Saving…" : "Save"}
+        </button>
+        <button type="button" style={S.btn} disabled={body == null} onClick={() => void share()}>Share text</button>
+        <button type="button" style={{ ...S.btn, color: RT.muted }} onClick={onDelete}>Delete</button>
+        {saved && <span style={{ alignSelf: "center", fontSize: 13, fontWeight: 700, color: RT.accentInk }}>Saved</span>}
+        {!saved && dirty && <span style={{ alignSelf: "center", fontSize: 13, color: RT.muted }}>Unsaved edits</span>}
+      </div>
+    </div>
+  );
+}
 
 function PerfDetail({ a, onAnalyze, onDelete }: { a: AnalyticsRow; onAnalyze: () => void; onDelete: () => void }) {
   const [detail, setDetail] = useState<{ summary: any; analysis: string | null; analysis_status: string; analysis_error: string | null } | null>(null);

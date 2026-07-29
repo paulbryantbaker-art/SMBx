@@ -24,6 +24,8 @@ import {
 } from '../services/researchAgent.js';
 import { renderResearchPdf, renderResearchCardPng, renderLinkedInDocPdf, renderCoverPng, researchPostText, renderAnnouncementCardPng, docPages, type ResearchRunRow, type AnnouncementSpec, renderPostCardPng, type PostCardSpec } from '../services/researchComposer.js';
 import { listStudioAssets, getStudioAsset, createStudioAsset, updateStudioAsset, deleteStudioAsset } from '../services/studioAssets.js';
+import { createLane, listLanes, getLane, addSource, listSources, deleteSource, synthesizeLane, listVersions, getVersion } from '../services/researchLanes.js';
+import { listArtifacts, getArtifact, createArtifact, updateArtifact, deleteArtifact, fileLaneMaster, repoSummary } from '../services/studioRepos.js';
 import { importLinkedInWorkbook, analyzeLinkedInImport } from '../services/linkedinAnalytics.js';
 import multer from 'multer';
 
@@ -205,6 +207,293 @@ researchRouter.post('/research/import-plan', planUpload.single('file'), async (r
     const apiMsg = err?.error?.error?.message;
     return res.status(500).json({ error: apiMsg ? String(apiMsg) : (err?.message || 'Import failed') });
   }
+});
+
+/* ─── The three studio repositories ───────────────────────────────────────
+ * Paul, 2026-07-24: "Just like in Google Drive, we need repositories for
+ * different types of data" — ARTIFACTS (the words: reports, post copy,
+ * research), ASSETS (the pictures used in them), COLLATERAL (the finished
+ * output posted or sent). Assets and collateral already lived in
+ * studio_assets by `kind`; artifacts is new. See services/studioRepos.ts.  */
+
+researchRouter.get('/studio/repos', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  try {
+    return res.json(await repoSummary(userId));
+  } catch (err: any) {
+    console.error('[repos] summary failed:', err?.message);
+    return res.status(500).json({ error: 'Failed to load repositories' });
+  }
+});
+
+researchRouter.get('/studio/artifacts', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  try {
+    return res.json({
+      artifacts: await listArtifacts(userId, {
+        kind: typeof req.query.kind === 'string' ? req.query.kind : undefined,
+        laneId: req.query.laneId ? Number(req.query.laneId) : undefined,
+        archived: req.query.archived === '1',
+      }),
+    });
+  } catch (err: any) {
+    console.error('[repos] list artifacts failed:', err?.message);
+    return res.status(500).json({ error: 'Failed to load artifacts' });
+  }
+});
+
+researchRouter.get('/studio/artifacts/:id', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const a = await getArtifact(userId, Number(req.params.id));
+  return a ? res.json(a) : res.status(404).json({ error: 'Artifact not found' });
+});
+
+researchRouter.post('/studio/artifacts', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const label = String(req.body?.label || '').trim();
+  if (!label) return res.status(400).json({ error: 'Name the artifact' });
+  try {
+    const id = await createArtifact(userId, {
+      label,
+      bodyMd: typeof req.body?.bodyMd === 'string' ? req.body.bodyMd : '',
+      kind: String(req.body?.kind || '').trim() || undefined,
+      notes: String(req.body?.notes || '').trim() || undefined,
+      laneId: req.body?.laneId ? Number(req.body.laneId) : undefined,
+      runId: req.body?.runId ? Number(req.body.runId) : undefined,
+      scheduleId: req.body?.scheduleId ? Number(req.body.scheduleId) : undefined,
+    });
+    return res.json({ id });
+  } catch (err: any) {
+    console.error('[repos] create artifact failed:', err?.message);
+    return res.status(500).json({ error: 'Failed to create artifact' });
+  }
+});
+
+researchRouter.patch('/studio/artifacts/:id', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const ok = await updateArtifact(userId, Number(req.params.id), {
+    label: typeof req.body?.label === 'string' ? req.body.label : undefined,
+    bodyMd: typeof req.body?.bodyMd === 'string' ? req.body.bodyMd : undefined,
+    kind: typeof req.body?.kind === 'string' ? req.body.kind : undefined,
+    notes: typeof req.body?.notes === 'string' ? req.body.notes : undefined,
+    archived: typeof req.body?.archived === 'boolean' ? req.body.archived : undefined,
+  });
+  return ok ? res.json({ ok: true }) : res.status(404).json({ error: 'Artifact not found' });
+});
+
+researchRouter.delete('/studio/artifacts/:id', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const ok = await deleteArtifact(userId, Number(req.params.id));
+  return ok ? res.json({ ok: true }) : res.status(404).json({ error: 'Artifact not found' });
+});
+
+/** File a run's report into the artifacts repository — the words a piece of
+ *  collateral gets built from, kept where they can be edited and reused. */
+researchRouter.post('/research/runs/:id/file-artifact', async (req, res) => {
+  const userId = userIdFromReq(req);
+  const id = parseId(req.params.id);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  if (!id) return res.status(400).json({ error: 'Bad run id' });
+  const [run] = await sql<{ report_md: string | null; report_title: string | null; topic: string; schedule_id: number | null }[]>`
+    SELECT report_md, report_title, topic, schedule_id FROM research_runs WHERE id = ${id} AND user_id = ${userId}`;
+  if (!run) return res.status(404).json({ error: 'Run not found' });
+  if (!run.report_md) return res.status(400).json({ error: 'This run has no report yet.' });
+  const artifactId = await createArtifact(userId, {
+    label: run.report_title || run.topic,
+    bodyMd: run.report_md,
+    kind: 'report',
+    runId: id,
+    scheduleId: run.schedule_id ?? undefined,
+  });
+  return res.json({ artifactId });
+});
+
+/* ─── Corp-dev documents from a market's master (Paul, 2026-07-26) ────────
+ * "do other work — market maps, who's who, thesis building or other corp dev
+ * beginning work." The practice work, not the marketing byproduct. Each one is
+ * an artifact derived from the master, so it edits, renders and seeds
+ * collateral like any other artifact. See services/corpDevDocs.ts.        */
+
+researchRouter.get('/research/corpdev/types', async (_req, res) => {
+  const { CORP_DEV_DOCS } = await import('../services/corpDevDocs.js');
+  return res.json({ types: CORP_DEV_DOCS.map(({ key, label, blurb }) => ({ key, label, blurb })) });
+});
+
+researchRouter.get('/research/lanes/:id/corpdev', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const id = parseId(req.params.id);
+  if (!id) return res.status(400).json({ error: 'Bad market id' });
+  try {
+    const { listCorpDevDocs } = await import('../services/corpDevDocs.js');
+    return res.json({ docs: await listCorpDevDocs(userId, id) });
+  } catch (err: any) {
+    console.error('[corpdev] list failed:', err?.message);
+    return res.status(500).json({ error: 'Couldn’t load the documents' });
+  }
+});
+
+researchRouter.post('/research/lanes/:id/corpdev', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const id = parseId(req.params.id);
+  if (!id) return res.status(400).json({ error: 'Bad market id' });
+  const type = String(req.body?.type || '');
+  if (!['market_map', 'who_who', 'thesis'].includes(type)) {
+    return res.status(400).json({ error: 'Unknown document type' });
+  }
+  try {
+    const { deriveCorpDevDoc } = await import('../services/corpDevDocs.js');
+    return res.json(await deriveCorpDevDoc({ userId, laneId: id, type: type as any }));
+  } catch (err: any) {
+    console.error('[corpdev] derive failed:', err?.message);
+    return res.status(400).json({ error: err?.message || 'Couldn’t write the document' });
+  }
+});
+
+/** File a lane's synthesized master into the artifacts repository. */
+researchRouter.post('/research/lanes/:id/file-artifact', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const lane = await getLane(userId, Number(req.params.id));
+  if (!lane) return res.status(404).json({ error: 'Lane not found' });
+  const id = await fileLaneMaster(userId, lane as any);
+  return id ? res.json({ artifactId: id }) : res.status(400).json({ error: 'This lane has no master yet — synthesize first.' });
+});
+
+/* ─── Research lanes: the living master document ──────────────────────────
+ * Paul, 2026-07-24: he runs deep research OUTSIDE the app (Claude web, Gemini,
+ * others — deliberately, for a variety of reads), uploads them all here, and
+ * the app folds them into ONE master it keeps updated, "maybe once a quarter."
+ * Sources are kept raw forever; every master is versioned, so a refresh never
+ * destroys the read it replaces. See server/services/researchLanes.ts.        */
+
+researchRouter.get('/research/lanes', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  try {
+    return res.json({ lanes: await listLanes(userId, req.query.archived === '1') });
+  } catch (err: any) {
+    console.error('[lanes] list failed:', err?.message);
+    return res.status(500).json({ error: 'Failed to load lanes' });
+  }
+});
+
+researchRouter.post('/research/lanes', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const label = String(req.body?.label || '').trim();
+  if (!label) return res.status(400).json({ error: 'Name the lane (e.g. "Commercial mechanical")' });
+  try {
+    return res.json(await createLane(userId, label, String(req.body?.notes || '').trim() || undefined));
+  } catch (err: any) {
+    console.error('[lanes] create failed:', err?.message);
+    return res.status(500).json({ error: 'Failed to create lane' });
+  }
+});
+
+researchRouter.get('/research/lanes/:id', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  try {
+    const lane = await getLane(userId, Number(req.params.id));
+    if (!lane) return res.status(404).json({ error: 'Lane not found' });
+    return res.json({ lane, sources: await listSources(lane.id), versions: await listVersions(lane.id) });
+  } catch (err: any) {
+    console.error('[lanes] get failed:', err?.message);
+    return res.status(500).json({ error: 'Failed to load lane' });
+  }
+});
+
+/** Upload one research document. PDF as a file, or markdown/text pasted. */
+researchRouter.post('/research/lanes/:id/sources', planUpload.single('file'), async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const lane = await getLane(userId, Number(req.params.id));
+  if (!lane) return res.status(404).json({ error: 'Lane not found' });
+  const file = (req as any).file as { buffer: Buffer; mimetype: string; originalname: string } | undefined;
+  const text = typeof req.body?.text === 'string' ? req.body.text : '';
+  if (!file && !text.trim()) return res.status(400).json({ error: 'Attach a research document (PDF) or paste its text' });
+  try {
+    const isPdf = !!file && (file.mimetype === 'application/pdf' || /\.pdf$/i.test(file.originalname));
+    const label = String(req.body?.label || '').trim()
+      || (file ? file.originalname.replace(/\.[a-z0-9]+$/i, '') : `Pasted research ${new Date().toISOString().slice(0, 10)}`);
+    const id = await addSource({
+      laneId: lane.id, label,
+      tool: String(req.body?.tool || '').trim() || undefined,
+      gatheredOn: String(req.body?.gatheredOn || '').trim() || undefined,
+      mime: isPdf ? 'application/pdf' : 'text/markdown',
+      data: isPdf ? file!.buffer : undefined,
+      text: isPdf ? undefined : (file ? file.buffer.toString('utf8') : text),
+    });
+    return res.json({ id });
+  } catch (err: any) {
+    console.error('[lanes] add source failed:', err?.message);
+    return res.status(500).json({ error: 'Upload failed' });
+  }
+});
+
+researchRouter.delete('/research/lanes/:id/sources/:sourceId', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const lane = await getLane(userId, Number(req.params.id));
+  if (!lane) return res.status(404).json({ error: 'Lane not found' });
+  const ok = await deleteSource(lane.id, Number(req.params.sourceId));
+  return ok ? res.json({ ok: true }) : res.status(404).json({ error: 'Source not found' });
+});
+
+/** Fold new research into the master. `full=1` re-synthesizes from every
+ *  source rather than only the ones not yet incorporated. */
+researchRouter.post('/research/lanes/:id/synthesize', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  try {
+    const out = await synthesizeLane(userId, Number(req.params.id), { full: req.body?.full === true || req.query.full === '1' });
+    return res.json(out);
+  } catch (err: any) {
+    console.error('[lanes] synthesis failed:', err?.message);
+    return res.status(500).json({ error: err?.message || 'Synthesis failed' });
+  }
+});
+
+/**
+ * Import a master synthesized outside the app.
+ *
+ * The app's API key can hit the org's spend ceiling (Paul, 2026-07-26), and
+ * the operating model already allows the expensive model work to run in a
+ * Cowork session on his own subscription. This is where that result lands.
+ * The citation audit still runs — it is mechanical, not a model call.
+ */
+researchRouter.post('/research/lanes/:id/master', planUpload.single('file'), async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const id = parseId(String(req.params.id));
+  if (!id) return res.status(400).json({ error: 'Bad market id' });
+  const file = (req as any).file as { buffer: Buffer; originalname: string } | undefined;
+  const md = file ? file.buffer.toString('utf8') : String(req.body?.md || '');
+  try {
+    const { importMaster } = await import('../services/researchLanes.js');
+    const out = await importMaster(userId, id, md, typeof req.body?.note === 'string' ? req.body.note : undefined);
+    return res.json(out);
+  } catch (err: any) {
+    console.error('[lanes] master import failed:', err?.message);
+    return res.status(400).json({ error: err?.message || 'Import failed' });
+  }
+});
+
+researchRouter.get('/research/lanes/:id/versions/:version', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const lane = await getLane(userId, Number(req.params.id));
+  if (!lane) return res.status(404).json({ error: 'Lane not found' });
+  const v = await getVersion(lane.id, Number(req.params.version));
+  return v ? res.json(v) : res.status(404).json({ error: 'Version not found' });
 });
 
 /* ─── Performance: LinkedIn analytics imports + Yulia's read ──────────────
@@ -468,6 +757,111 @@ researchRouter.get('/research/runs/:id/pages', async (req, res) => {
   } catch (err: any) {
     console.error('[research] pages failed:', err?.message);
     return res.status(500).json({ error: 'Couldn’t list the pages' });
+  }
+});
+
+/* ─── The collateral builder (Paul, 2026-07-25) ───────────────────────────
+ * "From the master document I need to be able to select which output type I
+ * want — a one pager, a PDF carousel, or a full depth PDF report. And then
+ * once the pages are rendered in preview I need to be able to drag drop
+ * whichever images or assets on which pages, all on one screen."
+ *
+ * A composition is a run row with origin='composed', so every existing render,
+ * preview, per-page artwork and export endpoint applies to it unchanged.  */
+
+researchRouter.post('/studio/compose', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  // Either a MARKET (its master, read live — never a snapshot) or a derived
+  // document from Artifacts. laneId wins if both somehow arrive.
+  const laneId = parseId(String(req.body?.laneId ?? ''));
+  const artifactId = parseId(String(req.body?.artifactId ?? ''));
+  const outputType = String(req.body?.outputType || 'carousel');
+  if (!laneId && !artifactId) return res.status(400).json({ error: 'Pick a market or a document' });
+  if (!['onepager', 'carousel', 'report'].includes(outputType)) {
+    return res.status(400).json({ error: 'Unknown output type' });
+  }
+  try {
+    const { composeFrom } = await import('../services/collateralComposer.js');
+    const out = await composeFrom({
+      userId,
+      source: laneId ? { kind: 'lane', id: laneId } : { kind: 'artifact', id: artifactId! },
+      outputType: outputType as any,
+      postAngle: typeof req.body?.postAngle === 'string' ? req.body.postAngle : null,
+      scheduleId: req.body?.scheduleId ? Number(req.body.scheduleId) : null,
+    });
+    return res.json(out);
+  } catch (err: any) {
+    console.error('[collateral] compose failed:', err?.message);
+    return res.status(400).json({ error: err?.message || 'Couldn’t build the collateral' });
+  }
+});
+
+/**
+ * The board: every page of this composition, rendered, as an image.
+ *
+ * The existing /pages endpoint returns headings — enough to label a tile, not
+ * enough to see what you are dropping a photo onto. This returns the pages as
+ * they will actually print, paired with the same drop-target metadata, so one
+ * screen can show the deck and accept the images.
+ */
+researchRouter.get('/research/runs/:id/board', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const id = parseId(req.params.id);
+  if (!id) return res.status(400).json({ error: 'Bad run id' });
+  try {
+    const run = await loadCompleteRun(id, userId);
+    if (!run) return res.status(404).json({ error: 'Run not found' });
+    const fmt = (run as any).output_format;
+    const rc = await import('../services/researchComposer.js');
+
+    if (fmt === 'report') {
+      // Report images attach to SECTIONS — a printed page is Chromium's
+      // pagination, not a thing an image can hang off. feed.reportArt is
+      // keyed by the same section ordinal these tiles carry.
+      const art = ((run as any).studio_feed?.reportArt ?? {}) as Record<string, number>;
+      const sections = await rc.renderReportSectionThumbs(run as any);
+      return res.json({
+        kind: 'report',
+        slot: 'reportArt',
+        pages: sections.map((s, i) => ({
+          i, kind: 'section', heading: s.heading,
+          artAssetId: Number(art[String(i)]) || null,
+          droppable: true, src: s.src,
+        })),
+      });
+    }
+    if (!(run as any).studio_feed) return res.status(400).json({ error: 'This run has no composed pages.' });
+    if (fmt === 'card') {
+      const thumbs = await rc.renderCardThumb(run as any);
+      const feed = (run as any).studio_feed ?? {};
+      return res.json({
+        kind: 'onepager', slot: 'artAssetId',
+        pages: thumbs.map((src, i) => ({ i, kind: 'cover', heading: 'Single-image post', artAssetId: feed.artAssetId ?? null, droppable: true, src })),
+      });
+    }
+    const meta = docPages(run as any);
+    const thumbs = await rc.renderDeckPageThumbs(run as any);
+    // The designed deck can legitimately differ in page count from the feed's
+    // own page list; pair by index and let the shorter one govern labels.
+    const pages = thumbs.map((src, i) => {
+      const p: any = meta[i] ?? {};
+      return {
+        i,
+        kind: String(p.kind ?? (i === 0 ? 'cover' : i === thumbs.length - 1 ? 'closer' : 'page')),
+        heading: String(p.heading ?? `Page ${i + 1}`).slice(0, 90),
+        artAssetId: p.artAssetId ?? (i === 0 ? ((run as any).studio_feed?.artAssetId ?? null) : null),
+        // The dark takeaway/closer pages carry the headshot byline by law —
+        // they are not photo pages, and the board must not offer them as one.
+        droppable: p.kind !== 'takeaway' && i !== thumbs.length - 1,
+        src,
+      };
+    });
+    return res.json({ kind: 'carousel', slot: 'pageArt', pages });
+  } catch (err: any) {
+    console.error('[collateral] board failed:', err?.message);
+    return res.status(500).json({ error: 'Couldn’t render the pages' });
   }
 });
 

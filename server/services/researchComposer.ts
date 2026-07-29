@@ -22,6 +22,8 @@ import { fileURLToPath } from 'url';
 import { newRenderPage } from './premiumPdfRenderer.js';
 import { listStudioAssets, getStudioAsset } from './studioAssets.js';
 import { fontFaceCss } from './fontEmbeds.js';
+import { LEDGER } from '../../house/tokens.js';
+import { deckPages, deckCss } from '../../house/deck.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -149,19 +151,21 @@ function logoImg(heightPx: number, opts: { white?: boolean } = {}): string {
   return `<img src="${LOGO_URI}" alt="smbX.ai" style="height:${heightPx}px;width:auto;display:block;${opts.white ? 'filter:brightness(0) invert(1);' : ''}">`;
 }
 
-/* ─── palette (practice .pd language) ─────────────────────────────────── */
-const INK = '#14181C';
-const BODY = '#5C6670';
-const TERT = '#8A9099';
-const CORAL = '#16624C'; // Ledger Deal Green 2026-07-17 (historical const name)
-const CORAL_DEEP = '#0F4E3C';
+/* ─── palette — THE shared definition, see house/tokens.ts ─────────────
+   Local const names are kept (CORAL is historical — it holds Deal Green
+   since 2026-07-17) so this 1,400-line file needs no call-site churn. */
+const INK = LEDGER.ink;
+const BODY = LEDGER.slate;
+const TERT = LEDGER.muted;
+const CORAL = LEDGER.green; // Ledger Deal Green 2026-07-17 (historical const name)
+const CORAL_DEEP = LEDGER.greenHover;
 const CARD = '#FFFFFF';
-const HAIR = '#E4E1D9';
-const WARM = '#F6F4EF';
-const DARK = '#0F1A16';
-const IVORY = '#F3F1EA';
-const IVORY_SUB = '#D8D5CA';
-const BRASS = '#B08637';
+const HAIR = LEDGER.hair;
+const WARM = LEDGER.bone;
+const DARK = LEDGER.dark;
+const IVORY = LEDGER.ivory;
+const IVORY_SUB = LEDGER.rule;
+const BRASS = LEDGER.brass;
 
 // Type ships EMBEDDED (fontEmbeds.ts): production render paths can't reach
 // the Google Fonts CDN, and the container has no brand fonts — the CDN link
@@ -220,10 +224,52 @@ async function reportBodyHtml(md: string): Promise<string> {
   return String(await marked.parse(withoutH1, { gfm: true, breaks: false }));
 }
 
+/**
+ * Tag every `<h2>` in the rendered body with its ordinal, so a section can be
+ * pointed at — by the board (which screenshots from a heading down) and by the
+ * accent bands (which sit under one).
+ */
+function numberSections(bodyHtml: string): string {
+  let n = 0;
+  return bodyHtml.replace(/<h2(\s[^>]*)?>/gi, (m, attrs) => `<h2 id="sec-${n++}"${attrs ?? ''}>`);
+}
+
+/**
+ * Photos placed on a REPORT (Paul, 2026-07-25).
+ *
+ * A carousel page is an authored page, so a photo lands on a page. A report
+ * is one flow that Chromium paginates, so "page 4" is not a thing an image can
+ * be attached to — the stable anchor is the SECTION. `feed.reportArt` maps a
+ * section ordinal to an asset, and the image renders as a framed band right
+ * under that section's header: the same treatment `build-report.mts` uses for
+ * its `accent:` lines, framed rather than dissolved because a soft edge on
+ * light paper prints as a smudge.
+ */
+async function reportAccentBands(bodyHtml: string, run: ResearchRunRow): Promise<string> {
+  const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
+  const map = feed.reportArt && typeof feed.reportArt === 'object' ? feed.reportArt : null;
+  if (!map) return bodyHtml;
+  let out = bodyHtml;
+  for (const [key, val] of Object.entries(map)) {
+    const idx = Number(key);
+    const assetId = Number(val);
+    if (!Number.isInteger(idx) || !Number.isInteger(assetId) || assetId <= 0) continue;
+    try {
+      const asset = await getStudioAsset(assetId);
+      if (!asset || !asset.mime.startsWith('image/')) continue;
+      const uri = await scaleForRender(`data:${asset.mime};base64,${asset.data.toString('base64')}`);
+      const pos = `${Math.round((asset.focal_x ?? 0.5) * 100)}% ${Math.round((asset.focal_y ?? 0.5) * 100)}%`;
+      const band = `<img class="rb-accent" style="object-position:${pos}" src="${uri}">`;
+      out = out.replace(new RegExp(`(<h2 id="sec-${idx}"[^>]*>[\\s\\S]*?</h2>)`), `$1${band}`);
+    } catch { /* a missing asset must not sink the report */ }
+  }
+  return out;
+}
+
 export async function researchReportHtml(run: ResearchRunRow): Promise<string> {
   const typeLabel = TYPE_LABELS[run.research_type] ?? 'Research Brief';
   const title = run.report_title || run.topic;
-  const body = await reportBodyHtml(run.report_md || '');
+  const body = await reportAccentBands(numberSections(await reportBodyHtml(run.report_md || '')), run);
   const sources = Array.isArray(run.sources) ? run.sources : [];
   const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : null;
   const photo = await authorPhoto();
@@ -281,6 +327,11 @@ export async function researchReportHtml(run: ResearchRunRow): Promise<string> {
     .doc td { padding: 7px 10px; border-bottom: 1px solid ${HAIR}; vertical-align: top; color: ${BODY}; }
     .doc tr:nth-child(even) td { background: ${CARD}; }
     /* TL;DR: the first h2's list reads as the executive summary */
+    /* a photo placed on a section — framed band, never a soft edge (a fade on
+       light paper prints as a smudge; the frame is what survives a rasterizer) */
+    .rb-accent { display: block; width: 100%; height: 2.2in; object-fit: cover; border-radius: 10px;
+      border: 1px solid ${HAIR}; box-shadow: 0 6px 20px rgba(20,24,28,0.13);
+      margin: 0.05in 0 0.22in; page-break-inside: avoid; }
     .appendix { margin-top: 30px; page-break-before: always; }
     .appendix h2 { font-size: 12pt; font-weight: 800; margin: 18px 0 8px; }
     .srcs { margin-left: 1.2em; font-size: 8.5pt; color: ${BODY}; }
@@ -497,6 +548,52 @@ export function researchPostText(run: ResearchRunRow): string {
 
 interface DocPage { kind: string; heading?: string; body?: string; stat?: string; source?: string; artAssetId?: number }
 
+/**
+ * Map a research run onto the CANONICAL house deck spec (`house/deck.ts`).
+ *
+ * Paul, 2026-07-24: "I want collateral to be produced the same as being done
+ * in Claude Code now." The local builders are the reference implementation, so
+ * the app translates its run model into their spec rather than carrying a
+ * parallel set of templates.
+ *
+ * Kind mapping — app model → house grammar:
+ *   cover     → the dark cover (hook + sub + picked artwork)
+ *   stat      → `numeral` (the giant cited figure with its brass bar)
+ *   story     → `statement` (tag + head + body)
+ *   takeaway  → the dark closer  (BOOKEND LAW: exactly two dark pages)
+ *
+ * `docPages()` has already applied the bookend ordering and per-page artwork,
+ * so this is a pure shape translation with no policy of its own.
+ */
+export function runToDeckSpec(run: ResearchRunRow, opts: { coverImagePos?: string } = {}): any {
+  const pages = docPages(run);
+  const cover = pages.find(p => p.kind === 'cover');
+  const takeaways = pages.filter(p => p.kind === 'takeaway');
+  const middles = pages.filter(p => p.kind !== 'cover' && p.kind !== 'takeaway');
+  const closer = takeaways[takeaways.length - 1];
+  const kicker = (run.report_title || run.topic || 'smbX.ai').toString().toUpperCase().slice(0, 42);
+
+  return {
+    slug: `run-${run.id}`,
+    kicker,
+    cover: {
+      hook: cover?.heading || run.report_title || run.topic || '',
+      sub: cover?.body || '',
+      imagePos: opts.coverImagePos || '50% 45%',
+    },
+    pages: middles.map((p, i) => (
+      p.kind === 'stat'
+        ? { kind: 'numeral', numeral: p.stat || '', unit: '', head: p.heading || '', body: p.body || '', source: p.source || '', _i: i }
+        : { kind: 'statement', tag: 'THE READ', tagColor: 'green', head: p.heading || '', body: p.body || '', source: p.source || '', _i: i }
+    )),
+    closer: {
+      tag: 'FOR THE ACQUIRER',
+      head: closer?.heading || 'What this means for an acquirer',
+      body: closer?.body || '',
+    },
+  };
+}
+
 /** Normalize the synthesized deck; older runs fall back to hook + data points.
  *  Exported for the review sheet's page tiles (final rendered order). */
 export function docPages(run: ResearchRunRow): DocPage[] {
@@ -587,7 +684,74 @@ export async function runArtwork(run: Pick<ResearchRunRow, 'id' | 'studio_feed'>
 }
 
 
+/**
+ * The carousel, rendered through the CANONICAL house grammar (`house/deck.ts`)
+ * — the same templates a Cowork `build-deck.mts` run uses.
+ *
+ * Paul, 2026-07-24: "I want collateral to be produced the same as being done
+ * in Claude Code now." This is that path. Set RESEARCH_DECK_HOUSE=false to
+ * fall back to the app's legacy templates.
+ *
+ * Fail-soft by construction, matching the deckDesigner pattern: any throw here
+ * returns null and the caller renders the legacy template instead. A brand
+ * consolidation must never be able to take down a download.
+ */
+export function houseDeckHtml(
+  run: ResearchRunRow,
+  photo: AuthorPhoto | null = null,
+  art: AuthorPhoto | null = null,
+  brand: AuthorPhoto | null = null,
+  pageImgs: Record<number, AuthorPhoto> = {},
+): string | null {
+  if (process.env.RESEARCH_DECK_HOUSE === 'false') return null;
+  try {
+    const spec = runToDeckSpec(run);
+    // Per-page artwork: docPages() indexes by FINAL page position; the house
+    // grammar asks per middle page, so offset by the cover.
+    const imageFor = (ref?: string): string | null => {
+      const i = Number(ref);
+      if (!Number.isInteger(i)) return null;
+      return pageImgs[i + 1]?.dataUri || null;
+    };
+    // A page with an assigned photo becomes the house grammar's `trade`
+    // layout — text left, framed image panel right. The plain numeral and
+    // statement templates have no image slot, so without this remap a photo
+    // Paul dropped onto a page would silently vanish whenever the Claude
+    // designer isn't the path taken (Paul, 2026-07-25: the board is the point).
+    spec.pages = spec.pages.map((p: any) => {
+      const img = pageImgs[p._i + 1];
+      if (!img) return { ...p, image: String(p._i) };
+      return {
+        kind: 'trade',
+        name: p.kind === 'numeral' ? 'THE READ' : (p.tag || 'THE READ'),
+        numeral: p.kind === 'numeral' ? p.numeral : '',
+        unit: p.unit || '',
+        head: p.head, body: p.body, source: p.source,
+        image: String(p._i),
+        imagePos: `${Math.round((img.focalX ?? 0.5) * 100)}% ${Math.round((img.focalY ?? 0.5) * 100)}%`,
+        _i: p._i,
+      };
+    });
+    const assets = {
+      logo: LOGO_URI || '',
+      logoWhite: DARK_LOGO_URI || LOGO_URI || '',
+      texture: DARK_TEXTURE_URI || '',
+      headshot: photo?.dataUri || '',
+      coverImage: art?.dataUri || brand?.dataUri || null,
+      image: imageFor,
+    };
+    if (!assets.logo || !assets.texture) return null; // brand assets missing → legacy
+    return `<!DOCTYPE html><html><head><meta charset="utf-8">${FONTS}
+<style>${deckCss(assets.texture)}</style></head><body>${deckPages(spec, assets).join('')}</body></html>`;
+  } catch (e) {
+    console.warn('[composer] house deck grammar failed, using legacy template:', (e as Error).message);
+    return null;
+  }
+}
+
 export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null = null, art: AuthorPhoto | null = null, brand: AuthorPhoto | null = null, pageImgs: Record<number, AuthorPhoto> = {}): string {
+  const house = houseDeckHtml(run, photo, art, brand, pageImgs);
+  if (house) return house;
   const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
   const typeLabel = TYPE_LABELS[run.research_type] ?? 'Research';
   const pages = docPages(run);
@@ -1150,6 +1314,132 @@ export async function renderCarouselStripPng(run: ResearchRunRow): Promise<Buffe
     await new Promise(r => setTimeout(r, 150));
     const png = await page.screenshot({ type: 'png', fullPage: true });
     return Buffer.from(png);
+  } finally {
+    await page.close().catch(() => {});
+  }
+}
+
+/**
+ * Every carousel page as its own small PNG — the page BOARD (Paul, 2026-07-25:
+ * "once the pages of whatever collateral I want to create are rendered in
+ * preview, I need to be able to drag drop whichever images or assets on which
+ * pages, all on one screen").
+ *
+ * The existing strip render answers "does the deck read right"; it can't be a
+ * drop target, because a tall PNG has no idea where page four starts. This
+ * screenshots each `.pg` section separately, at thumbnail scale, so the board
+ * shows the ACTUAL page a photo is about to land on rather than its heading.
+ *
+ * One Chromium session for the whole deck — the per-page cost is a screenshot,
+ * not a re-render. Thumbs come back as data URIs so the board is one request.
+ */
+export async function renderDeckPageThumbs(run: ResearchRunRow, width = 300): Promise<string[]> {
+  const photo = await authorPhoto();
+  const art = await ensureRunArtwork(run);
+  const brand = await brandPhoto();
+  const pageImgs = await loadPageArt(run);
+  const html = (await designedDeckHtml(run)) ?? linkedInDocHtml(run, photo, art, brand, pageImgs);
+  const page = await newRenderPage();
+  try {
+    // Render at page scale, then let the screenshot scale down: shrinking the
+    // viewport instead would reflow the layout and show a deck that isn't the
+    // one being exported.
+    await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: width / 1080 });
+    await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 120000 });
+    await page.evaluateHandle('document.fonts.ready').catch(() => {});
+    await page.evaluate(() => Promise.all(Array.from(document.images).map((im: any) => im.decode().catch(() => {})))).catch(() => {});
+    await new Promise(r => setTimeout(r, 150));
+    const handles = await page.$$('.pg');
+    const out: string[] = [];
+    for (const h of handles) {
+      try {
+        const shot = await h.screenshot({ type: 'jpeg', quality: 80 });
+        out.push(`data:image/jpeg;base64,${Buffer.from(shot as any).toString('base64')}`);
+      } catch {
+        out.push(''); // a page that won't shoot must not lose the pages after it
+      }
+    }
+    return out;
+  } finally {
+    await page.close().catch(() => {});
+  }
+}
+
+/** The single-image post as a one-page board — same shape, one tile. */
+export async function renderCardThumb(run: ResearchRunRow, width = 300): Promise<string[]> {
+  const photo = await authorPhoto();
+  const art = await ensureRunArtwork(run);
+  const brand = await brandPhoto();
+  const html = researchCardHtml(run, 0, photo, art, brand, 'light');
+  const page = await newRenderPage();
+  try {
+    await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: width / 1080 });
+    await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 120000 });
+    await page.evaluateHandle('document.fonts.ready').catch(() => {});
+    await page.evaluate(() => Promise.all(Array.from(document.images).map((im: any) => im.decode().catch(() => {})))).catch(() => {});
+    const shot = await page.screenshot({ type: 'jpeg', quality: 80 });
+    return [`data:image/jpeg;base64,${Buffer.from(shot as any).toString('base64')}`];
+  } finally {
+    await page.close().catch(() => {});
+  }
+}
+
+/**
+ * The report's board — one tile per SECTION, not per printed page.
+ *
+ * A report is one flow Chromium paginates, so a printed page is not something
+ * an image can be attached to; the section is. Each tile screenshots the
+ * document from that section's header down, so the tile shows the place the
+ * photo will actually land, and the tile index IS the key `feed.reportArt`
+ * uses. A document with no `##` headers falls back to page-height slices so
+ * the preview still shows something honest.
+ */
+export async function renderReportSectionThumbs(
+  run: ResearchRunRow,
+  width = 300,
+): Promise<{ heading: string; src: string }[]> {
+  const html = await researchReportHtml(run);
+  const page = await newRenderPage();
+  try {
+    const W = 816, H = 1056; // Letter at 96dpi
+    await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
+    await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 120000 });
+    await page.evaluateHandle('document.fonts.ready').catch(() => {});
+    await page.evaluate(() => Promise.all(Array.from(document.images).map((im: any) => im.decode().catch(() => {})))).catch(() => {});
+    await new Promise(r => setTimeout(r, 150));
+
+    const total: number = await page.evaluate(() => document.documentElement.scrollHeight);
+    const anchors: { heading: string; top: number }[] = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('h2[id^="sec-"]')).map((h: any) => ({
+        heading: (h.textContent || '').trim().slice(0, 90),
+        top: Math.max(0, h.getBoundingClientRect().top + window.scrollY - 24),
+      })));
+
+    await page.setViewport({ width: W, height: H, deviceScaleFactor: width / W });
+    const shoot = async (y: number, h: number) => {
+      try {
+        const shot = await page.screenshot({
+          type: 'jpeg', quality: 80,
+          clip: { x: 0, y, width: W, height: Math.max(80, Math.min(h, total - y)) },
+        });
+        return `data:image/jpeg;base64,${Buffer.from(shot as any).toString('base64')}`;
+      } catch { return ''; }
+    };
+
+    if (!anchors.length) {
+      const count = Math.min(24, Math.max(1, Math.ceil(total / H)));
+      const out: { heading: string; src: string }[] = [];
+      for (let i = 0; i < count; i++) out.push({ heading: `Page ${i + 1}`, src: await shoot(i * H, H) });
+      return out;
+    }
+
+    const out: { heading: string; src: string }[] = [];
+    for (let i = 0; i < Math.min(anchors.length, 30); i++) {
+      const a = anchors[i];
+      const next = anchors[i + 1]?.top ?? total;
+      out.push({ heading: a.heading, src: await shoot(a.top, Math.min(H, next - a.top)) });
+    }
+    return out;
   } finally {
     await page.close().catch(() => {});
   }

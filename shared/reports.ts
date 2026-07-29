@@ -59,7 +59,7 @@ export const REPORTS: ReportMeta[] = [
     kicker: 'Master assessment',
     shortTitle: 'Home Services M&A',
     abstract:
-      'Six trades, more than $600B in combined U.S. revenue, and roughly 250,000 businesses — with no single entity commanding 20% share of any major vertical. This master assessment consolidates three research workstreams into one register: the capital environment, market sizing, the platform map, and what the 2024–2026 wave of recaps repriced.',
+      'Six trades, roughly $753–768B in combined U.S. revenue, and some 250,000 businesses — with no single entity commanding 20% share of any major vertical. This assessment maps the capital environment, the market\'s real size, the platform landscape, and what the 2024–2026 wave of recaps repriced.',
     published: '2026-07-23',
     publishedLabel: 'July 2026',
     ogImage: '/reports/home-services-cover.jpg',

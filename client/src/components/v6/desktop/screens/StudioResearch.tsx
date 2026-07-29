@@ -23,6 +23,8 @@ import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import { authHeaders, type User } from "../../../../hooks/useAuth";
 import { T } from "../atlasTokens";
 import { StudioAnnouncement, StudioPostCards } from "./StudioAnnouncement";
+import CollateralBuilder from "./CollateralBuilder";
+import MarketWorkspace from "./MarketWorkspace";
 
 /* ─── API types ────────────────────────────────────────────── */
 
@@ -156,6 +158,8 @@ export default function StudioResearch({ user }: { user: User | null }) {
   const [runs, setRuns] = useState<RunRow[]>([]);
   const [schedules, setSchedules] = useState<ScheduleRow[]>([]);
   const [assets, setAssets] = useState<AssetRow[]>([]);
+  const [artifacts, setArtifacts] = useState<ArtifactRow[]>([]);
+  const [lanes, setLanes] = useState<LaneRow[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsRow[]>([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -178,6 +182,17 @@ export default function StudioResearch({ user }: { user: User | null }) {
   const [dl, setDl] = useState<string | null>(null); // "runId:kind" while downloading
   const [reviewId, setReviewId] = useState<number | null>(null); // review sheet
   const [sheet, setSheet] = useState<null | "collateral" | "import">(null); // slide-over sheets
+  // The collateral builder takes over the whole frame — one screen, per Paul.
+  const [building, setBuilding] = useState<{ source: { kind: "lane" | "artifact"; id: number }; label: string; output?: "onepager" | "carousel" | "report" } | null>(null);
+  // Reading a market's master — it lives in the lane and is never copied, so
+  // this fetches it live rather than opening a snapshot.
+  const [reading, setReading] = useState<{ laneId: number; label: string } | null>(null);
+  // Studio's two views: the market line of work, and the file manager behind it.
+  const [view, setView] = useState<"market" | "files">(() =>
+    (localStorage.getItem("smbx_studio_view") as "market" | "files") || "market");
+  useEffect(() => { localStorage.setItem("smbx_studio_view", view); }, [view]);
+  // "Read / edit" from the workspace deep-links into the Artifacts inspector.
+  const [openArtifactId, setOpenArtifactId] = useState<number | null>(null);
 
   // Notes surface as a frame-level toast (the create form isn't always on
   // screen); they auto-dismiss.
@@ -193,18 +208,22 @@ export default function StudioResearch({ user }: { user: User | null }) {
   const [connErr, setConnErr] = useState(false);
   const refresh = useCallback(async () => {
     try {
-      const [r, s, u, a, an] = await Promise.all([
+      const [r, s, u, a, an, ar, ln] = await Promise.all([
         api<{ runs: RunRow[] }>("/research/runs"),
         api<{ schedules: ScheduleRow[] }>("/research/schedules"),
         api<{ spentCents: number; capCents: number | null }>("/research/usage"),
         api<{ assets: AssetRow[] }>("/studio/assets"),
         api<{ items: AnalyticsRow[] }>("/research/analytics"),
+        api<{ artifacts: ArtifactRow[] }>("/studio/artifacts"),
+        api<{ lanes: LaneRow[] }>("/research/lanes"),
       ]);
       setRuns(r.runs ?? []);
       setSchedules(s.schedules ?? []);
       setUsage(u);
       setAssets(a.assets ?? []);
       setAnalytics(an.items ?? []);
+      setArtifacts(ar.artifacts ?? []);
+      setLanes(ln.lanes ?? []);
       setConnErr(false);
     } catch {
       setConnErr(true); // banner + fast retry below
@@ -220,8 +239,12 @@ export default function StudioResearch({ user }: { user: User | null }) {
 
   // Always-on poll: fast while a run is in flight or the last load failed,
   // slow but alive when idle (so the library can never go permanently stale).
+  // Synthesis is a long Claude pass over PDFs — the POST can outlive the
+  // proxy, so the lane ROW is the source of truth and the poll is what tells
+  // us it finished. Same reason runs poll.
   const inFlight = runs.some((r) => r.status === "queued" || r.status === "running")
-    || analytics.some((a) => a.analysis_status === "running");
+    || analytics.some((a) => a.analysis_status === "running")
+    || lanes.some((l) => l.synthesis_status === "running");
   const refreshRef = useRef(refresh);
   refreshRef.current = refresh;
   useEffect(() => {
@@ -350,6 +373,154 @@ export default function StudioResearch({ user }: { user: User | null }) {
       setNote({ kind: "err", text: e?.message || "Download failed." });
     }
   }, []);
+
+  /* ── Research lanes: the living master document ───────────────────────
+     Paul, 2026-07-24: "I'm gonna run the research in Claude Web app, I will
+     run a research and Gemini probably or other tool just so we have a variety
+     of research… then I will upload all of the research for it to pass through
+     and calculate all the information into one final document. I want to do
+     this part in the app too so that I can keep all the research in the
+     database and keep it updated." */
+
+  const newLane = useCallback(async () => {
+    const label = window.prompt("Name the lane — the market this master document covers:\n(e.g. “Commercial mechanical”, “Elevator & escalator”)")?.trim();
+    if (!label) return null;
+    try {
+      const lane = await api<LaneRow>("/research/lanes", { method: "POST", body: JSON.stringify({ label }) });
+      await refresh();
+      return lane.id;
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Couldn’t create the lane." });
+      return null;
+    }
+  }, [refresh]);
+
+  const uploadSource = useCallback(async (laneId: number, f: File) => {
+    const fd = new FormData();
+    fd.append("file", f);
+    fd.append("label", f.name.replace(/\.[a-z0-9]+$/i, ""));
+    try {
+      const r = await fetch(`/api/research/lanes/${laneId}/sources`, { method: "POST", headers: authHeaders(), body: fd });
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        throw new Error((j as any)?.error || `Upload failed (${r.status})`);
+      }
+      setNote({ kind: "ok", text: `“${f.name}” added — press Synthesize to fold it into the master.` });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Upload failed." });
+    }
+  }, [refresh]);
+
+  const pasteSource = useCallback(async (laneId: number, text: string, label: string, tool: string) => {
+    await api(`/research/lanes/${laneId}/sources`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, label, tool }),
+    });
+    void refresh();
+  }, [refresh]);
+
+  const deleteSource = useCallback(async (laneId: number, s: LaneSource) => {
+    if (!window.confirm(`Remove “${s.label}” from this lane?`)) return;
+    try {
+      await api(`/research/lanes/${laneId}/sources/${s.id}`, { method: "DELETE" });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Couldn’t remove it." });
+    }
+  }, [refresh]);
+
+  /**
+   * Fold the new research in. The server writes `synthesis_status='running'`
+   * before it starts, so the ROW is what tells us the outcome — this POST can
+   * legitimately outlive the proxy on a multi-PDF pass, and a timeout here
+   * does NOT mean the synthesis failed.
+   */
+  const synthesizeLane = useCallback(async (laneId: number, full: boolean) => {
+    setNote({ kind: "ok", text: "Synthesizing — reading every source and auditing the figures. This takes a few minutes; the lane shows its state as it goes." });
+    setLanes((ls) => ls.map((l) => (l.id === laneId ? { ...l, synthesis_status: "running", synthesis_error: null } : l)));
+    try {
+      await api(`/research/lanes/${laneId}/synthesize`, { method: "POST", body: JSON.stringify({ full }) });
+    } catch {
+      /* The poll is the truth — a dropped response is not a failed run. */
+    } finally {
+      void refresh();
+    }
+  }, [refresh]);
+
+  /* A master is never filed into Artifacts. It lives in its market, and
+     everything that builds from it reads that row live — so there is no copy
+     to go stale and no question about which one is real (Paul, 2026-07-26:
+     "when we complete a master research — that can be updated later — where
+     does it go?"). The route survives for the run→artifact path. */
+
+  /* ── Artifacts: the words repository ──────────────────────────────────
+     Reports, post copy, research masters, specs — the text a piece of
+     collateral is built from. Paul, 2026-07-24: "artifacts are the reports,
+     LinkedIn post, copy, etcetera. Text documents that are used to generate
+     collateral." Written here, uploaded as .md/.txt, or filed from a run. */
+
+  const newArtifact = useCallback(async (kind: string) => {
+    const label = window.prompt("Name the artifact:")?.trim();
+    if (!label) return null;
+    try {
+      const { id } = await api<{ id: number }>("/studio/artifacts", {
+        method: "POST",
+        body: JSON.stringify({ label, kind, bodyMd: "" }),
+      });
+      await refresh();
+      return id;
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Couldn’t create the artifact." });
+      return null;
+    }
+  }, [refresh]);
+
+  const uploadArtifact = useCallback(async (f: File) => {
+    try {
+      const bodyMd = await f.text();
+      await api("/studio/artifacts", {
+        method: "POST",
+        body: JSON.stringify({
+          label: f.name.replace(/\.(md|markdown|txt)$/i, ""),
+          kind: /post|caption/i.test(f.name) ? "post_copy" : "document",
+          bodyMd,
+        }),
+      });
+      setNote({ kind: "ok", text: `“${f.name}” is in Artifacts.` });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Upload failed." });
+    }
+  }, [refresh]);
+
+  const saveArtifact = useCallback(async (id: number, patch: Record<string, unknown>) => {
+    await api(`/studio/artifacts/${id}`, { method: "PATCH", body: JSON.stringify(patch) });
+    void refresh();
+  }, [refresh]);
+
+  const deleteArtifact = useCallback(async (a: ArtifactRow) => {
+    if (!window.confirm(`Delete “${a.label}”? This can't be undone.`)) return;
+    try {
+      await api(`/studio/artifacts/${a.id}`, { method: "DELETE" });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Delete failed." });
+    }
+  }, [refresh]);
+
+  /** File a finished run's report into Artifacts — the chain the three
+   *  repositories form: artifact (words) + asset (pictures) → collateral. */
+  const fileRunAsArtifact = useCallback(async (r: RunRow) => {
+    try {
+      await api(`/research/runs/${r.id}/file-artifact`, { method: "POST" });
+      setNote({ kind: "ok", text: "Filed in Artifacts — edit it there and it stays linked to this run." });
+      void refresh();
+    } catch (e: any) {
+      setNote({ kind: "err", text: e?.message || "Couldn’t file this run." });
+    }
+  }, [refresh]);
 
   /* ── Performance: LinkedIn analytics imports + Yulia's read ── */
 
@@ -622,15 +793,40 @@ export default function StudioResearch({ user }: { user: User | null }) {
 
   );
 
-  // ── the canvas app: the manager owns the whole content area ──
+  // ── the canvas app ──
+  // Paul, 2026-07-26: Studio is a LINE OF WORK, not a filing cabinet. The
+  // market workspace — add research → synthesize → produce — is the screen.
+  // The Finder stays reachable for the machinery that isn't market-scoped
+  // (agent runs, campaigns, analytics, the shared asset library).
   return (
     <div style={A.frame}>
+      <div style={A.viewTabs}>
+        <button type="button" style={{ ...A.viewTab, ...(view === "market" ? A.viewTabOn : null) }} onClick={() => setView("market")}>
+          Markets
+        </button>
+        <button type="button" style={{ ...A.viewTab, ...(view === "files" ? A.viewTabOn : null) }} onClick={() => setView("files")}>
+          All files
+        </button>
+      </div>
+
+      {view === "market" ? (
+        <MarketWorkspace
+          lanes={lanes}
+          onLanesChanged={() => void refresh()}
+          onNote={(kind, text) => setNote({ kind, text })}
+          onOpenBuilder={(source, label, output) => setBuilding({ source, label, output })}
+          onOpenArtifact={(artifactId) => { setView("files"); setOpenArtifactId(artifactId); }}
+          onReadMaster={(laneId, label) => setReading({ laneId, label })}
+        />
+      ) : (
       <Library
         loaded={loaded}
         connErr={connErr}
         runs={runs}
         schedules={schedules}
         assets={assets}
+        artifacts={artifacts}
+        lanes={lanes}
         typeLabel={typeLabel}
         angleLabel={angleLabel}
         dl={dl}
@@ -655,11 +851,41 @@ export default function StudioResearch({ user }: { user: User | null }) {
         onUploadPhoto={uploadPhoto}
         onNewCard={() => setSheet("collateral")}
         onImportPlan={() => setSheet("import")}
+        onNewLane={newLane}
+        onUploadSource={uploadSource}
+        onPasteSource={pasteSource}
+        onDeleteSource={deleteSource}
+        onSynthesize={synthesizeLane}
+        onBuildCollateral={(a) => setBuilding({ source: { kind: "artifact", id: a.id }, label: a.label })}
+        onNewArtifact={newArtifact}
+        onUploadArtifact={uploadArtifact}
+        onSaveArtifact={saveArtifact}
+        onDeleteArtifact={deleteArtifact}
+        onFileRunAsArtifact={fileRunAsArtifact}
         analytics={analytics}
         onUploadAnalytics={uploadAnalytics}
         onAnalyzeAnalytics={analyzeAnalytics}
         onDeleteAnalytics={deleteAnalytics}
+        openArtifactId={openArtifactId}
+        onArtifactOpened={() => setOpenArtifactId(null)}
       />
+      )}
+
+      {building && (
+        <CollateralBuilder
+          source={building.source}
+          artifactLabel={building.label}
+          initialOutput={building.output}
+          onClose={() => { setBuilding(null); void refresh(); }}
+          onExported={(text) => { setNote({ kind: "ok", text }); void refresh(); }}
+        />
+      )}
+
+      {reading && (
+        <Sheet title={reading.label} onClose={() => setReading(null)}>
+          <MasterReader laneId={reading.laneId} />
+        </Sheet>
+      )}
 
       {sheet === "collateral" && (
         <Sheet title="Media & collateral studio" onClose={() => { setSheet(null); void refresh(); }}>
@@ -721,6 +947,33 @@ function Sheet({ title, onClose, children }: { title: string; onClose: () => voi
    selected run's documents, review state, and its live activity trail —
    the Claude-style "what is it doing right now" feed). */
 
+/* A RESEARCH LANE (Paul, 2026-07-24): he runs deep research OUTSIDE the app —
+   Claude web, Gemini, others, deliberately, for a variety of reads — uploads
+   them all here, and the app folds them into ONE master it keeps updated,
+   "maybe once a quarter." The lane is that living document plus its sources. */
+type LaneRow = {
+  id: number; slug: string; label: string; notes: string | null;
+  master_title: string | null; master_version: number; has_master?: boolean;
+  synthesized_at: string | null; synthesis_status: string; synthesis_error: string | null;
+  archived: boolean; created_at: string;
+};
+type LaneSource = {
+  id: number; label: string; tool: string | null; mime: string;
+  bytes: number | null; gathered_on: string | null;
+  incorporated_version: number | null; created_at: string;
+};
+type LaneVersion = {
+  id: number; version: number; title: string | null; change_note: string | null;
+  source_ids: number[] | null; usage: any; created_at: string;
+};
+
+type ArtifactRow = {
+  id: number; kind: string; label: string; notes: string | null;
+  lane_id: number | null; lane_version: number | null;
+  run_id: number | null; schedule_id: number | null;
+  chars: number; preview: string; created_at: string; updated_at: string;
+};
+
 type FolderSel =
   | { kind: "all" }
   | { kind: "oneoff" }
@@ -728,9 +981,28 @@ type FolderSel =
   | { kind: "camp"; id: number }
   | { kind: "media" }
   | { kind: "collateral" }
+  | { kind: "artifacts" }
+  | { kind: "lane"; id: number }
   | { kind: "perf" };
 
 const ASSET_FOLDER = (s: FolderSel) => s.kind === "media" || s.kind === "collateral";
+/* Artifacts are the WORDS (reports, post copy, research) — the third
+   repository alongside Assets (pictures) and Collateral (finished output).
+   Paul, 2026-07-24: "just like in Google Drive, we need repositories for
+   different types of data." Text, so it gets its own list + editor rather
+   than the image preview the asset folders use. */
+const ARTIFACT_FOLDER = (s: FolderSel) => s.kind === "artifacts";
+
+/** What kind of words this is — set on the artifact, shown in the Kind column. */
+const ARTIFACT_KINDS: { key: string; label: string }[] = [
+  { key: "report", label: "Report" },
+  { key: "research", label: "Research master" },
+  { key: "post_copy", label: "Post copy" },
+  { key: "caption", label: "Caption" },
+  { key: "spec", label: "Deck spec" },
+  { key: "document", label: "Document" },
+];
+const artifactKindLabel = (k: string) => ARTIFACT_KINDS.find((x) => x.key === k)?.label ?? k;
 
 function shortDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -857,12 +1129,14 @@ function GroupHead({ label, onDropCampaign, action }: { label: string; onDropCam
   );
 }
 
-function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabel, angleLabel, dl, reviewId, createForm, angles, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onMoveAsset, onMakeCampaign, onArchiveRun, onDeleteRun, onRunCampaignNow, onPatchSchedule, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard, onImportPlan, onUploadAnalytics, onAnalyzeAnalytics, onDeleteAnalytics }: {
+function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, analytics, typeLabel, angleLabel, dl, reviewId, createForm, angles, onReview, onGrab, onCopyPost, onRerunRun, onMoveRun, onMoveAsset, onMakeCampaign, onArchiveRun, onDeleteRun, onRunCampaignNow, onPatchSchedule, onToggleSchedule, onDeleteSchedule, onDeleteAsset, onDownloadAsset, onUploadPhoto, onNewCard, onImportPlan, onNewLane, onUploadSource, onPasteSource, onDeleteSource, onSynthesize, onBuildCollateral, onNewArtifact, onUploadArtifact, onSaveArtifact, onDeleteArtifact, onFileRunAsArtifact, openArtifactId, onArtifactOpened, onUploadAnalytics, onAnalyzeAnalytics, onDeleteAnalytics }: {
   loaded: boolean;
   connErr: boolean;
   runs: RunRow[];
   schedules: ScheduleRow[];
   assets: AssetRow[];
+  artifacts: ArtifactRow[];
+  lanes: LaneRow[];
   typeLabel: (k: string) => string;
   angleLabel: (k?: string | null) => string | null;
   dl: string | null;
@@ -887,6 +1161,20 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
   onUploadPhoto: (f: File) => void;
   onNewCard: () => void;
   onImportPlan: () => void;
+  onNewLane: () => Promise<number | null>;
+  onUploadSource: (laneId: number, f: File) => void;
+  onPasteSource: (laneId: number, text: string, label: string, tool: string) => Promise<void>;
+  onDeleteSource: (laneId: number, s: LaneSource) => void;
+  onSynthesize: (laneId: number, full: boolean) => void;
+  onBuildCollateral: (a: ArtifactRow) => void;
+  onNewArtifact: (kind: string) => Promise<number | null>;
+  onUploadArtifact: (f: File) => void;
+  onSaveArtifact: (id: number, patch: Record<string, unknown>) => Promise<void>;
+  onDeleteArtifact: (a: ArtifactRow) => void;
+  onFileRunAsArtifact: (r: RunRow) => void;
+  /** Deep link from the market workspace: select this artifact on mount. */
+  openArtifactId: number | null;
+  onArtifactOpened: () => void;
   analytics: AnalyticsRow[];
   onUploadAnalytics: (f: File) => void;
   onAnalyzeAnalytics: (a: AnalyticsRow) => void;
@@ -895,7 +1183,20 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
   const [sel, setSel] = useState<FolderSel>({ kind: "all" });
   const [selRunId, setSelRunId] = useState<number | null>(null);
   const [selAssetId, setSelAssetId] = useState<number | null>(null);
+  const [selArtifactId, setSelArtifactId] = useState<number | null>(null);
   const [selPerfId, setSelPerfId] = useState<number | null>(null);
+  // A lane's sources + versions aren't in the list payload — they load when
+  // the lane is opened, and again whenever a synthesis lands.
+  const [laneDetail, setLaneDetail] = useState<{ sources: LaneSource[]; versions: LaneVersion[] } | null>(null);
+
+  // Arriving from the market workspace: land on that artifact, in Artifacts.
+  useEffect(() => {
+    if (openArtifactId == null) return;
+    setSel({ kind: "artifacts" });
+    setSelArtifactId(openArtifactId);
+    setInsp("item");
+    onArtifactOpened();
+  }, [openArtifactId, onArtifactOpened]);
   // The inspector shows the CREATE form, the selected item, or — when a
   // campaign folder is picked — the CAMPAIGN itself (rename, mandate,
   // cadence, archive, delete). That's where campaigns are managed.
@@ -903,6 +1204,8 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
   const [filter, setFilter] = useState("");
   const lastAutoRef = useRef<number | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const artFileRef = useRef<HTMLInputElement | null>(null);
+  const laneFileRef = useRef<HTMLInputElement | null>(null);
   const perfFileRef = useRef<HTMLInputElement | null>(null);
 
   // Resizable panes (drag the dividers; double-click to fit). Widths persist.
@@ -921,10 +1224,10 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
 
   /** Fit the sidebar to the longest folder name (glyph + gaps + count + pads ≈ 86px). */
   const autoFitSide = useCallback(() => {
-    const labels = ["All research", "One-off runs", "Archived", "Media", "Collateral", "LinkedIn analytics", "+ New research", ...schedules.map((s) => s.name)];
+    const labels = ["All research", "One-off runs", "Archived", "Research lanes", "Artifacts", "Assets", "Collateral", "LinkedIn analytics", "+ New research", ...schedules.map((s) => s.name), ...lanes.map((l) => l.label)];
     const w = widestLabel(labels, `600 12.5px ${T.font}`);
     if (w > 0) setSideW(clampW(w + 86, 150, 380));
-  }, [schedules]);
+  }, [schedules, lanes]);
 
   // First load with no saved width: auto-size to the campaign names.
   const autoFitDoneRef = useRef(false);
@@ -967,6 +1270,23 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
   const campAssetsAll = sel.kind === "camp" ? collateral.filter((a) => a.schedule_id === sel.id) : [];
   const campAssets = q ? campAssetsAll.filter((a) => a.label.toLowerCase().includes(q)) : campAssetsAll;
   const assetPool = assetMode ? assetItems : campAssets;
+  const laneMode = sel.kind === "lane";
+  const selLane = sel.kind === "lane" ? lanes.find((l) => l.id === sel.id) ?? null : null;
+  const laneKey = selLane ? `${selLane.id}:${selLane.master_version}:${selLane.synthesis_status}` : "";
+  useEffect(() => {
+    if (!selLane) { setLaneDetail(null); return; }
+    let alive = true;
+    api<{ sources: LaneSource[]; versions: LaneVersion[] }>(`/research/lanes/${selLane.id}`)
+      .then((j) => { if (alive) setLaneDetail({ sources: j.sources ?? [], versions: j.versions ?? [] }); })
+      .catch(() => { if (alive) setLaneDetail(null); });
+    return () => { alive = false; };
+    // laneKey changes when a synthesis lands, which is when the detail moves.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [laneKey]);
+  const artifactMode = ARTIFACT_FOLDER(sel);
+  const artifactItems = artifactMode
+    ? (q ? artifacts.filter((a) => `${a.label} ${a.kind} ${a.preview ?? ""}`.toLowerCase().includes(q)) : artifacts)
+    : [];
   const perfMode = sel.kind === "perf";
   const perfItems = perfMode ? (q ? analytics.filter((a) => a.label.toLowerCase().includes(q)) : analytics) : [];
 
@@ -991,6 +1311,12 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
       if (next !== selPerfId) setSelPerfId(next);
       return;
     }
+    if (artifactMode) {
+      if (selArtifactId != null && artifactItems.some((a) => a.id === selArtifactId)) return;
+      const next = artifactItems[0]?.id ?? null;
+      if (next !== selArtifactId) setSelArtifactId(next);
+      return;
+    }
     if (assetMode) {
       if (selAssetId != null && assetItems.some((a) => a.id === selAssetId)) return;
       const next = assetItems[0]?.id ?? null;
@@ -1002,10 +1328,11 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
     if (selRunId != null && items.some((r) => r.id === selRunId)) return;
     const next = items[0]?.id ?? null;
     if (next !== selRunId) setSelRunId(next);
-  }, [assetMode, perfMode, items, selRunId, assetItems, campAssets, selAssetId, perfItems, selPerfId]);
+  }, [assetMode, artifactMode, perfMode, items, selRunId, assetItems, artifactItems, selArtifactId, campAssets, selAssetId, perfItems, selPerfId]);
 
   const selRun = selRunId != null ? items.find((r) => r.id === selRunId) ?? null : null;
   const selAsset = assetPool.find((a) => a.id === selAssetId) ?? null;
+  const selArtifact = artifactItems.find((a) => a.id === selArtifactId) ?? null;
   const selCamp = sel.kind === "camp" ? schedules.find((s) => s.id === sel.id) ?? null : null;
   const selPerf = perfMode ? perfItems.find((a) => a.id === selPerfId) ?? null : null;
 
@@ -1128,8 +1455,48 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
             dim
           />
         ))}
-        <div style={{ ...F.sideHead, marginTop: 14 }}>Assets</div>
-        <SideRow label="Media" count={photos.length} on={sel.kind === "media"} onClick={() => setSel({ kind: "media" })} tint="#D9A441" />
+        {/* Research lanes — the living master documents. Outside research goes
+            IN, one synthesized master comes out, refreshed every few months. */}
+        <div style={{ ...F.sideHead, marginTop: 14, display: "flex", alignItems: "center" }}>
+          <span style={{ flex: 1 }}>Research lanes</span>
+          <button
+            type="button"
+            style={F.groupAdd}
+            title="New lane — a market you keep a master document for"
+            onClick={async () => { const id = await onNewLane(); if (id) setSel({ kind: "lane", id }); }}
+          >
+            + Lane
+          </button>
+        </div>
+        {/* With no lanes, dim helper text is a dead end — it reads like a drop
+            zone that ignores you. Make the empty state the way in. */}
+        {lanes.length === 0 && (
+          <button
+            type="button"
+            style={F.laneStart}
+            onClick={async () => { const id = await onNewLane(); if (id) { setSel({ kind: "lane", id }); setInsp("item"); } }}
+          >
+            Start a lane to upload outside research →
+          </button>
+        )}
+        {lanes.map((l) => (
+          <SideRow
+            key={l.id}
+            label={l.label}
+            count={l.master_version || 0}
+            on={sel.kind === "lane" && sel.id === l.id}
+            onClick={() => { setSel({ kind: "lane", id: l.id }); setInsp("item"); }}
+            tint={l.synthesis_status === "running" ? T.blue : l.synthesis_status === "failed" ? "#C4574A" : l.master_version > 0 ? "#4FA97E" : "#A8AEB8"}
+            dim={l.master_version === 0 && l.synthesis_status !== "running"}
+          />
+        ))}
+
+        {/* The three repositories, in the order the chain runs:
+            ARTIFACTS (the words) + ASSETS (the pictures) -> COLLATERAL (the
+            finished output posted or sent). Paul, 2026-07-24. */}
+        <div style={{ ...F.sideHead, marginTop: 14 }}>Repositories</div>
+        <SideRow label="Artifacts" count={artifacts.length} on={sel.kind === "artifacts"} onClick={() => setSel({ kind: "artifacts" })} tint="#4FA97E" />
+        <SideRow label="Assets" count={photos.length} on={sel.kind === "media"} onClick={() => setSel({ kind: "media" })} tint="#D9A441" />
         <SideRow label="Collateral" count={collateral.length} on={sel.kind === "collateral"} onClick={() => setSel({ kind: "collateral" })} tint="#8B7BD8" onDropPayload={dropUnfile} />
         <div style={{ ...F.sideHead, marginTop: 14 }}>Performance</div>
         <SideRow label="LinkedIn analytics" count={analytics.length} on={sel.kind === "perf"} onClick={() => setSel({ kind: "perf" })} tint="#4F9ED9" />
@@ -1173,6 +1540,51 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
           {sel.kind === "collateral" && (
             <button type="button" style={F.toolBtn} onClick={onNewCard}>New card</button>
           )}
+          {laneMode && selLane && (
+            <>
+              <input
+                ref={laneFileRef}
+                type="file"
+                accept=".pdf,.md,.markdown,.txt,application/pdf,text/markdown,text/plain"
+                style={{ display: "none" }}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) onUploadSource(selLane.id, f); e.currentTarget.value = ""; }}
+              />
+              <button type="button" style={F.toolBtn} onClick={() => laneFileRef.current?.click()}>Upload research</button>
+              <button
+                type="button"
+                style={{ ...F.toolBtn, color: T.ink3 }}
+                onClick={async () => {
+                  const text = window.prompt("Paste the research text (markdown is fine):");
+                  if (!text?.trim()) return;
+                  const label = window.prompt("Name it — where did this come from?", "Claude web research")?.trim() || "Pasted research";
+                  const tool = window.prompt("Which tool produced it? (Claude, Gemini, Perplexity…)", "Claude")?.trim() || "";
+                  try { await onPasteSource(selLane.id, text, label, tool); }
+                  catch { /* the handler surfaces its own error */ }
+                }}
+              >
+                Paste research
+              </button>
+            </>
+          )}
+          {artifactMode && (
+            <>
+              <input
+                ref={artFileRef}
+                type="file"
+                accept=".md,.markdown,.txt,text/markdown,text/plain"
+                style={{ display: "none" }}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) onUploadArtifact(f); e.currentTarget.value = ""; }}
+              />
+              <button
+                type="button"
+                style={F.toolBtn}
+                onClick={async () => { const id = await onNewArtifact("document"); if (id) { setSelArtifactId(id); setInsp("item"); } }}
+              >
+                New artifact
+              </button>
+              <button type="button" style={{ ...F.toolBtn, color: T.ink3 }} onClick={() => artFileRef.current?.click()}>Upload .md</button>
+            </>
+          )}
           {perfMode && (
             <>
               <input
@@ -1188,8 +1600,8 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
         </div>
         <div style={F.cols}>
           <span style={{ flex: 1 }}>Name</span>
-          <span style={{ width: 104, flex: "none" }}>{perfMode ? "Period" : assetMode ? "Type" : "Format"}</span>
-          <span style={{ width: 66, flex: "none" }}>{assetMode ? "Size" : "Status"}</span>
+          <span style={{ width: 104, flex: "none" }}>{laneMode ? "Tool" : perfMode ? "Period" : artifactMode ? "Kind" : assetMode ? "Type" : "Format"}</span>
+          <span style={{ width: 66, flex: "none" }}>{assetMode || artifactMode ? "Size" : laneMode ? "Folded in" : "Status"}</span>
           <span style={{ width: 48, flex: "none", textAlign: "right" }}>Date</span>
         </div>
         <div style={F.rows}>
@@ -1197,13 +1609,86 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
           {loaded && perfMode && perfItems.length === 0 && (
             <div style={F.emptyList}>{q ? "Nothing matches the filter." : "No analytics yet — export the .xlsx from LinkedIn (Analytics → Post impressions → Export) and import it here."}</div>
           )}
-          {loaded && !perfMode && assetMode && assetItems.length === 0 && (
-            <div style={F.emptyList}>{q ? "Nothing matches the filter." : sel.kind === "media" ? "No photos yet — upload below in Media." : "No collateral yet — every card you render lands here."}</div>
+          {loaded && artifactMode && artifactItems.length === 0 && (
+            <div style={F.emptyList}>
+              {q ? "Nothing matches the filter." : (
+                <>
+                  No artifacts yet. These are FINISHED words a piece of collateral gets built from — write one with “New artifact”,
+                  upload a .md, or file a research run or a synthesized master here from its inspector.
+                  <br /><br />
+                  Uploading outside research to be synthesized? That goes in a <b>Research lane</b>, not here — the master
+                  lands in Artifacts once you file it.
+                </>
+              )}
+            </div>
           )}
-          {loaded && !assetMode && !perfMode && items.length === 0 && campAssets.length === 0 && (
+          {loaded && !perfMode && assetMode && assetItems.length === 0 && (
+            <div style={F.emptyList}>{q ? "Nothing matches the filter." : sel.kind === "media" ? "No photos yet — upload one with “Upload photo”." : "No collateral yet — every card you render lands here."}</div>
+          )}
+          {loaded && !assetMode && !artifactMode && !perfMode && !laneMode && items.length === 0 && campAssets.length === 0 && (
             <div style={F.emptyList}>{q ? "Nothing matches the filter." : sel.kind === "archived" ? "Nothing archived." : "No runs in this folder yet."}</div>
           )}
-          {perfMode
+          {laneMode && selLane && (
+            <>
+              {loaded && laneDetail && laneDetail.sources.length === 0 && (
+                <div style={F.emptyList}>
+                  No research uploaded yet. Run your deep research in Claude web, Gemini, or wherever you like,
+                  then Upload research (PDF or .md) or Paste research here. When the sources are in, press Synthesize —
+                  the app folds them into one master and audits every figure against them.
+                </div>
+              )}
+              {!laneDetail && <div style={F.emptyList}>Loading the lane…</div>}
+              {/* A row is not a button: removing a source is deliberate, via
+                  the ×, not something a stray click can do. */}
+              {(laneDetail?.sources ?? []).map((s) => (
+                <div key={`ls-${s.id}`} style={{ ...F.row, cursor: "default" }}>
+                  <span style={F.rowIcon}><DocGlyph c={s.incorporated_version ? "#4FA97E" : "#D9A441"} /></span>
+                  <span style={F.rowName} title={s.label}>{s.label}</span>
+                  <span style={F.rowCol}>{s.tool || (s.mime === "application/pdf" ? "PDF" : "Markdown")}</span>
+                  <span style={{ ...F.rowCol, width: 66 }}>
+                    {s.incorporated_version
+                      ? <span style={{ color: "#0F4E3C", fontWeight: 600 }}>v{s.incorporated_version}</span>
+                      : <span style={{ color: "#8A6A2B", fontWeight: 600 }}>pending</span>}
+                  </span>
+                  <span style={{ ...F.rowCol, width: 48, textAlign: "right" }}>{shortDate(s.created_at)}</span>
+                  <button
+                    type="button"
+                    title="Remove this source from the lane"
+                    onClick={() => onDeleteSource(selLane.id, s)}
+                    style={{ flex: "none", border: "none", background: "none", color: T.muted, cursor: "pointer", fontSize: 15, lineHeight: 1, padding: "0 2px" }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              {(laneDetail?.versions ?? []).length > 0 && (
+                <div style={{ ...F.sideHead, margin: "12px 8px 2px" }}>Master versions</div>
+              )}
+              {(laneDetail?.versions ?? []).map((v) => (
+                <div key={`lv-${v.id}`} style={{ ...F.row, cursor: "default" }}>
+                  <span style={F.rowIcon}><DocGlyph c={T.muted} /></span>
+                  <span style={F.rowName}>v{v.version} · {v.title || "Master"}</span>
+                  <span style={F.rowCol}>{(v.source_ids?.length ?? 0)} source{(v.source_ids?.length ?? 0) === 1 ? "" : "s"}</span>
+                  <span style={{ ...F.rowCol, width: 66 }} />
+                  <span style={{ ...F.rowCol, width: 48, textAlign: "right" }}>{shortDate(v.created_at)}</span>
+                </div>
+              ))}
+            </>
+          )}
+          {!laneMode && (artifactMode
+            ? artifactItems.map((a) => {
+                const on = a.id === selArtifactId;
+                return (
+                  <button key={`ar-${a.id}`} type="button" onClick={() => { setSelArtifactId(a.id); setInsp("item"); }} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
+                    <span style={F.rowIcon}><DocGlyph c={on ? T.blue : "#4FA97E"} /></span>
+                    <span style={F.rowName}>{a.label}</span>
+                    <span style={F.rowCol}>{artifactKindLabel(a.kind)}</span>
+                    <span style={{ ...F.rowCol, width: 66 }}>{a.chars ? `${Math.max(1, Math.round(a.chars / 1000))}k ch` : "empty"}</span>
+                    <span style={{ ...F.rowCol, width: 48, textAlign: "right" }}>{shortDate(a.updated_at)}</span>
+                  </button>
+                );
+              })
+            : perfMode
             ? perfItems.map((a) => {
                 const on = a.id === selPerfId;
                 const running = a.analysis_status === "running";
@@ -1254,7 +1739,7 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
                     <span style={{ ...F.rowCol, width: 48, textAlign: "right" }}>{shortDate(r.created_at)}</span>
                   </button>
                 );
-              })}
+              }))}
           {/* the campaign's exported collateral, after its runs */}
           {!assetMode && campAssets.map((a) => {
             const on = a.id === selAssetId && selRunId == null;
@@ -1288,6 +1773,29 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
             onArchive={(v) => onPatchSchedule(selCamp, { archived: v }, v ? "Campaign archived — it's under Archived campaigns." : "Campaign restored.")}
             onDelete={() => onDeleteSchedule(selCamp)}
           />
+        ) : laneMode ? (
+          selLane ? (
+            <LanePreview
+              lane={selLane}
+              detail={laneDetail}
+              onSynthesize={(full) => onSynthesize(selLane.id, full)}
+            />
+          ) : (
+            <div style={F.createWrap}>{createForm}</div>
+          )
+        ) : artifactMode ? (
+          selArtifact ? (
+            <ArtifactPreview
+              key={selArtifact.id}
+              row={selArtifact}
+              campName={schedules.find((sc) => sc.id === selArtifact.schedule_id)?.name ?? null}
+              onSave={(patch) => onSaveArtifact(selArtifact.id, patch)}
+              onDelete={() => onDeleteArtifact(selArtifact)}
+              onBuild={() => onBuildCollateral(selArtifact)}
+            />
+          ) : (
+            <div style={F.createWrap}>{createForm}</div>
+          )
         ) : assetMode ? (
           selAsset ? (
             <AssetPreview asset={selAsset} campName={schedules.find((sc) => sc.id === selAsset.schedule_id)?.name ?? null} onDownload={() => onDownloadAsset(selAsset)} onDelete={() => onDeleteAsset(selAsset)} />
@@ -1314,6 +1822,7 @@ function Library({ loaded, connErr, runs, schedules, assets, analytics, typeLabe
             onRerun={() => onRerunRun(selRun)}
             onMove={(sid) => onMoveRun(selRun, sid)}
             onMakeCampaign={() => onMakeCampaign(selRun)}
+            onFileArtifact={() => onFileRunAsArtifact(selRun)}
             onArchive={(v) => onArchiveRun(selRun, v)}
             onDelete={() => onDeleteRun(selRun)}
           />
@@ -1340,7 +1849,7 @@ function DocRow({ label, sub, onClick, busy, muted }: { label: string; sub?: str
   );
 }
 
-function RunPreview({ run, schedules, typeLabel, angleLabel, dl, reviewOpen, onReview, onGrab, onCopyPost, onRerun, onMove, onMakeCampaign, onArchive, onDelete }: {
+function RunPreview({ run, schedules, typeLabel, angleLabel, dl, reviewOpen, onReview, onGrab, onCopyPost, onRerun, onMove, onMakeCampaign, onFileArtifact, onArchive, onDelete }: {
   run: RunRow;
   schedules: ScheduleRow[];
   typeLabel: (k: string) => string;
@@ -1353,6 +1862,7 @@ function RunPreview({ run, schedules, typeLabel, angleLabel, dl, reviewOpen, onR
   onRerun: () => void;
   onMove: (scheduleId: number | null) => void;
   onMakeCampaign: () => void;
+  onFileArtifact: () => void;
   onArchive: (archived: boolean) => void;
   onDelete: () => void;
 }) {
@@ -1401,6 +1911,11 @@ function RunPreview({ run, schedules, typeLabel, angleLabel, dl, reviewOpen, onR
         {!running && run.schedule_id == null && (
           <button type="button" style={F.smallBtn} onClick={onMakeCampaign} title="Turn this run into a recurring campaign — it becomes the campaign's first run">
             Make a campaign
+          </button>
+        )}
+        {done && (
+          <button type="button" style={F.smallBtn} onClick={onFileArtifact} title="Copy this report into the Artifacts repository, where you can edit and reuse the words">
+            File in Artifacts
           </button>
         )}
         {!running && (
@@ -1492,6 +2007,281 @@ function CampaignPreview({ s, count, angles, onSave, onRunNow, onToggle, onArchi
 }
 
 /** Asset preview — media photos and rendered collateral share it. */
+/** The market's master, read live from the lane.
+ *
+ *  Read-only on purpose: the master is machine-built from the sources and
+ *  mechanically audited against them, so a hand edit would quietly invalidate
+ *  what the audit claims about it. The derived documents are the editable
+ *  layer — those are Paul's to rewrite. */
+function MasterReader({ laneId }: { laneId: number }) {
+  const [md, setMd] = useState<string | null>(null);
+  const [err, setErr] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    api<{ lane: { master_md: string | null } }>(`/research/lanes/${laneId}`)
+      .then((j) => { if (alive) setMd(j.lane?.master_md ?? ""); })
+      .catch(() => { if (alive) setErr(true); });
+    return () => { alive = false; };
+  }, [laneId]);
+
+  if (err) return <div style={F.actEmpty}>Couldn’t load the master.</div>;
+  if (md === null) return <div style={F.actEmpty}>Loading…</div>;
+  if (!md) return <div style={F.actEmpty}>This market has no master yet.</div>;
+  return (
+    <>
+      <div style={{ fontSize: 11.5, color: T.muted2, marginBottom: 10, lineHeight: 1.5 }}>
+        Built from the sources and audited against them — read-only. To change what it says, fold in
+        new research or rebuild. The corp-dev documents derived from it are the editable layer.
+      </div>
+      <pre style={F.masterPre}>{md}</pre>
+    </>
+  );
+}
+
+/* ─── Lane inspector — the master document and its synthesis ─────────────
+   The one screen that says what the lane holds, what hasn't been folded in
+   yet, and — when a synthesis fails its audit — exactly which figures broke
+   the citation rule. Paul, 2026-07-24: "we cannot lose citation, and if we
+   infer a value, we need to be able to explain our inferred value." A master
+   that fails is PARKED, not passed off as clean, so this pane has to say so. */
+
+function LanePreview({ lane, detail, onSynthesize }: {
+  lane: LaneRow;
+  detail: { sources: LaneSource[]; versions: LaneVersion[] } | null;
+  onSynthesize: (full: boolean) => void;
+}) {
+  const running = lane.synthesis_status === "running";
+  const failed = lane.synthesis_status === "failed";
+  const needsReview = lane.synthesis_status === "needs_review";
+  const sources = detail?.sources ?? [];
+  const pending = sources.filter((s) => s.incorporated_version == null);
+  const hasMaster = lane.master_version > 0;
+
+  return (
+    <div style={F.prevInner}>
+      <div style={F.prevTitle}>{lane.label}</div>
+      <div style={F.prevMeta}>
+        {hasMaster ? `Master v${lane.master_version}` : "No master yet"}
+        {" · "}{sources.length} source{sources.length === 1 ? "" : "s"}
+        {pending.length ? ` · ${pending.length} not yet folded in` : ""}
+        {lane.synthesized_at ? ` · last synthesized ${shortDate(lane.synthesized_at)}` : ""}
+      </div>
+
+      {running && (
+        <div style={{ ...F.actEmpty, marginTop: 12, display: "flex", alignItems: "center", gap: 8 }}>
+          <Spinner />
+          <span>Reading every source and auditing the figures. This takes a few minutes — you can leave this screen.</span>
+        </div>
+      )}
+      {failed && lane.synthesis_error && (
+        <div style={{ ...R.rowErr, marginTop: 12 }}>{lane.synthesis_error}</div>
+      )}
+      {needsReview && (
+        <div style={{ ...F.actEmpty, marginTop: 12, background: "#FFF4E0", borderColor: "#E8D3A8", color: "#8A6A2B", lineHeight: 1.5 }}>
+          <b>Parked for review.</b> The master saved, but it still fails the citation audit after a retry —
+          {lane.synthesis_error ? ` ${lane.synthesis_error}` : " some figures appear in no source and carry no stated derivation."}
+          {" "}Read it before anything goes to a client.
+        </div>
+      )}
+
+      {/* the whole point of the lane */}
+      <div style={F.prevLabel}>Master document</div>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <button
+          type="button"
+          style={{ ...F.reviewBtn, marginTop: 0, opacity: running || sources.length === 0 ? 0.5 : 1 }}
+          disabled={running || sources.length === 0}
+          onClick={() => onSynthesize(false)}
+          title={hasMaster ? "Fold the new research into the existing master" : "Build the master from these sources"}
+        >
+          {running ? "Synthesizing…" : hasMaster ? `Fold in ${pending.length || "new"} research` : "Synthesize the master"}
+        </button>
+        {hasMaster && (
+          <button
+            type="button"
+            style={{ ...F.smallBtn, alignSelf: "center" }}
+            disabled={running}
+            onClick={() => { if (window.confirm("Rebuild the master from EVERY source, discarding the current text? The old version stays in the version list.")) onSynthesize(true); }}
+            title="Re-synthesize from every source rather than only the new ones"
+          >
+            Rebuild from all
+          </button>
+        )}
+      </div>
+      {sources.length === 0 && (
+        <div style={{ fontSize: 11.5, color: T.muted2, marginTop: 6, lineHeight: 1.45 }}>
+          Upload your Claude / Gemini research first — Synthesize needs something to read.
+        </div>
+      )}
+
+      {hasMaster && (
+        <>
+          <div style={F.prevLabel}>Use it</div>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {/* No "File in Artifacts": the master lives here and nothing copies
+                it. Everything that builds from a market reads this row live, so
+                it is always the current version (Paul, 2026-07-26). */}
+            <button
+              type="button"
+              style={F.smallBtn}
+              onClick={async () => {
+                // The endpoint returns the version row; what Paul wants is the
+                // document, so pull the markdown out and save that.
+                const v = await api<{ master_md: string }>(`/research/lanes/${lane.id}/versions/${lane.master_version}`);
+                const url = URL.createObjectURL(new Blob([v.master_md ?? ""], { type: "text/markdown" }));
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `${slugify(lane.label)}-master-v${lane.master_version}.md`;
+                a.click();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+              }}
+            >
+              Download master (.md)
+            </button>
+          </div>
+          <div style={{ fontSize: 11.5, color: T.muted2, marginTop: 6, lineHeight: 1.45 }}>
+            Filing it in Artifacts is how a master becomes a carousel, a 1-pager, or a report.
+          </div>
+        </>
+      )}
+
+      {pending.length > 0 && !running && (
+        <>
+          <div style={F.prevLabel}>Waiting to be folded in</div>
+          {pending.map((s) => (
+            <div key={s.id} style={{ fontSize: 12, color: T.ink, lineHeight: 1.6 }}>
+              · {s.label}{s.tool ? ` — ${s.tool}` : ""}
+            </div>
+          ))}
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ─── Artifacts inspector — the words, editable ──────────────────────────
+   The list only carries a preview, so the full body loads on selection. The
+   editor is deliberately plain markdown: these documents are the source the
+   composers read, and what gets saved must be exactly what was typed. */
+
+function ArtifactPreview({ row, campName, onSave, onDelete, onBuild }: {
+  row: ArtifactRow;
+  campName?: string | null;
+  onSave: (patch: Record<string, unknown>) => Promise<void>;
+  onDelete: () => void;
+  onBuild: () => void;
+}) {
+  const [label, setLabel] = useState(row.label);
+  const [kind, setKind] = useState(row.kind);
+  const [body, setBody] = useState<string | null>(null);
+  const [loadErr, setLoadErr] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const orig = useRef<string | null>(null); // what came back from the server
+
+  useEffect(() => {
+    let alive = true;
+    setBody(null);
+    setLoadErr(false);
+    orig.current = null;
+    api<{ body_md: string }>(`/studio/artifacts/${row.id}`)
+      .then((a) => { if (alive) { orig.current = a.body_md ?? ""; setBody(a.body_md ?? ""); } })
+      .catch(() => { if (alive) setLoadErr(true); });
+    return () => { alive = false; };
+  }, [row.id]);
+
+  const dirty = body != null && (label !== row.label || kind !== row.kind || body !== orig.current);
+
+  const save = async () => {
+    if (body == null || saving) return;
+    setSaving(true);
+    try {
+      await onSave({ label: label.trim() || row.label, kind, bodyMd: body });
+      orig.current = body;
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const grabMd = () => {
+    if (body == null) return;
+    const url = URL.createObjectURL(new Blob([body], { type: "text/markdown" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${slugify(label || row.label)}.md`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
+  return (
+    <div style={F.prevInner}>
+      <input value={label} onChange={(e) => setLabel(e.target.value)} style={F.artTitleInput} />
+      <div style={F.prevMeta}>
+        {artifactKindLabel(row.kind)} · {row.chars ? `${row.chars.toLocaleString()} characters` : "empty"} · edited {shortDate(row.updated_at)}
+        {campName ? ` · ${campName}` : ""}
+        {row.lane_id != null ? ` · research lane v${row.lane_version ?? "?"}` : row.run_id != null ? " · from a research run" : ""}
+      </div>
+
+      {/* The point of a master document: turn it into something to send. */}
+      <button
+        type="button"
+        style={{ ...F.reviewBtn, alignSelf: "stretch", marginTop: 14 }}
+        onClick={onBuild}
+        title="Pick an output type, place your images on the rendered pages, export"
+      >
+        Build collateral →
+      </button>
+
+      <div style={F.prevLabel}>Kind</div>
+      <select value={kind} onChange={(e) => setKind(e.target.value)} style={F.moveSel}>
+        {ARTIFACT_KINDS.map((k) => (
+          <option key={k.key} value={k.key}>{k.label}</option>
+        ))}
+      </select>
+
+      <div style={F.prevLabel}>Text</div>
+      {loadErr ? (
+        <div style={F.actEmpty}>Couldn’t load this artifact — reselect it to try again.</div>
+      ) : body == null ? (
+        <div style={F.actEmpty}>Loading…</div>
+      ) : (
+        <textarea
+          value={body}
+          onChange={(e) => { setBody(e.target.value); setSaved(false); }}
+          spellCheck={false}
+          style={F.artBody}
+          placeholder="Markdown — the words a report, carousel, or post is built from."
+        />
+      )}
+
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 10, alignItems: "center" }}>
+        <button
+          type="button"
+          style={{ ...F.reviewBtn, marginTop: 0, opacity: body == null || saving ? 0.5 : 1 }}
+          disabled={body == null || saving}
+          onClick={save}
+        >
+          {saving ? "Saving…" : "Save"}
+        </button>
+        <button type="button" style={F.smallBtn} disabled={body == null} onClick={grabMd}>Download .md</button>
+        <button
+          type="button"
+          style={F.smallBtn}
+          disabled={body == null}
+          onClick={() => { if (body != null) void navigator.clipboard.writeText(body); }}
+        >
+          Copy
+        </button>
+        <button type="button" style={{ ...F.smallBtn, color: T.muted }} onClick={onDelete}>Delete</button>
+        {saved && <span style={{ fontSize: 12, color: "#0F4E3C", fontWeight: 600 }}>Saved</span>}
+        {!saved && dirty && body != null && <span style={{ fontSize: 12, color: T.muted }}>Unsaved edits</span>}
+      </div>
+    </div>
+  );
+}
+
 function AssetPreview({ asset, campName, onDownload, onDelete }: { asset: AssetRow; campName?: string | null; onDownload: () => void; onDelete: () => void }) {
   const [src, setSrc] = useState<string | null>(null);
   const isImage = asset.mime.startsWith("image/");
@@ -2346,6 +3136,7 @@ const F: Record<string, React.CSSProperties> = {
   sideRowHot: { background: "#E3EEFF", boxShadow: `inset 0 0 0 1.5px ${T.blue}` },
   groupAdd: { marginLeft: "auto", background: "transparent", border: "none", color: T.blue, fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: T.font, padding: "0 2px", letterSpacing: "0.02em", textTransform: "none" as const },
   groupEmpty: { fontSize: 11.5, color: T.muted2, padding: "2px 8px 6px 20px" },
+  laneStart: { display: "block", width: "100%", textAlign: "left", background: "transparent", border: "none", padding: "2px 8px 7px 20px", fontSize: 11.5, lineHeight: 1.4, color: T.blue, fontWeight: 600, cursor: "pointer", fontFamily: T.font },
   sideLabel: { flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
   sideCount: { flex: "none", fontSize: 11.5, color: T.muted, fontWeight: 600 },
 
@@ -2376,6 +3167,9 @@ const F: Record<string, React.CSSProperties> = {
   prevTitle: { fontSize: 13.5, fontWeight: 700, color: T.ink, lineHeight: 1.35 },
   prevMeta: { fontSize: 11.5, color: T.muted, marginTop: 4, lineHeight: 1.5 },
   prevLabel: { fontSize: 11, fontWeight: 700, color: T.muted2, letterSpacing: "0.05em", textTransform: "uppercase", marginTop: 16, marginBottom: 6 },
+  masterPre: { whiteSpace: "pre-wrap", wordBreak: "break-word", fontSize: 12.5, lineHeight: 1.7, color: T.ink, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", margin: 0 },
+  artTitleInput: { width: "100%", boxSizing: "border-box", fontSize: 13.5, fontWeight: 700, color: T.ink, lineHeight: 1.35, fontFamily: T.font, background: T.white, border: `1px solid transparent`, borderRadius: 7, padding: "4px 6px", margin: "-4px -6px 0", outline: "none" },
+  artBody: { width: "100%", boxSizing: "border-box", minHeight: 300, resize: "vertical", background: T.white, border: `1px solid ${T.inputBd}`, borderRadius: 10, padding: "10px 11px", fontSize: 12.5, lineHeight: 1.6, color: T.ink, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", outline: "none" },
   docRow: { display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", background: T.white, border: `1px solid ${T.border}`, borderRadius: 9, padding: "8px 10px", cursor: "pointer", fontFamily: T.font, marginTop: 5 },
   docLabel: { flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: 600 },
   docGet: { flex: "none", fontSize: 11.5, fontWeight: 700, color: T.blue },
@@ -2409,6 +3203,9 @@ const F: Record<string, React.CSSProperties> = {
    never position:fixed, the Safari toolbar rule). */
 const A: Record<string, React.CSSProperties> = {
   frame: { flex: 1, minHeight: 0, position: "relative", display: "flex", flexDirection: "column", padding: "0 26px 18px" },
+  viewTabs: { flex: "none", display: "flex", gap: 4, padding: "0 0 12px" },
+  viewTab: { background: "transparent", border: "none", borderRadius: T.rPill, padding: "7px 15px", fontSize: 13, fontWeight: 700, color: T.muted, cursor: "pointer", fontFamily: T.font },
+  viewTabOn: { background: T.blueBg, color: T.blue },
   sheetWrap: { position: "absolute", inset: 0, zIndex: 40, display: "flex", justifyContent: "flex-end" },
   scrim: { position: "absolute", inset: 0, background: "rgba(15,20,26,0.32)" },
   sheet: { position: "relative", width: "min(1080px, 94%)", height: "100%", background: T.surface, borderLeft: `1px solid ${T.border}`, borderRadius: "14px 0 0 14px", boxShadow: "0 12px 40px rgba(15,20,26,0.28)", display: "flex", flexDirection: "column", overflow: "hidden" },
