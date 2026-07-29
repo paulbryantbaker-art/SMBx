@@ -283,6 +283,106 @@ app.post('/api/practice/leads', leadLimiter, async (req, res) => {
   }
 });
 
+// ─── Research report downloads — verified email required ────
+// The reports READ free at /reports/:slug; the PDF requires a confirmed email
+// (Paul, 2026-07-29: "anybody can read the blog, but you must be signed in to
+// download it"). Practice mode restricts real accounts to the team allowlist,
+// so a literal login would let nobody but the team download — this is the
+// equivalent that works for an outside acquirer. See services/reportAccess.ts.
+// All three routes sit above the blanket `app.use('/api', requireAuth)`.
+
+// 1. "Get the PDF" → the report is MAILED to the address given, attached, with
+//    a link in the body (Paul, 2026-07-29: "enter the email and have a button
+//    get the PDF, and the PDF is delivered to that email — that solves both
+//    problems"). Nothing is released to the browser here: delivery to an inbox
+//    is itself the verification, since a fake address never receives it.
+app.post('/api/practice/reports/access', leadLimiter, async (req, res) => {
+  try {
+    const { email, slug } = req.body || {};
+    const { issueAccess } = await import('./services/reportAccess.js');
+    const appUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
+    const ip = req.ip || (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || null;
+    const out = await issueAccess({ email, slug, appUrl, ip });
+    if (!out.ok) {
+      return res.status(400).json({
+        error: out.reason === 'invalid_email' ? 'That email looks incomplete.' : 'Unknown report.',
+      });
+    }
+    // `emailed: false` means the mail transport is unconfigured and the link
+    // was only logged. Surfaced so the UI never points at an inbox nothing was
+    // sent to — with confirmation required, a silent mail failure is a dead end.
+    return res.json({ ok: true, emailed: out.emailed !== false });
+  } catch (err: any) {
+    console.error('[report-access] issue failed:', err.message);
+    return res.status(500).json({ error: 'Could not send the link just now.' });
+  }
+});
+
+// 2. The link in the email. Confirms the address, then hands the browser a
+//    signed reader cookie good for every report, not just this one.
+app.get('/reports/:slug/unlock', async (req, res) => {
+  const slug = req.params.slug;
+  try {
+    const { verifyToken, mintReaderToken, readerCookieOptions, READER_COOKIE, READER_HINT_COOKIE } =
+      await import('./services/reportAccess.js');
+    const out = await verifyToken(String(req.query.t || ''));
+    if (!out.ok || !out.email) {
+      return res.redirect(302, `/reports/${encodeURIComponent(slug)}?unlock=${out.reason || 'bad_token'}`);
+    }
+    const opts = readerCookieOptions();
+    res.cookie(READER_COOKIE, mintReaderToken(out.email), opts);
+    // Readable companion so the page shows the unlocked state with no round
+    // trip. It grants nothing; the HttpOnly cookie above is the credential.
+    res.cookie(READER_HINT_COOKIE, '1', { ...opts, httpOnly: false });
+    return res.redirect(302, `/reports/${encodeURIComponent(out.slug || slug)}?dl=1`);
+  } catch (err: any) {
+    console.error('[report-access] verify failed:', err.message);
+    return res.redirect(302, `/reports/${encodeURIComponent(slug)}?unlock=error`);
+  }
+});
+
+// 3. The file itself. Released to a verified reader, or to a team member
+//    holding an app JWT (practicePerimeter above has already 403'd any
+//    non-team token, so a valid one here is the team).
+app.get('/api/practice/reports/:slug/file', async (req, res) => {
+  try {
+    const { readerFromCookie, reportPdfPath, recordDownload } =
+      await import('./services/reportAccess.js');
+    const { findReport } = await import('../shared/reports.js');
+
+    const report = findReport(req.params.slug);
+    if (!report) return res.status(404).json({ error: 'Unknown report' });
+
+    let who = readerFromCookie(req.headers.cookie);
+    if (!who) {
+      const bearer = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+      if (bearer) {
+        try {
+          const jwtLib = await import('jsonwebtoken');
+          jwtLib.default.verify(bearer, process.env.JWT_SECRET || process.env.SESSION_SECRET || 'dev');
+          who = 'team';
+        } catch { /* fall through to the 401 */ }
+      }
+    }
+    if (!who) return res.status(401).json({ error: 'Confirm your email to download this report.' });
+
+    const file = reportPdfPath(report.slug);
+    if (!file) {
+      console.error(`[report-access] PDF missing on disk for ${report.slug}`);
+      return res.status(404).json({ error: 'That file is not available right now.' });
+    }
+
+    if (who !== 'team') void recordDownload(who, report.slug);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${report.slug}.pdf"`);
+    res.setHeader('Cache-Control', 'private, no-store');
+    return res.sendFile(file);
+  } catch (err: any) {
+    console.error('[report-access] download failed:', err.message);
+    return res.status(500).json({ error: 'Could not fetch the file.' });
+  }
+});
+
 // ─── Analytics event capture (public — sendBeacon, no auth) ─
 // Moved above the blanket `app.use('/api', requireAuth)` mount: it previously
 // sat below it, so ANONYMOUS visitors' events 401'd and were silently dropped
@@ -980,6 +1080,71 @@ app.post('/api/support/client-error', express.json(), async (req, res) => {
     res.json({ ok: true });
   } catch {
     res.json({ ok: false });
+  }
+});
+
+// ─── 5c. Report link previews ──────────────────────────────
+// Social crawlers (LinkedIn, Slack, X) do not run JS, so the client-side
+// <title>/OG tags on /reports/:slug are invisible to them — a posted link
+// would preview as the generic site card. Stamp the report's own title,
+// abstract and cover into index.html before serving it. Google reads the
+// client-side tags; the two come from the same shared/reports.ts entries.
+// Static files (/reports/<slug>.pdf, the cover jpg) are already resolved by
+// express.static above, so only real page routes reach this.
+const REPORT_META_CACHE = new Map<string, string>();
+
+app.get('/reports/:slug', async (req, res, next) => {
+  try {
+    const { findReport } = await import('../shared/reports.js');
+    const report = findReport(req.params.slug);
+    if (!report) return next();
+
+    const cached = REPORT_META_CACHE.get(report.slug);
+    if (cached) {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      return res.send(cached);
+    }
+
+    const { readFile } = await import('node:fs/promises');
+    const shell = await readFile(path.join(clientPath, 'index.html'), 'utf8');
+
+    const esc = (v: string) =>
+      v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const title = `${report.shortTitle} — ${report.kicker} | smbX.ai`;
+    const origin = `${req.protocol}://${req.get('host')}`;
+    const url = `${origin}/reports/${report.slug}`;
+
+    const tags = [
+      `<meta property="og:url" content="${esc(url)}" />`,
+      `<link rel="canonical" href="${esc(url)}" />`,
+      `<meta name="twitter:card" content="${report.ogImage ? 'summary_large_image' : 'summary'}" />`,
+      report.ogImage ? `<meta property="og:image" content="${esc(origin + report.ogImage)}" />` : '',
+    ].filter(Boolean).join('\n    ');
+
+    const html = shell
+      .replace(/<title>[\s\S]*?<\/title>/, `<title>${esc(title)}</title>`)
+      .replace(
+        /<meta name="description"[^>]*>/,
+        `<meta name="description" content="${esc(report.abstract)}" />`,
+      )
+      .replace(
+        /<meta property="og:title"[^>]*>/,
+        `<meta property="og:title" content="${esc(title)}" />`,
+      )
+      .replace(
+        /<meta property="og:description"[^>]*>/,
+        `<meta property="og:description" content="${esc(report.abstract)}" />`,
+      )
+      .replace(/<meta property="og:type"[^>]*>/, `<meta property="og:type" content="article" />\n    ${tags}`);
+
+    REPORT_META_CACHE.set(report.slug, html);
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    return res.send(html);
+  } catch (err: any) {
+    console.error('[reports] meta injection failed:', err.message);
+    return next(); // the SPA catch-all still serves a working page
   }
 });
 

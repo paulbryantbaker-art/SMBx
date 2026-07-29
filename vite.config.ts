@@ -2,9 +2,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import reportMarkdown from './vite-plugins/report-markdown';
 
 export default defineConfig({
-  plugins: [react()],
+  // reportMarkdown renders `scripts/studio/reports/*.md?report` to HTML at
+  // BUILD time — the same markdown the PDF builder consumes, so the web report
+  // and the downloadable PDF can never drift, and no markdown library or model
+  // call reaches the browser.
+  plugins: [reportMarkdown(), react()],
   root: 'client',
   envDir: '..',
   cacheDir: '/tmp/.vite',
@@ -64,6 +69,9 @@ export default defineConfig({
     // IPv4 (Claude desktop embedded webviews, some MCP probes, etc.).
     // For a solo founder on a laptop the network exposure tradeoff is fine.
     host: true,
+    // The report markdown and its photos live outside `root` (client/), in
+    // scripts/studio/reports/. Allow the dev server to read the repo.
+    fs: { allow: ['..'] },
     proxy: {
       '/api': {
         target: 'http://localhost:3000',

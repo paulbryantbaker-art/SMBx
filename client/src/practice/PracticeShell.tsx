@@ -1,6 +1,9 @@
 /**
  * Practice-site chrome — v3 (Claude Design handoff, 2026-07-16). Sticky nav:
- * Why us · How it works · Industries (→ /industries) · Who it's for, with
+ * Why us · How it works · Industries (→ /industries) · Research (→ /reports,
+ * added 2026-07-29 — Paul: "I don't see a reports link"; the published
+ * assessments are the practice's proof, so they belong in the chrome, not
+ * only in the footer) · Who it's for, with
  * Confidential consultation (→ #cta) + Build your market map (→ #yulia).
  * Footer is the flat warm-charcoal band (#2B2A27 — deliberately NOT a third
  * textured bleed band; the CSS remaps the text vars and inverts the logo).
@@ -87,6 +90,7 @@ export default function PracticeShell({
   const [loc] = useLocation();
   const onSegment = loc.startsWith('/buyers/');
   const onIndustries = loc === '/industries';
+  const onReports = loc.startsWith('/reports');
 
   // Condense the sticky nav once the user scrolls off the top (v3: > 40px).
   const [navMin, setNavMin] = useState(false);
@@ -210,6 +214,7 @@ export default function PracticeShell({
             <a href={anchor('#why')}>Why us</a>
             <a href={anchor('#how')}>How it works</a>
             <Link href="/industries" className={onIndustries ? 'pd-navon' : undefined} aria-current={onIndustries ? 'page' : undefined}>Industries</Link>
+            <Link href="/reports" className={onReports ? 'pd-navon' : undefined} aria-current={onReports ? 'page' : undefined}>Research</Link>
             <a href={anchor('#who')} className={onSegment ? 'pd-navon' : undefined} aria-current={onSegment ? 'page' : undefined}>Who it's for</a>
           </nav>
           <div className="pd-nav-ctas">
@@ -244,6 +249,7 @@ export default function PracticeShell({
         <a href={anchor('#why')} onClick={closeMenu}>Why us <span className="arr" aria-hidden>→</span></a>
         <a href={anchor('#how')} onClick={closeMenu}>How it works <span className="arr" aria-hidden>→</span></a>
         <Link href="/industries" onClick={closeMenu}>Industries <span className="arr" aria-hidden>→</span></Link>
+        <Link href="/reports" onClick={closeMenu}>Research <span className="arr" aria-hidden>→</span></Link>
         <a href={anchor('#who')} onClick={closeMenu}>Who it's for <span className="arr" aria-hidden>→</span></a>
         <a className="quiet" href={anchor('#cta')} onClick={() => { closeMenu(); trackEvent('practice_booking_clicked', { placement: 'mobile-menu' }); }}>Confidential consultation</a>
       </nav>
@@ -276,6 +282,7 @@ export default function PracticeShell({
                 <div className="h">FIRM</div>
                 <a href="/#how">How it works</a>
                 <a href="/#sample">Sample read</a>
+                <a href="/reports">Research</a>
                 <a href="/#cta">Confidential consultation</a>
                 <a href="/login">Team sign in</a>
               </div>
@@ -286,6 +293,7 @@ export default function PracticeShell({
                   <a href={anchor('#why')}>Why us</a>
                   <a href={anchor('#how')}>How it works</a>
                   <a href={anchor('#sample')}>Sample read</a>
+                  <a href="/reports">Research</a>
                   <a href={anchor('#proof')}>Track record</a>
                   <a href={anchor('#cta')}>Confidential consultation</a>
                   <a href="/login">Team sign in</a>

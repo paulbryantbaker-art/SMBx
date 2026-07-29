@@ -1,0 +1,455 @@
+/**
+ * Report pages — `.rp-*` (2026-07-29).
+ *
+ * A SELF-CONTAINED DOCUMENT SCOPE, the same sanctioned exemption the Market
+ * Map (`.pd-map`/`.map-*`) carries: it holds PDF parity with
+ * `scripts/studio/build-report.mts`, so its prose ladder is the report's, not
+ * the marketing page's. Everything else obeys the site — colour, shape, the
+ * two-width law, the 13px floor, no decorative eyebrows.
+ *
+ * Body ink here is #3F464C rather than the site's #5C6670: this is a
+ * 37-minute read, and it is the exact body colour the PDF uses.
+ */
+
+/* ═══ reading progress ═══════════════════════════════════════════════════ */
+/* Hairline, top of the viewport. position:fixed is safe here — it is 3px
+   tall, NOT a full-viewport coloured div (the Safari toolbar-tint rule). */
+.rp-progress {
+  position: fixed; top: 0; left: 0; right: 0; height: 3px;
+  z-index: 60; pointer-events: none; background: transparent;
+}
+.rp-progress-bar {
+  height: 100%; width: 100%; transform-origin: 0 50%; transform: scaleX(0);
+  background: var(--pd-coral);
+}
+
+/* ═══ masthead ═══════════════════════════════════════════════════════════ */
+.rp-head { padding-top: clamp(28px, 4vw, 56px); }
+.rp-head-in { display: flex; flex-direction: column; align-items: flex-start; }
+
+.rp-kicker {
+  font-family: var(--pd-mono); font-size: 13.5px; letter-spacing: 0.11em;
+  text-transform: uppercase; color: var(--pd-coral-link); font-weight: 500;
+}
+.rp-head .rp-kicker { margin-top: clamp(18px, 2.6vw, 32px); }
+
+.rp-title {
+  margin: 18px 0 0;
+  font-family: var(--pd-display); font-optical-sizing: auto; font-weight: 545;
+  font-size: clamp(34px, 4.6vw, 60px); line-height: 1.04; letter-spacing: -0.018em;
+  color: var(--pd-ink); max-width: 17em; text-wrap: balance;
+}
+.rp-sub {
+  margin: 20px 0 0; font-size: clamp(19px, 1.7vw, 23px); line-height: 1.5;
+  color: var(--pd-body); max-width: 34em; font-weight: 400;
+}
+
+/* byline · date — one quiet row, no micro-labels */
+.rp-meta {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  margin-top: clamp(26px, 3.2vw, 40px);
+  padding-top: 22px; border-top: 1px solid var(--pd-hair); width: 100%;
+}
+.rp-face {
+  width: 46px; height: 46px; border-radius: 50%; object-fit: cover;
+  object-position: 50% 20%; flex: none; border: 2px solid rgba(22, 98, 76, 0.32);
+}
+.rp-meta-t { display: flex; flex-direction: column; gap: 2px; }
+.rp-by { font-size: 15px; font-weight: 600; color: var(--pd-ink); }
+.rp-role { font-size: 13.5px; color: var(--pd-body); }
+.rp-meta-dot {
+  width: 4px; height: 4px; border-radius: 50%; background: var(--pd-faint);
+  margin: 0 6px;
+}
+
+/* Cover photo: a FRAMED panel, never a soft-masked fade — the house law from
+   the carousel pass (fades on light paper read as smudges). */
+.rp-cover {
+  display: block; width: 100%; height: clamp(220px, 34vw, 460px);
+  object-fit: cover; margin-top: clamp(30px, 3.6vw, 48px);
+  border-radius: 16px; border: 1px solid var(--pd-hair);
+  box-shadow: 0 12px 34px rgba(20, 24, 28, 0.10);
+}
+
+/* ═══ key findings ═══════════════════════════════════════════════════════ */
+.rp-stats { padding-top: clamp(48px, 6vw, 84px); }
+.rp-stats-in { border-top: 2px solid var(--pd-ink); padding-top: 26px; }
+.rp-stats-h {
+  margin: 0 0 clamp(24px, 2.6vw, 34px);
+  font-family: var(--pd-mono); font-size: 13.5px; letter-spacing: 0.11em;
+  text-transform: uppercase; color: var(--pd-body); font-weight: 500;
+}
+.rp-stats-grid {
+  display: grid; gap: clamp(26px, 3vw, 44px);
+  grid-template-columns: repeat(auto-fit, minmax(238px, 1fr));
+}
+.rp-stat { display: flex; flex-direction: column; gap: 12px; }
+.rp-stat-n {
+  font-family: var(--pd-display); font-optical-sizing: auto; font-weight: 545;
+  font-size: clamp(34px, 3.4vw, 47px); line-height: 1; letter-spacing: -0.03em;
+  color: var(--pd-brass); font-variant-numeric: tabular-nums;
+}
+.rp-stat-l {
+  font-size: 15px; line-height: 1.55; color: var(--pd-body);
+  padding-top: 12px; border-top: 1px solid var(--pd-hair);
+}
+
+/* ═══ the read — contents rail + column ══════════════════════════════════ */
+/* NO `align-items: start` here. The rail's sticky child can only stick while
+   its CONTAINING BLOCK is on screen — with an auto-height rail that means the
+   contents vanish a screen or two into a 37-minute read. Letting the grid
+   stretch the rail to the row height (the default) keeps it pinned the whole
+   way down. */
+.rp-main {
+  display: grid; grid-template-columns: 244px minmax(0, 1fr);
+  gap: clamp(40px, 5vw, 86px);
+  padding-top: clamp(52px, 6vw, 92px);
+}
+.rp-col { min-width: 0; }
+
+.rp-rail { position: relative; min-width: 0; }
+.rp-rail-sticky {
+  position: sticky; top: 96px; max-height: calc(100vh - 132px);
+  overflow-y: auto; overscroll-behavior: contain;
+  padding-right: 8px;
+}
+.rp-rail-h {
+  font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.11em;
+  text-transform: uppercase; color: var(--pd-tert); font-weight: 500;
+  padding-bottom: 14px; border-bottom: 1px solid var(--pd-hair); margin-bottom: 6px;
+}
+.rp-toc-list { display: flex; flex-direction: column; }
+.rp-toc-a {
+  display: block; padding: 8px 0 8px 14px; font-size: 14px; line-height: 1.45;
+  color: var(--pd-body); text-decoration: none;
+  border-left: 2px solid transparent; transition: color 0.14s, border-color 0.14s;
+}
+.rp-toc-a:hover { color: var(--pd-ink); }
+.rp-toc-a.on { color: var(--pd-coral-link); border-left-color: var(--pd-coral); font-weight: 600; }
+.rp-toc-a.lvl0 { font-weight: 600; color: var(--pd-ink); margin-top: 10px; }
+.rp-toc-a.lvl0.on { color: var(--pd-coral-link); }
+.rp-toc-a.lvl1 { padding-left: 26px; font-size: 13.5px; }
+.rp-toc-a.lvl2 { padding-left: 38px; font-size: 13px; color: var(--pd-tert); }
+.rp-toc-a.lvl2.on { color: var(--pd-coral-link); }
+
+/* ═══ prose ══════════════════════════════════════════════════════════════ */
+/* Anchors clear the sticky nav when the TOC jumps to a section. */
+.rp-prose :is(h1, h2, h3) { scroll-margin-top: 104px; }
+
+.rp-intro {
+  max-width: 34em; padding-bottom: clamp(26px, 3vw, 38px);
+  border-bottom: 1px solid var(--pd-hair);
+}
+.rp-intro p {
+  margin: 0 0 12px; font-size: 15.5px; line-height: 1.7; color: var(--pd-body);
+}
+.rp-intro strong { color: var(--pd-ink); font-weight: 600; }
+.rp-intro em { font-style: italic; }
+
+/* The prose column itself is NOT capped — the report's registers are wide and
+   should use the full column. The 34em measure is applied to the running text
+   instead, so a table can be wider than the paragraph above it. The wrapper
+   divs (one per HTML chunk between accent photos) dissolve so every element
+   is a direct layout child. */
+.rp-prose { color: #3F464C; }
+.rp-prose > div { display: contents; }
+.rp-prose :is(p, li, blockquote, h1, h2, h3, pre) { max-width: 34em; }
+.rp-prose :is(ul, ol) { max-width: 35em; }
+
+.rp-prose h1 {
+  margin: clamp(58px, 6vw, 88px) 0 22px;
+  font-family: var(--pd-display); font-optical-sizing: auto; font-weight: 545;
+  font-size: clamp(30px, 3.2vw, 42px); line-height: 1.1; letter-spacing: -0.015em;
+  color: var(--pd-ink); padding-top: 26px; border-top: 2px solid var(--pd-brass);
+  text-wrap: balance;
+}
+.rp-prose h2 {
+  margin: clamp(48px, 5vw, 72px) 0 18px;
+  font-family: var(--pd-display); font-optical-sizing: auto; font-weight: 545;
+  font-size: clamp(26px, 2.7vw, 35px); line-height: 1.15; letter-spacing: -0.012em;
+  color: var(--pd-ink); text-wrap: balance;
+}
+.rp-prose h3 {
+  margin: clamp(34px, 3.4vw, 46px) 0 14px;
+  font-size: 19.5px; font-weight: 700; line-height: 1.35; color: var(--pd-ink);
+  letter-spacing: -0.005em;
+}
+.rp-prose p { margin: 0 0 20px; font-size: 18px; line-height: 1.75; }
+.rp-prose strong { color: var(--pd-ink); font-weight: 650; }
+.rp-prose em { font-style: italic; }
+.rp-prose a {
+  color: var(--pd-coral-link); text-decoration: underline;
+  text-decoration-color: rgba(22, 98, 76, 0.34); text-underline-offset: 3px;
+}
+.rp-prose a:hover { text-decoration-color: var(--pd-coral); }
+
+.rp-prose ul, .rp-prose ol { margin: 0 0 22px; padding-left: 1.35em; }
+.rp-prose li { margin-bottom: 11px; font-size: 18px; line-height: 1.72; }
+.rp-prose li::marker { color: var(--pd-coral); }
+.rp-prose ol li::marker { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+/* A blockquote in a report is a NOTICE — a correction, a caveat, something the
+   reader must not skim past — NOT a decorative pull-quote. Same brass rail and
+   tint build-report.mts gives it, so the page and the PDF agree. */
+.rp-prose blockquote {
+  margin: 30px 0; padding: 16px 22px;
+  border-left: 3px solid var(--pd-brass);
+  background: rgba(176, 134, 55, 0.06); border-radius: 0 10px 10px 0;
+  color: #3F464C;
+}
+.rp-prose blockquote > :last-child { margin-bottom: 0; }
+.rp-prose blockquote p, .rp-prose blockquote li { font-size: 16px; line-height: 1.6; }
+.rp-prose code {
+  font-family: var(--pd-mono); font-size: 0.88em;
+  background: var(--pd-band); padding: 2px 6px; border-radius: 5px;
+}
+.rp-prose pre {
+  background: var(--pd-band); padding: 18px 20px; border-radius: 10px;
+  overflow-x: auto; margin: 0 0 22px;
+}
+.rp-prose pre code { background: none; padding: 0; }
+
+/* Section separators (`---` in the markdown) — a hairline, not a rule. */
+.rp-prose hr {
+  border: 0; height: 1px; background: var(--pd-hair);
+  margin: clamp(44px, 4.6vw, 66px) 0;
+}
+
+/* Accent photo band — framed, like the cover and like the PDF. */
+.rp-accent {
+  display: block; width: 100%; height: clamp(200px, 26vw, 330px);
+  object-fit: cover; margin: clamp(28px, 3vw, 40px) 0;
+  border-radius: 14px; border: 1px solid var(--pd-hair);
+  box-shadow: 0 8px 26px rgba(20, 24, 28, 0.10);
+}
+
+/* ── tables: hairline, mono headers, brass underline, tabular figures ──
+   The report's registers are wide; they scroll INSIDE their own box so the
+   page body never scrolls sideways. */
+.rp-tablewrap {
+  /* Full column width — the em measure governs prose, not registers. */
+  width: 100%; max-width: 46em;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  margin: 0 0 26px; padding-bottom: 4px;
+}
+.rp-prose table {
+  width: 100%; border-collapse: collapse; font-size: 14.5px;
+  font-variant-numeric: tabular-nums;
+}
+.rp-prose thead th {
+  font-family: var(--pd-mono); font-size: 12.5px; letter-spacing: 0.07em;
+  text-transform: uppercase; color: var(--pd-body); font-weight: 500;
+  text-align: left; padding: 0 16px 10px 0; white-space: nowrap;
+  border-bottom: 2px solid var(--pd-brass);
+}
+.rp-prose tbody td {
+  padding: 12px 16px 12px 0; vertical-align: top; line-height: 1.5;
+  border-bottom: 1px solid var(--pd-hair); color: #3F464C;
+}
+.rp-prose tbody tr:last-child td { border-bottom: 0; }
+.rp-prose tbody strong { color: var(--pd-ink); }
+
+/* Body chunk in flight / failed — the masthead is already on screen, so these
+   are quiet lines in the column rather than a full-page state. */
+.rp-bodywait, .rp-bodyfail {
+  margin: clamp(30px, 4vw, 48px) 0; max-width: 34em;
+  font-size: 16px; line-height: 1.6; color: var(--pd-body);
+}
+.rp-bodyfail button, .rp-bodyfail a {
+  background: none; border: 0; padding: 0; cursor: pointer; font: inherit;
+  color: var(--pd-coral-link); text-decoration: underline; text-underline-offset: 3px;
+}
+
+/* ═══ the takeaway card ══════════════════════════════════════════════════ */
+.rp-dl {
+  margin: clamp(34px, 4vw, 52px) 0;
+  background: var(--pd-card); border: 1px solid var(--pd-border);
+  border-radius: 16px; box-shadow: 0 8px 26px rgba(20, 24, 28, 0.055);
+  max-width: 34em;
+}
+.rp-dl-body { padding: clamp(24px, 3vw, 32px); }
+.rp-dl-lead { margin-bottom: 20px; }
+.rp-dl-h {
+  margin: 0 0 8px; font-size: 20px; font-weight: 700; color: var(--pd-ink);
+  letter-spacing: -0.008em;
+}
+.rp-dl-p { margin: 0; font-size: 15.5px; line-height: 1.6; color: var(--pd-body); }
+.rp-dl-cta, .rp-dl-go { border: 0; cursor: pointer; font: inherit; }
+.rp-dl-cta { width: 100%; }
+
+.rp-dl-form { display: flex; flex-direction: column; gap: 10px; }
+.rp-dl-label { font-size: 14px; font-weight: 600; color: var(--pd-ink); }
+.rp-dl-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.rp-dl-input {
+  flex: 1 1 200px; min-width: 0; padding: 14px 18px;
+  border: 1px solid var(--pd-border); border-radius: 999px;
+  font-family: inherit; font-size: 16px; color: var(--pd-ink);
+  background: #fff; outline: none;
+}
+.rp-dl-input:focus { border-color: var(--pd-ink); }
+.rp-dl-input[aria-invalid='true'] { border-color: #B3261E; }
+.rp-dl-go { flex: 0 0 auto; }
+.rp-dl-go:disabled { opacity: 0.6; cursor: default; }
+.rp-dl-err { margin: 0; font-size: 13.5px; color: #B3261E; }
+.rp-dl-fine { margin: 2px 0 0; font-size: 13.5px; color: var(--pd-tert); }
+
+/* Returning from a stale or already-used link. */
+.rp-dl-note {
+  margin: 0 0 16px; padding: 12px 16px; border-radius: 10px;
+  background: var(--pd-band); font-size: 14.5px; line-height: 1.55; color: var(--pd-ink);
+}
+
+.rp-dl-done { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.rp-dl-thanks { margin: 0; font-size: 17px; font-weight: 650; color: var(--pd-coral-link); }
+.rp-dl-done .rp-dl-fine { margin: 0; }
+.rp-dl-done strong { color: var(--pd-ink); font-weight: 600; }
+.rp-dl-again {
+  background: none; border: 0; padding: 0; cursor: pointer; font: inherit;
+  font-size: 14px; color: var(--pd-body); text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.rp-dl-again:hover { color: var(--pd-ink); }
+
+/* ═══ closing ask (the page's one dark movement) ═════════════════════════ */
+.rp-cta { margin-top: clamp(70px, 8vw, 120px); }
+.rp-cta-in { text-align: center; display: flex; flex-direction: column; align-items: center; }
+.rp-cta-p { margin: 20px auto clamp(30px, 3.4vw, 42px); max-width: 34em; }
+
+/* ═══ place-keeper ═══════════════════════════════════════════════════════ */
+/* Small, dismissible, and it never moves the page on its own. */
+.rp-resume {
+  position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
+  z-index: 55; display: flex; align-items: center; gap: 12px;
+  padding: 11px 12px 11px 20px; max-width: calc(100vw - 32px);
+  background: var(--pd-dark-bg); color: #F3F1EA;
+  border-radius: 999px; box-shadow: 0 12px 34px rgba(15, 26, 22, 0.34);
+  animation: rp-rise 0.32s ease-out both;
+}
+@keyframes rp-rise { from { opacity: 0; transform: translate(-50%, 12px); } }
+.rp-resume-t { font-size: 14.5px; color: #CBD1CB; }
+.rp-resume-go {
+  background: #8FD0AE; color: #0F1A16; border: 0; cursor: pointer;
+  font: inherit; font-size: 14.5px; font-weight: 600;
+  padding: 9px 18px; border-radius: 999px; white-space: nowrap;
+}
+.rp-resume-go:hover { background: #A6DCBF; }
+.rp-resume-x {
+  background: none; border: 0; cursor: pointer; color: #CBD1CB;
+  font-size: 22px; line-height: 1; padding: 0 6px;
+}
+.rp-resume-x:hover { color: #fff; }
+
+/* ═══ mobile contents ════════════════════════════════════════════════════ */
+.rp-toc-fab { display: none; }
+.rp-toc-sheet { display: none; }
+
+/* ═══ index page ═════════════════════════════════════════════════════════ */
+.rp-idx-head { padding-top: clamp(46px, 6vw, 88px); }
+.rp-idx-sub { margin: 22px 0 0; max-width: 34em; }
+.rp-idx-list {
+  display: grid; gap: clamp(26px, 3vw, 40px);
+  padding-top: clamp(40px, 5vw, 66px);
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  align-items: start;
+}
+.rp-card {
+  background: var(--pd-card); border: 1px solid var(--pd-hair);
+  border-radius: 16px; padding: clamp(26px, 3vw, 36px);
+  box-shadow: 0 8px 26px rgba(20, 24, 28, 0.05);
+  display: flex; flex-direction: column;
+}
+.rp-card-top {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 14px; margin-bottom: 16px;
+}
+.rp-card-date {
+  font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.08em;
+  color: var(--pd-tert); text-transform: uppercase;
+}
+.rp-card-h {
+  margin: 0 0 14px; font-family: var(--pd-display); font-optical-sizing: auto;
+  font-weight: 545; font-size: clamp(25px, 2.4vw, 32px); line-height: 1.14;
+  letter-spacing: -0.014em;
+}
+.rp-card-h a { color: var(--pd-ink); text-decoration: none; }
+.rp-card-h a:hover { color: var(--pd-coral-link); }
+.rp-card-p { margin: 0 0 22px; font-size: 16px; line-height: 1.65; color: var(--pd-body); }
+.rp-card-stats {
+  display: flex; flex-wrap: wrap; gap: 20px 30px;
+  padding: 20px 0; margin-bottom: 22px;
+  border-top: 1px solid var(--pd-hair); border-bottom: 1px solid var(--pd-hair);
+}
+.rp-card-stat { display: flex; flex-direction: column; gap: 5px; max-width: 15em; }
+.rp-card-stat .n {
+  font-family: var(--pd-display); font-weight: 545; font-size: 25px;
+  line-height: 1; color: var(--pd-brass); letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.rp-card-stat .l { font-size: 13.5px; line-height: 1.45; color: var(--pd-body); }
+.rp-card-foot {
+  margin-top: auto; display: flex; flex-wrap: wrap; align-items: center;
+  gap: 16px 20px;
+}
+.rp-card-cta { text-decoration: none; }
+.rp-card-meta { font-size: 13.5px; color: var(--pd-tert); }
+
+.rp-missing { padding: clamp(80px, 12vw, 160px) 0 clamp(60px, 8vw, 100px); }
+.rp-missing .pd-body { margin-top: 16px; }
+.rp-missing a { color: var(--pd-coral-link); }
+
+/* ═══ responsive ═════════════════════════════════════════════════════════ */
+@media (max-width: 1000px) {
+  /* The rail becomes a sheet — the column takes the page. */
+  .rp-main { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .rp-rail { display: none; }
+
+  .rp-toc-fab {
+    display: block; position: fixed; right: 16px; bottom: 20px; z-index: 54;
+    padding: 13px 22px; border: 0; cursor: pointer; font: inherit;
+    font-size: 14.5px; font-weight: 600; border-radius: 999px;
+    background: var(--pd-dark-bg); color: #F3F1EA;
+    box-shadow: 0 10px 28px rgba(15, 26, 22, 0.3);
+  }
+  /* The place-keeper sits above the contents button rather than under it. */
+  .rp-resume { bottom: 84px; }
+
+  .rp-toc-sheet { display: block; position: fixed; inset: 0; z-index: 70; }
+  .rp-toc-scrim {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    border: 0; padding: 0; cursor: pointer;
+    background: rgba(15, 26, 22, 0.5);
+    animation: rp-fade 0.2s ease-out both;
+  }
+  @keyframes rp-fade { from { opacity: 0; } }
+  .rp-toc-panel {
+    position: absolute; left: 0; right: 0; bottom: 0; max-height: 78dvh;
+    overflow-y: auto; overscroll-behavior: contain;
+    background: #F6F4EF; border-radius: 20px 20px 0 0;
+    padding: 22px 24px calc(28px + env(safe-area-inset-bottom));
+    animation: rp-up 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes rp-up { from { transform: translateY(100%); } }
+  .rp-toc-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .rp-toc-top .rp-rail-h { flex: 1; margin-bottom: 0; }
+  .rp-toc-close {
+    background: none; border: 0; cursor: pointer; font-size: 28px; line-height: 1;
+    color: var(--pd-body); padding: 0 4px 12px;
+  }
+  .rp-toc-panel .rp-toc-a { padding-top: 11px; padding-bottom: 11px; font-size: 15px; }
+}
+
+@media (max-width: 640px) {
+  .rp-prose p, .rp-prose li { font-size: 17px; }
+  .rp-meta { gap: 12px; }
+  .rp-meta-dot { display: none; }
+  .rp-dl-row { flex-direction: column; }
+  .rp-dl-go { width: 100%; }
+  .rp-resume { left: 16px; right: 16px; transform: none; padding-left: 18px; }
+  @keyframes rp-rise { from { opacity: 0; transform: translateY(12px); } }
+  .rp-resume-t { flex: 1 1 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rp-resume, .rp-toc-panel, .rp-toc-scrim { animation: none; }
+  .rp-progress-bar { transition: none; }
+}
