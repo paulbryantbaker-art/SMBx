@@ -11,6 +11,13 @@
  *   { kind:'numeral',   numeral, unit?, head, body?, source? }   giant figure + brass bar
  *   { kind:'statement', tag, tagColor?:'green'|'brass', head, body?, source? }
  *   { kind:'diagram',   tag, head, body?, source?, connector?, bars:[{label,sub,style:'ink'|'green',h}] }
+ *   { kind:'trade',     name, image?, imagePos?, numeral?, unit?, head, body?, source? }
+ *
+ * IMAGES: `trade` is the ONLY body page with an image slot (404×604, object-fit
+ * cover — request 3:4 from Gemini and keep the subject centred). An `image:` key
+ * on any other page kind is silently dropped: the build succeeds and the picture
+ * simply is not there. The cover has its own slot (476×1102, request 9:16).
+ * Full slot table and the imagery brief: content/studio/FORMATS.md.
  *
  * LAW: every number/source must be VERIFIED (zero hallucination). Keep the
  * headline copy tight; the deck carries the depth, the caption hooks.

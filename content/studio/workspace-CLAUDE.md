@@ -117,6 +117,10 @@ re-synthesizing a master** — that is the moment positions silently go stale.
 
 ### 3. Produce collateral
 
+**Read `FORMATS.md` in this folder first, every time.** It is the spec: which
+builder, the exact field grammar, the image slot dimensions, and the imagery
+brief. Collateral drifts when a session works from memory instead of that file.
+
 ```
 npx tsx $REPO/scripts/studio/build-report.mts    <doc.md>          # long report PDF
 npx tsx $REPO/scripts/studio/build-deck.mts      <spec.deck.mts>   # LinkedIn carousel
@@ -125,6 +129,19 @@ npx tsx $REPO/scripts/studio/build-onepager.mts  <spec.post.mts>   # single-imag
 
 Run these from the workspace root: they default to `./media` + `./assets` for
 images and `./collateral` for output.
+
+**Never hand-roll a layout.** The builders are deterministic — the same spec
+renders the same pixels. If the output looks off, the spec is wrong, not the
+renderer. Writing your own HTML/CSS to "match the style" is the drift.
+
+**Write the imagery brief before building anything.** Every production run:
+work out what images the piece needs and write the Gemini prompts to
+`markets/<m>/collateral/image-brief.md`, sized to the slot table in FORMATS.md.
+This is a standing step, not a conditional one.
+
+**Then look at the render.** Every image slot is `object-fit: cover`, so the
+image is cropped from the centre. Build, open the output, adjust `imagePos`,
+build again. One pass of that is the difference between fitting and not.
 
 ### 4. Deal analysis
 

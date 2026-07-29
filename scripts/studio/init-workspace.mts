@@ -71,6 +71,15 @@ const playSrc = path.join(ROOT, 'content/studio/PLAYBOOK.md');
 const playDst = path.join(target, 'PLAYBOOK.md');
 if (existsSync(playSrc) && !existsSync(playDst)) copyFileSync(playSrc, playDst);
 
+/* The collateral spec — which builder, the exact field grammar, the image slot
+   dimensions, and the imagery brief. Without it a session rebuilds the layout
+   from memory every time and the output drifts: images cropped wrong because
+   nobody knew the container was 476×1102, `image:` keys on page kinds that have
+   no image slot, hand-rolled HTML that approximates the house style. */
+const fmtSrc = path.join(ROOT, 'content/studio/FORMATS.md');
+const fmtDst = path.join(target, 'FORMATS.md');
+if (existsSync(fmtSrc) && !existsSync(fmtDst)) copyFileSync(fmtSrc, fmtDst);
+
 /* The workspace is meant to live in git (that is how a master gets version
    history without a database), so the one file that must never go up needs to
    be excluded before anyone commits — a key put somewhere sensible should not
