@@ -73,12 +73,19 @@
       ]
     }
     </script>
-    <link rel="icon" type="image/png" href="/X.png" />
-    <!-- PWA icon: dark variant (white X on near-black) — works best on
-         dark home screens which are the majority. iOS PWAs don't support
-         light/dark icon switching; this is set at install time.
-         Light variant (pwa-icon-180.png) exists for future use. -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/pwa-icon-180-dark.png" />
+    <!-- Tab icon. These used to point at /X.png and /pwa-icon-*.png, none of
+         which existed — the mark was deleted in a logo cleanup and the links
+         were never updated, so every browser fell back to its generic
+         document glyph. Re-cut from the current mark by
+         `npx tsx scripts/studio/build-icons.mts`; run it again if the accent
+         colour ever moves, which it has three times. -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="icon" type="image/png" sizes="180x180" href="/favicon-180.png" />
+    <!-- iOS home screen. Apple ignores transparency, so this tile is opaque
+         bone rather than the dark PWA variant — it reads on both a light and
+         a dark home screen, which the near-black tile does not. -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- Marketing (2026-07 terra redesign): Inter 400–800 is the whole voice; Sora 800
