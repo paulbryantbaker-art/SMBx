@@ -63,7 +63,7 @@ function law(srcRel: string, dstName: string): void {
      markets/  the knowledge base per market — research in, master out
      deals/    per-deal documents and the analysis produced from them
      the rest  as before (media, assets, collateral, decks) */
-const dirs = ['media', 'assets', 'collateral', 'decks', 'markets', 'deals'];
+const dirs = ['media', 'assets', 'collateral', 'decks', 'markets', 'deals', 'clients'];
 for (const d of dirs) mkdirSync(path.join(target, d), { recursive: true });
 
 /* A market is a folder. Seed one so the shape is obvious rather than described. */
@@ -102,6 +102,14 @@ if (existsSync(planSrc) && !existsSync(planDst)) copyFileSync(planSrc, planDst);
 law('content/studio/workspace-CLAUDE.md', 'CLAUDE.md');
 law('content/studio/PLAYBOOK.md', 'PLAYBOOK.md');
 law('content/studio/FORMATS.md', 'FORMATS.md');
+
+/* engagements.mjs is a TOOL, not a law, but it travels the same way and for the
+   same reason (Paul, 2026-07-29: "I don't want to have to keep downloading main
+   and reimporting it so that Cowork can use it"). It lands IN the workspace as
+   plain JavaScript on node built-ins — no npm install, no tsx, no network — so
+   a session opened on this folder can run it immediately and never needs the
+   repo again. `--update` refreshes it in place, keeping a .bak. */
+law('content/studio/engagements.mjs', 'engagements.mjs');
 
 /* The workspace is meant to live in git (that is how a master gets version
    history without a database), so the one file that must never go up needs to
@@ -145,6 +153,7 @@ const notes: Record<string, string> = {
   decks: 'Your deck specs. Copy example.deck.mts, change the copy, point cover.image at a file in ../media, then build.',
   markets: 'One folder per market you keep a knowledge base for. Copy _example-market/ and rename it. Research goes in research/; the synthesized master is master.md.',
   deals: 'One folder per deal. Copy _example-deal/ and rename it. What the seller sent goes in documents/; what we produce goes in analysis/.',
+  clients: 'One folder per client, one folder per engagement inside it — clients/<client>/<engagement>/engagement.md holds the stage, what we owe them, and the log. `node engagements.mjs list` is the board.',
 };
 writeFileSync(path.join(exampleMarket, 'README.txt'),
   ['A MARKET — everything you know about one lane.', '',
@@ -195,6 +204,7 @@ writeFileSync(path.join(target, 'README.md'), [
   'assets/       recurring images (headshots, brand shots)',
   'collateral/   rendered outputs — post the .pdf, paste the -caption.txt',
   'decks/        your deck specs (start from example.deck.mts)',
+  'clients/      one folder per client — engagements, their stage, and the log',
   'markets/      one folder per market — research in, master out, documents derived',
   'deals/        one folder per deal — what they sent, what we produced',
   'posting-plan.md   what to build next',

@@ -20,6 +20,11 @@ markets/<market>/     a knowledge base for one market
                       consolidators.md (who already owns what),
                       benchmarks.md, candidates.csv
     collateral/       rendered output for this market
+clients/<client>/<engagement>/  what we're doing for a client, and where it stands
+                      engagement.md  stage, next move, log
+                      documents/     what they sent us
+                      analysis/      what we produced
+
 deals/<deal>/
     documents/        what the seller sent
     analysis/         what we produced
@@ -148,6 +153,42 @@ build again. One pass of that is the difference between fitting and not.
 Read what's in `deals/<d>/documents/`, write to `analysis/`. Same citation
 discipline: a number in the analysis comes from a document in `documents/`, or
 it says where it came from.
+
+### 5. Track the client work
+
+`clients/<client>/<engagement>/engagement.md` is the record of what we're doing
+for someone and where it stands. Front matter carries the stage, who the next
+move belongs to, and what that move is; the body carries the mandate, the
+current picture, and a dated log.
+
+```
+node engagements.mjs list                          the board
+node engagements.mjs new "<client>" "<engagement>"  scaffold one
+node engagements.mjs stage <path> <stage> [note]    advance it, stamped + logged
+node engagements.mjs note  <path> "<note>"          append to the log
+node engagements.mjs board                          rewrite ENGAGEMENTS.md
+node engagements.mjs check                          exit 1 if anything stalled
+```
+
+Stages: `prospect → engaged → thesis → sourcing → outreach → diligence →
+structuring → closing → closed`, plus `parked` and `ended` which never read as
+stalled.
+
+Three things to hold onto:
+
+- **`waiting_on` is the honest field.** Most engagements don't stall because
+  the work is hard, they stall because someone is waiting on someone. `board`
+  prints an "Ours to move" list off exactly that, and it is the only part of
+  the page worth reading most mornings.
+- **The script is optional.** These are markdown files. Edit them by hand, or
+  ask a session to. `check` and `board` are conveniences, not gatekeepers.
+- **A stage is what WE are doing, never what the client did.** "closing" means
+  we are supporting a close the client runs and signs. THE LINE does not bend
+  because a status field is shorter that way.
+
+When an engagement produces a document, it goes in that engagement's
+`analysis/`, the same split `deals/` uses: `documents/` is what they sent us,
+`analysis/` is what we made.
 
 ---
 
