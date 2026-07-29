@@ -24,29 +24,38 @@ async function getResend() {
 }
 
 /**
- * Who the practice writes as (Paul, 2026-07-29: "I don't want the email to be
- * from Yulia anymore — it should be 'Paul at smbX.ai'").
+ * Who the practice writes as (Paul, 2026-07-29: "where is my updated signature
+ * that makes it look like it is from me" — the sender line has to read the way
+ * his own compose window does: `Paul Baker – pbaker@smbx.ai`).
  *
- * The DISPLAY NAME is brand copy, so it lives here rather than in an env var
- * where it drifts silently. The ADDRESS is infrastructure — it has to match a
- * domain verified with the mail provider — so that still comes from
- * EMAIL_FROM. Setting EMAIL_FROM to a bare address or to a
- * `Name <addr>` pair both work; only the address is taken from it, so the
- * sender a reader sees can never go stale against a value in Railway.
+ * The seam is DOMAIN vs IDENTITY. The domain is infrastructure — it has to be
+ * verified with the mail provider or nothing sends — so EMAIL_FROM still owns
+ * it. The mailbox and the display name are brand, so they live here.
+ *
+ * EMAIL_FROM contributes the DOMAIN AND NOTHING ELSE. There is deliberately no
+ * escape hatch for a display name in the env, because the value most likely
+ * sitting in Railway right now is `Yulia <notifications@smbx.ai>` — honouring
+ * it would quietly reinstate the exact sender Paul retired. A name in the env
+ * is therefore read as history, not intent, and discarded:
+ *   `Yulia <x@smbx.ai>`   → `Paul Baker <pbaker@smbx.ai>`
+ *   `notifications@x.com` → `Paul Baker <pbaker@x.com>`
+ *   unset / unparseable   → `Paul Baker <pbaker@smbx.ai>`
  */
-const FROM_NAME = 'Paul at smbX.ai';
-const DEFAULT_FROM_ADDRESS = 'notifications@smbx.ai';
+const FROM_NAME = 'Paul Baker';
+const FROM_MAILBOX = 'pbaker';
+const DEFAULT_FROM_DOMAIN = 'smbx.ai';
 
-/** Pull the bare address out of `Name <addr>` or a plain `addr`. */
-function fromAddress(): string {
+const VALID_ADDR = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function resolveFrom(): string {
   const raw = (process.env.EMAIL_FROM || '').trim();
-  if (!raw) return DEFAULT_FROM_ADDRESS;
   const angled = raw.match(/<([^>]+)>/);
   const addr = (angled ? angled[1] : raw).trim();
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(addr) ? addr : DEFAULT_FROM_ADDRESS;
+  const domain = VALID_ADDR.test(addr) ? addr.split('@')[1] : DEFAULT_FROM_DOMAIN;
+  return `${FROM_NAME} <${FROM_MAILBOX}@${domain}>`;
 }
 
-const FROM_EMAIL = `${FROM_NAME} <${fromAddress()}>`;
+const FROM_EMAIL = resolveFrom();
 const BASE_URL = process.env.APP_URL || process.env.BASE_URL || 'https://smbx.ai';
 
 // ─── Branded email wrapper matching marketing materials ───
@@ -137,6 +146,45 @@ export function brandedEmail({ headline, body, ctaLabel, ctaUrl, footnote }: {
   </table>
 </body>
 </html>`;
+}
+
+/**
+ * Paul's signature block — the one he uses in Gmail, so an email from the site
+ * and an email typed by hand sign off the same way (Paul, 2026-07-29: "I
+ * should have my signature applied like the second image").
+ *
+ * Built with a table and inline styles because that is what survives Outlook,
+ * and the logo is a hosted URL with real alt text: clients that block images
+ * still show the name, the role and the address, which is the part that
+ * matters. Height is set in the attribute as well as the style — Outlook
+ * ignores CSS dimensions on images.
+ *
+ * The mark sits on nothing, exactly as it does in his compose window. It CAN
+ * disappear in a dark-mode client — the master is transparent RGBA with a
+ * near-black wordmark, and clients invert surfaces rather than image pixels —
+ * so the defence is at the other end: every email that carries this sets an
+ * explicit light background on its wrapper, which is what stops Apple Mail
+ * inverting the message in the first place. Fixing it there keeps the
+ * signature identical to his own instead of putting a plate behind it.
+ */
+export function signatureHtml(): string {
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0">
+  <tr><td style="font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;line-height:1.5;color:#14181C;padding:0 0 2px">
+    <strong style="font-weight:600">Paul Baker</strong>
+  </td></tr>
+  <tr><td style="font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;line-height:1.5;color:#3F464C;padding:0 0 2px">
+    Founder &amp; Deal Captain
+  </td></tr>
+  <tr><td style="font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;line-height:1.5;padding:0 0 10px">
+    <a href="mailto:pbaker@smbx.ai" style="color:#16624C;text-decoration:none">pbaker@smbx.ai</a>
+  </td></tr>
+  <tr><td style="padding:0">
+    <a href="${BASE_URL}" style="text-decoration:none">
+      <img src="${BASE_URL}/logo-green-x.png" alt="smbX.ai" width="150" height="38"
+           style="display:block;width:150px;height:38px;border:0;outline:none;text-decoration:none">
+    </a>
+  </td></tr>
+</table>`;
 }
 
 /** A file to send with the message (the research reports ride this path). */

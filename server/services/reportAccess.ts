@@ -38,7 +38,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import { createSql } from '../dbConfig.js';
-import { sendEmail } from './emailService.js';
+import { sendEmail, signatureHtml } from './emailService.js';
 import { findReport } from '../../shared/reports.js';
 
 /** How long a mailed link stays good. Long enough to survive an inbox triage,
@@ -356,7 +356,10 @@ export async function unsubscribeEmail(email: string, token: string): Promise<bo
 
 function deliveryEmailHtml(title: string, kicker: string, link: string, attached: boolean, unsub: string): string {
   const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  return `<div style="font-family:-apple-system,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;color:#14181C">
+  // The explicit white background is load-bearing, not decoration: Apple Mail
+  // in dark mode inverts a message that declares none, which would turn the
+  // signature's near-black wordmark invisible against its own background.
+  return `<div bgcolor="#FFFFFF" style="font-family:-apple-system,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#FFFFFF;color:#14181C">
   <div style="font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:#B08637;font-weight:600">${esc(kicker)}</div>
   <h1 style="margin:12px 0 16px;font-size:24px;line-height:1.25;font-weight:600;color:#14181C">${esc(title)}</h1>
   <p style="margin:0 0 24px;font-size:15px;line-height:1.65;color:#3F464C">
@@ -367,15 +370,14 @@ function deliveryEmailHtml(title: string, kicker: string, link: string, attached
   <p style="margin:0 0 28px">
     <a href="${esc(link)}" style="display:inline-block;background:#16624C;color:#fff;text-decoration:none;padding:14px 28px;border-radius:999px;font-size:15px;font-weight:600">Open the report</a>
   </p>
-  <p style="margin:0 0 8px;font-size:13px;line-height:1.6;color:#8A9099">
+  <p style="margin:0 0 32px;font-size:13px;line-height:1.6;color:#8A9099">
     The link works for ${LINK_TTL_HOURS} hours. If the button doesn't open, paste this into your browser:<br>
     <span style="color:#5C6670;word-break:break-all">${esc(link)}</span>
   </p>
-  <hr style="border:0;border-top:1px solid #E4E1D9;margin:28px 0 16px">
-  <p style="margin:0;font-size:13px;line-height:1.6;color:#8A9099">
-    Paul Baker · smbX.ai — buy-side corporate development.<br>
+  ${signatureHtml()}
+  <p style="margin:36px 0 0;padding-top:16px;border-top:1px solid #E4E1D9;font-size:12px;line-height:1.6;color:#9BA1A8">
     You got this because someone asked for the report at smbx.ai. We'll send occasional research after this —
-    <a href="${esc(unsub)}" style="color:#5C6670">unsubscribe</a> any time.
+    <a href="${esc(unsub)}" style="color:#9BA1A8">unsubscribe</a> any time.
   </p>
 </div>`;
 }
