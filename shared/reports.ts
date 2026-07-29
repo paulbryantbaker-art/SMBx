@@ -41,6 +41,12 @@ export interface ReportMeta {
   publishedLabel: string;
   /** Stable image URL for link previews (crawlers can't read hashed bundles). */
   ogImage?: string;
+  /** The markdown filename in `scripts/studio/reports/`. The SERVER reads it to
+   *  ground "Ask about this report" in the document itself — the client already
+   *  has the rendered body, but the server needs the source text and must not
+   *  guess a filename from the slug (they differ: `home-services` ←
+   *  `home-services-state-of-market.md`). */
+  md: string;
 }
 
 export const REPORTS: ReportMeta[] = [
@@ -53,6 +59,7 @@ export const REPORTS: ReportMeta[] = [
     published: '2026-07-23',
     publishedLabel: 'July 2026',
     ogImage: '/reports/commercial-mep-cover.jpg',
+    md: 'commercial-mep-buy-side-assessment.md',
   },
   {
     slug: 'home-services',
@@ -68,6 +75,7 @@ export const REPORTS: ReportMeta[] = [
     published: '2026-07-29',
     publishedLabel: 'July 2026',
     ogImage: '/reports/home-services-cover.jpg',
+    md: 'home-services-state-of-market.md',
   },
 ];
 

@@ -26,6 +26,8 @@ import PracticeShell, { PageCrumb } from './PracticeShell';
 import { getReport, loadReportBody, type ReportBody } from './reports/registry';
 import DownloadCard from './reports/DownloadCard';
 import { usePageMeta } from './reports/usePageMeta';
+import RailNav from './reports/RailNav';
+import AskAgent from './reports/AskAgent';
 import { bookHref, bookTarget } from './leads';
 import { trackEvent } from '../lib/analytics';
 import './report.css';
@@ -85,33 +87,6 @@ const Body = memo(function Body(
 
   return <div className="rp-prose">{children}</div>;
 });
-
-/* ── contents rail ──────────────────────────────────────────────────────── */
-
-function Contents({
-  toc, active, top, onPick,
-}: {
-  toc: { id: string; text: string; level: number }[];
-  active: string;
-  top: number;
-  onPick?: () => void;
-}) {
-  return (
-    <nav className="rp-toc-list" aria-label="Report contents">
-      {toc.map(h => (
-        <a
-          key={h.id}
-          href={`#${h.id}`}
-          className={`rp-toc-a lvl${h.level - top}${active === h.id ? ' on' : ''}`}
-          aria-current={active === h.id ? 'location' : undefined}
-          onClick={onPick}
-        >
-          {h.text}
-        </a>
-      ))}
-    </nav>
-  );
-}
 
 /* ── page ───────────────────────────────────────────────────────────────── */
 
@@ -257,7 +232,7 @@ export default function ReportPage({ slug }: { slug: string }) {
         {/* ── masthead ─────────────────────────────────────────────── */}
         <header className="rp-head">
           <div className="pd-wrap rp-head-in">
-            <PageCrumb parent={{ label: 'Research', href: '/reports' }} here={report.shortTitle} />
+            <PageCrumb parent={{ label: 'Research', href: '/research' }} here={report.shortTitle} />
             <div className="rp-kicker">{report.kicker}</div>
             <h1 className="rp-title">{s.title}</h1>
             {s.subtitle && <p className="rp-sub">{s.subtitle}</p>}
@@ -310,8 +285,7 @@ export default function ReportPage({ slug }: { slug: string }) {
           <aside className="rp-rail">
             {body && (
               <div className="rp-rail-sticky">
-                <div className="rp-rail-h">Contents</div>
-                <Contents toc={body.toc} active={active} top={topLevel} />
+                <RailNav toc={body.toc} active={active} top={topLevel} bodyRef={bodyRef} />
               </div>
             )}
           </aside>
@@ -404,13 +378,17 @@ export default function ReportPage({ slug }: { slug: string }) {
           <button type="button" className="rp-toc-scrim" aria-label="Close" onClick={() => setTocOpen(false)} />
           <div className="rp-toc-panel">
             <div className="rp-toc-top">
-              <span className="rp-rail-h">Contents</span>
               <button type="button" className="rp-toc-close" onClick={() => setTocOpen(false)} aria-label="Close">×</button>
             </div>
-            <Contents toc={body.toc} active={active} top={topLevel} onPick={() => setTocOpen(false)} />
+            <RailNav
+              toc={body.toc} active={active} top={topLevel} bodyRef={bodyRef}
+              onPick={() => setTocOpen(false)}
+            />
           </div>
         </div>
       )}
+
+      <AskAgent slug={report.slug} title={report.shortTitle} />
     </PracticeShell>
   );
 }

@@ -11,6 +11,20 @@
  * 37-minute read, and it is the exact body colour the PDF uses.
  */
 
+/* Two knobs for the read (2026-07-29). The running measure governs PROSE only
+   — tables, figures and photos take the whole column, which is the point: an
+   eight-column register and a paragraph want opposite things, and capping both
+   at one width is what made the page feel like a narrow strip with a thousand
+   pixels of margin beside it.
+
+   In REM, deliberately. A custom property holding `em` resolves against the
+   font-size of the element that DECLARES it — .rp, at the 16px body size — not
+   against the 18px paragraph that uses it, so `38em` here quietly meant 608px
+   rather than the 684px it reads as. rem removes the trap and still scales
+   with a reader who has enlarged their base font. */
+.rp { --rp-measure: 43rem; --rp-rail: 272px; }   /* ~688px of running text */
+@media (max-width: 1100px) { .rp { --rp-measure: 40rem; --rp-rail: 244px; } }
+
 /* ═══ reading progress ═══════════════════════════════════════════════════ */
 /* Hairline, top of the viewport. position:fixed is safe here — it is 3px
    tall, NOT a full-viewport coloured div (the Safari toolbar-tint rule). */
@@ -101,8 +115,12 @@
    stretch the rail to the row height (the default) keeps it pinned the whole
    way down. */
 .rp-main {
-  display: grid; grid-template-columns: 244px minmax(0, 1fr);
-  gap: clamp(40px, 5vw, 86px);
+  display: grid; grid-template-columns: var(--rp-rail) minmax(0, 1fr);
+  /* The gap was up to 86px, which on a 1360 rail spent width the registers
+     needed. Tightened, and the rail widened to carry search (Paul, 2026-07-29:
+     "the right hand content column is too narrow… more like reading a news
+     article"). */
+  gap: clamp(30px, 3.2vw, 56px);
   padding-top: clamp(52px, 6vw, 92px);
 }
 .rp-col { min-width: 0; }
@@ -118,11 +136,60 @@
   text-transform: uppercase; color: var(--pd-tert); font-weight: 500;
   padding-bottom: 14px; border-bottom: 1px solid var(--pd-hair); margin-bottom: 6px;
 }
+/* ── in-report search ─────────────────────────────────────────────────────
+   A 19,000-word assessment needs a way in that is not scrolling. The field
+   filters the index to the sections that actually discuss the term and says
+   how often each one does. */
+.rp-find {
+  position: relative; display: flex; align-items: center;
+  margin: 12px 0 4px;
+}
+.rp-find-i {
+  position: absolute; left: 10px; width: 14px; height: 14px;
+  color: var(--pd-tert); pointer-events: none;
+}
+.rp-find-in {
+  width: 100%; padding: 9px 30px 9px 31px;
+  font: inherit; font-size: 13.5px; color: var(--pd-ink);
+  background: #fff; border: 1px solid var(--pd-border); border-radius: 9px;
+  transition: border-color 0.14s, box-shadow 0.14s;
+  -webkit-appearance: none; appearance: none;
+}
+.rp-find-in::placeholder { color: var(--pd-tert); }
+.rp-find-in:focus {
+  outline: none; border-color: var(--pd-coral);
+  box-shadow: 0 0 0 3px rgba(22, 98, 76, 0.12);
+}
+/* The field is the focus affordance; the global ring would draw a second box
+   inside it (the same rule the practice chat input carries). */
+.rp-find-in:focus-visible { outline: none; }
+.rp-find-in::-webkit-search-cancel-button { display: none; }
+.rp-find-x {
+  position: absolute; right: 6px; width: 22px; height: 22px;
+  display: grid; place-items: center;
+  background: none; border: 0; cursor: pointer; padding: 0;
+  font-size: 17px; line-height: 1; color: var(--pd-tert); border-radius: 6px;
+}
+.rp-find-x:hover { color: var(--pd-ink); background: var(--pd-card); }
+.rp-find-n {
+  font-size: 12.5px; line-height: 1.5; color: var(--pd-body);
+  padding: 6px 0 8px; border-bottom: 1px solid var(--pd-hair); margin-bottom: 4px;
+}
+
 .rp-toc-list { display: flex; flex-direction: column; }
 .rp-toc-a {
-  display: block; padding: 8px 0 8px 14px; font-size: 14px; line-height: 1.45;
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 8px 0 8px 14px; font-size: 14px; line-height: 1.45;
   color: var(--pd-body); text-decoration: none;
   border-left: 2px solid transparent; transition: color 0.14s, border-color 0.14s;
+}
+.rp-toc-t { min-width: 0; }
+/* Match count — a quiet register, not a notification badge. */
+.rp-toc-n {
+  flex: none; margin-left: auto;
+  font-family: var(--pd-mono); font-size: 11.5px; font-variant-numeric: tabular-nums;
+  color: var(--pd-brass); padding: 1px 6px;
+  background: rgba(176, 134, 55, 0.10); border-radius: 5px;
 }
 .rp-toc-a:hover { color: var(--pd-ink); }
 .rp-toc-a.on { color: var(--pd-coral-link); border-left-color: var(--pd-coral); font-weight: 600; }
@@ -137,7 +204,7 @@
 .rp-prose :is(h1, h2, h3) { scroll-margin-top: 104px; }
 
 .rp-intro {
-  max-width: 34em; padding-bottom: clamp(26px, 3vw, 38px);
+  max-width: var(--rp-measure); padding-bottom: clamp(26px, 3vw, 38px);
   border-bottom: 1px solid var(--pd-hair);
 }
 .rp-intro p {
@@ -153,8 +220,8 @@
    is a direct layout child. */
 .rp-prose { color: #3F464C; }
 .rp-prose > div { display: contents; }
-.rp-prose :is(p, li, blockquote, h1, h2, h3, pre) { max-width: 34em; }
-.rp-prose :is(ul, ol) { max-width: 35em; }
+.rp-prose :is(p, li, blockquote, h1, h2, h3, pre) { max-width: var(--rp-measure); }
+.rp-prose :is(ul, ol) { max-width: calc(var(--rp-measure) + 1em); }
 
 .rp-prose h1 {
   margin: clamp(58px, 6vw, 88px) 0 22px;
@@ -227,8 +294,11 @@
    The report's registers are wide; they scroll INSIDE their own box so the
    page body never scrolls sideways. */
 .rp-tablewrap {
-  /* Full column width — the em measure governs prose, not registers. */
-  width: 100%; max-width: 46em;
+  /* FULL column — the em measure governs prose, not registers. This carried a
+     46em cap, which squeezed an eight-column platform table into ~830px and
+     made it scroll sideways when a thousand pixels of column sat unused
+     (Paul: "some of the tables don't look right"). */
+  width: 100%; max-width: none;
   overflow-x: auto; -webkit-overflow-scrolling: touch;
   margin: 0 0 26px; padding-bottom: 4px;
 }
@@ -252,7 +322,7 @@
 /* Body chunk in flight / failed — the masthead is already on screen, so these
    are quiet lines in the column rather than a full-page state. */
 .rp-bodywait, .rp-bodyfail {
-  margin: clamp(30px, 4vw, 48px) 0; max-width: 34em;
+  margin: clamp(30px, 4vw, 48px) 0; max-width: var(--rp-measure);
   font-size: 16px; line-height: 1.6; color: var(--pd-body);
 }
 .rp-bodyfail button, .rp-bodyfail a {
@@ -465,4 +535,106 @@
 @media (prefers-reduced-motion: reduce) {
   .rp-resume, .rp-toc-panel, .rp-toc-scrim { animation: none; }
   .rp-progress-bar { transition: none; }
+}
+
+/* ═══ ask the agent ══════════════════════════════════════════════════════
+   The launcher and panel are `position: fixed`, which the Safari toolbar-tint
+   rule permits: that rule bans full-VIEWPORT coloured divs, because Safari
+   samples them for chrome tinting. These are a pill and a bounded card. */
+.rp-ask-fab {
+  position: fixed; right: clamp(14px, 2vw, 26px); bottom: clamp(14px, 2vw, 26px);
+  z-index: 55; display: inline-flex; align-items: center; gap: 9px;
+  padding: 12px 20px; border: 0; border-radius: 999px; cursor: pointer;
+  background: var(--pd-coral); color: #fff;
+  font: inherit; font-size: 14.5px; font-weight: 600; letter-spacing: -0.005em;
+  box-shadow: 0 10px 30px rgba(20, 24, 28, 0.22);
+  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+.rp-ask-fab:hover {
+  background: var(--pd-coral-hover);
+  transform: translateY(-1px); box-shadow: 0 14px 36px rgba(20, 24, 28, 0.26);
+}
+.rp-ask-fab svg { width: 17px; height: 17px; flex: none; }
+
+.rp-ask {
+  position: fixed; right: clamp(14px, 2vw, 26px); bottom: clamp(14px, 2vw, 26px);
+  z-index: 56; width: min(420px, calc(100vw - 28px));
+  max-height: min(620px, calc(100dvh - 96px));
+  display: flex; flex-direction: column;
+  background: #fff; border: 1px solid var(--pd-border); border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(20, 24, 28, 0.24);
+  overflow: hidden;
+}
+.rp-ask-top {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 16px 16px 14px 20px; border-bottom: 1px solid var(--pd-hair);
+}
+.rp-ask-t { min-width: 0; }
+.rp-ask-h { font-size: 15px; font-weight: 700; color: var(--pd-ink); }
+.rp-ask-s { margin-top: 3px; font-size: 12.5px; line-height: 1.5; color: var(--pd-body); }
+.rp-ask-x {
+  flex: none; margin-left: auto; width: 28px; height: 28px;
+  display: grid; place-items: center; border: 0; border-radius: 8px;
+  background: none; cursor: pointer; font-size: 20px; line-height: 1; color: var(--pd-tert);
+}
+.rp-ask-x:hover { background: var(--pd-card); color: var(--pd-ink); }
+
+.rp-ask-scroll {
+  flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+  padding: 16px 20px; display: flex; flex-direction: column; gap: 14px;
+}
+.rp-ask-starters { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.rp-ask-chip {
+  text-align: left; padding: 9px 14px; border-radius: 999px; cursor: pointer;
+  background: var(--pd-card); border: 1px solid var(--pd-border);
+  font: inherit; font-size: 13.5px; color: var(--pd-ink);
+  transition: border-color 0.14s, background 0.14s;
+}
+.rp-ask-chip:hover { border-color: var(--pd-coral); background: #fff; }
+
+.rp-ask-turn p { margin: 0 0 8px; font-size: 14.5px; line-height: 1.62; }
+.rp-ask-turn p:last-child { margin-bottom: 0; }
+.rp-ask-turn.user {
+  align-self: flex-end; max-width: 88%;
+  background: var(--pd-coral); color: #fff;
+  padding: 10px 15px; border-radius: 15px 15px 4px 15px;
+}
+.rp-ask-turn.assistant { color: #3F464C; }
+.rp-ask-wait { color: var(--pd-tert); font-style: italic; }
+.rp-ask-err {
+  font-size: 13.5px; line-height: 1.55; color: #8A3B2F;
+  background: #FBEFEC; border: 1px solid #F0D8D2; border-radius: 10px; padding: 10px 13px;
+}
+
+.rp-ask-form {
+  display: flex; align-items: flex-end; gap: 8px;
+  padding: 12px 14px 14px; border-top: 1px solid var(--pd-hair);
+}
+.rp-ask-in {
+  flex: 1; min-width: 0; resize: none; max-height: 120px;
+  padding: 10px 13px; font: inherit; font-size: 14.5px; line-height: 1.5;
+  color: var(--pd-ink); background: var(--pd-card);
+  border: 1px solid var(--pd-border); border-radius: 12px;
+}
+.rp-ask-in:focus {
+  outline: none; border-color: var(--pd-coral); background: #fff;
+  box-shadow: 0 0 0 3px rgba(22, 98, 76, 0.12);
+}
+/* Same reason as the search field: the border carries focus, and the global
+   ring would draw a second box inside the input. */
+.rp-ask-in:focus-visible { outline: none; }
+.rp-ask-send {
+  flex: none; width: 38px; height: 38px; border: 0; border-radius: 50%;
+  background: var(--pd-coral); color: #fff; cursor: pointer;
+  font-size: 17px; line-height: 1; display: grid; place-items: center;
+  transition: background 0.14s, opacity 0.14s;
+}
+.rp-ask-send:disabled { opacity: 0.34; cursor: default; }
+.rp-ask-send:not(:disabled):hover { background: var(--pd-coral-hover); }
+
+/* The mobile Contents launcher already owns the bottom-left; keep the two
+   from colliding on a phone by shortening the FAB to its icon. */
+@media (max-width: 700px) {
+  .rp-ask-fab { padding: 12px 15px; }
+  .rp-ask-fab span { display: none; }
 }
