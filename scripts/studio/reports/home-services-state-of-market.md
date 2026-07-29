@@ -6,6 +6,9 @@ image: hs-cover.jpg
 imagePos: 50% 50%
 eyebrow: MARKET ASSESSMENT
 footer: Home Services — State of the Market
+stat: 13.3x → 9.5x | HVAC services EV/EBITDA, 2021–23 vs. 2024–YTD26
+stat: ~89% | Of 112,088 NAICS 238220 firms, under 20 staff
+stat: 16–20x | What trophy platforms still clear
 accent: TAM / SAM / SOM | hs-accent-sizing.jpg | 50% 45%
 accent: PE share of deal flow | hs-accent-consolidation.jpg | 50% 45%
 accent: Valuation estimation framework | hs-accent-aggregators.jpg | 50% 45%
