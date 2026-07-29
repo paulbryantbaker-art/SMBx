@@ -202,10 +202,76 @@ export async function recordDownload(email: string, slug: string): Promise<void>
         ORDER BY created_at DESC LIMIT 1
       )
     `;
+
+    // Paul, 2026-07-29: tell him when someone confirms and takes a report.
+    // ONCE per person per report — a second read of the same file is not news,
+    // and a notification that cries wolf gets filtered within a week. Their
+    // FULL history rides along, because the buying signal isn't one download,
+    // it's an acquirer who has now taken three.
+    const [row] = await sql`
+      SELECT COALESCE(SUM(download_count), 0)::int AS downloads
+      FROM report_access
+      WHERE LOWER(email) = ${email.toLowerCase()} AND slug = ${slug}
+    `;
+    if (Number(row?.downloads) === 1) {
+      const history = await sql`
+        SELECT slug, MIN(created_at) AS first_asked, SUM(download_count)::int AS downloads
+        FROM report_access
+        WHERE LOWER(email) = ${email.toLowerCase()}
+        GROUP BY slug ORDER BY MIN(created_at)
+      `;
+      void notifyDownload(email, slug, history as any[]);
+    }
   } catch {
     /* the file matters more than the counter */
   } finally {
     await sql.end();
+  }
+}
+
+/** Tell the practitioner. Best-effort: a failed notification must never cost
+ *  the reader their download. */
+async function notifyDownload(
+  email: string,
+  slug: string,
+  history: { slug: string; first_asked: Date; downloads: number }[],
+): Promise<void> {
+  try {
+    const { teamAllowlist } = await import('./practiceMode.js');
+    const to = teamAllowlist()[0];
+    if (!to) return;
+
+    const report = findReport(slug);
+    const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const returning = history.length > 1;
+    const rows = history.map(h => {
+      const r = findReport(h.slug);
+      return `<tr>
+        <td style="padding:6px 16px 6px 0;font-size:14px;color:#14181C">${esc(r?.shortTitle || h.slug)}</td>
+        <td style="padding:6px 0;font-size:13px;color:#8A9099;white-space:nowrap">${new Date(h.first_asked).toISOString().slice(0, 10)}</td>
+      </tr>`;
+    }).join('');
+
+    await sendEmail({
+      to,
+      subject: `${returning ? 'Returning reader' : 'Report download'}: ${email}`,
+      html: `<div style="font-family:-apple-system,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;color:#14181C">
+  <div style="font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:#B08637;font-weight:600">${returning ? 'Came back' : 'New reader'}</div>
+  <h1 style="margin:10px 0 4px;font-size:22px;line-height:1.3;font-weight:600">${esc(email)}</h1>
+  <p style="margin:0 0 22px;font-size:15px;line-height:1.6;color:#3F464C">
+    Confirmed their address and took <strong>${esc(report?.shortTitle || slug)}</strong>.
+  </p>
+  <table style="border-collapse:collapse;margin:0 0 22px">
+    <tr><td colspan="2" style="padding-bottom:8px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#8A9099">Everything they've taken</td></tr>
+    ${rows}
+  </table>
+  <p style="margin:0;font-size:13px;line-height:1.6;color:#8A9099">
+    They agreed to occasional research, so they're on the campaign list unless they unsubscribe.
+  </p>
+</div>`,
+    });
+  } catch (err: any) {
+    console.error('[report-access] download notification failed:', err?.message);
   }
 }
 
