@@ -344,8 +344,17 @@
 .rp-toc-sheet { display: none; }
 
 /* ═══ index page ═════════════════════════════════════════════════════════ */
-.rp-idx-head { padding-top: clamp(46px, 6vw, 88px); }
-.rp-idx-sub { margin: 22px 0 0; max-width: 34em; }
+/* Centred, matching the landing's section heads and this page's own closing
+   CTA — which was already centred, so the left-aligned masthead was the one
+   thing on the page reading off-axis (Paul, 2026-07-29: "center the hero on
+   the research page too").
+   `text-align` alone is not enough: .pd-h2 and .rp-idx-sub both carry a max-
+   width and `margin: 0`, so their BOX stays flush left and only the text
+   inside it would centre. The auto side margins centre the box — the same
+   pairing .pd-sechead uses on the landing. */
+.rp-idx-head { padding-top: clamp(46px, 6vw, 88px); text-align: center; }
+.rp-idx-head .pd-h2 { margin-left: auto; margin-right: auto; }
+.rp-idx-sub { margin: 22px auto 0; max-width: 34em; }
 /* NO `align-items: start` — cards in a row are the same height, so the shelf
    reads as a set rather than as two things that happen to sit side by side.
    The abstract absorbs the slack (see .rp-card-p), which lands every card's
