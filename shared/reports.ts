@@ -9,9 +9,17 @@
  *
  * Adding a report is three steps:
  *   1. Drop the markdown in `scripts/studio/reports/`.
- *   2. Build the PDF:  npx tsx scripts/studio/build-report.mts \
- *        scripts/studio/reports/<file>.md --out client/public/reports --slug <slug>
+ *   2. Build the artifacts:
+ *        npx tsx scripts/studio/build-report.mts  scripts/studio/reports/<file>.md \
+ *          --out content/reports --slug <slug>          # the gated PDF
+ *        npx tsx scripts/studio/build-og-card.mts scripts/studio/reports/<file>.md \
+ *          --slug <slug>                                # the link-preview card
  *   3. Add an entry here + one line in `client/src/practice/reports/registry.ts`.
+ *
+ * Note there is no `pdf` path here on purpose: the PDFs live in
+ * `content/reports/`, OUTSIDE `client/public`, and are released only through
+ * `/api/practice/reports/:slug/file` after the reader's email is verified.
+ * A static path would be a way around the gate.
  *
  * Abstracts are drawn from each report's own executive summary — no claim
  * appears here that the report does not make (zero-hallucination law).
@@ -31,8 +39,6 @@ export interface ReportMeta {
   published: string;
   /** Human label for the date line. */
   publishedLabel: string;
-  /** Static PDF under client/public — the portable takeaway. */
-  pdf: string;
   /** Stable image URL for link previews (crawlers can't read hashed bundles). */
   ogImage?: string;
 }
@@ -46,7 +52,6 @@ export const REPORTS: ReportMeta[] = [
       'Commercial mechanical, HVAC and plumbing services are institutionalizing — pulled by a data-center demand shock, an accelerating but still-early consolidation cycle, and a persistent valuation gap between project-led and service-led operators. This assessment sizes the market against its own sources, maps the consolidators, and sets out the commercial-specific diligence stack that makes these deals materially harder than residential.',
     published: '2026-07-23',
     publishedLabel: 'July 2026',
-    pdf: '/reports/commercial-mep.pdf',
     ogImage: '/reports/commercial-mep-cover.jpg',
   },
   {
@@ -57,7 +62,6 @@ export const REPORTS: ReportMeta[] = [
       'Six trades, more than $600B in combined U.S. revenue, and roughly 250,000 businesses — with no single entity commanding 20% share of any major vertical. This master assessment consolidates three research workstreams into one register: the capital environment, market sizing, the platform map, and what the 2024–2026 wave of recaps repriced.',
     published: '2026-07-23',
     publishedLabel: 'July 2026',
-    pdf: '/reports/home-services.pdf',
     ogImage: '/reports/home-services-cover.jpg',
   },
 ];

@@ -283,6 +283,101 @@ app.post('/api/practice/leads', leadLimiter, async (req, res) => {
   }
 });
 
+// ─── Research report downloads — verified email required ────
+// The reports READ free at /reports/:slug; the PDF requires a confirmed email
+// (Paul, 2026-07-29: "anybody can read the blog, but you must be signed in to
+// download it"). Practice mode restricts real accounts to the team allowlist,
+// so a literal login would let nobody but the team download — this is the
+// equivalent that works for an outside acquirer. See services/reportAccess.ts.
+// All three routes sit above the blanket `app.use('/api', requireAuth)`.
+
+// 1. Ask for the file → a one-click link goes to the address given.
+app.post('/api/practice/reports/access', leadLimiter, async (req, res) => {
+  try {
+    const { email, slug } = req.body || {};
+    const { issueAccess } = await import('./services/reportAccess.js');
+    const appUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
+    const ip = req.ip || (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || null;
+    const out = await issueAccess({ email, slug, appUrl, ip });
+    if (!out.ok) {
+      return res.status(400).json({
+        error: out.reason === 'invalid_email' ? 'That email looks incomplete.' : 'Unknown report.',
+      });
+    }
+    // `emailed` false means RESEND isn't configured and the link was logged
+    // instead — surfaced so the UI never claims a mail that didn't send.
+    return res.json({ ok: true, emailed: out.emailed !== false });
+  } catch (err: any) {
+    console.error('[report-access] issue failed:', err.message);
+    return res.status(500).json({ error: 'Could not send the link just now.' });
+  }
+});
+
+// 2. The link in the email. Confirms the address, then hands the browser a
+//    signed reader cookie good for every report, not just this one.
+app.get('/reports/:slug/unlock', async (req, res) => {
+  const slug = req.params.slug;
+  try {
+    const { verifyToken, mintReaderToken, readerCookieOptions, READER_COOKIE, READER_HINT_COOKIE } =
+      await import('./services/reportAccess.js');
+    const out = await verifyToken(String(req.query.t || ''));
+    if (!out.ok || !out.email) {
+      return res.redirect(302, `/reports/${encodeURIComponent(slug)}?unlock=${out.reason || 'bad_token'}`);
+    }
+    const opts = readerCookieOptions();
+    res.cookie(READER_COOKIE, mintReaderToken(out.email), opts);
+    // Readable companion so the page shows the unlocked state with no round
+    // trip. It grants nothing; the HttpOnly cookie above is the credential.
+    res.cookie(READER_HINT_COOKIE, '1', { ...opts, httpOnly: false });
+    return res.redirect(302, `/reports/${encodeURIComponent(out.slug || slug)}?dl=1`);
+  } catch (err: any) {
+    console.error('[report-access] verify failed:', err.message);
+    return res.redirect(302, `/reports/${encodeURIComponent(slug)}?unlock=error`);
+  }
+});
+
+// 3. The file itself. Released to a verified reader, or to a team member
+//    holding an app JWT (practicePerimeter above has already 403'd any
+//    non-team token, so a valid one here is the team).
+app.get('/api/practice/reports/:slug/file', async (req, res) => {
+  try {
+    const { readerFromCookie, reportPdfPath, recordDownload } =
+      await import('./services/reportAccess.js');
+    const { findReport } = await import('../shared/reports.js');
+
+    const report = findReport(req.params.slug);
+    if (!report) return res.status(404).json({ error: 'Unknown report' });
+
+    let who = readerFromCookie(req.headers.cookie);
+    if (!who) {
+      const bearer = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+      if (bearer) {
+        try {
+          const jwtLib = await import('jsonwebtoken');
+          jwtLib.default.verify(bearer, process.env.JWT_SECRET || process.env.SESSION_SECRET || 'dev');
+          who = 'team';
+        } catch { /* fall through to the 401 */ }
+      }
+    }
+    if (!who) return res.status(401).json({ error: 'Confirm your email to download this report.' });
+
+    const file = reportPdfPath(report.slug);
+    if (!file) {
+      console.error(`[report-access] PDF missing on disk for ${report.slug}`);
+      return res.status(404).json({ error: 'That file is not available right now.' });
+    }
+
+    if (who !== 'team') void recordDownload(who, report.slug);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${report.slug}.pdf"`);
+    res.setHeader('Cache-Control', 'private, no-store');
+    return res.sendFile(file);
+  } catch (err: any) {
+    console.error('[report-access] download failed:', err.message);
+    return res.status(500).json({ error: 'Could not fetch the file.' });
+  }
+});
+
 // ─── Analytics event capture (public — sendBeacon, no auth) ─
 // Moved above the blanket `app.use('/api', requireAuth)` mount: it previously
 // sat below it, so ANONYMOUS visitors' events 401'd and were silently dropped

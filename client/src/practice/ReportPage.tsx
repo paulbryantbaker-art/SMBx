@@ -319,15 +319,15 @@ export default function ReportPage({ slug }: { slug: string }) {
           <div className="rp-col">
             {introHtml && <div className="rp-intro" dangerouslySetInnerHTML={introHtml} />}
 
-            <DownloadCard slug={report.slug} pdf={report.pdf} pages={pagesLine} placement="top" />
+            <DownloadCard slug={report.slug} pages={pagesLine} placement="top" />
 
             <div ref={bodyRef}>
               {body ? (
                 <Body html={body.html} accents={body.accents} />
               ) : bodyFailed ? (
                 <p className="rp-bodyfail">
-                  The report didn't load. <button type="button" onClick={() => window.location.reload()}>Try again</button>
-                  {' '}— or read it as a <a href={report.pdf}>PDF</a>.
+                  The report didn't load.{' '}
+                  <button type="button" onClick={() => window.location.reload()}>Try again</button>.
                 </p>
               ) : (
                 <p className="rp-bodywait" role="status">Loading the report…</p>
@@ -335,7 +335,7 @@ export default function ReportPage({ slug }: { slug: string }) {
             </div>
 
             {body && (
-              <DownloadCard slug={report.slug} pdf={report.pdf} pages={pagesLine} placement="end" />
+              <DownloadCard slug={report.slug} pages={pagesLine} placement="end" />
             )}
           </div>
         </div>
