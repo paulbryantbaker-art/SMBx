@@ -291,11 +291,11 @@ app.post('/api/practice/leads', leadLimiter, async (req, res) => {
 // equivalent that works for an outside acquirer. See services/reportAccess.ts.
 // All three routes sit above the blanket `app.use('/api', requireAuth)`.
 
-// 1. Ask for the file → a one-click link goes to the address given. NOTHING is
-//    released here (Paul, 2026-07-29: "we need to verify their email as a legit
-//    email before we let them download… they must confirm their email"). The
-//    credential is minted only in step 2, on the click — that click is the
-//    proof the address is real.
+// 1. "Get the PDF" → the report is MAILED to the address given, attached, with
+//    a link in the body (Paul, 2026-07-29: "enter the email and have a button
+//    get the PDF, and the PDF is delivered to that email — that solves both
+//    problems"). Nothing is released to the browser here: delivery to an inbox
+//    is itself the verification, since a fake address never receives it.
 app.post('/api/practice/reports/access', leadLimiter, async (req, res) => {
   try {
     const { email, slug } = req.body || {};

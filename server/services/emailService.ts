@@ -116,24 +116,54 @@ export function brandedEmail({ headline, body, ctaLabel, ctaUrl, footnote }: {
 </html>`;
 }
 
+/** A file to send with the message (the research reports ride this path). */
+export interface EmailAttachment {
+  filename: string;
+  content: Buffer;
+}
+
 /**
  * Send an email. Falls back to console.log if Resend is not configured.
+ *
+ * `attachments` is optional. If the send fails WITH attachments, we retry once
+ * without them — a recipient gateway that rejects a multi-MB PDF should not
+ * cost the reader the message body, which carries a download link anyway.
  */
-export async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }): Promise<boolean> {
+export async function sendEmail({ to, subject, html, attachments }: {
+  to: string;
+  subject: string;
+  html: string;
+  attachments?: EmailAttachment[];
+}): Promise<boolean> {
   const resend = await getResend();
 
   if (!resend) {
     console.log(`[EMAIL-FALLBACK] To: ${to} | Subject: ${subject}`);
     console.log(`[EMAIL-FALLBACK] Body preview: ${html.replace(/<[^>]*>/g, '').substring(0, 200)}`);
+    if (attachments?.length) {
+      console.log(`[EMAIL-FALLBACK] Attachments: ${attachments.map(a => a.filename).join(', ')}`);
+    }
     return false;
   }
 
+  const payload: Record<string, unknown> = { from: FROM_EMAIL, to, subject, html };
+  if (attachments?.length) payload.attachments = attachments;
+
   try {
-    await resend.emails.send({ from: FROM_EMAIL, to, subject, html });
+    await resend.emails.send(payload as any);
     return true;
   } catch (err: any) {
     console.error('Email send error:', err.message);
-    return false;
+    if (!attachments?.length) return false;
+    // Second chance without the payload — the link in the body still delivers.
+    try {
+      await resend.emails.send({ from: FROM_EMAIL, to, subject, html });
+      console.warn(`[email] sent to ${to} WITHOUT attachments after a failure`);
+      return true;
+    } catch (retryErr: any) {
+      console.error('Email send error (no-attachment retry):', retryErr.message);
+      return false;
+    }
   }
 }
 

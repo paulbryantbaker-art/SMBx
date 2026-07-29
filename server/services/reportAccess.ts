@@ -1,26 +1,30 @@
 /**
  * Verified-email access to the research PDFs (2026-07-29).
  *
- * Paul: "they can read anything openly without providing an email… if they want
- * to download it we need the email and they must CONFIRM their email." So the
- * report is open to everyone and the PDF costs a confirmed address — a typed-in
- * one is free to fake, a confirmed one is a lead worth having. (Practice mode
- * restricts real accounts to the team allowlist, so a literal login would have
- * meant nobody but the team could ever download; this is the equivalent that
- * works for an outside acquirer.)
+ * Paul: "enter the email and have a button 'get the PDF', and the PDF is
+ * delivered to that email — that solves both problems." It does, and it's the
+ * neatest form of the thing: **delivery IS the verification.** The report is
+ * open to everyone on the page; the PDF goes to an inbox, so a fake address
+ * simply never receives it. No separate confirm-your-address hurdle, and the
+ * addresses that reach Paul are ones that actually work.
  *
  * The flow:
- *   1. Reader gives an address → `issueAccess` stores a random token, saves the
- *      lead, and mails a one-click link. NOTHING is released yet.
- *   2. They click it → `verifyToken` marks the address confirmed and the route
- *      sets a signed, HttpOnly reader cookie (180 days), then redirects to
- *      `?dl=1` so the download starts on arrival.
+ *   1. Reader gives an address and presses Get the PDF → `issueAccess` stores a
+ *      token, saves the lead, and MAILS THE REPORT: the PDF as an attachment,
+ *      plus a link in the body for anyone whose gateway strips attachments.
+ *      Nothing is released to the browser.
+ *   2. Opening that link marks the address confirmed and sets a signed,
+ *      HttpOnly reader cookie (180 days), then redirects to `?dl=1` so the
+ *      download also starts in the browser.
  *   3. That cookie releases the file from `/api/practice/reports/:slug/file`
- *      for that report and every later one — confirm once, not per report.
+ *      for that report and every later one — so a reader who has already had a
+ *      report delivered gets the next one in one click.
  *
- * Because confirmation is required, working mail is load-bearing: `issueAccess`
- * reports whether it actually sent, and the UI refuses to point at an inbox
- * that will stay empty.
+ * Mail is therefore load-bearing: `issueAccess` reports whether it actually
+ * sent, and the UI refuses to point at an inbox that will stay empty.
+ * (Practice mode restricts real accounts to the team allowlist, so a literal
+ * login would have meant nobody but the team could ever download; this is the
+ * equivalent that works for an outside acquirer.)
  *
  * The PDFs live in `content/reports/`, deliberately OUTSIDE `client/public`:
  * anything under public is served statically by Express, so the old
@@ -29,7 +33,7 @@
  * Team members holding a normal app JWT are let straight through — Paul should
  * never have to email himself a link to open his own research.
  */
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import jwt from 'jsonwebtoken';
@@ -136,13 +140,25 @@ export async function issueAccess(input: {
   }
 
   const link = `${input.appUrl.replace(/\/$/, '')}/reports/${report.slug}/unlock?t=${token}`;
+
+  // Attach the report itself — the point of the flow is that the PDF ARRIVES,
+  // not that the reader is sent on an errand. The link in the body covers the
+  // case where a corporate gateway strips attachments, and sendEmail retries
+  // without the file rather than losing the message.
+  const file = reportPdfPath(report.slug);
+  const attachments = file
+    ? [{ filename: `smbX-${report.slug}.pdf`, content: readFileSync(file) }]
+    : undefined;
+  if (!file) console.error(`[report-access] PDF missing on disk for ${report.slug}; mailing link only`);
+
   const emailed = await sendEmail({
     to: email,
     subject: `Your copy of ${report.shortTitle}`,
-    html: unlockEmailHtml(report.shortTitle, report.kicker, link),
+    html: deliveryEmailHtml(report.shortTitle, report.kicker, link, !!attachments),
+    attachments,
   });
 
-  // The lead is worth keeping whether or not they ever click.
+  // The lead is worth keeping whether or not the mail lands.
   void recordLead(email, report.slug);
 
   return { ok: true, emailed };
@@ -212,16 +228,18 @@ async function recordLead(email: string, slug: string): Promise<void> {
 
 /* ── the email ──────────────────────────────────────────────────────────── */
 
-function unlockEmailHtml(title: string, kicker: string, link: string): string {
+function deliveryEmailHtml(title: string, kicker: string, link: string, attached: boolean): string {
   const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   return `<div style="font-family:-apple-system,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;color:#14181C">
   <div style="font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:#B08637;font-weight:600">${esc(kicker)}</div>
   <h1 style="margin:12px 0 16px;font-size:24px;line-height:1.25;font-weight:600;color:#14181C">${esc(title)}</h1>
   <p style="margin:0 0 24px;font-size:15px;line-height:1.65;color:#3F464C">
-    Confirm this address and your copy opens straight away — the full PDF, every figure attributed to its source.
+    ${attached
+      ? 'Your copy is attached — the full assessment, every figure attributed to its source. You can also open it in the browser:'
+      : 'Here\'s your copy — the full assessment, every figure attributed to its source:'}
   </p>
   <p style="margin:0 0 28px">
-    <a href="${esc(link)}" style="display:inline-block;background:#16624C;color:#fff;text-decoration:none;padding:14px 28px;border-radius:999px;font-size:15px;font-weight:600">Confirm and download</a>
+    <a href="${esc(link)}" style="display:inline-block;background:#16624C;color:#fff;text-decoration:none;padding:14px 28px;border-radius:999px;font-size:15px;font-weight:600">Open the report</a>
   </p>
   <p style="margin:0 0 8px;font-size:13px;line-height:1.6;color:#8A9099">
     The link works for ${LINK_TTL_HOURS} hours. If the button doesn't open, paste this into your browser:<br>

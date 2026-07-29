@@ -7,20 +7,20 @@
  * artifact — the PDF that gets forwarded to a partner or dropped in an IC
  * packet.
  *
- * Paul: "we need to verify their email as a legit email before we let them
- * download… they must confirm their email." So submitting an address releases
- * nothing — it sends a one-click link, and clicking that link is what proves
- * the address and mints the credential. A typed-in address costs nothing to
- * fake; a confirmed one is a lead worth having.
+ * Paul: "enter the email and have a button 'get the PDF', and the PDF is
+ * delivered to that email — that solves both problems." So this is a DELIVERY,
+ * not a hurdle: press the button and the report is mailed to the address given
+ * (attached, plus a link). Verification comes free — a fake address never
+ * receives it — without asking anyone to go and prove themselves first.
  *
- * Confirmed ONCE, the reader cookie covers every report — nobody re-verifies
- * per download. The credential is checked SERVER-side
+ * A reader who has already had one delivered keeps a signed cookie, so their
+ * NEXT report downloads in one click. The credential is checked SERVER-side
  * (`/api/practice/reports/:slug/file`); the PDFs no longer sit under
- * `client/public`, so there is no static URL to type around the gate. A team
+ * `client/public`, so there is no static URL to type around the ask. A team
  * member holding an app JWT skips the whole thing.
  *
- * Because confirmation is required, a silent mail failure is a dead end — so
- * the card never claims an inbox when the server reports the mail didn't send.
+ * Mail is load-bearing here, so the card never claims an inbox when the server
+ * reports the send failed — it offers a call instead.
  */
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { trackEvent } from '../../lib/analytics';
@@ -75,7 +75,7 @@ export default function DownloadCard({
         // The credential lapsed (180 days, or a cleared cookie jar) — ask again.
         setUnlocked(false);
         setPhase('form');
-        setErr('Your access expired. Confirm your email again to download.');
+        setErr('Your access expired. Enter your email and we\'ll send it again.');
         return;
       }
       if (!res.ok) throw new Error(String(res.status));
@@ -108,8 +108,8 @@ export default function DownloadCard({
       const why = params.get('unlock');
       autoFired = true;
       setNote(why === 'expired'
-        ? 'That link has expired — links are good for 48 hours. Send yourself a new one.'
-        : 'That link is no longer valid. Send yourself a new one.');
+        ? 'That link has expired — links are good for 48 hours. Enter your email and we\'ll send a fresh copy.'
+        : 'That link is no longer valid. Enter your email and we\'ll send a fresh copy.');
       setPhase('form');
       params.delete('unlock');
       cleanUrl(params);
@@ -147,7 +147,7 @@ export default function DownloadCard({
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setErr(data.error || 'Could not send the link just now.');
+        setErr(data.error || 'Could not send the report just now.');
         setPhase('form');
         return;
       }
@@ -155,12 +155,12 @@ export default function DownloadCard({
       // the address. If the mail never went out, say so instead of sending
       // someone to an inbox to wait for nothing.
       if (data.emailed === false) {
-        setErr("We couldn't send the confirmation email just now. Book a call and Paul will send the report directly.");
+        setErr("We couldn't send it just now. Book a call and Paul will send the report directly.");
         setPhase('form');
         return;
       }
       setPhase('sent');
-      trackEvent('report_link_sent', { slug, placement });
+      trackEvent('report_emailed', { slug, placement });
     } catch {
       setErr('Could not reach the server. Try again in a moment.');
       setPhase('form');
@@ -182,11 +182,10 @@ export default function DownloadCard({
 
         {phase === 'sent' ? (
           <div className="rp-dl-done">
-            <p className="rp-dl-thanks">Check your inbox.</p>
+            <p className="rp-dl-thanks">On its way to {email}.</p>
             <p className="rp-dl-fine">
-              We sent a one-click link to <strong>{email}</strong> — opening it
-              confirms the address and downloads the report. Good for 48 hours.
-              If it isn't there, check spam.
+              The report is attached to that email, with a link to open it in the
+              browser. If it hasn't arrived in a minute, check spam.
             </p>
             <button
               type="button"
@@ -226,7 +225,7 @@ export default function DownloadCard({
                 autoFocus
               />
               <button className="pd-pill-primary rp-dl-go" type="submit" disabled={phase === 'sending'}>
-                {phase === 'sending' ? 'Sending…' : 'Send me the link'}
+                {phase === 'sending' ? 'Sending…' : 'Get the PDF'}
               </button>
             </div>
             {err && <p className="rp-dl-err" id={`err-${placement}`} role="alert">{err}</p>}
@@ -234,8 +233,8 @@ export default function DownloadCard({
                 link, the lead lands in practice_leads and pings Paul. No list,
                 no sequence — do not promise a newsletter that doesn't exist. */}
             <p className="rp-dl-fine">
-              We'll email a one-click link to confirm the address — opening it
-              downloads the report. Goes straight to Paul — no list, no sequence.
+              We'll send the PDF straight to that address. Goes to Paul too —
+              no list, no sequence.
             </p>
           </form>
         ) : (
@@ -246,7 +245,10 @@ export default function DownloadCard({
               onClick={onAsk}
               disabled={phase === 'fetching'}
             >
-              {phase === 'fetching' ? 'Fetching the PDF…' : 'Download the PDF'}
+              {/* A reader we've already delivered to downloads straight away;
+                  everyone else is being offered a delivery, so say so. */}
+              {phase === 'fetching' ? 'Fetching the PDF…'
+                : unlocked ? 'Download the PDF' : 'Get the PDF'}
             </button>
             {err && <p className="rp-dl-err" role="alert">{err}</p>}
           </>
