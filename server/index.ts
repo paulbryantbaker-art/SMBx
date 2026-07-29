@@ -320,26 +320,37 @@ app.post('/api/practice/reports/access', leadLimiter, async (req, res) => {
 
 // 2. The link in the email. Confirms the address, then hands the browser a
 //    signed reader cookie good for every report, not just this one.
-app.get('/reports/:slug/unlock', async (req, res) => {
-  const slug = req.params.slug;
+//
+//    Registered under BOTH /research and /reports. The reports path is not
+//    legacy decoration here: every link already sitting in somebody's inbox
+//    points at it, and unlike a page URL it cannot be answered with a redirect
+//    without the token surviving the hop. Keeping the handler on both paths is
+//    simpler than trusting that, and it must be registered BEFORE the
+//    /reports/:slug redirect below, which would otherwise never match anyway
+//    (Express matches the two-segment path exactly) but ordering makes it
+//    impossible to break by accident later.
+const unlockReport: import('express').RequestHandler = async (req, res) => {
+  const slug = String(req.params.slug || '');
   try {
     const { verifyToken, mintReaderToken, readerCookieOptions, READER_COOKIE, READER_HINT_COOKIE } =
       await import('./services/reportAccess.js');
     const out = await verifyToken(String(req.query.t || ''));
     if (!out.ok || !out.email) {
-      return res.redirect(302, `/reports/${encodeURIComponent(slug)}?unlock=${out.reason || 'bad_token'}`);
+      return res.redirect(302, `/research/${encodeURIComponent(slug)}?unlock=${out.reason || 'bad_token'}`);
     }
     const opts = readerCookieOptions();
     res.cookie(READER_COOKIE, mintReaderToken(out.email), opts);
     // Readable companion so the page shows the unlocked state with no round
     // trip. It grants nothing; the HttpOnly cookie above is the credential.
     res.cookie(READER_HINT_COOKIE, '1', { ...opts, httpOnly: false });
-    return res.redirect(302, `/reports/${encodeURIComponent(out.slug || slug)}?dl=1`);
+    return res.redirect(302, `/research/${encodeURIComponent(out.slug || slug)}?dl=1`);
   } catch (err: any) {
     console.error('[report-access] verify failed:', err.message);
-    return res.redirect(302, `/reports/${encodeURIComponent(slug)}?unlock=error`);
+    return res.redirect(302, `/research/${encodeURIComponent(slug)}?unlock=error`);
   }
-});
+};
+app.get('/research/:slug/unlock', unlockReport);
+app.get('/reports/:slug/unlock', unlockReport);
 
 // 3. The file itself. Released to a verified reader, or to a team member
 //    holding an app JWT (practicePerimeter above has already 403'd any
@@ -350,7 +361,7 @@ app.get('/api/practice/reports/:slug/file', async (req, res) => {
       await import('./services/reportAccess.js');
     const { findReport } = await import('../shared/reports.js');
 
-    const report = findReport(req.params.slug);
+    const report = findReport(String(req.params.slug || ''));
     if (!report) return res.status(404).json({ error: 'Unknown report' });
 
     let who = readerFromCookie(req.headers.cookie);
@@ -1118,12 +1129,27 @@ app.post('/api/support/client-error', express.json(), async (req, res) => {
 // client-side tags; the two come from the same shared/reports.ts entries.
 // Static files (/reports/<slug>.pdf, the cover jpg) are already resolved by
 // express.static above, so only real page routes reach this.
+//
+// The canonical path is /research (Paul, 2026-07-29: "can we make the URL be
+// Research instead of Reports?"). /reports is answered with a PERMANENT
+// redirect rather than a second live route, because links to it are already
+// out on LinkedIn: a 301 is what moves a crawler's index and a reader's
+// bookmark onto the new URL, where two routes serving the same page would
+// leave both in circulation and split the page against itself. The redirect
+// keeps the query string — `?dl=1` and `?unlock=…` ride on it.
+app.get(['/reports', '/reports/:slug'], (req, res) => {
+  const raw = String(req.params.slug || '');
+  const slug = raw ? `/${encodeURIComponent(raw)}` : '';
+  const qs = req.originalUrl.includes('?') ? `?${req.originalUrl.split('?').slice(1).join('?')}` : '';
+  return res.redirect(301, `/research${slug}${qs}`);
+});
+
 const REPORT_META_CACHE = new Map<string, string>();
 
-app.get('/reports/:slug', async (req, res, next) => {
+app.get('/research/:slug', async (req, res, next) => {
   try {
     const { findReport } = await import('../shared/reports.js');
-    const report = findReport(req.params.slug);
+    const report = findReport(String(req.params.slug || ''));
     if (!report) return next();
 
     const cached = REPORT_META_CACHE.get(report.slug);
@@ -1140,7 +1166,7 @@ app.get('/reports/:slug', async (req, res, next) => {
       v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     const title = `${report.shortTitle} — ${report.kicker} | smbX.ai`;
     const origin = `${req.protocol}://${req.get('host')}`;
-    const url = `${origin}/reports/${report.slug}`;
+    const url = `${origin}/research/${report.slug}`;
 
     const tags = [
       `<meta property="og:url" content="${esc(url)}" />`,

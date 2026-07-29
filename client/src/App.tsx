@@ -436,11 +436,18 @@ export default function App() {
             they must render the same for a logged-in practitioner checking the
             link as for a cold visitor (same exemption the token-gated share
             surfaces above carry). */}
-        <Route path="/reports">
+        <Route path="/research">
           <Suspense fallback={<PageLoader />}><PracticeReports /></Suspense>
         </Route>
-        <Route path="/reports/:slug">
+        <Route path="/research/:slug">
           {(params) => <Suspense fallback={<PageLoader />}><PracticeReport slug={params.slug} /></Suspense>}
+        </Route>
+        {/* The old path, kept for links already posted. The server answers a
+            301 before the SPA ever loads, so these only fire on an in-app
+            navigation — a stale bookmark opened from another tab, say. */}
+        <Route path="/reports"><Redirect to="/research" /></Route>
+        <Route path="/reports/:slug">
+          {(params) => <Redirect to={`/research/${params.slug}`} />}
         </Route>
         <Route path="/about">{marketingOrApp(<PracticeAbout />)}</Route>
         <Route path="/industries">{marketingOrApp(<PracticeIndustries />)}</Route>
