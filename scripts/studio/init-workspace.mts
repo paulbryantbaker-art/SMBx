@@ -17,11 +17,42 @@
  *
  * Usage: npx tsx scripts/studio/init-workspace.mts [targetDir]
  */
-import { mkdirSync, writeFileSync, copyFileSync, existsSync } from 'node:fs';
+import { mkdirSync, writeFileSync, copyFileSync, existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
 const ROOT = path.resolve(new URL('../..', import.meta.url).pathname);
-const target = path.resolve(process.argv[2] || '.');
+const args = process.argv.slice(2).filter(a => a !== '--update');
+const target = path.resolve(args[0] || '.');
+
+/* --update refreshes the LAW FILES.
+ *
+ * Everything else here is create-if-missing, which is right for your work — a
+ * re-run must never eat a plan or a market. But CLAUDE.md, PLAYBOOK.md and
+ * FORMATS.md are not your work, they are the repo's rules travelling with the
+ * workspace, and create-if-missing quietly strands them at whatever version
+ * you first ran. That is how a fix ships and never arrives: FORMATS.md lands
+ * because it is new, CLAUDE.md keeps the old text that never mentions it, and
+ * a session is never told to read the thing that was just written for it.
+ *
+ * So: `init-workspace.mts . --update` overwrites those three, keeping a .bak of
+ * anything that actually differed so nothing is lost silently.
+ */
+const UPDATE = process.argv.includes('--update');
+const refreshed: string[] = [], backedUp: string[] = [], stale: string[] = [];
+
+/** Copy a law file: always if missing, on --update if changed (with a backup). */
+function law(srcRel: string, dstName: string): void {
+  const src = path.join(ROOT, srcRel), dst = path.join(target, dstName);
+  if (!existsSync(src)) return;
+  if (!existsSync(dst)) { copyFileSync(src, dst); refreshed.push(dstName); return; }
+  if (readFileSync(src, 'utf8') === readFileSync(dst, 'utf8')) return;
+  // It differs from the repo. Either refresh it, or say so — a silently stale
+  // rule file is the failure this whole flag exists to prevent.
+  if (!UPDATE) { stale.push(dstName); return; }
+  copyFileSync(dst, dst + '.bak');
+  copyFileSync(src, dst);
+  refreshed.push(dstName); backedUp.push(dstName + '.bak');
+}
 
 /* Paul, 2026-07-26: "i want for all research artifacts and assets to live
    locally on my macbook. the collateral that is produced will be in a folder
@@ -55,21 +86,22 @@ const planSrc = path.join(ROOT, 'content/studio/posting-plan.md');
 const planDst = path.join(target, 'posting-plan.md');
 if (existsSync(planSrc) && !existsSync(planDst)) copyFileSync(planSrc, planDst);
 
-/* The operating instructions, as CLAUDE.md so a Claude Code session opened on
-   this folder picks them up automatically. This is what carries the citation
-   law, THE LINE and the attribution rules once the app is no longer enforcing
-   them in server prompts. */
-const claudeSrc = path.join(ROOT, 'content/studio/workspace-CLAUDE.md');
-const claudeDst = path.join(target, 'CLAUDE.md');
-if (existsSync(claudeSrc) && !existsSync(claudeDst)) copyFileSync(claudeSrc, claudeDst);
+/* THE LAW FILES — refreshed by --update, see `law()` above.
 
-/* The corp-dev document specifications — market map, who's who, target map,
-   thesis. These used to live as prompts inside server/services/corpDevDocs.ts;
-   with the app out of the loop they have to travel with the workspace or the
-   documents lose their structure and their perimeter. */
-const playSrc = path.join(ROOT, 'content/studio/PLAYBOOK.md');
-const playDst = path.join(target, 'PLAYBOOK.md');
-if (existsSync(playSrc) && !existsSync(playDst)) copyFileSync(playSrc, playDst);
+   CLAUDE.md   the operating instructions, named so a Claude Code session opened
+               on this folder picks them up automatically: citation law, THE
+               LINE, attribution — everything the server prompts used to carry.
+   PLAYBOOK.md the corp-dev document specs (market map, who's who, target map,
+               thesis), which used to live in server/services/corpDevDocs.ts.
+   FORMATS.md  the collateral spec: which builder, the field grammar, the image
+               slot dimensions, the imagery brief. Without it a session rebuilds
+               the layout from memory and the output drifts — images cropped
+               wrong because nobody knew the container was 476×1102, `image:`
+               keys on page kinds that have no image slot, hand-rolled HTML
+               approximating the house style. */
+law('content/studio/workspace-CLAUDE.md', 'CLAUDE.md');
+law('content/studio/PLAYBOOK.md', 'PLAYBOOK.md');
+law('content/studio/FORMATS.md', 'FORMATS.md');
 
 /* The workspace is meant to live in git (that is how a master gets version
    history without a database), so the one file that must never go up needs to
@@ -187,9 +219,19 @@ writeFileSync(path.join(target, 'README.md'), [
 
 const builder = path.join(ROOT, 'scripts/studio/build-deck.mts');
 console.log(`✓ studio workspace ready at ${target}`);
+if (refreshed.length) console.log(`  rules: ${refreshed.join(', ')}${UPDATE ? ' — refreshed from the repo' : ''}`);
+if (backedUp.length) console.log(`  previous versions kept as ${backedUp.join(', ')}`);
+/* The stale warning prints LAST, below the build hint — a warning above six
+   lines of routine output is a warning nobody reads. */
 console.log(`  folders: ${dirs.map(d => d + '/').join('  ')}  + posting-plan.md`);
 console.log(`  to build a deck:`);
 console.log(`    cd ${target}`);
 console.log(`    npx tsx ${builder} decks/example.deck.mts`);
 console.log(`  → outputs land in ${path.join(target, 'collateral')}/`);
+if (stale.length) {
+  console.log(`\n  ! ${stale.join(', ')} differ${stale.length === 1 ? 's' : ''} from the repo — this workspace is running OLDER RULES.`);
+  console.log(`    A session here will follow them, so a fix in the repo never arrives.`);
+  console.log(`    Refresh (keeps the current one as .bak):`);
+  console.log(`      npx tsx ${path.join(ROOT, 'scripts/studio/init-workspace.mts')} ${target} --update`);
+}
 process.exit(0);
