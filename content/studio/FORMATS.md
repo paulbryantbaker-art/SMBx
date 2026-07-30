@@ -3,6 +3,11 @@
 Two jobs live here, and they are the same job: **what goes in the container, and
 what shape the container is.** Drift happens when a session improvises either.
 
+**`DESIGN.md` is the other half: the house LOOK** — palette, type, layout
+grammar, and the retired systems named with their hexes. This file tells you
+where a thing goes; that one tells you what it looks like when it gets there.
+Read both before building. Neither repeats the other.
+
 ---
 
 # LAW 1 — Never hand-roll a layout

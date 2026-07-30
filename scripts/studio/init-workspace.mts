@@ -27,14 +27,15 @@ const target = path.resolve(args[0] || '.');
 /* --update refreshes the LAW FILES.
  *
  * Everything else here is create-if-missing, which is right for your work — a
- * re-run must never eat a plan or a market. But CLAUDE.md, PLAYBOOK.md and
- * FORMATS.md are not your work, they are the repo's rules travelling with the
- * workspace, and create-if-missing quietly strands them at whatever version
- * you first ran. That is how a fix ships and never arrives: FORMATS.md lands
- * because it is new, CLAUDE.md keeps the old text that never mentions it, and
- * a session is never told to read the thing that was just written for it.
+ * re-run must never eat a plan or a market. But CLAUDE.md, PLAYBOOK.md,
+ * FORMATS.md and DESIGN.md are not your work, they are the repo's rules
+ * travelling with the workspace, and create-if-missing quietly strands them at
+ * whatever version you first ran. That is how a fix ships and never arrives:
+ * FORMATS.md lands because it is new, CLAUDE.md keeps the old text that never
+ * mentions it, and a session is never told to read the thing that was just
+ * written for it.
  *
- * So: `init-workspace.mts . --update` overwrites those three, keeping a .bak of
+ * So: `init-workspace.mts . --update` overwrites those four, keeping a .bak of
  * anything that actually differed so nothing is lost silently.
  */
 const UPDATE = process.argv.includes('--update');
@@ -98,10 +99,24 @@ if (existsSync(planSrc) && !existsSync(planDst)) copyFileSync(planSrc, planDst);
                the layout from memory and the output drifts — images cropped
                wrong because nobody knew the container was 476×1102, `image:`
                keys on page kinds that have no image slot, hand-rolled HTML
-               approximating the house style. */
+               approximating the house style.
+   DESIGN.md   the house LOOK — palette, type, the layout grammar of the three
+               formats, and the retired systems named with their hexes.
+
+   DESIGN.md is here because FORMATS.md was not enough on its own (Paul,
+   2026-07-30: collateral "keeps wanting to reference design languages from last
+   year"). FORMATS.md says what shape the container is; nothing that travelled
+   said what the house looks like — CLAUDE.md and PLAYBOOK.md carry zero hexes
+   and zero typefaces between them, and DESIGN_LANGUAGE.md lives at the repo
+   root and never came along. So a session had the slot table and no visual
+   system, and filled the gap from general familiarity with this repo — which
+   contains seven retired palettes in committed CSS. The tell was always a warm
+   accent where a green belongs. Naming the dead hexes is what lets a session
+   catch itself. */
 law('content/studio/workspace-CLAUDE.md', 'CLAUDE.md');
 law('content/studio/PLAYBOOK.md', 'PLAYBOOK.md');
 law('content/studio/FORMATS.md', 'FORMATS.md');
+law('content/studio/DESIGN.md', 'DESIGN.md');
 
 /* engagements.mjs is a TOOL, not a law, but it travels the same way and for the
    same reason (Paul, 2026-07-29: "I don't want to have to keep downloading main
