@@ -590,7 +590,8 @@
      the second offset by the first's measured height, and that number goes
      wrong the moment the label wraps. The close × moved inside it for the same
      reason, and it earns its place there — a 78dvh sheet whose only other
-     dismissal is the strip of scrim above it. */
+     dismissal is the strip of scrim above it.
+
      I tried the "obvious" hardening here — panel as a non-scrolling flex column
      with only the list scrolling — on the theory that iOS might not honour
      sticky. It broke the sheet badly: the panel is sized by `max-height`, so
@@ -598,14 +599,28 @@
      `overflow: hidden` simply CLIPPED it. Measured: last row at y=4843 with the
      panel bottom at 844 — most of the contents unreachable, no scrollbar. That
      is worse than the bug it was guarding against, and the guard was against a
-     risk I had no evidence for. Reverted to sticky, which measures correct. */
+     risk I had no evidence for. Reverted to sticky, which measures correct.
+
+     That revert then shipped a real bug inside a PR labelled "comment only":
+     the paragraph above was pasted in after the previous comment's closing
+     marker, so it ran on as raw CSS and swallowed the `padding-top: 0` rule
+     below into a selector that matches nothing. The panel kept its 22px top
+     padding, sticky `top: 0` lands at the CONTENT box, and rows scrolled
+     through the gap above the header — visible text behind the search box.
+     CSS fails silently here: an unparseable selector is dropped without a
+     build warning. `npm run test:design` now asserts this file's comment
+     markers balance, because nothing else would have caught it. */
   .rp-toc-panel { padding-top: 0; }
   .rp-toc-panel .rp-rail-top {
     position: sticky; top: 0; z-index: 2;
     /* Bleed to the panel's edges so rows cannot slide past in the side gutters,
        then re-add the inset as padding. */
-    margin: 0 -24px; padding: 20px 24px 12px;
+    margin: 0 -24px; padding: 20px 24px 14px;
     background: #F6F4EF; border-bottom: 1px solid var(--pd-hair);
+    /* A row passing under the header gets sliced mid-glyph at the edge, which
+       reads as a rendering fault rather than as scrolling. The soft drop makes
+       the header a layer the list runs beneath — same pixels, legible cause. */
+    box-shadow: 0 6px 12px -6px rgba(20, 24, 28, 0.16);
   }
   /* The block's own bottom rule replaces the label's. */
   .rp-toc-panel .rp-rail-h {

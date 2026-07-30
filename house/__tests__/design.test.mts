@@ -195,6 +195,29 @@ for (const [name, needle] of MUST_SAY) is(name, DESIGN.includes(needle), true);
 is('DESIGN.md does not duplicate the slot table', /476\s*×\s*1102|404\s*×\s*604\s*px\b.*\bratio/i.test(DESIGN), false);
 is('DESIGN.md points at FORMATS.md instead', DESIGN.includes('FORMATS.md'), true);
 
+/* ── 4b. CSS comment markers must balance ─────────────────────────────────
+   This exists because it shipped. A paragraph pasted in after a comment's
+   closing marker ran on as raw CSS and swallowed the rule beneath it into a
+   selector that matches nothing, so `padding-top: 0` silently stopped applying
+   and the contents sheet grew a 22px gap that list rows scrolled through.
+
+   CSS has no safety net here: an unparseable selector is DROPPED, with no
+   build warning and no runtime error. The only signal was a user screenshot.
+   Counting the markers is crude and would have caught it instantly. */
+for (const rel of ['client/src/practice/report.css', 'client/src/practice/practice.css']) {
+  const css = readFileSync(path.join(ROOT, rel), 'utf8');
+  const opens = (css.match(/\/\*/g) || []).length;
+  const closes = (css.match(/\*\//g) || []).length;
+  is(`${path.basename(rel)}: comment markers balance`, `${opens} open / ${closes} close`, `${opens} open / ${opens} close`);
+  // A stray terminator sitting after ordinary prose, once real comments are
+  // stripped, is the exact shape of the bug. (Written with line comments on
+  // purpose: spelling the terminator inside a block comment closes it early —
+  // which is how I broke this file on the first attempt, minutes after the
+  // same slip broke report.css.)
+  const orphanClose = /^\s*[^/*\s][^\n]*\*\/\s*$/m.test(css.replace(/\/\*[\s\S]*?\*\//g, ''));
+  is(`${path.basename(rel)}: no comment terminator outside a comment`, orphanClose, false);
+}
+
 /* ── 5. it travels ────────────────────────────────────────────────────────
    The document only solves anything if it reaches the workspace. */
 const INIT = readFileSync(path.join(ROOT, 'scripts/studio/init-workspace.mts'), 'utf8');
