@@ -22,8 +22,23 @@
    against the 18px paragraph that uses it, so `38em` here quietly meant 608px
    rather than the 684px it reads as. rem removes the trap and still scales
    with a reader who has enlarged their base font. */
-.rp { --rp-measure: 43rem; --rp-rail: 272px; }   /* ~688px of running text */
-@media (max-width: 1100px) { .rp { --rp-measure: 40rem; --rp-rail: 244px; } }
+.rp {
+  /* WIDE (Paul, 2026-07-29: "i want the whole thing to be wider like the column
+     header"). The text now fills its column instead of stopping 226px short of
+     it — that dead gutter, with tables running past it to the real column edge,
+     is what made the page read as unbalanced and the heading look wider than
+     the body beneath it. Prose, headings, tables and the column now share one
+     right edge.
+
+     A ~990px line is longer than the 66–80 character optimum, so the type is
+     sized up to carry it: at 19px that is roughly 90 characters, and the taller
+     line-height below keeps the return sweep findable. */
+  --rp-measure: 62rem;
+  --rp-rail: 330px;      /* section titles here run long; 272 wrapped them to four lines */
+  --rp-bleed: 0px;
+}
+@media (max-width: 1240px) { .rp { --rp-measure: 46rem; --rp-rail: 262px; } }
+@media (max-width: 1000px) { .rp { --rp-measure: 40rem; --rp-rail: 250px; } }
 
 /* ═══ reading progress ═══════════════════════════════════════════════════ */
 /* Hairline, top of the viewport. position:fixed is safe here — it is 3px
@@ -115,6 +130,10 @@
    stretch the rail to the row height (the default) keeps it pinned the whole
    way down. */
 .rp-main {
+  /* Wider than the site's --pd-max 1360. The two-width law governs marketing
+     sections; this scope is the sanctioned document exemption, and a 19,000-word
+     register needs the room. */
+  max-width: 1540px;
   display: grid; grid-template-columns: var(--rp-rail) minmax(0, 1fr);
   /* The gap was up to 86px, which on a 1360 rail spent width the registers
      needed. Tightened, and the rail widened to carry search (Paul, 2026-07-29:
@@ -123,7 +142,38 @@
   gap: clamp(30px, 3.2vw, 56px);
   padding-top: clamp(52px, 6vw, 92px);
 }
-.rp-col { min-width: 0; }
+/* The column is the TEXT column, and the text fills it.
+   It used to be whatever the grid left over — 914px at a 1440 viewport, with
+   the measure at 688 — so every paragraph and heading ended 226px short of its
+   own column while tables ran the full width. That gap is what read as
+   "imbalanced": no shared right edge, and a heading that looked wider than the
+   body it introduced. Now prose, headings and the column share one edge, and
+   only the registers are allowed past it. */
+/* ── the sheet ────────────────────────────────────────────────────────────
+   The read sits on PAPER (Paul, 2026-07-29: "maybe we should make it look
+   like a paper too... like they are reading a nice looking report").
+
+   This is the answer to "it looks like neither" — a page that neither read as
+   a web article nor as a document. Now the frame commits: the masthead, cover
+   and key findings stay on the bone canvas as the outside of the report, and
+   the body sits on a white sheet with real margins. The contents rail stays
+   OFF the sheet, because it is navigation, not part of the document.
+
+   Squarer corners and a shallower shadow than the site's cards on purpose —
+   a card floats, a sheet of paper lies down. */
+.rp-col {
+  min-width: 0;
+  background: #fff;
+  border: 1px solid var(--pd-hair);
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(20, 24, 28, 0.04), 0 10px 34px rgba(20, 24, 28, 0.055);
+  padding: clamp(30px, 4.2vw, 68px) clamp(24px, 3.6vw, 62px) clamp(44px, 5vw, 78px);
+}
+/* The sheet already provides the top margin the first heading would add. */
+.rp-col > .rp-intro:first-child { padding-top: 0; }
+.rp-prose > div:first-child > :is(h1, h2, h3):first-child { margin-top: 0; }
+/* Anchors must clear the sticky nav AND the sheet's own top padding. */
+.rp-prose :is(h1, h2, h3) { scroll-margin-top: 120px; }
 
 .rp-rail { position: relative; min-width: 0; }
 .rp-rail-sticky {
@@ -241,7 +291,7 @@
   font-size: 19.5px; font-weight: 700; line-height: 1.35; color: var(--pd-ink);
   letter-spacing: -0.005em;
 }
-.rp-prose p { margin: 0 0 20px; font-size: 18px; line-height: 1.75; }
+.rp-prose p { margin: 0 0 21px; font-size: 19px; line-height: 1.78; }
 .rp-prose strong { color: var(--pd-ink); font-weight: 650; }
 .rp-prose em { font-style: italic; }
 .rp-prose a {
@@ -251,7 +301,7 @@
 .rp-prose a:hover { text-decoration-color: var(--pd-coral); }
 
 .rp-prose ul, .rp-prose ol { margin: 0 0 22px; padding-left: 1.35em; }
-.rp-prose li { margin-bottom: 11px; font-size: 18px; line-height: 1.72; }
+.rp-prose li { margin-bottom: 12px; font-size: 19px; line-height: 1.75; }
 .rp-prose li::marker { color: var(--pd-coral); }
 .rp-prose ol li::marker { font-variant-numeric: tabular-nums; font-weight: 600; }
 
@@ -298,6 +348,9 @@
      46em cap, which squeezed an eight-column platform table into ~830px and
      made it scroll sideways when a thousand pixels of column sat unused
      (Paul: "some of the tables don't look right"). */
+  /* Registers may exceed the text — that is the point of a register — so they
+     bleed RIGHT into the space the narrower text column gives back, and scroll
+     inside themselves beyond that. The page body never scrolls sideways. */
   width: 100%; max-width: none;
   overflow-x: auto; -webkit-overflow-scrolling: touch;
   margin: 0 0 26px; padding-bottom: 4px;
