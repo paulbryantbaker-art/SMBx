@@ -591,6 +591,14 @@
      wrong the moment the label wraps. The close × moved inside it for the same
      reason, and it earns its place there — a 78dvh sheet whose only other
      dismissal is the strip of scrim above it. */
+     I tried the "obvious" hardening here — panel as a non-scrolling flex column
+     with only the list scrolling — on the theory that iOS might not honour
+     sticky. It broke the sheet badly: the panel is sized by `max-height`, so
+     its height is never definite, the list never got a box to shrink into, and
+     `overflow: hidden` simply CLIPPED it. Measured: last row at y=4843 with the
+     panel bottom at 844 — most of the contents unreachable, no scrollbar. That
+     is worse than the bug it was guarding against, and the guard was against a
+     risk I had no evidence for. Reverted to sticky, which measures correct. */
   .rp-toc-panel { padding-top: 0; }
   .rp-toc-panel .rp-rail-top {
     position: sticky; top: 0; z-index: 2;
