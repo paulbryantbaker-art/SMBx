@@ -22,6 +22,38 @@ interface Sector {
 }
 
 const SECTORS: Sector[] = [
+  /* The two flagship lanes lead, and they are two DIFFERENT markets (Paul,
+     2026-07-29: "residential home services and we also do Commercial MEP —
+     don't confuse them, these need to stand out"). They are kept adjacent and
+     each one names its boundary in the first line, because "HVAC" belongs to
+     both and a reader skimming will otherwise merge them. They cannot be
+     separated by a divider element: the zig-zag runs on nth-of-type over
+     direct siblings, so anything inserted between blocks flips the alternation
+     for every sector after it. The copy carries the distinction instead.
+     Theses are drawn from our own published assessments; per this page's copy
+     law they state no market sizes. */
+  {
+    nm: 'Residential home services',
+    lead: 'Fragmentation is the thesis, not market size',
+    tags: ['HVAC · plumbing · electrical', 'Roofing · pest control · garage doors', 'Homeowner demand'],
+    paras: [
+      'Service and replacement work sold to homeowners. Roughly nine in ten of these firms employ fewer than twenty people, no single company holds a fifth of any major trade, and the owners are closer to retirement than to a succession plan.',
+      'The top of the market has re-rated while add-ons have not, which is the whole arbitrage. Tier-one Sun Belt metros are picked over; platform formation in under-consolidated metros is where the opening still is.',
+    ],
+    who: 'Family offices, independent sponsors and first-time platforms — plus operators adding density around a business they already run.',
+    desk: 'The deepest independent base we cover, and the trade whose consolidation mechanics we have run first-hand.',
+  },
+  {
+    nm: 'Commercial mechanical, HVAC & plumbing',
+    lead: 'A construction trade being repriced as infrastructure',
+    tags: ['Commercial & institutional buildings', 'Contracted service books', 'Data center · healthcare'],
+    paras: [
+      'Not the residential trade above, and it does not underwrite like it. The customer is a building owner or a general contractor, the work is bid and contracted, and the prize is the recurring maintenance book hiding inside a project business.',
+      'It is genuinely hard to diligence — percentage-of-completion accounting, working-capital pegs, surety transfer, multiemployer pension withdrawal liability. That difficulty is what keeps generalist capital out, which is exactly why it is worth doing properly.',
+    ],
+    who: 'Sponsors and operator-acquirers who can underwrite contract accounting, and buyers chasing data-center-adjacent service revenue.',
+    desk: 'Harder to underwrite than residential, years behind it on the consolidation curve, and the difficulty is the moat.',
+  },
   {
     nm: 'Fire & life safety',
     lead: 'Revenue that renews because the code says so',
@@ -145,9 +177,15 @@ export default function Industries() {
           <div className="pd-sechead" data-rv>
             <div className="pd-seclabel">Key industry verticals</div>
             <h2 className="pd-h2">Buy-side M&amp;A for acquirers of private companies under $250M in revenue.</h2>
+            {/* "We decline the rest" is gone — Paul, 2026-07-29: "we don't
+                decline the rest, we never turn down business." It also
+                contradicted the CTA at the foot of this same page, which
+                offers to take on something new. The lanes below are where we
+                are deepest, not a list of what we will accept. */}
             <p className="pd-sub" style={{ margin: '22px auto 0' }}>
-              Retainer plus success fee, paid by the acquirer — never the seller. We work a handful
-              of lanes, chosen deliberately, and we decline the rest.
+              Institutional-grade corporate development, on demand — retainer plus success fee, paid
+              by the acquirer, never the seller. These lanes are where we know the most; bring us a
+              market that isn't here and we'll go learn it.
             </p>
           </div>
         </div>
@@ -187,16 +225,22 @@ export default function Industries() {
                 <span className="tag">Residential &amp; commercial services trades</span>
                 <span className="tag">Commercial landscaping — contract-heavy only</span>
               </div>
+              {/* Was "Thirty-six acquisitions", which counted platforms and
+                  left their add-ons out (Paul, 2026-07-29: "when we add all the
+                  platforms and add-ons it was more than a hundred
+                  transactions"). "led or co-led" and "selected transactions"
+                  stay — Track Record doctrine, non-negotiable — and the
+                  attribution shield below travels with the claim. */}
               <div className="b">
-                Thirty-six acquisitions across the residential and commercial services trades. I was
-                inside the consolidation wave: what a platform pays for, what dies in diligence,
-                what integration actually costs.
+                More than a hundred transactions across the residential and commercial services
+                trades, counting the platforms and every add-on bolted onto them. I was inside the
+                consolidation wave: what a platform pays for, what dies in diligence, what
+                integration actually costs.
               </div>
               <div className="b">
-                Much of that world is consolidated now. We take mandates here selectively — where a
-                genuine lane is still open, like contract-heavy commercial landscaping — and decline
-                them where the trade is saturated. The mechanics haven't changed. The current focus
-                applies them one wave earlier.
+                Much of that world is consolidated now, so the current focus applies the same
+                mechanics one wave earlier — while still taking mandates here where a genuine lane
+                is open, like contract-heavy commercial landscaping. The mechanics haven't changed.
               </div>
               <div className="attr">
                 Selected transactions led or co-led in the course of employment at a world-class
