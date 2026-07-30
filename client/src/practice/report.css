@@ -579,11 +579,34 @@
     animation: rp-up 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
   @keyframes rp-up { from { transform: translateY(100%); } }
-  .rp-toc-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-  .rp-toc-top .rp-rail-h { flex: 1; margin-bottom: 0; }
+
+  /* PIN THE SEARCH (Paul, 2026-07-30: "In the content picker I can't search if
+     I'm scrolled down"). The panel is one scroll container, so the field left
+     with the list — on a 56-section report you had to scroll all the way back
+     up to type.
+
+     The header, the field and the match count are one element (.rp-rail-top in
+     RailNav), so this is a SINGLE sticky block. Two sticky siblings would need
+     the second offset by the first's measured height, and that number goes
+     wrong the moment the label wraps. The close × moved inside it for the same
+     reason, and it earns its place there — a 78dvh sheet whose only other
+     dismissal is the strip of scrim above it. */
+  .rp-toc-panel { padding-top: 0; }
+  .rp-toc-panel .rp-rail-top {
+    position: sticky; top: 0; z-index: 2;
+    /* Bleed to the panel's edges so rows cannot slide past in the side gutters,
+       then re-add the inset as padding. */
+    margin: 0 -24px; padding: 20px 24px 12px;
+    background: #F6F4EF; border-bottom: 1px solid var(--pd-hair);
+  }
+  /* The block's own bottom rule replaces the label's. */
+  .rp-toc-panel .rp-rail-h {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    border-bottom: 0; padding-bottom: 0; margin-bottom: 0;
+  }
   .rp-toc-close {
     background: none; border: 0; cursor: pointer; font-size: 28px; line-height: 1;
-    color: var(--pd-body); padding: 0 4px 12px;
+    color: var(--pd-body); padding: 0 2px; margin: -6px 0;
   }
   .rp-toc-panel .rp-toc-a { padding-top: 11px; padding-bottom: 11px; font-size: 15px; }
 }

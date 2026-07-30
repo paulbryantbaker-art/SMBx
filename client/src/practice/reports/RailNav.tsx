@@ -60,7 +60,7 @@ function countOf(haystack: string, needle: string): number {
 }
 
 export default function RailNav({
-  toc, active, top, bodyRef, onPick,
+  toc, active, top, bodyRef, onPick, onClose,
 }: {
   toc: TocItem[];
   active: string;
@@ -68,6 +68,10 @@ export default function RailNav({
   /** The rendered prose, for the body index. */
   bodyRef: React.RefObject<HTMLDivElement | null>;
   onPick?: () => void;
+  /** Mobile only. When given, the close control rides INSIDE the pinned header
+   *  rather than sitting in its own row above it — which is what lets the whole
+   *  header be one sticky element with no hand-tuned offset between two. */
+  onClose?: () => void;
 }) {
   const [q, setQ] = useState('');
   const [index, setIndex] = useState<Map<string, string>>(new Map());
@@ -98,7 +102,17 @@ export default function RailNav({
 
   return (
     <>
-      <div className="rp-rail-h">Contents</div>
+      {/* Header and search are ONE element so the mobile sheet can pin them as a
+          single sticky block. Two sticky siblings would need the second offset
+          by the first's measured height — a hand-tuned number that goes wrong
+          the moment the label wraps. */}
+      <div className="rp-rail-top">
+      <div className="rp-rail-h">
+        Contents
+        {onClose && (
+          <button type="button" className="rp-toc-close" onClick={onClose} aria-label="Close contents">×</button>
+        )}
+      </div>
 
       <div className="rp-find">
         <svg className="rp-find-i" viewBox="0 0 16 16" aria-hidden="true">
@@ -135,6 +149,9 @@ export default function RailNav({
             : <>{total} mention{total === 1 ? '' : 's'} across {hits.length} section{hits.length === 1 ? '' : 's'}</>}
         </div>
       )}
+      </div>{/* /rp-rail-top — the match count stays pinned with the field it
+                describes, so the tally is still readable while you scroll the
+                results it is counting. */}
 
       <nav className="rp-toc-list" aria-label="Report contents">
         {shown.map(h => {

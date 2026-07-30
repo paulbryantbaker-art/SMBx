@@ -377,12 +377,13 @@ export default function ReportPage({ slug }: { slug: string }) {
         <div className="rp-toc-sheet" role="dialog" aria-modal="true" aria-label="Report contents">
           <button type="button" className="rp-toc-scrim" aria-label="Close" onClick={() => setTocOpen(false)} />
           <div className="rp-toc-panel">
-            <div className="rp-toc-top">
-              <button type="button" className="rp-toc-close" onClick={() => setTocOpen(false)} aria-label="Close">×</button>
-            </div>
+            {/* No separate close row: the × rides inside RailNav's header so the
+                header + search + match count pin as ONE sticky block (Paul,
+                2026-07-30: "I can't search if I'm scrolled down"). */}
             <RailNav
               toc={body.toc} active={active} top={topLevel} bodyRef={bodyRef}
               onPick={() => setTocOpen(false)}
+              onClose={() => setTocOpen(false)}
             />
           </div>
         </div>
