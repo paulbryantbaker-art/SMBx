@@ -142,13 +142,6 @@
   gap: clamp(30px, 3.2vw, 56px);
   padding-top: clamp(52px, 6vw, 92px);
 }
-/* The column is the TEXT column, and the text fills it.
-   It used to be whatever the grid left over — 914px at a 1440 viewport, with
-   the measure at 688 — so every paragraph and heading ended 226px short of its
-   own column while tables ran the full width. That gap is what read as
-   "imbalanced": no shared right edge, and a heading that looked wider than the
-   body it introduced. Now prose, headings and the column share one edge, and
-   only the registers are allowed past it. */
 /* ── the sheet ────────────────────────────────────────────────────────────
    The read sits on PAPER (Paul, 2026-07-29: "maybe we should make it look
    like a paper too... like they are reading a nice looking report").
