@@ -597,11 +597,27 @@
 
      --pd-pad-x is re-declared on .rp, which is an ANCESTOR of the .pd-wrap
      that consumes it, so this narrows the rail for the document scope only
-     and leaves every marketing section alone. The sheet keeps a visible
-     margin — it should still read as paper on a desk, not as a full-bleed
-     app screen. */
-  .rp { --pd-pad-x: 14px; }
-  .rp-col { padding: 26px 18px 38px; }
+     and leaves every marketing section alone.
+
+     EDGE TO EDGE (Paul, 2026-07-30: "Edge to edge on scroll to kind of give it
+     that immersive feel"). The masthead keeps the rail, so the kicker, title
+     and abstract stay framed like the cover of something; the SHEET breaks out
+     of it and spans the screen, so the moment the reading starts the document
+     is all there is. The break-out is a negative inline margin reading the SAME
+     variable as the rail it cancels — they cannot drift apart, and it cannot
+     reintroduce the horizontal overflow that put the buttons off-screen.
+
+     Deliberately NOT scroll-triggered. Changing the column width mid-scroll
+     re-lays-out the whole 19,000-word document, re-breaking every line and
+     sliding the reader's place out from under their thumb. The immersion comes
+     from the chrome receding instead, which already happens — the nav condenses
+     on scroll (.pd-navwrap.min) and the progress hairline takes over. */
+  .rp { --pd-pad-x: 18px; }
+  .rp-col {
+    margin-inline: calc(-1 * var(--pd-pad-x));
+    border-left: 0; border-right: 0; border-radius: 0;
+    padding: 28px 20px 40px;
+  }
 
   .rp-prose p, .rp-prose li { font-size: 17px; }
   .rp-meta { gap: 12px; }
