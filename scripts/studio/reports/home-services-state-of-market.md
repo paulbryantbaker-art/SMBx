@@ -731,7 +731,7 @@ A historically high number of PE-backed platforms are seeking exits in 2026–20
 
 1. Underwrite rollover equity to return par, not 2–4x.
 
-2. Assume ≈5–7% annual wage inflation and require matching pricing power.
+2. Assume **3–4%** annual wage inflation and require matching pricing power. No source publishes the ≈5–7% figure in circulation; BLS ECI for installation, maintenance and repair is **+4.0%** for the twelve months to March 2026, and the OEWS medians run lower still (§6.3).
 
 3. Model equipment inflation (A2L plus tariffs) as raising ticket but pressuring close rates; prefer
 
