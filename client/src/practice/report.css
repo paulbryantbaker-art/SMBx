@@ -352,6 +352,23 @@
   width: 100%; border-collapse: collapse; font-size: 14.5px;
   font-variant-numeric: tabular-nums;
 }
+/* ── Long URLs must break, or the whole PAGE scrolls sideways ─────────────
+   The Sources register carries bare links like
+   https://data.census.gov/table/ECNBASIC2022.EC2200BASIC — one unbreakable
+   token far wider than a phone. It pushed the document to 738px on a 390px
+   screen, and the damage was not the sideways scroll itself: `position: fixed`
+   pins to the LAYOUT viewport, so the Contents button and the Ask pill were
+   parked at x≈604, off the right edge of the screen. The mobile table of
+   contents was unreachable, and looked like it did not exist (Paul,
+   2026-07-30: "There does not seem to be a way to use the table of contents
+   on mobile").
+
+   `anywhere` rather than `break-word` on purpose: only `anywhere` shrinks the
+   element's MIN-CONTENT width, which is what stops a long token from forcing
+   its container wider. `break-word` wraps the glyphs and leaves the container
+   blown out — it would have looked fixed and left the FABs off-screen. */
+.rp-prose { overflow-wrap: break-word; }
+.rp-prose a { overflow-wrap: anywhere; }
 .rp-prose thead th {
   font-family: var(--pd-mono); font-size: 12.5px; letter-spacing: 0.07em;
   text-transform: uppercase; color: var(--pd-body); font-weight: 500;
@@ -532,8 +549,12 @@
   .rp-main { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .rp-rail { display: none; }
 
+  /* LEFT, not right. Contents and "Ask about this report" were both pinned to
+     the bottom-right — the Ask pill (z-index 55) sat over the right 28% of the
+     Contents button (z-index 54), so the end a thumb reaches for was dead.
+     Two controls, two corners, no stacking order to get wrong. */
   .rp-toc-fab {
-    display: block; position: fixed; right: 16px; bottom: 20px; z-index: 54;
+    display: block; position: fixed; left: 16px; right: auto; bottom: 20px; z-index: 54;
     padding: 13px 22px; border: 0; cursor: pointer; font: inherit;
     font-size: 14.5px; font-weight: 600; border-radius: 999px;
     background: var(--pd-dark-bg); color: #F3F1EA;
@@ -568,6 +589,20 @@
 }
 
 @media (max-width: 640px) {
+  /* Give the read the phone back. Measured at 390px: 128px — a third of the
+     screen — went to margins, leaving 262px of text (67%). That is two nested
+     paddings, the page rail and the sheet's own, each sized for a desktop
+     where there is width to spare (Paul, 2026-07-30: "it is too narrow on
+     mobile").
+
+     --pd-pad-x is re-declared on .rp, which is an ANCESTOR of the .pd-wrap
+     that consumes it, so this narrows the rail for the document scope only
+     and leaves every marketing section alone. The sheet keeps a visible
+     margin — it should still read as paper on a desk, not as a full-bleed
+     app screen. */
+  .rp { --pd-pad-x: 14px; }
+  .rp-col { padding: 26px 18px 38px; }
+
   .rp-prose p, .rp-prose li { font-size: 17px; }
   .rp-meta { gap: 12px; }
   .rp-meta-dot { display: none; }
