@@ -33,7 +33,7 @@ HVAC · plumbing · electrical · roofing · pest control · garage doors.
 
 - **Private equity takes about half of tracked deal flow, but the top of the market has re-rated down.** Capstone Partners (2026-07-27) counts 92 announced or completed HVAC services transactions YTD 2026, **down 4.2%** year over year. Sponsors took 47, up one — but 38 of those were add-ons and only 9 were platform creations, down from 10. Public strategics doubled their participation, from 5 deals to 11. The valuation line is the headline: HVAC services cleared **9.5x** EV/EBITDA across 2024–YTD 2026 against **13.3x** across 2021–23. Broader HVAC ran 11.4x against 13.4x, and EV/revenue 2.0x against 2.3x. **The sector is roughly four turns cheaper than it was.**
 
-- **Trophy platforms still clear 16–20x, and none of those figures came from a sponsor.** Five recaps between November 2024 and May 2026 carry reported valuations summing to roughly **$16B**: Apex ≈$10B including debt, Champions ≈$2.5B, Sila ≈$1.7B, Redwood ≈$1.1B, Guild Garage above $800M. Service Logic, which Bain Capital and Mubadala closed in December 2025, has no enterprise value on record. Neither the Apex nor the Champions transaction is confirmed closed — Apex is expected in Q4 2026, and the Champions window stated at announcement has passed without a completion notice. Two processes are live: **ARS/Rescue Rooter**, explored at "over $3.5 billion" (Reuters, March 2026) on an EBITDA figure people close to the company dispute, and **USA** **Hometown Experts** (MSouth, April 2026).
+- **Trophy platforms still clear 16–20x, and none of those figures came from a sponsor.** Five recaps between November 2024 and May 2026 carry reported valuations summing to roughly **$16B**: Apex ≈$10B including debt, Champions ≈$2.5B, Sila ≈$1.7B, Redwood ≈$1.1B, Guild Garage above $800M. Service Logic, which Bain Capital and Mubadala closed in December 2025, has no enterprise value on record. Neither the Apex nor the Champions transaction is confirmed closed — Apex is expected in Q4 2026, and the Champions window stated at announcement has passed without a completion notice. Two processes are live: **ARS/Rescue Rooter**, explored at "over $3.5 billion" (Reuters, March 2026) on an EBITDA figure people close to the company dispute, and **USA Hometown Experts** (MSouth, April 2026).
 
 - **Labour still binds, but two other constraints have eased in the buyer's favour.** BLS projects about 40,100 HVAC and 44,000 plumbing openings a year through 2034, against a projected 550,000 unfilled plumbing positions by 2027 (LIXIL / John Dunham & Associates). That has not changed. What has: the refrigerant crisis ended in **October 2025**, and R-454B has fallen from a peak above $900 a cylinder to roughly **$449–499**. And the tariff stack that shaped 2025 underwriting no longer exists — the Supreme Court struck the IEEPA tariffs 6–3 on 20 **February 2026**, and Section 232 duties on residential HVAC were cut from 25% to 15% on 8 June 2026. Equipment inflation continues, but through manufacturer pricing rather than import duties.
 
@@ -73,7 +73,7 @@ With rates roughly flat and public software valuations volatile, institutional c
 
 Apollo, Goldman Sachs, Blackstone, Leonard Green, Bain Capital, KKR, and Brookfield have all capitalized platform entities specifically to execute roll-ups in North American home services. Aggregate PE capital deployed into residential home services since 2018 exceeds **$50B**.
 
-**Private-credit fragility is a new risk vector to underwrite.** The Financial Stability Board's *Report on* *Vulnerabilities in Private Credit* (2026-05-06) puts private credit at **$1.5–2.0 trillion in assets at end-** 2024. It counts roughly **$220 billion** in direct bank credit lines to private credit funds; commercial estimates run **$270–500 billion**. The FSB notes that borrowers "typically have lower credit quality and higher leverage than borrowers observed in comparable public markets," and that "valuation opacity and reliance on private credit ratings can amplify strains in stress." Lending is concentrated in technology, healthcare and **services**. That reaches this sector directly: Service Logic's acquisition was financed with a **$3.1 billion private-credit package** led by Blackstone. Capstone's Q1 2026 leveraged finance update reports 84.4% of new-issue direct-lending LBO spreads priced below S+550, expects increases of 25–50**bp** ahead, and describes positive momentum as having stalled in Q1 2026.
+**Private-credit fragility is a new risk vector to underwrite.** The Financial Stability Board's *Report on* *Vulnerabilities in Private Credit* (2026-05-06) puts private credit at **$1.5–2.0 trillion in assets at end-** 2024. It counts roughly **$220 billion** in direct bank credit lines to private credit funds; commercial estimates run **$270–500 billion**. The FSB notes that borrowers "typically have lower credit quality and higher leverage than borrowers observed in comparable public markets," and that "valuation opacity and reliance on private credit ratings can amplify strains in stress." Lending is concentrated in technology, healthcare and **services**. That reaches this sector directly: Service Logic's acquisition was financed with a **$3.1 billion private-credit package** led by Blackstone. Capstone's Q1 2026 leveraged finance update reports 84.4% of new-issue direct-lending LBO spreads priced below S+550, expects increases of 25–50bp ahead, and describes positive momentum as having stalled in Q1 2026.
 
 ## 1.2 Multiple arbitrage mechanics
 
@@ -87,7 +87,7 @@ The financial engine of the supercycle is simple. Acquire independent companies 
 
 ## 1.3 Valuation matrix by revenue tier (2026)
 
-Current pricing frames every row below. Capstone Partners' July 2026 HVAC Services update prices the sector at 9.5**x EV/EBITDA across 2024–YTD 2026 against 13.3x across 2021–2023**, roughly four turns of de-rating. GF Data's blended lower-middle-market figure was 7.2**x for FY2025** (297 completed transactions, down 23% YoY and 41% below the 2021 peak) and 7.3**x in Q1 2026** (80 transactions). Capstone's Middle Market M&A Valuations Index puts 2025 at **9.8x**, up from 9.4x (2024) and 9.0x (2023), with advisors expecting typical and premium 2026 multiples of 6.8**x and 9.8x**. Do not average these populations. Capstone's HVAC set includes upmarket and strategic deals, GF Data covers PE-sponsored LMM, and broker-published owner-operator ranges sit lower still.
+Current pricing frames every row below. Capstone Partners' July 2026 HVAC Services update prices the sector at 9.5x EV/EBITDA across 2024–YTD 2026 against 13.3x across 2021–2023, roughly four turns of de-rating. GF Data's blended lower-middle-market figure was 7.2x for FY2025 (297 completed transactions, down 23% YoY and 41% below the 2021 peak) and 7.3x in Q1 2026 (80 transactions). Capstone's Middle Market M&A Valuations Index puts 2025 at **9.8x**, up from 9.4x (2024) and 9.0x (2023), with advisors expecting typical and premium 2026 multiples of 6.8x and 9.8x. Do not average these populations. Capstone's HVAC set includes upmarket and strategic deals, GF Data covers PE-sponsored LMM, and broker-published owner-operator ranges sit lower still.
 
 | REVENUE SCALE / TIER | PRIMARY METRIC | IMPLIED MULTIPLE (HVAC/PLUMBING/ELECTRICAL) | DOMINANT BUYER UNIVERSE |
 | --- | --- | --- | --- |
@@ -108,7 +108,7 @@ Buyers underwrite EBITDA multiples, because EBITDA is the cash available to serv
 
 The arbitrage playbook runs on a diligence asymmetry. Institutional buyers bring dedicated sourcing teams, QofE firms, and M&A counsel. Independent sellers bring cash-basis books, no SOPs, and volume-incentivized local brokers. The standard buyer levers during the 4–6 month post-LOI window:
 
-- **QofE add-back rejection:** Contractor books commonly mingle personal and business expenses and lack monthly closes, which drives 20–40% **price chips** in diligence. Sellers typically lose 5–15% **of** **headline EBITDA** in QofE. Worked example: a $14M-revenue Texas HVAC company claiming $3.0M adjusted EBITDA loses $400K of undocumented add-backs, and at 6x, **$2.4M of enterprise value evaporates**.
+- **QofE add-back rejection:** Contractor books commonly mingle personal and business expenses and lack monthly closes, which drives 20–40% **price chips** in diligence. Sellers typically lose 5–15% **of headline EBITDA** in QofE. Worked example: a $14M-revenue Texas HVAC company claiming $3.0M adjusted EBITDA loses $400K of undocumented add-backs, and at 6x, **$2.4M of enterprise value evaporates**.
 
 - **Owner-dependency discount:** 20–30% discount or a heavy earnout when the business cannot function without the founder.
 
@@ -193,7 +193,7 @@ The rows below do not sum. Vintages differ (2022–2026), publishers differ, and
 
 - **Electrical.** The dollar figure is contested: the same trade is $230.78B, $237.59B or $347.5B depending on whose definition you accept, across three different years. Any single pick is an editorial choice, not a sourced fact. The qualitative case is not contested. Goldman projects U.S. data-center power demand more than doubling from 31 GW (2025) to 66 GW (2027), and electrical is 45–70% of data-center construction cost. Data-center and healthcare capability commands a 1– 2 turn premium. MYR Group paid $328M for two regional commercial contractors in late 2025, and the top-50 electrical contractors consolidated a record $59.5B of revenue in 2025. For a residential buy-side thesis, what matters is where that concentration sits: electrical's 21.6% large-enterprise share (§2.3) is concentrated in commercial and data-center revenue. Residential electrical is materially less consolidated than the aggregate implies — better hunting ground, not worse.
 
-- **Pest control** is the high-multiple standard. 85.4% **of U.S. residential pest service revenue was** **recurring in 2025**, up from 85.2% in 2024 (Specialty Consultants LLC via NPMA, 2026-04-01). Read the scope carefully: that is residential service revenue, not all pest revenue. Independents trade 6–10x against a global oligopoly. Rentokil Initial group revenue was **$6,908m** in 2025, +3.8%, with North America at **$4,294m**, +3.1% reported and +3.2% constant currency. Rollins posted **$3,761,050 thousand** in FY2025, with 26 **acquisitions** and **$310M** invested. Some 33,000 independents remain.
+- **Pest control** is the high-multiple standard. 85.4% **of U.S. residential pest service revenue was recurring in 2025**, up from 85.2% in 2024 (Specialty Consultants LLC via NPMA, 2026-04-01). Read the scope carefully: that is residential service revenue, not all pest revenue. Independents trade 6–10x against a global oligopoly. Rentokil Initial group revenue was **$6,908m** in 2025, +3.8%, with North America at **$4,294m**, +3.1% reported and +3.2% constant currency. Rollins posted **$3,761,050 thousand** in FY2025, with 26 **acquisitions** and **$310M** invested. Some 33,000 independents remain.
 
 - **Garage doors** is "PE's next HVAC": non-cyclical breakdown demand, DIY-proof. FMI's March 2026 brief splits the market **≈60% service and maintenance (≈$9.6B) / ≈40% new installation and replacement (≈$6.4B)**. That service-weighted mix is exactly why sponsors like it. Guild Garage validates the model — self-funded $35M in 2024, then ≈30 tuck-ins, reaching "over $300 million of annual revenue and close to $50 million of annual EBITDA" (Reuters, 2026-03-06, citing four people familiar with the matter). Reuters gives no multiple; PitchBook separately states $800M at 16x. KKR's C.H.I. Overhead Doors returned 9.8x (2015–2022).
 
@@ -251,7 +251,7 @@ Two framing notes on these counts. First, Capstone's 2025-12-05 update counted 1
 
 - **Sub-segments:** Residential service and replacement with maintenance-plan recurring revenue is the highest-value, lowest-risk profile. Avoid new-construction and GC concentration, which most buyers price as an add-on or exclude from the buy-box entirely. Commercial mechanical commands premium multiples in data centers and healthcare, but it requires different underwriting.
 
-- **Size bands:** $1–3M EBITDA residential is add-on territory with heavy buyer competition. **$5–15M** **EBITDA is the sweet spot**, with the deepest buyer pool. Sub-$1M EBITDA is search-fund and SBA territory, where a capitalized platform can buy at 3–5x and arbitrage instantly.
+- **Size bands:** $1–3M EBITDA residential is add-on territory with heavy buyer competition. **$5–15M EBITDA is the sweet spot**, with the deepest buyer pool. Sub-$1M EBITDA is search-fund and SBA territory, where a capitalized platform can buy at 3–5x and arbitrage instantly.
 
 # PART IV — THE AGGREGATOR MAP
 
@@ -261,13 +261,13 @@ Most platforms are private. Where EV, revenue or EBITDA are undisclosed, the est
 
 **Step 1 — Revenue base (two cross-checked methods):**
 
-- *Revenue per field technician*: the two named published sources conflict, so both are carried. **Prophet** **Accounting** (an accounting firm serving HVAC) puts residential service and replacement at "$200,000 to $350,000 per technician annually." **Tradesly** (field-service software, 2026-05-28) reports that "HVAC technicians generate **$180K–$250K** annually in 2026, with top-quartile residential shops hitting $250K+ per tech," plumbing at **$160K–$220K**, and regional spreads of SE/SW $190–270K, NE $170–240K, MW $160–230K, West Coast $200–280K. Treat that as a practitioner spread, not a benchmark consensus. Base case **$250K/tech**; $300K for replacement-heavy Sun Belt; $200K plumbing-weighted.
+- *Revenue per field technician*: the two named published sources conflict, so both are carried. **Prophet Accounting** (an accounting firm serving HVAC) puts residential service and replacement at "$200,000 to $350,000 per technician annually." **Tradesly** (field-service software, 2026-05-28) reports that "HVAC technicians generate **$180K–$250K** annually in 2026, with top-quartile residential shops hitting $250K+ per tech," plumbing at **$160K–$220K**, and regional spreads of SE/SW $190–270K, NE $170–240K, MW $160–230K, West Coast $200–280K. Treat that as a practitioner spread, not a benchmark consensus. Base case **$250K/tech**; $300K for replacement-heavy Sun Belt; $200K plumbing-weighted.
 
 - *Revenue per total employee*: platform math converges on **≈$180K–$271K/employee** (Apex ">$3B" / "more than 13,000 employees" ≈ $230K; Redwood >$500M/2,500 ≈ $200K; Champions ≈$650M/2,400 ≈ $271K). Default to **$180K/employee** where only headcount is known.
 
 **Step 2 — EBITDA margin by scale.**
 
-- Sub-scale independents run 8–12%. Scaled, integrated PE platforms reach 18–22% **within 24** **months**. Both endpoints come from CT Acquisitions: "A $50M HVAC platform might operate at 8-12% EBITDA margin independently," and, with 10–12 add-ons, can "reach 18-22% EBITDA within 24 months."
+- Sub-scale independents run 8–12%. Scaled, integrated PE platforms reach 18–22% **within 24 months**. Both endpoints come from CT Acquisitions: "A $50M HVAC platform might operate at 8-12% EBITDA margin independently," and, with 10–12 add-ons, can "reach 18-22% EBITDA within 24 months."
 
 - The regional, partially-integrated tier sits at 12–18%, per CT Acquisitions' 2026 *Home Services* *M*&*A Multiples Report* (April 2026), which splits HVAC margins into discount <10% / market 12–18% / premium 20%+.
 
@@ -277,11 +277,11 @@ Most platforms are private. Where EV, revenue or EBITDA are undisclosed, the est
 
 - Tier 1 (national, >$150M EBITDA, tech-enabled, high recurring): **18–20x**. Anchor: Champions ≈18.5x reported. Apex's ≈20x is derived arithmetic, not a reported multiple.
 
-- Tier 2 (super-regional, $40–150M EBITDA): **14–17x**. Anchors: Redwood "**about 17x EBITDA"** (publisher-stated), Sila ≈17x reported / ≈20x excluding pending acquisitions, Guild 16**x per** **PitchBook data**.
+- Tier 2 (super-regional, $40–150M EBITDA): **14–17x**. Anchors: Redwood "**about 17x EBITDA**" (publisher-stated), Sila ≈17x reported / ≈20x excluding pending acquisitions, Guild 16x per PitchBook data.
 
-- Tier 3 (regional, $15–40M EBITDA): **10–14x**. The new 2026 anchor is Redwood's May 2026 purchase of the five-contractor Sierra platform at ≈$220M, reported at "**roughly 11x on around $20** **million of EBITDA"** or "**roughly 13x on approximately $17 million"** — the source carries both readings, so both stand.
+- Tier 3 (regional, $15–40M EBITDA): **10–14x**. The new 2026 anchor is Redwood's May 2026 purchase of the five-contractor Sierra platform at ≈$220M, reported at "**roughly 11x on around $20 million of EBITDA**" or "**roughly 13x on approximately $17 million**" — the source carries both readings, so both stand.
 
-- Tier 4 (emerging, <$15M EBITDA): **7–10x**. Owner-operator reality check: CT Acquisitions' 2026 Multiples Report (a broker-published aggregator restating GF Data, DealStats, SRS Acquiom and others, scope $1M–$25M revenue) puts HVAC at 3.0**x low / 5.5–7.0x market / 10.0x high**; plumbing 2.4x / 4.0–5.0x / 6.5x; roofing 2.5x / 4.0–5.5x / 7.0x; pest control 3.3x / 5.0–6.0x / 8.0x+; electrical 3.2x / 5.0–6.5x / 8.0x.
+- Tier 4 (emerging, <$15M EBITDA): **7–10x**. Owner-operator reality check: CT Acquisitions' 2026 Multiples Report (a broker-published aggregator restating GF Data, DealStats, SRS Acquiom and others, scope $1M–$25M revenue) puts HVAC at 3.0x low / 5.5–7.0x market / 10.0x high; plumbing 2.4x / 4.0–5.0x / 6.5x; roofing 2.5x / 4.0–5.5x / 7.0x; pest control 3.3x / 5.0–6.0x / 8.0x+; electrical 3.2x / 5.0–6.5x / 8.0x.
 
 *Worked example* (*Strikepoint*): ≈2,700 employees × $180K = ≈$486M revenue; 15% margin = ≈$73M EBITDA; 13x = **≈$950M EV (estimated)**.
 
@@ -333,7 +333,7 @@ No sponsor disclosed terms for any transaction in this table. Every "Reported" f
 
 - **Neighborly** (KKR, Q1 2025): 27–28 franchise brands (Aire Serv, Mr. Rooter, Mr. Electric); U.S. + Canada.
 
-- **Roto-Rooter / Chemed** (NYSE: CHE): FY2025 segment revenue was **$899,877 thousand** (**≈$900M)**, essentially flat against FY2024's **$900,309 thousand**. Q1 2026 came in at $237.5M vs. $239.5M, "a decrease of 0.9%"; FY2026 segment guidance is +3.0–3.5%. **Refranchising is running** **in reverse.** San Francisco and Fort Worth were re-acquired 2026-03-31 for "approximately $20.6 million", adding "$5.0 million to $5.5 million" of 2026 revenue across a population of ≈3.3M, and a 21-county south Texas franchise was re-acquired 2026-06-08 for "approximately $12.0 million" — franchise buy-back is running at roughly **$33M YTD** across the two deals (see Derivations). *Q*2 2026 *reports today*, 2026-07-28, *after close*. An aggregator headline claiming Chemed "reveals Roto-Rooter divestiture plans" is not corroborated by any SEC filing and cuts against a company that is buying territory back. Do not carry it.
+- **Roto-Rooter / Chemed** (NYSE: CHE): FY2025 segment revenue was **$899,877 thousand** (**≈$900M**), essentially flat against FY2024's **$900,309 thousand**. Q1 2026 came in at $237.5M vs. $239.5M, "a decrease of 0.9%"; FY2026 segment guidance is +3.0–3.5%. **Refranchising is running in reverse.** San Francisco and Fort Worth were re-acquired 2026-03-31 for "approximately $20.6 million", adding "$5.0 million to $5.5 million" of 2026 revenue across a population of ≈3.3M, and a 21-county south Texas franchise was re-acquired 2026-06-08 for "approximately $12.0 million" — franchise buy-back is running at roughly **$33M YTD** across the two deals (see Derivations). Q2 2026 reports today, 2026-07-28, *after close*. An aggregator headline claiming Chemed "reveals Roto-Rooter divestiture plans" is not corroborated by any SEC filing and cuts against a company that is buying territory back. Do not carry it.
 
 - **ServiceMaster Brands** (Roark Capital): 7 franchise brands.
 
@@ -343,7 +343,7 @@ No sponsor disclosed terms for any transaction in this table. Every "Reported" f
 
 - **Pest oligopoly (adjacency reference):**
 
-- **Rentokil Initial** — FY2025 "Revenue increased 3.8% to **$6,908m**" (organic +2.6%). North America was "up 3.1% **to $4,294m**" as reported and +3.2% **on a constant-currency basis** (2025 Preliminary Results, 2026-03-05). The Q1 2026 trading update (2026-04-16) shows group $1,677m, +7.8% reported / +3.4% organic, and North America $995m, +3.9% organic. *H*1 2026 *interims land* 2026-07-30.
+- **Rentokil Initial** — FY2025 "Revenue increased 3.8% to **$6,908m**" (organic +2.6%). North America was "up 3.1% to **$4,294m**" as reported and +3.2% on a constant-currency basis (2025 Preliminary Results, 2026-03-05). The Q1 2026 trading update (2026-04-16) shows group $1,677m, +7.8% reported / +3.4% organic, and North America $995m, +3.9% organic. H1 2026 interims land 2026-07-30.
 
 - **Rollins** — FY2025 revenue **$3,761,050 thousand** ("$3.8 billion, an increase of 11.0%" as the release rounds it), organic +6.9%, adj. EBITDA $855M, 26 **acquisitions**, **$310M** invested (10-K filed 2026-02-12). **Q2 2026: revenue $1.1B, +7.9%; organic +5.7%; but adjusted EBITDA only** +2.2% **and free cash flow −1.2%** — the first clear margin compression in the series. Rollins invested $117M in acquisitions in Q2 and $135M YTD; the release gives dollars but no 2026 deal count.
 
@@ -351,7 +351,7 @@ No sponsor disclosed terms for any transaction in this table. Every "Reported" f
 
 ## 4.5 Brand-level detail — largest platforms
 
-**Apex Service Partners (Tampa, FL).** 75–107 brands, 46 states. Identifiable: Frank Gay Services (Orlando), Best Home Services (Naples), We Care Plumbing Heating & Air (Inland Empire — ownership contested with Any Hour as of Dec 2025), ProFlo (Temecula), BelRed Energy Solutions (Seattle), Academy Air, HomeBreeze, Hansen Super Techs (2025), plus ex-Frontier brands Haley Mechanical (Ann Arbor), Korte Does It All (Fort Wayne), AB May (Kansas City). ≈60 add-ons in 2025. The official May 2026 release describes 75 **brands across 46 states, more than 13,000 employees, over 8,000** **technicians supported and over 300 Apex-trained operating leaders placed** — the talent engine is the platform's stated differentiator. Reuters' "**more than 7,800 tradespeople"** is cited to Apex's own website and is a field-technician denominator, not a contradiction of the 13,000 employee figure. **The** **transaction had not closed as of this document's effective date; completion is expected in Q4 2026.**
+**Apex Service Partners (Tampa, FL).** 75–107 brands, 46 states. Identifiable: Frank Gay Services (Orlando), Best Home Services (Naples), We Care Plumbing Heating & Air (Inland Empire — ownership contested with Any Hour as of Dec 2025), ProFlo (Temecula), BelRed Energy Solutions (Seattle), Academy Air, HomeBreeze, Hansen Super Techs (2025), plus ex-Frontier brands Haley Mechanical (Ann Arbor), Korte Does It All (Fort Wayne), AB May (Kansas City). ≈60 add-ons in 2025. The official May 2026 release describes 75 **brands across 46 states, more than 13,000 employees, over 8,000 technicians supported and over 300 Apex-trained operating leaders placed** — the talent engine is the platform's stated differentiator. Reuters' "**more than 7,800 tradespeople**" is cited to Apex's own website and is a field-technician denominator, not a contradiction of the 13,000 employee figure. **The** **transaction had not closed as of this document's effective date; completion is expected in Q4 2026.**
 
 **Wrench Group (Atlanta, GA).** Founding four (2016): Coolray (Atlanta), Berkeys (Dallas), Abacus (Houston), Parker & Sons (Phoenix). Added: Morris-Jenkins (Charlotte, 2021), Baker Brothers (Dallas), Comfort Dynamics (Memphis), Lindstrom (SE Florida, 2024), plus brands in Denver, Fort Myers/Naples, Jacksonville, Sacramento, SF Bay, Tampa, Salt Lake City, Tucson, Louisville, Nashville, OKC, Cincinnati, Columbus, Indianapolis, southern Maryland. ≈7,300 team members, 26 markets / 15 states, 2M+ customers/yr, 400,000+ **service agreements**.
 
@@ -389,7 +389,7 @@ No sponsor disclosed terms for any transaction in this table. Every "Reported" f
 
 **The cross-comp theme for 2026 is pricing power intact, volumes stalling.** Three independent residential-exposed issuers show growth carried by price against flat or declining units. AHRI equipment shipments fell 20% in 2025, with a further 3.5% decline YTD 2026. Underwrite organic growth accordingly: a mid-single-digit organic assumption is currently a **pricing** assumption, not a demand one.
 
-*Recommended addition to the standing comp set*: Frontdoor, Inc. (NASDAQ: FTDR) — *subscription* *home warranty plus on*-*demand service*, *FY*2025 *revenue $*2.093*B* (+14%, *organic* +3.7%), *adj*. *EBITDA $*553*M* (+25%), 2.11*M warranties*. *It is the closest listed analog to a residential home*-*services* *thesis*.
+*Recommended addition to the standing comp set*: Frontdoor, Inc. (NASDAQ: FTDR) — subscription home warranty plus on-demand service, FY2025 revenue $2.093B (+14%, organic +3.7%), adj. EBITDA $553M (+25%), 2.11M warranties. It is the closest listed analog to a residential home-services thesis.
 
 # PART V — REGIONALITY & COVERAGE
 
@@ -489,7 +489,7 @@ Pay ladder: entry ≈$54,100; intermediate ≈$65,700; senior ≈$77,200; superv
 
 ## 7.1 A2L refrigerant transition — the deadline was removed on 27 July 2026
 
-EPA's *Phasedown of Hydrofluorocarbons*: *Reconsideration of Certain Regulatory Requirements* was published in the Federal Register on 2026-05-26 and took effect 2026-07-27. It removes the installation deadline for residential and light-commercial AC and heat pump equipment manufactured or imported before January 1, 2025. EPA now allows "continued installation in homes of HVAC units manufactured or imported prior to Jan. 1, 2025, that use R-410A refrigerant **until existing supplies of** **these HVAC units are depleted**" (NAHB).
+EPA's *Phasedown of Hydrofluorocarbons*: *Reconsideration of Certain Regulatory Requirements* was published in the Federal Register on 2026-05-26 and took effect 2026-07-27. It removes the installation deadline for residential and light-commercial AC and heat pump equipment manufactured or imported before January 1, 2025. EPA now allows "continued installation in homes of HVAC units manufactured or imported prior to Jan. 1, 2025, that use R-410A refrigerant **until existing supplies of these HVAC units are depleted**" (NAHB).
 
 The 700 **GWP limit itself was not changed** (Holland & Knight, 2026-05-26). Manufacturing of new R-410A residential equipment remains banned, and R-410A production steps down to 15% of current output by 2036. The rule "maintains ultimate GWP requirements unchanged" and projects **$976 million** in engineering cost savings. What changed is timing, not direction.
 
@@ -497,7 +497,7 @@ The 700 **GWP limit itself was not changed** (Holland & Knight, 2026-05-26). Man
 
 1. **Litigation.** 19 state attorneys general, in a coalition led by NY AG Letitia James, filed 2026-07-23.
 
-- NRDC filed 2026-07-22. Five industry groups — **ACCA, AHRI, HARDI, PHCC and the Alliance for** **Responsible Atmospheric Policy** — also filed. Venue is the **D.C. Circuit**. The industry groups' position is split: they support eliminating installation restrictions on existing R-410A systems but oppose the commercial-refrigeration extensions.
+- NRDC filed 2026-07-22. Five industry groups — **ACCA, AHRI, HARDI, PHCC and the Alliance for Responsible Atmospheric Policy** — also filed. Venue is the **D.C. Circuit**. The industry groups' position is split: they support eliminating installation restrictions on existing R-410A systems but oppose the commercial-refrigeration extensions.
 
 2. **State override. New York has codified the original January 1, 2026 deadline.** R-410A installation is
 
@@ -511,13 +511,13 @@ The 700 **GWP limit itself was not changed** (Holland & Knight, 2026-05-26). Man
 
 ### Refrigerant pricing — the crisis is over, and the direction has reversed
 
-HARDI declared it over in October 2025. Alex Ayers, HARDI director of government affairs, put it plainly (ACHR News, 2025-10-13): "**If you were to be really specific, I would definitely say the** crisis **is** **over."** Availability shifted in late August and September 2025. Peak pricing had reached "**upwards of** **$900"** per cylinder.
+HARDI declared it over in October 2025. Alex Ayers, HARDI director of government affairs, put it plainly (ACHR News, 2025-10-13): "**If you were to be really specific, I would definitely say the** crisis **is over."** Availability shifted in late August and September 2025. Peak pricing had reached **"upwards of $900"** per cylinder.
 
 | REFRIGERANT | 2025 CRISIS PEAK | CURRENT (CHECKED 2026-07-28) | DIRECTION |
 | --- | --- | --- | --- |
 | R-454B, 20-lb cylinder R-454B, per lb R-32, per lb R-410A, per lb | ≈$900; spot reports to $2,000 — ≈$350/cylinder ≈$6–10 (distributor, ≈2024) | $449–499 (≈$22.45/lb) $10–60 range, ≈$25 average $8–40 range, ≈$18 average $12–18 by early 2026 — roughly doubled | Falling Falling Stable Rising |
 
-**The live cost story has inverted.** The A2L refrigerants that drove the 2025 crisis are normalizing. **R-** 410**A is now the one spiking.** Production is stepping down while the newly extended install window keeps legacy equipment in service and demanding service charges. The R-32-to-R-454B gap has compressed sharply on average per-pound (see Derivations).
+**The live cost story has inverted.** The A2L refrigerants that drove the 2025 crisis are normalizing. **R-410A is now the one spiking.** Production is stepping down while the newly extended install window keeps legacy equipment in service and demanding service charges. The R-32-to-R-454B gap has compressed sharply on average per-pound (see Derivations).
 
 For context: Honeywell imposed a 42% **R-454B surcharge in April 2025** on top of 15% February and 8% March increases plus $4/lb. The root cause was a shortage of DOT-approved A2L cylinders, with Worthington the sole domestic manufacturer, not the chemical itself. No 2026 source shows an ongoing cylinder constraint.
 
@@ -537,11 +537,11 @@ Two 2026 rulings dismantled the tariff stack that shaped 2025 underwriting. Any 
 
 - **Section 232 stands and expanded** (effective 2026-04-06): 50% primary metals; 25% certain derivative products; 15% metal-intensive industrial and grid equipment, temporary through 2027-12-31, then 25%. It applies to **full customs value**, and duty stacking on derivatives was eliminated.
 
-- **HVAC got a cut.** Section 232 on residential HVAC systems and components was **reduced from 25%** **to 15%, effective 2026-06-08**. HARDI estimates consumers retain **≈$2.3 billion**, supporting $2.9B in economic activity and $1.7B in GDP value added.
+- **HVAC got a cut.** Section 232 on residential HVAC systems and components was **reduced from 25% to 15%, effective 2026-06-08**. HARDI estimates consumers retain **≈$2.3 billion**, supporting $2.9B in economic activity and $1.7B in GDP value added.
 
 - Section 301 China duties remain under separate authority. A Japan-specific ≈15% applies to Mitsubishi Electric Trane products.
 
-**Equipment inflation persists anyway — through manufacturer pricing, not duties.** Prices are up 15– 30% **since mid-2025** (Facilities News, 2026-05-05). A system that cost **$7,000 installed in 2020** **could realistically cost $10,000–14,000 today** for comparable quality. Two increase waves landed in 2026:
+**Equipment inflation persists anyway — through manufacturer pricing, not duties.** Prices are up 15– 30% **since mid-2025** (Facilities News, 2026-05-05). A system that cost **$7,000 installed in 2020 could realistically cost $10,000–14,000 today** for comparable quality. Two increase waves landed in 2026:
 
 - **Wave 1 (Jan–May 2026):** Trane up to 5%; Lennox up to 10%; Daikin up to 7%; Goodman up to 7% equipment / 11% parts; Allied Air up to 7%; WaterFurnace 3.9% + 1.1% tariff surcharge; Carrier mid-single-digit. Cumulative since 2020: Trane >60%, Lennox >50%, Carrier >45%, Daikin >40%. Goodman/Daikin cumulative ≈30–40% since 2020, which compressed Goodman's historical 30– 40% discount to premium brands down to 10–20%.
 
@@ -569,9 +569,9 @@ Two 2026 rulings dismantled the tariff stack that shaped 2025 underwriting. Any 
 
 - **AIM Act phasedown:** 85% HFC reduction by 2036 (10% 2022 → 40% 2024 → 70% 2029 → 80% 2034). **The phasedown stands. The installation deadline that made it a near-term forcing function** **does not** (§7.1). Underwrite the replacement supercycle as a 2029–2036 structural tailwind, not a 2026 demand event, and treat the D.C. Circuit litigation as a binary that could restore the near-term version.
 
-- **Residential energy credits are gone.** The **One Big Beautiful Bill Act (P.L. 119-21, §70505)** terminated **Section 25C for property placed in service after 2025-12-31** and **Section 25D for** **expenditures made after that same date**. Both previously ran through 2032/2034 under the IRA. IRS FS-2025-05 confirms property must have been placed in service by 2025-12-31 to qualify. Contractors put the lost lever at **$2,000–$10,000 per project**. HEEHRA/HEAR rebates are fully reserved or waitlisted in some states. Net: negative for install- and upgrade-dependent theses, neutral-to-positive for service-heavy books.
+- **Residential energy credits are gone.** The **One Big Beautiful Bill Act (P.L. 119-21, §70505)** terminated **Section 25C for property placed in service after 2025-12-31** and **Section 25D for expenditures made after that same date**. Both previously ran through 2032/2034 under the IRA. IRS FS-2025-05 confirms property must have been placed in service by 2025-12-31 to qualify. Contractors put the lost lever at **$2,000–$10,000 per project**. HEEHRA/HEAR rebates are fully reserved or waitlisted in some states. Net: negative for install- and upgrade-dependent theses, neutral-to-positive for service-heavy books.
 
-- **Heat pumps are not a future story — they are the current market.** RMI's tracker (updated May 2026, period April 2025–March 2026) puts heat pumps at 47% **share against gas furnaces — 3.6M** **heat pumps vs. 3.2M furnaces — and 47% of air conditioners sold were heat pumps.** AHRI's FY2025 data shows 3.64**M heat pumps shipped vs. 3.25M gas warm-air furnaces, 11% more heat** **pumps than furnaces.** Forecasts putting heat pumps at ≈50% of heating by 2035 have already been overtaken. Mix per RMI: 35% of heat pump sales replace an existing system, 30% become a new primary heating system, 35% become a secondary system. Heat pumps require electrical work, which drives **trade convergence** — the strategic argument for multi-trade platforms.
+- **Heat pumps are not a future story — they are the current market.** RMI's tracker (updated May 2026, period April 2025–March 2026) puts heat pumps at 47% **share against gas furnaces — 3.6M heat pumps vs. 3.2M furnaces — and 47% of air conditioners sold were heat pumps.** AHRI's FY2025 data shows 3.64M heat pumps shipped vs. 3.25M gas warm-air furnaces, 11% more heat pumps than furnaces. Forecasts putting heat pumps at ≈50% of heating by 2035 have already been overtaken. Mix per RMI: 35% of heat pump sales replace an existing system, 30% become a new primary heating system, 35% become a secondary system. Heat pumps require electrical work, which drives **trade convergence** — the strategic argument for multi-trade platforms.
 
 - **Volume context, and it is not good.** AHRI FY2025 combined AC + air-source heat pump shipments were 7.75 **million units, down 20%** from 9.68M in 2024 (AC −26.2%, heat pumps −11.6%). April 2026 came in +5.1% **YoY**, but **YTD 2026 through April is 2,773,432 units, −3.5%**. Unit demand is contracting even as price rises.
 
@@ -640,7 +640,7 @@ The broader market has turned soft. Overall US commercial rates rose +2.5% **in 
 
 - **Market reality** (HVAC Project Cost, 2026-07-16): contractor true-installment 9–15% **APR**; contractor deferred-interest "0% promo, then 26–29%"; HELOC 8.5–10.5%; personal loan 10–25%; PACE 5–9%.
 
-Underwrite it this way: 6–9% is available on subsidized, high-dealer-fee plans; 9–15% **is typical on** **true installment**; deferred-interest products carry 26–29% back-end risk.
+Underwrite it this way: 6–9% is available on subsidized, high-dealer-fee plans; 9–15% **is typical on true installment**; deferred-interest products carry 26–29% back-end risk.
 
 2026 **headwinds:** 25C/25D expiration removes a demand lever (§7.4), and approval tightening on lower-FICO customers is being reported.
 
@@ -663,7 +663,7 @@ Together they support **≈$7,500 average, $5,000–$16,000 typical, and ≈$22,
 
 - **Working capital:** true-ups cost sellers $100K–$500K at close, and lean-AR/heavy-AP operators can owe money at close.
 
-- **The capacity paradox:** Jobber's *Blue Collar Strong*: *The* 2026 *Home Service Trends Report* (2026-03-25; n=1,050 home-service business owners, ±3% at 90% confidence) finds 72% "**consistently** **booked with limited availability"** plus 8% "**at capacity and turning away new work"** — the 80% figure — against 3% **reporting difficulty filling their schedule**. HVAC shows the strongest booking rates. Demand is not the constraint. Labor is.
+- **The capacity paradox:** Jobber's *Blue Collar Strong*: *The* 2026 *Home Service Trends Report* (2026-03-25; n=1,050 home-service business owners, ±3% at 90% confidence) finds 72% "**consistently booked with limited availability**" plus 8% "**at capacity and turning away new work**" — the 80% figure — against 3% **reporting difficulty filling their schedule**. HVAC shows the strongest booking rates. Demand is not the constraint. Labor is.
 
 - **Pricing:** PE platforms exercise pricing power and raise faster than inflation, while independents absorb the lead-cost and materials squeeze. The 2026 public-comp evidence (§4.6) says this is now the entire growth story: price up, volume flat to down.
 
@@ -671,17 +671,17 @@ Together they support **≈$7,500 average, $5,000–$16,000 typical, and ≈$22,
 
 ## 9.1 Multiple compression signals
 
-Compression is no longer a signal. It is measured. Capstone Partners' July 2026 update prices HVAC Services at 9.5**x EV/EBITDA across 2024–YTD 2026 against 13.3x across 2021–2023**; broader HVAC at 11.4x vs. 13.4x; EV/revenue at 2.0x vs. 2.3x. That is roughly **four turns off the sector**, and it sits underneath trophy platforms still transacting at 16–20x. The gap between those two prices is the risk in every platform-formation model in this document.
+Compression is no longer a signal. It is measured. Capstone Partners' July 2026 update prices HVAC Services at 9.5x EV/EBITDA across 2024–YTD 2026 against 13.3x across 2021–2023; broader HVAC at 11.4x vs. 13.4x; EV/revenue at 2.0x vs. 2.3x. That is roughly **four turns off the sector**, and it sits underneath trophy platforms still transacting at 16–20x. The gap between those two prices is the risk in every platform-formation model in this document.
 
 - **The arbitrage still works** — add-ons at 4–8x into platforms at 16–20x. But the platform end of the trade has repriced and the add-on end has not, which narrows the spread from the top.
 
-- **GF Data** publishes only a blended multiple, with its platform-versus-add-on drilldowns reserved for subscribers: 7.2**x for FY2025** (297 completed transactions, −23% YoY, 41% below the 2021 peak) and 7.3**x in Q1 2026** (80 transactions). Its Q1 2026 commentary points the other way from the arbitrage story — "larger platform transactions saw stronger valuation gains, while pricing for smaller deals and add-on acquisitions remained relatively flat" — with no figures attached to the split.
+- **GF Data** publishes only a blended multiple, with its platform-versus-add-on drilldowns reserved for subscribers: 7.2x for FY2025 (297 completed transactions, −23% YoY, 41% below the 2021 peak) and 7.3x in Q1 2026 (80 transactions). Its Q1 2026 commentary points the other way from the arbitrage story — "larger platform transactions saw stronger valuation gains, while pricing for smaller deals and add-on acquisitions remained relatively flat" — with no figures attached to the split.
 
 - **Volume is the leading indicator.** Capstone counts 9 **platform creations YTD 2026, down from 10**, against 38 add-ons. GF Data's 2025 transaction count fell 23%. Sponsors are consolidating existing platforms rather than starting new ones.
 
 - **Rates are no longer the obvious tailwind.** SOFR sits at 3.64%, but the FOMC has held since June and market pricing has swung toward a possible **hike** by year-end 2026 (§1.1). Renewed tightening remains the single biggest downside risk, and it now has a live path.
 
-- **Credit conditions have stalled.** Capstone's Q1 2026 leveraged finance update reports that positive momentum "stalls in Q1 2026." Some 84.4% of new-issue direct-lending LBO spreads sit below S+550, but increases of 25–50**bp** are expected, particularly for lower-quality credits. The FSB's May 2026 private-credit warning (§1.1) is the systemic version of the same concern, and this sector is financed there.
+- **Credit conditions have stalled.** Capstone's Q1 2026 leveraged finance update reports that positive momentum "stalls in Q1 2026." Some 84.4% of new-issue direct-lending LBO spreads sit below S+550, but increases of 25–50bp are expected, particularly for lower-quality credits. The FSB's May 2026 private-credit warning (§1.1) is the systemic version of the same concern, and this sector is financed there.
 
 - Wrench's $1.3B refinance and Champions' move into **Blackstone's BXPE perpetual vehicle** signal both capital availability and longer holds.
 
@@ -695,7 +695,7 @@ The standard buyer levers are QofE add-back rejection (5–15% of headline EBITD
 
 - **Months 4–6 — leverage scale:** renegotiate materials, vehicles, and equipment with distributors and OEMs on national pricing. Distributors that once managed dozens of fragmented relationships now face a sophisticated procurement organization. Optimize marketing with forensic CPL, book-rate, and close-rate tracking.
 
-- **Throughout — protect the facade:** keep the legacy family name and logo on the trucks and replace the financial, technological, and operational plumbing behind it. Keep **pricing and dispatch local for** **the first ≈12 months**. Heavy early centralization triggers the documented attrition failure mode, the 15% member-base loss case.
+- **Throughout — protect the facade:** keep the legacy family name and logo on the trucks and replace the financial, technological, and operational plumbing behind it. Keep **pricing and dispatch local for the first ≈12 months**. Heavy early centralization triggers the documented attrition failure mode, the 15% member-base loss case.
 
 - **Margin target:** 18–22% EBITDA within 24 months of integration.
 
@@ -749,7 +749,7 @@ A historically high number of PE-backed platforms are seeking exits in 2026–20
 
 - **Mortgage rates 7%+ or renewed tightening** → slow platform buys; acquire tuck-ins from distressed platforms.
 
-- **AIM Act install-deadline removal — already happened** (2026-07-27). The near-term replacement forcing function is gone; the 700-GWP limit itself stands. Re-weight toward service, and **watch the** **D.C. Circuit**: if the rule is vacated on the state-AG or NRDC challenges, the 2026 install cutoff snaps back and the replacement tailwind returns.
+- **AIM Act install-deadline removal — already happened** (2026-07-27). The near-term replacement forcing function is gone; the 700-GWP limit itself stands. Re-weight toward service, and **watch the D.C. Circuit**: if the rule is vacated on the state-AG or NRDC challenges, the 2026 install cutoff snaps back and the replacement tailwind returns.
 
 - **Add-on multiples <4x in target metros** → pivot to distressed-platform acquisition ("roll-up of the roll-ups").
 
@@ -810,7 +810,7 @@ Two readings changed with them:
 
 ## A.0.2 Corrections applied 2026-07-27 — primary-source verification pass
 
-A figure-by-figure verification of every load-bearing number against live primary sources found **six** **figures that could not be sourced at all** and several more that were materially misstated. All are corrected in the body above. This pass is the reason a combined six-trade total no longer appears anywhere in this document.
+A figure-by-figure verification of every load-bearing number against live primary sources found **six figures that could not be sourced at all** and several more that were materially misstated. All are corrected in the body above. This pass is the reason a combined six-trade total no longer appears anywhere in this document.
 
 | FIGURE | WAS | NOW | WHY |
 | --- | --- | --- | --- |
@@ -831,7 +831,7 @@ A figure-by-figure verification of every load-bearing number against live primar
 
 ## A.0.3 Corrections applied 2026-07-28 — full live-source re-verification
 
-The deepest pass yet: eight parallel research streams re-checked every load-bearing figure against live primary sources on the effective date. It found **two errors in the previous day's own corrections**, **five figures overtaken by events since May 2026**, **four claims with no source at all**, and **one** **correction that was itself a mistake and has been reversed**.
+The deepest pass yet: eight parallel research streams re-checked every load-bearing figure against live primary sources on the effective date. It found **two errors in the previous day's own corrections**, **five figures overtaken by events since May 2026**, **four claims with no source at all**, and **one correction that was itself a mistake and has been reversed**.
 
 ### A. Errors in this document's own prior corrections
 
@@ -902,17 +902,17 @@ The deepest pass yet: eight parallel research streams re-checked every load-bear
 
 - **FSB private-credit warning** (2026-05-06) and Capstone's Q1 2026 leveraged-finance stall — the financing channel this sector depends on.
 
-- 25**C and 25D terminated** by the One Big Beautiful Bill Act (P.L. 119-21, §70505) for property placed in service after 2025-12-31.
+- **25C and 25D terminated** by the One Big Beautiful Bill Act (P.L. 119-21, §70505) for property placed in service after 2025-12-31.
 
 - **FMI's primary garage-door brief** (March 2026) — ≈$16B in 2026 to >$19.6B by 2030, ≈60% service / ≈40% installation.
 
 - **Frontdoor (FTDR)** added as the closest listed residential comp.
 
-- **Q2 2026 public-comp actuals** for Rollins and Comfort Systems; the cross-comp theme of **price up,** **volume flat**.
+- **Q2 2026 public-comp actuals** for Rollins and Comfort Systems; the cross-comp theme of **price up, volume flat**.
 
 ### Method note
 
-Trade coverage of this sector is concentrated in HomePros, PE Hub and Reuters/Bloomberg. Several sites that surface prominently in search — thehardwirenews.com, ctacquisitions.com (as an aggregator), homesteadsp.com, aja-financial.com, catalystforthetrades.com, ainvest.com — restate or distort primary figures; homesteadsp.com carries a false "$1B+ EV" for Service Logic, and aja-financial.com splices Capstone period counts across inconsistent cutoffs. None were used as sources. Where a research stream exhausted its search budget before completing a recency sweep, that is stated rather than papered over: the market-sizing and operating-economics streams both ended with partial recency passes, so **absence of a newer publication in those two areas should not be read as a** **clean negative.**
+Trade coverage of this sector is concentrated in HomePros, PE Hub and Reuters/Bloomberg. Several sites that surface prominently in search — thehardwirenews.com, ctacquisitions.com (as an aggregator), homesteadsp.com, aja-financial.com, catalystforthetrades.com, ainvest.com — restate or distort primary figures; homesteadsp.com carries a false "$1B+ EV" for Service Logic, and aja-financial.com splices Capstone period counts across inconsistent cutoffs. None were used as sources. Where a research stream exhausted its search budget before completing a recency sweep, that is stated rather than papered over: the market-sizing and operating-economics streams both ended with partial recency passes, so **absence of a newer publication in those two areas should not be read as a clean negative.**
 
 ## A.1 Reconciled data conflicts across the three source documents
 
@@ -941,7 +941,7 @@ Trade coverage of this sector is concentrated in HomePros, PE Hub and Reuters/Bl
 
 - **Berg v. Bosch** OEM price-coordination claims are unproven litigation.
 
-- **Census figures are 2022 vintage and that is the newest available** (Economic Census runs on a five-year cycle; next 2027). CBP's latest is 2023; SUSB's latest is 2022. Per-size-band absolutes require the raw SUSB file, and **share percentages must not be multiplied against firm counts to** **manufacture absolutes.**
+- **Census figures are 2022 vintage and that is the newest available** (Economic Census runs on a five-year cycle; next 2027). CBP's latest is 2023; SUSB's latest is 2022. Per-size-band absolutes require the raw SUSB file, and **share percentages must not be multiplied against firm counts to manufacture absolutes.**
 
 - **Know which Census variable you are quoting.** RCPTOT (total revenue), RCPCWRK (value of construction work) and RCPNCW (**net** of subcontractor payments) differ materially on this code, and EMP (employees) vs. HOURS (annual worker-hours in thousands) differ by 44%. Mislabeling these is what A.0.3 §A corrects.
 
