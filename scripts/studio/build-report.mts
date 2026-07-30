@@ -212,7 +212,22 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
   blockquote p { margin: 0 0 0.08in; font-size: 9.5pt; line-height: 1.55; }
   blockquote p:last-child, blockquote ol:last-child, blockquote ul:last-child { margin-bottom: 0; }
   blockquote ol, blockquote li { font-size: 9.5pt; line-height: 1.55; }
-  .rbody p { margin: 0 0 0.11in; }
+  /* Orphan control. Every part/section header carries page-break-before:always,
+     so a paragraph that spills two words past a page boundary leaves those two
+     words alone on a page and the next section starts fresh after them — a
+     near-blank sheet in the middle of the document. It happened three times
+     across the two published reports; MEP p3 held the single line "approaching
+     current scale." and nothing else.
+     orphans/widows are the standards answer and Blink does not implement them
+     for paged media, so they are set for correctness and break-inside is what
+     actually does the work: a paragraph moves whole to the next page rather
+     than splitting. Blink still breaks a paragraph taller than a page, so
+     there is no runaway case.
+     NOTE: no backticks anywhere in this stylesheet, including comments. The
+     whole thing is a JS template literal, so a markdown-style code span ends
+     the string and the build fails on a confusing syntax error. */
+  .rbody p, .rbody li { orphans: 3; widows: 3; }
+  .rbody p { margin: 0 0 0.11in; break-inside: avoid; }
   .rbody strong { color: ${INK}; font-weight: 600; }
   .rbody em { font-style: italic; }
   .rbody ul, .rbody ol { margin: 0 0 0.12in; padding-left: 1.25em; }

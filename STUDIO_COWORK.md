@@ -39,8 +39,10 @@ deals/<deal>/
 media/  assets/  collateral/  decks/     images in, renders out
 posting-plan.md       what to build next
 THESES.md             every position we hold and what it rests on (generated)
-CLAUDE.md             the laws  ┐ copied in by init-workspace, so a session
-PLAYBOOK.md           the specs ┘ opened here behaves correctly on its own
+CLAUDE.md             the laws       ┐ copied in by init-workspace, so a
+PLAYBOOK.md           the doc specs  │ session opened here behaves correctly
+FORMATS.md            the containers │ on its own — nothing else enforces
+DESIGN.md             the look       ┘ any of it
 ```
 
 Create it in one command (from the repo dir, target your workspace path):
@@ -49,9 +51,18 @@ Create it in one command (from the repo dir, target your workspace path):
 npx tsx scripts/studio/init-workspace.mts ~/Documents/smbx-studio
 ```
 
-That last pair matters. With the app out of the loop, no server prompt enforces
-the citation law, THE LINE, or the document structures any more — so they travel
-*with the workspace* as its own `CLAUDE.md` and `PLAYBOOK.md`.
+Those four matter. With the app out of the loop, no server prompt enforces the
+citation law, THE LINE, the document structures, or the house style any more —
+so they travel *with the workspace*. Re-run with `--update` after pulling the
+repo to refresh them; without it, a workspace quietly keeps whatever version it
+was first created with, and a fix in the repo never arrives.
+
+**FORMATS.md and DESIGN.md are two halves of one spec.** FORMATS.md is the
+container — which builder, the field grammar, the image slot dimensions.
+DESIGN.md is the look — palette, type, the page-by-page layout grammar, and the
+retired systems named with their hexes. DESIGN.md was added 2026-07-30 because
+FORMATS.md alone was not enough: collateral kept drifting toward last year's
+palettes, and nothing that travelled to the workspace described the current one.
 
 ## One-time setup
 

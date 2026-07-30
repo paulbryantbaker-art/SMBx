@@ -1,7 +1,19 @@
 # smbX — DESIGN LANGUAGE (canonical)
 
-**Status: CURRENT · Last updated 2026-07-19 · Supersedes every other design doc in this repo for visual decisions.**
+**Status: CURRENT · Last updated 2026-07-30 · Supersedes every other design doc in this repo for visual decisions.**
 This is the one document to hand to any Claude, designer, or design tool working on smbX surfaces. If a doc, screenshot, or memory disagrees with this file, this file wins.
+
+> **Producing COLLATERAL — a carousel, a one-pager, a report PDF? Read
+> `content/studio/DESIGN.md` instead.** It is this system applied to the three
+> builders: the same palette and type, plus the page-by-page layout grammar,
+> the standing marks, and the drift checklist. It also travels — `init-workspace`
+> copies it into the studio workspace as `DESIGN.md`, which this file does not
+> do, and that gap is why collateral was drifting toward retired palettes.
+>
+> The two cannot disagree: both describe `house/tokens.ts`, and
+> `npm run test:design` checks the collateral doc against that module **and**
+> against the live site stylesheet on every run. This file stays canonical for
+> the site and for the system as a whole.
 
 ---
 

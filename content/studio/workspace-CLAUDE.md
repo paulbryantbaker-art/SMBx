@@ -122,9 +122,19 @@ re-synthesizing a master** — that is the moment positions silently go stale.
 
 ### 3. Produce collateral
 
-**Read `FORMATS.md` in this folder first, every time.** It is the spec: which
-builder, the exact field grammar, the image slot dimensions, and the imagery
-brief. Collateral drifts when a session works from memory instead of that file.
+**Read `FORMATS.md` and `DESIGN.md` in this folder first, every time.** They are
+two halves of one spec and neither works alone:
+
+- **`FORMATS.md` is the container** — which builder, the exact field grammar,
+  the image slot dimensions, the imagery brief.
+- **`DESIGN.md` is the look** — palette, type, the layout grammar of the three
+  formats, the standing marks, and the retired systems named with their hexes.
+
+Collateral drifts when a session works from memory instead of those files, and
+it drifts toward a *specific* place: this practice has run seven visual systems,
+so the gap gets filled with coral, terra cotta or office blue rather than with
+nothing. If a colour, a typeface or a layout is about to be decided, it has
+already been decided — read DESIGN.md §2 and §4.
 
 ```
 npx tsx $REPO/scripts/studio/build-report.mts    <doc.md>          # long report PDF
@@ -137,7 +147,9 @@ images and `./collateral` for output.
 
 **Never hand-roll a layout.** The builders are deterministic — the same spec
 renders the same pixels. If the output looks off, the spec is wrong, not the
-renderer. Writing your own HTML/CSS to "match the style" is the drift.
+renderer. Writing your own HTML/CSS to "match the style" is the drift — it is
+the largest single tell, and the reason a 52-page report once shipped in the
+wrong typeface.
 
 **Write the imagery brief before building anything.** Every production run:
 work out what images the piece needs and write the Gemini prompts to
