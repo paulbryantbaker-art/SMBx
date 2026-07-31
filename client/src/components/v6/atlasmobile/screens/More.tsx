@@ -81,6 +81,16 @@ export default function MoreScreen({ user }: AtlasScreenProps) {
         <ChevronRightIcon size={18} c={RT.muted} />
       </button>
 
+      {/* Clients — the CLIENT pipeline (the acquirers we serve), as distinct
+          from Deals (the targets we underwrite). It sits above Modules because
+          it is core work, not a module. */}
+      <DetailSection title="Pipeline" desc="The acquirers we serve, ranked by fit.">
+        <ActionRow leading={<ClientsGlyph />} title="Clients" action={<Chevron />} onClick={() => nav.go("clients")} />
+        <ActionRow leading={<SourcingGlyph />} title="Sourcing" action={<Chevron />} onClick={() => nav.go("sourcing")} />
+      </DetailSection>
+
+      <Divider />
+
       {/* Studio is retired from the chrome (2026-07-31) — the document work
           moved to disk. The screen still exists and still routes; see
           appSurfaces.ts. The section blurb drops "Build collateral" with it,
@@ -165,6 +175,27 @@ function glyphSvg(children: ReactNode, stroke: string, fill = false) {
 }
 
 /** Studio — collateral / document grid. */
+/** Clients — a handshake reduced to two meeting arcs (the client relationship). */
+function ClientsGlyph() {
+  return glyphSvg(
+    <>
+      <path d="M3 12h5l2-2 2 4 2-2h5" />
+      <circle cx="12" cy="5" r="2" />
+    </>,
+    RT.muted,
+  );
+}
+
+/** Sourcing — a funnel (the target pipeline narrowing). */
+function SourcingGlyph() {
+  return glyphSvg(
+    <>
+      <path d="M4 5h16l-6 7v7l-4-2v-5z" />
+    </>,
+    RT.muted,
+  );
+}
+
 function StudioGlyph() {
   return glyphSvg(
     <>

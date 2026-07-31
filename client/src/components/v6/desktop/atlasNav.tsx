@@ -16,6 +16,7 @@ export type AtlasScreen =
   | "pipeline"
   | "sourcing"
   | "deals"
+  | "clients"
   | "studio"
   | "integration"
   | "files"

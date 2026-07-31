@@ -67,6 +67,7 @@ import CanvasMobileScreen from "./screens/Canvas";
 import FilesMobileScreen from "./screens/Files";
 import MoreScreen from "./screens/More";
 import SourcingMobileScreen from "./screens/Sourcing";
+import ClientsMobileScreen from "./screens/ClientsM";
 import StudioMobileScreen from "./screens/Studio";
 import IntegrationMobileScreen from "./screens/Integration";
 import AgentMobileScreen from "./screens/Agent";
@@ -217,6 +218,7 @@ const SCREEN_TITLE: Record<AtlasScreen, string> = {
   pipeline: "Deals",
   sourcing: "Sourcing",
   deals: "Deals",
+  clients: "Clients",
   studio: "Studio",
   integration: "Integration",
   files: "Files",
@@ -543,6 +545,8 @@ function ActiveScreen({
       return <FilesMobileScreen user={user} view={view} />;
     case "more":
       return <MoreScreen user={user} view={view} />;
+    case "clients":
+      return <ClientsMobileScreen user={user} view={view} />;
     case "sourcing":
       return <SourcingMobileScreen user={user} view={view} />;
     case "studio":
