@@ -79,15 +79,16 @@ import { T } from "../atlasTokens";
 
 const PAGE_SIZE = 25;
 
-type FilterId = "all" | "buy" | "sell" | "watch" | "due";
+// Buy-side only (2026-07-31). "All" and "Buy-side" became the same list and
+// "Sell-side" can never match, so both are gone — the practice does not take
+// sell-side mandates (THE LINE §perimeter). Due now is a real filter instead.
+type FilterId = "all" | "watch" | "due";
 type ViewId = "board" | "table";
 /** Which SET of deals we're looking at. Not a filter — a different row set. */
 type ScopeId = "active" | "archived";
 
 const FILTERS: { id: FilterId; label: string }[] = [
   { id: "all", label: "All" },
-  { id: "buy", label: "Buy-side" },
-  { id: "sell", label: "Sell-side" },
   { id: "watch", label: "Watchlist" },
   // Client-side, deliberately: every row is already in memory, so this is
   // instant. The server's `?due=1` exists for other callers.
@@ -95,6 +96,11 @@ const FILTERS: { id: FilterId; label: string }[] = [
 ];
 
 /* ─── per-row derivations (honest) ─────────────────────────── */
+
+/** One source of truth for a stage's name — PIPELINE_STAGES. */
+function stageTitle(id: PipelineStageId): string {
+  return PIPELINE_STAGES.find(s => s.id === id)?.title ?? "—";
+}
 
 /** Sector from the `sub` line. The hook builds `all`'s sub as
  *  `[industry, location].join(" · ")`, so the leading segment is the sector
@@ -116,16 +122,18 @@ function sectorOf(row: MobileStageRow): string {
  *  (the demo's IOI tier), Diligence→blue, Structuring→terra, Close→green. */
 function stageMeta(row: MobileStageRow): { label: string; bg: string; fg: string } {
   switch (row.stageId) {
+    // Labels come from PIPELINE_STAGES so the pill and the kanban column header
+    // can never disagree; only the tint ladder lives here.
     case "source":
-      return { label: "Sourcing", bg: T.track, fg: T.muted };
+      return { label: stageTitle("source"), bg: T.track, fg: T.muted };
     case "value":
-      return { label: "Valuation", bg: T.amberBg2, fg: T.amber };
+      return { label: stageTitle("value"), bg: T.amberBg2, fg: T.amber };
     case "diligence":
-      return { label: "Diligence", bg: T.blueBg, fg: T.blue };
+      return { label: stageTitle("diligence"), bg: T.blueBg, fg: T.blue };
     case "structure":
-      return { label: "Structuring", bg: T.terraBg, fg: T.terra };
+      return { label: stageTitle("structure"), bg: T.terraBg, fg: T.terra };
     case "close":
-      return { label: "Close / PMI", bg: T.greenBg, fg: T.green };
+      return { label: stageTitle("close"), bg: T.greenBg, fg: T.green };
     default:
       return { label: "—", bg: T.track, fg: T.muted };
   }
@@ -148,14 +156,6 @@ const MARK_TINTS: { bg: string; fg: string }[] = [
 ];
 function markTint(rawId: number) {
   return MARK_TINTS[Math.abs(rawId) % MARK_TINTS.length];
-}
-
-/** Buy/sell side from the gate letter prefix (B → buy, S → sell, R → raise). */
-function sideOf(row: MobileStageRow): "buy" | "sell" | "raise" {
-  const c = (row.gate ?? "").trim().charAt(0).toUpperCase();
-  if (c === "S") return "sell";
-  if (c === "R") return "raise";
-  return "buy";
 }
 
 /** Owner identity from the signed-in user (these are the user's own deals). */
@@ -260,8 +260,6 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
       }
       if (filter === "watch") return row.verdict === "watch";
       if (filter === "due") return (daysUntil(row.nextActionOn) ?? 1) <= 0;
-      if (filter === "buy") return sideOf(row) === "buy";
-      if (filter === "sell") return sideOf(row) === "sell";
       return true;
     });
   }, [all, query, filter]);
