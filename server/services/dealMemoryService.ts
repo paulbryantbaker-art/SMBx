@@ -107,10 +107,10 @@ export async function findDealByIdOrName(userId: number, query: string | number)
   const [byName] = await sql`
     SELECT id, updated_at FROM (
       SELECT id, updated_at FROM deals
-      WHERE user_id = ${userId} AND business_name ILIKE ${'%' + q + '%'}
+      WHERE user_id = ${userId} AND business_name ILIKE ${'%' + q + '%'} AND archived = FALSE
       UNION
       SELECT d.id, d.updated_at FROM deals d JOIN deal_participants dp ON dp.deal_id = d.id
-      WHERE dp.user_id = ${userId} AND dp.accepted_at IS NOT NULL AND d.business_name ILIKE ${'%' + q + '%'}
+      WHERE dp.user_id = ${userId} AND dp.accepted_at IS NOT NULL AND d.business_name ILIKE ${'%' + q + '%'} AND d.archived = FALSE
     ) matches ORDER BY updated_at DESC LIMIT 1
   `;
   return byName ? { id: byName.id } : null;

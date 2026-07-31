@@ -61,7 +61,7 @@ adminRouter.get('/admin/metrics/overview', async (_req, res) => {
       SELECT COUNT(DISTINCT user_id)::int as count FROM conversations
       WHERE updated_at > NOW() - INTERVAL '7 days' AND user_id IS NOT NULL
     `;
-    const [deals] = await sql`SELECT COUNT(*)::int as total FROM deals WHERE status = 'active'`;
+    const [deals] = await sql`SELECT COUNT(*)::int as total FROM deals WHERE status = 'active' AND archived = FALSE`;
     const mrrCents = await calculateMrrCents();
     const [deliverables] = await sql`
       SELECT COUNT(*)::int as total FROM deliverables WHERE created_at > NOW() - INTERVAL '30 days'
@@ -125,7 +125,7 @@ adminRouter.get('/admin/metrics/journeys', async (_req, res) => {
     const journeys = await sql`
       SELECT journey_type, COUNT(*)::int as count,
              AVG(CASE WHEN current_gate ~ '[0-9]' THEN CAST(SUBSTRING(current_gate FROM '[0-9]+') AS INTEGER) ELSE 0 END) as avg_gate
-      FROM deals WHERE status = 'active'
+      FROM deals WHERE status = 'active' AND archived = FALSE
       GROUP BY journey_type ORDER BY count DESC
     `;
     res.json({ journeys });
@@ -140,7 +140,7 @@ adminRouter.get('/admin/metrics/gate-heatmap', async (_req, res) => {
   try {
     const gates = await sql`
       SELECT current_gate, COUNT(*)::int as count
-      FROM deals WHERE status = 'active' AND current_gate IS NOT NULL
+      FROM deals WHERE status = 'active' AND archived = FALSE AND current_gate IS NOT NULL
       GROUP BY current_gate ORDER BY current_gate
     `;
     res.json({ gates });

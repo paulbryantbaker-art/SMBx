@@ -131,7 +131,7 @@ async function start() {
       console.log('[worker] Running weekly freshness scan...');
       const deals = await sql`
         SELECT id FROM deals
-        WHERE status IN ('active', 'exploring', 'listed')
+        WHERE status IN ('active', 'exploring', 'listed') AND archived = FALSE
           AND financial_snapshot IS NOT NULL
       `;
       let staleTotal = 0;
@@ -183,7 +183,7 @@ async function start() {
           const buyerDeals = await sql`
             SELECT d.id, d.user_id, d.business_name, d.ebitda, d.sde
             FROM deals d
-            WHERE d.journey_type = 'buy' AND d.status = 'active'
+            WHERE d.journey_type = 'buy' AND d.status = 'active' AND d.archived = FALSE
               AND (d.financials->>'financing_type' = 'sba' OR d.current_gate IN ('B2', 'B3', 'B4', 'B5'))
           `.catch(() => []);
           for (const deal of buyerDeals as any[]) {

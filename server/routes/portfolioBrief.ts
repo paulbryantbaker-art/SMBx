@@ -96,7 +96,7 @@ portfolioBriefRouter.get('/agency/portfolio-brief', async (req, res) => {
              (SELECT COUNT(*) FROM deliverables del WHERE del.deal_id = d.id AND del.status = 'complete') as deliverable_count,
              (SELECT COUNT(*) FROM data_room_documents doc WHERE doc.deal_id = d.id) as document_count
       FROM deals d
-      WHERE d.user_id = ${userId} AND d.status = 'active'
+      WHERE d.user_id = ${userId} AND d.status = 'active' AND d.archived = FALSE
       ORDER BY d.updated_at DESC
       LIMIT 25
     `;
@@ -110,7 +110,7 @@ portfolioBriefRouter.get('/agency/portfolio-brief', async (req, res) => {
              (SELECT COUNT(*) FROM data_room_documents doc WHERE doc.deal_id = d.id) as document_count
       FROM deals d
       JOIN deal_participants dp ON dp.deal_id = d.id
-      WHERE dp.user_id = ${userId} AND dp.accepted_at IS NOT NULL AND d.status = 'active'
+      WHERE dp.user_id = ${userId} AND dp.accepted_at IS NOT NULL AND d.status = 'active' AND d.archived = FALSE
       ORDER BY d.updated_at DESC
       LIMIT 25
     `;

@@ -454,7 +454,7 @@ async function readDeals(userId: number): Promise<DealRow[]> {
            (SELECT COUNT(*) FROM review_requests rr WHERE rr.deal_id = d.id AND rr.status IN ('pending', 'reviewing')) as review_count,
            (SELECT COUNT(*) FROM data_room_documents doc WHERE doc.deal_id = d.id) as document_count
     FROM deals d
-    WHERE d.user_id = ${userId} AND d.status = 'active'
+    WHERE d.user_id = ${userId} AND d.status = 'active' AND d.archived = FALSE
     ORDER BY d.updated_at DESC
     LIMIT 25
   `;
@@ -471,7 +471,7 @@ async function readDeals(userId: number): Promise<DealRow[]> {
              (SELECT COUNT(*) FROM data_room_documents doc WHERE doc.deal_id = d.id) as document_count
       FROM deals d
       JOIN deal_participants dp ON dp.deal_id = d.id
-      WHERE dp.user_id = ${userId} AND dp.accepted_at IS NOT NULL AND d.status = 'active'
+      WHERE dp.user_id = ${userId} AND dp.accepted_at IS NOT NULL AND d.status = 'active' AND d.archived = FALSE
       ORDER BY d.updated_at DESC
       LIMIT 25
     `;

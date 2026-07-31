@@ -47,7 +47,7 @@ intelligenceRouter.get('/intelligence/portfolio-heat', async (req, res) => {
     const rows = await sql`
       SELECT DISTINCT industry FROM deals
       WHERE user_id = ${userId}
-        AND status = 'active'
+        AND status = 'active' AND archived = FALSE
         AND industry IS NOT NULL AND TRIM(industry) <> ''
     `;
     const industries = rows.map(r => String(r.industry).trim()).slice(0, 24);

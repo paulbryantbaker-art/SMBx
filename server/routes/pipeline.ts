@@ -26,7 +26,7 @@ pipelineRouter.get('/portfolio/summary', async (req, res) => {
              d.seven_factor_composite, d.financials,
              d.created_at, d.updated_at
       FROM deals d
-      WHERE d.user_id = ${userId} AND d.status = 'active'
+      WHERE d.user_id = ${userId} AND d.status = 'active' AND d.archived = FALSE
     `;
 
     // Weighted EV: sum of (asking_price OR derived value) × probability.

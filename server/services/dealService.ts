@@ -72,7 +72,7 @@ export async function getDeal(dealId: number): Promise<Deal | null> {
 export async function getUserDeals(userId: number): Promise<Deal[]> {
   const deals = await sql`
     SELECT * FROM deals
-    WHERE user_id = ${userId} AND status = 'active'
+    WHERE user_id = ${userId} AND status = 'active' AND archived = FALSE
     ORDER BY updated_at DESC
   `;
   return deals as unknown as Deal[];

@@ -38,7 +38,7 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
       SELECT id, business_name, journey_type, current_gate, league,
              industry, revenue, sde, ebitda, financials, created_at, updated_at
       FROM deals
-      WHERE user_id = ${userId} AND status = 'active'
+      WHERE user_id = ${userId} AND status = 'active' AND archived = FALSE
       ORDER BY updated_at DESC
       LIMIT 10
     `;
@@ -49,7 +49,7 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
              d.created_at, d.updated_at, dp.role as participant_role
       FROM deals d
       JOIN deal_participants dp ON dp.deal_id = d.id
-      WHERE dp.user_id = ${userId} AND dp.accepted_at IS NOT NULL AND d.status = 'active'
+      WHERE dp.user_id = ${userId} AND dp.accepted_at IS NOT NULL AND d.status = 'active' AND d.archived = FALSE
       ORDER BY d.updated_at DESC
       LIMIT 10
     `;
