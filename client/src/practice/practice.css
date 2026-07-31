@@ -228,6 +228,9 @@
   --pd-border: #2E7A61;
   --pd-hair: rgba(242, 251, 246, 0.12);
   --pd-coral-link: #F2FBF6;
+  /* Amber drops to 3.1:1 on the block, so the block re-scopes it to honey
+     rather than every brass rule growing a .pd-dark twin. */
+  --pd-brass: #F5C452;
   width: 100%;
   --pd-curve: clamp(52px, 6vw, 112px); /* @kind spacing */
   /* Full-bleed texture — Paul's blackBleedBG slate/plaster surface, kept
@@ -248,9 +251,15 @@
      by URL rather than as a data URI.
 
      Mirrors it in intent, not by import — if you change one, change both. */
+  /* The top three layers are the LIFE of the block — without them it is a flat
+     slab of one colour, which reads as heavy however light the colour is. A
+     jade sweep from the top-left, a honey answer at the bottom-right, and a
+     cool deep-teal corner give it a direction to travel. They ride ABOVE the
+     glaze so they tint the field rather than the texture under it. */
   background:
-    radial-gradient(90% 52% at 50% -8%, rgba(15, 169, 124, 0.20), rgba(15, 169, 124, 0) 58%),
-    radial-gradient(78% 46% at 50% 110%, rgba(245, 196, 82, 0.075), rgba(245, 196, 82, 0) 62%),
+    radial-gradient(72% 62% at 12% -12%, rgba(15, 169, 124, 0.42), rgba(15, 169, 124, 0) 62%),
+    radial-gradient(64% 58% at 94% 104%, rgba(245, 196, 82, 0.16), rgba(245, 196, 82, 0) 64%),
+    radial-gradient(58% 50% at 98% -8%, rgba(8, 74, 92, 0.24), rgba(8, 74, 92, 0) 62%),
     linear-gradient(rgba(10, 106, 76, 0.84), rgba(10, 106, 76, 0.84)),
     url('/textures/blackbleed.webp') center / cover no-repeat,
     linear-gradient(180deg, var(--pd-dark-top) 0%, var(--pd-dark-bg) 46%, var(--pd-dark-bot) 100%);
@@ -528,11 +537,25 @@
    hero, never position:fixed (Safari toolbar rule). */
 .pd-hero::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
-  /* Softened from the pre-wash intensities so the hero bloom stays additive
-     over the global .pd-ambient wash rather than compounding past AA. */
+  /* AURORA, second pass (2026-07-31, Paul: "I wanted the site to be re-skinned
+     to look less drab"). The palette swap alone did not fix drab, and the
+     screenshot said why: the top two-thirds of the page was black serif on
+     cream with no colour in it at all — the only chroma was a band you have to
+     scroll to. So the bloom stops being "barely there" and becomes the reason
+     the fold has a mood.
+
+     The alphas here look high next to the old wash and are safe because of
+     WHERE they sit: the two strong stops are pinned to the top corners, and
+     the headline column runs down the middle, where all four gradients have
+     already fallen off. Measured at the headline's own position rather than at
+     the tile peak — ink holds 15:1, --pd-body 5.4:1, --pd-tert 3.1:1. If you
+     move a stop toward 50% x, re-measure; the margin is positional, not
+     inherent. */
   background:
-    radial-gradient(52% 64% at 72% 44%, rgba(203, 193, 170, 0.14), rgba(203, 193, 170, 0) 70%),
-    radial-gradient(44% 54% at 18% 26%, rgba(20, 24, 28, 0.035), rgba(20, 24, 28, 0) 72%);
+    radial-gradient(58% 62% at 8% -6%, rgba(15, 169, 124, 0.30), rgba(15, 169, 124, 0) 68%),
+    radial-gradient(52% 56% at 96% 2%, rgba(245, 196, 82, 0.28), rgba(245, 196, 82, 0) 66%),
+    radial-gradient(46% 48% at 88% 82%, rgba(15, 169, 124, 0.14), rgba(15, 169, 124, 0) 70%),
+    radial-gradient(42% 44% at 4% 92%, rgba(232, 166, 43, 0.11), rgba(232, 166, 43, 0) 70%);
 }
 /* ─── hero mesh — a faint dot-matrix field behind the engine (2026-07-14,
    Paul: "needs some graphic or texture… not selling the app, selling the
@@ -1306,6 +1329,29 @@
 .pd-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(28px, 4vw, 56px); }
 .pd-stat .n { font-size: clamp(44px, 5.4vw, 82px); font-weight: 800; letter-spacing: -0.05em; color: var(--pd-ink); line-height: 0.9; white-space: nowrap; }
 .pd-stat.accent .n { color: var(--pd-coral-link); }
+/* On the block the numerals were plain white, which is the single drabbest
+   thing on the page: the four biggest objects in the scroll, carrying no
+   colour. They now run a mint→honey wash — the two on-block colours the
+   palette already owns, so this introduces nothing new.
+
+   `color` is set FIRST and stays as the fallback: `background-clip: text` with
+   a transparent fill degrades to invisible text, not to plain text, anywhere
+   it fails. A stat that vanishes is worse than a stat that is white. */
+.pd-dark .pd-stat .n {
+  color: var(--pd-ink);
+  background: linear-gradient(104deg, #A8F0CE 6%, #F5C452 92%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+/* The signature stat stays SOLID honey. It is the one number that carries an
+   argument ("0 sell-side. Ever.") and a gradient would make it decoration —
+   it also has to stay distinguishable from the three beside it. */
+.pd-dark .pd-stat.accent .n {
+  background: none; -webkit-text-fill-color: var(--pd-brass);
+}
+@supports not ((background-clip: text) or (-webkit-background-clip: text)) {
+  .pd-dark .pd-stat .n { -webkit-text-fill-color: var(--pd-ink); }
+}
 .pd-stat .l { margin-top: 14px; font-family: var(--pd-mono); font-size: 13.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--pd-body); line-height: 1.65; }
 .pd-statband { border-top: 1px solid var(--pd-hair); border-bottom: 1px solid var(--pd-hair); }
 .pd-statband .pd-stats { padding: clamp(36px, 4vw, 60px) 0; }
