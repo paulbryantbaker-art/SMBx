@@ -872,19 +872,19 @@ export async function buildSystemPrompt(
   // can't flood the prompt; the count stays honest.
   try {
     const [{ count: ownedCountRaw }] = await sql`
-      SELECT COUNT(*) AS count FROM deals WHERE user_id = ${user.id} AND status = 'active'
+      SELECT COUNT(*) AS count FROM deals WHERE user_id = ${user.id} AND status = 'active' AND archived = FALSE
     `;
     const ownedCount = Number(ownedCountRaw);
     const allDeals = await sql`
       SELECT id, journey_type, current_gate, business_name, league, revenue, status
-      FROM deals WHERE user_id = ${user.id} AND status = 'active'
+      FROM deals WHERE user_id = ${user.id} AND status = 'active' AND archived = FALSE
       ORDER BY updated_at DESC
       LIMIT 12
     `;
     const participantDeals = await sql`
       SELECT d.id, d.journey_type, d.business_name, dp.role
       FROM deals d JOIN deal_participants dp ON dp.deal_id = d.id
-      WHERE dp.user_id = ${user.id} AND dp.accepted_at IS NOT NULL AND d.status = 'active'
+      WHERE dp.user_id = ${user.id} AND dp.accepted_at IS NOT NULL AND d.status = 'active' AND d.archived = FALSE
       LIMIT 12
     `;
     const totalDeals = ownedCount + participantDeals.length;
@@ -897,13 +897,13 @@ export async function buildSystemPrompt(
     let inactiveCount = 0;
     try {
       const [{ count: inactiveCountRaw }] = await sql`
-        SELECT COUNT(*) AS count FROM deals WHERE user_id = ${user.id} AND status != 'active'
+        SELECT COUNT(*) AS count FROM deals WHERE user_id = ${user.id} AND status != 'active' AND archived = FALSE
       `;
       inactiveCount = Number(inactiveCountRaw);
       if (inactiveCount > 0) {
         const inactive = await sql`
           SELECT business_name, status, updated_at FROM deals
-          WHERE user_id = ${user.id} AND status != 'active'
+          WHERE user_id = ${user.id} AND status != 'active' AND archived = FALSE
           ORDER BY updated_at DESC LIMIT 3
         `;
         const names = inactive.map((d: any) => {

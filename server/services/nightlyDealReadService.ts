@@ -23,13 +23,13 @@ export async function refreshNightlyDealReads(): Promise<NightlyReadResult> {
 
   const deferredRows = (await sql`
     SELECT COUNT(*)::int AS n FROM deals
-    WHERE status = 'active' AND COALESCE(disposition, 'active') = 'deferred'
+    WHERE status = 'active' AND archived = FALSE AND COALESCE(disposition, 'active') = 'deferred'
   `) as Array<{ n: number }>;
   res.skippedDeferred = Number(deferredRows[0]?.n ?? 0);
 
   const rows = (await sql`
     SELECT user_id, id AS deal_id FROM deals
-    WHERE status = 'active' AND COALESCE(disposition, 'active') <> 'deferred'
+    WHERE status = 'active' AND archived = FALSE AND COALESCE(disposition, 'active') <> 'deferred'
     ORDER BY user_id, id
   `) as Array<{ user_id: number; deal_id: number }>;
   res.deals = rows.length;

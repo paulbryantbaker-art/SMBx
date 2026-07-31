@@ -34,6 +34,18 @@ export const CRM_STAGES = [
 
 const ACTIVITY_KINDS = ['note', 'email', 'call', 'meeting', 'intro', 'stage_change'];
 
+/**
+ * What kind of organisation a row is (migration 115). ONE address book, because
+ * Paul's framing is "whatever, as long as I have their email" — a CPA has to be
+ * mailable from a campaign AND assignable from a deal, and two registers would
+ * mean two answers to "who do we know".
+ *
+ * `acquirer` is the only kind house/leads.ts ranks: a law firm is in the book to
+ * be reachable, not to be scored. The Clients board therefore defaults to
+ * acquirers so it does not fill up with counsel.
+ */
+export const ACCOUNT_KINDS = ['acquirer', 'service_provider', 'target', 'other'] as const;
+
 /** Markets we hold a verified master for. Drives the lane score; overridable
  *  per request so the board can be re-cut when a new master lands. */
 const DEFAULT_TRADES = ['fire and life safety', 'hvac', 'plumbing'];
@@ -101,6 +113,12 @@ crmRouter.get('/crm/accounts', async (req, res) => {
     const userId = (req as any).userId;
     const q = String(req.query.q ?? '').trim();
     const archived = req.query.archived === '1' || req.query.archived === 'true';
+    // Default to acquirers: the ranked client pipeline. `?kind=all` opens the
+    // whole address book (counsel, CPAs, targets), `?kind=service_provider`
+    // narrows to the professionals.
+    const kindParam = String(req.query.kind ?? 'acquirer');
+    const kindFilter = kindParam === 'all' ? null
+      : (ACCOUNT_KINDS as readonly string[]).includes(kindParam) ? kindParam : 'acquirer';
 
     const rows = await sql`
       SELECT a.*,
@@ -110,6 +128,7 @@ crmRouter.get('/crm/accounts', async (req, res) => {
       FROM crm_accounts a
       WHERE a.user_id = ${userId}
         AND a.archived = ${archived}
+        ${kindFilter ? sql`AND COALESCE(a.kind, 'acquirer') = ${kindFilter}` : sql``}
         ${req.query.tier ? sql`AND a.tier = ${String(req.query.tier)}` : sql``}
         ${req.query.stage ? sql`AND a.stage = ${String(req.query.stage)}` : sql``}
         ${req.query.dfw ? sql`AND a.dfw = ${String(req.query.dfw)}` : sql``}
@@ -157,7 +176,62 @@ crmRouter.get('/crm/summary', async (req, res) => {
   }
 });
 
-/** GET /api/crm/accounts/:id — the account with its people and its history. */
+/**
+ * GET /api/crm/picker — the id+name list a deal's "run for" selector needs.
+ * Deliberately tiny (no evidence, no notes, no score detail): a picker that
+ * shipped the whole board would move ~80 rows of prose to render a dropdown.
+ * Archived clients are excluded — you do not assign new work to a retired one.
+ */
+crmRouter.get('/crm/picker', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const rows = await sql`
+      SELECT id, firm, stage, tier FROM crm_accounts
+      WHERE user_id = ${userId} AND archived = FALSE
+      ORDER BY firm ASC
+    `;
+    return res.json(rows);
+  } catch (err: any) {
+    console.error('CRM picker error:', err.message);
+    return res.status(500).json({ error: 'Failed to list clients' });
+  }
+});
+
+/**
+ * GET /api/crm/contacts — the flat address book, for assignee pickers.
+ *   ?role=cpa      narrow to a profession
+ *   ?mailable=1    only rows with an email and no unsubscribe
+ *
+ * Flat and cross-account on purpose: the CPA a deal needs an action from works
+ * at a different firm than the client, so a picker scoped to one account would
+ * never find them.
+ */
+crmRouter.get('/crm/contacts', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const role = String(req.query.role ?? '').trim();
+    const mailable = req.query.mailable === '1' || req.query.mailable === 'true';
+    const rows = await sql`
+      SELECT c.id, c.name, c.title, c.role, c.email, c.is_primary,
+             c.unsubscribed_at, a.id AS account_id, a.firm,
+             COALESCE(a.kind, 'acquirer') AS account_kind
+      FROM crm_contacts c
+      JOIN crm_accounts a ON a.id = c.account_id
+      WHERE a.user_id = ${userId} AND a.archived = FALSE
+        ${role ? sql`AND c.role = ${role}` : sql``}
+        ${mailable ? sql`AND c.email IS NOT NULL AND c.email <> '' AND c.unsubscribed_at IS NULL` : sql``}
+      ORDER BY a.firm ASC, c.is_primary DESC, c.name ASC
+      LIMIT 2000
+    `;
+    return res.json(rows);
+  } catch (err: any) {
+    console.error('CRM contacts error:', err.message);
+    return res.status(500).json({ error: 'Failed to list contacts' });
+  }
+});
+
+/** GET /api/crm/accounts/:id — the account with its people, history and the
+ *  deals being run for it (migration 114's join, read from this side). */
 crmRouter.get('/crm/accounts/:id', async (req, res) => {
   try {
     const userId = (req as any).userId;
@@ -177,7 +251,36 @@ crmRouter.get('/crm/accounts/:id', async (req, res) => {
       SELECT * FROM crm_activity WHERE account_id = ${id}
       ORDER BY occurred_at DESC LIMIT 200
     `;
-    return res.json({ account, contacts, activity });
+    // Best-effort: before migration 114 the column does not exist, and a client
+    // that cannot list its deals is far better than a detail pane that 500s.
+    let deals: any[] = [];
+    try {
+      deals = await sql`
+        SELECT id, business_name, name, current_gate, status, next_action, next_action_on
+        FROM deals
+        WHERE crm_account_id = ${id} AND user_id = ${userId} AND archived = FALSE
+        ORDER BY updated_at DESC
+      `;
+    } catch (e: any) {
+      console.warn('[crm] deals-for-client unavailable (migration 114?):', e?.message);
+    }
+
+    // The searches running for this client (migration 116). This is the top of
+    // the chain that already existed: thesis → portfolio → candidates → deal.
+    // Same best-effort guard, same reason.
+    let searches: any[] = [];
+    try {
+      searches = await sql`
+        SELECT t.id, t.name, t.industry, t.geography, t.is_active,
+               (SELECT COUNT(*) FROM sourcing_candidates c WHERE c.thesis_id = t.id) AS candidate_count
+        FROM buyer_theses t
+        WHERE t.crm_account_id = ${id} AND t.user_id = ${userId}
+        ORDER BY t.updated_at DESC
+      `;
+    } catch (e: any) {
+      console.warn('[crm] searches-for-client unavailable (migration 116?):', e?.message);
+    }
+    return res.json({ account, contacts, activity, deals, searches });
   } catch (err: any) {
     console.error('CRM read error:', err.message);
     return res.status(500).json({ error: 'Failed to read account' });
@@ -359,6 +462,12 @@ crmRouter.patch('/crm/accounts/:id', async (req, res) => {
     if ('next_action_on' in b) updates.next_action_on = dateOrNull(b.next_action_on);
     if (typeof b.notes === 'string') updates.notes = b.notes;
     if (typeof b.archived === 'boolean') updates.archived = b.archived;
+    if (typeof b.kind === 'string') {
+      if (!(ACCOUNT_KINDS as readonly string[]).includes(b.kind)) {
+        return res.status(400).json({ error: `Invalid kind (${ACCOUNT_KINDS.join(' | ')})` });
+      }
+      updates.kind = b.kind;
+    }
     // Scoring inputs.
     if ('last_deal_on' in b) updates.last_deal_on = dateOrNull(b.last_deal_on);
     if ('disqualified' in b) updates.disqualified = String(b.disqualified ?? '').trim() || null;
@@ -398,6 +507,75 @@ crmRouter.patch('/crm/accounts/:id', async (req, res) => {
   }
 });
 
+/* ── lead → deal ──────────────────────────────────────────────────────── */
+
+/**
+ * POST /api/crm/accounts/:id/deals   { business_name, industry?, location? }
+ *
+ * Paul: "do we have a lead and then transfer that into a deal." This is the
+ * transfer. It creates a `deals` row already linked back through
+ * `crm_account_id` (migration 114), which is what makes the two pipelines one
+ * practice rather than two lists.
+ *
+ * The TARGET name is required and comes from the caller: an acquirer client is
+ * not itself a deal. "Amalgam Capital" is who we work for; the deal is the
+ * company they are buying, and inventing that name from the client's would be a
+ * fabricated record.
+ *
+ * Journey `buy` / gate `B0` (Thesis) is the only correct start for this
+ * practice — buy-side only, THE LINE §perimeter — so it is not a parameter.
+ */
+crmRouter.post('/crm/accounts/:id/deals', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ error: 'Bad id' });
+
+    const [account] = await sql`
+      SELECT id, firm, stage FROM crm_accounts WHERE id = ${id} AND user_id = ${userId}
+    `;
+    if (!account) return res.status(404).json({ error: 'Client not found' });
+
+    const businessName = String(req.body?.business_name ?? '').trim();
+    if (!businessName) {
+      return res.status(400).json({
+        error: 'business_name (the target company) is required — a client is not a deal',
+      });
+    }
+
+    const [deal] = await sql`
+      INSERT INTO deals
+        (user_id, journey_type, current_gate, status, business_name, name,
+         industry, location, crm_account_id)
+      VALUES
+        (${userId}, 'buy', 'B0', 'active', ${businessName.slice(0, 200)},
+         ${businessName.slice(0, 200)},
+         ${typeof req.body?.industry === 'string' ? req.body.industry.slice(0, 200) : null},
+         ${typeof req.body?.location === 'string' ? req.body.location.slice(0, 200) : null},
+         ${id})
+      RETURNING id, business_name, current_gate, journey_type, crm_account_id
+    `;
+
+    // The client's history should show that a deal opened for them.
+    try {
+      await sql`
+        INSERT INTO crm_activity (account_id, user_id, kind, subject, body)
+        VALUES (${id}, ${userId}, 'note',
+                ${`Deal opened — ${businessName}`.slice(0, 300)},
+                ${`Target added to the pipeline for ${account.firm}.`})
+      `;
+    } catch (e: any) {
+      // The deal exists. A missing log line is not a failed conversion.
+      console.warn('[crm] convert activity log failed:', e?.message);
+    }
+
+    return res.json(deal);
+  } catch (err: any) {
+    console.error('CRM convert error:', err.message);
+    return res.status(500).json({ error: `Failed to open a deal: ${err.message}` });
+  }
+});
+
 /* ── contacts + activity ──────────────────────────────────────────────── */
 
 async function ownsAccount(userId: number, accountId: number): Promise<boolean> {
@@ -416,12 +594,14 @@ crmRouter.post('/crm/accounts/:id/contacts', async (req, res) => {
     if (!name) return res.status(400).json({ error: 'name is required' });
 
     const [row] = await sql`
-      INSERT INTO crm_contacts (account_id, name, title, email, phone, linkedin_url, is_primary, notes)
-      VALUES (${id}, ${name}, ${req.body?.title || null}, ${req.body?.email || null},
+      INSERT INTO crm_contacts (account_id, name, title, role, email, phone, linkedin_url, is_primary, notes)
+      VALUES (${id}, ${name}, ${req.body?.title || null}, ${req.body?.role || null},
+              ${req.body?.email || null},
               ${req.body?.phone || null}, ${req.body?.linkedin_url || null},
               ${!!req.body?.is_primary}, ${req.body?.notes || null})
       ON CONFLICT (account_id, lower(name)) DO UPDATE SET
         title = COALESCE(EXCLUDED.title, crm_contacts.title),
+        role = COALESCE(EXCLUDED.role, crm_contacts.role),
         email = COALESCE(EXCLUDED.email, crm_contacts.email),
         phone = COALESCE(EXCLUDED.phone, crm_contacts.phone),
         linkedin_url = COALESCE(EXCLUDED.linkedin_url, crm_contacts.linkedin_url),

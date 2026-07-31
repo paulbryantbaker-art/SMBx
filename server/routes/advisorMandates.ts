@@ -111,7 +111,7 @@ advisorMandatesRouter.get('/advisor/mandates', async (req, res) => {
         FROM deal_offers GROUP BY deal_id
       ) o ON o.deal_id = d.id
       WHERE d.user_id = ${userId}
-        AND d.status = 'active'
+        AND d.status = 'active' AND d.archived = FALSE
         AND (d.journey_type ILIKE '%sell%' OR d.current_gate LIKE 'S%')
       ORDER BY d.updated_at DESC NULLS LAST`;
 

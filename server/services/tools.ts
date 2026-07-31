@@ -3649,13 +3649,13 @@ async function listUserDeals(input: Record<string, any>, userId: number): Promis
       ? await sql`
           SELECT id, journey_type, current_gate, league, business_name, industry, location,
                  revenue, sde, ebitda, asking_price, status, created_at, updated_at
-          FROM deals WHERE user_id = ${userId} AND journey_type = ${journeyFilter}
+          FROM deals WHERE user_id = ${userId} AND journey_type = ${journeyFilter} AND archived = FALSE
           ORDER BY updated_at DESC
         `
       : await sql`
           SELECT id, journey_type, current_gate, league, business_name, industry, location,
                  revenue, sde, ebitda, asking_price, status, created_at, updated_at
-          FROM deals WHERE user_id = ${userId} AND status = 'active' AND journey_type = ${journeyFilter}
+          FROM deals WHERE user_id = ${userId} AND status = 'active' AND archived = FALSE AND journey_type = ${journeyFilter}
           ORDER BY updated_at DESC
         `;
   } else {
@@ -3663,13 +3663,13 @@ async function listUserDeals(input: Record<string, any>, userId: number): Promis
       ? await sql`
           SELECT id, journey_type, current_gate, league, business_name, industry, location,
                  revenue, sde, ebitda, asking_price, status, created_at, updated_at
-          FROM deals WHERE user_id = ${userId}
+          FROM deals WHERE user_id = ${userId} AND archived = FALSE
           ORDER BY updated_at DESC
         `
       : await sql`
           SELECT id, journey_type, current_gate, league, business_name, industry, location,
                  revenue, sde, ebitda, asking_price, status, created_at, updated_at
-          FROM deals WHERE user_id = ${userId} AND status = 'active'
+          FROM deals WHERE user_id = ${userId} AND status = 'active' AND archived = FALSE
           ORDER BY updated_at DESC
         `;
   }
@@ -3686,7 +3686,7 @@ async function listUserDeals(input: Record<string, any>, userId: number): Promis
                  dp.role as participant_role, dp.access_level
           FROM deals d
           JOIN deal_participants dp ON dp.deal_id = d.id
-          WHERE dp.user_id = ${userId} AND dp.accepted_at IS NOT NULL
+          WHERE dp.user_id = ${userId} AND dp.accepted_at IS NOT NULL AND d.archived = FALSE
           ORDER BY d.updated_at DESC
         `
       : await sql`
@@ -3695,7 +3695,7 @@ async function listUserDeals(input: Record<string, any>, userId: number): Promis
                  dp.role as participant_role, dp.access_level
           FROM deals d
           JOIN deal_participants dp ON dp.deal_id = d.id
-          WHERE dp.user_id = ${userId} AND dp.accepted_at IS NOT NULL AND d.status = 'active'
+          WHERE dp.user_id = ${userId} AND dp.accepted_at IS NOT NULL AND d.status = 'active' AND d.archived = FALSE
           ORDER BY d.updated_at DESC
         `;
   }
@@ -4407,7 +4407,7 @@ async function queryAdminData(input: Record<string, any>, userId: number): Promi
         SELECT COUNT(DISTINCT user_id)::int as c FROM conversations
         WHERE updated_at > NOW() - ${interval}::interval AND user_id IS NOT NULL
       `;
-      const [deals] = await sql`SELECT COUNT(*)::int as total FROM deals WHERE status = 'active'`;
+      const [deals] = await sql`SELECT COUNT(*)::int as total FROM deals WHERE status = 'active' AND archived = FALSE`;
       const [mrr] = hasSubs
         ? await sql`SELECT COALESCE(SUM(CASE WHEN plan IN ('solo', 'starter') THEN 9900 WHEN plan IN ('pro', 'professional') THEN 24900 WHEN plan = 'team' THEN 74900 WHEN plan = 'enterprise' THEN 300000 ELSE 0 END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')`
         : [{ mrr_cents: 0 }];
@@ -4452,7 +4452,7 @@ async function queryAdminData(input: Record<string, any>, userId: number): Promi
       const journeys = await sql`
         SELECT journey_type, COUNT(*)::int as count,
                AVG(CASE WHEN current_gate ~ '[0-9]' THEN CAST(SUBSTRING(current_gate FROM '[0-9]+') AS INTEGER) ELSE 0 END)::numeric(3,1) as avg_gate
-        FROM deals WHERE status = 'active' GROUP BY journey_type ORDER BY count DESC
+        FROM deals WHERE status = 'active' AND archived = FALSE GROUP BY journey_type ORDER BY count DESC
       `;
       return JSON.stringify({ journeys });
     }
@@ -4460,7 +4460,7 @@ async function queryAdminData(input: Record<string, any>, userId: number): Promi
     case 'gate_heatmap': {
       const gates = await sql`
         SELECT current_gate, COUNT(*)::int as count FROM deals
-        WHERE status = 'active' AND current_gate IS NOT NULL
+        WHERE status = 'active' AND archived = FALSE AND current_gate IS NOT NULL
         GROUP BY current_gate ORDER BY current_gate
       `;
       return JSON.stringify({ gates });

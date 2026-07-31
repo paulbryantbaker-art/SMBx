@@ -15,12 +15,10 @@
  *  - SECTOR: MobileStageRow has no `industry`. The `sub` line is built from
  *    `[industry, location]` upstream, so we read the segment before the first
  *    "·" as the sector and fall back to "—".
- *  - OWNER: the deal hook has no owner-name field. These are the signed-in
- *    user's deals, so we render the current user's initials/name (honest) —
- *    never a fabricated teammate.
- *  - ACTIVITY: MobileStageRow carries no updated_at → "—".
  *  - FIT: rendered ONLY when `fit` is a real composite (the hook already nulls
- *    synthetic fits in `all`). Otherwise "—".
+ *    synthetic fits in `all`) — board cards only; the table dropped the column.
+ *  - RUN FOR: null is the honest default and prints "unassigned", because an
+ *    unassigned deal cannot be checked against one-buyer-per-target.
  *  - KPIs: IN FLOW / FLOW VALUE are real summary fields; IOI/LOI and STALLED are
  *    not derivable from the available fields → honest "—".
  *  - MONEY: a literal 0-cents "Ask" must not print "$0 Ask"; the board card
@@ -35,6 +33,19 @@
  * "Archived" is a SCOPE, not a filter chip: the archive and the board are two
  * views of different rows, never one mixed list. Archived scope forces the
  * table (a kanban of retired deals says nothing) and swaps Archive → Restore.
+ *
+ * ── DEAL MANAGEMENT (2026-07-31, migration 114) ──────────────────────────
+ * Paul: "I need it to be a CRM tool and then a deal management tool." The table
+ * gained RUN FOR (which acquirer client the deal is run for) and NEXT (what is
+ * owed, and when), and LOST two columns that were honest but useless: OWNER
+ * printed the signed-in user on every row — a constant is not a column — and
+ * ACTIVITY was a hardcoded "—". The per-deal owner moved to the detail pane
+ * where it can be set.
+ *
+ * Assigning a client runs THE LINE's one-buyer-per-target check server-side
+ * (`targetConflicts`). It WARNS, never blocks: target identity is a name match,
+ * and a false block on a collision would be worse than a flag someone reads.
+ * The pane surfaces that warning verbatim.
  */
 import { useMemo, useState } from "react";
 import type { AtlasScreenProps } from "../atlasNav";
@@ -51,7 +62,6 @@ import type { Verdict } from "../../mobile/types";
 import type { User } from "../../../../hooks/useAuth";
 import {
   MarkBadge,
-  Avatar,
   Pill,
   KpiCard,
   EmptyState,
@@ -59,11 +69,17 @@ import {
   fmtCents,
 } from "../primitives";
 import { SearchIcon, BackIcon, ChevronRightIcon } from "../icons";
+import { useCrmPicker } from "../../../../hooks/useCrmAccounts";
+import {
+  useDealTasks, useAddressBook, TASK_STATUS_LABEL, ROLE_LABEL,
+  type AddressBookContact, type DealTask,
+} from "../../../../hooks/useDealTasks";
+import { dueLabel, daysUntil } from "../../../../lib/crm";
 import { T } from "../atlasTokens";
 
 const PAGE_SIZE = 25;
 
-type FilterId = "all" | "buy" | "sell" | "watch";
+type FilterId = "all" | "buy" | "sell" | "watch" | "due";
 type ViewId = "board" | "table";
 /** Which SET of deals we're looking at. Not a filter — a different row set. */
 type ScopeId = "active" | "archived";
@@ -73,6 +89,9 @@ const FILTERS: { id: FilterId; label: string }[] = [
   { id: "buy", label: "Buy-side" },
   { id: "sell", label: "Sell-side" },
   { id: "watch", label: "Watchlist" },
+  // Client-side, deliberately: every row is already in memory, so this is
+  // instant. The server's `?due=1` exists for other callers.
+  { id: "due", label: "Due now" },
 ];
 
 /* ─── per-row derivations (honest) ─────────────────────────── */
@@ -117,13 +136,6 @@ function stageMeta(row: MobileStageRow): { label: string; bg: string; fg: string
  *  mislabel it as enterprise value. No asking price → "—" via fmtCents. */
 function evCents(row: MobileStageRow): number | null {
   return row.askingPrice ?? null;
-}
-
-/** Fit pill palette by score (map 00): ≥80 green, 65–79 blue, <65 gray. */
-function fitMeta(fit: number): { bg: string; fg: string } {
-  if (fit >= 80) return { bg: T.greenBg, fg: T.green };
-  if (fit >= 65) return { bg: T.blueBg, fg: T.blue };
-  return { bg: T.track, fg: T.muted2 };
 }
 
 /** Mark-tile palette — stable per row so the table reads as a set, not noise. */
@@ -186,14 +198,19 @@ function verdictPill(v: Verdict): { label: string; bg: string; fg: string } {
 
 /* ─── column layout (flex weights from map 00) ─────────────── */
 
+// Deal management (2026-07-31, migration 114) rebalanced these. OWNER and
+// ACTIVITY are gone from the table: OWNER printed the signed-in user on every
+// single row (a constant is not a column) and ACTIVITY was a hardcoded "—"
+// because MobileStageRow carried no timestamp. Both were honest and useless.
+// CLIENT — which acquirer the deal is run FOR — and NEXT replace them, and the
+// per-deal owner moved to the detail pane where it can actually be set.
 const COLS = {
-  deal: 2.4,
-  sector: 1.4,
-  stage: 1.3,
+  deal: 2.2,
+  client: 1.5,
+  sector: 1.2,
+  stage: 1.2,
   ev: 1,
-  fit: 1,
-  owner: 1.3,
-  activity: 1.2,
+  next: 1.7,
 } as const;
 
 const ROW_PAD = "11px 22px";
@@ -215,14 +232,19 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [busy, setBusy] = useState(false);
   const [bulkError, setBulkError] = useState<string | null>(null);
+  // The deal being managed in the side pane (client / next action / owner).
+  const [managing, setManaging] = useState<MobileStageRow | null>(null);
 
   const { all, loading, loaded, isAuthed, refresh } = useMobileDeals(user, {
     archived: scope === "archived",
   });
   const { summary } = usePortfolioSummary(user, isAuthed);
   const mandates = useAdvisorMandates(user);
+  const { clients } = useCrmPicker(user);
+  // Cross-account: the CPA a deal needs an action from works at a different firm
+  // than the client, so the assignee picker cannot be scoped to one account.
+  const addressBook = useAddressBook(user);
 
-  const owner = ownerOf(user);
   // A kanban of retired deals communicates nothing, so the archive is always
   // the table.
   const effectiveView: ViewId = scope === "archived" ? "table" : view;
@@ -237,6 +259,7 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
         if (!hay.includes(q)) return false;
       }
       if (filter === "watch") return row.verdict === "watch";
+      if (filter === "due") return (daysUntil(row.nextActionOn) ?? 1) <= 0;
       if (filter === "buy") return sideOf(row) === "buy";
       if (filter === "sell") return sideOf(row) === "sell";
       return true;
@@ -438,7 +461,6 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
       ) : (
         <TableView
           rows={pageRows}
-          owner={owner}
           total={filtered.length}
           start={start}
           end={Math.min(start + PAGE_SIZE, filtered.length)}
@@ -451,10 +473,23 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
           onToggleRow={toggleRow}
           onToggleAll={toggleAll}
           onOpen={openDeal}
+          onManage={setManaging}
           onClear={() => {
             setQuery("");
             setFilter("all");
           }}
+        />
+      )}
+
+      {managing && (
+        <DealPane
+          key={managing.rawId}
+          row={managing}
+          user={user}
+          clients={clients}
+          addressBook={addressBook}
+          onClose={() => setManaging(null)}
+          onSaved={refresh}
         />
       )}
     </div>
@@ -741,7 +776,6 @@ function BulkBar({
 
 function TableView({
   rows,
-  owner,
   total,
   start,
   end,
@@ -754,10 +788,10 @@ function TableView({
   onToggleRow,
   onToggleAll,
   onOpen,
+  onManage,
   onClear,
 }: {
   rows: MobileStageRow[];
-  owner: { initials: string; name: string } | null;
   total: number;
   start: number;
   end: number;
@@ -770,6 +804,7 @@ function TableView({
   onToggleRow: (rawId: number) => void;
   onToggleAll: () => void;
   onOpen: (row: MobileStageRow) => void;
+  onManage: (row: MobileStageRow) => void;
   onClear: () => void;
 }) {
   if (total === 0) {
@@ -809,12 +844,12 @@ function TableView({
           label={allSelected ? `Deselect all ${total}` : `Select all ${total}`}
         />
         <div style={{ flex: COLS.deal, minWidth: 0 }}>DEAL</div>
+        <div style={{ flex: COLS.client, minWidth: 0 }}>RUN FOR</div>
         <div style={{ flex: COLS.sector, minWidth: 0 }}>SECTOR</div>
         <div style={{ flex: COLS.stage, minWidth: 0 }}>STAGE</div>
         <div style={{ flex: COLS.ev, minWidth: 0 }}>EV</div>
-        <div style={{ flex: COLS.fit, minWidth: 0 }}>FIT</div>
-        <div style={{ flex: COLS.owner, minWidth: 0 }}>OWNER</div>
-        <div style={{ flex: COLS.activity, minWidth: 0 }}>ACTIVITY</div>
+        <div style={{ flex: COLS.next, minWidth: 0 }}>NEXT</div>
+        <span style={{ width: 66, flex: "none" }} />
       </div>
 
       {/* rows */}
@@ -823,10 +858,10 @@ function TableView({
           <DealRow
             key={row.id}
             row={row}
-            owner={owner}
             selected={selected.has(row.rawId)}
             onToggleSelect={() => onToggleRow(row.rawId)}
             onOpen={() => onOpen(row)}
+            onManage={() => onManage(row)}
           />
         ))}
       </div>
@@ -1154,26 +1189,357 @@ function DealCard({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) 
   );
 }
 
+/* ─── deal management pane ─────────────────────────────────── */
+
+/**
+ * Assign the client, set what's next, name the owner. Deliberately NOT the deal
+ * cockpit — that is where the analysis lives; this is the three fields that make
+ * the board a pipeline, reachable without leaving it.
+ *
+ * position:absolute inside the screen's relative root — never fixed with a
+ * background colour (Safari toolbar rule).
+ */
+function DealPane({
+  row, user, clients, addressBook, onClose, onSaved,
+}: {
+  row: MobileStageRow;
+  user: User | null;
+  clients: { id: number; firm: string; stage: string }[];
+  addressBook: AddressBookContact[];
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [clientId, setClientId] = useState<string>(row.crmAccountId ? String(row.crmAccountId) : "");
+  const [action, setAction] = useState(row.nextAction ?? "");
+  const [on, setOn] = useState(row.nextActionOn ?? "");
+  const [ownerEmail, setOwnerEmail] = useState(row.ownerEmail ?? "");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // THE LINE's one-buyer-per-target warning, surfaced verbatim from the server.
+  const [lineWarning, setLineWarning] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  const fallbackOwner = ownerOf(user);
+
+  const save = async () => {
+    setSaving(true); setError(null); setLineWarning(null); setSaved(false);
+    try {
+      const r = await fetch(`/api/deals/${row.rawId}`, {
+        method: "PATCH",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({
+          crm_account_id: clientId === "" ? null : Number(clientId),
+          next_action: action,
+          next_action_on: on || null,
+          owner_email: ownerEmail,
+        }),
+      });
+      if (!r.ok) {
+        let detail = "";
+        try { detail = (await r.json())?.error || ""; } catch { /* no body */ }
+        throw new Error(detail || `HTTP ${r.status}`);
+      }
+      const body = await r.json();
+      if (body?.lineWarning) setLineWarning(body.lineWarning);
+      setSaved(true);
+      onSaved();
+    } catch (e: any) {
+      setError(e?.message ?? "Could not save");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div style={{
+      position: "absolute", top: 0, right: 0, bottom: 0, width: 460, maxWidth: "94%",
+      background: T.white, borderLeft: `1px solid ${T.border}`,
+      boxShadow: "-14px 0 40px rgba(16,24,40,0.10)",
+      display: "flex", flexDirection: "column", zIndex: 5,
+    }}>
+      <div style={{ padding: "16px 20px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", gap: 12, flex: "none" }}>
+        <span style={{ flex: 1, minWidth: 0, fontWeight: 700, fontSize: 15, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {row.name}
+        </span>
+        <button type="button" onClick={onClose} style={paneGhost}>Close</button>
+      </div>
+
+      <div style={{ flex: 1, minHeight: 0, overflow: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
+        {error && <p style={{ margin: 0, color: T.amber, fontSize: 13 }}>{error}</p>}
+        {lineWarning && (
+          <p style={{
+            margin: 0, padding: "10px 12px", background: T.amberBg, borderRadius: 8,
+            color: T.amber, fontSize: 12.5, lineHeight: 1.55,
+          }}>
+            {lineWarning}
+          </p>
+        )}
+        {saved && !lineWarning && !error && (
+          <p style={{ margin: 0, color: T.green, fontSize: 12.5 }}>Saved.</p>
+        )}
+
+        <label style={{ display: "block" }}>
+          <span style={paneLabel}>Run for</span>
+          <select value={clientId} onChange={e => setClientId(e.target.value)} style={paneInput}>
+            <option value="">Unassigned</option>
+            {clients.map(c => <option key={c.id} value={String(c.id)}>{c.firm}</option>)}
+          </select>
+          <span style={{ display: "block", fontSize: 12, color: T.muted2, marginTop: 5, lineHeight: 1.5 }}>
+            {clients.length === 0
+              ? "No clients yet — import the buy-side register on the Clients tab."
+              : "Which acquirer client this deal is run for. One buyer per target is checked on save."}
+          </span>
+        </label>
+
+        <label style={{ display: "block" }}>
+          <span style={paneLabel}>Next action</span>
+          <input
+            value={action}
+            onChange={e => setAction(e.target.value)}
+            placeholder="e.g. send the LOI draft to counsel"
+            style={paneInput}
+          />
+        </label>
+
+        <label style={{ display: "block" }}>
+          <span style={paneLabel}>When</span>
+          <input type="date" value={on} onChange={e => setOn(e.target.value)} style={paneInput} />
+        </label>
+
+        <label style={{ display: "block" }}>
+          <span style={paneLabel}>Owner</span>
+          <input
+            value={ownerEmail}
+            onChange={e => setOwnerEmail(e.target.value)}
+            placeholder={fallbackOwner?.name ?? "email"}
+            style={paneInput}
+          />
+          <span style={{ display: "block", fontSize: 12, color: T.muted2, marginTop: 5 }}>
+            Blank means you. Set it when a partner is carrying the deal.
+          </span>
+        </label>
+
+        <button
+          type="button"
+          disabled={saving}
+          onClick={save}
+          style={{
+            ...paneGhost, borderColor: T.blue, color: "#fff",
+            background: saving ? T.muted2 : T.blue, fontSize: 13,
+          }}
+        >
+          {saving ? "Saving…" : "Save"}
+        </button>
+
+        <TaskBlock dealId={row.rawId} addressBook={addressBook} />
+
+        <div style={{ borderTop: `1px solid ${T.rowDiv}`, paddingTop: 14 }}>
+          <p style={{ margin: 0, fontSize: 12, color: T.muted2, lineHeight: 1.5 }}>
+            Analysis, documents and the data room live in the deal cockpit — click
+            the row itself to open it.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Actions this deal needs from someone — often someone outside the practice.
+ *
+ * Two buttons, deliberately not one. "Add" records that the action is needed;
+ * "Ask" emails the assignee. Creating a task and telling a CPA about it are
+ * different decisions, and a note typed while thinking must never mail anybody.
+ *
+ * The send reports itself honestly: `{sent:false, reason}` arrives on a 200 when
+ * there is no email address or no mail key, and the reason is repeated verbatim
+ * rather than shown as a success.
+ */
+function TaskBlock({ dealId, addressBook }: { dealId: number; addressBook: AddressBookContact[] }) {
+  const { tasks, error, create, patch, notify } = useDealTasks(dealId);
+  const [title, setTitle] = useState("");
+  const [detail, setDetail] = useState("");
+  const [who, setWho] = useState("");
+  const [due, setDue] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
+
+  const mailable = addressBook.filter(c => c.email && !c.unsubscribed_at);
+
+  const add = async (andAsk: boolean) => {
+    if (!title.trim() || busy) return;
+    setBusy(true); setNote(null);
+    try {
+      const r = await create({
+        title: title.trim(),
+        detail: detail.trim() || null,
+        assignee_contact_id: who || null,
+        due_on: due || null,
+        notify: andAsk,
+      });
+      setTitle(""); setDetail(""); setDue("");
+      if (andAsk) {
+        setNote(r?.sent ? "Emailed." : (r?.reason ?? "Nothing was sent."));
+      }
+    } catch (e: any) {
+      setNote(e?.message ?? "Could not save");
+    } finally { setBusy(false); }
+  };
+
+  const ask = async (t: DealTask) => {
+    setBusy(true); setNote(null);
+    try {
+      const r = await notify(t.id);
+      setNote(r.sent ? `Emailed ${t.assignee_email}.` : (r.reason ?? "Nothing was sent."));
+    } catch (e: any) {
+      setNote(e?.message ?? "Could not send");
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <div style={{ borderTop: `1px solid ${T.rowDiv}`, paddingTop: 14 }}>
+      <span style={paneLabel}>Actions needed</span>
+
+      {error && <p style={{ margin: "0 0 10px", fontSize: 12.5, color: T.amber }}>{error}</p>}
+      {note && <p style={{ margin: "0 0 10px", fontSize: 12.5, color: T.ink3 }}>{note}</p>}
+
+      {tasks.length > 0 && (
+        <div style={{ marginBottom: 14 }}>
+          {tasks.map(t => {
+            const overdue = (daysUntil(t.due_on) ?? 1) <= 0 && t.status !== "done";
+            return (
+              <div key={t.id} style={{ padding: "8px 0", borderBottom: `1px solid ${T.rowDiv}` }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: T.ink }}>{t.title}</div>
+                <div style={{ fontSize: 12, color: T.muted2, marginTop: 2 }}>
+                  {[
+                    TASK_STATUS_LABEL[t.status as never] ?? t.status,
+                    t.assignee_name || t.contact_name || t.assignee_email || "unassigned",
+                    t.assignee_role ? ROLE_LABEL[t.assignee_role] ?? t.assignee_role : null,
+                    t.due_on ? dueLabel(t.due_on) : null,
+                    t.notify_count > 0 ? `asked ${t.notify_count}×` : null,
+                  ].filter(Boolean).join(" · ")}
+                </div>
+                {overdue && (
+                  <div style={{ fontSize: 12, color: T.amber, marginTop: 2 }}>
+                    {dueLabel(t.due_on)}
+                  </div>
+                )}
+                <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
+                  {t.status !== "done" && (
+                    <>
+                      <button
+                        type="button" disabled={busy || !t.assignee_email}
+                        title={t.assignee_email ? `Email ${t.assignee_email}` : "No email on this assignee"}
+                        onClick={() => ask(t)}
+                        style={{ ...paneGhost, padding: "4px 10px", fontSize: 12, opacity: t.assignee_email ? 1 : 0.5 }}
+                      >
+                        {t.notify_count > 0 ? "Remind" : "Ask"}
+                      </button>
+                      <button
+                        type="button" disabled={busy}
+                        onClick={() => patch(t.id, { status: "done" })}
+                        style={{ ...paneGhost, padding: "4px 10px", fontSize: 12 }}
+                      >
+                        Done
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <input
+        value={title}
+        onChange={e => setTitle(e.target.value)}
+        placeholder="What's needed? e.g. QoE scope for the Sept close"
+        style={{ ...paneInput, marginBottom: 8 }}
+      />
+      <textarea
+        value={detail}
+        onChange={e => setDetail(e.target.value)}
+        rows={2}
+        placeholder="Any detail they need (optional)"
+        style={{ ...paneInput, marginBottom: 8, resize: "vertical", lineHeight: 1.5 }}
+      />
+      <select value={who} onChange={e => setWho(e.target.value)} style={{ ...paneInput, marginBottom: 8 }}>
+        <option value="">Unassigned</option>
+        {mailable.map(c => (
+          <option key={c.id} value={String(c.id)}>
+            {c.name}{c.role ? ` — ${ROLE_LABEL[c.role] ?? c.role}` : ""} · {c.firm}
+          </option>
+        ))}
+      </select>
+      <input type="date" value={due} onChange={e => setDue(e.target.value)} style={{ ...paneInput, marginBottom: 8 }} />
+
+      <div style={{ display: "flex", gap: 8 }}>
+        <button type="button" disabled={busy || !title.trim()} onClick={() => add(false)}
+                style={{ ...paneGhost, opacity: title.trim() ? 1 : 0.5 }}>
+          Add
+        </button>
+        <button
+          type="button"
+          disabled={busy || !title.trim() || !who}
+          title={who ? "Add it and email them now" : "Pick an assignee to email"}
+          onClick={() => add(true)}
+          style={{
+            ...paneGhost, borderColor: T.blue, color: "#fff",
+            background: T.blue, opacity: title.trim() && who ? 1 : 0.5,
+          }}
+        >
+          Add &amp; ask
+        </button>
+      </div>
+      {mailable.length === 0 && (
+        <p style={{ margin: "8px 0 0", fontSize: 12, color: T.muted2, lineHeight: 1.5 }}>
+          No mailable contacts yet. Add people — CPAs, counsel, lenders — under
+          Clients, and they become assignable here.
+        </p>
+      )}
+    </div>
+  );
+}
+
+const paneGhost: React.CSSProperties = {
+  fontSize: 12.5, fontWeight: 600, padding: "8px 14px", borderRadius: T.rPill,
+  border: `1px solid ${T.border}`, background: T.white, color: T.muted,
+  cursor: "pointer", fontFamily: T.font,
+};
+const paneLabel: React.CSSProperties = {
+  display: "block", fontSize: 12, fontWeight: 700, letterSpacing: "0.04em",
+  color: T.muted2, marginBottom: 5, textTransform: "uppercase",
+};
+const paneInput: React.CSSProperties = {
+  width: "100%", boxSizing: "border-box", padding: "9px 11px", fontSize: 13,
+  fontFamily: T.font, color: T.ink, background: T.white,
+  border: `1px solid ${T.border}`, borderRadius: 8, outline: "none",
+};
+
 /* ─── row (table) ──────────────────────────────────────────── */
 
 function DealRow({
   row,
-  owner,
   selected,
   onToggleSelect,
   onOpen,
+  onManage,
 }: {
   row: MobileStageRow;
-  owner: { initials: string; name: string } | null;
   selected: boolean;
   onToggleSelect: () => void;
+  /** Row click — the full deal cockpit. */
   onOpen: () => void;
+  /** Manage — the quick pipeline pane, without leaving the board. */
+  onManage: () => void;
 }) {
   const sector = sectorOf(row);
   const stage = stageMeta(row);
   const ev = evCents(row);
   const tint = markTint(row.rawId);
-  const fitReal = typeof row.fit === "number";
+  const due = dueLabel(row.nextActionOn);
+  const overdue = (daysUntil(row.nextActionOn) ?? 1) <= 0;
   // A selected row keeps its wash through mouseleave/blur, so the inline hover
   // handlers below restore the selected tint rather than "transparent".
   const restBg = selected ? T.blueBg3 : "transparent";
@@ -1239,6 +1605,17 @@ function DealRow({
         </span>
       </div>
 
+      {/* RUN FOR — the acquirer client. Unassigned is the honest default and
+          says so rather than printing a dash: an unassigned deal cannot be
+          checked against THE LINE's one-buyer-per-target rule. */}
+      <div style={{ flex: COLS.client, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        {row.clientFirm ? (
+          <span style={{ color: T.ink3 }}>{row.clientFirm}</span>
+        ) : (
+          <span style={{ color: T.faint }}>unassigned</span>
+        )}
+      </div>
+
       {/* SECTOR */}
       <div
         style={{
@@ -1263,48 +1640,35 @@ function DealRow({
         {fmtCents(ev)}
       </div>
 
-      {/* FIT — only when real */}
-      <div style={{ flex: COLS.fit, minWidth: 0 }}>
-        {fitReal ? (
-          <Pill
-            bg={fitMeta(row.fit as number).bg}
-            fg={fitMeta(row.fit as number).fg}
-            style={{ padding: "3px 9px" }}
-          >
-            {row.fit}
-          </Pill>
-        ) : (
-          <span style={{ color: T.faint }}>—</span>
-        )}
-      </div>
-
-      {/* OWNER — the signed-in user (these are their deals) */}
-      <div style={{ flex: COLS.owner, minWidth: 0, display: "flex", alignItems: "center", gap: 8 }}>
-        {owner ? (
+      {/* NEXT — what is owed, and when. The one thing that makes this a
+          pipeline rather than a list. */}
+      <div style={{ flex: COLS.next, minWidth: 0, fontSize: 12.5 }}>
+        {row.nextAction ? (
           <>
-            {/* Owner is the signed-in user on every row, so the avatar uses a
-                single stable blue tint — the Avatar primitive renders initials
-                in T.blue, so a rotating non-blue tile would print blue text on
-                amber/green/terra (off-palette, low contrast). */}
-            <Avatar initials={owner.initials} size={22} bg={T.blueBg} />
-            <span
-              style={{
-                color: T.muted,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {owner.name}
+            <span style={{ display: "block", color: T.ink3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {row.nextAction}
             </span>
+            {due && <span style={{ color: overdue ? T.amber : T.muted2 }}>{due}</span>}
           </>
         ) : (
-          <span style={{ color: T.faint }}>—</span>
+          <span style={{ color: T.faint }}>no next action</span>
         )}
       </div>
 
-      {/* ACTIVITY — no updated_at on stage rows → honest dash */}
-      <div style={{ flex: COLS.activity, minWidth: 0, color: T.faint, fontSize: 12.5 }}>—</div>
+      <span style={{ width: 66, flex: "none", display: "flex", justifyContent: "flex-end" }}>
+        <button
+          type="button"
+          onClick={e => { e.stopPropagation(); onManage(); }}
+          title="Assign a client, set what's next"
+          style={{
+            fontSize: 12, fontWeight: 600, padding: "4px 9px", borderRadius: T.rPill,
+            border: `1px solid ${T.border}`, background: T.white, color: T.muted,
+            cursor: "pointer", fontFamily: T.font,
+          }}
+        >
+          Manage
+        </button>
+      </span>
     </div>
   );
 }

@@ -847,7 +847,7 @@ chatRouter.get('/conversations/grouped', requireAuth, async (req, res) => {
              seven_factor_composite, seven_factor_scores,
              employee_count, naics_code
       FROM deals
-      WHERE user_id = ${userId} AND status = 'active'
+      WHERE user_id = ${userId} AND status = 'active' AND archived = FALSE
       ORDER BY updated_at DESC
     `;
 
@@ -1175,7 +1175,7 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
 
     if (!deal && !conv.is_general) {
       const [activeDeal] = await sql`
-        SELECT * FROM deals WHERE user_id = ${userId} AND status = 'active'
+        SELECT * FROM deals WHERE user_id = ${userId} AND status = 'active' AND archived = FALSE
         ORDER BY updated_at DESC LIMIT 1
       `;
       if (activeDeal) {

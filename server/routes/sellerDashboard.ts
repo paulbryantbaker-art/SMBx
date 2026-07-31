@@ -20,7 +20,7 @@ sellerDashboardRouter.get('/seller/dashboard', async (req, res) => {
     const [deal] = await sql`
       SELECT d.id, d.journey_type, d.current_gate, d.business_name,
              d.revenue, d.sde, d.ebitda, d.league
-      FROM deals d WHERE d.user_id = ${userId} AND d.journey_type = 'sell'
+      FROM deals d WHERE d.user_id = ${userId} AND d.journey_type = 'sell' AND d.archived = FALSE
       ORDER BY d.updated_at DESC LIMIT 1
     `;
 
@@ -202,7 +202,7 @@ sellerDashboardRouter.post('/seller/optimization-plan', async (req, res) => {
     // Get active sell deal
     const [deal] = await sql`
       SELECT d.*, d.financials FROM deals d
-      WHERE d.user_id = ${userId} AND d.journey_type = 'sell' AND d.status = 'active'
+      WHERE d.user_id = ${userId} AND d.journey_type = 'sell' AND d.status = 'active' AND d.archived = FALSE
       ORDER BY d.updated_at DESC LIMIT 1
     `;
     if (!deal) return res.status(404).json({ error: 'No active sell deal found' });
@@ -264,7 +264,7 @@ sellerDashboardRouter.get('/seller/optimization-timeline', async (req, res) => {
 
     const [deal] = await sql`
       SELECT id FROM deals
-      WHERE user_id = ${userId} AND journey_type = 'sell'
+      WHERE user_id = ${userId} AND journey_type = 'sell' AND archived = FALSE
       ORDER BY updated_at DESC LIMIT 1
     `;
     if (!deal) return res.json({ milestones: [] });

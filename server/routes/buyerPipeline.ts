@@ -18,7 +18,7 @@ buyerPipelineRouter.get('/buyer/pipeline', async (req, res) => {
     // Get active thesis (prefer new theses table, fall back to buyer_theses)
     const [deal] = await sql`
       SELECT id, journey_type, current_gate FROM deals
-      WHERE user_id = ${userId} AND journey_type = 'buy'
+      WHERE user_id = ${userId} AND journey_type = 'buy' AND archived = FALSE
       ORDER BY updated_at DESC LIMIT 1
     `;
 

@@ -26,7 +26,7 @@ pipelineRouter.get('/portfolio/summary', async (req, res) => {
              d.seven_factor_composite, d.financials,
              d.created_at, d.updated_at
       FROM deals d
-      WHERE d.user_id = ${userId} AND d.status = 'active'
+      WHERE d.user_id = ${userId} AND d.status = 'active' AND d.archived = FALSE
     `;
 
     // Weighted EV: sum of (asking_price OR derived value) × probability.
@@ -101,6 +101,8 @@ pipelineRouter.get('/deals', async (req, res) => {
   // no "both" — the board and the archive are two views, never one mixed list).
   // Default false, so every existing caller silently gains the filter.
   const wantArchived = req.query.archived === '1' || req.query.archived === 'true';
+  // `?due=1` narrows to what is owed now — next action today or earlier.
+  const dueOnly = req.query.due === '1' || req.query.due === 'true';
   try {
     const deals = await sql`
       SELECT d.id, d.journey_type, d.current_gate, d.status, d.league,
@@ -108,12 +110,18 @@ pipelineRouter.get('/deals', async (req, res) => {
              d.industry, d.revenue, d.sde, d.ebitda,
              d.asking_price, d.location, d.financials,
              d.seven_factor_composite,
+             d.crm_account_id, d.next_action, d.next_action_on, d.owner_email,
+             -- The acquirer client this deal is run FOR (migration 114). LEFT
+             -- JOIN: an unassigned deal is normal, not an error.
+             a.firm AS client_firm, a.stage AS client_stage,
              d.created_at, d.updated_at,
              (SELECT COUNT(*) FROM deliverables del WHERE del.deal_id = d.id AND del.status = 'complete') as deliverable_count,
              (SELECT COUNT(*) FROM data_room_documents doc WHERE doc.deal_id = d.id) as document_count,
              (SELECT c.id FROM conversations c WHERE c.deal_id = d.id ORDER BY c.updated_at DESC LIMIT 1) as conversation_id
       FROM deals d
+      LEFT JOIN crm_accounts a ON a.id = d.crm_account_id AND a.user_id = d.user_id
       WHERE d.user_id = ${userId} AND d.archived = ${wantArchived}
+        ${dueOnly ? sql`AND d.next_action_on IS NOT NULL AND d.next_action_on <= CURRENT_DATE` : sql``}
       ORDER BY d.is_favorite DESC, d.updated_at DESC
     `;
     return res.json(deals);
@@ -139,6 +147,10 @@ pipelineRouter.get('/deals', async (req, res) => {
         SELECT d.id, d.journey_type, d.current_gate, d.status, d.league,
                d.business_name, NULL as name, FALSE as is_favorite, 'active' as disposition,
                FALSE as archived,
+               -- Migration 114 columns are optional here too: this fallback must
+               -- survive a database that has not run it yet.
+               NULL as crm_account_id, NULL as next_action, NULL as next_action_on,
+               NULL as owner_email, NULL as client_firm, NULL as client_stage,
                d.industry, d.revenue, d.sde, d.ebitda,
                d.asking_price, d.location, d.financials,
                d.seven_factor_composite,
@@ -198,7 +210,54 @@ pipelineRouter.patch('/deals', async (req, res) => {
   }
 });
 
-// ─── Update deal metadata (rename / favorite / disposition / archive) ──
+/* ─── THE LINE: one buyer per target ─────────────────────────────────────
+ *
+ * THE_LINE_POLICY.md §perimeter: buy-side only, ONE BUYER PER TARGET. Until
+ * migration 114 there was no buyer on a deal, so the rule lived entirely in
+ * `process.env.ENGAGED_LANES` — a comma-separated deploy string that nothing
+ * could query, audit or date. With `deals.crm_account_id` it becomes checkable.
+ *
+ * WARNS, NEVER BLOCKS. The practitioner owns the judgement, and target identity
+ * here is a NAME match — "Acme Fire Protection" and "Acme Fire & Safety" may or
+ * may not be the same company. A false block on a name collision would be worse
+ * than a flag someone reads, so this returns text and lets Paul decide.
+ *
+ * Deliberately narrow to avoid crying wolf: archived deals and deals already
+ * marked `passed`/`closed` are excluded, and a deal linked to the SAME client is
+ * not a conflict (that is just two records of one engagement).
+ */
+async function targetConflicts(
+  userId: number, dealId: number, crmAccountId: number,
+): Promise<string | null> {
+  const [self] = await sql`
+    SELECT LOWER(TRIM(COALESCE(NULLIF(business_name, ''), NULLIF(name, ''), ''))) AS target
+    FROM deals WHERE id = ${dealId} AND user_id = ${userId}
+  `;
+  const target = (self?.target ?? '').trim();
+  // No name to compare on is not a clean bill — say nothing rather than imply one.
+  if (!target) return null;
+
+  const clashes = await sql`
+    SELECT d.id, d.business_name, d.name, a.firm
+    FROM deals d
+    JOIN crm_accounts a ON a.id = d.crm_account_id
+    WHERE d.user_id = ${userId}
+      AND d.id <> ${dealId}
+      AND d.archived = FALSE
+      AND COALESCE(d.status, 'active') NOT IN ('closed', 'passed', 'dead')
+      AND d.crm_account_id IS NOT NULL
+      AND d.crm_account_id <> ${crmAccountId}
+      AND LOWER(TRIM(COALESCE(NULLIF(d.business_name, ''), NULLIF(d.name, ''), ''))) = ${target}
+    LIMIT 5
+  `;
+  if (clashes.length === 0) return null;
+
+  const who = [...new Set(clashes.map(c => c.firm))].join(', ');
+  return `THE LINE — one buyer per target: this target is already being worked for ${who}. ` +
+    `Confirm these are different companies, or retire the other engagement before proceeding.`;
+}
+
+// ─── Update deal metadata (rename / favorite / disposition / archive / client) ──
 // Rename → deals.name; star → is_favorite; defer → disposition='deferred'
 // (Yulia then does no background reading); archive → out of the working board
 // entirely. updated_at is NOT bumped: these are metadata, not analysis-source
@@ -214,11 +273,45 @@ pipelineRouter.patch('/deals/:dealId', async (req, res) => {
 
     const body = (req.body ?? {}) as {
       name?: unknown; is_favorite?: unknown; disposition?: unknown; archived?: unknown;
+      crm_account_id?: unknown; next_action?: unknown; next_action_on?: unknown;
+      owner_email?: unknown;
     };
     const updates: Record<string, unknown> = {};
     if (typeof body.name === 'string') updates.name = body.name.trim().slice(0, 200) || null;
     if (typeof body.is_favorite === 'boolean') updates.is_favorite = body.is_favorite;
     if (typeof body.archived === 'boolean') updates.archived = body.archived;
+
+    // Deal management (migration 114).
+    if (typeof body.next_action === 'string') {
+      updates.next_action = body.next_action.trim().slice(0, 400) || null;
+    }
+    if ('next_action_on' in body) {
+      const s = String(body.next_action_on ?? '').trim().slice(0, 10);
+      updates.next_action_on = /^\d{4}-\d{2}-\d{2}$/.test(s) && Number.isFinite(Date.parse(s)) ? s : null;
+    }
+    if (typeof body.owner_email === 'string') {
+      updates.owner_email = body.owner_email.trim().slice(0, 200) || null;
+    }
+
+    // Which acquirer client this deal is run for. Ownership-checked: linking to
+    // somebody else's CRM row would leak a firm name across accounts.
+    let lineWarning: string | null = null;
+    if ('crm_account_id' in body) {
+      if (body.crm_account_id === null || body.crm_account_id === '') {
+        updates.crm_account_id = null;
+      } else {
+        const accountId = Number(body.crm_account_id);
+        if (!Number.isInteger(accountId) || accountId <= 0) {
+          return res.status(400).json({ error: 'Bad crm_account_id' });
+        }
+        const [account] = await sql`
+          SELECT id FROM crm_accounts WHERE id = ${accountId} AND user_id = ${userId}
+        `;
+        if (!account) return res.status(404).json({ error: 'Client not found' });
+        updates.crm_account_id = accountId;
+        lineWarning = await targetConflicts(userId, dealId, accountId);
+      }
+    }
     if (typeof body.disposition === 'string') {
       if (!['active', 'deferred'].includes(body.disposition)) {
         return res.status(400).json({ error: 'Invalid disposition (active | deferred)' });
@@ -230,9 +323,12 @@ pipelineRouter.patch('/deals/:dealId', async (req, res) => {
     const [updated] = await sql`
       UPDATE deals SET ${sql(updates)}
       WHERE id = ${dealId} AND user_id = ${userId}
-      RETURNING id, business_name, name, is_favorite, disposition, archived, status
+      RETURNING id, business_name, name, is_favorite, disposition, archived, status,
+                crm_account_id, next_action, next_action_on, owner_email
     `;
-    return res.json(updated);
+    // The warning rides on a 200: the write happened. Suppressing the change
+    // would be a block, and this rule warns (see targetConflicts).
+    return res.json(lineWarning ? { ...updated, lineWarning } : updated);
   } catch (err: any) {
     console.error('Update deal error:', err.message);
     return res.status(500).json({ error: 'Failed to update deal' });

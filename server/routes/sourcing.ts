@@ -22,12 +22,17 @@ sourcingRouter.get('/sourcing/theses', async (req, res) => {
   try {
     const userId = (req as any).userId;
 
+    // `t.*` already carries crm_account_id (migration 116); the LEFT JOIN adds
+    // the firm NAME so the screen can say whose buy-box this is without a second
+    // request. LEFT, because sourcing for ourselves is still valid — an
+    // unassigned thesis is normal, not an error.
     const theses = await sql`
-      SELECT t.*,
+      SELECT t.*, a.firm AS client_firm,
         (SELECT COUNT(*) FROM thesis_matches tm WHERE tm.thesis_id = t.id AND tm.status = 'new') as new_matches,
         (SELECT COUNT(*) FROM thesis_matches tm WHERE tm.thesis_id = t.id AND tm.status = 'pursuing') as pursuing_count,
         (SELECT COUNT(*) FROM thesis_matches tm WHERE tm.thesis_id = t.id) as total_matches
       FROM buyer_theses t
+      LEFT JOIN crm_accounts a ON a.id = t.crm_account_id AND a.user_id = t.user_id
       WHERE t.user_id = ${userId}
       ORDER BY t.updated_at DESC
     `;
@@ -46,19 +51,34 @@ sourcingRouter.post('/sourcing/theses', async (req, res) => {
       name, industry, naicsCodes, geography, stateCodes,
       revenueMin, revenueMax, ebitdaMin, ebitdaMax, sdeMin, sdeMax,
       priceMin, priceMax, employeeMin, employeeMax, keywords, notes,
+      crmAccountId,
     } = req.body;
 
     if (!name) return res.status(400).json({ error: 'Thesis name is required' });
+
+    // WHOSE buy-box this is (migration 116) — the one thing that changed when
+    // the practice started sourcing for clients rather than for itself.
+    // Ownership-checked: a thesis must not be able to name someone else's client.
+    let clientId: number | null = null;
+    if (crmAccountId != null && crmAccountId !== '') {
+      const id = Number(crmAccountId);
+      if (!Number.isInteger(id)) return res.status(400).json({ error: 'Bad crmAccountId' });
+      const [a] = await sql`SELECT id FROM crm_accounts WHERE id = ${id} AND user_id = ${userId}`;
+      if (!a) return res.status(404).json({ error: 'Client not found' });
+      clientId = id;
+    }
 
     const [thesis] = await sql`
       INSERT INTO buyer_theses (
         user_id, name, industry, naics_codes, geography, state_codes,
         revenue_min, revenue_max, ebitda_min, ebitda_max, sde_min, sde_max,
-        price_min, price_max, employee_min, employee_max, keywords, notes
+        price_min, price_max, employee_min, employee_max, keywords, notes,
+        crm_account_id
       ) VALUES (
         ${userId}, ${name}, ${industry || null}, ${naicsCodes || null}, ${geography || null}, ${stateCodes || null},
         ${revenueMin || null}, ${revenueMax || null}, ${ebitdaMin || null}, ${ebitdaMax || null}, ${sdeMin || null}, ${sdeMax || null},
-        ${priceMin || null}, ${priceMax || null}, ${employeeMin || null}, ${employeeMax || null}, ${keywords || null}, ${notes || null}
+        ${priceMin || null}, ${priceMax || null}, ${employeeMin || null}, ${employeeMax || null}, ${keywords || null}, ${notes || null},
+        ${clientId}
       )
       RETURNING *
     `;
@@ -94,6 +114,27 @@ sourcingRouter.patch('/sourcing/theses/:thesisId', async (req, res) => {
       WHERE id = ${thesisId}
       RETURNING *
     `;
+
+    // Assigning (or clearing) the client is handled separately: the COALESCE
+    // pattern above cannot express "set this to NULL", and existing theses need
+    // to be assignable to a client after the fact. Ownership-checked so a thesis
+    // cannot name somebody else's client.
+    if ('crmAccountId' in (updates ?? {})) {
+      let clientId: number | null = null;
+      if (updates.crmAccountId != null && updates.crmAccountId !== '') {
+        const id = Number(updates.crmAccountId);
+        if (!Number.isInteger(id)) return res.status(400).json({ error: 'Bad crmAccountId' });
+        const [a] = await sql`SELECT id FROM crm_accounts WHERE id = ${id} AND user_id = ${userId}`;
+        if (!a) return res.status(404).json({ error: 'Client not found' });
+        clientId = id;
+      }
+      const [reassigned] = await sql`
+        UPDATE buyer_theses SET crm_account_id = ${clientId}, updated_at = NOW()
+        WHERE id = ${thesisId} AND user_id = ${userId}
+        RETURNING *
+      `;
+      return res.json(reassigned ?? updated);
+    }
 
     return res.json(updated);
   } catch (err: any) {
