@@ -4,6 +4,14 @@ Four documents come off a market's master. They are the practice's work
 product — what an acquirer client is actually paying for. Collateral is a
 byproduct; these are the job.
 
+> **This file is the SPEC, not the method.** It says what a finished document
+> contains. It does NOT tell you how to gather what goes in it — that is
+> **`RESEARCH.md`**, six passes and roughly twenty runs across several hours.
+>
+> One check before anything here: `ls markets/<m>/research/`. **Empty or thin
+> means you are at the wrong file.** Every document below is derived from the
+> master, and the master is derived from that folder.
+
 Build them by asking, in a session opened on this workspace:
 
 > Build the market map for home-services.
@@ -51,6 +59,14 @@ never an invented midpoint. Every document ends on **What we don't know yet**.
 *How this market is actually structured and where an acquirer can enter it.*
 
 **Source:** the master.
+
+> **Before writing a line of this: does the master exist, and is it built on real
+> research?** Every section below is DERIVED. If `markets/<m>/research/` is empty
+> or thin, this document cannot be written from here — an empty research folder
+> does not produce a thin market map, it produces an invented one. Go to
+> **`RESEARCH.md`** and gather first (six passes, ~20 runs, several hours), then
+> come back. Saying "the research isn't there yet" is the correct answer; the
+> document shape with nothing behind it is not.
 
 ```
 # <the market>, mapped
