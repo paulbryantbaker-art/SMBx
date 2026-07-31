@@ -310,16 +310,57 @@ a roadmap**. That includes the surfaces added in the last week of July —
 `corpDevDocs`, `marketKnowledgeTools`. They work; they are simply not where the
 work happens, and `PLAYBOOK.md` is canonical over `corpDevDocs.ts`.
 
+## 8. What the app is FOR (Paul, 2026-07-31)
+
+> *"It's just for me to run corp dev through. I need it to be a CRM tool and then
+> a deal management tool. I will need to communicate with lawyers, attorneys,
+> etcetera, and third-party folks, but it will not be outsourced and used by
+> other firms."*
+
+Two jobs, in that order: **CRM, then deal management.** Plus a communication
+layer that reaches outward without ever letting anyone in.
+
+**Never multi-tenant** — no orgs, no workspaces, no tenant column, no seats.
+Multi-USER yes (a partner may join; `TEAM_ALLOWLIST` is the mechanism), multi-
+TENANT never. Enforced in code: practice mode defaults ON, the perimeter 403s
+non-team JWTs, Stripe and anonymous chat 410, `/mcp` and agent discovery 410.
+
+**The communication layer is with professionals, not a marketing list.** That is
+a different build from the campaign work in §5 and it changes the shape:
+
+| Who | How they receive | Never |
+|---|---|---|
+| Acquirer prospects (the register) | Cold outbound to `crm_contacts`, logged as `crm_activity` | Pooled with the consented inbound list |
+| Report readers / intake leads | The consented list, via `export-leads.mts` | Cold-mailed |
+| Lawyers, CPAs, appraisers, lenders, sellers' advisors | **Email out + token share links** — `emailService.sendEmail`, `documentShareService`, `document_shares`, `transaction_tokens` | Given an account |
+
+`service_providers` + `service_referrals` (migration 021) is the typed register
+for the professionals — attorney/CPA/appraiser with `practice_areas`,
+`industries`, `deal_size_min/max` and a `sent → viewed → engaged → completed`
+ladder. It already exists and should be extended, not duplicated.
+
+**Do not build counterparty comms on `direct_threads`/`direct_messages`**
+(migration 085). That is a product-era social DM feature presuming both sides
+have accounts — the exact shape this rule forbids. Token links are why the
+practice perimeter deliberately lets tokenless requests fall through to each
+route's own auth: an outsider can receive a document without ever becoming a
+user.
+
+THE LINE governs the content regardless of the channel: Yulia drafts, records and
+sends on the practitioner's instruction. She never initiates or negotiates with a
+counterparty on her own, and never quotes or collects a fee.
+
 ### Next
 
-1. **A UI for the CRM.** The schema, ranking, import and export are live; nothing
-   renders them. This is the gap between "the app owns the client pipeline" and
-   being able to use it.
-2. **Email campaigns** against `crm_contacts`, drafted and logged as
-   `crm_activity` with `kind='email'` — keeping the consented inbound list
-   separate, per the seam above. THE LINE: the practitioner sends.
-3. **A local LinkedIn-analytics CLI**, to close the one Studio capability with no
+1. ~~**A UI for the CRM.**~~ Shipped — `Clients` tab, desktop + mobile.
+2. **Deal management, second job.** The pipeline exists and is now clean of test
+   rows; what it lacks is the same next-action/owner discipline the CRM just got.
+3. **Communications.** Two separate builds, per the table above: cold outbound
+   against `crm_contacts`, and professional correspondence on the token-link +
+   email path. Both log to `crm_activity` / `deal_activity_log`; neither creates
+   an account for anyone outside the team.
+4. **A local LinkedIn-analytics CLI**, to close the one Studio capability with no
    equivalent on disk.
-4. **`engaged_lanes` as a table** — "one buyer per target" is a THE LINE
+5. **`engaged_lanes` as a table** — "one buyer per target" is a THE LINE
    commitment currently enforced by `process.env.ENGAGED_LANES`, which nothing
    can query, audit or date.

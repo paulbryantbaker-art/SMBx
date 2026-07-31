@@ -24,6 +24,7 @@ interface TabDef {
 const TABS: TabDef[] = ([
   { id: "today", label: "Today" },
   { id: "deals", label: "Deals" },
+  { id: "clients", label: "Clients" },
   { id: "sourcing", label: "Sourcing" },
   ...(STUDIO_IN_APP ? [{ id: "studio", label: "Studio" } as TabDef] : []),
   { id: "integration", label: "Integration" },

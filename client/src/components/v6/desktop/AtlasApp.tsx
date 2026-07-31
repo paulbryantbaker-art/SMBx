@@ -41,6 +41,7 @@ import SourcingScreen from "./screens/Sourcing";
 import DealsScreen from "./screens/Deals";
 import CockpitScreen from "./screens/Cockpit";
 import StudioScreen from "./screens/StudioCreate";
+import ClientsScreen from "./screens/Clients";
 import IntegrationScreen from "./screens/Integration";
 import FilesScreen from "./screens/Files";
 import AgentScreen from "./screens/Agent";
@@ -448,6 +449,8 @@ function AppScreen({ user, view }: { user: User | null; view: AtlasView }) {
     case "pipeline":
     case "deals":
       return <DealsScreen user={user} view={view} />;
+    case "clients":
+      return <ClientsScreen user={user} view={view} />;
     case "studio":
       return <StudioScreen user={user} view={view} />;
     case "integration":
