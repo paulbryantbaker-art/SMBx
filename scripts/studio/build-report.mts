@@ -27,7 +27,7 @@ const { newRenderPage } = await import(pathToFileURL(path.join(ROOT, 'server/ser
 const { marked } = await import('marked');
 
 /* ── house palette — THE shared definition, see house/tokens.ts ───────── */
-const { LEDGER, REPORT, TYPE } = await import(pathToFileURL(path.join(ROOT, 'house/tokens.ts')).href);
+const { LEDGER, REPORT, TYPE, blockBackground } = await import(pathToFileURL(path.join(ROOT, 'house/tokens.ts')).href);
 const INK = LEDGER.ink, BODY = REPORT.body, TERT = LEDGER.muted, GREEN = LEDGER.green;
 const WARM = LEDGER.bone, DARK = LEDGER.dark, IVORY = LEDGER.ivory, IVORY_SUB = REPORT.ivorySub;
 const BRASS = LEDGER.brass, HAIR = LEDGER.hair;
@@ -147,10 +147,10 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
   body { font-family: ${SANS}; color: ${BODY}; font-size: 10.5pt; line-height: 1.5; font-variant-numeric: tabular-nums; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
   /* cover (dark boardroom title card, fills page 1 within the print margins) */
-  .cover { position: relative; min-height: 9.35in; padding: 0.44in 0.58in 0.4in; background: ${DARK} url('${TEXTURE}') center/cover; color: ${IVORY}; border-radius: 12px; overflow: hidden; page-break-after: always; display: flex; flex-direction: column; }
+  .cover { position: relative; min-height: 9.35in; padding: 0.44in 0.58in 0.4in; background: ${blockBackground(TEXTURE)}; color: ${IVORY}; border-radius: 12px; overflow: hidden; page-break-after: always; display: flex; flex-direction: column; }
   .cover::before { content: ''; position: absolute; inset: 0; background:
-    radial-gradient(760px 420px at 26% 2%, rgba(22,98,76,0.30), transparent 60%),
-    linear-gradient(180deg, rgba(15,26,22,0.42), rgba(15,26,22,0.74)); }
+    radial-gradient(760px 420px at 26% 2%, rgba(10,122,88,0.30), transparent 60%),
+    linear-gradient(180deg, rgba(10,106,76,0.42), rgba(10,106,76,0.74)); }
   .cover > * { position: relative; z-index: 1; }
   /* logo is 4:1 — align-self stops the column flexbox from stretching it wide */
   .cv-logo { height: 25px; width: auto; align-self: flex-start; display: block; }
@@ -167,14 +167,14 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
   .cv-hero { width: 100%; height: 2.05in; object-fit: cover; border-radius: 10px; border: 1px solid rgba(255,255,255,0.16); box-shadow: 0 10px 30px rgba(0,0,0,0.4); display: block; margin: 0 0 0.16in; }
   .cover p, .cover li { color: ${IVORY_SUB}; font-size: 10pt; line-height: 1.5; margin: 0 0 0.07in; }
   .cover strong { color: ${IVORY}; font-weight: 600; }
-  .cover em { color: #8FD0AE; font-style: italic; }
+  .cover em { color: #A8F0CE; font-style: italic; }
   .cover ol { padding-left: 1.1em; margin: 0.06in 0; }
 
   /* "by the numbers" stat band — framed cards, brass Fraunces numerals */
   .cv-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin: 0.02in 0 0.16in; }
-  .cv-stat { border: 1px solid rgba(143,208,174,0.24); border-radius: 10px; padding: 11px 13px 12px; background: rgba(255,255,255,0.035); }
+  .cv-stat { border: 1px solid rgba(168,240,206,0.24); border-radius: 10px; padding: 11px 13px 12px; background: rgba(255,255,255,0.035); }
   .cv-stat .n { font-family: ${DISPLAY}; font-weight: 545; font-size: 19pt; line-height: 1; color: ${BRASS}; letter-spacing: -0.01em; }
-  .cv-stat .l { font-family: ${MONO}; font-size: 6.6pt; letter-spacing: 0.05em; text-transform: uppercase; color: #A6BEB2; margin-top: 6px; line-height: 1.4; }
+  .cv-stat .l { font-family: ${MONO}; font-size: 6.6pt; letter-spacing: 0.05em; text-transform: uppercase; color: #BFE3D2; margin-top: 6px; line-height: 1.4; }
 
   /* framed workstream cards (the cover's numbered list) */
   .cv-cards { display: flex; flex-direction: column; gap: 7px; margin: 0.05in 0 0.1in; }
@@ -191,9 +191,9 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
   .cv-body { flex: 1; display: flex; flex-direction: column; min-height: 0; }
   .cover.nohero .cv-body { justify-content: center; padding-bottom: 0.3in; }
   .cv-byline { margin-top: auto; display: flex; align-items: center; gap: 13px; padding-top: 0.16in; border-top: 1px solid rgba(255,255,255,0.13); }
-  .cv-face { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; object-position: 50% 20%; border: 2px solid rgba(143,208,174,0.5); flex: none; }
+  .cv-face { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; object-position: 50% 20%; border: 2px solid rgba(168,240,206,0.5); flex: none; }
   .cv-by-name { font-family: ${SANS}; font-weight: 600; font-size: 11pt; color: ${IVORY}; }
-  .cv-by-role { font-family: ${MONO}; font-size: 7.6pt; letter-spacing: 0.05em; color: #A6BEB2; margin-top: 3px; text-transform: uppercase; }
+  .cv-by-role { font-family: ${MONO}; font-size: 7.6pt; letter-spacing: 0.05em; color: #BFE3D2; margin-top: 3px; text-transform: uppercase; }
 
   /* body */
   .rbody h1 { font-family: ${DISPLAY}; font-weight: 545; font-size: 21pt; line-height: 1.08; letter-spacing: -0.01em; color: ${INK}; page-break-before: always; margin: 0 0 0.12in; padding-top: 0.16in; border-top: 2.5px solid ${BRASS}; }
@@ -208,7 +208,7 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
      the reader must not skim past. Brass rail, not the decorative gray a
      stock stylesheet would give it. */
   blockquote { margin: 0.18in 0; padding: 0.14in 0.2in; border-left: 3px solid ${BRASS};
-    background: rgba(176,134,55,0.05); border-radius: 0 8px 8px 0; page-break-inside: avoid; }
+    background: rgba(232,166,43,0.05); border-radius: 0 8px 8px 0; page-break-inside: avoid; }
   blockquote p { margin: 0 0 0.08in; font-size: 9.5pt; line-height: 1.55; }
   blockquote p:last-child, blockquote ol:last-child, blockquote ul:last-child { margin-bottom: 0; }
   blockquote ol, blockquote li { font-size: 9.5pt; line-height: 1.55; }
@@ -239,7 +239,7 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
 
   /* tables — hairline, bone header, tabular figures */
   .rbody table { width: 100%; border-collapse: collapse; margin: 0.12in 0 0.2in; font-size: 8.4pt; line-height: 1.34; }
-  .rbody thead { background: #EEE9DD; }
+  .rbody thead { background: #F1ECE0; }
   .rbody th { font-family: ${MONO}; font-size: 7.4pt; letter-spacing: 0.03em; text-transform: uppercase; color: ${INK}; text-align: left; padding: 6px 8px; border-bottom: 1.5px solid ${BRASS}; vertical-align: bottom; }
   .rbody td { padding: 5px 8px; border-bottom: 1px solid ${HAIR}; color: ${BODY}; vertical-align: top; }
   .rbody tr { page-break-inside: avoid; }
@@ -274,7 +274,7 @@ try {
     margin: { top: '0.55in', bottom: '0.7in', left: '0.75in', right: '0.75in' },
     displayHeaderFooter: true,
     headerTemplate: '<div></div>',
-    footerTemplate: `<div style="width:100%;font-family:'IBM Plex Mono',monospace;font-size:7pt;color:#8A9099;padding:0 0.75in;display:flex;justify-content:space-between;"><span>smbX.ai&nbsp;&nbsp;·&nbsp;&nbsp;${footerLabel}</span><span>Page <span class="pageNumber"></span> / <span class="totalPages"></span></span></div>`,
+    footerTemplate: `<div style="width:100%;font-family:'IBM Plex Mono',monospace;font-size:7pt;color:#83898F;padding:0 0.75in;display:flex;justify-content:space-between;"><span>smbX.ai&nbsp;&nbsp;·&nbsp;&nbsp;${footerLabel}</span><span>Page <span class="pageNumber"></span> / <span class="totalPages"></span></span></div>`,
   });
   writeFileSync(path.join(outDir, `${slug}.pdf`), Buffer.from(pdf));
   const kb = (pdf.length / 1024).toFixed(0);

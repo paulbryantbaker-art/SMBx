@@ -29,8 +29,10 @@ const { fontFaceCss } = await import(pathToFileURL(path.join(ROOT, 'server/servi
 const { newRenderPage } = await import(pathToFileURL(path.join(ROOT, 'server/services/premiumPdfRenderer.ts')).href);
 
 /* ── house palette (Ledger) ───────────────────────────────────────────── */
-const DARK = '#0F1A16', IVORY = '#F3F1EA', IVORY_SUB = '#CBD1CB';
-const BRASS = '#B08637', MINT = '#8FD0AE';
+/* THE shared definition — see house/tokens.ts. Never hardcode a hex here. */
+const { LEDGER, REPORT, blockBackground } = await import(pathToFileURL(path.join(ROOT, 'house/tokens.ts')).href);
+const DARK = LEDGER.dark, IVORY = LEDGER.ivory, IVORY_SUB = REPORT.ivorySub;
+const BRASS = LEDGER.brass, MINT = LEDGER.mint;
 const DISPLAY = `'Fraunces', Georgia, serif`, SANS = `'Inter', -apple-system, sans-serif`, MONO = `'IBM Plex Mono', monospace`;
 
 /* ── CLI ──────────────────────────────────────────────────────────────── */
@@ -114,15 +116,15 @@ const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFace
   body { width: 1200px; height: 630px; overflow: hidden; }
   .card {
     position: relative; width: 1200px; height: 630px; display: flex;
-    background: ${DARK} url('${TEXTURE}') center / cover; color: ${IVORY};
+    background: ${blockBackground(TEXTURE)}; color: ${IVORY};
     font-family: ${SANS};
   }
   .card::before {
     content: ''; position: absolute; inset: 0;
     background:
-      radial-gradient(80% 60% at 50% -10%, rgba(143,208,174,0.13), rgba(143,208,174,0) 60%),
-      radial-gradient(70% 50% at 50% 110%, rgba(176,134,55,0.10), rgba(176,134,55,0) 62%),
-      linear-gradient(rgba(15,26,22,0.42), rgba(13,23,19,0.42));
+      radial-gradient(80% 60% at 50% -10%, rgba(168,240,206,0.13), rgba(168,240,206,0) 60%),
+      radial-gradient(70% 50% at 50% 110%, rgba(232,166,43,0.10), rgba(232,166,43,0) 62%),
+      linear-gradient(rgba(10,106,76,0.42), rgba(10,106,76,0.42));
   }
   .card > * { position: relative; z-index: 1; }
 
@@ -146,7 +148,7 @@ const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFace
   .byline { display: flex; align-items: center; gap: 14px; }
   .face {
     width: 52px; height: 52px; border-radius: 50%; object-fit: cover;
-    object-position: 50% 20%; flex: none; border: 2px solid rgba(143,208,174,0.55);
+    object-position: 50% 20%; flex: none; border: 2px solid rgba(168,240,206,0.55);
   }
   .by-name { font-size: 17px; font-weight: 600; color: ${IVORY}; }
   .by-role { font-size: 14px; color: ${IVORY_SUB}; margin-top: 2px; }

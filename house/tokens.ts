@@ -15,28 +15,67 @@
  * file is its machine-readable form and must not drift from it.
  */
 
-/** The Ledger palette. Values verified identical across every renderer. */
+/**
+ * The Ledger palette, AURORA pass (2026-07-31, Paul: "I hate the dark green…
+ * too dark… what can we do to make the pages look more cheerful").
+ *
+ * The complaint was about WEIGHT, not hue. Two values were carrying it: the
+ * boardroom band at `#0F1A16` (L* 8.9 — near-black with just enough green to
+ * read as a mistake rather than a decision) appearing three-plus times in the
+ * landing scroll, and Deal Green at `#16624C` (L* 36), dark enough that it
+ * receded on bone instead of leading. So the system keeps its shape and loses
+ * its heaviness: nothing is near-black any more, the rhythm break is a
+ * saturated jade BLOCK rather than an absence of colour, and brass grows up
+ * from jewelry-on-one-stat into a working second warm.
+ *
+ * WHY THE ACCENT IS NOT THE VIVID JADE. The obvious move — make the accent the
+ * bright jade — fails accessibility outright, and it fails quietly: white on
+ * `#0FA97C` is 2.97:1 and the same jade as link text on bone is 2.85:1, both
+ * well under the 4.5:1 floor. Nothing in a diff shows that. So the vivid jade
+ * is a HIGHLIGHT token (ambient bloom, large numerals, block edges — roles
+ * that carry no small text) and `green` sits deep enough to hold white at
+ * 5.3:1 and to read as a link on bone at 5.1:1, while still landing ~9 L*
+ * brighter and materially more saturated than the green it replaces.
+ *
+ * Contrast on the jade block `dark` (#0A6A4C), all measured not assumed, flat
+ * value first and over the texture second (the glaze deepens it slightly, so
+ * the flat number is always the worse case and the one to hold):
+ * ivory 6.2 / 7.4 · ivorySub 5.0 / 5.9 · mint 5.0 / 5.9 · statLabel 4.7 / 5.6 ·
+ * honey 4.0 / 4.8 · brass 3.1 / 3.7. Honey and brass are large-text-only
+ * colours — numerals and tags — which is the only job either has here.
+ *
+ * The block was briefly set five points deeper than this out of caution, and
+ * that was a mistake worth recording: rendering it showed a field visibly
+ * heavier than the one that was reviewed and signed off, and re-checking the
+ * roles showed the caution bought nothing — every role still clears AA at this
+ * lightness, because the two that come closest are numerals. Contrast margin
+ * is not free; spending it darkens the thing the whole pass exists to lighten.
+ *
+ * Values verified identical across every renderer.
+ */
 export const LEDGER = {
   /* canvas + ink */
-  bone: '#F6F4EF', // page canvas
-  ink: '#14181C', // headings, primary text
-  slate: '#5C6670', // body text (decks, cards, the app)
-  muted: '#8A9099', // sources, vintages, captions
-  hair: '#E4E1D9', // hairline borders
-  rule: '#D8D5CA', // heavier dividers
+  bone: '#FCFAF6', // page canvas — lifted, so the accent has room
+  ink: '#16181A', // headings, primary text
+  slate: '#5A6169', // body text (decks, cards, the app)
+  muted: '#83898F', // sources, vintages, captions
+  hair: '#EAE5DC', // hairline borders
+  rule: '#DED8CC', // heavier dividers
 
-  /* the ONE accent */
-  green: '#16624C', // Deal Green — the only accent
-  greenHover: '#0F4E3C',
-  greenTint: '#E7F0EC', // chip fill
-  mint: '#8FD0AE', // green-on-dark links, rings
+  /* the accent — one green, two values, plus a highlight that carries no text */
+  green: '#0A7A58', // the working accent: CTA fills, links, the logo mark
+  greenHover: '#086348',
+  greenTint: '#DFF5EC', // chip fill
+  jade: '#0FA97C', // vivid highlight — ambient bloom, large numerals, edges. NEVER small text.
+  mint: '#A8F0CE', // green-on-block links, rings
 
-  /* jewelry — signature numerals only, never a second accent */
-  brass: '#B08637',
+  /* the warm — brass on light surfaces, honey on the block */
+  brass: '#E8A62B', // amber: rules, bars, large numerals on bone
+  honey: '#F5C452', // amber on the jade block — numerals and tags
 
-  /* dark boardroom band */
-  dark: '#0F1A16',
-  ivory: '#F3F1EA', // reading text on dark
+  /* the rhythm break — a saturated jade block, not a near-black */
+  dark: '#0A6A4C',
+  ivory: '#F2FBF6', // reading text on the block
 } as const;
 
 /**
@@ -49,9 +88,9 @@ export const LEDGER = {
  */
 export const REPORT = {
   body: '#3F464C', // darker than LEDGER.slate for sustained reading
-  ivorySub: '#CBD1CB', // cover sub-text on dark
-  statLabel: '#A6BEB2', // cover stat-card labels on dark
-  tableHead: '#EEE9DD', // GFM table header fill
+  ivorySub: '#C9E8DA', // cover sub-text on the block
+  statLabel: '#BFE3D2', // cover stat-card labels on the block
+  tableHead: '#F1ECE0', // GFM table header fill
 } as const;
 
 /** Working type. Fraunces displays, Inter works, Plex Mono labels. */
@@ -78,9 +117,44 @@ export function rgba(hex: string, alpha: number): string {
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
 }
 
-/** The mint byline ring and the green halo on dark bands — house constants. */
+/**
+ * The mint byline ring and the halo on the block — house constants.
+ *
+ * The halo is derived from `jade`, not `green`: it is a glow laid OVER the
+ * jade block, and the working accent is now close enough to the block itself
+ * that a halo made from it would be invisible. The vivid highlight is what
+ * separates from the ground, which is the job a halo has.
+ */
 export const MINT_RING = rgba(LEDGER.mint, 0.65);
-export const GREEN_HALO = rgba(LEDGER.green, 0.28);
+export const GREEN_HALO = rgba(LEDGER.jade, 0.28);
+
+/**
+ * The jade block, laid over the boardroom texture.
+ *
+ * This helper exists because the obvious way to write it is wrong, and wrong
+ * in a way that renders rather than errors. The old rule was
+ * `background: DARK url(texture) center/cover` — with the near-black band
+ * colour that read fine, because the image and the colour underneath it were
+ * the same shade. The image is opaque and FULLY covers the colour, so the
+ * colour was never really doing any work; it was a fallback. Point that same
+ * rule at a saturated jade and the page still renders near-black — the whole
+ * change silently does nothing, on every dark surface at once.
+ *
+ * So the block is composited: an 84% jade glaze OVER the texture, with the
+ * flat colour last as the no-image fallback. The plaster detail survives at
+ * roughly one part in six — enough to keep the material Paul asked to keep
+ * ("the dark texture is cool") without the field reading as black.
+ *
+ * The glaze also deepens the effective ground a little, which is a gift and
+ * not a problem: ivory on the composited block measures 8.7:1 against 7.7:1
+ * on flat jade.
+ */
+export const BLOCK_GLAZE = rgba(LEDGER.dark, 0.84);
+
+/** The full background stack for a textured jade block. */
+export function blockBackground(textureUrl: string): string {
+  return `linear-gradient(${BLOCK_GLAZE}, ${BLOCK_GLAZE}), url('${textureUrl}') center/cover, ${LEDGER.dark}`;
+}
 
 /**
  * The palette paragraph handed to MODELS — the deck designer's brand contract
@@ -93,14 +167,16 @@ export const GREEN_HALO = rgba(LEDGER.green, 0.28);
  * review and nothing visibly wrong in the diff. Generating it means the
  * instructions cannot disagree with the renderer.
  *
- * Wording is deliberately byte-identical to the hand-written original: the
- * deck cache key hashes the prompt, so changing a character would invalidate
- * every cached deck.
+ * The deck cache key hashes the prompt, so editing these lines invalidates
+ * every cached deck. On a palette change that is the CORRECT outcome, not a
+ * cost to avoid: a cached deck is a deck rendered in the old colours, and
+ * serving it after a rebrand is the exact drift this function exists to stop.
+ * Outside a palette change, leave the wording alone.
  */
 export function brandPaletteLines(): string[] {
   return [
     `- Bone paper ${LEDGER.bone}; ink ${LEDGER.ink}; body gray ${LEDGER.slate}; muted ${LEDGER.muted}; hairline ${LEDGER.hair}.`,
-    `- Deal Green ${LEDGER.green} (deep ${LEDGER.greenHover}); mint on dark ${LEDGER.mint}; brass ${LEDGER.brass} (jewelry only); boardroom dark ${LEDGER.dark}; ivory ${LEDGER.ivory}; ivory-sub ${LEDGER.rule}.`,
+    `- Deal Green ${LEDGER.green} (deep ${LEDGER.greenHover}); vivid jade ${LEDGER.jade} for large numerals and edges ONLY, never small text; mint on the block ${LEDGER.mint}; amber ${LEDGER.brass} on light and honey ${LEDGER.honey} on the block, for numerals and rules; jade block ${LEDGER.dark} (the rhythm break — nothing in this system is near-black); ivory ${LEDGER.ivory}; ivory-sub ${LEDGER.rule}.`,
   ];
 }
 

@@ -894,7 +894,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
         </Sheet>
       )}
       {note && (
-        <div style={{ ...A.toast, color: note.kind === "err" ? "#B3261E" : "#0F4E3C" }}>{note.text}</div>
+        <div style={{ ...A.toast, color: note.kind === "err" ? "#B3261E" : "#086348" }}>{note.text}</div>
       )}
 
       {sheet === "import" && (
@@ -1647,7 +1647,7 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, a
                   <span style={F.rowCol}>{s.tool || (s.mime === "application/pdf" ? "PDF" : "Markdown")}</span>
                   <span style={{ ...F.rowCol, width: 66 }}>
                     {s.incorporated_version
-                      ? <span style={{ color: "#0F4E3C", fontWeight: 600 }}>v{s.incorporated_version}</span>
+                      ? <span style={{ color: "#086348", fontWeight: 600 }}>v{s.incorporated_version}</span>
                       : <span style={{ color: "#8A6A2B", fontWeight: 600 }}>pending</span>}
                   </span>
                   <span style={{ ...F.rowCol, width: 48, textAlign: "right" }}>{shortDate(s.created_at)}</span>
@@ -1701,7 +1701,7 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, a
                     <span style={{ ...F.rowCol, width: 66 }}>
                       {running ? <span style={{ color: T.blue, fontWeight: 600 }}>Analyzing</span>
                         : failed ? <span style={{ color: "#B3261E", fontWeight: 600 }}>Failed</span>
-                        : a.has_analysis ? <span style={{ color: "#0F4E3C", fontWeight: 600 }}>Analyzed</span>
+                        : a.has_analysis ? <span style={{ color: "#086348", fontWeight: 600 }}>Analyzed</span>
                         : <span style={{ color: T.muted, fontWeight: 600 }}>Imported</span>}
                     </span>
                     <span style={{ ...F.rowCol, width: 48, textAlign: "right" }}>{shortDate(a.created_at)}</span>
@@ -1733,7 +1733,7 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, a
                     <span style={{ ...F.rowCol, width: 66 }}>
                       {running ? <span style={{ color: T.blue, fontWeight: 600 }}>Running</span>
                         : failed ? <span style={{ color: "#B3261E", fontWeight: 600 }}>Failed</span>
-                        : r.review_status === "approved" ? <span style={{ color: "#0F4E3C", fontWeight: 600 }}>Approved</span>
+                        : r.review_status === "approved" ? <span style={{ color: "#086348", fontWeight: 600 }}>Approved</span>
                         : <span style={{ color: "#8A6A2B", fontWeight: 600 }}>Draft</span>}
                     </span>
                     <span style={{ ...F.rowCol, width: 48, textAlign: "right" }}>{shortDate(r.created_at)}</span>
@@ -2275,7 +2275,7 @@ function ArtifactPreview({ row, campName, onSave, onDelete, onBuild }: {
           Copy
         </button>
         <button type="button" style={{ ...F.smallBtn, color: T.muted }} onClick={onDelete}>Delete</button>
-        {saved && <span style={{ fontSize: 12, color: "#0F4E3C", fontWeight: 600 }}>Saved</span>}
+        {saved && <span style={{ fontSize: 12, color: "#086348", fontWeight: 600 }}>Saved</span>}
         {!saved && dirty && body != null && <span style={{ fontSize: 12, color: T.muted }}>Unsaved edits</span>}
       </div>
     </div>
@@ -2949,12 +2949,12 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab, dl }: {
                           }
                         } catch { /* not an asset payload */ }
                       }}
-                      style={{ width: 122, border: dragPage === pg.i ? `2px solid ${T.blue}` : `1px solid ${T.border}`, borderRadius: 10, padding: 8, background: dark ? "#0F1A16" : "#fff" }}
+                      style={{ width: 122, border: dragPage === pg.i ? `2px solid ${T.blue}` : `1px solid ${T.border}`, borderRadius: 10, padding: 8, background: dark ? "#0A6A4C" : "#fff" }}
                     >
-                      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.04em", color: dark ? "#D8D5CA" : T.muted, textTransform: "uppercase" }}>{pg.i + 1} · {pg.kind}</div>
-                      <div style={{ fontSize: 11, color: dark ? "#F3F1EA" : T.ink, lineHeight: 1.3, margin: "4px 0 6px", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const }}>{pg.heading}</div>
+                      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.04em", color: dark ? "#DED8CC" : T.muted, textTransform: "uppercase" }}>{pg.i + 1} · {pg.kind}</div>
+                      <div style={{ fontSize: 11, color: dark ? "#F2FBF6" : T.ink, lineHeight: 1.3, margin: "4px 0 6px", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const }}>{pg.heading}</div>
                       {dark ? (
-                        <div style={{ fontSize: 10, color: "#8FD0AE" }}>your photo page</div>
+                        <div style={{ fontSize: 10, color: "#A8F0CE" }}>your photo page</div>
                       ) : aid ? (
                         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                           {thumbs[aid]
@@ -3120,7 +3120,7 @@ const R: Record<string, React.CSSProperties> = {
 
   chip: { flex: "none", fontSize: 11.5, fontWeight: 700, borderRadius: 99, padding: "3px 10px", letterSpacing: "0.02em" },
   chipDraft: { background: "#FBF3E2", color: "#8A6A2B", border: "1px solid #E7D5AC" },
-  chipOk: { background: "#E7F0EC", color: "#0F4E3C", border: "1px solid #BFD8CD" },
+  chipOk: { background: "#DFF5EC", color: "#086348", border: "1px solid #A9E3C9" },
 };
 
 /* Finder library styles — the manager fills the app frame. */
