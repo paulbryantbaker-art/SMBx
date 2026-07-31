@@ -37,6 +37,48 @@ posting-plan.md       what to build next
 THESES.md             every position we hold and what it rests on (generated)
 ```
 
+## The rule files in this folder — and when to read which
+
+These sit beside this file. They are not background reading; each one exists
+because work drifted without it.
+
+```
+PLAYBOOK.md   the SPEC for each client document — market map, who's who,
+              target map, investment thesis. Section by section.
+RESEARCH.md   the METHOD for gathering what those documents need. Six passes,
+              roughly twenty runs, several hours, usually more than one session.
+FORMATS.md    the collateral containers — which builder, which fields, and the
+              exact image slot dimensions.
+DESIGN.md     the house LOOK — palette, type, layout grammar, and the retired
+              design systems named with their hexes.
+```
+
+**Route by what you were asked for:**
+
+| Asked to… | Read FIRST |
+|---|---|
+| research a market / build a market map from scratch | **RESEARCH.md** |
+| fold new research into a master | job 1 below |
+| write a market map, who's who, target map or thesis | **PLAYBOOK.md** |
+| build a carousel, one-pager or report | **FORMATS.md**, then **DESIGN.md** |
+| anything, and you are about to hand-write HTML or CSS | **DESIGN.md** — stop, you are drifting |
+
+**The hard precondition.** Every client document is DERIVED from
+`markets/<m>/master.md`, which is derived from `markets/<m>/research/`. So:
+
+> If `research/` is empty or thin, you cannot write the document you were asked
+> for. Building a market map from an empty research folder does not produce a
+> thin map — it produces an invented one, which is the worst failure this
+> practice has. Go to **RESEARCH.md** and do that job first, and say so plainly
+> rather than producing the document shape with nothing behind it.
+
+Check before you start:
+
+```
+ls markets/<m>/research/ | wc -l      # 0 or 1 → you are at RESEARCH.md, not here
+cat markets/<m>/research/_log.md      # mid-job? resume from the first row not `done`
+```
+
 ## The four jobs
 
 ### 1. Fold new research into a market's master
