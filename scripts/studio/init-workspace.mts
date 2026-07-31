@@ -102,6 +102,13 @@ if (existsSync(planSrc) && !existsSync(planDst)) copyFileSync(planSrc, planDst);
                approximating the house style.
    DESIGN.md   the house LOOK — palette, type, the layout grammar of the three
                formats, and the retired systems named with their hexes.
+   RESEARCH.md the METHOD for building a market map: six passes, ~20 runs,
+               several hours, spanning more than one session. PLAYBOOK.md says
+               what the finished documents look like; this says how to gather
+               what they need, and — because the job outlives a session — how to
+               make it resumable (a frame file, one file per run, a coverage
+               ledger, and a stop condition). Paul, 2026-07-31: "this needs to be
+               a built out process that we can tell Cowork how to do."
 
    DESIGN.md is here because FORMATS.md was not enough on its own (Paul,
    2026-07-30: collateral "keeps wanting to reference design languages from last
@@ -117,6 +124,7 @@ law('content/studio/workspace-CLAUDE.md', 'CLAUDE.md');
 law('content/studio/PLAYBOOK.md', 'PLAYBOOK.md');
 law('content/studio/FORMATS.md', 'FORMATS.md');
 law('content/studio/DESIGN.md', 'DESIGN.md');
+law('content/studio/RESEARCH.md', 'RESEARCH.md');
 
 /* engagements.mjs is a TOOL, not a law, but it travels the same way and for the
    same reason (Paul, 2026-07-29: "I don't want to have to keep downloading main
