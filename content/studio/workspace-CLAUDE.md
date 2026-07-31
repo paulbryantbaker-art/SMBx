@@ -41,6 +41,13 @@ THESES.md             every position we hold and what it rests on (generated)
 
 ### 1. Fold new research into a market's master
 
+**If the research does not exist yet, read `RESEARCH.md` first.** Building a
+market map from scratch is six passes and roughly twenty runs across several
+hours — usually more than one session. That file carries the procedure, the
+coverage ledger that makes it resumable, and the stop condition. This job here
+assumes `research/` is already populated.
+
+
 Read every file in `markets/<m>/research/`, plus the current `master.md` if one
 exists, and write a new master. Then **audit it before anything else happens**:
 

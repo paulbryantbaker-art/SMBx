@@ -73,6 +73,24 @@ palettes, and nothing that travelled to the workspace described the current one.
 
 ## The four jobs
 
+### 0. Build the research in the first place
+
+If a market has no `research/` yet, **that is its own job and it is the long
+one** — six passes, roughly twenty runs, several hours, usually across more than
+one session. The procedure is `RESEARCH.md` in the workspace (source:
+`content/studio/RESEARCH.md`), and it exists because the two ways this goes wrong
+are expensive: searching without a frame, so three of the seven sections the
+client pays for end up empty; and synthesizing after two passes, which produces a
+confident document about a market you have half-read.
+
+It is built to be RESUMABLE — a frame file written before any searching, one file
+per run with the query in its header, a coverage ledger mapping every market-map
+section to the pass that fills it, and a stop condition (two consecutive runs
+producing nothing new). Resuming is: read `00-frame.md`, then `_log.md`, then the
+section table. No summary, no memory.
+
+> Build the research for fire and life safety in DFW. Read RESEARCH.md first.
+
 ### 1. Fold new research into a market's master
 
 Gather reads however you like — Claude, Gemini, a PDF someone sent — and drop
