@@ -88,8 +88,9 @@ export default function TodayMobileScreen({ user }: AtlasScreenProps) {
   const hasPipeline = !!summary && summary.totalActive > 0 && summary.weightedEvCents > 0;
 
   const startFirstDeal = useCallback(() => {
-    if (chat) chat.send("I want to start a new deal — help me set it up.");
-    else nav.go("deals");
+    // Buy-side: a deal comes out of a client's search, not out of nowhere.
+    if (chat) chat.send("Help me set up a buy-box for one of my clients — ");
+    else nav.go("clients");
   }, [chat, nav]);
 
   return (
@@ -192,10 +193,30 @@ function AttentionList({
       {actions.map((a) => (
         <ActionRow
           key={a.id}
-          leading={<MarkBadge label={a.dealName || a.title} seed={a.dealId ?? a.id} size={40} />}
-          title={a.title}
-          sub={a.description || a.cta}
-          action="Open"
+          leading={<MarkBadge label={a.client || a.dealName || a.title} seed={a.dealId ?? a.id} size={40} />}
+          /* CLIENT › DEAL › ACTION (Paul, 2026-07-31). The breadcrumb is the
+             title, so a row answers "whose, on what" before "do what". Segments
+             that do not exist are OMITTED rather than filled with a placeholder:
+             a client-level action has no deal, and an unassigned deal has no
+             client — and that gap is often the point of the row. */
+          title={
+            <span style={{ display: "block", fontSize: 12.5, color: RT.muted, fontWeight: 600, marginBottom: 2 }}>
+              {[a.client, a.dealName].filter(Boolean).join(" › ") || "Not assigned"}
+            </span>
+          }
+          sub={
+            <>
+              <span style={{ display: "block", fontSize: 15.5, fontWeight: 600, color: RT.ink, lineHeight: 1.35 }}>
+                {a.action || a.title}
+              </span>
+              {a.because && (
+                <span style={{ display: "block", fontSize: 13, color: RT.muted, marginTop: 2 }}>
+                  {a.because}
+                </span>
+              )}
+            </>
+          }
+          action={a.cta || "Open"}
           onClick={() => onAction(a)}
         />
       ))}
@@ -207,12 +228,15 @@ function FirstDealCard({ onStartDeal }: { onStartDeal: () => void }) {
   return (
     <div style={S.card}>
       <div style={{ fontSize: 17, fontWeight: 600, color: RT.ink, marginBottom: 4 }}>No deals yet</div>
+      {/* Buy-side only — the old copy offered "selling, or raising", journeys
+          THE LINE forbids. A deal starts from a client's buy-box, so that is
+          what this points at. */}
       <div style={{ fontSize: 14, color: RT.muted, lineHeight: 1.5, marginBottom: 14 }}>
-        Tell Yulia what you're buying, selling, or raising for, and she'll open your first deal and
-        start the work.
+        A deal starts from a client's buy-box. Tell Yulia which client you're
+        hunting for and what they want to own.
       </div>
       <button type="button" onClick={onStartDeal} style={S.cta}>
-        Start your first deal
+        Start a search
       </button>
     </div>
   );

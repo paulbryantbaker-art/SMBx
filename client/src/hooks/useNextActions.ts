@@ -18,6 +18,13 @@ export interface NextAction {
   id: string;
   dealId: number | null;
   dealName: string;
+  /** CLIENT › DEAL › ACTION — the row states whose work it is, on what, and what
+   *  to do. Null client means nothing is assigned yet, which is itself the
+   *  action. `because` is the traceable reason, never generated prose. */
+  client?: string | null;
+  clientId?: number | null;
+  action?: string;
+  because?: string;
   journeyType: string | null;
   currentGate: string | null;
   icon: string;
