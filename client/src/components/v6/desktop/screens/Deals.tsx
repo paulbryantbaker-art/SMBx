@@ -2,9 +2,9 @@
  * Atlas DEALS — the merged portfolio screen (design map 00 §"SCREEN 4 — DEALS"
  * folded together with the former Pipeline kanban).
  *
- * ONE tab, board-first. A Board/Table Segmented toggle picks the view; both
- * read the SAME filtered slice of `useMobileDeals(user).all` (the shared search
- * box + All/Buy/Sell/Watchlist chips apply to both):
+ * ONE tab, board-first. A Board/Table toggle picks the view; both read the SAME
+ * filtered slice of `useMobileDeals(user).all` (the shared search box +
+ * All/Buy/Sell/Watchlist chips apply to both):
  *   - BOARD (default): the active funnel — KPI tiles (usePortfolioSummary) + a
  *     kanban grouped by the five shared PIPELINE_STAGES (Source→Value→Diligence→
  *     Structure→Close).
@@ -25,10 +25,21 @@
  *    not derivable from the available fields → honest "—".
  *  - MONEY: a literal 0-cents "Ask" must not print "$0 Ask"; the board card
  *    falls through ask → EBITDA → SDE via a `> 0` guard.
+ *
+ * ── ARCHIVE (2026-07-31, migration 112) ──────────────────────────────────
+ * The TABLE view is the bulk-management surface: tick rows (or the header box
+ * to take the whole filtered set) and archive them in one PATCH /api/deals.
+ * ARCHIVE, NOT DELETE — 11 foreign keys reference deals(id) with no ON DELETE
+ * clause, so Postgres RESTRICTs a real delete; archiving hides the deal from
+ * every board and leaves its conversations/deliverables/gates intact.
+ * "Archived" is a SCOPE, not a filter chip: the archive and the board are two
+ * views of different rows, never one mixed list. Archived scope forces the
+ * table (a kanban of retired deals says nothing) and swaps Archive → Restore.
  */
 import { useMemo, useState } from "react";
 import type { AtlasScreenProps } from "../atlasNav";
 import { useAtlasNav, useAtlasChat } from "../atlasNav";
+import { authHeaders } from "../../../../hooks/useAuth";
 import { useMobileDeals, type MobileStageRow } from "../../../../hooks/useMobileDeals";
 import { useAdvisorMandates } from "../../../../hooks/useAdvisorMandates";
 import { usePortfolioSummary } from "../../../../hooks/usePortfolioSummary";
@@ -53,6 +64,9 @@ import { T } from "../atlasTokens";
 const PAGE_SIZE = 25;
 
 type FilterId = "all" | "buy" | "sell" | "watch";
+type ViewId = "board" | "table";
+/** Which SET of deals we're looking at. Not a filter — a different row set. */
+type ScopeId = "active" | "archived";
 
 const FILTERS: { id: FilterId; label: string }[] = [
   { id: "all", label: "All" },
@@ -189,15 +203,29 @@ const ROW_PAD = "11px 22px";
 export default function DealsScreen({ user }: AtlasScreenProps) {
   const nav = useAtlasNav();
   const chat = useAtlasChat();
-  const { all, loading, loaded, isAuthed } = useMobileDeals(user);
-  const { summary } = usePortfolioSummary(user, isAuthed);
-  const mandates = useAdvisorMandates(user);
 
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterId>("all");
   const [page, setPage] = useState(0);
+  const [view, setView] = useState<ViewId>("board");
+  const [scope, setScope] = useState<ScopeId>("active");
+  // Selected rawIds. Survives paging (the selection is over the filtered set,
+  // not the visible page) and is cleared on every scope/filter/search change so
+  // an off-screen tick can never be archived by surprise.
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [busy, setBusy] = useState(false);
+  const [bulkError, setBulkError] = useState<string | null>(null);
+
+  const { all, loading, loaded, isAuthed, refresh } = useMobileDeals(user, {
+    archived: scope === "archived",
+  });
+  const { summary } = usePortfolioSummary(user, isAuthed);
+  const mandates = useAdvisorMandates(user);
 
   const owner = ownerOf(user);
+  // A kanban of retired deals communicates nothing, so the archive is always
+  // the table.
+  const effectiveView: ViewId = scope === "archived" ? "table" : view;
 
   // Client-side filter: search over name + sub, chips over side/watchlist.
   // Drives BOTH the table and the board (same `all` set, one filter pass).
@@ -234,16 +262,71 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
   const start = safePage * PAGE_SIZE;
   const pageRows = filtered.slice(start, start + PAGE_SIZE);
 
+  const clearSelection = () => setSelected(new Set());
+
   const onSearch = (v: string) => {
     setQuery(v);
     setPage(0);
+    clearSelection();
   };
   const onFilter = (id: FilterId) => {
     setFilter(id);
     setPage(0);
+    clearSelection();
+  };
+  const onScope = (id: ScopeId) => {
+    setScope(id);
+    setPage(0);
+    clearSelection();
+    setBulkError(null);
   };
 
   const openDeal = (row: MobileStageRow) => nav.openDeal(row.rawId, row.name);
+
+  const toggleRow = (rawId: number) =>
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(rawId)) next.delete(rawId);
+      else next.add(rawId);
+      return next;
+    });
+
+  // The header box takes the WHOLE filtered set, not just the visible page —
+  // that's the point of it when clearing out a board full of test rows.
+  const allFilteredSelected = filtered.length > 0 && filtered.every(r => selected.has(r.rawId));
+  const toggleAll = () =>
+    setSelected(allFilteredSelected ? new Set() : new Set(filtered.map(r => r.rawId)));
+
+  /** Archive (or restore) every selected deal in one request. */
+  const applyArchive = async (archived: boolean) => {
+    const ids = [...selected];
+    if (ids.length === 0 || busy) return;
+    setBusy(true);
+    setBulkError(null);
+    try {
+      const r = await fetch("/api/deals", {
+        method: "PATCH",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ ids, archived }),
+      });
+      if (!r.ok) {
+        let detail = "";
+        try {
+          detail = (await r.json())?.error || "";
+        } catch {
+          /* no body */
+        }
+        throw new Error(detail || `HTTP ${r.status}`);
+      }
+      clearSelection();
+      refresh();
+    } catch (e: any) {
+      // Say WHY rather than silently leaving the rows on screen.
+      setBulkError(e?.message || "Could not update those deals");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   /* ── KPIs (real fields or honest "—") ──────────────────── */
   const inFlow = summary ? String(summary.totalActive) : "—";
@@ -264,20 +347,32 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
     overflow: "hidden",
   };
 
+  // One toolbar instance for all three render paths (loading / empty / list),
+  // so the view + scope controls never disappear — reaching an empty archive
+  // and being unable to get back to the board would be a trap.
+  const toolbar = (
+    <Toolbar
+      query={query}
+      onSearch={onSearch}
+      filter={filter}
+      onFilter={onFilter}
+      count={loaded ? all.length : 0}
+      view={effectiveView}
+      onView={setView}
+      viewLocked={scope === "archived"}
+      scope={scope}
+      onScope={onScope}
+      onAdd={() => chat?.send("I want to add a new deal.")}
+    />
+  );
+
   /* ── loading / empty ── */
   if (loading && !loaded) {
     return (
       <div style={root}>
-        <Toolbar
-          query={query}
-          onSearch={onSearch}
-          filter={filter}
-          onFilter={onFilter}
-          count={0}
-          onAdd={() => chat?.send("I want to add a new deal.")}
-        />
+        {toolbar}
         <div style={{ flex: 1, display: "flex" }}>
-          <LoadingState label="Loading your deals…" />
+          <LoadingState label={scope === "archived" ? "Loading the archive…" : "Loading your deals…"} />
         </div>
       </div>
     );
@@ -286,21 +381,23 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
   if (loaded && all.length === 0) {
     return (
       <div style={root}>
-        <Toolbar
-          query={query}
-          onSearch={onSearch}
-          filter={filter}
-          onFilter={onFilter}
-          count={0}
-          onAdd={() => chat?.send("I want to add a new deal.")}
-        />
+        {toolbar}
         <div style={{ flex: 1, display: "flex" }}>
-          <EmptyState
-            title="No deals yet"
-            hint="Talk to Yulia to add a target, evaluate a business, or import a deal. She is the front door to everything in Atlas."
-            cta="Add your first deal"
-            onCta={() => chat?.send("I want to add a new deal.")}
-          />
+          {scope === "archived" ? (
+            <EmptyState
+              title="Nothing archived"
+              hint="Archived deals are hidden from the board but never deleted. Select rows in the table view and archive them to retire them from your working set."
+              cta="Back to the board"
+              onCta={() => onScope("active")}
+            />
+          ) : (
+            <EmptyState
+              title="No deals yet"
+              hint="Talk to Yulia to add a target, evaluate a business, or import a deal. She is the front door to everything in Atlas."
+              cta="Add your first deal"
+              onCta={() => chat?.send("I want to add a new deal.")}
+            />
+          )}
         </div>
       </div>
     );
@@ -308,30 +405,58 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
 
   return (
     <div style={root}>
-      <Toolbar
-        query={query}
-        onSearch={onSearch}
-        filter={filter}
-        onFilter={onFilter}
-        count={all.length}
-        onAdd={() => chat?.send("I want to add a new deal.")}
-      />
+      {toolbar}
 
-      <BoardView
-        byStage={byStage}
-        matchCount={filtered.length}
-        inFlow={inFlow}
-        inFlowDelta={inFlowDelta}
-        flowValue={flowValue}
-        flowDelta={flowDelta}
-        liveOffers={mandates.totals?.liveOffers ?? null}
-        mandateCount={mandates.mandates.length}
-        onOpen={openDeal}
-        onClear={() => {
-          setQuery("");
-          setFilter("all");
-        }}
-      />
+      {selected.size > 0 && (
+        <BulkBar
+          count={selected.size}
+          total={filtered.length}
+          scope={scope}
+          busy={busy}
+          error={bulkError}
+          onApply={() => applyArchive(scope !== "archived")}
+          onClear={clearSelection}
+        />
+      )}
+
+      {effectiveView === "board" ? (
+        <BoardView
+          byStage={byStage}
+          matchCount={filtered.length}
+          inFlow={inFlow}
+          inFlowDelta={inFlowDelta}
+          flowValue={flowValue}
+          flowDelta={flowDelta}
+          liveOffers={mandates.totals?.liveOffers ?? null}
+          mandateCount={mandates.mandates.length}
+          onOpen={openDeal}
+          onClear={() => {
+            setQuery("");
+            setFilter("all");
+          }}
+        />
+      ) : (
+        <TableView
+          rows={pageRows}
+          owner={owner}
+          total={filtered.length}
+          start={start}
+          end={Math.min(start + PAGE_SIZE, filtered.length)}
+          canPrev={safePage > 0}
+          canNext={safePage < pageCount - 1}
+          onPrev={() => setPage(p => Math.max(0, p - 1))}
+          onNext={() => setPage(p => Math.min(pageCount - 1, p + 1))}
+          selected={selected}
+          allSelected={allFilteredSelected}
+          onToggleRow={toggleRow}
+          onToggleAll={toggleAll}
+          onOpen={openDeal}
+          onClear={() => {
+            setQuery("");
+            setFilter("all");
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -344,6 +469,11 @@ function Toolbar({
   filter,
   onFilter,
   count,
+  view,
+  onView,
+  viewLocked,
+  scope,
+  onScope,
   onAdd,
 }: {
   query: string;
@@ -351,6 +481,12 @@ function Toolbar({
   filter: FilterId;
   onFilter: (id: FilterId) => void;
   count: number;
+  view: ViewId;
+  onView: (v: ViewId) => void;
+  /** True in archived scope, where the table is the only sensible view. */
+  viewLocked: boolean;
+  scope: ScopeId;
+  onScope: (s: ScopeId) => void;
   onAdd: () => void;
 }) {
   return (
@@ -381,7 +517,13 @@ function Toolbar({
         <input
           value={query}
           onChange={(e) => onSearch(e.target.value)}
-          placeholder={count > 0 ? `Search ${count} deals` : "Search deals"}
+          placeholder={
+            count > 0
+              ? `Search ${count} ${scope === "archived" ? "archived deals" : "deals"}`
+              : scope === "archived"
+                ? "Search the archive"
+                : "Search deals"
+          }
           style={{
             flex: 1,
             minWidth: 0,
@@ -429,6 +571,61 @@ function Toolbar({
           there's no sort menu behind it. An inert chevron asserting a sort that
           doesn't exist is misleading, so we omit it rather than fake it. */}
 
+      {/* Board / Table — the table is the bulk-management surface */}
+      <div
+        style={{
+          display: "flex",
+          border: `1px solid ${T.border}`,
+          borderRadius: T.rPill,
+          overflow: "hidden",
+          opacity: viewLocked ? 0.55 : 1,
+        }}
+        title={viewLocked ? "The archive is always the table view" : undefined}
+      >
+        {(["board", "table"] as ViewId[]).map((v) => {
+          const active = v === view;
+          return (
+            <button
+              key={v}
+              type="button"
+              disabled={viewLocked}
+              onClick={() => onView(v)}
+              style={{
+                fontSize: 12.5,
+                fontWeight: 600,
+                padding: "7px 14px",
+                border: "none",
+                cursor: viewLocked ? "default" : "pointer",
+                fontFamily: T.font,
+                background: active ? T.track : T.white,
+                color: active ? T.ink : T.muted,
+              }}
+            >
+              {v === "board" ? "Board" : "Table"}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Archived scope toggle — a different row set, not a filter */}
+      <button
+        type="button"
+        onClick={() => onScope(scope === "archived" ? "active" : "archived")}
+        style={{
+          fontSize: 12.5,
+          fontWeight: 600,
+          padding: "7px 13px",
+          borderRadius: T.rPill,
+          cursor: "pointer",
+          fontFamily: T.font,
+          border: `1px solid ${scope === "archived" ? T.ink3 : T.border}`,
+          background: scope === "archived" ? T.ink3 : T.white,
+          color: scope === "archived" ? "#fff" : T.muted,
+        }}
+      >
+        {scope === "archived" ? "← Back to board" : "Archived"}
+      </button>
+
       {/* + Add deal → Yulia */}
       <button
         type="button"
@@ -448,6 +645,231 @@ function Toolbar({
         + Add deal
       </button>
     </div>
+  );
+}
+
+/* ─── bulk action bar ──────────────────────────────────────── */
+
+/** Appears only while rows are ticked. One verb: Archive in the working set,
+ *  Restore in the archive. Archiving is reversible, so it needs no confirm
+ *  dialog — the Archived scope is one click away and Restore undoes it. */
+function BulkBar({
+  count,
+  total,
+  scope,
+  busy,
+  error,
+  onApply,
+  onClear,
+}: {
+  count: number;
+  total: number;
+  scope: ScopeId;
+  busy: boolean;
+  error: string | null;
+  onApply: () => void;
+  onClear: () => void;
+}) {
+  const verb = scope === "archived" ? "Restore" : "Archive";
+  return (
+    <div
+      style={{
+        margin: "0 22px 10px",
+        padding: "10px 14px",
+        background: T.blueBg,
+        border: `1px solid ${T.border}`,
+        borderRadius: 10,
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        flexWrap: "wrap",
+        flex: "none",
+        fontSize: 13,
+      }}
+    >
+      <span style={{ fontWeight: 600, color: T.ink }}>
+        {count} of {total} selected
+      </span>
+
+      {error && (
+        <span style={{ color: T.amber, fontSize: 12.5 }}>{error}</span>
+      )}
+
+      <div style={{ flex: 1 }} />
+
+      <button
+        type="button"
+        onClick={onClear}
+        disabled={busy}
+        style={{
+          fontSize: 12.5,
+          fontWeight: 600,
+          padding: "7px 13px",
+          borderRadius: T.rPill,
+          border: `1px solid ${T.border}`,
+          background: T.white,
+          color: T.muted,
+          cursor: busy ? "default" : "pointer",
+          fontFamily: T.font,
+        }}
+      >
+        Clear
+      </button>
+      <button
+        type="button"
+        onClick={onApply}
+        disabled={busy}
+        style={{
+          fontSize: 12.5,
+          fontWeight: 600,
+          padding: "7px 15px",
+          borderRadius: T.rPill,
+          border: "none",
+          background: busy ? T.muted2 : T.blue,
+          color: "#fff",
+          cursor: busy ? "default" : "pointer",
+          fontFamily: T.font,
+        }}
+      >
+        {busy ? `${verb.slice(0, -1)}ing…` : `${verb} ${count}`}
+      </button>
+    </div>
+  );
+}
+
+/* ─── table view ───────────────────────────────────────────── */
+
+function TableView({
+  rows,
+  owner,
+  total,
+  start,
+  end,
+  canPrev,
+  canNext,
+  onPrev,
+  onNext,
+  selected,
+  allSelected,
+  onToggleRow,
+  onToggleAll,
+  onOpen,
+  onClear,
+}: {
+  rows: MobileStageRow[];
+  owner: { initials: string; name: string } | null;
+  total: number;
+  start: number;
+  end: number;
+  canPrev: boolean;
+  canNext: boolean;
+  onPrev: () => void;
+  onNext: () => void;
+  selected: Set<number>;
+  allSelected: boolean;
+  onToggleRow: (rawId: number) => void;
+  onToggleAll: () => void;
+  onOpen: (row: MobileStageRow) => void;
+  onClear: () => void;
+}) {
+  if (total === 0) {
+    return (
+      <div style={{ flex: 1, display: "flex" }}>
+        <EmptyState
+          title="No deals match"
+          hint="Clear the search and filters to see your full pipeline."
+          cta="Clear filters"
+          onCta={onClear}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+      {/* header — the box takes the whole filtered set, hence the count label */}
+      <div
+        style={{
+          padding: ROW_PAD,
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          borderBottom: `1px solid ${T.border}`,
+          background: T.surface,
+          fontSize: 11.5,
+          fontWeight: 700,
+          letterSpacing: "0.05em",
+          color: T.muted2,
+          flex: "none",
+        }}
+      >
+        <SelectBox
+          checked={allSelected}
+          onChange={onToggleAll}
+          label={allSelected ? `Deselect all ${total}` : `Select all ${total}`}
+        />
+        <div style={{ flex: COLS.deal, minWidth: 0 }}>DEAL</div>
+        <div style={{ flex: COLS.sector, minWidth: 0 }}>SECTOR</div>
+        <div style={{ flex: COLS.stage, minWidth: 0 }}>STAGE</div>
+        <div style={{ flex: COLS.ev, minWidth: 0 }}>EV</div>
+        <div style={{ flex: COLS.fit, minWidth: 0 }}>FIT</div>
+        <div style={{ flex: COLS.owner, minWidth: 0 }}>OWNER</div>
+        <div style={{ flex: COLS.activity, minWidth: 0 }}>ACTIVITY</div>
+      </div>
+
+      {/* rows */}
+      <div style={{ flex: 1, minHeight: 0, overflow: "auto" }}>
+        {rows.map((row) => (
+          <DealRow
+            key={row.id}
+            row={row}
+            owner={owner}
+            selected={selected.has(row.rawId)}
+            onToggleSelect={() => onToggleRow(row.rawId)}
+            onOpen={() => onOpen(row)}
+          />
+        ))}
+      </div>
+
+      <Pager
+        total={total}
+        start={start}
+        end={end}
+        canPrev={canPrev}
+        canNext={canNext}
+        onPrev={onPrev}
+        onNext={onNext}
+      />
+    </div>
+  );
+}
+
+/** Native checkbox in the Atlas accent — no custom control, so keyboard and
+ *  screen-reader behaviour comes for free. */
+function SelectBox({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean;
+  onChange: () => void;
+  label: string;
+}) {
+  return (
+    <span
+      style={{ width: 22, flex: "none", display: "flex", alignItems: "center" }}
+      // The row behind this cell opens the deal; a tick must never do that too.
+      onClick={(e) => e.stopPropagation()}
+    >
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={onChange}
+        aria-label={label}
+        title={label}
+        style={{ width: 15, height: 15, accentColor: T.blue, cursor: "pointer", margin: 0 }}
+      />
+    </span>
   );
 }
 
@@ -737,10 +1159,14 @@ function DealCard({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) 
 function DealRow({
   row,
   owner,
+  selected,
+  onToggleSelect,
   onOpen,
 }: {
   row: MobileStageRow;
   owner: { initials: string; name: string } | null;
+  selected: boolean;
+  onToggleSelect: () => void;
   onOpen: () => void;
 }) {
   const sector = sectorOf(row);
@@ -748,6 +1174,9 @@ function DealRow({
   const ev = evCents(row);
   const tint = markTint(row.rawId);
   const fitReal = typeof row.fit === "number";
+  // A selected row keeps its wash through mouseleave/blur, so the inline hover
+  // handlers below restore the selected tint rather than "transparent".
+  const restBg = selected ? T.blueBg3 : "transparent";
 
   return (
     <div
@@ -769,12 +1198,13 @@ function DealRow({
         fontSize: 13.5,
         cursor: "pointer",
         outline: "none",
+        background: restBg,
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.background = T.hover;
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.background = "transparent";
+        e.currentTarget.style.background = restBg;
       }}
       // Keyboard focus ring — these rows are role=button/tabIndex=0, so give
       // keyboard users a visible focus state (inline, matching the hover wash).
@@ -783,10 +1213,16 @@ function DealRow({
         e.currentTarget.style.boxShadow = `inset 0 0 0 2px ${T.stageActiveBd}`;
       }}
       onBlur={(e) => {
-        e.currentTarget.style.background = "transparent";
+        e.currentTarget.style.background = restBg;
         e.currentTarget.style.boxShadow = "none";
       }}
     >
+      <SelectBox
+        checked={selected}
+        onChange={onToggleSelect}
+        label={`Select ${row.name}`}
+      />
+
       {/* DEAL */}
       <div style={{ flex: COLS.deal, minWidth: 0, display: "flex", alignItems: "center", gap: 11 }}>
         <MarkBadge letter={row.name} bg={tint.bg} fg={tint.fg} size={26} radius={7} />

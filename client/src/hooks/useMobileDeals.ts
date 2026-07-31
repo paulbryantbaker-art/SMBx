@@ -34,6 +34,9 @@ export interface RawDeal {
   name: string | null;
   is_favorite: boolean | null;
   disposition: string | null;
+  /** Migration 112 — archived deals are out of the working board. The list
+   *  endpoint filters server-side, so this is here for completeness. */
+  archived?: boolean | null;
   industry: string | null;
   location: string | null;
   league: string | null;
@@ -142,9 +145,12 @@ export interface UseMobileDealsResult {
   picks: MobilePick[];
   featured: MobileFeatured | null;
   all: MobileStageRow[];
+  /** Re-read the list. For callers that mutate deals (archive / restore) — the
+   *  board has to catch up without a full page reload. */
+  refresh: () => void;
 }
 
-const EMPTY: Omit<UseMobileDealsResult, "loading" | "loaded" | "isAuthed" | "hasData" | "error"> = {
+const EMPTY: ShapedDeals = {
   today: [],
   picks: [],
   featured: null,
@@ -268,7 +274,13 @@ function normalizeRawDeal(raw: any): RawDeal {
 
 /* ─── shape per-screen ────────────────────────────────────── */
 
-function shape(deals: RawDeal[]): Omit<UseMobileDealsResult, "loading" | "loaded" | "isAuthed" | "hasData" | "error"> {
+/** The derived slices only — `refresh` is the hook's handle, not shaped data. */
+type ShapedDeals = Omit<
+  UseMobileDealsResult,
+  "loading" | "loaded" | "isAuthed" | "hasData" | "error" | "refresh"
+>;
+
+function shape(deals: RawDeal[]): ShapedDeals {
   // Full pipeline: every deal the user owns (all statuses), tagged with its
   // gate-derived stage so the mobile Pipeline can group them like desktop.
   const all: MobileStageRow[] = deals.map(d => {
@@ -372,12 +384,27 @@ function shape(deals: RawDeal[]): Omit<UseMobileDealsResult, "loading" | "loaded
 
 /* ─── hook ────────────────────────────────────────────────── */
 
-export function useMobileDeals(user: User | null): UseMobileDealsResult {
+/** Options are OPTIONAL and default to the working set, so every existing
+ *  `useMobileDeals(user)` caller is unaffected by the archive (migration 112).
+ *  - archived: read the ARCHIVE instead of the board (`?archived=1`).
+ *  - Call the returned `refresh()` after a mutation (archive/restore) to re-read. */
+export interface UseMobileDealsOptions {
+  archived?: boolean;
+}
+
+export function useMobileDeals(
+  user: User | null,
+  opts: UseMobileDealsOptions = {},
+): UseMobileDealsResult {
+  const { archived = false } = opts;
   const [shaped, setShaped] = useState(EMPTY);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [hasData, setHasData] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Bumping this re-runs the effect — the refresh handle for callers that
+  // mutate deals (archive, restore) and need the list to catch up.
+  const [nonce, setNonce] = useState(0);
 
   useEffect(() => {
     if (!user || DEV_AUTH_BYPASS) {
@@ -391,7 +418,7 @@ export function useMobileDeals(user: User | null): UseMobileDealsResult {
     setLoading(true);
     setLoaded(false);
     setError(null);
-    fetch("/api/deals", { headers: authHeaders() })
+    fetch(archived ? "/api/deals?archived=1" : "/api/deals", { headers: authHeaders() })
       .then(async r => {
         if (r.ok) return r.json();
         // Surface the server's message so an on-device user can tell us WHY.
@@ -421,7 +448,15 @@ export function useMobileDeals(user: User | null): UseMobileDealsResult {
     return () => {
       cancelled = true;
     };
-  }, [user?.id]);
+  }, [user?.id, archived, nonce]);
 
-  return { ...shaped, loading, loaded, isAuthed: !!user, hasData, error };
+  return {
+    ...shaped,
+    loading,
+    loaded,
+    isAuthed: !!user,
+    hasData,
+    error,
+    refresh: () => setNonce(n => n + 1),
+  };
 }
