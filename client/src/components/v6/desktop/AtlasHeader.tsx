@@ -12,21 +12,24 @@ import { useAtlasNav, type AtlasScreen } from "./atlasNav";
 import { Sparkle, Avatar } from "./primitives";
 import { SearchIcon, HelpIcon, BellIcon } from "./icons";
 import { T } from "./atlasTokens";
+import { STUDIO_IN_APP } from "../appSurfaces";
 
 interface TabDef {
   id: AtlasScreen;
   label: string;
 }
 
-const TABS: TabDef[] = [
+// Studio is retired from the chrome (2026-07-31) — the document work moved to
+// disk. The screen still exists and still routes; see appSurfaces.ts.
+const TABS: TabDef[] = ([
   { id: "today", label: "Today" },
   { id: "deals", label: "Deals" },
   { id: "sourcing", label: "Sourcing" },
-  { id: "studio", label: "Studio" },
+  ...(STUDIO_IN_APP ? [{ id: "studio", label: "Studio" } as TabDef] : []),
   { id: "integration", label: "Integration" },
   { id: "files", label: "Files" },
   { id: "agent", label: "Agent" },
-];
+] as TabDef[]);
 
 /** Map the current screen to the highlighted tab. Cockpit + canvas highlight
  *  Deals; the retired "pipeline" alias also highlights Deals (the funnel now
