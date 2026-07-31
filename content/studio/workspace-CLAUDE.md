@@ -45,8 +45,11 @@ because work drifted without it.
 ```
 PLAYBOOK.md   the SPEC for each client document — market map, who's who,
               target map, investment thesis. Section by section.
-RESEARCH.md   the METHOD for gathering what those documents need. Six passes,
-              roughly twenty runs, several hours, usually more than one session.
+RESEARCH.md   the METHOD for gathering. THREE SEPARATE HUNTS — do not mix
+              them: (A) clients to serve, (B) how a market works, (C) targets
+              for a client to buy. Different sources, different scorers,
+              different outputs. 15–25 runs each, several hours, usually more
+              than one session.
 FORMATS.md    the collateral containers — which builder, which fields, and the
               exact image slot dimensions.
 DESIGN.md     the house LOOK — palette, type, layout grammar, and the retired
@@ -57,11 +60,21 @@ DESIGN.md     the house LOOK — palette, type, layout grammar, and the retired
 
 | Asked to… | Read FIRST |
 |---|---|
-| research a market / build a market map from scratch | **RESEARCH.md** |
+| find **clients** — acquirers to pitch, a prospect list for us | **RESEARCH.md § A** |
+| research a **market** / build a market map from scratch | **RESEARCH.md § B** |
+| build a **target list** of companies for a client to buy | **RESEARCH.md § C** |
 | fold new research into a master | job 1 below |
 | write a market map, who's who, target map or thesis | **PLAYBOOK.md** |
 | build a carousel, one-pager or report | **FORMATS.md**, then **DESIGN.md** |
 | anything, and you are about to hand-write HTML or CSS | **DESIGN.md** — stop, you are drifting |
+
+**Three hunts, and they are not interchangeable.** A "list of companies" means
+something different in each: A is acquirers we want as clients, C is companies a
+client should buy, and B is not a list at all. Getting this wrong produces an
+authoritative-looking artifact that answers a question nobody asked.
+
+The engagement order is **B → thesis → C**. And never derive C from B alone: a
+market master contains no target list, so building one from it invents companies.
 
 **The hard precondition.** Every client document is DERIVED from
 `markets/<m>/master.md`, which is derived from `markets/<m>/research/`. So:
