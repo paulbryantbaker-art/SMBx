@@ -4,11 +4,14 @@ Last updated: 2026-07-31
 > The decision doc for one question: when a piece of work lands, does it go in a
 > Cowork session against `~/Documents/smbx-studio`, or into the app?
 >
-> This SUPERSEDES the blanket reading of `CLAUDE.md` rule 0 ("the app is
-> MARKETING ONLY… do not build new internal app features"). That rule was
-> written on 2026-07-27 in response to a spend ceiling, and it was right about
-> the cost problem and wrong about the scope. `CLAUDE.md` has not been edited
-> yet — see §7.
+> **Settled by Paul, 2026-07-31:** *"i think i want all Studio work to be on
+> disc Cowork — ill do CRM and Deal management in the app."*
+>
+> **Studio → disk. CRM and deals → the app.** `CLAUDE.md` rule 0 has been
+> rewritten to match (it previously read "marketing only… do not build new
+> internal app features," which was right about the cost problem and wrong about
+> the scope). Studio is retired from the app's navigation but not deleted — one
+> constant, `STUDIO_IN_APP` in `client/src/components/v6/appSurfaces.ts`.
 
 ---
 
@@ -53,6 +56,46 @@ The market master lives BOTH in `research_lanes.master_md` (Postgres) and as
 `markets/<m>/master.md` on disk. Under this doc the **file wins**; the app's
 copy is legacy. Do not re-adopt the app as the master's home, and do not build
 new features that write to `research_lanes`.
+
+### Studio, retired in place (2026-07-31)
+
+`STUDIO_IN_APP = false` in `client/src/components/v6/appSurfaces.ts` takes Studio
+out of the desktop header tab strip and the mobile More → Modules list. Nothing
+else changes: every screen, service, route and migration stays where it is and
+still compiles, `/api/research` and `/api/studio` remain mounted, direct URLs and
+existing exports still work. Flip the constant to `true` and Studio returns
+intact — no restoration work.
+
+It is a build-time constant, not an env var, deliberately: this is a product
+decision with a written rationale, and an env var would let two environments
+disagree about what the app is for.
+
+**The one real gap.** `server/services/linkedinAnalytics.ts` — the
+dependency-free XLSX reader that parses LinkedIn's aggregate export mechanically
+(zip central directory → worksheet XML → sharedStrings, zero hallucination, every
+stored number verbatim) plus Yulia's read of it — has **no local equivalent**.
+Everything else Studio did has one: `build-deck`/`build-onepager`/`build-report`/
+`build-og-card` for collateral, `audit.mts` for citations, `thesis.mts` for the
+thesis register, `PLAYBOOK.md` for the document specs. Analytics does not. Until
+a local CLI exists, an analytics import is the one legitimate reason to open the
+app's Studio, and the mechanical parse is the part worth porting — the read is a
+Cowork session's job anyway.
+
+### The email-campaign seam already exists
+
+Worth knowing before building sequences: `scripts/studio/export-leads.mts` (PR
+#183, 2026-07-29) already pulls the MAILABLE list — consented, never opted out,
+deduplicated — and migration 109 stores `consent_text` **verbatim**, so an old
+row still says what *that person* agreed to.
+
+**That list and the CRM register are different legal objects and must not be
+merged.** The consented list is inbound: people who downloaded a report or used
+the intake and were shown a notice. The 77-firm register is **cold outbound to
+businesses** — a different posture with different obligations. A sequence that
+pooled them would break a promise those readers were given at capture, and the
+download card previously promised "no list, no sequence." Campaign work should
+read `crm_contacts` for outbound and leave `export-leads.mts` owning the
+consented list.
 
 ## 3. What runs in the app
 
@@ -253,11 +296,30 @@ So the working set is managed by archiving:
 There is deliberately no "delete all deals" button. Archiving is reversible;
 deletion of a real deal's conversations and deliverables is not.
 
-## 7. What this doc does not do
+## 7. Doctrine status
 
-It does not edit `CLAUDE.md`. Rule 0 there still reads "the app is MARKETING
-ONLY… Do not build new internal app features," which contradicts §3 and §5 and
-will cause any fresh session to decline the CRM work. That edit is a separate,
-deliberate act — rule 0 should point here and narrow itself to: heavy research
-and synthesis are local; records, CRM, deal state and model math are the app's
-job.
+`CLAUDE.md` rule 0 and its "THE WORK IS LOCAL" section were rewritten on
+2026-07-31 to match this doc: **THE SPLIT** — documents are files, pipelines are
+rows; all Studio work is local; CRM and deal management are the app's job and
+building there is expected; research and synthesis stay local because they are
+the only paths that can spend real money.
+
+The Studio section further down `CLAUDE.md` is a **record of what was built, not
+a roadmap**. That includes the surfaces added in the last week of July —
+`MarketWorkspace`, `CollateralBuilder`, `studioRepos`, `researchLanes`,
+`corpDevDocs`, `marketKnowledgeTools`. They work; they are simply not where the
+work happens, and `PLAYBOOK.md` is canonical over `corpDevDocs.ts`.
+
+### Next
+
+1. **A UI for the CRM.** The schema, ranking, import and export are live; nothing
+   renders them. This is the gap between "the app owns the client pipeline" and
+   being able to use it.
+2. **Email campaigns** against `crm_contacts`, drafted and logged as
+   `crm_activity` with `kind='email'` — keeping the consented inbound list
+   separate, per the seam above. THE LINE: the practitioner sends.
+3. **A local LinkedIn-analytics CLI**, to close the one Studio capability with no
+   equivalent on disk.
+4. **`engaged_lanes` as a table** — "one buyer per target" is a THE LINE
+   commitment currently enforced by `process.env.ENGAGED_LANES`, which nothing
+   can query, audit or date.

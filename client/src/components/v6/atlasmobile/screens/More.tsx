@@ -31,6 +31,7 @@ import { DetailSection, Divider, ActionRow } from "../redesign/kit";
 import { ActionSheet } from "../iosKit";
 import { useMobileShell } from "../mobileShell";
 import { planLabel } from "../../../../lib/pricing";
+import { STUDIO_IN_APP } from "../../appSurfaces";
 
 function titleCase(s: string | null | undefined): string {
   if (!s) return "";
@@ -80,8 +81,14 @@ export default function MoreScreen({ user }: AtlasScreenProps) {
         <ChevronRightIcon size={18} c={RT.muted} />
       </button>
 
-      <DetailSection title="Modules" desc="Build collateral, connect your tools, and run agents.">
-        <ActionRow leading={<StudioGlyph />} title="Studio" action={<Chevron />} onClick={() => nav.go("studio")} />
+      {/* Studio is retired from the chrome (2026-07-31) — the document work
+          moved to disk. The screen still exists and still routes; see
+          appSurfaces.ts. The section blurb drops "Build collateral" with it,
+          rather than advertising a door that is no longer here. */}
+      <DetailSection title="Modules" desc="Connect your tools and run agents.">
+        {STUDIO_IN_APP && (
+          <ActionRow leading={<StudioGlyph />} title="Studio" action={<Chevron />} onClick={() => nav.go("studio")} />
+        )}
         <ActionRow leading={<IntegrationGlyph />} title="Integration" action={<Chevron />} onClick={() => nav.go("integration")} />
         <ActionRow leading={<AgentGlyph />} title="Agent" action={<Chevron />} onClick={() => nav.go("agent")} />
       </DetailSection>
