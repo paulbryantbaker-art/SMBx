@@ -11,6 +11,11 @@ byproduct; these are the job.
 > One check before anything here: `ls markets/<m>/research/`. **Empty or thin
 > means you are at the wrong file.** Every document below is derived from the
 > master, and the master is derived from that folder.
+>
+> RESEARCH.md carries **three separate hunts** — (A) clients to serve, (B) how a
+> market works, (C) targets for a client to buy. The market map, who's who and
+> thesis below all come off **B**. The **target map** below is the write-up of
+> **C**, and C needs a client, a buy-box and B before it can start.
 
 Build them by asking, in a session opened on this workspace:
 
@@ -130,6 +135,11 @@ companies nobody wrote a research report about. So:
 > **A target map requires its own research input.** Do not build one from the
 > master alone — you will produce plausible-sounding companies that do not
 > exist, which is the single worst failure mode this practice has.
+>
+> That research input has its own procedure: **`RESEARCH.md § C — Target hunt`**
+> (the licence registry is the authoritative list, not a search engine; Places is
+> discovery, not evidence; affiliation is a register lookup, not a judgement).
+> It needs a named client, a buy-box and a market master before it can start.
 
 **If you have target-level research** (a directory pull, a sourcing export, a
 research pass on operators in named metros), put it in `research/` and build
