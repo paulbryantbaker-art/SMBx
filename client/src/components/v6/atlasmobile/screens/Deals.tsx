@@ -43,16 +43,19 @@ import {
   fmtCents,
 } from "../../desktop/primitives";
 import { SearchIcon } from "../../desktop/icons";
+import { daysUntil } from "../../../../lib/crm";
 import { RT } from "../redesign/rt";
 import { ActionRow, MarkBadge as RMarkBadge } from "../redesign/kit";
 
-type FilterId = "all" | "buy" | "sell" | "watch";
+// Buy-side only (2026-07-31). "All" and "Buy-side" became the same list and
+// "Sell-side" can never match, so both are gone — the practice does not take
+// sell-side mandates (THE LINE §perimeter). Due now is a real filter instead.
+type FilterId = "all" | "watch" | "due";
 
 const FILTERS: { id: FilterId; label: string }[] = [
   { id: "all", label: "All" },
-  { id: "buy", label: "Buy-side" },
-  { id: "sell", label: "Sell-side" },
   { id: "watch", label: "Watchlist" },
+  { id: "due", label: "Due now" },
 ];
 
 /* ─── per-row derivations (copied wiring from the desktop sibling) ── */
@@ -97,14 +100,6 @@ function fitMeta(fit: number): { bg: string; fg: string } {
   if (fit >= 80) return { bg: RT.accentSoft, fg: RT.accentInk };
   if (fit >= 65) return { bg: RT.line, fg: RT.muted };
   return { bg: RT.line, fg: RT.muted };
-}
-
-/** Buy/sell side from the gate letter prefix (B → buy, S → sell, R → raise). */
-function sideOf(row: MobileStageRow): "buy" | "sell" | "raise" {
-  const c = (row.gate ?? "").trim().charAt(0).toUpperCase();
-  if (c === "S") return "sell";
-  if (c === "R") return "raise";
-  return "buy";
 }
 
 /* ─── board money helpers (ported from Pipeline) ───────────── */
@@ -159,8 +154,7 @@ export default function DealsMobileScreen({ user }: AtlasScreenProps) {
         if (!hay.includes(q)) return false;
       }
       if (filter === "watch") return row.verdict === "watch";
-      if (filter === "buy") return sideOf(row) === "buy";
-      if (filter === "sell") return sideOf(row) === "sell";
+      if (filter === "due") return (daysUntil(row.nextActionOn) ?? 1) <= 0;
       return true;
     });
   }, [all, query, filter]);
