@@ -72,6 +72,9 @@ export const ACTIVITY_KINDS = ['note', 'email', 'call', 'meeting', 'intro'] as c
 export interface CrmAccount {
   id: number;
   firm: string;
+  /** acquirer | service_provider | target | other (migration 115). Only
+   *  `acquirer` is ranked — a law firm is in the book to be reachable. */
+  kind?: string | null;
   website: string | null;
   domain: string | null;
   hq_city: string | null;
@@ -108,6 +111,11 @@ export interface CrmContact {
   account_id: number;
   name: string;
   title: string | null;
+  /** Migration 115 — the load-bearing field for who's who. It decides who gets
+   *  a campaign and who can be assigned a deal action. */
+  role: string | null;
+  /** Set once, never cleared by an import: an unsubscribe is permanent. */
+  unsubscribed_at: string | null;
   email: string | null;
   phone: string | null;
   linkedin_url: string | null;

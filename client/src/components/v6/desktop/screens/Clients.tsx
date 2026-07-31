@@ -39,6 +39,8 @@ import {
   type CrmAccount,
 } from "../../../../lib/crm";
 import { MarkBadge, Pill, KpiCard, EmptyState, LoadingState } from "../primitives";
+import { CONTACT_ROLES, ROLE_LABEL } from "../../../../hooks/useDealTasks";
+import { authHeaders } from "../../../../hooks/useAuth";
 import { SearchIcon, ChevronRightIcon } from "../icons";
 import { T } from "../atlasTokens";
 
@@ -431,13 +433,21 @@ function DetailPane({
   patch: (id: number, body: Record<string, unknown>) => Promise<unknown>;
   logActivity: (id: number, body: Record<string, unknown>) => Promise<unknown>;
 }) {
-  const { account, contacts, activity, loading, error } = useCrmAccount(id, nonce);
+  const { account, contacts, activity, deals, loading, error } = useCrmAccount(id, nonce);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [nextAction, setNextAction] = useState<string | null>(null);
   const [nextOn, setNextOn] = useState<string | null>(null);
   const [touch, setTouch] = useState("");
   const [touchKind, setTouchKind] = useState<string>("note");
+  // Add a person — who's who at the firm. Role is the field that decides who
+  // gets which email later.
+  const [pName, setPName] = useState("");
+  const [pRole, setPRole] = useState("principal");
+  const [pEmail, setPEmail] = useState("");
+  const [pTitle, setPTitle] = useState("");
+  // Lead → deal. The TARGET name, never the client's: a client is not a deal.
+  const [target, setTarget] = useState("");
 
   const action = nextAction ?? account?.next_action ?? "";
   const actionOn = nextOn ?? (account?.next_action_on ? String(account.next_action_on).slice(0, 10) : "");
@@ -554,6 +564,55 @@ function DetailPane({
               />
             </Section>
 
+            {/* deals run for this client — migration 114's join, read from
+                this side. "Do we have a lead, and then transfer that into a
+                deal" is this section plus the field under it. */}
+            <Section title={`Deals for this client (${deals.length})`}>
+              {deals.length === 0 ? (
+                <p style={{ margin: "0 0 10px", fontSize: 13, color: T.muted }}>
+                  No deals opened for them yet.
+                </p>
+              ) : deals.map(d => (
+                <div key={d.id} style={{ padding: "7px 0", borderBottom: `1px solid ${T.rowDiv}` }}>
+                  <div style={{ fontSize: 13.5, fontWeight: 600 }}>{d.business_name || d.name}</div>
+                  <div style={{ fontSize: 12, color: T.muted2 }}>
+                    {[d.current_gate, d.status, d.next_action].filter(Boolean).join(" · ")}
+                  </div>
+                </div>
+              ))}
+              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                <input
+                  value={target}
+                  onChange={e => setTarget(e.target.value)}
+                  placeholder="Target company name"
+                  style={{ ...input, flex: 1 }}
+                />
+                <button
+                  type="button"
+                  disabled={saving || !target.trim()}
+                  onClick={() => run(async () => {
+                    const r = await fetch(`/api/crm/accounts/${id}/deals`, {
+                      method: "POST",
+                      headers: { ...authHeaders(), "Content-Type": "application/json" },
+                      body: JSON.stringify({ business_name: target.trim() }),
+                    });
+                    if (!r.ok) {
+                      let d = ""; try { d = (await r.json())?.error || ""; } catch { /* none */ }
+                      throw new Error(d || `HTTP ${r.status}`);
+                    }
+                    setTarget("");
+                  })}
+                  style={{ ...ghostBtn, borderColor: T.blue, color: T.blue, whiteSpace: "nowrap", opacity: target.trim() ? 1 : 0.5 }}
+                >
+                  Open a deal
+                </button>
+              </div>
+              <p style={{ margin: "6px 0 0", fontSize: 12, color: T.muted2, lineHeight: 1.5 }}>
+                The target company, not the client — the deal is what they're
+                buying. It opens at gate B0 (Thesis), linked back to this client.
+              </p>
+            </Section>
+
             {/* people */}
             <Section title={`People (${contacts.length})`}>
               {contacts.length === 0 ? (
@@ -564,14 +623,58 @@ function DetailPane({
               ) : contacts.map(c => (
                 <div key={c.id} style={{ padding: "8px 0", borderBottom: `1px solid ${T.rowDiv}` }}>
                   <div style={{ fontWeight: 600, fontSize: 13.5 }}>
-                    {c.name}{c.is_primary && <span style={{ color: T.muted2, fontWeight: 400 }}> · primary</span>}
+                    {c.name}
+                    {c.role && (
+                      <span style={{ color: T.blue, fontWeight: 600 }}> · {ROLE_LABEL[c.role] ?? c.role}</span>
+                    )}
+                    {c.is_primary && <span style={{ color: T.muted2, fontWeight: 400 }}> · primary</span>}
                   </div>
                   {c.title && <div style={{ fontSize: 12.5, color: T.muted }}>{c.title}</div>}
                   {(c.email || c.phone) && (
                     <div style={{ fontSize: 12.5, color: T.muted2 }}>{[c.email, c.phone].filter(Boolean).join(" · ")}</div>
                   )}
+                  {!c.email && (
+                    <div style={{ fontSize: 12, color: T.faint }}>no email — cannot be mailed or assigned</div>
+                  )}
                 </div>
               ))}
+
+              {/* Add a person. ROLE is the load-bearing field: it decides who
+                  gets a campaign and who can be assigned a deal action. */}
+              <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+                <input value={pName} onChange={e => setPName(e.target.value)} placeholder="Name" style={input} />
+                <div style={{ display: "flex", gap: 8 }}>
+                  <select value={pRole} onChange={e => setPRole(e.target.value)} style={{ ...input, flex: 1 }}>
+                    {CONTACT_ROLES.map(r => (
+                      <option key={r} value={r}>{ROLE_LABEL[r] ?? r}</option>
+                    ))}
+                  </select>
+                  <input value={pTitle} onChange={e => setPTitle(e.target.value)} placeholder="Title (optional)" style={{ ...input, flex: 1 }} />
+                </div>
+                <input value={pEmail} onChange={e => setPEmail(e.target.value)} placeholder="Email" style={input} />
+                <button
+                  type="button"
+                  disabled={saving || !pName.trim()}
+                  onClick={() => run(async () => {
+                    const r = await fetch(`/api/crm/accounts/${id}/contacts`, {
+                      method: "POST",
+                      headers: { ...authHeaders(), "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        name: pName.trim(), role: pRole,
+                        title: pTitle.trim() || null, email: pEmail.trim() || null,
+                      }),
+                    });
+                    if (!r.ok) {
+                      let d = ""; try { d = (await r.json())?.error || ""; } catch { /* none */ }
+                      throw new Error(d || `HTTP ${r.status}`);
+                    }
+                    setPName(""); setPTitle(""); setPEmail("");
+                  })}
+                  style={{ ...ghostBtn, alignSelf: "flex-start", opacity: pName.trim() ? 1 : 0.5 }}
+                >
+                  Add person
+                </button>
+              </div>
             </Section>
 
             {/* history */}

@@ -42,6 +42,7 @@ import { portfolioBriefRouter } from './routes/portfolioBrief.js';
 import { studioRouter } from './routes/studio.js';
 import { researchRouter } from './routes/research.js';
 import { crmRouter } from './routes/crm.js';
+import { dealTasksRouter } from './routes/dealTasks.js';
 import { startResearchScheduler } from './services/researchAgent.js';
 import { v19ResourcesRouter } from './routes/v19Resources.js';
 import { createSql, getDatabaseUrl, getPostgresOptions } from './dbConfig.js';
@@ -1106,6 +1107,7 @@ app.use('/api', docViewsRouter);
 app.use('/api', studioRouter);
 app.use('/api', researchRouter);
 app.use('/api', crmRouter);
+app.use('/api', dealTasksRouter);
 app.use('/api', pmiPlanRouter);
 app.use('/api', v19ResourcesRouter);
 

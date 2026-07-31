@@ -70,6 +70,10 @@ import {
 } from "../primitives";
 import { SearchIcon, BackIcon, ChevronRightIcon } from "../icons";
 import { useCrmPicker } from "../../../../hooks/useCrmAccounts";
+import {
+  useDealTasks, useAddressBook, TASK_STATUS_LABEL, ROLE_LABEL,
+  type AddressBookContact, type DealTask,
+} from "../../../../hooks/useDealTasks";
 import { dueLabel, daysUntil } from "../../../../lib/crm";
 import { T } from "../atlasTokens";
 
@@ -237,6 +241,9 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
   const { summary } = usePortfolioSummary(user, isAuthed);
   const mandates = useAdvisorMandates(user);
   const { clients } = useCrmPicker(user);
+  // Cross-account: the CPA a deal needs an action from works at a different firm
+  // than the client, so the assignee picker cannot be scoped to one account.
+  const addressBook = useAddressBook(user);
 
   // A kanban of retired deals communicates nothing, so the archive is always
   // the table.
@@ -480,6 +487,7 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
           row={managing}
           user={user}
           clients={clients}
+          addressBook={addressBook}
           onClose={() => setManaging(null)}
           onSaved={refresh}
         />
@@ -1192,11 +1200,12 @@ function DealCard({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) 
  * background colour (Safari toolbar rule).
  */
 function DealPane({
-  row, user, clients, onClose, onSaved,
+  row, user, clients, addressBook, onClose, onSaved,
 }: {
   row: MobileStageRow;
   user: User | null;
   clients: { id: number; firm: string; stage: string }[];
+  addressBook: AddressBookContact[];
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -1322,16 +1331,173 @@ function DealPane({
           {saving ? "Saving…" : "Save"}
         </button>
 
+        <TaskBlock dealId={row.rawId} addressBook={addressBook} />
+
         <div style={{ borderTop: `1px solid ${T.rowDiv}`, paddingTop: 14 }}>
-          <button type="button" onClick={onClose} style={paneGhost}>
-            Open the full deal →
-          </button>
-          <p style={{ margin: "8px 0 0", fontSize: 12, color: T.muted2, lineHeight: 1.5 }}>
+          <p style={{ margin: 0, fontSize: 12, color: T.muted2, lineHeight: 1.5 }}>
             Analysis, documents and the data room live in the deal cockpit — click
             the row itself to open it.
           </p>
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Actions this deal needs from someone — often someone outside the practice.
+ *
+ * Two buttons, deliberately not one. "Add" records that the action is needed;
+ * "Ask" emails the assignee. Creating a task and telling a CPA about it are
+ * different decisions, and a note typed while thinking must never mail anybody.
+ *
+ * The send reports itself honestly: `{sent:false, reason}` arrives on a 200 when
+ * there is no email address or no mail key, and the reason is repeated verbatim
+ * rather than shown as a success.
+ */
+function TaskBlock({ dealId, addressBook }: { dealId: number; addressBook: AddressBookContact[] }) {
+  const { tasks, error, create, patch, notify } = useDealTasks(dealId);
+  const [title, setTitle] = useState("");
+  const [detail, setDetail] = useState("");
+  const [who, setWho] = useState("");
+  const [due, setDue] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
+
+  const mailable = addressBook.filter(c => c.email && !c.unsubscribed_at);
+
+  const add = async (andAsk: boolean) => {
+    if (!title.trim() || busy) return;
+    setBusy(true); setNote(null);
+    try {
+      const r = await create({
+        title: title.trim(),
+        detail: detail.trim() || null,
+        assignee_contact_id: who || null,
+        due_on: due || null,
+        notify: andAsk,
+      });
+      setTitle(""); setDetail(""); setDue("");
+      if (andAsk) {
+        setNote(r?.sent ? "Emailed." : (r?.reason ?? "Nothing was sent."));
+      }
+    } catch (e: any) {
+      setNote(e?.message ?? "Could not save");
+    } finally { setBusy(false); }
+  };
+
+  const ask = async (t: DealTask) => {
+    setBusy(true); setNote(null);
+    try {
+      const r = await notify(t.id);
+      setNote(r.sent ? `Emailed ${t.assignee_email}.` : (r.reason ?? "Nothing was sent."));
+    } catch (e: any) {
+      setNote(e?.message ?? "Could not send");
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <div style={{ borderTop: `1px solid ${T.rowDiv}`, paddingTop: 14 }}>
+      <span style={paneLabel}>Actions needed</span>
+
+      {error && <p style={{ margin: "0 0 10px", fontSize: 12.5, color: T.amber }}>{error}</p>}
+      {note && <p style={{ margin: "0 0 10px", fontSize: 12.5, color: T.ink3 }}>{note}</p>}
+
+      {tasks.length > 0 && (
+        <div style={{ marginBottom: 14 }}>
+          {tasks.map(t => {
+            const overdue = (daysUntil(t.due_on) ?? 1) <= 0 && t.status !== "done";
+            return (
+              <div key={t.id} style={{ padding: "8px 0", borderBottom: `1px solid ${T.rowDiv}` }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: T.ink }}>{t.title}</div>
+                <div style={{ fontSize: 12, color: T.muted2, marginTop: 2 }}>
+                  {[
+                    TASK_STATUS_LABEL[t.status as never] ?? t.status,
+                    t.assignee_name || t.contact_name || t.assignee_email || "unassigned",
+                    t.assignee_role ? ROLE_LABEL[t.assignee_role] ?? t.assignee_role : null,
+                    t.due_on ? dueLabel(t.due_on) : null,
+                    t.notify_count > 0 ? `asked ${t.notify_count}×` : null,
+                  ].filter(Boolean).join(" · ")}
+                </div>
+                {overdue && (
+                  <div style={{ fontSize: 12, color: T.amber, marginTop: 2 }}>
+                    {dueLabel(t.due_on)}
+                  </div>
+                )}
+                <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
+                  {t.status !== "done" && (
+                    <>
+                      <button
+                        type="button" disabled={busy || !t.assignee_email}
+                        title={t.assignee_email ? `Email ${t.assignee_email}` : "No email on this assignee"}
+                        onClick={() => ask(t)}
+                        style={{ ...paneGhost, padding: "4px 10px", fontSize: 12, opacity: t.assignee_email ? 1 : 0.5 }}
+                      >
+                        {t.notify_count > 0 ? "Remind" : "Ask"}
+                      </button>
+                      <button
+                        type="button" disabled={busy}
+                        onClick={() => patch(t.id, { status: "done" })}
+                        style={{ ...paneGhost, padding: "4px 10px", fontSize: 12 }}
+                      >
+                        Done
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <input
+        value={title}
+        onChange={e => setTitle(e.target.value)}
+        placeholder="What's needed? e.g. QoE scope for the Sept close"
+        style={{ ...paneInput, marginBottom: 8 }}
+      />
+      <textarea
+        value={detail}
+        onChange={e => setDetail(e.target.value)}
+        rows={2}
+        placeholder="Any detail they need (optional)"
+        style={{ ...paneInput, marginBottom: 8, resize: "vertical", lineHeight: 1.5 }}
+      />
+      <select value={who} onChange={e => setWho(e.target.value)} style={{ ...paneInput, marginBottom: 8 }}>
+        <option value="">Unassigned</option>
+        {mailable.map(c => (
+          <option key={c.id} value={String(c.id)}>
+            {c.name}{c.role ? ` — ${ROLE_LABEL[c.role] ?? c.role}` : ""} · {c.firm}
+          </option>
+        ))}
+      </select>
+      <input type="date" value={due} onChange={e => setDue(e.target.value)} style={{ ...paneInput, marginBottom: 8 }} />
+
+      <div style={{ display: "flex", gap: 8 }}>
+        <button type="button" disabled={busy || !title.trim()} onClick={() => add(false)}
+                style={{ ...paneGhost, opacity: title.trim() ? 1 : 0.5 }}>
+          Add
+        </button>
+        <button
+          type="button"
+          disabled={busy || !title.trim() || !who}
+          title={who ? "Add it and email them now" : "Pick an assignee to email"}
+          onClick={() => add(true)}
+          style={{
+            ...paneGhost, borderColor: T.blue, color: "#fff",
+            background: T.blue, opacity: title.trim() && who ? 1 : 0.5,
+          }}
+        >
+          Add &amp; ask
+        </button>
+      </div>
+      {mailable.length === 0 && (
+        <p style={{ margin: "8px 0 0", fontSize: 12, color: T.muted2, lineHeight: 1.5 }}>
+          No mailable contacts yet. Add people — CPAs, counsel, lenders — under
+          Clients, and they become assignable here.
+        </p>
+      )}
     </div>
   );
 }
