@@ -29,6 +29,7 @@ import {
   ACTIVITY_KINDS, dueLabel, touchLabel, daysUntil, type CrmAccount,
 } from "../../../../lib/crm";
 import { ROLE_LABEL } from "../../../../hooks/useDealTasks";
+import { useDraft } from "../../../../hooks/useDraft";
 import { Pill, EmptyState, LoadingState } from "../../desktop/primitives";
 import { SearchIcon } from "../../desktop/icons";
 import { RT } from "../redesign/rt";
@@ -365,10 +366,19 @@ function Detail({
   const { account, contacts, activity, deals, loading, error } = useCrmAccount(id, nonce);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [touch, setTouch] = useState("");
   const [touchKind, setTouchKind] = useState<string>("call");
-  const [action, setAction] = useState<string | null>(null);
-  const [when, setWhen] = useState<string | null>(null);
+
+  // Anything typed and not yet saved survives a back-swipe (useDraft). Keyed by
+  // account id — a draft typed against one client must never appear under
+  // another. Cleared on a successful save, not before.
+  const [touch, setTouch, clearTouch] = useDraft(`client:${id}:touch`);
+  const [action, setAction, clearAction] = useDraft(
+    `client:${id}:action`, account?.next_action ?? "",
+  );
+  const [when, setWhen, clearWhen] = useDraft(
+    `client:${id}:when`,
+    account?.next_action_on ? String(account.next_action_on).slice(0, 10) : "",
+  );
 
   const run = async (fn: () => Promise<unknown>) => {
     setSaving(true); setSaveError(null);
@@ -377,9 +387,9 @@ function Detail({
     finally { setSaving(false); }
   };
 
-  const actionVal = action ?? account?.next_action ?? "";
-  const whenVal = when ?? (account?.next_action_on ? String(account.next_action_on).slice(0, 10) : "");
-  const dirty = action != null || when != null;
+  const savedAction = account?.next_action ?? "";
+  const savedWhen = account?.next_action_on ? String(account.next_action_on).slice(0, 10) : "";
+  const dirty = action !== savedAction || when !== savedWhen;
 
   return (
     <div style={S.root}>
@@ -487,16 +497,17 @@ function Detail({
             <div>
               <Head>
                 Next action{dueLabel(account.next_action_on) ? ` — ${dueLabel(account.next_action_on)}` : ""}
+                {dirty && <span style={{ color: RT.accentInk }}> · unsaved</span>}
               </Head>
               <input
-                value={actionVal}
+                value={action}
                 onChange={e => setAction(e.target.value)}
                 placeholder="e.g. intro via a fire-alarm distributor"
                 style={{ ...field, marginBottom: 9 }}
               />
               <input
                 type="date"
-                value={whenVal}
+                value={when}
                 onChange={e => setWhen(e.target.value)}
                 style={{ ...field, marginBottom: 9 }}
               />
@@ -504,8 +515,8 @@ function Detail({
                 <button
                   type="button" disabled={saving} style={btn(true)}
                   onClick={() => run(async () => {
-                    await patch(id, { next_action: actionVal, next_action_on: whenVal || null });
-                    setAction(null); setWhen(null);
+                    await patch(id, { next_action: action, next_action_on: when || null });
+                    clearAction(); clearWhen();
                   })}
                 >
                   {saving ? "Saving…" : "Save"}
@@ -514,7 +525,7 @@ function Detail({
             </div>
 
             <div>
-              <Head>Log a touch — records it, sends nothing</Head>
+              <Head>Log a touch — records it, sends nothing{touch.trim() ? " · unsaved" : ""}</Head>
               <div
                 className="scr"
                 style={{ display: "flex", gap: 7, margin: "0 -18px 9px", padding: "0 18px", overflowX: "auto" }}
@@ -541,7 +552,7 @@ function Detail({
                     kind: touchKind, body: touch.trim(),
                     direction: touchKind === "note" ? null : "out",
                   });
-                  setTouch("");
+                  clearTouch();
                 })}
               >
                 {saving ? "Saving…" : "Log it"}

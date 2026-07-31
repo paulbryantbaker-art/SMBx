@@ -41,6 +41,7 @@ import {
 import { MarkBadge, Pill, KpiCard, EmptyState, LoadingState } from "../primitives";
 import { CONTACT_ROLES, ROLE_LABEL } from "../../../../hooks/useDealTasks";
 import { authHeaders } from "../../../../hooks/useAuth";
+import { useDraft } from "../../../../hooks/useDraft";
 import { SearchIcon, ChevronRightIcon } from "../icons";
 import { T } from "../atlasTokens";
 
@@ -436,9 +437,16 @@ function DetailPane({
   const { account, contacts, activity, deals, searches, loading, error } = useCrmAccount(id, nonce);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [nextAction, setNextAction] = useState<string | null>(null);
-  const [nextOn, setNextOn] = useState<string | null>(null);
-  const [touch, setTouch] = useState("");
+  // Drafts, keyed by account id — unsaved text survives leaving the pane, and a
+  // draft for one client can never surface under another.
+  const [nextAction, setNextAction, clearNextAction] = useDraft(
+    `client:${id}:action`, account?.next_action ?? "",
+  );
+  const [nextOn, setNextOn, clearNextOn] = useDraft(
+    `client:${id}:when`,
+    account?.next_action_on ? String(account.next_action_on).slice(0, 10) : "",
+  );
+  const [touch, setTouch, clearTouch] = useDraft(`client:${id}:touch`);
   const [touchKind, setTouchKind] = useState<string>("note");
   // Add a person — who's who at the firm. Role is the field that decides who
   // gets which email later.
@@ -449,9 +457,11 @@ function DetailPane({
   // Lead → deal. The TARGET name, never the client's: a client is not a deal.
   const [target, setTarget] = useState("");
 
-  const action = nextAction ?? account?.next_action ?? "";
-  const actionOn = nextOn ?? (account?.next_action_on ? String(account.next_action_on).slice(0, 10) : "");
-  const dirty = nextAction != null || nextOn != null;
+  const action = nextAction;
+  const actionOn = nextOn;
+  const savedAction = account?.next_action ?? "";
+  const savedOn = account?.next_action_on ? String(account.next_action_on).slice(0, 10) : "";
+  const dirty = action !== savedAction || actionOn !== savedOn;
 
   const run = async (fn: () => Promise<unknown>) => {
     setSaving(true); setSaveError(null);
@@ -537,7 +547,7 @@ function DetailPane({
                   disabled={saving}
                   onClick={() => run(async () => {
                     await patch(id, { next_action: action, next_action_on: actionOn || null });
-                    setNextAction(null); setNextOn(null);
+                    clearNextAction(); clearNextOn();
                   })}
                   style={{ ...ghostBtn, borderColor: T.blue, color: T.blue }}
                 >
@@ -723,7 +733,7 @@ function DetailPane({
                 disabled={saving || !touch.trim()}
                 onClick={() => run(async () => {
                   await logActivity(id, { kind: touchKind, body: touch.trim(), direction: touchKind === "note" ? null : "out" });
-                  setTouch("");
+                  clearTouch();
                 })}
                 style={{ ...ghostBtn, marginTop: 8, opacity: touch.trim() ? 1 : 0.5 }}
               >
