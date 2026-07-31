@@ -1,0 +1,491 @@
+/**
+ * CRM — the client pipeline (migration 113).
+ *
+ * The acquirers the practice serves, as distinct from the targets it
+ * underwrites. See WHERE_THE_WORK_HAPPENS.md §5 for why this had no home.
+ *
+ * SCORING LIVES IN `house/leads.ts`, not here. That file is pure — no db, no
+ * API — so the app and a local Cowork session (`scripts/studio/leads.mts`) rank
+ * the same register identically. This router imports it, materialises the result
+ * onto the row so the board can sort in SQL, and stamps `scored_at`. Anything
+ * that changes a scoring input re-scores that row on the spot.
+ *
+ * THE LINE: this TRACKS a relationship. It never contacts anyone, never quotes a
+ * fee, and never records compensation — the engagement letter is a human
+ * artefact and stays outside the app.
+ */
+import { Router } from 'express';
+import { sql } from '../db.js';
+import { requireAuth } from '../middleware/auth.js';
+import {
+  parseLeadCsv, rankLeads, scoreLead, picture, LEAD_COLUMNS,
+  type LeadRow, type LeadBox, type RankedLead,
+} from '../../house/leads.js';
+import { toCsv } from '../../house/screen.js';
+
+export const crmRouter = Router();
+crmRouter.use(requireAuth);
+
+/** Pipeline stages for a CLIENT relationship — deliberately not deal gates.
+ *  A deal gate describes a target; this describes whether we have a mandate. */
+export const CRM_STAGES = [
+  'prospect', 'conversation', 'proposal', 'engaged', 'mandate_live', 'passed',
+] as const;
+
+const ACTIVITY_KINDS = ['note', 'email', 'call', 'meeting', 'intro', 'stage_change'];
+
+/** Markets we hold a verified master for. Drives the lane score; overridable
+ *  per request so the board can be re-cut when a new master lands. */
+const DEFAULT_TRADES = ['fire and life safety', 'hvac', 'plumbing'];
+
+const today = () => new Date().toISOString().slice(0, 10);
+
+function boxFrom(body: any): LeadBox {
+  const t = Array.isArray(body?.trades)
+    ? body.trades.map((s: unknown) => String(s).trim().toLowerCase()).filter(Boolean)
+    : DEFAULT_TRADES;
+  return { trades: t, metro: 'Dallas', asOf: today() };
+}
+
+/** Host only — no scheme, no www, no path. The dedupe key. */
+function normDomain(s: string | undefined | null): string | null {
+  const v = (s || '').trim().toLowerCase();
+  if (!v) return null;
+  const m = v.replace(/^[a-z]+:\/\//, '').replace(/^www\./, '').split(/[/?#]/)[0];
+  return m || null;
+}
+
+/** A DB row back into the shape `house/leads.ts` scores. Kept in one place so
+ *  the scorer can never be handed a differently-shaped object by two callers. */
+function toLeadRow(r: any): LeadRow {
+  return {
+    firm: r.firm ?? '',
+    segment: r.segment ?? '',
+    website: r.website ?? '',
+    hq_city: r.hq_city ?? '',
+    hq_state: r.hq_state ?? '',
+    trades: r.trades ?? '',
+    dfw: r.dfw ?? '',
+    grade: r.grade ?? '',
+    buyer_moment: r.buyer_moment ?? '',
+    product_fit: r.product_fit ?? '',
+    key_person: r.key_person ?? '',
+    key_person_title: r.key_person_title ?? '',
+    sponsor: r.sponsor ?? '',
+    evidence: r.evidence ?? '',
+    source_url: r.source_url ?? '',
+    notes: r.notes ?? '',
+    last_deal_on: r.last_deal_on ? String(r.last_deal_on).slice(0, 10) : '',
+    disqualified: r.disqualified ?? '',
+  };
+}
+
+/** ISO date or null — a blank cell must not become 1970. */
+function dateOrNull(v: unknown): string | null {
+  const s = String(v ?? '').trim().slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(s) && Number.isFinite(Date.parse(s)) ? s : null;
+}
+
+/* ── the board ────────────────────────────────────────────────────────── */
+
+/**
+ * GET /api/crm/accounts
+ *   ?archived=1  the archive instead of the working set
+ *   ?tier=A      &stage=prospect  &dfw=yes  &moment=thesis_no_flow
+ *   ?due=1       only rows with next_action_on today or earlier
+ *   ?q=          substring over firm / notes / trades
+ * Ordered by score, because the point of the board is what to do next.
+ */
+crmRouter.get('/crm/accounts', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const q = String(req.query.q ?? '').trim();
+    const archived = req.query.archived === '1' || req.query.archived === 'true';
+
+    const rows = await sql`
+      SELECT a.*,
+             (SELECT COUNT(*) FROM crm_contacts c WHERE c.account_id = a.id) AS contact_count,
+             (SELECT COUNT(*) FROM crm_activity v WHERE v.account_id = a.id) AS activity_count,
+             (SELECT MAX(v.occurred_at) FROM crm_activity v WHERE v.account_id = a.id) AS last_touch_at
+      FROM crm_accounts a
+      WHERE a.user_id = ${userId}
+        AND a.archived = ${archived}
+        ${req.query.tier ? sql`AND a.tier = ${String(req.query.tier)}` : sql``}
+        ${req.query.stage ? sql`AND a.stage = ${String(req.query.stage)}` : sql``}
+        ${req.query.dfw ? sql`AND a.dfw = ${String(req.query.dfw)}` : sql``}
+        ${req.query.moment ? sql`AND a.buyer_moment = ${String(req.query.moment)}` : sql``}
+        ${req.query.due ? sql`AND a.next_action_on IS NOT NULL AND a.next_action_on <= CURRENT_DATE` : sql``}
+        ${q ? sql`AND (a.firm ILIKE ${'%' + q + '%'} OR a.notes ILIKE ${'%' + q + '%'} OR a.trades ILIKE ${'%' + q + '%'})` : sql``}
+      ORDER BY a.score DESC NULLS LAST, a.firm ASC
+    `;
+    return res.json(rows);
+  } catch (err: any) {
+    console.error('CRM list error:', err.message);
+    return res.status(500).json({ error: 'Failed to list accounts' });
+  }
+});
+
+/** GET /api/crm/summary — the picture, counted from the rows themselves. */
+crmRouter.get('/crm/summary', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const rows = await sql`
+      SELECT * FROM crm_accounts WHERE user_id = ${userId} AND archived = FALSE
+    `;
+    const ranked = rows.map(r => ({
+      ...toLeadRow(r), score: r.score ?? 0, tier: r.tier ?? 'D',
+      score_detail: r.score_detail ?? '', pitch: r.pitch ?? 'unknown',
+    })) as RankedLead[];
+
+    const [due] = await sql`
+      SELECT COUNT(*)::int AS n FROM crm_accounts
+      WHERE user_id = ${userId} AND archived = FALSE
+        AND next_action_on IS NOT NULL AND next_action_on <= CURRENT_DATE
+    `;
+    const stages = await sql`
+      SELECT stage, COUNT(*)::int AS n FROM crm_accounts
+      WHERE user_id = ${userId} AND archived = FALSE GROUP BY stage
+    `;
+    return res.json({
+      ...picture(ranked),
+      byStage: Object.fromEntries(stages.map(s => [s.stage, s.n])),
+      dueNow: due?.n ?? 0,
+    });
+  } catch (err: any) {
+    console.error('CRM summary error:', err.message);
+    return res.status(500).json({ error: 'Failed to summarise' });
+  }
+});
+
+/** GET /api/crm/accounts/:id — the account with its people and its history. */
+crmRouter.get('/crm/accounts/:id', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ error: 'Bad id' });
+
+    const [account] = await sql`
+      SELECT * FROM crm_accounts WHERE id = ${id} AND user_id = ${userId}
+    `;
+    if (!account) return res.status(404).json({ error: 'Account not found' });
+
+    const contacts = await sql`
+      SELECT * FROM crm_contacts WHERE account_id = ${id}
+      ORDER BY is_primary DESC, name ASC
+    `;
+    const activity = await sql`
+      SELECT * FROM crm_activity WHERE account_id = ${id}
+      ORDER BY occurred_at DESC LIMIT 200
+    `;
+    return res.json({ account, contacts, activity });
+  } catch (err: any) {
+    console.error('CRM read error:', err.message);
+    return res.status(500).json({ error: 'Failed to read account' });
+  }
+});
+
+/* ── import ───────────────────────────────────────────────────────────── */
+
+/** Columns the importer will write. Anything else in the CSV is IGNORED rather
+ *  than silently coerced — and reported back, so a renamed column in the Sheet
+ *  surfaces instead of quietly going missing. */
+const IMPORTABLE = new Set([
+  'firm', 'segment', 'website', 'hq_city', 'hq_state', 'trades', 'dfw', 'grade',
+  'buyer_moment', 'product_fit', 'key_person', 'key_person_title', 'sponsor',
+  'evidence', 'source_url', 'notes', 'last_deal_on', 'disqualified',
+]);
+
+/**
+ * POST /api/crm/accounts/import   { csv: "...", trades?: string[] }
+ *
+ * Upsert by (user_id, lower(firm)). An existing row is UPDATED, so re-importing
+ * the Sheet after a research pass refreshes evidence without duplicating firms —
+ * and the PIPELINE FIELDS a human set in the app (stage, owner, next action) are
+ * never touched by an import. That asymmetry is the whole point: the Sheet owns
+ * the research, the app owns the pipeline.
+ *
+ * `key_person` becomes the primary contact. Existing contacts are left alone.
+ */
+crmRouter.post('/crm/accounts/import', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const csv = typeof req.body?.csv === 'string' ? req.body.csv : '';
+    if (!csv.trim()) return res.status(400).json({ error: 'csv (string) is required' });
+
+    const rows = parseLeadCsv(csv);
+    if (!rows.length) {
+      return res.status(400).json({ error: 'No rows with a firm name — is that the right file?' });
+    }
+
+    const box = boxFrom(req.body);
+    const ranked = rankLeads(rows, box);
+
+    // Report unknown columns instead of dropping them in silence.
+    const seen = new Set<string>();
+    rows.forEach(r => Object.keys(r).forEach(k => seen.add(k)));
+    const ignored = [...seen].filter(k => !IMPORTABLE.has(k) && !['score', 'tier', 'pitch', 'score_detail'].includes(k));
+
+    let created = 0, updated = 0, contactsAdded = 0;
+
+    for (const r of ranked) {
+      const firm = (r.firm || '').trim();
+      if (!firm) continue;
+
+      const vals = {
+        user_id: userId,
+        firm,
+        website: r.website || null,
+        domain: normDomain(r.website),
+        hq_city: r.hq_city || null,
+        hq_state: r.hq_state || null,
+        segment: r.segment || null,
+        buyer_moment: r.buyer_moment || null,
+        dfw: r.dfw || null,
+        trades: r.trades || null,
+        product_fit: r.product_fit || null,
+        sponsor: r.sponsor || null,
+        grade: r.grade || null,
+        evidence: r.evidence || null,
+        source_url: r.source_url || null,
+        notes: r.notes || null,
+        last_deal_on: dateOrNull(r.last_deal_on),
+        disqualified: r.disqualified || null,
+        score: r.score,
+        tier: r.tier,
+        pitch: r.pitch,
+        score_detail: r.score_detail,
+        scored_at: new Date(),
+      };
+
+      // ON CONFLICT on the case-insensitive unique index. `stage`, `owner_email`,
+      // `next_action*` and `archived` are deliberately absent from the UPDATE
+      // set — an import must never reset work done in the app.
+      const [row] = await sql`
+        INSERT INTO crm_accounts ${sql(vals)}
+        ON CONFLICT (user_id, lower(firm)) DO UPDATE SET
+          website = EXCLUDED.website, domain = EXCLUDED.domain,
+          hq_city = EXCLUDED.hq_city, hq_state = EXCLUDED.hq_state,
+          segment = EXCLUDED.segment, buyer_moment = EXCLUDED.buyer_moment,
+          dfw = EXCLUDED.dfw, trades = EXCLUDED.trades,
+          product_fit = EXCLUDED.product_fit, sponsor = EXCLUDED.sponsor,
+          grade = EXCLUDED.grade, evidence = EXCLUDED.evidence,
+          source_url = EXCLUDED.source_url, notes = EXCLUDED.notes,
+          last_deal_on = EXCLUDED.last_deal_on, disqualified = EXCLUDED.disqualified,
+          score = EXCLUDED.score, tier = EXCLUDED.tier, pitch = EXCLUDED.pitch,
+          score_detail = EXCLUDED.score_detail, scored_at = EXCLUDED.scored_at,
+          updated_at = NOW()
+        RETURNING id, (created_at = updated_at) AS is_new
+      `;
+      if (row?.is_new) created++; else updated++;
+
+      const person = (r.key_person || '').trim();
+      if (person && row?.id) {
+        const [c] = await sql`
+          INSERT INTO crm_contacts (account_id, name, title, is_primary, source_url)
+          VALUES (${row.id}, ${person}, ${r.key_person_title || null}, TRUE, ${r.source_url || null})
+          ON CONFLICT (account_id, lower(name)) DO NOTHING
+          RETURNING id
+        `;
+        if (c) contactsAdded++;
+      }
+    }
+
+    return res.json({
+      imported: ranked.length, created, updated, contactsAdded,
+      ignoredColumns: ignored,
+      trades: box.trades,
+      picture: picture(ranked),
+    });
+  } catch (err: any) {
+    console.error('CRM import error:', err.message);
+    return res.status(500).json({ error: `Import failed: ${err.message}` });
+  }
+});
+
+/** POST /api/crm/accounts/rescore  { trades?: string[] }
+ *  Re-runs house/leads.ts over every row. Needed whenever a new market master
+ *  lands (the lane scale changes) or a `last_deal_on` gets verified. */
+crmRouter.post('/crm/accounts/rescore', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const box = boxFrom(req.body);
+    const rows = await sql`SELECT * FROM crm_accounts WHERE user_id = ${userId}`;
+    let n = 0;
+    for (const r of rows) {
+      const s = scoreLead(toLeadRow(r), box);
+      await sql`
+        UPDATE crm_accounts SET
+          score = ${s.score}, tier = ${s.tier}, pitch = ${s.pitch},
+          score_detail = ${s.detail}, scored_at = NOW()
+        WHERE id = ${r.id} AND user_id = ${userId}
+      `;
+      n++;
+    }
+    return res.json({ rescored: n, trades: box.trades });
+  } catch (err: any) {
+    console.error('CRM rescore error:', err.message);
+    return res.status(500).json({ error: 'Rescore failed' });
+  }
+});
+
+/* ── edits ────────────────────────────────────────────────────────────── */
+
+/**
+ * PATCH /api/crm/accounts/:id
+ * Pipeline fields plus the two research fields a human resolves inside the app
+ * (`last_deal_on`, `disqualified`). Both are scoring inputs, so the row
+ * re-scores in the same request rather than drifting until the next import.
+ */
+crmRouter.patch('/crm/accounts/:id', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ error: 'Bad id' });
+
+    const [owned] = await sql`SELECT * FROM crm_accounts WHERE id = ${id} AND user_id = ${userId}`;
+    if (!owned) return res.status(404).json({ error: 'Account not found' });
+
+    const b = req.body ?? {};
+    const updates: Record<string, unknown> = {};
+
+    if (typeof b.stage === 'string') {
+      if (!CRM_STAGES.includes(b.stage as any)) {
+        return res.status(400).json({ error: `Invalid stage (${CRM_STAGES.join(' | ')})` });
+      }
+      updates.stage = b.stage;
+    }
+    if (typeof b.owner_email === 'string') updates.owner_email = b.owner_email.trim() || null;
+    if (typeof b.next_action === 'string') updates.next_action = b.next_action.trim().slice(0, 400) || null;
+    if ('next_action_on' in b) updates.next_action_on = dateOrNull(b.next_action_on);
+    if (typeof b.notes === 'string') updates.notes = b.notes;
+    if (typeof b.archived === 'boolean') updates.archived = b.archived;
+    // Scoring inputs.
+    if ('last_deal_on' in b) updates.last_deal_on = dateOrNull(b.last_deal_on);
+    if ('disqualified' in b) updates.disqualified = String(b.disqualified ?? '').trim() || null;
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: 'No updatable fields' });
+    }
+    updates.updated_at = new Date();
+
+    // Re-score off the MERGED row, so a changed input takes effect immediately.
+    const merged = { ...owned, ...updates };
+    const s = scoreLead(toLeadRow(merged), boxFrom(b));
+    updates.score = s.score;
+    updates.tier = s.tier;
+    updates.pitch = s.pitch;
+    updates.score_detail = s.detail;
+    updates.scored_at = new Date();
+
+    const [row] = await sql`
+      UPDATE crm_accounts SET ${sql(updates)}
+      WHERE id = ${id} AND user_id = ${userId} RETURNING *
+    `;
+
+    // A stage move is history worth keeping — it is the one edit you want to be
+    // able to read back as a date later.
+    if (updates.stage && updates.stage !== owned.stage) {
+      await sql`
+        INSERT INTO crm_activity (account_id, user_id, kind, subject, body)
+        VALUES (${id}, ${userId}, 'stage_change', ${`${owned.stage} → ${updates.stage}`},
+                ${typeof b.note === 'string' ? b.note : null})
+      `;
+    }
+    return res.json(row);
+  } catch (err: any) {
+    console.error('CRM patch error:', err.message);
+    return res.status(500).json({ error: 'Failed to update account' });
+  }
+});
+
+/* ── contacts + activity ──────────────────────────────────────────────── */
+
+async function ownsAccount(userId: number, accountId: number): Promise<boolean> {
+  const [a] = await sql`SELECT id FROM crm_accounts WHERE id = ${accountId} AND user_id = ${userId}`;
+  return !!a;
+}
+
+crmRouter.post('/crm/accounts/:id/contacts', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || !(await ownsAccount(userId, id))) {
+      return res.status(404).json({ error: 'Account not found' });
+    }
+    const name = String(req.body?.name ?? '').trim();
+    if (!name) return res.status(400).json({ error: 'name is required' });
+
+    const [row] = await sql`
+      INSERT INTO crm_contacts (account_id, name, title, email, phone, linkedin_url, is_primary, notes)
+      VALUES (${id}, ${name}, ${req.body?.title || null}, ${req.body?.email || null},
+              ${req.body?.phone || null}, ${req.body?.linkedin_url || null},
+              ${!!req.body?.is_primary}, ${req.body?.notes || null})
+      ON CONFLICT (account_id, lower(name)) DO UPDATE SET
+        title = COALESCE(EXCLUDED.title, crm_contacts.title),
+        email = COALESCE(EXCLUDED.email, crm_contacts.email),
+        phone = COALESCE(EXCLUDED.phone, crm_contacts.phone),
+        linkedin_url = COALESCE(EXCLUDED.linkedin_url, crm_contacts.linkedin_url),
+        updated_at = NOW()
+      RETURNING *
+    `;
+    return res.json(row);
+  } catch (err: any) {
+    console.error('CRM contact error:', err.message);
+    return res.status(500).json({ error: 'Failed to save contact' });
+  }
+});
+
+/** Log a touch. This RECORDS an interaction; it does not send anything. */
+crmRouter.post('/crm/accounts/:id/activity', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || !(await ownsAccount(userId, id))) {
+      return res.status(404).json({ error: 'Account not found' });
+    }
+    const kind = String(req.body?.kind ?? 'note');
+    if (!ACTIVITY_KINDS.includes(kind)) {
+      return res.status(400).json({ error: `Invalid kind (${ACTIVITY_KINDS.join(' | ')})` });
+    }
+    const contactId = Number(req.body?.contact_id);
+    const [row] = await sql`
+      INSERT INTO crm_activity (account_id, contact_id, user_id, kind, direction, subject, body, occurred_at)
+      VALUES (${id}, ${Number.isInteger(contactId) ? contactId : null}, ${userId}, ${kind},
+              ${req.body?.direction === 'in' || req.body?.direction === 'out' ? req.body.direction : null},
+              ${req.body?.subject || null}, ${req.body?.body || null},
+              ${dateOrNull(req.body?.occurred_at) ?? new Date()})
+      RETURNING *
+    `;
+    return res.json(row);
+  } catch (err: any) {
+    console.error('CRM activity error:', err.message);
+    return res.status(500).json({ error: 'Failed to log activity' });
+  }
+});
+
+/* ── export ───────────────────────────────────────────────────────────── */
+
+/** GET /api/crm/accounts.csv — back out to the Sheet, ranking first. */
+crmRouter.get('/crm/accounts.csv', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const rows = await sql`
+      SELECT * FROM crm_accounts WHERE user_id = ${userId} AND archived = FALSE
+      ORDER BY score DESC NULLS LAST, firm ASC
+    `;
+    const out = rows.map(r => ({
+      ...toLeadRow(r),
+      score: String(r.score ?? ''), tier: r.tier ?? '', pitch: r.pitch ?? '',
+      score_detail: r.score_detail ?? '',
+      stage: r.stage ?? '', owner_email: r.owner_email ?? '',
+      next_action: r.next_action ?? '',
+      next_action_on: r.next_action_on ? String(r.next_action_on).slice(0, 10) : '',
+    }));
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="smbx-buyside-register.csv"');
+    return res.send(toCsv(out as any, [...LEAD_COLUMNS, 'stage', 'owner_email', 'next_action', 'next_action_on']));
+  } catch (err: any) {
+    console.error('CRM export error:', err.message);
+    return res.status(500).json({ error: 'Export failed' });
+  }
+});

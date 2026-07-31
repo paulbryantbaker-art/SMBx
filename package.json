@@ -36,6 +36,7 @@
     "test:marketing-math": "npx tsx scripts/marketing-math-reconcile.ts",
     "test:design": "npx tsx house/__tests__/design.test.mts",
     "test:screen": "npx tsx house/__tests__/screen.test.mts",
+    "test:leads": "npx tsx house/__tests__/leads.test.mts",
     "seed:demo-user": "node scripts/seed-demo-user-data.mjs",
     "design:extract": "node scripts/extract-design-tokens.mjs",
     "preview:build": "vite build --config preview.vite.config.mts"

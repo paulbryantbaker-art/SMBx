@@ -157,21 +157,75 @@ strategics) is the second kind, and nothing in the schema holds it.
    a practice taking real mandates this has to become a table with the client,
    the lane and the dates on it.
 
+### The column decision
+
+All 16 register columns are imported. Nothing is dropped, because the groups
+that don't rank are the ones that make a ranking usable:
+
+| Group | Columns | Role |
+|---|---|---|
+| **Ranks** | `buyer_moment` · `dfw` · `trades` · `key_person`(+`_title`) · `segment` | The five scales |
+| **Routes** | `product_fit` · `sponsor` | Which service to pitch; who owns them |
+| **Proves** | `grade` · `evidence` · `source_url` | Provenance, stored verbatim |
+| **Identifies** | `firm` · `website` · `hq_city` · `hq_state` · `notes` | Who and where |
+
+Two are added: `last_deal_on` (see the limit below) and `disqualified`, which a
+human sets. Import ignores any other column and **reports which**, so a rename
+in the Sheet surfaces instead of going quietly missing.
+
+`notes` is never dropped — it carries the sharpest judgement in the file
+("MOST EXPLICITLY DFW-ACTIVE SPONSOR IN THE SCAN", "WEAKEST ENTRY").
+
+### The scoring model
+
+`house/leads.ts`, pure and dependency-free, so the app and
+`scripts/studio/leads.mts` rank identically. **need 35 · lane 25 · reach 15 ·
+structure 10 · activity 15**, then a confidence multiplier from `grade`.
+
+- **`buyer_moment` is the buy signal**, and the register's own notes say so: MRE
+  Capital is "BEST-FIT NAME ON THE LIST" because "add-on cadence not yet
+  established, which is exactly the flow gap"; FSP is "a genuine
+  flow-constrained buyer, which is the fit signal". So `thesis_no_flow` carries
+  the largest weight and **`has_both` is the hardest sale, not the best lead** —
+  a buyer with thesis and flow already has the function in-house.
+- **Evidence quality gates, it does not weight.** `grade` applies a visible
+  discount (directory-only ×0.80) rather than floating a thinly-evidenced firm
+  up the list. Scored as a bonus it would do the reverse — the same mistake
+  `screen.ts` made in its first cut.
+- **Disqualification is a human act.** The register marks APi Group "Not a
+  client; competitive context" in prose; the model does not read prose for
+  intent, it reads the `disqualified` column.
+
+**The known limit:** the model ranks FIT, not whether a buyer is real. No
+register column recorded whether a firm has ever closed a deal, so a
+well-written site with zero acquisitions scores like an active buyer — Homestead
+Service Partners is the live example. `last_deal_on` closes it as it gets
+verified; while absent, every row takes the same neutral-low activity figure, so
+a missing column shifts no row relative to another and the detail string says
+so outright.
+
 ### Build order
 
 Each step is independently useful and none of it calls an API.
 
-1. **`accounts` + `contacts` + `account_activity`** (one migration) with CSV
-   import for the existing register and CSV export so Google Sheets still works.
-   Keep `evidence`/`source_url` verbatim.
-2. **Next action + owner + stage** on `accounts`, and a "due this week" read.
-   This is the point at which it stops being a spreadsheet.
-3. **`engaged_lanes` as a table**, with `practiceIntake` reading it instead of
+1. ~~**`crm_accounts` + `crm_contacts` + `crm_activity`** with CSV import for the
+   existing register and CSV export so Google Sheets still works.~~ **Shipped
+   2026-07-31** — migration 113, `server/routes/crm.ts`, `house/leads.ts`
+   (61 tests, `npm run test:leads`). Import upserts by `(user_id, lower(firm))`
+   and **never touches the pipeline fields a human set in the app**: the Sheet
+   owns the research, the app owns the pipeline.
+2. ~~**Next action + owner + stage**~~ — shipped with step 1: `stage`
+   (prospect → conversation → proposal → engaged → mandate_live → passed),
+   `owner_email`, `next_action`, `next_action_on`, plus `?due=1` on the board.
+   A stage move writes itself to `crm_activity`.
+3. **A UI for it.** The API and the ranking exist; nothing renders them yet.
+4. **Email campaigns.** Sequences against `crm_contacts`, drafted and logged as
+   `crm_activity` with `kind='email'`. THE LINE: the practitioner sends; the app
+   drafts, records, and never contacts a counterparty on its own.
+5. **`engaged_lanes` as a table**, with `practiceIntake` reading it instead of
    `process.env`, falling back to the env var so nothing breaks mid-deploy.
-4. **Wire `service_providers` in as the referral source** on an account, so a
+6. **Wire `service_providers` in as the referral source** on an account, so a
    warm intro is a record and not a memory.
-5. **Comms capture** — log an outbound touch against a contact, reusing
-   `sendEmail`.
 
 ## 6. Deals: archive, not delete (shipped 2026-07-31)
 
