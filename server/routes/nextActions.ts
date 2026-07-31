@@ -18,6 +18,18 @@ interface NextAction {
   id: string;
   dealId: number | null;
   dealName: string;
+  /** CLIENT › DEAL › ACTION (2026-07-31). Paul: "the needs-you page is going to
+   *  be Yulia reading my deals and understanding what needs my attention…
+   *  Client > Deal > Action." So a row states WHOSE work it is, on WHAT, and
+   *  what to do — in that order. `client` is null when nothing is assigned yet,
+   *  which is itself an action worth surfacing. */
+  client: string | null;
+  clientId: number | null;
+  /** The imperative, on its own, so the UI can render the hierarchy rather than
+   *  a sentence with the deal name buried in it. */
+  action: string;
+  /** Why this is on the list, traceable to a record — never a generated claim. */
+  because: string;
   journeyType: string | null;
   currentGate: string | null;
   icon: string;
@@ -35,11 +47,15 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
 
     // 1. Get all active deals (owned + participated)
     const ownedDeals = await sql`
-      SELECT id, business_name, journey_type, current_gate, league,
-             industry, revenue, sde, ebitda, financials, created_at, updated_at
-      FROM deals
-      WHERE user_id = ${userId} AND status = 'active' AND archived = FALSE
-      ORDER BY updated_at DESC
+      SELECT d.id, d.business_name, d.journey_type, d.current_gate, d.league,
+             d.industry, d.revenue, d.sde, d.ebitda, d.financials,
+             d.created_at, d.updated_at,
+             -- Client › Deal › Action: a gate row should name whose deal it is.
+             a.id AS client_id, a.firm AS client_firm
+      FROM deals d
+      LEFT JOIN crm_accounts a ON a.id = d.crm_account_id
+      WHERE d.user_id = ${userId} AND d.status = 'active' AND d.archived = FALSE
+      ORDER BY d.updated_at DESC
       LIMIT 10
     `;
 
@@ -127,6 +143,10 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
           id: `deal-${deal.id}-stale`,
           dealId: deal.id,
           dealName: name,
+          client: deal.client_firm ?? null,
+          clientId: deal.client_id ?? null,
+          action: missing[0].label,
+          because: `${daysSinceActivity} days since last activity`,
           journeyType: journey,
           currentGate: gate,
           icon: 'schedule',
@@ -142,6 +162,10 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
           id: `deal-${deal.id}-gate`,
           dealId: deal.id,
           dealName: name,
+          client: deal.client_firm ?? null,
+          clientId: deal.client_id ?? null,
+          action: topMissing.label,
+          because: `${gateLabel(gate)} is waiting on it`,
           journeyType: journey,
           currentGate: gate,
           icon: journeyIcon(journey),
@@ -157,6 +181,10 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
           id: `deal-${deal.id}-advance`,
           dealId: deal.id,
           dealName: name,
+          client: deal.client_firm ?? null,
+          clientId: deal.client_id ?? null,
+          action: `Move past ${gateLabel(gate)}`,
+          because: 'Everything this gate needs is in',
           journeyType: journey,
           currentGate: gate,
           icon: 'arrow_circle_right',
@@ -167,6 +195,164 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
           prefill: `Let's advance my ${name} deal to the next stage.`,
         });
       }
+    }
+
+    /* ── WHAT IS ACTUALLY OWED (2026-07-31) ────────────────────────────────
+     * Client › Deal › Action, from real rows. DELIBERATELY DETERMINISTIC: every
+     * line below cites a record — a task with a due date, a next action someone
+     * typed, an unassigned deal. Nothing here is generated prose, so nothing here
+     * can invent a commitment that was never made. It also costs no API call, so
+     * opening Today does not spend money.
+     *
+     * Ordered by what breaks first: an overdue promise to a third party outranks
+     * an internal note, which outranks a gate that merely could advance.
+     */
+
+    // 3a. A deal action we owe a third party — a CPA, counsel, a lender.
+    try {
+      const owed = await sql`
+        SELECT t.id, t.title, t.due_on, t.status, t.notified_at, t.assignee_name,
+               t.assignee_email, d.id AS deal_id, d.business_name, d.name AS deal_name,
+               a.id AS client_id, a.firm
+        FROM deal_tasks t
+        JOIN deals d ON d.id = t.deal_id AND d.archived = FALSE
+        LEFT JOIN crm_accounts a ON a.id = d.crm_account_id
+        WHERE d.user_id = ${userId}
+          AND t.status IN ('open', 'waiting')
+          AND t.due_on IS NOT NULL AND t.due_on <= CURRENT_DATE
+        ORDER BY t.due_on ASC
+        LIMIT 6
+      `;
+      for (const t of owed) {
+        const who = t.assignee_name || t.assignee_email || 'someone';
+        const asked = t.status === 'waiting';
+        actions.push({
+          id: `task-${t.id}`,
+          dealId: t.deal_id,
+          dealName: t.business_name || t.deal_name || 'a deal',
+          client: t.firm ?? null,
+          clientId: t.client_id ?? null,
+          action: asked ? `Chase ${who} — ${t.title}` : `Ask ${who} — ${t.title}`,
+          because: asked
+            ? `Asked ${t.notified_at ? 'already' : 'not yet'}, due ${String(t.due_on).slice(0, 10)}`
+            : `Due ${String(t.due_on).slice(0, 10)}, not sent yet`,
+          journeyType: 'buy', currentGate: null, icon: 'schedule',
+          title: t.title,
+          description: `${t.business_name || t.deal_name || 'Deal'} — ${asked ? 'waiting on' : 'needs'} ${who}.`,
+          cta: asked ? 'Chase' : 'Ask',
+          priority: 0,
+        });
+      }
+    } catch (e: any) {
+      // Migration 115 may not have run. A missing table must not blank Today.
+      console.warn('[next-actions] deal_tasks unavailable:', e?.message);
+    }
+
+    // 3b. A next action WE committed to, on a deal or on a client.
+    try {
+      const dueDeals = await sql`
+        SELECT d.id, d.business_name, d.name, d.next_action, d.next_action_on,
+               a.id AS client_id, a.firm
+        FROM deals d
+        LEFT JOIN crm_accounts a ON a.id = d.crm_account_id
+        WHERE d.user_id = ${userId} AND d.archived = FALSE
+          AND d.next_action IS NOT NULL
+          AND d.next_action_on IS NOT NULL AND d.next_action_on <= CURRENT_DATE
+        ORDER BY d.next_action_on ASC
+        LIMIT 6
+      `;
+      for (const d of dueDeals) {
+        actions.push({
+          id: `dealnext-${d.id}`,
+          dealId: d.id,
+          dealName: d.business_name || d.name || 'a deal',
+          client: d.firm ?? null,
+          clientId: d.client_id ?? null,
+          action: d.next_action,
+          because: `You set this for ${String(d.next_action_on).slice(0, 10)}`,
+          journeyType: 'buy', currentGate: null, icon: 'flag',
+          title: d.next_action,
+          description: `${d.business_name || d.name} — your next step is due.`,
+          cta: 'Open', priority: 1,
+        });
+      }
+
+      const dueClients = await sql`
+        SELECT id, firm, next_action, next_action_on, tier
+        FROM crm_accounts
+        WHERE user_id = ${userId} AND archived = FALSE
+          AND next_action IS NOT NULL
+          AND next_action_on IS NOT NULL AND next_action_on <= CURRENT_DATE
+        ORDER BY next_action_on ASC
+        LIMIT 6
+      `;
+      for (const c of dueClients) {
+        actions.push({
+          id: `clientnext-${c.id}`,
+          dealId: null, dealName: '',
+          client: c.firm, clientId: c.id,
+          action: c.next_action,
+          because: `You set this for ${String(c.next_action_on).slice(0, 10)}`,
+          journeyType: 'buy', currentGate: null, icon: 'group',
+          title: c.next_action,
+          description: `${c.firm} — your next step is due.`,
+          cta: 'Open', priority: 1,
+        });
+      }
+
+      // 3c. A live deal nobody owns. Until a deal names its client, the
+      //     one-buyer-per-target check has nothing to compare, so this is a
+      //     THE LINE gap and not just untidy data.
+      const orphans = await sql`
+        SELECT id, business_name, name FROM deals
+        WHERE user_id = ${userId} AND archived = FALSE
+          AND crm_account_id IS NULL
+          AND COALESCE(status, 'active') = 'active'
+        ORDER BY updated_at DESC LIMIT 3
+      `;
+      for (const d of orphans) {
+        actions.push({
+          id: `orphan-${d.id}`,
+          dealId: d.id,
+          dealName: d.business_name || d.name || 'a deal',
+          client: null, clientId: null,
+          action: 'Assign the client this is run for',
+          because: 'One buyer per target cannot be checked without it',
+          journeyType: 'buy', currentGate: null, icon: 'link',
+          title: 'Assign a client',
+          description: `${d.business_name || d.name} is not attached to a client yet.`,
+          cta: 'Assign', priority: 2,
+        });
+      }
+
+      // 3d. A client worth calling that we cannot call.
+      const noContact = await sql`
+        SELECT a.id, a.firm, a.tier FROM crm_accounts a
+        WHERE a.user_id = ${userId} AND a.archived = FALSE
+          AND COALESCE(a.kind, 'acquirer') = 'acquirer'
+          AND a.tier IN ('A', 'B')
+          AND NOT EXISTS (
+            SELECT 1 FROM crm_contacts c
+            WHERE c.account_id = a.id AND c.email IS NOT NULL AND c.email <> ''
+          )
+        ORDER BY a.score DESC NULLS LAST LIMIT 3
+      `;
+      for (const c of noContact) {
+        actions.push({
+          id: `nocontact-${c.id}`,
+          dealId: null, dealName: '',
+          client: c.firm, clientId: c.id,
+          action: 'Find the named contact',
+          because: `Tier ${c.tier} with nobody to email`,
+          journeyType: 'buy', currentGate: null, icon: 'person_search',
+          title: 'Find a contact',
+          description: `${c.firm} ranks well but has no email on file.`,
+          cta: 'Open', priority: 4,
+        });
+      }
+    } catch (e: any) {
+      // Migrations 113–115 may not have run yet.
+      console.warn('[next-actions] crm signals unavailable:', e?.message);
     }
 
     // 3. Pending review requests (where THIS user is the reviewer)
@@ -192,6 +378,12 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
         id: `review-${review.id}`,
         dealId: review.deal_id,
         dealName: review.deal_name || 'Deal',
+        // A review is someone else's request, so the person is the "client" of
+        // this row — it is who is blocked, which is the point of the hierarchy.
+        client: null,
+        clientId: null,
+        action: `Review ${review.doc_name || 'the document'}`,
+        because: `${review.requester_name || 'Someone'} is blocked on it`,
         journeyType: null,
         currentGate: null,
         icon: 'rate_review',
@@ -202,47 +394,40 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
       });
     }
 
-    // 4. If no deals at all, suggest starting one
-    if (allDeals.length === 0 && pendingReviews.length === 0) {
-      actions.push({
-        id: 'start-sell',
-        dealId: null,
-        dealName: '',
-        journeyType: 'sell',
-        currentGate: null,
-        icon: 'sell',
-        title: 'Sell a business',
-        description: 'Get your Baseline — Yulia finds what your business is actually worth.',
-        cta: 'Start',
-        priority: 10,
-        prefill: 'I want to sell my business — ',
-      });
-      actions.push({
-        id: 'start-buy',
-        dealId: null,
-        dealName: '',
-        journeyType: 'buy',
-        currentGate: null,
-        icon: 'shopping_cart',
-        title: 'Buy a business',
-        description: 'Run The Rundown on any deal — score it in 8 seconds.',
-        cta: 'Start',
-        priority: 10,
-        prefill: 'I want to buy a business — ',
-      });
-      actions.push({
-        id: 'start-raise',
-        dealId: null,
-        dealName: '',
-        journeyType: 'raise',
-        currentGate: null,
-        icon: 'savings',
-        title: 'Raise capital',
-        description: 'Model every stack — senior, mezz, equity — see what you keep.',
-        cta: 'Start',
-        priority: 10,
-        prefill: 'I need to raise capital — ',
-      });
+    // 4. Nothing to do yet. The old block here offered "Sell a business" and
+    //    "Raise capital" — product-era cards for journeys THE LINE forbids, and
+    //    they reappeared the moment the deals were archived. One honest row
+    //    instead, pointing at the actual first step of the practice.
+    if (actions.length === 0) {
+      const [anyClient] = await sql`
+        SELECT COUNT(*)::int AS n FROM crm_accounts
+        WHERE user_id = ${userId} AND archived = FALSE
+      `;
+      actions.push(
+        anyClient?.n
+          ? {
+              id: 'start-search',
+              dealId: null, dealName: '',
+              client: null, clientId: null,
+              action: 'Set up a buy-box for a client',
+              because: 'No search is running yet',
+              journeyType: 'buy', currentGate: null, icon: 'search',
+              title: 'Start a search',
+              description: 'Pick a client, set the buy-box, and Sourcing does the hunting.',
+              cta: 'Open Sourcing', priority: 9,
+            }
+          : {
+              id: 'start-clients',
+              dealId: null, dealName: '',
+              client: null, clientId: null,
+              action: 'Import your buy-side register',
+              because: 'No clients on the board yet',
+              journeyType: 'buy', currentGate: null, icon: 'group',
+              title: 'Add your clients',
+              description: 'Import the register and every firm is ranked on the way in.',
+              cta: 'Open Clients', priority: 9,
+            },
+      );
     }
 
     // 5. Sort by priority (lower = more urgent) and return top 5
