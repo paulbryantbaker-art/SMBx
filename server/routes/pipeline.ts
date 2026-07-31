@@ -97,10 +97,14 @@ function deriveEvCents(d: any): number {
 
 pipelineRouter.get('/deals', async (req, res) => {
   const userId = (req as any).userId;
+  // `?archived=1` returns the archived set INSTEAD of the working set (there is
+  // no "both" — the board and the archive are two views, never one mixed list).
+  // Default false, so every existing caller silently gains the filter.
+  const wantArchived = req.query.archived === '1' || req.query.archived === 'true';
   try {
     const deals = await sql`
       SELECT d.id, d.journey_type, d.current_gate, d.status, d.league,
-             d.business_name, d.name, d.is_favorite, d.disposition,
+             d.business_name, d.name, d.is_favorite, d.disposition, d.archived,
              d.industry, d.revenue, d.sde, d.ebitda,
              d.asking_price, d.location, d.financials,
              d.seven_factor_composite,
@@ -109,7 +113,7 @@ pipelineRouter.get('/deals', async (req, res) => {
              (SELECT COUNT(*) FROM data_room_documents doc WHERE doc.deal_id = d.id) as document_count,
              (SELECT c.id FROM conversations c WHERE c.deal_id = d.id ORDER BY c.updated_at DESC LIMIT 1) as conversation_id
       FROM deals d
-      WHERE d.user_id = ${userId}
+      WHERE d.user_id = ${userId} AND d.archived = ${wantArchived}
       ORDER BY d.is_favorite DESC, d.updated_at DESC
     `;
     return res.json(deals);
@@ -124,10 +128,17 @@ pipelineRouter.get('/deals', async (req, res) => {
     // nameOf() falls back to business_name. deliverable/document counts the mobile
     // board doesn't render, so 0/NULL is safe.
     console.warn('[deals] preferred query failed — bulletproof fallback:', err?.message);
+    // `archived` (migration 112) is one of the optional columns this fallback
+    // must survive without. An ARCHIVE request therefore returns [] rather than
+    // the unfiltered list: with no column to read, "everything" is a wrong
+    // answer that would print active deals under an Archived heading. The
+    // WORKING-set request still returns every row — the board never blanks.
+    if (wantArchived) return res.json([]);
     try {
       const deals = await sql`
         SELECT d.id, d.journey_type, d.current_gate, d.status, d.league,
                d.business_name, NULL as name, FALSE as is_favorite, 'active' as disposition,
+               FALSE as archived,
                d.industry, d.revenue, d.sde, d.ebitda,
                d.asking_price, d.location, d.financials,
                d.seven_factor_composite,
@@ -145,10 +156,53 @@ pipelineRouter.get('/deals', async (req, res) => {
   }
 });
 
-// ─── Update deal metadata (rename / favorite / disposition) ──
+// ─── Bulk archive / restore ──────────────────────────────────
+// The select-all path: the Deals table hands back the ids the user ticked and
+// this flips them in ONE statement. Scoped by user_id in the WHERE, so an id
+// belonging to someone else is silently skipped rather than 403-ing the whole
+// batch (the client can't know another user's ids anyway, and a partial batch
+// with a truthful count is more useful than an all-or-nothing failure).
+// Declared before '/deals/:dealId' for readability; Express would not confuse
+// them regardless, since '/deals' cannot match a one-segment param route.
+const BULK_CAP = 1000;
+
+pipelineRouter.patch('/deals', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const body = (req.body ?? {}) as { ids?: unknown; archived?: unknown };
+
+    if (typeof body.archived !== 'boolean') {
+      return res.status(400).json({ error: 'archived (boolean) is required' });
+    }
+    if (!Array.isArray(body.ids)) {
+      return res.status(400).json({ error: 'ids (array of deal ids) is required' });
+    }
+    // Coerce + drop anything that isn't a real id, then de-dupe.
+    const ids = [...new Set(body.ids.map(n => Number(n)).filter(n => Number.isInteger(n) && n > 0))];
+    if (ids.length === 0) return res.status(400).json({ error: 'No valid deal ids' });
+    if (ids.length > BULK_CAP) {
+      return res.status(400).json({ error: `Too many ids (max ${BULK_CAP})` });
+    }
+
+    // `= ANY(${ids})` rather than `IN ${sql(ids)}`: an empty array degrades to a
+    // valid no-match instead of `IN ()`, which is a syntax error.
+    const updated = await sql`
+      UPDATE deals SET archived = ${body.archived}
+      WHERE id = ANY(${ids}) AND user_id = ${userId}
+      RETURNING id
+    `;
+    return res.json({ archived: body.archived, count: updated.length, ids: updated.map(r => r.id) });
+  } catch (err: any) {
+    console.error('Bulk archive deals error:', err.message);
+    return res.status(500).json({ error: 'Failed to update deals' });
+  }
+});
+
+// ─── Update deal metadata (rename / favorite / disposition / archive) ──
 // Rename → deals.name; star → is_favorite; defer → disposition='deferred'
-// (Yulia then does no background reading). updated_at is NOT bumped: these are
-// metadata, not analysis-source changes, so they don't trigger a brief regen.
+// (Yulia then does no background reading); archive → out of the working board
+// entirely. updated_at is NOT bumped: these are metadata, not analysis-source
+// changes, so they don't trigger a brief regen.
 pipelineRouter.patch('/deals/:dealId', async (req, res) => {
   try {
     const userId = (req as any).userId;
@@ -158,10 +212,13 @@ pipelineRouter.patch('/deals/:dealId', async (req, res) => {
     const [owned] = await sql`SELECT id FROM deals WHERE id = ${dealId} AND user_id = ${userId}`;
     if (!owned) return res.status(404).json({ error: 'Deal not found' });
 
-    const body = (req.body ?? {}) as { name?: unknown; is_favorite?: unknown; disposition?: unknown };
+    const body = (req.body ?? {}) as {
+      name?: unknown; is_favorite?: unknown; disposition?: unknown; archived?: unknown;
+    };
     const updates: Record<string, unknown> = {};
     if (typeof body.name === 'string') updates.name = body.name.trim().slice(0, 200) || null;
     if (typeof body.is_favorite === 'boolean') updates.is_favorite = body.is_favorite;
+    if (typeof body.archived === 'boolean') updates.archived = body.archived;
     if (typeof body.disposition === 'string') {
       if (!['active', 'deferred'].includes(body.disposition)) {
         return res.status(400).json({ error: 'Invalid disposition (active | deferred)' });
@@ -173,7 +230,7 @@ pipelineRouter.patch('/deals/:dealId', async (req, res) => {
     const [updated] = await sql`
       UPDATE deals SET ${sql(updates)}
       WHERE id = ${dealId} AND user_id = ${userId}
-      RETURNING id, business_name, name, is_favorite, disposition, status
+      RETURNING id, business_name, name, is_favorite, disposition, archived, status
     `;
     return res.json(updated);
   } catch (err: any) {
