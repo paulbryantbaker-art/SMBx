@@ -75,6 +75,7 @@ import {
   type AddressBookContact, type DealTask,
 } from "../../../../hooks/useDealTasks";
 import { dueLabel, daysUntil } from "../../../../lib/crm";
+import { useDraft } from "../../../../hooks/useDraft";
 import { T } from "../atlasTokens";
 
 const PAGE_SIZE = 25;
@@ -1208,9 +1209,11 @@ function DealPane({
   onSaved: () => void;
 }) {
   const [clientId, setClientId] = useState<string>(row.crmAccountId ? String(row.crmAccountId) : "");
-  const [action, setAction] = useState(row.nextAction ?? "");
-  const [on, setOn] = useState(row.nextActionOn ?? "");
-  const [ownerEmail, setOwnerEmail] = useState(row.ownerEmail ?? "");
+  // Drafts keyed by deal id — closing the pane or navigating away no longer
+  // throws away what was typed.
+  const [action, setAction, clearAction] = useDraft(`deal:${row.rawId}:action`, row.nextAction ?? "");
+  const [on, setOn, clearOn] = useDraft(`deal:${row.rawId}:when`, row.nextActionOn ?? "");
+  const [ownerEmail, setOwnerEmail, clearOwner] = useDraft(`deal:${row.rawId}:owner`, row.ownerEmail ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // THE LINE's one-buyer-per-target warning, surfaced verbatim from the server.
@@ -1239,6 +1242,8 @@ function DealPane({
       }
       const body = await r.json();
       if (body?.lineWarning) setLineWarning(body.lineWarning);
+      // Committed — the drafts have served their purpose.
+      clearAction(); clearOn(); clearOwner();
       setSaved(true);
       onSaved();
     } catch (e: any) {
@@ -1355,10 +1360,11 @@ function DealPane({
  */
 function TaskBlock({ dealId, addressBook }: { dealId: number; addressBook: AddressBookContact[] }) {
   const { tasks, error, create, patch, notify } = useDealTasks(dealId);
-  const [title, setTitle] = useState("");
-  const [detail, setDetail] = useState("");
   const [who, setWho] = useState("");
   const [due, setDue] = useState("");
+  // A half-typed ask survives leaving the pane.
+  const [title, setTitle, clearTitle] = useDraft(`deal:${dealId}:tasktitle`);
+  const [detail, setDetail, clearDetail] = useDraft(`deal:${dealId}:taskdetail`);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
 
@@ -1375,7 +1381,7 @@ function TaskBlock({ dealId, addressBook }: { dealId: number; addressBook: Addre
         due_on: due || null,
         notify: andAsk,
       });
-      setTitle(""); setDetail(""); setDue("");
+      clearTitle(); clearDetail(); setDue("");
       if (andAsk) {
         setNote(r?.sent ? "Emailed." : (r?.reason ?? "Nothing was sent."));
       }

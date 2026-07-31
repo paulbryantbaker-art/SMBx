@@ -237,14 +237,96 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
   // it overlays whatever screen you're on. `openChat` opens it (the full-screen
   // chat is retired).
   const [sheetOpen, setSheetOpen] = useState(false);
-  const mobileShell = useMemo(
-    () => ({ openChat: () => setSheetOpen(true), closeChat: () => setSheetOpen(false), signOut: onSignOut }),
-    [onSignOut],
-  );
 
-  // Latest view for the canvas_action listener (subscribes once).
+  // Latest view for the canvas_action listener (subscribes once) AND for
+  // commitNav, which merges a partial navigation onto the current view.
   const viewRef = useRef(view);
   viewRef.current = view;
+  /* ── BROWSER / SWIPE BACK ────────────────────────────────────────────
+   * Paul: "when I'm logged in and I go back, it takes me to a logged out page."
+   *
+   * Cause: mobile navigation was pure React state. The URL never changed, so
+   * the browser's back stack still held whatever was there BEFORE the app — the
+   * logged-out marketing page — and an iOS back-swipe left the app entirely.
+   * Desktop already did this properly (AtlasApp's `commitView`); the mobile
+   * shell never got it.
+   *
+   * So every navigation pushes a history entry, and popstate restores it. The
+   * OVERLAYS are entries too (the More hub, the Yulia sheet), because on a phone
+   * a back-swipe with a sheet open should close the sheet — not exit.
+   *
+   * `depthRef` counts entries WE pushed, so the header back button can use the
+   * same mechanism as the swipe (history.back()) while still knowing when it has
+   * run out of app history and should fall back to an explicit target instead of
+   * stepping off the app.
+   */
+  const depthRef = useRef(0);
+
+  const commitNav = useCallback(
+    (next: { view?: AtlasView; moreOpen?: boolean; sheetOpen?: boolean },
+     mode: "push" | "replace" = "push") => {
+      const merged = {
+        view: next.view ?? viewRef.current,
+        moreOpen: next.moreOpen ?? false,
+        sheetOpen: next.sheetOpen ?? false,
+      };
+      setView(merged.view);
+      setMoreOpen(merged.moreOpen);
+      setSheetOpen(merged.sheetOpen);
+      const state = { atlasMobile: merged };
+      if (mode === "replace") {
+        window.history.replaceState(state, "");
+      } else {
+        window.history.pushState(state, "");
+        depthRef.current += 1;
+      }
+    },
+    [],
+  );
+
+  // Stable handle for the once-subscribed canvas_action listener.
+  const commitNavRef = useRef(commitNav);
+  commitNavRef.current = commitNav;
+
+  // Seed the first entry so backing to it restores Today rather than reloading
+  // or falling out to the marketing page.
+  useEffect(() => {
+    window.history.replaceState(
+      { atlasMobile: { view: { screen: "today" }, moreOpen: false, sheetOpen: false } },
+      "",
+    );
+  }, []);
+
+  // Restore whatever a Back / Forward / swipe lands on.
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => {
+      const st = (e.state as { atlasMobile?: { view: AtlasView; moreOpen: boolean; sheetOpen: boolean } } | null)?.atlasMobile;
+      depthRef.current = Math.max(0, depthRef.current - 1);
+      if (!st) {
+        // No app state on this entry — we have walked back to before the app.
+        // Land on Today instead of showing a logged-out surface.
+        setView({ screen: "today" });
+        setMoreOpen(false);
+        setSheetOpen(false);
+        return;
+      }
+      setView(st.view);
+      setMoreOpen(st.moreOpen);
+      setSheetOpen(st.sheetOpen);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  const mobileShell = useMemo(
+    () => ({
+      openChat: () => commitNav({ sheetOpen: true }),
+      closeChat: () => window.history.back(),
+      signOut: onSignOut,
+    }),
+    [commitNav, onSignOut],
+  );
+
 
   // When the user lands on a deal surface (cockpit/canvas), resume that deal's
   // saved Yulia conversation + rehydrate its persisted canvas tabs — so Yulia
@@ -265,26 +347,14 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
   const nav = useMemo<AtlasNav>(
     () => ({
       view,
-      go: (screen: AtlasScreen, opts?: Partial<AtlasView>) => {
-        setMoreOpen(false);
-        setSheetOpen(false);
-        setView({ screen, ...opts });
-      },
-      openDeal: (dealId: number, dealName?: string) => {
-        setMoreOpen(false);
-        setSheetOpen(false);
-        setView({ screen: "cockpit", dealId, dealName });
-      },
-      openSettings: (pane?: SettingsPane) => {
-        setMoreOpen(false);
-        setSheetOpen(false);
-        setView({ screen: "settings", settingsPane: pane ?? "profile" });
-      },
-      openCanvas: (canvasTabId: string, dealId?: number) => {
-        setMoreOpen(false);
-        setSheetOpen(false);
-        setView({ screen: "canvas", canvasTabId, dealId });
-      },
+      go: (screen: AtlasScreen, opts?: Partial<AtlasView>) =>
+        commitNav({ view: { screen, ...opts } }),
+      openDeal: (dealId: number, dealName?: string) =>
+        commitNav({ view: { screen: "cockpit", dealId, dealName } }),
+      openSettings: (pane?: SettingsPane) =>
+        commitNav({ view: { screen: "settings", settingsPane: pane ?? "profile" } }),
+      openCanvas: (canvasTabId: string, dealId?: number) =>
+        commitNav({ view: { screen: "canvas", canvasTabId, dealId } }),
       // Document tabs are a desktop affordance — mobile navigates one surface at
       // a time, so these are inert here (the shared AtlasNav type requires them).
       openTabs: [],
@@ -292,7 +362,7 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
       selectTab: () => {},
       closeTab: () => {},
     }),
-    [view],
+    [view, commitNav],
   );
 
   // Subscribe to Yulia's tool results (the ONE chat→canvas bridge). Same event
@@ -314,12 +384,13 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
       if (detail.canvas_action === "create_model_tab" && detail.tabId) {
         const ensured = ensureModelTabFromCanvasAction(detail);
         if (ensured) {
-          setMoreOpen(false);
-          setView({
-            screen: "canvas",
-            canvasTabId: ensured.tabId,
-            dealId: typeof detail.dealId === "number" ? detail.dealId : current.dealId,
-            dealName: detail.dealTitle ?? current.dealName,
+          commitNavRef.current({
+            view: {
+              screen: "canvas",
+              canvasTabId: ensured.tabId,
+              dealId: typeof detail.dealId === "number" ? detail.dealId : current.dealId,
+              dealName: detail.dealTitle ?? current.dealName,
+            },
           });
           return;
         }
@@ -333,8 +404,7 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
           analysisRunId: detail.analysisRunId ?? null,
           dealId: typeof detail.dealId === "number" ? detail.dealId : null,
         });
-        setMoreOpen(false);
-        setView({ screen: "canvas", canvasTabId: id, dealId: current.dealId, dealName: current.dealName });
+        commitNavRef.current({ view: { screen: "canvas", canvasTabId: id, dealId: current.dealId, dealName: current.dealName } });
         return;
       }
 
@@ -352,8 +422,7 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
           analysisRunId: tab.analysisRunId ?? detail.analysisRunId ?? null,
           dealId: typeof detail.dealId === "number" ? detail.dealId : null,
         });
-        setMoreOpen(false);
-        setView({ screen: "canvas", canvasTabId: id, dealId: current.dealId, dealName: current.dealName });
+        commitNavRef.current({ view: { screen: "canvas", canvasTabId: id, dealId: current.dealId, dealName: current.dealName } });
         return;
       }
 
@@ -372,11 +441,11 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
           // Tag with the deal so it lists under the cockpit's "On the canvas".
           dealId: typeof detail.dealId === "number" ? detail.dealId : current.dealId ?? null,
         });
-        setMoreOpen(false);
         // Replay (resuming a deal's saved chat): registered above so it's reopenable
-        // from the deal page — but DON'T navigate away from the deal the user opened.
+        // from the deal page — but DON'T navigate away from the deal the user
+        // opened, and DON'T push a history entry for a silent registration.
         if (detail.replay) return;
-        setView({ screen: "canvas", canvasTabId: id, dealId: current.dealId, dealName: current.dealName });
+        commitNavRef.current({ view: { screen: "canvas", canvasTabId: id, dealId: current.dealId, dealName: current.dealName } });
         return;
       }
 
@@ -421,19 +490,25 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
   // (studio/integration/agent/settings) → the More menu; everything else
   // (including the Sourcing bottom-bar tab) → Today.
   const onBack = useCallback(() => {
-    const s = view.screen;
-    if (s === "studio" || s === "integration" || s === "agent" || s === "settings") {
-      setView({ screen: "today" }); // reset the underlying view, then show More
-      setMoreOpen(true);
+    // Prefer the real back stack so the header button and an iOS back-swipe are
+    // the SAME operation — two code paths would drift and confuse the history.
+    if (depthRef.current > 0) {
+      window.history.back();
       return;
     }
-    setMoreOpen(false);
-    if (s === "cockpit" || s === "canvas") {
-      setView({ screen: "deals" });
-    } else {
-      setView({ screen: "today" });
+    // No app history left (deep link straight into a detail screen). Step to the
+    // sensible parent with REPLACE, so we still never fall out of the app and
+    // don't grow a stack that leads nowhere.
+    const s = view.screen;
+    if (s === "studio" || s === "integration" || s === "agent" || s === "settings") {
+      commitNav({ view: { screen: "today" }, moreOpen: true }, "replace");
+      return;
     }
-  }, [view.screen]);
+    commitNav(
+      { view: { screen: s === "cockpit" || s === "canvas" ? "deals" : "today" } },
+      "replace",
+    );
+  }, [view.screen, commitNav]);
 
   // Surface context for the quick-chat sheet (screen-aware Yulia).
   const surfaceContext: SurfaceContext = useMemo(
@@ -449,9 +524,7 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
   );
 
   const onTab = (tab: BottomTab) => {
-    setSheetOpen(false);
-    setMoreOpen(false);
-    nav.go(tab as AtlasScreen);
+    commitNav({ view: { screen: tab as AtlasScreen } });
   };
 
   // The shell owns the header. Variant A on Today; variant B back bar elsewhere
@@ -463,8 +536,8 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
     <MobileTabHeader
       title="Today"
       initials={initials}
-      onAvatar={() => setMoreOpen(true)}
-      onSearch={() => setSheetOpen(true)}
+      onAvatar={() => commitNav({ moreOpen: true })}
+      onSearch={() => commitNav({ sheetOpen: true })}
     />
   ) : surface === "deals" ? (
     // Deals is a bottom-nav TAB — a titled top bar with search + avatar, NOT a
@@ -472,11 +545,11 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
     <MobileTabHeader
       title="Deals"
       initials={initials}
-      onAvatar={() => setMoreOpen(true)}
-      onSearch={() => setSheetOpen(true)}
+      onAvatar={() => commitNav({ moreOpen: true })}
+      onSearch={() => commitNav({ sheetOpen: true })}
     />
   ) : surface === "more" ? (
-    <MobileBackHeader title="Menu" onBack={() => setMoreOpen(false)} />
+    <MobileBackHeader title="Menu" onBack={onBack} />
   ) : surface === "cockpit" ? (
     // Cockpit owns a FULL-BLEED textured header — its back button + deal name live
     // inside the banner (over the texture), so the shell renders no separate bar.
@@ -508,11 +581,11 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
               fixed bars (like macrumors.com / the legacy V6Mobile TabBar) don't
               trigger that, so the chrome collapses normally. The YuliaSheet returns
               null when closed, so on content screens nothing fills the viewport. */}
-          {showNav && <BottomNav active={activeTab} onTab={onTab} onYulia={() => setSheetOpen(true)} />}
-          {showFab && <YuliaFab onOpen={() => setSheetOpen(true)} />}
+          {showNav && <BottomNav active={activeTab} onTab={onTab} onYulia={() => commitNav({ sheetOpen: true })} />}
+          {showFab && <YuliaFab onOpen={() => commitNav({ sheetOpen: true })} />}
           <YuliaSheet
             open={sheetOpen}
-            onClose={() => setSheetOpen(false)}
+            onClose={onBack}
             surfaceContext={surfaceContext}
           />
         </div>
