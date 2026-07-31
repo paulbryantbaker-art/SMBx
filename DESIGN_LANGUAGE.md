@@ -19,7 +19,7 @@ This is the one document to hand to any Claude, designer, or design tool working
 
 ## PASTE-THIS-INTO-CLAUDE SUMMARY
 
-> smbX is a buy-side corp-dev practice. The visual language ("Ledger") is a quiet fintech-editorial system: **bone paper `#F6F4EF`**, near-black ink `#14181C`, white hairline cards, and **exactly one accent — Deal Green `#16624C`** — with **brass `#B08637`** reserved as jewelry on signature numbers. Dark sections are **green-black boardroom bands `#0F1A16`** with ivory text `#F3F1EA`. Display type is **Fraunces** (serif, weight ~545); working type is **Inter** with tabular figures; labels are **IBM Plex Mono**, 13–13.5px, ≤0.12em tracking, never smaller. Buttons are **pills** (fully rounded); cards are 12–16px radius. Giant cited numerals ARE the graphics. **Never use:** terra cotta `#D4714E`, coral/pink `#FF385C` `#E61E4D`, office blue `#185ABD`, neon green `#00D632`, lavender/periwinkle, or gradients on CTAs. No decorative micro-labels ("eyebrows"). Photography is real (founder photos) or absent — no stock, no AI-gloss people.
+> smbX is a buy-side corp-dev practice. The visual language ("Ledger") is a quiet fintech-editorial system: **bone paper `#FCFAF6`**, ink `#16181A`, white hairline cards, and **exactly one accent — Deal Green `#0A7A58`** (with vivid jade `#0FA97C` for large numerals, edges and ambient blooms — never small text, it does not hold contrast) — plus **amber `#E8A62B`** as jewelry on signature numbers, `#F5C452` where that sits on the block. **Nothing in this system is near-black.** The full-bleed rhythm break is a **saturated jade block `#0A6A4C`** with ivory text `#F2FBF6` and mint `#A8F0CE` rules. Display type is **Fraunces** (serif, weight ~545); working type is **Inter** with tabular figures; labels are **IBM Plex Mono**, 13–13.5px, ≤0.12em tracking, never smaller. Buttons are **pills** (fully rounded); cards are 12–16px radius. Giant cited numerals ARE the graphics. **Never use:** the retired Ledger green-black `#16624C` `#0F4E3C` `#0F1A16`, terra cotta `#D4714E`, coral/pink `#FF385C` `#E61E4D`, office blue `#185ABD`, neon green `#00D632`, lavender/periwinkle, or gradients on CTAs. No decorative micro-labels ("eyebrows"). Photography is real (founder photos) or absent — no stock, no AI-gloss people.
 
 ---
 
@@ -46,31 +46,33 @@ Every one of these appeared in an older doc or screenshot and is **retired**. If
 ### Surfaces
 | Token | Value | Use |
 |---|---|---|
-| Bone canvas | `#F6F4EF` | Page background. Tonal-bone ambient only — **no chromatic washes** |
-| Card | `#FFFFFF` | Raised elements. 1px hairline `#E4E1D9`, radius 12–16, soft-lift shadow |
-| Hairline | `#E4E1D9` | Borders, rules, table lines |
-| Dark band | `#0F1A16` (top `#151312` → bot `#131313` family) | Full-bleed "boardroom" sections |
+| Bone canvas | `#FCFAF6` | Page background. Tonal-bone ambient only — **no chromatic washes** |
+| Card | `#FFFFFF` | Raised elements. 1px hairline `#EAE5DC`, radius 12–16, soft-lift shadow |
+| Hairline | `#EAE5DC` | Borders, rules, table lines |
+| Jade block | `#0A6A4C` (top `#0C7554` → bot `#085F43`) | Full-bleed rhythm-break sections. Not near-black — see the recipe below |
 
 ### Ink
 | Token | Value | Use |
 |---|---|---|
-| Ink | `#14181C` | Headlines, strong text |
-| Slate body | `#5C6670` | Body copy |
-| Muted | `#8A9099` | Tertiary, timestamps, sources |
-| Ivory (on dark) | `#F3F1EA` | All reading text on dark bands — hierarchy comes from size/weight, not color |
-| Ivory-sub (on dark) | `#D8D5CA` | Secondary on dark |
+| Ink | `#16181A` | Headlines, strong text |
+| Slate body | `#5A6169` | Body copy |
+| Muted | `#83898F` | Tertiary, timestamps, sources |
+| Ivory (on dark) | `#F2FBF6` | All reading text on dark bands — hierarchy comes from size/weight, not color |
+| Ivory-sub (on dark) | `#DED8CC` | Secondary on dark |
 
 ### The one accent + jewelry
 | Token | Value | Use |
 |---|---|---|
-| **Deal Green** | `#16624C` | THE accent: CTAs, links, active states, rules, dots |
-| Green hover | `#0F4E3C` | Hover/pressed |
-| Green tint chip | `#E7F0EC` | Chip/soft-pill backgrounds (green text on top) |
-| Mint on dark | `#8FD0AE` | Links/labels on dark bands; the X in the dark logo |
-| **Brass** | `#B08637` | JEWELRY ONLY: the bar under a signature numeral, one mono label (e.g. KEY FINDINGS), never body text, never buttons |
+| **Deal Green** | `#0A7A58` | THE accent: CTAs, links, active states, rules, dots |
+| Green hover | `#086348` | Hover/pressed |
+| Green tint chip | `#DFF5EC` | Chip/soft-pill backgrounds (green text on top) |
+| Mint on dark | `#A8F0CE` | Links/labels on dark bands; the X in the dark logo |
+| **Brass** | `#E8A62B` | JEWELRY ONLY: the bar under a signature numeral, one mono label (e.g. KEY FINDINGS), never body text, never buttons |
 
 ### Dark-band recipe
-Base `#0F1A16` + the blackbleed texture (`/textures/blackbleed.webp`, cover) + a **green top halo** `radial-gradient(rgba(84,150,118,~.16–.28) at top)` + a low dark glaze `linear-gradient(rgba(15,26,22,.24), rgba(13,23,19,.45))`. Text ivory. Never aubergine, never warm ember, never neutral charcoal.
+Base `#0A6A4C`, the blackbleed texture (`/textures/blackbleed.webp`, cover), **then an 0.84 glaze of the base colour OVER the texture** — `linear-gradient(rgba(10,106,76,.84), rgba(10,106,76,.84))` — then a **jade top halo** `radial-gradient(rgba(15,169,124,~.20–.28) at top)`. Text ivory. Never aubergine, never warm ember, never neutral charcoal.
+
+**The 0.84 glaze is mandatory and it is the easiest thing here to get wrong.** The texture is a near-black image sitting ABOVE the colour in the background stack, so it wins outright at a low alpha and the colour underneath is only ever the no-image fallback. Written the intuitive way — `background: #0A6A4C url(texture)` — every block renders near-black while the code reads as though it is jade, with no error and no visual diff to catch it. Use `blockBackground()` from `house/tokens.ts`; do not hand-roll the stack.
 
 ---
 
@@ -89,7 +91,7 @@ Ladder law: one size per role, one header measure (≈18em). No per-section besp
 
 - **Buttons: pills** (radius 999). Primary = solid Deal Green with white text; secondary = ghost with ink hairline. Never squared, never gradient.
 - **Cards:** white, hairline, radius 12–16, soft shadow. Surfaces separate by tone, not heavy borders.
-- **Chips:** green-on-tint (`#16624C` on `#E7F0EC`), pill.
+- **Chips:** green-on-tint (`#0A7A58` on `#DFF5EC`), pill.
 - **Chat console:** 16px-radius white card (not a 999 pill).
 - **Nav:** solid bone, no backdrop-blur.
 - **NO decorative eyebrows/micro-labels** ("PIPELINE", "deal intelligence · online"). Lead with the real header. A label exists only when it carries information the reader can't infer.

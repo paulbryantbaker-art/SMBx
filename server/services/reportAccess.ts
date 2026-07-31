@@ -249,25 +249,25 @@ async function notifyDownload(
     const rows = history.map(h => {
       const r = findReport(h.slug);
       return `<tr>
-        <td style="padding:6px 16px 6px 0;font-size:14px;color:#14181C">${esc(r?.shortTitle || h.slug)}</td>
-        <td style="padding:6px 0;font-size:13px;color:#8A9099;white-space:nowrap">${new Date(h.first_asked).toISOString().slice(0, 10)}</td>
+        <td style="padding:6px 16px 6px 0;font-size:14px;color:#16181A">${esc(r?.shortTitle || h.slug)}</td>
+        <td style="padding:6px 0;font-size:13px;color:#83898F;white-space:nowrap">${new Date(h.first_asked).toISOString().slice(0, 10)}</td>
       </tr>`;
     }).join('');
 
     await sendEmail({
       to,
       subject: `${returning ? 'Returning reader' : 'Report download'}: ${email}`,
-      html: `<div style="font-family:-apple-system,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;color:#14181C">
-  <div style="font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:#B08637;font-weight:600">${returning ? 'Came back' : 'New reader'}</div>
+      html: `<div style="font-family:-apple-system,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;color:#16181A">
+  <div style="font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:#E8A62B;font-weight:600">${returning ? 'Came back' : 'New reader'}</div>
   <h1 style="margin:10px 0 4px;font-size:22px;line-height:1.3;font-weight:600">${esc(email)}</h1>
   <p style="margin:0 0 22px;font-size:15px;line-height:1.6;color:#3F464C">
     Confirmed their address and took <strong>${esc(report?.shortTitle || slug)}</strong>.
   </p>
   <table style="border-collapse:collapse;margin:0 0 22px">
-    <tr><td colspan="2" style="padding-bottom:8px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#8A9099">Everything they've taken</td></tr>
+    <tr><td colspan="2" style="padding-bottom:8px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#83898F">Everything they've taken</td></tr>
     ${rows}
   </table>
-  <p style="margin:0;font-size:13px;line-height:1.6;color:#8A9099">
+  <p style="margin:0;font-size:13px;line-height:1.6;color:#83898F">
     They agreed to occasional research, so they're on the campaign list unless they unsubscribe.
   </p>
 </div>`,
@@ -361,23 +361,23 @@ function deliveryEmailHtml(title: string, kicker: string, link: string, attached
   // The explicit white background is load-bearing, not decoration: Apple Mail
   // in dark mode inverts a message that declares none, which would turn the
   // signature's near-black wordmark invisible against its own background.
-  return `<div bgcolor="#FFFFFF" style="font-family:-apple-system,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#FFFFFF;color:#14181C">
-  <div style="font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:#B08637;font-weight:600">${esc(kicker)}</div>
-  <h1 style="margin:12px 0 16px;font-size:24px;line-height:1.25;font-weight:600;color:#14181C">${esc(title)}</h1>
+  return `<div bgcolor="#FFFFFF" style="font-family:-apple-system,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#FFFFFF;color:#16181A">
+  <div style="font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:#E8A62B;font-weight:600">${esc(kicker)}</div>
+  <h1 style="margin:12px 0 16px;font-size:24px;line-height:1.25;font-weight:600;color:#16181A">${esc(title)}</h1>
   <p style="margin:0 0 24px;font-size:15px;line-height:1.65;color:#3F464C">
     ${attached
       ? 'Your copy is attached — the full assessment, every figure attributed to its source. You can also open it in the browser:'
       : 'Here\'s your copy — the full assessment, every figure attributed to its source:'}
   </p>
   <p style="margin:0 0 28px">
-    <a href="${esc(link)}" style="display:inline-block;background:#16624C;color:#fff;text-decoration:none;padding:14px 28px;border-radius:999px;font-size:15px;font-weight:600">Open the report</a>
+    <a href="${esc(link)}" style="display:inline-block;background:#0A7A58;color:#fff;text-decoration:none;padding:14px 28px;border-radius:999px;font-size:15px;font-weight:600">Open the report</a>
   </p>
-  <p style="margin:0 0 32px;font-size:13px;line-height:1.6;color:#8A9099">
+  <p style="margin:0 0 32px;font-size:13px;line-height:1.6;color:#83898F">
     The link works for ${LINK_TTL_HOURS} hours. If the button doesn't open, paste this into your browser:<br>
-    <span style="color:#5C6670;word-break:break-all">${esc(link)}</span>
+    <span style="color:#5A6169;word-break:break-all">${esc(link)}</span>
   </p>
   ${signatureHtml()}
-  <p style="margin:36px 0 0;padding-top:16px;border-top:1px solid #E4E1D9;font-size:12px;line-height:1.6;color:#9BA1A8">
+  <p style="margin:36px 0 0;padding-top:16px;border-top:1px solid #EAE5DC;font-size:12px;line-height:1.6;color:#9BA1A8">
     You got this because someone asked for the report at smbx.ai. We'll send occasional research after this —
     <a href="${esc(unsub)}" style="color:#9BA1A8">unsubscribe</a> any time.
   </p>

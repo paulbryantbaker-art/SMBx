@@ -54,6 +54,7 @@ const TOKENS: Record<string, string> = { ...LEDGER, ...REPORT };
    section would read as sanctioned. */
 
 const DEAD = [
+  '#16624C', '#0F4E3C', '#0F1A16',  // Ledger green-black, retired by Aurora 2026-07-31
   '#FF385C', '#E61E4D', '#D70466',  // coral practice site v1–v3
   '#185ABD', '#124A9E', '#9EC1FF',  // office-blue pivot
   '#D4714E',                        // terra cotta wireframe pass

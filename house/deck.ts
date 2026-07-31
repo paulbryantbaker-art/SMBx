@@ -12,7 +12,7 @@
  * for the app) and pass data URIs in. Same spec + same assets → same bytes,
  * wherever it runs.
  */
-import { LEDGER, TYPE, DISPLAY_WEIGHT, MINT_RING } from './tokens.js';
+import { LEDGER, TYPE, DISPLAY_WEIGHT, MINT_RING, GREEN_HALO, blockBackground, rgba } from './tokens.js';
 import { esc, faceDisc, logoImg } from './assets.js';
 
 export interface DeckAssets {
@@ -143,10 +143,14 @@ export function deckCss(TEXTURE: string): string {
   .pg { width: 1080px; height: 1350px; position: relative; overflow: hidden; page-break-after: always; font-family: ${SANS}; font-variant-numeric: tabular-nums; }
   .pg:last-child { page-break-after: auto; }
   .pg.light { background: ${WARM}; color: ${INK}; }
-  .pg.dark { background: ${DARK} url('${TEXTURE}') center/cover; color: ${IVORY}; }
+  .pg.dark { background: ${blockBackground(TEXTURE)}; color: ${IVORY}; }
+  /* The cover's quieting veil. It is much lighter than it used to be because
+     the block itself is now a glazed composite — stacking the old 0.55→0.72
+     dark veil on top of that would take the jade straight back to the
+     near-black this pass exists to remove. */
   .glaze { position: absolute; inset: 0; background:
-    radial-gradient(900px 500px at 50% -10%, rgba(22,98,76,0.22), transparent 65%),
-    linear-gradient(180deg, rgba(15,26,22,0.55), rgba(15,26,22,0.72)); }
+    radial-gradient(900px 500px at 50% -10%, ${GREEN_HALO}, transparent 65%),
+    linear-gradient(180deg, ${rgba(LEDGER.dark, 0.3)}, ${rgba(LEDGER.dark, 0.48)}); }
   .kick { position: absolute; left: 66px; right: 66px; top: 60px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid ${HAIR}; padding-bottom: 22px; z-index: 3; }
   .kt { font-family: ${MONO}; font-size: 18px; letter-spacing: 0.1em; color: ${TERT}; text-transform: uppercase; }
   .kt.brass { color: ${BRASS}; }

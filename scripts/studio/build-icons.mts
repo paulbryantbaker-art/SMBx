@@ -30,9 +30,10 @@ const { newRenderPage } = await import(pathToFileURL(path.join(ROOT, 'server/ser
 const OUT = path.join(ROOT, 'client/public');
 mkdirSync(OUT, { recursive: true });
 
-/* The Ledger palette — the same values practice.css uses. */
-const BONE = '#F6F4EF';
-const DARK = '#0F1A16';
+/* THE shared definition — see house/tokens.ts. Never hardcode a hex here. */
+const { LEDGER } = await import(pathToFileURL(path.join(ROOT, 'house/tokens.ts')).href);
+const BONE = LEDGER.bone;
+const DARK = LEDGER.dark;
 
 const MARK = 'data:image/png;base64,' +
   readFileSync(path.join(OUT, 'logo-x-green.png')).toString('base64');

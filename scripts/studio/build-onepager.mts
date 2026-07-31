@@ -38,7 +38,7 @@ const { newRenderPage } = await import(pathToFileURL(path.join(ROOT, 'server/ser
 
 /* ── house palette (mirrors build-deck.mts / researchComposer.ts) ─────── */
 /* THE shared definition — see house/tokens.ts. Never hardcode a hex here. */
-const { LEDGER, TYPE } = await import(pathToFileURL(path.join(ROOT, 'house/tokens.ts')).href);
+const { LEDGER, TYPE, blockBackground } = await import(pathToFileURL(path.join(ROOT, 'house/tokens.ts')).href);
 const INK = LEDGER.ink, BODY = LEDGER.slate, GREEN = LEDGER.green;
 const WARM = LEDGER.bone, DARK = LEDGER.dark, IVORY = LEDGER.ivory, IVORY_SUB = LEDGER.rule;
 const BRASS = LEDGER.brass, HAIR = LEDGER.hair, MINT = LEDGER.mint;
@@ -103,7 +103,7 @@ const PHOTOW = 1080 - COLW;
 
 /* ── one card (dark|light), the approved split composition ────────────── */
 function card(dark: boolean): string {
-  const colBg = dark ? `background:${DARK} url('${TEXTURE}') center/cover` : `background:${WARM}`;
+  const colBg = dark ? `background:${blockBackground(TEXTURE)}` : `background:${WARM}`;
   const glaze = dark
     ? `radial-gradient(760px 460px at 30% -6%, rgba(22,98,76,0.22), transparent 62%), linear-gradient(180deg, rgba(15,26,22,0.5), rgba(15,26,22,0.72))`
     : `radial-gradient(900px 620px at 12% 0%, rgba(22,98,76,0.05), transparent 60%)`;

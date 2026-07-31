@@ -6,41 +6,53 @@
    quotes, asymmetry, and Linear-grade micro-craft. Hard constraints honored:
    no ticking counters, no motion ornament. The 2026-07-13 atmosphere pass
    (Paul-directed) amends the no-gradient/no-glow rule for AMBIENT layers
-   only: soft coral blooms accent section text and the dark bands carry
-   procedural SVG art (.pd-accent / .pd-bandart in atmo.tsx) — CTAs and
-   surfaces stay solid.
-   Scope: `.pd` root. Ledger trial: Deal Green #16624C · Fraunces display + Inter
-   working type · IBM Plex Mono. (2026-07-17 pivot, Paul: "all of the pink,
-   the red accents… think Microsoft Office" — the coral accent system is
-   retired; the --pd-coral* var NAMES are historical and now hold the blue.)
+   only: soft blooms accent section text and the dark bands carry procedural
+   SVG art (.pd-accent / .pd-bandart in atmo.tsx) — CTAs and surfaces stay
+   solid. That amendment is what AURORA's hero bloom rides on.
+   Scope: `.pd` root. AURORA: jade accent · amber warm · Fraunces display +
+   Inter working type · IBM Plex Mono. Values are NOT authored here — they
+   mirror `house/tokens.ts`, and `npm run test:design` fails if they drift.
    ──────────────────────────────────────────────────────────────────────────── */
 
 .pd {
-  /* LEDGER TRIAL (2026-07-17 night, Paul: "let's do what the recommendation
-     says and see how we like it"): the fintech-DL research system, faithful —
-     bone canvas, ink #14181C, slate body, WHITE hairline cards, one Deal Green
-     accent, brass jewelry on key numbers, green-black boardroom dark bands,
-     Inter working type under the Fraunces display. Accent var names are
-     historical (coral → blue → green, same slots). */
-  --pd-ink: #14181C;
-  --pd-body: #5C6670;
-  --pd-tert: #8A9099;
-  --pd-faint: #AEB4BA;
+  /* AURORA (2026-07-31, Paul: "I hate the dark green… too dark… make the pages
+     more cheerful"). The Ledger structure survives intact — bone canvas, white
+     hairline cards, one accent, warm jewelry, full-bleed rhythm bands. What
+     changed is the WEIGHT: nothing in the palette is near-black any more. The
+     boardroom band (#0F1A16, L* 8.9) became a saturated jade BLOCK at L* 34,
+     the accent lifted ~9 L* and gained chroma, and brass grew from jewelry on
+     one stat into a working amber.
+
+     The accent is deliberately NOT the vivid jade (#0FA97C) it looks like it
+     should be: white on that jade is 2.97:1 and it reads at 2.85:1 as a link
+     on bone — both under the 4.5:1 floor, and neither failure shows up in a
+     diff. The vivid jade lives in --pd-jade and is used ONLY where no small
+     text sits on it: the ambient bloom, the hero mesh, large numerals.
+
+     Accent var names are historical (coral → blue → green → jade, same slots).
+     Renaming them to --pd-accent* is still the deferred cleanup it always was. */
+  --pd-ink: #16181A;
+  --pd-body: #5A6169;
+  --pd-tert: #83898F;
+  --pd-faint: #A8ADB2;
   --pd-card: #FFFFFF;
-  --pd-band: #EFECE4;
-  --pd-border: #D8D4C9;
-  --pd-hair: #E4E1D9;
-  --pd-coral: #16624C;
-  --pd-coral-link: #0F4E3C;
-  --pd-cta: #16624C;
-  --pd-cta-hover: #0F4E3C;
-  --pd-brass: #B08637;
-  /* Dark-band depth tokens — the band bg gradient and BOTH swoosh fills read
-     from these, so the curve can never drift from the band edge it meets.
-     Ledger "boardroom": near-black with a green undertone (ties the accent). */
-  --pd-dark-bg: #0F1A16;
-  --pd-dark-top: #111D18;
-  --pd-dark-bot: #0D1713;
+  --pd-band: #F3EFE4;
+  --pd-border: #DED8CC;
+  --pd-hair: #EAE5DC;
+  --pd-coral: #0A7A58;
+  --pd-coral-link: #086348;
+  --pd-cta: #0A7A58;
+  --pd-cta-hover: #086348;
+  --pd-brass: #E8A62B;
+  /* The vivid highlight. Ambient layers, the hero mesh and large numerals only
+     — it carries no small text anywhere, by rule. */
+  --pd-jade: #0FA97C;
+  /* Band depth tokens — the band bg gradient and BOTH curve fills read from
+     these, so the curve can never drift from the band edge it meets.
+     AURORA: a saturated jade block, not a green-black. */
+  --pd-dark-bg: #0A6A4C;
+  --pd-dark-top: #0C7554;
+  --pd-dark-bot: #085F43;
   --pd-font: 'Inter', system-ui, sans-serif;
   /* Editorial serif for the display ladder (H1/H2/quote/statement) — the
      gravitas voice; Schibsted stays for working type (h3, body, UI, numerals).
@@ -64,7 +76,7 @@
      — Safari-safe (absolute in a relative parent, NEVER a fixed colored div). */
   position: relative;
   isolation: isolate;
-  background: #F6F4EF;
+  background: #FCFAF6;
   color: var(--pd-ink);
   font-family: var(--pd-font);
   /* Ledger: tabular figures everywhere money appears — set globally so every
@@ -84,10 +96,20 @@
    and below every in-flow section, so light sections show it and opaque dark
    bands occlude it for free — no need to promote/position any child (which
    would clobber the sticky nav/CTA z-index). Distributed no-repeat radials →
-   whole-page breath with no tiling seam. Warmth pass 2026-07-17 (reviewers:
-   "cold") raised every stop — now ≤0.085 alpha, coral→rose→peach→apricot, so
-   the warmth is unmistakable on a phone yet body text holds AA (body #5D5651
-   ≥5.5:1 at the densest tile).
+   whole-page breath with no tiling seam.
+
+   AURORA (2026-07-31) turns this back into a CHROMATIC wash — jade and amber
+   rather than tonal bone — because with the near-black bands gone, the ambient
+   layer is now most of what keeps the page from reading flat.
+
+   THE ALPHA CEILING IS SET BY THE CAPTION TIER, NOT THE BODY TIER, and that is
+   the whole reason these numbers look oddly specific. The reviewed mockup used
+   0.15; at that strength the densest jade tile darkens the paper enough to
+   push --pd-tert (#83898F, the 13.5px source/caption grey) to 2.91:1, under
+   the 3:1 floor. Body text never noticed — it sits at 5.2:1 even there — so
+   checking only the body tier would have shipped it. Jade stops at 0.11
+   (caption 3.04:1) and amber at 0.10. Amber LIGHTENS the paper, so it is
+   bounded by taste rather than contrast; jade is the one to watch.
    PERF LAW — never add will-change/transform/filter/backdrop-filter here: that
    promotes a ~1440×10000 backing store (~57MB 1×, far more at mobile DPR) and
    janks/OOMs. Un-promoted, the compositor rasterizes only viewport-adjacent
@@ -99,16 +121,15 @@
   pointer-events: none;
   overflow: hidden;
   background-repeat: no-repeat;
-  /* Ledger restraint: no chromatic wash — depth comes from TONAL bone
-     variation (deeper paper, not colored light) plus two whispers of the
-     green accent so the canvas isn't clinically flat. */
+  /* Aurora: jade and amber alternating down the scroll, with a tonal bone tile
+     between them so the two hues never meet at full strength. */
   background:
-    radial-gradient(46% 18% at 10% 3%,  rgba(203, 193, 170, 0.16), rgba(203, 193, 170, 0) 62%),
-    radial-gradient(40% 15% at 95% 12%, rgba(22, 98, 76, 0.030), rgba(22, 98, 76, 0) 60%),
-    radial-gradient(52% 18% at 3% 40%,  rgba(206, 196, 174, 0.13), rgba(206, 196, 174, 0) 62%),
-    radial-gradient(46% 16% at 99% 58%, rgba(210, 200, 178, 0.12), rgba(210, 200, 178, 0) 62%),
-    radial-gradient(50% 18% at 7% 82%,  rgba(203, 193, 170, 0.13), rgba(203, 193, 170, 0) 62%),
-    radial-gradient(44% 16% at 96% 98%, rgba(22, 98, 76, 0.024), rgba(22, 98, 76, 0) 62%);
+    radial-gradient(52% 20% at 12% 2%,  rgba(15, 169, 124, 0.110), rgba(15, 169, 124, 0) 64%),
+    radial-gradient(46% 17% at 92% 11%, rgba(232, 166, 43, 0.100), rgba(232, 166, 43, 0) 62%),
+    radial-gradient(52% 18% at 3% 40%,  rgba(206, 196, 174, 0.13),  rgba(206, 196, 174, 0) 62%),
+    radial-gradient(50% 18% at 99% 56%, rgba(15, 169, 124, 0.085),  rgba(15, 169, 124, 0) 64%),
+    radial-gradient(48% 18% at 7% 80%,  rgba(232, 166, 43, 0.090),  rgba(232, 166, 43, 0) 62%),
+    radial-gradient(46% 17% at 96% 97%, rgba(15, 169, 124, 0.075),  rgba(15, 169, 124, 0) 62%);
 }
 .pd *, .pd *::before, .pd *::after { box-sizing: border-box; }
 .pd a { color: var(--pd-ink); text-decoration: none; transition: color 160ms ease; }
@@ -182,39 +203,64 @@
 .pd-section { padding-top: clamp(130px, 15vw, 220px); }
 .pd-section-lg { padding-top: clamp(140px, 16vw, 240px); }
 
-/* ─── dark sections — near-black, full-bleed ───
-   The rhythm device: 2–3 points in the scroll go dark. Everything inside
-   re-reads its colors from these vars, so components adapt untouched. */
+/* ─── the block sections — saturated jade, full-bleed ───
+   The rhythm device: 2–3 points in the scroll break to a block. Everything
+   inside re-reads its colors from these vars, so components adapt untouched.
+   The class name stays `.pd-dark` — it is referenced from six components and
+   from atmo.tsx, and renaming it buys nothing but churn. Under AURORA it means
+   "the full-bleed rhythm break", not "near-black". */
 .pd-dark {
-  /* Over the textured bands ALL reading text is bright white for legibility
-     (Paul, 2026-07-14) — body, meta and the eyebrow labels/tags (which keyed
-     off coral and were the hardest to read on the coral waves). Hierarchy now
-     comes from size/weight, not color. Links keep a bright coral for
-     affordance (see .pd-dark a.pd-link below). */
-  --pd-ink: #F3F1EA;
-  --pd-body: #EDEAE0;
-  --pd-tert: #D8D5CA;
-  --pd-faint: #B8B5AC;
-  --pd-card: #16221D;
-  --pd-border: #3A443E;
-  --pd-hair: rgba(243, 241, 234, 0.12);
-  --pd-coral-link: #F3F1EA;
+  /* Over the band ALL reading text is bright for legibility (Paul,
+     2026-07-14) — body, meta and the eyebrow labels/tags. Hierarchy comes from
+     size/weight, not color.
+
+     Measured on the FLAT block, not assumed, because the texture glaze only
+     ever deepens it — the flat value is the worse case: ink 6.2:1 · body
+     5.6:1 · tert 5.0:1 · the mint link 5.0:1 · the honey numeral 4.0:1 (a
+     numeral, so large-text). Every reading role clears AA, which is the bar a
+     mid-lightness ground has to be held to — a near-black one clears it by
+     accident, which is why it was never worth checking before. */
+  --pd-ink: #F2FBF6;
+  --pd-body: #E4F4EB;
+  --pd-tert: #C9E8DA;
+  --pd-faint: #A8C9BA;
+  --pd-card: #0D6B52;
+  --pd-border: #2E7A61;
+  --pd-hair: rgba(242, 251, 246, 0.12);
+  --pd-coral-link: #F2FBF6;
+  /* Amber drops to 3.1:1 on the block, so the block re-scopes it to honey
+     rather than every brass rule growing a .pd-dark twin. */
+  --pd-brass: #F5C452;
   width: 100%;
   --pd-curve: clamp(52px, 6vw, 112px); /* @kind spacing */
-  /* Full-bleed dark texture — Paul's blackBleedBG slate/plaster surface, shown
-     in full (all band text is bright white, so no legibility veil needed). A
-     subtle top coral halo keeps a whisper of brand; the base gradient is the
-     fallback if the image fails. ONE continuous texture crop — the curved
-     divider edges are masked OUT of this same element (no separate swoosh to
-     seam against). */
-  /* Warmth pass 2026-07-17: the neutral charcoal read cold — a stronger coral
-     halo up top, a low ember glow at the base, and a whisper-warm glaze across
-     the whole texture (low alpha so the plaster detail stays fully visible;
-     white band text keeps ~15:1). */
+  /* Full-bleed texture — Paul's blackBleedBG slate/plaster surface, kept
+     because he asked for it to be kept ("the dark texture is cool"). ONE
+     continuous crop: the curved divider edges are masked OUT of this same
+     element, so there is no separate swoosh to seam against.
+
+     AURORA: the glaze went 0.34 → 0.84, and that is load-bearing rather than a
+     taste tweak. The texture is a NEAR-BLACK image sitting above the colour
+     layers, so at the old alpha it simply won — swapping --pd-dark-bg to jade
+     would have changed the fallback nobody sees and left every band on the
+     site exactly as black as before, with no visual diff to catch it. At 0.84
+     the jade is the field and the plaster survives at about one part in six —
+     picked off a rendered ladder of 0.76/0.80/0.84/0.88, where 0.76 greyed the
+     jade and 0.88 lost the texture Paul asked to keep.
+     `blockBackground()` in house/tokens.ts is the same recipe for the
+     renderers; this one is written out because the site references the texture
+     by URL rather than as a data URI.
+
+     Mirrors it in intent, not by import — if you change one, change both. */
+  /* The top three layers are the LIFE of the block — without them it is a flat
+     slab of one colour, which reads as heavy however light the colour is. A
+     jade sweep from the top-left, a honey answer at the bottom-right, and a
+     cool deep-teal corner give it a direction to travel. They ride ABOVE the
+     glaze so they tint the field rather than the texture under it. */
   background:
-    radial-gradient(90% 52% at 50% -8%, rgba(84, 150, 118, 0.11), rgba(84, 150, 118, 0) 58%),
-    radial-gradient(78% 46% at 50% 110%, rgba(176, 134, 55, 0.055), rgba(176, 134, 55, 0) 62%),
-    linear-gradient(rgba(15, 26, 22, 0.34), rgba(13, 23, 19, 0.34)),
+    radial-gradient(72% 62% at 12% -12%, rgba(15, 169, 124, 0.42), rgba(15, 169, 124, 0) 62%),
+    radial-gradient(64% 58% at 94% 104%, rgba(245, 196, 82, 0.16), rgba(245, 196, 82, 0) 64%),
+    radial-gradient(58% 50% at 98% -8%, rgba(8, 74, 92, 0.24), rgba(8, 74, 92, 0) 62%),
+    linear-gradient(rgba(10, 106, 76, 0.84), rgba(10, 106, 76, 0.84)),
     url('/textures/blackbleed.webp') center / cover no-repeat,
     linear-gradient(180deg, var(--pd-dark-top) 0%, var(--pd-dark-bg) 46%, var(--pd-dark-bot) 100%);
   color: var(--pd-ink);
@@ -241,11 +287,11 @@
    near-invisible on the texture (Paul, 2026-07-14: "secondary buttons on dark
    panels need a white outline") — give them a clear white outline, brightening
    to solid with a faint fill on hover. */
-.pd-dark .pd-pill { border-color: rgba(243, 241, 234, 0.9); }
-.pd-dark .pd-pill:hover { border-color: #F3F1EA; background: rgba(243, 241, 234, 0.10); }
+.pd-dark .pd-pill { border-color: rgba(242, 251, 246, 0.9); }
+.pd-dark .pd-pill:hover { border-color: #F2FBF6; background: rgba(242, 251, 246, 0.10); }
 /* text links stay a bright, legible coral so they still read as links even
    with all other dark-band text white */
-.pd-dark a.pd-link, .pd-dark a.pd-link:hover { color: #8FD0AE; }
+.pd-dark a.pd-link, .pd-dark a.pd-link:hover { color: #A8F0CE; }
 
 /* ─── type ─── */
 /* ─── unified type scale (2026-07-13 consistency pass) ───
@@ -387,7 +433,7 @@
 .pd-navwrap {
   position: sticky; top: 0; z-index: 50;
   /* Ledger: no backdrop-blur anywhere — solid bone with a hairline. */
-  background: #F6F4EF;
+  background: #FCFAF6;
   border-bottom: 1px solid var(--pd-hair);
   transition: box-shadow 0.28s ease, border-color 0.28s ease, background 0.28s ease;
 }
@@ -404,7 +450,7 @@
    (Paul, 2026-07-14). Tighter padding + smaller logo + smaller pills, and it
    lifts onto a soft shadow so it reads as a slim floating bar. */
 .pd-navwrap.min {
-  background: #F6F4EF;
+  background: #FCFAF6;
   border-bottom-color: var(--pd-hair);
   box-shadow: 0 4px 18px rgba(20, 24, 28, 0.06);
 }
@@ -491,11 +537,25 @@
    hero, never position:fixed (Safari toolbar rule). */
 .pd-hero::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
-  /* Softened from the pre-wash intensities so the hero bloom stays additive
-     over the global .pd-ambient wash rather than compounding past AA. */
+  /* AURORA, second pass (2026-07-31, Paul: "I wanted the site to be re-skinned
+     to look less drab"). The palette swap alone did not fix drab, and the
+     screenshot said why: the top two-thirds of the page was black serif on
+     cream with no colour in it at all — the only chroma was a band you have to
+     scroll to. So the bloom stops being "barely there" and becomes the reason
+     the fold has a mood.
+
+     The alphas here look high next to the old wash and are safe because of
+     WHERE they sit: the two strong stops are pinned to the top corners, and
+     the headline column runs down the middle, where all four gradients have
+     already fallen off. Measured at the headline's own position rather than at
+     the tile peak — ink holds 15:1, --pd-body 5.4:1, --pd-tert 3.1:1. If you
+     move a stop toward 50% x, re-measure; the margin is positional, not
+     inherent. */
   background:
-    radial-gradient(52% 64% at 72% 44%, rgba(203, 193, 170, 0.14), rgba(203, 193, 170, 0) 70%),
-    radial-gradient(44% 54% at 18% 26%, rgba(20, 24, 28, 0.035), rgba(20, 24, 28, 0) 72%);
+    radial-gradient(58% 62% at 8% -6%, rgba(15, 169, 124, 0.30), rgba(15, 169, 124, 0) 68%),
+    radial-gradient(52% 56% at 96% 2%, rgba(245, 196, 82, 0.28), rgba(245, 196, 82, 0) 66%),
+    radial-gradient(46% 48% at 88% 82%, rgba(15, 169, 124, 0.14), rgba(15, 169, 124, 0) 70%),
+    radial-gradient(42% 44% at 4% 92%, rgba(232, 166, 43, 0.11), rgba(232, 166, 43, 0) 70%);
 }
 /* ─── hero mesh — a faint dot-matrix field behind the engine (2026-07-14,
    Paul: "needs some graphic or texture… not selling the app, selling the
@@ -506,7 +566,7 @@
 .pd-heromesh {
   position: absolute; inset: 0; pointer-events: none;
   background-image:
-    radial-gradient(rgba(22, 98, 76, 0.20) 1.2px, rgba(22, 98, 76, 0) 1.7px),
+    radial-gradient(rgba(15, 169, 124, 0.20) 1.2px, rgba(15, 169, 124, 0) 1.7px),
     radial-gradient(rgba(20, 24, 28, 0.13) 1px, rgba(20, 24, 28, 0) 1.4px);
   background-size: 96px 96px, 24px 24px;
   background-position: 11px 13px, 0 0;
@@ -545,10 +605,10 @@
   mask-image: linear-gradient(180deg, transparent, #000 16%, #000 84%, transparent);
 }
 .pd-accent.ar::before {
-  background: radial-gradient(56% 88% at 103% 30%, rgba(255, 206, 124, 0.045), rgba(255, 206, 124, 0) 72%);
+  background: radial-gradient(56% 88% at 103% 30%, rgba(245, 196, 82, 0.045), rgba(245, 196, 82, 0) 72%);
 }
 .pd-accent.al::before {
-  background: radial-gradient(56% 88% at -3% 34%, rgba(255, 206, 124, 0.042), rgba(255, 206, 124, 0) 72%);
+  background: radial-gradient(56% 88% at -3% 34%, rgba(245, 196, 82, 0.042), rgba(245, 196, 82, 0) 72%);
 }
 
 .pd-dark { position: relative; }
@@ -564,17 +624,17 @@
           mask-image: radial-gradient(58% 58% at 88% 6%, #000, transparent 70%);
   background-repeat: no-repeat;
   background-image:
-    radial-gradient(1.5px 1.5px at 82% 12%, rgba(243, 241, 234, 0.60), transparent 60%),
-    radial-gradient(1.5px 1.5px at 91% 24%, rgba(143, 208, 174, 0.50), transparent 60%),
-    radial-gradient(1px 1px at 74% 20%, rgba(243, 241, 234, 0.42), transparent 60%),
-    radial-gradient(1px 1px at 95% 9%, rgba(243, 241, 234, 0.40), transparent 60%),
-    radial-gradient(1.5px 1.5px at 86% 33%, rgba(176, 134, 55, 0.45), transparent 60%);
+    radial-gradient(1.5px 1.5px at 82% 12%, rgba(242, 251, 246, 0.60), transparent 60%),
+    radial-gradient(1.5px 1.5px at 91% 24%, rgba(168, 240, 206, 0.50), transparent 60%),
+    radial-gradient(1px 1px at 74% 20%, rgba(242, 251, 246, 0.42), transparent 60%),
+    radial-gradient(1px 1px at 95% 9%, rgba(242, 251, 246, 0.40), transparent 60%),
+    radial-gradient(1.5px 1.5px at 86% 33%, rgba(232, 166, 43, 0.45), transparent 60%);
 }
-.pd-dark.bl-tr::before { background: radial-gradient(48% 72% at 72% 44%, rgba(84, 150, 118, 0.08), rgba(84, 150, 118, 0) 72%); }
-.pd-dark.bl-val::before { background: radial-gradient(42% 64% at 16% 32%, rgba(84, 150, 118, 0.11), rgba(84, 150, 118, 0) 70%); }
-.pd-dark.bl-side::before { background: radial-gradient(42% 64% at 78% 60%, rgba(84, 150, 118, 0.09), rgba(84, 150, 118, 0) 72%); }
-.pd-dark.bl-cta::before { background: radial-gradient(44% 66% at 16% 36%, rgba(84, 150, 118, 0.085), rgba(84, 150, 118, 0) 72%); }
-.pd-dark.bl-creed::before { background: radial-gradient(42% 58% at 82% 10%, rgba(84, 150, 118, 0.07), rgba(84, 150, 118, 0) 72%); }
+.pd-dark.bl-tr::before { background: radial-gradient(48% 72% at 72% 44%, rgba(15, 169, 124, 0.08), rgba(15, 169, 124, 0) 72%); }
+.pd-dark.bl-val::before { background: radial-gradient(42% 64% at 16% 32%, rgba(15, 169, 124, 0.11), rgba(15, 169, 124, 0) 70%); }
+.pd-dark.bl-side::before { background: radial-gradient(42% 64% at 78% 60%, rgba(15, 169, 124, 0.09), rgba(15, 169, 124, 0) 72%); }
+.pd-dark.bl-cta::before { background: radial-gradient(44% 66% at 16% 36%, rgba(15, 169, 124, 0.085), rgba(15, 169, 124, 0) 72%); }
+.pd-dark.bl-creed::before { background: radial-gradient(42% 58% at 82% 10%, rgba(15, 169, 124, 0.07), rgba(15, 169, 124, 0) 72%); }
 
 .pd-bandart { position: absolute; inset: 0; overflow: hidden; pointer-events: none; user-select: none; }
 .pd-mapart {
@@ -860,10 +920,10 @@
   transition: border-color 160ms ease;
 }
 .pd-chat-inputrow .pd-send { border-radius: 999px; }
-.pd-chat-inputrow:focus-within { border-color: #222222; }
+.pd-chat-inputrow:focus-within { border-color: #16181A; }
 .pd-chat-input {
   flex: 1; min-width: 0; padding: 13px 0;
-  font-size: 16.5px; color: #222222; outline: none; background: transparent;
+  font-size: 16.5px; color: #16181A; outline: none; background: transparent;
   /* Kill iOS Safari's native field chrome — the inset rounded box that read as
      a distracting second box inside the input bar (Paul, 2026-07-14). */
   -webkit-appearance: none; appearance: none;
@@ -911,7 +971,7 @@
   box-shadow: 0 2px 4px rgba(20, 24, 28, 0.06), 0 12px 32px rgba(20, 24, 28, 0.10);
   transition: border-color 160ms ease;
 }
-.pd-herobar:focus-within { border-color: #222222; }
+.pd-herobar:focus-within { border-color: #16181A; }
 .pd-herobar input {
   flex: 1; min-width: 0; padding: 16px 0;
   font-size: 17.5px; color: var(--pd-ink); background: transparent;
@@ -937,11 +997,11 @@
    chat") — tappable thesis starters that drop into the field. ── */
 .pd-chips { display: flex; flex-wrap: wrap; gap: 9px; padding: 6px 32px 4px; }
 .pd-chip {
-  border: 1px solid rgba(22, 98, 76, 0.26); background: #E7F0EC; color: #0F4E3C;
+  border: 1px solid rgba(15, 169, 124, 0.26); background: #DFF5EC; color: #086348;
   border-radius: 99px; padding: 9px 16px; font-size: 14px; font-weight: 600; white-space: nowrap;
   cursor: pointer; transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
 }
-.pd-chip:hover { border-color: #16624C; color: #0B3E30; background: #DCEAE3; }
+.pd-chip:hover { border-color: #0A7A58; color: #06503A; background: #CFEEE0; }
 
 /* ── Mobile: the hero bar stays in the page as the doorway (typing never
    happens in-page); the actual chat is a bottom sheet that is ALWAYS
@@ -1130,7 +1190,7 @@
 /* ─── industries — the anchor market as a near-black card, the hunt as a
    numbered board ─── */
 .pd-anchorcard {
-  background: #141414; color: #F5F5F5; border-radius: 18px;
+  background: #0A6A4C; color: #F5F5F5; border-radius: 18px;
   padding: clamp(28px, 3.4vw, 44px) clamp(28px, 3.6vw, 52px);
   margin-top: 48px;
 }
@@ -1153,7 +1213,7 @@
 /* ─── Why us — pillar ledger (3×2 hairline grid, research-desk voice) ─── */
 .pd-whygrid { margin-top: clamp(44px, 5vw, 68px); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--pd-hair); border-left: 1px solid var(--pd-hair); }
 .pd-why { padding: clamp(28px, 3vw, 42px) clamp(24px, 2.6vw, 38px) clamp(32px, 3.4vw, 46px); border-right: 1px solid var(--pd-hair); border-bottom: 1px solid var(--pd-hair); transition: background 0.25s; }
-.pd-why:hover, .pd-why[open] { background: rgba(255, 56, 92, 0.024); }
+.pd-why:hover, .pd-why[open] { background: rgba(15, 169, 124, 0.024); }
 .pd-why summary { list-style: none; cursor: pointer; }
 .pd-why summary::-webkit-details-marker { display: none; }
 .pd-why .more { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; font-family: var(--pd-mono); font-size: 12.5px; letter-spacing: 0.08em; color: var(--pd-tert); transition: color 0.2s; }
@@ -1251,10 +1311,10 @@
 .pd-input {
   min-width: 0; width: 100%; box-sizing: border-box;
   border: 1px solid var(--pd-border); border-radius: 12px; padding: 15px 16px;
-  font-size: 16px; background: #fff; color: #222222; outline: none;
+  font-size: 16px; background: #fff; color: #16181A; outline: none;
   transition: border-color 160ms ease;
 }
-.pd-input:focus { border-color: #222222; }
+.pd-input:focus { border-color: #16181A; }
 .pd-dark .pd-input { border-color: transparent; }
 
 /* ─── firm section ─── */
@@ -1269,6 +1329,29 @@
 .pd-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(28px, 4vw, 56px); }
 .pd-stat .n { font-size: clamp(44px, 5.4vw, 82px); font-weight: 800; letter-spacing: -0.05em; color: var(--pd-ink); line-height: 0.9; white-space: nowrap; }
 .pd-stat.accent .n { color: var(--pd-coral-link); }
+/* On the block the numerals were plain white, which is the single drabbest
+   thing on the page: the four biggest objects in the scroll, carrying no
+   colour. They now run a mint→honey wash — the two on-block colours the
+   palette already owns, so this introduces nothing new.
+
+   `color` is set FIRST and stays as the fallback: `background-clip: text` with
+   a transparent fill degrades to invisible text, not to plain text, anywhere
+   it fails. A stat that vanishes is worse than a stat that is white. */
+.pd-dark .pd-stat .n {
+  color: var(--pd-ink);
+  background: linear-gradient(104deg, #A8F0CE 6%, #F5C452 92%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+/* The signature stat stays SOLID honey. It is the one number that carries an
+   argument ("0 sell-side. Ever.") and a gradient would make it decoration —
+   it also has to stay distinguishable from the three beside it. */
+.pd-dark .pd-stat.accent .n {
+  background: none; -webkit-text-fill-color: var(--pd-brass);
+}
+@supports not ((background-clip: text) or (-webkit-background-clip: text)) {
+  .pd-dark .pd-stat .n { -webkit-text-fill-color: var(--pd-ink); }
+}
 .pd-stat .l { margin-top: 14px; font-family: var(--pd-mono); font-size: 13.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--pd-body); line-height: 1.65; }
 .pd-statband { border-top: 1px solid var(--pd-hair); border-bottom: 1px solid var(--pd-hair); }
 .pd-statband .pd-stats { padding: clamp(36px, 4vw, 60px) 0; }
@@ -1298,7 +1381,7 @@
 .pd-dealsearch {
   margin-left: auto; min-width: 220px;
   border: 1px solid var(--pd-border); border-radius: 99px; padding: 9px 18px;
-  font-size: 13.5px; color: #222222; background: #fff; outline: none;
+  font-size: 13.5px; color: #16181A; background: #fff; outline: none;
   transition: border-color 160ms ease;
 }
 .pd-dealsearch:focus { border-color: var(--pd-ink); }
@@ -1379,7 +1462,7 @@
    third bleed band. Text vars remap; the wordmark flips to white via filter. */
 .pd-footer {
   margin-top: clamp(130px, 15vw, 210px);
-  background: #2B2A27;
+  background: #084433;
   --pd-ink: #FFFFFF; --pd-body: rgba(255, 255, 255, 0.75); --pd-tert: rgba(255, 255, 255, 0.52);
   --pd-faint: rgba(255, 255, 255, 0.35); --pd-hair: rgba(255, 255, 255, 0.12);
   color: var(--pd-body);
@@ -1399,7 +1482,7 @@
 }
 .pd-footer-founder .fname { font-size: 15.5px; font-weight: 700; color: var(--pd-ink); line-height: 1.3; }
 .pd-footer-founder .frole { font-size: 14px; color: var(--pd-tert); margin-top: 3px; line-height: 1.4; }
-.pd .pd-footer-founder a.fmeet { font-size: 14px; color: #9EC1FF; margin-top: 5px; display: inline-block; }
+.pd .pd-footer-founder a.fmeet { font-size: 14px; color: #A8F0CE; margin-top: 5px; display: inline-block; }
 .pd .pd-footer-founder a.fmeet:hover { color: #fff; }
 .pd-footer-inner {
   max-width: var(--pd-max); margin: 0 auto; padding: clamp(36px, 4.5vw, 64px) var(--pd-pad-x);

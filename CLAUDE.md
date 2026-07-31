@@ -79,7 +79,43 @@ Paul shipped the practice-site design (`corpdevservices/`, approved direction
 3a) and it is implemented at `client/src/practice/`. DEFINITIVE is untouched.
 The app shells (Atlas) continue as the working surfaces for the practice.
 
-The three current languages:
+**AURORA (2026-07-31, Paul: "I hate the dark green… it's too dark and slight
+green tint is too dark… what can we do to make the pages look more cheerful and
+AI forward DEAL making goodness?"). THIS IS THE CURRENT PALETTE — the LEDGER
+TRIAL entry below is now a historical record of what it replaced.** The
+complaint was about WEIGHT, not hue, so the Ledger structure survives intact
+(bone canvas, white hairline cards, one accent, warm jewelry, full-bleed rhythm
+bands, Fraunces/Inter/Plex) and only the values move: **nothing in the system is
+near-black any more.** The green-black boardroom band became a saturated **jade
+block `#0A6A4C`**, the accent lifted to **Deal Green `#0A7A58`**, brass grew from
+jewelry-on-one-stat into a working **amber `#E8A62B`** (`#F5C452` on the block),
+the canvas brightened to `#FCFAF6`, and a jade/amber ambient bloom replaced the
+tonal-bone wash. Two new tokens: **`jade #0FA97C`** — large numerals, edges and
+ambient only, NEVER small text (white on it is 2.97:1, it as link text on bone
+is 2.85:1, and neither failure is visible in a diff) — and **`honey #F5C452`**,
+amber's on-block value. Retired into the dead list: `#16624C` `#0F4E3C`
+`#0F1A16`.
+
+**TWO TRAPS, both of which render rather than error.** (1) The dark texture is a
+near-black image that sits ABOVE the colour in the background stack, so
+`background: DARK url(texture)` ignores the colour entirely — swap the token to
+jade and every dark surface stays exactly as black as before, with nothing in
+the diff to catch it. The block is therefore a COMPOSITE: an 0.84 glaze of the
+base over the texture, defined once as `blockBackground()` in `house/tokens.ts`.
+Never hand-roll the stack. (2) The alpha ceiling on the ambient wash is set by
+the 13.5px caption tier (`--pd-tert`), not the body tier — body text still reads
+at 5.2:1 where captions have already dropped under 3:1, so checking the obvious
+one passes a wash that fails.
+
+Sources of truth unchanged and all four move together or the gate fails:
+`house/tokens.ts` (the values), `client/src/practice/practice.css` +
+`report.css` (the site), `content/studio/DESIGN.md` (the law that travels to the
+workspace), `DESIGN_LANGUAGE.md` (the root brief). `npm run test:design` is the
+gate — 58 cases asserting every hex is a real token, every token is documented,
+no retired hex appears as live guidance, and the live stylesheet still matches.
+
+The three current languages (the LEDGER TRIAL entry records the system Aurora
+re-valued, not a system to build against):
 - **LEDGER TRIAL (2026-07-17 night, Paul: "let's do what the recommendation says and see how we like it" — the fintech-DL research system, implemented faithfully for evaluation):** bone canvas `#F6F4EF` (tonal-bone ambient, no chromatic wash), ink `#14181C`/slate `#5C6670`/muted `#8A9099`, WHITE hairline cards (radius 12–16, Ledger soft-lift shadow), ONE accent **Deal Green `#16624C`** (hover `#0F4E3C`, tint chips `#E7F0EC`, mint-on-dark links `#8FD0AE`) in the historical `--pd-coral*` slots, **brass `#B08637`** jewelry on the signature "0 sell-side" stat (`--pd-brass`), green-black boardroom dark bands (`--pd-dark-* #0F1A16` family, ivory text `#F3F1EA` rescope, green halo + brass base glow + green-black glaze over the blackbleed texture), working type switched Schibsted→**Inter** with global `tnum` tabular figures, Fraunces display at weight 545, **pill buttons** (Paul 2026-07-18 overrode Ledger's 8px: "no squared buttons"; ghost secondary keeps the ink hairline), 16px white chat console (was 999px pill), solid bone nav (backdrop-blur removed per Ledger anti-patterns), logo X recolored to the green (`/logo-green-x.png`, `/logo-x-green.png`; coral+blue masters remain). Composers (researchComposer, practiceMapPdf) follow. Deliberately skipped from the doc: Sell/Raise chips + client-logo walls + pricing (THE LINE / attribution law), the dark hero (doc's own light-mode conversion caveat; light hero kept), Inter-for-Schibsted in the APP shells (site only). Rollback = revert one commit per system (blue and coral live in git history).
 - **OFFICE-BLUE PIVOT (2026-07-17 evening, Paul: "all of the pink, the red accents… no more terra cotta anything. think Microsoft Office"):** the coral accent system is RETIRED sitewide. Accent = professional Office blue `#185ABD` (hover `#124A9E`, links/labels `#1656B4`, bright-on-dark `#9EC1FF`) held in the HISTORICAL `--pd-coral*` var names (values swapped, names kept to avoid churn — rename to `--pd-accent*` in a quiet moment). Atmosphere = CHAMPAGNE-GOLD only (hue ~42°; no pink, no clay/terra-cotta hues anywhere); dark bands carry a steel-blue top halo + champagne base. Chips blue-on-ice (`#1656B4` on `#EDF3FC`). Logo: the X recolored to the blue — `/logo-blue-x.png` + `/logo-x-blue.png` (generated pixel-exact from the coral masters, which remain on disk as history; footer white-inversion law unchanged). Server composers (researchComposer, practiceMapPdf) carry the same blue + blue logo. The "coral" language name below is historical.
 - **WARMTH PASS (2026-07-17, human reviewers: "cold, boring… warm it up"; hue law same day, Paul: "the hard pink is a no"):** the coral system's neutrals all moved onto the warm axis — paper base `#FDF8F3`, warm ink/body/tert/card/border tokens (R≥G≥B), ambient wash raised to ≤0.085 alpha and **hue-locked to APRICOT/HONEY/PEACH only — no coral/rose/pink in ANY ambient layer** (hero bloom, heromesh dots, section accents, dark-band halos/sparks all amber; coral acts only where the brand acts: CTAs, links, labels; AA re-checked against the new body `#5D5651`), dark bands warmed from neutral charcoal to ember near-black (`--pd-dark-*` R>G>B) with an ember halo + base glow + low warm glaze over the blackbleed texture, chips rust-on-cream (`#A2542A` on `#FFF2E6`), and the display ladder (`.pd-h1/.pd-h2/.pd-quote/.pd-statement/.pd-cta-h`) moved to **Fraunces serif** (`--pd-display`, weight ~600, near-normal tracking, more leading) while ALL working type (h3, body, UI, numerals, mono) stays Schibsted; chips warmed to peach tint; theme-color meta + boot bg fixed from stale V6 slate `#F6F7F9` to the warm paper; a founder photo band (`.pd-fndband`, real Times Square walking shot at `/founder-walking.webp`, sanctioned deal-captain copy) sits before `#cta`. Sizes/ladder law unchanged.

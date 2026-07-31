@@ -26,18 +26,23 @@ note to Paul — you describe the real thing.
 
 # 1. Paste this into anything that needs the short version
 
-> smbX house style ("Ledger") — a quiet fintech-editorial system. Bone paper
-> `#F6F4EF`, near-black ink `#14181C`, white hairline cards. **Exactly one
-> accent: Deal Green `#16624C`.** Brass `#B08637` is jewelry — the bar under a
+> smbX house style ("Ledger", Aurora pass) — a bright fintech-editorial
+> system. Bone paper `#FCFAF6`, ink `#16181A`, white hairline cards.
+> **Exactly one accent: Deal Green `#0A7A58`**, with vivid jade `#0FA97C`
+> reserved for large numerals, edges and ambient blooms — never small text, it
+> does not hold contrast. Amber `#E8A62B` is jewelry — the bar under a
 > signature numeral, one mono label — never body text, never a button, never a
-> second accent. Dark sections are green-black boardroom bands `#0F1A16` with
-> ivory text `#F3F1EA` and mint `#8FD0AE` rules. Display type is **Fraunces**
-> at weight **545**; working type is **Inter** with tabular figures; labels are
-> **IBM Plex Mono** at 13px+ with ≤0.12em tracking. Buttons are pills, cards are
-> 12–24px radius. A cited number rendered enormous IS the graphic. Photography
-> is real or absent. **Never: coral `#FF385C`, terra cotta `#D4714E`, office
-> blue `#185ABD`, neon `#00D632`, hot pink `#D44A78`, lavender, gradient CTAs,
-> decorative micro-labels, stock photography.**
+> second accent. **Nothing in this system is near-black.** The full-bleed
+> rhythm break is a saturated jade block `#0A6A4C` with ivory text `#F2FBF6`,
+> mint `#A8F0CE` rules and honey `#F5C452` numerals. Display type is
+> **Fraunces** at weight **545**; working type is **Inter** with tabular
+> figures; labels are **IBM Plex Mono** at 13px+ with ≤0.12em tracking. Buttons
+> are pills, cards are 12–24px radius. A cited number rendered enormous IS the
+> graphic. Photography is real or absent. **Never: coral `#FF385C`, terra cotta
+> `#D4714E`, office blue `#185ABD`, neon `#00D632`, hot pink `#D44A78`, the
+> retired Ledger greens `#16624C` `#0F4E3C` and the boardroom near-black
+> `#0F1A16`, lavender, gradient CTAs, decorative micro-labels, stock
+> photography.**
 
 ---
 
@@ -49,6 +54,7 @@ with their hexes because that is how you catch yourself: a hex that is not in
 
 | Dead system | Signature | Died |
 |---|---|---|
+| Ledger green-black (the first Ledger pass) | Deal Green `#16624C`, hover `#0F4E3C`, boardroom band `#0F1A16` — a near-black with a green cast | 2026-07-31 |
 | Coral practice site v1–v3 | `#FF385C` `#E61E4D` `#D70466`, pink/rose ambient washes | 2026-07-17 |
 | Office-blue pivot (lasted one day) | `#185ABD` `#124A9E` `#9EC1FF` | 2026-07-17 |
 | Terra cotta wireframe pass | `#D4714E`, clay / apricot / "warm" anything | 2026-07-10 |
@@ -64,10 +70,17 @@ system went coral → blue → green and the slots were reused rather than renam
 read the value.
 
 **Why the drift happens, so you can see it coming.** This repo's history
-contains all seven systems above, in committed CSS, in design bundles, in old
+contains all eight systems above, in committed CSS, in design bundles, in old
 briefs. Anything reconstructing "the smbX look" from general familiarity rather
-than from `house/tokens.ts` will surface one of them, confidently. The tell is
-always the same: a warm accent where a green belongs.
+than from `house/tokens.ts` will surface one of them, confidently.
+
+The old tell was "a warm accent where a green belongs", and as of the Aurora
+pass that tell is **retired and actively misleading** — amber is now a working
+house colour, so warmth on the page is no longer evidence of anything. The
+current tells are darkness and dullness: a near-black band, or a green so deep
+it reads as a forest. If a surface looks heavy, you are probably in the 2026-07
+Ledger green-black, which is the newest dead system and therefore the easiest
+one to mistake for current.
 
 ---
 
@@ -87,15 +100,16 @@ The rest maps one-to-one:
 
 | Website | Collateral | Value |
 |---|---|---|
-| Page canvas | light deck pages, light one-pager, report body | bone `#F6F4EF` |
-| `--pd-ink` headlines | heads on light pages | `#14181C` |
-| `--pd-body` copy | body on decks and cards | slate `#5C6670` |
-| `--pd-tert` | sources, page numbers, captions | muted `#8A9099` |
-| `--pd-hair` rules | hairlines, table rules, image frames | `#E4E1D9` |
-| `--pd-coral` *(green)* | tags, rules, list markers, links | Deal Green `#16624C` |
-| `--pd-brass` | the bar under a numeral, KEY FINDINGS | brass `#B08637` |
-| `--pd-dark-bg` bands | cover, closer, dark one-pager, report cover | `#0F1A16` |
-| Dark-band ivory text | reading text on every dark surface | `#F3F1EA` |
+| Page canvas | light deck pages, light one-pager, report body | bone `#FCFAF6` |
+| `--pd-ink` headlines | heads on light pages | `#16181A` |
+| `--pd-body` copy | body on decks and cards | slate `#5A6169` |
+| `--pd-tert` | sources, page numbers, captions | muted `#83898F` |
+| `--pd-hair` rules | hairlines, table rules, image frames | `#EAE5DC` |
+| `--pd-coral` *(green)* | tags, rules, list markers, links | Deal Green `#0A7A58` |
+| `--pd-jade` | ambient blooms, the hero mesh, large numerals | jade `#0FA97C` |
+| `--pd-brass` | the bar under a numeral, KEY FINDINGS | amber `#E8A62B` |
+| `--pd-dark-bg` blocks | cover, closer, dark one-pager, report cover | jade block `#0A6A4C` |
+| Block ivory text | reading text on every block surface | `#F2FBF6` |
 | `.pd-h1/.pd-h2` Fraunces 545 | every hook and head | Fraunces 545 |
 | Site body Inter + `tnum` | all working copy and every figure | Inter, tabular |
 | `.pd-num` giant numerals | the numeral page, the one-pager figure | Inter 800 |
@@ -115,57 +129,80 @@ Verbatim from `house/tokens.ts`. Nothing outside this table is a house colour.
 
 | Name | Hex | Where it goes |
 |---|---|---|
-| bone | `#F6F4EF` | page canvas on every light surface |
-| ink | `#14181C` | headings and primary text on light |
-| slate | `#5C6670` | body copy on decks and cards |
-| muted | `#8A9099` | sources, vintages, page numbers, captions |
-| hair | `#E4E1D9` | hairline borders, table rules, image frames |
-| rule | `#D8D5CA` | heavier dividers; secondary text on dark |
+| bone | `#FCFAF6` | page canvas on every light surface |
+| ink | `#16181A` | headings and primary text on light |
+| slate | `#5A6169` | body copy on decks and cards |
+| muted | `#83898F` | sources, vintages, page numbers, captions |
+| hair | `#EAE5DC` | hairline borders, table rules, image frames |
+| rule | `#DED8CC` | heavier dividers; secondary text on the block |
 
 ### The one accent
 
 | Name | Hex | Where it goes |
 |---|---|---|
-| **Deal Green** | `#16624C` | THE accent — tags, rules, list markers, links, solid bars |
-| green hover | `#0F4E3C` | pressed and hover states |
-| green tint | `#E7F0EC` | chip fill, with green text on top |
-| mint | `#8FD0AE` | rules on dark, the headshot ring, SWIPE and FOLLOW |
+| **Deal Green** | `#0A7A58` | THE accent — tags, rules, list markers, links, solid bars, every button fill |
+| green hover | `#086348` | pressed and hover states |
+| green tint | `#DFF5EC` | chip fill, with green text on top |
+| **jade** | `#0FA97C` | large numerals, block edges, ambient blooms, the hero mesh — **never small text** |
+| mint | `#A8F0CE` | rules on the block, the headshot ring, SWIPE and FOLLOW |
 
 One accent means one. A second colour introduced "for contrast" is the most
-common way this system is broken.
+common way this system is broken. Jade is not a second accent — it is the same
+green at a lightness that cannot carry text, which is why its row says so.
+
+**Why jade is not the accent, when it obviously wants to be.** It fails
+contrast, and it fails invisibly: white on jade is 2.97:1 and jade as link text
+on bone is 2.85:1, both under the 4.5:1 floor, and neither shows up in a diff
+or in a screenshot you are not squinting at. Deal Green sits deep enough to
+hold white at 5.3:1. **If you find yourself reaching for jade because the green
+looks dull, the answer is a bigger numeral, not a lighter green.**
 
 ### Jewelry
 
 | Name | Hex | Where it goes |
 |---|---|---|
-| **brass** | `#B08637` | the bar under a signature numeral · the cover eyebrow · report part-rules and table underlines · one mono tag · the notice rail |
+| **amber** | `#E8A62B` | on LIGHT surfaces: the bar under a signature numeral · the cover eyebrow · report part-rules and table underlines · one mono tag · the notice rail |
+| **honey** | `#F5C452` | the same jobs on the jade block, where amber drops to 3.8:1 |
 
-Brass is not an accent, it is punctuation. Never body text, never a button,
-never a fill.
+Amber is not an accent, it is punctuation. Never body text, never a button,
+never a fill. It is a large-text-only colour on both grounds — a numeral, a
+rule, a tag — never a caption.
 
-### Dark
+### The block
 
 | Name | Hex | Where it goes |
 |---|---|---|
-| dark | `#0F1A16` | the boardroom band |
-| ivory | `#F3F1EA` | all reading text on dark |
+| dark | `#0A6A4C` | the full-bleed rhythm break |
+| ivory | `#F2FBF6` | all reading text on the block |
 
-**The boardroom recipe**, identical on every dark surface: base `#0F1A16`, the
-`blackbleed.webp` texture at `center/cover`, a green top halo
-(`radial-gradient(rgba(22,98,76,0.22–0.30) at top)`) and a dark glaze
-(`linear-gradient(rgba(15,26,22,0.42→0.55), rgba(15,26,22,0.72))`). Never
-aubergine, never warm ember, never flat charcoal. On dark, hierarchy comes from
-**size and weight, not colour** — the text is ivory, the secondary is
-`#D8D5CA`, and that is the whole ladder.
+The token is still named `dark` because six renderers and the site stylesheet
+reference it; it means "the rhythm break", not "near-black". **Nothing in this
+system is near-black.**
+
+**The block recipe**, identical on every such surface: base `#0A6A4C`, the
+`blackbleed.webp` texture at `center/cover`, **an 0.84 glaze of the base colour
+OVER the texture**, then a jade top halo. Never aubergine, never a flat
+charcoal, never an unglazed texture.
+
+**That 0.84 is the single most breakable number in this document.** The texture
+is a near-black image and it sits ABOVE the colour in the stack, so it wins
+outright at a low alpha — the colour underneath is only ever a no-image
+fallback. Write the recipe the intuitive way and every block on every surface
+renders near-black while the code reads as though it is jade. There is no error
+and no visual diff to catch it; the palette change simply does not happen. Use
+`blockBackground()` from `house/tokens.ts` and do not hand-roll the stack.
+
+On the block, hierarchy comes from **size and weight, not colour** — the text
+is ivory, the secondary is `#DED8CC`, and that is the whole ladder.
 
 ### Long-form reading
 
 | Name | Hex | Where it goes |
 |---|---|---|
 | report body | `#3F464C` | report PDF body **and** the research web page |
-| ivory-sub | `#CBD1CB` | cover sub-text on dark |
-| stat label | `#A6BEB2` | cover stat-card labels |
-| table head | `#EEE9DD` | GFM table header fill |
+| ivory-sub | `#C9E8DA` | cover sub-text on the block |
+| stat label | `#BFE3D2` | cover stat-card labels |
+| table head | `#F1ECE0` | GFM table header fill |
 
 Report body is deliberately darker than slate: a page read for twenty minutes
 wants more contrast than a slide glanced at for two seconds.

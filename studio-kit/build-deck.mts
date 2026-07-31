@@ -29,9 +29,15 @@ import { newRenderPage, closeBrowser } from './lib/render.mts';
 const KIT = path.dirname(fileURLToPath(import.meta.url));
 
 /* ── house palette (Ledger) ──────────────────────────────────────────── */
-const INK = '#14181C', BODY = '#5C6670', TERT = '#8A9099', GREEN = '#16624C';
-const WARM = '#F6F4EF', DARK = '#0F1A16', IVORY = '#F3F1EA', IVORY_SUB = '#D8D5CA';
-const BRASS = '#B08637', HAIR = '#E4E1D9', MINT = '#8FD0AE';
+const INK = '#16181A', BODY = '#5A6169', TERT = '#83898F', GREEN = '#0A7A58';
+const WARM = '#FCFAF6', DARK = '#0A6A4C', IVORY = '#F2FBF6', IVORY_SUB = '#DED8CC';
+const BRASS = '#E8A62B', HAIR = '#EAE5DC', MINT = '#A8F0CE';
+/* The jade block over the boardroom texture. The texture is a NEAR-BLACK
+   image ABOVE the colour in the stack, so it wins outright without this
+   glaze and the block renders black while the code reads as jade. The kit
+   vendors this rather than importing it — see house/tokens.ts
+   blockBackground(), which must stay in step with it. */
+const BLOCK = (tex: string) => `linear-gradient(rgba(10,106,76,0.84), rgba(10,106,76,0.84)), url('${tex}') center/cover, ${DARK}`;
 const DISPLAY = `'Fraunces', Georgia, serif`, SANS = `'Inter', -apple-system, sans-serif`, MONO = `'IBM Plex Mono', monospace`;
 
 /* ── CLI args ─────────────────────────────────────────────────────────── */
@@ -105,8 +111,8 @@ const COVER_IMG = resolveImg(deck.cover.image);
 
 const esc = (s: string) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const face = (s: number) => HEAD
-  ? `<img src="${HEAD}" style="width:${s}px;height:${s}px;border-radius:50%;object-fit:cover;object-position:50% 22%;display:block;flex:none;border:3px solid rgba(143,208,174,0.65)">`
-  : `<div style="width:${s}px;height:${s}px;border-radius:50%;background:${INK};color:${IVORY};display:flex;align-items:center;justify-content:center;font-family:${SANS};font-weight:800;font-size:${Math.round(s * 0.38)}px;flex:none;border:3px solid rgba(143,208,174,0.65)">PB</div>`;
+  ? `<img src="${HEAD}" style="width:${s}px;height:${s}px;border-radius:50%;object-fit:cover;object-position:50% 22%;display:block;flex:none;border:3px solid rgba(168,240,206,0.65)">`
+  : `<div style="width:${s}px;height:${s}px;border-radius:50%;background:${INK};color:${IVORY};display:flex;align-items:center;justify-content:center;font-family:${SANS};font-weight:800;font-size:${Math.round(s * 0.38)}px;flex:none;border:3px solid rgba(168,240,206,0.65)">PB</div>`;
 const total = deck.pages.length + 2; // cover + middles + closer
 const kicker = `<div class="kick"><img src="${LOGO}" style="height:30px;width:auto;display:block"><span class="kt">${esc(deck.kicker)}</span></div>`;
 const pfoot = (n: number) => `<div class="pfoot"><img src="${LOGO_W}" style="height:34px;width:auto;display:block"><span class="pn">${n} / ${total}</span></div>`;
@@ -193,10 +199,10 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
   .pg { width: 1080px; height: 1350px; position: relative; overflow: hidden; page-break-after: always; font-family: ${SANS}; font-variant-numeric: tabular-nums; }
   .pg:last-child { page-break-after: auto; }
   .pg.light { background: ${WARM}; color: ${INK}; }
-  .pg.dark { background: ${DARK} url('${TEXTURE}') center/cover; color: ${IVORY}; }
+  .pg.dark { background: ${BLOCK(TEXTURE)}; color: ${IVORY}; }
   .glaze { position: absolute; inset: 0; background:
-    radial-gradient(900px 500px at 50% -10%, rgba(22,98,76,0.22), transparent 65%),
-    linear-gradient(180deg, rgba(15,26,22,0.55), rgba(15,26,22,0.72)); }
+    radial-gradient(900px 500px at 50% -10%, rgba(10,122,88,0.22), transparent 65%),
+    linear-gradient(180deg, rgba(10,106,76,0.55), rgba(10,106,76,0.72)); }
   .kick { position: absolute; left: 66px; right: 66px; top: 60px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid ${HAIR}; padding-bottom: 22px; z-index: 3; }
   .kt { font-family: ${MONO}; font-size: 18px; letter-spacing: 0.1em; color: ${TERT}; text-transform: uppercase; }
   .kt.brass { color: ${BRASS}; }
@@ -209,8 +215,8 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
   .cv-hook { font-family: ${DISPLAY}; font-weight: 545; font-size: 52px; line-height: 1.08; letter-spacing: -0.014em; color: ${IVORY}; text-wrap: balance; }
   .cv-rule { width: 70px; height: 6px; background: ${MINT}; border-radius: 99px; margin: 30px 0 26px; }
   .cv-sub { font-size: 22px; line-height: 1.5; color: ${IVORY_SUB}; font-weight: 500; }
-  .cv-right { position: absolute; left: 544px; top: 60px; right: 60px; bottom: 188px; background: #fff; border: 1px solid rgba(243,241,234,0.18); border-radius: 24px; overflow: hidden; z-index: 1; }
-  .cv-foot { position: absolute; left: 0; right: 0; bottom: 0; height: 128px; border-top: 1px solid rgba(243,241,234,0.10); display: flex; align-items: center; gap: 26px; padding: 0 60px; z-index: 3; }
+  .cv-right { position: absolute; left: 544px; top: 60px; right: 60px; bottom: 188px; background: #fff; border: 1px solid rgba(242,251,246,0.18); border-radius: 24px; overflow: hidden; z-index: 1; }
+  .cv-foot { position: absolute; left: 0; right: 0; bottom: 0; height: 128px; border-top: 1px solid rgba(242,251,246,0.10); display: flex; align-items: center; gap: 26px; padding: 0 60px; z-index: 3; }
   .who { display: flex; align-items: center; gap: 18px; }
   .wn { color: ${IVORY}; font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
   .wt { margin-top: 3px; color: ${IVORY_SUB}; font-size: 16.5px; font-weight: 500; }

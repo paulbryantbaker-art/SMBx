@@ -169,14 +169,14 @@ export function brandedEmail({ headline, body, ctaLabel, ctaUrl, footnote }: {
  */
 export function signatureHtml(): string {
   return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0">
-  <tr><td style="font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;line-height:1.5;color:#14181C;padding:0 0 2px">
+  <tr><td style="font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;line-height:1.5;color:#16181A;padding:0 0 2px">
     <strong style="font-weight:600">Paul Baker</strong>
   </td></tr>
   <tr><td style="font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;line-height:1.5;color:#3F464C;padding:0 0 2px">
     Founder &amp; Deal Captain
   </td></tr>
   <tr><td style="font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;line-height:1.5;padding:0 0 10px">
-    <a href="mailto:pbaker@smbx.ai" style="color:#16624C;text-decoration:none">pbaker@smbx.ai</a>
+    <a href="mailto:pbaker@smbx.ai" style="color:#0A7A58;text-decoration:none">pbaker@smbx.ai</a>
   </td></tr>
   <tr><td style="padding:0">
     <a href="${BASE_URL}" style="text-decoration:none">

@@ -83,17 +83,17 @@ function taskEmailHtml(opts: {
     ? `<p style="margin:0 0 14px;white-space:pre-wrap;">${esc(opts.detail)}</p>`
     : '';
   return `<!doctype html>
-<html><body style="margin:0;padding:24px;background:#F6F4EF;font:15px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#14181C;">
+<html><body style="margin:0;padding:24px;background:#FCFAF6;font:15px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#16181A;">
   <div style="max-width:560px;margin:0 auto;background:#fff;border:1px solid rgba(20,24,28,0.10);border-radius:14px;padding:28px;">
     <p style="margin:0 0 14px;">${greeting}</p>
     <p style="margin:0 0 14px;">There's an item outstanding on <strong>${esc(opts.dealLabel)}</strong>:</p>
-    <p style="margin:0 0 14px;padding:12px 14px;background:#E7F0EC;border-radius:10px;"><strong>${esc(opts.title)}</strong></p>
+    <p style="margin:0 0 14px;padding:12px 14px;background:#DFF5EC;border-radius:10px;"><strong>${esc(opts.title)}</strong></p>
     ${detail}
     ${due}
     <p style="margin:0 0 14px;">Reply to this email and it comes straight to me.</p>
     <p style="margin:0;">${esc(opts.fromName)}<br>
-      <a href="mailto:${esc(opts.fromEmail)}" style="color:#16624C;">${esc(opts.fromEmail)}</a><br>
-      <span style="color:#5C6670;">smbX — buy-side corporate development</span>
+      <a href="mailto:${esc(opts.fromEmail)}" style="color:#0A7A58;">${esc(opts.fromEmail)}</a><br>
+      <span style="color:#5A6169;">smbX — buy-side corporate development</span>
     </p>
   </div>
 </body></html>`;
