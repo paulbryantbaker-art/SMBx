@@ -37,6 +37,13 @@ export interface RawDeal {
   /** Migration 112 — archived deals are out of the working board. The list
    *  endpoint filters server-side, so this is here for completeness. */
   archived?: boolean | null;
+  /** Deal management (migration 114). `client_firm` is joined from
+   *  crm_accounts — which acquirer this deal is run FOR. */
+  crm_account_id?: number | null;
+  client_firm?: string | null;
+  next_action?: string | null;
+  next_action_on?: string | null;
+  owner_email?: string | null;
   industry: string | null;
   location: string | null;
   league: string | null;
@@ -131,6 +138,13 @@ export interface MobileStageRow {
   /** User-starred (sorts first on the board) + workflow disposition. */
   isFavorite: boolean;
   disposition: string;
+  /** Deal management (migration 114). `clientFirm` is the acquirer this deal is
+   *  run FOR — null is normal (unassigned), not an error. */
+  crmAccountId: number | null;
+  clientFirm: string | null;
+  nextAction: string | null;
+  nextActionOn: string | null;
+  ownerEmail: string | null;
 }
 
 export interface UseMobileDealsResult {
@@ -303,6 +317,13 @@ function shape(deals: RawDeal[]): ShapedDeals {
       fit: compositeFit(d),
       isFavorite: d.is_favorite === true,
       disposition: d.disposition || "active",
+      crmAccountId: d.crm_account_id ?? null,
+      clientFirm: d.client_firm ?? null,
+      nextAction: d.next_action ?? null,
+      // Postgres DATE arrives as a full timestamp through postgres-js; the board
+      // only ever wants the day, and slicing here keeps every consumer honest.
+      nextActionOn: d.next_action_on ? String(d.next_action_on).slice(0, 10) : null,
+      ownerEmail: d.owner_email ?? null,
     };
   });
 

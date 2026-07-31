@@ -148,10 +148,51 @@ export function useCrmAccounts(user: User | null, filters: CrmFilters, query: st
   };
 }
 
+export interface CrmPickerRow { id: number; firm: string; stage: string; tier: string | null }
+
+/**
+ * The id+firm list a deal's "run for" selector needs. Deliberately its own tiny
+ * endpoint rather than reusing the board: a picker that shipped every column
+ * would move ~80 rows of evidence prose to render a dropdown.
+ */
+export function useCrmPicker(user: User | null) {
+  const [clients, setClients] = useState<CrmPickerRow[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user || DEV_AUTH_BYPASS) { setClients([]); return; }
+    let cancelled = false;
+    json<CrmPickerRow[]>(`/api/crm/picker`)
+      .then(rows => { if (!cancelled) setClients(Array.isArray(rows) ? rows : []); })
+      .catch((e: Error) => {
+        if (cancelled) return;
+        // A missing picker must not break the deals board — the selector just
+        // says it cannot load rather than the screen failing.
+        console.warn("[crm] picker unavailable:", e.message);
+        setClients([]);
+        setError(e.message);
+      });
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
+  return { clients, error };
+}
+
 /** One account with its people and its history — the detail pane. */
+export interface CrmAccountDeal {
+  id: number;
+  business_name: string | null;
+  name: string | null;
+  current_gate: string | null;
+  status: string | null;
+  next_action: string | null;
+  next_action_on: string | null;
+}
+
 export function useCrmAccount(id: number | null, nonce = 0) {
   const [data, setData] = useState<{
     account: CrmAccount; contacts: CrmContact[]; activity: CrmActivity[];
+    deals: CrmAccountDeal[];
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -161,9 +202,10 @@ export function useCrmAccount(id: number | null, nonce = 0) {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    json<{ account: CrmAccount; contacts: CrmContact[]; activity: CrmActivity[] }>(
-      `/api/crm/accounts/${id}`,
-    )
+    json<{
+      account: CrmAccount; contacts: CrmContact[]; activity: CrmActivity[];
+      deals: CrmAccountDeal[];
+    }>(`/api/crm/accounts/${id}`)
       .then(d => { if (!cancelled) setData(d); })
       .catch((e: Error) => {
         if (cancelled) return;
@@ -174,5 +216,5 @@ export function useCrmAccount(id: number | null, nonce = 0) {
     return () => { cancelled = true; };
   }, [id, nonce]);
 
-  return { ...(data ?? { account: null, contacts: [], activity: [] }), loading, error };
+  return { ...(data ?? { account: null, contacts: [], activity: [], deals: [] }), loading, error };
 }

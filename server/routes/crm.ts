@@ -157,7 +157,29 @@ crmRouter.get('/crm/summary', async (req, res) => {
   }
 });
 
-/** GET /api/crm/accounts/:id — the account with its people and its history. */
+/**
+ * GET /api/crm/picker — the id+name list a deal's "run for" selector needs.
+ * Deliberately tiny (no evidence, no notes, no score detail): a picker that
+ * shipped the whole board would move ~80 rows of prose to render a dropdown.
+ * Archived clients are excluded — you do not assign new work to a retired one.
+ */
+crmRouter.get('/crm/picker', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const rows = await sql`
+      SELECT id, firm, stage, tier FROM crm_accounts
+      WHERE user_id = ${userId} AND archived = FALSE
+      ORDER BY firm ASC
+    `;
+    return res.json(rows);
+  } catch (err: any) {
+    console.error('CRM picker error:', err.message);
+    return res.status(500).json({ error: 'Failed to list clients' });
+  }
+});
+
+/** GET /api/crm/accounts/:id — the account with its people, history and the
+ *  deals being run for it (migration 114's join, read from this side). */
 crmRouter.get('/crm/accounts/:id', async (req, res) => {
   try {
     const userId = (req as any).userId;
@@ -177,7 +199,20 @@ crmRouter.get('/crm/accounts/:id', async (req, res) => {
       SELECT * FROM crm_activity WHERE account_id = ${id}
       ORDER BY occurred_at DESC LIMIT 200
     `;
-    return res.json({ account, contacts, activity });
+    // Best-effort: before migration 114 the column does not exist, and a client
+    // that cannot list its deals is far better than a detail pane that 500s.
+    let deals: any[] = [];
+    try {
+      deals = await sql`
+        SELECT id, business_name, name, current_gate, status, next_action, next_action_on
+        FROM deals
+        WHERE crm_account_id = ${id} AND user_id = ${userId} AND archived = FALSE
+        ORDER BY updated_at DESC
+      `;
+    } catch (e: any) {
+      console.warn('[crm] deals-for-client unavailable (migration 114?):', e?.message);
+    }
+    return res.json({ account, contacts, activity, deals });
   } catch (err: any) {
     console.error('CRM read error:', err.message);
     return res.status(500).json({ error: 'Failed to read account' });
