@@ -433,7 +433,7 @@ function DetailPane({
   patch: (id: number, body: Record<string, unknown>) => Promise<unknown>;
   logActivity: (id: number, body: Record<string, unknown>) => Promise<unknown>;
 }) {
-  const { account, contacts, activity, deals, loading, error } = useCrmAccount(id, nonce);
+  const { account, contacts, activity, deals, searches, loading, error } = useCrmAccount(id, nonce);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [nextAction, setNextAction] = useState<string | null>(null);
@@ -611,6 +611,31 @@ function DetailPane({
                 The target company, not the client — the deal is what they're
                 buying. It opens at gate B0 (Thesis), linked back to this client.
               </p>
+            </Section>
+
+            {/* The searches running for this client — the top of the chain
+                that already existed: thesis → portfolio → candidates → deal.
+                Sourcing does the hunting; nothing about that changed when the
+                practice started working for clients. */}
+            <Section title={`Searches (${searches.length})`}>
+              {searches.length === 0 ? (
+                <p style={{ margin: 0, fontSize: 13, color: T.muted }}>
+                  No buy-box set up for them yet. Create one in Sourcing and pick
+                  this client — the candidates and any deal that comes out of it
+                  then belong to them.
+                </p>
+              ) : searches.map(t => (
+                <div key={t.id} style={{ padding: "7px 0", borderBottom: `1px solid ${T.rowDiv}` }}>
+                  <div style={{ fontSize: 13.5, fontWeight: 600 }}>{t.name}</div>
+                  <div style={{ fontSize: 12, color: T.muted2 }}>
+                    {[
+                      t.industry, t.geography,
+                      `${t.candidate_count} candidate${t.candidate_count === 1 ? "" : "s"}`,
+                      t.is_active === false ? "paused" : null,
+                    ].filter(Boolean).join(" · ")}
+                  </div>
+                </div>
+              ))}
             </Section>
 
             {/* people */}

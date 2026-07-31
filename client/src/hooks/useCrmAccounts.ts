@@ -179,6 +179,15 @@ export function useCrmPicker(user: User | null) {
 }
 
 /** One account with its people and its history — the detail pane. */
+export interface CrmAccountSearch {
+  id: number;
+  name: string;
+  industry: string | null;
+  geography: string | null;
+  is_active: boolean | null;
+  candidate_count: number;
+}
+
 export interface CrmAccountDeal {
   id: number;
   business_name: string | null;
@@ -192,7 +201,7 @@ export interface CrmAccountDeal {
 export function useCrmAccount(id: number | null, nonce = 0) {
   const [data, setData] = useState<{
     account: CrmAccount; contacts: CrmContact[]; activity: CrmActivity[];
-    deals: CrmAccountDeal[];
+    deals: CrmAccountDeal[]; searches: CrmAccountSearch[];
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -204,7 +213,7 @@ export function useCrmAccount(id: number | null, nonce = 0) {
     setError(null);
     json<{
       account: CrmAccount; contacts: CrmContact[]; activity: CrmActivity[];
-      deals: CrmAccountDeal[];
+      deals: CrmAccountDeal[]; searches: CrmAccountSearch[];
     }>(`/api/crm/accounts/${id}`)
       .then(d => { if (!cancelled) setData(d); })
       .catch((e: Error) => {
@@ -216,5 +225,8 @@ export function useCrmAccount(id: number | null, nonce = 0) {
     return () => { cancelled = true; };
   }, [id, nonce]);
 
-  return { ...(data ?? { account: null, contacts: [], activity: [], deals: [] }), loading, error };
+  return {
+    ...(data ?? { account: null, contacts: [], activity: [], deals: [], searches: [] }),
+    loading, error,
+  };
 }

@@ -264,7 +264,23 @@ crmRouter.get('/crm/accounts/:id', async (req, res) => {
     } catch (e: any) {
       console.warn('[crm] deals-for-client unavailable (migration 114?):', e?.message);
     }
-    return res.json({ account, contacts, activity, deals });
+
+    // The searches running for this client (migration 116). This is the top of
+    // the chain that already existed: thesis → portfolio → candidates → deal.
+    // Same best-effort guard, same reason.
+    let searches: any[] = [];
+    try {
+      searches = await sql`
+        SELECT t.id, t.name, t.industry, t.geography, t.is_active,
+               (SELECT COUNT(*) FROM sourcing_candidates c WHERE c.thesis_id = t.id) AS candidate_count
+        FROM buyer_theses t
+        WHERE t.crm_account_id = ${id} AND t.user_id = ${userId}
+        ORDER BY t.updated_at DESC
+      `;
+    } catch (e: any) {
+      console.warn('[crm] searches-for-client unavailable (migration 116?):', e?.message);
+    }
+    return res.json({ account, contacts, activity, deals, searches });
   } catch (err: any) {
     console.error('CRM read error:', err.message);
     return res.status(500).json({ error: 'Failed to read account' });
