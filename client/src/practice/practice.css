@@ -126,6 +126,17 @@
   /* Aurora: jade and amber alternating down the scroll, with a tonal bone tile
      between them so the two hues never meet at full strength. */
   background:
+    /* TOP FADE — the page eases into Safari's toolbar instead of meeting it
+       at an edge (Paul: "around the area of the line and going up toward the
+       menu bar, start fading and match the Safari colour"). Opaque bone at
+       y=0, gone by 130px, laid OVER the wash so the first rows are exactly
+       the flat #FCFAF6 the meta tag carries and the colour arrives below.
+       This is what lets theme-color go back to plain bone: rather than
+       hunting for a flat value that approximates a gradient — and tripping
+       Safari's grey-toolbar behaviour on the way, see PR #225 — the page
+       simply becomes that value where the two meet. Anchored in px and
+       duplicated verbatim in `.pd-navwrap`, same as the two radials below. */
+    linear-gradient(rgba(252, 250, 246, 1) 0, rgba(252, 250, 246, 0) 130px),
     /* THE TOP TWO ARE SIZED IN PIXELS, and the nav bar repeats them verbatim
        so the two surfaces are one continuous wash (Paul: "blend the hero
        background with the header so it doesn't look like two separate
@@ -494,6 +505,11 @@
 
      Ledger: no backdrop-blur anywhere — the fill is solid, not a frost. */
   background:
+    /* The same top fade as the page layer — see .pd-ambient. The bar sits
+       inside the faded zone entirely, so without this it would carry full
+       wash while the page immediately below it was fading, which is the
+       seam this pair exists to prevent. */
+    linear-gradient(rgba(252, 250, 246, 1) 0, rgba(252, 250, 246, 0) 130px),
     radial-gradient(52% 620px at 12% 0px, rgba(15, 169, 124, 0.110), rgba(15, 169, 124, 0) 64%),
     radial-gradient(46% 560px at 92% 0px, rgba(232, 166, 43, 0.100), rgba(232, 166, 43, 0) 62%),
     #FCFAF6;
