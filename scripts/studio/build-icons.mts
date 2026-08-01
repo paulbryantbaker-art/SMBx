@@ -13,10 +13,18 @@
  *
  *     npx tsx scripts/studio/build-icons.mts
  *
- * Light tiles put the green mark on the bone canvas — the site's own pairing,
- * and a light tile keeps its contrast against a DARK browser tab strip, which
- * a transparent mark does not. Dark tiles invert it to bone on boardroom
- * green-black, which is what the manifest's `-dark` names always meant.
+ * EVERY tile is now the mark in bone on the JADE PLATE (2026-08-01, Paul:
+ * "let's improve the favicon"). The original reasoning — a light tile holds
+ * its own against a dark tab strip — was right about the TILE and silent
+ * about the MARK: a thin Deal-Green X on near-white bone measures a hair over
+ * 3:1, and at 16px, after the browser has anti-aliased a one-pixel stroke, it
+ * reads as a smudge. Ivory on jade is 6.2:1 and the plate is saturated, so it
+ * separates from a light strip AND a dark one. The `-dark` suffix on the PWA
+ * names is now historical; it is the only treatment.
+ *
+ * Padding is tighter than it was for the same reason: the stroke weight is
+ * intrinsic to the mark, so the only way to thicken it at 16px is to let the
+ * mark occupy more of the tile.
  *
  * Pure local Chromium. No model, no API key.
  */
@@ -41,18 +49,19 @@ const MARK = 'data:image/png;base64,' +
 interface Icon { file: string; size: number; dark?: boolean; pad?: number; radius?: number }
 
 const ICONS: Icon[] = [
-  // Browser tab. 32 covers most cases; 16 is cut separately because the mark
-  // needs slightly more breathing room to stay legible that small.
-  { file: 'favicon-32.png', size: 32, pad: 0.14 },
-  { file: 'favicon-16.png', size: 16, pad: 0.10 },
+  // Browser tab. 32 covers most cases; 16 is cut separately because it needs
+  // the mark proportionally LARGER — not smaller — to survive anti-aliasing.
+  { file: 'favicon-32.png', size: 32, dark: true, pad: 0.17 },
+  { file: 'favicon-16.png', size: 16, dark: true, pad: 0.13 },
   // Bookmarks, and the icon Safari shows on a pinned/home-screen tile.
-  { file: 'favicon-180.png', size: 180, pad: 0.20 },
-  // iOS home screen. Apple ignores transparency, so the tile must be opaque.
-  { file: 'apple-touch-icon.png', size: 180, pad: 0.20, radius: 0 },
-  // Installed PWA — the manifest's documented dark variant.
-  { file: 'pwa-icon-180-dark.png', size: 180, dark: true, pad: 0.20, radius: 0 },
-  { file: 'pwa-icon-192-dark.png', size: 192, dark: true, pad: 0.20, radius: 0 },
-  { file: 'pwa-icon-512-dark.png', size: 512, dark: true, pad: 0.20, radius: 0 },
+  { file: 'favicon-180.png', size: 180, dark: true, pad: 0.22 },
+  // iOS home screen. Apple ignores transparency, so the tile must be opaque —
+  // which the jade plate is, so this needs no special case any more.
+  { file: 'apple-touch-icon.png', size: 180, dark: true, pad: 0.22, radius: 0 },
+  // Installed PWA.
+  { file: 'pwa-icon-180-dark.png', size: 180, dark: true, pad: 0.22, radius: 0 },
+  { file: 'pwa-icon-192-dark.png', size: 192, dark: true, pad: 0.22, radius: 0 },
+  { file: 'pwa-icon-512-dark.png', size: 512, dark: true, pad: 0.22, radius: 0 },
 ];
 
 const html = (i: Icon) => `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
@@ -86,7 +95,7 @@ try {
       clip: { x: 0, y: 0, width: icon.size, height: icon.size },
     });
     writeFileSync(path.join(OUT, icon.file), buf);
-    console.log(`  ✓ ${icon.file.padEnd(26)} ${icon.size}×${icon.size}  ${icon.dark ? 'bone on green-black' : 'green on bone'}  ${Math.round(buf.length / 1024)}KB`);
+    console.log(`  ✓ ${icon.file.padEnd(26)} ${icon.size}×${icon.size}  ${icon.dark ? 'bone on jade' : 'green on bone'}  ${Math.round(buf.length / 1024)}KB`);
   }
 } finally {
   await page.close();
