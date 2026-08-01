@@ -20,7 +20,16 @@
     <meta property="og:description" content="An on-demand corporate development team that guides your acquisition from thesis to close. We build value by applying operator instincts to the buy-side." />
     <meta property="og:type" content="website" />
     <meta name="color-scheme" content="light" />
-    <meta name="theme-color" content="#FCFAF6" />
+    <!-- Safari tints BOTH its toolbars from this. It is a compromise value,
+         not the page's bone: the top of the page carries the ambient wash
+         (jade at the left, amber at the right), so a flat token can only ever
+         approximate it — see the measurement in PR #224.
+         #EEF6EC was the measured best fit and it made Safari render the BOTTOM
+         toolbar flat grey, so the fit has a ceiling somewhere below that. This
+         is 40% of the way from bone toward it: closer than bone, well short of
+         the value that broke. If grey ever returns, step back toward #FCFAF6
+         rather than hunting for the exact threshold. -->
+    <meta name="theme-color" content="#F6F8F2" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <script>
