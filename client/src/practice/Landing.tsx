@@ -307,6 +307,17 @@ export default function Landing() {
               involves. You make the calls that matter. We do the rest.
             </p>
           </div>
+          <img
+            className="pd-accentband"
+            src="/industries/trade-fleet.jpg"
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            width={1700}
+            height={520}
+            data-rv
+            style={{ marginBottom: 'clamp(10px, 1.4vw, 20px)' }}
+          />
           <div className="pd-phases rv-stagger" data-rv>
             {PHASES.map((p, i) => (
               <details className="pd-phase" key={p.ph}>
@@ -415,6 +426,16 @@ export default function Landing() {
               targets already on our desk. Focus, not limits.
             </p>
           </div>
+          <img
+            className="pd-accentband"
+            src="/industries/trade-hvac.jpg"
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            width={1700}
+            height={520}
+            data-rv
+          />
           <div className="pd-huntboard rv-stagger" data-rv style={{ marginTop: 'clamp(40px, 5vw, 64px)' }}>
             {HUNTS.map(h => (
               <Link className="pd-hunt" href="/industries" key={h.nm} onClick={() => trackEvent('practice_sector_clicked', { sector: h.nm })}>
