@@ -457,12 +457,19 @@
      Ledger: no backdrop-blur anywhere — the fill is solid bone, not a frost. */
   background: #FCFAF6;
   border-bottom: 1px solid transparent;
+  /* Slides clear of the screen on the way down. `transform` rather than `top`
+     or `height`: it is composited, so the slide cannot cause layout or reflow
+     the page underneath — and because the bar is `position: sticky`, animating
+     its offset instead would fight the sticky positioning. translateY(-100%)
+     also clears the safe-area padding above, so nothing is left peeking under
+     the status bar. */
+  transform: translateY(0);
   /* Full bleed to the TRUE top of the screen. `viewport-fit=cover` is set in
      index.html, so in standalone/PWA the viewport runs under the status bar
      and a sticky bar at top:0 would leave page content showing in that strip.
      Zero in ordinary Safari, so this costs nothing there. */
   padding-top: env(safe-area-inset-top, 0px);
-  transition: box-shadow 0.28s ease, border-color 0.28s ease, background 0.28s ease;
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.28s ease;
 }
 /* THE BAR HAS NO EDGE (2026-07-31, Paul: "it should blend in so that it
    doesn't look so obvious that it's a header bar").
@@ -483,6 +490,14 @@
    quality being removed. A dissolve has no surface at all. */
 .pd-navwrap.solid {
   border-bottom-color: transparent;
+}
+/* Gone on the way down; the page gets the full screen. */
+.pd-navwrap.away { transform: translateY(-100%); }
+/* A reader who has asked for less motion gets the bar simply present, not
+   sliding in and out under their thumb. */
+@media (prefers-reduced-motion: reduce) {
+  .pd-navwrap { transition: none; }
+  .pd-navwrap.away { transform: none; }
 }
 /* The dissolve. Sits BELOW the bar rather than inside it, so the fade never
    eats into the space the logo and pills occupy — the controls keep a solid
@@ -517,20 +532,6 @@
   display: block; width: auto; margin: -6px 0;
   height: 44px; transition: height 0.28s ease;
 }
-/* Condensed on scroll — the nav stays put (sticky) but shrinks to reclaim ~40%
-   of its height, so the user never scrolls back up yet it barely intrudes
-   (Paul, 2026-07-14). Tighter padding + smaller logo + smaller pills.
-   The soft shadow this used to lift onto is gone (2026-07-31): a shadow is a
-   drawn edge, and it was the loudest of the three tells that this is a bar.
-   The condensed state now inherits .solid's dissolve like every other state. */
-.pd-navwrap.min {
-  background: #FCFAF6;
-  border-bottom-color: transparent;
-}
-.pd-navwrap.min .pd-nav-logo { height: 30px; }
-.pd-navwrap.min .pd-nav { padding-top: 9px; padding-bottom: 9px; }
-.pd-navwrap.min .pd-nav-ctas .pd-pill,
-.pd-navwrap.min .pd-nav-ctas .pd-pill-primary { padding-top: 9px; padding-bottom: 9px; }
 .pd-nav-ctas .pd-pill, .pd-nav-ctas .pd-pill-primary { transition: padding 0.28s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
 .pd-nav-links { display: flex; gap: clamp(24px, 3vw, 44px); font-size: 15px; font-weight: 600; }
 .pd-nav-links a { color: var(--pd-body); }

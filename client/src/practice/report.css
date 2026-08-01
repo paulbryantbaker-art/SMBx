@@ -660,8 +660,10 @@
      Deliberately NOT scroll-triggered. Changing the column width mid-scroll
      re-lays-out the whole 19,000-word document, re-breaking every line and
      sliding the reader's place out from under their thumb. The immersion comes
-     from the chrome receding instead, which already happens — the nav condenses
-     on scroll (.pd-navwrap.min) and the progress hairline takes over. */
+     from the chrome receding instead, which already happens — the nav now
+     slides clear of the screen on the way down (.pd-navwrap.away) and the
+     progress hairline takes over. It used to condense rather than leave; the
+     read gets more of the screen this way, which is the same argument. */
   .rp { --pd-pad-x: 18px; }
   .rp-col {
     margin-inline: calc(-1 * var(--pd-pad-x));
