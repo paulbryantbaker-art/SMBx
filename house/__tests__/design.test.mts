@@ -229,5 +229,34 @@ is('the workspace CLAUDE.md tells a session to read it', WS.includes('DESIGN.md'
 is('FORMATS.md cross-references it',
   readFileSync(path.join(ROOT, 'content/studio/FORMATS.md'), 'utf8').includes('DESIGN.md'), true);
 
+/* ── 6. image briefs ──────────────────────────────────────────────────────
+   A brief hardcodes the palette as literal text, because a human copies it
+   into Gemini — so it cannot import a token, and it is exactly the drift
+   `brandPaletteLines()` exists to stop: move the palette and the brief keeps
+   instructing the model in the old colours, faithfully, with nothing wrong in
+   any diff. It is checked here instead.
+
+   Retired hexes are ALLOWED in a brief, but only inside its reject checklist,
+   which is where they do their job — a session cannot catch itself drifting
+   without knowing which values are dead. So the rule is scoped: live sections
+   must carry only live tokens; the checklist may name the dead. */
+const BRIEFS = ['scripts/studio/briefs/site-hero.image-brief.md'];
+for (const rel of BRIEFS) {
+  const brief = readFileSync(path.join(ROOT, rel), 'utf8');
+  const name = rel.split('/').pop();
+
+  // The prompt must name the CURRENT accent, ink and paper.
+  const promptStart = brief.indexOf('## The prompt');
+  const promptEnd = brief.indexOf('## Accepting it');
+  is(`${name} has a prompt block`, promptStart > 0 && promptEnd > promptStart, true);
+  const prompt = brief.slice(promptStart, promptEnd).toUpperCase();
+  for (const [label, hex] of [['accent', LEDGER.green], ['ink', LEDGER.ink], ['paper', LEDGER.bone]] as const) {
+    is(`${name} prompt names the live ${label} ${hex}`, prompt.includes(hex.toUpperCase()), true);
+  }
+  // …and must not name a retired one, where the model would obey it.
+  const deadInPrompt = DEAD.filter(d => prompt.includes(d.toUpperCase()));
+  is(`${name} prompt names no retired colour`, deadInPrompt, []);
+}
+
 console.log(`\n${pass}/${total} passed`);
 process.exit(pass === total ? 0 : 1);
