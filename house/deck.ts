@@ -149,9 +149,13 @@ export function deckCss(TEXTURE: string): string {
      the block itself is now a glazed composite — stacking the old 0.55→0.72
      dark veil on top of that would take the jade straight back to the
      near-black this pass exists to remove. */
+  /* The cover's quieting veil, on TOP of the already-glazed block. Kept very
+     light: at 0.30-0.48 it multiplied with the base glaze to about 0.92
+     effective and flattened the plaster out of the cover entirely, which is
+     why a ladder of the BASE alpha alone showed almost no difference. */
   .glaze { position: absolute; inset: 0; background:
     radial-gradient(900px 500px at 50% -10%, ${GREEN_HALO}, transparent 65%),
-    linear-gradient(180deg, ${rgba(LEDGER.dark, 0.3)}, ${rgba(LEDGER.dark, 0.48)}); }
+    linear-gradient(180deg, ${rgba(LEDGER.dark, 0.06)}, ${rgba(LEDGER.dark, 0.16)}); }
   .kick { position: absolute; left: 66px; right: 66px; top: 60px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid ${HAIR}; padding-bottom: 22px; z-index: 3; }
   .kt { font-family: ${MONO}; font-size: 18px; letter-spacing: 0.1em; color: ${TERT}; text-transform: uppercase; }
   .kt.brass { color: ${BRASS}; }
