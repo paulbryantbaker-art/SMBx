@@ -432,10 +432,29 @@
 /* ─── nav ─── */
 .pd-navwrap {
   position: sticky; top: 0; z-index: 50;
-  /* Ledger: no backdrop-blur anywhere — solid bone with a hairline. */
-  background: #FCFAF6;
-  border-bottom: 1px solid var(--pd-hair);
+  /* AT REST THE BAR IS TRANSPARENT (2026-07-31, Paul on mobile: "the header
+     does not have the same color bleed as the hero and it looks weird").
+
+     The ambient wash's strongest jade stop is centred at 12% 2% — inside the
+     nav's own footprint — so an opaque bar clipped the top off that bloom and
+     printed a hard horizontal seam across the full width of the page: flat
+     bone above the hairline, tinted bone below it. It read as a rendering
+     fault, and it got worse the moment Aurora made the wash chromatic, since
+     a tonal-bone wash had almost nothing to clip.
+
+     Filling it with a flat colour cannot fix this — the wash is a gradient, so
+     any single value matches it at exactly one x position. Transparency is the
+     only thing that matches it everywhere. The bar fills on scroll instead
+     (.solid), where it must be opaque for content to pass under it.
+
+     Ledger: no backdrop-blur anywhere — the fill is solid bone, not a frost. */
+  background: transparent;
+  border-bottom: 1px solid transparent;
   transition: box-shadow 0.28s ease, border-color 0.28s ease, background 0.28s ease;
+}
+.pd-navwrap.solid {
+  background: #FCFAF6;
+  border-bottom-color: var(--pd-hair);
 }
 .pd-nav {
   max-width: var(--pd-max); margin: 0 auto;
