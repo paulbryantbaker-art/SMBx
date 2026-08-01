@@ -1603,6 +1603,22 @@
 .pd-points { max-width: 44em; }
 .pd-point { padding: clamp(22px, 2.4vw, 30px) 0; border-top: 1px solid var(--pd-hair); }
 .pd-point:last-child { border-bottom: 1px solid var(--pd-hair); }
+/* `.tri` — three across, under a full-width head.
+   Beside a head instead, the head column holds a label and two lines and then
+   runs out, leaving ~280px of void under it while the list runs long. That is
+   the same shape of imbalance the creed had: a short column parked next to a
+   tall one. Three columns give the section a flat bottom edge. */
+.pd-points.tri {
+  max-width: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 clamp(30px, 3.6vw, 56px); margin-top: clamp(34px, 4vw, 54px);
+}
+.pd-points.tri .pd-point { border-bottom: none; padding-bottom: 0; }
+.pd-points.tri .pd-point p { max-width: none; }
+@media (max-width: 860px) {
+  .pd-points.tri { grid-template-columns: minmax(0, 1fr); }
+  .pd-points.tri .pd-point { padding-bottom: clamp(22px, 2.4vw, 30px); }
+  .pd-points.tri .pd-point:last-child { border-bottom: 1px solid var(--pd-hair); }
+}
 .pd-point .lead {
   font-size: clamp(21px, 2.1vw, 27px); font-weight: 800;
   letter-spacing: -0.02em; line-height: 1.2; color: var(--pd-ink);
@@ -1645,9 +1661,15 @@
 }
 
 /* ─── footer ─── */
-/* Dark footer (Paul, 2026-07-15): darker than the page, but a FLAT warm
-   charcoal — no texture, no curve, no coral halo — so it never reads as a
-   third bleed band. Text vars remap; the wordmark flips to white via filter. */
+/* Dark footer (Paul, 2026-07-15): darker than the page, and FLAT — no texture,
+   no curve, no halo — so it never reads as a bleed band. Text vars remap; the
+   wordmark flips to white via filter.
+   The fill was a warm charcoal until the Aurora pass (2026-07-31) took it to a
+   deep green; the comment said "warm charcoal" for a day after that and this
+   corrects it. It is deliberately DEEPER than the jade block so it reads as the
+   page's base rather than a second band — which only works if something light
+   sits between them. Every page that ends on a `.pd-dark` band therefore needs
+   a closing section; without one the two greens stack with a hole between. */
 .pd-footer {
   margin-top: clamp(130px, 15vw, 210px);
   background: #084433;
