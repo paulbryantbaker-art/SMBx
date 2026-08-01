@@ -20,7 +20,7 @@
     <meta property="og:description" content="An on-demand corporate development team that guides your acquisition from thesis to close. We build value by applying operator instincts to the buy-side." />
     <meta property="og:type" content="website" />
     <meta name="color-scheme" content="light" />
-    <meta name="theme-color" content="#FDF8F3" />
+    <meta name="theme-color" content="#FCFAF6" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <script>
@@ -44,7 +44,12 @@
         // the first paint most visitors get, and a cool slate/white flash (or
         // slate overscroll edges) read cold against its warm canvas. The app
         // shells paint their own surfaces over this immediately.
-        var bg = '#FDF8F3';
+        // AURORA 2026-07-31: this is LEDGER.bone, and it has to be kept in
+        // step with it by hand — a boot script cannot import a token. It sat
+        // two systems stale (the July-17 warmth-pass paper) through the whole
+        // Ledger era without anyone seeing it, because a first-paint colour is
+        // only visible for one frame and only on a cold load.
+        var bg = '#FCFAF6';
         document.documentElement.style.backgroundColor = bg;
         if (document.body) document.body.style.backgroundColor = bg;
         else document.addEventListener('DOMContentLoaded', function() {
