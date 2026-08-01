@@ -572,6 +572,13 @@
     color: var(--pd-ink); border-bottom: 1px solid var(--pd-hair);
   }
   .pd .pd-mmenu a .arr { color: var(--pd-coral-link); font-weight: 700; }
+  .pd .pd-mmenu a.pd-mmenu-cta {
+    justify-content: center;
+    margin: 6px 0 14px; padding: 15px 20px;
+    font-size: 16px; font-weight: 700; letter-spacing: 0;
+    color: #fff; background: var(--pd-cta);
+    border-bottom: none; border-radius: 999px;
+  }
   .pd .pd-mmenu a.quiet { font-size: 16px; font-weight: 600; color: var(--pd-body); border-bottom: none; padding-bottom: 8px; }
   .pd-mmenu-scrim {
     display: block; position: fixed; inset: 0; z-index: 48;
@@ -754,6 +761,9 @@
   transition: color 150ms ease;
 }
 .pd-samplelink:hover { color: var(--pd-ink); text-decoration-color: var(--pd-ink); }
+/* The fold's booking button. Sized a touch under the standard pill so it sits
+   beside a text link without shouting. */
+.pd-hero-book { padding: 12px 24px; font-size: 15px; }
 .pd-cta-row { margin-top: 36px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 .pd-proofrow { margin-top: 34px; display: flex; gap: 10px 20px; justify-content: center; align-items: center; flex-wrap: wrap; }
 .pd-proofrow .lab { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--pd-tert); }
@@ -1569,11 +1579,23 @@
   .pd-dealsearch { margin-left: 0; flex: 1 1 100%; }
 }
 @media (max-width: 760px) {
+  /* THE PHONE HEADER IS THE WORDMARK AND THE BURGER (Paul, 2026-07-31: "the
+     button in the header is just too big and takes up too much space").
+
+     The primary pill is gone from the bar, not shrunk — a smaller pill was
+     tried and it still dominated a 390px row. It has not been dropped, it has
+     MOVED: the fold's own chat bar already is "build your market map", and the
+     booking ask it was competing with is now a real button under that bar.
+     The action also sits at the top of the burger menu, so nothing is lost for
+     a visitor deeper down the page.
+
+     With the pill gone the bar can lose height too ("shrink the header down
+     just a little bit") — it now carries two small objects instead of three. */
   .pd-nav-links, .pd-nav-book { display: none; }
-  /* The nav must fit logo + primary pill + hamburger on a 390px screen. */
-  .pd-nav-logo { height: 34px; }
+  .pd-nav-ctas .pd-pill-primary { display: none; }
+  .pd-nav-logo { height: 30px; }
+  .pd-nav { padding-top: 13px; padding-bottom: 13px; }
   .pd-nav-ctas { gap: 6px; }
-  .pd-nav-ctas .pd-pill-primary { padding: 10px 14px; font-size: 12.5px; }
   .pd-indexrow { gap: 14px; padding: 28px 0; }
   .pd-stats { grid-template-columns: 1fr; gap: 52px; }
   .pd-ledger-head { flex-direction: column; align-items: flex-start !important; gap: 14px !important; }

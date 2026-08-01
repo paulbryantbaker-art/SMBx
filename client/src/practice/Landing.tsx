@@ -236,9 +236,19 @@ export default function Landing() {
             <YuliaIntake />
           </div>
         </div>
+        {/* Booking is a BUTTON here, not a text link (Paul, 2026-07-31). It
+            took the weight the header pill used to carry — that pill is gone on
+            a phone, so this is now the only standing ask on the fold besides
+            the chat bar itself.
+
+            The GHOST pill, not the solid one: the chat bar is the primary
+            action and already carries a solid green send control a few pixels
+            above. Two solid greens that close together would read as two
+            primaries competing, and this one is explicitly the "instead"
+            option. Same size and shape as the header pill was — just the
+            secondary variant. */}
         <div className="pd-hero-below">
-          <a className="pd-samplelink" href="#cta" onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero' })}>Or book a call instead</a>
-          <span style={{ color: 'var(--pd-faint)' }}>·</span>
+          <a className="pd-pill pd-hero-book" href="#cta" onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero' })}>Book a call</a>
           <a className="pd-samplelink" href="#sample" onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero-sample' })}>See a sample read →</a>
         </div>
       </section>
