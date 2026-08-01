@@ -5,7 +5,7 @@
 import PracticeShell, { PageCrumb } from './PracticeShell';
 import Mark from './Mark';
 import { Swoosh } from './atmo';
-import { bookHref, bookTarget } from './leads';
+import { bookHref, bookTarget, bookRel } from './leads';
 import { AttributionLine } from './TrackRecord';
 
 const BELIEFS = [
@@ -194,7 +194,7 @@ export default function About() {
                 className="pd-pill-primary"
                 href={bookHref()}
                 target={bookTarget()}
-                rel={bookTarget() ? 'noopener noreferrer' : undefined}
+                rel={bookRel()}
                 style={{ marginTop: 24, display: 'flex', justifyContent: 'center', padding: '15px 26px' }}
               >
                 Pick a time →

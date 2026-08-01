@@ -388,7 +388,7 @@
   font-size: 15px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
   margin: 0 0 22px;
 }
-.pd-crumb a { color: var(--pd-coral-link); text-decoration: none; }
+.pd-crumb a { color: var(--pd-coral-link); text-decoration: none; padding-block: 3px; }
 .pd-crumb a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .pd-crumb .sep { color: var(--pd-tert); font-weight: 500; }
 .pd-crumb .here { color: var(--pd-ink); }
@@ -456,7 +456,13 @@
   .pd-pill-lg, .pd-pill-lg-quiet { white-space: normal; text-align: center; padding-left: 24px; padding-right: 24px; }
 }
 .pd-pill-lg-quiet { padding: 16px 32px; font-size: 16.5px; }
-.pd-link { font-weight: 700; color: var(--pd-coral-link); font-size: 15px; }
+/* `padding-block` on an INLINE element grows the hit area without growing the
+   line box — so these clear the 24px pointer-target minimum (WCAG 2.2 SC
+   2.5.8) at ~29px while the page lays out identically. That is the whole
+   reason it is padding and not min-height: `.pd-link` appears both standalone
+   and mid-sentence ("explore the full deal sheet →"), and blockifying it would
+   break the wrap in the sentence case. */
+.pd-link { font-weight: 700; color: var(--pd-coral-link); font-size: 15px; padding-block: 4px; }
 .pd-link:hover { color: var(--pd-coral-link); text-decoration: underline; }
 
 /* ─── nav ─── */
@@ -549,6 +555,13 @@
    the X mark. The swap is not being retried until there is an agreed reference
    for what the scrolled header should look like — see PR #216, which is parked
    with the direction-driven minimize in it. */
+/* The home link measured 18px tall around a 30px mark — under the 24px
+   pointer-target minimum. The cause is `.pd-nav-logo`'s `margin: -6px 0`
+   optical nudge below: it pulls 6px off each end of the anchor's box, so
+   30 becomes 18. `min-height` restores the hit area and cannot change the
+   bar, which is sized by the taller CTA pills beside it. Targeted by
+   aria-label because that is what the element IS, not where it sits. */
+.pd-nav a[aria-label] { display: inline-flex; align-items: center; min-height: 32px; }
 .pd-nav-logo {
   display: block; width: auto; margin: -6px 0;
   height: 44px; transition: height 0.28s ease;
@@ -803,7 +816,9 @@
 .pd-hero-below { position: relative; z-index: 1; width: 100%; margin: clamp(30px, 3.6vw, 52px) auto 0; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px 28px; }
 /* Quiet sample-read toggle in the meta row (replaced the heavy pill-tab row). */
 .pd-samplelink {
-  border: none; background: transparent; padding: 0;
+  /* padding-block, not 0: it is a <button> in a centred flex row, and 4px
+     takes the target from ~21px to ~29px without moving the row. */
+  border: none; background: transparent; padding: 4px 0;
   font-size: 15px; font-weight: 700; color: var(--pd-body); cursor: pointer;
   text-decoration: underline; text-decoration-color: var(--pd-border); text-underline-offset: 4px;
   transition: color 150ms ease;
@@ -1370,7 +1385,14 @@
 .pd-sector .know .lead { font-size: clamp(22px, 2.3vw, 30px); font-weight: 800; letter-spacing: -0.018em; line-height: 1.25; color: var(--pd-ink); }
 .pd-sector .know .lead .fs { color: var(--pd-coral-link); }
 .pd-sector .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
-.pd-sector .tag { border: 1.5px solid var(--pd-border); border-radius: 99px; padding: 7px 15px; font-size: 13.5px; font-weight: 600; color: var(--pd-ink); background: #fff; white-space: nowrap; }
+/* No `white-space: nowrap`. It is the right default for a chip that is a
+   label, and these are not all labels — "Commercial landscaping —
+   contract-heavy only" measures 448px, so on a 390px phone it was horizontal
+   scroll on the whole page rather than a wide chip. Allowing the text to wrap
+   is viewport-independent: `flex-wrap` on `.tags` already flows chips onto new
+   rows, so this only ever engages when ONE chip exceeds the row by itself,
+   which never happens at desktop width. */
+.pd-sector .tag { border: 1.5px solid var(--pd-border); border-radius: 99px; padding: 7px 15px; font-size: 13.5px; font-weight: 600; color: var(--pd-ink); background: #fff; max-width: 100%; }
 .pd-sector .know .b { margin-top: 22px; font-size: 17px; line-height: 1.75; color: var(--pd-body); }
 .pd-sector .aside { display: flex; flex-direction: column; gap: 20px; }
 .pd-sector .who { border-left: 3px solid var(--pd-coral-link); padding: 6px 0 6px 20px; }
@@ -1699,16 +1721,24 @@
 }
 .pd-footer-founder .fname { font-size: 15.5px; font-weight: 700; color: var(--pd-ink); line-height: 1.3; }
 .pd-footer-founder .frole { font-size: 14px; color: var(--pd-tert); margin-top: 3px; line-height: 1.4; }
-.pd .pd-footer-founder a.fmeet { font-size: 14px; color: #A8F0CE; margin-top: 5px; display: inline-block; }
+.pd .pd-footer-founder a.fmeet { font-size: 14px; color: #A8F0CE; margin-top: 2px; padding-block: 3px; display: inline-block; }
 .pd .pd-footer-founder a.fmeet:hover { color: #fff; }
 .pd-footer-inner {
   max-width: var(--pd-max); margin: 0 auto; padding: clamp(36px, 4.5vw, 64px) var(--pd-pad-x);
   display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 60px;
 }
-.pd-footer-col { display: flex; flex-direction: column; gap: 12px; line-height: 1.4; font-size: 14.5px; }
-.pd-footer-col a { color: var(--pd-body); }
+/* The footer columns are flex, so their links are BLOCKIFIED — `padding-block`
+   here does move layout, unlike on the inline `.pd-link` above. The gap is
+   reduced by exactly what the padding adds, so the pitch between rows is
+   unchanged (was 12 gap + ~20 text = 32; now 6 gap + ~26 box = 32) and only
+   the hit area grows. These are standalone navigation targets, not links
+   inside a sentence, so the 24px minimum applies to them with no exception. */
+.pd-footer-col { display: flex; flex-direction: column; gap: 6px; line-height: 1.4; font-size: 14.5px; }
+.pd-footer-col a { color: var(--pd-body); padding-block: 3px; }
 .pd-footer-col .h { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.08em; color: var(--pd-body); margin-bottom: 6px; }
 .pd-footer-legal { max-width: var(--pd-max); margin: 0 auto; padding: 0 var(--pd-pad-x) 40px; font-size: 13.5px; color: var(--pd-tert); }
+/* Inline links in the legal row — same padding-block trick, same reason. */
+.pd-footer-legal a { padding-block: 5px; }
 
 /* ─── responsive ─── */
 @media (max-width: 980px) {

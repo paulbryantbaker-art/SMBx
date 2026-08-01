@@ -19,7 +19,7 @@
  */
 import PracticeShell from './PracticeShell';
 import Mark from './Mark';
-import { bookHref, bookTarget } from './leads';
+import { bookHref, bookTarget, bookRel } from './leads';
 
 /** The shield — reconciles the stat strip with the wall, plainly true, and
  *  makes any accusation of misrepresentation impossible. Rendered wherever
@@ -151,7 +151,7 @@ export default function TrackRecord() {
           Every transaction above was done for a buyer. That hasn't&nbsp;changed.
         </div>
         <div style={{ marginTop: 32 }}>
-          <a className="pd-pill-primary pd-pill-lg" href={bookHref()} target={bookTarget()} rel={bookTarget() ? 'noreferrer' : undefined}>
+          <a className="pd-pill-primary pd-pill-lg" href={bookHref()} target={bookTarget()} rel={bookRel()}>
             Confidential consultation
           </a>
         </div>

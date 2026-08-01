@@ -28,7 +28,7 @@ import DownloadCard from './reports/DownloadCard';
 import { usePageMeta } from './reports/usePageMeta';
 import RailNav from './reports/RailNav';
 import AskAgent from './reports/AskAgent';
-import { bookHref, bookTarget } from './leads';
+import { bookHref, bookTarget, bookRel } from './leads';
 import { trackEvent } from '../lib/analytics';
 import './report.css';
 
@@ -327,7 +327,7 @@ export default function ReportPage({ slug }: { slug: string }) {
               className="pd-pill-primary pd-pill-lg"
               href={bookHref()}
               target={bookTarget()}
-              rel="noopener noreferrer"
+              rel={bookRel()}
               onClick={() => trackEvent('practice_cta_clicked', { placement: 'report', slug })}
             >
               Book a confidential call

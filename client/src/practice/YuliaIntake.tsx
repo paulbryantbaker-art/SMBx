@@ -15,7 +15,7 @@
  * appears. Full funnel instrumentation, including dwell time on the artifact.
  */
 import { useEffect, useRef, useState } from 'react';
-import { bookHref, bookTarget } from './leads';
+import { bookHref, bookTarget, bookRel } from './leads';
 import { trackEvent } from '../lib/analytics';
 
 interface FunnelStep { n: string; label: string; }
@@ -755,7 +755,7 @@ export default function YuliaIntake() {
               style={{ padding: '13px 26px' }}
               href={bookHref()}
               target={bookTarget()}
-              rel={bookTarget() ? 'noreferrer' : undefined}
+              rel={bookRel()}
               onClick={() => { fireDwell(); trackEvent('practice_booking_clicked', { placement: 'chat-pill' }); }}
             >
               Book your consultation →
