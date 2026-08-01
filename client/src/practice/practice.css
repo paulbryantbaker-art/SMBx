@@ -124,8 +124,18 @@
   /* Aurora: jade and amber alternating down the scroll, with a tonal bone tile
      between them so the two hues never meet at full strength. */
   background:
-    radial-gradient(52% 20% at 12% 13%, rgba(15, 169, 124, 0.110), rgba(15, 169, 124, 0) 64%),
-    radial-gradient(46% 17% at 92% 19%, rgba(232, 166, 43, 0.100), rgba(232, 166, 43, 0) 62%),
+    /* THE TOP TWO ARE SIZED IN PIXELS, and the nav bar repeats them verbatim
+       so the two surfaces are one continuous wash (Paul: "blend the hero
+       background with the header so it doesn't look like two separate
+       things"). A percentage Y radius resolves against PAGE height, which
+       differs on every route and is unknowable to a 76px bar — matching it
+       from the bar is impossible in general, so the shared part of the ramp is
+       made absolute instead. The X radius stays a percentage on purpose: it
+       resolves against each element's own WIDTH, and both are full-bleed, so
+       it is already identical in both places. Change these two lines and you
+       must change the pair in `.pd-navwrap` with them. */
+    radial-gradient(52% 620px at 12% 0px, rgba(15, 169, 124, 0.110), rgba(15, 169, 124, 0) 64%),
+    radial-gradient(46% 560px at 92% 0px, rgba(232, 166, 43, 0.100), rgba(232, 166, 43, 0) 62%),
     radial-gradient(52% 18% at 3% 40%,  rgba(206, 196, 174, 0.13),  rgba(206, 196, 174, 0) 62%),
     radial-gradient(50% 18% at 99% 56%, rgba(15, 169, 124, 0.085),  rgba(15, 169, 124, 0) 64%),
     radial-gradient(48% 18% at 7% 80%,  rgba(232, 166, 43, 0.090),  rgba(232, 166, 43, 0) 62%),
@@ -442,20 +452,39 @@
      fault, and it got worse the moment Aurora made the wash chromatic, since
      a tonal-bone wash had almost nothing to clip.
 
-     I fixed that by making the bar TRANSPARENT, and that was the wrong half of
-     the problem — it let page content scroll up into the top of the screen,
-     which is what "the whole header on mobile is completely broken" was.
+     Two wrong fixes preceded the right one, and both are worth naming.
 
-     The right fix, from Paul's MacRumors reference: the bar is a SOLID
-     FULL-BLEED BAND at every scroll position, and the WASH moves out of its
-     way instead. MacRumors' header merges with the status-bar tint above it
-     into one continuous surface — that is what "full bleed" meant here, not
-     transparency. Status bar, bar and the top of the page are now all flat
-     bone with no boundary between them, and the wash begins below the bar
-     where there is nothing to clip it.
+     First I made the bar TRANSPARENT, which let page content scroll up into
+     the top of the screen — "the whole header on mobile is completely broken".
+     Then I made it solid and moved the WASH down out of its way, which left a
+     flat bone band above a washed hero and a hard line between them: "let's
+     blend the hero background with the header so it doesn't look like two
+     separate things".
 
-     Ledger: no backdrop-blur anywhere — the fill is solid bone, not a frost. */
-  background: #FCFAF6;
+     Moving the wash was solving the wrong half. The bar has to be opaque (the
+     MacRumors reference, and so content cannot bleed through), and the wash
+     has to reach the top of the page (or the top of the page is a dead flat
+     strip). Both are satisfiable: the bar carries its OWN COPY of the bloom,
+     matched to the page's, so an opaque bar and a continuous wash stop being
+     mutually exclusive.
+
+     The copy is BYTE-IDENTICAL to the page layer's top two radials, which is
+     only possible because those were re-expressed in pixels for this. A
+     percentage Y radius resolves against page height — different on every
+     route, unknowable to a 76px bar — so no fixed value could have tracked it.
+     Both boxes start at the same origin (the bar is sticky at top:0 inside
+     .pd, and its safe-area padding is inside its own box), so at rest the two
+     ramps coincide exactly rather than approximately.
+
+     They diverge once the page scrolls, since the bar stays and the page moves
+     under it. That is correct: a scrolled bar is a deliberate overlay, which
+     is what the reference does too.
+
+     Ledger: no backdrop-blur anywhere — the fill is solid, not a frost. */
+  background:
+    radial-gradient(52% 620px at 12% 0px, rgba(15, 169, 124, 0.110), rgba(15, 169, 124, 0) 64%),
+    radial-gradient(46% 560px at 92% 0px, rgba(232, 166, 43, 0.100), rgba(232, 166, 43, 0) 62%),
+    #FCFAF6;
   border-bottom: 1px solid transparent;
   /* Slides clear of the screen on the way down. `transform` rather than `top`
      or `height`: it is composited, so the slide cannot cause layout or reflow
@@ -624,6 +653,20 @@
     radial-gradient(52% 56% at 96% 2%, rgba(245, 196, 82, 0.28), rgba(245, 196, 82, 0) 66%),
     radial-gradient(46% 48% at 88% 82%, rgba(15, 169, 124, 0.14), rgba(15, 169, 124, 0) 70%),
     radial-gradient(42% 44% at 4% 92%, rgba(232, 166, 43, 0.11), rgba(232, 166, 43, 0) 70%);
+  /* RAMP IN FROM ZERO OVER THE FIRST 150px (2026-07-31). This bloom is nearly
+     three times the strength of the page wash, and both of its strong stops
+     are centred at or above the hero's own top edge — so it arrived at full
+     force on the first pixel of the hero, directly under a bar that could only
+     ever carry the weaker page wash. Measured across that boundary the left
+     edge stepped 52 points of red in one pixel row: a hard line, which is what
+     "it looks like two separate things" was.
+
+     The bar cannot match this layer — it is the hero's, and the hero is one
+     section of many — so the hero starts where the bar ends instead, at the
+     page-wash value, and grows from there. Masking the layer rather than
+     moving its stops keeps the bloom's shape intact further down. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 150px);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 150px);
 }
 /* ─── hero mesh — a faint dot-matrix field behind the engine (2026-07-14,
    Paul: "needs some graphic or texture… not selling the app, selling the
