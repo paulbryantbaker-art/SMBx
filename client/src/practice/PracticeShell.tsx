@@ -94,31 +94,47 @@ export default function PracticeShell({
   // client redirect fires, so the nav stays lit for both spellings.
   const onReports = loc.startsWith('/research') || loc.startsWith('/reports');
 
-  // Two independent scroll states, deliberately not one.
+  // The bar HIDES on the way down and comes back on the way up (Paul,
+  // 2026-07-31: "on scroll down let's just scroll the header up out of the way
+  // completely and let the content bleed full page, and then immediately on
+  // scroll up we bring the full header back").
   //
-  // `navMin` CONDENSES the bar (v3: > 40px) — a size change, so it wants a
-  // threshold big enough that a nudge doesn't make it twitch.
+  // It slides out rather than shrinking. The condensed state that used to live
+  // here is gone with it: condensing existed to reclaim height from a bar that
+  // was permanently on screen, and a bar that is simply absent while you read
+  // has no height to reclaim. Two size transitions firing on every direction
+  // flip would also read as fidget.
   //
-  // `navSolid` FILLS it (> 8px), and exists because of the ambient wash
-  // (Paul, 2026-07-31, on mobile: "the header does not have the same color
-  // bleed as the hero and it looks weird"). The wash's strongest jade stop is
-  // centred at 12% 2% — inside the nav's own footprint — so an opaque bar
-  // clipped the top off that bloom and printed a hard horizontal seam: flat
-  // bone above the hairline, tinted bone below it. At rest the bar is now
-  // transparent and the wash runs through it unbroken.
+  // `navSolid` survives but no longer means "fill" — the bar is opaque at
+  // every position now. It gates the DISSOLVE below the bar, which is only
+  // wanted once there is content passing underneath.
   //
-  // It fills at 8px rather than sharing the 40px threshold because between 0
-  // and 40 the page has already moved under a transparent bar, and content
-  // showing through the nav is a worse bug than the one being fixed.
-  const [navMin, setNavMin] = useState(false);
+  // The 4px dead zone is load-bearing, not a nicety: iOS rubber-banding and
+  // momentum emit a stream of sub-pixel scroll events, including sign flips at
+  // the end of a fling, so a naive `y > last` would flap the header several
+  // times a second at the bottom of a long report.
+  const [navAway, setNavAway] = useState(false);
   const [navSolid, setNavSolid] = useState(false);
   useEffect(() => {
+    let last = window.scrollY;
+    const apply = (y: number, dir: number) => {
+      // Never hide while the bar is still its own height from the top — it
+      // would vanish before you had scrolled past it, which reads as a glitch
+      // rather than as getting out of the way.
+      if (y <= 80) { setNavAway(false); setNavSolid(y > 8); return; }
+      // dir === 0 is the mount case (restored scroll position, anchor load).
+      // Treated as "up", so a deep link never lands on a missing header.
+      setNavAway(dir > 0);
+      setNavSolid(true);
+    };
+    apply(last, 0);
     const onScroll = () => {
       const y = window.scrollY;
-      setNavMin(y > 40);
-      setNavSolid(y > 8);
+      const d = y - last;
+      if (Math.abs(d) < 4) return;
+      last = y;
+      apply(y, d);
     };
-    onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -213,7 +229,7 @@ export default function PracticeShell({
       {/* `menuOpen` forces the fill: the mobile menu can be opened at scroll 0,
           and a transparent bar above an opaque slide-down panel reads as a
           rendering fault rather than a design. */}
-      <header className={`pd-navwrap${navSolid || menuOpen ? ' solid' : ''}${navMin ? ' min' : ''}`}>
+      <header className={`pd-navwrap${navSolid || menuOpen ? ' solid' : ''}${navAway && !menuOpen ? ' away' : ''}`}>
         <div className="pd-nav">
           {/* SPA Link, not a plain anchor: a full reload from down-page races
               the browser's scroll restoration against the still-mounting page
