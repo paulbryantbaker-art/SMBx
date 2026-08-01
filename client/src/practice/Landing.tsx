@@ -241,14 +241,21 @@ export default function Landing() {
             a phone, so this is now the only standing ask on the fold besides
             the chat bar itself.
 
-            The GHOST pill, not the solid one: the chat bar is the primary
-            action and already carries a solid green send control a few pixels
-            above. Two solid greens that close together would read as two
-            primaries competing, and this one is explicitly the "instead"
-            option. Same size and shape as the header pill was — just the
-            secondary variant. */}
+            A TINTED CHIP, not an outlined pill and not a solid one (Paul,
+            2026-07-31: "the pill button looks out of place — is there a better
+            option?"). The outline was the only stroked element on the whole
+            fold — every other object is a solid fill, a white card or plain
+            text — which is what made it read as borrowed from somewhere else.
+            Solid green was the other candidate and loses to the same argument
+            as before: the chat bar's send control is solid green a few pixels
+            above, and two of those close together read as competing primaries.
+
+            The tint is not a new treatment — it is the chip language already
+            on this page for the hunting lanes (greenTint fill, green text, no
+            border), so the row now pairs a house chip with a house link
+            instead of a button with a link. */}
         <div className="pd-hero-below">
-          <a className="pd-pill pd-hero-book" href="#cta" onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero' })}>Book a call</a>
+          <a className="pd-hero-book" href="#cta" onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero' })}>Book a call</a>
           <a className="pd-samplelink" href="#sample" onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero-sample' })}>See a sample read →</a>
         </div>
       </section>
