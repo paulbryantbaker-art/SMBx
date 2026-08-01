@@ -47,6 +47,8 @@
   /* The vivid highlight. Ambient layers, the hero mesh and large numerals only
      — it carries no small text anywhere, by rule. */
   --pd-jade: #0FA97C;
+  /* chip fill — .pd-chip and the hero's booking chip read from this */
+  --pd-tint-chip: #DFF5EC;
   /* Band depth tokens — the band bg gradient and BOTH curve fills read from
      these, so the curve can never drift from the band edge it meets.
      AURORA: a saturated jade block, not a green-black. */
@@ -804,9 +806,16 @@
   transition: color 150ms ease;
 }
 .pd-samplelink:hover { color: var(--pd-ink); text-decoration-color: var(--pd-ink); }
-/* The fold's booking button. Sized a touch under the standard pill so it sits
-   beside a text link without shouting. */
-.pd-hero-book { padding: 12px 24px; font-size: 15px; }
+/* The fold's booking action: the site's own chip, at button size. Same fill
+   and text colour as .pd-chip so it is a treatment the page already uses,
+   rather than a fourth kind of control introduced for one row. */
+.pd-hero-book {
+  display: inline-block; border: 0; border-radius: 999px;
+  padding: 12px 24px; font-size: 15px; font-weight: 700;
+  background: var(--pd-tint-chip); color: var(--pd-coral-link);
+  transition: background 150ms ease, color 150ms ease;
+}
+.pd-hero-book:hover { background: #CFEEE0; color: #06503A; }
 .pd-cta-row { margin-top: 36px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 .pd-proofrow { margin-top: 34px; display: flex; gap: 10px 20px; justify-content: center; align-items: center; flex-wrap: wrap; }
 .pd-proofrow .lab { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--pd-tert); }
@@ -1111,7 +1120,7 @@
    chat") — tappable thesis starters that drop into the field. ── */
 .pd-chips { display: flex; flex-wrap: wrap; gap: 9px; padding: 6px 32px 4px; }
 .pd-chip {
-  border: 1px solid rgba(15, 169, 124, 0.26); background: #DFF5EC; color: #086348;
+  border: 1px solid rgba(15, 169, 124, 0.26); background: var(--pd-tint-chip); color: var(--pd-coral-link);
   border-radius: 99px; padding: 9px 16px; font-size: 14px; font-weight: 600; white-space: nowrap;
   cursor: pointer; transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
 }
