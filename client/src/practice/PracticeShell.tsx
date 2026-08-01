@@ -233,16 +233,7 @@ export default function PracticeShell({
               }
             }}
           >
-            {/* Two marks, both always in the DOM (2026-07-31, Paul: "instead of
-                the logo word getting kind of smaller let's just shrink it down
-                to a little X, like the favicon"). The wordmark collapses to
-                zero width and the X opens up in its place, so the swap is a
-                width animation rather than a cut — and neither image is
-                fetched mid-scroll, which a `src` swap would do.
-                The wordmark stays in the accessibility tree at zero width, so
-                the link keeps its name; the X is decorative. */}
             <img src="/logo-green-x.png" alt="smbX.ai" className="pd-nav-logo" />
-            <img src="/logo-x-green.png" alt="" aria-hidden="true" className="pd-nav-mark" />
           </Link>
           <nav className="pd-nav-links" aria-label="Site">
             <a href={anchor('#why')}>Why us</a>
@@ -259,22 +250,7 @@ export default function PracticeShell({
             >
               Confidential consultation
             </a>
-            {/* On a phone this pill shortens once you scroll (Paul,
-                2026-07-31: "minimize the button on mobile when we scroll so
-                that it's tiny next to the hamburger"). Both labels ship and CSS
-                picks one, so nothing re-renders on scroll and the pill cannot
-                flash empty mid-transition. `aria-label` carries the full
-                wording either way — a screen reader should never get the
-                abbreviation. */}
-            <a
-              className="pd-pill-primary pd-nav-map"
-              href={anchor('#yulia')}
-              aria-label="Build your market map"
-              onClick={() => trackEvent('practice_cta_clicked', { placement: 'nav-yulia' })}
-            >
-              <span className="pd-nav-map-full" aria-hidden="true">Build your market map</span>
-              <span className="pd-nav-map-short" aria-hidden="true">Market map</span>
-            </a>
+            <a className="pd-pill-primary" href={anchor('#yulia')} onClick={() => trackEvent('practice_cta_clicked', { placement: 'nav-yulia' })}>Build your market map</a>
             <button
               type="button"
               className="pd-nav-burger"
