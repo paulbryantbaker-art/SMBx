@@ -70,6 +70,35 @@ export default function About() {
         </div>
       </section>
 
+      {/* ── What we believe — the creed, the page's one dark movement.
+             It sits HERE, mid-page, and not at the end (Paul, 2026-08-01: "the
+             2 bleed bands can't be right next to each other"). The footer is
+             itself a deep-green band, so a dark section in the last slot leaves
+             two green masses separated by whatever thin thing is between them —
+             which no amount of padding fixes, because the problem is the order,
+             not the gap. Moved up, the tall founder section does the separating
+             and the page carries exactly one band, mid-scroll.
+             It reads better this way too: the gap, then the convictions, then
+             the man who holds them, then book time with him. ── */}
+      <div style={{ marginTop: 'clamp(72px, 8vw, 118px)' }}><Swoosh dir="in" /></div>
+      <section className="pd-dark bl-creed">
+        <span className="pd-spark" aria-hidden="true" />
+        <div className="pd-wrap pd-dark-pad">
+          <div className="pd-seclabel">What we believe</div>
+          <h2 className="pd-h2" data-rv>Four convictions run the practice.</h2>
+          <div className="pd-creed rv-stagger" data-rv>
+            {BELIEFS.map(b => (
+              <div className="pd-tenet" key={b.k}>
+                <div className="gn" aria-hidden="true">{b.n}</div>
+                <h3 className="k">{b.k}<span className="fs">.</span></h3>
+                <p className="v">{b.v}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <Swoosh dir="up" />
+
       {/* ── Your advisor — the record as a register, not a résumé paragraph.
              Employer anonymization is LAW (CLAUDE.md, 2026-07-18): "a global
              investment bank" and "a world-class PE-backed aggregator", never
@@ -131,26 +160,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* ── What we believe — the creed, the page's one dark movement ── */}
-      <div style={{ marginTop: 'clamp(72px, 8vw, 118px)' }}><Swoosh dir="in" /></div>
-      <section className="pd-dark bl-creed">
-        <span className="pd-spark" aria-hidden="true" />
-        <div className="pd-wrap pd-dark-pad">
-          <div className="pd-seclabel">What we believe</div>
-          <h2 className="pd-h2" data-rv>Four convictions run the practice.</h2>
-          <div className="pd-creed rv-stagger" data-rv>
-            {BELIEFS.map(b => (
-              <div className="pd-tenet" key={b.k}>
-                <div className="gn" aria-hidden="true">{b.n}</div>
-                <h3 className="k">{b.k}<span className="fs">.</span></h3>
-                <p className="v">{b.v}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-      <Swoosh dir="up" />
-
       {/* ── The close (2026-08-01, Paul: "the green bleed band is still right
              next to the bottom footer… too weighted at the bottom").
              The page used to end on the creed band, and the only thing between
@@ -162,7 +171,7 @@ export default function About() {
              sits in exactly that position. So About gets the same close — and
              it also fixes the CTA, which was buried mid-page inside the founder
              block where a visitor reaches it before the argument is made. ── */}
-      <section className="pd-section" id="cta">
+      <section className="pd-section pd-close" id="cta">
         <div className="pd-wrap">
           <div className="pd-cta-grid">
             <div>
