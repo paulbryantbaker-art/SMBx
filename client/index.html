@@ -20,7 +20,7 @@
     <meta property="og:description" content="An on-demand corporate development team that guides your acquisition from thesis to close. We build value by applying operator instincts to the buy-side." />
     <meta property="og:type" content="website" />
     <meta name="color-scheme" content="light" />
-    <meta name="theme-color" content="#FCFAF6" />
+    <meta name="theme-color" content="#EEF6EC" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <script>
@@ -49,6 +49,12 @@
         // two systems stale (the July-17 warmth-pass paper) through the whole
         // Ledger era without anyone seeing it, because a first-paint colour is
         // only visible for one frame and only on a cold load.
+        //
+        // Deliberately NOT the theme-color above. That value approximates the
+        // page's top edge WITH the ambient wash on it; this one is the page's
+        // true base, painted before any stylesheet has loaded and therefore
+        // before there is a wash to approximate. Matching them would put a
+        // tint on a page that has none yet.
         var bg = '#FCFAF6';
         document.documentElement.style.backgroundColor = bg;
         if (document.body) document.body.style.backgroundColor = bg;
