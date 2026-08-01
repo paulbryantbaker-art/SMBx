@@ -124,8 +124,8 @@
   /* Aurora: jade and amber alternating down the scroll, with a tonal bone tile
      between them so the two hues never meet at full strength. */
   background:
-    radial-gradient(52% 20% at 12% 2%,  rgba(15, 169, 124, 0.110), rgba(15, 169, 124, 0) 64%),
-    radial-gradient(46% 17% at 92% 11%, rgba(232, 166, 43, 0.100), rgba(232, 166, 43, 0) 62%),
+    radial-gradient(52% 20% at 12% 13%, rgba(15, 169, 124, 0.110), rgba(15, 169, 124, 0) 64%),
+    radial-gradient(46% 17% at 92% 19%, rgba(232, 166, 43, 0.100), rgba(232, 166, 43, 0) 62%),
     radial-gradient(52% 18% at 3% 40%,  rgba(206, 196, 174, 0.13),  rgba(206, 196, 174, 0) 62%),
     radial-gradient(50% 18% at 99% 56%, rgba(15, 169, 124, 0.085),  rgba(15, 169, 124, 0) 64%),
     radial-gradient(48% 18% at 7% 80%,  rgba(232, 166, 43, 0.090),  rgba(232, 166, 43, 0) 62%),
@@ -442,33 +442,46 @@
      fault, and it got worse the moment Aurora made the wash chromatic, since
      a tonal-bone wash had almost nothing to clip.
 
-     Filling it with a flat colour cannot fix this — the wash is a gradient, so
-     any single value matches it at exactly one x position. Transparency is the
-     only thing that matches it everywhere. The bar fills on scroll instead
-     (.solid), where it must be opaque for content to pass under it.
+     I fixed that by making the bar TRANSPARENT, and that was the wrong half of
+     the problem — it let page content scroll up into the top of the screen,
+     which is what "the whole header on mobile is completely broken" was.
+
+     The right fix, from Paul's MacRumors reference: the bar is a SOLID
+     FULL-BLEED BAND at every scroll position, and the WASH moves out of its
+     way instead. MacRumors' header merges with the status-bar tint above it
+     into one continuous surface — that is what "full bleed" meant here, not
+     transparency. Status bar, bar and the top of the page are now all flat
+     bone with no boundary between them, and the wash begins below the bar
+     where there is nothing to clip it.
 
      Ledger: no backdrop-blur anywhere — the fill is solid bone, not a frost. */
-  background: transparent;
+  background: #FCFAF6;
   border-bottom: 1px solid transparent;
+  /* Full bleed to the TRUE top of the screen. `viewport-fit=cover` is set in
+     index.html, so in standalone/PWA the viewport runs under the status bar
+     and a sticky bar at top:0 would leave page content showing in that strip.
+     Zero in ordinary Safari, so this costs nothing there. */
+  padding-top: env(safe-area-inset-top, 0px);
   transition: box-shadow 0.28s ease, border-color 0.28s ease, background 0.28s ease;
 }
-/* THE FILL HAS NO EDGE (2026-07-31, Paul: "even though it's static and the
-   content goes behind it, it should blend in so that it doesn't look so
-   obvious that it's a header bar — the buttons can kind of float there").
+/* THE BAR HAS NO EDGE (2026-07-31, Paul: "it should blend in so that it
+   doesn't look so obvious that it's a header bar").
 
-   Three things were announcing the bar, and none of them was the fill itself:
-   the hairline underneath it, the drop shadow the condensed state added, and
-   the hard terminating edge where bone met page. All three are gone. The fill
-   stays fully opaque behind the controls — that part is not negotiable, since
-   body text passing underneath has to be hidden rather than ghosted — and it
-   dissolves into the page across a soft strip below (see ::after).
+   Three things were announcing the bar, and the fill was none of them: the
+   hairline underneath it, the drop shadow the condensed state added, and the
+   hard terminating edge where bone met page. All three are gone.
+
+   `.solid` no longer owns a fill — the bar is solid at every scroll position
+   now — it owns only the DISSOLVE, which is a statement about there being
+   content underneath rather than about the bar's own appearance. At the top of
+   the page there is nothing to dissolve into, and a fade there would be a
+   visible gradient on flat bone.
 
    Deliberately NOT backdrop-filter, which is the usual way to do this. The
    Ledger pass removed blur from this element as an anti-pattern, and a blurred
-   bar reads as a distinct pane of glass — which is exactly the "obviously a
-   header" quality being removed here. A dissolve has no surface at all. */
+   bar reads as a distinct pane of glass — exactly the "obviously a header"
+   quality being removed. A dissolve has no surface at all. */
 .pd-navwrap.solid {
-  background: #FCFAF6;
   border-bottom-color: transparent;
 }
 /* The dissolve. Sits BELOW the bar rather than inside it, so the fade never
