@@ -287,8 +287,31 @@
 }
 
 /* ─── sticky CTA — persistent ask on a long page ─── */
+/* THE BOTTOM OFFSET CARRIES THE SAFE-AREA INSET (2026-08-01, Paul: "the gray
+   chin is back", with a screenshot of Safari's bottom toolbar rendering flat
+   neutral grey while the page above it is bone).
+
+   Two things were wrong with a flat `bottom: 22px`, and only the first is
+   certain:
+
+   1. CERTAIN — it ignores `env(safe-area-inset-bottom)`, so on any notched
+      iPhone the pill sat inside the home-indicator zone, under Safari's
+      toolbar. Every other fixed thing on this site already insets (see the
+      chat input row); this one was simply missed.
+
+   2. LIKELY, AND NOT VERIFIABLE FROM THIS REPO — that is also why the toolbar
+      went grey. Safari tints the bottom bar by SAMPLING the strip of page
+      behind it, which is the documented reason CLAUDE.md rule 5 bans fixed
+      coloured elements at the viewport edge. The strip held bone paper AND a
+      saturated green pill, and Safari falls back to neutral when it cannot
+      resolve one colour. The correlation across screenshots is exact: pill on
+      screen -> grey bar; pill absent (top of page, the error screen) -> normal
+      tint. It cannot be confirmed here, because this container has Chromium
+      and no iOS. If the grey survives this change, the next thing to try is
+      hiding `.pd-sticky` on phones entirely — the primary CTA is already in
+      the nav and at `#cta`, so it costs little. */
 .pd-sticky {
-  position: fixed; right: 22px; bottom: 22px; z-index: 60;
+  position: fixed; right: 22px; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); z-index: 60;
   translate: 0 96px; opacity: 0; pointer-events: none;
   padding: 15px 28px; font-size: 15px;
   box-shadow: 0 14px 40px -12px rgba(34, 34, 34, 0.45);
@@ -296,7 +319,10 @@
 }
 .pd-sticky.on { translate: 0 0; opacity: 1; pointer-events: auto; }
 @media (max-width: 760px) {
-  .pd-sticky { right: 14px; bottom: 14px; padding: 13px 22px; font-size: 14px; }
+  /* More clearance on a phone than the 14px it had: the inset lifts it off the
+     home indicator, and the extra 10px lifts it clear of the toolbar's own
+     sampling strip. */
+  .pd-sticky { right: 14px; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); padding: 13px 22px; font-size: 14px; }
 }
 
 /* ─── layout ─── */
