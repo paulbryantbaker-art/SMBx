@@ -6,6 +6,7 @@ import PracticeShell, { PageCrumb } from './PracticeShell';
 import Mark from './Mark';
 import { Swoosh } from './atmo';
 import { bookHref, bookTarget } from './leads';
+import { AttributionLine } from './TrackRecord';
 
 const BELIEFS = [
   {
@@ -46,79 +47,96 @@ export default function About() {
         </div>
       </section>
 
-      {/* ── Why we built it ── */}
+      {/* ── Why we built it — three points, not three paragraphs (Paul,
+             2026-08-01: "bigger bullets, less paragraphs, just the
+             highlights"). The argument was always three beats; it was just
+             buried in prose. ── */}
       <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(70px, 8vw, 120px)' }}>
-        <div className="pd-seclabel">Why we built it</div>
-        <h2 className="pd-h2">We spent twenty years as the buyer.</h2>
-        <div style={{ marginTop: 28, maxWidth: '46em', display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-            Inside a platform acquirer and inside a global bank, our founder saw the same imbalance
-            over and over. The seller always had someone in their corner — a broker, an advisor, a
-            banker working their number. The buyer had a corp-dev team, if they were big enough to
-            afford one. And almost nobody in the lower middle market is.
+        <div className="pd-lede">
+          <div>
+            <div className="pd-seclabel">Why we built it</div>
+            <h2 className="pd-h2">We spent two decades as the buyer.</h2>
           </div>
-          <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-            So the family office doing its first direct deal, the sponsor who has to lock up a
-            company before anyone will fund it, the operator buying a competitor — they all end up
-            running the biggest transaction of their careers with no one on their side.
+          <div className="pd-points">
+          <div className="pd-point">
+            <div className="lead">The seller always has someone.</div>
+            <p>Sellers have had professional representation for a hundred years — a broker, an advisor, a banker working their number.</p>
           </div>
-          <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-            <Mark /> exists to be that team: a complete corporate development function — sourcing,
-            evaluation, negotiation, integration — led by senior dealmakers who have led or co-led
-            150+ acquisitions, and pointed at one side of the table. Yours.
+          <div className="pd-point">
+            <div className="lead">The buyer usually doesn't.</div>
+            <p>A corporate development team is a luxury of scale. Almost nobody in the lower middle market has one, so the biggest transaction of a career gets run with no one on that side of the table.</p>
+          </div>
+          <div className="pd-point">
+            <div className="lead">So we became that team.</div>
+            <p>Sourcing, evaluation, negotiation, integration — a complete corp-dev function, led by senior dealmakers, pointed at one side of the table. Yours.</p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Your advisor ── */}
+      {/* ── Your advisor — the record as a register, not a résumé paragraph.
+             Employer anonymization is LAW (CLAUDE.md, 2026-07-18): "a global
+             investment bank" and "a world-class PE-backed aggregator", never
+             the names. Deloitte may stay named. "led or co-led", never
+             "closed". The total is 150, with no plus. ── */}
       <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(80px, 9vw, 130px)' }}>
-        <div className="pd-firm-grid">
+        <div className="pd-lede">
           <div>
             <div className="pd-seclabel">Firm leadership</div>
             <h2 className="pd-h2">Paul Baker — Founder</h2>
-            <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 18, fontSize: 17, lineHeight: 1.7, color: 'var(--pd-body)' }}>
-              <div>
-                Paul has spent two decades as a deal captain — the person accountable for a
-                transaction from the first conversation to the day it's fully integrated.
+            <div className="pd-founder-photo" style={{ marginTop: 'clamp(28px, 3vw, 40px)' }}>
+              <img
+                src="/founder-portrait.jpg"
+                alt="Paul Baker, founder of smbX"
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 20%' }}
+              />
+            </div>
+          </div>
+          <div>
+            <p className="pd-sub" style={{ margin: 0, maxWidth: '26em' }}>
+              Two decades as a deal captain — the person accountable for a transaction from
+              the first conversation to the day it is fully integrated.
+            </p>
+
+            <div className="pd-record">
+              <div className="pd-rec">
+                <div className="fig">36</div>
+                <div className="txt">
+                  <b>acquisitions, ~$2.9B enterprise value.</b> Led or co-led as Director of
+                  Corporate Development and M&amp;A Integration at a world-class PE-backed
+                  aggregator — the engine that turned four founding companies into a national
+                  home-services platform.
+                </div>
               </div>
-              <div>
-                For nearly a decade he was Director of Corporate Development and M&amp;A Integration
-                at <b style={{ color: 'var(--pd-ink)' }}>a world-class PE-backed aggregator</b>, building the acquisition engine that turned four
-                founding companies into a premier national home-services platform. He oversaw the
-                process from LOI to definitive agreement, and led or co-led{' '}
-                <b style={{ color: 'var(--pd-ink)' }}>36 acquisitions across roughly $2.9 billion in enterprise value</b> —
-                then owned the integration playbook that made them functional. He has sat across
-                from founders, brokers, bankers, and private equity sponsors on every one.
+              <div className="pd-rec">
+                <div className="fig">$2B+</div>
+                <div className="txt">
+                  <b>in synergies delivered.</b> Acquisition integration at a global investment
+                  bank, on some of the largest deals in modern banking.
+                </div>
               </div>
-              <div>
-                Before that, at <b style={{ color: 'var(--pd-ink)' }}>a global investment bank</b>, he led
-                acquisition integration on some of the largest deals in modern banking — delivering
-                over $2B in synergies — and integrated a run of fintech acquisitions. Earlier, he advised Fortune 500 clients on inorganic
-                growth strategy at <b style={{ color: 'var(--pd-ink)' }}>Deloitte Consulting</b>.
-              </div>
-              <div>
-                All told: <b style={{ color: 'var(--pd-ink)' }}>150 acquisitions, $5B+ in revenue added to the buyers he
-                worked for.</b> Always on the buy side. Always the one accountable when the deal had
-                to close.
-              </div>
-              <div>
-                He holds a Master of Applied Statistics and a BBA from LeTourneau University, and
-                is a certified Lean Six Sigma Black Belt. He works out of Dallas–Fort Worth and
-                takes deals nationwide.
+              <div className="pd-rec">
+                <div className="fig">150</div>
+                <div className="txt">
+                  <b>acquisitions all told, $5B+ in revenue added</b> to the buyers he worked
+                  for. Always the buy side.
+                </div>
               </div>
             </div>
-            <div style={{ marginTop: 36 }}>
+
+            <p className="pd-body-sm" style={{ marginTop: 26 }}>
+              Earlier, inorganic growth strategy for Fortune&nbsp;500 clients at Deloitte
+              Consulting. Master of Applied Statistics and a BBA from LeTourneau University;
+              certified Lean Six Sigma Black Belt. Based in Dallas–Fort Worth, deals nationwide.
+            </p>
+
+            <AttributionLine style={{ marginTop: 26 }} />
+
+            <div style={{ marginTop: 34 }}>
               <a className="pd-pill-primary pd-pill-lg" href={bookHref()} target={bookTarget()} rel={bookTarget() ? 'noreferrer' : undefined}>
                 Talk to our team — confidential consultation
               </a>
             </div>
-          </div>
-          <div className="pd-founder-photo">
-            <img
-              src="/founder-portrait.jpg"
-              alt="Paul Baker, founder of smbX"
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 20%' }}
-            />
           </div>
         </div>
       </section>
