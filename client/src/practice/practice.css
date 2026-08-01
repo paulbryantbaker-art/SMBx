@@ -471,50 +471,37 @@
   padding-top: env(safe-area-inset-top, 0px);
   transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.28s ease;
 }
-/* THE BAR HAS NO EDGE (2026-07-31, Paul: "it should blend in so that it
-   doesn't look so obvious that it's a header bar").
+/* NO DISSOLVE UNDER THE BAR (removed 2026-07-31, Paul: "the content still
+   does not have full bleed, there's something very blurry there — look at the
+   MacRumors site").
 
-   Three things were announcing the bar, and the fill was none of them: the
-   hairline underneath it, the drop shadow the condensed state added, and the
-   hard terminating edge where bone met page. All three are gone.
+   There was a 34px bone gradient below the bar, softening the edge where
+   content passed underneath. It had to go for two reasons.
 
-   `.solid` no longer owns a fill — the bar is solid at every scroll position
-   now — it owns only the DISSOLVE, which is a statement about there being
-   content underneath rather than about the bar's own appearance. At the top of
-   the page there is nothing to dissolve into, and a fade there would be a
-   visible gradient on flat bone.
+   THE BUG: it was positioned at `top: 100%`, i.e. just below the bar. When the
+   bar slides away it takes its own pseudo-element with it, so a strip that had
+   been sitting below an on-screen bar ended up pinned to the TOP of the
+   viewport — a 34px veil over the first line of content, on exactly the state
+   that is supposed to be full bleed. That is the blur.
 
-   Deliberately NOT backdrop-filter, which is the usual way to do this. The
-   Ledger pass removed blur from this element as an anti-pattern, and a blurred
-   bar reads as a distinct pane of glass — exactly the "obviously a header"
-   quality being removed. A dissolve has no surface at all. */
-.pd-navwrap.solid {
-  border-bottom-color: transparent;
-}
-/* Gone on the way down; the page gets the full screen. */
+   THE DESIGN: the reference has no fade anywhere. Content runs crisp to the
+   top edge and the bar has a hard boundary. A softened edge was my reading of
+   "it should blend in"; the same request, shown as a picture, is a solid bar
+   and sharp content. The hairline and the drop shadow stay gone — that is the
+   part of "don't make it look like a bar" that survives.
+
+   Nothing replaces this. If the edge ever wants softening again, it has to be
+   drawn INSIDE the bar's own box, never in a pseudo-element positioned outside
+   it, or this bug comes straight back the moment the bar moves. */
+
+/* Gone on the way down; the page gets the whole screen, status-bar strip
+   included. */
 .pd-navwrap.away { transform: translateY(-100%); }
-/* A reader who has asked for less motion gets the bar simply present, not
+/* A reader who asked for less motion gets the bar simply present, rather than
    sliding in and out under their thumb. */
 @media (prefers-reduced-motion: reduce) {
   .pd-navwrap { transition: none; }
   .pd-navwrap.away { transform: none; }
-}
-/* The dissolve. Sits BELOW the bar rather than inside it, so the fade never
-   eats into the space the logo and pills occupy — the controls keep a solid
-   ground at every scroll position, including the condensed state where the bar
-   is only ~48px tall and an inside-the-bar gradient would have had ~17px to
-   work with. Bone is spelled out as rgba because a gradient to `transparent`
-   interpolates through transparent BLACK in some engines and prints a grey
-   bloom; fading to a zero-alpha bone keeps the ramp neutral. */
-.pd-navwrap.solid::after {
-  content: '';
-  position: absolute; left: 0; right: 0; top: 100%;
-  height: 34px; pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    rgba(252, 250, 246, 1) 0%,
-    rgba(252, 250, 246, 0.72) 42%,
-    rgba(252, 250, 246, 0) 100%);
 }
 .pd-nav {
   max-width: var(--pd-max); margin: 0 auto;

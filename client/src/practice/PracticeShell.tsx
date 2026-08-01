@@ -105,27 +105,21 @@ export default function PracticeShell({
   // has no height to reclaim. Two size transitions firing on every direction
   // flip would also read as fidget.
   //
-  // `navSolid` survives but no longer means "fill" — the bar is opaque at
-  // every position now. It gates the DISSOLVE below the bar, which is only
-  // wanted once there is content passing underneath.
-  //
   // The 4px dead zone is load-bearing, not a nicety: iOS rubber-banding and
   // momentum emit a stream of sub-pixel scroll events, including sign flips at
   // the end of a fling, so a naive `y > last` would flap the header several
   // times a second at the bottom of a long report.
   const [navAway, setNavAway] = useState(false);
-  const [navSolid, setNavSolid] = useState(false);
   useEffect(() => {
     let last = window.scrollY;
     const apply = (y: number, dir: number) => {
       // Never hide while the bar is still its own height from the top — it
       // would vanish before you had scrolled past it, which reads as a glitch
       // rather than as getting out of the way.
-      if (y <= 80) { setNavAway(false); setNavSolid(y > 8); return; }
+      if (y <= 80) { setNavAway(false); return; }
       // dir === 0 is the mount case (restored scroll position, anchor load).
       // Treated as "up", so a deep link never lands on a missing header.
       setNavAway(dir > 0);
-      setNavSolid(true);
     };
     apply(last, 0);
     const onScroll = () => {
@@ -229,7 +223,7 @@ export default function PracticeShell({
       {/* `menuOpen` forces the fill: the mobile menu can be opened at scroll 0,
           and a transparent bar above an opaque slide-down panel reads as a
           rendering fault rather than a design. */}
-      <header className={`pd-navwrap${navSolid || menuOpen ? ' solid' : ''}${navAway && !menuOpen ? ' away' : ''}`}>
+      <header className={`pd-navwrap${navAway && !menuOpen ? ' away' : ''}`}>
         <div className="pd-nav">
           {/* SPA Link, not a plain anchor: a full reload from down-page races
               the browser's scroll restoration against the still-mounting page
