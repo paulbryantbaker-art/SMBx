@@ -31,6 +31,9 @@ const { LEDGER, REPORT, TYPE, blockBackground } = await import(pathToFileURL(pat
 const INK = LEDGER.ink, BODY = REPORT.body, TERT = LEDGER.muted, GREEN = LEDGER.green;
 const WARM = LEDGER.bone, DARK = LEDGER.dark, IVORY = LEDGER.ivory, IVORY_SUB = REPORT.ivorySub;
 const BRASS = LEDGER.brass, HAIR = LEDGER.hair;
+/* The cover is the jade block, so its amber is honey — see house/tokens.ts.
+   Body pages are bone and keep BRASS. */
+const HONEY = LEDGER.honey;
 const DISPLAY = TYPE.display, SANS = TYPE.sans, MONO = TYPE.mono;
 
 /* ── CLI ──────────────────────────────────────────────────────────────── */
@@ -154,7 +157,7 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
   .cover > * { position: relative; z-index: 1; }
   /* logo is 4:1 — align-self stops the column flexbox from stretching it wide */
   .cv-logo { height: 25px; width: auto; align-self: flex-start; display: block; }
-  .cv-eyebrow { font-family: ${MONO}; font-size: 9.5pt; letter-spacing: 0.2em; color: ${BRASS}; margin-top: 0.22in; }
+  .cv-eyebrow { font-family: ${MONO}; font-size: 9.5pt; letter-spacing: 0.2em; color: ${HONEY}; margin-top: 0.22in; }
   /* Fraunces ships a swash ampersand as a discretionary ligature. In a title
      like "Home Services M&A" it reads as a glyph nobody recognises, so the
      alternates are switched off here. */
@@ -162,7 +165,7 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
     font-variant-ligatures: none; }
   .cover h1 .amp { font-family: ${SANS}; font-weight: 500; font-size: 0.86em; }
   .cover h2 { font-family: ${SANS}; font-weight: 500; font-size: 12.5pt; line-height: 1.4; color: ${IVORY_SUB}; margin: 0 0 0.03in; max-width: 5.9in; }
-  .cover .rule { width: 84px; height: 5px; background: ${BRASS}; border-radius: 99px; margin: 0.06in 0 0.2in; }
+  .cover .rule { width: 84px; height: 5px; background: ${HONEY}; border-radius: 99px; margin: 0.06in 0 0.2in; }
   /* optional framed hero image on the cover (like the carousel cover) */
   .cv-hero { width: 100%; height: 2.05in; object-fit: cover; border-radius: 10px; border: 1px solid rgba(255,255,255,0.16); box-shadow: 0 10px 30px rgba(0,0,0,0.4); display: block; margin: 0 0 0.16in; }
   .cover p, .cover li { color: ${IVORY_SUB}; font-size: 10pt; line-height: 1.5; margin: 0 0 0.07in; }
@@ -173,13 +176,13 @@ const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceC
   /* "by the numbers" stat band — framed cards, brass Fraunces numerals */
   .cv-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin: 0.02in 0 0.16in; }
   .cv-stat { border: 1px solid rgba(168,240,206,0.24); border-radius: 10px; padding: 11px 13px 12px; background: rgba(255,255,255,0.035); }
-  .cv-stat .n { font-family: ${DISPLAY}; font-weight: 545; font-size: 19pt; line-height: 1; color: ${BRASS}; letter-spacing: -0.01em; }
+  .cv-stat .n { font-family: ${DISPLAY}; font-weight: 545; font-size: 19pt; line-height: 1; color: ${HONEY}; letter-spacing: -0.01em; }
   .cv-stat .l { font-family: ${MONO}; font-size: 6.6pt; letter-spacing: 0.05em; text-transform: uppercase; color: #BFE3D2; margin-top: 6px; line-height: 1.4; }
 
   /* framed workstream cards (the cover's numbered list) */
   .cv-cards { display: flex; flex-direction: column; gap: 7px; margin: 0.05in 0 0.1in; }
-  .cv-card { display: flex; gap: 11px; align-items: baseline; border: 1px solid rgba(255,255,255,0.10); border-left: 2.5px solid ${BRASS}; border-radius: 8px; padding: 9px 13px; background: rgba(255,255,255,0.022); }
-  .cv-cardno { font-family: ${MONO}; font-size: 8pt; color: ${BRASS}; letter-spacing: 0.06em; flex: none; }
+  .cv-card { display: flex; gap: 11px; align-items: baseline; border: 1px solid rgba(255,255,255,0.10); border-left: 2.5px solid ${HONEY}; border-radius: 8px; padding: 9px 13px; background: rgba(255,255,255,0.022); }
+  .cv-cardno { font-family: ${MONO}; font-size: 8pt; color: ${HONEY}; letter-spacing: 0.06em; flex: none; }
   .cv-cardbody { color: ${IVORY_SUB}; font-size: 9.5pt; line-height: 1.48; }
   .cv-cardbody em { color: ${IVORY}; font-style: italic; font-weight: 500; }
 

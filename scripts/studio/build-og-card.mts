@@ -32,7 +32,8 @@ const { newRenderPage } = await import(pathToFileURL(path.join(ROOT, 'server/ser
 /* THE shared definition — see house/tokens.ts. Never hardcode a hex here. */
 const { LEDGER, REPORT, blockBackground } = await import(pathToFileURL(path.join(ROOT, 'house/tokens.ts')).href);
 const DARK = LEDGER.dark, IVORY = LEDGER.ivory, IVORY_SUB = REPORT.ivorySub;
-const BRASS = LEDGER.brass, MINT = LEDGER.mint;
+/* The card is the block throughout, so amber is honey here — see tokens. */
+const BRASS = LEDGER.honey, MINT = LEDGER.mint;
 const DISPLAY = `'Fraunces', Georgia, serif`, SANS = `'Inter', -apple-system, sans-serif`, MONO = `'IBM Plex Mono', monospace`;
 
 /* ── CLI ──────────────────────────────────────────────────────────────── */

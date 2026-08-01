@@ -34,6 +34,7 @@ export interface DeckAssets {
 const INK = LEDGER.ink, BODY = LEDGER.slate, TERT = LEDGER.muted, GREEN = LEDGER.green;
 const WARM = LEDGER.bone, DARK = LEDGER.dark, IVORY = LEDGER.ivory, IVORY_SUB = LEDGER.rule;
 const BRASS = LEDGER.brass, HAIR = LEDGER.hair, MINT = LEDGER.mint;
+const HONEY = LEDGER.honey;
 const DISPLAY = TYPE.display, SANS = TYPE.sans, MONO = TYPE.mono;
 
 /** The page set. Returns one `<section class="pg">` string per page. */
@@ -199,6 +200,12 @@ export function deckCss(TEXTURE: string): string {
   .collab { font-family: ${MONO}; font-size: 17px; letter-spacing: 0.04em; color: ${TERT}; line-height: 1.5; }
   .collab.strong { color: ${GREEN}; font-weight: 600; }
   .vs { font-family: ${DISPLAY}; font-weight: 545; font-size: 52px; color: ${BRASS}; padding-bottom: 130px; }
+  /* Amber sits at 3.8:1 on the jade block — large-text only, and these are
+     small mono labels. HONEY is amber's on-block value and the block gets
+     it, exactly as the site re-scopes --pd-brass inside .pd-dark. Light
+     surfaces keep brass. */
+  .pg.dark .kt.brass, .pg.dark .tag.brasstag, .pg.dark .vs { color: ${HONEY}; }
+  .pg.dark .brassbar { background: ${HONEY}; }
   .closer { position: absolute; inset: 0; padding: 96px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; z-index: 1; }
   .ct-head { margin-top: 22px; font-family: ${DISPLAY}; font-weight: 545; font-size: 48px; line-height: 1.16; letter-spacing: -0.012em; color: ${IVORY}; max-width: 860px; }
   .ct-rule { margin: 30px 0; height: 6px; width: 96px; background: ${MINT}; border-radius: 99px; }
