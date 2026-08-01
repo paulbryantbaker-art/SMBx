@@ -156,32 +156,38 @@
     radial-gradient(48% 18% at 7% 80%,  rgba(232, 166, 43, 0.090),  rgba(232, 166, 43, 0) 62%),
     radial-gradient(46% 17% at 96% 97%, rgba(15, 169, 124, 0.075),  rgba(15, 169, 124, 0) 62%);
 }
-/* ─── the fold wash (2026-08-01) — the Gemini structure ───
+/* ─── accent bands (2026-08-01) ───
+   Paul: "on desktop, it is really big space… what if we put a couple of the
+   collateral images to highlight the industries… like we can put them
+   throughout like in the actual PDF market assessment (not the color MEP ones,
+   they don't match)".
 
-   ONE hue rising from the bottom of the first screen, with everything above it
-   flat bone. Three things make it behave:
+   The images ARE the report's — `scripts/studio/reports/media/hs-accent-*`,
+   the flat isometric trade illustrations drawn in this palette. His exclusion
+   is the useful half of the note: the MEP set are photographs, and a
+   photograph next to these reads as two different publications. Palette-native
+   illustration travels; a photo does not.
 
-   - VIEWPORT-ANCHORED, not page- or section-anchored. A percentage inside
-     `.pd-ambient` would land somewhere different on every route, because the
-     pages differ in height by an order of magnitude; `::before` on `.pd-hero`
-     gets clipped at the hero's edge. `svh` is the only unit that puts the
-     crest at the fold on all of them.
-   - TALLER THAN THE FOLD (160svh) so the falloff is RENDERED rather than cut.
-     The crest sits at 62.5% of the layer, which is exactly 100svh — the fold
-     line — and the gradient reaches zero at ~92% of the layer, well inside it.
-     A layer exactly one screen tall would clip the wash at its strongest point
-     and put back the same hard line this was moved to avoid.
-   - WIDE (150%) and centred, so there is no visible hotspot. The reference has
-     no discernible centre anywhere, and that is most of what makes it read as
-     calm rather than as a blob.
+   Grammar copied from the report's own `.rb-accent` (build-report.mts) so the
+   page and the PDF show the same object: full content width, framed panel,
+   hairline, soft lift, `object-fit: cover`. Never a soft-edge dissolve — a
+   fade on light paper reads as a smudge, which is the renderer-proof law the
+   carousel pass landed on.
 
-   Not promoted and not animated: `.pd-settle` handles the load motion on its
-   own one-screen layer, so this one never needs a backing store. */
-.pd-foldwash {
-  position: absolute; top: 0; left: 0; right: 0; height: 160svh;
-  z-index: -1; pointer-events: none;
-  background: radial-gradient(150% 30% at 50% 62.5%,
-    rgba(15, 169, 124, 0.26), rgba(15, 169, 124, 0.07) 46%, rgba(15, 169, 124, 0) 96%);
+   `aspect-ratio` rather than a fixed height so the frame keeps the artwork's
+   own 1700x520 proportion at every width and the illustration is never
+   cropped into nonsense. The source's composition is deliberate — subject
+   right, open bone left — so it wants its full width, not a centre crop. */
+.pd-accentband {
+  display: block; width: 100%; max-width: var(--pd-mid); margin: clamp(34px, 4vw, 56px) auto 0;
+  aspect-ratio: 1700 / 520; object-fit: cover; object-position: 50% 50%;
+  border-radius: 16px; border: 1px solid var(--pd-hair);
+  box-shadow: 0 2px 4px rgba(20, 24, 28, 0.05), 0 14px 34px rgba(20, 24, 28, 0.08);
+}
+@media (max-width: 760px) {
+  /* On a phone the band is ~110px tall at its own ratio, which is a sliver.
+     Cropping to a squarer frame keeps the subject legible. */
+  .pd-accentband { aspect-ratio: 16 / 9; object-position: 72% 50%; }
 }
 
 /* ─── the settle (2026-08-01, Paul: "add a little motion to the background
@@ -742,16 +748,25 @@
      the tile peak — ink holds 15:1, --pd-body 5.4:1, --pd-tert 3.1:1. If you
      move a stop toward 50% x, re-measure; the margin is positional, not
      inherent. */
-  /* The rise does NOT live here. It was put on this pseudo-element first and
-     that was wrong for a reason worth keeping: `::before` is `inset: 0` on
-     `.pd-hero`, so it is CLIPPED at the hero's bottom edge. With the old
-     layout that was invisible — the strong stops were at the TOP and only weak
-     tails reached the bottom. Move the strong end to the bottom and the clip
-     becomes a hard horizontal line across the page, which is exactly what
-     /about showed: a short hero, and the wash guillotined at its edge.
-     The rise belongs to the FOLD, not to one section of it — see
-     `.pd-foldwash`, which is viewport-anchored and clipped by nothing. */
-  background: none;
+  /* ONE hue rising through the lower fold — the Gemini structure; see the note
+     on `.pd-ambient`. Wide (170%) and centred so there is no visible hotspot,
+     which is most of what makes the reference read as calm.
+
+     THE CREST SITS AT 76%, NOT AT THE BOTTOM, and that is the whole fix for
+     the seam (Paul: "I don't like the visible seam"). A wash still CLIMBING
+     when the dark band arrives meets it as pale-jade against deep-jade at a
+     hard curved edge — green cut into green, which reads as a defect. The
+     wash now crests above the band and is back to bare paper before it, so
+     the band's edge is a bone→jade change of material again, which is what
+     it was designed to be.
+
+     Anchoring this to the hero rather than to the viewport is deliberate for
+     the same reason: the hero IS the fold, on every route, whatever its
+     height — so the wash completes inside it on a short /about hero exactly
+     as it does on a full-fold landing. A viewport-anchored layer cannot know
+     where the section ends, and that is what put the seam there. */
+  background:
+    radial-gradient(170% 52% at 50% 76%, rgba(15, 169, 124, 0.24), rgba(15, 169, 124, 0.06) 52%, rgba(15, 169, 124, 0) 88%);
   /* RAMP IN FROM ZERO OVER THE FIRST 150px (2026-07-31). This bloom is nearly
      three times the strength of the page wash, and both of its strong stops
      are centred at or above the hero's own top edge — so it arrived at full
@@ -764,8 +779,16 @@
      section of many — so the hero starts where the bar ends instead, at the
      page-wash value, and grows from there. Masking the layer rather than
      moving its stops keeps the bloom's shape intact further down. */
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 150px);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 150px);
+  /* Both ends in one mask.
+     IN over the first 150px: the bar above is transparent at scroll 0 and can
+     only ever show the page wash, so a bloom arriving at full strength on the
+     hero's first pixel row drew a hard line under it ("it looks like two
+     separate things"). The hero starts at the wash's value and grows.
+     OUT from 74% to 94%: belt-and-braces on the crest position above. Even if
+     someone moves a stop, the layer cannot reach this section's bottom edge
+     with any colour left in it, so the seam cannot come back by accident. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 150px, #000 74%, transparent 94%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 150px, #000 74%, transparent 94%);
 }
 /* ─── hero mesh — a faint dot-matrix field behind the engine (2026-07-14,
    Paul: "needs some graphic or texture… not selling the app, selling the
