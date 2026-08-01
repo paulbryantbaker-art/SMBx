@@ -196,6 +196,26 @@ export default function Industries() {
         </div>
       </section>
 
+      {/* An illustration under the head, and one on the Heritage block below.
+          TWO, not fourteen: the report's `hs-accent-*` set draws home-services
+          trades, and this page runs fourteen sectors including elevator, NDT
+          and MRO distribution. Putting an HVAC condenser beside "Elevator &
+          escalator service" would be a picture that lies, which is the same
+          rule the numbers follow. Sectors get art only where art exists for
+          them. */}
+      <section className="pd-wrap" style={{ marginTop: 'clamp(30px, 3.6vw, 52px)' }}>
+        <img
+          className="pd-accentband"
+          src="/industries/trade-home.jpg"
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          width={1700}
+          height={520}
+          data-rv
+        />
+      </section>
+
       {/* ── The theses — sectors must stay direct siblings for the zig-zag ── */}
       <section className="pd-accent ar">
         <div className="pd-wrap">
@@ -230,6 +250,16 @@ export default function Industries() {
                 <span className="tag">Residential &amp; commercial services trades</span>
                 <span className="tag">Commercial landscaping — contract-heavy only</span>
               </div>
+              <img
+                className="pd-accentband"
+                src="/industries/trade-roof.jpg"
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                width={1700}
+                height={520}
+                style={{ marginTop: 'clamp(22px, 2.6vw, 34px)' }}
+              />
               {/* Was "Thirty-six acquisitions", which counted platforms and
                   left their add-ons out (Paul, 2026-07-29: "when we add all the
                   platforms and add-ons it was more than a hundred
