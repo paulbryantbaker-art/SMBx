@@ -228,7 +228,9 @@ export default function Landing() {
       <section className="pd-hero pd-hero-c pd-hero-fold" id="top" style={{ justifyContent: 'center' }}>
         <div className="pd-heromesh" aria-hidden="true" />
         <div className="pd-heroc-inner">
-          <h1 className="pd-h1">We'll build and run your business acquisition strategy tailored to your&nbsp;goals.</h1>
+          {/* The non-breaking space keeps "three months" off a line of its
+              own — the number and its unit are the point of the sentence. */}
+          <h1 className="pd-h1">Deploy your tailored business acquisition strategy in as little as three&nbsp;months.</h1>
           <p className="pd-sub pd-sub-c">Institutional-grade corporate development, on demand.</p>
         </div>
         <div className="pd-showcase">
