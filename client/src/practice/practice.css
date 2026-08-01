@@ -135,9 +135,19 @@
        made absolute instead. The X radius stays a percentage on purpose: it
        resolves against each element's own WIDTH, and both are full-bleed, so
        it is already identical in both places. Change these two lines and you
-       must change the pair in `.pd-navwrap` with them. */
-    radial-gradient(52% 620px at 12% 0px, rgba(15, 169, 124, 0.110), rgba(15, 169, 124, 0) 64%),
-    radial-gradient(46% 560px at 92% 0px, rgba(232, 166, 43, 0.100), rgba(232, 166, 43, 0) 62%),
+       must change the pair in `.pd-navwrap` with them.
+
+       THE CENTRES SIT 400-420px DOWN, not at 0, so the page's first rows are
+       flat bone (Paul: "why does Safari's top bar not match the website?").
+       Safari paints the status-bar strip with `theme-color`, which is a single
+       flat colour and CANNOT represent a gradient — no value can match a ramp
+       that is jade on the left and amber on the right. So the page meets it
+       where it can: the top of the page is the same flat #FCFAF6 the meta tag
+       carries, and the wash builds below it. Each centre is past its own
+       colour stop (420/640 = 0.66 > 0.64; 400/580 = 0.69 > 0.62), which is
+       what puts the value at y=0 at exactly zero rather than merely faint. */
+    radial-gradient(52% 640px at 12% 420px, rgba(15, 169, 124, 0.110), rgba(15, 169, 124, 0) 64%),
+    radial-gradient(46% 580px at 92% 400px, rgba(232, 166, 43, 0.100), rgba(232, 166, 43, 0) 62%),
     radial-gradient(52% 18% at 3% 40%,  rgba(206, 196, 174, 0.13),  rgba(206, 196, 174, 0) 62%),
     radial-gradient(50% 18% at 99% 56%, rgba(15, 169, 124, 0.085),  rgba(15, 169, 124, 0) 64%),
     radial-gradient(48% 18% at 7% 80%,  rgba(232, 166, 43, 0.090),  rgba(232, 166, 43, 0) 62%),
@@ -484,8 +494,8 @@
 
      Ledger: no backdrop-blur anywhere — the fill is solid, not a frost. */
   background:
-    radial-gradient(52% 620px at 12% 0px, rgba(15, 169, 124, 0.110), rgba(15, 169, 124, 0) 64%),
-    radial-gradient(46% 560px at 92% 0px, rgba(232, 166, 43, 0.100), rgba(232, 166, 43, 0) 62%),
+    radial-gradient(52% 640px at 12% 420px, rgba(15, 169, 124, 0.110), rgba(15, 169, 124, 0) 64%),
+    radial-gradient(46% 580px at 92% 400px, rgba(232, 166, 43, 0.100), rgba(232, 166, 43, 0) 62%),
     #FCFAF6;
   border-bottom: 1px solid transparent;
   /* Slides clear of the screen on the way down. `transform` rather than `top`
