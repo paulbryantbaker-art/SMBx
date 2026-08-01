@@ -47,11 +47,9 @@ const VALID = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 type Phase = 'idle' | 'form' | 'sending' | 'sent' | 'fetching' | 'done';
 
 export default function DownloadCard({
-  slug, pages, placement,
+  slug, placement,
 }: {
   slug: string;
-  /** Read-time line, so the ask is honest about what's being downloaded. */
-  pages: string;
   /** 'top' | 'end' — instrumentation, and which card owns the auto-download. */
   placement: string;
 }) {
@@ -168,16 +166,25 @@ export default function DownloadCard({
   };
 
   return (
-    <aside className="rp-dl" aria-labelledby={`dl-${placement}`}>
+    // No heading, no supporting line (Paul, 2026-07-31: "This looks like AI
+    // slop.. just say 'download the PDF' or something. No micro text is
+    // needed"). It used to open "Take the report with you" over a sentence
+    // restating the read time, the word count and "built to forward" — all of
+    // which the masthead already says, and none of which the reader needs in
+    // order to press a button whose label is the whole message. That was a
+    // straight violation of the repo's own micro-text law.
+    //
+    // `aria-label` replaces the heading as the region's accessible name: the
+    // aside still needs one, and a lone button does not supply it.
+    <aside
+      // At rest this is one button, so it gets no card around it — a border
+      // and a shadow drawn around a single control is the same fussiness as
+      // the heading that used to sit above it. The card appears when there is
+      // actually a form to hold together.
+      className={`rp-dl${phase === 'idle' ? ' rp-dl-bare' : ''}`}
+      aria-label="Download this report"
+    >
       <div className="rp-dl-body">
-        <div className="rp-dl-lead">
-          <h3 id={`dl-${placement}`} className="rp-dl-h">Take the report with you</h3>
-          <p className="rp-dl-p">
-            The full assessment as a formatted PDF — {pages}, every figure attributed,
-            built to forward.
-          </p>
-        </div>
-
         {note && <p className="rp-dl-note">{note}</p>}
 
         {phase === 'sent' ? (
@@ -225,7 +232,7 @@ export default function DownloadCard({
                 autoFocus
               />
               <button className="pd-pill-primary rp-dl-go" type="submit" disabled={phase === 'sending'}>
-                {phase === 'sending' ? 'Sending…' : 'Get the PDF'}
+                {phase === 'sending' ? 'Sending…' : 'Send it'}
               </button>
             </div>
             {err && <p className="rp-dl-err" id={`err-${placement}`} role="alert">{err}</p>}
@@ -249,10 +256,12 @@ export default function DownloadCard({
               onClick={onAsk}
               disabled={phase === 'fetching'}
             >
-              {/* A reader we've already delivered to downloads straight away;
-                  everyone else is being offered a delivery, so say so. */}
+              {/* A reader we've already delivered to downloads straight away.
+                  Everyone else gets it by email, and the label says so rather
+                  than promising a download and then asking for an address —
+                  that is a bait label, not brevity. */}
               {phase === 'fetching' ? 'Fetching the PDF…'
-                : unlocked ? 'Download the PDF' : 'Get the PDF'}
+                : unlocked ? 'Download the PDF' : 'Email me the PDF'}
             </button>
             {err && <p className="rp-dl-err" role="alert">{err}</p>}
           </>

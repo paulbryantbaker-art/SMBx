@@ -94,10 +94,30 @@ export default function PracticeShell({
   // client redirect fires, so the nav stays lit for both spellings.
   const onReports = loc.startsWith('/research') || loc.startsWith('/reports');
 
-  // Condense the sticky nav once the user scrolls off the top (v3: > 40px).
+  // Two independent scroll states, deliberately not one.
+  //
+  // `navMin` CONDENSES the bar (v3: > 40px) — a size change, so it wants a
+  // threshold big enough that a nudge doesn't make it twitch.
+  //
+  // `navSolid` FILLS it (> 8px), and exists because of the ambient wash
+  // (Paul, 2026-07-31, on mobile: "the header does not have the same color
+  // bleed as the hero and it looks weird"). The wash's strongest jade stop is
+  // centred at 12% 2% — inside the nav's own footprint — so an opaque bar
+  // clipped the top off that bloom and printed a hard horizontal seam: flat
+  // bone above the hairline, tinted bone below it. At rest the bar is now
+  // transparent and the wash runs through it unbroken.
+  //
+  // It fills at 8px rather than sharing the 40px threshold because between 0
+  // and 40 the page has already moved under a transparent bar, and content
+  // showing through the nav is a worse bug than the one being fixed.
   const [navMin, setNavMin] = useState(false);
+  const [navSolid, setNavSolid] = useState(false);
   useEffect(() => {
-    const onScroll = () => setNavMin(window.scrollY > 40);
+    const onScroll = () => {
+      const y = window.scrollY;
+      setNavMin(y > 40);
+      setNavSolid(y > 8);
+    };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -190,7 +210,10 @@ export default function PracticeShell({
           layer inside the relative .pd, never a fixed colored div). Must stay
           the first child so it spans the whole scroll. */}
       <div className="pd-ambient" aria-hidden="true" />
-      <header className={`pd-navwrap${navMin ? ' min' : ''}`}>
+      {/* `menuOpen` forces the fill: the mobile menu can be opened at scroll 0,
+          and a transparent bar above an opaque slide-down panel reads as a
+          rendering fault rather than a design. */}
+      <header className={`pd-navwrap${navSolid || menuOpen ? ' solid' : ''}${navMin ? ' min' : ''}`}>
         <div className="pd-nav">
           {/* SPA Link, not a plain anchor: a full reload from down-page races
               the browser's scroll restoration against the still-mounting page
@@ -210,7 +233,16 @@ export default function PracticeShell({
               }
             }}
           >
+            {/* Two marks, both always in the DOM (2026-07-31, Paul: "instead of
+                the logo word getting kind of smaller let's just shrink it down
+                to a little X, like the favicon"). The wordmark collapses to
+                zero width and the X opens up in its place, so the swap is a
+                width animation rather than a cut — and neither image is
+                fetched mid-scroll, which a `src` swap would do.
+                The wordmark stays in the accessibility tree at zero width, so
+                the link keeps its name; the X is decorative. */}
             <img src="/logo-green-x.png" alt="smbX.ai" className="pd-nav-logo" />
+            <img src="/logo-x-green.png" alt="" aria-hidden="true" className="pd-nav-mark" />
           </Link>
           <nav className="pd-nav-links" aria-label="Site">
             <a href={anchor('#why')}>Why us</a>
@@ -227,7 +259,22 @@ export default function PracticeShell({
             >
               Confidential consultation
             </a>
-            <a className="pd-pill-primary" href={anchor('#yulia')} onClick={() => trackEvent('practice_cta_clicked', { placement: 'nav-yulia' })}>Build your market map</a>
+            {/* On a phone this pill shortens once you scroll (Paul,
+                2026-07-31: "minimize the button on mobile when we scroll so
+                that it's tiny next to the hamburger"). Both labels ship and CSS
+                picks one, so nothing re-renders on scroll and the pill cannot
+                flash empty mid-transition. `aria-label` carries the full
+                wording either way — a screen reader should never get the
+                abbreviation. */}
+            <a
+              className="pd-pill-primary pd-nav-map"
+              href={anchor('#yulia')}
+              aria-label="Build your market map"
+              onClick={() => trackEvent('practice_cta_clicked', { placement: 'nav-yulia' })}
+            >
+              <span className="pd-nav-map-full" aria-hidden="true">Build your market map</span>
+              <span className="pd-nav-map-short" aria-hidden="true">Market map</span>
+            </a>
             <button
               type="button"
               className="pd-nav-burger"

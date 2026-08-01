@@ -432,10 +432,61 @@
 /* ─── nav ─── */
 .pd-navwrap {
   position: sticky; top: 0; z-index: 50;
-  /* Ledger: no backdrop-blur anywhere — solid bone with a hairline. */
-  background: #FCFAF6;
-  border-bottom: 1px solid var(--pd-hair);
+  /* AT REST THE BAR IS TRANSPARENT (2026-07-31, Paul on mobile: "the header
+     does not have the same color bleed as the hero and it looks weird").
+
+     The ambient wash's strongest jade stop is centred at 12% 2% — inside the
+     nav's own footprint — so an opaque bar clipped the top off that bloom and
+     printed a hard horizontal seam across the full width of the page: flat
+     bone above the hairline, tinted bone below it. It read as a rendering
+     fault, and it got worse the moment Aurora made the wash chromatic, since
+     a tonal-bone wash had almost nothing to clip.
+
+     Filling it with a flat colour cannot fix this — the wash is a gradient, so
+     any single value matches it at exactly one x position. Transparency is the
+     only thing that matches it everywhere. The bar fills on scroll instead
+     (.solid), where it must be opaque for content to pass under it.
+
+     Ledger: no backdrop-blur anywhere — the fill is solid bone, not a frost. */
+  background: transparent;
+  border-bottom: 1px solid transparent;
   transition: box-shadow 0.28s ease, border-color 0.28s ease, background 0.28s ease;
+}
+/* THE FILL HAS NO EDGE (2026-07-31, Paul: "even though it's static and the
+   content goes behind it, it should blend in so that it doesn't look so
+   obvious that it's a header bar — the buttons can kind of float there").
+
+   Three things were announcing the bar, and none of them was the fill itself:
+   the hairline underneath it, the drop shadow the condensed state added, and
+   the hard terminating edge where bone met page. All three are gone. The fill
+   stays fully opaque behind the controls — that part is not negotiable, since
+   body text passing underneath has to be hidden rather than ghosted — and it
+   dissolves into the page across a soft strip below (see ::after).
+
+   Deliberately NOT backdrop-filter, which is the usual way to do this. The
+   Ledger pass removed blur from this element as an anti-pattern, and a blurred
+   bar reads as a distinct pane of glass — which is exactly the "obviously a
+   header" quality being removed here. A dissolve has no surface at all. */
+.pd-navwrap.solid {
+  background: #FCFAF6;
+  border-bottom-color: transparent;
+}
+/* The dissolve. Sits BELOW the bar rather than inside it, so the fade never
+   eats into the space the logo and pills occupy — the controls keep a solid
+   ground at every scroll position, including the condensed state where the bar
+   is only ~48px tall and an inside-the-bar gradient would have had ~17px to
+   work with. Bone is spelled out as rgba because a gradient to `transparent`
+   interpolates through transparent BLACK in some engines and prints a grey
+   bloom; fading to a zero-alpha bone keeps the ramp neutral. */
+.pd-navwrap.solid::after {
+  content: '';
+  position: absolute; left: 0; right: 0; top: 100%;
+  height: 34px; pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(252, 250, 246, 1) 0%,
+    rgba(252, 250, 246, 0.72) 42%,
+    rgba(252, 250, 246, 0) 100%);
 }
 .pd-nav {
   max-width: var(--pd-max); margin: 0 auto;
@@ -444,18 +495,34 @@
   gap: 16px;
   transition: padding 0.28s ease;
 }
-.pd-nav-logo { height: 44px; width: auto; display: block; margin: -6px 0; transition: height 0.28s ease; }
+/* The wordmark and the X are BOTH in the flow, and the swap is a width
+   collapse rather than a display toggle (2026-07-31). Toggling `display` would
+   snap — there is nothing to interpolate — and swapping the `src` would fetch
+   an image mid-scroll and flash the alt text on a slow connection.
+
+   `max-width: 0` on an image whose width is `auto` resolves the used width to
+   zero while the element stays in the layout and in the accessibility tree, so
+   the home link keeps its name from the wordmark's alt at every scroll
+   position. That is why the collapsed mark is not `display: none`. */
+.pd-nav-logo, .pd-nav-mark {
+  display: block; width: auto; margin: -6px 0;
+  transition: height 0.28s ease, max-width 0.28s ease, opacity 0.2s ease;
+}
+.pd-nav-logo { height: 44px; max-width: 240px; opacity: 1; }
+.pd-nav-mark { height: 34px; max-width: 0; opacity: 0; }
+.pd-navwrap.min .pd-nav-logo { max-width: 0; opacity: 0; }
+.pd-navwrap.min .pd-nav-mark { max-width: 44px; opacity: 1; }
 /* Condensed on scroll — the nav stays put (sticky) but shrinks to reclaim ~40%
    of its height, so the user never scrolls back up yet it barely intrudes
-   (Paul, 2026-07-14). Tighter padding + smaller logo + smaller pills, and it
-   lifts onto a soft shadow so it reads as a slim floating bar. */
+   (Paul, 2026-07-14). Tighter padding + smaller logo + smaller pills.
+   The soft shadow this used to lift onto is gone (2026-07-31): a shadow is a
+   drawn edge, and it was the loudest of the three tells that this is a bar.
+   The condensed state now inherits .solid's dissolve like every other state. */
 .pd-navwrap.min {
   background: #FCFAF6;
-  border-bottom-color: var(--pd-hair);
-  box-shadow: 0 4px 18px rgba(20, 24, 28, 0.06);
+  border-bottom-color: transparent;
 }
 .pd-navwrap.min .pd-nav { padding-top: 9px; padding-bottom: 9px; }
-.pd-navwrap.min .pd-nav-logo { height: 30px; }
 .pd-navwrap.min .pd-nav-ctas .pd-pill,
 .pd-navwrap.min .pd-nav-ctas .pd-pill-primary { padding-top: 9px; padding-bottom: 9px; }
 .pd-nav-ctas .pd-pill, .pd-nav-ctas .pd-pill-primary { transition: padding 0.28s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
@@ -469,6 +536,8 @@
   text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 7px;
 }
 .pd-nav-ctas { display: flex; gap: 10px; }
+/* Default: full label everywhere. The phone block opts into the short one. */
+.pd-nav-map-short { display: none; }
 
 /* ── Mobile nav: hamburger + slide-down menu (Paul, 2026-07-16: "there is no
    nav hamburger on mobile"). The panel is fixed and transform-parked above
@@ -1513,6 +1582,16 @@
   .pd-nav-logo { height: 34px; }
   .pd-nav-ctas { gap: 6px; }
   .pd-nav-ctas .pd-pill-primary { padding: 10px 14px; font-size: 12.5px; }
+  /* Condensed on a phone, the pill shortens AND shrinks so it sits as a small
+     chip beside the hamburger instead of dominating the bar. Paired with the
+     wordmark collapsing to the X, the whole bar gives its width back to the
+     page while you read. Both labels are in the DOM; only one is displayed, so
+     the swap costs no render and cannot flash an empty pill. */
+  .pd-navwrap.min .pd-nav-map-full { display: none; }
+  .pd-navwrap.min .pd-nav-map-short { display: inline; }
+  .pd-navwrap.min .pd-nav-ctas .pd-pill-primary {
+    padding: 7px 13px; font-size: 11.5px; letter-spacing: 0.005em;
+  }
   .pd-indexrow { gap: 14px; padding: 28px 0; }
   .pd-stats { grid-template-columns: 1fr; gap: 52px; }
   .pd-ledger-head { flex-direction: column; align-items: flex-start !important; gap: 14px !important; }
