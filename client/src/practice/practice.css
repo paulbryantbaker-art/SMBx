@@ -452,9 +452,41 @@
   border-bottom: 1px solid transparent;
   transition: box-shadow 0.28s ease, border-color 0.28s ease, background 0.28s ease;
 }
+/* THE FILL HAS NO EDGE (2026-07-31, Paul: "even though it's static and the
+   content goes behind it, it should blend in so that it doesn't look so
+   obvious that it's a header bar — the buttons can kind of float there").
+
+   Three things were announcing the bar, and none of them was the fill itself:
+   the hairline underneath it, the drop shadow the condensed state added, and
+   the hard terminating edge where bone met page. All three are gone. The fill
+   stays fully opaque behind the controls — that part is not negotiable, since
+   body text passing underneath has to be hidden rather than ghosted — and it
+   dissolves into the page across a soft strip below (see ::after).
+
+   Deliberately NOT backdrop-filter, which is the usual way to do this. The
+   Ledger pass removed blur from this element as an anti-pattern, and a blurred
+   bar reads as a distinct pane of glass — which is exactly the "obviously a
+   header" quality being removed here. A dissolve has no surface at all. */
 .pd-navwrap.solid {
   background: #FCFAF6;
-  border-bottom-color: var(--pd-hair);
+  border-bottom-color: transparent;
+}
+/* The dissolve. Sits BELOW the bar rather than inside it, so the fade never
+   eats into the space the logo and pills occupy — the controls keep a solid
+   ground at every scroll position, including the condensed state where the bar
+   is only ~48px tall and an inside-the-bar gradient would have had ~17px to
+   work with. Bone is spelled out as rgba because a gradient to `transparent`
+   interpolates through transparent BLACK in some engines and prints a grey
+   bloom; fading to a zero-alpha bone keeps the ramp neutral. */
+.pd-navwrap.solid::after {
+  content: '';
+  position: absolute; left: 0; right: 0; top: 100%;
+  height: 34px; pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(252, 250, 246, 1) 0%,
+    rgba(252, 250, 246, 0.72) 42%,
+    rgba(252, 250, 246, 0) 100%);
 }
 .pd-nav {
   max-width: var(--pd-max); margin: 0 auto;
@@ -466,12 +498,13 @@
 .pd-nav-logo { height: 44px; width: auto; display: block; margin: -6px 0; transition: height 0.28s ease; }
 /* Condensed on scroll — the nav stays put (sticky) but shrinks to reclaim ~40%
    of its height, so the user never scrolls back up yet it barely intrudes
-   (Paul, 2026-07-14). Tighter padding + smaller logo + smaller pills, and it
-   lifts onto a soft shadow so it reads as a slim floating bar. */
+   (Paul, 2026-07-14). Tighter padding + smaller logo + smaller pills.
+   The soft shadow this used to lift onto is gone (2026-07-31): a shadow is a
+   drawn edge, and it was the loudest of the three tells that this is a bar.
+   The condensed state now inherits .solid's dissolve like every other state. */
 .pd-navwrap.min {
   background: #FCFAF6;
-  border-bottom-color: var(--pd-hair);
-  box-shadow: 0 4px 18px rgba(20, 24, 28, 0.06);
+  border-bottom-color: transparent;
 }
 .pd-navwrap.min .pd-nav { padding-top: 9px; padding-bottom: 9px; }
 .pd-navwrap.min .pd-nav-logo { height: 30px; }
