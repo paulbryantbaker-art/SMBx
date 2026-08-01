@@ -258,5 +258,27 @@ for (const rel of BRIEFS) {
   is(`${name} prompt names no retired colour`, deadInPrompt, []);
 }
 
+/* ── 7. the error screen ──────────────────────────────────────────────────
+   The one screen a visitor sees when everything else has failed, and until
+   2026-08-01 the only screen still wearing the retired terra-cotta wireframe
+   palette. It survived every rebrand because this suite reads STYLESHEETS and
+   that component styles inline — so the check follows it there.
+
+   Its palette is inlined deliberately (it must render when the app is broken,
+   and an import is one more thing that can be broken), which is exactly the
+   condition that makes an automated check worth having. */
+const EB = readFileSync(path.join(ROOT, 'client/src/components/shared/ErrorBoundary.tsx'), 'utf8');
+/* The header comment documents what it used to be, so retired hexes are
+   legitimate there and nowhere else — same scoping as the image briefs. */
+const EB_CODE = EB.slice(EB.indexOf('export class'));
+const ebHexes = [...new Set((EB_CODE.match(/#[0-9A-Fa-f]{6}/g) || []).map(h => h.toUpperCase()))];
+const LIVE = new Set([...Object.values(LEDGER), ...Object.values(REPORT)].map(v => String(v).toUpperCase()));
+is('the error screen invents no colours',
+  ebHexes.filter(h => !LIVE.has(h) && h !== '#FFFFFF'), []);
+is('the error screen names no retired colour',
+  DEAD.filter(d => EB_CODE.toUpperCase().includes(d.toUpperCase())), []);
+is('the error screen uses the house faces', /Fraunces/.test(EB_CODE) && /Inter/.test(EB_CODE), true);
+is('the error screen no longer names Yulia at a stranger', /Yulia/.test(EB_CODE), false);
+
 console.log(`\n${pass}/${total} passed`);
 process.exit(pass === total ? 0 : 1);

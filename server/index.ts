@@ -1122,6 +1122,31 @@ app.use('/api', (err: any, _req: Request, res: Response, _next: NextFunction) =>
 // ─── 5. Static file serving ────────────────────────────────
 const clientPath = path.resolve(__dirname, '../client');
 app.use('/assets', express.static(path.join(clientPath, 'assets'), { maxAge: '1y', immutable: true }));
+/**
+ * A MISSING hashed asset must 404, not fall through to the SPA shell.
+ *
+ * Without this, `express.static` calls next() for a file it cannot find, the
+ * request reaches the catch-all at the bottom of this file, and the browser is
+ * handed `index.html` — with `Content-Type: text/html` — in answer to a
+ * `<script type="module">` request. What the user then sees is:
+ *
+ *   'text/html' is not a valid JavaScript MIME type for module script
+ *   'https://smbx.ai/assets/ReportsIndex-Cn8qVfIi.js'
+ *
+ * which is a true statement about a symptom and says nothing about the cause.
+ * The cause is ordinary: someone had the page open across a deploy, every
+ * chunk was rebuilt under a new hash, and their still-loaded index.html asked
+ * for one of the old names. Eight deploys in an afternoon makes it common.
+ *
+ * 404 is the honest answer, and it is also the useful one — a dynamic import
+ * that 404s rejects cleanly, which is what `vite:preloadError` listens for
+ * (see client/src/main.tsx, where the page reloads itself onto the new build).
+ * Handed HTML instead, the import fails with a MIME error the client cannot
+ * classify.
+ */
+app.use('/assets', (_req, res) => {
+  res.status(404).type('text/plain').send('Not found');
+});
 app.use(express.static(clientPath, { maxAge: 0 }));
 
 // ─── 5b. Support: client-side error capture (no auth required) ──
