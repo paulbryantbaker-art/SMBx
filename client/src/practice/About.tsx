@@ -52,12 +52,9 @@ export default function About() {
              highlights"). The argument was always three beats; it was just
              buried in prose. ── */}
       <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(70px, 8vw, 120px)' }}>
-        <div className="pd-lede">
-          <div>
-            <div className="pd-seclabel">Why we built it</div>
-            <h2 className="pd-h2">We spent two decades as the buyer.</h2>
-          </div>
-          <div className="pd-points">
+        <div className="pd-seclabel">Why we built it</div>
+        <h2 className="pd-h2">We spent two decades as the buyer.</h2>
+        <div className="pd-points tri">
           <div className="pd-point">
             <div className="lead">The seller always has someone.</div>
             <p>Sellers have had professional representation for a hundred years — a broker, an advisor, a banker working their number.</p>
@@ -69,7 +66,6 @@ export default function About() {
           <div className="pd-point">
             <div className="lead">So we became that team.</div>
             <p>Sourcing, evaluation, negotiation, integration — a complete corp-dev function, led by senior dealmakers, pointed at one side of the table. Yours.</p>
-            </div>
           </div>
         </div>
       </section>
@@ -131,12 +127,6 @@ export default function About() {
             </p>
 
             <AttributionLine style={{ marginTop: 26 }} />
-
-            <div style={{ marginTop: 34 }}>
-              <a className="pd-pill-primary pd-pill-lg" href={bookHref()} target={bookTarget()} rel={bookTarget() ? 'noreferrer' : undefined}>
-                Talk to our team — confidential consultation
-              </a>
-            </div>
           </div>
         </div>
       </section>
@@ -160,6 +150,53 @@ export default function About() {
         </div>
       </section>
       <Swoosh dir="up" />
+
+      {/* ── The close (2026-08-01, Paul: "the green bleed band is still right
+             next to the bottom footer… too weighted at the bottom").
+             The page used to end on the creed band, and the only thing between
+             it and the deep-green footer was `.pd-footer`'s top margin — ~460px
+             of EMPTY bone. Two green masses with a hole between them, which is
+             what read as bottom-heavy; the gap was never a breath because
+             nothing was in it.
+             The landing does not have this problem because its booking card
+             sits in exactly that position. So About gets the same close — and
+             it also fixes the CTA, which was buried mid-page inside the founder
+             block where a visitor reaches it before the argument is made. ── */}
+      <section className="pd-section" id="cta">
+        <div className="pd-wrap">
+          <div className="pd-cta-grid">
+            <div>
+              <h2 className="pd-cta-h">Start with a confidential conversation.</h2>
+              <p className="pd-body" style={{ marginTop: 22 }}>
+                Thirty minutes with the person who will run your deal. Your ideas, our read on
+                the market, and a straight answer on whether we're the right team for it.
+              </p>
+            </div>
+            <div className="pd-form">
+              <div className="t">Book 30 minutes</div>
+              <p style={{ margin: '14px 0 0', fontSize: 15, lineHeight: 1.6, color: 'var(--pd-body)' }}>
+                A personal conversation, not a sales call. Come with your ideas — you don't need
+                a finished thesis. Building one together is part of the work.
+              </p>
+              <div style={{ marginTop: 18, fontFamily: 'var(--pd-mono)', fontSize: 13, letterSpacing: '0.06em', color: 'var(--pd-tert)' }}>
+                30 MIN · VIDEO CALL · CONFIDENTIAL
+              </div>
+              <a
+                className="pd-pill-primary"
+                href={bookHref()}
+                target={bookTarget()}
+                rel={bookTarget() ? 'noopener noreferrer' : undefined}
+                style={{ marginTop: 24, display: 'flex', justifyContent: 'center', padding: '15px 26px' }}
+              >
+                Pick a time →
+              </a>
+              <p className="pd-caption" style={{ marginTop: 14 }}>
+                Scheduling opens in Google Calendar. No lists sold, no sellers represented.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
     </PracticeShell>
   );
 }
