@@ -9,7 +9,7 @@
 import { Link } from 'wouter';
 import PracticeShell from './PracticeShell';
 import { REPORT_LIST } from './reports/registry';
-import { bookHref, bookTarget } from './leads';
+import { bookHref, bookTarget, bookRel } from './leads';
 import { trackEvent } from '../lib/analytics';
 import './report.css';
 
@@ -77,7 +77,7 @@ export default function ReportsIndex() {
               className="pd-pill-primary pd-pill-lg"
               href={bookHref()}
               target={bookTarget()}
-              rel="noopener noreferrer"
+              rel={bookRel()}
               onClick={() => trackEvent('practice_cta_clicked', { placement: 'reports-index' })}
             >
               Book a confidential call

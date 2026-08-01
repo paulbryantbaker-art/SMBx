@@ -15,7 +15,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'wouter';
 import PracticeShell from './PracticeShell';
 import YuliaIntake from './YuliaIntake';
-import { bookHref, bookTarget } from './leads';
+import { bookHref, bookTarget, bookRel } from './leads';
 import { trackEvent } from '../lib/analytics';
 
 /* ── Who it's for — the interactive index (copy verbatim from the bundle) ── */
@@ -348,7 +348,7 @@ export default function Landing() {
           <div data-rv style={{ marginTop: 'clamp(44px, 5.5vw, 72px)' }}>
             <div className="pd-map" style={{ maxWidth: 760, margin: '0 auto' }}>
               <div className="map-head">
-                <img src="/logo-green-x.png" alt="smbX.ai" style={{ height: 22, width: 'auto', display: 'block' }} />
+                <img src="/logo-green-x.png" alt="smbX.ai" width={1584} height={396} style={{ height: 22, width: 'auto', display: 'block' }} />
                 <span className="map-label">SAMPLE READ</span>
               </div>
               <div className="map-title">Commercial Landscaping — Southeast</div>
@@ -498,7 +498,7 @@ export default function Landing() {
                 className="pd-pill-primary"
                 href={bookHref()}
                 target={bookTarget()}
-                rel="noopener noreferrer"
+                rel={bookRel()}
                 style={{ marginTop: 24, display: 'flex', justifyContent: 'center', padding: '15px 26px' }}
                 onClick={() => trackEvent('practice_booking_clicked', { placement: 'cta-card' })}
               >

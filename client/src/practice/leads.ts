@@ -34,3 +34,16 @@ export function bookHref(): string {
 export function bookTarget(): string | undefined {
   return '_blank';
 }
+
+/**
+ * The `rel` that MUST accompany `bookTarget()`.
+ *
+ * Six call sites open the booking link in a new tab and each wrote its own
+ * `rel` by hand; two of them ended up with `noreferrer` alone. In a current
+ * browser that is nearly harmless — `noreferrer` implies `noopener` — but it
+ * is only nearly, and the real problem is that the pairing was six chances to
+ * forget rather than one. `target` and `rel` travel together now.
+ */
+export function bookRel(): string | undefined {
+  return bookTarget() ? 'noopener noreferrer' : undefined;
+}
