@@ -1,8 +1,8 @@
 <!--cover
 byline: Paul Baker
 role: smbX.ai · Buy-side corporate development
-image: founder-walking.webp
-imagePos: 50% 30%
+image: founder-portrait.jpg
+imagePos: 50% 22%
 -->
 
 # Buy-side corporate development for the lower middle market

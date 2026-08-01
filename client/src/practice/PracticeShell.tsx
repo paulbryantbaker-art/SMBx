@@ -245,6 +245,10 @@ export default function PracticeShell({
           layer inside the relative .pd, never a fixed colored div). Must stay
           the first child so it spans the whole scroll. */}
       <div className="pd-ambient" aria-hidden="true" />
+      {/* The settle — one viewport-tall bloom that drifts to rest and fades to
+          nothing shortly after load. It ends fully transparent, so it adds no
+          colour to the resting page; see `.pd-settle`. */}
+      <div className="pd-settle" aria-hidden="true" />
       {/* `menuOpen` forces the fill: the mobile menu can be opened at scroll 0,
           and a transparent bar above an opaque slide-down panel reads as a
           rendering fault rather than a design. */}

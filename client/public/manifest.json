@@ -1,7 +1,7 @@
 {
-  "name": "smbx.ai — AI Deal Intelligence",
-  "short_name": "smbx.ai",
-  "description": "AI that makes M&A faster and easier. Sell, buy, raise, or integrate — by talking to Yulia.",
+  "name": "smbX.ai — Buy-side corporate development",
+  "short_name": "smbX.ai",
+  "description": "An on-demand corporate development team that guides your acquisition from thesis to close. Buy-side only, one client per target.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -21,24 +21,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "New conversation",
-      "short_name": "Chat",
-      "url": "/chat",
-      "icons": [{ "src": "/pwa-icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Sell my business",
-      "short_name": "Sell",
-      "url": "/sell"
-    },
-    {
-      "name": "Buy a business",
-      "short_name": "Buy",
-      "url": "/buy"
     }
   ]
 }
