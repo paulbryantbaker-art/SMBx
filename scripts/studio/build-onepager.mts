@@ -42,6 +42,7 @@ const { LEDGER, TYPE, blockBackground } = await import(pathToFileURL(path.join(R
 const INK = LEDGER.ink, BODY = LEDGER.slate, GREEN = LEDGER.green;
 const WARM = LEDGER.bone, DARK = LEDGER.dark, IVORY = LEDGER.ivory, IVORY_SUB = LEDGER.rule;
 const BRASS = LEDGER.brass, HAIR = LEDGER.hair, MINT = LEDGER.mint;
+const HONEY = LEDGER.honey;
 const DISPLAY = TYPE.display, SANS = TYPE.sans, MONO = TYPE.mono;
 
 /* ── CLI args ─────────────────────────────────────────────────────────── */
@@ -125,7 +126,7 @@ function card(dark: boolean): string {
     : '';
 
   return `<div class="card" style="color:${inkC}">
-    <div class="col" style="${colBg}">
+    <div class="col${dark ? ' dark' : ''}" style="${colBg}">
       <div class="glaze" style="background:${glaze}"></div>
       <div class="pad" style="padding:${pad}">
         <div class="top"><img src="${logoImg}" style="height:38px;width:auto;display:block">${kick}</div>
@@ -156,6 +157,11 @@ const CSS = `
   .pad { position:absolute; inset:0; display:flex; flex-direction:column; z-index:1; }
   .top { display:flex; align-items:center; justify-content:space-between; }
   .kick { font-family:${MONO}; font-size:17px; letter-spacing:0.16em; color:${BRASS}; font-weight:600; text-transform:uppercase; }
+  /* Amber sits at 3.8:1 on the jade block — large-text only, and these are
+     small mono labels. HONEY is amber's on-block value and the block gets
+     it, exactly as the site re-scopes --pd-brass inside .pd-dark. Light
+     surfaces keep brass. */
+  .col.dark .kick { color:${HONEY}; }
   .mid { flex:1; display:flex; flex-direction:column; justify-content:center; }
   .seats { display:flex; align-items:baseline; gap:20px; margin-bottom:26px; }
   .num { font-family:${DISPLAY}; font-weight:545; font-size:124px; line-height:0.86; }
