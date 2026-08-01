@@ -140,16 +140,26 @@ export const GREEN_HALO = rgba(LEDGER.jade, 0.28);
  * rule at a saturated jade and the page still renders near-black — the whole
  * change silently does nothing, on every dark surface at once.
  *
- * So the block is composited: an 84% jade glaze OVER the texture, with the
- * flat colour last as the no-image fallback. The plaster detail survives at
- * roughly one part in six — enough to keep the material Paul asked to keep
- * ("the dark texture is cool") without the field reading as black.
+ * So the block is composited: a 72% jade glaze OVER the texture, with the
+ * flat colour last as the no-image fallback.
+ *
+ * This was 0.84 and the collateral came back flat ("what happened to the
+ * texture?"). The alpha was only half of why: on the CAROUSEL COVER a second
+ * veil is painted over this composite (deck.ts `.glaze`), so the two
+ * multiplied out to ~0.92 effective and the plaster vanished. Both were
+ * pulled back together — changing either alone barely moves it, which a
+ * ladder of this value ALONE demonstrated before the second layer was
+ * found: 0.84 through 0.54 looked nearly identical on the cover.
+ *
+ * Contrast is unaffected in the direction that matters: the mean ground goes
+ * #1B6251 -> #205B4F, so ivory measures 7.4:1 rather than 6.7:1. More
+ * texture makes the field slightly DARKER on average, not lighter.
  *
  * The glaze also deepens the effective ground a little, which is a gift and
  * not a problem: ivory on the composited block measures 8.7:1 against 7.7:1
  * on flat jade.
  */
-export const BLOCK_GLAZE = rgba(LEDGER.dark, 0.84);
+export const BLOCK_GLAZE = rgba(LEDGER.dark, 0.72);
 
 /** The full background stack for a textured jade block. */
 export function blockBackground(textureUrl: string): string {
