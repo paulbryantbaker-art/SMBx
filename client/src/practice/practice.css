@@ -1660,6 +1660,13 @@
   scroll-margin-top: 90px;
 }
 
+/* The closing section, immediately above the footer. `.pd-section`'s own
+   padding-bottom plus `.pd-footer`'s top margin stack to ~430px of empty bone
+   under the last card — fine as a gap between two content sections, far too
+   much as the run-out at the end of a page. The footer margin alone is the
+   breath here. */
+.pd-close { padding-top: clamp(90px, 10vw, 150px); padding-bottom: clamp(28px, 3vw, 48px); }
+
 /* ─── footer ─── */
 /* Dark footer (Paul, 2026-07-15): darker than the page, and FLAT — no texture,
    no curve, no halo — so it never reads as a bleed band. Text vars remap; the
