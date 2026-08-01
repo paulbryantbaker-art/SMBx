@@ -148,8 +148,8 @@ imagePos: 50% 45%
 
 PROMPT
 A flat editorial illustration of a residential HVAC condenser unit beside a
-suburban house wall, drawn in clean geometric line work. Deep green (#16624C)
-and brass (#B08637) on a warm bone background (#F6F4EF). Subject centred with
+suburban house wall, drawn in clean geometric line work. Deal Green (#0A7A58)
+and amber (#E8A62B) on a warm bone background (#FCFAF6). Subject centred with
 generous empty background to the left and right. Uniform flat background to all
 four edges. No text, no lettering, no people, no logos, no charts, no vignette,
 no drop shadow, no edge fade. 9:16 portrait.
@@ -160,8 +160,11 @@ no drop shadow, no edge fade. 9:16 portrait.
 These are learned constraints — each one exists because breaking it produced an
 unusable image:
 
-- **Palette, always named:** Deal Green `#16624C`, brass `#B08637`, ink
-  `#14181C`, bone `#F6F4EF`, dark `#0F1A16`.
+- **Palette, always named:** Deal Green `#0A7A58`, amber `#E8A62B`, ink
+  `#16181A`, bone `#FCFAF6`, jade block `#0A6A4C`. (Aurora, 2026-07-31 — the
+  green-black era's `#16624C` / `#B08637` / `#0F1A16` are RETIRED. If a prompt
+  you are copying names those, it predates the current palette. `DESIGN.md` in
+  this workspace is the authority; this list must match its §4.)
 - **Flat editorial illustration.** Not photorealistic, not 3D, not a stock-photo
   look.
 - **Ban, in every prompt:** text, lettering, numbers, people, faces, logos,
