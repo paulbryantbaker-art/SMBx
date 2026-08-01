@@ -35,45 +35,26 @@ export function PageCrumb({ parent, here }: { parent?: { label: string; href: st
   );
 }
 
-/** Persistent ask on the long home scroll: slides in past ~0.9 viewport
- *  heights (v3 threshold), retires while the engine (#yulia) or the booking
- *  CTA (#cta) is on screen. */
-function StickyCta() {
-  const [past, setPast] = useState(false);
-  const [vis, setVis] = useState<Record<string, boolean>>({});
+/* THE STICKY CTA IS GONE (2026-08-01, Paul: "ok let's rethink it").
+   It was a fixed pill, bottom-right, armed past 0.9 viewport heights, asking
+   "Build your market map". Retired on the numbers rather than on taste: the
+   landing already carries NINE in-page conversion points on a phone — Book a
+   call, Build your market map, Confidential consultation, Bring us your idea,
+   Run yours, two more at the close, Pick a time — and the LARGEST gap between
+   any two of them is 4.1 screens on a 21.3-screen page. The persistent ask it
+   existed to provide already existed.
 
-  useEffect(() => {
-    const onScroll = () => setPast(window.scrollY > window.innerHeight * 0.9);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    const targets = ['yulia', 'cta']
-      .map(id => document.getElementById(id))
-      .filter((el): el is HTMLElement => el !== null);
-    const io = new IntersectionObserver(
-      entries => setVis(v => {
-        const next = { ...v };
-        for (const e of entries) next[(e.target as HTMLElement).id] = e.isIntersecting;
-        return next;
-      }),
-      { threshold: 0.05 },
-    );
-    targets.forEach(el => io.observe(el));
-    return () => { window.removeEventListener('scroll', onScroll); io.disconnect(); };
-  }, []);
+   It was also costing three things for that duplication: it overlapped body
+   text wherever it sat, it is a fixed COLOURED element at the viewport edge —
+   which CLAUDE.md rule 5 bans because Safari samples that strip to tint its
+   toolbar, and which correlated exactly with the grey bottom bar Paul
+   photographed — and it was one more thing on a surface whose whole current
+   direction is calm.
 
-  const on = past && !vis.yulia && !vis.cta;
-  return (
-    <a
-      className={`pd-pill-primary pd-sticky${on ? ' on' : ''}`}
-      href="#yulia"
-      onClick={() => trackEvent('practice_cta_clicked', { placement: 'sticky' })}
-      aria-hidden={!on}
-      tabIndex={on ? 0 : -1}
-    >
-      Build your market map
-    </a>
-  );
-}
+   The scroll-away nav is the better home for a persistent ask anyway: it
+   returns the instant you pull up, and it lives in the chrome rather than on
+   top of the reading. If a floating ask is ever wanted again, it is in git
+   history at 86fb98f — but read the numbers above first. */
 
 export default function PracticeShell({
   home = false,
@@ -331,7 +312,6 @@ export default function PracticeShell({
 
       {children}
 
-      {home && <StickyCta />}
 
       <footer className="pd-footer">
         <div className="pd-footer-inner" data-rv>
