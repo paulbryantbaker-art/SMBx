@@ -286,6 +286,17 @@ export default function PracticeShell({
         <Link href="/industries" onClick={closeMenu}>Industries <span className="arr" aria-hidden>→</span></Link>
         <Link href="/research" onClick={closeMenu}>Research <span className="arr" aria-hidden>→</span></Link>
         <a href={anchor('#who')} onClick={closeMenu}>Who it's for <span className="arr" aria-hidden>→</span></a>
+        {/* The primary action lives here now that the phone bar has dropped
+            its pill. Styled as a button rather than a seventh 21px link — it
+            is the only thing in this menu that is not navigation, and as a row
+            it would have been buried in the list it needs to lead. */}
+        <a
+          className="pd-mmenu-cta"
+          href={anchor('#yulia')}
+          onClick={() => { closeMenu(); trackEvent('practice_cta_clicked', { placement: 'mobile-menu' }); }}
+        >
+          Build your market map
+        </a>
         <a className="quiet" href={anchor('#cta')} onClick={() => { closeMenu(); trackEvent('practice_booking_clicked', { placement: 'mobile-menu' }); }}>Confidential consultation</a>
       </nav>
 
