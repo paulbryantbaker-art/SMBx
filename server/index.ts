@@ -1200,11 +1200,16 @@ app.get('/research/:slug', async (req, res, next) => {
     const tags = [
       `<meta property="og:url" content="${esc(url)}" />`,
       `<link rel="canonical" href="${esc(url)}" />`,
-      `<meta name="twitter:card" content="${report.ogImage ? 'summary_large_image' : 'summary'}" />`,
-      report.ogImage ? `<meta property="og:image" content="${esc(origin + report.ogImage)}" />` : '',
-    ].filter(Boolean).join('\n    ');
+    ].join('\n    ');
 
     const html = shell
+      // index.html now carries a DEFAULT og:image (the site card), so a
+      // report's card must REPLACE it rather than be appended alongside it —
+      // two og:image tags leave the crawler to pick, and it picks the first.
+      .replace(
+        /<meta property="og:image" content="[^"]*" \/>/,
+        `<meta property="og:image" content="${esc(origin + (report.ogImage || '/site-cover.jpg'))}" />`,
+      )
       .replace(/<title>[\s\S]*?<\/title>/, `<title>${esc(title)}</title>`)
       .replace(
         /<meta name="description"[^>]*>/,
@@ -1231,9 +1236,72 @@ app.get('/research/:slug', async (req, res, next) => {
 });
 
 // ─── 6. SPA catch-all (must be LAST) ──────────────────────
-app.get('*', (_req, res) => {
+//
+// Public practice pages get their OWN title/description/canonical/OG stamped
+// in, for the same reason the report route above does: LinkedIn, Slack and X
+// do not run JavaScript, so a posted link previews from the HTML as SERVED,
+// not from anything React sets afterwards. Google renders JS and would
+// eventually read the client-side tags, but "eventually" is not what a
+// freshly posted link gets.
+//
+// Before this, ten public URLs answered with one title and one description —
+// the register in shared/pageMeta.ts is the fix, and it is the same register
+// the client re-applies on SPA navigation.
+//
+// Anything without an entry falls through to the untouched shell, which is
+// the previous behaviour exactly. A page is never worse off for being absent
+// from the register.
+const PAGE_META_CACHE = new Map<string, string>();
+
+app.get('*', async (req, res) => {
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-  res.sendFile(path.join(clientPath, 'index.html'));
+  const shellPath = path.join(clientPath, 'index.html');
+  try {
+    const { findPageMeta } = await import('../shared/pageMeta.js');
+    const meta = findPageMeta(req.path);
+    if (!meta) return res.sendFile(shellPath);
+
+    const cached = PAGE_META_CACHE.get(meta.path);
+    if (cached) {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      return res.send(cached);
+    }
+
+    const { readFile } = await import('node:fs/promises');
+    const shell = await readFile(shellPath, 'utf8');
+    const esc = (v: string) =>
+      v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const origin = `${req.protocol}://${req.get('host')}`;
+    const url = origin + (meta.path === '/' ? '/' : meta.path);
+
+    const html = shell
+      .replace(/<title>[\s\S]*?<\/title>/, `<title>${esc(meta.title)}</title>`)
+      .replace(
+        /<meta name="description"[^>]*>/,
+        `<meta name="description" content="${esc(meta.description)}" />`,
+      )
+      .replace(
+        /<meta property="og:title"[^>]*>/,
+        `<meta property="og:title" content="${esc(meta.title)}" />`,
+      )
+      .replace(
+        /<meta property="og:description"[^>]*>/,
+        `<meta property="og:description" content="${esc(meta.description)}" />`,
+      )
+      .replace(
+        /<meta property="og:type"[^>]*>/,
+        `<meta property="og:type" content="website" />\n    ` +
+          `<meta property="og:url" content="${esc(url)}" />\n    ` +
+          `<link rel="canonical" href="${esc(url)}" />`,
+      );
+
+    PAGE_META_CACHE.set(meta.path, html);
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    return res.send(html);
+  } catch (err: any) {
+    console.error('[pageMeta] injection failed:', err?.message);
+    return res.sendFile(shellPath); // a working page always beats a right title
+  }
 });
 
 // ─── 7. Global error handler — auto-logs to support_issues ──

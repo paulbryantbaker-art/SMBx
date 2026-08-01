@@ -19,6 +19,18 @@
     <meta property="og:title" content="smbX — Buy-side corporate development" />
     <meta property="og:description" content="An on-demand corporate development team that guides your acquisition from thesis to close. We build value by applying operator instincts to the buy-side." />
     <meta property="og:type" content="website" />
+    <!-- The DEFAULT link-preview card. Without one, a posted smbx.ai link
+         previewed as bare text on LinkedIn, Slack and iMessage — which is the
+         one channel the practice markets through. Rendered by the same builder
+         the report cards use, from `scripts/studio/site-og.md`:
+           npx tsx scripts/studio/build-og-card.mts scripts/studio/site-og.md \
+             --slug site --out client/public --kicker "Buy-side only"
+         Report pages REPLACE this tag with their own card (server/index.ts) —
+         replace, never append, or a crawler picks whichever it sees first. -->
+    <meta property="og:image" content="https://smbx.ai/site-cover.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="color-scheme" content="light" />
     <!-- Safari tints BOTH its toolbars from this. It is a compromise value,
          not the page's bone: the top of the page carries the ambient wash
