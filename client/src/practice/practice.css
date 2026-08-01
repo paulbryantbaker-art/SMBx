@@ -495,7 +495,23 @@
   gap: 16px;
   transition: padding 0.28s ease;
 }
-.pd-nav-logo { height: 44px; width: auto; display: block; margin: -6px 0; transition: height 0.28s ease; }
+/* The wordmark and the X are BOTH in the flow, and the swap is a width
+   collapse rather than a display toggle (2026-07-31). Toggling `display` would
+   snap — there is nothing to interpolate — and swapping the `src` would fetch
+   an image mid-scroll and flash the alt text on a slow connection.
+
+   `max-width: 0` on an image whose width is `auto` resolves the used width to
+   zero while the element stays in the layout and in the accessibility tree, so
+   the home link keeps its name from the wordmark's alt at every scroll
+   position. That is why the collapsed mark is not `display: none`. */
+.pd-nav-logo, .pd-nav-mark {
+  display: block; width: auto; margin: -6px 0;
+  transition: height 0.28s ease, max-width 0.28s ease, opacity 0.2s ease;
+}
+.pd-nav-logo { height: 44px; max-width: 240px; opacity: 1; }
+.pd-nav-mark { height: 34px; max-width: 0; opacity: 0; }
+.pd-navwrap.min .pd-nav-logo { max-width: 0; opacity: 0; }
+.pd-navwrap.min .pd-nav-mark { max-width: 44px; opacity: 1; }
 /* Condensed on scroll — the nav stays put (sticky) but shrinks to reclaim ~40%
    of its height, so the user never scrolls back up yet it barely intrudes
    (Paul, 2026-07-14). Tighter padding + smaller logo + smaller pills.
@@ -507,7 +523,6 @@
   border-bottom-color: transparent;
 }
 .pd-navwrap.min .pd-nav { padding-top: 9px; padding-bottom: 9px; }
-.pd-navwrap.min .pd-nav-logo { height: 30px; }
 .pd-navwrap.min .pd-nav-ctas .pd-pill,
 .pd-navwrap.min .pd-nav-ctas .pd-pill-primary { padding-top: 9px; padding-bottom: 9px; }
 .pd-nav-ctas .pd-pill, .pd-nav-ctas .pd-pill-primary { transition: padding 0.28s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
@@ -521,6 +536,8 @@
   text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 7px;
 }
 .pd-nav-ctas { display: flex; gap: 10px; }
+/* Default: full label everywhere. The phone block opts into the short one. */
+.pd-nav-map-short { display: none; }
 
 /* ── Mobile nav: hamburger + slide-down menu (Paul, 2026-07-16: "there is no
    nav hamburger on mobile"). The panel is fixed and transform-parked above
@@ -1565,6 +1582,16 @@
   .pd-nav-logo { height: 34px; }
   .pd-nav-ctas { gap: 6px; }
   .pd-nav-ctas .pd-pill-primary { padding: 10px 14px; font-size: 12.5px; }
+  /* Condensed on a phone, the pill shortens AND shrinks so it sits as a small
+     chip beside the hamburger instead of dominating the bar. Paired with the
+     wordmark collapsing to the X, the whole bar gives its width back to the
+     page while you read. Both labels are in the DOM; only one is displayed, so
+     the swap costs no render and cannot flash an empty pill. */
+  .pd-navwrap.min .pd-nav-map-full { display: none; }
+  .pd-navwrap.min .pd-nav-map-short { display: inline; }
+  .pd-navwrap.min .pd-nav-ctas .pd-pill-primary {
+    padding: 7px 13px; font-size: 11.5px; letter-spacing: 0.005em;
+  }
   .pd-indexrow { gap: 14px; padding: 28px 0; }
   .pd-stats { grid-template-columns: 1fr; gap: 52px; }
   .pd-ledger-head { flex-direction: column; align-items: flex-start !important; gap: 14px !important; }
