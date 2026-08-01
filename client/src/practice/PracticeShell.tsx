@@ -245,6 +245,10 @@ export default function PracticeShell({
           layer inside the relative .pd, never a fixed colored div). Must stay
           the first child so it spans the whole scroll. */}
       <div className="pd-ambient" aria-hidden="true" />
+      {/* The fold wash — one jade rise behind the first screen; see
+          `.pd-foldwash`. Viewport-anchored, so it lands at the fold on every
+          route regardless of how tall the page is. */}
+      <div className="pd-foldwash" aria-hidden="true" />
       {/* The settle — one viewport-tall bloom that drifts to rest and fades to
           nothing shortly after load. It ends fully transparent, so it adds no
           colour to the resting page; see `.pd-settle`. */}
