@@ -275,6 +275,16 @@ export default function Landing() {
               spend a year hiring, a bank with a seller's habits, or us. Here's the case.
             </p>
           </div>
+          <img
+            className="pd-accentband"
+            src="/industries/trade-van.jpg"
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            width={1700}
+            height={520}
+            data-rv
+          />
           <div className="pd-whygrid rv-stagger" data-rv>
             {WHY.map((w, i) => (
               <details className="pd-why" key={w.nm}>
@@ -411,6 +421,16 @@ export default function Landing() {
             <div className="pd-seclabel">Who it's for</div>
             <h2 className="pd-h2">Built for serious buyers.</h2>
           </div>
+          <img
+            className="pd-accentband"
+            src="/industries/trade-power.jpg"
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            width={1700}
+            height={520}
+            data-rv
+          />
           <WhoIndex />
         </div>
       </section>
