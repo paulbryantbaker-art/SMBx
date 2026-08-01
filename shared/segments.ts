@@ -13,6 +13,12 @@
  * segment page's full walkthrough and the landing's per-type How-it-works
  * overview. Every line stays inside THE LINE: the client decides and signs, we
  * coordinate the licensed specialists, buy-side only, one client per target.
+ *
+ * MOVED to shared/ 2026-08-01, following the `shared/reports.ts` precedent:
+ * the SERVER now stamps each segment page's own <title>/description/OG into
+ * index.html (crawlers do not run JS), and the CLIENT renders the same page.
+ * Copying the h1 and card body into a second table for the server is exactly
+ * the drift this repo keeps paying for — one source, both surfaces.
  */
 export interface SegmentPain { name: string; body: string; tag: string; }
 export interface SegmentAnswer { k: string; v: string; }

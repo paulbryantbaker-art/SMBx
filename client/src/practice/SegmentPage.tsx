@@ -11,7 +11,7 @@
  */
 import { Link, Redirect } from 'wouter';
 import PracticeShell, { PageCrumb } from './PracticeShell';
-import { getSegment } from './segmentData';
+import { getSegment } from '@shared/segments';
 import { Swoosh } from './atmo';
 
 export default function SegmentPage({ slug }: { slug: string }) {

@@ -16,6 +16,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
 import './practice.css';
 import { trackEvent } from '../lib/analytics';
+import { useSiteMeta } from './useSiteMeta';
 
 /** Page locator — a breadcrumb in the site's coral label voice, used by the
  *  surviving inner pages (segments, about, track record). The v3 landing and
@@ -84,6 +85,10 @@ export default function PracticeShell({
   children: ReactNode;
 }) {
   const anchor = (hash: string) => (home ? hash : `/${hash}`);
+
+  // Keep the tab, the history entry and the canonical describing the page you
+  // are actually on after an in-app navigation. First load is the server's job.
+  useSiteMeta();
 
   // Highlight the nav item for where the current page lives (Industries page;
   // segment pages still sit under Who it's for).

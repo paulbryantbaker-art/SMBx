@@ -1,23 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://smbx.ai/</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://smbx.ai/sell</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://smbx.ai/buy</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://smbx.ai/raise</loc><lastmod>2026-04-14</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://smbx.ai/integrate</loc><lastmod>2026-04-14</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://smbx.ai/pricing</loc><lastmod>2026-04-14</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://smbx.ai/how-it-works</loc><lastmod>2026-07-10</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://smbx.ai/advise</loc><lastmod>2026-07-10</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://smbx.ai/standard</loc><lastmod>2026-07-10</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://smbx.ai/connectors</loc><lastmod>2026-07-10</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://smbx.ai/industries</loc><lastmod>2026-07-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://smbx.ai/track-record</loc><lastmod>2026-07-18</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://smbx.ai/about</loc><lastmod>2026-07-18</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://smbx.ai/research</loc><lastmod>2026-07-29</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://smbx.ai/research/commercial-mep</loc><lastmod>2026-07-29</lastmod><changefreq>yearly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://smbx.ai/</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://smbx.ai/about</loc><lastmod>2026-08-01</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://smbx.ai/industries</loc><lastmod>2026-08-01</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://smbx.ai/track-record</loc><lastmod>2026-08-01</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://smbx.ai/research</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://smbx.ai/buyers/family-offices</loc><lastmod>2026-08-01</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://smbx.ai/buyers/independent-sponsors</loc><lastmod>2026-08-01</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://smbx.ai/buyers/pe-firms</loc><lastmod>2026-08-01</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://smbx.ai/buyers/searchers</loc><lastmod>2026-08-01</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://smbx.ai/buyers/operators</loc><lastmod>2026-08-01</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://smbx.ai/research/commercial-mep</loc><lastmod>2026-07-23</lastmod><changefreq>yearly</changefreq><priority>0.9</priority></url>
   <url><loc>https://smbx.ai/research/home-services</loc><lastmod>2026-07-29</lastmod><changefreq>yearly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://smbx.ai/login</loc><lastmod>2026-04-14</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://smbx.ai/signup</loc><lastmod>2026-04-14</lastmod><changefreq>yearly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://smbx.ai/legal/terms</loc><lastmod>2026-04-14</lastmod><changefreq>yearly</changefreq><priority>0.2</priority></url>
-  <url><loc>https://smbx.ai/legal/privacy</loc><lastmod>2026-04-14</lastmod><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://smbx.ai/legal/terms</loc><lastmod>2026-08-01</lastmod><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://smbx.ai/legal/privacy</loc><lastmod>2026-08-01</lastmod><changefreq>yearly</changefreq><priority>0.2</priority></url>
 </urlset>

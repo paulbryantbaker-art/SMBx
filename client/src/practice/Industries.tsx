@@ -176,7 +176,12 @@ export default function Industries() {
         <div className="pd-wrap">
           <div className="pd-sechead" data-rv>
             <div className="pd-seclabel">Key industry verticals</div>
-            <h2 className="pd-h2">Buy-side M&amp;A for acquirers of private companies under $250M in revenue.</h2>
+            {/* An H1, styled as an H2. The page had NO h1 at all — its heading
+                outline started at level 2 — which is both a screen-reader
+                defect and an SEO one. The type ladder's law is one SIZE per
+                role, not one TAG per size, so keeping `.pd-h2` preserves the
+                page exactly while giving it a document outline. */}
+            <h1 className="pd-h2">Buy-side M&amp;A for acquirers of private companies under $250M in revenue.</h1>
             {/* "We decline the rest" is gone — Paul, 2026-07-29: "we don't
                 decline the rest, we never turn down business." It also
                 contradicted the CTA at the foot of this same page, which
