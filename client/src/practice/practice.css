@@ -131,32 +131,22 @@
        menu bar, start fading and match the Safari colour"). Opaque bone at
        y=0, gone by 130px, laid OVER the wash so the first rows are exactly
        the flat #FCFAF6 the meta tag carries and the colour arrives below.
-       This is what lets theme-color go back to plain bone: rather than
-       hunting for a flat value that approximates a gradient — and tripping
-       Safari's grey-toolbar behaviour on the way, see PR #225 — the page
-       simply becomes that value where the two meet. Anchored in px and
-       duplicated verbatim in `.pd-navwrap`, same as the two radials below. */
-    linear-gradient(rgba(252, 250, 246, 1) 0, rgba(252, 250, 246, 0) 130px),
-    /* THE TOP TWO ARE SIZED IN PIXELS, and the nav bar repeats them verbatim
-       so the two surfaces are one continuous wash (Paul: "blend the hero
-       background with the header so it doesn't look like two separate
-       things"). A percentage Y radius resolves against PAGE height, which
-       differs on every route and is unknowable to a 76px bar — matching it
-       from the bar is impossible in general, so the shared part of the ramp is
-       made absolute instead. The X radius stays a percentage on purpose: it
-       resolves against each element's own WIDTH, and both are full-bleed, so
-       it is already identical in both places. Change these two lines and you
-       must change the pair in `.pd-navwrap` with them.
 
-       THE CENTRES SIT 400-420px DOWN, not at 0, so the page's first rows are
-       flat bone (Paul: "why does Safari's top bar not match the website?").
-       Safari paints the status-bar strip with `theme-color`, which is a single
-       flat colour and CANNOT represent a gradient — no value can match a ramp
-       that is jade on the left and amber on the right. So the page meets it
-       where it can: the top of the page is the same flat #FCFAF6 the meta tag
-       carries, and the wash builds below it. Each centre is past its own
-       colour stop (420/640 = 0.66 > 0.64; 400/580 = 0.69 > 0.62), which is
-       what puts the value at y=0 at exactly zero rather than merely faint. */
+       This is what lets theme-color stay plain bone: rather than hunting for
+       a flat value that approximates a gradient — and tripping Safari's
+       grey-toolbar behaviour on the way, see PR #225 — the page simply
+       becomes that value where the two meet.
+
+       Sized in px because the ramp has to land at a known distance from the
+       top of the screen, not at a fraction of a page whose height differs on
+       every route. */
+    linear-gradient(rgba(252, 250, 246, 1) 0, rgba(252, 250, 246, 0) 130px),
+    /* The two top blooms. THIS LAYER IS NOW THE ONLY COPY: the nav bar used to
+       repeat it verbatim so that an opaque bar could still look like the top
+       of the page, and keeping the two in step is what put a seam on the page
+       twice. The bar is transparent at the top instead and shows this one
+       through — see `.pd-navwrap`. Their Y radii stay absolute because the
+       fade above them is, and the three want to be reasoned about together. */
     radial-gradient(52% 620px at 12% 0px, rgba(15, 169, 124, 0.110), rgba(15, 169, 124, 0) 64%),
     radial-gradient(46% 560px at 92% 0px, rgba(232, 166, 43, 0.100), rgba(232, 166, 43, 0) 62%),
     radial-gradient(52% 18% at 3% 40%,  rgba(206, 196, 174, 0.13),  rgba(206, 196, 174, 0) 62%),
@@ -465,54 +455,29 @@
 /* ─── nav ─── */
 .pd-navwrap {
   position: sticky; top: 0; z-index: 50;
-  /* AT REST THE BAR IS TRANSPARENT (2026-07-31, Paul on mobile: "the header
-     does not have the same color bleed as the hero and it looks weird").
+  /* TRANSPARENT AT THE TOP, OPAQUE ONCE SCROLLED (Paul: "shouldn't the nav
+     bar just be transparent, and the hero colour fade up and match, so it
+     doesn't really matter that the nav bar covers it part of the time?").
 
-     The ambient wash's strongest jade stop is centred at 12% 2% — inside the
-     nav's own footprint — so an opaque bar clipped the top off that bloom and
-     printed a hard horizontal seam across the full width of the page: flat
-     bone above the hairline, tinted bone below it. It read as a rendering
-     fault, and it got worse the moment Aurora made the wash chromatic, since
-     a tonal-bone wash had almost nothing to clip.
+     Yes — and it splits along the 80px threshold the slide-away already uses,
+     so there is only ever one flip.
 
-     Two wrong fixes preceded the right one, and both are worth naming.
+     AT THE TOP nothing is behind the bar, so it can be transparent and simply
+     show the page's own wash. One source of the gradient, matched by
+     construction rather than by a duplicate kept in sync.
 
-     First I made the bar TRANSPARENT, which let page content scroll up into
-     the top of the screen — "the whole header on mobile is completely broken".
-     Then I made it solid and moved the WASH down out of its way, which left a
-     flat bone band above a washed hero and a hard line between them: "let's
-     blend the hero background with the header so it doesn't look like two
-     separate things".
+     ONCE SCROLLED body text passes underneath and the bar has to hide it, so
+     `.solid` fills it with flat bone. It does not need to match the page there
+     — covering it is the job, and that is the reference behaviour too.
 
-     Moving the wash was solving the wrong half. The bar has to be opaque (the
-     MacRumors reference, and so content cannot bleed through), and the wash
-     has to reach the top of the page (or the top of the page is a dead flat
-     strip). Both are satisfiable: the bar carries its OWN COPY of the bloom,
-     matched to the page's, so an opaque bar and a continuous wash stop being
-     mutually exclusive.
-
-     The copy is BYTE-IDENTICAL to the page layer's top two radials, which is
-     only possible because those were re-expressed in pixels for this. A
-     percentage Y radius resolves against page height — different on every
-     route, unknowable to a 76px bar — so no fixed value could have tracked it.
-     Both boxes start at the same origin (the bar is sticky at top:0 inside
-     .pd, and its safe-area padding is inside its own box), so at rest the two
-     ramps coincide exactly rather than approximately.
-
-     They diverge once the page scrolls, since the bar stays and the page moves
-     under it. That is correct: a scrolled bar is a deliberate overlay, which
-     is what the reference does too.
-
-     Ledger: no backdrop-blur anywhere — the fill is solid, not a frost. */
-  background:
-    /* The same top fade as the page layer — see .pd-ambient. The bar sits
-       inside the faded zone entirely, so without this it would carry full
-       wash while the page immediately below it was fading, which is the
-       seam this pair exists to prevent. */
-    linear-gradient(rgba(252, 250, 246, 1) 0, rgba(252, 250, 246, 0) 130px),
-    radial-gradient(52% 620px at 12% 0px, rgba(15, 169, 124, 0.110), rgba(15, 169, 124, 0) 64%),
-    radial-gradient(46% 560px at 92% 0px, rgba(232, 166, 43, 0.100), rgba(232, 166, 43, 0) 62%),
-    #FCFAF6;
+     THE HISTORY IS WORTH ONE LINE, because three earlier passes all failed the
+     same way. The bar was opaque and clipped the wash's top bloom (a seam);
+     then transparent everywhere, which let content scroll into the top of the
+     screen (broken); then opaque with the wash moved down (a flat band above a
+     tinted hero); then opaque carrying a COPY of the wash, which worked until
+     the copy drifted. Every one of those was an attempt to make an opaque bar
+     look like the page underneath it. The answer was to stop needing it to. */
+  background: transparent;
   border-bottom: 1px solid transparent;
   /* Slides clear of the screen on the way down. `transform` rather than `top`
      or `height`: it is composited, so the slide cannot cause layout or reflow
@@ -550,6 +515,11 @@
    Nothing replaces this. If the edge ever wants softening again, it has to be
    drawn INSIDE the bar's own box, never in a pseudo-element positioned outside
    it, or this bug comes straight back the moment the bar moves. */
+
+/* Opaque once scrolled: body text passes underneath and has to be hidden, not
+   ghosted. This is the ONLY state that needs a fill — at the top the bar shows
+   the page through instead. */
+.pd-navwrap.solid { background: #FCFAF6; }
 
 /* Gone on the way down; the page gets the whole screen, status-bar strip
    included. */

@@ -109,14 +109,34 @@ export default function PracticeShell({
   // momentum emit a stream of sub-pixel scroll events, including sign flips at
   // the end of a fling, so a naive `y > last` would flap the header several
   // times a second at the bottom of a long report.
+  //
+  // `navSolid` FILLS the bar, and it shares the 80px threshold on purpose so
+  // there is only ever one flip (Paul: "shouldn't the nav bar just be
+  // transparent, and the hero colour fade up and match, so it doesn't matter
+  // that the nav bar covers it part of the time?").
+  //
+  // Exactly right, and it splits cleanly along the threshold that already
+  // exists. AT THE TOP there is nothing behind the bar, so it can be
+  // transparent and simply show the page's own wash — one source of the
+  // gradient, matched by construction rather than by a duplicate kept in sync.
+  // ONCE SCROLLED it is an overlay with body text passing under it, so it must
+  // be opaque — and it no longer needs to match anything, because covering the
+  // page is the job at that point.
+  //
+  // That deletes the copy of the wash the bar used to carry. Two of the seams
+  // in this sequence came from that copy drifting from the original; the fix
+  // for a duplicate that keeps going stale is not a better sync rule, it is
+  // not having the duplicate.
   const [navAway, setNavAway] = useState(false);
+  const [navSolid, setNavSolid] = useState(false);
   useEffect(() => {
     let last = window.scrollY;
     const apply = (y: number, dir: number) => {
       // Never hide while the bar is still its own height from the top — it
       // would vanish before you had scrolled past it, which reads as a glitch
       // rather than as getting out of the way.
-      if (y <= 80) { setNavAway(false); return; }
+      if (y <= 80) { setNavAway(false); setNavSolid(false); return; }
+      setNavSolid(true);
       // dir === 0 is the mount case (restored scroll position, anchor load).
       // Treated as "up", so a deep link never lands on a missing header.
       setNavAway(dir > 0);
@@ -223,7 +243,7 @@ export default function PracticeShell({
       {/* `menuOpen` forces the fill: the mobile menu can be opened at scroll 0,
           and a transparent bar above an opaque slide-down panel reads as a
           rendering fault rather than a design. */}
-      <header className={`pd-navwrap${navAway && !menuOpen ? ' away' : ''}`}>
+      <header className={`pd-navwrap${navSolid || menuOpen ? ' solid' : ''}${navAway && !menuOpen ? ' away' : ''}`}>
         <div className="pd-nav">
           {/* SPA Link, not a plain anchor: a full reload from down-page races
               the browser's scroll restoration against the still-mounting page
