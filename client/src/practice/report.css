@@ -400,13 +400,17 @@
   border-radius: 16px; box-shadow: 0 8px 26px rgba(20, 24, 28, 0.055);
   max-width: 34em;
 }
-.rp-dl-body { padding: clamp(24px, 3vw, 32px); }
-.rp-dl-lead { margin-bottom: 20px; }
-.rp-dl-h {
-  margin: 0 0 8px; font-size: 20px; font-weight: 700; color: var(--pd-ink);
-  letter-spacing: -0.008em;
+/* Tighter at rest than it was, because at rest this is now a button and
+   nothing else (Paul, 2026-07-31: "just say 'download the PDF' or something.
+   No micro text is needed"). The old padding was sized around a heading and a
+   supporting paragraph that are gone; keeping it would have left a lone button
+   floating in a box built for three elements.
+   .rp-dl-lead / .rp-dl-h / .rp-dl-p were deleted with the markup they styled. */
+.rp-dl-body { padding: clamp(18px, 2.2vw, 22px); }
+.rp-dl-bare {
+  background: none; border: 0; box-shadow: none;
 }
-.rp-dl-p { margin: 0; font-size: 15.5px; line-height: 1.6; color: var(--pd-body); }
+.rp-dl-bare .rp-dl-body { padding: 0; }
 .rp-dl-cta, .rp-dl-go { border: 0; cursor: pointer; font: inherit; }
 .rp-dl-cta { width: 100%; }
 
