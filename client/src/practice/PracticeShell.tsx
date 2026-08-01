@@ -94,31 +94,47 @@ export default function PracticeShell({
   // client redirect fires, so the nav stays lit for both spellings.
   const onReports = loc.startsWith('/research') || loc.startsWith('/reports');
 
-  // Two independent scroll states, deliberately not one.
+  // The bar has three states, and DIRECTION decides between two of them
+  // (Paul, 2026-07-31: "when scrolling down it's basically minimized out of
+  // the way and essentially transparent… scrolling the page back up would
+  // immediately return it back to normal").
   //
-  // `navMin` CONDENSES the bar (v3: > 40px) — a size change, so it wants a
-  // threshold big enough that a nudge doesn't make it twitch.
+  //   at the top      — transparent, full. Nothing is behind it to hide.
+  //   scrolling DOWN  — minimized: the X and the burger only, no fill. You are
+  //                     reading; the header gets out of the way.
+  //   scrolling UP    — full, filled. You are looking for navigation, so it is
+  //                     already there when you arrive.
   //
-  // `navSolid` FILLS it (> 8px), and exists because of the ambient wash
-  // (Paul, 2026-07-31, on mobile: "the header does not have the same color
-  // bleed as the hero and it looks weird"). The wash's strongest jade stop is
-  // centred at 12% 2% — inside the nav's own footprint — so an opaque bar
-  // clipped the top off that bloom and printed a hard horizontal seam: flat
-  // bone above the hairline, tinted bone below it. At rest the bar is now
-  // transparent and the wash runs through it unbroken.
+  // `navSolid` is deliberately NOT just `y > 8`. The fill exists so body text
+  // passing under the bar is hidden rather than ghosted — which is only a
+  // problem when the bar is showing something. Minimized, there is nothing to
+  // protect but two small marks, and those carry their own backing.
   //
-  // It fills at 8px rather than sharing the 40px threshold because between 0
-  // and 40 the page has already moved under a transparent bar, and content
-  // showing through the nav is a worse bug than the one being fixed.
+  // The 4px dead zone is not a nicety. iOS rubber-banding and momentum emit a
+  // stream of sub-pixel scroll events, including sign flips at the end of a
+  // fling, so a naive `y > last` toggles the header several times a second at
+  // the bottom of a long report.
   const [navMin, setNavMin] = useState(false);
   const [navSolid, setNavSolid] = useState(false);
   useEffect(() => {
+    let last = window.scrollY;
+    const apply = (y: number, dir: number) => {
+      // Near the top, position wins over direction: the full header belongs to
+      // the top of the page whichever way you happen to be moving.
+      if (y <= 40) { setNavMin(false); setNavSolid(y > 8); return; }
+      // dir === 0 is the mount case (a restored scroll position, an anchor
+      // load). Treated as "up" so a deep link never lands on a bare bar.
+      if (dir > 0) { setNavMin(true); setNavSolid(false); }
+      else { setNavMin(false); setNavSolid(true); }
+    };
+    apply(last, 0);
     const onScroll = () => {
       const y = window.scrollY;
-      setNavMin(y > 40);
-      setNavSolid(y > 8);
+      const d = y - last;
+      if (Math.abs(d) < 4) return;
+      last = y;
+      apply(y, d);
     };
-    onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -221,6 +237,7 @@ export default function PracticeShell({
               (already home) never re-fire the router, so handle them here. */}
           <Link
             href="/"
+            className="pd-nav-brand"
             aria-label="smbX.ai home"
             onClick={(e) => {
               if (window.location.pathname === '/') {
@@ -300,6 +317,17 @@ export default function PracticeShell({
         <Link href="/industries" onClick={closeMenu}>Industries <span className="arr" aria-hidden>→</span></Link>
         <Link href="/research" onClick={closeMenu}>Research <span className="arr" aria-hidden>→</span></Link>
         <a href={anchor('#who')} onClick={closeMenu}>Who it's for <span className="arr" aria-hidden>→</span></a>
+        {/* The primary action lives here too, because the condensed bar drops
+            it (Paul: "I wanted it to be moved inside the hamburger"). It is
+            the menu's first action rather than a link in the list — it is the
+            one thing on this menu that is not navigation. */}
+        <a
+          className="pd-mmenu-cta"
+          href={anchor('#yulia')}
+          onClick={() => { closeMenu(); trackEvent('practice_cta_clicked', { placement: 'mobile-menu' }); }}
+        >
+          Build your market map
+        </a>
         <a className="quiet" href={anchor('#cta')} onClick={() => { closeMenu(); trackEvent('practice_booking_clicked', { placement: 'mobile-menu' }); }}>Confidential consultation</a>
       </nav>
 

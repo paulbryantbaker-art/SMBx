@@ -467,7 +467,7 @@
    Ledger pass removed blur from this element as an anti-pattern, and a blurred
    bar reads as a distinct pane of glass — which is exactly the "obviously a
    header" quality being removed here. A dissolve has no surface at all. */
-.pd-navwrap.solid {
+.pd-navwrap.solid, .pd-navwrap.min {
   background: #FCFAF6;
   border-bottom-color: transparent;
 }
@@ -478,7 +478,7 @@
    work with. Bone is spelled out as rgba because a gradient to `transparent`
    interpolates through transparent BLACK in some engines and prints a grey
    bloom; fading to a zero-alpha bone keeps the ramp neutral. */
-.pd-navwrap.solid::after {
+.pd-navwrap.solid::after, .pd-navwrap.min::after {
   content: '';
   position: absolute; left: 0; right: 0; top: 100%;
   height: 34px; pointer-events: none;
@@ -504,24 +504,24 @@
    zero while the element stays in the layout and in the accessibility tree, so
    the home link keeps its name from the wordmark's alt at every scroll
    position. That is why the collapsed mark is not `display: none`. */
+.pd-nav-brand { display: flex; align-items: center; }
 .pd-nav-logo, .pd-nav-mark {
-  display: block; width: auto; margin: -6px 0;
+  display: block; width: auto;
   transition: height 0.28s ease, max-width 0.28s ease, opacity 0.2s ease;
 }
-.pd-nav-logo { height: 44px; max-width: 240px; opacity: 1; }
-.pd-nav-mark { height: 34px; max-width: 0; opacity: 0; }
+/* The -6px is optical, correcting the WORDMARK's own bundled whitespace. The
+   X asset is a tight square crop with none, so it must not inherit it — that
+   offset is what pushed the mark up out of line with the burger. */
+.pd-nav-logo { height: 44px; max-width: 240px; opacity: 1; margin: -6px 0; }
+.pd-nav-mark { height: 24px; max-width: 0; opacity: 0; margin: 0; }
 .pd-navwrap.min .pd-nav-logo { max-width: 0; opacity: 0; }
-.pd-navwrap.min .pd-nav-mark { max-width: 44px; opacity: 1; }
+.pd-navwrap.min .pd-nav-mark { max-width: 30px; opacity: 1; }
 /* Condensed on scroll — the nav stays put (sticky) but shrinks to reclaim ~40%
    of its height, so the user never scrolls back up yet it barely intrudes
    (Paul, 2026-07-14). Tighter padding + smaller logo + smaller pills.
    The soft shadow this used to lift onto is gone (2026-07-31): a shadow is a
    drawn edge, and it was the loudest of the three tells that this is a bar.
    The condensed state now inherits .solid's dissolve like every other state. */
-.pd-navwrap.min {
-  background: #FCFAF6;
-  border-bottom-color: transparent;
-}
 .pd-navwrap.min .pd-nav { padding-top: 9px; padding-bottom: 9px; }
 .pd-navwrap.min .pd-nav-ctas .pd-pill,
 .pd-navwrap.min .pd-nav-ctas .pd-pill-primary { padding-top: 9px; padding-bottom: 9px; }
@@ -580,6 +580,17 @@
     color: var(--pd-ink); border-bottom: 1px solid var(--pd-hair);
   }
   .pd .pd-mmenu a .arr { color: var(--pd-coral-link); font-weight: 700; }
+  /* The primary action, now that the condensed bar drops it. Styled as a
+     BUTTON rather than a menu row on purpose: it is the only thing in here
+     that is not navigation, and the surrounding rows are 21px/800 links, so a
+     seventh one would have buried it in the list it needs to lead. */
+  .pd .pd-mmenu a.pd-mmenu-cta {
+    justify-content: center;
+    margin: 6px 0 14px; padding: 15px 20px;
+    font-size: 16px; font-weight: 700; letter-spacing: 0;
+    color: #fff; background: var(--pd-cta);
+    border-bottom: none; border-radius: 999px;
+  }
   .pd .pd-mmenu a.quiet { font-size: 16px; font-weight: 600; color: var(--pd-body); border-bottom: none; padding-bottom: 8px; }
   .pd-mmenu-scrim {
     display: block; position: fixed; inset: 0; z-index: 48;
@@ -1582,16 +1593,32 @@
   .pd-nav-logo { height: 34px; }
   .pd-nav-ctas { gap: 6px; }
   .pd-nav-ctas .pd-pill-primary { padding: 10px 14px; font-size: 12.5px; }
-  /* Condensed on a phone, the pill shortens AND shrinks so it sits as a small
-     chip beside the hamburger instead of dominating the bar. Paired with the
-     wordmark collapsing to the X, the whole bar gives its width back to the
-     page while you read. Both labels are in the DOM; only one is displayed, so
-     the swap costs no render and cannot flash an empty pill. */
-  .pd-navwrap.min .pd-nav-map-full { display: none; }
-  .pd-navwrap.min .pd-nav-map-short { display: inline; }
-  .pd-navwrap.min .pd-nav-ctas .pd-pill-primary {
-    padding: 7px 13px; font-size: 11.5px; letter-spacing: 0.005em;
+  /* MINIMIZED ON A PHONE = two floating marks and nothing else (Paul,
+     2026-07-31: "I wanted it to be moved inside the hamburger, that way the
+     header when scrolling down is basically minimized out of the way and
+     essentially transparent").
+
+     A shorter pill was the previous attempt and it was still a bar with a
+     button on it. So while you are scrolling DOWN the primary action leaves
+     the header altogether — it is the first item in the menu the burger opens,
+     which is where it now lives — and the fill and dissolve come off, because
+     there is no longer a row of content that needs body text hidden behind it.
+
+     What is left has to stay legible over whatever it floats above, so the two
+     marks carry their own bone discs. That is the smallest amount of surface
+     that keeps a dark-green X readable over a photograph, and it is the
+     "buttons can kind of float there" reading rather than a bar. */
+  .pd-navwrap.min { background: transparent; }
+  .pd-navwrap.min::after { content: none; }
+  .pd-navwrap.min .pd-nav-map { display: none; }
+  .pd-navwrap.min .pd-nav-brand,
+  .pd-navwrap.min .pd-nav-burger {
+    background: rgba(252, 250, 246, 0.88);
+    border-radius: 999px;
+    box-shadow: 0 1px 10px rgba(20, 24, 28, 0.07);
   }
+  .pd-navwrap.min .pd-nav-brand { padding: 7px 10px; }
+  .pd-navwrap.min .pd-nav-burger { width: 40px; height: 40px; display: grid; place-items: center; }
   .pd-indexrow { gap: 14px; padding: 28px 0; }
   .pd-stats { grid-template-columns: 1fr; gap: 52px; }
   .pd-ledger-head { flex-direction: column; align-items: flex-start !important; gap: 14px !important; }
