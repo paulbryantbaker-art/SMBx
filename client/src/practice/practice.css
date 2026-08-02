@@ -927,16 +927,16 @@
    gives back the height of the dark band's swoosh curve so the curve's crest
    sits flush with the viewport bottom — the next band visibly "peeks" at the
    fold (Paul, 2026-07-15). Mobile keeps the full chat-app fold, no peek. */
-.pd-hero-fold { min-height: calc(100svh - 86px); }
+.pd-hero-fold { min-height: calc(100svh - 86px); justify-content: center; }
 @media (min-width: 761px) { .pd-hero-fold { min-height: calc(100svh - 86px - clamp(52px, 6vw, 112px)); } }
-/* The phone fold keeps its FULL height. A giveback was tried at 146/99/65px
-   to spend the fold's top air; every setting pulled the proof band's stats
-   into view (the giveback buys band position at 1:1 but returns air at only
-   1:2), and one variant — a clamp() inside this calc() — was silently dropped
-   by Safari, collapsing the fold to its content height. Adjust height here
-   only with a plain `calc(100svh - Npx)`. (The fold→band gradient system
-   that once lived at the end of this file was retired 2026-08-02 — see the
-   tombstone there.) */
+/* The phone fold now GIVES BACK 120px so the proof band's crest and the
+   TWO DECADES eyebrow show above the toolbar — see ONE CLUSTER, ONE VOID
+   in the ≤760 block, which overrides this rule there. (That reverses the
+   earlier "full height, no peek" law: under the old two-auto layout a
+   giveback only pulled stats into a composition that had no room for
+   them; the cluster grammar wants the proof visible.) Safari law stands:
+   plain `calc(100svh - Npx)` only — a clamp() inside this calc() was
+   silently dropped once, collapsing the fold to its content height. */
 .pd-heroc-inner { position: relative; z-index: 1; width: 100%; max-width: var(--pd-max); margin: 0 auto; }
 .pd-hero-c .pd-h1 { max-width: 24em; margin: 0 auto; font-size: clamp(42px, 5.2vw, 68px); letter-spacing: -0.012em; line-height: 1.08; }
 .pd-hero-c .pd-sub { font-size: 19px; }
@@ -2112,47 +2112,87 @@
      crest, halos, texture — exactly as on desktop. Do not reintroduce a
      fold→band gradient without reading this block's git history first;
      every failure mode is documented there. */
-  .pd-hero-c.pd-hero-fold { padding-bottom: 28px; }
-  /* THE PILL SPOTLIGHT (2026-08-02, Paul, first screenshot after the
-     gradient was retired: "the bloom looks awful with the white band below
-     it above the green band — either make the bloom highlight the chat
-     pill or come in from a different direction"). The base wash was built
-     for the desktop fold: it crests at 76% of the hero and its mask kills
-     it by 94%, which on a phone lands the crest ABOVE the pill and the
-     death BELOW the buttons — a green stripe, then a bone gap, then the
-     band. Three stacked stripes.
+  /* ─── ONE CLUSTER, ONE VOID, VISIBLE PROOF (2026-08-02 evening, Paul:
+     "do all the things that you think will make it look better — right now
+     it looks awful", after a four-lens critique of his screenshot).
 
-     This override is his first option: the bloom becomes a SPOTLIGHT
-     centred on the pill + buttons cluster (~85% of the fold), elliptical,
-     fading to nothing in EVERY direction — gone by ~70% above and ~98%
-     below, so the bone beneath it is the canvas around a halo, not a gap
-     in a stripe. Both radials reach zero before the fold's bottom edge:
-     nothing here can touch the band, so the band's curved crest stays a
-     clean bone→jade change of material.
+     What the screenshot measured: 44% of the fold was empty bone in TWO
+     stacked voids — ~220css between the nav and the headline, ~185css
+     between the sub and the pill — so nav, statement and controls read as
+     three unrelated strata, the sub's "acquisition engine" sat 185px from
+     the engine it names, and the proof band survived only as a sliver
+     swallowed by the Safari toolbar: a claim with no evidence and no
+     scroll cue. The Grok/Gemini fold grammar works because greeting and
+     input are ONE cluster with ONE dominant void; ours had the grammar
+     and not the grouping.
 
-     The base mask (ramp-in 150px, fade-out 74–94%) would cut a glow
-     centred at 85%, so it is removed — this layer needs no mask, its own
-     geometry ends it. Contrast: the meta row sits inside the glow at ~91%
-     where the jade tint is ≤0.09 alpha; --pd-body #5A6169 measures ≥5.1:1
-     there (re-measure if the alphas or the centre move). */
+     The new grammar, top to bottom: nav → fixed 64px breath → headline +
+     sub + pill + CTA row as one cluster (fixed gaps, no autos) → the
+     fold's remaining air as a single void → the band's curved crest with
+     ~120css visible, enough for the TWO DECADES eyebrow to read above the
+     toolbar. The old two-auto split (statement floating mid-air, pill
+     anchored at the bottom) is retired with the voids it produced.
+
+     The 100svh-206px height REPLACES the "phone keeps its full height" law
+     at the base .pd-hero-fold rule — that law protected a composition that
+     no longer exists. Plain px only inside the calc (Safari clamp-in-calc
+     drop, twice). */
+  .pd-hero-fold { min-height: calc(100svh - 206px); justify-content: flex-start; }
+  .pd-hero-c.pd-hero-fold { padding-top: 64px; padding-bottom: 28px; }
+  .pd-hero-c.pd-hero-fold .pd-heroc-inner { margin-top: 0; margin-bottom: 0; }
+  .pd-hero-c.pd-hero-fold .pd-showcase { margin-top: 34px; }
+  /* Sentence-boundary headline stack (see the H1's own comment in
+     Landing.tsx): "Buying businesses / is hard work. / We make it easier."
+     Slightly larger than the old 36px cap — the statement was the one
+     element the chat-first grammar hinges on and it read timid in the
+     space it was given — and lh 1.12 clears Fraunces descenders across a
+     three-line setting (1.08 was tuned for two). */
+  .pd-h1-s2 { display: block; }
+  .pd-hero-c .pd-h1 { font-size: clamp(30px, 9.3vw, 40px); line-height: 1.12; }
+  /* The placeholder and the sub spoke in one voice (same gray, near-same
+     size) — a lede and a form hint are different rungs. The input must
+     stay 16px (smaller triggers iOS focus-zoom), so the placeholder
+     demotes by COLOR only. */
+  .pd-herobar input::placeholder { color: var(--pd-tert); }
+  /* A whisper of lift so the pill reads raised off the wash rather than
+     recessed into it (Paul, earlier: "the chat pill is hard to see"). */
+  .pd-hero-fold .pd-herobar { box-shadow: 0 6px 22px rgba(20, 24, 28, 0.06); }
+  /* The row keeps Paul's edge-alignment with the pill (space-between, set
+     above) and keeps the tinted chip (his 2026-07-31 call against a solid
+     pill next to the solid send disc). Hierarchy is fixed from the other
+     side: the sample link drops to 600 weight so the bold ink no longer
+     outweighs the chip beside it. */
+  .pd-hero-fold .pd-samplelink { font-weight: 600; }
+  /* The dot grid at phone alpha read as sensor noise — a scatter of specks
+     in the void with a few landing on the CTA row like dust. Desktop keeps
+     the mesh; the phone fold is cleaner without it. */
+  .pd-hero-fold .pd-heromesh { display: none; }
+  /* THE PILL SPOTLIGHT, re-anchored (2026-08-02; the spotlight itself was
+     Paul's pick: "make the bloom highlight the chat pill"). The cluster
+     grammar above moved the pill from ~85% of the fold to a FIXED distance
+     under the nav, so the glow is now anchored in px from the hero's top —
+     identical on every viewport height — instead of a percentage that
+     tracked the old bottom-anchored layout. Centred between the pill and
+     the CTA row, gone by its own geometry in every direction, well above
+     the band. The base mask (fade-out at 74–94%) is removed: it was built
+     for the desktop wash and would cut this glow.
+
+     Contrast: the meta row sits inside the glow where the jade tint is
+     ≤0.09 alpha; --pd-body #5A6169 measured 5.6:1 at the link row under
+     the previous, stronger placement — re-measure if alphas change. */
   .pd-hero-fold::before {
     background:
-      radial-gradient(72% 13% at 50% 85%,
+      radial-gradient(76% 120px at 50% 330px,
         rgba(15, 169, 124, 0.15), rgba(15, 169, 124, 0.05) 58%, rgba(15, 169, 124, 0) 98%),
-      radial-gradient(110% 24% at 50% 85%,
-        rgba(15, 169, 124, 0.07), rgba(15, 169, 124, 0) 60%);
+      radial-gradient(115% 220px at 50% 320px,
+        rgba(15, 169, 124, 0.07), rgba(15, 169, 124, 0) 62%);
     -webkit-mask-image: none;
     mask-image: none;
   }
-  /* Free space splits EVENLY: one auto above the statement, one above the
-     pill. A third auto (below the statement) gave the hole between statement
-     and pill two shares against the top's one — measured 200px above vs 251px
-     of hole — and the fold read as two clumps. Air above a headline reads as
-     composition; a gap between blocks reads as a mistake. */
-  .pd-hero-c.pd-hero-fold .pd-heroc-inner { margin-top: auto; margin-bottom: 0; }
-  .pd-hero-c.pd-hero-fold .pd-showcase { margin-top: auto; }
+  /* (The old two-auto slack split and the 36px H1 cap lived here — retired
+     by the ONE CLUSTER grammar above, which owns the fold's spacing and
+     the headline's scale now.) */
   .pd-hero-c.pd-hero-fold .pd-hero-below { margin-top: 18px; }
-  .pd-hero-c .pd-h1 { font-size: clamp(28px, 8.6vw, 36px); }
   .pd-sub { font-size: 18px; }
   .pd-sub-c { margin-top: 12px; max-width: 26em; }
   .pd-hero-below { margin-top: 18px; gap: 12px 20px; }
