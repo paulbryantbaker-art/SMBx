@@ -2210,12 +2210,19 @@
   .pd-hero-fold::before { background: none; -webkit-mask-image: none; mask-image: none; }
   .pd-hero-fold .pd-showcase::before {
     content: ''; position: absolute; z-index: -1; pointer-events: none;
-    inset: -110px -28px -160px;
+    /* Wider + deeper (2026-08-02, Paul: "the bloom should spread out a
+       little more in all directions and maybe be a little bit darker
+       behind the chat pill"). Insets grew ~60/32/50px and the core peak
+       moved 0.15 → 0.21. The 44%/45% centres keep the peak ON the pill
+       after the box grew (pill centre = (170+31)/442 of the new box).
+       Contrast held: --pd-body over the CTA row's tint computes ≥5.2:1
+       even at the deeper values. */
+    inset: -170px -60px -210px;
     background:
-      radial-gradient(76% 46% at 50% 42%,
-        rgba(15, 169, 124, 0.15), rgba(15, 169, 124, 0.05) 58%, rgba(15, 169, 124, 0) 98%),
-      radial-gradient(115% 78% at 50% 42%,
-        rgba(15, 169, 124, 0.07), rgba(15, 169, 124, 0) 62%);
+      radial-gradient(82% 48% at 50% 45%,
+        rgba(15, 169, 124, 0.21), rgba(15, 169, 124, 0.08) 56%, rgba(15, 169, 124, 0) 96%),
+      radial-gradient(130% 82% at 50% 44%,
+        rgba(15, 169, 124, 0.09), rgba(15, 169, 124, 0) 68%);
   }
   /* (The old two-auto slack split and the 36px H1 cap lived here — retired
      by the ONE CLUSTER grammar above, which owns the fold's spacing and
