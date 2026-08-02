@@ -256,7 +256,19 @@ export default function Landing() {
               apart. If that ever reads as a muddle, "acquisition program" is
               the swap that costs nothing else. */}
           <h1 className="pd-h1">Get started building your acquisition engine today.</h1>
-          <p className="pd-sub pd-sub-c">We’ll set up and run your corp dev strategy so you can focus on your core business.</p>
+          {/* Paul's copy, 2026-08-02, replacing "We'll set up and run your corp
+              dev strategy so you can focus on your core business." The sub
+              stops explaining the mechanism and starts acknowledging the
+              reader — the mechanism is what the Why-us grid and the phase
+              accordion are for, and the fold was carrying it twice.
+
+              Punctuated with a full stop rather than the comma it was written
+              with: every other two-beat line on this site takes one ("Buy-side
+              only. One client per target.", "Senior-only. No junior hand-off.",
+              "You make the decisions. We handle the rest…"), and a comma splice
+              here would be the only one on the site — which reads as a typo to
+              exactly the careful reader this page is written for. */}
+          <p className="pd-sub pd-sub-c">Buying businesses is hard. We make it easier.</p>
         </div>
         <div className="pd-showcase">
           <div className="pd-show-stage">
