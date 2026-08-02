@@ -2137,16 +2137,22 @@
      at the base .pd-hero-fold rule — that law protected a composition that
      no longer exists. Plain px only inside the calc (Safari clamp-in-calc
      drop, twice). */
-  /* 286, was 206 (2026-08-02, Paul on the live cluster fold: "a little too
-     much space between the hero and the band?" — his arrow measured a
-     ~165css bone gap between the CTA row and the curve; this brings it to
-     ~85). Safe now that the stats hide until scrolled: a taller crest
-     shows only dark band + eyebrow. On short viewports the content floors
-     the min-height and the band simply follows the fold — no overlap. */
-  .pd-hero-fold { min-height: calc(100svh - 286px); justify-content: flex-start; }
-  .pd-hero-c.pd-hero-fold { padding-top: 64px; padding-bottom: 28px; }
+  /* GOLDEN-RATIO RHYTHM (2026-08-02, Paul — after trying a tighter 85css
+     band gap: "No. That's not it. Let's move that back down", plus his
+     pasted spacing framework: golden-ratio section proportions, a 4x
+     multiplier scale for gaps, ~40% whitespace under the squint test).
+
+     The two big voids now sit in the golden ratio on his viewport
+     (svh≈800): top breath 88px : bottom void ~142px ≈ 1 : 1.618, with the
+     larger air at the bottom — the band back down where he wanted it.
+     In-cluster gaps snap to the 4x scale: 12 (headline→sub, micro) ·
+     32 (sub→pill, macro) · 16 (pill→CTA row, macro). The 206px giveback
+     is restored (286 was the rejected tighter cut). On short viewports
+     the content floors the min-height and the band follows the fold. */
+  .pd-hero-fold { min-height: calc(100svh - 206px); justify-content: flex-start; }
+  .pd-hero-c.pd-hero-fold { padding-top: 108px; padding-bottom: 28px; }
   .pd-hero-c.pd-hero-fold .pd-heroc-inner { margin-top: 0; margin-bottom: 0; }
-  .pd-hero-c.pd-hero-fold .pd-showcase { margin-top: 34px; }
+  .pd-hero-c.pd-hero-fold .pd-showcase { margin-top: 32px; }
   /* Sentence-boundary headline stack (see the H1's own comment in
      Landing.tsx): "Buying businesses / is hard work. / We make it easier."
      Slightly larger than the old 36px cap — the statement was the one
@@ -2197,8 +2203,8 @@
   }
   /* (The old two-auto slack split and the 36px H1 cap lived here — retired
      by the ONE CLUSTER grammar above, which owns the fold's spacing and
-     the headline's scale now.) */
-  .pd-hero-c.pd-hero-fold .pd-hero-below { margin-top: 18px; }
+     the headline's scale now. 16px = the 4x-scale macro gap.) */
+  .pd-hero-c.pd-hero-fold .pd-hero-below { margin-top: 16px; }
   .pd-sub { font-size: 18px; }
   .pd-sub-c { margin-top: 12px; max-width: 26em; }
   .pd-hero-below { margin-top: 18px; gap: 12px 20px; }
