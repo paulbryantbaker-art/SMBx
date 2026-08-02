@@ -2146,7 +2146,7 @@
      1 · THE WASH — flat bone above ~45%, one jade hue rising to crest under
          the chat pill (the crest is what makes the recessed pill visible at
          all: white-on-bone measured 1.01:1 before it), arriving at the
-         hero's bottom edge at THE SEAM VALUE, ~#C9E5D9. The 240% width and
+         hero's bottom edge at THE SEAM VALUE, #A4DCC8. The 240% width and
          96% outer stop exist because a radial normalises by BOTH radii —
          narrower left the bottom corners past the zero stop, bare paper
          exactly where the band's curve is transparent. The 93→100% floor is
@@ -2154,13 +2154,16 @@
          alone decays to ~0.04 alpha in the corners. The 0.30 crest carries
          no text; the 0.10 caption-tier ceiling applies wherever --pd-tert
          could sit.
-     2 · THE OVERLAP — the hero extends 68px below its content and the band
-         rides up by EXACTLY the band's mobile curve (40px — .pd-dark
-         re-scopes --pd-curve to 40 on phones, NOT the 52 the hero inherits).
-         The curve's transparent corners reveal wash, the band's opaque top
-         lands on the viewport's bottom edge, and nothing dark is on screen
-         at rest.
-     3 · THE RAMP — the band's own colour starts at the seam value and
+     2 · THE STRAIGHT SEAM — on the phone the first band has NO top curve
+         (the bottom curve stays; mid-page bands keep both). A curve is a
+         shaped boundary between two different colour functions, and it
+         rendered as a pale arc: the wash had already descended BELOW the
+         ramp's head, so luminance went down, up, down — and a non-monotonic
+         gradient reads as a watermark however soft its edges are. The hero
+         ends, the band begins, flush — nothing dark on screen at rest, and
+         one MONOTONIC descent from mid-fold into the band, which is the
+         whole Gemini lesson.
+     3 · THE RAMP — the band's own colour starts at THE SEAM VALUE and
          deepens to the boardroom green over 150px. An OPAQUE band with a
          lighter head, never a transparent band: transparency was tried
          twice (#272/#273) and the page lost the block holding its bottom.
@@ -2172,9 +2175,12 @@
      LAWS for this block, learned expensively:
      · plain px only — clamp() inside calc() was silently dropped by Safari
        here twice, and a dropped declaration measures as a design bug.
-     · the seam colours are PAIRED, both measured: the wash floor's
-       0.24-alpha jade composites to ~#C9E5D9 on bone, which is the ramp's
-       start. Change one, change both.
+     · THE SEAM VALUE (#A4DCC8) is MEASURED, not derived: it is the wash's
+       true last row, read from a SCROLLED render (682css in a --scroll 230
+       shot). Never measure it at the resting viewport's bottom — those rows
+       are already inside the band, which is how the first pass paired the
+       ramp to itself and shipped a hue line at matched luminance. Change
+       the wash → re-measure → re-pair.
      · everything lives in THIS media block. The wash once sat at ≤900px
        while its overlap sat at ≤760px, and every tablet showed the bone
        strip the phone had been cured of.
@@ -2190,13 +2196,30 @@
     -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 150px, #000 100%);
     mask-image: linear-gradient(to bottom, transparent 0, #000 150px, #000 100%);
   }
-  .pd-hero-c.pd-hero-fold { padding-bottom: 68px; margin-bottom: -40px; }
+  .pd-hero-c.pd-hero-fold { padding-bottom: 68px; }
+  #proof.pd-dark {
+    /* Halo-free stack: the desktop band's jade/teal TOP halos bled through
+       the ramp's semi-transparent head as a hue cast — a visible line at
+       matched luminance. Glaze, texture, base and the bottom honey halo
+       stay. */
+    background:
+      radial-gradient(64% 58% at 94% 104%, rgba(245, 196, 82, 0.16), rgba(245, 196, 82, 0) 64%),
+      linear-gradient(rgba(10, 106, 76, 0.84), rgba(10, 106, 76, 0.84)),
+      url('/textures/blackbleed.webp') center / cover no-repeat,
+      linear-gradient(180deg, var(--pd-dark-top) 0%, var(--pd-dark-bg) 46%, var(--pd-dark-bot) 100%);
+    -webkit-mask:
+      linear-gradient(#fff, #fff) top / 100% calc(100% - 38px) no-repeat,
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1440,0 L1440,60 C1040,12 400,12 0,60 Z' fill='%23fff'/%3E%3C/svg%3E") bottom / 100% 40px no-repeat;
+    mask:
+      linear-gradient(#fff, #fff) top / 100% calc(100% - 38px) no-repeat,
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1440,0 L1440,60 C1040,12 400,12 0,60 Z' fill='%23fff'/%3E%3C/svg%3E") bottom / 100% 40px no-repeat;
+  }
   #proof.pd-dark::after {
     content: ''; position: absolute; left: 0; right: 0; top: 0; height: 150px;
     /* Under .pd-wrap's z-index:1, so it can never cover content; as part of
        the band it is clipped by the curve mask like everything else. */
     z-index: 0; pointer-events: none;
-    background: linear-gradient(to bottom, #C9E5D9 0%, rgba(201, 229, 217, 0) 100%);
+    background: linear-gradient(to bottom, #A4DCC8 0%, rgba(164, 220, 200, 0) 100%);
   }
   #proof .pd-dark-pad { padding-top: 190px; }
   /* Free space splits EVENLY: one auto above the statement, one above the
