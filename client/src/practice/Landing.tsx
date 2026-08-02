@@ -228,10 +228,13 @@ export default function Landing() {
       <section className="pd-hero pd-hero-c pd-hero-fold" id="top" style={{ justifyContent: 'center' }}>
         <div className="pd-heromesh" aria-hidden="true" />
         <div className="pd-heroc-inner">
-          {/* The non-breaking space keeps "three months" off a line of its
-              own — the number and its unit are the point of the sentence. */}
-          <h1 className="pd-h1">Deploy your tailored business acquisition strategy in as little as three&nbsp;months.</h1>
-          <p className="pd-sub pd-sub-c">Institutional-grade corporate development, on demand.</p>
+          {/* Paul's copy, 2026-08-02. Replaces "Deploy your tailored business
+              acquisition strategy in as little as three months." — which led on
+              a vendor verb and buried the only concrete thing in it at the end.
+              The pair now opens on the reader's action and lets the sub carry
+              the mechanism, which is the order the rest of the page reads in. */}
+          <h1 className="pd-h1">Start executing your business acquisition strategy today.</h1>
+          <p className="pd-sub pd-sub-c">We’ll set up and run your corp dev strategy so you can focus on your core business.</p>
         </div>
         <div className="pd-showcase">
           <div className="pd-show-stage">
