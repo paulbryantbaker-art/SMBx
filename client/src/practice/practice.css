@@ -2188,6 +2188,14 @@
        scrolled) → look → ship. */
   .pd-hero-fold::before {
     background:
+      /* DITHER. Browsers do not dither CSS gradients, and any slope shallower
+         than ~1 level per 10px paints visible stair-stripes on OLED — ours
+         measured 22css wide in the shallow zones against Gemini's ≤10 (theirs
+         are narrow because their whole descent is only ~40 levels; ours is
+         ~90, so we cannot match them by reshaping stops alone). A ±3-level
+         grain breaks the quantisation the way film grain does, and at 2.4%
+         opacity it reads as paper, not as texture. */
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.024'/%3E%3C/svg%3E") repeat,
       radial-gradient(240% 54% at 50% 84%, rgba(15, 169, 124, 0.30), rgba(15, 169, 124, 0.09) 48%, rgba(15, 169, 124, 0) 96%),
       linear-gradient(to bottom, rgba(15, 169, 124, 0) 93%, rgba(15, 169, 124, 0.24) 100%);
     /* Ramp-in stops a hard line under the nav; held at full to 100% because
