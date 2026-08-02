@@ -402,11 +402,11 @@
    pale half. */
 @media (max-width: 760px) {
   #proof.pd-dark::after {
-    content: ''; position: absolute; left: 0; right: 0; top: 0; height: 300px;
+    content: ''; position: absolute; left: 0; right: 0; top: 0; height: 150px;
     z-index: 0; pointer-events: none;
     background: linear-gradient(to bottom, #C9E5D9 0%, rgba(201, 229, 217, 0) 100%);
   }
-  #proof .pd-dark-pad { padding-top: 336px; }
+  #proof .pd-dark-pad { padding-top: 190px; }
 }
 /* content clears the curved edges: curve height + breathing room */
 .pd-dark-pad { padding-top: calc(var(--pd-curve, 0px) + clamp(56px, 6.5vw, 110px)); padding-bottom: calc(var(--pd-curve, 0px) + clamp(56px, 6.5vw, 110px)); }
