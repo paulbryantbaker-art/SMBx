@@ -1372,14 +1372,30 @@
      left INSIDE the pill (it opens the sheet, where the starter chips live),
      the send affordance is a compact coral circle, and the in-page chips are
      gone entirely. */
-  /* The bar breaks the fold's 28px gutter and runs nearer the edges, which is
-     the only way to look wider on a phone — Grok gets 423px of a 430px screen;
-     the gutter alone was costing us 56px. -14px each side buys 28 of it back
-     without letting the shadowless pill touch the screen edge. */
-  .pd-chat-hero { margin-inline: -14px; }
+  /* THE GUTTER WAS BEING APPLIED TWICE. `.pd-hero` pads `--pd-pad-x` (28px at
+     this width) and `.pd-showcase` pads another 28px inside it, so the bar had
+     56px of inset per side and got 318px of a 430px screen — measured off a
+     phone screenshot, not assumed. That is why four passes of "make it wider"
+     never looked wider: the widening was real and the container was eating it.
+
+     The previous attempt at this, `margin-inline: -14px` on `.pd-chat-hero`,
+     made it worse in a way that is easy to miss: that element carries an
+     explicit `width: 100%`, so a negative inline margin cannot widen it — it
+     just SHIFTS the box 14px left. The measured result was a pill 28.3px
+     off-centre (42.0 left, 70.3 right), which is exactly what Paul saw.
+
+     Fixed at the source: the showcase drops its second gutter inside the hero
+     and takes a 14px one, so the bar is 402px wide and centred by the `margin:
+     0 auto` it already had. The text above keeps the full 28px gutter — a chat
+     bar running wider than its own body copy is the Grok/Gemini grammar, not a
+     misalignment. */
+  .pd-hero .pd-showcase { padding-left: 14px; padding-right: 14px; }
   .pd-herobar { padding: 8px 8px 8px 8px; gap: 2px; }
   .pd-herobar .pd-plus { display: grid; }
-  .pd-herobar input { font-size: 16px; padding: 13px 0; }
+  /* 10px, was 13px. Measured off the phone screenshot the bar was 67px, not the
+     61 the arithmetic predicted — real line metrics run taller than the 1.2
+     estimate. This brings it to ~61px, which is Grok's 60.7. */
+  .pd-herobar input { font-size: 16px; padding: 10px 0; }
   .pd-herobar .pd-send {
     width: 42px; height: 42px; padding: 0; border-radius: 50%;
     display: grid; place-items: center;
