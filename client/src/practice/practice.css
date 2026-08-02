@@ -2144,7 +2144,26 @@
      flex column. */
   .pd-hero-c { padding-top: 18px; }
   .pd-hero-c.pd-hero-fold { padding-bottom: 16px; }
-  .pd-hero-c.pd-hero-fold .pd-heroc-inner { margin-top: auto; margin-bottom: auto; }
+  /* TWO auto margins, not three (2026-08-02, Paul: "now we can balance the
+     rest of the page to feel more aligned").
+
+     The composition above is right and stays; what was wrong was the SPLIT.
+     Three autos — above the statement, below it, and above the pill — hand the
+     hole between the statement and the pill TWO shares while the air above the
+     statement gets one. Measured on a 430x932 phone: 200px above, 251px of
+     nothing in the middle. The fold read as two clumps with a hole, which is
+     what "balance" was asking about.
+
+     Dropping `margin-bottom: auto` leaves one share above the statement and
+     one above the pill, so the free space splits evenly instead of 1:2. On
+     that same phone the hole goes ~251 → ~187 and the top air ~200 → ~262 —
+     which is the right direction, because air ABOVE a headline reads as
+     composition while a gap BETWEEN two blocks reads as a mistake.
+
+     Deliberately not closed further: driving it to zero means abandoning "the
+     statement floats in the upper-middle air", and the pill has to stay near
+     the bottom of the viewport where a thumb is. */
+  .pd-hero-c.pd-hero-fold .pd-heroc-inner { margin-top: auto; margin-bottom: 0; }
   .pd-hero-c.pd-hero-fold .pd-showcase { margin-top: auto; }
   .pd-hero-c.pd-hero-fold .pd-hero-below { margin-top: 18px; }
   .pd-hero-c .pd-h1 { font-size: clamp(28px, 8.6vw, 36px); }
