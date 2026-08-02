@@ -232,8 +232,15 @@ export default function Landing() {
               acquisition strategy in as little as three months." — which led on
               a vendor verb and buried the only concrete thing in it at the end.
               The pair now opens on the reader's action and lets the sub carry
-              the mechanism, which is the order the rest of the page reads in. */}
-          <h1 className="pd-h1">Start executing your business acquisition strategy today.</h1>
+              the mechanism, which is the order the rest of the page reads in.
+
+              Second pass same day: "…your business acquisition strategy…"
+              became "…on your business acquisitions…". Two gains. "strategy"
+              now appears once across the pair instead of twice in four seconds,
+              and the H1 stops promising a document and starts promising the
+              deals themselves — the plural is the practice's whole shape, since
+              a programmatic acquirer buys more than one. */}
+          <h1 className="pd-h1">Start executing on your business acquisitions today.</h1>
           <p className="pd-sub pd-sub-c">We’ll set up and run your corp dev strategy so you can focus on your core business.</p>
         </div>
         <div className="pd-showcase">
