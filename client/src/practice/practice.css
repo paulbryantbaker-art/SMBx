@@ -1390,6 +1390,57 @@
      bar running wider than its own body copy is the Grok/Gemini grammar, not a
      misalignment. */
   .pd-hero .pd-showcase { padding-left: 14px; padding-right: 14px; }
+
+  /* THE WASH CRESTS ON THE PILL, NOT ABOVE IT (2026-08-02, Paul: "the green
+     shading needs to fill around the bottom of the viewport more, especially on
+     mobile, to highlight the chat pill — right now the chat pill is hard to
+     see"). Measured off his screenshot: greenness (G−R) peaks at +15 around
+     y=633css, is already down to +7 beside the pill at y=703, and is back to
+     bare bone (−1) by y=767. Working back from the desktop crest at 76%, the
+     hero is ~833css tall, which puts the pill's centre at 84% — on the falling
+     edge, in almost no colour. A warm #F6F3EB pill on near-bone is a hue
+     difference at the same luminance, which is exactly the "hard to see".
+
+     So the crest moves 76% → 84%, onto the pill, and gains alpha (0.24 → 0.30).
+
+     THE SEAM CONSTRAINT STILL HOLDS, and it is why the outer stop pulls IN
+     rather than out. The rule this replaces exists because a wash still
+     climbing when the dark proof band arrives meets it pale-jade against
+     deep-jade at a hard curved edge — green cut into green, which reads as a
+     defect. Falling is not climbing, but it still has to arrive quiet: at the
+     hero's bottom edge this carries ~0.037 alpha (about #F7FAF7), a shade off
+     bone, so the band still reads as a change of material.
+
+     THE MASK WAS THE REAL CULPRIT, and moving the gradient alone would not
+     have worked. The base rule fades this layer out with
+     `linear-gradient(to bottom, transparent 0, #000 150px, #000 74%,
+     transparent 94%)` — so the bloom is already half-erased at 84%, whatever
+     the gradient underneath it says. That is why the measured colour died at
+     the pill.
+
+     Holding the mask to 90% and cutting it to nothing at 100% is also a
+     BETTER answer to the seam than tuning stops: at the hero's bottom edge
+     the layer is masked to zero, so there is no green there by construction
+     rather than by arithmetic, and the proof band's curve still meets bare
+     bone. The 150px ramp-in is preserved — it stops a hard line forming under
+     the nav.
+
+     Mobile only, and scoped to `.pd-hero-fold` so short heroes like /about —
+     where there is no pill to light and far less room before the band — keep
+     the desktop geometry.
+
+     Contrast re-measured against the real Aurora tokens, since this raises the
+     alpha: the only text sitting ON the wash down here is the sample link at
+     ~90%, which holds 4.89:1. The pill itself goes from 1.01:1 against its
+     background — identical luminance, which IS the "hard to see" — to 1.28:1.
+     If a `--pd-tert` caption is ever added to this row, re-measure: the caption
+     tier runs 2.5–2.9:1 through this band and would fail. */
+  .pd-hero-fold::before {
+    background:
+      radial-gradient(180% 54% at 50% 84%, rgba(15, 169, 124, 0.30), rgba(15, 169, 124, 0.09) 48%, rgba(15, 169, 124, 0) 78%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 150px, #000 90%, transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 150px, #000 90%, transparent 100%);
+  }
   .pd-herobar { padding: 8px 8px 8px 8px; gap: 2px; }
   .pd-herobar .pd-plus { display: grid; }
   /* 10px, was 13px. Measured off the phone screenshot the bar was 67px, not the
