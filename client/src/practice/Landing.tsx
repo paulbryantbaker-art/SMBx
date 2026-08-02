@@ -306,7 +306,13 @@ export default function Landing() {
               it easier." — the free wrap used to land on "…hard work. We /
               make it easier.", a dangling pronoun severed from its verb. */}
           <h1 className="pd-h1"><span className="pd-h1-s1">Buying businesses is hard work.</span> <span className="pd-h1-s2">We make it easier.</span></h1>
-          <p className="pd-sub pd-sub-c">Deploy your acquisition engine today.</p>
+          {/* "customized" + the exclamation are Paul's, verbatim (2026-08-02:
+              "let's say Deploy your customized acquisition engine today!") —
+              the one sanctioned exclamation on the page. The no-break space
+              glues "acquisition engine" so the phone wrap lands before the
+              compound ("Deploy your customized / acquisition engine today!")
+              instead of splitting it ("…acquisition / engine today!"). */}
+          <p className="pd-sub pd-sub-c">Deploy your customized acquisition{'\u00A0'}engine today!</p>
         </div>
         <div className="pd-showcase">
           <div className="pd-show-stage">
