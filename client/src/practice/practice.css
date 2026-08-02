@@ -1589,7 +1589,20 @@
          non-zero. Costs nothing at the crest, which is still 0.30 at the
          centre, so the contrast ceiling measured for the caption tier holds. */
       radial-gradient(240% 54% at 50% 84%, rgba(15, 169, 124, 0.30), rgba(15, 169, 124, 0.09) 48%, rgba(15, 169, 124, 0) 96%),
-      radial-gradient(165% 52% at 50% 30%, rgba(15, 169, 124, 0.10), rgba(15, 169, 124, 0.035) 52%, rgba(15, 169, 124, 0) 84%);
+      radial-gradient(165% 52% at 50% 30%, rgba(15, 169, 124, 0.10), rgba(15, 169, 124, 0.035) 52%, rgba(15, 169, 124, 0) 84%),
+      /* A FLOOR UNDER THE LAST 7%, so the fold meets the band with colour
+         rather than with paper. The bloom alone only carries ~0.04 alpha into
+         the bottom corners — technically non-zero, visually indistinguishable
+         from bone, which is why widening it in #269 was not enough on its own.
+         A linear ramp does not fall off toward the corners the way a radial
+         does, so it covers the full width evenly right down to the edge.
+
+         It starts at 93% because that is below the content: the 68px of
+         padding-bottom is ~8% of the box, so nothing readable sits in this
+         zone and the contrast ceilings measured for the blooms are untouched.
+         Where it is strongest it is behind the band anyway — only the part
+         showing through the curve is ever seen. */
+      linear-gradient(to bottom, rgba(15, 169, 124, 0) 93%, rgba(15, 169, 124, 0.24) 100%);
     /* NO FADE-OUT AT THE BOTTOM (2026-08-02, Paul: "there is an odd gap in the
        shading"). Measured off his screenshot at the left edge: greenness peaks
        at +22 around 583–642css, falls to +5 by 650, and is BARE BONE (#FBFAF6,
@@ -2280,9 +2293,31 @@
      curve and nothing else, which is the "small band, no visible text" asked
      for. `.pd-hero`'s `overflow: hidden` is not a problem because the layer
      stays inside the padding box rather than escaping it. */
+  /* PLAIN NUMBERS, NOT calc(var(--pd-curve)).
+
+     WHAT IS CERTAIN is that the previous version never applied. Measured off
+     Paul's screenshot: the band's top edge sat 18px BELOW the hero's bottom,
+     when `margin-bottom: calc(-1 * var(--pd-curve))` should have put it 52px
+     ABOVE. The sign is wrong, not the magnitude — the declaration was dropped.
+
+     WHAT IS INFERRED is why. `--pd-curve` is `clamp(52px, 6vw, 112px)`, so
+     both declarations became a clamp() inside a calc() after substitution,
+     which is the same shape that silently dropped `min-height` two commits
+     ago. But that is not a complete theory: the desktop `min-height` at the
+     top of this file has carried a single clamp-in-calc for months and works,
+     as does the band's own mask. The broken `min-height` had TWO clamps in one
+     expression, which may be the actual trigger. Recorded as a suspicion
+     rather than a finding.
+
+     Either way, plain numbers remove the variable entirely, and hardcoding is
+     exactly equivalent here rather than an approximation: `6vw` only exceeds
+     52px above an 867px viewport, so inside this ≤760px query `--pd-curve` is
+     always 52px. If the strip survives this, the cause is somewhere else and
+     the next step is measuring the hero's computed padding box directly rather
+     than inferring it from where the wash stops. */
   .pd-hero-c.pd-hero-fold {
-    padding-bottom: calc(16px + var(--pd-curve));
-    margin-bottom: calc(-1 * var(--pd-curve));
+    padding-bottom: 68px;   /* 16 + the 52px curve */
+    margin-bottom: -52px;   /* the band rides back up under the extended hero */
   }
   /* TWO auto margins, not three (2026-08-02, Paul: "now we can balance the
      rest of the page to feel more aligned").
