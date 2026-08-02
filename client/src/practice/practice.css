@@ -1233,10 +1233,20 @@
    page headline/sub already carry it). On desktop it swaps for the
    conversation card the moment the visitor engages; on phones it is always the
    doorway to the slide-up sheet (typing never happens in-page). ── */
-.pd-chat-hero { width: 100%; max-width: 780px; margin: 0 auto; }
+/* 880, up from 780 (2026-08-02, Paul: wider and sleeker). It also closes the
+   gap to the engaged card, which is `--pd-mid` (1040) — the resting bar is
+   meant to read as the same element, and 780 → 1040 was a 260px jump on
+   engage. 880 halves it. */
+.pd-chat-hero { width: 100%; max-width: 880px; margin: 0 auto; }
 .pd-herobar {
   display: flex; align-items: center; gap: 10px;
-  padding: 12px 12px 12px 28px;
+  /* SLEEKER = shorter, not narrower — the two pull in opposite directions and
+     only the height was doing the damage. 12px of bar padding around a 50px
+     send button made this ~74px tall; at 10px around a 46px button it is ~66px,
+     which is where Grok and Gemini sit. Left inset goes 28 → 30 to stay ahead
+     of the deeper corner the extra width buys (radius is half the height, so
+     the curve moved with it). */
+  padding: 10px 10px 10px 30px;
   background: #fff;
   /* `--pd-hair` (#EAE5DC) here was 1px of near-white on white — technically a
      border, visually nothing, which is why the bar read as edgeless in a phone
@@ -1268,7 +1278,11 @@
      resting bar is supposed to become the card's input row when the
      conversation opens, and a radius mismatch is exactly what breaks it. */
   border-radius: 999px;
-  box-shadow: 0 2px 4px rgba(20, 24, 28, 0.06), 0 12px 32px rgba(20, 24, 28, 0.10);
+  /* Lifted off the page rather than dropped onto it — the old 12px/32px cast
+     enough shadow to read as a floating card, which is the opposite of sleek on
+     a control this wide. The border carries the edge now; the shadow only
+     separates it from the wash behind. */
+  box-shadow: 0 1px 3px rgba(20, 24, 28, 0.05), 0 8px 24px rgba(20, 24, 28, 0.07);
   transition: border-color 160ms ease;
 }
 .pd-herobar:focus-within { border-color: #16181A; }
@@ -1278,7 +1292,9 @@
   -webkit-appearance: none; appearance: none; border: none; border-radius: 0; box-shadow: none; outline: none;
 }
 .pd .pd-herobar input:focus-visible { outline: none; }
-.pd-herobar .pd-send { border-radius: 999px; padding: 15px 28px; }
+/* 12px, was 15px — this button sets the bar's height, so it is where "sleeker"
+   is actually spent. Horizontal stays 28px so the label keeps its room. */
+.pd-herobar .pd-send { border-radius: 999px; padding: 12px 28px; }
 /* The + inside the pill — hidden on desktop (chips live under the bar there),
    shown ≤900px where it stands in for the starter chips. */
 .pd-herobar .pd-plus {
@@ -1286,7 +1302,17 @@
   border: none; background: transparent; color: var(--pd-ink); cursor: pointer;
   border-radius: 50%;
 }
-.pd-chat-hero .pd-chips { justify-content: center; padding: 18px 0 0; }
+/* The starter chips span the bar's width instead of huddling in the middle of
+   it (Paul, 2026-08-02: "the buttons below it could match the width"). Centred
+   was fine at 780; at 880 a centred cluster just grows the dead air either side
+   of it, so the row now sets its own edges against the pill's.
+
+   Safe from the usual space-between trap — a wrapped last line spreading two
+   chips to the far corners — because this rule only ever applies at ≥901px
+   (below that `.pd-chat-hero .pd-chips` is display:none) and the five lanes
+   measure ~655px against 880px of room, so they cannot wrap. If a sixth lane is
+   ever added, check this before shipping it. */
+.pd-chat-hero .pd-chips { justify-content: space-between; padding: 18px 0 0; }
 @media (min-width: 901px) {
   /* Resting desktop = hero bar only; engaged desktop = the card only. */
   .pd-chat-zone:not(.resting) .pd-chat-hero { display: none; }
