@@ -182,10 +182,22 @@ function ProofBand() {
     if (!host) return;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const io = new IntersectionObserver(es => es.forEach(e => {
-      if (!e.isIntersecting) return;
-      io.disconnect();
-      host.classList.add('rv-in');
-      if (!reduce) host.querySelectorAll<HTMLElement>('.pd-stat .n').forEach(countUp);
+      if (e.isIntersecting) {
+        if (host.classList.contains('rv-in')) return;
+        host.classList.add('rv-in');
+        if (!reduce) host.querySelectorAll<HTMLElement>('.pd-stat .n').forEach(countUp);
+      } else if (e.boundingClientRect.top > 0) {
+        /* The reveal RESETS when the stats drop back below the viewport
+           (2026-08-02, Paul: "hide the reveal honey text when navigating
+           back to home or scroll back to top"). A one-shot reveal stuck
+           rv-in on, so scrolling back to the top left the numerals opaque
+           in the chrome zone again — the exact state the reveal exists to
+           prevent. The top>0 guard resets ONLY on the way back up: when
+           the stats exit past the viewport TOP while reading deeper, they
+           stay revealed rather than visibly fading at the edge. Each
+           re-entry replays the fade and the count. */
+        host.classList.remove('rv-in');
+      }
     }), { threshold: 0.15, rootMargin: '0px 0px -18% 0px' });
     io.observe(host);
     return () => io.disconnect();
