@@ -373,54 +373,6 @@
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1440,0 L1440,60 C1040,12 400,12 0,60 Z' fill='%23fff'/%3E%3C/svg%3E") bottom / 100% var(--pd-curve) no-repeat;
 }
 @media (max-width: 760px) { .pd-dark { --pd-curve: clamp(40px, 9vw, 68px); /* @kind spacing */ } }
-
-/* THE FOLD'S BAND DISSOLVES INSTEAD OF BEING CUT (2026-08-02, Paul, with a
-   Gemini screenshot beside ours: "see how Gemini has a smoother gradient — it
-   should fade out the band").
-
-   The reference has no edge at all: white at the top, one colour deepening
-   continuously into the bottom of the screen, the input pill floating in it.
-   Ours arrives at a crisp curve, and no amount of matching the colour ON
-   either side of that curve makes an edge stop being an edge — which is what
-   the last four passes were doing.
-
-   So on the phone the FIRST band drops its top curve for a 300px alpha fade,
-   of which only the palest ~60px is ever on screen (see the hero's
-   margin-bottom). The bottom curve stays: that edge borders the next light
-   section and is the site's rhythm, not the fold's problem.
-
-   300px, not the 140px first tried, comes from measuring the reference rather
-   than guessing: Gemini drops 40 luminance points at ~0.13 per pixel and ends
-   on a LIGHT blue, where ours dropped 163 points at 0.64 into near-dark. A
-   longer ramp with less of it visible is the only way to get that rate out of
-   a band that is genuinely dark at the far end.
-
-   SCOPED TO #proof ON PURPOSE. This is the fold transition — the one being
-   judged against a chat app's home screen. The mid-page bands are punctuation
-   between reading sections, where a crisp curve is doing a different and
-   still-correct job. If this reads well, widening it to `.pd-dark` is one
-   selector.
-
-   Two things make it work, and it is broken without either: the hero extends
-   140px behind the fade (see `.pd-hero-c.pd-hero-fold`) so the dissolve
-   reveals green rather than bone, and the content padding clears the fade so
-   no text ever sits on a half-transparent band. Every value is a plain px —
-   three rules in this fold have already been silently dropped today for
-   wrapping a clamp() in a calc(). */
-@media (max-width: 760px) {
-  #proof.pd-dark {
-    -webkit-mask:
-      linear-gradient(to bottom, rgba(0, 0, 0, 0) 0, #000 300px) 0 0 / 100% calc(100% - 38px) no-repeat,
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1440,0 L1440,60 C1040,12 400,12 0,60 Z' fill='%23fff'/%3E%3C/svg%3E") bottom / 100% 40px no-repeat;
-    mask:
-      linear-gradient(to bottom, rgba(0, 0, 0, 0) 0, #000 300px) 0 0 / 100% calc(100% - 38px) no-repeat,
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1440,0 L1440,60 C1040,12 400,12 0,60 Z' fill='%23fff'/%3E%3C/svg%3E") bottom / 100% 40px no-repeat;
-  }
-  /* Clears the 140px dissolve, so the eyebrow never lands on a half-opaque
-     band. The default is curve + breathing room, which is 96px here — inside
-     the fade. */
-  #proof .pd-dark-pad { padding-top: 336px; }
-}
 /* content clears the curved edges: curve height + breathing room */
 .pd-dark-pad { padding-top: calc(var(--pd-curve, 0px) + clamp(56px, 6.5vw, 110px)); padding-bottom: calc(var(--pd-curve, 0px) + clamp(56px, 6.5vw, 110px)); }
 .pd-dark a.pd-pill, .pd-dark a.pd-pill:hover { color: var(--pd-ink); }
@@ -2364,22 +2316,8 @@
      the next step is measuring the hero's computed padding box directly rather
      than inferring it from where the wash stops. */
   .pd-hero-c.pd-hero-fold {
-    /* ONLY 60px OF THE BAND'S 300px DISSOLVE IS ON SCREEN — that is the whole
-       point, and it is what the previous 140/−140 got wrong.
-
-       Measured against the reference: Gemini holds pure white for the top half
-       of the screen and then drops just 40 luminance points (251 → 211) at
-       ~0.13 points per pixel, ending on a LIGHT blue. Ours dropped 163 points
-       (249 → 86) at 0.64 — five times the rate, into near-dark. Matching an
-       edge cannot fix a destination that is 125 luminance points too low: the
-       problem was that the band reached full opacity on screen at all.
-
-       Pulling the band up by only 60px against a 300px fade means the visible
-       screen is ~20% into the dissolve, so it bottoms out around luminance 185
-       instead of 86 — a deepening green, not a dark band — and the remaining
-       80% of the fade happens below the fold as you scroll. */
-    padding-bottom: 76px;   /* 16 + the 60px of dissolve that is on screen */
-    margin-bottom: -60px;   /* the band rides up only into the fade's pale end */
+    padding-bottom: 68px;   /* 16 + the 52px curve */
+    margin-bottom: -52px;   /* the band rides back up under the extended hero */
   }
   /* TWO auto margins, not three (2026-08-02, Paul: "now we can balance the
      rest of the page to feel more aligned").
