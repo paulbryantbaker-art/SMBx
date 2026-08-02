@@ -235,12 +235,27 @@ export default function Landing() {
               the mechanism, which is the order the rest of the page reads in.
 
               Second pass same day: "…your business acquisition strategy…"
-              became "…on your business acquisitions…". Two gains. "strategy"
-              now appears once across the pair instead of twice in four seconds,
-              and the H1 stops promising a document and starts promising the
-              deals themselves — the plural is the practice's whole shape, since
-              a programmatic acquirer buys more than one. */}
-          <h1 className="pd-h1">Start executing on your business acquisitions today.</h1>
+              became "…on your business acquisitions…", dropping the repeat of
+              "strategy" and promising the deals rather than a document.
+
+              Third pass, and the one that matters (Paul: "by today I mean start
+              setting it up today with a phone call — it's a metaphor humans
+              understand; they know it won't be in place today, but they can get
+              started today"). "Start executing" broke that metaphor by claiming
+              the deals were already moving; "get started building" says the
+              true thing — you begin today, the engine exists later — and no
+              reader has to squint at it.
+
+              "Engine" is deliberate and sets up the Why-us H2 three sections
+              down: "The machine serial acquirers build in-house. Yours, without
+              the headcount." Same metaphor, stated then evidenced. The known
+              cost is that the intake tool is publicly the "Acquisition Engine",
+              so the word is doing two jobs one element apart — the headline's
+              is lowercase and possessive ("your acquisition engine"), the
+              tool's is a capitalised proper noun, which is what keeps them
+              apart. If that ever reads as a muddle, "acquisition program" is
+              the swap that costs nothing else. */}
+          <h1 className="pd-h1">Get started building your acquisition engine today.</h1>
           <p className="pd-sub pd-sub-c">We’ll set up and run your corp dev strategy so you can focus on your core business.</p>
         </div>
         <div className="pd-showcase">
