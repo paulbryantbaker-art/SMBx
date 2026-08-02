@@ -228,10 +228,35 @@ export default function Landing() {
       <section className="pd-hero pd-hero-c pd-hero-fold" id="top" style={{ justifyContent: 'center' }}>
         <div className="pd-heromesh" aria-hidden="true" />
         <div className="pd-heroc-inner">
-          {/* The non-breaking space keeps "three months" off a line of its
-              own — the number and its unit are the point of the sentence. */}
-          <h1 className="pd-h1">Deploy your tailored business acquisition strategy in as little as three&nbsp;months.</h1>
-          <p className="pd-sub pd-sub-c">Institutional-grade corporate development, on demand.</p>
+          {/* Paul's copy, 2026-08-02. Replaces "Deploy your tailored business
+              acquisition strategy in as little as three months." — which led on
+              a vendor verb and buried the only concrete thing in it at the end.
+              The pair now opens on the reader's action and lets the sub carry
+              the mechanism, which is the order the rest of the page reads in.
+
+              Second pass same day: "…your business acquisition strategy…"
+              became "…on your business acquisitions…", dropping the repeat of
+              "strategy" and promising the deals rather than a document.
+
+              Third pass, and the one that matters (Paul: "by today I mean start
+              setting it up today with a phone call — it's a metaphor humans
+              understand; they know it won't be in place today, but they can get
+              started today"). "Start executing" broke that metaphor by claiming
+              the deals were already moving; "get started building" says the
+              true thing — you begin today, the engine exists later — and no
+              reader has to squint at it.
+
+              "Engine" is deliberate and sets up the Why-us H2 three sections
+              down: "The machine serial acquirers build in-house. Yours, without
+              the headcount." Same metaphor, stated then evidenced. The known
+              cost is that the intake tool is publicly the "Acquisition Engine",
+              so the word is doing two jobs one element apart — the headline's
+              is lowercase and possessive ("your acquisition engine"), the
+              tool's is a capitalised proper noun, which is what keeps them
+              apart. If that ever reads as a muddle, "acquisition program" is
+              the swap that costs nothing else. */}
+          <h1 className="pd-h1">Get started building your acquisition engine today.</h1>
+          <p className="pd-sub pd-sub-c">We’ll set up and run your corp dev strategy so you can focus on your core business.</p>
         </div>
         <div className="pd-showcase">
           <div className="pd-show-stage">
@@ -257,7 +282,7 @@ export default function Landing() {
             border), so the row now pairs a house chip with a house link
             instead of a button with a link. */}
         <div className="pd-hero-below">
-          <a className="pd-hero-book" href="#cta" onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero' })}>Book a call</a>
+          <a className="pd-hero-book" href={bookHref()} target={bookTarget()} rel={bookRel()} onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero' })}>Book a call</a>
           <a className="pd-samplelink" href="#sample" onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero-sample' })}>See a sample read →</a>
         </div>
       </section>
@@ -350,7 +375,7 @@ export default function Landing() {
               more experienced side of the table.
             </p>
             <p className="strong">You make the decisions. We handle the rest, and we get you to the closing table.</p>
-            <a className="pd-pill-primary pd-pill-lg" href="#yulia" style={{ marginTop: 34 }} onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-close' })}>Bring us your idea →</a>
+            <a className="pd-pill-primary pd-pill-lg" href="#yulia" style={{ marginTop: 34 }} onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-close' })}>Build your market map →</a>
           </div>
         </div>
       </section>
@@ -485,7 +510,7 @@ export default function Landing() {
               </p>
               <div style={{ marginTop: 34, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 <a className="pd-pill-primary pd-pill-lg" href="#yulia" onClick={() => trackEvent('practice_cta_clicked', { placement: 'whose-side' })}>Build your market map →</a>
-                <a className="pd-pill pd-pill-lg-quiet" href="#cta" onClick={() => trackEvent('practice_booking_clicked', { placement: 'whose-side' })}>Book a call</a>
+                <a className="pd-pill pd-pill-lg-quiet" href={bookHref()} target={bookTarget()} rel={bookRel()} onClick={() => trackEvent('practice_booking_clicked', { placement: 'whose-side' })}>Book a call</a>
               </div>
             </div>
           </div>

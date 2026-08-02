@@ -697,12 +697,36 @@
     border-bottom: none; border-radius: 999px;
   }
   .pd .pd-mmenu a.quiet { font-size: 16px; font-weight: 600; color: var(--pd-body); border-bottom: none; padding-bottom: 8px; }
+  /* MEASURED, not suspected (2026-08-01). Paul's screenshot had Safari's bottom
+     toolbar flat grey at #B0AFAB while the page above it was bone (#F8F7F3 as
+     captured). This scrim's rgba(20, 18, 17, 0.32) over that bone computes to
+     #AFAEAB — a match to within one unit per channel. The chat scrim's 0.5
+     black would have produced #86847F, so this is an identification, not a
+     shortlist. The previous pass blamed the sticky CTA and shipped a "probably";
+     retiring it did not fix the grey, because this was always the source.
+
+     What it was: a `position: fixed` full-viewport div carrying a background
+     colour — CLAUDE.md rule 5 verbatim, sitting in the strip Safari samples to
+     tint its toolbars. The tint OUTLIVES the element that caused it, which is
+     the whole reason the bug reads the way Paul described it: opening the phone
+     menu is how you navigate on a phone, so "any navigation" armed the grey,
+     and it stayed through the menu closing and the route change.
+
+     Two changes, each sufficient on its own, both correct:
+      • absolute inside the relative .pd — the sanctioned pattern, already
+        proven here by .pd-ambient. .pd spans the whole document, so inset:0
+        still covers the viewport, and the menu holds html at overflow:hidden
+        while it is open so the covered region cannot drift.
+      • the colour lives only in .on, so at rest — which is essentially always
+        — there is no coloured viewport-sized layer to read in the first place.
+     Fading background-color rather than opacity keeps the animation identical;
+     no JS reads either property. */
   .pd-mmenu-scrim {
-    display: block; position: fixed; inset: 0; z-index: 48;
-    background: rgba(20, 18, 17, 0.32);
-    opacity: 0; pointer-events: none; transition: opacity 0.26s ease;
+    display: block; position: absolute; inset: 0; z-index: 48;
+    background-color: transparent;
+    pointer-events: none; transition: background-color 0.26s ease;
   }
-  .pd-mmenu-scrim.on { opacity: 1; pointer-events: auto; }
+  .pd-mmenu-scrim.on { background-color: rgba(20, 18, 17, 0.32); pointer-events: auto; }
 }
 
 /* ─── hero — split: statement left, the engine right (the pattern the
@@ -1283,13 +1307,26 @@
   }
   .pd-chat-hero .pd-chips { display: none; }
 
-  /* Scrim — always mounted so it can fade both ways. */
+  /* Scrim — always mounted so it can fade both ways.
+
+     This one CANNOT take the absolute treatment .pd-mmenu-scrim just got: it
+     renders inside .pd-chat-zone, so its containing block would be that
+     fold-sized box rather than the document, and inset:0 would quietly stop
+     covering the viewport — a scrim that no longer scrims, with nothing in the
+     diff to catch it. What it can do is stop carrying a colour while closed,
+     which is the state the page is in every moment except while the sheet is
+     up. That leaves the resting page with no fixed coloured viewport layer
+     anywhere, which is the condition rule 5 is actually asking for.
+
+     While the sheet is OPEN a tint is still possible, and there it is honest
+     rather than a defect: the whole screen is dimmed behind a 92vh sheet, so a
+     dimmed toolbar agrees with the page instead of contradicting it. */
   .pd-chat-scrim {
     display: block; position: fixed; inset: 0; z-index: 88;
-    background: rgba(20, 18, 18, 0.5); touch-action: none;
-    opacity: 0; pointer-events: none; transition: opacity 0.28s ease;
+    background-color: transparent; touch-action: none;
+    pointer-events: none; transition: background-color 0.28s ease;
   }
-  .pd-chat-scrim.on { opacity: 1; pointer-events: auto; }
+  .pd-chat-scrim.on { background-color: rgba(20, 18, 18, 0.5); pointer-events: auto; }
 
   /* The sheet — parked below the viewport, slides up on .open. --pd-kb is the
      on-screen keyboard height (set from the visualViewport by the component):

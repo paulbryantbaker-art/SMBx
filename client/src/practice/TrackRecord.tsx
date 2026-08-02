@@ -150,9 +150,35 @@ export default function TrackRecord() {
         <div className="pd-statement" style={{ maxWidth: '16em' }}>
           Every transaction above was done for a buyer. That hasn't&nbsp;changed.
         </div>
+        {/* Relabelled from "Confidential consultation" (2026-08-02). That
+            phrase appears four other times — desktop nav, phone menu, both
+            footers — and in every one of them it scrolls to the booking card
+            so you can read the terms before committing. Here alone it dropped
+            you straight into Google Calendar, so the same words did two
+            different things depending on which page you were reading.
+
+            Fixed by moving the LABEL rather than the destination, because the
+            direct jump is right here and there is already a house word for it.
+            This page is the same shape as /research and /research/:slug — a
+            long credibility read closing on a single bare primary pill, no
+            booking card in front of it — and both of those say "Book a
+            confidential call" and go straight to the calendar. Someone at the
+            bottom of the deal wall is the warmest traffic on the site; sending
+            them to another page to find a card would add a hop, and would have
+            split this page off from the two it behaves like.
+
+            The rule this settles: the CHROME's standing ask is "Confidential
+            consultation" and goes to the card; an in-page pill at the close of
+            a read goes to the calendar. Every label now means exactly one
+            thing. */}
         <div style={{ marginTop: 32 }}>
-          <a className="pd-pill-primary pd-pill-lg" href={bookHref()} target={bookTarget()} rel={bookRel()}>
-            Confidential consultation
+          <a
+            className="pd-pill-primary pd-pill-lg"
+            href={bookHref()}
+            target={bookTarget()}
+            rel={bookRel()}
+          >
+            Book a confidential call
           </a>
         </div>
       </section>
