@@ -2179,27 +2179,35 @@
      in the void with a few landing on the CTA row like dust. Desktop keeps
      the mesh; the phone fold is cleaner without it. */
   .pd-hero-fold .pd-heromesh { display: none; }
-  /* THE PILL SPOTLIGHT, re-anchored (2026-08-02; the spotlight itself was
-     Paul's pick: "make the bloom highlight the chat pill"). The cluster
-     grammar above moved the pill from ~85% of the fold to a FIXED distance
-     under the nav, so the glow is now anchored in px from the hero's top —
-     identical on every viewport height — instead of a percentage that
-     tracked the old bottom-anchored layout. Centred between the pill and
-     the CTA row, gone by its own geometry in every direction, well above
-     the band. The base mask (fade-out at 74–94%) is removed: it was built
-     for the desktop wash and would cut this glow.
+  /* THE PILL SPOTLIGHT, anchored to the pill ITSELF (2026-08-02, third
+     anchor in one day and the lesson is the anchor, not the glow. The
+     spotlight was Paul's pick — "make the bloom highlight the chat pill" —
+     but %-of-fold tracked the retired bottom layout, and px-from-hero-top
+     went stale the moment the golden-ratio pass moved the cluster 44px:
+     "the bloom needs to be fixed". A glow that must follow an element
+     belongs ON the element.)
 
-     Contrast: the meta row sits inside the glow where the jade tint is
-     ≤0.09 alpha; --pd-body #5A6169 measured 5.6:1 at the link row under
-     the previous, stronger placement — re-measure if alphas change. */
-  .pd-hero-fold::before {
+     The glow is now a ::before of .pd-showcase — the pill's own wrapper —
+     extending past it via negative insets (110px above, 160px below, so
+     the halo wraps pill + CTA row). It moves with the pill through ANY
+     future spacing change. .pd-showcase already has position:relative +
+     z-index:1: its stacking context puts a z-index:-1 child behind the
+     pill but above the page background. The hero's own ::before is
+     emptied (background:none, mask:none) — it exists only on desktop; the
+     base wash + 74–94% fade-out mask would paint the old stripe here.
+
+     Contrast: the CTA row sits inside the glow where the jade tint is
+     ≤0.09 alpha; --pd-body #5A6169 measured 5.6:1 there — re-measure if
+     the alphas grow. */
+  .pd-hero-fold::before { background: none; -webkit-mask-image: none; mask-image: none; }
+  .pd-hero-fold .pd-showcase::before {
+    content: ''; position: absolute; z-index: -1; pointer-events: none;
+    inset: -110px -28px -160px;
     background:
-      radial-gradient(76% 120px at 50% 330px,
+      radial-gradient(76% 46% at 50% 42%,
         rgba(15, 169, 124, 0.15), rgba(15, 169, 124, 0.05) 58%, rgba(15, 169, 124, 0) 98%),
-      radial-gradient(115% 220px at 50% 320px,
+      radial-gradient(115% 78% at 50% 42%,
         rgba(15, 169, 124, 0.07), rgba(15, 169, 124, 0) 62%);
-    -webkit-mask-image: none;
-    mask-image: none;
   }
   /* (The old two-auto slack split and the 36px H1 cap lived here — retired
      by the ONE CLUSTER grammar above, which owns the fold's spacing and
