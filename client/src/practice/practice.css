@@ -967,7 +967,9 @@
    The underlying cause of the trade is that this fold carries ~303px of
    content in a ~750px viewport. Until it carries more, any split is choosing
    which gap to spend. */
-@media (max-width: 760px) { .pd-hero-fold { min-height: calc(100svh - 86px - clamp(56px, 15vw, 88px)); } }
+/* `+ var(--pd-curve)` compensates the padding-bottom added further down so the
+   content area is unchanged — see the note on `.pd-hero-c.pd-hero-fold`. */
+@media (max-width: 760px) { .pd-hero-fold { min-height: calc(100svh - 86px - clamp(56px, 15vw, 88px) + var(--pd-curve)); } }
 .pd-heroc-inner { position: relative; z-index: 1; width: 100%; max-width: var(--pd-max); margin: 0 auto; }
 .pd-hero-c .pd-h1 { max-width: 24em; margin: 0 auto; font-size: clamp(42px, 5.2vw, 68px); letter-spacing: -0.012em; line-height: 1.08; }
 .pd-hero-c .pd-sub { font-size: 19px; }
@@ -1560,7 +1562,14 @@
      at 30% of a ~600px fold. */
   .pd-hero-fold::before {
     background:
-      radial-gradient(180% 54% at 50% 84%, rgba(15, 169, 124, 0.30), rgba(15, 169, 124, 0.09) 48%, rgba(15, 169, 124, 0) 78%),
+      /* 240% wide, not 180%, and the outer stop pushed 78% → 96%. A radial
+         gradient normalises by BOTH radii, so at the bottom-left corner the
+         old figures gave sqrt((50/90)² + (16/27)²) = 0.81 — past the 78% zero
+         stop, i.e. bare paper exactly where the band's curve is most
+         transparent. Widening drops that to 0.71 and the later stop keeps it
+         non-zero. Costs nothing at the crest, which is still 0.30 at the
+         centre, so the contrast ceiling measured for the caption tier holds. */
+      radial-gradient(240% 54% at 50% 84%, rgba(15, 169, 124, 0.30), rgba(15, 169, 124, 0.09) 48%, rgba(15, 169, 124, 0) 96%),
       radial-gradient(165% 52% at 50% 30%, rgba(15, 169, 124, 0.10), rgba(15, 169, 124, 0.035) 52%, rgba(15, 169, 124, 0) 84%);
     /* NO FADE-OUT AT THE BOTTOM (2026-08-02, Paul: "there is an odd gap in the
        shading"). Measured off his screenshot at the left edge: greenness peaks
@@ -2219,7 +2228,39 @@
      margin:auto pairs distribute the free space; the section is already a
      flex column. */
   .pd-hero-c { padding-top: 18px; }
-  .pd-hero-c.pd-hero-fold { padding-bottom: 16px; }
+  /* THE HERO REACHES UNDER THE BAND'S CURVE (2026-08-02, Paul: "odd space
+     still there", after the mask fix did not remove it).
+
+     Profiling his screenshot settled what it actually is. At BOTH the left
+     edge and the centre the wash is strongly green at 747css (+14 and +20
+     G−R) and bare bone at 751css (−1) — a single 4px step. A gradient does
+     not do that. That is an element boundary: the hero ends, and `::before`
+     is `inset: 0` on the hero, so the wash stops with it.
+
+     What sits below is the band's own curve. The dark band cuts its curved
+     top edge OUT OF ITSELF with a mask, so the region above the dome is
+     TRANSPARENT — and what shows through is the page, not the hero. The strip
+     was never a colour bug, which is why two passes at the gradient and the
+     mask could not shift it.
+
+     The fix is to make the hero's box extend under that transparent region
+     and then take the space back:
+
+       padding-bottom  +curve   the hero's box, and so its ::before, now
+                                reaches beneath the band's curve
+       margin-bottom   −curve   pulls the band back up so nothing moves
+       min-height      +curve   `box-sizing: border-box` means the new
+                                padding would otherwise eat the content area
+                                and shove the fold's contents upward
+
+     All three are required and they cancel: the layout is identical, the
+     visible band is unchanged, and the curve now reveals green instead of
+     bone. `.pd-hero`'s `overflow: hidden` is not a problem because the layer
+     stays inside the padding box rather than escaping it. */
+  .pd-hero-c.pd-hero-fold {
+    padding-bottom: calc(16px + var(--pd-curve));
+    margin-bottom: calc(-1 * var(--pd-curve));
+  }
   /* TWO auto margins, not three (2026-08-02, Paul: "now we can balance the
      rest of the page to feel more aligned").
 
