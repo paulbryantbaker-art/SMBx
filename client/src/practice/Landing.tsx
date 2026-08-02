@@ -282,7 +282,7 @@ export default function Landing() {
             border), so the row now pairs a house chip with a house link
             instead of a button with a link. */}
         <div className="pd-hero-below">
-          <a className="pd-hero-book" href="#cta" onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero' })}>Book a call</a>
+          <a className="pd-hero-book" href={bookHref()} target={bookTarget()} rel={bookRel()} onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero' })}>Book a call</a>
           <a className="pd-samplelink" href="#sample" onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero-sample' })}>See a sample read →</a>
         </div>
       </section>
@@ -375,7 +375,7 @@ export default function Landing() {
               more experienced side of the table.
             </p>
             <p className="strong">You make the decisions. We handle the rest, and we get you to the closing table.</p>
-            <a className="pd-pill-primary pd-pill-lg" href="#yulia" style={{ marginTop: 34 }} onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-close' })}>Bring us your idea →</a>
+            <a className="pd-pill-primary pd-pill-lg" href="#yulia" style={{ marginTop: 34 }} onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-close' })}>Build your market map →</a>
           </div>
         </div>
       </section>
@@ -510,7 +510,7 @@ export default function Landing() {
               </p>
               <div style={{ marginTop: 34, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 <a className="pd-pill-primary pd-pill-lg" href="#yulia" onClick={() => trackEvent('practice_cta_clicked', { placement: 'whose-side' })}>Build your market map →</a>
-                <a className="pd-pill pd-pill-lg-quiet" href="#cta" onClick={() => trackEvent('practice_booking_clicked', { placement: 'whose-side' })}>Book a call</a>
+                <a className="pd-pill pd-pill-lg-quiet" href={bookHref()} target={bookTarget()} rel={bookRel()} onClick={() => trackEvent('practice_booking_clicked', { placement: 'whose-side' })}>Book a call</a>
               </div>
             </div>
           </div>

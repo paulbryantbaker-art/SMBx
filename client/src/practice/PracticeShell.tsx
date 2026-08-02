@@ -354,12 +354,19 @@ export default function PracticeShell({
                   <a href="/login">Team sign in</a>
                 </div>
                 <div className="pd-footer-col">
+                  {/* Each name goes to ITS OWN page (2026-08-02). All five used
+                      to point at #who — five different labels, one destination,
+                      and none of them selected the buyer they named: clicking
+                      "PE firms" scrolled you to the who-index showing whichever
+                      panel happened to be active. The five segment pages exist,
+                      are routed at /buyers/:slug and are richer than the panel;
+                      they were simply never linked from here. */}
                   <div className="h">BUYERS</div>
-                  <a href={anchor('#who')}>Family offices</a>
-                  <a href={anchor('#who')}>Independent sponsors</a>
-                  <a href={anchor('#who')}>Search funds</a>
-                  <a href={anchor('#who')}>Operators &amp; strategics</a>
-                  <a href={anchor('#who')}>PE firms</a>
+                  <a href="/buyers/family-offices">Family offices</a>
+                  <a href="/buyers/independent-sponsors">Independent sponsors</a>
+                  <a href="/buyers/searchers">Search funds</a>
+                  <a href="/buyers/operators">Operators &amp; strategics</a>
+                  <a href="/buyers/pe-firms">PE firms</a>
                 </div>
                 <div className="pd-footer-col" style={{ maxWidth: 200 }}>
                   <div className="h">WHERE WE WORK</div>

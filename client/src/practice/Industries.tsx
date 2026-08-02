@@ -10,6 +10,7 @@
  * Paul's approved deck — verbatim.
  */
 import PracticeShell from './PracticeShell';
+import { bookHref, bookTarget, bookRel } from './leads';
 import { trackEvent } from '../lib/analytics';
 
 interface Sector {
@@ -297,7 +298,7 @@ export default function Industries() {
             </p>
             <div style={{ marginTop: 36, display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
               <a className="pd-pill-primary pd-pill-lg" href="/#yulia" onClick={() => trackEvent('practice_cta_clicked', { placement: 'industries-cta' })}>Tell us what you're buying →</a>
-              <a className="pd-pill pd-pill-lg-quiet" href="/#cta" onClick={() => trackEvent('practice_booking_clicked', { placement: 'industries-cta' })}>Book a call</a>
+              <a className="pd-pill pd-pill-lg-quiet" href={bookHref()} target={bookTarget()} rel={bookRel()} onClick={() => trackEvent('practice_booking_clicked', { placement: 'industries-cta' })}>Book a call</a>
             </div>
           </div>
         </div>
