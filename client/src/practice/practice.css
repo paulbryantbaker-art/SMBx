@@ -2134,84 +2134,73 @@
      for. `.pd-hero`'s `overflow: hidden` is not a problem because the layer
      stays inside the padding box rather than escaping it. */
   /* ─── THE FOLD → BAND TRANSITION (phone) ────────────────────────────────
-     One system, four parts, tuned by RENDERING the built page and profiling
-     it against the Gemini reference (`npm run shoot:fold`) — six earlier
-     passes tuned these values blind, and every one shipped a defect a
-     screenshot would have caught. The reference lesson, measured: Gemini
-     holds flat paper for the top half of the screen, then descends ~40
-     luminance points at ~0.13/px, and NEVER shows anything dark at rest.
-     Match the rate and keep the dark end below the fold; do not soften
-     edges after the fact.
+     ONE OPAQUE GRADIENT, the textbook way. After a day of fighting a
+     two-element architecture (wash + band matched at a boundary — it
+     produced, in order: a bone strip, a pale arc, a hue line, a wall),
+     Paul said "just make the gradient work — look it up", and the looked-up
+     answer is the standard one: a single gradient that ENDS on the exact
+     colour the next section STARTS with. Identity, not matching. There is
+     no seam because there is no boundary between two colour functions.
 
-     1 · THE WASH — flat bone above ~45%, one jade hue rising to crest under
-         the chat pill (the crest is what makes the recessed pill visible at
-         all: white-on-bone measured 1.01:1 before it), arriving at the
-         hero's bottom edge at THE SEAM VALUE, #A4DCC8. The 240% width and
-         96% outer stop exist because a radial normalises by BOTH radii —
-         narrower left the bottom corners past the zero stop, bare paper
-         exactly where the band's curve is transparent. The 93→100% floor is
-         what guarantees the seam value across the full width; the radial
-         alone decays to ~0.04 alpha in the corners. The 0.30 crest carries
-         no text; the 0.10 caption-tier ceiling applies wherever --pd-tert
-         could sit.
-     2 · THE STRAIGHT SEAM — on the phone the first band has NO top curve
-         (the bottom curve stays; mid-page bands keep both). A curve is a
-         shaped boundary between two different colour functions, and it
-         rendered as a pale arc: the wash had already descended BELOW the
-         ramp's head, so luminance went down, up, down — and a non-monotonic
-         gradient reads as a watermark however soft its edges are. The hero
-         ends, the band begins, flush — nothing dark on screen at rest, and
-         one MONOTONIC descent from mid-fold into the band, which is the
-         whole Gemini lesson.
-     3 · THE RAMP — the band's own colour starts at THE SEAM VALUE and
-         deepens to the boardroom green over 150px. An OPAQUE band with a
-         lighter head, never a transparent band: transparency was tried
-         twice (#272/#273) and the page lost the block holding its bottom.
-     4 · THE RUNWAY — band content clears the ramp at 160px, so the white
-         eyebrow only ever sits on fully dark band, and the scroll between
-         the fold's buttons and the band's first line is ~205css (Paul,
-         2026-08-02: "why is there so much space between the sections" — it
-         opened at ~400).
+     THE PIECES:
+     · .pd-hero-fold::before — one opaque linear gradient, flat bone past
+       the nav, long sage middle, jade under the pill, ending on #2B5F49 at
+       100%. Grain rides on top (browsers do not dither gradients; the
+       shallow middle stripes without it — measured 64.7css stripes once).
+     · mask-image: none IS LOAD-BEARING. The base desktop .pd-hero::before
+       carries a mask that fades its wash out at 74–94%; inherited here it
+       bent this gradient back to bone and cut it 50px above the band,
+       which rendered as a pale zone and a cliff. Hours went to finding
+       that. If the bottom of the fold ever goes pale again, check the
+       mask FIRST.
+     · #proof.pd-dark::after — a solid 40px plate of #2B5F49 (the identity
+       partner), dissolving over the next 200px so the blackbleed texture
+       fades in. The band's top halos stay off on the phone (their jade/
+       teal cast through a semi-transparent head reads as a hue line).
+     · #proof .pd-dark-pad 160px — the eyebrow sits past the plate's solid
+       head; buttons → band content is ~205css (opened the day at ~400).
 
-     LAWS for this block, learned expensively:
-     · plain px only — clamp() inside calc() was silently dropped by Safari
-       here twice, and a dropped declaration measures as a design bug.
-     · THE SEAM VALUE (#A4DCC8) is MEASURED, not derived: it is the wash's
-       true last row, read from a SCROLLED render (682css in a --scroll 230
-       shot). Never measure it at the resting viewport's bottom — those rows
-       are already inside the band, which is how the first pass paired the
-       ramp to itself and shipped a hue line at matched luminance. Change
-       the wash → re-measure → re-pair.
-     · everything lives in THIS media block. The wash once sat at ≤900px
-       while its overlap sat at ≤760px, and every tablet showed the bone
-       strip the phone had been cured of.
-     · change a value → npm run build && npm run shoot:fold (rest AND
-       scrolled) → look → ship. */
+     THE TEXT FLOOR: the 88% stop (#7FB59E) exists for CONTRAST — the meta
+     row's ink needs its ground to hold: measured 5.18:1 at the link's
+     rows. Nothing below the 96% stop carries text. If a caption tier ever
+     lands in the lower fold, re-measure before shipping.
+
+     THE LAWS: plain px only (Safari silently dropped clamp-in-calc here
+     twice); the end colour and the plate are ONE value — change #2B5F49
+     in both places or nowhere; and change a value → npm run build &&
+     npm run shoot:fold, rest AND scrolled → look → ship. */
   .pd-hero-fold::before {
+    /* ONE GRADIENT, the textbook way (Paul, after everything: "just make the
+       gradient work — if you don't know how to implement a gradient, look it
+       up"). He was right. Every artefact this fold produced — the strip, the
+       arc, the wall — came from ONE architectural choice: two elements
+       carrying two colour functions, matched at a boundary by measurement.
+       The standard implementation has no boundary to match: a single OPAQUE
+       gradient that ENDS on the exact colour the band's plate STARTS with.
+       Identity, not pairing.
+
+       Stops: flat bone past the nav, a long sage middle, jade around the
+       pill (the recessed pill needs ground behind it), then a controlled
+       drop onto #2B5F49 — the band's own composited surface. The 88%
+       stop is a floor for TEXT: the meta row's ink needs its ground to hold
+       ~lum 160 (measured ≥6:1); everything below 93% carries no text.
+       Grain stays on top: the shallow middle still needs dither. */
     background:
-      /* DITHER. Browsers do not dither CSS gradients, and any slope shallower
-         than ~1 level per 10px paints visible stair-stripes on OLED — ours
-         measured 22css wide in the shallow zones against Gemini's ≤10 (theirs
-         are narrow because their whole descent is only ~40 levels; ours is
-         ~90, so we cannot match them by reshaping stops alone). A ±3-level
-         grain breaks the quantisation the way film grain does, and at 2.4%
-         opacity it reads as paper, not as texture. */
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.024'/%3E%3C/svg%3E") repeat,
-      radial-gradient(240% 54% at 50% 84%, rgba(15, 169, 124, 0.30), rgba(15, 169, 124, 0.09) 48%, rgba(15, 169, 124, 0) 96%),
-      /* THE VEIL (Paul: "carry the gradient from the band all the way to the
-         top and fade it out before you get to the toolbar"). A near-plateau
-         at the bottom (0.07 → 0.09 over half the fold) so it adds almost no
-         SLOPE at the seam — the floor below owns the seam's slope-match with
-         the band's ramp — while the top half gains the continuous tint the
-         reference reads as one veil of colour. Fades to zero 120px below the
-         top, just under the nav. */
-      linear-gradient(to bottom, rgba(15, 169, 124, 0) 120px, rgba(15, 169, 124, 0.07) 50%, rgba(15, 169, 124, 0.09) 100%),
-      linear-gradient(to bottom, rgba(15, 169, 124, 0) 93%, rgba(15, 169, 124, 0.24) 100%);
-    /* Ramp-in stops a hard line under the nav; held at full to 100% because
-       an earlier 90%→transparent tail cut the wash to bare paper just above
-       the band — the gradient tapers on its own. */
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 150px, #000 100%);
-    mask-image: linear-gradient(to bottom, transparent 0, #000 150px, #000 100%);
+      linear-gradient(to bottom,
+        #FCFAF6 0px, #FCFAF6 120px,
+        #EDF5F0 34%,
+        #D3E8DC 56%,
+        #A8D2BF 74%,
+        #7FB59E 88%,
+        #4C8168 96%,
+        #2B5F49 100%);
+    /* The BASE .pd-hero::before mask fades the desktop wash out at 74–94% —
+       on the phone it was bending this gradient back to bone and cutting it
+       off 50px above the band, which rendered as a pale zone and a cliff.
+       The gradient needs no mask at all: its own first stops ARE flat bone. */
+    -webkit-mask-image: none;
+    mask-image: none;
   }
   .pd-hero-c.pd-hero-fold { padding-bottom: 28px; }
   /* The veil deepened the wash under the fold's meta row: --pd-body computes
@@ -2236,11 +2225,13 @@
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1440,0 L1440,60 C1040,12 400,12 0,60 Z' fill='%23fff'/%3E%3C/svg%3E") bottom / 100% 40px no-repeat;
   }
   #proof.pd-dark::after {
-    content: ''; position: absolute; left: 0; right: 0; top: 0; height: 150px;
-    /* Under .pd-wrap's z-index:1, so it can never cover content; as part of
-       the band it is clipped by the curve mask like everything else. */
+    content: ''; position: absolute; left: 0; right: 0; top: 0; height: 240px;
+    /* Under .pd-wrap's z-index:1, so it can never cover content. A solid
+       40px plate of the band's OWN surface colour — the hero's gradient ends
+       on this exact value, so the seam is an identity, not a match — then
+       the plate dissolves over 200px and the blackbleed texture fades in. */
     z-index: 0; pointer-events: none;
-    background: linear-gradient(to bottom, #A4DCC8 0%, rgba(164, 220, 200, 0) 100%);
+    background: linear-gradient(to bottom, #2B5F49 0px, #2B5F49 40px, rgba(43, 95, 73, 0) 240px);
   }
   #proof .pd-dark-pad { padding-top: 160px; }
   /* Free space splits EVENLY: one auto above the statement, one above the
