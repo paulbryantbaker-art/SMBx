@@ -929,14 +929,6 @@
    fold (Paul, 2026-07-15). Mobile keeps the full chat-app fold, no peek. */
 .pd-hero-fold { min-height: calc(100svh - 86px); }
 @media (min-width: 761px) { .pd-hero-fold { min-height: calc(100svh - 86px - clamp(52px, 6vw, 112px)); } }
-/* Hero band — EXPERIMENTAL (2026-08-02). See the note at its markup in
-   Landing.tsx, including that the image is a stand-in for one the brief at
-   `scripts/studio/briefs/site-hero.image-brief.md` already specifies.
-   Slot sizes come from that brief's measured table (desktop 1040x190), so the
-   artwork it was written for drops straight in. */
-.pd-heroband { position: relative; z-index: 1; width: 100%; max-width: var(--pd-mid); margin: 0 auto clamp(20px, 3vw, 40px); }
-.pd-heroband img { display: block; width: 100%; height: clamp(120px, 14vw, 190px); object-fit: cover; object-position: 50% 50%; }
-
 .pd-heroc-inner { position: relative; z-index: 1; width: 100%; max-width: var(--pd-max); margin: 0 auto; }
 .pd-hero-c .pd-h1 { max-width: 24em; margin: 0 auto; font-size: clamp(42px, 5.2vw, 68px); letter-spacing: -0.012em; line-height: 1.08; }
 .pd-hero-c .pd-sub { font-size: 19px; }
@@ -1437,25 +1429,6 @@
     padding-left: 14px;
     padding-right: 14px;
   }
-
-  /* FULL BLEED, which is what Paul asked for on the phone. Same cross-axis
-     mechanics as the pill above: `align-self: stretch` to opt out of the
-     column's centring, then negative margins equal to the hero's own padding
-     to reach the screen edges. No inner padding here — unlike the pill, the
-     point is that it touches. `max-width: none` matters because the base rule
-     caps at `--pd-mid`. */
-  .pd-hero-fold .pd-heroband {
-    align-self: stretch;
-    width: auto;
-    max-width: none;
-    margin-left: calc(-1 * var(--pd-pad-x));
-    margin-right: calc(-1 * var(--pd-pad-x));
-    margin-bottom: clamp(16px, 4vw, 28px);
-  }
-  /* 3.27:1 is the artwork's own aspect, so at full-bleed width nothing is
-     cropped and the reboned field simply merges with the page. Capped so the
-     band cannot eat the fold it is meant to balance. */
-  .pd-hero-fold .pd-heroband img { height: clamp(96px, 30vw, 132px); }
 
   /* THE ROW UNDER THE PILL SETS ITS EDGES TO THE PILL'S (2026-08-02, Paul
      circled both and wrote "not the same widths").
