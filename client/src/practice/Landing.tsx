@@ -227,6 +227,37 @@ export default function Landing() {
              room for the proof band's curve to crest at the fold ── */}
       <section className="pd-hero pd-hero-c pd-hero-fold" id="top" style={{ justifyContent: 'center' }}>
         <div className="pd-heromesh" aria-hidden="true" />
+        {/* EXPERIMENT (2026-08-02, Paul: "what if we balanced a small hero image
+            above the h1 just below the header, full bleed on mobile? this is an
+            experiment to see how we like it").
+
+            It sits above `.pd-heroc-inner`, which carries `margin-top: auto` on
+            the phone fold — so the band is pushed hard against the nav and the
+            free space distributes BELOW it, which is the "just below the
+            header" Paul asked for without a second auto-margin to tune.
+
+            THE IMAGE IS A STAND-IN AND SHOULD BE REPLACED. The real one is
+            already specified in `scripts/studio/briefs/site-hero.image-brief.md`
+            — a row of trade subjects that speaks for the whole practice —
+            and it does not exist yet because it needs generating in Gemini.
+            This is `trade-hvac.jpg` run through `rebone.mts`, which is enough
+            to judge the COMPOSITION but is wrong on the brief's own terms:
+            it is one trade rather than a row, and it carries lettering
+            ("72°F", "A/C") that the brief lists as a reject condition.
+
+            Reboning was not optional. These illustrations were drawn on the
+            pre-Aurora bone `#F5F4EF`, seven points off today's `#FCFAF6`.
+            Framed, nobody sees it; unframed — which is what this slot is — the
+            mismatch draws a visible rectangle on the page. The stand-in now
+            measures `#FBFAF6` in its field, so it disappears into the canvas.
+
+            To swap in the real one: generate per the brief, then
+              npx tsx scripts/studio/rebone.mts <out.jpg> \
+                client/public/industries/hero-band.jpg
+            and change the one path below. */}
+        <div className="pd-heroband" aria-hidden="true">
+          <img src="/industries/hero-band-standin.jpg" alt="" width={1700} height={520} />
+        </div>
         <div className="pd-heroc-inner">
           {/* THE FOLD, settled 2026-08-02 after five passes in one day. All of
               Paul's words; the arrangement is the last thing that moved and the
