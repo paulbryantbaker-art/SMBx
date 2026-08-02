@@ -2158,7 +2158,13 @@
      is restored (286 was the rejected tighter cut). On short viewports
      the content floors the min-height and the band follows the fold. */
   .pd-hero-fold { min-height: calc(100svh - 206px); justify-content: flex-start; }
-  .pd-hero-c.pd-hero-fold { padding-top: 108px; padding-bottom: 28px; }
+  /* 76, was 108 (2026-08-02 final pass, tuned against PAUL'S OWN 5:48
+     screenshot rather than the headless render: his device renders the
+     type taller, so with 108 the measured airs came out 128:124 — the
+     golden ratio INVERTED, big air on top. iOS text metrics are the
+     court of record for this number; the headless render under-measures
+     the content by ~30px. 76 puts his device at ~96:156 ≈ 1:1.62. */
+  .pd-hero-c.pd-hero-fold { padding-top: 76px; padding-bottom: 28px; }
   .pd-hero-c.pd-hero-fold .pd-heroc-inner { margin-top: 0; margin-bottom: 0; }
   .pd-hero-c.pd-hero-fold .pd-showcase { margin-top: 32px; }
   /* Sentence-boundary headline stack (see the H1's own comment in
