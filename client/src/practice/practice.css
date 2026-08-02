@@ -2108,11 +2108,42 @@
      plate. Every version measured clean in headless Chromium and showed a
      defect on Paul's iPhone, and he ended it: "Get rid of the gradient,
      just go back to the band." So there is NO transition system here any
-     more: the fold sits on the base .pd-hero wash, and the proof band below
-     is the base .pd-dark — curved crest, halos, texture — exactly as on
-     desktop. Do not reintroduce a fold→band gradient without reading this
-     block's git history first; every failure mode is documented there. */
+     more: the proof band below the fold is the base .pd-dark — curved
+     crest, halos, texture — exactly as on desktop. Do not reintroduce a
+     fold→band gradient without reading this block's git history first;
+     every failure mode is documented there. */
   .pd-hero-c.pd-hero-fold { padding-bottom: 28px; }
+  /* THE PILL SPOTLIGHT (2026-08-02, Paul, first screenshot after the
+     gradient was retired: "the bloom looks awful with the white band below
+     it above the green band — either make the bloom highlight the chat
+     pill or come in from a different direction"). The base wash was built
+     for the desktop fold: it crests at 76% of the hero and its mask kills
+     it by 94%, which on a phone lands the crest ABOVE the pill and the
+     death BELOW the buttons — a green stripe, then a bone gap, then the
+     band. Three stacked stripes.
+
+     This override is his first option: the bloom becomes a SPOTLIGHT
+     centred on the pill + buttons cluster (~85% of the fold), elliptical,
+     fading to nothing in EVERY direction — gone by ~70% above and ~98%
+     below, so the bone beneath it is the canvas around a halo, not a gap
+     in a stripe. Both radials reach zero before the fold's bottom edge:
+     nothing here can touch the band, so the band's curved crest stays a
+     clean bone→jade change of material.
+
+     The base mask (ramp-in 150px, fade-out 74–94%) would cut a glow
+     centred at 85%, so it is removed — this layer needs no mask, its own
+     geometry ends it. Contrast: the meta row sits inside the glow at ~91%
+     where the jade tint is ≤0.09 alpha; --pd-body #5A6169 measures ≥5.1:1
+     there (re-measure if the alphas or the centre move). */
+  .pd-hero-fold::before {
+    background:
+      radial-gradient(72% 13% at 50% 85%,
+        rgba(15, 169, 124, 0.15), rgba(15, 169, 124, 0.05) 58%, rgba(15, 169, 124, 0) 98%),
+      radial-gradient(110% 24% at 50% 85%,
+        rgba(15, 169, 124, 0.07), rgba(15, 169, 124, 0) 60%);
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
   /* Free space splits EVENLY: one auto above the statement, one above the
      pill. A third auto (below the statement) gave the hole between statement
      and pill two shares against the top's one — measured 200px above vs 251px
