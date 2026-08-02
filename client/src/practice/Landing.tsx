@@ -161,7 +161,20 @@ function countUp(el: HTMLElement) {
   requestAnimationFrame(tick);
 }
 
-/** The dark proof band — stats roll up when the band enters the viewport. */
+/** The dark proof band — stats stay HIDDEN until they are genuinely in view,
+ *  then fade in and roll up together.
+ *
+ *  The stats deliberately do NOT carry data-rv (2026-08-02, Paul: "it looks
+ *  weird when safari address bar and controls are over the numbers — hide
+ *  the numbers and reveal when scrolled up"). The shell's generic reveal
+ *  fires at 12% intersection, and at rest on a phone the fold's 120px band
+ *  crest plus iOS Safari's collapsed chrome put ~30% of the stats grid
+ *  "visible" — under the floating toolbar — so the numerals went opaque
+ *  half-covered by browser controls. This observer owns the reveal instead:
+ *  rootMargin trims the bottom 18% of the viewport (the chrome zone), so
+ *  nothing shows until the first numeral is clear of the controls, then the
+ *  rv-stagger fade and the count-up run as one moment. The eyebrow keeps
+ *  its early data-rv reveal — it IS the crest's teaser. */
 function ProofBand() {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -171,8 +184,9 @@ function ProofBand() {
     const io = new IntersectionObserver(es => es.forEach(e => {
       if (!e.isIntersecting) return;
       io.disconnect();
+      host.classList.add('rv-in');
       if (!reduce) host.querySelectorAll<HTMLElement>('.pd-stat .n').forEach(countUp);
-    }), { threshold: 0.35 });
+    }), { threshold: 0.15, rootMargin: '0px 0px -18% 0px' });
     io.observe(host);
     return () => io.disconnect();
   }, []);
@@ -183,7 +197,7 @@ function ProofBand() {
         <div className="pd-mono" data-rv style={{ letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--pd-tert)', textAlign: 'center' }}>
           Two decades on the buy side
         </div>
-        <div className="pd-stats rv-stagger" data-rv ref={ref} style={{ marginTop: 'clamp(32px, 3.8vw, 54px)' }}>
+        <div className="pd-stats rv-stagger" ref={ref} style={{ marginTop: 'clamp(32px, 3.8vw, 54px)' }}>
           <div className="pd-stat"><div className="n">150</div><div className="l">Acquisitions closed</div></div>
           <div className="pd-stat"><div className="n">$5B+</div><div className="l">Enterprise value added</div></div>
           <div className="pd-stat"><div className="n">~$21B</div><div className="l">Transactions touched</div></div>
