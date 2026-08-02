@@ -373,6 +373,47 @@
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1440,0 L1440,60 C1040,12 400,12 0,60 Z' fill='%23fff'/%3E%3C/svg%3E") bottom / 100% var(--pd-curve) no-repeat;
 }
 @media (max-width: 760px) { .pd-dark { --pd-curve: clamp(40px, 9vw, 68px); /* @kind spacing */ } }
+
+/* THE FOLD'S BAND DISSOLVES INSTEAD OF BEING CUT (2026-08-02, Paul, with a
+   Gemini screenshot beside ours: "see how Gemini has a smoother gradient — it
+   should fade out the band").
+
+   The reference has no edge at all: white at the top, one colour deepening
+   continuously into the bottom of the screen, the input pill floating in it.
+   Ours arrives at a crisp curve, and no amount of matching the colour ON
+   either side of that curve makes an edge stop being an edge — which is what
+   the last four passes were doing.
+
+   So on the phone the FIRST band drops its top curve for a 140px alpha fade.
+   The bottom curve stays: that edge borders the next light section and is the
+   site's rhythm, not the fold's problem.
+
+   SCOPED TO #proof ON PURPOSE. This is the fold transition — the one being
+   judged against a chat app's home screen. The mid-page bands are punctuation
+   between reading sections, where a crisp curve is doing a different and
+   still-correct job. If this reads well, widening it to `.pd-dark` is one
+   selector.
+
+   Two things make it work, and it is broken without either: the hero extends
+   140px behind the fade (see `.pd-hero-c.pd-hero-fold`) so the dissolve
+   reveals green rather than bone, and the content padding clears the fade so
+   no text ever sits on a half-transparent band. Every value is a plain px —
+   three rules in this fold have already been silently dropped today for
+   wrapping a clamp() in a calc(). */
+@media (max-width: 760px) {
+  #proof.pd-dark {
+    -webkit-mask:
+      linear-gradient(to bottom, rgba(0, 0, 0, 0) 0, #000 140px) 0 0 / 100% calc(100% - 38px) no-repeat,
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1440,0 L1440,60 C1040,12 400,12 0,60 Z' fill='%23fff'/%3E%3C/svg%3E") bottom / 100% 40px no-repeat;
+    mask:
+      linear-gradient(to bottom, rgba(0, 0, 0, 0) 0, #000 140px) 0 0 / 100% calc(100% - 38px) no-repeat,
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1440,0 L1440,60 C1040,12 400,12 0,60 Z' fill='%23fff'/%3E%3C/svg%3E") bottom / 100% 40px no-repeat;
+  }
+  /* Clears the 140px dissolve, so the eyebrow never lands on a half-opaque
+     band. The default is curve + breathing room, which is 96px here — inside
+     the fade. */
+  #proof .pd-dark-pad { padding-top: 176px; }
+}
 /* content clears the curved edges: curve height + breathing room */
 .pd-dark-pad { padding-top: calc(var(--pd-curve, 0px) + clamp(56px, 6.5vw, 110px)); padding-bottom: calc(var(--pd-curve, 0px) + clamp(56px, 6.5vw, 110px)); }
 .pd-dark a.pd-pill, .pd-dark a.pd-pill:hover { color: var(--pd-ink); }
@@ -2316,8 +2357,13 @@
      the next step is measuring the hero's computed padding box directly rather
      than inferring it from where the wash stops. */
   .pd-hero-c.pd-hero-fold {
-    padding-bottom: 68px;   /* 16 + the 52px curve */
-    margin-bottom: -52px;   /* the band rides back up under the extended hero */
+    /* 140px, matching the band's fade below — the hero has to reach behind the
+       ENTIRE dissolve, not just the old curve. A band fading into nothing would
+       reveal page bone and read as the band evaporating into white, which is
+       the opposite of the reference. Behind this, the hero's floor gradient is
+       running 0.24→0.33 alpha, so the band dissolves into green. */
+    padding-bottom: 156px;  /* 16 + the 140px fade */
+    margin-bottom: -140px;  /* the band rides back up under the extended hero */
   }
   /* TWO auto margins, not three (2026-08-02, Paul: "now we can balance the
      rest of the page to feel more aligned").
