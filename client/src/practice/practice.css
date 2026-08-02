@@ -373,6 +373,41 @@
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1440,0 L1440,60 C1040,12 400,12 0,60 Z' fill='%23fff'/%3E%3C/svg%3E") bottom / 100% var(--pd-curve) no-repeat;
 }
 @media (max-width: 760px) { .pd-dark { --pd-curve: clamp(40px, 9vw, 68px); /* @kind spacing */ } }
+
+/* THE CHIN FADES UP (2026-08-02, Paul: "can we not just fade up the big green
+   chin to fade out over gradients like Gemini does?").
+
+   Measured at the seam, centre column: the wash reaches #BEE3D2 at 790css
+   (luminance 217) and the band starts at #2E624C at 793 (luminance 85). That
+   is 140 luminance points in three pixels — a cliff, and the reason every
+   colour-matching pass on either SIDE of it failed to help.
+
+   WHY THIS IS NOT #272/#273 AGAIN, which made the page worse and were
+   reverted. Those made the band TRANSPARENT at the top, so it stopped being a
+   block and the page lost its structure — a washed-out screen with nothing
+   holding the bottom. This lightens the band's own COLOUR instead: it stays
+   fully opaque, keeps its texture, and keeps its curve. Only the luminance
+   ramps, from the wash's value at the seam down to the band's over 180px, or
+   ~0.75 points per pixel against the current 45.
+
+   The band peeks ~52px, so what is on screen is just the pale head of that
+   ramp — a deepening green rather than a wall — and the rest resolves as you
+   scroll. That is the reference's shape without pretending our palette has no
+   dark end.
+
+   `::after`, because `::before` is already the ambient bloom. It sits at
+   z-index 0 under `.pd-wrap`'s z-index 1, so it can never cover the content,
+   and being a child it is clipped by the band's curve mask like everything
+   else. The content padding clears the ramp so no white text lands on the
+   pale half. */
+@media (max-width: 760px) {
+  #proof.pd-dark::after {
+    content: ''; position: absolute; left: 0; right: 0; top: 0; height: 180px;
+    z-index: 0; pointer-events: none;
+    background: linear-gradient(to bottom, #C9E5D9 0%, rgba(201, 229, 217, 0) 100%);
+  }
+  #proof .pd-dark-pad { padding-top: 216px; }
+}
 /* content clears the curved edges: curve height + breathing room */
 .pd-dark-pad { padding-top: calc(var(--pd-curve, 0px) + clamp(56px, 6.5vw, 110px)); padding-bottom: calc(var(--pd-curve, 0px) + clamp(56px, 6.5vw, 110px)); }
 .pd-dark a.pd-pill, .pd-dark a.pd-pill:hover { color: var(--pd-ink); }
