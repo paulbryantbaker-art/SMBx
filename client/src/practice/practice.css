@@ -402,11 +402,11 @@
    pale half. */
 @media (max-width: 760px) {
   #proof.pd-dark::after {
-    content: ''; position: absolute; left: 0; right: 0; top: 0; height: 180px;
+    content: ''; position: absolute; left: 0; right: 0; top: 0; height: 300px;
     z-index: 0; pointer-events: none;
     background: linear-gradient(to bottom, #C9E5D9 0%, rgba(201, 229, 217, 0) 100%);
   }
-  #proof .pd-dark-pad { padding-top: 216px; }
+  #proof .pd-dark-pad { padding-top: 336px; }
 }
 /* content clears the curved edges: curve height + breathing room */
 .pd-dark-pad { padding-top: calc(var(--pd-curve, 0px) + clamp(56px, 6.5vw, 110px)); padding-bottom: calc(var(--pd-curve, 0px) + clamp(56px, 6.5vw, 110px)); }
@@ -1624,7 +1624,12 @@
          non-zero. Costs nothing at the crest, which is still 0.30 at the
          centre, so the contrast ceiling measured for the caption tier holds. */
       radial-gradient(240% 54% at 50% 84%, rgba(15, 169, 124, 0.30), rgba(15, 169, 124, 0.09) 48%, rgba(15, 169, 124, 0) 96%),
-      radial-gradient(165% 52% at 50% 30%, rgba(15, 169, 124, 0.10), rgba(15, 169, 124, 0.035) 52%, rgba(15, 169, 124, 0) 84%),
+      /* THE TOP BLOOM IS GONE (2026-08-02). Rendered locally and profiled
+         against the reference: Gemini holds FLAT PURE WHITE for the top 55% of
+         the screen and only then begins its descent. This bloom, added in
+         #266 to stop the upper fold reading as drab, tinted from 5% down and
+         is the single biggest difference between the two profiles. Calm at the
+         top is not an absence of design in the reference — it is the design. */
       /* A FLOOR UNDER THE LAST 7%, so the fold meets the band with colour
          rather than with paper. The bloom alone only carries ~0.04 alpha into
          the bottom corners — technically non-zero, visually indistinguishable
@@ -2351,8 +2356,25 @@
      the next step is measuring the hero's computed padding box directly rather
      than inferring it from where the wash stops. */
   .pd-hero-c.pd-hero-fold {
-    padding-bottom: 68px;   /* 16 + the 52px curve */
-    margin-bottom: -52px;   /* the band rides back up under the extended hero */
+    /* NO NEGATIVE MARGIN. Profiled locally against the reference: our fold is
+       already GENTLER than Gemini through the middle (0.05 lum/px against
+       their 0.15) and the entire remaining difference is the last 10%, where
+       the band was being pulled 52px into view and dropping 56 luminance
+       points. Gemini has nothing dark on screen at all. `min-height` already
+       ends the hero exactly at the viewport bottom, so simply not pulling the
+       band up puts it below the fold, where its darkness costs nothing. The
+       padding stays: it is what gives the wash room to run to the edge.
+
+       −40px, EXACTLY the mobile curve, is not the same as the −52 this
+       replaces. Rendered locally, the band starting flush at the hero's bottom
+       left its 40px transparent curve region showing page bone — measured as a
+       jump back to #FCFAF6 at 916css, a 40-point step UP. Pulling by exactly
+       the curve puts the hero's wash behind that transparent zone and lands
+       the band's OPAQUE top on the viewport edge: the curve is filled, nothing
+       dark is on screen. −52 overshot by 12px, which is how the dark band got
+       into view in the first place. */
+    padding-bottom: 68px;
+    margin-bottom: -40px;
   }
   /* TWO auto margins, not three (2026-08-02, Paul: "now we can balance the
      rest of the page to feel more aligned").
