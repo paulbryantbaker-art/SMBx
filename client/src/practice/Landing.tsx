@@ -225,7 +225,10 @@ export default function Landing() {
     <PracticeShell home>
       {/* ── Hero — the chat engine front and center; the section height leaves
              room for the proof band's curve to crest at the fold ── */}
-      <section className="pd-hero pd-hero-c pd-hero-fold" id="top" style={{ justifyContent: 'center' }}>
+      {/* Vertical centering moved from an inline style into .pd-hero-fold's
+          own CSS (2026-08-02): an inline style outranks every stylesheet
+          rule, and the phone needs flex-start for the ONE CLUSTER grammar. */}
+      <section className="pd-hero pd-hero-c pd-hero-fold" id="top">
         <div className="pd-heromesh" aria-hidden="true" />
         <div className="pd-heroc-inner">
           {/* THE FOLD, settled 2026-08-02 after five passes in one day. All of
@@ -282,7 +285,13 @@ export default function Landing() {
               Length check, because an H1 of two sentences invites one: at 50
               characters this is within one of the line it replaced, so the fold
               rhythm `.pd-hero-fold` was tuned for is unchanged. */}
-          <h1 className="pd-h1">Buying businesses is hard work. We make it easier.</h1>
+          {/* The two sentences are two spans so the PHONE can break at the
+              sentence boundary. Unstyled on desktop (spans are inline, the
+              copy is byte-identical); at ≤760px .pd-h1-s2 goes display:block,
+              so the stack reads "Buying businesses / is hard work. / We make
+              it easier." — the free wrap used to land on "…hard work. We /
+              make it easier.", a dangling pronoun severed from its verb. */}
+          <h1 className="pd-h1"><span className="pd-h1-s1">Buying businesses is hard work.</span> <span className="pd-h1-s2">We make it easier.</span></h1>
           <p className="pd-sub pd-sub-c">Deploy your acquisition engine today.</p>
         </div>
         <div className="pd-showcase">
@@ -310,7 +319,10 @@ export default function Landing() {
             instead of a button with a link. */}
         <div className="pd-hero-below">
           <a className="pd-hero-book" href={bookHref()} target={bookTarget()} rel={bookRel()} onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero' })}>Book a call</a>
-          <a className="pd-samplelink" href="#sample" onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero-sample' })}>See a sample read →</a>
+          {/* "sample market map", not "sample read" (2026-08-02 fold pass):
+              the artifact the engine delivers is publicly the market map, and
+              "read" is practice vocabulary a cold visitor can't parse. */}
+          <a className="pd-samplelink" href="#sample" onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero-sample' })}>See a sample market map →</a>
         </div>
       </section>
 
