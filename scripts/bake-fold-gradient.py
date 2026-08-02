@@ -12,16 +12,27 @@ noise before quantisation. Pixels render identically everywhere.
 
 Output: client/public/textures/fold-gradient.png (also .webp if cwebp exists).
 Rerun after changing THE STOPS below; they must stay paired with the plate
-colour in practice.css (#2B5F49 — the identity seam).
+colour in practice.css (#4C8168 — the identity seam).
+
+THE END COLOUR IS #4C8168, NOT THE BAND'S DARK (2026-08-02, Paul's third
+screenshot of the same defect). The fold used to end on #2B5F49 — the band's
+own surface — which forced the last 12% of the fold to fall ~86 luminance
+levels (4x the slope above it) and then STOP DEAD on the band's flat plate.
+A steep zone between a gentle ramp and a plateau reads as exactly what Paul
+kept drawing: a dark band across the middle. No colour error, no stop corner
+— a slope structure. So the fold now ends on the MID green and the band's
+plate carries the remaining #4C8168 → dark descent inside itself over
+~260px (see #proof.pd-dark::after in practice.css). The darkening never
+stops at the seam; there is no plateau for the eye to edge against.
 """
 from PIL import Image
 import random
 random.seed(7)
 
 W, H = 720, 2400
-STOPS = [  # (fraction of height, hex) — mirrors the retired CSS gradient
+STOPS = [  # (fraction of height, hex) — the 88% stop is the TEXT FLOOR
     (0.00, 'FCFAF6'), (0.13, 'FCFAF6'), (0.34, 'EDF5F0'), (0.56, 'D3E8DC'),
-    (0.74, 'A8D2BF'), (0.88, '7FB59E'), (0.96, '4C8168'), (1.00, '2B5F49'),
+    (0.74, 'A8D2BF'), (0.88, '7FB59E'), (1.00, '4C8168'),
 ]
 
 def s2l(c):
