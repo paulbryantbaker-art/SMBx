@@ -1187,11 +1187,10 @@
   /* 999px, moved in lockstep with .pd-herobar 2026-08-02 — see the reasoning
      there. This rule's whole job is to match the resting bar, so it is the one
      place a stale radius would silently undo the morph. */
-  border: 1px solid var(--pd-hair); border-radius: 999px; background: #fff;
-  /* Matches .pd-herobar's Grok-measured hairline. This rule had been left on
-     the ORIGINAL 12/32 through every softening pass — the two are supposed to
-     read as the same element, so the engaged card was still dropping a card
-     shadow while the resting bar had stopped. */
+  /* Recessed to match .pd-herobar — see the note there. Inside the white chat
+     card this reads the same way it does on bone: a well, not a raised object.
+     These two rules exist to be the same element, so the fill moves with it. */
+  border: 1px solid var(--pd-hair); border-radius: 999px; background: #F6F3EB;
   box-shadow: 0 1px 2px rgba(20, 24, 28, 0.05);
   transition: border-color 160ms ease;
 }
@@ -1248,7 +1247,15 @@
      ~53px tall at 1040 wide is a 19.6:1 ratio; Gemini runs 13.6, ChatGPT 14.8,
      so this sits deliberately leaner than either. */
   padding: 7px 7px 7px 26px;
-  background: #fff;
+  /* RECESSED, not raised — and this is the thing four "sleeker" passes kept
+     missing while trimming pixels. Grok's bar is #F8F8F8 on a #FCFCFC page:
+     four units DARKER than its canvas, so it reads as a well cut into the page.
+     White on bone is the opposite — a few units lighter, so it sat ON the page
+     like a card, which is what made it look heavy no matter how thin it got.
+     #F6F3EB is bone's own warm family, six units down, so it sinks the same way
+     without leaving the palette. The white-card law still governs cards; this
+     is a control. */
+  background: #F6F3EB;
   /* `--pd-hair` (#EAE5DC) here was 1px of near-white on white — technically a
      border, visually nothing, which is why the bar read as edgeless in a phone
      screenshot. `--pd-border` (#DED8CC) is the same family one step down and
@@ -1257,8 +1264,13 @@
      in CSS. Writing `var(--pd-rule)` here made the whole shorthand invalid at
      computed-value time, which falls back to Tailwind preflight's
      `border-width: 0` — i.e. it silently REMOVED the border rather than
-     erroring. Caught by reading the computed style, not the diff. */
-  border: 1px solid var(--pd-border);
+     erroring. Caught by reading the computed style, not the diff.
+
+     Stepped back to `--pd-hair` now the fill is recessed: with a tinted well
+     the FILL defines the shape, so `--pd-border` drew a hard ring around it.
+     Grok runs a 15-unit border delta over its fill; hair over #F6F3EB is 12.
+     The near-invisible-border problem above was specific to a WHITE fill. */
+  border: 1px solid var(--pd-hair);
   /* A PILL, not a 16px box (2026-08-02, Paul: "it looks like a square in the
      middle of the page and looks awkward" — wanting the Grok/Gemini shape on
      both breakpoints).
