@@ -1240,13 +1240,20 @@
 .pd-chat-hero { width: 100%; max-width: 880px; margin: 0 auto; }
 .pd-herobar {
   display: flex; align-items: center; gap: 10px;
-  /* SLEEKER = shorter, not narrower — the two pull in opposite directions and
-     only the height was doing the damage. 12px of bar padding around a 50px
-     send button made this ~74px tall; at 10px around a 46px button it is ~66px,
-     which is where Grok and Gemini sit. Left inset goes 28 → 30 to stay ahead
-     of the deeper corner the extra width buys (radius is half the height, so
-     the curve moved with it). */
-  padding: 10px 10px 10px 30px;
+  /* HEIGHT IS SET BY THE INPUT, NOT THE SEND BUTTON. Worth stating because the
+     first sleeker pass got it wrong: it trimmed the send button's padding on
+     the assumption that the button was the tallest child, when at 17.5px with
+     16px of padding the INPUT was ~53px against the button's ~42px. Trimming
+     the shorter child changed nothing, and the bar stayed ~73px.
+
+     Now: input padding 16 → 11 (~43px), bar padding 10 → 8, so the bar is
+     ~59px. Against 880px of width that is a 14.9:1 ratio, which is where
+     Gemini (13.6) and ChatGPT (14.8) sit. Left inset back to 28 — the corner
+     is shallower now that the bar is shorter, so it needs less clearance.
+
+     If this ever needs to be shorter again, the lever is the input's padding,
+     then its font-size. The send button is along for the ride. */
+  padding: 8px 8px 8px 28px;
   background: #fff;
   /* `--pd-hair` (#EAE5DC) here was 1px of near-white on white — technically a
      border, visually nothing, which is why the bar read as edgeless in a phone
@@ -1278,23 +1285,30 @@
      resting bar is supposed to become the card's input row when the
      conversation opens, and a radius mismatch is exactly what breaks it. */
   border-radius: 999px;
-  /* Lifted off the page rather than dropped onto it — the old 12px/32px cast
-     enough shadow to read as a floating card, which is the opposite of sleek on
-     a control this wide. The border carries the edge now; the shadow only
-     separates it from the wash behind. */
-  box-shadow: 0 1px 3px rgba(20, 24, 28, 0.05), 0 8px 24px rgba(20, 24, 28, 0.07);
+  /* Lifted off the page rather than dropped onto it. The original 12/32 cast
+     enough to read as a floating card, which is the opposite of sleek on a
+     control this wide; now that the bar is ~59px rather than ~73px the shadow
+     comes down again to match, because the same spread under a shorter object
+     reads heavier. The border carries the edge; the shadow only separates it
+     from the ambient wash. */
+  box-shadow: 0 1px 2px rgba(20, 24, 28, 0.04), 0 6px 18px rgba(20, 24, 28, 0.06);
   transition: border-color 160ms ease;
 }
 .pd-herobar:focus-within { border-color: #16181A; }
 .pd-herobar input {
-  flex: 1; min-width: 0; padding: 16px 0;
+  /* 11px, was 16px. THIS is the bar's height — see the note on .pd-herobar.
+     Font stays at 17.5px: the bar is meant to read as one big inviting input,
+     and shrinking the type to buy height would trade the wrong thing. */
+  flex: 1; min-width: 0; padding: 11px 0;
   font-size: 17.5px; color: var(--pd-ink); background: transparent;
   -webkit-appearance: none; appearance: none; border: none; border-radius: 0; box-shadow: none; outline: none;
 }
 .pd .pd-herobar input:focus-visible { outline: none; }
-/* 12px, was 15px — this button sets the bar's height, so it is where "sleeker"
-   is actually spent. Horizontal stays 28px so the label keeps its room. */
-.pd-herobar .pd-send { border-radius: 999px; padding: 12px 28px; }
+/* Sized to sit INSIDE the input's height rather than to set it (~40px against
+   the input's ~43px). The earlier comment here claimed this button drove the
+   bar's height; it did not, which is why trimming it the first time changed
+   nothing visible. */
+.pd-herobar .pd-send { border-radius: 999px; padding: 11px 26px; }
 /* The + inside the pill — hidden on desktop (chips live under the bar there),
    shown ≤900px where it stands in for the starter chips. */
 .pd-herobar .pd-plus {
