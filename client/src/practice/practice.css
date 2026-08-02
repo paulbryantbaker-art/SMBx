@@ -2167,10 +2167,11 @@
          deepens to the boardroom green over 150px. An OPAQUE band with a
          lighter head, never a transparent band: transparency was tried
          twice (#272/#273) and the page lost the block holding its bottom.
-     4 · THE RUNWAY — band content clears the ramp at 190px, so the white
+     4 · THE RUNWAY — band content clears the ramp at 160px, so the white
          eyebrow only ever sits on fully dark band, and the scroll between
-         the fold's buttons and the band's first line is ~250css rather than
-         the ~400 the first cut left.
+         the fold's buttons and the band's first line is ~205css (Paul,
+         2026-08-02: "why is there so much space between the sections" — it
+         opened at ~400).
 
      LAWS for this block, learned expensively:
      · plain px only — clamp() inside calc() was silently dropped by Safari
@@ -2197,6 +2198,14 @@
          opacity it reads as paper, not as texture. */
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.024'/%3E%3C/svg%3E") repeat,
       radial-gradient(240% 54% at 50% 84%, rgba(15, 169, 124, 0.30), rgba(15, 169, 124, 0.09) 48%, rgba(15, 169, 124, 0) 96%),
+      /* THE VEIL (Paul: "carry the gradient from the band all the way to the
+         top and fade it out before you get to the toolbar"). A near-plateau
+         at the bottom (0.07 → 0.09 over half the fold) so it adds almost no
+         SLOPE at the seam — the floor below owns the seam's slope-match with
+         the band's ramp — while the top half gains the continuous tint the
+         reference reads as one veil of colour. Fades to zero 120px below the
+         top, just under the nav. */
+      linear-gradient(to bottom, rgba(15, 169, 124, 0) 120px, rgba(15, 169, 124, 0.07) 50%, rgba(15, 169, 124, 0.09) 100%),
       linear-gradient(to bottom, rgba(15, 169, 124, 0) 93%, rgba(15, 169, 124, 0.24) 100%);
     /* Ramp-in stops a hard line under the nav; held at full to 100% because
        an earlier 90%→transparent tail cut the wash to bare paper just above
@@ -2204,7 +2213,11 @@
     -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 150px, #000 100%);
     mask-image: linear-gradient(to bottom, transparent 0, #000 150px, #000 100%);
   }
-  .pd-hero-c.pd-hero-fold { padding-bottom: 68px; }
+  .pd-hero-c.pd-hero-fold { padding-bottom: 28px; }
+  /* The veil deepened the wash under the fold's meta row: --pd-body computes
+     to ~4.47:1 there, a hair under the 4.5 floor. Ink holds ~12:1; the
+     underline keeps the affordance. */
+  .pd-hero-c.pd-hero-fold .pd-samplelink { color: var(--pd-ink); }
   #proof.pd-dark {
     /* Halo-free stack: the desktop band's jade/teal TOP halos bled through
        the ramp's semi-transparent head as a hue cast — a visible line at
@@ -2229,7 +2242,7 @@
     z-index: 0; pointer-events: none;
     background: linear-gradient(to bottom, #A4DCC8 0%, rgba(164, 220, 200, 0) 100%);
   }
-  #proof .pd-dark-pad { padding-top: 190px; }
+  #proof .pd-dark-pad { padding-top: 160px; }
   /* Free space splits EVENLY: one auto above the statement, one above the
      pill. A third auto (below the statement) gave the hole between statement
      and pill two shares against the top's one — measured 200px above vs 251px
