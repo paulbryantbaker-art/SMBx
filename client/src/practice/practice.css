@@ -1237,27 +1237,17 @@
    page headline/sub already carry it). On desktop it swaps for the
    conversation card the moment the visitor engages; on phones it is always the
    doorway to the slide-up sheet (typing never happens in-page). ── */
-/* 880, up from 780 (2026-08-02, Paul: wider and sleeker). It also closes the
-   gap to the engaged card, which is `--pd-mid` (1040) — the resting bar is
-   meant to read as the same element, and 780 → 1040 was a 260px jump on
-   engage. 880 halves it. */
-.pd-chat-hero { width: 100%; max-width: 880px; margin: 0 auto; }
+/* Full artifact width — the same `--pd-mid` the engaged card uses, so the
+   resting bar and the card it becomes are finally the same width. 780 → 880 →
+   1040 over three passes; this is the end of it. */
+.pd-chat-hero { width: 100%; max-width: var(--pd-mid); margin: 0 auto; }
 .pd-herobar {
   display: flex; align-items: center; gap: 10px;
-  /* HEIGHT IS SET BY THE INPUT, NOT THE SEND BUTTON. Worth stating because the
-     first sleeker pass got it wrong: it trimmed the send button's padding on
-     the assumption that the button was the tallest child, when at 17.5px with
-     16px of padding the INPUT was ~53px against the button's ~42px. Trimming
-     the shorter child changed nothing, and the bar stayed ~73px.
-
-     Now: input padding 16 → 11 (~43px), bar padding 10 → 8, so the bar is
-     ~59px. Against 880px of width that is a 14.9:1 ratio, which is where
-     Gemini (13.6) and ChatGPT (14.8) sit. Left inset back to 28 — the corner
-     is shallower now that the bar is shorter, so it needs less clearance.
-
-     If this ever needs to be shorter again, the lever is the input's padding,
-     then its font-size. The send button is along for the ride. */
-  padding: 8px 8px 8px 28px;
+  /* HEIGHT IS SET BY THE INPUT, NOT THE SEND BUTTON — the input is the taller
+     child, so its padding is the lever and the button is along for the ride.
+     ~53px tall at 1040 wide is a 19.6:1 ratio; Gemini runs 13.6, ChatGPT 14.8,
+     so this sits deliberately leaner than either. */
+  padding: 7px 7px 7px 26px;
   background: #fff;
   /* `--pd-hair` (#EAE5DC) here was 1px of near-white on white — technically a
      border, visually nothing, which is why the bar read as edgeless in a phone
@@ -1307,10 +1297,9 @@
 }
 .pd-herobar:focus-within { border-color: #16181A; }
 .pd-herobar input {
-  /* 11px, was 16px. THIS is the bar's height — see the note on .pd-herobar.
-     Font stays at 17.5px: the bar is meant to read as one big inviting input,
-     and shrinking the type to buy height would trade the wrong thing. */
-  flex: 1; min-width: 0; padding: 11px 0;
+  /* THIS is the bar's height — see the note on .pd-herobar. Font stays 17.5px;
+     buying height by shrinking the type would trade the wrong thing. */
+  flex: 1; min-width: 0; padding: 9px 0;
   font-size: 17.5px; color: var(--pd-ink); background: transparent;
   -webkit-appearance: none; appearance: none; border: none; border-radius: 0; box-shadow: none; outline: none;
 }
@@ -1371,11 +1360,12 @@
      left INSIDE the pill (it opens the sheet, where the starter chips live),
      the send affordance is a compact coral circle, and the in-page chips are
      gone entirely. */
-  /* 9px, was 7px — pairs with the 42px send disc below to hold the bar at 60px
-     while matching Grok's interior proportion: their disc measures 40px inside
-     a 60.7px bar, a 10px inset, where ours was 46px inside 60 at 7px. Same
-     height, more air around the control. */
-  .pd-herobar { padding: 9px 9px 9px 8px; gap: 2px; }
+  /* The bar breaks the fold's 28px gutter and runs nearer the edges, which is
+     the only way to look wider on a phone — Grok gets 423px of a 430px screen;
+     the gutter alone was costing us 56px. -14px each side buys 28 of it back
+     without letting the shadowless pill touch the screen edge. */
+  .pd-chat-hero { margin-inline: -14px; }
+  .pd-herobar { padding: 8px 8px 8px 8px; gap: 2px; }
   .pd-herobar .pd-plus { display: grid; }
   .pd-herobar input { font-size: 16px; padding: 13px 0; }
   .pd-herobar .pd-send {
