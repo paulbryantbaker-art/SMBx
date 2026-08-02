@@ -1446,31 +1446,29 @@
     padding-right: 14px;
   }
 
-  /* THE ROW UNDER THE PILL SETS ITS EDGES TO THE PILL'S (2026-08-02, Paul
-     circled both and wrote "not the same widths").
+  /* THE ROW UNDER THE PILL IS CENTRED ON THE FOLD'S AXIS (2026-08-02,
+     Paul: "are they in the best positions to match the golden ratio or
+     the calm view of the page?" — answer: no. Every other element sits
+     on one centred axis; the space-between row was the lone asymmetric
+     element, a chip flush left and a link flush right with a dead hole
+     between. It reads as two stray objects, and it contradicted the
+     desktop, where the base rule centres the pair.
 
-     Measured off that screenshot: the pill runs 44 → 386css, while the row
-     below it ran roughly 67 → 364 — a centred cluster sitting ~23px inside the
-     pill on each side, which is close enough to look like a mistake rather
-     than a margin.
-
-     Two things were wrong and both are needed. `.pd-hero-below` lives in
-     `.pd-hero`, which pads 28px, while the pill lives in `.pd-showcase`, which
-     pads a further 14px — so the row started 14px outside the pill and then
-     centre-justified its two items well inside it. Matching the showcase's
-     inset puts the row's box on the pill's box, and space-between pushes the
-     chip to the left edge and the sample link to the right.
-
-     Safe from the wrapped-last-line trap: at 342px the chip (~145px) and the
-     link (~175px) fit on one line with room to spare. A third item in this row
-     would need re-checking. */
+     History: space-between was the cure for an earlier near-miss — the
+     row floated 23px inside the pill's edges and read as a mistake
+     ("not the same widths"). The box-matching that fixed (stretch +
+     negative margins + the showcase's 14px inset) is KEPT so the row's
+     box still equals the pill's box; only the justification returns to
+     centre, with the 4x-scale 24px gap between the two actions so they
+     read as one grouped set, subordinate to the pill above. */
   .pd-hero-fold .pd-hero-below {
     align-self: stretch;
     width: auto;
     margin-left: calc(-1 * var(--pd-pad-x));
     margin-right: calc(-1 * var(--pd-pad-x));
     padding-left: 14px; padding-right: 14px;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 12px 24px;
   }
 
   .pd-herobar { padding: 8px 8px 8px 8px; gap: 2px; }
