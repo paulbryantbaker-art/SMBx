@@ -929,6 +929,21 @@
    fold (Paul, 2026-07-15). Mobile keeps the full chat-app fold, no peek. */
 .pd-hero-fold { min-height: calc(100svh - 86px); }
 @media (min-width: 761px) { .pd-hero-fold { min-height: calc(100svh - 86px - clamp(52px, 6vw, 112px)); } }
+/* THE PHONE FOLD GIVES BACK HEIGHT TOO (2026-08-02). Desktop has always
+   surrendered the curve so the proof band peeks at the fold edge; mobile was
+   deliberately excluded ("Mobile keeps the full chat-app fold, no peek").
+   Measured on a 430x932 phone, that exclusion was the actual problem behind
+   three passes of moving gaps around: the fold ran 747px against ~303px of
+   content, leaving ~410px of slack with nowhere good to go. Above the headline
+   it read as "the page has not started"; between the headline and the pill it
+   read as a hole. Relocating it could never fix it — only deleting it could.
+
+   146px back at this width puts the fold near 600px, which is the height at
+   which an even split lands the headline at ~25% instead of 38% and drops the
+   middle gap from 187 to ~132. It also converts dead space into a scroll cue:
+   the dark band now shows its curve and its first line of proof, so the fold
+   ends on something rather than on nothing. */
+@media (max-width: 760px) { .pd-hero-fold { min-height: calc(100svh - 86px - clamp(120px, 34vw, 160px)); } }
 .pd-heroc-inner { position: relative; z-index: 1; width: 100%; max-width: var(--pd-max); margin: 0 auto; }
 .pd-hero-c .pd-h1 { max-width: 24em; margin: 0 auto; font-size: clamp(42px, 5.2vw, 68px); letter-spacing: -0.012em; line-height: 1.08; }
 .pd-hero-c .pd-sub { font-size: 19px; }
@@ -1501,9 +1516,28 @@
      background — identical luminance, which IS the "hard to see" — to 1.28:1.
      If a `--pd-tert` caption is ever added to this row, re-measure: the caption
      tier runs 2.5–2.9:1 through this band and would fail. */
+  /* A SECOND, WEAKER BLOOM IN THE UPPER FOLD (2026-08-02, Paul: "I'm not sure
+     I actually like it — what does it need?"). Moving the crest down to light
+     the pill was right for the pill and drained the top: the fold read as a
+     pale half and a green half, splitting exactly where the empty middle was
+     and reinforcing the "two things with a hole" impression. This puts colour
+     back above the headline so the fold reads as one field.
+
+     0.10 IS A CEILING, NOT A TASTE. Measured against the real tokens: at 0.12
+     the caption tier (`--pd-tert`) falls to 2.99:1 and fails, while body still
+     reads 5.31:1 and ink 15:1 — the exact trap the design law names, where
+     checking the obvious tier passes a wash that has already broken the
+     quiet one. At 0.10: ink 15.4:1, body 5.43:1, tert 3.06:1.
+
+     The two blooms do not overlap — the top spans ~4–52% and the bottom
+     ~57–111% — so nothing sums past either ceiling. The ~5% dip between them
+     is deliberate and invisible: both sides are already tapering to zero
+     there. The 150px mask ramp still clears the top bloom's crest, which sits
+     at 30% of a ~600px fold. */
   .pd-hero-fold::before {
     background:
-      radial-gradient(180% 54% at 50% 84%, rgba(15, 169, 124, 0.30), rgba(15, 169, 124, 0.09) 48%, rgba(15, 169, 124, 0) 78%);
+      radial-gradient(180% 54% at 50% 84%, rgba(15, 169, 124, 0.30), rgba(15, 169, 124, 0.09) 48%, rgba(15, 169, 124, 0) 78%),
+      radial-gradient(165% 52% at 50% 30%, rgba(15, 169, 124, 0.10), rgba(15, 169, 124, 0.035) 52%, rgba(15, 169, 124, 0) 84%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 150px, #000 90%, transparent 100%);
     mask-image: linear-gradient(to bottom, transparent 0, #000 150px, #000 90%, transparent 100%);
   }
