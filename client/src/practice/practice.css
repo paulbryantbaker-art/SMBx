@@ -1389,7 +1389,33 @@
      0 auto` it already had. The text above keeps the full 28px gutter — a chat
      bar running wider than its own body copy is the Grok/Gemini grammar, not a
      misalignment. */
-  .pd-hero .pd-showcase { padding-left: 14px; padding-right: 14px; }
+  /* THE RESTING PILL TAKES THE OPEN SHEET'S GEOMETRY (2026-08-02, Paul on a
+     screenshot of the sheet: "this one is actually wide like I'm asking for").
+
+     He was pointing at `.pd-chat .pd-chat-inputrow`, which on a phone is
+     `margin: 10px 14px …` inside a sheet pinned `left: 0; right: 0` — so 14px
+     of inset and 402px of a 430px screen. The resting bar was getting 42px of
+     inset (28 from `.pd-hero`, 14 more from `.pd-showcase`) and 342px. Same
+     control, two states, 60px apart — which is also why the morph between them
+     never felt like one element.
+
+     Cancelling the hero's padding with a matching negative margin, then
+     applying the sheet's own 14px, makes the resting bar and the engaged
+     bar the same width by construction rather than by two numbers that have to
+     be kept in step by hand.
+
+     `width: auto` IS LOAD-BEARING. `.pd-showcase` ships `width: 100%`, and a
+     negative inline margin on an explicitly-sized box does not widen it — it
+     shifts it. That is exactly the bug that put the pill 28px off-centre
+     earlier today (#258). With `auto`, the negative margins expand the box,
+     which is what is wanted here. */
+  .pd-hero-fold .pd-showcase {
+    width: auto;
+    margin-left: calc(-1 * var(--pd-pad-x));
+    margin-right: calc(-1 * var(--pd-pad-x));
+    padding-left: 14px;
+    padding-right: 14px;
+  }
 
   /* THE ROW UNDER THE PILL SETS ITS EDGES TO THE PILL'S (2026-08-02, Paul
      circled both and wrote "not the same widths").
@@ -1410,6 +1436,9 @@
      link (~175px) fit on one line with room to spare. A third item in this row
      would need re-checking. */
   .pd-hero-fold .pd-hero-below {
+    width: auto;
+    margin-left: calc(-1 * var(--pd-pad-x));
+    margin-right: calc(-1 * var(--pd-pad-x));
     padding-left: 14px; padding-right: 14px;
     justify-content: space-between;
   }
