@@ -2158,13 +2158,14 @@
      is restored (286 was the rejected tighter cut). On short viewports
      the content floors the min-height and the band follows the fold. */
   .pd-hero-fold { min-height: calc(100svh - 206px); justify-content: flex-start; }
-  /* 76, was 108 (2026-08-02 final pass, tuned against PAUL'S OWN 5:48
-     screenshot rather than the headless render: his device renders the
-     type taller, so with 108 the measured airs came out 128:124 — the
-     golden ratio INVERTED, big air on top. iOS text metrics are the
-     court of record for this number; the headless render under-measures
-     the content by ~30px. 76 puts his device at ~96:156 ≈ 1:1.62. */
-  .pd-hero-c.pd-hero-fold { padding-top: 76px; padding-bottom: 28px; }
+  /* 108 RESTORED (2026-08-02, Paul: "you keep making the green chin
+     bigger. Put it back… The bloom is what needs to be improved further
+     to better balance the space." A 76px experiment moved the cluster up
+     to chase the on-device golden ratio and grew the visible band — the
+     wrong lever. The layout stays put; the BLOOM balances the space:
+     its lower half stretches into the bottom void, see the spotlight
+     rule below.) */
+  .pd-hero-c.pd-hero-fold { padding-top: 108px; padding-bottom: 28px; }
   .pd-hero-c.pd-hero-fold .pd-heroc-inner { margin-top: 0; margin-bottom: 0; }
   .pd-hero-c.pd-hero-fold .pd-showcase { margin-top: 32px; }
   /* Sentence-boundary headline stack (see the H1's own comment in
@@ -2216,19 +2217,23 @@
   .pd-hero-fold::before { background: none; -webkit-mask-image: none; mask-image: none; }
   .pd-hero-fold .pd-showcase::before {
     content: ''; position: absolute; z-index: -1; pointer-events: none;
-    /* Wider + deeper (2026-08-02, Paul: "the bloom should spread out a
-       little more in all directions and maybe be a little bit darker
-       behind the chat pill"). Insets grew ~60/32/50px and the core peak
-       moved 0.15 → 0.21. The 44%/45% centres keep the peak ON the pill
-       after the box grew (pill centre = (170+31)/442 of the new box).
-       Contrast held: --pd-body over the CTA row's tint computes ≥5.2:1
-       even at the deeper values. */
-    inset: -170px -60px -210px;
+    /* Wider + deeper (Paul: "spread out a little more in all directions…
+       a little bit darker behind the chat pill"), then WEIGHTED DOWNWARD
+       (Paul: "the bloom is what needs to be improved further to better
+       balance the space" — after a layout shift that grew the band was
+       rejected). The bottom inset runs 300px so the glow's tail reaches
+       into the void between the CTA row and the band, softening the bone
+       there instead of moving any element. The tail must be ≤3 G−R units
+       within ~40px of the band's crest — a stronger tint dying against
+       the dark edge reads as the old stripe defect. Peak stays pinned to
+       the pill: centre = (190+31)/552 of the grown box ≈ 40%. Contrast:
+       --pd-body over the CTA row's tint ≥5.0:1. */
+    inset: -190px -70px -300px;
     background:
-      radial-gradient(82% 48% at 50% 45%,
+      radial-gradient(82% 36% at 50% 40%,
         rgba(15, 169, 124, 0.21), rgba(15, 169, 124, 0.08) 56%, rgba(15, 169, 124, 0) 96%),
-      radial-gradient(130% 82% at 50% 44%,
-        rgba(15, 169, 124, 0.09), rgba(15, 169, 124, 0) 68%);
+      radial-gradient(140% 60% at 50% 42%,
+        rgba(15, 169, 124, 0.10), rgba(15, 169, 124, 0) 76%);
   }
   /* (The old two-auto slack split and the 36px H1 cap lived here — retired
      by the ONE CLUSTER grammar above, which owns the fold's spacing and
