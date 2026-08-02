@@ -228,47 +228,53 @@ export default function Landing() {
       <section className="pd-hero pd-hero-c pd-hero-fold" id="top" style={{ justifyContent: 'center' }}>
         <div className="pd-heromesh" aria-hidden="true" />
         <div className="pd-heroc-inner">
-          {/* Paul's copy, 2026-08-02. Replaces "Deploy your tailored business
-              acquisition strategy in as little as three months." — which led on
-              a vendor verb and buried the only concrete thing in it at the end.
-              The pair now opens on the reader's action and lets the sub carry
-              the mechanism, which is the order the rest of the page reads in.
+          {/* THE FOLD, settled 2026-08-02 after five passes in one day. All of
+              Paul's words; the arrangement is the last thing that moved and the
+              thing that made it work.
 
-              Second pass same day: "…your business acquisition strategy…"
-              became "…on your business acquisitions…", dropping the repeat of
-              "strategy" and promising the deals rather than a document.
+              The order is now RECOGNITION then INSTRUCTION. The H1 names the
+              reader's problem back to them, the sub tells them what to do about
+              it. That is the right way round, and it took the whole day to get
+              there because every earlier version led with the instruction and
+              had nothing underneath it but mechanism:
 
-              Third pass, and the one that matters (Paul: "by today I mean start
-              setting it up today with a phone call — it's a metaphor humans
-              understand; they know it won't be in place today, but they can get
-              started today"). "Start executing" broke that metaphor by claiming
-              the deals were already moving; "get started building" says the
-              true thing — you begin today, the engine exists later — and no
-              reader has to squint at it.
+                "Deploy your tailored business acquisition strategy in as
+                 little as three months."      — a vendor verb, and the only
+                                                 concrete thing buried at the end
+                "Start executing on your business acquisitions today."
+                                               — claimed the deals were already
+                                                 moving, which is the reading a
+                                                 sophisticated buyer prices as
+                                                 overreach
+                "Get started building your acquisition engine today."
+                                               — true, and now demoted to the
+                                                 sub where an instruction belongs
 
-              "Engine" is deliberate and sets up the Why-us H2 three sections
-              down: "The machine serial acquirers build in-house. Yours, without
-              the headcount." Same metaphor, stated then evidenced. The known
-              cost is that the intake tool is publicly the "Acquisition Engine",
-              so the word is doing two jobs one element apart — the headline's
-              is lowercase and possessive ("your acquisition engine"), the
-              tool's is a capitalised proper noun, which is what keeps them
-              apart. If that ever reads as a muddle, "acquisition program" is
-              the swap that costs nothing else. */}
-          <h1 className="pd-h1">Get started building your acquisition engine today.</h1>
-          {/* Paul's copy, 2026-08-02, replacing "We'll set up and run your corp
-              dev strategy so you can focus on your core business." The sub
-              stops explaining the mechanism and starts acknowledging the
-              reader — the mechanism is what the Why-us grid and the phase
-              accordion are for, and the fold was carrying it twice.
+              "Today" survives all of it and is deliberate. Paul: "by today I
+              mean start setting it up today with a phone call — it's a metaphor
+              humans understand; they know it won't be in place today, but they
+              can get started today." As a sub it can say that without the H1
+              having to carry the promise.
 
-              Punctuated with a full stop rather than the comma it was written
-              with: every other two-beat line on this site takes one ("Buy-side
-              only. One client per target.", "Senior-only. No junior hand-off.",
-              "You make the decisions. We handle the rest…"), and a comma splice
-              here would be the only one on the site — which reads as a typo to
-              exactly the careful reader this page is written for. */}
-          <p className="pd-sub pd-sub-c">Buying businesses is hard. We make it easier.</p>
+              "Engine" sets up the Why-us H2 three sections down: "The machine
+              serial acquirers build in-house. Yours, without the headcount."
+              Known cost — the intake tool is publicly the "Acquisition Engine",
+              so the word does two jobs one element apart; case and possession
+              keep them separate ("your acquisition engine" vs the proper noun),
+              and "acquisition program" is the swap if it ever muddles.
+
+              Full stops, not the commas these were written with. Every two-beat
+              line on this site takes one — "Buy-side only. One client per
+              target.", "Senior-only. No junior hand-off.", "You make the
+              decisions. We handle the rest…" — so a splice here would be the
+              only one, and to this page's reader it lands as a typo rather than
+              as a voice.
+
+              Length check, because an H1 of two sentences invites one: at 50
+              characters this is within one of the line it replaced, so the fold
+              rhythm `.pd-hero-fold` was tuned for is unchanged. */}
+          <h1 className="pd-h1">Buying businesses is hard work. We make it easier.</h1>
+          <p className="pd-sub pd-sub-c">Get started building your acquisition engine today.</p>
         </div>
         <div className="pd-showcase">
           <div className="pd-show-stage">
