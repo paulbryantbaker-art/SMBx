@@ -938,12 +938,28 @@
    it read as "the page has not started"; between the headline and the pill it
    read as a hole. Relocating it could never fix it — only deleting it could.
 
-   146px back at this width puts the fold near 600px, which is the height at
-   which an even split lands the headline at ~25% instead of 38% and drops the
-   middle gap from 187 to ~132. It also converts dead space into a scroll cue:
-   the dark band now shows its curve and its first line of proof, so the fold
-   ends on something rather than on nothing. */
-@media (max-width: 760px) { .pd-hero-fold { min-height: calc(100svh - 86px - clamp(120px, 34vw, 160px)); } }
+   HOW MUCH, dialled back from 146 (Paul: "the green bleed section is too high
+   up maybe"). He is right and the measurement says why. 146 moved the band's
+   top edge 843 → 693css, taking the visible band from 89px to 239px — and the
+   proof band's count-up numeral then lands half-behind the browser toolbar,
+   which reads as broken rather than as a peek.
+
+   ~99px is the compromise, and the trade-off is worth stating because there is
+   no setting that wins outright: the giveback comes off the top air and the
+   middle hole at HALF its value each, but off the band's position at its FULL
+   value. So every pixel that improves the fold's proportions costs a pixel of
+   band. At 99:
+
+     top air  223 → 172      hole  205 → 154
+     band top 843 → 744      leaving ~100px above the toolbar
+
+   which shows the curve and the "TWO DECADES ON THE BUY SIDE" line while
+   keeping the numeral below the fold where it is not cut in half.
+
+   The underlying cause of the trade is that this fold carries ~303px of
+   content in a ~750px viewport. Until it carries more, any split is choosing
+   which gap to spend. */
+@media (max-width: 760px) { .pd-hero-fold { min-height: calc(100svh - 86px - clamp(80px, 23vw, 120px)); } }
 .pd-heroc-inner { position: relative; z-index: 1; width: 100%; max-width: var(--pd-max); margin: 0 auto; }
 .pd-hero-c .pd-h1 { max-width: 24em; margin: 0 auto; font-size: clamp(42px, 5.2vw, 68px); letter-spacing: -0.012em; line-height: 1.08; }
 .pd-hero-c .pd-sub { font-size: 19px; }
