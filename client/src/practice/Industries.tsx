@@ -188,10 +188,18 @@ export default function Industries() {
                 contradicted the CTA at the foot of this same page, which
                 offers to take on something new. The lanes below are where we
                 are deepest, not a list of what we will accept. */}
+            {/* Opened on "Institutional-grade corporate development, on
+                demand" until 2026-08-02 — the hero sub from before the copy
+                pass, and the last place it survived anywhere on the site.
+                Two reasons it goes rather than gets modernised: it was the
+                retired tagline, and it was redundant, since the h1 directly
+                above already names the category. What the sentence uniquely
+                carries — how we are paid, and what the lanes mean — is what
+                is left, now with a subject instead of a fragment. */}
             <p className="pd-sub" style={{ margin: '22px auto 0' }}>
-              Institutional-grade corporate development, on demand — retainer plus success fee, paid
-              by the acquirer, never the seller. These lanes are where we know the most; bring us a
-              market that isn't here and we'll go learn it.
+              We work on a retainer plus a success fee, paid by the acquirer, never the seller.
+              These lanes are where we know the most; bring us a market that isn't here and we'll
+              go learn it.
             </p>
           </div>
         </div>
