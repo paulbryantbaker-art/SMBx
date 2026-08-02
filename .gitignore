@@ -18,3 +18,4 @@ testing/definitive/results/
 
 # stray local sqlite (app uses Railway Postgres)
 database.db
+fold-shots/
