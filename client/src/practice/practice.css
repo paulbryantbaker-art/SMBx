@@ -2185,9 +2185,26 @@
        stop is a floor for TEXT: the meta row's ink needs its ground to hold
        ~lum 160 (measured ≥6:1); everything below 93% carries no text.
        Grain stays on top: the shallow middle still needs dither. */
+    /* Two declarations, deliberately: the second interpolates in OKLAB
+       (perceptually uniform — R, G and B stop stepping at different rows,
+       which is the chroma banding an sRGB ramp produces between stops) and
+       replaces the first wherever `in oklab` is supported; older engines
+       drop the second declaration wholesale and keep the sRGB fallback.
+       Grain: 3.2%, coarser turbulence — the dither profile that breaks the
+       residual per-channel steps on OLED. */
     background:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.024'/%3E%3C/svg%3E") repeat,
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.032'/%3E%3C/svg%3E") repeat,
       linear-gradient(to bottom,
+        #FCFAF6 0px, #FCFAF6 120px,
+        #EDF5F0 34%,
+        #D3E8DC 56%,
+        #A8D2BF 74%,
+        #7FB59E 88%,
+        #4C8168 96%,
+        #2B5F49 100%);
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.032'/%3E%3C/svg%3E") repeat,
+      linear-gradient(to bottom in oklab,
         #FCFAF6 0px, #FCFAF6 120px,
         #EDF5F0 34%,
         #D3E8DC 56%,
