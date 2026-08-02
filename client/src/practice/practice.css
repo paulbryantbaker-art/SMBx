@@ -1184,7 +1184,10 @@
 .pd-chat-inputrow {
   display: flex; align-items: center; gap: 10px;
   margin: 14px 32px 28px; padding: 8px 8px 8px 22px;
-  border: 1px solid var(--pd-hair); border-radius: 16px; background: #fff;
+  /* 999px, moved in lockstep with .pd-herobar 2026-08-02 — see the reasoning
+     there. This rule's whole job is to match the resting bar, so it is the one
+     place a stale radius would silently undo the morph. */
+  border: 1px solid var(--pd-hair); border-radius: 999px; background: #fff;
   box-shadow: 0 2px 4px rgba(20, 24, 28, 0.06), 0 12px 32px rgba(20, 24, 28, 0.10);
   transition: border-color 160ms ease;
 }
@@ -1245,7 +1248,26 @@
      `border-width: 0` — i.e. it silently REMOVED the border rather than
      erroring. Caught by reading the computed style, not the diff. */
   border: 1px solid var(--pd-border);
-  border-radius: 16px;
+  /* A PILL, not a 16px box (2026-08-02, Paul: "it looks like a square in the
+     middle of the page and looks awkward" — wanting the Grok/Gemini shape on
+     both breakpoints).
+
+     16px came in with the Ledger pass, which took this from 999px down to a
+     "console". On a control this wide it reads as a rectangle rather than as a
+     radius, and it was the only pill-shaped affordance on the page that wasn't
+     one: the send button inside it is 999px, the starter chips under it are
+     999px, and DESIGN.md's own rule is "buttons are pills, cards are 12–24px".
+     The bar is a control, so it takes the control shape.
+
+     Geometry checks out at both sizes without touching the padding: desktop is
+     ~73px tall so the corner lands at ~36px against 28px of left padding, and
+     the phone is 60px tall against a 46px send disc and a 6px-inset plus, which
+     is the same arrangement Grok and ChatGPT use on a phone.
+
+     .pd-chat-inputrow MUST move with this — see the note on that rule; the
+     resting bar is supposed to become the card's input row when the
+     conversation opens, and a radius mismatch is exactly what breaks it. */
+  border-radius: 999px;
   box-shadow: 0 2px 4px rgba(20, 24, 28, 0.06), 0 12px 32px rgba(20, 24, 28, 0.10);
   transition: border-color 160ms ease;
 }
