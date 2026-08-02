@@ -1188,7 +1188,11 @@
      there. This rule's whole job is to match the resting bar, so it is the one
      place a stale radius would silently undo the morph. */
   border: 1px solid var(--pd-hair); border-radius: 999px; background: #fff;
-  box-shadow: 0 2px 4px rgba(20, 24, 28, 0.06), 0 12px 32px rgba(20, 24, 28, 0.10);
+  /* Matches .pd-herobar's Grok-measured hairline. This rule had been left on
+     the ORIGINAL 12/32 through every softening pass — the two are supposed to
+     read as the same element, so the engaged card was still dropping a card
+     shadow while the resting bar had stopped. */
+  box-shadow: 0 1px 2px rgba(20, 24, 28, 0.05);
   transition: border-color 160ms ease;
 }
 .pd-chat-inputrow .pd-send { border-radius: 999px; }
@@ -1285,13 +1289,20 @@
      resting bar is supposed to become the card's input row when the
      conversation opens, and a radius mismatch is exactly what breaks it. */
   border-radius: 999px;
-  /* Lifted off the page rather than dropped onto it. The original 12/32 cast
-     enough to read as a floating card, which is the opposite of sleek on a
-     control this wide; now that the bar is ~59px rather than ~73px the shadow
-     comes down again to match, because the same spread under a shorter object
-     reads heavier. The border carries the edge; the shadow only separates it
-     from the ambient wash. */
-  box-shadow: 0 1px 2px rgba(20, 24, 28, 0.04), 0 6px 18px rgba(20, 24, 28, 0.06);
+  /* MEASURED OFF GROK (2026-08-02, Paul: "see grok web on mobile"). Sampling
+     their bar at 3x: the page is #FCFCFC, and directly under the bar's bottom
+     border it reads #F7F7F7 at +2px, #FAFAFA at +5px and back to page at +9px.
+     That is a 2px hairline, not a cast shadow — they have essentially none, and
+     THAT is what reads as sleek. Everything else we already matched: 60.7px
+     tall against our 59, a full pill radius, and a hairline border.
+
+     Two heavy shadows was what kept this reading as a floating card through
+     three "sleeker" passes. The fill does the rest: Grok sits 4 units DARKER
+     than its page (#F8F8F8 on #FCFCFC); white on bone sits a few units LIGHTER
+     than ours. Opposite directions, same near-invisible delta, and the hairline
+     border defines the shape in both — so the house's white-card-on-bone law
+     survives without changing the fill. */
+  box-shadow: 0 1px 2px rgba(20, 24, 28, 0.05);
   transition: border-color 160ms ease;
 }
 .pd-herobar:focus-within { border-color: #16181A; }
@@ -1360,11 +1371,15 @@
      left INSIDE the pill (it opens the sheet, where the starter chips live),
      the send affordance is a compact coral circle, and the in-page chips are
      gone entirely. */
-  .pd-herobar { padding: 7px 7px 7px 6px; gap: 2px; }
+  /* 9px, was 7px — pairs with the 42px send disc below to hold the bar at 60px
+     while matching Grok's interior proportion: their disc measures 40px inside
+     a 60.7px bar, a 10px inset, where ours was 46px inside 60 at 7px. Same
+     height, more air around the control. */
+  .pd-herobar { padding: 9px 9px 9px 8px; gap: 2px; }
   .pd-herobar .pd-plus { display: grid; }
   .pd-herobar input { font-size: 16px; padding: 13px 0; }
   .pd-herobar .pd-send {
-    width: 46px; height: 46px; padding: 0; border-radius: 50%;
+    width: 42px; height: 42px; padding: 0; border-radius: 50%;
     display: grid; place-items: center;
   }
   .pd-chat-hero .pd-chips { display: none; }
