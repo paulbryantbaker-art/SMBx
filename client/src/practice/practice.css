@@ -2137,7 +2137,13 @@
      at the base .pd-hero-fold rule — that law protected a composition that
      no longer exists. Plain px only inside the calc (Safari clamp-in-calc
      drop, twice). */
-  .pd-hero-fold { min-height: calc(100svh - 206px); justify-content: flex-start; }
+  /* 286, was 206 (2026-08-02, Paul on the live cluster fold: "a little too
+     much space between the hero and the band?" — his arrow measured a
+     ~165css bone gap between the CTA row and the curve; this brings it to
+     ~85). Safe now that the stats hide until scrolled: a taller crest
+     shows only dark band + eyebrow. On short viewports the content floors
+     the min-height and the band simply follows the fold — no overlap. */
+  .pd-hero-fold { min-height: calc(100svh - 286px); justify-content: flex-start; }
   .pd-hero-c.pd-hero-fold { padding-top: 64px; padding-bottom: 28px; }
   .pd-hero-c.pd-hero-fold .pd-heroc-inner { margin-top: 0; margin-bottom: 0; }
   .pd-hero-c.pd-hero-fold .pd-showcase { margin-top: 34px; }
