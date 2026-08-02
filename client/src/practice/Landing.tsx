@@ -247,14 +247,23 @@ export default function Landing() {
                                                  sophisticated buyer prices as
                                                  overreach
                 "Get started building your acquisition engine today."
-                                               — true, and now demoted to the
-                                                 sub where an instruction belongs
+                                               — true, demoted to the sub where
+                                                 an instruction belongs, then
+                                                 tightened to the line below
 
               "Today" survives all of it and is deliberate. Paul: "by today I
               mean start setting it up today with a phone call — it's a metaphor
               humans understand; they know it won't be in place today, but they
               can get started today." As a sub it can say that without the H1
               having to carry the promise.
+
+              Recorded because it is the live tension in this pair: "Deploy…
+              today" leans on that metaphor harder than "get started building…
+              today" did — deploy is what you do to a thing that already exists.
+              It is survivable here only because the H1 no longer promises
+              anything, so this is the single claim on the fold rather than the
+              second of two. If a reader ever reads it as "operational today",
+              this is the line to soften, not the headline.
 
               "Engine" sets up the Why-us H2 three sections down: "The machine
               serial acquirers build in-house. Yours, without the headcount."
@@ -274,7 +283,7 @@ export default function Landing() {
               characters this is within one of the line it replaced, so the fold
               rhythm `.pd-hero-fold` was tuned for is unchanged. */}
           <h1 className="pd-h1">Buying businesses is hard work. We make it easier.</h1>
-          <p className="pd-sub pd-sub-c">Get started building your acquisition engine today.</p>
+          <p className="pd-sub pd-sub-c">Deploy your acquisition engine today.</p>
         </div>
         <div className="pd-showcase">
           <div className="pd-show-stage">
