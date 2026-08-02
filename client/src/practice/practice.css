@@ -1391,6 +1391,29 @@
      misalignment. */
   .pd-hero .pd-showcase { padding-left: 14px; padding-right: 14px; }
 
+  /* THE ROW UNDER THE PILL SETS ITS EDGES TO THE PILL'S (2026-08-02, Paul
+     circled both and wrote "not the same widths").
+
+     Measured off that screenshot: the pill runs 44 → 386css, while the row
+     below it ran roughly 67 → 364 — a centred cluster sitting ~23px inside the
+     pill on each side, which is close enough to look like a mistake rather
+     than a margin.
+
+     Two things were wrong and both are needed. `.pd-hero-below` lives in
+     `.pd-hero`, which pads 28px, while the pill lives in `.pd-showcase`, which
+     pads a further 14px — so the row started 14px outside the pill and then
+     centre-justified its two items well inside it. Matching the showcase's
+     inset puts the row's box on the pill's box, and space-between pushes the
+     chip to the left edge and the sample link to the right.
+
+     Safe from the wrapped-last-line trap: at 342px the chip (~145px) and the
+     link (~175px) fit on one line with room to spare. A third item in this row
+     would need re-checking. */
+  .pd-hero-fold .pd-hero-below {
+    padding-left: 14px; padding-right: 14px;
+    justify-content: space-between;
+  }
+
   /* THE WASH CRESTS ON THE PILL, NOT ABOVE IT (2026-08-02, Paul: "the green
      shading needs to fill around the bottom of the viewport more, especially on
      mobile, to highlight the chat pill — right now the chat pill is hard to
