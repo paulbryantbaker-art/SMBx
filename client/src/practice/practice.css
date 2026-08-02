@@ -956,10 +956,18 @@
    which shows the curve and the "TWO DECADES ON THE BUY SIDE" line while
    keeping the numeral below the fold where it is not cut in half.
 
+   DIALLED AGAIN to ~65px (Paul: "the green band is a little too high still").
+   Worth recording that the screenshot behind that note still showed the 146px
+   build — the band measured 692css in it, against 693 in the previous shot —
+   so the 99px reduction had not deployed and was never actually seen. 65
+   lands the band around 780css, roughly 150px visible: about two-thirds of the
+   way back from 146 toward the original 0, keeping a real peek without the
+   fold reinflating to its 223px of dead air.
+
    The underlying cause of the trade is that this fold carries ~303px of
    content in a ~750px viewport. Until it carries more, any split is choosing
    which gap to spend. */
-@media (max-width: 760px) { .pd-hero-fold { min-height: calc(100svh - 86px - clamp(80px, 23vw, 120px)); } }
+@media (max-width: 760px) { .pd-hero-fold { min-height: calc(100svh - 86px - clamp(56px, 15vw, 88px)); } }
 .pd-heroc-inner { position: relative; z-index: 1; width: 100%; max-width: var(--pd-max); margin: 0 auto; }
 .pd-hero-c .pd-h1 { max-width: 24em; margin: 0 auto; font-size: clamp(42px, 5.2vw, 68px); letter-spacing: -0.012em; line-height: 1.08; }
 .pd-hero-c .pd-sub { font-size: 19px; }
@@ -1554,8 +1562,26 @@
     background:
       radial-gradient(180% 54% at 50% 84%, rgba(15, 169, 124, 0.30), rgba(15, 169, 124, 0.09) 48%, rgba(15, 169, 124, 0) 78%),
       radial-gradient(165% 52% at 50% 30%, rgba(15, 169, 124, 0.10), rgba(15, 169, 124, 0.035) 52%, rgba(15, 169, 124, 0) 84%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 150px, #000 90%, transparent 100%);
-    mask-image: linear-gradient(to bottom, transparent 0, #000 150px, #000 90%, transparent 100%);
+    /* NO FADE-OUT AT THE BOTTOM (2026-08-02, Paul: "there is an odd gap in the
+       shading"). Measured off his screenshot at the left edge: greenness peaks
+       at +22 around 583–642css, falls to +5 by 650, and is BARE BONE (#FBFAF6,
+       −1) from 667 to 683 — a ~25px strip of naked paper between the wash and
+       the band's edge at 692. That strip is this mask, which used to run
+       `#000 90%, transparent 100%` and cut the wash to zero just before the
+       band arrived.
+
+       It was written that way to avoid a green-on-green seam, and it traded
+       one artefact for a worse one: pale-green meeting deep-green is a soft
+       material change, while green → WHITE → deep-green is a visible band of
+       nothing. Holding the mask to 100% lets the gradient taper on its own —
+       it reaches the fold's bottom edge at ~0.057 alpha (about #EFF5EF), which
+       is a whisper of green rather than a hard stop, and the curve still reads
+       as a change of material.
+
+       The 150px ramp-in stays: that end of the mask solves a different
+       problem, a hard line forming under the nav. */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 150px, #000 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 150px, #000 100%);
   }
   .pd-herobar { padding: 8px 8px 8px 8px; gap: 2px; }
   .pd-herobar .pd-plus { display: grid; }
