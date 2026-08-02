@@ -1277,8 +1277,16 @@
      Stepped back to `--pd-hair` now the fill is recessed: with a tinted well
      the FILL defines the shape, so `--pd-border` drew a hard ring around it.
      Grok runs a 15-unit border delta over its fill; hair over #F6F3EB is 12.
-     The near-invisible-border problem above was specific to a WHITE fill. */
-  border: 1px solid var(--pd-hair);
+     The near-invisible-border problem above was specific to a WHITE fill.
+
+     OUTLINED IN THE BRAND GREEN (2026-08-02, Paul on the finished fold:
+     "maybe the chat pill just needs a slight outline or something to make
+     it pop a little more — it's a little subdued"). Hair over the recessed
+     fill was quiet by design, and he judged it one notch TOO quiet. Deal
+     Green at 0.20 alpha over bone reads as a soft sage line — a visible
+     edge that ties the pill to the send disc and the jade halo behind it,
+     without the hard-gray-ring problem --pd-border had. */
+  border: 1.5px solid rgba(10, 122, 88, 0.20);
   /* A PILL, not a 16px box (2026-08-02, Paul: "it looks like a square in the
      middle of the page and looks awkward" — wanting the Grok/Gemini shape on
      both breakpoints).
@@ -2168,7 +2176,7 @@
   .pd-herobar input::placeholder { color: var(--pd-tert); }
   /* A whisper of lift so the pill reads raised off the wash rather than
      recessed into it (Paul, earlier: "the chat pill is hard to see"). */
-  .pd-hero-fold .pd-herobar { box-shadow: 0 6px 22px rgba(20, 24, 28, 0.06); }
+  .pd-hero-fold .pd-herobar { box-shadow: 0 8px 26px rgba(20, 24, 28, 0.08); }
   /* The row keeps Paul's edge-alignment with the pill (space-between, set
      above) and keeps the tinted chip (his 2026-07-31 call against a solid
      pill next to the solid send disc). Hierarchy is fixed from the other
