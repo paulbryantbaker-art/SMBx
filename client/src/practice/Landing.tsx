@@ -203,7 +203,10 @@ function ProofBand() {
     <section className="pd-dark bl-tr" id="proof">
       <span className="pd-spark" aria-hidden="true" />
       <div className="pd-wrap pd-dark-pad">
-        <div className="pd-mono" data-rv style={{ letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--pd-tert)', textAlign: 'center' }}>
+        {/* The band title, in the one band-title voice (Paul, 2026-08-03:
+            "make the band title the same font every[where]") — this was the
+            lone mono holdout among the dark bands. */}
+        <div className="pd-seclabel" data-rv style={{ textAlign: 'center', marginBottom: 0 }}>
           Two decades on the buy side
         </div>
         <div className="pd-stats rv-stagger" ref={ref} style={{ marginTop: 'clamp(32px, 3.8vw, 54px)' }}>
