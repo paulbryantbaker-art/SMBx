@@ -27,7 +27,7 @@ export const RT = {
   // surfaces — the warm well over bone-family tones (matches M.frameBg;
   // the old "neutral light grey, closer to Cash App" note is superseded:
   // grammar theirs, palette ours)
-  page: "#F9F6F0",
+  page: "#F9F9F9",
   card: "#ffffff", // white — every raised element (no border, no shadow)
   // ink scale (NEUTRAL greys — de-tinted + DARKENED so secondary text stays
   // crisp on the light page; Cash App never floats light type on light grey)
