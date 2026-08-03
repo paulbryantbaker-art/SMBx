@@ -952,7 +952,17 @@
   .pd-hero-fold::before { background: none; -webkit-mask-image: none; mask-image: none; }
   .pd-hero-fold .pd-showcase::before {
     content: ''; position: absolute; z-index: -1; pointer-events: none;
-    inset: -150px -140px -240px;
+    /* PROPORTIONAL TO THE VIEWPORT (2026-08-03, Paul on a wide monitor:
+       "does the bloom need to be bigger on desktop as a proportion of
+       viewport size? it feels small"). The showcase is a fixed 1040px
+       rail, so px insets made the glow a fixed-size puddle that shrank
+       relative to every larger screen. The insets now grow with vw/vh
+       (the radial sizes are % of this box, so they scale for free); the
+       clamps keep laptops close to the tuned 1440 look and stop the
+       spread from swallowing the fold on ultrawides. */
+    inset: calc(-1 * clamp(150px, 20vh, 280px))
+           calc(-1 * clamp(140px, 18vw, 480px))
+           calc(-1 * clamp(240px, 32vh, 440px));
     background:
       radial-gradient(52% 34% at 50% 27%,
         rgba(15, 169, 124, 0.16), rgba(15, 169, 124, 0.06) 55%, rgba(15, 169, 124, 0) 96%),
