@@ -187,7 +187,15 @@ function ProofBand() {
            re-entry replays the fade and the count. */
         host.classList.remove('rv-in');
       }
-    }), { threshold: 0.15, rootMargin: '0px 0px -18% 0px' });
+      /* The -18% bottom margin exists for iOS Safari's floating chrome —
+         numerals half-under the toolbar looked broken (2026-08-02). Desktop
+         has no chrome zone, and the 2026-08-03 band-as-floor layout parks
+         the stats INSIDE the viewport's last fifth at rest — Paul: "the
+         numbers are viewable" — so the phone keeps its guard and the
+         desktop reveals what is genuinely on screen. */
+    }), window.matchMedia('(max-width: 760px)').matches
+      ? { threshold: 0.15, rootMargin: '0px 0px -18% 0px' }
+      : { threshold: 0.2 });
     io.observe(host);
     return () => io.disconnect();
   }, []);
