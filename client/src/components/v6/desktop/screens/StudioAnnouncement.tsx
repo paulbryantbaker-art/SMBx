@@ -257,7 +257,7 @@ export function StudioAnnouncement() {
           <button style={{ ...S.btn, ...S.btnPrimary }} disabled={busy || !copy.headline.trim()} onClick={render}>
             {busy ? "Rendering…" : "Render card (downloads PNG)"}
           </button>
-          {note && <span style={{ ...S.hint, color: note.kind === "err" ? "#B3261E" : T.green }}>{note.text}</span>}
+          {note && <span style={{ ...S.hint, color: note.kind === "err" ? "#C2410C" : T.green }}>{note.text}</span>}
         </div>
         {preview && (
           <div style={S.previewWrap}>

@@ -16,6 +16,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { HomeIcon, DealsListIcon } from "../desktop/icons";
 import type { AtlasScreen } from "../desktop/atlasNav";
+import { RT } from "./redesign/rt";
 
 // Two content tabs. Yulia is the chat action (opens the slide-up sheet), not a
 // destination, so it's rendered separately — not part of the tab union.
@@ -28,13 +29,16 @@ const TABS: { id: BottomTab; label: string; icon: (c: string) => ReactNode }[] =
   { id: "deals", label: "Deals", icon: (c) => <DealsListIcon size={ICON} c={c} /> },
 ];
 
-// Brand-green dock: the active tab gets a pale-green pill with a deep-green icon
-// (green is illegible as a light icon); Yulia is the bright-green fill with a
-// dark on-accent sparkle. Inactive tabs are warm grey.
-const ACCENT_FILL = "#2BFF77"; // Yulia button (bright brand green)
-const ACCENT_SOFT = "#CFFFE1"; // active tab pill (pale green)
-const ACCENT_INK = "#0A5C2E"; // active tab icon (deep green, legible on pale)
-const ON_ACCENT = "#00210F"; // sparkle on the green Yulia button
+// Brand-green dock, Aurora values via RT (2026-08-02 — these constants
+// duplicated the token file and went stale the moment it moved; now they
+// point at it). The active tab gets the accent-tint pill with a deep-green
+// icon; Yulia is the Deal Green fill with a WHITE on-accent sparkle (the
+// neon-era fill wanted dark — Deal Green carries white at 5.3:1).
+// Inactive tabs are warm grey.
+const ACCENT_FILL = RT.accent; // Yulia button (Deal Green)
+const ACCENT_SOFT = RT.accentSoft; // active tab pill (accent tint)
+const ACCENT_INK = RT.accentInk; // active tab icon (legible on the tint)
+const ON_ACCENT = RT.onAccent; // sparkle on the Yulia button (white)
 const INACTIVE = "#605B4F"; // inactive tab icon (warm grey)
 
 export function BottomNav({

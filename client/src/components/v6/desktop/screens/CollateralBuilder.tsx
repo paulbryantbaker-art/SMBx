@@ -388,7 +388,7 @@ const S: Record<string, React.CSSProperties> = {
   segOn: { background: T.blue, color: "#fff" },
 
   warn: { margin: "10px 16px 0", padding: "10px 13px", borderRadius: 10, background: "#FFF4E0", color: "#8A6A2B", fontSize: 12.5, lineHeight: 1.5 },
-  err: { margin: "10px 16px 0", padding: "10px 13px", borderRadius: 10, background: "#FBE4DE", color: "#B3261E", fontSize: 12.5, lineHeight: 1.5 },
+  err: { margin: "10px 16px 0", padding: "10px 13px", borderRadius: 10, background: "#FDEEE6", color: "#C2410C", fontSize: 12.5, lineHeight: 1.5 },
 
   body: { flex: 1, minHeight: 0, display: "flex" },
   board: { flex: 1, minWidth: 0, overflowY: "auto", padding: 16 },

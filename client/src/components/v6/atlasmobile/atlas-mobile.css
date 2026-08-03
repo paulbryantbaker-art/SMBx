@@ -12,7 +12,8 @@
  * touching desktop (which keeps its slate-blue). Inline background-clip stays. */
 /* background-IMAGE (not the shorthand) so the inline `background-clip:text` that
  * shapes the ✦ glyph survives — the shorthand would reset clip and fill the box. */
-.atlas-mobile .atlas-spark { background-image: linear-gradient(135deg, #2BFF77 0%, #0E9E54 100%) !important; }
+/* Aurora sparkle — jade → Deal Green (was the Ramp neon; mirrors T.avatarGrad's family) */
+.atlas-mobile .atlas-spark { background-image: linear-gradient(135deg, #0FA97C 0%, #0A7A58 100%) !important; }
 .atlas-mobile .atlas-avatar-grad { background-image: linear-gradient(140deg, #34D27E 0%, #0B8F4E 100%) !important; }
 
 .atlas-mobile {
