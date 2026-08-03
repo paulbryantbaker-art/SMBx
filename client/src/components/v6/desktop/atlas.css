@@ -58,7 +58,8 @@
   --at-input-bd: #DED8CC;
   --at-prog-track: #EDE9DF;
   --at-spark: linear-gradient(135deg, #0FA97C, #0A7A58 50%, #E8A62B);
-  --at-avatar-grad: linear-gradient(135deg, #0FA97C, #0A7A58);
+  /* Flat despite the name — see T.avatarGrad (Paul: "needs to be flattened"). */
+  --at-avatar-grad: #0A7A58;
 
   font-family: var(--at-font);
   color: var(--at-ink);

@@ -14,7 +14,9 @@
  * shapes the ✦ glyph survives — the shorthand would reset clip and fill the box. */
 /* Aurora sparkle — jade → Deal Green (was the Ramp neon; mirrors T.avatarGrad's family) */
 .atlas-mobile .atlas-spark { background-image: linear-gradient(135deg, #0FA97C 0%, #0A7A58 100%) !important; }
-.atlas-mobile .atlas-avatar-grad { background-image: linear-gradient(140deg, #34D27E 0%, #0B8F4E 100%) !important; }
+/* Flat Deal Green disc — no gradient (Paul: avatars "should be flat"). The
+   `background-image: none` kills any inherited gradient; the color paints it. */
+.atlas-mobile .atlas-avatar-grad { background-image: none !important; background-color: #0A7A58 !important; }
 
 .atlas-mobile {
   /* Native system font (San Francisco on iOS) — hinted + optically sized by the
