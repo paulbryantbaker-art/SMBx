@@ -14,7 +14,7 @@
  * deterministically (lead persisted, honest lane check) the moment an email
  * appears. Full funnel instrumentation, including dwell time on the artifact.
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { bookHref, bookTarget, bookRel } from './leads';
 import { trackEvent } from '../lib/analytics';
 
@@ -42,6 +42,15 @@ const OPENING =
  *  anything that remounts this component (the sample-read tab swap, a reload,
  *  minimize/reopen on mobile). Session-scoped: a fresh visit starts fresh. */
 const SS_KEY = 'smbx_intake_v1';
+
+/** The engine emits markdown **bold** and the bubble rendered the literal
+ *  asterisks (Paul's 2026-08-03 screenshot). This is the WHOLE parser on
+ *  purpose — bold segments only, no library, nothing else interpreted. */
+function boldSpans(text: string): React.ReactNode {
+  const parts = text.split(/\*\*(.+?)\*\*/g);
+  if (parts.length === 1) return text;
+  return parts.map((seg, i) => (i % 2 ? <strong key={i}>{seg}</strong> : seg));
+}
 
 const HINTS = [
   'Sector & Strategy — "HVAC roll-up in the Southeast"',
@@ -312,6 +321,20 @@ export default function YuliaIntake() {
   const [pending, setPending] = useState(false);
   const [live, setLive] = useState<StreamView | null>(null);
   const [pdfState, setPdfState] = useState<'idle' | 'busy' | 'error'>('idle');
+
+  /* START OVER (2026-08-03, Paul: "if we mess up or want to cancel out of
+     it, have an X in the top right corner of the chat box"). The X abandons
+     the session: storage cleared, state back to the opening line, the
+     mobile sheet closed. Deliberately NOT offered mid-stream — pending
+     disables it so an in-flight map isn't half-orphaned. */
+  const startOver = useCallback(() => {
+    try { sessionStorage.removeItem(SS_KEY); } catch { /* fine */ }
+    setMessages([{ from: 'y', text: OPENING }]);
+    setDone(false);
+    setDraft('');
+    setLive(null);
+    setOpen(false);
+  }, []);
   // On phones the chat lifts into a slide-up sheet so typing isn't buried in the
   // page under the keyboard (Paul, 2026-07-14: "a drawer that slides up and can
   // be minimized"). Desktop ignores this — the chat stays inline, front-and-center.
@@ -727,6 +750,11 @@ export default function YuliaIntake() {
           <button type="button" className="pd-chat-min" onClick={() => setOpen(false)} aria-label="Minimize chat">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </button>
+          {/* Start over — both breakpoints (minimize keeps the session; the X
+              abandons it). Disabled while a map is streaming. */}
+          <button type="button" className="pd-chat-x" onClick={startOver} disabled={pending} aria-label="Cancel this conversation and start over">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>
+          </button>
         </div>
       <div className="pd-msgs" ref={listRef}>
         {messages.map((m, i) => (
@@ -738,7 +766,7 @@ export default function YuliaIntake() {
             <div className="pd-msgrow" key={i}>
               <div className={`pd-bub ${m.from === 'y' ? 'pd-bub-y' : 'pd-bub-u'}`}>
                 {m.from === 'y' && m.text
-                  ? m.text.split('\n\n').map((p, j) => <p key={j} style={{ margin: j === 0 ? 0 : '10px 0 0' }}>{p}</p>)
+                  ? m.text.split('\n\n').map((p, j) => <p key={j} style={{ margin: j === 0 ? 0 : '10px 0 0' }}>{boldSpans(p)}</p>)
                   : m.text}
               </div>
             </div>
@@ -746,7 +774,7 @@ export default function YuliaIntake() {
         ))}
         {pending && live?.preText && (
           <div className="pd-msgrow">
-            <div className="pd-bub pd-bub-y">{live.preText}</div>
+            <div className="pd-bub pd-bub-y">{boldSpans(live.preText)}</div>
           </div>
         )}
         {liveMapVisible && (

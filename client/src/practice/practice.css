@@ -1280,6 +1280,19 @@
 .pd-chat-title { font-weight: 800; font-size: 17px; color: var(--pd-ink); }
 /* Grab handle, minimize button, scrim — all mobile-only, hidden here. */
 .pd-chat-grab, .pd-chat-min, .pd-chat-scrim { display: none; }
+/* Start-over X (2026-08-03, Paul: "if we mess up or want to cancel out of
+   it, have an X in the top right corner of the chat box"). Both
+   breakpoints — the chevron minimizes and KEEPS the session; the X abandons
+   it. Quiet until hovered; disabled (dimmed) while a map streams. */
+.pd-chat-x {
+  margin-left: auto; border: none; background: transparent; cursor: pointer;
+  color: var(--pd-tert); padding: 6px; border-radius: 8px; display: inline-flex;
+  transition: color 150ms ease, background-color 150ms ease;
+}
+.pd-chat-x:hover { color: var(--pd-ink); background: rgba(22, 24, 26, 0.05); }
+.pd-chat-x:disabled { opacity: 0.35; cursor: default; }
+/* The title no longer owns the right edge — the X does. */
+.pd-chat .pd-chat-head { align-items: center; }
 /* Zone wrapper — the #yulia anchor target that holds the hero bar / the
    conversation card, so hash-jumps land somewhere in-flow on both breakpoints. */
 .pd-chat-zone { width: 100%; }
