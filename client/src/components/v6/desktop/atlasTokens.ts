@@ -71,7 +71,11 @@ export const T = {
   inputBd: LEDGER.rule, progTrack: '#EDE9DF',
   // gradients — the AI sparkle speaks Aurora now: jade → green → amber
   spark: `linear-gradient(135deg,${LEDGER.jade},${LEDGER.green} 50%,${LEDGER.brass})`,
-  avatarGrad: `linear-gradient(135deg,${LEDGER.jade},${LEDGER.green})`,
+  // FLAT, despite the slot name (2026-08-02, Paul: "my user icon needs to
+  // be flattened — it's very 3-D right now"). The diagonal gradient read
+  // as a bevel; a flat Deal Green disc with white initials is the Cash App
+  // read. The name stays for the same reason `blue` does.
+  avatarGrad: LEDGER.green,
   // radii
   rCard: 14, rCardLg: 16, rPill: 999, rComposer: 24,
   // shadow — warm-ink tinted (was faintly violet for the purple wash era)
