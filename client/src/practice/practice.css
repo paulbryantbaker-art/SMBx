@@ -928,7 +928,16 @@
    sits flush with the viewport bottom — the next band visibly "peeks" at the
    fold (Paul, 2026-07-15). Mobile keeps the full chat-app fold, no peek. */
 .pd-hero-fold { min-height: calc(100svh - 86px); justify-content: center; }
-@media (min-width: 761px) { .pd-hero-fold { min-height: calc(100svh - 86px - clamp(52px, 6vw, 112px)); } }
+@media (min-width: 761px) {
+  .pd-hero-fold { min-height: calc(100svh - 86px - clamp(52px, 6vw, 112px)); }
+  /* GOLDEN RATIO on the desktop fold too (2026-08-02, Paul: "on desktop we
+     need to golden ratio the layout" — the same 1:1.618 the phone fold
+     carries, tuned against the 1440x900 render). The fold centers its
+     content (justify-content:center), so asymmetric air comes from the
+     padding difference: bottom-heavier padding pushes the cluster up
+     until breath-above : air-below ≈ 1 : 1.618. */
+  .pd-hero-c.pd-hero-fold { padding-top: 76px; padding-bottom: 96px; }
+}
 /* The phone fold now GIVES BACK 120px so the proof band's crest and the
    TWO DECADES eyebrow show above the toolbar — see ONE CLUSTER, ONE VOID
    in the ≤760 block, which overrides this rule there. (That reverses the
@@ -938,7 +947,14 @@
    plain `calc(100svh - Npx)` only — a clamp() inside this calc() was
    silently dropped once, collapsing the fold to its content height. */
 .pd-heroc-inner { position: relative; z-index: 1; width: 100%; max-width: var(--pd-max); margin: 0 auto; }
-.pd-hero-c .pd-h1 { max-width: 24em; margin: 0 auto; font-size: clamp(42px, 5.2vw, 68px); letter-spacing: -0.012em; line-height: 1.08; }
+/* ONE LINE on desktop (2026-08-02, Paul: "make the hero be on one line,
+   then the tag on the other line — it is not so narrow constrained"). The
+   24em measure forced the statement to wrap at every width; the size now
+   trades height for width so the full sentence sits on a single line from
+   ~1100px up (measured at 3.75vw: 50 chars ≈ 0.46em/char ≈ 86vw… fits
+   inside the 1360 rail with air). The phone block overrides size and
+   splits at sentence boundaries — mobile is untouched. */
+.pd-hero-c .pd-h1 { max-width: none; margin: 0 auto; font-size: clamp(40px, 3.75vw, 56px); letter-spacing: -0.012em; line-height: 1.08; }
 .pd-hero-c .pd-sub { font-size: 19px; }
 .pd-sub-c { margin: 16px auto 0; max-width: 33em; }
 /* One quiet meta line under the showcase — the secondary ask and the proof
@@ -1354,7 +1370,11 @@
    (below that `.pd-chat-hero .pd-chips` is display:none) and the five lanes
    measure ~655px against 880px of room, so they cannot wrap. If a sixth lane is
    ever added, check this before shipping it. */
-.pd-chat-hero .pd-chips { justify-content: space-between; padding: 18px 0 0; }
+/* CENTERED + GAP, not space-between (2026-08-02): the chips became the full
+   twelve-lane hunt board, which wraps to two/three rows — exactly the
+   wrapped-last-line trap the old comment warned about. Centered rows with a
+   fixed gap read as a tag field under the bar at any count. */
+.pd-chat-hero .pd-chips { justify-content: center; gap: 9px 10px; padding: 18px 0 0; }
 @media (min-width: 901px) {
   /* Resting desktop = hero bar only; engaged desktop = the card only. */
   .pd-chat-zone:not(.resting) .pd-chat-hero { display: none; }
