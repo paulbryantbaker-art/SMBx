@@ -303,5 +303,25 @@ const ATLAS_CSS = readFileSync(path.join(ROOT, 'client/src/components/v6/desktop
 is('the atlas var mirror moved with the tokens',
   ATLAS_CSS.includes('--at-blue: #0A7A58') && !ATLAS_CSS.toLowerCase().includes('#0b57d0'), true);
 
+/* ── 9. no retired era survives in the app CODE (Phase 3 sweep, 2026-08-02).
+   The Ramp neon, the Google blue, the Cash-App violet and the Material
+   error red are dead in v6. Comments may name them as history (rt.ts
+   documents what it replaced), so the scan strips comments first. */
+import { readdirSync } from 'node:fs';
+const DEAD_APP = ['#2BFF77', '#10E060', '#CFFFE1', '#0A5C2E', '#00210F',
+  '#0B57D0', '#5B53D6', '#8B7BD8', '#4F9ED9', '#B3261E'];
+const V6DIR = path.join(ROOT, 'client/src/components/v6');
+const v6Files = readdirSync(V6DIR, { recursive: true }) as string[];
+const offenders: string[] = [];
+for (const f of v6Files) {
+  if (!/\.(ts|tsx|css)$/.test(f)) continue;
+  const code = readFileSync(path.join(V6DIR, f), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:])\/\/.*$/gm, '$1');
+  const up = code.toUpperCase();
+  for (const d of DEAD_APP) if (up.includes(d)) offenders.push(`${f}:${d}`);
+}
+is('no retired era hex survives in v6 code', offenders, []);
+
 console.log(`\n${pass}/${total} passed`);
 process.exit(pass === total ? 0 : 1);

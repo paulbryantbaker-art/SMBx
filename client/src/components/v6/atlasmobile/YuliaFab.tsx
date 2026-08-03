@@ -9,6 +9,8 @@
  * (Cockpit / Sourcing, which have no nav).
  */
 import type { CSSProperties } from "react";
+import { RT } from "./redesign/rt";
+import { rgba, LEDGER } from "../../../../../house/tokens";
 
 export function YuliaFab({
   onOpen,
@@ -29,8 +31,9 @@ export function YuliaFab({
           : "calc(env(safe-area-inset-bottom, 0px) + 20px)",
       }}
     >
-      {/* dark sparkle — Yulia's mark on the bright-green primary FAB */}
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="#00210F" aria-hidden="true">
+      {/* white sparkle — Yulia's mark on the Deal Green primary FAB (the
+          neon era wanted a dark glyph; Deal Green carries white at 5.3:1) */}
+      <svg width="26" height="26" viewBox="0 0 24 24" fill={RT.onAccent} aria-hidden="true">
         <path d="M12 2c.4 4.6 2.4 6.6 7 7-4.6.4-6.6 2.4-7 7-.4-4.6-2.4-6.6-7-7 4.6-.4 6.6-2.4 7-7z" />
       </svg>
     </button>
@@ -46,9 +49,9 @@ const S: Record<string, CSSProperties> = {
     width: 58,
     height: 58,
     borderRadius: "50%",
-    background: "#2BFF77",
+    background: RT.accent,
     border: "none",
-    boxShadow: "0 10px 26px rgba(16,224,96,.42), 0 2px 6px rgba(30,32,70,.16)",
+    boxShadow: `0 10px 26px ${rgba(LEDGER.green, 0.38)}, 0 2px 6px ${rgba(LEDGER.ink, 0.16)}`,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",

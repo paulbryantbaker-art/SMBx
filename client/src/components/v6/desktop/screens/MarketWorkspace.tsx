@@ -488,7 +488,7 @@ const S: Record<string, React.CSSProperties> = {
   foot: { fontSize: 11.5, color: T.muted2, marginTop: 10 },
 
   working: { marginTop: 12, fontSize: 12, color: T.blue, fontWeight: 600 },
-  bad: { marginTop: 12, fontSize: 12, color: "#B3261E", lineHeight: 1.5, background: "#FBE4DE", borderRadius: 9, padding: "9px 11px" },
+  bad: { marginTop: 12, fontSize: 12, color: "#C2410C", lineHeight: 1.5, background: "#FDEEE6", borderRadius: 9, padding: "9px 11px" },
   warn: { marginTop: 12, fontSize: 12, color: "#8A6A2B", lineHeight: 1.5, background: "#FFF4E0", borderRadius: 9, padding: "9px 11px" },
 
   masterBox: { marginTop: 14, marginBottom: 10, padding: "11px 12px", borderRadius: 10, background: T.surface, border: `1px solid ${T.hair}` },

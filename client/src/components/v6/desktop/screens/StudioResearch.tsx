@@ -788,7 +788,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
             {busy ? "Starting…" : asCampaign ? "Create campaign" : "Run research"}
           </button>
         </div>
-        {note && <div style={{ ...R.note, color: note.kind === "err" ? "#B3261E" : T.green }}>{note.text}</div>}
+        {note && <div style={{ ...R.note, color: note.kind === "err" ? "#C2410C" : T.green }}>{note.text}</div>}
       </div>
 
   );
@@ -894,7 +894,7 @@ export default function StudioResearch({ user }: { user: User | null }) {
         </Sheet>
       )}
       {note && (
-        <div style={{ ...A.toast, color: note.kind === "err" ? "#B3261E" : "#086348" }}>{note.text}</div>
+        <div style={{ ...A.toast, color: note.kind === "err" ? "#C2410C" : "#086348" }}>{note.text}</div>
       )}
 
       {sheet === "import" && (
@@ -1386,8 +1386,8 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, a
         <button type="button" style={F.importBtn} onClick={onImportPlan}>Import a plan</button>
         <div style={F.sideHead}>Library</div>
         <SideRow label="All research" count={activeRuns.length} on={sel.kind === "all"} onClick={() => setSel({ kind: "all" })} tint="#6E9BE0" />
-        <SideRow label="One-off runs" count={oneoffs.length} on={sel.kind === "oneoff"} onClick={() => setSel({ kind: "oneoff" })} tint="#A8AEB8" onDropPayload={dropUnfile} />
-        <SideRow label="Archived" count={archivedRuns.length} on={sel.kind === "archived"} onClick={() => setSel({ kind: "archived" })} tint="#C9CDD3" onDropPayload={dropOnArchived} />
+        <SideRow label="One-off runs" count={oneoffs.length} on={sel.kind === "oneoff"} onClick={() => setSel({ kind: "oneoff" })} tint="#A8A296" onDropPayload={dropUnfile} />
+        <SideRow label="Archived" count={archivedRuns.length} on={sel.kind === "archived"} onClick={() => setSel({ kind: "archived" })} tint="#CCC6BA" onDropPayload={dropOnArchived} />
         {(schedules.some((s) => !s.archived) || groupNames.length > 0) && (
           <GroupHead
             label="Campaigns"
@@ -1414,7 +1414,7 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, a
             count={(byCamp.get(s.id) ?? []).length}
             on={sel.kind === "camp" && sel.id === s.id}
             onClick={() => { setSel({ kind: "camp", id: s.id }); setInsp("camp"); }}
-            tint={s.active ? "#63B98F" : "#A8AEB8"}
+            tint={s.active ? "#63B98F" : "#A8A296"}
             dim={!s.active}
             dragStart={(e) => setDrag(e, "camp", s.id)}
             onDropPayload={dropOnCampaign(s.id)}
@@ -1433,7 +1433,7 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, a
                   count={(byCamp.get(s.id) ?? []).length}
                   on={sel.kind === "camp" && sel.id === s.id}
                   onClick={() => { setSel({ kind: "camp", id: s.id }); setInsp("camp"); }}
-                  tint={s.active ? "#63B98F" : "#A8AEB8"}
+                  tint={s.active ? "#63B98F" : "#A8A296"}
                   dim={!s.active}
                   indent
                   dragStart={(e) => setDrag(e, "camp", s.id)}
@@ -1451,7 +1451,7 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, a
             count={(byCamp.get(s.id) ?? []).length}
             on={sel.kind === "camp" && sel.id === s.id}
             onClick={() => { setSel({ kind: "camp", id: s.id }); setInsp("camp"); }}
-            tint="#C9CDD3"
+            tint="#CCC6BA"
             dim
           />
         ))}
@@ -1486,7 +1486,7 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, a
             count={l.master_version || 0}
             on={sel.kind === "lane" && sel.id === l.id}
             onClick={() => { setSel({ kind: "lane", id: l.id }); setInsp("item"); }}
-            tint={l.synthesis_status === "running" ? T.blue : l.synthesis_status === "failed" ? "#C4574A" : l.master_version > 0 ? "#4FA97E" : "#A8AEB8"}
+            tint={l.synthesis_status === "running" ? T.blue : l.synthesis_status === "failed" ? "#C2410C" : l.master_version > 0 ? "#4FA97E" : "#A8A296"}
             dim={l.master_version === 0 && l.synthesis_status !== "running"}
           />
         ))}
@@ -1497,9 +1497,9 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, a
         <div style={{ ...F.sideHead, marginTop: 14 }}>Repositories</div>
         <SideRow label="Artifacts" count={artifacts.length} on={sel.kind === "artifacts"} onClick={() => setSel({ kind: "artifacts" })} tint="#4FA97E" />
         <SideRow label="Assets" count={photos.length} on={sel.kind === "media"} onClick={() => setSel({ kind: "media" })} tint="#D9A441" />
-        <SideRow label="Collateral" count={collateral.length} on={sel.kind === "collateral"} onClick={() => setSel({ kind: "collateral" })} tint="#8B7BD8" onDropPayload={dropUnfile} />
+        <SideRow label="Collateral" count={collateral.length} on={sel.kind === "collateral"} onClick={() => setSel({ kind: "collateral" })} tint="#E8A62B" onDropPayload={dropUnfile} />
         <div style={{ ...F.sideHead, marginTop: 14 }}>Performance</div>
-        <SideRow label="LinkedIn analytics" count={analytics.length} on={sel.kind === "perf"} onClick={() => setSel({ kind: "perf" })} tint="#4F9ED9" />
+        <SideRow label="LinkedIn analytics" count={analytics.length} on={sel.kind === "perf"} onClick={() => setSel({ kind: "perf" })} tint="#0FA97C" />
       </div>
 
       <PaneDivider onDrag={(dx) => setSideW((w) => clampW((w > 0 ? w : effSideW) + dx, 150, 380))} onAuto={autoFitSide} />
@@ -1695,12 +1695,12 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, a
                 const failed = a.analysis_status === "failed";
                 return (
                   <button key={`pf-${a.id}`} type="button" onClick={() => { setSelPerfId(a.id); setInsp("item"); }} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
-                    <span style={F.rowIcon}>{running ? <Spinner /> : <DocGlyph c={on ? T.blue : "#4F9ED9"} />}</span>
+                    <span style={F.rowIcon}>{running ? <Spinner /> : <DocGlyph c={on ? T.blue : "#0FA97C"} />}</span>
                     <span style={F.rowName}>{a.label}</span>
                     <span style={F.rowCol}>{a.period_start && a.period_end ? `${shortDate(a.period_start)} – ${shortDate(a.period_end)}` : "—"}</span>
                     <span style={{ ...F.rowCol, width: 66 }}>
                       {running ? <span style={{ color: T.blue, fontWeight: 600 }}>Analyzing</span>
-                        : failed ? <span style={{ color: "#B3261E", fontWeight: 600 }}>Failed</span>
+                        : failed ? <span style={{ color: "#C2410C", fontWeight: 600 }}>Failed</span>
                         : a.has_analysis ? <span style={{ color: "#086348", fontWeight: 600 }}>Analyzed</span>
                         : <span style={{ color: T.muted, fontWeight: 600 }}>Imported</span>}
                     </span>
@@ -1727,12 +1727,12 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, a
                 const running = r.status === "queued" || r.status === "running";
                 return (
                   <button key={r.id} type="button" draggable onDragStart={(e) => setDrag(e, "run", r.id)} onClick={() => { setSelRunId(r.id); setSelAssetId(null); setInsp("item"); }} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
-                    <span style={F.rowIcon}>{running ? <Spinner /> : failed ? <span style={{ color: "#B3261E", fontWeight: 700 }}>!</span> : <DocGlyph c={on ? T.blue : T.muted} />}</span>
+                    <span style={F.rowIcon}>{running ? <Spinner /> : failed ? <span style={{ color: "#C2410C", fontWeight: 700 }}>!</span> : <DocGlyph c={on ? T.blue : T.muted} />}</span>
                     <span style={F.rowName}>{r.report_title || r.topic}</span>
                     <span style={F.rowCol}>{angleLabel(r.post_angle) ?? typeLabel(r.research_type)}</span>
                     <span style={{ ...F.rowCol, width: 66 }}>
                       {running ? <span style={{ color: T.blue, fontWeight: 600 }}>Running</span>
-                        : failed ? <span style={{ color: "#B3261E", fontWeight: 600 }}>Failed</span>
+                        : failed ? <span style={{ color: "#C2410C", fontWeight: 600 }}>Failed</span>
                         : r.review_status === "approved" ? <span style={{ color: "#086348", fontWeight: 600 }}>Approved</span>
                         : <span style={{ color: "#8A6A2B", fontWeight: 600 }}>Draft</span>}
                     </span>
@@ -1745,7 +1745,7 @@ function Library({ loaded, connErr, runs, schedules, assets, artifacts, lanes, a
             const on = a.id === selAssetId && selRunId == null;
             return (
               <button key={`ca-${a.id}`} type="button" draggable onDragStart={(e) => setDrag(e, "asset", a.id)} onClick={() => { setSelAssetId(a.id); setSelRunId(null); setInsp("item"); }} style={{ ...F.row, ...(on ? F.rowOn : null) }}>
-                <span style={F.rowIcon}><DocGlyph c={on ? T.blue : "#8B7BD8"} /></span>
+                <span style={F.rowIcon}><DocGlyph c={on ? T.blue : "#E8A62B"} /></span>
                 <span style={F.rowName}>{a.label}</span>
                 <span style={F.rowCol}>{(a.mime.split("/")[1] ?? a.mime).toUpperCase()}</span>
                 <span style={{ ...F.rowCol, width: 66 }}>{fmtBytes(a.bytes)}</span>
@@ -2608,7 +2608,7 @@ function ImportPlanSheet({ catalog, onDone }: { catalog: Catalog | null; onDone:
           </div>
         </>
       )}
-      {err && <div style={{ marginTop: 12, fontSize: 12.5, color: "#B3261E", lineHeight: 1.5 }}>{err}</div>}
+      {err && <div style={{ marginTop: 12, fontSize: 12.5, color: "#C2410C", lineHeight: 1.5 }}>{err}</div>}
     </div>
   );
 }
@@ -2670,7 +2670,7 @@ function ActivityFeed({ runId, running }: { runId: number; running: boolean }) {
               ...F.actText,
               ...(l.kind === "phase" ? { fontWeight: 700, color: T.ink } : null),
               ...(l.kind === "done" ? { fontWeight: 700, color: T.green } : null),
-              ...(l.kind === "error" ? { fontWeight: 600, color: "#B3261E" } : null),
+              ...(l.kind === "error" ? { fontWeight: 600, color: "#C2410C" } : null),
             }}
           >
             {l.kind === "search" ? <>Searched — {l.text}</> : l.kind === "read" ? <>Read — {l.text}</> : l.text}
@@ -2995,7 +2995,7 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab, dl }: {
               ? <button type="button" style={RV.reopenBtn} disabled={saving !== null} onClick={() => setReview("draft")}>Reopen draft</button>
               : <button type="button" style={RV.approveBtn} disabled={saving !== null} onClick={() => setReview("approved")}>{saving === "approve" ? "…" : "Approve"}</button>}
           </div>
-          {err && <div style={{ marginTop: 8, fontSize: 12.5, color: "#B3261E" }}>{err}</div>}
+          {err && <div style={{ marginTop: 8, fontSize: 12.5, color: "#C2410C" }}>{err}</div>}
           <div style={{ ...RV.label, marginTop: 18 }}>Export</div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 6 }}>
             <button type="button" style={{ ...RV.exportBtn, ...(busyKind === "card" || busyKind === "cardDark" ? RV.exportBtnBusy : null) }} disabled={busyKind != null} onClick={() => onGrab(pvVariant === "dark" ? "cardDark" : "card")}>
@@ -3021,7 +3021,7 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab, dl }: {
                 <button key={v} type="button" onClick={() => setPvVariant(v)}
                   style={{ fontSize: 11.5, fontWeight: 700, padding: "3px 12px", borderRadius: 999, cursor: "pointer",
                     border: `1px solid ${pvVariant === v ? T.blue : "#D6DAE1"}`,
-                    background: pvVariant === v ? "#EDF3FC" : "#fff",
+                    background: pvVariant === v ? "#F1FAF5" : "#fff",
                     color: pvVariant === v ? T.blue : T.muted }}>
                   {v === "light" ? "Light" : "Dark"}
                 </button>
@@ -3039,7 +3039,7 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab, dl }: {
             </div>
           ) : (
             <div style={{ ...RV.previewEmpty, flexDirection: "column", gap: 10, padding: "0 14px", textAlign: "center" }}>
-              <span style={{ color: "#B3261E", fontWeight: 600 }}>{pvErr}</span>
+              <span style={{ color: "#C2410C", fontWeight: 600 }}>{pvErr}</span>
               <button type="button" style={RV.exportBtn} onClick={() => { pvTriedRef.current = 0; void loadPreview(); }}>Try again</button>
             </div>
           )}
@@ -3055,7 +3055,7 @@ function ReviewPanel({ run, onStatus, onCopyPost, onGrab, dl }: {
             </div>
           ) : (
             <div style={{ ...RV.previewEmpty, flexDirection: "column", gap: 10, minHeight: 100, padding: "0 14px", textAlign: "center" }}>
-              {coverErr && <span style={{ color: "#B3261E", fontWeight: 600, fontSize: 12.5 }}>{coverErr}</span>}
+              {coverErr && <span style={{ color: "#C2410C", fontWeight: 600, fontSize: 12.5 }}>{coverErr}</span>}
               <button type="button" style={RV.exportBtn} onClick={() => { coverTriedRef.current = 0; void loadCover(); }}>Retry carousel preview</button>
             </div>
           )}
@@ -3107,7 +3107,7 @@ const R: Record<string, React.CSSProperties> = {
   note: { marginTop: 10, fontSize: 12.5, lineHeight: 1.5 },
 
   secLabel: { fontSize: 13, color: T.muted, marginBottom: 10, fontWeight: 600 },
-  rowErr: { fontSize: 12, color: "#B3261E", marginTop: 3, lineHeight: 1.4 },
+  rowErr: { fontSize: 12, color: "#C2410C", marginTop: 3, lineHeight: 1.4 },
   tinyBtn: { flex: "none", background: "transparent", border: `1px solid ${T.border}`, borderRadius: 8, padding: "6px 10px", fontSize: 12, fontWeight: 600, color: T.blue, cursor: "pointer", fontFamily: T.font },
 
   empty: { fontSize: 13, color: T.muted, padding: "14px 2px" },

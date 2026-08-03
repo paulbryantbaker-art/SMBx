@@ -155,7 +155,7 @@ function Pill({ text, bg, fg }: { text: string; bg: string; fg: string }) {
 function statusPill(r: RunRow) {
   const running = r.status === "queued" || r.status === "running";
   if (running) return <Pill text="Running" bg={RT.accentSoft} fg={RT.accentInk} />;
-  if (r.status === "failed") return <Pill text="Failed" bg="#FBE4DE" fg={RT.down} />;
+  if (r.status === "failed") return <Pill text="Failed" bg="#FDEEE6" fg={RT.down} />;
   if (r.review_status === "approved") return <Pill text="Approved" bg={RT.accentSoft} fg={RT.accentInk} />;
   return <Pill text="Draft" bg={RT.line} fg={RT.muted} />;
 }
@@ -445,7 +445,7 @@ export default function StudioResearchM({ user: _user }: { user: User | null }) 
   );
 
   const noteBanner = note && (
-    <div style={{ ...S.note, background: note.kind === "err" ? "#FBE4DE" : RT.accentSoft, color: note.kind === "err" ? RT.down : RT.accentInk }}>
+    <div style={{ ...S.note, background: note.kind === "err" ? "#FDEEE6" : RT.accentSoft, color: note.kind === "err" ? RT.down : RT.accentInk }}>
       {note.text}
     </div>
   );
@@ -729,7 +729,7 @@ export default function StudioResearchM({ user: _user }: { user: User | null }) 
                 {a.analysis_status === "running" && <DotSpinner size={14} />}
                 <span style={S.rowTitle}>{a.label}</span>
                 {a.analysis_status === "running" ? <Pill text="Analyzing" bg={RT.accentSoft} fg={RT.accentInk} />
-                  : a.analysis_status === "failed" ? <Pill text="Failed" bg="#FBE4DE" fg={RT.down} />
+                  : a.analysis_status === "failed" ? <Pill text="Failed" bg="#FDEEE6" fg={RT.down} />
                   : a.has_analysis ? <Pill text="Analyzed" bg={RT.accentSoft} fg={RT.accentInk} />
                   : <Pill text="Imported" bg={RT.line} fg={RT.muted} />}
               </div>
@@ -1407,6 +1407,6 @@ const S: Record<string, React.CSSProperties> = {
   btnAccent: { border: "none", background: RT.accentSoft, color: RT.accentInk, borderRadius: RT.rPill, padding: "9px 14px", fontFamily: RT.font, fontSize: 13.5, fontWeight: 800, cursor: "pointer" },
   note: { borderRadius: 12, padding: "10px 13px", fontSize: 13.5, fontWeight: 600, lineHeight: 1.45 },
   connBar: { borderRadius: 12, padding: "9px 13px", fontSize: 12.5, fontWeight: 600, background: "#FFF4E0", color: "#8A6A2B" },
-  errBox: { borderRadius: 10, padding: "9px 12px", fontSize: 12.5, background: "#FBE4DE", color: RT.down, marginTop: 8, lineHeight: 1.5 },
+  errBox: { borderRadius: 10, padding: "9px 12px", fontSize: 12.5, background: "#FDEEE6", color: RT.down, marginTop: 8, lineHeight: 1.5 },
   topPost: { display: "flex", alignItems: "center", gap: 8, padding: "9px 12px", borderRadius: 11, background: RT.page, fontSize: 13, color: RT.ink2, textDecoration: "none", marginTop: 8 },
 };
