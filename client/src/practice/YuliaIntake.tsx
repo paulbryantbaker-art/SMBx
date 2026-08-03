@@ -53,26 +53,19 @@ const HINTS = [
 /** The send button rotates with the step (Paul's copy update, Y-4). */
 const SEND_LABELS = ['Continue', 'Generate Map', 'Send', 'Send'];
 
-/** Quick-start chips = THE HUNT BOARD, verbatim (2026-08-02, Paul: "in the
- *  chips, some are missing" — the v3 set carried five of the twelve lanes
- *  and skipped whole hunting grounds). One source of truth: these are the
- *  landing hunt board's lane names exactly, so a tap sends the engine the
- *  same words the board underwrites. If a lane joins or leaves the board,
- *  it joins or leaves here. */
-const CHIPS: string[] = [
-  'Fire & life safety',
-  'Elevator & escalator service',
-  'Power & grid infrastructure services',
-  'Building automation & critical power',
-  'Testing, inspection & certification / NDT',
-  'Environmental & industrial cleaning',
-  'Water & wastewater contract O&M',
-  'Specialty & MRO distribution',
-  'Machine shops & precision manufacturing',
-  'Food contract manufacturing & co-packing',
-  'Non-emergency medical transport',
-  'Revenue cycle management & medical billing',
-];
+/** Quick-start chips read the ONE lane register (lanes.ts) — the same
+ *  array the landing hunt board renders, so a lane cannot be on the board
+ *  and missing here (2026-08-03, Paul: "I don't see Home Services… nor
+ *  landscape and hardscaping" — the hand-copied list drifted within a day
+ *  of being written; a register cannot).
+ *
+ *  DESKTOP shows the FEATURED row + an "All lanes →" chip that jumps to
+ *  the hunt board (Paul: "is there a better way to present rather than
+ *  just a cloud of chat pills?" — six white pills and a door beats
+ *  fourteen). The mobile SHEET lists every lane — a scrollable sheet is
+ *  where a full list belongs. */
+import { HUNT_LANES, FEATURED_LANES } from './lanes';
+const CHIPS: string[] = HUNT_LANES.map(l => l.nm);
 
 /** Narration for the block currently being written — shown while the map
  *  streams, so the work is legible without pretending anything. System
@@ -706,11 +699,18 @@ export default function YuliaIntake() {
         </div>
         {resting && (
           <div className="pd-chips">
-            {CHIPS.map(c => (
+            {FEATURED_LANES.map(c => (
               <button type="button" key={c} className="pd-chip" onClick={() => useChip(c)}>
                 {c}
               </button>
             ))}
+            <a
+              className="pd-chip"
+              href="#sectors"
+              onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero-all-lanes' })}
+            >
+              All {CHIPS.length} lanes →
+            </a>
           </div>
         )}
       </div>

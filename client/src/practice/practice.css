@@ -1240,10 +1240,10 @@
   /* 999px, moved in lockstep with .pd-herobar 2026-08-02 — see the reasoning
      there. This rule's whole job is to match the resting bar, so it is the one
      place a stale radius would silently undo the morph. */
-  /* Recessed to match .pd-herobar — see the note there. Inside the white chat
-     card this reads the same way it does on bone: a well, not a raised object.
-     These two rules exist to be the same element, so the fill moves with it. */
-  border: 1px solid var(--pd-hair); border-radius: 999px; background: #F6F3EB;
+  /* Matches .pd-herobar — see the note there (white since 2026-08-03; these
+     two rules exist to be the same element, so the fill moves with it).
+     Inside the white card the green outline is what defines the control. */
+  border: 1px solid rgba(10, 122, 88, 0.20); border-radius: 999px; background: #FFFFFF;
   box-shadow: 0 1px 2px rgba(20, 24, 28, 0.05);
   transition: border-color 160ms ease;
 }
@@ -1300,15 +1300,15 @@
      ~53px tall at 1040 wide is a 19.6:1 ratio; Gemini runs 13.6, ChatGPT 14.8,
      so this sits deliberately leaner than either. */
   padding: 7px 7px 7px 26px;
-  /* RECESSED, not raised — and this is the thing four "sleeker" passes kept
-     missing while trimming pixels. Grok's bar is #F8F8F8 on a #FCFCFC page:
-     four units DARKER than its canvas, so it reads as a well cut into the page.
-     White on bone is the opposite — a few units lighter, so it sat ON the page
-     like a card, which is what made it look heavy no matter how thin it got.
-     #F6F3EB is bone's own warm family, six units down, so it sinks the same way
-     without leaving the palette. The white-card law still governs cards; this
-     is a control. */
-  background: #F6F3EB;
+  /* WHITE, superseding the recessed-well doctrine (2026-08-03, Paul on
+     desktop: "I don't like the yellow looking chat pill at all" + on the
+     phone: "maybe the chat pill needs to be whiter or lighter too"). The
+     well was tuned for a bare bone page; once the jade bloom pooled behind
+     the bar and the chips went paper-white, the cream fill read YELLOW
+     against them — same value, new context. The bar is now white like the
+     chips around it; the green outline + the bloom do the separating work
+     the recess used to do. History of the recess kept in git. */
+  background: #FFFFFF;
   /* `--pd-hair` (#EAE5DC) here was 1px of near-white on white — technically a
      border, visually nothing, which is why the bar read as edgeless in a phone
      screenshot. `--pd-border` (#DED8CC) is the same family one step down and
