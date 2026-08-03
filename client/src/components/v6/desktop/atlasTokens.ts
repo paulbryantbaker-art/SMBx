@@ -26,10 +26,12 @@
  * differ.
  *
  * The warm neutrals between bone and hair (page/hover/track/rowDiv…) are
- * DERIVED blends, documented here because LEDGER carries only the endpoints;
- * `#F6F3EB` is the site's recessed-well value (the chat pill's fill), reused
- * as the page tone so white cards read raised the Cash-App way — by tone —
- * while staying in Aurora's warm family.
+ * DERIVED blends, documented here because LEDGER carries only the endpoints.
+ * `page` #F9F6F0 is the bone↔well midpoint (2026-08-02, Paul on the first
+ * deploy: "a little too dark — I don't think Aurora is that dark". The
+ * first cut used the site's recessed-well #F6F3EB and it read dingy next
+ * to Safari showing the site's bone canvas). White cards still read raised
+ * the Cash-App way — by tone — but the step is one notch, not two.
  */
 import { LEDGER, rgba } from '../../../../../house/tokens';
 
@@ -60,7 +62,7 @@ export const T = {
   violet: LEDGER.green, violetBg: LEDGER.greenTint,
   // surfaces / borders — bone canvas, white cards, warm hairlines (the
   // Aurora card grammar; separation by tone, per the Cash App reference)
-  white: '#fff', surface: LEDGER.bone, page: '#F6F3EB', hover: '#F8F5EE',
+  white: '#fff', surface: LEDGER.bone, page: '#F9F6F0', hover: '#F8F5EE',
   track: '#F2EEE5', railDiv: '#F0ECE3',
   border: LEDGER.rule, hair: LEDGER.hair, rowDiv: '#F2EEE5', rowDiv2: '#F6F2EA',
   inputBd: LEDGER.rule, progTrack: '#EDE9DF',

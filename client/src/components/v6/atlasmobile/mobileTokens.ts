@@ -53,12 +53,12 @@ const glassSheet = {
 
 export const M = {
   /** The mobile app-shell background, applied to EVERY screen's root (never
-   *  a fixed child — Safari toolbar rule). Flat warm page — the site's
-   *  recessed-well value (#F6F3EB, the chat pill's fill; flagged for formal
-   *  tokenization in house/tokens.ts). Separation is by TONE — white cards
-   *  and the floating nav read as raised on it, the Cash App way — but the
-   *  tone is Aurora's bone family, not the old neutral grey. */
-  frameBg: "#F6F3EB",
+   *  a fixed child — Safari toolbar rule). Flat warm page — the bone↔well
+   *  midpoint, matching T.page (the well itself read "a little too dark",
+   *  Paul, first deploy). Separation is by TONE — white cards and the
+   *  floating nav read as raised on it, the Cash App way — but the tone is
+   *  Aurora's bone family, not the old neutral grey. */
+  frameBg: "#F9F6F0",
   glassNav,
   glassSheet,
 } as const;
