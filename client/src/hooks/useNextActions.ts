@@ -23,6 +23,9 @@ export interface NextAction {
    *  action. `because` is the traceable reason, never generated prose. */
   client?: string | null;
   clientId?: number | null;
+  /** CRM tier (A–D) of the client — the server uses it to order same-urgency
+   *  rows (tier breaks ties within a priority band, never across bands). */
+  clientTier?: string | null;
   action?: string;
   because?: string;
   journeyType: string | null;

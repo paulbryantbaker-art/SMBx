@@ -25,6 +25,10 @@ interface NextAction {
    *  which is itself an action worth surfacing. */
   client: string | null;
   clientId: number | null;
+  /** The client's CRM tier (A–D from house/leads.ts, materialised on the
+   *  account row). Breaks ties WITHIN a priority band — see the sort. Null
+   *  when the row has no client (orphan deals, reviews, empty states). */
+  clientTier: string | null;
   /** The imperative, on its own, so the UI can render the hierarchy rather than
    *  a sentence with the deal name buried in it. */
   action: string;
@@ -51,7 +55,7 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
              d.industry, d.revenue, d.sde, d.ebitda, d.financials,
              d.created_at, d.updated_at,
              -- Client › Deal › Action: a gate row should name whose deal it is.
-             a.id AS client_id, a.firm AS client_firm
+             a.id AS client_id, a.firm AS client_firm, a.tier AS client_tier
       FROM deals d
       LEFT JOIN crm_accounts a ON a.id = d.crm_account_id
       WHERE d.user_id = ${userId} AND d.status = 'active' AND d.archived = FALSE
@@ -145,6 +149,7 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
           dealName: name,
           client: deal.client_firm ?? null,
           clientId: deal.client_id ?? null,
+          clientTier: deal.client_tier ?? null,
           action: missing[0].label,
           because: `${daysSinceActivity} days since last activity`,
           journeyType: journey,
@@ -164,6 +169,7 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
           dealName: name,
           client: deal.client_firm ?? null,
           clientId: deal.client_id ?? null,
+          clientTier: deal.client_tier ?? null,
           action: topMissing.label,
           because: `${gateLabel(gate)} is waiting on it`,
           journeyType: journey,
@@ -183,6 +189,7 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
           dealName: name,
           client: deal.client_firm ?? null,
           clientId: deal.client_id ?? null,
+          clientTier: deal.client_tier ?? null,
           action: `Move past ${gateLabel(gate)}`,
           because: 'Everything this gate needs is in',
           journeyType: journey,
@@ -213,7 +220,7 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
       const owed = await sql`
         SELECT t.id, t.title, t.due_on, t.status, t.notified_at, t.assignee_name,
                t.assignee_email, d.id AS deal_id, d.business_name, d.name AS deal_name,
-               a.id AS client_id, a.firm
+               a.id AS client_id, a.firm, a.tier AS client_tier
         FROM deal_tasks t
         JOIN deals d ON d.id = t.deal_id AND d.archived = FALSE
         LEFT JOIN crm_accounts a ON a.id = d.crm_account_id
@@ -232,6 +239,7 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
           dealName: t.business_name || t.deal_name || 'a deal',
           client: t.firm ?? null,
           clientId: t.client_id ?? null,
+          clientTier: t.client_tier ?? null,
           action: asked ? `Chase ${who} — ${t.title}` : `Ask ${who} — ${t.title}`,
           because: asked
             ? `Asked ${t.notified_at ? 'already' : 'not yet'}, due ${String(t.due_on).slice(0, 10)}`
@@ -252,7 +260,7 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
     try {
       const dueDeals = await sql`
         SELECT d.id, d.business_name, d.name, d.next_action, d.next_action_on,
-               a.id AS client_id, a.firm
+               a.id AS client_id, a.firm, a.tier AS client_tier
         FROM deals d
         LEFT JOIN crm_accounts a ON a.id = d.crm_account_id
         WHERE d.user_id = ${userId} AND d.archived = FALSE
@@ -268,6 +276,7 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
           dealName: d.business_name || d.name || 'a deal',
           client: d.firm ?? null,
           clientId: d.client_id ?? null,
+          clientTier: d.client_tier ?? null,
           action: d.next_action,
           because: `You set this for ${String(d.next_action_on).slice(0, 10)}`,
           journeyType: 'buy', currentGate: null, icon: 'flag',
@@ -290,7 +299,7 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
         actions.push({
           id: `clientnext-${c.id}`,
           dealId: null, dealName: '',
-          client: c.firm, clientId: c.id,
+          client: c.firm, clientId: c.id, clientTier: c.tier ?? null,
           action: c.next_action,
           because: `You set this for ${String(c.next_action_on).slice(0, 10)}`,
           journeyType: 'buy', currentGate: null, icon: 'group',
@@ -315,7 +324,7 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
           id: `orphan-${d.id}`,
           dealId: d.id,
           dealName: d.business_name || d.name || 'a deal',
-          client: null, clientId: null,
+          client: null, clientId: null, clientTier: null,
           action: 'Assign the client this is run for',
           because: 'One buyer per target cannot be checked without it',
           journeyType: 'buy', currentGate: null, icon: 'link',
@@ -341,7 +350,7 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
         actions.push({
           id: `nocontact-${c.id}`,
           dealId: null, dealName: '',
-          client: c.firm, clientId: c.id,
+          client: c.firm, clientId: c.id, clientTier: c.tier ?? null,
           action: 'Find the named contact',
           because: `Tier ${c.tier} with nobody to email`,
           journeyType: 'buy', currentGate: null, icon: 'person_search',
@@ -382,6 +391,7 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
         // this row — it is who is blocked, which is the point of the hierarchy.
         client: null,
         clientId: null,
+        clientTier: null,
         action: `Review ${review.doc_name || 'the document'}`,
         because: `${review.requester_name || 'Someone'} is blocked on it`,
         journeyType: null,
@@ -408,7 +418,7 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
           ? {
               id: 'start-search',
               dealId: null, dealName: '',
-              client: null, clientId: null,
+              client: null, clientId: null, clientTier: null,
               action: 'Set up a buy-box for a client',
               because: 'No search is running yet',
               journeyType: 'buy', currentGate: null, icon: 'search',
@@ -419,7 +429,7 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
           : {
               id: 'start-clients',
               dealId: null, dealName: '',
-              client: null, clientId: null,
+              client: null, clientId: null, clientTier: null,
               action: 'Import your buy-side register',
               because: 'No clients on the board yet',
               journeyType: 'buy', currentGate: null, icon: 'group',
@@ -430,8 +440,17 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
       );
     }
 
-    // 5. Sort by priority (lower = more urgent) and return top 5
-    actions.sort((a, b) => a.priority - b.priority);
+    // 5. Sort and return top 5. PRIORITY BAND FIRST, ALWAYS — an overdue
+    //    promise on a C-tier client still beats a gate nudge on an A-tier one;
+    //    what breaks first is not negotiable. WITHIN a band, the client's CRM
+    //    tier (A-D from house/leads.ts) orders the work — a tier-A mandate's
+    //    item outranks a same-urgency item for an unassigned or D-tier row.
+    //    Untiered/clientless rows sort last in their band. JS sort is stable,
+    //    so the existing date/insertion order survives as the final tiebreak.
+    const TIER_RANK: Record<string, number> = { A: 0, B: 1, C: 2, D: 3 };
+    const tierRank = (t: string | null) => TIER_RANK[(t || '').toUpperCase()] ?? 4;
+    actions.sort((a, b) =>
+      (a.priority - b.priority) || (tierRank(a.clientTier) - tierRank(b.clientTier)));
     return res.json({ actions: actions.slice(0, 5) });
 
   } catch (err: any) {
