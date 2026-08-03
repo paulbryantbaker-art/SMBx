@@ -25,13 +25,16 @@
  * third green). Until then the values stay put and the gate asserts they
  * differ.
  *
- * The warm neutrals between bone and hair (page/hover/track/rowDiv…) are
- * DERIVED blends, documented here because LEDGER carries only the endpoints.
- * `page` #F9F6F0 is the bone↔well midpoint (2026-08-02, Paul on the first
- * deploy: "a little too dark — I don't think Aurora is that dark". The
- * first cut used the site's recessed-well #F6F3EB and it read dingy next
- * to Safari showing the site's bone canvas). White cards still read raised
- * the Cash-App way — by tone — but the step is one notch, not two.
+ * THE PAGE IS NEUTRAL NEAR-WHITE, NOT WARM (settled 2026-08-02 in three
+ * steps: the site's recessed-well #F6F3EB read "a little too dark"; the
+ * bone↔well midpoint #F9F6F0 was still not it; then Paul screenshotted the
+ * Claude mobile app — "the background should be this color" — and the
+ * sampled value is #F9F9F9, a pure neutral). So the marriage is: Aurora's
+ * greens, accents and warm hairlines on a NEUTRAL airy page — the tool
+ * reads calm and native, the color lives in the accents and cards. The
+ * remaining warm in-card wells (track/rowDiv/progTrack…) sit on WHITE, not
+ * on the page, and are one decision away from neutralizing if they read
+ * yellowed against it.
  */
 import { LEDGER, rgba } from '../../../../../house/tokens';
 
@@ -62,7 +65,7 @@ export const T = {
   violet: LEDGER.green, violetBg: LEDGER.greenTint,
   // surfaces / borders — bone canvas, white cards, warm hairlines (the
   // Aurora card grammar; separation by tone, per the Cash App reference)
-  white: '#fff', surface: LEDGER.bone, page: '#F9F6F0', hover: '#F8F5EE',
+  white: '#fff', surface: LEDGER.bone, page: '#F9F9F9', hover: '#F8F5EE',
   track: '#F2EEE5', railDiv: '#F0ECE3',
   border: LEDGER.rule, hair: LEDGER.hair, rowDiv: '#F2EEE5', rowDiv2: '#F6F2EA',
   inputBd: LEDGER.rule, progTrack: '#EDE9DF',
