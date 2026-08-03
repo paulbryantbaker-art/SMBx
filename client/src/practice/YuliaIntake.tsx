@@ -14,7 +14,7 @@
  * deterministically (lead persisted, honest lane check) the moment an email
  * appears. Full funnel instrumentation, including dwell time on the artifact.
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { bookHref, bookTarget, bookRel } from './leads';
 import { trackEvent } from '../lib/analytics';
 
@@ -43,6 +43,15 @@ const OPENING =
  *  minimize/reopen on mobile). Session-scoped: a fresh visit starts fresh. */
 const SS_KEY = 'smbx_intake_v1';
 
+/** The engine emits markdown **bold** and the bubble rendered the literal
+ *  asterisks (Paul's 2026-08-03 screenshot). This is the WHOLE parser on
+ *  purpose — bold segments only, no library, nothing else interpreted. */
+function boldSpans(text: string): React.ReactNode {
+  const parts = text.split(/\*\*(.+?)\*\*/g);
+  if (parts.length === 1) return text;
+  return parts.map((seg, i) => (i % 2 ? <strong key={i}>{seg}</strong> : seg));
+}
+
 const HINTS = [
   'Sector & Strategy — "HVAC roll-up in the Southeast"',
   'Size & Geography (e.g., "$2–5M EBITDA, within 4 hours of Atlanta")',
@@ -53,26 +62,19 @@ const HINTS = [
 /** The send button rotates with the step (Paul's copy update, Y-4). */
 const SEND_LABELS = ['Continue', 'Generate Map', 'Send', 'Send'];
 
-/** Quick-start chips = THE HUNT BOARD, verbatim (2026-08-02, Paul: "in the
- *  chips, some are missing" — the v3 set carried five of the twelve lanes
- *  and skipped whole hunting grounds). One source of truth: these are the
- *  landing hunt board's lane names exactly, so a tap sends the engine the
- *  same words the board underwrites. If a lane joins or leaves the board,
- *  it joins or leaves here. */
-const CHIPS: string[] = [
-  'Fire & life safety',
-  'Elevator & escalator service',
-  'Power & grid infrastructure services',
-  'Building automation & critical power',
-  'Testing, inspection & certification / NDT',
-  'Environmental & industrial cleaning',
-  'Water & wastewater contract O&M',
-  'Specialty & MRO distribution',
-  'Machine shops & precision manufacturing',
-  'Food contract manufacturing & co-packing',
-  'Non-emergency medical transport',
-  'Revenue cycle management & medical billing',
-];
+/** Quick-start chips read the ONE lane register (lanes.ts) — the same
+ *  array the landing hunt board renders, so a lane cannot be on the board
+ *  and missing here (2026-08-03, Paul: "I don't see Home Services… nor
+ *  landscape and hardscaping" — the hand-copied list drifted within a day
+ *  of being written; a register cannot).
+ *
+ *  DESKTOP shows the FEATURED row + an "All lanes →" chip that jumps to
+ *  the hunt board (Paul: "is there a better way to present rather than
+ *  just a cloud of chat pills?" — six white pills and a door beats
+ *  fourteen). The mobile SHEET lists every lane — a scrollable sheet is
+ *  where a full list belongs. */
+import { HUNT_LANES, FEATURED_LANES } from './lanes';
+const CHIPS: string[] = HUNT_LANES.map(l => l.nm);
 
 /** Narration for the block currently being written — shown while the map
  *  streams, so the work is legible without pretending anything. System
@@ -319,6 +321,20 @@ export default function YuliaIntake() {
   const [pending, setPending] = useState(false);
   const [live, setLive] = useState<StreamView | null>(null);
   const [pdfState, setPdfState] = useState<'idle' | 'busy' | 'error'>('idle');
+
+  /* START OVER (2026-08-03, Paul: "if we mess up or want to cancel out of
+     it, have an X in the top right corner of the chat box"). The X abandons
+     the session: storage cleared, state back to the opening line, the
+     mobile sheet closed. Deliberately NOT offered mid-stream — pending
+     disables it so an in-flight map isn't half-orphaned. */
+  const startOver = useCallback(() => {
+    try { sessionStorage.removeItem(SS_KEY); } catch { /* fine */ }
+    setMessages([{ from: 'y', text: OPENING }]);
+    setDone(false);
+    setDraft('');
+    setLive(null);
+    setOpen(false);
+  }, []);
   // On phones the chat lifts into a slide-up sheet so typing isn't buried in the
   // page under the keyboard (Paul, 2026-07-14: "a drawer that slides up and can
   // be minimized"). Desktop ignores this — the chat stays inline, front-and-center.
@@ -706,11 +722,18 @@ export default function YuliaIntake() {
         </div>
         {resting && (
           <div className="pd-chips">
-            {CHIPS.map(c => (
+            {FEATURED_LANES.map(c => (
               <button type="button" key={c} className="pd-chip" onClick={() => useChip(c)}>
                 {c}
               </button>
             ))}
+            <a
+              className="pd-chip"
+              href="#sectors"
+              onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero-all-lanes' })}
+            >
+              All {CHIPS.length} lanes →
+            </a>
           </div>
         )}
       </div>
@@ -727,6 +750,11 @@ export default function YuliaIntake() {
           <button type="button" className="pd-chat-min" onClick={() => setOpen(false)} aria-label="Minimize chat">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </button>
+          {/* Start over — both breakpoints (minimize keeps the session; the X
+              abandons it). Disabled while a map is streaming. */}
+          <button type="button" className="pd-chat-x" onClick={startOver} disabled={pending} aria-label="Cancel this conversation and start over">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>
+          </button>
         </div>
       <div className="pd-msgs" ref={listRef}>
         {messages.map((m, i) => (
@@ -738,7 +766,7 @@ export default function YuliaIntake() {
             <div className="pd-msgrow" key={i}>
               <div className={`pd-bub ${m.from === 'y' ? 'pd-bub-y' : 'pd-bub-u'}`}>
                 {m.from === 'y' && m.text
-                  ? m.text.split('\n\n').map((p, j) => <p key={j} style={{ margin: j === 0 ? 0 : '10px 0 0' }}>{p}</p>)
+                  ? m.text.split('\n\n').map((p, j) => <p key={j} style={{ margin: j === 0 ? 0 : '10px 0 0' }}>{boldSpans(p)}</p>)
                   : m.text}
               </div>
             </div>
@@ -746,7 +774,7 @@ export default function YuliaIntake() {
         ))}
         {pending && live?.preText && (
           <div className="pd-msgrow">
-            <div className="pd-bub pd-bub-y">{live.preText}</div>
+            <div className="pd-bub pd-bub-y">{boldSpans(live.preText)}</div>
           </div>
         )}
         {liveMapVisible && (
