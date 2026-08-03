@@ -53,14 +53,25 @@ const HINTS = [
 /** The send button rotates with the step (Paul's copy update, Y-4). */
 const SEND_LABELS = ['Continue', 'Generate Map', 'Send', 'Send'];
 
-/** Quick-start chips (v3 design set — the five hunting lanes). A tap sends
- *  the lane straight to the engine, per the prototype's behavior. */
+/** Quick-start chips = THE HUNT BOARD, verbatim (2026-08-02, Paul: "in the
+ *  chips, some are missing" — the v3 set carried five of the twelve lanes
+ *  and skipped whole hunting grounds). One source of truth: these are the
+ *  landing hunt board's lane names exactly, so a tap sends the engine the
+ *  same words the board underwrites. If a lane joins or leaves the board,
+ *  it joins or leaves here. */
 const CHIPS: string[] = [
   'Fire & life safety',
-  'Elevator service',
-  'NDT & inspection',
-  'Environmental services',
-  'MRO distribution',
+  'Elevator & escalator service',
+  'Power & grid infrastructure services',
+  'Building automation & critical power',
+  'Testing, inspection & certification / NDT',
+  'Environmental & industrial cleaning',
+  'Water & wastewater contract O&M',
+  'Specialty & MRO distribution',
+  'Machine shops & precision manufacturing',
+  'Food contract manufacturing & co-packing',
+  'Non-emergency medical transport',
+  'Revenue cycle management & medical billing',
 ];
 
 /** Narration for the block currently being written — shown while the map
