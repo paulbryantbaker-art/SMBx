@@ -298,7 +298,7 @@ is('the verdict green did NOT adopt the brand accent (two-greens law)',
 is('the sparkle gradient speaks Aurora, not Google',
   !T.spark.includes('4285F4') && T.spark.includes(LEDGER.jade) && T.spark.includes(LEDGER.brass), true);
 is('the mobile active capsule is the accent tint', M.glassNav.activeBg, LEDGER.greenTint);
-is('the mobile frame is the warm well, not the neutral grey', M.frameBg, '#F6F3EB');
+is('the mobile frame is the warm bone-well midpoint, not the neutral grey', M.frameBg, '#F9F6F0');
 const ATLAS_CSS = readFileSync(path.join(ROOT, 'client/src/components/v6/desktop/atlas.css'), 'utf8');
 is('the atlas var mirror moved with the tokens',
   ATLAS_CSS.includes('--at-blue: #0A7A58') && !ATLAS_CSS.toLowerCase().includes('#0b57d0'), true);
