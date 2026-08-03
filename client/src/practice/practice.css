@@ -638,7 +638,10 @@
 }
 .pd-nav-ctas .pd-pill, .pd-nav-ctas .pd-pill-primary { transition: padding 0.28s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
 .pd-nav-links { display: flex; gap: clamp(24px, 3vw, 44px); font-size: 15px; font-weight: 600; }
-.pd-nav-links a { color: var(--pd-body); }
+/* nowrap — a nav link folding into a two-line column ("How / it / works") is
+   never an acceptable degradation; if the row can't fit, the burger takes
+   over (see the 1024px cutover below). */
+.pd-nav-links a { color: var(--pd-body); white-space: nowrap; }
 .pd-nav-links a:hover { color: var(--pd-ink); }
 /* Active section — the nav reflects where you are (segment pages → Who it's
    for; the deal sheet → Track record). Coral, with a coral underline. */
@@ -656,7 +659,19 @@
    close; the burger morphs to an X via aria-expanded. ── */
 .pd-nav-burger { display: none; }
 .pd-mmenu, .pd-mmenu-scrim { display: none; }
-@media (max-width: 760px) {
+/* THE CUTOVER IS 1024, NOT 760 (2026-08-03, Paul's rotated-phone screenshot:
+   at ~930px the desktop nav got the width band nothing was designed for —
+   links folded into three-line columns and the logo was squeezed out of the
+   row entirely). The full nav needs ~1240px; landscape phones and portrait
+   tablets live at 760–1024. So the burger owns everything to 1024, and a
+   compact desktop cut (below) covers 1025–1240. */
+@media (max-width: 1024px) {
+  .pd-nav-links, .pd-nav-book { display: none; }
+  .pd-nav-ctas .pd-pill-primary { display: none; }
+  .pd-nav-logo { height: 30px; }
+  .pd-nav { padding-top: 13px; padding-bottom: 13px; }
+  .pd-nav-ctas { gap: 6px; }
+
   .pd-nav-burger {
     display: grid; place-items: center; width: 40px; height: 40px; flex: none;
     margin-right: -6px; border: none; background: transparent; color: var(--pd-ink);
@@ -727,6 +742,15 @@
     pointer-events: none; transition: background-color 0.26s ease;
   }
   .pd-mmenu-scrim.on { background-color: rgba(20, 18, 17, 0.32); pointer-events: auto; }
+}
+
+/* THE TABLET BAND — 1025 to 1240, where the desktop nav exists but only in
+   its compact cut: smaller mark, tighter links, trimmer pills. Above 1240
+   the full-size nav has the room it was designed for. */
+@media (min-width: 1025px) and (max-width: 1240px) {
+  .pd-nav-logo { height: 34px; }
+  .pd-nav-links { gap: 14px; font-size: 14px; }
+  .pd-nav-ctas .pd-pill, .pd-nav-ctas .pd-pill-primary { padding: 10px 16px; font-size: 14px; }
 }
 
 /* ─── hero — split: statement left, the engine right (the pattern the
@@ -2228,12 +2252,10 @@
      a visitor deeper down the page.
 
      With the pill gone the bar can lose height too ("shrink the header down
-     just a little bit") — it now carries two small objects instead of three. */
-  .pd-nav-links, .pd-nav-book { display: none; }
-  .pd-nav-ctas .pd-pill-primary { display: none; }
-  .pd-nav-logo { height: 30px; }
-  .pd-nav { padding-top: 13px; padding-bottom: 13px; }
-  .pd-nav-ctas { gap: 6px; }
+     just a little bit") — it now carries two small objects instead of three.
+     2026-08-03: these nav rules MOVED to the 1024px burger block above — the
+     rotated-phone/tablet band needed them too, and two copies at different
+     widths is how one goes stale. */
   .pd-indexrow { gap: 14px; padding: 28px 0; }
   .pd-stats { grid-template-columns: 1fr; gap: 52px; }
   .pd-ledger-head { flex-direction: column; align-items: flex-start !important; gap: 14px !important; }
