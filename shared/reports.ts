@@ -77,6 +77,19 @@ export const REPORTS: ReportMeta[] = [
     ogImage: '/reports/home-services-cover.jpg',
     md: 'home-services-state-of-market.md',
   },
+  {
+    slug: 'dfw-home-services',
+    kicker: 'Metro market map',
+    shortTitle: 'Dallas–Fort Worth Home Services',
+    // Drawn from this report's own executive summary — the metro-depth cut of
+    // the statewide assessment (its Part XI), published as its own volume.
+    abstract:
+      'The acquirable universe is roughly 300 businesses, not 2,400: Dallas–Fort Worth counts 2,412 plumbing-and-HVAC establishments, and 74.5% have fewer than ten employees. Eighteen platform parents hold verified DFW ground, platform share of the acquisition band runs 8.5% to 22.6%, and roughly 280 establishments carrying an estimated $2–6B of annual work match no consolidator in the register.',
+    published: '2026-08-03',
+    publishedLabel: 'August 2026',
+    ogImage: '/reports/dfw-home-services-cover.jpg',
+    md: 'dfw-home-services.md',
+  },
 ];
 
 export function findReport(slug: string): ReportMeta | undefined {
