@@ -937,6 +937,35 @@
      padding difference: bottom-heavier padding pushes the cluster up
      until breath-above : air-below ≈ 1 : 1.618. */
   .pd-hero-c.pd-hero-fold { padding-top: 76px; padding-bottom: 96px; }
+  /* THE BLOOM RIDES THE PILL ON DESKTOP TOO (2026-08-02, Paul: "the bloom
+     needs to be aligned better — central behind the chat pill and spread
+     out from there… the bloom will highlight the chips"). Same anchor the
+     phone learned the hard way: a glow that must follow an element lives
+     ON the element (.pd-showcase wraps the bar + chips), not on the hero,
+     where every layout change strands it. The base .pd-hero::before wash
+     (crest at 76%, mask fade) is emptied on the fold — it was built for a
+     content-free lower fold and pools in the wrong place now.
+     Centre sits at the BAR (upper part of the showcase box); the wide
+     outer radial carries a soft tint down across the chip field so the
+     soft-white chips sit IN the bloom. Meta-row rows land below ~0.04
+     alpha — body contrast holds. */
+  .pd-hero-fold::before { background: none; -webkit-mask-image: none; mask-image: none; }
+  .pd-hero-fold .pd-showcase::before {
+    content: ''; position: absolute; z-index: -1; pointer-events: none;
+    inset: -150px -140px -240px;
+    background:
+      radial-gradient(52% 34% at 50% 27%,
+        rgba(15, 169, 124, 0.16), rgba(15, 169, 124, 0.06) 55%, rgba(15, 169, 124, 0) 96%),
+      radial-gradient(80% 60% at 50% 32%,
+        rgba(15, 169, 124, 0.08), rgba(15, 169, 124, 0) 72%);
+  }
+  /* Soft-white chips (Paul: "the chips don't need to be green — a soft
+     white like the top of the page, the bloom will highlight them"). The
+     fill goes paper-white with a quiet hairline; the LABEL keeps the deep
+     green so the lanes still read as live. Hover keeps the existing green
+     deepen. Desktop-only: the mobile sheet's chips are a different
+     surface and stay as they are. */
+  .pd-chat-hero .pd-chip { background: #FFFFFF; border-color: rgba(22, 24, 26, 0.10); }
 }
 /* The phone fold now GIVES BACK 120px so the proof band's crest and the
    TWO DECADES eyebrow show above the toolbar — see ONE CLUSTER, ONE VOID
