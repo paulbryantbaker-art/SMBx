@@ -577,9 +577,9 @@ export default function Landing() {
       {/* ── Whose side — the second dark movement ── */}
       <section className="pd-dark bl-side" style={{ marginTop: 'clamp(130px, 15vw, 220px)' }}>
         <div className="pd-wrap pd-dark-pad">
+          <div className="pd-seclabel" data-rv>Whose side we're on</div>
           <div className="pd-askew">
             <div data-rv>
-              <div className="pd-seclabel">Whose side we're on</div>
               <p className="pd-quote">The seller has a broker. Who is working for you?</p>
             </div>
             <div className="off" data-rv>

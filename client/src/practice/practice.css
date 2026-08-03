@@ -454,8 +454,11 @@
    band title honey color"). var(--pd-brass) is already re-scoped to honey
    #F5C452 inside .pd-dark, so this reads the token rather than a hex — and
    on light surfaces the label stays Deal Green, where honey would sink into
-   the bone. */
-.pd-dark .pd-seclabel { color: var(--pd-brass); }
+   the bone. CENTERED, same day ("let's center all of the band titles") —
+   which is why the whose-side label sits ABOVE the askew grid in Landing.tsx
+   rather than inside its first column: text-align centers within the
+   element's box, and a column-width box would read as off-centre on desktop. */
+.pd-dark .pd-seclabel { color: var(--pd-brass); text-align: center; }
 /* Page locator — a breadcrumb in the coral label voice, top of each subpage
    hero, so a visitor always knows which page they're on (Paul, 2026-07-14).
    Parent is a link back to its section/home; the current page reads in ink. */
