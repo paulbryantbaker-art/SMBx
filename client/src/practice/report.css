@@ -679,6 +679,31 @@
   .rp-resume { left: 16px; right: 16px; transform: none; padding-left: 18px; }
   @keyframes rp-rise { from { opacity: 0; transform: translateY(12px); } }
   .rp-resume-t { flex: 1 1 100%; }
+
+  /* THE SHELF, COMPACT (Paul, 2026-08-03: "we need a better way to see
+     research docs in Mobile. they take up a lot of vertical space").
+     A desktop card is a full pitch — kicker, 32px title, abstract, a stat
+     band, a pill — and on a 390px screen each one ran ~600px tall, so three
+     reports meant two screens of scrolling before the shelf was even seen.
+     On the phone a card's job is smaller: say what the report is and open
+     it. So: stats hidden (they repeat the abstract's own numbers and the
+     masthead shows them in full on tap-through), the abstract clamped to
+     three lines, the title a size down, and the padding cut to phone scale.
+     The CTA pill stays — it is the tap target the whole card promises. */
+  .rp-card { padding: 18px 18px 16px; border-radius: 14px; }
+  .rp-card-top { margin-bottom: 8px; }
+  .rp-card-h { margin-bottom: 8px; font-size: 21px; }
+  .rp-card-p {
+    margin-bottom: 14px; font-size: 15px; line-height: 1.55;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .rp-card-stats { display: none; }
+  .rp-card-foot { gap: 10px 14px; }
+  .rp-card-cta { padding: 10px 20px; font-size: 15px; }
+  .rp-idx-list { gap: 14px; padding-top: 30px; }
+  .rp-idx-head { padding-top: 34px; }
+  .rp-idx-sub { margin-top: 14px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
