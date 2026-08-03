@@ -35,10 +35,10 @@ const TABS: { id: BottomTab; label: string; icon: (c: string) => ReactNode }[] =
 // icon; Yulia is the Deal Green fill with a WHITE on-accent sparkle (the
 // neon-era fill wanted dark — Deal Green carries white at 5.3:1).
 // Inactive tabs are warm grey.
-const ACCENT_FILL = RT.accent; // Yulia button (Deal Green)
+const ACCENT_FILL = RT.agent; // Yulia button (vivid jade — "too dark" as Deal Green)
 const ACCENT_SOFT = RT.accentSoft; // active tab pill (accent tint)
 const ACCENT_INK = RT.accentInk; // active tab icon (legible on the tint)
-const ON_ACCENT = RT.onAccent; // sparkle on the Yulia button (white)
+const ON_ACCENT = RT.onAgent; // sparkle on the Yulia button (ink on jade, 6.0:1)
 const INACTIVE = "#605B4F"; // inactive tab icon (warm grey)
 
 export function BottomNav({
