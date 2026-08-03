@@ -996,10 +996,17 @@
    lands on the golden ratio at 1920x1080. Heights under ~1000px never hit
    the cap and keep the 900-tuned values above. */
 @media (min-width: 761px) and (min-height: 1000px) {
-  .pd-hero-fold { min-height: 780px; }
-  /* Golden pads for the CAPPED fold (measured at 1920x1080: 76/96 gave
-     187:244 = 1.31; solving the 22px shift lands 165:266 = 1.61). */
-  .pd-hero-c.pd-hero-fold { padding-top: 54px; padding-bottom: 118px; }
+  /* SCREEN-LEVEL GOLDEN (2026-08-03, Paul: "now apply gold ratio to it" —
+     the first screen's two masses). The band stands ~457px at this width;
+     its crest belongs at 1.618 x 457 ≈ 739 from the top, so the fold cap
+     solves backward: 739 - 86 nav - ~38 curve = 615. Both numbers are
+     fixed px under this media, so above-the-band : band holds golden on
+     every tall window, and 1080p monitors see ~340px of proof instead of
+     a 167px sliver. */
+  .pd-hero-fold { min-height: 615px; }
+  /* Golden pads for the 615 fold (measured 75:182 = 2.43 at 54/118; the
+     23px shift lands 98:159 = 1.62 — solved, as always, from the render). */
+  .pd-hero-c.pd-hero-fold { padding-top: 77px; padding-bottom: 95px; }
   /* NO ORPHANED SECTION LABEL (2026-08-03, Paul: "I like that we can see
      the whole band now, but I don't like that WHY US is popping up —
      looks orphaned"). With the fold capped, tall windows fit fold + whole
