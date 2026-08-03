@@ -144,6 +144,14 @@ export default function PracticeShell({
   // scroll-held while it's open (restored to the shell's 'auto').
   const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => { setMenuOpen(false); }, [loc]);
+  /* Route changes start at the TOP of the new page (2026-08-02, found via
+     the who-index: wouter preserves scroll, so a link tapped 3000px down
+     the landing opened the segment page 3000px down — which read as the
+     link going nowhere). Hash navigations keep the browser's own anchor
+     behavior. */
+  useEffect(() => {
+    if (!window.location.hash) window.scrollTo(0, 0);
+  }, [loc]);
   useEffect(() => {
     if (!menuOpen) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };

@@ -220,22 +220,32 @@ function ProofBand() {
   );
 }
 
-/** Who it's for — five giant names; the active one swaps the side panel. */
+/** Who it's for — five giant names, each a REAL LINK to its segment page
+ *  (2026-08-02, Paul: "These links don't go anywhere"). They didn't: on a
+ *  phone the side panel is display:none and every row's click was
+ *  preventDefault + setActive — a visible arrow with no destination. The
+ *  five /buyers/<slug> pages have been routed and fully built since the
+ *  per-segment pass; this index is now where the site links them. Desktop
+ *  keeps the panel as a HOVER preview (mouse-enter swaps it); click
+ *  navigates everywhere. The panel's own ask still routes to #cta. */
+const WHO_SLUGS = ['family-offices', 'independent-sponsors', 'searchers', 'operators', 'pe-firms'];
 function WhoIndex() {
   const [active, setActive] = useState(0);
   return (
     <div className="pd-whosel" data-rv>
       <div className="names rv-stagger" data-rv>
         {WHO.map((w, i) => (
-          <a
+          <Link
             key={w.label}
-            href="#who"
+            href={`/buyers/${WHO_SLUGS[i]}`}
             className={`name${i === active ? ' on' : ''}`}
-            onClick={e => { e.preventDefault(); setActive(i); }}
+            onMouseEnter={() => setActive(i)}
+            onFocus={() => setActive(i)}
+            onClick={() => trackEvent('practice_cta_clicked', { placement: 'who-index', segment: WHO_SLUGS[i] })}
           >
             <span>{w.label}</span>
             <span className="arr" aria-hidden>→</span>
-          </a>
+          </Link>
         ))}
       </div>
       <div className="panel" aria-live="polite">
