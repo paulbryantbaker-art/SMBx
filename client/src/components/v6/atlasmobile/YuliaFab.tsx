@@ -31,9 +31,9 @@ export function YuliaFab({
           : "calc(env(safe-area-inset-bottom, 0px) + 20px)",
       }}
     >
-      {/* white sparkle — Yulia's mark on the Deal Green primary FAB (the
-          neon era wanted a dark glyph; Deal Green carries white at 5.3:1) */}
-      <svg width="26" height="26" viewBox="0 0 24 24" fill={RT.onAccent} aria-hidden="true">
+      {/* ink sparkle on vivid jade — Yulia's button is the one BRIGHT object
+          in the chrome (Paul: Deal Green here read "too dark"). 6.0:1. */}
+      <svg width="26" height="26" viewBox="0 0 24 24" fill={RT.onAgent} aria-hidden="true">
         <path d="M12 2c.4 4.6 2.4 6.6 7 7-4.6.4-6.6 2.4-7 7-.4-4.6-2.4-6.6-7-7 4.6-.4 6.6-2.4 7-7z" />
       </svg>
     </button>
@@ -49,9 +49,9 @@ const S: Record<string, CSSProperties> = {
     width: 58,
     height: 58,
     borderRadius: "50%",
-    background: RT.accent,
+    background: RT.agent,
     border: "none",
-    boxShadow: `0 10px 26px ${rgba(LEDGER.green, 0.38)}, 0 2px 6px ${rgba(LEDGER.ink, 0.16)}`,
+    boxShadow: `0 10px 26px ${rgba(LEDGER.jade, 0.34)}, 0 2px 6px ${rgba(LEDGER.ink, 0.14)}`,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",

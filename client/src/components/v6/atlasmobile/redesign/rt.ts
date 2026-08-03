@@ -42,6 +42,14 @@ export const RT = {
   accentSoft: LEDGER.greenTint, // soft pill / chip backgrounds
   accentInk: LEDGER.green, // accent-colored TEXT/icons on white or on accentSoft
   onAccent: "#FFFFFF", // text/icon ON the accent fills (5.3:1 on Deal Green)
+  // YULIA'S BUTTON ONLY (2026-08-02, Paul: "the Yulia Agent button is too
+  // dark"). The agent's control is the one bright object in the chrome —
+  // vivid jade with an INK glyph (6.0:1, measured), the Cash App
+  // bright-fill read. Jade carries no small text anywhere (house law);
+  // a glyph at 26px on 6:1 is fine. Do NOT use this pair for ordinary
+  // CTAs — they stay Deal Green + white.
+  agent: LEDGER.jade,
+  onAgent: LEDGER.ink,
   // live data — the desktop's own semantics (verdict green / terra), so
   // "up" never collides with the brand accent (two-greens law)
   up: "#1f8a5b",

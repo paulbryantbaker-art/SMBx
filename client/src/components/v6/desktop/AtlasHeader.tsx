@@ -21,11 +21,18 @@ interface TabDef {
 
 // Studio is retired from the chrome (2026-07-31) — the document work moved to
 // disk. The screen still exists and still routes; see appSurfaces.ts.
+/* TAB ORDER IS THE WORKFLOW (2026-08-02, Paul: "client is number one and
+   then from the client we have a thesis where we're gonna go out and
+   source, and then we have the stages of the deal — a couple levels above
+   the deal now"). The data chain has read that way since migrations 114/116
+   (crm_accounts → buyer_theses.crm_account_id → sourcing_portfolios →
+   candidates → deals → gates); the chrome now reads in the same order:
+   Clients → Sourcing (the thesis lives there) → Deals (the stages). */
 const TABS: TabDef[] = ([
   { id: "today", label: "Today" },
-  { id: "deals", label: "Deals" },
   { id: "clients", label: "Clients" },
   { id: "sourcing", label: "Sourcing" },
+  { id: "deals", label: "Deals" },
   ...(STUDIO_IN_APP ? [{ id: "studio", label: "Studio" } as TabDef] : []),
   { id: "integration", label: "Integration" },
   { id: "files", label: "Files" },
