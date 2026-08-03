@@ -224,6 +224,10 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
 
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterId>("all");
+  // THE CLIENT CUT (2026-08-02, Paul: "a client-forward deal management
+  // tool"). "all" | "none" (unassigned) | a client firm name. Client-side
+  // like the other filters — every row is already in memory.
+  const [clientCut, setClientCut] = useState<string>("all");
   const [page, setPage] = useState(0);
   const [view, setView] = useState<ViewId>("board");
   const [scope, setScope] = useState<ScopeId>("active");
@@ -252,18 +256,29 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
 
   // Client-side filter: search over name + sub, chips over side/watchlist.
   // Drives BOTH the table and the board (same `all` set, one filter pass).
+  // Distinct client firms present on the board, for the client cut.
+  const clientFirms = useMemo(() => {
+    const firms = new Set<string>();
+    for (const row of all) if (row.clientFirm) firms.add(row.clientFirm);
+    return [...firms].sort((a, b) => a.localeCompare(b));
+  }, [all]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return all.filter((row) => {
       if (q) {
-        const hay = `${row.name} ${row.sub ?? ""}`.toLowerCase();
+        // The client's name is part of the haystack — "whose deal" is a
+        // first-class way to search a client-forward board.
+        const hay = `${row.name} ${row.sub ?? ""} ${row.clientFirm ?? ""}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
+      if (clientCut === "none" && row.crmAccountId != null) return false;
+      if (clientCut !== "all" && clientCut !== "none" && row.clientFirm !== clientCut) return false;
       if (filter === "watch") return row.verdict === "watch";
       if (filter === "due") return (daysUntil(row.nextActionOn) ?? 1) <= 0;
       return true;
     });
-  }, [all, query, filter]);
+  }, [all, query, filter, clientCut]);
 
   // Board grouping — the same filtered slice, bucketed into the five stages.
   const byStage = useMemo(() => {
@@ -293,6 +308,11 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
   };
   const onFilter = (id: FilterId) => {
     setFilter(id);
+    setPage(0);
+    clearSelection();
+  };
+  const onClientCut = (v: string) => {
+    setClientCut(v);
     setPage(0);
     clearSelection();
   };
@@ -378,6 +398,9 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
       onSearch={onSearch}
       filter={filter}
       onFilter={onFilter}
+      clientCut={clientCut}
+      onClientCut={onClientCut}
+      clientFirms={clientFirms}
       count={loaded ? all.length : 0}
       view={effectiveView}
       onView={setView}
@@ -502,6 +525,9 @@ function Toolbar({
   onSearch,
   filter,
   onFilter,
+  clientCut,
+  onClientCut,
+  clientFirms,
   count,
   view,
   onView,
@@ -514,6 +540,9 @@ function Toolbar({
   onSearch: (v: string) => void;
   filter: FilterId;
   onFilter: (id: FilterId) => void;
+  clientCut: string;
+  onClientCut: (v: string) => void;
+  clientFirms: string[];
   count: number;
   view: ViewId;
   onView: (v: ViewId) => void;
@@ -596,6 +625,34 @@ function Toolbar({
             </button>
           );
         })}
+        {/* The client cut — the board sliced to one client's book, or to the
+            unassigned deals that still need a client named. Renders only when
+            a client exists to cut by. */}
+        {clientFirms.length > 0 && (
+          <select
+            value={clientCut}
+            onChange={(e) => onClientCut(e.target.value)}
+            aria-label="Filter by client"
+            style={{
+              fontSize: 12.5,
+              fontWeight: 600,
+              padding: "7px 11px",
+              borderRadius: T.rPill,
+              cursor: "pointer",
+              fontFamily: T.font,
+              border: `1px solid ${clientCut !== "all" ? T.blue : T.border}`,
+              background: T.white,
+              color: clientCut !== "all" ? T.blue : T.muted,
+              maxWidth: 220,
+            }}
+          >
+            <option value="all">All clients</option>
+            {clientFirms.map((f) => (
+              <option key={f} value={f}>{f}</option>
+            ))}
+            <option value="none">Unassigned</option>
+          </select>
+        )}
       </div>
 
       <div style={{ flex: 1 }} />
