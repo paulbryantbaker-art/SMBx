@@ -19,7 +19,7 @@ import type { CSSProperties, ReactNode } from "react";
 import type { AtlasScreenProps } from "../atlasNav";
 import { useAtlasNav, useAtlasChat } from "../atlasNav";
 import { T } from "../atlasTokens";
-import { MarkBadge } from "../primitives";
+import { MarkBadge, fmtCents } from "../primitives";
 import { PlusIcon, ChevronRightIcon, SendArrowIcon } from "../icons";
 import { useMobileDeals } from "../../../../hooks/useMobileDeals";
 import { useNextActions, type NextAction } from "../../../../hooks/useNextActions";
@@ -167,6 +167,10 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
           down-and-right. Margins are untouched by the animation, so centering
           holds. left:50% + marginLeft:-450 = horizontal page-center;
           top:46dvh + marginTop:-210 = vertical center landing on the composer. */}
+      {/* Aurora glow — jade, quiet (was Google blue→violet in rgb() components,
+          which the hex-sweep gate can't see; recolored with the Today calm
+          pass 2026-08-02). Same geometry, lower presence: the site's
+          pill-spotlight grammar, not a lava lamp. */}
       <div
         aria-hidden="true"
         style={{
@@ -178,7 +182,7 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
           width: 960,
           height: 440,
           background:
-            "radial-gradient(ellipse at center, rgba(66,133,244,.34), rgba(155,114,203,.19) 45%, transparent 70%)",
+            "radial-gradient(ellipse at center, rgba(15,169,124,.20), rgba(10,122,88,.08) 45%, transparent 70%)",
           filter: "blur(10px)",
           animation: "atlas-glow 6s ease-in-out infinite",
           pointerEvents: "none",
@@ -214,11 +218,15 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
         >
         {/* greeting — real display_name is unbounded, so wrap+clamp instead of
             nowrap (a long single first name at 50px would clip the 920px column). */}
+        {/* Fraunces at 545 — the ONE serif display moment on this screen (the
+            Aurora × Cash App pass, 2026-08-02: working type stays the system
+            font; the greeting is Today's headline and earns the house face). */}
         <h1
           style={{
-            fontSize: 50,
-            fontWeight: 600,
-            letterSpacing: "-.025em",
+            fontFamily: "'Fraunces', Georgia, serif",
+            fontSize: 46,
+            fontWeight: 545,
+            letterSpacing: "-.01em",
             margin: "0 0 32px",
             maxWidth: "100%",
             textAlign: "center",
@@ -247,11 +255,46 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
             justifyContent: "center",
           }}
         >
-          <QuickChip emoji="📊" label="Build a pitch deck" onClick={() => nav.go("studio")} />
+          {/* The pitch-deck chip pointed at Studio, which is out of the chrome
+              (STUDIO_IN_APP=false) — replaced with a pipeline read via chat,
+              the practice's actual daily ask. */}
+          <QuickChip
+            emoji="📊"
+            label="Read my pipeline"
+            onClick={() => chat?.send("Give me a read on my pipeline — what moved, what's stalled, what needs me this week?")}
+          />
           <QuickChip emoji="🔍" label="Screen new targets" onClick={() => nav.go("sourcing")} />
           <QuickChip emoji="📂" label="Summarize a data room" onClick={() => nav.go("files")} />
           <QuickChip emoji="🤖" label="Set up an agent" onClick={() => nav.go("agent")} />
         </div>
+
+        {/* HERO NUMBERS — the Cash App move: the state of the practice as two
+            or three big flat figures, no card chrome, straight on the page.
+            Every figure is REAL (honesty law): the pipeline sum only renders
+            when at least one deal carries an asking price, and a partial sum
+            says so in its label rather than posing as the whole book. */}
+        {deals.loaded && deals.hasData && (() => {
+          const valued = deals.all.filter((d) => d.askingPrice != null);
+          const pipelineCents = valued.reduce((s, d) => s + (d.askingPrice as number), 0);
+          const stat = (n: string, l: string) => (
+            <div key={l} style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 34, fontWeight: 700, color: T.ink, fontVariantNumeric: "tabular-nums", letterSpacing: "-.01em" }}>{n}</div>
+              <div style={{ fontSize: 13, color: T.muted, marginTop: 4 }}>{l}</div>
+            </div>
+          );
+          return (
+            <div style={{ display: "flex", gap: 56, marginTop: 34, justifyContent: "center", flexWrap: "wrap" }}>
+              {valued.length > 0 && stat(
+                fmtCents(pipelineCents),
+                valued.length === deals.all.length
+                  ? "Pipeline · asking"
+                  : `Pipeline · ${valued.length} of ${deals.all.length} valued`,
+              )}
+              {stat(String(deals.all.length), deals.all.length === 1 ? "Deal in motion" : "Deals in motion")}
+              {next.loaded && stat(String(next.actions.length), next.actions.length === 1 ? "Needs your attention" : "Need your attention")}
+            </div>
+          );
+        })()}
         </div>
 
         {/* Multi-mandate roll-up — full-width band, advisors with 2+ sell-side
@@ -286,18 +329,24 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
           </div>
         )}
 
-        {/* two-column lower band — below the centered hero (scroll to reach) */}
+        {/* ONE CALM COLUMN below the hero (the Aurora × Cash App pass,
+            2026-08-02 — was a two-column band, each list squeezed to ~450px
+            beside the other). Cash App stacks: attention first because it is
+            actionable, the activity feed second because it is ambient. The
+            stack is capped at a readable width and centered — full-bleed 920px
+            rows read as a spreadsheet, not a feed. */}
         <div
           style={{
             width: "100%",
-            display: "flex",
-            gap: 18,
-            marginTop: 16,
+            maxWidth: 680,
+            margin: "16px auto 0",
             paddingTop: 30,
+            display: "flex",
+            flexDirection: "column",
+            gap: 34,
           }}
         >
-          {/* LEFT — Needs your attention */}
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div>
             <ColumnHeading>Needs your attention</ColumnHeading>
             <AttentionColumn
               noDeals={noDeals}
@@ -312,8 +361,7 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
             />
           </div>
 
-          {/* RIGHT — Notifications (real deal-team / deal-activity feed) */}
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div>
             <ColumnHeading>Notifications</ColumnHeading>
             <NotificationColumn
               loaded={notifs.loaded}
