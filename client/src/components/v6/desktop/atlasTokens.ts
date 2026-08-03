@@ -1,48 +1,78 @@
 /**
  * Atlas desktop design tokens — the single source of truth for inline-styled
- * desktop components. Values are verbatim from /tmp/atlas_maps/00 §(a) GLOBAL
- * TOKENS and the ATLAS_BUILD_CONTRACT. `atlas.css` mirrors the palette as CSS
- * vars under `.atlas-root`; this object is what every screen imports.
+ * desktop components. `atlas.css` mirrors the palette as CSS vars under
+ * `.atlas-root`; this object is what every screen imports.
+ *
+ * AURORA SKIN (2026-08-02, Paul: "how do we marry Aurora with Cash App…
+ * I like the style guide of Aurora"). The app now IMPORTS the house palette
+ * from `house/tokens.ts` — the same file the practice site, the PDF
+ * composers and the studio builders read — so the app and every other
+ * surface cannot drift apart. This executes Phase 1 of
+ * UI_RETOOL_READINESS.md: token-level, reversible, the shells' grammar
+ * untouched.
+ *
+ * SLOT NAMES ARE HISTORICAL, VALUES ARE AURORA. `blue` holds Deal Green now
+ * — the same names-kept/values-swapped pattern practice.css uses for its
+ * `--pd-coral*` slots. Renaming the keys is a 33-file churn for zero pixels;
+ * do it in a quiet moment or never.
+ *
+ * TWO-GREENS LAW (UI_RETOOL_READINESS §3.6): `green`/`greenBg`/`greenAv` are
+ * the VERDICT/"pursue" semantic and deliberately did NOT move to the brand
+ * accent — verdict pills must stay visually distinct from primary actions.
+ * With the brand itself now green, that law is under real pressure: #1f8a5b
+ * vs #0A7A58 read as cousins. Flagged for a Phase 3 decision (likely a
+ * shape/treatment distinction — tinted pill + check glyph — rather than a
+ * third green). Until then the values stay put and the gate asserts they
+ * differ.
+ *
+ * The warm neutrals between bone and hair (page/hover/track/rowDiv…) are
+ * DERIVED blends, documented here because LEDGER carries only the endpoints;
+ * `#F6F3EB` is the site's recessed-well value (the chat pill's fill), reused
+ * as the page tone so white cards read raised the Cash-App way — by tone —
+ * while staying in Aurora's warm family.
  */
+import { LEDGER, rgba } from '../../../../../house/tokens';
+
 export const T = {
-  // The native system font (San Francisco on iOS/macOS, Segoe UI on Windows,
-  // Roboto on Android). The OS hints it to the device and optically sizes it, so
-  // it renders crisper than any webfont — the app reads as cleanly as a native
-  // app (YouTube/Kroger reference). Replaced 'DM Sans', which read soft on mobile.
+  // The native system font (San Francisco on iOS/macOS, Segoe UI on Windows).
+  // The OS hints it, so it renders crisper than any webfont — the app reads
+  // as native (the Cash App note). Fraunces enters only for select display
+  // moments in the Phase 3 screen sweep, never as working type.
   font: '-apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-  // ink / text — the whole scale lifted darker for stronger contrast/readability
-  // (2026-06-23). Titles near-black for YouTube-style punch; body a touch darker;
-  // the secondary grays raised from ~5.6:1 to ~7:1 (AAA) so they stay legible on
-  // the tinted frame wash, not just on white. Hierarchy steps preserved.
-  ink: '#141519', ink2: '#181a1e', ink3: '#2d3136', label: '#393c41',
-  // Secondary text — all comfortably AAA on white (≈6.7–7:1) and still ≥AA on the
-  // lavender wash. (Earlier these were illegible: muted2 #80868b ~3.5:1 / faint
-  // #9aa3ad ~2.6:1.) Readability is paramount, especially on mobile.
+  // ink / text — the neutral AAA-tuned scale kept from Atlas (2026-06-23
+  // lift); only the top step moves onto the house ink. Neutral grays sit
+  // fine on warm surfaces; re-warming the whole ladder bought nothing in a
+  // side-by-side.
+  ink: LEDGER.ink, ink2: '#181a1e', ink3: '#2d3136', label: '#393c41',
   muted: '#4d5765', muted2: '#4b5460', faint: '#4e5764',
-  // blue (primary/active)
-  blue: '#0b57d0', blueBg: '#e8f0fe', blueBg3: '#f3f7ff',
-  navActive: '#d3e3fd', stageActiveBd: '#bcd4fb', approvalBd: '#cfe0ff',
-  tabActive: 'rgba(11,87,208,.10)', tabHover: 'rgba(11,87,208,.05)',
-  // green / amber / terra / violet
+  // primary / active — Deal Green (slot names historical, see header).
+  // White on LEDGER.green measures 5.3:1 (documented in house/tokens.ts).
+  blue: LEDGER.green, blueBg: LEDGER.greenTint, blueBg3: '#F2F9F5',
+  navActive: rgba(LEDGER.green, 0.16), stageActiveBd: rgba(LEDGER.green, 0.32), approvalBd: rgba(LEDGER.green, 0.26),
+  tabActive: rgba(LEDGER.green, 0.10), tabHover: rgba(LEDGER.green, 0.05),
+  // verdict green — UNCHANGED on purpose (two-greens law, see header)
   green: '#1f8a5b', greenBg: '#e6f4ec', greenAv: '#cdeada',
+  // semantic warning/danger — already Aurora-compatible warms; unchanged
   amber: '#9a6b00', amberBg: '#fdf0d5', amberBg2: '#fff3e0', amberAv: '#f3e0b0',
   terra: '#c2410c', terraBg: '#fdeee6',
-  violet: '#5b53d6', violetBg: '#ecebfb',
-  // surfaces / borders
-  white: '#fff', surface: '#fafbfd', page: '#e9edf2', hover: '#f7f9fc',
-  track: '#f0f4f9', railDiv: '#f0f2f5',
-  border: '#d8dfe9', hair: '#eef1f5', rowDiv: '#f3f5f8', rowDiv2: '#f6f8fb',
-  inputBd: '#dbe3ec', progTrack: '#e8edf3',
-  // gradients
-  spark: 'linear-gradient(135deg,#4285F4,#9B72CB 50%,#D96570)',
-  avatarGrad: 'linear-gradient(135deg,#4285F4,#9B72CB)',
+  // the violet secondary collapses into the brand accent for Phase 1; if a
+  // surface needs a genuine second hue in Phase 3, Aurora's answer is amber.
+  violet: LEDGER.green, violetBg: LEDGER.greenTint,
+  // surfaces / borders — bone canvas, white cards, warm hairlines (the
+  // Aurora card grammar; separation by tone, per the Cash App reference)
+  white: '#fff', surface: LEDGER.bone, page: '#F6F3EB', hover: '#F8F5EE',
+  track: '#F2EEE5', railDiv: '#F0ECE3',
+  border: LEDGER.rule, hair: LEDGER.hair, rowDiv: '#F2EEE5', rowDiv2: '#F6F2EA',
+  inputBd: LEDGER.rule, progTrack: '#EDE9DF',
+  // gradients — the AI sparkle speaks Aurora now: jade → green → amber
+  spark: `linear-gradient(135deg,${LEDGER.jade},${LEDGER.green} 50%,${LEDGER.brass})`,
+  avatarGrad: `linear-gradient(135deg,${LEDGER.jade},${LEDGER.green})`,
   // radii
   rCard: 14, rCardLg: 16, rPill: 999, rComposer: 24,
-  // shadow — slightly deeper + faintly violet-tinted so white cards lift cleanly
-  // off the new purple frame wash (more separation = more perceived contrast).
-  shCard: '0 2px 6px rgba(34,36,72,.09), 0 1px 2px rgba(34,36,72,.05)',
-  shSoft: '0 1px 3px rgba(34,36,72,.07)',
-  shHover: '0 6px 16px rgba(34,36,72,.13)',
+  // shadow — warm-ink tinted (was faintly violet for the purple wash era)
+  shCard: '0 2px 6px rgba(22,24,26,.08), 0 1px 2px rgba(22,24,26,.05)',
+  shSoft: '0 1px 3px rgba(22,24,26,.06)',
+  shHover: '0 6px 16px rgba(22,24,26,.12)',
 } as const;
 
 export type AtlasTokens = typeof T;

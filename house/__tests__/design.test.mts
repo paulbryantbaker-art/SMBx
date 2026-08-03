@@ -280,5 +280,28 @@ is('the error screen names no retired colour',
 is('the error screen uses the house faces', /Fraunces/.test(EB_CODE) && /Inter/.test(EB_CODE), true);
 is('the error screen no longer names Yulia at a stranger', /Yulia/.test(EB_CODE), false);
 
+/* ── 8. the APP wears Aurora too (2026-08-02, Paul: "marry Aurora with
+   Cash App"). Phase 1 of UI_RETOOL_READINESS.md: the Atlas token objects
+   import house/tokens.ts, so the app and the site cannot drift. Slot
+   names are historical (T.blue holds Deal Green — the --pd-coral
+   precedent); these cases pin the marriage AND the two laws that must
+   survive it: the verdict green stays distinct from the brand accent
+   (two-greens law), and no Google-era hue survives in the gradients. */
+const { T } = await import('../../client/src/components/v6/desktop/atlasTokens');
+const { M } = await import('../../client/src/components/v6/atlasmobile/mobileTokens');
+is('the app primary slot is Deal Green', T.blue, LEDGER.green);
+is('the violet slot collapsed into the accent', T.violet, LEDGER.green);
+is('app surfaces are the bone family',
+  [T.surface, T.border, T.hair], [LEDGER.bone, LEDGER.rule, LEDGER.hair]);
+is('the verdict green did NOT adopt the brand accent (two-greens law)',
+  T.green !== LEDGER.green && T.green.toLowerCase() === '#1f8a5b', true);
+is('the sparkle gradient speaks Aurora, not Google',
+  !T.spark.includes('4285F4') && T.spark.includes(LEDGER.jade) && T.spark.includes(LEDGER.brass), true);
+is('the mobile active capsule is the accent tint', M.glassNav.activeBg, LEDGER.greenTint);
+is('the mobile frame is the warm well, not the neutral grey', M.frameBg, '#F6F3EB');
+const ATLAS_CSS = readFileSync(path.join(ROOT, 'client/src/components/v6/desktop/atlas.css'), 'utf8');
+is('the atlas var mirror moved with the tokens',
+  ATLAS_CSS.includes('--at-blue: #0A7A58') && !ATLAS_CSS.toLowerCase().includes('#0b57d0'), true);
+
 console.log(`\n${pass}/${total} passed`);
 process.exit(pass === total ? 0 : 1);
