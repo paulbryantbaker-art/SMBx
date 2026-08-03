@@ -321,17 +321,15 @@ export default function Landing() {
           {/* The two sentences are two spans so the PHONE can break at the
               sentence boundary. Unstyled on desktop (spans are inline, the
               copy is byte-identical); at ≤760px .pd-h1-s2 goes display:block,
-              so the stack reads "Buying businesses / is hard work. / We make
+              so the stack reads "Buying a business / is hard work. / We make
               it easier." — the free wrap used to land on "…hard work. We /
               make it easier.", a dangling pronoun severed from its verb. */}
-          <h1 className="pd-h1"><span className="pd-h1-s1">Buying businesses is hard work.</span> <span className="pd-h1-s2">We make it easier.</span></h1>
-          {/* "customized" + the exclamation are Paul's, verbatim (2026-08-02:
-              "let's say Deploy your customized acquisition engine today!") —
-              the one sanctioned exclamation on the page. The no-break space
-              glues "acquisition engine" so the phone wrap lands before the
-              compound ("Deploy your customized / acquisition engine today!")
-              instead of splitting it ("…acquisition / engine today!"). */}
-          <p className="pd-sub pd-sub-c">Deploy your customized acquisition{'\u00A0'}engine today!</p>
+          <h1 className="pd-h1"><span className="pd-h1-s1">Buying a business is hard work.</span> <span className="pd-h1-s2">We make it easier.</span></h1>
+          {/* Paul's copy, verbatim (2026-08-03: "Whether your first or your
+              100th acquisition, we run the process for you, freeing up your
+              time and resources."). The no-break space glues "100th
+              acquisition" so no wrap severs the ordinal from its noun. */}
+          <p className="pd-sub pd-sub-c">Whether your first or your 100th{'\u00A0'}acquisition, we run the process for you, freeing up your time and{'\u00A0'}resources.</p>
         </div>
         <div className="pd-showcase">
           <div className="pd-show-stage">

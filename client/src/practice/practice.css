@@ -1001,16 +1001,37 @@
      down… to where the band is at the bottom of the viewport but the
      numbers are viewable — no bottom whitespace until scroll"). So the
      fold DERIVES from the screen: 100svh minus the nav (86) minus the
-     ~388px of band the crest + eyebrow + numerals + labels need. The
-     band then always bleeds past the bottom edge with the stats in view
-     — on a 1500-tall window and on 1080p alike — and nothing below it
-     can show before a scroll. Plain px in the calc (Safari law). */
+     band slice the crest + eyebrow + numerals + labels need. The band
+     then always bleeds past the bottom edge with the stats in view, and
+     nothing below it can show before a scroll. Plain px in the calc
+     (Safari law) — which is also why the WIDTH-dependent part of the
+     band's height (curve 6vw≤112 + dark-pad 6.5vw≤110 + numeral scale)
+     is stepped in the media queries below instead of a clamp() inside
+     this calc: Paul's 2000px-wide laptop clipped the stat labels off
+     the bottom because 474 was measured at 1440 wide. */
   .pd-hero-fold { min-height: calc(100svh - 474px); }
-  /* Golden pads for the viewport-derived fold (measured 303:365 = 1.21
-     at 77/95 on a 1500-tall window; the 48px shift lands 255:413 = 1.62
-     — solved, as always, from the render). */
-  .pd-hero-c.pd-hero-fold { padding-top: 29px; padding-bottom: 143px; }
+  /* GOLDEN INTERIOR AT ANY HEIGHT (2026-08-03, Paul's laptop: "really
+     imbalanced" — the fixed 29/143 pads only landed 1.62 at the one
+     height they were solved on; at 1208 tall the same pixels measured
+     1:2.6, headline hugging the nav over a dead hole). The flex centring
+     splits leftover evenly, so the RATIO is set by the pad DIFFERENCE —
+     which must scale with the leftover, i.e. with the viewport: the line
+     through the two render-measured solutions (diff 16.8 at 1208 tall →
+     1.62, diff 106 at 1500 tall → 1.62, solved WITH the 2026-08-03 long
+     tag in place — the tag's height is inside these constants, so new
+     hero copy means re-solving this line) is 0.306·svh − 353. Negative
+     calc padding clamps to 0 per spec, so short-tall windows (1080p)
+     degrade to pure centring — the best available without negative
+     space. */
+  .pd-hero-c.pd-hero-fold { padding-top: 0; padding-bottom: calc(30.6svh - 353px); }
 }
+/* The band-reserve width steps (see the floor comment above): each step =
+   86 nav + 208 fixed band interior + curve(w) + dark-pad-extra(w) + numeral
+   growth + 4 breathing, computed from the clamps at each width. */
+@media (min-width: 1500px) and (min-height: 1000px) { .pd-hero-fold { min-height: calc(100svh - 490px); } }
+@media (min-width: 1650px) and (min-height: 1000px) { .pd-hero-fold { min-height: calc(100svh - 508px); } }
+@media (min-width: 1800px) and (min-height: 1000px) { .pd-hero-fold { min-height: calc(100svh - 520px); } }
+@media (min-width: 1950px) and (min-height: 1000px) { .pd-hero-fold { min-height: calc(100svh - 524px); } }
 /* ONE LINE, GUARANTEED, where there is room to guarantee it (2026-08-03:
    Paul's screenshot showed the hero wrapped to two lines on HIS browser
    while every headless render held one — engines measure variable-font
