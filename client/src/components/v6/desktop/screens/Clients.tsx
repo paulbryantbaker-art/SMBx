@@ -31,7 +31,7 @@
  */
 import { useMemo, useRef, useState } from "react";
 import type { AtlasScreenProps } from "../atlasNav";
-import { useAtlasChat } from "../atlasNav";
+import { useAtlasChat, useAtlasNav } from "../atlasNav";
 import { useCrmAccounts, useCrmAccount, type CrmFilters } from "../../../../hooks/useCrmAccounts";
 import {
   CRM_STAGES, STAGE_LABEL, MOMENT_LABEL, MOMENT_WHY, SEGMENT_LABEL, PITCH_LABEL,
@@ -87,6 +87,7 @@ const ROW_PAD = "11px 22px";
 
 export default function ClientsScreen({ user }: AtlasScreenProps) {
   const chat = useAtlasChat();
+  const nav = useAtlasNav();
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<CrmFilters>({});
   const [openId, setOpenId] = useState<number | null>(null);
@@ -246,6 +247,8 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
           id={openId}
           nonce={detailNonce}
           onClose={() => setOpenId(null)}
+          onOpenDeal={(dealId, name) => nav.openDeal(dealId, name)}
+          onOpenSourcing={() => nav.go("sourcing")}
           onChanged={() => { crm.refresh(); setDetailNonce(n => n + 1); }}
           patch={crm.patch}
           logActivity={crm.logActivity}
@@ -425,12 +428,18 @@ function Row({ account: a, rank, onOpen }: { account: CrmAccount; rank: number; 
 /* ── detail pane ──────────────────────────────────────────────────────── */
 
 function DetailPane({
-  id, nonce, onClose, onChanged, patch, logActivity,
+  id, nonce, onClose, onChanged, patch, logActivity, onOpenDeal, onOpenSourcing,
 }: {
   id: number;
   nonce: number;
   onClose: () => void;
   onChanged: () => void;
+  /** The dossier drills DOWN (2026-08-02, Paul: "a client-forward deal
+   *  management tool") — a deal listed here opens its cockpit, a search
+   *  opens Sourcing. Rows were read-only before, which made the client hub
+   *  a dead end. */
+  onOpenDeal: (dealId: number, name?: string) => void;
+  onOpenSourcing: () => void;
   patch: (id: number, body: Record<string, unknown>) => Promise<unknown>;
   logActivity: (id: number, body: Record<string, unknown>) => Promise<unknown>;
 }) {
@@ -583,12 +592,23 @@ function DetailPane({
                   No deals opened for them yet.
                 </p>
               ) : deals.map(d => (
-                <div key={d.id} style={{ padding: "7px 0", borderBottom: `1px solid ${T.rowDiv}` }}>
-                  <div style={{ fontSize: 13.5, fontWeight: 600 }}>{d.business_name || d.name}</div>
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => onOpenDeal(d.id, d.business_name || d.name || undefined)}
+                  style={{
+                    display: "block", width: "100%", textAlign: "left", cursor: "pointer",
+                    background: "transparent", border: "none", fontFamily: T.font,
+                    padding: "7px 0", borderBottom: `1px solid ${T.rowDiv}`,
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = T.hover)}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                >
+                  <div style={{ fontSize: 13.5, fontWeight: 600, color: T.blue }}>{d.business_name || d.name} →</div>
                   <div style={{ fontSize: 12, color: T.muted2 }}>
                     {[d.current_gate, d.status, d.next_action].filter(Boolean).join(" · ")}
                   </div>
-                </div>
+                </button>
               ))}
               <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
                 <input
@@ -635,8 +655,19 @@ function DetailPane({
                   then belong to them.
                 </p>
               ) : searches.map(t => (
-                <div key={t.id} style={{ padding: "7px 0", borderBottom: `1px solid ${T.rowDiv}` }}>
-                  <div style={{ fontSize: 13.5, fontWeight: 600 }}>{t.name}</div>
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={onOpenSourcing}
+                  style={{
+                    display: "block", width: "100%", textAlign: "left", cursor: "pointer",
+                    background: "transparent", border: "none", fontFamily: T.font,
+                    padding: "7px 0", borderBottom: `1px solid ${T.rowDiv}`,
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = T.hover)}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                >
+                  <div style={{ fontSize: 13.5, fontWeight: 600, color: T.blue }}>{t.name} →</div>
                   <div style={{ fontSize: 12, color: T.muted2 }}>
                     {[
                       t.industry, t.geography,
@@ -644,7 +675,7 @@ function DetailPane({
                       t.is_active === false ? "paused" : null,
                     ].filter(Boolean).join(" · ")}
                   </div>
-                </div>
+                </button>
               ))}
             </Section>
 
