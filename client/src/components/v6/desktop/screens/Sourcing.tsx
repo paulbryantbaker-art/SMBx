@@ -40,6 +40,9 @@ import { ChevronDownIcon } from "../icons";
 interface Thesis {
   id: number;
   name: string;
+  /** Whose buy-box (migration 116, joined firm name). Null = our own
+   *  unassigned search — valid, not an error. */
+  client_firm?: string | null;
   industry: string | null;
   /** Real column is `naics_codes` (VARCHAR(10)[] array), NOT a singular string. */
   naics_codes: string[] | null;
@@ -930,11 +933,34 @@ function ThesisSelect({
           outline: "none",
         }}
       >
-        {theses.map((t) => (
-          <option key={t.id} value={t.id}>
-            {t.name}
-          </option>
-        ))}
+        {/* GROUPED BY CLIENT (2026-08-02, the client-forward pass): the
+            picker reads Client -> their searches, matching the workflow
+            chain (client -> thesis -> search). Unassigned searches sit in
+            their own group at the end — visible, because an unassigned
+            search is often the thing to fix. */}
+        {(() => {
+          const groups = new Map<string, typeof theses>();
+          for (const t of theses) {
+            const k = t.client_firm || "";
+            if (!groups.has(k)) groups.set(k, []);
+            groups.get(k)!.push(t);
+          }
+          const firms = [...groups.keys()].filter(Boolean).sort((a, b) => a.localeCompare(b));
+          const render = (list: typeof theses) => list.map((t) => (
+            <option key={t.id} value={t.id}>{t.name}</option>
+          ));
+          if (firms.length === 0) return render(theses);
+          return (
+            <>
+              {firms.map((f) => (
+                <optgroup key={f} label={f}>{render(groups.get(f)!)}</optgroup>
+              ))}
+              {groups.has("") && (
+                <optgroup label="Unassigned">{render(groups.get("")!)}</optgroup>
+              )}
+            </>
+          );
+        })()}
       </select>
       <ChevronDownIcon size={14} c={T.muted} />
     </label>

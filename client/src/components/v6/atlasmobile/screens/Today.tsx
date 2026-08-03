@@ -201,7 +201,12 @@ function AttentionList({
              client — and that gap is often the point of the row. */
           title={
             <span style={{ display: "block", fontSize: 12.5, color: RT.muted, fontWeight: 600, marginBottom: 2 }}>
-              {[a.client, a.dealName].filter(Boolean).join(" › ") || "Not assigned"}
+              {/* Tier rides the client segment — WHY this row sorted here is
+                  visible (the server orders same-urgency rows by tier). */}
+              {[
+                a.client ? `${a.clientTier ? `${a.clientTier} · ` : ""}${a.client}` : null,
+                a.dealName,
+              ].filter(Boolean).join(" › ") || "Not assigned"}
             </span>
           }
           sub={
