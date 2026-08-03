@@ -963,11 +963,16 @@
     inset: calc(-1 * clamp(150px, 20vh, 280px))
            calc(-1 * clamp(140px, 18vw, 480px))
            calc(-1 * clamp(240px, 32vh, 440px));
-    background:
-      radial-gradient(52% 34% at 50% 27%,
-        rgba(15, 169, 124, 0.16), rgba(15, 169, 124, 0.06) 55%, rgba(15, 169, 124, 0) 96%),
-      radial-gradient(80% 60% at 50% 32%,
-        rgba(15, 169, 124, 0.08), rgba(15, 169, 124, 0) 72%);
+    /* BAKED PIXELS, not CSS radials (2026-08-03, Paul: "you can see where
+       the band lines are in the bloom instead of a clean fade"). Browsers
+       do not dither gradients — the fold learned this over a full day —
+       and a shallow jade ramp on bone quantizes into contour rings on a
+       large monitor. scripts/bake-bloom.py bakes the two radials as
+       analytic quartic bumps (zero slope at their edges: no stop corner
+       to Mach-band) with triangular-PDF dither in the ALPHA channel,
+       saved LOSSLESS (lossy smooths the dither back into rings). Rerun
+       the script after changing the glow's shape. */
+    background: url('/textures/bloom-jade.webp') center / 100% 100% no-repeat;
   }
   /* Soft-white chips (Paul: "the chips don't need to be green — a soft
      white like the top of the page, the bloom will highlight them"). The
