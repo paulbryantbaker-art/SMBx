@@ -71,9 +71,9 @@ export const REPORTS: ReportMeta[] = [
     // sources of differing definition, vintage and scope manufactures a number
     // no source reports. The superseded July 23 edition led on it.
     abstract:
-      'Fragmentation is the thesis, not market size: about 89% of the 112,088 firms in the combined NAICS 238220 code employ fewer than 20 people, and no single company commands 20% of any major vertical. The top of the market has re-rated — HVAC services cleared 9.5x EV/EBITDA across 2024–YTD 2026 against 13.3x across 2021–23, roughly four turns cheaper, while trophy platforms still clear 16–20x.',
-    published: '2026-07-29',
-    publishedLabel: 'July 2026',
+      'Fragmentation is the thesis, not market size: about 89% of the 112,088 firms in the combined NAICS 238220 code employ fewer than 20 people, and no single company commands 20% of any major vertical. The top of the market has re-rated — HVAC services cleared 9.5x EV/EBITDA across 2024–YTD 2026 against 13.3x across 2021–23, roughly four turns cheaper, while trophy platforms still clear 16–20x. New in this edition: a metro-depth cut of Dallas–Fort Worth — eighteen platform parents hold a verified operating location, and roughly 280 establishments in the buyable middle match no consolidator in the register.',
+    published: '2026-08-03',
+    publishedLabel: 'August 2026',
     ogImage: '/reports/home-services-cover.jpg',
     md: 'home-services-state-of-market.md',
   },
