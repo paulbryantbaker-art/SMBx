@@ -3,31 +3,35 @@
  * design system is reused from `../desktop/atlasTokens` (`T`) — this file holds
  * ONLY the mobile-only values that have no desktop equivalent: the three glass
  * materials (nav / FAB / bottom-sheet), the frame-background wash, and a couple
- * of mobile neutrals. Values are verbatim from the Atlas-mobile shell spec
- * (m4 §2 "MOBILE-ONLY values").
+ * of mobile neutrals.
  *
  * Law: never re-derive a desktop token here. If a color resolves to a `T`
  * token, import `T` and use it — only the liquid-glass materials + the frame
  * gradient are genuinely new.
+ *
+ * AURORA SKIN (2026-08-02, with atlasTokens.ts — see its header for the full
+ * mapping and the laws that travelled): the violet Cash-App-era accents move
+ * to Deal Green via `house/tokens.ts`, and the frame goes from neutral grey
+ * to the warm bone family. The earlier "neutral, not warm — closer to Cash
+ * App" note is superseded by Paul's direction: Cash App's GRAMMAR (tone
+ * separation, floating white chrome, card-first), Aurora's PALETTE.
  */
+import { LEDGER, rgba } from '../../../../../house/tokens';
 
 /** Liquid-glass tab-bar material (m4 §1d). A small inset rounded bar — NOT a
  *  full-viewport fixed bg div (Safari toolbar rule). The `fallbackBg` is the
  *  higher-opacity solid for browsers without backdrop-filter support. */
 const glassNav = {
-  // Frosted, but predominantly a bright material so the bar reads as a clear,
-  // floating panel against the busy purple wash (it was too translucent at .46 —
-  // it disappeared into the gradient). Apple's tab bars are heavily frosted, not
-  // see-through; the blur + saturate still let content hint through the edges.
-  // Redesign: a clean SOLID white floating pill (no glass) — the only place a
-  // soft shadow is allowed (floating chrome needs lift off the grey page).
+  // A clean SOLID white floating pill (no glass) — the only place a soft
+  // shadow is allowed (floating chrome needs lift off the page). Shadow and
+  // border are warm-ink now, not the violet-tinted originals.
   background: "#ffffff",
   fallbackBg: "#ffffff",
   backdropFilter: "none",
-  border: "1px solid rgba(40,42,80,.06)",
-  boxShadow: "0 8px 26px rgba(30,32,70,.14), 0 1px 3px rgba(30,32,70,.08)",
-  /** Selected-tab capsule — the violet accent, soft tint. */
-  activeBg: "#ece9fb",
+  border: `1px solid ${rgba(LEDGER.ink, 0.07)}`,
+  boxShadow: `0 8px 26px ${rgba(LEDGER.ink, 0.12)}, 0 1px 3px ${rgba(LEDGER.ink, 0.07)}`,
+  /** Selected-tab capsule — the brand accent's tint (was the violet tint). */
+  activeBg: LEDGER.greenTint,
   radius: 30,
   height: 68,
 } as const;
@@ -42,21 +46,19 @@ const glassSheet = {
   boxShadow:
     "0 -10px 34px rgba(0,0,0,.18), inset 0 1px 1.5px rgba(255,255,255,.9)",
   scrim: "rgba(15,17,22,.4)",
-  handle: { width: 40, height: 5, radius: 3, color: "#cdd5df" },
+  // Warm-neutral handle (was cool #cdd5df) — sits on the white sheet, one
+  // step lighter than LEDGER.rule.
+  handle: { width: 40, height: 5, radius: 3, color: "#D6D0C4" },
 } as const;
 
 export const M = {
-  /** The mobile app-shell background wash, applied to EVERY screen's root (never
-   *  a fixed child — Safari toolbar rule). Two layers: a top-anchored blue→violet
-   *  glow (the "purple gradient" that used to live only on Today, now on all
-   *  pages) over a light lavender base. The glow is px-anchored near the top so it
-   *  sits behind the header/hero on every screen and scrolls away with the page;
-   *  the base stays light so cards/text keep strong contrast (white cards pop
-   *  harder against the violet than against the old near-white wash). */
-  // Redesign: a flat NEUTRAL LIGHT-GREY page (RT.page). Separation is by TONE —
-  // white elements read as raised on the light grey, no gradient. (Neutral, not
-  // warm/brown — closer to Cash App.)
-  frameBg: "#F4F4F6",
+  /** The mobile app-shell background, applied to EVERY screen's root (never
+   *  a fixed child — Safari toolbar rule). Flat warm page — the site's
+   *  recessed-well value (#F6F3EB, the chat pill's fill; flagged for formal
+   *  tokenization in house/tokens.ts). Separation is by TONE — white cards
+   *  and the floating nav read as raised on it, the Cash App way — but the
+   *  tone is Aurora's bone family, not the old neutral grey. */
+  frameBg: "#F6F3EB",
   glassNav,
   glassSheet,
 } as const;

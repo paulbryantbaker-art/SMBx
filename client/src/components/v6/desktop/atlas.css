@@ -12,22 +12,26 @@
   --at-font: -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   /* Text scale — kept in sync with atlasTokens.ts T (lifted darker 2026-06-23 for
    * stronger contrast; only --at-ink is consumed today, but mirror the rest). */
-  --at-ink: #141519;
+  /* AURORA SKIN (2026-08-02) — values mirror atlasTokens.ts, which now
+   * imports house/tokens.ts. Slot names historical: --at-blue holds Deal
+   * Green (the --pd-coral precedent). Verdict green unchanged (two-greens
+   * law — see atlasTokens.ts header). */
+  --at-ink: #16181A;
   --at-ink2: #181a1e;
   --at-ink3: #2d3136;
   --at-label: #393c41;
   --at-muted: #4d5765;
   --at-muted2: #4b5460;
   --at-faint: #4e5764;
-  --at-blue: #0b57d0;
-  --at-blue-bg: #e8f0fe;
-  --at-blue-bg2: #eef4ff;
-  --at-blue-bg3: #f3f7ff;
-  --at-nav-active: #d3e3fd;
-  --at-stage-active-bd: #bcd4fb;
-  --at-approval-bd: #cfe0ff;
-  --at-tab-active: rgba(11, 87, 208, 0.10);
-  --at-tab-hover: rgba(11, 87, 208, 0.05);
+  --at-blue: #0A7A58;
+  --at-blue-bg: #DFF5EC;
+  --at-blue-bg2: #EAF6F0;
+  --at-blue-bg3: #F2F9F5;
+  --at-nav-active: rgba(10, 122, 88, 0.16);
+  --at-stage-active-bd: rgba(10, 122, 88, 0.32);
+  --at-approval-bd: rgba(10, 122, 88, 0.26);
+  --at-tab-active: rgba(10, 122, 88, 0.10);
+  --at-tab-hover: rgba(10, 122, 88, 0.05);
   --at-green: #1f8a5b;
   --at-green-bg: #e6f4ec;
   --at-green-av: #cdeada;
@@ -39,22 +43,22 @@
   --at-cite-bd: #f0dca0;
   --at-terra: #c2410c;
   --at-terra-bg: #fdeee6;
-  --at-violet: #5b53d6;
-  --at-violet-bg: #ecebfb;
+  --at-violet: #0A7A58;
+  --at-violet-bg: #DFF5EC;
   --at-white: #fff;
-  --at-surface: #fafbfd;
-  --at-page: #e9edf2;
-  --at-hover: #f7f9fc;
-  --at-track: #f0f4f9;
-  --at-rail-div: #f0f2f5;
-  --at-border: #e3e8ef;
-  --at-hair: #eef1f5;
-  --at-row-div: #f3f5f8;
-  --at-row-div2: #f6f8fb;
-  --at-input-bd: #dbe3ec;
-  --at-prog-track: #e8edf3;
-  --at-spark: linear-gradient(135deg, #4285F4, #9B72CB 50%, #D96570);
-  --at-avatar-grad: linear-gradient(135deg, #4285F4, #9B72CB);
+  --at-surface: #FCFAF6;
+  --at-page: #F6F3EB;
+  --at-hover: #F8F5EE;
+  --at-track: #F2EEE5;
+  --at-rail-div: #F0ECE3;
+  --at-border: #DED8CC;
+  --at-hair: #EAE5DC;
+  --at-row-div: #F2EEE5;
+  --at-row-div2: #F6F2EA;
+  --at-input-bd: #DED8CC;
+  --at-prog-track: #EDE9DF;
+  --at-spark: linear-gradient(135deg, #0FA97C, #0A7A58 50%, #E8A62B);
+  --at-avatar-grad: linear-gradient(135deg, #0FA97C, #0A7A58);
 
   font-family: var(--at-font);
   color: var(--at-ink);
