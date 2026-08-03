@@ -56,9 +56,12 @@
 .rp-head { padding-top: clamp(28px, 4vw, 56px); }
 .rp-head-in { display: flex; flex-direction: column; align-items: flex-start; }
 
+/* The one band-title voice (Paul, 2026-08-03: "same font every[where]") —
+   the report kicker was the last mono holdout; it now speaks .pd-seclabel's
+   header-weight Inter, sized a step down for the masthead and cards. */
 .rp-kicker {
-  font-family: var(--pd-mono); font-size: 13.5px; letter-spacing: 0.11em;
-  text-transform: uppercase; color: var(--pd-coral-link); font-weight: 500;
+  font-size: 15px; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--pd-coral-link); font-weight: 800;
 }
 .rp-head .rp-kicker { margin-top: clamp(18px, 2.6vw, 32px); }
 
