@@ -936,7 +936,10 @@
      content (justify-content:center), so asymmetric air comes from the
      padding difference: bottom-heavier padding pushes the cluster up
      until breath-above : air-below ≈ 1 : 1.618. */
-  .pd-hero-c.pd-hero-fold { padding-top: 76px; padding-bottom: 96px; }
+  /* Re-tuned after the featured-chips pass shortened the cluster
+     (2026-08-03): measured 154:214 = 1.39 at 1440x900; the 13px shift
+     lands 141:227 = 1.61. */
+  .pd-hero-c.pd-hero-fold { padding-top: 63px; padding-bottom: 109px; }
   /* THE BLOOM RIDES THE PILL ON DESKTOP TOO (2026-08-02, Paul: "the bloom
      needs to be aligned better — central behind the chat pill and spread
      out from there… the bloom will highlight the chips"). Same anchor the
@@ -982,6 +985,22 @@
      surface and stay as they are. */
   .pd-chat-hero .pd-chip { background: #FFFFFF; border-color: rgba(22, 24, 26, 0.10); }
 }
+/* TALL DISPLAYS: THE FOLD STOPS STRETCHING (2026-08-03, Paul on a large
+   monitor: "on desktop it does not look right to me… what are we doing
+   wrong?"). What was wrong: the fold filled 100svh on ANY height, so on a
+   1100px-tall window the little cluster floated in an ocean of bone with
+   nothing anchoring the screen — a scaled-up phone view. Capping the fold
+   lets the PROOF BAND rise into the first screen and anchor it (the
+   band's crest + eyebrow are the composition's floor, exactly as on the
+   phone). Pads re-tuned for the capped height: measured breath:air below
+   lands on the golden ratio at 1920x1080. Heights under ~1000px never hit
+   the cap and keep the 900-tuned values above. */
+@media (min-width: 761px) and (min-height: 1000px) {
+  .pd-hero-fold { min-height: 780px; }
+  /* Golden pads for the CAPPED fold (measured at 1920x1080: 76/96 gave
+     187:244 = 1.31; solving the 22px shift lands 165:266 = 1.61). */
+  .pd-hero-c.pd-hero-fold { padding-top: 54px; padding-bottom: 118px; }
+}
 /* The phone fold now GIVES BACK 120px so the proof band's crest and the
    TWO DECADES eyebrow show above the toolbar — see ONE CLUSTER, ONE VOID
    in the ≤760 block, which overrides this rule there. (That reverses the
@@ -998,7 +1017,7 @@
    ~1100px up (measured at 3.75vw: 50 chars ≈ 0.46em/char ≈ 86vw… fits
    inside the 1360 rail with air). The phone block overrides size and
    splits at sentence boundaries — mobile is untouched. */
-.pd-hero-c .pd-h1 { max-width: none; margin: 0 auto; font-size: clamp(40px, 3.75vw, 56px); letter-spacing: -0.012em; line-height: 1.08; }
+.pd-hero-c .pd-h1 { max-width: none; margin: 0 auto; font-size: clamp(40px, 3.75vw, 68px); letter-spacing: -0.012em; line-height: 1.08; }
 .pd-hero-c .pd-sub { font-size: 19px; }
 .pd-sub-c { margin: 16px auto 0; max-width: 33em; }
 /* One quiet meta line under the showcase — the secondary ask and the proof
