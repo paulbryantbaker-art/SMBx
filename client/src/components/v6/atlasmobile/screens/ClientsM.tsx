@@ -23,6 +23,7 @@
  */
 import { useState } from "react";
 import type { AtlasScreenProps } from "../../desktop/atlasNav";
+import { useAtlasNav } from "../../desktop/atlasNav";
 import { useCrmAccounts, useCrmAccount, type CrmFilters } from "../../../../hooks/useCrmAccounts";
 import {
   CRM_STAGES, STAGE_LABEL, MOMENT_LABEL, MOMENT_WHY, SEGMENT_LABEL, GRADE_LABEL,
@@ -364,6 +365,7 @@ function Detail({
   logActivity: (id: number, body: Record<string, unknown>) => Promise<unknown>;
 }) {
   const { account, contacts, activity, deals, loading, error } = useCrmAccount(id, nonce);
+  const nav = useAtlasNav();
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [touchKind, setTouchKind] = useState<string>("call");
@@ -461,14 +463,26 @@ function Detail({
                 <Head>Deals for them</Head>
                 <Block>
                   {deals.map((d, i) => (
-                    <div key={d.id} style={{ marginTop: i === 0 ? 0 : 12 }}>
-                      <div style={{ fontSize: 15.5, fontWeight: 600, color: RT.ink }}>
-                        {d.business_name || d.name}
+                    /* Tappable (2026-08-02, the client-forward pass) — the
+                       dossier drills into the deal, same as desktop. */
+                    <button
+                      key={d.id}
+                      type="button"
+                      onClick={() => nav.openDeal(d.id, d.business_name || d.name || undefined)}
+                      style={{
+                        display: "block", width: "100%", textAlign: "left",
+                        background: "transparent", border: "none", padding: 0,
+                        fontFamily: RT.font, cursor: "pointer",
+                        marginTop: i === 0 ? 0 : 12,
+                      }}
+                    >
+                      <div style={{ fontSize: 15.5, fontWeight: 600, color: RT.accentInk }}>
+                        {d.business_name || d.name} →
                       </div>
                       <div style={{ fontSize: 14, color: RT.muted, marginTop: 2 }}>
                         {[d.current_gate, d.next_action].filter(Boolean).join(" · ") || "just opened"}
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </Block>
               </div>

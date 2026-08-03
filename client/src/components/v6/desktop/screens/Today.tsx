@@ -624,6 +624,15 @@ function AttentionColumn({
                   whiteSpace: "nowrap",
                 }}
               >
+                {/* The client line, when there is one: TIER · FIRM — why this
+                    row jumped the queue is visible, not just computed (the
+                    server orders same-urgency rows by tier). */}
+                {a.client && (
+                  <span style={{ color: T.blue, fontWeight: 700 }}>
+                    {a.clientTier ? `${a.clientTier} · ` : ""}{a.client}
+                    <span style={{ color: T.faint, fontWeight: 400 }}> › </span>
+                  </span>
+                )}
                 {a.title}
               </span>
               <span
