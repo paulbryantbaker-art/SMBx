@@ -996,26 +996,20 @@
    lands on the golden ratio at 1920x1080. Heights under ~1000px never hit
    the cap and keep the 900-tuned values above. */
 @media (min-width: 761px) and (min-height: 1000px) {
-  /* SCREEN-LEVEL GOLDEN (2026-08-03, Paul: "now apply gold ratio to it" —
-     the first screen's two masses). The band stands ~457px at this width;
-     its crest belongs at 1.618 x 457 ≈ 739 from the top, so the fold cap
-     solves backward: 739 - 86 nav - ~38 curve = 615. Both numbers are
-     fixed px under this media, so above-the-band : band holds golden on
-     every tall window, and 1080p monitors see ~340px of proof instead of
-     a 167px sliver. */
-  .pd-hero-fold { min-height: 615px; }
-  /* Golden pads for the 615 fold (measured 75:182 = 2.43 at 54/118; the
-     23px shift lands 98:159 = 1.62 — solved, as always, from the render). */
-  .pd-hero-c.pd-hero-fold { padding-top: 77px; padding-bottom: 95px; }
-  /* NO ORPHANED SECTION LABEL (2026-08-03, Paul: "I like that we can see
-     the whole band now, but I don't like that WHY US is popping up —
-     looks orphaned"). With the fold capped, tall windows fit fold + whole
-     band + a sliver of the next section — and a section LABEL alone at
-     the screen edge reads as debris. Extra air after the band pushes the
-     Why-us opener below the first screen on ~1000-1200px-tall windows;
-     genuinely huge windows show the full section header, which reads
-     fine — it is the label-alone state that is ugly. */
-  #why { padding-top: clamp(220px, 26vh, 330px); }
+  /* THE BAND IS THE VIEWPORT'S FLOOR (2026-08-03, Paul, after the fixed
+     615 cap put bone below the band on his display: "move everything
+     down… to where the band is at the bottom of the viewport but the
+     numbers are viewable — no bottom whitespace until scroll"). So the
+     fold DERIVES from the screen: 100svh minus the nav (86) minus the
+     ~388px of band the crest + eyebrow + numerals + labels need. The
+     band then always bleeds past the bottom edge with the stats in view
+     — on a 1500-tall window and on 1080p alike — and nothing below it
+     can show before a scroll. Plain px in the calc (Safari law). */
+  .pd-hero-fold { min-height: calc(100svh - 474px); }
+  /* Golden pads for the viewport-derived fold (measured 303:365 = 1.21
+     at 77/95 on a 1500-tall window; the 48px shift lands 255:413 = 1.62
+     — solved, as always, from the render). */
+  .pd-hero-c.pd-hero-fold { padding-top: 29px; padding-bottom: 143px; }
 }
 /* ONE LINE, GUARANTEED, where there is room to guarantee it (2026-08-03:
    Paul's screenshot showed the hero wrapped to two lines on HIS browser
