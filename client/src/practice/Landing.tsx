@@ -325,11 +325,11 @@ export default function Landing() {
               it easier." — the free wrap used to land on "…hard work. We /
               make it easier.", a dangling pronoun severed from its verb. */}
           <h1 className="pd-h1"><span className="pd-h1-s1">Buying a business is hard work.</span> <span className="pd-h1-s2">We make it easier.</span></h1>
-          {/* Paul's copy, verbatim (2026-08-03: "Whether your first or your
-              100th acquisition, we run the process for you, freeing up your
-              time and resources."). The no-break space glues "100th
+          {/* Paul's copy (2026-08-03), "1st" matched to "100th" same day
+              (Paul: "maybe 1st needs to be 1st to match 100th?" — agreed,
+              the paired numerals read as a range). No-break spaces glue "100th
               acquisition" so no wrap severs the ordinal from its noun. */}
-          <p className="pd-sub pd-sub-c">Whether your first or your 100th{'\u00A0'}acquisition, we run the process for you, freeing up your time and{'\u00A0'}resources.</p>
+          <p className="pd-sub pd-sub-c">Whether your 1st or your 100th{'\u00A0'}acquisition, we run the process for you, freeing up your time and{'\u00A0'}resources.</p>
         </div>
         <div className="pd-showcase">
           <div className="pd-show-stage">
