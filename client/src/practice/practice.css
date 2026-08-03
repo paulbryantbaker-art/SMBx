@@ -1000,6 +1000,24 @@
   /* Golden pads for the CAPPED fold (measured at 1920x1080: 76/96 gave
      187:244 = 1.31; solving the 22px shift lands 165:266 = 1.61). */
   .pd-hero-c.pd-hero-fold { padding-top: 54px; padding-bottom: 118px; }
+  /* NO ORPHANED SECTION LABEL (2026-08-03, Paul: "I like that we can see
+     the whole band now, but I don't like that WHY US is popping up —
+     looks orphaned"). With the fold capped, tall windows fit fold + whole
+     band + a sliver of the next section — and a section LABEL alone at
+     the screen edge reads as debris. Extra air after the band pushes the
+     Why-us opener below the first screen on ~1000-1200px-tall windows;
+     genuinely huge windows show the full section header, which reads
+     fine — it is the label-alone state that is ugly. */
+  #why { padding-top: clamp(220px, 26vh, 330px); }
+}
+/* ONE LINE, GUARANTEED, where there is room to guarantee it (2026-08-03:
+   Paul's screenshot showed the hero wrapped to two lines on HIS browser
+   while every headless render held one — engines measure variable-font
+   Fraunces differently, and text-wrap:balance happily splits a line that
+   almost-fits. Above 1100px the slack is >20% even for the widest
+   measurement, so nowrap is safe; below it the balanced wrap stands. */
+@media (min-width: 1100px) {
+  .pd-hero-c .pd-h1 { white-space: nowrap; }
 }
 /* The phone fold now GIVES BACK 120px so the proof band's crest and the
    TWO DECADES eyebrow show above the toolbar — see ONE CLUSTER, ONE VOID
