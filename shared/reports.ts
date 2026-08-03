@@ -39,6 +39,13 @@ export interface ReportMeta {
   published: string;
   /** Human label for the date line. */
   publishedLabel: string;
+  /** Facet: the industry the assessment covers — drives the /research filter
+   *  chips (Paul, 2026-08-03: "group / Filter by Industry and or Metro Area"). */
+  industry: string;
+  /** Facet: metro scope. 'USA' when the assessment is national — the default
+   *  reading, per the same instruction ("USA if there is not a metro area
+   *  specific"). */
+  metro: string;
   /** Stable image URL for link previews (crawlers can't read hashed bundles). */
   ogImage?: string;
   /** The markdown filename in `scripts/studio/reports/`. The SERVER reads it to
@@ -52,6 +59,8 @@ export interface ReportMeta {
 export const REPORTS: ReportMeta[] = [
   {
     slug: 'commercial-mep',
+    industry: 'Commercial mechanical',
+    metro: 'USA',
     kicker: 'Market assessment',
     shortTitle: 'Commercial Mechanical, HVAC & Plumbing Services',
     abstract:
@@ -63,6 +72,8 @@ export const REPORTS: ReportMeta[] = [
   },
   {
     slug: 'home-services',
+    industry: 'Home services',
+    metro: 'USA',
     kicker: 'Market assessment',
     shortTitle: 'Home Services: State of the Market',
     // Drawn from this edition's own executive summary. It deliberately states
@@ -79,6 +90,8 @@ export const REPORTS: ReportMeta[] = [
   },
   {
     slug: 'dfw-home-services',
+    industry: 'Home services',
+    metro: 'Dallas–Fort Worth',
     kicker: 'Metro market map',
     shortTitle: 'Dallas–Fort Worth Home Services',
     // Drawn from this report's own executive summary — the metro-depth cut of

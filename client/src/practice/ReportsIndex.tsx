@@ -5,7 +5,17 @@
  * the proof, so the page's job is to get out of their way. Each card states
  * what the read costs in minutes — a 37-minute document should say so before
  * someone commits to it.
+ *
+ * FACETS (2026-08-03, Paul: "when we have many researches to view or scroll
+ * through.. we need to group / Filter by Industry and or Metro Area (USA if
+ * there is not a metro area specific)"). Every registry entry carries an
+ * `industry` and a `metro` (metro = 'USA' for national assessments), and the
+ * shelf filters on both. A facet row only renders once it has two or more
+ * distinct values — a filter with one option is furniture. The values come
+ * from the registry itself, never a hardcoded list, so adding a report with a
+ * new industry or metro grows the chips with zero UI work.
  */
+import { useMemo, useState } from 'react';
 import { Link } from 'wouter';
 import PracticeShell from './PracticeShell';
 import { REPORT_LIST } from './reports/registry';
@@ -13,7 +23,32 @@ import { bookHref, bookTarget, bookRel } from './leads';
 import { trackEvent } from '../lib/analytics';
 import './report.css';
 
+const ALL = 'All';
+
+function facetValues(pick: (r: (typeof REPORT_LIST)[number]) => string): string[] {
+  return [...new Set(REPORT_LIST.map(pick))];
+}
+
 export default function ReportsIndex() {
+  const [industry, setIndustry] = useState(ALL);
+  const [metro, setMetro] = useState(ALL);
+
+  const industries = useMemo(() => facetValues(r => r.industry), []);
+  const metros = useMemo(() => facetValues(r => r.metro), []);
+
+  const shown = REPORT_LIST.filter(
+    r => (industry === ALL || r.industry === industry) && (metro === ALL || r.metro === metro),
+  );
+
+  const pickIndustry = (v: string) => {
+    setIndustry(v);
+    trackEvent('report_filter_changed', { facet: 'industry', value: v });
+  };
+  const pickMetro = (v: string) => {
+    setMetro(v);
+    trackEvent('report_filter_changed', { facet: 'metro', value: v });
+  };
+
   return (
     <PracticeShell footerCompact>
       <div className="rp-idx">
@@ -26,8 +61,45 @@ export default function ReportsIndex() {
           </p>
         </header>
 
+        {(industries.length > 1 || metros.length > 1) && (
+          <div className="pd-wrap rp-filters">
+            {industries.length > 1 && (
+              <div className="rp-filter-group" role="group" aria-label="Filter by industry">
+                <span className="rp-filter-label">Industry</span>
+                {[ALL, ...industries].map(v => (
+                  <button
+                    key={v}
+                    type="button"
+                    className={`rp-fchip${industry === v ? ' on' : ''}`}
+                    aria-pressed={industry === v}
+                    onClick={() => pickIndustry(v)}
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
+            )}
+            {metros.length > 1 && (
+              <div className="rp-filter-group" role="group" aria-label="Filter by metro area">
+                <span className="rp-filter-label">Metro</span>
+                {[ALL, ...metros].map(v => (
+                  <button
+                    key={v}
+                    type="button"
+                    className={`rp-fchip${metro === v ? ' on' : ''}`}
+                    aria-pressed={metro === v}
+                    onClick={() => pickMetro(v)}
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="pd-wrap rp-idx-list">
-          {REPORT_LIST.map(r => (
+          {shown.map(r => (
             <article className="rp-card" key={r.slug}>
               <div className="rp-card-top">
                 <span className="rp-kicker">{r.kicker}</span>
@@ -64,6 +136,21 @@ export default function ReportsIndex() {
               </div>
             </article>
           ))}
+
+          {shown.length === 0 && (
+            <div className="rp-filter-empty">
+              <p className="pd-body">
+                No assessment covers that industry–metro pair yet.
+              </p>
+              <button
+                type="button"
+                className="rp-fchip"
+                onClick={() => { setIndustry(ALL); setMetro(ALL); }}
+              >
+                Show everything
+              </button>
+            </div>
+          )}
         </div>
 
         <section className="rp-cta">

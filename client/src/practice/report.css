@@ -492,6 +492,40 @@
 .rp-idx-head { padding-top: clamp(46px, 6vw, 88px); text-align: center; }
 .rp-idx-head .pd-h2 { margin-left: auto; margin-right: auto; }
 .rp-idx-sub { margin: 22px auto 0; max-width: 34em; }
+/* FACET CHIPS (2026-08-03, Paul: "group / Filter by Industry and or Metro
+   Area"). One row per facet, label + chips, values read from the registry so
+   the UI grows itself. Active chip takes the accent fill — the same green the
+   CTA pill wears, because both mean "this is the selected action". A row with
+   a single value never renders (see ReportsIndex), so the bar only appears
+   once the shelf actually needs filtering. */
+.rp-filters {
+  display: flex; flex-direction: column; gap: 12px;
+  padding-top: clamp(28px, 3.5vw, 44px);
+}
+.rp-filter-group { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.rp-filter-label {
+  font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--pd-tert); margin-right: 6px;
+  min-width: 5.5em;
+}
+.rp-fchip {
+  appearance: none; cursor: pointer;
+  font-family: var(--pd-font, inherit); font-size: 14px; font-weight: 600;
+  color: var(--pd-body); background: var(--pd-card);
+  border: 1px solid var(--pd-hair); border-radius: 99px;
+  padding: 7px 16px; line-height: 1.2;
+  transition: border-color 120ms ease, color 120ms ease;
+}
+.rp-fchip:hover { border-color: var(--pd-coral); color: var(--pd-ink); }
+.rp-fchip.on {
+  background: var(--pd-coral); border-color: var(--pd-coral); color: #fff;
+}
+.rp-filter-empty {
+  grid-column: 1 / -1; text-align: center;
+  padding: clamp(30px, 5vw, 60px) 0;
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+}
+
 /* NO `align-items: start` — cards in a row are the same height, so the shelf
    reads as a set rather than as two things that happen to sit side by side.
    The abstract absorbs the slack (see .rp-card-p), which lands every card's
