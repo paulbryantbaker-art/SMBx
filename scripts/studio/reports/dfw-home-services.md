@@ -275,11 +275,13 @@ produces the most thesis-relevant structure in this report:
 |---|---|---|---|---|---|
 | Electrical (238210) | 1,634 | 28,980 | $2.149B | ≈$6.880B derived | ≈8 commercial large-owner locations; no residential-first platform found |
 | Roofing (238160) | 907 | 6,053 | $0.458B | ≈$2.759B derived | commercial held; residential/storm entries 2024–2025 |
-| Pest control (561710) | 396 | 3,954 | $0.206B | metro figure publishable from the sector-56 census | ≈40 locations across 9 parents |
+| Pest control (561710) | 396 | 3,954 | $0.206B | **$585.1M measured** (2022 Economic Census) | ≈40 locations across 9 parents |
 | Finish carpentry (238350), the garage-door host code | 391 | 3,260 | $0.194B | ≈$0.845B derived | Guild Garage Group confirmed absent |
 
 **Platform density runs exactly with recurring-revenue quality.** Pest control —
-where residential recurring share runs 85.4% — carries ≈40 platform locations
+where residential recurring share runs 85.4% — is the one home-services trade
+with a measured metro market: $585.1M of 2022 receipts across 344 firms, of
+which DFW holds 32.9% of the Texas total. It carries ≈40 platform locations
 against 396 establishments: 10.1% of the entire trade, held by Rollins
 (including HomeTeam Pest Defense, headquartered in Dallas, and Romex, acquired
 2026-04-02), Rentokil with ten-plus Terminix branches, Anticimex through a
@@ -450,6 +452,7 @@ the named source that overturned it.
 - OMB Bulletin No. 23-01 — https://www.whitehouse.gov/wp-content/uploads/2023/07/OMB-Bulletin-23-01.pdf
 - Census County Business Patterns 2023, Complete County File — https://www2.census.gov/programs-surveys/cbp/datasets/2023/cbp23co.zip
 - 2022 Economic Census, Construction: Value of Business Done (EC2223KOB) — https://www2.census.gov/programs-surveys/economic-census/data/2022/sector23/EC2223KOB.zip
+- 2022 Economic Census, sector 56 Geographic Area Statistics (EC2256BASIC) — https://www2.census.gov/programs-surveys/economic-census/data/2022/sector56/EC2256BASIC.zip
 - TDLR air-conditioning contractor licence file — https://www.tdlr.texas.gov/LicenseSearch/licfile.asp
 - Tex. Occ. Code Ch. 1302 — https://statutes.capitol.texas.gov/docs/OC/htm/OC.1302.htm
 - Apollo / Apex Service Partners release, 2026-05-28 — https://www.apollo.com/insights-news/pressreleases/2026/05/apex-service-partners-and-alpine-investors-announce-strategic-mi
@@ -480,12 +483,11 @@ states its inputs, its arithmetic and its assumption.
 - **What Apex owns in this metro.** The largest single unknown in the report.
 - **Employee counts for most platform locations** — the input that would turn
   the 8.5–22.6% range into a figure.
-- **Service versus new construction inside 238220** — unpublished anywhere, and
-  the split the recurring-revenue thesis lives in.
+- **Service versus new construction inside 238220** — confirmed unpublished in
+  every public geography (the last candidate Census table splits by location of
+  work, not work type). Permanently an assumption, and stated as one.
 - **The roofing replacement-versus-storm mix** — the number that decides
   whether the overweight trade is an annuity or an episode.
-- **Metro pest receipts** — publishable from the sector-56 Economic Census, not
-  yet pulled.
 - **Who owns what in Houston, Austin and San Antonio.** The ownership work in
   this report covers Dallas–Fort Worth only; the other metros are measured in
   Part I and unmapped beyond it.
