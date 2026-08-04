@@ -13,7 +13,7 @@
  * 2026-08-03 additions are lanes the practice actively hunts and publishes
  * research on.
  *
- * NOTE: /industries still presents twelve sectors — adding the two new lanes
+ * NOTE: /industries presents fifteen sectors — adding the two new lanes
  * there needs full zig-zag thesis blocks (real copy, Paul's voice), flagged
  * as open work rather than improvised here.
  */
@@ -29,6 +29,7 @@ export const HUNT_LANES: HuntLane[] = [
   { nm: 'Elevator & escalator service', th: 'Mandated inspections, sticky contract books, light capex, aging owners.' },
   { nm: 'Power & grid infrastructure services', th: 'Transformer refurb, substations, certified testing — the layer electrification runs on.' },
   { nm: 'Building automation & critical power', th: 'Controls, commissioning, cooling and backup power — recurring service where downtime isn’t an option.' },
+  { nm: 'Energy-adjacent services & distribution', th: 'The electrification wave at operating-company scale — services, contracting and distribution; never minerals or generation.' },
   { nm: 'Testing, inspection & certification / NDT', th: 'Demand written into code, behind a certification moat — and succession in almost every shop.' },
   { nm: 'Environmental & industrial cleaning', th: 'Permit-gated, regulation-driven, and rarely brokered.' },
   { nm: 'Water & wastewater contract O&M', th: 'Multi-year municipal contracts — the most durable revenue in the services economy.' },

@@ -55,6 +55,8 @@ export const OWNER_LANES: OwnerLane[] = [
   { key: 'fire-life-safety', label: 'Fire & life safety' },
   { key: 'elevator-escalator', label: 'Elevator & escalator' },
   { key: 'power-grid', label: 'Power & grid services' },
+  { key: 'energy-services', label: 'Energy & industrial services' },
+  { key: 'fuel-distribution', label: 'Fuel & propane distribution' },
   { key: 'building-automation', label: 'Building automation' },
   { key: 'tic-ndt', label: 'Testing & inspection' },
   { key: 'environmental-cleaning', label: 'Environmental & industrial cleaning' },

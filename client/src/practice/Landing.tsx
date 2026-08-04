@@ -258,6 +258,10 @@ function WhoIndex() {
 }
 
 export default function Landing() {
+  // Owner mode reaches up from the chat card so the whole fold changes voice
+  // (Paul, 2026-08-04: "adjust the hero and tag so they are not staring at
+  // the regular buy side hero").
+  const [ownerHero, setOwnerHero] = useState(false);
   return (
     <PracticeShell home>
       {/* ── Hero — the chat engine front and center; the section height leaves
@@ -328,16 +332,28 @@ export default function Landing() {
               so the stack reads "Buying a business / is hard work. / We make
               it easier." — the free wrap used to land on "…hard work. We /
               make it easier.", a dangling pronoun severed from its verb. */}
-          <h1 className="pd-h1"><span className="pd-h1-s1">Buying a business is hard work.</span> <span className="pd-h1-s2">We make it easier.</span></h1>
+          {/* OWNER MODE swaps the fold's voice with the card (Paul,
+              2026-08-04: "adjust the hero and tag so they are not staring at
+              the regular buy side hero" — his copy, tightened to the display
+              scale; the 'prepare' idea carries in the sub). */}
+          {ownerHero ? (
+            <h1 className="pd-h1"><span className="pd-h1-s1">Think like a buyer.</span> <span className="pd-h1-s2">Exit on your terms.</span></h1>
+          ) : (
+            <h1 className="pd-h1"><span className="pd-h1-s1">Buying a business is hard work.</span> <span className="pd-h1-s2">We make it easier.</span></h1>
+          )}
           {/* Paul's copy (2026-08-03), "1st" matched to "100th" same day
               (Paul: "maybe 1st needs to be 1st to match 100th?" — agreed,
               the paired numerals read as a range). No-break spaces glue "100th
               acquisition" so no wrap severs the ordinal from its noun. */}
-          <p className="pd-sub pd-sub-c">Whether your 1st or your 100th{'\u00A0'}acquisition, we run the process for you, freeing up your time and{'\u00A0'}resources.</p>
+          {ownerHero ? (
+            <p className="pd-sub pd-sub-c">Thinking like a buyer is the best way to prepare — and starting here, with your valuation, puts you in front of potential buyers when you're{'\u00A0'}ready.</p>
+          ) : (
+            <p className="pd-sub pd-sub-c">Whether your 1st or your 100th{'\u00A0'}acquisition, we run the process for you, freeing up your time and{'\u00A0'}resources.</p>
+          )}
         </div>
         <div className="pd-showcase">
           <div className="pd-show-stage">
-            <YuliaIntake />
+            <YuliaIntake onOwnerModeChange={setOwnerHero} />
           </div>
         </div>
         {/* Booking is a BUTTON here, not a text link (Paul, 2026-07-31). It

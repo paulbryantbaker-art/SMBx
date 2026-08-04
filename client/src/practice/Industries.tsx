@@ -1,6 +1,6 @@
 /**
  * /industries — the full sector theses (v3 Claude Design handoff,
- * SectorsPage.dc.html). Twelve `.pd-sector` blocks in a zig-zag 7/5 split
+ * SectorsPage.dc.html). Fifteen `.pd-sector` blocks in a zig-zag 7/5 split
  * (nth-of-type alternates — the blocks must stay direct siblings), then the
  * Heritage block styled apart (gray card, first-person, attribution shield
  * line per the Track Record doctrine), then a centered CTA.
@@ -22,8 +22,8 @@ interface Sector {
   desk: string;
   /** Sector band illustration (green-and-bone set, 2026-08-04). OPTIONAL and
    *  honest: a sector renders art only when art exists FOR IT — the same rule
-   *  the numbers follow. Elevator, building automation and food co-packing
-   *  stay bare until their runs come back clean. */
+   *  the numbers follow. Elevator, building automation, food co-packing and
+   *  energy-adjacent services stay bare until their runs come back clean. */
   img?: string;
 }
 
@@ -100,6 +100,27 @@ const SECTORS: Sector[] = [
     ],
     who: 'Sponsors chasing data-center-adjacent services, and operator-acquirers from the mechanical world.',
     desk: 'Recurring service revenue and technical crews, in demand that is structural rather than cyclical.',
+  },
+  /* Energy (2026-08-04, Paul: "we can add Energy to our list of industries",
+     from the energy-market viability research). Deliberately framed as
+     ENERGY-ADJACENT SERVICES, CONTRACTING & DISTRIBUTION — the research's
+     own reframe: the viable segments are operating companies that underwrite
+     like the trades; upstream, minerals, midstream assets and generation are
+     out of scope (different buyers, different valuation discipline, and a
+     real securities tripwire on mineral/royalty/working interests). NO
+     figures from that research appear here — none have passed verification,
+     and this page's copy law bans market numbers anyway. Bare of art until
+     an honest energy illustration exists (the elevator rule). */
+  {
+    nm: 'Energy-adjacent services, contracting & distribution',
+    lead: 'Energy, entered through the service door',
+    tags: ['Industrial & energy services', 'Fuel, propane & PVF distribution', 'Electrification demand'],
+    paras: [
+      'The electrification and data-center wave runs on ordinary operating companies: industrial and energy service firms — electrical testing, turnaround and outage work, valve and compression field service — and the fuel, propane, PVF and electrical distributors that supply them. Fragmented, founder-owned, technician-constrained, and underwritten the way we already underwrite the trades.',
+      'The boundary is deliberate, and it protects the client: we work operating-company M&A only. Minerals, royalties, working interests and generation assets are a different profession under different law — when a mandate touches them, we bring in securities counsel and a licensed broker-dealer rather than improvising.',
+    ],
+    who: 'Family offices and first-time platform builders entering the energy theme at operating-company scale — capital and conviction, in need of an origination engine.',
+    desk: 'The same buy-side machine we run in the trades, pointed at the demand behind the grid.',
   },
   {
     nm: 'Testing, inspection & certification / NDT',
@@ -223,11 +244,12 @@ export default function Industries() {
 
       {/* An illustration under the head; each SECTOR carries its own band via
           `Sector.img` since 2026-08-04 (Paul's green-and-bone Gemini set) —
-          eleven of fourteen have one. The rule is unchanged: art only where
+          eleven of fifteen have one. The rule is unchanged: art only where
           honest art exists. Putting an HVAC condenser beside "Elevator &
           escalator service" would be a picture that lies, which is the same
-          rule the numbers follow — elevator, building automation and food
-          co-packing stay bare until their runs come back clean. */}
+          rule the numbers follow — elevator, building automation, food
+          co-packing and energy-adjacent services stay bare until their runs
+          come back clean. */}
       <section className="pd-wrap" style={{ marginTop: 'clamp(30px, 3.6vw, 52px)' }}>
         <img
           className="pd-accentband"
