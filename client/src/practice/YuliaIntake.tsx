@@ -739,7 +739,7 @@ export default function YuliaIntake() {
                 their own chat at /owners. */}
             <a
               className="pd-chip"
-              href="/owners"
+              href="#owners"
               onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero-owner-eval' })}
             >
               Own one of these? Get a free valuation →

@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'wouter';
 import PracticeShell from './PracticeShell';
 import YuliaIntake from './YuliaIntake';
+import OwnerChat from './OwnerChat';
 import { bookHref, bookTarget, bookRel } from './leads';
 import { trackEvent } from '../lib/analytics';
 
@@ -593,6 +594,39 @@ export default function Landing() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ── For owners — the seller side of the buy-side story (#owners;
+          2026-08-04, Paul: "maybe it doesn't need its own page, maybe it
+          just needs to be its own section" — the standalone /owners page is
+          retired, this section is its home and /owners redirects here).
+          Placed directly after Whose side deliberately: that band ends on
+          "we represent buyers, and only buyers", and this section resolves
+          what that loyalty means for an OWNER — the read buyers use, free,
+          and the first call when a buyer engages in their lane. The card is
+          the site's own conversation card; OwnerChat only swaps the brain
+          (scripted valuation walk, figures never persisted). ── */}
+      <section className="pd-section pd-accent al" id="owners">
+        <div className="pd-wrap">
+          <div className="pd-sechead" data-rv>
+            <div className="pd-seclabel">Own one of these businesses?</div>
+            <h2 className="pd-h2">Get the valuation buyers are working from — free.</h2>
+            <p className="pd-sub" style={{ margin: '22px auto 0' }}>
+              We never take a fee from an owner. Run your valuation right here — and when
+              a buyer engages us in your lane, you're the first call we make. What stays
+              on file afterward is your call, shown to you in full at the end.
+            </p>
+          </div>
+          <div className="ow-card" data-rv>
+            <OwnerChat />
+          </div>
+          <p className="ow-disc" data-rv>
+            Published market ranges for your trade, applied to figures you provide, plus the
+            readiness drivers buyers actually price — not a formal appraisal; for one, engage a
+            credentialed appraiser. At the end, the chat shows you exactly what's on file for
+            your company, and you keep it or delete it on the spot.
+          </p>
         </div>
       </section>
 

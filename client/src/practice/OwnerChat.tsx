@@ -14,7 +14,10 @@
  * band, situation) persist to sessionStorage so a Google-redirect or reload
  * resumes cleanly. Stage C figures live in React state ONLY — never
  * sessionStorage, never a transcript row anywhere. On delivery, state is
- * wiped. "We don't save your financials" stays literally true end to end.
+ * wiped. The FIGURES are never stored; the finished REPORT (which shows the
+ * normalized numbers) is the one record, kept only if the owner chooses Keep
+ * on the end card — every storage sentence in this file carries that
+ * exception explicitly.
  *
  * CONSENT SHAPE (Paul, 2026-08-04 evening): acceptance up front is MINIMAL —
  * one tap agreeing we process the answers to build and email the report.
@@ -80,12 +83,16 @@ interface StageA { lane?: string; laneLabel?: string; geo?: string; revBand?: st
 declare const google: any;
 
 function money(s: string): number | null {
-  const n = Number(s.replace(/[^0-9.]/g, ''));
-  if (!isFinite(n) || n < 0) return null;
-  // Owners type "1.2m", "750k", or plain dollars.
-  if (/m/i.test(s)) return Math.round(n * 1_000_000);
-  if (/k/i.test(s)) return Math.round(n * 1_000);
-  return Math.round(n);
+  // Owners type "1.2m", "750k", "-40k" (a loss year is a real answer), or
+  // plain dollars. The sign must be read BEFORE stripping non-digits, or a
+  // negative silently becomes a positive.
+  const neg = /^\s*-/.test(s) || /\(.*\)/.test(s); // "-40k" or accountant's "(40k)"
+  const digits = s.replace(/[^0-9.]/g, '');
+  if (digits === '' || digits === '.') return null;
+  const n = Number(digits);
+  if (!isFinite(n)) return null;
+  const mag = /m/i.test(s) ? 1_000_000 : /k/i.test(s) ? 1_000 : 1;
+  return Math.round(n * mag) * (neg ? -1 : 1);
 }
 function pct(s: string): number | null {
   const n = Number(s.replace(/[^0-9.]/g, ''));
@@ -125,7 +132,10 @@ export default function OwnerChat() {
   // Persist ONLY stage A + transcript-so-far (never stage C figures).
   useEffect(() => {
     if (stage === 'done' || stage === 'sending') { try { sessionStorage.removeItem(SS_KEY); } catch { /* fine */ } return; }
-    const persistable = ['lane', 'lane-other', 'geo', 'revband', 'situation', 'laneread', 'gate', 'waitlist', 'waitlist-done'].includes(stage);
+    // 'laneread' is deliberately NOT here: it renders no chips and no input
+    // (it's the await on the lane-read fetch), so a reload restored into it
+    // would have nothing to tap. The prior 'situation' write resumes cleanly.
+    const persistable = ['lane', 'lane-other', 'geo', 'revband', 'situation', 'gate', 'waitlist', 'waitlist-done'].includes(stage);
     if (!persistable) return;
     try { sessionStorage.setItem(SS_KEY, JSON.stringify({ a, stage, msgs })); } catch { /* fine */ }
   }, [a, stage, msgs]);
@@ -213,8 +223,9 @@ export default function OwnerChat() {
           `(${j.band.basisNote}). Source: ${j.band.source}.`);
         say('y',
           'To build YOUR valuation I need your actual figures — and a verified email to deliver the report to. ' +
-          "Continue with Google below, or I'll email you a link. Your figures are never stored: they run through the " +
-          'calculator, your report is built, and they\'re gone.');
+          "Continue with Google below, or I'll email you a link. The figures you type are never stored — they run " +
+          'the calculation and are gone. The finished report is the one record of them, and whether we keep a copy ' +
+          'is YOUR call at the end.');
         setStage('gate');
       } else {
         say('y', j.message);
@@ -327,8 +338,9 @@ export default function OwnerChat() {
     say('me', draft.trim()); setDraft(''); fin.current.newConstructionPct = v;
     say('y',
       "That's everything. To build your valuation, we process your answers and email you the report — that's " +
-      "the minimum this takes. Your financial figures are never stored. When it's delivered, I'll show you exactly " +
-      "what's on file for your company and YOU decide whether we keep it.");
+      "the minimum this takes. The figures themselves are never stored. When it's delivered, I'll show you exactly " +
+      "what's on file — including the report copy, which is the one record of your numbers — and YOU decide " +
+      'whether we keep any of it.');
     setStage('accept');
   };
 
@@ -350,9 +362,10 @@ export default function OwnerChat() {
         ? `Done — your valuation report is in your inbox (readiness read: ${j.position} of your lane's band).`
         : 'Your valuation is built, but mail delivery is unavailable right now — we\'ll get it to you shortly.');
       say('y',
-        "One last thing, and it's your call. Below is everything we have on your company — general business " +
+        "One last thing, and it's your call. Below is what we hold for this trade — general business " +
         'information and the report itself, nothing else. Keep it on file and you\'re on the first-call list ' +
-        'when a buyer engages us in your lane; tell us to delete it and it\'s gone right now, report and all.');
+        'when a buyer engages us in your lane; tell us to delete and everything under your email is gone ' +
+        'right now — this record, any other trade you\'ve run, report and all.');
       setOnFile(j.onFile || null);
       setCloseLine(j.close || '');
       setStage('retain');
@@ -371,7 +384,9 @@ export default function OwnerChat() {
     try {
       const r = await fetch('/api/owners/retention', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ keep, firstCall: keep }),
+        // keep is scoped to THIS lane (consent covers only what the card
+        // showed); delete is email-wide (erasure is broader by right).
+        body: JSON.stringify({ keep, firstCall: keep, lane: a.lane }),
       });
       if (!r.ok) { say('y', 'That didn\'t go through — give it another tap.'); setDeciding(false); return; }
       if (keep) {
@@ -466,15 +481,15 @@ export default function OwnerChat() {
 
       {stage === 'retain' && onFile && (
         <div className="ow-onfile">
-          <div className="k">On file for your company</div>
+          <div className="k">On file for this trade</div>
           <dl>
             <div><dt>Contact</dt><dd>{onFile.name ? `${onFile.name} · ` : ''}{onFile.email}</dd></div>
             <div><dt>Trade</dt><dd>{onFile.lane}</dd></div>
             {onFile.geography && <div><dt>Area</dt><dd>{onFile.geography}</dd></div>}
             {onFile.situation && <div><dt>Where you stand</dt><dd>{onFile.situation}</dd></div>}
-            <div><dt>Size band</dt><dd>{onFile.revenueBand} revenue (the band only — no figures)</dd></div>
+            <div><dt>Size band</dt><dd>{onFile.revenueBand} revenue (the band only, never a figure)</dd></div>
             <div><dt>Readiness read</dt><dd>{onFile.readiness}</dd></div>
-            <div><dt>Report</dt><dd>{onFile.report}</dd></div>
+            <div><dt>Report</dt><dd>{onFile.report} — the one record of your numbers; delete and it goes too</dd></div>
           </dl>
           <div className="ow-decide">
             <button type="button" className="pd-pill-primary" disabled={deciding} onClick={() => decide(true)}>

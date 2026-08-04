@@ -6,10 +6,16 @@
  * pure engine (house/evaluate.ts), renders the report, mails it, and files
  * the registry row. Three laws are load-bearing here:
  *
- *  • FINANCIALS ARE EPHEMERAL. The figures arrive in the request, feed
- *    `evaluate()`, appear inside the rendered PDF, and are never written
- *    anywhere else — seller_registry has no columns for them (migration 117),
- *    and this file must never log a request body.
+ *  • FINANCIALS ARE EPHEMERAL — WITH ONE NAMED EXCEPTION. The figures arrive
+ *    in the request, feed `evaluate()`, and are never written as data:
+ *    seller_registry has no columns for them (migration 117) and this file
+ *    must never log a request body. The rendered REPORT PDF (which shows the
+ *    normalized numbers — that's what makes it useful) is the one record,
+ *    kept only under the owner's explicit Keep on the end card, deleted with
+ *    everything else on Delete, purged if pending goes unanswered 30 days.
+ *    Every customer-facing sentence about storage must carry this exception
+ *    — the law critic's 2026-08-04 P0 was copy that said "never stored"
+ *    while this INSERT existed.
  *  • THE OWNER IDENTITY IS A FUNNEL PASS, NOT AN ACCOUNT. Google's GIS
  *    credential (the same verifyIdToken flow the team login uses — no new
  *    redirect URI) or a magic link mints an `smbx_owner` JWT with aud
@@ -112,9 +118,10 @@ export async function ownerMagicVerify(req: Request, res: Response) {
   try {
     const claims = jwt.verify(String(req.query.t || ''), secret(), { audience: `${OWNER_AUD}-magic` }) as { email: string };
     mintOwnerCookie(res, claims.email);
-    res.redirect('/owners?verified=1');
+    // The valuation lives as a landing section — return the reader to it.
+    res.redirect('/#owners');
   } catch {
-    res.redirect('/owners?verified=expired');
+    res.redirect('/#owners');
   }
 }
 
@@ -236,6 +243,7 @@ export function reportHtml(r: EvaluationResult, meta: { name?: string; geography
       <h2>Where your business sits, and why</h2>
       <p>On the readiness drivers buyers actually price, your profile reads in the <b>${r.readiness.position}</b> of that band.</p>
       <table>${drivers}</table>
+      <div class="src">Readiness thresholds carried from smbX published assessments: "Home Services — State of the Market" (Aug 2026) and "Commercial MEP Buy-Side Assessment" (Aug 2026).</div>
       <div class="disc"><b>How to read this:</b> ${r.disclaimer}</div>
     </div>
     <div class="foot">smbX.ai · buy-side corporate development · we work for buyers, never for a fee from an owner</div>
@@ -329,19 +337,24 @@ export async function ownerEvaluate(req: Request, res: Response) {
 }
 
 /** POST /api/owners/retention — the owner's decision on the end card.
- *  keep=true files the row as kept (with the first-call choice); keep=false
- *  is the right to erasure: every row for this email is DELETED, report and
- *  all. The email already sent stays theirs either way. */
+ *  ASYMMETRIC SCOPE, deliberately: keep=true files ONLY the (email, lane)
+ *  row the card actually showed — consent can't be recorded against rows
+ *  the owner never saw. keep=false is the right to erasure and goes the
+ *  other way: every row under the email is DELETED, report and all (the
+ *  chat says exactly this before the button). The emailed report stays
+ *  theirs either way. */
 export async function ownerRetention(req: Request, res: Response) {
   const owner = readOwner(req);
   if (!owner) return res.status(401).json({ error: 'verify first' });
   const keep = !!req.body?.keep;
   if (keep) {
     const firstCall = req.body?.firstCall !== false;
+    const lane = String(req.body?.lane || '');
+    if (!lane) return res.status(400).json({ error: 'lane required to keep' });
     await sql`
       UPDATE seller_registry
       SET retention = 'kept', consent_storage = true, consent_first_call = ${firstCall}, updated_at = now()
-      WHERE LOWER(email) = ${owner.email.toLowerCase()}
+      WHERE LOWER(email) = ${owner.email.toLowerCase()} AND lane = ${lane}
     `;
     return res.json({ ok: true, kept: true });
   }

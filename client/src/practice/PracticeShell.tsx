@@ -79,7 +79,6 @@ export default function PracticeShell({
   // /reports still reaches the SPA on an in-app navigation before the
   // client redirect fires, so the nav stays lit for both spellings.
   const onReports = loc.startsWith('/research') || loc.startsWith('/reports');
-  const onOwners = loc === '/owners';
 
   // The bar HIDES on the way down and comes back on the way up (Paul,
   // 2026-07-31: "on scroll down let's just scroll the header up out of the way
@@ -272,8 +271,9 @@ export default function PracticeShell({
             <a href={anchor('#who')} className={onSegment ? 'pd-navon' : undefined} aria-current={onSegment ? 'page' : undefined}>Who it's for</a>
             {/* The owner funnel (2026-08-04, Paul: "a link in the menu for Get
                 Free Valuation"). A deliberate, sanctioned addition to the
-                locked v3 IA — the same standing Research earned 2026-07-29. */}
-            <Link href="/owners" className={onOwners ? 'pd-navon' : undefined} aria-current={onOwners ? 'page' : undefined}>Free Valuation</Link>
+                locked v3 IA — the same standing Research earned 2026-07-29.
+                An ANCHOR, not a route: the valuation is a landing section. */}
+            <a href={anchor('#owners')}>Free Valuation</a>
           </nav>
           <div className="pd-nav-ctas">
             <a
@@ -308,7 +308,7 @@ export default function PracticeShell({
         <a href={anchor('#how')} onClick={closeMenu}>How it works <span className="arr" aria-hidden>→</span></a>
         <Link href="/industries" onClick={closeMenu}>Industries <span className="arr" aria-hidden>→</span></Link>
         <Link href="/research" onClick={closeMenu}>Research <span className="arr" aria-hidden>→</span></Link>
-        <Link href="/owners" onClick={closeMenu}>Get Free Valuation <span className="arr" aria-hidden>→</span></Link>
+        <a href={anchor('#owners')} onClick={closeMenu}>Get Free Valuation <span className="arr" aria-hidden>→</span></a>
         <a href={anchor('#who')} onClick={closeMenu}>Who it's for <span className="arr" aria-hidden>→</span></a>
         {/* The primary action lives here now that the phone bar has dropped
             its pill. Styled as a button rather than a seventh 21px link — it
