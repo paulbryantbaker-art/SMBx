@@ -29,8 +29,18 @@ Valuation")
    sanctioned addition to the locked v3 IA, same class of decision as
    Research (2026-07-29). The HOMEPAGE keeps its buyer engine pure: one
    starter chip under the home pill — *"I own a business — what's it
-   worth?"* — routes to `/owners`. One chat per job; the funnels never
-   blend.
+   worth?"* — routes to `/owners`. ~~One chat per job; the funnels never
+   blend.~~ **SUPERSEDED (Paul, 2026-08-04 night): ONE CHAT.** "We don't
+   need multiple chats — when the user selects one of the options it just
+   takes them back to the chat at the homepage." The #owners landing
+   section holds the pitch + trade picker; a pick dispatches
+   `smbx:open-owner` and the ONE conversation card (YuliaIntake) swaps to
+   the OwnerChat brain — same card, same mobile sheet, X returns to the
+   buyer engine. The standalone /owners page is deleted; /owners 301s to
+   /#owners. Backend direction (Paul, same message): the valuation should
+   tie into DEFINITIVE — `house/evaluate.ts` already mirrors core.ts's
+   basis grammar, and the P3 dashboard routes through the v19ModelRuntime
+   MODEL slots (deterministic, no API key) under the smbx_owner identity.
 3. **The chat runs the whole evaluation** (the Acquisition Engine
    grammar: Haiku conversation, SSE, scripted fail-soft, sheet hardening
    on phones — all reused). Stage A, no login: trade, geography, rough

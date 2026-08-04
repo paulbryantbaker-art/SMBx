@@ -10,9 +10,15 @@
  * when the model API is down. A Haiku conversational layer can front this in
  * P2; the scripted path must exist anyway as its fail-soft.
  *
+ * ONE CHAT (Paul, 2026-08-04 night: "we don't need its own chat… just use
+ * the chat pill on the homepage again"): this component renders NO card of
+ * its own — it is the msgs/chips/inputrow FRAGMENT YuliaIntake mounts inside
+ * its one conversation card (and mobile sheet) when owner mode is on.
+ *
  * PRIVACY MECHANICS (the transcript law): stage A answers (lane, geography,
- * band, situation) persist to sessionStorage so a Google-redirect or reload
- * resumes cleanly. Stage C figures live in React state ONLY — never
+ * band, situation) persist to localStorage — sessionStorage broke the magic
+ * link, which opens a new tab where sessionStorage is empty — so a Google
+ * redirect, reload, or emailed return resumes cleanly. Stage C figures live in React state ONLY — never
  * sessionStorage, never a transcript row anywhere. On delivery, state is
  * wiped. The FIGURES are never stored; the finished REPORT (which shows the
  * normalized numbers) is the one record, kept only if the owner chooses Keep
@@ -30,12 +36,14 @@ import { trackEvent } from '../lib/analytics';
 
 const SS_KEY = 'smbx_owner_intake_v1';
 
+export interface OwnerLane { key: string; label: string }
+
 /** Every vertical the practice covers (the Industries page's own list), not
  *  just the lanes with published bands (Paul, 2026-08-04: "why are only a
  *  handful of home service verticals being offered"). Lanes without sourced
  *  valuation data flow to the honest waitlist path — the server refuses to
  *  guess, and the owner is first in line when that lane's read exists. */
-const LANES = [
+export const OWNER_LANES: OwnerLane[] = [
   { key: 'hvac', label: 'HVAC' },
   { key: 'plumbing', label: 'Plumbing' },
   { key: 'electrical', label: 'Electrical' },
@@ -57,6 +65,7 @@ const LANES = [
   { key: 'nemt', label: 'Medical transport (NEMT)' },
   { key: 'rcm-billing', label: 'Medical billing / RCM' },
 ];
+const LANES = OWNER_LANES;
 
 const REV_BANDS = ['Under $1M', '$1M–$3M', '$3M–$10M', '$10M+'];
 const SITUATIONS = ['Just curious', 'Thinking about it in 1–3 years', 'Ready in the next 12 months'];
@@ -99,7 +108,7 @@ function pct(s: string): number | null {
   return isFinite(n) && n >= 0 && n <= 100 ? Math.round(n) : null;
 }
 
-export default function OwnerChat() {
+export default function OwnerChat({ initialLane, onBusy }: { initialLane?: OwnerLane | null; onBusy?: (b: boolean) => void }) {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [stage, setStage] = useState<Stage>('lane');
   const [a, setA] = useState<StageA>({});
@@ -118,9 +127,20 @@ export default function OwnerChat() {
   // Hydrate stage A after a Google redirect or reload; greet fresh visitors.
   useEffect(() => {
     let saved: { a: StageA; stage: Stage; msgs: Msg[] } | null = null;
-    try { saved = JSON.parse(sessionStorage.getItem(SS_KEY) || 'null'); } catch { /* fine */ }
+    try { saved = JSON.parse(localStorage.getItem(SS_KEY) || 'null'); } catch { /* fine */ }
     if (saved?.a?.lane && saved.stage) {
       setA(saved.a); setMsgs(saved.msgs || []); setStage(saved.stage === 'gate' ? 'gate' : saved.stage);
+    } else if (initialLane) {
+      // Entered from the #owners section with a trade already picked — the
+      // conversation starts one step in.
+      setA({ lane: initialLane.key, laneLabel: initialLane.label });
+      setMsgs([{ who: 'y', text: `${initialLane.label} — good. Let's build your free valuation. What metro or region is the business in?` }]);
+      setStage('geo');
+      trackEvent('owner_lane_picked', { lane: initialLane.key, via: 'section' });
+    } else if (initialLane === null) {
+      // "Another trade" from the section.
+      setMsgs([{ who: 'y', text: "Let's build your free valuation. Name the trade — what's the business?" }]);
+      setStage('lane-other');
     } else {
       setMsgs([{ who: 'y', text: "Let's build your free valuation. First — which trade is your business in?" }]);
     }
@@ -131,16 +151,20 @@ export default function OwnerChat() {
 
   // Persist ONLY stage A + transcript-so-far (never stage C figures).
   useEffect(() => {
-    if (stage === 'done' || stage === 'sending') { try { sessionStorage.removeItem(SS_KEY); } catch { /* fine */ } return; }
+    if (stage === 'done' || stage === 'sending') { try { localStorage.removeItem(SS_KEY); } catch { /* fine */ } return; }
     // 'laneread' is deliberately NOT here: it renders no chips and no input
     // (it's the await on the lane-read fetch), so a reload restored into it
     // would have nothing to tap. The prior 'situation' write resumes cleanly.
     const persistable = ['lane', 'lane-other', 'geo', 'revband', 'situation', 'gate', 'waitlist', 'waitlist-done'].includes(stage);
     if (!persistable) return;
-    try { sessionStorage.setItem(SS_KEY, JSON.stringify({ a, stage, msgs })); } catch { /* fine */ }
+    try { localStorage.setItem(SS_KEY, JSON.stringify({ a, stage, msgs })); } catch { /* fine */ }
   }, [a, stage, msgs]);
 
   useEffect(() => { listRef.current?.scrollTo({ top: 1e6, behavior: 'smooth' }); }, [msgs, stage]);
+
+  // Tell the host card when leaving mid-flight would orphan a delivery —
+  // it disables its X during 'sending' (and only then).
+  useEffect(() => { onBusy?.(stage === 'sending'); }, [stage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Verified mid-gate (Google popup or magic-link return) → continue to figures.
   useEffect(() => {
@@ -418,11 +442,7 @@ export default function OwnerChat() {
   };
 
   return (
-    <div className="ow-chatwrap">
-      <div className="pd-chat-head">
-        <img src="/logo-green-x.png" alt="smbX.ai" style={{ height: 28, width: 'auto', display: 'block' }} />
-        <div className="pd-chat-title">Free Valuation</div>
-      </div>
+    <>
       <div className="pd-msgs" ref={listRef}>
         {msgs.map((m, i) => (
           <div className="pd-msgrow" key={i}>
@@ -529,6 +549,6 @@ export default function OwnerChat() {
       {stage === 'done' && (
         <div className="ow-doneline">We work for buyers — an owner never pays us anything.</div>
       )}
-    </div>
+    </>
   );
 }

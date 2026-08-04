@@ -166,10 +166,13 @@ export default function App() {
     const clientId = (window as any).__GOOGLE_CLIENT_ID;
     const google = (window as any).google;
     if (!clientId || !google?.accounts?.id) return false;
-    if (!googleInitRef.current) {
-      google.accounts.id.initialize({ client_id: clientId, callback: handleGoogleCredential });
-      googleInitRef.current = true;
-    }
+    // ALWAYS re-initialize (2026-08-04): GIS `initialize` is a global
+    // singleton, and the owner-valuation gate re-points its callback at
+    // /api/owners/google. Guarding on the ref meant a later /login visit
+    // kept the OWNER callback and sign-in silently did nothing. Re-arming
+    // before each use is cheap and makes whoever renders last correct.
+    google.accounts.id.initialize({ client_id: clientId, callback: handleGoogleCredential });
+    googleInitRef.current = true;
     return true;
   }, [handleGoogleCredential]);
 

@@ -74,6 +74,7 @@ const SEND_LABELS = ['Continue', 'Generate Map', 'Send', 'Send'];
  *  fourteen). The mobile SHEET lists every lane — a scrollable sheet is
  *  where a full list belongs. */
 import { HUNT_LANES, FEATURED_LANES } from './lanes';
+import OwnerChat, { OwnerLane } from './OwnerChat';
 const CHIPS: string[] = HUNT_LANES.map(l => l.nm);
 
 /** Narration for the block currently being written — shown while the map
@@ -327,14 +328,27 @@ export default function YuliaIntake() {
      the session: storage cleared, state back to the opening line, the
      mobile sheet closed. Deliberately NOT offered mid-stream — pending
      disables it so an in-flight map isn't half-orphaned. */
+  const [ownerMode, setOwnerMode] = useState(false);
+  const [ownerEpoch, setOwnerEpoch] = useState(0);
+  const [ownerBusy, setOwnerBusy] = useState(false);
+  const ownerLane = useRef<OwnerLane | null | undefined>(undefined);
+
   const startOver = useCallback(() => {
+    if (ownerMode) {
+      // In owner mode the X leaves the valuation and hands the card back to
+      // the buyer engine; the abandoned owner session is cleared.
+      try { localStorage.removeItem('smbx_owner_intake_v1'); } catch { /* fine */ }
+      setOwnerMode(false);
+      setOpen(false);
+      return;
+    }
     try { sessionStorage.removeItem(SS_KEY); } catch { /* fine */ }
     setMessages([{ from: 'y', text: OPENING }]);
     setDone(false);
     setDraft('');
     setLive(null);
     setOpen(false);
-  }, []);
+  }, [ownerMode]);
   // On phones the chat lifts into a slide-up sheet so typing isn't buried in the
   // page under the keyboard (Paul, 2026-07-14: "a drawer that slides up and can
   // be minimized"). Desktop ignores this — the chat stays inline, front-and-center.
@@ -553,6 +567,46 @@ export default function YuliaIntake() {
     return () => window.removeEventListener('smbx:open-intake', onAsk);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // The #owners section's chips land HERE: enter owner mode with the picked
+  // trade ({key,label}, or {other:true} for a free-text trade), lift the
+  // sheet on phones, scroll the card into view on desktop. Each entry
+  // remounts OwnerChat (epoch key) so a new pick starts its own thread.
+  useEffect(() => {
+    const onOwner = (e: Event) => {
+      const d = (e as CustomEvent).detail;
+      ownerLane.current = d?.key ? { key: d.key, label: d.label } : null;
+      // An explicit pick starts fresh — without this, OwnerChat's
+      // hydrate-first priority resumes the PREVIOUS lane's saved session
+      // and the new pick is silently discarded.
+      try { localStorage.removeItem('smbx_owner_intake_v1'); } catch { /* fine */ }
+      setOwnerEpoch(n => n + 1);
+      setOwnerMode(true);
+      if (isMobile()) openSheet();
+      else setTimeout(() => document.getElementById('yulia')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 30);
+    };
+    window.addEventListener('smbx:open-owner', onOwner);
+    return () => window.removeEventListener('smbx:open-owner', onOwner);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // A returning owner (magic-link email opens a NEW tab at /#owners, or a
+  // reload mid-valuation) resumes into owner mode instead of the buyer
+  // engine — but only when the hash says that's what they came for.
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('smbx_owner_intake_v1') || 'null');
+      if (saved?.a?.lane && window.location.hash === '#owners') {
+        ownerLane.current = undefined;
+        setOwnerEpoch(n => n + 1);
+        setOwnerMode(true);
+        if (isMobile()) setOpen(true);
+        // Desktop: the hash scroll parks the page at the #owners section —
+        // the resumed conversation is at the top. Bring it into view (the
+        // timeout outwaits the browser's own hash jump).
+        else setTimeout(() => document.getElementById('yulia')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 400);
+      }
+    } catch { /* fine */ }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // On phones every "#yulia" ask (nav CTA, sticky CTA, hero pills) opens the
   // drawer directly instead of scrolling to an inline card the visitor then
   // has to tap again. Desktop keeps the anchor scroll.
@@ -676,7 +730,7 @@ export default function YuliaIntake() {
   // The conversation card only materializes once the visitor engages (Paul,
   // 2026-07-14 ×3: "too crowded… results are not what I wanted"). On phones
   // the bar is always the doorway — typing happens in the slide-up sheet.
-  const resting = userTurns === 0 && !pending && !done;
+  const resting = userTurns === 0 && !pending && !done && !ownerMode;
 
   return (
     <div id="yulia" className={`pd-chat-zone${resting ? ' resting' : ''}`}>
@@ -705,7 +759,7 @@ export default function YuliaIntake() {
             value={draft}
             onChange={e => setDraft(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') send(); }}
-            placeholder={done ? 'Your map is ready — reopen it' : userTurns > 0 ? 'Tap to continue your session' : mobileVP ? 'What are you buying?' : hint}
+            placeholder={ownerMode ? 'Tap to continue your valuation' : done ? 'Your map is ready — reopen it' : userTurns > 0 ? 'Tap to continue your session' : mobileVP ? 'What are you buying?' : hint}
             aria-label="Describe your acquisition criteria"
           />
           <button
@@ -755,17 +809,26 @@ export default function YuliaIntake() {
           {/* Grab handle — shown only in the mobile sheet. */}
           <span className="pd-chat-grab" aria-hidden="true" />
           <img src="/logo-green-x.png" alt="smbX.ai" style={{ height: 28, width: 'auto', display: 'block' }} />
-          <div className="pd-chat-title">Acquisition Engine</div>
+          <div className="pd-chat-title">{ownerMode ? 'Free Valuation' : 'Acquisition Engine'}</div>
           {/* Minimize — shown only in the mobile sheet. */}
           <button type="button" className="pd-chat-min" onClick={() => setOpen(false)} aria-label="Minimize chat">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </button>
           {/* Start over — both breakpoints (minimize keeps the session; the X
               abandons it). Disabled while a map is streaming. */}
-          <button type="button" className="pd-chat-x" onClick={startOver} disabled={pending} aria-label="Cancel this conversation and start over">
+          <button type="button" className="pd-chat-x" onClick={startOver} disabled={ownerMode ? ownerBusy : pending} aria-label="Cancel this conversation and start over">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>
           </button>
         </div>
+      {/* ── OWNER MODE (Paul: one chat, two brains). The card body swaps
+             wholesale: OwnerChat renders the same msgs/chips/inputrow grammar
+             as direct children, so the mobile sheet's flex layout treats both
+             brains identically. The epoch key restarts a fresh valuation per
+             section pick; the X (startOver) returns to the buyer engine. ── */}
+      {ownerMode ? (
+        <OwnerChat key={ownerEpoch} initialLane={ownerLane.current} onBusy={setOwnerBusy} />
+      ) : (
+        <>
       <div className="pd-msgs" ref={listRef}>
         {messages.map((m, i) => (
           m.map ? (
@@ -832,6 +895,8 @@ export default function YuliaIntake() {
         />
         <button type="button" className="pd-send" onClick={() => send()} disabled={done || pending}>{sendLabel}</button>
       </div>
+        </>
+      )}
       </div>
     </div>
   );
