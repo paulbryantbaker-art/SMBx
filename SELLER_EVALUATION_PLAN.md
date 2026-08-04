@@ -16,23 +16,43 @@ practice's proprietary deal flow.
 
 ---
 
-## 1 · The loop
+## 1 · The loop (CHAT-FIRST — Paul, 2026-08-04 second pass: "use the Agent
+chat pill for all of the business intake and valuation… full valuation
+after the user logs in with Google… a link in the menu for Get Free
+Valuation")
 
 1. **Ad / post** (LinkedIn, the research reports' own traffic): "We work
    for buyers. If you own a business in one of our lanes, get the market
    read buyers are using — free, in fifteen minutes, no broker, no fee."
-2. **Landing page** `/owners` — practice-site language, one job: start the
-   evaluation.
-3. **Guided evaluation** — chat-style structured intake (the herobar
-   grammar visitors already know from the Acquisition Engine), 10–14
-   questions, numbers entered in-flow.
+2. **Landing page** `/owners` — practice-site language, one job: the chat
+   pill. **"Get Free Valuation" joins the nav menu** pointing here — a
+   sanctioned addition to the locked v3 IA, same class of decision as
+   Research (2026-07-29). The HOMEPAGE keeps its buyer engine pure: one
+   starter chip under the home pill — *"I own a business — what's it
+   worth?"* — routes to `/owners`. One chat per job; the funnels never
+   blend.
+3. **The chat runs the whole evaluation** (the Acquisition Engine
+   grammar: Haiku conversation, SSE, scripted fail-soft, sheet hardening
+   on phones — all reused). Stage A, no login: trade, geography, rough
+   size, situation → the free taste, immediately: the lane's cited
+   multiple band. Stage B, **the Google gate sits exactly where the
+   numbers start**: "To run your full evaluation I need your actual
+   figures — sign in with Google so the report has somewhere to go."
+   Stage C, financials in-chat; the math runs in `house/evaluate.ts`
+   underneath — chat is the collection UX, never the calculator.
 4. **The report arrives by email** (the report-gate rail: delivery IS the
    verification). Nothing financial is released to the browser.
-5. **The permission close:** "When a buyer engages us in your lane, do you
-   want to be on the first-call list?" — explicit checkbox, stored.
+5. **The permission close, in chat:** the storage sentence (§5) and the
+   first-call checkbox — "When a buyer engages us in your lane, do you
+   want to be on the first-call list?"
 6. **The register:** a lane-tagged seller/target record lands in the
    pipeline. When a mandate opens: one query — *who raised their hand in
    this lane at this size* — and the first calls are warm.
+
+**Chat-first changes one privacy mechanic (see §5): financial turns are
+never persisted.** The stored transcript ends at Stage A; Stage C figures
+stream through to the calculator and evaporate. Otherwise "we don't save
+your financials" would be false by transcript.
 
 `ENGAGED_LANES` honesty carries over: a lane with a live mandate closes
 with "we have an active buyer in your lane today"; every other lane closes
@@ -82,20 +102,18 @@ invented is the **reader identity**: `reportAccess` mints a signed
 HttpOnly `smbx_reader` JWT when someone confirms their email. Sellers get
 the same class of thing, one step richer:
 
-- **P1 — magic-link "owner pass" (recommended, ship first).** The
-  evaluation asks for email up front; the report is delivered there;
-  clicking the emailed link confirms the address and sets an
-  `smbx_owner` JWT (180d, separate audience, its own `seller_registry`
-  row — NEVER a `users` row, so `practicePerimeter` needs no carve-out and
-  the app's account system stays team-only). Returning owners click
-  "email me a sign-in link" to update numbers or re-download. No
-  passwords, nothing to breach, nothing to support.
-- **P2 — "Continue with Google" (optional, only if funnel data shows email
-  friction).** Same `seller_registry` identity, Google used purely to
-  verify the address in one tap. Requires a deliberate carve-out in the
-  Google OAuth path (a separate client/route that can never mint an app
-  session). Costs care; adds one-tap convenience. Decision deferred until
-  P1 conversion numbers exist.
+- **"Continue with Google" AT LAUNCH (Paul, 2026-08-04 second pass —
+  promoted from P2).** Placed mid-chat, at the Stage B gate before
+  financials — value first, friction exactly once. Google is used purely
+  to verify the address in one tap; success mints an `smbx_owner` JWT
+  (180d, separate audience) and a `seller_registry` row — NEVER a `users`
+  row. Implementation is a walled-off OAuth route (own callback, own
+  cookie, cannot mint an app session), so `practicePerimeter` and the
+  TEAM_ALLOWLIST gate need no carve-out and the app's account system
+  stays team-only.
+- **Magic-link fallback on the same gate** ("no Google? we'll email you a
+  link") — the `smbx_reader` pattern, one template away, and it doubles
+  as the return-visit mechanism for updating numbers or re-downloading.
 
 Either way: this is a **funnel identity**, scoped to `/owners` and report
 retrieval. It cannot see or touch the deal app. Law #3's intent — no
@@ -155,6 +173,14 @@ architecture makes it true:
   never logged**. The evaluation route is built so there is no code path
   that persists them (and the plan's test suite asserts it: submit, then
   prove the db contains no raw figures).
+- **Chat-first corollary: the transcript is not a loophole.** Session
+  persistence (the sessionStorage hydration the intake drawer uses, and
+  any server-side lead capture) stores the conversation only through
+  Stage A (lane/geography/size-band/situation). Stage C financial turns
+  stream to `house/evaluate.ts` and are dropped — not in the db, not in
+  logs, not in the stored transcript, and the client's own sessionStorage
+  copy is scrubbed of figure turns on report delivery. The
+  no-financials-persisted test covers the transcript tables too.
 - **What we DO keep, disclosed in the same breath:** contact details,
   lane, geography, **broad size band** (checkbox ranges like "$1–3M
   revenue," which is all mandate-matching needs), the readiness grade,
@@ -219,8 +245,9 @@ candidate row can carry.
 
 | # | Decision | Default |
 |---|---|---|
-| 1 | Identity at launch | Magic-link owner pass; Google deferred to P2 |
+| 1 | Identity at launch | **DECIDED (Paul): Google sign-in at the mid-chat gate**, magic-link fallback |
 | 2 | Keep the report PDF on file? | Yes (per Paul), disclosed verbatim; strict email-only mode is one flag |
-| 3 | Route name | `/owners` ("sellers" self-label poorly this early) |
-| 4 | Nav placement | Ads-first, unlinked; chrome slot is a later Paul call |
+| 3 | Route name | `/owners` ("sellers" self-label poorly this early) — menu label **"Get Free Valuation"** |
+| 4 | Nav placement | **DECIDED (Paul): menu link at launch**; homepage gets the owner starter chip routing to `/owners`, buyer engine untouched |
 | 5 | Launch lanes | The seven with published bands; others capture-and-promise |
+| 6 | Intake modality | **DECIDED (Paul): chat-first** (Acquisition Engine grammar), scripted fail-soft when the model is down |
