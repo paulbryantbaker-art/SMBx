@@ -225,6 +225,56 @@ architecture makes it true:
   string (the same law the bands obey). Until then the report carries a
   blanket attribution line under the drivers table.
 
+## P2 — THE FULL EVALUATION (Paul, 2026-08-04 night, after reviewing the
+## 16-page Acme sample: "plug into DEFINITIVE on the front end… where they
+## can log back in, finish, go get answers, come back — when they're done
+## they have a full thorough report they can bank on")
+
+**The 16-page sample IS the product spec.** Its section list is the
+question set and the compute plan:
+
+| Report section | Compute | New inputs needed |
+|---|---|---|
+| Exec summary | derived from everything below | — |
+| Company profile & revenue lines | pure arithmetic | revenue by line (service vs project), GM per line, employees, states |
+| Normalized earnings (bridge) | ALREADY LIVE (house/evaluate.ts) | interest, D&A split from the lump earnings question |
+| Three-year trend | pure arithmetic | 2 prior years: revenue, service mix, EBITDA |
+| Published band, tiered table | laneBenchmarks + per-lane TIER rows | — |
+| Buyer's ratios (DSO, WIP, debt/EBITDA, backlog coverage…) | pure arithmetic | AR, WIP over/under, debt schedule, backlog, working capital |
+| What moves the number (24-mo arithmetic) | pure arithmetic | target mix, growth assumption (defaulted below achieved) |
+| Proceeds waterfall | pure arithmetic | funded debt; costs/escrow are practice norms, labeled |
+| Offer anatomy / buyer types / diligence preview / sequence | conditional prose on the profile | — |
+
+**THE PRIVACY MODEL FORKS — deliberately, by Paul's instruction.** A
+multi-session evaluation cannot be ephemeral: "log back in and finish"
+IS storage. So the full evaluation is a second tier with its own
+up-front consent: *"To build the full report across visits, we save
+your answers to your evaluation workspace until it's built. Delete
+anytime; the end-of-report keep-or-delete still governs everything."*
+The quick valuation (P1, live) stays ephemeral — its promise is
+untouched. New table `owner_evaluations`: owner email/sub, lane,
+`answers JSONB` (sectioned), `sections_done`, `report_pdf` on
+completion, `retention` states as in 117/118, updated_at. The
+smbx_owner pass (180d) is the login; Google or magic link both re-enter.
+
+**Chat UX:** section-based walk in the ONE chat (owner mode) — progress
+line ("Section 4 of 9 — the balance sheet"), every section ends with
+"Save & come back later" and the resume greeting names what's missing
+("Two answers left in Three Years — your FY2024 revenue and service
+mix"). "Go get answers" is a real state, not an error.
+
+**Compute routing:** deterministic only — house/evaluate.ts grows
+section calculators (pure, tested, same doctrine), reconciled against
+the v19 runtime inventory (agent report pending → fold findings in
+here). No model call anywhere in the compute path; prose sections are
+conditional templates in the renderer.
+
+**Renderer:** the 16-page grammar from the Acme build (SAMPLE-VALUATION-
+SPEC.md + build-acme-sample.mts are the ground truth) becomes the
+production `reportHtml` v2 — same bookends, sectioned body, ratios and
+waterfall tables, THE LINE furniture (range never number, tax named not
+estimated, RE separate asset, no uncited benchmark column).
+
 ## 6 · Where registrants land — pipeline, not CRM clients
 
 `crm_accounts` is the CLIENT pipeline (acquirers) — sellers must not land
