@@ -1,0 +1,370 @@
+/**
+ * OwnerChat — the free owner evaluation, run as a conversation
+ * (SELLER_EVALUATION_PLAN.md, Paul 2026-08-04: "use the Agent chat pill for
+ * all of the business intake and valuation… full valuation after the user
+ * logs in with Google").
+ *
+ * P1 brain is SCRIPTED — a deterministic step machine wearing the chat UI.
+ * That is a feature, not a shortcut: the evaluation needs exact numbers, the
+ * math is pure (house/evaluate.ts, server-side), and the funnel keeps working
+ * when the model API is down. A Haiku conversational layer can front this in
+ * P2; the scripted path must exist anyway as its fail-soft.
+ *
+ * PRIVACY MECHANICS (the transcript law): stage A answers (lane, geography,
+ * band, situation) persist to sessionStorage so a Google-redirect or reload
+ * resumes cleanly. Stage C figures live in React state ONLY — never
+ * sessionStorage, never a transcript row anywhere. On delivery, state is
+ * wiped. "We don't save your financials" stays literally true end to end.
+ */
+import { useEffect, useRef, useState } from 'react';
+import { trackEvent } from '../lib/analytics';
+
+const SS_KEY = 'smbx_owner_intake_v1';
+
+const LANES = [
+  { key: 'hvac', label: 'HVAC' },
+  { key: 'plumbing', label: 'Plumbing' },
+  { key: 'electrical', label: 'Electrical' },
+  { key: 'roofing', label: 'Roofing' },
+  { key: 'pest-control', label: 'Pest control' },
+  { key: 'commercial-mechanical', label: 'Commercial mechanical' },
+  { key: 'garage-doors', label: 'Garage doors' },
+];
+
+const REV_BANDS = ['Under $1M', '$1M–$3M', '$3M–$10M', '$10M+'];
+const SITUATIONS = ['Just curious', 'Thinking about it in 1–3 years', 'Ready in the next 12 months'];
+
+interface Msg { who: 'y' | 'me'; text: string }
+
+type Stage =
+  | 'lane' | 'geo' | 'revband' | 'situation' | 'laneread'
+  | 'gate' | 'fin-revenue' | 'fin-earnings' | 'fin-ownercomp' | 'fin-addbacks'
+  | 'fin-recurring' | 'fin-owner' | 'fin-customer' | 'fin-books' | 'fin-newcon'
+  | 'consent' | 'sending' | 'done' | 'waitlist' | 'waitlist-done';
+
+interface StageA { lane?: string; laneLabel?: string; geo?: string; revBand?: string; situation?: string }
+
+declare const google: any;
+
+function money(s: string): number | null {
+  const n = Number(s.replace(/[^0-9.]/g, ''));
+  if (!isFinite(n) || n < 0) return null;
+  // Owners type "1.2m", "750k", or plain dollars.
+  if (/m/i.test(s)) return Math.round(n * 1_000_000);
+  if (/k/i.test(s)) return Math.round(n * 1_000);
+  return Math.round(n);
+}
+function pct(s: string): number | null {
+  const n = Number(s.replace(/[^0-9.]/g, ''));
+  return isFinite(n) && n >= 0 && n <= 100 ? Math.round(n) : null;
+}
+
+export default function OwnerChat() {
+  const [msgs, setMsgs] = useState<Msg[]>([]);
+  const [stage, setStage] = useState<Stage>('lane');
+  const [a, setA] = useState<StageA>({});
+  const [verified, setVerified] = useState<{ email: string } | null>(null);
+  // Stage C — React state only, per the transcript law. Never persisted.
+  const fin = useRef<Record<string, number | string>>({});
+  const [draft, setDraft] = useState('');
+  const [consentCall, setConsentCall] = useState(true);
+  const [consentStore, setConsentStore] = useState(false);
+  const [closeLine, setCloseLine] = useState('');
+  const listRef = useRef<HTMLDivElement>(null);
+  const googleBtn = useRef<HTMLDivElement>(null);
+
+  const say = (who: 'y' | 'me', text: string) => setMsgs(m => [...m, { who, text }]);
+
+  // Hydrate stage A after a Google redirect or reload; greet fresh visitors.
+  useEffect(() => {
+    let saved: { a: StageA; stage: Stage; msgs: Msg[] } | null = null;
+    try { saved = JSON.parse(sessionStorage.getItem(SS_KEY) || 'null'); } catch { /* fine */ }
+    if (saved?.a?.lane && saved.stage) {
+      setA(saved.a); setMsgs(saved.msgs || []); setStage(saved.stage === 'gate' ? 'gate' : saved.stage);
+    } else {
+      setMsgs([{ who: 'y', text: "Let's get you the market read buyers are using. First — which trade is your business in?" }]);
+    }
+    fetch('/api/owners/me').then(r => (r.ok ? r.json() : null)).then(me => {
+      if (me?.email) setVerified({ email: me.email });
+    }).catch(() => { /* fine */ });
+  }, []);
+
+  // Persist ONLY stage A + transcript-so-far (never stage C figures).
+  useEffect(() => {
+    if (stage === 'done' || stage === 'sending') { try { sessionStorage.removeItem(SS_KEY); } catch { /* fine */ } return; }
+    const persistable = ['lane', 'geo', 'revband', 'situation', 'laneread', 'gate', 'waitlist', 'waitlist-done'].includes(stage);
+    if (!persistable) return;
+    try { sessionStorage.setItem(SS_KEY, JSON.stringify({ a, stage, msgs })); } catch { /* fine */ }
+  }, [a, stage, msgs]);
+
+  useEffect(() => { listRef.current?.scrollTo({ top: 1e6, behavior: 'smooth' }); }, [msgs, stage]);
+
+  // Verified mid-gate (Google popup or magic-link return) → continue to figures.
+  useEffect(() => {
+    if (verified && stage === 'gate') {
+      say('y', `You're verified as ${verified.email} — the report will go there. Now the numbers. Trailing-twelve-month revenue? (e.g. "2.4m")`);
+      setStage('fin-revenue');
+    }
+  }, [verified, stage]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // GIS button at the gate — the same credential flow the app login uses.
+  useEffect(() => {
+    if (stage !== 'gate' || verified) return;
+    const cid = (window as any).__GOOGLE_CLIENT_ID;
+    if (!cid || typeof google === 'undefined' || !googleBtn.current) return;
+    try {
+      google.accounts.id.initialize({
+        client_id: cid,
+        callback: async (resp: { credential: string }) => {
+          const r = await fetch('/api/owners/google', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ credential: resp.credential }),
+          });
+          if (r.ok) { const j = await r.json(); setVerified({ email: j.email }); trackEvent('owner_verified', { via: 'google' }); }
+        },
+      });
+      google.accounts.id.renderButton(googleBtn.current, { theme: 'outline', size: 'large', shape: 'pill', text: 'continue_with' });
+    } catch { /* GIS unavailable — magic link still works */ }
+  }, [stage, verified]);
+
+  const pickLane = async (key: string, label: string) => {
+    say('me', label);
+    setA(v => ({ ...v, lane: key, laneLabel: label }));
+    say('y', 'Got it. What metro or region are you in?');
+    setStage('geo');
+    trackEvent('owner_lane_picked', { lane: key });
+  };
+
+  const submitGeo = () => {
+    const geo = draft.trim(); if (!geo) return;
+    say('me', geo); setDraft('');
+    setA(v => ({ ...v, geo }));
+    say('y', 'Roughly what revenue band is the business in?');
+    setStage('revband');
+  };
+
+  const pickRevBand = (band: string) => {
+    say('me', band);
+    setA(v => ({ ...v, revBand: band }));
+    say('y', 'And where is your head on selling?');
+    setStage('situation');
+  };
+
+  const pickSituation = async (s: string) => {
+    say('me', s);
+    const nextA = { ...a, situation: s };
+    setA(nextA);
+    setStage('laneread');
+    try {
+      const r = await fetch(`/api/owners/lane-read?lane=${encodeURIComponent(nextA.lane || '')}&geography=${encodeURIComponent(nextA.geo || '')}`);
+      const j = await r.json();
+      if (j.supported) {
+        say('y',
+          `Here's the free part before anything else: published data has ${nextA.laneLabel} businesses trading between ` +
+          `${j.band.low}x and ${j.band.high}x, with the market's middle at ${j.band.marketLow}x–${j.band.marketHigh}x ` +
+          `(${j.band.basisNote}). Source: ${j.band.source}.`);
+        say('y',
+          'To run YOUR full evaluation I need your actual figures — and a verified email for the report to land in. ' +
+          "Continue with Google below, or I'll email you a link. Your figures are never stored: they run through the " +
+          'calculator, the report is built, and they\'re gone.');
+        setStage('gate');
+      } else {
+        say('y', j.message);
+        say('y', "Leave your email and you're first in line the day your lane's read exists — and on the first-call list when a buyer engages us in your lane.");
+        setStage('waitlist');
+      }
+    } catch {
+      say('y', 'Something hiccuped on my side — give that another tap.');
+      setStage('situation');
+    }
+  };
+
+  const submitMagic = async () => {
+    const email = draft.trim(); if (!email) return;
+    say('me', email); setDraft('');
+    const r = await fetch('/api/owners/magic', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }),
+    });
+    if (r.ok) say('y', 'Link sent — open it on this device and we pick up right here. (Good for 30 minutes.)');
+    else say('y', "That email didn't look right — try again?");
+  };
+
+  const submitWaitlist = async () => {
+    const email = draft.trim(); if (!email) return;
+    say('me', email); setDraft('');
+    await fetch('/api/owners/lead', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, lane: a.lane, geography: a.geo }),
+    }).catch(() => { /* fine */ });
+    say('y', "Done — you're registered. We work for buyers and never take a fee from an owner; when one engages us in your lane, registered owners hear first.");
+    setStage('waitlist-done');
+    trackEvent('owner_waitlisted', { lane: a.lane });
+  };
+
+  const FIN_STEPS: Array<{ stage: Stage; key: string; parse: (s: string) => number | string | null; ask: string }> = [
+    { stage: 'fin-revenue', key: 'revenueUsd', parse: money, ask: 'Profit on the tax return last year — before any add-backs? (rough is fine)' },
+    { stage: 'fin-earnings', key: 'earningsUsd', parse: money, ask: 'Your total owner compensation — salary plus whatever you take out?' },
+    { stage: 'fin-ownercomp', key: 'ownerCompUsd', parse: money, ask: 'One-time or personal expenses run through the business last year (vehicles, family phones, that trip)? "0" is a fine answer.' },
+    { stage: 'fin-addbacks', key: 'addBacksUsd', parse: money, ask: 'What percent of revenue recurs — maintenance plans, service contracts? (0–100)' },
+    { stage: 'fin-recurring', key: 'recurringPct', parse: pct, ask: 'Who runs the day to day?' },
+  ];
+
+  const submitFin = () => {
+    const step = FIN_STEPS.find(s => s.stage === stage);
+    if (!step) return;
+    const v = step.parse(draft);
+    if (v === null) { say('y', "I couldn't read that as a number — try like \"1.2m\", \"750k\", or \"40\"."); return; }
+    say('me', draft.trim()); setDraft('');
+    fin.current[step.key] = v;
+    const idx = FIN_STEPS.indexOf(step);
+    say('y', step.ask);
+    setStage(idx === 0 ? 'fin-earnings' : idx === 1 ? 'fin-ownercomp' : idx === 2 ? 'fin-addbacks' : idx === 3 ? 'fin-recurring' : 'fin-owner');
+  };
+
+  const pickOwnerDep = (label: string, val: string) => {
+    say('me', label); fin.current.ownerDependence = val;
+    say('y', 'Largest single customer — roughly what percent of revenue? (0–100)');
+    setStage('fin-customer');
+  };
+  const submitCustomer = () => {
+    const v = pct(draft); if (v === null) { say('y', 'A percent between 0 and 100, roughly.'); return; }
+    say('me', draft.trim()); setDraft(''); fin.current.topCustomerPct = v;
+    say('y', 'How are the books kept?');
+    setStage('fin-books');
+  };
+  const pickBooks = (label: string, val: string) => {
+    say('me', label); fin.current.booksQuality = val;
+    say('y', 'Last one: what percent of revenue is new-construction or GC work? (0–100)');
+    setStage('fin-newcon');
+  };
+  const submitNewcon = () => {
+    const v = pct(draft); if (v === null) { say('y', 'A percent between 0 and 100, roughly.'); return; }
+    say('me', draft.trim()); setDraft(''); fin.current.newConstructionPct = v;
+    say('y',
+      "That's everything. Two boxes before I build it — the first is the honest sentence about what we keep, " +
+      'the second is the whole point of this being free.');
+    setStage('consent');
+  };
+
+  const runEvaluation = async () => {
+    if (!consentStore) return;
+    setStage('sending');
+    say('y', 'Building your evaluation…');
+    try {
+      const r = await fetch('/api/owners/evaluate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lane: a.lane, geography: a.geo, situation: a.situation,
+          financials: fin.current,
+          consentFirstCall: consentCall, consentStorage: consentStore,
+        }),
+      });
+      const j = await r.json();
+      if (!r.ok) { say('y', j.error || 'That didn\'t go through — try once more.'); setStage('consent'); return; }
+      fin.current = {}; // the figures evaporate — nothing left client-side either
+      say('y', j.mailed
+        ? `Done — your evaluation is in your inbox (readiness read: ${j.position} of your lane's band).`
+        : 'Your evaluation is built, but mail delivery is unavailable right now — we\'ll get it to you shortly.');
+      setCloseLine(j.close || '');
+      if (j.close) say('y', j.close);
+      setStage('done');
+      trackEvent('owner_evaluated', { lane: a.lane, position: j.position });
+    } catch {
+      say('y', 'Network hiccup — nothing was lost, tap Build again.');
+      setStage('consent');
+    }
+  };
+
+  const inputStages: Stage[] = ['geo', 'fin-revenue', 'fin-earnings', 'fin-ownercomp', 'fin-addbacks', 'fin-recurring', 'fin-customer', 'fin-newcon', 'waitlist'];
+  const onSubmit = () => {
+    if (stage === 'geo') return submitGeo();
+    if (stage === 'waitlist') return submitWaitlist();
+    if (stage === 'fin-customer') return submitCustomer();
+    if (stage === 'fin-newcon') return submitNewcon();
+    if (stage === 'gate') return submitMagic();
+    return submitFin();
+  };
+
+  return (
+    <div className="ow-chat" data-rv>
+      <div className="ow-msgs" ref={listRef}>
+        {msgs.map((m, i) => <div key={i} className={`ow-msg ${m.who}`}>{m.text}</div>)}
+      </div>
+
+      {stage === 'lane' && (
+        <div className="ow-chips">
+          {LANES.map(l => <button key={l.key} type="button" className="pd-chip" onClick={() => pickLane(l.key, l.label)}>{l.label}</button>)}
+        </div>
+      )}
+      {stage === 'revband' && (
+        <div className="ow-chips">{REV_BANDS.map(b => <button key={b} type="button" className="pd-chip" onClick={() => pickRevBand(b)}>{b}</button>)}</div>
+      )}
+      {stage === 'situation' && (
+        <div className="ow-chips">{SITUATIONS.map(s => <button key={s} type="button" className="pd-chip" onClick={() => pickSituation(s)}>{s}</button>)}</div>
+      )}
+      {stage === 'fin-owner' && (
+        <div className="ow-chips">
+          <button type="button" className="pd-chip" onClick={() => pickOwnerDep('I run it day to day', 'runs-daily')}>I run it day to day</button>
+          <button type="button" className="pd-chip" onClick={() => pickOwnerDep('A manager runs it', 'manager-in-place')}>A manager runs it</button>
+          <button type="button" className="pd-chip" onClick={() => pickOwnerDep('It runs without me', 'absentee')}>It runs without me</button>
+        </div>
+      )}
+      {stage === 'fin-books' && (
+        <div className="ow-chips">
+          <button type="button" className="pd-chip" onClick={() => pickBooks('Cash basis', 'cash')}>Cash basis</button>
+          <button type="button" className="pd-chip" onClick={() => pickBooks('Accrual', 'accrual')}>Accrual</button>
+          <button type="button" className="pd-chip" onClick={() => pickBooks('Accrual + CPA reviewed', 'reviewed')}>Accrual + CPA reviewed</button>
+        </div>
+      )}
+
+      {stage === 'gate' && !verified && (
+        <div className="ow-gate">
+          <div ref={googleBtn} className="ow-gbtn" />
+          <div className="ow-or">or</div>
+        </div>
+      )}
+
+      {stage === 'consent' && (
+        <div className="ow-consent">
+          <label>
+            <input type="checkbox" checked={consentStore} onChange={e => setConsentStore(e.target.checked)} />
+            <span>I understand smbX does <b>not</b> store the financial figures I entered. It keeps my contact details, my lane and size band, and a copy of my finished report so the team can reference it if they call me.</span>
+          </label>
+          <label>
+            <input type="checkbox" checked={consentCall} onChange={e => setConsentCall(e.target.checked)} />
+            <span>When a buyer engages smbX in my lane, contact me — I want to be on the first-call list.</span>
+          </label>
+          <button type="button" className="pd-pill-primary ow-build" disabled={!consentStore} onClick={runEvaluation}>
+            Build my evaluation →
+          </button>
+        </div>
+      )}
+
+      {(inputStages.includes(stage) || stage === 'gate') && (
+        <div className="ow-inputrow">
+          <input
+            className="ow-input"
+            value={draft}
+            onChange={e => setDraft(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') onSubmit(); }}
+            placeholder={
+              stage === 'geo' ? 'e.g. Dallas–Fort Worth'
+              : stage === 'gate' ? 'you@company.com — email me a link instead'
+              : stage === 'waitlist' ? 'you@company.com'
+              : stage === 'fin-revenue' ? 'e.g. 2.4m'
+              : ['fin-recurring'].includes(stage) ? 'e.g. 35'
+              : ['fin-customer', 'fin-newcon'].includes(stage) ? 'e.g. 10'
+              : 'e.g. 300k'}
+            inputMode={stage.startsWith('fin') ? 'decimal' : undefined}
+            aria-label="Your answer"
+          />
+          <button type="button" className="pd-pill-primary ow-send" onClick={onSubmit}>Send</button>
+        </div>
+      )}
+
+      {stage === 'done' && (
+        <div className="ow-doneline">We work for buyers — an owner never pays us anything. {closeLine ? '' : ''}</div>
+      )}
+    </div>
+  );
+}

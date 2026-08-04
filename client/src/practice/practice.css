@@ -2431,3 +2431,100 @@
   .pd-dealgrid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
   .pd-form { padding: 30px 24px; }
 }
+
+/* ═══ /owners — the free owner evaluation (SELLER_EVALUATION_PLAN.md §2,
+   2026-08-04). The chat is the tool: OwnerChat is a scripted step machine
+   wearing the site's chat grammar, so these rules deliberately mirror
+   .pd-chat/.pd-msgs/.pd-chat-inputrow rather than inventing a second chat
+   look. Scoped .ow-* because this chat lives INLINE in a page card on every
+   breakpoint — it never becomes the fixed bottom sheet, so it must not
+   inherit the buyer chat's mobile-sheet geometry. ═══ */
+.pd .ow-card {
+  margin: clamp(40px, 5vw, 64px) auto 0; max-width: var(--pd-mid); background: #fff;
+  border: 1px solid var(--pd-hair); border-radius: 16px;
+  box-shadow: 0 40px 100px -32px rgba(34, 34, 34, 0.28);
+  text-align: left; overflow: hidden;
+}
+.pd .ow-chat { display: flex; flex-direction: column; }
+.pd .ow-msgs {
+  padding: 24px 32px 4px; max-height: 480px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 14px; overscroll-behavior: contain;
+}
+.pd .ow-msg { font-size: 17px; line-height: 1.65; }
+.pd .ow-msg.y { max-width: 94%; margin-right: auto; color: var(--pd-ink); }
+.pd .ow-msgs .ow-msg.y:first-child { font-size: 20px; font-weight: 600; letter-spacing: -0.012em; line-height: 1.45; }
+.pd .ow-msg.me {
+  max-width: 72%; margin-left: auto; background: var(--pd-card); color: var(--pd-ink);
+  padding: 11px 18px; border-radius: 16px;
+  border: 1px solid var(--pd-hair);
+}
+.pd .ow-chips { display: flex; flex-wrap: wrap; gap: 9px; padding: 10px 32px 6px; }
+.pd .ow-inputrow {
+  display: flex; align-items: center; gap: 10px;
+  margin: 14px 32px 28px; padding: 8px 8px 8px 22px;
+  border: 1px solid rgba(10, 122, 88, 0.20); border-radius: 999px; background: #FFFFFF;
+  box-shadow: 0 1px 2px rgba(20, 24, 28, 0.05);
+  transition: border-color 160ms ease;
+}
+.pd .ow-inputrow:focus-within { border-color: #16181A; }
+.pd .ow-input {
+  flex: 1; min-width: 0; padding: 13px 0;
+  font-size: 16.5px; color: #16181A; outline: none; background: transparent;
+  -webkit-appearance: none; appearance: none;
+  border: none; border-radius: 0; box-shadow: none;
+}
+.pd .ow-input:focus-visible { outline: none; }
+.pd .ow-send { border-radius: 999px; }
+/* The Google gate — GIS renders its own button; we give it a centered row. */
+.pd .ow-gate { display: flex; align-items: center; gap: 14px; padding: 12px 32px 0; flex-wrap: wrap; }
+.pd .ow-gbtn { min-height: 44px; }
+.pd .ow-or { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-tert); text-transform: uppercase; }
+/* Consent — two checkboxes and the build button. The first label IS the
+   privacy promise; it reads at body-sm, never caption size. */
+.pd .ow-consent { display: flex; flex-direction: column; gap: 14px; padding: 16px 32px 28px; }
+.pd .ow-consent label { display: flex; gap: 12px; align-items: flex-start; cursor: pointer; }
+.pd .ow-consent input[type='checkbox'] { margin-top: 4px; width: 18px; height: 18px; accent-color: var(--pd-cta); flex: none; }
+.pd .ow-consent span { font-size: 15px; line-height: 1.6; color: var(--pd-body); }
+.pd .ow-build { align-self: flex-start; margin-top: 4px; }
+.pd .ow-doneline { padding: 14px 32px 26px; font-size: 15px; color: var(--pd-body); }
+/* Standing disclaimer under the card — THE LINE's sentence, on the page
+   itself, not only inside the PDF. */
+.pd .ow-disc {
+  margin: 18px auto 0; max-width: var(--pd-mid);
+  font-size: 13.5px; line-height: 1.6; color: var(--pd-tert); text-align: center;
+}
+/* Why-free band body — two paragraphs at reading width inside the jade block. */
+.pd .ow-why { max-width: 44em; margin: clamp(28px, 3.4vw, 44px) auto 0; }
+.pd .ow-why p { font-size: 19px; line-height: 1.75; color: var(--pd-body); margin: 0; }
+.pd .ow-why p + p { margin-top: 18px; }
+/* What-you-get — three hairline cards on the landing card grammar. */
+.pd .ow-gets {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+  margin-top: clamp(32px, 4vw, 52px);
+}
+.pd .ow-get {
+  background: #fff; border: 1px solid var(--pd-hair); border-radius: 16px;
+  padding: 26px 26px 28px;
+}
+.pd .ow-get .k { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; color: var(--pd-ink); }
+.pd .ow-get .b { margin-top: 10px; font-size: 15px; line-height: 1.65; color: var(--pd-body); }
+/* Privacy — one bordered statement block, brass keyline: it is the page's
+   load-bearing promise, and it should read like a term, not a footnote. */
+.pd .ow-privacy {
+  max-width: var(--pd-mid); margin: clamp(40px, 5vw, 64px) auto 0;
+  border: 1px solid var(--pd-border); border-left: 3px solid var(--pd-brass);
+  border-radius: 14px; background: #fff; padding: 26px 30px 28px;
+}
+.pd .ow-privacy .k { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; color: var(--pd-ink); }
+.pd .ow-privacy p { margin: 10px 0 0; font-size: 16px; line-height: 1.7; color: var(--pd-body); }
+@media (max-width: 900px) {
+  .pd .ow-msgs { padding: 18px 20px 4px; max-height: 420px; }
+  .pd .ow-msgs .ow-msg.y:first-child { font-size: 18px; }
+  .pd .ow-msg.me { max-width: 86%; }
+  .pd .ow-chips { padding: 10px 20px 6px; }
+  .pd .ow-gate { padding: 12px 20px 0; }
+  .pd .ow-consent { padding: 14px 20px 24px; }
+  .pd .ow-inputrow { margin: 12px 14px 20px; padding: 6px 6px 6px 14px; }
+  .pd .ow-doneline { padding: 12px 20px 22px; }
+  .pd .ow-gets { grid-template-columns: 1fr; }
+}

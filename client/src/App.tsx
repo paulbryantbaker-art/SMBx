@@ -109,6 +109,10 @@ const PracticeTrackRecord = lazy(() => import('./practice/TrackRecord'));
 // both render from one markdown file in scripts/studio/reports/.
 const PracticeReports = lazy(() => import('./practice/ReportsIndex'));
 const PracticeReport = lazy(() => import('./practice/ReportPage'));
+// Free owner evaluation (2026-08-04, SELLER_EVALUATION_PLAN.md) — the seller
+// lead-magnet funnel. Always public like /research: the report goes by email
+// and identity is the smbx_owner funnel JWT, never a users row.
+const PracticeOwners = lazy(() => import('./practice/OwnersPage'));
 const SharedDocument = lazy(() => import('./pages/public/SharedDocument'));
 const SharedDocumentView = lazy(() => import('./pages/SharedDocumentView'));
 const AcceptInvite = lazy(() => import('./pages/public/AcceptInvite'));
@@ -448,6 +452,13 @@ export default function App() {
         <Route path="/reports"><Redirect to="/research" /></Route>
         <Route path="/reports/:slug">
           {(params) => <Redirect to={`/research/${params.slug}`} />}
+        </Route>
+        {/* Free owner evaluation — ALWAYS public for the same reason as
+            /research: it's the page ads and posts point at, and its identity
+            is the owner funnel cookie, not the app session. A logged-in
+            practitioner checking the link sees what an owner sees. */}
+        <Route path="/owners">
+          <Suspense fallback={<PageLoader />}><PracticeOwners /></Suspense>
         </Route>
         <Route path="/about">{marketingOrApp(<PracticeAbout />)}</Route>
         <Route path="/industries">{marketingOrApp(<PracticeIndustries />)}</Route>

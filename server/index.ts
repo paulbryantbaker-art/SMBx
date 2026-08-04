@@ -94,6 +94,7 @@ import {
 import { buildDefinitiveSchemaRegistry, getDefinitiveSchema } from './services/definitiveSchemas.js';
 import { ensureModelRegistrySeeded } from './services/modelRegistry.js';
 import rateLimit from 'express-rate-limit';
+import * as ownerFunnel from './services/ownerFunnel.js';
 import type { Request, Response, NextFunction } from 'express';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -156,6 +157,22 @@ const mapPdfLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many downloads, please try again in a little while' },
+});
+
+const ownerLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30, // lane reads + auth + one evaluation per visit fits well inside
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again in a little while' },
+});
+
+const ownerEvaluateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 4, // each evaluation renders a Chromium PDF and sends an email
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many evaluations, please try again in a little while' },
 });
 
 // ─── Startup checks ─────────────────────────────────────────
@@ -284,6 +301,21 @@ app.post('/api/practice/leads', leadLimiter, async (req, res) => {
     return res.status(500).json({ error: 'Failed to save' });
   }
 });
+
+// ─── The free owner evaluation (/owners funnel) ──────────────────────────
+// Public seller-facing surface (SELLER_EVALUATION_PLAN.md). Sits above the
+// blanket requireAuth like the other funnel routes. Identity is the walled
+// `smbx_owner` funnel pass — never a users row, so the practice perimeter
+// needs no carve-out. Financial figures pass through ownerEvaluate() to the
+// pure engine and are NEVER persisted or logged; migration 117's schema has
+// no columns that could hold them.
+app.post('/api/owners/google', ownerLimiter, ownerFunnel.ownerGoogle);
+app.post('/api/owners/magic', ownerLimiter, ownerFunnel.ownerMagicRequest);
+app.get('/api/owners/verify', ownerLimiter, ownerFunnel.ownerMagicVerify);
+app.get('/api/owners/me', ownerLimiter, ownerFunnel.ownerMe);
+app.get('/api/owners/lane-read', ownerLimiter, ownerFunnel.ownerLaneRead);
+app.post('/api/owners/lead', ownerLimiter, ownerFunnel.ownerLead);
+app.post('/api/owners/evaluate', ownerEvaluateLimiter, ownerFunnel.ownerEvaluate);
 
 // ─── Research report downloads — verified email required ────
 // The reports READ free at /reports/:slug; the PDF requires a confirmed email
