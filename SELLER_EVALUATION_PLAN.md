@@ -225,6 +225,114 @@ architecture makes it true:
   string (the same law the bands obey). Until then the report carries a
   blanket attribution line under the drivers table.
 
+## P2 — THE FULL EVALUATION (Paul, 2026-08-04 night, after reviewing the
+## 16-page Acme sample: "plug into DEFINITIVE on the front end… where they
+## can log back in, finish, go get answers, come back — when they're done
+## they have a full thorough report they can bank on")
+
+**The 16-page sample IS the product spec.** Its section list is the
+question set and the compute plan:
+
+| Report section | Compute | New inputs needed |
+|---|---|---|
+| Exec summary | derived from everything below | — |
+| Company profile & revenue lines | pure arithmetic | revenue by line (service vs project), GM per line, employees, states |
+| Normalized earnings (bridge) | ALREADY LIVE (house/evaluate.ts) | interest, D&A split from the lump earnings question |
+| Three-year trend | pure arithmetic | 2 prior years: revenue, service mix, EBITDA |
+| Published band, tiered table | laneBenchmarks + per-lane TIER rows | — |
+| Buyer's ratios (DSO, WIP, debt/EBITDA, backlog coverage…) | pure arithmetic | AR, WIP over/under, debt schedule, backlog, working capital |
+| What moves the number (24-mo arithmetic) | pure arithmetic | target mix, growth assumption (defaulted below achieved) |
+| Proceeds waterfall | pure arithmetic | funded debt; costs/escrow are practice norms, labeled |
+| Offer anatomy / buyer types / diligence preview / sequence | conditional prose on the profile | — |
+
+**THE PRIVACY MODEL FORKS — deliberately, by Paul's instruction.** A
+multi-session evaluation cannot be ephemeral: "log back in and finish"
+IS storage. So the full evaluation is a second tier with its own
+up-front consent: *"To build the full report across visits, we save
+your answers to your evaluation workspace until it's built. Delete
+anytime; the end-of-report keep-or-delete still governs everything."*
+The quick valuation (P1, live) stays ephemeral — its promise is
+untouched. New table `owner_evaluations`: owner email/sub, lane,
+`answers JSONB` (sectioned), `sections_done`, `report_pdf` on
+completion, `retention` states as in 117/118, updated_at. The
+smbx_owner pass (180d) is the login; Google or magic link both re-enter.
+
+**Chat UX — THE CIRCLE-BACK LEDGER (Paul, 2026-08-04: "they probably
+will have to go and come back several times… the chat walks them
+through it thoroughly and notes what is missing, what they need to
+circle back to — a very smart process").** Going to get answers is the
+DESIGNED PATH, not an edge case:
+
+- **Every question has three states:** answered · skipped-with-reason ·
+  parked ("I need to find this"). Parking is a first-class answer — it
+  creates a LEDGER ENTRY, never an error.
+- **Every question carries a "where you'd find this" hint** in its
+  definition (tax return line, QuickBooks report name, AR aging, debt
+  schedule, WIP schedule from the bookkeeper) — the chat teaches while
+  it asks, and the hint becomes the go-get instruction when parked.
+- **On save-and-leave (and at section ends):** the chat reads the
+  ledger back — "You're 6 of 9 sections in. Four things to go get:
+  FY2024 revenue (your 2024 return, line 1a)…" — and EMAILS the go-get
+  checklist through the existing delivery rail, so the list survives
+  the walk to the filing cabinet.
+- **On return** (Google or magic link, any device): the greeting is the
+  ledger head, not a restart — "Welcome back. You were finding your AR
+  aging — have it?" — and the walk jumps straight to gaps.
+- **Deterministic smartness, no model needed:** live cross-checks as
+  answers land — the bridge must sum, revenue mix must total 100%,
+  three-year figures get monotonic sanity checks, ratio outliers draw a
+  gentle "that's unusual for the trade — worth double-checking" (rule
+  from published thresholds only). A Haiku conversational layer can
+  front this later; the rules engine must exist anyway as its fail-soft.
+- **The report gates itself:** sections render only when their inputs
+  are complete; an owner can request the DRAFT at any point and it
+  names its own gaps ("built without the FY2024 comparative — the trend
+  page is withheld until it lands") — every client-facing document ends
+  on what we don't know yet, including this one.
+- **Question set lives in `house/fullEvaluation.ts`** (pure module):
+  SECTIONS[] of questions {key, ask, whereToFind, parse, validate,
+  optional, feeds: [which report section / which model input]} — the
+  single source the chat, the ledger, the validators, and the report
+  gates all read.
+
+**Compute routing (v19 inventory verified, 2026-08-04):** all 116
+`MODEL.*.v1` runtime models are pure, synchronous, executable functions
+— `executeV19Model()` calls nothing external, and skipping
+`persistV19ModelExecution()` writes NOTHING, so the ephemeral law
+survives the integration untouched. Division of labor:
+- **house/evaluate.ts stays the normalization + band leg** — it is
+  ahead of `MODEL.VAL.SDE.v1`/`MODEL.QOE.LITE.v1` (itemized bridge,
+  4-point sourced band, zero-floor honesty).
+- **V19 supplies the legs it does better, ungated, unpersisted:**
+  `MODEL.DSCR.STRESS.v1` (debt capacity + 0/−10/−20/−30% stress ladder
+  vs the SBA lender floor), `MODEL.LBO.SBA.v1`, `MODEL.SOURCES.USES.v1`,
+  `MODEL.FINANCE.ABL.BORROWING_BASE.v1`, `MODEL.VAL.DCF.TWOSTAGE.v1`
+  (the income-approach cross-check the 16-pager names),
+  `MODEL.RE.OPBUS.BIFURCATION.v1` (the building-as-separate-asset math),
+  `MODEL.STRUCT.NWC.PEG.v1`, `MODEL.TIMELINE.MC.v1` (the sequence page),
+  `MODEL.DEALKILL.PROB.v1` (fix-before-sale list).
+- **`composeModelStack({journey:'sell'})` already routes a sell-side
+  stack** — the funnel adopts it rather than hand-picking forever.
+- **Port `calculateBlendedValuation` from core.ts into house/** — the
+  approach-reconciliation leg exists only on the client today.
+- **Ratio engine is the one genuine build** (DSO, WIP position,
+  debt/EBITDA, backlog coverage — pure arithmetic, new house module).
+  No industry-average column without a citable source (the 16-pager's
+  own law).
+- **Boundaries respected:** M135 fairness opinion is explicitly out of
+  lane — "bank on" stays a market read, never an opinion of value; RE
+  appraisal stays a policy boundary (the cap-rate bridge COULD compute
+  one; we don't); sensitivity uses core.ts's LBO-rerun grid, not the
+  scalar `MODEL.SENSITIVITY.MATRIX.v1`; lane bands pass through the
+  market-multiple resolver as the market packet so provenance
+  discipline holds.
+
+**Renderer:** the 16-page grammar from the Acme build (SAMPLE-VALUATION-
+SPEC.md + build-acme-sample.mts are the ground truth) becomes the
+production `reportHtml` v2 — same bookends, sectioned body, ratios and
+waterfall tables, THE LINE furniture (range never number, tax named not
+estimated, RE separate asset, no uncited benchmark column).
+
 ## 6 · Where registrants land — pipeline, not CRM clients
 
 `crm_accounts` is the CLIENT pipeline (acquirers) — sellers must not land
