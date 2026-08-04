@@ -20,6 +20,7 @@ import { laneBand, LaneBand, SIZE_TIERS, SIZE_TIER_SOURCE } from './laneBenchmar
 
 export type OwnerDependence = 'runs-daily' | 'manager-in-place' | 'absentee';
 export type BooksQuality = 'cash' | 'accrual' | 'reviewed';
+export type RealEstate = 'owned' | 'leased';
 
 export interface EvaluationInput {
   lane: string;
@@ -29,8 +30,25 @@ export interface EvaluationInput {
   earningsUsd: number;
   /** Owner's total compensation taken from the business, USD. */
   ownerCompUsd: number;
-  /** One-time / personal expenses run through the business, USD. */
-  addBacksUsd: number;
+  /** ITEMIZED add-backs (2026-08-04, Paul: "thorough with real estate,
+   *  add-backs etc. not fluff") — buyers rebuild these line by line in
+   *  diligence, so the evaluation walks them the same way instead of taking
+   *  one lump number on faith. Each defaults to 0. */
+  /** One-time, non-recurring costs (a lawsuit, a flood repair, a one-off equipment buy). */
+  addBackOneTimeUsd?: number;
+  /** Personal expenses run through the business (vehicles, phones, travel). */
+  addBackPersonalUsd?: number;
+  /** Compensation of family on payroll who don't work in the business. */
+  addBackFamilyUsd?: number;
+  /** Real estate posture. 'owned' triggers the market-rent normalization —
+   *  the single most common distortion in owner-operator P&Ls: rent paid to
+   *  yourself (or no rent at all) is not a market cost, so earnings are
+   *  restated as if a stranger-landlord charged market rent. */
+  realEstate?: RealEstate;
+  /** Annual rent the business currently expenses for its space (owned case; 0 if none). */
+  rentPaidUsd?: number;
+  /** Owner's estimate of annual market rent for the space (owned case). */
+  marketRentUsd?: number;
   /** Share of revenue that recurs (maintenance plans, contracts), 0–100. */
   recurringPct: number;
   ownerDependence: OwnerDependence;
@@ -40,6 +58,10 @@ export interface EvaluationInput {
   /** New-construction / GC-dependent share of revenue, 0–100. */
   newConstructionPct: number;
 }
+
+/** One line of the normalized-earnings bridge — the report prints these
+ *  verbatim, so every amount must be an input or arithmetic between inputs. */
+export interface BridgeLine { label: string; amountUsd: number }
 
 export interface ReadinessDriver {
   key: string;
@@ -54,6 +76,13 @@ export interface EvaluationResult {
   band: LaneBand;
   basisType: 'SDE' | 'Adjusted EBITDA';
   basisUsd: number;
+  /** The normalized-earnings walk, reported profit → basis. Zero-amount
+   *  adjustments are omitted — the report prints what actually moved. */
+  bridge: BridgeLine[];
+  /** Owned real estate is a SEPARATE ASSET from the operating business —
+   *  this note carries that treatment (and the market-rent restatement)
+   *  into every renderer. null when the business leases from a third party. */
+  realEstateNote: string | null;
   /** The market range: basis × band endpoints. A RANGE, never a number. */
   rangeUsd: { low: number; marketLow: number; marketHigh: number; high: number };
   sizeTier: { label: string; low: number; high: number; basis: string; source: string };
@@ -90,10 +119,41 @@ export function evaluate(input: EvaluationInput): EvaluationResult | Unsupported
   }
 
   // Basis, mirroring core.ts: SDE folds owner comp back in; EBITDA does not.
+  // Built as an explicit BRIDGE so the report shows the same walk a buyer's
+  // QofE will run — reported profit, each adjustment named, the total.
   const sdeBasis = input.revenueUsd < 3_000_000;
-  const basisUsd = sdeBasis
-    ? input.earningsUsd + input.ownerCompUsd + input.addBacksUsd
-    : input.earningsUsd + input.addBacksUsd;
+  const oneTime = input.addBackOneTimeUsd || 0;
+  const personal = input.addBackPersonalUsd || 0;
+  const family = input.addBackFamilyUsd || 0;
+  const owned = input.realEstate === 'owned';
+  // Market-rent normalization (owned only): strip the rent actually expensed
+  // (often zero, or a number set for tax reasons) and charge market instead.
+  // Positive when the business over-pays its owner-landlord, negative when it
+  // under-pays — under-payment is the common case, and it means the P&L
+  // overstates what a buyer will earn paying real rent.
+  const rentNorm = owned ? (input.rentPaidUsd || 0) - (input.marketRentUsd || 0) : 0;
+
+  const bridge: BridgeLine[] = [
+    { label: `Reported profit (per tax return)`, amountUsd: input.earningsUsd },
+  ];
+  if (sdeBasis) bridge.push({ label: "Owner's total compensation (added back for SDE)", amountUsd: input.ownerCompUsd });
+  if (oneTime) bridge.push({ label: 'One-time, non-recurring costs', amountUsd: oneTime });
+  if (personal) bridge.push({ label: 'Personal expenses run through the business', amountUsd: personal });
+  if (family) bridge.push({ label: 'Non-working family payroll', amountUsd: family });
+  if (owned && rentNorm !== 0) bridge.push({ label: 'Occupancy restated to market rent', amountUsd: rentNorm });
+
+  const basisUsd = bridge.reduce((s, l) => s + l.amountUsd, 0);
+
+  const realEstateNote = owned
+    ? 'The business occupies real estate you own, so two things hold. First, the range below values the OPERATING BUSINESS ' +
+      'on a market-rent basis — earnings were restated as if the business paid market rent to a third-party landlord' +
+      ((input.rentPaidUsd || 0) < (input.marketRentUsd || 0)
+        ? ', because rent currently expensed is below market and the P&L otherwise overstates what a buyer earns'
+        : '') +
+      '. Second, the property itself is a separate asset with its own value: buyers typically either lease it from you at market ' +
+      'rate (a lease often negotiated as part of the deal) or purchase it separately. Its value comes from a licensed real ' +
+      'estate appraiser — it is not included in the range below and we do not estimate it.'
+    : null;
 
   // Readiness — each driver is a published buyer behavior, not our opinion.
   const drivers: ReadinessDriver[] = [];
@@ -209,11 +269,16 @@ export function evaluate(input: EvaluationInput): EvaluationResult | Unsupported
     band,
     basisType: sdeBasis ? 'SDE' : 'Adjusted EBITDA',
     basisUsd,
+    bridge,
+    realEstateNote,
+    // Floor at 0: a basis at or below zero after normalization means the
+    // multiples don't apply — the renderer says so instead of printing a
+    // negative dollar range.
     rangeUsd: {
-      low: round1k(basisUsd * band.low),
-      marketLow: round1k(basisUsd * band.marketLow),
-      marketHigh: round1k(basisUsd * band.marketHigh),
-      high: round1k(basisUsd * band.high),
+      low: Math.max(0, round1k(basisUsd * band.low)),
+      marketLow: Math.max(0, round1k(basisUsd * band.marketLow)),
+      marketHigh: Math.max(0, round1k(basisUsd * band.marketHigh)),
+      high: Math.max(0, round1k(basisUsd * band.high)),
     },
     sizeTier: { label: tier.label, low: tier.low, high: tier.high, basis: tier.basis, source: SIZE_TIER_SOURCE },
     readiness: { score, position, drivers },

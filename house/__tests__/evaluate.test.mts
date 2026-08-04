@@ -10,7 +10,9 @@ function ok(cond: boolean, name: string) {
 
 const base: EvaluationInput = {
   lane: 'hvac', revenueUsd: 2_000_000, earningsUsd: 300_000, ownerCompUsd: 150_000,
-  addBacksUsd: 50_000, recurringPct: 20, ownerDependence: 'runs-daily',
+  addBackOneTimeUsd: 30_000, addBackPersonalUsd: 15_000, addBackFamilyUsd: 5_000,
+  realEstate: 'leased',
+  recurringPct: 20, ownerDependence: 'runs-daily',
   topCustomerPct: 8, booksQuality: 'cash', newConstructionPct: 10,
 };
 
@@ -18,12 +20,54 @@ const base: EvaluationInput = {
 {
   const r = evaluate(base);
   ok(r.laneSupported && r.basisType === 'SDE', 'sub-$3M revenue uses SDE');
-  ok(r.laneSupported && r.basisUsd === 500_000, 'SDE folds owner comp + add-backs back in');
+  ok(r.laneSupported && r.basisUsd === 500_000, 'SDE folds owner comp + itemized add-backs back in');
 }
 {
   const r = evaluate({ ...base, revenueUsd: 5_000_000 });
   ok(r.laneSupported && r.basisType === 'Adjusted EBITDA', '$3M+ revenue uses adjusted EBITDA');
   ok(r.laneSupported && r.basisUsd === 350_000, 'EBITDA basis excludes owner comp');
+}
+
+// ── the bridge is the basis, line by line ──────────────────────────────────
+{
+  const r = evaluate(base);
+  ok(r.laneSupported && r.bridge.reduce((s, l) => s + l.amountUsd, 0) === r.basisUsd,
+    'bridge lines sum exactly to the basis');
+  ok(r.laneSupported && r.bridge.length === 5, 'zero/absent adjustments print no line');
+  const r2 = evaluate({ ...base, addBackOneTimeUsd: 0, addBackPersonalUsd: 0, addBackFamilyUsd: 0 });
+  ok(r2.laneSupported && r2.bridge.length === 2, 'no add-backs → profit + owner comp only');
+}
+
+// ── real estate: market-rent normalization + separate-asset treatment ─────
+{
+  // Owns the building, business pays no rent → earnings restated DOWN by market rent.
+  const r = evaluate({ ...base, realEstate: 'owned', rentPaidUsd: 0, marketRentUsd: 60_000 });
+  ok(r.laneSupported && r.basisUsd === 440_000, 'owned + no rent expensed → basis drops by market rent');
+  ok(r.laneSupported && r.bridge.some(l => /market rent/i.test(l.label) && l.amountUsd === -60_000),
+    'rent normalization appears as its own bridge line');
+  ok(r.laneSupported && !!r.realEstateNote && /separate asset/i.test(r.realEstateNote)
+    && /licensed real estate appraiser/i.test(r.realEstateNote),
+    'owned RE note: separate asset, appraiser named (no RE value estimated)');
+  ok(r.laneSupported && /overstates/i.test(r.realEstateNote || ''),
+    'below-market rent names the overstatement honestly');
+  // Over-paying the owner-landlord → basis restated UP.
+  const r2 = evaluate({ ...base, realEstate: 'owned', rentPaidUsd: 90_000, marketRentUsd: 60_000 });
+  ok(r2.laneSupported && r2.basisUsd === 530_000, 'owned + above-market rent → basis rises to market');
+  // Leased from a third party → no adjustment, no note, market rent ignored.
+  const r3 = evaluate({ ...base, marketRentUsd: 60_000 });
+  ok(r3.laneSupported && r3.basisUsd === 500_000 && r3.realEstateNote === null,
+    'leased → rent stays as-is and no RE note renders');
+}
+
+// ── a basis at or below zero floors the range at 0 (never a negative range) ─
+{
+  const r = evaluate({
+    ...base, earningsUsd: -200_000, ownerCompUsd: 60_000,
+    addBackOneTimeUsd: 0, addBackPersonalUsd: 0, addBackFamilyUsd: 0,
+    realEstate: 'owned', rentPaidUsd: 0, marketRentUsd: 40_000,
+  });
+  ok(r.laneSupported && r.basisUsd < 0 && r.rangeUsd.low === 0 && r.rangeUsd.high === 0,
+    'negative normalized earnings → range floors at 0');
 }
 
 // ── range math is band × basis, rounded to $1K ────────────────────────────
