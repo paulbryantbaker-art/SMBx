@@ -78,10 +78,14 @@ export const LANE_BANDS: Record<string, LaneBand | null> = {
   'commercial-mechanical': {
     key: 'commercial-mechanical',
     label: 'Commercial mechanical / HVAC / plumbing',
-    low: 6.0, marketLow: 8.0, marketHigh: 11.0, high: 11.0,
+    /* low was 6.0 until 2026-08-04 — an overstated floor: the assessment
+     * publishes project-led contractors at 5–6x, and 6x is the bottom of the
+     * PLATFORM-ENTRY population, which is not who runs this funnel. Carried
+     * exactly as published now (this file's own law). */
+    low: 5.0, marketLow: 8.0, marketHigh: 11.0, high: 11.0,
     basisNote: 'adjusted EBITDA; the spread is the service-mix arbitrage',
     source: 'smbX, "The U.S. Commercial Mechanical, HVAC & Plumbing Services Market" (July 2026)',
-    scopeNote: 'project-led lower-middle-market contractor ≈6x; 8–11x with a real service book',
+    scopeNote: 'project-led lower-middle-market contractor 5–6x; 8–11x with a real service book',
   },
   /* No published owner-operator band — the funnel captures the lead and says
    * the lane's read is being built. NEVER substitute a platform multiple

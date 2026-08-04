@@ -227,9 +227,13 @@
   /* Rises a little and settles — the motion runs along the same axis as the
      gradient, so it reads as the field coming to rest rather than as a layer
      sliding over one. */
-  0%   { opacity: 0;    transform: translate3d(0, 3.5%, 0) scale(1.05); }
-  22%  { opacity: 1;    transform: translate3d(0, 2%, 0)   scale(1.03); }
-  100% { opacity: 0;    transform: translate3d(0, 0, 0)    scale(1); }
+  /* Translate-only (2026-08-04): the scale() this ran with made the layer
+     105% of the viewport, and a transformed element's visual overflow counts
+     as scrollable width — a permanent ~10px side-pan on desktop. The rise
+     reads the same without it. */
+  0%   { opacity: 0;    transform: translate3d(0, 3.5%, 0); }
+  22%  { opacity: 1;    transform: translate3d(0, 2%, 0); }
+  100% { opacity: 0;    transform: translate3d(0, 0, 0); }
 }
 /* Motion for its own sake is exactly what this setting exists to switch off. */
 @media (prefers-reduced-motion: reduce) {
@@ -640,13 +644,18 @@
    30 becomes 18. `min-height` restores the hit area and cannot change the
    bar, which is sized by the taller CTA pills beside it. Targeted by
    aria-label because that is what the element IS, not where it sits. */
-.pd-nav a[aria-label] { display: inline-flex; align-items: center; min-height: 32px; }
+/* flex:none — the logo is the one flex item with an intrinsic width the
+   browser will happily crush; when the row overflows (a sixth link joined
+   2026-08-04) the mark collapsed to a sliver. The logo NEVER gives way:
+   if the row is tight, the links/pills compact (bands below), never the
+   mark. */
+.pd-nav a[aria-label] { display: inline-flex; align-items: center; min-height: 32px; flex: none; }
 .pd-nav-logo {
   display: block; width: auto; margin: -6px 0;
   height: 44px; transition: height 0.28s ease;
 }
 .pd-nav-ctas .pd-pill, .pd-nav-ctas .pd-pill-primary { transition: padding 0.28s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
-.pd-nav-links { display: flex; gap: clamp(24px, 3vw, 44px); font-size: 15px; font-weight: 600; }
+.pd-nav-links { display: flex; gap: clamp(18px, 2.2vw, 36px); font-size: 15px; font-weight: 600; }
 /* nowrap — a nav link folding into a two-line column ("How / it / works") is
    never an acceptable degradation; if the row can't fit, the burger takes
    over (see the 1024px cutover below). */
@@ -753,13 +762,23 @@
   .pd-mmenu-scrim.on { background-color: rgba(20, 18, 17, 0.32); pointer-events: auto; }
 }
 
-/* THE TABLET BAND — 1025 to 1240, where the desktop nav exists but only in
-   its compact cut: smaller mark, tighter links, trimmer pills. Above 1240
-   the full-size nav has the room it was designed for. */
-@media (min-width: 1025px) and (max-width: 1240px) {
+/* THE COMPACT BAND — 1025 to 1700, where the desktop nav exists but only in
+   its compact cut: smaller mark, tighter links, trimmer pills. The ceiling
+   moved 1240 → 1700 when the sixth link (Free Valuation, 2026-08-04) grew
+   the row: MEASURED, the full-size row's min-content clips the CTA pill
+   through ~1690 (screenshots at 1500/1600/1680), so the full cut only
+   returns where it genuinely fits. */
+@media (min-width: 1025px) and (max-width: 1700px) {
   .pd-nav-logo { height: 34px; }
-  .pd-nav-links { gap: 14px; font-size: 14px; }
+  .pd-nav-links { gap: 13px; font-size: 14px; }
   .pd-nav-ctas .pd-pill, .pd-nav-ctas .pd-pill-primary { padding: 10px 16px; font-size: 14px; }
+}
+/* The low end of the compact band can't seat six links AND both pills
+   (measured: 118px over at 1140). The secondary pill is the one that
+   yields — same call the ≤1024 cut already made — and the primary CTA
+   plus every link stays. */
+@media (min-width: 1025px) and (max-width: 1240px) {
+  .pd-nav-book { display: none; }
 }
 
 /* ─── hero — split: statement left, the engine right (the pattern the
@@ -2432,48 +2451,24 @@
   .pd-form { padding: 30px 24px; }
 }
 
-/* ═══ /owners — the free owner evaluation (SELLER_EVALUATION_PLAN.md §2,
-   2026-08-04). The chat is the tool: OwnerChat is a scripted step machine
-   wearing the site's chat grammar, so these rules deliberately mirror
-   .pd-chat/.pd-msgs/.pd-chat-inputrow rather than inventing a second chat
-   look. Scoped .ow-* because this chat lives INLINE in a page card on every
-   breakpoint — it never becomes the fixed bottom sheet, so it must not
-   inherit the buyer chat's mobile-sheet geometry. ═══ */
-/* The card is the homepage conversation card, verbatim — same white card,
-   hairline, radius and shadow as .pd-chat — but under its OWN outer class,
-   because on phones .pd-chat is the fixed bottom SHEET (parked off-screen
-   until opened) and this chat lives inline in the page at every width.
-   Everything INSIDE is the real chat grammar: .pd-chat-head, .pd-msgs,
-   .pd-bub, .pd-chips, .pd-chat-inputrow — zero bespoke chat parts (Paul,
-   2026-08-04: "why does it have a modified chat bar and not just the same
-   chat bar?"). */
-/* ── GOLDEN-SECTION FOLD (Paul, 2026-08-04: "it needs to have golden ratio
-   applied"). Two mechanisms, both φ = 1.618:
-   1. THE FOLD DIVIDES AT THE GOLDEN SECTION. The hero block (nav + statement
-      + sub) occupies the upper MINOR segment — 38.2% of the viewport — so the
-      conversation card, the page's focal element, begins on the φ line and
-      owns the major segment. min-height is a floor: when the statement needs
-      more room (phones), content wins over geometry.
-   2. SPACING RUNS ON A φ LADDER anchored at 16px: 16 · 26 · 42 · 68 · 110 —
-      each step ×1.618, rounded. Every ow-* gap below is one of these values,
-      so the page's rhythm accelerates geometrically instead of drifting. */
-.pd .ow-fold {
-  min-height: calc(38.2svh - 86px); /* 86 = the nav bar above the section */
-  /* No fixed vertical padding: .pd-hero is a flex row with centered items,
-     so the statement optically centers inside the minor segment and the
-     card's top edge sits ON the φ line whenever the type fits. Where it
-     can't (phones stack the H1 four lines tall), content wins over
-     geometry — the floor stretches, never the other way. */
-  padding-top: 0; padding-bottom: 0;
-}
+/* ═══ The owner valuation — a LANDING SECTION (#owners), not a page
+   (Paul, 2026-08-04: "maybe it just needs to be its own section" — the
+   standalone /owners page is retired; /owners redirects to /#owners).
+   The card is the homepage conversation card, verbatim — same white card,
+   hairline, radius and shadow as .pd-chat — under its OWN outer class only
+   because .pd-chat is the fixed bottom SHEET on phones and this chat lives
+   inline in the section at every width. Everything INSIDE is the real chat
+   grammar: .pd-chat-head, .pd-msgs, .pd-bub, .pd-chips, .pd-chat-inputrow.
+   Spacing keeps the φ ladder: 16 · 26 · 42 · 68. ═══ */
 .pd .ow-card {
-  margin: 0 auto; max-width: var(--pd-mid); background: #fff;
+  margin: 42px auto 0; max-width: var(--pd-mid); background: #fff;
   border: 1px solid var(--pd-hair); border-radius: 16px;
   box-shadow: 0 40px 100px -32px rgba(34, 34, 34, 0.28);
   text-align: left; overflow: hidden;
 }
 .pd .ow-card .pd-msgs { max-height: min(56vh, 560px); }
 .pd .ow-card .pd-chips { padding-bottom: 10px; }
+.pd .ow-card .pd-chat-title { white-space: nowrap; }
 /* The Google gate — GIS renders its own button; we give it a centered row. */
 .pd .ow-gate { display: flex; align-items: center; gap: 14px; padding: 12px 32px 0; flex-wrap: wrap; }
 .pd .ow-gbtn { min-height: 44px; }
@@ -2495,7 +2490,7 @@
 .pd .ow-onfile .k { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; color: var(--pd-ink); }
 .pd .ow-onfile dl { margin: 12px 0 0; }
 .pd .ow-onfile dl div { display: flex; gap: 14px; padding: 7px 0; border-top: 1px solid var(--pd-hair); }
-.pd .ow-onfile dt { flex: none; width: 132px; font-family: var(--pd-mono); font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--pd-tert); padding-top: 2px; }
+.pd .ow-onfile dt { flex: none; width: 140px; font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--pd-tert); padding-top: 2px; }
 .pd .ow-onfile dd { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--pd-ink); }
 .pd .ow-decide { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 18px; }
 .pd .ow-erase {
@@ -2503,7 +2498,7 @@
   padding: 12px 22px; font-size: 14px; font-weight: 600; color: var(--pd-body); cursor: pointer;
   transition: border-color 150ms ease, color 150ms ease;
 }
-.pd .ow-erase:hover { border-color: #B4552D; color: #B4552D; }
+.pd .ow-erase:hover { border-color: #16181A; color: #16181A; }
 .pd .ow-erase:disabled, .pd .ow-decide .pd-pill-primary:disabled { opacity: 0.55; cursor: default; }
 .pd .ow-doneline { padding: 14px 32px 26px; font-size: 15px; color: var(--pd-body); }
 /* Standing disclaimer under the card — THE LINE's sentence, on the page
@@ -2512,30 +2507,6 @@
   margin: 26px auto 0; max-width: var(--pd-mid);
   font-size: 13.5px; line-height: 1.6; color: var(--pd-tert); text-align: center;
 }
-/* Why-free band body — two paragraphs at reading width inside the jade block. */
-.pd .ow-why { max-width: 44em; margin: 42px auto 0; }
-.pd .ow-why p { font-size: 19px; line-height: 1.75; color: var(--pd-body); margin: 0; }
-.pd .ow-why p + p { margin-top: 26px; }
-/* What-you-get — three hairline cards on the landing card grammar. */
-.pd .ow-gets {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px;
-  margin-top: 42px;
-}
-.pd .ow-get {
-  background: #fff; border: 1px solid var(--pd-hair); border-radius: 16px;
-  padding: 26px 26px 26px;
-}
-.pd .ow-get .k { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; color: var(--pd-ink); }
-.pd .ow-get .b { margin-top: 16px; font-size: 15px; line-height: 1.65; color: var(--pd-body); }
-/* Privacy — one bordered statement block, brass keyline: it is the page's
-   load-bearing promise, and it should read like a term, not a footnote. */
-.pd .ow-privacy {
-  max-width: var(--pd-mid); margin: 68px auto 0;
-  border: 1px solid var(--pd-border); border-left: 3px solid var(--pd-brass);
-  border-radius: 14px; background: #fff; padding: 26px 30px 28px;
-}
-.pd .ow-privacy .k { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; color: var(--pd-ink); }
-.pd .ow-privacy p { margin: 16px 0 0; font-size: 16px; line-height: 1.7; color: var(--pd-body); }
 @media (max-width: 900px) {
   .pd .ow-card .pd-msgs { max-height: 52vh; }
   /* .pd-chat's own mobile input margin is scoped to the sheet — mirror it here. */
@@ -2546,5 +2517,4 @@
   .pd .ow-onfile dl div { flex-direction: column; gap: 2px; }
   .pd .ow-onfile dt { width: auto; }
   .pd .ow-doneline { padding: 12px 20px 22px; }
-  .pd .ow-gets { grid-template-columns: 1fr; }
-}
+  }

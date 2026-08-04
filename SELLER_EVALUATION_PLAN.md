@@ -207,6 +207,14 @@ architecture makes it true:
   question is not consent. The first-call query only ever reads `kept`
   rows.
 
+### Follow-up (from the 2026-08-04 verification pass)
+- **Per-lane readiness thresholds**: the driver notes' percentages verify
+  against the home-services assessment; commercial-MEP publishes its own
+  concentration threshold that differs. Move driver thresholds + note
+  templates into `house/laneBenchmarks.ts` per lane, each with a source
+  string (the same law the bands obey). Until then the report carries a
+  blanket attribution line under the drivers table.
+
 ## 6 · Where registrants land — pipeline, not CRM clients
 
 `crm_accounts` is the CLIENT pipeline (acquirers) — sellers must not land

@@ -6,10 +6,16 @@
  * pure engine (house/evaluate.ts), renders the report, mails it, and files
  * the registry row. Three laws are load-bearing here:
  *
- *  • FINANCIALS ARE EPHEMERAL. The figures arrive in the request, feed
- *    `evaluate()`, appear inside the rendered PDF, and are never written
- *    anywhere else — seller_registry has no columns for them (migration 117),
- *    and this file must never log a request body.
+ *  • FINANCIALS ARE EPHEMERAL — WITH ONE NAMED EXCEPTION. The figures arrive
+ *    in the request, feed `evaluate()`, and are never written as data:
+ *    seller_registry has no columns for them (migration 117) and this file
+ *    must never log a request body. The rendered REPORT PDF (which shows the
+ *    normalized numbers — that's what makes it useful) is the one record,
+ *    kept only under the owner's explicit Keep on the end card, deleted with
+ *    everything else on Delete, purged if pending goes unanswered 30 days.
+ *    Every customer-facing sentence about storage must carry this exception
+ *    — the law critic's 2026-08-04 P0 was copy that said "never stored"
+ *    while this INSERT existed.
  *  • THE OWNER IDENTITY IS A FUNNEL PASS, NOT AN ACCOUNT. Google's GIS
  *    credential (the same verifyIdToken flow the team login uses — no new
  *    redirect URI) or a magic link mints an `smbx_owner` JWT with aud
@@ -96,11 +102,11 @@ export async function ownerMagicRequest(req: Request, res: Response) {
   const url = `${appUrl()}/api/owners/verify?t=${encodeURIComponent(t)}`;
   const mailed = await sendEmail({
     to: email,
-    subject: 'Your smbX evaluation — sign-in link',
+    subject: 'Your smbX valuation — sign-in link',
     html: brandedEmail({
-      headline: 'Continue your free evaluation',
-      body: 'Tap the button below to verify your email and pick up your evaluation where you left off. The link is good for 30 minutes.',
-      ctaLabel: 'Continue my evaluation',
+      headline: 'Continue your free valuation',
+      body: 'Tap the button below to verify your email and pick up your valuation where you left off. The link is good for 30 minutes.',
+      ctaLabel: 'Continue my valuation',
       ctaUrl: url,
     }),
   });
@@ -112,9 +118,10 @@ export async function ownerMagicVerify(req: Request, res: Response) {
   try {
     const claims = jwt.verify(String(req.query.t || ''), secret(), { audience: `${OWNER_AUD}-magic` }) as { email: string };
     mintOwnerCookie(res, claims.email);
-    res.redirect('/owners?verified=1');
+    // The valuation lives as a landing section — return the reader to it.
+    res.redirect('/#owners');
   } catch {
-    res.redirect('/owners?verified=expired');
+    res.redirect('/#owners');
   }
 }
 
@@ -136,7 +143,7 @@ export function ownerLaneRead(req: Request, res: Response) {
     return res.json({
       supported: false,
       lanes: supportedLanes().map(b => b.key),
-      message: "We haven't published a sourced multiple band for this lane yet — we don't guess. Leave your email and you'll get your lane's read the day it exists.",
+      message: "We haven't published sourced valuation data for your trade yet — and we don't guess. Leave your email and you'll get your trade's valuation the day the data exists.",
       engaged,
     });
   }
@@ -216,8 +223,8 @@ export function reportHtml(r: EvaluationResult, meta: { name?: string; geography
     .foot { padding:0 54px 40px; font-family:'IBM Plex Mono',monospace; font-size:10px; color:${L.muted}; }
   </style></head><body>
     <div class="cover">
-      <div class="eyebrow">OWNER EVALUATION · CONFIDENTIAL</div>
-      <h1>${r.band.label} — your market read</h1>
+      <div class="eyebrow">OWNER VALUATION · CONFIDENTIAL</div>
+      <h1>Your ${r.band.label} valuation</h1>
       <div class="sub">${meta.name ? meta.name + ' · ' : ''}${meta.geography} · prepared by smbX.ai, buy-side corporate development</div>
       <div class="rule"></div>
     </div>
@@ -236,6 +243,7 @@ export function reportHtml(r: EvaluationResult, meta: { name?: string; geography
       <h2>Where your business sits, and why</h2>
       <p>On the readiness drivers buyers actually price, your profile reads in the <b>${r.readiness.position}</b> of that band.</p>
       <table>${drivers}</table>
+      <div class="src">Readiness thresholds carried from smbX published assessments: "Home Services — State of the Market" (Aug 2026) and "Commercial MEP Buy-Side Assessment" (Aug 2026).</div>
       <div class="disc"><b>How to read this:</b> ${r.disclaimer}</div>
     </div>
     <div class="foot">smbX.ai · buy-side corporate development · we work for buyers, never for a fee from an owner</div>
@@ -265,11 +273,11 @@ export async function ownerEvaluate(req: Request, res: Response) {
 
   const mailed = await sendEmail({
     to: owner.email,
-    subject: `Your ${result.band.label} market evaluation — smbX`,
+    subject: `Your ${result.band.label} valuation — smbX`,
     html: brandedEmail({
-      headline: 'Your evaluation is attached',
+      headline: 'Your valuation is attached',
       body:
-        `Your ${result.band.label} market read is attached as a PDF — the published multiple band for your lane, applied to the figures you provided, plus the readiness drivers buyers actually price. ` +
+        `Your ${result.band.label} valuation is attached as a PDF — your earnings normalized the way a buyer's accountants do it, the published multiple band for your lane applied to the result, plus the readiness drivers buyers actually price. ` +
         `Keep it for your banker, your CPA, or your own planning. ${result.disclaimer}`,
       footnote: 'We work for buyers. We never take a fee from an owner.',
     }),
@@ -329,19 +337,24 @@ export async function ownerEvaluate(req: Request, res: Response) {
 }
 
 /** POST /api/owners/retention — the owner's decision on the end card.
- *  keep=true files the row as kept (with the first-call choice); keep=false
- *  is the right to erasure: every row for this email is DELETED, report and
- *  all. The email already sent stays theirs either way. */
+ *  ASYMMETRIC SCOPE, deliberately: keep=true files ONLY the (email, lane)
+ *  row the card actually showed — consent can't be recorded against rows
+ *  the owner never saw. keep=false is the right to erasure and goes the
+ *  other way: every row under the email is DELETED, report and all (the
+ *  chat says exactly this before the button). The emailed report stays
+ *  theirs either way. */
 export async function ownerRetention(req: Request, res: Response) {
   const owner = readOwner(req);
   if (!owner) return res.status(401).json({ error: 'verify first' });
   const keep = !!req.body?.keep;
   if (keep) {
     const firstCall = req.body?.firstCall !== false;
+    const lane = String(req.body?.lane || '');
+    if (!lane) return res.status(400).json({ error: 'lane required to keep' });
     await sql`
       UPDATE seller_registry
       SET retention = 'kept', consent_storage = true, consent_first_call = ${firstCall}, updated_at = now()
-      WHERE LOWER(email) = ${owner.email.toLowerCase()}
+      WHERE LOWER(email) = ${owner.email.toLowerCase()} AND lane = ${lane}
     `;
     return res.json({ ok: true, kept: true });
   }
