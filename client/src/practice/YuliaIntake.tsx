@@ -734,6 +734,16 @@ export default function YuliaIntake() {
             >
               All {CHIPS.length} lanes →
             </a>
+            {/* The owner funnel's homepage doorway (2026-08-04). A LINK chip,
+                not an intake path — the buyer engine stays pure; owners get
+                their own chat at /owners. */}
+            <a
+              className="pd-chip"
+              href="/owners"
+              onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero-owner-eval' })}
+            >
+              Own one of these? Get a free valuation →
+            </a>
           </div>
         )}
       </div>
