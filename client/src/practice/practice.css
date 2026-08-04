@@ -2439,42 +2439,22 @@
    look. Scoped .ow-* because this chat lives INLINE in a page card on every
    breakpoint — it never becomes the fixed bottom sheet, so it must not
    inherit the buyer chat's mobile-sheet geometry. ═══ */
+/* The card is the homepage conversation card, verbatim — same white card,
+   hairline, radius and shadow as .pd-chat — but under its OWN outer class,
+   because on phones .pd-chat is the fixed bottom SHEET (parked off-screen
+   until opened) and this chat lives inline in the page at every width.
+   Everything INSIDE is the real chat grammar: .pd-chat-head, .pd-msgs,
+   .pd-bub, .pd-chips, .pd-chat-inputrow — zero bespoke chat parts (Paul,
+   2026-08-04: "why does it have a modified chat bar and not just the same
+   chat bar?"). */
 .pd .ow-card {
-  margin: clamp(40px, 5vw, 64px) auto 0; max-width: var(--pd-mid); background: #fff;
+  margin: clamp(44px, 5.5vw, 76px) auto 0; max-width: var(--pd-mid); background: #fff;
   border: 1px solid var(--pd-hair); border-radius: 16px;
   box-shadow: 0 40px 100px -32px rgba(34, 34, 34, 0.28);
   text-align: left; overflow: hidden;
 }
-.pd .ow-chat { display: flex; flex-direction: column; }
-.pd .ow-msgs {
-  padding: 24px 32px 4px; max-height: 480px; overflow-y: auto;
-  display: flex; flex-direction: column; gap: 14px; overscroll-behavior: contain;
-}
-.pd .ow-msg { font-size: 17px; line-height: 1.65; }
-.pd .ow-msg.y { max-width: 94%; margin-right: auto; color: var(--pd-ink); }
-.pd .ow-msgs .ow-msg.y:first-child { font-size: 20px; font-weight: 600; letter-spacing: -0.012em; line-height: 1.45; }
-.pd .ow-msg.me {
-  max-width: 72%; margin-left: auto; background: var(--pd-card); color: var(--pd-ink);
-  padding: 11px 18px; border-radius: 16px;
-  border: 1px solid var(--pd-hair);
-}
-.pd .ow-chips { display: flex; flex-wrap: wrap; gap: 9px; padding: 10px 32px 6px; }
-.pd .ow-inputrow {
-  display: flex; align-items: center; gap: 10px;
-  margin: 14px 32px 28px; padding: 8px 8px 8px 22px;
-  border: 1px solid rgba(10, 122, 88, 0.20); border-radius: 999px; background: #FFFFFF;
-  box-shadow: 0 1px 2px rgba(20, 24, 28, 0.05);
-  transition: border-color 160ms ease;
-}
-.pd .ow-inputrow:focus-within { border-color: #16181A; }
-.pd .ow-input {
-  flex: 1; min-width: 0; padding: 13px 0;
-  font-size: 16.5px; color: #16181A; outline: none; background: transparent;
-  -webkit-appearance: none; appearance: none;
-  border: none; border-radius: 0; box-shadow: none;
-}
-.pd .ow-input:focus-visible { outline: none; }
-.pd .ow-send { border-radius: 999px; }
+.pd .ow-card .pd-msgs { max-height: min(56vh, 560px); }
+.pd .ow-card .pd-chips { padding-bottom: 10px; }
 /* The Google gate — GIS renders its own button; we give it a centered row. */
 .pd .ow-gate { display: flex; align-items: center; gap: 14px; padding: 12px 32px 0; flex-wrap: wrap; }
 .pd .ow-gbtn { min-height: 44px; }
@@ -2538,16 +2518,14 @@
 .pd .ow-privacy .k { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; color: var(--pd-ink); }
 .pd .ow-privacy p { margin: 10px 0 0; font-size: 16px; line-height: 1.7; color: var(--pd-body); }
 @media (max-width: 900px) {
-  .pd .ow-msgs { padding: 18px 20px 4px; max-height: 420px; }
-  .pd .ow-msgs .ow-msg.y:first-child { font-size: 18px; }
-  .pd .ow-msg.me { max-width: 86%; }
-  .pd .ow-chips { padding: 10px 20px 6px; }
+  .pd .ow-card .pd-msgs { max-height: 52vh; }
+  /* .pd-chat's own mobile input margin is scoped to the sheet — mirror it here. */
+  .pd .ow-card .pd-chat-inputrow { margin: 10px 14px 18px; padding: 6px 6px 6px 14px; }
   .pd .ow-gate { padding: 12px 20px 0; }
   .pd .ow-consent { padding: 14px 20px 24px; }
   .pd .ow-onfile { margin: 6px 14px 22px; padding: 16px 18px 18px; }
   .pd .ow-onfile dl div { flex-direction: column; gap: 2px; }
   .pd .ow-onfile dt { width: auto; }
-  .pd .ow-inputrow { margin: 12px 14px 20px; padding: 6px 6px 6px 14px; }
   .pd .ow-doneline { padding: 12px 20px 22px; }
   .pd .ow-gets { grid-template-columns: 1fr; }
 }

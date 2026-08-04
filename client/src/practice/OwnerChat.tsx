@@ -369,37 +369,45 @@ export default function OwnerChat() {
   };
 
   return (
-    <div className="ow-chat" data-rv>
-      <div className="ow-msgs" ref={listRef}>
-        {msgs.map((m, i) => <div key={i} className={`ow-msg ${m.who}`}>{m.text}</div>)}
+    <div className="ow-chatwrap">
+      <div className="pd-chat-head">
+        <img src="/logo-green-x.png" alt="smbX.ai" style={{ height: 28, width: 'auto', display: 'block' }} />
+        <div className="pd-chat-title">Free Valuation</div>
+      </div>
+      <div className="pd-msgs" ref={listRef}>
+        {msgs.map((m, i) => (
+          <div className="pd-msgrow" key={i}>
+            <div className={`pd-bub ${m.who === 'y' ? 'pd-bub-y' : 'pd-bub-u'}`}>{m.text}</div>
+          </div>
+        ))}
       </div>
 
       {stage === 'lane' && (
-        <div className="ow-chips">
+        <div className="pd-chips">
           {LANES.map(l => <button key={l.key} type="button" className="pd-chip" onClick={() => pickLane(l.key, l.label)}>{l.label}</button>)}
         </div>
       )}
       {stage === 'revband' && (
-        <div className="ow-chips">{REV_BANDS.map(b => <button key={b} type="button" className="pd-chip" onClick={() => pickRevBand(b)}>{b}</button>)}</div>
+        <div className="pd-chips">{REV_BANDS.map(b => <button key={b} type="button" className="pd-chip" onClick={() => pickRevBand(b)}>{b}</button>)}</div>
       )}
       {stage === 'situation' && (
-        <div className="ow-chips">{SITUATIONS.map(s => <button key={s} type="button" className="pd-chip" onClick={() => pickSituation(s)}>{s}</button>)}</div>
+        <div className="pd-chips">{SITUATIONS.map(s => <button key={s} type="button" className="pd-chip" onClick={() => pickSituation(s)}>{s}</button>)}</div>
       )}
       {stage === 'fin-re' && (
-        <div className="ow-chips">
+        <div className="pd-chips">
           <button type="button" className="pd-chip" onClick={() => pickRealEstate('We own the property', 'owned')}>We own the property</button>
           <button type="button" className="pd-chip" onClick={() => pickRealEstate('We lease from a third party', 'leased')}>We lease from a third party</button>
         </div>
       )}
       {stage === 'fin-owner' && (
-        <div className="ow-chips">
+        <div className="pd-chips">
           <button type="button" className="pd-chip" onClick={() => pickOwnerDep('I run it day to day', 'runs-daily')}>I run it day to day</button>
           <button type="button" className="pd-chip" onClick={() => pickOwnerDep('A manager runs it', 'manager-in-place')}>A manager runs it</button>
           <button type="button" className="pd-chip" onClick={() => pickOwnerDep('It runs without me', 'absentee')}>It runs without me</button>
         </div>
       )}
       {stage === 'fin-books' && (
-        <div className="ow-chips">
+        <div className="pd-chips">
           <button type="button" className="pd-chip" onClick={() => pickBooks('Cash basis', 'cash')}>Cash basis</button>
           <button type="button" className="pd-chip" onClick={() => pickBooks('Accrual', 'accrual')}>Accrual</button>
           <button type="button" className="pd-chip" onClick={() => pickBooks('Accrual + CPA reviewed', 'reviewed')}>Accrual + CPA reviewed</button>
@@ -445,9 +453,9 @@ export default function OwnerChat() {
       )}
 
       {(inputStages.includes(stage) || stage === 'gate') && (
-        <div className="ow-inputrow">
+        <div className="pd-chat-inputrow">
           <input
-            className="ow-input"
+            className="pd-chat-input"
             value={draft}
             onChange={e => setDraft(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') onSubmit(); }}
@@ -464,7 +472,7 @@ export default function OwnerChat() {
             inputMode={stage.startsWith('fin') ? 'decimal' : undefined}
             aria-label="Your answer"
           />
-          <button type="button" className="pd-pill-primary ow-send" onClick={onSubmit}>Send</button>
+          <button type="button" className="pd-send" onClick={onSubmit}>Send</button>
         </div>
       )}
 

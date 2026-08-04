@@ -18,18 +18,25 @@ import OwnerChat from './OwnerChat';
 export default function OwnersPage() {
   return (
     <PracticeShell footerCompact>
-      {/* ── Hero — statement + the chat, nothing between them ── */}
-      <section className="pd-section" style={{ paddingTop: 'clamp(80px, 9vw, 130px)' }}>
-        <div className="pd-wrap">
-          <div className="pd-sechead" data-rv>
-            <div className="pd-seclabel">Free owner evaluation</div>
-            <h1 className="pd-h2">Know what buyers are actually paying for businesses like yours.</h1>
-            <p className="pd-sub" style={{ margin: '22px auto 0' }}>
-              A market range and a readiness read for your trade — HVAC, plumbing, electrical,
-              roofing, pest control, commercial mechanical — built from published transaction data.
-              Free, about fifteen minutes, and your financials are never stored.
-            </p>
+      {/* ── Hero — the subpage hero grammar (same as /about, /buyers/*):
+             centered .pd-h1 statement over a generous sub, then clear air
+             before the conversation card. The card is the SAME card as the
+             homepage engine — .pd-chat chrome, bubbles, chips, input pill —
+             OwnerChat only swaps the brain behind it. ── */}
+      <section className="pd-hero" style={{ paddingBottom: 'clamp(24px, 3vw, 44px)' }}>
+        <div style={{ position: 'relative', maxWidth: 1080, margin: '0 auto', textAlign: 'center' }}>
+          <h1 className="pd-h1" style={{ margin: '0 auto' }}>
+            Know what buyers are actually paying for businesses like yours.
+          </h1>
+          <div className="pd-sub" style={{ margin: '30px auto 0', maxWidth: '34em' }}>
+            A market range and a readiness read for your trade, built from published
+            transaction data. Free, about fifteen minutes — and your financials are
+            never stored.
           </div>
+        </div>
+      </section>
+      <section style={{ padding: '0 var(--pd-pad-x)' }}>
+        <div className="pd-wrap">
           <div className="ow-card" data-rv>
             <OwnerChat />
           </div>
