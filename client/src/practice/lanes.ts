@@ -13,7 +13,7 @@
  * 2026-08-03 additions are lanes the practice actively hunts and publishes
  * research on.
  *
- * NOTE: /industries still presents twelve sectors — adding the two new lanes
+ * NOTE: /industries presents fifteen sectors — adding the two new lanes
  * there needs full zig-zag thesis blocks (real copy, Paul's voice), flagged
  * as open work rather than improvised here.
  */

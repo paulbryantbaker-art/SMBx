@@ -1,6 +1,6 @@
 /**
  * /industries — the full sector theses (v3 Claude Design handoff,
- * SectorsPage.dc.html). Twelve `.pd-sector` blocks in a zig-zag 7/5 split
+ * SectorsPage.dc.html). Fifteen `.pd-sector` blocks in a zig-zag 7/5 split
  * (nth-of-type alternates — the blocks must stay direct siblings), then the
  * Heritage block styled apart (gray card, first-person, attribution shield
  * line per the Track Record doctrine), then a centered CTA.
@@ -22,8 +22,8 @@ interface Sector {
   desk: string;
   /** Sector band illustration (green-and-bone set, 2026-08-04). OPTIONAL and
    *  honest: a sector renders art only when art exists FOR IT — the same rule
-   *  the numbers follow. Elevator, building automation and food co-packing
-   *  stay bare until their runs come back clean. */
+   *  the numbers follow. Elevator, building automation, food co-packing and
+   *  energy-adjacent services stay bare until their runs come back clean. */
   img?: string;
 }
 
@@ -244,11 +244,12 @@ export default function Industries() {
 
       {/* An illustration under the head; each SECTOR carries its own band via
           `Sector.img` since 2026-08-04 (Paul's green-and-bone Gemini set) —
-          eleven of fourteen have one. The rule is unchanged: art only where
+          eleven of fifteen have one. The rule is unchanged: art only where
           honest art exists. Putting an HVAC condenser beside "Elevator &
           escalator service" would be a picture that lies, which is the same
-          rule the numbers follow — elevator, building automation and food
-          co-packing stay bare until their runs come back clean. */}
+          rule the numbers follow — elevator, building automation, food
+          co-packing and energy-adjacent services stay bare until their runs
+          come back clean. */}
       <section className="pd-wrap" style={{ marginTop: 'clamp(30px, 3.6vw, 52px)' }}>
         <img
           className="pd-accentband"
