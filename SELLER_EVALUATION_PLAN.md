@@ -263,11 +263,37 @@ line ("Section 4 of 9 — the balance sheet"), every section ends with
 ("Two answers left in Three Years — your FY2024 revenue and service
 mix"). "Go get answers" is a real state, not an error.
 
-**Compute routing:** deterministic only — house/evaluate.ts grows
-section calculators (pure, tested, same doctrine), reconciled against
-the v19 runtime inventory (agent report pending → fold findings in
-here). No model call anywhere in the compute path; prose sections are
-conditional templates in the renderer.
+**Compute routing (v19 inventory verified, 2026-08-04):** all 116
+`MODEL.*.v1` runtime models are pure, synchronous, executable functions
+— `executeV19Model()` calls nothing external, and skipping
+`persistV19ModelExecution()` writes NOTHING, so the ephemeral law
+survives the integration untouched. Division of labor:
+- **house/evaluate.ts stays the normalization + band leg** — it is
+  ahead of `MODEL.VAL.SDE.v1`/`MODEL.QOE.LITE.v1` (itemized bridge,
+  4-point sourced band, zero-floor honesty).
+- **V19 supplies the legs it does better, ungated, unpersisted:**
+  `MODEL.DSCR.STRESS.v1` (debt capacity + 0/−10/−20/−30% stress ladder
+  vs the SBA lender floor), `MODEL.LBO.SBA.v1`, `MODEL.SOURCES.USES.v1`,
+  `MODEL.FINANCE.ABL.BORROWING_BASE.v1`, `MODEL.VAL.DCF.TWOSTAGE.v1`
+  (the income-approach cross-check the 16-pager names),
+  `MODEL.RE.OPBUS.BIFURCATION.v1` (the building-as-separate-asset math),
+  `MODEL.STRUCT.NWC.PEG.v1`, `MODEL.TIMELINE.MC.v1` (the sequence page),
+  `MODEL.DEALKILL.PROB.v1` (fix-before-sale list).
+- **`composeModelStack({journey:'sell'})` already routes a sell-side
+  stack** — the funnel adopts it rather than hand-picking forever.
+- **Port `calculateBlendedValuation` from core.ts into house/** — the
+  approach-reconciliation leg exists only on the client today.
+- **Ratio engine is the one genuine build** (DSO, WIP position,
+  debt/EBITDA, backlog coverage — pure arithmetic, new house module).
+  No industry-average column without a citable source (the 16-pager's
+  own law).
+- **Boundaries respected:** M135 fairness opinion is explicitly out of
+  lane — "bank on" stays a market read, never an opinion of value; RE
+  appraisal stays a policy boundary (the cap-rate bridge COULD compute
+  one; we don't); sensitivity uses core.ts's LBO-rerun grid, not the
+  scalar `MODEL.SENSITIVITY.MATRIX.v1`; lane bands pass through the
+  market-multiple resolver as the market packet so provenance
+  discipline holds.
 
 **Renderer:** the 16-page grammar from the Acme build (SAMPLE-VALUATION-
 SPEC.md + build-acme-sample.mts are the ground truth) becomes the
