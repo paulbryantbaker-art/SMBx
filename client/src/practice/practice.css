@@ -2447,8 +2447,27 @@
    .pd-bub, .pd-chips, .pd-chat-inputrow — zero bespoke chat parts (Paul,
    2026-08-04: "why does it have a modified chat bar and not just the same
    chat bar?"). */
+/* ── GOLDEN-SECTION FOLD (Paul, 2026-08-04: "it needs to have golden ratio
+   applied"). Two mechanisms, both φ = 1.618:
+   1. THE FOLD DIVIDES AT THE GOLDEN SECTION. The hero block (nav + statement
+      + sub) occupies the upper MINOR segment — 38.2% of the viewport — so the
+      conversation card, the page's focal element, begins on the φ line and
+      owns the major segment. min-height is a floor: when the statement needs
+      more room (phones), content wins over geometry.
+   2. SPACING RUNS ON A φ LADDER anchored at 16px: 16 · 26 · 42 · 68 · 110 —
+      each step ×1.618, rounded. Every ow-* gap below is one of these values,
+      so the page's rhythm accelerates geometrically instead of drifting. */
+.pd .ow-fold {
+  min-height: calc(38.2svh - 86px); /* 86 = the nav bar above the section */
+  /* No fixed vertical padding: .pd-hero is a flex row with centered items,
+     so the statement optically centers inside the minor segment and the
+     card's top edge sits ON the φ line whenever the type fits. Where it
+     can't (phones stack the H1 four lines tall), content wins over
+     geometry — the floor stretches, never the other way. */
+  padding-top: 0; padding-bottom: 0;
+}
 .pd .ow-card {
-  margin: clamp(44px, 5.5vw, 76px) auto 0; max-width: var(--pd-mid); background: #fff;
+  margin: 0 auto; max-width: var(--pd-mid); background: #fff;
   border: 1px solid var(--pd-hair); border-radius: 16px;
   box-shadow: 0 40px 100px -32px rgba(34, 34, 34, 0.28);
   text-align: left; overflow: hidden;
@@ -2490,33 +2509,33 @@
 /* Standing disclaimer under the card — THE LINE's sentence, on the page
    itself, not only inside the PDF. */
 .pd .ow-disc {
-  margin: 18px auto 0; max-width: var(--pd-mid);
+  margin: 26px auto 0; max-width: var(--pd-mid);
   font-size: 13.5px; line-height: 1.6; color: var(--pd-tert); text-align: center;
 }
 /* Why-free band body — two paragraphs at reading width inside the jade block. */
-.pd .ow-why { max-width: 44em; margin: clamp(28px, 3.4vw, 44px) auto 0; }
+.pd .ow-why { max-width: 44em; margin: 42px auto 0; }
 .pd .ow-why p { font-size: 19px; line-height: 1.75; color: var(--pd-body); margin: 0; }
-.pd .ow-why p + p { margin-top: 18px; }
+.pd .ow-why p + p { margin-top: 26px; }
 /* What-you-get — three hairline cards on the landing card grammar. */
 .pd .ow-gets {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
-  margin-top: clamp(32px, 4vw, 52px);
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px;
+  margin-top: 42px;
 }
 .pd .ow-get {
   background: #fff; border: 1px solid var(--pd-hair); border-radius: 16px;
-  padding: 26px 26px 28px;
+  padding: 26px 26px 26px;
 }
 .pd .ow-get .k { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; color: var(--pd-ink); }
-.pd .ow-get .b { margin-top: 10px; font-size: 15px; line-height: 1.65; color: var(--pd-body); }
+.pd .ow-get .b { margin-top: 16px; font-size: 15px; line-height: 1.65; color: var(--pd-body); }
 /* Privacy — one bordered statement block, brass keyline: it is the page's
    load-bearing promise, and it should read like a term, not a footnote. */
 .pd .ow-privacy {
-  max-width: var(--pd-mid); margin: clamp(40px, 5vw, 64px) auto 0;
+  max-width: var(--pd-mid); margin: 68px auto 0;
   border: 1px solid var(--pd-border); border-left: 3px solid var(--pd-brass);
   border-radius: 14px; background: #fff; padding: 26px 30px 28px;
 }
 .pd .ow-privacy .k { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; color: var(--pd-ink); }
-.pd .ow-privacy p { margin: 10px 0 0; font-size: 16px; line-height: 1.7; color: var(--pd-body); }
+.pd .ow-privacy p { margin: 16px 0 0; font-size: 16px; line-height: 1.7; color: var(--pd-body); }
 @media (max-width: 900px) {
   .pd .ow-card .pd-msgs { max-height: 52vh; }
   /* .pd-chat's own mobile input margin is scoped to the sheet — mirror it here. */
