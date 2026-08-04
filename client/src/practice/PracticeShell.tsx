@@ -273,7 +273,7 @@ export default function PracticeShell({
             {/* The owner funnel (2026-08-04, Paul: "a link in the menu for Get
                 Free Valuation"). A deliberate, sanctioned addition to the
                 locked v3 IA — the same standing Research earned 2026-07-29. */}
-            <Link href="/owners" className={onOwners ? 'pd-navon' : undefined} aria-current={onOwners ? 'page' : undefined}>Get Free Valuation</Link>
+            <Link href="/owners" className={onOwners ? 'pd-navon' : undefined} aria-current={onOwners ? 'page' : undefined}>Free Valuation</Link>
           </nav>
           <div className="pd-nav-ctas">
             <a

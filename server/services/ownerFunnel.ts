@@ -96,11 +96,11 @@ export async function ownerMagicRequest(req: Request, res: Response) {
   const url = `${appUrl()}/api/owners/verify?t=${encodeURIComponent(t)}`;
   const mailed = await sendEmail({
     to: email,
-    subject: 'Your smbX evaluation — sign-in link',
+    subject: 'Your smbX valuation — sign-in link',
     html: brandedEmail({
-      headline: 'Continue your free evaluation',
-      body: 'Tap the button below to verify your email and pick up your evaluation where you left off. The link is good for 30 minutes.',
-      ctaLabel: 'Continue my evaluation',
+      headline: 'Continue your free valuation',
+      body: 'Tap the button below to verify your email and pick up your valuation where you left off. The link is good for 30 minutes.',
+      ctaLabel: 'Continue my valuation',
       ctaUrl: url,
     }),
   });
@@ -136,7 +136,7 @@ export function ownerLaneRead(req: Request, res: Response) {
     return res.json({
       supported: false,
       lanes: supportedLanes().map(b => b.key),
-      message: "We haven't published a sourced multiple band for this lane yet — we don't guess. Leave your email and you'll get your lane's read the day it exists.",
+      message: "We haven't published sourced valuation data for your trade yet — and we don't guess. Leave your email and you'll get your trade's valuation the day the data exists.",
       engaged,
     });
   }
@@ -216,8 +216,8 @@ export function reportHtml(r: EvaluationResult, meta: { name?: string; geography
     .foot { padding:0 54px 40px; font-family:'IBM Plex Mono',monospace; font-size:10px; color:${L.muted}; }
   </style></head><body>
     <div class="cover">
-      <div class="eyebrow">OWNER EVALUATION · CONFIDENTIAL</div>
-      <h1>${r.band.label} — your market read</h1>
+      <div class="eyebrow">OWNER VALUATION · CONFIDENTIAL</div>
+      <h1>Your ${r.band.label} valuation</h1>
       <div class="sub">${meta.name ? meta.name + ' · ' : ''}${meta.geography} · prepared by smbX.ai, buy-side corporate development</div>
       <div class="rule"></div>
     </div>
@@ -265,11 +265,11 @@ export async function ownerEvaluate(req: Request, res: Response) {
 
   const mailed = await sendEmail({
     to: owner.email,
-    subject: `Your ${result.band.label} market evaluation — smbX`,
+    subject: `Your ${result.band.label} valuation — smbX`,
     html: brandedEmail({
-      headline: 'Your evaluation is attached',
+      headline: 'Your valuation is attached',
       body:
-        `Your ${result.band.label} market read is attached as a PDF — the published multiple band for your lane, applied to the figures you provided, plus the readiness drivers buyers actually price. ` +
+        `Your ${result.band.label} valuation is attached as a PDF — your earnings normalized the way a buyer's accountants do it, the published multiple band for your lane applied to the result, plus the readiness drivers buyers actually price. ` +
         `Keep it for your banker, your CPA, or your own planning. ${result.disclaimer}`,
       footnote: 'We work for buyers. We never take a fee from an owner.',
     }),

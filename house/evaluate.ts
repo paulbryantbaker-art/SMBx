@@ -113,8 +113,8 @@ export function evaluate(input: EvaluationInput): EvaluationResult | Unsupported
       laneSupported: false,
       lane: input.lane,
       message:
-        "We haven't published a sourced multiple band for this lane yet — we don't guess. " +
-        'Your read is being built; registered owners get it first.',
+        "We haven't published sourced valuation data for this trade yet — we don't guess. " +
+        "Your trade's read is being built; registered owners get it first.",
     };
   }
 

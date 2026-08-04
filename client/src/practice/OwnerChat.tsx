@@ -27,14 +27,32 @@ import { trackEvent } from '../lib/analytics';
 
 const SS_KEY = 'smbx_owner_intake_v1';
 
+/** Every vertical the practice covers (the Industries page's own list), not
+ *  just the lanes with published bands (Paul, 2026-08-04: "why are only a
+ *  handful of home service verticals being offered"). Lanes without sourced
+ *  valuation data flow to the honest waitlist path — the server refuses to
+ *  guess, and the owner is first in line when that lane's read exists. */
 const LANES = [
   { key: 'hvac', label: 'HVAC' },
   { key: 'plumbing', label: 'Plumbing' },
   { key: 'electrical', label: 'Electrical' },
   { key: 'roofing', label: 'Roofing' },
   { key: 'pest-control', label: 'Pest control' },
-  { key: 'commercial-mechanical', label: 'Commercial mechanical' },
   { key: 'garage-doors', label: 'Garage doors' },
+  { key: 'landscaping', label: 'Landscaping & grounds' },
+  { key: 'commercial-mechanical', label: 'Commercial MEP' },
+  { key: 'fire-life-safety', label: 'Fire & life safety' },
+  { key: 'elevator-escalator', label: 'Elevator & escalator' },
+  { key: 'power-grid', label: 'Power & grid services' },
+  { key: 'building-automation', label: 'Building automation' },
+  { key: 'tic-ndt', label: 'Testing & inspection' },
+  { key: 'environmental-cleaning', label: 'Environmental & industrial cleaning' },
+  { key: 'water-wastewater', label: 'Water & wastewater O&M' },
+  { key: 'mro-distribution', label: 'Specialty & MRO distribution' },
+  { key: 'machining', label: 'Machine shops & precision mfg' },
+  { key: 'food-copack', label: 'Food co-packing' },
+  { key: 'nemt', label: 'Medical transport (NEMT)' },
+  { key: 'rcm-billing', label: 'Medical billing / RCM' },
 ];
 
 const REV_BANDS = ['Under $1M', '$1M–$3M', '$3M–$10M', '$10M+'];
@@ -43,7 +61,7 @@ const SITUATIONS = ['Just curious', 'Thinking about it in 1–3 years', 'Ready i
 interface Msg { who: 'y' | 'me'; text: string }
 
 type Stage =
-  | 'lane' | 'geo' | 'revband' | 'situation' | 'laneread'
+  | 'lane' | 'lane-other' | 'geo' | 'revband' | 'situation' | 'laneread'
   | 'gate' | 'fin-revenue' | 'fin-earnings' | 'fin-ownercomp'
   | 'fin-onetime' | 'fin-personal' | 'fin-family'
   | 'fin-re' | 'fin-rentpaid' | 'fin-marketrent'
@@ -97,7 +115,7 @@ export default function OwnerChat() {
     if (saved?.a?.lane && saved.stage) {
       setA(saved.a); setMsgs(saved.msgs || []); setStage(saved.stage === 'gate' ? 'gate' : saved.stage);
     } else {
-      setMsgs([{ who: 'y', text: "Let's get you the market read buyers are using. First — which trade is your business in?" }]);
+      setMsgs([{ who: 'y', text: "Let's build your free valuation. First — which trade is your business in?" }]);
     }
     fetch('/api/owners/me').then(r => (r.ok ? r.json() : null)).then(me => {
       if (me?.email) setVerified({ email: me.email });
@@ -107,7 +125,7 @@ export default function OwnerChat() {
   // Persist ONLY stage A + transcript-so-far (never stage C figures).
   useEffect(() => {
     if (stage === 'done' || stage === 'sending') { try { sessionStorage.removeItem(SS_KEY); } catch { /* fine */ } return; }
-    const persistable = ['lane', 'geo', 'revband', 'situation', 'laneread', 'gate', 'waitlist', 'waitlist-done'].includes(stage);
+    const persistable = ['lane', 'lane-other', 'geo', 'revband', 'situation', 'laneread', 'gate', 'waitlist', 'waitlist-done'].includes(stage);
     if (!persistable) return;
     try { sessionStorage.setItem(SS_KEY, JSON.stringify({ a, stage, msgs })); } catch { /* fine */ }
   }, [a, stage, msgs]);
@@ -117,7 +135,7 @@ export default function OwnerChat() {
   // Verified mid-gate (Google popup or magic-link return) → continue to figures.
   useEffect(() => {
     if (verified && stage === 'gate') {
-      say('y', `You're verified as ${verified.email} — the report will go there. Now the numbers. Trailing-twelve-month revenue? (e.g. "2.4m")`);
+      say('y', `You're verified as ${verified.email} — your valuation report will go there. Now the numbers. Trailing-twelve-month revenue? (e.g. "2.4m")`);
       setStage('fin-revenue');
     }
   }, [verified, stage]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -141,6 +159,21 @@ export default function OwnerChat() {
       google.accounts.id.renderButton(googleBtn.current, { theme: 'outline', size: 'large', shape: 'pill', text: 'continue_with' });
     } catch { /* GIS unavailable — magic link still works */ }
   }, [stage, verified]);
+
+  const pickOtherLane = () => {
+    say('me', 'Another trade');
+    say('y', "Name it — what's the trade?");
+    setStage('lane-other');
+  };
+  const submitOtherLane = () => {
+    const label = draft.trim(); if (!label) return;
+    say('me', label); setDraft('');
+    const key = label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'other';
+    setA(v => ({ ...v, lane: key, laneLabel: label }));
+    say('y', 'Got it. What metro or region are you in?');
+    setStage('geo');
+    trackEvent('owner_lane_picked', { lane: key, other: true });
+  };
 
   const pickLane = async (key: string, label: string) => {
     say('me', label);
@@ -175,17 +208,17 @@ export default function OwnerChat() {
       const j = await r.json();
       if (j.supported) {
         say('y',
-          `Here's the free part before anything else: published data has ${nextA.laneLabel} businesses trading between ` +
+          `The market context first: published data has ${nextA.laneLabel} businesses trading between ` +
           `${j.band.low}x and ${j.band.high}x, with the market's middle at ${j.band.marketLow}x–${j.band.marketHigh}x ` +
           `(${j.band.basisNote}). Source: ${j.band.source}.`);
         say('y',
-          'To run YOUR full evaluation I need your actual figures — and a verified email for the report to land in. ' +
+          'To build YOUR valuation I need your actual figures — and a verified email to deliver the report to. ' +
           "Continue with Google below, or I'll email you a link. Your figures are never stored: they run through the " +
-          'calculator, the report is built, and they\'re gone.');
+          'calculator, your report is built, and they\'re gone.');
         setStage('gate');
       } else {
         say('y', j.message);
-        say('y', "Leave your email and you're first in line the day your lane's read exists — and on the first-call list when a buyer engages us in your lane.");
+        say('y', "Leave your email and you're first in line the day your trade's valuation data is published — and on the first-call list when a buyer engages us in your lane.");
         setStage('waitlist');
       }
     } catch {
@@ -293,15 +326,15 @@ export default function OwnerChat() {
     const v = pct(draft); if (v === null) { say('y', 'A percent between 0 and 100, roughly.'); return; }
     say('me', draft.trim()); setDraft(''); fin.current.newConstructionPct = v;
     say('y',
-      "That's everything. To build it, we process your answers and email you the report — that's the minimum " +
-      "this takes. Your financial figures are never stored. When it's delivered, I'll show you exactly what's " +
-      'on file for your company and YOU decide whether we keep it.');
+      "That's everything. To build your valuation, we process your answers and email you the report — that's " +
+      "the minimum this takes. Your financial figures are never stored. When it's delivered, I'll show you exactly " +
+      "what's on file for your company and YOU decide whether we keep it.");
     setStage('accept');
   };
 
   const runEvaluation = async () => {
     setStage('sending');
-    say('y', 'Building your evaluation…');
+    say('y', 'Building your valuation…');
     try {
       const r = await fetch('/api/owners/evaluate', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -314,8 +347,8 @@ export default function OwnerChat() {
       if (!r.ok) { say('y', j.error || 'That didn\'t go through — try once more.'); setStage('accept'); return; }
       fin.current = {}; // the figures evaporate — nothing left client-side either
       say('y', j.mailed
-        ? `Done — your evaluation is in your inbox (readiness read: ${j.position} of your lane's band).`
-        : 'Your evaluation is built, but mail delivery is unavailable right now — we\'ll get it to you shortly.');
+        ? `Done — your valuation report is in your inbox (readiness read: ${j.position} of your lane's band).`
+        : 'Your valuation is built, but mail delivery is unavailable right now — we\'ll get it to you shortly.');
       say('y',
         "One last thing, and it's your call. Below is everything we have on your company — general business " +
         'information and the report itself, nothing else. Keep it on file and you\'re on the first-call list ' +
@@ -355,10 +388,11 @@ export default function OwnerChat() {
   };
 
   const inputStages: Stage[] = [
-    'geo', 'fin-revenue', 'fin-earnings', 'fin-ownercomp', 'fin-onetime', 'fin-personal',
+    'lane-other', 'geo', 'fin-revenue', 'fin-earnings', 'fin-ownercomp', 'fin-onetime', 'fin-personal',
     'fin-family', 'fin-rentpaid', 'fin-marketrent', 'fin-recurring', 'fin-customer', 'fin-newcon', 'waitlist',
   ];
   const onSubmit = () => {
+    if (stage === 'lane-other') return submitOtherLane();
     if (stage === 'geo') return submitGeo();
     if (stage === 'waitlist') return submitWaitlist();
     if (stage === 'fin-family') return submitFamily();
@@ -385,6 +419,7 @@ export default function OwnerChat() {
       {stage === 'lane' && (
         <div className="pd-chips">
           {LANES.map(l => <button key={l.key} type="button" className="pd-chip" onClick={() => pickLane(l.key, l.label)}>{l.label}</button>)}
+          <button type="button" className="pd-chip" onClick={pickOtherLane}>Another trade →</button>
         </div>
       )}
       {stage === 'revband' && (
@@ -424,7 +459,7 @@ export default function OwnerChat() {
       {stage === 'accept' && (
         <div className="ow-consent">
           <button type="button" className="pd-pill-primary ow-build" onClick={runEvaluation}>
-            I agree — build my evaluation →
+            I agree — build my valuation →
           </button>
         </div>
       )}
