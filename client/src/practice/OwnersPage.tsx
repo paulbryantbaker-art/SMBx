@@ -18,20 +18,21 @@ import OwnerChat from './OwnerChat';
 export default function OwnersPage() {
   return (
     <PracticeShell footerCompact>
-      {/* ── Hero — the subpage hero grammar (same as /about, /buyers/*):
-             centered .pd-h1 statement over a generous sub, then clear air
-             before the conversation card. The card is the SAME card as the
-             homepage engine — .pd-chat chrome, bubbles, chips, input pill —
-             OwnerChat only swaps the brain behind it. ── */}
-      <section className="pd-hero" style={{ paddingBottom: 'clamp(24px, 3vw, 44px)' }}>
+      {/* ── Hero — the subpage hero grammar (same as /about, /buyers/*), sized
+             by the golden section: .ow-fold reserves the viewport's minor
+             segment (38.2%) for nav + statement + sub, so the conversation
+             card — the focal element — begins on the φ line and owns the
+             major segment. Gaps inside are φ-ladder steps (26 · 42). The card
+             is the SAME card as the homepage engine — .pd-chat chrome,
+             bubbles, chips, input pill — OwnerChat only swaps the brain. ── */}
+      <section className="pd-hero ow-fold">
         <div style={{ position: 'relative', maxWidth: 1080, margin: '0 auto', textAlign: 'center' }}>
           <h1 className="pd-h1" style={{ margin: '0 auto' }}>
             Know what buyers are actually paying for businesses like yours.
           </h1>
-          <div className="pd-sub" style={{ margin: '30px auto 0', maxWidth: '34em' }}>
+          <div className="pd-sub" style={{ margin: '26px auto 0', maxWidth: '40em' }}>
             A market range and a readiness read for your trade, built from published
-            transaction data. Free, about fifteen minutes — and your financials are
-            never stored.
+            transaction data — free, and your financials are never stored.
           </div>
         </div>
       </section>
