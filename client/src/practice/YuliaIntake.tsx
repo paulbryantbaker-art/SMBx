@@ -301,7 +301,7 @@ export function MapDoc({
   );
 }
 
-export default function YuliaIntake() {
+export default function YuliaIntake({ onOwnerModeChange }: { onOwnerModeChange?: (on: boolean) => void } = {}) {
   // Conversation state hydrates from sessionStorage so minimizing the mobile
   // drawer, toggling the sample-read tab, or reloading never wipes a session
   // (Paul, 2026-07-14: "minimize it, the chat experience is gone and started
@@ -331,6 +331,12 @@ export default function YuliaIntake() {
   const [ownerMode, setOwnerMode] = useState(false);
   const [ownerEpoch, setOwnerEpoch] = useState(0);
   const [ownerBusy, setOwnerBusy] = useState(false);
+
+  // The HERO swaps copy with the card (Paul, 2026-08-04: an owner running a
+  // valuation shouldn't be staring at the buy-side headline) — a prop, not a
+  // window event, because the parent's listener wouldn't be attached yet
+  // when the resume effect enters owner mode on mount.
+  useEffect(() => { onOwnerModeChange?.(ownerMode); }, [ownerMode]); // eslint-disable-line react-hooks/exhaustive-deps
   const ownerLane = useRef<OwnerLane | null | undefined>(undefined);
 
   const startOver = useCallback(() => {
