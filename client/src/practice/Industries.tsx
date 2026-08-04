@@ -40,7 +40,7 @@ const SECTORS: Sector[] = [
      law they state no market sizes. */
   {
     nm: 'Residential home services',
-    img: '/industries/trade-fleet.jpg',
+    img: '/industries/trade-fleet-sq.jpg',
     lead: 'Fragmentation is the thesis, not market size',
     tags: ['HVAC · plumbing · electrical', 'Roofing · pest control · garage doors', 'Homeowner demand'],
     paras: [
@@ -52,7 +52,7 @@ const SECTORS: Sector[] = [
   },
   {
     nm: 'Commercial mechanical, HVAC & plumbing',
-    img: '/industries/trade-mep.jpg',
+    img: '/industries/trade-mep-sq.jpg',
     lead: 'A construction trade being repriced as infrastructure',
     tags: ['Commercial & institutional buildings', 'Contracted service books', 'Data center · healthcare'],
     paras: [
@@ -64,7 +64,7 @@ const SECTORS: Sector[] = [
   },
   {
     nm: 'Fire & life safety',
-    img: '/industries/trade-fire.jpg',
+    img: '/industries/trade-fire-sq.jpg',
     lead: 'Revenue that renews because the code says so',
     paras: [
       'Sprinkler and alarm inspection, testing and maintenance under NFPA 25 and 72. Suppression, detection, monitoring. Every installed system becomes an inspection obligation — and an annuity.',
@@ -84,7 +84,7 @@ const SECTORS: Sector[] = [
   },
   {
     nm: 'Power & grid infrastructure services',
-    img: '/industries/trade-power.jpg',
+    img: '/industries/trade-power-sq.jpg',
     lead: 'The grid runs on founder-owned shops',
     paras: [
       'Transformer repair and refurbishment, substation construction and maintenance, certified electrical testing. Electrification runs on this layer — and most of the companies doing the work are certified, founder-owned, and hard to replicate.',
@@ -103,7 +103,7 @@ const SECTORS: Sector[] = [
   },
   {
     nm: 'Testing, inspection & certification / NDT',
-    img: '/industries/trade-ndt.jpg',
+    img: '/industries/trade-ndt-sq.jpg',
     lead: 'Certification is the gate',
     tags: ['Nondestructive testing', 'Code inspection', 'Materials testing labs'],
     paras: [
@@ -115,7 +115,7 @@ const SECTORS: Sector[] = [
   },
   {
     nm: 'Environmental & industrial cleaning services',
-    img: '/industries/trade-enviro.jpg',
+    img: '/industries/trade-enviro-sq.jpg',
     lead: 'Permits gate entry',
     paras: [
       'Permitted industrial and environmental services, remediation, industrial cleaning. RCRA authorizations and state operator certifications keep casual buyers out.',
@@ -126,7 +126,7 @@ const SECTORS: Sector[] = [
   },
   {
     nm: 'Water & wastewater contract O&M',
-    img: '/industries/trade-water.jpg',
+    img: '/industries/trade-water-sq.jpg',
     lead: 'Revenue as durable as the water bill',
     paras: [
       'Contract operations for municipal and industrial water and wastewater systems. Multi-year contracts, non-discretionary demand, and systems aging faster than the towns can staff them.',
@@ -136,7 +136,7 @@ const SECTORS: Sector[] = [
   },
   {
     nm: 'Specialty & MRO distribution',
-    img: '/industries/trade-mro.jpg',
+    img: '/industries/trade-mro-sq.jpg',
     lead: 'Authorization is the moat',
     paras: [
       "Niche industrial product lines, vendor-authorized distribution, VMI and integrated supply. The revenue behaves like a contract — and the authorizations don't transfer casually, which is exactly the diligence we run.",
@@ -146,7 +146,7 @@ const SECTORS: Sector[] = [
   },
   {
     nm: 'Machine shops & precision manufacturing',
-    img: '/industries/trade-machine.jpg',
+    img: '/industries/trade-machine-sq.jpg',
     lead: 'Qualification makes revenue stick',
     paras: [
       'Certified machine shops and precision manufacturers — AS9100, ISO 13485, defense-qualified. Reshoring is pulling work back to shops that spent years earning their qualifications; those cycles make revenue durable and the businesses hard to value from the outside.',
@@ -165,7 +165,7 @@ const SECTORS: Sector[] = [
   },
   {
     nm: 'Non-emergency medical transport',
-    img: '/industries/trade-nemt.jpg',
+    img: '/industries/trade-nemt-sq.jpg',
     lead: 'Recurring trips, funded by reimbursement',
     paras: [
       'Scheduled, recurring, Medicaid- and Medicare-funded transport. Fragmented and early — with payor and reimbursement diligence treated as the deal, not a footnote.',
@@ -175,7 +175,7 @@ const SECTORS: Sector[] = [
   },
   {
     nm: 'Revenue cycle management & medical billing',
-    img: '/industries/trade-billing.jpg',
+    img: '/industries/trade-billing-sq.jpg',
     lead: 'Fragmented, clean to diligence, and changing fast',
     paras: [
       'Many owners, clean books, active consolidation — and automation reshaping the work, which is why we underwrite the niche before the number.',
@@ -260,20 +260,16 @@ export default function Industries() {
                 <div className="aside">
                   <div className="who"><div className="k">Who we run it for</div><div className="v">{s.who}</div></div>
                   <div className="desk"><div className="k">Why this lane</div><div className="v">{s.desk}</div></div>
+                  {/* Tight-cropped to the subject and set IN the column
+                      (Paul, 2026-08-04: "squared off and put more in line
+                      instead of the image itself having a bunch of weird
+                      white space") — the aside is where the sector's slack
+                      vertical space actually lives. */}
+                  {s.img && (
+                    <img className="pd-secimg" src={s.img} alt="" aria-hidden="true" loading="lazy" data-rv />
+                  )}
                 </div>
               </div>
-              {s.img && (
-                <img
-                  className="pd-accentband"
-                  src={s.img}
-                  alt=""
-                  aria-hidden="true"
-                  loading="lazy"
-                  width={1700}
-                  height={520}
-                  data-rv
-                />
-              )}
             </div>
           ))}
 
