@@ -2460,15 +2460,13 @@
    inline in the section at every width. Everything INSIDE is the real chat
    grammar: .pd-chat-head, .pd-msgs, .pd-bub, .pd-chips, .pd-chat-inputrow.
    Spacing keeps the φ ladder: 16 · 26 · 42 · 68. ═══ */
-.pd .ow-card {
-  margin: 42px auto 0; max-width: var(--pd-mid); background: #fff;
-  border: 1px solid var(--pd-hair); border-radius: 16px;
-  box-shadow: 0 40px 100px -32px rgba(34, 34, 34, 0.28);
-  text-align: left; overflow: hidden;
+/* The trade picker in the #owners section — the site's own chips, centered.
+   A tap dispatches smbx:open-owner and the ONE conversation card up top
+   swaps to the valuation brain (no second chat exists anywhere). */
+.pd .ow-lanes {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 9px;
+  max-width: 940px; margin: 42px auto 0;
 }
-.pd .ow-card .pd-msgs { max-height: min(56vh, 560px); }
-.pd .ow-card .pd-chips { padding-bottom: 10px; }
-.pd .ow-card .pd-chat-title { white-space: nowrap; }
 /* The Google gate — GIS renders its own button; we give it a centered row. */
 .pd .ow-gate { display: flex; align-items: center; gap: 14px; padding: 12px 32px 0; flex-wrap: wrap; }
 .pd .ow-gbtn { min-height: 44px; }
@@ -2508,9 +2506,6 @@
   font-size: 13.5px; line-height: 1.6; color: var(--pd-tert); text-align: center;
 }
 @media (max-width: 900px) {
-  .pd .ow-card .pd-msgs { max-height: 52vh; }
-  /* .pd-chat's own mobile input margin is scoped to the sheet — mirror it here. */
-  .pd .ow-card .pd-chat-inputrow { margin: 10px 14px 18px; padding: 6px 6px 6px 14px; }
   .pd .ow-gate { padding: 12px 20px 0; }
   .pd .ow-consent { padding: 14px 20px 24px; }
   .pd .ow-onfile { margin: 6px 14px 22px; padding: 16px 18px 18px; }

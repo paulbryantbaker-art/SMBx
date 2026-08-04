@@ -15,7 +15,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'wouter';
 import PracticeShell from './PracticeShell';
 import YuliaIntake from './YuliaIntake';
-import OwnerChat from './OwnerChat';
+import { OWNER_LANES } from './OwnerChat';
 import { bookHref, bookTarget, bookRel } from './leads';
 import { trackEvent } from '../lib/analytics';
 
@@ -598,28 +598,51 @@ export default function Landing() {
       </section>
 
       {/* ── For owners — the seller side of the buy-side story (#owners;
-          2026-08-04, Paul: "maybe it doesn't need its own page, maybe it
-          just needs to be its own section" — the standalone /owners page is
-          retired, this section is its home and /owners redirects here).
+          2026-08-04, Paul: "maybe it just needs to be its own section", then
+          "we don't need multiple chats — when the user selects one of the
+          options it just takes them back to the chat at the homepage").
           Placed directly after Whose side deliberately: that band ends on
           "we represent buyers, and only buyers", and this section resolves
-          what that loyalty means for an OWNER — the read buyers use, free,
-          and the first call when a buyer engages in their lane. The card is
-          the site's own conversation card; OwnerChat only swaps the brain
-          (scripted valuation walk, figures never persisted). ── */}
+          what that loyalty means for an OWNER. The section holds the PITCH
+          and the trade picker; picking one dispatches smbx:open-owner and
+          the ONE conversation card up top swaps to the valuation brain
+          (sheet on phones, scroll on desktop). ── */}
       <section className="pd-section pd-accent al" id="owners">
         <div className="pd-wrap">
           <div className="pd-sechead" data-rv>
             <div className="pd-seclabel">Own one of these businesses?</div>
             <h2 className="pd-h2">Get the valuation buyers are working from — free.</h2>
             <p className="pd-sub" style={{ margin: '22px auto 0' }}>
-              We never take a fee from an owner. Run your valuation right here — and when
-              a buyer engages us in your lane, you're the first call we make. What stays
-              on file afterward is your call, shown to you in full at the end.
+              We never take a fee from an owner. Pick your trade and the engine above runs
+              your valuation — and when a buyer engages us in your lane, you're the first
+              call we make. What stays on file afterward is your call, shown to you in
+              full at the end.
             </p>
           </div>
-          <div className="ow-card" data-rv>
-            <OwnerChat />
+          <div className="ow-lanes rv-stagger" data-rv>
+            {OWNER_LANES.map(l => (
+              <button
+                key={l.key}
+                type="button"
+                className="pd-chip"
+                onClick={() => {
+                  trackEvent('owner_lane_picked', { lane: l.key, via: 'owners-section' });
+                  window.dispatchEvent(new CustomEvent('smbx:open-owner', { detail: l }));
+                }}
+              >
+                {l.label}
+              </button>
+            ))}
+            <button
+              type="button"
+              className="pd-chip"
+              onClick={() => {
+                trackEvent('owner_lane_picked', { lane: 'other', via: 'owners-section' });
+                window.dispatchEvent(new CustomEvent('smbx:open-owner', { detail: { other: true } }));
+              }}
+            >
+              Another trade →
+            </button>
           </div>
           <p className="ow-disc" data-rv>
             Published market ranges for your trade, applied to figures you provide, plus the
