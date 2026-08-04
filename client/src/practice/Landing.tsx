@@ -575,24 +575,26 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Whose side — the second dark movement ── */}
+      {/* ── Whose side — the second dark movement. CENTERED (2026-08-04,
+          Paul's screenshot: "this section looks off balance and not
+          symmetrical") — the old .pd-askew split put the quote top-left and
+          the body low-right, which read as lopsided under the centered honey
+          band title. Now the band stacks on the page's own centered axis:
+          title → quote → body → CTAs. SegmentPage keeps .pd-askew; only this
+          band moved. ── */}
       <section className="pd-dark bl-side" style={{ marginTop: 'clamp(130px, 15vw, 220px)' }}>
-        <div className="pd-wrap pd-dark-pad">
-          <div className="pd-seclabel" data-rv>Whose side we're on</div>
-          <div className="pd-askew">
-            <div data-rv>
-              <p className="pd-quote">The seller has a broker. Who is working for you?</p>
-            </div>
-            <div className="off" data-rv>
-              <p className="pd-body">
-                We represent buyers, and only buyers — one client per target. You get our full
-                attention, unfiltered analysis, and a proprietary deal that stays yours.
-              </p>
-              <div style={{ marginTop: 34, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                <a className="pd-pill-primary pd-pill-lg" href="#yulia" onClick={() => trackEvent('practice_cta_clicked', { placement: 'whose-side' })}>Build your market map →</a>
-                <a className="pd-pill pd-pill-lg-quiet" href={bookHref()} target={bookTarget()} rel={bookRel()} onClick={() => trackEvent('practice_booking_clicked', { placement: 'whose-side' })}>Book a call</a>
-              </div>
-            </div>
+        <div className="pd-wrap pd-dark-pad" style={{ textAlign: 'center' }}>
+          <div className="pd-seclabel" data-rv style={{ marginBottom: 0 }}>Whose side we're on</div>
+          <p className="pd-quote" data-rv style={{ margin: 'clamp(32px, 3.8vw, 54px) auto 0', maxWidth: '15em', textWrap: 'balance' }}>
+            The seller has a broker. Who is working for you?
+          </p>
+          <p className="pd-body" data-rv style={{ margin: '26px auto 0', maxWidth: '38em' }}>
+            We represent buyers, and only buyers — one client per target. You get our full
+            attention, unfiltered analysis, and a proprietary deal that stays yours.
+          </p>
+          <div data-rv style={{ marginTop: 42, display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+            <a className="pd-pill-primary pd-pill-lg" href="#yulia" onClick={() => trackEvent('practice_cta_clicked', { placement: 'whose-side' })}>Build your market map →</a>
+            <a className="pd-pill pd-pill-lg-quiet" href={bookHref()} target={bookTarget()} rel={bookRel()} onClick={() => trackEvent('practice_booking_clicked', { placement: 'whose-side' })}>Book a call</a>
           </div>
         </div>
       </section>
@@ -613,12 +615,51 @@ export default function Landing() {
             <div className="pd-seclabel">Own one of these businesses?</div>
             <h2 className="pd-h2">Get the valuation buyers are working from — free.</h2>
             <p className="pd-sub" style={{ margin: '22px auto 0' }}>
-              We never take a fee from an owner. Pick your trade and the engine above runs
-              your valuation — and when a buyer engages us in your lane, you're the first
-              call we make. What stays on file afterward is your call, shown to you in
-              full at the end.
+              You'll sit across from a buyer exactly once, and they'll arrive knowing what
+              your business is worth to them. This is that read, from the people who build
+              it for buyers — free, because when one engages us in your lane, we want to
+              already know you.
             </p>
           </div>
+
+          {/* Why through the buyer lens — the section's teaching job (Paul,
+              2026-08-04: "a section that explains why an owner would want to
+              do a valuation with us, to compare to how buyers think"). Every
+              claim traces to the engine's own mechanics and the published
+              bands — nothing here the valuation doesn't actually do. */}
+          <div className="ow-think rv-stagger" data-rv>
+            <div className="ow-card-th">
+              <div className="k">Buyers rebuild your numbers</div>
+              <div className="b">
+                A buyer's accountants don't price the tax return — they rebuild it: owner
+                compensation, one-time costs, personal expenses, owned real estate restated
+                to market rent. Your valuation runs that same walk, line by line, so the
+                number your range applies to is the one a buyer would actually use.
+              </div>
+            </div>
+            <div className="ow-card-th">
+              <div className="k">Buyers pay for what recurs</div>
+              <div className="b">
+                Two businesses with identical profit can trade turns apart. Maintenance
+                contracts, a team that runs without you, a granular customer base, clean
+                books — these are the drivers buyers price, and your readiness read scores
+                every one and names which is worth your next year of work.
+              </div>
+            </div>
+            <div className="ow-card-th">
+              <div className="k">Buyers price the trade first</div>
+              <div className="b">
+                Every trade has a published band where deals actually clear. Your valuation
+                cites that band — source and vintage named — and shows where your business
+                profile sits inside it. No made-up number, and never a single magic figure.
+              </div>
+            </div>
+          </div>
+
+          <p className="ow-pick" data-rv>
+            Pick your trade — the engine above runs your valuation, and what stays on file
+            afterward is your call, shown to you in full at the end.
+          </p>
           <div className="ow-lanes rv-stagger" data-rv>
             {OWNER_LANES.map(l => (
               <button

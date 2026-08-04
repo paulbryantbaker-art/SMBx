@@ -330,6 +330,7 @@ export default function YuliaIntake() {
      disables it so an in-flight map isn't half-orphaned. */
   const [ownerMode, setOwnerMode] = useState(false);
   const [ownerEpoch, setOwnerEpoch] = useState(0);
+  const [ownerBusy, setOwnerBusy] = useState(false);
   const ownerLane = useRef<OwnerLane | null | undefined>(undefined);
 
   const startOver = useCallback(() => {
@@ -574,6 +575,10 @@ export default function YuliaIntake() {
     const onOwner = (e: Event) => {
       const d = (e as CustomEvent).detail;
       ownerLane.current = d?.key ? { key: d.key, label: d.label } : null;
+      // An explicit pick starts fresh — without this, OwnerChat's
+      // hydrate-first priority resumes the PREVIOUS lane's saved session
+      // and the new pick is silently discarded.
+      try { localStorage.removeItem('smbx_owner_intake_v1'); } catch { /* fine */ }
       setOwnerEpoch(n => n + 1);
       setOwnerMode(true);
       if (isMobile()) openSheet();
@@ -594,6 +599,10 @@ export default function YuliaIntake() {
         setOwnerEpoch(n => n + 1);
         setOwnerMode(true);
         if (isMobile()) setOpen(true);
+        // Desktop: the hash scroll parks the page at the #owners section —
+        // the resumed conversation is at the top. Bring it into view (the
+        // timeout outwaits the browser's own hash jump).
+        else setTimeout(() => document.getElementById('yulia')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 400);
       }
     } catch { /* fine */ }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -750,7 +759,7 @@ export default function YuliaIntake() {
             value={draft}
             onChange={e => setDraft(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') send(); }}
-            placeholder={done ? 'Your map is ready — reopen it' : userTurns > 0 ? 'Tap to continue your session' : mobileVP ? 'What are you buying?' : hint}
+            placeholder={ownerMode ? 'Tap to continue your valuation' : done ? 'Your map is ready — reopen it' : userTurns > 0 ? 'Tap to continue your session' : mobileVP ? 'What are you buying?' : hint}
             aria-label="Describe your acquisition criteria"
           />
           <button
@@ -807,7 +816,7 @@ export default function YuliaIntake() {
           </button>
           {/* Start over — both breakpoints (minimize keeps the session; the X
               abandons it). Disabled while a map is streaming. */}
-          <button type="button" className="pd-chat-x" onClick={startOver} disabled={pending} aria-label="Cancel this conversation and start over">
+          <button type="button" className="pd-chat-x" onClick={startOver} disabled={ownerMode ? ownerBusy : pending} aria-label="Cancel this conversation and start over">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>
           </button>
         </div>
@@ -817,7 +826,7 @@ export default function YuliaIntake() {
              brains identically. The epoch key restarts a fresh valuation per
              section pick; the X (startOver) returns to the buyer engine. ── */}
       {ownerMode ? (
-        <OwnerChat key={ownerEpoch} initialLane={ownerLane.current} />
+        <OwnerChat key={ownerEpoch} initialLane={ownerLane.current} onBusy={setOwnerBusy} />
       ) : (
         <>
       <div className="pd-msgs" ref={listRef}>

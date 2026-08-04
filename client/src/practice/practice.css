@@ -1727,8 +1727,21 @@
     border: 1px solid var(--pd-hair); background: #fff; color: var(--pd-body);
   }
   .pd-chat .pd-msgs { flex: 1 1 auto; max-height: none; min-height: 0; }
-  .pd-chat .pd-chips { flex: 0 0 auto; }
+  /* Chip stacks and the owner tail blocks must be able to SHRINK AND SCROLL
+     inside the sheet (2026-08-04, measured on a 375×667 phone: the buyer's
+     14-lane chip column ran 701px in a 614px sheet, and the owner
+     keep-or-delete card ran 688px — both clipped with no scroll path, which
+     for the retention card meant the promised decision was UNREACHABLE).
+     flex '0 0 auto' was the bug: a child that can't shrink inside an
+     overflow:hidden sheet simply exits the screen. */
+  .pd-chat .pd-chips { flex: 0 1 auto; min-height: 0; overflow-y: auto; }
+  .pd-chat .ow-onfile { flex: 0 1 auto; min-height: 0; overflow-y: auto; }
+  .pd-chat .ow-consent { flex: 0 1 auto; min-height: 0; overflow-y: auto; }
   .pd-chat .pd-chat-inputrow { flex: 0 0 auto; margin-bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
+  /* Stages whose LAST child isn't the input row (accept, retain, done) end
+     against the home-indicator zone on notched phones without this. */
+  .pd-chat .ow-consent, .pd-chat .ow-onfile { margin-bottom: env(safe-area-inset-bottom, 0px); }
+  .pd-chat .ow-doneline { padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* segment-page hero is now the shared centered hero (the off-axis ghost
@@ -2460,12 +2473,31 @@
    inline in the section at every width. Everything INSIDE is the real chat
    grammar: .pd-chat-head, .pd-msgs, .pd-bub, .pd-chips, .pd-chat-inputrow.
    Spacing keeps the φ ladder: 16 · 26 · 42 · 68. ═══ */
+/* The buyer-lens explainer cards in the #owners section — hairline cards on
+   the landing grammar, text only (the trades already carry the section's
+   art budget elsewhere on the page). */
+.pd .ow-think {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px;
+  margin-top: 42px;
+}
+.pd .ow-card-th {
+  background: #fff; border: 1px solid var(--pd-hair); border-radius: 16px;
+  padding: 26px;
+}
+.pd .ow-card-th .k { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; color: var(--pd-ink); }
+.pd .ow-card-th .b { margin-top: 16px; font-size: 15px; line-height: 1.65; color: var(--pd-body); }
+@media (max-width: 900px) { .pd .ow-think { grid-template-columns: 1fr; gap: 16px; } }
+/* The hand-off line between the explainer and the picker. */
+.pd .ow-pick {
+  margin: 68px auto 0; max-width: 40em; text-align: center;
+  font-size: 17px; line-height: 1.65; color: var(--pd-body);
+}
 /* The trade picker in the #owners section — the site's own chips, centered.
    A tap dispatches smbx:open-owner and the ONE conversation card up top
    swaps to the valuation brain (no second chat exists anywhere). */
 .pd .ow-lanes {
   display: flex; flex-wrap: wrap; justify-content: center; gap: 9px;
-  max-width: 940px; margin: 42px auto 0;
+  max-width: 940px; margin: 26px auto 0;
 }
 /* The Google gate — GIS renders its own button; we give it a centered row. */
 .pd .ow-gate { display: flex; align-items: center; gap: 14px; padding: 12px 32px 0; flex-wrap: wrap; }

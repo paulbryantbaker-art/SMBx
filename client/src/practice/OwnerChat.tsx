@@ -108,7 +108,7 @@ function pct(s: string): number | null {
   return isFinite(n) && n >= 0 && n <= 100 ? Math.round(n) : null;
 }
 
-export default function OwnerChat({ initialLane }: { initialLane?: OwnerLane | null }) {
+export default function OwnerChat({ initialLane, onBusy }: { initialLane?: OwnerLane | null; onBusy?: (b: boolean) => void }) {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [stage, setStage] = useState<Stage>('lane');
   const [a, setA] = useState<StageA>({});
@@ -161,6 +161,10 @@ export default function OwnerChat({ initialLane }: { initialLane?: OwnerLane | n
   }, [a, stage, msgs]);
 
   useEffect(() => { listRef.current?.scrollTo({ top: 1e6, behavior: 'smooth' }); }, [msgs, stage]);
+
+  // Tell the host card when leaving mid-flight would orphan a delivery —
+  // it disables its X during 'sending' (and only then).
+  useEffect(() => { onBusy?.(stage === 'sending'); }, [stage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Verified mid-gate (Google popup or magic-link return) → continue to figures.
   useEffect(() => {
