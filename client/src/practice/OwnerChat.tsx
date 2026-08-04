@@ -44,7 +44,9 @@ interface Msg { who: 'y' | 'me'; text: string }
 
 type Stage =
   | 'lane' | 'geo' | 'revband' | 'situation' | 'laneread'
-  | 'gate' | 'fin-revenue' | 'fin-earnings' | 'fin-ownercomp' | 'fin-addbacks'
+  | 'gate' | 'fin-revenue' | 'fin-earnings' | 'fin-ownercomp'
+  | 'fin-onetime' | 'fin-personal' | 'fin-family'
+  | 'fin-re' | 'fin-rentpaid' | 'fin-marketrent'
   | 'fin-recurring' | 'fin-owner' | 'fin-customer' | 'fin-books' | 'fin-newcon'
   | 'accept' | 'sending' | 'retain' | 'done' | 'waitlist' | 'waitlist-done';
 
@@ -214,12 +216,27 @@ export default function OwnerChat() {
     trackEvent('owner_waitlisted', { lane: a.lane });
   };
 
-  const FIN_STEPS: Array<{ stage: Stage; key: string; parse: (s: string) => number | string | null; ask: string }> = [
-    { stage: 'fin-revenue', key: 'revenueUsd', parse: money, ask: 'Profit on the tax return last year — before any add-backs? (rough is fine)' },
-    { stage: 'fin-earnings', key: 'earningsUsd', parse: money, ask: 'Your total owner compensation — salary plus whatever you take out?' },
-    { stage: 'fin-ownercomp', key: 'ownerCompUsd', parse: money, ask: 'One-time or personal expenses run through the business last year (vehicles, family phones, that trip)? "0" is a fine answer.' },
-    { stage: 'fin-addbacks', key: 'addBacksUsd', parse: money, ask: 'What percent of revenue recurs — maintenance plans, service contracts? (0–100)' },
-    { stage: 'fin-recurring', key: 'recurringPct', parse: pct, ask: 'Who runs the day to day?' },
+  // Each step stores THIS stage's answer, then asks the NEXT question and
+  // moves there. The add-backs are itemized (Paul, 2026-08-04: "thorough with
+  // real estate, add-backs etc. not fluff") — buyers rebuild them line by
+  // line in QofE, so the intake walks them the same way.
+  const FIN_STEPS: Array<{ stage: Stage; key: string; parse: (s: string) => number | string | null; ask: string; next: Stage }> = [
+    { stage: 'fin-revenue', key: 'revenueUsd', parse: money, next: 'fin-earnings',
+      ask: 'Profit on the tax return last year — the bottom line before any adjustments? (rough is fine)' },
+    { stage: 'fin-earnings', key: 'earningsUsd', parse: money, next: 'fin-ownercomp',
+      ask: 'Your total owner compensation — W-2 salary plus the distributions you actually take?' },
+    { stage: 'fin-ownercomp', key: 'ownerCompUsd', parse: money, next: 'fin-onetime',
+      ask: 'Now the add-backs, one at a time — a buyer\'s accountants will rebuild these line by line, so precise beats optimistic. First: one-time costs that won\'t repeat (a lawsuit, a flood repair, a one-off equipment purchase)? "0" is a fine answer.' },
+    { stage: 'fin-onetime', key: 'addBackOneTimeUsd', parse: money, next: 'fin-personal',
+      ask: 'Personal expenses run through the business — vehicles you drive personally, family phones, travel, meals?' },
+    { stage: 'fin-personal', key: 'addBackPersonalUsd', parse: money, next: 'fin-family',
+      ask: "Family on payroll who don't actually work in the business — their total comp? (If everyone earns their keep, \"0\".)" },
+    { stage: 'fin-rentpaid', key: 'rentPaidUsd', parse: money, next: 'fin-marketrent',
+      ask: 'And market rent for that space — roughly what a landlord would charge a stranger per year? Buyers restate your earnings at market rent, so this moves the number.' },
+    { stage: 'fin-marketrent', key: 'marketRentUsd', parse: money, next: 'fin-recurring',
+      ask: 'What percent of revenue recurs — maintenance plans, service contracts? (0–100)' },
+    { stage: 'fin-recurring', key: 'recurringPct', parse: pct, next: 'fin-owner',
+      ask: 'Who runs the day to day?' },
   ];
 
   const submitFin = () => {
@@ -229,9 +246,31 @@ export default function OwnerChat() {
     if (v === null) { say('y', "I couldn't read that as a number — try like \"1.2m\", \"750k\", or \"40\"."); return; }
     say('me', draft.trim()); setDraft('');
     fin.current[step.key] = v;
-    const idx = FIN_STEPS.indexOf(step);
     say('y', step.ask);
-    setStage(idx === 0 ? 'fin-earnings' : idx === 1 ? 'fin-ownercomp' : idx === 2 ? 'fin-addbacks' : idx === 3 ? 'fin-recurring' : 'fin-owner');
+    setStage(step.next);
+  };
+
+  // fin-family types a number but forks to the RE chips rather than a next
+  // question, so it has its own handler instead of a FIN_STEPS entry.
+  const submitFamily = () => {
+    const v = money(draft);
+    if (v === null) { say('y', "I couldn't read that as a number — try like \"25k\" or \"0\"."); return; }
+    say('me', draft.trim()); setDraft('');
+    fin.current.addBackFamilyUsd = v;
+    say('y', 'Real estate — does the business (or you personally) own the property it operates from, or do you lease from a third party?');
+    setStage('fin-re');
+  };
+
+  const pickRealEstate = (label: string, val: 'owned' | 'leased') => {
+    say('me', label);
+    fin.current.realEstate = val;
+    if (val === 'owned') {
+      say('y', 'What rent does the business currently pay for the space per year? "0" if it pays none — common, and exactly why buyers restate it.');
+      setStage('fin-rentpaid');
+    } else {
+      say('y', 'Got it — your lease carries over as a real cost, no restatement needed. What percent of revenue recurs — maintenance plans, service contracts? (0–100)');
+      setStage('fin-recurring');
+    }
   };
 
   const pickOwnerDep = (label: string, val: string) => {
@@ -315,10 +354,14 @@ export default function OwnerChat() {
     }
   };
 
-  const inputStages: Stage[] = ['geo', 'fin-revenue', 'fin-earnings', 'fin-ownercomp', 'fin-addbacks', 'fin-recurring', 'fin-customer', 'fin-newcon', 'waitlist'];
+  const inputStages: Stage[] = [
+    'geo', 'fin-revenue', 'fin-earnings', 'fin-ownercomp', 'fin-onetime', 'fin-personal',
+    'fin-family', 'fin-rentpaid', 'fin-marketrent', 'fin-recurring', 'fin-customer', 'fin-newcon', 'waitlist',
+  ];
   const onSubmit = () => {
     if (stage === 'geo') return submitGeo();
     if (stage === 'waitlist') return submitWaitlist();
+    if (stage === 'fin-family') return submitFamily();
     if (stage === 'fin-customer') return submitCustomer();
     if (stage === 'fin-newcon') return submitNewcon();
     if (stage === 'gate') return submitMagic();
@@ -341,6 +384,12 @@ export default function OwnerChat() {
       )}
       {stage === 'situation' && (
         <div className="ow-chips">{SITUATIONS.map(s => <button key={s} type="button" className="pd-chip" onClick={() => pickSituation(s)}>{s}</button>)}</div>
+      )}
+      {stage === 'fin-re' && (
+        <div className="ow-chips">
+          <button type="button" className="pd-chip" onClick={() => pickRealEstate('We own the property', 'owned')}>We own the property</button>
+          <button type="button" className="pd-chip" onClick={() => pickRealEstate('We lease from a third party', 'leased')}>We lease from a third party</button>
+        </div>
       )}
       {stage === 'fin-owner' && (
         <div className="ow-chips">
@@ -407,6 +456,8 @@ export default function OwnerChat() {
               : stage === 'gate' ? 'you@company.com — email me a link instead'
               : stage === 'waitlist' ? 'you@company.com'
               : stage === 'fin-revenue' ? 'e.g. 2.4m'
+              : ['fin-onetime', 'fin-personal', 'fin-family'].includes(stage) ? 'e.g. 25k — or 0'
+              : ['fin-rentpaid', 'fin-marketrent'].includes(stage) ? 'e.g. 60k'
               : ['fin-recurring'].includes(stage) ? 'e.g. 35'
               : ['fin-customer', 'fin-newcon'].includes(stage) ? 'e.g. 10'
               : 'e.g. 300k'}

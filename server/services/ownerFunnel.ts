@@ -158,8 +158,9 @@ interface EvaluatePayload {
 }
 
 const money = (n: number) => '$' + Math.round(n).toLocaleString('en-US');
+const signedMoney = (n: number) => (n < 0 ? '−$' + Math.abs(Math.round(n)).toLocaleString('en-US') : '+$' + Math.round(n).toLocaleString('en-US'));
 
-function reportHtml(r: EvaluationResult, meta: { name?: string; geography: string }): string {
+export function reportHtml(r: EvaluationResult, meta: { name?: string; geography: string }): string {
   const L = LEDGER;
   const statusColor = { strength: L.green, watch: L.brass, fix: '#B4552D' } as const;
   const drivers = r.readiness.drivers.map(d => `
@@ -168,6 +169,27 @@ function reportHtml(r: EvaluationResult, meta: { name?: string; geography: strin
       <td class="ds" style="color:${statusColor[d.status]}">${d.status === 'fix' ? 'Fix before sale' : d.status === 'watch' ? 'Watch' : 'Strength'}</td>
       <td class="dn">${d.note}</td>
     </tr>`).join('');
+  // The normalized-earnings bridge — the same walk a buyer's QofE runs.
+  // First line prints unsigned (it's the starting point, not an adjustment).
+  const bridgeRows = r.bridge.map((l, i) => `
+    <tr>
+      <td class="bl">${l.label}</td>
+      <td class="bn">${i === 0 ? money(l.amountUsd) : signedMoney(l.amountUsd)}</td>
+    </tr>`).join('');
+  const basisOk = r.basisUsd > 0;
+  const rangeSection = basisOk
+    ? `<p>${r.band.label} businesses in the published data trade between <b>${r.band.low}x and ${r.band.high}x</b>,
+      with the market's middle at <b>${r.band.marketLow}x–${r.band.marketHigh}x</b> (${r.band.basisNote}).
+      Applied to your normalized ${r.basisType} of ${money(r.basisUsd)}:</p>
+      <div class="range">
+        <div class="rr"><div class="n">${money(r.rangeUsd.low)} – ${money(r.rangeUsd.high)}</div><div class="l">Full published band</div></div>
+        <div class="rr"><div class="n">${money(r.rangeUsd.marketLow)} – ${money(r.rangeUsd.marketHigh)}</div><div class="l">Where the market clears</div></div>
+      </div>
+      <div class="src">Band: ${r.band.source} — ${r.band.scopeNote}. Size context: ${r.sizeTier.label} typically ${r.sizeTier.low}–${r.sizeTier.high}x (${r.sizeTier.source}).</div>`
+    : `<p>After normalization your ${r.basisType} comes out at <b>${money(r.basisUsd)}</b> — at or below zero.
+      Multiples of earnings don't produce a meaningful range from a non-positive base, so we won't print one:
+      at this profile the conversation with a buyer is about asset value, the customer book, and the turnaround
+      plan rather than an earnings multiple. The readiness drivers below are where that conversation starts.</p>`;
   return `<!doctype html><html><head><meta charset="utf-8"><style>
     ${fontFaceCss()}
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -188,6 +210,8 @@ function reportHtml(r: EvaluationResult, meta: { name?: string; geography: strin
     table { width:100%; border-collapse:collapse; margin-top:12px; }
     td { border-top:1px solid ${L.hair}; padding:10px 8px; font-size:12.5px; vertical-align:top; }
     .dl { font-weight:600; width:150px; } .ds { width:110px; font-weight:600; } .dn { color:#3F464C; }
+    .bl { color:#3F464C; } .bn { text-align:right; font-variant-numeric:tabular-nums; font-weight:600; width:130px; white-space:nowrap; }
+    .bt td { border-top:2px solid ${L.ink}; font-weight:700; color:${L.ink}; }
     .disc { margin-top:30px; border:1px solid ${L.hair}; border-left:3px solid ${L.brass}; background:#fff; padding:14px 18px; font-size:12px; color:#3F464C; }
     .foot { padding:0 54px 40px; font-family:'IBM Plex Mono',monospace; font-size:10px; color:${L.muted}; }
   </style></head><body>
@@ -198,15 +222,17 @@ function reportHtml(r: EvaluationResult, meta: { name?: string; geography: strin
       <div class="rule"></div>
     </div>
     <div class="body">
+      <h2>Your earnings, normalized the way a buyer will</h2>
+      <p>Buyers don't price the tax return — their accountants rebuild it, adding back what won't
+      recur under new ownership and restating what isn't at market. This is that walk, run on the
+      figures you provided:</p>
+      <table>
+        ${bridgeRows}
+        <tr class="bt"><td class="bl">Normalized ${r.basisType}</td><td class="bn">${money(r.basisUsd)}</td></tr>
+      </table>
+      ${r.realEstateNote ? `<h2>The real estate</h2><p>${r.realEstateNote}</p>` : ''}
       <h2>What buyers are paying in your lane</h2>
-      <p>${r.band.label} businesses in the published data trade between <b>${r.band.low}x and ${r.band.high}x</b>,
-      with the market's middle at <b>${r.band.marketLow}x–${r.band.marketHigh}x</b> (${r.band.basisNote}).
-      Applied to your ${r.basisType} of ${money(r.basisUsd)}:</p>
-      <div class="range">
-        <div class="rr"><div class="n">${money(r.rangeUsd.low)} – ${money(r.rangeUsd.high)}</div><div class="l">Full published band</div></div>
-        <div class="rr"><div class="n">${money(r.rangeUsd.marketLow)} – ${money(r.rangeUsd.marketHigh)}</div><div class="l">Where the market clears</div></div>
-      </div>
-      <div class="src">Band: ${r.band.source} — ${r.band.scopeNote}. Size context: ${r.sizeTier.label} typically ${r.sizeTier.low}–${r.sizeTier.high}x (${r.sizeTier.source}).</div>
+      ${rangeSection}
       <h2>Where your business sits, and why</h2>
       <p>On the readiness drivers buyers actually price, your profile reads in the <b>${r.readiness.position}</b> of that band.</p>
       <table>${drivers}</table>
