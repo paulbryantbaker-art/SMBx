@@ -364,6 +364,11 @@ export default function Landing() {
               the artifact the engine delivers is publicly the market map, and
               "read" is practice vocabulary a cold visitor can't parse. */}
           <a className="pd-samplelink" href="#sample" onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero-sample' })}>See a sample market map →</a>
+          {/* The owner doorway in the fold's meta row (Paul, 2026-08-04:
+              "put a button for are you a business owner below the hero too
+              and take them to the valuation section"). Same house-chip
+              treatment as Book a call — a doorway, not a second engine. */}
+          <a className="pd-hero-book" href="#owners" onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero-owner-button' })}>Are you a business owner? →</a>
         </div>
       </section>
 
