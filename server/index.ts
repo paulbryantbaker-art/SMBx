@@ -44,6 +44,7 @@ import { researchRouter } from './routes/research.js';
 import { crmRouter } from './routes/crm.js';
 import { dealTasksRouter } from './routes/dealTasks.js';
 import { startResearchScheduler } from './services/researchAgent.js';
+import { startOwnerDigestScheduler } from './services/ownerDigest.js';
 import { v19ResourcesRouter } from './routes/v19Resources.js';
 import { createSql, getDatabaseUrl, getPostgresOptions } from './dbConfig.js';
 
@@ -95,6 +96,7 @@ import { buildDefinitiveSchemaRegistry, getDefinitiveSchema } from './services/d
 import { ensureModelRegistrySeeded } from './services/modelRegistry.js';
 import rateLimit from 'express-rate-limit';
 import * as ownerFunnel from './services/ownerFunnel.js';
+import * as ownerFullEval from './services/ownerFullEval.js';
 import type { Request, Response, NextFunction } from 'express';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -317,6 +319,20 @@ app.get('/api/owners/lane-read', ownerLimiter, ownerFunnel.ownerLaneRead);
 app.post('/api/owners/lead', ownerLimiter, ownerFunnel.ownerLead);
 app.post('/api/owners/evaluate', ownerEvaluateLimiter, ownerFunnel.ownerEvaluate);
 app.post('/api/owners/retention', ownerLimiter, ownerFunnel.ownerRetention);
+
+// P2 — the FULL evaluation workspace (owner_evaluations, migration 119).
+// Same `smbx_owner` funnel pass; storage here is the EXPLICITLY CONSENTED
+// second tier: /consent records the versioned terms acceptance before any
+// row exists, /answers bodies are never logged, /delete is the delete-
+// anytime right. The report leg runs V19 models in memory only (no
+// persistV19ModelExecution) — the row keeps answers + the finished PDF.
+app.get('/api/owners/full/state', ownerLimiter, ownerFullEval.fullEvalState);
+app.post('/api/owners/full/consent', ownerLimiter, ownerFullEval.fullEvalConsent);
+app.post('/api/owners/full/answers', ownerLimiter, ownerFullEval.fullEvalAnswers);
+app.post('/api/owners/full/checklist', ownerLimiter, ownerFullEval.fullEvalChecklist);
+// Report renders a Chromium PDF + sends an email — same budget as /evaluate.
+app.post('/api/owners/full/report', ownerEvaluateLimiter, ownerFullEval.fullEvalReport);
+app.post('/api/owners/full/delete', ownerLimiter, ownerFullEval.fullEvalDelete);
 
 // ─── Research report downloads — verified email required ────
 // The reports READ free at /reports/:slug; the PDF requires a confirmed email
@@ -1503,6 +1519,11 @@ runMigrations().then(async () => {
       startResearchScheduler();
     } catch (err: any) {
       console.warn('[research] Scheduler init skipped:', err?.message);
+    }
+    try {
+      startOwnerDigestScheduler();
+    } catch (err: any) {
+      console.warn('[owner-digest] Scheduler init skipped:', err?.message);
     }
   });
 });
