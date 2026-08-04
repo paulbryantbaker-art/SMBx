@@ -257,11 +257,43 @@ untouched. New table `owner_evaluations`: owner email/sub, lane,
 completion, `retention` states as in 117/118, updated_at. The
 smbx_owner pass (180d) is the login; Google or magic link both re-enter.
 
-**Chat UX:** section-based walk in the ONE chat (owner mode) — progress
-line ("Section 4 of 9 — the balance sheet"), every section ends with
-"Save & come back later" and the resume greeting names what's missing
-("Two answers left in Three Years — your FY2024 revenue and service
-mix"). "Go get answers" is a real state, not an error.
+**Chat UX — THE CIRCLE-BACK LEDGER (Paul, 2026-08-04: "they probably
+will have to go and come back several times… the chat walks them
+through it thoroughly and notes what is missing, what they need to
+circle back to — a very smart process").** Going to get answers is the
+DESIGNED PATH, not an edge case:
+
+- **Every question has three states:** answered · skipped-with-reason ·
+  parked ("I need to find this"). Parking is a first-class answer — it
+  creates a LEDGER ENTRY, never an error.
+- **Every question carries a "where you'd find this" hint** in its
+  definition (tax return line, QuickBooks report name, AR aging, debt
+  schedule, WIP schedule from the bookkeeper) — the chat teaches while
+  it asks, and the hint becomes the go-get instruction when parked.
+- **On save-and-leave (and at section ends):** the chat reads the
+  ledger back — "You're 6 of 9 sections in. Four things to go get:
+  FY2024 revenue (your 2024 return, line 1a)…" — and EMAILS the go-get
+  checklist through the existing delivery rail, so the list survives
+  the walk to the filing cabinet.
+- **On return** (Google or magic link, any device): the greeting is the
+  ledger head, not a restart — "Welcome back. You were finding your AR
+  aging — have it?" — and the walk jumps straight to gaps.
+- **Deterministic smartness, no model needed:** live cross-checks as
+  answers land — the bridge must sum, revenue mix must total 100%,
+  three-year figures get monotonic sanity checks, ratio outliers draw a
+  gentle "that's unusual for the trade — worth double-checking" (rule
+  from published thresholds only). A Haiku conversational layer can
+  front this later; the rules engine must exist anyway as its fail-soft.
+- **The report gates itself:** sections render only when their inputs
+  are complete; an owner can request the DRAFT at any point and it
+  names its own gaps ("built without the FY2024 comparative — the trend
+  page is withheld until it lands") — every client-facing document ends
+  on what we don't know yet, including this one.
+- **Question set lives in `house/fullEvaluation.ts`** (pure module):
+  SECTIONS[] of questions {key, ask, whereToFind, parse, validate,
+  optional, feeds: [which report section / which model input]} — the
+  single source the chat, the ledger, the validators, and the report
+  gates all read.
 
 **Compute routing (v19 inventory verified, 2026-08-04):** all 116
 `MODEL.*.v1` runtime models are pure, synchronous, executable functions
