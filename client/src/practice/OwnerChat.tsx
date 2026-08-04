@@ -15,6 +15,12 @@
  * resumes cleanly. Stage C figures live in React state ONLY — never
  * sessionStorage, never a transcript row anywhere. On delivery, state is
  * wiped. "We don't save your financials" stays literally true end to end.
+ *
+ * CONSENT SHAPE (Paul, 2026-08-04 evening): acceptance up front is MINIMAL —
+ * one tap agreeing we process the answers to build and email the report.
+ * The real decision comes AFTER delivery: the chat renders the server's
+ * truthful inventory of what's on file (general business info + the report,
+ * nothing else) and the owner keeps it or erases it on the spot.
  */
 import { useEffect, useRef, useState } from 'react';
 import { trackEvent } from '../lib/analytics';
@@ -40,7 +46,14 @@ type Stage =
   | 'lane' | 'geo' | 'revband' | 'situation' | 'laneread'
   | 'gate' | 'fin-revenue' | 'fin-earnings' | 'fin-ownercomp' | 'fin-addbacks'
   | 'fin-recurring' | 'fin-owner' | 'fin-customer' | 'fin-books' | 'fin-newcon'
-  | 'consent' | 'sending' | 'done' | 'waitlist' | 'waitlist-done';
+  | 'accept' | 'sending' | 'retain' | 'done' | 'waitlist' | 'waitlist-done';
+
+/** The truthful inventory the end card renders — comes back from the server's
+ *  evaluate response, so the card can only show what was actually written. */
+interface OnFile {
+  email: string; name: string | null; lane: string; geography: string | null;
+  situation: string | null; revenueBand: string; readiness: string; report: string;
+}
 
 interface StageA { lane?: string; laneLabel?: string; geo?: string; revBand?: string; situation?: string }
 
@@ -67,9 +80,9 @@ export default function OwnerChat() {
   // Stage C — React state only, per the transcript law. Never persisted.
   const fin = useRef<Record<string, number | string>>({});
   const [draft, setDraft] = useState('');
-  const [consentCall, setConsentCall] = useState(true);
-  const [consentStore, setConsentStore] = useState(false);
+  const [onFile, setOnFile] = useState<OnFile | null>(null);
   const [closeLine, setCloseLine] = useState('');
+  const [deciding, setDeciding] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const googleBtn = useRef<HTMLDivElement>(null);
 
@@ -241,13 +254,13 @@ export default function OwnerChat() {
     const v = pct(draft); if (v === null) { say('y', 'A percent between 0 and 100, roughly.'); return; }
     say('me', draft.trim()); setDraft(''); fin.current.newConstructionPct = v;
     say('y',
-      "That's everything. Two boxes before I build it — the first is the honest sentence about what we keep, " +
-      'the second is the whole point of this being free.');
-    setStage('consent');
+      "That's everything. To build it, we process your answers and email you the report — that's the minimum " +
+      "this takes. Your financial figures are never stored. When it's delivered, I'll show you exactly what's " +
+      'on file for your company and YOU decide whether we keep it.');
+    setStage('accept');
   };
 
   const runEvaluation = async () => {
-    if (!consentStore) return;
     setStage('sending');
     say('y', 'Building your evaluation…');
     try {
@@ -256,22 +269,49 @@ export default function OwnerChat() {
         body: JSON.stringify({
           lane: a.lane, geography: a.geo, situation: a.situation,
           financials: fin.current,
-          consentFirstCall: consentCall, consentStorage: consentStore,
         }),
       });
       const j = await r.json();
-      if (!r.ok) { say('y', j.error || 'That didn\'t go through — try once more.'); setStage('consent'); return; }
+      if (!r.ok) { say('y', j.error || 'That didn\'t go through — try once more.'); setStage('accept'); return; }
       fin.current = {}; // the figures evaporate — nothing left client-side either
       say('y', j.mailed
         ? `Done — your evaluation is in your inbox (readiness read: ${j.position} of your lane's band).`
         : 'Your evaluation is built, but mail delivery is unavailable right now — we\'ll get it to you shortly.');
+      say('y',
+        "One last thing, and it's your call. Below is everything we have on your company — general business " +
+        'information and the report itself, nothing else. Keep it on file and you\'re on the first-call list ' +
+        'when a buyer engages us in your lane; tell us to delete it and it\'s gone right now, report and all.');
+      setOnFile(j.onFile || null);
       setCloseLine(j.close || '');
-      if (j.close) say('y', j.close);
-      setStage('done');
+      setStage('retain');
       trackEvent('owner_evaluated', { lane: a.lane, position: j.position });
     } catch {
       say('y', 'Network hiccup — nothing was lost, tap Build again.');
-      setStage('consent');
+      setStage('accept');
+    }
+  };
+
+  // The retention decision — Keep files the row (and the first-call consent);
+  // Delete is the right to erasure, exercised on the spot.
+  const decide = async (keep: boolean) => {
+    if (deciding) return;
+    setDeciding(true);
+    try {
+      const r = await fetch('/api/owners/retention', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keep, firstCall: keep }),
+      });
+      if (!r.ok) { say('y', 'That didn\'t go through — give it another tap.'); setDeciding(false); return; }
+      if (keep) {
+        say('y', `Kept. ${closeLine || 'When a buyer engages us in your lane, registered owners hear before anyone else.'}`);
+      } else {
+        say('y', 'Deleted — your information and the report copy are gone from our system. The email in your inbox is yours to keep.');
+      }
+      setStage('done');
+      trackEvent('owner_retention', { lane: a.lane, kept: keep });
+    } catch {
+      say('y', 'Network hiccup — give it another tap.');
+      setDeciding(false);
     }
   };
 
@@ -324,19 +364,34 @@ export default function OwnerChat() {
         </div>
       )}
 
-      {stage === 'consent' && (
+      {stage === 'accept' && (
         <div className="ow-consent">
-          <label>
-            <input type="checkbox" checked={consentStore} onChange={e => setConsentStore(e.target.checked)} />
-            <span>I understand smbX does <b>not</b> store the financial figures I entered. It keeps my contact details, my lane and size band, and a copy of my finished report so the team can reference it if they call me.</span>
-          </label>
-          <label>
-            <input type="checkbox" checked={consentCall} onChange={e => setConsentCall(e.target.checked)} />
-            <span>When a buyer engages smbX in my lane, contact me — I want to be on the first-call list.</span>
-          </label>
-          <button type="button" className="pd-pill-primary ow-build" disabled={!consentStore} onClick={runEvaluation}>
-            Build my evaluation →
+          <button type="button" className="pd-pill-primary ow-build" onClick={runEvaluation}>
+            I agree — build my evaluation →
           </button>
+        </div>
+      )}
+
+      {stage === 'retain' && onFile && (
+        <div className="ow-onfile">
+          <div className="k">On file for your company</div>
+          <dl>
+            <div><dt>Contact</dt><dd>{onFile.name ? `${onFile.name} · ` : ''}{onFile.email}</dd></div>
+            <div><dt>Trade</dt><dd>{onFile.lane}</dd></div>
+            {onFile.geography && <div><dt>Area</dt><dd>{onFile.geography}</dd></div>}
+            {onFile.situation && <div><dt>Where you stand</dt><dd>{onFile.situation}</dd></div>}
+            <div><dt>Size band</dt><dd>{onFile.revenueBand} revenue (the band only — no figures)</dd></div>
+            <div><dt>Readiness read</dt><dd>{onFile.readiness}</dd></div>
+            <div><dt>Report</dt><dd>{onFile.report}</dd></div>
+          </dl>
+          <div className="ow-decide">
+            <button type="button" className="pd-pill-primary" disabled={deciding} onClick={() => decide(true)}>
+              Keep it — put me on the first-call list
+            </button>
+            <button type="button" className="ow-erase" disabled={deciding} onClick={() => decide(false)}>
+              Delete my information
+            </button>
+          </div>
         </div>
       )}
 
@@ -363,7 +418,7 @@ export default function OwnerChat() {
       )}
 
       {stage === 'done' && (
-        <div className="ow-doneline">We work for buyers — an owner never pays us anything. {closeLine ? '' : ''}</div>
+        <div className="ow-doneline">We work for buyers — an owner never pays us anything.</div>
       )}
     </div>
   );

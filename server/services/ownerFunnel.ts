@@ -155,7 +155,6 @@ export function ownerLaneRead(req: Request, res: Response) {
 interface EvaluatePayload {
   lane: string; geography: string; situation: string;
   financials: Omit<EvaluationInput, 'lane'>;
-  consentFirstCall: boolean; consentStorage: boolean;
 }
 
 const money = (n: number) => '$' + Math.round(n).toLocaleString('en-US');
@@ -223,7 +222,6 @@ export async function ownerEvaluate(req: Request, res: Response) {
 
   const p = req.body as EvaluatePayload;
   if (!p?.lane || !p?.financials) return res.status(400).json({ error: 'lane and financials required' });
-  if (!p.consentStorage) return res.status(400).json({ error: 'storage acknowledgment required' });
 
   const input: EvaluationInput = { lane: p.lane, ...p.financials };
   const result = evaluate(input);
@@ -252,25 +250,31 @@ export async function ownerEvaluate(req: Request, res: Response) {
     attachments: [{ filename: 'smbX-owner-evaluation.pdf', content: pdf }],
   });
 
-  // Persist ONLY what the schema allows — no financial columns exist.
+  // Persist ONLY what the schema allows — no financial columns exist. The row
+  // is born PENDING (migration 118): processed to build and deliver, not yet
+  // accepted for retention. The chat's end card shows the owner exactly these
+  // fields and they decide — Keep marks it 'kept', Delete removes the row.
+  // While here, expire pending rows whose owners never answered: an
+  // unanswered question is not consent.
   const band = revenueBandLabel(input.revenueUsd);
   const engaged = laneConflict(`${p.lane.replace(/-/g, ' ')} ${p.geography || ''}`);
+  await sql`DELETE FROM seller_registry WHERE retention = 'pending' AND created_at < now() - interval '30 days'`;
   await sql`
     INSERT INTO seller_registry
       (email, name, google_sub, lane, geography, situation, revenue_band,
        readiness_score, readiness_position, consent_first_call, consent_storage,
-       report_pdf, report_generated_at, updated_at)
+       retention, report_pdf, report_generated_at, updated_at)
     VALUES
       (${owner.email}, ${owner.name || null}, ${owner.sub.startsWith('email:') ? null : owner.sub},
        ${p.lane}, ${p.geography || null}, ${p.situation || null}, ${band},
        ${result.readiness.score}, ${result.readiness.position},
-       ${!!p.consentFirstCall}, ${!!p.consentStorage},
+       null, null, 'pending',
        ${pdf}, now(), now())
     ON CONFLICT (LOWER(email), lane) DO UPDATE SET
       name = EXCLUDED.name, geography = EXCLUDED.geography, situation = EXCLUDED.situation,
       revenue_band = EXCLUDED.revenue_band, readiness_score = EXCLUDED.readiness_score,
       readiness_position = EXCLUDED.readiness_position,
-      consent_first_call = EXCLUDED.consent_first_call, consent_storage = EXCLUDED.consent_storage,
+      consent_first_call = null, consent_storage = null, retention = 'pending',
       report_pdf = EXCLUDED.report_pdf, report_generated_at = now(), updated_at = now()
   `;
 
@@ -279,10 +283,44 @@ export async function ownerEvaluate(req: Request, res: Response) {
     mailed: mailed !== false,
     engaged,
     position: result.readiness.position,
+    // The end card renders THIS list — the truthful, complete inventory of
+    // what is on file for them. If a field is ever added to the INSERT above,
+    // it must be added here too, or the card lies by omission.
+    onFile: {
+      email: owner.email,
+      name: owner.name || null,
+      lane: result.band.label,
+      geography: p.geography || null,
+      situation: p.situation || null,
+      revenueBand: band,
+      readiness: `${result.readiness.position} (score ${result.readiness.score})`,
+      report: 'your finished evaluation report (PDF)',
+    },
     close: engaged
       ? 'We have an active buyer engagement in your lane today — with your permission, expect a call.'
-      : "You're on the first-call list: when a buyer engages us in your lane, registered owners hear before anyone else.",
+      : 'When a buyer engages us in your lane, registered owners hear before anyone else.',
   });
+}
+
+/** POST /api/owners/retention — the owner's decision on the end card.
+ *  keep=true files the row as kept (with the first-call choice); keep=false
+ *  is the right to erasure: every row for this email is DELETED, report and
+ *  all. The email already sent stays theirs either way. */
+export async function ownerRetention(req: Request, res: Response) {
+  const owner = readOwner(req);
+  if (!owner) return res.status(401).json({ error: 'verify first' });
+  const keep = !!req.body?.keep;
+  if (keep) {
+    const firstCall = req.body?.firstCall !== false;
+    await sql`
+      UPDATE seller_registry
+      SET retention = 'kept', consent_storage = true, consent_first_call = ${firstCall}, updated_at = now()
+      WHERE LOWER(email) = ${owner.email.toLowerCase()}
+    `;
+    return res.json({ ok: true, kept: true });
+  }
+  await sql`DELETE FROM seller_registry WHERE LOWER(email) = ${owner.email.toLowerCase()}`;
+  res.json({ ok: true, kept: false });
 }
 
 /** POST /api/owners/lead — capture for unsupported lanes (no financials involved). */
@@ -290,9 +328,10 @@ export async function ownerLead(req: Request, res: Response) {
   const email = String(req.body?.email || '').trim().toLowerCase();
   const lane = String(req.body?.lane || '').trim();
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !lane) return res.status(400).json({ error: 'email and lane required' });
+  // A waitlist signup is an explicit hand-raise — born 'kept', not pending.
   await sql`
-    INSERT INTO seller_registry (email, lane, geography, situation, consent_first_call, consent_storage, updated_at)
-    VALUES (${email}, ${lane}, ${String(req.body?.geography || '') || null}, ${'lane-waitlist'}, true, true, now())
+    INSERT INTO seller_registry (email, lane, geography, situation, consent_first_call, consent_storage, retention, updated_at)
+    VALUES (${email}, ${lane}, ${String(req.body?.geography || '') || null}, ${'lane-waitlist'}, true, true, 'kept', now())
     ON CONFLICT (LOWER(email), lane) DO UPDATE SET updated_at = now()
   `;
   res.json({ ok: true });

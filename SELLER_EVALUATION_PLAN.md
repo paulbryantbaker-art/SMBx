@@ -194,12 +194,18 @@ architecture makes it true:
   (Alternative if Paul prefers the stricter promise: don't retain the PDF
   either — email-only delivery, keep only bands + grade. One flag flips
   it; default per Paul's instruction is keep-the-report.)
-- **Two checkboxes at the close, separately:**
-  1. *First-call consent* — "contact me when a buyer engages you in my
-     lane" (the whole point; unchecked still gets the report).
-  2. *Data acknowledgment* — the storage sentence above, verbatim.
-- **Deletion on request** honored by email (`seller_registry` row + stored
-  PDF), noted on the page.
+- **The decision comes AFTER delivery (Paul, 2026-08-04 evening —
+  supersedes the two-checkbox close above; migration 118):** up front the
+  owner accepts only the minimum in one tap ("we process your answers and
+  email you the report"). When the report is delivered, the chat renders
+  the server's truthful inventory of what's on file — general business
+  information and the report, nothing else — and the owner chooses:
+  **Keep it** (row marked `kept`, first-call consent recorded) or
+  **Delete my information** (every row for that email erased on the spot,
+  report and all — a real button, not an email request). A `pending` row
+  whose owner never answered expires after 30 days, because an unanswered
+  question is not consent. The first-call query only ever reads `kept`
+  rows.
 
 ## 6 · Where registrants land — pipeline, not CRM clients
 

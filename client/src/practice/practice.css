@@ -2479,13 +2479,33 @@
 .pd .ow-gate { display: flex; align-items: center; gap: 14px; padding: 12px 32px 0; flex-wrap: wrap; }
 .pd .ow-gbtn { min-height: 44px; }
 .pd .ow-or { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-tert); text-transform: uppercase; }
-/* Consent — two checkboxes and the build button. The first label IS the
-   privacy promise; it reads at body-sm, never caption size. */
+/* Acceptance — ONE button (2026-08-04 evening, Paul: "they accept a minimal
+   amount of data collection… at the end I'll show them" — the checkbox pair
+   moved to the post-delivery keep-or-delete card below). The message above
+   the button carries the promise; the tap is the acceptance. */
 .pd .ow-consent { display: flex; flex-direction: column; gap: 14px; padding: 16px 32px 28px; }
-.pd .ow-consent label { display: flex; gap: 12px; align-items: flex-start; cursor: pointer; }
-.pd .ow-consent input[type='checkbox'] { margin-top: 4px; width: 18px; height: 18px; accent-color: var(--pd-cta); flex: none; }
-.pd .ow-consent span { font-size: 15px; line-height: 1.6; color: var(--pd-body); }
 .pd .ow-build { align-self: flex-start; margin-top: 4px; }
+/* The end card — the truthful inventory of what's on file, then the owner's
+   decision. Brass keyline like the page's privacy block: same promise, same
+   material. The delete action is a REAL button, styled quiet but never
+   hidden — the right to erasure isn't fine print. */
+.pd .ow-onfile {
+  margin: 6px 32px 28px; border: 1px solid var(--pd-border); border-left: 3px solid var(--pd-brass);
+  border-radius: 14px; background: #fff; padding: 20px 24px 22px;
+}
+.pd .ow-onfile .k { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; color: var(--pd-ink); }
+.pd .ow-onfile dl { margin: 12px 0 0; }
+.pd .ow-onfile dl div { display: flex; gap: 14px; padding: 7px 0; border-top: 1px solid var(--pd-hair); }
+.pd .ow-onfile dt { flex: none; width: 132px; font-family: var(--pd-mono); font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--pd-tert); padding-top: 2px; }
+.pd .ow-onfile dd { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--pd-ink); }
+.pd .ow-decide { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 18px; }
+.pd .ow-erase {
+  background: none; border: 1px solid var(--pd-border); border-radius: 999px;
+  padding: 12px 22px; font-size: 14px; font-weight: 600; color: var(--pd-body); cursor: pointer;
+  transition: border-color 150ms ease, color 150ms ease;
+}
+.pd .ow-erase:hover { border-color: #B4552D; color: #B4552D; }
+.pd .ow-erase:disabled, .pd .ow-decide .pd-pill-primary:disabled { opacity: 0.55; cursor: default; }
 .pd .ow-doneline { padding: 14px 32px 26px; font-size: 15px; color: var(--pd-body); }
 /* Standing disclaimer under the card — THE LINE's sentence, on the page
    itself, not only inside the PDF. */
@@ -2524,6 +2544,9 @@
   .pd .ow-chips { padding: 10px 20px 6px; }
   .pd .ow-gate { padding: 12px 20px 0; }
   .pd .ow-consent { padding: 14px 20px 24px; }
+  .pd .ow-onfile { margin: 6px 14px 22px; padding: 16px 18px 18px; }
+  .pd .ow-onfile dl div { flex-direction: column; gap: 2px; }
+  .pd .ow-onfile dt { width: auto; }
   .pd .ow-inputrow { margin: 12px 14px 20px; padding: 6px 6px 6px 14px; }
   .pd .ow-doneline { padding: 12px 20px 22px; }
   .pd .ow-gets { grid-template-columns: 1fr; }
