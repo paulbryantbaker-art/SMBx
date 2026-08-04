@@ -1880,6 +1880,16 @@
 .pd-sector .know .lead { font-size: clamp(22px, 2.3vw, 30px); font-weight: 800; letter-spacing: -0.018em; line-height: 1.25; color: var(--pd-ink); }
 .pd-sector .know .lead .fs { color: var(--pd-coral-link); }
 .pd-sector .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+/* The sector illustration — a tight subject crop set into the aside column
+   (2026-08-04, replacing the full-width empty-left bands Paul flagged). Free
+   aspect: each crop is exactly its subject plus breathing room, so heights
+   vary card to card and that is fine — they are a column apart, never side
+   by side. */
+.pd-sector .pd-secimg {
+  display: block; width: 100%; height: auto; margin-top: 22px;
+  border-radius: 16px; border: 1px solid var(--pd-hair);
+  box-shadow: 0 2px 4px rgba(20, 24, 28, 0.05), 0 14px 34px rgba(20, 24, 28, 0.08);
+}
 /* No `white-space: nowrap`. It is the right default for a chip that is a
    label, and these are not all labels — "Commercial landscaping —
    contract-heavy only" measures 448px, so on a 390px phone it was horizontal
