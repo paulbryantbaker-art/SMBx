@@ -257,6 +257,26 @@ untouched. New table `owner_evaluations`: owner email/sub, lane,
 completion, `retention` states as in 117/118, updated_at. The
 smbx_owner pass (180d) is the login; Google or magic link both re-enter.
 
+**TERMS ACCEPTANCE AT SIGN-UP (Paul, 2026-08-04):** creating the
+full-evaluation workspace requires accepting the owner-evaluation
+terms, and the acceptance is RECORDED — `terms_version` +
+`terms_accepted_at` on the owner_evaluations row (an unversioned
+checkbox proves nothing later). The terms cover, in plain sentences:
+1. DATA PRIVACY — what the workspace stores (their answers, until
+   built or deleted), the delete-anytime right, the end-of-report
+   keep-or-delete, and that the quick valuation's never-stored promise
+   is a different tier.
+2. EVALUATION ONLY — this is a market-data evaluation, not an
+   appraisal, not an opinion of value, not an offer, and not an
+   engagement; NOTHING IS CONCRETE UNTIL A FORMAL PROCESS runs under
+   its own papered engagement. No fee from an owner, ever.
+3. The standing disclaimers (range never a number; diligence prices
+   the actual transaction) incorporated by reference.
+The chat presents this as one clear acceptance moment before the first
+full-tier question; the terms text lives on /legal/terms (owner-
+evaluation section added) so the chat links a real page, not a modal
+nobody can find again. Bumping the text bumps terms_version.
+
 **Chat UX — THE CIRCLE-BACK LEDGER (Paul, 2026-08-04: "they probably
 will have to go and come back several times… the chat walks them
 through it thoroughly and notes what is missing, what they need to
@@ -326,6 +346,33 @@ survives the integration untouched. Division of labor:
   scalar `MODEL.SENSITIVITY.MATRIX.v1`; lane bands pass through the
   market-multiple resolver as the market packet so provenance
   discipline holds.
+
+**THE NARROWED BAND (Paul, 2026-08-04: "it's kind of bullshit on
+evaluations where they give you this big range — we should be able to
+narrow it down").** The published tier band is the STARTING band, not
+the deliverable. The full evaluation narrows it deterministically, and
+every narrowing step is attributed — evidence, never opinion:
+
+- **Driver narrowing:** each readiness driver with a published spread
+  moves an endpoint. Service mix ≥45% lifts the floor into the upper
+  half of the tier (the mix spread is published in full turns); a named
+  president removes the owner-dependence width at the bottom; reviewed
+  books remove the QofE-haircut width; concentration inside 15% holds
+  the top. Each step prints as a line: "9.5x floor — service book at
+  47% (threshold: smbX MEP assessment)."
+- **The financing ceiling caps the top:** MODEL.DSCR.STRESS.v1 +
+  MODEL.LBO.SBA.v1 compute the maximum price the business's own cash
+  flow can finance at market leverage for each buyer type — a buyer
+  cannot pay what the earnings cannot service, and that is arithmetic,
+  not opinion. The DCF cross-check trims inconsistent endpoints.
+- **Completeness buys precision:** parked/unanswered questions leave
+  their driver's width IN the band, and the report says so ("your band
+  is 1.4x wider because the WIP position is unverified") — the
+  narrowing engine IS the incentive to finish the walk.
+- **Output grammar:** "the market clears for a business with YOUR
+  profile at 9.3x–10.4x — $43.2M–$48.3M," with the attribution table
+  under it. Still a range, never a number; target width for a complete,
+  clean profile is ~1x of basis, not a tier.
 
 **Renderer:** the 16-page grammar from the Acme build (SAMPLE-VALUATION-
 SPEC.md + build-acme-sample.mts are the ground truth) becomes the
