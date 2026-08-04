@@ -106,10 +106,11 @@ export default function OwnersPage() {
             <p>
               Your revenue, earnings, and every other figure you enter are used to run the
               calculation and are <b>not stored</b> — there is nowhere in our system for them
-              to live. What we keep, with your permission: your contact details, your trade
-              and metro, a coarse size band, and a copy of your finished report so the team
-              can reference it if a buyer engagement reaches your lane. You'll confirm exactly
-              this in the chat before anything is saved.
+              to live. When your report is delivered, the chat shows you exactly what is on
+              file for your company — general business information and the report itself,
+              nothing else — and <b>you decide</b>: keep it and you're on the first-call list
+              when a buyer engages us in your lane, or tell us to delete it and it's erased
+              on the spot.
             </p>
           </div>
         </div>

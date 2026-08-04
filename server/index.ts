@@ -316,6 +316,7 @@ app.get('/api/owners/me', ownerLimiter, ownerFunnel.ownerMe);
 app.get('/api/owners/lane-read', ownerLimiter, ownerFunnel.ownerLaneRead);
 app.post('/api/owners/lead', ownerLimiter, ownerFunnel.ownerLead);
 app.post('/api/owners/evaluate', ownerEvaluateLimiter, ownerFunnel.ownerEvaluate);
+app.post('/api/owners/retention', ownerLimiter, ownerFunnel.ownerRetention);
 
 // ─── Research report downloads — verified email required ────
 // The reports READ free at /reports/:slug; the PDF requires a confirmed email
