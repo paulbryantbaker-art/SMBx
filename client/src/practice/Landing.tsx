@@ -486,7 +486,7 @@ export default function Landing() {
               className="pd-samplelink"
               href="/collateral/smbx-corpdev-offering.pdf"
               download="smbx-corpdev-offering.pdf"
-              style={{ display: 'inline-block', marginTop: 18 }}
+              style={{ display: 'block', width: 'fit-content', margin: '18px auto 0' }}
               onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-offering-pdf' })}
             >
               Take this with you — the offering in five pages (PDF)
