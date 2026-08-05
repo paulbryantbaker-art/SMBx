@@ -35,6 +35,37 @@ export function PageCrumb({ parent, here }: { parent?: { label: string; href: st
   );
 }
 
+/** Walk the scroll to a landing anchor as the freshly-mounted page settles
+ *  (2026-08-05, Paul: "build market map does not take me to the chat bar all
+ *  the way when the menu bar button is clicked from elsewhere in the site").
+ *  Off the landing those links were plain `/#hash` anchors — a full reload
+ *  whose one browser scroll fires while images/fonts are still expanding the
+ *  layout, stranding the reader short of the target. This seeks the element
+ *  once it mounts, re-asserts through the settle window, and stands down the
+ *  moment the reader scrolls on their own. */
+function settleToAnchor(hash: string) {
+  const evs = ['wheel', 'touchstart', 'keydown'] as const;
+  let stop = false;
+  const cancel = () => { stop = true; evs.forEach(ev => window.removeEventListener(ev, cancel)); };
+  evs.forEach(ev => window.addEventListener(ev, cancel, { passive: true }));
+  const el = () => document.getElementById(hash.slice(1));
+  const go = () => el()?.scrollIntoView();
+  let tries = 0;
+  const seek = () => {
+    if (stop) return;
+    if (el()) go(); else if (tries++ < 240) requestAnimationFrame(seek);
+  };
+  requestAnimationFrame(seek);
+  [300, 700, 1300, 2200].forEach(d => setTimeout(() => { if (!stop) go(); }, d));
+  setTimeout(cancel, 2300);
+  // Phones: a #yulia ask opens the chat sheet directly, mirroring the
+  // landing's own a[href="#yulia"] tap behavior (the listener checks
+  // isMobile itself, so this is a no-op on desktop).
+  if (hash === '#yulia') {
+    setTimeout(() => { if (!stop) window.dispatchEvent(new Event('smbx:open-intake')); }, 500);
+  }
+}
+
 /* THE STICKY CTA IS GONE (2026-08-01, Paul: "ok let's rethink it").
    It was a fixed pill, bottom-right, armed past 0.9 viewport heights, asking
    "Build your market map". Retired on the numbers rather than on taste: the
@@ -73,7 +104,28 @@ export default function PracticeShell({
 
   // Highlight the nav item for where the current page lives (Industries page;
   // segment pages still sit under Who it's for).
-  const [loc] = useLocation();
+  const [loc, navigate] = useLocation();
+
+  // Off the landing, every `/#hash` link — nav, mobile menu, footer, and the
+  // inner pages' own CTAs — becomes an SPA navigation plus settleToAnchor,
+  // instead of a full reload that races the mount (see settleToAnchor above).
+  // Delegated at the document so SegmentPage/Industries pills are covered
+  // without each carrying its own handler. On the landing (home) the links
+  // are plain `#hash` and native in-page behavior is already right.
+  useEffect(() => {
+    if (home) return;
+    const onClick = (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = (e.target as Element | null)?.closest?.('a[href^="/#"]') as HTMLAnchorElement | null;
+      if (!a || a.target === '_blank') return;
+      e.preventDefault();
+      const hash = a.getAttribute('href')!.slice(1);
+      navigate(`/${hash}`);
+      settleToAnchor(hash);
+    };
+    document.addEventListener('click', onClick);
+    return () => document.removeEventListener('click', onClick);
+  }, [home, navigate]);
   const onSegment = loc.startsWith('/buyers/');
   const onIndustries = loc === '/industries';
   // /reports still reaches the SPA on an in-app navigation before the
