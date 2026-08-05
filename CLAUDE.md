@@ -153,6 +153,11 @@ ONE schedule, every client, NO negotiated pricing — the no-negotiation
 posture is itself a loyalty statement (the fee cannot grow by talking a
 client into a bigger deal). Chosen over Double Lehman deliberately (9.1%
 on a $1.8M deal reads investment-bank and prices out the searcher lanes).
+COPY VOICE (Paul, same day: "dont be so combative lol"): the section
+sells CLARITY warmly — "Simple, up-front pricing your whole team can
+embrace", "nothing to haggle over, no surprises at close" — never the
+defiant register ("No negotiation." / "the schedule is the schedule"
+stay out of customer copy; the mechanics don't soften, the voice does).
 - **Engagement: $15,000 up front, covering the first 90 days.** Then
   **$5,000/month**, month-to-month, stop anytime.
 - **Success fee, banded like tax brackets** (each dollar priced in its

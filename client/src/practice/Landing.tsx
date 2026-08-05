@@ -532,11 +532,11 @@ export default function Landing() {
         <div className="pd-wrap">
           <div className="pd-sechead" data-rv>
             <div className="pd-seclabel">What it costs</div>
-            <h2 className="pd-h2">One schedule. Every client. No negotiation.</h2>
+            <h2 className="pd-h2">Simple, up-front pricing your whole team can embrace.</h2>
             <p className="pd-sub" style={{ margin: '22px auto 0' }}>
-              Published before you ever call, papered in the engagement letter.
-              Our fee can't grow by talking you into a bigger deal — the schedule
-              is the schedule.
+              One schedule for every client — published right here and papered in
+              the engagement letter. Nothing to haggle over, no surprises at
+              close.
             </p>
           </div>
           <div className="pd-pricing rv-stagger" data-rv>
@@ -575,9 +575,9 @@ export default function Landing() {
           <p className="pd-price-note" data-rv>
             <strong>smbXCorpDev Premium</strong> adds no second formula — the
             retainer simply continues through integration and value creation,
-            and add-on acquisitions run the same schedule. Retainers are earned
-            as we work; if no deal closes, they're what the work cost. Full
-            terms in the engagement letter.
+            and add-on acquisitions run the same schedule. Retainers cover the
+            work as it runs; every term is spelled out plainly in the
+            engagement letter.
           </p>
         </div>
       </section>
