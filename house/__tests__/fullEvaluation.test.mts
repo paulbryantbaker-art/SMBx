@@ -4,6 +4,7 @@ import {
   answeredCount, parkedList, questionState, sectionStatus,
   TRANSACTION_COSTS_PCT, ESCROW_PCT,
   narrowBand, bandBasisFor, READINESS_THRESHOLD_SOURCE,
+  mapDraftAnswers,
   type EvalAnswers, type EvalAnswer, type NarrowBandModels,
 } from '../fullEvaluation';
 import { DISCLAIMER, type EvaluationResult } from '../evaluate';
@@ -560,6 +561,59 @@ const QUICK = quickOf(fullAnswers());
     const nb = narrowBand(QUICK, ans, m);
     return nb.lowX < nb.highX && nb.lowUsd < nb.highUsd;
   }), 'every configuration yields floor < ceiling in x AND dollars');
+}
+
+// ── the draft carry-over: mapDraftAnswers seeds the walk, nothing re-asked ─
+{
+  // A complete first sitting, exactly as OwnerChat's fin ref holds it.
+  const fin: Record<string, number | string> = {
+    revenueUsd: 2_400_000, earningsUsd: 380_000, ownerCompUsd: 160_000,
+    addBackOneTimeUsd: 25_000, addBackPersonalUsd: 12_000, addBackFamilyUsd: 0,
+    realEstate: 'owned', rentPaidUsd: 0, marketRentUsd: 60_000,
+    recurringPct: 35, ownerDependence: 'manager-in-place', topCustomerPct: 10,
+    booksQuality: 'accrual', newConstructionPct: 20,
+  };
+  const seeded = mapDraftAnswers(fin, { lane: 'hvac', geo: 'Dallas', revBand: '$1M–$3M', situation: 'Ready in the next 12 months' });
+  ok(seeded['ttmRevenueUsd']?.state === 'answered' && seeded['ttmRevenueUsd'].value === 2_400_000,
+    'revenueUsd carries over as ttmRevenueUsd');
+  ok(seeded['pretaxIncomeUsd']?.state === 'answered' && seeded['pretaxIncomeUsd'].value === 380_000,
+    'earningsUsd (the bottom line before adjustments) carries as pretaxIncomeUsd');
+  ok(seeded['timeline']?.value === 'ready-12mo', 'the situation label maps to the timeline choice value');
+  ok(seeded['realEstate']?.value === 'owned' && seeded['booksQuality']?.value === 'accrual'
+    && seeded['ownerDependence']?.value === 'manager-in-place',
+    'choice answers carry with the questions\' own values');
+  ok(seeded['recurringPct']?.value === 35 && seeded['marketRentUsd']?.value === 60_000
+    && seeded['addBackFamilyUsd']?.value === 0,
+    'numeric drivers, rent figures and zero-valued add-backs all carry');
+  ok(seeded['interestUsd'] === undefined && seeded['daUsd'] === undefined,
+    'the interest/D&A split the first sitting never asked stays open — the walk asks it');
+  ok(Object.keys(seeded).every(k => ALL_QUESTIONS.some(q => q.key === k)),
+    'every seeded key is a real question key (the server sanitizer would accept the whole patch)');
+  ok(Object.values(seeded).every(a => a.state === 'answered'),
+    'carry-over only ever seeds answered — never parked or skipped on the owner\'s behalf');
+
+  // The walk opens past what carried: no seeded question should be re-asked.
+  const status = sectionStatus(seeded);
+  const customers = status.find(s => s.key === 'customers');
+  ok(customers !== undefined && customers.complete,
+    'the concentration & management section is complete from the first sitting alone');
+  const realEstateSec = status.find(s => s.key === 'real-estate');
+  ok(realEstateSec !== undefined && realEstateSec.complete,
+    'the real-estate section (owned, both rents) is complete from the first sitting alone');
+
+  // Bad values drop silently — the walk simply asks.
+  const junk = mapDraftAnswers(
+    { revenueUsd: Number.NaN, realEstate: 'castle', ownerDependence: 42, earningsUsd: 100_000 },
+    { situation: 'no idea' },
+  );
+  ok(junk['ttmRevenueUsd'] === undefined, 'a non-finite number never seeds');
+  ok(junk['realEstate'] === undefined && junk['ownerDependence'] === undefined,
+    'a value outside the question\'s own choices never seeds');
+  ok(junk['timeline'] === undefined, 'an unknown situation label never seeds');
+  ok(junk['pretaxIncomeUsd']?.value === 100_000, 'the good keys still carry');
+
+  // Empty in, empty out — a lost session carries nothing and breaks nothing.
+  ok(Object.keys(mapDraftAnswers({}, {})).length === 0, 'empty first sitting → empty seed');
 }
 
 console.log(`\n${pass}/${pass + fail} passed`);

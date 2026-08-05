@@ -678,8 +678,10 @@ export default function Landing() {
           </div>
 
           <p className="ow-pick" data-rv>
-            Pick your trade — the engine above runs your valuation, and what stays on file
-            afterward is your call, shown to you in full at the end.
+            Pick your trade — the engine above starts your valuation. The first sitting
+            delivers your draft; finishing the walk narrows the range, and from there your
+            progress saves so you can leave and come back. What stays on file is your call,
+            shown to you in full at the end.
           </p>
           <div className="ow-lanes rv-stagger" data-rv>
             {OWNER_LANES.map(l => (

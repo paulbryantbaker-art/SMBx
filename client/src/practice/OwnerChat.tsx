@@ -19,11 +19,13 @@
  * band, situation) persist to localStorage — sessionStorage broke the magic
  * link, which opens a new tab where sessionStorage is empty — so a Google
  * redirect, reload, or emailed return resumes cleanly. Stage C figures live in React state ONLY — never
- * sessionStorage, never a transcript row anywhere. On delivery, state is
- * wiped. The FIGURES are never stored; the finished REPORT (which shows the
- * normalized numbers) is the one record, kept only if the owner chooses Keep
- * on the end card — every storage sentence in this file carries that
- * exception explicitly.
+ * sessionStorage, never a transcript row anywhere. After delivery they stay
+ * in MEMORY ONLY for the finish-your-valuation carry-over (mapDraftAnswers
+ * seeds the consented workspace so nothing is re-asked), and are wiped the
+ * moment the owner declines the continuation or the carry lands. The FIGURES
+ * are never stored; the finished REPORT (which shows the normalized numbers)
+ * is the one record, kept only if the owner chooses Keep on the end card —
+ * every storage sentence in this file carries that exception explicitly.
  *
  * CONSENT SHAPE (Paul, 2026-08-04 evening): acceptance up front is MINIMAL —
  * one tap agreeing we process the answers to build and email the report.
@@ -31,8 +33,11 @@
  * truthful inventory of what's on file (general business info + the report,
  * nothing else) and the owner keeps it or erases it on the spot.
  *
- * FULL EVALUATION (P2, §P2 of the plan): offered only AFTER the quick tier
- * delivers, and it is a different privacy deal the owner accepts explicitly —
+ * FINISHING THE VALUATION (P2 mechanics; PAUL'S TAXONOMY 2026-08-05: the
+ * valuation is ONE full-depth product — the first sitting's deliverable is
+ * the DRAFT, and the section walk completes it; no customer-facing "quick"
+ * tier exists): offered only AFTER the draft delivers, and the continuation
+ * is a different privacy deal the owner accepts explicitly —
  * "log back in and finish" IS storage, so answers save to the consented
  * workspace (owner_evaluations) as sections close. The walk is driven
  * ENTIRELY by SECTIONS from house/fullEvaluation — the chat never carries a
@@ -52,6 +57,7 @@ import {
   SECTIONS,
   ALL_QUESTIONS,
   answeredCount,
+  mapDraftAnswers,
   parkedList,
   sectionStatus,
   type EvalAnswer,
@@ -456,10 +462,14 @@ export default function OwnerChat({ initialLane, onBusy }: { initialLane?: Owner
       });
       const j = await r.json();
       if (!r.ok) { say('y', j.error || 'That didn\'t go through — try once more.'); setStage('accept'); return; }
-      fin.current = {}; // the figures evaporate — nothing left client-side either
+      // The figures stay in MEMORY ONLY (React ref — never persisted anywhere)
+      // so continuing into the workspace can carry them over without
+      // re-asking; they are wiped when the owner declines the continuation
+      // (declineFull) or the carry lands in the consented workspace
+      // (acceptFull → mapDraftAnswers).
       say('y', j.mailed
-        ? `Done — your valuation report is in your inbox (readiness read: ${j.position} of your lane's band).`
-        : 'Your valuation is built, but mail delivery is unavailable right now — we\'ll get it to you shortly.');
+        ? `Done — your draft valuation is in your inbox — the wide published band applied to your figures (readiness read: ${j.position} of your lane's band).`
+        : 'Your draft valuation is built, but mail delivery is unavailable right now — we\'ll get it to you shortly.');
       say('y',
         "One last thing, and it's your call. Below is what we hold for this trade — general business " +
         'information and the report itself, nothing else. Keep it on file and you\'re on the first-call list ' +
@@ -493,9 +503,9 @@ export default function OwnerChat({ initialLane, onBusy }: { initialLane?: Owner
       } else {
         say('y', 'Deleted — your information and the report copy are gone from our system. The email in your inbox is yours to keep.');
       }
-      // The full tier's one entry point — offered only now, after the quick
-      // tier has fully delivered and the retention decision is made.
-      say('y', 'Want the full evaluation — the 16-page bank-grade version? It saves your progress so you can leave and come back.');
+      // The walk's one entry point — offered only now, after the draft has
+      // fully delivered and the retention decision is made.
+      say('y', 'Finish your valuation — the rest of the walk narrows your range and completes the full report. From here your progress saves so you can leave and come back.');
       setFullOffered(true);
       setStage('done');
       trackEvent('owner_retention', { lane: a.lane, kept: keep });
@@ -771,7 +781,7 @@ export default function OwnerChat({ initialLane, onBusy }: { initialLane?: Owner
     const prevStage = stage;
     say('me', mode === 'final' ? 'Build my full report' : 'Build my draft');
     setStage('full-build');
-    say('y', mode === 'final' ? 'Building your full evaluation…' : 'Building your draft — it will name its own gaps…');
+    say('y', mode === 'final' ? 'Building your full report…' : 'Building your draft — it will name its own gaps…');
     // The report renders from the WORKSPACE, so unsaved answers must land
     // first — building off a stale server copy would name gaps that aren't.
     if (Object.keys(patch.current).length && !(await flush())) {
@@ -795,7 +805,7 @@ export default function OwnerChat({ initialLane, onBusy }: { initialLane?: Owner
       } else {
         trackEvent('owner_full_report', { lane: fullLane.current, mode, mailed: j.mailed });
         say('y', j.mailed
-          ? (mode === 'final' ? 'Done — your full evaluation is in your inbox.' : 'Draft delivered — check your inbox.')
+          ? (mode === 'final' ? 'Done — your full report is in your inbox.' : 'Draft delivered — check your inbox.')
           : "Built, but mail delivery is unavailable right now — we'll get it to you shortly.");
         if (mode === 'draft' && Array.isArray(j.gaps) && j.gaps.length) {
           say('y', `It names ${j.gaps.length} gap${j.gaps.length === 1 ? '' : 's'} on the page itself — finish the walk and the withheld pages fill in.`);
@@ -840,19 +850,22 @@ export default function OwnerChat({ initialLane, onBusy }: { initialLane?: Owner
   };
 
   const startFull = () => {
-    say('me', 'Start the full evaluation');
+    say('me', 'Finish my valuation');
     setFullOffered(false);
     say('y',
-      'Plainly, because this tier works differently: to build the full report across visits, we save your answers ' +
-      "to your evaluation workspace until it's built. Delete anytime, and the keep-or-delete decision at the end " +
-      'still governs everything. It stays an evaluation from published market data — a range, never a number; ' +
-      'not an appraisal, not an opinion of value, not an offer.');
+      'Plainly, because from here the walk works differently: to finish your valuation across visits, we save your ' +
+      "answers to your evaluation workspace until the full report is built. Delete anytime, and the keep-or-delete " +
+      'decision at the end still governs everything. It stays an evaluation from published market data — a range, ' +
+      'never a number; not an appraisal, not an opinion of value, not an offer.');
     setStage('full-consent');
     trackEvent('owner_full_started', { lane: a.lane });
   };
   const declineFull = () => {
     say('me', 'Not now');
-    say('y', 'Here whenever you want it — the quick read stands on its own.');
+    // The figures' memory-only copy dies with the decline — nothing carries
+    // unless the owner chooses to continue.
+    fin.current = {};
+    say('y', 'Here whenever you want it — your draft valuation stands on its own.');
     setFullOffered(false);
   };
   const acceptFull = async () => {
@@ -876,10 +889,22 @@ export default function OwnerChat({ initialLane, onBusy }: { initialLane?: Owner
         const sj = sr.ok ? await sr.json() : null;
         answers.current = (sj?.answers as EvalAnswers) || {};
         patch.current = {};
+        fin.current = {}; // the workspace's own answers win — nothing to carry
         beginWalk(true);
       } else {
-        answers.current = {};
-        patch.current = {};
+        // ANSWER CARRY-OVER (Paul's taxonomy, 2026-08-05): the first
+        // sitting's answers seed the workspace so nothing already given is
+        // re-asked — the walk opens at the first section with unanswered
+        // questions. The figures were memory-only until this moment; from
+        // here their one home is the consented workspace.
+        const seeded = mapDraftAnswers(fin.current, a);
+        fin.current = {};
+        answers.current = seeded;
+        patch.current = { ...seeded };
+        if (Object.keys(seeded).length) {
+          void flush();
+          say('y', 'Everything from your first sitting is already in — nothing you told me gets re-asked.');
+        }
         beginWalk(false);
       }
     } catch {
@@ -908,7 +933,7 @@ export default function OwnerChat({ initialLane, onBusy }: { initialLane?: Owner
       const parked = parkedList(answers.current);
       const greet: Msg[] = [{
         who: 'y',
-        text: `Welcome back — your ${label} full evaluation is ${led.answered} of ${led.total} answered${parked.length ? `, ${parked.length} parked` : ''}.`,
+        text: `Welcome back — your ${label} valuation is ${led.answered} of ${led.total} answered${parked.length ? `, ${parked.length} parked` : ''}.`,
       }];
       if (parked.length) greet.push({ who: 'y', text: `You were finding: ${parked[0].ask} (${parked[0].whereToFind})` });
       setMsgs(greet);
@@ -1025,7 +1050,7 @@ export default function OwnerChat({ initialLane, onBusy }: { initialLane?: Owner
 
       {stage === 'done' && fullOffered && (
         <div className="pd-chips">
-          <button type="button" className="pd-chip" onClick={startFull}>Start the full evaluation →</button>
+          <button type="button" className="pd-chip" onClick={startFull}>Finish my valuation →</button>
           <button type="button" className="pd-chip" onClick={declineFull}>Not now</button>
         </div>
       )}

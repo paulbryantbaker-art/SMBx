@@ -16,6 +16,45 @@ practice's proprietary deal flow.
 
 ---
 
+## THE TAXONOMY (Paul, 2026-08-05 — FINAL; supersedes the two-tier
+## "quick valuation vs. full evaluation" framing everywhere below)
+
+The **MARKET MAP is the buyer artifact** (the Acquisition Engine's
+deliverable — unchanged, untouched). The **VALUATION is the owner product,
+and it is FULL-DEPTH BY DEFINITION** — there is no "quick valuation" as a
+separate customer-facing product. The former P1 walk is the **FIRST
+SITTING** of the one valuation; its deliverable is the **DRAFT** (the wide
+published band applied to the owner's figures). Finishing the walk narrows
+the range and completes the full report.
+
+Mechanics are unchanged by the rename — only the framing moved:
+
+- **The first sitting stays ephemeral until its end** (figures in memory
+  only, never persisted), and the retention keep/delete card still follows
+  the draft exactly as built.
+- **Progress saves only from the moment the owner continues** into the
+  consented workspace — "from here your progress saves so you can leave
+  and come back" is the honest sentence, because before that moment
+  nothing was stored.
+- **The first sitting's answers CARRY OVER** into the workspace
+  (`mapDraftAnswers` in `house/fullEvaluation.ts`, seeded at consent while
+  the figures are still in memory) so nothing already given is re-asked —
+  the section walk opens at the first section with unanswered questions.
+- **Copy law:** customer-facing copy never says "quick", and never
+  pitches "the full evaluation — the 16-page bank-grade version"; the
+  offer is "Finish your valuation — the rest of the walk narrows your
+  range and completes the full report." The draft delivery says so too:
+  "your draft valuation is in your inbox — the wide published band applied
+  to your figures."
+
+Where this plan says "quick valuation"/"quick tier", read **the first
+sitting**; where it says "full evaluation" as a separate product, read
+**the rest of the one valuation**. Internal identifiers (`quick` fields,
+`full-*` stages, route names) keep their names — the taxonomy governs what
+customers see, not what code calls things.
+
+---
+
 ## 1 · The loop (CHAT-FIRST — Paul, 2026-08-04 second pass: "use the Agent
 chat pill for all of the business intake and valuation… full valuation
 after the user logs in with Google… a link in the menu for Get Free

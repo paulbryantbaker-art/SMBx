@@ -596,6 +596,84 @@ export function sectionStatus(answers: EvalAnswers): SectionStatus[] {
   });
 }
 
+/* ── the draft carry-over ────────────────────────────────────────────────────
+ *
+ * PAUL'S TAXONOMY (2026-08-05, final): the MARKET MAP is the buyer artifact;
+ * the VALUATION is the owner product and is FULL-DEPTH BY DEFINITION — there
+ * is no "quick valuation" as a separate customer-facing product. The former
+ * P1 walk is the FIRST SITTING of the one valuation and its deliverable is
+ * the DRAFT. So when the owner continues into the workspace, the first
+ * sitting's answers CARRY OVER and nothing already given is re-asked — the
+ * section walk opens at the first section with unanswered questions.
+ */
+
+/** The first sitting's stage-A context as the chat holds it. Only
+ *  `situation` maps to a question (timeline); `lane` keys the workspace and
+ *  geo / revBand have no full-walk question to feed (the walk collects the
+ *  actual top line instead of a band). */
+export interface DraftStageA { lane?: string; geo?: string; revBand?: string; situation?: string }
+
+const QUESTION_BY_KEY: Record<string, EvalQuestion> = Object.fromEntries(
+  ALL_QUESTIONS.map(q => [q.key, q]),
+);
+
+/** The chat's situation labels → the timeline question's own choice values.
+ *  Value forms pass through so a caller holding either representation maps
+ *  cleanly. */
+const SITUATION_TO_TIMELINE: Record<string, string> = {
+  'Just curious': 'exploring',
+  'Thinking about it in 1–3 years': '1-3-years',
+  'Ready in the next 12 months': 'ready-12mo',
+  'exploring': 'exploring',
+  '1-3-years': '1-3-years',
+  'ready-12mo': 'ready-12mo',
+};
+
+/** First-sitting keys that carry over unchanged — same key, same meaning,
+ *  same value vocabulary (the chat's chips use the questions' own choice
+ *  values). */
+const DRAFT_SAME_KEYS = [
+  'ownerCompUsd', 'addBackOneTimeUsd', 'addBackPersonalUsd', 'addBackFamilyUsd',
+  'realEstate', 'rentPaidUsd', 'marketRentUsd',
+  'recurringPct', 'ownerDependence', 'topCustomerPct', 'booksQuality', 'newConstructionPct',
+] as const;
+
+/** Map the first sitting's in-memory answers onto the full walk's question
+ *  keys. Every value is validated against the question's own definition
+ *  (choice values must be among the question's choices, numbers finite) —
+ *  the same law the server-side sanitizer enforces — so a bad carry drops
+ *  silently and the walk simply asks. Renames: the sitting's `revenueUsd`
+ *  is the walk's `ttmRevenueUsd`; its `earningsUsd` ("the bottom line before
+ *  any adjustments") is `pretaxIncomeUsd` — the walk then asks the interest
+ *  and D&A split the first sitting skipped. */
+export function mapDraftAnswers(
+  fin: Record<string, number | string>,
+  a: DraftStageA,
+): EvalAnswers {
+  const out: EvalAnswers = {};
+  const put = (key: string, value: number | string | undefined) => {
+    if (value === undefined || value === null) return;
+    const q = QUESTION_BY_KEY[key];
+    if (!q) return;
+    if (q.kind === 'choice') {
+      if (typeof value === 'string' && (q.choices ?? []).some(c => c.value === value)) {
+        out[key] = { state: 'answered', value };
+      }
+      return;
+    }
+    if (q.kind === 'text') {
+      if (typeof value === 'string' && value !== '') out[key] = { state: 'answered', value };
+      return;
+    }
+    if (typeof value === 'number' && isFinite(value)) out[key] = { state: 'answered', value };
+  };
+  for (const k of DRAFT_SAME_KEYS) put(k, fin[k]);
+  put('ttmRevenueUsd', fin['revenueUsd']);
+  put('pretaxIncomeUsd', fin['earningsUsd']);
+  if (a.situation) put('timeline', SITUATION_TO_TIMELINE[a.situation]);
+  return out;
+}
+
 /* ── the report data model ───────────────────────────────────────────────── */
 
 export interface FullBridgeLine {
