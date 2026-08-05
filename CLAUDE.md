@@ -61,7 +61,7 @@ The business splits into three separate workflows with separate infra and separa
 4. **V6App.tsx is the ONLY current app shell.** Never create parallel layouts. All UI changes go through the V6 shell/components.
 5. **NEVER use position:fixed full-viewport divs with background-color.** Safari reads them for toolbar tinting and it breaks dark mode switching. Use position:absolute inside a relative parent instead.
 6. **ValueLens (NOT Bizestimate).** The old name is dead.
-7. **The public funnel is the practice site (`client/src/practice/`).** Logged-out visitors see the corpdevservices landing + five buyer-segment pages (`/buyers/*`), converting into two actions: the **Claude-backed intake** (publicly labeled the "smbX Acquisition Engine" (renamed from "Target Mapping Engine", Paul 2026-07-13, to match the hero and drop insider jargon) — the Yulia name is app-side only; `/api/practice/intake` + `/intake/stream` SSE, Haiku, intake-only system prompt in firm system voice — no advice, no specific-target valuations, no fee talk; delivers the 8-block MARKET MAP artifact (streamed so it assembles on screen; PDF via `/api/practice/map-pdf`); the server closes deterministically — lead persisted, ENGAGED_LANES conflict check — the moment an email appears, with a scripted fallback if the model is down) and Book a call (`VITE_BOOKING_URL`, defaulting to Paul's live Google Calendar booking page `https://calendar.app.google/rA9vC7RRdR2wLJbV6` — the old #book lead form is retired; v3 sends all booking asks to the `#cta` booking card). Copy law (Paul, 2026-07-11 + confidence pass 2026-07-12): never describe a competitor — describe the work (grievance copy is banned; every differentiator is a fact about us, never a criticism of them); the category is a corporate development function, not a cheaper investment bank (be generous about banks — "different function"); AI-explicit language stays out of customer copy except the outcome claim in the process section ("we cover a market in days… inside a week of the mandate"); the intake tool is named the "Acquisition Engine" across the fold (hero sub, card, CTAs) — a system/tool framing, not an overt AI claim (Paul dropped the "Corp Dev agent" wording 2026-07-13 as insider jargon); no needy self-reassurance lines by default ("That hasn't changed." — EXCEPT the sanctioned Track Record closer "Every transaction above was done for a buyer. That hasn't changed.", Paul 2026-07-13, where it lands as a buy-side punchline); the buy-side loyalty is stated warmly, never as a stacked oath; section labels are real headers, no eyebrow micro-text. No product marketing, no pricing page; `/api/chat/anonymous` stays 410. Retired product pages remain unrouted in `marketing/`.
+7. **The public funnel is the practice site (`client/src/practice/`).** Logged-out visitors see the corpdevservices landing + five buyer-segment pages (`/buyers/*`), converting into two actions: the **Claude-backed intake** (publicly labeled the "smbX Acquisition Engine" (renamed from "Target Mapping Engine", Paul 2026-07-13, to match the hero and drop insider jargon) — the Yulia name is app-side only; `/api/practice/intake` + `/intake/stream` SSE, Haiku, intake-only system prompt in firm system voice — no advice, no specific-target valuations, no fee talk; delivers the 8-block MARKET MAP artifact (streamed so it assembles on screen; PDF via `/api/practice/map-pdf`); the server closes deterministically — lead persisted, ENGAGED_LANES conflict check — the moment an email appears, with a scripted fallback if the model is down) and Book a call (`VITE_BOOKING_URL`, defaulting to Paul's live Google Calendar booking page `https://calendar.app.google/rA9vC7RRdR2wLJbV6` — the old #book lead form is retired; v3 sends all booking asks to the `#cta` booking card). Copy law (Paul, 2026-07-11 + confidence pass 2026-07-12): never describe a competitor — describe the work (grievance copy is banned; every differentiator is a fact about us, never a criticism of them); the category is a corporate development function, not a cheaper investment bank (be generous about banks — "different function"); AI-explicit language stays out of customer copy except the outcome claim in the process section ("we cover a market in days… inside a week of the mandate"); the intake tool is named the "Acquisition Engine" across the fold (hero sub, card, CTAs) — a system/tool framing, not an overt AI claim (Paul dropped the "Corp Dev agent" wording 2026-07-13 as insider jargon); no needy self-reassurance lines by default ("That hasn't changed." — EXCEPT the sanctioned Track Record closer "Every transaction above was done for a buyer. That hasn't changed.", Paul 2026-07-13, where it lands as a buy-side punchline); the buy-side loyalty is stated warmly, never as a stacked oath; section labels are real headers, no eyebrow micro-text. No product marketing; the "no pricing page" law was AMENDED 2026-08-05 — the landing's `#pricing` section publishes the practice's set fee schedule (see "The published fee schedule" under Product naming; the intake/Yulia still never quote fees in chat); `/api/chat/anonymous` stays 410. Retired product pages remain unrouted in `marketing/`.
 8. **Yulia never says "As an AI."** Expert M&A deal intelligence. Adapts persona by league.
 9. **Financial data: zero hallucination.** Extract exactly from documents, never invent numbers.
 10. **All money stored in cents (integers).** Never use floating point for financial values.
@@ -146,6 +146,33 @@ not what the repo calls things. These are ENGAGEMENT names — not app
 products (rule: the app is never sold). Owner-side vocabulary is
 unchanged: the market read is the buyer artifact, the valuation is the
 owner product.
+
+### The published fee schedule (Paul, 2026-08-05 — "a set price that any
+### would-be buyer would not say no to"; supersedes "no pricing page")
+ONE schedule, every client, NO negotiated pricing — the no-negotiation
+posture is itself a loyalty statement (the fee cannot grow by talking a
+client into a bigger deal). Chosen over Double Lehman deliberately (9.1%
+on a $1.8M deal reads investment-bank and prices out the searcher lanes).
+- **Engagement: $15,000 up front, covering the first 90 days.** Then
+  **$5,000/month**, month-to-month, stop anytime.
+- **Success fee, banded like tax brackets** (each dollar priced in its
+  band, no cliffs): **5%** of the first $1M · **4%** of $1–5M · **3%** of
+  $5–10M · **2%** above $10M · **$100,000 minimum** (floor binds below
+  $2.25M EV). Worked anchors: $1.8M→$100K (floor) · $3.46M→$148K ·
+  $5M→$210K · $10M→$360K · $32.58M→$811.5K (= fixed $360K + 2% over $10M).
+- **Every retainer dollar is credited against the success fee at close**
+  — prepayment, not a refundable deposit. Credit caps at the fee (a long
+  mandate on a floor deal owes $0 at close, excess NOT refunded); **no
+  close, no credit** — retainers are earned as the work runs.
+- **Premium adds no second formula**: the retainer simply continues
+  through integration/value creation; add-on acquisitions run the same
+  schedule; one retainer covers the platform.
+- Lives on the SITE (`#pricing` section — a sanctioned amendment to the
+  rule-7 "no pricing page" law) and in the ENGAGEMENT LETTER. Yulia and
+  the intake still NEVER quote fees (chat stays fee-silent; the page
+  speaks). The one-time §15(b)(13)/state-registration counsel
+  confirmation remains pending and should bless this schedule before the
+  first letter papers it.
 
 ## Business Model — The Practice (THE LINE v2)
 smbX.ai is a buy-side corp-dev-as-a-service practice. Revenue is per-engagement, papered by humans in the engagement letter: a **buy-side retainer** and a **buy-side success fee**, both paid by the practice's own acquirer client (independent-sponsor economics). The perimeter: buy-side only, one buyer per target, never sell-side/two-sided/neutral-intermediary, targets under $250M revenue. One-time counsel confirmation (Exchange Act §15(b)(13), state M&A-broker regimes, engagement-letter language) is pending — see `THE_LINE_POLICY.md`.
