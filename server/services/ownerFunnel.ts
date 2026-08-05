@@ -205,6 +205,7 @@ export function reportHtml(r: EvaluationResult, meta: { name?: string; geography
     .eyebrow { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.18em; color:${L.honey}; }
     h1 { font-family:'Fraunces',serif; font-weight:560; font-size:34px; margin:14px 0 6px; }
     .sub { font-size:14px; color:${L.ivory}; opacity:.85; }
+    .draftline { font-size:12px; color:${L.ivory}; opacity:.7; margin-top:10px; }
     .rule { width:64px; height:3px; background:${L.honey}; margin:18px 0 0; }
     .body { padding:38px 54px; }
     h2 { font-family:'Fraunces',serif; font-weight:560; font-size:21px; margin:26px 0 10px; }
@@ -224,8 +225,9 @@ export function reportHtml(r: EvaluationResult, meta: { name?: string; geography
   </style></head><body>
     <div class="cover">
       <div class="eyebrow">OWNER VALUATION · CONFIDENTIAL</div>
-      <h1>Your ${r.band.label} valuation</h1>
+      <h1>Your ${r.band.label} valuation — draft</h1>
       <div class="sub">${meta.name ? meta.name + ' · ' : ''}${meta.geography} · prepared by smbX.ai, buy-side corporate development</div>
+      <div class="draftline">This is the first sitting's draft — finishing the walk narrows the range and completes the full report.</div>
       <div class="rule"></div>
     </div>
     <div class="body">
@@ -273,11 +275,12 @@ export async function ownerEvaluate(req: Request, res: Response) {
 
   const mailed = await sendEmail({
     to: owner.email,
-    subject: `Your ${result.band.label} valuation — smbX`,
+    subject: 'Your draft valuation — smbX',
     html: brandedEmail({
-      headline: 'Your valuation is attached',
+      headline: 'Your draft valuation is attached',
       body:
-        `Your ${result.band.label} valuation is attached as a PDF — your earnings normalized the way a buyer's accountants do it, the published multiple band for your lane applied to the result, plus the readiness drivers buyers actually price. ` +
+        `Your draft ${result.band.label} valuation is attached as a PDF — your earnings normalized the way a buyer's accountants do it, the wide published band for your lane applied to the result, plus the readiness drivers buyers actually price. ` +
+        `Finishing the walk in the chat narrows the range and completes the full report. ` +
         `Keep it for your banker, your CPA, or your own planning. ${result.disclaimer}`,
       footnote: 'We work for buyers. We never take a fee from an owner.',
     }),
