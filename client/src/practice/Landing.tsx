@@ -477,6 +477,20 @@ export default function Landing() {
             </p>
             <p className="strong">You make the decisions. We handle the rest, and we get you to the closing table.</p>
             <a className="pd-pill-primary pd-pill-lg" href="#yulia" style={{ marginTop: 34 }} onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-close' })}>Build your market map →</a>
+            {/* The take-with-you collateral (Paul, 2026-08-05): the five-page
+                offering PDF — smbXCorpDev thesis-to-close, Premium through
+                integration — served static from /collateral. A quiet
+                samplelink under the CTA, not a second pill: the pill is the
+                funnel, the PDF is the leave-behind. */}
+            <a
+              className="pd-samplelink"
+              href="/collateral/smbx-corpdev-offering.pdf"
+              download="smbx-corpdev-offering.pdf"
+              style={{ display: 'block', width: 'fit-content', margin: '18px auto 0' }}
+              onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-offering-pdf' })}
+            >
+              Take this with you — the offering in five pages (PDF)
+            </a>
           </div>
         </div>
       </section>
