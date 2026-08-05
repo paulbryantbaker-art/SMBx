@@ -523,6 +523,65 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── Pricing — the published schedule (2026-08-05, Paul: "a set price
+          that any would-be buyer would not say no to" — a sanctioned
+          amendment to the old no-pricing-page law; see CLAUDE.md, "The
+          published fee schedule"). One schedule, every client, no
+          negotiation. Chat/intake stay fee-silent — this section speaks. ── */}
+      <section className="pd-section" id="pricing">
+        <div className="pd-wrap">
+          <div className="pd-sechead" data-rv>
+            <div className="pd-seclabel">What it costs</div>
+            <h2 className="pd-h2">Simple, up-front pricing your whole team can embrace.</h2>
+            <p className="pd-sub" style={{ margin: '22px auto 0' }}>
+              One schedule for every client — published right here and papered in
+              the engagement letter. Nothing to haggle over, no surprises at
+              close.
+            </p>
+          </div>
+          <div className="pd-pricing rv-stagger" data-rv>
+            <div className="pd-price-card">
+              <h3 className="pd-h3">The retainer</h3>
+              <div className="pd-price-big">$5K<span>/month</span></div>
+              <p className="pd-body-sm">
+                <strong>$15,000 engagement</strong> covers the first 90 days up
+                front — the thesis, the market map, and the first wave of owner
+                outreach. Month-to-month after that; stop anytime.
+              </p>
+              <p className="pd-body-sm">
+                <strong>Every dollar is credited against the success fee at
+                close.</strong> If we close your deal, the retainer was free.
+              </p>
+            </div>
+            <div className="pd-price-card">
+              <h3 className="pd-h3">The success fee</h3>
+              <table className="pd-price-table">
+                <tbody>
+                  <tr><td>First $1M</td><td>5%</td></tr>
+                  <tr><td>$1M – $5M</td><td>4%</td></tr>
+                  <tr><td>$5M – $10M</td><td>3%</td></tr>
+                  <tr><td>Above $10M</td><td>2%</td></tr>
+                  <tr className="min"><td>Minimum fee</td><td>$100K</td></tr>
+                </tbody>
+              </table>
+              <p className="pd-body-sm">
+                Banded like tax brackets — each dollar is priced in its band, so
+                one more dollar of price never changes the rate on the whole
+                deal. A $5M acquisition works out to $210K — 4.2% — before your
+                retainer credit.
+              </p>
+            </div>
+          </div>
+          <p className="pd-price-note" data-rv>
+            <strong>smbXCorpDev Premium</strong> adds no second formula — the
+            retainer simply continues through integration and value creation,
+            and add-on acquisitions run the same schedule. Retainers cover the
+            work as it runs; every term is spelled out plainly in the
+            engagement letter.
+          </p>
+        </div>
+      </section>
+
       {/* ── Sample read — the flagship artifact, static and clearly labeled ── */}
       <section className="pd-section" id="sample">
         <div className="pd-wrap">

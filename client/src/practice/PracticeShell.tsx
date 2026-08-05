@@ -417,6 +417,7 @@ export default function PracticeShell({
               <div className="pd-footer-col">
                 <div className="h">FIRM</div>
                 <a href="/#how">How it works</a>
+                <a href="/#pricing">Pricing</a>
                 <a href="/#sample">Sample read</a>
                 <a href="/research">Research</a>
                 <a href="/#cta">Confidential consultation</a>
@@ -428,6 +429,7 @@ export default function PracticeShell({
                   <div className="h">FIRM</div>
                   <a href={anchor('#why')}>Why us</a>
                   <a href={anchor('#how')}>How it works</a>
+                  <a href={anchor('#pricing')}>Pricing</a>
                   <a href={anchor('#sample')}>Sample read</a>
                   <a href="/research">Research</a>
                   <a href={anchor('#proof')}>Track record</a>

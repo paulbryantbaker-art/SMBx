@@ -1823,6 +1823,20 @@
 .pd-phase[open] .tog { transform: rotate(45deg); background: var(--pd-ink); color: #fff; }
 .pd-phase .bd { padding: 0 60px 32px 116px; font-size: 17px; line-height: 1.7; color: var(--pd-body); max-width: 44em; }
 /* Closing block — the weight lands on smbX, then the CTA. */
+/* ── Pricing — the published schedule (#pricing, 2026-08-05) ── */
+.pd-pricing { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(18px, 2.4vw, 30px); max-width: var(--pd-mid); margin: clamp(44px, 5.5vw, 72px) auto 0; }
+.pd-price-card { background: #fff; border: 1px solid var(--pd-hair); border-radius: 24px; padding: clamp(28px, 3.4vw, 44px); display: flex; flex-direction: column; gap: 16px; }
+.pd-price-card .pd-body-sm { color: var(--pd-body); line-height: 1.65; margin: 0; }
+.pd-price-big { font-weight: 800; font-size: clamp(44px, 4.6vw, 64px); letter-spacing: -0.02em; line-height: 1; color: var(--pd-ink); font-variant-numeric: tabular-nums; }
+.pd-price-big span { font-size: 0.38em; font-weight: 700; color: var(--pd-body); letter-spacing: 0; }
+.pd-price-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.pd-price-table td { padding: 11px 2px; border-bottom: 1px solid var(--pd-hair); font-size: 16px; color: var(--pd-ink); }
+.pd-price-table td:last-child { text-align: right; font-weight: 800; }
+.pd-price-table tr.min td { border-bottom: none; color: var(--pd-body); }
+.pd-price-table tr.min td:last-child { color: var(--pd-coral); }
+.pd-price-note { max-width: 720px; margin: clamp(28px, 3.4vw, 44px) auto 0; text-align: center; font-size: 15px; line-height: 1.7; color: var(--pd-body); }
+@media (max-width: 860px) { .pd-pricing { grid-template-columns: 1fr; } }
+
 .pd-phases-close { max-width: 760px; margin: clamp(56px, 7vw, 88px) auto 0; text-align: center; }
 .pd-phases-close .strong { font-size: clamp(20px, 2.2vw, 26px); font-weight: 700; letter-spacing: -0.015em; line-height: 1.35; color: var(--pd-ink); margin: 26px auto 0; max-width: 24em; }
 @media (max-width: 760px) {
