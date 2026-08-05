@@ -126,7 +126,9 @@ const PHASES = [
   { ph: 'Structure & offer', t: 'We shape the deal and take it to the seller.', bd: 'Price is one piece of it; so are seller notes, earnouts, rollover, and escrows. We build the financing a lender will actually back, write the LOI, and run the negotiation for you.' },
   { ph: 'Diligence & close', t: 'This is where most deals come apart, and where we do the heaviest work.', bd: 'We run diligence across the financials, legal, tax, and operations, keep the accountants and lawyers and lenders on schedule, and hold every thread together through to a signed deal.' },
   { ph: 'Integration', t: 'The price is set at close. The value comes in the six months after.', bd: 'We plan the first hundred days — keeping the people and customers you just paid for — the part most buyers underestimate and most advisors skip.' },
-  { ph: 'Value creation · add-on service', t: 'After the close, we can stay on to help the thesis come true.', bd: 'For clients who want it, we stay engaged past the hundred days — tracking performance against the original thesis, building the pricing and operating levers into a plan, and sourcing the add-on acquisitions that turn one deal into a platform. Optional, and scoped separately.' },
+  /* 'add-on service' dropped from the kicker 2026-08-05 — this phase now sits
+     under the smbXCorpDev Premium group header, which says it better. */
+  { ph: 'Value creation', t: 'After the close, we can stay on to help the thesis come true.', bd: 'For clients who want it, we stay engaged past the hundred days — tracking performance against the original thesis, building the pricing and operating levers into a plan, and sourcing the add-on acquisitions that turn one deal into a platform. Part of the Premium engagement, scoped to the deal.' },
 ];
 
 /* ── Key industry verticals — the hunt-board teaser to /industries. The
@@ -454,11 +456,37 @@ export default function Landing() {
             data-rv
             style={{ marginBottom: 'clamp(10px, 1.4vw, 20px)' }}
           />
+          {/* The two services, named (2026-08-05, Paul: "i thought we added
+              the services specifically… item 7 needs to be in the Premium").
+              Phases 1–5 = smbXCorpDev (thesis to close); 6–7 = smbXCorpDev
+              Premium (post-merger integration + value creation) — the same
+              split the published offering PDF states. */}
           <div className="pd-phases rv-stagger" data-rv>
-            {PHASES.map((p, i) => (
+            <div className="pd-phasegroup">
+              <span className="nm">smb<span className="x">X</span>CorpDev</span>
+              <span className="d">The full buy-side engagement — thesis to close.</span>
+            </div>
+            {PHASES.slice(0, 5).map((p, i) => (
               <details className="pd-phase" key={p.ph}>
                 <summary>
                   <div className="no">{String(i + 1).padStart(2, '0')}</div>
+                  <div>
+                    <div className="ph">{p.ph}</div>
+                    <div className="t">{p.t}</div>
+                  </div>
+                  <div className="tog">+</div>
+                </summary>
+                <div className="bd">{p.bd}</div>
+              </details>
+            ))}
+            <div className="pd-phasegroup">
+              <span className="nm">smb<span className="x">X</span>CorpDev Premium</span>
+              <span className="d">Everything above — then the part most advisors skip.</span>
+            </div>
+            {PHASES.slice(5).map((p, i) => (
+              <details className="pd-phase" key={p.ph}>
+                <summary>
+                  <div className="no">{String(i + 6).padStart(2, '0')}</div>
                   <div>
                     <div className="ph">{p.ph}</div>
                     <div className="t">{p.t}</div>
@@ -489,7 +517,7 @@ export default function Landing() {
               style={{ display: 'block', width: 'fit-content', margin: '18px auto 0' }}
               onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-offering-pdf' })}
             >
-              Take this with you — the offering in five pages (PDF)
+              Take this with you — smbXCorpDev &amp; Premium in five pages (PDF)
             </a>
           </div>
         </div>
