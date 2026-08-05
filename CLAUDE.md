@@ -132,11 +132,17 @@ re-valued, not a system to build against):
 
 **No gratuitous eyebrows or micro text (LOCKED 2026-06-01; hard floor added 2026-07-13).** Paul's readability floor: no customer-facing text below 13px — the practice site's mono label voice runs 13–13.5px with ≤0.12em tracking, and label grays stop at `--pd-body`, never fainter. Do NOT add decorative eyebrow kickers (small uppercase mono labels like `PIPELINE`, `RECENTS`, `MARKET INTELLIGENCE LIVE`) or micro status/subtitle lines (like `deal intelligence · online`) by default — they clutter and read as AI filler. Lead with the title alone. Add a label or secondary line ONLY when it carries information the user genuinely needs and cannot infer from context. When in doubt, leave it out. Applies to new components, headers, cards, chat surfaces, and FABs; when reskinning or refactoring existing UI, prefer removing these over preserving them.
 
-## Product naming (Paul, 2026-08-05)
+## Product naming (Paul, 2026-08-05; tier + process renamed same day)
 The practice's primary offering is **smbXCorpDev** — the buy-side
 corp-dev-as-a-service engagement through close. With post-merger
-integration support (the PMI0–PMI3 stages) it is **smbXCorpDev Plus**.
-These are ENGAGEMENT names for decks, letters and site copy — not app
+integration support (the PMI0–PMI3 stages) it is **smbXCorpDev
+Premium** (renamed from "Plus"). The proprietary process behind both is
+branded **smbXDefinitive** — the single external name for what internal
+docs historically call THE LINE (the compliance perimeter) and
+DEFINITIVE (the methodology/substrate). BRANDING ONLY: internal doc
+titles, code identifiers, file names and the laws themselves keep their
+names — smbXDefinitive governs what decks, letters and site copy say,
+not what the repo calls things. These are ENGAGEMENT names — not app
 products (rule: the app is never sold). Owner-side vocabulary is
 unchanged: the market read is the buyer artifact, the valuation is the
 owner product.
