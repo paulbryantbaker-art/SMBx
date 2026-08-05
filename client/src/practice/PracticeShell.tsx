@@ -48,8 +48,13 @@ function settleToAnchor(hash: string) {
   let stop = false;
   const cancel = () => { stop = true; evs.forEach(ev => window.removeEventListener(ev, cancel)); };
   evs.forEach(ev => window.addEventListener(ev, cancel, { passive: true }));
-  const el = () => document.getElementById(hash.slice(1));
-  const go = () => el()?.scrollIntoView();
+  // #yulia lives in the hero fold, and "take me to the chat" means the TOP of
+  // the landing — H1, bar, chips — not the zone's edge parked under the
+  // sticky nav (Paul, 2026-08-05: "it does not reset the page and focus on
+  // the chat bar like it should"). Every other anchor scrolls to itself.
+  const yulia = hash === '#yulia';
+  const el = () => (yulia ? document.body : document.getElementById(hash.slice(1)));
+  const go = () => { if (yulia) window.scrollTo(0, 0); else document.getElementById(hash.slice(1))?.scrollIntoView(); };
   let tries = 0;
   const seek = () => {
     if (stop) return;
@@ -58,10 +63,9 @@ function settleToAnchor(hash: string) {
   requestAnimationFrame(seek);
   [300, 700, 1300, 2200].forEach(d => setTimeout(() => { if (!stop) go(); }, d));
   setTimeout(cancel, 2300);
-  // Phones: a #yulia ask opens the chat sheet directly, mirroring the
-  // landing's own a[href="#yulia"] tap behavior (the listener checks
-  // isMobile itself, so this is a no-op on desktop).
-  if (hash === '#yulia') {
+  // A #yulia ask ENGAGES the chat: YuliaIntake's listener opens the sheet on
+  // phones and hands focus to the visible input on desktop.
+  if (yulia) {
     setTimeout(() => { if (!stop) window.dispatchEvent(new Event('smbx:open-intake')); }, 500);
   }
 }
@@ -113,15 +117,26 @@ export default function PracticeShell({
   // without each carrying its own handler. On the landing (home) the links
   // are plain `#hash` and native in-page behavior is already right.
   useEffect(() => {
-    if (home) return;
     const onClick = (e: MouseEvent) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      const a = (e.target as Element | null)?.closest?.('a[href^="/#"]') as HTMLAnchorElement | null;
+      const a = (e.target as Element | null)?.closest?.('a[href^="/#"], a[href="#yulia"]') as HTMLAnchorElement | null;
       if (!a || a.target === '_blank') return;
-      e.preventDefault();
-      const hash = a.getAttribute('href')!.slice(1);
-      navigate(`/${hash}`);
-      settleToAnchor(hash);
+      const href = a.getAttribute('href')!;
+      if (href.startsWith('/#')) {
+        // Inner page → landing section.
+        if (home) return; // shouldn't occur on the landing, but never double-handle
+        e.preventDefault();
+        const hash = href.slice(1);
+        navigate(`/${hash}`);
+        settleToAnchor(hash);
+      } else {
+        // "#yulia" ON the landing (desktop — a phone tap was already taken by
+        // YuliaIntake's own listener, which preventDefaults): reset to the
+        // top, where the chat is, instead of the native anchor jump that
+        // parks the bar under the sticky nav.
+        e.preventDefault();
+        settleToAnchor('#yulia');
+      }
     };
     document.addEventListener('click', onClick);
     return () => document.removeEventListener('click', onClick);

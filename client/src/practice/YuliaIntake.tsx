@@ -568,7 +568,10 @@ export default function YuliaIntake({ onOwnerModeChange }: { onOwnerModeChange?:
   // Other components (the showcase's "Map your market" tab) can ask the drawer
   // to open on phones without reaching into this component.
   useEffect(() => {
-    const onAsk = () => { if (isMobile()) openSheet(); };
+    // Sheet on phones; on desktop the ask lands as focus in whichever input
+    // is visible (2026-08-05, Paul: a market-map click should "reset the page
+    // and focus on the chat bar" — the shell scrolls, this places the cursor).
+    const onAsk = () => { if (isMobile()) openSheet(); else focusActive(); };
     window.addEventListener('smbx:open-intake', onAsk);
     return () => window.removeEventListener('smbx:open-intake', onAsk);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
