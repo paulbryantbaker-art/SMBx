@@ -21,15 +21,20 @@
     <meta property="og:type" content="website" />
     <!-- The DEFAULT link-preview card. Without one, a posted smbx.ai link
          previewed as bare text on LinkedIn, Slack and iMessage — which is the
-         one channel the practice markets through. Rendered by the same builder
-         the report cards use, from `scripts/studio/site-og.md`:
-           npx tsx scripts/studio/build-og-card.mts scripts/studio/site-og.md \
-             --slug site --out client/public --kicker "Buy-side only"
-         Report pages REPLACE this tag with their own card (server/index.ts) —
-         replace, never append, or a crawler picks whichever it sees first. -->
-    <meta property="og:image" content="https://smbx.ai/site-cover.jpg" />
+         one channel the practice markets through. CURRENT CARD (2026-08-06):
+         Paul's Claude-Design Aurora card ("this is what pasted links should
+         look like style wise") — jade sweep, wordmark + BUY-SIDE CORPORATE
+         DEVELOPMENT kicker, two-tone Fraunces H1. The file carries a NEW name
+         on purpose: LinkedIn caches OG images by URL, so replacing the bytes
+         at the old URL would keep showing the stale card; a new URL forces a
+         fresh scrape. (The old builder path — build-og-card.mts + site-og.md
+         → site-cover.jpg — is superseded for the SITE card; report cards
+         still use it.) Report pages REPLACE this tag with their own card
+         (server/index.ts) — replace, never append, or a crawler picks
+         whichever it sees first. -->
+    <meta property="og:image" content="https://smbx.ai/site-card.png" />
     <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
+    <meta property="og:image:height" content="628" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="color-scheme" content="light" />
     <!-- Safari tints BOTH its toolbars from this. It is a compromise value,
