@@ -567,16 +567,23 @@ export default function Landing() {
             </p>
             <p className="strong">You make the decisions. We handle the rest, and we get you to the closing table.</p>
             <a className="pd-pill-primary pd-pill-lg" href="#yulia" style={{ marginTop: 34 }} onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-close' })}>Build your market map →</a>
-            {/* Get pricing (2026-08-06, Paul — replaces the offering-PDF
-                "Take this with you" link): after seeing the work, the ask is
-                the price, and #pricing is one section down. Paul's redone
-                pricing brochure will hang its download inside #pricing when
-                it lands; the offering PDF stays served at
-                /collateral/smbx-corpdev-offering.pdf. */}
+            {/* Two quiet leave-behinds (Paul, 2026-08-06): the offering deck
+                (no pricing in it) downloads free; pricing asks route to the
+                #pricing section, whose ONLY content is the email-gated
+                brochure request — no figure is published on the site. */}
+            <a
+              className="pd-samplelink"
+              href="/collateral/smbx-corpdev-offering.pdf"
+              download="smbx-corpdev-offering.pdf"
+              style={{ display: 'block', width: 'fit-content', margin: '18px auto 0' }}
+              onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-offering-pdf' })}
+            >
+              Take this with you — the smbXCorpDev offering (PDF)
+            </a>
             <a
               className="pd-samplelink"
               href="#pricing"
-              style={{ display: 'block', width: 'fit-content', margin: '18px auto 0' }}
+              style={{ display: 'block', width: 'fit-content', margin: '10px auto 0' }}
               onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-get-pricing' })}
             >
               Get pricing →
@@ -585,63 +592,24 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Pricing — the published schedule (2026-08-05, Paul: "a set price
-          that any would-be buyer would not say no to" — a sanctioned
-          amendment to the old no-pricing-page law; see CLAUDE.md, "The
-          published fee schedule"). One schedule, every client, no
-          negotiation. Chat/intake stay fee-silent — this section speaks. ── */}
+      {/* ── Pricing — THE ASK, NOT THE SCHEDULE (2026-08-06, Paul: "remove
+          the public upfront pricing, what it costs section entirely" — hours
+          after the public schedule shipped, superseding it). No figure
+          appears on the site: the schedule lives in the EMAIL-GATED brochure
+          (POST /api/practice/pricing) and the engagement letter. This
+          section is only the request — heading + email row. Chat/intake stay
+          fee-silent as always. ── */}
       <section className="pd-section" id="pricing">
         <div className="pd-wrap">
           <div className="pd-sechead" data-rv>
-            <div className="pd-seclabel">What it costs</div>
-            <h2 className="pd-h2">Simple, up-front pricing your whole team can embrace.</h2>
+            <div className="pd-seclabel">Pricing</div>
+            <h2 className="pd-h2">Simple, up-front pricing — we'll send you the schedule.</h2>
             <p className="pd-sub" style={{ margin: '22px auto 0' }}>
-              One schedule for every client — published right here and papered in
-              the engagement letter. Nothing to haggle over, no surprises at
-              close.
+              One schedule for every client, spelled out in a short brochure —
+              the retainer, the success fee, and how the credit at close works.
+              Nothing to haggle over. Tell us where to send it.
             </p>
           </div>
-          <div className="pd-pricing rv-stagger" data-rv>
-            <div className="pd-price-card">
-              <h3 className="pd-h3">The retainer</h3>
-              <div className="pd-price-big">$15K<span>/quarter</span></div>
-              <p className="pd-body-sm">
-                <strong>$5K a month, billed quarterly up front.</strong> Your
-                first quarter starts the engagement — the thesis, the market
-                map, and the first wave of owner outreach. Renew quarter by
-                quarter; step away at any quarter's end.
-              </p>
-              <p className="pd-body-sm">
-                <strong>Every dollar is credited against the success fee at
-                close.</strong> If we close your deal, the retainer was free.
-              </p>
-            </div>
-            <div className="pd-price-card">
-              <h3 className="pd-h3">The success fee</h3>
-              <table className="pd-price-table">
-                <tbody>
-                  <tr><td>First $1M</td><td>5%</td></tr>
-                  <tr><td>$1M – $5M</td><td>4%</td></tr>
-                  <tr><td>$5M – $10M</td><td>3%</td></tr>
-                  <tr><td>Above $10M</td><td>2%</td></tr>
-                  <tr className="min"><td>Minimum fee</td><td>$100K</td></tr>
-                </tbody>
-              </table>
-              <p className="pd-body-sm">
-                Banded like tax brackets — each dollar is priced in its band, so
-                one more dollar of price never changes the rate on the whole
-                deal. A $5M acquisition works out to $210K — 4.2% — before your
-                retainer credit.
-              </p>
-            </div>
-          </div>
-          <p className="pd-price-note" data-rv>
-            <strong>smbXCorpDev Premium</strong> adds no second formula — the
-            retainer simply continues through integration and value creation,
-            and add-on acquisitions run the same schedule. Retainers cover the
-            work as it runs; every term is spelled out plainly in the
-            engagement letter.
-          </p>
           <PricingRequest />
         </div>
       </section>
