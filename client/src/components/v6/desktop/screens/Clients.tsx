@@ -99,6 +99,23 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
   const toggle = (key: keyof CrmFilters, value: string | boolean) =>
     setFilters(f => ({ ...f, [key]: f[key] === value ? undefined : value }));
 
+  // One click loads the 2026-08-05 outreach plan shipped with the app —
+  // 81 orgs, 75 named contacts, hooks + research notes, wave dates as
+  // next-action dates. Idempotent server-side.
+  const seedPlan = async () => {
+    try {
+      const r = await crm.seedOutreach();
+      setBanner(
+        `Outreach plan seeded — ${r.accountsCreated} firms new, ${r.accountsUpdated} refreshed, ` +
+        `${r.contactsAdded} contacts, ${r.activitiesAdded} notes. ` +
+        `${r.unnamedParked} records still need a named person (flagged in next actions); ` +
+        `${r.doNotPitch} marked do-not-pitch.`,
+      );
+    } catch (e: any) {
+      setBanner(`Seed failed: ${e?.message ?? "unknown error"}`);
+    }
+  };
+
   const root: React.CSSProperties = {
     flex: 1, minWidth: 0, display: "flex", flexDirection: "column",
     fontFamily: T.font, color: T.ink, overflow: "hidden",
@@ -131,6 +148,7 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
           setBanner(`Re-score failed: ${e?.message ?? "unknown error"}`);
         }
       }}
+      onSeed={seedPlan}
     />
   );
 
@@ -153,12 +171,16 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
   }
 
   if (crm.loaded && crm.all.length === 0) {
-    return <div style={root}>{toolbar}<div style={{ flex: 1, display: "flex" }}>
+    return <div style={root}>{toolbar}
+      {banner && (
+        <div style={{ margin: "0 22px 10px", padding: "10px 14px", background: T.blueBg, border: `1px solid ${T.border}`, borderRadius: 10, fontSize: 13 }}>{banner}</div>
+      )}
+      <div style={{ flex: 1, display: "flex" }}>
       <EmptyState
         title="No firms yet"
-        hint="Import the buy-side register CSV to populate the board. Every firm is ranked on import — the buy signal (a declared thesis it cannot fill) carries the most weight."
-        cta="Ask Yulia about the register"
-        onCta={() => chat?.send("How do I import my buy-side register into the client pipeline?")}
+        hint="Load the 2026-08-05 buy-side outreach plan — 81 organizations and 75 named contacts across the capital and client layers, with each record's next action dated to its wave — or import the register CSV from the toolbar."
+        cta="Seed the outreach plan"
+        onCta={seedPlan}
       />
     </div></div>;
   }
@@ -277,7 +299,7 @@ function chip(active: boolean): React.CSSProperties {
 }
 
 function Toolbar({
-  query, onSearch, filters, onToggle, count, onImport, onRescore,
+  query, onSearch, filters, onToggle, count, onImport, onRescore, onSeed,
 }: {
   query: string;
   onSearch: (v: string) => void;
@@ -286,6 +308,7 @@ function Toolbar({
   count: number;
   onImport: (csv: string) => void;
   onRescore: () => void;
+  onSeed: () => void;
 }) {
   const file = useRef<HTMLInputElement | null>(null);
 
@@ -317,6 +340,9 @@ function Toolbar({
 
       <div style={{ flex: 1 }} />
 
+      <button type="button" style={ghostBtn} onClick={onSeed} title="Load the 2026-08-05 outreach plan shipped with the app — idempotent, never resets stage/owner/next action on firms you've already worked">
+        Seed outreach plan
+      </button>
       <button type="button" style={ghostBtn} onClick={onRescore} title="Re-run the scorer over every firm — needed after a new market master lands">
         Re-score
       </button>

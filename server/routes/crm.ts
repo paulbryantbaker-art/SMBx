@@ -405,6 +405,25 @@ crmRouter.post('/crm/accounts/import', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/crm/seed-outreach — seed the board from the 2026-08-05 outreach
+ * plan shipped at content/crm-seed/ (91 contacts · 81 orgs · waves · research
+ * queue). Idempotent: accounts upsert by firm with pipeline fields untouched
+ * on update, contacts/activities skip when present — safe to run twice.
+ * Mapping laws + what is deliberately deferred: crmOutreachSeed.ts header.
+ */
+crmRouter.post('/crm/seed-outreach', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const { seedOutreachBoard } = await import('../services/crmOutreachSeed.js');
+    const report = await seedOutreachBoard(userId);
+    return res.json(report);
+  } catch (err: any) {
+    console.error('CRM outreach seed error:', err.message);
+    return res.status(500).json({ error: `Seed failed: ${err.message}` });
+  }
+});
+
 /** POST /api/crm/accounts/rescore  { trades?: string[] }
  *  Re-runs house/leads.ts over every row. Needed whenever a new market master
  *  lands (the lane scale changes) or a `last_deal_on` gets verified. */
