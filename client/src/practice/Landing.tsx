@@ -107,11 +107,11 @@ const WHY: { nm: string; bd: string; more: string; xp: React.ReactNode }[] = [
   },
   {
     nm: 'A fraction of the cost of in-house',
-    bd: 'An in-house corp-dev function runs $500K–$1M a year and takes a year to build. We deliver the whole function for a fraction of that — buy-side focused, where most banks live on the sell side.',
+    bd: 'An in-house corp-dev function runs $500K–$1.5M a year all-in and takes a year to build. We deliver the whole function for a fraction of that — buy-side focused, where most banks live on the sell side.',
     more: 'THE COMPARISON',
     xp: (
       <>
-        <p>In-house corp dev runs <strong>$500K–$1M+ a year fully loaded</strong> — before the year it takes to hire and ramp. And most banks are built for the sell side; running a buy-side search is a different job, and rarely their first love.</p>
+        <p>In-house corp dev runs <strong>$500K–$1.5M a year all-in</strong> — before the year it takes to hire and ramp. And most banks are built for the sell side; running a buy-side search is a different job, and rarely their first love.</p>
         <p>The modern tooling that replaces the junior pod costs less than one analyst's salary. Those unit economics are the engine of this model — and they're priced into what you pay us.</p>
       </>
     ),
