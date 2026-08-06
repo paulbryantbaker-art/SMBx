@@ -107,11 +107,11 @@ const WHY: { nm: string; bd: string; more: string; xp: React.ReactNode }[] = [
   },
   {
     nm: 'A fraction of the cost of in-house',
-    bd: 'An in-house corp-dev function runs $500K–$1M a year and takes a year to build. We deliver the whole function for a fraction of that — buy-side focused, where most banks live on the sell side.',
+    bd: 'An in-house corp-dev function runs $500K–$1.5M a year all-in and takes a year to build. We deliver the whole function for a fraction of that — buy-side focused, where most banks live on the sell side.',
     more: 'THE COMPARISON',
     xp: (
       <>
-        <p>In-house corp dev runs <strong>$500K–$1M+ a year fully loaded</strong> — before the year it takes to hire and ramp. And most banks are built for the sell side; running a buy-side search is a different job, and rarely their first love.</p>
+        <p>In-house corp dev runs <strong>$500K–$1.5M a year all-in</strong> — before the year it takes to hire and ramp. And most banks are built for the sell side; running a buy-side search is a different job, and rarely their first love.</p>
         <p>The modern tooling that replaces the junior pod costs less than one analyst's salary. Those unit economics are the engine of this model — and they're priced into what you pay us.</p>
       </>
     ),
@@ -167,6 +167,68 @@ function countUp(el: HTMLElement) {
  *  nothing shows until the first numeral is clear of the controls, then the
  *  rv-stagger fade and the count-up run as one moment. The eyebrow keeps
  *  its early data-rv reveal — it IS the crest's teaser. */
+/** The pricing-brochure ask (2026-08-06, Paul: "make the pricing be behind
+ *  an email"). The brochure is DELIVERED, never linked — the server holds it
+ *  outside the public root and attaches it to the email, so the address is
+ *  the gate and the lead is the price of the download. Honest-send law: we
+ *  never claim an inbox the server said it couldn't reach. */
+function PricingRequest() {
+  const [email, setEmail] = useState('');
+  const [state, setState] = useState<'idle' | 'busy' | 'sent' | 'err'>('idle');
+  const [msg, setMsg] = useState('');
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (state === 'busy') return;
+    setState('busy');
+    trackEvent('practice_cta_clicked', { placement: 'pricing-brochure' });
+    try {
+      const res = await fetch('/api/practice/pricing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.sent) {
+        setState('sent');
+      } else {
+        setState('err');
+        setMsg(
+          data.error ||
+          "We couldn't send it just now — book a call and we'll walk you through the schedule directly.",
+        );
+      }
+    } catch {
+      setState('err');
+      setMsg("We couldn't send it just now — please try again in a moment.");
+    }
+  };
+  if (state === 'sent') {
+    return (
+      <p className="pd-price-get sent" data-rv>
+        Sent — the pricing brochure is on its way to your inbox.
+      </p>
+    );
+  }
+  return (
+    <div className="pd-price-get" data-rv>
+      <form onSubmit={submit}>
+        <input
+          type="email"
+          required
+          placeholder="you@company.com"
+          aria-label="Your email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+        />
+        <button type="submit" className="pd-pill-primary" disabled={state === 'busy'}>
+          {state === 'busy' ? 'Sending…' : 'Email me the pricing brochure'}
+        </button>
+      </form>
+      {state === 'err' && <p className="err">{msg}</p>}
+    </div>
+  );
+}
+
 function ProofBand() {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -505,11 +567,10 @@ export default function Landing() {
             </p>
             <p className="strong">You make the decisions. We handle the rest, and we get you to the closing table.</p>
             <a className="pd-pill-primary pd-pill-lg" href="#yulia" style={{ marginTop: 34 }} onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-close' })}>Build your market map →</a>
-            {/* The take-with-you collateral (Paul, 2026-08-05): the five-page
-                offering PDF — smbXCorpDev thesis-to-close, Premium through
-                integration — served static from /collateral. A quiet
-                samplelink under the CTA, not a second pill: the pill is the
-                funnel, the PDF is the leave-behind. */}
+            {/* Two quiet leave-behinds (Paul, 2026-08-06): the offering deck
+                (no pricing in it) downloads free; pricing asks route to the
+                #pricing section, whose ONLY content is the email-gated
+                brochure request — no figure is published on the site. */}
             <a
               className="pd-samplelink"
               href="/collateral/smbx-corpdev-offering.pdf"
@@ -517,68 +578,39 @@ export default function Landing() {
               style={{ display: 'block', width: 'fit-content', margin: '18px auto 0' }}
               onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-offering-pdf' })}
             >
-              Take this with you — smbXCorpDev &amp; Premium in five pages (PDF)
+              Take this with you — the smbXCorpDev offering (PDF)
+            </a>
+            <a
+              className="pd-samplelink"
+              href="#pricing"
+              style={{ display: 'block', width: 'fit-content', margin: '10px auto 0' }}
+              onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-get-pricing' })}
+            >
+              Get pricing →
             </a>
           </div>
         </div>
       </section>
 
-      {/* ── Pricing — the published schedule (2026-08-05, Paul: "a set price
-          that any would-be buyer would not say no to" — a sanctioned
-          amendment to the old no-pricing-page law; see CLAUDE.md, "The
-          published fee schedule"). One schedule, every client, no
-          negotiation. Chat/intake stay fee-silent — this section speaks. ── */}
+      {/* ── Pricing — THE ASK, NOT THE SCHEDULE (2026-08-06, Paul: "remove
+          the public upfront pricing, what it costs section entirely" — hours
+          after the public schedule shipped, superseding it). No figure
+          appears on the site: the schedule lives in the EMAIL-GATED brochure
+          (POST /api/practice/pricing) and the engagement letter. This
+          section is only the request — heading + email row. Chat/intake stay
+          fee-silent as always. ── */}
       <section className="pd-section" id="pricing">
         <div className="pd-wrap">
           <div className="pd-sechead" data-rv>
-            <div className="pd-seclabel">What it costs</div>
-            <h2 className="pd-h2">Simple, up-front pricing your whole team can embrace.</h2>
+            <div className="pd-seclabel">Pricing</div>
+            <h2 className="pd-h2">Simple, up-front pricing — we'll send you the schedule.</h2>
             <p className="pd-sub" style={{ margin: '22px auto 0' }}>
-              One schedule for every client — published right here and papered in
-              the engagement letter. Nothing to haggle over, no surprises at
-              close.
+              One schedule for every client, spelled out in a short brochure —
+              the retainer, the success fee, and how the credit at close works.
+              Nothing to haggle over. Tell us where to send it.
             </p>
           </div>
-          <div className="pd-pricing rv-stagger" data-rv>
-            <div className="pd-price-card">
-              <h3 className="pd-h3">The retainer</h3>
-              <div className="pd-price-big">$5K<span>/month</span></div>
-              <p className="pd-body-sm">
-                <strong>$15,000 engagement</strong> covers the first 90 days up
-                front — the thesis, the market map, and the first wave of owner
-                outreach. Month-to-month after that; stop anytime.
-              </p>
-              <p className="pd-body-sm">
-                <strong>Every dollar is credited against the success fee at
-                close.</strong> If we close your deal, the retainer was free.
-              </p>
-            </div>
-            <div className="pd-price-card">
-              <h3 className="pd-h3">The success fee</h3>
-              <table className="pd-price-table">
-                <tbody>
-                  <tr><td>First $1M</td><td>5%</td></tr>
-                  <tr><td>$1M – $5M</td><td>4%</td></tr>
-                  <tr><td>$5M – $10M</td><td>3%</td></tr>
-                  <tr><td>Above $10M</td><td>2%</td></tr>
-                  <tr className="min"><td>Minimum fee</td><td>$100K</td></tr>
-                </tbody>
-              </table>
-              <p className="pd-body-sm">
-                Banded like tax brackets — each dollar is priced in its band, so
-                one more dollar of price never changes the rate on the whole
-                deal. A $5M acquisition works out to $210K — 4.2% — before your
-                retainer credit.
-              </p>
-            </div>
-          </div>
-          <p className="pd-price-note" data-rv>
-            <strong>smbXCorpDev Premium</strong> adds no second formula — the
-            retainer simply continues through integration and value creation,
-            and add-on acquisitions run the same schedule. Retainers cover the
-            work as it runs; every term is spelled out plainly in the
-            engagement letter.
-          </p>
+          <PricingRequest />
         </div>
       </section>
 
