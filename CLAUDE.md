@@ -158,8 +158,10 @@ sells CLARITY warmly — "Simple, up-front pricing your whole team can
 embrace", "nothing to haggle over, no surprises at close" — never the
 defiant register ("No negotiation." / "the schedule is the schedule"
 stay out of customer copy; the mechanics don't soften, the voice does).
-- **Engagement: $15,000 up front, covering the first 90 days.** Then
-  **$5,000/month**, month-to-month, stop anytime.
+- **Retainer: QUARTERLY (Paul, 2026-08-06 — supersedes the same-week
+  monthly billing): $15,000 per quarter, paid up front** ($5K/month
+  equivalent). The first quarter IS the engagement; each renewal is
+  another $15K quarter up front; step away at any quarter's end.
 - **Success fee, banded like tax brackets** (each dollar priced in its
   band, no cliffs): **5%** of the first $1M · **4%** of $1–5M · **3%** of
   $5–10M · **2%** above $10M · **$100,000 minimum** (floor binds below

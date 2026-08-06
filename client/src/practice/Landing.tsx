@@ -604,11 +604,12 @@ export default function Landing() {
           <div className="pd-pricing rv-stagger" data-rv>
             <div className="pd-price-card">
               <h3 className="pd-h3">The retainer</h3>
-              <div className="pd-price-big">$5K<span>/month</span></div>
+              <div className="pd-price-big">$15K<span>/quarter</span></div>
               <p className="pd-body-sm">
-                <strong>$15,000 engagement</strong> covers the first 90 days up
-                front — the thesis, the market map, and the first wave of owner
-                outreach. Month-to-month after that; stop anytime.
+                <strong>$5K a month, billed quarterly up front.</strong> Your
+                first quarter starts the engagement — the thesis, the market
+                map, and the first wave of owner outreach. Renew quarter by
+                quarter; step away at any quarter's end.
               </p>
               <p className="pd-body-sm">
                 <strong>Every dollar is credited against the success fee at
