@@ -1835,6 +1835,15 @@
 .pd-price-table tr.min td { border-bottom: none; color: var(--pd-body); }
 .pd-price-table tr.min td:last-child { color: var(--pd-coral); }
 .pd-price-note { max-width: 720px; margin: clamp(28px, 3.4vw, 44px) auto 0; text-align: center; font-size: 15px; line-height: 1.7; color: var(--pd-body); }
+/* The brochure ask — one email row, centered under the schedule. */
+.pd-price-get { max-width: 640px; margin: clamp(26px, 3vw, 40px) auto 0; text-align: center; }
+.pd-price-get form { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.pd-price-get input { flex: 1 1 240px; max-width: 320px; padding: 13px 20px; border: 1px solid var(--pd-hair); border-radius: 999px; background: #fff; font-size: 15px; color: var(--pd-ink); }
+.pd-price-get input:focus-visible { outline: none; border-color: var(--pd-coral); }
+.pd-price-get button { border: none; cursor: pointer; }
+.pd-price-get button[disabled] { opacity: 0.6; cursor: default; }
+.pd-price-get.sent { font-size: 15px; font-weight: 600; color: var(--pd-coral); }
+.pd-price-get .err { margin-top: 12px; font-size: 14px; color: var(--pd-body); }
 @media (max-width: 860px) { .pd-pricing { grid-template-columns: 1fr; } }
 
 .pd-phases-close { max-width: 760px; margin: clamp(56px, 7vw, 88px) auto 0; text-align: center; }

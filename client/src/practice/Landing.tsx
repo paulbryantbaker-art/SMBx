@@ -167,6 +167,68 @@ function countUp(el: HTMLElement) {
  *  nothing shows until the first numeral is clear of the controls, then the
  *  rv-stagger fade and the count-up run as one moment. The eyebrow keeps
  *  its early data-rv reveal — it IS the crest's teaser. */
+/** The pricing-brochure ask (2026-08-06, Paul: "make the pricing be behind
+ *  an email"). The brochure is DELIVERED, never linked — the server holds it
+ *  outside the public root and attaches it to the email, so the address is
+ *  the gate and the lead is the price of the download. Honest-send law: we
+ *  never claim an inbox the server said it couldn't reach. */
+function PricingRequest() {
+  const [email, setEmail] = useState('');
+  const [state, setState] = useState<'idle' | 'busy' | 'sent' | 'err'>('idle');
+  const [msg, setMsg] = useState('');
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (state === 'busy') return;
+    setState('busy');
+    trackEvent('practice_cta_clicked', { placement: 'pricing-brochure' });
+    try {
+      const res = await fetch('/api/practice/pricing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.sent) {
+        setState('sent');
+      } else {
+        setState('err');
+        setMsg(
+          data.error ||
+          "We couldn't send it just now — book a call and we'll walk you through the schedule directly.",
+        );
+      }
+    } catch {
+      setState('err');
+      setMsg("We couldn't send it just now — please try again in a moment.");
+    }
+  };
+  if (state === 'sent') {
+    return (
+      <p className="pd-price-get sent" data-rv>
+        Sent — the pricing brochure is on its way to your inbox.
+      </p>
+    );
+  }
+  return (
+    <div className="pd-price-get" data-rv>
+      <form onSubmit={submit}>
+        <input
+          type="email"
+          required
+          placeholder="you@company.com"
+          aria-label="Your email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+        />
+        <button type="submit" className="pd-pill-primary" disabled={state === 'busy'}>
+          {state === 'busy' ? 'Sending…' : 'Email me the pricing brochure'}
+        </button>
+      </form>
+      {state === 'err' && <p className="err">{msg}</p>}
+    </div>
+  );
+}
+
 function ProofBand() {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -505,19 +567,19 @@ export default function Landing() {
             </p>
             <p className="strong">You make the decisions. We handle the rest, and we get you to the closing table.</p>
             <a className="pd-pill-primary pd-pill-lg" href="#yulia" style={{ marginTop: 34 }} onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-close' })}>Build your market map →</a>
-            {/* The take-with-you collateral (Paul, 2026-08-05): the five-page
-                offering PDF — smbXCorpDev thesis-to-close, Premium through
-                integration — served static from /collateral. A quiet
-                samplelink under the CTA, not a second pill: the pill is the
-                funnel, the PDF is the leave-behind. */}
+            {/* Get pricing (2026-08-06, Paul — replaces the offering-PDF
+                "Take this with you" link): after seeing the work, the ask is
+                the price, and #pricing is one section down. Paul's redone
+                pricing brochure will hang its download inside #pricing when
+                it lands; the offering PDF stays served at
+                /collateral/smbx-corpdev-offering.pdf. */}
             <a
               className="pd-samplelink"
-              href="/collateral/smbx-corpdev-offering.pdf"
-              download="smbx-corpdev-offering.pdf"
+              href="#pricing"
               style={{ display: 'block', width: 'fit-content', margin: '18px auto 0' }}
-              onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-offering-pdf' })}
+              onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-get-pricing' })}
             >
-              Take this with you — smbXCorpDev &amp; Premium in five pages (PDF)
+              Get pricing →
             </a>
           </div>
         </div>
@@ -579,6 +641,7 @@ export default function Landing() {
             work as it runs; every term is spelled out plainly in the
             engagement letter.
           </p>
+          <PricingRequest />
         </div>
       </section>
 

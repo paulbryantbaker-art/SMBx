@@ -304,6 +304,54 @@ app.post('/api/practice/leads', leadLimiter, async (req, res) => {
   }
 });
 
+// ─── The pricing brochure, behind an email (Paul, 2026-08-06) ────────────
+// "make the pricing be behind an email" — the redone pricing brochure is
+// DELIVERED, never linked: it lives in content/collateral/ (outside
+// client/public, like the gated report PDFs — reportAccess.ts documents
+// why), so there is no guessable URL. The email IS the gate: address in →
+// lead persisted (savePracticeLead pings the practitioner) → PDF attached.
+// The offering brochure (no pricing in it) stays a free public download.
+// Honest-send law (reportAccess, 2026-07-29): the response reports whether
+// mail actually went out, and the UI must not claim an inbox that will
+// stay empty.
+app.post('/api/practice/pricing', leadLimiter, async (req, res) => {
+  try {
+    const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || email.length > 320) {
+      return res.status(400).json({ error: 'A valid email is required.' });
+    }
+    const { existsSync, readFileSync } = await import('node:fs');
+    const candidates = [
+      path.join(process.cwd(), 'content/collateral/smbx-corpdev-pricing.pdf'),
+      path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../content/collateral/smbx-corpdev-pricing.pdf'),
+    ];
+    const file = candidates.find(p => existsSync(p));
+    if (!file) {
+      return res.status(503).json({ error: 'The pricing brochure is being updated — check back shortly, or book a call and we will walk you through it.' });
+    }
+    await savePracticeLead({ email, source: 'pricing-brochure' });
+    const { sendEmail } = await import('./services/emailService.js');
+    const sent = await sendEmail({
+      to: email,
+      subject: 'smbXCorpDev pricing — the full schedule',
+      html: `<div style="font-family:system-ui,sans-serif;font-size:15px;line-height:1.7;color:#16181A">
+        <p>Thanks for your interest — the smbXCorpDev pricing brochure is attached.</p>
+        <p>It's the same schedule for every client: the retainer, the banded
+        success fee, and how the credit at close works, all spelled out.</p>
+        <p>If the attachment didn't come through, just reply to this email and
+        we'll send it directly. And if you'd rather walk through it live:
+        <a href="https://smbx.ai/#cta" style="color:#0A7A58">book a call</a>.</p>
+        <p style="color:#5A6169">— Paul Baker · smbX.ai · buy-side corporate development</p>
+      </div>`,
+      attachments: [{ filename: 'smbx-corpdev-pricing.pdf', content: readFileSync(file) }],
+    });
+    return res.json({ sent });
+  } catch (err: any) {
+    console.error('[practice-pricing] failed:', err.message);
+    return res.status(500).json({ error: 'Something went wrong — please try again.' });
+  }
+});
+
 // ─── The free owner evaluation (/owners funnel) ──────────────────────────
 // Public seller-facing surface (SELLER_EVALUATION_PLAN.md). Sits above the
 // blanket requireAuth like the other funnel routes. Identity is the walled
