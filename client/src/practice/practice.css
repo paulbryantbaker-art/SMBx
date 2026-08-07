@@ -565,23 +565,27 @@
 /* Buttons: PILLS by founder law (Paul, 2026-07-18: "i dont like any squared
    buttons make them all pills" — overrides Ledger's 8px). The Ledger ghost
    treatment stays: ink hairline secondary, one filled CTA per band. */
+/* CARTA BUTTONS (2026-08-07). THE BUTTON LAW: green is NEVER a resting fill.
+   Primary = ink, hover green; secondary = 1.5px ink outline, hover panel
+   tint; radius 10, never a pill. These two rules restyle every legacy
+   consumer (chat booking pill, DownloadCard, OwnerChat) in one move. */
 .pd-pill {
   display: inline-flex; align-items: center; justify-content: center;
-  border: 1px solid var(--pd-ink);
-  padding: 11px 24px; border-radius: 99px;
-  font-size: 15px; font-weight: 600; color: var(--pd-ink);
+  border: 1.5px solid var(--pd-ink);
+  padding: 11px 24px; border-radius: 10px;
+  font-size: 15px; font-weight: 500; color: var(--pd-ink);
   white-space: nowrap; background: transparent;
   transition: border-color 160ms ease, background-color 160ms ease;
 }
-.pd-pill:hover { border-color: var(--pd-ink); background: rgba(20, 24, 28, 0.045); color: var(--pd-ink); }
+.pd-pill:hover { border-color: var(--pd-ink); background: #F3F0E9; color: var(--pd-ink); }
 .pd-pill-primary {
   display: inline-flex; align-items: center; justify-content: center;
-  background: var(--pd-cta); color: #fff; border: none;
-  padding: 12px 26px; border-radius: 99px;
-  font-size: 15px; font-weight: 700; white-space: nowrap;
+  background: var(--pd-ink); color: #FCFAF6; border: none;
+  padding: 12px 26px; border-radius: 10px;
+  font-size: 15px; font-weight: 600; white-space: nowrap;
   transition: background-color 160ms ease;
 }
-.pd-pill-primary:hover { background: var(--pd-cta-hover); color: #fff; }
+.pd-pill-primary:hover { background: #0A7A58; color: #FCFAF6; }
 .pd-pill-lg { padding: 17px 36px; font-size: 16.5px; }
 /* The nowrap above is correct in the nav, where every pill is two or three
    words. In body copy a long label ("Talk to our team — confidential
@@ -774,12 +778,13 @@
     color: var(--pd-ink); border-bottom: 1px solid var(--pd-hair);
   }
   .pd .pd-mmenu a .arr { color: var(--pd-coral-link); font-weight: 700; }
+  /* Ink, not green — the Carta button law reaches the phone menu too. */
   .pd .pd-mmenu a.pd-mmenu-cta {
     justify-content: center;
     margin: 6px 0 14px; padding: 15px 20px;
-    font-size: 16px; font-weight: 700; letter-spacing: 0;
-    color: #fff; background: var(--pd-cta);
-    border-bottom: none; border-radius: 999px;
+    font-size: 16px; font-weight: 600; letter-spacing: 0;
+    color: #FCFAF6; background: var(--pd-ink);
+    border-bottom: none; border-radius: 10px;
   }
   .pd .pd-mmenu a.quiet { font-size: 16px; font-weight: 600; color: var(--pd-body); border-bottom: none; padding-bottom: 8px; }
   /* MEASURED, not suspected (2026-08-01). Paul's screenshot had Safari's bottom
@@ -1339,71 +1344,73 @@
    Assembles block by block as the model writes it. Numbers as heroes, the
    insight block distinct and last, sources footer as the credibility seal. */
 .pd-map {
+  /* CARTA (2026-08-07): square document card, serif numerals, green mono
+     kickers — the landing sample read's grammar, live. */
   width: 100%;
   background: #ffffff;
-  border: 1px solid var(--pd-border);
-  border-radius: 14px;
+  border: 1px solid var(--pd-ink);
+  border-radius: 0;
   padding: clamp(22px, 3vw, 34px) clamp(22px, 3.5vw, 38px) clamp(20px, 2.6vw, 28px);
   margin: 6px 0;
   text-align: left;
-  box-shadow: 0 14px 44px -24px rgba(34, 34, 34, 0.35);
 }
 .pd-map > * { animation: pd-rise 260ms ease both; }
-.pd-map .map-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 12px; border-bottom: 1.5px solid var(--pd-ink); }
+.pd-map .map-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--pd-hair); }
 .pd-map .map-mark { font-weight: 800; font-size: 15px; letter-spacing: -0.02em; color: var(--pd-ink); }
-.pd-map .map-label { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-body); text-align: right; }
-.pd-map .map-title { margin-top: 18px; font-size: clamp(22px, 2.6vw, 30px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; color: var(--pd-ink); }
-.pd-map .map-thesis { margin-top: 8px; font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.04em; color: var(--pd-body); text-transform: uppercase; line-height: 1.6; }
+.pd-map .map-label { display: inline-flex; align-items: center; gap: 7px; background: #0A7A58; color: #FCFAF6; font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.12em; padding: 5px 9px; text-align: right; }
+.pd-map .map-label::before { content: ''; width: 7px; height: 7px; background: #FCFAF6; flex: none; }
+.pd-map .map-title { margin-top: 18px; font-family: var(--pd-display); font-size: clamp(22px, 2.6vw, 30px); font-weight: 600; letter-spacing: -0.01em; line-height: 1.12; color: var(--pd-ink); }
+.pd-map .map-thesis { margin-top: 8px; font-family: var(--pd-mono); font-size: 12.5px; letter-spacing: 0.05em; color: var(--pd-tert); line-height: 1.6; }
 .pd-map .map-answer { margin-top: 20px; border-left: 3px solid var(--pd-ink); padding: 4px 0 4px 16px; }
-.pd-map .map-answer .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
+.pd-map .map-answer .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #0A7A58; }
 .pd-map .map-answer .v { margin-top: 6px; font-size: 17px; font-weight: 700; line-height: 1.5; color: var(--pd-ink); }
 .pd-map .map-funnel { margin-top: 22px; border-top: 1px solid var(--pd-hair); padding-top: 16px; }
-.pd-map .map-funnel .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
+.pd-map .map-funnel .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #0A7A58; }
 .pd-map .map-step { display: flex; align-items: baseline; gap: 26px; padding: 8px 0 2px; animation: pd-rise 260ms ease both; }
-.pd-map .map-step .n { font-size: clamp(30px, 3.8vw, 46px); font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--pd-ink); min-width: clamp(96px, 13vw, 150px); white-space: nowrap; }
+.pd-map .map-step .n { font-family: var(--pd-display); font-size: clamp(30px, 3.8vw, 46px); font-weight: 600; letter-spacing: -0.02em; line-height: 1; color: var(--pd-ink); min-width: clamp(96px, 13vw, 150px); white-space: nowrap; }
 .pd-map .map-step .l { font-size: 14.5px; line-height: 1.45; color: var(--pd-body); }
 .pd-map .map-sec { margin-top: 18px; }
-.pd-map .map-sec .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
+.pd-map .map-sec .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #0A7A58; }
 .pd-map .map-sec .v { margin-top: 5px; font-size: 14.5px; line-height: 1.6; color: var(--pd-ink); }
 /* The punchline block — the one place a tint and a weight shift is earned. */
-.pd-map .map-insight { margin-top: 22px; background: var(--pd-card); border-radius: 10px; padding: 18px 20px; }
-.pd-map .map-insight .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-ink); }
+.pd-map .map-insight { margin-top: 22px; background: #F9F7F1; border: 1px solid var(--pd-hair); border-radius: 0; padding: 18px 20px; }
+.pd-map .map-insight .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #0A7A58; }
 .pd-map .map-insight .v { margin-top: 7px; font-size: 15.5px; font-weight: 600; line-height: 1.6; color: var(--pd-ink); }
 .pd-map .map-foot { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--pd-hair); display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap; }
 .pd-map .map-foot .src { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.02em; line-height: 1.6; color: var(--pd-body); flex: 1 1 320px; }
 .pd-map .map-pdf {
-  /* Same voice as every other primary CTA (was a one-off outlined pill). */
-  border: none; background: var(--pd-cta); color: #fff;
-  border-radius: 99px; padding: 11px 24px; font-size: 13.5px; font-weight: 700; white-space: nowrap;
+  /* Same voice as every other primary CTA — ink at rest, green on hover. */
+  border: none; background: var(--pd-ink); color: #FCFAF6;
+  border-radius: 9px; padding: 11px 20px; font-size: 14px; font-weight: 600; white-space: nowrap;
   transition: background-color 160ms ease;
 }
-.pd-map .map-pdf:hover { background: var(--pd-cta-hover); color: #fff; }
+.pd-map .map-pdf:hover { background: #0A7A58; color: #FCFAF6; }
 .pd-map .map-pdf:disabled { opacity: 0.55; cursor: default; }
 /* Rebuilt sample read (Paul, 2026-07-15): counts compress to one setup strip;
    the payoff is judgment — the 9, the screens, the dollar swing, the verdict. */
 .pd-map .map-flow { margin-top: 22px; border-top: 1px solid var(--pd-hair); padding-top: 18px; display: flex; align-items: baseline; gap: 10px 14px; flex-wrap: wrap; }
-.pd-map .map-flow .k { flex-basis: 100%; font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
+.pd-map .map-flow .k { flex-basis: 100%; font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #0A7A58; }
 .pd-map .map-flow .f { display: flex; align-items: baseline; gap: 8px; }
-.pd-map .map-flow .f .n { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; color: var(--pd-ink); white-space: nowrap; }
+.pd-map .map-flow .f .n { font-family: var(--pd-display); font-size: 24px; font-weight: 600; letter-spacing: -0.01em; color: var(--pd-ink); white-space: nowrap; }
 .pd-map .map-flow .f .l { font-size: 13.5px; line-height: 1.4; color: var(--pd-body); }
 .pd-map .map-flow .arr { color: var(--pd-faint); font-weight: 700; }
 .pd-map .map-nine { margin-top: 16px; display: flex; align-items: center; gap: 22px; }
-.pd-map .map-nine .n { font-size: clamp(60px, 7.5vw, 96px); font-weight: 800; letter-spacing: -0.04em; line-height: 0.85; color: var(--pd-coral-link); }
+.pd-map .map-nine .n { font-family: var(--pd-display); font-size: clamp(60px, 7.5vw, 96px); font-weight: 550; letter-spacing: -0.02em; line-height: 0.9; color: var(--pd-ink); }
 .pd-map .map-nine .l { font-size: 16.5px; font-weight: 600; line-height: 1.5; color: var(--pd-ink); max-width: 24em; }
 .pd-map .map-screens { margin-top: 28px; }
-.pd-map .map-screens .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
+.pd-map .map-screens .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #0A7A58; }
 .pd-map .map-scr { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 4px 14px; padding: 15px 0; }
 .pd-map .map-scr + .map-scr { border-top: 1px solid var(--pd-hair); }
 .pd-map .map-scr .i { grid-row: 1 / 3; font-family: var(--pd-mono); font-size: 13px; color: var(--pd-tert); padding-top: 3px; }
 .pd-map .map-scr .t { font-size: 16px; font-weight: 700; color: var(--pd-ink); }
 .pd-map .map-scr .b { font-size: 14.5px; line-height: 1.6; color: var(--pd-body); }
-.pd-map .map-number { margin-top: 24px; background: var(--pd-ink); border-radius: 12px; padding: 24px 26px; }
-.pd-map .map-number .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral); }
-.pd-map .map-number .big { margin-top: 10px; font-size: clamp(40px, 5vw, 60px); font-weight: 800; letter-spacing: -0.035em; line-height: 1; color: #fff; }
-.pd-map .map-number .v { margin-top: 12px; font-size: 15px; line-height: 1.65; color: rgba(255, 255, 255, 0.85); }
-.pd-map .map-number .v strong { color: #fff; }
-.pd-map .map-verdict { margin-top: 24px; border-left: 3px solid var(--pd-coral-link); padding: 4px 0 4px 18px; }
-.pd-map .map-verdict .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
+.pd-map .map-number { margin-top: 24px; position: relative; background: #131512; border-radius: 0; padding: 24px 26px; background-image: radial-gradient(rgba(168, 240, 206, 0.16) 1px, transparent 1px); background-size: 14px 14px; }
+.pd-map .map-number .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #A8F0CE; }
+.pd-map .map-number .big { margin-top: 10px; font-family: var(--pd-display); font-size: clamp(40px, 5vw, 60px); font-weight: 550; letter-spacing: -0.02em; line-height: 1; color: #A8F0CE; }
+.pd-map .map-number .v { margin-top: 12px; font-size: 15px; line-height: 1.65; color: #D7DBD2; }
+.pd-map .map-number .v strong { color: #F4F5F1; }
+.pd-map .map-verdict { margin-top: 24px; border-left: 3px solid #0A7A58; padding: 4px 0 4px 18px; }
+.pd-map .map-verdict .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #0A7A58; }
 .pd-map .map-verdict .v { margin-top: 7px; font-size: 16px; font-weight: 600; line-height: 1.6; color: var(--pd-ink); }
 @media (max-width: 640px) { .pd-map .map-nine { gap: 16px; } .pd-map .map-nine .l { font-size: 15px; } }
 

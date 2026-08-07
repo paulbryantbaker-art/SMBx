@@ -22,7 +22,7 @@
  */
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'wouter';
-import PracticeShell, { PageCrumb } from './PracticeShell';
+import PracticeShell, { Handles } from './PracticeShell';
 import { getReport, loadReportBody, type ReportBody } from './reports/registry';
 import DownloadCard from './reports/DownloadCard';
 import { usePageMeta } from './reports/usePageMeta';
@@ -232,7 +232,14 @@ export default function ReportPage({ slug }: { slug: string }) {
         {/* ── masthead ─────────────────────────────────────────────── */}
         <header className="rp-head">
           <div className="pd-wrap rp-head-in">
-            <PageCrumb parent={{ label: 'Research', href: '/research' }} here={report.shortTitle} />
+            {/* The Carta mono breadcrumb (the About-page grammar). */}
+            <nav aria-label="Breadcrumb" style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, letterSpacing: '0.12em', color: '#7C8187', marginBottom: 'clamp(18px, 2.6vw, 32px)' }}>
+              <Link href="/" style={{ color: '#0A7A58' }}>SMBX</Link>
+              <span style={{ margin: '0 10px' }}>/</span>
+              <Link href="/research" style={{ color: '#0A7A58' }}>RESEARCH</Link>
+              <span style={{ margin: '0 10px' }}>/</span>
+              <span style={{ color: '#16181A' }}>{report.shortTitle.toUpperCase()}</span>
+            </nav>
             <div className="rp-kicker">{report.kicker}</div>
             <h1 className="rp-title">{s.title}</h1>
             {s.subtitle && <p className="rp-sub">{s.subtitle}</p>}
@@ -251,14 +258,17 @@ export default function ReportPage({ slug }: { slug: string }) {
             </div>
 
             {s.coverImage && (
-              <img
-                className="rp-cover"
-                src={s.coverImage}
-                style={{ objectPosition: s.coverPos }}
-                alt=""
-                fetchPriority="high"
-                decoding="async"
-              />
+              <div style={{ position: 'relative', width: '100%', marginTop: 'clamp(30px, 3.6vw, 48px)' }}>
+                <img
+                  className="rp-cover"
+                  src={s.coverImage}
+                  style={{ objectPosition: s.coverPos }}
+                  alt=""
+                  fetchPriority="high"
+                  decoding="async"
+                />
+                <Handles />
+              </div>
             )}
           </div>
         </header>
@@ -314,24 +324,28 @@ export default function ReportPage({ slug }: { slug: string }) {
           </div>
         </div>
 
-        {/* ── the ask ──────────────────────────────────────────────── */}
-        <section className="rp-cta" id="cta">
-          <div className="pd-wrap rp-cta-in">
-            <h2 className="pd-cta-h">Buying in this market?</h2>
-            <p className="pd-body rp-cta-p">
+        {/* ── the ask — the dark band the Research index also closes on ── */}
+        <section id="cta" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(110px, 10vw, 160px) 32px', marginTop: 'clamp(70px, 8vw, 120px)', position: 'relative', overflow: 'hidden' }}>
+          <div aria-hidden="true" data-plx="0.025" style={{ position: 'absolute', right: '6%', bottom: 30, width: 260, height: 150, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
+          <div style={{ maxWidth: 840, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
+            <h2 data-rv style={{ margin: 0, fontFamily: "'Source Serif 4', Georgia, serif", fontWeight: 550, fontSize: 'clamp(34px, 3.6vw, 58px)', lineHeight: 1.1, letterSpacing: '-0.014em' }}>Buying in this market?</h2>
+            <p data-rv style={{ margin: '24px auto 0', maxWidth: '36em', fontSize: 17.5, lineHeight: 1.65, color: '#ABB2AB' }}>
               This is the research we run before a mandate. If you're building a
               platform or adding to one, a conversation costs nothing and we'll
               tell you plainly whether the lane is open.
             </p>
-            <a
-              className="pd-pill-primary pd-pill-lg"
-              href={bookHref()}
-              target={bookTarget()}
-              rel={bookRel()}
-              onClick={() => trackEvent('practice_cta_clicked', { placement: 'report', slug })}
-            >
-              Book a confidential call
-            </a>
+            <div data-rv style={{ marginTop: 38 }}>
+              <a
+                href={bookHref()}
+                target={bookTarget()}
+                rel={bookRel()}
+                className="ca-h-mintbg"
+                style={{ display: 'inline-block', fontSize: 17, fontWeight: 600, color: '#16181A', background: '#FCFAF6', padding: '16px 30px', borderRadius: 10, whiteSpace: 'nowrap' }}
+                onClick={() => trackEvent('practice_cta_clicked', { placement: 'report', slug })}
+              >
+                Book a confidential call
+              </a>
+            </div>
           </div>
         </section>
       </article>

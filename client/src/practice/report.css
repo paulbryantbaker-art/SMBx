@@ -2,13 +2,13 @@
  * Report pages — `.rp-*` (2026-07-29).
  *
  * A SELF-CONTAINED DOCUMENT SCOPE, the same sanctioned exemption the Market
- * Map (`.pd-map`/`.map-*`) carries: it holds PDF parity with
- * `scripts/studio/build-report.mts`, so its prose ladder is the report's, not
- * the marketing page's. Everything else obeys the site — colour, shape, the
- * two-width law, the 13px floor, no decorative eyebrows.
+ * Map (`.pd-map`/`.map-*`) carries: its prose ladder is the report's, not the
+ * marketing page's. CARTA (2026-08-07): colour, shape and accent now follow
+ * the Carta system — square corners, hairlines, ONE green accent (the brass
+ * jewellery retired with Aurora), ink-filled buttons per the button law.
  *
- * Body ink here is #3F464C rather than the site's #5A6169: this is a
- * 37-minute read, and it is the exact body colour the PDF uses.
+ * Body ink here is #3F464C rather than the site's body grey: this is a
+ * 37-minute read and the darker ink carries it.
  */
 
 /* Two knobs for the read (2026-07-29). The running measure governs PROSE only
@@ -60,14 +60,17 @@
    the report kicker was the last mono holdout; it now speaks .pd-seclabel's
    header-weight Inter, sized a step down for the masthead and cards. */
 .rp-kicker {
-  font-size: 15px; letter-spacing: 0.04em;
-  text-transform: uppercase; color: var(--pd-coral-link); font-weight: 800;
+  display: inline-flex; align-items: center; gap: 7px;
+  background: #0A7A58; color: #FCFAF6;
+  font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.12em;
+  text-transform: uppercase; font-weight: 400; padding: 5px 9px;
 }
+.rp-kicker::before { content: ''; width: 7px; height: 7px; background: #FCFAF6; }
 .rp-head .rp-kicker { margin-top: clamp(18px, 2.6vw, 32px); }
 
 .rp-title {
   margin: 18px 0 0;
-  font-family: var(--pd-display); font-optical-sizing: auto; font-weight: 545;
+  font-family: var(--pd-display); font-optical-sizing: auto; font-weight: 550;
   font-size: clamp(34px, 4.6vw, 60px); line-height: 1.04; letter-spacing: -0.018em;
   color: var(--pd-ink); max-width: 17em; text-wrap: balance;
 }
@@ -98,9 +101,8 @@
    the carousel pass (fades on light paper read as smudges). */
 .rp-cover {
   display: block; width: 100%; height: clamp(220px, 34vw, 460px);
-  object-fit: cover; margin-top: clamp(30px, 3.6vw, 48px);
-  border-radius: 16px; border: 1px solid var(--pd-hair);
-  box-shadow: 0 12px 34px rgba(20, 24, 28, 0.10);
+  object-fit: cover; margin-top: 0;
+  border-radius: 0; border: 1px solid var(--pd-hair);
 }
 
 /* ═══ key findings ═══════════════════════════════════════════════════════ */
@@ -117,13 +119,18 @@
 }
 .rp-stat { display: flex; flex-direction: column; gap: 12px; }
 .rp-stat-n {
-  font-family: var(--pd-display); font-optical-sizing: auto; font-weight: 545;
+  font-family: var(--pd-display); font-optical-sizing: auto; font-weight: 550;
   font-size: clamp(34px, 3.4vw, 47px); line-height: 1; letter-spacing: -0.03em;
-  color: var(--pd-brass); font-variant-numeric: tabular-nums;
+  color: var(--pd-ink); font-variant-numeric: tabular-nums;
 }
 .rp-stat-l {
+  position: relative;
   font-size: 15px; line-height: 1.55; color: var(--pd-body);
-  padding-top: 12px; border-top: 1px solid var(--pd-hair);
+  padding-top: 12px; border-top: 2px solid var(--pd-ink);
+}
+.rp-stat-l::before {
+  content: ''; position: absolute; top: -2px; left: 0;
+  width: 38px; height: 2px; background: #0A7A58;
 }
 
 /* ═══ the read — contents rail + column ══════════════════════════════════ */
@@ -161,7 +168,7 @@
   min-width: 0;
   background: #fff;
   border: 1px solid var(--pd-hair);
-  border-radius: 6px;
+  border-radius: 0;
   box-shadow: 0 1px 2px rgba(20, 24, 28, 0.04), 0 10px 34px rgba(20, 24, 28, 0.055);
   padding: clamp(30px, 4.2vw, 68px) clamp(24px, 3.6vw, 62px) clamp(44px, 5vw, 78px);
 }
@@ -234,8 +241,8 @@
 .rp-toc-n {
   flex: none; margin-left: auto;
   font-family: var(--pd-mono); font-size: 11.5px; font-variant-numeric: tabular-nums;
-  color: var(--pd-brass); padding: 1px 6px;
-  background: rgba(232, 166, 43, 0.10); border-radius: 5px;
+  color: #0A7A58; padding: 1px 6px;
+  background: var(--pd-tint-chip); border-radius: 0;
 }
 .rp-toc-a:hover { color: var(--pd-ink); }
 .rp-toc-a.on { color: var(--pd-coral-link); border-left-color: var(--pd-coral); font-weight: 600; }
@@ -271,14 +278,18 @@
 
 .rp-prose h1 {
   margin: clamp(58px, 6vw, 88px) 0 22px;
-  font-family: var(--pd-display); font-optical-sizing: auto; font-weight: 545;
+  font-family: var(--pd-display); font-optical-sizing: auto; font-weight: 550;
   font-size: clamp(30px, 3.2vw, 42px); line-height: 1.1; letter-spacing: -0.015em;
-  color: var(--pd-ink); padding-top: 26px; border-top: 2px solid var(--pd-brass);
-  text-wrap: balance;
+  color: var(--pd-ink); padding-top: 26px; border-top: 2px solid var(--pd-ink);
+  position: relative; text-wrap: balance;
+}
+.rp-prose h1::before {
+  content: ''; position: absolute; top: -2px; left: 0;
+  width: 44px; height: 2px; background: #0A7A58;
 }
 .rp-prose h2 {
   margin: clamp(48px, 5vw, 72px) 0 18px;
-  font-family: var(--pd-display); font-optical-sizing: auto; font-weight: 545;
+  font-family: var(--pd-display); font-optical-sizing: auto; font-weight: 600;
   font-size: clamp(26px, 2.7vw, 35px); line-height: 1.15; letter-spacing: -0.012em;
   color: var(--pd-ink); text-wrap: balance;
 }
@@ -306,18 +317,18 @@
    tint build-report.mts gives it, so the page and the PDF agree. */
 .rp-prose blockquote {
   margin: 30px 0; padding: 16px 22px;
-  border-left: 3px solid var(--pd-brass);
-  background: rgba(232, 166, 43, 0.06); border-radius: 0 10px 10px 0;
+  border-left: 3px solid #0A7A58;
+  background: rgba(10, 122, 88, 0.06); border-radius: 0;
   color: #3F464C;
 }
 .rp-prose blockquote > :last-child { margin-bottom: 0; }
 .rp-prose blockquote p, .rp-prose blockquote li { font-size: 16px; line-height: 1.6; }
 .rp-prose code {
   font-family: var(--pd-mono); font-size: 0.88em;
-  background: var(--pd-band); padding: 2px 6px; border-radius: 5px;
+  background: var(--pd-band); padding: 2px 6px; border-radius: 0;
 }
 .rp-prose pre {
-  background: var(--pd-band); padding: 18px 20px; border-radius: 10px;
+  background: var(--pd-band); padding: 18px 20px; border-radius: 0;
   overflow-x: auto; margin: 0 0 22px;
 }
 .rp-prose pre code { background: none; padding: 0; }
@@ -332,8 +343,7 @@
 .rp-accent {
   display: block; width: 100%; height: clamp(200px, 26vw, 330px);
   object-fit: cover; margin: clamp(28px, 3vw, 40px) 0;
-  border-radius: 14px; border: 1px solid var(--pd-hair);
-  box-shadow: 0 8px 26px rgba(20, 24, 28, 0.10);
+  border-radius: 0; border: 1px solid var(--pd-hair);
 }
 
 /* ── tables: hairline, mono headers, brass underline, tabular figures ──
@@ -376,7 +386,7 @@
   font-family: var(--pd-mono); font-size: 12.5px; letter-spacing: 0.07em;
   text-transform: uppercase; color: var(--pd-body); font-weight: 500;
   text-align: left; padding: 0 16px 10px 0; white-space: nowrap;
-  border-bottom: 2px solid var(--pd-brass);
+  border-bottom: 2px solid var(--pd-ink);
 }
 .rp-prose tbody td {
   padding: 12px 16px 12px 0; vertical-align: top; line-height: 1.5;
@@ -399,8 +409,8 @@
 /* ═══ the takeaway card ══════════════════════════════════════════════════ */
 .rp-dl {
   margin: clamp(34px, 4vw, 52px) 0;
-  background: var(--pd-card); border: 1px solid var(--pd-border);
-  border-radius: 16px; box-shadow: 0 8px 26px rgba(20, 24, 28, 0.055);
+  background: #fff; border: 1px solid var(--pd-border);
+  border-radius: 0; box-shadow: 0 8px 26px rgba(20, 24, 28, 0.055);
   max-width: 34em;
 }
 /* Tighter at rest than it was, because at rest this is now a button and
@@ -422,7 +432,7 @@
 .rp-dl-row { display: flex; gap: 10px; flex-wrap: wrap; }
 .rp-dl-input {
   flex: 1 1 200px; min-width: 0; padding: 14px 18px;
-  border: 1px solid var(--pd-border); border-radius: 999px;
+  border: 1.5px solid var(--pd-border); border-radius: 10px;
   font-family: inherit; font-size: 16px; color: var(--pd-ink);
   background: #fff; outline: none;
 }
@@ -435,7 +445,7 @@
 
 /* Returning from a stale or already-used link. */
 .rp-dl-note {
-  margin: 0 0 16px; padding: 12px 16px; border-radius: 10px;
+  margin: 0 0 16px; padding: 12px 16px; border-radius: 0;
   background: var(--pd-band); font-size: 14.5px; line-height: 1.55; color: var(--pd-ink);
 }
 
@@ -461,20 +471,20 @@
   position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
   z-index: 55; display: flex; align-items: center; gap: 12px;
   padding: 11px 12px 11px 20px; max-width: calc(100vw - 32px);
-  background: var(--pd-dark-bg); color: #F2FBF6;
-  border-radius: 999px; box-shadow: 0 12px 34px rgba(10, 106, 76, 0.34);
+  background: #131512; color: #F4F5F1;
+  border-radius: 10px; box-shadow: 0 12px 34px rgba(22, 24, 26, 0.34);
   animation: rp-rise 0.32s ease-out both;
 }
 @keyframes rp-rise { from { opacity: 0; transform: translate(-50%, 12px); } }
-.rp-resume-t { font-size: 14.5px; color: #C9E8DA; }
+.rp-resume-t { font-size: 14.5px; color: #D7DBD2; }
 .rp-resume-go {
-  background: #A8F0CE; color: #0A6A4C; border: 0; cursor: pointer;
+  background: #A8F0CE; color: #16181A; border: 0; cursor: pointer;
   font: inherit; font-size: 14.5px; font-weight: 600;
-  padding: 9px 18px; border-radius: 999px; white-space: nowrap;
+  padding: 9px 18px; border-radius: 8px; white-space: nowrap;
 }
 .rp-resume-go:hover { background: #C2F5DC; }
 .rp-resume-x {
-  background: none; border: 0; cursor: pointer; color: #C9E8DA;
+  background: none; border: 0; cursor: pointer; color: #D7DBD2;
   font-size: 22px; line-height: 1; padding: 0 6px;
 }
 .rp-resume-x:hover { color: #fff; }
@@ -484,102 +494,9 @@
 .rp-toc-sheet { display: none; }
 
 /* ═══ index page ═════════════════════════════════════════════════════════ */
-/* Centred, matching the landing's section heads and this page's own closing
-   CTA — which was already centred, so the left-aligned masthead was the one
-   thing on the page reading off-axis (Paul, 2026-07-29: "center the hero on
-   the research page too").
-   `text-align` alone is not enough: .pd-h2 and .rp-idx-sub both carry a max-
-   width and `margin: 0`, so their BOX stays flush left and only the text
-   inside it would centre. The auto side margins centre the box — the same
-   pairing .pd-sechead uses on the landing. */
-.rp-idx-head { padding-top: clamp(46px, 6vw, 88px); text-align: center; }
-.rp-idx-head .pd-h2 { margin-left: auto; margin-right: auto; }
-.rp-idx-sub { margin: 22px auto 0; max-width: 34em; }
-/* FACET CHIPS (2026-08-03, Paul: "group / Filter by Industry and or Metro
-   Area"). One row per facet, label + chips, values read from the registry so
-   the UI grows itself. Active chip takes the accent fill — the same green the
-   CTA pill wears, because both mean "this is the selected action". A row with
-   a single value never renders (see ReportsIndex), so the bar only appears
-   once the shelf actually needs filtering. */
-.rp-filters {
-  display: flex; flex-direction: column; gap: 12px;
-  padding-top: clamp(28px, 3.5vw, 44px);
-}
-.rp-filter-group { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.rp-filter-label {
-  font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.08em;
-  text-transform: uppercase; color: var(--pd-tert); margin-right: 6px;
-  min-width: 5.5em;
-}
-.rp-fchip {
-  appearance: none; cursor: pointer;
-  font-family: var(--pd-font, inherit); font-size: 14px; font-weight: 600;
-  color: var(--pd-body); background: var(--pd-card);
-  border: 1px solid var(--pd-hair); border-radius: 99px;
-  padding: 7px 16px; line-height: 1.2;
-  transition: border-color 120ms ease, color 120ms ease;
-}
-.rp-fchip:hover { border-color: var(--pd-coral); color: var(--pd-ink); }
-.rp-fchip.on {
-  background: var(--pd-coral); border-color: var(--pd-coral); color: #fff;
-}
-.rp-filter-empty {
-  grid-column: 1 / -1; text-align: center;
-  padding: clamp(30px, 5vw, 60px) 0;
-  display: flex; flex-direction: column; align-items: center; gap: 16px;
-}
-
-/* NO `align-items: start` — cards in a row are the same height, so the shelf
-   reads as a set rather than as two things that happen to sit side by side.
-   The abstract absorbs the slack (see .rp-card-p), which lands every card's
-   stat band and CTA on the same line across the row. */
-.rp-idx-list {
-  display: grid; gap: clamp(26px, 3vw, 40px);
-  padding-top: clamp(40px, 5vw, 66px);
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-}
-.rp-card {
-  background: var(--pd-card); border: 1px solid var(--pd-hair);
-  border-radius: 16px; padding: clamp(26px, 3vw, 36px);
-  box-shadow: 0 8px 26px rgba(20, 24, 28, 0.05);
-  display: flex; flex-direction: column;
-}
-.rp-card-top {
-  display: flex; align-items: baseline; justify-content: space-between;
-  gap: 14px; margin-bottom: 16px;
-}
-.rp-card-date {
-  font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.08em;
-  color: var(--pd-tert); text-transform: uppercase;
-}
-.rp-card-h {
-  margin: 0 0 14px; font-family: var(--pd-display); font-optical-sizing: auto;
-  font-weight: 545; font-size: clamp(25px, 2.4vw, 32px); line-height: 1.14;
-  letter-spacing: -0.014em;
-}
-.rp-card-h a { color: var(--pd-ink); text-decoration: none; }
-.rp-card-h a:hover { color: var(--pd-coral-link); }
-/* flex: 1 — the abstract takes the leftover height so everything below it aligns. */
-.rp-card-p { flex: 1; margin: 0 0 22px; font-size: 16px; line-height: 1.65; color: var(--pd-body); }
-.rp-card-stats {
-  display: flex; flex-wrap: wrap; gap: 20px 30px;
-  padding: 20px 0; margin-bottom: 22px;
-  border-top: 1px solid var(--pd-hair); border-bottom: 1px solid var(--pd-hair);
-}
-.rp-card-stat { display: flex; flex-direction: column; gap: 5px; max-width: 15em; }
-.rp-card-stat .n {
-  font-family: var(--pd-display); font-weight: 545; font-size: 25px;
-  line-height: 1; color: var(--pd-brass); letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-}
-.rp-card-stat .l { font-size: 13.5px; line-height: 1.45; color: var(--pd-body); }
-.rp-card-foot {
-  margin-top: auto; display: flex; flex-wrap: wrap; align-items: center;
-  gap: 16px 20px;
-}
-.rp-card-cta { text-decoration: none; }
-.rp-card-meta { font-size: 13.5px; color: var(--pd-tert); }
-
+/* The /research shelf was transcribed into ReportsIndex.tsx with inline
+   Carta styles (2026-08-07) — its old .rp-idx/.rp-filters/.rp-card rules are
+   gone. Only the not-found state below still renders from this scope. */
 .rp-missing { padding: clamp(80px, 12vw, 160px) 0 clamp(60px, 8vw, 100px); }
 .rp-missing .pd-body { margin-top: 16px; }
 .rp-missing a { color: var(--pd-coral-link); }
@@ -597,9 +514,9 @@
   .rp-toc-fab {
     display: block; position: fixed; left: 16px; right: auto; bottom: 20px; z-index: 54;
     padding: 13px 22px; border: 0; cursor: pointer; font: inherit;
-    font-size: 14.5px; font-weight: 600; border-radius: 999px;
-    background: var(--pd-dark-bg); color: #F2FBF6;
-    box-shadow: 0 10px 28px rgba(10, 106, 76, 0.3);
+    font-size: 14.5px; font-weight: 600; border-radius: 10px;
+    background: #131512; color: #F4F5F1;
+    box-shadow: 0 10px 28px rgba(22, 24, 26, 0.3);
   }
   /* The place-keeper sits above the contents button rather than under it. */
   .rp-resume { bottom: 84px; }
@@ -608,14 +525,14 @@
   .rp-toc-scrim {
     position: absolute; inset: 0; width: 100%; height: 100%;
     border: 0; padding: 0; cursor: pointer;
-    background: rgba(10, 106, 76, 0.5);
+    background: rgba(22, 24, 26, 0.5);
     animation: rp-fade 0.2s ease-out both;
   }
   @keyframes rp-fade { from { opacity: 0; } }
   .rp-toc-panel {
     position: absolute; left: 0; right: 0; bottom: 0; max-height: 78dvh;
     overflow-y: auto; overscroll-behavior: contain;
-    background: #FCFAF6; border-radius: 20px 20px 0 0;
+    background: #FCFAF6; border-radius: 0;
     padding: 22px 24px calc(28px + env(safe-area-inset-bottom));
     animation: rp-up 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
@@ -717,30 +634,6 @@
   @keyframes rp-rise { from { opacity: 0; transform: translateY(12px); } }
   .rp-resume-t { flex: 1 1 100%; }
 
-  /* THE SHELF, COMPACT (Paul, 2026-08-03: "we need a better way to see
-     research docs in Mobile. they take up a lot of vertical space").
-     A desktop card is a full pitch — kicker, 32px title, abstract, a stat
-     band, a pill — and on a 390px screen each one ran ~600px tall, so three
-     reports meant two screens of scrolling before the shelf was even seen.
-     On the phone a card's job is smaller: say what the report is and open
-     it. So: stats hidden (they repeat the abstract's own numbers and the
-     masthead shows them in full on tap-through), the abstract clamped to
-     three lines, the title a size down, and the padding cut to phone scale.
-     The CTA pill stays — it is the tap target the whole card promises. */
-  .rp-card { padding: 18px 18px 16px; border-radius: 14px; }
-  .rp-card-top { margin-bottom: 8px; }
-  .rp-card-h { margin-bottom: 8px; font-size: 21px; }
-  .rp-card-p {
-    margin-bottom: 14px; font-size: 15px; line-height: 1.55;
-    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .rp-card-stats { display: none; }
-  .rp-card-foot { gap: 10px 14px; }
-  .rp-card-cta { padding: 10px 20px; font-size: 15px; }
-  .rp-idx-list { gap: 14px; padding-top: 30px; }
-  .rp-idx-head { padding-top: 34px; }
-  .rp-idx-sub { margin-top: 14px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -755,14 +648,14 @@
 .rp-ask-fab {
   position: fixed; right: clamp(14px, 2vw, 26px); bottom: clamp(14px, 2vw, 26px);
   z-index: 55; display: inline-flex; align-items: center; gap: 9px;
-  padding: 12px 20px; border: 0; border-radius: 999px; cursor: pointer;
-  background: var(--pd-coral); color: #fff;
+  padding: 12px 20px; border: 0; border-radius: 10px; cursor: pointer;
+  background: #16181A; color: #FCFAF6;
   font: inherit; font-size: 14.5px; font-weight: 600; letter-spacing: -0.005em;
   box-shadow: 0 10px 30px rgba(20, 24, 28, 0.22);
   transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
 }
 .rp-ask-fab:hover {
-  background: var(--pd-coral-hover);
+  background: #0A7A58;
   transform: translateY(-1px); box-shadow: 0 14px 36px rgba(20, 24, 28, 0.26);
 }
 .rp-ask-fab svg { width: 17px; height: 17px; flex: none; }
@@ -772,7 +665,7 @@
   z-index: 56; width: min(420px, calc(100vw - 28px));
   max-height: min(620px, calc(100dvh - 96px));
   display: flex; flex-direction: column;
-  background: #fff; border: 1px solid var(--pd-border); border-radius: 18px;
+  background: #fff; border: 1px solid #16181A; border-radius: 0;
   box-shadow: 0 24px 60px rgba(20, 24, 28, 0.24);
   overflow: hidden;
 }
@@ -796,25 +689,25 @@
 }
 .rp-ask-starters { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
 .rp-ask-chip {
-  text-align: left; padding: 9px 14px; border-radius: 999px; cursor: pointer;
-  background: var(--pd-card); border: 1px solid var(--pd-border);
+  text-align: left; padding: 9px 14px; border-radius: 0; cursor: pointer;
+  background: #fff; border: 1px solid var(--pd-border);
   font: inherit; font-size: 13.5px; color: var(--pd-ink);
   transition: border-color 0.14s, background 0.14s;
 }
-.rp-ask-chip:hover { border-color: var(--pd-coral); background: #fff; }
+.rp-ask-chip:hover { border-color: #0A7A58; color: #0A7A58; background: #fff; }
 
 .rp-ask-turn p { margin: 0 0 8px; font-size: 14.5px; line-height: 1.62; }
 .rp-ask-turn p:last-child { margin-bottom: 0; }
 .rp-ask-turn.user {
   align-self: flex-end; max-width: 88%;
-  background: var(--pd-coral); color: #fff;
-  padding: 10px 15px; border-radius: 15px 15px 4px 15px;
+  background: #F3F0E9; color: var(--pd-ink);
+  padding: 10px 15px; border-radius: 0;
 }
 .rp-ask-turn.assistant { color: #3F464C; }
 .rp-ask-wait { color: var(--pd-tert); font-style: italic; }
 .rp-ask-err {
   font-size: 13.5px; line-height: 1.55; color: #8A3B2F;
-  background: #FBEFEC; border: 1px solid #F0D8D2; border-radius: 10px; padding: 10px 13px;
+  background: #FBEFEC; border: 1px solid #F0D8D2; border-radius: 0; padding: 10px 13px;
 }
 
 .rp-ask-form {
@@ -824,24 +717,24 @@
 .rp-ask-in {
   flex: 1; min-width: 0; resize: none; max-height: 120px;
   padding: 10px 13px; font: inherit; font-size: 14.5px; line-height: 1.5;
-  color: var(--pd-ink); background: var(--pd-card);
-  border: 1px solid var(--pd-border); border-radius: 12px;
+  color: var(--pd-ink); background: #FCFAF6;
+  border: 1.5px solid var(--pd-border); border-radius: 10px;
 }
 .rp-ask-in:focus {
-  outline: none; border-color: var(--pd-coral); background: #fff;
+  outline: none; border-color: #0A7A58; background: #fff;
   box-shadow: 0 0 0 3px rgba(10, 122, 88, 0.12);
 }
 /* Same reason as the search field: the border carries focus, and the global
    ring would draw a second box inside the input. */
 .rp-ask-in:focus-visible { outline: none; }
 .rp-ask-send {
-  flex: none; width: 38px; height: 38px; border: 0; border-radius: 50%;
-  background: var(--pd-coral); color: #fff; cursor: pointer;
+  flex: none; width: 38px; height: 38px; border: 0; border-radius: 9px;
+  background: #16181A; color: #FCFAF6; cursor: pointer;
   font-size: 17px; line-height: 1; display: grid; place-items: center;
   transition: background 0.14s, opacity 0.14s;
 }
 .rp-ask-send:disabled { opacity: 0.34; cursor: default; }
-.rp-ask-send:not(:disabled):hover { background: var(--pd-coral-hover); }
+.rp-ask-send:not(:disabled):hover { background: #0A7A58; }
 
 /* The mobile Contents launcher already owns the bottom-left; keep the two
    from colliding on a phone by shortening the FAB to its icon. */
