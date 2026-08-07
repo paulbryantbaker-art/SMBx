@@ -135,7 +135,7 @@ crmRouter.get('/crm/accounts', async (req, res) => {
         ${req.query.moment ? sql`AND a.buyer_moment = ${String(req.query.moment)}` : sql``}
         ${req.query.due ? sql`AND a.next_action_on IS NOT NULL AND a.next_action_on <= CURRENT_DATE` : sql``}
         ${q ? sql`AND (a.firm ILIKE ${'%' + q + '%'} OR a.notes ILIKE ${'%' + q + '%'} OR a.trades ILIKE ${'%' + q + '%'})` : sql``}
-      ORDER BY a.score DESC NULLS LAST, a.firm ASC
+      ORDER BY (a.tier IS NULL), a.tier ASC, a.score DESC NULLS LAST, a.firm ASC
     `;
     return res.json(rows);
   } catch (err: any) {
@@ -421,6 +421,60 @@ crmRouter.post('/crm/seed-outreach', async (req, res) => {
   } catch (err: any) {
     console.error('CRM outreach seed error:', err.message);
     return res.status(500).json({ error: `Seed failed: ${err.message}` });
+  }
+});
+
+/**
+ * POST /api/crm/import-bundle   { files: { "<name>.csv": "<csv text>", … } }
+ *
+ * THE COWORK BRIDGE (2026-08-07, Paul: "I need a smart importer that does
+ * what you're doing and just puts the data where it needs to go… do all of
+ * this in Cowork… without burning API"). The smart half — reading a messy
+ * sheet, mapping columns, splitting the layers — happens in a Cowork session
+ * on the subscription. It writes the seven-table bundle and POSTs it here
+ * (scripts/studio/push-crm.mts is the one-command client). This endpoint is
+ * the dumb half on purpose: pure code, zero model calls, the SAME idempotent
+ * loader the shipped plan uses, the same honest report. Files are matched by
+ * number prefix or name; missing tables load as empty; unrecognized names
+ * are RETURNED, never silently dropped.
+ */
+crmRouter.post('/crm/import-bundle', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const files = req.body?.files;
+    if (!files || typeof files !== 'object' || Array.isArray(files)) {
+      return res.status(400).json({ error: 'files (object of name → csv text) is required' });
+    }
+    const { parseCsv, seedOutreachFromTables } = await import('../services/crmOutreachSeed.js');
+    const tables: Record<string, Record<string, string>[]> = {
+      contacts: [], orgs: [], waves: [], steps: [], templates: [], events: [], queue: [],
+    };
+    const slotFor = (name: string): string | null => {
+      const n = name.toLowerCase();
+      if (/^0?1[_\-.]|contact/.test(n) && !/queue|research/.test(n)) return 'contacts';
+      if (/^0?2[_\-.]|organi[sz]|^orgs?\b/.test(n)) return 'orgs';
+      if (/^0?3[_\-.]|wave/.test(n)) return 'waves';
+      if (/^0?4[_\-.]|step|sequence/.test(n)) return 'steps';
+      if (/^0?5[_\-.]|template|message/.test(n)) return 'templates';
+      if (/^0?6[_\-.]|event/.test(n)) return 'events';
+      if (/^0?7[_\-.]|research|queue/.test(n)) return 'queue';
+      return null;
+    };
+    const ignored: string[] = [];
+    for (const [name, text] of Object.entries(files)) {
+      if (typeof text !== 'string') { ignored.push(`${name} (not text)`); continue; }
+      const slot = slotFor(name);
+      if (!slot) { ignored.push(name); continue; }
+      tables[slot] = tables[slot].concat(parseCsv(text));
+    }
+    if (!tables.contacts.length && !tables.orgs.length) {
+      return res.status(400).json({ error: 'No contacts or organizations recognized — check the file names (01_contacts.csv / 02_organizations.csv or names containing "contact"/"organization").' });
+    }
+    const report = await seedOutreachFromTables(userId, tables as any);
+    return res.json({ ...report, ignoredFiles: ignored });
+  } catch (err: any) {
+    console.error('CRM bundle import error:', err.message);
+    return res.status(500).json({ error: `Bundle import failed: ${err.message}` });
   }
 });
 

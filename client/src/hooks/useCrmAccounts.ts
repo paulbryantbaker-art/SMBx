@@ -25,6 +25,9 @@ export interface CrmFilters {
   /** Only rows whose next action is today or earlier. */
   due?: boolean;
   archived?: boolean;
+  /** The layer: default = ranked acquirers; 'service_provider' = the
+   *  capital/referral address book; 'all' = every firm on file. */
+  kind?: string;
 }
 
 async function json<T>(url: string, init?: RequestInit): Promise<T> {
@@ -52,6 +55,7 @@ function queryFor(f: CrmFilters): string {
   if (f.moment) p.set("moment", f.moment);
   if (f.due) p.set("due", "1");
   if (f.archived) p.set("archived", "1");
+  if (f.kind) p.set("kind", f.kind);
   const s = p.toString();
   return s ? `?${s}` : "";
 }

@@ -48,6 +48,7 @@ const CHIPS: { label: string; key: keyof CrmFilters; value: string | boolean }[]
   { label: "Flow-constrained", key: "moment", value: "thesis_no_flow" },
   { label: "Tier A", key: "tier", value: "A" },
   { label: "DFW", key: "dfw", value: "yes" },
+  { label: "Everyone", key: "kind", value: "all" },
 ];
 
 /* ── palettes (match the desktop sibling exactly) ─────────────────────── */
