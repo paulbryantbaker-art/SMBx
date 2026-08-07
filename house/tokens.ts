@@ -53,6 +53,103 @@
  *
  * Values verified identical across every renderer.
  */
+/**
+ * ── THE CARTA SYSTEM (2026-08-07) — the PUBLIC SITE's language ──────────────
+ *
+ * Values transcribed from `design_handoff_smbx_carta_restyle/` (Claude Design),
+ * which is a BINDING spec: its README's rule is "transcription, not
+ * interpretation — extract values from the source, never eyeball, never round,
+ * never improve." Nothing here is a judgement call; every hex was read out of
+ * the reference HTML and cross-checked against its frequency in the file.
+ *
+ * WHY THIS IS A SECOND EXPORT INSTEAD OF AN EDIT TO `LEDGER`.
+ * Paul's scope call was explicit: the public site lands first, the collateral
+ * renderers follow in a second pass. But `LEDGER` is imported by
+ * researchComposer, deckDesigner, practiceMapPdf, ownerFullReport, artworkService
+ * and both app shells — so editing it in place would have re-skinned every
+ * report PDF, LinkedIn carousel and one-pager the moment the site changed,
+ * which is precisely the thing he deferred. Two exports keep the phases
+ * honest: the site consumes CARTA, the collateral keeps LEDGER, and phase 2
+ * is the commit that moves the renderers over and deletes LEDGER.
+ *
+ * THE COST OF THAT, STATED PLAINLY: between now and phase 2 the site and the
+ * collateral are DIFFERENT SYSTEMS. `content/studio/DESIGN.md` exists on the
+ * premise that they are one, and `npm run test:design` checks that premise —
+ * so both say so during the interim rather than quietly asserting something
+ * false. A deck built this week will not match the website; that is a known,
+ * time-boxed divergence, not drift.
+ *
+ * WHAT CHANGED, AND THE ONE THING THAT DID NOT: the accent survives untouched.
+ * Deal Green `#0A7A58`, its hover, its tint and mint are identical values to
+ * Aurora's — the brand mark does not move. What moves is everything around it:
+ * the dark surface stops being a saturated jade block over a texture and
+ * becomes flat near-black `#131512` with square edges; the warm second accent
+ * (brass/honey) is GONE, leaving exactly one accent; and the neutrals go
+ * cooler and slightly deeper for reading.
+ *
+ * THE BUTTON LAW IS A TOKEN-LEVEL FACT, NOT A STYLE PREFERENCE: green is
+ * NEVER a resting button fill. Primary is ink on light / bone on dark, and
+ * green appears as hover feedback, chips, kickers and links. `greenHover`
+ * therefore names a FILL that only exists in the hover state — read it that
+ * way or the law inverts.
+ */
+export const CARTA = {
+  /* light surfaces */
+  bone: '#FCFAF6',        // page ground — unchanged from Aurora
+  boneAlt: '#F9F7F1',     // second light ground, used for banded sections
+  panel: '#F3F0E9',       // tint / panel fill
+  panelHover: '#EFEBE1',
+  panelDeep: '#ECE8DC',
+  white: '#FFFFFF',       // card fill — cards are white, and square
+
+  /* ink scale — cooler and deeper than Ledger's slate/muted pair */
+  ink: '#16181A',         // headlines, primary button fill — unchanged
+  body: '#4A4F54',        // body copy
+  muted: '#7C8187',       // labels, meta
+  placeholder: '#8B9088',
+
+  /* lines. Radius is 0 everywhere except buttons/inputs, so a hairline is
+     doing the work a rounded card used to do — these carry the layout. */
+  hair: '#E4DFD3',        // hairlines AND the 1px grid seam behind tiles
+  chipBorder: '#D8D3C6',
+
+  /* the one accent — identical to Aurora's, deliberately */
+  green: '#0A7A58',       // links, chips, kickers, ACTIVE states
+  greenHover: '#086348',  // the hover FILL (never a resting fill — see above)
+  greenTint: '#DFF5EC',   // light-surface wash
+  greenBright: '#0FA97C', // rare
+  mint: '#A8F0CE',        // the accent ON dark surfaces
+
+  /* dark bands + footer — flat, square, untextured */
+  dark: '#131512',
+  darkSeam: '#2A2E29',    // grid seams and hairlines on dark
+  darkPlate: '#22261F',   // label plates
+  darkInk: '#F4F5F1',     // reading text on dark
+  darkSub: '#D7DBD2',
+  darkMuted: '#ABB2AB',
+  darkLegal: '#8A9088',
+  darkBtnBorder: '#4A4F44',
+} as const;
+
+/** Type for the site. Loaded from Google Fonts in the browser — which is fine
+ *  HERE and fatal in a renderer: the PDF/deck paths must embed woff2s locally
+ *  (Railway blocks the Google CDN; the Docker image carries only Noto). Phase 2
+ *  needs @fontsource packages for Source Serif 4 and Schibsted Grotesk before
+ *  the collateral can move. */
+export const CARTA_TYPE = {
+  display: `'Source Serif 4', Georgia, serif`,
+  sans: `'Schibsted Grotesk', -apple-system, sans-serif`,
+  mono: `'IBM Plex Mono', monospace`,
+} as const;
+
+/** Display weights: 550 headlines, 600 card titles. */
+export const CARTA_DISPLAY_WEIGHT = 550;
+
+/** The signature frame device — 8px ink squares at −4px offsets (7px at −3.5px
+ *  on small cards). Square, never rounded; this is what replaces Aurora's
+ *  curved band crests as the house's recognisable gesture. */
+export const CARTA_HANDLE = { size: 8, offset: -4, sizeSmall: 7, offsetSmall: -3.5 } as const;
+
 export const LEDGER = {
   /* canvas + ink */
   bone: '#FCFAF6', // page canvas — lifted, so the accent has room

@@ -31,19 +31,37 @@
 
      Accent var names are historical (coral → blue → green → jade, same slots).
      Renaming them to --pd-accent* is still the deferred cleanup it always was. */
+  /* ── CARTA PASS (2026-08-07) — values transcribed from the binding handoff
+     at design_handoff_smbx_carta_restyle/, mirrored from house/tokens.ts
+     (CARTA). The accent does NOT move: Deal Green, its hover and its tint are
+     the same values Aurora used, so the brand mark is continuous. Everything
+     around it does: the neutrals go cooler and deeper for reading, the warm
+     second accent (brass/honey) is GONE so there is exactly one accent, and
+     the dark surface stops being a saturated jade block over a texture and
+     becomes flat near-black with square edges.
+
+     THE BUTTON LAW, because it inverts if you read the token names naively:
+     GREEN IS NEVER A RESTING BUTTON FILL. Primary is ink-on-light /
+     bone-on-dark; --pd-cta-hover names a fill that exists only on hover.
+
+     The var NAMES stay historical (coral → blue → green → jade → carta, same
+     slots) — renaming them to --pd-accent* is still the deferred cleanup it
+     has always been, and doing it during a port would bury the real diff. */
   --pd-ink: #16181A;
-  --pd-body: #5A6169;
-  --pd-tert: #83898F;
-  --pd-faint: #A8ADB2;
+  --pd-body: #4A4F54;
+  --pd-tert: #7C8187;
+  --pd-faint: #8B9088;
   --pd-card: #FFFFFF;
-  --pd-band: #F3EFE4;
-  --pd-border: #DED8CC;
-  --pd-hair: #EAE5DC;
+  --pd-band: #F3F0E9;
+  --pd-band-hover: #EFEBE1;
+  --pd-band-deep: #ECE8DC;
+  --pd-bone-alt: #F9F7F1;
+  --pd-border: #D8D3C6;
+  --pd-hair: #E4DFD3;
   --pd-coral: #0A7A58;
   --pd-coral-link: #086348;
   --pd-cta: #0A7A58;
   --pd-cta-hover: #086348;
-  --pd-brass: #E8A62B;
   /* The vivid highlight. Ambient layers, the hero mesh and large numerals only
      — it carries no small text anywhere, by rule. */
   --pd-jade: #0FA97C;
@@ -52,9 +70,19 @@
   /* Band depth tokens — the band bg gradient and BOTH curve fills read from
      these, so the curve can never drift from the band edge it meets.
      AURORA: a saturated jade block, not a green-black. */
-  --pd-dark-bg: #0A6A4C;
-  --pd-dark-top: #0C7554;
-  --pd-dark-bot: #085F43;
+  /* Flat, square, untextured — a single value, not a gradient triple. The top
+     and bottom slots keep the same value so any rule still reading them (the
+     curve fills, until those are ported out) cannot produce a seam. */
+  --pd-dark-bg: #131512;
+  --pd-dark-top: #131512;
+  --pd-dark-bot: #131512;
+  --pd-dark-seam: #2A2E29;
+  --pd-dark-plate: #22261F;
+  --pd-dark-ink: #F4F5F1;
+  --pd-dark-sub: #D7DBD2;
+  --pd-dark-muted: #ABB2AB;
+  --pd-dark-legal: #8A9088;
+  --pd-dark-btn-border: #4A4F44;
   --pd-font: 'Inter', system-ui, sans-serif;
   /* Editorial serif for the display ladder (H1/H2/quote/statement) — the
      gravitas voice; Schibsted stays for working type (h3, body, UI, numerals).
