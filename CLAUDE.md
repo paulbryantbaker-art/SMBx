@@ -76,8 +76,30 @@ The business splits into three separate workflows with separate infra and separa
 The Track Record page (`/track-record`) and the landing track-record band present Paul Baker's employment deals — they were NOT smbX engagements — so six rules are non-negotiable and enforced in `TrackRecord.tsx` (see its header + the exported `AttributionLine`/`ATTRIBUTION`): (1) always "led or co-led", never "deal captain on every one" or unqualified "closed"; (2) always "selected transactions" (the wall is a selection, which reconciles it with the 150+ figure); (3) the attribution shield sentence appears WHEREVER the deal names appear (landing band, track-record page, any deck/PDF) — never a footnote; (4) names, not logos; (5) never "our clients" for a Wrench/JPMorgan transaction; (6) JPMorgan is integration (Director of Acquisition Integration), not origination. The interactive filter/search deal sheet (old task #27) was replaced by static per-employer selected-transaction lists so names sit under the employer they belong to. The proof stat strip now ends on "0 · sell-side transactions. Ever." (was "1 · side of the table").
 
 ## Design System
-**PRACTICE SITE (2026-07-11, corpdevservices bundle — the current public
-surface.)** The THE LINE v2 pivot retired the product marketing; the same day
+**CARTA (2026-08-07, `design_handoff_smbx_carta_restyle/` — THE CURRENT PUBLIC-SITE
+LANGUAGE; Aurora below is now the app/collateral language only, pending phase 2.)**
+Paul's correction set the method: *"this is not what Claude Design shipped.. it
+shipped a new design for the existing content"* — so the five logged-out pages
+(Landing, About, Industries, Research, Track Record) were REBUILT by transcribing the
+`.dc.html` references 1:1, not by evolving the Aurora components. The system:
+Source Serif 4 (550/600 display) · Schibsted Grotesk (working) · IBM Plex Mono;
+bone `#FCFAF6` / panel `#F3F0E9` neutrals with cooler ink scale (`#16181A/#4A4F54/#7C8187`);
+ONE accent (Deal Green `#0A7A58`, hover `#086348`, tint `#DFF5EC`, mint `#A8F0CE` on
+dark) — brass/honey are GONE from the site; flat near-black dark bands `#131512`
+(square edges, no texture, no curves); radius 0 except buttons/inputs; corner-handle
+frames (8px ink squares at −4px — the house gesture that replaced the curved band
+crests); dot-field ornaments + orbit; hairline 1px grids. THE BUTTON LAW: green is
+NEVER a resting button fill — primary is ink-on-light / bone-on-dark, green appears
+on hover, chips, kickers, links. Tokens live in `house/tokens.ts` (`CARTA`,
+`CARTA_TYPE`, `CARTA_HANDLE`); the `.pd` var layer mirrors them; layout values live
+INLINE in the transcribed pages per the handoff doctrine, and `carta.css` carries only
+hover/media/keyframes plus the `.ca-engine` intake redress. Build record:
+`design_handoff_smbx_carta_restyle/IMPLEMENTATION_PLAN.md`. Deferred: mobile layer,
+collateral renderers (LEDGER stays their source until phase 2 — see the interim
+notice atop `content/studio/DESIGN.md`), report bodies + `/buyers/*` interiors.
+
+**PRACTICE SITE (2026-07-11, corpdevservices bundle — the prior public
+surface, now HISTORY beneath the Carta restyle.)** The THE LINE v2 pivot retired the product marketing; the same day
 Paul shipped the practice-site design (`corpdevservices/`, approved direction
 3a) and it is implemented at `client/src/practice/`. DEFINITIVE is untouched.
 The app shells (Atlas) continue as the working surfaces for the practice.

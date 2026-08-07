@@ -1,211 +1,161 @@
 /**
- * /about — "New firm. Old hands." (Paul's copy additions, 2026-07-11).
- * Why we built it → Your advisor (Paul Baker bio + portrait) → What we believe.
+ * About — CARTA RESTYLE (2026-08-07). Transcribed 1:1 from
+ * `design_handoff_smbx_carta_restyle/About - Carta Style.dc.html`.
+ * Structure: breadcrumb hero · Why we built it (three ruled cards) · What we
+ * believe (dark creed band, four convictions) · Firm leadership (framed
+ * portrait, stat trio, tenure rows, attribution shield) · CTA card.
+ *
+ * ATTRIBUTION LAW (2026-08-07, naming REVERSED): employers are NAMED —
+ * Wrench Group · JPMorgan Chase · Deloitte Consulting — and the stat set is
+ * the sanctioned one (150+ · $5B · $2B synergies). The italic shield line
+ * rides directly under the tenure rows, verbatim from the reference. Do not
+ * merge in deal names or figures from any other source.
  */
-import PracticeShell, { PageCrumb } from './PracticeShell';
-import Mark from './Mark';
-import { Swoosh } from './atmo';
+import PracticeShell, { Handles, Kicker } from './PracticeShell';
+import { Link } from 'wouter';
 import { bookHref, bookTarget, bookRel } from './leads';
-import { AttributionLine } from './TrackRecord';
+import { trackEvent } from '../lib/analytics';
 
-const BELIEFS = [
-  {
-    n: 'I',
-    k: 'The buyer deserves a corner',
-    v: "Sellers have had professional representation for a hundred years. In the lower middle market, buyers mostly haven't. That's the gap we exist to close.",
-  },
-  {
-    n: 'II',
-    k: 'Coverage wins',
-    v: 'The best target is usually not for sale. You find it by covering the whole market — every operator in the segment, not just the companies being shown around.',
-  },
-  {
-    n: 'III',
-    k: 'Focus beats breadth',
-    v: 'We advise buyers. Only buyers. One client per target. It makes us less flexible and far more useful.',
-  },
-  {
-    n: 'IV',
-    k: "The deal isn't done at close",
-    v: 'Value is made or lost in the first six months after the wire. We built the integration playbook that proves it, and we stay through it.',
-  },
+const SERIF = "'Source Serif 4', Georgia, serif";
+const MONO = "'IBM Plex Mono', monospace";
+
+const WHY_BUILT = [
+  { no: '01', t: 'The seller always has someone.', b: 'Sellers have had professional representation for a hundred years — a broker, an advisor, a banker working their number.' },
+  { no: '02', t: "The buyer usually doesn't.", b: 'A corporate development team is a luxury of scale. Almost nobody in the lower middle market has one, so the biggest transaction of a career gets run with no one on that side of the table.' },
+  { no: '03', t: 'So we became that team.', b: 'Sourcing, evaluation, negotiation, integration — a complete corp-dev function, led by senior dealmakers, pointed at one side of the table. Yours.' },
+];
+
+const CREED = [
+  { n: 'I', t: 'The buyer deserves a corner', b: "Sellers have had professional representation for a hundred years. In the lower middle market, buyers mostly haven't. That's the gap we exist to close." },
+  { n: 'II', t: 'Coverage wins', b: 'The best target is usually not for sale. You find it by covering the whole market — every operator in the segment, not just the companies being shown around.' },
+  { n: 'III', t: 'Focus beats breadth', b: 'We advise buyers. Only buyers. One client per target. It makes us less flexible and far more useful.' },
+  { n: 'IV', t: "The deal isn't done at close", b: 'Value is made or lost in the first six months after the wire. We built the integration playbook that proves it, and we stay through it.' },
 ];
 
 export default function About() {
   return (
     <PracticeShell>
-      {/* ── Hero ── */}
-      <section className="pd-hero" style={{ paddingBottom: 'clamp(50px, 6vw, 90px)' }}>
-        <div style={{ position: 'relative', maxWidth: 1080, margin: '0 auto', textAlign: 'center' }}>
-          <PageCrumb parent={{ label: 'smbX', href: '/' }} here="About" />
-          <h1 className="pd-h1 pd-h1-seg" style={{ margin: 0 }}>A new firm. Decades of execution.</h1>
-          <div className="pd-sub" style={{ margin: '38px auto 0', maxWidth: 680 }}>
-            <Mark /> was built to give buyers in the lower middle market something they have
-            rarely had access to — a dedicated corporate development function, on demand,
-            exclusively on their side of the table.
-          </div>
-        </div>
-      </section>
+      <main style={{ background: '#FCFAF6', overflow: 'clip' }}>
 
-      {/* ── Why we built it — three points, not three paragraphs (Paul,
-             2026-08-01: "bigger bullets, less paragraphs, just the
-             highlights"). The argument was always three beats; it was just
-             buried in prose. ── */}
-      <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(70px, 8vw, 120px)' }}>
-        <div className="pd-seclabel">Why we built it</div>
-        <h2 className="pd-h2">We spent two decades as the buyer.</h2>
-        <div className="pd-points tri">
-          <div className="pd-point">
-            <div className="lead">The seller always has someone.</div>
-            <p>Sellers have had professional representation for a hundred years — a broker, an advisor, a banker working their number.</p>
-          </div>
-          <div className="pd-point">
-            <div className="lead">The buyer usually doesn't.</div>
-            <p>A corporate development team is a luxury of scale. Almost nobody in the lower middle market has one, so the biggest transaction of a career gets run with no one on that side of the table.</p>
-          </div>
-          <div className="pd-point">
-            <div className="lead">So we became that team.</div>
-            <p>Sourcing, evaluation, negotiation, integration — a complete corp-dev function, led by senior dealmakers, pointed at one side of the table. Yours.</p>
-          </div>
-        </div>
-      </section>
+        {/* ══ HERO ══ */}
+        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(100px, 9vw, 150px) 32px clamp(60px, 6vw, 90px)', textAlign: 'center', position: 'relative' }}>
+          <div aria-hidden="true" data-plx="-0.02" style={{ position: 'absolute', left: '7%', top: 70, width: 110, height: 110, backgroundImage: 'radial-gradient(rgba(22,24,26,.14) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
+          <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', right: '8%', top: 130, width: 90, height: 90, backgroundImage: 'radial-gradient(rgba(10,122,88,.22) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
+          <nav data-hs="0" aria-label="Breadcrumb" style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.12em', color: '#7C8187' }}>
+            <Link href="/" style={{ color: '#0A7A58' }}>SMBX</Link>
+            <span style={{ margin: '0 10px' }}>/</span>
+            <span style={{ color: '#16181A' }}>ABOUT</span>
+          </nav>
+          <h1 data-hs="1" style={{ margin: '30px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(44px, 4.6vw, 78px)', lineHeight: 1.05, letterSpacing: '-0.015em', textWrap: 'balance' }}>A new firm. Decades of execution.</h1>
+          <p data-hs="2" style={{ margin: '32px auto 0', maxWidth: '37em', fontSize: 18.5, lineHeight: 1.65, color: '#4A4F54' }}>smb<span style={{ color: '#0A7A58' }}>x</span>.ai was built to give buyers in the lower middle market something they have rarely had access to — a dedicated corporate development function, on demand, exclusively on their side of the table.</p>
+        </section>
 
-      {/* ── What we believe — the creed, the page's one dark movement.
-             It sits HERE, mid-page, and not at the end (Paul, 2026-08-01: "the
-             2 bleed bands can't be right next to each other"). The footer is
-             itself a deep-green band, so a dark section in the last slot leaves
-             two green masses separated by whatever thin thing is between them —
-             which no amount of padding fixes, because the problem is the order,
-             not the gap. Moved up, the tall founder section does the separating
-             and the page carries exactly one band, mid-scroll.
-             It reads better this way too: the gap, then the convictions, then
-             the man who holds them, then book time with him. ── */}
-      <div style={{ marginTop: 'clamp(72px, 8vw, 118px)' }}><Swoosh dir="in" /></div>
-      <section className="pd-dark bl-creed">
-        <span className="pd-spark" aria-hidden="true" />
-        <div className="pd-wrap pd-dark-pad">
-          <div className="pd-seclabel">What we believe</div>
-          <h2 className="pd-h2" data-rv>Four convictions run the practice.</h2>
-          <div className="pd-creed rv-stagger" data-rv>
-            {BELIEFS.map(b => (
-              <div className="pd-tenet" key={b.k}>
-                <div className="gn" aria-hidden="true">{b.n}</div>
-                <h3 className="k">{b.k}<span className="fs">.</span></h3>
-                <p className="v">{b.v}</p>
+        {/* ══ WHY WE BUILT IT ══ */}
+        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(100px, 9vw, 150px) 32px 30px' }}>
+          <div data-rv>
+            <Kicker>WHY WE BUILT IT</Kicker>
+            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(34px, 3.2vw, 54px)', lineHeight: 1.08, letterSpacing: '-0.012em' }}>Over two decades as a buyer and integrator.</h2>
+          </div>
+          <div data-rv className="rv-stagger" data-tri style={{ marginTop: 52, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 26 }}>
+            {WHY_BUILT.map(c => (
+              <div key={c.no} style={{ borderTop: '2px solid #16181A', paddingTop: 22, position: 'relative' }}>
+                <span style={{ position: 'absolute', top: -2, left: 0, width: 44, height: 2, background: '#0A7A58' }} />
+                <div style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.1em', color: '#7C8187' }}>{c.no}</div>
+                <div style={{ marginTop: 12, fontFamily: SERIF, fontWeight: 600, fontSize: 24, lineHeight: 1.2 }}>{c.t}</div>
+                <p style={{ margin: '14px 0 0', fontSize: 15.5, lineHeight: 1.65, color: '#4A4F54' }}>{c.b}</p>
               </div>
             ))}
           </div>
-        </div>
-      </section>
-      <Swoosh dir="up" />
+        </section>
 
-      {/* ── Your advisor — the record as a register, not a résumé paragraph.
-             Employer anonymization is LAW (CLAUDE.md, 2026-07-18): "a global
-             investment bank" and "a world-class PE-backed aggregator", never
-             the names. Deloitte may stay named. "led or co-led", never
-             "closed". The total is 150, with no plus. ── */}
-      <section className="pd-wrap pd-section" style={{ paddingTop: 'clamp(80px, 9vw, 130px)' }}>
-        <div className="pd-lede">
-          <div>
-            <div className="pd-seclabel">Firm leadership</div>
-            <h2 className="pd-h2">Paul Baker — Founder</h2>
-            <div className="pd-founder-photo" style={{ marginTop: 'clamp(28px, 3vw, 40px)' }}>
-              <img
-                src="/founder-portrait.jpg"
-                alt="Paul Baker, founder of smbX"
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 20%' }}
-              />
+        {/* ══ WHAT WE BELIEVE — dark band ══ */}
+        <section style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(120px, 10vw, 170px) 32px', marginTop: 'clamp(100px, 9vw, 160px)', position: 'relative', overflow: 'hidden' }}>
+          <div aria-hidden="true" data-plx="0.025" style={{ position: 'absolute', top: 44, right: '5%', width: 260, height: 160, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
+          <div style={{ maxWidth: 1360, margin: '0 auto', position: 'relative' }}>
+            <div data-rv><Kicker dark>WHAT WE BELIEVE</Kicker></div>
+            <h2 data-rv style={{ margin: '24px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(34px, 3.4vw, 56px)', lineHeight: 1.1, letterSpacing: '-0.012em' }}>Four convictions run the practice.</h2>
+            <div data-rv className="rv-stagger" data-creed style={{ marginTop: 56, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: '#2A2E29', border: '1px solid #2A2E29', position: 'relative' }}>
+              <Handles color="#F4F5F1" />
+              {CREED.map(c => (
+                <div key={c.n} style={{ background: '#131512', padding: '34px 28px 36px' }}>
+                  <div style={{ fontFamily: SERIF, fontWeight: 550, fontSize: 44, lineHeight: 1, color: '#A8F0CE' }}>{c.n}</div>
+                  <div style={{ marginTop: 18, fontFamily: SERIF, fontWeight: 600, fontSize: 21, lineHeight: 1.25 }}>{c.t}<span style={{ color: '#0A7A58' }}>.</span></div>
+                  <p style={{ margin: '12px 0 0', fontSize: 14.5, lineHeight: 1.65, color: '#ABB2AB' }}>{c.b}</p>
+                </div>
+              ))}
             </div>
           </div>
-          <div>
-            <p className="pd-sub" style={{ margin: 0, maxWidth: '26em' }}>
-              Two decades as a deal captain — the person accountable for a transaction from
-              the first conversation to the day it is fully integrated.
-            </p>
+        </section>
 
-            <div className="pd-record">
-              <div className="pd-rec">
-                <div className="fig">36</div>
-                <div className="txt">
-                  <b>acquisitions, ~$2.9B enterprise value.</b> Led or co-led as Director of
-                  Corporate Development and M&amp;A Integration at a world-class PE-backed
-                  aggregator — the engine that turned four founding companies into a national
-                  home-services platform.
-                </div>
-              </div>
-              <div className="pd-rec">
-                <div className="fig">$2B+</div>
-                <div className="txt">
-                  <b>in synergies delivered.</b> Acquisition integration at a global investment
-                  bank, on some of the largest deals in modern banking.
-                </div>
-              </div>
-              <div className="pd-rec">
-                <div className="fig">150</div>
-                <div className="txt">
-                  <b>acquisitions all told, $5B+ in revenue added</b> to the buyers he worked
-                  for. Always the buy side.
-                </div>
+        {/* ══ FIRM LEADERSHIP ══ */}
+        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(120px, 11vw, 180px) 32px 30px' }}>
+          <div data-lede style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: 72, alignItems: 'start' }}>
+            <div data-rv>
+              <Kicker>FIRM LEADERSHIP</Kicker>
+              <h2 style={{ margin: '20px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(30px, 2.8vw, 44px)', lineHeight: 1.1, letterSpacing: '-0.012em' }}>Paul Baker — Founder</h2>
+              <div style={{ marginTop: 32, position: 'relative', width: '100%', maxWidth: 360 }}>
+                <img src="/founder-portrait.jpg" alt="Paul Baker, founder of smbX" style={{ display: 'block', width: '100%', aspectRatio: '4 / 5', objectFit: 'cover', objectPosition: '50% 0%' }} />
+                <Handles />
+                <span style={{ position: 'absolute', left: 12, bottom: 12, display: 'inline-flex', alignItems: 'center', gap: 7, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '5px 9px', whiteSpace: 'nowrap' }}>
+                  <span style={{ width: 7, height: 7, background: '#FCFAF6', display: 'inline-block' }} />FOUNDER
+                </span>
               </div>
             </div>
-
-            <p className="pd-body-sm" style={{ marginTop: 26 }}>
-              Earlier, inorganic growth strategy for Fortune&nbsp;500 clients at Deloitte
-              Consulting. Master of Applied Statistics and a BBA from LeTourneau University;
-              certified Lean Six Sigma Black Belt. Based in Dallas–Fort Worth, deals nationwide.
-            </p>
-
-            <AttributionLine style={{ marginTop: 26 }} />
+            <div data-rv>
+              <p style={{ margin: '6px 0 0', fontSize: 19, lineHeight: 1.6, color: '#16181A', fontWeight: 500, maxWidth: '26em' }}>Two decades as a deal captain — the person accountable for a transaction from the first conversation to the day it is fully integrated.</p>
+              <div style={{ marginTop: 40, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 26, borderTop: '1px solid #E4DFD3', paddingTop: 28 }}>
+                {[['150+', 'ACQUISITIONS & INTEGRATIONS'], ['$5B', 'ENTERPRISE VALUE ADDED'], ['$2B', 'SYNERGIES CAPTURED']].map(([n, l]) => (
+                  <div key={l}>
+                    <div style={{ fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(40px, 3.4vw, 58px)', lineHeight: 1, letterSpacing: '-0.02em' }}>
+                      {n}<span style={{ display: 'block', height: 4, width: 52, background: '#0A7A58', marginTop: 10 }} />
+                    </div>
+                    <div style={{ marginTop: 12, fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.12em', color: '#7C8187' }}>{l}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginTop: 34, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '170px 1fr', gap: 28, alignItems: 'baseline', padding: '22px 0', borderTop: '1px solid #E4DFD3' }}>
+                  <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: '#0A7A58' }}>10 YEARS</div>
+                  <div style={{ fontSize: 15.5, lineHeight: 1.65, color: '#4A4F54' }}><strong style={{ color: '#16181A' }}>Wrench Group</strong> — PE-backed mid-market buy-and-build consolidator.</div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '170px 1fr', gap: 28, alignItems: 'baseline', padding: '22px 0', borderTop: '1px solid #E4DFD3', borderBottom: '1px solid #E4DFD3' }}>
+                  <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: '#0A7A58' }}>10 YEARS</div>
+                  <div style={{ fontSize: 15.5, lineHeight: 1.65, color: '#4A4F54' }}><strong style={{ color: '#16181A' }}>JPMorgan Chase</strong> — Mega-cap integration and value capture.</div>
+                </div>
+              </div>
+              <p style={{ margin: '28px 0 0', fontSize: 14.5, lineHeight: 1.65, color: '#4A4F54' }}>Earlier, inorganic growth strategy for Fortune&nbsp;500 clients at Deloitte Consulting. Master of Applied Statistics and a BBA from LeTourneau University; certified Lean Six Sigma Black Belt. Based in Dallas–Fort Worth, deals nationwide.</p>
+              <div style={{ marginTop: 28, fontStyle: 'italic', fontSize: 14, lineHeight: 1.65, color: '#7C8187', maxWidth: '48em', borderLeft: '2px solid #0A7A58', paddingLeft: 16 }}>Selected transactions led or co-led by Paul Baker in the course of his employment at Wrench Group and at JPMorgan Chase. These transactions were completed by those firms and were not smbx.ai engagements.</div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── The close (2026-08-01, Paul: "the green bleed band is still right
-             next to the bottom footer… too weighted at the bottom").
-             The page used to end on the creed band, and the only thing between
-             it and the deep-green footer was `.pd-footer`'s top margin — ~460px
-             of EMPTY bone. Two green masses with a hole between them, which is
-             what read as bottom-heavy; the gap was never a breath because
-             nothing was in it.
-             The landing does not have this problem because its booking card
-             sits in exactly that position. So About gets the same close — and
-             it also fixes the CTA, which was buried mid-page inside the founder
-             block where a visitor reaches it before the argument is made. ── */}
-      <section className="pd-section pd-close" id="cta">
-        <div className="pd-wrap">
-          <div className="pd-cta-grid">
-            <div>
-              <h2 className="pd-cta-h">Start with a confidential conversation.</h2>
-              <p className="pd-body" style={{ marginTop: 22 }}>
-                Thirty minutes with the person who will run your deal. Your ideas, our read on
-                the market, and a straight answer on whether we're the right team for it.
-              </p>
+        {/* ══ CTA ══ */}
+        <section id="cta" style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(120px, 11vw, 180px) 32px clamp(130px, 12vw, 200px)' }}>
+          <div data-cta-grid style={{ display: 'grid', gridTemplateColumns: '1.1fr .9fr', gap: 64, alignItems: 'center' }}>
+            <div data-rv>
+              <h2 style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(38px, 4.2vw, 68px)', lineHeight: 1.06, letterSpacing: '-0.015em', textWrap: 'balance' }}>Start with a confidential conversation.</h2>
+              <p style={{ margin: '24px 0 0', maxWidth: '30em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>Thirty minutes with the person who will run your deal. Your ideas, our read on the market, and a straight answer on whether we're the right team for it.</p>
             </div>
-            <div className="pd-form">
-              <div className="t">Book 30 minutes</div>
-              <p style={{ margin: '14px 0 0', fontSize: 15, lineHeight: 1.6, color: 'var(--pd-body)' }}>
-                A personal conversation, not a sales call. Come with your ideas — you don't need
-                a finished thesis. Building one together is part of the work.
-              </p>
-              <div style={{ marginTop: 18, fontFamily: 'var(--pd-mono)', fontSize: 13, letterSpacing: '0.06em', color: 'var(--pd-tert)' }}>
-                30 MIN · VIDEO CALL · CONFIDENTIAL
-              </div>
+            <div data-rv style={{ position: 'relative', background: '#FFFFFF', border: '1px solid #16181A', padding: '32px 34px' }}>
+              <Handles />
+              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 26 }}>Book 30 minutes</div>
+              <p style={{ margin: '14px 0 0', fontSize: 15, lineHeight: 1.6, color: '#4A4F54' }}>A personal conversation, not a sales call. Come with your ideas — you don't need a finished thesis. Building one together is part of the work.</p>
+              <div style={{ marginTop: 18, fontFamily: MONO, fontSize: 12, letterSpacing: '0.1em', color: '#7C8187' }}>30 MIN · VIDEO CALL · CONFIDENTIAL</div>
               <a
-                className="pd-pill-primary"
                 href={bookHref()}
                 target={bookTarget()}
                 rel={bookRel()}
-                style={{ marginTop: 24, display: 'flex', justifyContent: 'center', padding: '15px 26px' }}
+                className="ca-h-greenbg"
+                style={{ display: 'flex', justifyContent: 'center', marginTop: 24, fontSize: 16, fontWeight: 600, color: '#FCFAF6', background: '#16181A', padding: '15px 26px', borderRadius: 10 }}
+                onClick={() => trackEvent('practice_booking_clicked', { placement: 'about-cta' })}
               >
                 Pick a time →
               </a>
-              <p className="pd-caption" style={{ marginTop: 14 }}>
-                Scheduling opens in Google Calendar. No lists sold, no sellers represented.
-              </p>
+              <p style={{ margin: '14px 0 0', fontSize: 12.5, color: '#7C8187', textAlign: 'center' }}>Scheduling opens in Google Calendar. No lists sold, no sellers represented.</p>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
     </PracticeShell>
   );
 }

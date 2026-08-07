@@ -92,11 +92,11 @@
   --pd-dark-muted: #ABB2AB;
   --pd-dark-legal: #8A9088;
   --pd-dark-btn-border: #4A4F44;
-  --pd-font: 'Inter', system-ui, sans-serif;
-  /* Editorial serif for the display ladder (H1/H2/quote/statement) — the
-     gravitas voice; Schibsted stays for working type (h3, body, UI, numerals).
-     Fraunces is already in the font payload (index.html). */
-  --pd-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  /* CARTA type (2026-08-07): Schibsted Grotesk is the working voice again,
+     Source Serif 4 the display serif (weight 550 via the variable axis —
+     loaded in index.html). Values mirror CARTA_TYPE in house/tokens.ts. */
+  --pd-font: 'Schibsted Grotesk', -apple-system, sans-serif;
+  --pd-display: 'Source Serif 4', Georgia, serif;
   --pd-mono: 'IBM Plex Mono', monospace; /* @kind font */
   --pd-pad-x: clamp(28px, 4.5vw, 64px);
   /* Two-width system (Paul, 2026-07-15: sections each had their own width and

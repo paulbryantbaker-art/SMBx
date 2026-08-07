@@ -245,3 +245,53 @@ picker only) · print styles.
 **Acceptance** is the README's checklist, plus: `npm run test:design` green, no dead
 anchors, intake mechanics verified live (send a map, capture a lead), and the
 preservation contract walked item by item.
+
+---
+
+## BUILD RECORD (2026-08-07, same day)
+
+**Status: BUILT — all five pages transcribed 1:1 and live on the branch.** Paul's
+correction mid-build set the method: *"this is not what Claude Design shipped.. it
+shipped a new design for the existing content"* — so the pages were rebuilt from the
+reference markup outright, not evolved from the Aurora components.
+
+What shipped:
+
+- **`carta.css`** — only what inline styles cannot express: the three keyframes
+  (marquee/orbit/caret), the hover vocabulary (one `.ca-h-*` class per distinct
+  `style-hover` in the handoff, `!important` because the transcribed markup styles
+  inline), the responsive guards from all five references, and the `.ca-engine` scope
+  that redresses the REAL intake as the Acquisition Engine card.
+- **`PracticeShell.tsx`** — the shared chrome, transcribed: sticky 76px nav
+  (hairline+shadow past 24px, never hides — the Aurora hide-on-scroll retired with
+  Aurora), Who-it's-for hover dropdown (buyer names → their real `/buyers/*` pages,
+  per the 2026-08-02 five-labels-one-destination lesson), dark mega footer. Kept
+  load-bearing machinery: settleToAnchor, scroll-release, `data-rv` reveal, mobile
+  burger menu (the bundle ships no mobile; a phone without nav is a regression, not a
+  transcription), plus the shared `data-hs` cascade and `data-plx` parallax.
+- **`Landing.tsx`** — full transcription with real machinery mounted: YuliaIntake in
+  the framed hero card (its resting state now renders the reference card interior —
+  header chip + logo, the opening line as a set paragraph, ink-border input, square ↑
+  send, mono step label, uppercase chips), PricingRequest on the dark band
+  (`POST /api/practice/pricing`, honest-send), owners chips dispatching
+  `smbx:open-owner`, lanes/chips from the one register (`lanes.ts` — the reference's
+  lists match it verbatim), phase explorer with 5.2s auto-cycle, proof-band count-up.
+- **`About.tsx` · `Industries.tsx` · `ReportsIndex.tsx` · `TrackRecord.tsx`** — each
+  transcribed; Research reads `REPORT_LIST` (real read-times on the meta line, real
+  covers, cards → `/research/:slug`), Track Record ports the CLEARED SET verbatim.
+- **Fonts:** Source Serif 4 variable added to the index.html payload (weight 550 via
+  the axis). `--pd-font`/`--pd-display` moved to Schibsted/Source Serif 4, so legacy
+  inner surfaces (segments, report pages) inherit the Carta voice.
+
+Verified: `npm run test:design` 77/77 · tsc clean · production build green · every
+page rendered at 1440px and inspected strip-by-strip (intake resting card, marquee,
+proof band, phase explorer, sample read, pricing band, who/sectors grids, owners,
+founder, CTA, mega footer; sector illustrations frame correctly on /industries; the
+CLEARED SET renders under its attribution shield).
+
+Two screenshot artifacts documented so nobody chases them: lazy images below the fold
+don't load in a no-scroll full-page capture, and `data-rv` content photographs blank
+if the capture script scrolls with `scroll-behavior:smooth`. Neither is a page defect.
+
+Deferred (unchanged): mobile layer, collateral renderer pass (phase 2), report detail
+pages and `/buyers/*` segment pages keep their current bodies under the new chrome.

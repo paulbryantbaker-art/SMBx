@@ -1,26 +1,60 @@
 /**
- * Practice-site chrome — v3 (Claude Design handoff, 2026-07-16). Sticky nav:
- * Why us · How it works · Industries (→ /industries) · Research (→ /reports,
- * added 2026-07-29 — Paul: "I don't see a reports link"; the published
- * assessments are the practice's proof, so they belong in the chrome, not
- * only in the footer) · Who it's for, with
- * Confidential consultation (→ #cta) + Build your market map (→ #yulia).
- * Footer is the flat warm-charcoal band (#2B2A27 — deliberately NOT a third
- * textured bleed band; the CSS remaps the text vars and inverts the logo).
- * `footerCompact` renders the Industries page's shortened FIRM-only footer.
- * The legal row keeps Terms/Privacy/Disclosures as real links plus a quiet
- * team Sign in — a sanctioned deviation from the prototype (the team needs a
- * door; see practiceSite/IMPLEMENTATION_PLAN.md §4).
+ * Practice-site chrome — CARTA RESTYLE (2026-08-07, the Claude Design handoff
+ * at design_handoff_smbx_carta_restyle/; supersedes the v3/Aurora chrome).
+ * Transcribed 1:1 from the reference pages, which all share this shell:
+ * sticky 76px nav (logo · Why us · How it works · Industries · Research ·
+ * Who it's for hover-dropdown · Free Valuation · Confidential consultation
+ * outline CTA · Build your market map ink CTA) that gains its hairline +
+ * shadow past 24px of scroll and never hides, and the dark mega footer
+ * (brand + founder chip · FIRM · BUYERS · WHERE WE WORK · disclosures ·
+ * legal row). Layout values live INLINE per the transcription doctrine;
+ * carta.css carries only what inline styles cannot (hover, media, keyframes).
+ *
+ * Real-machinery mappings (the prototype's stand-in hrefs → live routes):
+ * Industries/Research/Track record → their routes; the dropdown's five buyer
+ * names → /buyers/<slug> (each name goes to ITS OWN page — the 2026-08-02
+ * lesson: five labels, one destination reads as broken); Team sign in →
+ * /login. The burger + slide-down menu (≤760px) stay from the previous
+ * chrome — the bundle ships no mobile ("no mobile yet", Paul 2026-08-07),
+ * and a phone with no nav is a regression, not a transcription.
  */
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
 import './practice.css';
+import './carta.css';
 import { trackEvent } from '../lib/analytics';
 import { useSiteMeta } from './useSiteMeta';
 
-/** Page locator — a breadcrumb in the site's coral label voice, used by the
- *  surviving inner pages (segments, about, track record). The v3 landing and
- *  Industries pages don't carry one. */
+const MONO = "'IBM Plex Mono', monospace";
+
+/** The signature frame device — four ink squares riding a card's corners
+ *  (8px at −4px; 7px at −3.5px for small cards). Parent must be relative. */
+export function Handles({ color = '#16181A', small = false }: { color?: string; small?: boolean }) {
+  const s = small ? 7 : 8;
+  const o = small ? -3.5 : -4;
+  const base = { position: 'absolute' as const, width: s, height: s, background: color };
+  return (
+    <>
+      <span aria-hidden="true" style={{ ...base, top: o, left: o }} />
+      <span aria-hidden="true" style={{ ...base, top: o, right: o }} />
+      <span aria-hidden="true" style={{ ...base, bottom: o, left: o }} />
+      <span aria-hidden="true" style={{ ...base, bottom: o, right: o }} />
+    </>
+  );
+}
+
+/** Section kicker — the 8px green square + mono label pair every section
+ *  opens with. `dark` swaps the label to the dark-band muted tone. */
+export function Kicker({ children, dark = false, center = false }: { children: ReactNode; dark?: boolean; center?: boolean }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: center ? 'center' : undefined, gap: 8 }}>
+      <span style={{ width: 8, height: 8, background: '#0A7A58', flex: 'none' }} />
+      <span style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.16em', color: dark ? '#ABB2AB' : '#7C8187' }}>{children}</span>
+    </div>
+  );
+}
+
+/** Page locator — kept for the surviving inner pages (segments). */
 export function PageCrumb({ parent, here }: { parent?: { label: string; href: string }; here: string }) {
   return (
     <nav className="pd-crumb" aria-label="Breadcrumb">
@@ -49,9 +83,8 @@ function settleToAnchor(hash: string) {
   const cancel = () => { stop = true; evs.forEach(ev => window.removeEventListener(ev, cancel)); };
   evs.forEach(ev => window.addEventListener(ev, cancel, { passive: true }));
   // #yulia lives in the hero fold, and "take me to the chat" means the TOP of
-  // the landing — H1, bar, chips — not the zone's edge parked under the
-  // sticky nav (Paul, 2026-08-05: "it does not reset the page and focus on
-  // the chat bar like it should"). Every other anchor scrolls to itself.
+  // the landing — H1, engine card — not the zone's edge parked under the
+  // sticky nav. Every other anchor scrolls to itself.
   const yulia = hash === '#yulia';
   const el = () => (yulia ? document.body : document.getElementById(hash.slice(1)));
   const go = () => { if (yulia) window.scrollTo(0, 0); else document.getElementById(hash.slice(1))?.scrollIntoView(); };
@@ -70,26 +103,50 @@ function settleToAnchor(hash: string) {
   }
 }
 
-/* THE STICKY CTA IS GONE (2026-08-01, Paul: "ok let's rethink it").
-   It was a fixed pill, bottom-right, armed past 0.9 viewport heights, asking
-   "Build your market map". Retired on the numbers rather than on taste: the
-   landing already carries NINE in-page conversion points on a phone — Book a
-   call, Build your market map, Confidential consultation, Bring us your idea,
-   Run yours, two more at the close, Pick a time — and the LARGEST gap between
-   any two of them is 4.1 screens on a 21.3-screen page. The persistent ask it
-   existed to provide already existed.
-
-   It was also costing three things for that duplication: it overlapped body
-   text wherever it sat, it is a fixed COLOURED element at the viewport edge —
-   which CLAUDE.md rule 5 bans because Safari samples that strip to tint its
-   toolbar, and which correlated exactly with the grey bottom bar Paul
-   photographed — and it was one more thing on a surface whose whole current
-   direction is calm.
-
-   The scroll-away nav is the better home for a persistent ask anyway: it
-   returns the instant you pull up, and it lives in the chrome rather than on
-   top of the reading. If a floating ask is ever wanted again, it is in git
-   history at 86fb98f — but read the numbers above first. */
+/** The Who-it's-for hover dropdown (desktop): five buyer links + the owners
+ *  promo card, transcribed from the reference nav. */
+function WhoMenu({ anchor }: { anchor: (hash: string) => string }) {
+  const [open, setOpen] = useState(false);
+  const buyers: [string, string][] = [
+    ['Family offices', '/buyers/family-offices'],
+    ['Independent sponsors', '/buyers/independent-sponsors'],
+    ['Search funds & solo acquirers', '/buyers/searchers'],
+    ['Operators & strategics', '/buyers/operators'],
+    ['PE firms', '/buyers/pe-firms'],
+  ];
+  return (
+    <div style={{ position: 'relative' }} onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+      <a href={anchor('#who')} className="ca-h-green" style={{ color: '#16181A', padding: '6px 0', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+        Who it's for <span style={{ fontSize: 10, color: '#7C8187' }}>▾</span>
+      </a>
+      {open && (
+        <div style={{ position: 'absolute', top: '100%', left: -24, paddingTop: 18, zIndex: 70 }}>
+          <div style={{ width: 560, background: '#FFFFFF', border: '1px solid #E4DFD3', boxShadow: '0 24px 60px rgba(22,24,26,.10)', display: 'grid', gridTemplateColumns: '1fr 220px' }}>
+            <div style={{ padding: '26px 28px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                <span style={{ width: 8, height: 8, background: '#0A7A58' }} />
+                <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.14em', color: '#7C8187' }}>BUYERS</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, fontSize: 16, fontWeight: 500 }}>
+                {buyers.map(([label, href]) => (
+                  <Link key={href} href={href} className="ca-h-green" style={{ color: '#16181A' }} onClick={() => setOpen(false)}>{label}</Link>
+                ))}
+              </div>
+            </div>
+            <a href={anchor('#owners')} className="ca-h-bandmenu" style={{ display: 'block', background: '#F3F0E9', padding: '22px 20px', borderLeft: '1px solid #E4DFD3' }} onClick={() => setOpen(false)}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '4px 8px', whiteSpace: 'nowrap' }}>
+                <span style={{ width: 7, height: 7, background: '#FCFAF6', display: 'inline-block' }} />FREE VALUATION
+              </span>
+              <span style={{ display: 'block', marginTop: 12, fontSize: 14.5, lineHeight: 1.5, color: '#16181A', fontWeight: 500 }}>
+                Get the valuation buyers are working from — free. →
+              </span>
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function PracticeShell({
   home = false,
@@ -97,25 +154,23 @@ export default function PracticeShell({
   children,
 }: {
   home?: boolean;
+  /** Accepted for compatibility — the Carta references ship ONE footer, so
+   *  every page now carries the full mega footer. */
   footerCompact?: boolean;
   children: ReactNode;
 }) {
+  void footerCompact;
   const anchor = (hash: string) => (home ? hash : `/${hash}`);
 
   // Keep the tab, the history entry and the canonical describing the page you
   // are actually on after an in-app navigation. First load is the server's job.
   useSiteMeta();
 
-  // Highlight the nav item for where the current page lives (Industries page;
-  // segment pages still sit under Who it's for).
   const [loc, navigate] = useLocation();
 
   // Off the landing, every `/#hash` link — nav, mobile menu, footer, and the
   // inner pages' own CTAs — becomes an SPA navigation plus settleToAnchor,
   // instead of a full reload that races the mount (see settleToAnchor above).
-  // Delegated at the document so SegmentPage/Industries pills are covered
-  // without each carrying its own handler. On the landing (home) the links
-  // are plain `#hash` and native in-page behavior is already right.
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
@@ -123,7 +178,6 @@ export default function PracticeShell({
       if (!a || a.target === '_blank') return;
       const href = a.getAttribute('href')!;
       if (href.startsWith('/#')) {
-        // Inner page → landing section.
         if (home) return; // shouldn't occur on the landing, but never double-handle
         e.preventDefault();
         const hash = href.slice(1);
@@ -141,81 +195,25 @@ export default function PracticeShell({
     document.addEventListener('click', onClick);
     return () => document.removeEventListener('click', onClick);
   }, [home, navigate]);
-  const onSegment = loc.startsWith('/buyers/');
-  const onIndustries = loc === '/industries';
-  // /reports still reaches the SPA on an in-app navigation before the
-  // client redirect fires, so the nav stays lit for both spellings.
-  const onReports = loc.startsWith('/research') || loc.startsWith('/reports');
 
-  // The bar HIDES on the way down and comes back on the way up (Paul,
-  // 2026-07-31: "on scroll down let's just scroll the header up out of the way
-  // completely and let the content bleed full page, and then immediately on
-  // scroll up we bring the full header back").
-  //
-  // It slides out rather than shrinking. The condensed state that used to live
-  // here is gone with it: condensing existed to reclaim height from a bar that
-  // was permanently on screen, and a bar that is simply absent while you read
-  // has no height to reclaim. Two size transitions firing on every direction
-  // flip would also read as fidget.
-  //
-  // The 4px dead zone is load-bearing, not a nicety: iOS rubber-banding and
-  // momentum emit a stream of sub-pixel scroll events, including sign flips at
-  // the end of a fling, so a naive `y > last` would flap the header several
-  // times a second at the bottom of a long report.
-  //
-  // `navSolid` FILLS the bar, and it shares the 80px threshold on purpose so
-  // there is only ever one flip (Paul: "shouldn't the nav bar just be
-  // transparent, and the hero colour fade up and match, so it doesn't matter
-  // that the nav bar covers it part of the time?").
-  //
-  // Exactly right, and it splits cleanly along the threshold that already
-  // exists. AT THE TOP there is nothing behind the bar, so it can be
-  // transparent and simply show the page's own wash — one source of the
-  // gradient, matched by construction rather than by a duplicate kept in sync.
-  // ONCE SCROLLED it is an overlay with body text passing under it, so it must
-  // be opaque — and it no longer needs to match anything, because covering the
-  // page is the job at that point.
-  //
-  // That deletes the copy of the wash the bar used to carry. Two of the seams
-  // in this sequence came from that copy drifting from the original; the fix
-  // for a duplicate that keeps going stale is not a better sync rule, it is
-  // not having the duplicate.
-  const [navAway, setNavAway] = useState(false);
-  const [navSolid, setNavSolid] = useState(false);
+  // Nav hairline + shadow once the page has scrolled 24px (reference behavior
+  // — the bar stays; the Aurora hide-on-scroll chrome retired with Aurora).
+  const [navOn, setNavOn] = useState(false);
   useEffect(() => {
-    let last = window.scrollY;
-    const apply = (y: number, dir: number) => {
-      // Never hide while the bar is still its own height from the top — it
-      // would vanish before you had scrolled past it, which reads as a glitch
-      // rather than as getting out of the way.
-      if (y <= 80) { setNavAway(false); setNavSolid(false); return; }
-      setNavSolid(true);
-      // dir === 0 is the mount case (restored scroll position, anchor load).
-      // Treated as "up", so a deep link never lands on a missing header.
-      setNavAway(dir > 0);
-    };
-    apply(last, 0);
-    const onScroll = () => {
-      const y = window.scrollY;
-      const d = y - last;
-      if (Math.abs(d) < 4) return;
-      last = y;
-      apply(y, d);
-    };
+    const onScroll = () => setNavOn(window.scrollY > 24);
+    onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Mobile menu (Paul, 2026-07-16: "there is no nav hamburger on mobile").
-  // Closes on route change, Esc, scrim, or any link tap; the page behind is
-  // scroll-held while it's open (restored to the shell's 'auto').
+  // Mobile menu (≤760px). Closes on route change, Esc, scrim, or any link
+  // tap; the page behind is scroll-held while it's open.
   const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => { setMenuOpen(false); }, [loc]);
-  /* Route changes start at the TOP of the new page (2026-08-02, found via
-     the who-index: wouter preserves scroll, so a link tapped 3000px down
-     the landing opened the segment page 3000px down — which read as the
-     link going nowhere). Hash navigations keep the browser's own anchor
-     behavior. */
+  /* Route changes start at the TOP of the new page (wouter preserves scroll,
+     so a link tapped 3000px down the landing opened the next page 3000px
+     down — which read as the link going nowhere). Hash navigations keep the
+     browser's own anchor behavior. */
   useEffect(() => {
     if (!window.location.hash) window.scrollTo(0, 0);
   }, [loc]);
@@ -233,12 +231,49 @@ export default function PracticeShell({
   }, [menuOpen]);
   const closeMenu = () => setMenuOpen(false);
 
-  // Scroll-reveal (v3 logic from the design bundle): elements already at or
-  // above the viewport reveal immediately (a deep-link or restored scroll must
-  // never leave opacity-0 holes), the rest reveal via the observer — and a
-  // MutationObserver re-scans, because re-rendered/replaced nodes lose rv-in
-  // and were never re-observed. Reduced-motion users get everything visible
-  // via the CSS guard.
+  // Hero entrance: data-hs elements rise in sequence (i × 130ms) on mount —
+  // the reference cascade, shared by every page. Children mount before the
+  // shell's effects run, so the DOM is complete here.
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const ease = 'cubic-bezier(.2,.7,.3,1)';
+    const hs = Array.from(document.querySelectorAll<HTMLElement>('[data-hs]'));
+    hs.forEach(el => { el.style.opacity = '0'; el.style.transform = 'translateY(26px)'; });
+    const t = setTimeout(() => hs.forEach(el => {
+      const i = parseInt(el.getAttribute('data-hs') || '0', 10) || 0;
+      el.style.transition = `opacity .85s ${ease} ${i * 130}ms, transform .85s ${ease} ${i * 130}ms`;
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+    }), 80);
+    return () => clearTimeout(t);
+  }, [loc]);
+
+  // Parallax drift for the decorative dot fields (data-plx). The base is the
+  // element's UNTRANSLATED document-space anchor, cached once per element.
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const bases = new WeakMap<HTMLElement, number>();
+    const onScroll = () => {
+      document.querySelectorAll<HTMLElement>('[data-plx]').forEach(el => {
+        const f = parseFloat(el.getAttribute('data-plx') || '0') || 0;
+        if (!bases.has(el)) {
+          const r = el.getBoundingClientRect();
+          bases.set(el, r.top + window.scrollY + r.height / 2);
+        }
+        const mid = bases.get(el)! - window.scrollY - window.innerHeight / 2;
+        el.style.translate = `0 ${(mid * f * -1).toFixed(1)}px`;
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Scroll-reveal: elements already at or above the viewport reveal
+  // immediately (a deep-link or restored scroll must never leave opacity-0
+  // holes), the rest reveal via the observer — and a MutationObserver
+  // re-scans, because re-rendered/replaced nodes lose rv-in and were never
+  // re-observed. Reduced-motion users get everything visible via the CSS guard.
   useEffect(() => {
     const io = new IntersectionObserver(
       entries => {
@@ -269,9 +304,8 @@ export default function PracticeShell({
   //    container, breaking native fragment jumps, full-page capture, print).
   //  • BODY overflow must be `visible`, NOT `auto`. `overflow:auto` on body
   //    makes body a scroll container too, so `position:sticky` descendants
-  //    (the nav, the sidebar cards) stick to the TOP OF BODY — which itself
-  //    scrolls up inside html — instead of the viewport, and the sticky nav
-  //    scrolls off screen (Paul, 2026-07-14: "it does not stay sticky").
+  //    (the nav) stick to the TOP OF BODY — which itself scrolls up inside
+  //    html — instead of the viewport, and the sticky nav scrolls off screen.
   //    html carries the scroll (`overflow:auto`); body just flows.
   useEffect(() => {
     const html = document.documentElement.style;
@@ -295,21 +329,12 @@ export default function PracticeShell({
     };
   }, []);
 
+  const navLink = { color: '#16181A', padding: '6px 0' } as const;
+
   return (
-    <div className="pd">
-      {/* Full-page ambient coral wash — Safari-safe (an absolute negative-z
-          layer inside the relative .pd, never a fixed colored div). Must stay
-          the first child so it spans the whole scroll. */}
-      <div className="pd-ambient" aria-hidden="true" />
-      {/* The settle — one viewport-tall bloom that drifts to rest and fades to
-          nothing shortly after load. It ends fully transparent, so it adds no
-          colour to the resting page; see `.pd-settle`. */}
-      <div className="pd-settle" aria-hidden="true" />
-      {/* `menuOpen` forces the fill: the mobile menu can be opened at scroll 0,
-          and a transparent bar above an opaque slide-down panel reads as a
-          rendering fault rather than a design. */}
-      <header className={`pd-navwrap${navSolid || menuOpen ? ' solid' : ''}${navAway && !menuOpen ? ' away' : ''}`}>
-        <div className="pd-nav">
+    <div className="pd" style={{ background: '#FCFAF6' }}>
+      <header className={`ca-nav${navOn || menuOpen ? ' on' : ''}`}>
+        <div data-nav-inner style={{ maxWidth: 1360, margin: '0 auto', padding: '0 32px', height: 76, display: 'flex', alignItems: 'center', gap: 36, minWidth: 0 }}>
           {/* SPA Link, not a plain anchor: a full reload from down-page races
               the browser's scroll restoration against the still-mounting page
               and strands the user a screen below the top. Same-path clicks
@@ -317,40 +342,44 @@ export default function PracticeShell({
           <Link
             href="/"
             aria-label="smbX.ai home"
+            style={{ display: 'flex', alignItems: 'center', flex: 'none' }}
             onClick={(e) => {
               if (window.location.pathname === '/') {
                 e.preventDefault();
                 if (window.location.hash) history.replaceState(null, '', '/');
                 window.scrollTo(0, 0);
-                // Re-assert through the settle window — late images/fonts can
-                // nudge the page a few px off zero as the layout settles.
                 [120, 350, 800, 1500, 2400].forEach(d => setTimeout(() => window.scrollTo(0, 0), d));
               }
             }}
           >
-            <img src="/logo-green-x.png" alt="smbX.ai" className="pd-nav-logo" width={1584} height={396} />
+            <img src="/logo-green-x.png" alt="smbX.ai" width={1584} height={396} style={{ height: 30, width: 'auto', display: 'block' }} />
           </Link>
-          <nav className="pd-nav-links" aria-label="Site">
-            <a href={anchor('#why')}>Why us</a>
-            <a href={anchor('#how')}>How it works</a>
-            <Link href="/industries" className={onIndustries ? 'pd-navon' : undefined} aria-current={onIndustries ? 'page' : undefined}>Industries</Link>
-            <Link href="/research" className={onReports ? 'pd-navon' : undefined} aria-current={onReports ? 'page' : undefined}>Research</Link>
-            <a href={anchor('#who')} className={onSegment ? 'pd-navon' : undefined} aria-current={onSegment ? 'page' : undefined}>Who it's for</a>
-            {/* The owner funnel (2026-08-04, Paul: "a link in the menu for Get
-                Free Valuation"). A deliberate, sanctioned addition to the
-                locked v3 IA — the same standing Research earned 2026-07-29.
-                An ANCHOR, not a route: the valuation is a landing section. */}
-            <a href={anchor('#owners')}>Free Valuation</a>
+          <nav data-nav-links aria-label="Site" style={{ display: 'flex', alignItems: 'center', gap: 28, fontSize: 15.5, fontWeight: 500, whiteSpace: 'nowrap', minWidth: 0 }}>
+            <a href={anchor('#why')} className="ca-h-green" style={navLink}>Why us</a>
+            <a href={anchor('#how')} className="ca-h-green" style={navLink}>How it works</a>
+            <Link href="/industries" className="ca-h-green" style={navLink}>Industries</Link>
+            <Link href="/research" className="ca-h-green" style={navLink}>Research</Link>
+            <WhoMenu anchor={anchor} />
+            <a href={anchor('#owners')} className="ca-h-green" style={navLink}>Free Valuation</a>
           </nav>
-          <div className="pd-nav-ctas">
+          <div data-nav-ctas style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 14, flex: 'none', whiteSpace: 'nowrap' }}>
             <a
-              className="pd-pill pd-nav-book"
+              data-nav-quiet
               href={anchor('#cta')}
+              className="ca-h-band"
+              style={{ fontSize: 15.5, fontWeight: 500, color: '#16181A', padding: '11px 18px', border: '1.5px solid #16181A', borderRadius: 10, background: 'transparent', whiteSpace: 'nowrap' }}
               onClick={() => trackEvent('practice_booking_clicked', { placement: 'nav' })}
             >
               Confidential consultation
             </a>
-            <a className="pd-pill-primary" href={anchor('#yulia')} onClick={() => trackEvent('practice_cta_clicked', { placement: 'nav-yulia' })}>Build your market map</a>
+            <a
+              href={anchor('#yulia')}
+              className="ca-h-greenbg"
+              style={{ fontSize: 15.5, fontWeight: 600, color: '#FCFAF6', background: '#16181A', padding: '12.5px 20px', borderRadius: 10, whiteSpace: 'nowrap' }}
+              onClick={() => trackEvent('practice_cta_clicked', { placement: 'nav-yulia' })}
+            >
+              Build your market map
+            </a>
             <button
               type="button"
               className="pd-nav-burger"
@@ -377,10 +406,6 @@ export default function PracticeShell({
         <Link href="/research" onClick={closeMenu}>Research <span className="arr" aria-hidden>→</span></Link>
         <a href={anchor('#owners')} onClick={closeMenu}>Get Free Valuation <span className="arr" aria-hidden>→</span></a>
         <a href={anchor('#who')} onClick={closeMenu}>Who it's for <span className="arr" aria-hidden>→</span></a>
-        {/* The primary action lives here now that the phone bar has dropped
-            its pill. Styled as a button rather than a seventh 21px link — it
-            is the only thing in this menu that is not navigation, and as a row
-            it would have been buried in the list it needs to lead. */}
         <a
           className="pd-mmenu-cta"
           href={anchor('#yulia')}
@@ -393,92 +418,81 @@ export default function PracticeShell({
 
       {children}
 
-
-      <footer className="pd-footer">
-        <div className="pd-footer-inner" data-rv>
-          <div>
-            <img src="/logo-green-x.png" alt="smbX.ai" width={1584} height={396} loading="lazy" style={{ height: 40, width: 'auto', margin: '-5px 0 0 -8px' }} />
-            <div style={{ marginTop: 14, fontSize: 15, lineHeight: 1.6, color: 'var(--pd-tert)', maxWidth: 340 }}>
-              {footerCompact
-                ? 'Buy-side corporate development for acquirers in the lower middle market.'
-                : "Buy-side corporate development for acquirers in the lower middle market. A senior operator and a full team's output, exclusively on your side of the table."}
-            </div>
-            <div className="pd-footer-founder">
-              <img src="/founder-portrait.jpg" alt="Paul Baker" loading="lazy" />
-              <div>
-                <div className="fname">Paul Baker</div>
-                <div className="frole">Founder · two decades on the buy side</div>
-                <a className="fmeet" href="/about">Meet Paul →</a>
+      {/* ══ MEGA FOOTER — transcribed from the reference ══ */}
+      <footer style={{ background: '#131512', color: '#F4F5F1', padding: '88px 32px 40px' }}>
+        <div style={{ maxWidth: 1360, margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 44 }}>
+            <div>
+              <img src="/logo-green-x-dark.png" alt="smbX.ai" width={1584} height={396} loading="lazy" style={{ height: 36, width: 'auto', display: 'block' }} />
+              <p style={{ margin: '18px 0 0', fontSize: 14.5, lineHeight: 1.65, color: '#ABB2AB', maxWidth: '22em' }}>
+                Buy-side corporate development for acquirers in the lower middle market. A senior
+                operator and a full team's output, exclusively on your side of the table.
+              </p>
+              <div style={{ marginTop: 26, display: 'flex', gap: 14, alignItems: 'center' }}>
+                <img src="/founder-portrait.jpg" alt="Paul Baker" loading="lazy" style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', objectPosition: '50% 18%', border: '2px solid #A8F0CE' }} />
+                <div>
+                  <div style={{ fontSize: 14.5, fontWeight: 600, color: '#F4F5F1' }}>Paul Baker</div>
+                  <div style={{ fontSize: 12.5, color: '#ABB2AB' }}>Founder · two decades on the buy side</div>
+                  <Link href="/about" className="ca-h-tint" style={{ fontSize: 13, color: '#A8F0CE' }}>Meet Paul →</Link>
+                </div>
               </div>
             </div>
-          </div>
-          <div style={{ display: 'flex', gap: 56, flexWrap: 'wrap' }}>
-            {footerCompact ? (
-              <div className="pd-footer-col">
-                <div className="h">FIRM</div>
-                <a href="/#how">How it works</a>
-                <a href="/#pricing">Pricing</a>
-                <a href="/#sample">Sample read</a>
-                <a href="/research">Research</a>
-                <a href="/#cta">Confidential consultation</a>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #2A2E29', paddingBottom: 12 }}>
+                <span style={{ width: 7, height: 7, background: '#0A7A58' }} />
+                <span style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.16em', color: '#ABB2AB' }}>FIRM</span>
+              </div>
+              <div className="ca-foot-col" style={{ marginTop: 16 }}>
+                <a href={anchor('#why')}>Why us</a>
+                <a href={anchor('#how')}>How it works</a>
+                <a href={anchor('#pricing')}>Pricing</a>
+                <a href={anchor('#sample')}>Sample read</a>
+                <Link href="/research">Research</Link>
+                <Link href="/track-record">Track record</Link>
+                <a href={anchor('#cta')}>Confidential consultation</a>
                 <a href="/login">Team sign in</a>
               </div>
-            ) : (
-              <>
-                <div className="pd-footer-col">
-                  <div className="h">FIRM</div>
-                  <a href={anchor('#why')}>Why us</a>
-                  <a href={anchor('#how')}>How it works</a>
-                  <a href={anchor('#pricing')}>Pricing</a>
-                  <a href={anchor('#sample')}>Sample read</a>
-                  <a href="/research">Research</a>
-                  <a href={anchor('#proof')}>Track record</a>
-                  <a href={anchor('#cta')}>Confidential consultation</a>
-                  <a href="/login">Team sign in</a>
-                </div>
-                <div className="pd-footer-col">
-                  {/* Each name goes to ITS OWN page (2026-08-02). All five used
-                      to point at #who — five different labels, one destination,
-                      and none of them selected the buyer they named: clicking
-                      "PE firms" scrolled you to the who-index showing whichever
-                      panel happened to be active. The five segment pages exist,
-                      are routed at /buyers/:slug and are richer than the panel;
-                      they were simply never linked from here. */}
-                  <div className="h">BUYERS</div>
-                  <a href="/buyers/family-offices">Family offices</a>
-                  <a href="/buyers/independent-sponsors">Independent sponsors</a>
-                  <a href="/buyers/searchers">Search funds</a>
-                  <a href="/buyers/operators">Operators &amp; strategics</a>
-                  <a href="/buyers/pe-firms">PE firms</a>
-                </div>
-                <div className="pd-footer-col" style={{ maxWidth: 200 }}>
-                  <div className="h">WHERE WE WORK</div>
-                  <div style={{ color: 'var(--pd-body)', fontSize: 15, lineHeight: 1.6 }}>
-                    Nationwide, from Dallas–Fort Worth, Texas.
-                  </div>
-                </div>
-              </>
-            )}
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #2A2E29', paddingBottom: 12 }}>
+                <span style={{ width: 7, height: 7, background: '#0A7A58' }} />
+                <span style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.16em', color: '#ABB2AB' }}>BUYERS</span>
+              </div>
+              {/* Each name goes to ITS OWN page — the segment pages are routed
+                  and richer than any landing panel (2026-08-02 law). */}
+              <div className="ca-foot-col" style={{ marginTop: 16 }}>
+                <Link href="/buyers/family-offices">Family offices</Link>
+                <Link href="/buyers/independent-sponsors">Independent sponsors</Link>
+                <Link href="/buyers/searchers">Search funds</Link>
+                <Link href="/buyers/operators">Operators &amp; strategics</Link>
+                <Link href="/buyers/pe-firms">PE firms</Link>
+              </div>
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #2A2E29', paddingBottom: 12 }}>
+                <span style={{ width: 7, height: 7, background: '#0A7A58' }} />
+                <span style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.16em', color: '#ABB2AB' }}>WHERE WE WORK</span>
+              </div>
+              <p style={{ margin: '16px 0 0', fontSize: 14.5, lineHeight: 1.65, color: '#D7DBD2' }}>
+                Nationwide, from Dallas–Fort Worth, Texas.
+              </p>
+            </div>
           </div>
-        </div>
-        <div id="disclosures" className="pd-disclosure">
-          smbX advises buyers only. We work exclusively on acquisitions of privately held companies
-          with under $250M in annual revenue, and we do not represent sellers or act for both sides
-          of a transaction. smbX is not a registered broker-dealer or investment adviser, does not
-          offer securities, does not take custody of client funds, and does not provide legal, tax,
-          or accounting advice — we coordinate the licensed specialists your deal requires. Nothing
-          here is an offer to buy or sell any security.
-        </div>
-        <div className="pd-footer-legal">
-          © 2026 smbX. Buy-side only, by design.
-          <span style={{ margin: '0 8px' }}>·</span>
-          <a href="/legal/terms" style={{ color: 'var(--pd-tert)' }}>Terms</a>
-          <span style={{ margin: '0 8px' }}>·</span>
-          <a href="/legal/privacy" style={{ color: 'var(--pd-tert)' }}>Privacy</a>
-          <span style={{ margin: '0 8px' }}>·</span>
-          <a href="#disclosures" style={{ color: 'var(--pd-tert)' }}>Disclosures</a>
-          <span style={{ margin: '0 8px' }}>·</span>
-          <a href="/login" style={{ color: 'var(--pd-tert)' }}>Sign in</a>
+          <div id="disclosures" style={{ marginTop: 64, borderTop: '1px solid #2A2E29', paddingTop: 26, fontSize: 12.5, lineHeight: 1.7, color: '#8A9088', maxWidth: '76em' }}>
+            smbx.ai advises buyers only. We work exclusively on acquisitions of privately held
+            companies with under $250M in annual revenue, and we do not represent sellers or act
+            for both sides of a transaction. smbx.ai is not a registered broker-dealer or
+            investment adviser, does not offer securities, does not take custody of client funds,
+            and does not provide legal, tax, or accounting advice — we coordinate the licensed
+            specialists your deal requires. Nothing here is an offer to buy or sell any security.
+          </div>
+          <div style={{ marginTop: 22, fontSize: 13, color: '#8A9088', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span>© 2026 smbx.ai. Buy-side only, by design.</span><span>·</span>
+            <a href="/legal/terms" className="ca-h-mint" style={{ color: '#ABB2AB' }}>Terms</a><span>·</span>
+            <a href="/legal/privacy" className="ca-h-mint" style={{ color: '#ABB2AB' }}>Privacy</a><span>·</span>
+            <a href="#disclosures" className="ca-h-mint" style={{ color: '#ABB2AB' }}>Disclosures</a><span>·</span>
+            <a href="/login" className="ca-h-mint" style={{ color: '#ABB2AB' }}>Sign in</a>
+          </div>
         </div>
       </footer>
     </div>

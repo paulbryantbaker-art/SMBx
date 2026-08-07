@@ -745,8 +745,17 @@ export default function YuliaIntake({ onOwnerModeChange }: { onOwnerModeChange?:
     <div id="yulia" className={`pd-chat-zone${resting ? ' resting' : ''}`}>
       {/* ── The hero bar — desktop resting state AND the mobile doorway. On a
              phone, pointerdown opens the sheet before focus (no keyboard
-             behind the sheet); on desktop it's the real input. ── */}
+             behind the sheet); on desktop it's the real input. CARTA (2026-08-07):
+             the resting state renders the reference's card interior — header
+             chip + logo, the opening line as a set paragraph, the ink-border
+             input with a square send, the mono step label — inside the frame
+             the landing draws around this component (.ca-engine). ── */}
       <div className="pd-chat-hero">
+        <div className="ca-eng-head">
+          <span className="ca-eng-chip">{ownerMode ? 'FREE VALUATION' : 'ACQUISITION ENGINE'}</span>
+          <img src="/logo-x-green.png" alt="" style={{ height: 18, width: 'auto', opacity: 0.9 }} />
+        </div>
+        {resting && <p className="ca-eng-open">{OPENING}</p>}
         <div
           className="pd-herobar"
           onClick={() => { if (isMobile()) openSheet(); }}
@@ -778,11 +787,13 @@ export default function YuliaIntake({ onOwnerModeChange }: { onOwnerModeChange?:
             disabled={pending}
             aria-label={userTurns > 0 || done ? 'Reopen the conversation' : sendLabel}
           >
-            {mobileVP ? (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            ) : (userTurns > 0 || done ? 'Reopen' : sendLabel)}
+            {/* The square ink ↑ (reference grammar) — the rotating step label
+                ("Continue" → "Generate Map" → "Send") lives on the mono line
+                under the bar instead of in the button. */}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </button>
         </div>
+        <div className="ca-eng-step">{userTurns > 0 || done ? 'Continue' : sendLabel}</div>
         {resting && (
           <div className="pd-chips">
             {FEATURED_LANES.map(c => (
@@ -791,7 +802,7 @@ export default function YuliaIntake({ onOwnerModeChange }: { onOwnerModeChange?:
               </button>
             ))}
             <a
-              className="pd-chip"
+              className="pd-chip ca-chip-green"
               href="#sectors"
               onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero-all-lanes' })}
             >
@@ -801,7 +812,7 @@ export default function YuliaIntake({ onOwnerModeChange }: { onOwnerModeChange?:
                 not an intake path — the buyer engine stays pure; owners get
                 their own chat at /owners. */}
             <a
-              className="pd-chip"
+              className="pd-chip ca-chip-tint"
               href="#owners"
               onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero-owner-eval' })}
             >
@@ -902,8 +913,11 @@ export default function YuliaIntake({ onOwnerModeChange }: { onOwnerModeChange?:
           disabled={done}
           aria-label="Describe your acquisition criteria"
         />
-        <button type="button" className="pd-send" onClick={() => send()} disabled={done || pending}>{sendLabel}</button>
+        <button type="button" className="pd-send" onClick={() => send()} disabled={done || pending} aria-label={sendLabel}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        </button>
       </div>
+      {!done && <div className="ca-eng-step" style={{ margin: '4px 26px 14px' }}>{sendLabel}</div>}
         </>
       )}
       </div>
