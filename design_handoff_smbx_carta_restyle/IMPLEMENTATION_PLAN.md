@@ -1,8 +1,6 @@
 # Carta-restyle handoff — Implementation Plan
 
-**Status:** PLAN — Paul answered Q2/Q3/Q5 on 2026-08-07 (recorded inline below).
-**Q1 (employer naming) is still open and is the only true blocker**; it does not touch
-step 1 of the build, so tokens + shell proceed while it is outstanding.
+**Status:** APPROVED TO BUILD — all six questions answered 2026-08-07 (recorded inline).
 
 **Source of truth:** this folder. The README's rules of engagement are accepted verbatim —
 **transcription, not interpretation**; values extracted from the HTML, never eyeballed;
@@ -146,9 +144,17 @@ NEVER named on public surfaces — "a global investment bank", "a world-class PE
 aggregator", with Deloitte allowed. The README says copy was "user-edited in places
 (…employer names)", which reads as you re-naming them deliberately during the design
 session.
-Both readings are plausible and I will not guess: naming them by accident undoes a
-protective decision, and anonymizing them by accident overrides your newer instruction.
-**Which is it?**
+**ANSWERED (Paul, 2026-08-07): "Lets name — i have hidden any deals or other information
+that is basically not on my resume."** Employers are NAMED; the 2026-07-18 anonymization
+is retired (CLAUDE.md updated in the same commit so no future session reverses it).
+**The reasoning sets the boundary and must be carried:** what appears publicly is what is
+already on Paul's résumé, and he curated this bundle's copy himself to that standard.
+**Therefore the handoff's name lists are the CLEARED SET — port them verbatim and never
+merge in names from the older `TrackRecord.tsx`** (which carries additional deal names
+that did not pass his filter). The other five attribution rules are untouched: led or
+co-led · "selected transactions" (the design's register header already says it) · the
+shield wherever names appear · names not logos · never "our clients" · JPMorgan is
+integration, not origination.
 
 **Q2 — "150+" and the $2B stat.**
 The design writes **150+** (About, Landing, Track Record); the law says the total is
