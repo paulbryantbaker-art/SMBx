@@ -70,8 +70,11 @@ palettes, and nothing that travelled to the workspace described the current one.
 2. Run `init-workspace.mts` (above).
 3. Open **Cowork** on the workspace folder. Set `REPO` to wherever the repo is
    cloned — every command below uses it.
+4. For job 5 (pushing research into the app's CRM), put the app credentials
+   where the session can reach them — `SMBX_EMAIL` + `SMBX_PASSWORD`, or a
+   longer-lived `SMBX_TOKEN`. Without them the push asks every time.
 
-## The four jobs
+## The five jobs
 
 ### 0. Build the research in the first place
 
@@ -200,6 +203,35 @@ post specs, `scripts/studio/reports/` for report cover blocks.
 What the seller sent goes in `deals/<d>/documents/`; what we produce goes in
 `analysis/`. Same discipline — a number in the analysis comes from a document in
 `documents/`, or it says where it came from.
+
+### 5. Push a research run into the app's CRM
+
+The one place this workspace WRITES into the app (2026-08-07). Paul: *"I'd like
+to be able to do all of this in Cowork and just have that updated list put into
+the app… without burning API."*
+
+The session does the smart half — read the sheet or the research, map it into
+the seven-table bundle (`01_contacts.csv`, `02_organizations.csv`,
+`03_outreach_waves.csv`, `04_sequence_steps.csv`, `05_message_templates.csv`,
+`06_events.csv`, `07_research_queue.csv`; copy the headers from
+`content/crm-seed/`). Then one command delivers it:
+
+```bash
+SMBX_EMAIL=… SMBX_PASSWORD=… npx tsx $REPO/scripts/studio/push-crm.mts <folder>
+```
+
+A partial bundle is legal — an updated contacts sheet alone is a valid push;
+the loader upserts and never wipes what it wasn't given. The report prints what
+landed and NAMES every unresolvable target rather than dropping it.
+
+**The app side calls no model.** `POST /api/crm/import-bundle` is parse → map →
+upsert, pure code. The intelligence is the mapping this session does, on the
+subscription. That is why this loop costs nothing against the org key — the
+same reason the rest of Studio lives here.
+
+The full laws for this job (never invent a person; `bucket` decides the layer;
+`tier` is conviction, not size) are in the workspace's own `CLAUDE.md` under
+"6. Push a research run into the app's CRM".
 
 ## The LinkedIn loop, specifically
 
