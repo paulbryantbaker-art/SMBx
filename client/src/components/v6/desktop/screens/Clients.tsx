@@ -39,6 +39,7 @@ import {
   type CrmAccount,
 } from "../../../../lib/crm";
 import { MarkBadge, Pill, KpiCard, EmptyState, LoadingState } from "../primitives";
+import OutreachPanel from "./ClientsOutreach";
 import { CONTACT_ROLES, ROLE_LABEL } from "../../../../hooks/useDealTasks";
 import { authHeaders } from "../../../../hooks/useAuth";
 import { useDraft } from "../../../../hooks/useDraft";
@@ -93,6 +94,9 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
   const [openId, setOpenId] = useState<number | null>(null);
   const [detailNonce, setDetailNonce] = useState(0);
   const [banner, setBanner] = useState<string | null>(null);
+  // Board = the ranked register ("who do I call next"); Outreach = the
+  // campaign machine ("what does the plan say I owe today", migration 120).
+  const [mode, setMode] = useState<"board" | "outreach">("board");
 
   const crm = useCrmAccounts(user, filters, query);
 
@@ -108,8 +112,11 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
       setBanner(
         `Outreach plan seeded — ${r.accountsCreated} firms new, ${r.accountsUpdated} refreshed, ` +
         `${r.contactsAdded} contacts, ${r.activitiesAdded} notes. ` +
-        `${r.unnamedParked} records still need a named person (flagged in next actions); ` +
-        `${r.doNotPitch} marked do-not-pitch.`,
+        `Campaign machine: ${r.wavesLoaded} waves, ${r.stepsLoaded} steps, ${r.templatesLoaded} templates, ` +
+        `${r.eventsLoaded} events, ${r.touchesQueued} touches queued` +
+        (r.touchesExcluded ? ` (${r.touchesExcluded} excluded: do-not-pitch/unsubscribed)` : "") + `. ` +
+        `${r.unnamedParked} records still need a named person; ${r.doNotPitch} marked do-not-pitch.` +
+        (r.targetsUnmatched?.length ? ` Unmatched targets: ${r.targetsUnmatched.join("; ")}.` : ""),
       );
     } catch (e: any) {
       setBanner(`Seed failed: ${e?.message ?? "unknown error"}`);
@@ -122,6 +129,28 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
     // The detail pane is absolute inside this — never fixed (Safari rule).
     position: "relative",
   };
+
+  // The two modes of the screen, one tab row above whichever is live.
+  const modeTabs = (
+    <div style={{ display: "flex", gap: 6, padding: "14px 22px 10px", flex: "none" }}>
+      {(["board", "outreach"] as const).map(k => (
+        <button
+          key={k}
+          type="button"
+          onClick={() => setMode(k)}
+          style={{
+            padding: "7px 16px", borderRadius: 99, fontSize: 13, fontWeight: 700,
+            cursor: "pointer",
+            border: `1px solid ${mode === k ? T.ink : T.border}`,
+            background: mode === k ? T.ink : T.white,
+            color: mode === k ? "#fff" : T.ink,
+          }}
+        >
+          {k === "board" ? "Board" : "Outreach"}
+        </button>
+      ))}
+    </div>
+  );
 
   const toolbar = (
     <Toolbar
@@ -152,15 +181,21 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
     />
   );
 
+  // Outreach mode is its own surface — the board's toolbar/filters don't
+  // apply, and its load/error/empty states are its own.
+  if (mode === "outreach") {
+    return <div style={root}>{modeTabs}<OutreachPanel user={user} /></div>;
+  }
+
   if (crm.loading && !crm.loaded) {
-    return <div style={root}>{toolbar}<div style={{ flex: 1, display: "flex" }}>
+    return <div style={root}>{modeTabs}{toolbar}<div style={{ flex: 1, display: "flex" }}>
       <LoadingState label="Loading the client pipeline…" />
     </div></div>;
   }
 
   // A real failure must not read as an empty pipeline.
   if (crm.error) {
-    return <div style={root}>{toolbar}<div style={{ flex: 1, display: "flex" }}>
+    return <div style={root}>{modeTabs}{toolbar}<div style={{ flex: 1, display: "flex" }}>
       <EmptyState
         title="Could not load the client pipeline"
         hint={`${crm.error}. If this is the first deploy carrying migration 113, the crm_accounts tables may not exist yet — check the boot log for "[migrations] Applied: 113_crm_accounts.sql".`}
@@ -171,7 +206,7 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
   }
 
   if (crm.loaded && crm.all.length === 0) {
-    return <div style={root}>{toolbar}
+    return <div style={root}>{modeTabs}{toolbar}
       {banner && (
         <div style={{ margin: "0 22px 10px", padding: "10px 14px", background: T.blueBg, border: `1px solid ${T.border}`, borderRadius: 10, fontSize: 13 }}>{banner}</div>
       )}
@@ -189,6 +224,7 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
 
   return (
     <div style={root}>
+      {modeTabs}
       {toolbar}
 
       {banner && (
