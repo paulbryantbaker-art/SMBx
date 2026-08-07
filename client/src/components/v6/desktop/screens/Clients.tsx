@@ -378,6 +378,11 @@ function Toolbar({
         <button type="button" style={chip(filters.tier === "A")} onClick={() => onToggle("tier", "A")}>Tier A</button>
         <button type="button" style={chip(filters.dfw === "yes")} onClick={() => onToggle("dfw", "yes")}>DFW</button>
         <button type="button" style={chip(filters.archived === true)} onClick={() => onToggle("archived", true)}>Archived</button>
+        {/* The layers (2026-08-07, Paul: "i still only see 35 leads" — 81
+            firms WERE on file; the board deliberately ranks acquirers only,
+            but the capital/referral layer had no doorway at all). */}
+        <button type="button" style={chip(filters.kind === "service_provider")} onClick={() => onToggle("kind", "service_provider")}>Capital & referral</button>
+        <button type="button" style={chip(filters.kind === "all")} onClick={() => onToggle("kind", "all")}>Everyone</button>
       </div>
 
       <div style={{ flex: 1 }} />

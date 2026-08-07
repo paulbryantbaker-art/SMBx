@@ -147,18 +147,46 @@ export interface SeedReport {
   targetsUnmatched: string[];
 }
 
+/** The seven-table bundle, already parsed. The shape a Cowork session (or
+ *  any smart mapper) produces — the loader itself never calls a model. */
+export interface SeedTables {
+  contacts: Record<string, string>[];
+  orgs: Record<string, string>[];
+  waves: Record<string, string>[];
+  steps: Record<string, string>[];
+  templates: Record<string, string>[];
+  events: Record<string, string>[];
+  queue: Record<string, string>[];
+}
+
+/** Load the repo-shipped 2026-08-05 plan from content/crm-seed/. */
 export async function seedOutreachBoard(userId: number): Promise<SeedReport> {
   const dir = seedDir();
   if (!dir) throw new Error('content/crm-seed is missing — the plan bundle is not on this deploy');
   const read = (f: string) => parseCsv(readFileSync(path.join(dir, f), 'utf8'));
+  return seedOutreachFromTables(userId, {
+    contacts: read('01_contacts.csv'),
+    orgs: read('02_organizations.csv'),
+    waves: read('03_outreach_waves.csv'),
+    steps: read('04_sequence_steps.csv'),
+    templates: read('05_message_templates.csv'),
+    events: read('06_events.csv'),
+    queue: read('07_research_queue.csv'),
+  });
+}
 
-  const orgs = read('02_organizations.csv');
-  const contacts = read('01_contacts.csv');
-  const waves = read('03_outreach_waves.csv');
-  const steps = read('04_sequence_steps.csv');
-  const templates = read('05_message_templates.csv');
-  const events = read('06_events.csv');
-  const queue = read('07_research_queue.csv');
+/** THE BRIDGE (2026-08-07, Paul: "I need a smart importer that does what
+ *  you're doing and just puts the data where it needs to go… do all of this
+ *  in Cowork… without burning API"). The division of labour is THE SPLIT's:
+ *  the SMART half (reading a messy sheet, mapping columns, splitting layers)
+ *  happens in a Cowork session on the subscription — a model, but never the
+ *  app's metered key; the DUMB half (this function) is pure code the app
+ *  runs for free. Cowork writes the seven CSVs, POST /api/crm/import-bundle
+ *  (or scripts/studio/push-crm.mts) delivers them, and the same idempotent
+ *  loader the shipped plan uses puts every row where it goes — no GitHub
+ *  round-trip, no hand-formatting, no model call server-side. */
+export async function seedOutreachFromTables(userId: number, tables: SeedTables): Promise<SeedReport> {
+  const { contacts, orgs, waves, steps, templates, events, queue } = tables;
 
   const ISO_DATE = /^\d{4}-\d{2}-\d{2}/;
   const isoOrNull = (s: string | undefined) =>
@@ -192,6 +220,13 @@ export async function seedOutreachBoard(userId: number): Promise<SeedReport> {
       segment: r.segment || null,
       source_key: r.org_id || null,
       grade: r.tier || null,
+      /* The plan's conviction tier ALSO lands in the ranked `tier` column
+         (2026-08-07, Paul's first board: "none are on the A tier" — the plan's
+         A/B/C sat only in `grade` as provenance, every `tier` was NULL, and an
+         unscored board fell back to alphabetical). COALESCE on conflict: a
+         real re-score owns the column the moment one runs; until then the
+         board ranks by Paul's own plan. */
+      tier: r.tier || null,
       evidence: r.buyside_signal
         ? (r.signal_date ? `${r.buyside_signal} (signal: ${r.signal_date})` : r.buyside_signal)
         : null,
@@ -215,6 +250,7 @@ export async function seedOutreachBoard(userId: number): Promise<SeedReport> {
       ON CONFLICT (user_id, lower(firm)) DO UPDATE SET
         kind = EXCLUDED.kind,
         source_key = COALESCE(crm_accounts.source_key, EXCLUDED.source_key),
+        tier = COALESCE(crm_accounts.tier, EXCLUDED.tier),
         website = COALESCE(EXCLUDED.website, crm_accounts.website),
         domain = COALESCE(EXCLUDED.domain, crm_accounts.domain),
         hq_city = COALESCE(EXCLUDED.hq_city, crm_accounts.hq_city),
