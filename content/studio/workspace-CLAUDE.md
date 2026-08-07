@@ -293,11 +293,15 @@ whatever shape it arrives in — the job is:
 2. **Push it.**
 
    ```
-   SMBX_EMAIL=… SMBX_PASSWORD=… npx tsx scripts/studio/push-crm.mts <folder>
+   SMBX_TOKEN=… npx tsx scripts/studio/push-crm.mts <folder>
    ```
 
-   (or `SMBX_TOKEN=…` to skip the login. `SMBX_APP_URL` defaults to
-   https://smbx.ai.)
+   The token comes from the app: **Settings → Connections → "Show my token"**.
+   Paul signs in with Google, so there is no password for a script to log in
+   with — that pane exists for exactly this. Valid a year, revocable there
+   (Regenerate kills the old one and leaves browser sessions alone). Set it
+   once in the session's environment. `SMBX_APP_URL` defaults to
+   https://smbx.ai.
 
 3. **Read the report back to Paul.** It prints firms new/refreshed, contacts
    added, how many still need a named person, the campaign tables, touches

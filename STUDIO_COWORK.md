@@ -70,9 +70,10 @@ palettes, and nothing that travelled to the workspace described the current one.
 2. Run `init-workspace.mts` (above).
 3. Open **Cowork** on the workspace folder. Set `REPO` to wherever the repo is
    cloned — every command below uses it.
-4. For job 5 (pushing research into the app's CRM), put the app credentials
-   where the session can reach them — `SMBX_EMAIL` + `SMBX_PASSWORD`, or a
-   longer-lived `SMBX_TOKEN`. Without them the push asks every time.
+4. For job 5 (pushing research into the app's CRM), get a token from the app —
+   **Settings → Connections → "Show my token"** — and put it in the session's
+   environment as `SMBX_TOKEN`. (Google sign-in has no password for a script
+   to use; that pane is the answer to it.)
 
 ## The five jobs
 
@@ -217,8 +218,11 @@ the seven-table bundle (`01_contacts.csv`, `02_organizations.csv`,
 `content/crm-seed/`). Then one command delivers it:
 
 ```bash
-SMBX_EMAIL=… SMBX_PASSWORD=… npx tsx $REPO/scripts/studio/push-crm.mts <folder>
+SMBX_TOKEN=… npx tsx $REPO/scripts/studio/push-crm.mts <folder>
 ```
+
+The token: app → **Settings → Connections → "Show my token"**. Google sign-in
+means there is no password to script with, which is why that pane exists.
 
 A partial bundle is legal — an updated contacts sheet alone is a valid push;
 the loader upserts and never wipes what it wasn't given. The report prints what

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
-import { requireAuth, signToken } from '../middleware/auth.js';
+import { requireAuth, signToken, signCliToken } from '../middleware/auth.js';
 import { sendEmail, sendWelcomeEmail, brandedEmail } from '../services/emailService.js';
 import { createSql } from '../dbConfig.js';
 import { OAuth2Client } from 'google-auth-library';
@@ -399,4 +399,42 @@ authRouter.post('/verify-email', async (req, res) => {
 
 authRouter.post('/logout', (_req, res) => {
   res.json({ ok: true });
+});
+
+
+/**
+ * GET  /api/auth/cli-token  — mint a Cowork access token for the signed-in user
+ * POST /api/auth/cli-token  — regenerate (bumps the epoch, killing the old one)
+ *
+ * Paul signs in with Google and has no password, so `push-crm.mts` had no way
+ * to authenticate. This is that way: he is already authenticated in the
+ * browser, so the app hands him a long-lived token to paste into Cowork once.
+ * The token is scoped to his own user exactly like a browser session — it is a
+ * credential, not a capability grant, and the UI says so.
+ */
+authRouter.get('/cli-token', requireAuth, async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const [row] = await sql`SELECT cli_token_epoch FROM users WHERE id = ${userId}`;
+    const epoch = Number(row?.cli_token_epoch ?? 0);
+    return res.json({ token: signCliToken(userId, epoch), expiresInDays: 365 });
+  } catch (err: any) {
+    console.error('cli-token error:', err.message);
+    return res.status(500).json({ error: 'Could not mint a token' });
+  }
+});
+
+authRouter.post('/cli-token', requireAuth, async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const [row] = await sql`
+      UPDATE users SET cli_token_epoch = COALESCE(cli_token_epoch, 0) + 1
+      WHERE id = ${userId} RETURNING cli_token_epoch
+    `;
+    const epoch = Number(row?.cli_token_epoch ?? 0);
+    return res.json({ token: signCliToken(userId, epoch), expiresInDays: 365, revokedPrevious: true });
+  } catch (err: any) {
+    console.error('cli-token regenerate error:', err.message);
+    return res.status(500).json({ error: 'Could not regenerate the token' });
+  }
 });
