@@ -207,7 +207,7 @@ outreachRouter.post('/outreach/touches/:id/send', async (req, res) => {
     if (!emailChannel(t.channel)) return res.status(400).json({ error: `Channel "${t.channel}" is not an email channel — mark the touch done once you have made it.` });
 
     const html = style === 'letterhead'
-      ? letterheadEmail({ body, signatureName: 'Paul Baker', signatureRole: 'Founder · smbX.ai — buy-side corporate development' })
+      ? letterheadEmail({ body })
       : personalHtml(body);
     const delivered = await sendEmail({ to: t.contact_email, subject, html });
     if (!delivered) {

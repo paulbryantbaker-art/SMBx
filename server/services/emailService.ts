@@ -174,7 +174,7 @@ export function signatureHtml(): string {
     <strong style="font-weight:600">Paul Baker</strong>
   </td></tr>
   <tr><td style="font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;line-height:1.5;color:#3F464C;padding:0 0 2px">
-    Founder &amp; Deal Captain
+    Founder | Deal Captain
   </td></tr>
   <tr><td style="font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;line-height:1.5;padding:0 0 10px">
     <a href="mailto:pbaker@smbx.ai" style="color:#0A7A58;text-decoration:none">pbaker@smbx.ai</a>
@@ -211,23 +211,25 @@ export function signatureHtml(): string {
  * list-unsubscribe link — this is one-to-one correspondence, and the machine
  * honors "unsubscribe" replies via the contact's unsubscribed_at (115).
  */
-export function letterheadEmail({ body, signatureName, signatureRole }: {
-  body: string;
-  signatureName?: string;
-  signatureRole?: string;
-}): string {
+export function letterheadEmail({ body }: { body: string }): string {
   const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const paragraphs = body
     .split(/\n{2,}/)
     .map(p => `<p style="margin:0 0 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;font-size:15.5px;line-height:1.7;color:#16181A;">${esc(p.trim()).replace(/\n/g, '<br>')}</p>`)
     .join('');
-  const sig = signatureName ? `
-      <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:26px;">
-        <tr><td style="border-top:2px solid #0A6A4C;padding-top:14px;">
-          <div style="font-family:Georgia,'Times New Roman',serif;font-size:17px;font-weight:600;color:#16181A;">${esc(signatureName)}</div>
-          ${signatureRole ? `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;font-size:13px;color:#5A6169;margin-top:3px;">${esc(signatureRole)}</div>` : ''}
+  /* The sign-off is THE signature — signatureHtml(), the block built to
+     match Paul's own Gmail compose window (name · Founder | Deal Captain ·
+     pbaker@smbx.ai · the real wordmark, linked) — under a jade rule. One
+     signature, one source: a letterhead email and a hand-typed one sign
+     identically, which is the whole point of that function (2026-07-29).
+     (Paul, 2026-08-07: "a nice signature at the bottom with the actual
+     logo correct and me as the Founder | Deal Captain".) */
+  const sig = `
+      <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:28px;">
+        <tr><td style="border-top:2px solid #0A6A4C;padding-top:16px;">
+          ${signatureHtml()}
         </td></tr>
-      </table>` : '';
+      </table>`;
   return `
 <!DOCTYPE html>
 <html>
