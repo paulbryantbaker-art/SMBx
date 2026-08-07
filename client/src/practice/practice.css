@@ -62,6 +62,15 @@
   --pd-coral-link: #086348;
   --pd-cta: #0A7A58;
   --pd-cta-hover: #086348;
+  /* NOT part of the Carta palette — kept because `report.css` uses it in six
+     places (numerals, rules, the key-findings band) and the research pages hold
+     parity with the report PDF, so they are deliberately OUT of this pass and
+     move in phase 2 with the renderers. Deleting this line broke every one of
+     those light-surface uses in a way nothing rendered on the marketing pages
+     would have shown: `.pd-dark` re-scopes --pd-brass to honey, so the dark
+     bands kept working while the document scope silently lost its colour.
+     When phase 2 moves report.css, this goes with it. */
+  --pd-brass: #E8A62B;
   /* The vivid highlight. Ambient layers, the hero mesh and large numerals only
      — it carries no small text anywhere, by rule. */
   --pd-jade: #0FA97C;
@@ -381,13 +390,17 @@
      jade sweep from the top-left, a honey answer at the bottom-right, and a
      cool deep-teal corner give it a direction to travel. They ride ABOVE the
      glaze so they tint the field rather than the texture under it. */
-  background:
-    radial-gradient(72% 62% at 12% -12%, rgba(15, 169, 124, 0.42), rgba(15, 169, 124, 0) 62%),
-    radial-gradient(64% 58% at 94% 104%, rgba(245, 196, 82, 0.16), rgba(245, 196, 82, 0) 64%),
-    radial-gradient(58% 50% at 98% -8%, rgba(8, 74, 92, 0.24), rgba(8, 74, 92, 0) 62%),
-    linear-gradient(rgba(10, 106, 76, 0.84), rgba(10, 106, 76, 0.84)),
-    url('/textures/blackbleed.webp') center / cover no-repeat,
-    linear-gradient(180deg, var(--pd-dark-top) 0%, var(--pd-dark-bg) 46%, var(--pd-dark-bot) 100%);
+  /* CARTA: FLAT. The handoff's dark surface is one value with square edges —
+     no texture, no glaze, no ambient radials.
+
+     This replaces a six-layer stack, and removing it was not optional: an
+     84%-opaque jade glaze plus the blackbleed texture sat ABOVE the only layer
+     that read --pd-dark-*, so swapping that token to #131512 changed the
+     computed custom property and NOTHING on screen. The design gate passed the
+     whole time, because it verifies the token's value and not the paint. That
+     is the trap CLAUDE.md documents for Aurora, hit in reverse — and the reason
+     this pass renders every change rather than trusting a green suite. */
+  background: var(--pd-dark-bg);
   color: var(--pd-ink);
   /* Curved top + bottom cut from the band itself: a fixed-height curve mask at
      top and at bottom, a solid fill between them (union of the three). The
