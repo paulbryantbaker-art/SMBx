@@ -92,7 +92,7 @@ ls markets/<m>/research/ | wc -l      # 0 or 1 → you are at RESEARCH.md, not h
 cat markets/<m>/research/_log.md      # mid-job? resume from the first row not `done`
 ```
 
-## The four jobs
+## The six jobs
 
 ### 1. Fold new research into a market's master
 
@@ -263,6 +263,70 @@ Three things to hold onto:
 When an engagement produces a document, it goes in that engagement's
 `analysis/`, the same split `deals/` uses: `documents/` is what they sent us,
 `analysis/` is what we made.
+
+### 6. Push a research run into the app's CRM
+
+**Paul, 2026-08-07: "I'd like to be able to do all of this in Cowork and just
+have that updated list put into the app… where we're not having to drop data
+back and forth… but I don't want to burn up API."** So this is the ONE place
+the local workspace writes into the app, and the division of labour is exactly
+THE SPLIT's: **you do the smart half here on the subscription, the app does the
+dumb half for free.**
+
+When a research run produces buyers, capital partners, referral sources or an
+updated contact list — from a Google Sheet, a scraped register, a fresh pass,
+whatever shape it arrives in — the job is:
+
+1. **Map it into the seven-table bundle.** One folder, CSVs, these names:
+
+   ```
+   01_contacts.csv        person rows      02_organizations.csv   firm rows
+   03_outreach_waves.csv  the calendar     04_sequence_steps.csv  the plan's steps
+   05_message_templates.csv  the copy      06_events.csv          conferences
+   07_research_queue.csv  what's unknown
+   ```
+
+   `content/crm-seed/` in the repo is the worked example — copy its headers.
+   **A partial bundle is legal**: an updated `01_contacts.csv` alone is a valid
+   push. The loader upserts; it never wipes what it wasn't given.
+
+2. **Push it.**
+
+   ```
+   SMBX_EMAIL=… SMBX_PASSWORD=… npx tsx scripts/studio/push-crm.mts <folder>
+   ```
+
+   (or `SMBX_TOKEN=…` to skip the login. `SMBX_APP_URL` defaults to
+   https://smbx.ai.)
+
+3. **Read the report back to Paul.** It prints firms new/refreshed, contacts
+   added, how many still need a named person, the campaign tables, touches
+   queued, and — the part that matters — **every target expression it could
+   not resolve, by name.** Those are research tasks, not errors. Nothing is
+   ever dropped silently.
+
+**Three laws for this job:**
+
+- **NEVER invent a person, a firm, an email or a title to fill a column.** The
+  citation law applies to a CRM row exactly as it applies to a master. A record
+  with no named individual goes in with the firm and a research-queue entry —
+  the app parks it as "[NAME THE PERSON FIRST]" and it shows up as work to do.
+  A plausible invented contact is the most expensive error this loop can make:
+  it gets *emailed*.
+- **The layer is a judgement, and it is yours to get right.** `bucket` decides
+  where a firm lands: `CLIENT` / `CLIENT+REFERRAL` → the ranked board (people
+  who might pay a retainer); `REFERRAL` → the address book (capital, lenders,
+  counsel, bankers — reachable, never ranked); `ECOSYSTEM_DO_NOT_PITCH` →
+  stored and permanently locked out of every send. Mis-bucketing a competitor
+  as a client is how a do-not-pitch firm gets pitched.
+- **`tier` is conviction (A/B/C), not size.** It ranks the board. Set it the
+  way the plan set it, or leave it blank — never guess a tier to make a row
+  look important.
+
+**Why this costs nothing on the app side:** the endpoint the push hits
+(`POST /api/crm/import-bundle`) is pure code — parse, map, upsert. It calls no
+model. The intelligence is the session doing step 1 here, on Paul's
+subscription. That is the whole point of the arrangement.
 
 ---
 
