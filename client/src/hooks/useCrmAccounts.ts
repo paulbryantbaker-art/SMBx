@@ -135,12 +135,17 @@ export function useCrmAccounts(user: User | null, filters: CrmFilters, query: st
   }, [refresh]);
 
   // The 2026-08-05 outreach plan shipped in the repo (content/crm-seed/) —
-  // one click seeds 81 orgs + 75 named contacts + hooks/research notes.
+  // one click seeds 81 orgs + 75 named contacts + hooks/research notes, AND
+  // (since migration 120) the whole campaign machine: waves, steps,
+  // templates, events, and the expanded touch queue.
   // Idempotent server-side; safe to press twice.
   const seedOutreach = useCallback(async () => {
     const res = await json<{
       accountsCreated: number; accountsUpdated: number; contactsAdded: number;
       activitiesAdded: number; unnamedParked: number; doNotPitch: number;
+      wavesLoaded: number; templatesLoaded: number; stepsLoaded: number;
+      eventsLoaded: number; touchesQueued: number; touchesExcluded: number;
+      targetsUnmatched: string[];
     }>(`/api/crm/seed-outreach`, { method: "POST", body: JSON.stringify({}) });
     refresh();
     return res;

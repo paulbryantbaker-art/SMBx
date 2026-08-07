@@ -34,6 +34,7 @@ import { useDraft } from "../../../../hooks/useDraft";
 import { Pill, EmptyState, LoadingState } from "../../desktop/primitives";
 import { SearchIcon } from "../../desktop/icons";
 import { RT } from "../redesign/rt";
+import OutreachMobile from "./OutreachM";
 import { MarkBadge as RMarkBadge } from "../redesign/kit";
 
 const PAGE_H = "0 18px"; // shell owns vertical; we own the horizontal 18px
@@ -71,8 +72,36 @@ export default function ClientsMobileScreen({ user }: AtlasScreenProps) {
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<number | null>(null);
   const [nonce, setNonce] = useState(0);
+  // Board = the ranked register; Outreach = the campaign queue (migration
+  // 120). Same two modes as desktop Clients, in the mobile grammar.
+  const [mode, setMode] = useState<"board" | "outreach">("board");
 
   const crm = useCrmAccounts(user, filters, query);
+
+  const modeTabs = (
+    <div style={{ display: "flex", gap: 7, padding: "0 18px 12px" }}>
+      {(["board", "outreach"] as const).map(k => (
+        <button key={k} type="button" onClick={() => setMode(k)}
+          style={{
+            height: 34, padding: "0 16px", borderRadius: 99, border: "none",
+            fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: RT.font,
+            background: mode === k ? RT.ink : RT.card,
+            color: mode === k ? "#fff" : RT.ink,
+          }}>
+          {k === "board" ? "Board" : "Outreach"}
+        </button>
+      ))}
+    </div>
+  );
+
+  if (mode === "outreach") {
+    return (
+      <div style={S.root}>
+        {modeTabs}
+        <OutreachMobile user={user} />
+      </div>
+    );
+  }
 
   if (openId != null) {
     return (
@@ -100,6 +129,7 @@ export default function ClientsMobileScreen({ user }: AtlasScreenProps) {
   if (crm.loading && !crm.loaded) {
     return (
       <div style={S.root}>
+        {modeTabs}
         {toolbar}
         <div style={{ padding: "32px 18px", display: "flex", minHeight: 200 }}>
           <LoadingState label="Loading your clients…" />
@@ -112,6 +142,7 @@ export default function ClientsMobileScreen({ user }: AtlasScreenProps) {
   if (crm.error) {
     return (
       <div style={S.root}>
+        {modeTabs}
         {toolbar}
         <div style={{ padding: "24px 18px", display: "flex", minHeight: 260 }}>
           <EmptyState
@@ -129,6 +160,7 @@ export default function ClientsMobileScreen({ user }: AtlasScreenProps) {
   if (crm.loaded && crm.all.length === 0) {
     return (
       <div style={S.root}>
+        {modeTabs}
         {toolbar}
         <div style={{ padding: "24px 18px", display: "flex", minHeight: 260 }}>
           <EmptyState
@@ -143,6 +175,7 @@ export default function ClientsMobileScreen({ user }: AtlasScreenProps) {
 
   return (
     <div style={S.root}>
+      {modeTabs}
       {toolbar}
       <div style={{ padding: PAGE_H, display: "flex", flexDirection: "column", gap: 11, marginTop: 13 }}>
         {crm.accounts.length === 0 ? (
