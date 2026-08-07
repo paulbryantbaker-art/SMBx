@@ -76,10 +76,25 @@ const STATIC_PAGES: PageMeta[] = [
     // so the three load-bearing facts come first: led OR CO-LED, during
     // EMPLOYMENT, and NOT smbX engagements. A shield cut off mid-clause by a
     // search result would be worse than a shorter one that lands intact.
+    // EMPLOYERS NAMED (2026-08-07, anonymization REVERSED — the retired
+    // "aggregator / global investment bank" euphemisms must not be
+    // reinstated; the fidelity audit caught this snippet still carrying them).
     path: '/track-record',
     title: `Track record — one side of the table | ${SITE}`,
     description:
-      'Selected transactions led or co-led by Paul Baker while employed at a world-class PE-backed aggregator and a global investment bank — not smbX engagements.',
+      'Selected transactions led or co-led by Paul Baker while employed at Wrench Group and JPMorgan Chase — completed by those firms, not smbX engagements.',
+  },
+  {
+    path: '/legal/terms',
+    title: `Terms of use | ${SITE}`,
+    description:
+      "The terms for this site's tools — the market-map engine and the owner valuation: what you share with them, and what their outputs are and are not.",
+  },
+  {
+    path: '/legal/privacy',
+    title: `Privacy policy | ${SITE}`,
+    description:
+      'What smbx.ai collects, how it is used, and your rights — including removal at any time.',
   },
   {
     path: '/research',

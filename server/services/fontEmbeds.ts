@@ -34,7 +34,38 @@ function readFontFile(pkgPath: string): Buffer {
   }
 }
 
+/** The CARTA set (2026-08-07) — Source Serif 4 variable + Schibsted Grotesk
+ *  + Plex Mono, for artifacts rendered in the site's current language (the
+ *  practice market-map PDF). Separate from FILES so the LEDGER collateral
+ *  paths don't embed fonts they never set. */
+const CARTA_FILES: Array<{ family: string; pkgPath: string; weight: string; variations?: boolean }> = [
+  { family: 'Source Serif 4', pkgPath: '@fontsource-variable/source-serif-4/files/source-serif-4-latin-wght-normal.woff2', weight: '200 900', variations: true },
+  { family: 'Schibsted Grotesk', pkgPath: '@fontsource/schibsted-grotesk/files/schibsted-grotesk-latin-400-normal.woff2', weight: '400' },
+  { family: 'Schibsted Grotesk', pkgPath: '@fontsource/schibsted-grotesk/files/schibsted-grotesk-latin-500-normal.woff2', weight: '500' },
+  { family: 'Schibsted Grotesk', pkgPath: '@fontsource/schibsted-grotesk/files/schibsted-grotesk-latin-600-normal.woff2', weight: '600' },
+  { family: 'Schibsted Grotesk', pkgPath: '@fontsource/schibsted-grotesk/files/schibsted-grotesk-latin-700-normal.woff2', weight: '700' },
+  { family: 'IBM Plex Mono', pkgPath: '@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2', weight: '400' },
+  { family: 'IBM Plex Mono', pkgPath: '@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-500-normal.woff2', weight: '500' },
+];
+
 let cached: string | null = null;
+let cachedCarta: string | null = null;
+
+/** The Carta @font-face set, inlined; '' when the files are missing. */
+export function cartaFontFaceCss(): string {
+  if (cachedCarta !== null) return cachedCarta;
+  try {
+    cachedCarta = CARTA_FILES.map(f => {
+      const b64 = readFontFile(f.pkgPath).toString('base64');
+      const fmt = f.variations ? 'woff2-variations' : 'woff2';
+      return `@font-face{font-family:'${f.family}';font-style:normal;font-display:block;font-weight:${f.weight};src:url(data:font/woff2;base64,${b64}) format('${fmt}');}`;
+    }).join('\n');
+  } catch (err: any) {
+    console.warn('[fonts] carta embedding failed — artifact falls back to system faces:', err?.message);
+    cachedCarta = '';
+  }
+  return cachedCarta;
+}
 
 /** All @font-face rules with the fonts inlined; '' when the files are missing
  *  (the composer then falls back to the CDN link, the old behavior). */

@@ -31,18 +31,45 @@
 
      Accent var names are historical (coral → blue → green → jade, same slots).
      Renaming them to --pd-accent* is still the deferred cleanup it always was. */
+  /* ── CARTA PASS (2026-08-07) — values transcribed from the binding handoff
+     at design_handoff_smbx_carta_restyle/, mirrored from house/tokens.ts
+     (CARTA). The accent does NOT move: Deal Green, its hover and its tint are
+     the same values Aurora used, so the brand mark is continuous. Everything
+     around it does: the neutrals go cooler and deeper for reading, the warm
+     second accent (brass/honey) is GONE so there is exactly one accent, and
+     the dark surface stops being a saturated jade block over a texture and
+     becomes flat near-black with square edges.
+
+     THE BUTTON LAW, because it inverts if you read the token names naively:
+     GREEN IS NEVER A RESTING BUTTON FILL. Primary is ink-on-light /
+     bone-on-dark; --pd-cta-hover names a fill that exists only on hover.
+
+     The var NAMES stay historical (coral → blue → green → jade → carta, same
+     slots) — renaming them to --pd-accent* is still the deferred cleanup it
+     has always been, and doing it during a port would bury the real diff. */
   --pd-ink: #16181A;
-  --pd-body: #5A6169;
-  --pd-tert: #83898F;
-  --pd-faint: #A8ADB2;
+  --pd-body: #4A4F54;
+  --pd-tert: #7C8187;
+  --pd-faint: #8B9088;
   --pd-card: #FFFFFF;
-  --pd-band: #F3EFE4;
-  --pd-border: #DED8CC;
-  --pd-hair: #EAE5DC;
+  --pd-band: #F3F0E9;
+  --pd-band-hover: #EFEBE1;
+  --pd-band-deep: #ECE8DC;
+  --pd-bone-alt: #F9F7F1;
+  --pd-border: #D8D3C6;
+  --pd-hair: #E4DFD3;
   --pd-coral: #0A7A58;
   --pd-coral-link: #086348;
   --pd-cta: #0A7A58;
   --pd-cta-hover: #086348;
+  /* NOT part of the Carta palette — kept because `report.css` uses it in six
+     places (numerals, rules, the key-findings band) and the research pages hold
+     parity with the report PDF, so they are deliberately OUT of this pass and
+     move in phase 2 with the renderers. Deleting this line broke every one of
+     those light-surface uses in a way nothing rendered on the marketing pages
+     would have shown: `.pd-dark` re-scopes --pd-brass to honey, so the dark
+     bands kept working while the document scope silently lost its colour.
+     When phase 2 moves report.css, this goes with it. */
   --pd-brass: #E8A62B;
   /* The vivid highlight. Ambient layers, the hero mesh and large numerals only
      — it carries no small text anywhere, by rule. */
@@ -52,14 +79,24 @@
   /* Band depth tokens — the band bg gradient and BOTH curve fills read from
      these, so the curve can never drift from the band edge it meets.
      AURORA: a saturated jade block, not a green-black. */
-  --pd-dark-bg: #0A6A4C;
-  --pd-dark-top: #0C7554;
-  --pd-dark-bot: #085F43;
-  --pd-font: 'Inter', system-ui, sans-serif;
-  /* Editorial serif for the display ladder (H1/H2/quote/statement) — the
-     gravitas voice; Schibsted stays for working type (h3, body, UI, numerals).
-     Fraunces is already in the font payload (index.html). */
-  --pd-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  /* Flat, square, untextured — a single value, not a gradient triple. The top
+     and bottom slots keep the same value so any rule still reading them (the
+     curve fills, until those are ported out) cannot produce a seam. */
+  --pd-dark-bg: #131512;
+  --pd-dark-top: #131512;
+  --pd-dark-bot: #131512;
+  --pd-dark-seam: #2A2E29;
+  --pd-dark-plate: #22261F;
+  --pd-dark-ink: #F4F5F1;
+  --pd-dark-sub: #D7DBD2;
+  --pd-dark-muted: #ABB2AB;
+  --pd-dark-legal: #8A9088;
+  --pd-dark-btn-border: #4A4F44;
+  /* CARTA type (2026-08-07): Schibsted Grotesk is the working voice again,
+     Source Serif 4 the display serif (weight 550 via the variable axis —
+     loaded in index.html). Values mirror CARTA_TYPE in house/tokens.ts. */
+  --pd-font: 'Schibsted Grotesk', -apple-system, sans-serif;
+  --pd-display: 'Source Serif 4', Georgia, serif;
   --pd-mono: 'IBM Plex Mono', monospace; /* @kind font */
   --pd-pad-x: clamp(28px, 4.5vw, 64px);
   /* Two-width system (Paul, 2026-07-15: sections each had their own width and
@@ -353,13 +390,17 @@
      jade sweep from the top-left, a honey answer at the bottom-right, and a
      cool deep-teal corner give it a direction to travel. They ride ABOVE the
      glaze so they tint the field rather than the texture under it. */
-  background:
-    radial-gradient(72% 62% at 12% -12%, rgba(15, 169, 124, 0.42), rgba(15, 169, 124, 0) 62%),
-    radial-gradient(64% 58% at 94% 104%, rgba(245, 196, 82, 0.16), rgba(245, 196, 82, 0) 64%),
-    radial-gradient(58% 50% at 98% -8%, rgba(8, 74, 92, 0.24), rgba(8, 74, 92, 0) 62%),
-    linear-gradient(rgba(10, 106, 76, 0.84), rgba(10, 106, 76, 0.84)),
-    url('/textures/blackbleed.webp') center / cover no-repeat,
-    linear-gradient(180deg, var(--pd-dark-top) 0%, var(--pd-dark-bg) 46%, var(--pd-dark-bot) 100%);
+  /* CARTA: FLAT. The handoff's dark surface is one value with square edges —
+     no texture, no glaze, no ambient radials.
+
+     This replaces a six-layer stack, and removing it was not optional: an
+     84%-opaque jade glaze plus the blackbleed texture sat ABOVE the only layer
+     that read --pd-dark-*, so swapping that token to #131512 changed the
+     computed custom property and NOTHING on screen. The design gate passed the
+     whole time, because it verifies the token's value and not the paint. That
+     is the trap CLAUDE.md documents for Aurora, hit in reverse — and the reason
+     this pass renders every change rather than trusting a green suite. */
+  background: var(--pd-dark-bg);
   color: var(--pd-ink);
   /* Curved top + bottom cut from the band itself: a fixed-height curve mask at
      top and at bottom, a solid fill between them (union of the three). The
@@ -474,18 +515,9 @@
    rather than inside its first column: text-align centers within the
    element's box, and a column-width box would read as off-centre on desktop. */
 .pd-dark .pd-seclabel { color: var(--pd-brass); text-align: center; }
-/* Page locator — a breadcrumb in the coral label voice, top of each subpage
-   hero, so a visitor always knows which page they're on (Paul, 2026-07-14).
-   Parent is a link back to its section/home; the current page reads in ink. */
-.pd-crumb {
-  display: inline-flex; align-items: center; gap: 11px;
-  font-size: 15px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
-  margin: 0 0 22px;
-}
-.pd-crumb a { color: var(--pd-coral-link); text-decoration: none; padding-block: 3px; }
-.pd-crumb a:hover { text-decoration: underline; text-underline-offset: 3px; }
-.pd-crumb .sep { color: var(--pd-tert); font-weight: 500; }
-.pd-crumb .here { color: var(--pd-ink); }
+/* .pd-crumb DELETED 2026-08-07 — every page now renders the Carta mono
+   breadcrumb inline (About grammar); the old uppercase green crumb would
+   clash beside it. */
 /* Lede — the single deck paragraph under a hero or an H2. */
 .pd-sub { font-size: 22px; line-height: 1.55; color: var(--pd-body); max-width: 34em; }
 /* Body — THE default reading paragraph, everywhere. 18px at #6A6A6A holds AA
@@ -524,23 +556,27 @@
 /* Buttons: PILLS by founder law (Paul, 2026-07-18: "i dont like any squared
    buttons make them all pills" — overrides Ledger's 8px). The Ledger ghost
    treatment stays: ink hairline secondary, one filled CTA per band. */
+/* CARTA BUTTONS (2026-08-07). THE BUTTON LAW: green is NEVER a resting fill.
+   Primary = ink, hover green; secondary = 1.5px ink outline, hover panel
+   tint; radius 10, never a pill. These two rules restyle every legacy
+   consumer (chat booking pill, DownloadCard, OwnerChat) in one move. */
 .pd-pill {
   display: inline-flex; align-items: center; justify-content: center;
-  border: 1px solid var(--pd-ink);
-  padding: 11px 24px; border-radius: 99px;
-  font-size: 15px; font-weight: 600; color: var(--pd-ink);
+  border: 1.5px solid var(--pd-ink);
+  padding: 11px 24px; border-radius: 10px;
+  font-size: 15px; font-weight: 500; color: var(--pd-ink);
   white-space: nowrap; background: transparent;
   transition: border-color 160ms ease, background-color 160ms ease;
 }
-.pd-pill:hover { border-color: var(--pd-ink); background: rgba(20, 24, 28, 0.045); color: var(--pd-ink); }
+.pd-pill:hover { border-color: var(--pd-ink); background: #F3F0E9; color: var(--pd-ink); }
 .pd-pill-primary {
   display: inline-flex; align-items: center; justify-content: center;
-  background: var(--pd-cta); color: #fff; border: none;
-  padding: 12px 26px; border-radius: 99px;
-  font-size: 15px; font-weight: 700; white-space: nowrap;
+  background: var(--pd-ink); color: #FCFAF6; border: none;
+  padding: 12px 26px; border-radius: 10px;
+  font-size: 15px; font-weight: 600; white-space: nowrap;
   transition: background-color 160ms ease;
 }
-.pd-pill-primary:hover { background: var(--pd-cta-hover); color: #fff; }
+.pd-pill-primary:hover { background: #0A7A58; color: #FCFAF6; }
 .pd-pill-lg { padding: 17px 36px; font-size: 16.5px; }
 /* The nowrap above is correct in the nav, where every pill is two or three
    words. In body copy a long label ("Talk to our team — confidential
@@ -694,7 +730,7 @@
    row entirely). The full nav needs ~1240px; landscape phones and portrait
    tablets live at 760–1024. So the burger owns everything to 1024, and a
    compact desktop cut (below) covers 1025–1240. */
-@media (max-width: 1024px) {
+@media (max-width: 760px) {
   .pd-nav-links, .pd-nav-book { display: none; }
   .pd-nav-ctas .pd-pill-primary { display: none; }
   .pd-nav-logo { height: 30px; }
@@ -733,12 +769,13 @@
     color: var(--pd-ink); border-bottom: 1px solid var(--pd-hair);
   }
   .pd .pd-mmenu a .arr { color: var(--pd-coral-link); font-weight: 700; }
+  /* Ink, not green — the Carta button law reaches the phone menu too. */
   .pd .pd-mmenu a.pd-mmenu-cta {
     justify-content: center;
     margin: 6px 0 14px; padding: 15px 20px;
-    font-size: 16px; font-weight: 700; letter-spacing: 0;
-    color: #fff; background: var(--pd-cta);
-    border-bottom: none; border-radius: 999px;
+    font-size: 16px; font-weight: 600; letter-spacing: 0;
+    color: #FCFAF6; background: var(--pd-ink);
+    border-bottom: none; border-radius: 10px;
   }
   .pd .pd-mmenu a.quiet { font-size: 16px; font-weight: 600; color: var(--pd-body); border-bottom: none; padding-bottom: 8px; }
   /* MEASURED, not suspected (2026-08-01). Paul's screenshot had Safari's bottom
@@ -1298,73 +1335,51 @@
    Assembles block by block as the model writes it. Numbers as heroes, the
    insight block distinct and last, sources footer as the credibility seal. */
 .pd-map {
+  /* CARTA (2026-08-07): square document card, serif numerals, green mono
+     kickers — the landing sample read's grammar, live. */
+  position: relative;
   width: 100%;
   background: #ffffff;
-  border: 1px solid var(--pd-border);
-  border-radius: 14px;
+  border: 1px solid var(--pd-ink);
+  border-radius: 0;
   padding: clamp(22px, 3vw, 34px) clamp(22px, 3.5vw, 38px) clamp(20px, 2.6vw, 28px);
   margin: 6px 0;
   text-align: left;
-  box-shadow: 0 14px 44px -24px rgba(34, 34, 34, 0.35);
 }
 .pd-map > * { animation: pd-rise 260ms ease both; }
-.pd-map .map-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 12px; border-bottom: 1.5px solid var(--pd-ink); }
-.pd-map .map-mark { font-weight: 800; font-size: 15px; letter-spacing: -0.02em; color: var(--pd-ink); }
-.pd-map .map-label { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-body); text-align: right; }
-.pd-map .map-title { margin-top: 18px; font-size: clamp(22px, 2.6vw, 30px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; color: var(--pd-ink); }
-.pd-map .map-thesis { margin-top: 8px; font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.04em; color: var(--pd-body); text-transform: uppercase; line-height: 1.6; }
+.pd-map .map-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--pd-hair); }
+.pd-map .map-label { display: inline-flex; align-items: center; gap: 7px; background: #0A7A58; color: #FCFAF6; font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.12em; padding: 5px 9px; text-align: right; }
+.pd-map .map-label::before { content: ''; width: 7px; height: 7px; background: #FCFAF6; flex: none; }
+.pd-map .map-title { margin-top: 18px; font-family: var(--pd-display); font-size: clamp(22px, 2.6vw, 30px); font-weight: 600; letter-spacing: -0.01em; line-height: 1.12; color: var(--pd-ink); }
+.pd-map .map-thesis { margin-top: 8px; font-family: var(--pd-mono); font-size: 12.5px; letter-spacing: 0.05em; color: var(--pd-tert); line-height: 1.6; }
 .pd-map .map-answer { margin-top: 20px; border-left: 3px solid var(--pd-ink); padding: 4px 0 4px 16px; }
-.pd-map .map-answer .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
+.pd-map .map-answer .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #0A7A58; }
 .pd-map .map-answer .v { margin-top: 6px; font-size: 17px; font-weight: 700; line-height: 1.5; color: var(--pd-ink); }
 .pd-map .map-funnel { margin-top: 22px; border-top: 1px solid var(--pd-hair); padding-top: 16px; }
-.pd-map .map-funnel .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
+.pd-map .map-funnel .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #0A7A58; }
 .pd-map .map-step { display: flex; align-items: baseline; gap: 26px; padding: 8px 0 2px; animation: pd-rise 260ms ease both; }
-.pd-map .map-step .n { font-size: clamp(30px, 3.8vw, 46px); font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--pd-ink); min-width: clamp(96px, 13vw, 150px); white-space: nowrap; }
+.pd-map .map-step .n { font-family: var(--pd-display); font-size: clamp(30px, 3.8vw, 46px); font-weight: 600; letter-spacing: -0.02em; line-height: 1; color: var(--pd-ink); min-width: clamp(96px, 13vw, 150px); white-space: nowrap; }
 .pd-map .map-step .l { font-size: 14.5px; line-height: 1.45; color: var(--pd-body); }
 .pd-map .map-sec { margin-top: 18px; }
-.pd-map .map-sec .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
+.pd-map .map-sec .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #0A7A58; }
 .pd-map .map-sec .v { margin-top: 5px; font-size: 14.5px; line-height: 1.6; color: var(--pd-ink); }
 /* The punchline block — the one place a tint and a weight shift is earned. */
-.pd-map .map-insight { margin-top: 22px; background: var(--pd-card); border-radius: 10px; padding: 18px 20px; }
-.pd-map .map-insight .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-ink); }
+.pd-map .map-insight { margin-top: 22px; background: #F9F7F1; border: 1px solid var(--pd-hair); border-radius: 0; padding: 18px 20px; }
+.pd-map .map-insight .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #0A7A58; }
 .pd-map .map-insight .v { margin-top: 7px; font-size: 15.5px; font-weight: 600; line-height: 1.6; color: var(--pd-ink); }
 .pd-map .map-foot { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--pd-hair); display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap; }
 .pd-map .map-foot .src { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.02em; line-height: 1.6; color: var(--pd-body); flex: 1 1 320px; }
 .pd-map .map-pdf {
-  /* Same voice as every other primary CTA (was a one-off outlined pill). */
-  border: none; background: var(--pd-cta); color: #fff;
-  border-radius: 99px; padding: 11px 24px; font-size: 13.5px; font-weight: 700; white-space: nowrap;
+  /* Same voice as every other primary CTA — ink at rest, green on hover. */
+  border: none; background: var(--pd-ink); color: #FCFAF6;
+  border-radius: 9px; padding: 11px 20px; font-size: 14px; font-weight: 600; white-space: nowrap;
   transition: background-color 160ms ease;
 }
-.pd-map .map-pdf:hover { background: var(--pd-cta-hover); color: #fff; }
+.pd-map .map-pdf:hover { background: #0A7A58; color: #FCFAF6; }
 .pd-map .map-pdf:disabled { opacity: 0.55; cursor: default; }
 /* Rebuilt sample read (Paul, 2026-07-15): counts compress to one setup strip;
    the payoff is judgment — the 9, the screens, the dollar swing, the verdict. */
-.pd-map .map-flow { margin-top: 22px; border-top: 1px solid var(--pd-hair); padding-top: 18px; display: flex; align-items: baseline; gap: 10px 14px; flex-wrap: wrap; }
-.pd-map .map-flow .k { flex-basis: 100%; font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
-.pd-map .map-flow .f { display: flex; align-items: baseline; gap: 8px; }
-.pd-map .map-flow .f .n { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; color: var(--pd-ink); white-space: nowrap; }
-.pd-map .map-flow .f .l { font-size: 13.5px; line-height: 1.4; color: var(--pd-body); }
-.pd-map .map-flow .arr { color: var(--pd-faint); font-weight: 700; }
-.pd-map .map-nine { margin-top: 16px; display: flex; align-items: center; gap: 22px; }
-.pd-map .map-nine .n { font-size: clamp(60px, 7.5vw, 96px); font-weight: 800; letter-spacing: -0.04em; line-height: 0.85; color: var(--pd-coral-link); }
-.pd-map .map-nine .l { font-size: 16.5px; font-weight: 600; line-height: 1.5; color: var(--pd-ink); max-width: 24em; }
-.pd-map .map-screens { margin-top: 28px; }
-.pd-map .map-screens .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
-.pd-map .map-scr { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 4px 14px; padding: 15px 0; }
-.pd-map .map-scr + .map-scr { border-top: 1px solid var(--pd-hair); }
-.pd-map .map-scr .i { grid-row: 1 / 3; font-family: var(--pd-mono); font-size: 13px; color: var(--pd-tert); padding-top: 3px; }
-.pd-map .map-scr .t { font-size: 16px; font-weight: 700; color: var(--pd-ink); }
-.pd-map .map-scr .b { font-size: 14.5px; line-height: 1.6; color: var(--pd-body); }
-.pd-map .map-number { margin-top: 24px; background: var(--pd-ink); border-radius: 12px; padding: 24px 26px; }
-.pd-map .map-number .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral); }
-.pd-map .map-number .big { margin-top: 10px; font-size: clamp(40px, 5vw, 60px); font-weight: 800; letter-spacing: -0.035em; line-height: 1; color: #fff; }
-.pd-map .map-number .v { margin-top: 12px; font-size: 15px; line-height: 1.65; color: rgba(255, 255, 255, 0.85); }
-.pd-map .map-number .v strong { color: #fff; }
-.pd-map .map-verdict { margin-top: 24px; border-left: 3px solid var(--pd-coral-link); padding: 4px 0 4px 18px; }
-.pd-map .map-verdict .k { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-coral-link); }
-.pd-map .map-verdict .v { margin-top: 7px; font-size: 16px; font-weight: 600; line-height: 1.6; color: var(--pd-ink); }
-@media (max-width: 640px) { .pd-map .map-nine { gap: 16px; } .pd-map .map-nine .l { font-size: 15px; } }
+@media (max-width: 640px) {   }
 
 
 /* One unified input bar — borderless field + send inside a single container.
@@ -2544,49 +2559,27 @@
    inline in the section at every width. Everything INSIDE is the real chat
    grammar: .pd-chat-head, .pd-msgs, .pd-bub, .pd-chips, .pd-chat-inputrow.
    Spacing keeps the φ ladder: 16 · 26 · 42 · 68. ═══ */
-/* The buyer-lens explainer cards in the #owners section — hairline cards on
-   the landing grammar, text only (the trades already carry the section's
-   art budget elsewhere on the page). */
-.pd .ow-think {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px;
-  margin-top: 42px;
-}
-.pd .ow-card-th {
-  background: #fff; border: 1px solid var(--pd-hair); border-radius: 16px;
-  padding: 26px;
-}
-.pd .ow-card-th .k { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; color: var(--pd-ink); }
-.pd .ow-card-th .b { margin-top: 16px; font-size: 15px; line-height: 1.65; color: var(--pd-body); }
-@media (max-width: 900px) { .pd .ow-think { grid-template-columns: 1fr; gap: 16px; } }
-/* The hand-off line between the explainer and the picker. */
-.pd .ow-pick {
-  margin: 68px auto 0; max-width: 40em; text-align: center;
-  font-size: 17px; line-height: 1.65; color: var(--pd-body);
-}
-/* The trade picker in the #owners section — the site's own chips, centered.
-   A tap dispatches smbx:open-owner and the ONE conversation card up top
-   swaps to the valuation brain (no second chat exists anywhere). */
-.pd .ow-lanes {
-  display: flex; flex-wrap: wrap; justify-content: center; gap: 9px;
-  max-width: 940px; margin: 26px auto 0;
-}
+/* The pre-Carta #owners-section rules (.ow-think/.ow-card-th/.ow-pick/
+   .ow-lanes/.ow-disc) were DELETED 2026-08-07: the landing owners section is
+   transcribed inline with .ca-lanechip, and the rounded cards these styled
+   would be off-language if anything revived them. */
 /* The Google gate — GIS renders its own button; we give it a centered row. */
-.pd .ow-gate { display: flex; align-items: center; gap: 14px; padding: 12px 32px 0; flex-wrap: wrap; }
+.pd .ow-gate { display: flex; align-items: center; gap: 14px; padding: 12px 20px 0; flex-wrap: wrap; }
 .pd .ow-gbtn { min-height: 44px; }
 .pd .ow-or { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-tert); text-transform: uppercase; }
 /* Acceptance — ONE button (2026-08-04 evening, Paul: "they accept a minimal
    amount of data collection… at the end I'll show them" — the checkbox pair
    moved to the post-delivery keep-or-delete card below). The message above
    the button carries the promise; the tap is the acceptance. */
-.pd .ow-consent { display: flex; flex-direction: column; gap: 14px; padding: 16px 32px 28px; }
+.pd .ow-consent { display: flex; flex-direction: column; gap: 14px; padding: 16px 20px 28px; }
 .pd .ow-build { align-self: flex-start; margin-top: 4px; }
 /* The end card — the truthful inventory of what's on file, then the owner's
-   decision. Brass keyline like the page's privacy block: same promise, same
-   material. The delete action is a REAL button, styled quiet but never
+   decision. Green keyline — the notice rail the reports also use: same
+   promise, same material. The delete action is a REAL button, never
    hidden — the right to erasure isn't fine print. */
 .pd .ow-onfile {
-  margin: 6px 32px 28px; border: 1px solid var(--pd-border); border-left: 3px solid var(--pd-brass);
-  border-radius: 14px; background: #fff; padding: 20px 24px 22px;
+  margin: 6px 20px 28px; border: 1px solid var(--pd-border); border-left: 3px solid #0A7A58;
+  border-radius: 0; background: #fff; padding: 20px 24px 22px;
 }
 .pd .ow-onfile .k { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; color: var(--pd-ink); }
 .pd .ow-onfile dl { margin: 12px 0 0; }
@@ -2595,13 +2588,13 @@
 .pd .ow-onfile dd { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--pd-ink); }
 .pd .ow-decide { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 18px; }
 .pd .ow-erase {
-  background: none; border: 1px solid var(--pd-border); border-radius: 999px;
-  padding: 12px 22px; font-size: 14px; font-weight: 600; color: var(--pd-body); cursor: pointer;
-  transition: border-color 150ms ease, color 150ms ease;
+  background: none; border: 1.5px solid var(--pd-ink); border-radius: 10px;
+  padding: 11px 22px; font-size: 14px; font-weight: 500; color: var(--pd-ink); cursor: pointer;
+  transition: border-color 150ms ease, background-color 150ms ease;
 }
-.pd .ow-erase:hover { border-color: #16181A; color: #16181A; }
-.pd .ow-erase:disabled, .pd .ow-decide .pd-pill-primary:disabled { opacity: 0.55; cursor: default; }
-.pd .ow-doneline { padding: 14px 32px 26px; font-size: 15px; color: var(--pd-body); }
+.pd .ow-erase:hover { background: #F3F0E9; }
+.pd .ow-erase:disabled, .pd .pd-pill-primary:disabled, .pd .pd-pill:disabled { opacity: 0.55; cursor: default; }
+.pd .ow-doneline { padding: 14px 20px 26px; font-size: 15px; color: var(--pd-body); }
 /* Standing disclaimer under the card — THE LINE's sentence, on the page
    itself, not only inside the PDF. */
 .pd .ow-disc {

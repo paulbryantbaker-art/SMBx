@@ -23,7 +23,7 @@
  */
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { LEDGER, REPORT } from '../tokens.js';
+import { CARTA, LEDGER, REPORT } from '../tokens.js';
 
 const ROOT = path.resolve(new URL('../..', import.meta.url).pathname);
 const DESIGN = readFileSync(path.join(ROOT, 'content/studio/DESIGN.md'), 'utf8');
@@ -151,15 +151,14 @@ is('every house token is in the §4 palette tables', undocumented, []);
    rather than the document quietly describing a site that no longer exists. */
 
 const SITE_MAP: [string, string, string][] = [
-  ['--pd-ink', LEDGER.ink, 'ink'],
-  ['--pd-body', LEDGER.slate, 'slate body'],
-  ['--pd-tert', LEDGER.muted, 'muted'],
-  ['--pd-hair', LEDGER.hair, 'hairline'],
-  ['--pd-coral', LEDGER.green, 'Deal Green (historical var name)'],
-  ['--pd-cta', LEDGER.green, 'CTA green'],
-  ['--pd-cta-hover', LEDGER.greenHover, 'green hover'],
-  ['--pd-brass', LEDGER.brass, 'brass'],
-  ['--pd-dark-bg', LEDGER.dark, 'boardroom dark'],
+  ['--pd-ink', CARTA.ink, 'ink'],
+  ['--pd-body', CARTA.body, 'body ink'],
+  ['--pd-tert', CARTA.muted, 'muted'],
+  ['--pd-hair', CARTA.hair, 'hairline'],
+  ['--pd-coral', CARTA.green, 'Deal Green (historical var name)'],
+  ['--pd-cta', CARTA.green, 'CTA green'],
+  ['--pd-cta-hover', CARTA.greenHover, 'green hover'],
+  ['--pd-dark-bg', CARTA.dark, 'the flat dark band'],
 ];
 for (const [varName, hex, label] of SITE_MAP) {
   const m = SITE_CSS.match(new RegExp(`${varName}:\\s*(#[0-9A-Fa-f]{6})`));
@@ -168,7 +167,7 @@ for (const [varName, hex, label] of SITE_MAP) {
 
 /* The bone canvas is set as a literal background on .pd, not as a custom
    property, so it is matched on its own. */
-is('site canvas is bone', SITE_CSS.includes(`background: ${LEDGER.bone}`), true);
+is('site canvas is bone', SITE_CSS.includes(`background: ${CARTA.bone}`), true);
 
 /* The research page holds parity with the report PDF, which is the strongest
    form of the claim in §3 — same markdown, same reading ink. */
@@ -177,6 +176,16 @@ is('research page uses the report body ink', REPORT_CSS.includes(REPORT.body), t
 /* ── 4. the laws that make the document work ──────────────────────────────
    Each of these is a rule that cost a rebuild when it was broken. They are
    pinned so an edit cannot quietly drop one. */
+
+/* The site and the collateral are DIFFERENT SYSTEMS during the Carta port
+   (2026-08-07). DESIGN.md's opening claim — "everything smbX produces looks
+   like one practice" — is false while that is true, so the interim notice is
+   pinned here: a session that deletes it re-asserts something untrue, and a
+   session that reads the site's tokens into a deck breaks the phase split. */
+is('DESIGN.md declares the interim site/collateral split',
+   DESIGN.includes('INTERIM: the WEBSITE has moved and the collateral has not'), true);
+is('DESIGN.md names both token exports so neither is guessed at',
+   DESIGN.includes('`LEDGER`') && DESIGN.includes('`CARTA`'), true);
 
 const MUST_SAY: [string, string][] = [
   ['tokens.ts is named as the source of truth', 'house/tokens.ts'],

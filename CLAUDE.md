@@ -68,13 +68,38 @@ The business splits into three separate workflows with separate infra and separa
 11. **Mobile browser first.** Design for mobile, then adapt to desktop.
 12. **THE LINE v2 is practice law.** Read `THE_LINE_POLICY.md` (v2, 2026-07-11; v1 archived at `docs/_archive/THE_LINE_POLICY_v1.md`). The perimeter: buy-side only; one buyer per target; never sell-side, two-sided, or neutral-intermediary; targets under $250M revenue; no unlicensed opinions (securities, tax, legal, appraisal → coordinate the specialist). Yulia remains the instrument: analysis, options, implications, models, drafts — she never contacts or negotiates with counterparties on her own, custodies funds, signs, files, or sets/collects compensation. The practitioner runs the deal and owns the judgment.
 
-### Track Record attribution doctrine (LAW, Paul 2026-07-13; employer anonymization 2026-07-18)
-**Employer anonymization (Paul, 2026-07-18: "to keep from getting into trouble… who knows the climate these days"):** the employers are NEVER named on public surfaces — say **"a global investment bank"** and **"a world-class PE-backed aggregator"** (Deloitte may stay named). The bank's own deal names were also removed from About prose. The total is stated as **150 acquisitions** (no "+"). The /track-record page still lists selected target names under the anonymized headers — flagged to Paul that those names make the employers inferable; his call whether to aggregate further.
+### Track Record attribution doctrine (LAW, Paul 2026-07-13; anonymization REVERSED 2026-08-07)
+**EMPLOYERS ARE NAMED AGAIN (Paul, 2026-08-07, on the Carta-restyle handoff: "Lets name — i have hidden any deals or other information that is basically not on my resume").** This supersedes the 2026-07-18 anonymization ("a global investment bank" / "a world-class PE-backed aggregator"), which is now HISTORY — do not reinstate it, and do not "correct" a named employer back to a euphemism.
+**The reasoning is the boundary, so keep it:** what may appear publicly is what is already on Paul's résumé. He curated the handoff's copy himself and removed anything that is not. **Wrench Group · JPMorgan Chase · Deloitte Consulting** are therefore named, and the deal-name lists in `design_handoff_smbx_carta_restyle/Track Record - Carta Style.dc.html` are **the CLEARED SET**. Port them verbatim: never merge in names from the older `TrackRecord.tsx`, never add a name from a deck or a memo, because the filter that produced that list was Paul's judgement about his own résumé and no other source has passed it.
+**The other five rules are untouched and still bind:** (1) always "led or co-led", never unqualified "closed"; (2) always **"selected transactions"** (the design's register cards already carry the header); (3) the attribution shield appears WHEREVER the deal names appear, never as a footnote; (4) names, not logos; (5) never "our clients" for an employment deal; (6) JPMorgan is integration (Director of Acquisition Integration), not origination.
+**Stat set (Paul, 2026-08-07, "all good here"):** the public figures are **150+ acquisitions & integrations · $5B+ enterprise value added · ~$21B transactions touched · $2B synergies captured · 0 sell-side engagements, ever.** The earlier no-plus rule ("150", no "+") is superseded; `$2B synergies captured` joins the sanctioned set.
 The Track Record page (`/track-record`) and the landing track-record band present Paul Baker's employment deals — they were NOT smbX engagements — so six rules are non-negotiable and enforced in `TrackRecord.tsx` (see its header + the exported `AttributionLine`/`ATTRIBUTION`): (1) always "led or co-led", never "deal captain on every one" or unqualified "closed"; (2) always "selected transactions" (the wall is a selection, which reconciles it with the 150+ figure); (3) the attribution shield sentence appears WHEREVER the deal names appear (landing band, track-record page, any deck/PDF) — never a footnote; (4) names, not logos; (5) never "our clients" for a Wrench/JPMorgan transaction; (6) JPMorgan is integration (Director of Acquisition Integration), not origination. The interactive filter/search deal sheet (old task #27) was replaced by static per-employer selected-transaction lists so names sit under the employer they belong to. The proof stat strip now ends on "0 · sell-side transactions. Ever." (was "1 · side of the table").
 
 ## Design System
-**PRACTICE SITE (2026-07-11, corpdevservices bundle — the current public
-surface.)** The THE LINE v2 pivot retired the product marketing; the same day
+**CARTA (2026-08-07, `design_handoff_smbx_carta_restyle/` — THE CURRENT PUBLIC-SITE
+LANGUAGE; Aurora below is now the app/collateral language only, pending phase 2.)**
+Paul's correction set the method: *"this is not what Claude Design shipped.. it
+shipped a new design for the existing content"* — so the five logged-out pages
+(Landing, About, Industries, Research, Track Record) were REBUILT by transcribing the
+`.dc.html` references 1:1, not by evolving the Aurora components. The system:
+Source Serif 4 (550/600 display) · Schibsted Grotesk (working) · IBM Plex Mono;
+bone `#FCFAF6` / panel `#F3F0E9` neutrals with cooler ink scale (`#16181A/#4A4F54/#7C8187`);
+ONE accent (Deal Green `#0A7A58`, hover `#086348`, tint `#DFF5EC`, mint `#A8F0CE` on
+dark) — brass/honey are GONE from the site; flat near-black dark bands `#131512`
+(square edges, no texture, no curves); radius 0 except buttons/inputs; corner-handle
+frames (8px ink squares at −4px — the house gesture that replaced the curved band
+crests); dot-field ornaments + orbit; hairline 1px grids. THE BUTTON LAW: green is
+NEVER a resting button fill — primary is ink-on-light / bone-on-dark, green appears
+on hover, chips, kickers, links. Tokens live in `house/tokens.ts` (`CARTA`,
+`CARTA_TYPE`, `CARTA_HANDLE`); the `.pd` var layer mirrors them; layout values live
+INLINE in the transcribed pages per the handoff doctrine, and `carta.css` carries only
+hover/media/keyframes plus the `.ca-engine` intake redress. Build record:
+`design_handoff_smbx_carta_restyle/IMPLEMENTATION_PLAN.md`. Deferred: mobile layer,
+collateral renderers (LEDGER stays their source until phase 2 — see the interim
+notice atop `content/studio/DESIGN.md`), report bodies + `/buyers/*` interiors.
+
+**PRACTICE SITE (2026-07-11, corpdevservices bundle — the prior public
+surface, now HISTORY beneath the Carta restyle.)** The THE LINE v2 pivot retired the product marketing; the same day
 Paul shipped the practice-site design (`corpdevservices/`, approved direction
 3a) and it is implemented at `client/src/practice/`. DEFINITIVE is untouched.
 The app shells (Atlas) continue as the working surfaces for the practice.

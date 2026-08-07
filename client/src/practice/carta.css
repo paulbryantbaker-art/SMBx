@@ -1,0 +1,319 @@
+/* ────────────────────────────────────────────────────────────────────────────
+   CARTA RESTYLE (2026-08-07) — the stylesheet the transcribed pages lean on.
+   The binding spec is design_handoff_smbx_carta_restyle/*.dc.html: those pages
+   carry their layout INLINE, so this file holds only what inline styles cannot
+   express — keyframes, media queries, hover states (the reference's
+   style-hover attributes become the .ca-h-* utilities below), ::selection,
+   input placeholders, the <details> marker reset — plus the .ca-engine scope
+   that redresses the REAL intake (YuliaIntake, .pd-chat-* machinery) as the
+   reference's Acquisition Engine card.
+
+   Every utility uses !important deliberately: the transcribed markup styles
+   inline (specificity above any class), so a hover rule that wants to win
+   must say so. That is the entire trick — do not "clean it up".
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* ── Keyframes (names verbatim from the reference) ── */
+@keyframes smbxMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes smbxOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes smbxCaret { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
+
+/* ── Base, scoped to the practice root ── */
+.pd ::selection { background: #DFF5EC; color: #16181A; }
+.pd input::placeholder { color: #8B9088; }
+.pd details > summary { list-style: none; }
+.pd details > summary::-webkit-details-marker { display: none; }
+
+/* ── Hover vocabulary — one class per distinct style-hover in the handoff ── */
+.ca-h-green:hover { color: #0A7A58 !important; }
+.ca-h-deepgreen:hover { color: #086348 !important; }
+.ca-h-mint:hover { color: #A8F0CE !important; }
+.ca-h-tint:hover { color: #DFF5EC !important; }
+.ca-h-greenbg:hover { background: #0A7A58 !important; }
+.ca-h-mintbg:hover { background: #A8F0CE !important; }
+.ca-h-tintbg:hover { background: #DFF5EC !important; }
+.ca-h-whitebg:hover { background: #FFFFFF !important; }
+.ca-h-band:hover { background: #F3F0E9 !important; }
+.ca-h-bandhv:hover { background: #EFEBE1 !important; }
+.ca-h-banddeep:hover { background: #ECE8DC !important; }
+.ca-h-bandmenu:hover { background: #EDE9DF !important; }
+.ca-h-greenline:hover { border-color: #0A7A58 !important; color: #0A7A58 !important; }
+.ca-h-mintline:hover { border-color: #A8F0CE !important; color: #A8F0CE !important; }
+.ca-h-greenborder:hover { border-color: #0A7A58 !important; }
+
+/* ── Nav: sticky bar that gains its hairline + shadow past 24px of scroll
+      (the reference's data-nav behavior — the bar never hides). ── */
+.ca-nav {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  background: #FCFAF6;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.ca-nav.on { border-bottom-color: #E4DFD3; box-shadow: 0 10px 30px rgba(22, 24, 26, 0.05); }
+
+/* Responsive guards, verbatim from the reference <style> block — the nav
+   compresses, then drops the quiet CTA, then hands over to the burger menu.
+   (One deviation: the links hide at 760px, not the reference's 840px, so the
+   hand-off lands exactly where the existing .pd-mmenu mobile menu wakes up —
+   between 761–840px the compressed links still fit.) */
+@media (max-width: 1180px) {
+  [data-nav-inner] { gap: 20px !important; }
+  [data-nav-links] { gap: 16px !important; font-size: 14px !important; }
+  [data-nav-ctas] a { font-size: 14px !important; padding: 10px 14px !important; }
+}
+@media (max-width: 1080px) {
+  [data-nav-quiet] { display: none !important; }
+  [data-nav-links] { gap: 13px !important; font-size: 13.5px !important; }
+}
+@media (max-width: 760px) {
+  [data-nav-links] { display: none !important; }
+}
+@media (max-width: 1024px) {
+  [data-hero-grid] { grid-template-columns: 1fr !important; }
+  [data-cta-grid] { grid-template-columns: 1fr !important; }
+  [data-who-grid] { grid-template-columns: repeat(2, 1fr) !important; }
+  [data-who-grid] > a:last-child { grid-column: 1 / -1; }
+  [data-stats-grid] { grid-template-columns: repeat(2, 1fr) !important; }
+  /* Inner pages (About / Industries / Research / Track Record guards) */
+  [data-tri] { grid-template-columns: 1fr !important; }
+  [data-creed] { grid-template-columns: repeat(2, 1fr) !important; }
+  [data-lede] { grid-template-columns: 1fr !important; }
+  [data-sector] { grid-template-columns: 1fr !important; }
+  [data-sector] > div { order: 0 !important; padding-top: 0 !important; }
+  [data-rcard] { grid-template-columns: 1fr !important; }
+  [data-emp] { grid-template-columns: 1fr !important; }
+}
+
+/* ── The Acquisition Engine card (.ca-engine wraps the REAL YuliaIntake).
+      The reference frames the intake as a white card: header row (green mono
+      chip + logo), the opening line as a set paragraph, an ink-bordered input
+      with a square ink send, a mono step label, mono chips. The real engine
+      keeps every behavior (SSE, sessionStorage, owner mode, the phone sheet);
+      these rules only redress its chrome. Desktop-scoped where the phone
+      sheet must keep its own geometry. ── */
+
+.ca-engine { position: relative; background: #FFFFFF; border: 1px solid #E4DFD3; box-shadow: 0 30px 70px rgba(22, 24, 26, 0.10); }
+
+/* The card header the resting state renders (chip + logo). */
+.ca-eng-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #E4DFD3;
+}
+.ca-eng-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #0A7A58;
+  color: #FCFAF6;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  padding: 5px 9px;
+  white-space: nowrap;
+}
+.ca-eng-chip::before { content: ''; width: 7px; height: 7px; background: #FCFAF6; display: inline-block; }
+.ca-eng-open { margin: 0; padding: 22px 20px 8px; font-size: 15.5px; line-height: 1.6; color: #4A4F54; }
+.ca-eng-step {
+  margin: 6px 20px 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: #7C8187;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+/* Resting bar → the reference input row: ink hairline, radius 12, bone fill. */
+.ca-engine .pd-chat-hero { max-width: none; }
+.ca-engine .pd-herobar {
+  position: relative;
+  margin: 14px 20px 0;
+  width: auto;
+  border: 1.5px solid #16181A;
+  border-radius: 12px;
+  padding: 6px 6px 6px 16px;
+  background: #FCFAF6;
+  box-shadow: none;
+  gap: 10px;
+}
+/* The desktop ghost line — the reference's staged example text with its
+   blinking green caret, riding OVER the real input (a native placeholder
+   cannot carry a child element). pointer-events pass through to the input;
+   the fake caret yields the moment real focus brings a real one. */
+.ca-engine .ca-ghost {
+  position: absolute;
+  left: 16px;
+  right: 62px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15.5px;
+  color: #8B9088;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+.ca-caret {
+  display: inline-block;
+  width: 1.5px;
+  height: 16px;
+  background: #0A7A58;
+  margin-left: 3px;
+  vertical-align: -2px;
+  animation: smbxCaret 1.1s step-end infinite;
+}
+.ca-engine .pd-herobar:focus-within .ca-caret { display: none; }
+.ca-engine .pd-herobar:focus-within { border-color: #0A7A58; }
+.ca-engine .pd-herobar input { font-size: 15.5px; padding: 9px 0; }
+/* The send control is the reference's 42px ink square with the ↑ glyph; the
+   step label ("CONTINUE" …) moves to the mono line under the bar. */
+.ca-engine .pd-herobar .pd-send,
+.ca-engine .pd-chat-inputrow .pd-send {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  background: #16181A;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  color: #FCFAF6;
+  font-size: 18px;
+  overflow: hidden;
+}
+.ca-engine .pd-herobar .pd-send:hover,
+.ca-engine .pd-chat-inputrow .pd-send:hover { background: #0A7A58; }
+
+/* Chips → mono tiles on hairline borders, square. NO text-transform: the
+   reference renders the featured lanes in sentence case; only the two tail
+   chips are uppercase, and they are uppercase LITERALLY in the markup.
+   The 18px top padding is the reference's gap below the CONTINUE label. */
+.ca-engine .pd-chips { padding: 18px 20px 20px; gap: 8px; justify-content: flex-start; }
+.ca-engine .pd-chip {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: #16181A;
+  border: 1px solid #D8D3C6;
+  background: #FFFFFF;
+  border-radius: 0;
+  padding: 7px 11px;
+  white-space: nowrap;
+}
+.ca-engine .pd-chip:hover { border-color: #0A7A58; color: #0A7A58; background: #FFFFFF; }
+/* The two colored doorways at the tail of the chip row. */
+.ca-engine .pd-chip.ca-chip-green { color: #0A7A58; border-color: #0A7A58; }
+.ca-engine .pd-chip.ca-chip-green:hover { background: #DFF5EC; }
+.ca-engine .pd-chip.ca-chip-tint { color: #0A7A58; background: #DFF5EC; border-color: #DFF5EC; }
+.ca-engine .pd-chip.ca-chip-tint:hover { border-color: #0A7A58; background: #DFF5EC; }
+
+/* Engaged card (desktop): the conversation lives inside the same frame —
+   square, no second border, the head restyled to the reference header. */
+@media (min-width: 901px) {
+  .ca-engine .pd-chat {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: #FFFFFF;
+    margin: 0;
+    max-width: none;
+  }
+  .ca-engine .pd-chat-head {
+    padding: 16px 20px;
+    border-bottom: 1px solid #E4DFD3;
+    gap: 12px;
+  }
+  /* Reorder to the reference grammar: chip · (spacer) · logo · X. */
+  .ca-engine .pd-chat-head .pd-chat-title {
+    order: -1;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #0A7A58;
+    color: #FCFAF6;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 400;
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 9px;
+    white-space: nowrap;
+  }
+  .ca-engine .pd-chat-head .pd-chat-title::before { content: ''; width: 7px; height: 7px; background: #FCFAF6; display: inline-block; }
+  .ca-engine .pd-chat-head > img { order: 1; margin-left: auto; height: 18px !important; opacity: 0.9; }
+  .ca-engine .pd-chat-head .pd-chat-x { order: 2; }
+  .ca-engine .pd-msgs { padding: 14px 20px 4px; }
+  .ca-engine .pd-chat-inputrow {
+    margin: 10px 20px 18px;
+    border: 1.5px solid #16181A;
+    border-radius: 12px;
+    padding: 6px 6px 6px 16px;
+    background: #FCFAF6;
+    box-shadow: none;
+  }
+  .ca-engine .pd-chat-inputrow:focus-within { border-color: #0A7A58; }
+  .ca-engine .pd-chat-input { font-size: 15.5px; }
+}
+
+/* User bubble squares off to the panel tint (cards are square in this
+   language; the tint keeps the turn legible). */
+.ca-engine .pd-bub-u { background: #F3F0E9; border-radius: 0; }
+
+/* ── Owner-trade chips (the #owners picker) — mono tiles; the real chips are
+      BUTTONS dispatching smbx:open-owner, so they carry a class rather than
+      inline styles. `alt` is the tinted "another trade" doorway. ── */
+.ca-lanechip {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #16181A;
+  border: 1px solid #D8D3C6;
+  background: #FFFFFF;
+  border-radius: 0;
+  padding: 8px 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ca-lanechip:hover { border-color: #0A7A58; color: #0A7A58; }
+.ca-lanechip.alt { color: #0A7A58; border-color: #0A7A58; background: #DFF5EC; }
+.ca-lanechip.alt:hover { background: #FFFFFF; }
+
+/* Evidence paragraphs inside the Why-us cards — strongs read in ink. */
+.ca-why-xp strong { color: #16181A; }
+
+/* The pricing band's input: keyboard focus must be visible on the dark band
+   (the renders-not-errors trap from the Aurora band — a transparent border
+   override killed :focus-visible there). */
+.ca-price-input:focus-visible { border-color: #0A7A58 !important; outline: none; }
+
+/* ── Footer link columns ── */
+.ca-foot-col a { display: block; color: #D7DBD2; font-size: 14.5px; }
+.ca-foot-col a + a { margin-top: 11px; }
+.ca-foot-col a:hover { color: #A8F0CE; }
+
+/* ── Dark surfaces: keyboard focus must survive #131512 — the global ring
+      is ink, invisible there. Every inline-styled dark band and the footer
+      carry .ca-dark so the ring flips to bone. ── */
+.ca-dark :focus-visible { outline-color: #F4F5F1; }
+
+/* ── Engine chat: the opening line reads the same before and after the
+      first send — the 21px statement rule was pre-Carta chrome. ── */
+.ca-engine .pd-msgs .pd-msgrow:first-child .pd-bub-y {
+  font-size: 15.5px; font-weight: 400; letter-spacing: 0; line-height: 1.6; color: #4A4F54;
+}
+
+/* ── Reduced motion: the marquee, orbit and caret stand still (the orbit's
+      animation rides the child div, so target both), and the market map's
+      block-rise holds too ── */
+@media (prefers-reduced-motion: reduce) {
+  .ca-marquee, [data-marquee] { animation: none !important; }
+  .ca-orbit, .ca-orbit > div { animation: none !important; }
+  .ca-caret { animation: none !important; }
+  .pd-map > *, .pd-map .map-step { animation: none !important; }
+}

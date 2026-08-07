@@ -271,7 +271,7 @@ export default function OwnerChat({ initialLane, onBusy }: { initialLane?: Owner
           if (r.ok) { const j = await r.json(); setVerified({ email: j.email }); trackEvent('owner_verified', { via: 'google' }); }
         },
       });
-      google.accounts.id.renderButton(googleBtn.current, { theme: 'outline', size: 'large', shape: 'pill', text: 'continue_with' });
+      google.accounts.id.renderButton(googleBtn.current, { theme: 'outline', size: 'large', shape: 'rectangular', text: 'continue_with' });
     } catch { /* GIS unavailable — magic link still works */ }
   }, [stage, verified]);
 
@@ -1017,7 +1017,9 @@ export default function OwnerChat({ initialLane, onBusy }: { initialLane?: Owner
 
       {stage === 'lane' && (
         <div className="pd-chips">
-          {LANES.map(l => <button key={l.key} type="button" className="pd-chip" onClick={() => pickLane(l.key, l.label)}>{l.label}</button>)}
+          {/* Uppercase to match the landing #owners picker — same 22 trades,
+              one case (2026-08-07 consistency audit). */}
+          {LANES.map(l => <button key={l.key} type="button" className="pd-chip" style={{ textTransform: 'uppercase' }} onClick={() => pickLane(l.key, l.label)}>{l.label}</button>)}
           <button type="button" className="pd-chip" onClick={pickOtherLane}>Another trade →</button>
         </div>
       )}
@@ -1126,7 +1128,7 @@ export default function OwnerChat({ initialLane, onBusy }: { initialLane?: Owner
         </div>
       )}
 
-      {stage === 'gate' && !verified && (
+      {stage === 'gate' && !verified && !!(window as any).__GOOGLE_CLIENT_ID && (
         <div className="ow-gate">
           <div ref={googleBtn} className="ow-gbtn" />
           <div className="ow-or">or</div>
@@ -1190,7 +1192,7 @@ export default function OwnerChat({ initialLane, onBusy }: { initialLane?: Owner
             inputMode={stage.startsWith('fin') || (fullTyping && fullQNow!.kind !== 'text') ? 'decimal' : undefined}
             aria-label="Your answer"
           />
-          <button type="button" className="pd-send" onClick={onSubmit}>Send</button>
+          <button type="button" className="pd-send" onClick={onSubmit} aria-label="Send">↑</button>
         </div>
       )}
 

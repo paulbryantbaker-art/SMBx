@@ -1,5 +1,24 @@
 # The house design language — collateral
 
+> ## ⚠ INTERIM: the WEBSITE has moved and the collateral has not (2026-08-07)
+>
+> The public site is being rebuilt in a new language (the Carta-restyle handoff:
+> Source Serif 4 + Schibsted Grotesk, flat near-black bands, square corners,
+> corner-handle frames, no warm second accent). **The collateral you build from
+> this document still uses the Ledger/Aurora system and will NOT match the
+> website until the phase-2 renderer pass.**
+>
+> This is a deliberate, time-boxed split — Paul's call was site first, collateral
+> right after — and it is written here because the sentence directly below this
+> box would otherwise be a lie, and because a session that noticed the mismatch
+> would reasonably "fix" it by inventing values.
+>
+> **What to do meanwhile: keep building collateral exactly as this file says.**
+> `house/tokens.ts` holds both systems side by side — `LEDGER` (collateral, what
+> this document describes) and `CARTA` (the site). Do not read CARTA values into
+> a deck, a report or a one-pager; the builders import LEDGER and that is
+> correct until phase 2 moves them together.
+
 Everything smbX produces looks like one practice because every renderer reads
 the same values. This file is what those values are, what they came from, and
 what is retired.

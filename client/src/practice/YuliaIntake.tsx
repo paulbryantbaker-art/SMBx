@@ -234,6 +234,12 @@ export function MapDoc({
 
   return (
     <div className="pd-map">
+      {/* The corner handles — the deliverable wears the same frame device as
+          the landing's sample of it (.pd-map is position:relative). */}
+      <span aria-hidden="true" style={{ position: 'absolute', top: -4, left: -4, width: 8, height: 8, background: '#16181A' }} />
+      <span aria-hidden="true" style={{ position: 'absolute', top: -4, right: -4, width: 8, height: 8, background: '#16181A' }} />
+      <span aria-hidden="true" style={{ position: 'absolute', bottom: -4, left: -4, width: 8, height: 8, background: '#16181A' }} />
+      <span aria-hidden="true" style={{ position: 'absolute', bottom: -4, right: -4, width: 8, height: 8, background: '#16181A' }} />
       <div className="map-head" style={rise()}>
         <img src="/logo-green-x.png" alt="smbX.ai" style={{ height: 22, width: 'auto', display: 'block' }} />
         <span className="map-label">{headLabel || `PRELIMINARY MARKET READ · ${DOC_DATE.toUpperCase()}`}</span>
@@ -742,11 +748,22 @@ export default function YuliaIntake({ onOwnerModeChange }: { onOwnerModeChange?:
   const resting = userTurns === 0 && !pending && !done && !ownerMode;
 
   return (
-    <div id="yulia" className={`pd-chat-zone${resting ? ' resting' : ''}`}>
+    // The #yulia anchor lives on the landing's hero SECTION (the reference
+    // grammar) — not duplicated here.
+    <div className={`pd-chat-zone${resting ? ' resting' : ''}`}>
       {/* ── The hero bar — desktop resting state AND the mobile doorway. On a
              phone, pointerdown opens the sheet before focus (no keyboard
-             behind the sheet); on desktop it's the real input. ── */}
+             behind the sheet); on desktop it's the real input. CARTA (2026-08-07):
+             the resting state renders the reference's card interior — header
+             chip + logo, the opening line as a set paragraph, the ink-border
+             input with a square send, the mono step label — inside the frame
+             the landing draws around this component (.ca-engine). ── */}
       <div className="pd-chat-hero">
+        <div className="ca-eng-head">
+          <span className="ca-eng-chip">{ownerMode ? 'FREE VALUATION' : 'ACQUISITION ENGINE'}</span>
+          <img src="/logo-x-green.png" alt="" style={{ height: 18, width: 'auto', opacity: 0.9 }} />
+        </div>
+        {resting && <p className="ca-eng-open">{OPENING}</p>}
         <div
           className="pd-herobar"
           onClick={() => { if (isMobile()) openSheet(); }}
@@ -768,9 +785,19 @@ export default function YuliaIntake({ onOwnerModeChange }: { onOwnerModeChange?:
             value={draft}
             onChange={e => setDraft(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') send(); }}
-            placeholder={ownerMode ? 'Tap to continue your valuation' : done ? 'Your map is ready — reopen it' : userTurns > 0 ? 'Tap to continue your session' : mobileVP ? 'What are you buying?' : hint}
+            /* Desktop renders the ghost text as an OVERLAY (below) so the
+               reference's blinking green caret can ride it — a native
+               placeholder cannot carry a child element. Phones keep the
+               plain placeholder (the bar is just the sheet's doorway). */
+            placeholder={mobileVP ? (ownerMode ? 'Tap to continue your valuation' : done ? 'Your map is ready — reopen it' : userTurns > 0 ? 'Tap to continue your session' : 'What are you buying?') : undefined}
             aria-label="Describe your acquisition criteria"
           />
+          {!mobileVP && draft === '' && (
+            <span className="ca-ghost" aria-hidden="true">
+              {ownerMode ? 'Tap to continue your valuation' : done ? 'Your map is ready — reopen it' : userTurns > 0 ? 'Tap to continue your session' : hint}
+              <span className="ca-caret" />
+            </span>
+          )}
           <button
             type="button"
             className="pd-send"
@@ -778,11 +805,13 @@ export default function YuliaIntake({ onOwnerModeChange }: { onOwnerModeChange?:
             disabled={pending}
             aria-label={userTurns > 0 || done ? 'Reopen the conversation' : sendLabel}
           >
-            {mobileVP ? (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            ) : (userTurns > 0 || done ? 'Reopen' : sendLabel)}
+            {/* The reference's 18px ↑ text glyph in the 42px ink square — the
+                rotating step label ("Continue" → "Generate Map" → "Send")
+                lives on the mono line under the bar instead of in the button. */}
+            ↑
           </button>
         </div>
+        <div className="ca-eng-step">{userTurns > 0 || done ? 'Continue' : sendLabel}</div>
         {resting && (
           <div className="pd-chips">
             {FEATURED_LANES.map(c => (
@@ -790,22 +819,24 @@ export default function YuliaIntake({ onOwnerModeChange }: { onOwnerModeChange?:
                 {c}
               </button>
             ))}
+            {/* The two tail chips are LITERALLY uppercase in the reference —
+                the featured chips render in sentence case from the register. */}
             <a
-              className="pd-chip"
+              className="pd-chip ca-chip-green"
               href="#sectors"
               onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero-all-lanes' })}
             >
-              All {CHIPS.length} lanes →
+              ALL {CHIPS.length} LANES →
             </a>
             {/* The owner funnel's homepage doorway (2026-08-04). A LINK chip,
                 not an intake path — the buyer engine stays pure; owners get
                 their own chat at /owners. */}
             <a
-              className="pd-chip"
+              className="pd-chip ca-chip-tint"
               href="#owners"
               onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero-owner-eval' })}
             >
-              Own one of these? Get a free valuation →
+              OWN ONE OF THESE? GET A FREE VALUATION →
             </a>
           </div>
         )}
@@ -902,8 +933,11 @@ export default function YuliaIntake({ onOwnerModeChange }: { onOwnerModeChange?:
           disabled={done}
           aria-label="Describe your acquisition criteria"
         />
-        <button type="button" className="pd-send" onClick={() => send()} disabled={done || pending}>{sendLabel}</button>
+        <button type="button" className="pd-send" onClick={() => send()} disabled={done || pending} aria-label={sendLabel}>
+          ↑
+        </button>
       </div>
+      {!done && <div className="ca-eng-step" style={{ margin: '4px 26px 14px' }}>{sendLabel}</div>}
         </>
       )}
       </div>

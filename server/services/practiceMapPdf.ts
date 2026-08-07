@@ -3,14 +3,17 @@
  * this to their CIO, a sponsor to their capital partner — so it must be
  * self-contained, unmistakably smbX, dated, and carry the next step on it.
  *
- * Deliberately self-contained HTML: system font stack + monospace, no
- * external resources (no font fetch to flake at render time), no charts.
+ * CARTA (2026-08-07): the PDF holds parity with the on-page map (`.pd-map`)
+ * — Source Serif 4 numerals/title, Schibsted body, Plex Mono kickers, one
+ * green accent, square panels — with the woff2s inlined (cartaFontFaceCss)
+ * so no render environment can fall back to system faces.
  * Shares the Puppeteer singleton with the premium deliverable renderer.
  */
 import fs from 'fs';
 import path from 'path';
 import { newRenderPage } from './premiumPdfRenderer.js';
-import { LEDGER } from '../../house/tokens.js';
+import { cartaFontFaceCss } from './fontEmbeds.js';
+import { CARTA } from '../../house/tokens.js';
 import type { IntakeMap } from './practiceIntake.js';
 
 const esc = (v: string): string =>
@@ -45,7 +48,7 @@ function mapHtml(map: IntakeMap, generatedAt: string): string {
         <div class="l">${esc(s.label)}</div>
       </div>`,
     )
-    .join('<div class="arrow">&darr;</div>');
+    .join('');
 
   const section = (label: string, body: string) =>
     body
@@ -57,47 +60,50 @@ function mapHtml(map: IntakeMap, generatedAt: string): string {
 <head>
 <meta charset="utf-8">
 <style>
+  ${cartaFontFaceCss()}
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { background: #ffffff; }
   body {
-    font-family: -apple-system, 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    color: ${LEDGER.ink}; font-size: 11.5px; font-variant-numeric: tabular-nums; line-height: 1.55;
+    font-family: 'Schibsted Grotesk', 'Helvetica Neue', Arial, sans-serif;
+    color: ${CARTA.ink}; font-size: 11.5px; font-variant-numeric: tabular-nums; line-height: 1.55;
     padding: 52px 56px 40px;
   }
-  .mono { font-family: 'SF Mono', 'Cascadia Mono', Consolas, Menlo, monospace; }
-  .head { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 2px solid ${LEDGER.ink}; }
-  .mark { font-weight: 800; font-size: 17px; letter-spacing: -0.02em; }
-  .mark .x { color: ${LEDGER.greenHover}; }
-  .headmeta { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${LEDGER.muted}; text-align: right; }
-  .title { margin-top: 26px; font-family: Georgia, 'Times New Roman', serif; font-size: 27px; font-weight: 600; letter-spacing: -0.008em; line-height: 1.16; }
-  .thesis { margin-top: 9px; font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 9.5px; letter-spacing: 0.05em; color: ${LEDGER.slate}; }
-  .answer { margin-top: 20px; border-left: 3px solid ${LEDGER.ink}; padding: 10px 0 10px 16px; font-size: 13.5px; font-weight: 700; line-height: 1.45; }
-  .funnel { margin-top: 26px; border-top: 1px solid ${LEDGER.hair}; border-bottom: 1px solid ${LEDGER.hair}; padding: 18px 0; }
-  .funnel .fk { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${LEDGER.greenHover}; margin-bottom: 12px; }
-  .step { display: flex; align-items: baseline; gap: 16px; }
-  .step .n { font-size: 34px; font-weight: 800; letter-spacing: -0.03em; min-width: 128px; }
-  .step .l { font-size: 11.5px; color: ${LEDGER.slate}; }
-  .arrow { color: #AEB4BA; font-size: 13px; padding: 2px 0 2px 4px; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+  .head { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid ${CARTA.hair}; }
+  .mark { font-weight: 700; font-size: 17px; letter-spacing: -0.02em; }
+  .mark .x { color: ${CARTA.green}; }
+  .headmeta { display: inline-flex; align-items: center; gap: 6px; background: ${CARTA.green}; color: ${CARTA.bone}; font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.12em; padding: 4px 8px; }
+  .headmeta::before { content: ''; width: 6px; height: 6px; background: ${CARTA.bone}; }
+  .title { margin-top: 26px; font-family: 'Source Serif 4', Georgia, serif; font-size: 27px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.16; }
+  .thesis { margin-top: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.05em; color: ${CARTA.muted}; }
+  .answer { margin-top: 20px; border-left: 3px solid ${CARTA.ink}; padding: 6px 0 6px 16px; }
+  .answer .k { font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${CARTA.green}; }
+  .answer .v { margin-top: 5px; font-size: 13.5px; font-weight: 700; line-height: 1.45; }
+  .funnel { margin-top: 26px; border-top: 1px solid ${CARTA.hair}; padding: 18px 0 6px; }
+  .funnel .fk { font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${CARTA.green}; margin-bottom: 12px; }
+  .step { display: flex; align-items: baseline; gap: 16px; padding: 5px 0; }
+  .step .n { font-family: 'Source Serif 4', Georgia, serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em; min-width: 128px; }
+  .step .l { font-size: 11.5px; color: ${CARTA.body}; }
   .sec { margin-top: 20px; }
-  .sec .k { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${LEDGER.greenHover}; }
+  .sec .k { font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${CARTA.green}; }
   .sec .v { margin-top: 5px; font-size: 11.5px; line-height: 1.6; }
-  .insight { margin-top: 24px; background: ${LEDGER.bone}; padding: 18px 20px; }
-  .insight .k { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${LEDGER.ink}; }
+  .insight { margin-top: 24px; background: ${CARTA.boneAlt}; border: 1px solid ${CARTA.hair}; padding: 18px 20px; }
+  .insight .k { font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${CARTA.green}; }
   .insight .v { margin-top: 7px; font-size: 12.5px; font-weight: 600; line-height: 1.6; }
-  .next { margin-top: 26px; border: 1px solid ${LEDGER.ink}; padding: 16px 20px; }
-  .next .k { font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${LEDGER.ink}; }
+  .next { margin-top: 26px; border: 1px solid ${CARTA.ink}; padding: 16px 20px; }
+  .next .k { font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${CARTA.green}; }
   .next .v { margin-top: 6px; font-size: 11.5px; line-height: 1.6; }
-  .foot { margin-top: 24px; padding-top: 12px; border-top: 1px solid ${LEDGER.hair}; font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 7.8px; letter-spacing: 0.06em; line-height: 1.7; color: ${LEDGER.muted}; }
+  .foot { margin-top: 24px; padding-top: 12px; border-top: 1px solid ${CARTA.hair}; font-family: 'IBM Plex Mono', monospace; font-size: 7.8px; letter-spacing: 0.06em; line-height: 1.7; color: ${CARTA.muted}; }
 </style>
 </head>
 <body>
   <div class="head">
     ${mark}
-    <div class="headmeta">PRELIMINARY MARKET READ<br>${esc(generatedAt.toUpperCase())}</div>
+    <div class="headmeta">PRELIMINARY MARKET READ &middot; ${esc(generatedAt.toUpperCase())}</div>
   </div>
   <div class="title">${esc(map.title)}</div>
-  <div class="thesis">${esc(map.thesis.toUpperCase())}</div>
-  ${pushback && map.answer ? `<div class="answer">${esc(map.answer)}</div>` : ''}
+  <div class="thesis">${esc(map.thesis)}</div>
+  ${pushback && map.answer ? `<div class="answer"><div class="k">STRAIGHT ANSWER</div><div class="v">${esc(map.answer)}</div></div>` : ''}
   <div class="funnel">
     <div class="fk">${pushback ? 'THE EVIDENCE' : 'THE UNIVERSE'}</div>
     ${funnel}

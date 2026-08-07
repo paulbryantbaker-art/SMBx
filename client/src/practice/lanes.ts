@@ -13,9 +13,14 @@
  * 2026-08-03 additions are lanes the practice actively hunts and publishes
  * research on.
  *
- * NOTE: /industries presents fifteen sectors — adding the two new lanes
- * there needs full zig-zag thesis blocks (real copy, Paul's voice), flagged
- * as open work rather than improvised here.
+ * REGISTER PARITY SETTLED (Paul, 2026-08-07, closing the audit's "different
+ * fifteen-lane sets" flag): "Landscape and hardscape are ok" — the lane
+ * stands on the board WITHOUT an /industries block, deliberately, so do not
+ * re-flag the asymmetry — and "Add MEP": Commercial mechanical joined the
+ * board below, its thesis line taken VERBATIM from the /industries block's
+ * own desk line (his copy, not improvised). It sits directly after Home
+ * services, mirroring the /industries adjacency, because the line's
+ * "harder to underwrite than residential" reads against the lane above it.
  */
 export interface HuntLane {
   nm: string;
@@ -24,6 +29,7 @@ export interface HuntLane {
 
 export const HUNT_LANES: HuntLane[] = [
   { nm: 'Home services', th: 'Need-based work in the home — recurring, fragmented, succession-heavy, and rarely brokered.' },
+  { nm: 'Commercial mechanical, HVAC & plumbing', th: 'Harder to underwrite than residential, years behind it on the consolidation curve, and the difficulty is the moat.' },
   { nm: 'Landscaping & hardscaping', th: 'Commercial grounds contracts renew season after season; route density is the moat.' },
   { nm: 'Fire & life safety', th: 'NFPA 25 and 72 make inspection the law — every install becomes an annuity.' },
   { nm: 'Elevator & escalator service', th: 'Mandated inspections, sticky contract books, light capex, aging owners.' },
