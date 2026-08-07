@@ -406,5 +406,10 @@ dedup; all fixed except the content items listed for Paul below.
    owner valuation, Google sign-in name/email, reader cookie, removal
    rights), aligned with the Terms data story; Last-updated bumped to
    August 7, 2026. No public surface speaks product-era language any more.
-5. `server/services/postcardFiller.ts` still instructs employer
-   anonymization (flagged previously, still open).
+5. ~~postcardFiller.ts employer anonymization~~ — RESOLVED 2026-08-07 by
+   Paul: "Let's anonymize". The instruction STANDS as deliberate
+   per-surface law: the public site names the employers, the LinkedIn
+   post-card surface anonymizes them, by his call (recorded in the file
+   header so a named-employers pass doesn't "correct" it). The career
+   figure aligned to the sanctioned "150+". **All five audit content
+   calls are now closed.**

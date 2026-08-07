@@ -3,6 +3,14 @@
  * PostCardSpec via Haiku. The brand-law guardrails live in the prompt:
  * zero-hallucination (only facts present in the brief), buy-side voice,
  * employer anonymization, no fees, no grievance copy.
+ *
+ * ANONYMIZATION IS DELIBERATE HERE (Paul, 2026-08-07: "Let's anonymize" —
+ * closing the last audit flag). The public SITE names the employers
+ * (Wrench Group · JPMorgan Chase · Deloitte, the 2026-08-07 reversal);
+ * this LinkedIn-card surface anonymizes them BY HIS CALL, a per-surface
+ * exception, not a stale leftover. A named-employers pass must NOT
+ * "correct" rule 3 below — the two surfaces carry different law on
+ * purpose.
  */
 import Anthropic from '@anthropic-ai/sdk';
 import type { PostCardSpec, PostCardTemplate } from './researchComposer.js';
@@ -28,7 +36,7 @@ Also always include: "template" (the chosen one) and "footerTag" (default "smbx.
 HARD RULES:
 1. Use ONLY facts, numbers, names, and claims present in the brief. NEVER invent a statistic, source, or figure. If the brief has no number, do not choose "stat".
 2. Buy-side voice: we represent acquirers only. Never sell-side language, never fees or pricing, never investment/legal/tax advice, never a valuation of a named company.
-3. Employers are anonymized: if the founder's history comes up, say "a global investment bank" or "a world-class PE-backed aggregator" — never the firm names. Career total is "150 acquisitions".
+3. Employers are anonymized: if the founder's history comes up, say "a global investment bank" or "a world-class PE-backed aggregator" — never the firm names. Career total is "150+ acquisitions".
 4. Describe our work, never criticize competitors by name or category.
 5. Display-grade brevity: every field must fit its length cap; tighten, don't truncate mid-thought.
 
