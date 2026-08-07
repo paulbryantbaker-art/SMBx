@@ -382,8 +382,9 @@
 /* The approach to a MID-PAGE block (2026-08-07 sales-journey reflow, Paul:
    "between the 2 green bands there is a whole lot of space"). One class for
    every band that follows a light section — the pricing and whose-side bands
-   both wear it — replacing per-band inline marginTop copies of the full
-   .pd-section gap. Tightened to the .pd-close scale because the band's own
+   both wear it — replacing the whose-side band's inline marginTop (the only
+   inline band margin that existed) and the old #pricing section's .pd-section
+   padding-top. Tightened to the .pd-close scale because the band's own
    transparent curve crest already supplies 52–112px of visual transition on
    top of whatever margin sits here; blocks should interrupt the scroll, not
    arrive at a distant station. (The proof band needs no approach — the hero

@@ -129,13 +129,19 @@ work it prices; no figure on the site, unchanged) → `#who` → `#sectors` →
 whose-side (jade) → `#owners` → founder → `#cta`. Band cadence jade → 2 light →
 jade → 2 light → jade → 3 light, inside the "2–3 points in the scroll" law.
 Mechanics: `.pd-dark-sect` is the ONE band-approach margin
-(clamp(90px,10vw,150px); both mid-page bands wear it, replacing per-band inline
-copies of the full section gap — the curve crest supplies the rest of the
-transition); `.pd-getting` holds the sub-block margin plus the nested `#sample`
-scroll-margin; `.pd-dark .pd-price-get` re-scopes the sent-state and input
-border because `.pd-dark` does NOT re-scope `--pd-coral` (the "Sent"
-confirmation rendered Deal Green on jade at ~1.1:1 — invisible, the
-renders-not-errors trap again). The "Get pricing →" link at `#how`'s close was
+(clamp(90px,10vw,150px); both mid-page bands wear it — it replaces the
+whose-side band's inline marginTop, the only inline band margin that existed,
+and the pricing section's old `.pd-section` padding-top — the curve crest
+supplies the rest of the transition); `.pd-getting` holds the sub-block margin
+plus the nested `#sample` scroll-margin; `.pd-dark .pd-price-get` carries FOUR
+declarations, every one a renders-not-errors trap that read clean in a diff:
+the "Sent" state and the input border (`.pd-dark` does NOT re-scope
+`--pd-coral`, so the confirmation rendered Deal Green on jade at ~1.1:1), the
+typed email + caret hard-coded to ink (the input's `color: var(--pd-ink)`
+re-scopes to near-white on the white fill — idle screenshots pass because the
+placeholder is UA grey), and a re-stated `:focus-visible` border (the
+transparent-border override sits LATER at equal specificity, and the light
+rule also kills the outline, so keyboard focus showed nothing on the band). The "Get pricing →" link at `#how`'s close was
 removed as redundant — the band is the next screenful; the anchor stays live
 for nav/footer/emailed links.
 
