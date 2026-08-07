@@ -1856,14 +1856,22 @@
 .pd-price-get .err { margin-top: 12px; font-size: 14px; color: var(--pd-body); }
 /* The brochure ask on the JADE BAND (#pricing became the third block,
    2026-08-07). .pd-dark re-scopes ink/body/tert/hair/coral-link/brass but
-   NOT --pd-coral — so without these two rules the "Sent" confirmation
-   renders Deal Green #0A7A58 on jade #0A6A4C (~1.1:1, invisible) and the
-   input keeps a hairline drawn for bone. Both are the renders-not-errors
-   trap the AURORA notes name: clean in a diff, silent in the browser. The
-   white input needs no border on the block (same call as .pd-dark
-   .pd-input); its Deal-Green focus border sits ON the white fill, so that
-   stays. */
-.pd-dark .pd-price-get input { border-color: transparent; }
+   NOT --pd-coral — so without these rules the "Sent" confirmation renders
+   Deal Green #0A7A58 on jade #0A6A4C (~1.1:1, invisible) and the input
+   keeps a hairline drawn for bone. All renders-not-errors traps: clean in
+   a diff, silent in the browser. The input's TEXT color is the sneakiest —
+   `color: var(--pd-ink)` re-scopes to #F2FBF6 inside the band, so the
+   visitor's typed email (and the caret) went near-white on the white fill
+   while the idle form looked fine in screenshots (the placeholder is UA
+   grey). Literal ink on the white fill, exactly why .pd-input hard-codes
+   its own #16181A and survives dark bands untouched. The Deal-Green focus
+   border sits ON the white fill, so that stays. */
+.pd-dark .pd-price-get input { border-color: transparent; color: #16181A; caret-color: #16181A; }
+/* Equal specificity (0,2,1) and LATER in the sheet than the light-surface
+   `.pd-price-get input:focus-visible` — without this re-statement the
+   transparent border wins on focus too, and since that rule also kills the
+   outline, keyboard focus would show NOTHING on the band. */
+.pd-dark .pd-price-get input:focus-visible { border-color: var(--pd-coral); }
 .pd-dark .pd-price-get.sent { color: var(--pd-ink); }
 @media (max-width: 860px) { .pd-pricing { grid-template-columns: 1fr; } }
 
