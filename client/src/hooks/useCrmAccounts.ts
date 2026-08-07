@@ -134,6 +134,18 @@ export function useCrmAccounts(user: User | null, filters: CrmFilters, query: st
     return res;
   }, [refresh]);
 
+  // The 2026-08-05 outreach plan shipped in the repo (content/crm-seed/) —
+  // one click seeds 81 orgs + 75 named contacts + hooks/research notes.
+  // Idempotent server-side; safe to press twice.
+  const seedOutreach = useCallback(async () => {
+    const res = await json<{
+      accountsCreated: number; accountsUpdated: number; contactsAdded: number;
+      activitiesAdded: number; unnamedParked: number; doNotPitch: number;
+    }>(`/api/crm/seed-outreach`, { method: "POST", body: JSON.stringify({}) });
+    refresh();
+    return res;
+  }, [refresh]);
+
   const logActivity = useCallback(async (id: number, body: Record<string, unknown>) => {
     const row = await json<CrmActivity>(`/api/crm/accounts/${id}/activity`, {
       method: "POST", body: JSON.stringify(body),
@@ -144,7 +156,7 @@ export function useCrmAccounts(user: User | null, filters: CrmFilters, query: st
 
   return {
     accounts: visible, all: accounts, summary, loading, loaded, error,
-    refresh, patch, importCsv, rescore, logActivity,
+    refresh, patch, importCsv, rescore, seedOutreach, logActivity,
   };
 }
 
