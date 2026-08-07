@@ -295,3 +295,49 @@ if the capture script scrolls with `scroll-behavior:smooth`. Neither is a page d
 
 Deferred (unchanged): mobile layer, collateral renderer pass (phase 2), report detail
 pages and `/buyers/*` segment pages keep their current bodies under the new chrome.
+
+---
+
+## FIDELITY AUDIT (2026-08-07, adversarial verification run — Paul: "to-the-letter")
+
+An 11-agent workflow audited every built surface against its reference (one auditor
+per page + one for the shell/system, each finding then re-read by a skeptic before it
+counted). About came back CLEAN; 27 findings survived verification elsewhere, all now
+fixed or dispositioned:
+
+**Fixed:**
+- Landing: card-02 apostrophes back to the reference's straight quotes; featured
+  chips render sentence case (the uppercase was a CSS transform — the reference
+  uppercases only the two tail chips, now literal); the blinking green ghost caret
+  restored (an overlay span, since a native placeholder can't carry a child; the fake
+  caret yields on focus); the CONTINUE→chips gap corrected to 18px; `id="yulia"`
+  moved onto the hero section (one anchor, one owner); the owners chip row reveals
+  un-staggered; the send square renders the reference's 18px ↑ text glyph.
+- Shell: the current page's nav link wears the reference's active state (green, 2px
+  underline, aria-current); the Who-it's-for dropdown is landing-only (inner
+  references show a plain link, no caret); #cta resolves to the page's OWN CTA on
+  About and Research; the footer now varies per page exactly as the references do —
+  Industries/Research compact (short blurb, no BUYERS column, six-link FIRM),
+  Track Record omits its self-link, and Research/Track Record carry the #2A2E29
+  seam above the footer; small corner handles moved to −4px (the references never
+  use −3.5; `CARTA_HANDLE.offsetSmall` corrected).
+- Industries: the Heritage kicker matched literally (a 12px/.15em one-off in the
+  reference).
+- Research: the shelf sort is stable on the August-2026 tie (order now matches the
+  reference: Home Services → DFW → Commercial MEP); inactive facet chips lost their
+  invented hover; card titles are plain text (the CTA is the card's one doorway).
+- **/track-record's meta description carried the RETIRED employer anonymization** —
+  now names Wrench Group and JPMorgan Chase per the 2026-08-07 attribution law
+  (149 chars, inside the truncation cap).
+
+**Dispositioned, not changed (documented judgment):**
+- Landing sector tiles + "Read the full sector theses →" go to /industries (the
+  reference's #sectors self-anchor is a no-op stand-in; the theses live there).
+- The Research facet band keeps the ≥2-values rule ("a filter with one option is
+  furniture" — established house doctrine; output identical with today's register).
+- Page <title>s keep the 2026-08-01 SEO set rather than the prototype's short
+  helmet titles — titles are content, not design, and the SEO pass was deliberate.
+
+**Found outside the audit's scope, flagged for a later pass:**
+`server/services/postcardFiller.ts` still INSTRUCTS employer anonymization in its
+prompt — it will generate non-compliant copy under the reversed attribution law.

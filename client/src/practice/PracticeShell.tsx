@@ -28,10 +28,11 @@ import { useSiteMeta } from './useSiteMeta';
 const MONO = "'IBM Plex Mono', monospace";
 
 /** The signature frame device — four ink squares riding a card's corners
- *  (8px at −4px; 7px at −3.5px for small cards). Parent must be relative. */
+ *  (8px, or 7px on small cards — both at −4px offsets, per every small-handle
+ *  site in the references). Parent must be relative. */
 export function Handles({ color = '#16181A', small = false }: { color?: string; small?: boolean }) {
   const s = small ? 7 : 8;
-  const o = small ? -3.5 : -4;
+  const o = -4;
   const base = { position: 'absolute' as const, width: s, height: s, background: color };
   return (
     <>
@@ -330,6 +331,28 @@ export default function PracticeShell({
   }, []);
 
   const navLink = { color: '#16181A', padding: '6px 0' } as const;
+  /* The current page's nav link wears the reference's active treatment —
+     green with a 2px green underline and aria-current (the Industries and
+     Research references both mark themselves this way). */
+  const navOnStyle = { color: '#0A7A58', padding: '6px 0', borderBottom: '2px solid #0A7A58' } as const;
+  const onIndustries = loc === '/industries';
+  const onResearch = loc.startsWith('/research') || loc.startsWith('/reports');
+  const onTrackRecord = loc === '/track-record';
+  const onAbout = loc === '/about';
+
+  /* #cta resolves to the page's OWN CTA section where one exists (About and
+     the Research index carry a local #cta in the references; their nav/footer
+     consultation links point at it), and to the landing's otherwise. */
+  const hasLocalCta = onAbout || loc === '/research';
+  const ctaHref = home || hasLocalCta ? '#cta' : '/#cta';
+
+  /* The footer varies per page in the references: Industries and Research
+     run COMPACT (short brand blurb, no BUYERS column, a six-link FIRM set),
+     Track Record drops its own self-link, and the two pages that close on a
+     dark band (Research, Track Record) put a #2A2E29 hairline atop the
+     footer so the blocks don't run together. */
+  const footCompact = onIndustries || onResearch;
+  const footSeam = onResearch || onTrackRecord;
 
   return (
     <div className="pd" style={{ background: '#FCFAF6' }}>
@@ -357,15 +380,21 @@ export default function PracticeShell({
           <nav data-nav-links aria-label="Site" style={{ display: 'flex', alignItems: 'center', gap: 28, fontSize: 15.5, fontWeight: 500, whiteSpace: 'nowrap', minWidth: 0 }}>
             <a href={anchor('#why')} className="ca-h-green" style={navLink}>Why us</a>
             <a href={anchor('#how')} className="ca-h-green" style={navLink}>How it works</a>
-            <Link href="/industries" className="ca-h-green" style={navLink}>Industries</Link>
-            <Link href="/research" className="ca-h-green" style={navLink}>Research</Link>
-            <WhoMenu anchor={anchor} />
+            <Link href="/industries" className="ca-h-green" style={onIndustries ? navOnStyle : navLink} aria-current={onIndustries ? 'page' : undefined}>Industries</Link>
+            <Link href="/research" className="ca-h-green" style={onResearch ? navOnStyle : navLink} aria-current={onResearch ? 'page' : undefined}>Research</Link>
+            {/* The hover dropdown belongs to the LANDING nav only — the four
+                inner references render a plain link with no caret. */}
+            {home ? (
+              <WhoMenu anchor={anchor} />
+            ) : (
+              <a href="/#who" className="ca-h-green" style={navLink}>Who it's for</a>
+            )}
             <a href={anchor('#owners')} className="ca-h-green" style={navLink}>Free Valuation</a>
           </nav>
           <div data-nav-ctas style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 14, flex: 'none', whiteSpace: 'nowrap' }}>
             <a
               data-nav-quiet
-              href={anchor('#cta')}
+              href={ctaHref}
               className="ca-h-band"
               style={{ fontSize: 15.5, fontWeight: 500, color: '#16181A', padding: '11px 18px', border: '1.5px solid #16181A', borderRadius: 10, background: 'transparent', whiteSpace: 'nowrap' }}
               onClick={() => trackEvent('practice_booking_clicked', { placement: 'nav' })}
@@ -418,22 +447,30 @@ export default function PracticeShell({
 
       {children}
 
-      {/* ══ MEGA FOOTER — transcribed from the reference ══ */}
-      <footer style={{ background: '#131512', color: '#F4F5F1', padding: '88px 32px 40px' }}>
+      {/* ══ MEGA FOOTER — transcribed from the references, which VARY it per
+             page: Industries/Research run compact (short blurb, no BUYERS,
+             six-link FIRM), Track Record drops its self-link, and the pages
+             that close on a dark band carry a hairline seam up top. ══ */}
+      <footer style={{ background: '#131512', color: '#F4F5F1', padding: '88px 32px 40px', borderTop: footSeam ? '1px solid #2A2E29' : undefined }}>
         <div style={{ maxWidth: 1360, margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 44 }}>
             <div>
               <img src="/logo-green-x-dark.png" alt="smbX.ai" width={1584} height={396} loading="lazy" style={{ height: 36, width: 'auto', display: 'block' }} />
               <p style={{ margin: '18px 0 0', fontSize: 14.5, lineHeight: 1.65, color: '#ABB2AB', maxWidth: '22em' }}>
-                Buy-side corporate development for acquirers in the lower middle market. A senior
-                operator and a full team's output, exclusively on your side of the table.
+                {footCompact
+                  ? 'Buy-side corporate development for acquirers in the lower middle market.'
+                  : "Buy-side corporate development for acquirers in the lower middle market. A senior operator and a full team's output, exclusively on your side of the table."}
               </p>
               <div style={{ marginTop: 26, display: 'flex', gap: 14, alignItems: 'center' }}>
                 <img src="/founder-portrait.jpg" alt="Paul Baker" loading="lazy" style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', objectPosition: '50% 18%', border: '2px solid #A8F0CE' }} />
                 <div>
                   <div style={{ fontSize: 14.5, fontWeight: 600, color: '#F4F5F1' }}>Paul Baker</div>
                   <div style={{ fontSize: 12.5, color: '#ABB2AB' }}>Founder · two decades on the buy side</div>
-                  <Link href="/about" className="ca-h-tint" style={{ fontSize: 13, color: '#A8F0CE' }}>Meet Paul →</Link>
+                  {/* On About the reference sends "Meet Paul" to the page's
+                      own CTA — you're already meeting him. */}
+                  {onAbout
+                    ? <a href="#cta" className="ca-h-tint" style={{ fontSize: 13, color: '#A8F0CE' }}>Meet Paul →</a>
+                    : <Link href="/about" className="ca-h-tint" style={{ fontSize: 13, color: '#A8F0CE' }}>Meet Paul →</Link>}
                 </div>
               </div>
             </div>
@@ -443,16 +480,17 @@ export default function PracticeShell({
                 <span style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.16em', color: '#ABB2AB' }}>FIRM</span>
               </div>
               <div className="ca-foot-col" style={{ marginTop: 16 }}>
-                <a href={anchor('#why')}>Why us</a>
+                {!footCompact && <a href={anchor('#why')}>Why us</a>}
                 <a href={anchor('#how')}>How it works</a>
                 <a href={anchor('#pricing')}>Pricing</a>
                 <a href={anchor('#sample')}>Sample read</a>
                 <Link href="/research">Research</Link>
-                <Link href="/track-record">Track record</Link>
-                <a href={anchor('#cta')}>Confidential consultation</a>
+                {!footCompact && !onTrackRecord && <Link href="/track-record">Track record</Link>}
+                <a href={ctaHref}>Confidential consultation</a>
                 <a href="/login">Team sign in</a>
               </div>
             </div>
+            {!footCompact && (
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #2A2E29', paddingBottom: 12 }}>
                 <span style={{ width: 7, height: 7, background: '#0A7A58' }} />
@@ -468,6 +506,7 @@ export default function PracticeShell({
                 <Link href="/buyers/pe-firms">PE firms</Link>
               </div>
             </div>
+            )}
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #2A2E29', paddingBottom: 12 }}>
                 <span style={{ width: 7, height: 7, background: '#0A7A58' }} />

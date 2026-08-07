@@ -145,10 +145,13 @@ export const CARTA_TYPE = {
 /** Display weights: 550 headlines, 600 card titles. */
 export const CARTA_DISPLAY_WEIGHT = 550;
 
-/** The signature frame device — 8px ink squares at −4px offsets (7px at −3.5px
- *  on small cards). Square, never rounded; this is what replaces Aurora's
- *  curved band crests as the house's recognisable gesture. */
-export const CARTA_HANDLE = { size: 8, offset: -4, sizeSmall: 7, offsetSmall: -3.5 } as const;
+/** The signature frame device — 8px ink squares at −4px offsets (7px squares
+ *  keep the SAME −4px offset on small cards — the 2026-08-07 fidelity audit
+ *  confirmed every small-handle site in the references sits at −4, and the
+ *  README says "−4px offsets" for both sizes). Square, never rounded; this is
+ *  what replaces Aurora's curved band crests as the house's recognisable
+ *  gesture. */
+export const CARTA_HANDLE = { size: 8, offset: -4, sizeSmall: 7, offsetSmall: -4 } as const;
 
 export const LEDGER = {
   /* canvas + ink */

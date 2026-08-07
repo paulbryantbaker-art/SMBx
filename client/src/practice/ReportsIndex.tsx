@@ -34,7 +34,6 @@ function Chip({ label, on, onClick }: { label: string; on: boolean; onClick: () 
       type="button"
       aria-pressed={on}
       onClick={onClick}
-      className={on ? undefined : 'ca-h-greenline'}
       style={{
         cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: MONO, fontSize: 11.5,
         letterSpacing: '0.06em', padding: '8px 12px', textTransform: 'uppercase',
@@ -55,9 +54,12 @@ export default function ReportsIndex() {
   const industries = useMemo(() => facetValues(r => r.industry), []);
   const metros = useMemo(() => facetValues(r => r.metro), []);
 
-  // Newest first — the shelf leads with the latest assessment.
+  // Newest first — the shelf leads with the latest assessment. localeCompare
+  // returns 0 on a published-date tie, so the sort stays STABLE and tied
+  // reports keep their register order (the previous never-zero comparator
+  // let V8 flip the August 2026 pair).
   const list = useMemo(
-    () => [...REPORT_LIST].sort((a, b) => (a.published < b.published ? 1 : -1)),
+    () => [...REPORT_LIST].sort((a, b) => b.published.localeCompare(a.published)),
     [],
   );
   const shown = list.filter(
@@ -125,15 +127,10 @@ export default function ReportsIndex() {
                     </span>
                     <span style={{ marginLeft: 'auto', fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.1em', color: '#7C8187', textTransform: 'uppercase' }}>{r.publishedLabel}</span>
                   </div>
+                  {/* Plain text per the reference — the card's one doorway is
+                      the "Read the assessment" CTA below. */}
                   <h2 style={{ margin: '20px 0 0', fontFamily: SERIF, fontWeight: 600, fontSize: 'clamp(26px, 2.4vw, 36px)', lineHeight: 1.15, letterSpacing: '-0.01em' }}>
-                    <Link
-                      href={`/research/${r.slug}`}
-                      style={{ color: '#16181A' }}
-                      className="ca-h-green"
-                      onClick={() => trackEvent('report_card_clicked', { slug: r.slug })}
-                    >
-                      {r.shortTitle}
-                    </Link>
+                    {r.shortTitle}
                   </h2>
                   <p style={{ margin: '16px 0 0', fontSize: 15.5, lineHeight: 1.68, color: '#4A4F54' }}>{r.abstract}</p>
                   <div style={{ marginTop: 'auto', paddingTop: 26, display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>

@@ -54,7 +54,7 @@ const WHY: { nm: string; bd: string; more: string; xp: React.ReactNode }[] = [
   },
   {
     nm: 'A target universe in days, not weeks',
-    bd: 'Our AI stack compresses an analyst pod’s month of market mapping into days of a senior operator’s supervised work. You see the whole market before most teams finish staffing.',
+    bd: "Our AI stack compresses an analyst pod's month of market mapping into days of a senior operator's supervised work. You see the whole market before most teams finish staffing.",
     more: 'HOW',
     xp: (
       <>
@@ -332,7 +332,9 @@ export default function Landing() {
       <main id="top" style={{ background: '#FCFAF6', overflow: 'clip' }}>
 
         {/* ══ HERO ══ */}
-        <section data-hero-grid style={{ position: 'relative', maxWidth: 1360, margin: '0 auto', minHeight: 'calc(100svh - 76px)', padding: 'clamp(60px, 6vh, 110px) 32px clamp(70px, 8vh, 140px)', display: 'grid', gridTemplateColumns: '1.02fr .98fr', gap: 'clamp(56px, 5vw, 92px)', alignItems: 'center' }}>
+        {/* id="yulia" sits on the SECTION per the reference — YuliaIntake no
+            longer carries its own copy of the id (one anchor, one owner). */}
+        <section data-hero-grid id="yulia" style={{ position: 'relative', maxWidth: 1360, margin: '0 auto', minHeight: 'calc(100svh - 76px)', padding: 'clamp(60px, 6vh, 110px) 32px clamp(70px, 8vh, 140px)', display: 'grid', gridTemplateColumns: '1.02fr .98fr', gap: 'clamp(56px, 5vw, 92px)', alignItems: 'center' }}>
           <div>
             {ownerHero ? (
               <h1 data-hs="0" style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(48px, 4.8vw, 92px)', lineHeight: 1.04, letterSpacing: '-0.015em', textWrap: 'balance' }}>Think like a buyer. Exit on your&nbsp;terms.</h1>
@@ -686,7 +688,9 @@ export default function Landing() {
             </div>
           </div>
           <p data-rv style={{ margin: '52px auto 0', maxWidth: '44em', textAlign: 'center', fontSize: 16.5, lineHeight: 1.65, color: '#16181A', fontWeight: 500 }}>Pick your trade — the engine above starts your valuation. The first sitting delivers your draft; finishing the walk narrows the range, and from there your progress saves so you can leave and come back. What stays on file is your call, shown to you in full at the end.</p>
-          <div data-rv className="rv-stagger" style={{ margin: '26px auto 0', maxWidth: 980, display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
+          {/* One un-staggered reveal — the reference reserves data-stagger for
+              the grids, not this chip row. */}
+          <div data-rv style={{ margin: '26px auto 0', maxWidth: 980, display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
             {OWNER_LANES.map(l => (
               <button
                 key={l.key}

@@ -120,7 +120,13 @@ export default function Industries() {
           {/* Heritage */}
           <div data-rv style={{ marginTop: 80, position: 'relative', background: '#F3F0E9', padding: '52px 56px 56px' }}>
             <Handles />
-            <Kicker>HERITAGE</Kicker>
+            {/* The Heritage kicker is a one-off in the reference: 12px/.15em
+                where every other light kicker runs 12.5px/.16em — matched
+                literally rather than through the shared Kicker. */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ width: 8, height: 8, background: '#0A7A58' }} />
+              <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.15em', color: '#7C8187' }}>HERITAGE</span>
+            </div>
             <h2 style={{ margin: '18px 0 0', fontFamily: SERIF, fontWeight: 600, fontSize: 'clamp(28px, 2.7vw, 42px)', lineHeight: 1.12, letterSpacing: '-0.01em' }}>Home &amp; commercial services</h2>
             <div style={{ marginTop: 12, fontSize: 18, fontWeight: 600, color: '#16181A' }}>Where the record was built<span style={{ color: '#0A7A58' }}>.</span></div>
             <div style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: 8 }}>

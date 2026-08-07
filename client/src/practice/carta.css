@@ -131,6 +131,7 @@
 /* Resting bar → the reference input row: ink hairline, radius 12, bone fill. */
 .ca-engine .pd-chat-hero { max-width: none; }
 .ca-engine .pd-herobar {
+  position: relative;
   margin: 14px 20px 0;
   width: auto;
   border: 1.5px solid #16181A;
@@ -140,6 +141,33 @@
   box-shadow: none;
   gap: 10px;
 }
+/* The desktop ghost line — the reference's staged example text with its
+   blinking green caret, riding OVER the real input (a native placeholder
+   cannot carry a child element). pointer-events pass through to the input;
+   the fake caret yields the moment real focus brings a real one. */
+.ca-engine .ca-ghost {
+  position: absolute;
+  left: 16px;
+  right: 62px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15.5px;
+  color: #8B9088;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+.ca-caret {
+  display: inline-block;
+  width: 1.5px;
+  height: 16px;
+  background: #0A7A58;
+  margin-left: 3px;
+  vertical-align: -2px;
+  animation: smbxCaret 1.1s step-end infinite;
+}
+.ca-engine .pd-herobar:focus-within .ca-caret { display: none; }
 .ca-engine .pd-herobar:focus-within { border-color: #0A7A58; }
 .ca-engine .pd-herobar input { font-size: 15.5px; padding: 9px 0; }
 /* The send control is the reference's 42px ink square with the ↑ glyph; the
@@ -161,13 +189,15 @@
 .ca-engine .pd-herobar .pd-send:hover,
 .ca-engine .pd-chat-inputrow .pd-send:hover { background: #0A7A58; }
 
-/* Chips → mono uppercase tiles on hairline borders, square. */
-.ca-engine .pd-chips { padding: 12px 20px 20px; gap: 8px; justify-content: flex-start; }
+/* Chips → mono tiles on hairline borders, square. NO text-transform: the
+   reference renders the featured lanes in sentence case; only the two tail
+   chips are uppercase, and they are uppercase LITERALLY in the markup.
+   The 18px top padding is the reference's gap below the CONTINUE label. */
+.ca-engine .pd-chips { padding: 18px 20px 20px; gap: 8px; justify-content: flex-start; }
 .ca-engine .pd-chip {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 11.5px;
   letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: #16181A;
   border: 1px solid #D8D3C6;
   background: #FFFFFF;
