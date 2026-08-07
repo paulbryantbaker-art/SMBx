@@ -22,7 +22,7 @@
 import { Router } from 'express';
 import { sql } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
-import { sendEmail } from '../services/emailService.js';
+import { sendEmail, letterheadEmail } from '../services/emailService.js';
 import { mergeContext, renderTemplate, hasUnresolved } from '../../house/outreach.js';
 
 export const outreachRouter = Router();
@@ -165,11 +165,17 @@ outreachRouter.get('/outreach/queue', async (req, res) => {
 /* ── the send — one message, one press, one human ─────────────────────── */
 
 /**
- * POST /api/outreach/touches/:id/send   { subject, body }
+ * POST /api/outreach/touches/:id/send   { subject, body, style? }
  * The subject/body are the practitioner's FINAL draft (usually the rendered
  * template, edited). Refused while any {merge_field} survives. sent_at is
  * stamped only when the mail service actually accepted the message — the
  * honest-send law (deal_tasks.notified_at set the precedent).
+ *
+ * `style` is the practitioner's per-message voice (2026-08-07, Paul):
+ * 'personal' (default) = bare note, how a cold first touch reads best;
+ * 'letterhead' = the same words on the site's Aurora chrome, for the reader
+ * who already knows the name. The audit trail stores the raw TEXT either
+ * way — the wrapper is presentation, not content.
  */
 outreachRouter.post('/outreach/touches/:id/send', async (req, res) => {
   try {
@@ -177,6 +183,7 @@ outreachRouter.post('/outreach/touches/:id/send', async (req, res) => {
     const id = Number(req.params.id);
     const subject = String(req.body?.subject || '').trim();
     const body = String(req.body?.body || '').trim();
+    const style = req.body?.style === 'letterhead' ? 'letterhead' : 'personal';
     if (!subject || !body) return res.status(400).json({ error: 'subject and body are required' });
     if (hasUnresolved(subject) || hasUnresolved(body)) {
       return res.status(400).json({ error: 'The draft still carries {merge_fields} — fill them before sending.' });
@@ -199,7 +206,10 @@ outreachRouter.post('/outreach/touches/:id/send', async (req, res) => {
     if (t.account_archived) return res.status(403).json({ error: 'This account is archived.' });
     if (!emailChannel(t.channel)) return res.status(400).json({ error: `Channel "${t.channel}" is not an email channel — mark the touch done once you have made it.` });
 
-    const delivered = await sendEmail({ to: t.contact_email, subject, html: personalHtml(body) });
+    const html = style === 'letterhead'
+      ? letterheadEmail({ body, signatureName: 'Paul Baker', signatureRole: 'Founder · smbX.ai — buy-side corporate development' })
+      : personalHtml(body);
+    const delivered = await sendEmail({ to: t.contact_email, subject, html });
     if (!delivered) {
       await sql`
         UPDATE crm_touches SET last_send_error = 'Email service declined or is not configured (RESEND_API_KEY / EMAIL_FROM)', updated_at = NOW()

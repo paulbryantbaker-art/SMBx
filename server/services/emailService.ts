@@ -103,8 +103,9 @@ export function brandedEmail({ headline, body, ctaLabel, ctaUrl, footnote }: {
   </style>
 </head>
 <body class="email-body" style="margin:0;padding:0;background:#F8F6F2;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-text-size-adjust:100%;">
-  <!-- Full-bleed rose accent stripe -->
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="height:4px;background:#D44A78;"></td></tr></table>
+  <!-- Full-bleed accent stripe — jade since AURORA (was the retired rose #D44A78,
+       which survived here unnoticed because the design gate doesn't scan email HTML) -->
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="height:4px;background:#0A6A4C;"></td></tr></table>
 
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
     <tr><td align="center" style="padding:0;">
@@ -185,6 +186,78 @@ export function signatureHtml(): string {
     </a>
   </td></tr>
 </table>`;
+}
+
+/**
+ * The HOUSE LETTERHEAD (2026-08-07, Paul on the outreach machine: "the style
+ * and chrome of the email does not look like the site" + "have to prepare to
+ * get emails"). The middle voice between the two that existed: brandedEmail
+ * is the marketing/transactional wrapper (headline, CTA pill — report
+ * delivery, brochures) and the outreach personal note is bare text. This is
+ * CORRESPONDENCE ON LETTERHEAD — the practitioner's own words carried on the
+ * site's Aurora chrome: jade rule, the green-X wordmark, bone ground, ink
+ * text, a quiet signature block. No headline, no CTA pill, no imagery —
+ * letterhead frames a letter, it doesn't turn one into a campaign.
+ *
+ * Which voice an outreach touch uses is the PRACTITIONER'S CHOICE per message
+ * (the compose pane's Personal/Letterhead toggle): cold first touches read
+ * best personally typed; letterhead earns its place once the reader knows the
+ * name — follow-ups, report sends, event recaps.
+ *
+ * Email-client reality: paragraphs are real <p> blocks (Outlook's Word engine
+ * ignores white-space CSS), fonts are system stacks with Georgia for the
+ * signature name (no webfont loads reliably in mail), the wordmark loads from
+ * the live site by absolute URL, and the footer's opt-out is a REPLY, not a
+ * list-unsubscribe link — this is one-to-one correspondence, and the machine
+ * honors "unsubscribe" replies via the contact's unsubscribed_at (115).
+ */
+export function letterheadEmail({ body, signatureName, signatureRole }: {
+  body: string;
+  signatureName?: string;
+  signatureRole?: string;
+}): string {
+  const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const paragraphs = body
+    .split(/\n{2,}/)
+    .map(p => `<p style="margin:0 0 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;font-size:15.5px;line-height:1.7;color:#16181A;">${esc(p.trim()).replace(/\n/g, '<br>')}</p>`)
+    .join('');
+  const sig = signatureName ? `
+      <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:26px;">
+        <tr><td style="border-top:2px solid #0A6A4C;padding-top:14px;">
+          <div style="font-family:Georgia,'Times New Roman',serif;font-size:17px;font-weight:600;color:#16181A;">${esc(signatureName)}</div>
+          ${signatureRole ? `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;font-size:13px;color:#5A6169;margin-top:3px;">${esc(signatureRole)}</div>` : ''}
+        </td></tr>
+      </table>` : '';
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body style="margin:0;padding:0;background:#FCFAF6;-webkit-text-size-adjust:100%;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="height:4px;background:#0A6A4C;"></td></tr></table>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FCFAF6;">
+    <tr><td align="center" style="padding:34px 20px 44px;">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+        <tr><td style="padding-bottom:22px;">
+          <img src="${BASE_URL}/logo-green-x.png" alt="smbX.ai" height="24" style="height:24px;width:auto;display:block;" />
+        </td></tr>
+        <tr><td style="background:#FFFFFF;border:1px solid rgba(22,24,26,0.08);border-radius:14px;padding:34px 36px 28px;">
+          ${paragraphs}
+          ${sig}
+        </td></tr>
+        <tr><td style="padding:18px 8px 0;">
+          <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;font-size:12px;line-height:1.6;color:#83898F;">
+            smbX.ai · buy-side corporate development · Dallas, TX<br>
+            This is a personal note from our practice. Reply "unsubscribe" and we won't write again.
+          </div>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
 }
 
 /** A file to send with the message (the research reports ride this path). */

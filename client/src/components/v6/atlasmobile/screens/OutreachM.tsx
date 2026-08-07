@@ -40,11 +40,14 @@ function TouchDetail({ touch, busy, onBack, onSend, onStatus }: {
   touch: OutreachTouch;
   busy: boolean;
   onBack: () => void;
-  onSend: (subject: string, body: string) => void;
+  onSend: (subject: string, body: string, style: "personal" | "letterhead") => void;
   onStatus: (status: string) => void;
 }) {
   const [subject, setSubject] = useState(touch.draft?.subject ?? "");
   const [body, setBody] = useState(touch.draft?.body ?? "");
+  // Voice per message (Paul, 2026-08-07): personal = bare note for cold
+  // touches; letterhead = the same words on the site's Aurora chrome.
+  const [style, setStyle] = useState<"personal" | "letterhead">("personal");
   const unresolved = UNRESOLVED_RE.test(subject) || UNRESOLVED_RE.test(body);
   const sendable = touch.canEmail && !unresolved && !busy && subject.trim() && body.trim();
   const isEvent = !!touch.event_id && !touch.account_id;
@@ -117,10 +120,24 @@ function TouchDetail({ touch, busy, onBack, onSend, onStatus }: {
       {touch.status === "pending" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {touch.canEmail && (
+            <div style={{ display: "flex", gap: 7 }}>
+              {(["personal", "letterhead"] as const).map(k => (
+                <button key={k} type="button" onClick={() => setStyle(k)}
+                  style={{
+                    flex: 1, height: 38, borderRadius: 12, border: "none", fontSize: 12.5, fontWeight: 700,
+                    cursor: "pointer", fontFamily: RT.font,
+                    background: style === k ? RT.ink : RT.card, color: style === k ? "#fff" : RT.ink,
+                  }}>
+                  {k === "personal" ? "Personal note" : "Letterhead"}
+                </button>
+              ))}
+            </div>
+          )}
+          {touch.canEmail && (
             <button
               type="button"
               disabled={!sendable}
-              onClick={() => onSend(subject, body)}
+              onClick={() => onSend(subject, body, style)}
               style={{ ...btn, background: RT.accent, color: RT.onAccent, opacity: sendable ? 1 : 0.45 }}
             >
               {busy ? "Sending…" : `Send to ${touch.contact_email}`}
@@ -162,9 +179,9 @@ export default function OutreachMobile({ user }: { user: User | null }) {
           touch={open}
           busy={busy}
           onBack={() => { setOpenId(null); setBanner(null); }}
-          onSend={async (s, b) => {
+          onSend={async (s, b, st) => {
             setBusy(true);
-            try { await o.sendTouch(open.id, s, b); setBanner(`Sent to ${open.contact_email}.`); }
+            try { await o.sendTouch(open.id, s, b, st); setBanner(`Sent to ${open.contact_email}.`); }
             catch (e: any) { setBanner(`Not sent: ${e?.message ?? "unknown error"}`); }
             finally { setBusy(false); }
           }}

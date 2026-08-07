@@ -83,7 +83,7 @@ function dueLabelFor(d: string | null): { text: string; color: string } {
 
 function TouchPane({ touch, onSend, onStatus, busy }: {
   touch: OutreachTouch;
-  onSend: (subject: string, body: string) => void;
+  onSend: (subject: string, body: string, style: "personal" | "letterhead") => void;
   onStatus: (status: string) => void;
   busy: boolean;
 }) {
@@ -91,6 +91,11 @@ function TouchPane({ touch, onSend, onStatus, busy }: {
   // Keyed remount (see call site) resets them when the selection changes.
   const [subject, setSubject] = useState(touch.draft?.subject ?? "");
   const [body, setBody] = useState(touch.draft?.body ?? "");
+  // The message's VOICE (2026-08-07, Paul): personal = bare note, the right
+  // read for a cold first touch; letterhead = the same words on the site's
+  // Aurora chrome (jade rule, wordmark, signature block) for a reader who
+  // already knows the name. Per-message, defaulting personal.
+  const [style, setStyle] = useState<"personal" | "letterhead">("personal");
   const unresolved = UNRESOLVED_RE.test(subject) || UNRESOLVED_RE.test(body);
   const sendable = touch.canEmail && !unresolved && !busy && subject.trim() && body.trim();
 
@@ -168,6 +173,22 @@ function TouchPane({ touch, onSend, onStatus, busy }: {
               <b>Guardrails ({touch.template_key}):</b> {touch.template_guardrails}
             </div>
           )}
+          {touch.canEmail && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: T.muted }}>Send as:</span>
+              {(["personal", "letterhead"] as const).map(k => (
+                <button key={k} type="button" onClick={() => setStyle(k)}
+                  style={{ ...btn, padding: "4px 12px", fontSize: 12, ...(style === k ? { background: T.track, fontWeight: 800 } : {}) }}>
+                  {k === "personal" ? "Personal note" : "House letterhead"}
+                </button>
+              ))}
+              <span style={{ fontSize: 11.5, color: T.faint, flexBasis: "100%" }}>
+                {style === "personal"
+                  ? "Bare text, as if typed — the right read for a cold first touch."
+                  : "Same words on the site's chrome: jade rule, wordmark, signature. For readers who already know you."}
+              </span>
+            </div>
+          )}
         </>
       ) : (
         <div style={{ fontSize: 13, color: T.muted, lineHeight: 1.6 }}>
@@ -188,7 +209,7 @@ function TouchPane({ touch, onSend, onStatus, busy }: {
               style={sendable ? primaryBtn : deadBtn}
               disabled={!sendable}
               title={unresolved ? "The draft still carries {merge_fields}" : !touch.contact_email ? "No email on the contact" : undefined}
-              onClick={() => onSend(subject, body)}
+              onClick={() => onSend(subject, body, style)}
             >
               {busy ? "Sending…" : `Send to ${touch.contact_email}`}
             </button>
@@ -298,10 +319,10 @@ export default function OutreachPanel({ user }: { user: User | null }) {
   const o = useOutreach(user, statusFilter);
   const open = useMemo(() => o.touches.find(t => t.id === openId) ?? null, [o.touches, openId]);
 
-  const doSend = async (t: OutreachTouch, subject: string, body: string) => {
+  const doSend = async (t: OutreachTouch, subject: string, body: string, style: "personal" | "letterhead") => {
     setBusy(true);
     try {
-      await o.sendTouch(t.id, subject, body);
+      await o.sendTouch(t.id, subject, body, style);
       setBanner(`Sent to ${t.contact_email} — logged on ${t.firm}.`);
     } catch (e: any) {
       setBanner(`Not sent: ${e?.message ?? "unknown error"}`);
@@ -429,7 +450,7 @@ export default function OutreachPanel({ user }: { user: User | null }) {
                 key={open.id}
                 touch={open}
                 busy={busy}
-                onSend={(s, b) => doSend(open, s, b)}
+                onSend={(s, b, st) => doSend(open, s, b, st)}
                 onStatus={st => doStatus(open, st)}
               />
             ) : (

@@ -119,9 +119,9 @@ export function useOutreach(user: User | null, touchStatus: string) {
 
   const refresh = useCallback(() => setNonce(n => n + 1), []);
 
-  const sendTouch = useCallback(async (id: number, subject: string, body: string) => {
+  const sendTouch = useCallback(async (id: number, subject: string, body: string, style: "personal" | "letterhead" = "personal") => {
     const res = await json<{ touch: unknown }>(`/api/outreach/touches/${id}/send`, {
-      method: "POST", body: JSON.stringify({ subject, body }),
+      method: "POST", body: JSON.stringify({ subject, body, style }),
     });
     refresh();
     return res;
