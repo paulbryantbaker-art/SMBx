@@ -1,0 +1,19 @@
+-- COWORK ACCESS TOKENS (2026-08-07). Paul: "i use Google Auth to sign in, i
+-- dont have PW."
+--
+-- push-crm.mts logs in with email+password to get a JWT. That is unusable for
+-- an identity that has no password — and Google is how Paul signs in. So the
+-- app mints a long-lived token instead: he is already authenticated in the
+-- browser, presses a button, pastes the token into Cowork once.
+--
+-- A token that lives in a config file for a year needs to be REVOCABLE, and
+-- rotating JWT_SECRET (the only lever that existed) would sign every human out
+-- of every device — a blast radius wildly out of proportion to "I pasted that
+-- into the wrong window." So each CLI token carries the epoch it was minted
+-- under, and `requireAuth` rejects any cli token whose epoch is behind the
+-- user's current one. Pressing Regenerate bumps the epoch: the old token dies
+-- instantly, every browser session is untouched.
+--
+-- The epoch is checked ONLY for tokenUse='cli' tokens, so the ordinary
+-- browser path keeps its zero-query auth.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS cli_token_epoch INTEGER NOT NULL DEFAULT 0;

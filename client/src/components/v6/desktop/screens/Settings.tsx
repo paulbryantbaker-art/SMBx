@@ -170,7 +170,7 @@ export default function SettingsScreen({ user, view }: AtlasScreenProps) {
           {pane === "billing" && <BillingPane />}
           {pane === "notifications" && <NotificationsPane />}
           {pane === "members" && <MembersPane user={user} />}
-          {pane === "connections" && <StubPane text="Connect Google Workspace, Slack, your CRM, and agent / MCP keys here. These integrations are configured by talking to Yulia today — a self-serve panel is coming." />}
+          {pane === "connections" && <ConnectionsPane />}
           {pane === "security" && <StubPane text="Two-factor authentication, active sessions, and SSO configuration live here. SSO and API controls ship with the Enterprise plan; self-serve security settings are coming." />}
         </div>
       </div>
@@ -732,5 +732,125 @@ function StubPane({ text }: { text: string }) {
     <Card style={{ borderRadius: T.rCardLg, padding: 30, textAlign: "center" }}>
       <div style={{ fontSize: 14, color: T.muted2, lineHeight: 1.6 }}>{text}</div>
     </Card>
+  );
+}
+
+
+/* ─── Connections: the Cowork access token ─────────────────────────────────
+ * Paul, 2026-08-07: "i use Google Auth to sign in, i dont have PW." The local
+ * CLIs (push-crm.mts) authenticated with email+password, which a Google
+ * identity does not have. This pane closes that: he is already signed in
+ * here, so the app hands him a long-lived token to paste into Cowork once.
+ *
+ * HONESTY RULES, because this is a credential:
+ *  - The token is shown ONCE per press and never stored client-side. Pressing
+ *    again mints a fresh one; Regenerate REVOKES the old (epoch bump).
+ *  - What it grants is stated plainly: everything the signed-in user can do.
+ *    A CRM-only scope would be a lie — the JWT is the same identity.
+ *  - The copy-paste line is the whole setup, spelled out, so the next step is
+ *    obvious without leaving the screen.
+ */
+function ConnectionsPane() {
+  const [token, setToken] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const mint = async (regenerate: boolean) => {
+    setBusy(true); setErr(null); setCopied(false);
+    try {
+      const r = await fetch("/api/auth/cli-token", {
+        method: regenerate ? "POST" : "GET",
+        headers: authHeaders(),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || `HTTP ${r.status}`);
+      setToken(d.token);
+    } catch (e: any) {
+      setErr(e?.message ?? "Could not get a token");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const card: CSSProperties = {
+    background: T.white, border: `1px solid ${T.border}`, borderRadius: 12,
+    padding: 22, display: "flex", flexDirection: "column", gap: 12,
+  };
+  const btn: CSSProperties = {
+    padding: "9px 16px", borderRadius: 9, border: `1px solid ${T.border}`,
+    background: T.white, color: T.ink, fontSize: 13.5, fontWeight: 600,
+    cursor: busy ? "default" : "pointer", fontFamily: T.font, opacity: busy ? 0.6 : 1,
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div style={card}>
+        <div style={{ fontSize: 16, fontWeight: 700 }}>Cowork access token</div>
+        <div style={{ fontSize: 14, lineHeight: 1.65, color: T.muted }}>
+          Lets a local Cowork session push research into this app — the CRM
+          bundle importer (<code>push-crm.mts</code>) uses it. You sign in with
+          Google, so there is no password for a script to use; this is the
+          equivalent. Paste it into Cowork once as <code>SMBX_TOKEN</code>.
+        </div>
+
+        {token ? (
+          <>
+            <textarea
+              readOnly
+              value={token}
+              onFocus={e => e.currentTarget.select()}
+              style={{
+                width: "100%", minHeight: 84, resize: "vertical", padding: 12,
+                borderRadius: 9, border: `1px solid ${T.border}`, background: T.surface,
+                fontFamily: "ui-monospace, monospace", fontSize: 12, lineHeight: 1.5,
+                color: T.ink, wordBreak: "break-all",
+              }}
+            />
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button type="button" style={{ ...btn, background: T.green, borderColor: T.green, color: "#fff" }}
+                onClick={() => { navigator.clipboard?.writeText(token); setCopied(true); }}>
+                {copied ? "Copied" : "Copy token"}
+              </button>
+              <button type="button" style={btn} disabled={busy} onClick={() => mint(true)}>
+                Regenerate (revokes this one)
+              </button>
+            </div>
+            <div style={{ fontSize: 12.5, lineHeight: 1.6, color: T.muted2 }}>
+              Valid for a year. It carries everything your signed-in account can
+              do, so treat it like a password — anyone holding it is you. It is
+              shown once per press and never stored in this browser; Regenerate
+              kills the previous token immediately and leaves your browser
+              sessions alone.
+            </div>
+          </>
+        ) : (
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <button type="button" style={btn} disabled={busy} onClick={() => mint(false)}>
+              {busy ? "Working…" : "Show my token"}
+            </button>
+          </div>
+        )}
+        {err && <ErrorNote label={err} />}
+      </div>
+
+      <div style={card}>
+        <div style={{ fontSize: 16, fontWeight: 700 }}>Using it in Cowork</div>
+        <pre style={{
+          margin: 0, padding: 14, borderRadius: 9, background: T.surface,
+          border: `1px solid ${T.border}`, overflowX: "auto",
+          fontFamily: "ui-monospace, monospace", fontSize: 12.5, lineHeight: 1.7, color: T.ink,
+        }}>{`export SMBX_TOKEN="…paste it here…"
+
+# then, after any research run:
+npx tsx scripts/studio/push-crm.mts <folder-of-csvs>`}</pre>
+        <div style={{ fontSize: 13.5, lineHeight: 1.65, color: T.muted }}>
+          The session maps your workbook into the bundle and pushes it. The app
+          side runs no model, so this costs nothing against the API budget.
+        </div>
+      </div>
+
+      <StubPane text="Google Workspace, Slack and agent / MCP connections are configured by talking to Yulia today — a self-serve panel is coming." />
+    </div>
   );
 }

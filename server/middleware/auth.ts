@@ -75,12 +75,33 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   try {
     const token = header.slice(7);
     const payload = jwt.verify(token, JWT_SECRET) as AuthTokenClaims;
+    /* CLI tokens (Cowork) carry the epoch they were minted under, so
+       Regenerate can kill one without signing every browser out. The extra
+       query runs ONLY for cli tokens — the browser path stays zero-query. */
+    if ((payload as any).tokenUse === 'cli') {
+      cliTokenValid(payload).then(ok => {
+        if (!ok) return res.status(401).json({ error: 'This Cowork token was revoked — generate a new one in Settings → Connections.' });
+        (req as any).userId = payload.userId;
+        (req as any).authClaims = payload;
+        next();
+      }).catch(() => res.status(401).json({ error: 'Invalid or expired token' }));
+      return;
+    }
     (req as any).userId = payload.userId;
     (req as any).authClaims = payload;
     next();
   } catch {
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
+}
+
+/** True when a cli token's epoch still matches the user's. A token minted
+ *  before the last Regenerate is dead. */
+async function cliTokenValid(payload: AuthTokenClaims): Promise<boolean> {
+  const { sql } = await import('../db.js');
+  const [row] = await sql`SELECT cli_token_epoch FROM users WHERE id = ${payload.userId}`;
+  if (!row) return false;
+  return Number((payload as any).epoch ?? -1) === Number(row.cli_token_epoch ?? 0);
 }
 
 /**
@@ -109,6 +130,17 @@ export function requireAuthQueryToken(req: Request, res: Response, next: NextFun
 
 export function signToken(userId: number): string {
   return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '30d' });
+}
+
+/**
+ * A COWORK ACCESS TOKEN (2026-08-07) — long-lived, revocable, for the local
+ * CLIs (`push-crm.mts`) that cannot log in as a Google identity because there
+ * is no password to log in WITH. Stamped with `tokenUse: 'cli'` and the user's
+ * current `cli_token_epoch`, which is what makes Regenerate a real revocation
+ * rather than a secret rotation that logs everyone out everywhere.
+ */
+export function signCliToken(userId: number, epoch: number): string {
+  return jwt.sign({ userId, tokenUse: 'cli', epoch }, JWT_SECRET, { expiresIn: '365d' });
 }
 
 export function signDefinitiveAgentToken(input: DefinitiveAgentTokenInput): string {

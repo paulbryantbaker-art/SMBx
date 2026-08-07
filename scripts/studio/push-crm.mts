@@ -18,11 +18,16 @@
  * tabs as CSV into the folder (or let the session download them), push.
  *
  * Usage:
- *   SMBX_EMAIL=you@x.com SMBX_PASSWORD=… npx tsx scripts/studio/push-crm.mts <dir>
+ *   SMBX_TOKEN=… npx tsx scripts/studio/push-crm.mts <dir>
  *
+ *   SMBX_TOKEN       the Cowork access token — get it in the app under
+ *                    Settings → Connections → "Show my token". This is the
+ *                    normal path: Paul signs in with GOOGLE and has no
+ *                    password, so there is nothing for a script to log in
+ *                    with (2026-08-07). Valid a year, revocable there.
  *   <dir>            folder of CSVs (default: ./crm-bundle, then content/crm-seed)
  *   SMBX_APP_URL     app base (default https://smbx.ai)
- *   SMBX_TOKEN       skip login and use an existing JWT instead
+ *   SMBX_EMAIL/_PASSWORD  fallback for password identities
  *
  * File names are matched by number prefix or meaning (01_/contacts,
  * 02_/organizations, waves, steps/sequence, templates, events,
@@ -39,7 +44,10 @@ async function token(): Promise<string> {
   if (process.env.SMBX_TOKEN) return process.env.SMBX_TOKEN;
   const email = process.env.SMBX_EMAIL, password = process.env.SMBX_PASSWORD;
   if (!email || !password) {
-    console.error('Set SMBX_TOKEN, or SMBX_EMAIL + SMBX_PASSWORD to log in.');
+    console.error('No credentials.\n');
+    console.error('Get a token: open the app → Settings → Connections → "Show my token", then:');
+    console.error('  export SMBX_TOKEN="…"\n');
+    console.error('(SMBX_EMAIL + SMBX_PASSWORD also work for password identities.)');
     process.exit(1);
   }
   const r = await fetch(`${APP}/api/auth/login`, {
