@@ -1,8 +1,8 @@
 # Carta-restyle handoff — Implementation Plan
 
-**Status:** PLAN — awaiting Paul's answers to §5. Every question has a default, so
-silence = defaults, EXCEPT Q1 (employer naming), which is a deliberate reversal of a
-standing protective decision and will not be actioned either way without a word from him.
+**Status:** PLAN — Paul answered Q2/Q3/Q5 on 2026-08-07 (recorded inline below).
+**Q1 (employer naming) is still open and is the only true blocker**; it does not touch
+step 1 of the build, so tokens + shell proceed while it is outstanding.
 
 **Source of truth:** this folder. The README's rules of engagement are accepted verbatim —
 **transcription, not interpretation**; values extracted from the HTML, never eyeballed;
@@ -156,31 +156,51 @@ stated as **150**, no plus. The About stat trio also introduces **"$2B — SYNER
 CAPTURED"**, which is not in the sanctioned set (150 · $5B+ · ~$21B · 0 sell-side).
 Zero-hallucination law: every public number is real and defensible or it does not ship.
 **Confirm $2B is a figure you stand behind, and whether "+" returns.**
-*Default: keep the design's "150+" and "$2B" only if you confirm; otherwise 150 and the
-trio drops to two stats.*
+**ANSWERED (Paul, 2026-08-07): "all good here."** The design's copy stands — `150+`
+returns and `$2B — SYNERGIES CAPTURED` joins the sanctioned stat set. The no-plus rule
+in CLAUDE.md is superseded for the public site, and the sanctioned set becomes
+150+ · $5B+ · ~$21B · $2B · 0. Both laws get updated in the tokens+shell commit so a
+future session does not "correct" this back.
 
 **Q3 — MOBILE. The biggest gap.**
 The handoff is desktop-only and says so. Its four media queries only shrink the nav and
 stack three grids — **at 840px the nav links `display:none` with nothing replacing them.**
 On a phone the new site would have a logo, two CTAs and no navigation. Your standing law
 is mobile-first, and your research traffic is mostly phones.
-*Default: I design the mobile layer myself, in the new language, reusing the current
-mobile architecture that already works (hamburger menu, the intake bottom sheet with its
-iOS scroll-lock/drag-dismiss/keyboard handling) — and you review it as its own preview.
-Alternative: ask Claude Design for a mobile handoff and we ship desktop-first.*
+**ANSWERED (Paul, 2026-08-07): "no mobile yet."** Desktop ships first. The existing
+mobile CSS is NOT deleted in the meantime — the live phone layout keeps working against
+whatever survives, and the phone-specific machinery (intake bottom sheet, iOS scroll
+lock, `--pd-kb` keyboard lift) is preserved intact for the mobile pass rather than being
+torn out and rebuilt later. **Known consequence, stated plainly: between this ship and
+the mobile pass, the phone experience will be a desktop layout squeezed down — and at
+≤840px it has no nav links at all.** If that is not acceptable at ship time, the minimum
+patch is a hamburger returning the existing mobile menu.
 
 **Q4 — The report DETAIL pages (`/research/:slug`).**
 Out of scope in the handoff. The Research INDEX gets the new language; the reports
 themselves keep the current `.rp-*` document design, which holds parity with the PDF.
-*Default: leave them, and fold them into the collateral pass where page and PDF can move
-together — that is the only way they stay in parity.*
+**Sharpened (2026-08-07) — also NOT legacy, and the newest surface on the site:**
+`/research/:slug` is where a published assessment is actually READ (three live today:
+commercial-mep, home-services, dfw-home-services). Research is in the top nav; the PDF
+delivery flows through these pages. The handoff designs the research INDEX (the card
+list) but not the reading page behind "Read the assessment".
+*Default: leave them, and fold them into the collateral pass — `.rp-*` holds parity with
+the PDF, so the page and the PDF must move together or they drift.*
 
 **Q5 — The five segment pages (`/buyers/*`).**
 Not in the bundle, and the new design links nothing to them (the "Who it's for" cards are
 a hairline grid, not links to the five pages). They stay routed and reachable by direct
 URL but would still be wearing Aurora.
-*Default: leave them Aurora this pass, and decide in the collateral pass whether to
-restyle or retire them.*
+**Sharpened after Paul asked what these are (2026-08-07) — they are NOT legacy:**
+all five are live, routed, fully built (`/buyers/family-offices`, `-independent-sponsors`,
+`-searchers`, `-operators`, `-pe-firms`), each carrying a tailored engagement walkthrough
+and deliverables grid. **The LIVE landing links to them right now** — the Who-it's-for
+rows are real links, fixed on 2026-08-02 after Paul's "These links don't go anywhere."
+The new design's Who cards link only to `#cta` and `#sectors`, so **shipping the design
+verbatim orphans five live pages and undoes that fix.**
+*Default: wire the new Who cards to the five pages — a one-line deviation that keeps the
+design's layout exactly and preserves the destinations. Say the word if you would rather
+retire those pages instead.*
 
 **Q6 — Getting started as its own section.**
 This morning you asked for it to be *part of* How it Works, and I folded it in. The
