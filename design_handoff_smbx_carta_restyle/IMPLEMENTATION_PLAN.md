@@ -388,12 +388,19 @@ dedup; all fixed except the content items listed for Paul below.
    /industries block; /industries has "Commercial mechanical…" missing from
    the board). Known gap in lanes.ts — needs your thesis copy, not
    improvisation.
-2. About says "10 YEARS" at Wrench Group; Track Record says "2016–2025 ·
-   over nine years" — both verbatim from the handoff, and they disagree.
+2. ~~About "10 YEARS" vs Track Record "2016–2025 · over nine years"~~ —
+   RESOLVED 2026-08-07: Paul updated the handoff himself and directed "use
+   what is in the handoff". Both pages verified character-exact against his
+   upload (About: 10 YEARS ×2; Track Record: 2016–2025 / 2005–2015 /
+   2010–2011, "Over nine years… 36 acquisitions… $2.9B"). The figures stand
+   as he wrote them.
 3. The Why-us card's "the operator who closed the 150" is handoff copy that
    sits badly against the "never unqualified closed" rule.
-4. The Privacy page's copy is February-2026 product-era (names Yulia,
-   promises "your deal room"/"delete your account") — restyled but not
-   rewritten; a privacy notice rewrite is yours.
+4. ~~Privacy page product-era copy~~ — RESOLVED 2026-08-07: Paul's "How is
+   there still copy from the old product pages" authorized the rewrite.
+   Privacy.tsx now describes the practice site's actual mechanics (engine +
+   owner valuation, Google sign-in name/email, reader cookie, removal
+   rights), aligned with the Terms data story; Last-updated bumped to
+   August 7, 2026. No public surface speaks product-era language any more.
 5. `server/services/postcardFiller.ts` still instructs employer
    anonymization (flagged previously, still open).
