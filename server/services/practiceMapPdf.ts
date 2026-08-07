@@ -48,7 +48,7 @@ function mapHtml(map: IntakeMap, generatedAt: string): string {
         <div class="l">${esc(s.label)}</div>
       </div>`,
     )
-    .join('<div class="arrow">&darr;</div>');
+    .join('');
 
   const section = (label: string, body: string) =>
     body
@@ -76,13 +76,14 @@ function mapHtml(map: IntakeMap, generatedAt: string): string {
   .headmeta::before { content: ''; width: 6px; height: 6px; background: ${CARTA.bone}; }
   .title { margin-top: 26px; font-family: 'Source Serif 4', Georgia, serif; font-size: 27px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.16; }
   .thesis { margin-top: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.05em; color: ${CARTA.muted}; }
-  .answer { margin-top: 20px; border-left: 3px solid ${CARTA.green}; padding: 10px 0 10px 16px; font-size: 13.5px; font-weight: 700; line-height: 1.45; }
-  .funnel { margin-top: 26px; border-top: 1px solid ${CARTA.hair}; border-bottom: 1px solid ${CARTA.hair}; padding: 18px 0; }
+  .answer { margin-top: 20px; border-left: 3px solid ${CARTA.ink}; padding: 6px 0 6px 16px; }
+  .answer .k { font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${CARTA.green}; }
+  .answer .v { margin-top: 5px; font-size: 13.5px; font-weight: 700; line-height: 1.45; }
+  .funnel { margin-top: 26px; border-top: 1px solid ${CARTA.hair}; padding: 18px 0 6px; }
   .funnel .fk { font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${CARTA.green}; margin-bottom: 12px; }
-  .step { display: flex; align-items: baseline; gap: 16px; }
+  .step { display: flex; align-items: baseline; gap: 16px; padding: 5px 0; }
   .step .n { font-family: 'Source Serif 4', Georgia, serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em; min-width: 128px; }
   .step .l { font-size: 11.5px; color: ${CARTA.body}; }
-  .arrow { color: ${CARTA.green}; font-size: 13px; padding: 2px 0 2px 4px; }
   .sec { margin-top: 20px; }
   .sec .k { font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${CARTA.green}; }
   .sec .v { margin-top: 5px; font-size: 11.5px; line-height: 1.6; }
@@ -90,7 +91,7 @@ function mapHtml(map: IntakeMap, generatedAt: string): string {
   .insight .k { font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${CARTA.green}; }
   .insight .v { margin-top: 7px; font-size: 12.5px; font-weight: 600; line-height: 1.6; }
   .next { margin-top: 26px; border: 1px solid ${CARTA.ink}; padding: 16px 20px; }
-  .next .k { font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${CARTA.ink}; }
+  .next .k { font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.14em; color: ${CARTA.green}; }
   .next .v { margin-top: 6px; font-size: 11.5px; line-height: 1.6; }
   .foot { margin-top: 24px; padding-top: 12px; border-top: 1px solid ${CARTA.hair}; font-family: 'IBM Plex Mono', monospace; font-size: 7.8px; letter-spacing: 0.06em; line-height: 1.7; color: ${CARTA.muted}; }
 </style>
@@ -102,7 +103,7 @@ function mapHtml(map: IntakeMap, generatedAt: string): string {
   </div>
   <div class="title">${esc(map.title)}</div>
   <div class="thesis">${esc(map.thesis)}</div>
-  ${pushback && map.answer ? `<div class="answer">${esc(map.answer)}</div>` : ''}
+  ${pushback && map.answer ? `<div class="answer"><div class="k">STRAIGHT ANSWER</div><div class="v">${esc(map.answer)}</div></div>` : ''}
   <div class="funnel">
     <div class="fk">${pushback ? 'THE EVIDENCE' : 'THE UNIVERSE'}</div>
     ${funnel}

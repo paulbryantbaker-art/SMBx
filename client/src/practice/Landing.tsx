@@ -232,14 +232,14 @@ function ProofBand() {
   const plate = { margin: '20px auto 0', display: 'table', background: '#22261F', color: '#D7DBD2', fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.1em', padding: '6px 10px' } as const;
   const cell = { background: '#131512', padding: '44px 30px 40px', textAlign: 'center' } as const;
   return (
-    <section id="proof" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(120px, 10vw, 170px) 32px clamp(120px, 10vw, 180px)' }}>
+    <section id="proof" className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(120px, 10vw, 170px) 32px clamp(120px, 10vw, 180px)' }}>
       <div style={{ maxWidth: 1360, margin: '0 auto' }}>
         <div data-rv><Kicker dark center>TWO DECADES ON THE BUY SIDE</Kicker></div>
         <div ref={ref} data-rv className="rv-stagger" data-stats-grid style={{ marginTop: 'clamp(58px, 5vw, 84px)', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: '#2A2E29', border: '1px solid #2A2E29', position: 'relative' }}>
           <Handles color="#F4F5F1" />
           <div style={cell}>
             <div data-count="150" style={num}>150+</div>
-            <div style={plate}>ACQUISITIONS CLOSED</div>
+            <div style={plate}>ACQUISITIONS &amp; INTEGRATIONS</div>
           </div>
           <div style={cell}>
             <div data-count="5" style={num}>$5B+</div>
@@ -556,7 +556,7 @@ export default function Landing() {
                   style={{ fontSize: 14.5, color: '#0A7A58', borderBottom: '1px solid #0A7A58', paddingBottom: 2 }}
                   onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-offering-pdf' })}
                 >
-                  Take this with you — the smbxCorpDev offering (PDF)
+                  Take this with you — the smbXCorpDev offering (PDF)
                 </a>
               </div>
             </div>
@@ -564,7 +564,7 @@ export default function Landing() {
         </section>
 
         {/* ══ PRICING — dark band ══ */}
-        <section id="pricing" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(120px, 10vw, 170px) 32px', marginTop: 'clamp(110px, 10vw, 170px)', position: 'relative' }}>
+        <section id="pricing" className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(120px, 10vw, 170px) 32px', marginTop: 'clamp(110px, 10vw, 170px)', position: 'relative' }}>
           <div aria-hidden="true" data-plx="0.02" style={{ position: 'absolute', top: 40, right: '6%', width: 280, height: 190, backgroundImage: 'radial-gradient(rgba(168,240,206,.2) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 840, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
             <div data-rv><Kicker dark center>PRICING</Kicker></div>
@@ -637,7 +637,7 @@ export default function Landing() {
         </section>
 
         {/* ══ WHOSE SIDE — dark band ══ */}
-        <section style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(130px, 11vw, 180px) 32px', marginTop: 'clamp(110px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
+        <section className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(130px, 11vw, 180px) 32px', marginTop: 'clamp(110px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
           <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', left: '5%', bottom: 36, width: 300, height: 170, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
             <div data-rv><Kicker dark center>WHOSE SIDE WE'RE ON</Kicker></div>

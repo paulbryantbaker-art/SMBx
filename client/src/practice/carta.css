@@ -297,8 +297,23 @@
 .ca-foot-col a + a { margin-top: 11px; }
 .ca-foot-col a:hover { color: #A8F0CE; }
 
-/* ── Reduced motion: the marquee, orbit and caret stand still ── */
+/* ── Dark surfaces: keyboard focus must survive #131512 — the global ring
+      is ink, invisible there. Every inline-styled dark band and the footer
+      carry .ca-dark so the ring flips to bone. ── */
+.ca-dark :focus-visible { outline-color: #F4F5F1; }
+
+/* ── Engine chat: the opening line reads the same before and after the
+      first send — the 21px statement rule was pre-Carta chrome. ── */
+.ca-engine .pd-msgs .pd-msgrow:first-child .pd-bub-y {
+  font-size: 15.5px; font-weight: 400; letter-spacing: 0; line-height: 1.6; color: #4A4F54;
+}
+
+/* ── Reduced motion: the marquee, orbit and caret stand still (the orbit's
+      animation rides the child div, so target both), and the market map's
+      block-rise holds too ── */
 @media (prefers-reduced-motion: reduce) {
   .ca-marquee, [data-marquee] { animation: none !important; }
-  .ca-orbit { animation: none !important; }
+  .ca-orbit, .ca-orbit > div { animation: none !important; }
+  .ca-caret { animation: none !important; }
+  .pd-map > *, .pd-map .map-step { animation: none !important; }
 }

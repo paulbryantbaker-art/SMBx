@@ -71,9 +71,9 @@ export default function SegmentPage({ slug }: { slug: string }) {
           <div aria-hidden="true" data-plx="-0.02" style={{ position: 'absolute', left: '7%', top: 70, width: 110, height: 110, backgroundImage: 'radial-gradient(rgba(22,24,26,.14) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
           <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', right: '8%', top: 130, width: 90, height: 90, backgroundImage: 'radial-gradient(rgba(10,122,88,.22) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
           <nav data-hs="0" aria-label="Breadcrumb" style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.12em', color: '#7C8187' }}>
-            <Link href="/" style={{ color: '#0A7A58' }}>SMBX</Link>
+            <Link href="/" className="ca-h-deepgreen" style={{ color: '#0A7A58' }}>SMBX</Link>
             <span style={{ margin: '0 10px' }}>/</span>
-            <a href="/#who" style={{ color: '#0A7A58' }}>WHO IT'S FOR</a>
+            <a href="/#who" className="ca-h-deepgreen" style={{ color: '#0A7A58' }}>WHO IT'S FOR</a>
             <span style={{ margin: '0 10px' }}>/</span>
             <span style={{ color: '#16181A' }}>{seg.footerLabel.toUpperCase()}</span>
           </nav>
@@ -113,7 +113,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
         </section>
 
         {/* ══ THE PROBLEM — dark band ══ */}
-        <section style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(110px, 10vw, 160px) 32px', marginTop: 'clamp(60px, 6vw, 100px)', position: 'relative', overflow: 'hidden' }}>
+        <section className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(110px, 10vw, 160px) 32px', marginTop: 'clamp(60px, 6vw, 100px)', position: 'relative', overflow: 'hidden' }}>
           <div aria-hidden="true" data-plx="0.025" style={{ position: 'absolute', top: 44, right: '5%', width: 260, height: 160, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 1360, margin: '0 auto', position: 'relative' }}>
             <div data-rv><Kicker dark>THE PROBLEM</Kicker></div>
@@ -197,11 +197,11 @@ export default function SegmentPage({ slug }: { slug: string }) {
             </div>
             <div style={lightCell}>
               <div data-count="21" style={statNum}>~$21B</div>
-              <div style={statLabel}>IN TRANSACTION VALUE TOUCHED</div>
+              <div style={statLabel}>TRANSACTIONS TOUCHED</div>
             </div>
             <div style={{ background: '#131512', padding: '38px 28px 34px', textAlign: 'center' }}>
               <div style={{ ...statNum, color: '#A8F0CE' }}>0</div>
-              <div style={{ margin: '16px auto 0', display: 'table', background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.12em', padding: '5px 9px' }}>SELL-SIDE TRANSACTIONS. EVER.</div>
+              <div style={{ margin: '16px auto 0', display: 'table', background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.12em', padding: '5px 9px' }}>SELL-SIDE ENGAGEMENTS. EVER.</div>
             </div>
           </div>
           <p data-rv style={{ margin: '22px 0 0', fontSize: 15, lineHeight: 1.6, color: '#4A4F54' }}>

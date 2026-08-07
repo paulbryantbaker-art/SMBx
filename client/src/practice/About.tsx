@@ -7,7 +7,7 @@
  *
  * ATTRIBUTION LAW (2026-08-07, naming REVERSED): employers are NAMED —
  * Wrench Group · JPMorgan Chase · Deloitte Consulting — and the stat set is
- * the sanctioned one (150+ · $5B · $2B synergies). The italic shield line
+ * the sanctioned one (150+ · $5B+ · $2B synergies). The italic shield line
  * rides directly under the tenure rows, verbatim from the reference. Do not
  * merge in deal names or figures from any other source.
  */
@@ -42,7 +42,7 @@ export default function About() {
           <div aria-hidden="true" data-plx="-0.02" style={{ position: 'absolute', left: '7%', top: 70, width: 110, height: 110, backgroundImage: 'radial-gradient(rgba(22,24,26,.14) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
           <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', right: '8%', top: 130, width: 90, height: 90, backgroundImage: 'radial-gradient(rgba(10,122,88,.22) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
           <nav data-hs="0" aria-label="Breadcrumb" style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.12em', color: '#7C8187' }}>
-            <Link href="/" style={{ color: '#0A7A58' }}>SMBX</Link>
+            <Link href="/" className="ca-h-deepgreen" style={{ color: '#0A7A58' }}>SMBX</Link>
             <span style={{ margin: '0 10px' }}>/</span>
             <span style={{ color: '#16181A' }}>ABOUT</span>
           </nav>
@@ -69,7 +69,7 @@ export default function About() {
         </section>
 
         {/* ══ WHAT WE BELIEVE — dark band ══ */}
-        <section style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(120px, 10vw, 170px) 32px', marginTop: 'clamp(100px, 9vw, 160px)', position: 'relative', overflow: 'hidden' }}>
+        <section className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(120px, 10vw, 170px) 32px', marginTop: 'clamp(100px, 9vw, 160px)', position: 'relative', overflow: 'hidden' }}>
           <div aria-hidden="true" data-plx="0.025" style={{ position: 'absolute', top: 44, right: '5%', width: 260, height: 160, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 1360, margin: '0 auto', position: 'relative' }}>
             <div data-rv><Kicker dark>WHAT WE BELIEVE</Kicker></div>
@@ -104,7 +104,7 @@ export default function About() {
             <div data-rv>
               <p style={{ margin: '6px 0 0', fontSize: 19, lineHeight: 1.6, color: '#16181A', fontWeight: 500, maxWidth: '26em' }}>Two decades as a deal captain — the person accountable for a transaction from the first conversation to the day it is fully integrated.</p>
               <div style={{ marginTop: 40, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 26, borderTop: '1px solid #E4DFD3', paddingTop: 28 }}>
-                {[['150+', 'ACQUISITIONS & INTEGRATIONS'], ['$5B', 'ENTERPRISE VALUE ADDED'], ['$2B', 'SYNERGIES CAPTURED']].map(([n, l]) => (
+                {[['150+', 'ACQUISITIONS & INTEGRATIONS'], ['$5B+', 'ENTERPRISE VALUE ADDED'], ['$2B', 'SYNERGIES CAPTURED']].map(([n, l]) => (
                   <div key={l}>
                     <div style={{ fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(40px, 3.4vw, 58px)', lineHeight: 1, letterSpacing: '-0.02em' }}>
                       {n}<span style={{ display: 'block', height: 4, width: 52, background: '#0A7A58', marginTop: 10 }} />

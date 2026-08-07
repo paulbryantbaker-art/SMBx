@@ -20,11 +20,11 @@ export function LegalFrame({ crumb, title, children }: { crumb: string; title: s
       <main style={{ background: '#FCFAF6', overflow: 'clip' }}>
         <section style={{ maxWidth: 820, margin: '0 auto', padding: 'clamp(80px, 8vw, 130px) 32px clamp(100px, 10vw, 160px)' }}>
           <nav data-hs="0" aria-label="Breadcrumb" style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.12em', color: '#7C8187' }}>
-            <Link href="/" style={{ color: '#0A7A58' }}>SMBX</Link>
+            <Link href="/" className="ca-h-deepgreen" style={{ color: '#0A7A58' }}>SMBX</Link>
             <span style={{ margin: '0 10px' }}>/</span>
             <span style={{ color: '#16181A' }}>{crumb}</span>
           </nav>
-          <h1 data-hs="1" style={{ margin: '26px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(36px, 3.8vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.013em' }}>{title}</h1>
+          <h1 data-hs="1" style={{ margin: '30px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(36px, 3.8vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.013em' }}>{title}</h1>
           <div data-hs="2" style={{ marginTop: 'clamp(32px, 4vw, 48px)', fontSize: 15.5, lineHeight: 1.7, color: '#4A4F54', display: 'flex', flexDirection: 'column', gap: 28 }}>
             {children}
           </div>
@@ -88,7 +88,7 @@ export default function Terms() {
       </div>
 
       <p style={{ margin: 0, fontSize: 13.5, color: '#7C8187' }}>
-        Questions or removal requests: use the contact in this site's footer. Our privacy notice
+        Questions or removal requests: hello@smbx.ai. Our privacy notice
         is at <a href="/legal/privacy" className="ca-h-deepgreen" style={{ color: '#0A7A58', borderBottom: '1px solid #0A7A58', paddingBottom: 1 }}>/legal/privacy</a>.
       </p>
     </LegalFrame>

@@ -234,6 +234,12 @@ export function MapDoc({
 
   return (
     <div className="pd-map">
+      {/* The corner handles — the deliverable wears the same frame device as
+          the landing's sample of it (.pd-map is position:relative). */}
+      <span aria-hidden="true" style={{ position: 'absolute', top: -4, left: -4, width: 8, height: 8, background: '#16181A' }} />
+      <span aria-hidden="true" style={{ position: 'absolute', top: -4, right: -4, width: 8, height: 8, background: '#16181A' }} />
+      <span aria-hidden="true" style={{ position: 'absolute', bottom: -4, left: -4, width: 8, height: 8, background: '#16181A' }} />
+      <span aria-hidden="true" style={{ position: 'absolute', bottom: -4, right: -4, width: 8, height: 8, background: '#16181A' }} />
       <div className="map-head" style={rise()}>
         <img src="/logo-green-x.png" alt="smbX.ai" style={{ height: 22, width: 'auto', display: 'block' }} />
         <span className="map-label">{headLabel || `PRELIMINARY MARKET READ · ${DOC_DATE.toUpperCase()}`}</span>

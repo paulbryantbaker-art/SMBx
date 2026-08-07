@@ -341,3 +341,59 @@ fixed or dispositioned:
 **Found outside the audit's scope, flagged for a later pass:**
 `server/services/postcardFiller.ts` still INSTRUCTS employer anonymization in its
 prompt — it will generate non-compliant copy under the reversed attribution law.
+
+---
+
+## CONSISTENCY AUDIT + 1–4 CONVERSION (2026-08-07, "fix ALL of the small things… NO INCONSISTENCIES")
+
+A 12-agent adversarial pass over every visitor-reachable surface (segments,
+report surface + subcomponents, legal/shell seams, map page-vs-PDF parity,
+the owner flow, and a cross-site sweep) confirmed ~45 distinct issues after
+dedup; all fixed except the content items listed for Paul below.
+
+**The systemic fixes:**
+- **One stat strip everywhere.** The sanctioned labels (ACQUISITIONS &
+  INTEGRATIONS · ENTERPRISE VALUE ADDED · TRANSACTIONS TOUCHED · SELL-SIDE
+  ENGAGEMENTS. EVER.) now render identically on the landing proof band,
+  /track-record, and every segment page — the landing's "ACQUISITIONS
+  CLOSED" (an attribution-law violation the handoff shipped) and About's
+  bare "$5B" are gone.
+- **Keyboard focus survives dark surfaces.** Every dark band and the footer
+  carry .ca-dark; the focus ring flips to bone there (it was ink-on-black,
+  1.02:1 — invisible on ~20 footer links per page).
+- **The button law, fully enforced.** The report resume action and Contents
+  FAB, the owner flow's delete button and Google gate, and the mobile-menu
+  CTA all rest ink/bone now; the owner end-card lost its brass keyline and
+  radius; OwnerChat's send is the same ↑ square as the buyer engine.
+- **#cta resolves correctly on every route.** The Research index recovered
+  the reference's id="cta"; report pages keep readers on their own closing
+  band; the mobile menu agrees with the desktop nav on label, order, and
+  destination.
+- **The 761–1024px double-chrome bug** (desktop links AND burger both
+  visible) is gone — the burger now wakes exactly where the links hide.
+- **Map parity:** page and PDF agree on the answer rail, funnel treatment,
+  and kicker voice; the live map wears the corner handles its own
+  advertisement carries; reduced-motion now stills the orbit and map rises.
+- **Dead code that invited regressions deleted:** PageCrumb + .pd-crumb, the
+  orphaned sample-read map classes, the pre-Carta owners-section rules, the
+  .rp-cta trio, stale "brass" comments.
+- Legal pages joined pageMeta (own tab titles); Terms' contact line points
+  at hello@smbx.ai instead of a footer contact that doesn't exist;
+  breadcrumbs hover site-wide; report masthead spacing, kicker size, "By
+  the numbers" grammar, placeholder tokens, and the error treatment unified.
+
+**FOR PAUL — content calls the audit surfaced that are not mine to make:**
+1. The landing's 15 hunt-board lanes and /industries' 15 theses are
+   DIFFERENT SETS (landing has "Landscaping & hardscaping" with no
+   /industries block; /industries has "Commercial mechanical…" missing from
+   the board). Known gap in lanes.ts — needs your thesis copy, not
+   improvisation.
+2. About says "10 YEARS" at Wrench Group; Track Record says "2016–2025 ·
+   over nine years" — both verbatim from the handoff, and they disagree.
+3. The Why-us card's "the operator who closed the 150" is handoff copy that
+   sits badly against the "never unqualified closed" rule.
+4. The Privacy page's copy is February-2026 product-era (names Yulia,
+   promises "your deal room"/"delete your account") — restyled but not
+   rewritten; a privacy notice rewrite is yours.
+5. `server/services/postcardFiller.ts` still instructs employer
+   anonymization (flagged previously, still open).

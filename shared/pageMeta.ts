@@ -85,6 +85,18 @@ const STATIC_PAGES: PageMeta[] = [
       'Selected transactions led or co-led by Paul Baker while employed at Wrench Group and JPMorgan Chase — completed by those firms, not smbX engagements.',
   },
   {
+    path: '/legal/terms',
+    title: `Terms of use | ${SITE}`,
+    description:
+      "The terms for this site's tools — the market-map engine and the owner valuation: what you share with them, and what their outputs are and are not.",
+  },
+  {
+    path: '/legal/privacy',
+    title: `Privacy policy | ${SITE}`,
+    description:
+      'What smbx.ai collects, how it is used, and your rights — including removal at any time.',
+  },
+  {
     path: '/research',
     title: `Research — published market assessments | ${SITE}`,
     description:

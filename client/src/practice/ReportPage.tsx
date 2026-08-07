@@ -233,10 +233,10 @@ export default function ReportPage({ slug }: { slug: string }) {
         <header className="rp-head">
           <div className="pd-wrap rp-head-in">
             {/* The Carta mono breadcrumb (the About-page grammar). */}
-            <nav aria-label="Breadcrumb" style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, letterSpacing: '0.12em', color: '#7C8187', marginBottom: 'clamp(18px, 2.6vw, 32px)' }}>
-              <Link href="/" style={{ color: '#0A7A58' }}>SMBX</Link>
+            <nav aria-label="Breadcrumb" style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, letterSpacing: '0.12em', color: '#7C8187' }}>
+              <Link href="/" className="ca-h-deepgreen" style={{ color: '#0A7A58' }}>SMBX</Link>
               <span style={{ margin: '0 10px' }}>/</span>
-              <Link href="/research" style={{ color: '#0A7A58' }}>RESEARCH</Link>
+              <Link href="/research" className="ca-h-deepgreen" style={{ color: '#0A7A58' }}>RESEARCH</Link>
               <span style={{ margin: '0 10px' }}>/</span>
               <span style={{ color: '#16181A' }}>{report.shortTitle.toUpperCase()}</span>
             </nav>
@@ -325,7 +325,7 @@ export default function ReportPage({ slug }: { slug: string }) {
         </div>
 
         {/* ── the ask — the dark band the Research index also closes on ── */}
-        <section id="cta" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(110px, 10vw, 160px) 32px', marginTop: 'clamp(70px, 8vw, 120px)', position: 'relative', overflow: 'hidden' }}>
+        <section id="cta" className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(110px, 10vw, 160px) 32px', marginTop: 'clamp(70px, 8vw, 120px)', position: 'relative', overflow: 'hidden' }}>
           <div aria-hidden="true" data-plx="0.025" style={{ position: 'absolute', right: '6%', bottom: 30, width: 260, height: 150, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 840, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
             <h2 data-rv style={{ margin: 0, fontFamily: "'Source Serif 4', Georgia, serif", fontWeight: 550, fontSize: 'clamp(34px, 3.6vw, 58px)', lineHeight: 1.1, letterSpacing: '-0.014em' }}>Buying in this market?</h2>

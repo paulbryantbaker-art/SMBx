@@ -515,18 +515,9 @@
    rather than inside its first column: text-align centers within the
    element's box, and a column-width box would read as off-centre on desktop. */
 .pd-dark .pd-seclabel { color: var(--pd-brass); text-align: center; }
-/* Page locator — a breadcrumb in the coral label voice, top of each subpage
-   hero, so a visitor always knows which page they're on (Paul, 2026-07-14).
-   Parent is a link back to its section/home; the current page reads in ink. */
-.pd-crumb {
-  display: inline-flex; align-items: center; gap: 11px;
-  font-size: 15px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
-  margin: 0 0 22px;
-}
-.pd-crumb a { color: var(--pd-coral-link); text-decoration: none; padding-block: 3px; }
-.pd-crumb a:hover { text-decoration: underline; text-underline-offset: 3px; }
-.pd-crumb .sep { color: var(--pd-tert); font-weight: 500; }
-.pd-crumb .here { color: var(--pd-ink); }
+/* .pd-crumb DELETED 2026-08-07 — every page now renders the Carta mono
+   breadcrumb inline (About grammar); the old uppercase green crumb would
+   clash beside it. */
 /* Lede — the single deck paragraph under a hero or an H2. */
 .pd-sub { font-size: 22px; line-height: 1.55; color: var(--pd-body); max-width: 34em; }
 /* Body — THE default reading paragraph, everywhere. 18px at #6A6A6A holds AA
@@ -739,7 +730,7 @@
    row entirely). The full nav needs ~1240px; landscape phones and portrait
    tablets live at 760–1024. So the burger owns everything to 1024, and a
    compact desktop cut (below) covers 1025–1240. */
-@media (max-width: 1024px) {
+@media (max-width: 760px) {
   .pd-nav-links, .pd-nav-book { display: none; }
   .pd-nav-ctas .pd-pill-primary { display: none; }
   .pd-nav-logo { height: 30px; }
@@ -1346,6 +1337,7 @@
 .pd-map {
   /* CARTA (2026-08-07): square document card, serif numerals, green mono
      kickers — the landing sample read's grammar, live. */
+  position: relative;
   width: 100%;
   background: #ffffff;
   border: 1px solid var(--pd-ink);
@@ -1356,7 +1348,6 @@
 }
 .pd-map > * { animation: pd-rise 260ms ease both; }
 .pd-map .map-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--pd-hair); }
-.pd-map .map-mark { font-weight: 800; font-size: 15px; letter-spacing: -0.02em; color: var(--pd-ink); }
 .pd-map .map-label { display: inline-flex; align-items: center; gap: 7px; background: #0A7A58; color: #FCFAF6; font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.12em; padding: 5px 9px; text-align: right; }
 .pd-map .map-label::before { content: ''; width: 7px; height: 7px; background: #FCFAF6; flex: none; }
 .pd-map .map-title { margin-top: 18px; font-family: var(--pd-display); font-size: clamp(22px, 2.6vw, 30px); font-weight: 600; letter-spacing: -0.01em; line-height: 1.12; color: var(--pd-ink); }
@@ -1388,31 +1379,7 @@
 .pd-map .map-pdf:disabled { opacity: 0.55; cursor: default; }
 /* Rebuilt sample read (Paul, 2026-07-15): counts compress to one setup strip;
    the payoff is judgment — the 9, the screens, the dollar swing, the verdict. */
-.pd-map .map-flow { margin-top: 22px; border-top: 1px solid var(--pd-hair); padding-top: 18px; display: flex; align-items: baseline; gap: 10px 14px; flex-wrap: wrap; }
-.pd-map .map-flow .k { flex-basis: 100%; font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #0A7A58; }
-.pd-map .map-flow .f { display: flex; align-items: baseline; gap: 8px; }
-.pd-map .map-flow .f .n { font-family: var(--pd-display); font-size: 24px; font-weight: 600; letter-spacing: -0.01em; color: var(--pd-ink); white-space: nowrap; }
-.pd-map .map-flow .f .l { font-size: 13.5px; line-height: 1.4; color: var(--pd-body); }
-.pd-map .map-flow .arr { color: var(--pd-faint); font-weight: 700; }
-.pd-map .map-nine { margin-top: 16px; display: flex; align-items: center; gap: 22px; }
-.pd-map .map-nine .n { font-family: var(--pd-display); font-size: clamp(60px, 7.5vw, 96px); font-weight: 550; letter-spacing: -0.02em; line-height: 0.9; color: var(--pd-ink); }
-.pd-map .map-nine .l { font-size: 16.5px; font-weight: 600; line-height: 1.5; color: var(--pd-ink); max-width: 24em; }
-.pd-map .map-screens { margin-top: 28px; }
-.pd-map .map-screens .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #0A7A58; }
-.pd-map .map-scr { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 4px 14px; padding: 15px 0; }
-.pd-map .map-scr + .map-scr { border-top: 1px solid var(--pd-hair); }
-.pd-map .map-scr .i { grid-row: 1 / 3; font-family: var(--pd-mono); font-size: 13px; color: var(--pd-tert); padding-top: 3px; }
-.pd-map .map-scr .t { font-size: 16px; font-weight: 700; color: var(--pd-ink); }
-.pd-map .map-scr .b { font-size: 14.5px; line-height: 1.6; color: var(--pd-body); }
-.pd-map .map-number { margin-top: 24px; position: relative; background: #131512; border-radius: 0; padding: 24px 26px; background-image: radial-gradient(rgba(168, 240, 206, 0.16) 1px, transparent 1px); background-size: 14px 14px; }
-.pd-map .map-number .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #A8F0CE; }
-.pd-map .map-number .big { margin-top: 10px; font-family: var(--pd-display); font-size: clamp(40px, 5vw, 60px); font-weight: 550; letter-spacing: -0.02em; line-height: 1; color: #A8F0CE; }
-.pd-map .map-number .v { margin-top: 12px; font-size: 15px; line-height: 1.65; color: #D7DBD2; }
-.pd-map .map-number .v strong { color: #F4F5F1; }
-.pd-map .map-verdict { margin-top: 24px; border-left: 3px solid #0A7A58; padding: 4px 0 4px 18px; }
-.pd-map .map-verdict .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #0A7A58; }
-.pd-map .map-verdict .v { margin-top: 7px; font-size: 16px; font-weight: 600; line-height: 1.6; color: var(--pd-ink); }
-@media (max-width: 640px) { .pd-map .map-nine { gap: 16px; } .pd-map .map-nine .l { font-size: 15px; } }
+@media (max-width: 640px) {   }
 
 
 /* One unified input bar — borderless field + send inside a single container.
@@ -2592,49 +2559,27 @@
    inline in the section at every width. Everything INSIDE is the real chat
    grammar: .pd-chat-head, .pd-msgs, .pd-bub, .pd-chips, .pd-chat-inputrow.
    Spacing keeps the φ ladder: 16 · 26 · 42 · 68. ═══ */
-/* The buyer-lens explainer cards in the #owners section — hairline cards on
-   the landing grammar, text only (the trades already carry the section's
-   art budget elsewhere on the page). */
-.pd .ow-think {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px;
-  margin-top: 42px;
-}
-.pd .ow-card-th {
-  background: #fff; border: 1px solid var(--pd-hair); border-radius: 16px;
-  padding: 26px;
-}
-.pd .ow-card-th .k { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; color: var(--pd-ink); }
-.pd .ow-card-th .b { margin-top: 16px; font-size: 15px; line-height: 1.65; color: var(--pd-body); }
-@media (max-width: 900px) { .pd .ow-think { grid-template-columns: 1fr; gap: 16px; } }
-/* The hand-off line between the explainer and the picker. */
-.pd .ow-pick {
-  margin: 68px auto 0; max-width: 40em; text-align: center;
-  font-size: 17px; line-height: 1.65; color: var(--pd-body);
-}
-/* The trade picker in the #owners section — the site's own chips, centered.
-   A tap dispatches smbx:open-owner and the ONE conversation card up top
-   swaps to the valuation brain (no second chat exists anywhere). */
-.pd .ow-lanes {
-  display: flex; flex-wrap: wrap; justify-content: center; gap: 9px;
-  max-width: 940px; margin: 26px auto 0;
-}
+/* The pre-Carta #owners-section rules (.ow-think/.ow-card-th/.ow-pick/
+   .ow-lanes/.ow-disc) were DELETED 2026-08-07: the landing owners section is
+   transcribed inline with .ca-lanechip, and the rounded cards these styled
+   would be off-language if anything revived them. */
 /* The Google gate — GIS renders its own button; we give it a centered row. */
-.pd .ow-gate { display: flex; align-items: center; gap: 14px; padding: 12px 32px 0; flex-wrap: wrap; }
+.pd .ow-gate { display: flex; align-items: center; gap: 14px; padding: 12px 20px 0; flex-wrap: wrap; }
 .pd .ow-gbtn { min-height: 44px; }
 .pd .ow-or { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.09em; color: var(--pd-tert); text-transform: uppercase; }
 /* Acceptance — ONE button (2026-08-04 evening, Paul: "they accept a minimal
    amount of data collection… at the end I'll show them" — the checkbox pair
    moved to the post-delivery keep-or-delete card below). The message above
    the button carries the promise; the tap is the acceptance. */
-.pd .ow-consent { display: flex; flex-direction: column; gap: 14px; padding: 16px 32px 28px; }
+.pd .ow-consent { display: flex; flex-direction: column; gap: 14px; padding: 16px 20px 28px; }
 .pd .ow-build { align-self: flex-start; margin-top: 4px; }
 /* The end card — the truthful inventory of what's on file, then the owner's
-   decision. Brass keyline like the page's privacy block: same promise, same
-   material. The delete action is a REAL button, styled quiet but never
+   decision. Green keyline — the notice rail the reports also use: same
+   promise, same material. The delete action is a REAL button, never
    hidden — the right to erasure isn't fine print. */
 .pd .ow-onfile {
-  margin: 6px 32px 28px; border: 1px solid var(--pd-border); border-left: 3px solid var(--pd-brass);
-  border-radius: 14px; background: #fff; padding: 20px 24px 22px;
+  margin: 6px 20px 28px; border: 1px solid var(--pd-border); border-left: 3px solid #0A7A58;
+  border-radius: 0; background: #fff; padding: 20px 24px 22px;
 }
 .pd .ow-onfile .k { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; color: var(--pd-ink); }
 .pd .ow-onfile dl { margin: 12px 0 0; }
@@ -2643,13 +2588,13 @@
 .pd .ow-onfile dd { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--pd-ink); }
 .pd .ow-decide { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 18px; }
 .pd .ow-erase {
-  background: none; border: 1px solid var(--pd-border); border-radius: 999px;
-  padding: 12px 22px; font-size: 14px; font-weight: 600; color: var(--pd-body); cursor: pointer;
-  transition: border-color 150ms ease, color 150ms ease;
+  background: none; border: 1.5px solid var(--pd-ink); border-radius: 10px;
+  padding: 11px 22px; font-size: 14px; font-weight: 500; color: var(--pd-ink); cursor: pointer;
+  transition: border-color 150ms ease, background-color 150ms ease;
 }
-.pd .ow-erase:hover { border-color: #16181A; color: #16181A; }
-.pd .ow-erase:disabled, .pd .ow-decide .pd-pill-primary:disabled { opacity: 0.55; cursor: default; }
-.pd .ow-doneline { padding: 14px 32px 26px; font-size: 15px; color: var(--pd-body); }
+.pd .ow-erase:hover { background: #F3F0E9; }
+.pd .ow-erase:disabled, .pd .pd-pill-primary:disabled, .pd .pd-pill:disabled { opacity: 0.55; cursor: default; }
+.pd .ow-doneline { padding: 14px 20px 26px; font-size: 15px; color: var(--pd-body); }
 /* Standing disclaimer under the card — THE LINE's sentence, on the page
    itself, not only inside the PDF. */
 .pd .ow-disc {

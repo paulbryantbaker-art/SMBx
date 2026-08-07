@@ -56,13 +56,12 @@
 .rp-head { padding-top: clamp(28px, 4vw, 56px); }
 .rp-head-in { display: flex; flex-direction: column; align-items: flex-start; }
 
-/* The one band-title voice (Paul, 2026-08-03: "same font every[where]") —
-   the report kicker was the last mono holdout; it now speaks .pd-seclabel's
-   header-weight Inter, sized a step down for the masthead and cards. */
+/* The masthead kicker is the Carta green chip — mono, uppercase, with the
+   7px white leading square (same device as the /research index cards). */
 .rp-kicker {
   display: inline-flex; align-items: center; gap: 7px;
   background: #0A7A58; color: #FCFAF6;
-  font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.12em;
+  font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.12em;
   text-transform: uppercase; font-weight: 400; padding: 5px 9px;
 }
 .rp-kicker::before { content: ''; width: 7px; height: 7px; background: #FCFAF6; }
@@ -109,10 +108,12 @@
 .rp-stats { padding-top: clamp(48px, 6vw, 84px); }
 .rp-stats-in { border-top: 2px solid var(--pd-ink); padding-top: 26px; }
 .rp-stats-h {
+  display: flex; align-items: center; gap: 8px;
   margin: 0 0 clamp(24px, 2.6vw, 34px);
-  font-family: var(--pd-mono); font-size: 13.5px; letter-spacing: 0.11em;
-  text-transform: uppercase; color: var(--pd-body); font-weight: 500;
+  font-family: var(--pd-mono); font-size: 12.5px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--pd-tert); font-weight: 400;
 }
+.rp-stats-h::before { content: ''; width: 8px; height: 8px; background: #0A7A58; flex: none; }
 .rp-stats-grid {
   display: grid; gap: clamp(26px, 3vw, 44px);
   grid-template-columns: repeat(auto-fit, minmax(238px, 1fr));
@@ -208,7 +209,7 @@
   transition: border-color 0.14s, box-shadow 0.14s;
   -webkit-appearance: none; appearance: none;
 }
-.rp-find-in::placeholder { color: var(--pd-tert); }
+.rp-find-in::placeholder { color: var(--pd-faint); }
 .rp-find-in:focus {
   outline: none; border-color: var(--pd-coral);
   box-shadow: 0 0 0 3px rgba(10, 122, 88, 0.12);
@@ -221,7 +222,7 @@
   position: absolute; right: 6px; width: 22px; height: 22px;
   display: grid; place-items: center;
   background: none; border: 0; cursor: pointer; padding: 0;
-  font-size: 17px; line-height: 1; color: var(--pd-tert); border-radius: 6px;
+  font-size: 17px; line-height: 1; color: var(--pd-tert); border-radius: 0;
 }
 .rp-find-x:hover { color: var(--pd-ink); background: var(--pd-card); }
 .rp-find-n {
@@ -253,8 +254,8 @@
 .rp-toc-a.lvl2.on { color: var(--pd-coral-link); }
 
 /* ═══ prose ══════════════════════════════════════════════════════════════ */
-/* Anchors clear the sticky nav when the TOC jumps to a section. */
-.rp-prose :is(h1, h2, h3) { scroll-margin-top: 104px; }
+/* (Anchor scroll-margins live above — 120px clears the sticky nav AND the
+   sheet's top padding; a duplicate 104px rule here used to override it.) */
 
 .rp-intro {
   max-width: var(--rp-measure); padding-bottom: clamp(26px, 3vw, 38px);
@@ -313,8 +314,8 @@
 .rp-prose ol li::marker { font-variant-numeric: tabular-nums; font-weight: 600; }
 
 /* A blockquote in a report is a NOTICE — a correction, a caveat, something the
-   reader must not skim past — NOT a decorative pull-quote. Same brass rail and
-   tint build-report.mts gives it, so the page and the PDF agree. */
+   reader must not skim past — NOT a decorative pull-quote. Green rail + green
+   tint, the Carta notice material. */
 .rp-prose blockquote {
   margin: 30px 0; padding: 16px 22px;
   border-left: 3px solid #0A7A58;
@@ -346,7 +347,7 @@
   border-radius: 0; border: 1px solid var(--pd-hair);
 }
 
-/* ── tables: hairline, mono headers, brass underline, tabular figures ──
+/* ── tables: hairline, mono headers, ink underline, tabular figures ──
    The report's registers are wide; they scroll INSIDE their own box so the
    page body never scrolls sideways. */
 .rp-tablewrap {
@@ -436,11 +437,18 @@
   font-family: inherit; font-size: 16px; color: var(--pd-ink);
   background: #fff; outline: none;
 }
+.rp-dl-input::placeholder { color: var(--pd-faint); }
 .rp-dl-input:focus { border-color: var(--pd-ink); }
+/* The border carries focus — the global ring would draw a second box (the
+   same rule every other text input on the site carries). */
+.rp-dl-input:focus-visible { outline: none; }
 .rp-dl-input[aria-invalid='true'] { border-color: #B3261E; }
 .rp-dl-go { flex: 0 0 auto; }
 .rp-dl-go:disabled { opacity: 0.6; cursor: default; }
-.rp-dl-err { margin: 0; font-size: 13.5px; color: #B3261E; }
+.rp-dl-err {
+  margin: 0; font-size: 13.5px; line-height: 1.55; color: #8A3B2F;
+  background: #FBEFEC; border: 1px solid #F0D8D2; padding: 10px 13px;
+}
 .rp-dl-fine { margin: 2px 0 0; font-size: 13.5px; color: var(--pd-tert); }
 
 /* Returning from a stale or already-used link. */
@@ -460,10 +468,10 @@
 }
 .rp-dl-again:hover { color: var(--pd-ink); }
 
-/* ═══ closing ask (the page's one dark movement) ═════════════════════════ */
-.rp-cta { margin-top: clamp(70px, 8vw, 120px); }
-.rp-cta-in { text-align: center; display: flex; flex-direction: column; align-items: center; }
-.rp-cta-p { margin: 20px auto clamp(30px, 3.4vw, 42px); max-width: 34em; }
+/* ═══ closing ask ════════════════════════════════════════════════════════
+   The dark booking band is built inline in ReportPage.tsx (the Research
+   index's grammar) — the old .rp-cta rules were deleted 2026-08-07 so
+   nothing re-adopts them against the live band. */
 
 /* ═══ place-keeper ═══════════════════════════════════════════════════════ */
 /* Small, dismissible, and it never moves the page on its own. */
@@ -472,17 +480,17 @@
   z-index: 55; display: flex; align-items: center; gap: 12px;
   padding: 11px 12px 11px 20px; max-width: calc(100vw - 32px);
   background: #131512; color: #F4F5F1;
-  border-radius: 10px; box-shadow: 0 12px 34px rgba(22, 24, 26, 0.34);
+  border-radius: 0; box-shadow: 0 12px 34px rgba(22, 24, 26, 0.34);
   animation: rp-rise 0.32s ease-out both;
 }
 @keyframes rp-rise { from { opacity: 0; transform: translate(-50%, 12px); } }
 .rp-resume-t { font-size: 14.5px; color: #D7DBD2; }
 .rp-resume-go {
-  background: #A8F0CE; color: #16181A; border: 0; cursor: pointer;
+  background: #FCFAF6; color: #16181A; border: 0; cursor: pointer;
   font: inherit; font-size: 14.5px; font-weight: 600;
   padding: 9px 18px; border-radius: 8px; white-space: nowrap;
 }
-.rp-resume-go:hover { background: #C2F5DC; }
+.rp-resume-go:hover { background: #A8F0CE; }
 .rp-resume-x {
   background: none; border: 0; cursor: pointer; color: #D7DBD2;
   font-size: 22px; line-height: 1; padding: 0 6px;
@@ -499,7 +507,11 @@
    gone. Only the not-found state below still renders from this scope. */
 .rp-missing { padding: clamp(80px, 12vw, 160px) 0 clamp(60px, 8vw, 100px); }
 .rp-missing .pd-body { margin-top: 16px; }
-.rp-missing a { color: var(--pd-coral-link); }
+.rp-missing a {
+  color: #0A7A58; font-weight: 600;
+  border-bottom: 1px solid #0A7A58; padding-bottom: 1px;
+}
+.rp-missing a:hover { color: #086348; }
 
 /* ═══ responsive ═════════════════════════════════════════════════════════ */
 @media (max-width: 1000px) {
@@ -515,9 +527,11 @@
     display: block; position: fixed; left: 16px; right: auto; bottom: 20px; z-index: 54;
     padding: 13px 22px; border: 0; cursor: pointer; font: inherit;
     font-size: 14.5px; font-weight: 600; border-radius: 10px;
-    background: #131512; color: #F4F5F1;
+    background: #16181A; color: #FCFAF6;
     box-shadow: 0 10px 28px rgba(22, 24, 26, 0.3);
+    transition: background 0.15s;
   }
+  .rp-toc-fab:hover { background: #0A7A58; }
   /* The place-keeper sits above the contents button rather than under it. */
   .rp-resume { bottom: 84px; }
 
@@ -678,7 +692,7 @@
 .rp-ask-s { margin-top: 3px; font-size: 12.5px; line-height: 1.5; color: var(--pd-body); }
 .rp-ask-x {
   flex: none; margin-left: auto; width: 28px; height: 28px;
-  display: grid; place-items: center; border: 0; border-radius: 8px;
+  display: grid; place-items: center; border: 0; border-radius: 0;
   background: none; cursor: pointer; font-size: 20px; line-height: 1; color: var(--pd-tert);
 }
 .rp-ask-x:hover { background: var(--pd-card); color: var(--pd-ink); }
@@ -720,6 +734,7 @@
   color: var(--pd-ink); background: #FCFAF6;
   border: 1.5px solid var(--pd-border); border-radius: 10px;
 }
+.rp-ask-in::placeholder { color: var(--pd-faint); }
 .rp-ask-in:focus {
   outline: none; border-color: #0A7A58; background: #fff;
   box-shadow: 0 0 0 3px rgba(10, 122, 88, 0.12);

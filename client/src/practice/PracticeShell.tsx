@@ -55,20 +55,9 @@ export function Kicker({ children, dark = false, center = false }: { children: R
   );
 }
 
-/** Page locator — kept for the surviving inner pages (segments). */
-export function PageCrumb({ parent, here }: { parent?: { label: string; href: string }; here: string }) {
-  return (
-    <nav className="pd-crumb" aria-label="Breadcrumb">
-      {parent && (
-        <>
-          <a href={parent.href}>{parent.label}</a>
-          <span className="sep" aria-hidden="true">/</span>
-        </>
-      )}
-      <span className="here" aria-current="page">{here}</span>
-    </nav>
-  );
-}
+/* PageCrumb DELETED 2026-08-07 — every page renders the Carta mono
+   breadcrumb inline (the About grammar); the old .pd-crumb rules went with
+   it so nothing revives the pre-Carta treatment by following a comment. */
 
 /** Walk the scroll to a landing anchor as the freshly-mounted page settles
  *  (2026-08-05, Paul: "build market map does not take me to the chat bar all
@@ -340,10 +329,10 @@ export default function PracticeShell({
   const onTrackRecord = loc === '/track-record';
   const onAbout = loc === '/about';
 
-  /* #cta resolves to the page's OWN CTA section where one exists (About and
-     the Research index carry a local #cta in the references; their nav/footer
-     consultation links point at it), and to the landing's otherwise. */
-  const hasLocalCta = onAbout || loc === '/research';
+  /* #cta resolves to the page's OWN CTA section where one exists (About,
+     the Research index, and every report detail page end on a local #cta
+     band), and to the landing's otherwise. */
+  const hasLocalCta = onAbout || onResearch;
   const ctaHref = home || hasLocalCta ? '#cta' : '/#cta';
 
   /* The footer varies per page in the references: Industries and Research
@@ -383,11 +372,14 @@ export default function PracticeShell({
             <Link href="/industries" className="ca-h-green" style={onIndustries ? navOnStyle : navLink} aria-current={onIndustries ? 'page' : undefined}>Industries</Link>
             <Link href="/research" className="ca-h-green" style={onResearch ? navOnStyle : navLink} aria-current={onResearch ? 'page' : undefined}>Research</Link>
             {/* The hover dropdown belongs to the LANDING nav only — the four
-                inner references render a plain link with no caret. */}
+                inner references render a plain link with no caret. On a
+                /buyers/* page the link wears the active treatment: it is the
+                segment pages' parent in the IA, and a fully dark nav there
+                read as "you are nowhere". */}
             {home ? (
               <WhoMenu anchor={anchor} />
             ) : (
-              <a href="/#who" className="ca-h-green" style={navLink}>Who it's for</a>
+              <a href="/#who" className="ca-h-green" style={loc.startsWith('/buyers/') ? navOnStyle : navLink} aria-current={loc.startsWith('/buyers/') ? 'page' : undefined}>Who it's for</a>
             )}
             <a href={anchor('#owners')} className="ca-h-green" style={navLink}>Free Valuation</a>
           </nav>
@@ -433,8 +425,8 @@ export default function PracticeShell({
         <a href={anchor('#how')} onClick={closeMenu}>How it works <span className="arr" aria-hidden>→</span></a>
         <Link href="/industries" onClick={closeMenu}>Industries <span className="arr" aria-hidden>→</span></Link>
         <Link href="/research" onClick={closeMenu}>Research <span className="arr" aria-hidden>→</span></Link>
-        <a href={anchor('#owners')} onClick={closeMenu}>Get Free Valuation <span className="arr" aria-hidden>→</span></a>
         <a href={anchor('#who')} onClick={closeMenu}>Who it's for <span className="arr" aria-hidden>→</span></a>
+        <a href={anchor('#owners')} onClick={closeMenu}>Free Valuation <span className="arr" aria-hidden>→</span></a>
         <a
           className="pd-mmenu-cta"
           href={anchor('#yulia')}
@@ -442,7 +434,7 @@ export default function PracticeShell({
         >
           Build your market map
         </a>
-        <a className="quiet" href={anchor('#cta')} onClick={() => { closeMenu(); trackEvent('practice_booking_clicked', { placement: 'mobile-menu' }); }}>Confidential consultation</a>
+        <a className="quiet" href={ctaHref} onClick={() => { closeMenu(); trackEvent('practice_booking_clicked', { placement: 'mobile-menu' }); }}>Confidential consultation</a>
       </nav>
 
       {children}
@@ -451,7 +443,7 @@ export default function PracticeShell({
              page: Industries/Research run compact (short blurb, no BUYERS,
              six-link FIRM), Track Record drops its self-link, and the pages
              that close on a dark band carry a hairline seam up top. ══ */}
-      <footer style={{ background: '#131512', color: '#F4F5F1', padding: '88px 32px 40px', borderTop: footSeam ? '1px solid #2A2E29' : undefined }}>
+      <footer className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: '88px 32px 40px', borderTop: footSeam ? '1px solid #2A2E29' : undefined }}>
         <div style={{ maxWidth: 1360, margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 44 }}>
             <div>
