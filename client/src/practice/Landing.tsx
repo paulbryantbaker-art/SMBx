@@ -76,6 +76,9 @@ const WHY: { nm: string; bd: string; more: string; xp: React.ReactNode }[] = [
   },
   {
     nm: 'Senior-only. No junior hand-off.',
+    // "the operator who closed the 150" is SANCTIONED verbatim (Paul,
+    // 2026-08-07: "150 is ok") — the audits flagged it against the
+    // never-unqualified-"closed" rule and he kept it. Do not soften it.
     bd: 'At a bank, a senior wins the mandate and juniors execute. Here, every deal is worked by the operator who closed the 150. The AI replaces the analyst pod — never the judgment.',
     more: 'WHAT THAT MEANS',
     xp: (

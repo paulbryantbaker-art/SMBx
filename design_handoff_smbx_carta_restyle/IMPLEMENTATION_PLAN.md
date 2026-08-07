@@ -383,19 +383,23 @@ dedup; all fixed except the content items listed for Paul below.
   the numbers" grammar, placeholder tokens, and the error treatment unified.
 
 **FOR PAUL — content calls the audit surfaced that are not mine to make:**
-1. The landing's 15 hunt-board lanes and /industries' 15 theses are
-   DIFFERENT SETS (landing has "Landscaping & hardscaping" with no
-   /industries block; /industries has "Commercial mechanical…" missing from
-   the board). Known gap in lanes.ts — needs your thesis copy, not
-   improvisation.
+1. ~~Lane registers disagree~~ — RESOLVED 2026-08-07 by Paul: "Landscape
+   and hardscape are ok" (the lane stands on the board without an
+   /industries block, deliberately — do not re-flag the asymmetry) and
+   "Add MEP" (Commercial mechanical, HVAC & plumbing joined HUNT_LANES,
+   thesis line verbatim from the /industries block's desk line, seated
+   after Home services to mirror the /industries adjacency). The board is
+   now sixteen lanes; the hero's "ALL n LANES" chip derives.
 2. ~~About "10 YEARS" vs Track Record "2016–2025 · over nine years"~~ —
    RESOLVED 2026-08-07: Paul updated the handoff himself and directed "use
    what is in the handoff". Both pages verified character-exact against his
    upload (About: 10 YEARS ×2; Track Record: 2016–2025 / 2005–2015 /
    2010–2011, "Over nine years… 36 acquisitions… $2.9B"). The figures stand
    as he wrote them.
-3. The Why-us card's "the operator who closed the 150" is handoff copy that
-   sits badly against the "never unqualified closed" rule.
+3. ~~"The operator who closed the 150"~~ — RESOLVED 2026-08-07 by Paul:
+   "150 is ok". The phrase is SANCTIONED verbatim on the Why-us card (a
+   comment above the copy in Landing.tsx records it) — future audits must
+   not re-flag or soften it.
 4. ~~Privacy page product-era copy~~ — RESOLVED 2026-08-07: Paul's "How is
    there still copy from the old product pages" authorized the rewrite.
    Privacy.tsx now describes the practice site's actual mechanics (engine +
