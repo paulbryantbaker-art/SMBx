@@ -379,6 +379,16 @@
 @media (max-width: 760px) { .pd-dark { --pd-curve: clamp(40px, 9vw, 68px); /* @kind spacing */ } }
 /* content clears the curved edges: curve height + breathing room */
 .pd-dark-pad { padding-top: calc(var(--pd-curve, 0px) + clamp(56px, 6.5vw, 110px)); padding-bottom: calc(var(--pd-curve, 0px) + clamp(56px, 6.5vw, 110px)); }
+/* The approach to a MID-PAGE block (2026-08-07 sales-journey reflow, Paul:
+   "between the 2 green bands there is a whole lot of space"). One class for
+   every band that follows a light section — the pricing and whose-side bands
+   both wear it — replacing per-band inline marginTop copies of the full
+   .pd-section gap. Tightened to the .pd-close scale because the band's own
+   transparent curve crest already supplies 52–112px of visual transition on
+   top of whatever margin sits here; blocks should interrupt the scroll, not
+   arrive at a distant station. (The proof band needs no approach — the hero
+   fold is sized so its crest crests AT the fold.) */
+.pd-dark-sect { margin-top: clamp(90px, 10vw, 150px); /* @kind spacing */ }
 .pd-dark a.pd-pill, .pd-dark a.pd-pill:hover { color: var(--pd-ink); }
 /* Secondary (outline) buttons on dark bands: the default #3D3D3D border is
    near-invisible on the texture (Paul, 2026-07-14: "secondary buttons on dark
@@ -1844,10 +1854,31 @@
 .pd-price-get button[disabled] { opacity: 0.6; cursor: default; }
 .pd-price-get.sent { font-size: 15px; font-weight: 600; color: var(--pd-coral); }
 .pd-price-get .err { margin-top: 12px; font-size: 14px; color: var(--pd-body); }
+/* The brochure ask on the JADE BAND (#pricing became the third block,
+   2026-08-07). .pd-dark re-scopes ink/body/tert/hair/coral-link/brass but
+   NOT --pd-coral — so without these two rules the "Sent" confirmation
+   renders Deal Green #0A7A58 on jade #0A6A4C (~1.1:1, invisible) and the
+   input keeps a hairline drawn for bone. Both are the renders-not-errors
+   trap the AURORA notes name: clean in a diff, silent in the browser. The
+   white input needs no border on the block (same call as .pd-dark
+   .pd-input); its Deal-Green focus border sits ON the white fill, so that
+   stays. */
+.pd-dark .pd-price-get input { border-color: transparent; }
+.pd-dark .pd-price-get.sent { color: var(--pd-ink); }
 @media (max-width: 860px) { .pd-pricing { grid-template-columns: 1fr; } }
 
 .pd-phases-close { max-width: 760px; margin: clamp(56px, 7vw, 88px) auto 0; text-align: center; }
 .pd-phases-close .strong { font-size: clamp(20px, 2.2vw, 26px); font-weight: 700; letter-spacing: -0.015em; line-height: 1.35; color: var(--pd-ink); margin: 26px auto 0; max-width: 24em; }
+/* Getting started — the sample read as a SUB-BLOCK of How it works
+   (2026-08-07, Paul: "the getting started should be part of How it Works
+   section"). A sub-section margin, deliberately smaller than .pd-section's
+   clamp(130px,15vw,220px), so the chapter reads process → proof → ask as
+   one movement with an internal beat — a full section gap here would keep
+   the sample rendering as the sibling section Paul asked to retire. Its
+   heading sits at the .pd-statement tier for the same reason. The nested
+   #sample anchor lost the section pad that used to clear the sticky nav,
+   so it carries its own scroll-margin (the practice.css:2250 pattern). */
+.pd-getting { margin-top: clamp(72px, 8.5vw, 124px); scroll-margin-top: 96px; }
 @media (max-width: 760px) {
   .pd-phase summary { grid-template-columns: 1fr auto; padding: 22px 2px; }
   .pd-phase .no { display: none; }
