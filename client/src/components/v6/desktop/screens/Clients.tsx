@@ -267,8 +267,14 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
           />
         </div>
 
-        {/* table */}
-        <div style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: 12, overflow: "hidden" }}>
+        {/* table. flex:"none" is LOAD-BEARING (2026-08-07, Paul's first real
+            board: "it does not scroll"): this card is a child of the column
+            flex scroll area, and its overflow:hidden (there for the rounded
+            corners) makes flexbox resolve its automatic minimum height to
+            ZERO — so instead of overflowing the scroller, the card SHRANK to
+            the window and silently clipped the rows. Invisible until the
+            seed put 35 firms on the board. */}
+        <div style={{ flex: "none", background: T.white, border: `1px solid ${T.border}`, borderRadius: 12, overflow: "hidden" }}>
           <div style={{
             padding: ROW_PAD, display: "flex", alignItems: "center", gap: 12,
             borderBottom: `1px solid ${T.border}`, background: T.surface,
