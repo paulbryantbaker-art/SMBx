@@ -1,12 +1,33 @@
 /**
  * Practice-site landing — v3, the Claude Design handoff (practiceSite/
- * bundle, implemented 2026-07-16). Section order: nav · hero (chat engine,
- * `.pd-hero-fold` so the proof band's curve crests at the fold, `.pd-heromesh`
- * dot-matrix behind the input) · dark proof band with count-up (#proof) ·
- * Why us evidence grid (#why) · 7-phase accordion (#how) · sample read
- * (#sample) · who-it's-for index (#who) · 12-sector teaser (#sectors) ·
- * whose-side band · booking CTA (#cta) · footer. Copy is Paul's approved
- * deck from the bundle — verbatim, do not rewrite here.
+ * bundle, implemented 2026-07-16; SALES-JOURNEY REFLOW 2026-08-07, see below).
+ * Section order: nav · hero (chat engine, `.pd-hero-fold` so the proof band's
+ * curve crests at the fold, `.pd-heromesh` dot-matrix behind the input) ·
+ * jade proof band with count-up (#proof) · Why us evidence grid (#why) ·
+ * How it works (#how — the 7 phases, then the Getting-started sample read
+ * as its closing movement, #sample kept as a live anchor, then the CTA
+ * cluster) · jade pricing band (#pricing) · who-it's-for index (#who) ·
+ * 12-sector teaser (#sectors) · jade whose-side band · owners (#owners) ·
+ * founder · booking CTA (#cta) · footer. Copy is Paul's approved deck from
+ * the bundle — verbatim, do not rewrite here.
+ *
+ * THE SALES-JOURNEY REFLOW (2026-08-07, Paul: "between the 2 green bands
+ * there is a whole lot of space and the sections kind of run together…
+ * the getting started should be part of How it Works… add a green to break
+ * up monotony where it makes sense… the pricing section is just stuck on
+ * the page somewhere"). The page is now built for the reader who will NOT
+ * chat: each section answers the question a cold visitor has at that scroll
+ * depth — what is this (hero) → can I trust you (#proof) → why you (#why) →
+ * what do I get (#how, which now SHOWS the sample map as proof mid-section)
+ * → what does it cost (#pricing, the third jade band, directly after the
+ * work it prices) → is it for me (#who) → do you know my market (#sectors)
+ * → whose side are you on (whose-side) → the owner branch (#owners) → the
+ * human (founder) → act (#cta). Band cadence: jade → two light → jade →
+ * two light → jade → three light (owners · founder · cta) → footer —
+ * inside the "2–3 points in the scroll break to a block" law the block
+ * system documents, with the tail at the ceiling by design (the footer
+ * law needs a light closer, so nothing more can append there without a
+ * fourth band).
  *
  * The chat engine is the REAL intake (YuliaIntake — SSE market map, lead
  * capture, mobile sheet); the prototype's scripted demo only illustrated it.
@@ -559,6 +580,70 @@ export default function Landing() {
               </details>
             ))}
           </div>
+          {/* ── Getting started — folded INTO How it works (2026-08-07,
+              Paul: "the getting started should be part of How it Works
+              section"). The sample map sits between the phases and the
+              close so the chapter reads process → proof → ask: the seven
+              phases say what the job is, this shows the first artifact an
+              engagement puts in your hands, and the crescendo line lands
+              directly on the CTA cluster instead of cooling off first.
+              #sample stays a live anchor here — the hero's "See a sample
+              market map →" and both footer variants point at it. ── */}
+          <div className="pd-getting" id="sample">
+            <div className="pd-sechead" data-rv>
+              <div className="pd-seclabel">Getting started</div>
+              <p className="pd-statement" style={{ marginInline: 'auto' }}>Every engagement starts with a read like this.</p>
+              <p className="pd-sub" style={{ margin: '18px auto 0' }}>
+                Not a chatbot answer — an institutional market map: the universe, the short list, and
+                the thing most buyers miss.
+              </p>
+            </div>
+            <div data-rv style={{ marginTop: 'clamp(38px, 4.5vw, 60px)' }}>
+              <div className="pd-map" style={{ maxWidth: 760, margin: '0 auto' }}>
+                <div className="map-head">
+                  <img src="/logo-green-x.png" alt="smbX.ai" width={1584} height={396} style={{ height: 22, width: 'auto', display: 'block' }} />
+                  <span className="map-label">SAMPLE READ</span>
+                </div>
+                <div className="map-title">Commercial Landscaping — Southeast</div>
+                <div className="map-thesis">Commercial landscaping · GA, NC, SC, TN · $2–8M EBITDA · commercial-contract mix</div>
+                <div className="map-flow rv-stagger" data-rv>
+                  <div className="k">THE FUNNEL</div>
+                  <div className="f"><span className="n">~2,400</span><span className="l">operators in-footprint</span></div>
+                  <span className="arr">→</span>
+                  <div className="f"><span className="n">~180</span><span className="l">in your size band</span></div>
+                  <span className="arr">→</span>
+                  <div className="f"><span className="n">~55</span><span className="l">above 60% commercial-contract mix</span></div>
+                </div>
+                <div className="map-nine" data-rv>
+                  <div className="n">9</div>
+                  <div className="l">Of those 55, the number we'd tell you to spend real time on. The drop from 55 to 9 is the part you can't Google.</div>
+                </div>
+                <div className="map-screens rv-stagger" data-rv>
+                  <div className="k">WHAT SEPARATES THE 9</div>
+                  <div className="map-scr"><div className="i">01</div><div className="t">Route density.</div><div className="b">A crew running 8 stops in 4 miles is a different business than 8 stops across 40. It never shows in EBITDA, and it's the single biggest driver of margin after close. We'd rank the 55 by drive-time density before anything else.</div></div>
+                  <div className="map-scr"><div className="i">02</div><div className="t">Contract tenure.</div><div className="b">Month-to-month "commercial" revenue is worth a fraction of 3-year contracted revenue, even at identical margin. A third of the 55 won't survive this test.</div></div>
+                  <div className="map-scr"><div className="i">03</div><div className="t">Crew that stays without the owner.</div><div className="b">In this trade, the crews often leave with the seller. The ones where they don't are worth a full turn more — and you can check it in diligence before you're committed.</div></div>
+                </div>
+                <div className="map-insight" data-rv>
+                  <div className="k">WHAT MOST BUYERS MISS</div>
+                  <div className="v">Two companies here with identical EBITDA can be worth two turns apart on route density alone. Most buyers underwrite the earnings, ignore the drive time, and wonder why margins compress the quarter after close. We price the routes first, the EBITDA second.</div>
+                </div>
+                <div className="map-number" data-rv>
+                  <div className="k">THE NUMBER</div>
+                  <div className="big">$6–8M</div>
+                  <div className="v">On a $4M-EBITDA target at this size, getting the route-density read wrong is roughly a <strong>1.5–2.0x swing in EBITDA multiple</strong> — call it $6–8M of purchase price on a single deal, decided by one variable most buyers never model.</div>
+                </div>
+                <div className="map-verdict" data-rv>
+                  <div className="k">OUR READ</div>
+                  <div className="v">This is one of the last genuinely fragmented service niches in the region, and the window is open — but only for a buyer disciplined enough to pay for route quality and walk from the pretty-EBITDA traps. That discipline is the whole game here.</div>
+                </div>
+                <div className="map-foot">
+                  <div className="src">Preliminary sample — illustrative of the deliverable format.</div>
+                  <a className="map-pdf" href="#yulia" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} onClick={() => trackEvent('practice_cta_clicked', { placement: 'sample-run-yours' })}>Run yours →</a>
+                </div>
+              </div>
+            </div>
+          </div>
           <div className="pd-phases-close" data-rv>
             <p className="pd-body">
               That's the work. Most acquisitions fall apart somewhere in the middle — an add-back
@@ -567,10 +652,12 @@ export default function Landing() {
             </p>
             <p className="strong">You make the decisions. We handle the rest, and we get you to the closing table.</p>
             <a className="pd-pill-primary pd-pill-lg" href="#yulia" style={{ marginTop: 34 }} onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-close' })}>Build your market map →</a>
-            {/* Two quiet leave-behinds (Paul, 2026-08-06): the offering deck
-                (no pricing in it) downloads free; pricing asks route to the
-                #pricing section, whose ONLY content is the email-gated
-                brochure request — no figure is published on the site. */}
+            {/* One quiet leave-behind (Paul, 2026-08-06): the offering deck
+                (no pricing in it) downloads free. The "Get pricing →" link
+                that used to sit under it is gone (2026-08-07): the jade
+                #pricing band is now DIRECTLY below this cluster, so a link
+                to the next screenful only stacked a fourth ask on one seam
+                — the band itself is the pricing ask. */}
             <a
               className="pd-samplelink"
               href="/collateral/smbx-corpdev-offering.pdf"
@@ -580,27 +667,25 @@ export default function Landing() {
             >
               Take this with you — the smbXCorpDev offering (PDF)
             </a>
-            <a
-              className="pd-samplelink"
-              href="#pricing"
-              style={{ display: 'block', width: 'fit-content', margin: '10px auto 0' }}
-              onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-get-pricing' })}
-            >
-              Get pricing →
-            </a>
           </div>
         </div>
       </section>
 
-      {/* ── Pricing — THE ASK, NOT THE SCHEDULE (2026-08-06, Paul: "remove
-          the public upfront pricing, what it costs section entirely" — hours
-          after the public schedule shipped, superseding it). No figure
-          appears on the site: the schedule lives in the EMAIL-GATED brochure
+      {/* ── Pricing — the third jade movement (2026-08-07, Paul: "the
+          pricing section is just stuck on the page somewhere… can we add a
+          green to break up monotony where it makes sense"). Same ask as
+          before, now in a full-bleed room of its own, directly after the
+          work it prices — the reader's next question at this scroll depth —
+          and the mid-page block that breaks the old six-light-section run.
+          THE ASK, NOT THE SCHEDULE (2026-08-06, Paul: "remove the public
+          upfront pricing, what it costs section entirely" — hours after the
+          public schedule shipped, superseding it). No figure appears on the
+          site: the schedule lives in the EMAIL-GATED brochure
           (POST /api/practice/pricing) and the engagement letter. This
           section is only the request — heading + email row. Chat/intake stay
           fee-silent as always. ── */}
-      <section className="pd-section" id="pricing">
-        <div className="pd-wrap">
+      <section className="pd-dark pd-dark-sect bl-val" id="pricing">
+        <div className="pd-wrap pd-dark-pad">
           <div className="pd-sechead" data-rv>
             <div className="pd-seclabel">Pricing</div>
             <h2 className="pd-h2">Simple, up-front pricing — we'll send you the schedule.</h2>
@@ -611,65 +696,6 @@ export default function Landing() {
             </p>
           </div>
           <PricingRequest />
-        </div>
-      </section>
-
-      {/* ── Sample read — the flagship artifact, static and clearly labeled ── */}
-      <section className="pd-section" id="sample">
-        <div className="pd-wrap">
-          <div className="pd-sechead" data-rv>
-            <div className="pd-seclabel">Getting started</div>
-            <h2 className="pd-h2">Every engagement starts with a read like this.</h2>
-            <p className="pd-sub" style={{ margin: '22px auto 0' }}>
-              Not a chatbot answer — an institutional market map: the universe, the short list, and
-              the thing most buyers miss.
-            </p>
-          </div>
-          <div data-rv style={{ marginTop: 'clamp(44px, 5.5vw, 72px)' }}>
-            <div className="pd-map" style={{ maxWidth: 760, margin: '0 auto' }}>
-              <div className="map-head">
-                <img src="/logo-green-x.png" alt="smbX.ai" width={1584} height={396} style={{ height: 22, width: 'auto', display: 'block' }} />
-                <span className="map-label">SAMPLE READ</span>
-              </div>
-              <div className="map-title">Commercial Landscaping — Southeast</div>
-              <div className="map-thesis">Commercial landscaping · GA, NC, SC, TN · $2–8M EBITDA · commercial-contract mix</div>
-              <div className="map-flow rv-stagger" data-rv>
-                <div className="k">THE FUNNEL</div>
-                <div className="f"><span className="n">~2,400</span><span className="l">operators in-footprint</span></div>
-                <span className="arr">→</span>
-                <div className="f"><span className="n">~180</span><span className="l">in your size band</span></div>
-                <span className="arr">→</span>
-                <div className="f"><span className="n">~55</span><span className="l">above 60% commercial-contract mix</span></div>
-              </div>
-              <div className="map-nine" data-rv>
-                <div className="n">9</div>
-                <div className="l">Of those 55, the number we'd tell you to spend real time on. The drop from 55 to 9 is the part you can't Google.</div>
-              </div>
-              <div className="map-screens rv-stagger" data-rv>
-                <div className="k">WHAT SEPARATES THE 9</div>
-                <div className="map-scr"><div className="i">01</div><div className="t">Route density.</div><div className="b">A crew running 8 stops in 4 miles is a different business than 8 stops across 40. It never shows in EBITDA, and it's the single biggest driver of margin after close. We'd rank the 55 by drive-time density before anything else.</div></div>
-                <div className="map-scr"><div className="i">02</div><div className="t">Contract tenure.</div><div className="b">Month-to-month "commercial" revenue is worth a fraction of 3-year contracted revenue, even at identical margin. A third of the 55 won't survive this test.</div></div>
-                <div className="map-scr"><div className="i">03</div><div className="t">Crew that stays without the owner.</div><div className="b">In this trade, the crews often leave with the seller. The ones where they don't are worth a full turn more — and you can check it in diligence before you're committed.</div></div>
-              </div>
-              <div className="map-insight" data-rv>
-                <div className="k">WHAT MOST BUYERS MISS</div>
-                <div className="v">Two companies here with identical EBITDA can be worth two turns apart on route density alone. Most buyers underwrite the earnings, ignore the drive time, and wonder why margins compress the quarter after close. We price the routes first, the EBITDA second.</div>
-              </div>
-              <div className="map-number" data-rv>
-                <div className="k">THE NUMBER</div>
-                <div className="big">$6–8M</div>
-                <div className="v">On a $4M-EBITDA target at this size, getting the route-density read wrong is roughly a <strong>1.5–2.0x swing in EBITDA multiple</strong> — call it $6–8M of purchase price on a single deal, decided by one variable most buyers never model.</div>
-              </div>
-              <div className="map-verdict" data-rv>
-                <div className="k">OUR READ</div>
-                <div className="v">This is one of the last genuinely fragmented service niches in the region, and the window is open — but only for a buyer disciplined enough to pay for route quality and walk from the pretty-EBITDA traps. That discipline is the whole game here.</div>
-              </div>
-              <div className="map-foot">
-                <div className="src">Preliminary sample — illustrative of the deliverable format.</div>
-                <a className="map-pdf" href="#yulia" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} onClick={() => trackEvent('practice_cta_clicked', { placement: 'sample-run-yours' })}>Run yours →</a>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -736,7 +762,7 @@ export default function Landing() {
           band title. Now the band stacks on the page's own centered axis:
           title → quote → body → CTAs. SegmentPage keeps .pd-askew; only this
           band moved. ── */}
-      <section className="pd-dark bl-side" style={{ marginTop: 'clamp(130px, 15vw, 220px)' }}>
+      <section className="pd-dark pd-dark-sect bl-side">
         <div className="pd-wrap pd-dark-pad" style={{ textAlign: 'center' }}>
           <div className="pd-seclabel" data-rv style={{ marginBottom: 0 }}>Whose side we're on</div>
           <p className="pd-quote" data-rv style={{ margin: 'clamp(32px, 3.8vw, 54px) auto 0', maxWidth: '15em', textWrap: 'balance' }}>

@@ -114,6 +114,37 @@ workspace), `DESIGN_LANGUAGE.md` (the root brief). `npm run test:design` is the
 gate — 58 cases asserting every hex is a real token, every token is documented,
 no retired hex appears as live guidance, and the live stylesheet still matches.
 
+**SALES-JOURNEY REFLOW (2026-08-07, Paul: "between the 2 green bands there is a
+whole lot of space and the sections kind of run together… the getting started
+should be part of How it Works… add a green to break up monotony where it makes
+sense… the pricing section is just stuck on the page somewhere"; vetted by a
+3-lens critique workflow).** The landing is now built for the reader who never
+chats — each section answers the next question a cold visitor has: hero → jade
+`#proof` (trust) → `#why` (the case) → `#how` (what you get — the seven phases
+now CONTAIN the Getting-started sample read as a sub-block, `#sample` kept as a
+live anchor, and the section closes exactly ONCE: phases → sample → verdict
+paragraphs → CTA cluster) → **`#pricing` as the THIRD jade band** (the
+email-gated brochure ask in a full-bleed room of its own, directly after the
+work it prices; no figure on the site, unchanged) → `#who` → `#sectors` →
+whose-side (jade) → `#owners` → founder → `#cta`. Band cadence jade → 2 light →
+jade → 2 light → jade → 3 light, inside the "2–3 points in the scroll" law.
+Mechanics: `.pd-dark-sect` is the ONE band-approach margin
+(clamp(90px,10vw,150px); both mid-page bands wear it — it replaces the
+whose-side band's inline marginTop, the only inline band margin that existed,
+and the pricing section's old `.pd-section` padding-top — the curve crest
+supplies the rest of the transition); `.pd-getting` holds the sub-block margin
+plus the nested `#sample` scroll-margin; `.pd-dark .pd-price-get` carries FOUR
+declarations, every one a renders-not-errors trap that read clean in a diff:
+the "Sent" state and the input border (`.pd-dark` does NOT re-scope
+`--pd-coral`, so the confirmation rendered Deal Green on jade at ~1.1:1), the
+typed email + caret hard-coded to ink (the input's `color: var(--pd-ink)`
+re-scopes to near-white on the white fill — idle screenshots pass because the
+placeholder is UA grey), and a re-stated `:focus-visible` border (the
+transparent-border override sits LATER at equal specificity, and the light
+rule also kills the outline, so keyboard focus showed nothing on the band). The "Get pricing →" link at `#how`'s close was
+removed as redundant — the band is the next screenful; the anchor stays live
+for nav/footer/emailed links.
+
 The three current languages (the LEDGER TRIAL entry records the system Aurora
 re-valued, not a system to build against):
 - **LEDGER TRIAL (2026-07-17 night, Paul: "let's do what the recommendation says and see how we like it" — the fintech-DL research system, implemented faithfully for evaluation):** bone canvas `#F6F4EF` (tonal-bone ambient, no chromatic wash), ink `#14181C`/slate `#5C6670`/muted `#8A9099`, WHITE hairline cards (radius 12–16, Ledger soft-lift shadow), ONE accent **Deal Green `#16624C`** (hover `#0F4E3C`, tint chips `#E7F0EC`, mint-on-dark links `#8FD0AE`) in the historical `--pd-coral*` slots, **brass `#B08637`** jewelry on the signature "0 sell-side" stat (`--pd-brass`), green-black boardroom dark bands (`--pd-dark-* #0F1A16` family, ivory text `#F3F1EA` rescope, green halo + brass base glow + green-black glaze over the blackbleed texture), working type switched Schibsted→**Inter** with global `tnum` tabular figures, Fraunces display at weight 545, **pill buttons** (Paul 2026-07-18 overrode Ledger's 8px: "no squared buttons"; ghost secondary keeps the ink hairline), 16px white chat console (was 999px pill), solid bone nav (backdrop-blur removed per Ledger anti-patterns), logo X recolored to the green (`/logo-green-x.png`, `/logo-x-green.png`; coral+blue masters remain). Composers (researchComposer, practiceMapPdf) follow. Deliberately skipped from the doc: Sell/Raise chips + client-logo walls + pricing (THE LINE / attribution law), the dark hero (doc's own light-mode conversion caveat; light hero kept), Inter-for-Schibsted in the APP shells (site only). Rollback = revert one commit per system (blue and coral live in git history).
