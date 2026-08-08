@@ -1,14 +1,36 @@
 /**
- * mobile-audit — render every public page at phone width and report what
- * actually breaks, rather than guessing from CSS.
+ * mobile-audit — an ADVERSARIAL pass over every public page at phone width.
  *
- * Two outputs per route:
- *   1. An OVERFLOW REPORT — document.scrollWidth vs viewport, plus the
- *      specific elements whose box extends past the right edge. This is the
- *      thing a screenshot makes you hunt for.
- *   2. Viewport-sized strips down the page, so the layout can be looked at.
+ * Exists because of 2026-08-08: the first mobile layer fixed what a handful of
+ * screenshots happened to show, and Paul's reply was the right one — "I can't
+ * take a picture of everything that looks awful." A screenshot only reports the
+ * strip you photographed, and only the defect you happened to notice. This
+ * looks at every element on every route and hunts specific, named failure
+ * classes, so the report is a work list rather than a vibe.
  *
- *   node mobile-audit.mjs [--w 390] [--h 844] [--out dir] [--strips 1]
+ * What it hunts (each is a real defect seen on this site, not a generic lint):
+ *
+ *   BLEED     an element whose box runs past the right edge, ignoring anything
+ *             an ancestor clips or scrolls (the marquee and the report's wide
+ *             registers are deliberate and must not be reported).
+ *   GRID      a multi-column grid still standing at phone width. THE headline
+ *             defect: three-column cards at 390px is what "looks awful" means.
+ *   RAGGED    a text box so narrow the copy breaks to one or two words a line.
+ *             This is the symptom a reader actually feels, and it survives
+ *             every overflow check because nothing overflows.
+ *   TINY      customer-facing text under Paul's 13px floor.
+ *   TAP       an interactive target under 44x44.
+ *   CLIP      text cut off inside a box that cannot scroll.
+ *   COLLIDE   two text boxes overlapping that are not ancestor/descendant.
+ *   VOID      a run of empty vertical space tall enough to read as a hole.
+ *
+ * Usage:
+ *   npm run shoot:mobile                     # audit + strips, 390x844
+ *   node scripts/mobile-audit.mjs --strips 0 # report only, much faster
+ *   node scripts/mobile-audit.mjs --w 430 --h 932
+ *   node scripts/mobile-audit.mjs --only landing
+ *
+ * Exit code 1 if any defect is found, so this can gate a commit.
  */
 import http from 'node:http';
 import fs from 'node:fs';
@@ -21,15 +43,25 @@ const H = Number(arg('h', 844));
 const OUT = arg('out', 'mobile-shots');
 const STRIPS = arg('strips', '1') !== '0';
 const ONLY = arg('only', '');
+const MAX_STRIPS = Number(arg('maxstrips', 26));
 
 const ROUTES = [
   ['/', 'landing'],
   ['/about', 'about'],
   ['/industries', 'industries'],
-  ['/research', 'research'],
   ['/track-record', 'track-record'],
-  ['/research/home-services', 'report'],
-].filter(([, n]) => !ONLY || n === ONLY);
+  ['/research', 'research'],
+  ['/research/home-services', 'report-home-services'],
+  ['/research/commercial-mep', 'report-commercial-mep'],
+  ['/research/dfw-home-services', 'report-dfw'],
+  ['/buyers/family-offices', 'seg-family-offices'],
+  ['/buyers/independent-sponsors', 'seg-independent-sponsors'],
+  ['/buyers/pe-firms', 'seg-pe-firms'],
+  ['/buyers/searchers', 'seg-searchers'],
+  ['/buyers/operators', 'seg-operators'],
+  ['/legal/privacy', 'legal-privacy'],
+  ['/legal/terms', 'legal-terms'],
+].filter(([, n]) => !ONLY || n.includes(ONLY));
 
 const ROOT = path.resolve('dist/client');
 if (!fs.existsSync(path.join(ROOT, 'index.html'))) {
@@ -56,7 +88,7 @@ const MIME = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
   '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg',
   '.webp': 'image/webp', '.svg': 'image/svg+xml', '.woff2': 'font/woff2',
-  '.ico': 'image/x-icon',
+  '.ico': 'image/x-icon', '.pdf': 'application/pdf',
 };
 const srv = http.createServer((req, res) => {
   let f = path.join(ROOT, decodeURIComponent(req.url.split('?')[0]));
@@ -77,84 +109,229 @@ const report = [];
 for (const [route, name] of ROUTES) {
   await page.goto(`http://localhost:${port}${route}`, { waitUntil: 'networkidle0', timeout: 60000 });
   await page.evaluate(() => { document.documentElement.style.scrollBehavior = 'auto'; });
-  // Walk the whole page once so lazy images + data-rv reveals fire, then
-  // return to the top — a no-scroll capture photographs them blank.
+  // Walk the page once so lazy images and data-rv reveals fire — a no-scroll
+  // capture photographs them blank and audits them as zero-size.
   await page.evaluate(async () => {
     const step = window.innerHeight * 0.8;
-    for (let y = 0; y < document.body.scrollHeight; y += step) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 60)); }
+    for (let y = 0; y < document.body.scrollHeight; y += step) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 50)); }
     window.scrollTo(0, 0);
   });
-  await new Promise(r => setTimeout(r, 1200));
+  await new Promise(r => setTimeout(r, 1100));
 
   const info = await page.evaluate(() => {
     const vw = document.documentElement.clientWidth;
-    const bad = [];
+    const out = [];
     const seen = new Set();
-    for (const el of document.querySelectorAll('body *')) {
+    const push = (kind, el, detail) => {
+      const id = `${el.tagName.toLowerCase()}${el.id ? '#' + el.id : ''}${typeof el.className === 'string' && el.className.trim() ? '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.') : ''}`;
+      const attrs = [...el.attributes].map(a => a.name).filter(n => n.startsWith('data-') && n !== 'data-rv' && n !== 'data-hs');
+      const y = Math.round(el.getBoundingClientRect().top + window.scrollY);
+      out.push({ kind, id: id + (attrs.length ? `[${attrs.join(',')}]` : ''), y, detail, text: (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 54) });
+    };
+    // A closed <details> still reports a laid-out box for its content in
+    // Chromium (the slot is content-visibility:hidden, but the child answers
+    // getBoundingClientRect with a real size). Without this the why-us
+    // evidence panels read as eight collisions on a page that renders
+    // perfectly — the tool must not invent work.
+    const inClosedDetails = el => {
+      for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
+        if (a.tagName === 'DETAILS' && !a.open && !el.closest('summary')) return true;
+      }
+      return false;
+    };
+    const vis = el => {
       const cs = getComputedStyle(el);
-      if (cs.display === 'none' || cs.visibility === 'hidden' || cs.position === 'fixed') continue;
-      const r = el.getBoundingClientRect();
-      if (r.width === 0 || r.height === 0) continue;
-      const over = Math.round(r.right - vw);
-      if (over <= 1) continue;
-      // An element wider than the viewport is FINE if an ancestor clips or
-      // scrolls it — that is a deliberate device, not a defect: the report's
-      // wide registers scroll inside `.rp-tablewrap`, the lane marquee runs
-      // inside `overflow: hidden`. Flagging them buries the real findings
-      // (31 report tables reported as broken when all 31 behave correctly),
-      // and a tool that cries wolf gets ignored exactly once.
-      let clipped = false;
+      if (cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0') return false;
+      return !inClosedDetails(el);
+    };
+    const clippedByAncestor = el => {
       for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
         const ax = getComputedStyle(a).overflowX;
-        if (ax === 'hidden' || ax === 'clip' || ax === 'auto' || ax === 'scroll') { clipped = true; break; }
+        if (ax === 'hidden' || ax === 'clip' || ax === 'auto' || ax === 'scroll') return true;
       }
-      if (clipped) continue;
-      // Report the OUTERMOST offender only — children inherit the overflow.
-      let anc = el.parentElement, dup = false;
-      while (anc && anc !== document.body) { if (seen.has(anc)) { dup = true; break; } anc = anc.parentElement; }
-      if (dup) continue;
-      seen.add(el);
-      const id = `${el.tagName.toLowerCase()}${el.id ? '#' + el.id : ''}${el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.') : ''}`;
-      const attrs = [...el.attributes].map(a => a.name).filter(n => n.startsWith('data-')).join(',');
-      const path = [];
-      for (let a = el.parentElement; a && a !== document.body && path.length < 4; a = a.parentElement) {
-        path.unshift(`${a.tagName.toLowerCase()}${a.id ? '#' + a.id : ''}${[...a.attributes].map(x => x.name).filter(n => n.startsWith('data-')).map(n => `[${n}]`).join('')}`);
+      return false;
+    };
+    // Own text = text this element renders itself, not via element children.
+    const ownText = el => [...el.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').replace(/\s+/g, ' ').trim();
+
+    const all = [...document.querySelectorAll('body *')];
+
+    for (const el of all) {
+      if (!vis(el)) continue;
+      const cs = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) continue;
+      const fixed = cs.position === 'fixed';
+
+      // ── BLEED ────────────────────────────────────────────────────────────
+      if (!fixed && Math.round(r.right - vw) > 1 && !clippedByAncestor(el)) {
+        let dup = false;
+        for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) if (seen.has(a)) { dup = true; break; }
+        if (!dup) { seen.add(el); push('BLEED', el, `+${Math.round(r.right - vw)}px past the edge (w ${Math.round(r.width)})`); }
       }
-      bad.push({ id, attrs, over, w: Math.round(r.width), path: path.join(' > '), text: (el.textContent || '').trim().slice(0, 46) });
+
+      // ── GRID: a multi-column grid still standing at phone width ──────────
+      if (cs.display === 'grid') {
+        const tracks = cs.gridTemplateColumns.split(' ').filter(Boolean).map(parseFloat).filter(n => !isNaN(n));
+        // A narrow track is only a defect if it is meant to hold PROSE. Index
+        // gutters and icon rails are deliberately tiny — `30px 1fr` on the
+        // numbered rows is the fix, not the bug — so anything under 60px is
+        // read as a gutter and the check runs on the content tracks only.
+        const content = tracks.filter(t => t >= 60);
+        if (content.length >= 2) {
+          const narrowest = Math.min(...content);
+          // Under ~165px a cell cannot hold a sentence, which is the actual
+          // failure a reader sees: three-column cards at 390px. But the
+          // question is "can it hold a SENTENCE", so a grid whose cells carry
+          // no prose is exempt — the proof band's 2×2 of numerals reads
+          // perfectly at 158px on a 360px screen, and stacking it would make
+          // a four-screen band out of a one-screen one.
+          const carriesProse = [...el.querySelectorAll('*')].some(d =>
+            [...d.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim().length > 70);
+          if (narrowest < 165 && carriesProse) push('GRID', el, `${content.length} content columns, narrowest ${Math.round(narrowest)}px — ${cs.gridTemplateColumns}`);
+        }
+      }
+
+      // ── RAGGED: prose in a column too narrow to read ─────────────────────
+      const t = ownText(el);
+      // Cells inside a register that scrolls sideways are MEANT to be narrow —
+      // the table is wider than the phone and the reader pans it. 69 table
+      // cells on one report is noise that buries the one real ragged column.
+      if (t.length > 70 && !fixed && !clippedByAncestor(el)) {
+        const fsz = parseFloat(cs.fontSize) || 16;
+        // ~0.5em average glyph advance; under ~22 characters a line the copy
+        // breaks to two or three words and reads as a broken column.
+        const chars = r.width / (fsz * 0.5);
+        if (chars < 22) push('RAGGED', el, `${Math.round(r.width)}px wide at ${fsz}px — about ${Math.round(chars)} characters a line`);
+      }
+
+      // ── SQUEEZE: a form field crushed by a sibling that won't wrap ───────
+      // Added after the pricing band shipped with a 145px email field that
+      // could show "you@" and nothing more. No other check could see it: an
+      // input has no text content, so RAGGED skips it, and nothing overflows.
+      if (/^(input|select|textarea)$/i.test(el.tagName) && el.type !== 'hidden' && el.type !== 'checkbox' && el.type !== 'radio'
+          // A readOnly field is a doorway, not a field — the phone hero bar is
+          // readOnly precisely so tapping it opens the sheet instead of a
+          // keyboard, and it only ever has to show its own placeholder.
+          && !el.readOnly) {
+        if (r.width < 200) push('SQUEEZE', el, `field only ${Math.round(r.width)}px wide (placeholder "${el.placeholder || ''}")`);
+      }
+
+      // ── TINY: under the 13px customer-facing floor ───────────────────────
+      if (t.length > 3) {
+        const fsz = parseFloat(cs.fontSize);
+        if (fsz && fsz < 12.5) push('TINY', el, `${fsz}px`);
+      }
+
+      // ── TAP: interactive target under 44x44 ──────────────────────────────
+      if (/^(a|button)$/i.test(el.tagName) && (el.getAttribute('href') || el.tagName === 'BUTTON')) {
+        // Inline links inside a paragraph are exempt — they are prose, not
+        // controls, and padding them would wreck the line box.
+        const inProse = el.parentElement && /^(p|li|span|td|em|strong)$/i.test(el.parentElement.tagName);
+        // Round before comparing: a 43.98px box is a 44px target, and
+        // reporting 69 of them as failures hides the ones that are really 22.
+        const hh = Math.round(r.height), ww = Math.round(r.width);
+        if (!inProse && (hh < 44 || ww < 44) && hh > 0) push('TAP', el, `${ww}x${hh}`);
+      }
+
+      // ── CLIP: text cut off in a box that cannot scroll ───────────────────
+      if (t.length > 0 && cs.overflowX === 'hidden' && el.scrollWidth - el.clientWidth > 2) {
+        push('CLIP', el, `${el.scrollWidth - el.clientWidth}px of text cut off`);
+      }
     }
-    // Long unbreakable strings are the other phone killer.
+
+    // ── COLLIDE: two text boxes overlapping, neither containing the other ──
+    // Inline boxes are excluded: an <em> or <strong> that wraps across two
+    // lines reports a rect spanning BOTH full lines, so it legitimately
+    // overlaps every sibling inline on those lines. On a long report that is
+    // a dozen phantom collisions inside perfectly set prose.
+    const texts = all.filter(el => vis(el) && ownText(el).length > 2
+        && !/^(inline|contents)$/.test(getComputedStyle(el).display)
+        && getComputedStyle(el).position !== 'fixed')
+      .map(el => ({ el, r: el.getBoundingClientRect() }))
+      .filter(o => o.r.width > 8 && o.r.height > 8);
+    const overlaps = [];
+    for (let i = 0; i < texts.length; i++) {
+      for (let j = i + 1; j < texts.length; j++) {
+        const a = texts[i], b = texts[j];
+        if (a.el.contains(b.el) || b.el.contains(a.el)) continue;
+        const ox = Math.min(a.r.right, b.r.right) - Math.max(a.r.left, b.r.left);
+        const oy = Math.min(a.r.bottom, b.r.bottom) - Math.max(a.r.top, b.r.top);
+        if (ox > 6 && oy > 6) overlaps.push({ a, b, area: Math.round(ox * oy) });
+      }
+    }
+    for (const o of overlaps.sort((x, y) => y.area - x.area).slice(0, 8)) {
+      push('COLLIDE', o.a.el, `overlaps "${(o.b.el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 30)}" by ${o.area}px²`);
+    }
+
     return {
       vw, scrollW: document.documentElement.scrollWidth, docH: document.body.scrollHeight,
-      bad: bad.slice(0, 24),
+      findings: out,
     };
   });
+
+  // ── VOID: a tall run of empty page. Sampled rather than computed, because
+  //    "is anything painted here" is a rendering question, not a DOM one.
+  const voids = await page.evaluate((vh) => {
+    const holes = [];
+    const step = 40;
+    const w = document.documentElement.clientWidth;
+    let runStart = null;
+    for (let y = 0; y < document.body.scrollHeight; y += step) {
+      let painted = false;
+      for (const x of [w * 0.15, w * 0.5, w * 0.85]) {
+        const el = document.elementFromPoint(x, y - window.scrollY);
+        if (el && el !== document.body && el !== document.documentElement) {
+          const t = (el.textContent || '').trim();
+          if (t || /^(img|svg|video|canvas)$/i.test(el.tagName)) { painted = true; break; }
+        }
+      }
+      if (!painted) { if (runStart === null) runStart = y; }
+      else { if (runStart !== null && y - runStart > vh * 0.85) holes.push([runStart, y]); runStart = null; }
+      if (y % (step * 12) === 0) window.scrollTo(0, y);
+    }
+    window.scrollTo(0, 0);
+    return holes.slice(0, 6);
+  }, H);
+  for (const [a, b] of voids) info.findings.push({ kind: 'VOID', id: '(page)', y: a, detail: `${b - a}px of empty page`, text: '' });
 
   report.push({ route, name, ...info });
 
   if (STRIPS) {
-    const n = Math.min(26, Math.ceil(info.docH / H));
+    const n = Math.min(MAX_STRIPS, Math.ceil(info.docH / H));
     for (let i = 0; i < n; i++) {
       await page.evaluate(y => window.scrollTo(0, y), i * H);
-      await new Promise(r => setTimeout(r, 260));
+      await new Promise(r => setTimeout(r, 220));
       await page.screenshot({ path: path.join(OUT, `${name}-${String(i).padStart(2, '0')}.png`) });
     }
   }
 }
 
-console.log(`\n=== MOBILE AUDIT @ ${W}×${H} ===`);
+const ORDER = ['BLEED', 'GRID', 'RAGGED', 'SQUEEZE', 'COLLIDE', 'CLIP', 'VOID', 'TAP', 'TINY'];
+let total = 0;
+console.log(`\n════ ADVERSARIAL MOBILE AUDIT @ ${W}×${H} ════`);
 for (const r of report) {
+  const byKind = {};
+  for (const f of r.findings) (byKind[f.kind] ||= []).push(f);
+  const n = r.findings.length;
+  total += n;
   const bleed = r.scrollW - r.vw;
-  console.log(`\n${r.route}  (doc ${r.docH}px tall)`);
-  console.log(`  horizontal: viewport ${r.vw} · scrollWidth ${r.scrollW} ${bleed > 0 ? `→ BLEEDS ${bleed}px` : '→ ok'}`);
-  if (r.bad.length) {
-    console.log(`  ${r.bad.length} element(s) past the right edge:`);
-    for (const b of r.bad) {
-      console.log(`    +${String(b.over).padStart(4)}px  w=${String(b.w).padStart(4)}  ${b.id}${b.attrs ? ` [${b.attrs}]` : ''}  ${b.text ? `“${b.text}”` : ''}`);
-      console.log(`              in  ${b.path}`);
+  console.log(`\n── ${r.route}  (${r.docH}px tall, ${n} finding${n === 1 ? '' : 's'})${bleed > 0 ? `  ⚠ PAGE SCROLLS SIDEWAYS ${bleed}px` : ''}`);
+  for (const k of ORDER) {
+    const list = byKind[k];
+    if (!list) continue;
+    console.log(`   ${k} × ${list.length}`);
+    for (const f of list.slice(0, 8)) {
+      console.log(`     y=${String(f.y).padStart(6)}  ${f.id}`);
+      console.log(`               ${f.detail}${f.text ? `   “${f.text}”` : ''}`);
     }
+    if (list.length > 8) console.log(`     … and ${list.length - 8} more`);
   }
+  if (!n) console.log('   clean');
 }
-console.log(`\nStrips → ${OUT}/`);
+console.log(`\n════ ${total} finding(s) across ${report.length} route(s) ════`);
+if (STRIPS) console.log(`Strips → ${OUT}/`);
 
 await browser.close();
 srv.close();
+process.exit(total ? 1 : 0);

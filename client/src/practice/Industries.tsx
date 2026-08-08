@@ -97,7 +97,7 @@ export default function Industries() {
                   <div style={{ marginTop: 12, fontSize: 18, fontWeight: 600, color: '#16181A' }}>{s.lead}<span style={{ color: '#0A7A58' }}>.</span></div>
                   {s.tags && s.tags.length > 0 && (
                     <div style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                      {s.tags.map(t => <span key={t} style={TAG_STYLE}>{t}</span>)}
+                      {s.tags.map(t => <span key={t} data-tag style={TAG_STYLE}>{t}</span>)}
                     </div>
                   )}
                   <p style={{ margin: '18px 0 0', fontSize: 15.5, lineHeight: 1.7, color: '#4A4F54' }}>{s.paras[0]}</p>
@@ -130,8 +130,8 @@ export default function Industries() {
             <h2 style={{ margin: '18px 0 0', fontFamily: SERIF, fontWeight: 600, fontSize: 'clamp(20px, 2.7vw, 42px)', lineHeight: 1.12, letterSpacing: '-0.01em' }}>Home &amp; commercial services</h2>
             <div style={{ marginTop: 12, fontSize: 18, fontWeight: 600, color: '#16181A' }}>Where the record was built<span style={{ color: '#0A7A58' }}>.</span></div>
             <div style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              <span style={TAG_STYLE}>Residential &amp; commercial services trades</span>
-              <span style={TAG_STYLE}>Commercial landscaping — contract-heavy only</span>
+              <span data-tag style={TAG_STYLE}>Residential &amp; commercial services trades</span>
+              <span data-tag style={TAG_STYLE}>Commercial landscaping — contract-heavy only</span>
             </div>
             <div style={{ marginTop: 26, position: 'relative', maxWidth: 900 }}>
               <img data-rvimg src="/industries/trade-roof.jpg" alt="" loading="lazy" style={{ display: 'block', width: '100%', height: 240, objectFit: 'cover' }} />

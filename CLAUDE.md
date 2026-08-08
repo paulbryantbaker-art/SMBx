@@ -128,12 +128,27 @@ has a phone sibling block; its 22px top radius is the ONE sanctioned exception
 to radius-0, Paul 2026-08-08: "yes the top corners need to be rounded on the
 phone sheet" — the curve is what says the panel slid up and can slide back
 down). Nav ≤760 drops both CTAs to the burger (they already live in the menu).
-Gate: `npm run shoot:mobile` renders every public page — including a report
-detail page — at phone width and reports both the strips AND the elements past
-the right edge, IGNORING anything an ancestor clips or scrolls (the marquee, the
-report's `.rp-tablewrap` registers); without that rule it flagged all 31
-correctly-behaving tables on `/research/home-services`. The `.rp-*` report
-document scope was audited and needs no work.
+**THE GATE IS `npm run shoot:mobile`** (`scripts/mobile-audit.mjs`) — and after
+Paul's *"I can't take a picture of everything that looks awful… let's do an
+antagonistic pass"* it is no longer an overflow reporter but a hunter for eight
+NAMED failure classes across ALL FIFTEEN public routes (landing · 4 inner pages
+· 3 report bodies · 5 `/buyers/*` · 2 legal): **BLEED · GRID · RAGGED · SQUEEZE
+· COLLIDE · CLIP · VOID · TAP · TINY**, exit 1 on any finding. 719 → 246, with
+every structural class at ZERO across 360/390/430px. The three defects a
+screenshot could never have shown, all of which render rather than error:
+a `white-space: nowrap` link winning a flex row and leaving the paragraph a
+104px two-words-a-line column; the pricing band's email field crushed to 145px
+by a `flex: none` button (an input has no text, so no text check could see it);
+and `#who`'s ornament chips anchored at `left: 1%` of a **1360px rail** — 14px
+from a desktop headline, 3px from a phone one, as solid green blocks under the
+letterforms. **Four checks had to be taught what is DELIBERATE** and each
+correction is commented in the source: content scrolling inside `.rp-tablewrap`
+or the marquee's `overflow:hidden` is not a bleed (it flagged all 31 of a
+report's registers); a closed `<details>` still answers `getBoundingClientRect`
+with a laid-out box in Chromium; inline `<em>`/`<strong>` wrapping two lines
+legitimately overlap; a grid of NUMERALS is fine at 158px where a grid of
+sentences is not. The `.rp-*` report document scope was audited and needs no
+structural work.
 
 **PRACTICE SITE (2026-07-11, corpdevservices bundle — the prior public
 surface, now HISTORY beneath the Carta restyle.)** The THE LINE v2 pivot retired the product marketing; the same day

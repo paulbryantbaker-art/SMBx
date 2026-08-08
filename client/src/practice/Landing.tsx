@@ -202,7 +202,14 @@ function PricingRequest() {
   }
   return (
     <div data-rv style={{ margin: '38px auto 0', maxWidth: 520 }}>
-      <form onSubmit={submit} style={{ display: 'flex', gap: 10 }}>
+      {/* The button is `flex: none` around a 28-character label, so on a phone
+          it took 270 of 350px and left the field 145 — wide enough to show
+          "you@" and nothing else. `minWidth: 0` was actively making it worse:
+          it let the field shrink to whatever was left instead of pushing the
+          button onto its own line. A real minimum plus flex-wrap turns the
+          squeeze into a stack. Desktop is unaffected — 220 + 10 + ~270 fits
+          the 520px cap, so the row never wraps there. */}
+      <form onSubmit={submit} style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
         <input
           type="email"
           required
@@ -211,7 +218,7 @@ function PricingRequest() {
           value={email}
           onChange={e => setEmail(e.target.value)}
           className="ca-price-input"
-          style={{ flex: 1, minWidth: 0, background: '#FFFFFF', border: '1.5px solid #FFFFFF', borderRadius: 10, padding: '15px 18px', fontSize: 16, fontFamily: "'Schibsted Grotesk', sans-serif", color: '#16181A', caretColor: '#16181A', outline: 'none' }}
+          style={{ flex: '1 1 220px', minWidth: 220, background: '#FFFFFF', border: '1.5px solid #FFFFFF', borderRadius: 10, padding: '15px 18px', fontSize: 16, fontFamily: "'Schibsted Grotesk', sans-serif", color: '#16181A', caretColor: '#16181A', outline: 'none' }}
         />
         <button
           type="submit"
@@ -451,7 +458,13 @@ export default function Landing() {
               </details>
             ))}
           </div>
-          <div data-rv style={{ marginTop: 44, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 24, borderTop: '1px solid #E4DFD3', paddingTop: 26 }}>
+          {/* flexWrap, because the link is `white-space: nowrap` and wins the
+              row: at 390px it took 222 of 350px and left the paragraph a
+              104px column running two words to the line. Nothing overflowed,
+              so no overflow check would ever have caught it — it just read as
+              broken. Wrapping costs desktop nothing (the row is 1296px there
+              and never wraps). */}
+          <div data-rv style={{ marginTop: 44, display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between', gap: 24, borderTop: '1px solid #E4DFD3', paddingTop: 26 }}>
             <p style={{ margin: 0, fontSize: 17, lineHeight: 1.6, color: '#4A4F54', maxWidth: '44em' }}>And it compounds — every engagement sharpens the thesis, the scorecards, and the playbook the next one runs on.</p>
             <a href="#how" className="ca-h-deepgreen" style={{ flex: 'none', fontSize: 16, fontWeight: 600, color: '#0A7A58', borderBottom: '1.5px solid #0A7A58', paddingBottom: 2, whiteSpace: 'nowrap' }}>See how the machine runs →</a>
           </div>
@@ -598,13 +611,13 @@ export default function Landing() {
         {/* ══ WHO IT'S FOR ══ */}
         <section id="who" style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(68px, 12vw, 200px) clamp(20px, 4vw, 32px) 20px' }}>
           <div data-rv style={{ position: 'relative', textAlign: 'center', padding: '10px 0 26px' }}>
-            <div aria-hidden="true" data-plx="-0.02" style={{ position: 'absolute', left: '1%', top: -14, width: 110, height: 110, zIndex: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(rgba(22,24,26,.15) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }}>
+            <div aria-hidden="true" data-whomark data-plx="-0.02" style={{ position: 'absolute', left: '1%', top: -14, width: 110, height: 110, zIndex: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(rgba(22,24,26,.15) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }}>
               <span style={{ position: 'absolute', left: 0, bottom: -12, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.1em', padding: '3px 7px' }}>FAMILY OFFICE</span>
             </div>
-            <div aria-hidden="true" data-plx="0.025" style={{ position: 'absolute', right: '1%', top: -6, width: 100, height: 100, zIndex: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(rgba(22,24,26,.15) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }}>
+            <div aria-hidden="true" data-whomark data-plx="0.025" style={{ position: 'absolute', right: '1%', top: -6, width: 100, height: 100, zIndex: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(rgba(22,24,26,.15) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }}>
               <span style={{ position: 'absolute', right: 0, bottom: -12, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.1em', padding: '3px 7px' }}>PE FIRM</span>
             </div>
-            <div aria-hidden="true" data-plx="0.04" style={{ position: 'absolute', left: '2%', bottom: -56, width: 86, height: 86, zIndex: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(rgba(22,24,26,.15) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }}>
+            <div aria-hidden="true" data-whomark data-plx="0.04" style={{ position: 'absolute', left: '2%', bottom: -56, width: 86, height: 86, zIndex: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(rgba(22,24,26,.15) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }}>
               <span style={{ position: 'absolute', left: 0, top: -12, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.1em', padding: '3px 7px' }}>SEARCHER</span>
             </div>
             <Kicker center>WHO IT'S FOR</Kicker>

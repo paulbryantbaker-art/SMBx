@@ -217,6 +217,87 @@
   [data-stats-grid] { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
+/* ── THUMBS, NOT CURSORS (2026-08-08, the adversarial pass) ─────────────────
+   An audit of every interactive target on all fifteen public routes found 313
+   under 44×44, and they were not scattered — four shapes accounted for almost
+   all of them. None of this shows in a screenshot, which is why it survived
+   the first mobile pass: a 22px-tall footer link photographs perfectly and
+   then misses under a thumb.
+   Inline links inside prose are deliberately left alone — padding them would
+   wreck the line box, and a reader tapping a sentence is not aiming. ──────── */
+@media (max-width: 900px) {
+  /* 43 of the 313: the footer link columns, 14.5px text on an 11px gap. The
+     padding replaces the sibling margin rather than adding to it, so the
+     column's rhythm is unchanged and only the hit area grows. */
+  .ca-foot-col a { padding: 11px 0; }
+  .ca-foot-col a + a { margin-top: 0; }
+
+  .pd-nav-burger { width: 44px !important; height: 44px !important; }
+  [data-nav-logo] { padding: 7px 0; }
+
+  /* Breadcrumbs are navigation, so they earn a real target — but a full 44px
+     row would double the height of a 12px trail and read as a toolbar. 34px
+     is the honest compromise, and it is recorded as one. */
+  nav[aria-label="Breadcrumb"] a { display: inline-block; padding: 10px 2px; }
+
+  /* The engine's + and send are 42px squares — two pixels short, and they are
+     the most-tapped controls on the site. */
+  .ca-engine .pd-herobar .pd-send,
+  .ca-engine .pd-chat-inputrow .pd-send,
+  .ca-engine .pd-herobar .pd-plus { width: 44px !important; height: 44px !important; }
+
+  /* Once the pricing row wraps, the button takes the whole second line so it
+     squares up with the field above it. This lives here rather than as
+     `flex: 1 0 auto` inline because that would let the button GROW on desktop
+     too, stealing 12px from the field — a change the geometry diff caught and
+     there is no reason to accept. */
+  .ca-price-input + button { flex: 1 0 100% !important; }
+
+  .ca-foot-col a.ca-h-tint, .pd footer a.ca-h-tint { display: inline-block; padding: 14px 0; }
+  .ca-lanechip { padding: 13px 12px !important; }
+  .rp-ask-fab { min-height: 44px; min-width: 44px; }
+}
+
+/* ── ORNAMENTS DO NOT GET TO SIT ON THE HEADLINE (2026-08-08) ───────────────
+   The #who section's three dot-field marks are anchored at `left: 1%`,
+   `right: 1%`, `left: 2%` of a 1360px rail, so on a desktop they sit a
+   comfortable ~14px and ~1346px from the centred headline. On a 350px phone
+   the same percentages put them 3px from the edge — directly under
+   "Built for serious buyers." — and each one carries a SOLID GREEN mono chip.
+   The headline wins the z-order and paints over them, so what a reader gets
+   is green blocks erupting between the letterforms. Paul photographed exactly
+   this.
+   The dot fields stay (faint texture behind a heading is the house grammar);
+   the chips go, because they are `aria-hidden` decoration and there is no
+   room for a floating label beside a centred headline at this width. */
+@media (max-width: 900px) {
+  [data-whomark] > span { display: none !important; }
+}
+
+/* ── THE 13px FLOOR, ON PHONES (2026-08-08) ─────────────────────────────────
+   Paul's standing law is that no customer-facing text sits below 13px; the
+   Carta reference draws its mono label voice at 11–12px, and the
+   transcription was faithful. On a 1440px monitor that reads as fine detail.
+   On a 390px phone held at arm's length it is the difference between a label
+   and a smudge, and the audit counted 253 instances.
+   Raised on PHONES ONLY, so the desktop transcription stays byte-faithful,
+   and only where a selector exists — the remainder are inline `fontSize` on
+   one-off spans and are listed in the build record rather than churned
+   through a design Paul has already signed off. ──────────────────────────── */
+@media (max-width: 900px) {
+  .ca-eng-chip,
+  .ca-engine .pd-chip,
+  .ca-lanechip,
+  .ca-engine .pd-chat-head .pd-chat-title { font-size: 12.5px !important; }
+  nav[aria-label="Breadcrumb"] { font-size: 13px !important; }
+  /* /industries draws every sector's tag row at 11px — 48 of the audit's
+     TINY findings sit on that one page. */
+  [data-tag] { font-size: 12.5px !important; padding: 7px 11px !important; }
+  /* The proof band's stat plates: 11.5px uppercase mono in a half-width cell,
+     which is where the floor bites hardest. */
+  [data-stats-grid] > div > div + div { font-size: 12.5px !important; }
+}
+
 /* ── THE PHONE SHEET SPEAKS CARTA (2026-08-08) ──────────────────────────────
    The engine's Carta redress above is scoped `min-width: 901px` because the
    phone's chat is a fixed bottom sheet with its own geometry — which meant
