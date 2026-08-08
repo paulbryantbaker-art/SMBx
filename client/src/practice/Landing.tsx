@@ -27,7 +27,7 @@
  * here. Layout values live INLINE per the transcription doctrine; carta.css
  * carries hover/media/keyframes only.
  */
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { Link } from 'wouter';
 import PracticeShell, { Handles, Kicker } from './PracticeShell';
 import YuliaIntake from './YuliaIntake';
@@ -438,10 +438,17 @@ export default function Landing() {
         <section id="why" style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(68px, 12vw, 200px) clamp(20px, 4vw, 32px) 40px' }}>
           <div data-rv style={{ maxWidth: 880 }}>
             <Kicker>WHY US</Kicker>
-            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'balance' }}>The machine serial acquirers build in-house. Yours, without the headcount.</h2>
+            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'balance' }}>The machine serial acquirers build in-house. <span style={{ color: '#0A7A58' }}>Yours</span>, without the headcount.</h2>
             <p style={{ margin: '24px 0 0', maxWidth: '42em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>You already know what you want to buy. The question is who runs the hunt — a team you'd spend a year hiring, a bank with a seller's habits, or us. Here's the case.</p>
           </div>
-          <div data-rv data-g3 className="rv-stagger" style={{ marginTop: 'clamp(29px, 5vw, 84px)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 26, alignItems: 'start' }}>
+          {/* No `alignItems: start` (2026-08-08). Grid's default IS stretch,
+              and `start` was making every card size to its own copy — so each
+              row stepped down left to right and the block's bottom edge came
+              out ragged. Carta's equivalent 4-up is flush, and that flushness
+              is most of what reads as "tidier" at a glance. Stretch costs
+              nothing on a phone, where the grid is one column and every card
+              is already full width. */}
+          <div data-rv data-g3 className="rv-stagger" style={{ marginTop: 'clamp(29px, 5vw, 84px)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 26 }}>
             {WHY.map((w, i) => (
               <details key={w.nm} className="ca-h-bandhv" style={{ background: '#F3F0E9', padding: 0 }}>
                 <summary style={{ cursor: 'pointer', padding: '26px 26px 24px', display: 'block' }}>
@@ -499,26 +506,48 @@ export default function Landing() {
                 <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 30, letterSpacing: '-0.01em' }}>Commercial Landscaping — Southeast</div>
                 <div style={{ marginTop: 8, fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.05em', color: '#7C8187' }}>Commercial landscaping · GA, NC, SC, TN · $2–8M EBITDA · commercial-contract mix</div>
                 <div style={{ marginTop: 30, fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#0A7A58' }}>THE FUNNEL</div>
-                <div style={{ marginTop: 14, display: 'flex', alignItems: 'stretch', gap: 12, flexWrap: 'wrap' }}>
-                  <div style={{ flex: 1, minWidth: 150, border: '1px solid #E4DFD3', background: '#F9F7F1', padding: '16px 18px' }}>
-                    <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 30 }}>~2,400</div>
-                    <div style={{ marginTop: 4, fontSize: 13.5, color: '#4A4F54' }}>operators in-footprint</div>
-                  </div>
-                  <div aria-hidden="true" style={{ alignSelf: 'center', color: '#0A7A58', fontSize: 20 }}>→</div>
-                  <div style={{ flex: 1, minWidth: 150, border: '1px solid #E4DFD3', background: '#F9F7F1', padding: '16px 18px' }}>
-                    <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 30 }}>~180</div>
-                    <div style={{ marginTop: 4, fontSize: 13.5, color: '#4A4F54' }}>in your size band</div>
-                  </div>
-                  <div aria-hidden="true" style={{ alignSelf: 'center', color: '#0A7A58', fontSize: 20 }}>→</div>
-                  <div style={{ flex: 1, minWidth: 150, border: '1px solid #E4DFD3', background: '#F9F7F1', padding: '16px 18px' }}>
-                    <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 30 }}>~55</div>
-                    <div style={{ marginTop: 4, fontSize: 13.5, color: '#4A4F54' }}>above 60% commercial-contract mix</div>
-                  </div>
+                {/* THE FUNNEL AS A WIRED NODE CHAIN (2026-08-08, the Carta
+                    polish pass). It was three flat boxes with → glyphs between
+                    them and the payoff — the 9 — stranded in a separate panel
+                    below, so the drop that IS the argument never read as one
+                    movement.
+                    This is our answer to Carta's LP→GP→CFO→CEO→GC chip chain,
+                    and it beats theirs on the only axis that matters: their
+                    graphic labels an audience, ours carries four real numbers
+                    and lands the whole method. 2,400 to 9 in one glance.
+                    The terminal node takes the accent fill because it is the
+                    conclusion, not another step. The dot field sits BEHIND the
+                    chain — composing with it, the same correction made to the
+                    whose-side band.
+                    Geometry lives in carta.css under [data-funnel]: a flex row
+                    whose connectors are their own children, so the phone flip
+                    is `flex-direction: column` plus a wire that turns
+                    vertical. No duplicated node markup between the two. */}
+                <div data-funnel style={{ marginTop: 16, position: 'relative' }}>
+                  <div aria-hidden="true" style={{ position: 'absolute', inset: '-14px -10px', zIndex: 0, backgroundImage: 'radial-gradient(rgba(22,24,26,.14) 1.1px, transparent 1.1px)', backgroundSize: '15px 15px' }} />
+                  {[
+                    { n: '~2,400', l: 'OPERATORS IN-FOOTPRINT' },
+                    { n: '~180', l: 'IN YOUR SIZE BAND' },
+                    { n: '~55', l: 'ABOVE 60% CONTRACT MIX' },
+                    { n: '9', l: 'WORTH YOUR TIME', hit: true },
+                  ].map((s, i) => (
+                    <Fragment key={s.l}>
+                      {i > 0 && <span className="fn-wire" aria-hidden="true"><i /></span>}
+                      <div className={`fn-node${s.hit ? ' fn-hit' : ''}`}>
+                        <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 32, lineHeight: 1, letterSpacing: '-0.01em' }}>{s.n}</div>
+                        <div style={{ marginTop: 9, fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.08em', lineHeight: 1.35 }}>{s.l}</div>
+                      </div>
+                    </Fragment>
+                  ))}
                 </div>
-                <div data-split style={{ marginTop: 22, display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 22, alignItems: 'center', background: '#131512', color: '#F4F5F1', padding: '22px 26px', position: 'relative' }}>
+                <div style={{ marginTop: 20, background: '#131512', color: '#F4F5F1', padding: '20px 24px', position: 'relative', overflow: 'hidden' }}>
                   <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.16) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
-                  <div style={{ position: 'relative', fontFamily: SERIF, fontWeight: 550, fontSize: 64, lineHeight: 1, color: '#A8F0CE' }}>9</div>
-                  <div style={{ position: 'relative', fontSize: 15, lineHeight: 1.6, color: '#D7DBD2' }}>Of those 55, the number we'd tell you to spend real time on. The drop from 55 to 9 is the part you can't Google.</div>
+                  {/* The giant "9" that used to sit here is now the chain's
+                      terminal node — repeating it beside the sentence that
+                      explains it was the redundancy that made the old block
+                      read as two graphics arguing. The words are unchanged. */}
+                  <div style={{ position: 'relative', fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.14em', color: '#A8F0CE' }}>THE DROP</div>
+                  <div style={{ position: 'relative', marginTop: 10, fontSize: 15, lineHeight: 1.6, color: '#D7DBD2' }}>Of those 55, the number we'd tell you to spend real time on. The drop from 55 to 9 is the part you can't Google.</div>
                 </div>
                 <div style={{ marginTop: 30, fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#0A7A58' }}>WHAT SEPARATES THE 9</div>
                 <div style={{ marginTop: 6 }}>
@@ -694,10 +723,28 @@ export default function Landing() {
 
         {/* ══ WHOSE SIDE — dark band ══ */}
         <section className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(68px, 11vw, 180px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
-          <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', left: '5%', bottom: 36, width: 300, height: 170, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
-          <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
+          {/* The dot field sits BEHIND the headline, not marooned in a corner
+              (2026-08-08). It was anchored `left: 5%; bottom: 36` — a 300×170
+              block alone in the band's bottom-left, aligned to nothing and
+              meaning nothing. Carta's dot fields always sit behind the type
+              they belong to; that is the difference between an ornament that
+              composes and one that decorates.
+              Centred on the headline's own axis and wide enough to run past
+              it on both sides, so the type reads as sitting ON the field
+              rather than next to it. z-index 0 under the content's z-index 1
+              — the copy below already carries its own stacking. */}
+          <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', left: '50%', top: '30%', transform: 'translateX(-50%)', width: 'min(760px, 86%)', height: 200, zIndex: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(rgba(168,240,206,.16) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
+          <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
             <div data-rv><Kicker dark center>WHOSE SIDE WE'RE ON</Kicker></div>
-            <p data-rv style={{ margin: '34px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(27px, 4.2vw, 68px)', lineHeight: 1.1, letterSpacing: '-0.014em', textWrap: 'balance' }}>The seller has a broker. Who is working for&nbsp;you?</p>
+            {/* TWO-TONE (2026-08-08). The accent lands on the TURN, never on the
+                setup — the sentence states a fact, then asks the question that
+                is the whole practice. Mint rather than Deal Green because this
+                is a dark band: green on #131512 is the low-contrast trap the
+                token table already warns about, and mint is the sanctioned
+                on-dark accent. The device is not new here — the collateral
+                deck builder has drawn hooks this way for months
+                (`twoToneHook`); it had simply never reached the site. */}
+            <p data-rv style={{ margin: '34px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(27px, 4.2vw, 68px)', lineHeight: 1.1, letterSpacing: '-0.014em', textWrap: 'balance' }}>The seller has a broker. <span style={{ color: '#A8F0CE' }}>Who is working for&nbsp;you?</span></p>
             <p data-rv style={{ margin: '26px auto 0', maxWidth: '38em', fontSize: 17.5, lineHeight: 1.65, color: '#ABB2AB' }}>We represent buyers, and only buyers — one client per target. You get our full attention, unfiltered analysis, and a proprietary deal that stays yours.</p>
             <div data-rv style={{ marginTop: 42, display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
               <a
