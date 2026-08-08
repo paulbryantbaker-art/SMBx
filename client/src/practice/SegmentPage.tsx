@@ -58,7 +58,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
   if (!seg) return <Redirect to="/" />;
   const [work, practitioner, side] = seg.answers;
 
-  const statNum = { fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(48px, 4.6vw, 76px)', lineHeight: 1, letterSpacing: '-0.02em' } as const;
+  const statNum = { fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(35px, 4.6vw, 76px)', lineHeight: 1, letterSpacing: '-0.02em' } as const;
   const statLabel = { marginTop: 16, fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.12em', color: '#7C8187' } as const;
   const lightCell = { background: '#F3F0E9', padding: '38px 28px 34px', textAlign: 'center' } as const;
 
@@ -67,7 +67,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
       <main style={{ background: '#FCFAF6', overflow: 'clip' }}>
 
         {/* ══ HERO ══ */}
-        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(100px, 9vw, 150px) 32px clamp(60px, 6vw, 90px)', textAlign: 'center', position: 'relative' }}>
+        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(52px, 9vw, 150px) clamp(20px, 4vw, 32px) clamp(31px, 6vw, 90px)', textAlign: 'center', position: 'relative' }}>
           <div aria-hidden="true" data-plx="-0.02" style={{ position: 'absolute', left: '7%', top: 70, width: 110, height: 110, backgroundImage: 'radial-gradient(rgba(22,24,26,.14) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
           <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', right: '8%', top: 130, width: 90, height: 90, backgroundImage: 'radial-gradient(rgba(10,122,88,.22) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
           <nav data-hs="0" aria-label="Breadcrumb" style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.12em', color: '#7C8187' }}>
@@ -77,7 +77,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
             <span style={{ margin: '0 10px' }}>/</span>
             <span style={{ color: '#16181A' }}>{seg.footerLabel.toUpperCase()}</span>
           </nav>
-          <h1 data-hs="1" style={{ margin: '30px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(40px, 4.2vw, 72px)', lineHeight: 1.06, letterSpacing: '-0.015em', textWrap: 'balance' }}>{seg.h1}</h1>
+          <h1 data-hs="1" style={{ margin: '30px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(29px, 4.2vw, 72px)', lineHeight: 1.06, letterSpacing: '-0.015em', textWrap: 'balance' }}>{seg.h1}</h1>
           <p data-hs="2" style={{ margin: '30px auto 0', maxWidth: '37em', fontSize: 18.5, lineHeight: 1.65, color: '#4A4F54' }}>{seg.sub}</p>
           <div data-hs="3" style={{ marginTop: 40, display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
             <a
@@ -104,7 +104,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
               approved line as its explanation. */}
           <div data-hs="3" style={{ margin: '56px auto 0', maxWidth: '34em' }}>
             <div style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#0A7A58' }}>THE NUMBER</div>
-            <div style={{ marginTop: 10, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(44px, 4vw, 64px)', lineHeight: 1, letterSpacing: '-0.02em' }}>
+            <div style={{ marginTop: 10, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(32px, 4vw, 64px)', lineHeight: 1, letterSpacing: '-0.02em' }}>
               {seg.stat.n}
               <span style={{ display: 'block', height: 5, width: 76, background: '#0A7A58', margin: '10px auto 0' }} />
             </div>
@@ -113,11 +113,11 @@ export default function SegmentPage({ slug }: { slug: string }) {
         </section>
 
         {/* ══ THE PROBLEM — dark band ══ */}
-        <section className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(110px, 10vw, 160px) 32px', marginTop: 'clamp(60px, 6vw, 100px)', position: 'relative', overflow: 'hidden' }}>
+        <section className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(57px, 10vw, 160px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(31px, 6vw, 100px)', position: 'relative', overflow: 'hidden' }}>
           <div aria-hidden="true" data-plx="0.025" style={{ position: 'absolute', top: 44, right: '5%', width: 260, height: 160, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 1360, margin: '0 auto', position: 'relative' }}>
             <div data-rv><Kicker dark>THE PROBLEM</Kicker></div>
-            <h2 data-rv style={{ margin: '24px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(32px, 3.2vw, 52px)', lineHeight: 1.1, letterSpacing: '-0.012em', maxWidth: '20em', textWrap: 'balance' }}>{seg.painTitle}</h2>
+            <h2 data-rv style={{ margin: '24px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(23px, 3.2vw, 52px)', lineHeight: 1.1, letterSpacing: '-0.012em', maxWidth: '20em', textWrap: 'balance' }}>{seg.painTitle}</h2>
             <div data-rv className="rv-stagger" data-tri style={{ marginTop: 56, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: '#2A2E29', border: '1px solid #2A2E29', position: 'relative' }}>
               <Handles color="#F4F5F1" />
               {seg.pains.map(p => (
@@ -132,10 +132,10 @@ export default function SegmentPage({ slug }: { slug: string }) {
         </section>
 
         {/* ══ HOW SMBX ANSWERS IT ══ */}
-        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(110px, 10vw, 170px) 32px 30px' }}>
+        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(57px, 10vw, 170px) clamp(20px, 4vw, 32px) 30px' }}>
           <div data-rv style={{ maxWidth: 880 }}>
             <Kicker>HOW SMBX ANSWERS IT</Kicker>
-            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(34px, 3.2vw, 54px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'balance' }}>The heavy lifting, handled. The final judgment, yours.</h2>
+            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(24px, 3.2vw, 54px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'balance' }}>The heavy lifting, handled. The final judgment, yours.</h2>
           </div>
           <div data-rv className="rv-stagger" data-tri style={{ marginTop: 52, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 26 }}>
             {[work, practitioner, side].map(a => (
@@ -149,16 +149,16 @@ export default function SegmentPage({ slug }: { slug: string }) {
         </section>
 
         {/* ══ HOW A DEAL RUNS FOR YOU ══ */}
-        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(110px, 10vw, 170px) 32px 30px' }}>
+        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(57px, 10vw, 170px) clamp(20px, 4vw, 32px) 30px' }}>
           <div data-rv style={{ maxWidth: 880 }}>
             <Kicker>HOW IT WORKS</Kicker>
-            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(34px, 3.2vw, 54px)', lineHeight: 1.08, letterSpacing: '-0.012em' }}>How a deal runs for you.</h2>
+            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(24px, 3.2vw, 54px)', lineHeight: 1.08, letterSpacing: '-0.012em' }}>How a deal runs for you.</h2>
             <p style={{ margin: '24px 0 0', maxWidth: '42em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>{seg.scenarioLede}</p>
           </div>
           <div data-rv style={{ margin: '52px 0 0', maxWidth: 980, position: 'relative', background: '#FFFFFF', border: '1px solid #16181A', padding: '14px 32px 18px' }}>
             <Handles />
             {seg.scenario.map((s, i) => (
-              <div key={s.k} style={{ display: 'grid', gridTemplateColumns: '44px 200px 1fr', gap: 16, padding: '18px 0', borderBottom: i < seg.scenario.length - 1 ? '1px solid #E4DFD3' : undefined }}>
+              <div key={s.k} data-numrow style={{ display: 'grid', gridTemplateColumns: '44px 200px 1fr', gap: 16, padding: '18px 0', borderBottom: i < seg.scenario.length - 1 ? '1px solid #E4DFD3' : undefined }}>
                 <div style={{ fontFamily: MONO, fontSize: 12, color: '#7C8187' }}>{String(i + 1).padStart(2, '0')}</div>
                 <div style={{ fontWeight: 600, fontSize: 16 }}>{s.k}.</div>
                 <div style={{ fontSize: 14.5, lineHeight: 1.6, color: '#4A4F54' }}>{s.v}</div>
@@ -168,10 +168,10 @@ export default function SegmentPage({ slug }: { slug: string }) {
         </section>
 
         {/* ══ WHAT YOU WALK AWAY WITH ══ */}
-        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(110px, 10vw, 170px) 32px 30px' }}>
+        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(57px, 10vw, 170px) clamp(20px, 4vw, 32px) 30px' }}>
           <div data-rv style={{ maxWidth: 880 }}>
             <Kicker>WHAT YOU WALK AWAY WITH</Kicker>
-            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(34px, 3.2vw, 54px)', lineHeight: 1.08, letterSpacing: '-0.012em' }}>The deliverables, in your hands.</h2>
+            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(24px, 3.2vw, 54px)', lineHeight: 1.08, letterSpacing: '-0.012em' }}>The deliverables, in your hands.</h2>
           </div>
           <div data-rv className="rv-stagger" data-tri style={{ marginTop: 52, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: '#E4DFD3', border: '1px solid #E4DFD3' }}>
             {seg.gets.map((g, i) => (
@@ -184,7 +184,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
         </section>
 
         {/* ══ THE PROOF — the record behind every engagement ══ */}
-        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(110px, 10vw, 170px) 32px 0' }}>
+        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(57px, 10vw, 170px) clamp(20px, 4vw, 32px) 0' }}>
           <div ref={statsRef} data-rv className="rv-stagger" data-stats-grid style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: '#E4DFD3', border: '1px solid #E4DFD3', position: 'relative' }}>
             <Handles />
             <div style={lightCell}>
@@ -210,9 +210,9 @@ export default function SegmentPage({ slug }: { slug: string }) {
         </section>
 
         {/* ══ THE ASK ══ */}
-        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(110px, 10vw, 170px) 32px clamp(130px, 12vw, 200px)', textAlign: 'center' }}>
+        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(57px, 10vw, 170px) clamp(20px, 4vw, 32px) clamp(68px, 12vw, 200px)', textAlign: 'center' }}>
           <div data-rv>
-            <h2 style={{ margin: '0 auto', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(36px, 3.8vw, 62px)', lineHeight: 1.08, letterSpacing: '-0.014em', maxWidth: '16em', textWrap: 'balance' }}>{seg.ctaH}</h2>
+            <h2 style={{ margin: '0 auto', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.8vw, 62px)', lineHeight: 1.08, letterSpacing: '-0.014em', maxWidth: '16em', textWrap: 'balance' }}>{seg.ctaH}</h2>
             <p style={{ margin: '24px auto 0', maxWidth: '38em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>{seg.ctaBody}</p>
             <div style={{ marginTop: 38, display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
               <a

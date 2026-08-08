@@ -9,6 +9,7 @@
     "dev:api": "npx tsx server/index.ts",
     "dev:health": "node scripts/dev-health.mjs",
     "shoot:fold": "node scripts/fold-shot.mjs",
+    "shoot:mobile": "node scripts/mobile-audit.mjs",
     "dev:seed": "node scripts/seed-dev-admin.mjs",
     "dev:seed:personas": "node scripts/seed-test-users.mjs",
     "build": "rm -rf dist && vite build && esbuild server/index.ts --bundle --platform=node --outdir=dist/server --format=esm --packages=external && mkdir -p dist/server/migrations && cp server/migrations/*.sql dist/server/migrations/",

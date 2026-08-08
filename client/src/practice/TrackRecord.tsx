@@ -75,7 +75,7 @@ export default function TrackRecord() {
     return () => io.disconnect();
   }, []);
 
-  const statNum = { fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(48px, 4.6vw, 76px)', lineHeight: 1, letterSpacing: '-0.02em' } as const;
+  const statNum = { fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(35px, 4.6vw, 76px)', lineHeight: 1, letterSpacing: '-0.02em' } as const;
   const statLabel = { marginTop: 16, fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.12em', color: '#7C8187' } as const;
   const lightCell = { background: '#F3F0E9', padding: '38px 28px 34px', textAlign: 'center' } as const;
 
@@ -84,17 +84,17 @@ export default function TrackRecord() {
       <main style={{ background: '#FCFAF6', overflow: 'clip' }}>
 
         {/* ══ HERO ══ */}
-        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(100px, 9vw, 150px) 32px 30px', textAlign: 'center', position: 'relative' }}>
+        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(52px, 9vw, 150px) clamp(20px, 4vw, 32px) 30px', textAlign: 'center', position: 'relative' }}>
           <div aria-hidden="true" data-plx="-0.02" style={{ position: 'absolute', left: '6%', top: 80, width: 110, height: 110, backgroundImage: 'radial-gradient(rgba(22,24,26,.14) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
           <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', right: '7%', top: 150, width: 90, height: 90, backgroundImage: 'radial-gradient(rgba(10,122,88,.22) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
           <div data-hs="0"><Kicker center>SELECTED TRANSACTION EXPERIENCE</Kicker></div>
-          <h1 data-hs="1" style={{ margin: '28px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(44px, 4.6vw, 78px)', lineHeight: 1.05, letterSpacing: '-0.015em', textWrap: 'balance' }}>More than 150 deals. One side of the table.</h1>
+          <h1 data-hs="1" style={{ margin: '28px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(32px, 4.6vw, 78px)', lineHeight: 1.05, letterSpacing: '-0.015em', textWrap: 'balance' }}>More than 150 deals. One side of the table.</h1>
           <p data-hs="2" style={{ margin: '28px auto 0', maxWidth: '34em', fontSize: 18.5, lineHeight: 1.65, color: '#4A4F54' }}>A selection of the acquisitions Paul Baker led or co-led over two decades in corporate development.</p>
           <div data-hs="3" style={{ margin: '30px auto 0', maxWidth: '46em', textAlign: 'left', fontStyle: 'italic', fontSize: 14, lineHeight: 1.65, color: '#7C8187', borderLeft: '2px solid #0A7A58', paddingLeft: 16 }}>{ATTRIBUTION}</div>
         </section>
 
         {/* ══ STAT STRIP ══ */}
-        <section style={{ maxWidth: 1360, margin: '0 auto', padding: '50px 32px 20px' }}>
+        <section style={{ maxWidth: 1360, margin: '0 auto', padding: '50px clamp(20px, 4vw, 32px) 20px' }}>
           <div ref={statsRef} data-rv className="rv-stagger" data-stats-grid style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: '#E4DFD3', border: '1px solid #E4DFD3', position: 'relative' }}>
             <Handles />
             <div style={lightCell}>
@@ -117,15 +117,15 @@ export default function TrackRecord() {
         </section>
 
         {/* ══ THE AGGREGATOR ══ */}
-        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(110px, 10vw, 170px) 32px 0' }}>
+        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(57px, 10vw, 170px) clamp(20px, 4vw, 32px) 0' }}>
           <div data-emp data-rv className="rv-stagger" style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: 64, alignItems: 'start' }}>
             <div>
               <Kicker>CHAPTER 01</Kicker>
-              <h2 style={{ margin: '20px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(28px, 2.6vw, 40px)', lineHeight: 1.15, letterSpacing: '-0.012em' }}>Wrench Group</h2>
+              <h2 style={{ margin: '20px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(20px, 2.6vw, 40px)', lineHeight: 1.15, letterSpacing: '-0.012em' }}>Wrench Group</h2>
               <div style={{ marginTop: 14, fontFamily: MONO, fontSize: 12, letterSpacing: '0.08em', color: '#0A7A58' }}>2016–2025 · DIRECTOR, CORPORATE DEVELOPMENT &amp; M&amp;A INTEGRATION</div>
               <p style={{ margin: '22px 0 0', fontSize: 16, lineHeight: 1.7, color: '#4A4F54' }}>Recruited to build the M&amp;A pipeline and execution engine for a PE-backed mid-market buy-and-build consolidator. Over nine years Paul led or co-led 36 acquisitions representing roughly $2.9B in enterprise value — then built the integration playbook that made them work.</p>
             </div>
-            <div style={{ position: 'relative', border: '1px solid #16181A', background: '#FFFFFF', padding: '28px 32px 30px' }}>
+            <div data-dealcard style={{ position: 'relative', border: '1px solid #16181A', background: '#FFFFFF', padding: '28px 32px 30px' }}>
               <Handles />
               <div style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#7C8187' }}>SELECTED TRANSACTIONS</div>
               <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -139,15 +139,15 @@ export default function TrackRecord() {
         </section>
 
         {/* ══ THE BANK ══ */}
-        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(100px, 9vw, 160px) 32px 0' }}>
+        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(52px, 9vw, 160px) clamp(20px, 4vw, 32px) 0' }}>
           <div data-emp data-rv className="rv-stagger" style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: 64, alignItems: 'start' }}>
             <div>
               <Kicker>CHAPTER 02</Kicker>
-              <h2 style={{ margin: '20px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(28px, 2.6vw, 40px)', lineHeight: 1.15, letterSpacing: '-0.012em' }}>JPMorgan Chase</h2>
+              <h2 style={{ margin: '20px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(20px, 2.6vw, 40px)', lineHeight: 1.15, letterSpacing: '-0.012em' }}>JPMorgan Chase</h2>
               <div style={{ marginTop: 14, fontFamily: MONO, fontSize: 12, letterSpacing: '0.08em', color: '#0A7A58' }}>2005–2015 · DIRECTOR, ACQUISITION INTEGRATION</div>
               <p style={{ margin: '22px 0 0', fontSize: 16, lineHeight: 1.7, color: '#4A4F54' }}>Led integration on the bank's largest platform and fintech acquisitions, delivering over $2B in synergies across 100+ stakeholder touchpoints.</p>
             </div>
-            <div style={{ position: 'relative', border: '1px solid #16181A', background: '#FFFFFF', padding: '28px 32px 30px' }}>
+            <div data-dealcard style={{ position: 'relative', border: '1px solid #16181A', background: '#FFFFFF', padding: '28px 32px 30px' }}>
               <Handles />
               <div style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#7C8187' }}>SELECTED TRANSACTIONS</div>
               <div style={{ marginTop: 14, fontSize: 15, lineHeight: 1.7, color: '#4A4F54' }}>Bank One · Washington Mutual · Chase Paymentech (JV and buyout) · Collegiate Funding Services · Sears Canada card portfolio · Neovest · Vastera · Xign · clearXchange · Bloomspot · GoPago</div>
@@ -156,11 +156,11 @@ export default function TrackRecord() {
         </section>
 
         {/* ══ DELOITTE ══ */}
-        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(100px, 9vw, 160px) 32px 0' }}>
+        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(52px, 9vw, 160px) clamp(20px, 4vw, 32px) 0' }}>
           <div data-emp data-rv className="rv-stagger" style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: 64, alignItems: 'start', borderTop: '1px solid #E4DFD3', paddingTop: 64 }}>
             <div>
               <Kicker>CHAPTER 03</Kicker>
-              <h2 style={{ margin: '20px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(28px, 2.6vw, 40px)', lineHeight: 1.15, letterSpacing: '-0.012em' }}>Deloitte Consulting</h2>
+              <h2 style={{ margin: '20px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(20px, 2.6vw, 40px)', lineHeight: 1.15, letterSpacing: '-0.012em' }}>Deloitte Consulting</h2>
               <div style={{ marginTop: 14, fontFamily: MONO, fontSize: 12, letterSpacing: '0.08em', color: '#0A7A58' }}>2010–2011 · ENGAGEMENT MANAGER, STRATEGY &amp; OPERATIONS</div>
             </div>
             <p style={{ margin: 0, fontSize: 16, lineHeight: 1.7, color: '#4A4F54', maxWidth: '44em' }}>Advised Fortune 500 clients on inorganic growth strategy, target operating models, and post-merger integration.</p>
@@ -168,10 +168,10 @@ export default function TrackRecord() {
         </section>
 
         {/* ══ CLOSER — dark band ══ */}
-        <section className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(130px, 11vw, 180px) 32px', marginTop: 'clamp(110px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
+        <section className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(68px, 11vw, 180px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
           <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', left: '6%', bottom: 36, width: 280, height: 160, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
-            <p data-rv style={{ margin: '0 auto', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(36px, 4vw, 64px)', lineHeight: 1.12, letterSpacing: '-0.014em', textWrap: 'balance' }}>Every transaction above was done for a buyer. That hasn't&nbsp;changed.</p>
+            <p data-rv style={{ margin: '0 auto', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 4vw, 64px)', lineHeight: 1.12, letterSpacing: '-0.014em', textWrap: 'balance' }}>Every transaction above was done for a buyer. That hasn't&nbsp;changed.</p>
             <div data-rv style={{ marginTop: 40 }}>
               <a
                 href={bookHref()}

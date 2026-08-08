@@ -80,19 +80,19 @@ export default function ReportsIndex() {
       <main style={{ background: '#FCFAF6', overflow: 'clip' }}>
 
         {/* ══ HERO ══ */}
-        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(100px, 9vw, 150px) 32px 20px', position: 'relative' }}>
+        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(52px, 9vw, 150px) clamp(20px, 4vw, 32px) 20px', position: 'relative' }}>
           <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', right: '7%', top: 80, width: 130, height: 130, backgroundImage: 'radial-gradient(rgba(10,122,88,.2) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
           <div data-hs="0" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ width: 8, height: 8, background: '#0A7A58' }} />
             <span style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.16em', color: '#7C8187' }}>PUBLISHED ASSESSMENTS</span>
           </div>
-          <h1 data-hs="1" style={{ margin: '24px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(44px, 4.6vw, 78px)', lineHeight: 1.05, letterSpacing: '-0.015em' }}>Research</h1>
+          <h1 data-hs="1" style={{ margin: '24px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(32px, 4.6vw, 78px)', lineHeight: 1.05, letterSpacing: '-0.015em' }}>Research</h1>
           <p data-hs="2" style={{ margin: '24px 0 0', maxWidth: '40em', fontSize: 18.5, lineHeight: 1.65, color: '#4A4F54' }}>The market assessments we run before taking a mandate. Every figure is attributed to its source, and where analysts disagree we show both numbers rather than picking the flattering one.</p>
         </section>
 
         {/* ══ FACETS ══ */}
         {(industries.length > 1 || metros.length > 1) && (
-          <section style={{ maxWidth: 1360, margin: '0 auto', padding: '36px 32px 0' }}>
+          <section style={{ maxWidth: 1360, margin: '0 auto', padding: '36px clamp(20px, 4vw, 32px) 0' }}>
             <div data-hs="3" style={{ display: 'flex', flexWrap: 'wrap', gap: 26, borderTop: '1px solid #E4DFD3', borderBottom: '1px solid #E4DFD3', padding: '18px 0' }}>
               {industries.length > 1 && (
                 <div role="group" aria-label="Filter by industry" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -115,7 +115,7 @@ export default function ReportsIndex() {
         )}
 
         {/* ══ THE SHELF ══ */}
-        <section style={{ maxWidth: 1360, margin: '0 auto', padding: '56px 32px 20px' }}>
+        <section style={{ maxWidth: 1360, margin: '0 auto', padding: '56px clamp(20px, 4vw, 32px) 20px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
             {shown.map(r => (
               <article key={r.slug} data-rv data-rcard style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 380px', background: '#FFFFFF', border: '1px solid #16181A' }}>
@@ -129,7 +129,7 @@ export default function ReportsIndex() {
                   </div>
                   {/* Plain text per the reference — the card's one doorway is
                       the "Read the assessment" CTA below. */}
-                  <h2 style={{ margin: '20px 0 0', fontFamily: SERIF, fontWeight: 600, fontSize: 'clamp(26px, 2.4vw, 36px)', lineHeight: 1.15, letterSpacing: '-0.01em' }}>
+                  <h2 style={{ margin: '20px 0 0', fontFamily: SERIF, fontWeight: 600, fontSize: 'clamp(20px, 2.4vw, 36px)', lineHeight: 1.15, letterSpacing: '-0.01em' }}>
                     {r.shortTitle}
                   </h2>
                   <p style={{ margin: '16px 0 0', fontSize: 15.5, lineHeight: 1.68, color: '#4A4F54' }}>{r.abstract}</p>
@@ -177,10 +177,10 @@ export default function ReportsIndex() {
         </section>
 
         {/* ══ CTA — dark band ══ */}
-        <section id="cta" className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(120px, 10vw, 170px) 32px', marginTop: 'clamp(100px, 9vw, 160px)', position: 'relative', overflow: 'hidden' }}>
+        <section id="cta" className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(52px, 9vw, 160px)', position: 'relative', overflow: 'hidden' }}>
           <div aria-hidden="true" data-plx="0.025" style={{ position: 'absolute', right: '6%', bottom: 30, width: 260, height: 150, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 840, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
-            <h2 data-rv style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(34px, 3.6vw, 58px)', lineHeight: 1.1, letterSpacing: '-0.014em' }}>Want this run on your lane?</h2>
+            <h2 data-rv style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(24px, 3.6vw, 58px)', lineHeight: 1.1, letterSpacing: '-0.014em' }}>Want this run on your lane?</h2>
             <p data-rv style={{ margin: '24px auto 0', maxWidth: '36em', fontSize: 17.5, lineHeight: 1.65, color: '#ABB2AB' }}>We build the same register for a client's specific market before the first approach goes out. If you're buying, start with a conversation.</p>
             <div data-rv style={{ marginTop: 38 }}>
               <a
