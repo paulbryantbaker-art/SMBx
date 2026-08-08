@@ -73,6 +73,7 @@ const Body = memo(function Body(
           <img
             key={`a${i}`}
             className="rp-accent"
+            data-rvimg
             src={a.img}
             style={{ objectPosition: a.pos }}
             alt=""
