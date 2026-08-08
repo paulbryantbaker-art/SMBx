@@ -53,6 +53,19 @@
 }
 .ca-nav.on { border-bottom-color: #E4DFD3; box-shadow: 0 10px 30px rgba(22, 24, 26, 0.05); }
 
+/* Hide-on-scroll-down / show-on-scroll-up (2026-08-08). `translate` on a
+   position:sticky element, NOT `top` — sticky already owns `top`, so
+   animating it fights the stick and stutters. 110% rather than 100% so the
+   box-shadow clears the edge too instead of leaving a grey smear along the
+   top of the page. The transition is transform-only and the state is driven
+   from a rAF-throttled scroll handler in PracticeShell. */
+.ca-nav { transition: border-color 0.25s ease, box-shadow 0.25s ease, translate 0.32s cubic-bezier(0.22, 0.9, 0.26, 1); }
+.ca-nav.up { translate: 0 -110%; }
+@media (prefers-reduced-motion: reduce) {
+  .ca-nav { transition: border-color 0.25s ease, box-shadow 0.25s ease; }
+  .ca-nav.up { translate: none; }
+}
+
 /* Responsive guards, verbatim from the reference <style> block — the nav
    compresses, then drops the quiet CTA, then hands over to the burger menu.
    (One deviation: the links hide at 760px, not the reference's 840px, so the

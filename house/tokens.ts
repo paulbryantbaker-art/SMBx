@@ -133,9 +133,16 @@ export const CARTA = {
 
 /** Type for the site. Loaded from Google Fonts in the browser — which is fine
  *  HERE and fatal in a renderer: the PDF/deck paths must embed woff2s locally
- *  (Railway blocks the Google CDN; the Docker image carries only Noto). Phase 2
- *  needs @fontsource packages for Source Serif 4 and Schibsted Grotesk before
- *  the collateral can move. */
+ *  (Railway blocks the Google CDN; the Docker image carries only Noto).
+ *
+ *  THE PHASE-2 FONT BLOCKER IS CLEARED (2026-08-08). This comment used to say
+ *  collateral could not move until @fontsource packages existed for Source
+ *  Serif 4 and Schibsted Grotesk. They do:
+ *  `server/services/fontEmbeds.ts` exports `cartaFontFaceCss()`, inlining
+ *  Source Serif 4 variable + Schibsted Grotesk 400–700 + Plex Mono 400/500,
+ *  already proven by the practice market-map PDF. A renderer moving to CARTA
+ *  swaps `fontFaceCss()` for `cartaFontFaceCss()` and is done.
+ *  Work order: `content/studio/CARTA_COLLATERAL_CONVERSION.md`. */
 export const CARTA_TYPE = {
   display: `'Source Serif 4', Georgia, serif`,
   sans: `'Schibsted Grotesk', -apple-system, sans-serif`,

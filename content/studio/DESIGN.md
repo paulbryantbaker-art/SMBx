@@ -18,6 +18,13 @@
 > this document describes) and `CARTA` (the site). Do not read CARTA values into
 > a deck, a report or a one-pager; the builders import LEDGER and that is
 > correct until phase 2 moves them together.
+>
+> **The phase-2 work order now exists:**
+> `content/studio/CARTA_COLLATERAL_CONVERSION.md` (repo, not the workspace —
+> it changes renderer code). It carries the token-by-token translation, the
+> six files that change, the traps, and the order of work. **Closing it
+> includes rewriting THIS document and deleting this box**, which is the last
+> step in that order. Until someone runs it, this box is still true.
 
 Everything smbX produces looks like one practice because every renderer reads
 the same values. This file is what those values are, what they came from, and

@@ -648,6 +648,19 @@ export default function Landing() {
                 <span style={{ display: 'block', marginTop: 9, fontSize: 14, lineHeight: 1.55, color: '#7C8187' }}>{l.th}</span>
               </Link>
             ))}
+            {/* Fill the last row's remainder (Paul, 2026-08-08: "in markets
+                there is a weird dark rectangle"). The grid paints the seam by
+                showing its own #E4DFD3 background through a 1px gap, so any
+                cell the lanes don't fill renders as a solid tan block — which
+                is what appeared the moment MEP took the board from 15 lanes
+                (exactly 5 rows of 3) to 16. ONE filler spanning the whole
+                remainder, not one per empty cell: separate fillers would draw
+                seams between themselves and read as an unfinished table.
+                Computed from the register so the next lane added can't bring
+                the block back. */}
+            {HUNT_LANES.length % 3 !== 0 && (
+              <div aria-hidden="true" style={{ gridColumn: `span ${3 - (HUNT_LANES.length % 3)}`, background: '#FCFAF6' }} />
+            )}
           </div>
           <div data-rv style={{ marginTop: 38, textAlign: 'center' }}>
             <Link href="/industries" className="ca-h-deepgreen" style={{ fontSize: 16, fontWeight: 600, color: '#0A7A58', borderBottom: '1.5px solid #0A7A58', paddingBottom: 2 }}>Read the full sector theses →</Link>
@@ -770,7 +783,7 @@ export default function Landing() {
 
         {/* ══ FOUNDER ══ */}
         <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(120px, 11vw, 190px) 32px 0' }}>
-          <div data-rv style={{ background: '#F3F0E9', display: 'grid', gridTemplateColumns: '300px 1fr', gap: 48, padding: '48px 52px', alignItems: 'center', position: 'relative' }}>
+          <div data-rv className="rv-stagger" style={{ background: '#F3F0E9', display: 'grid', gridTemplateColumns: '300px 1fr', gap: 48, padding: '48px 52px', alignItems: 'center', position: 'relative' }}>
             <div style={{ position: 'relative', width: 230 }}>
               <img data-rvimg src="/founder-portrait.jpg" alt="Paul Baker" loading="lazy" style={{ display: 'block', width: 230, height: 250, objectFit: 'cover', objectPosition: '50% 0%' }} />
               <span style={{ position: 'absolute', right: -14, bottom: -14, width: 34, height: 34, background: '#0A7A58', color: '#FCFAF6', display: 'grid', placeItems: 'center', fontFamily: SERIF, fontWeight: 700, fontSize: 20, fontStyle: 'italic' }}>"</span>

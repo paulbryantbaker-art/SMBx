@@ -118,7 +118,7 @@ export default function TrackRecord() {
 
         {/* ══ THE AGGREGATOR ══ */}
         <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(110px, 10vw, 170px) 32px 0' }}>
-          <div data-emp data-rv style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: 64, alignItems: 'start' }}>
+          <div data-emp data-rv className="rv-stagger" style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: 64, alignItems: 'start' }}>
             <div>
               <Kicker>CHAPTER 01</Kicker>
               <h2 style={{ margin: '20px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(28px, 2.6vw, 40px)', lineHeight: 1.15, letterSpacing: '-0.012em' }}>Wrench Group</h2>
@@ -140,7 +140,7 @@ export default function TrackRecord() {
 
         {/* ══ THE BANK ══ */}
         <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(100px, 9vw, 160px) 32px 0' }}>
-          <div data-emp data-rv style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: 64, alignItems: 'start' }}>
+          <div data-emp data-rv className="rv-stagger" style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: 64, alignItems: 'start' }}>
             <div>
               <Kicker>CHAPTER 02</Kicker>
               <h2 style={{ margin: '20px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(28px, 2.6vw, 40px)', lineHeight: 1.15, letterSpacing: '-0.012em' }}>JPMorgan Chase</h2>
@@ -157,7 +157,7 @@ export default function TrackRecord() {
 
         {/* ══ DELOITTE ══ */}
         <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(100px, 9vw, 160px) 32px 0' }}>
-          <div data-emp data-rv style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: 64, alignItems: 'start', borderTop: '1px solid #E4DFD3', paddingTop: 64 }}>
+          <div data-emp data-rv className="rv-stagger" style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: 64, alignItems: 'start', borderTop: '1px solid #E4DFD3', paddingTop: 64 }}>
             <div>
               <Kicker>CHAPTER 03</Kicker>
               <h2 style={{ margin: '20px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(28px, 2.6vw, 40px)', lineHeight: 1.15, letterSpacing: '-0.012em' }}>Deloitte Consulting</h2>

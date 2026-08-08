@@ -186,14 +186,53 @@ export default function PracticeShell({
     return () => document.removeEventListener('click', onClick);
   }, [home, navigate]);
 
-  // Nav hairline + shadow once the page has scrolled 24px (reference behavior
-  // — the bar stays; the Aurora hide-on-scroll chrome retired with Aurora).
+  // Nav hairline + shadow once the page has scrolled 24px, AND hide-on-down /
+  // show-on-up (2026-08-08, Paul: "lets add back the menu bar hiding on scroll
+  // down and unhiding on scroll up"). The Carta references ship a bar that
+  // never hides; this is a deliberate departure — the reading pages are long
+  // and the bar was eating 76px of every screenful on the way down.
+  //
+  // Three rules keep it from feeling twitchy or trapping anyone:
+  //   · a 6px dead zone, so sub-pixel jitter and momentum wobble don't flip it;
+  //   · it never hides in the top 120px — the hero must always show its nav,
+  //     and iOS rubber-band scrolling reports negative offsets up there;
+  //   · it always returns when the mobile menu opens, when focus lands on
+  //     something inside it (keyboard tabbing must never chase a hidden bar
+  //     off-screen), and at the very bottom of the page, where overscroll can
+  //     otherwise strand it hidden.
   const [navOn, setNavOn] = useState(false);
+  const [navHidden, setNavHidden] = useState(false);
   useEffect(() => {
-    const onScroll = () => setNavOn(window.scrollY > 24);
-    onScroll();
+    let last = window.scrollY;
+    let ticking = false;
+    const apply = () => {
+      ticking = false;
+      const y = window.scrollY;
+      setNavOn(y > 24);
+      const dy = y - last;
+      if (Math.abs(dy) < 6) return;            // dead zone
+      last = y;
+      const atBottom = y + window.innerHeight >= document.documentElement.scrollHeight - 2;
+      if (y < 120 || atBottom) { setNavHidden(false); return; }
+      setNavHidden(dy > 0);
+    };
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(apply);
+    };
+    apply();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  // Keyboard focus inside the bar always brings it back — see above.
+  useEffect(() => {
+    const onFocusIn = (e: FocusEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && t.closest('.ca-nav')) setNavHidden(false);
+    };
+    document.addEventListener('focusin', onFocusIn);
+    return () => document.removeEventListener('focusin', onFocusIn);
   }, []);
 
   // Mobile menu (≤760px). Closes on route change, Esc, scrim, or any link
@@ -353,7 +392,7 @@ export default function PracticeShell({
 
   return (
     <div className="pd" style={{ background: '#FCFAF6' }}>
-      <header className={`ca-nav${navOn || menuOpen ? ' on' : ''}`}>
+      <header className={`ca-nav${navOn || menuOpen ? ' on' : ''}${navHidden && !menuOpen ? ' up' : ''}`}>
         <div data-nav-inner style={{ maxWidth: 1360, margin: '0 auto', padding: '0 32px', height: 76, display: 'flex', alignItems: 'center', gap: 36, minWidth: 0 }}>
           {/* SPA Link, not a plain anchor: a full reload from down-page races
               the browser's scroll restoration against the still-mounting page

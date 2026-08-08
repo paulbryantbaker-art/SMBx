@@ -87,7 +87,7 @@ export default function Industries() {
           {SECTORS.map((s, i) => {
             const even = i % 2 === 0;
             return (
-              <div key={s.nm} data-rv data-sector style={{ display: 'grid', gap: 56, alignItems: 'start', padding: '64px 0', borderBottom: '1px solid #E4DFD3', gridTemplateColumns: even ? '7fr 4fr' : '4fr 7fr' }}>
+              <div key={s.nm} data-rv className="rv-stagger" data-sector style={{ display: 'grid', gap: 56, alignItems: 'start', padding: '64px 0', borderBottom: '1px solid #E4DFD3', gridTemplateColumns: even ? '7fr 4fr' : '4fr 7fr' }}>
                 <div style={{ order: even ? 1 : 2 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.1em', color: '#0A7A58' }}>{String(i + 1).padStart(2, '0')}</span>
