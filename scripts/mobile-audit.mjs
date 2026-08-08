@@ -264,6 +264,37 @@ for (const [route, name] of ROUTES) {
       push('COLLIDE', o.a.el, `overlaps "${(o.b.el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 30)}" by ${o.area}px²`);
     }
 
+    // ── SAMEDEST: several DIFFERENTLY-LABELLED links sharing one destination.
+    //    Added 2026-08-08 after Paul: "if I click on any of these I go to book
+    //    a call instead." All five who-index cards carried href="#cta", so
+    //    five distinct promises landed on the same booking card — the exact
+    //    failure the 2026-08-02 lesson already named for the nav dropdown
+    //    ("five labels, one destination reads as broken") and which nothing
+    //    was watching for anywhere else. Repeated IDENTICAL labels are fine
+    //    and common (three "Book a call" buttons is one promise offered three
+    //    times), so this counts DISTINCT labels only.
+    const byHref = new Map();
+    for (const a of document.querySelectorAll('a[href]')) {
+      const href = a.getAttribute('href');
+      if (!href || href === '#' || /^(mailto|tel):/.test(href)) continue;
+      // Normalise before counting: the same promise appears in the nav, the
+      // burger menu and the footer as "Research", "Research →" and
+      // "RESEARCH". Three renderings of one link is chrome, not a defect —
+      // counting them raw made the check fire on every page and would have
+      // trained us to ignore it.
+      const label = (a.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase()
+        .replace(/[\s→›»…\-–—]+$/u, '').slice(0, 40);
+      if (!label) continue;
+      if (!byHref.has(href)) byHref.set(href, new Set());
+      byHref.get(href).add(label);
+    }
+    for (const [href, labels] of byHref) {
+      if (labels.size >= 3) {
+        const a = document.querySelector(`a[href="${CSS.escape(href)}"]`);
+        if (a) push('SAMEDEST', a, `${labels.size} differently-labelled links all go to ${href} — ${[...labels].slice(0, 3).map(l => `"${l}"`).join(', ')}…`);
+      }
+    }
+
     return {
       vw, scrollW: document.documentElement.scrollWidth, docH: document.body.scrollHeight,
       findings: out,
@@ -307,7 +338,7 @@ for (const [route, name] of ROUTES) {
   }
 }
 
-const ORDER = ['BLEED', 'GRID', 'RAGGED', 'SQUEEZE', 'COLLIDE', 'CLIP', 'VOID', 'TAP', 'TINY'];
+const ORDER = ['BLEED', 'GRID', 'RAGGED', 'SQUEEZE', 'SAMEDEST', 'COLLIDE', 'CLIP', 'VOID', 'TAP', 'TINY'];
 let total = 0;
 console.log(`\n════ ADVERSARIAL MOBILE AUDIT @ ${W}×${H} ════`);
 for (const r of report) {
