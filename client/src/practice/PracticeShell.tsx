@@ -445,16 +445,17 @@ export default function PracticeShell({
               }
             }}
           >
-            {/* 34px, up from the reference's 30 (Paul, 2026-08-08: "maybe a
-                little small"). Vertical centring measured exact before
-                changing anything — box 23px above / 23px below in the 76px
-                bar, and the burger's centre agrees to 0.1px — so size was the
-                real finding, not alignment. 34 rather than a guess: the same
-                Carta design already draws this mark at 36px in its dark
-                variant, so this stays inside the system's own vocabulary and
-                still leaves 21px of clearance in a bar whose other controls
-                are 44px. */}
-            <img src="/logo-green-x.png" alt="smbX.ai" width={1584} height={396} style={{ height: 34, width: 'auto', display: 'block' }} />
+            {/* 38px, up from the reference's 30 via 34 (Paul, 2026-08-08:
+                "maybe a little small", then "yes bigger logo" after seeing 34
+                — his call, over my recommendation of 34, which is recorded
+                here rather than argued).
+                Vertical centring was measured exact before any of this and is
+                unchanged by size — box centred in the 76px bar, the burger's
+                centre agreeing to 0.1px — so size was always the real finding.
+                38 leaves 19px of clearance top and bottom; the BAR is now the
+                constraint, not the artwork, so anything beyond ~42 wants the
+                76px nav to grow with it. */}
+            <img src="/logo-green-x.png" alt="smbX.ai" width={1584} height={396} style={{ height: 38, width: 'auto', display: 'block' }} />
           </Link>
           <nav data-nav-links aria-label="Site" style={{ display: 'flex', alignItems: 'center', gap: 28, fontSize: 15.5, fontWeight: 500, whiteSpace: 'nowrap', minWidth: 0 }}>
             <a href={anchor('#why')} className="ca-h-green" style={navLink}>Why us</a>
