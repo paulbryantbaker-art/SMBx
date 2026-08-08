@@ -370,19 +370,80 @@ export default function Landing() {
         {/* ══ HERO ══ */}
         {/* id="yulia" sits on the SECTION per the reference — YuliaIntake no
             longer carries its own copy of the id (one anchor, one owner). */}
-        <section data-hero-grid id="yulia" style={{ position: 'relative', maxWidth: 1360, margin: '0 auto', minHeight: 'calc(100svh - 76px)', padding: 'clamp(60px, 6vh, 110px) clamp(20px, 4vw, 32px) clamp(70px, 8vh, 140px)', display: 'grid', gridTemplateColumns: '1.02fr .98fr', gap: 'clamp(29px, 5vw, 92px)', alignItems: 'center' }}>
-          <div>
+        {/* DESKTOP COMPOSITION (2026-08-08, Paul: "the hero / above the fold is
+            a little boring on desktop… carta is actually a little busy, we can
+            meet in the middle — making the ball bigger balancing out the page
+            (golden ratio)… blending our old with it to make an original").
+
+            Boring had a cause: two near-equal columns (1.02fr/.98fr) with the
+            type at its loudest and the only geometry a 150px sliver tucked
+            behind the card's corner. So the fix is proportion, not content —
+            nothing was added to read, which is the half of Carta we are NOT
+            copying.
+
+            Three moves. (1) The columns go to 1.32fr/1fr — φ is 1.618 and that
+            starves the engine card (467px at 1440, where its chips start
+            wrapping two-deep), so this is the meet-in-the-middle: asymmetric
+            enough to have a subject, wide enough to keep the card usable.
+            (2) The orbit becomes the counterweight it was pretending to be —
+            a hero-scale ring the card floats on, bleeding off the right edge
+            (safe: `main` is `overflow: clip`). It is our gesture, wearing
+            Carta's square handles as its nodes. (3) The headline sheds ~11px
+            so the ring, not the type, is the loudest thing on the fold.
+
+            EVERY new decoration here is DESKTOP-ONLY (see the ≥1025 block in
+            carta.css) and the two marks it replaces are hidden at the same
+            breakpoint, so below 1024 this hero renders exactly as it did. */}
+        <section data-hero-grid id="yulia" style={{ position: 'relative', maxWidth: 1360, margin: '0 auto', minHeight: 'calc(100svh - 76px)', padding: 'clamp(60px, 6vh, 110px) clamp(20px, 4vw, 32px) clamp(70px, 8vh, 140px)', display: 'grid', gridTemplateColumns: '1.32fr 1fr', gap: 'clamp(29px, 4.4vw, 80px)', alignItems: 'center' }}>
+          {/* THE RING. Absolutely positioned on the SECTION, not the card
+              column, so it can bridge both — and first in the DOM so the two
+              columns (each z-index 1) paint over it. `data-plx` drifts it on
+              scroll via `translate`, which is why the centring uses `transform`
+              instead: the two properties compose rather than fight. */}
+          {/* NOT CONCENTRIC WITH THE CARD, deliberately (Paul, 2026-08-08:
+              "why is the ball hiding behind the chat box?"). The first cut
+              centred the ring on the engine card, and an even rim around an
+              opaque panel reads as a HALO on the panel rather than an object
+              behind it — the eye has no cue about which is in front. Offsetting
+              it left (right: 0 vs the card's own bleed) leaves ~230px of ball
+              showing on one side and ~30px on the other, and that asymmetry is
+              the whole depth cue. The innermost circle came out with it: at
+              this scale it sat entirely behind the card, contributing nothing
+              but a second concentric edge. Strokes carry more weight too — at
+              790px across, 1.2px at .30 opacity is a rumour, not a shape. */}
+          <div aria-hidden="true" data-plx="-0.04" className="ca-orbit ca-orbit-hero" style={{ position: 'absolute', top: '50%', right: '0%', width: 'clamp(560px, 55vw, 860px)', aspectRatio: '1 / 1', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+            <div style={{ width: '100%', height: '100%', transformOrigin: '50% 50%' }}>
+              <svg viewBox="0 0 600 600" width="100%" height="100%" fill="none">
+                <circle cx="300" cy="300" r="292" stroke="#0A7A58" strokeWidth="1.6" opacity=".52" />
+                <ellipse cx="300" cy="300" rx="291" ry="116" stroke="#0A7A58" strokeWidth="1.6" strokeDasharray="7 9" opacity=".62" />
+                <ellipse cx="300" cy="300" rx="116" ry="291" stroke="#0A7A58" strokeWidth="1.6" opacity=".46" />
+                {/* Square nodes, not dots — Carta's 8px handle is the house
+                    gesture, so the satellites wear it. */}
+                <rect x="292" y="0" width="16" height="16" fill="#0A7A58" />
+                <rect x="585" y="294" width="11" height="11" fill="#0A7A58" opacity=".6" />
+                {/* There was a third node on the vertical ellipse's left. Once
+                    the ring moved off-centre that one no longer sat on any
+                    visible arc — it landed alone in the open bone between the
+                    copy and the card and read as a smudge on the screen. A
+                    node has to be ON its orbit to be a node. */}
+              </svg>
+            </div>
+          </div>
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            {/* Dot field behind the headline — where real carta.com puts one.
+                Ink, not green: the ring owns the accent on this fold. */}
+            <span aria-hidden="true" className="ca-hero-hdots" style={{ position: 'absolute', left: -22, top: -26, width: 300, height: 196, backgroundImage: 'radial-gradient(rgba(22,24,26,.14) 1.1px, transparent 1.1px)', backgroundSize: '16px 16px', maskImage: 'linear-gradient(to bottom right, #000 18%, transparent 76%)', WebkitMaskImage: 'linear-gradient(to bottom right, #000 18%, transparent 76%)', zIndex: -1 }} />
             {ownerHero ? (
-              <h1 data-hs="0" style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(35px, 4.8vw, 92px)', lineHeight: 1.04, letterSpacing: '-0.015em', textWrap: 'balance' }}>Think like a buyer. Exit on your&nbsp;terms.</h1>
+              <h1 data-hs="0" style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(35px, 4.05vw, 82px)', lineHeight: 1.05, letterSpacing: '-0.015em', textWrap: 'balance' }}>Think like a buyer. Exit on your&nbsp;terms.</h1>
             ) : (
-              <h1 data-hs="0" style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(35px, 4.8vw, 92px)', lineHeight: 1.04, letterSpacing: '-0.015em', textWrap: 'balance' }}>Buying a business is hard&nbsp;work. We make it&nbsp;easier.</h1>
+              <h1 data-hs="0" style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(35px, 4.05vw, 82px)', lineHeight: 1.05, letterSpacing: '-0.015em', textWrap: 'balance' }}>Buying a business is hard&nbsp;work. We make it&nbsp;easier.</h1>
             )}
             {ownerHero ? (
-              <p data-hs="1" style={{ margin: '30px 0 0', maxWidth: '34em', fontSize: 20, lineHeight: 1.65, color: '#4A4F54' }}>Thinking like a buyer is the best way to prepare — and starting here, with your valuation, puts you in front of potential buyers when you're{' '}ready.</p>
+              <p data-hs="1" style={{ margin: '26px 0 0', maxWidth: '28em', fontSize: 19, lineHeight: 1.68, color: '#4A4F54' }}>Thinking like a buyer is the best way to prepare — and starting here, with your valuation, puts you in front of potential buyers when you're{' '}ready.</p>
             ) : (
-              <p data-hs="1" style={{ margin: '30px 0 0', maxWidth: '34em', fontSize: 20, lineHeight: 1.65, color: '#4A4F54' }}>Whether your 1st or your 100th&nbsp;acquisition, we run the process for you, freeing up your time and&nbsp;resources.</p>
+              <p data-hs="1" style={{ margin: '26px 0 0', maxWidth: '28em', fontSize: 19, lineHeight: 1.68, color: '#4A4F54' }}>Whether your 1st or your 100th&nbsp;acquisition, we run the process for you, freeing up your time and&nbsp;resources.</p>
             )}
-            <div data-hs="2" style={{ marginTop: 40, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+            <div data-hs="2" style={{ marginTop: 36, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
               <a
                 href={bookHref()}
                 target={bookTarget()}
@@ -402,21 +463,31 @@ export default function Landing() {
                 See a sample market map
               </a>
             </div>
-            <a
-              data-hs="3"
-              href="#owners"
-              className="ca-h-deepgreen"
-              style={{ display: 'inline-block', marginTop: 24, fontSize: 15.5, fontWeight: 500, color: '#0A7A58', borderBottom: '1px solid #0A7A58', paddingBottom: 2 }}
-              onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero-owner-button' })}
-            >
-              Are you a business owner? →
-            </a>
+            {/* The hairline is structure, not decoration: it closes the stack
+                so the owner link reads as the block's footer rather than a
+                stray line drifting in the fold's whitespace. Carta's grid
+                gesture, no words added. */}
+            <div data-hs="3" style={{ marginTop: 32, paddingTop: 22, borderTop: '1px solid #E4DFD3' }}>
+              <a
+                href="#owners"
+                className="ca-h-deepgreen"
+                style={{ display: 'inline-block', fontSize: 15.5, fontWeight: 500, color: '#0A7A58', borderBottom: '1px solid #0A7A58', paddingBottom: 2 }}
+                onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero-owner-button' })}
+              >
+                Are you a business owner? →
+              </a>
+            </div>
           </div>
 
           {/* The Acquisition Engine — the REAL intake, framed as the hero object */}
-          <div data-hs="1" style={{ position: 'relative', padding: '28px 0 8px' }}>
-            <div aria-hidden="true" style={{ position: 'absolute', inset: '-10px -20px 30px', backgroundImage: 'radial-gradient(rgba(10,122,88,.22) 1.2px, transparent 1.2px)', backgroundSize: '17px 17px' }} />
-            <div aria-hidden="true" data-plx="-0.03" className="ca-orbit" style={{ position: 'absolute', top: -26, right: -8, width: 150, height: 150 }}>
+          <div data-hs="1" style={{ position: 'relative', zIndex: 1, padding: '28px 0 8px' }}>
+            {/* These two are the SMALL marks the hero ring replaces above
+                1024 — both are hidden there, neither is deleted, and below
+                1024 (where the ring is hidden) they are the hero's geometry
+                exactly as before. Two green textures plus a 600px green ring
+                in the same corner is the "busy" Paul is steering away from. */}
+            <div aria-hidden="true" className="ca-hero-cdots" style={{ position: 'absolute', inset: '-10px -20px 30px', backgroundImage: 'radial-gradient(rgba(10,122,88,.22) 1.2px, transparent 1.2px)', backgroundSize: '17px 17px' }} />
+            <div aria-hidden="true" data-plx="-0.03" className="ca-orbit ca-orbit-corner" style={{ position: 'absolute', top: -26, right: -8, width: 150, height: 150 }}>
               {/* Spin + entrance both live in carta.css (.ca-orbit > div) —
                   an inline `animation` would outrank the stylesheet and drop
                   the settle-in. */}
