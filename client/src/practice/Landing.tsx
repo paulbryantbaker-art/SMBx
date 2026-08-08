@@ -250,31 +250,45 @@ function ProofBand() {
     io.observe(host);
     return () => io.disconnect();
   }, []);
-  const num = { fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(40px, 5.4vw, 92px)', lineHeight: 1, letterSpacing: '-0.02em' } as const;
-  const plate = { margin: '20px auto 0', display: 'table', background: '#22261F', color: '#D7DBD2', fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.1em', padding: '6px 10px' } as const;
-  const cell = { background: '#131512', padding: '44px 30px 40px', textAlign: 'center' } as const;
+  // Size lives in carta.css under [data-proof] — the chain and the phone
+  // grid want different numeral scales and a single inline clamp cannot
+  // express "smaller in a rail, larger in a 2-up".
+  const num = { fontFamily: SERIF, fontWeight: 550, lineHeight: 1, letterSpacing: '-0.02em' } as const;
   return (
     <section id="proof" className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px) clamp(62px, 10vw, 180px)' }}>
       <div style={{ maxWidth: 1360, margin: '0 auto' }}>
         <div data-rv><Kicker dark center>TWO DECADES ON THE BUY SIDE</Kicker></div>
-        <div ref={ref} data-rv className="rv-stagger" data-stats-grid style={{ marginTop: 'clamp(30px, 5vw, 84px)', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: '#2A2E29', border: '1px solid #2A2E29', position: 'relative' }}>
+        {/* THE PROOF AS A CHAIN (2026-08-08). Five nodes wired, ending on
+            the 0 in the accent fill — the same grammar as the funnel and the
+            engagement track, so the three read as one house device rather
+            than three ideas.
+            $2B SYNERGIES CAPTURED joins the band here. It is in the sanctioned
+            stat set and already runs on /about; the landing was the only
+            surface carrying four of the five.
+            TRADE-OFF, STATED: five nodes in a rail means the numerals come
+            down from 92px to ~46px, because "~$21B" at 92px is 270px of glyph
+            in a 248px node. The band trades scale for sequence.
+            Below 900 it drops back to the 2-up GRID it has always been — five
+            stacked nodes would cost a phone a full screen for one band, and
+            the grid is genuinely better there. The 0 spans the last row on
+            its own, which is where it wants to be anyway. */}
+        <div ref={ref} data-rv data-chain data-proof className="rv-stagger ch-dark" style={{ marginTop: 'clamp(30px, 5vw, 84px)', position: 'relative' }}>
           <Handles color="#F4F5F1" />
-          <div style={cell}>
-            <div data-count="150" style={num}>150+</div>
-            <div style={plate}>ACQUISITIONS &amp; INTEGRATIONS</div>
-          </div>
-          <div style={cell}>
-            <div data-count="5" style={num}>$5B+</div>
-            <div style={plate}>ENTERPRISE VALUE ADDED</div>
-          </div>
-          <div style={cell}>
-            <div data-count="21" style={num}>~$21B</div>
-            <div style={plate}>TRANSACTIONS TOUCHED</div>
-          </div>
-          <div style={cell}>
-            <div style={{ ...num, color: '#A8F0CE' }}>0</div>
-            <div style={{ ...plate, background: '#0A7A58', color: '#FCFAF6' }}>SELL-SIDE ENGAGEMENTS. EVER.</div>
-          </div>
+          {[
+            { c: '150', v: '150+', l: 'ACQUISITIONS & INTEGRATIONS' },
+            { c: '5', v: '$5B+', l: 'ENTERPRISE VALUE ADDED' },
+            { c: '21', v: '~$21B', l: 'TRANSACTIONS TOUCHED' },
+            { c: '2', v: '$2B', l: 'SYNERGIES CAPTURED' },
+            { v: '0', l: 'SELL-SIDE. EVER.', hit: true },
+          ].map((n, i) => (
+            <Fragment key={n.l}>
+              {i > 0 && <span className="ch-wire" aria-hidden="true"><i /></span>}
+              <div className={`ch-node${n.hit ? ' ch-hit' : ''}`} style={{ textAlign: 'center' }}>
+                <div {...(n.c ? { 'data-count': n.c } : {})} style={{ ...num, color: n.hit ? '#FCFAF6' : undefined }}>{n.v}</div>
+                <div style={{ marginTop: 14, fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', lineHeight: 1.4 }}>{n.l}</div>
+              </div>
+            </Fragment>
+          ))}
         </div>
       </div>
     </section>
@@ -493,6 +507,43 @@ export default function Landing() {
             <p style={{ margin: '24px 0 0', maxWidth: '44em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>A good acquisition isn't a single moment — it's months of work, in the right order, usually against someone who does this for a living. Here's what the job actually involves. You make the calls that matter. We do the rest.</p>
           </div>
 
+          {/* THE ENGAGEMENT TRACK (2026-08-08). An overview above the
+              interactive explorer: seven links, wired, with the Premium
+              boundary carried on colour and named by the bracket beneath.
+              It earns its place by showing the one thing the explorer buries
+              — where smbXCorpDev ends and Premium begins is invisible when
+              you are reading phases one at a time.
+              A FRAMED panel rather than a full-bleed band, because this sits
+              inside #how's 1360 container and a bleed would need the section
+              to break its own rail.
+              DESKTOP ONLY — on a phone the explorer below prints the group
+              headers inline and states the Premium boundary in words, so the
+              track would be the same seven phases twice with nothing new in
+              the second telling. Reasoning in full at [data-trackpanel] in
+              carta.css. */}
+          <div data-rv data-trackpanel style={{ marginTop: 'clamp(29px, 5vw, 84px)', position: 'relative', background: '#131512', padding: 'clamp(26px, 3vw, 40px)' }}>
+            <Handles color="#F4F5F1" />
+            <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.13) 1.1px, transparent 1.1px)', backgroundSize: '16px 16px' }} />
+            <div style={{ position: 'relative' }}>
+              <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.14em', color: '#A8F0CE' }}>THE ENGAGEMENT</div>
+              <div data-chain data-track className="ch-dark" style={{ marginTop: 20 }}>
+                {PHASES.map((p, i) => (
+                  <Fragment key={p.ph}>
+                    {i > 0 && <span className="ch-wire" aria-hidden="true"><i /></span>}
+                    <div className="ch-node" style={{ background: i > 4 ? '#16241E' : undefined, borderColor: i > 4 ? '#2E5F4C' : undefined, textAlign: 'center' }}>
+                      <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: '#0FA97C' }}>{String(i + 1).padStart(2, '0')}</div>
+                      <div style={{ marginTop: 7, fontSize: 13.5, lineHeight: 1.3, color: '#F4F5F1' }}>{p.ph}</div>
+                    </div>
+                  </Fragment>
+                ))}
+              </div>
+              <div data-trackbr style={{ display: 'flex', marginTop: 14, fontFamily: MONO, fontSize: 12, letterSpacing: '0.1em' }}>
+                <div style={{ flex: '0 0 calc(5 / 7 * 100% + 12px)', paddingTop: 10, borderTop: '1px solid #3A3F38', color: '#8E948B', textAlign: 'center' }}>SMBXCORPDEV</div>
+                <div style={{ flex: 1, marginLeft: 18, paddingTop: 10, borderTop: '1px solid #2E5F4C', color: '#A8F0CE', textAlign: 'center' }}>PREMIUM</div>
+              </div>
+            </div>
+          </div>
+
           <PhaseExplorer />
 
           {/* Getting started — the sample read */}
@@ -527,11 +578,11 @@ export default function Landing() {
                     conclusion, not another step. The dot field sits BEHIND the
                     chain — composing with it, the same correction made to the
                     whose-side band.
-                    Geometry lives in carta.css under [data-funnel]: a flex row
+                    Geometry lives in carta.css as the shared chain primitive: a flex row
                     whose connectors are their own children, so the phone flip
                     is `flex-direction: column` plus a wire that turns
                     vertical. No duplicated node markup between the two. */}
-                <div data-funnel style={{ marginTop: 16, position: 'relative' }}>
+                <div data-chain style={{ marginTop: 16, position: 'relative' }}>
                   <div aria-hidden="true" style={{ position: 'absolute', inset: '-14px -10px', zIndex: 0, backgroundImage: 'radial-gradient(rgba(22,24,26,.14) 1.1px, transparent 1.1px)', backgroundSize: '15px 15px' }} />
                   {[
                     { n: '~2,400', l: 'OPERATORS IN-FOOTPRINT' },
@@ -540,8 +591,8 @@ export default function Landing() {
                     { n: '9', l: 'WORTH YOUR TIME', hit: true },
                   ].map((s, i) => (
                     <Fragment key={s.l}>
-                      {i > 0 && <span className="fn-wire" aria-hidden="true"><i /></span>}
-                      <div className={`fn-node${s.hit ? ' fn-hit' : ''}`}>
+                      {i > 0 && <span className="ch-wire" aria-hidden="true"><i /></span>}
+                      <div className={`ch-node${s.hit ? ' ch-hit' : ''}`}>
                         <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 32, lineHeight: 1, letterSpacing: '-0.01em' }}>{s.n}</div>
                         <div style={{ marginTop: 9, fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.08em', lineHeight: 1.35 }}>{s.l}</div>
                       </div>
@@ -754,7 +805,35 @@ export default function Landing() {
                 (`twoToneHook`); it had simply never reached the site. */}
             <p data-rv style={{ margin: '34px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(27px, 4.2vw, 68px)', lineHeight: 1.1, letterSpacing: '-0.014em', textWrap: 'balance' }}>The seller has a broker. <span style={{ color: '#A8F0CE' }}>Who is working for&nbsp;you?</span></p>
             <p data-rv style={{ margin: '26px auto 0', maxWidth: '38em', fontSize: 17.5, lineHeight: 1.65, color: '#ABB2AB' }}>We represent buyers, and only buyers — one client per target. You get our full attention, unfiltered analysis, and a proprietary deal that stays yours.</p>
-            <div data-rv style={{ marginTop: 42, display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+            {/* THE LINE, DRAWN (2026-08-08). The band asserted exclusivity in
+                prose; this is the same claim as a picture — you, us, and ONE
+                company, wired, with the target left unlit because it is the
+                thing being worked rather than a party to the engagement.
+                The three chips are facts about US, which is the copy law: the
+                grievance register stays out, and the reader draws the contrast
+                from the headline above, which is already sanctioned. */}
+            <div data-rv data-chain className="ch-dark" style={{ margin: '46px auto 0', maxWidth: 760 }}>
+              {[
+                { t: 'YOU', v: 'The buyer', on: true },
+                { t: 'SMBX', v: 'Your corp dev', on: true },
+                { t: 'TARGET', v: 'One company' },
+              ].map((n, i) => (
+                <Fragment key={n.t}>
+                  {i > 0 && <span className="ch-wire" aria-hidden="true"><i /></span>}
+                  <div className={`ch-node${n.on ? ' ch-hit' : ''}`} style={{ textAlign: 'center' }}>
+                    <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em' }}>{n.t}</div>
+                    <div style={{ marginTop: 8, fontFamily: SERIF, fontWeight: 600, fontSize: 21, lineHeight: 1.2 }}>{n.v}</div>
+                  </div>
+                </Fragment>
+              ))}
+            </div>
+            <div data-rv style={{ margin: '20px auto 0', display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+              {['NOT SHOPPED', 'NO SECOND BUYER', 'NO SELL-SIDE FEE'].map(c => (
+                <span key={c} style={{ border: '1px dashed #3A3F38', color: '#8E948B', fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.08em', padding: '9px 13px' }}>{c}</span>
+              ))}
+            </div>
+            <div data-rv style={{ margin: '22px auto 0', fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.14em', color: '#A8F0CE' }}>ONE CLIENT · ONE TARGET · ONE SIDE</div>
+            <div data-rv style={{ marginTop: 52, display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
               <a
                 href="#yulia"
                 className="ca-h-mintbg"
