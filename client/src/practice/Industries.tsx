@@ -67,11 +67,11 @@ export default function Industries() {
       <main style={{ background: '#FCFAF6', overflow: 'clip' }}>
 
         {/* ══ HERO ══ */}
-        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(100px, 9vw, 150px) 32px 0', textAlign: 'center', position: 'relative' }}>
+        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(52px, 9vw, 150px) clamp(20px, 4vw, 32px) 0', textAlign: 'center', position: 'relative' }}>
           <div aria-hidden="true" data-plx="-0.02" style={{ position: 'absolute', left: '6%', top: 70, width: 110, height: 110, backgroundImage: 'radial-gradient(rgba(22,24,26,.14) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
           <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', right: '7%', top: 140, width: 90, height: 90, backgroundImage: 'radial-gradient(rgba(10,122,88,.22) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
           <div data-hs="0"><Kicker center>KEY INDUSTRY VERTICALS</Kicker></div>
-          <h1 data-hs="1" style={{ margin: '28px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(36px, 3.6vw, 60px)', lineHeight: 1.1, letterSpacing: '-0.013em', textWrap: 'balance' }}>Buy-side M&amp;A for acquirers of private companies under $250M in revenue.</h1>
+          <h1 data-hs="1" style={{ margin: '28px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.6vw, 60px)', lineHeight: 1.1, letterSpacing: '-0.013em', textWrap: 'balance' }}>Buy-side M&amp;A for acquirers of private companies under $250M in revenue.</h1>
           <p data-hs="2" style={{ margin: '26px auto 0', maxWidth: '42em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>We work on a retainer plus a success fee, paid by the acquirer, never the seller. These lanes are where we know the most; bring us a market that isn't here and we'll go learn it.</p>
           <div data-hs="3" style={{ margin: '52px auto 0', maxWidth: 1080, position: 'relative' }}>
             <img src="/industries/trade-home.jpg" alt="" style={{ display: 'block', width: '100%', height: 300, objectFit: 'cover' }} />
@@ -83,7 +83,7 @@ export default function Industries() {
         </section>
 
         {/* ══ THE THESES ══ */}
-        <section style={{ maxWidth: 1360, margin: '0 auto', padding: '40px 32px 0' }}>
+        <section style={{ maxWidth: 1360, margin: '0 auto', padding: '40px clamp(20px, 4vw, 32px) 0' }}>
           {SECTORS.map((s, i) => {
             const even = i % 2 === 0;
             return (
@@ -93,7 +93,7 @@ export default function Industries() {
                     <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.1em', color: '#0A7A58' }}>{String(i + 1).padStart(2, '0')}</span>
                     <span style={{ height: 1, flex: 1, background: '#E4DFD3' }} />
                   </div>
-                  <h2 style={{ margin: '18px 0 0', fontFamily: SERIF, fontWeight: 600, fontSize: 'clamp(26px, 2.5vw, 38px)', lineHeight: 1.15, letterSpacing: '-0.01em' }}>{s.nm}</h2>
+                  <h2 style={{ margin: '18px 0 0', fontFamily: SERIF, fontWeight: 600, fontSize: 'clamp(20px, 2.5vw, 38px)', lineHeight: 1.15, letterSpacing: '-0.01em' }}>{s.nm}</h2>
                   <div style={{ marginTop: 12, fontSize: 18, fontWeight: 600, color: '#16181A' }}>{s.lead}<span style={{ color: '#0A7A58' }}>.</span></div>
                   {s.tags && s.tags.length > 0 && (
                     <div style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -118,7 +118,7 @@ export default function Industries() {
           })}
 
           {/* Heritage */}
-          <div data-rv style={{ marginTop: 80, position: 'relative', background: '#F3F0E9', padding: '52px 56px 56px' }}>
+          <div data-rv data-heritage style={{ marginTop: 80, position: 'relative', background: '#F3F0E9', padding: '52px 56px 56px' }}>
             <Handles />
             {/* The Heritage kicker is a one-off in the reference: 12px/.15em
                 where every other light kicker runs 12.5px/.16em — matched
@@ -127,7 +127,7 @@ export default function Industries() {
               <span style={{ width: 8, height: 8, background: '#0A7A58' }} />
               <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.15em', color: '#7C8187' }}>HERITAGE</span>
             </div>
-            <h2 style={{ margin: '18px 0 0', fontFamily: SERIF, fontWeight: 600, fontSize: 'clamp(28px, 2.7vw, 42px)', lineHeight: 1.12, letterSpacing: '-0.01em' }}>Home &amp; commercial services</h2>
+            <h2 style={{ margin: '18px 0 0', fontFamily: SERIF, fontWeight: 600, fontSize: 'clamp(20px, 2.7vw, 42px)', lineHeight: 1.12, letterSpacing: '-0.01em' }}>Home &amp; commercial services</h2>
             <div style={{ marginTop: 12, fontSize: 18, fontWeight: 600, color: '#16181A' }}>Where the record was built<span style={{ color: '#0A7A58' }}>.</span></div>
             <div style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               <span style={TAG_STYLE}>Residential &amp; commercial services trades</span>
@@ -144,9 +144,9 @@ export default function Industries() {
         </section>
 
         {/* ══ CTA ══ */}
-        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(120px, 11vw, 190px) 32px clamp(130px, 12vw, 200px)', textAlign: 'center' }}>
+        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(62px, 11vw, 190px) clamp(20px, 4vw, 32px) clamp(68px, 12vw, 200px)', textAlign: 'center' }}>
           <div data-rv>
-            <h2 style={{ margin: '0 auto', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(36px, 3.8vw, 62px)', lineHeight: 1.08, letterSpacing: '-0.014em', maxWidth: '14em' }}>Let's talk about what you're buying.</h2>
+            <h2 style={{ margin: '0 auto', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.8vw, 62px)', lineHeight: 1.08, letterSpacing: '-0.014em', maxWidth: '14em' }}>Let's talk about what you're buying.</h2>
             <p style={{ margin: '24px auto 0', maxWidth: '38em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>We're happy to dive into opportunities in these industries or take on something new in an area you're interested in.</p>
             <div style={{ marginTop: 38, display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
               <a

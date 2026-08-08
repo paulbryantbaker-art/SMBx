@@ -298,6 +298,80 @@ pages and `/buyers/*` segment pages keep their current bodies under the new chro
 
 ---
 
+## MOBILE LAYER — BUILT (2026-08-08). Q3 closed.
+
+Paul: *"can we start on Mobile? i dont think we need CD for this., can you do it?"*
+Also fixed in the same pass: the dashed quarter-arc springing off the founder
+portrait on the landing page (*"there is an arc on my headshot that should not
+be"*) — against a face it read as damage to the photo, not as house jewelry.
+
+**The whole gap had one mechanical cause, and it was not "no mobile CSS".** Every
+clamp on the site carried a DESKTOP-SCALE FLOOR. `clamp(130px, 12vw, 200px)` never
+returns less than 130px, and 12vw only reaches 130px at a 1083px viewport — so
+below ~1080px the vw term is always under the floor and the floor always wins. A
+390px phone was therefore rendering the desktop MINIMUM of the entire page: 130px
+section padding, 48px headlines, 32px gutters, and grids still at three, four and
+five columns. It was not a squeezed desktop layout by accident; it was the
+desktop layout's own floor, faithfully applied.
+
+So the fix is FLUID, not a breakpoint. The floors were re-cut in the `.tsx` files
+— type `×0.72` (min 20px), space `×0.52` (min 28px), page gutters to
+`clamp(20px, 4vw, 32px)` — which makes the ladder descend continuously from
+~1080px down. **A floor only binds below its own crossover width, so desktop
+cannot move.** Verified rather than asserted: the geometry (position, size,
+font-size, padding, grid-template-columns) of every laid-out element on all five
+pages at 1440px, before and after — identical except the two arc nodes that were
+deliberately deleted.
+
+`carta.css` then carries only what a clamp cannot express:
+- **≤1024** — `min-width: 0` on the children of every collapsing grid.
+- **≤900** — one column for `[data-g3]` `[data-phase]` `[data-fnd]` `[data-split]`
+  `[data-deflist]` `[data-creed]`; `[data-numrow]` keeps its index column and
+  drops the body under the title; card interiors (`[data-sample-body]`
+  `[data-heritage]` `[data-dealcard]`, stat cells); `[data-lanefill]` and
+  `[data-cta-orbit]` hidden; the phase rail's divider turns the corner.
+- **≤760** — both nav CTAs retire into the burger, which already carried them.
+- **≤640** — `[data-who-grid]` to one column.
+
+**Three traps, every one of which RENDERS rather than errors:**
+1. A grid item defaults to `min-width: auto`, so a single wide descendant stops
+   the track shrinking and the column pushes past the section's padding. The
+   hero's engine card measured 370px inside a 350px content box — flush against
+   the right edge with a 20px gutter on the left. Collapsing to one column is
+   what exposes it; multi-column tracks were never asked to get this narrow.
+2. **An IDENTITY `transform` still makes an element the containing block for
+   `position: fixed` descendants.** The `data-hs` hero cascade animated to
+   `translateY(0)` and left it on the element, so the Acquisition Engine's phone
+   bottom sheet was pinned to the 350px card column instead of the viewport —
+   390px screen, 350px "sheet". This shipped with the Carta transcription and is
+   invisible in the CSS, in a diff, and in a static screenshot: the sheet has
+   entirely correct rules and the wrong containing block. The cascade now clears
+   the transform on `transitionend`, with a timeout sweep for the
+   hidden-tab case where that event never fires.
+3. The `.ca-engine` redress is scoped `min-width: 901px` because the phone chat
+   is a fixed sheet with its own geometry — which left the most important
+   surface on a phone as the only thing still wearing Aurora (rounded pill
+   sheet, bold Schibsted title, 999px input pill). Its chips read correctly the
+   whole time, which is what made the mismatch legible. It now has a phone
+   sibling block: mono green chip header, square sheet, ink-hairline input
+   keeping its safe-area inset.
+
+**The gate is `npm run shoot:mobile`** (`scripts/mobile-audit.mjs`, sibling of
+`fold-shot.mjs`): renders every public page at phone width, writes viewport
+strips, and — the part a screenshot makes you hunt for — reports `scrollWidth` vs
+viewport plus the specific elements whose box extends past the right edge, with
+their ancestor chain. Result: all five pages at 390×844 and 768×1024 report
+`scrollWidth === viewport`; the only elements still past the edge are the
+marquee (inside `overflow: hidden`, by design) and the hero orbit (absolute,
+decorative). Intake sheet and burger menu verified by real touch events, not by
+reading the CSS.
+
+Still deferred: collateral renderer pass (phase 2), report detail pages and
+`/buyers/*` interiors (both now inherit the fluid ladder through the shared
+components, but neither has had a phone pass of its own).
+
+---
+
 ## FIDELITY AUDIT (2026-08-07, adversarial verification run — Paul: "to-the-letter")
 
 An 11-agent workflow audited every built surface against its reference (one auditor

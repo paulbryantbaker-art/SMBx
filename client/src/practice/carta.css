@@ -106,6 +106,13 @@
 }
 @media (max-width: 760px) {
   [data-nav-links] { display: none !important; }
+  /* Both nav CTAs retire into the burger menu, which already carries them
+     (.pd-mmenu-cta + the quiet consultation link). Keeping the ink pill in
+     the bar is what pushed the header 10px past the right edge on a 390px
+     phone — and the reference's own phone header is logo + burger, nothing
+     else. */
+  [data-nav-ctas] > a { display: none !important; }
+  [data-nav-inner] { gap: 12px !important; }
 }
 @media (max-width: 1024px) {
   [data-hero-grid] { grid-template-columns: 1fr !important; }
@@ -121,6 +128,152 @@
   [data-sector] > div { order: 0 !important; padding-top: 0 !important; }
   [data-rcard] { grid-template-columns: 1fr !important; }
   [data-emp] { grid-template-columns: 1fr !important; }
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   THE MOBILE LAYER (2026-08-08, Paul: "can we start on Mobile?"). The Carta
+   restyle shipped desktop-only by decision (IMPLEMENTATION_PLAN Q3, "no
+   mobile yet"), and the phone consequence was stated at the time: a desktop
+   layout squeezed down.
+
+   THE CAUSE WAS ONE THING, AND IT IS FIXED IN THE PAGES, NOT HERE. Every
+   clamp on this site had a DESKTOP-SCALE FLOOR — `clamp(130px, 12vw, 200px)`
+   never goes below 130px, and 12vw only reaches 130px at a 1083px viewport.
+   So below ~1080px the vw term was always under the floor and the floor
+   always won: a 390px phone rendered the desktop MINIMUM of everything —
+   130px section padding, 48px headlines, 32px gutters. Those floors were
+   re-cut in the .tsx files (a floor only binds below its own crossover
+   width, so desktop is untouched) and the ladder now actually descends.
+
+   What is left for CSS is what a clamp cannot express: multi-column grids
+   that must become one column, and the handful of fixed inner paddings.
+   900px is the boundary on purpose — it is where the intake's phone sheet
+   already takes over (`.ca-engine` is desktop-scoped at min-width 901px), so
+   the layout and the chat agree on where "phone" starts.
+   ──────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  /* A grid item defaults to `min-width: auto`, so a single wide descendant
+     stops the track shrinking and the whole column pushes past the section's
+     right padding — which is why the hero's engine card measured 370px inside
+     a 350px content box and sat flush against the right edge with a 20px
+     gutter on the left. Collapsing a grid to one column is what exposes this:
+     at two-plus columns the tracks were never asked to get this narrow. */
+  [data-hero-grid] > *, [data-cta-grid] > *, [data-phase] > *,
+  [data-fnd] > *, [data-split] > *, [data-emp] > *, [data-lede] > * { min-width: 0; }
+}
+
+@media (max-width: 900px) {
+  /* One column, everywhere a card row lives. */
+  [data-g3],
+  [data-phase],
+  [data-fnd],
+  [data-split],
+  [data-deflist],
+  [data-creed] { grid-template-columns: 1fr !important; }
+
+  /* The phase explorer's rail sits ABOVE the pane once stacked, so its
+     divider has to turn the corner with it — a right border on a full-width
+     block is a line hanging in space. */
+  [data-phase-rail] { border-right: none !important; border-bottom: 1px solid #16181A; }
+  [data-phase-pane] { padding: 30px 22px 34px !important; min-height: 0 !important; }
+
+  /* The numbered rows keep their index column — stacking "01" onto its own
+     line reads as a list item with a stray number above it. The body drops
+     under the title instead, in the title's column. */
+  [data-numrow] { grid-template-columns: 30px 1fr !important; gap: 6px 12px !important; }
+  [data-numrow] > :nth-child(3) { grid-column: 2 !important; }
+
+  /* The lane board's last-row filler spans `3 - (n % 3)` cells. At one or two
+     columns that arithmetic is meaningless and the filler renders as a blank
+     card at the end of the board. */
+  [data-lanefill] { display: none !important; }
+
+  /* The closing orbit rides the left column's slack on desktop. Once that
+     column is gone it sits UNDER the booking card and half of it emerges past
+     the bottom edge — reading as a stray arc against the card, which is
+     exactly the ornament-over-content complaint the founder portrait just
+     got. The hero orbit keeps its place; it has room. */
+  [data-cta-orbit] { display: none !important; }
+
+  /* Fixed inner paddings — the pages express these in px because they are
+     card interiors, not page rhythm. */
+  [data-sample-body] { padding: 26px 20px 30px !important; }
+  [data-fnd] { padding: 30px 24px 34px !important; gap: 28px !important; }
+  [data-heritage] { padding: 34px 24px 38px !important; }
+  [data-dealcard] { padding: 24px 22px 26px !important; }
+  [data-stats-grid] > div { padding: 30px 16px 28px !important; }
+
+  /* The portrait's WRAPPER carries the fixed 230px, so sizing the img alone
+     changes nothing — 100% of 230 is still 230. Both have to give. */
+  [data-fnd] > div:first-of-type { width: 100% !important; max-width: 260px; }
+  [data-fnd] img { width: 100% !important; height: auto !important; aspect-ratio: 230 / 250; }
+}
+
+@media (max-width: 640px) {
+  /* Five buyer cards two-up at 390px leaves ~131px of text under a 22px
+     serif label. One column below the phone boundary. */
+  [data-who-grid] { grid-template-columns: 1fr !important; }
+  [data-stats-grid] { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+/* ── THE PHONE SHEET SPEAKS CARTA (2026-08-08) ──────────────────────────────
+   The engine's Carta redress above is scoped `min-width: 901px` because the
+   phone's chat is a fixed bottom sheet with its own geometry — which meant
+   the single most important surface on a phone, the Acquisition Engine
+   itself, was the one thing still wearing Aurora: a rounded pill sheet, a
+   bold Schibsted title, a 999px input pill. The chips already read correctly
+   (their rules are unscoped), which is what made the mismatch obvious.
+
+   These rules are deliberately a phone SIBLING of the desktop block rather
+   than a shared unscoped one: every value that differs here differs for a
+   phone reason (the grabber needs head room, the input row must keep its
+   safe-area inset), so folding them together would take more overrides than
+   it saves. ──────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  /* Square, like every other surface in this language. */
+  .ca-engine .pd-chat { border-radius: 0; }
+
+  .ca-engine .pd-chat .pd-chat-head {
+    padding: 22px 20px 14px;
+    gap: 10px;
+    border-bottom: 1px solid #E4DFD3;
+  }
+  /* chip · (spacer) · logo · minimize · close — the desktop card's grammar. */
+  .ca-engine .pd-chat-head .pd-chat-title {
+    order: -1;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #0A7A58;
+    color: #FCFAF6;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 400;
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+    line-height: 1.1;
+    text-transform: uppercase;
+    padding: 5px 9px;
+    white-space: nowrap;
+  }
+  .ca-engine .pd-chat-head .pd-chat-title::before { content: ''; width: 7px; height: 7px; background: #FCFAF6; display: inline-block; flex: none; }
+  .ca-engine .pd-chat-head > img { order: 1; margin-left: auto; height: 16px !important; width: auto; opacity: 0.9; }
+  .ca-engine .pd-chat-head .pd-chat-min { order: 2; }
+  .ca-engine .pd-chat-head .pd-chat-x { order: 3; }
+
+  /* The input takes the reference's ink-hairline box, NOT the 999px pill —
+     but keeps the phone's safe-area bottom inset, which the desktop rule has
+     no reason to carry. */
+  .ca-engine .pd-chat .pd-chat-inputrow {
+    border: 1.5px solid #16181A;
+    border-radius: 12px;
+    background: #FCFAF6;
+    box-shadow: none;
+    margin: 10px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+    padding: 6px 6px 6px 14px;
+  }
+  .ca-engine .pd-chat .pd-chat-inputrow:focus-within { border-color: #0A7A58; }
+  .ca-engine .pd-chat .pd-chat-inputrow .pd-send { border-radius: 9px; }
 }
 
 /* ── The Acquisition Engine card (.ca-engine wraps the REAL YuliaIntake).

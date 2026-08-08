@@ -94,9 +94,39 @@ on hover, chips, kickers, links. Tokens live in `house/tokens.ts` (`CARTA`,
 `CARTA_TYPE`, `CARTA_HANDLE`); the `.pd` var layer mirrors them; layout values live
 INLINE in the transcribed pages per the handoff doctrine, and `carta.css` carries only
 hover/media/keyframes plus the `.ca-engine` intake redress. Build record:
-`design_handoff_smbx_carta_restyle/IMPLEMENTATION_PLAN.md`. Deferred: mobile layer,
+`design_handoff_smbx_carta_restyle/IMPLEMENTATION_PLAN.md`. Deferred:
 collateral renderers (LEDGER stays their source until phase 2 — see the interim
 notice atop `content/studio/DESIGN.md`), report bodies + `/buyers/*` interiors.
+
+**MOBILE IS IN (2026-08-08, Paul: "can we start on Mobile?" — closes Q3, the
+deferral the plan flagged as "the biggest gap"). THE FIX WAS FLUID, NOT A
+BREAKPOINT, because the cause was one mechanical thing: EVERY CLAMP ON THE SITE
+HAD A DESKTOP-SCALE FLOOR.** `clamp(130px, 12vw, 200px)` never goes below 130px
+and 12vw only reaches 130px at a 1083px viewport, so below ~1080px the vw term
+was always under the floor and the floor always won — a 390px phone rendered the
+desktop MINIMUM of everything (130px section padding, 48px headlines, 32px
+gutters, four-column grids). The floors were re-cut IN THE PAGES (type ×0.72,
+space ×0.52, gutters to `clamp(20px, 4vw, 32px)`); **a floor only binds below its
+own crossover width, so desktop is untouched** — verified by diffing the
+geometry of every laid-out element on all five pages at 1440px before and after:
+identical but for the two deliberately deleted arc nodes. `carta.css` then holds
+only what a clamp cannot say: the grid collapses at ≤900 (`[data-g3]`
+`[data-phase]` `[data-fnd]` `[data-split]` `[data-numrow]` `[data-deflist]`,
+`[data-who-grid]` at ≤640), the `min-width: 0` guard, the card interiors, and the
+phone sheet's Carta redress. Three traps, all of which RENDER rather than error:
+(1) a grid item defaults to `min-width: auto`, so one wide descendant stops the
+track shrinking and the column pushes past the section padding — the hero's
+engine card measured 370px in a 350px box, flush right with a 20px gutter left;
+(2) **an IDENTITY `transform` still makes an element the containing block for
+`position: fixed` descendants** — the `data-hs` hero cascade landed on
+`translateY(0)` and left it there, which pinned the intake's phone bottom sheet
+to the 350px card column instead of the viewport (shipped broken with the Carta
+transcription; the cascade now clears the transform on `transitionend`); (3) the
+`.ca-engine` redress is scoped `min-width: 901px`, so the phone sheet — the most
+important surface on a phone — was the one thing still wearing Aurora. Nav ≤760
+drops both CTAs to the burger (they already live in the menu). Gate:
+`npm run shoot:mobile` renders every public page at phone width and reports both
+the strips AND the elements past the right edge.
 
 **PRACTICE SITE (2026-07-11, corpdevservices bundle — the prior public
 surface, now HISTORY beneath the Carta restyle.)** The THE LINE v2 pivot retired the product marketing; the same day

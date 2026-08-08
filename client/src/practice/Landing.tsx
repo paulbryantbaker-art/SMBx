@@ -243,14 +243,14 @@ function ProofBand() {
     io.observe(host);
     return () => io.disconnect();
   }, []);
-  const num = { fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(56px, 5.4vw, 92px)', lineHeight: 1, letterSpacing: '-0.02em' } as const;
+  const num = { fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(40px, 5.4vw, 92px)', lineHeight: 1, letterSpacing: '-0.02em' } as const;
   const plate = { margin: '20px auto 0', display: 'table', background: '#22261F', color: '#D7DBD2', fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.1em', padding: '6px 10px' } as const;
   const cell = { background: '#131512', padding: '44px 30px 40px', textAlign: 'center' } as const;
   return (
-    <section id="proof" className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(120px, 10vw, 170px) 32px clamp(120px, 10vw, 180px)' }}>
+    <section id="proof" className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px) clamp(62px, 10vw, 180px)' }}>
       <div style={{ maxWidth: 1360, margin: '0 auto' }}>
         <div data-rv><Kicker dark center>TWO DECADES ON THE BUY SIDE</Kicker></div>
-        <div ref={ref} data-rv className="rv-stagger" data-stats-grid style={{ marginTop: 'clamp(58px, 5vw, 84px)', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: '#2A2E29', border: '1px solid #2A2E29', position: 'relative' }}>
+        <div ref={ref} data-rv className="rv-stagger" data-stats-grid style={{ marginTop: 'clamp(30px, 5vw, 84px)', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: '#2A2E29', border: '1px solid #2A2E29', position: 'relative' }}>
           <Handles color="#F4F5F1" />
           <div style={cell}>
             <div data-count="150" style={num}>150+</div>
@@ -304,9 +304,9 @@ function PhaseExplorer() {
     );
   };
   return (
-    <div data-rv style={{ marginTop: 'clamp(56px, 5vw, 84px)', position: 'relative', border: '1px solid #16181A', display: 'grid', gridTemplateColumns: '380px 1fr', background: '#FFFFFF' }}>
+    <div data-rv data-phase style={{ marginTop: 'clamp(29px, 5vw, 84px)', position: 'relative', border: '1px solid #16181A', display: 'grid', gridTemplateColumns: '380px 1fr', background: '#FFFFFF' }}>
       <Handles />
-      <div style={{ borderRight: '1px solid #16181A', display: 'flex', flexDirection: 'column' }}>
+      <div data-phase-rail style={{ borderRight: '1px solid #16181A', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '16px 20px', borderBottom: '1px solid #E4DFD3', display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ width: 8, height: 8, background: '#0A7A58' }} />
           <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.14em', color: '#7C8187' }}>THE SEVEN PHASES</span>
@@ -320,10 +320,10 @@ function PhaseExplorer() {
         </div>
         {PHASES.slice(5).map((p, i) => tab(p, i + 5))}
       </div>
-      <div style={{ padding: '44px 48px 48px', minHeight: 430, position: 'relative' }}>
+      <div data-phase-pane style={{ padding: '44px 48px 48px', minHeight: 430, position: 'relative' }}>
         <div aria-hidden="true" style={{ position: 'absolute', top: 0, right: 0, width: 220, height: 130, backgroundImage: 'radial-gradient(rgba(10,122,88,.2) 1.1px, transparent 1.1px)', backgroundSize: '15px 15px' }} />
         <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.14em', color: '#0A7A58' }}>PHASE {String(phase + 1).padStart(2, '0')} — {active.g}</div>
-        <div style={{ marginTop: 16, fontFamily: SERIF, fontWeight: 600, fontSize: 'clamp(30px, 2.6vw, 44px)', lineHeight: 1.12, letterSpacing: '-0.01em', maxWidth: '15em' }}>{active.ph}</div>
+        <div style={{ marginTop: 16, fontFamily: SERIF, fontWeight: 600, fontSize: 'clamp(22px, 2.6vw, 44px)', lineHeight: 1.12, letterSpacing: '-0.01em', maxWidth: '15em' }}>{active.ph}</div>
         <p style={{ margin: '22px 0 0', fontSize: 18, lineHeight: 1.6, color: '#16181A', fontWeight: 500, maxWidth: '30em' }}>{active.t}</p>
         <p style={{ margin: '16px 0 0', fontSize: 16.5, lineHeight: 1.7, color: '#4A4F54', maxWidth: '34em' }}>{active.bd}</p>
       </div>
@@ -349,12 +349,12 @@ export default function Landing() {
         {/* ══ HERO ══ */}
         {/* id="yulia" sits on the SECTION per the reference — YuliaIntake no
             longer carries its own copy of the id (one anchor, one owner). */}
-        <section data-hero-grid id="yulia" style={{ position: 'relative', maxWidth: 1360, margin: '0 auto', minHeight: 'calc(100svh - 76px)', padding: 'clamp(60px, 6vh, 110px) 32px clamp(70px, 8vh, 140px)', display: 'grid', gridTemplateColumns: '1.02fr .98fr', gap: 'clamp(56px, 5vw, 92px)', alignItems: 'center' }}>
+        <section data-hero-grid id="yulia" style={{ position: 'relative', maxWidth: 1360, margin: '0 auto', minHeight: 'calc(100svh - 76px)', padding: 'clamp(60px, 6vh, 110px) clamp(20px, 4vw, 32px) clamp(70px, 8vh, 140px)', display: 'grid', gridTemplateColumns: '1.02fr .98fr', gap: 'clamp(29px, 5vw, 92px)', alignItems: 'center' }}>
           <div>
             {ownerHero ? (
-              <h1 data-hs="0" style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(48px, 4.8vw, 92px)', lineHeight: 1.04, letterSpacing: '-0.015em', textWrap: 'balance' }}>Think like a buyer. Exit on your&nbsp;terms.</h1>
+              <h1 data-hs="0" style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(35px, 4.8vw, 92px)', lineHeight: 1.04, letterSpacing: '-0.015em', textWrap: 'balance' }}>Think like a buyer. Exit on your&nbsp;terms.</h1>
             ) : (
-              <h1 data-hs="0" style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(48px, 4.8vw, 92px)', lineHeight: 1.04, letterSpacing: '-0.015em', textWrap: 'balance' }}>Buying a business is hard&nbsp;work. We make it&nbsp;easier.</h1>
+              <h1 data-hs="0" style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(35px, 4.8vw, 92px)', lineHeight: 1.04, letterSpacing: '-0.015em', textWrap: 'balance' }}>Buying a business is hard&nbsp;work. We make it&nbsp;easier.</h1>
             )}
             {ownerHero ? (
               <p data-hs="1" style={{ margin: '30px 0 0', maxWidth: '34em', fontSize: 20, lineHeight: 1.65, color: '#4A4F54' }}>Thinking like a buyer is the best way to prepare — and starting here, with your valuation, puts you in front of potential buyers when you're{' '}ready.</p>
@@ -428,13 +428,13 @@ export default function Landing() {
         <ProofBand />
 
         {/* ══ WHY US ══ */}
-        <section id="why" style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(130px, 12vw, 200px) 32px 40px' }}>
+        <section id="why" style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(68px, 12vw, 200px) clamp(20px, 4vw, 32px) 40px' }}>
           <div data-rv style={{ maxWidth: 880 }}>
             <Kicker>WHY US</Kicker>
-            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(36px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'balance' }}>The machine serial acquirers build in-house. Yours, without the headcount.</h2>
+            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'balance' }}>The machine serial acquirers build in-house. Yours, without the headcount.</h2>
             <p style={{ margin: '24px 0 0', maxWidth: '42em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>You already know what you want to buy. The question is who runs the hunt — a team you'd spend a year hiring, a bank with a seller's habits, or us. Here's the case.</p>
           </div>
-          <div data-rv className="rv-stagger" style={{ marginTop: 'clamp(56px, 5vw, 84px)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 26, alignItems: 'start' }}>
+          <div data-rv data-g3 className="rv-stagger" style={{ marginTop: 'clamp(29px, 5vw, 84px)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 26, alignItems: 'start' }}>
             {WHY.map((w, i) => (
               <details key={w.nm} className="ca-h-bandhv" style={{ background: '#F3F0E9', padding: 0 }}>
                 <summary style={{ cursor: 'pointer', padding: '26px 26px 24px', display: 'block' }}>
@@ -458,20 +458,20 @@ export default function Landing() {
         </section>
 
         {/* ══ HOW IT WORKS ══ */}
-        <section id="how" style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(120px, 11vw, 190px) 32px 30px' }}>
+        <section id="how" style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(62px, 11vw, 190px) clamp(20px, 4vw, 32px) 30px' }}>
           <div data-rv style={{ maxWidth: 880 }}>
             <Kicker>HOW IT WORKS</Kicker>
-            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(36px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'balance' }}>Buying a company is a hundred small decisions. We handle the ones that don't need you.</h2>
+            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'balance' }}>Buying a company is a hundred small decisions. We handle the ones that don't need you.</h2>
             <p style={{ margin: '24px 0 0', maxWidth: '44em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>A good acquisition isn't a single moment — it's months of work, in the right order, usually against someone who does this for a living. Here's what the job actually involves. You make the calls that matter. We do the rest.</p>
           </div>
 
           <PhaseExplorer />
 
           {/* Getting started — the sample read */}
-          <div id="sample" style={{ paddingTop: 'clamp(96px, 9vw, 150px)' }}>
+          <div id="sample" style={{ paddingTop: 'clamp(50px, 9vw, 150px)' }}>
             <div data-rv style={{ textAlign: 'center' }}>
               <Kicker center>GETTING STARTED</Kicker>
-              <div style={{ margin: '22px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(32px, 3vw, 50px)', lineHeight: 1.12, letterSpacing: '-0.012em' }}>Every engagement starts with a read like this.</div>
+              <div style={{ margin: '22px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(23px, 3vw, 50px)', lineHeight: 1.12, letterSpacing: '-0.012em' }}>Every engagement starts with a read like this.</div>
               <p style={{ margin: '18px auto 0', maxWidth: '38em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>Not a chatbot answer — an institutional market map: the universe, the short list, and the thing most buyers miss.</p>
             </div>
             <div data-rv style={{ margin: '56px auto 0', maxWidth: 820, position: 'relative', background: '#FFFFFF', border: '1px solid #16181A' }}>
@@ -482,7 +482,7 @@ export default function Landing() {
                   <span style={{ width: 7, height: 7, background: '#FCFAF6', display: 'inline-block' }} />SAMPLE READ
                 </span>
               </div>
-              <div style={{ padding: '34px 40px 38px' }}>
+              <div data-sample-body style={{ padding: '34px 40px 38px' }}>
                 <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 30, letterSpacing: '-0.01em' }}>Commercial Landscaping — Southeast</div>
                 <div style={{ marginTop: 8, fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.05em', color: '#7C8187' }}>Commercial landscaping · GA, NC, SC, TN · $2–8M EBITDA · commercial-contract mix</div>
                 <div style={{ marginTop: 30, fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#0A7A58' }}>THE FUNNEL</div>
@@ -502,24 +502,24 @@ export default function Landing() {
                     <div style={{ marginTop: 4, fontSize: 13.5, color: '#4A4F54' }}>above 60% commercial-contract mix</div>
                   </div>
                 </div>
-                <div style={{ marginTop: 22, display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 22, alignItems: 'center', background: '#131512', color: '#F4F5F1', padding: '22px 26px', position: 'relative' }}>
+                <div data-split style={{ marginTop: 22, display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 22, alignItems: 'center', background: '#131512', color: '#F4F5F1', padding: '22px 26px', position: 'relative' }}>
                   <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.16) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
                   <div style={{ position: 'relative', fontFamily: SERIF, fontWeight: 550, fontSize: 64, lineHeight: 1, color: '#A8F0CE' }}>9</div>
                   <div style={{ position: 'relative', fontSize: 15, lineHeight: 1.6, color: '#D7DBD2' }}>Of those 55, the number we'd tell you to spend real time on. The drop from 55 to 9 is the part you can't Google.</div>
                 </div>
                 <div style={{ marginTop: 30, fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#0A7A58' }}>WHAT SEPARATES THE 9</div>
                 <div style={{ marginTop: 6 }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '44px 200px 1fr', gap: 16, padding: '16px 0', borderBottom: '1px solid #E4DFD3' }}>
+                  <div data-numrow style={{ display: 'grid', gridTemplateColumns: '44px 200px 1fr', gap: 16, padding: '16px 0', borderBottom: '1px solid #E4DFD3' }}>
                     <div style={{ fontFamily: MONO, fontSize: 12, color: '#7C8187' }}>01</div>
                     <div style={{ fontWeight: 600, fontSize: 16 }}>Route density.</div>
                     <div style={{ fontSize: 14.5, lineHeight: 1.6, color: '#4A4F54' }}>A crew running 8 stops in 4 miles is a different business than 8 stops across 40. It never shows in EBITDA, and it's the single biggest driver of margin after close. We'd rank the 55 by drive-time density before anything else.</div>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '44px 200px 1fr', gap: 16, padding: '16px 0', borderBottom: '1px solid #E4DFD3' }}>
+                  <div data-numrow style={{ display: 'grid', gridTemplateColumns: '44px 200px 1fr', gap: 16, padding: '16px 0', borderBottom: '1px solid #E4DFD3' }}>
                     <div style={{ fontFamily: MONO, fontSize: 12, color: '#7C8187' }}>02</div>
                     <div style={{ fontWeight: 600, fontSize: 16 }}>Contract tenure.</div>
                     <div style={{ fontSize: 14.5, lineHeight: 1.6, color: '#4A4F54' }}>Month-to-month "commercial" revenue is worth a fraction of 3-year contracted revenue, even at identical margin. A third of the 55 won't survive this test.</div>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '44px 200px 1fr', gap: 16, padding: '16px 0' }}>
+                  <div data-numrow style={{ display: 'grid', gridTemplateColumns: '44px 200px 1fr', gap: 16, padding: '16px 0' }}>
                     <div style={{ fontFamily: MONO, fontSize: 12, color: '#7C8187' }}>03</div>
                     <div style={{ fontWeight: 600, fontSize: 16 }}>Crew that stays without the owner.</div>
                     <div style={{ fontSize: 14.5, lineHeight: 1.6, color: '#4A4F54' }}>In this trade, the crews often leave with the seller. The ones where they don't are worth a full turn more — and you can check it in diligence before you're committed.</div>
@@ -529,7 +529,7 @@ export default function Landing() {
                   <div style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#0A7A58' }}>WHAT MOST BUYERS MISS</div>
                   <div style={{ marginTop: 10, fontSize: 15, lineHeight: 1.65, color: '#4A4F54' }}>Two companies here with identical EBITDA can be worth two turns apart on route density alone. Most buyers underwrite the earnings, ignore the drive time, and wonder why margins compress the quarter after close. We price the routes first, the EBITDA second.</div>
                 </div>
-                <div style={{ marginTop: 22, display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 26, alignItems: 'center' }}>
+                <div data-split style={{ marginTop: 22, display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 26, alignItems: 'center' }}>
                   <div>
                     <div style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#0A7A58' }}>THE NUMBER</div>
                     <div style={{ marginTop: 6, fontFamily: SERIF, fontWeight: 550, fontSize: 58, lineHeight: 1, letterSpacing: '-0.02em' }}>
@@ -582,21 +582,21 @@ export default function Landing() {
         </section>
 
         {/* ══ PRICING — dark band ══ */}
-        <section id="pricing" className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(120px, 10vw, 170px) 32px', marginTop: 'clamp(110px, 10vw, 170px)', position: 'relative' }}>
+        <section id="pricing" className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative' }}>
           <div aria-hidden="true" data-plx="0.02" style={{ position: 'absolute', top: 40, right: '6%', width: 280, height: 190, backgroundImage: 'radial-gradient(rgba(168,240,206,.2) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           {/* HEAD_CTR, not the reference's 840 — same one-line finding as
               #owners. The sub (38em) and the form (520) carry their own caps,
               so only the headline takes the extra width. */}
           <div style={{ maxWidth: HEAD_CTR, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
             <div data-rv><Kicker dark center>PRICING</Kicker></div>
-            <h2 data-rv style={{ margin: '26px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(34px, 3.2vw, 54px)', lineHeight: 1.12, letterSpacing: '-0.012em', textWrap: 'balance' }}>Simple, up-front pricing — we'll send you the schedule.</h2>
+            <h2 data-rv style={{ margin: '26px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(24px, 3.2vw, 54px)', lineHeight: 1.12, letterSpacing: '-0.012em', textWrap: 'balance' }}>Simple, up-front pricing — we'll send you the schedule.</h2>
             <p data-rv style={{ margin: '22px auto 0', maxWidth: '38em', fontSize: 17.5, lineHeight: 1.65, color: '#ABB2AB' }}>One schedule for every client, spelled out in a short brochure — the retainer, the success fee, and how the credit at close works. Nothing to haggle over. Tell us where to send it.</p>
             <PricingRequest />
           </div>
         </section>
 
         {/* ══ WHO IT'S FOR ══ */}
-        <section id="who" style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(130px, 12vw, 200px) 32px 20px' }}>
+        <section id="who" style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(68px, 12vw, 200px) clamp(20px, 4vw, 32px) 20px' }}>
           <div data-rv style={{ position: 'relative', textAlign: 'center', padding: '10px 0 26px' }}>
             <div aria-hidden="true" data-plx="-0.02" style={{ position: 'absolute', left: '1%', top: -14, width: 110, height: 110, zIndex: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(rgba(22,24,26,.15) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }}>
               <span style={{ position: 'absolute', left: 0, bottom: -12, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.1em', padding: '3px 7px' }}>FAMILY OFFICE</span>
@@ -608,9 +608,9 @@ export default function Landing() {
               <span style={{ position: 'absolute', left: 0, top: -12, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.1em', padding: '3px 7px' }}>SEARCHER</span>
             </div>
             <Kicker center>WHO IT'S FOR</Kicker>
-            <h2 style={{ position: 'relative', zIndex: 1, margin: '26px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(44px, 5vw, 84px)', lineHeight: 1.05, letterSpacing: '-0.015em' }}>Built for serious buyers.</h2>
+            <h2 style={{ position: 'relative', zIndex: 1, margin: '26px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(32px, 5vw, 84px)', lineHeight: 1.05, letterSpacing: '-0.015em' }}>Built for serious buyers.</h2>
           </div>
-          <div data-rv className="rv-stagger" data-who-grid style={{ marginTop: 'clamp(52px, 4.6vw, 76px)', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 1, background: '#E4DFD3', border: '1px solid #E4DFD3' }}>
+          <div data-rv className="rv-stagger" data-who-grid style={{ marginTop: 'clamp(28px, 4.6vw, 76px)', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 1, background: '#E4DFD3', border: '1px solid #E4DFD3' }}>
             {WHO.map(w => (
               <a
                 key={w.label}
@@ -629,13 +629,13 @@ export default function Landing() {
         </section>
 
         {/* ══ SECTORS ══ */}
-        <section id="sectors" style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(120px, 11vw, 190px) 32px 30px' }}>
+        <section id="sectors" style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(62px, 11vw, 190px) clamp(20px, 4vw, 32px) 30px' }}>
           <div data-rv style={{ maxWidth: 880 }}>
             <Kicker>KEY INDUSTRY VERTICALS</Kicker>
-            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(36px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'balance' }}>We go deep in a handful of markets. Yours may be one of them.</h2>
+            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'balance' }}>We go deep in a handful of markets. Yours may be one of them.</h2>
             <p style={{ margin: '24px 0 0', maxWidth: '42em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>The sectors we know cold — the operators, the multiples, the diligence traps, and the targets already on our desk. Focus, not limits.</p>
           </div>
-          <div data-rv className="rv-stagger" style={{ marginTop: 'clamp(52px, 4.6vw, 76px)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: '#E4DFD3', border: '1px solid #E4DFD3' }}>
+          <div data-rv data-g3 className="rv-stagger" style={{ marginTop: 'clamp(28px, 4.6vw, 76px)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: '#E4DFD3', border: '1px solid #E4DFD3' }}>
             {HUNT_LANES.map(l => (
               <Link
                 key={l.nm}
@@ -662,7 +662,7 @@ export default function Landing() {
                 Computed from the register so the next lane added can't bring
                 the block back. */}
             {HUNT_LANES.length % 3 !== 0 && (
-              <div aria-hidden="true" style={{ gridColumn: `span ${3 - (HUNT_LANES.length % 3)}`, background: '#FCFAF6' }} />
+              <div aria-hidden="true" data-lanefill style={{ gridColumn: `span ${3 - (HUNT_LANES.length % 3)}`, background: '#FCFAF6' }} />
             )}
           </div>
           <div data-rv style={{ marginTop: 38, textAlign: 'center' }}>
@@ -671,11 +671,11 @@ export default function Landing() {
         </section>
 
         {/* ══ WHOSE SIDE — dark band ══ */}
-        <section className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(130px, 11vw, 180px) 32px', marginTop: 'clamp(110px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
+        <section className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(68px, 11vw, 180px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
           <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', left: '5%', bottom: 36, width: 300, height: 170, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
             <div data-rv><Kicker dark center>WHOSE SIDE WE'RE ON</Kicker></div>
-            <p data-rv style={{ margin: '34px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(38px, 4.2vw, 68px)', lineHeight: 1.1, letterSpacing: '-0.014em', textWrap: 'balance' }}>The seller has a broker. Who is working for&nbsp;you?</p>
+            <p data-rv style={{ margin: '34px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(27px, 4.2vw, 68px)', lineHeight: 1.1, letterSpacing: '-0.014em', textWrap: 'balance' }}>The seller has a broker. Who is working for&nbsp;you?</p>
             <p data-rv style={{ margin: '26px auto 0', maxWidth: '38em', fontSize: 17.5, lineHeight: 1.65, color: '#ABB2AB' }}>We represent buyers, and only buyers — one client per target. You get our full attention, unfiltered analysis, and a proprietary deal that stays yours.</p>
             <div data-rv style={{ marginTop: 42, display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
               <a
@@ -715,13 +715,13 @@ export default function Landing() {
             five-row chip cluster — the cramping Paul felt. It is now ONE
             framed panel with the house corner handles: the same pixels read
             as a deliberate "start here" card instead of a dense drift. */}
-        <section id="owners" style={{ position: 'relative', maxWidth: 1360, margin: '0 auto', padding: 'clamp(130px, 12vw, 200px) 32px 20px' }}>
+        <section id="owners" style={{ position: 'relative', maxWidth: 1360, margin: '0 auto', padding: 'clamp(68px, 12vw, 200px) clamp(20px, 4vw, 32px) 20px' }}>
           <div data-rv style={{ position: 'relative', zIndex: 1, maxWidth: HEAD_CTR, margin: '0 auto', textAlign: 'center' }}>
             <Kicker center>OWN ONE OF THESE BUSINESSES?</Kicker>
-            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(36px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'balance' }}>Get the valuation buyers are working from — free.</h2>
+            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'balance' }}>Get the valuation buyers are working from — free.</h2>
             <p style={{ margin: '24px auto 0', maxWidth: '42em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>You'll sit across from a buyer exactly once, and they'll arrive knowing what your business is worth to them. This is that read, from the people who build it for buyers — free, because when one engages us in your lane, we want to already know you.</p>
           </div>
-          <div data-rv className="rv-stagger" style={{ position: 'relative', zIndex: 1, marginTop: 'clamp(70px, 6vw, 104px)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
+          <div data-rv data-g3 className="rv-stagger" style={{ position: 'relative', zIndex: 1, marginTop: 'clamp(36px, 6vw, 104px)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
             <div style={{ borderTop: '2px solid #16181A', paddingTop: 20 }}>
               <div style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.13em', color: '#0A7A58' }}>BUYERS REBUILD YOUR NUMBERS</div>
               <p style={{ margin: '14px 0 0', fontSize: 15, lineHeight: 1.65, color: '#4A4F54' }}>A buyer's accountants don't price the tax return — they rebuild it: owner compensation, one-time costs, personal expenses, owned real estate restated to market rent. Your valuation runs that same walk, line by line, so the number your range applies to is the one a buyer would actually use.</p>
@@ -739,7 +739,7 @@ export default function Landing() {
               instruction, the trade chips and the disclaimer are one object
               on the panel tint, wearing the house handles. The chips are
               white, so they still read against #F3F0E9. */}
-          <div data-rv style={{ position: 'relative', zIndex: 1, margin: 'clamp(72px, 6vw, 100px) auto 0', maxWidth: HEAD_CTR, background: '#F3F0E9', padding: 'clamp(38px, 3.4vw, 52px) clamp(28px, 3vw, 46px) clamp(34px, 3vw, 46px)' }}>
+          <div data-rv style={{ position: 'relative', zIndex: 1, margin: 'clamp(37px, 6vw, 100px) auto 0', maxWidth: HEAD_CTR, background: '#F3F0E9', padding: 'clamp(28px, 3.4vw, 52px) clamp(28px, 3vw, 46px) clamp(28px, 3vw, 46px)' }}>
             {/* Dot texture INSIDE the panel, not flanking it. Side ornaments
                 were tried here first and cannot survive: a 1080 head inside a
                 1216 content box at 1280px leaves 68px of gutter, so any
@@ -785,18 +785,20 @@ export default function Landing() {
         </section>
 
         {/* ══ FOUNDER ══ */}
-        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(120px, 11vw, 190px) 32px 0' }}>
-          <div data-rv className="rv-stagger" style={{ background: '#F3F0E9', display: 'grid', gridTemplateColumns: '300px 1fr', gap: 48, padding: '48px 52px', alignItems: 'center', position: 'relative' }}>
+        <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(62px, 11vw, 190px) clamp(20px, 4vw, 32px) 0' }}>
+          <div data-rv data-fnd className="rv-stagger" style={{ background: '#F3F0E9', display: 'grid', gridTemplateColumns: '300px 1fr', gap: 48, padding: '48px 52px', alignItems: 'center', position: 'relative' }}>
             <div style={{ position: 'relative', width: 230 }}>
               <img data-rvimg src="/founder-portrait.jpg" alt="Paul Baker" loading="lazy" style={{ display: 'block', width: 230, height: 250, objectFit: 'cover', objectPosition: '50% 0%' }} />
               <span style={{ position: 'absolute', right: -14, bottom: -14, width: 34, height: 34, background: '#0A7A58', color: '#FCFAF6', display: 'grid', placeItems: 'center', fontFamily: SERIF, fontWeight: 700, fontSize: 20, fontStyle: 'italic' }}>"</span>
-              <svg aria-hidden="true" width="110" height="110" viewBox="0 0 120 120" fill="none" style={{ position: 'absolute', top: -38, left: 172, pointerEvents: 'none' }}>
-                <path d="M4 116 A112 112 0 0 1 116 4" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 6" />
-              </svg>
+              {/* No ornament over the portrait (2026-08-08, Paul: "there is an
+                  arc on my headshot that should not be"). A dashed quarter-arc
+                  used to spring off the top-right corner; against a face it
+                  read as a defect in the photo rather than as house jewelry.
+                  The green quote mark stays — it sits clear of the crop. */}
             </div>
             <div>
               <Kicker>WHO YOU'LL TALK TO</Kicker>
-              <p style={{ margin: '20px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 2.4vw, 38px)', lineHeight: 1.25, letterSpacing: '-0.01em', maxWidth: '22em' }}>Twenty years as the internal deal captain for major platforms. Now running that same playbook for independent buyers.</p>
+              <p style={{ margin: '20px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(20px, 2.4vw, 38px)', lineHeight: 1.25, letterSpacing: '-0.01em', maxWidth: '22em' }}>Twenty years as the internal deal captain for major platforms. Now running that same playbook for independent buyers.</p>
               <div style={{ marginTop: 26, fontFamily: MONO, fontSize: 13, letterSpacing: '0.1em', color: '#16181A' }}>PAUL BAKER</div>
               <div style={{ marginTop: 4, fontFamily: MONO, fontSize: 12, letterSpacing: '0.08em', color: '#7C8187' }}>FOUNDER · TWO DECADES ON THE BUY SIDE</div>
               <Link href="/about" className="ca-h-deepgreen" style={{ display: 'inline-block', marginTop: 18, fontSize: 15.5, fontWeight: 600, color: '#0A7A58', borderBottom: '1.5px solid #0A7A58', paddingBottom: 2 }}>Meet Paul →</Link>
@@ -805,13 +807,13 @@ export default function Landing() {
         </section>
 
         {/* ══ CTA ══ */}
-        <section id="cta" style={{ position: 'relative', maxWidth: 1360, margin: '0 auto', padding: 'clamp(130px, 12vw, 200px) 32px clamp(130px, 12vw, 210px)' }}>
+        <section id="cta" style={{ position: 'relative', maxWidth: 1360, margin: '0 auto', padding: 'clamp(68px, 12vw, 200px) clamp(20px, 4vw, 32px) clamp(68px, 12vw, 210px)' }}>
           {/* The closing section carried no mark at all (Paul, 2026-08-08:
               "we can have more whatever these little shapes are called"). The
               orbit is the founder band's gesture, reused here at the page's
               last turn; it sits in the left column's own slack under a
               text-wrap:balance headline, so it cannot crowd the copy. */}
-          <div aria-hidden="true" data-plx="-0.02" className="ca-orbit" style={{ position: 'absolute', left: 22, bottom: 'clamp(74px, 7vw, 130px)', width: 132, height: 132, zIndex: 0, pointerEvents: 'none' }}>
+          <div aria-hidden="true" data-cta-orbit data-plx="-0.02" className="ca-orbit" style={{ position: 'absolute', left: 22, bottom: 'clamp(38px, 7vw, 130px)', width: 132, height: 132, zIndex: 0, pointerEvents: 'none' }}>
             {/* Wrapper > animated div > svg is the hero orbit's exact
                 structure, kept because the reduced-motion guard in carta.css
                 targets `.ca-orbit > div` — a bare svg child would spin
@@ -825,7 +827,7 @@ export default function Landing() {
           </div>
           <div data-cta-grid style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: '1.1fr .9fr', gap: 64, alignItems: 'center' }}>
             <div data-rv>
-              <h2 style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(40px, 4.4vw, 72px)', lineHeight: 1.06, letterSpacing: '-0.015em', textWrap: 'balance' }}>Start with a confidential conversation.</h2>
+              <h2 style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(29px, 4.4vw, 72px)', lineHeight: 1.06, letterSpacing: '-0.015em', textWrap: 'balance' }}>Start with a confidential conversation.</h2>
               <p style={{ margin: '24px 0 0', maxWidth: '30em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>Thirty minutes. Your ideas, our read on the market, and a straight answer on whether we're the right team to run it.</p>
             </div>
             <div data-rv style={{ position: 'relative', background: '#FFFFFF', border: '1px solid #16181A', padding: '32px 34px' }}>

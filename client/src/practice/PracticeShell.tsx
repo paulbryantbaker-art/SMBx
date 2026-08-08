@@ -268,13 +268,51 @@ export default function PracticeShell({
     const ease = 'cubic-bezier(.2,.7,.3,1)';
     const hs = Array.from(document.querySelectorAll<HTMLElement>('[data-hs]'));
     hs.forEach(el => { el.style.opacity = '0'; el.style.transform = 'translateY(26px)'; });
+
+    // THE TRANSFORM MUST BE REMOVED, NOT LANDED ON translateY(0) — this is a
+    // renders-not-errors trap that cost the phone its intake (found 2026-08-08
+    // while building the mobile layer; the defect shipped with the Carta
+    // transcription). A transformed element becomes the CONTAINING BLOCK for
+    // any `position: fixed` descendant, and an IDENTITY transform counts: the
+    // box still exists, so the browser keeps honouring it. The hero's engine
+    // card sits inside `[data-hs="1"]`, and the Acquisition Engine's phone
+    // doorway opens a fixed bottom sheet — which was therefore being pinned
+    // to the 350px card column instead of the viewport, measuring 350px wide
+    // in a 390px screen and never reading as a sheet at all. Nothing about it
+    // looks wrong in the CSS or in a static screenshot; the sheet has the
+    // right rules and the wrong containing block.
+    const done = new WeakSet<HTMLElement>();
+    const settle = (el: HTMLElement) => {
+      if (done.has(el)) return;
+      done.add(el);
+      el.style.transition = '';
+      el.style.transform = '';
+    };
+    const onEnd = (e: TransitionEvent) => {
+      if (e.propertyName !== 'transform') return;
+      const el = e.target as HTMLElement;
+      if (el.hasAttribute('data-hs')) settle(el);
+    };
+    document.addEventListener('transitionend', onEnd);
+
     const t = setTimeout(() => hs.forEach(el => {
       const i = parseInt(el.getAttribute('data-hs') || '0', 10) || 0;
       el.style.transition = `opacity .85s ${ease} ${i * 130}ms, transform .85s ${ease} ${i * 130}ms`;
       el.style.opacity = '1';
       el.style.transform = 'translateY(0)';
     }), 80);
-    return () => clearTimeout(t);
+
+    // Belt and braces: transitionend never fires on a tab that was hidden for
+    // the whole animation, and a permanently-trapped sheet is a worse failure
+    // than a cascade that ends a frame early. The longest run is the last
+    // index's delay plus the 850ms duration.
+    const sweep = setTimeout(() => hs.forEach(settle), 80 + hs.length * 130 + 900);
+
+    return () => {
+      clearTimeout(t);
+      clearTimeout(sweep);
+      document.removeEventListener('transitionend', onEnd);
+    };
   }, [loc]);
 
   // Parallax drift for the decorative dot fields (data-plx). The base is the
@@ -393,7 +431,7 @@ export default function PracticeShell({
   return (
     <div className="pd" style={{ background: '#FCFAF6' }}>
       <header className={`ca-nav${navOn || menuOpen ? ' on' : ''}${navHidden && !menuOpen ? ' up' : ''}`}>
-        <div data-nav-inner style={{ maxWidth: 1360, margin: '0 auto', padding: '0 32px', height: 76, display: 'flex', alignItems: 'center', gap: 36, minWidth: 0 }}>
+        <div data-nav-inner style={{ maxWidth: 1360, margin: '0 auto', padding: '0 clamp(20px, 4vw, 32px)', height: 76, display: 'flex', alignItems: 'center', gap: 36, minWidth: 0 }}>
           {/* SPA Link, not a plain anchor: a full reload from down-page races
               the browser's scroll restoration against the still-mounting page
               and strands the user a screen below the top. Same-path clicks
@@ -490,7 +528,7 @@ export default function PracticeShell({
              page: Industries/Research run compact (short blurb, no BUYERS,
              six-link FIRM), Track Record drops its self-link, and the pages
              that close on a dark band carry a hairline seam up top. ══ */}
-      <footer className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: '88px 32px 40px', borderTop: footSeam ? '1px solid #2A2E29' : undefined }}>
+      <footer className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(56px, 7vw, 88px) clamp(20px, 4vw, 32px) 40px', borderTop: footSeam ? '1px solid #2A2E29' : undefined }}>
         <div style={{ maxWidth: 1360, margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 44 }}>
             <div>
