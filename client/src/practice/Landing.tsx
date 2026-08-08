@@ -32,7 +32,7 @@ import { Link } from 'wouter';
 import PracticeShell, { Handles, Kicker } from './PracticeShell';
 import YuliaIntake from './YuliaIntake';
 import { OWNER_LANES } from './OwnerChat';
-import { HUNT_LANES, buyerHref } from './lanes';
+import { HUNT_LANES, buyerHref, laneHref, SECTOR_NAMES } from './lanes';
 import { bookHref, bookTarget, bookRel } from './leads';
 import { trackEvent } from '../lib/analytics';
 
@@ -661,7 +661,7 @@ export default function Landing() {
             {HUNT_LANES.map(l => (
               <Link
                 key={l.nm}
-                href="/industries"
+                href={laneHref(l.nm, SECTOR_NAMES)}
                 className="ca-h-band"
                 style={{ position: 'relative', display: 'block', background: '#FCFAF6', padding: '22px 24px 24px', color: '#16181A' }}
                 onClick={() => trackEvent('practice_sector_clicked', { sector: l.nm })}

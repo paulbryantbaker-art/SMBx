@@ -445,7 +445,16 @@ export default function PracticeShell({
               }
             }}
           >
-            <img src="/logo-green-x.png" alt="smbX.ai" width={1584} height={396} style={{ height: 30, width: 'auto', display: 'block' }} />
+            {/* 34px, up from the reference's 30 (Paul, 2026-08-08: "maybe a
+                little small"). Vertical centring measured exact before
+                changing anything — box 23px above / 23px below in the 76px
+                bar, and the burger's centre agrees to 0.1px — so size was the
+                real finding, not alignment. 34 rather than a guess: the same
+                Carta design already draws this mark at 36px in its dark
+                variant, so this stays inside the system's own vocabulary and
+                still leaves 21px of clearance in a bar whose other controls
+                are 44px. */}
+            <img src="/logo-green-x.png" alt="smbX.ai" width={1584} height={396} style={{ height: 34, width: 'auto', display: 'block' }} />
           </Link>
           <nav data-nav-links aria-label="Site" style={{ display: 'flex', alignItems: 'center', gap: 28, fontSize: 15.5, fontWeight: 500, whiteSpace: 'nowrap', minWidth: 0 }}>
             <a href={anchor('#why')} className="ca-h-green" style={navLink}>Why us</a>
