@@ -374,6 +374,63 @@ audited as part of this and needs no work: masthead, byline, cover, contents
 rail and body all read correctly on a phone, and every one of its 31 registers
 stays inside the viewport and scrolls within its own box.
 
+### THE ADVERSARIAL PASS (2026-08-08, same day)
+
+Paul, after the first layer shipped: *"I can't take a picture or screenshot
+everything that looks awful… Let's do an antagonistic pass on all mobile
+surface."* He was right about the method, not just the result — **the first
+pass fixed what a handful of screenshots happened to show.** A screenshot only
+reports the strip you photographed and the defect you happened to notice, and
+the two worst remaining defects were both invisible to one: nothing overflowed,
+nothing errored, both just read as broken.
+
+`scripts/mobile-audit.mjs` was rewritten from an overflow reporter into a
+hunter for eight NAMED failure classes across **all fifteen public routes** —
+landing, the four inner pages, all three report bodies, all five `/buyers/*`
+segments, and both legal pages. BLEED · GRID · RAGGED · SQUEEZE · COLLIDE ·
+CLIP · VOID · TAP · TINY. It exits 1 on any finding, so it can gate.
+
+**719 findings on the first run → 246, and every structural class is now zero
+at 360, 390 and 430px.** What it caught that no screenshot had:
+
+- **RAGGED** — a flex row where the link is `white-space: nowrap` and wins:
+  222px of 350px, leaving the paragraph a 104px column running two words to
+  the line. Nothing overflows, so no overflow check could ever see it.
+- **SQUEEZE** — the pricing band's email field crushed to 145px by a `flex:
+  none` button carrying a 28-character label. It rendered "you@" and nothing
+  more. An input has no text content, so even the RAGGED check skipped it;
+  this class was added to the tool *because* of it.
+- **COLLIDE** — the `#who` section's three ornament chips are anchored at
+  `left: 1%` / `right: 1%` of a **1360px rail**. On a desktop that is a
+  comfortable ~14px from a centred headline; on a 350px phone it is 3px, and
+  each chip is a SOLID GREEN block that the headline then paints over. Paul
+  photographed exactly this. The dot fields stay, the chips go.
+- **TAP** — 313 targets under 44×44, and not scattered: 43 of them were the
+  footer link columns at 22px tall. Perfect in a screenshot, missed under a
+  thumb.
+- **TINY** — 253 instances below Paul's standing 13px floor, 48 of them on
+  `/industries` alone. Raised on phones only, where a selector exists; the
+  remainder are one-off inline `fontSize` values on a design already signed
+  off, and are left rather than churned.
+
+**Four of the eight checks had to be taught what is DELIBERATE**, and each
+correction is in the source: content that scrolls inside `.rp-tablewrap` or
+the marquee's `overflow: hidden` is not a bleed (it was reporting all 31 of a
+report's registers as broken); a closed `<details>` still answers
+`getBoundingClientRect` with a laid-out box in Chromium (eight phantom
+collisions on a perfect page); inline `<em>`/`<strong>` spanning two lines
+legitimately overlap their siblings; and a grid of NUMERALS is fine at 158px
+where a grid of sentences is not. A tool that cries wolf gets ignored exactly
+once, and it would be on the run that mattered.
+
+**Desktop is unchanged, and this was checked rather than assumed** — the
+geometry of every laid-out element on seven routes at 1440px, before and
+after, with animation noise (the spinning orbit, the running marquee) filtered
+rather than eyeballed. The first attempt reported two real changes: making the
+pricing button `flex: 1 0 auto` so it fills the wrapped row also let it GROW
+on desktop, taking 12px from the field. The button keeps `flex: none` and the
+full-width behaviour moved into the phone media query.
+
 **One correction the same day:** the phone sheet was first squared to 0 under
 the radius-0 law, and Paul reversed it — *"yes the top corners need to be
 rounded on the phone sheet."* The 22px top is the sanctioned exception: the

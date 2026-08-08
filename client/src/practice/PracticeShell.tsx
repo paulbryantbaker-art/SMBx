@@ -439,6 +439,7 @@ export default function PracticeShell({
           <Link
             href="/"
             aria-label="smbX.ai home"
+            data-nav-logo
             style={{ display: 'flex', alignItems: 'center', flex: 'none' }}
             onClick={(e) => {
               if (window.location.pathname === '/') {
