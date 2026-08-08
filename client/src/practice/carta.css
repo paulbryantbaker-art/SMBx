@@ -258,6 +258,47 @@
   .rp-ask-fab { min-height: 44px; min-width: 44px; }
 }
 
+/* ── THE FUNNEL CHAIN (2026-08-08) ──────────────────────────────────────────
+   The nodes and the wires between them are SIBLINGS in one flex row, which is
+   the whole trick: turning the chain vertical for a phone is then a single
+   `flex-direction` flip plus a wire that stands up, with no second copy of the
+   node markup to keep in step. The alternative — connectors as ::before on
+   each node — cannot change axis without redrawing every rule.
+   `min-width: 0` on the nodes because a flex item defaults to min-content and
+   "OPERATORS IN-FOOTPRINT" would otherwise refuse to shrink, pushing the row
+   past the card. That is the same trap the hero grid hit; it is not
+   theoretical here, it is a 4-across row inside a 820px card. ─────────────── */
+[data-funnel] { display: flex; align-items: stretch; position: relative; }
+[data-funnel] > * { position: relative; z-index: 1; }
+.fn-node {
+  flex: 1 1 0;
+  min-width: 0;
+  border: 1px solid #E4DFD3;
+  background: #FFFFFF;
+  color: #16181A;
+  padding: 18px 16px 16px;
+}
+.fn-node > div + div { color: #7C8187; }
+/* The terminal node is the conclusion, so it takes the accent fill rather
+   than another hairline box. */
+.fn-hit { background: #0A7A58; border-color: #0A7A58; color: #FCFAF6; }
+.fn-hit > div + div { color: #DFF5EC; }
+
+.fn-wire { flex: 0 0 30px; display: grid; place-items: center; }
+.fn-wire i { display: block; width: 100%; height: 1px; background: #D8D3C6; position: relative; }
+.fn-wire i::after {
+  content: '';
+  position: absolute; left: 50%; top: 50%;
+  width: 6px; height: 6px; background: #0A7A58;
+  transform: translate(-50%, -50%);
+}
+
+@media (max-width: 900px) {
+  [data-funnel] { flex-direction: column; }
+  .fn-wire { flex: 0 0 24px; }
+  .fn-wire i { width: 1px; height: 100%; }
+}
+
 /* ── ORNAMENTS DO NOT GET TO SIT ON THE HEADLINE (2026-08-08) ───────────────
    The #who section's three dot-field marks are anchored at `left: 1%`,
    `right: 1%`, `left: 2%` of a 1360px rail, so on a desktop they sit a
