@@ -13,7 +13,7 @@
  */
 import PracticeShell, { Handles, Kicker } from './PracticeShell';
 import { Link } from 'wouter';
-import { bookHref, bookTarget, bookRel } from './leads';
+import { bookHref, bookTarget, bookRel, LINKEDIN_URL } from './leads';
 import { trackEvent } from '../lib/analytics';
 
 const SERIF = "'Source Serif 4', Georgia, serif";
@@ -100,6 +100,26 @@ export default function About() {
                   <span style={{ width: 7, height: 7, background: '#FCFAF6', display: 'inline-block' }} />FOUNDER
                 </span>
               </div>
+              {/* The one outbound personal link on the site (Paul, 2026-08-08).
+                  It sits under the portrait rather than in the bio column
+                  because this block IS the identity — name, face, and where to
+                  find him. Tracking param stripped from the URL he sent: a
+                  `utm_source=share` on a link we publish would attribute our
+                  own site's traffic to whatever share sheet he copied it
+                  from. */}
+              <a
+                href={LINKEDIN_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ca-h-deepgreen"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 9, marginTop: 22, fontSize: 15.5, fontWeight: 600, color: '#0A7A58', borderBottom: '1.5px solid #0A7A58', paddingBottom: 3 }}
+                onClick={() => trackEvent('practice_cta_clicked', { placement: 'about-linkedin' })}
+              >
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ flex: 'none' }}>
+                  <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05a3.74 3.74 0 0 1 3.37-1.85c3.6 0 4.27 2.37 4.27 5.46zM5.34 7.43a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13M7.12 20.45H3.55V9h3.57zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.55C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.72C24 .77 23.2 0 22.22 0" />
+                </svg>
+                Connect on LinkedIn
+              </a>
             </div>
             <div data-rv>
               <p style={{ margin: '6px 0 0', fontSize: 19, lineHeight: 1.6, color: '#16181A', fontWeight: 500, maxWidth: '26em' }}>Two decades as a deal captain — the person accountable for a transaction from the first conversation to the day it is fully integrated.</p>

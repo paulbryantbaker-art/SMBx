@@ -24,6 +24,7 @@ import './practice.css';
 import './carta.css';
 import { trackEvent } from '../lib/analytics';
 import { useSiteMeta } from './useSiteMeta';
+import { BUYERS } from './lanes';
 
 const MONO = "'IBM Plex Mono', monospace";
 
@@ -97,13 +98,7 @@ function settleToAnchor(hash: string) {
  *  promo card, transcribed from the reference nav. */
 function WhoMenu({ anchor }: { anchor: (hash: string) => string }) {
   const [open, setOpen] = useState(false);
-  const buyers: [string, string][] = [
-    ['Family offices', '/buyers/family-offices'],
-    ['Independent sponsors', '/buyers/independent-sponsors'],
-    ['Search funds & solo acquirers', '/buyers/searchers'],
-    ['Operators & strategics', '/buyers/operators'],
-    ['PE firms', '/buyers/pe-firms'],
-  ];
+  const buyers = BUYERS;
   return (
     <div style={{ position: 'relative' }} onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
       <a href={anchor('#who')} className="ca-h-green" style={{ color: '#16181A', padding: '6px 0', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
@@ -118,7 +113,7 @@ function WhoMenu({ anchor }: { anchor: (hash: string) => string }) {
                 <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.14em', color: '#7C8187' }}>BUYERS</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, fontSize: 16, fontWeight: 500 }}>
-                {buyers.map(([label, href]) => (
+                {buyers.map(({ label, href }) => (
                   <Link key={href} href={href} className="ca-h-green" style={{ color: '#16181A' }} onClick={() => setOpen(false)}>{label}</Link>
                 ))}
               </div>
@@ -450,7 +445,16 @@ export default function PracticeShell({
               }
             }}
           >
-            <img src="/logo-green-x.png" alt="smbX.ai" width={1584} height={396} style={{ height: 30, width: 'auto', display: 'block' }} />
+            {/* 34px, up from the reference's 30 (Paul, 2026-08-08: "maybe a
+                little small"). Vertical centring measured exact before
+                changing anything — box 23px above / 23px below in the 76px
+                bar, and the burger's centre agrees to 0.1px — so size was the
+                real finding, not alignment. 34 rather than a guess: the same
+                Carta design already draws this mark at 36px in its dark
+                variant, so this stays inside the system's own vocabulary and
+                still leaves 21px of clearance in a bar whose other controls
+                are 44px. */}
+            <img src="/logo-green-x.png" alt="smbX.ai" width={1584} height={396} style={{ height: 34, width: 'auto', display: 'block' }} />
           </Link>
           <nav data-nav-links aria-label="Site" style={{ display: 'flex', alignItems: 'center', gap: 28, fontSize: 15.5, fontWeight: 500, whiteSpace: 'nowrap', minWidth: 0 }}>
             <a href={anchor('#why')} className="ca-h-green" style={navLink}>Why us</a>

@@ -14,6 +14,7 @@
 import PracticeShell, { Handles, Kicker } from './PracticeShell';
 import { bookHref, bookTarget, bookRel } from './leads';
 import { trackEvent } from '../lib/analytics';
+import { SECTOR_NAMES, sectorSlug } from './lanes';
 
 const SERIF = "'Source Serif 4', Georgia, serif";
 const MONO = "'IBM Plex Mono', monospace";
@@ -48,6 +49,20 @@ const SECTORS: Sector[] = [
   { nm: 'Non-emergency medical transport', img: '/industries/trade-nemt-sq.jpg', lead: 'Recurring trips, funded by reimbursement', paras: ['Scheduled, recurring, Medicaid- and Medicare-funded transport. Fragmented and early — with payor and reimbursement diligence treated as the deal, not a footnote.'], who: 'Sponsors and holdcos comfortable with reimbursement-funded revenue.', desk: 'Recurring demand and an open runway, entered with eyes open.' },
   { nm: 'Revenue cycle management & medical billing', img: '/industries/trade-billing-sq.jpg', lead: 'Fragmented, clean to diligence, and changing fast', paras: ['Many owners, clean books, active consolidation — and automation reshaping the work, which is why we underwrite the niche before the number.'], who: 'Buyers selective about which billing niches hold as automation compresses the routine work.', desk: 'Fragmentation and fee-friendly deal sizes — in the niches that hold.' },
 ];
+
+/* PARITY GUARD (2026-08-08). The landing's hunt board deep-links each lane to
+   `/industries#<slug>`, and those slugs are built from SECTOR_NAMES in
+   lanes.ts. Rename a heading here without updating that list and the link
+   still resolves — to nothing — which drops the reader at the top of this
+   page: exactly the sixteen-lanes-one-destination defect the deep links were
+   added to fix, and completely silent. Fail loudly instead. */
+{
+  const here = SECTORS.map(s => s.nm).join('|');
+  if (here !== SECTOR_NAMES.join('|')) {
+    throw new Error('Industries SECTORS headings have drifted from SECTOR_NAMES in lanes.ts — hunt-board deep links would miss.');
+  }
+}
+
 
 const TAG_STYLE = { fontFamily: MONO, fontSize: 11, letterSpacing: '0.05em', color: '#0A7A58', background: '#DFF5EC', padding: '6px 10px' } as const;
 
@@ -87,7 +102,7 @@ export default function Industries() {
           {SECTORS.map((s, i) => {
             const even = i % 2 === 0;
             return (
-              <div key={s.nm} data-rv className="rv-stagger" data-sector style={{ display: 'grid', gap: 56, alignItems: 'start', padding: '64px 0', borderBottom: '1px solid #E4DFD3', gridTemplateColumns: even ? '7fr 4fr' : '4fr 7fr' }}>
+              <div key={s.nm} id={sectorSlug(s.nm)} data-rv className="rv-stagger" data-sector style={{ display: 'grid', gap: 56, alignItems: 'start', padding: '64px 0', borderBottom: '1px solid #E4DFD3', gridTemplateColumns: even ? '7fr 4fr' : '4fr 7fr', scrollMarginTop: 92 }}>
                 <div style={{ order: even ? 1 : 2 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.1em', color: '#0A7A58' }}>{String(i + 1).padStart(2, '0')}</span>

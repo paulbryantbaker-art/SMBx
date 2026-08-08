@@ -27,6 +27,16 @@ export function postPracticeLead(lead: PracticeLead): Promise<boolean> {
 const DEFAULT_BOOKING_URL = 'https://calendar.app.google/rA9vC7RRdR2wLJbV6';
 export const BOOKING_URL: string = (import.meta as any).env?.VITE_BOOKING_URL || DEFAULT_BOOKING_URL;
 
+/** Paul's LinkedIn profile (2026-08-08) — the one outbound personal link the
+ *  site carries. It lives beside BOOKING_URL because this file is where the
+ *  practice's outbound destinations belong; a second copy in a page component
+ *  is how one of them goes stale.
+ *  The URL Paul sent arrived with a `?utm_source=share…` tail from a share
+ *  sheet. Stripped deliberately: publishing it would tag everyone who clicks
+ *  through from our own site as arriving from whatever app he copied the link
+ *  out of, quietly poisoning his LinkedIn referrer data. */
+export const LINKEDIN_URL = 'https://www.linkedin.com/in/paul-baker-mas-41436135a';
+
 export function bookHref(): string {
   return BOOKING_URL;
 }

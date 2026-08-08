@@ -32,7 +32,7 @@ import { Link } from 'wouter';
 import PracticeShell, { Handles, Kicker } from './PracticeShell';
 import YuliaIntake from './YuliaIntake';
 import { OWNER_LANES } from './OwnerChat';
-import { HUNT_LANES } from './lanes';
+import { HUNT_LANES, buyerHref, laneHref, SECTOR_NAMES } from './lanes';
 import { bookHref, bookTarget, bookRel } from './leads';
 import { trackEvent } from '../lib/analytics';
 
@@ -624,10 +624,19 @@ export default function Landing() {
             <h2 style={{ position: 'relative', zIndex: 1, margin: '26px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(32px, 5vw, 84px)', lineHeight: 1.05, letterSpacing: '-0.015em' }}>Built for serious buyers.</h2>
           </div>
           <div data-rv className="rv-stagger" data-who-grid style={{ marginTop: 'clamp(28px, 4.6vw, 76px)', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 1, background: '#E4DFD3', border: '1px solid #E4DFD3' }}>
+            {/* Each card goes to ITS OWN buyer page (2026-08-08, Paul: "if I
+                click on any of these I go to book a call instead"). Every one
+                of the five carried `href="#cta"`, so five distinct promises —
+                direct deals, a live deal, your search — all landed on the same
+                booking card. That is the 2026-08-02 lesson verbatim: five
+                labels, one destination reads as broken. The nav dropdown was
+                fixed then; these were left behind because the Carta reference
+                draws them as a hairline grid and the prototype had no pages to
+                send them to. We have all five. */}
             {WHO.map(w => (
-              <a
+              <Link
                 key={w.label}
-                href="#cta"
+                href={buyerHref(w.label)}
                 className="ca-h-banddeep"
                 style={{ position: 'relative', display: 'block', background: '#F3F0E9', padding: '26px 22px 60px', color: '#16181A' }}
                 onClick={() => trackEvent('practice_cta_clicked', { placement: 'who-index', segment: w.label })}
@@ -636,7 +645,7 @@ export default function Landing() {
                 <span style={{ display: 'block', marginTop: 14, fontSize: 14, lineHeight: 1.6, color: '#4A4F54' }}>{w.body}</span>
                 <span style={{ position: 'absolute', left: 22, bottom: 18, fontSize: 13.5, fontWeight: 600, color: '#0A7A58' }}>{w.link}</span>
                 <span aria-hidden="true" style={{ position: 'absolute', top: 14, right: 14, width: 26, height: 26, background: '#0A7A58', color: '#FCFAF6', display: 'grid', placeItems: 'center', fontSize: 14 }}>→</span>
-              </a>
+              </Link>
             ))}
           </div>
         </section>
@@ -652,7 +661,7 @@ export default function Landing() {
             {HUNT_LANES.map(l => (
               <Link
                 key={l.nm}
-                href="/industries"
+                href={laneHref(l.nm, SECTOR_NAMES)}
                 className="ca-h-band"
                 style={{ position: 'relative', display: 'block', background: '#FCFAF6', padding: '22px 24px 24px', color: '#16181A' }}
                 onClick={() => trackEvent('practice_sector_clicked', { sector: l.nm })}
