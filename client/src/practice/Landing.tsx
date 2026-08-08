@@ -396,7 +396,10 @@ export default function Landing() {
           <div data-hs="1" style={{ position: 'relative', padding: '28px 0 8px' }}>
             <div aria-hidden="true" style={{ position: 'absolute', inset: '-10px -20px 30px', backgroundImage: 'radial-gradient(rgba(10,122,88,.22) 1.2px, transparent 1.2px)', backgroundSize: '17px 17px' }} />
             <div aria-hidden="true" data-plx="-0.03" className="ca-orbit" style={{ position: 'absolute', top: -26, right: -8, width: 150, height: 150 }}>
-              <div style={{ width: 150, height: 150, animation: 'smbxOrbit 60s linear infinite', transformOrigin: '50% 50%' }}>
+              {/* Spin + entrance both live in carta.css (.ca-orbit > div) —
+                  an inline `animation` would outrank the stylesheet and drop
+                  the settle-in. */}
+              <div style={{ width: 150, height: 150, transformOrigin: '50% 50%' }}>
                 <svg width="150" height="150" viewBox="0 0 150 150" fill="none">
                   <ellipse cx="75" cy="75" rx="72" ry="30" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 5" opacity=".7" />
                   <ellipse cx="75" cy="75" rx="30" ry="72" stroke="#0A7A58" strokeWidth="1.4" opacity=".55" />
@@ -813,7 +816,7 @@ export default function Landing() {
                 structure, kept because the reduced-motion guard in carta.css
                 targets `.ca-orbit > div` — a bare svg child would spin
                 straight through that preference. */}
-            <div style={{ width: 132, height: 132, animation: 'smbxOrbit 60s linear infinite', transformOrigin: '50% 50%' }}>
+            <div style={{ width: 132, height: 132, transformOrigin: '50% 50%' }}>
               <svg width="132" height="132" viewBox="0 0 132 132" fill="none">
                 <ellipse cx="66" cy="66" rx="63" ry="26" stroke="#0A7A58" strokeWidth="1.2" strokeDasharray="5 6" opacity=".55" />
                 <circle cx="66" cy="66" r="62" stroke="#0A7A58" strokeWidth="1.2" opacity=".3" />
