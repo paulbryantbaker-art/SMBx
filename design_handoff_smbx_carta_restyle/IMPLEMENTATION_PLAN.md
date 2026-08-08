@@ -374,6 +374,54 @@ audited as part of this and needs no work: masthead, byline, cover, contents
 rail and body all read correctly on a phone, and every one of its 31 registers
 stays inside the viewport and scrolls within its own box.
 
+### THE CARTA POLISH PASS (2026-08-08, comparing against the real carta.com)
+
+Paul, with screenshots of carta.com beside ours: *"we're not done yet… we can
+improve the polish."* The diagnosis that mattered: **their graphic devices
+carry information and compose INTO the type; ours decorated the margins.**
+Their `All together now` headline has the LP→GP→CFO→CEO→GC chips wired
+*through* the letterforms — the graphic names the audience. Ours had a dot
+field marooned in a band's bottom-left corner, aligned to nothing.
+
+Shipped (#372):
+
+- **The funnel is a wired node chain.** It was three flat boxes with `→`
+  glyphs and the payoff — the 9 — stranded in a panel below, so the drop that
+  IS the argument never read as one movement. Now 2,400 → 180 → 55 → 9,
+  hairline wires with square joints, dot field behind, terminal node in the
+  accent fill because it is the conclusion rather than another step. **This
+  beats Carta's chip chain on the only axis that matters: theirs labels an
+  audience, ours carries four real numbers and cannot be copied, because it is
+  our actual screen.** The giant "9" left the panel below since the chain now
+  ends on it; every word of copy is unchanged.
+  Geometry: the connectors are SIBLINGS of the nodes in one flex row, so the
+  phone flip is one `flex-direction: column` plus a wire that stands up, with
+  no second copy of the node markup. `min-width: 0` on the nodes — a flex item
+  defaults to min-content and the mono labels would otherwise refuse to shrink
+  inside an 820px card.
+- **The whose-side dot field** moved from `left: 5%; bottom: 36` to behind the
+  headline, where Carta always puts theirs.
+- **Two-tone headlines reached the site** for the first time — the accent on
+  the TURN, never the setup. Mint on the dark band, because Deal Green on
+  `#131512` is the low-contrast trap the token table warns about. The deck
+  builder had drawn hooks this way for months (`twoToneHook`).
+- **Ragged rows flushed** — the why-us grid carried `align-items: start`, so
+  each row stepped down left to right. Grid's default is stretch.
+
+**DECIDED AND CLOSED: the why-us cards KEEP their dot bands** (Paul: *"I like
+the dot fields actually"*). The case for removing them was ours — real
+carta.com puts dot fields only behind headlines, never inside cards, and six
+identical 84px bands is the page's most repetitive texture. Paul heard that
+case and kept them; they are also in the approved reference. **Do not remove
+them on either ground.** The decision is repeated in `Landing.tsx` at the band
+itself, because a future polish pass would otherwise re-derive the same
+argument and act on it.
+
+Mobile was the explicit constraint (*"just be really careful not to break
+mobile"*) and was verified unchanged at 360, 390 and 430px: 249 findings across
+15 routes, identical to the pre-change baseline, no structural class at any
+width.
+
 ### THE ADVERSARIAL PASS (2026-08-08, same day)
 
 Paul, after the first layer shipped: *"I can't take a picture or screenshot

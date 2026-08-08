@@ -452,6 +452,14 @@ export default function Landing() {
             {WHY.map((w, i) => (
               <details key={w.nm} className="ca-h-bandhv" style={{ background: '#F3F0E9', padding: 0 }}>
                 <summary style={{ cursor: 'pointer', padding: '26px 26px 24px', display: 'block' }}>
+                  {/* THE DOT BAND STAYS (Paul, 2026-08-08: "I like the dot
+                      fields actually"). Recorded because the argument for
+                      removing them was mine and it was a reasonable one —
+                      real carta.com puts dot fields only BEHIND headlines,
+                      never inside cards, and six identical 84px bands is the
+                      most repetitive texture on the page. Paul looked at that
+                      case and kept them. They are also in the approved Carta
+                      reference. Do not "tidy" them out on either ground. */}
                   <span aria-hidden="true" style={{ display: 'block', height: 84, backgroundImage: 'radial-gradient(rgba(22,24,26,.16) 1.1px, transparent 1.1px)', backgroundSize: '15px 15px', marginBottom: 20, position: 'relative' }}>
                     <span style={{ position: 'absolute', left: 0, bottom: 0, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 11, letterSpacing: '0.1em', padding: '4px 8px' }}>{String(i + 1).padStart(2, '0')}</span>
                   </span>
