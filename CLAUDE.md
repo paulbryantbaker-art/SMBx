@@ -123,10 +123,17 @@ engine card measured 370px in a 350px box, flush right with a 20px gutter left;
 to the 350px card column instead of the viewport (shipped broken with the Carta
 transcription; the cascade now clears the transform on `transitionend`); (3) the
 `.ca-engine` redress is scoped `min-width: 901px`, so the phone sheet — the most
-important surface on a phone — was the one thing still wearing Aurora. Nav ≤760
-drops both CTAs to the burger (they already live in the menu). Gate:
-`npm run shoot:mobile` renders every public page at phone width and reports both
-the strips AND the elements past the right edge.
+important surface on a phone — was the one thing still wearing Aurora (it now
+has a phone sibling block; its 22px top radius is the ONE sanctioned exception
+to radius-0, Paul 2026-08-08: "yes the top corners need to be rounded on the
+phone sheet" — the curve is what says the panel slid up and can slide back
+down). Nav ≤760 drops both CTAs to the burger (they already live in the menu).
+Gate: `npm run shoot:mobile` renders every public page — including a report
+detail page — at phone width and reports both the strips AND the elements past
+the right edge, IGNORING anything an ancestor clips or scrolls (the marquee, the
+report's `.rp-tablewrap` registers); without that rule it flagged all 31
+correctly-behaving tables on `/research/home-services`. The `.rp-*` report
+document scope was audited and needs no work.
 
 **PRACTICE SITE (2026-07-11, corpdevservices bundle — the prior public
 surface, now HISTORY beneath the Carta restyle.)** The THE LINE v2 pivot retired the product marketing; the same day

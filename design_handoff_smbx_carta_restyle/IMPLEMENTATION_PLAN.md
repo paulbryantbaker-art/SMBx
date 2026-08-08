@@ -360,11 +360,25 @@ deliberately deleted.
 `fold-shot.mjs`): renders every public page at phone width, writes viewport
 strips, and — the part a screenshot makes you hunt for — reports `scrollWidth` vs
 viewport plus the specific elements whose box extends past the right edge, with
-their ancestor chain. Result: all five pages at 390×844 and 768×1024 report
-`scrollWidth === viewport`; the only elements still past the edge are the
-marquee (inside `overflow: hidden`, by design) and the hero orbit (absolute,
-decorative). Intake sheet and burger menu verified by real touch events, not by
-reading the CSS.
+their ancestor chain. It **ignores anything an ancestor clips or scrolls**,
+because that is a deliberate device rather than a defect: the lane marquee runs
+inside `overflow: hidden`, and the report's wide registers scroll inside
+`.rp-tablewrap`. Without that rule the tool reported all 31 tables on
+`/research/home-services` as broken when all 31 behave correctly — and a tool
+that cries wolf gets ignored exactly once. Result: every route clean at 360×800,
+390×844, 430×932 and 768×1024. Intake sheet and burger menu verified by real
+touch events, not by reading the CSS.
+
+The report DETAIL page (`/research/:slug`, the `.rp-*` document scope) was
+audited as part of this and needs no work: masthead, byline, cover, contents
+rail and body all read correctly on a phone, and every one of its 31 registers
+stays inside the viewport and scrolls within its own box.
+
+**One correction the same day:** the phone sheet was first squared to 0 under
+the radius-0 law, and Paul reversed it — *"yes the top corners need to be
+rounded on the phone sheet."* The 22px top is the sanctioned exception: the
+curve is the affordance that says the panel slid up over the page and can slide
+back down, and squaring it made the sheet read as a second page.
 
 Still deferred: collateral renderer pass (phase 2), report detail pages and
 `/buyers/*` interiors (both now inherit the fluid ladder through the shared

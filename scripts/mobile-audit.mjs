@@ -28,6 +28,7 @@ const ROUTES = [
   ['/industries', 'industries'],
   ['/research', 'research'],
   ['/track-record', 'track-record'],
+  ['/research/home-services', 'report'],
 ].filter(([, n]) => !ONLY || n === ONLY);
 
 const ROOT = path.resolve('dist/client');
@@ -96,6 +97,18 @@ for (const [route, name] of ROUTES) {
       if (r.width === 0 || r.height === 0) continue;
       const over = Math.round(r.right - vw);
       if (over <= 1) continue;
+      // An element wider than the viewport is FINE if an ancestor clips or
+      // scrolls it — that is a deliberate device, not a defect: the report's
+      // wide registers scroll inside `.rp-tablewrap`, the lane marquee runs
+      // inside `overflow: hidden`. Flagging them buries the real findings
+      // (31 report tables reported as broken when all 31 behave correctly),
+      // and a tool that cries wolf gets ignored exactly once.
+      let clipped = false;
+      for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
+        const ax = getComputedStyle(a).overflowX;
+        if (ax === 'hidden' || ax === 'clip' || ax === 'auto' || ax === 'scroll') { clipped = true; break; }
+      }
+      if (clipped) continue;
       // Report the OUTERMOST offender only — children inherit the overflow.
       let anc = el.parentElement, dup = false;
       while (anc && anc !== document.body) { if (seen.has(anc)) { dup = true; break; } anc = anc.parentElement; }

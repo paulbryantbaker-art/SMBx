@@ -231,8 +231,13 @@
    safe-area inset), so folding them together would take more overrides than
    it saves. ──────────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
-  /* Square, like every other surface in this language. */
-  .ca-engine .pd-chat { border-radius: 0; }
+  /* The sheet KEEPS its rounded top (Paul, 2026-08-08: "yes the top corners
+     need to be rounded on the phone sheet"). This is the one sanctioned
+     exception to the radius-0 law: the curve is the physical affordance that
+     says "this slid up over the page and can slide back down", and squaring
+     it made the sheet read as a second page rather than a panel. Everything
+     inside it still obeys the language. */
+  .ca-engine .pd-chat { border-radius: 22px 22px 0 0; }
 
   .ca-engine .pd-chat .pd-chat-head {
     padding: 22px 20px 14px;
