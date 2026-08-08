@@ -776,7 +776,33 @@ export default function Landing() {
                 position:relative rather than sitting under the dots. */}
             <div aria-hidden="true" data-plx="0.02" style={{ position: 'absolute', top: 0, right: 0, width: 190, height: 128, zIndex: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(rgba(22,24,26,.14) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
             <Handles />
-            <p style={{ position: 'relative', zIndex: 1, margin: '0 auto', maxWidth: '44em', textAlign: 'center', fontSize: 16.5, lineHeight: 1.65, color: '#16181A', fontWeight: 500 }}>Pick your trade — the engine above starts your valuation. The first sitting delivers your draft; finishing the walk narrows the range, and from there your progress saves so you can leave and come back. What stays on file is your call, shown to you in full at the end.</p>
+            {/* The same instructions as a numbered list (Paul, 2026-08-08:
+                "let's make the instructions a simple number list on mobile and
+                desktop"). It was one centred paragraph of five clauses, which
+                on a phone is six lines of prose where the reader is trying to
+                work out what happens next.
+                The WORDS are Paul's, split at the punctuation he already used
+                as beats — the semicolon after "draft", the comma before "and
+                from there" — so this is a re-set, not a rewrite.
+                A real <ol>, so it is announced as a five-step list rather than
+                as five stray lines, and one grid shape that needs no
+                breakpoint: a 26px numeral rail holds at 360px and at 1440px
+                alike. Left-aligned inside a centred block — numbers down a
+                ragged centre would be unreadable as a sequence. */}
+            <ol style={{ position: 'relative', zIndex: 1, margin: '0 auto', maxWidth: '34em', padding: 0, listStyle: 'none', display: 'grid', gap: 14, textAlign: 'left' }}>
+              {[
+                'Pick your trade — the engine above starts your valuation.',
+                'The first sitting delivers your draft.',
+                'Finishing the walk narrows the range.',
+                'Your progress saves, so you can leave and come back.',
+                'What stays on file is your call — shown to you in full at the end.',
+              ].map((step, i) => (
+                <li key={step} style={{ display: 'grid', gridTemplateColumns: '26px 1fr', gap: 12, alignItems: 'baseline' }}>
+                  <span aria-hidden="true" style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: '#0A7A58' }}>{String(i + 1).padStart(2, '0')}</span>
+                  <span style={{ fontSize: 16.5, lineHeight: 1.6, color: '#16181A', fontWeight: 500 }}>{step}</span>
+                </li>
+              ))}
+            </ol>
             <div style={{ position: 'relative', zIndex: 1, margin: '32px auto 0', maxWidth: 1000, display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
             {OWNER_LANES.map(l => (
               <button
