@@ -311,6 +311,21 @@
    cascade, killed entirely under prefers-reduced-motion. */
 [data-rv] { opacity: 0; translate: 0 24px; transition: opacity 520ms ease, translate 640ms cubic-bezier(0.22, 0.9, 0.26, 1); }
 [data-rv].rv-in { opacity: 1; translate: 0 0; }
+
+/* MEDIA REVEAL (2026-08-08, Paul: "scroll reveal can be better and image fade
+   ins on reveal"). Photographs settle SLOWER and LATER than the text around
+   them — 900ms against the text's 520ms, plus a 90ms delay — so a band reads
+   words-then-picture instead of everything arriving in one slab. That
+   difference is the whole effect; matching the text timing looks like nothing
+   was done.
+   Opacity + translate ONLY, deliberately: a scale-in would push a photo past
+   the framed panels it sits in (those frames are hairline boxes with no
+   overflow clip, so the bleed would render, not error), and a blur-up costs a
+   full-size filter pass per frame on images as large as the report covers.
+   The observer in PracticeShell adds .rv-in to these exactly as it does for
+   [data-rv]. */
+[data-rvimg] { opacity: 0; translate: 0 16px; transition: opacity 900ms ease 90ms, translate 1000ms cubic-bezier(0.22, 0.9, 0.26, 1) 90ms; }
+[data-rvimg].rv-in { opacity: 1; translate: 0 0; }
 /* Stagger containers stay visible themselves; their children cascade. */
 [data-rv].rv-stagger { opacity: 1; translate: none; }
 .rv-stagger > * { opacity: 0; translate: 0 20px; transition: opacity 480ms ease, translate 580ms cubic-bezier(0.22, 0.9, 0.26, 1); }
@@ -323,7 +338,7 @@
 .rv-stagger.rv-in > *:nth-child(7) { transition-delay: 420ms; }
 .rv-stagger.rv-in > *:nth-child(n+8) { transition-delay: 490ms; }
 @media (prefers-reduced-motion: reduce) {
-  [data-rv], .rv-stagger > * { opacity: 1 !important; translate: none !important; transition: none !important; }
+  [data-rv], [data-rvimg], .rv-stagger > * { opacity: 1 !important; translate: none !important; transition: none !important; }
   .pd-chat, .pd-chat-scrim { transition: none !important; }
 }
 

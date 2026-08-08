@@ -274,9 +274,17 @@ export default function PracticeShell({
           }
         }
       },
-      { threshold: 0.12 },
+      // rootMargin, NOT a ratio threshold (2026-08-08). `threshold: 0.12`
+      // made the trigger point depend on the element's own height: a short
+      // chip row revealed after 12px crossed the fold while a tall band
+      // needed ~240px, so identical-looking sections fired at visibly
+      // different moments down the page. A bottom inset fires every element
+      // when its TOP edge crosses the same line (88% of the viewport),
+      // whatever its height — which is what makes the cascade feel authored
+      // rather than random.
+      { threshold: 0, rootMargin: '0px 0px -12% 0px' },
     );
-    const scan = () => document.querySelectorAll('[data-rv]:not(.rv-in)').forEach(el => {
+    const scan = () => document.querySelectorAll('[data-rv]:not(.rv-in), [data-rvimg]:not(.rv-in)').forEach(el => {
       if (el.getBoundingClientRect().top < window.innerHeight * 0.92) el.classList.add('rv-in');
       else io.observe(el);
     });

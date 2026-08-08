@@ -108,7 +108,7 @@ export default function Industries() {
                   <Aside k="WHY THIS LANE">{s.desk}</Aside>
                   {s.img && (
                     <div style={{ marginTop: 24, position: 'relative' }}>
-                      <img src={s.img} alt="" loading="lazy" style={{ display: 'block', width: '100%', aspectRatio: '4 / 3', objectFit: 'cover' }} />
+                      <img data-rvimg src={s.img} alt="" loading="lazy" style={{ display: 'block', width: '100%', aspectRatio: '4 / 3', objectFit: 'cover' }} />
                       <Handles small />
                     </div>
                   )}
@@ -134,7 +134,7 @@ export default function Industries() {
               <span style={TAG_STYLE}>Commercial landscaping — contract-heavy only</span>
             </div>
             <div style={{ marginTop: 26, position: 'relative', maxWidth: 900 }}>
-              <img src="/industries/trade-roof.jpg" alt="" loading="lazy" style={{ display: 'block', width: '100%', height: 240, objectFit: 'cover' }} />
+              <img data-rvimg src="/industries/trade-roof.jpg" alt="" loading="lazy" style={{ display: 'block', width: '100%', height: 240, objectFit: 'cover' }} />
               <Handles small />
             </div>
             <p style={{ margin: '26px 0 0', fontSize: 15.5, lineHeight: 1.7, color: '#4A4F54', maxWidth: '52em' }}>More than a hundred transactions across the residential and commercial services trades, counting the platforms and every add-on bolted onto them. I was inside the consolidation wave: what a platform pays for, what dies in diligence, what integration actually costs.</p>

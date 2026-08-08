@@ -39,6 +39,18 @@ import { trackEvent } from '../lib/analytics';
 const SERIF = "'Source Serif 4', Georgia, serif";
 const MONO = "'IBM Plex Mono', monospace";
 
+/**
+ * The measure for CENTRED section heads (Paul, 2026-08-08: "hero is truncated
+ * instead of wide"). Left-aligned heads keep the reference's 880 editorial
+ * measure — he excluded those explicitly ("unless a left like the home hero").
+ * This value is MEASURED, not chosen: 1080 is the smallest width that lands
+ * both centred headlines (#owners, #pricing) on ONE line at every viewport
+ * from 1440 down to 1100. Below it they break to two lines inside a column
+ * narrower than the content they head, which is the "truncated" read. Kept as
+ * one constant so the two centred heads cannot drift apart.
+ */
+const HEAD_CTR = 1080;
+
 /* ── Why us — six evidence cards (copy verbatim from the reference) ── */
 const WHY: { nm: string; bd: string; more: string; xp: React.ReactNode }[] = [
   {
@@ -569,7 +581,10 @@ export default function Landing() {
         {/* ══ PRICING — dark band ══ */}
         <section id="pricing" className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(120px, 10vw, 170px) 32px', marginTop: 'clamp(110px, 10vw, 170px)', position: 'relative' }}>
           <div aria-hidden="true" data-plx="0.02" style={{ position: 'absolute', top: 40, right: '6%', width: 280, height: 190, backgroundImage: 'radial-gradient(rgba(168,240,206,.2) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
-          <div style={{ maxWidth: 840, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
+          {/* HEAD_CTR, not the reference's 840 — same one-line finding as
+              #owners. The sub (38em) and the form (520) carry their own caps,
+              so only the headline takes the extra width. */}
+          <div style={{ maxWidth: HEAD_CTR, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
             <div data-rv><Kicker dark center>PRICING</Kicker></div>
             <h2 data-rv style={{ margin: '26px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(34px, 3.2vw, 54px)', lineHeight: 1.12, letterSpacing: '-0.012em', textWrap: 'balance' }}>Simple, up-front pricing — we'll send you the schedule.</h2>
             <p data-rv style={{ margin: '22px auto 0', maxWidth: '38em', fontSize: 17.5, lineHeight: 1.65, color: '#ABB2AB' }}>One schedule for every client, spelled out in a short brochure — the retainer, the success fee, and how the credit at close works. Nothing to haggle over. Tell us where to send it.</p>
@@ -670,13 +685,27 @@ export default function Landing() {
         </section>
 
         {/* ══ OWNERS ══ */}
-        <section id="owners" style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(130px, 12vw, 200px) 32px 20px' }}>
-          <div data-rv style={{ maxWidth: 880, margin: '0 auto', textAlign: 'center' }}>
+        {/* CENTERED-HEAD MEASURE + TAIL PANEL (Paul, 2026-08-08, on the live
+            site: "hero is truncated instead of wide … content feel vertically
+            cramped on valuation page"). Both are deliberate departures from
+            the reference, which boxed this centred head at 880 over a 1296
+            grid — measured, the headline broke to two lines at every desktop
+            width while 416px of the row sat empty beside it. 1080 is the
+            MEASURED threshold: the minimum width that lands the headline on
+            one line at every viewport down to 1100 (see HEAD_CTR below), so
+            it goes wide without becoming a full-bleed slab. The sub keeps its
+            own 42em cap, so body measure is untouched.
+            The tail was three text blocks stacked at 52/26/30 under a
+            five-row chip cluster — the cramping Paul felt. It is now ONE
+            framed panel with the house corner handles: the same pixels read
+            as a deliberate "start here" card instead of a dense drift. */}
+        <section id="owners" style={{ position: 'relative', maxWidth: 1360, margin: '0 auto', padding: 'clamp(130px, 12vw, 200px) 32px 20px' }}>
+          <div data-rv style={{ position: 'relative', zIndex: 1, maxWidth: HEAD_CTR, margin: '0 auto', textAlign: 'center' }}>
             <Kicker center>OWN ONE OF THESE BUSINESSES?</Kicker>
             <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(36px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'balance' }}>Get the valuation buyers are working from — free.</h2>
             <p style={{ margin: '24px auto 0', maxWidth: '42em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>You'll sit across from a buyer exactly once, and they'll arrive knowing what your business is worth to them. This is that read, from the people who build it for buyers — free, because when one engages us in your lane, we want to already know you.</p>
           </div>
-          <div data-rv className="rv-stagger" style={{ marginTop: 'clamp(54px, 4.8vw, 80px)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 26 }}>
+          <div data-rv className="rv-stagger" style={{ position: 'relative', zIndex: 1, marginTop: 'clamp(70px, 6vw, 104px)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
             <div style={{ borderTop: '2px solid #16181A', paddingTop: 20 }}>
               <div style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.13em', color: '#0A7A58' }}>BUYERS REBUILD YOUR NUMBERS</div>
               <p style={{ margin: '14px 0 0', fontSize: 15, lineHeight: 1.65, color: '#4A4F54' }}>A buyer's accountants don't price the tax return — they rebuild it: owner compensation, one-time costs, personal expenses, owned real estate restated to market rent. Your valuation runs that same walk, line by line, so the number your range applies to is the one a buyer would actually use.</p>
@@ -690,10 +719,27 @@ export default function Landing() {
               <p style={{ margin: '14px 0 0', fontSize: 15, lineHeight: 1.65, color: '#4A4F54' }}>Every trade has a published band where deals actually clear. Your valuation cites that band — source and vintage named — and shows where your business profile sits inside it. No made-up number, and never a single magic figure.</p>
             </div>
           </div>
-          <p data-rv style={{ margin: '52px auto 0', maxWidth: '44em', textAlign: 'center', fontSize: 16.5, lineHeight: 1.65, color: '#16181A', fontWeight: 500 }}>Pick your trade — the engine above starts your valuation. The first sitting delivers your draft; finishing the walk narrows the range, and from there your progress saves so you can leave and come back. What stays on file is your call, shown to you in full at the end.</p>
-          {/* One un-staggered reveal — the reference reserves data-stagger for
-              the grids, not this chip row. */}
-          <div data-rv style={{ margin: '26px auto 0', maxWidth: 980, display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
+          {/* The tail as one framed panel (see the section note above): the
+              instruction, the trade chips and the disclaimer are one object
+              on the panel tint, wearing the house handles. The chips are
+              white, so they still read against #F3F0E9. */}
+          <div data-rv style={{ position: 'relative', zIndex: 1, margin: 'clamp(72px, 6vw, 100px) auto 0', maxWidth: HEAD_CTR, background: '#F3F0E9', padding: 'clamp(38px, 3.4vw, 52px) clamp(28px, 3vw, 46px) clamp(34px, 3vw, 46px)' }}>
+            {/* Dot texture INSIDE the panel, not flanking it. Side ornaments
+                were tried here first and cannot survive: a 1080 head inside a
+                1216 content box at 1280px leaves 68px of gutter, so any
+                cluster wide enough to read either collides with the headline
+                or leaves the viewport. Contained, it works at every width.
+                Two traps, both of which would have RENDERED rather than
+                errored: the panel must NOT clip its overflow (the handles sit
+                at -4px OUTSIDE it and would be sheared off), so the texture
+                is inset to 0 instead of bled past the corner; and an
+                absolutely-positioned box paints ABOVE static text in the same
+                stacking context, so the copy below carries its own
+                position:relative rather than sitting under the dots. */}
+            <div aria-hidden="true" data-plx="0.02" style={{ position: 'absolute', top: 0, right: 0, width: 190, height: 128, zIndex: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(rgba(22,24,26,.14) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
+            <Handles />
+            <p style={{ position: 'relative', zIndex: 1, margin: '0 auto', maxWidth: '44em', textAlign: 'center', fontSize: 16.5, lineHeight: 1.65, color: '#16181A', fontWeight: 500 }}>Pick your trade — the engine above starts your valuation. The first sitting delivers your draft; finishing the walk narrows the range, and from there your progress saves so you can leave and come back. What stays on file is your call, shown to you in full at the end.</p>
+            <div style={{ position: 'relative', zIndex: 1, margin: '32px auto 0', maxWidth: 1000, display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
             {OWNER_LANES.map(l => (
               <button
                 key={l.key}
@@ -717,15 +763,16 @@ export default function Landing() {
             >
               Another trade →
             </button>
+            </div>
+            <p style={{ position: 'relative', zIndex: 1, margin: '34px auto 0', maxWidth: '52em', textAlign: 'center', fontSize: 13, lineHeight: 1.65, color: '#7C8187', fontStyle: 'italic' }}>Published market ranges for your trade, applied to figures you provide, plus the readiness drivers buyers actually price — not a formal appraisal; for one, engage a credentialed appraiser. At the end, the chat shows you exactly what's on file for your company, and you keep it or delete it on the spot.</p>
           </div>
-          <p data-rv style={{ margin: '30px auto 0', maxWidth: '52em', textAlign: 'center', fontSize: 13, lineHeight: 1.65, color: '#7C8187', fontStyle: 'italic' }}>Published market ranges for your trade, applied to figures you provide, plus the readiness drivers buyers actually price — not a formal appraisal; for one, engage a credentialed appraiser. At the end, the chat shows you exactly what's on file for your company, and you keep it or delete it on the spot.</p>
         </section>
 
         {/* ══ FOUNDER ══ */}
         <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(120px, 11vw, 190px) 32px 0' }}>
           <div data-rv style={{ background: '#F3F0E9', display: 'grid', gridTemplateColumns: '300px 1fr', gap: 48, padding: '48px 52px', alignItems: 'center', position: 'relative' }}>
             <div style={{ position: 'relative', width: 230 }}>
-              <img src="/founder-portrait.jpg" alt="Paul Baker" loading="lazy" style={{ display: 'block', width: 230, height: 250, objectFit: 'cover', objectPosition: '50% 0%' }} />
+              <img data-rvimg src="/founder-portrait.jpg" alt="Paul Baker" loading="lazy" style={{ display: 'block', width: 230, height: 250, objectFit: 'cover', objectPosition: '50% 0%' }} />
               <span style={{ position: 'absolute', right: -14, bottom: -14, width: 34, height: 34, background: '#0A7A58', color: '#FCFAF6', display: 'grid', placeItems: 'center', fontFamily: SERIF, fontWeight: 700, fontSize: 20, fontStyle: 'italic' }}>"</span>
               <svg aria-hidden="true" width="110" height="110" viewBox="0 0 120 120" fill="none" style={{ position: 'absolute', top: -38, left: 172, pointerEvents: 'none' }}>
                 <path d="M4 116 A112 112 0 0 1 116 4" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 6" />
@@ -742,8 +789,25 @@ export default function Landing() {
         </section>
 
         {/* ══ CTA ══ */}
-        <section id="cta" style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(130px, 12vw, 200px) 32px clamp(130px, 12vw, 210px)' }}>
-          <div data-cta-grid style={{ display: 'grid', gridTemplateColumns: '1.1fr .9fr', gap: 64, alignItems: 'center' }}>
+        <section id="cta" style={{ position: 'relative', maxWidth: 1360, margin: '0 auto', padding: 'clamp(130px, 12vw, 200px) 32px clamp(130px, 12vw, 210px)' }}>
+          {/* The closing section carried no mark at all (Paul, 2026-08-08:
+              "we can have more whatever these little shapes are called"). The
+              orbit is the founder band's gesture, reused here at the page's
+              last turn; it sits in the left column's own slack under a
+              text-wrap:balance headline, so it cannot crowd the copy. */}
+          <div aria-hidden="true" data-plx="-0.02" className="ca-orbit" style={{ position: 'absolute', left: 22, bottom: 'clamp(74px, 7vw, 130px)', width: 132, height: 132, zIndex: 0, pointerEvents: 'none' }}>
+            {/* Wrapper > animated div > svg is the hero orbit's exact
+                structure, kept because the reduced-motion guard in carta.css
+                targets `.ca-orbit > div` — a bare svg child would spin
+                straight through that preference. */}
+            <div style={{ width: 132, height: 132, animation: 'smbxOrbit 60s linear infinite', transformOrigin: '50% 50%' }}>
+              <svg width="132" height="132" viewBox="0 0 132 132" fill="none">
+                <ellipse cx="66" cy="66" rx="63" ry="26" stroke="#0A7A58" strokeWidth="1.2" strokeDasharray="5 6" opacity=".55" />
+                <circle cx="66" cy="66" r="62" stroke="#0A7A58" strokeWidth="1.2" opacity=".3" />
+              </svg>
+            </div>
+          </div>
+          <div data-cta-grid style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: '1.1fr .9fr', gap: 64, alignItems: 'center' }}>
             <div data-rv>
               <h2 style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(40px, 4.4vw, 72px)', lineHeight: 1.06, letterSpacing: '-0.015em', textWrap: 'balance' }}>Start with a confidential conversation.</h2>
               <p style={{ margin: '24px 0 0', maxWidth: '30em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>Thirty minutes. Your ideas, our read on the market, and a straight answer on whether we're the right team to run it.</p>
