@@ -392,8 +392,14 @@ shield's rule is that it appears wherever the employer claims appear, and that
 block was the only thing on the page making one — no employer name survives
 there now. `/track-record` still carries both. Mobile baseline 258 → **257**,
 the single TINY being that block's 12px kicker. (6) The ring is on `/research`
-too, chip fixed to EVERY FIGURE CITED rather than cycling — a listing page
-should not have a second rotating word competing with the cards.
+too. It cycles its label like the hero's (three restatements of that page's
+own opening sentence — attributed figures, named sources, both numbers — so
+nothing new is claimed), and it hangs BELOW its own section so the first
+report card's top-right corner cuts into it: ~29% of the ring is behind the
+card, clearing its right edge by 25px, which keeps it from overpowering the
+masthead. That works because the card is `position: relative` and later in the
+DOM, so it paints over the ring at the same z-level, and the hero section does
+not clip.
 
 **THE GATE IS `npm run shoot:mobile`** (`scripts/mobile-audit.mjs`) — and after
 Paul's *"I can't take a picture of everything that looks awful… let's do an

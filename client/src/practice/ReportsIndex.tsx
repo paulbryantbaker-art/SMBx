@@ -13,7 +13,7 @@
  * should say so before someone commits to it). Facet chips render only once
  * a facet has two or more values — a filter with one option is furniture.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'wouter';
 import PracticeShell, { Handles } from './PracticeShell';
 import { REPORT_LIST } from './reports/registry';
@@ -27,6 +27,14 @@ const ALL = 'All';
 function facetValues(pick: (r: (typeof REPORT_LIST)[number]) => string): string[] {
   return [...new Set(REPORT_LIST.map(pick))];
 }
+
+/* The ring's label cycles here the way it does on the landing hero (Paul:
+   "is the ball on the research spinning with the labels just like home?" — it
+   was spinning, but its word was fixed). The three words are restatements of
+   this page's own opening sentence, so nothing new is being claimed: every
+   figure attributed to its source, and both numbers shown where analysts
+   disagree. */
+const RING_WORDS = ['EVERY FIGURE CITED', 'SOURCES NAMED', 'BOTH NUMBERS SHOWN'];
 
 function Chip({ label, on, onClick }: { label: string; on: boolean; onClick: () => void }) {
   return (
@@ -48,6 +56,13 @@ function Chip({ label, on, onClick }: { label: string; on: boolean; onClick: () 
 }
 
 export default function ReportsIndex() {
+  // Same cadence as the hero's chips — slow enough not to read as flicker.
+  const [ringWord, setRingWord] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const t = setInterval(() => setRingWord(v => (v + 1) % RING_WORDS.length), 5600);
+    return () => clearInterval(t);
+  }, []);
   const [industry, setIndustry] = useState(ALL);
   const [metro, setMetro] = useState(ALL);
 
@@ -89,10 +104,15 @@ export default function ReportsIndex() {
               Desktop only: it is `.ca-orbit-hero`, which carta.css hides
               below 1025, where this column collapses under the copy and a
               280px ring would sit on top of the filter row.
-              The label is fixed here rather than cycling — a listing page
-              names what the ring IS, and a second rotating word on a page
-              whose job is to be scanned would compete with the cards. */}
-          <div aria-hidden="true" data-plx="-0.04" className="ca-orbit ca-orbit-hero" style={{ position: 'absolute', right: '4%', top: 40, width: 'clamp(200px, 20vw, 290px)', aspectRatio: '1 / 1', pointerEvents: 'none', zIndex: 0 }}>
+              It hangs BELOW its own section on purpose, so the first report
+              card's top-right corner cuts into it and the ring reads as
+              sitting behind the register rather than floating over the
+              masthead (Paul: "partially hidden behind the top right corner of
+              the research docs column so it does not overpower the hero").
+              That works because the card is `position: relative` and comes
+              later in the DOM, so it paints over this at the same z-level —
+              and the hero section has no clipping of its own. */}
+          <div aria-hidden="true" data-plx="-0.04" className="ca-orbit ca-orbit-hero" style={{ position: 'absolute', right: '0.5%', top: 'clamp(150px, 24vw, 350px)', width: 'clamp(200px, 20vw, 290px)', aspectRatio: '1 / 1', pointerEvents: 'none', zIndex: 0 }}>
             <div style={{ width: '100%', height: '100%', transformOrigin: '50% 50%' }}>
               <svg viewBox="0 0 300 300" width="100%" height="100%" fill="none">
                 <circle cx="150" cy="150" r="146" stroke="#0A7A58" strokeWidth="1.4" opacity=".42" />
@@ -102,7 +122,8 @@ export default function ReportsIndex() {
               <span style={{ position: 'absolute', left: '50%', top: '2.4%', transform: 'translate(-50%, -50%)' }}>
                 <span className="ca-chip-level">
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '3px 9px 2px 8px', background: '#FFFFFF', border: '1px solid #E4DFD3', fontFamily: MONO, fontSize: 13, letterSpacing: '0.08em', color: '#16181A', whiteSpace: 'nowrap' }}>
-                    <span style={{ width: 7, height: 7, background: '#0A7A58', flex: 'none' }} />EVERY FIGURE CITED
+                    <span style={{ width: 7, height: 7, background: '#0A7A58', flex: 'none' }} />
+                    <span key={RING_WORDS[ringWord]} className="ca-flip">{RING_WORDS[ringWord]}</span>
                   </span>
                 </span>
               </span>
