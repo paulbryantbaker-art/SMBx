@@ -22,9 +22,11 @@
    every revolution. So the chip is nested: the positioner rides the spinning
    layer, and this animation runs the SAME 360° backwards on the label inside
    it, at the same duration and easing. The chip orbits; the word stays level.
-   Both are `linear` and both start on mount, so they cannot drift apart. */
+   Both are `linear` and both start on mount, so they cannot drift apart.
+   THE TWO DURATIONS MUST MATCH — 210s here and 210s on `.ca-orbit-hero > div`.
+   Change one without the other and the word slowly cartwheels. */
 @keyframes smbxOrbitCCW { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
-.ca-chip-level { display: inline-block; animation: smbxOrbitCCW 150s linear infinite; }
+.ca-chip-level { display: inline-block; animation: smbxOrbitCCW 210s linear infinite; }
 
 /* The orbit settles into place on load (2026-08-08, Paul: "animate this
    little guy more on load to give a slight bouncing into place feel … maybe
@@ -58,14 +60,18 @@
    a chip pinned to an ELLIPSE. The outer CIRCLE is rotation-invariant: its top
    and left points are in the same place at every angle. So the chips move onto
    the circle, the ellipses keep spinning underneath, and both things are true
-   at once. 150s rather than the corner mark's 60s: same 360° over a rim four
-   times longer, so the surface speed matches and it reads as drift.
+   at once. 210s rather than the corner mark's 60s: same 360° over a rim four
+   times longer, so the surface speed is calmer than the small mark's, not
+   faster (Paul: "slow down the spin on the labels, it just looks like they
+   are flickering" — the flicker was mostly the WORD swap, since retimed in
+   Landing.tsx, but the rim came down with it). Keep this equal to the
+   counter-turn on `.ca-chip-level`.
 
    The labels are the seven PHASES now, cycled in the markup — which is what
    was actually being asked for. The ring is a process, not two nouns. */
 .ca-orbit-hero > div {
   animation:
-    smbxOrbit 150s linear infinite,
+    smbxOrbit 210s linear infinite,
     smbxOrbitIn 1150ms cubic-bezier(0.33, 0.9, 0.35, 1) 500ms both;
 }
 
@@ -173,7 +179,7 @@
 
    And a brick is SET DOWN, so the travel is negative: each one arrives from
    slightly above and settles onto the course beneath it. */
-[data-bricks] > * { opacity: 0; translate: 0 -14px; transition: opacity 300ms ease, translate 420ms cubic-bezier(0.3, 1.3, 0.5, 1); }
+[data-bricks] > * { opacity: 0; translate: 0 -18px; transition: opacity 460ms ease, translate 620ms cubic-bezier(0.3, 1.25, 0.5, 1); }
 [data-bricks].rv-in > * { opacity: 1; translate: 0 0; }
 
 /* The why-us cards travel further and land in sequence — the shared 20px was

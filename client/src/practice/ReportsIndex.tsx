@@ -82,12 +82,38 @@ export default function ReportsIndex() {
         {/* ══ HERO ══ */}
         <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(52px, 9vw, 150px) clamp(20px, 4vw, 32px) 20px', position: 'relative' }}>
           <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', right: '7%', top: 80, width: 130, height: 130, backgroundImage: 'radial-gradient(rgba(10,122,88,.2) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
+          {/* THE RING, ON RESEARCH TOO (2026-08-09, Paul marked the empty
+              block right of the masthead). Same instrument as the landing
+              hero — the spinning layer carries a chip and `.ca-chip-level`
+              runs the rotation backwards inside it so the word stays level.
+              Desktop only: it is `.ca-orbit-hero`, which carta.css hides
+              below 1025, where this column collapses under the copy and a
+              280px ring would sit on top of the filter row.
+              The label is fixed here rather than cycling — a listing page
+              names what the ring IS, and a second rotating word on a page
+              whose job is to be scanned would compete with the cards. */}
+          <div aria-hidden="true" data-plx="-0.04" className="ca-orbit ca-orbit-hero" style={{ position: 'absolute', right: '4%', top: 40, width: 'clamp(200px, 20vw, 290px)', aspectRatio: '1 / 1', pointerEvents: 'none', zIndex: 0 }}>
+            <div style={{ width: '100%', height: '100%', transformOrigin: '50% 50%' }}>
+              <svg viewBox="0 0 300 300" width="100%" height="100%" fill="none">
+                <circle cx="150" cy="150" r="146" stroke="#0A7A58" strokeWidth="1.4" opacity=".42" />
+                <ellipse cx="150" cy="150" rx="145" ry="58" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 6" opacity=".62" />
+                <ellipse cx="150" cy="150" rx="58" ry="145" stroke="#0A7A58" strokeWidth="1.4" opacity=".45" />
+              </svg>
+              <span style={{ position: 'absolute', left: '50%', top: '2.4%', transform: 'translate(-50%, -50%)' }}>
+                <span className="ca-chip-level">
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '3px 9px 2px 8px', background: '#FFFFFF', border: '1px solid #E4DFD3', fontFamily: MONO, fontSize: 13, letterSpacing: '0.08em', color: '#16181A', whiteSpace: 'nowrap' }}>
+                    <span style={{ width: 7, height: 7, background: '#0A7A58', flex: 'none' }} />EVERY FIGURE CITED
+                  </span>
+                </span>
+              </span>
+            </div>
+          </div>
           <div data-hs="0" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ width: 8, height: 8, background: '#0A7A58' }} />
             <span style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.16em', color: '#7C8187' }}>PUBLISHED ASSESSMENTS</span>
           </div>
-          <h1 data-hs="1" style={{ margin: '24px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(32px, 4.6vw, 78px)', lineHeight: 1.05, letterSpacing: '-0.015em' }}>Research</h1>
-          <p data-hs="2" style={{ margin: '24px 0 0', maxWidth: '40em', fontSize: 18.5, lineHeight: 1.65, color: '#4A4F54' }}>The market assessments we run before taking a mandate. Every figure is attributed to its source, and where analysts disagree we show both numbers rather than picking the flattering one.</p>
+          <h1 data-hs="1" style={{ position: 'relative', zIndex: 1, margin: '24px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(32px, 4.6vw, 78px)', lineHeight: 1.05, letterSpacing: '-0.015em' }}>Research</h1>
+          <p data-hs="2" style={{ position: 'relative', zIndex: 1, margin: '24px 0 0', maxWidth: '40em', fontSize: 18.5, lineHeight: 1.65, color: '#4A4F54' }}>The market assessments we run before taking a mandate. Every figure is attributed to its source, and where analysts disagree we show both numbers rather than picking the flattering one.</p>
         </section>
 
         {/* ══ FACETS ══ */}

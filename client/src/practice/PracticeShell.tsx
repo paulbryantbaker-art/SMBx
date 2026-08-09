@@ -377,10 +377,18 @@ export default function PracticeShell({
     const io = new IntersectionObserver(
       entries => {
         for (const e of entries) {
-          if (e.isIntersecting) {
-            e.target.classList.add('rv-in');
-            io.unobserve(e.target);
-          }
+          // REVEALS REPLAY (2026-08-09, Paul: "all animation and scroll reveal
+          // mechanics should always work every time the page is rescrolled or
+          // navigated back to"). The observer used to `unobserve` on first
+          // intersect and the class was never removed, so a section animated
+          // exactly once per page load — scroll back up and down and it was
+          // already there, and a wouter route change that reuses a node kept
+          // its `rv-in` too. Keeping the element observed and DROPPING the
+          // class once it is fully clear of the viewport re-arms it, so the
+          // brick wall and the card cascades play every time they are come
+          // back to.
+          if (e.isIntersecting) e.target.classList.add('rv-in');
+          else if (e.boundingClientRect.top > window.innerHeight) e.target.classList.remove('rv-in');
         }
       },
       // rootMargin, NOT a ratio threshold (2026-08-08). `threshold: 0.12`
@@ -393,9 +401,13 @@ export default function PracticeShell({
       // rather than random.
       { threshold: 0, rootMargin: '0px 0px -12% 0px' },
     );
-    const scan = () => document.querySelectorAll('[data-rv]:not(.rv-in), [data-rvimg]:not(.rv-in)').forEach(el => {
-      if (el.getBoundingClientRect().top < window.innerHeight * 0.92) el.classList.add('rv-in');
-      else io.observe(el);
+    // Everything is observed, always — including what is already on screen,
+    // which is what lets it re-arm later. Only elements at or above the fold
+    // on arrival are marked immediately, so a deep link or a restored scroll
+    // never lands on opacity-0 holes.
+    const scan = () => document.querySelectorAll<HTMLElement>('[data-rv], [data-rvimg]').forEach(el => {
+      io.observe(el);
+      if (!el.classList.contains('rv-in') && el.getBoundingClientRect().top < window.innerHeight * 0.92) el.classList.add('rv-in');
     });
     scan();
     const mo = new MutationObserver(scan);
