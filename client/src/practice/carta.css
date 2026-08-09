@@ -154,6 +154,23 @@
 }
 .ca-nav.on { border-bottom-color: #E4DFD3; box-shadow: 0 10px 30px rgba(22, 24, 26, 0.05); }
 
+/* THE LOGO'S VISIBLE EDGE SITS ON THE CONTENT GRID (2026-08-09). The mark is
+   a 1584×396 PNG carrying 13.26% TRANSPARENT PADDING on each side, so at the
+   38px nav height its box is 152px wide but the ink does not start until
+   20.2px in. Every box was aligned correctly and the thing you can actually
+   see was not: the logo's ink began 40px from the screen edge on a phone
+   while the burger's glyph ended 28px from the other, and on desktop the ink
+   sat 20px right of the hero headline it should line up with.
+
+   Pulling the box left by the padding puts the INK on the nav's own gutter —
+   and therefore on the same vertical line as the H1 below it.
+
+   COUPLED TO THE ASSET AND THE HEIGHT: 13.26% × (38px × 1584/396) = 20.2px.
+   Change the logo file or the 38px height and this number must be recomputed
+   (measure it by drawing the PNG to a canvas and scanning the alpha channel —
+   that is how it was found). */
+[data-nav-logo] { margin-left: -20px; }
+
 /* Hide-on-scroll-down / show-on-scroll-up (2026-08-08). `translate` on a
    position:sticky element, NOT `top` — sticky already owns `top`, so
    animating it fights the stick and stutters. 110% rather than 100% so the
@@ -321,6 +338,16 @@
   .ca-foot-col a + a { margin-top: 0; }
 
   .pd-nav-burger { width: 44px !important; height: 44px !important; }
+  /* …and it sits 14px in, not 6 (2026-08-09, Paul: "the logo doesn't look
+     even with the hamburger"). Vertical was never the problem — bar, logo
+     box, logo INK and burger all measure mid 38.0–38.2 at 390px. The
+     asymmetry is horizontal: the burger's 24px svg draws its strokes from
+     x=4 to x=20, so 4px of the box is empty on each side, and with the
+     inherited -6px margin the visible glyph ended 28px from the screen edge
+     while the logo's visible ink began 40px from the other one. -14px puts
+     the glyph's ink on the nav's own 20px gutter, the same line the logo now
+     starts on. The 44px tap box still ends 6px inside the viewport. */
+  .pd-nav-burger { margin-right: -14px !important; }
   [data-nav-logo] { padding: 7px 0; }
 
   /* Breadcrumbs are navigation, so they earn a real target — but a full 44px
