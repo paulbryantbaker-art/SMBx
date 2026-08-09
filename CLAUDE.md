@@ -237,6 +237,31 @@ has a phone sibling block; its 22px top radius is the ONE sanctioned exception
 to radius-0, Paul 2026-08-08: "yes the top corners need to be rounded on the
 phone sheet" — the curve is what says the panel slid up and can slide back
 down). Nav ≤760 drops both CTAs to the burger (they already live in the menu).
+**SHORTLINE, THE TENTH CHECK (2026-08-09, Paul circled the phone hero's lede:
+"the tag is truncated for no reason").** It was not truncated — line one ended
+at "Whether your 1st or your" and line two ran full width, because a `&nbsp;`
+glued "100th acquisition" into an 18-character token that could not fit, so
+the whole token wrapped and stranded the line before it. **RAGGED could never
+see this: RAGGED measures the BOX and the box was full width.** The defect
+lives in the rendered LINES, so the new check measures them — a Range over
+each text node answers `getClientRects()` with one rect per line box, merged
+by `top`, and a NON-FINAL line under 62% of the widest is reported. Copy fix
+was deleting the nbsp; `text-wrap: pretty` on the lede makes the next copy
+edit resilient. **Three things the first cut got wrong, all of which reported
+confidently:** (1) walking only DIRECT text children made every `<strong>`
+inside a paragraph split its parent into fragments that scored as 5%-full
+lines — 197 false findings on one report page (fix: TreeWalker over all
+descendant text nodes, and skip elements with block-level descendants);
+(2) an INLINE element measured on its own starts and ends mid-parent-line, so
+its rects are fragments too — 28 more (fix: skip `display: inline/contents`,
+the same exclusion COLLIDE already carries); (3) **the reporter iterates a
+fixed `ORDER` array, so a kind not listed there is counted in the total and
+then silently dropped from the printout** — the check ran clean for a full
+debugging round while firing correctly the whole time. `ORDER` now has an
+assertion that exits 2 on any emitted-but-unlisted kind. Baseline 249 → 258;
+the 9 additions are all report-body prose whose lines break early around long
+unbreakable tokens (company parentheticals, citation strings), not defects.
+
 **THE GATE IS `npm run shoot:mobile`** (`scripts/mobile-audit.mjs`) — and after
 Paul's *"I can't take a picture of everything that looks awful… let's do an
 antagonistic pass"* it is no longer an overflow reporter but a hunter for eight

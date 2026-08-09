@@ -448,9 +448,9 @@ export default function Landing() {
               <h1 data-hs="0" style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(35px, 4.05vw, 82px)', lineHeight: 1.05, letterSpacing: '-0.015em', textWrap: 'balance' }}>Buying a business is hard&nbsp;work. We make it&nbsp;easier.</h1>
             )}
             {ownerHero ? (
-              <p data-hs="1" style={{ margin: '26px 0 0', maxWidth: '28em', fontSize: 19, lineHeight: 1.68, color: '#4A4F54' }}>Thinking like a buyer is the best way to prepare — and starting here, with your valuation, puts you in front of potential buyers when you're{' '}ready.</p>
+              <p data-hs="1" style={{ margin: '26px 0 0', maxWidth: '28em', fontSize: 19, lineHeight: 1.68, color: '#4A4F54', textWrap: 'pretty' }}>Thinking like a buyer is the best way to prepare — and starting here, with your valuation, puts you in front of potential buyers when you're{' '}ready.</p>
             ) : (
-              <p data-hs="1" style={{ margin: '26px 0 0', maxWidth: '28em', fontSize: 19, lineHeight: 1.68, color: '#4A4F54' }}>Whether your 1st or your 100th&nbsp;acquisition, we run the process for you, freeing up your time and&nbsp;resources.</p>
+              <p data-hs="1" style={{ margin: '26px 0 0', maxWidth: '28em', fontSize: 19, lineHeight: 1.68, color: '#4A4F54', textWrap: 'pretty' }}>Whether your 1st or your 100th acquisition, we run the process for you, freeing up your time and&nbsp;resources.</p>
             )}
             <div data-hs="2" style={{ marginTop: 36, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
               <a
