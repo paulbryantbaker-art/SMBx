@@ -40,11 +40,13 @@
     smbxOrbit 60s linear infinite,
     smbxOrbitIn 1150ms cubic-bezier(0.33, 0.9, 0.35, 1) 500ms both;
 }
-/* The ball spins slower than the corner mark it replaces, in proportion to
-   its radius: same 360° over twice the circumference travels the rim twice as
-   fast, and a hero object that visibly moves is a distraction from the
-   headline beside it. 60s × (295/150) ≈ 120s holds the rim at the same speed. */
-.ca-orbit-hero > div { animation-duration: 120s, 1150ms; }
+/* THE BALL IS STILL (2026-08-09). It carries labelled nodes now — BUYER /
+   TARGETS chips pinned to its arcs, the reference's own device — and a
+   labelled instrument doesn't rotate: the chips are HTML siblings of the
+   spinning layer, so a rotating rim would slide out from under its own
+   labels within seconds. Carta's globe is static too. Entrance settle only;
+   the corner mark (and the phone hero) keep the house spin. */
+.ca-orbit-hero > div { animation: smbxOrbitIn 1150ms cubic-bezier(0.33, 0.9, 0.35, 1) 500ms both; }
 
 /* ── HERO GEOMETRY: exactly one ring, ever (2026-08-08) ──
    Above 1024 the fold is two columns and carries the hero-scale ring; at or
@@ -58,6 +60,23 @@
   .ca-orbit-hero { display: block; }
   .ca-hero-hdots { display: block; }
   .ca-orbit-corner, .ca-hero-cdots { display: none; }
+
+  /* THE FOLD ANCHORS TO THE TOP (2026-08-09). The hero's inline
+     `minHeight: 100svh` + `alignItems: center` is a centering fold, and on a
+     tall monitor it floated the ~850px cluster with ~260px of dead bone above
+     AND below — Paul's screenshot, next to carta.com whose hero rides the top
+     while the logo wall and product band fill the fold's lower minor. Ours
+     has the same next act sitting right after this section (lane marquee →
+     jade proof band), so zeroing the stretch lets it rise into the fold:
+     hero ≈ the fold's golden major on a tall screen, the cropped proof band
+     the scroll invitation. At ≤~940-tall viewports the hero's natural height
+     already exceeded the old minimum, so laptops render exactly as before;
+     ≤1024 keeps the inline values (the phone fold is approved as-is). */
+  [data-hero-grid] {
+    min-height: 0 !important;
+    padding-top: clamp(48px, 5vh, 84px) !important;
+    padding-bottom: clamp(44px, 5vh, 80px) !important;
+  }
 }
 /* φ COSTS WIDTH, AND BELOW ~1360 THE CARD CANNOT PAY IT. The hero's inline
    `1.618fr 1fr` is a true golden section of the two columns, and it holds

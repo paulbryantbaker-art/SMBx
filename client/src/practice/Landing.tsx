@@ -414,12 +414,34 @@ export default function Landing() {
             reads as depth. Its centre is φ DOWN the card rather than φ⁻² up:
             at 38.2% the ball's top arc ran through the tail of the headline's
             second line, and low also fills the dead bottom-centre the fold
-            otherwise carries. */}
+            otherwise carries.
+
+            THE FOLD ANCHORS TO THE TOP ON DESKTOP (2026-08-09, Paul's tall
+            monitor: the hero floated in the middle of the screen with ~260px
+            of dead bone above AND below). The inline `minHeight: 100svh` +
+            `alignItems: center` is a centering fold, and centering is exactly
+            what carta.com does not do: their hero rides the top of the fold
+            and the logo wall + product band fill the lower minor, so the fold
+            splits hero ≈ φ⁻¹ / next-act ≈ φ⁻² and the cropped band is the
+            scroll invitation. Ours has the same structure sitting right there
+            — the lane marquee and the jade proof band follow this section —
+            so the ≥1025 block in carta.css zeroes the min-height and tightens
+            the paddings, and on a tall screen the marquee and the proof band
+            rise into the fold instead of bone. At laptop heights (≤~940) the
+            hero's natural height already exceeded the old minimum, so nothing
+            moves there; phones keep the inline values untouched. */}
         <section data-hero-grid id="yulia" style={{ position: 'relative', maxWidth: 1360, margin: '0 auto', minHeight: 'calc(100svh - 76px)', padding: 'clamp(60px, 6vh, 110px) clamp(20px, 4vw, 32px) clamp(70px, 8vh, 140px)', display: 'grid', gridTemplateColumns: '1.618fr 1fr', gap: 'clamp(29px, 4.4vw, 80px)', alignItems: 'center' }}>
           <div style={{ position: 'relative', zIndex: 1 }}>
             {/* Dot field behind the headline — where real carta.com puts one.
-                Ink, not green: the ring owns the accent on this fold. */}
-            <span aria-hidden="true" className="ca-hero-hdots" style={{ position: 'absolute', left: -22, top: -26, width: 300, height: 196, backgroundImage: 'radial-gradient(rgba(22,24,26,.14) 1.1px, transparent 1.1px)', backgroundSize: '16px 16px', maskImage: 'linear-gradient(to bottom right, #000 18%, transparent 76%)', WebkitMaskImage: 'linear-gradient(to bottom right, #000 18%, transparent 76%)', zIndex: -1 }} />
+                Ink, not green: the ball owns the accent on this fold.
+                20px pitch and a 1.5px dot, not 16/1.1: on a scaled display
+                (Paul's monitor renders the page at a non-integer ratio) the
+                tighter grid moiréd into horizontal grey streaks above the
+                headline — it read as a smudge, not a texture. A coarser,
+                heavier dot survives resampling; the field also no longer
+                overhangs the cap line, because rows floating above the
+                headline in open bone looked like an accident. */}
+            <span aria-hidden="true" className="ca-hero-hdots" style={{ position: 'absolute', left: -22, top: -6, width: 300, height: 180, backgroundImage: 'radial-gradient(rgba(22,24,26,.12) 1.5px, transparent 1.5px)', backgroundSize: '20px 20px', maskImage: 'linear-gradient(to bottom right, #000 18%, transparent 76%)', WebkitMaskImage: 'linear-gradient(to bottom right, #000 18%, transparent 76%)', zIndex: -1 }} />
             {ownerHero ? (
               <h1 data-hs="0" style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(35px, 4.05vw, 82px)', lineHeight: 1.05, letterSpacing: '-0.015em', textWrap: 'balance' }}>Think like a buyer. Exit on your&nbsp;terms.</h1>
             ) : (
@@ -479,20 +501,51 @@ export default function Landing() {
                 then splits the ball across it φ⁻¹ clear / φ⁻² behind, and
                 drops its centre φ⁻² down the card. `data-plx` writes
                 `translate` on scroll, so the placement uses `transform` —
-                the two properties compose instead of overwriting. */}
-            <div aria-hidden="true" data-plx="-0.03" className="ca-orbit ca-orbit-hero" style={{ position: 'absolute', left: 0, top: '61.8%', width: 'clamp(210px, 20.5vw, 330px)', aspectRatio: '1 / 1', transform: 'translate(-61.8%, -50%)', pointerEvents: 'none' }}>
+                the two properties compose instead of overwriting.
+
+                The cap is 287px, not a round number: the grid maxes at 1360,
+                which fixes the card column at ~464px on every wide screen,
+                and 464 / φ = 287. The old 330 cap silently broke the ratio to
+                0.71 on any monitor past ~1400 — the one place Paul actually
+                looks at it.
+
+                LABELLED NODES, from the reference (Paul re-sent carta.com:
+                their globe carries CAP TABLE / COMPANY / FUND / LIMITED
+                PARTNER chips pinned to its orbits — the labels are what turn
+                the ornament into a diagram). Ours carries the practice's two
+                entities: the BUYER and the TARGETS, which is the acquisition
+                in two words and exactly what the engine card beside it maps.
+                Both chips sit ON visible arcs (the old right-side node died —
+                the φ split hides that rim behind the card). 13px mono is the
+                readability floor, not below it. And the ball is STATIC now
+                (entrance settle only, no spin — see .ca-orbit-hero in
+                carta.css): a labelled instrument doesn't rotate, and Carta's
+                globe is still. The corner mark keeps the house spin. */}
+            <div aria-hidden="true" data-plx="-0.03" className="ca-orbit ca-orbit-hero" style={{ position: 'absolute', left: 0, top: '61.8%', width: 'clamp(210px, 20.5vw, 287px)', aspectRatio: '1 / 1', transform: 'translate(-61.8%, -50%)', pointerEvents: 'none' }}>
               <div style={{ width: '100%', height: '100%', transformOrigin: '50% 50%' }}>
                 <svg viewBox="0 0 300 300" width="100%" height="100%" fill="none">
                   <circle cx="150" cy="150" r="146" stroke="#0A7A58" strokeWidth="1.4" opacity=".42" />
                   <ellipse cx="150" cy="150" rx="145" ry="58" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 6" opacity=".62" />
                   <ellipse cx="150" cy="150" rx="58" ry="145" stroke="#0A7A58" strokeWidth="1.4" opacity=".45" />
-                  {/* Square nodes, not dots — Carta's handle is the house
-                      gesture, so the satellites wear it. Both sit ON an arc:
-                      an orphaned node reads as a smudge, not a satellite. */}
-                  <rect x="144" y="-2" width="13" height="13" fill="#0A7A58" />
-                  <rect x="290" y="145" width="9" height="9" fill="#0A7A58" opacity=".6" />
                 </svg>
               </div>
+              {/* The chip IS the node: its 7px green square lands on the rim
+                  point, the way Carta pins theirs. White fill so the chip
+                  reads as pinned ON the line, not under it. The two chips
+                  read in OPPOSITE directions for a physical reason: the top
+                  node sits only ~34px left of the card edge (the φ split puts
+                  it there), so a rightward word runs under the card — BUYER
+                  is row-reversed, square on its right end pinned to the rim,
+                  word extending left into the open gutter. TARGETS reads
+                  rightward across the ball's interior. */}
+              {[
+                { word: 'BUYER', pos: { left: '50%', top: '1.5%' }, flip: true },
+                { word: 'TARGETS', pos: { left: '1.5%', top: '50%' }, flip: false },
+              ].map(n => (
+                <span key={n.word} style={{ position: 'absolute', ...n.pos, transform: n.flip ? 'translate(calc(-100% + 12px), -50%)' : 'translate(-12px, -50%)', display: 'inline-flex', flexDirection: n.flip ? 'row-reverse' : 'row', alignItems: 'center', gap: 7, padding: '3px 9px 2px 8px', background: '#FFFFFF', border: '1px solid #E4DFD3', fontFamily: MONO, fontSize: 13, letterSpacing: '0.08em', color: '#16181A', whiteSpace: 'nowrap' }}>
+                  <span style={{ width: 7, height: 7, background: '#0A7A58', flex: 'none' }} />{n.word}
+                </span>
+              ))}
             </div>
             <div aria-hidden="true" data-plx="-0.03" className="ca-orbit ca-orbit-corner" style={{ position: 'absolute', top: -26, right: -8, width: 150, height: 150 }}>
               {/* Spin + entrance both live in carta.css (.ca-orbit > div) —
