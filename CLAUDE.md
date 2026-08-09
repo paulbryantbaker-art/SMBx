@@ -368,6 +368,33 @@ a 230×250 box, so `cover` cropped 123px off the BOTTOM and kept every pixel of
 headroom. Chosen by rendering 0 / 26 / 38 and looking: 38 clips the crown, 26
 still leaves a gap.
 
+**REVEALS REPLAY, AND FOUR CONTENT MOVES (2026-08-09).** (1) **"All animation
+and scroll reveal mechanics should always work every time the page is
+rescrolled or navigated back to."** They did not: the IntersectionObserver
+`unobserve`d on first intersect and `rv-in` was never removed, so a section
+animated exactly ONCE per page load. Now every `[data-rv]`/`[data-rvimg]` stays
+observed and the class is DROPPED once the element is fully below the viewport,
+so it re-arms — verified by driving it: `false → true → false → true` across
+scroll down, up, and back. The immediate-mark-on-arrival path is unchanged, so
+a deep link still never lands on opacity-0 holes. (2) The brick cascade went
+90/45ms → **170/85ms** a course/brick (last brick 540ms → ~1.02s) — "I never
+get to see the bricks animate, it is way too quick" — and the ring plus its
+counter-turn went 150s → **210s**, with the word cycles at 5.6s/6.4s, because
+what read as flicker was mostly the word SWAP, not the rim. **The two 210s
+durations must stay equal or the label slowly cartwheels.** (3) The owner
+instructions are three steps, not five: pick a vertical · the Agent walks you
+through · leave and come back. (4) `/industries` rows put ALL the text on one
+side and the picture alone on the other — the ruled asides used to sit above
+the image, so each row read as prose | prose+picture and the alternation
+alternated nothing but column widths. (5) The HERITAGE block is deleted (it
+restated lane 01) and **its attribution shield went with it, correctly**: the
+shield's rule is that it appears wherever the employer claims appear, and that
+block was the only thing on the page making one — no employer name survives
+there now. `/track-record` still carries both. Mobile baseline 258 → **257**,
+the single TINY being that block's 12px kicker. (6) The ring is on `/research`
+too, chip fixed to EVERY FIGURE CITED rather than cycling — a listing page
+should not have a second rotating word competing with the cards.
+
 **THE GATE IS `npm run shoot:mobile`** (`scripts/mobile-audit.mjs`) — and after
 Paul's *"I can't take a picture of everything that looks awful… let's do an
 antagonistic pass"* it is no longer an overflow reporter but a hunter for eight

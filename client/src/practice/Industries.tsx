@@ -117,12 +117,23 @@ export default function Industries() {
                   )}
                   <p style={{ margin: '18px 0 0', fontSize: 15.5, lineHeight: 1.7, color: '#4A4F54' }}>{s.paras[0]}</p>
                   {s.paras[1] && <p style={{ margin: '14px 0 0', fontSize: 15.5, lineHeight: 1.7, color: '#4A4F54' }}>{s.paras[1]}</p>}
+                  {/* TEXT ON ONE SIDE, PICTURE ON THE OTHER (2026-08-09, Paul:
+                      "text should be opposite the image — you can keep the bar
+                      separators and all of it, just rearrange"). The two ruled
+                      asides used to sit ABOVE the image in the picture column,
+                      so each row read as prose | prose + picture and the
+                      alternating rhythm never actually alternated anything but
+                      the widths. They belong with the copy: the row now reads
+                      as one column of words against one column of image, and
+                      the rules and their mono headers are unchanged. */}
+                  <div style={{ marginTop: 30 }}>
+                    <Aside k="WHO WE RUN IT FOR">{s.who}</Aside>
+                    <Aside k="WHY THIS LANE">{s.desk}</Aside>
+                  </div>
                 </div>
                 <div style={{ order: even ? 2 : 1, paddingTop: 46 }}>
-                  <Aside k="WHO WE RUN IT FOR">{s.who}</Aside>
-                  <Aside k="WHY THIS LANE">{s.desk}</Aside>
                   {s.img && (
-                    <div style={{ marginTop: 24, position: 'relative' }}>
+                    <div style={{ position: 'relative' }}>
                       <img data-rvimg src={s.img} alt="" loading="lazy" style={{ display: 'block', width: '100%', aspectRatio: '4 / 3', objectFit: 'cover' }} />
                       <Handles small />
                     </div>
@@ -132,30 +143,18 @@ export default function Industries() {
             );
           })}
 
-          {/* Heritage */}
-          <div data-rv data-heritage style={{ marginTop: 80, position: 'relative', background: '#F3F0E9', padding: '52px 56px 56px' }}>
-            <Handles />
-            {/* The Heritage kicker is a one-off in the reference: 12px/.15em
-                where every other light kicker runs 12.5px/.16em — matched
-                literally rather than through the shared Kicker. */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ width: 8, height: 8, background: '#0A7A58' }} />
-              <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.15em', color: '#7C8187' }}>HERITAGE</span>
-            </div>
-            <h2 style={{ margin: '18px 0 0', fontFamily: SERIF, fontWeight: 600, fontSize: 'clamp(20px, 2.7vw, 42px)', lineHeight: 1.12, letterSpacing: '-0.01em' }}>Home &amp; commercial services</h2>
-            <div style={{ marginTop: 12, fontSize: 18, fontWeight: 600, color: '#16181A' }}>Where the record was built<span style={{ color: '#0A7A58' }}>.</span></div>
-            <div style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              <span data-tag style={TAG_STYLE}>Residential &amp; commercial services trades</span>
-              <span data-tag style={TAG_STYLE}>Commercial landscaping — contract-heavy only</span>
-            </div>
-            <div style={{ marginTop: 26, position: 'relative', maxWidth: 900 }}>
-              <img data-rvimg src="/industries/trade-roof.jpg" alt="" loading="lazy" style={{ display: 'block', width: '100%', height: 240, objectFit: 'cover' }} />
-              <Handles small />
-            </div>
-            <p style={{ margin: '26px 0 0', fontSize: 15.5, lineHeight: 1.7, color: '#4A4F54', maxWidth: '52em' }}>More than a hundred transactions across the residential and commercial services trades, counting the platforms and every add-on bolted onto them. I was inside the consolidation wave: what a platform pays for, what dies in diligence, what integration actually costs.</p>
-            <p style={{ margin: '14px 0 0', fontSize: 15.5, lineHeight: 1.7, color: '#4A4F54', maxWidth: '52em' }}>Much of that world is consolidated now, so the current focus applies the same mechanics one wave earlier — while still taking mandates here where a genuine lane is open, like contract-heavy commercial landscaping. The mechanics haven't changed.</p>
-            <div style={{ marginTop: 22, fontStyle: 'italic', fontSize: 13.5, lineHeight: 1.65, color: '#7C8187', maxWidth: '48em', borderLeft: '2px solid #0A7A58', paddingLeft: 16 }}>Selected transactions led or co-led in the course of employment at Wrench Group and at JPMorgan Chase.</div>
-          </div>
+          {/* The HERITAGE block was here and is gone (2026-08-09, Paul: "the
+              big home services block at the bottom can go, we already say that
+              at the top"). It restated the residential-services record that
+              lane 01 already opens the page with.
+
+              THE ATTRIBUTION SHIELD LEFT WITH IT, AND THAT IS CORRECT, NOT AN
+              OVERSIGHT: the shield's rule is that it appears WHEREVER the
+              employer deal claims appear, and this block was the only thing on
+              /industries making one — no employer name survives on this page
+              outside this note. /track-record still carries the claims AND the
+              shield, as it must. If an employer claim is ever added back here,
+              the shield comes back with it in the same block. */}
         </section>
 
         {/* ══ CTA ══ */}

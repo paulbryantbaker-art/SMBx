@@ -396,13 +396,14 @@ function Engagement() {
    the delay counts rows from the BOTTOM, not from the top of the DOM. Derived
    from the register's own length so adding a lane cannot silently mis-order
    the wall (the nth-child version it replaced would have). 3 columns, 90ms a
-   course, 45ms a brick: ~540ms to lay the last one. */
+   course, 85ms a brick: ~1.02s to lay the last one, so a course can
+   actually be watched going down. */
 const BRICK_COLS = 3;
 function brickDelay(i: number) {
   const rows = Math.ceil((HUNT_LANES.length + 1) / BRICK_COLS);
   const row = Math.floor(i / BRICK_COLS);
   const col = i % BRICK_COLS;
-  return `${(rows - 1 - row) * 90 + col * 45}ms`;
+  return `${(rows - 1 - row) * 170 + col * 85}ms`;
 }
 
 /* The three ornament chips around "Built for serious buyers." and the words
@@ -482,8 +483,8 @@ export default function Landing() {
   const [ownerHero, setOwnerHero] = useState(false);
   // The hero ring's two chips step through the seven phases, three apart so
   // they never show the same word.
-  const ring = useCycle(PHASES.length, 2600);
-  const who = useCycle(WHO_WORDS.length, 3200);
+  const ring = useCycle(PHASES.length, 5600);
+  const who = useCycle(WHO_WORDS.length, 6400);
 
   // Hero entrance (data-hs) and dot-field parallax (data-plx) run in the
   // shell — every reference page carries them.
@@ -1176,11 +1177,15 @@ export default function Landing() {
                 ragged centre would be unreadable as a sequence. */}
             <ol style={{ position: 'relative', zIndex: 1, margin: '0 auto', maxWidth: '34em', padding: 0, listStyle: 'none', display: 'grid', gap: 14, textAlign: 'left' }}>
               {[
-                'Pick your trade — the engine above starts your valuation.',
-                'The first sitting delivers your draft.',
-                'Finishing the walk narrows the range.',
-                'Your progress saves, so you can leave and come back.',
-                'What stays on file is your call — shown to you in full at the end.',
+                /* Three steps, not five (2026-08-09, Paul: "all we need to
+                   say about the instructions is pick an industry vertical, 2
+                   the Agent will walk you through the process, 3 leave and
+                   come back as needed to complete the process on your time").
+                   The two that went were mechanics of the draft rather than
+                   things an owner has to decide. */
+                'Pick your industry vertical.',
+                'The Agent walks you through the process.',
+                'Leave and come back as needed — finish on your time.',
               ].map((step, i) => (
                 <li key={step} style={{ display: 'grid', gridTemplateColumns: '26px 1fr', gap: 12, alignItems: 'baseline' }}>
                   <span aria-hidden="true" style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: '#0A7A58' }}>{String(i + 1).padStart(2, '0')}</span>
