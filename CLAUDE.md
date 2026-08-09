@@ -401,6 +401,28 @@ masthead. That works because the card is `position: relative` and later in the
 DOM, so it paints over the ring at the same z-level, and the hero section does
 not clip.
 
+**THE BRICKS NEVER ANIMATED AT ALL — A SPECIFICITY TRAP (2026-08-09, Paul's
+third report of "I never get to see the brick-layer be built").** Two passes
+were spent re-timing the cascade (90/45ms → 170/85ms) and neither could have
+worked: **the lane cells are ANCHORS, and `practice.css` carries
+`.pd a { transition: color 160ms ease }` at specificity (0,1,1), which beats
+`[data-bricks] > *` at (0,1,0).** The cells' only transitionable property was
+COLOR, so opacity/translate/scale snapped instantly — they APPEARED at
+staggered times and never moved. Nothing about it shows in a diff; the delays
+were applying perfectly to an animation that could not run. **Check
+`getComputedStyle(el).transitionProperty`, not the rule you wrote.** The same
+trap had silently disabled the who-it's-for cards (also anchors), so the fix
+went on the shared `.rv-stagger > *` too.
+**And the fill is SCROLL-DRIVEN now, which was Paul's own suggestion and is
+the right instrument**: a one-shot cascade starts when the container's top
+crosses the reveal line, and a six-row grid is always finished before a reader
+has scrolled far enough to look at it. `useScrollFill` reveals cell by cell in
+DOM order (top-left along each row) across the grid's travel through the
+viewport — measured 0 → 2 → 4 … → 17 as it passes. Each block arrives from up
+and to the left, slightly undersized, and settles on a gentle overshoot.
+DESKTOP ONLY (≥1025) and off under reduced motion; below that the CSS cascade
+runs untouched, which keeps the audited mobile page unchanged.
+
 **THE GATE IS `npm run shoot:mobile`** (`scripts/mobile-audit.mjs`) — and after
 Paul's *"I can't take a picture of everything that looks awful… let's do an
 antagonistic pass"* it is no longer an overflow reporter but a hunter for eight

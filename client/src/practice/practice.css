@@ -328,7 +328,14 @@
 [data-rvimg].rv-in { opacity: 1; translate: 0 0; }
 /* Stagger containers stay visible themselves; their children cascade. */
 [data-rv].rv-stagger { opacity: 1; translate: none; }
-.rv-stagger > * { opacity: 0; translate: 0 20px; transition: opacity 480ms ease, translate 580ms cubic-bezier(0.22, 0.9, 0.26, 1); }
+/* `!important` because an ANCHOR child never animated without it: `.pd a`
+   sets `transition: color 160ms` at specificity (0,1,1), which beats this
+   rule's (0,1,0), so any stagger cell that happens to be a link had COLOR as
+   its only transitionable property and simply appeared instead of sliding.
+   Found 2026-08-09 chasing the industries grid; the who-it's-for cards were
+   silently affected the same way. Nothing shows in a diff — the delays were
+   applying perfectly to an animation that could not run. */
+.rv-stagger > * { opacity: 0; translate: 0 20px; transition: opacity 480ms ease, translate 580ms cubic-bezier(0.22, 0.9, 0.26, 1) !important; }
 .rv-stagger.rv-in > * { opacity: 1; translate: 0 0; }
 .rv-stagger.rv-in > *:nth-child(2) { transition-delay: 70ms; }
 .rv-stagger.rv-in > *:nth-child(3) { transition-delay: 140ms; }
