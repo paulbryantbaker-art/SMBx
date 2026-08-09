@@ -50,6 +50,16 @@ const MONO = "'IBM Plex Mono', monospace";
  * one constant so the two centred heads cannot drift apart.
  */
 const HEAD_CTR = 1080;
+/* HEAD_L — the measure for a LEFT-ALIGNED section header (2026-08-09, Paul:
+   "the header is truncated to the left side… there's a lot of places on
+   desktop where the header is truncated"). The blocks were a flat 880px while
+   the headings inside them scale to 56px, so on a wide monitor a heading is
+   15.7em — it breaks into more, shorter lines and reads as though it were
+   clipped. Measured against its own container (not the section, which is the
+   wrong denominator and made a two-column CTA look broken), fill ran 73–98%
+   at 1440 but fell to 55–84% at 2560. 1120px is ~20em at the capped 56px,
+   which is a display measure rather than a column. */
+const HEAD_L = 'min(1120px, 100%)';
 
 /* ── Why us — six evidence cards (copy verbatim from the reference) ── */
 const WHY: { nm: string; bd: string; more: string; xp: React.ReactNode }[] = [
@@ -298,16 +308,91 @@ function ProofBand() {
 /** The seven-phase explorer: left rail of mono tabs grouped under the two
  *  engagement names, right pane with the active phase. Auto-cycles every
  *  5.2s until the reader interacts with the section (reference behavior). */
-function PhaseExplorer() {
+/* THE ENGAGEMENT ADVANCES AS YOU SCROLL (2026-08-09, Paul, sending
+   progressive screenshots of carta.com's SOLUTIONS section: "look at some of
+   the progression scroll animations… this would be kinda cool for how it
+   works as it scrolls. It goes from thesis to sourcing to evaluation").
+
+   The seven phases used to advance on a 5.2s TIMER, which is the wrong
+   instrument for this: it moves while you are reading and it ignores you
+   entirely. Scroll position is the reader's own control, so the phase index
+   is now derived from where the block sits in the viewport — and it drives
+   BOTH surfaces, the track's lit node and the explorer's pane, so the two
+   read as one mechanism rather than two ideas about the same seven steps.
+
+   DESKTOP ONLY (≥1025). On a phone the track is hidden (see [data-trackpanel]
+   in carta.css) and the explorer stacks, so content changing under the thumb
+   mid-read would be disorienting rather than choreographic — below 1025 the
+   original timer runs, which also keeps the audited mobile page unchanged.
+
+   The travel window is deliberately longer than the block: phases advance
+   from when its top crosses 82% of the viewport until its bottom clears 18%,
+   so all seven land inside one comfortable scroll rather than flickering past
+   in the last 200px. A click PINS the selection — reading beats scrubbing,
+   and the pin is what makes the panel usable as a reference. */
+function Engagement() {
   const [phase, setPhase] = useState(0);
-  const paused = useRef(false);
+  const pinned = useRef(false);
+  const trackRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const t = setInterval(() => { if (!paused.current) setPhase(p => (p + 1) % 7); }, 5200);
-    const stop = (e: MouseEvent) => { if ((e.target as Element | null)?.closest?.('#how')) paused.current = true; };
-    document.addEventListener('click', stop);
-    return () => { clearInterval(t); document.removeEventListener('click', stop); };
+    // Below the desktop breakpoint, keep the original timer.
+    if (!window.matchMedia('(min-width: 1025px)').matches) {
+      const t = setInterval(() => { if (!pinned.current) setPhase(p => (p + 1) % 7); }, 5200);
+      return () => clearInterval(t);
+    }
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      const el = trackRef.current;
+      if (!el || pinned.current) return;
+      const host = el.parentElement;
+      if (!host) return;
+      const r = host.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const span = r.height + vh * 0.64;
+      if (span <= 0) return;
+      const p = (vh * 0.82 - r.top) / span;
+      const i = Math.max(0, Math.min(6, Math.floor(p * 7)));
+      setPhase(cur => (cur === i ? cur : i));
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(read); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    read();
+    return () => { if (raf) cancelAnimationFrame(raf); window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); };
   }, []);
+  return (
+    <>
+          <div data-rv data-trackpanel ref={trackRef} style={{ marginTop: 'clamp(29px, 5vw, 84px)', position: 'relative', background: '#131512', padding: 'clamp(26px, 3vw, 40px)' }}>
+        <Handles color="#F4F5F1" />
+        <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.13) 1.1px, transparent 1.1px)', backgroundSize: '16px 16px' }} />
+        <div style={{ position: 'relative' }}>
+          <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.14em', color: '#A8F0CE' }}>THE ENGAGEMENT</div>
+          <div data-chain data-track className="ch-dark" style={{ marginTop: 20 }}>
+            {PHASES.map((p, i) => (
+              <Fragment key={p.ph}>
+                {i > 0 && <span className="ch-wire" aria-hidden="true"><i /></span>}
+                <div className="ch-node" style={{ background: i === phase ? '#0A7A58' : i > 4 ? '#16241E' : undefined, borderColor: i === phase ? '#0FA97C' : i > 4 ? '#2E5F4C' : undefined, textAlign: 'center', transition: 'background .35s ease, border-color .35s ease' }}>
+                  <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: i === phase ? '#DFF5EC' : '#0FA97C' }}>{String(i + 1).padStart(2, '0')}</div>
+                  <div style={{ marginTop: 7, fontSize: 13.5, lineHeight: 1.3, color: '#F4F5F1' }}>{p.ph}</div>
+                </div>
+              </Fragment>
+            ))}
+          </div>
+          <div data-trackbr style={{ display: 'flex', marginTop: 14, fontFamily: MONO, fontSize: 12, letterSpacing: '0.1em' }}>
+            <div style={{ flex: '0 0 calc(5 / 7 * 100% + 12px)', paddingTop: 10, borderTop: '1px solid #3A3F38', color: '#8E948B', textAlign: 'center' }}>SMBXCORPDEV</div>
+            <div style={{ flex: 1, marginLeft: 18, paddingTop: 10, borderTop: '1px solid #2E5F4C', color: '#A8F0CE', textAlign: 'center' }}>PREMIUM</div>
+          </div>
+        </div>
+      </div>
+
+      <PhaseExplorer phase={phase} setPhase={setPhase} pin={() => { pinned.current = true; }} />
+    </>
+  );
+}
+
+function PhaseExplorer({ phase, setPhase, pin }: { phase: number; setPhase: (i: number) => void; pin: () => void }) {
   const active = PHASES[phase];
   const tab = (p: typeof PHASES[number], i: number) => {
     const on = phase === i;
@@ -316,8 +401,8 @@ function PhaseExplorer() {
         key={p.ph}
         role="button"
         tabIndex={0}
-        onClick={() => { paused.current = true; setPhase(i); }}
-        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); paused.current = true; setPhase(i); } }}
+        onClick={() => { pin(); setPhase(i); }}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pin(); setPhase(i); } }}
         style={{ cursor: 'pointer', padding: '13px 20px', fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', transition: 'background .2s, color .2s', background: on ? '#16181A' : 'transparent', color: on ? '#FCFAF6' : '#4A4F54' }}
       >
         {String(i + 1).padStart(2, '0')}&nbsp;&nbsp;{p.ph.toUpperCase()}
@@ -581,9 +666,9 @@ export default function Landing() {
 
         {/* ══ WHY US ══ */}
         <section id="why" style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(68px, 12vw, 200px) clamp(20px, 4vw, 32px) 40px' }}>
-          <div data-rv style={{ maxWidth: 880 }}>
+          <div data-rv style={{ maxWidth: HEAD_L }}>
             <Kicker>WHY US</Kicker>
-            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'balance' }}>The machine serial acquirers build in-house. <span style={{ color: '#0A7A58' }}>Yours</span>, without the headcount.</h2>
+            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'pretty' }}>The machine serial acquirers build in-house. <span style={{ color: '#0A7A58' }}>Yours</span>, without the headcount.</h2>
             <p style={{ margin: '24px 0 0', maxWidth: '42em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>You already know what you want to buy. The question is who runs the hunt — a team you'd spend a year hiring, a bank with a seller's habits, or us. Here's the case.</p>
           </div>
           {/* No `alignItems: start` (2026-08-08). Grid's default IS stretch,
@@ -632,9 +717,9 @@ export default function Landing() {
 
         {/* ══ HOW IT WORKS ══ */}
         <section id="how" style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(62px, 11vw, 190px) clamp(20px, 4vw, 32px) 30px' }}>
-          <div data-rv style={{ maxWidth: 880 }}>
+          <div data-rv style={{ maxWidth: HEAD_L }}>
             <Kicker>HOW IT WORKS</Kicker>
-            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'balance' }}>Buying a company is a hundred small decisions. We handle the ones that don't need you.</h2>
+            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'pretty' }}>Buying a company is a hundred small decisions. We handle the ones that don't need you.</h2>
             <p style={{ margin: '24px 0 0', maxWidth: '44em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>A good acquisition isn't a single moment — it's months of work, in the right order, usually against someone who does this for a living. Here's what the job actually involves. You make the calls that matter. We do the rest.</p>
           </div>
 
@@ -652,30 +737,7 @@ export default function Landing() {
               track would be the same seven phases twice with nothing new in
               the second telling. Reasoning in full at [data-trackpanel] in
               carta.css. */}
-          <div data-rv data-trackpanel style={{ marginTop: 'clamp(29px, 5vw, 84px)', position: 'relative', background: '#131512', padding: 'clamp(26px, 3vw, 40px)' }}>
-            <Handles color="#F4F5F1" />
-            <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.13) 1.1px, transparent 1.1px)', backgroundSize: '16px 16px' }} />
-            <div style={{ position: 'relative' }}>
-              <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.14em', color: '#A8F0CE' }}>THE ENGAGEMENT</div>
-              <div data-chain data-track className="ch-dark" style={{ marginTop: 20 }}>
-                {PHASES.map((p, i) => (
-                  <Fragment key={p.ph}>
-                    {i > 0 && <span className="ch-wire" aria-hidden="true"><i /></span>}
-                    <div className="ch-node" style={{ background: i > 4 ? '#16241E' : undefined, borderColor: i > 4 ? '#2E5F4C' : undefined, textAlign: 'center' }}>
-                      <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: '#0FA97C' }}>{String(i + 1).padStart(2, '0')}</div>
-                      <div style={{ marginTop: 7, fontSize: 13.5, lineHeight: 1.3, color: '#F4F5F1' }}>{p.ph}</div>
-                    </div>
-                  </Fragment>
-                ))}
-              </div>
-              <div data-trackbr style={{ display: 'flex', marginTop: 14, fontFamily: MONO, fontSize: 12, letterSpacing: '0.1em' }}>
-                <div style={{ flex: '0 0 calc(5 / 7 * 100% + 12px)', paddingTop: 10, borderTop: '1px solid #3A3F38', color: '#8E948B', textAlign: 'center' }}>SMBXCORPDEV</div>
-                <div style={{ flex: 1, marginLeft: 18, paddingTop: 10, borderTop: '1px solid #2E5F4C', color: '#A8F0CE', textAlign: 'center' }}>PREMIUM</div>
-              </div>
-            </div>
-          </div>
-
-          <PhaseExplorer />
+          <Engagement />
 
           {/* Getting started — the sample read */}
           <div id="sample" style={{ paddingTop: 'clamp(50px, 9vw, 150px)' }}>
@@ -871,9 +933,9 @@ export default function Landing() {
 
         {/* ══ SECTORS ══ */}
         <section id="sectors" style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(62px, 11vw, 190px) clamp(20px, 4vw, 32px) 30px' }}>
-          <div data-rv style={{ maxWidth: 880 }}>
+          <div data-rv style={{ maxWidth: HEAD_L }}>
             <Kicker>KEY INDUSTRY VERTICALS</Kicker>
-            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'balance' }}>We go deep in a handful of markets. Yours may be one of them.</h2>
+            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'pretty' }}>We go deep in a handful of markets. Yours may be one of them.</h2>
             <p style={{ margin: '24px 0 0', maxWidth: '42em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>The sectors we know cold — the operators, the multiples, the diligence traps, and the targets already on our desk. Focus, not limits.</p>
           </div>
           <div data-rv data-g3 className="rv-stagger" style={{ marginTop: 'clamp(28px, 4.6vw, 76px)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: '#E4DFD3', border: '1px solid #E4DFD3' }}>
@@ -1140,7 +1202,7 @@ export default function Landing() {
           </div>
           <div data-cta-grid style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: '1.1fr .9fr', gap: 64, alignItems: 'center' }}>
             <div data-rv>
-              <h2 style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(29px, 4.4vw, 72px)', lineHeight: 1.06, letterSpacing: '-0.015em', textWrap: 'balance' }}>Start with a confidential conversation.</h2>
+              <h2 style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(29px, 4.4vw, 72px)', lineHeight: 1.06, letterSpacing: '-0.015em', textWrap: 'pretty' }}>Start with a confidential conversation.</h2>
               <p style={{ margin: '24px 0 0', maxWidth: '30em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>Thirty minutes. Your ideas, our read on the market, and a straight answer on whether we're the right team to run it.</p>
             </div>
             <div data-rv style={{ position: 'relative', background: '#FFFFFF', border: '1px solid #16181A', padding: '32px 34px' }}>
