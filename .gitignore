@@ -19,3 +19,7 @@ testing/definitive/results/
 # stray local sqlite (app uses Railway Postgres)
 database.db
 fold-shots/
+# `npm run shoot:mobile` strip captures — 200+ PNGs (~43MB) regenerated on
+# every audit run. The FINDINGS are the artifact and they live in the run
+# output; the strips are what you look at while fixing one.
+mobile-shots/

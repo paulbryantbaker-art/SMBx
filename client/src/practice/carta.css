@@ -40,6 +40,37 @@
     smbxOrbit 60s linear infinite,
     smbxOrbitIn 1150ms cubic-bezier(0.33, 0.9, 0.35, 1) 500ms both;
 }
+/* The hero ring spins slower than the corner mark. Same 360°, four times the
+   radius: at 60s the outer edge travels fast enough to read as motion rather
+   than drift, and a hero object that visibly moves is a distraction from the
+   headline sitting beside it. */
+.ca-orbit-hero > div { animation-duration: 210s, 1150ms; }
+
+/* ── HERO GEOMETRY: exactly one ring, ever (2026-08-08) ──
+   Above 1024 the fold is two columns and carries the hero-scale ring; at or
+   below, the fold is ONE column (see [data-hero-grid] at max-width 1024) and
+   a 430px ring would sit under the stacked copy with nowhere to go, so the
+   corner mark and the card's dot field stay exactly as they shipped. The two
+   media queries are complementary, so no width ever shows both sets — and
+   the phone hero is byte-identical to before this pass. */
+.ca-orbit-hero, .ca-hero-hdots { display: none; }
+@media (min-width: 1280px) {
+  .ca-orbit-hero { display: block; }
+  .ca-hero-hdots { display: block; }
+  .ca-orbit-corner, .ca-hero-cdots { display: none; }
+}
+/* NARROW DESKTOP (1025–1279) keeps the corner mark, and the reason is
+   geometric rather than a matter of taste: the engine card is opaque and
+   ~470px wide here, so any ring that fits the fold is barely wider than the
+   thing hiding its middle — at 1100 a 510px ring showed a 66px crescent and
+   two stray arcs, which reads as debris, not an object. The ring needs the
+   card to be a detail inside it, and that only happens once the viewport can
+   spare ~700px. The split also relaxes toward even here: 1.32fr leaves the
+   card ~415px, where its lane chips break to six rows and the card grows
+   taller than the copy beside it. */
+@media (min-width: 1025px) and (max-width: 1279px) {
+  [data-hero-grid] { grid-template-columns: 1.08fr 1fr !important; }
+}
 @keyframes smbxCaret { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
 
 /* ── Base, scoped to the practice root ── */
@@ -95,12 +126,23 @@
    (One deviation: the links hide at 760px, not the reference's 840px, so the
    hand-off lands exactly where the existing .pd-mmenu mobile menu wakes up —
    between 761–840px the compressed links still fit.) */
-@media (max-width: 1180px) {
+/* THE LADDER MOVED UP ~130px (2026-08-08). The reference's 1180/1080 steps
+   were transcribed against the reference's nav; ours has since grown a
+   Research link, a Free Valuation link and a 38px logo, so the bar needed
+   more room than the steps gave it and the links SPILLED — `[data-nav-links]`
+   carries `min-width: 0`, so the flex item shrinks below min-content and its
+   `white-space: nowrap` children hang out past its right edge. The box never
+   overlaps, which is why measuring the container reads clean; only the last
+   CHILD's right edge against the CTA cluster's left edge shows it.
+   Two bands were live: 1081–1112, and 1181–~1290 — the second one catching
+   1280, the single most common laptop width there is. Measured, not guessed:
+   the uncompressed bar crosses zero at ~1282 and the tier-1 bar at ~1090. */
+@media (max-width: 1310px) {
   [data-nav-inner] { gap: 20px !important; }
   [data-nav-links] { gap: 16px !important; font-size: 14px !important; }
   [data-nav-ctas] a { font-size: 14px !important; padding: 10px 14px !important; }
 }
-@media (max-width: 1080px) {
+@media (max-width: 1150px) {
   [data-nav-quiet] { display: none !important; }
   [data-nav-links] { gap: 13px !important; font-size: 13.5px !important; }
 }
@@ -258,19 +300,26 @@
   .rp-ask-fab { min-height: 44px; min-width: 44px; }
 }
 
-/* ── THE FUNNEL CHAIN (2026-08-08) ──────────────────────────────────────────
-   The nodes and the wires between them are SIBLINGS in one flex row, which is
-   the whole trick: turning the chain vertical for a phone is then a single
-   `flex-direction` flip plus a wire that stands up, with no second copy of the
-   node markup to keep in step. The alternative — connectors as ::before on
-   each node — cannot change axis without redrawing every rule.
-   `min-width: 0` on the nodes because a flex item defaults to min-content and
-   "OPERATORS IN-FOOTPRINT" would otherwise refuse to shrink, pushing the row
-   past the card. That is the same trap the hero grid hit; it is not
-   theoretical here, it is a 4-across row inside a 820px card. ─────────────── */
-[data-funnel] { display: flex; align-items: stretch; position: relative; }
-[data-funnel] > * { position: relative; z-index: 1; }
-.fn-node {
+/* ── THE CHAIN PRIMITIVE (2026-08-08) ─────────────────────────────────────
+   One wired-node device, three uses: the sample read's funnel, the proof
+   band, and the engagement track. Written once because the mechanics are
+   identical and the phone behaviour is the fiddly part — three copies would
+   be three chances to get the axis flip wrong.
+
+   THE TRICK: connectors are SIBLINGS of the nodes in one flex row, not
+   ::before pseudo-elements on each node. That is why turning the chain
+   vertical is a single `flex-direction: column` plus a wire that stands up,
+   with no second copy of the node markup and no rule that has to be
+   rewritten per breakpoint.
+
+   `min-width: 0` on every node: a flex item defaults to min-content, so a
+   mono label like "OPERATORS IN-FOOTPRINT" would refuse to shrink and push
+   the row past its container. Not theoretical — the funnel sits in an 820px
+   card and the proof chain carries five nodes. ──────────────────────────── */
+[data-chain] { display: flex; align-items: stretch; position: relative; }
+[data-chain] > * { position: relative; z-index: 1; }
+
+.ch-node {
   flex: 1 1 0;
   min-width: 0;
   border: 1px solid #E4DFD3;
@@ -278,15 +327,25 @@
   color: #16181A;
   padding: 18px 16px 16px;
 }
-.fn-node > div + div { color: #7C8187; }
-/* The terminal node is the conclusion, so it takes the accent fill rather
-   than another hairline box. */
-.fn-hit { background: #0A7A58; border-color: #0A7A58; color: #FCFAF6; }
-.fn-hit > div + div { color: #DFF5EC; }
+.ch-node > div + div { color: #7C8187; }
+/* The terminal node is a CONCLUSION, not another step, so it takes the accent
+   fill rather than another hairline box. */
+.ch-hit { background: #0A7A58; border-color: #0A7A58; color: #FCFAF6; }
+.ch-hit > div + div { color: #DFF5EC; }
 
-.fn-wire { flex: 0 0 30px; display: grid; place-items: center; }
-.fn-wire i { display: block; width: 100%; height: 1px; background: #D8D3C6; position: relative; }
-.fn-wire i::after {
+/* On a dark band the same node inverts: a lifted panel on the near-black
+   rather than white-on-bone. Deal Green stays the joint colour throughout —
+   it is the accent everywhere — but node TEXT never uses it on dark (the
+   contrast trap the token table warns about); mint carries that job. */
+[data-chain].ch-dark .ch-node { background: #1A1D19; border-color: #3A3F38; color: #F4F5F1; }
+[data-chain].ch-dark .ch-node > div + div { color: #8E948B; }
+[data-chain].ch-dark .ch-hit { background: #0A7A58; border-color: #0A7A58; }
+[data-chain].ch-dark .ch-hit > div + div { color: #DFF5EC; }
+
+.ch-wire { flex: 0 0 30px; display: grid; place-items: center; }
+.ch-wire i { display: block; width: 100%; height: 1px; background: #D8D3C6; position: relative; }
+[data-chain].ch-dark .ch-wire i { background: #3A3F38; }
+.ch-wire i::after {
   content: '';
   position: absolute; left: 50%; top: 50%;
   width: 6px; height: 6px; background: #0A7A58;
@@ -294,9 +353,52 @@
 }
 
 @media (max-width: 900px) {
-  [data-funnel] { flex-direction: column; }
-  .fn-wire { flex: 0 0 24px; }
-  .fn-wire i { width: 1px; height: 100%; }
+  [data-chain] { flex-direction: column; }
+  .ch-wire { flex: 0 0 24px; }
+  .ch-wire i { width: 1px; height: 100%; }
+}
+
+/* ── THE PROOF CHAIN carries the site's loudest numerals, so its scale is
+      set here rather than inline: a rail of five wants ~46px (at 92px a
+      "~$21B" is 270px of glyph in a 248px node), while the phone's 2-up grid
+      wants the 40px it has always had. One inline clamp cannot say both. ── */
+[data-proof] .ch-node { padding: 40px 20px 34px; }
+[data-proof] .ch-node > div:first-child { font-size: clamp(30px, 3.2vw, 46px); }
+
+@media (max-width: 900px) {
+  /* Back to the 2-up grid it has always been below 900. Five stacked nodes
+     would spend a whole phone screen on one band, and the grid genuinely
+     reads better — the 0 takes the last row alone, which is where the
+     punchline wants to be. */
+  [data-proof] { display: grid !important; grid-template-columns: repeat(2, 1fr); gap: 1px; background: #2A2E29; border: 1px solid #2A2E29; }
+  [data-proof] .ch-wire { display: none; }
+  [data-proof] .ch-node { border: none; padding: 30px 16px 28px; }
+  [data-proof] .ch-node > div:first-child { font-size: clamp(38px, 9vw, 52px); }
+  [data-proof] .ch-hit { grid-column: 1 / -1; }
+}
+
+/* ── THE ENGAGEMENT TRACK is a chain with seven links, and seven stacked
+      nodes on a phone is a column taller than the interactive explorer that
+      follows it — the overview would cost more scroll than the detail. So it
+      alone re-flows to a WRAPPED CHIP ROW below 900: the wires go (they mean
+      nothing once the run wraps) and the Premium boundary keeps carrying on
+      colour, which is the only thing the graphic has to say at that size. ── */
+[data-track] .ch-node { padding: 12px 12px 11px; }
+/* THE TRACK IS DESKTOP-ONLY, and this is a judgement rather than a shrug.
+   Its whole job is to show at a glance where smbXCorpDev ends and Premium
+   begins — something the interactive explorer buries on a wide screen, where
+   you read one phase at a time in a tall panel beside a rail.
+   On a phone the explorer does NOT bury it. The rail collapses to a list
+   that prints the group headers inline — "smbxCorpDev — the full buy-side
+   engagement", then 01–05, then "smbxCorpDev Premium — everything above",
+   then 06–07 — which states the boundary in WORDS, better than a colour
+   tint states it. Keeping the track there would mean the same seven phases
+   twice in a row with nothing new in the second telling, at the cost of most
+   of a screen.
+   Not hidden because it broke; hidden because on that surface it is
+   redundant to something clearer. */
+@media (max-width: 900px) {
+  [data-trackpanel] { display: none !important; }
 }
 
 /* ── ORNAMENTS DO NOT GET TO SIT ON THE HEADLINE (2026-08-08) ───────────────

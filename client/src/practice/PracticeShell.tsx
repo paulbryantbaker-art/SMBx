@@ -181,6 +181,43 @@ export default function PracticeShell({
     return () => document.removeEventListener('click', onClick);
   }, [home, navigate]);
 
+  // THE HASH DOES NOT GET TO STAY IN THE ADDRESS BAR (2026-08-08, Paul: "any
+  // time I refresh the page, it scrolls to here for some reason").
+  //
+  // The reason: his URL was `smbx.ai/#owners`. One click on "Free Valuation"
+  // or "Are you a business owner?" writes that hash, and it never leaves —
+  // so every later refresh is a fresh hash navigation and the browser jumps
+  // to #owners again. Standard platform behaviour, and completely opaque
+  // from the reader's side: the tab still looks like the homepage.
+  //
+  // A first visit to a SHARED `/#owners` link still lands where it should —
+  // the jump has already happened by the time this runs. All it removes is
+  // the URL's memory of it, so a reload behaves like a fresh visit. 2600ms
+  // waits out settleToAnchor's last re-assert at 2200; stripping earlier
+  // would leave that timer re-scrolling a page whose hash is gone.
+  //
+  // replaceState, not navigate(): the PATH is unchanged, so wouter's location
+  // stays correct and no re-render is triggered — this only edits what the
+  // address bar remembers.
+  // A `hashchange` listener as well as the route effect, because wouter's
+  // `loc` is the PATH — clicking `#owners` on the page you are already on
+  // changes the hash and nothing else, so a route-keyed effect never re-runs
+  // and that is the exact case Paul hit.
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const strip = () => {
+      clearTimeout(t);
+      if (!window.location.hash) return;
+      t = setTimeout(() => {
+        if (!window.location.hash) return;
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }, 2600);
+    };
+    strip();
+    window.addEventListener('hashchange', strip);
+    return () => { clearTimeout(t); window.removeEventListener('hashchange', strip); };
+  }, [loc]);
+
   // Nav hairline + shadow once the page has scrolled 24px, AND hide-on-down /
   // show-on-up (2026-08-08, Paul: "lets add back the menu bar hiding on scroll
   // down and unhiding on scroll up"). The Carta references ship a bar that

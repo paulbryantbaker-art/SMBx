@@ -374,6 +374,54 @@ audited as part of this and needs no work: masthead, byline, cover, contents
 rail and body all read correctly on a phone, and every one of its 31 registers
 stays inside the viewport and scrolls within its own box.
 
+### THE CARTA POLISH PASS (2026-08-08, comparing against the real carta.com)
+
+Paul, with screenshots of carta.com beside ours: *"we're not done yet… we can
+improve the polish."* The diagnosis that mattered: **their graphic devices
+carry information and compose INTO the type; ours decorated the margins.**
+Their `All together now` headline has the LP→GP→CFO→CEO→GC chips wired
+*through* the letterforms — the graphic names the audience. Ours had a dot
+field marooned in a band's bottom-left corner, aligned to nothing.
+
+Shipped (#372):
+
+- **The funnel is a wired node chain.** It was three flat boxes with `→`
+  glyphs and the payoff — the 9 — stranded in a panel below, so the drop that
+  IS the argument never read as one movement. Now 2,400 → 180 → 55 → 9,
+  hairline wires with square joints, dot field behind, terminal node in the
+  accent fill because it is the conclusion rather than another step. **This
+  beats Carta's chip chain on the only axis that matters: theirs labels an
+  audience, ours carries four real numbers and cannot be copied, because it is
+  our actual screen.** The giant "9" left the panel below since the chain now
+  ends on it; every word of copy is unchanged.
+  Geometry: the connectors are SIBLINGS of the nodes in one flex row, so the
+  phone flip is one `flex-direction: column` plus a wire that stands up, with
+  no second copy of the node markup. `min-width: 0` on the nodes — a flex item
+  defaults to min-content and the mono labels would otherwise refuse to shrink
+  inside an 820px card.
+- **The whose-side dot field** moved from `left: 5%; bottom: 36` to behind the
+  headline, where Carta always puts theirs.
+- **Two-tone headlines reached the site** for the first time — the accent on
+  the TURN, never the setup. Mint on the dark band, because Deal Green on
+  `#131512` is the low-contrast trap the token table warns about. The deck
+  builder had drawn hooks this way for months (`twoToneHook`).
+- **Ragged rows flushed** — the why-us grid carried `align-items: start`, so
+  each row stepped down left to right. Grid's default is stretch.
+
+**DECIDED AND CLOSED: the why-us cards KEEP their dot bands** (Paul: *"I like
+the dot fields actually"*). The case for removing them was ours — real
+carta.com puts dot fields only behind headlines, never inside cards, and six
+identical 84px bands is the page's most repetitive texture. Paul heard that
+case and kept them; they are also in the approved reference. **Do not remove
+them on either ground.** The decision is repeated in `Landing.tsx` at the band
+itself, because a future polish pass would otherwise re-derive the same
+argument and act on it.
+
+Mobile was the explicit constraint (*"just be really careful not to break
+mobile"*) and was verified unchanged at 360, 390 and 430px: 249 findings across
+15 routes, identical to the pre-change baseline, no structural class at any
+width.
+
 ### THE ADVERSARIAL PASS (2026-08-08, same day)
 
 Paul, after the first layer shipped: *"I can't take a picture or screenshot
@@ -440,6 +488,113 @@ back down, and squaring it made the sheet read as a second page.
 Still deferred: collateral renderer pass (phase 2), report detail pages and
 `/buyers/*` interiors (both now inherit the fluid ladder through the shared
 components, but neither has had a phone pass of its own).
+
+---
+
+## THE DESKTOP FOLD (2026-08-08)
+
+Paul: *"the hero / above the fold is a little boring on desktop… while carta
+is actually a little busy, we can meet in the middle — making the ball bigger
+balancing out the page (golden ratio)… lean into the Carta look and feel,
+blending our old with it to make an original."*
+
+Boring had a mechanical cause, the way the mobile gap did. The fold was two
+near-equal columns (`1.02fr .98fr`), the type at its loudest setting, and the
+only geometry on the page a 150px orbit tucked behind the engine card's
+top-right corner where roughly a third of it showed. Nothing in that is a
+composition; it is a stack beside a card.
+
+So this pass moves PROPORTION and adds no content — which is the half of
+Carta we are deliberately not copying.
+
+**Columns → `1.32fr 1fr`.** φ is 1.618, and at 1440 it hands the engine card
+467px, where its lane chips break two-deep and the card outgrows the copy
+beside it. 1.32 is the meet-in-the-middle: asymmetric enough to have a
+subject, wide enough to keep the card usable at 531px.
+
+**Type quiets down.** H1 `clamp(35px, 4.8vw, 92px)` → `clamp(35px, 4.05vw,
+82px)`, which is 69→58px at 1440. Lede 20→19px, measure 34em→28em. The floor
+is untouched, so nothing below its crossover moves; the H1 gives up ~3px in
+the 730–1024 band and the phone stays at 35px exactly.
+
+**The orbit becomes a hero-scale ring** — `clamp(560px, 55vw, 860px)`,
+absolutely positioned on the SECTION so it can bridge both columns, first in
+the DOM so the two columns (each `z-index: 1`) paint over it. It keeps the
+house spin, slowed to 210s: same 360° at four times the radius moves the rim
+fast enough to distract from the headline beside it. Its satellites are
+Carta's 8px handle squares rather than dots — that is the "blend our old with
+it" the brief asked for, our gesture wearing their vocabulary.
+
+### The one that mattered: NOT concentric
+
+Paul, mid-build: *"why is the ball hiding behind the chat box?"*
+
+The first cut centred the ring on the engine card. An even rim around an
+opaque panel reads as a HALO ON the panel, not an object behind it — the eye
+gets no cue about which is in front, so the ring stops being a ball and
+becomes a frame. Offsetting it (`right: 0` against the card's own position)
+leaves ~230px of ball showing on one side and ~30px on the other, and that
+asymmetry IS the depth cue. Same ring, same size; only the offset changed and
+it went from decoration to object.
+
+Two corollaries, both found by rendering rather than reasoning:
+
+- **A node must sit on a visible arc.** The third satellite was on the
+  vertical ellipse's left edge. Once the ring moved off-centre that arc was
+  no longer where the node was, so it landed alone in open bone between the
+  copy and the card and read as a smudge on the screen. Deleted.
+- **The rim crossed the lede.** The ring's widest point sits at the section's
+  vertical centre, which is exactly where the lede's first line runs. Pulling
+  the measure to 28em breaks the line before the rim reaches it.
+
+Also dropped: the innermost `r=172` circle, which at this scale sat entirely
+behind the card and contributed nothing but a second concentric edge.
+
+### Desktop-only, by construction
+
+Every new decoration is scoped `min-width: 1280px`, and the two marks it
+replaces (`.ca-orbit-corner`, `.ca-hero-cdots`) hide at exactly the same
+breakpoint. The queries are complementary, so no width ever shows both sets
+and the phone hero is byte-identical to what shipped in the mobile layer.
+
+**The ring starts at 1280, not 1025, and the reason is geometric rather than
+a matter of taste.** Below that the engine card is ~470px and opaque, so any
+ring that fits inside the fold's height is barely wider than the thing hiding
+its middle. At 1100 a 510px ring rendered a 66px crescent and two stray arcs
+— debris, not an object. The ring needs the card to be a detail inside it,
+and that only happens once the viewport can spare ~700px. 1025–1279 keeps the
+corner mark and relaxes the split to `1.08fr 1fr`, because 1.32fr there
+leaves the card ~415px and six rows of chips.
+
+### The nav defect this pass surfaced
+
+Rendering at 1100 showed "Free Valuation" sitting under the Confidential
+consultation pill. It was live on `main`, not caused by this work: the
+reference's 1180/1080 compression steps were transcribed before our nav grew
+a Research link, a Free Valuation link and a 38px logo.
+
+**`[data-nav-links]` carries `min-width: 0`.** The flex item therefore shrinks
+below min-content and its `white-space: nowrap` children hang out past its
+right edge — so the container box never overlaps the CTA cluster, and a script
+measuring the two containers reports a comfortable 20px gap while the page
+visibly collides. Only the last CHILD's right edge against the cluster's left
+edge shows it. That is the general lesson: for a shrunk-below-content flex
+item, measure the children.
+
+Two bands were live — 1081–1112, and 1181–~1290, the second catching **1280**,
+the single most common laptop width there is. The ladder moved to 1310 / 1150
+and was re-measured at 18 widths from 1024 to 1920: clean everywhere, worst
+margin −38px at 1320.
+
+### Verified
+
+- `npm run build` green.
+- `npm run test:design` — 77/77.
+- `npm run shoot:mobile` — **249 findings across 15 routes, identical to the
+  pre-pass baseline**, and every structural class (BLEED · GRID · RAGGED ·
+  SQUEEZE · COLLIDE · CLIP · VOID) still at ZERO. The residue is the known
+  cosmetic set: TAP 91, TINY 156, SAMEDEST 2.
+- Rendered and looked at: 1100, 1280, 1366, 1440, 1728 desktop; 390 phone.
 
 ---
 

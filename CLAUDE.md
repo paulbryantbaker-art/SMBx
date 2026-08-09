@@ -98,6 +98,48 @@ hover/media/keyframes plus the `.ca-engine` intake redress. Build record:
 collateral renderers (LEDGER stays their source until phase 2 — see the interim
 notice atop `content/studio/DESIGN.md`), report bodies + `/buyers/*` interiors.
 
+**THE DESKTOP FOLD (2026-08-08, Paul: "the hero / above the fold is a little
+boring on desktop… while carta is actually a little busy, we can meet in the
+middle — making the ball bigger balancing out the page (golden ratio)… lean
+into the Carta look and feel, blending our old with it to make an original").
+Boring had a mechanical cause, same as mobile did: two near-equal columns
+(1.02fr/.98fr), the type at its loudest, and the only geometry a 150px orbit
+tucked behind the engine card's corner. So the pass is PROPORTION, not
+content — nothing was added to read, which is precisely the half of Carta we
+are not copying. Columns → **1.32fr 1fr** (φ is 1.618 and starves the card to
+467px, where its lane chips break two-deep; 1.32 is the meet-in-the-middle),
+H1 `clamp(35px, 4.05vw, 82px)` (69→58px at 1440), lede 20→19px at a 28em
+measure, and the orbit grows into a **hero-scale ring** — `clamp(560px, 55vw,
+860px)`, our gesture wearing Carta's square handles as its satellites.
+**THE RING IS NOT CONCENTRIC WITH THE CARD, and that is the whole trick**
+(Paul, same day: *"why is the ball hiding behind the chat box?"*): the first
+cut centred it, and an even rim around an opaque panel reads as a HALO ON the
+panel — the eye gets no cue as to which is in front. Offsetting it left leaves
+~230px of ball on one side and ~30px on the other, and that asymmetry is the
+depth. Two corollaries, both learned by rendering: a node must sit ON a
+visible arc or it reads as a smudge (the third one, orphaned by the offset,
+was deleted), and the lede's measure had to come in to 28em because the ring's
+widest point crossed its first line.
+**Every new decoration is DESKTOP-ONLY and the two marks it replaces hide at
+the same breakpoint** (`.ca-orbit-hero`/`.ca-hero-hdots` vs
+`.ca-orbit-corner`/`.ca-hero-cdots`, complementary media queries) so exactly
+one set shows at any width and the phone hero is byte-identical. The ring
+starts at **1280**, not 1025, for a geometric reason rather than a taste one:
+below that the card is ~470px and opaque, so any ring that fits the fold is
+barely wider than the thing hiding its middle — at 1100 a 510px ring showed a
+66px crescent and two stray arcs, which reads as debris. 1025–1279 keeps the
+corner mark and relaxes to 1.08fr.
+**The pass also caught a live nav defect across the most common laptop
+widths.** The reference's 1180/1080 compression steps were transcribed before
+our nav grew a Research link, a Free Valuation link and a 38px logo, so the
+links SPILLED — `[data-nav-links]` carries `min-width: 0`, the flex item
+shrinks below min-content, and its `white-space: nowrap` children hang past
+its right edge. **The container box never overlaps, so measuring it reads
+clean; only the last CHILD's right edge against the CTA cluster shows it.**
+Two bands were live: 1081–1112 and 1181–~1290 — the second catching **1280**.
+Ladder moved to 1310/1150; measured clean (worst margin −38px) at every width
+from 1024 to 1920.
+
 **MOBILE IS IN (2026-08-08, Paul: "can we start on Mobile?" — closes Q3, the
 deferral the plan flagged as "the biggest gap"). THE FIX WAS FLUID, NOT A
 BREAKPOINT, because the cause was one mechanical thing: EVERY CLAMP ON THE SITE
