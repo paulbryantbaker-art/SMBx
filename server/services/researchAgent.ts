@@ -829,8 +829,27 @@ export function startResearchScheduler() {
 
   failOrphanedRuns().catch(() => {});
 
-  if (process.env.RESEARCH_SCHEDULES_DISABLED === 'true') {
-    console.log('[research] Campaign scheduler disabled (RESEARCH_SCHEDULES_DISABLED) — boot sweep still ran');
+  // OFF UNLESS EXPLICITLY TURNED ON (2026-08-09, Paul: "we need to kill these
+  // bc they eat up API. ALL of them.").
+  //
+  // This used to be opt-OUT, and the opt-out was never set on Railway — so a
+  // saved campaign fired unattended on the metered org key, at `deep` depth
+  // (40 searches + 25 page fetches), with RESEARCH_MONTHLY_CAP_CENTS unset and
+  // therefore no cap at all. An expensive default that depends on an env var
+  // being remembered across every deploy is not a safe default; the failure
+  // mode is silent and it bills.
+  //
+  // Inverted, the money path cannot come back by omission. RESEARCH_SCHEDULES_
+  // DISABLED is still honoured so an existing env var keeps working, but it is
+  // now redundant: without RESEARCH_SCHEDULES_ENABLED=true the loop never
+  // starts. Migration 122 also disarms every existing campaign row, so turning
+  // the flag on does not fire a backlog.
+  //
+  // MANUAL RUNS ARE UNAFFECTED — pressing Run in Studio never touches this.
+  // The boot sweep above still runs either way: it only heals orphaned rows
+  // and costs nothing.
+  if (process.env.RESEARCH_SCHEDULES_DISABLED === 'true' || process.env.RESEARCH_SCHEDULES_ENABLED !== 'true') {
+    console.log('[research] Campaign scheduler NOT started — scheduled runs spend on the metered key, so they are off unless RESEARCH_SCHEDULES_ENABLED=true. Boot sweep still ran.');
     return;
   }
 
