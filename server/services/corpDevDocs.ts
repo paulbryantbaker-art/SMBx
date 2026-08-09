@@ -24,11 +24,16 @@ import { sql } from '../db.js';
 import Anthropic from '@anthropic-ai/sdk';
 import { figuresNotIn } from './researchLanes.js';
 import { createArtifact } from './studioRepos.js';
+import { assertSpendAllowed } from './apiSpend.js';
 
 const MODEL = 'claude-sonnet-4-6';
 
 let client: Anthropic | null = null;
 function getClient(): Anthropic {
+  // Corp-dev documents are derived in a Cowork session against the workspace
+  // now — PLAYBOOK.md is the canonical spec and this file is the stale
+  // duplicate of it (it lacks the target map entirely).
+  assertSpendAllowed('studio', 'Corp-dev document generation');
   if (!client) {
     if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY is not set');
     client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 600_000, maxRetries: 2 });

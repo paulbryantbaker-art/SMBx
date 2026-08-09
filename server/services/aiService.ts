@@ -5,6 +5,7 @@ import { executeGovernedTool } from './governedToolExecutor.js';
 import { persistCanvasTabFromAction } from './canvasTabPersist.js';
 import { resolveChatModel, type ModelPreference } from './modelPreference.js';
 import type { Response } from 'express';
+import { assertSpendAllowed } from './apiSpend.js';
 
 const MODEL = 'claude-sonnet-4-6';
 const MAX_TOOL_ROUNDS = 10; // safety limit on agentic loops
@@ -12,6 +13,11 @@ const MAX_TOOL_ROUNDS = 10; // safety limit on agentic loops
 let client: Anthropic | null = null;
 
 function getClient(): Anthropic {
+  // ON by default — Yulia, the agentic loop and the deliverable generators
+  // are the app's working instruments (CLAUDE.md: "The operational core is
+  // NOT gated beyond team auth"). Switching this lane off leaves a brick, so
+  // it takes a deliberate API_LANES=marketing (or =none) to do it.
+  assertSpendAllowed('chat', 'Yulia and the deal tools');
   if (!client) {
     if (!process.env.ANTHROPIC_API_KEY) {
       throw new Error('ANTHROPIC_API_KEY is not set');

@@ -17,6 +17,7 @@ import {
 } from '../constants/definitive.js';
 import { buildModelBackedChatAuditPacket } from '../services/definitiveAuditPacket.js';
 import { resolveDefinitiveMandateContext } from '../services/definitiveMandateService.js';
+import { assertSpendAllowed } from '../services/apiSpend.js';
 
 /** Safe SSE write — checks destroyed + writableEnded, catches errors */
 function safeWrite(res: Response, data: string): boolean {
@@ -193,6 +194,9 @@ const STREAMING_MODEL = 'claude-sonnet-4-6';
 
 let anthropicClient: Anthropic | null = null;
 function getAnthropicClient(): Anthropic {
+  // Same lane as aiService — this route holds its own client, so the guard
+  // has to be repeated here or the chat stream slips past it.
+  assertSpendAllowed('chat', 'Yulia chat');
   if (!anthropicClient) {
     if (!process.env.ANTHROPIC_API_KEY) {
       throw new Error('ANTHROPIC_API_KEY is not set');

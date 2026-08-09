@@ -11,6 +11,7 @@
  */
 import Anthropic from '@anthropic-ai/sdk';
 import { sql } from '../db.js';
+import { assertSpendAllowed } from './apiSpend.js';
 
 const anthropic = new Anthropic();
 
@@ -108,6 +109,11 @@ export async function enrichCompanyWebsite(
   }
 
   // Analyze with Claude Haiku
+  // Reached from BOTH lanes — Yulia's enrich tool (chat) and sourcing stage 3.
+  // Sourcing already refuses at its stage entries, so `chat` is the lane that
+  // governs whatever still arrives here. The scrape above is free and has
+  // already happened; this is the line that spends.
+  assertSpendAllowed('chat', 'Website enrichment');
   try {
     const response = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',

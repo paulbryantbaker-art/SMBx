@@ -54,7 +54,7 @@ The business splits into three separate workflows with separate infra and separa
 - Premium PDF export via Puppeteer (headless Chromium) + Chart.js
 
 ## Critical Rules — Read These First
-0. **THE SPLIT (2026-07-31).** **Documents are files; pipelines are rows.** ALL Studio work — masters, corp-dev documents, theses, collateral — happens in Cowork against `~/Documents/smbx-studio`, whose own `CLAUDE.md` + `PLAYBOOK.md` + `FORMATS.md` + `DESIGN.md` carry the citation law, THE LINE and the specs, because no server prompt enforces them any more. **CRM and deal management happen in the app, and building there is expected** — a CRM calls no model. Research and master synthesis stay local because they are the only paths that can spend real money. Read `WHERE_THE_WORK_HAPPENS.md` before deciding where new work goes; it supersedes the earlier "marketing only" rule.
+0. **THE SPLIT (2026-07-31).** **Documents are files; pipelines are rows.** ALL Studio work — masters, corp-dev documents, theses, collateral — happens in Cowork against `~/Documents/smbx-studio`, whose own `CLAUDE.md` + `PLAYBOOK.md` + `FORMATS.md` + `DESIGN.md` carry the citation law, THE LINE and the specs, because no server prompt enforces them any more. **CRM and deal management happen in the app, and building there is expected** — a CRM calls no model. Research and master synthesis stay local because they are the only paths that can spend real money. Read `WHERE_THE_WORK_HAPPENS.md` before deciding where new work goes — its **§0** is the one-question boundary (does the ANSWER get looked up later, or does the DOCUMENT get read later?) and **§6A** settles the genuinely ambiguous cases; it supersedes the earlier "marketing only" rule. **THE KILL SWITCH (2026-08-09, Paul: "Ok we need to kill these bc they eat up API. ALL of them." → "Let's kill all for now."):** every model call in the server now passes through `server/services/apiSpend.ts` — four lanes on one env var `API_LANES`, defaulting **studio OFF · sourcing OFF · chat ON · marketing ON**. Everything with a Cowork equivalent is dark; the two that would break the product (Yulia, the public funnel) are one word (`API_LANES=none`) from dark as well. A blocked path names the work, says where that work happens now, and spells the env var that undoes it. Gate: `npm run test:api-lanes` (34 cases).
 1. **COMPENSATION (THE LINE v2, 2026-07-11).** smbX is a practice, not a product — **nothing in the app charges money.** Practice compensation is per-engagement and human-papered: buy-side retainer + buy-side success fee paid by the practice's own acquirer client (engagement letter; one-time §15(b)(13)/state-registration counsel confirmation pending — see `THE_LINE_POLICY.md`). Forbidden absolutely: sell-side, two-sided, or neutral-intermediary compensation; % of capital raised; referral fees; Yulia quoting or collecting any fee. All product billing (subscription ladder, Stripe checkout, the one-day July-10 flat-fee marketing model) is retired/dormant — `SMBX_PRICING_LOCKED.md` is a historical record with a retirement banner. No wallet, ever.
 2. **WALLET IS DEAD.** walletService, paywallService, dealExecutionFee, platformFeeService deleted. Never recreate.
 3. **PRACTICE MODE (default ON).** The app serves the team allowlist only: signup/login gated and every authenticated request perimeter-checked (`server/services/practiceMode.ts`; `TEAM_ALLOWLIST` env, fallback `paulbryantbaker@gmail.com`); team runs at full entitlements — no paywall, no free-tier gate; anonymous chat and Stripe checkout return 410. `PRACTICE_MODE=false` restores the retired product posture — a deliberate act, not a default.
@@ -757,8 +757,14 @@ RESEND_API_KEY + EMAIL_FROM (lead pings + transactional email; console-log fallb
 RESEARCH_MONTHLY_CAP_CENTS (research agent monthly budget — UNSET/0 = NO LIMIT, the default
   since 2026-07-21, Paul: "from the app perspective let's remove any limits" after the old
   $150 default blocked his month; set a positive cents value to opt back into the gate),
-RESEARCH_SCHEDULES_ENABLED (the campaign scheduler is OFF unless this is
-  exactly "true" — inverted 2026-08-09 after a saved campaign fired unattended
+API_LANES (THE KILL SWITCH, 2026-08-09 — which server paths may call a model at
+  all. Unset = "chat,marketing" (the shipped posture: studio + sourcing OFF because
+  both have a local Cowork equivalent); "all"; "none" kills EVERYTHING including
+  Yulia; or a comma list of chat|marketing|studio|sourcing. An unrecognised name is
+  dropped and warned about at boot — a typo must never read as "all". Read live, so
+  a Railway change lands on the next request. See WHERE_THE_WORK_HAPPENS.md §4A),
+RESEARCH_SCHEDULES_ENABLED (the campaign scheduler needs BOTH this exactly "true"
+  AND the studio lane in API_LANES — inverted 2026-08-09 after a saved campaign fired unattended
   on the metered org key at `deep` depth with no cap set; an expensive default
   that depends on an env var being remembered across deploys is not a safe
   default, because the failure mode is silent and it bills. Migration 122 also

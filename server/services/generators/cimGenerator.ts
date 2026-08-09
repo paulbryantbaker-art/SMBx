@@ -6,11 +6,13 @@
  * Uses Claude Opus for the highest quality output.
  */
 import Anthropic from '@anthropic-ai/sdk';
+import { assertSpendAllowed } from '../../services/apiSpend.js';
 
 const OPUS_MODEL = 'claude-opus-4-6';
 
 let client: Anthropic | null = null;
 function getClient(): Anthropic {
+  assertSpendAllowed('chat', 'Deliverable generation');
   if (!client) {
     client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   }

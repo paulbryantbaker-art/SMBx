@@ -15,9 +15,11 @@
  *   - Fails silently — never blocks the response
  */
 import Anthropic from '@anthropic-ai/sdk';
+import { assertSpendAllowed } from './apiSpend.js';
 
 let client: Anthropic | null = null;
 function getClient(): Anthropic {
+  assertSpendAllowed('chat', 'Conversation naming');
   if (!client) {
     client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
   }

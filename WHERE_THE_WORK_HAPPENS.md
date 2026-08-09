@@ -1,5 +1,5 @@
 # WHERE THE WORK HAPPENS — Cowork vs the app
-Last updated: 2026-07-31
+Last updated: 2026-08-09
 
 > The decision doc for one question: when a piece of work lands, does it go in a
 > Cowork session against `~/Documents/smbx-studio`, or into the app?
@@ -14,6 +14,43 @@ Last updated: 2026-07-31
 > constant, `STUDIO_IN_APP` in `client/src/components/v6/appSurfaces.ts`.
 
 ---
+
+## 0. Start here — the short answer
+
+*(Added 2026-08-09, after Paul: "Let's kill all for now. I'm still confused on
+what can be cowork and what must be in app.")*
+
+**Ask one question about the work in front of you: does the ANSWER need to be
+looked up later, or does the DOCUMENT need to be read later?**
+
+- **Looked up later → the app.** Who owes a touch this week. What stage is this
+  deal at. What did the model say at 3.2× versus 3.8×. Which contacts belong to
+  which account. These are questions, and a question needs rows and SQL. A
+  folder cannot answer them.
+- **Read later → Cowork, in `~/Documents/smbx-studio`.** A market master. A
+  who's-who. A thesis for a family office. A carousel. A report. These are
+  artifacts, and an artifact wants a file, a version, and a diff.
+
+That is the whole boundary. It is not "cheap vs expensive" and it is not "AI vs
+no AI" — those are consequences, not causes. It happens that documents are the
+expensive things, which is why the cost story and the shape story point the
+same way, and why it is tempting to confuse them. Don't: **a CRM would still
+belong in the app if it were free to build in Cowork, and a market master would
+still belong on disk if research were free.**
+
+**The three-second version:** if you'd want it in a spreadsheet, it's the app.
+If you'd want it in a Google Doc, it's Cowork.
+
+**Two things sit outside the rule and always have.** They are in the app on
+purpose and are not up for relitigation:
+- **Yulia and the deal tools.** The practitioner is sitting there, in a deal,
+  asking. That is not a document and not a record — it is the working surface.
+- **The public funnel** — the intake engine and report Q&A. They face leads,
+  not Paul, and they have to answer at 11pm on a phone whether or not anyone is
+  at a keyboard.
+
+Where it is still genuinely ambiguous, §6A names each case and says which way
+it went.
 
 ## 1. The rule
 
@@ -145,13 +182,81 @@ local because the builders are already local and iterate in ~30 seconds — not
 because of spend.
 
 **Two operational settings that follow from this:**
-- Set `RESEARCH_SCHEDULES_DISABLED=true`. The scheduler is the only thing that
-  can spend without a person present, and `RESEARCH_MONTHLY_CAP_CENTS` is unset
-  by default, so there is currently no gate behind it.
+- ~~Set `RESEARCH_SCHEDULES_DISABLED=true`.~~ **Superseded 2026-08-09 — the
+  scheduler is now off unless `RESEARCH_SCHEDULES_ENABLED=true` AND the
+  `studio` lane is on, and migration 122 disarmed every campaign row.** The
+  advice was correct and it was never applied to Railway, which is precisely
+  why an expensive default guarded by a remembered env var is not a safe
+  default. See §4A.
 - Give the two lead-facing surfaces (`practiceIntake`, `reportQA`) their own
   key. The 2026-07-27 outage took down chat, extraction AND the public funnel
   at once because all of it shares one `ANTHROPIC_API_KEY`. The blast radius is
-  the defect; the spend was only the trigger.
+  the defect; the spend was only the trigger. **Still outstanding** — the lane
+  switch below separates them *logically* (marketing can be on while studio is
+  off) but they are still one key and one bill.
+
+## 4A. The kill switch — `server/services/apiSpend.ts` (2026-08-09)
+
+Paul, after a scheduled campaign emailed him a research report he had not
+asked for: *"Ok we need to kill these bc they eat up API. ALL of them."* →
+*"Let's kill all for now."*
+
+The immediate fix — scheduler off, campaigns disarmed — closed the one path
+that ran on a timer. It did not answer the real question, which was **"what
+else in this app can call a model?"** Nobody could say, because the answer was
+spread across 32 files. So it is answered in one place now, and every expensive
+path asks it before spending.
+
+**Four lanes, one env var.** `API_LANES` — unset gives the shipped default;
+`all` turns everything on; `none` turns everything off, including chat; a
+comma list turns on exactly what it names. An unrecognised name is dropped
+(fails closed) and warned about at boot, so a typo cannot silently mean "all".
+
+| Lane | Default | What it governs | Why |
+|---|---|---|---|
+| `studio` | **OFF** | research runs, master synthesis, corp-dev documents, collateral composition, deck design, artwork, Yulia's read of a LinkedIn import | All of it moved to Cowork; Studio is already out of the chrome (`STUDIO_IN_APP = false`), so nothing reachable was taken away |
+| `sourcing` | **OFF** | the 5-stage sourcing engine, on-demand enrichment, the weekly/monthly portfolio jobs | Ported to `house/screen.ts` + `scripts/studio/screen.mts` on Paul's own instruction, so it has a local equivalent too |
+| `chat` | **ON** | Yulia, the agentic loop, the deliverable generators, document/field extraction, gate summaries, briefings | This IS the app. Off, it's a brick. CLAUDE.md: "The operational core is NOT gated beyond team auth" |
+| `marketing` | **ON** | the intake engine, report Q&A | Lead-facing. A cap here "silently breaks the funnel rather than Paul's work" — the one failure mode CLAUDE.md names |
+
+So *"kill all"* shipped as: **everything with a Cowork equivalent is off, and
+the two that would break the product are one word (`API_LANES=none`) from off
+as well.** That is a judgement call on Paul's instruction and it is written
+down here rather than buried, because he may well want the stronger reading.
+
+**The refusal is the UI.** A blocked path throws a `SpendDisabledError` whose
+message names the work, says where that work happens now, and spells the exact
+env var that undoes it — because the person reading it is the person who has to
+undo it. Two paths fail SOFT instead, matching contracts they already had:
+`deckDesigner` returns `null` and the house template renders, and
+`artworkService` returns its usual `{assetId: null, reason}`.
+
+**Three findings from probing rather than reading**, each a guard that sat
+*downstream* of database work and would have left junk behind:
+- `synthesizeLane` stamps `synthesis_status='running'` before it reaches the
+  client — a blocked press would have wedged the lane for the full 30-minute
+  stale-lock window over work that never started. The guard manufacturing
+  exactly the state the stale-lock code exists to heal.
+- `initializePipeline` writes a `sourcing_briefs` row *and* a
+  `sourcing_portfolios` row before Stage 1 spends, so a refusal left both
+  behind marked `failed` for a pipeline that never began.
+- `analyzeLinkedInImport` stamps the row `running` first, so a refusal parked
+  the import at `failed` — which reads as "the analysis broke", not "this lane
+  is off".
+
+All three now assert at the door. **None of this shows in a diff**; it took
+importing the real services against a scratch Postgres and looking at what they
+did. Same lesson as the CSS specificity trap: check what the code *does*, not
+what the guard *says*.
+
+**What did NOT get gated, deliberately:** Google Places (different key, free
+under 5k Place Details a month — the Places spend was never the problem), the
+LinkedIn XLSX parser (calls no model, and it is the one Studio capability with
+no local equivalent — see §2), every renderer and PDF path (local Chromium),
+and all CRM/deal SQL.
+
+Gate: `npm run test:api-lanes` — 34 cases, most of them about the ways a parser
+can quietly say yes.
 
 ## 5. The CRM gap — what the app does not have
 
@@ -295,6 +400,29 @@ So the working set is managed by archiving:
 
 There is deliberately no "delete all deals" button. Archiving is reversible;
 deletion of a real deal's conversations and deliverables is not.
+
+## 6A. The cases that are genuinely ambiguous — and which way each went
+
+*(2026-08-09. Paul: "I'm still confused on what can be cowork and what must be
+in app." Most of the map is obvious; this is the short list where it isn't, so
+the confusion has somewhere to land instead of being re-litigated each time.)*
+
+| The work | Where | The tell |
+|---|---|---|
+| **A deal memo / IC packet** | **Cowork** | It is a document someone reads. It draws FROM app rows (model output, deal facts), but the artifact is a file. Export the numbers, write the memo on disk. |
+| **The target screen** | **Both, in sequence** | Building the list is a document job (`screen.mts` → `candidates.csv`, which Paul manages in Sheets). The moment a target becomes a live pursuit it becomes a deal row in the app. The CSV is the funnel; the deal is the commitment. |
+| **The market master** | **Cowork, and only there** | It has a double home today (`research_lanes.master_md` in Postgres, `markets/<m>/master.md` on disk). **The file wins.** Do not build new features that write to `research_lanes`. |
+| **A thesis** | **Cowork** | A position held for one buyer profile, which ages as its master moves — `thesis.mts check` makes going stale a fact on disk. There is no query to answer here, only a document to keep honest. |
+| **LinkedIn collateral** | **Cowork** | Built by `build-deck` / `build-onepager` / `build-report` in ~30s, free, local Chromium. |
+| **LinkedIn ANALYTICS** | **The app** — the standing exception | The XLSX parser has no local equivalent. It calls no model, so the lane switch does not touch importing or reading the verbatim stat grid; only Yulia's *read* of it is gated. This is the one legitimate reason to open Studio. |
+| **The outreach queue** | **The app** | "Who do I owe a touch to" is a question, not a document. Rows, and `crm_touches` is already built for it. |
+| **The outreach COPY** | **Either** | The template is a document; the send is a row. `crm_templates` holds the text because it is merged per-person at send time — that is a rendering step, not authorship. |
+| **Deal analysis / model math** | **The app** | `v19ModelRuntime` and the canvas models call NO model and cost nothing. The output is a number you will want again at a different assumption — that is a query. |
+| **Anything you are about to hand a client** | **Cowork** | Every client-facing document runs through the citation audit and PLAYBOOK/FORMATS/DESIGN, all of which live in the workspace. Nothing on the server enforces them any more. |
+
+**When it is still unclear, the tiebreak is: which one would hurt more to
+lose?** If losing the *history of changes* would hurt, it wants files and git.
+If losing the *ability to filter and sort* would hurt, it wants rows and SQL.
 
 ## 7. Doctrine status
 

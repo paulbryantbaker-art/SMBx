@@ -30,6 +30,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { findReport, type ReportMeta } from '../../shared/reports.js';
+import { spendAllowed } from './apiSpend.js';
 
 const MODEL = 'claude-haiku-4-5-20251001';
 const MAX_Q_CHARS = 600;
@@ -37,6 +38,9 @@ const MAX_TURNS = 12;
 
 let client: Anthropic | null = null;
 function getClient(): Anthropic | null {
+  // ON by default (see practiceIntake). Soft: the route answers 503 and the
+  // panel says so, rather than the report appearing to have no answer.
+  if (!spendAllowed('marketing')) return null;
   if (!process.env.ANTHROPIC_API_KEY) return null;
   if (!client) {
     client = new Anthropic({

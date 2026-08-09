@@ -23,12 +23,18 @@
  */
 import Anthropic from '@anthropic-ai/sdk';
 import { sql } from '../db.js';
+import { assertSpendAllowed } from './apiSpend.js';
 
 const MODEL = process.env.RESEARCH_SYNTHESIS_MODEL || 'claude-sonnet-4-6';
 const MAX_OUTPUT = 32000;
 
 let client: Anthropic | null = null;
 function anthropic(): Anthropic {
+  // Master synthesis sends every source's FULL TEXT, plus a retry on audit
+  // failure — one of the two paths CLAUDE.md names as able to spend real money
+  // per press. It runs in a Cowork session now; the guard is here rather than
+  // only at synthesizeLane so no later call site can slip past it.
+  assertSpendAllowed('studio', 'Master synthesis');
   if (!client) client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 900_000, maxRetries: 2 });
   return client;
 }
@@ -253,6 +259,11 @@ function explainFailure(err: any): string {
 }
 
 export async function synthesizeLane(userId: number, laneId: number, opts: { full?: boolean } = {}): Promise<{ version: number; usage: any; audit: CitationAudit }> {
+  // BEFORE the lock. anthropic() below would refuse anyway, but only after
+  // this function has already stamped synthesis_status='running' — wedging
+  // the lane for the full 30-minute stale-lock window over work that never
+  // started. Refusing at the door leaves the lane exactly as it was.
+  assertSpendAllowed('studio', 'Master synthesis');
   const lane = await getLane(userId, laneId);
   if (!lane) throw new Error('Lane not found');
 

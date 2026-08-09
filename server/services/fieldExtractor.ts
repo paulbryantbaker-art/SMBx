@@ -3,12 +3,14 @@
  * from conversation messages. Runs asynchronously after each response.
  */
 import Anthropic from '@anthropic-ai/sdk';
+import { assertSpendAllowed } from './apiSpend.js';
 
 const HAIKU_MODEL = 'claude-haiku-4-5-20251001';
 
 let client: Anthropic | null = null;
 
 function getClient(): Anthropic {
+  assertSpendAllowed('chat', 'Field extraction');
   if (!client) {
     client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   }
