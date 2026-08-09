@@ -392,6 +392,31 @@ function Engagement() {
   );
 }
 
+/* The three ornament chips around "Built for serious buyers." and the words
+   they cycle. Kept beside the section rather than inline so the geometry
+   (which never changes) reads separately from the copy (which rotates). */
+const WHO_WORDS = ['FAMILY OFFICE', 'SEARCHER', 'PE FIRM', 'INDEPENDENT SPONSOR', 'OPERATOR'];
+const WHO_MARKS = [
+  { plx: '-0.02', size: 110, pos: { left: '1%', top: -14 }, chip: { left: 0, bottom: -12 } },
+  { plx: '0.025', size: 100, pos: { right: '1%', top: -6 }, chip: { right: 0, bottom: -12 } },
+  { plx: '0.04', size: 86, pos: { left: '2%', bottom: -56 }, chip: { left: 0, top: -12 } },
+] as const;
+
+/* One cycler for every rotating label on the page (2026-08-09). Returns the
+   index that both the hero ring's stage chips and the who-marks' buyer chips
+   step through. Paused for prefers-reduced-motion, and it never runs on the
+   server. */
+function useCycle(len: number, ms: number) {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (len < 2) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const t = setInterval(() => setI(v => (v + 1) % len), ms);
+    return () => clearInterval(t);
+  }, [len, ms]);
+  return i;
+}
+
 function PhaseExplorer({ phase, setPhase, pin }: { phase: number; setPhase: (i: number) => void; pin: () => void }) {
   const active = PHASES[phase];
   const tab = (p: typeof PHASES[number], i: number) => {
@@ -442,6 +467,10 @@ export default function Landing() {
   // (Paul, 2026-08-04: an owner running a valuation shouldn't be staring at
   // the buy-side headline).
   const [ownerHero, setOwnerHero] = useState(false);
+  // The hero ring's two chips step through the seven phases, three apart so
+  // they never show the same word.
+  const ring = useCycle(PHASES.length, 2600);
+  const who = useCycle(WHO_WORDS.length, 3200);
 
   // Hero entrance (data-hs) and dot-field parallax (data-plx) run in the
   // shell — every reference page carries them.
@@ -624,13 +653,17 @@ export default function Landing() {
                   word extending left into the open gutter. TARGETS reads
                   rightward across the ball's interior. */}
               {[
-                { word: 'BUYER', pos: { left: '50%', top: '1.5%' }, flip: true },
-                { word: 'TARGETS', pos: { left: '1.5%', top: '50%' }, flip: false },
-              ].map(n => (
-                <span key={n.word} style={{ position: 'absolute', ...n.pos, transform: n.flip ? 'translate(calc(-100% + 12px), -50%)' : 'translate(-12px, -50%)', display: 'inline-flex', flexDirection: n.flip ? 'row-reverse' : 'row', alignItems: 'center', gap: 7, padding: '3px 9px 2px 8px', background: '#FFFFFF', border: '1px solid #E4DFD3', fontFamily: MONO, fontSize: 13, letterSpacing: '0.08em', color: '#16181A', whiteSpace: 'nowrap' }}>
-                  <span style={{ width: 7, height: 7, background: '#0A7A58', flex: 'none' }} />{n.word}
-                </span>
-              ))}
+                { pos: { left: '50%', top: '1.5%' }, flip: true, off: 0 },
+                { pos: { left: '1.5%', top: '50%' }, flip: false, off: 3 },
+              ].map(n => {
+                const word = PHASES[(ring + n.off) % PHASES.length].ph.toUpperCase();
+                return (
+                  <span key={n.off} style={{ position: 'absolute', ...n.pos, transform: n.flip ? 'translate(calc(-100% + 12px), -50%)' : 'translate(-12px, -50%)', display: 'inline-flex', flexDirection: n.flip ? 'row-reverse' : 'row', alignItems: 'center', gap: 7, padding: '3px 9px 2px 8px', background: '#FFFFFF', border: '1px solid #E4DFD3', fontFamily: MONO, fontSize: 13, letterSpacing: '0.08em', color: '#16181A', whiteSpace: 'nowrap' }}>
+                    <span style={{ width: 7, height: 7, background: '#0A7A58', flex: 'none' }} />
+                    <span key={word} className="ca-flip">{word}</span>
+                  </span>
+                );
+              })}
             </div>
             <div aria-hidden="true" data-plx="-0.03" className="ca-orbit ca-orbit-corner" style={{ position: 'absolute', top: -26, right: -8, width: 150, height: 150 }}>
               {/* Spin + entrance both live in carta.css (.ca-orbit > div) —
@@ -678,7 +711,7 @@ export default function Landing() {
               is most of what reads as "tidier" at a glance. Stretch costs
               nothing on a phone, where the grid is one column and every card
               is already full width. */}
-          <div data-rv data-g3 className="rv-stagger" style={{ marginTop: 'clamp(29px, 5vw, 84px)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 26 }}>
+          <div data-rv data-g3 data-whyslide className="rv-stagger" style={{ marginTop: 'clamp(29px, 5vw, 84px)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 26 }}>
             {WHY.map((w, i) => (
               <details key={w.nm} className="ca-h-bandhv" style={{ background: '#F3F0E9', padding: 0 }}>
                 <summary style={{ cursor: 'pointer', padding: '26px 26px 24px', display: 'block' }}>
@@ -892,15 +925,20 @@ export default function Landing() {
         {/* ══ WHO IT'S FOR ══ */}
         <section id="who" style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(68px, 12vw, 200px) clamp(20px, 4vw, 32px) 20px' }}>
           <div data-rv style={{ position: 'relative', textAlign: 'center', padding: '10px 0 26px' }}>
-            <div aria-hidden="true" data-whomark data-plx="-0.02" style={{ position: 'absolute', left: '1%', top: -14, width: 110, height: 110, zIndex: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(rgba(22,24,26,.15) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }}>
-              <span style={{ position: 'absolute', left: 0, bottom: -12, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.1em', padding: '3px 7px' }}>FAMILY OFFICE</span>
-            </div>
-            <div aria-hidden="true" data-whomark data-plx="0.025" style={{ position: 'absolute', right: '1%', top: -6, width: 100, height: 100, zIndex: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(rgba(22,24,26,.15) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }}>
-              <span style={{ position: 'absolute', right: 0, bottom: -12, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.1em', padding: '3px 7px' }}>PE FIRM</span>
-            </div>
-            <div aria-hidden="true" data-whomark data-plx="0.04" style={{ position: 'absolute', left: '2%', bottom: -56, width: 86, height: 86, zIndex: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(rgba(22,24,26,.15) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }}>
-              <span style={{ position: 'absolute', left: 0, top: -12, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.1em', padding: '3px 7px' }}>SEARCHER</span>
-            </div>
+            {/* THE MARKS TRADE PLACES (2026-08-09, Paul: "have a little animation
+                on the green labels that can flip them around (but not too
+                much) to show different words after flip — like change the
+                places — was family offices now Searcher").
+                Five buyer types, three chips, each reading a different offset
+                of the same cycle, so no two ever show the same word and the
+                set keeps rotating through everyone the section is for. */}
+            {WHO_MARKS.map((m, k) => (
+              <div key={k} aria-hidden="true" data-whomark data-plx={m.plx} style={{ position: 'absolute', ...m.pos, width: m.size, height: m.size, zIndex: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(rgba(22,24,26,.15) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }}>
+                <span style={{ position: 'absolute', ...m.chip, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.1em', padding: '3px 7px', whiteSpace: 'nowrap' }}>
+                  <span key={WHO_WORDS[(who + k * 2) % WHO_WORDS.length]} className="ca-flip">{WHO_WORDS[(who + k * 2) % WHO_WORDS.length]}</span>
+                </span>
+              </div>
+            ))}
             <Kicker center>WHO IT'S FOR</Kicker>
             <h2 style={{ position: 'relative', zIndex: 1, margin: '26px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(32px, 5vw, 84px)', lineHeight: 1.05, letterSpacing: '-0.015em' }}>Built for serious buyers.</h2>
           </div>
@@ -938,7 +976,7 @@ export default function Landing() {
             <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'pretty' }}>We go deep in a handful of markets. Yours may be one of them.</h2>
             <p style={{ margin: '24px 0 0', maxWidth: '42em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>The sectors we know cold — the operators, the multiples, the diligence traps, and the targets already on our desk. Focus, not limits.</p>
           </div>
-          <div data-rv data-g3 className="rv-stagger" style={{ marginTop: 'clamp(28px, 4.6vw, 76px)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: '#E4DFD3', border: '1px solid #E4DFD3' }}>
+          <div data-rv data-g3 data-bricks style={{ marginTop: 'clamp(28px, 4.6vw, 76px)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: '#E4DFD3', border: '1px solid #E4DFD3' }}>
             {HUNT_LANES.map(l => (
               <Link
                 key={l.nm}
@@ -1009,11 +1047,11 @@ export default function Landing() {
               {[
                 { t: 'YOU', v: 'The buyer', on: true },
                 { t: 'SMBX', v: 'Your corp dev', on: true },
-                { t: 'TARGET', v: 'One company' },
+                { t: 'TARGET', v: 'One company', mark: true },
               ].map((n, i) => (
                 <Fragment key={n.t}>
                   {i > 0 && <span className="ch-wire" aria-hidden="true"><i /></span>}
-                  <div className={`ch-node${n.on ? ' ch-hit' : ''}`} style={{ textAlign: 'center' }}>
+                  <div className={`ch-node${n.on ? ' ch-hit' : ''}${n.mark ? ' ca-target' : ''}`} style={{ textAlign: 'center' }}>
                     <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em' }}>{n.t}</div>
                     <div style={{ marginTop: 8, fontFamily: SERIF, fontWeight: 600, fontSize: 21, lineHeight: 1.2 }}>{n.v}</div>
                   </div>
@@ -1163,7 +1201,7 @@ export default function Landing() {
         <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(62px, 11vw, 190px) clamp(20px, 4vw, 32px) 0' }}>
           <div data-rv data-fnd className="rv-stagger" style={{ background: '#F3F0E9', display: 'grid', gridTemplateColumns: '300px 1fr', gap: 48, padding: '48px 52px', alignItems: 'center', position: 'relative' }}>
             <div style={{ position: 'relative', width: 230 }}>
-              <img data-rvimg src="/founder-portrait.jpg" alt="Paul Baker" loading="lazy" style={{ display: 'block', width: 230, height: 250, objectFit: 'cover', objectPosition: '50% 0%' }} />
+              <img data-rvimg src="/founder-portrait.jpg" alt="Paul Baker" loading="lazy" style={{ display: 'block', width: 230, height: 250, objectFit: 'cover', objectPosition: '50% 32%' }} />
               <span style={{ position: 'absolute', right: -14, bottom: -14, width: 34, height: 34, background: '#0A7A58', color: '#FCFAF6', display: 'grid', placeItems: 'center', fontFamily: SERIF, fontWeight: 700, fontSize: 20, fontStyle: 'italic' }}>"</span>
               {/* No ornament over the portrait (2026-08-08, Paul: "there is an
                   arc on my headshot that should not be"). A dashed quarter-arc

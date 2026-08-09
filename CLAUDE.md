@@ -327,6 +327,32 @@ evens lines, which SHORTENS the longest — worth 6–12 points on its own; cent
 headings keep `balance`, where symmetric space is correct) takes them to
 **92–99% at 2560**.
 
+**THE MOTION PASS (2026-08-09, six asks in one message).** All of it lives in
+one vocabulary block in `carta.css` and honours the existing reduced-motion
+guard. (1) **The ball spins again** — I had stilled it on the reasoning that
+"chips are siblings of the spinning layer, so a rotating rim slides out from
+under its own labels". True for a chip pinned to an ELLIPSE and FALSE for the
+outer CIRCLE, whose top and left points are rotation-invariant: move the chips
+onto the circle and both facts hold at once. 150s, so the rim's surface speed
+matches the 60s corner mark four times smaller. Its labels are now the seven
+PHASES, cycled three apart so no two read alike — "different labels for the
+stages" is what was asked for, and the ring is a process, not two nouns.
+(2) **`[data-bricks]`** replaces `.rv-stagger` on the 16-lane hunt board,
+because **the shared stagger CAPS its delays at 490ms from the 8th child on** —
+the board revealed seven in sequence then dropped the remaining nine at once,
+which is exactly the "whole grid appears" complaint. 42ms × 16 = 672ms.
+(3) `[data-whyslide]` travels 40px instead of the shared 20, which is what
+makes a card that size read as sliding rather than fading. (4) The three
+who-marks cycle five buyer types at offset indices via `useCycle`, with a
+shallow `rotateX` flip — "not too much" rules out a 180° card flip on a 10.5px
+chip. (5) The TARGET node was the only one in its chain saying nothing and its
+value ran **#8E948B on #1A1D19 = 3.4:1**, under the floor for the phrase the
+band exists to land; it is ivory now with a slow border pulse. (6) The founder
+photo is `object-position: 50% 32%`, not `50% 0%` — the source is 1200×1944 in
+a 230×250 box, so `cover` cropped 123px off the BOTTOM and kept every pixel of
+headroom. Chosen by rendering 0 / 26 / 38 and looking: 38 clips the crown, 26
+still leaves a gap.
+
 **THE GATE IS `npm run shoot:mobile`** (`scripts/mobile-audit.mjs`) — and after
 Paul's *"I can't take a picture of everything that looks awful… let's do an
 antagonistic pass"* it is no longer an overflow reporter but a hunter for eight

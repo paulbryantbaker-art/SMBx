@@ -40,13 +40,25 @@
     smbxOrbit 60s linear infinite,
     smbxOrbitIn 1150ms cubic-bezier(0.33, 0.9, 0.35, 1) 500ms both;
 }
-/* THE BALL IS STILL (2026-08-09). It carries labelled nodes now — BUYER /
-   TARGETS chips pinned to its arcs, the reference's own device — and a
-   labelled instrument doesn't rotate: the chips are HTML siblings of the
-   spinning layer, so a rotating rim would slide out from under its own
-   labels within seconds. Carta's globe is static too. Entrance settle only;
-   the corner mark (and the phone hero) keep the house spin. */
-.ca-orbit-hero > div { animation: smbxOrbitIn 1150ms cubic-bezier(0.33, 0.9, 0.35, 1) 500ms both; }
+/* THE BALL SPINS AGAIN, AND THE OBJECTION THAT STOPPED IT WAS SOLVABLE
+   (2026-08-09, Paul: "i thought the ball was supposed to spin, showing
+   different labels for the stages of the process?").
+
+   I had stilled it because the chips are HTML siblings of the spinning layer,
+   so a rotating rim slides out from under its own labels. True — but only for
+   a chip pinned to an ELLIPSE. The outer CIRCLE is rotation-invariant: its top
+   and left points are in the same place at every angle. So the chips move onto
+   the circle, the ellipses keep spinning underneath, and both things are true
+   at once. 150s rather than the corner mark's 60s: same 360° over a rim four
+   times longer, so the surface speed matches and it reads as drift.
+
+   The labels are the seven PHASES now, cycled in the markup — which is what
+   was actually being asked for. The ring is a process, not two nouns. */
+.ca-orbit-hero > div {
+  animation:
+    smbxOrbit 150s linear infinite,
+    smbxOrbitIn 1150ms cubic-bezier(0.33, 0.9, 0.35, 1) 500ms both;
+}
 
 /* ── HERO GEOMETRY: exactly one ring, ever (2026-08-08) ──
    Above 1024 the fold is two columns and carries the hero-scale ring; at or
@@ -117,6 +129,67 @@
 @media (min-width: 1025px) and (min-height: 1000px) {
   #proof { padding-top: clamp(90px, 7vh, 132px) !important; }
 }
+/* ── MOTION VOCABULARY (2026-08-09, Paul: the ball should spin and show the
+      stages; the why-us cards should slide into place; the green labels should
+      flip to different words; the industries grid should lay in like bricks
+      rather than appear whole; the one-target node should do something.)
+      One rule per gesture, all of them honouring prefers-reduced-motion via
+      the existing guard at the foot of practice.css. ── */
+
+/* A word that swaps: the outgoing word tips away, the incoming one tips in.
+   Short and shallow on purpose — Paul asked to "flip them around (but not too
+   much)", and a full 180° card-flip on a 10.5px mono chip reads as a gimmick. */
+@keyframes caFlipIn {
+  0%   { opacity: 0; transform: rotateX(-72deg); }
+  60%  { opacity: 1; transform: rotateX(8deg); }
+  100% { opacity: 1; transform: rotateX(0); }
+}
+.ca-flip { display: inline-block; transform-origin: 50% 50%; animation: caFlipIn 460ms cubic-bezier(0.3, 0.85, 0.35, 1) both; }
+
+/* BRICKS. The hunt board used the shared .rv-stagger, whose delays CAP at
+   490ms from the 8th child on — so a 16-cell board revealed its first seven
+   in sequence and then dropped the remaining nine simultaneously, which is
+   exactly the "whole grid appears" Paul is describing. Here every cell gets
+   its own step. 42ms × 16 = 672ms end to end: laid, not dumped, and short
+   enough that nobody waits for it. */
+[data-bricks] > * { opacity: 0; translate: 0 16px; transition: opacity 360ms ease, translate 460ms cubic-bezier(0.22, 0.9, 0.26, 1); }
+[data-bricks].rv-in > * { opacity: 1; translate: 0 0; }
+[data-bricks].rv-in > *:nth-child(1)  { transition-delay:   0ms; }
+[data-bricks].rv-in > *:nth-child(2)  { transition-delay:  42ms; }
+[data-bricks].rv-in > *:nth-child(3)  { transition-delay:  84ms; }
+[data-bricks].rv-in > *:nth-child(4)  { transition-delay: 126ms; }
+[data-bricks].rv-in > *:nth-child(5)  { transition-delay: 168ms; }
+[data-bricks].rv-in > *:nth-child(6)  { transition-delay: 210ms; }
+[data-bricks].rv-in > *:nth-child(7)  { transition-delay: 252ms; }
+[data-bricks].rv-in > *:nth-child(8)  { transition-delay: 294ms; }
+[data-bricks].rv-in > *:nth-child(9)  { transition-delay: 336ms; }
+[data-bricks].rv-in > *:nth-child(10) { transition-delay: 378ms; }
+[data-bricks].rv-in > *:nth-child(11) { transition-delay: 420ms; }
+[data-bricks].rv-in > *:nth-child(12) { transition-delay: 462ms; }
+[data-bricks].rv-in > *:nth-child(13) { transition-delay: 504ms; }
+[data-bricks].rv-in > *:nth-child(14) { transition-delay: 546ms; }
+[data-bricks].rv-in > *:nth-child(15) { transition-delay: 588ms; }
+[data-bricks].rv-in > *:nth-child(16) { transition-delay: 630ms; }
+[data-bricks].rv-in > *:nth-child(n+17) { transition-delay: 672ms; }
+
+/* The why-us cards travel further and land in sequence — the shared 20px was
+   too small to read as "sliding into place" on a card that size. */
+[data-whyslide] > * { translate: 0 40px; transition: opacity 520ms ease, translate 680ms cubic-bezier(0.2, 0.85, 0.25, 1); }
+
+/* THE TARGET NODE. The chain ends on the one company you are buying, and it
+   was the only node saying nothing. A slow breath on the border plus a lit
+   marker: enough to draw the eye to the end of the sentence, not enough to
+   blink at the reader. */
+@keyframes caTargetPulse {
+  0%, 100% { border-color: #3A3F38; box-shadow: 0 0 0 0 rgba(15, 169, 124, 0); }
+  50%      { border-color: #0FA97C; box-shadow: 0 0 0 4px rgba(15, 169, 124, 0.10); }
+}
+.ca-target { animation: caTargetPulse 3.6s ease-in-out infinite; }
+/* …and its value was #8E948B on #1A1D19 — 3.4:1, under the floor for the one
+   phrase the band is built to land (Paul: "the font is too dim on the one
+   company"). Ivory reads at 12:1 and matches the two nodes beside it. */
+[data-chain].ch-dark .ch-node.ca-target > div + div { color: #F4F5F1; }
+
 @keyframes smbxCaret { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
 
 /* ── Base, scoped to the practice root ── */

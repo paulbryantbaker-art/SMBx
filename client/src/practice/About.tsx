@@ -94,7 +94,7 @@ export default function About() {
               <Kicker>FIRM LEADERSHIP</Kicker>
               <h2 style={{ margin: '20px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(22px, 2.8vw, 44px)', lineHeight: 1.1, letterSpacing: '-0.012em' }}>Paul Baker — Founder</h2>
               <div style={{ marginTop: 32, position: 'relative', width: '100%', maxWidth: 360 }}>
-                <img data-rvimg src="/founder-portrait.jpg" alt="Paul Baker, founder of smbX" style={{ display: 'block', width: '100%', aspectRatio: '4 / 5', objectFit: 'cover', objectPosition: '50% 0%' }} />
+                <img data-rvimg src="/founder-portrait.jpg" alt="Paul Baker, founder of smbX" style={{ display: 'block', width: '100%', aspectRatio: '4 / 5', objectFit: 'cover', objectPosition: '50% 32%' }} />
                 <Handles />
                 <span style={{ position: 'absolute', left: 12, bottom: 12, display: 'inline-flex', alignItems: 'center', gap: 7, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '5px 9px', whiteSpace: 'nowrap' }}>
                   <span style={{ width: 7, height: 7, background: '#FCFAF6', display: 'inline-block' }} />FOUNDER
