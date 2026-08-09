@@ -757,7 +757,15 @@ RESEND_API_KEY + EMAIL_FROM (lead pings + transactional email; console-log fallb
 RESEARCH_MONTHLY_CAP_CENTS (research agent monthly budget — UNSET/0 = NO LIMIT, the default
   since 2026-07-21, Paul: "from the app perspective let's remove any limits" after the old
   $150 default blocked his month; set a positive cents value to opt back into the gate),
-RESEARCH_SCHEDULES_DISABLED (set "true" to stop the in-process campaign scheduler),
+RESEARCH_SCHEDULES_ENABLED (the campaign scheduler is OFF unless this is
+  exactly "true" — inverted 2026-08-09 after a saved campaign fired unattended
+  on the metered org key at `deep` depth with no cap set; an expensive default
+  that depends on an env var being remembered across deploys is not a safe
+  default, because the failure mode is silent and it bills. Migration 122 also
+  disarmed every existing campaign row, so enabling the flag cannot fire a
+  backlog. MANUAL runs are unaffected),
+RESEARCH_SCHEDULES_DISABLED (still honoured and now redundant — it forces the
+  scheduler off even if ENABLED is set),
 RESEARCH_DECK_MODEL (deck-designer model, default claude-sonnet-4-6) and
 RESEARCH_DECK_DESIGNER (set "off" to force the fixed template — Claude designs by default),
 RESEARCH_ARTWORK_AUTOGEN (set "true" to let runs auto-call the Gemini image API at
