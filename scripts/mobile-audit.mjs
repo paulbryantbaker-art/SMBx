@@ -18,6 +18,10 @@
  *   RAGGED    a text box so narrow the copy breaks to one or two words a line.
  *             This is the symptom a reader actually feels, and it survives
  *             every overflow check because nothing overflows.
+ *   SHORTLINE a paragraph whose LINES are wildly uneven — a non-final line
+ *             under 62% of the widest. RAGGED measures the box; this measures
+ *             the rendered line boxes, which is the only way to see a &nbsp;
+ *             gluing a long token and stranding the line before it.
  *   TINY      customer-facing text under Paul's 13px floor.
  *   TAP       an interactive target under 44x44.
  *   CLIP      text cut off inside a box that cannot scroll.
@@ -205,6 +209,64 @@ for (const [route, name] of ROUTES) {
         if (chars < 22) push('RAGGED', el, `${Math.round(r.width)}px wide at ${fsz}px — about ${Math.round(chars)} characters a line`);
       }
 
+      // ── SHORTLINE: a paragraph whose lines are wildly uneven ─────────────
+      // Added 2026-08-09, after Paul circled the phone hero's lede: line one
+      // ended at "Whether your 1st or your" and line two ran full width. It
+      // reads as truncated, and RAGGED could never see it — RAGGED measures
+      // the BOX, and this box is full width. The defect is in the rendered
+      // LINES, so this measures them: a Range over the element's own text
+      // answers getClientRects() with one rect per line box.
+      //
+      // Cause, in the case that prompted it: a &nbsp; gluing "100th
+      // acquisition" into one 18-character token that could not fit after
+      // "Whether your 1st or your", so the whole token wrapped and left the
+      // first line 57% full. Non-breaking spaces are the usual culprit, and
+      // they are invisible in a diff.
+      //
+      // Only NON-FINAL lines count (a short last line is normal typesetting),
+      // only boxes ≥200px wide (narrower is RAGGED's job), and elements
+      // containing <br> are skipped because those breaks are deliberate.
+      // Only elements whose content is entirely INLINE: with a block-level
+      // descendant the rects below span several blocks, not lines. And the
+      // walk must cover EVERY descendant text node, not just direct children
+      // — the first version walked direct children only, so any paragraph
+      // carrying a <strong> reported the fragments either side of it as
+      // separate "lines" and cried wolf 197 times on one report page. A line
+      // is a row of rects sharing a top, whoever owns the text.
+      // An INLINE element (a <strong> mid-paragraph) starts and ends wherever
+      // the parent's text left off, so its first and last rects are fragments
+      // of the parent's lines. Measuring them as lines flagged 28 report-body
+      // spans that render perfectly — the same reason COLLIDE excludes inline.
+      // The parent block gets measured on its own pass anyway.
+      if (t.length > 70 && !fixed && r.width >= 200
+          && cs.display !== 'inline' && cs.display !== 'contents'
+          && !el.querySelector('br, p, div, ul, ol, li, h1, h2, h3, h4, h5, table, section, figure, blockquote')) {
+        const lines = [];
+        const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        for (let n = tw.nextNode(); n; n = tw.nextNode()) {
+          if (!n.textContent.trim()) continue;
+          const rg = document.createRange();
+          rg.selectNodeContents(n);
+          for (const lr of rg.getClientRects()) {
+            if (lr.width < 1) continue;
+            const hit = lines.find(l => Math.abs(l.top - lr.top) < 4);
+            if (hit) { hit.left = Math.min(hit.left, lr.left); hit.right = Math.max(hit.right, lr.right); }
+            else lines.push({ top: lr.top, left: lr.left, right: lr.right });
+          }
+        }
+        if (lines.length > 1) {
+          lines.sort((a, b) => a.top - b.top);
+          const widest = Math.max(...lines.map(l => l.right - l.left));
+          for (let i = 0; i < lines.length - 1; i++) {
+            const w = lines[i].right - lines[i].left;
+            if (widest > 0 && w / widest < 0.62) {
+              push('SHORTLINE', el, `line ${i + 1} of ${lines.length} fills ${Math.round((w / widest) * 100)}% — check for a non-breaking space`);
+              break;
+            }
+          }
+        }
+      }
+
       // ── SQUEEZE: a form field crushed by a sibling that won't wrap ───────
       // Added after the pricing band shipped with a 145px email field that
       // could show "you@" and nothing more. No other check could see it: an
@@ -338,7 +400,17 @@ for (const [route, name] of ROUTES) {
   }
 }
 
-const ORDER = ['BLEED', 'GRID', 'RAGGED', 'SQUEEZE', 'SAMEDEST', 'COLLIDE', 'CLIP', 'VOID', 'TAP', 'TINY'];
+// EVERY KIND push() CAN EMIT MUST BE LISTED HERE. The reporter iterates this
+// array, so an unlisted kind is counted in the total and then silently
+// dropped from the printout — a new check appears to find nothing. That cost
+// a debugging round when SHORTLINE was added (it was firing the whole time).
+const ORDER = ['BLEED', 'GRID', 'RAGGED', 'SHORTLINE', 'SQUEEZE', 'SAMEDEST', 'COLLIDE', 'CLIP', 'VOID', 'TAP', 'TINY'];
+{
+  // Fail loudly rather than under-report if a kind is emitted but unlisted.
+  const emitted = new Set(report.flatMap(r => r.findings.map(f => f.kind)));
+  const orphan = [...emitted].filter(k => !ORDER.includes(k));
+  if (orphan.length) { console.error(`\nAUDIT BUG: kind(s) not in ORDER, would be hidden: ${orphan.join(', ')}`); process.exit(2); }
+}
 let total = 0;
 console.log(`\n════ ADVERSARIAL MOBILE AUDIT @ ${W}×${H} ════`);
 for (const r of report) {
