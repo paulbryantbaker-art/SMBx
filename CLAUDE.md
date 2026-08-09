@@ -333,14 +333,29 @@ guard. (1) **The ball spins again** — I had stilled it on the reasoning that
 "chips are siblings of the spinning layer, so a rotating rim slides out from
 under its own labels". True for a chip pinned to an ELLIPSE and FALSE for the
 outer CIRCLE, whose top and left points are rotation-invariant: move the chips
-onto the circle and both facts hold at once. 150s, so the rim's surface speed
+onto the circle and both facts hold at once. **Then Paul asked for the labels
+to rotate WITH the ball "as they are attached", which retires that workaround
+entirely**: the chip now lives INSIDE the spinning layer and is carried round,
+while `.ca-chip-level` runs the same 360° BACKWARDS (`smbxOrbitCCW`, same
+150s, same `linear`, same start) so the word never goes upside down. Chip
+orbits, word stays level. The old row-reversal went with it — that existed to
+keep a FIXED chip out from under the card, and an orbiting chip passes behind
+the card by design. 150s, so the rim's surface speed
 matches the 60s corner mark four times smaller. Its labels are now the seven
 PHASES, cycled three apart so no two read alike — "different labels for the
 stages" is what was asked for, and the ring is a process, not two nouns.
 (2) **`[data-bricks]`** replaces `.rv-stagger` on the 16-lane hunt board,
 because **the shared stagger CAPS its delays at 490ms from the 8th child on** —
 the board revealed seven in sequence then dropped the remaining nine at once,
-which is exactly the "whole grid appears" complaint. 42ms × 16 = 672ms.
+which is exactly the "whole grid appears" complaint. **Second pass, same day
+("stack it like bricks being stacked"): the fix was right and the ORDER was
+wrong.** A flat DOM-order cascade reveals top-left to bottom-right, which is
+READING order — nobody builds a wall from the top down. The delay is now
+computed from each cell's ROW and COLUMN (`brickDelay()`, inline on the child,
+derived from `HUNT_LANES.length` so adding a lane cannot silently mis-order
+the wall the way nth-child would): bottom course first, left to right, then
+the course above — 90ms a course, 45ms a brick, ~540ms to the last one. Travel
+is NEGATIVE (−14px) because a brick is set DOWN onto the course beneath it.
 (3) `[data-whyslide]` travels 40px instead of the shared 20, which is what
 makes a card that size read as sliding rather than fading. (4) The three
 who-marks cycle five buyer types at offset indices via `useCycle`, with a

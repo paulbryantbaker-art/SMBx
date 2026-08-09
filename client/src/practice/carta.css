@@ -16,6 +16,15 @@
 /* ── Keyframes (names verbatim from the reference) ── */
 @keyframes smbxMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @keyframes smbxOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+/* The counter-turn. A chip ATTACHED to the ring has to travel with it (Paul:
+   "the labels on the ball need to rotate with the ball as they are attached")
+   — but a word carried around a rim upside-down is unreadable for half of
+   every revolution. So the chip is nested: the positioner rides the spinning
+   layer, and this animation runs the SAME 360° backwards on the label inside
+   it, at the same duration and easing. The chip orbits; the word stays level.
+   Both are `linear` and both start on mount, so they cannot drift apart. */
+@keyframes smbxOrbitCCW { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+.ca-chip-level { display: inline-block; animation: smbxOrbitCCW 150s linear infinite; }
 
 /* The orbit settles into place on load (2026-08-08, Paul: "animate this
    little guy more on load to give a slight bouncing into place feel … maybe
@@ -146,31 +155,26 @@
 }
 .ca-flip { display: inline-block; transform-origin: 50% 50%; animation: caFlipIn 460ms cubic-bezier(0.3, 0.85, 0.35, 1) both; }
 
-/* BRICKS. The hunt board used the shared .rv-stagger, whose delays CAP at
-   490ms from the 8th child on — so a 16-cell board revealed its first seven
-   in sequence and then dropped the remaining nine simultaneously, which is
-   exactly the "whole grid appears" Paul is describing. Here every cell gets
-   its own step. 42ms × 16 = 672ms end to end: laid, not dumped, and short
-   enough that nobody waits for it. */
-[data-bricks] > * { opacity: 0; translate: 0 16px; transition: opacity 360ms ease, translate 460ms cubic-bezier(0.22, 0.9, 0.26, 1); }
+/* BRICKS, LAID BOTTOM-UP IN COURSES (2026-08-09, second pass — Paul: "let's
+   stack in the industry grid like bricks being stacked").
+
+   The first cut fixed the right bug and got the ORDER wrong. The shared
+   .rv-stagger caps its delays at 490ms from the 8th child on, so a 16-cell
+   board revealed seven in sequence and then dropped the remaining nine at
+   once — that part is why it read as "the whole grid appears". But replacing
+   it with a flat DOM-order cascade just reveals top-left to bottom-right,
+   which is READING order. Nobody builds a wall from the top down.
+
+   So the delay is computed from the cell's ROW and COLUMN, inline on each
+   child (see the hunt board in Landing.tsx) rather than from nth-child here:
+   the bottom course lays first, left to right, then the course above it. It
+   is data-driven for a reason — nth-child would silently mis-order the whole
+   wall the next time a lane is added.
+
+   And a brick is SET DOWN, so the travel is negative: each one arrives from
+   slightly above and settles onto the course beneath it. */
+[data-bricks] > * { opacity: 0; translate: 0 -14px; transition: opacity 300ms ease, translate 420ms cubic-bezier(0.3, 1.3, 0.5, 1); }
 [data-bricks].rv-in > * { opacity: 1; translate: 0 0; }
-[data-bricks].rv-in > *:nth-child(1)  { transition-delay:   0ms; }
-[data-bricks].rv-in > *:nth-child(2)  { transition-delay:  42ms; }
-[data-bricks].rv-in > *:nth-child(3)  { transition-delay:  84ms; }
-[data-bricks].rv-in > *:nth-child(4)  { transition-delay: 126ms; }
-[data-bricks].rv-in > *:nth-child(5)  { transition-delay: 168ms; }
-[data-bricks].rv-in > *:nth-child(6)  { transition-delay: 210ms; }
-[data-bricks].rv-in > *:nth-child(7)  { transition-delay: 252ms; }
-[data-bricks].rv-in > *:nth-child(8)  { transition-delay: 294ms; }
-[data-bricks].rv-in > *:nth-child(9)  { transition-delay: 336ms; }
-[data-bricks].rv-in > *:nth-child(10) { transition-delay: 378ms; }
-[data-bricks].rv-in > *:nth-child(11) { transition-delay: 420ms; }
-[data-bricks].rv-in > *:nth-child(12) { transition-delay: 462ms; }
-[data-bricks].rv-in > *:nth-child(13) { transition-delay: 504ms; }
-[data-bricks].rv-in > *:nth-child(14) { transition-delay: 546ms; }
-[data-bricks].rv-in > *:nth-child(15) { transition-delay: 588ms; }
-[data-bricks].rv-in > *:nth-child(16) { transition-delay: 630ms; }
-[data-bricks].rv-in > *:nth-child(n+17) { transition-delay: 672ms; }
 
 /* The why-us cards travel further and land in sequence — the shared 20px was
    too small to read as "sliding into place" on a card that size. */
