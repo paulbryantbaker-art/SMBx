@@ -392,6 +392,19 @@ function Engagement() {
   );
 }
 
+/* A wall is laid from the bottom course up, each course left to right — so
+   the delay counts rows from the BOTTOM, not from the top of the DOM. Derived
+   from the register's own length so adding a lane cannot silently mis-order
+   the wall (the nth-child version it replaced would have). 3 columns, 90ms a
+   course, 45ms a brick: ~540ms to lay the last one. */
+const BRICK_COLS = 3;
+function brickDelay(i: number) {
+  const rows = Math.ceil((HUNT_LANES.length + 1) / BRICK_COLS);
+  const row = Math.floor(i / BRICK_COLS);
+  const col = i % BRICK_COLS;
+  return `${(rows - 1 - row) * 90 + col * 45}ms`;
+}
+
 /* The three ornament chips around "Built for serious buyers." and the words
    they cycle. Kept beside the section rather than inline so the geometry
    (which never changes) reads separately from the copy (which rotates). */
@@ -642,28 +655,35 @@ export default function Landing() {
                   <ellipse cx="150" cy="150" rx="145" ry="58" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 6" opacity=".62" />
                   <ellipse cx="150" cy="150" rx="58" ry="145" stroke="#0A7A58" strokeWidth="1.4" opacity=".45" />
                 </svg>
+                {/* ATTACHED TO THE RING, so they travel with it (2026-08-09,
+                    Paul: "the labels on the ball need to rotate with the ball
+                    as they are attached"). The positioner now sits INSIDE the
+                    spinning layer and is carried round; `.ca-chip-level`
+                    inside it runs the same 360° backwards, so the chip orbits
+                    while the word stays level — a label carried upside down is
+                    unreadable for half of every revolution. Both nodes sit on
+                    the OUTER circle, whose radius is constant, so a chip stays
+                    welded to the rim at every angle.
+                    The old row-reversal is gone with them: it existed to keep
+                    a fixed chip out from under the card, and a chip that
+                    orbits passes behind the card by design. */}
+                {[
+                  { at: { left: '50%', top: '2.4%' }, off: 0 },
+                  { at: { left: '2.4%', top: '50%' }, off: 3 },
+                ].map(n => {
+                  const word = PHASES[(ring + n.off) % PHASES.length].ph.toUpperCase();
+                  return (
+                    <span key={n.off} aria-hidden="true" style={{ position: 'absolute', ...n.at, transform: 'translate(-50%, -50%)' }}>
+                      <span className="ca-chip-level">
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '3px 9px 2px 8px', background: '#FFFFFF', border: '1px solid #E4DFD3', fontFamily: MONO, fontSize: 13, letterSpacing: '0.08em', color: '#16181A', whiteSpace: 'nowrap' }}>
+                          <span style={{ width: 7, height: 7, background: '#0A7A58', flex: 'none' }} />
+                          <span key={word} className="ca-flip">{word}</span>
+                        </span>
+                      </span>
+                    </span>
+                  );
+                })}
               </div>
-              {/* The chip IS the node: its 7px green square lands on the rim
-                  point, the way Carta pins theirs. White fill so the chip
-                  reads as pinned ON the line, not under it. The two chips
-                  read in OPPOSITE directions for a physical reason: the top
-                  node sits only ~34px left of the card edge (the φ split puts
-                  it there), so a rightward word runs under the card — BUYER
-                  is row-reversed, square on its right end pinned to the rim,
-                  word extending left into the open gutter. TARGETS reads
-                  rightward across the ball's interior. */}
-              {[
-                { pos: { left: '50%', top: '1.5%' }, flip: true, off: 0 },
-                { pos: { left: '1.5%', top: '50%' }, flip: false, off: 3 },
-              ].map(n => {
-                const word = PHASES[(ring + n.off) % PHASES.length].ph.toUpperCase();
-                return (
-                  <span key={n.off} style={{ position: 'absolute', ...n.pos, transform: n.flip ? 'translate(calc(-100% + 12px), -50%)' : 'translate(-12px, -50%)', display: 'inline-flex', flexDirection: n.flip ? 'row-reverse' : 'row', alignItems: 'center', gap: 7, padding: '3px 9px 2px 8px', background: '#FFFFFF', border: '1px solid #E4DFD3', fontFamily: MONO, fontSize: 13, letterSpacing: '0.08em', color: '#16181A', whiteSpace: 'nowrap' }}>
-                    <span style={{ width: 7, height: 7, background: '#0A7A58', flex: 'none' }} />
-                    <span key={word} className="ca-flip">{word}</span>
-                  </span>
-                );
-              })}
             </div>
             <div aria-hidden="true" data-plx="-0.03" className="ca-orbit ca-orbit-corner" style={{ position: 'absolute', top: -26, right: -8, width: 150, height: 150 }}>
               {/* Spin + entrance both live in carta.css (.ca-orbit > div) —
@@ -977,12 +997,12 @@ export default function Landing() {
             <p style={{ margin: '24px 0 0', maxWidth: '42em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>The sectors we know cold — the operators, the multiples, the diligence traps, and the targets already on our desk. Focus, not limits.</p>
           </div>
           <div data-rv data-g3 data-bricks style={{ marginTop: 'clamp(28px, 4.6vw, 76px)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: '#E4DFD3', border: '1px solid #E4DFD3' }}>
-            {HUNT_LANES.map(l => (
+            {HUNT_LANES.map((l, i) => (
               <Link
                 key={l.nm}
                 href={laneHref(l.nm, SECTOR_NAMES)}
                 className="ca-h-band"
-                style={{ position: 'relative', display: 'block', background: '#FCFAF6', padding: '22px 24px 24px', color: '#16181A' }}
+                style={{ position: 'relative', display: 'block', background: '#FCFAF6', padding: '22px 24px 24px', color: '#16181A', transitionDelay: brickDelay(i) }}
                 onClick={() => trackEvent('practice_sector_clicked', { sector: l.nm })}
               >
                 <span style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
@@ -1003,7 +1023,7 @@ export default function Landing() {
                 Computed from the register so the next lane added can't bring
                 the block back. */}
             {HUNT_LANES.length % 3 !== 0 && (
-              <div aria-hidden="true" data-lanefill style={{ gridColumn: `span ${3 - (HUNT_LANES.length % 3)}`, background: '#FCFAF6' }} />
+              <div aria-hidden="true" data-lanefill style={{ gridColumn: `span ${3 - (HUNT_LANES.length % 3)}`, background: '#FCFAF6', transitionDelay: brickDelay(HUNT_LANES.length) }} />
             )}
           </div>
           <div data-rv style={{ marginTop: 38, textAlign: 'center' }}>
