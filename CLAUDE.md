@@ -302,6 +302,31 @@ which it had never been. 2px rather than the measured 2.26 keeps the raster on
 whole pixels. **When a metric and the owner's eye disagree three times, render
 the variants against a reference line instead of defending the metric.**
 
+**THE ENGAGEMENT SCRUBS ON SCROLL + THE LEFT HEADERS STOPPED LOOKING CLIPPED
+(2026-08-09, Paul with progressive carta.com screenshots: "look at some of the
+progression scroll animations… this would be kinda cool for how it works as it
+scrolls. It goes from thesis to sourcing to evaluation. Also, why is the header
+so truncated to the left side?").** Two findings. (1) The seven phases advanced
+on a **5.2s timer** — the wrong instrument, since it moves while you read and
+ignores you entirely. The index is now derived from the block's position in the
+viewport and drives BOTH surfaces (the track's lit node and the explorer's
+pane) so they read as one mechanism; travel runs from the block's top crossing
+82vh to its bottom clearing 18vh, so all seven land in one comfortable scroll
+rather than flickering past. DESKTOP ONLY (≥1025) — below that the track is
+hidden and the explorer stacks, so content changing under the thumb would be
+disorienting; the original timer runs there, which also keeps the audited
+mobile page byte-identical. A click still PINS. (2) "Truncated" was real and
+**measuring it wrong twice nearly hid it**: fill against the SECTION made a
+two-column CTA and a centred pricing band look broken (25%), so the denominator
+had to become each heading's OWN container. Corrected, left-aligned headers
+filled 73–98% at 1440 but only **55–84% at 2560** — the blocks were a flat
+880px while the headings inside them scale to 56px, i.e. 15.7em, so they broke
+into more, shorter lines. `HEAD_L = min(1120px, 100%)` (~20em at the cap) plus
+`text-wrap: pretty` instead of `balance` on LEFT-aligned headings (balance
+evens lines, which SHORTENS the longest — worth 6–12 points on its own; centred
+headings keep `balance`, where symmetric space is correct) takes them to
+**92–99% at 2560**.
+
 **THE GATE IS `npm run shoot:mobile`** (`scripts/mobile-audit.mjs`) — and after
 Paul's *"I can't take a picture of everything that looks awful… let's do an
 antagonistic pass"* it is no longer an overflow reporter but a hunter for eight
