@@ -98,47 +98,67 @@ hover/media/keyframes plus the `.ca-engine` intake redress. Build record:
 collateral renderers (LEDGER stays their source until phase 2 — see the interim
 notice atop `content/studio/DESIGN.md`), report bodies + `/buyers/*` interiors.
 
-**THE DESKTOP FOLD (2026-08-08, Paul: "the hero / above the fold is a little
-boring on desktop… while carta is actually a little busy, we can meet in the
-middle — making the ball bigger balancing out the page (golden ratio)… lean
-into the Carta look and feel, blending our old with it to make an original").
-Boring had a mechanical cause, same as mobile did: two near-equal columns
-(1.02fr/.98fr), the type at its loudest, and the only geometry a 150px orbit
-tucked behind the engine card's corner. So the pass is PROPORTION, not
-content — nothing was added to read, which is precisely the half of Carta we
-are not copying. Columns → **1.32fr 1fr** (φ is 1.618 and starves the card to
-467px, where its lane chips break two-deep; 1.32 is the meet-in-the-middle),
-H1 `clamp(35px, 4.05vw, 82px)` (69→58px at 1440), lede 20→19px at a 28em
-measure, and the orbit grows into a **hero-scale ring** — `clamp(560px, 55vw,
-860px)`, our gesture wearing Carta's square handles as its satellites.
-**THE RING IS NOT CONCENTRIC WITH THE CARD, and that is the whole trick**
-(Paul, same day: *"why is the ball hiding behind the chat box?"*): the first
-cut centred it, and an even rim around an opaque panel reads as a HALO ON the
-panel — the eye gets no cue as to which is in front. Offsetting it left leaves
-~230px of ball on one side and ~30px on the other, and that asymmetry is the
-depth. Two corollaries, both learned by rendering: a node must sit ON a
-visible arc or it reads as a smudge (the third one, orphaned by the offset,
-was deleted), and the lede's measure had to come in to 28em because the ring's
-widest point crossed its first line.
+**THE GOLDEN FOLD (2026-08-08→09). Paul asked for the desktop hero to stop
+being "a little boring", meet Carta in the middle, and make "the ball bigger
+balancing out the page (golden ratio)". The first attempt read the brief as
+SCALE and grew the orbit to ~790px — *"this is not what i meant… look at carta
+again. Understand the balance that should be. Golden ratio, always."* **The
+reference settles it by measurement: carta.com's text column is 561px inside a
+908px content band, and 908 × 0.618 = 561 — their text column IS the golden
+major, to the pixel; their globe is 290px, the RIGHT column over φ.** So the
+object is a COMPANION to the panel beside it, never a planet the panel lives
+inside, and no placement of a 790px ring was going to fix an instrument that
+size. Three objects, every value φ or a power of it:
+`copy : card = φ : 1` (`1.618fr 1fr` → 762 : 471 at 1440) · `ball = card / φ`
+(≈295px; Carta's is 290) · the card's left edge splits the ball `φ⁻¹` clear /
+`φ⁻²` behind · ball centre `φ` down the card.
+**The ball lives INSIDE the card column, not on the section** — pinned to the
+card's own left edge, so the φ split holds at every width where a
+section-relative percentage would land on the boundary at exactly one viewport.
+It precedes `.ca-engine` in the DOM, so the card paints over it and the overlap
+reads as depth.
+**Two constructions were built and rejected by rendering, and both are
+instructive.** (1) *Concentric*: centring the ring on the card makes an even
+rim around an opaque panel, which reads as a HALO ON the panel — the eye gets
+no cue which is in front (Paul: *"why is the ball hiding behind the chat box?"*).
+Offsetting is the entire depth cue. (2) *Carta's exact construction* —
+`61.8% 1fr`, gap inside the minor, card 432px — STARVES the panel: every lane
+chip drops to its own row, the card runs seven rows deep and outgrows the copy
+beside it. Their minor column holds a decorative wireframe; ours holds a
+working form. Hence φ is taken BETWEEN THE COLUMNS, and **relaxes to 1.15
+below 1360** (card 428 at 1280 and 368 at 1100 under φ — the same starvation).
+Corollaries learned the same way: a node must sit ON a visible arc or it reads
+as a smudge, and the lede came to a 28em measure because the ring's widest
+point crossed its first line.
 **Every new decoration is DESKTOP-ONLY and the two marks it replaces hide at
 the same breakpoint** (`.ca-orbit-hero`/`.ca-hero-hdots` vs
-`.ca-orbit-corner`/`.ca-hero-cdots`, complementary media queries) so exactly
-one set shows at any width and the phone hero is byte-identical. The ring
-starts at **1280**, not 1025, for a geometric reason rather than a taste one:
-below that the card is ~470px and opaque, so any ring that fits the fold is
-barely wider than the thing hiding its middle — at 1100 a 510px ring showed a
-66px crescent and two stray arcs, which reads as debris. 1025–1279 keeps the
-corner mark and relaxes to 1.08fr.
-**The pass also caught a live nav defect across the most common laptop
-widths.** The reference's 1180/1080 compression steps were transcribed before
-our nav grew a Research link, a Free Valuation link and a 38px logo, so the
-links SPILLED — `[data-nav-links]` carries `min-width: 0`, the flex item
-shrinks below min-content, and its `white-space: nowrap` children hang past
-its right edge. **The container box never overlaps, so measuring it reads
-clean; only the last CHILD's right edge against the CTA cluster shows it.**
-Two bands were live: 1081–1112 and 1181–~1290 — the second catching **1280**.
-Ladder moved to 1310/1150; measured clean (worst margin −38px) at every width
-from 1024 to 1920.
+`.ca-orbit-corner`/`.ca-hero-cdots`, complementary queries at 1025) so exactly
+one set shows at any width and the phone hero is byte-identical.
+Type quieted with it: H1 `clamp(35px, 4.05vw, 82px)` (69→58px at 1440), lede
+20→19px.
+
+**A REFRESH RETURNS YOU TO THE TOP (2026-08-09, Paul: "the page does not reset
+on refresh and still scrolls to the Valuation section").** Nothing in the
+codebase had ever set `history.scrollRestoration`, so the browser default
+`'auto'` was live and **it restores the previous scroll offset on reload, with
+or without a hash** — the offset is stored against the history entry, not the
+URL fragment, which is why the 2026-08-08 hash-strip (a real fix for the anchor
+staying in the address bar) could never have fixed this one. `'manual'` is set
+in the **boot script in `client/index.html`**, because restoration is applied
+around first paint and a React effect is already too late. It disables
+RESTORATION only: a genuine deep link (`smbx.ai/#how`, an emailed anchor) still
+scrolls to its target, since fragment navigation is a separate mechanism.
+Verified by driving it — scroll 3200 → reload → 0, and `/#how` → 2855.
+
+**THE NAV LADDER MOVED UP ~130px (2026-08-08).** The reference's 1180/1080
+compression steps were transcribed before our nav grew a Research link, a Free
+Valuation link and a 38px logo, so the links SPILLED — `[data-nav-links]`
+carries `min-width: 0`, the flex item shrinks below min-content, and its
+`white-space: nowrap` children hang past its right edge. **The container box
+never overlaps, so measuring it reads clean; only the last CHILD's right edge
+against the CTA cluster shows it.** Two bands were live: 1081–1112 and
+1181–~1290 — the second catching **1280**. Ladder moved to 1310/1150; measured
+clean (worst margin −38px) at every width from 1024 to 1920.
 
 **MOBILE IS IN (2026-08-08, Paul: "can we start on Mobile?" — closes Q3, the
 deferral the plan flagged as "the biggest gap"). THE FIX WAS FLUID, NOT A

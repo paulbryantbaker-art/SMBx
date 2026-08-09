@@ -40,11 +40,11 @@
     smbxOrbit 60s linear infinite,
     smbxOrbitIn 1150ms cubic-bezier(0.33, 0.9, 0.35, 1) 500ms both;
 }
-/* The hero ring spins slower than the corner mark. Same 360°, four times the
-   radius: at 60s the outer edge travels fast enough to read as motion rather
-   than drift, and a hero object that visibly moves is a distraction from the
-   headline sitting beside it. */
-.ca-orbit-hero > div { animation-duration: 210s, 1150ms; }
+/* The ball spins slower than the corner mark it replaces, in proportion to
+   its radius: same 360° over twice the circumference travels the rim twice as
+   fast, and a hero object that visibly moves is a distraction from the
+   headline beside it. 60s × (295/150) ≈ 120s holds the rim at the same speed. */
+.ca-orbit-hero > div { animation-duration: 120s, 1150ms; }
 
 /* ── HERO GEOMETRY: exactly one ring, ever (2026-08-08) ──
    Above 1024 the fold is two columns and carries the hero-scale ring; at or
@@ -54,22 +54,21 @@
    media queries are complementary, so no width ever shows both sets — and
    the phone hero is byte-identical to before this pass. */
 .ca-orbit-hero, .ca-hero-hdots { display: none; }
-@media (min-width: 1280px) {
+@media (min-width: 1025px) {
   .ca-orbit-hero { display: block; }
   .ca-hero-hdots { display: block; }
   .ca-orbit-corner, .ca-hero-cdots { display: none; }
 }
-/* NARROW DESKTOP (1025–1279) keeps the corner mark, and the reason is
-   geometric rather than a matter of taste: the engine card is opaque and
-   ~470px wide here, so any ring that fits the fold is barely wider than the
-   thing hiding its middle — at 1100 a 510px ring showed a 66px crescent and
-   two stray arcs, which reads as debris, not an object. The ring needs the
-   card to be a detail inside it, and that only happens once the viewport can
-   spare ~700px. The split also relaxes toward even here: 1.32fr leaves the
-   card ~415px, where its lane chips break to six rows and the card grows
-   taller than the copy beside it. */
-@media (min-width: 1025px) and (max-width: 1279px) {
-  [data-hero-grid] { grid-template-columns: 1.08fr 1fr !important; }
+/* φ COSTS WIDTH, AND BELOW ~1360 THE CARD CANNOT PAY IT. The hero's inline
+   `1.618fr 1fr` is a true golden section of the two columns, and it holds
+   while the minor track stays wide enough for the engine card to lay its lane
+   chips two-up. At 1280 that track is 428px and at 1100 it is 368px — every
+   chip drops to its own row, the card runs eight rows deep and towers over
+   the copy beside it, which is not a golden anything. So the ratio relaxes to
+   1.15 below 1360 (card 521 at 1280, 448 at 1100) and the fold keeps its
+   asymmetry without starving the one object on it that has a job to do. */
+@media (min-width: 1025px) and (max-width: 1359px) {
+  [data-hero-grid] { grid-template-columns: 1.15fr 1fr !important; }
 }
 @keyframes smbxCaret { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
 

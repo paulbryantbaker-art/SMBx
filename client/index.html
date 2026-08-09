@@ -50,6 +50,27 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <script>
+      // A REFRESH RETURNS YOU TO THE TOP (2026-08-09, Paul: "the page does not
+      // reset on refresh and still scrolls to the Valuation section").
+      //
+      // Nothing in this codebase had ever set `history.scrollRestoration`, so
+      // the browser default `'auto'` was live and it RESTORES THE PREVIOUS
+      // SCROLL OFFSET on reload — with or without a hash in the URL. That is
+      // the whole bug. The earlier hash-strip was a real fix for a real
+      // symptom (the anchor staying in the address bar) and it could never
+      // have fixed this one: strip the hash, reload, and the browser still
+      // puts you back where you were, because the offset is stored against
+      // the history entry, not the URL fragment.
+      //
+      // `'manual'` only disables RESTORATION. A genuine deep link
+      // (smbx.ai/#how, an emailed anchor) still scrolls to its target,
+      // because that is fragment navigation and a different mechanism — so
+      // this resets a refresh without breaking a shared link.
+      //
+      // It has to run here rather than in a component: restoration is applied
+      // around first paint, and a React effect is already too late.
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
       // Set body bg synchronously before first paint:
       //  - Desktop V6: #F6F7F9 (slate, avoids white flash)
       //  - Mobile: #D4A258 (warm gold sunrise) so iOS Safari samples it

@@ -370,65 +370,52 @@ export default function Landing() {
         {/* ══ HERO ══ */}
         {/* id="yulia" sits on the SECTION per the reference — YuliaIntake no
             longer carries its own copy of the id (one anchor, one owner). */}
-        {/* DESKTOP COMPOSITION (2026-08-08, Paul: "the hero / above the fold is
-            a little boring on desktop… carta is actually a little busy, we can
-            meet in the middle — making the ball bigger balancing out the page
-            (golden ratio)… blending our old with it to make an original").
+        {/* THE GOLDEN FOLD (2026-08-09, Paul: "take these 3 objects and arrange
+            the above the fold on desktop in the most golden ratio spatial
+            design possible" — after the first attempt went the wrong way:
+            "this is NOT what i meant by make it a little bigger. look at carta
+            again. Understand the balance that should be. Golden ratio,
+            always.")
 
-            Boring had a cause: two near-equal columns (1.02fr/.98fr) with the
-            type at its loudest and the only geometry a 150px sliver tucked
-            behind the card's corner. So the fix is proportion, not content —
-            nothing was added to read, which is the half of Carta we are NOT
-            copying.
+            The reference settles the scale argument, measured rather than
+            eyeballed. On carta.com the text column is 561px and the whole
+            content band is 908 — and 908 × 0.618 = 561. Their text column IS
+            the golden major of the content width, to the pixel. Their globe is
+            290px, which is the RIGHT column over φ. So the object is a
+            companion to the panel beside it, not a planet the panel lives
+            inside; a 790px ring was the wrong instrument no matter where it
+            sat.
 
-            Three moves. (1) The columns go to 1.32fr/1fr — φ is 1.618 and that
-            starves the engine card (467px at 1440, where its chips start
-            wrapping two-deep), so this is the meet-in-the-middle: asymmetric
-            enough to have a subject, wide enough to keep the card usable.
-            (2) The orbit becomes the counterweight it was pretending to be —
-            a hero-scale ring the card floats on, bleeding off the right edge
-            (safe: `main` is `overflow: clip`). It is our gesture, wearing
-            Carta's square handles as its nodes. (3) The headline sheds ~11px
-            so the ring, not the type, is the loudest thing on the fold.
+            Three objects, and every number below is φ (1.618) or one of its
+            powers — nothing here is a taste value:
 
-            EVERY new decoration here is DESKTOP-ONLY (see the ≥1025 block in
-            carta.css) and the two marks it replaces are hidden at the same
-            breakpoint, so below 1024 this hero renders exactly as it did. */}
-        <section data-hero-grid id="yulia" style={{ position: 'relative', maxWidth: 1360, margin: '0 auto', minHeight: 'calc(100svh - 76px)', padding: 'clamp(60px, 6vh, 110px) clamp(20px, 4vw, 32px) clamp(70px, 8vh, 140px)', display: 'grid', gridTemplateColumns: '1.32fr 1fr', gap: 'clamp(29px, 4.4vw, 80px)', alignItems: 'center' }}>
-          {/* THE RING. Absolutely positioned on the SECTION, not the card
-              column, so it can bridge both — and first in the DOM so the two
-              columns (each z-index 1) paint over it. `data-plx` drifts it on
-              scroll via `translate`, which is why the centring uses `transform`
-              instead: the two properties compose rather than fight. */}
-          {/* NOT CONCENTRIC WITH THE CARD, deliberately (Paul, 2026-08-08:
-              "why is the ball hiding behind the chat box?"). The first cut
-              centred the ring on the engine card, and an even rim around an
-              opaque panel reads as a HALO on the panel rather than an object
-              behind it — the eye has no cue about which is in front. Offsetting
-              it left (right: 0 vs the card's own bleed) leaves ~230px of ball
-              showing on one side and ~30px on the other, and that asymmetry is
-              the whole depth cue. The innermost circle came out with it: at
-              this scale it sat entirely behind the card, contributing nothing
-              but a second concentric edge. Strokes carry more weight too — at
-              790px across, 1.2px at .30 opacity is a rumour, not a shape. */}
-          <div aria-hidden="true" data-plx="-0.04" className="ca-orbit ca-orbit-hero" style={{ position: 'absolute', top: '50%', right: '0%', width: 'clamp(560px, 55vw, 860px)', aspectRatio: '1 / 1', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-            <div style={{ width: '100%', height: '100%', transformOrigin: '50% 50%' }}>
-              <svg viewBox="0 0 600 600" width="100%" height="100%" fill="none">
-                <circle cx="300" cy="300" r="292" stroke="#0A7A58" strokeWidth="1.6" opacity=".52" />
-                <ellipse cx="300" cy="300" rx="291" ry="116" stroke="#0A7A58" strokeWidth="1.6" strokeDasharray="7 9" opacity=".62" />
-                <ellipse cx="300" cy="300" rx="116" ry="291" stroke="#0A7A58" strokeWidth="1.6" opacity=".46" />
-                {/* Square nodes, not dots — Carta's 8px handle is the house
-                    gesture, so the satellites wear it. */}
-                <rect x="292" y="0" width="16" height="16" fill="#0A7A58" />
-                <rect x="585" y="294" width="11" height="11" fill="#0A7A58" opacity=".6" />
-                {/* There was a third node on the vertical ellipse's left. Once
-                    the ring moved off-centre that one no longer sat on any
-                    visible arc — it landed alone in the open bone between the
-                    copy and the card and read as a smudge on the screen. A
-                    node has to be ON its orbit to be a node. */}
-              </svg>
-            </div>
-          </div>
+              copy : card      = φ : 1        (1.618fr 1fr → 762 : 471)
+              ball diameter    = card / φ     (≈295px at 1440 — Carta's is 290)
+              ball ÷ card edge = φ⁻¹ : φ⁻²    (61.8% clear, 38.2% behind)
+              ball centre      = φ down the card (61.8%)
+
+            ONE DEVIATION, and it is worth knowing why. Carta's construction is
+            stricter than the above: their text column is 0.618 of the whole
+            band and the GAP lives inside the minor, which here would be
+            `61.8% 1fr` and a 432px card. Built and rendered, it starves the
+            panel — every lane chip drops to its own row, the card grows to
+            seven rows and outgrows the copy beside it, and the ball ends up
+            behind a taller card than before. Their minor column holds a
+            decorative wireframe; ours holds a working form. So the φ is taken
+            BETWEEN THE COLUMNS (762 : 471 is 1.618 to three decimals) rather
+            than against the band, which is a true golden section of the space
+            the two objects actually share.
+
+            The ball lives INSIDE the card column rather than on the section,
+            so it is pinned to the card's own left edge and that φ split holds
+            at every width — a percentage measured off the section would only
+            land on the boundary at one viewport size. It sits before
+            `.ca-engine` in the DOM, so the card paints over it and the overlap
+            reads as depth. Its centre is φ DOWN the card rather than φ⁻² up:
+            at 38.2% the ball's top arc ran through the tail of the headline's
+            second line, and low also fills the dead bottom-centre the fold
+            otherwise carries. */}
+        <section data-hero-grid id="yulia" style={{ position: 'relative', maxWidth: 1360, margin: '0 auto', minHeight: 'calc(100svh - 76px)', padding: 'clamp(60px, 6vh, 110px) clamp(20px, 4vw, 32px) clamp(70px, 8vh, 140px)', display: 'grid', gridTemplateColumns: '1.618fr 1fr', gap: 'clamp(29px, 4.4vw, 80px)', alignItems: 'center' }}>
           <div style={{ position: 'relative', zIndex: 1 }}>
             {/* Dot field behind the headline — where real carta.com puts one.
                 Ink, not green: the ring owns the accent on this fold. */}
@@ -487,6 +474,26 @@ export default function Landing() {
                 exactly as before. Two green textures plus a 600px green ring
                 in the same corner is the "busy" Paul is steering away from. */}
             <div aria-hidden="true" className="ca-hero-cdots" style={{ position: 'absolute', inset: '-10px -20px 30px', backgroundImage: 'radial-gradient(rgba(10,122,88,.22) 1.2px, transparent 1.2px)', backgroundSize: '17px 17px' }} />
+            {/* THE BALL — third object, sized and placed by φ (see the section
+                comment). `left: 0` is the card's own left edge; the transform
+                then splits the ball across it φ⁻¹ clear / φ⁻² behind, and
+                drops its centre φ⁻² down the card. `data-plx` writes
+                `translate` on scroll, so the placement uses `transform` —
+                the two properties compose instead of overwriting. */}
+            <div aria-hidden="true" data-plx="-0.03" className="ca-orbit ca-orbit-hero" style={{ position: 'absolute', left: 0, top: '61.8%', width: 'clamp(210px, 20.5vw, 330px)', aspectRatio: '1 / 1', transform: 'translate(-61.8%, -50%)', pointerEvents: 'none' }}>
+              <div style={{ width: '100%', height: '100%', transformOrigin: '50% 50%' }}>
+                <svg viewBox="0 0 300 300" width="100%" height="100%" fill="none">
+                  <circle cx="150" cy="150" r="146" stroke="#0A7A58" strokeWidth="1.4" opacity=".42" />
+                  <ellipse cx="150" cy="150" rx="145" ry="58" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 6" opacity=".62" />
+                  <ellipse cx="150" cy="150" rx="58" ry="145" stroke="#0A7A58" strokeWidth="1.4" opacity=".45" />
+                  {/* Square nodes, not dots — Carta's handle is the house
+                      gesture, so the satellites wear it. Both sit ON an arc:
+                      an orphaned node reads as a smudge, not a satellite. */}
+                  <rect x="144" y="-2" width="13" height="13" fill="#0A7A58" />
+                  <rect x="290" y="145" width="9" height="9" fill="#0A7A58" opacity=".6" />
+                </svg>
+              </div>
+            </div>
             <div aria-hidden="true" data-plx="-0.03" className="ca-orbit ca-orbit-corner" style={{ position: 'absolute', top: -26, right: -8, width: 150, height: 150 }}>
               {/* Spin + entrance both live in carta.css (.ca-orbit > div) —
                   an inline `animation` would outrank the stylesheet and drop
