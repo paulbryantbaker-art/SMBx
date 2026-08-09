@@ -262,6 +262,28 @@ assertion that exits 2 on any emitted-but-unlisted kind. Baseline 249 → 258;
 the 9 additions are all report-body prose whose lines break early around long
 unbreakable tokens (company parentheticals, citation strings), not defects.
 
+**THE LOGO WAS NEVER OFF ITS VERTICAL CENTRE (2026-08-09, Paul: "on mobile I
+still don't think the logo looks even with the Hamburger" — his second time
+raising it, and the first fix, growing it 30→38px, was answering the wrong
+question).** Measured four ways at 390px, the vertical is exact: nav bar, logo
+link, logo IMG and burger all sit at mid 38.0, and the mark's own ink centroid
+lands 0.4px ABOVE its box centre — invisible. **The asymmetry is horizontal,
+and it was hiding inside the asset.** `/logo-green-x.png` is 1584×396 carrying
+**13.26% TRANSPARENT PADDING on each side**, so at the 38px nav height its box
+is 152px wide but the ink does not begin until 20.2px in. Every BOX was
+aligned correctly and the only thing a viewer can see was not: the logo's ink
+started **40.2px** from the phone's left edge while the burger's glyph ended
+**28px** from the right (its 24px svg draws strokes from x=4 to x=20, so 4px
+of its box is empty too, on top of an inherited `margin-right: -6px`).
+Correction is `[data-nav-logo] { margin-left: -20px }` plus the burger at
+`-14px`: both visible gutters now measure **20.2 / 20.0**, the nav's own
+padding — **and on desktop this puts the logo's ink on the same vertical line
+as the H1 below it**, which it had never been. The −20px is COUPLED to the
+asset and the height (13.26% × 38 × 1584/396); change either and it must be
+recomputed by scanning the PNG's alpha channel, which is how it was found. The
+lesson generalises: when every box measures right and it still looks wrong,
+measure the INK, not the box.
+
 **THE GATE IS `npm run shoot:mobile`** (`scripts/mobile-audit.mjs`) — and after
 Paul's *"I can't take a picture of everything that looks awful… let's do an
 antagonistic pass"* it is no longer an overflow reporter but a hunter for eight
