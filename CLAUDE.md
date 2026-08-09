@@ -283,6 +283,24 @@ asset and the height (13.26% × 38 × 1584/396); change either and it must be
 recomputed by scanning the PNG's alpha channel, which is how it was found. The
 lesson generalises: when every box measures right and it still looks wrong,
 measure the INK, not the box.
+**AND THE INK'S OPTICAL CENTRE IS THE WORDMARK (same day, Paul: "don't measure
+from the bottom edge of the logo, measure from the CENTER of the logo — it
+looks like the hamburger sits below the logo").** He was right and three of my
+measurements were not, in an instructive way: **the green X spans the PNG's
+ENTIRE height (rows 18–382 of 396) while the letters occupy 85–264**, so the
+full-ink bbox, its alpha-weighted centroid AND its densest-rows band are all
+governed by the X rather than by the thing a reader reads. All three reported
+"centred to within 0.3px" while the letters sat 2.3px high — **a contaminated
+metric still looks authoritative**, which is the trap. Separating DARK pixels
+from GREEN ones split them apart (wordmark centre 35.74 vs burger 38.00), and
+rendering a red rule on the bar's centre line settled which correction was
+right: at rest the line grazed the letters near their baseline; nudged, it
+bisects them and the burger's middle bar together.
+`[data-nav-logo] img { transform: translateY(2px) }` therefore drops the mark
+so its WORDMARK sits on the burger's line and, on desktop, on the nav links' —
+which it had never been. 2px rather than the measured 2.26 keeps the raster on
+whole pixels. **When a metric and the owner's eye disagree three times, render
+the variants against a reference line instead of defending the metric.**
 
 **THE GATE IS `npm run shoot:mobile`** (`scripts/mobile-audit.mjs`) — and after
 Paul's *"I can't take a picture of everything that looks awful… let's do an

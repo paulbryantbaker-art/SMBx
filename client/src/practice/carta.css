@@ -171,6 +171,29 @@
    that is how it was found). */
 [data-nav-logo] { margin-left: -20px; }
 
+/* AND ITS OPTICAL CENTRE IS THE WORDMARK, NOT THE INK BOX (2026-08-09, Paul:
+   "don't measure from the bottom edge of the logo, measure from the CENTER of
+   the logo — it looks like the hamburger sits below the logo").
+
+   He was right and my first three measurements were not, in an instructive
+   way. The green X spans the PNG's ENTIRE height (rows 18–382 of 396) while
+   the letters occupy 85–264, so the full-ink bounding box, its alpha-weighted
+   centroid and its densest-rows band are all governed by the X, not by the
+   thing you read. All three said "centred to within 0.3px" while the letters
+   sat 2.3px high — a metric can be contaminated and still look authoritative.
+   Isolating the DARK pixels from the GREEN ones is what separated them, and
+   rendering a red rule on the bar's centre line is what settled it: at rest
+   the line grazed the letters near their baseline; nudged, it bisects them
+   and the burger's middle bar together.
+
+   So the logo drops 2px, putting its WORDMARK on the same line as the burger
+   and — on desktop — as the nav links, which it had never been.
+
+   2px, not the measured 2.26: a whole-pixel offset keeps the raster on the
+   pixel grid, and 0.26px of a 38px mark is not visible. Recompute if the
+   asset or the 38px height changes. */
+[data-nav-logo] img { transform: translateY(2px); }
+
 /* Hide-on-scroll-down / show-on-scroll-up (2026-08-08). `translate` on a
    position:sticky element, NOT `top` — sticky already owns `top`, so
    animating it fights the stick and stutters. 110% rather than 100% so the
