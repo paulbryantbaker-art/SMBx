@@ -620,6 +620,65 @@ re-measured at 18 widths from 1024 to 1920: clean everywhere, worst margin
 
 ---
 
+## ACT II: TOP-ANCHOR + LABELS (2026-08-09, from Paul's tall monitor)
+
+Paul's screenshot of the live fold beside carta.com's showed two things the
+1440-tall renders never could.
+
+**The fold centered, and centering was the whole problem.** At ~1400px of
+viewport the hero's `minHeight: 100svh` + `alignItems: center` floated the
+~850px cluster with ~260px of dead bone above AND below. Carta doesn't
+center: their hero rides the top and the logo wall + product band fill the
+fold's lower minor — hero ≈ φ⁻¹ of the fold, next act ≈ φ⁻², cropped as the
+scroll invitation. Our page already had that next act sitting immediately
+after the hero (lane marquee → jade proof band), so the fix was to stop
+suppressing it: the ≥1025 block zeroes the min-height and tightens paddings,
+and on a tall screen the marquee and the proof band's stat chain rise into
+the fold. Laptops ≤~940 tall render pixel-identically (natural height already
+exceeded the old minimum); ≤1024 keeps the inline values, so the approved
+phone fold is untouched.
+
+**The ball's φ had silently broken at exactly Paul's width.** The cap was
+330px, but the grid maxes at 1360 which fixes the card at ~464px on every
+monitor past ~1400 — so the wide-screen ratio was 0.71, not 0.618, on the one
+class of screen the composition was for. Cap → 287 (= 464/φ).
+
+**Labels are what make Carta's globe a diagram.** CAP TABLE / COMPANY / FUND
+/ LIMITED PARTNER — without them it's an ornament. The ball now carries the
+practice's two entities as chips pinned to its rims: **BUYER · TARGETS**, the
+acquisition in two words, each chip's 7px green square landing ON the arc,
+white fill so it reads pinned on the line. Two mechanical consequences:
+
+- The chips read in OPPOSITE directions. The top node sits ~34px left of the
+  card edge (the φ split puts it there), so a rightward word runs under the
+  card — the first render clipped BUYER mid-word. It is row-reversed, square
+  on its right end pinned to the rim, word extending left into the gutter.
+- **The ball is static now** (entrance settle only, no spin). The chips are
+  HTML siblings of the spinning layer, so a rotating rim would slide out from
+  under its own labels within seconds. Carta's globe is still. The corner
+  mark and the phone hero keep the house spin.
+- The old right-side node died on inspection: the φ split hides that rim
+  behind the card, so it violated the visible-arc law from day one.
+
+**The smudge above the headline was moiré.** The dot field ran 16px pitch /
+1.1px dots; at a non-integer display scale the rows resample into horizontal
+grey streaks. 20px pitch / 1.5px dots survives scaling, and the field no
+longer overhangs the cap line — rows floating in open bone above the
+headline read as an accident.
+
+13px mono on the chips is the readability floor (the no-micro-text law), not
+below it.
+
+### Verified
+
+- `npm run test:design` — 77/77.
+- `npm run shoot:mobile` — 249 findings across 15 routes, identical to
+  baseline; every structural class still ZERO.
+- Rendered: 2560×1400 (the monitor class that surfaced it), 1440×900,
+  1100×900, 390×844. Phone byte-identical.
+
+---
+
 
 ---
 

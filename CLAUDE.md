@@ -137,6 +137,34 @@ one set shows at any width and the phone hero is byte-identical.
 Type quieted with it: H1 `clamp(35px, 4.05vw, 82px)` (69→58px at 1440), lede
 20→19px.
 
+**THE FOLD ANCHORS TO THE TOP + THE BALL IS A LABELLED DIAGRAM (2026-08-09,
+Paul from his tall monitor, resending carta.com: "aligning the objects above
+the fold… golden ratio. See also the Carta site").** Two findings. (1) The
+hero's `minHeight: 100svh` + `alignItems: center` is a CENTERING fold, and on
+a ~1400px-tall monitor it floated the ~850px cluster with ~260px of dead bone
+above AND below — carta.com never centers: their hero rides the top and the
+logo wall + product band fill the fold's lower minor. Ours has the same next
+act sitting right after the hero (lane marquee → jade proof band), so the
+≥1025 block in carta.css zeroes the stretch (`min-height: 0` + tighter
+paddings) and on tall screens the marquee and proof band rise into the fold —
+hero ≈ the golden major, the cropped band the scroll invitation. Laptops
+≤~940 tall are pixel-unchanged (natural height already exceeded the old
+minimum); phones keep the inline values. (2) What turns Carta's globe from
+ornament into diagram is its LABELS (CAP TABLE / COMPANY / FUND / LP), so the
+ball now carries the practice's two entities as chips pinned to its rims —
+**BUYER · TARGETS**, the acquisition in two words, each chip's 7px green
+square landing ON the arc. The chips read in OPPOSITE directions for a
+physical reason: the top node sits ~34px left of the card edge, so a rightward
+word runs under the card — BUYER is row-reversed into the open gutter. And
+the ball is STATIC now (entrance settle only): the chips are HTML siblings of
+the spinning layer, so a rotating rim would slide out from under its own
+labels — the corner mark and phone keep the house spin. Ball cap corrected
+330→287 (the maxed grid fixes the card at ~464, and 464/φ = 287 — the 330 cap
+silently broke the ratio to 0.71 precisely on wide monitors). The headline
+dot-field went 16px/1.1 → 20px/1.5 with no cap-line overhang: at a scaled
+display the tight pitch moiréd into grey streaks that read as a smudge.
+13px mono on the chips is the readability floor, deliberately not below it.
+
 **A REFRESH RETURNS YOU TO THE TOP (2026-08-09, Paul: "the page does not reset
 on refresh and still scrolls to the Valuation section").** Nothing in the
 codebase had ever set `history.scrollRestoration`, so the browser default
