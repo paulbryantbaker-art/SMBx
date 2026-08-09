@@ -392,18 +392,61 @@ function Engagement() {
   );
 }
 
-/* A wall is laid from the bottom course up, each course left to right — so
-   the delay counts rows from the BOTTOM, not from the top of the DOM. Derived
-   from the register's own length so adding a lane cannot silently mis-order
-   the wall (the nth-child version it replaced would have). 3 columns, 90ms a
-   course, 85ms a brick: ~1.02s to lay the last one, so a course can
-   actually be watched going down. */
-const BRICK_COLS = 3;
-function brickDelay(i: number) {
-  const rows = Math.ceil((HUNT_LANES.length + 1) / BRICK_COLS);
-  const row = Math.floor(i / BRICK_COLS);
-  const col = i % BRICK_COLS;
-  return `${(rows - 1 - row) * 170 + col * 85}ms`;
+/* THE GRID FILLS AS YOU SCROLL (2026-08-09, Paul, third time on this one:
+   "I never get to see the brick-layer be built on the industry grid, even
+   still… since we're scrolling down, come in from the top left and fill in
+   the grid on scroll").
+
+   He is right that slowing it down was never going to fix it, and his fix is
+   the correct one. A one-shot cascade fires when the container's TOP crosses
+   the reveal line — but this grid is six rows tall, so by the time a reader
+   has scrolled far enough to actually look at it, a cascade that started
+   1.5s ago is long finished. Timing was the wrong axis entirely; the fill has
+   to be driven by the scroll itself, and then it cannot be missed, because
+   the reader is the one advancing it.
+
+   Order is DOM order now — top-left, along each row — which is what he asked
+   for and also what reading order wants when the motion is tied to scrolling
+   DOWN the page. (The bottom-up bricklaying courses were the right answer to
+   the previous question and the wrong one to this.)
+
+   Returns the number of cells revealed, or -1 meaning "not driving" — below
+   1025 and under prefers-reduced-motion the CSS cascade in carta.css runs
+   exactly as it did, which also keeps the audited mobile page unchanged. */
+/* '' hands the cell to the CSS cascade; otherwise it is explicitly in or out. */
+function fillClass(n: number, i: number) {
+  if (n < 0) return '';
+  return i < n ? ' fl-in' : ' fl-out';
+}
+
+function useScrollFill(ref: React.RefObject<HTMLElement | null>, count: number) {
+  const [n, setN] = useState(-1);
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!window.matchMedia('(min-width: 1025px)').matches) return;
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      const el = ref.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      // Travel runs from the grid's top crossing 88vh to its bottom clearing
+      // ~26vh, so the last cell lands while the grid is still fully on screen
+      // rather than as it leaves.
+      const span = r.height + vh * 0.62;
+      if (span <= 0) return;
+      const p = (vh * 0.88 - r.top) / span;
+      const v = Math.max(0, Math.min(count, Math.round(p * count)));
+      setN(cur => (cur === v ? cur : v));
+    };
+    const on = () => { if (!raf) raf = requestAnimationFrame(read); };
+    window.addEventListener('scroll', on, { passive: true });
+    window.addEventListener('resize', on);
+    read();
+    return () => { if (raf) cancelAnimationFrame(raf); window.removeEventListener('scroll', on); window.removeEventListener('resize', on); };
+  }, [ref, count]);
+  return n;
 }
 
 /* The three ornament chips around "Built for serious buyers." and the words
@@ -485,6 +528,10 @@ export default function Landing() {
   // they never show the same word.
   const ring = useCycle(PHASES.length, 5600);
   const who = useCycle(WHO_WORDS.length, 6400);
+  // The hunt board fills under the reader's own scroll (desktop); -1 hands it
+  // back to the CSS cascade.
+  const huntRef = useRef<HTMLDivElement>(null);
+  const hunt = useScrollFill(huntRef, HUNT_LANES.length + 1);
 
   // Hero entrance (data-hs) and dot-field parallax (data-plx) run in the
   // shell — every reference page carries them.
@@ -997,13 +1044,13 @@ export default function Landing() {
             <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'pretty' }}>We go deep in a handful of markets. Yours may be one of them.</h2>
             <p style={{ margin: '24px 0 0', maxWidth: '42em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>The sectors we know cold — the operators, the multiples, the diligence traps, and the targets already on our desk. Focus, not limits.</p>
           </div>
-          <div data-rv data-g3 data-bricks style={{ marginTop: 'clamp(28px, 4.6vw, 76px)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: '#E4DFD3', border: '1px solid #E4DFD3' }}>
+          <div ref={huntRef} data-rv data-g3 data-bricks style={{ marginTop: 'clamp(28px, 4.6vw, 76px)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: '#E4DFD3', border: '1px solid #E4DFD3' }}>
             {HUNT_LANES.map((l, i) => (
               <Link
                 key={l.nm}
                 href={laneHref(l.nm, SECTOR_NAMES)}
-                className="ca-h-band"
-                style={{ position: 'relative', display: 'block', background: '#FCFAF6', padding: '22px 24px 24px', color: '#16181A', transitionDelay: brickDelay(i) }}
+                className={`ca-h-band${fillClass(hunt, i)}`}
+                style={{ position: 'relative', display: 'block', background: '#FCFAF6', padding: '22px 24px 24px', color: '#16181A' }}
                 onClick={() => trackEvent('practice_sector_clicked', { sector: l.nm })}
               >
                 <span style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
@@ -1024,7 +1071,7 @@ export default function Landing() {
                 Computed from the register so the next lane added can't bring
                 the block back. */}
             {HUNT_LANES.length % 3 !== 0 && (
-              <div aria-hidden="true" data-lanefill style={{ gridColumn: `span ${3 - (HUNT_LANES.length % 3)}`, background: '#FCFAF6', transitionDelay: brickDelay(HUNT_LANES.length) }} />
+              <div aria-hidden="true" data-lanefill className={fillClass(hunt, HUNT_LANES.length).trim()} style={{ gridColumn: `span ${3 - (HUNT_LANES.length % 3)}`, background: '#FCFAF6' }} />
             )}
           </div>
           <div data-rv style={{ marginTop: 38, textAlign: 'center' }}>

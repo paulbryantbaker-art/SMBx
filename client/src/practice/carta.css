@@ -179,7 +179,32 @@
 
    And a brick is SET DOWN, so the travel is negative: each one arrives from
    slightly above and settles onto the course beneath it. */
-[data-bricks] > * { opacity: 0; translate: 0 -18px; transition: opacity 460ms ease, translate 620ms cubic-bezier(0.3, 1.25, 0.5, 1); }
+/* `!important` ON THE TRANSITION, AND THIS IS THE WHOLE REASON THE BRICKS
+   NEVER ANIMATED (2026-08-09, Paul, three rounds of "I never get to see it").
+   The lane cells are ANCHORS, and practice.css carries
+   `.pd a { transition: color 160ms ease; }` — specificity (0,1,1) against this
+   rule's (0,1,0), so the anchor rule won and the cells' only transitionable
+   property was COLOR. Opacity, translate and scale therefore snapped
+   instantly: the cells appeared at staggered times and never moved. Two
+   passes spent re-timing a cascade could not fix a transition that was not
+   running, and nothing about it is visible in a diff — the delays were all
+   applying correctly. Check `transitionProperty`, not the rule you wrote. */
+[data-bricks] > * { opacity: 0; translate: 0 -18px; transition: opacity 420ms ease, translate 560ms cubic-bezier(0.3, 1.2, 0.5, 1), scale 560ms cubic-bezier(0.3, 1.2, 0.5, 1) !important; }
+
+/* SCROLL-DRIVEN FILL (2026-08-09). Above 1025 the board is filled cell by cell
+   by the reader's own scroll (`useScrollFill` in Landing.tsx), which is the
+   only way the motion cannot be missed — a timed cascade starts when the
+   container's top crosses the reveal line, and this grid is six rows tall, so
+   it is always over before anyone has scrolled far enough to look at it.
+   Each block ANIMATES INTO PLACE rather than just appearing: it arrives from
+   up and to the left, a touch undersized, and settles on a gentle overshoot
+   (Paul: "make each grid block kinda animate into place"). The offsets are
+   small deliberately — seventeen cells each travelling a long way reads as
+   chaos, not construction.
+   `!important` because these have to beat the delay-based cascade below,
+   which still runs untouched on phones and under reduced motion. */
+[data-bricks] > *.fl-out { opacity: 0 !important; translate: -22px -16px !important; scale: 0.975 !important; transition-delay: 0ms !important; }
+[data-bricks] > *.fl-in { opacity: 1 !important; translate: 0 0 !important; scale: 1 !important; transition-delay: 0ms !important; }
 [data-bricks].rv-in > * { opacity: 1; translate: 0 0; }
 
 /* The why-us cards travel further and land in sequence — the shared 20px was
