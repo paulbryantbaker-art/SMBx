@@ -164,6 +164,25 @@ silently broke the ratio to 0.71 precisely on wide monitors). The headline
 dot-field went 16px/1.1 → 20px/1.5 with no cap-line overhang: at a scaled
 display the tight pitch moiréd into grey streaks that read as a smudge.
 13px mono on the chips is the readability floor, deliberately not below it.
+**THE FOLD IS MEASURED TO φ, NOT JUST UNPINNED (2026-08-09, Paul: "a little
+vertically cramped… push the band down some and to where the stat cards are
+above the fold — and golden ratio the hero").** Zeroing the min-height was the
+right direction with no target: the hero then took whatever height its content
+needed, ~40% of a 1349-tall fold, and the dark band dominated the opening
+statement. The comment claimed "≈ the fold's golden major" and **nothing
+enforced it**. The section now measures — `min-height: calc(61.8svh - 76px)`,
+so its BOTTOM EDGE lands on the golden line (the 76px is the fixed nav;
+subtracting it puts the boundary there rather than the section's own height),
+and the remaining φ⁻² carries the marquee plus the proof band's stat cards.
+Second half of the same problem: whether the CARDS cleared the fold was luck,
+because `#proof`'s top padding is `10vw` — a WIDTH-derived value on a purely
+HEIGHT problem (170px at 2560, leaving ~15px of clearance at 1349 tall and
+cutting the cards outright at 1200). On `min-height: 1000px` viewports it
+becomes `clamp(90px, 7vh, 132px)` and they clear by ~90px. Scoped to tall
+viewports on purpose: a laptop fold cannot hold the hero AND the cards
+whatever the padding, so tightening there would cost rhythm and buy nothing —
+every ≤1000-tall viewport renders the approved band untouched, and TOP only,
+so the band cadence law is unaffected.
 
 **A REFRESH RETURNS YOU TO THE TOP (2026-08-09, Paul: "the page does not reset
 on refresh and still scrolls to the Valuation section").** Nothing in the

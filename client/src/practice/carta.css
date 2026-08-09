@@ -61,21 +61,30 @@
   .ca-hero-hdots { display: block; }
   .ca-orbit-corner, .ca-hero-cdots { display: none; }
 
-  /* THE FOLD ANCHORS TO THE TOP (2026-08-09). The hero's inline
-     `minHeight: 100svh` + `alignItems: center` is a centering fold, and on a
-     tall monitor it floated the ~850px cluster with ~260px of dead bone above
-     AND below — Paul's screenshot, next to carta.com whose hero rides the top
-     while the logo wall and product band fill the fold's lower minor. Ours
-     has the same next act sitting right after this section (lane marquee →
-     jade proof band), so zeroing the stretch lets it rise into the fold:
-     hero ≈ the fold's golden major on a tall screen, the cropped proof band
-     the scroll invitation. At ≤~940-tall viewports the hero's natural height
-     already exceeded the old minimum, so laptops render exactly as before;
-     ≤1024 keeps the inline values (the phone fold is approved as-is). */
+  /* THE FOLD IS GOLDEN-SECTIONED (2026-08-09, second pass). The inline
+     `minHeight: 100svh` centres the hero in the whole viewport, which on a
+     tall monitor floated the cluster with ~260px of dead bone above AND below.
+     The first fix ZEROED the stretch — right direction, no target: the hero
+     then took whatever height its content happened to need, which on Paul's
+     screen was ~40% of the fold. Cramped, and the dark proof band dominated
+     what should be the opening statement. (The comment here claimed "≈ the
+     fold's golden major"; nothing enforced it, and it was not true.)
+
+     So the section now MEASURES to φ: its bottom edge lands at 61.8svh, which
+     is the golden major of the fold, and the remaining φ⁻² carries the lane
+     marquee plus the proof band's stat cards — cropped, which is the scroll
+     invitation carta.com gets from its logo wall and product band. The 76px
+     is the fixed nav the hero sits under; subtracting it is what puts the
+     SECTION BOUNDARY on the golden line rather than the section's own height.
+
+     It is a min-height, so it only ever adds space: at ≤~1050-tall viewports
+     the hero's natural height already exceeds it and laptops render exactly
+     as they did. ≤1024 keeps the inline values — the phone fold is approved
+     as-is. */
   [data-hero-grid] {
-    min-height: 0 !important;
-    padding-top: clamp(48px, 5vh, 84px) !important;
-    padding-bottom: clamp(44px, 5vh, 80px) !important;
+    min-height: calc(61.8svh - 76px) !important;
+    padding-top: clamp(48px, 5vh, 96px) !important;
+    padding-bottom: clamp(44px, 5vh, 92px) !important;
   }
 }
 /* φ COSTS WIDTH, AND BELOW ~1360 THE CARD CANNOT PAY IT. The hero's inline
@@ -88,6 +97,25 @@
    asymmetry without starving the one object on it that has a job to do. */
 @media (min-width: 1025px) and (max-width: 1359px) {
   [data-hero-grid] { grid-template-columns: 1.15fr 1fr !important; }
+}
+
+/* ...AND THE PROOF BAND'S STAT CARDS HAVE TO CLEAR IT (2026-08-09, Paul:
+   "push the band down some and to where the stat cards are above the fold").
+   With the hero measured to 61.8svh the band lands on the golden line, but
+   whether its CARDS clear the fold was still luck: the band's top padding is
+   `10vw` (170px at 2560), a WIDTH-derived value on a problem that is entirely
+   about HEIGHT. At 1349 tall that left the cards clearing by ~15px — one
+   bookmarks bar from being cut — and on a 1200-tall monitor they were cut
+   outright. So on tall viewports the top padding becomes height-derived and
+   the cards clear by ~90px instead.
+
+   Scoped `min-height: 1000px` on purpose: every laptop-height viewport keeps
+   the approved band exactly as it is, because down there the fold cannot hold
+   the hero AND the cards regardless, so tightening the band would cost
+   rhythm and buy nothing. TOP only — the bottom padding is untouched, so the
+   band's outgoing spacing and the documented band cadence do not move. */
+@media (min-width: 1025px) and (min-height: 1000px) {
+  #proof { padding-top: clamp(90px, 7vh, 132px) !important; }
 }
 @keyframes smbxCaret { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
 
