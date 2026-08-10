@@ -372,12 +372,129 @@ function cmdDigest(args: string[]): number {
   return needsEye ? 1 : 0;
 }
 
+
+/* ── how old is a market's read? ────────────────────────────────────────────
+ *
+ * Paul, 2026-08-10: "once the market assessment is in place, it probably really
+ * only needs to be updated quarterly for each vertical (so 1 per week)." So the
+ * weekly job stopped being "sweep everything" and became a ROTATION: each
+ * market gets one proper quarterly refresh, and the weeks are how they queue.
+ *
+ * AGE COMES FROM GIT, NOT MTIME, and that is not a preference. **git does not
+ * preserve modification times on clone** — check out this workspace on a new
+ * Mac and every master reads as refreshed today, so an mtime rotation would
+ * quietly decide nothing was ever due again. Same class of bug as the
+ * `--since` traversal trap above: plausible, silent, and wrong in the
+ * direction of doing no work.
+ *
+ * Without git there is no honest answer, so `due` says so rather than guessing
+ * from mtime — a rotation that cannot tell you when it last ran is not a
+ * rotation.
+ */
+function masterAgeDays(slug: string, version: number | null): { days: number | null; on: string; how: 'git' | 'none' } {
+  if (version == null) return { days: null, on: '', how: 'none' };
+  // The newest master version file IS the refresh event; master.md is a copy of
+  // it and gets touched by unrelated edits.
+  const file = `markets/${slug}/versions/master-v${version}.md`;
+  const iso = git(['log', '-1', '--format=%cI', '--', file])
+    || git(['log', '-1', '--format=%cI', '--', `markets/${slug}/master.md`]);
+  if (!iso) return { days: null, on: '', how: 'none' };
+  const then = Date.parse(iso);
+  if (!Number.isFinite(then)) return { days: null, on: '', how: 'none' };
+  return { days: Math.floor((Date.now() - then) / 86_400_000), on: iso.slice(0, 10), how: 'git' };
+}
+
+/* ── due ──────────────────────────────────────────────────────────────────── */
+
+function cmdDue(args: string[]): number {
+  const num = (flag: string, dflt: number) => {
+    const i = args.indexOf(flag);
+    const v = i >= 0 ? Number(args[i + 1]) : NaN;
+    return Number.isFinite(v) && v > 0 ? v : dflt;
+  };
+  const every = num('--every', 90);   // quarterly
+  const warn = num('--warn', Math.round(every * 0.85));
+
+  const slugs = marketDirs();
+  if (!slugs.length) { console.log('No markets.'); return 0; }
+  if (!hasGit()) {
+    console.log('This workspace is not a git repository, so there is no reliable');
+    console.log('record of when each master was last refreshed — mtimes are reset by');
+    console.log('any clone, so guessing from them would silently skip the rotation.');
+    console.log('Put the workspace in git and this command becomes exact.');
+    return 2;
+  }
+
+  const rows = slugs.map(slug => {
+    const m = readMarket(slug);
+    return { m, age: masterAgeDays(slug, m.version) };
+  });
+
+  // A market with no master has never been BUILT. That is the full hunt in
+  // RESEARCH.md, not a quarterly refresh, and conflating the two is how a
+  // weekly cron talks itself into a six-hour job.
+  const unbuilt = rows.filter(r => r.m.version == null);
+  const built = rows.filter(r => r.m.version != null);
+  const dated = built.filter(r => r.age.days != null) as { m: MarketState; age: { days: number; on: string; how: 'git' } }[];
+  const undated = built.filter(r => r.age.days == null);
+
+  dated.sort((a, b) => b.age.days - a.age.days);
+  const top = dated[0];
+  const isDue = !!top && top.age.days >= warn;
+
+  console.log(isDue ? `DUE: ${top.m.slug}` : 'DUE: none');
+  console.log('');
+
+  if (isDue) {
+    const over = top.age.days - every;
+    console.log(`UP THIS WEEK`);
+    console.log(`  ${top.m.slug} — master v${top.m.version}, last refreshed ${top.age.on} (${top.age.days} days ago${over >= 0 ? `, ${over} past the ${every}-day cycle` : `, due at ${every}`})`);
+    console.log('');
+  }
+
+  // The arithmetic a person forgets: one market a week over a 90-day cycle
+  // holds ~13 markets. Past that the rotation cannot keep its own promise, and
+  // it should say so rather than quietly running later and later.
+  const capacity = Math.floor(every / 7);
+  console.log(`ROTATION  ${built.length} built market${built.length === 1 ? '' : 's'} · one per week · ${every}-day cycle`);
+  if (built.length > capacity) {
+    console.log(`  ⚠ ONE PER WEEK CANNOT HOLD ${built.length} MARKETS on a ${every}-day cycle — it tops out at ${capacity}.`);
+    console.log(`    Every market will drift past ${every} days. Either widen the cycle (--every), do more`);
+    console.log(`    than one some weeks, or accept that ${built.length - capacity} of them refresh less often.`);
+  } else {
+    console.log(`  Capacity is ${capacity}; every market comes round every ${built.length} week${built.length === 1 ? '' : 's'}. Comfortable.`);
+  }
+  console.log('');
+
+  const others = dated.filter(r => r !== top);
+  if (others.length) {
+    console.log('NOT DUE');
+    for (const r of others) console.log(`  ${r.m.slug.padEnd(22)} ${String(r.age.days).padStart(4)} days   (${r.age.on})`);
+    console.log('');
+  }
+  if (undated.length) {
+    console.log('NO COMMIT HISTORY — never committed, so age is unknown:');
+    for (const r of undated) console.log(`  ${r.m.slug}`);
+    console.log('');
+  }
+  if (unbuilt.length) {
+    console.log('NOT BUILT YET — these need a FULL hunt (RESEARCH.md), not a refresh.');
+    console.log('They are not part of the rotation and this job will not start one:');
+    for (const r of unbuilt) console.log(`  ${r.m.slug}${r.m.sources ? `  (${r.m.sources} source${r.m.sources === 1 ? '' : 's'} waiting)` : ''}`);
+    console.log('');
+  }
+
+  if (built.length > capacity) return 2;
+  return isDue ? 1 : 0;
+}
+
 /* ── main ──────────────────────────────────────────────────────────────── */
 
 const [cmd, ...rest] = process.argv.slice(2);
 switch (cmd) {
   case 'status': process.exit(cmdStatus());
   case 'digest': process.exit(cmdDigest(rest));
+  case 'due': process.exit(cmdDue(rest));
   default:
     console.log(`
 THE WEEKLY MARKET SWEEP — run from the workspace root.
@@ -385,6 +502,13 @@ THE WEEKLY MARKET SWEEP — run from the workspace root.
   npx tsx <repo>/scripts/studio/weekly.mts status
       The Saturday pre-flight. Every market: what version its master is on,
       what research is sitting unfolded, which theses have gone stale.
+
+  npx tsx <repo>/scripts/studio/weekly.mts due [--every 90] [--warn 77]
+      WHICH market is up this week. Masters need a quarterly refresh, not a
+      weekly one, so the weeks are a rotation — this says whose turn it is.
+      First line is DUE: <slug> (or DUE: none), for a script to read.
+      Exit: 0 nothing due (skip the week) · 1 work this market · 2 the
+      rotation cannot keep up, or there is no git to date it from.
 
   npx tsx <repo>/scripts/studio/weekly.mts digest [--since 7d] [--out FILE]
       The Sunday delta, read from git. Markdown, phone-shaped, summary first.

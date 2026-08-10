@@ -13,7 +13,7 @@ the citation law disagree, the citation law wins.
 
 ---
 
-## The three rules that make this safe to run unattended
+## The four rules that make this safe to run unattended
 
 **1. You may WRITE. You may not PUBLISH.**
 Fold research into masters, update documents, rebuild collateral, open a pull
@@ -37,59 +37,81 @@ it — hourly via launchd, `--ff-only` so it can never eat an uncommitted edit.
 So: commit the collateral you build, not just the masters. A PDF left
 uncommitted in `collateral/` never reaches him.
 
-**3. When you are unsure, write it down and leave it alone.**
+**3. One market a week, and a quiet week is allowed.**
+Masters get a QUARTERLY refresh; the weeks are just how the verticals queue.
+`weekly.mts due` names whose turn it is and exits `0` when nobody's is — that
+means stop, not "find something to do". An agent that must produce a change
+every week will eventually produce one that isn't there.
+
+**4. When you are unsure, write it down and leave it alone.**
 An honest "the sources disagree and I did not resolve it" in the digest is worth
 more than a smoothed number. Two sources with different figures is a FINDING —
 keep both values, cite both, never invent the midpoint.
 
 ---
 
-## Saturday — per market, in order
+## Saturday — ONE market, in order
 
 Run these from the workspace root. `<repo>` is wherever the SMBx repo is cloned.
 
-### 0. Pre-flight — read the board before touching it
+### 0. Whose turn is it?
 
 ```
+npx tsx <repo>/scripts/studio/weekly.mts due
 npx tsx <repo>/scripts/studio/weekly.mts status
 ```
 
-Every market, what version its master is on, what research is sitting unfolded,
-which theses have gone stale. **Free, no model, no network.** Do this first; it
-tells you which markets actually need work and stops you re-researching one that
-was updated on Thursday.
+**A market assessment does not need refreshing every week** (Paul, 2026-08-10:
+*"once the market assessment is in place, it probably really only needs to be
+updated quarterly for each vertical (so 1 per week)"*). Markets do not move
+week to week; a weekly re-read of every one of them would mostly re-find what
+the master already says, and would burn the rate limit doing it.
 
-### 1. Research the vertical — a REFRESH, not a hunt
+So the weeks are a **ROTATION**. `due` names the ONE market whose master is
+furthest past its quarterly cycle. Its first line is `DUE: <slug>` or
+`DUE: none`, and its exit code is the instruction:
 
-**`RESEARCH.md` is the method and it is not restated here.** Read it: the run
-discipline, the frame file, one file per run, the coverage log, the stop
-condition. This step is hunt **B** (how a market works), and everything
-`RESEARCH.md` says about it applies unchanged.
+| Exit | Meaning |
+|---|---|
+| `0` | **Nothing is due. Stop — do not do the research steps.** Go to Sunday's digest; a quiet week is a correct week. |
+| `1` | Work the market it named. **That one, not the others.** |
+| `2` | Either the workspace is not in git (so nothing can be dated), or there are more markets than a one-per-week rotation can hold. Report it in the digest; do not silently pick something. |
 
-**The one thing that IS different, and it is the important one: a full hunt B is
-~20 runs over several hours, spanning more than one session. A weekly sweep is
-not that.** Attempting a full hunt every Saturday across every market would
-burn hours, hammer the rate limit, and mostly re-find what the master already
-says. The weekly job is a DELTA pass — typically two to five runs per market,
-looking only for what has moved since the master's last version:
+`status` then gives the detail on that market — what research is sitting
+unfolded, which theses have gone stale.
+
+**A market with NO master is not in the rotation.** Building a first master is
+the full hunt in `RESEARCH.md` — roughly 20 runs over several hours, spanning
+more than one session. That is Paul's decision to start, not a Saturday cron's.
+`due` lists them separately; name them in the digest and leave them.
+
+### 1. Refresh that market — a quarterly review
+
+`RESEARCH.md` is the method and is not restated here: the run discipline, the
+frame file, one file per run, the coverage log, the stop condition. This is hunt
+**B**, and all of it applies.
+
+**Scope it to a quarter's worth of movement, not a rebuild.** The master is
+already good; you are asking what has changed in three months. That is deeper
+than a weekly skim and much shallower than a first build — expect several runs,
+not twenty, and not two.
+
+What you are looking for, in priority order:
 
 - **New primary data** — a regulator, a licensing board, a census release, a
   trade association's own numbers, a company's own filing or site.
 - **Movement in the consolidator set** — an acquisition, a new platform, a fund
-  raising for the space. This is what makes `screen/consolidators.md` go stale,
-  and a stale register is how a franchise location gets screened as independent.
+  raising for the space. A quarter is long enough that this genuinely moves, and
+  a stale `screen/consolidators.md` is how a franchise location gets screened as
+  independent.
 - **Anything that CONTRADICTS the master.** A contradiction is the single most
   valuable thing you can bring back. Do not quietly drop it because it is
   inconvenient — a master that only ever accretes agreeing evidence is not
   research, and reporting one is the best week this job can have.
 
-A full re-hunt is a decision Paul makes, not something a Saturday cron starts.
-If a market looks like it needs one — the master is many months stale, or the
-delta pass keeps turning up contradictions — **say so in the digest and let him
-call it.**
-
-If a week turns up nothing new for a market, that is a legitimate result. Say so
-and move on. **Do not manufacture an update.**
+If a quarter genuinely turned up nothing that moves the master, that is a
+legitimate result. Say so and change nothing. **Do not manufacture an update to
+justify the week.**
 
 ### 2. Fold it into the master
 
@@ -141,8 +163,13 @@ that looks wrong means a wrong SPEC, not a wrong renderer (`FORMATS.md` §1).
 
 One commit per market, so the diff reads. Then one PR for the week, titled
 `Weekly sweep — <date>`, whose body is the digest from Sunday's step. If nothing
-changed in any market, **open no PR at all** — an empty weekly PR trains you to
-stop reading them.
+changed — a quiet week, or `due` exited `0` — **open no PR at all.** An empty
+weekly PR trains Paul to stop reading them, and the whole design rests on him
+reading them.
+
+**Commit the collateral you build, not only the masters.** A PDF left
+uncommitted in `collateral/` never reaches his Mac, and that failure looks
+exactly like the builder never having run.
 
 ---
 

@@ -250,7 +250,10 @@ or in whoever set the schedule up.
 The deterministic half is `weekly.mts`, and it calls no model:
 
 ```bash
-# Saturday, before touching anything — what needs work and what has gone stale
+# Saturday — WHOSE TURN is it? Exit 0 nothing due · 1 work it · 2 can't keep up
+npx tsx <repo>/scripts/studio/weekly.mts due
+
+# then the detail on that market — unfolded research, stale theses
 npx tsx <repo>/scripts/studio/weekly.mts status
 
 # Sunday — the delta, read out of git so it is exact rather than remembered
@@ -269,11 +272,22 @@ Exit `0` nothing needs you · `1` something does · `2` a market could not be re
    reason this is safe — it is the one place you can say no. Which is also why
    the workspace wants to be in git: without it there is no diff to read and the
    digest can only report current state, not a delta.
-3. **It is a DELTA pass, not a hunt.** A full hunt B is ~20 runs over several
-   hours (`RESEARCH.md`); doing that weekly across every market would burn hours
-   and hammer your rate limit to mostly re-find what the master already says.
-   Two to five runs per market, looking only for what moved. A full re-hunt is
-   your call, and the digest asks for it rather than starting one.
+3. **ONE MARKET A WEEK, quarterly per vertical** (Paul, 2026-08-10: *"once the
+   market assessment is in place, it probably really only needs to be updated
+   quarterly for each vertical (so 1 per week)"*). Markets do not move week to
+   week. `due` names the one furthest past its 90-day cycle and exits 0 when
+   nobody is — a quiet week is a correct week, and an agent that must produce a
+   change every week eventually produces one that is not there. A market with
+   NO master is not in the rotation at all: a first build is the full hunt in
+   `RESEARCH.md`, which is your call to start, not a cron's.
+
+   **Age is read from git, never from mtime** — git does not preserve
+   modification times on clone, so a workspace checked out on a new Mac would
+   read as if every master were refreshed today and the rotation would quietly
+   decide nothing was ever due again.
+
+   One per week over a 90-day cycle tops out at **12 markets**. Past that `due`
+   exits 2 and says so rather than running later and later.
 
 **Getting it onto your Mac — `sync.mjs`, in the workspace.** The PR is the
 review gate; it is not delivery. **Git is a transport, not a destination:** a
