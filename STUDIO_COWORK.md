@@ -275,6 +275,23 @@ Exit `0` nothing needs you · `1` something does · `2` a market could not be re
    Two to five runs per market, looking only for what moved. A full re-hunt is
    your call, and the digest asks for it rather than starting one.
 
+**Getting it onto your Mac — `sync.mjs`, in the workspace.** The PR is the
+review gate; it is not delivery. **Git is a transport, not a destination:** a
+merged PR puts nothing on your laptop, and until something pulls, every builder
+here renders from a stale master with no error to tell you. So:
+
+```bash
+node sync.mjs              # pull the workspace AND the SMBx repo, refresh the laws
+node sync.mjs --check      # report only, exit 1 if behind
+node sync.mjs --install    # print the launchd job that runs it hourly
+```
+
+Install it and merging a PR on your phone lands the files here within the hour,
+with nothing to remember. It pulls **both** repositories, because pulling only
+the workspace leaves you building this week's master with last month's builder.
+Pulls are `--ff-only` and it exits 2 rather than merging over an uncommitted
+edit — the one thing worse than a stale master is a lost one.
+
 **What it cannot do, and says so in every digest:** the citation audit checks
 NUMBERS, not prose. A fabricated qualitative claim carries no figure and passes
 clean, so a master that changed still wants your eyes before anything derived

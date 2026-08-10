@@ -27,6 +27,16 @@ The branch is `weekly/<iso-date>`. The PR is the review gate — it is the entir
 reason this arrangement is safe, because it is the one place Paul can say no.
 A master rewritten in place with no diff to read is a liability.
 
+**And the PR is not the finish line — Paul's Mac is** (2026-08-10: *"the only
+thing that I want to be sure that happens is that the Docs.MTS and the
+collateral all get updated on the Mac on disk. Where the work is processed I
+don't care."*). **Git is a transport, not a destination.** A merged PR puts
+nothing on that machine; until something pulls, every builder there renders from
+a stale master, silently and with no error. `sync.mjs` in the workspace closes
+it — hourly via launchd, `--ff-only` so it can never eat an uncommitted edit.
+So: commit the collateral you build, not just the masters. A PDF left
+uncommitted in `collateral/` never reaches him.
+
 **3. When you are unsure, write it down and leave it alone.**
 An honest "the sources disagree and I did not resolve it" in the digest is worth
 more than a smoothed number. Two sources with different figures is a FINDING —
