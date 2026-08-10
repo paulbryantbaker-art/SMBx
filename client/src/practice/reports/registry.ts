@@ -14,6 +14,7 @@
  */
 import { REPORTS, type ReportMeta } from '@shared/reports';
 
+import fireSafetyMeta from '../../../../scripts/studio/reports/fire-safety-buy-side-assessment.md?report-meta';
 import commercialMepMeta from '../../../../scripts/studio/reports/commercial-mep-buy-side-assessment.md?report-meta';
 import homeServicesMeta from '../../../../scripts/studio/reports/home-services-state-of-market.md?report-meta';
 import dfwHomeServicesMeta from '../../../../scripts/studio/reports/dfw-home-services.md?report-meta';
@@ -27,12 +28,14 @@ export type ReportBody = Awaited<
 >['default'];
 
 const SUMMARIES: Record<string, ReportSummary> = {
+  'fire-safety': fireSafetyMeta,
   'commercial-mep': commercialMepMeta,
   'home-services': homeServicesMeta,
   'dfw-home-services': dfwHomeServicesMeta,
 };
 
 const BODY_LOADERS = {
+  'fire-safety': () => import('../../../../scripts/studio/reports/fire-safety-buy-side-assessment.md?report'),
   'commercial-mep': () => import('../../../../scripts/studio/reports/commercial-mep-buy-side-assessment.md?report'),
   'home-services': () => import('../../../../scripts/studio/reports/home-services-state-of-market.md?report'),
   'dfw-home-services': () => import('../../../../scripts/studio/reports/dfw-home-services.md?report'),
