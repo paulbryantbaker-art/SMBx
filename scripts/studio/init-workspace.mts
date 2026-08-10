@@ -125,6 +125,11 @@ law('content/studio/PLAYBOOK.md', 'PLAYBOOK.md');
 law('content/studio/FORMATS.md', 'FORMATS.md');
 law('content/studio/DESIGN.md', 'DESIGN.md');
 law('content/studio/RESEARCH.md', 'RESEARCH.md');
+/* The standing job for the Saturday agent (2026-08-10). It travels with the
+   workspace for the same reason the other laws do: a scheduled session opens
+   on this folder with nothing but what is in it, so the prompt has to be here
+   rather than in the repo or in whoever set the schedule up. */
+law('content/studio/WEEKLY.md', 'WEEKLY.md');
 
 /* engagements.mjs is a TOOL, not a law, but it travels the same way and for the
    same reason (Paul, 2026-07-29: "I don't want to have to keep downloading main

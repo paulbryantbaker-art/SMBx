@@ -1,5 +1,5 @@
 # WHERE THE WORK HAPPENS — Cowork vs the app
-Last updated: 2026-08-09
+Last updated: 2026-08-10
 
 > The decision doc for one question: when a piece of work lands, does it go in a
 > Cowork session against `~/Documents/smbx-studio`, or into the app?
@@ -419,6 +419,8 @@ the confusion has somewhere to land instead of being re-litigated each time.)*
 | **The outreach COPY** | **Either** | The template is a document; the send is a row. `crm_templates` holds the text because it is merged per-person at send time — that is a rendering step, not authorship. |
 | **Deal analysis / model math** | **The app** | `v19ModelRuntime` and the canvas models call NO model and cost nothing. The output is a number you will want again at a different assumption — that is a query. |
 | **Anything you are about to hand a client** | **Cowork** | Every client-facing document runs through the citation audit and PLAYBOOK/FORMATS/DESIGN, all of which live in the workspace. Nothing on the server enforces them any more. |
+
+| **The weekly research sweep** | **Cowork, on a schedule** | Added 2026-08-10. It is document work, so it is Cowork by the rule — but it is also the case that put the workspace in git: an agent that rewrites a master with no diff to read is a liability, one that opens a PR is a colleague. `WEEKLY.md` + `weekly.mts`, and STUDIO_COWORK.md job 6. |
 
 **When it is still unclear, the tiebreak is: which one would hurt more to
 lose?** If losing the *history of changes* would hurt, it wants files and git.

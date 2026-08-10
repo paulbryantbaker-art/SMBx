@@ -75,7 +75,7 @@ palettes, and nothing that travelled to the workspace described the current one.
    environment as `SMBX_TOKEN`. (Google sign-in has no password for a script
    to use; that pane is the answer to it.)
 
-## The five jobs
+## The six jobs
 
 ### 0. Build the research in the first place
 
@@ -237,6 +237,49 @@ The full laws for this job (never invent a person; `bucket` decides the layer;
 `tier` is conviction, not size) are in the workspace's own `CLAUDE.md` under
 "6. Push a research run into the app's CRM".
 
+### 6. The weekly sweep — the Saturday agent
+
+Paul, 2026-08-10: *"All markets should update weekly starting in Saturday and
+Email me the delta of what's new or changed on Sunday."*
+
+The standing prompt is **`WEEKLY.md`**, which `init-workspace` copies into the
+workspace beside the other laws — a scheduled session opens on that folder with
+nothing but what is in it, so the job has to live there rather than in this repo
+or in whoever set the schedule up.
+
+The deterministic half is `weekly.mts`, and it calls no model:
+
+```bash
+# Saturday, before touching anything — what needs work and what has gone stale
+npx tsx <repo>/scripts/studio/weekly.mts status
+
+# Sunday — the delta, read out of git so it is exact rather than remembered
+npx tsx <repo>/scripts/studio/weekly.mts digest --out digest.md
+```
+
+Exit `0` nothing needs you · `1` something does · `2` a market could not be read.
+
+**Three things make this safe to leave running**, and all three are in
+`WEEKLY.md` as laws rather than suggestions:
+
+1. **It writes; it never publishes.** No LinkedIn, no client email, no
+   counterparty contact, no CRM or outreach writes. The same *one touch, one
+   press, one human* rule the outreach machine already enforces.
+2. **Everything lands in a pull request.** That is the review gate and the whole
+   reason this is safe — it is the one place you can say no. Which is also why
+   the workspace wants to be in git: without it there is no diff to read and the
+   digest can only report current state, not a delta.
+3. **It is a DELTA pass, not a hunt.** A full hunt B is ~20 runs over several
+   hours (`RESEARCH.md`); doing that weekly across every market would burn hours
+   and hammer your rate limit to mostly re-find what the master already says.
+   Two to five runs per market, looking only for what moved. A full re-hunt is
+   your call, and the digest asks for it rather than starting one.
+
+**What it cannot do, and says so in every digest:** the citation audit checks
+NUMBERS, not prose. A fabricated qualitative claim carries no figure and passes
+clean, so a master that changed still wants your eyes before anything derived
+from it reaches a client.
+
 ## The LinkedIn loop, specifically
 
 1. **"Build the next slot and research it out."** Cowork reads
@@ -273,8 +316,10 @@ keep **both** values; an invented midpoint is a fabrication.
   They work with every API on earth capped.
 - The thinking steps (research, synthesis, writing) run on **your Claude
   subscription** in the Cowork session, not the app's metered key.
-- Assisted, not unattended: this is a session with you in the loop. Hands-off
-  weekly automation is a later step.
+- Assisted, not unattended — for the jobs you run yourself. **The weekly sweep
+  (job 6) IS unattended**, and it changes the failure mode rather than removing
+  it: the risk stops being a bill and becomes a rate limit, so it stays a delta
+  pass rather than a full hunt, and it writes to a PR rather than to your files.
 
 ## About `studio-kit/`
 
