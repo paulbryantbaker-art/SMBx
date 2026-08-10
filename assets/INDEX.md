@@ -120,3 +120,22 @@ Moved to `_to_delete/redundant-assets/`. About 25MB of duplication across 22 fil
 | `paul-headshot-site-portrait.jpg` | Byte-identical to `founder-portrait.jpg` |
 | `screenshot-2026-07-17.png` | A screenshot, not collateral art |
 | `media-copy-*.png` | Six copies of the trade art that briefly lived in `media/` before the `assets/trades/` split |
+
+## `fire/` — fire and life safety
+
+Added 2026-08-10. Both files were sitting in `assets/extraiomages2/` and
+`assets/extraImages/` under generator filenames, unindexed and therefore
+invisible — the fire-safety teardown was written on the stated basis that the
+house library held no fire imagery. It held two.
+
+| File | Shows | Used by |
+|---|---|---|
+| `alarm-panel-and-riser.png` | Fire alarm control panel, open, against a sprinkler riser with pressure gauge and two pendent heads. **Carries no text at all** | Fire-safety market assessment cover; fire-safety teardown cover |
+| `fire-system-schematic.png` | The full annotated system — extinguisher cabinet, fire control panel, smoke and heat detectors, manual pull station, riser flow switch, alarm check valve, pendent / upright / sidewall branches, pre-action system | Source of the six accent bands in `markets/fire-safety/media/`. **Do not use whole: its extinguisher label reads "FIRE EXTINGUISER" — a generator typo.** Every band crop starts right of it |
+
+**The unnamed folders are a standing hazard.** `extraImages/` and
+`extraiomages2/` hold ten files under generator names, in breach of the naming
+law, and two of them turned out to be load-bearing. The remaining eight are a
+machine shop, a water tower, a vacuum tanker, a service van, a storefront van,
+a turbine hall, a box truck and rooftop units. Name them for what they show and
+index them, or a future session will again conclude the library is empty.
