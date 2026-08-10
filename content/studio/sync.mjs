@@ -41,7 +41,7 @@
  * thing worse than a stale master is a lost one.
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 
@@ -63,23 +63,61 @@ const isRepo = dir => existsSync(path.join(dir, '.git')) && git(dir, ['rev-parse
 
 /* ── find the engine ───────────────────────────────────────────────────── */
 
+/** Is this the SMBx engine? Judged by CONTENT, never by folder name — which is
+ *  exactly why a clone called `smbx-engine` resolves correctly. */
+function isEngine(dir) {
+  return !!dir && existsSync(path.join(dir, 'scripts/studio/build-report.mts'));
+}
+
+/** Immediate subdirectories, tolerating anything unreadable. */
+function safeDirs(root) {
+  try {
+    return readdirSync(root, { withFileTypes: true })
+      .filter(e => e.isDirectory() && !e.name.startsWith('.'))
+      .map(e => path.join(root, e.name));
+  } catch { return []; }
+}
+
 function findRepo() {
+  const home = os.homedir();
   const pin = path.join(WS, '.smbx-repo');
-  const candidates = [
-    process.env.SMBX_REPO,
-    existsSync(pin) ? readFileSync(pin, 'utf8').trim() : null,
-    path.join(os.homedir(), 'SMBx'),
-    path.join(os.homedir(), 'smbx'),
-    path.join(os.homedir(), 'code', 'SMBx'),
-    path.join(os.homedir(), 'Documents', 'SMBx'),
-    path.join(os.homedir(), 'Developer', 'SMBx'),
-  ].filter(Boolean);
-  for (const c of candidates) {
-    const dir = path.resolve(c.replace(/^~/, os.homedir()));
-    // Confirm it is the SMBx repo and not merely a folder with that name.
-    if (existsSync(path.join(dir, 'scripts/studio/build-report.mts'))) return dir;
+  const expand = c => path.resolve(String(c).replace(/^~/, home));
+
+  // An explicit answer wins and is never second-guessed.
+  for (const c of [process.env.SMBX_REPO, existsSync(pin) ? readFileSync(pin, 'utf8').trim() : null]) {
+    if (c && isEngine(expand(c))) return { dir: expand(c), all: [expand(c)], pinned: true };
   }
-  return null;
+
+  // Otherwise look where clones actually land. GitHubRepos is on this list
+  // because that is where Paul's are (2026-08-10, from a Finder screenshot);
+  // the first version of this guessed ~/SMBx and ~/code/SMBx and would have
+  // found nothing at all on his machine.
+  const roots = [
+    home,
+    path.join(home, 'Documents'),
+    path.join(home, 'Documents/GitHubRepos'),
+    path.join(home, 'GitHubRepos'),
+    path.join(home, 'code'),
+    path.join(home, 'Developer'),
+    path.join(home, 'Projects'),
+    path.join(home, 'src'),
+  ];
+  const found = [];
+  for (const root of roots) {
+    if (!existsSync(root)) continue;
+    // The root, then ONE level down. Not a deep walk: a sync script has no
+    // business spending seconds crawling a home directory.
+    for (const dir of [root, ...safeDirs(root)]) {
+      if (isEngine(dir) && !found.includes(dir)) found.push(dir);
+    }
+  }
+
+  // MORE THAN ONE CLONE IS AMBIGUOUS AND MUST NOT BE GUESSED AT. Paul has
+  // smbx-engine, SMBx-main and SMBx-main-old side by side. Picking the stale
+  // one would render this week's collateral from last quarter's design system
+  // and look like it worked, which is the failure mode this whole file exists
+  // to prevent one level up.
+  return { dir: found.length === 1 ? found[0] : null, all: found, pinned: false };
 }
 
 /* ── one repository ────────────────────────────────────────────────────── */
@@ -156,7 +194,8 @@ on this Mac within the hour, with nothing to remember. Logs to sync.log here.
 
 /* ── run ───────────────────────────────────────────────────────────────── */
 
-const repo = findRepo();
+const engine = findRepo();
+const repo = engine.dir;
 const results = [sync('workspace', WS), sync('engine (SMBx repo)', repo)];
 
 console.log(`\n[${new Date().toISOString()}] studio sync${CHECK ? ' — check only' : ''}`);
@@ -171,6 +210,11 @@ for (const r of results) {
     console.log(`      ${r.detail}`);
   } else if (r.state === 'behind') {
     console.log(`${head}  ${r.behind} commit(s) waiting — run without --check to pull`);
+  } else if (r.state === 'not found' && engine.all.length > 1) {
+    console.log(`  ${r.label.padEnd(20)} AMBIGUOUS — ${engine.all.length} clones found. Guessing between them could`);
+    console.log(`      build from a stale one, so nothing was pulled. Pin the right one:`);
+    console.log(`        echo "<path>" > ${path.join(WS, '.smbx-repo')}`);
+    for (const d of engine.all) console.log(`      · ${d}`);
   } else if (r.state === 'not found') {
     console.log(`${head}  — set SMBX_REPO, or put its path in .smbx-repo beside this script`);
   } else {
@@ -197,7 +241,10 @@ if (!CHECK && repo) {
   }
 }
 
-const blocked = results.some(r => r.state === 'BLOCKED');
+// Ambiguity is the same class as BLOCKED: something that should have synced
+// did not, and a person has to act. Exiting 0 would let a launchd job report
+// success forever while the engine silently never updated.
+const blocked = results.some(r => r.state === 'BLOCKED') || engine.all.length > 1;
 const behind = results.some(r => r.state === 'behind');
 console.log('');
 process.exit(blocked ? 2 : (CHECK && behind) ? 1 : 0);
