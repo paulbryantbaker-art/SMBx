@@ -1,0 +1,62 @@
+# Secrets — never commit these.
+.env
+.env.local
+
+# OS noise
+.DS_Store
+
+# ─────────────────────────────────────────────────────────────────────────
+# Repo scope — added 2026-08-10, when the workspace was first put in git.
+#
+# THE RULE: source is versioned, derived is reproducible.
+# A rendered PDF is rebuildable from three things — its spec, the master
+# version it was built against, and the engine commit that rendered it.
+# Each dated output folder records the last of those in BUILD.txt. Anything
+# that CANNOT be rebuilt that way stays in the repo, however large.
+#
+# PRIVACY: markets/*/screen/ carries target company names, and clients/ and
+# deals/ are the practice's confidential record. This repo is private and
+# must stay private. Adding a collaborator is a decision, not a convenience.
+# ─────────────────────────────────────────────────────────────────────────
+
+# The junk drawer — 1.8GB of retired files, deleted by hand not by git
+_to_delete/
+
+# Census and BLS bulk downloads — immutable and re-fetchable from the agency
+smbx-search/
+
+# Editor and script backups — git is the backup now
+*.bak
+*.bak-*
+*.bak2-*
+
+# Archives
+*.zip
+*.tgz
+
+# Rendered output — reproducible; the dated folder on disk stays the artifact
+# of record, and the backup covers it. Captions are authored copy, so they
+# are NOT ignored and are re-included below.
+markets/*/collateral/**/*.pdf
+markets/*/collateral/**/*.jpg
+markets/*/collateral/**/*.jpeg
+markets/*/collateral/**/*.png
+markets/*/decks/**/*.pdf
+markets/*/decks/**/*.jpg
+markets/*/decks/**/*.jpeg
+markets/*/decks/**/*.png
+collateral/**/*.pdf
+collateral/**/*.jpg
+collateral/**/*.jpeg
+collateral/**/*.png
+
+# Authored copy travels with its post, always
+!**/*-caption.txt
+!**/BUILD.txt
+
+# Deliberately NOT ignored, and why:
+#   assets/              the house image library (39M). Source, not derived —
+#                        re-running a prompt does not reproduce the file.
+#   markets/*/media/     per-market report art (8M). Same argument.
+#   markets/*/versions/  the master history IS the point of this repo.
+#   markets/*/screen/    the target boards. Confidential, and irreplaceable.

@@ -1,0 +1,26 @@
+RETIRED PALETTE — DO NOT REUSE THIS BUILD
+=========================================
+
+This folder was rendered before 2026-08-08 in a palette the house has retired
+(Ledger / Aurora, or an earlier system still). It is kept as the record of what
+was published on this date. It is not a starting point.
+
+THE RE-RENDER LAW. A pre-Carta artifact is never patched, it is rebuilt.
+
+  - Do not edit anything in here.
+  - Do not lift a page, a figure or an image out of it.
+  - Do not "just fix the one slide".
+
+If this artifact needs to change, re-render it from its spec into a NEW dated
+folder. The spec is the source; this folder is an output.
+
+  npx tsx $REPO/scripts/studio/carta-guard.mts --assets assets --src .
+  npx tsx $REPO/scripts/studio/build-<deck|onepager|report>.mts <spec> \
+    --out <collateral|decks>/<slug>/$(date +%F)
+
+The builders now refuse to write a document containing a retired colour
+(house/palette-guard.ts), so a correct rebuild cannot come out looking like
+this one. The current build of this artifact is the newest dated folder beside
+this one.
+
+Carta is canon until Paul says otherwise - 2026-08-08.
