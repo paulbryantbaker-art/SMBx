@@ -108,21 +108,21 @@ caption is neither.
 
 | # | Angle | Format | Carries | Grade | Status |
 |---|---|---|---|---|---|
-| Q15 | **FLS · The mandate is real. Capture of it is not.** 63% current on inspection in one enforced city; no national rate is published. | Teardown | 63%, 11 visits, $3–$4 | verified in master | **drafted** — the teardown, 2026-08-10 |
-| Q16 | **FLS · Seventeen platforms, not thirty-odd.** Five owner classes; a blended tracker overstates the competitive set. | Market Map | 17 / 5 / 3 / 8 / 5 | verified | next |
-| Q17 | **FLS · The multiple everyone repeats that nobody published.** One 2024 conditional about a business that did not sell, restated four times. **Never restate the number.** | Contrarian Take | the chain, not the figure | RETIRED as a value | next |
-| Q18 | **FLS · Six companies trade as "Guardian."** Five in the master, a sixth found on 2026-08-10. Why a target board silently drops live targets. | Practitioner Note | six | verified 2026-08-10 | next |
-| Q19 | **Home services · 90.8%, not 91%.** A rounded figure is a different figure. What re-verification actually looks like. | Practitioner Note | 90.8% | verified | next |
-| Q20 | **Home services · DFW said four platforms. It was eighteen.** "Saturated" is what a market looks like without corp dev. | Market Map | 4 → 18 | verified (A.0.4) | next |
+| Q15 | **FLS · The mandate is real. Capture of it is not.** 63% current on inspection in one enforced city; no national rate is published. | Teardown | 63%, 11 visits, $3–$4 | VERIFIED (master, primary-source pass) | **drafted** — the teardown, 2026-08-10 |
+| Q16 | **FLS · Seventeen platforms, not thirty-odd.** Five owner classes; a blended tracker overstates the competitive set. | Market Map | 17 / 5 / 3 / 8 / 5 | VERIFIED (master) | next |
+| Q17 | **FLS · The multiple everyone repeats that nobody published.** One 2024 conditional about a business that did not sell, restated four times. **Never restate the number.** | Contrarian Take | the chain, not the figure | RETIRED — never restate the number | next |
+| Q18 | **FLS · Six companies trade as "Guardian."** Five in the master, a sixth found on 2026-08-10. Why a target board silently drops live targets. | Practitioner Note | six | VERIFIED (register, 2026-08-10) | next |
+| Q19 | **Home services · 90.8%, not 91%.** A rounded figure is a different figure. What re-verification actually looks like. | Practitioner Note | 90.8% | VERIFIED (master) | next |
+| Q20 | **Home services · DFW said four platforms. It was eighteen.** "Saturated" is what a market looks like without corp dev. | Market Map | 4 → 18 | VERIFIED (master, A.0.4) | next |
 
 ### Tier 5 — house and human
 
 | # | Angle | Format | Carries | Grade | Status |
 |---|---|---|---|---|---|
-| Q21 | **I spent a week checking my own numbers. Six did not survive.** The correction ledger as a credential. | Human Thread | the six | verified | next |
-| Q22 | **A clean audit proves traceability, not truth.** 386 of 386 sourced, and three claim clusters still came out three days later. | Practitioner Note | 386 / 3 | verified | next |
+| Q21 | **I spent a week checking my own numbers. Six did not survive.** The correction ledger as a credential. | Human Thread | the six | VERIFIED (master) | next |
+| Q22 | **A clean audit proves traceability, not truth.** 386 of 386 sourced, and three claim clusters still came out three days later. | Practitioner Note | 386 / 3 | VERIFIED (master) | next |
 | Q23 | **Who I am open for.** Buy-side only, and what that excludes. | Hand-Raiser | none | n/a | next |
-| Q24 | **The Mandate** — weekly roundup, 5 bullets across 3–5 verticals. Rebuilt each week from what actually printed. | Market Map | that week's deals | per-item | recurring — every Wed |
+| Q24 | **The Mandate** — weekly roundup, 5 bullets across 3–5 verticals. Rebuilt each week from what actually printed. | Market Map | that week's deals | n/a (graded per item each week) | recurring — every Wed |
 
 ---
 
