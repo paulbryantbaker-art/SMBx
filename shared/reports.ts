@@ -58,6 +58,23 @@ export interface ReportMeta {
 
 export const REPORTS: ReportMeta[] = [
   {
+    slug: 'fire-safety',
+    industry: 'Fire & life safety',
+    metro: 'USA',
+    kicker: 'Market assessment',
+    shortTitle: 'Fire & Life Safety Services',
+    // Drawn from the report's own executive summary — the three findings it
+    // leads on. Zero-hallucination law: nothing here is a claim the document
+    // does not make, and the refusals ("no published size", "17, not
+    // thirty-odd") are the report's own words about its own limits.
+    abstract:
+      'Fire and life safety runs on a legal mandate — a dated, licensed, repeating obligation written into adopted code — and inspection is bought for the repair work it finds. But capture of that mandate is not established: in the one actively enforced jurisdiction with mandatory electronic reporting, only 63% of systems were current on their annual inspection, and no published source establishes the equivalent nationally. This assessment counts the real competitive set at 17 sponsor-backed platforms rather than the thirty-odd a blended tracker reports, and declines to manufacture a market size the sources do not support.',
+    published: '2026-08-10',
+    publishedLabel: 'August 2026',
+    ogImage: '/reports/fire-safety-cover.jpg',
+    md: 'fire-safety-buy-side-assessment.md',
+  },
+  {
     slug: 'commercial-mep',
     industry: 'Commercial mechanical',
     metro: 'USA',

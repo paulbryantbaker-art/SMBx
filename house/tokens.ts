@@ -266,6 +266,96 @@ export const GREEN_HALO = rgba(LEDGER.jade, 0.28);
  * not a problem: ivory on the composited block measures 8.7:1 against 7.7:1
  * on flat jade.
  */
+
+/* ── LIFTED FROM smbx-ai/smbx-engine, 2026-08-10 ─────────────────────────
+ * The exports scripts/studio/build-report.mts needs, taken verbatim from the
+ * engine copy of this file rather than re-derived. NOT the whole file: its
+ * BLOCK_GLAZE is jade at 0.52 where this tree's is dark at 0.72, and its
+ * blockBackground() layers jade over a dark base rather than glazing dark on
+ * dark. Taking those would silently re-glaze every dark surface in the deck
+ * builder and both composers — eight call sites, no error, no visual diff in
+ * a review. So the glaze semantics below stay exactly as they were.
+ */
+
+/**
+ * RADIUS. Zero everywhere. The only exceptions are buttons and inputs at 10px.
+ *
+ * Ledger's 12–16px cards are the single loudest tell that a surface did not
+ * convert, so this is a token rather than a habit — a rounded card is now a
+ * value someone had to type, not a value they forgot to change.
+ */
+export const CARTA_RADIUS = 0;
+
+export const CARTA_CONTROL_RADIUS = 10;
+
+/**
+ * The four corner handles, as markup + CSS.
+ *
+ * Returned as a pair so every builder draws the same gesture from the same
+ * definition. `on` is the frame's own selector; the handles are its children
+ * and it must be `position: relative` (and NOT `overflow: hidden`).
+ */
+export const HANDLE_HTML =
+  '<i class="hdl hdl-tl"></i><i class="hdl hdl-tr"></i><i class="hdl hdl-bl"></i><i class="hdl hdl-br"></i>';
+
+export function handleCss(color: string = CARTA.ink, small = false): string {
+  const size = small ? CARTA_HANDLE.sizeSmall : CARTA_HANDLE.size;
+  const off = small ? CARTA_HANDLE.offsetSmall : CARTA_HANDLE.offset;
+  return `.hdl{position:absolute;width:${size}px;height:${size}px;background:${color};z-index:3;}`
+    + `.hdl-tl{top:${off}px;left:${off}px;}.hdl-tr{top:${off}px;right:${off}px;}`
+    + `.hdl-bl{bottom:${off}px;left:${off}px;}.hdl-br{bottom:${off}px;right:${off}px;}`;
+}
+
+/**
+ * The handle colour for ONE surface, scoped.
+ *
+ * A builder that renders a light card and a dark card from one stylesheet
+ * cannot colour the handles in `handleCss()` — whichever value it passes is
+ * wrong on the other surface, and the failure is silent: ink handles on the
+ * `#131512` band are invisible, and an invisible handle is indistinguishable
+ * from a page that never converted. This is the same defect `design-check.mts`
+ * was written to catch on cover text, one gesture further out.
+ */
+export function handleColorCss(scope: string, color: string): string {
+  return `${scope} .hdl{background:${color};}`;
+}
+
+/**
+ * The Carta band, as a background value. It is a colour. That is the whole
+ * function, and it exists so that a builder reads `cartaBand()` in the same
+ * slot where it used to read `blockBackground(TEXTURE, …)` — making the
+ * deletion of the glaze/texture/halo stack visible in the diff rather than
+ * silent.
+ *
+ * TRAP THIS REPLACES: `background: DARK url(texture)` ignores the colour. The
+ * texture image sits ABOVE the base colour in the CSS background stack, so
+ * repointing the token while leaving the texture layer in place changes
+ * nothing on screen and shows a clean diff.
+ */
+export function cartaBand(): string { return CARTA.dark; }
+
+/**
+ * Blend `hex` at `alpha` over an OPAQUE base and return an opaque hex.
+ *
+ * THE RENDERER-PROOF LAW, applied to vector output. A translucent fill makes
+ * Chromium emit a PDF transparency group, and Preview re-composites those its
+ * own way — that is the hard-edged rectangle Paul reported on the sample cover.
+ * Decks solve it by rasterizing every page. A REPORT cannot: rasterizing 55
+ * pages of research would destroy selectable, searchable text and balloon the
+ * file. So a report flattens instead — same colour to the eye, no alpha channel
+ * for a renderer to disagree about.
+ *
+ * Use it for any fill sitting on a KNOWN, OPAQUE background. It cannot help a
+ * fill over a photograph or a gradient; those must be rasterized.
+ */
+export function flatten(hex: string, alpha: number, over: string): string {
+  const c = (h: string) => { const n = parseInt(h.replace('#', ''), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+  const [r1, g1, b1] = c(hex), [r2, g2, b2] = c(over);
+  const mix = (a: number, b: number) => Math.round(a * alpha + b * (1 - alpha));
+  return '#' + [mix(r1, r2), mix(g1, g2), mix(b1, b2)]
+    .map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+
 export const BLOCK_GLAZE = rgba(LEDGER.dark, 0.72);
 
 /** The full background stack for a textured jade block. */
