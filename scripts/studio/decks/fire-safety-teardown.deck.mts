@@ -1,10 +1,3 @@
-/* Source of record: smbx-ai/smbx-studio,
- *   markets/fire-safety/specs/fire-safety-teardown.deck.mts
- * Master: markets/fire-safety/master.md, published 2026-07-30.
- * This copy exists so the site build can reach it. Edit the studio copy.
- * Build: --media scripts/studio/decks/media
- * verify-spec: 13 figures on pages, 13 traced to the master, 0 unexplained.
- */
 /**
  * Fire & life safety teardown — buy-side, teaser.
  *
@@ -106,7 +99,7 @@ export const deck = {
        no text at all. No text is why it is the cover: nothing on it can be
        wrong. The labelled full schematic is the companion file and stays off
        the cover, because its extinguisher label is misspelled. */
-    image: 'fs-cover.png', imagePos: '50% 50%',
+    image: 'fs-cover.jpg', imagePos: '40% 52%',
     sub: 'Fire code makes the inspection non-discretionary. That is not the same as somebody being paid for it.',
     /* The cover carries the argument, not the title. Every figure below is
        cited on a page of this same deck — the numeral on page 2, the stats on
