@@ -112,16 +112,16 @@ export default function ReportsIndex() {
               That works because the card is `position: relative` and comes
               later in the DOM, so it paints over this at the same z-level —
               and the hero section has no clipping of its own. */}
-          <div aria-hidden="true" data-plx="-0.04" className="ca-orbit ca-orbit-hero" style={{ position: 'absolute', right: '0.5%', top: 'clamp(150px, 24vw, 350px)', width: 'clamp(200px, 20vw, 290px)', aspectRatio: '1 / 1', pointerEvents: 'none', zIndex: 0 }}>
+          <div aria-hidden="true" data-plx="-0.04" className="ca-orbit ca-orbit-hero" style={{ position: 'absolute', right: 'clamp(-120px, -8vw, -64px)', top: 'clamp(200px, 28vw, 400px)', width: 'clamp(200px, 20vw, 290px)', aspectRatio: '1 / 1', pointerEvents: 'none', zIndex: 0 }}>
             <div style={{ width: '100%', height: '100%', transformOrigin: '50% 50%' }}>
               <svg viewBox="0 0 300 300" width="100%" height="100%" fill="none">
                 <circle cx="150" cy="150" r="146" stroke="#0A7A58" strokeWidth="1.4" opacity=".42" />
                 <ellipse cx="150" cy="150" rx="145" ry="58" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 6" opacity=".62" />
                 <ellipse cx="150" cy="150" rx="58" ry="145" stroke="#0A7A58" strokeWidth="1.4" opacity=".45" />
               </svg>
-              <span style={{ position: 'absolute', left: '50%', top: '2.4%', transform: 'translate(-50%, -50%)' }}>
+              <span style={{ position: 'absolute', left: '50%', top: '2.4%', transform: 'translate(-100%, -50%)' }}>
                 <span className="ca-chip-level">
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '3px 9px 2px 8px', background: '#FFFFFF', border: '1px solid #E4DFD3', fontFamily: MONO, fontSize: 13, letterSpacing: '0.08em', color: '#16181A', whiteSpace: 'nowrap' }}>
+                  <span style={{ display: 'inline-flex', flexDirection: 'row-reverse', alignItems: 'center', gap: 7, padding: '3px 8px 2px 9px', background: '#FFFFFF', border: '1px solid #E4DFD3', fontFamily: MONO, fontSize: 13, letterSpacing: '0.08em', color: '#16181A', whiteSpace: 'nowrap' }}>
                     <span style={{ width: 7, height: 7, background: '#0A7A58', flex: 'none' }} />
                     <span key={RING_WORDS[ringWord]} className="ca-flip">{RING_WORDS[ringWord]}</span>
                   </span>
