@@ -87,7 +87,21 @@ for (const line of md.split('\n')) {
     carries: carries.replace(/\*\*/g, '').trim(),
     evidence_grade: grade,
     source_disclosure: disclosure,
-    status,
+    // STATUS IS CAPPED ON EXPORT, and this is not a nicety.
+    //
+    // The guide owns content; the app owns `posted`. A Postgres CHECK of the
+    // form (status <> 'posted' OR posted_at IS NOT NULL) is evaluated against
+    // the PROPOSED row before ON CONFLICT resolves — so an upsert offering
+    // status='posted' with a null timestamp is rejected even when the conflict
+    // branch would have preserved the existing posted_at. The guard enforcing
+    // "posted is never inferred" would break the one import path honouring it.
+    //
+    // The fix belongs here, not in the constraint: this file must never assert
+    // `posted`. The markdown may say it for a human reader; the export caps at
+    // `drafted` and lets the app own the transition. `markdown_status` is
+    // carried so nothing is silently lost.
+    status: status === 'posted' ? 'drafted' : status,
+    markdown_status: status,
     // THE LAW, carried into the data so an importer cannot lose it:
     // THIN means the post makes an argument and states no figure.
     // VERIFIED = traced to a master that passed primary-source verification.

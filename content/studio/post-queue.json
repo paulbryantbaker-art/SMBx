@@ -14,6 +14,7 @@
       "evidence_grade": "STRONG",
       "source_disclosure": "single vendor — disclose SPS/Bain ownership",
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": true
     },
     {
@@ -26,6 +27,7 @@
       "evidence_grade": "STRONG",
       "source_disclosure": "independent academic",
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": true
     },
     {
@@ -38,6 +40,7 @@
       "evidence_grade": "STRONG",
       "source_disclosure": "Axial, self-reported members — disclose",
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": true
     },
     {
@@ -50,6 +53,7 @@
       "evidence_grade": "STRONG",
       "source_disclosure": null,
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": true
     },
     {
@@ -62,6 +66,7 @@
       "evidence_grade": "THIN",
       "source_disclosure": null,
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": false
     },
     {
@@ -74,6 +79,7 @@
       "evidence_grade": "MODERATE",
       "source_disclosure": null,
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": true
     },
     {
@@ -86,6 +92,7 @@
       "evidence_grade": "MODERATE",
       "source_disclosure": "dated, single vendor",
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": true
     },
     {
@@ -98,6 +105,7 @@
       "evidence_grade": "THIN",
       "source_disclosure": null,
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": false
     },
     {
@@ -110,6 +118,7 @@
       "evidence_grade": "MODERATE",
       "source_disclosure": null,
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": true
     },
     {
@@ -122,6 +131,7 @@
       "evidence_grade": "STRONG",
       "source_disclosure": null,
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": true
     },
     {
@@ -134,6 +144,7 @@
       "evidence_grade": "MODERATE",
       "source_disclosure": null,
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": true
     },
     {
@@ -146,6 +157,7 @@
       "evidence_grade": "STRONG",
       "source_disclosure": "GF Data",
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": true
     },
     {
@@ -158,6 +170,7 @@
       "evidence_grade": "STRONG",
       "source_disclosure": null,
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": true
     },
     {
@@ -170,6 +183,7 @@
       "evidence_grade": "STRONG",
       "source_disclosure": "GF Data — sponsored deals only, disclose",
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": true
     },
     {
@@ -182,6 +196,7 @@
       "evidence_grade": "VERIFIED",
       "source_disclosure": "master, primary-source pass",
       "status": "drafted",
+      "markdown_status": "drafted",
       "may_state_figure": true
     },
     {
@@ -194,6 +209,7 @@
       "evidence_grade": "VERIFIED",
       "source_disclosure": "master",
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": true
     },
     {
@@ -206,6 +222,7 @@
       "evidence_grade": "RETIRED",
       "source_disclosure": null,
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": false
     },
     {
@@ -218,6 +235,7 @@
       "evidence_grade": "VERIFIED",
       "source_disclosure": "register, 2026-08-10",
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": true
     },
     {
@@ -230,6 +248,7 @@
       "evidence_grade": "VERIFIED",
       "source_disclosure": "master",
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": true
     },
     {
@@ -242,6 +261,7 @@
       "evidence_grade": "VERIFIED",
       "source_disclosure": "master, A.0.4",
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": true
     },
     {
@@ -254,6 +274,7 @@
       "evidence_grade": "VERIFIED",
       "source_disclosure": "master",
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": true
     },
     {
@@ -266,6 +287,7 @@
       "evidence_grade": "VERIFIED",
       "source_disclosure": "master",
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": true
     },
     {
@@ -278,6 +300,7 @@
       "evidence_grade": "n/a",
       "source_disclosure": null,
       "status": "next",
+      "markdown_status": "next",
       "may_state_figure": false
     },
     {
@@ -290,6 +313,7 @@
       "evidence_grade": "n/a",
       "source_disclosure": "graded per item each week",
       "status": "recurring",
+      "markdown_status": "recurring",
       "may_state_figure": false
     }
   ]
