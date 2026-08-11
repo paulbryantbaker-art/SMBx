@@ -42,6 +42,7 @@ import { portfolioBriefRouter } from './routes/portfolioBrief.js';
 import { studioRouter } from './routes/studio.js';
 import { researchRouter } from './routes/research.js';
 import { crmRouter } from './routes/crm.js';
+import postQueueRouter from './routes/postQueue.js';
 import { outreachRouter } from './routes/outreach.js';
 import { dealTasksRouter } from './routes/dealTasks.js';
 import { startResearchScheduler } from './services/researchAgent.js';
@@ -1208,6 +1209,8 @@ app.use('/api', docViewsRouter);
 app.use('/api', studioRouter);
 app.use('/api', researchRouter);
 app.use('/api', crmRouter);
+// The post queue holds ROWS. It dispatches nothing — see migration 123.
+app.use('/api/post-queue', postQueueRouter);
 app.use('/api', outreachRouter);
 app.use('/api', dealTasksRouter);
 app.use('/api', pmiPlanRouter);
