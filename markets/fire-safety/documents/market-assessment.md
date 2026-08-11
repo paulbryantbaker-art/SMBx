@@ -2,8 +2,8 @@
 byline: Paul Baker
 role: smbX.ai · Buy-side corporate development
 headshot: founder-portrait.jpg
-image: cover-alarm-panel.png
-imagePos: 50% 50%
+image: cover-corridor.jpg
+imagePos: 50% 58%
 footer: Fire & Life Safety — Buy-Side Market Assessment
 eyebrow: MARKET ASSESSMENT
 stat: 17 | Sponsor-backed US fire contracting platforms at platform level, against the thirty-odd a blended tracker reports
