@@ -24,10 +24,22 @@ import {
   type PlacePro,
 } from './googlePlacesClient.js';
 import { enrichCompanyWebsite, type WebsiteEnrichment } from './websiteEnrichmentService.js';
+import { assertSpendAllowed, spendAllowed } from './apiSpend.js';
 import crypto from 'crypto';
 
 let anthropic: Anthropic | null = null;
 function getClient(): Anthropic {
+  // The five-stage engine's four model call sites all come through here — the
+  // intelligence brief, the deep-analysis pass, the refresh and the expansion.
+  // Screening was ported to house/screen.ts + scripts/studio/screen.mts on
+  // Paul's own instruction ("this whole search and rank function needs to be
+  // built locally so that Cowork can do it"), so this lane has a local
+  // equivalent like the studio one does.
+  //
+  // Google Places is NOT gated by this and should not be: it is a different
+  // key with a free monthly tier, and the Places spend was never what the cap
+  // problem was about.
+  assertSpendAllowed('sourcing', 'The sourcing pipeline');
   if (!anthropic) {
     anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
   }
@@ -51,6 +63,10 @@ export async function initializePipeline(
   thesisId: number,
   userId: number,
 ): Promise<PipelineResult> {
+  // Before any row is written. Stage 1 reaches getClient() only after a brief
+  // AND a portfolio have been inserted, so without this a blocked press left
+  // both behind marked 'failed' for a pipeline that never started.
+  assertSpendAllowed('sourcing', 'The sourcing pipeline');
   // Load thesis
   const [thesis] = await sql`
     SELECT * FROM buyer_theses WHERE id = ${thesisId} AND user_id = ${userId}
@@ -247,6 +263,8 @@ async function runStage1(briefId: number, thesisId: number, userId: number): Pro
 // ─── Stage 2: Expansion Search ──────────────────────────────────────
 
 export async function runStage2(portfolioId: number): Promise<void> {
+  assertSpendAllowed('sourcing', 'Sourcing stage 2 (discovery)');
+
   await updateProgress(portfolioId, 'expanding', 2, 0, 'Starting expansion search...');
 
   const [portfolio] = await sql`
@@ -347,6 +365,12 @@ export async function runStage2(portfolioId: number): Promise<void> {
 // ─── Stage 3: Tiered Enrichment ─────────────────────────────────────
 
 export async function runStage3(portfolioId: number): Promise<void> {
+  // Stage 3 enriches websites through websiteEnrichmentService, which owns a
+  // SEPARATE Anthropic client (Haiku) and is also a Yulia tool — so it is not
+  // gated there. Assert at the stage entry or Stage 3 spends before it ever
+  // reaches getClient().
+  assertSpendAllowed('sourcing', 'Sourcing stage 3 (deep analysis)');
+
   await updateProgress(portfolioId, 'enriching', 3, 0, 'Starting tiered enrichment...');
 
   const [portfolio] = await sql`
@@ -604,6 +628,8 @@ export async function runStage3(portfolioId: number): Promise<void> {
 // ─── Stage 4: Scoring & Categorization ──────────────────────────────
 
 export async function runStage4(portfolioId: number): Promise<void> {
+  assertSpendAllowed('sourcing', 'Sourcing stage 4 (scoring)');
+
   await updateProgress(portfolioId, 'scoring', 4, 0, 'Starting multi-factor scoring...');
 
   const [portfolio] = await sql`
@@ -934,6 +960,12 @@ async function fetchCensusForThesis(
  * re-run website enrichment for stale Tier 3 data, re-score all.
  */
 export async function runWeeklyPortfolioRefresh(): Promise<{ portfoliosRefreshed: number; candidatesUpdated: number }> {
+  // A scheduled job returns a result rather than throwing — a queue retrying a
+  // switched-off lane forever is noise, not safety.
+  if (!spendAllowed('sourcing')) {
+    console.log('[sourcing] Weekly portfolio refresh skipped — the sourcing lane is off (API_LANES).');
+    return { portfoliosRefreshed: 0, candidatesUpdated: 0 };
+  }
   const portfolios = await sql`
     SELECT id, thesis_id, user_id FROM sourcing_portfolios
     WHERE pipeline_status = 'ready'
@@ -1015,6 +1047,10 @@ export async function runWeeklyPortfolioRefresh(): Promise<{ portfoliosRefreshed
  * through Stages 3-4.
  */
 export async function runMonthlyPortfolioExpansion(): Promise<{ portfoliosExpanded: number; newCandidates: number }> {
+  if (!spendAllowed('sourcing')) {
+    console.log('[sourcing] Monthly portfolio expansion skipped — the sourcing lane is off (API_LANES).');
+    return { portfoliosExpanded: 0, newCandidates: 0 };
+  }
   const portfolios = await sql`
     SELECT p.id, p.thesis_id, p.user_id, b.recommended_params,
            t.industry, t.naics_codes, t.state_codes, t.geography
@@ -1137,6 +1173,8 @@ export async function getPortfolioProgress(portfolioId: number): Promise<{
  * Re-scores after enrichment.
  */
 export async function enrichCandidateOnDemand(candidateId: number): Promise<Record<string, unknown>> {
+  assertSpendAllowed('sourcing', 'On-demand candidate enrichment');
+
   const [candidate] = await sql`SELECT * FROM sourcing_candidates WHERE id = ${candidateId}`;
   if (!candidate) throw new Error('Candidate not found');
 

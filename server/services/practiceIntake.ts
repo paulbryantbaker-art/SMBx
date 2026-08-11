@@ -24,6 +24,7 @@
  * commentary, and the practitioner covers the rest on the call.
  */
 import Anthropic from '@anthropic-ai/sdk';
+import { spendAllowed } from './apiSpend.js';
 
 const MODEL = 'claude-haiku-4-5-20251001';
 const MAX_MESSAGES = 16;
@@ -31,6 +32,12 @@ const MAX_MSG_CHARS = 800;
 
 let client: Anthropic | null = null;
 function getClient(): Anthropic | null {
+  // ON by default — this is the lead funnel, and CLAUDE.md is explicit that a
+  // cap here "silently breaks the funnel rather than Paul's work". It still
+  // honours the switch so API_LANES=none is TRUE rather than nearly true.
+  // Soft, like the missing-key line below: the caller falls back to the
+  // scripted close.
+  if (!spendAllowed('marketing')) return null;
   if (!process.env.ANTHROPIC_API_KEY) return null;
   if (!client) {
     client = new Anthropic({

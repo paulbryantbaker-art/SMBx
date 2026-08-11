@@ -22,6 +22,7 @@
  */
 import { createStudioAsset } from './studioAssets.js';
 import { LEDGER } from '../../house/tokens.js';
+import { spendAllowed } from './apiSpend.js';
 
 const IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
 
@@ -82,6 +83,12 @@ export async function generateRunArtwork(input: {
   title: string;
   visualBrief: string;
 }): Promise<{ assetId: number } | { assetId: null; reason: string }> {
+  // Soft, matching this function's whole contract (every failure returns a
+  // reason rather than throwing) and the missing-key line right below. Gemini
+  // image generation is a Studio path — Paul generates images in the Gemini
+  // app and uploads them to Media, which is why RESEARCH_ARTWORK_AUTOGEN has
+  // defaulted off since 2026-07-20 anyway.
+  if (!spendAllowed('studio')) return { assetId: null, reason: 'the studio lane is off (API_LANES)' };
   const key = process.env.GOOGLE_AI_API_KEY;
   if (!key) return { assetId: null, reason: 'GOOGLE_AI_API_KEY not set' };
   if (!input.visualBrief?.trim()) return { assetId: null, reason: 'no visual brief in the feed' };

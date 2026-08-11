@@ -16,9 +16,11 @@
  */
 import { sql } from '../db.js';
 import Anthropic from '@anthropic-ai/sdk';
+import { assertSpendAllowed } from './apiSpend.js';
 
 let anthropicClient: Anthropic | null = null;
 function getClient(): Anthropic {
+  assertSpendAllowed('chat', 'PMI value capture');
   if (!anthropicClient) anthropicClient = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
   return anthropicClient;
 }

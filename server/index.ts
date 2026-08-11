@@ -45,6 +45,7 @@ import { crmRouter } from './routes/crm.js';
 import { outreachRouter } from './routes/outreach.js';
 import { dealTasksRouter } from './routes/dealTasks.js';
 import { startResearchScheduler } from './services/researchAgent.js';
+import { logSpendLanes, spendAllowed } from './services/apiSpend.js';
 import { startOwnerDigestScheduler } from './services/ownerDigest.js';
 import { v19ResourcesRouter } from './routes/v19Resources.js';
 import { createSql, getDatabaseUrl, getPostgresOptions } from './dbConfig.js';
@@ -1023,7 +1024,9 @@ app.get('/api/debug/check-ai', async (_req, res) => {
     checks.dbError = e.message;
   }
 
-  if (process.env.ANTHROPIC_API_KEY) {
+  if (!spendAllowed('chat')) {
+    checks.anthropicSkipped = 'the "chat" lane is off (API_LANES) — no model call made';
+  } else if (process.env.ANTHROPIC_API_KEY) {
     try {
       const { default: Anthropic } = await import('@anthropic-ai/sdk');
       const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -1564,6 +1567,10 @@ runMigrations().then(async () => {
 
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+    // Which paths are allowed to spend on a model, printed rather than
+    // inferred. The whole reason the kill switch exists is that nobody could
+    // answer that question about a running deploy.
+    logSpendLanes();
     startWorker().catch(err => console.warn('[worker] Init skipped:', err.message));
     try {
       startResearchScheduler();

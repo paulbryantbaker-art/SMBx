@@ -17,6 +17,7 @@ import {
 import { hasDealAccess } from '../services/dealAccessService.js';
 import { isGateFree } from '../../shared/gateRegistry.js';
 import { markDeliverableRefreshed } from '../services/dealFreshnessService.js';
+import { assertSpendAllowed } from '../services/apiSpend.js';
 
 export const deliverablesRouter = Router();
 
@@ -375,6 +376,9 @@ deliverablesRouter.post('/deliverables/:id/revise', async (req, res) => {
       return res.status(403).json({ error: 'Cannot revise this deliverable' });
     }
 
+    // This route builds its own client inline rather than going through
+    // aiService, so it needs its own guard or it slips the switch.
+    assertSpendAllowed('chat', 'Deliverable revision');
     const { default: Anthropic } = await import('@anthropic-ai/sdk');
     const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 

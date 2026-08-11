@@ -30,6 +30,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { sql } from '../db.js';
 import { newRenderPage } from './premiumPdfRenderer.js';
 import { LEDGER, brandPaletteLines, MINT_RING, GREEN_HALO, BLOCK_GLAZE } from '../../house/tokens.js';
+import { spendAllowed } from './apiSpend.js';
 
 const DECK_MODEL = process.env.RESEARCH_DECK_MODEL || 'claude-sonnet-4-6';
 const PROMPT_VERSION = 'v6'; // v6 (2026-07-21): framed cover + quiet ground — Paul: "we do need an image border that makes the image pop… too subsued behind the massive dark left panel", "make the left panel feel more background"
@@ -244,6 +245,14 @@ export function assembleDeckHtml(raw: string, inp: DesignInputs, fontsHead: stri
  *  image so the model composes around what it actually sees. */
 export async function generateDeckHtml(inp: DesignInputs, fontsHead: string): Promise<string | null> {
   if (!process.env.ANTHROPIC_API_KEY) return null;
+  // FAIL SOFT, like the missing-key path directly above: null sends the caller
+  // to the fixed house template, so an export still produces a deck. Throwing
+  // here would turn "designed by Claude" off by breaking the download, and the
+  // fallback exists precisely so that never happens.
+  if (!spendAllowed('studio')) {
+    console.log(`[deck] Claude design skipped for run ${inp.runId} — studio lane off; rendering the house template.`);
+    return null;
+  }
   const content: any[] = [{ type: 'text', text: pagesBrief(inp.pages, inp.typeLabel, inp.title) }];
   for (const im of inp.images) {
     const meta = await analyzeImage(im.dataUri);

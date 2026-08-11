@@ -26,6 +26,7 @@ import { sql } from '../db.js';
 import { composeFeedFromMarkdown } from './researchAgent.js';
 import { figuresNotIn } from './researchLanes.js';
 import { getArtifact } from './studioRepos.js';
+import { assertSpendAllowed } from './apiSpend.js';
 
 export type OutputType = 'onepager' | 'carousel' | 'report';
 
@@ -132,6 +133,10 @@ export async function composeFrom(opts: {
   postAngle?: string | null;
   scheduleId?: number | null;
 }): Promise<ComposeResult> {
+  // composeFeedFromMarkdown below would refuse anyway (researchAgent's client
+  // is guarded), but it does so several database writes in. Refuse at the door
+  // so a blocked press leaves no half-built composition row behind.
+  assertSpendAllowed('studio', 'Collateral composition');
   const { md: master, label } = await loadSource(opts.userId, opts.source);
   if (master.trim().length < 200) throw new Error('This document is too short to build collateral from.');
 

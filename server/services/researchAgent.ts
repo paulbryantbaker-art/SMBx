@@ -25,6 +25,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
 import { sql } from '../db.js';
 import { sendEmail, brandedEmail } from './emailService.js';
+import { assertSpendAllowed, spendAllowed } from './apiSpend.js';
 
 const MODEL = 'claude-sonnet-4-6';
 // Sonnet pricing in cents per 1M tokens + $10/1k searches (fetches bill as tokens).
@@ -39,6 +40,13 @@ const MONTHLY_CAP_CENTS = (() => {
 
 let client: Anthropic | null = null;
 function getClient(): Anthropic {
+  // THE CHOKE POINT. Every model call in this file — the agentic research
+  // rounds, the finalize/feed call, the campaign-plan import — goes through
+  // here, so one check covers all of them and a future call site cannot be
+  // added that quietly skips the switch. The individual entry points below
+  // assert as well, but only so the error arrives before a doomed row is
+  // written; this is the line that actually holds.
+  assertSpendAllowed('studio', 'The research agent');
   if (!client) {
     if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY is not set');
     // Research rounds run long (server-side search rounds + long writes).
@@ -391,6 +399,10 @@ export function validateRunInput(input: Partial<CreateRunInput>): string | null 
 }
 
 export async function createResearchRun(input: CreateRunInput): Promise<number> {
+  // Refuse before the row exists. Without this the run is created, executed,
+  // and lands in status='failed' — a queued-then-failed row for something that
+  // was never going to run is worse than a straight refusal at the button.
+  assertSpendAllowed('studio', 'Research runs');
   const [row] = await sql`
     INSERT INTO research_runs (user_id, schedule_id, research_type, topic, depth, output_format, post_angle, status, progress)
     VALUES (${input.userId}, ${input.scheduleId ?? null}, ${input.researchType}, ${input.topic.trim()},
@@ -411,6 +423,15 @@ async function setProgress(runId: number, progress: string) {
 export async function executeResearchRun(runId: number): Promise<void> {
   const [run] = await sql`SELECT * FROM research_runs WHERE id = ${runId}`;
   if (!run || run.status === 'running' || run.status === 'complete') return;
+
+  // A row queued before the lane was switched off is still sitting here. Leave
+  // it QUEUED rather than marking it failed: the work was never attempted, and
+  // 'failed' would read as "the research broke" when the truth is "the app is
+  // not the place this runs any more."
+  if (!spendAllowed('studio')) {
+    console.warn(`[research] Run ${runId} left queued — the studio lane is off (API_LANES).`);
+    return;
+  }
 
   const type = typeDef(run.research_type);
   const depth = depthDef(run.depth);
@@ -848,8 +869,17 @@ export function startResearchScheduler() {
   // MANUAL RUNS ARE UNAFFECTED — pressing Run in Studio never touches this.
   // The boot sweep above still runs either way: it only heals orphaned rows
   // and costs nothing.
-  if (process.env.RESEARCH_SCHEDULES_DISABLED === 'true' || process.env.RESEARCH_SCHEDULES_ENABLED !== 'true') {
-    console.log('[research] Campaign scheduler NOT started — scheduled runs spend on the metered key, so they are off unless RESEARCH_SCHEDULES_ENABLED=true. Boot sweep still ran.');
+  //
+  // The studio lane is checked as well as the flag, so the two switches can
+  // only ever agree: turning RESEARCH_SCHEDULES_ENABLED on while the lane is
+  // off would otherwise start a loop whose every run then refuses at
+  // getClient() — a scheduler that ticks, fires, and fails on a timer.
+  if (
+    process.env.RESEARCH_SCHEDULES_DISABLED === 'true' ||
+    process.env.RESEARCH_SCHEDULES_ENABLED !== 'true' ||
+    !spendAllowed('studio')
+  ) {
+    console.log('[research] Campaign scheduler NOT started — scheduled runs spend on the metered key, so they need BOTH RESEARCH_SCHEDULES_ENABLED=true and the "studio" lane in API_LANES. Boot sweep still ran.');
     return;
   }
 

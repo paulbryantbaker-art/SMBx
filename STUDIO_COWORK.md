@@ -75,7 +75,7 @@ palettes, and nothing that travelled to the workspace described the current one.
    environment as `SMBX_TOKEN`. (Google sign-in has no password for a script
    to use; that pane is the answer to it.)
 
-## The five jobs
+## The six jobs
 
 ### 0. Build the research in the first place
 
@@ -237,6 +237,80 @@ The full laws for this job (never invent a person; `bucket` decides the layer;
 `tier` is conviction, not size) are in the workspace's own `CLAUDE.md` under
 "6. Push a research run into the app's CRM".
 
+### 6. The weekly sweep — the Saturday agent
+
+Paul, 2026-08-10: *"All markets should update weekly starting in Saturday and
+Email me the delta of what's new or changed on Sunday."*
+
+The standing prompt is **`WEEKLY.md`**, which `init-workspace` copies into the
+workspace beside the other laws — a scheduled session opens on that folder with
+nothing but what is in it, so the job has to live there rather than in this repo
+or in whoever set the schedule up.
+
+The deterministic half is `weekly.mts`, and it calls no model:
+
+```bash
+# Saturday — WHOSE TURN is it? Exit 0 nothing due · 1 work it · 2 can't keep up
+npx tsx <repo>/scripts/studio/weekly.mts due
+
+# then the detail on that market — unfolded research, stale theses
+npx tsx <repo>/scripts/studio/weekly.mts status
+
+# Sunday — the delta, read out of git so it is exact rather than remembered
+npx tsx <repo>/scripts/studio/weekly.mts digest --out digest.md
+```
+
+Exit `0` nothing needs you · `1` something does · `2` a market could not be read.
+
+**Three things make this safe to leave running**, and all three are in
+`WEEKLY.md` as laws rather than suggestions:
+
+1. **It writes; it never publishes.** No LinkedIn, no client email, no
+   counterparty contact, no CRM or outreach writes. The same *one touch, one
+   press, one human* rule the outreach machine already enforces.
+2. **Everything lands in a pull request.** That is the review gate and the whole
+   reason this is safe — it is the one place you can say no. Which is also why
+   the workspace wants to be in git: without it there is no diff to read and the
+   digest can only report current state, not a delta.
+3. **ONE MARKET A WEEK, quarterly per vertical** (Paul, 2026-08-10: *"once the
+   market assessment is in place, it probably really only needs to be updated
+   quarterly for each vertical (so 1 per week)"*). Markets do not move week to
+   week. `due` names the one furthest past its 90-day cycle and exits 0 when
+   nobody is — a quiet week is a correct week, and an agent that must produce a
+   change every week eventually produces one that is not there. A market with
+   NO master is not in the rotation at all: a first build is the full hunt in
+   `RESEARCH.md`, which is your call to start, not a cron's.
+
+   **Age is read from git, never from mtime** — git does not preserve
+   modification times on clone, so a workspace checked out on a new Mac would
+   read as if every master were refreshed today and the rotation would quietly
+   decide nothing was ever due again.
+
+   One per week over a 90-day cycle tops out at **12 markets**. Past that `due`
+   exits 2 and says so rather than running later and later.
+
+**Getting it onto your Mac — `sync.mjs`, in the workspace.** The PR is the
+review gate; it is not delivery. **Git is a transport, not a destination:** a
+merged PR puts nothing on your laptop, and until something pulls, every builder
+here renders from a stale master with no error to tell you. So:
+
+```bash
+node sync.mjs              # pull the workspace AND the SMBx repo, refresh the laws
+node sync.mjs --check      # report only, exit 1 if behind
+node sync.mjs --install    # print the launchd job that runs it hourly
+```
+
+Install it and merging a PR on your phone lands the files here within the hour,
+with nothing to remember. It pulls **both** repositories, because pulling only
+the workspace leaves you building this week's master with last month's builder.
+Pulls are `--ff-only` and it exits 2 rather than merging over an uncommitted
+edit — the one thing worse than a stale master is a lost one.
+
+**What it cannot do, and says so in every digest:** the citation audit checks
+NUMBERS, not prose. A fabricated qualitative claim carries no figure and passes
+clean, so a master that changed still wants your eyes before anything derived
+from it reaches a client.
+
 ## The LinkedIn loop, specifically
 
 1. **"Build the next slot and research it out."** Cowork reads
@@ -273,8 +347,10 @@ keep **both** values; an invented midpoint is a fabrication.
   They work with every API on earth capped.
 - The thinking steps (research, synthesis, writing) run on **your Claude
   subscription** in the Cowork session, not the app's metered key.
-- Assisted, not unattended: this is a session with you in the loop. Hands-off
-  weekly automation is a later step.
+- Assisted, not unattended — for the jobs you run yourself. **The weekly sweep
+  (job 6) IS unattended**, and it changes the failure mode rather than removing
+  it: the risk stops being a bill and becomes a rate limit, so it stays a delta
+  pass rather than a full hunt, and it writes to a PR rather than to your files.
 
 ## About `studio-kit/`
 

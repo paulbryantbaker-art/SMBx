@@ -4,11 +4,13 @@
  */
 import Anthropic from '@anthropic-ai/sdk';
 import { sql } from '../db.js';
+import { assertSpendAllowed } from './apiSpend.js';
 
 const HAIKU_MODEL = 'claude-haiku-4-5-20251001';
 
 let client: Anthropic | null = null;
 function getClient(): Anthropic {
+  assertSpendAllowed('chat', 'Gate summaries');
   if (!client) client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   return client;
 }

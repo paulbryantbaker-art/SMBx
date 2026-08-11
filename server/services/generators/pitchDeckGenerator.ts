@@ -5,9 +5,11 @@
  * Output is structured JSON that can be rendered in the canvas or exported.
  */
 import Anthropic from '@anthropic-ai/sdk';
+import { assertSpendAllowed } from '../../services/apiSpend.js';
 
 let client: Anthropic | null = null;
 function getClient(): Anthropic {
+  assertSpendAllowed('chat', 'Deliverable generation');
   if (!client) client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
   return client;
 }

@@ -9,12 +9,14 @@
 import Anthropic from '@anthropic-ai/sdk';
 import crypto from 'crypto';
 import { sql } from '../db.js';
+import { assertSpendAllowed } from './apiSpend.js';
 
 const HAIKU_MODEL = 'claude-haiku-4-5-20251001';
 const MAX_FACTS_PER_DEAL = 60;
 
 let client: Anthropic | null = null;
 function getClient(): Anthropic {
+  assertSpendAllowed('chat', 'Deal fact extraction');
   if (!client) client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   return client;
 }

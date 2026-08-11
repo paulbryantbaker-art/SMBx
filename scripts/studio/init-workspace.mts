@@ -125,6 +125,11 @@ law('content/studio/PLAYBOOK.md', 'PLAYBOOK.md');
 law('content/studio/FORMATS.md', 'FORMATS.md');
 law('content/studio/DESIGN.md', 'DESIGN.md');
 law('content/studio/RESEARCH.md', 'RESEARCH.md');
+/* The standing job for the Saturday agent (2026-08-10). It travels with the
+   workspace for the same reason the other laws do: a scheduled session opens
+   on this folder with nothing but what is in it, so the prompt has to be here
+   rather than in the repo or in whoever set the schedule up. */
+law('content/studio/WEEKLY.md', 'WEEKLY.md');
 
 /* engagements.mjs is a TOOL, not a law, but it travels the same way and for the
    same reason (Paul, 2026-07-29: "I don't want to have to keep downloading main
@@ -133,6 +138,15 @@ law('content/studio/RESEARCH.md', 'RESEARCH.md');
    a session opened on this folder can run it immediately and never needs the
    repo again. `--update` refreshes it in place, keeping a .bak. */
 law('content/studio/engagements.mjs', 'engagements.mjs');
+
+/* sync.mjs travels for the same reason and closes the loop the weekly agent
+   opens (Paul, 2026-08-10: "the only thing that I want to be sure that happens
+   is that the Docs.MTS and the collateral all get updated on the Mac on disk").
+   GIT IS A TRANSPORT, NOT A DESTINATION — a merged PR puts nothing on the Mac
+   until something pulls it, and until then every builder here renders from a
+   stale master, silently. `node sync.mjs --install` prints the launchd job that
+   makes it automatic. */
+law('content/studio/sync.mjs', 'sync.mjs');
 
 /* The workspace is meant to live in git (that is how a master gets version
    history without a database), so the one file that must never go up needs to

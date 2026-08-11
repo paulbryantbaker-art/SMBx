@@ -10,11 +10,13 @@ import Anthropic from '@anthropic-ai/sdk';
 import XLSX from 'xlsx';
 import fs from 'fs';
 import path from 'path';
+import { assertSpendAllowed } from './apiSpend.js';
 
 const SONNET_MODEL = 'claude-sonnet-4-6';
 
 let client: Anthropic | null = null;
 function getClient(): Anthropic {
+  assertSpendAllowed('chat', 'Document extraction');
   if (!client) {
     client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   }
