@@ -41,7 +41,18 @@ const URL_RE = /https?:\/\/[^\s)<>\]"']+/gi;
 // "$180B" as often as "$180 billion", and missing that flagged honest
 // work as an unexplained inference. The trailing \b stops "$50 buyers"
 // from reading as 50 billion.
-const FIG_RE = /\$?\d[\d,]*\.?\d*\s?(?:billion|million|trillion|bn|mm|b|m|t|k|%|x)\b|\$\d[\d,]*\.?\d*/gi;
+//
+// `%` IS OUTSIDE THAT \b, and it has to be (2026-08-11, found by verify-spec).
+// `\b` is a boundary between a word character and a non-word character, and
+// `%` is not a word character — so `%\b` only matches where a percent sign is
+// followed by a letter or a digit. "63% of systems", "~60%.", "90%," and
+// "74% recurring" all failed to match, which means THE AUDIT NEVER CHECKED A
+// PERCENTAGE. Every percentage in every master audited clean by not being
+// looked at, and the guarantee the whole practice rests on — "every figure is
+// traceable" — silently excluded the most common figure type in this
+// collateral. The word-character suffixes still carry their \b; `%` needs none,
+// because it cannot run into the following word.
+const FIG_RE = /\$?\d[\d,]*\.?\d*\s?(?:(?:billion|million|trillion|bn|mm|b|m|t|k|x)\b|%)|\$\d[\d,]*\.?\d*/gi;
 
 /**
  * Expand ranges so a shared unit attaches to BOTH endpoints.
