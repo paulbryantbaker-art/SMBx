@@ -99,7 +99,7 @@ export const deck = {
        no text at all. No text is why it is the cover: nothing on it can be
        wrong. The labelled full schematic is the companion file and stays off
        the cover, because its extinguisher label is misspelled. */
-    image: 'fs-cover.jpg', imagePos: '40% 52%',
+    image: 'fs-cover.jpg', imagePos: '50% 50%',
     sub: 'Fire code makes the inspection non-discretionary. That is not the same as somebody being paid for it.',
     /* The cover carries the argument, not the title. Every figure below is
        cited on a page of this same deck — the numeral on page 2, the stats on

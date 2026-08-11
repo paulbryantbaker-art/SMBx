@@ -9,12 +9,12 @@ eyebrow: MARKET ASSESSMENT
 stat: 17 | Sponsor-backed US fire contracting platforms at platform level, against the thirty-odd a blended tracker reports
 stat: 63% | Of fire protection systems current on their annual inspection in one actively enforced jurisdiction
 stat: $3–$4 | Of repair and service work found per $1 of inspection revenue, on the acquirer's own disclosure
-accent: 1.1 The chain of obligation | band-riser.jpg | 50% 50%
-accent: 2.1 The instrument problem | band-alarm-panel.jpg | 50% 50%
-accent: 4.1 How to read this map | band-detectors.jpg | 50% 50%
-accent: 6.1 Five populations that are not comparable | band-sprinkler.jpg | 50% 50%
-accent: 7.1 Margin by scale tier | band-preaction.jpg | 50% 50%
-accent: 9.1 The central-station question | band-sidewall.jpg | 50% 50%
+accent: 1.1 The chain of obligation | fs-accent-riser.jpg | 50% 50%
+accent: 2.1 The instrument problem | fs-accent-panel.jpg | 50% 50%
+accent: 4.1 How to read this map | fs-accent-detectors.jpg | 50% 50%
+accent: 6.1 Five populations that are not comparable | fs-accent-sprinkler.jpg | 50% 50%
+accent: 7.1 Margin by scale tier | fs-accent-preaction.jpg | 50% 50%
+accent: 9.1 The central-station question | fs-accent-sidewall.jpg | 50% 50%
 -->
 # Fire & Life Safety: A State of the Market
 ## A Buy-Side Assessment for Acquirers · Published 10 August 2026
