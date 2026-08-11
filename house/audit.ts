@@ -72,10 +72,25 @@ const normUrl = (u: string) => u.replace(/[.,;]+$/, '').replace(/\/$/, '').toLow
 const normFig = (f: string) => f.toLowerCase().replace(/,/g, '').replace(/\s+/g, '')
   .replace(/billion/, 'b').replace(/million/, 'm').replace(/trillion/, 't').replace(/bn/, 'b');
 
-/** Pull a markdown section by heading pattern, up to the next heading. */
+/**
+ * Pull a markdown section by heading pattern, up to the next heading.
+ *
+ * Fixed 2026-08-11: this took the FIRST heading matching the pattern, so a body
+ * heading like "## 8.7 Two method flags for whoever reproduces this" hijacked
+ * the Sources register — /sources|references|method/i matched it, and every
+ * source then reported as unacknowledged. The mirror case is worse: had the
+ * hijacked section happened to contain the label words, a document with no
+ * register at all would have PASSED. So a heading whose title *is* the register
+ * wins over one that merely mentions the word; the loose match stays as the
+ * fallback, which keeps every previously-working document working.
+ */
 function section(md: string, pattern: RegExp): string | null {
   const lines = md.split('\n');
-  let i = lines.findIndex(l => /^#{1,4}\s/.test(l) && pattern.test(l));
+  const isHeading = (l: string) => /^#{1,4}\s/.test(l) && pattern.test(l);
+  // Prefer a heading that opens with the register's own name.
+  const titular = /^#{1,4}\s*(sources|references|derivations?|derived figures?|assumptions?)\b/i;
+  let i = lines.findIndex(l => isHeading(l) && titular.test(l));
+  if (i < 0) i = lines.findIndex(isHeading);
   if (i < 0) return null;
   const level = (lines[i].match(/^#+/) || ['#'])[0].length;
   const out: string[] = [];
