@@ -96,3 +96,63 @@ heading followed by the four fields, in order.
 - requires: route|density|stops|margin|payroll
 - ledger: A.0.1
 - verdict: NO SOURCE. The posted diagram renders "5 stops / route" against "8 stops / route" as a measured bar chart with no source line. The point survives and is now far better evidenced — NYC device data shows 3,072 buildings holding 34.5% of all devices at 10.5 devices each — but these two numbers were illustrative and were presented as measurements.
+
+### R-EL-014 · the fabricated Otis retention quotation
+- pattern: sustained time
+- requires: retention|94%|Otis|Marks|return
+- ledger: A.0.3
+- verdict: RETIRED — FABRICATED. No transcript contains "will take sustained time." Marks said close to the opposite: "So, I do believe you'll see the retention rate go up again." The 94% came from analyst Jeffrey Sprague recalling 2022. The 93.5% → 92.4% figures DO verify and may be used; the sentence may never be quoted again.
+
+### R-EL-015 · the NEBA "1:1 hard cap"
+- pattern: hard cap
+- requires: NEBA|apprentice|apprentices|helper|helpers|mechanic|1:1|ratio
+- ledger: A.0.3
+- verdict: CORRECTED. Article X ¶2 caps Helpers, Apprentices AND Assistant Mechanics against Mechanics "on any one job, except on jobs where two teams or more are working." Three classifications, per job, with an express exception. The growth-ceiling argument survives; the phrase "hard cap" does not.
+
+### R-EL-016 · Otis portfolio growth stated annually
+- pattern: fourth consecutive year
+- requires: Otis|portfolio|maintained|4%|grew
+- ledger: A.0.3
+- verdict: CORRECTED to "4% for the fourteenth consecutive quarter" (Marks, Q4 2025 call). No source states the annual form.
+
+### R-EL-017 · Otis US share of revenue
+- pattern: 29.1%
+- requires: Otis|US|net sales|total|4,192
+- ledger: A.0.3
+- verdict: CORRECTED to 29.0%. 4,192 ÷ 14,431 = 29.05%. A rounded figure is a different figure.
+
+### R-EL-018 · employees per establishment, all construction
+- pattern: 9.52
+- requires: establishment|establishments|construction|employees|per
+- ledger: A.0.3
+- verdict: CORRECTED to 9.32. 785,917 is the FIRM count, not establishments (803,120). Note this was itself a correction of an earlier 9.3 — a correction-to-another-guess, caught on its second occurrence. The 238290 side was never obtained at all, so the "18.4 vs 9.3" contrast remains withdrawn.
+
+### R-EL-019 · KONE's 2010 Oregon acquisition
+- pattern: Oregon Elevator
+- requires: KONE|2010|acquire|acquired|acquisition
+- ledger: A.0.3
+- verdict: CORRECTED to Reliant Elevator Co. The source said "an elevator service company in Oregon"; a description was read as a company name. Never generate or infer a company name.
+
+### R-EL-020 · the Florida A17.3 deferral date
+- pattern: 8/1/2029
+- requires: Florida|61C|A17.3|defer|deferred|enforcement
+- ledger: A.0.3
+- verdict: RETIRED — no 2029 date exists in Rule 61C-5.001. §3.10.12 moves to 8/1/2025; the separate deferral for §§3.8.5, 3.10.13, 3.10.14, 3.13.1 and 3.13.2 runs to 8/1/2028.
+
+### R-EL-021 · the EC cartel scope formula
+- pattern: sale, installation, maintenance and modernisation
+- requires: Commission|COMP|cartel|38.823|scope|European
+- ledger: A.0.3
+- verdict: RETIRED — that formula does not appear in the decision. The Official Journal carries the opposite qualification for Germany, which is €617m of the €992m: "services were not directly part of the cartel agreements." Do not present the European case as a service-market precedent.
+
+### R-EL-022 · Otis's ~50% independents used as a US figure
+- pattern: 50% of service units
+- requires: US|U.S.|United States|domestic|American
+- ledger: A.0.3
+- verdict: SCOPE ERROR. The sentence is real and verbatim but sits under Competition, scoped "in most of our local geographies", and is unchanged boilerplate across five 10-Ks. It is GLOBAL. It may be quoted as a global statement; it may NOT be used to measure the United States, and no US OEM-versus-independent split may be derived from it.
+
+### R-EL-023 · the NEBA signatory count
+- pattern: seven major OEMs
+- requires: NEBA|agreement|sign|signed|signatories
+- ledger: A.0.3
+- verdict: NOT FOUND on verification. Withdrawn.

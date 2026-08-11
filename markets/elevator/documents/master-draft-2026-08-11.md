@@ -40,12 +40,15 @@ second is why the multiple has not run away.
    adopts A17.3** **[D]**. Twelve states adopt it directly on top of that. This is a
    stronger legal basis than anything in home services.
 
-2. **The OEMs hold roughly half the service base and the better half.** Otis alone
-   maintains ~2.5m units globally **[D]**, and its own 10-K concedes independents hold
-   about **50% of service units** — explicitly the lower-value half **[D]**. Otis's
-   service segment runs a **25.1% operating margin against 4.8% on new equipment — a
-   20.3pp gap** **[D/E]**. The service annuity is where all the profit is, and the
-   OEMs know it.
+2. **The service annuity is where all the profit is.** Otis's service segment runs a
+   **25.1% operating margin against 4.8% on new equipment — a 20.3pp gap**, and 35% of
+   sales produces **91% of segment operating profit** **[D/E]**. Otis maintains
+   **~2.5m units globally** **[D]**. Its 10-K puts independents at about **50% of
+   service units** by count and a smaller share by value — but **that sentence is
+   global, sits under *Competition*, is scoped "in most of our local geographies", and
+   is unchanged boilerplate across five consecutive 10-Ks. It is not a US measurement**
+   (A.0.3). **No verified US split of OEM versus independent share exists**, and this
+   document does not assert one.
 
 3. **The lock-in is documented, and it is lawful.** *In re Elevator Antitrust
    Litigation* (2d Cir., 06-3128-cv, 4 Sep 2007) records the mechanism in the
@@ -79,7 +82,7 @@ South/Appalachia and Northern New England, where no platform has presence.
 
 **What would make us walk.** Labor. Elevator mechanics are the highest-paid
 construction trade in the BLS series and the trade is heavily unionised under a
-national agreement with a **1:1 hard cap on helpers and apprentices per mechanic**
+national agreement whose **1:1 ratio rule caps Helpers, Apprentices and Assistant Mechanics against Mechanics on any one job**
 **[D]**. There is no labor-arbitrage thesis here. A buyer who underwrites this like
 HVAC will be wrong by a wide margin.
 
@@ -172,6 +175,9 @@ Census `ECNLOCCONS2022.EC2223LOCCONS`, every band summing exactly to its total *
 | Population | Establishments | <5 emp | <10 emp | <20 emp |
 |---|---|---|---|---|
 | **2382** — 238290's parent | 203,401 | **52.59%** | **73.13%** | **86.65%** |
+
+*The three percentages are shares of the **167,779 establishments operated the entire year**, not of the 203,401 total. Against the full total they are 43.38% / 60.32% / 71.48% (A.0.3). The entire-year base is the right one for a fragmentation read; the caveat is that the two bases must never be mixed.*
+
 | **238210** — sibling | 81,249 | 52.80% | 73.18% | 86.40% |
 | **238220 + 238290 residual** (2382 − 238210 = 122,152) | 122,152 | 52.45% | 73.10% | **86.82%** |
 | All construction (CBP 2022, `CB2200CBP`) | 800,651 | **65.87%** | 81.71% | 91.02% |
@@ -184,9 +190,11 @@ contractors are **less** fragmented than construction at large — 52.59% under 
 employees against 65.87%. A buyer importing home-services fragmentation instincts
 will overestimate small-firm inventory here.
 
-> **A claim from the earlier draft is WITHDRAWN.** It stated 238290 runs "18.4
-> employees per establishment against 9.3 for construction overall." The
-> all-construction figure verifies at **9.52** (7,485,385 ÷ 785,917, CBP 2022), but
+> **A claim from the earlier draft is WITHDRAWN, and the replacement was wrong too.**
+> The draft stated 238290 runs "18.4 employees per establishment against 9.3 for
+> construction overall", then corrected the construction side to **9.52**. That was
+> also wrong: **785,917 is the FIRM count, not establishments** (803,120). Per
+> *establishment* the figure is **9.32**, or 9.19 on CBP (A.0.3). And
 > **the 238290 side was never obtained** — `EC2223BASIC` has 151 columns and every
 > positional read failed its own arithmetic control. The contrast is unverified and
 > is not carried. See A.0.2.
@@ -333,7 +341,7 @@ Built from primary code instead:
 
 | State | Edition | Instrument | Retroactive effect |
 |---|---|---|---|
-| **Florida** | A17.3-2020 | Rule 61C-5.001 | §3.10.12 door-contact monitoring moved from 12/31/2023 to **8/1/2025**, enforcement deferred to **8/1/2029** **[D]** |
+| **Florida** | A17.3-2020 | Rule 61C-5.001 | §3.10.12 door-contact monitoring moved from 12/31/2023 to **8/1/2025** — verbatim in the rule. *An "8/1/2029" deferral carried in earlier drafts appears nowhere; the rule defers §§3.8.5, 3.10.13, 3.10.14, 3.13.1 and 3.13.2 until **8/1/2028** (A.0.3).* **[D]** |
 | **Georgia** | A17.3-2020 | Rule 120-3-25-.02(c)(3) | A real schedule: §3.10.12 due **1/1/2025** (OCI Bulletin 23-EX-5), 2-year door restrictors, 5-year hydraulic §4.3.3 **[D]** |
 | **Illinois** | A17.3-2005 | 41 Ill. Adm. Code 1000.60 | upgrades *"completed by January 1, 2015"* **[D]** |
 | **Michigan** | A17.3-2017 | R 408.7003 | adopted **[D]** |
@@ -430,7 +438,7 @@ because global figures are routinely misread as US figures.
 - **The gap is widening:** FY2024 was 18.5pp, so it moved **1.8pp in one year** **[E]**.
 - Otis's own framing: 35% of sales produces **91% of segment operating profit**
   (2,374 ÷ 2,614 = 90.8%, both $m) **[D/E]**.
-- **US net sales 4,192 ($m) = 29.1% of total** **[D/E]**.
+- **US net sales 4,192 ($m) = 29.0% of total** **[D/E]** — 4,192 ÷ 14,431 = 29.05%.
 
 **KONE, FY2025** **[D]**: sales EUR 11,245.2 million, adjusted EBIT 1,369.3 (EUR m) (12.2%). New
 Building 4,097.7 (EUR m); Service EUR 4,753.6 million (+7.6%); Modernization EUR 2,394.0 million (+17.4%) →
@@ -438,7 +446,7 @@ Building 4,097.7 (EUR m); Service EUR 4,753.6 million (+7.6%); Modernization EUR
 business-line margin disclosed.**
 
 **Schindler, FY2025** **[D]**: revenue 10,947 (CHF m), EBIT CHF 1,384 million (12.6%), adjusted
-13.3%. Americas 3,214 (CHF m) (29.4%), **down 3.2%**. **No business-line split, no margin
+13.3%. Americas 3,214 (CHF m) (29.4%), **down 3.2% in reported CHF** — the group grew 1.3% in local currencies, so this is partly a currency effect, not only a trading one (A.0.3). **No business-line split, no margin
 split, no unit count.**
 
 **TK Elevator, FY24/25 ended 30 Sep 2025** **[D]**: sales €9.2bn, adjusted EBITDA
@@ -454,7 +462,7 @@ split published.
 
 | OEM | Maintained units | Note |
 |---|---|---|
-| Otis | **~2.5m** | grew 4% for a fourth consecutive year; 1.1m connected **[D]** |
+| Otis | **~2.5m** | portfolio grew **4% for a fourteenth consecutive quarter** (Marks, Q4 2025 call — earlier drafts said "fourth consecutive year", which no source states, A.0.3); 1.1m connected **[D]** |
 | KONE | **~1.8m** | **[D]** |
 | TK Elevator | **>1.4m** | 2.75%/yr CAGR computed **[E]** |
 | Schindler | *(none published)* | left empty |
@@ -499,11 +507,18 @@ governs US conduct.**
 
 Two disclosures from the incumbents themselves define the whitespace:
 
-- **Otis's 10-K concedes independents hold ~50% of service units** — and characterises
-  that half as **the lower-value half** **[D]**.
-- **Schindler's CFO** attributed an Americas service decline to *"increased
-  selectivity when it comes to recaptures"* **[D]** — the incumbent is choosing not to
-  chase certain units back.
+- **Otis's 10-K states independents hold about 50% of service units**, and that they
+  *"account for a smaller percentage of the service business when measured by value"*
+  **[D]**. **Read the scope before using it: that sentence is GLOBAL** — it sits under
+  *Competition*, scoped *"in most of our local geographies"*, and is unchanged across
+  all five 10-Ks FY2021–FY2025. It describes the market Otis competes in; it does not
+  measure the United States, and no US share can be derived from it (A.0.3).
+- **Schindler's CEO, Paolo Compagna**, attributed an Americas decline **in maintenance
+  portfolio UNITS** to *"our increased selectivity when it comes to recaptures… as well
+  as from softer conversions"* (FY2025 call, 11 February 2026) **[D, third-party
+  transcript — Schindler publishes none]**. *Earlier drafts attributed this to the CFO
+  and to revenue rather than units; both corrected, A.0.3.* The incumbent is choosing
+  not to chase certain units back.
 
 Read together: the OEMs concentrate on high-value, high-density, newer-equipment
 routes, and are deliberately conceding low-density, older, geographically dispersed
@@ -515,7 +530,7 @@ than treated as an oversight.
 
 | Date | Event |
 |---|---|
-| 2010 | KONE acquires Oregon Elevator **[P]** |
+| 2010 | KONE acquires **Reliant Elevator Co.**, an elevator service company in Oregon **[P]**. *Earlier drafts carried "Oregon Elevator" as the company name — a description misread as a name (A.0.3).* |
 | 2012 | KONE acquires Eagle Elevator, Minneapolis **[P]** |
 | 17 Aug 2020 | **Otis acquires Bay State Elevator** **[P]** |
 | 3 May 2021 | **TK Elevator acquires Albany** (plus Nashville, Omaha, Madison, Winnipeg) **[P]** |
@@ -648,7 +663,7 @@ is replacement demand**, not growth.
   by 21.6%.
 - Elevator median = **1.79× the HVAC median**.
 
-**California DIR prevailing wage determination SC-62-X-999-2023-1** **[D]**: mechanic
+**California DIR prevailing wage determination SC-62-X-999-2023-1** **[D]** — **note it expired 2023-12-31 and is carried as a point-in-time reference, not a current rate (A.0.3)**: mechanic
 basic rate **$63.95/hr**, **total package $108.095/hr** — a **69% fringe load**.
 
 **The consequence, stated plainly:** there is no labor-arbitrage thesis in this trade.
@@ -670,10 +685,11 @@ Facts republishing an LM-2 **[P]**.
 **The NEBA national agreement (2022–27)**, signed by all seven major OEMs **[D]**:
 
 - annual increases of **3.45–3.50%**
-- a **1:1 hard cap on helpers and apprentices per mechanic**
+- a **1:1 ratio** of Helpers, Apprentices and Assistant Mechanics to Mechanics — **per job, and with an express exception**: Article X ¶2 says the total shall not exceed Mechanics *"on any one job, except on jobs where two teams or more are working"*. Three classifications, not two; per job, not per firm. **Not a firm-level hard cap** (A.0.3)
 - overtime straight to **double time**
 
-**The 1:1 cap is the most important operating constraint in this document.** It means
+**The ratio rule is the most important operating constraint in this document**, and the
+argument survives the correction above because it binds on every job. It means
 **headcount growth is capped at the rate you can produce mechanics**, and mechanics
 come out of NEIEP: a **four-year programme, 6,800 on-the-job learning hours, 144
 classroom hours per year** **[D]**. **Annual completions are not published anywhere.**
@@ -762,9 +778,17 @@ a *dependent variable* of contracted visit frequency. With visit frequency spann
 13×, a single ratio cannot exist. **The correct diligence question is units × visit
 frequency per mechanic, not units per mechanic.**
 
-**Retention:** Otis reported **93.5% → 92.4%** and said returning to 94% "will take
-sustained time" (Marks, Q4 2024 call) **[D]**. Note this is the *OEM's* retention on
-its own installed base — the best case in the market, and it is declining.
+**Retention:** Otis reported **93.5% → 92.4%** — Marks, Q4 2024 call (29 Jan 2025):
+*"going from 93.5% or so to 92.4%, some of that is involuntary"* **[D]**. This is the
+*OEM's* retention on its own installed base, the best case available, and it declined.
+
+> **A quotation carried in earlier drafts is withdrawn as FABRICATED (A.0.3).** Those
+> drafts had management saying a return to 94% *"will take sustained time."* **No
+> transcript contains that sentence.** Marks said close to the opposite: *"So, I do
+> believe you'll see the retention rate go up again."* The 94% came from analyst
+> Jeffrey Sprague recalling 2022 — *"I had like 94% in '22 and 93.5% in '23"* — so an
+> analyst's recollection had become a management benchmark, attached to words
+> management never said. The two real numbers survive; the sentence does not.
 
 ## 7.4 Valuation — and why no LMM comp exists
 
@@ -837,7 +861,7 @@ the data. Escalator and dumbwaiter decommission rates run ~40% of records, **dou
 the elevator rate** — these are shrinking asset classes and should not be underwritten
 as growing ones.
 
-**By borough:** Manhattan **48,378 (51.8%)** — more than the other four combined ·
+**By borough** (of the 93,454 active base, not the 92,075 permanent base — so the borough and type tables differ by the 1,379 construction devices): Manhattan **48,378 (51.8%)** — more than the other four combined ·
 Brooklyn 20,115 · Queens 13,333 · Bronx 9,693 · Staten Island 1,935.
 
 ## 8.3 Route density — the number to anchor on
@@ -854,8 +878,9 @@ finding** **[E]**:
 | 11+ | 856 | |
 
 - **59.7% of buildings hold exactly one device — and only 27.8% of all devices.**
-- **3,072 buildings (7.1%) hold 32,208 devices — 34.5% of the base — at 10.5 devices
-  each.**
+- **3,072 buildings (7.1%) hold 32,208 devices — 34.5% of the base.** The threshold is
+  **5 or more devices**; 10.5 is the *average* within that group, and only about 1,000
+  buildings hold 10 or more (A.0.3).
 
 **This is the economics of the trade in one table.** A third of the city's devices sit
 in 7% of its buildings. A mechanic servicing a 10-device building has no travel time
@@ -1052,7 +1077,7 @@ contradicted by an SEC filing.
 | Figure | Was | Now | Why |
 |---|---|---|---|
 | **PE share of US elevator units** | **"PE services ~10% of US elevator units"**, posted on Elevator Teardown Nº1, **sourced on the card to `elevatorworld.com · Dec 2025`** | **8–9%, labelled [E], arithmetic at D-1** | **Correction to this practice's own first finding, 2026-08-11.** An earlier pass reported the figure as traceable to no publisher. That was wrong, and the error was ours: the pass never had the deck spec in front of it, because the spec was in the engine repo, which was found empty the same day. The card *does* name a publisher and a date. What is true is narrower and still disqualifying: **the cited article is paywalled — 403 to direct fetch, reader proxy and Wayback — and was never read**, so its base year, its denominator, and whether PE-owned OEMs sit inside or outside that denominator are all unknown. A citation nobody in this practice has read is not a verified figure. Replaced by our own bottom-up estimate, labelled as one |
-| **The OEM / independent split** | **"OEMs hold ~60%. Independents still hold ~30%"**, same card, same source | **RETIRED — conflicts with a primary source** | **Otis's own 10-K states that independents hold approximately 50% of service units.** A company filing beats a paywalled trade article this practice has not read. The two cannot both be right, and the posted figure is the one with no primary standing. The three posted shares also sum to exactly 100%, which no real ownership estimate does |
+| **The OEM / independent split** | **"OEMs hold ~60%. Independents still hold ~30%"**, same card, same source | **RETIRED — unverified, and no primary figure exists to replace it** | **The basis for this retirement was itself corrected on 2026-08-11 — see A.0.3.** It first read "conflicts with a primary source", citing Otis's ~50% independents. That comparison does not hold: the Otis sentence is **global**, scoped "in most of our local geographies", and is not a US measurement. What survives is narrower and still sufficient — the posted split rests on a paywalled article nobody in this practice has read, and **no verified US OEM-versus-independent split exists at all.** The three posted shares also sum to exactly 100%, which no real ownership estimate does |
 | **Platform deal cadence** | "40 deals at the 2021 peak — and 10+ transactions every year since" | **UNVERIFIED — do not restate** | Same paywalled article, never read. Our own register verified 10 PE service platforms with dated add-ons, but nothing that reproduces a 2021 peak of 40 |
 | **Platform retention** | "Customer retention on the platform books typically exceeds 90%" | **UNVERIFIED — and the direction is wrong** | Same unread article. The one *disclosed* retention figure in this market is Otis's own, on the OEM's own book — the best case available — and it fell from 93.5% to 92.4%, with management saying a return to 94% "will take sustained time." A rising-or-stable ">90%" for independent platform books is not supported |
 | **Route density diagram** | "5 stops / route" vs "8 stops / route", rendered as a bar chart | **NO SOURCE ON THE CARD** | The page carries two figures and no `source:` line. The underlying point survives and is now much better evidenced — NYC device data shows 3,072 buildings holding 34.5% of all devices at 10.5 devices each (§8.3) — but the 5-versus-8 numbers are illustrative and were presented as measurements |
@@ -1073,7 +1098,7 @@ standing rule.**
 | **238290 employees per establishment** | "18.4 against 9.3 for construction overall" | **WITHDRAWN — never obtained** | The all-construction side verifies at **9.52** (CBP 2022). The 238290 side was never retrieved; every positional read of EC2223BASIC failed its arithmetic control. The contrast is not carried |
 | **NEII's A17.3 coverage** | treated as a usable adoption reference | **RETIRED as an adoption source** | NEII's Feb 2019 table is an **A17.1** tracker whose A17.3 column is blank for six states that do adopt it. Absence from it means nothing |
 | **Ohio and Colorado as A17.3 demand** | would have been counted as adopters | **counted, but as forcing no capex** | Ohio's OAC 4101:5-3-02(B) expressly bars retroactive application; Colorado exempts pre-7/1/2008 stock |
-| **TAKA Elevator ownership** | attributed to Otis (2019) in the source research | **Otis never bought it** | Service book to **KONE, 2019**; the company to **TEI Group, 2025-01-03** (register date also corrected from 2026-01-03). Maven's ledger, the origin of the Otis claim, contains no such row |
+| **TAKA Elevator ownership** | attributed to Otis (2019) in the source research | **Otis never bought it** | Service book to KONE in 2019 — **NOT FOUND on verification** and withdrawn (A.0.3); the company to **TEI Group, 2025-01-03** (register date also corrected from 2026-01-03). Maven's ledger, the origin of the Otis claim, contains no such row |
 | **Elevated Holdings footprint** | read as a contraction across three versions | **three dated snapshots, contraction withdrawn** | At the 4 Jun 2024 APi close: **over 18 states, ~600 employees, ~$220M** (APi's own release). The "22 states / 30+ markets" figure was Elevated's own 2023-10-23 rebrand release, not APi material. Now 57 markets / 21 states |
 | **Century Elevator** | carried as an Align vs Maven ownership conflict | **never a conflict** | One event: acquired by the Action platform 2024-09-03, the day it passed Align → H.I.G. Founder-owned since 1989 before that |
 | **Axxiom / Urban HQs** | conflicting cities | **Axxiom = Pompano Beach FL; Urban = Lombard IL (prior: Cicero IL)** | Company contact pages; Urban's was a relocation, not a conflict |
@@ -1082,6 +1107,71 @@ standing rule.**
 **Two discarded confabulations, named so they are recognisable:** 238290 = 37,894 and
 238220 = 122,826, both generated from a truncated Census endpoint and both breaking the
 238210 + 238220 + 238290 = 2382 identity. **Neither is a figure.**
+
+## A.0.3 — Corrections applied 2026-08-11, third pass (PRIMARY-SOURCE VERIFICATION)
+
+**This is job 2 — the pass the draft had not been through.** Every load-bearing figure
+was checked against the body that issued it. Findings are in
+`research/verification-pass-2026-08-11.md`, which is a source document and is therefore
+citable, which is what lets the corrected figures below pass an audit honestly.
+
+**The draft audited `✓ CLEAN` at 129 figures before this pass ran.** It still found a
+fabricated quotation and a scope error that had already been acted on. That is the
+whole argument for not stopping at a clean audit.
+
+### The two that mattered
+
+| Finding | What was carried | What the source says |
+|---|---|---|
+| **A FABRICATED QUOTATION** | Otis management saying a return to 94% retention *"will take sustained time"* (Marks, Q4 2024 call) | **No transcript contains that sentence.** Marks said close to the opposite — *"So, I do believe you'll see the retention rate go up again."* The 94% came from **analyst Jeffrey Sprague** recalling 2022: *"I had like 94% in '22 and 93.5% in '23."* An analyst's recollection had become a management benchmark carrying words management never said. **The 93.5% → 92.4% figures do verify** — *"going from 93.5% or so to 92.4%, some of that is involuntary"* |
+| **A SCOPE ERROR THAT HAD BEEN ACTED ON** | Otis's 10-K "concedes independents hold ~50% of service units", used in **A.0.1 to retire a published figure** on the grounds that it "conflicts with a primary source" | The sentence is real and verbatim — *"These independent service providers have an aggregate portfolio of about 50% of service units, but account for a smaller percentage of the service business when measured by value"* — but it sits under **Competition**, is scoped *"in most of our local geographies"*, and is **unchanged boilerplate across all five 10-Ks FY2021–FY2025. It is GLOBAL.** A published **US** figure cannot be retired on it. **A.0.1's retirement of the ~60%/~30% split stands, but on the narrower and correct ground: the posted split rests on a paywalled article nobody here has read, and no verified US split exists at all** |
+
+### Everything else the pass changed
+
+| Figure or claim | Was | Now |
+|---|---|---|
+| NEBA apprentice ratio | "a **1:1 hard cap** on helpers and apprentices per mechanic" | **A per-job ratio with an express exception.** Article X ¶2: the total of *Helpers, Apprentices and Assistant Mechanics* shall not exceed Mechanics *"on any one job, except on jobs where two teams or more are working"*. Three classifications, not two; per job, not per firm. The growth-ceiling argument survives; "hard cap" does not |
+| NFPA 101 §9.4.2.2 wording | quoted as *"shall be in accordance with the requirements of ASME A17.3…"* | **Section number and substance VERIFIED; the exact wording is not.** State reproductions read **"shall conform with"**. Quotation marks withdrawn and the requirement paraphrased. **§9.4.2.1 (new → A17.1/CSA B44) is verified verbatim.** NFPA 101 sits behind an account wall; no paywall was bypassed |
+| EC decision COMP/E-1/38.823 scope | scope "expressly covering *sale, installation, maintenance and modernisation*" | **That formula is not in the decision.** The Official Journal carries the opposite qualification for its largest component: *"with the exception of Germany where — to the knowledge of the Commission — services were not directly part of the cartel agreements."* **Germany is €617m of the €992m**, so the case is a much weaker analogue for a *service* thesis than the headline suggests |
+| EC fine total | "exceeding €992m" | **€992,312,200** — the decision prints no total; this is the sum of its own table (D-18) |
+| Otis maintained-portfolio growth | "grew 4% for a **fourth consecutive year**" | **"4% for the fourteenth consecutive quarter"** (Marks, Q4 2025 call). No source states the annual form |
+| Otis US share of revenue | 29.1% | **29.0%** — 4,192 ÷ 14,431 = 29.05% |
+| Schindler Americas quote | attributed to **the CFO**, about **revenue** | **Paolo Compagna, CEO**, FY2025 call 11 Feb 2026, about **maintenance portfolio UNITS** |
+| Schindler Americas −3.2% | a trading decline | **reported CHF**; the group grew 1.3% in local currencies, so it is partly currency |
+| All-construction employees per establishment | 9.3, then "corrected" to **9.52** | **9.32.** Both prior figures were wrong: 785,917 is the **FIRM** count, not establishments (803,120). *A correction that was itself a correction-to-another-guess — the third failure pattern, caught on its second occurrence* |
+| NAICS 2382 size-band percentages | shares of 203,401 establishments | shares of the **167,779 establishments operated the entire year**. Against the full total they are 43.38 / 60.32 / 71.48%. The entire-year base is the right one; the two must never be mixed |
+| KONE's 2010 acquisition | "Oregon Elevator" | **Reliant Elevator Co.** — the source said "an elevator service company in Oregon" and a description was read as a company name |
+| TAKA service book to KONE, 2019 | carried as fact | **NOT FOUND.** Withdrawn. The company sale to TEI Group on 2025-01-03, and that **Otis never acquired TAKA**, both verify |
+| California DIR determination | carried as current | **Expired 2023-12-31.** Rates unchanged and correct; now labelled point-in-time. Fringe load 69.03% |
+| Florida A17.3 deferral | "enforcement deferred to **8/1/2029**" | **No 2029 date exists in the rule.** §3.10.12 moves to 8/1/2025; a separate deferral for §§3.8.5, 3.10.13, 3.10.14, 3.13.1, 3.13.2 runs to **8/1/2028** |
+| NYC borough table base | implied the 92,075 permanent base | the **93,454 active** base — borough and type tables differ by the 1,379 construction devices |
+| NYC device concentration | "3,072 buildings … at 10.5 devices each" | threshold is **5 or more** devices; 10.5 is the average within that group, and only ~1,000 buildings hold 10 or more |
+| "94% replacement demand" | stated as BLS | **a derivation** (20,000 openings, 1,200 growth = 94.0%); the OOH never states it, and **"replacement demand" is the wrong term** — BLS counts occupational transfers plus labour-force exits |
+| IUEC membership 31,290 | carried with a source-interest note | **UNVERIFIABLE, and downgraded further.** OLMS could not be reached (egress policy; robots/TLS failure on `olmsapps.dol.gov`). The Center for Union Facts page cites "Office of Labor-Management Standards" with **no file number, no report id, no fiscal year, no link** — **a laundered citation by this practice's own test**. The "FY ending 30 June" claim is NOT FOUND. And 31,290 (union, US **and Canada**, including retirees) against BLS 23,990 (US occupational employment) would imply over 100% density if the two were ever juxtaposed |
+| NEBA "signed by all seven major OEMs" | carried as fact | **NOT FOUND.** Withdrawn |
+
+### What the pass CONFIRMED, which matters as much
+
+- **Otis's segment economics are exactly as carried** — 25.1% service against 4.8% new
+  equipment, $9,442m / $2,374m and $4,989m / $240m, 91% of segment operating profit
+  from 35% of sales. The central economic claim of the document is untouched.
+- **The KONE–TKE merger verifies in every element**, and the divestment provision is
+  real. KONE's own release: consideration *"would be adjusted in connection with
+  completion, based on (i) the terms and scope of any potential divestments of TKE's or
+  KONE's current business operations required for the satisfaction of regulatory
+  conditions"* — note it expressly covers **KONE's own operations too**. Two things the
+  draft had not carried and now should: completion also requires **KONE shareholder
+  approval**, and TKE is disclosed at **≈€20.5bn annual sales**.
+- **NEII's "A majority of this data was compiled in 2007" is verbatim** on the 2019
+  fact sheet — the sentence the whole vintage caveat rests on.
+- **Every New York computation reproduces**, cross-footed to control totals. Statuses
+  sum to exactly 120,256. One active device carries a NULL `bin`, so a naive
+  `GROUP BY` yields 43,455 groups and 32,210 devices — a plausible false "correction"
+  that the verification specifically checked and rejected.
+- **All four BLS wage figures are the same vintage** (OEWS May 2023 national, all last
+  modified 2024-04-03). Part VI is not built on a mismatch.
+- **Ohio's non-retroactivity clause verifies verbatim**, which is the finding that stops
+  an adoption count from being read as demand.
 
 ## Derivations
 
@@ -1100,7 +1190,7 @@ including them would change the answer by an order of magnitude.*
 **D-3 — Otis service share of segment profit.** $2,374 million ÷ $2,614 million = **90.8%**, against
 service being 35% of sales.
 
-**D-4 — Otis US share.** $4,192 million ÷ $14,431 million = **29.1%**.
+**D-4 — Otis US share.** 4,192 ÷ 14,431 ($m) = **29.05%**, stated as **29.0%**. *Earlier drafts printed 29.1% (A.0.3).*
 
 **D-5 — KONE installed-base share.** (EUR 4,753.6 million + EUR 2,394.0 million) ÷ EUR 11,245.2 million = **63.6%**.
 
@@ -1151,6 +1241,11 @@ absence of evidence across 27 parents, not a stated policy.*
 **1%** of the plumber 90th percentile. $102,420 ÷ $84,250 = **1.216**, i.e. the elevator
 median exceeds the HVAC 90th percentile by **21.6%**. $102,420 ÷ $57,300 = **1.79×** the
 HVAC median. *All four inputs are BLS OEWS May 2023, same vintage and same table.*
+
+**D-18 — EC cartel fine total.** The decision prints no total; the per-country table
+sums to **€992,312,200**. *Assumption stated as a limit: this is arithmetic on the
+published table, and €617m of it is Germany, where the Commission states services were
+not directly part of the agreements.*
 
 **D-17 — NAICS 238210 establishment count.** 203,401 (all of 2382) − 122,152 (the
 238220 + 238290 residual) = **81,249**. *Assumption stated as a limit: this is arithmetic
@@ -1237,7 +1332,7 @@ working access, not more searching.
 
 ## Sources
 
-Every research document behind this draft, acknowledged by name, with the source URLs it carries. 16 documents, 359 unique URLs.
+Every research document behind this draft, acknowledged by name, with the source URLs it carries. 17 documents, 409 unique URLs.
 
 ### `01-structure-scale-census.md` — 26 sources
 
@@ -1768,3 +1863,91 @@ Every research document behind this draft, acknowledged by name, with the source
 
 ### `14-posted-teardown-reconcile.md` — 0 sources
 
+
+### `verification-pass-2026-08-11.md` — 85 sources
+
+- https://www.sec.gov/Archives/edgar/data/1781335/000178133526000011/otis-20251231.htm
+- https://data.sec.gov/api/xbrl/companyconcept/CIK0001781335/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json
+- https://otisinvestors.com/news/news-details/2026/OTIS-REPORTS-FOURTH-QUARTER-AND-FULL-YEAR-2025-RESULTS/default.aspx
+- https://data.sec.gov/api/xbrl/companyconcept/CIK0001781335/us-gaap/OperatingIncomeLoss.json
+- https://www.fool.com/earnings/call-transcripts/2026/01/28/otis-otis-q4-2025-earnings-call-transcript/
+- https://www.investing.com/news/transcripts/earnings-call-transcript-otis-worldwide-q4-2025-misses-eps-stock-dips-93CH-4480941
+- https://www.fool.com/earnings/call-transcripts/2025/01/29/otis-worldwide-otis-q4-2024-earnings-call-transcri/
+- https://www.insidermonkey.com/blog/otis-worldwide-corporation-nyseotis-q4-2024-earnings-call-transcript-1439078/
+- https://www.gurufocus.com/term/ev2ebitda/OTIS
+- https://stockanalysis.com/stocks/otis/statistics/
+- https://www.prnewswire.com/news-releases/otis-acquires-bay-state-elevator-further-strengthens-presence-in-northeast-us-301113093.html
+- https://elevatorworld.com/news/daily-news/otis-acquires-eight-urban-elevator-locations/
+- https://www.jonesday.com/en/practices/experience/2025/04/urban-elevator-sells-eight-locations-to-otis
+- https://www.sec.gov/Archives/edgar/data/1781335/000178133526000011/R121.htm
+- https://efts.sec.gov/LATEST/search-index
+- https://www.kone.com/en/Images/KONE_Financial%20Statement%20Bulletin_2025_tcm17-141561.pdf
+- https://group.schindler.com/en/media/press-releases/annual-results-2025.html
+- https://group.schindler.com/content/dam/website/group/docs/investors/2025/2025-schindler-fy-financial-statements-en.pdf/_jcr_content/renditions/original./2025-schindler-fy-financial-statements-en.pdf
+- https://www.tkelevator.com/media/baet/publications/presentations/tke_company_presentation_apr-2026.pdf
+- https://www.kone.com/global/en/newsroom/releases/2026/inside-information--kone-and-tke-to-combine--creating-a-world-class-company-in-the-elevator-and-escalator-industry-2026-04-29.html
+- https://www.mitsubishielectric.com/en/pr/2026/pdf/0428_co1.pdf
+- https://www.mitsubishielectric.com/en/pr/2026/pdf/0428_co2.pdf
+- https://www.mitsubishielectric.com/sites/news/2024/pdf/0529-a5.pdf
+- https://www.bls.gov/oes/2023/may/oes474021.htm
+- https://www.bls.gov/ooh/construction-and-extraction/elevator-installers-and-repairers.htm
+- https://www.dir.ca.gov/OPRL/2023-1/PWD/Determinations/Southern/SC-062-X-999.pdf
+- https://olmsapps.dol.gov/query/orgReport.do?rptId=923620&rptForm=LM2Form
+- https://olmsapps.dol.gov/olpdr/
+- https://olmsapps.dol.gov/olpdr/rest/unionAnnualReports/923620
+- https://olmsapps.dol.gov/olpdr/Guide_to_Working_with_OLMS_LM_Data.pdf
+- https://olmsapps.dol.gov/Disclosure/
+- https://unionfacts.com/union/elevator_constructors/
+- https://www.iuec.org/about,
+- https://iuec.org/wp-content/uploads/2022-2027-NEBA-Agreement.pdf
+- https://dir.ca.gov/das/MITC/MITC/Elevator/ElevatorConstructorIndustryTraining.pdf
+- https://www.neiep.org/iuec-apprenticeship-faq/
+- https://www.bls.gov/oes/2023/may/oes499021.htm
+- https://www.bls.gov/oes/2023/may/oes472152.htm
+- https://www.neiep.org/
+- https://nationalelevatorindustry.org/wp-content/uploads/2019/08/matrixelevator.pdf
+- https://www.ashe.org/system/files/media/file/2021/02/ASHE-K-Tag-Crosswalk.pdf.pdf
+- https://roxana-il.org/wp-content/uploads/2020/06/2000-NFPA-101.pdf
+- https://law.cornell.edu/regulations/texas/26-Tex-Admin-Code-SS-510-124
+- https://www.cms.gov/Medicare/CMS-Forms/CMS-Forms/downloads/cms2786R.pdf
+- https://www.law.cornell.edu/regulations/texas/26-Tex-Admin-Code-SS-505-164
+- https://regulations.justia.com/states/florida/department-61/division-61c/chapter-61c-5/section-61c-5-0015/
+- https://archive.org/details/gov.law.asme.a17.2.2010
+- https://www.dir.ca.gov/title8/3141_6.html
+- https://nycadmincode.readthedocs.io/t28/c03/art304/
+- https://app.leg.wa.gov/RCW/default.aspx?cite=70.87.120
+- https://www.law.cornell.edu/regulations/illinois/Ill-Admin-Code-tit-41-SS-1000.140
+- https://www.nj.gov/dca/codes/codreg/pdf_regs/njac_5_23_12.pdf
+- https://www.nj.gov/dca/codes/publications/pdf_elevator/elvr_six_mo_check.pdf
+- https://codelibrary.amlegal.com/codes/newyorkcity/latest/NYCadmin/0-0-0-158093
+- https://regulations.justia.com/states/maryland/title-09/subtitle-12/chapter-09-12-81/section-09-12-81-04-1/
+- https://regulations.justia.com/states/texas/title-16/part-4/chapter-74/section-74-72/
+- https://regulations.justia.com/states/florida/department-61/division-61c/chapter-61c-5/section-61c-5-001/
+- https://codes.ohio.gov/ohio-administrative-code/rule-4101:5-3-01
+- https://codes.ohio.gov/ohio-administrative-code/rule-4101:5-3-02
+- https://rules.sos.ga.gov/gac/120-3-25
+- https://www.ilga.gov/commission/jcar/admincode/041/041010000000600R.html
+- https://www.law.cornell.edu/regulations/texas/16-Tex-Admin-Code-SS-74-100
+- https://app.leg.wa.gov/WAC/default.aspx?cite=296-96-00650
+- https://nationalelevatorindustry.org/wp-content/uploads/2019/08/CodeAdoption.pdf
+- https://regulations.justia.com/states/colorado/1100/1101-d-2/rule-7-ccr-1101-8/article-2/section-7-ccr-1101-8-2-7/
+- https://law.justia.com/cases/federal/appellate-courts/ca2/06-3128/06-3128-cv_opn-2011-03-27.html
+- https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:52008XC0326(01
+- https://nationalelevatorindustry.org/wp-content/uploads/2020/07/NEII-Fact-Sheet-2020.pdf
+- https://nationalelevatorindustry.org/wp-content/uploads/2019/02/Fact-Sheet.pdf
+- https://controller.lacity.gov/audits/elevating-safety-audit-of-the-department-of-building-safetys-elevator-inspection-program
+- https://data.census.gov/api/access/data/table?id=ECNBASIC2022.EC2223BASIC&g=010XX00US&n=238290&y=2022
+- https://data.census.gov/api/access/data/table?id=ECNLOCCONS2022.EC2223LOCCONS&g=010XX00US&n=2382&y=2022
+- https://data.census.gov/api/access/data/table?id=CBP2022.CB2200CBP&g=010XX00US&n=23&y=2022
+- https://www.bls.gov/oes/2022/may/naics5_238290.htm
+- https://www.bls.gov/oes/2023/may/naics5_238290.htm
+- https://www.sec.gov/Archives/edgar/data/1796209/000162828024026540/apg-2024604xexx991.htm
+- https://www.prnewswire.com/news-releases/elevated-facility-services-unveils-rebranding-and-new-direction-for-growing-company-301963441.html
+- https://www.tkelevator.com/media/usa_canada/press_releases_us_ca/archive_7/20210503-tke-albany.pdf
+- https://nwlaborpress.org/2010/0604/6-4-10IUEC.html
+- https://www.kone.com/en/news-and-insights/releases/kone-acquires-elevator-service-company-in-oregon-usa.aspx
+- https://www.prnewswire.com/news-releases/kone-acquires-eagle-elevator-in-minneapolis-minnesota-usa-149815085.html
+- https://teigroup.com/Northeast-Region/news-article.php?id=182
+- https://data.cityofnewyork.us/resource/e5aq-a4j2.json.
+- https://data.ny.gov/resource/cxfs-ya8e.json
+- https://data.ny.gov/resource/jrac-r9vc.json
