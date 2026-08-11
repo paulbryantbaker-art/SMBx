@@ -425,26 +425,73 @@ function useScrollFill(ref: React.RefObject<HTMLElement | null>, count: number) 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if (!window.matchMedia('(min-width: 1025px)').matches) return;
     let raf = 0;
+    let timer = 0;
+    let target = 0;
+
+    /* THE PACED STEPPER (2026-08-11, Paul: "the bricks loading in was awkward
+       and too fast and didn't load all of them"). The first cut mapped the
+       revealed count STRAIGHT off the scroll offset, which was wrong twice
+       over: a fast scroll snapped half the wall in at once (the "too fast"),
+       and on a tall monitor the page RAN OUT OF SCROLL before the formula
+       reached 1.0 — the last cells sat at opacity 0 forever, an unfillable
+       beige hole (the "didn't load all of them", visible in his screenshot).
+
+       So scroll now sets a TARGET and this stepper walks toward it one brick
+       per tick, whatever the scroll velocity. The cadence is the wall's own
+       approved pace (85ms a brick, from the CSS cascade this replaced). */
+    const step = () => {
+      timer = 0;
+      setN(prev => {
+        const cur = prev < 0 ? 0 : prev;
+        if (cur >= target) return prev;
+        if (cur + 1 < target) timer = window.setTimeout(step, 85);
+        return cur + 1;
+      });
+    };
+    const nudge = () => { if (!timer) timer = window.setTimeout(step, 0); };
+
     const read = () => {
       raf = 0;
       const el = ref.current;
       if (!el) return;
       const r = el.getBoundingClientRect();
       const vh = window.innerHeight;
-      // Travel runs from the grid's top crossing 88vh to its bottom clearing
-      // ~26vh, so the last cell lands while the grid is still fully on screen
-      // rather than as it leaves.
-      const span = r.height + vh * 0.62;
-      if (span <= 0) return;
-      const p = (vh * 0.88 - r.top) / span;
-      const v = Math.max(0, Math.min(count, Math.round(p * count)));
-      setN(cur => (cur === v ? cur : v));
+
+      /* Fully below the viewport → reset, so the wall re-lays on the next pass
+         (the site-wide replay law: reveals must work every rescroll). */
+      if (r.top >= vh) {
+        target = 0;
+        if (timer) { clearTimeout(timer); timer = 0; }
+        setN(cur => (cur > 0 ? 0 : cur));
+        return;
+      }
+
+      /* THE COMPLETION GUARANTEE: the moment the whole grid is on screen,
+         everything is due — no formula, no dependence on how much page
+         remains below. This is what makes the tall-monitor hole impossible:
+         a grid you can SEE is a grid that finishes. */
+      let t: number;
+      if (r.bottom <= vh) {
+        t = count;
+      } else {
+        const span = r.height + vh * 0.62;
+        const p = (vh * 0.88 - r.top) / span;
+        t = Math.max(0, Math.min(count, Math.round(p * count)));
+      }
+      /* Monotonic while in view: scrolling back up a little must not un-lay
+         bricks mid-read — only a full exit below the fold resets. */
+      if (t > target) { target = t; nudge(); }
     };
     const on = () => { if (!raf) raf = requestAnimationFrame(read); };
     window.addEventListener('scroll', on, { passive: true });
     window.addEventListener('resize', on);
     read();
-    return () => { if (raf) cancelAnimationFrame(raf); window.removeEventListener('scroll', on); window.removeEventListener('resize', on); };
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      if (timer) clearTimeout(timer);
+      window.removeEventListener('scroll', on);
+      window.removeEventListener('resize', on);
+    };
   }, [ref, count]);
   return n;
 }
