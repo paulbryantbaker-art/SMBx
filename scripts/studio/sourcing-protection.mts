@@ -48,7 +48,9 @@
  * ── THE FIVE CARD FLAGS ───────────────────────────────────────────────────
  *   SELF                 the line cites the practice, with no instrument beside it
  *   OPAQUE               nothing on the line can be opened by a reader
- *   MONOCULTURE          every named source is one class, and none is an instrument
+ *   MONOCULTURE          every named source is one class, and none is terminal
+ *                        (an issuer's own DISCLOSURE counts as terminal as to
+ *                        itself — Paul, 2026-08-12 — but never as to its market)
  *   SYNDICATION RISK     two same-class non-instrument sources dated within 14 days
  *   UNDISCLOSED INTEREST an advisory or association that sells into the market
  *                        it is measuring, named without qualification
@@ -762,6 +764,33 @@ function testLine(where: string, line: string, copy: string): LineResult {
   if (!srcs.length) return res;
 
   const instruments = srcs.filter(s => s.cls === 'instrument');
+  /* THE ISSUER RULE (Paul, 2026-08-12: "yes, we cite what they said").
+     A company's own regulated disclosure IS the primary source for facts
+     about that company. Otis stating Otis's service margin is terminal — no
+     government table restates a filer's segment result, and demanding one
+     would mean the best evidence that exists cannot satisfy the check.
+
+     THE BOUNDARY, and it is the whole of the difference: this holds for what
+     the issuer says ABOUT ITSELF. A filer's claim about the SIZE OF ITS
+     MARKET is the filer citing someone else, or estimating — not a
+     disclosure, and not terminal. No class system can see that distinction;
+     it is a scope question, it is the "relabelled total" failure pattern from
+     job 2, and it stays a human read. What the machine can see is whether a
+     DISCLOSURE is named on the line at all, so that is what it tests. */
+  const DISCLOSURE = new RegExp([
+    /10-?K|10-?Q|8-?K|20-?F|6-?K|S-1|DEF ?14A|EX-99|form [0-9]|accession|EDGAR/.source,
+    /proxy|prospectus|offering circular|exhibit/.source,
+    /annual report|interim report|half-year|quarterly report/.source,
+    /inside[- ]information|regulatory (?:release|announcement)/.source,
+    /* An earnings call and an investor day are Reg FD events: the company on
+       the record about itself, transcribed and archived. The house writes them
+       as "Q4 2025 call" and "investor day, 21 May 2025", so the pattern has to
+       recognise the house's own shorthand or the rule only works on paper. */
+    /earnings (?:call|release)|(?:Q[1-4]|FY) ?\d{0,4} (?:call|results|earnings)/.source,
+    /investor day|capital markets day|analyst day/.source,
+  ].join('|'), 'i');
+  const disclosures = srcs.filter(s => s.cls === 'issuer' && DISCLOSURE.test(s.raw));
+  const terminal = [...instruments, ...disclosures];
   const named = srcs.filter(s => s.cls !== 'opaque');
   const classes = new Set(named.map(s => s.cls));
 
@@ -811,7 +840,9 @@ function testLine(where: string, line: string, copy: string): LineResult {
      single one of those is noise. Two dated events from one issuer is the
      shape that reads as two data points and is one. */
   const alreadyOpaque = res.flags.some(f => f.flag === 'OPAQUE');
-  if (!instruments.length && named.length && !selfs.length && !alreadyOpaque &&
+  if (disclosures.length && !instruments.length)
+    res.notes.push(`terminal on the issuer's own disclosure — ${disclosures.map(d => d.raw).join('; ')}. Primary as to the filer itself; NOT a source for the size of its market.`);
+  if (!terminal.length && named.length && !selfs.length && !alreadyOpaque &&
       res.corroborated === undefined) {
     const onlyClass = classes.size === 1 ? [...classes][0] : null;
     const enough = onlyClass === 'issuer' ? named.length >= 2 : named.length >= 1;
@@ -1262,9 +1293,13 @@ if (corpusFiles.length) {
          unrecognised origin and the claim cannot be made — it may be the
          statute. Unclassified is reported as unclassified. */
       const cls = [...classes.values()];
+      /* Same rule at corpus scale: an issuer origin is terminal as to itself.
+         The corpus cannot see whether the citing line named a filing, so it
+         takes the issuer class as terminal and reports it — visibly — rather
+         than calling a filer's own result unsupported. */
       if (attributed.length >= 3 && origins.size >= 1 &&
         cls.every(c => c !== 'unknown') &&
-        !cls.some(c => c === 'instrument') &&
+        !cls.some(c => c === 'instrument' || c === 'issuer') &&
         cls.some(c => RELAY.includes(c)))
         noInstrument.push(row);
     }
@@ -1409,6 +1444,10 @@ if (belowFloor || (!findings && blindFigures)) {
 }
 
 console.log('\nWhat this cannot do, and it is most of what matters:');
+console.log("  · An issuer's disclosure counts as terminal AS TO ITSELF. It cannot see");
+console.log('    whether the figure is a fact about the filer or a claim about the filer\'s');
+console.log('    MARKET — the second is the filer citing someone else, and is not terminal.');
+console.log('    That is a scope question and it stays a human read.');
 console.log('  · It cannot tell whether a source actually SUPPORTS the claim. A card can');
 console.log('    cite a statute that says something else, and this passes it. Fire-safety');
 console.log('    p9 cited the right state for the wrong credential and would clear here.');
