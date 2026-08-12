@@ -16,17 +16,11 @@
 /* ── Keyframes (names verbatim from the reference) ── */
 @keyframes smbxMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @keyframes smbxOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-/* The counter-turn. A chip ATTACHED to the ring has to travel with it (Paul:
-   "the labels on the ball need to rotate with the ball as they are attached")
-   — but a word carried around a rim upside-down is unreadable for half of
-   every revolution. So the chip is nested: the positioner rides the spinning
-   layer, and this animation runs the SAME 360° backwards on the label inside
-   it, at the same duration and easing. The chip orbits; the word stays level.
-   Both are `linear` and both start on mount, so they cannot drift apart.
-   THE TWO DURATIONS MUST MATCH — 210s here and 210s on `.ca-orbit-hero > div`.
-   Change one without the other and the word slowly cartwheels. */
-@keyframes smbxOrbitCCW { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
-.ca-chip-level { display: inline-block; animation: smbxOrbitCCW 210s linear infinite; }
+/* The counter-turn is RETIRED (2026-08-12): the hero rings no longer rotate
+   (see THE RING BUILDS ITSELF below), so there is no spin for a label to
+   counter and the old "TWO DURATIONS MUST MATCH" coupling law retires with
+   it. The class stays because the chip markup still nests through it. */
+.ca-chip-level { display: inline-block; }
 
 /* The orbit settles into place on load (2026-08-08, Paul: "animate this
    little guy more on load to give a slight bouncing into place feel … maybe
@@ -51,28 +45,70 @@
     smbxOrbit 60s linear infinite,
     smbxOrbitIn 1150ms cubic-bezier(0.33, 0.9, 0.35, 1) 500ms both;
 }
-/* THE BALL SPINS AGAIN, AND THE OBJECTION THAT STOPPED IT WAS SOLVABLE
-   (2026-08-09, Paul: "i thought the ball was supposed to spin, showing
-   different labels for the stages of the process?").
+/* THE RING BUILDS ITSELF (2026-08-12, measured from Paul's carta.com
+   walkthrough video — CartaDesign.mp4, frames at 16fps). Their globe never
+   rotates: on a ~7s loop it DISSOLVES, a node appears, the meridians sweep
+   in, the sphere completes, the label chips pop on one at a time, it holds,
+   and it rebuilds. Construction, not rotation — the diagram assembles the
+   way the product assembles a cap table. Ours now runs the same story on an
+   8s cycle: solid arcs draw in over ~2.1s (stroke-dash on a pathLength=100
+   normalised path), the dashed ellipse fades in behind them, the chips pop
+   at ~2.7s and ~3.3s, everything holds ~3.7s, dissolves over ~0.6s, repeats.
 
-   I had stilled it because the chips are HTML siblings of the spinning layer,
-   so a rotating rim slides out from under its own labels. True — but only for
-   a chip pinned to an ELLIPSE. The outer CIRCLE is rotation-invariant: its top
-   and left points are in the same place at every angle. So the chips move onto
-   the circle, the ellipses keep spinning underneath, and both things are true
-   at once. 210s rather than the corner mark's 60s: same 360° over a rim four
-   times longer, so the surface speed is calmer than the small mark's, not
-   faster (Paul: "slow down the spin on the labels, it just looks like they
-   are flickering" — the flicker was mostly the WORD swap, since retimed in
-   Landing.tsx, but the rim came down with it). Keep this equal to the
-   counter-turn on `.ca-chip-level`.
-
-   The labels are the seven PHASES now, cycled in the markup — which is what
-   was actually being asked for. The ring is a process, not two nouns. */
-.ca-orbit-hero > div {
-  animation:
-    smbxOrbit 210s linear infinite,
-    smbxOrbitIn 1150ms cubic-bezier(0.33, 0.9, 0.35, 1) 500ms both;
+   Mechanics that matter:
+   - Every element runs the SAME 8s/0.5s-delay cycle; the stagger lives in
+     the KEYFRAME PERCENTAGES, never in animation-delay — a per-element delay
+     shifts that element's whole loop, so its fade-out trespasses into the
+     next build (tried, looked broken).
+   - `backwards` fill so the 0.5s entrance delay (landing after the hero
+     cascade, same reason as the old settle) shows the 0% frame, not a flash
+     of the finished ring.
+   - The spin is gone HERE ONLY: `animation: none` beats the base
+     `.ca-orbit > div` rule, so the small corner marks keep the house 60s
+     spin + settle exactly as shipped.
+   - Under reduced motion the guard at the foot kills the animations and the
+     ring renders COMPLETE: dasharray 100 with pathLength 100 at the default
+     offset 0 is the full stroke, and the chips' base opacity is 1 — the 0%
+     hidden states live only inside the keyframes. */
+.ca-orbit-hero > div { animation: none; }
+.ca-orbit-hero .ca-arc-draw {
+  stroke-dasharray: 100;
+  animation: caArcDraw 8s linear 0.5s infinite backwards;
+}
+.ca-orbit-hero .ca-arc-fade {
+  animation: caArcFade 8s linear 0.5s infinite backwards;
+}
+@keyframes caArcDraw {
+  0%        { stroke-dashoffset: 100; opacity: 0; }
+  3%        { opacity: var(--arc-op, 0.45); }
+  26%       { stroke-dashoffset: 0; }
+  88%       { stroke-dashoffset: 0; opacity: var(--arc-op, 0.45); }
+  95%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes caArcFade {
+  0%, 16%   { opacity: 0; }
+  30%       { opacity: var(--arc-op, 0.62); }
+  88%       { opacity: var(--arc-op, 0.62); }
+  95%, 100% { opacity: 0; }
+}
+/* The chips pop AFTER the arcs complete — first the top node, then the left,
+   the same one-at-a-time entrance their CAP TABLE / FUND chips make. `scale`
+   not `transform`: the positioner's inline transform owns the centring. */
+.ca-chip-pop-a { animation: caChipPopA 8s cubic-bezier(0.3, 0.85, 0.35, 1) 0.5s infinite backwards; }
+.ca-chip-pop-b { animation: caChipPopB 8s cubic-bezier(0.3, 0.85, 0.35, 1) 0.5s infinite backwards; }
+@keyframes caChipPopA {
+  0%, 30%   { opacity: 0; scale: 0.82; }
+  34%       { opacity: 1; scale: 1.05; }
+  37%       { scale: 1; }
+  88%       { opacity: 1; scale: 1; }
+  95%, 100% { opacity: 0; scale: 1; }
+}
+@keyframes caChipPopB {
+  0%, 37%   { opacity: 0; scale: 0.82; }
+  41%       { opacity: 1; scale: 1.05; }
+  44%       { scale: 1; }
+  88%       { opacity: 1; scale: 1; }
+  95%, 100% { opacity: 0; scale: 1; }
 }
 
 /* ── HERO GEOMETRY: exactly one ring, ever (2026-08-08) ──
@@ -160,6 +196,88 @@
   100% { opacity: 1; transform: rotateX(0); }
 }
 .ca-flip { display: inline-block; transform-origin: 50% 50%; animation: caFlipIn 460ms cubic-bezier(0.3, 0.85, 0.35, 1) both; }
+
+/* A word that TYPES (2026-08-12, from the carta.com video: their "Connect
+   ___" panel types its rotating word letter by letter, then the diagram's
+   pills pop in — the page reads as a system doing work, not a slideshow).
+   The ring chips use this instead of the flip; the who-marks keep flipping.
+   Width-steps on a MONO face: the chip font is IBM Plex Mono, so 1ch is one
+   glyph exactly — but letter-spacing (0.08em) is NOT inside ch, and browsers
+   append it after every glyph including the last, so the target width is
+   n × (1ch + 0.08em) or the final letter clips. The right border is the
+   caret: green while typing, gone 900ms after the word lands. Both durations
+   derive from --n (≈110ms/char, Carta's measured cadence), so long words
+   type longer instead of faster. The keyed remount in the markup restarts
+   the pair on every word swap. */
+.ca-type {
+  display: inline-block; overflow: hidden; white-space: nowrap; vertical-align: bottom;
+  width: calc(var(--n) * (1ch + 0.08em));
+  border-right: 2px solid transparent;
+  animation:
+    caType calc(var(--n) * 110ms) steps(var(--n), end) 120ms both,
+    caCaret calc(var(--n) * 110ms + 900ms) linear 120ms both;
+}
+@keyframes caType { from { width: 0; } to { width: calc(var(--n) * (1ch + 0.08em)); } }
+@keyframes caCaret {
+  0%, 78% { border-right-color: #0A7A58; }
+  100%    { border-right-color: transparent; }
+}
+
+/* THE SPOTLIGHT RELAY (2026-08-12, from the video's stat carousel: Carta
+   shows ONE giant numeral at a time, ~3s dwell, and each number gets its
+   moment. Our proof band keeps all five nodes — the stat-set law values the
+   density — but borrows the moment: a mint rule sweeps open under one node
+   at a time, 3s each, 15s round trip. Mint, not Deal Green: the band is
+   near-black and green node TEXT is the documented contrast trap; a 2px
+   mint edge is the sanctioned mint-on-dark job. The delay comes from an
+   inline --spot-delay on each node (set in the Landing map), NOT nth-of-type
+   — the chain interleaves wires and corner handles, so positional selectors
+   would count the wrong children the day the markup gains a child.
+   Desktop-only: below 900 the band is the audited 2-up grid and stays
+   byte-identical. */
+@media (min-width: 1025px) {
+  [data-proof] .ch-node { position: relative; }
+  [data-proof] .ch-node::after {
+    content: ''; position: absolute; left: 20px; right: 20px; bottom: 16px; height: 2px;
+    background: #A8F0CE; transform: scaleX(0); opacity: 0;
+    animation: caSpot 15s linear infinite;
+    animation-delay: var(--spot-delay, 0s);
+  }
+}
+@keyframes caSpot {
+  0%        { transform: scaleX(0); opacity: 0; }
+  3%        { transform: scaleX(1); opacity: 1; }
+  17%       { transform: scaleX(1); opacity: 1; }
+  20%, 100% { transform: scaleX(0); opacity: 0; }
+}
+
+/* THE FUNNEL ASSEMBLES (2026-08-12, from the video's product heroes: their
+   floating UI fragments pop in one after another over the photo — the
+   product builds itself in front of you. The sample read is our version of
+   that surface, so its chain now assembles when it enters view: node, wire,
+   node, wire — 240ms a beat, the 9 landing last. Rides the existing reveal
+   observer (data-rv + rv-in), so it replays on every rescroll per the
+   replay law. The container NEUTRALIZES the standard [data-rv] block-fade
+   at every width (two-attribute specificity beats practice.css's one), and
+   the hidden base state for children lives only ≥1025 — the audited phone
+   page renders exactly as before, reveal system untouched. The dot-field
+   ornament is a classless child, so the .ch-node/.ch-wire selectors leave
+   it be. */
+[data-rv][data-assemble] { opacity: 1; translate: none; transition: none; }
+@media (min-width: 1025px) {
+  [data-assemble] > .ch-node, [data-assemble] > .ch-wire { opacity: 0; }
+  [data-assemble] > .ch-wire { transform-origin: 0 50%; }
+  [data-assemble].rv-in > .ch-node { animation: caNodeIn 480ms cubic-bezier(0.3, 0.85, 0.35, 1) calc(var(--as) * 240ms) both; }
+  [data-assemble].rv-in > .ch-wire { animation: caWireIn 420ms cubic-bezier(0.3, 0.85, 0.35, 1) calc(var(--as) * 240ms) both; }
+}
+@keyframes caNodeIn {
+  from { opacity: 0; scale: 0.9; translate: 0 10px; }
+  to   { opacity: 1; scale: 1; translate: 0 0; }
+}
+@keyframes caWireIn {
+  from { opacity: 0; scale: 0 1; }
+  to   { opacity: 1; scale: 1 1; }
+}
 
 /* BRICKS, LAID BOTTOM-UP IN COURSES (2026-08-09, second pass — Paul: "let's
    stack in the industry grid like bricks being stacked").
@@ -939,4 +1057,14 @@
   .ca-orbit, .ca-orbit > div { animation: none !important; }
   .ca-caret { animation: none !important; }
   .pd-map > *, .pd-map .map-step { animation: none !important; }
+  /* Construction pass (2026-08-12): with the animations off, every element's
+     BASE state is the finished one — dasharray 100 over pathLength 100 at
+     offset 0 is the full arc, chip and node base opacity is 1, the typed
+     word's base width is its full width, and the spotlight rule's base
+     scaleX(0) keeps it invisible. Only [data-assemble]'s children need the
+     explicit opacity, because their hidden state is a base style. */
+  .ca-orbit-hero svg *, .ca-chip-pop-a, .ca-chip-pop-b { animation: none !important; }
+  .ca-type { animation: none !important; border-right-color: transparent !important; }
+  [data-proof] .ch-node::after { animation: none !important; }
+  [data-assemble] > .ch-node, [data-assemble] > .ch-wire { opacity: 1 !important; animation: none !important; }
 }
