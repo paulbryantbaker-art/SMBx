@@ -156,3 +156,21 @@ heading followed by the four fields, in order.
 - requires: NEBA|agreement|sign|signed|signatories
 - ledger: A.0.3
 - verdict: NOT FOUND on verification. Withdrawn.
+
+### R-EL-024 · Otis service share of sales
+- pattern: 35% of its sales
+- requires: service|Service|Otis|segment|profit
+- ledger: A.0.4
+- verdict: RETIRED — FALSE as written. Service is 65.4% of Otis's sales (9,442 ÷ 14,431); 35% is NEW EQUIPMENT. The sentence inverted the argument it was making. "New equipment is 35% of sales and 9% of segment profit" is the true and stronger form. Every component was individually verified and the assembled sentence was not — check composed claims, not just figures.
+
+### R-EL-025 · the A17.3 adoption count
+- pattern: twelve states
+- requires: A17.3|adopt|adopted|retroactive|modernization
+- ledger: A.0.4
+- verdict: CORRECTED to nine states on their own instruments, plus Vermont from a summary source. New York City and Chicago are CITIES and were being counted as states.
+
+### R-EL-026 · New York unfiled five-year tests
+- pattern: 10,000
+- requires: five-year|Category 5|CAT5|never filed|unfiled|New York|NYC
+- ledger: A.0.4
+- verdict: CORRECTED to 8,442. The 10,000 summed Category 5 never-filed (8,442) with Category 1 never-filed (1,691), two populations that may overlap.

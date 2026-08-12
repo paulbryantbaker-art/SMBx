@@ -29,7 +29,7 @@ export const deck = {
       numeral: '25.1',
       unit: '%',
       head: 'is what the manufacturers earn servicing elevators. They earn 4.8% selling them.',
-      body: 'Otis reported both in the same filing. Service is 35% of its sales and 91% of its segment operating profit. Nobody in this trade is really in the equipment business.',
+      body: 'Otis reported both in the same filing. New equipment is 35% of its sales and 9% of its segment profit. Service is the other 65%, and 91%. Nobody in this trade is really in the equipment business.',
       source: 'Otis Worldwide FY2025 10-K · 31 Dec 2025',
     },
     {
@@ -86,7 +86,7 @@ export const deck = {
   caption: [
     'Elevator service companies look boring. The buyer math is anything but.',
     '',
-    'Otis earns 25.1% servicing elevators and 4.8% selling them. Service is 35% of its sales and 91% of its segment operating profit.',
+    'Otis earns 25.1% servicing elevators and 4.8% selling them. New equipment is 35% of its sales and 9% of its segment profit. Service is the other 65%, and 91%.',
     '',
     'That gap exists because the revenue is required. A building cannot lawfully run an elevator without a written maintenance plan for that unit, and the code sets the inspection clock — every year, and a heavier test every five.',
     '',

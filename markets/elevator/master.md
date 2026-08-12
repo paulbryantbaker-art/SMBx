@@ -37,12 +37,13 @@ second is why the multiple has not run away.
    A17.3** — the retroactive code — and **CMS adopted the 2012 Life Safety Code, with
    tag K531 on its survey form**, so every Medicare- or Medicaid-participating
    facility in the country is inside that requirement **whether or not its state
-   adopts A17.3** **[D]**. Twelve states adopt it directly on top of that. This is a
+   adopts A17.3** **[D]**. Nine states adopt it directly on top of that, plus New York City and Chicago. This is a
    stronger legal basis than anything in home services.
 
 2. **The service annuity is where all the profit is.** Otis's service segment runs a
-   **25.1% operating margin against 4.8% on new equipment — a 20.3pp gap**, and 35% of
-   sales produces **91% of segment operating profit** **[D/E]**. Otis maintains
+   **25.1% operating margin against 4.8% on new equipment — a 20.3pp gap**. New
+   equipment is 35% of sales and **9%** of segment operating profit; service is the
+   other 65%, and **91%** **[D/E]**. Otis maintains
    **~2.5m units globally** **[D]**. Its 10-K puts independents at about **50% of
    service units** by count and a smaller share by value — but **that sentence is
    global, sits under *Competition*, is scoped "in most of our local geographies", and
@@ -352,8 +353,7 @@ Built from primary code instead:
 | **Idaho** | A17.3-2015 | | adopted **[D]** |
 | **Ohio** | A17.3-2020 | OAC 4101:5-3-01, eff. 7/1/2024 | **⚠ ADOPTED BUT NOT RETROACTIVE.** OAC 4101:5-3-02(B) expressly bars retroactive application *"to existing elevators that are not otherwise being altered or repaired"* — **Ohio forces no capex** **[D]** |
 
-**Twelve states adopt A17.3** (the ten above plus Chicago and Vermont, both from
-summary sources only). **Ohio and Colorado are the cautionary pair: adoption alone
+**Nine states adopt A17.3 on their own instruments** — Florida, Georgia, Illinois, Michigan, Texas, Washington, Colorado, Idaho and Ohio. Vermont is carried from a summary source only. **New York City and Chicago are cities, not states**, and adopt separately. **Ohio and Colorado are the cautionary pair: adoption alone
 does not mean forced capex**, and a map that counts adopters without reading the
 retroactivity clause overstates demand.
 
@@ -436,7 +436,7 @@ because global figures are routinely misread as US figures.
 - **Margin gap: 25.1 − 4.8 = 20.3 percentage points**; service margin is **5.23×**
   new equipment **[E]**.
 - **The gap is widening:** FY2024 was 18.5pp, so it moved **1.8pp in one year** **[E]**.
-- Otis's own framing: 35% of sales produces **91% of segment operating profit**
+- Otis's own framing: new equipment is 35% of sales and produces **9% of segment operating profit**
   (2,374 ÷ 2,614 = 90.8%, both $m) **[D/E]**.
 - **US net sales 4,192 ($m) = 29.0% of total** **[D/E]** — 4,192 ÷ 14,431 = 29.05%.
 
@@ -1032,7 +1032,7 @@ sponsor process exists.**
    §5.3 tested, not assumed.
 3. **Modernization, and it is bigger than an adoption map suggests (§3.4)** — the
    NFPA 101 → CMS path makes A17.3 compliance national for health-care facilities
-   regardless of state adoption, and twelve states adopt it directly on top. **Health
+   regardless of state adoption, and nine states adopt it directly on top. **Health
    care is therefore the single best-defined modernization demand pool in this
    market.** Read the retroactivity clause before sizing any state: Ohio adopts A17.3
    and expressly bars retroactive application, and Colorado exempts everything
@@ -1093,7 +1093,7 @@ standing rule.**
 
 | Figure or claim | Was | Now | Why |
 |---|---|---|---|
-| **A17.3's reach** | "three-state", with modernization sizing explicitly gated pending NFPA 101 §9.4 | **Effectively national for health care, plus twelve states directly** | NFPA 101 §9.4.2.2 read as code text in two editions, corroborated by CMS-2786R tag K531 and 26 TAC §505.164. **This enlarges the thesis; it was carried as a risk and resolved in favour of the market** |
+| **A17.3's reach** | "three-state", with modernization sizing explicitly gated pending NFPA 101 §9.4 | **Effectively national for health care, plus nine states and two cities directly** | NFPA 101 §9.4.2.2 read as code text in two editions, corroborated by CMS-2786R tag K531 and 26 TAC §505.164. **This enlarges the thesis; it was carried as a risk and resolved in favour of the market** |
 | **A17.1 §8.6.1.4.1 / §8.6.1.4.2** | cited as five-year on-site record retention and callback logs | **WITHDRAWN — sub-citations unsettled** | In the edition actually read, those sections govern record *contents* and *availability to elevator personnel*. Searches for "retained", "on site" and "callback" found neither. The MCP requirement at §8.6.1.2 is unaffected and is now confirmed from ASME's own A17.2-2010 |
 | **238290 employees per establishment** | "18.4 against 9.3 for construction overall" | **WITHDRAWN — never obtained** | The all-construction side verifies at **9.52** (CBP 2022). The 238290 side was never retrieved; every positional read of EC2223BASIC failed its arithmetic control. The contrast is not carried |
 | **NEII's A17.3 coverage** | treated as a usable adoption reference | **RETIRED as an adoption source** | NEII's Feb 2019 table is an **A17.1** tracker whose A17.3 column is blank for six states that do adopt it. Absence from it means nothing |
@@ -1154,7 +1154,7 @@ whole argument for not stopping at a clean audit.
 
 - **Otis's segment economics are exactly as carried** — 25.1% service against 4.8% new
   equipment, $9,442m / $2,374m and $4,989m / $240m, 91% of segment operating profit
-  from 35% of sales. The central economic claim of the document is untouched.
+  against 9% for new equipment. The central economic claim of the document is untouched.
 - **The KONE–TKE merger verifies in every element**, and the divestment provision is
   real. KONE's own release: consideration *"would be adjusted in connection with
   completion, based on (i) the terms and scope of any potential divestments of TKE's or
@@ -1173,6 +1173,25 @@ whole argument for not stopping at a clean audit.
 - **Ohio's non-retroactivity clause verifies verbatim**, which is the finding that stops
   an adoption count from being read as demand.
 
+## A.0.4 — Corrections applied 2026-08-11, fourth pass (SOURCE-INDEPENDENCE REVIEW)
+
+**Why this pass exists.** A published carousel in another market was publicly called AI
+slop on the grounds that its sources all referenced each other. That prompted an
+adversarial re-reading of this market's collateral **before** it posted. The three
+findings below are not citation-independence failures — they are worse, because every
+one of them passed a clean audit and a primary-source verification pass.
+
+**The lesson is specific: `audit.mts` checks that each figure appears in a source, and
+job 2 checks each figure against its issuer. Neither checks the SENTENCE that assembles
+verified figures into a claim.** All three below are composed claims built from
+individually correct components.
+
+| Claim | Was | Now | Why |
+|---|---|---|---|
+| **Otis service share of sales** | "Service is **35%** of its sales and 91% of its segment operating profit" — on the master, the report, deck Nº1 page 1 **and verbatim in the LinkedIn caption** | **New equipment is 35% of sales and 9% of segment profit; service is the other 65%, and 91%** | 9,442 ÷ 14,431 = **65.4%**. 35% is New Equipment. The sentence inverted the deck's own thesis, required no filing to falsify, and would have been the first thing a hostile reader attacked. Every component figure was individually verified; the sentence assembling them was never checked |
+| **A17.3 adoption count** | "**Twelve states** adopt A17.3" | **Nine states on their own instruments**, plus Vermont from a summary source, plus **New York City and Chicago, which are cities, not states** | The twelve was built by counting two municipal adoptions as state adoptions |
+| **New York unfiled Category 5 tests** | "Roughly **10,000** devices have never had their five-year test filed" (deck Nº2) | **8,442** | The 10,000 summed two different populations — 8,442 Category 5 never filed and 1,691 Category 1 never filed — which may overlap. The master's own text is correct; the deck overstated it |
+
 ## Derivations
 
 **D-1 — PE share of US elevator units, bottom-up.** PE-backed roll-up unit counts, where
@@ -1187,8 +1206,7 @@ including them would change the answer by an order of magnitude.*
 **D-2 — Otis service margin gap.** 25.1% − 4.8% = **20.3pp**. Ratio 25.1 ÷ 4.8 =
 **5.23×**. FY2024 gap 18.5pp, so movement = 20.3 − 18.5 = **+1.8pp**.
 
-**D-3 — Otis service share of segment profit.** $2,374 million ÷ $2,614 million = **90.8%**, against
-service being 35% of sales.
+**D-3 — Otis service share of sales and of segment profit.** Revenue share: 9,442 ÷ 14,431 = **65.4%** for service, so new equipment is **34.6%**, stated as 35%. Profit share: $2,374 million ÷ $2,614 million = **90.8%** for service, so new equipment is **9.2%**. *The pairing matters: 35% of sales belongs to NEW EQUIPMENT, not to service. Earlier drafts attached it to service and inverted the argument (A.0.4).*
 
 **D-4 — Otis US share.** 4,192 ÷ 14,431 ($m) = **29.05%**, stated as **29.0%**. *Earlier drafts printed 29.1% (A.0.3).*
 

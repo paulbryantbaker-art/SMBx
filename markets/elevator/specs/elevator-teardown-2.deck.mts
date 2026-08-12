@@ -30,10 +30,10 @@ export const deck = {
     },
     {
       kind: 'numeral',
-      numeral: '12',
+      numeral: '9',
       unit: 'states',
-      head: 'adopt the retroactive code directly. That number is the reason people underestimate this.',
-      body: 'Counting states misses how the obligation actually travels. The national life-safety code points existing elevators at that same retroactive standard — and Medicare adopted the 2012 edition of it. Its hospital survey form carries the line item by name.',
+      head: 'adopt the retroactive code on their own instruments. That number is the reason people underestimate this.',
+      body: 'New York City and Chicago adopt separately, as cities. But counting jurisdictions misses how the obligation actually travels. The national life-safety code points existing elevators at that same retroactive standard — and Medicare adopted the 2012 edition of it. Its hospital survey form carries the line item by name.',
       source: 'NFPA 101 §9.4.2.2 · CMS-2786R tag K531',
     },
     {
@@ -59,7 +59,7 @@ export const deck = {
       numeral: '≈700',
       unit: 'devices',
       head: 'per licensed contractor in New York — before the manufacturers take their share.',
-      body: 'The city registers 92,075 permanent devices against 132 licensed elevator contractors and 78 inspection agencies. Roughly 10,000 of those devices have never had their five-year test filed at all. That is either a data gap or an enforcement one. Worth knowing which before you price a book.',
+      body: 'The city registers 92,075 permanent devices against 132 licensed elevator contractors and 78 inspection agencies. 8,442 of those devices have never had their five-year test filed at all. That is either a data gap or an enforcement one. Worth knowing which before you price a book.',
       source: 'NYC DOB NOW · NYS Dept of Labor · 11 Aug 2026',
     },
     {
@@ -90,7 +90,7 @@ export const deck = {
     '',
     'There are two elevator codes. One governs new installations. The other governs the elevators already in your building — and it applies backwards.',
     '',
-    'Twelve states adopt that retroactive code directly, which is the number people quote and the reason they underestimate it.',
+    'Nine states adopt that retroactive code on their own instruments — plus New York City and Chicago as cities. That count is what people quote, and the reason they underestimate it.',
     '',
     'Here is how it actually travels: the national life-safety code points existing elevators at that same standard, and Medicare adopted the 2012 edition. The hospital survey form carries the line item by name.',
     '',

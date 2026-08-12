@@ -27,11 +27,11 @@ accent: 6.1 The active base | band-highrise.jpg | 50% 50%
 
 - **Maintenance is a compliance obligation, not a service contract.** ASME A17.1 §8.6.1.2 requires a written, unit-specific Maintenance Control Program — scheduled tasks, procedures, examinations, tests and as-built wiring diagrams — for every unit in service. ASME's own A17.2-2010 refers to "the maintenance control program (MCP) as required by 8.6.1.2.1," and states enforce it directly: Florida 61C-5.0015 attaches deadlines to it. On top of that sits a fixed testing clock, reproduced identically in six states' own binding rules: **Category 1 at 12 months, Category 3 at 36 months, Category 5 at 60 months**, with periodic inspection annually. New Jersey requires escalator inspection every six months. Recurring revenue a code requires is a different asset from recurring revenue a customer renews.
 
-- **Modernization is mandated nationally, and almost nobody frames it that way.** Twelve states adopt ASME A17.3, the retroactive code for *existing* equipment. That undersells it. **NFPA 101 §9.4.2.2 requires existing elevators to conform to A17.3**, and CMS adopted the 2012 Life Safety Code — its survey form CMS-2786R carries tag K531, "Existing elevators conform to ASME/ANSI A17.3." Every Medicare- or Medicaid-participating facility in the country therefore sits inside the requirement regardless of what its state adopts. Texas cites the section by number at 26 TAC §505.164. Health care is the best-defined modernization demand pool in this market.
+- **Modernization is mandated nationally, and almost nobody frames it that way.** Nine states adopt ASME A17.3 on their own instruments, with New York City and Chicago adopting separately as cities. That undersells it. **NFPA 101 §9.4.2.2 requires existing elevators to conform to A17.3**, and CMS adopted the 2012 Life Safety Code — its survey form CMS-2786R carries tag K531, "Existing elevators conform to ASME/ANSI A17.3." Every Medicare- or Medicaid-participating facility in the country therefore sits inside the requirement regardless of what its state adopts. Texas cites the section by number at 26 TAC §505.164. Health care is the best-defined modernization demand pool in this market.
 
 - **Read the retroactivity clause before sizing any state.** Adoption alone does not force capital expenditure. Ohio adopts A17.3-2020 at OAC 4101:5-3-01 and then expressly bars retroactive application at OAC 4101:5-3-02(B) — "not to be retroactively applied to existing elevators that are not otherwise being altered or repaired." Colorado exempts everything installed before 1 July 2008. Georgia and Florida, by contrast, carry real dated schedules. An adoption count read as demand overstates the market.
 
-- **The service annuity is where all the profit is, and the manufacturers know it.** Otis Worldwide reported FY2025 service revenue of 9,442 against new equipment of 4,989 ($m), at operating margins of **25.1% and 4.8%** — a 20.3 percentage-point gap that widened 1.8 points from FY2024. Thirty-five per cent of sales produced **91%** of segment operating profit. KONE's installed-base businesses are 63.6% of sales; TK Elevator's are 65% as stated. The manufacturers are not equipment companies with a service arm.
+- **The service annuity is where all the profit is, and the manufacturers know it.** Otis Worldwide reported FY2025 service revenue of 9,442 against new equipment of 4,989 ($m), at operating margins of **25.1% and 4.8%** — a 20.3 percentage-point gap that widened 1.8 points from FY2024. New equipment was 35% of sales and produced **9%** of segment operating profit; service was 65% of sales and produced **91%**. KONE's installed-base businesses are 63.6% of sales; TK Elevator's are 65% as stated. The manufacturers are not equipment companies with a service arm.
 
 - **The constraint on an independent's route book is real, permanent and lawful.** *In re Elevator Antitrust Litigation* (2d Cir., 06-3128-cv, 4 September 2007) records the mechanism in the plaintiffs' own words — refusal to sell competitors "the parts, tools, software or diagrams," and "embedded computer systems that can only be interfaced with defendant-controlled handheld units" — and affirms dismissal, because no prior course of dealing had been terminated. There is no successor case and no right-to-repair statute reaches elevators. Which route books are contestable depends on the controller population inside them, and that is published nowhere.
 
@@ -69,9 +69,9 @@ The annuity has a fixed rhythm, and it reproduces identically across six states'
 
 Six independent state citations returning the same 12/36/60 structure is a strong result. Every unit generates a mandated billable event annually and a larger one every five years, and Part VI computes what that workload amounts to in a single metropolitan area.
 
-## 1.3 Modernization is mandated nationally, not in twelve states
+## 1.3 Modernization is mandated nationally, not in a handful of states
 
-Twelve states adopt **ASME A17.3**, the retroactive safety code for *existing* elevators and escalators. Counting them understates the mandate substantially.
+Nine states adopt **ASME A17.3** on their own instruments — the retroactive safety code for *existing* elevators and escalators — with New York City and Chicago adopting separately as cities. Counting jurisdictions understates the mandate substantially.
 
 **NFPA 101 §9.4.2.2 requires existing elevators, escalators, dumbwaiters and moving walks to conform to ASME A17.3.** The companion provision, §9.4.2.1, points *new* installations at ASME A17.1/CSA B44 and is verified verbatim. The consequence runs through federal healthcare regulation: **CMS adopted the 2012 Life Safety Code**, and its survey instrument **CMS-2786R carries tag K531 — "Existing elevators conform to ASME/ANSI A17.3."** Every Medicare- or Medicaid-participating facility in the United States therefore sits inside the A17.3 requirement, whatever its state does. Texas cites the section by number at 26 TAC §505.164.
 
@@ -129,7 +129,7 @@ Certification runs under ASME QEI-1. **Three ANAB-accredited certifying organisa
 | — Modernization | 1,858 | | |
 | Total | 14,431 | | |
 
-The margin gap is **20.3 percentage points**, and service margin is 5.23 times new-equipment margin. The gap widened 1.8 points from FY2024's 18.5. Thirty-five per cent of sales produced **91%** of segment operating profit. United States net sales were 4,192 ($m), **29.0%** of the total.
+The margin gap is **20.3 percentage points**, and service margin is 5.23 times new-equipment margin. The gap widened 1.8 points from FY2024's 18.5. New equipment was 35% of sales and produced **9%** of segment operating profit; service was 65% of sales and produced **91%**. United States net sales were 4,192 ($m), **29.0%** of the total.
 
 The other four, each in its own reporting currency:
 
@@ -444,7 +444,7 @@ The register's own behaviour supplies the boundary: below approximately 750 cont
 
 | Figure | Was | Now | Why |
 |---|---|---|---|
-| A17.3 reach | three states, modernization sizing gated | **National for health care, plus twelve states** | NFPA 101 §9.4.2.2 read as code text, corroborated by CMS-2786R tag K531 and 26 TAC §505.164 |
+| A17.3 reach | three states, modernization sizing gated | **National for health care, plus nine states and two cities** | NFPA 101 §9.4.2.2 read as code text, corroborated by CMS-2786R tag K531 and 26 TAC §505.164 |
 | A17.1 §8.6.1.4.1 / §8.6.1.4.2 | cited for record retention and callback logs | **Withdrawn** | Those sections govern record contents and availability in the edition read |
 | 238290 employees per establishment | "18.4 against 9.3 for construction" | **Withdrawn** | The 238290 side was never obtained |
 | NEII A17.3 coverage | treated as an adoption reference | **Retired for that use** | It is an A17.1 tracker whose A17.3 column is blank for six adopting states |
