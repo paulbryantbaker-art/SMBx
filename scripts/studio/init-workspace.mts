@@ -125,6 +125,14 @@ law('content/studio/PLAYBOOK.md', 'PLAYBOOK.md');
 law('content/studio/FORMATS.md', 'FORMATS.md');
 law('content/studio/DESIGN.md', 'DESIGN.md');
 law('content/studio/RESEARCH.md', 'RESEARCH.md');
+/* THE MACHINE (2026-08-12, Paul: "give Cowork the DL for the new element to
+   be used in collateral"). MACHINE.md is the design language + content law;
+   machine.html is the runnable element itself — a self-contained animated
+   diagram a session copies beside a piece, edits the SPEC of, and Paul
+   screen-records for video slideshows. The HTML travels like engagements.mjs:
+   a tool, not a law, but it has to BE here or a session can't use it. */
+law('content/studio/MACHINE.md', 'MACHINE.md');
+law('scripts/studio/machine.html', 'machine.html');
 /* The standing job for the Saturday agent (2026-08-10). It travels with the
    workspace for the same reason the other laws do: a scheduled session opens
    on this folder with nothing but what is in it, so the prompt has to be here
