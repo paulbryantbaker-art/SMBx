@@ -1,62 +1,100 @@
 /**
- * WORKED EXAMPLE + FIELD REFERENCE — D02 "Elevator Teardown Nº1".
- * This is the shape every deck spec takes. To make a new slot: copy this
- * file, change the copy, point `cover.image` / `headshot` at your images
- * (a Google-Drive download or a path under content/media/), then:
+ * THE MESSAGE. Check whose controllers are in the route book and who pays for the callbacks before you look at the revenue line.
  *
- *   npx tsx scripts/studio/build-deck.mts scripts/studio/decks/<name>.deck.mts
+ * Elevator service reads as a boring maintenance business. The money is in the service
+ * contract, the contract is required by law, and the two things that decide whether a
+ * book is worth owning appear on neither the profit statement nor the balance sheet.
  *
- * Page kinds available in `pages` (all light; cover + closer are dark and
- * auto-added as the bookends):
- *   { kind:'numeral',   numeral, unit?, head, body?, source? }   giant figure + brass bar
- *   { kind:'statement', tag, tagColor?:'green'|'brass', head, body?, source? }
- *   { kind:'diagram',   tag, head, body?, source?, connector?, bars:[{label,sub,style:'ink'|'green',h}] }
- *   { kind:'trade',     name, image?, imagePos?, numeral?, unit?, head, body?, source? }
- *
- * IMAGES: `trade` is the ONLY body page with an image slot (404×604, object-fit
- * cover — request 3:4 from Gemini and keep the subject centred). An `image:` key
- * on any other page kind is silently dropped: the build succeeds and the picture
- * simply is not there. The cover has its own slot (476×1102, request 9:16).
- * Full slot table and the imagery brief: content/studio/FORMATS.md.
- *
- * LAW: every number/source must be VERIFIED (zero hallucination). Keep the
- * headline copy tight; the deck carries the depth, the caption hooks.
+ * REBUILD, 2026-08-11. This replaces the originally posted Nº1. Five figures on that
+ * version were retired by correction ledgers A.0.1 and A.0.3 in
+ * markets/elevator/master.md — four of them rested on one trade article nobody in
+ * this practice had read, and one bar chart carried no source at all. Every figure
+ * below comes from a filing, a government table, a code, or a public registry, and
+ * every one survived primary-source verification on 2026-08-11.
  */
 export const deck = {
   slug: 'elevator-teardown-1',
   kicker: 'LANE TEARDOWN Nº1',
-  // A real slot points cover.image at your artwork (Gemini export in Drive,
-  // or content/media/…). This example uses a repo photo so it renders anywhere.
+
   cover: {
-    hook: 'The buyer math on independent elevator service',
-    sub: "Where the consolidation actually is — and the two traps in the book you'd be buying.",
-    image: '../../../client/public/founder-walking.webp',
-    imagePos: '50% 30%',
+    hook: 'The buyer math on independent elevator service.',
+    sub: 'Where the money actually is — and the two things that decide whether a route book is worth owning.',
+    image: 'elevator-teardown-1-cover.png',
+    imagePos: '50% 40%',
   },
+
   pages: [
-    { kind: 'numeral', numeral: '~10', unit: '%', head: 'of U.S. units are maintained by PE-backed platforms — early, not hot.', body: 'OEMs hold ~60%. Independents still hold ~30%. The lane has started moving; it has not moved.', source: 'elevatorworld.com · Dec 2025' },
-    { kind: 'numeral', numeral: '40', head: 'deals at the 2021 peak — and 10+ transactions every year since.', body: 'Steady volume, not a spike. PE has outpaced the OEMs on both count and acquired revenue.', source: 'elevatorworld.com · Dec 2025' },
-    { kind: 'statement', tag: 'THE REVENUE ENGINE', head: 'Maintenance contracts.', body: 'Recurring, sticky, priced below the majors. Customer retention on the platform books typically exceeds 90% — the contract base is the asset; install work is just how it grows.', source: 'elevatorworld.com · Dec 2025' },
-    { kind: 'diagram', tag: 'ROUTE DENSITY', head: 'Route density is the margin.', body: 'Same payroll, three more stops. Density is why the dense-metro book earns more than the scattered one.', connector: 'vs', bars: [
-      { label: '5', sub: '5 stops / route', style: 'ink', h: 200 },
-      { label: '8', sub: '8 stops / route', style: 'green', h: 320 },
-    ] },
-    { kind: 'statement', tag: 'THE MOAT', head: 'Licensed technicians are scarce.', body: 'Whoever holds the techs holds the market. The U.S. runs 1.03M+ elevators; the IUEC roster is roughly 30,000 constructors — and that covers the U.S. and Canada. Headcount is the constraint every buyer is really bidding on.', source: 'nationalelevatorindustry.org · iuec.org' },
-    { kind: 'statement', tag: 'TRAP Nº1 — ASSIGNABILITY', tagColor: 'brass', head: "Change-of-control clauses can vaporize the book you're buying.", body: 'The maintenance contracts are the asset. Read every one before you price them — some walk away at closing.' },
-    { kind: 'statement', tag: 'TRAP Nº2 — DEFERRED MAINTENANCE', tagColor: 'brass', head: 'The P&L hides what the route sheets show.', body: "Skipped visits inflate this year's margin and next year's callbacks. Diligence the route sheets, not just the statements." },
+    {
+      kind: 'numeral',
+      numeral: '25.1',
+      unit: '%',
+      head: 'is what the manufacturers earn servicing elevators. They earn 4.8% selling them.',
+      body: 'Otis reported both in the same filing. Service is 35% of its sales and 91% of its segment operating profit. Nobody in this trade is really in the equipment business.',
+      source: 'Otis Worldwide FY2025 10-K · 31 Dec 2025',
+    },
+    {
+      kind: 'statement',
+      tag: 'WHY IT RECURS',
+      head: 'The maintenance contract is not a sale. It is a legal obligation.',
+      body: 'A building cannot lawfully run an elevator without a written maintenance plan for that specific unit — tasks, procedures, tests, wiring diagrams. Then the code sets the clock: a full inspection every year, a heavier test every five. Revenue a code requires behaves nothing like revenue a customer renews.',
+      source: 'ASME A17.1 §8.6.1.2 · Florida 61C-5.0015',
+    },
+    {
+      kind: 'diagram',
+      tag: 'ROUTE DENSITY',
+      head: 'Two books. Same unit count. Different business.',
+      body: 'In New York most buildings have a single elevator — and together they hold barely a quarter of the city’s devices. A small group of buildings holds a third of them, five and more at a time. A mechanic working the second group barely gets in the van.',
+      source: 'NYC Open Data · DOB NOW · 11 Aug 2026',
+      connector: 'vs',
+      bars: [
+        { label: '27.8%', sub: 'of devices, in the 59.7% of buildings holding one', style: 'ink', h: 200 },
+        { label: '34.5%', sub: 'of devices, in the 7.1% holding five or more', style: 'green', h: 248 },
+      ],
+    },
+    {
+      kind: 'numeral',
+      numeral: '1.79',
+      unit: '×',
+      head: 'what an elevator mechanic earns against a heating and cooling technician.',
+      body: 'The median is $102,420 — within one percent of what a plumber earns at the ninetieth percentile. The trade is unionised, and the ratio of apprentices to mechanics is capped on every job. You cannot hire your way into capacity here. You buy it.',
+      source: 'BLS OEWS · May 2023 · SOC 47-4021',
+    },
+    {
+      kind: 'statement',
+      tag: 'TRAP Nº1 — WHOSE CONTROLLER',
+      tagColor: 'brass',
+      head: 'Some route books cannot be serviced by you at any price.',
+      body: 'A federal appeals court described the mechanism in 2007. Manufacturers declining to sell competitors the parts, tools, software and diagrams. Control systems that only their own handhelds talk to. Then it dismissed the case. It is documented, and it is lawful. Which units you can actually work on depends on what controllers sit in the book, and nobody publishes that. Ask for the asset register. A seller who cannot produce one has told you something.',
+      source: 'In re Elevator Antitrust Litigation · 2d Cir. · 4 Sep 2007',
+    },
+    {
+      kind: 'statement',
+      tag: 'TRAP Nº2 — WHO EATS THE CALLBACK',
+      tagColor: 'brass',
+      head: 'The cheap contract is not the cheap contract.',
+      body: 'Every tier does the same code-required work. What differs is who absorbs parts and emergency callbacks. Run four callbacks a year against a loaded California wage and a double-time overtime rule, and at the bottom of real published contract pricing the callbacks alone eat most of the revenue. That is why cheap contracts exclude parts, and why one of them limits service to weekday daytime. Read the tier mix before you read the revenue line.',
+      source: 'Wisconsin contract 19-5971 · CA DIR SC-62-X-999-2023-1',
+    },
   ],
+
   closer: {
     tag: 'FOR THE ACQUIRER',
-    head: 'Early lane. Sticky revenue. Scarce techs. Own a city, then the region.',
-    body: 'Follow for weekly lane maps. Next Tuesday: fire & life safety.',
+    head: 'Required revenue. Scarce mechanics. A moat you have to check unit by unit.',
+    body: 'Follow for weekly lane maps. Nº2 goes deeper on the mandate — and on the one deal that could put real density on the market.',
   },
-  // headshot: '../../../client/public/founder-portrait.jpg' is the default.
+
   caption: [
     'Elevator service companies look boring. The buyer math is anything but.',
     '',
-    "PE-backed platforms now maintain roughly 1 in 10 U.S. elevators — OEMs still hold ~60%, independents ~30%.",
+    'Otis earns 25.1% servicing elevators and 4.8% selling them. Service is 35% of its sales and 91% of its segment operating profit.',
     '',
-    "That's not a hot lane. It's an EARLY lane. Different things entirely.",
+    'That gap exists because the revenue is required. A building cannot lawfully run an elevator without a written maintenance plan for that unit, and the code sets the inspection clock — every year, and a heavier test every five.',
+    '',
+    'Two things decide whether a route book is worth owning, and neither shows up on a P&L:',
+    '',
+    '1. Whose controllers are in it. A federal appeals court described manufacturers declining to sell competitors the parts, tools and software — in 2007 — and dismissed the case. Some books you cannot service at any price.',
+    '',
+    '2. Who eats the callback. Every contract tier does the same code-required work. They differ on who pays when the phone rings at 2am.',
     '',
     'Full teardown in the carousel →',
     '',
