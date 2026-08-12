@@ -74,8 +74,7 @@ export const deck = {
       kind: 'statement',
       tag: 'WHAT TO DO NOW',
       head: 'Be positioned before the remedy phase, not after the announcement.',
-      body: 'A buyer with capital committed and a named geography is in a different conversation than one reacting to a press release. In the meantime the ground below the sponsors is open. Beneath roughly 750 contracted units we found no private-equity process at all. And no platform holds the Interior Mountain West, the Northern Plains, Appalachia or Northern New England.',
-      source: 'smbX.ai consolidator register · 11 Aug 2026',
+      body: 'A buyer with capital committed and a named geography is in a different conversation than one reacting to a press release. And below the size at which sponsors run a process, the ground is open — our own count of published sponsor deals finds whole regions with no platform in them. That count is ours, it is in the full assessment with its method, and it is the one number on this deck you should make me show my working on.',
     },
   ],
 

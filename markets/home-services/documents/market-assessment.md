@@ -116,11 +116,11 @@ The asset being bought is not trucks or dispatch. It is the **service agreement*
 
 - Well-managed operations retain **80–90%** of maintenance customers annually. A substantial share of high-margin replacement revenue originates from the maintenance base, because technicians identify aging equipment on scheduled visits.
 - Buyers compute ARR from active agreements and apply a gross-margin filter, typically **45–60%** for HVAC maintenance. They then scrutinize churn, cohort tenure, contract enforceability, and **auto-charge penetration**; a book above 90% auto-charge materially alters diligence outcomes.
-- **The 40% threshold:** Crossing ≈40% recurring revenue re-rates the asset from "contractor" to "platform." A company with 30%+ maintenance revenue commands a **1–2 turn premium** over an identical-revenue peer below 15% recurring. The landscape report goes further, putting the swing from recurring-revenue mix at **±3–4 turns** (a $4M-EBITDA shop at 60% recurring trades 8–9x versus 5–6x at 20% recurring).
+- **The re-rating is real; the threshold is not.** A heavier recurring book re-rates the asset from "contractor" to "platform," and buyers underwrite it that way. But every published crossing point for where that happens — the re-rating threshold, the premium over a lighter-book peer, and the unnamed landscape report's turn swing with its worked example — was carried from the pre-verification synthesis and traces to no publisher (A.0.6). The qualitative point survives. No number does.
 
 ## 1.7 "The Trap" at closing
 
-Residential customers are loyal to the **technician**, not the brand. Service agreements can carry change-of-control provisions, and attrition rises when integration disrupts service quality. One documented case lost **15% of its member base** after centralized pricing changes. Map technician retention and audit the contractual language of the recurring book **before LOI**. A buy-and-hold owner has no flip mechanism if the technicians and the customer book walk after closing.
+Residential customers are loyal to the **technician**, not the brand. Service agreements can carry change-of-control provisions, and attrition rises when integration disrupts service quality. The one member-base loss case in circulation has no source and is retired (A.0.6); the failure mode it names is real, and members leave when integration changes what they were sold. Map technician retention and audit the contractual language of the recurring book **before LOI**. A buy-and-hold owner has no flip mechanism if the technicians and the customer book walk after closing.
 
 ---
 
@@ -286,7 +286,7 @@ Most platforms are private. Where EV, revenue or EBITDA are undisclosed, the est
 
 *Worked example (Strikepoint):* ≈2,700 employees × $180K = ≈$486M revenue; 15% margin = ≈$73M EBITDA; 13x = **≈$950M EV (estimated)**.
 
-*Framework caveats:* headcounts blend techs, CSRs and back-office staff, which understates per-tech productivity. Recurring-revenue mix swings multiples ±3–4 turns and is unobservable from outside. Commercial-mechanical platforms trade on backlog and data-center logic, so they are tabled separately.
+*Framework caveats:* headcounts blend techs, CSRs and back-office staff, which understates per-tech productivity. Recurring-revenue mix moves multiples and is unobservable from outside; the turn-swing figure this caveat used to quote had no named publisher and is retired (A.0.6). Commercial-mechanical platforms trade on backlog and data-center logic, so they are tabled separately.
 
 ## 4.2 Master platform table — residential HVAC/plumbing/electrical (sorted by EV)
 
@@ -641,7 +641,7 @@ Together they support **≈$7,500 average, $5,000–$16,000 typical, and ≈$22,
 ## 8.4 Seasonality, working capital, and pricing pressure
 
 - **Seasonality:** HVAC demand and CPL swing hard with weather, and single-season operators are less attractive to platforms. Platforms smooth the curve with multi-trade mix, maintenance-plan recurring revenue, and geographic spread across heating and cooling climates.
-- **Maintenance-plan penetration:** published figures scatter. CT Acquisitions quotes 35–50% at platform scale on the same page as 40-60% and 50%+, while its April 2026 Multiples Report is materially lower — HVAC recurring penetration low <10%, market 15–30%, premium 40%+. Use **40%+ as the premium/platform threshold**. The same report puts pest control at 60–75% market and 80%+ premium.
+- **Maintenance-plan penetration:** published figures scatter. CT Acquisitions quotes 35–50% at platform scale on the same page as 40-60% and 50%+, while its April 2026 Multiples Report is materially lower — HVAC recurring penetration low <10%, market 15–30%, premium 40%+. **The scatter is the finding.** No threshold survives it, and none is stated here (A.0.6). The same report puts pest control at 60–75% market and 80%+ premium.
 - **Working capital:** true-ups cost sellers $100K–$500K at close, and lean-AR/heavy-AP operators can owe money at close.
 - **The capacity paradox:** Jobber's *Blue Collar Strong: The 2026 Home Service Trends Report* (2026-03-25; n=1,050 home-service business owners, ±3% at 90% confidence) finds **72% "consistently booked with limited availability"** plus **8% "at capacity and turning away new work"** — the 80% figure — against **3% reporting difficulty filling their schedule**. HVAC shows the strongest booking rates. Demand is not the constraint. Labor is.
 - **Pricing:** PE platforms exercise pricing power and raise faster than inflation, while independents absorb the lead-cost and materials squeeze. The 2026 public-comp evidence (§4.6) says this is now the entire growth story: price up, volume flat to down.
@@ -669,7 +669,7 @@ The standard buyer levers are QofE add-back rejection (5–15% of headline EBITD
 
 - **Months 1–3 — visibility and control:** convert cash-basis books to accrual/GAAP; build departmental P&Ls by service line (residential vs. commercial, install vs. break-fix); centralize HR, payroll, dispatch, and fleet.
 - **Months 4–6 — leverage scale:** renegotiate materials, vehicles, and equipment with distributors and OEMs on national pricing. Distributors that once managed dozens of fragmented relationships now face a sophisticated procurement organization. Optimize marketing with forensic CPL, book-rate, and close-rate tracking.
-- **Throughout — protect the facade:** keep the legacy family name and logo on the trucks and replace the financial, technological, and operational plumbing behind it. Keep **pricing and dispatch local for the first ≈12 months**. Heavy early centralization triggers the documented attrition failure mode, the 15% member-base loss case.
+- **Throughout — protect the facade:** keep the legacy family name and logo on the trucks and replace the financial, technological, and operational plumbing behind it. Keep **pricing and dispatch local for the first ≈12 months**. Heavy early centralization triggers the attrition failure mode described in §1.7.
 - **Margin target:** 18–22% EBITDA within 24 months of integration.
 
 ## 9.4 "Roll-up of the roll-ups" risk
@@ -690,7 +690,7 @@ A historically high number of PE-backed platforms are seeking exits in 2026–20
 
 ## 10.2 Value-creation levers to underwrite
 
-- **Recurring revenue is the #1 multiple driver**, worth 3–4 turns. Push maintenance-plan penetration toward 40%+ and auto-charge toward 90%.
+- **Recurring revenue is the #1 multiple driver.** Push maintenance-plan penetration up and auto-charge toward 90%. The turn count and the penetration threshold this line used to carry are retired for want of a publisher (A.0.6); the lever is not.
 - **Procurement consolidation:** equipment, refrigerant, and fleet insurance (telematics). Independents overpay 10–20%+ on these lines.
 - **Tech stack pre-exit:** FSM and KPI dashboards lift the multiple in diligence; accrual books plus departmental P&Ls close the information-asymmetry gap.
 - **Technician engine:** centralized recruiting and retention is the scaling gate, not capital.
@@ -1008,6 +1008,30 @@ One correction to the standing text, and the provenance of the new Part XI.
   location file was re-checked adversarially: 26 checks, zero refutations, three
   citation-level corrections registered in the pass.
 
+## A.0.6 Corrections applied 2026-08-06 — the percentage pass
+
+**Why this pass exists.** The citation guard's figure pattern could never match a
+percentage — `%` is a non-word character and the pattern ended in a word
+boundary. From the day that guard was written until 2026-08-06, **no percentage
+in this document, or in any deck built from it, was ever audited.** The
+extractor was repaired and everything re-checked.
+
+### Retired — no source
+
+| Claim | Finding |
+|---|---|
+| The recurring-revenue re-rating threshold, the maintenance-revenue premium over a lighter-book peer, and the unnamed landscape report's turn swing with its worked example (§1.6, §4.1, §8.4, §10.2) | **NOT FOUND.** Present in this document's pre-verification ancestors only; absent from every research file and every verification pass. The nearest verified material is CT Acquisitions on maintenance penetration — and A.1 already records that publisher's figures as unreliable as stated. The qualitative re-rating point survives; the thresholds do not. |
+| The member-base loss after centralized pricing changes (§1.7, §9.3) | **NOT FOUND.** No research document, no verification pass, no named publisher. The structural warning survives without the figure. |
+| The PE share of tracked HVAC deals derived from the 39-of-77 pair (`## Derivations`) | **RETIRED.** The counts could not be verified at primary source (A.0.3 §D) and the series was mis-dated by a full year. Only the Capstone 47-of-92 pair is carried. |
+
+### Corrected
+
+| Item | Correction |
+|---|---|
+| Roofing firms under twenty employees, as published in `home-services-teardown` | The deck said "about 91%"; §2.2 and the CRS table say **90.8%**. A rounded figure is a different figure. |
+
+**Everything else passed.** Apart from the items above, every figure re-traced.
+
 ## A.1 Reconciled data conflicts across the three source documents
 
 | Item | Conflict | Resolution used |
@@ -1078,7 +1102,7 @@ One correction to the standing text, and the provenance of the new Part XI.
 
 ## Sources
 
-Figures trace to the documents in `research/`, to the correction ledgers A.0.1–A.0.3, or to the derivations registered below.
+Figures trace to the documents in `research/`, to the correction ledgers A.0.1–A.0.6, or to the derivations registered below.
 
 | Source document | What it carries |
 |---|---|
@@ -1250,6 +1274,34 @@ Every URL below appears in one of the three files in `research/` and supports a 
 - https://www.tradesly.ai/blog/revenue-per-technician-benchmarks-guide
 - https://www.sec.gov/Archives/edgar/data/19584/000001958426000002/che-20260225xex99.htm
 
+### Source URLs carried from the Dallas–Fort Worth and adjacent-trade passes
+
+Owner-published rosters, location pages and transaction releases read directly during the Part XI and adjacent-trade work. Listed so the citation trail survives the render.
+
+- https://www.tectaamerica.com
+- https://nationsroof.com
+- https://www.aeainvestors.com/aea-acquires-nations-roof/
+- https://www.prnewswire.com/news-releases/centre-partners-completes-acquisition-of-quick-roofing-302028590.html
+- https://www.prnewswire.com/news-releases/leaf-home-announces-acquisition-of-erie-home-uniting-two-leading-residential-services-providers-302549233.html
+- https://www.anticimex.com/press-releases/anticimex-acquires-safehaven-pest-control-abby-s-pest-and-termite-services-and-metro-guard/
+- https://www.rollins.com/investors/press-releases/detail/429/rollins-acquires-romex-pest-control
+- https://pestdefense.com
+- https://www.terminix.com/exterminators/tx/
+- https://www.masseyservices.com/locations/
+- https://fsg.com/locations/
+- https://www.iescomm.com/locations/
+- https://www.rosendin.com/contact/office-locations/
+- https://www2.census.gov/programs-surveys/economic-census/data/2022/sector56/EC2256BASIC.zip
+- https://dallasinnovates.com/dallas-based-apex-service-partners-gets-minority-investment-from-apollo-funds/
+- https://alpineinvestors.com/update/apex-and-alpine-announce-strategic-minority-investment-from-apollo-funds-in-apex/
+- https://www.prnewswire.com/news-releases/imperial-capital-announces-the-sale-of-frontier-service-partners-to-apex-service-partners-302042748.html
+- https://apexservicepartners.com/
+- https://www.aireserv.com/locations/texas/
+- https://www.mrrooter.com/locations/texas/
+- https://www.mrelectric.com/locations/texas/
+- https://www.onehourheatandair.com/locations/texas/
+- https://www.benjaminfranklinplumbing.com/locations/texas/
+- https://www.mistersparky.com/locations/texas/
 
 ## Derivations
 
@@ -1260,7 +1312,7 @@ Figures below appear in no source and are arithmetic on figures that do. Each st
 | **≈$16 billion** — combined reported valuations of the five platform recaps, Nov 2024 – May 2026 | Apex $10B + Champions $2.5B + Sila $1.7B + Redwood $1.1B + Guild $0.8B | Sum = $16.1B, stated as ≈$16B | That summing five separately-reported valuations is meaningful. It is a headline convenience, not a market measure: the Apex figure is a whole-company valuation attached to a *minority* investment and includes debt, the others are enterprise values on control transactions, and all five are anonymous-source. Service Logic is excluded because no EV was ever disclosed. **Do not present this as a market total.** |
 | **≈20x** — Apex implied multiple | $10B valuation ÷ "over $500 million" EBITDA (both anonymous-source, and from *different* outlets — Reuters for the valuation, HomePros for the EBITDA) | $10B ÷ $500M ≤ 20x | That the reported EBITDA is the denominator the $10B was struck against, and that two outlets' anonymous sources are describing the same figures. **No source publishes an Apex multiple.** Flagged as derived wherever it appears. |
 | **≈$50 million** — Guild Garage EBITDA | Previously: $800M ÷ 16x | — | **Superseded.** Reuters (2026-03-06) publishes the figure directly: "close to $50 million of annual EBITDA," alongside "over $300 million of annual revenue." It is no longer a derivation — it is an anonymous-source reported figure. |
-| **50.6% and 51.1%** — PE share of tracked HVAC deals | 39 ÷ 77 and 47 ÷ 92 (Capstone counts) | Division | That the ratio is meaningful as a share. Capstone publishes the counts, not the percentages. The 92/47 pair is the current one; the 39/77 pair could not be verified at primary source (A.0.3 §D). |
+| **51.1%** — PE share of tracked HVAC deals | 47 ÷ 92 (Capstone counts) | Division | That the ratio is meaningful as a share. Capstone publishes the counts, not the percentages. The earlier 39-of-77 pair and the share derived from it are **retired**: the counts could not be verified at primary source (A.0.3 §D), and splicing them to Capstone's tracked universe produced a trend no single dataset supports (A.0.2). |
 | **≈$33 million** — Roto-Rooter franchise buy-back, 2026 YTD | $20.6M (San Francisco + Fort Worth, 2026-03-31) + $12.0M (21-county south Texas, 2026-06-08), both "approximately" as Chemed states them | Sum ≈ $32.6M, stated as ≈$33M | That two separately announced re-acquisitions are usefully read as one programme. Chemed does not publish a YTD franchise-repurchase total. |
 | **≈1.4x** — the R-32 to R-454B per-pound price gap | PICKHVAC 2026 averages: R-454B ≈$25/lb, R-32 ≈$18/lb | $25 ÷ $18 ≈ 1.4 | That the two averages are struck on a comparable basis. The 2025 "more than four times" comparison is AC Direct's, on early-2025 crisis pricing. Removed from the body; recorded here. |
 | **≈4 turns** — the HVAC services de-rating | Capstone: 9.5x (2024–YTD 2026) vs. 13.3x (2021–2023) | 13.3 − 9.5 = 3.8 turns | That two period averages are comparable as a before/after. Capstone publishes the two averages, not the difference. |
@@ -1283,6 +1335,6 @@ Figures below appear in no source and are arithmetic on figures that do. Each st
 
 ---
 
-*Effective 3 August 2026. Consolidated master for smbX.ai home-services vertical strategy, built from three commissioned research workstreams with four correction passes applied — 2026-07-26 (A.0.1, TAM reconciliation), 2026-07-27 (A.0.2, primary-source verification), 2026-07-28 (A.0.3, full live-source re-verification across eight domains), 2026-08-03 (A.0.4, the Dallas–Fort Worth cut, Part XI).*
+*Effective 3 August 2026. Consolidated master for smbX.ai home-services vertical strategy, built from three commissioned research workstreams with five correction passes applied — 2026-07-26 (A.0.1, TAM reconciliation), 2026-07-27 (A.0.2, primary-source verification), 2026-07-28 (A.0.3, full live-source re-verification across eight domains), 2026-08-03 (A.0.4, the Dallas–Fort Worth cut, Part XI), 2026-08-06 (A.0.6, the percentage pass).*
 
 *This file supersedes all prior home-services market assessments. Platform ownership, brand rosters and refrigerant pricing change monthly in this market; the regulatory position changed the day before this document issued. Re-verify at engagement time.*

@@ -479,6 +479,149 @@ the named source that overturned it.
 - Anticimex Texas entry, 2025-06-16 — https://www.anticimex.com/press-releases/anticimex-acquires-safehaven-pest-control-abby-s-pest-and-termite-services-and-metro-guard/
 - Platform rosters and location pages as named per figure in the body.
 
+### The master's source register, carried whole
+
+This report is a metro cut of the master, and it carries the master's URL
+register entire rather than a subset. A subset would quietly break the trail
+for anything a reader wants to follow upstream, and the two registers would
+stop reconciling. Not every entry below supports a figure in this document;
+each supports a figure in the master this document is derived from.
+
+- https://data.census.gov/table/ECNBASIC2022.EC2223BASIC
+- https://www.census.gov/data/tables/2022/econ/economic-census/naics-sector-23.html
+- https://www.bls.gov/ooh/installation-maintenance-and-repair/heating-air-conditioning-and-refrigeration-mechanics-and-installers.htm
+- https://www.bls.gov/ooh/construction-and-extraction/plumbers-pipefitters-and-steamfitters.htm
+- https://www.bls.gov/news.release/ocwage.nr0.htm
+- https://www.bls.gov/news.release/eci.t05.htm
+- https://fred.stlouisfed.org/series/WPU1054
+- https://markets.newyorkfed.org/api/rates/secured/sofr/search.json
+- https://www.federalreserve.gov/monetarypolicy/fomcminutes20260617.htm
+- https://www.federalregister.gov/documents/2026/05/26/2026-10387/phasedown-of-hydrofluorocarbons-reconsideration-of-certain-regulatory-requirements-promulgated-under
+- https://www.spglobal.com/market-intelligence/en/news-insights/articles/2024/7/private-equity-dry-powder-growth-accelerated-in-h1-2024-82385822
+- https://www.bain.com/insights/outlook-gaining-traction-global-private-equity-report-2026/
+- https://www.fsb.org/2026/05/fsb-warns-on-private-credit-vulnerabilities/
+- https://www.capstonepartners.com/insights/article-hvac-services-ma-update/
+- https://www.capstonepartners.com/insights/article-hvac-equipment-sector-ma-update/
+- https://www.capstonepartners.com/insights/report-capstone-partners-middle-market-mergers-and-acquisitions-valuations-index/
+- https://www.acg.org/news-trends/news/gf-data-reports-show-stronger-financing-markets-fueled-ma-gains-q1
+- https://www.axial.net/forum/hvac-private-equity/
+- https://grata.com/resources/hvac-pe-playbook-2025
+- https://www.mckinsey.com/industries/private-capital/our-insights/value-plays-in-us-home-services-where-opportunity-meets-reliability
+- https://www.blackstone.com/news/press/blackstone-announces-agreement-to-acquire-champions-group/
+- https://homepros.news/goldman-sachs-private-equity-arm-to-acquire-sila-services/
+- https://homepros.news/redwood-services-to-land-majority-investment-in-1-1-billion-deal/
+- https://homepros.news/redwood-services-buys-five-contractor-group-for-220-million/
+- https://www.businesswire.com/news/home/20250508241827/en/Redwood-Services-Announces-Strategic-Investment-from-Altas-Partners
+- https://finance.yahoo.com/markets/stocks/articles/pe-hopes-garage-door-roll-193930270.html
+- https://news.bloomberglaw.com/private-equity/bain-lines-up-3-1-billion-private-loan-for-service-logic-buy
+- https://www.baincapital.com/news/bain-capital-completes-acquisition-service-logic
+- https://www.pehub.com/exclusive-msouth-to-test-buyout-market-for-usa-hometown-experts-sources-say/
+- https://www.ibisworld.com/united-states/market-size/heating-air-conditioning-contractors/1945/
+- https://www.ibisworld.com/united-states/market-size/plumbers/1946/
+- https://www.ibisworld.com/united-states/market-size/roofing-contractors/198/
+- https://www.ibisworld.com/united-states/market-size/pest-control/1495/
+- https://www.ibisworld.com/united-states/industry/electricians/189/
+- https://www.arizton.com/market-reports/us-electrical-contractors-market
+- https://fmicorp.com/insights/thought-leadership/private-equity-sector-brief-overhead-garage-door-services
+- https://www.npmapestworld.org/your-business/latest-news/us-pest-control-industry-sustains-steady-growth-with-6-increase-in-2025/
+- https://www.achrnews.com/blogs/17-opinions/post/165373-hardi-on-r-454b-the-crisis-is-over
+- https://www.achrnews.com/articles/166470-epa-faces-new-lawsuits-over-hfc-refrigerant-rule-rollback
+- https://www.achrnews.com/articles/166275-trump-reduces-section-232-tariffs-on-hvac-equipment-to-15
+- https://www.achrnews.com/articles/165859-heat-pump-a-c-shipments-see-20-declines-in-2025
+- https://www.wilmerhale.com/en/insights/client-alerts/20260220-supreme-court-strikes-down-ieepa-tariffs-what-now
+- https://www.millernash.com/firm-news/news/tariffs-in-flux-ieepa-and-section-122-struck-down-section-232-duties-expand
+- https://www.hklaw.com/en/insights/publications/2026/05/epa-finalizes-changes-to-technology-transitions-provisions
+- https://www.nahb.org/blog/2026/05/epa-hvac-refrigerants-r-410a-final-rule
+- https://www.grantthornton.com/insights/alerts/tax/2025/insights/energy-incentives-under-obbba-what-you-need-to-know
+- https://rmi.org/resources/tracking-the-heat-pump-water-heater-market-in-the-united-states/
+- https://gopaschal.com/resources/2026-hvac-price-increases/
+- https://www.pmmag.com/articles/107578-phcp-pvf-price-increases-july-2026
+- https://searchlightdigital.io/what-is-a-good-cost-per-lead-for-hvac-google-ads/
+- https://thedatadriventrades.substack.com/p/google-lsa-benchmarks-june-2026
+- https://www.leadersedge.com/p-c/soft-market-reigned-in-q1-2026
+- https://www.globenewswire.com/news-release/2026/07/16/3328483/0/en/Ivans-Index-Q2-2026-Results-Released.html
+- https://www.getjobber.com/home-service-trends-report/
+- https://www.angi.com/articles/insider-s-price-guide-new-heating-and-cooling-system.htm
+- https://ctacquisitions.com/guides/home-services-ma-multiples-report-2026/
+- https://www.jll.com/en-us/newsroom/critical-skilled-trades-shortage-threatens-economic-losses
+- https://www.globenewswire.com/news-release/2026/03/11/3254093/0/en/LIXIL-Releases-Study-on-the-Economic-Consequences-of-America-s-Skilled-Labor-Shortage-this-World-Plumbing-Day.html
+- https://www.achrnews.com/articles/146238-hvacr-industry-must-work-harder-to-retain-technicians
+- https://nabtu.org/press_releases/the-u-s-does-not-have-a-skilled-craft-labor-shortage-it-has-a-workforce-planning-crisis/
+- https://www.sec.gov/Archives/edgar/data/84839/000008483926000008/rol-20251231.htm
+- https://www.prnewswire.com/news-releases/rollins-inc-reports-second-quarter-2026-financial-results-302832503.html
+- https://www.rentokil-initial.com/~/media/Files/R/Rentokil/documents/2025-prelims-statement.pdf
+- https://www.sec.gov/Archives/edgar/data/1035983/000110465926017530/fix-20251231x10k.htm
+- https://www.businesswire.com/news/home/20260723227439/en/Comfort-Systems-USA-Reports-Second-Quarter-2026-Results
+- https://www.businesswire.com/news/home/20260429893569/en/EMCOR-Group-Inc.-Reports-First-Quarter-2026-Results
+- https://www.businesswire.com/news/home/20260226042868/en/Frontdoor-Announces-Record-Full-Year-2025-Financial-Results
+- https://www.bain.com/insights/outlook-is-a-recovery-starting-to-take-shape-global-private-equity-report-2025/
+- https://www.abfjournal.com/1-2t-in-pe-dry-powder-why-deployment-pressure-is-reshaping-middle-market-deal-terms/
+- https://api.census.gov/data/2022/ecnbasic/variables/RCPTOT.json
+- https://vantainsights.com/reports/238220-plumbing-heating-air-conditioning
+- https://www.servicetitan.com/blog/plumbing-industry-statistics
+- https://www.sahmcapital.com/news/content/update-1-apex-service-sells-minority-stake-to-apollo-at-10-bln-valuation-source-says-2026-05-28
+- https://www.mdm.com/news/top-distributor-sectors/contractor/hvac-electrical-plumbing-service-platform-apex-nets-2b-investment-from-apollo/
+- https://homepros.news/champions-group-strikes-2-5-billion-blackstone-deal/
+- https://www.tradingview.com/news/reuters.com,2026:newsml_L6N3ZT1HO:0-oak-hill-capital-to-acquire-guild-garage-group-in-800-million-plus-deal-sources-say/
+- https://www.thehardwirenews.com/pe-firms-took-39-of-77-hvac-m-a-deals-through-mid-2026-as-commercial-sector-consolidation-accelerates/
+- https://www.capstonepartners.com/insights/report-hvac-services-market-update/
+- https://www.globenewswire.com/news-release/2026/03/11/3254093/0/en/LIXIL-Releases-Study-on-the-Economic-Consequences-of-America-s-Skilled-Labor-Shortage.html
+- https://www.prnewswire.com/news-releases/rollins-inc-reports-fourth-quarter-and-full-year-2025-financial-results-302685636.html
+- https://www.rentokil-initial.com/~/media/Files/R/Rentokil/documents/2025-prelims-transcript.pdf
+- https://www.bain.com/about/media-center/press-releases/2026/private-equity-resurgence-gathers-steam-as-new-era-challenges-firms-to-enhance-value-creationbain--company-global-pe-report/
+- https://www.bain.com/insights/welcome-to-a-new-era-global-private-equity-report-2026/
+- https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+- https://gfdata.com/year-end-ma-volume-hits-multi-year-low-as-market-navigates-choppy-conditions/
+- https://gfdata.com/mid-year-ma-insight-volume-soft-multiples-stable-back-half-hopeful/
+- https://ctacquisitions.com/answers/why-pe-buying-hvac-companies/
+- https://www.capstonepartners.com/insights/middle-market-leveraged-finance-report/
+- https://www.census.gov/programs-surveys/cbp.html
+- https://www.census.gov/programs-surveys/susb/data/tables.html
+- https://homepros.news/apex-service-partners-to-receive-minority-investment-at-10-billion-valuation/
+- https://www.onetonline.org/link/summary/49-9021.00
+- https://www.onetonline.org/link/summary/47-2152.00
+- https://www.achrnews.com/articles/153792-navigating-the-hvac-technician-shortage-by-connecting-with-techs
+- https://www.refrigerantdepot.com/product/r-454b/
+- https://www.pickhvac.com/ac-refrigerant-freon-cost-per-pound-r22-r410a-r32-r454b/
+- https://www.callmattioni.com/blog/t-why-is-refrigerant-so-expensive/
+- https://www.facilitiesnews.com/news/tariffs-hvac-equipment-costs-multi-site-capital-planning
+- https://money.com/whats-causing-hvac-prices-to-rise-in-2026-and-how-much-more-you-should-expect-to-pay/
+- https://servicenation.com/resources/seer2-hvac-efficiency-standards
+- https://hvacpproducts.com/2026/07/ahri-releases-latest-equipment-shipment-data-2/
+- https://www.wtwco.com/en-us/insights/2026/05/insurance-marketplace-realities-2026-spring-update
+- https://homepros.news/2024-hvac-industry-financing-providers/
+- https://hvacprojectcost.com/hvac-financing-options/
+- https://www.synchrony.com/contenthub/newsroom/synchrony-completes-acquisition-of-ally-lending.html
+- https://modernize.com/hvac/cost-calculator
+- https://www.simprogroup.com/blog/plumbing-business-profit-margin-guide
+- https://www.prophetaccounting.com/blog/hvac-revenue-per-technician
+- https://www.tradesly.ai/blog/revenue-per-technician-benchmarks-guide
+- https://www.sec.gov/Archives/edgar/data/19584/000001958426000002/che-20260225xex99.htm
+- https://www.tdlr.texas.gov/dbproduction2/ltairref.csv
+- https://www.tdlr.texas.gov/media/pdf/ACR%20at%20a%20Glance.pdf
+- https://www.tectaamerica.com
+- https://nationsroof.com
+- https://www.aeainvestors.com/aea-acquires-nations-roof/
+- https://www.prnewswire.com/news-releases/centre-partners-completes-acquisition-of-quick-roofing-302028590.html
+- https://www.prnewswire.com/news-releases/leaf-home-announces-acquisition-of-erie-home-uniting-two-leading-residential-services-providers-302549233.html
+- https://pestdefense.com
+- https://www.terminix.com/exterminators/tx/
+- https://www.masseyservices.com/locations/
+- https://fsg.com/locations/
+- https://www.iescomm.com/locations/
+- https://www.rosendin.com/contact/office-locations/
+- https://www.businesswire.com/news/home/20260528216487/en/
+- https://dallasinnovates.com/dallas-based-apex-service-partners-gets-minority-investment-from-apollo-funds/
+- https://alpineinvestors.com/update/apex-and-alpine-announce-strategic-minority-investment-from-apollo-funds-in-apex/
+- https://www.prnewswire.com/news-releases/imperial-capital-announces-the-sale-of-frontier-service-partners-to-apex-service-partners-302042748.html
+- https://apexservicepartners.com/
+- https://www.aireserv.com/locations/texas/
+- https://www.mrrooter.com/locations/texas/
+- https://www.mrelectric.com/locations/texas/
+- https://www.onehourheatandair.com/locations/texas/
+- https://www.benjaminfranklinplumbing.com/locations/texas/
+- https://www.mistersparky.com/locations/texas/
+
 ## Derivations
 
 Figures below appear in no source and are arithmetic on figures that do. Each
