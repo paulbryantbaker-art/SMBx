@@ -251,6 +251,19 @@
   20%, 100% { transform: scaleX(0); opacity: 0; }
 }
 
+/* THE HOLE BECOMES THE CLOSE (2026-08-12). The hunt board's 16th lane leaves
+   a two-cell remainder; on desktop the CTA takes that cell and the old
+   centred link below the grid hides. Below 1025 both rules idle, so the
+   audited phone page — aria-hidden bone filler + centred link — renders
+   byte-identically. Right-aligned inside the cell: the eye exits the wall at
+   its bottom-right corner, and that is where the door should be. */
+.ca-lanefill-link { display: none; }
+@media (min-width: 1025px) {
+  [data-lanefill] { display: none; }
+  .ca-lanefill-link { display: flex; align-items: center; justify-content: flex-end; }
+  .ca-theses-below { display: none; }
+}
+
 /* THE FUNNEL ASSEMBLES (2026-08-12, from the video's product heroes: their
    floating UI fragments pop in one after another over the photo — the
    product builds itself in front of you. The sample read is our version of
@@ -338,7 +351,7 @@
   50%      { border-color: #0FA97C; box-shadow: 0 0 0 4px rgba(15, 169, 124, 0.10); }
 }
 .ca-target { animation: caTargetPulse 3.6s ease-in-out infinite; }
-/* …and its value was #8E948B on #1A1D19 — 3.4:1, under the floor for the one
+/* …and its value was #8E948B on #212420 — 3.4:1, under the floor for the one
    phrase the band is built to land (Paul: "the font is too dim on the one
    company"). Ivory reads at 12:1 and matches the two nodes beside it. */
 [data-chain].ch-dark .ch-node.ca-target > div + div { color: #F4F5F1; }
@@ -659,7 +672,7 @@
    rather than white-on-bone. Deal Green stays the joint colour throughout —
    it is the accent everywhere — but node TEXT never uses it on dark (the
    contrast trap the token table warns about); mint carries that job. */
-[data-chain].ch-dark .ch-node { background: #1A1D19; border-color: #3A3F38; color: #F4F5F1; }
+[data-chain].ch-dark .ch-node { background: #212420; border-color: #3A3F38; color: #F4F5F1; }
 [data-chain].ch-dark .ch-node > div + div { color: #8E948B; }
 [data-chain].ch-dark .ch-hit { background: #0A7A58; border-color: #0A7A58; }
 [data-chain].ch-dark .ch-hit > div + div { color: #DFF5EC; }
@@ -1038,7 +1051,7 @@
 .ca-foot-col a + a { margin-top: 11px; }
 .ca-foot-col a:hover { color: #A8F0CE; }
 
-/* ── Dark surfaces: keyboard focus must survive #131512 — the global ring
+/* ── Dark surfaces: keyboard focus must survive #1A1B19 — the global ring
       is ink, invisible there. Every inline-styled dark band and the footer
       carry .ca-dark so the ring flips to bone. ── */
 .ca-dark :focus-visible { outline-color: #F4F5F1; }

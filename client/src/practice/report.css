@@ -479,7 +479,7 @@
   position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
   z-index: 55; display: flex; align-items: center; gap: 12px;
   padding: 11px 12px 11px 20px; max-width: calc(100vw - 32px);
-  background: #131512; color: #F4F5F1;
+  background: #1A1B19; color: #F4F5F1;
   border-radius: 0; box-shadow: 0 12px 34px rgba(22, 24, 26, 0.34);
   animation: rp-rise 0.32s ease-out both;
 }
