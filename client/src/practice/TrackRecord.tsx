@@ -176,7 +176,7 @@ export default function TrackRecord() {
         </section>
 
         {/* ══ CLOSER — dark band ══ */}
-        <section className="ca-dark" style={{ background: '#1A1B19', color: '#F4F5F1', padding: 'clamp(68px, 11vw, 180px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
+        <section className="ca-dark" style={{ background: '#181818', color: '#F4F5F1', padding: 'clamp(68px, 11vw, 180px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
           <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', left: '6%', bottom: 36, width: 280, height: 160, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
             <p data-rv style={{ margin: '0 auto', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 4vw, 64px)', lineHeight: 1.12, letterSpacing: '-0.014em', textWrap: 'balance' }}>Every transaction above was done for a buyer. That hasn't&nbsp;changed.</p>

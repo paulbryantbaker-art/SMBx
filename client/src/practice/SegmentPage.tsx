@@ -113,7 +113,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
         </section>
 
         {/* ══ THE PROBLEM — dark band ══ */}
-        <section className="ca-dark" style={{ background: '#1A1B19', color: '#F4F5F1', padding: 'clamp(57px, 10vw, 160px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(31px, 6vw, 100px)', position: 'relative', overflow: 'hidden' }}>
+        <section className="ca-dark" style={{ background: '#181818', color: '#F4F5F1', padding: 'clamp(57px, 10vw, 160px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(31px, 6vw, 100px)', position: 'relative', overflow: 'hidden' }}>
           <div aria-hidden="true" data-plx="0.025" style={{ position: 'absolute', top: 44, right: '5%', width: 260, height: 160, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 1360, margin: '0 auto', position: 'relative' }}>
             <div data-rv><Kicker dark>THE PROBLEM</Kicker></div>
@@ -121,7 +121,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
             <div data-rv className="rv-stagger" data-tri style={{ marginTop: 56, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: '#2A2E29', border: '1px solid #2A2E29', position: 'relative' }}>
               <Handles color="#F4F5F1" />
               {seg.pains.map(p => (
-                <div key={p.name} style={{ background: '#1A1B19', padding: '34px 28px 36px' }}>
+                <div key={p.name} style={{ background: '#181818', padding: '34px 28px 36px' }}>
                   <div style={{ display: 'table', background: '#22261F', color: '#D7DBD2', fontFamily: MONO, fontSize: 11, letterSpacing: '0.1em', padding: '5px 9px' }}>{p.tag}</div>
                   <div style={{ marginTop: 18, fontFamily: SERIF, fontWeight: 600, fontSize: 22, lineHeight: 1.25 }}>{p.name}<span style={{ color: '#0A7A58' }}>.</span></div>
                   <p style={{ margin: '12px 0 0', fontSize: 14.5, lineHeight: 1.65, color: '#ABB2AB' }}>{p.body}</p>
@@ -199,7 +199,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
               <div data-count="21" style={statNum}>~$21B</div>
               <div style={statLabel}>TRANSACTIONS TOUCHED</div>
             </div>
-            <div style={{ background: '#1A1B19', padding: '38px 28px 34px', textAlign: 'center' }}>
+            <div style={{ background: '#181818', padding: '38px 28px 34px', textAlign: 'center' }}>
               <div style={{ ...statNum, color: '#A8F0CE' }}>0</div>
               <div style={{ margin: '16px auto 0', display: 'table', background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.12em', padding: '5px 9px' }}>SELL-SIDE ENGAGEMENTS. EVER.</div>
             </div>
