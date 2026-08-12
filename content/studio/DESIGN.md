@@ -53,7 +53,8 @@ note to Paul — you describe the real thing.
 # 1. Paste this into anything that needs the short version
 
 > smbX house style ("Ledger", Aurora pass) — a bright fintech-editorial
-> system. Bone paper `#FCFAF6`, ink `#16181A`, white hairline cards.
+> system. White paper `#FFFFFF` (canvas moved bone→white 2026-08-12,
+> matching carta.com's measured ground), ink `#16181A`, hairline cards.
 > **Exactly one accent: Deal Green `#0A7A58`**, with vivid jade `#0FA97C`
 > reserved for large numerals, edges and ambient blooms — never small text, it
 > does not hold contrast. Amber `#E8A62B` is jewelry — the bar under a
@@ -126,7 +127,7 @@ The rest maps one-to-one:
 
 | Website | Collateral | Value |
 |---|---|---|
-| Page canvas | light deck pages, light one-pager, report body | bone `#FCFAF6` |
+| Page canvas | light deck pages, light one-pager, report body | bone `#FFFFFF` (white since 2026-08-12) |
 | `--pd-ink` headlines | heads on light pages | `#16181A` |
 | `--pd-body` copy | body on decks and cards | slate `#5A6169` |
 | `--pd-tert` | sources, page numbers, captions | muted `#83898F` |
@@ -155,7 +156,7 @@ Verbatim from `house/tokens.ts`. Nothing outside this table is a house colour.
 
 | Name | Hex | Where it goes |
 |---|---|---|
-| bone | `#FCFAF6` | page canvas on every light surface |
+| bone | `#FFFFFF` | page canvas on every light surface (the token keeps its historic NAME; the value moved to pure white 2026-08-12 — Paul, side-by-side with carta.com: "the background is definitely darker still") |
 | ink | `#16181A` | headings and primary text on light |
 | slate | `#5A6169` | body copy on decks and cards |
 | muted | `#83898F` | sources, vintages, page numbers, captions |

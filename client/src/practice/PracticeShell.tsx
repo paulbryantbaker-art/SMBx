@@ -119,8 +119,8 @@ function WhoMenu({ anchor }: { anchor: (hash: string) => string }) {
               </div>
             </div>
             <a href={anchor('#owners')} className="ca-h-bandmenu" style={{ display: 'block', background: '#F3F0E9', padding: '22px 20px', borderLeft: '1px solid #E4DFD3' }} onClick={() => setOpen(false)}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '4px 8px', whiteSpace: 'nowrap' }}>
-                <span style={{ width: 7, height: 7, background: '#FCFAF6', display: 'inline-block' }} />FREE VALUATION
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#0A7A58', color: '#FFFFFF', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '4px 8px', whiteSpace: 'nowrap' }}>
+                <span style={{ width: 7, height: 7, background: '#FFFFFF', display: 'inline-block' }} />FREE VALUATION
               </span>
               <span style={{ display: 'block', marginTop: 12, fontSize: 14.5, lineHeight: 1.5, color: '#16181A', fontWeight: 500 }}>
                 Get the valuation buyers are working from — free. →
@@ -478,7 +478,7 @@ export default function PracticeShell({
   const footSeam = onResearch || onTrackRecord;
 
   return (
-    <div className="pd" style={{ background: '#FCFAF6' }}>
+    <div className="pd" style={{ background: '#FFFFFF' }}>
       <header className={`ca-nav${navOn || menuOpen ? ' on' : ''}${navHidden && !menuOpen ? ' up' : ''}`}>
         <div data-nav-inner style={{ maxWidth: 1360, margin: '0 auto', padding: '0 clamp(20px, 4vw, 32px)', height: 76, display: 'flex', alignItems: 'center', gap: 36, minWidth: 0 }}>
           {/* SPA Link, not a plain anchor: a full reload from down-page races
@@ -541,7 +541,7 @@ export default function PracticeShell({
             <a
               href={anchor('#yulia')}
               className="ca-h-greenbg"
-              style={{ fontSize: 15.5, fontWeight: 600, color: '#FCFAF6', background: '#16181A', padding: '12.5px 20px', borderRadius: 10, whiteSpace: 'nowrap' }}
+              style={{ fontSize: 15.5, fontWeight: 600, color: '#FFFFFF', background: '#16181A', padding: '12.5px 20px', borderRadius: 10, whiteSpace: 'nowrap' }}
               onClick={() => trackEvent('practice_cta_clicked', { placement: 'nav-yulia' })}
             >
               Build your market map

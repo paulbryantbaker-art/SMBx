@@ -22,7 +22,7 @@ The `hs-accent-*` set cannot do this job, and the reasons are the brief:
    that sits ON the page with no frame, and there the panel draws a visible
    rectangle.
 2. **Their field is the pre-Aurora bone** (`#F5F4EF`, seven points off the
-   current `#FCFAF6`). Invisible inside a frame, obvious without one.
+   current `#FFFFFF`). Invisible inside a frame, obvious without one.
    `scripts/studio/rebone.mts` repaints that field, and it should still be run
    over whatever Gemini returns — but it cannot remove a composed panel, and it
    should not try. That is the artist's decision, not paper.
@@ -67,14 +67,14 @@ scene, with clear air between the objects.
 
 Palette, exactly: deep green #0A7A58 as the dominant colour, amber #E8A62B for
 small accents only (a handle, a hinge, a stripe), ink #16181A for outlines,
-background bone #FCFAF6.
+background bone #FFFFFF.
 
 Composition: the row of objects sits in a narrow horizontal band across the
 MIDDLE THIRD of the frame. The top third and the bottom third are empty
 background, uniform and flat, with no objects, no ground shadow and no texture
 in them. Wide margins of empty background at the left and right edges too.
 
-Uniform flat background colour #FCFAF6 all the way to all four edges.
+Uniform flat background colour #FFFFFF all the way to all four edges.
 
 Do not include: text, lettering, numbers, people, faces, logos, charts, graphs.
 Do not include: vignette, edge fade, gradient background, drop shadow, border,

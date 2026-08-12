@@ -60,11 +60,11 @@
    7px white leading square (same device as the /research index cards). */
 .rp-kicker {
   display: inline-flex; align-items: center; gap: 7px;
-  background: #0A7A58; color: #FCFAF6;
+  background: #0A7A58; color: #FFFFFF;
   font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.12em;
   text-transform: uppercase; font-weight: 400; padding: 5px 9px;
 }
-.rp-kicker::before { content: ''; width: 7px; height: 7px; background: #FCFAF6; }
+.rp-kicker::before { content: ''; width: 7px; height: 7px; background: #FFFFFF; }
 .rp-head .rp-kicker { margin-top: clamp(18px, 2.6vw, 32px); }
 
 .rp-title {
@@ -486,7 +486,7 @@
 @keyframes rp-rise { from { opacity: 0; transform: translate(-50%, 12px); } }
 .rp-resume-t { font-size: 14.5px; color: #D7DBD2; }
 .rp-resume-go {
-  background: #FCFAF6; color: #16181A; border: 0; cursor: pointer;
+  background: #FFFFFF; color: #16181A; border: 0; cursor: pointer;
   font: inherit; font-size: 14.5px; font-weight: 600;
   padding: 9px 18px; border-radius: 8px; white-space: nowrap;
 }
@@ -527,7 +527,7 @@
     display: block; position: fixed; left: 16px; right: auto; bottom: 20px; z-index: 54;
     padding: 13px 22px; border: 0; cursor: pointer; font: inherit;
     font-size: 14.5px; font-weight: 600; border-radius: 10px;
-    background: #16181A; color: #FCFAF6;
+    background: #16181A; color: #FFFFFF;
     box-shadow: 0 10px 28px rgba(22, 24, 26, 0.3);
     transition: background 0.15s;
   }
@@ -546,7 +546,7 @@
   .rp-toc-panel {
     position: absolute; left: 0; right: 0; bottom: 0; max-height: 78dvh;
     overflow-y: auto; overscroll-behavior: contain;
-    background: #FCFAF6; border-radius: 0;
+    background: #FFFFFF; border-radius: 0;
     padding: 22px 24px calc(28px + env(safe-area-inset-bottom));
     animation: rp-up 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
@@ -588,7 +588,7 @@
     /* Bleed to the panel's edges so rows cannot slide past in the side gutters,
        then re-add the inset as padding. */
     margin: 0 -24px; padding: 20px 24px 14px;
-    background: #FCFAF6; border-bottom: 1px solid var(--pd-hair);
+    background: #FFFFFF; border-bottom: 1px solid var(--pd-hair);
     /* A row passing under the header gets sliced mid-glyph at the edge, which
        reads as a rendering fault rather than as scrolling. The soft drop makes
        the header a layer the list runs beneath — same pixels, legible cause. */
@@ -663,7 +663,7 @@
   position: fixed; right: clamp(14px, 2vw, 26px); bottom: clamp(14px, 2vw, 26px);
   z-index: 55; display: inline-flex; align-items: center; gap: 9px;
   padding: 12px 20px; border: 0; border-radius: 10px; cursor: pointer;
-  background: #16181A; color: #FCFAF6;
+  background: #16181A; color: #FFFFFF;
   font: inherit; font-size: 14.5px; font-weight: 600; letter-spacing: -0.005em;
   box-shadow: 0 10px 30px rgba(20, 24, 28, 0.22);
   transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
@@ -731,7 +731,7 @@
 .rp-ask-in {
   flex: 1; min-width: 0; resize: none; max-height: 120px;
   padding: 10px 13px; font: inherit; font-size: 14.5px; line-height: 1.5;
-  color: var(--pd-ink); background: #FCFAF6;
+  color: var(--pd-ink); background: #FFFFFF;
   border: 1.5px solid var(--pd-border); border-radius: 10px;
 }
 .rp-ask-in::placeholder { color: var(--pd-faint); }
@@ -744,7 +744,7 @@
 .rp-ask-in:focus-visible { outline: none; }
 .rp-ask-send {
   flex: none; width: 38px; height: 38px; border: 0; border-radius: 9px;
-  background: #16181A; color: #FCFAF6; cursor: pointer;
+  background: #16181A; color: #FFFFFF; cursor: pointer;
   font-size: 17px; line-height: 1; display: grid; place-items: center;
   transition: background 0.14s, opacity 0.14s;
 }

@@ -34,7 +34,7 @@ that mirrors the live site is the deliberate exception, Paul 2026-08-12).
   pitch, square corners, no texture.
 - The line: Source Serif 4, weight 550 — standing words **mint `#A8F0CE`**,
   typed words **ivory `#F4F5F1`**, block caret in mint.
-- Pills: **Deal Green `#0A7A58`** fill, `#FCFAF6` IBM Plex Mono labels,
+- Pills: **Deal Green `#0A7A58`** fill, `#FFFFFF` IBM Plex Mono labels,
   letter-spaced, square.
 - Wires: `#3A3F38` hairlines; the current is mint marching dashes.
 - Plate (bottom-left): mono `#8E948B` with a 9px green square.

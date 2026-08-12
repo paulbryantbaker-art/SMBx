@@ -35,7 +35,7 @@ const CREED = [
 export default function About() {
   return (
     <PracticeShell>
-      <main style={{ background: '#FCFAF6', overflow: 'clip' }}>
+      <main style={{ background: '#FFFFFF', overflow: 'clip' }}>
 
         {/* ══ HERO ══ */}
         <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(52px, 9vw, 150px) clamp(20px, 4vw, 32px) clamp(31px, 6vw, 90px)', textAlign: 'center', position: 'relative' }}>
@@ -96,8 +96,8 @@ export default function About() {
               <div style={{ marginTop: 32, position: 'relative', width: '100%', maxWidth: 360 }}>
                 <img data-rvimg src="/founder-portrait.jpg" alt="Paul Baker, founder of smbX" style={{ display: 'block', width: '100%', aspectRatio: '4 / 5', objectFit: 'cover', objectPosition: '50% 32%' }} />
                 <Handles />
-                <span style={{ position: 'absolute', left: 12, bottom: 12, display: 'inline-flex', alignItems: 'center', gap: 7, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '5px 9px', whiteSpace: 'nowrap' }}>
-                  <span style={{ width: 7, height: 7, background: '#FCFAF6', display: 'inline-block' }} />FOUNDER
+                <span style={{ position: 'absolute', left: 12, bottom: 12, display: 'inline-flex', alignItems: 'center', gap: 7, background: '#0A7A58', color: '#FFFFFF', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '5px 9px', whiteSpace: 'nowrap' }}>
+                  <span style={{ width: 7, height: 7, background: '#FFFFFF', display: 'inline-block' }} />FOUNDER
                 </span>
               </div>
               {/* The one outbound personal link on the site (Paul, 2026-08-08).
@@ -166,7 +166,7 @@ export default function About() {
                 target={bookTarget()}
                 rel={bookRel()}
                 className="ca-h-greenbg"
-                style={{ display: 'flex', justifyContent: 'center', marginTop: 24, fontSize: 16, fontWeight: 600, color: '#FCFAF6', background: '#16181A', padding: '15px 26px', borderRadius: 10 }}
+                style={{ display: 'flex', justifyContent: 'center', marginTop: 24, fontSize: 16, fontWeight: 600, color: '#FFFFFF', background: '#16181A', padding: '15px 26px', borderRadius: 10 }}
                 onClick={() => trackEvent('practice_booking_clicked', { placement: 'about-cta' })}
               >
                 Pick a time →

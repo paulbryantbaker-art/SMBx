@@ -40,19 +40,21 @@
     <!-- iOS toolbar match (2026-08-12, Paul: "on ios i want to match the ios
          chrome so there is not visible difference when not scrolled").
          Under CARTA this is EXACT, not a compromise: the page top is flat
-         bone #FCFAF6 with no ambient wash (the old comment here described the
+         white #FFFFFF with no ambient wash (canvas moved bone->white
+         2026-08-12, matching carta.com's actual ground; the old comment
+         here described the
          Aurora jade/amber wash, retired 2026-08-07), and the sticky nav is
          the same value with a transparent border at rest — so a toolbar
          tinted from this token is indistinguishable from the page at
          scroll 0. The second tag pins the SAME value for dark-scheme phones:
          the site is light-only (color-scheme above), and without an explicit
          dark entry a dark-mode browser may fall back to its own dark chrome
-         against the bone page — which is exactly the seam being ruled out.
-         Keep both tags equal to the page bone; if the canvas token ever
+         against the light page — which is exactly the seam being ruled out.
+         Keep both tags equal to the page canvas; if the canvas token ever
          moves, move all three together (html/body boot bg below is the
          third). -->
-    <meta name="theme-color" content="#FCFAF6" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#FCFAF6" />
+    <meta name="theme-color" content="#FFFFFF" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#FFFFFF" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <script>
@@ -108,7 +110,7 @@
         // true base, painted before any stylesheet has loaded and therefore
         // before there is a wash to approximate. Matching them would put a
         // tint on a page that has none yet.
-        var bg = '#FCFAF6';
+        var bg = '#FFFFFF';
         document.documentElement.style.backgroundColor = bg;
         if (document.body) document.body.style.backgroundColor = bg;
         else document.addEventListener('DOMContentLoaded', function() {

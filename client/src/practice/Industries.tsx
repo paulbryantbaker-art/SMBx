@@ -168,7 +168,7 @@ function Aside({ k, children }: { k: string; children: React.ReactNode }) {
 export default function Industries() {
   return (
     <PracticeShell>
-      <main style={{ background: '#FCFAF6', overflow: 'clip' }}>
+      <main style={{ background: '#FFFFFF', overflow: 'clip' }}>
 
         {/* ══ HERO ══ */}
         <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(52px, 9vw, 150px) clamp(20px, 4vw, 32px) 0', textAlign: 'center', position: 'relative' }}>
@@ -183,8 +183,8 @@ export default function Industries() {
           <div className="ca-ind-band" data-hs="3" style={{ margin: '52px auto 0', maxWidth: 1080, position: 'relative' }}>
             <img src="/industries/trade-home.jpg" alt="" style={{ display: 'block', width: '100%', height: 300, objectFit: 'cover' }} />
             <Handles />
-            <span style={{ position: 'absolute', left: 14, bottom: 14, display: 'inline-flex', alignItems: 'center', gap: 7, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '5px 9px', whiteSpace: 'nowrap' }}>
-              <span style={{ width: 7, height: 7, background: '#FCFAF6', display: 'inline-block' }} />FIFTEEN SECTOR THESES
+            <span style={{ position: 'absolute', left: 14, bottom: 14, display: 'inline-flex', alignItems: 'center', gap: 7, background: '#0A7A58', color: '#FFFFFF', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '5px 9px', whiteSpace: 'nowrap' }}>
+              <span style={{ width: 7, height: 7, background: '#FFFFFF', display: 'inline-block' }} />FIFTEEN SECTOR THESES
             </span>
           </div>
           <div className="ca-ind-machine" data-hs="3" style={{ margin: '52px auto 0', maxWidth: 1080 }}>
@@ -278,7 +278,7 @@ export default function Industries() {
               <a
                 href="/#yulia"
                 className="ca-h-greenbg"
-                style={{ fontSize: 16.5, fontWeight: 600, color: '#FCFAF6', background: '#16181A', padding: '16px 28px', borderRadius: 10 }}
+                style={{ fontSize: 16.5, fontWeight: 600, color: '#FFFFFF', background: '#16181A', padding: '16px 28px', borderRadius: 10 }}
                 onClick={() => trackEvent('practice_cta_clicked', { placement: 'industries-cta' })}
               >
                 Tell us what you're buying →

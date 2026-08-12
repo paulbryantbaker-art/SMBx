@@ -17,7 +17,7 @@ const MONO = "'IBM Plex Mono', monospace";
 export function LegalFrame({ crumb, title, children }: { crumb: string; title: string; children: React.ReactNode }) {
   return (
     <PracticeShell>
-      <main style={{ background: '#FCFAF6', overflow: 'clip' }}>
+      <main style={{ background: '#FFFFFF', overflow: 'clip' }}>
         <section style={{ maxWidth: 820, margin: '0 auto', padding: 'clamp(80px, 8vw, 130px) 32px clamp(100px, 10vw, 160px)' }}>
           <nav data-hs="0" aria-label="Breadcrumb" style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.12em', color: '#7C8187' }}>
             <Link href="/" className="ca-h-deepgreen" style={{ color: '#0A7A58' }}>SMBX</Link>
