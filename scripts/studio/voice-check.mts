@@ -272,7 +272,7 @@ function checkMessage(raw: string, file: string, hits: Hit[]) {
     const lab = p.match(LABEL);
     if (!lab) continue;
     const after = squash(p.slice(lab[0].length)
-      .replace(/^[\s,:—–-]+/, '')
+      .replace(/^[\s.,:;—–-]+/, '')   // a full stop after the label is natural — 'THE MESSAGE. …' — and must not be read as the sentence
       .replace(/^in (one|a) (line|sentence)\b[\s,:—–-]*/i, ''));   // "THE MESSAGE, in one line: …"
     const sentence = firstSentence(after);
     if (sentence.split(/\s+/).length >= 6) {
