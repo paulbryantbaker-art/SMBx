@@ -99,8 +99,8 @@ export const REPORTS: ReportMeta[] = [
     // sources of differing definition, vintage and scope manufactures a number
     // no source reports. The superseded July 23 edition led on it.
     abstract:
-      'Fragmentation is the thesis, not market size: about 89% of the 112,088 firms in the combined NAICS 238220 code employ fewer than 20 people, and no single company commands 20% of any major vertical. The top of the market has re-rated — HVAC services cleared 9.5x EV/EBITDA across 2024–YTD 2026 against 13.3x across 2021–23, roughly four turns cheaper, while trophy platforms still clear 16–20x. New in this edition: a metro-depth cut of Dallas–Fort Worth — eighteen platform parents hold a verified operating location, and roughly 280 establishments in the buyable middle match no consolidator in the register.',
-    published: '2026-08-03',
+      'Fragmentation is the thesis, not market size: about 89% of the 112,088 firms in the combined NAICS 238220 code employ fewer than 20 people, and no single company commands 20% of any major vertical. The top of the market has re-rated — HVAC services cleared 9.5x EV/EBITDA across 2024–YTD 2026 against 13.3x across 2021–23, roughly four turns cheaper, while trophy platforms still clear 16–20x. New in this edition: a metro-depth cut of Dallas–Fort Worth — eighteen platform parents hold a verified operating location, and roughly 280 establishments in the 20–249 employee band match no consolidator in the register.',
+    published: '2026-08-12',
     publishedLabel: 'August 2026',
     ogImage: '/reports/home-services-cover.jpg',
     md: 'home-services-state-of-market.md',
@@ -114,8 +114,8 @@ export const REPORTS: ReportMeta[] = [
     // Drawn from this report's own executive summary — the metro-depth cut of
     // the statewide assessment (its Part XI), published as its own volume.
     abstract:
-      'The acquirable universe is roughly 300 businesses, not 2,400: Dallas–Fort Worth counts 2,412 plumbing-and-HVAC establishments, and 74.5% have fewer than ten employees. Eighteen platform parents hold verified DFW ground, platform share of the acquisition band runs 8.5% to 22.6%, and roughly 280 establishments carrying an estimated $2–6B of annual work match no consolidator in the register.',
-    published: '2026-08-03',
+      'The acquirable universe is 598 businesses, not 2,400: Dallas–Fort Worth counts 2,412 plumbing-and-HVAC establishments, and 74.5% have fewer than ten employees. Eighteen platform parents hold verified DFW ground, platform share of the acquisition band is 4.3% drawn at 10–249 employees — 8.5% at 20–249 and 22.6% at 50–249 — and roughly 280 establishments in the 20–249 band match no consolidator in the register.',
+    published: '2026-08-12',
     publishedLabel: 'August 2026',
     ogImage: '/reports/dfw-home-services-cover.jpg',
     md: 'dfw-home-services.md',
