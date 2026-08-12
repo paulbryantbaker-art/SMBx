@@ -251,6 +251,71 @@
   20%, 100% { transform: scaleX(0); opacity: 0; }
 }
 
+/* ── THE MACHINE, RUNNING (2026-08-12) — the Connect-diagram instrument,
+      measured from mroeCarta.mov and rebuilt with the practice's verbs.
+      React (MachineRun in Landing.tsx) drives the stage machine — typing,
+      hold, un-typing — and these classes carry every visual transition.
+      Desktop-only prototype: the wrap hides below 1025 so the audited phone
+      page is untouched. ── */
+.ca-machine-wrap { display: none; }
+@media (min-width: 1025px) { .ca-machine-wrap { display: block; } }
+
+/* The line: serif, centred, with a mint block caret. The caret blinks only
+   while the machine is mid-word — CSS can't know that, so it always blinks
+   and simply isn't rendered during the mark state. */
+.ca-mline {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: 'Source Serif 4', Georgia, serif; font-weight: 550;
+  font-size: clamp(30px, 3.4vw, 52px); letter-spacing: -0.01em;
+  opacity: 0; transition: opacity 300ms ease;
+}
+.ca-mline.on { opacity: 1; }
+.ca-mcaret {
+  display: inline-block; width: 3px; height: 0.92em; margin-left: 6px;
+  background: #A8F0CE; align-self: center;
+  animation: caMCaret 1.06s steps(1) infinite;
+}
+@keyframes caMCaret { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
+
+/* The boxed wordmark the cycle resets through — their `carta` box, our mark. */
+.ca-mmark {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  padding: 14px 22px; border: 1px solid #3A3F38; background: #1A1B19;
+  opacity: 0; scale: 0.9; transition: opacity 420ms ease, scale 420ms cubic-bezier(0.3, 0.85, 0.35, 1);
+}
+.ca-mmark.on { opacity: 1; scale: 1; }
+
+/* Connector elbows: the base path draws via dashoffset when the hold state
+   lands (per-path stagger rides an inline transition-delay); its twin runs
+   marching mint dashes — the current that makes the diagram read as a
+   system working, straight from the video. */
+.ca-mpath {
+  stroke-dasharray: 100; stroke-dashoffset: 100;
+  transition: stroke-dashoffset 520ms cubic-bezier(0.3, 0.85, 0.35, 1);
+}
+.ca-mpath.draw { stroke-dashoffset: 0; }
+.ca-mflow {
+  stroke-dasharray: 2 10; opacity: 0; transition: opacity 400ms ease 600ms;
+  animation: caMFlow 1.15s linear infinite;
+}
+.ca-mflow.run { opacity: 0.85; }
+@keyframes caMFlow { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -48; } }
+
+/* Pills enter the way theirs do: a bar that grows from its left edge, then
+   the label arrives on it. `scale` never `transform` — translate owns the
+   centring. Exit is the same transition run backwards, fast, with no delay
+   (the inline delay is zeroed when .on drops). */
+.ca-mpill {
+  position: absolute; transform: translate(-50%, -50%); transform-origin: 0 50%;
+  background: #0A7A58; color: #FCFAF6; white-space: nowrap;
+  font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; letter-spacing: 0.08em;
+  padding: 7px 11px; scale: 0 1;
+  transition: scale 320ms cubic-bezier(0.3, 0.85, 0.35, 1);
+}
+.ca-mpill.on { scale: 1 1; }
+.ca-mpill > span { opacity: 0; transition: opacity 260ms ease; display: inline-block; }
+.ca-mpill.on > span { opacity: 1; }
+
 /* THE HOLE BECOMES THE CLOSE (2026-08-12). The hunt board's 16th lane leaves
    a two-cell remainder; on desktop the CTA takes that cell and the old
    centred link below the grid hides. Below 1025 both rules idle, so the
@@ -1101,4 +1166,10 @@
   [data-proof] .ch-node::after { animation: none !important; }
   [data-assemble] > .ch-node, [data-assemble] > .ch-wire { opacity: 1 !important; animation: none !important; }
   .ch-wire i::after { animation: none !important; }
+  /* The machine renders its finale as a still under reduced motion (the
+     React loop never starts); the caret, current, and every transition
+     stand down with it. */
+  .ca-mcaret, .ca-mflow { animation: none !important; }
+  .ca-mflow { opacity: 0 !important; }
+  .ca-mpath, .ca-mpill, .ca-mpill > span, .ca-mline, .ca-mmark { transition: none !important; }
 }
