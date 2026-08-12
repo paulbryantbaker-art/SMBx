@@ -11,6 +11,7 @@
  * regulations (NFPA 25/72, RCRA, AS9100, ISO 13485). The sector copy is the
  * reference's, which took it verbatim from the live page — one source.
  */
+import { Fragment, useEffect, useState } from 'react';
 import PracticeShell, { Handles, Kicker } from './PracticeShell';
 import { bookHref, bookTarget, bookRel } from './leads';
 import { trackEvent } from '../lib/analytics';
@@ -66,6 +67,95 @@ const SECTORS: Sector[] = [
 
 const TAG_STYLE = { fontFamily: MONO, fontSize: 11, letterSpacing: '0.05em', color: '#0A7A58', background: '#DFF5EC', padding: '6px 10px' } as const;
 
+/* THE SECTOR MACHINE (2026-08-12, Paul: "maybe we can use this to update the
+   industries page? the industries page looks pretty boring"). The landing's
+   Connect-diagram instrument, pointed at this page's own register: the hero's
+   static illustration becomes the machine on desktop, typing each sector's
+   name while three pills pop on drawn elbows — and every pill RESTATES copy
+   this page (or the landing's hunt board) already carries for that sector,
+   the same only-restatements law the research ring runs. Nothing new is
+   claimed; a sector added without a pill entry just types with no pills
+   rather than inventing any. Below 1025 the framed illustration band ships
+   exactly as audited. */
+const MACHINE_PILLS: Record<string, [string, string, string]> = {
+  'Residential home services': ['HVAC · PLUMBING · ELECTRICAL', 'ROOFING · PEST · GARAGE DOORS', 'HOMEOWNER DEMAND'],
+  'Commercial mechanical, HVAC & plumbing': ['COMMERCIAL & INSTITUTIONAL', 'CONTRACTED SERVICE BOOKS', 'DATA CENTER · HEALTHCARE'],
+  'Fire & life safety': ['INSPECTION UNDER NFPA 25 & 72', 'SUPPRESSION · DETECTION', 'AN INSPECTION ANNUITY'],
+  'Elevator & escalator service': ['MANDATED INSPECTIONS', 'STICKY CONTRACT BOOKS', 'AGING OWNERS'],
+  'Power & grid infrastructure services': ['TRANSFORMER REFURB', 'SUBSTATIONS', 'CERTIFIED TESTING'],
+  'Building automation & critical power services': ['CONTROLS & COMMISSIONING', 'CRITICAL POWER & COOLING', 'RECURRING SERVICE'],
+  'Energy-adjacent services, contracting & distribution': ['INDUSTRIAL & ENERGY SERVICES', 'FUEL · PROPANE · PVF', 'ELECTRIFICATION DEMAND'],
+  'Testing, inspection & certification / NDT': ['NONDESTRUCTIVE TESTING', 'CODE INSPECTION', 'MATERIALS TESTING LABS'],
+  'Environmental & industrial cleaning services': ['PERMIT-GATED', 'RCRA AUTHORIZATIONS', 'RARELY BROKERED'],
+  'Water & wastewater contract O&M': ['MULTI-YEAR CONTRACTS', 'MUNICIPAL & INDUSTRIAL', 'NON-DISCRETIONARY DEMAND'],
+  'Specialty & MRO distribution': ['VENDOR-AUTHORIZED', 'VMI & INTEGRATED SUPPLY', 'NON-COMPETING LINES'],
+  'Machine shops & precision manufacturing': ['AS9100 · ISO 13485', 'DEFENSE-QUALIFIED', 'RESHORING TAILWIND'],
+  'Food contract manufacturing & co-packing': ['MULTI-YEAR SUPPLY AGREEMENTS', 'QUALIFICATION RUNS', 'REGIONAL DENSITY'],
+  'Non-emergency medical transport': ['SCHEDULED · RECURRING', 'MEDICAID & MEDICARE FUNDED', 'PAYOR DILIGENCE FIRST'],
+  'Revenue cycle management & medical billing': ['MANY OWNERS · CLEAN BOOKS', 'ACTIVE CONSOLIDATION', 'THE NICHE BEFORE THE NUMBER'],
+};
+const PILL_AT = [{ x: 73, y: 22 }, { x: 79, y: 63 }, { x: 18, y: 72 }];
+const SM_MX = { left: 355, right: 645, y: 212 };
+
+function SectorMachine() {
+  const [s, setS] = useState<{ vi: number; stage: 'type' | 'hold' | 'untype'; chars: number }>({ vi: 0, stage: 'type', chars: 0 });
+  const reduce = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  useEffect(() => {
+    if (reduce) { setS({ vi: 0, stage: 'hold', chars: SECTORS[0].nm.length }); return; }
+    let dead = false;
+    const timers: number[] = [];
+    const wait = (ms: number) => new Promise<void>(r => { timers.push(window.setTimeout(r, ms)); });
+    (async () => {
+      while (!dead) {
+        for (let vi = 0; vi < SECTORS.length; vi++) {
+          const w = SECTORS[vi].nm;
+          for (let c = 1; c <= w.length; c++) { setS({ vi, stage: 'type', chars: c }); await wait(52); if (dead) return; }
+          setS({ vi, stage: 'hold', chars: w.length });
+          await wait(2700); if (dead) return;
+          for (let c = w.length - 1; c >= 0; c--) { setS({ vi, stage: 'untype', chars: c }); await wait(24); if (dead) return; }
+          await wait(260); if (dead) return;
+        }
+      }
+    })();
+    return () => { dead = true; timers.forEach(clearTimeout); };
+  }, [reduce]);
+
+  const on = s.stage === 'hold';
+  const nm = SECTORS[s.vi].nm;
+  const pills = MACHINE_PILLS[nm] ?? [];
+  const paths = pills.map((_, i) => {
+    const p = PILL_AT[i];
+    return `M ${p.x > 50 ? SM_MX.right : SM_MX.left} ${SM_MX.y} H ${p.x * 10} V ${p.y * 4.6}`;
+  });
+  return (
+    <div className="ca-machine" style={{ position: 'relative', background: '#1A1B19', overflow: 'hidden', height: 'clamp(340px, 27vw, 420px)' }}>
+      <Handles color="#F4F5F1" />
+      <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.15) 1.1px, transparent 1.1px)', backgroundSize: '16px 16px' }} />
+      <svg aria-hidden="true" viewBox="0 0 1000 460" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} fill="none">
+        {paths.map((d, i) => (
+          <Fragment key={`${s.vi}-${i}`}>
+            <path d={d} pathLength={100} className={`ca-mpath${on ? ' draw' : ''}`} style={{ transitionDelay: on ? `${i * 130}ms` : '0ms' }} stroke="#3A3F38" strokeWidth="1.4" />
+            <path d={d} pathLength={100} className={`ca-mflow${on ? ' run' : ''}`} stroke="#A8F0CE" strokeWidth="1.4" />
+          </Fragment>
+        ))}
+      </svg>
+      <div className="ca-mline sm on" aria-hidden="true">
+        <span style={{ color: '#A8F0CE' }}>We cover&nbsp;</span>
+        <span style={{ color: '#F4F5F1' }}>{nm.slice(0, s.chars)}</span>
+        <span className="ca-mcaret" />
+      </div>
+      {pills.map((t, i) => (
+        <span key={`${s.vi}-${t}`} className={`ca-mpill${on ? ' on' : ''}`} style={{ left: `${PILL_AT[i].x}%`, top: `${PILL_AT[i].y}%`, transitionDelay: on ? `${140 + i * 150}ms` : '0ms' }}>
+          <span style={{ transitionDelay: on ? `${300 + i * 150}ms` : '0ms' }}>{t}</span>
+        </span>
+      ))}
+      <div style={{ position: 'absolute', left: 22, bottom: 16, display: 'inline-flex', alignItems: 'center', gap: 7, fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: '#8E948B' }}>
+        <span style={{ width: 7, height: 7, background: '#0A7A58', display: 'inline-block' }} />FIFTEEN SECTOR THESES
+      </div>
+    </div>
+  );
+}
+
 function Aside({ k, children }: { k: string; children: React.ReactNode }) {
   return (
     <div style={{ borderTop: '2px solid #16181A', paddingTop: 16, position: 'relative', marginTop: k === 'WHO WE RUN IT FOR' ? 0 : 24 }}>
@@ -88,13 +178,36 @@ export default function Industries() {
           <div data-hs="0"><Kicker center>KEY INDUSTRY VERTICALS</Kicker></div>
           <h1 data-hs="1" style={{ margin: '28px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.6vw, 60px)', lineHeight: 1.1, letterSpacing: '-0.013em', textWrap: 'balance' }}>Buy-side M&amp;A for acquirers of private companies under $250M in revenue.</h1>
           <p data-hs="2" style={{ margin: '26px auto 0', maxWidth: '42em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>We work on a retainer plus a success fee, paid by the acquirer, never the seller. These lanes are where we know the most; bring us a market that isn't here and we'll go learn it.</p>
-          <div data-hs="3" style={{ margin: '52px auto 0', maxWidth: 1080, position: 'relative' }}>
+          {/* Below 1025 the framed illustration band ships exactly as
+              audited; at ≥1025 the sector machine takes its place (the
+              complementary-classes pattern the hero orbit set). */}
+          <div className="ca-ind-band" data-hs="3" style={{ margin: '52px auto 0', maxWidth: 1080, position: 'relative' }}>
             <img src="/industries/trade-home.jpg" alt="" style={{ display: 'block', width: '100%', height: 300, objectFit: 'cover' }} />
             <Handles />
             <span style={{ position: 'absolute', left: 14, bottom: 14, display: 'inline-flex', alignItems: 'center', gap: 7, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '5px 9px', whiteSpace: 'nowrap' }}>
               <span style={{ width: 7, height: 7, background: '#FCFAF6', display: 'inline-block' }} />FIFTEEN SECTOR THESES
             </span>
           </div>
+          <div className="ca-ind-machine" data-hs="3" style={{ margin: '52px auto 0', maxWidth: 1080 }}>
+            <SectorMachine />
+          </div>
+          {/* THE DIRECTORY (2026-08-12): fifteen rows and no index meant a
+              blind scroll — the second Carta lesson after the instrument.
+              The anchors already existed (the hunt board deep-links them);
+              this is the first time the page offers them to its own reader.
+              Desktop-only for now, same prototype law as the machine. */}
+          <nav className="ca-ind-index" aria-label="Sector index" data-rv style={{ margin: '30px auto 0', maxWidth: 1160 }}>
+            {SECTORS.map((s, i) => (
+              <a
+                key={s.nm}
+                href={`#${sectorSlug(s.nm)}`}
+                className="ca-ind-chip"
+                onClick={() => trackEvent('practice_sector_clicked', { sector: s.nm })}
+              >
+                <b>{String(i + 1).padStart(2, '0')}</b>{s.nm}
+              </a>
+            ))}
+          </nav>
         </section>
 
         {/* ══ THE THESES ══ */}
