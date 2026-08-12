@@ -83,7 +83,7 @@
  * Deal Green `#0A7A58`, its hover, its tint and mint are identical values to
  * Aurora's — the brand mark does not move. What moves is everything around it:
  * the dark surface stops being a saturated jade block over a texture and
- * becomes flat near-black `#1A1B19` with square edges; the warm second accent
+ * becomes flat near-black `#181818` with square edges; the warm second accent
  * (brass/honey) is GONE, leaving exactly one accent; and the neutrals go
  * cooler and slightly deeper for reading.
  *
@@ -121,7 +121,7 @@ export const CARTA = {
   mint: '#A8F0CE',        // the accent ON dark surfaces
 
   /* dark bands + footer — flat, square, untextured */
-  dark: '#1A1B19',
+  dark: '#181818',
   darkSeam: '#2A2E29',    // grid seams and hairlines on dark
   darkPlate: '#22261F',   // label plates
   darkInk: '#F4F5F1',     // reading text on dark
@@ -312,7 +312,7 @@ export function handleCss(color: string = CARTA.ink, small = false): string {
  * A builder that renders a light card and a dark card from one stylesheet
  * cannot colour the handles in `handleCss()` — whichever value it passes is
  * wrong on the other surface, and the failure is silent: ink handles on the
- * `#1A1B19` band are invisible, and an invisible handle is indistinguishable
+ * `#181818` band are invisible, and an invisible handle is indistinguishable
  * from a page that never converted. This is the same defect `design-check.mts`
  * was written to catch on cover text, one gesture further out.
  */

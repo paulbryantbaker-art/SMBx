@@ -588,7 +588,7 @@ export default function PracticeShell({
              page: Industries/Research run compact (short blurb, no BUYERS,
              six-link FIRM), Track Record drops its self-link, and the pages
              that close on a dark band carry a hairline seam up top. ══ */}
-      <footer className="ca-dark" style={{ background: '#1A1B19', color: '#F4F5F1', padding: 'clamp(56px, 7vw, 88px) clamp(20px, 4vw, 32px) 40px', borderTop: footSeam ? '1px solid #2A2E29' : undefined }}>
+      <footer className="ca-dark" style={{ background: '#181818', color: '#F4F5F1', padding: 'clamp(56px, 7vw, 88px) clamp(20px, 4vw, 32px) 40px', borderTop: footSeam ? '1px solid #2A2E29' : undefined }}>
         <div style={{ maxWidth: 1360, margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 44 }}>
             <div>

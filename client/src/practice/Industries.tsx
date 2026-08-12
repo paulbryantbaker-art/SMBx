@@ -128,7 +128,7 @@ function SectorMachine() {
     return `M ${p.x > 50 ? SM_MX.right : SM_MX.left} ${SM_MX.y} H ${p.x * 10} V ${p.y * 4.6}`;
   });
   return (
-    <div className="ca-machine" style={{ position: 'relative', background: '#1A1B19', overflow: 'hidden', height: 'clamp(340px, 27vw, 420px)' }}>
+    <div className="ca-machine" style={{ position: 'relative', background: '#181818', overflow: 'hidden', height: 'clamp(340px, 27vw, 420px)' }}>
       <Handles color="#F4F5F1" />
       <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.15) 1.1px, transparent 1.1px)', backgroundSize: '16px 16px' }} />
       <svg aria-hidden="true" viewBox="0 0 1000 460" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} fill="none">
@@ -141,11 +141,10 @@ function SectorMachine() {
       </svg>
       <div className="ca-mline sm on" aria-hidden="true">
         <span style={{ color: '#A8F0CE' }}>We cover&nbsp;</span>
-        <span style={{ color: '#F4F5F1' }}>{nm.slice(0, s.chars)}</span>
-        <span className="ca-mcaret" />
+        <span className="ca-mword"><span style={{ color: '#F4F5F1' }}>{nm.slice(0, s.chars)}</span><span className="ca-mcaret" /></span>
       </div>
       {pills.map((t, i) => (
-        <span key={`${s.vi}-${t}`} className={`ca-mpill${on ? ' on' : ''}`} style={{ left: `${PILL_AT[i].x}%`, top: `${PILL_AT[i].y}%`, transitionDelay: on ? `${140 + i * 150}ms` : '0ms' }}>
+        <span key={`${s.vi}-${t}`} className={`ca-mpill i${i}${on ? ' on' : ''}`} style={{ left: `${PILL_AT[i].x}%`, top: `${PILL_AT[i].y}%`, transitionDelay: on ? `${140 + i * 150}ms` : '0ms' }}>
           <span style={{ transitionDelay: on ? `${300 + i * 150}ms` : '0ms' }}>{t}</span>
         </span>
       ))}

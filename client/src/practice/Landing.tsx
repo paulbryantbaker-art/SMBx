@@ -265,7 +265,7 @@ function ProofBand() {
   // express "smaller in a rail, larger in a 2-up".
   const num = { fontFamily: SERIF, fontWeight: 550, lineHeight: 1, letterSpacing: '-0.02em' } as const;
   return (
-    <section id="proof" className="ca-dark" style={{ background: '#1A1B19', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px) clamp(62px, 10vw, 180px)' }}>
+    <section id="proof" className="ca-dark" style={{ background: '#181818', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px) clamp(62px, 10vw, 180px)' }}>
       <div style={{ maxWidth: 1360, margin: '0 auto' }}>
         <div data-rv><Kicker dark center>TWO DECADES ON THE BUY SIDE</Kicker></div>
         {/* THE PROOF AS A CHAIN (2026-08-08). Five nodes wired, ending on
@@ -367,7 +367,7 @@ function Engagement() {
   }, []);
   return (
     <>
-          <div data-rv data-trackpanel ref={trackRef} style={{ marginTop: 'clamp(29px, 5vw, 84px)', position: 'relative', background: '#1A1B19', padding: 'clamp(26px, 3vw, 40px)' }}>
+          <div data-rv data-trackpanel ref={trackRef} style={{ marginTop: 'clamp(29px, 5vw, 84px)', position: 'relative', background: '#181818', padding: 'clamp(26px, 3vw, 40px)' }}>
         <Handles color="#F4F5F1" />
         <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.13) 1.1px, transparent 1.1px)', backgroundSize: '16px 16px' }} />
         <div style={{ position: 'relative' }}>
@@ -617,7 +617,7 @@ function MachineRun() {
       : [];
   return (
     <div className="ca-machine-wrap" data-rv>
-      <div className="ca-machine" style={{ position: 'relative', marginTop: 56, background: '#1A1B19', overflow: 'hidden', height: 'clamp(400px, 32vw, 500px)' }}>
+      <div className="ca-machine" style={{ position: 'relative', marginTop: 56, background: '#181818', overflow: 'hidden', height: 'clamp(400px, 32vw, 500px)' }}>
         <Handles color="#F4F5F1" />
         <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.15) 1.1px, transparent 1.1px)', backgroundSize: '16px 16px' }} />
         <svg aria-hidden="true" viewBox="0 0 1000 460" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} fill="none">
@@ -634,11 +634,10 @@ function MachineRun() {
         </div>
         <div className={`ca-mline${s.mode !== 'mark' ? ' on' : ''}`} aria-hidden="true">
           <span style={{ color: '#A8F0CE' }}>We run&nbsp;</span>
-          <span style={{ color: '#F4F5F1' }}>{word}</span>
-          <span className="ca-mcaret" />
+          <span className="ca-mword"><span style={{ color: '#F4F5F1' }}>{word}</span><span className="ca-mcaret" /></span>
         </div>
         {pills.map((p, i) => (
-          <span key={`${s.vi}-${p.t}`} className={`ca-mpill${on ? ' on' : ''}`} style={{ left: `${p.x}%`, top: `${p.y}%`, transitionDelay: on ? `${140 + i * 150}ms` : '0ms' }}>
+          <span key={`${s.vi}-${p.t}`} className={`ca-mpill i${i}${on ? ' on' : ''}`} style={{ left: `${p.x}%`, top: `${p.y}%`, transitionDelay: on ? `${140 + i * 150}ms` : '0ms' }}>
             <span style={{ transitionDelay: on ? `${300 + i * 150}ms` : '0ms' }}>{p.t}</span>
           </span>
         ))}
@@ -1092,7 +1091,7 @@ export default function Landing() {
                     </Fragment>
                   ))}
                 </div>
-                <div style={{ marginTop: 20, background: '#1A1B19', color: '#F4F5F1', padding: '20px 24px', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ marginTop: 20, background: '#181818', color: '#F4F5F1', padding: '20px 24px', position: 'relative', overflow: 'hidden' }}>
                   <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.16) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
                   {/* The giant "9" that used to sit here is now the chain's
                       terminal node — repeating it beside the sentence that
@@ -1176,7 +1175,7 @@ export default function Landing() {
         </section>
 
         {/* ══ PRICING — dark band ══ */}
-        <section id="pricing" className="ca-dark" style={{ background: '#1A1B19', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative' }}>
+        <section id="pricing" className="ca-dark" style={{ background: '#181818', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative' }}>
           <div aria-hidden="true" data-plx="0.02" style={{ position: 'absolute', top: 40, right: '6%', width: 280, height: 190, backgroundImage: 'radial-gradient(rgba(168,240,206,.2) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           {/* HEAD_CTR, not the reference's 840 — same one-line finding as
               #owners. The sub (38em) and the form (520) carry their own caps,
@@ -1298,7 +1297,7 @@ export default function Landing() {
         </section>
 
         {/* ══ WHOSE SIDE — dark band ══ */}
-        <section className="ca-dark" style={{ background: '#1A1B19', color: '#F4F5F1', padding: 'clamp(68px, 11vw, 180px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
+        <section className="ca-dark" style={{ background: '#181818', color: '#F4F5F1', padding: 'clamp(68px, 11vw, 180px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
           {/* The dot field sits BEHIND the headline, not marooned in a corner
               (2026-08-08). It was anchored `left: 5%; bottom: 36` — a 300×170
               block alone in the band's bottom-left, aligned to nothing and
@@ -1315,7 +1314,7 @@ export default function Landing() {
             {/* TWO-TONE (2026-08-08). The accent lands on the TURN, never on the
                 setup — the sentence states a fact, then asks the question that
                 is the whole practice. Mint rather than Deal Green because this
-                is a dark band: green on #1A1B19 is the low-contrast trap the
+                is a dark band: green on #181818 is the low-contrast trap the
                 token table already warns about, and mint is the sanctioned
                 on-dark accent. The device is not new here — the collateral
                 deck builder has drawn hooks this way for months

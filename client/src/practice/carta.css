@@ -96,6 +96,20 @@
    not `transform`: the positioner's inline transform owns the centring. */
 .ca-chip-pop-a { animation: caChipPopA 8s cubic-bezier(0.3, 0.85, 0.35, 1) 0.5s infinite backwards; }
 .ca-chip-pop-b { animation: caChipPopB 8s cubic-bezier(0.3, 0.85, 0.35, 1) 0.5s infinite backwards; }
+/* THE RING TURNS WHILE IT HOLDS (2026-08-12, Paul: "after the globes draw
+   themselves, they should rotate between being redrawn"). The rotation
+   rides the SVG inside the same 8s cycle: still while the arcs draw
+   (0–30%), a slow ~70° sweep through the hold, and the dissolve (88–95%)
+   hides the snap back to zero at the restart. The chips never move — they
+   sit on the OUTER CIRCLE, which is rotation-invariant (the 2026-08-09
+   lesson), so the ellipses are seen to travel while the labels hold still
+   and stay readable. Same cycle, same delay, same fill as everything else
+   in the loop — a different period here would slowly shear the phases. */
+.ca-orbit-hero svg { transform-origin: 50% 50%; animation: caRingTurn 8s linear 0.5s infinite backwards; }
+@keyframes caRingTurn {
+  0%, 30%   { transform: rotate(0deg); }
+  95%, 100% { transform: rotate(72deg); }
+}
 @keyframes caChipPopA {
   0%, 30%   { opacity: 0; scale: 0.82; }
   34%       { opacity: 1; scale: 1.05; }
@@ -233,16 +247,14 @@
    inline --spot-delay on each node (set in the Landing map), NOT nth-of-type
    — the chain interleaves wires and corner handles, so positional selectors
    would count the wrong children the day the markup gains a child.
-   Desktop-only: below 900 the band is the audited 2-up grid and stays
-   byte-identical. */
-@media (min-width: 1025px) {
-  [data-proof] .ch-node { position: relative; }
-  [data-proof] .ch-node::after {
-    content: ''; position: absolute; left: 20px; right: 20px; bottom: 16px; height: 2px;
-    background: #A8F0CE; transform: scaleX(0); opacity: 0;
-    animation: caSpot 15s linear infinite;
-    animation-delay: var(--spot-delay, 0s);
-  }
+   All widths since the mobile pass (2026-08-12): the relay works the same
+   on the phone's 2-up grid — a pure ::after, no layout impact. */
+[data-proof] .ch-node { position: relative; }
+[data-proof] .ch-node::after {
+  content: ''; position: absolute; left: 20px; right: 20px; bottom: 16px; height: 2px;
+  background: #A8F0CE; transform: scaleX(0); opacity: 0;
+  animation: caSpot 15s linear infinite;
+  animation-delay: var(--spot-delay, 0s);
 }
 @keyframes caSpot {
   0%        { transform: scaleX(0); opacity: 0; }
@@ -257,22 +269,27 @@
       hold, un-typing — and these classes carry every visual transition.
       Desktop-only prototype: the wrap hides below 1025 so the audited phone
       page is untouched. ── */
-.ca-machine-wrap { display: none; }
-@media (min-width: 1025px) { .ca-machine-wrap { display: block; } }
+/* THE MACHINES GO TO PHONES (2026-08-12, Paul: "implement the changes on
+   mobile too" — the desktop-only prototype law retires for the machine, the
+   sector machine and the directory). The wide-stage geometry does not
+   travel: below 1025 the SVG wiring hides (the elbow anchors assume a wide
+   panel) and the pills reform as a stack around the centred line — one
+   above it, two below, positions per pill index (the i0/i1/i2 classes set
+   in the markup) — so the panel reads as line + claims rather than a
+   diagram squeezed sideways. */
+.ca-machine-wrap { display: block; }
 
-/* THE SECTOR MACHINE + THE DIRECTORY (/industries, 2026-08-12). The same
-   complementary-classes pattern as the hero orbit: below 1025 the audited
-   illustration band renders untouched and neither addition exists; at ≥1025
-   the machine replaces the band and the fifteen-chip index appears under
-   the hero. The chips are 13px mono — at the readability floor, not below
-   it — and each one jumps to the sector anchor the hunt board already
-   deep-links. */
-.ca-ind-machine, .ca-ind-index { display: none; }
-@media (min-width: 1025px) {
-  .ca-ind-band { display: none; }
-  .ca-ind-machine { display: block; }
-  .ca-ind-index { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-}
+/* THE SECTOR MACHINE + THE DIRECTORY (/industries, 2026-08-12; mobile the
+   same day). The machine replaces the hero illustration band at every
+   width now, and the fifteen-chip index runs everywhere — it matters MOST
+   on phones, where this page is ~17,600px tall. The chips are 13px mono at
+   the readability floor, and each jumps to the sector anchor the hunt
+   board already deep-links. The band markup stays for rollback: dormant,
+   not deleted. */
+.ca-ind-band { display: none; }
+.ca-ind-machine { display: block; }
+.ca-ind-index { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+
 .ca-ind-chip {
   font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.04em;
   padding: 8px 13px; border: 1px solid #E4DFD3; background: #FFFFFF; color: #16181A;
@@ -280,6 +297,16 @@
 }
 .ca-ind-chip:hover { border-color: #0A7A58; color: #0A7A58; }
 .ca-ind-chip b { font-weight: 400; color: #0A7A58; margin-right: 8px; }
+
+/* The phone overrides sit AFTER the base rules on purpose — same
+   specificity, so source order is the whole mechanism (the first cut put
+   this block first and the base padding silently won at every width). */
+@media (max-width: 1024px) {
+  /* the tap target reaches 44px+ on phones (13px line + 30px padding + the
+     border); desktop keeps the tighter chip. The first cut used 12px and
+     landed at 38px — the audit's TAP floor caught it. */
+  .ca-ind-chip { padding: 15px 16px; }
+}
 
 /* The industries machine types sector names up to 52 characters, so its
    line runs a size down from the landing's verb line. */
@@ -295,6 +322,12 @@
   opacity: 0; transition: opacity 300ms ease;
 }
 .ca-mline.on { opacity: 1; }
+/* The standing words never break internally — on a narrow panel the LINE
+   may wrap (stand / typed name), but "We cover" splitting into "We" over
+   "cover" read as a defect on the phone pass. The caret rides INSIDE
+   .ca-mword so a wrapped layout can never strand it on its own line. */
+.ca-mline > span:first-child { white-space: nowrap; }
+.ca-mword { display: inline-flex; align-items: center; justify-content: center; }
 .ca-mcaret {
   display: inline-block; width: 3px; height: 0.92em; margin-left: 6px;
   background: #A8F0CE; align-self: center;
@@ -305,7 +338,7 @@
 /* The boxed wordmark the cycle resets through — their `carta` box, our mark. */
 .ca-mmark {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  padding: 14px 22px; border: 1px solid #3A3F38; background: #1A1B19;
+  padding: 14px 22px; border: 1px solid #3A3F38; background: #181818;
   opacity: 0; scale: 0.9; transition: opacity 420ms ease, scale 420ms cubic-bezier(0.3, 0.85, 0.35, 1);
 }
 .ca-mmark.on { opacity: 1; scale: 1; }
@@ -341,6 +374,26 @@
 .ca-mpill > span { opacity: 0; transition: opacity 260ms ease; display: inline-block; }
 .ca-mpill.on > span { opacity: 1; }
 
+/* THE MACHINE ON PHONES (2026-08-12, Paul: "implement the changes on mobile
+   too"). This block sits AFTER the vocabulary above on purpose — same
+   specificity, so source order is the whole mechanism (the first cut put it
+   ~700 lines earlier and every rule in it silently lost). Below 1025 the
+   SVG wiring hides (the elbow anchors assume a wide stage), the line stacks
+   — standing words above, typed name below, caret riding the name inline so
+   a wrap can never strand it — and the pills reform as a stack around the
+   line via the i0/i1/i2 classes set in the markup. */
+@media (max-width: 1024px) {
+  .ca-machine { height: 430px !important; }
+  .ca-machine svg { display: none; }
+  .ca-mline { font-size: clamp(22px, 6.6vw, 32px); flex-direction: column; gap: 4px; }
+  .ca-mline.sm { font-size: clamp(17px, 5.2vw, 24px); }
+  .ca-mword { display: inline; min-height: 1.2em; max-width: 88%; text-align: center; }
+  .ca-mpill { left: 50% !important; transition-delay: 0ms; }
+  .ca-mpill.i0 { top: 16% !important; }
+  .ca-mpill.i1 { top: 70% !important; }
+  .ca-mpill.i2 { top: 84% !important; }
+}
+
 /* THE HOLE BECOMES THE CLOSE (2026-08-12). The hunt board's 16th lane leaves
    a two-cell remainder; on desktop the CTA takes that cell and the old
    centred link below the grid hides. Below 1025 both rules idle, so the
@@ -367,11 +420,17 @@
    ornament is a classless child, so the .ch-node/.ch-wire selectors leave
    it be. */
 [data-rv][data-assemble] { opacity: 1; translate: none; transition: none; }
-@media (min-width: 1025px) {
-  [data-assemble] > .ch-node, [data-assemble] > .ch-wire { opacity: 0; }
-  [data-assemble] > .ch-wire { transform-origin: 0 50%; }
-  [data-assemble].rv-in > .ch-node { animation: caNodeIn 480ms cubic-bezier(0.3, 0.85, 0.35, 1) calc(var(--as) * 240ms) both; }
-  [data-assemble].rv-in > .ch-wire { animation: caWireIn 420ms cubic-bezier(0.3, 0.85, 0.35, 1) calc(var(--as) * 240ms) both; }
+[data-assemble] > .ch-node, [data-assemble] > .ch-wire { opacity: 0; }
+[data-assemble] > .ch-wire { transform-origin: 0 50%; }
+[data-assemble].rv-in > .ch-node { animation: caNodeIn 480ms cubic-bezier(0.3, 0.85, 0.35, 1) calc(var(--as) * 240ms) both; }
+[data-assemble].rv-in > .ch-wire { animation: caWireIn 420ms cubic-bezier(0.3, 0.85, 0.35, 1) calc(var(--as) * 240ms) both; }
+/* On phones the chain is a COLUMN (the ≤900 flip in the chain primitive),
+   so a wire grows DOWNWARD from its top edge — scaleX on a 1px-wide
+   vertical wire would collapse it sideways and read as a blink
+   (mobile pass, 2026-08-12). */
+@media (max-width: 900px) {
+  [data-assemble] > .ch-wire { transform-origin: 50% 0; }
+  [data-assemble].rv-in > .ch-wire { animation-name: caWireInV; }
 }
 @keyframes caNodeIn {
   from { opacity: 0; scale: 0.9; translate: 0 10px; }
@@ -379,6 +438,10 @@
 }
 @keyframes caWireIn {
   from { opacity: 0; scale: 0 1; }
+  to   { opacity: 1; scale: 1 1; }
+}
+@keyframes caWireInV {
+  from { opacity: 0; scale: 1 0; }
   to   { opacity: 1; scale: 1 1; }
 }
 
@@ -441,7 +504,7 @@
   50%      { border-color: #0FA97C; box-shadow: 0 0 0 4px rgba(15, 169, 124, 0.10); }
 }
 .ca-target { animation: caTargetPulse 3.6s ease-in-out infinite; }
-/* …and its value was #8E948B on #212420 — 3.4:1, under the floor for the one
+/* …and its value was #8E948B on #202020 — 3.4:1, under the floor for the one
    phrase the band is built to land (Paul: "the font is too dim on the one
    company"). Ivory reads at 12:1 and matches the two nodes beside it. */
 [data-chain].ch-dark .ch-node.ca-target > div + div { color: #F4F5F1; }
@@ -762,7 +825,7 @@
    rather than white-on-bone. Deal Green stays the joint colour throughout —
    it is the accent everywhere — but node TEXT never uses it on dark (the
    contrast trap the token table warns about); mint carries that job. */
-[data-chain].ch-dark .ch-node { background: #212420; border-color: #3A3F38; color: #F4F5F1; }
+[data-chain].ch-dark .ch-node { background: #202020; border-color: #3A3F38; color: #F4F5F1; }
 [data-chain].ch-dark .ch-node > div + div { color: #8E948B; }
 [data-chain].ch-dark .ch-hit { background: #0A7A58; border-color: #0A7A58; }
 [data-chain].ch-dark .ch-hit > div + div { color: #DFF5EC; }
@@ -780,21 +843,28 @@
    mroeCarta.mov, a 60fps dwell on their Connect diagram: during the hold,
    small nodes RUN ALONG the connector wires, which is most of why the panel
    reads as a system working rather than a finished picture). Our chains
-   already carry a node on every wire; on desktop it now flows left to right
-   — the direction every chain narrows (funnel to the 9, engagement to
-   close, buyer to target). All wires run in sync deliberately: one current
-   through the whole instrument, not eight fireflies. Below 1025 the wires
-   turn vertical in the column flip, so the dot stays put and the audited
-   phone page is untouched. Reduced motion: guard at the foot, dot rests at
-   centre. */
-@media (min-width: 1025px) {
-  .ch-wire i::after { animation: caWireTravel 2.8s linear infinite; }
-}
+   already carry a node on every wire; it flows the direction every chain
+   narrows (funnel to the 9, engagement to close, buyer to target). All
+   wires run in sync deliberately: one current through the whole instrument,
+   not eight fireflies. On phones the chains flip to a COLUMN and the wires
+   turn vertical, so the dot runs DOWN there — same current, rotated with
+   its wire (mobile pass, 2026-08-12). Reduced motion: guard at the foot,
+   dot rests at centre. */
+.ch-wire i::after { animation: caWireTravel 2.8s linear infinite; }
 @keyframes caWireTravel {
   0%   { left: 8%; opacity: 0; }
   14%  { opacity: 1; }
   86%  { opacity: 1; }
   100% { left: 92%; opacity: 0; }
+}
+@media (max-width: 900px) {
+  .ch-wire i::after { animation-name: caWireTravelV; }
+}
+@keyframes caWireTravelV {
+  0%   { top: 8%; opacity: 0; }
+  14%  { opacity: 1; }
+  86%  { opacity: 1; }
+  100% { top: 92%; opacity: 0; }
 }
 
 @media (max-width: 900px) {
@@ -1161,7 +1231,7 @@
 .ca-foot-col a + a { margin-top: 11px; }
 .ca-foot-col a:hover { color: #A8F0CE; }
 
-/* ── Dark surfaces: keyboard focus must survive #1A1B19 — the global ring
+/* ── Dark surfaces: keyboard focus must survive #181818 — the global ring
       is ink, invisible there. Every inline-styled dark band and the footer
       carry .ca-dark so the ring flips to bone. ── */
 .ca-dark :focus-visible { outline-color: #F4F5F1; }
@@ -1186,7 +1256,7 @@
      word's base width is its full width, and the spotlight rule's base
      scaleX(0) keeps it invisible. Only [data-assemble]'s children need the
      explicit opacity, because their hidden state is a base style. */
-  .ca-orbit-hero svg *, .ca-chip-pop-a, .ca-chip-pop-b { animation: none !important; }
+  .ca-orbit-hero svg, .ca-orbit-hero svg *, .ca-chip-pop-a, .ca-chip-pop-b { animation: none !important; }
   .ca-type { animation: none !important; border-right-color: transparent !important; }
   [data-proof] .ch-node::after { animation: none !important; }
   [data-assemble] > .ch-node, [data-assemble] > .ch-wire { opacity: 1 !important; animation: none !important; }
