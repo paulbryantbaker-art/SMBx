@@ -255,10 +255,24 @@ makes a map defensible.
 
 ```
 npx tsx $REPO/scripts/studio/audit.mts markets/<m>/master.md
+npx tsx $REPO/scripts/studio/crossfoot.mts markets/<m>/master.md
+npx tsx $REPO/scripts/studio/quote-check.mts markets/<m>/master.md
 ```
 
 Exit `0` clean · `1` not clean · **`2` NOT AUDITED** (no machine-readable
-source — not the same as passing).
+source — not the same as passing). Crossfoot recomputes every piece of
+arithmetic the master writes out; quote-check requires every quotation to
+exist verbatim in `research/`. All three are pure computation and run
+anywhere. Or run everything at once: `preflight.mts <market>` (CLAUDE.md, THE
+LAWS).
+
+**First session on a new market: class its outlets.** Add the market's trade
+press, associations, vendors and operator domains to `DOMAIN_CLASS` in
+`$REPO/scripts/studio/sourcing-protection.mts` while gathering, not after.
+The guard refuses to verdict (exit 3, NOT ESTABLISHED) when it can classify
+fewer than 90% of the corpus's origins — a verdict issued blind reads exactly
+like a verdict issued sighted, which is how the fire-safety circle survived
+every check.
 
 ### Pass 6 — Verify against primary sources (no searching until it fails)
 
@@ -277,6 +291,18 @@ The procedure, the worked example and the three failure patterns —
 are **CLAUDE.md job 2**. Read it there; it is not duplicated here. Findings go to
 `research/verification-pass-<date>.md` as a flat source file, corrections go into
 the master's `## A.0.x` ledger, and then the audit runs again.
+
+Two disciplines added 2026-08-12, both learned the expensive way:
+
+- **Verify SENTENCES, not just figures.** The two errors no source check can
+  catch — "Service is 35% of its sales" (two verified numbers, false
+  assembly) and the A.0.7 band labels (correct sums, wrong names) — are
+  sentence-level. So pass 6 reads each load-bearing CLAIM against its
+  instrument and quotes the instrument's own line in the verification file,
+  not just its number.
+- **Hold the instrument.** Where the instrument is a file, keep a local copy
+  (`smbx-search/`); otherwise pin URL + retrieval date + exact locator. The
+  DFW recount was possible in an hour because `cbp23co.txt` was on disk.
 
 A market hunt is not finished at pass 5. It is finished at pass 6.
 
