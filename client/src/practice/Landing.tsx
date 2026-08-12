@@ -533,6 +533,122 @@ function useCycle(len: number, ms: number, offsetMs = 0) {
   return i;
 }
 
+/* THE MACHINE, RUNNING (2026-08-12, Paul on the second carta.com recording:
+   "lets build something that looks cool like that and see how we like it").
+   Our version of their Connect diagram, carrying the practice's own verbs.
+   The measured cycle (mroeCarta.mov, 60fps): the standing word stays put,
+   the rotating word TYPES (~125ms/char), pills enter as bars that take
+   their labels, connector elbows draw through the dot grid, current runs
+   along them during the hold, the word UN-TYPES, and the loop finales on
+   the category tagline before collapsing to the boxed wordmark.
+   Every pill is a claim the page already makes in prose — nothing new is
+   asserted, THE LINE untouched. DESKTOP ONLY for the prototype
+   (.ca-machine-wrap hides <1025) so the audited phone page is untouched;
+   if it earns its keep, the phone variant is a follow-up. Reduced motion
+   renders the finale as a still. */
+const MACHINE_VERBS: { w: string; pills: { t: string; x: number; y: number }[] }[] = [
+  { w: 'Thesis', pills: [
+    { t: 'THE SECTOR', x: 72, y: 22 },
+    { t: 'THE SIZE BAND', x: 79, y: 62 },
+    { t: 'THE DEAL-BREAKERS', x: 19, y: 74 },
+  ] },
+  { w: 'Sourcing', pills: [
+    { t: 'OFF-MARKET', x: 71, y: 24 },
+    { t: 'UNDER YOUR NAME', x: 78, y: 64 },
+    { t: 'NEVER LISTED', x: 18, y: 70 },
+  ] },
+  { w: 'Evaluation', pills: [
+    { t: 'REBUILT FINANCIALS', x: 74, y: 22 },
+    { t: 'ADD-BACKS TESTED', x: 80, y: 60 },
+    { t: 'WHEN TO WALK', x: 17, y: 72 },
+  ] },
+  { w: 'Diligence', pills: [
+    { t: 'FINANCIAL · LEGAL · TAX', x: 73, y: 24 },
+    { t: 'LENDERS ON SCHEDULE', x: 79, y: 64 },
+    { t: 'THROUGH SIGNATURE', x: 18, y: 71 },
+  ] },
+];
+const MACHINE_TAG = 'corp dev, thesis to close.';
+/* Elbow anchors sit on the line's flanks in viewBox units (1000×460,
+   preserveAspectRatio none) — Carta's paths live loosely on the grid, not
+   glued to the glyphs, which is what lets one anchor serve every word. */
+const MX = { left: 355, right: 645, y: 212 };
+
+function MachineRun() {
+  const [s, setS] = useState<{ mode: 'mark' | 'verb' | 'tag'; vi: number; stage: 'type' | 'hold' | 'untype' | 'idle'; chars: number }>(
+    { mode: 'mark', vi: 0, stage: 'idle', chars: 0 },
+  );
+  const reduce = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  useEffect(() => {
+    if (reduce) { setS({ mode: 'tag', vi: 0, stage: 'hold', chars: MACHINE_TAG.length }); return; }
+    let dead = false;
+    const timers: number[] = [];
+    const wait = (ms: number) => new Promise<void>(r => { timers.push(window.setTimeout(r, ms)); });
+    (async () => {
+      while (!dead) {
+        setS({ mode: 'mark', vi: 0, stage: 'idle', chars: 0 });
+        await wait(2300); if (dead) return;
+        for (let vi = 0; vi < MACHINE_VERBS.length; vi++) {
+          const w = MACHINE_VERBS[vi].w;
+          for (let c = 1; c <= w.length; c++) { setS({ mode: 'verb', vi, stage: 'type', chars: c }); await wait(92); if (dead) return; }
+          setS({ mode: 'verb', vi, stage: 'hold', chars: w.length });
+          await wait(3100); if (dead) return;
+          for (let c = w.length - 1; c >= 0; c--) { setS({ mode: 'verb', vi, stage: 'untype', chars: c }); await wait(46); if (dead) return; }
+          await wait(260); if (dead) return;
+        }
+        for (let c = 1; c <= MACHINE_TAG.length; c++) { setS({ mode: 'tag', vi: 0, stage: 'type', chars: c }); await wait(58); if (dead) return; }
+        setS({ mode: 'tag', vi: 0, stage: 'hold', chars: MACHINE_TAG.length });
+        await wait(3600); if (dead) return;
+        for (let c = MACHINE_TAG.length - 1; c >= 0; c--) { setS({ mode: 'tag', vi: 0, stage: 'untype', chars: c }); await wait(32); if (dead) return; }
+        await wait(320); if (dead) return;
+      }
+    })();
+    return () => { dead = true; timers.forEach(clearTimeout); };
+  }, [reduce]);
+
+  const on = s.stage === 'hold';
+  const verb = s.mode === 'verb' ? MACHINE_VERBS[s.vi] : null;
+  const word = s.mode === 'verb' ? verb!.w.slice(0, s.chars) : s.mode === 'tag' ? MACHINE_TAG.slice(0, s.chars) : '';
+  const pills = s.mode === 'verb' ? verb!.pills : [];
+  const paths = s.mode === 'verb'
+    ? verb!.pills.map(p => `M ${p.x > 50 ? MX.right : MX.left} ${MX.y} H ${p.x * 10} V ${p.y * 4.6}`)
+    : s.mode === 'tag'
+      ? ['M 250 300 H 750', 'M 750 300 V 386 H 906', 'M 250 300 V 132 H 96']
+      : [];
+  return (
+    <div className="ca-machine-wrap" data-rv>
+      <div className="ca-machine" style={{ position: 'relative', marginTop: 56, background: '#1A1B19', overflow: 'hidden', height: 'clamp(400px, 32vw, 500px)' }}>
+        <Handles color="#F4F5F1" />
+        <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.15) 1.1px, transparent 1.1px)', backgroundSize: '16px 16px' }} />
+        <svg aria-hidden="true" viewBox="0 0 1000 460" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} fill="none">
+          {paths.map((d, i) => (
+            <Fragment key={`${s.mode}-${s.vi}-${i}`}>
+              <path d={d} pathLength={100} className={`ca-mpath${on ? ' draw' : ''}`} style={{ transitionDelay: on ? `${i * 130}ms` : '0ms' }} stroke="#3A3F38" strokeWidth="1.4" />
+              <path d={d} pathLength={100} className={`ca-mflow${on ? ' run' : ''}`} stroke="#A8F0CE" strokeWidth="1.4" />
+            </Fragment>
+          ))}
+        </svg>
+        {/* the boxed wordmark the cycle collapses to, exactly their reset */}
+        <div className={`ca-mmark${s.mode === 'mark' ? ' on' : ''}`} aria-hidden={s.mode !== 'mark'}>
+          <img src="/logo-green-x-dark.png" alt="" style={{ height: 20, width: 'auto', display: 'block' }} />
+        </div>
+        <div className={`ca-mline${s.mode !== 'mark' ? ' on' : ''}`} aria-hidden="true">
+          <span style={{ color: '#A8F0CE' }}>We run&nbsp;</span>
+          <span style={{ color: '#F4F5F1' }}>{word}</span>
+          <span className="ca-mcaret" />
+        </div>
+        {pills.map((p, i) => (
+          <span key={`${s.vi}-${p.t}`} className={`ca-mpill${on ? ' on' : ''}`} style={{ left: `${p.x}%`, top: `${p.y}%`, transitionDelay: on ? `${140 + i * 150}ms` : '0ms' }}>
+            <span style={{ transitionDelay: on ? `${300 + i * 150}ms` : '0ms' }}>{p.t}</span>
+          </span>
+        ))}
+        {/* the panel states its own honesty law once, quietly */}
+        <div style={{ position: 'absolute', left: 22, bottom: 16, fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: '#8E948B' }}>THE ENGAGEMENT, END TO END</div>
+      </div>
+    </div>
+  );
+}
+
 function PhaseExplorer({ phase, setPhase, pin }: { phase: number; setPhase: (i: number) => void; pin: () => void }) {
   const active = PHASES[phase];
   const tab = (p: typeof PHASES[number], i: number) => {
@@ -884,6 +1000,11 @@ export default function Landing() {
             <p style={{ margin: 0, fontSize: 17, lineHeight: 1.6, color: '#4A4F54', maxWidth: '44em' }}>And it compounds — every engagement sharpens the thesis, the scorecards, and the playbook the next one runs on.</p>
             <a href="#how" className="ca-h-deepgreen" style={{ flex: 'none', fontSize: 16, fontWeight: 600, color: '#0A7A58', borderBottom: '1.5px solid #0A7A58', paddingBottom: 2, whiteSpace: 'nowrap' }}>See how the machine runs →</a>
           </div>
+          {/* …and here it is running (2026-08-12): the sentence above promises
+              the machine, the panel below shows it working — the same seam
+              carta.com closes with its Connect diagram after the solutions
+              cards. */}
+          <MachineRun />
         </section>
 
         {/* ══ HOW IT WORKS ══ */}
