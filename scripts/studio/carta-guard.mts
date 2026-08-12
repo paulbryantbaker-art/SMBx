@@ -186,7 +186,56 @@ sys.exit(1 if bad else 0)
   console.log('\n── artwork ───────────────────────────────────────────────────\n  no assets dir — skipped (pass --assets <dir>)');
 }
 
+
+/* ── 3 · the builders ─────────────────────────────────────────────────────
+ *
+ * Added 2026-08-12, after a carousel was rebuilt in the retired design language
+ * and this guard reported clean.
+ *
+ * Checks 1 and 2 read SPEC FILES and IMAGE CORNERS. Neither can see the
+ * renderer. So `house/deck.ts` could import LEDGER — as it has in every commit
+ * of this repo, `deck.ts` having never once imported CARTA — and a carousel
+ * renders entirely in the retired palette while this guard prints "source and
+ * artwork are both Carta". It did exactly that.
+ *
+ * The retired palette is still a live export sitting beside CARTA in tokens.ts.
+ * Until it is deleted, the only thing between a build and a reversion is which
+ * identifier a builder happens to import. DESIGN.md §2 says a retired hex in a
+ * live file is a retired hex a session can copy; a retired PALETTE is worse,
+ * because one import line reverts a whole surface.
+ */
+console.log('\n── builders ──────────────────────────────────────────────────');
+
+const RENDER_PATH = /^(house\/(deck|report|onepager)\.ts|scripts\/studio\/build-[a-z-]+\.mts)$/;
+// Match the IDENTIFIER, not an import form. The builders reach for the retired
+// palette through `const { LEDGER } = await import(...)`, which a static-import
+// pattern cannot see — and a guard that misses two of three builders is worse
+// than none, because it prints clean. A render module has no legitimate reason
+// to name LEDGER at all; tokens.ts and palette-guard.ts are excluded by path.
+const IMPORTS_LEDGER = /\bLEDGER\b/;
+
+const renderFiles = walk(ROOT)
+  .map((f: string) => path.relative(ROOT, f).split(path.sep).join('/'))
+  .filter((f: string) => RENDER_PATH.test(f))
+  .sort();
+
+const reverted = renderFiles.filter((rel: string) =>
+  IMPORTS_LEDGER.test(readFileSync(path.join(ROOT, rel), 'utf8')));
+
+if (reverted.length) {
+  console.log(`\n  ${reverted.length} of ${renderFiles.length} render module(s) import the RETIRED palette.`);
+  console.log('  Anything they build comes out in the old design language:\n');
+  for (const r of reverted) console.log(`    ✗ ${r}`);
+  console.log('\n  This is not a hex that slipped into copy — it is the renderer itself.');
+  console.log('  A spec can pass every check and the artwork can be on-palette, and the');
+  console.log('  output is still Ledger. Convert the builder, or delete LEDGER from');
+  console.log('  house/tokens.ts so the import cannot resolve.');
+  findings++;
+} else {
+  console.log(`\n  clean - ${renderFiles.length} render module(s), none importing the retired palette`);
+}
+
 console.log('\n' + (findings
   ? `✗ carta-guard: ${findings} area(s) with findings. Carta is canon — fix before you build.`
-  : '✓ carta-guard: clean. Source and artwork are both Carta.'));
+  : '✓ carta-guard: clean. Source, artwork and builders are all Carta.'));
 process.exit(findings ? 1 : 0);
