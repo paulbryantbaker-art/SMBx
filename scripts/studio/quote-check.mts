@@ -53,6 +53,11 @@ const norm = (s: string) => s
   .replace(/[“”„″]/g, '"')
   .replace(/[‐-―−]/g, '-')
   .replace(/…/g, '...')
+  /* The house converts ~ to ≈ by rule (CLAUDE.md: a paired ~ is GFM
+     strikethrough and has silently struck out 51 lines of a master). So a
+     source written "~60%" and a document written "≈60%" are the same words
+     under this practice's own typography. */
+  .replace(/[~≈]/g, '≈')
   .replace(/ /g, ' ')
   .replace(/\*+(?=\S)|(?<=\S)\*+/g, '')  // emphasis hugs a word; " * " (multiplication) survives
   .replace(/__|~~|`/g, '')
@@ -148,6 +153,18 @@ console.log(`Quotations     ${quotes.length} span(s) of ${QUOTE_MIN_WORDS}+ word
    verbatim pieces — with sentence punctuation the writer's own style put
    inside the closing quote (trailing , . ; :) stripped. Wording inside a
    fragment is never loosened. */
+/* Sentence-initial case. A fragment lifted into the middle of a sentence is
+   lower-cased, and one opening a sentence is capitalised — the convention
+   scholarly writing marks with "[R]oughly". That is placement, not wording, so
+   the FIRST character is compared case-insensitively and every other character
+   is not: alter a word inside a quotation and it still fails. */
+const firstCharVariants = (f: string): string[] => {
+  if (!f) return [f];
+  const a = f[0].toUpperCase() + f.slice(1);
+  const b = f[0].toLowerCase() + f.slice(1);
+  return a === b ? [f] : [f, a, b];
+};
+
 const fragments = (text: string): string[] =>
   text.split(/\.\.\.|…/)
     .map(f => f.trim().replace(/^[,;:.]+|[,;:.]+$/g, '').trim())
@@ -156,10 +173,12 @@ const fragments = (text: string): string[] =>
 const missing: Quote[] = [];
 for (const q of quotes) {
   const frags = fragments(q.text);
-  const allFound = frags.length > 0 && frags.every(f => corpus.includes(f));
+  const inCorpus = (f: string) => firstCharVariants(f).some(v => corpus.includes(v));
+  const allFound = frags.length > 0 && frags.every(inCorpus);
   if (allFound) {
-    const home = corpusPerFile.find(c => frags.every(f => c.text.includes(f)))
-      ?? corpusPerFile.find(c => c.text.includes(frags[0]));
+    const inFile = (c: { text: string }, f: string) => firstCharVariants(f).some(v => c.text.includes(v));
+    const home = corpusPerFile.find(c => frags.every(f => inFile(c, f)))
+      ?? corpusPerFile.find(c => inFile(c, frags[0]));
     console.log(`  ok    "${q.text.length > 68 ? q.text.slice(0, 65) + '…' : q.text}"`);
     if (home) console.log(`        └ ${path.basename(home.file)}`);
   } else if (frags.length === 0) {

@@ -33,30 +33,29 @@ if (!files.length || files.some(f => !existsSync(f))) {
 }
 
 /* A number as documents print them: $1,858M · 4.3% · 598 · 2,412 · 13.3 */
-const NUM = String.raw`\$?\s?(\d[\d,]*(?:\.\d+)?)\s*(%|[KkMmBbTt]\b|million|billion|trillion|pp\b)?`;
+const NUM = String.raw`\$?\s?(\d[\d,]*(?:\.\d+)?)\s*(%|bps\b|pp\b|[KkMmBbTt]\b|million|billion|trillion)?`;
 const OPS = String.raw`[+×x*−\-÷/]`; // + × x * − - ÷ /
-/* chain = number (op number)+ = result   — markdown bold/space tolerant */
+/* chain = number (op number)+ = result — markdown-bold and space tolerant.
+   The leading (?<![\d.,)^%]\s?) guard stops a match STARTING mid-expression:
+   without it "(1,563 + 484) ÷ 7,911 × 365 = 94.45" also matches as the false
+   sub-chain "7,911 × 365 = 94.45", which computes to 2,887,515 and reads as a
+   defect. A guard that invents findings is discarded within a week. */
 const CHAIN = new RegExp(
-  String.raw`${NUM}((?:\s*${OPS}\s*\*{0,2}${NUM}\*{0,2}){1,8})\s*=\s*\*{0,2}${NUM}`, 'g');
+  String.raw`(?<![\d.,)^]\s?)(?<![÷/×*+−\-]\s?)${NUM}((?:\s*${OPS}\s*\*{0,2}${NUM}\*{0,2}){1,8})\s*=\s*\*{0,2}${NUM}`, 'g');
 
 const MAG: Record<string, number> = {
   k: 1e3, m: 1e6, b: 1e9, t: 1e12,
   million: 1e6, billion: 1e9, trillion: 1e12,
 };
-const toVal = (numStr: string, unit: string | undefined) => {
-  const v = parseFloat(numStr.replace(/,/g, ''));
-  if (!unit) return v;
-  const u = unit.toLowerCase();
-  if (u === '%' || u === 'pp') return v;      // computed in the printed unit
-  return v * (MAG[u] ?? 1);
-};
+const isMag = (u?: string) => !!u && MAG[u.toLowerCase()] !== undefined;
 /* precision of the printed result — 4.3 → 0.05 ; 598 → 0.5 */
 const tol = (s: string) => {
   const dp = (s.split('.')[1] ?? '').length;
   return 0.5 * Math.pow(10, -dp) + 1e-9;
 };
+const ISO_DATE = /\d{4}-\d{2}-\d{2}/;
 
-let checked = 0, wrong = 0;
+let checked = 0, wrong = 0, declined = 0;
 for (const file of files) {
   const raw = readFileSync(file, 'utf8');
   console.log(`\nCrossfoot      ${path.relative(process.cwd(), file)}`);
@@ -68,46 +67,60 @@ for (const file of files) {
     /* strip markdown emphasis so **598** parses; keep the raw line for print */
     const text = line.replace(/\*\*/g, '');
     for (const m of text.matchAll(CHAIN)) {
-      const [whole, n1, u1, chain, , , nR, uR] = m;
-      /* Re-tokenise the full expression left of `=` */
+      const whole = m[0];
+      const short = whole.replace(/\s+/g, ' ').trim();
+      const decline = (why: string) => {
+        declined++;
+        console.log(`  ·     L${li + 1}  ${short.slice(0, 70)} — ${why}; not computed`);
+      };
+      /* ── things this check does not do, each said out loud ───────────── */
+      if (ISO_DATE.test(whole)) { decline('dates, not quantities'); continue; }
+      if (/[\^()]/.test(whole)) { decline('exponent or parentheses — precedence unsupported'); continue; }
       const exprSrc = whole.slice(0, whole.lastIndexOf('='));
       const nums = [...exprSrc.matchAll(new RegExp(NUM, 'g'))]
-        .map(x => ({ v: toVal(x[1], x[2]), raw: x[0] }));
+        .map(x => ({ v: parseFloat(x[1].replace(/,/g, '')), unit: x[2] }));
       const ops = [...exprSrc.matchAll(new RegExp(OPS, 'g'))].map(x => x[0]);
       if (nums.length < 2 || ops.length !== nums.length - 1) continue;
-      /* Industry codes are numerals, not quantities — "238210 + 238220 +
-         238290 = 2382" is an identity about classification, and 2382 − 238210
-         is nobody's subtraction. The tell: real quantities that size carry
-         thousands separators in this house (92,075 · 122,152); codes never do.
-         Two or more comma-less 4+-digit integers in one chain is code talk.
-         The skip is PRINTED — a silent skip is how a guard goes blind. */
+      /* Industry codes are numerals, not quantities. The tell: real quantities
+         that size carry thousands separators in this house (92,075 · 122,152);
+         codes never do. Two or more comma-less 4+-digit integers is code talk. */
       const codeLike = [...whole.matchAll(/\d+(?:,\d{3})*(?:\.\d+)?/g)]
         .filter(x => !x[0].includes(',') && !x[0].includes('.') && x[0].length >= 4).length;
-      if (codeLike >= 2) {
-        console.log(`  ·     L${li + 1}  ${whole.replace(/\s+/g, ' ').trim().slice(0, 70)} — code-like operands, not arithmetic; skipped`);
-        continue;
-      }
-      /* Percent results from ÷ are printed ×100; detect by result unit. */
-      let acc = nums[0].v;
+      if (codeLike >= 2) { decline('code-like operands, not arithmetic'); continue; }
+
+      /* ── evaluate, left to right: house working is written in that order ── */
+      const anyMag = nums.some(n => isMag(n.unit));
+      const scaled = nums.map(n => isMag(n.unit) ? n.v * MAG[n.unit!.toLowerCase()] : n.v);
+      let acc = scaled[0];
       for (let i = 0; i < ops.length; i++) {
-        const b = nums[i + 1].v, op = ops[i];
+        const b = scaled[i + 1], op = ops[i];
         if (op === '+') acc += b;
         else if (op === '−' || op === '-') acc -= b;
         else if (op === '×' || op === 'x' || op === '*') acc *= b;
         else acc /= b;
       }
-      const resultStr = nR;
-      let expect = toVal(resultStr, uR);
+      /* ── compare IN THE UNIT THE PAGE PRINTED, which is the whole trick ──
+         · result in %   from divisions        → the quotient ×100
+         · result in pp  from % operands       → already in points
+         · result in bps from % operands       → points ×100
+         · result in a magnitude (M/B/T):
+             operands carried one  → divide down into that unit
+             operands bare         → they were implicitly in it already      */
+      const resultStr = m[m.length - 2] ?? '';
+      const uR = m[m.length - 1];
+      const uL = uR?.toLowerCase();
+      const allDiv = ops.every(o => o === '÷' || o === '/');
       let got = acc;
-      if (uR === '%' && ops.every(o => o === '÷' || o === '/')) got = acc * 100;
-      /* A magnitude-unit result compares in that magnitude, not raw. */
-      if (uR && uR !== '%' && uR !== 'pp') got = got / (MAG[uR.toLowerCase()] ?? 1) * (MAG[uR.toLowerCase()] ?? 1), expect = toVal(resultStr, uR);
+      if (uL === '%' && allDiv) got = acc * 100;
+      else if (uL === 'bps') got = acc * 100;
+      else if (isMag(uR) && anyMag) got = acc / MAG[uL!];
+      const expect = parseFloat(resultStr.replace(/,/g, ''));
       checked++;
-      if (Math.abs(got - expect) <= tol(resultStr) * (uR && MAG[uR.toLowerCase()] ? MAG[uR.toLowerCase()] : 1)) {
-        console.log(`  ok    L${li + 1}  ${whole.replace(/\s+/g, ' ').trim().slice(0, 84)}`);
+      if (Math.abs(got - expect) <= tol(resultStr)) {
+        console.log(`  ok    L${li + 1}  ${short.slice(0, 84)}`);
       } else {
         wrong++;
-        console.log(`  ✗ WRONG  L${li + 1}  ${whole.replace(/\s+/g, ' ').trim().slice(0, 84)}`);
+        console.log(`  ✗ WRONG  L${li + 1}  ${short.slice(0, 84)}`);
         console.log(`           computes to ${Number.isInteger(got) ? got : got.toPrecision(6)}, page says ${resultStr}${uR ?? ''}`);
       }
     }
@@ -115,13 +128,19 @@ for (const file of files) {
 }
 
 console.log('\n──────────────────────────────────────────────────────────────');
-if (!checked) {
+if (!checked && !declined) {
   console.log('· no inline arithmetic found. Nothing proved — a document that never');
   console.log('  shows its working gives this check nothing to hold.');
 } else if (wrong) {
   console.log(`✗ ${wrong} of ${checked} arithmetic statement(s) do not compute. Not ready to post.`);
+  if (declined) console.log(`  ${declined} further chain(s) DECLINED and named above — unchecked, not passed.`);
 } else {
   console.log(`✓ all ${checked} arithmetic statement(s) compute at printed precision.`);
+  if (declined) {
+    console.log(`  ${declined} chain(s) DECLINED and named above — dates, exponents, parentheses,`);
+    console.log('  codes. Each is unchecked, not passed: read them, or restate the working');
+    console.log('  in a form that computes left to right.');
+  }
   console.log('  This proves the working shown is done right — not that the inputs are');
   console.log('  true (job 2) or the labels on the results are right (a human read).');
 }

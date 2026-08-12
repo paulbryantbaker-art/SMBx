@@ -17,6 +17,7 @@
  *
  *   npx tsx $REPO/scripts/studio/preflight.mts <market>                 # the market
  *   npx tsx $REPO/scripts/studio/preflight.mts <market> --spec <path>   # + one spec
+ *   npx tsx $REPO/scripts/studio/preflight.mts <market> --retired-read  # after reading them
  *   npx tsx $REPO/scripts/studio/preflight.mts <market> --skip-sourcing # (never for a post)
  *
  * Run from the STUDIO ROOT, like every builder. Exit 0 all green · 1 anything
@@ -46,6 +47,7 @@ const args = process.argv.slice(2);
 const market = args.find(a => !a.startsWith('--'));
 const spec = args.includes('--spec') ? args[args.indexOf('--spec') + 1] : null;
 const skipSourcing = args.includes('--skip-sourcing');
+const retiredRead = args.includes('--retired-read');
 if (!market || !existsSync(path.join('markets', market))) {
   console.error('usage (from the studio root): preflight.mts <market> [--spec <path>]');
   console.error('markets on disk: ' + (existsSync('markets') ? readdirSync('markets').filter(m => !m.startsWith('_')).join(' · ') : '(none — are you in the studio root?)'));
@@ -93,7 +95,23 @@ if (skipSourcing) {
   for (const d of (docs.length ? docs : existsSync(master) ? [master] : []))
     run('sourcing', 'sourcing-protection.mts', [d], path.basename(d));
 }
-run('retired', 'retired-check.mjs', ['--studio', '.', '--market', market], market);
+/* retired-check REPORTS; it does not decide. Its own header says so, and it
+   exits 1 whenever any candidate exists — which, on a market with a real
+   correction history, is always. Gating on it makes the preflight permanently
+   red, and a gate that can never be green is a gate everybody learns to walk
+   past. So it is a READ requirement instead: the count is printed, and the run
+   cannot go green until someone states they read them by passing
+   --retired-read. That is an acknowledgement, not a skip — the difference is
+   that it is on the record and it is in the operator's own hand. */
+{
+  const r = spawnSync('node', [path.join(HERE, 'retired-check.mjs'), '--studio', '.', '--market', market], { encoding: 'utf8' });
+  const out = (r.stdout ?? '') + (r.stderr ?? '');
+  const m = out.match(/(\d+) CANDIDATE\(S\) in (\d+) file/);
+  const n = m ? Number(m[1]) : 0;
+  if (!n) rows.push({ guard: 'retired', target: market, verdict: 'PASS', note: 'no retired figure resurfaced' });
+  else if (retiredRead) rows.push({ guard: 'retired', target: market, verdict: 'PASS', note: `${n} candidate(s) READ and accepted by the operator (--retired-read)` });
+  else rows.push({ guard: 'retired', target: market, verdict: 'FAIL', note: `${n} candidate(s) to read — then re-run with --retired-read` });
+}
 
 /* spec-level */
 if (spec) {

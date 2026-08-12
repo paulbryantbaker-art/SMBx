@@ -87,7 +87,8 @@ console.log(`          ${n(a.citedCount)} found in a source`);
 console.log(`          ${n(a.derivedRegistered.length)} derived, with working stated`);
 console.log(`          ${n(a.unexplainedCount)} UNEXPLAINED`);
 console.log(`Registers Sources ${a.hasSourceRegister ? 'yes' : 'NO'} · Derivations ${a.hasDerivationRegister ? 'yes' : 'NO'}`);
-console.log(`URLs      ${a.urlsDropped.length} dropped from the sources`);
+const shown = a.urlsDroppedCount > a.urlsDropped.length ? ` (${a.urlsDropped.length} shown)` : '';
+console.log(`URLs      ${a.urlsDroppedCount} dropped from the sources${shown}`);
 
 if (a.ok && !unreadable.length) {
   console.log('\n✓ CLEAN — ' + a.note + '\n');
