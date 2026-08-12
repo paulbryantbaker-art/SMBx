@@ -520,6 +520,51 @@ Three things to hold onto:
 These are not style preferences. Each one exists because breaking it costs
 something real.
 
+## No pass on silence (2026-08-12)
+
+**A check that cannot see must refuse, never pass.** On 2026-08-12 the
+sourcing guard printed ✓ CLEAN on both home-services documents while 53 of the
+corpus's 70 origins were unclassified — including the market's main trade
+outlet. One lookup-table pass later, the same files showed 2 origin collapses
+and 21 figures with no instrument underneath. Nothing about the research had
+changed. The guard had been blind, and its blindness printed exactly like a
+pass. The same shape three days earlier: `%\b` in the audit's figure regex
+meant no percentage had ever been checked, on any master, ever — and every one
+of those masters printed ✓ CLEAN.
+
+So, binding on every guard in this practice, present and future:
+
+- **A guard reports its own coverage** — what it checked, what it could not
+  see — and refuses to verdict below its floor. `sourcing-protection.mts`
+  exits 3 (NOT ESTABLISHED) under 90% origin classification or when any
+  figure rests solely on an unclassified domain. A refusal is not a finding
+  and not a pass; it is the statement "I cannot know," said out loud.
+- **A skipped check is printed, never silent.** `crossfoot.mts` prints every
+  chain it declines to compute; `preflight.mts` prints SKIPPED rows and fails
+  on them.
+- **When a market opens, its outlets enter `DOMAIN_CLASS`** in
+  `sourcing-protection.mts` — first session, not after a post gets called
+  slop. The coverage floor makes forgetting this loud.
+- **Every guard bug becomes a pinned test** the day it is found
+  (`house/__tests__/audit.test.mts` is the pattern).
+
+## The preflight — one command before anything renders or posts (2026-08-12)
+
+Eight guards assembled by memory is how the 2026-08-12 teardown rendered in a
+retired design language. The checklist is now a command:
+
+```
+npx tsx $REPO/scripts/studio/preflight.mts <market>              # the market
+npx tsx $REPO/scripts/studio/preflight.mts <market> --spec <p>   # + one spec
+```
+
+From the studio root. It runs audit, crossfoot, quote-check, sourcing,
+retired-check — plus verify-spec, voice, design and carta for a spec — in
+dependency order, prints one table, and exits nonzero unless everything
+passed. **Nothing renders and nothing posts off a non-green preflight.** A
+green preflight still does not prove the research true — job 2 has no
+mechanical substitute, and the verdict line says so on every run.
+
 ## Citation law
 
 **Every figure must be traceable.** In a master: it appears in a source, or it
@@ -537,6 +582,33 @@ difference into a number no source reported.
 
 **Every source document is acknowledged** in a `## Sources` register, and
 source URLs carry through.
+
+**A quotation is a figure made of words (2026-08-12).** Words inside quotation
+marks must appear VERBATIM in a file in `research/` (or, for the A.0.x
+ledger's own history, in `versions/` or `retired.md`). A paraphrase wearing
+quotation marks is a fabrication however faithful the gist — the elevator
+draft attributed to Otis four words no transcript contains, and no check was
+looking, because the audit checks numbers. `quote-check.mts` now checks the
+words: ellipsis joins verbatim fragments, trailing punctuation and markdown
+emphasis are typography, and wording is never loosened. What it cannot check
+is attribution — a real sentence credited to the wrong speaker passes — so
+job 2 still reads the quote against its instrument.
+
+**Written arithmetic must compute (2026-08-12).** Wherever a document shows
+its working — `291 + 192 + 66 + 49 = 598`, `26 ÷ 598 = 4.3%` — the working is
+machine-checkable and `crossfoot.mts` checks it, at the precision printed,
+rounding half up. Its first run on a posted master found `92,075 ÷ 132 = 697`
+where the quotient is 697.54: printed working that does not compute. It
+cannot check the LABEL on a correct sum — A.0.7's actual failure — which is
+job 2's read, and it prints every chain it declines to compute, because a
+silent skip is how a guard goes blind.
+
+**Hold the instrument (2026-08-12).** A figure of record rests on an
+instrument this practice can re-open: a local copy where feasible
+(`smbx-search/cbp23co.txt` is why 598 could be recomputed from the raw file in
+an hour), otherwise the URL plus retrieval date plus the exact locator —
+table, cell, line. "The Census says" with no table ID is the laundered
+citation with better manners.
 
 **Run the audit before anything leaves this folder.** It is mechanical, free,
 and it is the whole reason these documents can be defended.
@@ -716,6 +788,24 @@ pdftoppm -png -r 55 -f 1 -l 1 collateral/<slug>/<date>/<slug>.pdf /tmp/cover
 Cover copy is **industry highlights** — the findings a reader should know before
 anything else. Not a table of contents, and not a summary of the document's own
 process.
+
+## The published copy law (2026-08-12)
+
+**A report on smbx.ai is a COPY of a studio document, and the copy is never
+edited in place.** The two live home-services reports carried a band-label
+error for nine days after the studio master was corrected, because someone —
+including a session — could patch the copy and nobody could see the gap. When
+the studio document changes, the website copy is replaced WHOLESALE; only the
+`<!--cover-->` block may differ (the site has its own art). `drift-check.mts`
+enforces it, on the report pairs and on the `content/studio/` method-doc
+copies, and its manifest is the map of what publishes where:
+
+```
+npx tsx $REPO/scripts/studio/drift-check.mts --studio ~/Documents/smbx-studio
+```
+
+Run it before every push of the SMBx repo. Pushing on a red drift-check
+publishes stale text to the one audience that matters.
 
 ## Derived artifacts do not follow the master (2026-07-28)
 
