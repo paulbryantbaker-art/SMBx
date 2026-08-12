@@ -1208,15 +1208,21 @@ export default function Landing() {
                 The three chips are facts about US, which is the copy law: the
                 grievance register stays out, and the reader draws the contrast
                 from the headline above, which is already sanctioned. */}
-            <div data-rv data-chain className="ch-dark" style={{ margin: '46px auto 0', maxWidth: 760 }}>
+            {/* Assembles on reveal since 2026-08-12 (the second carta.com
+                recording: their Connect diagram BUILDS — word, wires, pills —
+                rather than sitting finished). Same data-assemble mechanism as
+                the sample funnel: node, wire, node, wire, the TARGET landing
+                last, replaying on every rescroll. This was the one chain on
+                the page that still just sat there. */}
+            <div data-rv data-assemble data-chain className="ch-dark" style={{ margin: '46px auto 0', maxWidth: 760 }}>
               {[
                 { t: 'YOU', v: 'The buyer', on: true },
                 { t: 'SMBX', v: 'Your corp dev', on: true },
                 { t: 'TARGET', v: 'One company', mark: true },
               ].map((n, i) => (
                 <Fragment key={n.t}>
-                  {i > 0 && <span className="ch-wire" aria-hidden="true"><i /></span>}
-                  <div className={`ch-node${n.on ? ' ch-hit' : ''}${n.mark ? ' ca-target' : ''}`} style={{ textAlign: 'center' }}>
+                  {i > 0 && <span className="ch-wire" aria-hidden="true" style={{ ['--as' as string]: i * 2 - 1 }}><i /></span>}
+                  <div className={`ch-node${n.on ? ' ch-hit' : ''}${n.mark ? ' ca-target' : ''}`} style={{ textAlign: 'center', ['--as' as string]: i * 2 }}>
                     <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em' }}>{n.t}</div>
                     <div style={{ marginTop: 8, fontFamily: SERIF, fontWeight: 600, fontSize: 21, lineHeight: 1.2 }}>{n.v}</div>
                   </div>

@@ -686,6 +686,26 @@
   width: 6px; height: 6px; background: #0A7A58;
   transform: translate(-50%, -50%);
 }
+/* THE DOT TRAVELS (2026-08-12, from the second carta.com recording —
+   mroeCarta.mov, a 60fps dwell on their Connect diagram: during the hold,
+   small nodes RUN ALONG the connector wires, which is most of why the panel
+   reads as a system working rather than a finished picture). Our chains
+   already carry a node on every wire; on desktop it now flows left to right
+   — the direction every chain narrows (funnel to the 9, engagement to
+   close, buyer to target). All wires run in sync deliberately: one current
+   through the whole instrument, not eight fireflies. Below 1025 the wires
+   turn vertical in the column flip, so the dot stays put and the audited
+   phone page is untouched. Reduced motion: guard at the foot, dot rests at
+   centre. */
+@media (min-width: 1025px) {
+  .ch-wire i::after { animation: caWireTravel 2.8s linear infinite; }
+}
+@keyframes caWireTravel {
+  0%   { left: 8%; opacity: 0; }
+  14%  { opacity: 1; }
+  86%  { opacity: 1; }
+  100% { left: 92%; opacity: 0; }
+}
 
 @media (max-width: 900px) {
   [data-chain] { flex-direction: column; }
@@ -1080,4 +1100,5 @@
   .ca-type { animation: none !important; border-right-color: transparent !important; }
   [data-proof] .ch-node::after { animation: none !important; }
   [data-assemble] > .ch-node, [data-assemble] > .ch-wire { opacity: 1 !important; animation: none !important; }
+  .ch-wire i::after { animation: none !important; }
 }
