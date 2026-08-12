@@ -37,13 +37,42 @@ export const b64 = (p: string, mime?: string): string =>
 export const esc = (s: unknown): string =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+/**
+ * Wrap the X in an smbX-family wordmark so it can carry the brand colour.
+ *
+ * Added 2026-08-05 (Paul, on the services carousel: "smbXCorpDev and
+ * smbXCorpDev Premium — only the X is green"). The logo's X is the only
+ * coloured glyph in the mark; a product name set in TYPE has to match it, or
+ * the two read as different brands on the same page. Before this, a spec could
+ * only get the name into a page through `esc()`, which strips the markup the
+ * colour needs — so every previous attempt set the whole word in one colour.
+ *
+ * Deliberately narrow: it matches the literal `smbX` prefix and nothing else,
+ * so `smbXCorpDev`, `smbXCorpDev Premium` and `smbXDefinitive` all take it and
+ * an arbitrary capital X in prose does not.
+ */
+export const brandify = (s: string): string =>
+  s.replace(/smbX/g, 'smb<span class="bx">X</span>');
+
+/**
+ * `esc()` plus the only two pieces of inline markup house copy may carry:
+ * `**bold**` for a list item's lead-in, and the smbX wordmark's coloured X.
+ *
+ * This is NOT markdown and must not grow into it. It runs AFTER esc(), so a
+ * spec cannot inject markup through a copy string — the only tags that survive
+ * are the two this function puts there itself.
+ */
+export const rich = (s: unknown): string =>
+  brandify(esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'));
+
 /* ── brand assets ─────────────────────────────────────────────────────── */
 
 /** Canonical brand asset paths, relative to the repo root. */
 export const BRAND_PATHS = {
   logoGreen: 'client/public/logo-green-x.png',
   logoWhite: 'client/public/logo-green-x-dark.png', // for dark surfaces
-  texture: 'client/public/textures/blackbleed.webp', // boardroom band
+  texture: 'client/public/textures/blackbleed.webp', // the block
+  paperTexture: 'client/public/textures/bonebleed.webp', // light pages — blackbleed inverted + warmed
   founderPortrait: 'client/public/founder-portrait.jpg',
   founderWalking: 'client/public/founder-walking.webp',
 } as const;
@@ -58,6 +87,7 @@ export function brandAssets(root: string) {
     logoGreen: load(BRAND_PATHS.logoGreen),
     logoWhite: load(BRAND_PATHS.logoWhite),
     texture: load(BRAND_PATHS.texture),
+    paperTexture: load(BRAND_PATHS.paperTexture),
     founderPortrait: load(BRAND_PATHS.founderPortrait),
   };
 }
@@ -78,7 +108,11 @@ export function faceDisc(
 ): string {
   const ring = opts.ring ? `border:3px solid ${opts.ring};` : '';
   const pos = opts.objectPosition || '50% 22%';
-  return `<img src="${src}" alt="${esc(opts.alt || 'Paul Baker')}" style="width:${sizePx}px;height:${sizePx}px;border-radius:50%;object-fit:cover;object-position:${pos};display:block;flex:none;${ring}">`;
+  /* The class exists so the ring can be themed PER GROUND in CSS. The ring is
+     an inline style, which no stylesheet can reach — and it was mint, i.e. a
+     green ring around a photograph of a person, which is the same fight with
+     skin tones that retired the emerald cover (Paul, 2026-08-06). */
+  return `<img class="facedisc" src="${src}" alt="${esc(opts.alt || 'Paul Baker')}" style="width:${sizePx}px;height:${sizePx}px;border-radius:50%;object-fit:cover;object-position:${pos};display:block;flex:none;${ring}">`;
 }
 
 /**

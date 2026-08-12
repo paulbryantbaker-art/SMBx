@@ -288,6 +288,14 @@ export const CARTA_RADIUS = 0;
 
 export const CARTA_CONTROL_RADIUS = 10;
 
+/** The stat bar under a big numeral — 4×52 green, 10px below. The live site's
+ *  About-page proof trio, lifted rather than invented. Replaces Ledger's brass
+ *  bar, which is the jewelry Carta does not wear. */
+export const CARTA_STAT_BAR = { width: 52, height: 4, gap: 10 } as const;
+
+/** The kicker mark — an 8px green square before a mono label at 0.16em. */
+export const CARTA_KICKER = { square: 8, tracking: '0.16em' } as const;
+
 /**
  * The four corner handles, as markup + CSS.
  *
@@ -334,6 +342,15 @@ export function handleColorCss(scope: string, color: string): string {
  */
 export function cartaBand(): string { return CARTA.dark; }
 
+/** The Carta page. Flat bone — no bloom, no plaster, no wash.
+ *
+ *  Ledger lifted a light page with four radial blooms alternating jade and
+ *  amber. Amber is gone, and green-only blooms on bone read as a haze rather
+ *  than as light. Carta is a print-plate language: the page is paper, and the
+ *  structure — rules, plates, handles, the ink border on a white card — is what
+ *  keeps it from reading flat. */
+export function cartaPage(): string { return CARTA.bone; }
+
 /**
  * Blend `hex` at `alpha` over an OPAQUE base and return an opaque hex.
  *
@@ -362,6 +379,72 @@ export const BLOCK_GLAZE = rgba(LEDGER.dark, 0.72);
 export function blockBackground(textureUrl: string): string {
   return `linear-gradient(${BLOCK_GLAZE}, ${BLOCK_GLAZE}), url('${textureUrl}') center/cover, ${LEDGER.dark}`;
 }
+
+/* ── LIFTED FROM smbx-ai/smbx-engine, 2026-08-12 ─────────────────────────
+ * The remaining exports the Carta deck/one-pager builders need, taken verbatim
+ * from the engine copy of this file. ADDITIVE ONLY — nothing above this line
+ * moved, because build-report.mts is currently correct and imports from here.
+ * Deliberately NOT taken: the engine's BLOCK_GLAZE_ALPHA/COLOR, its
+ * blockBackground() signature, paperBackground(), inkBackground(), meshLayer()
+ * and its DISPLAY_WEIGHT of 600. Those re-glaze or re-weight surfaces this tree
+ * already renders correctly, and none of the three incoming files touch them.
+ */
+
+/**
+ * THE GOLDEN RATIO, as a working scale rather than a decoration.
+ *
+ * phi = 1.6180339887. Its useful property here is that the ladder is
+ * self-similar: every step is the previous one divided by phi, so a margin, a
+ * gutter and a measure taken from the same ladder relate to one another the way
+ * the page's two halves do. That is what reads as settled -- not the number, but
+ * the fact that nothing on the page is an arbitrary round value.
+ *
+ * A carousel page is 1080 x 1350, so the divisions that matter are:
+ *   major(1080) = 667.5   minor(1080) = 412.5    the vertical split
+ *   major(1350) = 834.4   minor(1350) = 515.6    the horizontal one
+ *
+ * Do NOT round these to tidy numbers afterwards. The tidying is what breaks the
+ * relationship, and a 412.5 rounded to 400 is just a number again.
+ */
+export const PHI = 1.6180339887;
+
+/** n divided by phi, steps times. phi(1080) = 667.5, phi(1080, 2) = 412.5. */
+export const phi = (n: number, steps = 1): number => n / Math.pow(PHI, steps);
+
+/** The larger part of a golden division of n. */
+export const major = (n: number): number => phi(n);
+
+/** The smaller part -- n less its major. minor(1080) = 412.5. */
+export const minor = (n: number): number => n - phi(n);
+
+/**
+ * The spacing ladder for a 1080-wide page. Every step is phi times the one
+ * below, derived FROM the page rather than picked to look right.
+ */
+export const SPACE = {
+  xs: +phi(1080, 8).toFixed(1),
+  sm: +phi(1080, 7).toFixed(1),
+  md: +phi(1080, 6).toFixed(1),
+  lg: +phi(1080, 5).toFixed(1),
+  xl: +phi(1080, 4).toFixed(1),
+  xxl: +phi(1080, 3).toFixed(1),
+} as const;
+
+/**
+ * The artwork lift — a `brightness()` multiplier on framed illustrations.
+ *
+ * It exists because the illustration library was generated against a retired
+ * bone and landed warmer and darker still, so a framed panel sat below the
+ * paper around it and read as a dingy rectangle. `brightness()` is
+ * multiplicative, which is the property that job needs: it lifts a near-white
+ * ground by nine points and the drawing's dark greens by one.
+ *
+ * It is 1 — i.e. OFF — because the library has since been regenerated onto
+ * Carta bone, which is the real fix the lift was only ever a bridge to. It
+ * stays as a named token rather than being deleted so that the next time art
+ * arrives off-ground the correction has one place to live.
+ */
+export const ARTWORK_LIFT = 1;
 
 /**
  * The palette paragraph handed to MODELS — the deck designer's brand contract
