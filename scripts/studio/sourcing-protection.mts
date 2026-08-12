@@ -48,7 +48,9 @@
  * ── THE FIVE CARD FLAGS ───────────────────────────────────────────────────
  *   SELF                 the line cites the practice, with no instrument beside it
  *   OPAQUE               nothing on the line can be opened by a reader
- *   MONOCULTURE          every named source is one class, and none is an instrument
+ *   MONOCULTURE          every named source is one class, and none is terminal
+ *                        (an issuer's own DISCLOSURE counts as terminal as to
+ *                        itself — Paul, 2026-08-12 — but never as to its market)
  *   SYNDICATION RISK     two same-class non-instrument sources dated within 14 days
  *   UNDISCLOSED INTEREST an advisory or association that sells into the market
  *                        it is measuring, named without qualification
@@ -170,6 +172,20 @@ const DOMAIN_CLASS: Record<string, [Cls, Sub, string]> = {
   'bisnow.com': ['press', '', 'press'],
   'constructiondive.com': ['press', '', 'trade press'],
   'crainsnewyork.com': ['press', '', 'press'],
+  /* home services — added 2026-08-12. homepros.news was the third most-cited
+     domain in the home-services corpus (10 URLs) and had never been classed,
+     so every figure resting on it was exempt from the collapse test. That is
+     the same shape as the fire-safety failure, one table entry away. */
+  'homepros.news': ['press', '', 'trade press — Homepros Media, Charlotte NC'],
+  'pmmag.com': ['press', '', 'trade press — Plumbing & Mechanical'],
+  'mdm.com': ['press', '', 'trade press — Modern Distribution Management'],
+  'facilitiesnews.com': ['press', '', 'trade press'],
+  'thehardwirenews.com': ['press', '', 'trade press'],
+  'abfjournal.com': ['press', '', 'trade press — asset-based finance'],
+  'dallasinnovates.com': ['press', '', 'regional press'],
+  'bloomberglaw.com': ['press', '', 'press'],
+  'money.com': ['press', '', 'press'],
+  'yahoo.com': ['press', '', 'press — much of it syndicated wire copy'],
   /* vendors and aggregators */
   'ibisworld.com': ['vendor', '', 'market-research aggregator, paywalled'],
   'pitchbook.com': ['vendor', '', 'deal-data vendor, paywalled'],
@@ -187,12 +203,355 @@ const DOMAIN_CLASS: Record<string, [Cls, Sub, string]> = {
   'verifiedmarketresearch.com': ['vendor', '', 'market-research firm'],
   'gartner.com': ['vendor', '', 'analyst firm'],
   'gfdata.com': ['vendor', '', 'private-transaction data provider, subscription'],
+  'arizton.com': ['vendor', '', 'market-research firm'],
+  'spglobal.com': ['vendor', '', 'data provider'],
+  'tradingview.com': ['vendor', '', 'market-data aggregator'],
+  'grata.com': ['vendor', '', 'company-search vendor'],
+  'vantainsights.com': ['vendor', '', 'market-research firm'],
+  /* consultancies publish research and sell services into the same market —
+     vendor, not instrument, however well regarded the name is */
+  'bain.com': ['vendor', '', 'consultancy research (Global PE Report)'],
+  'mckinsey.com': ['vendor', '', 'consultancy research'],
+  'grantthornton.com': ['vendor', '', 'accounting firm research'],
+  'fmicorp.com': ['vendor', '', 'construction-sector consultancy'],
   /* interested parties: they sell into, or represent, the market they measure */
   'nationalelevatorindustry.org': ['interested', '', 'NEII — OEM trade association'],
   'neiep.org': ['interested', '', 'industry education programme (union/OEM joint)'],
   'iuec.org': ['interested', '', 'IUEC — the union whose roster is the figure'],
   'naesai.org': ['interested', '', 'inspector trade association'],
   'ctacquisitions.com': ['interested', '', 'M&A aggregator page'],
+  /* home services — added 2026-08-12 */
+  'npmapestworld.org': ['interested', '', 'NPMA — pest-control trade association'],
+  'nahb.org': ['interested', '', 'NAHB — homebuilder association'],
+  'nabtu.org': ['interested', '', 'building-trades union federation'],
+  'acg.org': ['interested', '', 'Association for Corporate Growth'],
+  'fsb.org': ['interested', '', 'small-business membership body'],
+  'rmi.org': ['interested', '', 'advocacy nonprofit'],
+  'jll.com': ['interested', '', 'brokerage — sells into the market it measures'],
+  'axial.net': ['interested', '', 'deal marketplace'],
+  'leadersedge.com': ['interested', '', 'brokerage trade body'],
+  'wtwco.com': ['interested', '', 'insurance broker'],
+  /* software and finance vendors selling to the trade: their benchmarks are
+     marketing collateral with a number in them */
+  'servicetitan.com': ['interested', '', 'field-service software — sells to the trade'],
+  'getjobber.com': ['interested', '', 'field-service software — sells to the trade'],
+  'simprogroup.com': ['interested', '', 'field-service software — sells to the trade'],
+  'servicenation.com': ['interested', '', 'contractor membership organisation'],
+  'prophetaccounting.com': ['interested', '', 'accounting firm serving HVAC'],
+  'tradesly.ai': ['interested', '', 'field-service software — sells to the trade'],
+  'searchlightdigital.io': ['interested', '', 'marketing agency serving the trade'],
+  'angi.com': ['interested', '', 'lead marketplace'],
+  'modernize.com': ['interested', '', 'lead marketplace'],
+  'synchrony.com': ['interested', '', 'consumer lender to the trade'],
+  'refrigerantdepot.com': ['interested', '', 'distributor'],
+  'hvacpproducts.com': ['interested', '', 'distributor'],
+  'pickhvac.com': ['interested', '', 'affiliate/consumer pricing site'],
+  'hvacprojectcost.com': ['interested', '', 'affiliate/consumer pricing site'],
+  /* law firms publish client alerts to win the work the alert describes */
+  'hklaw.com': ['interested', '', 'law firm client alert'],
+  'wilmerhale.com': ['interested', '', 'law firm client alert'],
+  'millernash.com': ['interested', '', 'law firm client alert'],
+  /* a sponsor's or operator's own site is the issuer speaking about itself */
+  'apollo.com': ['issuer', '', "sponsor's own site"],
+  'blackstone.com': ['issuer', '', "sponsor's own site"],
+  'rentokil-initial.com': ['issuer', '', "operator's own site"],
+  'aireserv.com': ['issuer', '', 'Neighborly brand site'],
+  'mrrooter.com': ['issuer', '', 'Neighborly brand site'],
+  'mrelectric.com': ['issuer', '', 'Neighborly brand site'],
+  'mistersparky.com': ['issuer', '', 'Authority Brands site'],
+  'onehourheatandair.com': ['issuer', '', 'Authority Brands site'],
+  'benjaminfranklinplumbing.com': ['issuer', '', 'Authority Brands site'],
+  'callmattioni.com': ['issuer', '', "operator's own site"],
+  'gopaschal.com': ['issuer', '', "operator's own site"],
+  /* federal statistical publishers that do not sit on a .gov host */
+  'onetonline.org': ['instrument', 'authority', 'O*NET — sponsored by US DOL'],
+  'newyorkfed.org': ['instrument', 'authority', 'Federal Reserve Bank of New York'],
+  'stlouisfed.org': ['instrument', 'authority', 'Federal Reserve Bank of St. Louis (FRED)'],
+  /* platforms whose class depends entirely on who wrote the page */
+  'substack.com': ['unknown', 'mirror', 'newsletter platform — classify the author'],
+  /* elevator — added 2026-08-12 when the coverage floor found this corpus 40%
+     classified. The floor exists so this list gets written when a market
+     OPENS, not when a post gets called slop. */
+  'otis.com': ['issuer', '', "the manufacturer's own site and filings pages"],
+  'kone.com': ['issuer', '', "the manufacturer's own site — inside-information releases"],
+  'tkelevator.com': ['issuer', '', "the manufacturer's own site"],
+  'schindler.com': ['issuer', '', "the manufacturer's own site"],
+  'mitsubishielectric.com': ['issuer', '', "the manufacturer's own site"],
+  'apigroupcorp.com': ['issuer', '', "the issuer's own site"],
+  'q4cdn.com': ['issuer', 'wire', "IR hosting CDN — carries the issuer's own documents"],
+  'stockstory.org': ['press', '', 'markets press'],
+  'barchart.com': ['vendor', '', 'market-data aggregator'],
+  'financialcontent.com': ['issuer', 'wire', 'syndication shell — carries wire copy'],
+  'cbc.ca': ['press', '', 'press'],
+  'eleconomista.es': ['press', '', 'press'],
+  'habitatmag.com': ['press', '', 'trade press — co-op/condo boards'],
+  'skilledtradesiq.com': ['press', '', 'trade press'],
+  'elevatorblueprint.com': ['interested', '', 'industry content site'],
+  'costar.com': ['vendor', '', 'real-estate data vendor'],
+  'cbinsights.com': ['vendor', '', 'deal-data vendor'],
+  'stax.com': ['vendor', '', 'consultancy research'],
+  'naics.com': ['vendor', '', 'commercial NAICS lookup — NOT the Census'],
+  'repair.org': ['interested', '', 'right-to-repair advocacy'],
+  'neii.org': ['interested', '', 'NEII — OEM trade association'],
+  'naec.org': ['interested', '', 'NAEC — elevator contractor association'],
+  'elevatorcontractors.org': ['interested', '', 'contractor association'],
+  'csagroup.org': ['instrument', 'text', 'CSA — the standard itself'],
+  'credly.com': ['instrument', 'authority', 'credential registry'],
+  'elaws.us': ['instrument', 'text', 'code text mirror'],
+  'findlaw.com': ['instrument', 'text', 'case text'],
+  'amlegal.com': ['instrument', 'text', 'municipal code text'],
+  'wikipedia.org': ['unknown', 'mirror', 'tertiary — classify the citation under it'],
+  'github.com': ['unknown', 'mirror', 'hosting — classify the author'],
+  'archive.org': ['unknown', 'mirror', 'mirror — classify the page it copies'],
+  'socrata.com': ['instrument', 'authority', 'government open-data API host'],
+  'edgar.tools': ['instrument', 'authority', 'EDGAR full-text mirror'],
+  'cornell.edu': ['instrument', 'text', 'Cornell LII — code text'],
+  'uky.edu': ['unknown', '', 'academic host — classify by hand'],
+  'wisc.edu': ['instrument', 'authority', 'state university purchasing records'],
+  /* private-equity and sponsor sites in the elevator register */
+  'arcline.com': ['issuer', '', "sponsor's own site"],
+  'berkshirepartners.com': ['issuer', '', "sponsor's own site"],
+  'aligncp.com': ['issuer', '', "sponsor's own site"],
+  'carrollcapital.com': ['issuer', '', "sponsor's own site"],
+  'centuryparkcapital.com': ['issuer', '', "sponsor's own site"],
+  'gaugecapital.com': ['issuer', '', "sponsor's own site"],
+  'hl.com': ['interested', '', 'investment bank research'],
+  'bassberry.com': ['interested', '', 'law firm client alert'],
+  /* elevator operators' own sites — issuer for facts about themselves */
+  'mavenelevator.com': ['issuer', '', "operator's own site"],
+  'americanelevator.com': ['issuer', '', "operator's own site"],
+  'actionelevator.com': ['issuer', '', "operator's own site"],
+  'axxiomelevator.com': ['issuer', '', "operator's own site"],
+  'cedelevator.com': ['issuer', '', "operator's own site"],
+  'champion-elevator.com': ['issuer', '', "operator's own site"],
+  'delawareelevator.com': ['issuer', '', "operator's own site"],
+  'elevatedfacilityservices.com': ['issuer', '', "operator's own site"],
+  'elevatorsystems.com': ['issuer', '', "operator's own site"],
+  'cibeslift.com': ['issuer', '', "manufacturer's own site"],
+  'nidec.com': ['issuer', '', "component manufacturer's own site"],
+  'esigr.com': ['issuer', '', "operator's own site"],
+  'ascendsafetycollective.com': ['interested', '', 'industry safety group'],
+  'ashe.org': ['interested', '', 'ASHE — hospital engineering association'],
+  'elevatordatabase.com': ['unknown', '', 'enthusiast database — classify by hand'],
+  'elevatorinfo.org': ['interested', '', 'industry information site'],
+  /* elevator, second sweep — government and quasi-government hosts that the
+     .gov suffix rule cannot see */
+  'europa.eu': ['instrument', 'authority', 'EU institutions — DG COMP, CURIA, EUR-Lex'],
+  'broward.org': ['instrument', 'authority', 'Broward County government'],
+  'igchicago.org': ['instrument', 'authority', 'Chicago Inspector General'],
+  'usgovcloudapi.net': ['instrument', 'authority', 'US government cloud host — meeting records'],
+  'mylicense.com': ['instrument', 'authority', 'state licence-registry platform'],
+  'myfloridalicense.com': ['instrument', 'authority', 'Florida DBPR licence registry'],
+  'uky.edu': ['instrument', 'authority', 'University of Kentucky purchasing records'],
+  'law360.com': ['press', '', 'legal trade press'],
+  'vlex.es': ['instrument', 'text', 'case text'],
+  'hartfordbusiness.com': ['press', '', 'regional business press'],
+  'laist.com': ['press', '', 'regional press'],
+  'insidermonkey.com': ['press', '', 'markets content site'],
+  'gurufocus.com': ['vendor', '', 'market-data aggregator'],
+  'stockanalysis.com': ['vendor', '', 'market-data aggregator'],
+  'skyscrapercenter.com': ['vendor', '', 'CTBUH building database'],
+  'unionfacts.com': ['interested', '', 'anti-union advocacy — LM-2 restatements'],
+  'kingsiii.com': ['interested', '', 'emergency-phone vendor — sells into the trade'],
+  'liftnet.com': ['interested', '', 'monitoring vendor — sells into the trade'],
+  'plainhirecheck.com': ['interested', '', 'screening vendor'],
+  'mebs.com': ['issuer', '', "operator's own site"],
+  'specializedelevator.com': ['issuer', '', "operator's own site"],
+  'urbanelevator.com': ['issuer', '', "operator's own site"],
+  'teigroup.com': ['issuer', '', "operator's own site"],
+  'thayerstreet.com': ['issuer', '', "sponsor's own site"],
+/* fire-safety — added 2026-08-12. The corpus was 30% classified; the guard
+     refused to verdict it, correctly. 188 domains classed by hand: the
+     roster of operators and sponsors this market is largely built from, its
+     advisors and associations, and its trade press. */
+  'apigroupinc.com': ['issuer', '', 'operator’s own site'],
+  'davisulmer.com': ['issuer', '', 'operator’s own site'],
+  'pyebarkerfs.com': ['issuer', '', 'operator’s own site'],
+  'api-nsg.com': ['issuer', '', 'operator’s own site'],
+  'marmicfire.com': ['issuer', '', 'operator’s own site'],
+  'certasitepro.com': ['issuer', '', 'operator’s own site'],
+  'vfpg.com': ['issuer', '', 'operator’s own site'],
+  'encorefireprotection.com': ['issuer', '', 'operator’s own site'],
+  'wsfp.com': ['issuer', '', 'operator’s own site'],
+  'afpgusa.com': ['issuer', '', 'operator’s own site'],
+  'natfiresafety.com': ['issuer', '', 'operator’s own site'],
+  'everonsolutions.com': ['issuer', '', 'operator’s own site'],
+  'cintas.com': ['issuer', '', 'operator’s own site'],
+  'zeusfireandsecurity.com': ['issuer', '', 'operator’s own site'],
+  'aifire.com': ['issuer', '', 'operator’s own site'],
+  'summitcompanies.com': ['issuer', '', 'operator’s own site'],
+  'sciensusa.com': ['issuer', '', 'operator’s own site'],
+  'candoifp.com': ['issuer', '', 'operator’s own site'],
+  'adt.com': ['issuer', '', 'operator’s own site'],
+  'pavion.com': ['issuer', '', 'operator’s own site'],
+  'firesp.com': ['issuer', '', 'operator’s own site'],
+  'orrprotection.com': ['issuer', '', 'operator’s own site'],
+  'spectrum-safety.com': ['issuer', '', 'operator’s own site'],
+  'ironsmithfire.com': ['issuer', '', 'operator’s own site'],
+  'getzfire.com': ['issuer', '', 'operator’s own site'],
+  'facilitec-sw.com': ['issuer', '', 'operator’s own site'],
+  'minutemanst.com': ['issuer', '', 'operator’s own site'],
+  'carrier.com': ['issuer', '', 'operator’s own site'],
+  'honeywell.com': ['issuer', '', 'operator’s own site'],
+  'altusfire.com': ['issuer', '', 'operator’s own site'],
+  'guardianfireholdings.com': ['issuer', '', 'operator’s own site'],
+  'integratedprotectionservices.com': ['issuer', '', 'operator’s own site'],
+  'wmfireprotection.com': ['issuer', '', 'operator’s own site'],
+  'autronicafire.com': ['issuer', '', 'operator’s own site'],
+  'det-tronics.com': ['issuer', '', 'operator’s own site'],
+  'marioff.com': ['issuer', '', 'operator’s own site'],
+  'guardianfireprotection.com': ['issuer', '', 'operator’s own site'],
+  'ars-guardian.com': ['issuer', '', 'operator’s own site'],
+  'centralvalleyfire.com': ['issuer', '', 'operator’s own site'],
+  'summitfiresecurity.com': ['issuer', '', 'operator’s own site'],
+  'convergint.com': ['issuer', '', 'operator’s own site'],
+  'impactfireservices.com': ['issuer', '', 'operator’s own site'],
+  'telgian.com': ['issuer', '', 'operator’s own site'],
+  'absolutefireaz.com': ['issuer', '', 'operator’s own site'],
+  'securityfiresystems.com': ['issuer', '', 'operator’s own site'],
+  'comfortsystemsusa.com': ['issuer', '', 'operator’s own site'],
+  'kidde.com': ['issuer', '', 'operator’s own site'],
+  'vfpfire.com': ['issuer', '', 'operator’s own site'],
+  'grunaufire.com': ['issuer', '', 'operator’s own site'],
+  'cogswellsprinkler.com': ['issuer', '', 'operator’s own site'],
+  'psintegrated.com': ['issuer', '', 'operator’s own site'],
+  'ironcladfireprotection.com': ['issuer', '', 'operator’s own site'],
+  'tfp1.com': ['issuer', '', 'operator’s own site'],
+  'kinetixfire.com': ['issuer', '', 'operator’s own site'],
+  'firetron.com': ['issuer', '', 'operator’s own site'],
+  'pyebarkerfire.com': ['issuer', '', 'operator’s own site'],
+  'chubbfs.com': ['issuer', '', 'operator’s own site'],
+  'summitfire.com': ['issuer', '', 'operator’s own site'],
+  'kiddeglobalsolutions.com': ['issuer', '', 'operator’s own site'],
+  'academyfire.com': ['issuer', '', 'operator’s own site'],
+  'sciensbuildingsolutions.com': ['issuer', '', 'operator’s own site'],
+  'vscfire.com': ['issuer', '', 'operator’s own site'],
+  'coscofire.com': ['issuer', '', 'operator’s own site'],
+  'firetrol.com': ['issuer', '', 'operator’s own site'],
+  'security101.com': ['issuer', '', 'operator’s own site'],
+  'aspyrefls.com': ['issuer', '', 'operator’s own site'],
+  'spectrumsafetysolutions.com': ['issuer', '', 'operator’s own site'],
+  'rollins.com': ['issuer', '', 'operator’s own site'],
+  'unifirst.com': ['issuer', '', 'operator’s own site'],
+  'confirmedlifesafety.com': ['issuer', '', 'operator’s own site'],
+  'fpiseattle.com': ['issuer', '', 'operator’s own site'],
+  'securitas.com': ['issuer', '', 'operator’s own site'],
+  'stanleyblackanddecker.com': ['issuer', '', 'operator’s own site'],
+  'securitastechnology.com': ['issuer', '', 'operator’s own site'],
+  'kastle.com': ['issuer', '', 'operator’s own site'],
+  '1752.com': ['issuer', '', 'operator’s own site'],
+  'belforfranchisegroup.com': ['issuer', '', 'operator’s own site'],
+  'hoodzfranchise.com': ['issuer', '', 'operator’s own site'],
+  'kitchenguardfranchise.com': ['issuer', '', 'operator’s own site'],
+  'usmadesupply.com': ['issuer', '', 'operator’s own site'],
+  'nrg.com': ['issuer', '', 'operator’s own site'],
+  'fm.com': ['issuer', '', 'operator’s own site'],
+  'fsresidential.com': ['issuer', '', 'operator’s own site'],
+  'riversidecompany.com': ['issuer', '', 'sponsor’s own site'],
+  'leonardgreen.com': ['issuer', '', 'sponsor’s own site'],
+  'kkr.com': ['issuer', '', 'sponsor’s own site'],
+  'carlyle.com': ['issuer', '', 'sponsor’s own site'],
+  'knoxlane.com': ['issuer', '', 'sponsor’s own site'],
+  'gryphon-inv.com': ['issuer', '', 'sponsor’s own site'],
+  'altas.com': ['issuer', '', 'sponsor’s own site'],
+  'permira.com': ['issuer', '', 'sponsor’s own site'],
+  'investcorp.com': ['issuer', '', 'sponsor’s own site'],
+  'breakwaterma.com': ['issuer', '', 'sponsor’s own site'],
+  'caltius.com': ['issuer', '', 'sponsor’s own site'],
+  'gemspring.com': ['issuer', '', 'sponsor’s own site'],
+  'percheron.com': ['issuer', '', 'sponsor’s own site'],
+  'alliancebernstein.com': ['issuer', '', 'sponsor’s own site'],
+  'llcp.com': ['issuer', '', 'sponsor’s own site'],
+  'kirkland.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'rwbaird.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'harriswilliams.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'lincolninternational.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'meridianib.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'pmcf.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'benchmarkintl.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'morganbusinesssales.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'thecfigroup.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'generational.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'dealseam.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'valuationresearch.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'stblaw.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'davispolk.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'weil.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'lw.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'debevoise.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'koleyjessen.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'norrismclaughlin.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'deloitte.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'marsh.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'markel.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'ciab.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'latentinsure.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'verisk.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'isomitigation.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'federato.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'morganstanley.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'crunchbase.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'cushmanwakefield.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'commercialcafe.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'constrafor.com': ['interested', '', 'advisor, bank, law firm or insurer — sells into this market'],
+  'nfsa.org': ['interested', '', 'trade association or advocacy body'],
+  'firesprinkler.org': ['interested', '', 'trade association or advocacy body'],
+  'nafed.org': ['interested', '', 'trade association or advocacy body'],
+  'fssa.org': ['interested', '', 'trade association or advocacy body'],
+  'restaurant.org': ['interested', '', 'trade association or advocacy body'],
+  'aha.org': ['interested', '', 'trade association or advocacy body'],
+  'aia.org': ['interested', '', 'trade association or advocacy body'],
+  'nic.org': ['interested', '', 'trade association or advocacy body'],
+  'securityindustry.org': ['interested', '', 'trade association or advocacy body'],
+  'sprinklerfitters669.org': ['interested', '', 'trade association or advocacy body'],
+  'homefiresprinkler.org': ['interested', '', 'trade association or advocacy body'],
+  'cleanpower.org': ['interested', '', 'trade association or advocacy body'],
+  'msfes.org': ['interested', '', 'trade association or advocacy body'],
+  'servicetrade.com': ['interested', '', 'software or service vendor selling to the trade'],
+  'inspectpoint.com': ['interested', '', 'software or service vendor selling to the trade'],
+  'uptickhq.com': ['interested', '', 'software or service vendor selling to the trade'],
+  'buildops.com': ['interested', '', 'software or service vendor selling to the trade'],
+  'thecomplianceengine.com': ['interested', '', 'software or service vendor selling to the trade'],
+  'qrfs.com': ['interested', '', 'software or service vendor selling to the trade'],
+  'fireprotectionfinder.com': ['interested', '', 'software or service vendor selling to the trade'],
+  'firecertacademy.com': ['interested', '', 'software or service vendor selling to the trade'],
+  'contractorlicenserequirements.com': ['interested', '', 'software or service vendor selling to the trade'],
+  'zeorouteplanner.com': ['interested', '', 'software or service vendor selling to the trade'],
+  'vettedbiz.com': ['interested', '', 'software or service vendor selling to the trade'],
+  'homeguide.com': ['interested', '', 'software or service vendor selling to the trade'],
+  'memoori.com': ['interested', '', 'software or service vendor selling to the trade'],
+  'securityinfowatch.com': ['press', '', 'trade or business press'],
+  'securitysystemsnews.com': ['press', '', 'trade or business press'],
+  'themiddlemarket.com': ['press', '', 'trade or business press'],
+  'privsource.com': ['press', '', 'trade or business press'],
+  'datacenterdynamics.com': ['press', '', 'trade or business press'],
+  'internationalfireandsafetyjournal.com': ['press', '', 'trade or business press'],
+  'fireandsafetyjournalamericas.com': ['press', '', 'trade or business press'],
+  'facilitiesdive.com': ['press', '', 'trade or business press'],
+  'phcppros.com': ['press', '', 'trade or business press'],
+  'alternativeswatch.com': ['press', '', 'trade or business press'],
+  'fsmmag.com': ['press', '', 'trade or business press'],
+  'tcbmag.com': ['press', '', 'trade or business press'],
+  'natlawreview.com': ['press', '', 'trade or business press'],
+  'bgov.com': ['press', '', 'trade or business press'],
+  'middlemarketgrowth.com': ['press', '', 'trade or business press'],
+  'franchisetimes.com': ['press', '', 'trade or business press'],
+  'datacenterknowledge.com': ['press', '', 'trade or business press'],
+  'restaurantbusinessonline.com': ['press', '', 'trade or business press'],
+  'marketsgroup.com': ['press', '', 'trade or business press'],
+  'speedwellmemos.com': ['press', '', 'trade or business press'],
+  'kff.org': ['vendor', '', 'research nonprofit'],
+  'nclicensing.com': ['instrument', 'authority', 'state or county authority'],
+  'myfloridacfo.com': ['instrument', 'authority', 'state or county authority'],
+  'leegov.com': ['instrument', 'authority', 'state or county authority'],
+  'flrules.org': ['instrument', 'text', 'Florida Administrative Code text'],
+  'energy-storage.news': ['press', '', 'trade press — energy storage'],
+  'grantthornton.co.uk': ['vendor', '', 'accounting firm research'],
+  'prweb.com': ['issuer', 'wire', 'wire — carries the issuer’s own release'],
+  'squarespace.com': ['unknown', 'mirror', 'site host — classify the author'],
+  'municipal.codes': ['instrument', 'text', 'municipal code text'],
+  'firecodes.ai': ['interested', '', 'code-lookup vendor'],
+  'uptocode.build': ['interested', '', 'code-compliance vendor'],
   'smbx.ai': ['self', '', 'this practice'],
 };
 
@@ -405,6 +764,33 @@ function testLine(where: string, line: string, copy: string): LineResult {
   if (!srcs.length) return res;
 
   const instruments = srcs.filter(s => s.cls === 'instrument');
+  /* THE ISSUER RULE (Paul, 2026-08-12: "yes, we cite what they said").
+     A company's own regulated disclosure IS the primary source for facts
+     about that company. Otis stating Otis's service margin is terminal — no
+     government table restates a filer's segment result, and demanding one
+     would mean the best evidence that exists cannot satisfy the check.
+
+     THE BOUNDARY, and it is the whole of the difference: this holds for what
+     the issuer says ABOUT ITSELF. A filer's claim about the SIZE OF ITS
+     MARKET is the filer citing someone else, or estimating — not a
+     disclosure, and not terminal. No class system can see that distinction;
+     it is a scope question, it is the "relabelled total" failure pattern from
+     job 2, and it stays a human read. What the machine can see is whether a
+     DISCLOSURE is named on the line at all, so that is what it tests. */
+  const DISCLOSURE = new RegExp([
+    /10-?K|10-?Q|8-?K|20-?F|6-?K|S-1|DEF ?14A|EX-99|form [0-9]|accession|EDGAR/.source,
+    /proxy|prospectus|offering circular|exhibit/.source,
+    /annual report|interim report|half-year|quarterly report/.source,
+    /inside[- ]information|regulatory (?:release|announcement)/.source,
+    /* An earnings call and an investor day are Reg FD events: the company on
+       the record about itself, transcribed and archived. The house writes them
+       as "Q4 2025 call" and "investor day, 21 May 2025", so the pattern has to
+       recognise the house's own shorthand or the rule only works on paper. */
+    /earnings (?:call|release)|(?:Q[1-4]|FY) ?\d{0,4} (?:call|results|earnings)/.source,
+    /investor day|capital markets day|analyst day/.source,
+  ].join('|'), 'i');
+  const disclosures = srcs.filter(s => s.cls === 'issuer' && DISCLOSURE.test(s.raw));
+  const terminal = [...instruments, ...disclosures];
   const named = srcs.filter(s => s.cls !== 'opaque');
   const classes = new Set(named.map(s => s.cls));
 
@@ -454,7 +840,9 @@ function testLine(where: string, line: string, copy: string): LineResult {
      single one of those is noise. Two dated events from one issuer is the
      shape that reads as two data points and is one. */
   const alreadyOpaque = res.flags.some(f => f.flag === 'OPAQUE');
-  if (!instruments.length && named.length && !selfs.length && !alreadyOpaque &&
+  if (disclosures.length && !instruments.length)
+    res.notes.push(`terminal on the issuer's own disclosure — ${disclosures.map(d => d.raw).join('; ')}. Primary as to the filer itself; NOT a source for the size of its market.`);
+  if (!terminal.length && named.length && !selfs.length && !alreadyOpaque &&
       res.corroborated === undefined) {
     const onlyClass = classes.size === 1 ? [...classes][0] : null;
     const enough = onlyClass === 'issuer' ? named.length >= 2 : named.length >= 1;
@@ -788,6 +1176,22 @@ console.log(corpusFiles.length
   ? `Corpus               ${rel(corpusRoots[0])}${corpusRoots.length > 1 ? ` +${corpusRoots.length - 1}` : ''} · ${corpusFiles.length} file(s) · ${urlCount} URL(s) · ${allOrigins.size} distinct origin(s)`
   : `Corpus               NOT CHECKED — no research corpus found. Origin collapse was not tested.`);
 if (corpusWhy && corpusFiles.length) console.log(`                     ${corpusWhy}`);
+/* ── classification coverage — computed before anything is judged ────────
+   THE FLOOR (2026-08-12). On this date both home-services documents printed
+   ✓ CLEAN while 53 of the corpus's 70 origins were unclassified — including
+   homepros.news, the third most-cited domain in the corpus. The script's rule
+   of never asserting a collapse on a domain it cannot class is correct per
+   figure and catastrophic in aggregate: at 53-of-70 the silence had swallowed
+   the check, and `unclassified` was doing the work of `sound`. One lookup-table
+   pass later the same files showed 2 collapses and 21 no-instrument findings.
+
+   So coverage is now a precondition of the verdict, not a courtesy line. A run
+   below the floor CANNOT print CLEAN — it prints NOT ESTABLISHED and exits 3,
+   which is a refusal, not a pass and not a finding. The fix is always the
+   same and takes minutes: class the named domains in DOMAIN_CLASS. */
+const COVERAGE_FLOOR = 0.9;
+let unclassifiedOrigins: string[] = [];
+let classifiedShare = 1;
 if (allOrigins.size) {
   /* Item one of the job: classify every source in the corpus, not only the
      ones a card happens to name. An origin mix with no instruments in it is
@@ -796,10 +1200,13 @@ if (allOrigins.size) {
   for (const d of allOrigins) {
     const c = CLASS_LABEL[classifyDomain(d).cls];
     profile.set(c, (profile.get(c) ?? 0) + 1);
+    if (c === 'unclassified') unclassifiedOrigins.push(d);
   }
+  classifiedShare = 1 - unclassifiedOrigins.length / allOrigins.size;
   const order = ['instrument', 'issuer', 'press', 'vendor', 'interested', 'self', 'unclassified'];
   console.log(`Origins              ${order.filter(k => profile.get(k))
     .map(k => `${k} ${profile.get(k)}`).join(' · ')}`);
+  console.log(`Coverage             ${(classifiedShare * 100).toFixed(0)}% of origins classified (floor ${COVERAGE_FLOOR * 100}% — below it, CLEAN is impossible)`);
 }
 for (const u of unreadable) console.log(`                     · ${path.basename(u)}  NOT READ (no text layer)`);
 
@@ -886,9 +1293,13 @@ if (corpusFiles.length) {
          unrecognised origin and the claim cannot be made — it may be the
          statute. Unclassified is reported as unclassified. */
       const cls = [...classes.values()];
+      /* Same rule at corpus scale: an issuer origin is terminal as to itself.
+         The corpus cannot see whether the citing line named a filing, so it
+         takes the issuer class as terminal and reports it — visibly — rather
+         than calling a filer's own result unsupported. */
       if (attributed.length >= 3 && origins.size >= 1 &&
         cls.every(c => c !== 'unknown') &&
-        !cls.some(c => c === 'instrument') &&
+        !cls.some(c => c === 'instrument' || c === 'issuer') &&
         cls.some(c => RELAY.includes(c)))
         noInstrument.push(row);
     }
@@ -906,7 +1317,7 @@ if (corpusFiles.length) {
   console.log(`               ${n(collapses.length)} ORIGIN COLLAPSE — many citations, one origin`);
   console.log(`               ${n(noInstrument.length)} NO INSTRUMENT — press/vendor/interested/self all the way down`);
   if (singleUnclassified.length)
-    console.log(`               ${n(singleUnclassified.length)} single-origin on a domain this script cannot class — reported, not flagged`);
+    console.log(`               ${n(singleUnclassified.length)} single-origin on a domain this script cannot class — BLOCKS CLEAN until classed`);
   if (corroboratedFigs.length || singleInstrument.length)
     console.log(`               ${n(corroboratedFigs.length + singleInstrument.length)} single-origin and sound — a named text, or one instrument cited often`);
 } else {
@@ -998,11 +1409,33 @@ if (ALL) {
 
 /* ── the closing, and the part that matters ───────────────────────────── */
 const findings = flagged.length + collapses.length + noInstrument.length;
+const belowFloor = allOrigins.size > 0 && classifiedShare < COVERAGE_FLOOR;
+const blindFigures = singleUnclassified.length;
 console.log('\n──────────────────────────────────────────────────────────────');
 
-if (!findings) {
+if (belowFloor || (!findings && blindFigures)) {
+  /* The refusal. Distinct from a finding: nothing is known to be wrong — the
+     point is that not enough is KNOWN for a verdict either way, and a verdict
+     issued blind reads exactly like a verdict issued sighted. */
+  console.log(`✗ NOT ESTABLISHED — this run cannot verdict this file.`);
+  if (belowFloor) {
+    console.log(`  ${unclassifiedOrigins.length} of ${allOrigins.size} corpus origins are unclassified (${(classifiedShare * 100).toFixed(0)}% coverage, floor ${COVERAGE_FLOOR * 100}%).`);
+    console.log('  Every collapse and no-instrument test is silent on an unclassified domain,');
+    console.log('  so below the floor those silences ARE the result. Class these in');
+    console.log('  DOMAIN_CLASS (scripts/studio/sourcing-protection.mts) and re-run:');
+    for (const d of unclassifiedOrigins.slice(0, 25)) console.log(`    · ${d}`);
+    if (unclassifiedOrigins.length > 25) console.log(`    · … and ${unclassifiedOrigins.length - 25} more`);
+  }
+  if (blindFigures) {
+    console.log(`  ${blindFigures} figure(s) rest solely on a domain this script cannot class —`);
+    console.log('  each is either a collapse or sound, and it cannot say which:');
+    for (const c of singleUnclassified.slice(0, CAP)) console.log(`    · ${c.fig.padEnd(12)} ${c.attributed.length} citations, 1 origin — ${c.origins[0]}`);
+  }
+  if (findings) console.log(`  (${findings} finding(s) above stand regardless — fix those too.)`);
+} else if (!findings) {
   console.log('✓ CLEAN — every source line names something a reader can open, no class');
-  console.log('  monoculture, and no figure in this file collapses to a single origin.');
+  console.log('  monoculture, no figure collapses to a single origin, and the corpus is');
+  console.log(`  ${(classifiedShare * 100).toFixed(0)}% classified — this verdict was issued sighted, not blind.`);
 } else {
   console.log(`✗ ${findings} finding(s). This is not ready to post.`);
   console.log('  A source line is the only evidence most readers ever see. Fix the line,');
@@ -1011,6 +1444,10 @@ if (!findings) {
 }
 
 console.log('\nWhat this cannot do, and it is most of what matters:');
+console.log("  · An issuer's disclosure counts as terminal AS TO ITSELF. It cannot see");
+console.log('    whether the figure is a fact about the filer or a claim about the filer\'s');
+console.log('    MARKET — the second is the filer citing someone else, and is not terminal.');
+console.log('    That is a scope question and it stays a human read.');
 console.log('  · It cannot tell whether a source actually SUPPORTS the claim. A card can');
 console.log('    cite a statute that says something else, and this passes it. Fire-safety');
 console.log('    p9 cited the right state for the wrong credential and would clear here.');
@@ -1035,4 +1472,7 @@ if (!corpusFiles.length) {
 }
 console.log('');
 
-process.exit(findings ? 1 : 0);
+/* Exit 0 clean · 1 findings · 2 usage · 3 NOT ESTABLISHED (coverage refusal).
+   3 is not a pass. A caller that treats nonzero as "do not post" needs no
+   change; a caller that distinguishes can tell a defect from a blind spot. */
+process.exit(findings ? 1 : (belowFloor || blindFigures) ? 3 : 0);

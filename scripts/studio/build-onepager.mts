@@ -30,6 +30,7 @@
  */
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
+import { writeBuildRecord } from './build-record.mts';
 import { pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(new URL('../..', import.meta.url).pathname);
@@ -210,6 +211,10 @@ try {
 } finally { await page.close().catch(() => {}); }
 
 if (post.caption) writeFileSync(path.join(outDir, `${post.slug}-caption.txt`), post.caption.trim() + '\n');
+writeBuildRecord(outDir, 'build-onepager.mts', [
+  { label: 'spec', file: specPath },
+  { label: 'master', file: path.join(path.dirname(specPath), '..', 'master.md') },
+]);
 console.log(`✓ ${post.slug}: ${variants.join(' + ')} → ${outDir}/${post.slug}-*.png/.pdf${post.caption ? ' (+ caption)' : ''}`);
 console.log(`  photo: ${post.image ? (PHOTO ? post.image : 'NOT FOUND — text-only card') : 'none (text-only card)'}  ·  collateral: ${outDir}`);
 process.exit(0);

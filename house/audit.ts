@@ -24,7 +24,14 @@ export interface CitationAudit {
   /* citations */
   hasSourceRegister: boolean;
   sourcesMissing: string[];
-  sourceUrls: number; masterUrls: number; urlsDropped: string[];
+  sourceUrls: number; masterUrls: number;
+  /** A CAPPED SAMPLE — read `urlsDroppedCount` for how many there really
+   *  are. Found 2026-08-12: this array was sliced to 40 and the CLI printed
+   *  the SLICE length, so a master dropping 490 source URLs reported
+   *  "40 dropped". A guard that understates what it found is the same
+   *  disease as a guard that cannot see. */
+  urlsDropped: string[];
+  urlsDroppedCount: number;
   /* figures */
   masterFigures: number;
   citedCount: number;
@@ -35,7 +42,12 @@ export interface CitationAudit {
   note: string;
 }
 
-const URL_RE = /https?:\/\/[^\s)<>\]"']+/gi;
+/* A backtick, a comma and a semicolon cannot appear in a URL, and all three
+   sit against one in prose — `https://x` and "see a, b, c". Found
+   2026-08-12: five fire-safety URLs written inside code spans were read
+   WITH the closing backtick, so they could never match the master's clean
+   copy and reported as dropped forever. */
+const URL_RE = /https?:\/\/[^\s)<>\]"'`,;]+/gi;
 /** Money, percentages, multiples and magnitudes — the figures that carry a claim. */
 // Suffixes ordered longest-first. Bare b/t/m matter: the reports write
 // "$180B" as often as "$180 billion", and missing that flagged honest
@@ -173,7 +185,8 @@ export function auditCitations(
   return {
     ok,
     hasSourceRegister, sourcesMissing,
-    sourceUrls: srcUrls.size, masterUrls: mstUrls.size, urlsDropped: urlsDropped.slice(0, 40),
+    sourceUrls: srcUrls.size, masterUrls: mstUrls.size,
+    urlsDropped: urlsDropped.slice(0, 40), urlsDroppedCount: urlsDropped.length,
     masterFigures: seen.size, citedCount: cited,
     hasDerivationRegister,
     derivedRegistered: derivedRegistered.slice(0, 40),

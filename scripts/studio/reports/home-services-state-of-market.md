@@ -6,20 +6,20 @@ image: hs-cover.jpg
 imagePos: 50% 50%
 eyebrow: MARKET ASSESSMENT
 footer: Home Services — State of the Market
-stat: 13.3x → 9.5x | HVAC services EV/EBITDA, 2021–23 vs. 2024–YTD26
-stat: ~89% | Of 112,088 NAICS 238220 firms, under 20 staff
-stat: 16–20x | What trophy platforms still clear
-accent: TAM / SAM / SOM | hs-accent-sizing.jpg | 50% 45%
-accent: PE share of deal flow | hs-accent-consolidation.jpg | 50% 45%
-accent: Valuation estimation framework | hs-accent-aggregators.jpg | 50% 45%
-accent: Metro saturation map | hs-accent-regionality.jpg | 50% 45%
-accent: Supply data | hs-accent-labor.jpg | 50% 45%
-accent: A2L refrigerant transition | hs-accent-equipment.jpg | 50% 45%
-accent: Marketing / customer acquisition | hs-accent-operating.jpg | 50% 45%
-accent: Where to hunt | hs-accent-buyside.jpg | 50% 45%
+stat: 89% | Of 112,088 NAICS 238220 firms, under 20 staff
+stat: 13.3x → 9.5x | HVAC services EV/EBITDA, 2021–23 vs 2024–YTD26
+stat: 47 of 92 | HVAC deals YTD 2026 taken by sponsors
+accent: 2.1 TAM / SAM / SOM | hs-accent-sizing.jpg | 50% 45%
+accent: 3.1 PE share of deal flow | hs-accent-consolidation.jpg | 50% 45%
+accent: 4.1 Valuation estimation | hs-accent-aggregators.jpg | 50% 45%
+accent: 5.1 Metro saturation map | hs-accent-regionality.jpg | 50% 45%
+accent: 6.1 Supply data | hs-accent-labor.jpg | 50% 45%
+accent: 7.1 A2L refrigerant transition | hs-accent-equipment.jpg | 50% 45%
+accent: 8.1 Marketing / customer | hs-accent-operating.jpg | 50% 45%
+accent: 10.1 Where to hunt | hs-accent-buyside.jpg | 50% 45%
 -->
 # Home Services: State of the Market
-## A Buy-Side Assessment for Acquirers · Published 3 August 2026
+## A Buy-Side Assessment for Acquirers · Published 12 August 2026
 
 **HVAC · plumbing · electrical · roofing · pest control · garage doors.**
 
@@ -37,7 +37,7 @@ accent: Where to hunt | hs-accent-buyside.jpg | 50% 45%
 
 - **The regulatory ground moved the day before this report published.** EPA's reconsideration rule took effect **27 July 2026**, removing the installation deadline for R-410A equipment manufactured or imported before 1 January 2025. The 700 GWP limit itself is unchanged, but the near-term forcing function behind the replacement thesis is gone. New York codified the original deadline regardless, and the rule faces D.C. Circuit challenges from 19 state attorneys general, the NRDC and five industry groups — ACCA, AHRI, HARDI, PHCC and the Alliance for Responsible Atmospheric Policy. Underwrite the replacement tailwind as contested.
 
-- **A metro-depth cut of one saturated market shows what "picked over" is actually worth.** In the eleven-county Dallas–Fort Worth MSA, NAICS 238220 counts **2,412 establishments**, **31,980 employees** and **$2.418 billion** of annual payroll (Census CBP, 2023) — and **1,797 of those establishments, 74.5%, employ fewer than ten people**. The buyable middle is **307 establishments** at 10–249 employees, **115** of them at 20–249. Against that, **eighteen platform parents hold a verified DFW operating location**, ten residential-side and eight commercial-mechanical, two of them headquartered inside the MSA. Roughly **280 in-band establishments match no consolidator in the register**. Saturation at the platform-formation level and a tuck-in floor of several hundred businesses are the same finding, not competing ones. Part XI carries it in full.
+- **A metro-depth cut of one saturated market shows what "picked over" is actually worth.** In the eleven-county Dallas–Fort Worth MSA, NAICS 238220 counts **2,412 establishments**, **31,980 employees** and **$2.418 billion** of annual payroll (Census CBP, 2023) — and **1,797 of those establishments, 74.5%, employ fewer than ten people**. The buyable middle is **598 establishments** at 10–249 employees, **307** of them at 20–249 and **115** at 50–249. Against that, **eighteen platform parents hold a verified DFW operating location**, ten residential-side and eight commercial-mechanical, two of them headquartered inside the MSA. Roughly **280 establishments in the 20–249 band match no consolidator in the register**. Saturation at the platform-formation level and a tuck-in floor of several hundred businesses are the same finding, not competing ones. Part XI carries it in full.
 
 - **The cycle is mid-game, and demand is softening beneath the pricing.** Tier-one Sun Belt and coastal metros are picked over: DFW, Houston, Phoenix, Atlanta, Tampa and Southern California each host four or more platforms. Across the listed comparables the 2026 pattern is consistent — Rollins grew second-quarter revenue **7.9%** but adjusted EBITDA only **2.2%**; Roto-Rooter's FY2025 segment revenue was flat at **$899.9M**; Frontdoor's first-quarter growth was 5% price and 1% volume on a flat member count. Equipment shipments fell **20%** in 2025 and are down a further **3.5%** YTD. The opening for a new entrant is **platform formation in under-consolidated metros** — Mountain West, secondary Pacific Northwest, northern New England, the upper Midwest, second-tier Sun Belt — and tuck-in density everywhere else.
 
@@ -116,11 +116,11 @@ The asset being bought is not trucks or dispatch. It is the **service agreement*
 
 - Well-managed operations retain **80–90%** of maintenance customers annually. A substantial share of high-margin replacement revenue originates from the maintenance base, because technicians identify aging equipment on scheduled visits.
 - Buyers compute ARR from active agreements and apply a gross-margin filter, typically **45–60%** for HVAC maintenance. They then scrutinize churn, cohort tenure, contract enforceability, and **auto-charge penetration**; a book above 90% auto-charge materially alters diligence outcomes.
-- **The 40% threshold:** Crossing ≈40% recurring revenue re-rates the asset from "contractor" to "platform." A company with 30%+ maintenance revenue commands a **1–2 turn premium** over an identical-revenue peer below 15% recurring. The landscape report goes further, putting the swing from recurring-revenue mix at **±3–4 turns** (a $4M-EBITDA shop at 60% recurring trades 8–9x versus 5–6x at 20% recurring).
+- **The re-rating is real; the threshold is not.** A heavier recurring book re-rates the asset from "contractor" to "platform," and buyers underwrite it that way. But every published crossing point for where that happens — the re-rating threshold, the premium over a lighter-book peer, and the unnamed landscape report's turn swing with its worked example — was carried from the pre-verification synthesis and traces to no publisher (A.0.6). The qualitative point survives. No number does.
 
 ## 1.7 "The Trap" at closing
 
-Residential customers are loyal to the **technician**, not the brand. Service agreements can carry change-of-control provisions, and attrition rises when integration disrupts service quality. One documented case lost **15% of its member base** after centralized pricing changes. Map technician retention and audit the contractual language of the recurring book **before LOI**. A buy-and-hold owner has no flip mechanism if the technicians and the customer book walk after closing.
+Residential customers are loyal to the **technician**, not the brand. Service agreements can carry change-of-control provisions, and attrition rises when integration disrupts service quality. The one member-base loss case in circulation has no source and is retired (A.0.6); the failure mode it names is real, and members leave when integration changes what they were sold. Map technician retention and audit the contractual language of the recurring book **before LOI**. A buy-and-hold owner has no flip mechanism if the technicians and the customer book walk after closing.
 
 ---
 
@@ -286,7 +286,7 @@ Most platforms are private. Where EV, revenue or EBITDA are undisclosed, the est
 
 *Worked example (Strikepoint):* ≈2,700 employees × $180K = ≈$486M revenue; 15% margin = ≈$73M EBITDA; 13x = **≈$950M EV (estimated)**.
 
-*Framework caveats:* headcounts blend techs, CSRs and back-office staff, which understates per-tech productivity. Recurring-revenue mix swings multiples ±3–4 turns and is unobservable from outside. Commercial-mechanical platforms trade on backlog and data-center logic, so they are tabled separately.
+*Framework caveats:* headcounts blend techs, CSRs and back-office staff, which understates per-tech productivity. Recurring-revenue mix moves multiples and is unobservable from outside; the turn-swing figure this caveat used to quote had no named publisher and is retired (A.0.6). Commercial-mechanical platforms trade on backlog and data-center logic, so they are tabled separately.
 
 ## 4.2 Master platform table — residential HVAC/plumbing/electrical (sorted by EV)
 
@@ -641,7 +641,7 @@ Together they support **≈$7,500 average, $5,000–$16,000 typical, and ≈$22,
 ## 8.4 Seasonality, working capital, and pricing pressure
 
 - **Seasonality:** HVAC demand and CPL swing hard with weather, and single-season operators are less attractive to platforms. Platforms smooth the curve with multi-trade mix, maintenance-plan recurring revenue, and geographic spread across heating and cooling climates.
-- **Maintenance-plan penetration:** published figures scatter. CT Acquisitions quotes 35–50% at platform scale on the same page as 40-60% and 50%+, while its April 2026 Multiples Report is materially lower — HVAC recurring penetration low <10%, market 15–30%, premium 40%+. Use **40%+ as the premium/platform threshold**. The same report puts pest control at 60–75% market and 80%+ premium.
+- **Maintenance-plan penetration:** published figures scatter. CT Acquisitions quotes 35–50% at platform scale on the same page as 40-60% and 50%+, while its April 2026 Multiples Report is materially lower — HVAC recurring penetration low <10%, market 15–30%, premium 40%+. **The scatter is the finding.** No threshold survives it, and none is stated here (A.0.6). The same report puts pest control at 60–75% market and 80%+ premium.
 - **Working capital:** true-ups cost sellers $100K–$500K at close, and lean-AR/heavy-AP operators can owe money at close.
 - **The capacity paradox:** Jobber's *Blue Collar Strong: The 2026 Home Service Trends Report* (2026-03-25; n=1,050 home-service business owners, ±3% at 90% confidence) finds **72% "consistently booked with limited availability"** plus **8% "at capacity and turning away new work"** — the 80% figure — against **3% reporting difficulty filling their schedule**. HVAC shows the strongest booking rates. Demand is not the constraint. Labor is.
 - **Pricing:** PE platforms exercise pricing power and raise faster than inflation, while independents absorb the lead-cost and materials squeeze. The 2026 public-comp evidence (§4.6) says this is now the entire growth story: price up, volume flat to down.
@@ -669,7 +669,7 @@ The standard buyer levers are QofE add-back rejection (5–15% of headline EBITD
 
 - **Months 1–3 — visibility and control:** convert cash-basis books to accrual/GAAP; build departmental P&Ls by service line (residential vs. commercial, install vs. break-fix); centralize HR, payroll, dispatch, and fleet.
 - **Months 4–6 — leverage scale:** renegotiate materials, vehicles, and equipment with distributors and OEMs on national pricing. Distributors that once managed dozens of fragmented relationships now face a sophisticated procurement organization. Optimize marketing with forensic CPL, book-rate, and close-rate tracking.
-- **Throughout — protect the facade:** keep the legacy family name and logo on the trucks and replace the financial, technological, and operational plumbing behind it. Keep **pricing and dispatch local for the first ≈12 months**. Heavy early centralization triggers the documented attrition failure mode, the 15% member-base loss case.
+- **Throughout — protect the facade:** keep the legacy family name and logo on the trucks and replace the financial, technological, and operational plumbing behind it. Keep **pricing and dispatch local for the first ≈12 months**. Heavy early centralization triggers the attrition failure mode described in §1.7.
 - **Margin target:** 18–22% EBITDA within 24 months of integration.
 
 ## 9.4 "Roll-up of the roll-ups" risk
@@ -690,7 +690,7 @@ A historically high number of PE-backed platforms are seeking exits in 2026–20
 
 ## 10.2 Value-creation levers to underwrite
 
-- **Recurring revenue is the #1 multiple driver**, worth 3–4 turns. Push maintenance-plan penetration toward 40%+ and auto-charge toward 90%.
+- **Recurring revenue is the #1 multiple driver.** Push maintenance-plan penetration up and auto-charge toward 90%. The turn count and the penetration threshold this line used to carry are retired for want of a publisher (A.0.6); the lever is not.
 - **Procurement consolidation:** equipment, refrigerant, and fleet insurance (telematics). Independents overpay 10–20%+ on these lines.
 - **Tech stack pre-exit:** FSM and KPI dashboards lift the multiple in diligence; accrual books plus departmental P&Ls close the information-asymmetry gap.
 - **Technician engine:** centralized recruiting and retention is the scaling gate, not capital.
@@ -749,8 +749,10 @@ the market:
 
 **1,797 establishments — 74.5% — have fewer than ten employees.** Ten further
 establishments sit inside cells Census reports as N, "not available or not
-comparable" — never zero. The buyable middle is the 10–249 band: **307
-establishments**, of which **115** are at 20–249.
+comparable" — never zero. The buyable middle is the 10–249 band: **598
+establishments** (291 + 192 + 66 + 49), of which **307** are at 20–249 and
+**115** at 50–249. (Band labels corrected 2026-08-12 — see A.0.7. The counts are
+the Census cells and never changed; the names attached to them did.)
 
 The state licence registry gives the same market a second, independent
 denominator: **4,665 distinct licensed A/C contractor firms** in these counties
@@ -829,21 +831,25 @@ banding.
 
 ## 11.4 The acquisition band, and what is left
 
-Of the 307 establishments in the 10–249 band, **≈25** are platform-owned. Baker
+Of the 598 establishments in the 10–249 band, **≈25** are platform-owned. Baker
 Brothers, at 400 employees (employer-reported), sits above the band — it is one
 of the metro's seven 250-plus establishments.
 
-Platform share of the band: **8.5%** with the band drawn at 10–249 employees,
-**22.6%** at 20–249. The four platform locations with published headcounts —
+Platform share of the band: **4.3%** with the band drawn at 10–249 employees
+(26 ÷ 598), **8.5%** at 20–249 (26 ÷ 307) and **22.6%** at 50–249 (26 ÷ 115).
+The four platform locations with published headcounts —
 Baker Brothers 400, Berkeys 195, Lex 50+ technicians, Dallas Mechanical Group
 more than 150 — all exceed 50, so the truth likely sits nearer the top of the
 range. It cannot be narrowed further from public sources: branch-level headcount
 is not published for privately held trade businesses, which is the reason CBP
 exists.
 
-What is left: **≈280 establishments in the 10–249 band match no consolidator in
-the register**, carrying roughly **$2–6B** of annual work against the band's
-**$3.6B – $6.4B** total (bounds, not estimates — see Derivations).
+What is left: **≈280 establishments in the 20–249 band match no consolidator in
+the register**. Separately, and on the full 10–249 band, roughly **$2–6B** of
+annual work sits outside platform ownership against that band's
+**$3.6B – $6.4B** total (bounds, not estimates — see Derivations). The
+establishment residual and the dollar residual are computed on different bands
+and must not be paired in one sentence — see A.0.7.
 "Independent" here means unmatched, not confirmed independent, and every board
 derived from this section carries that label until the brand/DBA layer is built.
 
@@ -851,14 +857,15 @@ derived from this section carries that label until the brand/DBA layer is built.
 
 The §5.1 saturation read stands at the platform-formation level — eighteen
 parents holding ground is more crowded, not less. What is new is the tuck-in
-floor beneath it: roughly 280 unmatched establishments and several billion
-dollars of annual work. Entry is tuck-in only, exactly as §5.1 concludes; this
-part puts measured numbers behind that sentence.
+floor beneath it: roughly 280 unmatched establishments in the 20–249 band, and
+several billion dollars of annual work across the 10–249 band. Entry is tuck-in
+only, exactly as §5.1 concludes; this part puts measured numbers behind that
+sentence.
 
 Two developments would move the read: resolution of Apex's DFW holdings, which
 raises the platform share and shrinks the residual, and an employee-banded
-sizing of the in-band platform locations, which collapses the 8.5–22.6% range to
-a figure.
+sizing of the in-band platform locations, which collapses the 8.5% to 22.6%
+range, drawn between the 20–249 and 50–249 cuts, to a figure.
 
 # APPENDIX — DATA CONFLICTS, CAVEATS & SOURCE NOTES
 
@@ -1008,6 +1015,80 @@ One correction to the standing text, and the provenance of the new Part XI.
   location file was re-checked adversarially: 26 checks, zero refutations, three
   citation-level corrections registered in the pass.
 
+## A.0.6 Corrections applied 2026-08-06 — the percentage pass
+
+**Why this pass exists.** The citation guard's figure pattern could never match a
+percentage — `%` is a non-word character and the pattern ended in a word
+boundary. From the day that guard was written until 2026-08-06, **no percentage
+in this document, or in any deck built from it, was ever audited.** The
+extractor was repaired and everything re-checked.
+
+### Retired — no source
+
+| Claim | Finding |
+|---|---|
+| The recurring-revenue re-rating threshold, the maintenance-revenue premium over a lighter-book peer, and the unnamed landscape report's turn swing with its worked example (§1.6, §4.1, §8.4, §10.2) | **NOT FOUND.** Present in this document's pre-verification ancestors only; absent from every research file and every verification pass. The nearest verified material is CT Acquisitions on maintenance penetration — and A.1 already records that publisher's figures as unreliable as stated. The qualitative re-rating point survives; the thresholds do not. |
+| The member-base loss after centralized pricing changes (§1.7, §9.3) | **NOT FOUND.** No research document, no verification pass, no named publisher. The structural warning survives without the figure. |
+| The PE share of tracked HVAC deals derived from the 39-of-77 pair (`## Derivations`) | **RETIRED.** The counts could not be verified at primary source (A.0.3 §D) and the series was mis-dated by a full year. Only the Capstone 47-of-92 pair is carried. |
+
+### Corrected
+
+| Item | Correction |
+|---|---|
+| Roofing firms under twenty employees, as published in `home-services-teardown` | The deck said "about 91%"; §2.2 and the CRS table say **90.8%**. A rounded figure is a different figure. |
+
+**Everything else passed.** Apart from the items above, every figure re-traced.
+
+## A.0.7 Corrections applied 2026-08-12 — the DFW size-band labels
+
+**What happened.** The DFW research pass read the Census CBP 2023 county file
+correctly and summed the published size classes correctly. It then attached the
+wrong band name to two of the sums, and Part XI inherited the names.
+
+The published cells for the eleven-county Dallas–Fort Worth MSA, NAICS 238220,
+are **10–19 = 291 · 20–49 = 192 · 50–99 = 66 · 100–249 = 49 · 250–499 = 7**.
+They are verified and unchanged.
+
+### The bands
+
+| Count | Was labelled | Is | Arithmetic |
+|---|---|---|---|
+| **598** | *(had no row — the genuine 10–249 band was never published)* | **10–249** | 291 + 192 + 66 + 49 |
+| **307** | 10–249 | **20–249** | 192 + 66 + 49 |
+| **115** | 20–249 | **50–249** | 66 + 49 |
+
+**The counts never changed.** Nothing was re-measured, no source was re-read, no
+figure was replaced. Both band names were one step below the count sitting on
+them, so every share computed from those counts is also a correct number that
+was carried under a wrong band name.
+
+### The recomputed shares
+
+| Share | Was published as | Is | Arithmetic |
+|---|---|---|---|
+| Platform-owned share of the **10–249** band | **8.5%** | **4.3%** | 26 ÷ 598 |
+| Platform-owned share of the **20–249** band | *(published as the 10–249 share)* | **8.5%** | 26 ÷ 307 |
+| Platform-owned share of the **50–249** band | *(published as the 20–249 share)* | **22.6%** | 26 ÷ 115 |
+| Establishment share of the metro, **10–249** | *(no row)* | **24.8%** | 598 ÷ 2,412 |
+| Establishment share of the metro, **20–249** | 12.7% at 10–249 | **12.7%** | 307 ÷ 2,412 |
+| Establishment share of the metro, **50–249** | 4.8% at 20–249 | **4.8%** | 115 ÷ 2,412 |
+
+**The consequence that matters: the platform share of a genuine 10–249 band is
+4.3%, not 8.5%.** The published 8.5% to 22.6% range is a real range — it is the
+20–249 to 50–249 range. Drawn across the whole band a tuck-in buyer would
+actually shop, platform ownership is roughly one establishment in twenty-three,
+and DFW is materially less picked over at the bottom of the band than this
+document has said since 2026-08-03.
+
+### One pairing that must not be restored
+
+The **≈280 unmatched establishments** figure is 307 − ≈25 and therefore
+describes the **20–249** band. The **$3.6B – $6.4B** band dollars and the
+**$2–6B** dollar residual were computed from employment bounds built on the
+*full* 291 + 192 + 66 + 49 set and are correctly labelled **10–249**. Part XI
+previously ran the two through one sentence. They are different denominators and
+the sentence has been split.
+
 ## A.1 Reconciled data conflicts across the three source documents
 
 | Item | Conflict | Resolution used |
@@ -1073,12 +1154,12 @@ One correction to the standing text, and the provenance of the new Part XI.
 
 **Where the figures are least stable.** BLS Occupational Outlook data dates to its 28 August 2025 revision and refreshes in late August or early September; the newer OEWS May 2025 wage release already supersedes its wage line, and both vintages appear in §6.1. The FOMC met on 28–29 July 2026, so rate figures are pre-decision. Second-quarter 2026 earnings were mid-season at publication — Chemed reported that day, EMCOR and Rentokil two days later, Frontdoor the following week. And 2022 remains the latest Economic Census vintage; the next is 2027.
 
-**The correction record.** This document has been corrected three times since first issue, and every change is recorded rather than quietly absorbed: **A.0.1** (2026-07-26, TAM reconciliation), **A.0.2** (2026-07-27, primary-source verification), **A.0.3** (2026-07-28, full live-source re-verification). Each entry states what the figure was, what it became, and the named source that overturned it — including two cases where a prior correction was itself wrong, and one where a figure removed as unsourced turned out to be sourced and was restored. Retired figures are named so they stay recognisable if they resurface from an older copy.
+**The correction record.** This document has been corrected three times since first issue, and every change is recorded rather than quietly absorbed: **A.0.1** (2026-07-26, TAM reconciliation), **A.0.2** (2026-07-27, primary-source verification), **A.0.3** (2026-07-28, full live-source re-verification), and most recently **A.0.7** (2026-08-12, the DFW size-band labels). Each entry states what the figure was, what it became, and the named source that overturned it — including two cases where a prior correction was itself wrong, and one where a figure removed as unsourced turned out to be sourced and was restored. Retired figures are named so they stay recognisable if they resurface from an older copy.
 
 
 ## Sources
 
-Figures trace to the documents in `research/`, to the correction ledgers A.0.1–A.0.3, or to the derivations registered below.
+Figures trace to the documents in `research/`, to the correction ledgers A.0.1–A.0.6, or to the derivations registered below.
 
 | Source document | What it carries |
 |---|---|
@@ -1250,6 +1331,34 @@ Every URL below appears in one of the three files in `research/` and supports a 
 - https://www.tradesly.ai/blog/revenue-per-technician-benchmarks-guide
 - https://www.sec.gov/Archives/edgar/data/19584/000001958426000002/che-20260225xex99.htm
 
+### Source URLs carried from the Dallas–Fort Worth and adjacent-trade passes
+
+Owner-published rosters, location pages and transaction releases read directly during the Part XI and adjacent-trade work. Listed so the citation trail survives the render.
+
+- https://www.tectaamerica.com
+- https://nationsroof.com
+- https://www.aeainvestors.com/aea-acquires-nations-roof/
+- https://www.prnewswire.com/news-releases/centre-partners-completes-acquisition-of-quick-roofing-302028590.html
+- https://www.prnewswire.com/news-releases/leaf-home-announces-acquisition-of-erie-home-uniting-two-leading-residential-services-providers-302549233.html
+- https://www.anticimex.com/press-releases/anticimex-acquires-safehaven-pest-control-abby-s-pest-and-termite-services-and-metro-guard/
+- https://www.rollins.com/investors/press-releases/detail/429/rollins-acquires-romex-pest-control
+- https://pestdefense.com
+- https://www.terminix.com/exterminators/tx/
+- https://www.masseyservices.com/locations/
+- https://fsg.com/locations/
+- https://www.iescomm.com/locations/
+- https://www.rosendin.com/contact/office-locations/
+- https://www2.census.gov/programs-surveys/economic-census/data/2022/sector56/EC2256BASIC.zip
+- https://dallasinnovates.com/dallas-based-apex-service-partners-gets-minority-investment-from-apollo-funds/
+- https://alpineinvestors.com/update/apex-and-alpine-announce-strategic-minority-investment-from-apollo-funds-in-apex/
+- https://www.prnewswire.com/news-releases/imperial-capital-announces-the-sale-of-frontier-service-partners-to-apex-service-partners-302042748.html
+- https://apexservicepartners.com/
+- https://www.aireserv.com/locations/texas/
+- https://www.mrrooter.com/locations/texas/
+- https://www.mrelectric.com/locations/texas/
+- https://www.onehourheatandair.com/locations/texas/
+- https://www.benjaminfranklinplumbing.com/locations/texas/
+- https://www.mistersparky.com/locations/texas/
 
 ## Derivations
 
@@ -1260,7 +1369,7 @@ Figures below appear in no source and are arithmetic on figures that do. Each st
 | **≈$16 billion** — combined reported valuations of the five platform recaps, Nov 2024 – May 2026 | Apex $10B + Champions $2.5B + Sila $1.7B + Redwood $1.1B + Guild $0.8B | Sum = $16.1B, stated as ≈$16B | That summing five separately-reported valuations is meaningful. It is a headline convenience, not a market measure: the Apex figure is a whole-company valuation attached to a *minority* investment and includes debt, the others are enterprise values on control transactions, and all five are anonymous-source. Service Logic is excluded because no EV was ever disclosed. **Do not present this as a market total.** |
 | **≈20x** — Apex implied multiple | $10B valuation ÷ "over $500 million" EBITDA (both anonymous-source, and from *different* outlets — Reuters for the valuation, HomePros for the EBITDA) | $10B ÷ $500M ≤ 20x | That the reported EBITDA is the denominator the $10B was struck against, and that two outlets' anonymous sources are describing the same figures. **No source publishes an Apex multiple.** Flagged as derived wherever it appears. |
 | **≈$50 million** — Guild Garage EBITDA | Previously: $800M ÷ 16x | — | **Superseded.** Reuters (2026-03-06) publishes the figure directly: "close to $50 million of annual EBITDA," alongside "over $300 million of annual revenue." It is no longer a derivation — it is an anonymous-source reported figure. |
-| **50.6% and 51.1%** — PE share of tracked HVAC deals | 39 ÷ 77 and 47 ÷ 92 (Capstone counts) | Division | That the ratio is meaningful as a share. Capstone publishes the counts, not the percentages. The 92/47 pair is the current one; the 39/77 pair could not be verified at primary source (A.0.3 §D). |
+| **51.1%** — PE share of tracked HVAC deals | 47 ÷ 92 (Capstone counts) | Division | That the ratio is meaningful as a share. Capstone publishes the counts, not the percentages. The earlier 39-of-77 pair and the share derived from it are **retired**: the counts could not be verified at primary source (A.0.3 §D), and splicing them to Capstone's tracked universe produced a trend no single dataset supports (A.0.2). |
 | **≈$33 million** — Roto-Rooter franchise buy-back, 2026 YTD | $20.6M (San Francisco + Fort Worth, 2026-03-31) + $12.0M (21-county south Texas, 2026-06-08), both "approximately" as Chemed states them | Sum ≈ $32.6M, stated as ≈$33M | That two separately announced re-acquisitions are usefully read as one programme. Chemed does not publish a YTD franchise-repurchase total. |
 | **≈1.4x** — the R-32 to R-454B per-pound price gap | PICKHVAC 2026 averages: R-454B ≈$25/lb, R-32 ≈$18/lb | $25 ÷ $18 ≈ 1.4 | That the two averages are struck on a comparable basis. The 2025 "more than four times" comparison is AC Direct's, on early-2025 crisis pricing. Removed from the body; recorded here. |
 | **≈4 turns** — the HVAC services de-rating | Capstone: 9.5x (2024–YTD 2026) vs. 13.3x (2021–2023) | 13.3 − 9.5 = 3.8 turns | That two period averages are comparable as a before/after. Capstone publishes the two averages, not the difference. |
@@ -1269,13 +1378,13 @@ Figures below appear in no source and are arithmetic on figures that do. Each st
 | **≈$8.356B** — DFW MSA 238220 receipts (Part XI) | Texas 238220 receipts $25.418B (2022 Economic Census, EC2223KOB); DFW share of Texas 238220 payroll 32.87% (CBP 2023) | 0.3287 × $25.418B | That DFW's receipts-per-payroll ratio matches the Texas average — unverifiable, since no sub-state construction receipts are published. Employment and establishment bases give $7.735B and $6.882B; the 21% spread is the size of the assumption. Both ends carried, no midpoint. |
 | **≈$2.9B / ≈$2.7B** — DFW HVAC- and plumbing-specific spend (Part XI) | ≈$8.356B above; Texas kind-of-business mix 34.3% / 32.8% (EC2223KOB) | Multiplication | Adds a second assumption on top of the first: that DFW's trade mix matches the state's. DFW is more urban and commercial than the state average. Order of magnitude, not a count. |
 | **$241,879** — receipts per employee, Texas 238220 (Part XI) | $25.418B receipts (2022) ÷ 105,086 employees (2023) | Division | Mixed vintages, one year apart. |
-| **8.5% – 22.6%** — platform-owned share of the DFW acquisition band (Part XI) | ≈26 platform-owned 238220 establishments (owner-published rosters, licence-registry confirmed); 307 establishments at 10–249 employees and 115 at 20–249 (CBP 2023) | Division at each band cut | The numerator is a named-location count, not an employee-banded one; Baker Brothers (400 employees) sits above the band, moving the in-band count to ≈25 and the ends fractionally. The stated range is carried as computed. Four published headcounts, all above 50, place the likely truth near the top of the range. |
-| **≈280 establishments / roughly $2–6B** — the unmatched DFW residual (Part XI) | 307 in band − ≈25 platform in-band; band employment bounded 14,950–26,365 (size-class counts × class limits, constrained to the measured metro total of 31,980); × $241,879 | Subtraction; multiplication of bounds | Bounds, never point estimates. The width is almost entirely the 22 platform locations with no published headcount. "Unmatched" is register-dependent, and Apex's unresolved position overstates the residual. |
+| **4.3% / 8.5% / 22.6%** — platform-owned share of the DFW acquisition band at three band cuts (Part XI) | ≈26 platform-owned 238220 establishments (owner-published rosters, licence-registry confirmed); **598** establishments at 10–249 employees, **307** at 20–249 and **115** at 50–249 (CBP 2023 size classes: 291 + 192 + 66 + 49; 192 + 66 + 49; 66 + 49) | Division at each band cut: 26 ÷ 598 = 4.3%; 26 ÷ 307 = 8.5%; 26 ÷ 115 = 22.6% | The numerator is a named-location count, not an employee-banded one; Baker Brothers (400 employees) sits above the band, moving the in-band count to ≈25 and the ends fractionally. The stated shares are carried as computed. Four published headcounts, all above 50, place the platform locations in the 50–249 band, where the share is 22.6%. **Band labels corrected 2026-08-12 (A.0.7): the counts and the shares never changed; 8.5% and 22.6% were published against band names one step too low.** |
+| **≈280 establishments (20–249 band) / roughly $2–6B (10–249 band)** — the unmatched DFW residual (Part XI) | 307 in the 20–249 band − ≈25 platform in-band; band employment bounded 14,950–26,365 (size-class counts × class limits, constrained to the measured metro total of 31,980); × $241,879 | Subtraction; multiplication of bounds | Bounds, never point estimates. The width is almost entirely the 22 platform locations with no published headcount. "Unmatched" is register-dependent, and Apex's unresolved position overstates the residual. **The establishment residual runs on the 20–249 band and the dollar residual on the full 10–249 band of 598 establishments — different denominators, corrected 2026-08-12 per A.0.7, never to be paired in one sentence.** |
 
 ## What we don't know yet
 
 - **What Apex Service Partners owns in Dallas–Fort Worth.** The company publishes no brand roster, and no Apex operating brand in Texas could be identified from any public source, including the state licence file. It is the largest single hole in the DFW subtraction, and the unmatched residual in §11.4 is overstated by whatever it holds.
-- **Employee bands for 22 of the 26 platform-owned DFW locations.** Branch-level headcount is not published for privately held trade businesses. That one input is the difference between a platform share of 8.5–22.6% and a platform share.
+- **Employee bands for 22 of the 26 platform-owned DFW locations.** Branch-level headcount is not published for privately held trade businesses. That one input is the difference between a platform share of 8.5% to 22.6%, drawn between the 20–249 and 50–249 cuts, and a platform share.
 - **Service versus new-construction revenue inside NAICS 238220.** No public source separates them, and the recurring-revenue thesis lives in that split.
 - **How many of the 37 DFW franchise businesses share an owner.** A multi-unit franchisee is a different acquisition from a single-unit one, and the franchisor directories do not say.
 - **Whether the Apex and Champions transactions have closed.** Neither has been confirmed. Both are carried here at their announced valuations, and both are anonymous-source.
@@ -1283,6 +1392,6 @@ Figures below appear in no source and are arithmetic on figures that do. Each st
 
 ---
 
-*Effective 3 August 2026. Consolidated master for smbX.ai home-services vertical strategy, built from three commissioned research workstreams with four correction passes applied — 2026-07-26 (A.0.1, TAM reconciliation), 2026-07-27 (A.0.2, primary-source verification), 2026-07-28 (A.0.3, full live-source re-verification across eight domains), 2026-08-03 (A.0.4, the Dallas–Fort Worth cut, Part XI).*
+*Effective 3 August 2026. Consolidated master for smbX.ai home-services vertical strategy, built from three commissioned research workstreams with six correction passes applied — 2026-07-26 (A.0.1, TAM reconciliation), 2026-07-27 (A.0.2, primary-source verification), 2026-07-28 (A.0.3, full live-source re-verification across eight domains), 2026-08-03 (A.0.4, the Dallas–Fort Worth cut, Part XI), 2026-08-06 (A.0.6, the percentage pass), 2026-08-12 (A.0.7, the DFW size-band labels).*
 
 *This file supersedes all prior home-services market assessments. Platform ownership, brand rosters and refrigerant pricing change monthly in this market; the regulatory position changed the day before this document issued. Re-verify at engagement time.*

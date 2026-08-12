@@ -6,9 +6,9 @@ image: hs-cover.jpg
 imagePos: 50% 50%
 footer: Dallas–Fort Worth Home Services — Metro Market Map
 eyebrow: METRO MARKET MAP
-stat: 307 | The buyable middle — establishments at 10–249 employees
-stat: 18 | Platform parents holding verified DFW ground
-stat: ~280 | In-band establishments matched to no consolidator
+stat: 2,412 | Plumbing-and-HVAC establishments in the DFW MSA
+stat: 598 | The acquirable universe at 10–249 employees
+stat: 4.3% | Platform share of the 10–249 band
 accent: Four metros hold | hs-accent-regionality.jpg | 50% 45%
 accent: The size distribution is the market | hs-accent-sizing.jpg | 50% 45%
 accent: Measured at the state | hs-accent-aggregators.jpg | 50% 45%
@@ -18,7 +18,7 @@ accent: The empty side | hs-accent-equipment.jpg | 50% 45%
 -->
 # Dallas–Fort Worth Home Services
 
-## A Buy-Side Assessment for Acquirers · Published 3 August 2026
+## A Buy-Side Assessment for Acquirers · Published 12 August 2026
 
 **HVAC · plumbing · electrical · roofing · pest control · garage doors.**
 
@@ -26,10 +26,11 @@ accent: The empty side | hs-accent-equipment.jpg | 50% 45%
 
 ## EXECUTIVE SUMMARY
 
-- **The acquirable universe is roughly 300 businesses, not 2,400.** Dallas–Fort
+- **The acquirable universe is 598 businesses, not 2,400.** Dallas–Fort
   Worth counts 2,412 plumbing-and-HVAC establishments (Census CBP, 2023) — and
   1,797 of them, 74.5%, have fewer than ten employees. The buyable middle is
-  307 establishments of 10–249 employees.
+  598 establishments of 10–249 employees, 307 of them at 20–249 and 115 at
+  50–249.
 - **The licence registry overstates the market roughly 2x.** TDLR licenses
   4,665 HVAC contracting firms in these eleven counties; only the CBP employer
   count describes businesses with payroll. Most licensed contractors have no
@@ -38,14 +39,18 @@ accent: The empty side | hs-accent-equipment.jpg | 50% 45%
   eight commercial-mechanical — and the map moved inside 2026: United Building
   Solutions entered in January, and Chemed re-acquired Roto-Rooter's Fort Worth
   territory in March.
-- **Platform share of the acquisition band is 8.5% to 22.6%,** depending on
-  where the band is drawn, and likely near the top of that range. What is left:
-  roughly 280 establishments carrying an estimated $2–6B of annual work,
-  matched to no consolidator.
+- **Platform share of the acquisition band is 4.3% drawn at 10–249
+  employees** — 8.5% at 20–249 and 22.6% at 50–249, with the published
+  headcounts placing the truth near the top of that narrower range. What is
+  left: roughly 280 establishments in the 20–249 band matched to no
+  consolidator. Separately, and on the full 10–249 band, an estimated $2–6B of
+  annual work sits outside platform ownership.
 - **Platform density runs exactly with recurring-revenue quality.** Pest
   control: 9 parents holding ≈40 locations — 10.1% of every establishment in
-  the trade. HVAC and plumbing: 1.1%. Residential-first electrical: none found.
-  The consolidators' collective behaviour maps the annuity, trade by trade.
+  the trade. HVAC and plumbing: 1.1%. Residential electrical service: no
+  dedicated consolidator — one multi-trade recapitalization is the nearest
+  exception. The consolidators' collective behaviour maps the annuity, trade by
+  trade.
 - **No primary source publishes metro revenue for construction trades.** Every
   "DFW HVAC market is worth $X billion" figure in circulation is derived,
   whether its publisher says so or not. The derived figures in this report say
@@ -113,8 +118,11 @@ how small almost everyone is:
 layer of management, no acquirable operating platform. They are the market's
 long tail and its labour pool, but they are not its acquisition targets.
 
-The buyable middle — 10 to 249 employees — is 307 establishments, of which 115
-have twenty or more. The top of the market is seven establishments of 250-plus
+The buyable middle — 10 to 249 employees — is 598 establishments, of which 307
+have twenty or more and 115 have fifty or more. (Band labels corrected
+2026-08-12 — see A.0.7. The counts are the Census cells above and never
+changed; the names attached to them did.) The top of the market is seven
+establishments of 250-plus
 employees. Metro-wide, 238220 employs 31,980 people on $2.418 billion of annual
 payroll, averaging 13.3 employees per establishment.
 
@@ -232,35 +240,37 @@ banding of this market owes it a line of its own.
 
 ## The platform share, honestly bounded
 
-Of the 307 establishments in the 10–249 employee band, approximately 25 are
+Of the 598 establishments in the 10–249 employee band, approximately 25 are
 platform-owned. Baker Brothers — 400 employees by its employer-reported count —
 sits above the band entirely, one of the metro's seven establishments of
 250-plus employees, and the first named placement of a platform location in a
 specific Census size class.
 
-Drawn at 10–249 employees, the platform share of the band is 8.5% of
-establishments. Drawn at 20–249, it is 22.6%. The range cannot be narrowed
-from public sources, because branch-level headcount is not published for
-privately held trade businesses — the four platform locations whose headcounts
-are published (Baker Brothers 400, Berkeys 195, Lex 50+ technicians, Dallas
-Mechanical Group more than 150) all exceed fifty employees, which is why the
-truth likely sits near the top of the range.
+Drawn at 10–249 employees, the platform share of the band is 4.3% of
+establishments. Drawn at 20–249 it is 8.5%, and at 50–249, 22.6%. That upper
+range cannot be narrowed from public sources, because branch-level headcount is
+not published for privately held trade businesses — the four platform locations
+whose headcounts are published (Baker Brothers 400, Berkeys 195, Lex 50+
+technicians, Dallas Mechanical Group more than 150) all exceed fifty employees,
+which is why the truth likely sits near the top of it.
 
 ## What is left
 
-Roughly 280 establishments in the 10–249 band match no consolidator on a
-register of sixty verified parents. The band as a whole carries an estimated
-$3.6B – $6.4B of annual work; the unmatched residual, roughly $2–6B — bounds
-computed from the size-class structure, not point estimates, and registered in
-the Derivations appendix.
+Roughly 280 establishments in the 20–249 band match no consolidator on a
+register of sixty verified parents. Separately, and on the full 10–249 band,
+that band as a whole carries an estimated $3.6B – $6.4B of annual work and the
+unmatched residual is roughly $2–6B — bounds computed from the size-class
+structure, not point estimates, and registered in the Derivations appendix. The
+establishment residual and the dollar residual run on different bands and must
+not be paired in one sentence (A.0.7).
 
 Two qualifications keep those figures honest. "Unmatched" means not found on
 the register — a business whose ownership changed without public record would
 still read as independent. And the residual is overstated by the Apex position
 described in Part IV. Neither qualification changes the read: this is not a
 closed metro, and it is not an open one. It is tuck-in territory, with the
-tuck-in ground now measured for the first time — roughly 280 businesses and
-several billion dollars of annual work.
+tuck-in ground now measured for the first time — roughly 280 businesses in the
+20–249 band, and several billion dollars of annual work across the 10–249 band.
 
 ---
 
@@ -307,17 +317,29 @@ storm-restoration revenue is insurance-event-driven and episodic. The annuity
 logic that underwrites HVAC service agreements does not transfer to a hail
 market by default.
 
-## The empty side: residential electrical
+## The empty side: residential electrical service
 
-Electrical is the inverse of pest. A larger trade than roofing by
-establishments (1,634) and nearly HVAC's equal in payroll ($2.149B), it shows
-no residential-electrical-first consolidator in the metro at all — only
-commercial operators (IES Holdings, Facility Solutions Group, Rosendin, and
-Comfort Systems' Walker Engineering) plus twelve franchise locations. Whether
-that is an opening or a warning turns on a question the data does not answer:
-whether residential electrical service can carry the recurring-revenue annuity
-that has pulled consolidators into every trade where it exists. The platforms'
-absence may itself be the answer.
+Electrical is the inverse of pest — with a precision worth stating carefully. A
+larger trade than roofing by establishments (1,634) and nearly HVAC's equal in
+payroll ($2.149B), it has **no dedicated residential service-and-repair
+electrical consolidator** in the metro. What does exist, named exactly: the
+multi-trade platforms sell electrical as a service line (Wrench Group's Baker
+Brothers and Berkeys); one residential multi-trade operator with an
+electrical-led brand — **Team Enoch** — was recapitalized by McKinney Capital, a
+field-services family investment firm, in March 2022 and has since expanded to
+Austin and Houston, the nearest thing this segment has to a platform; the
+new-construction channel is consolidated by **IES Residential**, a public
+holding company's residential-electrical division with a Rowlett branch; and
+the commercial side belongs to large operators (Facility Solutions Group,
+Rosendin, Comfort Systems' Walker Engineering) plus twelve franchise locations.
+
+The segment is not empty of scale — its largest electrical-led residential
+operator is a substantial family-held multi-brand group, and that is the point:
+**the size exists; the institutional capital, with one exception, does not.**
+Whether that is an opening or a warning turns on a question the data does not
+answer: whether residential electrical service can carry the recurring-revenue
+annuity that has pulled consolidators into every trade where it exists. One
+recapitalization in four years may itself be the answer.
 
 ---
 
@@ -326,7 +348,7 @@ absence may itself be the answer.
 ## Where the openings are
 
 Three, in order of conviction. First, HVAC-and-plumbing tuck-ins: roughly 280
-unmatched establishments in the buyable band, in the largest home-services
+unmatched establishments in the 20–249 band, in the largest home-services
 metro in Texas, where every major platform has already accepted that entry is
 by tuck-in. An acquirer with an anchor here is buying in a market whose
 consolidation logic is proven and whose remaining inventory is now measured.
@@ -371,6 +393,44 @@ releases of every platform named.
 | Platforms holding DFW ground | 4 named | 18 verified | Parent-by-parent check of 34 register entries against their own rosters, 2026-08-01 |
 | TDLR county counts | included expired licences | current-only | The bulk file carries expiry dates; the mirror API does not filter |
 | IES Holdings listing | NYSE | NASDAQ | Issuer listing checked, 2026-08-03 |
+| Team Enoch | independent (own-site evidence) | recapitalized by McKinney Capital, March 2022 | The recap release refutes the site's family-owned copy — found on the adversarial re-check the principal's challenge triggered |
+
+## A.0.7 Corrections applied 2026-08-12 — the DFW size-band labels
+
+The research pass read the Census CBP 2023 county file correctly and summed the
+published size classes correctly. It then attached the wrong band name to two of
+the sums, and this report inherited the names. The published cells for the
+eleven-county DFW MSA, NAICS 238220, are **10–19 = 291 · 20–49 = 192 · 50–99 =
+66 · 100–249 = 49 · 250–499 = 7**. They are verified and unchanged.
+
+| Figure | Was | Now | Why |
+|---|---|---|---|
+| 598 establishments | no row — the genuine 10–249 band was never published | the 10–249 band | 291 + 192 + 66 + 49 |
+| 307 establishments | labelled 10–249 | the 20–249 band | 192 + 66 + 49 |
+| 115 establishments | labelled 20–249 | the 50–249 band | 66 + 49 |
+| Platform share of the 10–249 band | 8.5% | **4.3%** | 26 ÷ 598 |
+| Platform share of the 20–249 band | published as the 10–249 share | **8.5%** | 26 ÷ 307 |
+| Platform share of the 50–249 band | published as the 20–249 share | **22.6%** | 26 ÷ 115 |
+| Establishment share of the metro, 10–249 | no row | **24.8%** | 598 ÷ 2,412 |
+| Establishment share of the metro, 20–249 | 12.7% at 10–249 | **12.7%** | 307 ÷ 2,412 |
+| Establishment share of the metro, 50–249 | 4.8% at 20–249 | **4.8%** | 115 ÷ 2,412 |
+
+**The counts never changed.** Nothing was re-measured, no source was re-read, no
+figure was replaced. Both band names sat one step below the count carrying them,
+so every share computed from those counts is also a correct number that was
+carried under a wrong band name. The consequence that matters: the platform
+share of a genuine 10–249 band is 4.3%, not 8.5%. The published 8.5% to 22.6%
+range is a real range — it is the 20–249 to 50–249 range. Drawn across the whole
+band a tuck-in buyer would actually shop, platform ownership is roughly one
+establishment in twenty-three, and DFW is materially less picked over at the
+bottom of the band than this report said on publication.
+
+**One pairing that must not be restored.** The ≈280 unmatched establishments
+figure is 307 − ≈25 and therefore describes the **20–249** band. The $3.6B –
+$6.4B band dollars and the $2–6B dollar residual were computed from employment
+bounds built on the *full* 291 + 192 + 66 + 49 set and are correctly labelled
+**10–249**. Part V previously ran the two through one sentence. They are
+different denominators and the sentence has been split.
 
 ## A.1 Reconciled data conflicts
 
@@ -442,9 +502,9 @@ change monthly in this market; the 2026 entries in Part IV are the proof. The
 CBP vintage is 2023 and refreshes annually; the Economic Census is quinquennial
 with 2022 the current base.
 
-**The correction record.** Corrections are recorded in A.0.1 above rather than
-quietly absorbed. Each entry states what the figure was, what it became, and
-the named source that overturned it.
+**The correction record.** Corrections are recorded in A.0.1 and A.0.7 above
+rather than quietly absorbed. Each entry states what the figure was, what it
+became, and the named source that overturned it.
 
 ## Sources
 
@@ -464,6 +524,149 @@ the named source that overturned it.
 - Anticimex Texas entry, 2025-06-16 — https://www.anticimex.com/press-releases/anticimex-acquires-safehaven-pest-control-abby-s-pest-and-termite-services-and-metro-guard/
 - Platform rosters and location pages as named per figure in the body.
 
+### The master's source register, carried whole
+
+This report is a metro cut of the master, and it carries the master's URL
+register entire rather than a subset. A subset would quietly break the trail
+for anything a reader wants to follow upstream, and the two registers would
+stop reconciling. Not every entry below supports a figure in this document;
+each supports a figure in the master this document is derived from.
+
+- https://data.census.gov/table/ECNBASIC2022.EC2223BASIC
+- https://www.census.gov/data/tables/2022/econ/economic-census/naics-sector-23.html
+- https://www.bls.gov/ooh/installation-maintenance-and-repair/heating-air-conditioning-and-refrigeration-mechanics-and-installers.htm
+- https://www.bls.gov/ooh/construction-and-extraction/plumbers-pipefitters-and-steamfitters.htm
+- https://www.bls.gov/news.release/ocwage.nr0.htm
+- https://www.bls.gov/news.release/eci.t05.htm
+- https://fred.stlouisfed.org/series/WPU1054
+- https://markets.newyorkfed.org/api/rates/secured/sofr/search.json
+- https://www.federalreserve.gov/monetarypolicy/fomcminutes20260617.htm
+- https://www.federalregister.gov/documents/2026/05/26/2026-10387/phasedown-of-hydrofluorocarbons-reconsideration-of-certain-regulatory-requirements-promulgated-under
+- https://www.spglobal.com/market-intelligence/en/news-insights/articles/2024/7/private-equity-dry-powder-growth-accelerated-in-h1-2024-82385822
+- https://www.bain.com/insights/outlook-gaining-traction-global-private-equity-report-2026/
+- https://www.fsb.org/2026/05/fsb-warns-on-private-credit-vulnerabilities/
+- https://www.capstonepartners.com/insights/article-hvac-services-ma-update/
+- https://www.capstonepartners.com/insights/article-hvac-equipment-sector-ma-update/
+- https://www.capstonepartners.com/insights/report-capstone-partners-middle-market-mergers-and-acquisitions-valuations-index/
+- https://www.acg.org/news-trends/news/gf-data-reports-show-stronger-financing-markets-fueled-ma-gains-q1
+- https://www.axial.net/forum/hvac-private-equity/
+- https://grata.com/resources/hvac-pe-playbook-2025
+- https://www.mckinsey.com/industries/private-capital/our-insights/value-plays-in-us-home-services-where-opportunity-meets-reliability
+- https://www.blackstone.com/news/press/blackstone-announces-agreement-to-acquire-champions-group/
+- https://homepros.news/goldman-sachs-private-equity-arm-to-acquire-sila-services/
+- https://homepros.news/redwood-services-to-land-majority-investment-in-1-1-billion-deal/
+- https://homepros.news/redwood-services-buys-five-contractor-group-for-220-million/
+- https://www.businesswire.com/news/home/20250508241827/en/Redwood-Services-Announces-Strategic-Investment-from-Altas-Partners
+- https://finance.yahoo.com/markets/stocks/articles/pe-hopes-garage-door-roll-193930270.html
+- https://news.bloomberglaw.com/private-equity/bain-lines-up-3-1-billion-private-loan-for-service-logic-buy
+- https://www.baincapital.com/news/bain-capital-completes-acquisition-service-logic
+- https://www.pehub.com/exclusive-msouth-to-test-buyout-market-for-usa-hometown-experts-sources-say/
+- https://www.ibisworld.com/united-states/market-size/heating-air-conditioning-contractors/1945/
+- https://www.ibisworld.com/united-states/market-size/plumbers/1946/
+- https://www.ibisworld.com/united-states/market-size/roofing-contractors/198/
+- https://www.ibisworld.com/united-states/market-size/pest-control/1495/
+- https://www.ibisworld.com/united-states/industry/electricians/189/
+- https://www.arizton.com/market-reports/us-electrical-contractors-market
+- https://fmicorp.com/insights/thought-leadership/private-equity-sector-brief-overhead-garage-door-services
+- https://www.npmapestworld.org/your-business/latest-news/us-pest-control-industry-sustains-steady-growth-with-6-increase-in-2025/
+- https://www.achrnews.com/blogs/17-opinions/post/165373-hardi-on-r-454b-the-crisis-is-over
+- https://www.achrnews.com/articles/166470-epa-faces-new-lawsuits-over-hfc-refrigerant-rule-rollback
+- https://www.achrnews.com/articles/166275-trump-reduces-section-232-tariffs-on-hvac-equipment-to-15
+- https://www.achrnews.com/articles/165859-heat-pump-a-c-shipments-see-20-declines-in-2025
+- https://www.wilmerhale.com/en/insights/client-alerts/20260220-supreme-court-strikes-down-ieepa-tariffs-what-now
+- https://www.millernash.com/firm-news/news/tariffs-in-flux-ieepa-and-section-122-struck-down-section-232-duties-expand
+- https://www.hklaw.com/en/insights/publications/2026/05/epa-finalizes-changes-to-technology-transitions-provisions
+- https://www.nahb.org/blog/2026/05/epa-hvac-refrigerants-r-410a-final-rule
+- https://www.grantthornton.com/insights/alerts/tax/2025/insights/energy-incentives-under-obbba-what-you-need-to-know
+- https://rmi.org/resources/tracking-the-heat-pump-water-heater-market-in-the-united-states/
+- https://gopaschal.com/resources/2026-hvac-price-increases/
+- https://www.pmmag.com/articles/107578-phcp-pvf-price-increases-july-2026
+- https://searchlightdigital.io/what-is-a-good-cost-per-lead-for-hvac-google-ads/
+- https://thedatadriventrades.substack.com/p/google-lsa-benchmarks-june-2026
+- https://www.leadersedge.com/p-c/soft-market-reigned-in-q1-2026
+- https://www.globenewswire.com/news-release/2026/07/16/3328483/0/en/Ivans-Index-Q2-2026-Results-Released.html
+- https://www.getjobber.com/home-service-trends-report/
+- https://www.angi.com/articles/insider-s-price-guide-new-heating-and-cooling-system.htm
+- https://ctacquisitions.com/guides/home-services-ma-multiples-report-2026/
+- https://www.jll.com/en-us/newsroom/critical-skilled-trades-shortage-threatens-economic-losses
+- https://www.globenewswire.com/news-release/2026/03/11/3254093/0/en/LIXIL-Releases-Study-on-the-Economic-Consequences-of-America-s-Skilled-Labor-Shortage-this-World-Plumbing-Day.html
+- https://www.achrnews.com/articles/146238-hvacr-industry-must-work-harder-to-retain-technicians
+- https://nabtu.org/press_releases/the-u-s-does-not-have-a-skilled-craft-labor-shortage-it-has-a-workforce-planning-crisis/
+- https://www.sec.gov/Archives/edgar/data/84839/000008483926000008/rol-20251231.htm
+- https://www.prnewswire.com/news-releases/rollins-inc-reports-second-quarter-2026-financial-results-302832503.html
+- https://www.rentokil-initial.com/~/media/Files/R/Rentokil/documents/2025-prelims-statement.pdf
+- https://www.sec.gov/Archives/edgar/data/1035983/000110465926017530/fix-20251231x10k.htm
+- https://www.businesswire.com/news/home/20260723227439/en/Comfort-Systems-USA-Reports-Second-Quarter-2026-Results
+- https://www.businesswire.com/news/home/20260429893569/en/EMCOR-Group-Inc.-Reports-First-Quarter-2026-Results
+- https://www.businesswire.com/news/home/20260226042868/en/Frontdoor-Announces-Record-Full-Year-2025-Financial-Results
+- https://www.bain.com/insights/outlook-is-a-recovery-starting-to-take-shape-global-private-equity-report-2025/
+- https://www.abfjournal.com/1-2t-in-pe-dry-powder-why-deployment-pressure-is-reshaping-middle-market-deal-terms/
+- https://api.census.gov/data/2022/ecnbasic/variables/RCPTOT.json
+- https://vantainsights.com/reports/238220-plumbing-heating-air-conditioning
+- https://www.servicetitan.com/blog/plumbing-industry-statistics
+- https://www.sahmcapital.com/news/content/update-1-apex-service-sells-minority-stake-to-apollo-at-10-bln-valuation-source-says-2026-05-28
+- https://www.mdm.com/news/top-distributor-sectors/contractor/hvac-electrical-plumbing-service-platform-apex-nets-2b-investment-from-apollo/
+- https://homepros.news/champions-group-strikes-2-5-billion-blackstone-deal/
+- https://www.tradingview.com/news/reuters.com,2026:newsml_L6N3ZT1HO:0-oak-hill-capital-to-acquire-guild-garage-group-in-800-million-plus-deal-sources-say/
+- https://www.thehardwirenews.com/pe-firms-took-39-of-77-hvac-m-a-deals-through-mid-2026-as-commercial-sector-consolidation-accelerates/
+- https://www.capstonepartners.com/insights/report-hvac-services-market-update/
+- https://www.globenewswire.com/news-release/2026/03/11/3254093/0/en/LIXIL-Releases-Study-on-the-Economic-Consequences-of-America-s-Skilled-Labor-Shortage.html
+- https://www.prnewswire.com/news-releases/rollins-inc-reports-fourth-quarter-and-full-year-2025-financial-results-302685636.html
+- https://www.rentokil-initial.com/~/media/Files/R/Rentokil/documents/2025-prelims-transcript.pdf
+- https://www.bain.com/about/media-center/press-releases/2026/private-equity-resurgence-gathers-steam-as-new-era-challenges-firms-to-enhance-value-creationbain--company-global-pe-report/
+- https://www.bain.com/insights/welcome-to-a-new-era-global-private-equity-report-2026/
+- https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+- https://gfdata.com/year-end-ma-volume-hits-multi-year-low-as-market-navigates-choppy-conditions/
+- https://gfdata.com/mid-year-ma-insight-volume-soft-multiples-stable-back-half-hopeful/
+- https://ctacquisitions.com/answers/why-pe-buying-hvac-companies/
+- https://www.capstonepartners.com/insights/middle-market-leveraged-finance-report/
+- https://www.census.gov/programs-surveys/cbp.html
+- https://www.census.gov/programs-surveys/susb/data/tables.html
+- https://homepros.news/apex-service-partners-to-receive-minority-investment-at-10-billion-valuation/
+- https://www.onetonline.org/link/summary/49-9021.00
+- https://www.onetonline.org/link/summary/47-2152.00
+- https://www.achrnews.com/articles/153792-navigating-the-hvac-technician-shortage-by-connecting-with-techs
+- https://www.refrigerantdepot.com/product/r-454b/
+- https://www.pickhvac.com/ac-refrigerant-freon-cost-per-pound-r22-r410a-r32-r454b/
+- https://www.callmattioni.com/blog/t-why-is-refrigerant-so-expensive/
+- https://www.facilitiesnews.com/news/tariffs-hvac-equipment-costs-multi-site-capital-planning
+- https://money.com/whats-causing-hvac-prices-to-rise-in-2026-and-how-much-more-you-should-expect-to-pay/
+- https://servicenation.com/resources/seer2-hvac-efficiency-standards
+- https://hvacpproducts.com/2026/07/ahri-releases-latest-equipment-shipment-data-2/
+- https://www.wtwco.com/en-us/insights/2026/05/insurance-marketplace-realities-2026-spring-update
+- https://homepros.news/2024-hvac-industry-financing-providers/
+- https://hvacprojectcost.com/hvac-financing-options/
+- https://www.synchrony.com/contenthub/newsroom/synchrony-completes-acquisition-of-ally-lending.html
+- https://modernize.com/hvac/cost-calculator
+- https://www.simprogroup.com/blog/plumbing-business-profit-margin-guide
+- https://www.prophetaccounting.com/blog/hvac-revenue-per-technician
+- https://www.tradesly.ai/blog/revenue-per-technician-benchmarks-guide
+- https://www.sec.gov/Archives/edgar/data/19584/000001958426000002/che-20260225xex99.htm
+- https://www.tdlr.texas.gov/dbproduction2/ltairref.csv
+- https://www.tdlr.texas.gov/media/pdf/ACR%20at%20a%20Glance.pdf
+- https://www.tectaamerica.com
+- https://nationsroof.com
+- https://www.aeainvestors.com/aea-acquires-nations-roof/
+- https://www.prnewswire.com/news-releases/centre-partners-completes-acquisition-of-quick-roofing-302028590.html
+- https://www.prnewswire.com/news-releases/leaf-home-announces-acquisition-of-erie-home-uniting-two-leading-residential-services-providers-302549233.html
+- https://pestdefense.com
+- https://www.terminix.com/exterminators/tx/
+- https://www.masseyservices.com/locations/
+- https://fsg.com/locations/
+- https://www.iescomm.com/locations/
+- https://www.rosendin.com/contact/office-locations/
+- https://www.businesswire.com/news/home/20260528216487/en/
+- https://dallasinnovates.com/dallas-based-apex-service-partners-gets-minority-investment-from-apollo-funds/
+- https://alpineinvestors.com/update/apex-and-alpine-announce-strategic-minority-investment-from-apollo-funds-in-apex/
+- https://www.prnewswire.com/news-releases/imperial-capital-announces-the-sale-of-frontier-service-partners-to-apex-service-partners-302042748.html
+- https://apexservicepartners.com/
+- https://www.aireserv.com/locations/texas/
+- https://www.mrrooter.com/locations/texas/
+- https://www.mrelectric.com/locations/texas/
+- https://www.onehourheatandair.com/locations/texas/
+- https://www.benjaminfranklinplumbing.com/locations/texas/
+- https://www.mistersparky.com/locations/texas/
+
 ## Derivations
 
 Figures below appear in no source and are arithmetic on figures that do. Each
@@ -474,26 +677,28 @@ states its inputs, its arithmetic and its assumption.
 | ≈$8.356B — DFW 238220 receipts | Texas receipts $25.418B (2022 Economic Census); DFW share of Texas 238220 payroll 32.87% (CBP 2023) | 0.3287 × $25.418B | DFW's receipts-per-payroll ratio matches the Texas average — unverifiable, as no sub-state construction receipts exist. Employment and establishment bases give $7.735B and $6.882B; the 21% spread is the assumption's size. |
 | ≈$2.9B HVAC / ≈$2.7B plumbing | the above × the Texas kind-of-business mix (34.3% / 32.8%) | multiplication | Adds a second assumption: DFW's trade mix matches the state's. |
 | $241,879 receipts per employee | $25.418B ÷ 105,086 | division | Mixed vintages, one year apart. |
-| 8.5% – 22.6% platform share of the band | ≈25 in-band platform locations; 307 establishments at 10–249 and 115 at 20–249 | division at each cut | The numerator is a location count, not employee-banded. Published headcounts, all above fifty, place the likely truth near the top. |
-| ≈280 establishments / roughly $2–6B residual | 307 − ≈25; band employment bounded from the size-class structure × $241,879 | subtraction; bounds | Register-dependent; Apex unresolved; bounds, never point estimates. |
+| 4.3% / 8.5% / 22.6% platform share of the band at three cuts | ≈25 in-band platform locations; 598 establishments at 10–249, 307 at 20–249 and 115 at 50–249 | division at each cut | The numerator is a location count, not employee-banded. Published headcounts, all above fifty, place the likely truth near the top. Band labels corrected 2026-08-12 (A.0.7): the counts and the shares never changed; 8.5% and 22.6% were published against band names one step too low. |
+| ≈280 establishments (20–249 band) / roughly $2–6B (10–249 band) residual | 307 in the 20–249 band − ≈25; 10–249 band employment bounded from the size-class structure × $241,879 | subtraction; bounds | Register-dependent; Apex unresolved; bounds, never point estimates. Different denominators, corrected 2026-08-12 per A.0.7 — never to be paired in one sentence. |
 | ≈$6.880B electrical / ≈$2.759B roofing / ≈$0.845B finish carpentry | state receipts × DFW payroll shares (29.99% / 39.58% / 30.62%) | multiplication | Same family as above. Roofing's three bases agree within 3% — the tightest allocation in the study. |
 
 ## What we don't know yet
 
 - **What Apex owns in this metro.** The largest single unknown in the report.
 - **Employee counts for most platform locations** — the input that would turn
-  the 8.5–22.6% range into a figure.
+  the 8.5% to 22.6% range, drawn between the 20–249 and 50–249 cuts, into a
+  figure.
 - **Service versus new construction inside 238220** — confirmed unpublished in
   every public geography (the last candidate Census table splits by location of
   work, not work type). Permanently an assumption, and stated as one.
 - **The roofing replacement-versus-storm mix** — the number that decides
   whether the overweight trade is an annuity or an episode.
+
 - **Who owns what in Houston, Austin and San Antonio.** The ownership work in
   this report covers Dallas–Fort Worth only; the other metros are measured in
   Part I and unmapped beyond it.
 
 ---
 
-*Published 3 August 2026. The first metro-depth cut of the smbX home-services
+*Published 12 August 2026. The first metro-depth cut of the smbX home-services
 research; the statewide assessment remains the companion volume. Platform
 ownership changes monthly in this market — re-verify at engagement time.*

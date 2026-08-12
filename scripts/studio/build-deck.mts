@@ -23,6 +23,7 @@
  */
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
+import { writeBuildRecord } from './build-record.mts';
 import { pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(new URL('../..', import.meta.url).pathname);
@@ -135,6 +136,10 @@ try {
 } finally { await page.close().catch(() => {}); }
 
 if (deck.caption) writeFileSync(path.join(outDir, `${deck.slug}-caption.txt`), deck.caption.trim() + '\n');
+writeBuildRecord(outDir, 'build-deck.mts', [
+  { label: 'spec', file: specPath },
+  { label: 'master', file: path.join(path.dirname(specPath), '..', 'master.md') },
+]);
 console.log(`✓ ${deck.slug}: ${html.length} pages → ${outDir}/${deck.slug}.pdf${deck.caption ? ' (+ caption)' : ''}`);
 console.log(`  media: ${mediaDir || './media, ./assets (local folders)'}  ·  collateral: ${outDir}`);
 process.exit(0);

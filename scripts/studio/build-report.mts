@@ -19,6 +19,7 @@
  */
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
+import { writeBuildRecord } from './build-record.mts';
 import { pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(new URL('../..', import.meta.url).pathname);
@@ -382,6 +383,10 @@ try {
   writeFileSync(path.join(outDir, `${slug}.pdf`), buf);
   const kb = (buf.length / 1024).toFixed(0);
   console.log(`✓ ${slug}.pdf (${kb}KB) → ${outDir}`);
+  writeBuildRecord(outDir, 'build-report.mts', [
+    { label: 'source', file: mdPath },
+    { label: 'master', file: path.join(path.dirname(mdPath), '..', 'master.md') },
+  ]);
 
   /* THE ASSERTION. Prose in a design doc does not stop a regression; an exit
      code does. Both counts must be zero — see the law above. */

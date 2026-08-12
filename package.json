@@ -48,7 +48,11 @@
     "test:fulleval": "npx tsx house/__tests__/fullEvaluation.test.mts",
     "seed:demo-user": "node scripts/seed-demo-user-data.mjs",
     "design:extract": "node scripts/extract-design-tokens.mjs",
-    "preview:build": "vite build --config preview.vite.config.mts"
+    "preview:build": "vite build --config preview.vite.config.mts",
+    "studio:preflight": "npx tsx scripts/studio/preflight.mts",
+    "studio:crossfoot": "npx tsx scripts/studio/crossfoot.mts",
+    "studio:quotes": "npx tsx scripts/studio/quote-check.mts",
+    "studio:drift": "npx tsx scripts/studio/drift-check.mts --studio ~/Documents/smbx-studio"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
