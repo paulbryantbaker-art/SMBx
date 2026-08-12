@@ -106,8 +106,8 @@ export default function ReportsIndex() {
           <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', right: '7%', top: 80, width: 130, height: 130, backgroundImage: 'radial-gradient(rgba(10,122,88,.2) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
           {/* THE RING, ON RESEARCH TOO (2026-08-09, Paul marked the empty
               block right of the masthead). Same instrument as the landing
-              hero — the spinning layer carries a chip and `.ca-chip-level`
-              runs the rotation backwards inside it so the word stays level.
+              hero — since 2026-08-12 that means the build-hold-dissolve
+              construction loop with a typed chip, not a spin.
               Desktop only: it is `.ca-orbit-hero`, which carta.css hides
               below 1025, where this column collapses under the copy and a
               280px ring would sit on top of the filter row.
@@ -199,12 +199,17 @@ export default function ReportsIndex() {
                     >
                       Read the assessment
                     </Link>
+                    {/* Past two hours the unit flips: "197 MIN" is honest and
+                        still reads odd on a card next to "18 MIN" siblings
+                        (2026-08-12 polish review) — a three-hour document
+                        says so in hours, and the word count stays as the
+                        precise figure. */}
                     <span style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.08em', color: '#7C8187' }}>
-                      {r.summary.minutes} MIN · {r.summary.words.toLocaleString()} WORDS · PDF AVAILABLE
+                      {r.summary.minutes >= 120 ? `~${(r.summary.minutes / 60).toFixed(1).replace(/\.0$/, '')} HR` : `${r.summary.minutes} MIN`} · {r.summary.words.toLocaleString()} WORDS · PDF AVAILABLE
                     </span>
                   </div>
                 </div>
-                <div style={{ position: 'relative', borderLeft: '1px solid #16181A', minHeight: 280, background: '#131512', display: 'grid', placeItems: 'center', padding: 24, overflow: 'hidden' }}>
+                <div style={{ position: 'relative', borderLeft: '1px solid #16181A', minHeight: 280, background: '#1A1B19', display: 'grid', placeItems: 'center', padding: 24, overflow: 'hidden' }}>
                   <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.14) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
                   {r.ogImage && (
                     <div
@@ -234,7 +239,7 @@ export default function ReportsIndex() {
         </section>
 
         {/* ══ CTA — dark band ══ */}
-        <section id="cta" className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(52px, 9vw, 160px)', position: 'relative', overflow: 'hidden' }}>
+        <section id="cta" className="ca-dark" style={{ background: '#1A1B19', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(52px, 9vw, 160px)', position: 'relative', overflow: 'hidden' }}>
           <div aria-hidden="true" data-plx="0.025" style={{ position: 'absolute', right: '6%', bottom: 30, width: 260, height: 150, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 840, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
             <h2 data-rv style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(24px, 3.6vw, 58px)', lineHeight: 1.1, letterSpacing: '-0.014em' }}>Want this run on your lane?</h2>

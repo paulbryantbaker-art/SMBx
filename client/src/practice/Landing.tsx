@@ -136,7 +136,7 @@ const WHY: { nm: string; bd: string; more: string; xp: React.ReactNode }[] = [
 
 /* ── How it works — the seven phases (reference renderVals, verbatim) ── */
 const PHASES = [
-  { ph: 'Thesis', g: 'SMBXCORPDEV', t: 'We turn "I want to buy something" into a plan you can act on.', bd: 'We turn "I want to buy something" into a plan you can act on — the sector, size, and economics worth your time, and the deal-breakers that aren’t. If the thing you’re chasing isn’t buyable in today’s market, we’ll say so early, and point you somewhere better.' },
+  { ph: 'Thesis', g: 'SMBXCORPDEV', t: 'We turn "I want to buy something" into a plan you can act on.', bd: 'The sector, size, and economics worth your time — and the deal-breakers that aren’t. If the thing you’re chasing isn’t buyable in today’s market, we’ll say so early, and point you somewhere better.' },
   { ph: 'Sourcing', g: 'SMBXCORPDEV', t: 'We find the owners who aren’t looking to sell.', bd: 'We map the market, narrow it to the companies worth a call, and reach them directly and quietly, under your name. Most of the deals we work were never listed anywhere.' },
   { ph: 'Evaluation', g: 'SMBXCORPDEV', t: 'We tell you what a business is really worth, and whether to walk.', bd: 'We rebuild the financials, test the add-backs the seller’s advisor put in, and find the things that don’t show up in a pitch — customer concentration, owner dependence, the maintenance nobody mentioned.' },
   { ph: 'Structure & offer', g: 'SMBXCORPDEV', t: 'We shape the deal and take it to the seller.', bd: 'Price is one piece of it; so are seller notes, earnouts, rollover, and escrows. We build the financing a lender will actually back, write the LOI, and run the negotiation for you.' },
@@ -265,7 +265,7 @@ function ProofBand() {
   // express "smaller in a rail, larger in a 2-up".
   const num = { fontFamily: SERIF, fontWeight: 550, lineHeight: 1, letterSpacing: '-0.02em' } as const;
   return (
-    <section id="proof" className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px) clamp(62px, 10vw, 180px)' }}>
+    <section id="proof" className="ca-dark" style={{ background: '#1A1B19', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px) clamp(62px, 10vw, 180px)' }}>
       <div style={{ maxWidth: 1360, margin: '0 auto' }}>
         <div data-rv><Kicker dark center>TWO DECADES ON THE BUY SIDE</Kicker></div>
         {/* THE PROOF AS A CHAIN (2026-08-08). Five nodes wired, ending on
@@ -367,7 +367,7 @@ function Engagement() {
   }, []);
   return (
     <>
-          <div data-rv data-trackpanel ref={trackRef} style={{ marginTop: 'clamp(29px, 5vw, 84px)', position: 'relative', background: '#131512', padding: 'clamp(26px, 3vw, 40px)' }}>
+          <div data-rv data-trackpanel ref={trackRef} style={{ marginTop: 'clamp(29px, 5vw, 84px)', position: 'relative', background: '#1A1B19', padding: 'clamp(26px, 3vw, 40px)' }}>
         <Handles color="#F4F5F1" />
         <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.13) 1.1px, transparent 1.1px)', backgroundSize: '16px 16px' }} />
         <div style={{ position: 'relative' }}>
@@ -971,7 +971,7 @@ export default function Landing() {
                     </Fragment>
                   ))}
                 </div>
-                <div style={{ marginTop: 20, background: '#131512', color: '#F4F5F1', padding: '20px 24px', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ marginTop: 20, background: '#1A1B19', color: '#F4F5F1', padding: '20px 24px', position: 'relative', overflow: 'hidden' }}>
                   <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.16) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
                   {/* The giant "9" that used to sit here is now the chain's
                       terminal node — repeating it beside the sentence that
@@ -1055,7 +1055,7 @@ export default function Landing() {
         </section>
 
         {/* ══ PRICING — dark band ══ */}
-        <section id="pricing" className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative' }}>
+        <section id="pricing" className="ca-dark" style={{ background: '#1A1B19', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative' }}>
           <div aria-hidden="true" data-plx="0.02" style={{ position: 'absolute', top: 40, right: '6%', width: 280, height: 190, backgroundImage: 'radial-gradient(rgba(168,240,206,.2) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           {/* HEAD_CTR, not the reference's 840 — same one-line finding as
               #owners. The sub (38em) and the form (520) carry their own caps,
@@ -1147,18 +1147,37 @@ export default function Landing() {
                 remainder, not one per empty cell: separate fillers would draw
                 seams between themselves and read as an unfinished table.
                 Computed from the register so the next lane added can't bring
-                the block back. */}
+                the block back.
+                THE HOLE BECOMES THE CLOSE (2026-08-12, the Carta polish
+                review): on desktop the empty span reads as an unloaded cell,
+                and "Read the full sector theses →" floated loose below the
+                grid — Carta's grids end on a CTA cell, so ours does too. Two
+                siblings, one visible per width (carta.css .ca-lanefill-link):
+                below 1025 the aria-hidden filler renders exactly as audited
+                and the centred link keeps its old spot; at ≥1025 the link
+                takes the cell (same span, same brick-fill class so it arrives
+                with the wall) and the centred copy hides. */}
             {HUNT_LANES.length % 3 !== 0 && (
-              <div aria-hidden="true" data-lanefill className={fillClass(hunt, HUNT_LANES.length).trim()} style={{ gridColumn: `span ${3 - (HUNT_LANES.length % 3)}`, background: '#FCFAF6' }} />
+              <>
+                <div aria-hidden="true" data-lanefill className={fillClass(hunt, HUNT_LANES.length).trim()} style={{ gridColumn: `span ${3 - (HUNT_LANES.length % 3)}`, background: '#FCFAF6' }} />
+                <Link
+                  href="/industries"
+                  className={`ca-lanefill-link ca-h-band${fillClass(hunt, HUNT_LANES.length)}`}
+                  style={{ gridColumn: `span ${3 - (HUNT_LANES.length % 3)}`, background: '#FCFAF6', padding: '22px 24px', fontSize: 16, fontWeight: 600, color: '#0A7A58' }}
+                  onClick={() => trackEvent('practice_sector_clicked', { sector: 'all-theses' })}
+                >
+                  Read the full sector theses →
+                </Link>
+              </>
             )}
           </div>
-          <div data-rv style={{ marginTop: 38, textAlign: 'center' }}>
+          <div data-rv className="ca-theses-below" style={{ marginTop: 38, textAlign: 'center' }}>
             <Link href="/industries" className="ca-h-deepgreen" style={{ fontSize: 16, fontWeight: 600, color: '#0A7A58', borderBottom: '1.5px solid #0A7A58', paddingBottom: 2 }}>Read the full sector theses →</Link>
           </div>
         </section>
 
         {/* ══ WHOSE SIDE — dark band ══ */}
-        <section className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(68px, 11vw, 180px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
+        <section className="ca-dark" style={{ background: '#1A1B19', color: '#F4F5F1', padding: 'clamp(68px, 11vw, 180px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
           {/* The dot field sits BEHIND the headline, not marooned in a corner
               (2026-08-08). It was anchored `left: 5%; bottom: 36` — a 300×170
               block alone in the band's bottom-left, aligned to nothing and
@@ -1175,7 +1194,7 @@ export default function Landing() {
             {/* TWO-TONE (2026-08-08). The accent lands on the TURN, never on the
                 setup — the sentence states a fact, then asks the question that
                 is the whole practice. Mint rather than Deal Green because this
-                is a dark band: green on #131512 is the low-contrast trap the
+                is a dark band: green on #1A1B19 is the low-contrast trap the
                 token table already warns about, and mint is the sanctioned
                 on-dark accent. The device is not new here — the collateral
                 deck builder has drawn hooks this way for months
