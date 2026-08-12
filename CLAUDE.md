@@ -610,6 +610,23 @@ an hour), otherwise the URL plus retrieval date plus the exact locator —
 table, cell, line. "The Census says" with no table ID is the laundered
 citation with better manners.
 
+**An issuer's own disclosure is primary AS TO ITSELF — and never as to its
+market (2026-08-12, Paul: *"yes, we cite what they said"*).** A company's
+10-K, 10-Q, 8-K, earnings call, investor day or regulatory release is the
+best evidence that exists for a fact about that company. No government table
+restates a filer's segment result, so demanding one would mean the strongest
+available source could never satisfy the check — which is how a guard starts
+producing findings that are really just its own blind spot. Otis stating
+Otis's service margin is terminal. So is APi stating APi's revenue mix.
+
+**The boundary is scope, and it is the whole of the difference.** A filer's
+claim about the SIZE OF ITS MARKET is that filer citing someone else, or
+estimating — a claim about the world, not a disclosure about itself, and not
+terminal. No class system can see that distinction: it is the *relabelled
+total* failure pattern from job 2 and it stays a human read.
+`sourcing-protection.mts` prints a note naming the disclosure it accepted and
+saying exactly this, every time it accepts one.
+
 **Run the audit before anything leaves this folder.** It is mechanical, free,
 and it is the whole reason these documents can be defended.
 
