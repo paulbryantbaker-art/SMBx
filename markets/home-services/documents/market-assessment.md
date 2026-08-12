@@ -19,7 +19,7 @@ accent: 8.1 Marketing / customer | band-electrical.jpg | 50% 50%
 accent: 10.1 Where to hunt | band-roofing.jpg | 50% 50%
 -->
 # Home Services: State of the Market
-## A Buy-Side Assessment for Acquirers · Published 3 August 2026
+## A Buy-Side Assessment for Acquirers · Published 12 August 2026
 
 **HVAC · plumbing · electrical · roofing · pest control · garage doors.**
 
@@ -37,7 +37,7 @@ accent: 10.1 Where to hunt | band-roofing.jpg | 50% 50%
 
 - **The regulatory ground moved the day before this report published.** EPA's reconsideration rule took effect **27 July 2026**, removing the installation deadline for R-410A equipment manufactured or imported before 1 January 2025. The 700 GWP limit itself is unchanged, but the near-term forcing function behind the replacement thesis is gone. New York codified the original deadline regardless, and the rule faces D.C. Circuit challenges from 19 state attorneys general, the NRDC and five industry groups — ACCA, AHRI, HARDI, PHCC and the Alliance for Responsible Atmospheric Policy. Underwrite the replacement tailwind as contested.
 
-- **A metro-depth cut of one saturated market shows what "picked over" is actually worth.** In the eleven-county Dallas–Fort Worth MSA, NAICS 238220 counts **2,412 establishments**, **31,980 employees** and **$2.418 billion** of annual payroll (Census CBP, 2023) — and **1,797 of those establishments, 74.5%, employ fewer than ten people**. The buyable middle is **307 establishments** at 10–249 employees, **115** of them at 20–249. Against that, **eighteen platform parents hold a verified DFW operating location**, ten residential-side and eight commercial-mechanical, two of them headquartered inside the MSA. Roughly **280 in-band establishments match no consolidator in the register**. Saturation at the platform-formation level and a tuck-in floor of several hundred businesses are the same finding, not competing ones. Part XI carries it in full.
+- **A metro-depth cut of one saturated market shows what "picked over" is actually worth.** In the eleven-county Dallas–Fort Worth MSA, NAICS 238220 counts **2,412 establishments**, **31,980 employees** and **$2.418 billion** of annual payroll (Census CBP, 2023) — and **1,797 of those establishments, 74.5%, employ fewer than ten people**. The buyable middle is **598 establishments** at 10–249 employees, **307** of them at 20–249 and **115** at 50–249. Against that, **eighteen platform parents hold a verified DFW operating location**, ten residential-side and eight commercial-mechanical, two of them headquartered inside the MSA. Roughly **280 establishments in the 20–249 band match no consolidator in the register**. Saturation at the platform-formation level and a tuck-in floor of several hundred businesses are the same finding, not competing ones. Part XI carries it in full.
 
 - **The cycle is mid-game, and demand is softening beneath the pricing.** Tier-one Sun Belt and coastal metros are picked over: DFW, Houston, Phoenix, Atlanta, Tampa and Southern California each host four or more platforms. Across the listed comparables the 2026 pattern is consistent — Rollins grew second-quarter revenue **7.9%** but adjusted EBITDA only **2.2%**; Roto-Rooter's FY2025 segment revenue was flat at **$899.9M**; Frontdoor's first-quarter growth was 5% price and 1% volume on a flat member count. Equipment shipments fell **20%** in 2025 and are down a further **3.5%** YTD. The opening for a new entrant is **platform formation in under-consolidated metros** — Mountain West, secondary Pacific Northwest, northern New England, the upper Midwest, second-tier Sun Belt — and tuck-in density everywhere else.
 
@@ -749,8 +749,10 @@ the market:
 
 **1,797 establishments — 74.5% — have fewer than ten employees.** Ten further
 establishments sit inside cells Census reports as N, "not available or not
-comparable" — never zero. The buyable middle is the 10–249 band: **307
-establishments**, of which **115** are at 20–249.
+comparable" — never zero. The buyable middle is the 10–249 band: **598
+establishments** (291 + 192 + 66 + 49), of which **307** are at 20–249 and
+**115** at 50–249. (Band labels corrected 2026-08-12 — see A.0.7. The counts are
+the Census cells and never changed; the names attached to them did.)
 
 The state licence registry gives the same market a second, independent
 denominator: **4,665 distinct licensed A/C contractor firms** in these counties
@@ -829,21 +831,25 @@ banding.
 
 ## 11.4 The acquisition band, and what is left
 
-Of the 307 establishments in the 10–249 band, **≈25** are platform-owned. Baker
+Of the 598 establishments in the 10–249 band, **≈25** are platform-owned. Baker
 Brothers, at 400 employees (employer-reported), sits above the band — it is one
 of the metro's seven 250-plus establishments.
 
-Platform share of the band: **8.5%** with the band drawn at 10–249 employees,
-**22.6%** at 20–249. The four platform locations with published headcounts —
+Platform share of the band: **4.3%** with the band drawn at 10–249 employees
+(26 ÷ 598), **8.5%** at 20–249 (26 ÷ 307) and **22.6%** at 50–249 (26 ÷ 115).
+The four platform locations with published headcounts —
 Baker Brothers 400, Berkeys 195, Lex 50+ technicians, Dallas Mechanical Group
 more than 150 — all exceed 50, so the truth likely sits nearer the top of the
 range. It cannot be narrowed further from public sources: branch-level headcount
 is not published for privately held trade businesses, which is the reason CBP
 exists.
 
-What is left: **≈280 establishments in the 10–249 band match no consolidator in
-the register**, carrying roughly **$2–6B** of annual work against the band's
-**$3.6B – $6.4B** total (bounds, not estimates — see Derivations).
+What is left: **≈280 establishments in the 20–249 band match no consolidator in
+the register**. Separately, and on the full 10–249 band, roughly **$2–6B** of
+annual work sits outside platform ownership against that band's
+**$3.6B – $6.4B** total (bounds, not estimates — see Derivations). The
+establishment residual and the dollar residual are computed on different bands
+and must not be paired in one sentence — see A.0.7.
 "Independent" here means unmatched, not confirmed independent, and every board
 derived from this section carries that label until the brand/DBA layer is built.
 
@@ -851,14 +857,15 @@ derived from this section carries that label until the brand/DBA layer is built.
 
 The §5.1 saturation read stands at the platform-formation level — eighteen
 parents holding ground is more crowded, not less. What is new is the tuck-in
-floor beneath it: roughly 280 unmatched establishments and several billion
-dollars of annual work. Entry is tuck-in only, exactly as §5.1 concludes; this
-part puts measured numbers behind that sentence.
+floor beneath it: roughly 280 unmatched establishments in the 20–249 band, and
+several billion dollars of annual work across the 10–249 band. Entry is tuck-in
+only, exactly as §5.1 concludes; this part puts measured numbers behind that
+sentence.
 
 Two developments would move the read: resolution of Apex's DFW holdings, which
 raises the platform share and shrinks the residual, and an employee-banded
-sizing of the in-band platform locations, which collapses the 8.5–22.6% range to
-a figure.
+sizing of the in-band platform locations, which collapses the 8.5% to 22.6%
+range, drawn between the 20–249 and 50–249 cuts, to a figure.
 
 # APPENDIX — DATA CONFLICTS, CAVEATS & SOURCE NOTES
 
@@ -1032,6 +1039,56 @@ extractor was repaired and everything re-checked.
 
 **Everything else passed.** Apart from the items above, every figure re-traced.
 
+## A.0.7 Corrections applied 2026-08-12 — the DFW size-band labels
+
+**What happened.** The DFW research pass read the Census CBP 2023 county file
+correctly and summed the published size classes correctly. It then attached the
+wrong band name to two of the sums, and Part XI inherited the names.
+
+The published cells for the eleven-county Dallas–Fort Worth MSA, NAICS 238220,
+are **10–19 = 291 · 20–49 = 192 · 50–99 = 66 · 100–249 = 49 · 250–499 = 7**.
+They are verified and unchanged.
+
+### The bands
+
+| Count | Was labelled | Is | Arithmetic |
+|---|---|---|---|
+| **598** | *(had no row — the genuine 10–249 band was never published)* | **10–249** | 291 + 192 + 66 + 49 |
+| **307** | 10–249 | **20–249** | 192 + 66 + 49 |
+| **115** | 20–249 | **50–249** | 66 + 49 |
+
+**The counts never changed.** Nothing was re-measured, no source was re-read, no
+figure was replaced. Both band names were one step below the count sitting on
+them, so every share computed from those counts is also a correct number that
+was carried under a wrong band name.
+
+### The recomputed shares
+
+| Share | Was published as | Is | Arithmetic |
+|---|---|---|---|
+| Platform-owned share of the **10–249** band | **8.5%** | **4.3%** | 26 ÷ 598 |
+| Platform-owned share of the **20–249** band | *(published as the 10–249 share)* | **8.5%** | 26 ÷ 307 |
+| Platform-owned share of the **50–249** band | *(published as the 20–249 share)* | **22.6%** | 26 ÷ 115 |
+| Establishment share of the metro, **10–249** | *(no row)* | **24.8%** | 598 ÷ 2,412 |
+| Establishment share of the metro, **20–249** | 12.7% at 10–249 | **12.7%** | 307 ÷ 2,412 |
+| Establishment share of the metro, **50–249** | 4.8% at 20–249 | **4.8%** | 115 ÷ 2,412 |
+
+**The consequence that matters: the platform share of a genuine 10–249 band is
+4.3%, not 8.5%.** The published 8.5% to 22.6% range is a real range — it is the
+20–249 to 50–249 range. Drawn across the whole band a tuck-in buyer would
+actually shop, platform ownership is roughly one establishment in twenty-three,
+and DFW is materially less picked over at the bottom of the band than this
+document has said since 2026-08-03.
+
+### One pairing that must not be restored
+
+The **≈280 unmatched establishments** figure is 307 − ≈25 and therefore
+describes the **20–249** band. The **$3.6B – $6.4B** band dollars and the
+**$2–6B** dollar residual were computed from employment bounds built on the
+*full* 291 + 192 + 66 + 49 set and are correctly labelled **10–249**. Part XI
+previously ran the two through one sentence. They are different denominators and
+the sentence has been split.
+
 ## A.1 Reconciled data conflicts across the three source documents
 
 | Item | Conflict | Resolution used |
@@ -1097,7 +1154,7 @@ extractor was repaired and everything re-checked.
 
 **Where the figures are least stable.** BLS Occupational Outlook data dates to its 28 August 2025 revision and refreshes in late August or early September; the newer OEWS May 2025 wage release already supersedes its wage line, and both vintages appear in §6.1. The FOMC met on 28–29 July 2026, so rate figures are pre-decision. Second-quarter 2026 earnings were mid-season at publication — Chemed reported that day, EMCOR and Rentokil two days later, Frontdoor the following week. And 2022 remains the latest Economic Census vintage; the next is 2027.
 
-**The correction record.** This document has been corrected three times since first issue, and every change is recorded rather than quietly absorbed: **A.0.1** (2026-07-26, TAM reconciliation), **A.0.2** (2026-07-27, primary-source verification), **A.0.3** (2026-07-28, full live-source re-verification). Each entry states what the figure was, what it became, and the named source that overturned it — including two cases where a prior correction was itself wrong, and one where a figure removed as unsourced turned out to be sourced and was restored. Retired figures are named so they stay recognisable if they resurface from an older copy.
+**The correction record.** This document has been corrected three times since first issue, and every change is recorded rather than quietly absorbed: **A.0.1** (2026-07-26, TAM reconciliation), **A.0.2** (2026-07-27, primary-source verification), **A.0.3** (2026-07-28, full live-source re-verification), and most recently **A.0.7** (2026-08-12, the DFW size-band labels). Each entry states what the figure was, what it became, and the named source that overturned it — including two cases where a prior correction was itself wrong, and one where a figure removed as unsourced turned out to be sourced and was restored. Retired figures are named so they stay recognisable if they resurface from an older copy.
 
 
 ## Sources
@@ -1321,13 +1378,13 @@ Figures below appear in no source and are arithmetic on figures that do. Each st
 | **≈$8.356B** — DFW MSA 238220 receipts (Part XI) | Texas 238220 receipts $25.418B (2022 Economic Census, EC2223KOB); DFW share of Texas 238220 payroll 32.87% (CBP 2023) | 0.3287 × $25.418B | That DFW's receipts-per-payroll ratio matches the Texas average — unverifiable, since no sub-state construction receipts are published. Employment and establishment bases give $7.735B and $6.882B; the 21% spread is the size of the assumption. Both ends carried, no midpoint. |
 | **≈$2.9B / ≈$2.7B** — DFW HVAC- and plumbing-specific spend (Part XI) | ≈$8.356B above; Texas kind-of-business mix 34.3% / 32.8% (EC2223KOB) | Multiplication | Adds a second assumption on top of the first: that DFW's trade mix matches the state's. DFW is more urban and commercial than the state average. Order of magnitude, not a count. |
 | **$241,879** — receipts per employee, Texas 238220 (Part XI) | $25.418B receipts (2022) ÷ 105,086 employees (2023) | Division | Mixed vintages, one year apart. |
-| **8.5% – 22.6%** — platform-owned share of the DFW acquisition band (Part XI) | ≈26 platform-owned 238220 establishments (owner-published rosters, licence-registry confirmed); 307 establishments at 10–249 employees and 115 at 20–249 (CBP 2023) | Division at each band cut | The numerator is a named-location count, not an employee-banded one; Baker Brothers (400 employees) sits above the band, moving the in-band count to ≈25 and the ends fractionally. The stated range is carried as computed. Four published headcounts, all above 50, place the likely truth near the top of the range. |
-| **≈280 establishments / roughly $2–6B** — the unmatched DFW residual (Part XI) | 307 in band − ≈25 platform in-band; band employment bounded 14,950–26,365 (size-class counts × class limits, constrained to the measured metro total of 31,980); × $241,879 | Subtraction; multiplication of bounds | Bounds, never point estimates. The width is almost entirely the 22 platform locations with no published headcount. "Unmatched" is register-dependent, and Apex's unresolved position overstates the residual. |
+| **4.3% / 8.5% / 22.6%** — platform-owned share of the DFW acquisition band at three band cuts (Part XI) | ≈26 platform-owned 238220 establishments (owner-published rosters, licence-registry confirmed); **598** establishments at 10–249 employees, **307** at 20–249 and **115** at 50–249 (CBP 2023 size classes: 291 + 192 + 66 + 49; 192 + 66 + 49; 66 + 49) | Division at each band cut: 26 ÷ 598 = 4.3%; 26 ÷ 307 = 8.5%; 26 ÷ 115 = 22.6% | The numerator is a named-location count, not an employee-banded one; Baker Brothers (400 employees) sits above the band, moving the in-band count to ≈25 and the ends fractionally. The stated shares are carried as computed. Four published headcounts, all above 50, place the platform locations in the 50–249 band, where the share is 22.6%. **Band labels corrected 2026-08-12 (A.0.7): the counts and the shares never changed; 8.5% and 22.6% were published against band names one step too low.** |
+| **≈280 establishments (20–249 band) / roughly $2–6B (10–249 band)** — the unmatched DFW residual (Part XI) | 307 in the 20–249 band − ≈25 platform in-band; band employment bounded 14,950–26,365 (size-class counts × class limits, constrained to the measured metro total of 31,980); × $241,879 | Subtraction; multiplication of bounds | Bounds, never point estimates. The width is almost entirely the 22 platform locations with no published headcount. "Unmatched" is register-dependent, and Apex's unresolved position overstates the residual. **The establishment residual runs on the 20–249 band and the dollar residual on the full 10–249 band of 598 establishments — different denominators, corrected 2026-08-12 per A.0.7, never to be paired in one sentence.** |
 
 ## What we don't know yet
 
 - **What Apex Service Partners owns in Dallas–Fort Worth.** The company publishes no brand roster, and no Apex operating brand in Texas could be identified from any public source, including the state licence file. It is the largest single hole in the DFW subtraction, and the unmatched residual in §11.4 is overstated by whatever it holds.
-- **Employee bands for 22 of the 26 platform-owned DFW locations.** Branch-level headcount is not published for privately held trade businesses. That one input is the difference between a platform share of 8.5–22.6% and a platform share.
+- **Employee bands for 22 of the 26 platform-owned DFW locations.** Branch-level headcount is not published for privately held trade businesses. That one input is the difference between a platform share of 8.5% to 22.6%, drawn between the 20–249 and 50–249 cuts, and a platform share.
 - **Service versus new-construction revenue inside NAICS 238220.** No public source separates them, and the recurring-revenue thesis lives in that split.
 - **How many of the 37 DFW franchise businesses share an owner.** A multi-unit franchisee is a different acquisition from a single-unit one, and the franchisor directories do not say.
 - **Whether the Apex and Champions transactions have closed.** Neither has been confirmed. Both are carried here at their announced valuations, and both are anonymous-source.
@@ -1335,6 +1392,6 @@ Figures below appear in no source and are arithmetic on figures that do. Each st
 
 ---
 
-*Effective 3 August 2026. Consolidated master for smbX.ai home-services vertical strategy, built from three commissioned research workstreams with five correction passes applied — 2026-07-26 (A.0.1, TAM reconciliation), 2026-07-27 (A.0.2, primary-source verification), 2026-07-28 (A.0.3, full live-source re-verification across eight domains), 2026-08-03 (A.0.4, the Dallas–Fort Worth cut, Part XI), 2026-08-06 (A.0.6, the percentage pass).*
+*Effective 3 August 2026. Consolidated master for smbX.ai home-services vertical strategy, built from three commissioned research workstreams with six correction passes applied — 2026-07-26 (A.0.1, TAM reconciliation), 2026-07-27 (A.0.2, primary-source verification), 2026-07-28 (A.0.3, full live-source re-verification across eight domains), 2026-08-03 (A.0.4, the Dallas–Fort Worth cut, Part XI), 2026-08-06 (A.0.6, the percentage pass), 2026-08-12 (A.0.7, the DFW size-band labels).*
 
 *This file supersedes all prior home-services market assessments. Platform ownership, brand rosters and refrigerant pricing change monthly in this market; the regulatory position changed the day before this document issued. Re-verify at engagement time.*

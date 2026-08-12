@@ -309,3 +309,33 @@ Read by `scripts/studio/retired-check.mjs`. Format is fixed — each entry is a
 - requires: Apex
 - ledger: A.0.2 / A.2
 - verdict: DERIVED, NOT PUBLISHED. No source publishes an Apex multiple; terms were not disclosed. Carry as an arithmetic derivation or not at all.
+
+### R-HS-051 · the 8.5% platform share read as a 10–249 band share
+- pattern: 8.5%
+- requires: 10-249
+- ledger: A.0.7
+- verdict: MISLABELLED BAND. 8.5% is 26 ÷ 307 and **307 is the 20–249 band**. The share of a genuine 10–249 band is 26 ÷ 598 = **4.3%**. The number was never wrong; the band name under it was. CLEARING TEST — a line is fine if it reads "8.5% at 20–249" and names 598 or 4.3% as the 10–249 figure; it is wrong if 8.5% is offered as the 10–249 share or as the low end of a 10–249-to-20–249 range. Unrelated 8.5% figures (Texas's 8.5% share of US 238220 receipts, dfw-07) do not carry a band label and will not fire.
+
+### R-HS-052 · 307 establishments read as the 10–249 band
+- pattern: 307
+- requires: 10-249
+- ledger: A.0.7
+- verdict: MISLABELLED BAND. 307 = 192 + 66 + 49 and is the **20–249** count. The 10–249 band is 291 + 192 + 66 + 49 = **598**. The count was never wrong; the band name was. CLEARING TEST — fine if 307 is attached to 20–249 and 598 carries the 10–249 label; wrong in every form of "307 at 10–249", "307 in the 10–249 band", "the buyable middle is 307 establishments of 10–249 employees".
+
+### R-HS-053 · 115 establishments read as the 20–249 band
+- pattern: 115
+- requires: 20-249
+- ledger: A.0.7
+- verdict: MISLABELLED BAND. 115 = 66 + 49 and is the **50–249** count. The 20–249 band is **307**. CLEARING TEST — fine if 115 is attached to 50–249; wrong wherever 115 is offered as the 20–249 count. Unrelated 115s (Rockwall's licence count in dfw-05) carry no band label and will not fire.
+
+### R-HS-054 · the 22.6% share read as a 20–249 band share
+- pattern: 22.6%
+- requires: 20-249
+- ledger: A.0.7
+- verdict: MISLABELLED BAND. 22.6% is 26 ÷ 115 and **115 is the 50–249 band**. The share of the 20–249 band is 26 ÷ 307 = **8.5%**. CLEARING TEST — fine if 22.6% is attached to 50–249; wrong wherever it is offered as the 20–249 share or as the top of a range whose top cut is 20–249.
+
+### R-HS-055 · the ≈280 residual paired with the 10–249 dollar band
+- pattern: 280
+- requires: 10-249
+- ledger: A.0.7
+- verdict: TWO BANDS, ONE SENTENCE. ≈280 is 307 − ≈25 and describes the **20–249** band. The $3.6B–$6.4B band dollars and the $2–6B dollar residual were computed from employment bounds built on the full 10–249 set of **598** establishments. Both figures are correct; pairing them as though they share a denominator is not. CLEARING TEST — fine if ≈280 is labelled 20–249 and the dollars are labelled 10–249 in a separate clause; wrong in "≈280 establishments in the 10–249 band" and in any sentence that runs the establishment residual and the dollar residual through one "carrying".

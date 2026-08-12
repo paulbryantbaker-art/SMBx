@@ -7,8 +7,8 @@ imagePos: 50% 50%
 footer: Dallas–Fort Worth Home Services — Metro Market Map
 eyebrow: METRO MARKET MAP
 stat: 2,412 | Plumbing-and-HVAC establishments in the eleven-county DFW MSA (Census CBP, 2023)
-stat: ~300 | The acquirable universe — 307 establishments at 10–249 employees
-stat: 8.5–22.6% | Platform share of the acquisition band, likely near the top of the range
+stat: 598 | The acquirable universe at 10–249 employees
+stat: 4.3% | Platform share of the 10–249 band
 accent: Four metros hold | band-fleet-wide.jpg | 50% 50%
 accent: The size distribution is the market | band-hvac-wide.jpg | 50% 50%
 accent: Measured at the state | band-plumbing-wide.jpg | 50% 50%
@@ -18,7 +18,7 @@ accent: The empty side | band-electrical-wide.jpg | 50% 50%
 -->
 # Dallas–Fort Worth Home Services
 
-## A Buy-Side Assessment for Acquirers · Published 3 August 2026
+## A Buy-Side Assessment for Acquirers · Published 12 August 2026
 
 **HVAC · plumbing · electrical · roofing · pest control · garage doors.**
 
@@ -26,10 +26,11 @@ accent: The empty side | band-electrical-wide.jpg | 50% 50%
 
 ## EXECUTIVE SUMMARY
 
-- **The acquirable universe is roughly 300 businesses, not 2,400.** Dallas–Fort
+- **The acquirable universe is 598 businesses, not 2,400.** Dallas–Fort
   Worth counts 2,412 plumbing-and-HVAC establishments (Census CBP, 2023) — and
   1,797 of them, 74.5%, have fewer than ten employees. The buyable middle is
-  307 establishments of 10–249 employees.
+  598 establishments of 10–249 employees, 307 of them at 20–249 and 115 at
+  50–249.
 - **The licence registry overstates the market roughly 2x.** TDLR licenses
   4,665 HVAC contracting firms in these eleven counties; only the CBP employer
   count describes businesses with payroll. Most licensed contractors have no
@@ -38,10 +39,12 @@ accent: The empty side | band-electrical-wide.jpg | 50% 50%
   eight commercial-mechanical — and the map moved inside 2026: United Building
   Solutions entered in January, and Chemed re-acquired Roto-Rooter's Fort Worth
   territory in March.
-- **Platform share of the acquisition band is 8.5% to 22.6%,** depending on
-  where the band is drawn, and likely near the top of that range. What is left:
-  roughly 280 establishments carrying an estimated $2–6B of annual work,
-  matched to no consolidator.
+- **Platform share of the acquisition band is 4.3% drawn at 10–249
+  employees** — 8.5% at 20–249 and 22.6% at 50–249, with the published
+  headcounts placing the truth near the top of that narrower range. What is
+  left: roughly 280 establishments in the 20–249 band matched to no
+  consolidator. Separately, and on the full 10–249 band, an estimated $2–6B of
+  annual work sits outside platform ownership.
 - **Platform density runs exactly with recurring-revenue quality.** Pest
   control: 9 parents holding ≈40 locations — 10.1% of every establishment in
   the trade. HVAC and plumbing: 1.1%. Residential electrical service: no
@@ -115,8 +118,11 @@ how small almost everyone is:
 layer of management, no acquirable operating platform. They are the market's
 long tail and its labour pool, but they are not its acquisition targets.
 
-The buyable middle — 10 to 249 employees — is 307 establishments, of which 115
-have twenty or more. The top of the market is seven establishments of 250-plus
+The buyable middle — 10 to 249 employees — is 598 establishments, of which 307
+have twenty or more and 115 have fifty or more. (Band labels corrected
+2026-08-12 — see A.0.7. The counts are the Census cells above and never
+changed; the names attached to them did.) The top of the market is seven
+establishments of 250-plus
 employees. Metro-wide, 238220 employs 31,980 people on $2.418 billion of annual
 payroll, averaging 13.3 employees per establishment.
 
@@ -234,35 +240,37 @@ banding of this market owes it a line of its own.
 
 ## The platform share, honestly bounded
 
-Of the 307 establishments in the 10–249 employee band, approximately 25 are
+Of the 598 establishments in the 10–249 employee band, approximately 25 are
 platform-owned. Baker Brothers — 400 employees by its employer-reported count —
 sits above the band entirely, one of the metro's seven establishments of
 250-plus employees, and the first named placement of a platform location in a
 specific Census size class.
 
-Drawn at 10–249 employees, the platform share of the band is 8.5% of
-establishments. Drawn at 20–249, it is 22.6%. The range cannot be narrowed
-from public sources, because branch-level headcount is not published for
-privately held trade businesses — the four platform locations whose headcounts
-are published (Baker Brothers 400, Berkeys 195, Lex 50+ technicians, Dallas
-Mechanical Group more than 150) all exceed fifty employees, which is why the
-truth likely sits near the top of the range.
+Drawn at 10–249 employees, the platform share of the band is 4.3% of
+establishments. Drawn at 20–249 it is 8.5%, and at 50–249, 22.6%. That upper
+range cannot be narrowed from public sources, because branch-level headcount is
+not published for privately held trade businesses — the four platform locations
+whose headcounts are published (Baker Brothers 400, Berkeys 195, Lex 50+
+technicians, Dallas Mechanical Group more than 150) all exceed fifty employees,
+which is why the truth likely sits near the top of it.
 
 ## What is left
 
-Roughly 280 establishments in the 10–249 band match no consolidator on a
-register of sixty verified parents. The band as a whole carries an estimated
-$3.6B – $6.4B of annual work; the unmatched residual, roughly $2–6B — bounds
-computed from the size-class structure, not point estimates, and registered in
-the Derivations appendix.
+Roughly 280 establishments in the 20–249 band match no consolidator on a
+register of sixty verified parents. Separately, and on the full 10–249 band,
+that band as a whole carries an estimated $3.6B – $6.4B of annual work and the
+unmatched residual is roughly $2–6B — bounds computed from the size-class
+structure, not point estimates, and registered in the Derivations appendix. The
+establishment residual and the dollar residual run on different bands and must
+not be paired in one sentence (A.0.7).
 
 Two qualifications keep those figures honest. "Unmatched" means not found on
 the register — a business whose ownership changed without public record would
 still read as independent. And the residual is overstated by the Apex position
 described in Part IV. Neither qualification changes the read: this is not a
 closed metro, and it is not an open one. It is tuck-in territory, with the
-tuck-in ground now measured for the first time — roughly 280 businesses and
-several billion dollars of annual work.
+tuck-in ground now measured for the first time — roughly 280 businesses in the
+20–249 band, and several billion dollars of annual work across the 10–249 band.
 
 ---
 
@@ -340,7 +348,7 @@ recapitalization in four years may itself be the answer.
 ## Where the openings are
 
 Three, in order of conviction. First, HVAC-and-plumbing tuck-ins: roughly 280
-unmatched establishments in the buyable band, in the largest home-services
+unmatched establishments in the 20–249 band, in the largest home-services
 metro in Texas, where every major platform has already accepted that entry is
 by tuck-in. An acquirer with an anchor here is buying in a market whose
 consolidation logic is proven and whose remaining inventory is now measured.
@@ -386,6 +394,43 @@ releases of every platform named.
 | TDLR county counts | included expired licences | current-only | The bulk file carries expiry dates; the mirror API does not filter |
 | IES Holdings listing | NYSE | NASDAQ | Issuer listing checked, 2026-08-03 |
 | Team Enoch | independent (own-site evidence) | recapitalized by McKinney Capital, March 2022 | The recap release refutes the site's family-owned copy — found on the adversarial re-check the principal's challenge triggered |
+
+## A.0.7 Corrections applied 2026-08-12 — the DFW size-band labels
+
+The research pass read the Census CBP 2023 county file correctly and summed the
+published size classes correctly. It then attached the wrong band name to two of
+the sums, and this report inherited the names. The published cells for the
+eleven-county DFW MSA, NAICS 238220, are **10–19 = 291 · 20–49 = 192 · 50–99 =
+66 · 100–249 = 49 · 250–499 = 7**. They are verified and unchanged.
+
+| Figure | Was | Now | Why |
+|---|---|---|---|
+| 598 establishments | no row — the genuine 10–249 band was never published | the 10–249 band | 291 + 192 + 66 + 49 |
+| 307 establishments | labelled 10–249 | the 20–249 band | 192 + 66 + 49 |
+| 115 establishments | labelled 20–249 | the 50–249 band | 66 + 49 |
+| Platform share of the 10–249 band | 8.5% | **4.3%** | 26 ÷ 598 |
+| Platform share of the 20–249 band | published as the 10–249 share | **8.5%** | 26 ÷ 307 |
+| Platform share of the 50–249 band | published as the 20–249 share | **22.6%** | 26 ÷ 115 |
+| Establishment share of the metro, 10–249 | no row | **24.8%** | 598 ÷ 2,412 |
+| Establishment share of the metro, 20–249 | 12.7% at 10–249 | **12.7%** | 307 ÷ 2,412 |
+| Establishment share of the metro, 50–249 | 4.8% at 20–249 | **4.8%** | 115 ÷ 2,412 |
+
+**The counts never changed.** Nothing was re-measured, no source was re-read, no
+figure was replaced. Both band names sat one step below the count carrying them,
+so every share computed from those counts is also a correct number that was
+carried under a wrong band name. The consequence that matters: the platform
+share of a genuine 10–249 band is 4.3%, not 8.5%. The published 8.5% to 22.6%
+range is a real range — it is the 20–249 to 50–249 range. Drawn across the whole
+band a tuck-in buyer would actually shop, platform ownership is roughly one
+establishment in twenty-three, and DFW is materially less picked over at the
+bottom of the band than this report said on publication.
+
+**One pairing that must not be restored.** The ≈280 unmatched establishments
+figure is 307 − ≈25 and therefore describes the **20–249** band. The $3.6B –
+$6.4B band dollars and the $2–6B dollar residual were computed from employment
+bounds built on the *full* 291 + 192 + 66 + 49 set and are correctly labelled
+**10–249**. Part V previously ran the two through one sentence. They are
+different denominators and the sentence has been split.
 
 ## A.1 Reconciled data conflicts
 
@@ -457,9 +502,9 @@ change monthly in this market; the 2026 entries in Part IV are the proof. The
 CBP vintage is 2023 and refreshes annually; the Economic Census is quinquennial
 with 2022 the current base.
 
-**The correction record.** Corrections are recorded in A.0.1 above rather than
-quietly absorbed. Each entry states what the figure was, what it became, and
-the named source that overturned it.
+**The correction record.** Corrections are recorded in A.0.1 and A.0.7 above
+rather than quietly absorbed. Each entry states what the figure was, what it
+became, and the named source that overturned it.
 
 ## Sources
 
@@ -632,15 +677,16 @@ states its inputs, its arithmetic and its assumption.
 | ≈$8.356B — DFW 238220 receipts | Texas receipts $25.418B (2022 Economic Census); DFW share of Texas 238220 payroll 32.87% (CBP 2023) | 0.3287 × $25.418B | DFW's receipts-per-payroll ratio matches the Texas average — unverifiable, as no sub-state construction receipts exist. Employment and establishment bases give $7.735B and $6.882B; the 21% spread is the assumption's size. |
 | ≈$2.9B HVAC / ≈$2.7B plumbing | the above × the Texas kind-of-business mix (34.3% / 32.8%) | multiplication | Adds a second assumption: DFW's trade mix matches the state's. |
 | $241,879 receipts per employee | $25.418B ÷ 105,086 | division | Mixed vintages, one year apart. |
-| 8.5% – 22.6% platform share of the band | ≈25 in-band platform locations; 307 establishments at 10–249 and 115 at 20–249 | division at each cut | The numerator is a location count, not employee-banded. Published headcounts, all above fifty, place the likely truth near the top. |
-| ≈280 establishments / roughly $2–6B residual | 307 − ≈25; band employment bounded from the size-class structure × $241,879 | subtraction; bounds | Register-dependent; Apex unresolved; bounds, never point estimates. |
+| 4.3% / 8.5% / 22.6% platform share of the band at three cuts | ≈25 in-band platform locations; 598 establishments at 10–249, 307 at 20–249 and 115 at 50–249 | division at each cut | The numerator is a location count, not employee-banded. Published headcounts, all above fifty, place the likely truth near the top. Band labels corrected 2026-08-12 (A.0.7): the counts and the shares never changed; 8.5% and 22.6% were published against band names one step too low. |
+| ≈280 establishments (20–249 band) / roughly $2–6B (10–249 band) residual | 307 in the 20–249 band − ≈25; 10–249 band employment bounded from the size-class structure × $241,879 | subtraction; bounds | Register-dependent; Apex unresolved; bounds, never point estimates. Different denominators, corrected 2026-08-12 per A.0.7 — never to be paired in one sentence. |
 | ≈$6.880B electrical / ≈$2.759B roofing / ≈$0.845B finish carpentry | state receipts × DFW payroll shares (29.99% / 39.58% / 30.62%) | multiplication | Same family as above. Roofing's three bases agree within 3% — the tightest allocation in the study. |
 
 ## What we don't know yet
 
 - **What Apex owns in this metro.** The largest single unknown in the report.
 - **Employee counts for most platform locations** — the input that would turn
-  the 8.5–22.6% range into a figure.
+  the 8.5% to 22.6% range, drawn between the 20–249 and 50–249 cuts, into a
+  figure.
 - **Service versus new construction inside 238220** — confirmed unpublished in
   every public geography (the last candidate Census table splits by location of
   work, not work type). Permanently an assumption, and stated as one.
@@ -653,6 +699,6 @@ states its inputs, its arithmetic and its assumption.
 
 ---
 
-*Published 3 August 2026. The first metro-depth cut of the smbX home-services
+*Published 12 August 2026. The first metro-depth cut of the smbX home-services
 research; the statewide assessment remains the companion volume. Platform
 ownership changes monthly in this market — re-verify at engagement time.*
