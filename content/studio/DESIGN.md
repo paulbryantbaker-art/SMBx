@@ -134,6 +134,9 @@ The rest maps one-to-one:
 | Page canvas | light deck pages, light one-pager, report body | bone `#FFFFFF` (white since 2026-08-12) |
 | Alternating section | a quiet stripe, a second-tier panel | `#F9F7F1` |
 | Inset panel / filled cell | GFM table head, a plate on paper | `#F3F0E9` |
+| Panel hover | a hovered filled cell or tile | `#EFEBE1` |
+| Deep panel | the heaviest inset a light page carries | `#ECE8DC` |
+| Placeholder | input ghost text only | `#8B9088` |
 | Card surface | every card, always with a 1px ink border | `#FFFFFF` |
 | Headline ink | heads on light pages, borders, primary buttons | `#16181A` |
 | Body copy | body on decks, cards and one-pagers | `#4A4F54` |
@@ -169,7 +172,9 @@ and it is why none of it is yours to adjust.
 ### Grounds — four, and they are all light
 
 `bone #FFFFFF` is the page — pure white since 2026-08-12 (Paul, side-by-side with carta.com: "the background is definitely darker still"); the token keeps its historic name. `boneAlt #F9F7F1` is an alternating section.
-`panel #F3F0E9` is an inset — a filled cell, a table head. `white #FFFFFF` is a
+`panel #F3F0E9` is an inset — a filled cell, a table head; it hovers to
+`panelHover #EFEBE1` and its heaviest form is `panelDeep #ECE8DC`. Input ghost
+text is `placeholder #8B9088` — that role only. `white #FFFFFF` is a
 card, and a card **always** carries a 1px `ink` border; a white rectangle
 floating on bone with no edge is not a card, it is a hole.
 
@@ -287,6 +292,10 @@ seconds, and the site's own report pages use that exact ink.
 | Display | **Source Serif 4** at 550 | 600 for card titles. Hooks, heads, report titles, big figures set in serif. |
 | Working | **Schibsted Grotesk** | All body copy, cards, UI-like elements. Tabular figures everywhere. Giant grotesk numerals run at 800. |
 | Label | **IBM Plex Mono** | Kickers, sources, page numbers, figure labels. 0.16em tracking on a kicker. |
+
+**The readability floor: nothing customer-facing sets below 13px** (Paul,
+2026-07-13). Mono labels run 13–13.5px with their tracking; a label that
+"needs" to be smaller is a label that should not exist.
 
 **Fonts are embedded, never linked.** `cartaFontFaceCss()` inlines all three as
 base64 `@font-face` rules. A renderer that reaches the Google Fonts CDN gets
