@@ -28,7 +28,7 @@ with `ls /sessions/*/mnt/`.
 **1. Tar the engine on the device** (`device_bash`):
 
 ```bash
-R=/sessions/<session>/mnt/SMBx-main
+R=/sessions/<session>/mnt/GitHubRepos/SMBx-live/SMBx
 S=/sessions/<session>/mnt/smbx-studio
 mkdir -p $S/_to_delete
 tar -czf $S/_to_delete/engine.tar.gz -C $R \
@@ -92,13 +92,43 @@ woff2s, same brand assets.
 `device_bash` also cannot delete. To remove something, `mv` it into
 `_to_delete/` and tell Paul, who empties that folder himself.
 
+**And `mv` only works WITHIN one mounted folder.** Inside a mount it is a
+rename, which is allowed. Across two mounts it is copy-then-unlink, and the
+unlink fails — so moving a file out of `smbx-studio` into `GitHubRepos/_to_delete`
+fails while moving it into `smbx-studio/_to_delete` succeeds. Worth knowing
+before you conclude a file is undeletable: it may just be the wrong destination.
+Each mount needs its own `_to_delete/`.
+
+**Git through the bridge leaves locks behind** (found 2026-08-12). Git creates
+`.git/index.lock`, writes, then unlinks — and the unlink is the one thing the
+mount forbids. So every `git status` or `git commit` run through `device_bash`
+succeeds and then leaves a stale lock that blocks the NEXT command, including
+GitHub Desktop. A commit also strands `.git/HEAD.lock`,
+`.git/objects/maintenance.lock` and a `tmp_obj_*` per object written.
+
+Clear them the only way the bridge allows — move them out — then confirm the
+repository is intact:
+
+```bash
+# D MUST be inside the same mounted folder as the repo — see the mv note above
+D=$R/../_to_delete/git-locks-$(date +%F); mkdir -p $D
+find $R/.git -maxdepth 3 \( -name '*.lock' -o -name 'tmp_obj_*' \) \
+  -exec sh -c 'mv "$1" "$2/$(echo $1 | tr "/" "_")"' _ {} $D \;
+git -C $R fsck --no-progress --no-dangling   # must print nothing
+```
+
+Run this after the last git command, not before the first — the very act of
+checking creates another lock. And never push from here: there is no credential
+helper on the device and Paul signs in to GitHub with Google. Commit through the
+bridge if you must, then let him press Push in GitHub Desktop.
+
 ## The simpler path
 
 None of this is needed on Paul's own machine. In a Terminal on macOS the
 builders find Chrome themselves:
 
 ```bash
-export REPO=/Users/paulbaker/Documents/GitHubRepos/SMBx-main
+export REPO=/Users/paulbaker/Documents/GitHubRepos/SMBx-live/SMBx
 cd ~/Documents/smbx-studio
 npx tsx $REPO/scripts/studio/build-deck.mts markets/<m>/specs/<name>.deck.mts \
   --media markets/<m>/media \

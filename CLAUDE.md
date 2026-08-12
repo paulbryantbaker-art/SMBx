@@ -4,22 +4,40 @@ This folder is Paul Baker's corp-dev practice, on his machine. Claude Code
 drives it. There is no app, no server, no database — the folders below are the
 system of record, and the SMBx repo is the engine you run against them.
 
-**The paths on this machine (LOCKED, Paul 2026-07-27):**
+**The paths on this machine (corrected 2026-08-12 — see the note below):**
 
 ```
-REPO      /Users/paulbaker/Documents/GitHubRepos/SMBx-main    # the engine
-STUDIO    /Users/paulbaker/Documents/smbx-studio              # this folder
+REPO      /Users/paulbaker/Documents/GitHubRepos/SMBx-live/SMBx   # the engine
+STUDIO    /Users/paulbaker/Documents/smbx-studio                  # this folder
 ```
 
 Set `REPO` once per session — every command below uses it:
 
 ```
-export REPO=/Users/paulbaker/Documents/GitHubRepos/SMBx-main
+export REPO=/Users/paulbaker/Documents/GitHubRepos/SMBx-live/SMBx
 ```
 
 `$REPO` is the checkout that has `package.json`, `scripts/`, `house/` and
 `server/` in it — the one `npm install` was run in. The builders live at
 `$REPO/scripts/studio/`.
+
+> **Why this changed.** Until 2026-08-12 this file pointed `REPO` at
+> `GitHubRepos/SMBx-main`, which was locked in on 2026-07-27 and has been an
+> **empty folder** since at least 2026-08-11 — no `.git`, no `package.json`,
+> nothing. Every command in this file silently pointed at nothing, which is how
+> a session ends up rendering from a copy of the engine it found somewhere else.
+> There are exactly **two** git repositories in this practice and neither is
+> called SMBx-main:
+>
+> | | path | remote | deploys |
+> |---|---|---|---|
+> | **ENGINE + WEBSITE** | `GitHubRepos/SMBx-live/SMBx` | `paulbryantbaker-art/SMBx` | **yes — smbx.ai, on every push to `main`** |
+> | **WORKSPACE** | `smbx-studio` (this folder) | `smbx-ai/smbx-studio` | no |
+>
+> `GitHubRepos/SMBx-main` (empty), `GitHubRepos/smbx-engine` (a two-commit
+> snapshot of the website repo, unrelated history, deploys nothing) and
+> `GitHubRepos/Git` (a GitHub issue export) are debris. Do not run against them
+> and do not push to them.
 
 ## Layout
 
