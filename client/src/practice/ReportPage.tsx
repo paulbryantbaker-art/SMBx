@@ -341,7 +341,7 @@ export default function ReportPage({ slug }: { slug: string }) {
                 target={bookTarget()}
                 rel={bookRel()}
                 className="ca-h-mintbg"
-                style={{ display: 'inline-block', fontSize: 17, fontWeight: 600, color: '#16181A', background: '#FCFAF6', padding: '16px 30px', borderRadius: 10, whiteSpace: 'nowrap' }}
+                style={{ display: 'inline-block', fontSize: 17, fontWeight: 600, color: '#16181A', background: '#FFFFFF', padding: '16px 30px', borderRadius: 10, whiteSpace: 'nowrap' }}
                 onClick={() => trackEvent('practice_cta_clicked', { placement: 'report', slug })}
               >
                 Book a confidential call

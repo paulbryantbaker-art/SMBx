@@ -365,7 +365,7 @@
    (the inline delay is zeroed when .on drops). */
 .ca-mpill {
   position: absolute; transform: translate(-50%, -50%); transform-origin: 0 50%;
-  background: #0A7A58; color: #FCFAF6; white-space: nowrap;
+  background: #0A7A58; color: #FFFFFF; white-space: nowrap;
   font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; letter-spacing: 0.08em;
   padding: 7px 11px; scale: 0 1;
   transition: scale 320ms cubic-bezier(0.3, 0.85, 0.35, 1);
@@ -540,7 +540,7 @@
   position: sticky;
   top: 0;
   z-index: 60;
-  background: #FCFAF6;
+  background: #FFFFFF;
   border-bottom: 1px solid transparent;
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
@@ -818,7 +818,7 @@
 .ch-node > div + div { color: #7C8187; }
 /* The terminal node is a CONCLUSION, not another step, so it takes the accent
    fill rather than another hairline box. */
-.ch-hit { background: #0A7A58; border-color: #0A7A58; color: #FCFAF6; }
+.ch-hit { background: #0A7A58; border-color: #0A7A58; color: #FFFFFF; }
 .ch-hit > div + div { color: #DFF5EC; }
 
 /* On a dark band the same node inverts: a lifted panel on the near-black
@@ -990,7 +990,7 @@
     align-items: center;
     gap: 7px;
     background: #0A7A58;
-    color: #FCFAF6;
+    color: #FFFFFF;
     font-family: 'IBM Plex Mono', monospace;
     font-weight: 400;
     font-size: 11.5px;
@@ -1000,7 +1000,7 @@
     padding: 5px 9px;
     white-space: nowrap;
   }
-  .ca-engine .pd-chat-head .pd-chat-title::before { content: ''; width: 7px; height: 7px; background: #FCFAF6; display: inline-block; flex: none; }
+  .ca-engine .pd-chat-head .pd-chat-title::before { content: ''; width: 7px; height: 7px; background: #FFFFFF; display: inline-block; flex: none; }
   .ca-engine .pd-chat-head > img { order: 1; margin-left: auto; height: 16px !important; width: auto; opacity: 0.9; }
   .ca-engine .pd-chat-head .pd-chat-min { order: 2; }
   .ca-engine .pd-chat-head .pd-chat-x { order: 3; }
@@ -1011,7 +1011,7 @@
   .ca-engine .pd-chat .pd-chat-inputrow {
     border: 1.5px solid #16181A;
     border-radius: 12px;
-    background: #FCFAF6;
+    background: #FFFFFF;
     box-shadow: none;
     margin: 10px 16px calc(14px + env(safe-area-inset-bottom, 0px));
     padding: 6px 6px 6px 14px;
@@ -1043,14 +1043,14 @@
   align-items: center;
   gap: 7px;
   background: #0A7A58;
-  color: #FCFAF6;
+  color: #FFFFFF;
   font-family: 'IBM Plex Mono', monospace;
   font-size: 11.5px;
   letter-spacing: 0.12em;
   padding: 5px 9px;
   white-space: nowrap;
 }
-.ca-eng-chip::before { content: ''; width: 7px; height: 7px; background: #FCFAF6; display: inline-block; }
+.ca-eng-chip::before { content: ''; width: 7px; height: 7px; background: #FFFFFF; display: inline-block; }
 .ca-eng-open { margin: 0; padding: 22px 20px 8px; font-size: 15.5px; line-height: 1.6; color: #4A4F54; }
 .ca-eng-step {
   margin: 6px 20px 0;
@@ -1071,7 +1071,7 @@
   border: 1.5px solid #16181A;
   border-radius: 12px;
   padding: 6px 6px 6px 16px;
-  background: #FCFAF6;
+  background: #FFFFFF;
   box-shadow: none;
   gap: 10px;
 }
@@ -1116,7 +1116,7 @@
   border-radius: 9px;
   display: grid;
   place-items: center;
-  color: #FCFAF6;
+  color: #FFFFFF;
   font-size: 18px;
   overflow: hidden;
 }
@@ -1169,7 +1169,7 @@
     align-items: center;
     gap: 7px;
     background: #0A7A58;
-    color: #FCFAF6;
+    color: #FFFFFF;
     font-family: 'IBM Plex Mono', monospace;
     font-weight: 400;
     font-size: 11.5px;
@@ -1178,7 +1178,7 @@
     padding: 5px 9px;
     white-space: nowrap;
   }
-  .ca-engine .pd-chat-head .pd-chat-title::before { content: ''; width: 7px; height: 7px; background: #FCFAF6; display: inline-block; }
+  .ca-engine .pd-chat-head .pd-chat-title::before { content: ''; width: 7px; height: 7px; background: #FFFFFF; display: inline-block; }
   .ca-engine .pd-chat-head > img { order: 1; margin-left: auto; height: 18px !important; opacity: 0.9; }
   .ca-engine .pd-chat-head .pd-chat-x { order: 2; }
   .ca-engine .pd-msgs { padding: 14px 20px 4px; }
@@ -1187,7 +1187,7 @@
     border: 1.5px solid #16181A;
     border-radius: 12px;
     padding: 6px 6px 6px 16px;
-    background: #FCFAF6;
+    background: #FFFFFF;
     box-shadow: none;
   }
   .ca-engine .pd-chat-inputrow:focus-within { border-color: #0A7A58; }

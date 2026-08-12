@@ -104,7 +104,7 @@ looks.
 
 | Role | LEDGER (now) | CARTA (target) | |
 |---|---|---|---|
-| Page canvas | `bone #FCFAF6` | `bone #FCFAF6` | unchanged |
+| Page canvas | `bone #FFFFFF` | `bone #FFFFFF` | white since 2026-08-12 (was #FCFAF6) |
 | Headline ink | `ink #16181A` | `ink #16181A` | unchanged |
 | The accent | `green #0A7A58` | `green #0A7A58` | unchanged |
 | Accent hover | `greenHover #086348` | `greenHover #086348` | unchanged |

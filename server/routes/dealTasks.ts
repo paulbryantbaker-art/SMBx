@@ -83,7 +83,7 @@ function taskEmailHtml(opts: {
     ? `<p style="margin:0 0 14px;white-space:pre-wrap;">${esc(opts.detail)}</p>`
     : '';
   return `<!doctype html>
-<html><body style="margin:0;padding:24px;background:#FCFAF6;font:15px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#16181A;">
+<html><body style="margin:0;padding:24px;background:#FFFFFF;font:15px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#16181A;">
   <div style="max-width:560px;margin:0 auto;background:#fff;border:1px solid rgba(20,24,28,0.10);border-radius:14px;padding:28px;">
     <p style="margin:0 0 14px;">${greeting}</p>
     <p style="margin:0 0 14px;">There's an item outstanding on <strong>${esc(opts.dealLabel)}</strong>:</p>

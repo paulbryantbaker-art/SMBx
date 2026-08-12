@@ -22,7 +22,7 @@ wall charger), trade-van (van in front of a house).
 
 > Flat editorial vector illustration in an isometric or three-quarter view,
 > drawn with clean dark ink outlines (#16181A) and flat color fills. Strict
-> palette: warm bone paper background (#FCFAF6), deep greens (#0A7A58 and
+> palette: white paper background (#FFFFFF), deep greens (#0A7A58 and
 > #0A6A4C) for the main fills, cream/off-white panels, and muted gold/brass
 > (#E8A62B) as the single accent on small details. Subject composed in the
 > RIGHT HALF of a wide 16:9 frame; the LEFT 40% of the frame is completely

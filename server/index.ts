@@ -536,7 +536,7 @@ app.get('/unsubscribe', async (req, res) => {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     return res.send(`<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Unsubscribe — smbX.ai</title></head>
-<body style="margin:0;background:#FCFAF6;color:#16181A;font-family:-apple-system,'Segoe UI',sans-serif">
+<body style="margin:0;background:#FFFFFF;color:#16181A;font-family:-apple-system,'Segoe UI',sans-serif">
 <div style="max-width:520px;margin:0 auto;padding:88px 24px">
   <div style="font-family:Georgia,serif;font-size:28px;line-height:1.2;font-weight:600">${msg.h}</div>
   <p style="margin:16px 0 28px;font-size:16px;line-height:1.65;color:#3F464C">${msg.p}</p>

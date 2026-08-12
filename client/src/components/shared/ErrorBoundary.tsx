@@ -64,7 +64,7 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
           justifyContent: 'center',
           padding: 32,
           fontFamily: "'Inter', -apple-system, system-ui, sans-serif",
-          background: '#FCFAF6',
+          background: '#FFFFFF',
           color: '#16181A',
         }}>
           <div style={{ maxWidth: 440, textAlign: 'center' }}>

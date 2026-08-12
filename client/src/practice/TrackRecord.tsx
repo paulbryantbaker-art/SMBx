@@ -37,8 +37,8 @@ export const ATTRIBUTION =
 function DealGroup({ label, names, first = false }: { label: string; names: string; first?: boolean }) {
   return (
     <div style={first ? undefined : { borderTop: '1px solid #E4DFD3', paddingTop: 18 }}>
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 11, letterSpacing: '0.1em', padding: '4px 8px', whiteSpace: 'nowrap' }}>
-        <span style={{ width: 6, height: 6, background: '#FCFAF6', display: 'inline-block' }} />{label}
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#0A7A58', color: '#FFFFFF', fontFamily: MONO, fontSize: 11, letterSpacing: '0.1em', padding: '4px 8px', whiteSpace: 'nowrap' }}>
+        <span style={{ width: 6, height: 6, background: '#FFFFFF', display: 'inline-block' }} />{label}
       </div>
       <div style={{ marginTop: 10, fontSize: 15, lineHeight: 1.7, color: '#4A4F54' }}>{names}</div>
     </div>
@@ -81,7 +81,7 @@ export default function TrackRecord() {
 
   return (
     <PracticeShell>
-      <main style={{ background: '#FCFAF6', overflow: 'clip' }}>
+      <main style={{ background: '#FFFFFF', overflow: 'clip' }}>
 
         {/* ══ HERO ══ */}
         <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(52px, 9vw, 150px) clamp(20px, 4vw, 32px) 30px', textAlign: 'center', position: 'relative' }}>
@@ -118,7 +118,7 @@ export default function TrackRecord() {
                 label chip goes with it — a green chip inside a green cell
                 was only ever there to bring green to a dark card. */}
             <div style={{ background: '#0A7A58', padding: '38px 28px 34px', textAlign: 'center' }}>
-              <div style={{ ...statNum, color: '#FCFAF6' }}>0</div>
+              <div style={{ ...statNum, color: '#FFFFFF' }}>0</div>
               <div style={{ ...statLabel, color: '#DFF5EC' }}>SELL-SIDE ENGAGEMENTS. EVER.</div>
             </div>
           </div>
@@ -186,7 +186,7 @@ export default function TrackRecord() {
                 target={bookTarget()}
                 rel={bookRel()}
                 className="ca-h-mintbg"
-                style={{ display: 'inline-block', fontSize: 17, fontWeight: 600, color: '#16181A', background: '#FCFAF6', padding: '16px 30px', borderRadius: 10, whiteSpace: 'nowrap' }}
+                style={{ display: 'inline-block', fontSize: 17, fontWeight: 600, color: '#16181A', background: '#FFFFFF', padding: '16px 30px', borderRadius: 10, whiteSpace: 'nowrap' }}
                 onClick={() => trackEvent('practice_booking_clicked', { placement: 'track-record' })}
               >
                 Book a confidential call

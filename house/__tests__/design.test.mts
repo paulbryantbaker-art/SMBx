@@ -46,7 +46,22 @@ const hexesIn = (s: string) => [...new Set((s.match(HEX_RE) || []).map(up))];
 /* Every token that must be described, as `name → hex`. Derived from the token
    module rather than restated, so a token added there fails here until it is
    documented — which is the point. */
+/* 2026-08-12: CARTA joined the universe when Cowork's rewrite made it the
+   collateral language (the doc landed on main without this suite moving —
+   main ran 70/77 until this commit). LEDGER stays in the ALLOWED set because
+   the doc may still quote it as history, but the DOCUMENTED requirement below
+   is CARTA's — requiring LEDGER rows in a Carta palette table would demand
+   the doc teach a retired system. */
 const TOKENS: Record<string, string> = { ...LEDGER, ...REPORT };
+const DOCUMENTED: Record<string, string> = { ...CARTA };
+/* The hex universe is the VALUES of all three exports taken separately —
+   spreading them into one record silently DROPS every LEDGER value whose
+   key CARTA reuses (dark, muted, hair, bone…), which made real tokens read
+   as "invented". Found because #0A6A4C failed membership while LEDGER.dark
+   held exactly that value. */
+const ALL_TOKEN_VALUES = [
+  ...Object.values(LEDGER), ...Object.values(REPORT), ...Object.values(CARTA),
+] as string[];
 
 /* ── 1. the retired systems ───────────────────────────────────────────────
    These are the hexes a drifting session reaches for. They belong in the dead
@@ -55,6 +70,7 @@ const TOKENS: Record<string, string> = { ...LEDGER, ...REPORT };
 
 const DEAD = [
   '#16624C', '#0F4E3C', '#0F1A16',  // Ledger green-black, retired by Aurora 2026-07-31
+  '#F6F4EF', '#14181C', '#B08637', '#8FD0AE',  // Ledger-trial bone/ink/brass/mint, same retirement
   '#FF385C', '#E61E4D', '#D70466',  // coral practice site v1–v3
   '#185ABD', '#124A9E', '#9EC1FF',  // office-blue pivot
   '#D4714E',                        // terra cotta wireframe pass
@@ -118,7 +134,7 @@ for (const d of DEAD) {
    session would use and no renderer would produce; a token missing from the doc
    is a colour a session has to guess at. */
 
-const TOKEN_HEXES = new Set(Object.values(TOKENS).map(up));
+const TOKEN_HEXES = new Set(ALL_TOKEN_VALUES.map(up));
 
 /* Hexes the document legitimately carries that are not palette tokens: the
    glaze/ring rgba() recipes quote them, and the dead table names retired ones.
@@ -139,10 +155,10 @@ const PAL_END = DESIGN.indexOf('# 5. Type');
 is('DESIGN.md has a palette section', PAL_START > 0 && PAL_END > PAL_START, true);
 const paletteHexes = hexesIn(DESIGN.slice(PAL_START, PAL_END));
 
-const undocumented = Object.entries(TOKENS)
+const undocumented = Object.entries(DOCUMENTED)
   .filter(([, hex]) => !paletteHexes.includes(up(hex)))
   .map(([name]) => name);
-is('every house token is in the §4 palette tables', undocumented, []);
+is('every CARTA token is in the §4 palette tables', undocumented, []);
 
 /* ── 3. the website actually uses these ───────────────────────────────────
    §3 of DESIGN.md claims the collateral looks like the site because it IS the
@@ -182,17 +198,20 @@ is('research page uses the report body ink', REPORT_CSS.includes(REPORT.body), t
    like one practice" — is false while that is true, so the interim notice is
    pinned here: a session that deletes it re-asserts something untrue, and a
    session that reads the site's tokens into a deck breaks the phase split. */
-is('DESIGN.md declares the interim site/collateral split',
-   DESIGN.includes('INTERIM: the WEBSITE has moved and the collateral has not'), true);
+/* The interim split ENDED with the Carta collateral rewrite (2026-08-12):
+   the doc's claim is unity again, so the pin moves from the split notice to
+   the unity sentence — a session that deletes it deletes the point. */
+is('DESIGN.md claims site/collateral unity',
+   DESIGN.includes('read as the same practice'), true);
 is('DESIGN.md names both token exports so neither is guessed at',
    DESIGN.includes('`LEDGER`') && DESIGN.includes('`CARTA`'), true);
 
 const MUST_SAY: [string, string][] = [
   ['tokens.ts is named as the source of truth', 'house/tokens.ts'],
-  ['the display weight is stated', '545'],
+  ['the display weight is stated', '550'],
   ['the variable-name trap is called out', '`--pd-coral` is green'],
-  ['trade is named as the only carousel image page', 'only body page with an image slot'],
-  ['the bookend law is stated', 'exactly two dark pages'],
+  ['the trade slot is named', 'trade slot'],
+  ['the bookend law is stated', 'cover and closer take the band'],
   ['the 13px floor is stated', 'below 13px'],
   ['hand-rolled layout is named as the largest tell', 'You wrote HTML or CSS'],
   ['real-photos-only is stated', 'real or absent'],

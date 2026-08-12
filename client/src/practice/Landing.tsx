@@ -234,7 +234,7 @@ function PricingRequest() {
           type="submit"
           disabled={state === 'busy'}
           className="ca-h-mintbg"
-          style={{ flex: 'none', background: '#FCFAF6', color: '#16181A', border: 'none', borderRadius: 10, padding: '15px 22px', fontSize: 15.5, fontWeight: 600, fontFamily: "'Schibsted Grotesk', sans-serif", cursor: 'pointer' }}
+          style={{ flex: 'none', background: '#FFFFFF', color: '#16181A', border: 'none', borderRadius: 10, padding: '15px 22px', fontSize: 15.5, fontWeight: 600, fontFamily: "'Schibsted Grotesk', sans-serif", cursor: 'pointer' }}
         >
           {state === 'busy' ? 'Sending…' : 'Email me the pricing brochure'}
         </button>
@@ -297,7 +297,7 @@ function ProofBand() {
                   THE SPOTLIGHT RELAY) — inline so it can never miscount the
                   way a positional selector would among the wires/handles. */}
               <div className={`ch-node${n.hit ? ' ch-hit' : ''}`} style={{ textAlign: 'center', ['--spot-delay' as string]: `${i * 3}s` }}>
-                <div {...(n.c ? { 'data-count': n.c } : {})} style={{ ...num, color: n.hit ? '#FCFAF6' : undefined }}>{n.v}</div>
+                <div {...(n.c ? { 'data-count': n.c } : {})} style={{ ...num, color: n.hit ? '#FFFFFF' : undefined }}>{n.v}</div>
                 <div style={{ marginTop: 14, fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', lineHeight: 1.4 }}>{n.l}</div>
               </div>
             </Fragment>
@@ -659,7 +659,7 @@ function PhaseExplorer({ phase, setPhase, pin }: { phase: number; setPhase: (i: 
         tabIndex={0}
         onClick={() => { pin(); setPhase(i); }}
         onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pin(); setPhase(i); } }}
-        style={{ cursor: 'pointer', padding: '13px 20px', fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', transition: 'background .2s, color .2s', background: on ? '#16181A' : 'transparent', color: on ? '#FCFAF6' : '#4A4F54' }}
+        style={{ cursor: 'pointer', padding: '13px 20px', fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', transition: 'background .2s, color .2s', background: on ? '#16181A' : 'transparent', color: on ? '#FFFFFF' : '#4A4F54' }}
       >
         {String(i + 1).padStart(2, '0')}&nbsp;&nbsp;{p.ph.toUpperCase()}
       </div>
@@ -720,7 +720,7 @@ export default function Landing() {
 
   return (
     <PracticeShell home>
-      <main id="top" style={{ background: '#FCFAF6', overflow: 'clip' }}>
+      <main id="top" style={{ background: '#FFFFFF', overflow: 'clip' }}>
 
         {/* ══ HERO ══ */}
         {/* id="yulia" sits on the SECTION per the reference — YuliaIntake no
@@ -813,7 +813,7 @@ export default function Landing() {
                 target={bookTarget()}
                 rel={bookRel()}
                 className="ca-h-greenbg"
-                style={{ fontSize: 16, fontWeight: 600, color: '#FCFAF6', background: '#16181A', padding: '15px 26px', borderRadius: 10 }}
+                style={{ fontSize: 16, fontWeight: 600, color: '#FFFFFF', background: '#16181A', padding: '15px 26px', borderRadius: 10 }}
                 onClick={() => trackEvent('practice_booking_clicked', { placement: 'hero' })}
               >
                 Book a call
@@ -938,7 +938,7 @@ export default function Landing() {
         </section>
 
         {/* ══ LANE MARQUEE ══ */}
-        <div style={{ borderTop: '1px solid #E4DFD3', borderBottom: '1px solid #E4DFD3', background: '#FCFAF6', overflow: 'hidden' }}>
+        <div style={{ borderTop: '1px solid #E4DFD3', borderBottom: '1px solid #E4DFD3', background: '#FFFFFF', overflow: 'hidden' }}>
           <div data-marquee className="ca-marquee" style={{ display: 'flex', width: 'max-content', animation: 'smbxMarquee 46s linear infinite' }}>
             {marquee.map((m, i) => (
               <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '16px 26px', fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.12em', color: '#4A4F54', whiteSpace: 'nowrap' }}>
@@ -977,7 +977,7 @@ export default function Landing() {
                       case and kept them. They are also in the approved Carta
                       reference. Do not "tidy" them out on either ground. */}
                   <span aria-hidden="true" style={{ display: 'block', height: 84, backgroundImage: 'radial-gradient(rgba(22,24,26,.16) 1.1px, transparent 1.1px)', backgroundSize: '15px 15px', marginBottom: 20, position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: 0, bottom: 0, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 11, letterSpacing: '0.1em', padding: '4px 8px' }}>{String(i + 1).padStart(2, '0')}</span>
+                    <span style={{ position: 'absolute', left: 0, bottom: 0, background: '#0A7A58', color: '#FFFFFF', fontFamily: MONO, fontSize: 11, letterSpacing: '0.1em', padding: '4px 8px' }}>{String(i + 1).padStart(2, '0')}</span>
                   </span>
                   <span style={{ display: 'block', fontFamily: SERIF, fontWeight: 600, fontSize: 23, lineHeight: 1.2 }}>{w.nm}</span>
                   <span style={{ display: 'block', marginTop: 12, fontSize: 15.5, lineHeight: 1.6, color: '#4A4F54' }}>{w.bd}</span>
@@ -1041,8 +1041,8 @@ export default function Landing() {
               <Handles />
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 26px', borderBottom: '1px solid #E4DFD3' }}>
                 <img src="/logo-green-x.png" alt="smbX.ai" style={{ height: 22, width: 'auto', display: 'block' }} />
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.12em', padding: '5px 9px', whiteSpace: 'nowrap' }}>
-                  <span style={{ width: 7, height: 7, background: '#FCFAF6', display: 'inline-block' }} />SAMPLE READ
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#0A7A58', color: '#FFFFFF', fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.12em', padding: '5px 9px', whiteSpace: 'nowrap' }}>
+                  <span style={{ width: 7, height: 7, background: '#FFFFFF', display: 'inline-block' }} />SAMPLE READ
                 </span>
               </div>
               <div data-sample-body style={{ padding: '34px 40px 38px' }}>
@@ -1141,7 +1141,7 @@ export default function Landing() {
                 <a
                   href="#yulia"
                   className="ca-h-greenbg"
-                  style={{ fontSize: 15, fontWeight: 600, color: '#FCFAF6', background: '#16181A', padding: '10px 18px', borderRadius: 9 }}
+                  style={{ fontSize: 15, fontWeight: 600, color: '#FFFFFF', background: '#16181A', padding: '10px 18px', borderRadius: 9 }}
                   onClick={() => trackEvent('practice_cta_clicked', { placement: 'sample-run-yours' })}
                 >
                   Run yours →
@@ -1154,7 +1154,7 @@ export default function Landing() {
               <a
                 href="#yulia"
                 className="ca-h-greenbg"
-                style={{ display: 'inline-block', marginTop: 32, fontSize: 17, fontWeight: 600, color: '#FCFAF6', background: '#16181A', padding: '16px 30px', borderRadius: 10, whiteSpace: 'nowrap' }}
+                style={{ display: 'inline-block', marginTop: 32, fontSize: 17, fontWeight: 600, color: '#FFFFFF', background: '#16181A', padding: '16px 30px', borderRadius: 10, whiteSpace: 'nowrap' }}
                 onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-close' })}
               >
                 Build your market map →
@@ -1200,7 +1200,7 @@ export default function Landing() {
                 set keeps rotating through everyone the section is for. */}
             {WHO_MARKS.map((m, k) => (
               <div key={k} aria-hidden="true" data-whomark data-plx={m.plx} style={{ position: 'absolute', ...m.pos, width: m.size, height: m.size, zIndex: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(rgba(22,24,26,.15) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }}>
-                <span style={{ position: 'absolute', ...m.chip, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.1em', padding: '3px 7px', whiteSpace: 'nowrap' }}>
+                <span style={{ position: 'absolute', ...m.chip, background: '#0A7A58', color: '#FFFFFF', fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.1em', padding: '3px 7px', whiteSpace: 'nowrap' }}>
                   <span key={WHO_WORDS[(who + k * 2) % WHO_WORDS.length]} className="ca-flip">{WHO_WORDS[(who + k * 2) % WHO_WORDS.length]}</span>
                 </span>
               </div>
@@ -1229,7 +1229,7 @@ export default function Landing() {
                 <span style={{ display: 'block', fontFamily: SERIF, fontWeight: 600, fontSize: 22, lineHeight: 1.15 }}>{w.label}</span>
                 <span style={{ display: 'block', marginTop: 14, fontSize: 14, lineHeight: 1.6, color: '#4A4F54' }}>{w.body}</span>
                 <span style={{ position: 'absolute', left: 22, bottom: 18, fontSize: 13.5, fontWeight: 600, color: '#0A7A58' }}>{w.link}</span>
-                <span aria-hidden="true" style={{ position: 'absolute', top: 14, right: 14, width: 26, height: 26, background: '#0A7A58', color: '#FCFAF6', display: 'grid', placeItems: 'center', fontSize: 14 }}>→</span>
+                <span aria-hidden="true" style={{ position: 'absolute', top: 14, right: 14, width: 26, height: 26, background: '#0A7A58', color: '#FFFFFF', display: 'grid', placeItems: 'center', fontSize: 14 }}>→</span>
               </Link>
             ))}
           </div>
@@ -1248,7 +1248,7 @@ export default function Landing() {
                 key={l.nm}
                 href={laneHref(l.nm, SECTOR_NAMES)}
                 className={`ca-h-band${fillClass(hunt, i)}`}
-                style={{ position: 'relative', display: 'block', background: '#FCFAF6', padding: '22px 24px 24px', color: '#16181A' }}
+                style={{ position: 'relative', display: 'block', background: '#FFFFFF', padding: '22px 24px 24px', color: '#16181A' }}
                 onClick={() => trackEvent('practice_sector_clicked', { sector: l.nm })}
               >
                 <span style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
@@ -1279,11 +1279,11 @@ export default function Landing() {
                 with the wall) and the centred copy hides. */}
             {HUNT_LANES.length % 3 !== 0 && (
               <>
-                <div aria-hidden="true" data-lanefill className={fillClass(hunt, HUNT_LANES.length).trim()} style={{ gridColumn: `span ${3 - (HUNT_LANES.length % 3)}`, background: '#FCFAF6' }} />
+                <div aria-hidden="true" data-lanefill className={fillClass(hunt, HUNT_LANES.length).trim()} style={{ gridColumn: `span ${3 - (HUNT_LANES.length % 3)}`, background: '#FFFFFF' }} />
                 <Link
                   href="/industries"
                   className={`ca-lanefill-link ca-h-band${fillClass(hunt, HUNT_LANES.length)}`}
-                  style={{ gridColumn: `span ${3 - (HUNT_LANES.length % 3)}`, background: '#FCFAF6', padding: '22px 24px', fontSize: 16, fontWeight: 600, color: '#0A7A58' }}
+                  style={{ gridColumn: `span ${3 - (HUNT_LANES.length % 3)}`, background: '#FFFFFF', padding: '22px 24px', fontSize: 16, fontWeight: 600, color: '#0A7A58' }}
                   onClick={() => trackEvent('practice_sector_clicked', { sector: 'all-theses' })}
                 >
                   Read the full sector theses →
@@ -1359,7 +1359,7 @@ export default function Landing() {
               <a
                 href="#yulia"
                 className="ca-h-mintbg"
-                style={{ fontSize: 16, fontWeight: 600, color: '#16181A', background: '#FCFAF6', padding: '15px 26px', borderRadius: 10, whiteSpace: 'nowrap' }}
+                style={{ fontSize: 16, fontWeight: 600, color: '#16181A', background: '#FFFFFF', padding: '15px 26px', borderRadius: 10, whiteSpace: 'nowrap' }}
                 onClick={() => trackEvent('practice_cta_clicked', { placement: 'whose-side' })}
               >
                 Build your market map →
@@ -1497,7 +1497,7 @@ export default function Landing() {
           <div data-rv data-fnd className="rv-stagger" style={{ background: '#F3F0E9', display: 'grid', gridTemplateColumns: '300px 1fr', gap: 48, padding: '48px 52px', alignItems: 'center', position: 'relative' }}>
             <div style={{ position: 'relative', width: 230 }}>
               <img data-rvimg src="/founder-portrait.jpg" alt="Paul Baker" loading="lazy" style={{ display: 'block', width: 230, height: 250, objectFit: 'cover', objectPosition: '50% 32%' }} />
-              <span style={{ position: 'absolute', right: -14, bottom: -14, width: 34, height: 34, background: '#0A7A58', color: '#FCFAF6', display: 'grid', placeItems: 'center', fontFamily: SERIF, fontWeight: 700, fontSize: 20, fontStyle: 'italic' }}>"</span>
+              <span style={{ position: 'absolute', right: -14, bottom: -14, width: 34, height: 34, background: '#0A7A58', color: '#FFFFFF', display: 'grid', placeItems: 'center', fontFamily: SERIF, fontWeight: 700, fontSize: 20, fontStyle: 'italic' }}>"</span>
               {/* No ornament over the portrait (2026-08-08, Paul: "there is an
                   arc on my headshot that should not be"). A dashed quarter-arc
                   used to spring off the top-right corner; against a face it
@@ -1548,7 +1548,7 @@ export default function Landing() {
                 target={bookTarget()}
                 rel={bookRel()}
                 className="ca-h-greenbg"
-                style={{ display: 'flex', justifyContent: 'center', marginTop: 24, fontSize: 16, fontWeight: 600, color: '#FCFAF6', background: '#16181A', padding: '15px 26px', borderRadius: 10 }}
+                style={{ display: 'flex', justifyContent: 'center', marginTop: 24, fontSize: 16, fontWeight: 600, color: '#FFFFFF', background: '#16181A', padding: '15px 26px', borderRadius: 10 }}
                 onClick={() => trackEvent('practice_booking_clicked', { placement: 'cta-card' })}
               >
                 Pick a time →

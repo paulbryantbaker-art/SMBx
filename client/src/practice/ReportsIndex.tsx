@@ -47,7 +47,7 @@ function Chip({ label, on, onClick }: { label: string; on: boolean; onClick: () 
         letterSpacing: '0.06em', padding: '8px 12px', textTransform: 'uppercase',
         border: `1px solid ${on ? '#0A7A58' : '#D8D3C6'}`,
         background: on ? '#0A7A58' : '#FFFFFF',
-        color: on ? '#FCFAF6' : '#16181A',
+        color: on ? '#FFFFFF' : '#16181A',
       }}
     >
       {label}
@@ -99,7 +99,7 @@ export default function ReportsIndex() {
 
   return (
     <PracticeShell>
-      <main style={{ background: '#FCFAF6', overflow: 'clip' }}>
+      <main style={{ background: '#FFFFFF', overflow: 'clip' }}>
 
         {/* ══ HERO ══ */}
         <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(52px, 9vw, 150px) clamp(20px, 4vw, 32px) 20px', position: 'relative' }}>
@@ -179,8 +179,8 @@ export default function ReportsIndex() {
                 <Handles />
                 <div style={{ padding: '34px 38px 30px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 14, width: '100%' }}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '5px 9px', whiteSpace: 'nowrap', textTransform: 'uppercase' }}>
-                      <span style={{ width: 7, height: 7, background: '#FCFAF6', display: 'inline-block' }} />{r.kicker}
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#0A7A58', color: '#FFFFFF', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '5px 9px', whiteSpace: 'nowrap', textTransform: 'uppercase' }}>
+                      <span style={{ width: 7, height: 7, background: '#FFFFFF', display: 'inline-block' }} />{r.kicker}
                     </span>
                     <span style={{ marginLeft: 'auto', fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.1em', color: '#7C8187', textTransform: 'uppercase' }}>{r.publishedLabel}</span>
                   </div>
@@ -194,7 +194,7 @@ export default function ReportsIndex() {
                     <Link
                       href={`/research/${r.slug}`}
                       className="ca-h-greenbg"
-                      style={{ fontSize: 15, fontWeight: 600, color: '#FCFAF6', background: '#16181A', padding: '12px 20px', borderRadius: 9 }}
+                      style={{ fontSize: 15, fontWeight: 600, color: '#FFFFFF', background: '#16181A', padding: '12px 20px', borderRadius: 9 }}
                       onClick={() => trackEvent('report_card_clicked', { slug: r.slug })}
                     >
                       Read the assessment
@@ -250,7 +250,7 @@ export default function ReportsIndex() {
                 target={bookTarget()}
                 rel={bookRel()}
                 className="ca-h-mintbg"
-                style={{ display: 'inline-block', fontSize: 17, fontWeight: 600, color: '#16181A', background: '#FCFAF6', padding: '16px 30px', borderRadius: 10, whiteSpace: 'nowrap' }}
+                style={{ display: 'inline-block', fontSize: 17, fontWeight: 600, color: '#16181A', background: '#FFFFFF', padding: '16px 30px', borderRadius: 10, whiteSpace: 'nowrap' }}
                 onClick={() => trackEvent('practice_cta_clicked', { placement: 'reports-index' })}
               >
                 Book a confidential call

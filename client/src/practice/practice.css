@@ -115,7 +115,7 @@
      — Safari-safe (absolute in a relative parent, NEVER a fixed colored div). */
   position: relative;
   isolation: isolate;
-  background: #FCFAF6;
+  background: #FFFFFF;
   color: var(--pd-ink);
   font-family: var(--pd-font);
   /* Ledger: tabular figures everywhere money appears — set globally so every
@@ -167,7 +167,7 @@
        at an edge (Paul: "around the area of the line and going up toward the
        menu bar, start fading and match the Safari colour"). Opaque bone at
        y=0, gone by 130px, laid OVER the wash so the first rows are exactly
-       the flat #FCFAF6 the meta tag carries and the colour arrives below.
+       the flat #FFFFFF the meta tag carries and the colour arrives below.
 
        This is what lets theme-color stay plain bone: rather than hunting for
        a flat value that approximates a gradient — and tripping Safari's
@@ -593,12 +593,12 @@
 .pd-pill:hover { border-color: var(--pd-ink); background: #F3F0E9; color: var(--pd-ink); }
 .pd-pill-primary {
   display: inline-flex; align-items: center; justify-content: center;
-  background: var(--pd-ink); color: #FCFAF6; border: none;
+  background: var(--pd-ink); color: #FFFFFF; border: none;
   padding: 12px 26px; border-radius: 10px;
   font-size: 15px; font-weight: 600; white-space: nowrap;
   transition: background-color 160ms ease;
 }
-.pd-pill-primary:hover { background: #0A7A58; color: #FCFAF6; }
+.pd-pill-primary:hover { background: #0A7A58; color: #FFFFFF; }
 .pd-pill-lg { padding: 17px 36px; font-size: 16.5px; }
 /* The nowrap above is correct in the nav, where every pill is two or three
    words. In body copy a long label ("Talk to our team — confidential
@@ -684,7 +684,7 @@
 /* Opaque once scrolled: body text passes underneath and has to be hidden, not
    ghosted. This is the ONLY state that needs a fill — at the top the bar shows
    the page through instead. */
-.pd-navwrap.solid { background: #FCFAF6; }
+.pd-navwrap.solid { background: #FFFFFF; }
 
 /* Gone on the way down; the page gets the whole screen, status-bar strip
    included. */
@@ -796,7 +796,7 @@
     justify-content: center;
     margin: 6px 0 14px; padding: 15px 20px;
     font-size: 16px; font-weight: 600; letter-spacing: 0;
-    color: #FCFAF6; background: var(--pd-ink);
+    color: #FFFFFF; background: var(--pd-ink);
     border-bottom: none; border-radius: 10px;
   }
   .pd .pd-mmenu a.quiet { font-size: 16px; font-weight: 600; color: var(--pd-body); border-bottom: none; padding-bottom: 8px; }
@@ -1370,8 +1370,8 @@
 }
 .pd-map > * { animation: pd-rise 260ms ease both; }
 .pd-map .map-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--pd-hair); }
-.pd-map .map-label { display: inline-flex; align-items: center; gap: 7px; background: #0A7A58; color: #FCFAF6; font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.12em; padding: 5px 9px; text-align: right; }
-.pd-map .map-label::before { content: ''; width: 7px; height: 7px; background: #FCFAF6; flex: none; }
+.pd-map .map-label { display: inline-flex; align-items: center; gap: 7px; background: #0A7A58; color: #FFFFFF; font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.12em; padding: 5px 9px; text-align: right; }
+.pd-map .map-label::before { content: ''; width: 7px; height: 7px; background: #FFFFFF; flex: none; }
 .pd-map .map-title { margin-top: 18px; font-family: var(--pd-display); font-size: clamp(22px, 2.6vw, 30px); font-weight: 600; letter-spacing: -0.01em; line-height: 1.12; color: var(--pd-ink); }
 .pd-map .map-thesis { margin-top: 8px; font-family: var(--pd-mono); font-size: 12.5px; letter-spacing: 0.05em; color: var(--pd-tert); line-height: 1.6; }
 .pd-map .map-answer { margin-top: 20px; border-left: 3px solid var(--pd-ink); padding: 4px 0 4px 16px; }
@@ -1393,11 +1393,11 @@
 .pd-map .map-foot .src { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.02em; line-height: 1.6; color: var(--pd-body); flex: 1 1 320px; }
 .pd-map .map-pdf {
   /* Same voice as every other primary CTA — ink at rest, green on hover. */
-  border: none; background: var(--pd-ink); color: #FCFAF6;
+  border: none; background: var(--pd-ink); color: #FFFFFF;
   border-radius: 9px; padding: 11px 20px; font-size: 14px; font-weight: 600; white-space: nowrap;
   transition: background-color 160ms ease;
 }
-.pd-map .map-pdf:hover { background: #0A7A58; color: #FCFAF6; }
+.pd-map .map-pdf:hover { background: #0A7A58; color: #FFFFFF; }
 .pd-map .map-pdf:disabled { opacity: 0.55; cursor: default; }
 /* Rebuilt sample read (Paul, 2026-07-15): counts compress to one setup strip;
    the payoff is judgment — the 9, the screens, the dollar swing, the verdict. */

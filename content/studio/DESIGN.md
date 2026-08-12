@@ -48,12 +48,13 @@ actually says.
 # 1. Paste this into anything that needs the short version
 
 > smbX house style ("Carta") — a square, structural, print-plate editorial
-> system. Bone paper `#FCFAF6`, ink `#16181A`, white cards with a 1px ink
+> system. White paper `#FFFFFF` (canvas moved bone→white 2026-08-12,
+> matching carta.com's measured ground), ink `#16181A`, white cards with a 1px ink
 > border. **Exactly one accent: Deal Green `#0A7A58`**, with mint `#A8F0CE` as
 > its value on the dark band and bright green `#0FA97C` reserved for large
 > marks — never small text. **There is no warm colour: no amber, no brass, no
 > gold, no honey.** The full-bleed rhythm break is a **flat near-black band
-> `#131512`** — no texture, no glaze, no halo, no gradient — carrying reading
+> `#181818`** — no texture, no glaze, no halo, no gradient — carrying reading
 > text `#F4F5F1`. **Radius is 0 everywhere except buttons and inputs, at
 > 10px.** Framed things wear four 8px ink corner handles at −4px, outside the
 > frame. **Green is never a resting fill**: a primary is ink-on-light or
@@ -130,9 +131,12 @@ The rest maps one-to-one:
 
 | Website role | Collateral | Value |
 |---|---|---|
-| Page canvas | light deck pages, light one-pager, report body | bone `#FCFAF6` |
+| Page canvas | light deck pages, light one-pager, report body | bone `#FFFFFF` (white since 2026-08-12) |
 | Alternating section | a quiet stripe, a second-tier panel | `#F9F7F1` |
 | Inset panel / filled cell | GFM table head, a plate on paper | `#F3F0E9` |
+| Panel hover | a hovered filled cell or tile | `#EFEBE1` |
+| Deep panel | the heaviest inset a light page carries | `#ECE8DC` |
+| Placeholder | input ghost text only | `#8B9088` |
 | Card surface | every card, always with a 1px ink border | `#FFFFFF` |
 | Headline ink | heads on light pages, borders, primary buttons | `#16181A` |
 | Body copy | body on decks, cards and one-pagers | `#4A4F54` |
@@ -145,7 +149,7 @@ The rest maps one-to-one:
 | Chip fill | a chip, a tint behind a notice | `#DFF5EC` |
 | Vivid highlight | large marks and illustration masses only | `#0FA97C` |
 | The accent on dark | rules, links and the stat bar on the band | mint `#A8F0CE` |
-| The dark band | deck cover and closer, dark one-pager, report cover | `#131512` |
+| The dark band | deck cover and closer, dark one-pager, report cover | `#181818` |
 | Hairline on the band | strips, table rules, frame edges on dark | `#2A2E29` |
 | Label plate on the band | cover stat cards, numbered workstream cards | `#22261F` |
 | Reading text on the band | every head and paragraph on dark | `#F4F5F1` |
@@ -167,8 +171,10 @@ and it is why none of it is yours to adjust.
 
 ### Grounds — four, and they are all light
 
-`bone #FCFAF6` is the page. `boneAlt #F9F7F1` is an alternating section.
-`panel #F3F0E9` is an inset — a filled cell, a table head. `white #FFFFFF` is a
+`bone #FFFFFF` is the page — pure white since 2026-08-12 (Paul, side-by-side with carta.com: "the background is definitely darker still"); the token keeps its historic name. `boneAlt #F9F7F1` is an alternating section.
+`panel #F3F0E9` is an inset — a filled cell, a table head; it hovers to
+`panelHover #EFEBE1` and its heaviest form is `panelDeep #ECE8DC`. Input ghost
+text is `placeholder #8B9088` — that role only. `white #FFFFFF` is a
 card, and a card **always** carries a 1px `ink` border; a white rectangle
 floating on bone with no edge is not a card, it is a hole.
 
@@ -191,7 +197,7 @@ for hover and nothing else. `greenTint #DFF5EC` fills a chip.
 `greenBright #0FA97C` is a large mark — a chart mass, an illustration plane —
 and **never small text**; on bone it does not hold contrast.
 `mint #A8F0CE` is the accent's value **on the band**, because Deal Green on
-`#131512` is a 1.9:1 mark that reads as a dark smudge.
+`#181818` is a 1.9:1 mark that reads as a dark smudge.
 
 **THE BUTTON LAW: green is never a resting fill.** A primary button is
 ink-on-light or bone-on-dark. Green appears on hover, on chips, on kickers, on
@@ -210,14 +216,14 @@ want a second colour, it wants a rule, a plate or a handle instead.
 
 ### The band
 
-`dark #131512`, **flat**. No texture, no glaze, no halo, no gradient, no bloom.
+`dark #181818`, **flat**. No texture, no glaze, no halo, no gradient, no bloom.
 This is the largest single change in the Carta pass and it *deletes machinery*:
 the Ledger block was a composite built by `blockBackground()` — plaster under a
 jade glaze under a radial halo — and every one of those layers is gone.
 
 Do not keep the texture "for depth". Depth on a Carta surface is structural:
 the frame, the handles, the plate, the rule. And note the trap — writing
-`background: #131512 url(texture)` changes nothing on screen, because the image
+`background: #181818 url(texture)` changes nothing on screen, because the image
 sits above the colour in the CSS background stack. The colour underneath is
 only ever a no-image fallback. **Delete the layer; do not re-point it.**
 
@@ -286,6 +292,10 @@ seconds, and the site's own report pages use that exact ink.
 | Display | **Source Serif 4** at 550 | 600 for card titles. Hooks, heads, report titles, big figures set in serif. |
 | Working | **Schibsted Grotesk** | All body copy, cards, UI-like elements. Tabular figures everywhere. Giant grotesk numerals run at 800. |
 | Label | **IBM Plex Mono** | Kickers, sources, page numbers, figure labels. 0.16em tracking on a kicker. |
+
+**The readability floor: nothing customer-facing sets below 13px** (Paul,
+2026-07-13). Mono labels run 13–13.5px with their tracking; a label that
+"needs" to be smaller is a label that should not exist.
 
 **Fonts are embedded, never linked.** `cartaFontFaceCss()` inlines all three as
 base64 `@font-face` rules. A renderer that reaches the Google Fonts CDN gets

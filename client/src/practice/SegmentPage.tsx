@@ -64,7 +64,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
 
   return (
     <PracticeShell>
-      <main style={{ background: '#FCFAF6', overflow: 'clip' }}>
+      <main style={{ background: '#FFFFFF', overflow: 'clip' }}>
 
         {/* ══ HERO ══ */}
         <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(52px, 9vw, 150px) clamp(20px, 4vw, 32px) clamp(31px, 6vw, 90px)', textAlign: 'center', position: 'relative' }}>
@@ -83,7 +83,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
             <a
               href="/#yulia"
               className="ca-h-greenbg"
-              style={{ fontSize: 16, fontWeight: 600, color: '#FCFAF6', background: '#16181A', padding: '15px 26px', borderRadius: 10 }}
+              style={{ fontSize: 16, fontWeight: 600, color: '#FFFFFF', background: '#16181A', padding: '15px 26px', borderRadius: 10 }}
               onClick={() => trackEvent('practice_cta_clicked', { placement: 'segment-hero', segment: seg.slug })}
             >
               Build your market map →
@@ -175,7 +175,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
           </div>
           <div data-rv className="rv-stagger" data-tri style={{ marginTop: 52, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: '#E4DFD3', border: '1px solid #E4DFD3' }}>
             {seg.gets.map((g, i) => (
-              <div key={g} style={{ background: '#FCFAF6', padding: '22px 24px', display: 'flex', alignItems: 'baseline', gap: 12 }}>
+              <div key={g} style={{ background: '#FFFFFF', padding: '22px 24px', display: 'flex', alignItems: 'baseline', gap: 12 }}>
                 <span style={{ fontFamily: MONO, fontSize: 12, color: '#0A7A58', flex: 'none' }}>{String(i + 1).padStart(2, '0')}</span>
                 <span style={{ fontWeight: 600, fontSize: 15.5, lineHeight: 1.45 }}>{g}</span>
               </div>
@@ -201,7 +201,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
             </div>
             <div style={{ background: '#181818', padding: '38px 28px 34px', textAlign: 'center' }}>
               <div style={{ ...statNum, color: '#A8F0CE' }}>0</div>
-              <div style={{ margin: '16px auto 0', display: 'table', background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.12em', padding: '5px 9px' }}>SELL-SIDE ENGAGEMENTS. EVER.</div>
+              <div style={{ margin: '16px auto 0', display: 'table', background: '#0A7A58', color: '#FFFFFF', fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.12em', padding: '5px 9px' }}>SELL-SIDE ENGAGEMENTS. EVER.</div>
             </div>
           </div>
           <p data-rv style={{ margin: '22px 0 0', fontSize: 15, lineHeight: 1.6, color: '#4A4F54' }}>
@@ -218,7 +218,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
               <a
                 href="/#yulia"
                 className="ca-h-greenbg"
-                style={{ fontSize: 16.5, fontWeight: 600, color: '#FCFAF6', background: '#16181A', padding: '16px 28px', borderRadius: 10 }}
+                style={{ fontSize: 16.5, fontWeight: 600, color: '#FFFFFF', background: '#16181A', padding: '16px 28px', borderRadius: 10 }}
                 onClick={() => trackEvent('practice_cta_clicked', { placement: 'segment-cta', segment: seg.slug })}
               >
                 Build your market map →

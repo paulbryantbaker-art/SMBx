@@ -95,7 +95,14 @@
  */
 export const CARTA = {
   /* light surfaces */
-  bone: '#FCFAF6',        // page ground — unchanged from Aurora
+  /* WHITE, NOT BONE (2026-08-12, Paul with a side-by-side against carta.com:
+     "the background is definitely darker still"). Carta's canvas is pure
+     white; our warm #FCFAF6 read dingy beside it, and no dark-band change
+     could ever have fixed what was a CANVAS difference. The token keeps its
+     name — every consumer reads `bone` — but the value is the measured
+     match. Structure on light surfaces now comes entirely from hairlines,
+     handles and the warm panel, which is Carta's own grammar. */
+  bone: '#FFFFFF',        // page ground — Carta's actual canvas
   boneAlt: '#F9F7F1',     // second light ground, used for banded sections
   panel: '#F3F0E9',       // tint / panel fill
   panelHover: '#EFEBE1',
@@ -162,7 +169,7 @@ export const CARTA_HANDLE = { size: 8, offset: -4, sizeSmall: 7, offsetSmall: -4
 
 export const LEDGER = {
   /* canvas + ink */
-  bone: '#FCFAF6', // page canvas — lifted, so the accent has room
+  bone: '#FFFFFF', // page canvas — lifted, so the accent has room
   ink: '#16181A', // headings, primary text
   slate: '#5A6169', // body text (decks, cards, the app)
   muted: '#83898F', // sources, vintages, captions
