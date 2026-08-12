@@ -56,12 +56,19 @@ function Chip({ label, on, onClick }: { label: string; on: boolean; onClick: () 
 }
 
 export default function ReportsIndex() {
-  // Same cadence as the hero's chips — slow enough not to read as flicker.
+  // Same period as the 8s construction loop (carta.css, THE RING BUILDS
+  // ITSELF), first swap offset +1300ms so every swap lands at ~10% of the
+  // cycle — the middle of the chip's hidden window (95%..30%). Each rebuild
+  // types a fresh word; the word never changes in front of the reader.
   const [ringWord, setRingWord] = useState(0);
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const t = setInterval(() => setRingWord(v => (v + 1) % RING_WORDS.length), 5600);
-    return () => clearInterval(t);
+    let t: ReturnType<typeof setInterval> | undefined;
+    const kick = setTimeout(() => {
+      setRingWord(v => (v + 1) % RING_WORDS.length);
+      t = setInterval(() => setRingWord(v => (v + 1) % RING_WORDS.length), 8000);
+    }, 9300);
+    return () => { clearTimeout(kick); if (t) clearInterval(t); };
   }, []);
   const [industry, setIndustry] = useState(ALL);
   const [metro, setMetro] = useState(ALL);
@@ -113,17 +120,20 @@ export default function ReportsIndex() {
               later in the DOM, so it paints over this at the same z-level —
               and the hero section has no clipping of its own. */}
           <div aria-hidden="true" data-plx="-0.04" className="ca-orbit ca-orbit-hero" style={{ position: 'absolute', right: 'clamp(-120px, -8vw, -64px)', top: 'clamp(200px, 28vw, 400px)', width: 'clamp(200px, 20vw, 290px)', aspectRatio: '1 / 1', pointerEvents: 'none', zIndex: 0 }}>
+            {/* Construction pass (2026-08-12): same build-hold-dissolve loop
+                and typed word as the landing ring — see THE RING BUILDS
+                ITSELF in carta.css for the mechanics and the video evidence. */}
             <div style={{ width: '100%', height: '100%', transformOrigin: '50% 50%' }}>
               <svg viewBox="0 0 300 300" width="100%" height="100%" fill="none">
-                <circle cx="150" cy="150" r="146" stroke="#0A7A58" strokeWidth="1.4" opacity=".42" />
-                <ellipse cx="150" cy="150" rx="145" ry="58" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 6" opacity=".62" />
-                <ellipse cx="150" cy="150" rx="58" ry="145" stroke="#0A7A58" strokeWidth="1.4" opacity=".45" />
+                <circle className="ca-arc-draw" pathLength={100} cx="150" cy="150" r="146" stroke="#0A7A58" strokeWidth="1.4" opacity=".42" style={{ ['--arc-op' as string]: 0.42 }} />
+                <ellipse className="ca-arc-fade" cx="150" cy="150" rx="145" ry="58" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 6" opacity=".62" style={{ ['--arc-op' as string]: 0.62 }} />
+                <ellipse className="ca-arc-draw" pathLength={100} cx="150" cy="150" rx="58" ry="145" stroke="#0A7A58" strokeWidth="1.4" opacity=".45" style={{ ['--arc-op' as string]: 0.45 }} />
               </svg>
-              <span style={{ position: 'absolute', left: '50%', top: '2.4%', transform: 'translate(-100%, -50%)' }}>
+              <span className="ca-chip-pop-a" style={{ position: 'absolute', left: '50%', top: '2.4%', transform: 'translate(-100%, -50%)' }}>
                 <span className="ca-chip-level">
                   <span style={{ display: 'inline-flex', flexDirection: 'row-reverse', alignItems: 'center', gap: 7, padding: '3px 8px 2px 9px', background: '#FFFFFF', border: '1px solid #E4DFD3', fontFamily: MONO, fontSize: 13, letterSpacing: '0.08em', color: '#16181A', whiteSpace: 'nowrap' }}>
                     <span style={{ width: 7, height: 7, background: '#0A7A58', flex: 'none' }} />
-                    <span key={RING_WORDS[ringWord]} className="ca-flip">{RING_WORDS[ringWord]}</span>
+                    <span key={RING_WORDS[ringWord]} className="ca-type" style={{ ['--n' as string]: RING_WORDS[ringWord].length }}>{RING_WORDS[ringWord]}</span>
                   </span>
                 </span>
               </span>

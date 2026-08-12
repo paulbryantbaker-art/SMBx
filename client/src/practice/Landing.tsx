@@ -293,7 +293,10 @@ function ProofBand() {
           ].map((n, i) => (
             <Fragment key={n.l}>
               {i > 0 && <span className="ch-wire" aria-hidden="true"><i /></span>}
-              <div className={`ch-node${n.hit ? ' ch-hit' : ''}`} style={{ textAlign: 'center' }}>
+              {/* --spot-delay staggers the mint spotlight rule (carta.css,
+                  THE SPOTLIGHT RELAY) — inline so it can never miscount the
+                  way a positional selector would among the wires/handles. */}
+              <div className={`ch-node${n.hit ? ' ch-hit' : ''}`} style={{ textAlign: 'center', ['--spot-delay' as string]: `${i * 3}s` }}>
                 <div {...(n.c ? { 'data-count': n.c } : {})} style={{ ...num, color: n.hit ? '#FCFAF6' : undefined }}>{n.v}</div>
                 <div style={{ marginTop: 14, fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', lineHeight: 1.4 }}>{n.l}</div>
               </div>
@@ -510,14 +513,23 @@ const WHO_MARKS = [
    index that both the hero ring's stage chips and the who-marks' buyer chips
    step through. Paused for prefers-reduced-motion, and it never runs on the
    server. */
-function useCycle(len: number, ms: number) {
+function useCycle(len: number, ms: number, offsetMs = 0) {
   const [i, setI] = useState(0);
   useEffect(() => {
     if (len < 2) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const t = setInterval(() => setI(v => (v + 1) % len), ms);
-    return () => clearInterval(t);
-  }, [len, ms]);
+    /* offsetMs shifts WHERE in a matching animation cycle the swaps land —
+       the ring's 8s interval alone would fire at 93.75% of the 8s build loop
+       (0.5s animation delay), 140ms BEFORE the chips dissolve, so the reader
+       would catch every retype. +1.3s moves the landing to 10% of the cycle,
+       the middle of the hidden window (95%..30%). */
+    let t: ReturnType<typeof setInterval> | undefined;
+    const kick = setTimeout(() => {
+      setI(v => (v + 1) % len);
+      t = setInterval(() => setI(v => (v + 1) % len), ms);
+    }, ms + offsetMs);
+    return () => { clearTimeout(kick); if (t) clearInterval(t); };
+  }, [len, ms, offsetMs]);
   return i;
 }
 
@@ -573,7 +585,13 @@ export default function Landing() {
   const [ownerHero, setOwnerHero] = useState(false);
   // The hero ring's two chips step through the seven phases, three apart so
   // they never show the same word.
-  const ring = useCycle(PHASES.length, 5600);
+  /* 8000ms + 1300ms offset, not the old 5600: the ring runs the 8s
+     construction loop now (carta.css, THE RING BUILDS ITSELF) and the chips
+     are hidden between 95% of one cycle and 30% of the next, so a swap on
+     the loop's own period, offset into that window, always lands while
+     they're invisible — each rebuild types a fresh pair of words, and the
+     word never changes in front of the reader. */
+  const ring = useCycle(PHASES.length, 8000, 1300);
   const who = useCycle(WHO_WORDS.length, 6400);
   // The hunt board fills under the reader's own scroll (desktop); -1 hands it
   // back to the CSS cascade.
@@ -739,16 +757,21 @@ export default function Landing() {
                 in two words and exactly what the engine card beside it maps.
                 Both chips sit ON visible arcs (the old right-side node died —
                 the φ split hides that rim behind the card). 13px mono is the
-                readability floor, not below it. And the ball is STATIC now
-                (entrance settle only, no spin — see .ca-orbit-hero in
-                carta.css): a labelled instrument doesn't rotate, and Carta's
-                globe is still. The corner mark keeps the house spin. */}
+                readability floor, not below it. And the ball CONSTRUCTS now
+                (2026-08-12, measured from Paul's carta.com walkthrough video):
+                their globe never rotates — it dissolves, the meridians sweep
+                back in, the chips pop on one at a time, it holds, it rebuilds.
+                The loop lives in carta.css (THE RING BUILDS ITSELF); the
+                solid arcs carry pathLength=100 so the stroke-dash draw-in is
+                length-independent, and each arc's resting opacity rides in as
+                --arc-op because the keyframes own `opacity` while it runs.
+                The corner mark keeps the house spin. */}
             <div aria-hidden="true" data-plx="-0.03" className="ca-orbit ca-orbit-hero" style={{ position: 'absolute', left: 0, top: '61.8%', width: 'clamp(210px, 20.5vw, 287px)', aspectRatio: '1 / 1', transform: 'translate(-61.8%, -50%)', pointerEvents: 'none' }}>
               <div style={{ width: '100%', height: '100%', transformOrigin: '50% 50%' }}>
                 <svg viewBox="0 0 300 300" width="100%" height="100%" fill="none">
-                  <circle cx="150" cy="150" r="146" stroke="#0A7A58" strokeWidth="1.4" opacity=".42" />
-                  <ellipse cx="150" cy="150" rx="145" ry="58" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 6" opacity=".62" />
-                  <ellipse cx="150" cy="150" rx="58" ry="145" stroke="#0A7A58" strokeWidth="1.4" opacity=".45" />
+                  <circle className="ca-arc-draw" pathLength={100} cx="150" cy="150" r="146" stroke="#0A7A58" strokeWidth="1.4" opacity=".42" style={{ ['--arc-op' as string]: 0.42 }} />
+                  <ellipse className="ca-arc-fade" cx="150" cy="150" rx="145" ry="58" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 6" opacity=".62" style={{ ['--arc-op' as string]: 0.62 }} />
+                  <ellipse className="ca-arc-draw" pathLength={100} cx="150" cy="150" rx="58" ry="145" stroke="#0A7A58" strokeWidth="1.4" opacity=".45" style={{ ['--arc-op' as string]: 0.45 }} />
                 </svg>
                 {/* ATTACHED TO THE RING, so they travel with it (2026-08-09,
                     Paul: "the labels on the ball need to rotate with the ball
@@ -763,16 +786,16 @@ export default function Landing() {
                     a fixed chip out from under the card, and a chip that
                     orbits passes behind the card by design. */}
                 {[
-                  { at: { left: '50%', top: '2.4%' }, off: 0 },
-                  { at: { left: '2.4%', top: '50%' }, off: 3 },
+                  { at: { left: '50%', top: '2.4%' }, off: 0, pop: 'ca-chip-pop-a' },
+                  { at: { left: '2.4%', top: '50%' }, off: 3, pop: 'ca-chip-pop-b' },
                 ].map(n => {
                   const word = PHASES[(ring + n.off) % PHASES.length].ph.toUpperCase();
                   return (
-                    <span key={n.off} aria-hidden="true" style={{ position: 'absolute', ...n.at, transform: 'translate(-50%, -50%)' }}>
+                    <span key={n.off} aria-hidden="true" className={n.pop} style={{ position: 'absolute', ...n.at, transform: 'translate(-50%, -50%)' }}>
                       <span className="ca-chip-level">
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '3px 9px 2px 8px', background: '#FFFFFF', border: '1px solid #E4DFD3', fontFamily: MONO, fontSize: 13, letterSpacing: '0.08em', color: '#16181A', whiteSpace: 'nowrap' }}>
                           <span style={{ width: 7, height: 7, background: '#0A7A58', flex: 'none' }} />
-                          <span key={word} className="ca-flip">{word}</span>
+                          <span key={word} className="ca-type" style={{ ['--n' as string]: word.length }}>{word}</span>
                         </span>
                       </span>
                     </span>
@@ -923,7 +946,15 @@ export default function Landing() {
                     whose connectors are their own children, so the phone flip
                     is `flex-direction: column` plus a wire that turns
                     vertical. No duplicated node markup between the two. */}
-                <div data-chain style={{ marginTop: 16, position: 'relative' }}>
+                {/* THE FUNNEL ASSEMBLES on reveal (2026-08-12, from the
+                    carta.com video: their product-hero UI fragments pop in
+                    one after another — the thing builds itself in front of
+                    you). data-assemble + the inline --as indices drive the
+                    node-wire-node sequence in carta.css; data-rv puts it on
+                    the existing reveal observer so it replays per the replay
+                    law. Desktop-only in the CSS — the audited phone page
+                    renders exactly as before. */}
+                <div data-rv data-assemble data-chain style={{ marginTop: 16, position: 'relative' }}>
                   <div aria-hidden="true" style={{ position: 'absolute', inset: '-14px -10px', zIndex: 0, backgroundImage: 'radial-gradient(rgba(22,24,26,.14) 1.1px, transparent 1.1px)', backgroundSize: '15px 15px' }} />
                   {[
                     { n: '~2,400', l: 'OPERATORS IN-FOOTPRINT' },
@@ -932,8 +963,8 @@ export default function Landing() {
                     { n: '9', l: 'WORTH YOUR TIME', hit: true },
                   ].map((s, i) => (
                     <Fragment key={s.l}>
-                      {i > 0 && <span className="ch-wire" aria-hidden="true"><i /></span>}
-                      <div className={`ch-node${s.hit ? ' ch-hit' : ''}`}>
+                      {i > 0 && <span className="ch-wire" aria-hidden="true" style={{ ['--as' as string]: i * 2 - 1 }}><i /></span>}
+                      <div className={`ch-node${s.hit ? ' ch-hit' : ''}`} style={{ ['--as' as string]: i * 2 }}>
                         <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 32, lineHeight: 1, letterSpacing: '-0.01em' }}>{s.n}</div>
                         <div style={{ marginTop: 9, fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.08em', lineHeight: 1.35 }}>{s.l}</div>
                       </div>
