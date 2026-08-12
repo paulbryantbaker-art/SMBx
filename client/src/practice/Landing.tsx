@@ -136,7 +136,7 @@ const WHY: { nm: string; bd: string; more: string; xp: React.ReactNode }[] = [
 
 /* ── How it works — the seven phases (reference renderVals, verbatim) ── */
 const PHASES = [
-  { ph: 'Thesis', g: 'SMBXCORPDEV', t: 'We turn "I want to buy something" into a plan you can act on.', bd: 'We turn "I want to buy something" into a plan you can act on — the sector, size, and economics worth your time, and the deal-breakers that aren’t. If the thing you’re chasing isn’t buyable in today’s market, we’ll say so early, and point you somewhere better.' },
+  { ph: 'Thesis', g: 'SMBXCORPDEV', t: 'We turn "I want to buy something" into a plan you can act on.', bd: 'The sector, size, and economics worth your time — and the deal-breakers that aren’t. If the thing you’re chasing isn’t buyable in today’s market, we’ll say so early, and point you somewhere better.' },
   { ph: 'Sourcing', g: 'SMBXCORPDEV', t: 'We find the owners who aren’t looking to sell.', bd: 'We map the market, narrow it to the companies worth a call, and reach them directly and quietly, under your name. Most of the deals we work were never listed anywhere.' },
   { ph: 'Evaluation', g: 'SMBXCORPDEV', t: 'We tell you what a business is really worth, and whether to walk.', bd: 'We rebuild the financials, test the add-backs the seller’s advisor put in, and find the things that don’t show up in a pitch — customer concentration, owner dependence, the maintenance nobody mentioned.' },
   { ph: 'Structure & offer', g: 'SMBXCORPDEV', t: 'We shape the deal and take it to the seller.', bd: 'Price is one piece of it; so are seller notes, earnouts, rollover, and escrows. We build the financing a lender will actually back, write the LOI, and run the negotiation for you.' },
@@ -265,7 +265,7 @@ function ProofBand() {
   // express "smaller in a rail, larger in a 2-up".
   const num = { fontFamily: SERIF, fontWeight: 550, lineHeight: 1, letterSpacing: '-0.02em' } as const;
   return (
-    <section id="proof" className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px) clamp(62px, 10vw, 180px)' }}>
+    <section id="proof" className="ca-dark" style={{ background: '#1A1B19', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px) clamp(62px, 10vw, 180px)' }}>
       <div style={{ maxWidth: 1360, margin: '0 auto' }}>
         <div data-rv><Kicker dark center>TWO DECADES ON THE BUY SIDE</Kicker></div>
         {/* THE PROOF AS A CHAIN (2026-08-08). Five nodes wired, ending on
@@ -293,7 +293,10 @@ function ProofBand() {
           ].map((n, i) => (
             <Fragment key={n.l}>
               {i > 0 && <span className="ch-wire" aria-hidden="true"><i /></span>}
-              <div className={`ch-node${n.hit ? ' ch-hit' : ''}`} style={{ textAlign: 'center' }}>
+              {/* --spot-delay staggers the mint spotlight rule (carta.css,
+                  THE SPOTLIGHT RELAY) — inline so it can never miscount the
+                  way a positional selector would among the wires/handles. */}
+              <div className={`ch-node${n.hit ? ' ch-hit' : ''}`} style={{ textAlign: 'center', ['--spot-delay' as string]: `${i * 3}s` }}>
                 <div {...(n.c ? { 'data-count': n.c } : {})} style={{ ...num, color: n.hit ? '#FCFAF6' : undefined }}>{n.v}</div>
                 <div style={{ marginTop: 14, fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', lineHeight: 1.4 }}>{n.l}</div>
               </div>
@@ -364,7 +367,7 @@ function Engagement() {
   }, []);
   return (
     <>
-          <div data-rv data-trackpanel ref={trackRef} style={{ marginTop: 'clamp(29px, 5vw, 84px)', position: 'relative', background: '#131512', padding: 'clamp(26px, 3vw, 40px)' }}>
+          <div data-rv data-trackpanel ref={trackRef} style={{ marginTop: 'clamp(29px, 5vw, 84px)', position: 'relative', background: '#1A1B19', padding: 'clamp(26px, 3vw, 40px)' }}>
         <Handles color="#F4F5F1" />
         <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.13) 1.1px, transparent 1.1px)', backgroundSize: '16px 16px' }} />
         <div style={{ position: 'relative' }}>
@@ -510,15 +513,140 @@ const WHO_MARKS = [
    index that both the hero ring's stage chips and the who-marks' buyer chips
    step through. Paused for prefers-reduced-motion, and it never runs on the
    server. */
-function useCycle(len: number, ms: number) {
+function useCycle(len: number, ms: number, offsetMs = 0) {
   const [i, setI] = useState(0);
   useEffect(() => {
     if (len < 2) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const t = setInterval(() => setI(v => (v + 1) % len), ms);
-    return () => clearInterval(t);
-  }, [len, ms]);
+    /* offsetMs shifts WHERE in a matching animation cycle the swaps land —
+       the ring's 8s interval alone would fire at 93.75% of the 8s build loop
+       (0.5s animation delay), 140ms BEFORE the chips dissolve, so the reader
+       would catch every retype. +1.3s moves the landing to 10% of the cycle,
+       the middle of the hidden window (95%..30%). */
+    let t: ReturnType<typeof setInterval> | undefined;
+    const kick = setTimeout(() => {
+      setI(v => (v + 1) % len);
+      t = setInterval(() => setI(v => (v + 1) % len), ms);
+    }, ms + offsetMs);
+    return () => { clearTimeout(kick); if (t) clearInterval(t); };
+  }, [len, ms, offsetMs]);
   return i;
+}
+
+/* THE MACHINE, RUNNING (2026-08-12, Paul on the second carta.com recording:
+   "lets build something that looks cool like that and see how we like it").
+   Our version of their Connect diagram, carrying the practice's own verbs.
+   The measured cycle (mroeCarta.mov, 60fps): the standing word stays put,
+   the rotating word TYPES (~125ms/char), pills enter as bars that take
+   their labels, connector elbows draw through the dot grid, current runs
+   along them during the hold, the word UN-TYPES, and the loop finales on
+   the category tagline before collapsing to the boxed wordmark.
+   Every pill is a claim the page already makes in prose — nothing new is
+   asserted, THE LINE untouched. DESKTOP ONLY for the prototype
+   (.ca-machine-wrap hides <1025) so the audited phone page is untouched;
+   if it earns its keep, the phone variant is a follow-up. Reduced motion
+   renders the finale as a still. */
+const MACHINE_VERBS: { w: string; pills: { t: string; x: number; y: number }[] }[] = [
+  { w: 'Thesis', pills: [
+    { t: 'THE SECTOR', x: 72, y: 22 },
+    { t: 'THE SIZE BAND', x: 79, y: 62 },
+    { t: 'THE DEAL-BREAKERS', x: 19, y: 74 },
+  ] },
+  { w: 'Sourcing', pills: [
+    { t: 'OFF-MARKET', x: 71, y: 24 },
+    { t: 'UNDER YOUR NAME', x: 78, y: 64 },
+    { t: 'NEVER LISTED', x: 18, y: 70 },
+  ] },
+  { w: 'Evaluation', pills: [
+    { t: 'REBUILT FINANCIALS', x: 74, y: 22 },
+    { t: 'ADD-BACKS TESTED', x: 80, y: 60 },
+    { t: 'WHEN TO WALK', x: 17, y: 72 },
+  ] },
+  { w: 'Diligence', pills: [
+    { t: 'FINANCIAL · LEGAL · TAX', x: 73, y: 24 },
+    { t: 'LENDERS ON SCHEDULE', x: 79, y: 64 },
+    { t: 'THROUGH SIGNATURE', x: 18, y: 71 },
+  ] },
+];
+const MACHINE_TAG = 'corp dev, thesis to close.';
+/* Elbow anchors sit on the line's flanks in viewBox units (1000×460,
+   preserveAspectRatio none) — Carta's paths live loosely on the grid, not
+   glued to the glyphs, which is what lets one anchor serve every word. */
+const MX = { left: 355, right: 645, y: 212 };
+
+function MachineRun() {
+  const [s, setS] = useState<{ mode: 'mark' | 'verb' | 'tag'; vi: number; stage: 'type' | 'hold' | 'untype' | 'idle'; chars: number }>(
+    { mode: 'mark', vi: 0, stage: 'idle', chars: 0 },
+  );
+  const reduce = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  useEffect(() => {
+    if (reduce) { setS({ mode: 'tag', vi: 0, stage: 'hold', chars: MACHINE_TAG.length }); return; }
+    let dead = false;
+    const timers: number[] = [];
+    const wait = (ms: number) => new Promise<void>(r => { timers.push(window.setTimeout(r, ms)); });
+    (async () => {
+      while (!dead) {
+        setS({ mode: 'mark', vi: 0, stage: 'idle', chars: 0 });
+        await wait(2300); if (dead) return;
+        for (let vi = 0; vi < MACHINE_VERBS.length; vi++) {
+          const w = MACHINE_VERBS[vi].w;
+          for (let c = 1; c <= w.length; c++) { setS({ mode: 'verb', vi, stage: 'type', chars: c }); await wait(92); if (dead) return; }
+          setS({ mode: 'verb', vi, stage: 'hold', chars: w.length });
+          await wait(3100); if (dead) return;
+          for (let c = w.length - 1; c >= 0; c--) { setS({ mode: 'verb', vi, stage: 'untype', chars: c }); await wait(46); if (dead) return; }
+          await wait(260); if (dead) return;
+        }
+        for (let c = 1; c <= MACHINE_TAG.length; c++) { setS({ mode: 'tag', vi: 0, stage: 'type', chars: c }); await wait(58); if (dead) return; }
+        setS({ mode: 'tag', vi: 0, stage: 'hold', chars: MACHINE_TAG.length });
+        await wait(3600); if (dead) return;
+        for (let c = MACHINE_TAG.length - 1; c >= 0; c--) { setS({ mode: 'tag', vi: 0, stage: 'untype', chars: c }); await wait(32); if (dead) return; }
+        await wait(320); if (dead) return;
+      }
+    })();
+    return () => { dead = true; timers.forEach(clearTimeout); };
+  }, [reduce]);
+
+  const on = s.stage === 'hold';
+  const verb = s.mode === 'verb' ? MACHINE_VERBS[s.vi] : null;
+  const word = s.mode === 'verb' ? verb!.w.slice(0, s.chars) : s.mode === 'tag' ? MACHINE_TAG.slice(0, s.chars) : '';
+  const pills = s.mode === 'verb' ? verb!.pills : [];
+  const paths = s.mode === 'verb'
+    ? verb!.pills.map(p => `M ${p.x > 50 ? MX.right : MX.left} ${MX.y} H ${p.x * 10} V ${p.y * 4.6}`)
+    : s.mode === 'tag'
+      ? ['M 250 300 H 750', 'M 750 300 V 386 H 906', 'M 250 300 V 132 H 96']
+      : [];
+  return (
+    <div className="ca-machine-wrap" data-rv>
+      <div className="ca-machine" style={{ position: 'relative', marginTop: 56, background: '#1A1B19', overflow: 'hidden', height: 'clamp(400px, 32vw, 500px)' }}>
+        <Handles color="#F4F5F1" />
+        <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.15) 1.1px, transparent 1.1px)', backgroundSize: '16px 16px' }} />
+        <svg aria-hidden="true" viewBox="0 0 1000 460" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} fill="none">
+          {paths.map((d, i) => (
+            <Fragment key={`${s.mode}-${s.vi}-${i}`}>
+              <path d={d} pathLength={100} className={`ca-mpath${on ? ' draw' : ''}`} style={{ transitionDelay: on ? `${i * 130}ms` : '0ms' }} stroke="#3A3F38" strokeWidth="1.4" />
+              <path d={d} pathLength={100} className={`ca-mflow${on ? ' run' : ''}`} stroke="#A8F0CE" strokeWidth="1.4" />
+            </Fragment>
+          ))}
+        </svg>
+        {/* the boxed wordmark the cycle collapses to, exactly their reset */}
+        <div className={`ca-mmark${s.mode === 'mark' ? ' on' : ''}`} aria-hidden={s.mode !== 'mark'}>
+          <img src="/logo-green-x-dark.png" alt="" style={{ height: 20, width: 'auto', display: 'block' }} />
+        </div>
+        <div className={`ca-mline${s.mode !== 'mark' ? ' on' : ''}`} aria-hidden="true">
+          <span style={{ color: '#A8F0CE' }}>We run&nbsp;</span>
+          <span style={{ color: '#F4F5F1' }}>{word}</span>
+          <span className="ca-mcaret" />
+        </div>
+        {pills.map((p, i) => (
+          <span key={`${s.vi}-${p.t}`} className={`ca-mpill${on ? ' on' : ''}`} style={{ left: `${p.x}%`, top: `${p.y}%`, transitionDelay: on ? `${140 + i * 150}ms` : '0ms' }}>
+            <span style={{ transitionDelay: on ? `${300 + i * 150}ms` : '0ms' }}>{p.t}</span>
+          </span>
+        ))}
+        {/* the panel states its own honesty law once, quietly */}
+        <div style={{ position: 'absolute', left: 22, bottom: 16, fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: '#8E948B' }}>THE ENGAGEMENT, END TO END</div>
+      </div>
+    </div>
+  );
 }
 
 function PhaseExplorer({ phase, setPhase, pin }: { phase: number; setPhase: (i: number) => void; pin: () => void }) {
@@ -573,7 +701,13 @@ export default function Landing() {
   const [ownerHero, setOwnerHero] = useState(false);
   // The hero ring's two chips step through the seven phases, three apart so
   // they never show the same word.
-  const ring = useCycle(PHASES.length, 5600);
+  /* 8000ms + 1300ms offset, not the old 5600: the ring runs the 8s
+     construction loop now (carta.css, THE RING BUILDS ITSELF) and the chips
+     are hidden between 95% of one cycle and 30% of the next, so a swap on
+     the loop's own period, offset into that window, always lands while
+     they're invisible — each rebuild types a fresh pair of words, and the
+     word never changes in front of the reader. */
+  const ring = useCycle(PHASES.length, 8000, 1300);
   const who = useCycle(WHO_WORDS.length, 6400);
   // The hunt board fills under the reader's own scroll (desktop); -1 hands it
   // back to the CSS cascade.
@@ -739,16 +873,21 @@ export default function Landing() {
                 in two words and exactly what the engine card beside it maps.
                 Both chips sit ON visible arcs (the old right-side node died —
                 the φ split hides that rim behind the card). 13px mono is the
-                readability floor, not below it. And the ball is STATIC now
-                (entrance settle only, no spin — see .ca-orbit-hero in
-                carta.css): a labelled instrument doesn't rotate, and Carta's
-                globe is still. The corner mark keeps the house spin. */}
+                readability floor, not below it. And the ball CONSTRUCTS now
+                (2026-08-12, measured from Paul's carta.com walkthrough video):
+                their globe never rotates — it dissolves, the meridians sweep
+                back in, the chips pop on one at a time, it holds, it rebuilds.
+                The loop lives in carta.css (THE RING BUILDS ITSELF); the
+                solid arcs carry pathLength=100 so the stroke-dash draw-in is
+                length-independent, and each arc's resting opacity rides in as
+                --arc-op because the keyframes own `opacity` while it runs.
+                The corner mark keeps the house spin. */}
             <div aria-hidden="true" data-plx="-0.03" className="ca-orbit ca-orbit-hero" style={{ position: 'absolute', left: 0, top: '61.8%', width: 'clamp(210px, 20.5vw, 287px)', aspectRatio: '1 / 1', transform: 'translate(-61.8%, -50%)', pointerEvents: 'none' }}>
               <div style={{ width: '100%', height: '100%', transformOrigin: '50% 50%' }}>
                 <svg viewBox="0 0 300 300" width="100%" height="100%" fill="none">
-                  <circle cx="150" cy="150" r="146" stroke="#0A7A58" strokeWidth="1.4" opacity=".42" />
-                  <ellipse cx="150" cy="150" rx="145" ry="58" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 6" opacity=".62" />
-                  <ellipse cx="150" cy="150" rx="58" ry="145" stroke="#0A7A58" strokeWidth="1.4" opacity=".45" />
+                  <circle className="ca-arc-draw" pathLength={100} cx="150" cy="150" r="146" stroke="#0A7A58" strokeWidth="1.4" opacity=".42" style={{ ['--arc-op' as string]: 0.42 }} />
+                  <ellipse className="ca-arc-fade" cx="150" cy="150" rx="145" ry="58" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 6" opacity=".62" style={{ ['--arc-op' as string]: 0.62 }} />
+                  <ellipse className="ca-arc-draw" pathLength={100} cx="150" cy="150" rx="58" ry="145" stroke="#0A7A58" strokeWidth="1.4" opacity=".45" style={{ ['--arc-op' as string]: 0.45 }} />
                 </svg>
                 {/* ATTACHED TO THE RING, so they travel with it (2026-08-09,
                     Paul: "the labels on the ball need to rotate with the ball
@@ -763,16 +902,16 @@ export default function Landing() {
                     a fixed chip out from under the card, and a chip that
                     orbits passes behind the card by design. */}
                 {[
-                  { at: { left: '50%', top: '2.4%' }, off: 0 },
-                  { at: { left: '2.4%', top: '50%' }, off: 3 },
+                  { at: { left: '50%', top: '2.4%' }, off: 0, pop: 'ca-chip-pop-a' },
+                  { at: { left: '2.4%', top: '50%' }, off: 3, pop: 'ca-chip-pop-b' },
                 ].map(n => {
                   const word = PHASES[(ring + n.off) % PHASES.length].ph.toUpperCase();
                   return (
-                    <span key={n.off} aria-hidden="true" style={{ position: 'absolute', ...n.at, transform: 'translate(-50%, -50%)' }}>
+                    <span key={n.off} aria-hidden="true" className={n.pop} style={{ position: 'absolute', ...n.at, transform: 'translate(-50%, -50%)' }}>
                       <span className="ca-chip-level">
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '3px 9px 2px 8px', background: '#FFFFFF', border: '1px solid #E4DFD3', fontFamily: MONO, fontSize: 13, letterSpacing: '0.08em', color: '#16181A', whiteSpace: 'nowrap' }}>
                           <span style={{ width: 7, height: 7, background: '#0A7A58', flex: 'none' }} />
-                          <span key={word} className="ca-flip">{word}</span>
+                          <span key={word} className="ca-type" style={{ ['--n' as string]: word.length }}>{word}</span>
                         </span>
                       </span>
                     </span>
@@ -861,6 +1000,11 @@ export default function Landing() {
             <p style={{ margin: 0, fontSize: 17, lineHeight: 1.6, color: '#4A4F54', maxWidth: '44em' }}>And it compounds — every engagement sharpens the thesis, the scorecards, and the playbook the next one runs on.</p>
             <a href="#how" className="ca-h-deepgreen" style={{ flex: 'none', fontSize: 16, fontWeight: 600, color: '#0A7A58', borderBottom: '1.5px solid #0A7A58', paddingBottom: 2, whiteSpace: 'nowrap' }}>See how the machine runs →</a>
           </div>
+          {/* …and here it is running (2026-08-12): the sentence above promises
+              the machine, the panel below shows it working — the same seam
+              carta.com closes with its Connect diagram after the solutions
+              cards. */}
+          <MachineRun />
         </section>
 
         {/* ══ HOW IT WORKS ══ */}
@@ -923,7 +1067,15 @@ export default function Landing() {
                     whose connectors are their own children, so the phone flip
                     is `flex-direction: column` plus a wire that turns
                     vertical. No duplicated node markup between the two. */}
-                <div data-chain style={{ marginTop: 16, position: 'relative' }}>
+                {/* THE FUNNEL ASSEMBLES on reveal (2026-08-12, from the
+                    carta.com video: their product-hero UI fragments pop in
+                    one after another — the thing builds itself in front of
+                    you). data-assemble + the inline --as indices drive the
+                    node-wire-node sequence in carta.css; data-rv puts it on
+                    the existing reveal observer so it replays per the replay
+                    law. Desktop-only in the CSS — the audited phone page
+                    renders exactly as before. */}
+                <div data-rv data-assemble data-chain style={{ marginTop: 16, position: 'relative' }}>
                   <div aria-hidden="true" style={{ position: 'absolute', inset: '-14px -10px', zIndex: 0, backgroundImage: 'radial-gradient(rgba(22,24,26,.14) 1.1px, transparent 1.1px)', backgroundSize: '15px 15px' }} />
                   {[
                     { n: '~2,400', l: 'OPERATORS IN-FOOTPRINT' },
@@ -932,15 +1084,15 @@ export default function Landing() {
                     { n: '9', l: 'WORTH YOUR TIME', hit: true },
                   ].map((s, i) => (
                     <Fragment key={s.l}>
-                      {i > 0 && <span className="ch-wire" aria-hidden="true"><i /></span>}
-                      <div className={`ch-node${s.hit ? ' ch-hit' : ''}`}>
+                      {i > 0 && <span className="ch-wire" aria-hidden="true" style={{ ['--as' as string]: i * 2 - 1 }}><i /></span>}
+                      <div className={`ch-node${s.hit ? ' ch-hit' : ''}`} style={{ ['--as' as string]: i * 2 }}>
                         <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 32, lineHeight: 1, letterSpacing: '-0.01em' }}>{s.n}</div>
                         <div style={{ marginTop: 9, fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.08em', lineHeight: 1.35 }}>{s.l}</div>
                       </div>
                     </Fragment>
                   ))}
                 </div>
-                <div style={{ marginTop: 20, background: '#131512', color: '#F4F5F1', padding: '20px 24px', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ marginTop: 20, background: '#1A1B19', color: '#F4F5F1', padding: '20px 24px', position: 'relative', overflow: 'hidden' }}>
                   <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.16) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
                   {/* The giant "9" that used to sit here is now the chain's
                       terminal node — repeating it beside the sentence that
@@ -1024,7 +1176,7 @@ export default function Landing() {
         </section>
 
         {/* ══ PRICING — dark band ══ */}
-        <section id="pricing" className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative' }}>
+        <section id="pricing" className="ca-dark" style={{ background: '#1A1B19', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative' }}>
           <div aria-hidden="true" data-plx="0.02" style={{ position: 'absolute', top: 40, right: '6%', width: 280, height: 190, backgroundImage: 'radial-gradient(rgba(168,240,206,.2) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           {/* HEAD_CTR, not the reference's 840 — same one-line finding as
               #owners. The sub (38em) and the form (520) carry their own caps,
@@ -1116,18 +1268,37 @@ export default function Landing() {
                 remainder, not one per empty cell: separate fillers would draw
                 seams between themselves and read as an unfinished table.
                 Computed from the register so the next lane added can't bring
-                the block back. */}
+                the block back.
+                THE HOLE BECOMES THE CLOSE (2026-08-12, the Carta polish
+                review): on desktop the empty span reads as an unloaded cell,
+                and "Read the full sector theses →" floated loose below the
+                grid — Carta's grids end on a CTA cell, so ours does too. Two
+                siblings, one visible per width (carta.css .ca-lanefill-link):
+                below 1025 the aria-hidden filler renders exactly as audited
+                and the centred link keeps its old spot; at ≥1025 the link
+                takes the cell (same span, same brick-fill class so it arrives
+                with the wall) and the centred copy hides. */}
             {HUNT_LANES.length % 3 !== 0 && (
-              <div aria-hidden="true" data-lanefill className={fillClass(hunt, HUNT_LANES.length).trim()} style={{ gridColumn: `span ${3 - (HUNT_LANES.length % 3)}`, background: '#FCFAF6' }} />
+              <>
+                <div aria-hidden="true" data-lanefill className={fillClass(hunt, HUNT_LANES.length).trim()} style={{ gridColumn: `span ${3 - (HUNT_LANES.length % 3)}`, background: '#FCFAF6' }} />
+                <Link
+                  href="/industries"
+                  className={`ca-lanefill-link ca-h-band${fillClass(hunt, HUNT_LANES.length)}`}
+                  style={{ gridColumn: `span ${3 - (HUNT_LANES.length % 3)}`, background: '#FCFAF6', padding: '22px 24px', fontSize: 16, fontWeight: 600, color: '#0A7A58' }}
+                  onClick={() => trackEvent('practice_sector_clicked', { sector: 'all-theses' })}
+                >
+                  Read the full sector theses →
+                </Link>
+              </>
             )}
           </div>
-          <div data-rv style={{ marginTop: 38, textAlign: 'center' }}>
+          <div data-rv className="ca-theses-below" style={{ marginTop: 38, textAlign: 'center' }}>
             <Link href="/industries" className="ca-h-deepgreen" style={{ fontSize: 16, fontWeight: 600, color: '#0A7A58', borderBottom: '1.5px solid #0A7A58', paddingBottom: 2 }}>Read the full sector theses →</Link>
           </div>
         </section>
 
         {/* ══ WHOSE SIDE — dark band ══ */}
-        <section className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(68px, 11vw, 180px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
+        <section className="ca-dark" style={{ background: '#1A1B19', color: '#F4F5F1', padding: 'clamp(68px, 11vw, 180px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
           {/* The dot field sits BEHIND the headline, not marooned in a corner
               (2026-08-08). It was anchored `left: 5%; bottom: 36` — a 300×170
               block alone in the band's bottom-left, aligned to nothing and
@@ -1144,7 +1315,7 @@ export default function Landing() {
             {/* TWO-TONE (2026-08-08). The accent lands on the TURN, never on the
                 setup — the sentence states a fact, then asks the question that
                 is the whole practice. Mint rather than Deal Green because this
-                is a dark band: green on #131512 is the low-contrast trap the
+                is a dark band: green on #1A1B19 is the low-contrast trap the
                 token table already warns about, and mint is the sanctioned
                 on-dark accent. The device is not new here — the collateral
                 deck builder has drawn hooks this way for months
@@ -1158,15 +1329,21 @@ export default function Landing() {
                 The three chips are facts about US, which is the copy law: the
                 grievance register stays out, and the reader draws the contrast
                 from the headline above, which is already sanctioned. */}
-            <div data-rv data-chain className="ch-dark" style={{ margin: '46px auto 0', maxWidth: 760 }}>
+            {/* Assembles on reveal since 2026-08-12 (the second carta.com
+                recording: their Connect diagram BUILDS — word, wires, pills —
+                rather than sitting finished). Same data-assemble mechanism as
+                the sample funnel: node, wire, node, wire, the TARGET landing
+                last, replaying on every rescroll. This was the one chain on
+                the page that still just sat there. */}
+            <div data-rv data-assemble data-chain className="ch-dark" style={{ margin: '46px auto 0', maxWidth: 760 }}>
               {[
                 { t: 'YOU', v: 'The buyer', on: true },
                 { t: 'SMBX', v: 'Your corp dev', on: true },
                 { t: 'TARGET', v: 'One company', mark: true },
               ].map((n, i) => (
                 <Fragment key={n.t}>
-                  {i > 0 && <span className="ch-wire" aria-hidden="true"><i /></span>}
-                  <div className={`ch-node${n.on ? ' ch-hit' : ''}${n.mark ? ' ca-target' : ''}`} style={{ textAlign: 'center' }}>
+                  {i > 0 && <span className="ch-wire" aria-hidden="true" style={{ ['--as' as string]: i * 2 - 1 }}><i /></span>}
+                  <div className={`ch-node${n.on ? ' ch-hit' : ''}${n.mark ? ' ca-target' : ''}`} style={{ textAlign: 'center', ['--as' as string]: i * 2 }}>
                     <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em' }}>{n.t}</div>
                     <div style={{ marginTop: 8, fontFamily: SERIF, fontWeight: 600, fontSize: 21, lineHeight: 1.2 }}>{n.v}</div>
                   </div>

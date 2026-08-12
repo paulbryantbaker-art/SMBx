@@ -69,7 +69,7 @@ export default function About() {
         </section>
 
         {/* ══ WHAT WE BELIEVE — dark band ══ */}
-        <section className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(52px, 9vw, 160px)', position: 'relative', overflow: 'hidden' }}>
+        <section className="ca-dark" style={{ background: '#1A1B19', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(52px, 9vw, 160px)', position: 'relative', overflow: 'hidden' }}>
           <div aria-hidden="true" data-plx="0.025" style={{ position: 'absolute', top: 44, right: '5%', width: 260, height: 160, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 1360, margin: '0 auto', position: 'relative' }}>
             <div data-rv><Kicker dark>WHAT WE BELIEVE</Kicker></div>
@@ -77,7 +77,7 @@ export default function About() {
             <div data-rv className="rv-stagger" data-creed style={{ marginTop: 56, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: '#2A2E29', border: '1px solid #2A2E29', position: 'relative' }}>
               <Handles color="#F4F5F1" />
               {CREED.map(c => (
-                <div key={c.n} style={{ background: '#131512', padding: '34px 28px 36px' }}>
+                <div key={c.n} style={{ background: '#1A1B19', padding: '34px 28px 36px' }}>
                   <div style={{ fontFamily: SERIF, fontWeight: 550, fontSize: 44, lineHeight: 1, color: '#A8F0CE' }}>{c.n}</div>
                   <div style={{ marginTop: 18, fontFamily: SERIF, fontWeight: 600, fontSize: 21, lineHeight: 1.25 }}>{c.t}<span style={{ color: '#0A7A58' }}>.</span></div>
                   <p style={{ margin: '12px 0 0', fontSize: 14.5, lineHeight: 1.65, color: '#ABB2AB' }}>{c.b}</p>

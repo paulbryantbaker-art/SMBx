@@ -109,9 +109,17 @@ export default function TrackRecord() {
               <div data-count="21" style={statNum}>~$21B</div>
               <div style={statLabel}>TRANSACTIONS TOUCHED</div>
             </div>
-            <div style={{ background: '#131512', padding: '38px 28px 34px', textAlign: 'center' }}>
-              <div style={{ ...statNum, color: '#A8F0CE' }}>0</div>
-              <div style={{ margin: '16px auto 0', display: 'table', background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.12em', padding: '5px 9px' }}>SELL-SIDE ENGAGEMENTS. EVER.</div>
+            {/* ONE IDENTITY FOR THE 0 (2026-08-12, the Carta polish review):
+                this cell wore a dark card with a mint numeral while the
+                landing's proof chain gives the same stat the accent FILL —
+                the signature stat had two costumes. The fill is the house
+                grammar for a conclusion (the funnel's 9, the proof chain's
+                terminal node), so the dark-card treatment retires and the
+                label chip goes with it — a green chip inside a green cell
+                was only ever there to bring green to a dark card. */}
+            <div style={{ background: '#0A7A58', padding: '38px 28px 34px', textAlign: 'center' }}>
+              <div style={{ ...statNum, color: '#FCFAF6' }}>0</div>
+              <div style={{ ...statLabel, color: '#DFF5EC' }}>SELL-SIDE ENGAGEMENTS. EVER.</div>
             </div>
           </div>
         </section>
@@ -168,7 +176,7 @@ export default function TrackRecord() {
         </section>
 
         {/* ══ CLOSER — dark band ══ */}
-        <section className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(68px, 11vw, 180px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
+        <section className="ca-dark" style={{ background: '#1A1B19', color: '#F4F5F1', padding: 'clamp(68px, 11vw, 180px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
           <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', left: '6%', bottom: 36, width: 280, height: 160, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
             <p data-rv style={{ margin: '0 auto', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 4vw, 64px)', lineHeight: 1.12, letterSpacing: '-0.014em', textWrap: 'balance' }}>Every transaction above was done for a buyer. That hasn't&nbsp;changed.</p>

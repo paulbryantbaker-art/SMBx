@@ -82,9 +82,9 @@
   /* Flat, square, untextured — a single value, not a gradient triple. The top
      and bottom slots keep the same value so any rule still reading them (the
      curve fills, until those are ported out) cannot produce a seam. */
-  --pd-dark-bg: #131512;
-  --pd-dark-top: #131512;
-  --pd-dark-bot: #131512;
+  --pd-dark-bg: #1A1B19;
+  --pd-dark-top: #1A1B19;
+  --pd-dark-bot: #1A1B19;
   --pd-dark-seam: #2A2E29;
   --pd-dark-plate: #22261F;
   --pd-dark-ink: #F4F5F1;
@@ -417,7 +417,7 @@
 
      This replaces a six-layer stack, and removing it was not optional: an
      84%-opaque jade glaze plus the blackbleed texture sat ABOVE the only layer
-     that read --pd-dark-*, so swapping that token to #131512 changed the
+     that read --pd-dark-*, so swapping that token to #1A1B19 changed the
      computed custom property and NOTHING on screen. The design gate passed the
      whole time, because it verifies the token's value and not the paint. That
      is the trap CLAUDE.md documents for Aurora, hit in reverse — and the reason

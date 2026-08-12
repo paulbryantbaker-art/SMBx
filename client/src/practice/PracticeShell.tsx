@@ -464,12 +464,17 @@ export default function PracticeShell({
   const hasLocalCta = onAbout || onResearch;
   const ctaHref = home || hasLocalCta ? '#cta' : '/#cta';
 
-  /* The footer varies per page in the references: Industries and Research
-     run COMPACT (short brand blurb, no BUYERS column, a six-link FIRM set),
-     Track Record drops its own self-link, and the two pages that close on a
-     dark band (Research, Track Record) put a #2A2E29 hairline atop the
+  /* ONE FOOTER EVERYWHERE (2026-08-12, the Carta polish review — supersedes
+     the per-page COMPACT variant transcribed from the references). The
+     handoff varied the footer (Industries/Research: short blurb, no BUYERS,
+     six-link FIRM), which meant the Research page — the practice's proof
+     surface — was the one page whose footer dropped "Track record" and the
+     buyer segments. carta.com itself runs one mega footer on every page;
+     ours does now too. Two per-page nuances survive because they are not
+     variants of CONTENT: Track Record still drops its own self-link, and
+     the pages that close on a dark band keep the #2A2E29 hairline atop the
      footer so the blocks don't run together. */
-  const footCompact = onIndustries || onResearch;
+  const footCompact = false;
   const footSeam = onResearch || onTrackRecord;
 
   return (
@@ -583,7 +588,7 @@ export default function PracticeShell({
              page: Industries/Research run compact (short blurb, no BUYERS,
              six-link FIRM), Track Record drops its self-link, and the pages
              that close on a dark band carry a hairline seam up top. ══ */}
-      <footer className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(56px, 7vw, 88px) clamp(20px, 4vw, 32px) 40px', borderTop: footSeam ? '1px solid #2A2E29' : undefined }}>
+      <footer className="ca-dark" style={{ background: '#1A1B19', color: '#F4F5F1', padding: 'clamp(56px, 7vw, 88px) clamp(20px, 4vw, 32px) 40px', borderTop: footSeam ? '1px solid #2A2E29' : undefined }}>
         <div style={{ maxWidth: 1360, margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 44 }}>
             <div>

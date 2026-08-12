@@ -2,7 +2,7 @@
  * /industries — CARTA RESTYLE (2026-08-07). Transcribed 1:1 from
  * `design_handoff_smbx_carta_restyle/Industries - Carta Style.dc.html`.
  * Structure: centered hero (kicker · H1 · sub · framed hero photo with the
- * FIFTEEN LANES chip) · fifteen zig-zag sector theses (7fr/4fr, alternating;
+ * FIFTEEN SECTOR THESES chip (renamed 2026-08-12: the hunt board runs 16 LANES — landscaping deliberately has no thesis here, Paul 2026-08-07 — so the chip counts what this page actually holds, and the cross-page numbers stop disagreeing) · fifteen zig-zag sector theses (7fr/4fr, alternating;
  * ruled WHO WE RUN IT FOR / WHY THIS LANE asides, small framed sector photo
  * when one exists) · the Heritage panel (attribution shield per Track Record
  * doctrine) · centered CTA.
@@ -92,7 +92,7 @@ export default function Industries() {
             <img src="/industries/trade-home.jpg" alt="" style={{ display: 'block', width: '100%', height: 300, objectFit: 'cover' }} />
             <Handles />
             <span style={{ position: 'absolute', left: 14, bottom: 14, display: 'inline-flex', alignItems: 'center', gap: 7, background: '#0A7A58', color: '#FCFAF6', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '5px 9px', whiteSpace: 'nowrap' }}>
-              <span style={{ width: 7, height: 7, background: '#FCFAF6', display: 'inline-block' }} />FIFTEEN LANES
+              <span style={{ width: 7, height: 7, background: '#FCFAF6', display: 'inline-block' }} />FIFTEEN SECTOR THESES
             </span>
           </div>
         </section>

@@ -56,12 +56,19 @@ function Chip({ label, on, onClick }: { label: string; on: boolean; onClick: () 
 }
 
 export default function ReportsIndex() {
-  // Same cadence as the hero's chips — slow enough not to read as flicker.
+  // Same period as the 8s construction loop (carta.css, THE RING BUILDS
+  // ITSELF), first swap offset +1300ms so every swap lands at ~10% of the
+  // cycle — the middle of the chip's hidden window (95%..30%). Each rebuild
+  // types a fresh word; the word never changes in front of the reader.
   const [ringWord, setRingWord] = useState(0);
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const t = setInterval(() => setRingWord(v => (v + 1) % RING_WORDS.length), 5600);
-    return () => clearInterval(t);
+    let t: ReturnType<typeof setInterval> | undefined;
+    const kick = setTimeout(() => {
+      setRingWord(v => (v + 1) % RING_WORDS.length);
+      t = setInterval(() => setRingWord(v => (v + 1) % RING_WORDS.length), 8000);
+    }, 9300);
+    return () => { clearTimeout(kick); if (t) clearInterval(t); };
   }, []);
   const [industry, setIndustry] = useState(ALL);
   const [metro, setMetro] = useState(ALL);
@@ -99,8 +106,8 @@ export default function ReportsIndex() {
           <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', right: '7%', top: 80, width: 130, height: 130, backgroundImage: 'radial-gradient(rgba(10,122,88,.2) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
           {/* THE RING, ON RESEARCH TOO (2026-08-09, Paul marked the empty
               block right of the masthead). Same instrument as the landing
-              hero — the spinning layer carries a chip and `.ca-chip-level`
-              runs the rotation backwards inside it so the word stays level.
+              hero — since 2026-08-12 that means the build-hold-dissolve
+              construction loop with a typed chip, not a spin.
               Desktop only: it is `.ca-orbit-hero`, which carta.css hides
               below 1025, where this column collapses under the copy and a
               280px ring would sit on top of the filter row.
@@ -113,17 +120,20 @@ export default function ReportsIndex() {
               later in the DOM, so it paints over this at the same z-level —
               and the hero section has no clipping of its own. */}
           <div aria-hidden="true" data-plx="-0.04" className="ca-orbit ca-orbit-hero" style={{ position: 'absolute', right: 'clamp(-120px, -8vw, -64px)', top: 'clamp(200px, 28vw, 400px)', width: 'clamp(200px, 20vw, 290px)', aspectRatio: '1 / 1', pointerEvents: 'none', zIndex: 0 }}>
+            {/* Construction pass (2026-08-12): same build-hold-dissolve loop
+                and typed word as the landing ring — see THE RING BUILDS
+                ITSELF in carta.css for the mechanics and the video evidence. */}
             <div style={{ width: '100%', height: '100%', transformOrigin: '50% 50%' }}>
               <svg viewBox="0 0 300 300" width="100%" height="100%" fill="none">
-                <circle cx="150" cy="150" r="146" stroke="#0A7A58" strokeWidth="1.4" opacity=".42" />
-                <ellipse cx="150" cy="150" rx="145" ry="58" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 6" opacity=".62" />
-                <ellipse cx="150" cy="150" rx="58" ry="145" stroke="#0A7A58" strokeWidth="1.4" opacity=".45" />
+                <circle className="ca-arc-draw" pathLength={100} cx="150" cy="150" r="146" stroke="#0A7A58" strokeWidth="1.4" opacity=".42" style={{ ['--arc-op' as string]: 0.42 }} />
+                <ellipse className="ca-arc-fade" cx="150" cy="150" rx="145" ry="58" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 6" opacity=".62" style={{ ['--arc-op' as string]: 0.62 }} />
+                <ellipse className="ca-arc-draw" pathLength={100} cx="150" cy="150" rx="58" ry="145" stroke="#0A7A58" strokeWidth="1.4" opacity=".45" style={{ ['--arc-op' as string]: 0.45 }} />
               </svg>
-              <span style={{ position: 'absolute', left: '50%', top: '2.4%', transform: 'translate(-100%, -50%)' }}>
+              <span className="ca-chip-pop-a" style={{ position: 'absolute', left: '50%', top: '2.4%', transform: 'translate(-100%, -50%)' }}>
                 <span className="ca-chip-level">
                   <span style={{ display: 'inline-flex', flexDirection: 'row-reverse', alignItems: 'center', gap: 7, padding: '3px 8px 2px 9px', background: '#FFFFFF', border: '1px solid #E4DFD3', fontFamily: MONO, fontSize: 13, letterSpacing: '0.08em', color: '#16181A', whiteSpace: 'nowrap' }}>
                     <span style={{ width: 7, height: 7, background: '#0A7A58', flex: 'none' }} />
-                    <span key={RING_WORDS[ringWord]} className="ca-flip">{RING_WORDS[ringWord]}</span>
+                    <span key={RING_WORDS[ringWord]} className="ca-type" style={{ ['--n' as string]: RING_WORDS[ringWord].length }}>{RING_WORDS[ringWord]}</span>
                   </span>
                 </span>
               </span>
@@ -189,12 +199,17 @@ export default function ReportsIndex() {
                     >
                       Read the assessment
                     </Link>
+                    {/* Past two hours the unit flips: "197 MIN" is honest and
+                        still reads odd on a card next to "18 MIN" siblings
+                        (2026-08-12 polish review) — a three-hour document
+                        says so in hours, and the word count stays as the
+                        precise figure. */}
                     <span style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.08em', color: '#7C8187' }}>
-                      {r.summary.minutes} MIN · {r.summary.words.toLocaleString()} WORDS · PDF AVAILABLE
+                      {r.summary.minutes >= 120 ? `~${(r.summary.minutes / 60).toFixed(1).replace(/\.0$/, '')} HR` : `${r.summary.minutes} MIN`} · {r.summary.words.toLocaleString()} WORDS · PDF AVAILABLE
                     </span>
                   </div>
                 </div>
-                <div style={{ position: 'relative', borderLeft: '1px solid #16181A', minHeight: 280, background: '#131512', display: 'grid', placeItems: 'center', padding: 24, overflow: 'hidden' }}>
+                <div style={{ position: 'relative', borderLeft: '1px solid #16181A', minHeight: 280, background: '#1A1B19', display: 'grid', placeItems: 'center', padding: 24, overflow: 'hidden' }}>
                   <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.14) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
                   {r.ogImage && (
                     <div
@@ -224,7 +239,7 @@ export default function ReportsIndex() {
         </section>
 
         {/* ══ CTA — dark band ══ */}
-        <section id="cta" className="ca-dark" style={{ background: '#131512', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(52px, 9vw, 160px)', position: 'relative', overflow: 'hidden' }}>
+        <section id="cta" className="ca-dark" style={{ background: '#1A1B19', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(52px, 9vw, 160px)', position: 'relative', overflow: 'hidden' }}>
           <div aria-hidden="true" data-plx="0.025" style={{ position: 'absolute', right: '6%', bottom: 30, width: 260, height: 150, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 840, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
             <h2 data-rv style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(24px, 3.6vw, 58px)', lineHeight: 1.1, letterSpacing: '-0.014em' }}>Want this run on your lane?</h2>
