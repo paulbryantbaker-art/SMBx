@@ -1450,6 +1450,26 @@ Every URL below appears in one of the three files in `research/` and supports a 
 - https://www.mrelectric.com/locations/texas/ · https://www.onehourheatandair.com/locations/texas/
 - https://www.benjaminfranklinplumbing.com/locations/texas/ · https://www.mistersparky.com/locations/texas/
 
+### Instrument URLs carried through from the DFW registry runs
+
+Added 2026-08-12 — the state-registry and Census endpoints run 04–07 opened,
+carried so a reader can re-pull the same files.
+
+- https://data.texas.gov/resource/7358-krk7.json
+- https://www.tdlr.texas.gov/acr
+- https://www.tdlr.texas.gov/acr/forms/acr%20law%20booklet.pdf
+- https://www.tdlr.texas.gov/acr/forms/acr002%20contractor%20license%20application.pdf
+- https://www.tdlr.texas.gov/licensesearch/licfile.asp
+- https://www.tdlr.texas.gov/dbproduction2/lrformat.txt
+- https://data.texas.gov/dataset/tdlr-all-licenses/7358-krk7
+- https://tsbpe.texas.gov
+- https://tsbpe.texas.gov/free-licensee-list
+- https://api.census.gov/data/2022/ecnkob/geography.html
+- https://www.census.gov/data/tables/2022/econ/economic-census/naics-sector-56.html
+- https://www2.census.gov/programs-surveys/economic-census/data/2022/sector23/EC2223VALCON.zip
+- https://www2.census.gov/programs-surveys/economic-census/data/2022/sector23/EC2223LOCCONS.zip
+- https://homepros.news/about/
+
 ## Derivations
 
 Figures below appear in no source and are arithmetic on figures that do. Each states its inputs, its arithmetic and its assumption.

@@ -1192,6 +1192,43 @@ individually correct components.
 | **A17.3 adoption count** | "**Twelve states** adopt A17.3" | **Nine states on their own instruments**, plus Vermont from a summary source, plus **New York City and Chicago, which are cities, not states** | The twelve was built by counting two municipal adoptions as state adoptions |
 | **New York unfiled Category 5 tests** | "Roughly **10,000** devices have never had their five-year test filed" (deck Nº2) | **8,442** | The 10,000 summed two different populations — 8,442 Category 5 never filed and 1,691 Category 1 never filed — which may overlap. The master's own text is correct; the deck overstated it |
 
+
+## A.0.5 — Corrections applied 2026-08-12, fifth pass (GUARD PASS)
+
+The first run of this market against the hardened guard set — `crossfoot.mts`,
+`quote-check.mts` and a `sourcing-protection.mts` whose coverage floor now
+refuses to verdict a corpus it cannot classify. **No figure was re-measured and
+no source was re-read.** Every change below is a printed statement brought into
+agreement with itself.
+
+| Figure | Was | Now | Why |
+|---|---|---|---|
+| NYC devices per licensed contractor (D-11) | the quotient printed as a whole number, 697 | `92,075 ÷ 132 = **697.5**` | The quotient is 697.538. A whole number printed against it is working that does not compute, which `crossfoot.mts` reports. The deck's own read, ≈700, is unchanged and correct. |
+
+### Quotations brought to verbatim
+
+`quote-check.mts` requires every span in quotation marks to appear verbatim in
+`research/`. Three in the derived document did not, and none was invented — each
+was a real source sentence that had drifted in the retelling:
+
+| Quoted as | The source's own words | Where |
+|---|---|---|
+| the KONE release span, opening at "based on" | The KONE release reads "based on **(i)** the terms and scope…". The quotation silently dropped the enumerator, so the span was not the release's. | `research/04` · KONE inside-information release, 29 Apr 2026 |
+| the metro figure, phrased as a claim about New York | The phrase in circulation, as the research records it, is "**120,000 elevators in New York**". The document had paraphrased a paraphrase and kept the quotation marks. | `research/07` |
+| the retired platform-cadence claim, shortened | The retired claim reads "40 deals at the 2021 peak **- and** 10+ **transactions** every year since". A correction ledger that misquotes the claim it is retiring cannot be checked against the thing it retired. | `research/15` · retired, unread trade article |
+
+### The coverage finding, which is the one that matters
+
+Run against this market's corpus, the sourcing guard could classify **40% of
+409 origins** and refused to verdict at all — correctly. Every earlier "clean"
+sourcing result on elevator work was issued blind. 100+ domains were classed by
+hand (OEMs and their filings pages, sponsors, operators, associations, the
+federal statistical publishers that do not sit on a `.gov` host), taking
+coverage to **96%**, and the sighted run reports **13 findings** that were
+invisible before. They are recorded in the review, not absorbed here: none of
+them is a wrong figure, and each is a statement about what class of source the
+figure terminates at.
+
 ## Derivations
 
 **D-1 — PE share of US elevator units, bottom-up.** PE-backed roll-up unit counts, where
@@ -1228,7 +1265,7 @@ count overstates the active base by **28.7%**, stated as 29%.
 from the active base against the 12/60-month CAT1/CAT5 structure. Validation: theoretical
 CAT5 rate 16,246/yr against observed 2024 filings 16,212 = **0.2%** variance.
 
-**D-11 — NYC devices per licensed contractor.** 92,075 ÷ 132 = **697**, stated as ~700.
+**D-11 — NYC devices per licensed contractor.** 92,075 ÷ 132 = **697.5**, stated as ~700.
 *Assumption stated as a limit: this counts licensed contractors only and does not
 allocate the OEM branches' disproportionate books.*
 

@@ -230,6 +230,43 @@ looks like here · where the openings are · what would make us walk*.
   the edition the state is on). Recurring revenue a **code requires** is a
   different asset from recurring revenue a customer chooses.
 
+### Pass 1b — How the market PERFORMED, by segment, over time (3–4 runs)
+
+**Added 2026-08-12.** Paul: *"how come in none of these reports do we get any
+real market YoY performance in any of the segments, HVAC install, service,
+plumbing repair and service, etc. This is important in understanding the
+market."*
+
+He was right, and the reason was structural rather than a data problem. **Every
+pass above gathers a STOCK.** Pass 1 counts establishments and employment at one
+date. Pass 2 records who owns what. Pass 3 collects costs and multiples. **No
+pass asked how the market performed**, so no master carried it, so every
+assessment described a market's shape and none described its direction. A buyer
+underwriting a business needs both, and the second is the one that decides
+price.
+
+Coverage rows, and each has an instrument:
+
+| Row | Instrument | What it gives |
+|---|---|---|
+| Employment and wages, by quarter | **BLS QCEW**, 6-digit NAICS, national and county | YoY employment and total wages — the closest thing to a volume series the government publishes for a trade |
+| Prices | **BLS PPI**, industry series for the contractor NAICS | YoY price change. Pair with volume or the revenue read is price mistaken for demand |
+| Construction volume | **Census Value of Construction Put in Place (C30)**, monthly | New versus improvement, residential versus non-residential — the install-side split NAICS cannot make |
+| Equipment shipments | **AHRI** (HVAC), and the trade's equivalent elsewhere | The purest install-demand series that exists. See `home-services/research/dfw-22` — US A/C and heat-pump shipments fell **20%** in 2025, and no master carried it |
+| Segment performance at the filers | **10-K / 10-Q segment notes and earnings calls** | The only place service is reported separately from install. Otis service vs new equipment, APi inspection/service vs install, Comfort Systems backlog, Watsco same-store |
+| Establishment counts, several years | **CBP**, the same file pulled for 2–3 vintages | Formation and exit, not just a level |
+
+Three rules that make this pass worth running rather than decorative:
+
+- **Volume and price are different questions.** A revenue line that held up
+  while unit shipments fell a fifth is price, and price normalises.
+- **A filer's segment note is an instrument; an association's shipment count is
+  its members' own data.** Both are usable; they are not the same class, and the
+  card says which.
+- **Divergence is the finding, not the aggregate.** "The market grew 4%" tells a
+  buyer nothing. Cooling down 26% while furnaces rose 4% tells them what they
+  are buying.
+
 ### Pass 2 — Who already owns what (5–6 runs, the longest)
 
 Platform by platform: sponsor, footprint, brands, **add-on cadence as dates**.

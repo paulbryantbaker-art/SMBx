@@ -441,3 +441,22 @@ Read by `scripts/studio/retired-check.mjs`. Format is fixed — each entry is a
 - requires: average loss|loss per fire|loss reduction
 - ledger: 8.3
 - verdict: OCCUPANCY REQUIRED. 62% lower average loss per fire is **homes**; all structures is 11% lower; and in **warehouses and manufacturing the average loss is HIGHER in sprinklered properties** (Ahrens, NFPA, October 2021). The life-safety case holds across every occupancy; the property-loss case fails in exactly the two classes where the largest industrial accounts sit. Never present the loss-reduction figures without the inversion.
+
+
+## Retired quotations — recorded 2026-08-12 (guard pass, A.0.3)
+
+`quote-check.mts` requires every span in quotation marks to appear verbatim in
+the corpus. A correction ledger has to be able to NAME the wording it retired,
+and retired wording is by definition not in `research/`. It belongs here.
+
+| Retired wording, as it was published | Replaced by | Where it appeared |
+|---|---|---|
+| "X, A Pye-Barker Fire & Safety Company" | The real instance the corpus holds: "Cascade Fire & Security, A Pye-Barker Fire & Safety Company". The retired form was a naming PATTERN written inside quotation marks. | `documents/market-assessment.md` |
+| "more than 1 million outlets" | "more than 1 million restaurant and foodservice outlets" — the National Restaurant Association's own words. The shortened form changes the population being counted. | `documents/market-assessment.md` |
+| "current on required ITM" | "current on annual inspection" — the reporting platform's own predicate. | `documents/market-assessment.md` |
+
+## Retired arithmetic — recorded 2026-08-12
+
+| Was printed as | Is | Why |
+|---|---|---|
+| Grand View 2030 implied by its own stated CAGR, $130,514 m, working shown as a rounded intermediate times the base | $130,516 m, working shown from the unrounded power | 1.066 to the sixth is 1.467382 and the product is 130,516.3. The finding the derivation exists to make is unaffected. |

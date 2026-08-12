@@ -1585,7 +1585,7 @@ Four reasons neither figure appears in this report's sizing:
 1. **Neither is US-specific.** Both are global. Nothing in either publication isolates the United States, which is the only geography this practice underwrites.
 2. **Neither is decomposable into the three sub-verticals.** Sprinkler is a product line inside "products," not a services segment; inspection, testing and maintenance is buried inside "maintenance"; kitchen suppression and clean agent are not broken out at all. Neither figure can size sprinkler and suppression contracting, alarm and detection, or extinguisher and special hazard separately, which is the only cut that matters for a buy-box.
 3. **One is published to a precision no stated methodology supports.** A base-year figure of $88,945.0 million is six significant figures on a global market estimate. Neither publisher publishes a traceable methodology on its public page — no source for the base year, no bottom-up build, no survey base.
-4. **The stated forecast window and the arithmetic do not describe the same period in one case.** A 6.6% CAGR labelled 2025–2030 applied to the 2024 base compounds to about $130,514 m over six years, which reproduces the published 2030 figure of $130,369.2 m; the CAGR implied by the two stated endpoints across 2024→2030 is **6.58%** (Derivations N6). The label describes a five-year window and the arithmetic a six-year one. The second publisher's figures are internally consistent on this test: its stated endpoints imply **6.79%** over five years against a stated 6.8% (Derivations N7).
+4. **The stated forecast window and the arithmetic do not describe the same period in one case.** A 6.6% CAGR labelled 2025–2030 applied to the 2024 base compounds to about $130,516 m over six years, which reproduces the published 2030 figure of $130,369.2 m; the CAGR implied by the two stated endpoints across 2024→2030 is **6.58%** (Derivations N6). The label describes a five-year window and the arithmetic a six-year one. The second publisher's figures are internally consistent on this test: its stated endpoints imply **6.79%** over five years against a stated 6.8% (Derivations N7).
 
 The practical consequence is that market size for this sector has to be built bottom-up — from the installed base in Section 8.4, the occupancy-level obligation in Section 8.5, and a target's own route density and contract file — rather than purchased.
 
@@ -1802,6 +1802,42 @@ Every load-bearing figure was checked against the issuing body's own instrument.
 **What the pass confirmed rather than changed.** The 17x–20x chain in §6.6 was checked link by link and every link holds, on the publishers' own words: the origin is conditional and cites unnamed sources, no transaction occurred, and neither house named as the authority publishes the figure — Capstone publishes 11.8x and Breakwater a 7x-to-10x EBITDA ceiling. Every GF Data figure, every Census container figure, the Cintas dollar lines to the thousand, the federal 1998 and 1999 standard-edition references, the sprinkler loss inversion in warehouses and manufacturing, and the Rockville figures all confirmed exactly as written.
 
 **What could not be reached, and is therefore not carried as sourced:** the union membership filing, the fire-alarm-installer employment series, the current edition designations for five NFPA standards, and the specialty-trade breakout above. Each is named in §5 of the verification record.
+
+## A.0.3 Corrections applied 2026-08-12 — guard pass
+
+The first run of this market against the hardened guard set. **No figure was
+re-measured and no source was re-read.**
+
+| Figure | Was | Now | Why |
+|---|---|---|---|
+| Grand View 2030 implied by its own stated CAGR (N6) | **$130,514 m**, shown as `88,945 × 1.066^6 = 88,945 × 1.4674` | **$130,516 m**, shown as `1.066^6 = 1.467382, and 88,945 × 1.467382` | 1.066^6 is 1.467382 and the product is 130,516.3. The published working printed a rounded intermediate and then a product taken from the unrounded one, so the line did not compute — `crossfoot.mts` reports it. The finding the derivation exists to make, that the stated CAGR label and the arithmetic window differ, is unaffected. |
+
+### Quotations brought to verbatim
+
+| Quoted as | The source's own words | Where |
+|---|---|---|
+| the Pye-Barker naming pattern, with a placeholder inside the quotation marks | A naming **pattern** written inside quotation marks. Replaced with the real instance the corpus holds: "Cascade Fire & Security, A Pye-Barker Fire & Safety Company". | `research/09` |
+| the restaurant outlet count, shortened | The National Restaurant Association's own words are "more than 1 million **restaurant and foodservice** outlets". The shortened form changes what population is being counted. | `research/10` |
+| the compliance predicate, restated as ITM | The reporting platform's predicate is "current on **annual inspection**". | `research/12` |
+
+### Source URLs carried through
+
+The Sources register carried **193 of the corpus's 655 URLs**; the audit
+reported the shortfall as "40 dropped" because it printed the length of a
+40-item sample rather than the count. Both are fixed: the register now carries
+every research URL by document, and the audit reports the true number. This
+master is the reason that reporting bug was found.
+
+### The coverage finding
+
+The sourcing guard could classify **30% of this market's origins** and refused
+to verdict. 188 domains were classed by hand — the operator and sponsor roster
+this market is largely built from, its advisors, associations and trade press —
+taking coverage to **98%**. The sighted run reports **15 findings**, of which
+the three terminal classes (private-transaction multiples, broker and advisor
+surveys, deal values with terms undisclosed) have no instrument and never will:
+naming the source on the page is the whole of the sourcing available, and the
+guard reporting them is the guard working.
 
 ## A.1 Reconciled data conflicts across the twelve streams
 
@@ -2145,6 +2181,779 @@ International Fire & Safety Journal; Fire and Safety Journal Americas; FSM Magaz
 28. MarketsandMarkets, *Fire Protection System Market*, Report 1018 — October 2025 — https://www.marketsandmarkets.com/Market-Reports/fire-protection-system-market-1018.html
 
 
+### The full URL register — every source URL in `research/`, by document
+
+Added 2026-08-12. 17 documents, 655 unique URLs. Carried in full so a
+reader can open any evidence this document rests on without asking for the
+corpus. Company and brand sites appear where a roster entry rests on them.
+
+**`01-government-sizing.md`** — 38 sources
+
+- https://firesprinkler.org/about
+- https://nfsa.org
+- https://nfsa.org/join
+- https://nfsa.org/aboutnfsa
+- https://data.census.gov/api/access/data/table?id=ECNBASIC2022.EC2223BASIC&g=010XX00US&y=2022
+- https://data.census.gov/table/ECNBASIC2022.EC2223BASIC
+- https://data.census.gov/api/access/data/table?id=ECNKOB2022.EC2223KOB&g=010XX00US&y=2022
+- https://data.census.gov/api/access/data/table?id=ECNLOCCONS2022.EC2223LOCCONS&g=010XX00US&y=2022
+- https://data.census.gov/api/access/data/table?id=ECNBASIC2022.EC2256BASIC&g=010XX00US&y=2022
+- https://data.census.gov/api/access/data/table?id=ECNBASIC2022.EC2281BASIC&g=010XX00US&y=2022
+- https://data.census.gov/api/access/data/table?id=CBP2022.CB2200CBP&g=010XX00US&y=2022
+- https://www.census.gov/data/tables/2022/econ/economic-census/naics-sector-23.html
+- https://www.census.gov/data/tables/2022/econ/economic-census/naics-sector-56.html
+- https://www.census.gov/data/developers/data-sets/economic-census.html
+- https://api.census.gov/data/2022/ecnkob/variables.json
+- https://api.census.gov/data/2022/ecnvalcon/groups/EC2223VALCON.html
+- https://api.census.gov/data/2022/ecnsize/groups.html
+- https://api.census.gov/data/2022/ecnnapcsprd/groups.html
+- https://api.census.gov/data/2022/cbp/variables.json
+- https://www.onetonline.org/link/summary/49-2098.00
+- https://unionfacts.com/local-union/59937/PPF/669
+- https://www.cslb.ca.gov/onlineservices/Dataportal/ListByClassification
+- https://web.cslb.ca.gov/About_Us/Library/Reports.aspx
+- https://web.cslb.ca.gov/Resources/Reports/Sunset/CSLB_2023_Sunset_Report.pdf
+- https://www.cslb.ca.gov/Resources/IndustryBulletins/2024/24-02_-_Fire_Certification.pdf
+- https://www.cslb.ca.gov/about_us/library/licensing_classifications/Licensing_Classifications_Detail.aspx?Class=C16
+- https://www.tdi.texas.gov/fire/fmli.html
+- https://appscenter.tdi.texas.gov/reports/p/sfmo
+- https://www.legis.state.tx.us/tlodocs/84R/handouts/C2102016051613001/c7d5d6fc-741b-461b-8f29-cb886b211053.PDF
+- https://firemarshal.maryland.gov/permits-licensing/fire-sprinkler-contractors
+- https://onestop.md.gov/list_views/61701893a0c8d4019fc56757
+- https://nclicensing.org
+- https://wsp.wa.gov/fire-sprinklers
+- https://oci.georgia.gov/inspections-permits-plans/buildings-fire-suppression-systems/fire-suppression-professionals
+- https://statefiremarshal.delaware.gov/technical-services/licensed-public-fire-protection-companies-testing-applications
+- https://firecertacademy.com/resources/nicet-certified-by-state
+- https://www.ibisworld.com/united-states/market-research-reports/fire-protection-security-system-installation-contractors-industry
+- https://www.globenewswire.com/de/news-release/2025/11/10/3184858/28124/en/United-States-Fire-Sprinklers-Market-Analysis-Report-2025-2033-Rising-Fire-Safety-Awareness-Adoption-of-Advanced-Technologies-and-Stringent-Safety-Regulations-Bolster-Growth.html
+
+**`02-codes-and-mandate.md`** — 55 sources
+
+- https://www.nyc.gov/assets/fdny/downloads/pdf/about/Chapter-09.pdf
+- https://nfsa.org/2025/07/02/maryland-and-north-carolina-adopt-2023-edition-of-nfpa-25
+- https://docinfofiles.nfpa.org/files/AboutTheCodes/25/TIA_25_26_1.pdf
+- https://ironsmithfire.com/nfpa-25-inspection-schedule
+- https://www.ashe.org/sites/default/files/ashe/fire-safety-equipment-system-inspection_hospitals.pdf
+- https://nfsa.org/2023/08/17/nfpa-25-fire-sprinkler-testing
+- https://getzfire.com/wp-content/uploads/2020/09/Service-Requirements.pdf
+- https://seattle.gov/Documents/Departments/Fire/Business/SystemsTestingFireAlarm.pdf
+- https://facilitec-sw.com/compliance/nfpa-96-codes
+- https://usmadesupply.com/resources/building-codes-standards/fire-suppression-standards/nfpa-96
+- https://www.health.state.mn.us/facilities/regulation/engineering/docs/lsckitcheneqp.pdf
+- https://www.charleston-sc.gov/1456/Inspection-Frequency
+- https://www.uptocode.build/resources/nfpa-2001
+- https://plainfiredata.com/fire-codes
+- https://www.iccsafe.org/wp-content/uploads/Master-I-Code-Adoption-Chart-1.pdf
+- https://www.centralvalleyfire.com/adopted-codes-standards
+- https://www.nfpa.org/product/nfpa-25-standard-for-the-inspection-testing-and-maintenance-of-water-based-fire-protection-systems/p0025code
+- https://blog.qrfs.com/497-nfpa-25-2026-edition-key-updates-additions
+- https://www.nfpa.org/product/nfpa-72-national-fire-alarm-and-signaling-code/p0072code
+- https://shop.iccsafe.org/nfpa-72-national-fire-alarm-and-signaling-code-2025-edition.html
+- https://www.nfpa.org/product/nfpa-96-standard/p0096code
+- https://fireprotectionfinder.com/news/nfpa-10-2026-electronic-monitoring-fire-extinguishers
+- https://www.uptocode.build/resources/nfpa-25
+- https://www.psintegrated.com/blog/5-year-fire-sprinkler-inspection
+- https://www.health.state.mn.us/facilities/regulation/engineering/docs/lscfiresprinklers.pdf
+- https://dps.mn.gov/divisions/sfm/fire-code/fire-code-information-topic/sprinkler-inspection-testing-and-maintenance
+- https://regulations.justia.com/states/utah/public-safety/title-r710/rule-r710-5/section-r710-5-7
+- https://www.health.state.mn.us/facilities/regulation/engineering/docs/lscfatesting.pdf
+- https://www.uptocode.build/resources/nfpa-72
+- https://nfsa.org/2023/02/03/fire-sprinkler-monitoring-supervision
+- https://www.health.state.mn.us/facilities/regulation/engineering/docs/lscfireext.pdf
+- https://www.firecodes.ai/product/supported-codes
+- https://flrules.org/gateway/ruleno.asp?id=69A-60.003
+- https://flrules.org/gateway/ruleno.asp?id=69A-60.004
+- https://www.myfloridacfo.com/division/sfm/bfp/florida-fire-prevention-code
+- https://www.mass.gov/regulations/527-CMR-100-massachusetts-comprehensive-fire-safety-code
+- https://sfm.illinois.gov/resources/life-safety-code.html
+- https://www.dgs.ca.gov/BSC/Codes
+- https://codes.ohio.gov/ohio-administrative-code/rule-1301:7-7-09
+- https://sbcc.wa.gov/sites/default/files/2024-07/IFC_SignificantChangesReportMaster_07242024.pdf
+- https://nfsa.org/2025/11/06/a-guide-to-documentation-and-owner-retention
+- https://www.thecomplianceengine.com
+- https://www.sandiego.gov/fire/community-risk-reduction/fire-protection-systems/compliance-engine
+- https://raleighnc.gov/fire/services/inspections-compliance-engine
+- https://vancouver.municipal.codes/VMC/16.04.166
+- https://dial.iowa.gov/licenses/alarms-fire/fire-protection-system-licensing
+- https://contractorlicenserequirements.com/washington/fire-sprinkler-license-requirements
+- https://www.kitsap.gov/dcd/Documents/Referenced%20Standards%20for%20System%20Maintenance.pdf
+- https://www.ecfr.gov/current/title-42/chapter-IV/subchapter-G/part-482/subpart-C/section-482.41
+- https://www.federalregister.gov/documents/2016/05/04/2016-10043/medicare-and-medicaid-programs-fire-safety-requirements-for-certain-health-care-facilities
+- https://www.cms.gov/Medicare/Provider-Enrollment-and-Certification/SurveyCertificationGenInfo/Downloads/Survey-and-Cert-Letter-13-55.pdf
+- https://www.nyc.gov/html/dob/downloads/bldgs_code/ll26-04_summary.pdf
+- https://codelibrary.amlegal.com/codes/chicago/c7209359-81de-4059-a679f6a211f04dea/chicagobuilding_il/0-0-0-361622
+- https://codelibrary.amlegal.com/codes/chicago/c7209359-81de-4059-a679f6a211f04dea/chicagobuilding_il/0-0-0-361642
+- https://www.globenewswire.com/news-release/2025/07/10/3113603/0/en/National-Fire-Sprinkler-Association-Responds-to-Removal-of-High-Rise-Fire-Sprinkler-Retrofits-in-Maryland.html
+
+**`03-consolidators-a.md`** — 119 sources
+
+- https://ir.apigroupcorp.com/News/press-releases/news-details/2026/APi-Group-Reports-Record-Fourth-Quarter-and-Full-Year-2025-Financial-Results/default.aspx
+- https://www.businesswire.com/news/home/20260430987224/en/APi-Group-Reports-First-Quarter-2026-Financial-Results
+- https://s201.q4cdn.com/155847588/files/doc_news/APi-Group-Announces-Acquisition-of-CertaSite-and-Provides-Full-Year-2025-Update-2025.pdf
+- https://ir.apigroupcorp.com/News/press-releases/news-details/2026/APi-Group-Completes-Acquisition-of-CertaSite/default.aspx
+- https://www.businesswire.com/news/home/20210727005589/en/-APi-Group-Corporation-to-Acquire-Chubb-Fire-Security-Business-for-%243.1-Billion-
+- https://www.businesswire.com/news/home/20220103005355/en/APi-Group-Completes-Acquisition-of-Chubb-Fire-Security-Business
+- https://www.constrafor.com/network/california/1/api-group-life-safety-usa-dba-western-states-fire-protection
+- https://www.prnewswire.com/news-releases/johnson-controls-reports-q4-and-fy25-results-initiates-fy26-guidance-302604936.html
+- https://s21.q4cdn.com/502874060/files/doc_financials/2025/q4/fy2025-form-10-k-jci-plc.pdf
+- https://www.sec.gov/Archives/edgar/data/1035983/000155837025009536/fix-20250630x10q.htm
+- https://investors.comfortsystemsusa.com/static-files/7c7ffe71-99af-4529-86af-754eeb85f2cf
+- https://www.stocktitan.net/sec-filings/FIX/8-k-comfort-systems-usa-inc-reports-material-event-718072198101.html
+- https://www.businesswire.com/news/home/20260226702092/en/EMCOR-Group-Inc.-Reports-Fourth-Quarter-and-Full-Year-2025-Results
+- https://www.stocktitan.net/sec-filings/EME/10-k-emcor-group-inc-files-annual-report-62a78bc14854.html
+- https://www.corporate.carrier.com/news/news-articles/202403_carrier-announces-agreement-sell-industrial-fire-business-sentinel-capital-partners-for-1425-billion.html
+- https://www.corporate.carrier.com/news/news-articles/202412_carrier-completes-strategic-portfolio-transformation-with-closing-3b-sale-commercial-residential-fire-business.html
+- https://www.sentinelpartners.com/sentinel-capital-partners-carves-out-industrial-fire-business-from-carrier
+- https://www.prnewswire.com/news-releases/sentinel-capital-partners-to-sell-spectrum-safety-solutions-marioff-division-302729353.html
+- https://www.businesswire.com/news/home/20241201081134/en/Kidde-Global-Solutions-Acquired-by-Affiliate-of-Lone-Star-Funds
+- https://www.kidde.com/newsroom/press-release/kgs-acquired-by-affiliate-of-lone-star-funds
+- https://www.sdmmag.com/articles/103804-carrier-completes-sale-of-kidde-global-solutions-to-lone-star-funds
+- https://www.securityinfowatch.com/access-identity/news/53080175/honeywell-to-buy-carriers-access-solutions-business-including-lenels2
+- https://www.securityinfowatch.com/integrators/article/53058689/carrier-global-corp-shifts-portfolio-to-exit-fire-and-security-business
+- https://www.honeywell.com/us/en/press/2025/10/honeywell-announces-updated-business-segment-structure-ahead-of-aerospace-spin-off
+- https://investor.honeywell.com/news-releases/news-release-details/honeywell-completes-spin-solstice-advanced-materials
+- https://www.facilitiesdive.com/news/honeywell-spin-off-plans-leave-building-automation-at-core/803711
+- https://www.markel.com/about-us/news-and-press/markel-announces-agreement-to-acquire-vsc-15676
+- https://www.prnewswire.com/news-releases/markel-announces-agreement-to-acquire-vsc-300954961.html
+- https://www.sec.gov/Archives/edgar/data/1096343/000109634320000010/mkl02042020exhibit991.htm
+- https://www.gryphon-inv.com/companies/consolidated-fire-protection
+- https://www.gryphon-inv.com/news/gryphon-investors-acquires-consolidated-fire-protection-llc
+- https://www.phcppros.com/articles/5789-vsc-fire-security-acquires-automatic-sprinklersunited-fire-suppression
+- https://www.prnewswire.com/news-releases/pye-barker-fire--safety-announces-minority-investments-from-adia-and-gic-to-fuel-new-growth-302347964.html
+- https://www.altas.com/news/pye-barker-fire-safety-announces-minority-investments-from-adia-and-gic-to-fuel-new-growth
+- https://www.kirkland.com/news/press-release/2025/01/kirkland-advises-pye-barker-and-altas-on-sale-of-minority-stakes
+- https://www.prnewswire.com/news-releases/pye-barker-fire--safety-accelerates-growth-strategy-with-57-acquisitions-in-2025-302716032.html
+- https://www.prnewswire.com/news-releases/pye-barker-fire--safety-acquires-priority-one-security-adding-80-team-members-and-four-locations-in-the-southeast-302711773.html
+- https://www.abfjournal.com/adia-and-gic-join-leonard-green-and-atlas-as-investors-in-pye-barker
+- https://summitcompanies.com/insights/news-press/summit-companies-announces-acquisition-by-bdt-msd-partners
+- https://summitcompanies.com/insights/news-press/blackrock-long-term-private-capital-acquires-summit-companies
+- https://www.stblaw.com/about-us/news/view/2025/08/06/summit-companies-to-be-acquired-by-bdt-and-msd-partners
+- https://www.davispolk.com/experience/bdt-msd-partners-acquisition-summit-companies
+- https://www.rwbaird.com/transactions/investment-banking/dealcard/6549
+- https://www.pehub.com/bdt-msd-to-acquire-fire-and-life-safety-services-provider-summit-companies
+- https://aifire.com/about-us
+- https://aifire.com/news
+- https://truarcpartners.com/news/ai-fire-gains-momentum-with-four-new-acquisitions
+- https://www.bloomberg.com/news/articles/2025-02-07/blackstone-said-to-buy-ai-fire-from-truarc-in-1-1-billion-deal
+- https://news.bloomberglaw.com/mergers-and-acquisitions/blackstone-said-to-buy-ai-fire-from-truarc-in-1-1-billion-deal
+- https://www.themiddlemarket.com/latest-news/blackstone-reportedly-purchases-truarc-partners-backed-ai-fire
+- https://media.kkr.com/news-details?news_id=52d9ca49-a80b-4f0f-8f92-b82cb707f1ad
+- https://www.kkr.com/approach/shared-success/marmic-fire-and-safety
+- https://www.kirkland.com/news/press-release/2024/07/kirkland-advises-hggc-on-sale-of-marmic-fire-and-safety-to-kkr
+- https://marmicfire.com/marmic-fire-and-safety-and-kkr
+- https://www.pehub.com/kkr-acquires-marmic-fire-safety
+- https://www.huroncapital.com/news/huron-capital-completes-the-sale-of-sciens-building-solutions
+- https://www.prnewswire.com/news-releases/huron-capital-completes-the-sale-of-sciens-building-solutions-301445542.html
+- https://www.carlyle.com/media-room/news-release-archive/sciens-announces-majority-investment-carlyle
+- https://www.sciensusa.com/news/announces-eighth-florida-acquisition
+- https://www.rwbaird.com/transactions/investment-banking/dealcard/5964
+- https://www.securitysystemsnews.com/article/sciens-announces-majority-investment-from-carlyle
+- https://www.privsource.com/acquisitions/deal/sciens-building-solutions-acquires-southern-fire-control-LXSYWm
+- https://www.prnewswire.com/news-releases/ctsi-to-acquire-afa-protective-systems-301369182.html
+- https://www.prnewswire.com/news-releases/pavion-acquires-integrated-security-and-communications-302038707.html
+- https://www.wppartners.com/pavion-acquires-netronix-integration
+- https://www.wppartners.com/pavion-acquires-turnkey-technology
+- https://www.wppartners.com/pavion-acquires-short-circuit-electronics-inc
+- https://www.wppartners.com/pavion-acquires-premier-security-solutions
+- https://www.wppartners.com/pavion-acquires-security-source
+- https://pavion.com/resource/amidst-triple-digit-business-growth-ctsi-relaunches-as-pavion
+- https://www.securityinfowatch.com/integrators/news/21283202/pavion-ctsi-relaunches-as-pavion
+- https://www.permira.com/portfolio/our-portfolio/encore-fire-protection
+- https://www.kirkland.com/news/press-release/2025/03/kirkland-advises-llcp-on-sale-of-encore-fire-protection
+- https://www.harriswilliams.com/transactions/encore-fire-protection-acquired-by-permira
+- https://www.rwbaird.com/transactions/investment-banking/dealcard/6486
+- https://www.llcp.com/levine-leichtman-capital-partners-sells-encore-fire-protection
+- https://www.bloomberg.com/news/articles/2025-02-06/permira-said-to-buy-encore-fire-protection-in-1-8-billion-deal
+- https://www.alternativeswatch.com/2025/03/13/llcp-exits-fire-protection-specialist-in-1-8bn-deal-with-permira
+- https://www.crunchbase.com/acquisition/permira-acquires-encore-fire-protection--44572ba7
+- https://www.lincolninternational.com/transactions/ae-industrial-partners-has-sold-altus-fire-and-life-safety-to-apax-partners
+- https://www.prnewswire.com/news-releases/altus-fire-and-life-safety-an-ae-industrial-partners-portfolio-company-acquires-fire-systems-inc-301540547.html
+- https://www.prnewswire.com/news-releases/altus-fire-and-life-safety-an-ae-industrial-partners-portfolio-company-acquires-bk-systems-inc-301558614.html
+- https://www.prnewswire.com/news-releases/ae-industrial-partners-backed-altus-fire-and-life-safety-acquires-crime-intervention-alarm-301836785.html
+- https://www.prnewswire.com/news-releases/ae-industrial-partners-backed-altus-fire-and-life-safety-acquires-priority-fire-and-security-inc-301839706.html
+- https://www.altusfire.com/acquisitions
+- https://percheron.com/media/percheron-capital-announces-launch-of-aspyre
+- https://www.prnewswire.com/news-releases/percheron-capital-announces-launch-of-aspyre-fire--life-safety-through-foundational-acquisition-302612360.html
+- https://fsmmag.com/Articles/2025/Daily-Articles/11/Percheron-Capital-Announces-Launch-of-ASPYRE-Fire-Life-Safety.html
+- https://www.knoxlane.com/news/guardian-fire-protection-services
+- https://www.prnewswire.com/news-releases/knox-lane-partners-with-guardian-fire-protection-services-302037596.html
+- https://www.knoxlane.com/news/guardian-fire-protection-services-acquires-harris-fire-protection
+- https://www.alliancebernstein.com/americas/en/private-credit-investors/private-credit-transactions/business-services/deal-announcements/2024-guardian-fire-protection-services.html
+- https://www.harriswilliams.com/transactions/guardian-fire-protection-partners-with-knox-lane
+- https://www.investcorp.com/investcorp-acquires-guardian-fire-services
+- https://www.investcorp-capital.com/en/news-and-insights/2025/07-12-2025
+- https://www.lincolninternational.com/transactions/northern-lakes-capital-has-sold-guardian-fire-services-to-investcorp
+- https://guardianfireholdings.com/press-release
+- https://internationalfireandsafetyjournal.com/investcorp-guardian-fire
+- https://www.riversidecompany.com/currents/weber-add-on-to-certasite-news-release
+- https://www.riversidecompany.com/currents/fire-systems-professionals-add-on-news-release
+- https://www.certasitepro.com/acquisitions
+- https://www.certasitepro.com/news
+- https://www.marketsgroup.org/news/riverside-to-sell-certasite-to-api-group-in-strategic-exit
+- https://www.securityinfowatch.com/alarms-monitoring/fire-life-safety/news/55355522/api-group-completes-acquisition-of-certasite
+- https://www.securityinfowatch.com/alarms-monitoring/fire-life-safety/article/55337561/certasite-set-to-join-api-group-under-2026-acquisition-deal
+- https://tcbmag.com/api-group-acquires-indianapolis-fire-safety-company
+- https://www.securitysales.com/news/certasite-merges-life-safety-advanced-fire/117200
+- https://firesp.com/acquisitions
+- https://www.prnewswire.com/news-releases/fire-safety--protection-acquires-all-star-fire-llc-301187456.html
+- https://firesp.com/news/fire-safety-protection-acquires-all-star-fire-llc
+- https://www.benchmarkintl.com/insights/benchmark-international-successfully-facilitated-the-transaction-between-allstar-fire-llc-and-fire-safety-and-protection-llc-a-portfolio-company-of-sunny-river-management
+- https://sunnyrivermanagement.squarespace.com/s/Sunny-River-Management-SRM-Overview_081522.pdf
+- https://www.businesswire.com/news/home/20190916005845/en/Highview-Backed-National-Fire-Safety-Announces-Acquisition-Elite
+- https://www.businesswire.com/news/home/20211021005344/en/Highview-Backed-National-Fire-Safety-Announces-Acquisition-of-All-Pro-Fire-Protection
+- https://www.businesswire.com/news/home/20211207005594/en/Highview-Backed-National-Fire-Safety-Announces-Acquisition-of-Texas-Fire-Alarm
+- https://www.businesswire.com/news/home/20220111005525/en/Highview-Backed-National-Fire-Safety-Announces-Acquisition-of-Commercial-Fire-Protection
+- https://ctacquisitions.com/guides/private-equity-fire-life-safety-2026
+- https://dealseam.com/fire-life-safety-pe-rollup-tracker-2026
+- https://www.valuationresearch.com/insights/valuation-industry-update-fire-prevention
+
+**`04-consolidators-b.md`** — 96 sources
+
+- https://www.naics.com/naics-code-description/?code=561621
+- https://newsroom.adt.com/uploads/2023/08/ADT-announces-sale-of-commercial-business.pdf
+- https://investor.adt.com/News--Events/news/news-details/2023/ADT-Completes-Sale-of-Commercial-Business/default.aspx
+- https://www.prnewswire.com/news-releases/gtcr-completes-acquisition-of-adts-commercial-fire-and-security-segment-301944792.html
+- https://www.everonsolutions.com/insights/newsroom/press-release/everon-signs-agreement-acquire-multifamily-business-adt
+- https://www.everonsolutions.com/insights/newsroom/press-release/adt-commercial-establishes-standalone-organization-rebrands-company
+- https://www.altas.com/news/pye-barker-fire-safety-announces-minority-investments-from-adia-and-gic-to-fuel-new-growth
+- https://pyebarkerfs.com/news/pye-barker-fire-safety-secures-additional-private-capital-to-invest-in-its-team-customer-care-and-geographic-expansion
+- https://pyebarkerfs.com/services/fire-suppression/restaurant-kitchen-hoods/kitchen-hood-cleaning
+- https://www.huroncapital.com/case/sciens-building-solutions
+- https://www.rwbaird.com/transactions/investment-banking/dealcard/5964
+- https://www.carlyle.com/media-room/news-release-archive/sciens-announces-majority-investment-carlyle
+- https://www.lw.com/en/news/latham-watkins-advises-carlyle-group-acquisition-sciens-building-solutions
+- https://www.leonardgreen.com/ares-closes-850-million-single-asset-continuation-vehicle-for-convergint-led-by-leonard-green-partners
+- https://www.businesswire.com/news/home/20211215006067/en/Ares-Management-Sells-Stake-in-Convergint-Technologies-to-Leonard-Green-and-Harvest-Partners
+- https://www.businesswire.com/news/home/20240724616979/en/HGGC-Sells-Marmic-Fire-Safety-to-KKR
+- https://www.kkr.com/approach/shared-success/marmic-fire-and-safety
+- https://ir.apigroupcorp.com/News/press-releases/news-details/2025/APi-Group-Announces-Acquisition-of-CertaSite-and-Provides-Full-Year-2025-Update/default.aspx
+- https://s201.q4cdn.com/155847588/files/doc_presentations/2025/May/21/APG-Investor-Day-FINAL.pdf
+- https://www.riversidecompany.com/currents/eastman-fire-protection-news-release
+- https://www.riversidecompany.com/currents/psi-exit-news-release
+- https://www.riversidecompany.com/currents/accurate-fire-relay-add-on-news-release
+- https://www.riversidecompany.com/currents/greenguard-news-release
+- https://www.businesswire.com/news/home/20250312169008/en/Levine-Leichtman-Capital-Partners-Sells-Encore-Fire-Protection
+- https://www.llcp.com/levine-leichtman-capital-partners-sells-encore-fire-protection
+- https://www.harriswilliams.com/transactions/encore-fire-protection-acquired-by-permira
+- https://www.businesswire.com/news/home/20250206722322/en/TruArc-Partners-Announces-Sale-of-AI-Fire
+- https://www.caltius.com/equity-partners/news/caltius-equity-partners-sponsors-the-acquisition-of-impact-fire-services
+- https://www.investcorp.com/investcorp-acquires-guardian-fire-services
+- https://www.lincolninternational.com/transactions/northern-lakes-capital-has-sold-guardian-fire-services-to-investcorp
+- https://www.knoxlane.com/news/guardian-fire-protection-services
+- https://www.prnewswire.com/news-releases/knox-lane-partners-with-guardian-fire-protection-services-302037596.html
+- https://www.kirkland.com/news/press-release/2024/01/kirkland-counsels-knox-lane-on-guardian-fire-protection-services-acquisition
+- https://ars-guardian.com
+- https://www.guardianfireprotection.com/services
+- https://guardianfireholdings.com/fire-suppression-and-special-hazard-systems
+- https://www.businesswire.com/news/home/20220502005826/en/Align-Capital-Partners-Exits-Protegis-Fire-Safety
+- https://summitfiresecurity.com/news/blackrock-long-term-private-capital-acquires-summit-companies
+- https://summitcompanies.com/insights/news-press/summit-fire-security-finalizes-acquisition-of-performance-systems-integration
+- https://www.markel.com/about-us/news-and-press/markel-announces-agreement-to-acquire-VSC-15676
+- https://www.securitas.com/en/newsroom/regulatory-press-releases/securitas-has-completed-the-acquisition-of-stanley-security
+- https://ir.stanleyblackanddecker.com/news-events/press-releases/news-details/2022/Stanley-Black--Decker-Completes-Sale-of-Security-Business-to-Securitas-AB-for-3.2-Billion/default.aspx
+- https://www.securitastechnology.com/news/sonitrol-ft-lauderdale-and-level-5-security-group-are-now-part-securitas-technology
+- https://www.morganstanley.com/press-releases/morgan-stanley-capital-partners-acquires-security-101
+- https://www.gemspring.com/gemspring-capital-announces-sale-of-security-101
+- https://www.debevoise.com/news/2026/02/morgan-stanley-capital
+- https://www.koleyjessen.com/insights/news/koley-jessen-assists-tenex-capital-investment-in-minuteman-security-and-life-safety
+- https://minutemanst.com/news/minuteman-security-and-life-safety-secures-a-new-partner
+- https://minutemanst.com/news/minuteman-security-technologies-announces-partnership-with-prospect-partners
+- https://www.securityindustry.org/2025/01/22/sia-new-member-profile-zeus-fire-and-security
+- https://www.zeusfireandsecurity.com/resources/zeus-fire-and-security-acquires-pm-alarms
+- https://www.zeusfireandsecurity.com/resources/zeus-fire-and-security-partners-sgts
+- https://www.zeusfireandsecurity.com/resources/zeus-fire-and-security-partners-clearline
+- https://www.securityinfowatch.com/industry-news/press-release/55248701/pe-firm-graham-partners-acquires-becklar
+- https://www.prnewswire.com/news-releases/becklar-llc-and-bv-investment-partners-complete-transaction-on-new-partnership-301093352.html
+- https://markets.financialcontent.com/buffnews.buffalonewscom/article/gnwcq-2025-9-3-becklar-adds-dynamark-monitoring-to-its-expanding-portfolio-of-monitoring-centers
+- https://www.prnewswire.com/news-releases/lightview-completes-strategic-investment-in-fss-technologies-302595719.html
+- https://lightviewcapital.com/news-article/fss-technologies-acquires-the-fire-group-inc-a-fire-sprinkler-installation-and-service-company
+- https://www.businesswire.com/news/home/20211207005594/en/Highview-Backed-National-Fire-Safety-Announces-Acquisition-of-Texas-Fire-Alarm
+- https://investors.nrg.com/news-releases/news-release-details/nrg-completes-acquisition-vivint-smart-home-inc-creating-leading
+- https://www.cintas.com/docs/default-source/investor-relations/annual-reports/2025-form-10-k.pdf
+- https://www.cintas.com/fire-protection-services
+- https://www.cintas.com/fire-protection-services/special-hazard-suppression
+- https://www.prnewswire.com/news-releases/orr-protection-acquires-compass-fire-protection-to-add-union-sprinkler-capabilities-and-expand-presence-in-the-pacific-northwest-302536048.html
+- https://www.prnewswire.com/news-releases/orr-protection-acquires-detection--suppression-international-dsi-to-strengthen-fire-protection-services-in-texas-302278248.html
+- https://www.prnewswire.com/news-releases/kastle-systems-makes-strategic-investment-in-i2g-systems-strengthening-leadership-in-serving-high-security-industries-and-high-value-large-scale-facilities-302405949.html
+- https://info.security.kastle.com/news/sale-of-kastle-systems-to-entrepreneur-investor-mark-ein-provides-continuity-and-growth-for-security-systems-leader
+- https://1752.com/about-us/vector-security
+- https://www.generational.com/insights/generational-equity-announces-the-acquisition-of-white-fire-extinguisher-inc-by-cintas-corporation-no-2
+- https://belforfranchisegroup.com/our-brands/hoodz
+- https://www.prnewswire.com/news-releases/kitchen-guard-signs-first-franchise-agreement-302117673.html
+- https://www.bertramcapital.com/news/bertram-capital-announces-investment-in-safety-products-holdings
+- https://www.sdmmag.com/ext/resources/Issues/2026/05-May/SDM_100-Report_2026.0417-26.pdf
+- https://www.sdmmag.com/articles/105352-sdm-100-top-100-security-dealers-of-2026
+- https://www.sdmmag.com/ext/resources/Issues/2025/05-May/SDM_100_2025.pdf
+- https://www.securityinfowatch.com/integrators/article/55306317/alarm-industry-players-overcoming-headwinds
+- https://www.sdmmag.com/articles/105106-barnes-buchanan-2026-bullish-on-the-security-industry
+- https://www.sdmmag.com/articles/103337-pye-barker-could-be-eyeing-6b-market-listing-this-year-report-says
+- https://www.sdmmag.com/articles/103431-pye-barker-hits-over-1b-in-revenue-ranks-849th-on-inc-5000
+- https://www.sdmmag.com/articles/104131-guardian-protection-acquires-monitronics-commercial-alarm-accounts-division
+- https://www.bloomberg.com/news/articles/2025-02-07/blackstone-said-to-buy-ai-fire-from-truarc-in-1-1-billion-deal
+- https://www.bloomberg.com/news/articles/2025-02-06/permira-said-to-buy-encore-fire-protection-in-1-8-billion-deal
+- https://www.themiddlemarket.com/latest-news/blackstone-reportedly-purchases-truarc-partners-backed-ai-fire
+- https://www.themiddlemarket.com/latest-news/investcorp-buys-guardian-fire-services-from-northern-lakes-capital
+- https://dallasinnovates.com/north-texas-security-provider-everon-to-acquire-b2b-multifamily-business-from-adt-in-55-million-deal
+- https://www.securitysales.com/news/john-mackey-rapidfire-safety-security-board/153259
+- https://www.securitysales.com/business/mergers/nmc-merges-monitoring-firms
+- https://www.securitysales.com/business/mergers/nmc-president-woodie-andrawos-details-netwatch-merger-deal
+- https://www.securitysystemsnews.com/article/cops-acquires-wholesale-monitoring-business-from-security-partners
+- https://www.securitysystemsnews.com/article/cops-monitoring-acquires-alarmwatch
+- https://memoori.com/adt-commercial-fire-security-business-financial-examin
+- https://www.privateequitywire.co.uk/peterson-partners-sells-performance-systems-integration-riverside-company
+- https://www.franchisetimes.com/franchise_mergers_and_acquisitions/riverside-co-adds-kitchen-cleaning-concept-to-eversmith-brands/article_50e19bf8-eac3-11ed-8003-573782ddee6c.html
+- https://www.prweb.com/releases/eversmith-brands-reaches-milestone-with-500th-franchise-territory-awarded-302306995.html
+- https://www.privsource.com/acquisitions/deal/security-fire-systems-blackford-capital-acquires-lakeview-security-fire-communications-EMSLd5
+- https://privateequityinfo.com/directory/private-equity-portfolio-company/1/telgian
+
+**`05-brand-level-detail.md`** — 47 sources
+
+- https://pyebarkerfs.com/our-family-of-brands
+- https://www.sciensusa.com/service-area-finder/all-locations
+- https://pyebarkerfs.com/locations
+- https://pyebarkerfs.com/about-us/acquisitions
+- https://pyebarkerfs.com/pye_location-sitemap.xml
+- https://pyebarkerfs.com/pye_metro-sitemap.xml
+- https://pyebarkerfs.com/page-sitemap.xml
+- https://pyebarkerfs.com/locations/seattle-wa
+- https://pyebarkerfs.com/locations/salt-lake-city-ut
+- https://pyebarkerfs.com/locations/richmond-va
+- https://pyebarkerfs.com/locations/menomonee-falls-wi
+- https://www.pyebarkerfire.com/locations
+- https://www.wsfp.com
+- https://www.chubbfs.com
+- https://certasitepro.com/locations
+- https://summitcompanies.com/locations
+- https://summitfire.com/branch-locations
+- https://summitfiresecurity.com/branch-locations
+- https://www.everonsolutions.com
+- https://www.everonsolutions.com/about/company-information/locations
+- https://www.convergint.com/about-us
+- https://www.convergint.com/who-we-are/acquisitions
+- https://www.kiddeglobalsolutions.com
+- https://www.aifire.com
+- https://academyfire.com
+- https://impactfireservices.com/contact-us
+- https://www.marmicfire.com
+- https://www.marmicfire.com/locations
+- https://www.sciensbuildingsolutions.com
+- https://www.sciensusa.com
+- https://pavion.com
+- https://pavion.com/about-pavion/locations
+- https://altusfire.com
+- https://zeusfireandsecurity.com
+- https://www.vscfire.com
+- https://www.telgian.com
+- https://www.orrprotection.com
+- https://www.coscofire.com
+- https://www.firetrol.net
+- https://minutemanst.com
+- https://www.security101.com
+- https://firesp.com
+- https://aspyrefls.com
+- https://www.spectrumsafetysolutions.com
+- https://www.apigroupinc.com/robots.txt
+- https://www.businesswire.com/news/home/20260609553468/en/APi-Group-Completes-Acquisition-of-Onyx-Fire-Protection-Services-Inc.-And-Updates-2026-Guidance
+- https://www.businesswire.com/news/home/20260702084305/en/APi-Group-Completes-the-Acquisition-of-WTech-Fire-Group-and-Updates-2026-Guidance
+
+**`06-unit-economics.md`** — 41 sources
+
+- https://www.sec.gov/Archives/edgar/data/1796209/000162828026011620/apg-20251231.htm
+- https://www.sec.gov/Archives/edgar/data/1796209/000162828026011397/apg-20251231xexx991.htm
+- https://ir.apigroupcorp.com/News/press-releases/news-details/2026/APi-Group-Reports-Record-Fourth-Quarter-and-Full-Year-2025-Financial-Results/default.aspx
+- https://ir.apigroupcorp.com/News/press-releases/news-details/2025/APi-Group-Announces-New-Long-Term-Financial-Targets/default.aspx
+- https://www.sec.gov/Archives/edgar/data/1703056/000170305626000022/adt-20251231.htm
+- https://www.sec.gov/Archives/edgar/data/1703056/000170305626000013/q42025adtearningsrelease-e.htm
+- https://www.sec.gov/Archives/edgar/data/723254/000072325425000017/ctas-20250531.htm
+- https://www.sec.gov/Archives/edgar/data/833444/000083344425000097/jci-20250930.htm
+- https://www.bls.gov/oes/2019/may/oes492098.htm
+- https://www.bls.gov/oes/2021/may/oes492098.htm
+- https://www.bls.gov/oes/2022/may/oes492098.htm
+- https://www.bls.gov/oes/2023/may/oes492098.htm
+- https://www.bls.gov/oes/2021/may/oes472152.htm
+- https://www.bls.gov/oes/2023/may/oes472152.htm
+- https://www.onetonline.org/link/summary/49-2098.00
+- https://www.onetonline.org/link/summary/47-2152.00
+- https://www.bls.gov/oes/tables.htm
+- https://www.nicet.org/main-navigation-tree/certification-programs/fire-protection-building-systems/fire-alarm-systems
+- https://www.nicet.org/nicetorg/assets/File/public/CandidateHandbook-FAS.pdf
+- https://www.nicet.org/main-navigation-tree/certification-programs/fire-protection-building-systems/inspection-and-testing-of-water-based-systems
+- https://www.nicet.org/nicetorg/assets/File/public/candidatehandbookitwbs.pdf
+- https://www.nicet.org/main-navigation-tree/certification-programs/fire-protection-building-systems/water-based-systems-layout
+- https://www.nicet.org/main-navigation-tree/certification-programs/fire-protection-building-systems/inspection-and-testing-of-fire-alarm-systems
+- https://www.nicet.org/main-navigation-tree/certification-programs
+- https://www.sprinklerfitters669.org
+- https://firesprinkler.org/about
+- https://www.nfsa.org
+- https://www.nafed.org
+- https://www.flsenate.gov/Laws/Statutes/2024/633.328
+- https://www.flsenate.gov/Laws/Statutes/2024/633.318
+- https://pyebarkerfs.com/news/pye-barker-celebrates-its-80-year-legacy-community-impact-and-innovation-in-2026
+- https://pyebarkerfs.com/about-us/overview
+- https://www.orrprotection.com
+- https://orrprotection.com/who-we-are
+- https://www.servicetrade.com/pricing
+- https://servicetrade.com/resources/reports/fire-industry-benchmark-report
+- https://servicetrade.com/resources/reports/technician-insights-report
+- https://www.buildops.com/pricing
+- https://www.inspectpoint.com/pricing
+- https://www.investing.com/news/company-news/api-group-q4-2025-slides-earnings-beat-margins-hit-record-highs-93CH-4524826
+- https://www.speedwellmemos.com/p/api-group-2q25-business-update
+
+**`07-valuation-and-deals.md`** — 38 sources
+
+- https://www.sec.gov/Archives/edgar/data/1703056/000170305625000145/adt-20250912.htm
+- https://www.sec.gov/Archives/edgar/data/1703056/000170305623000168/commercialpressrelease-ex9.htm
+- https://www.sec.gov/Archives/edgar/data/1703056/000170305623000168/commercialproforma-ex992.htm
+- https://www.sec.gov/Archives/edgar/data/1796209/000162828026028658/apg-20260331.htm
+- https://www.sec.gov/Archives/edgar/data/1796209/000162828026041818/apg-20260609xexx991.htm
+- https://www.sec.gov/Archives/edgar/data/1796209/000162828026046698/apg-20260702xexx991.htm
+- https://www.sec.gov/Archives/edgar/data/1796209/000119312521230264/d146150dex992.htm
+- https://www.sec.gov/Archives/edgar/data/1796209/000119312522000650/d251823dex991.htm
+- https://www.sec.gov/Archives/edgar/data/1796209/000119312522000650/d251823dex992.htm
+- https://www.sec.gov/Archives/edgar/data/1783180/000095014221002448/eh210172127_ex9901.htm
+- https://www.sec.gov/Archives/edgar/data/1783180/000095014224001538/eh240490043_ex99.htm
+- https://www.sec.gov/Archives/edgar/data/1783180/000095014224002865/eh240559253_ex9901.htm
+- https://www.sec.gov/Archives/edgar/data/1783180/000178318025000008/carr-20241231.htm
+- https://www.sec.gov/Archives/edgar/data/1783180/000178318025000008/R120.htm
+- https://www.sec.gov/Archives/edgar/data/66570/000114036126019007/ny20072200x1_ex99-1.htm
+- https://www.globenewswire.com/news-release/2023/08/08/2720406/0/en/ADT-Announces-Sale-of-Commercial-Business-for-1-6-Billion.html
+- https://newsroom.adt.com/uploads/2023/08/ADT-announces-sale-of-commercial-business.pdf
+- https://s201.q4cdn.com/155847588/files/doc_presentations/2025/Feb/27/v2/APG-Investor-Presentation-vFINAL-2-27-Update.pdf
+- https://ir.apigroupcorp.com/News/press-releases/news-details/2025/APi-Group-Announces-Acquisition-of-CertaSite-and-Provides-Full-Year-2025-Update/default.aspx
+- https://www.sentinelpartners.com/sentinel-capital-partners-carves-out-industrial-fire-business-from-carrier
+- https://www.prnewswire.com/news-releases/sentinel-capital-partners-to-sell-spectrum-safety-solutions-marioff-division-302729353.html
+- https://www.prnewswire.com/news-releases/sentinel-closes-sale-of-spectrum-safety-solutions-autronica-unit-302822309.html
+- https://www.prnewswire.com/news-releases/msa-safety-to-acquire-autronica-fire-and-security-a-leading-provider-of-fire-and-gas-detection-and-alarm-systems-302762547.html
+- https://www.prnewswire.com/news-releases/msa-safety-completes-acquisition-of-autronica-fire-and-security-a-leading-provider-of-fire-and-gas-detection-and-alarm-systems-302822266.html
+- https://www.prnewswire.com/news-releases/everon-signs-agreement-to-acquire-multifamily-business-from-adt-302555882.html
+- https://www.prnewswire.com/news-releases/performance-systems-integration-completes-merger-with-summit-fire--security-302540379.html
+- https://www.prnewswire.com/news-releases/pye-barker-fire--safety-accelerates-growth-strategy-with-57-acquisitions-in-2025-302716032.html
+- https://www.prnewswire.com/news-releases/fortis-fire--safety-expands-into-midwest-with-acquisition-of-lamarco-systems-302717545.html
+- https://www.prnewswire.com/news-releases/delcam-capital-expands-space-age-electronics-fire--life-safety-platform-with-acquisition-of-sprinkguard-302801769.html
+- https://www.prnewswire.com/news-releases/gardiner-acquires-intellitech-fire--security-inc-302759929.html
+- https://www.prnewswire.com/news-releases/jensen-hughes-expands-southeast-asia-presence-with-acquisition-of-hilt-302815874.html
+- https://www.leonardgreen.com/portfolio
+- https://www.aifire.com/about
+- https://www.securityinfowatch.com/integrators/article/55306317/alarm-industry-players-overcoming-headwinds
+- https://www.securitysystemsnews.com/article/adt-announces-sale-of-commercial-business-for-1-6-billion-to-private-equity-firm-gtcr
+- https://www.fool.com/earnings/call-transcripts/2026/06/02/api-group-apg-q1-2026-earnings-transcript
+- https://www.fool.com/earnings/call-transcripts/2026/02/25/api-group-apg-q4-2025-earnings-call-transcript
+- https://stockanalysis.com/stocks/apg/statistics
+
+**`08-demand-drivers.md`** — 46 sources
+
+- https://www.eia.gov/consumption/commercial/data/2018/bc/html/b8.php
+- https://www.eia.gov/consumption/commercial/data/2018/bc/html/b7.php
+- https://www.eia.gov/consumption/commercial
+- https://www.eia.gov/consumption/commercial/data/2018/guide.php
+- https://www.marsh.com/en/services/international-placement-services/insights/global_insurance_market_index.html
+- https://www.ciab.com/resources/q1-2026-p-c-market-survey
+- https://www.latentinsure.com/habitational-insurance
+- https://www.verisk.com/resources/faqs/public-protection-classification-ppc-program
+- https://www.isomitigation.com/ppc
+- https://msfes.net/unionvfd/wp-content/uploads/2022/05/ISO-Insurance-Impacts.pdf
+- https://www.federato.ai/library/post/how-iso-fire-protection-ratings-drive-optimal-insurance-pricing
+- https://homefiresprinkler.org/fire-sprinklers-insurance-discounts
+- https://www.fm.com/resources/fm-data-sheets
+- https://www.nfpa.org/-/media/Files/News-and-Research/Fire-statistics-and-reports/Suppression/ossprinklers.pdf
+- https://www.usfa.fema.gov/statistics
+- https://www.usfa.fema.gov/statistics/nonresidential-fires
+- https://www.energy-storage.news/national-fire-protection-association-releases-nfpa-855-ess-safety-standard-2026-edition
+- https://www.telgian.com/nfpa-855-changes-in-2026
+- https://cleanpower.org/wp-content/uploads/gateway/2024/01/NFPA855_Safety_240111.pdf
+- https://www.energy-storage.news/california-bess-legislation-update-fire-safety-bill-becomes-law-permitting-restrictions-do-not
+- https://www.energy-storage.news/new-york-leads-us-in-bess-moratoriums-recent-data-shows
+- https://www.energy-storage.news/tag/moss-landing
+- https://www.nyserda.ny.gov/All-Programs/Energy-Storage-Program/Energy-Storage-Safety
+- https://www.dgs.ca.gov/BSC/Codes
+- https://rules.cityofnewyork.us/rule/uncertified-storage-batteries-for-powered-mobility-devices
+- https://www.nyc.gov/site/fdny/codes/fire-code/fire-code.page
+- https://www.fsresidential.com/new-york/news-events/articles-and-news/nyc-e-bike-laws-expert-insights
+- https://www.nyc.gov/site/dca/news/041-24/mayor-adams-speaker-adams-new-enforcement-powers-prevent-sale-dangerous-
+- https://norrismclaughlin.com/new-york-coop-condo-law-blog/uncategorized/e-bikes-safety-standards-for-new-york-city-apartments
+- https://www.ecfr.gov/current/title-42/chapter-IV/subchapter-G/part-483/subpart-B/section-483.90
+- https://www.ecfr.gov/current/title-42/chapter-IV/subchapter-G/part-482/subpart-C/section-482.41
+- https://www.nic.org/news-press
+- https://www.cushmanwakefield.com/en/united-states/insights/us-marketbeats/us-office-marketbeat-reports
+- https://www.cushmanwakefield.com/en/united-states/insights/us-marketbeats/us-industrial-marketbeat
+- https://www.commercialcafe.com/blog/national-office-report
+- https://www.constructiondive.com
+- https://www.aia.org/resource-center/consensus-construction-forecast
+- https://www.datacenterdynamics.com/en/tags/google
+- https://www.datacenterdynamics.com/en/tags/meta
+- https://www.datacenterdynamics.com/en/tags/amazon-web-services
+- https://www.datacenterdynamics.com/en/news
+- https://www.datacenterknowledge.com
+- https://restaurant.org/research-and-media/research/research-reports/state-of-the-industry
+- https://www.restaurantbusinessonline.com
+- https://www.grandviewresearch.com/industry-analysis/fire-protection-systems-market
+- https://www.marketsandmarkets.com/Market-Reports/fire-protection-system-market-1018.html
+
+**`09-brand-rosters-gapfill.md`** — 102 sources
+
+- https://www.apigroupinc.com/api/v1/companies
+- https://www.apigroupinc.com/api/v1/mapdata/companies
+- https://www.apigroupinc.com/about-us/our-companies/<slug
+- https://www.sec.gov/Archives/edgar/data/1796209/000162828026011620/apg-20251231exx211entityli.htm
+- https://www.sec.gov/Archives/edgar/data/1796209/000095017022002474/apg-ex21_1.htm
+- https://www.sec.gov/Archives/edgar/data/1796209/000119312520096159/d827912dex211.htm
+- https://www.apigroupinc.com/about-us/our-companies/3s
+- https://www.apigroupinc.com/about-us/our-companies/afpg
+- https://www.apigroupinc.com/about-us/our-companies/apinsg
+- https://www.apigroupinc.com/about-us/our-companies/certa
+- https://www.apigroupinc.com/about-us/our-companies/dufam
+- https://www.apigroupinc.com/about-us/our-companies/ics
+- https://www.candoifp.com/locations.php
+- https://www.apigroupinc.com/about-us/our-companies/PFS
+- https://www.apigroupinc.com/about-us/our-companies/secfire
+- https://www.apigroupinc.com/about-us/our-companies/tenet
+- https://www.apigroupinc.com/about-us/our-companies/texsprnk
+- https://www.apigroupinc.com/about-us/our-companies/usafp
+- https://www.apigroupinc.com/about-us/our-companies/vfpg
+- https://www.wsfp.com/locations
+- https://vfpg.com/companies
+- https://vfpg.com/companies/viking-automatic-sprinkler
+- https://vfpg.com/companies/vfp-fire-systems
+- https://vfpg.com/companies/absolute-fire
+- https://vfpg.com/companies/high-sierra
+- https://vfpg.com/companies/kimble-fire
+- https://vfpg.com/companies/landmark-sprinkler
+- https://vfpg.com/companies/quality-fire
+- https://vfpg.com/companies/valley-fire-protection
+- https://pmcf.com/transactions/pmcf-advises-wm-crook-fire-protection-in-its-sale-to-viking-fire-protection-a-subsidiary-of-api-group
+- https://www.davisulmer.com/about-us/our-family.php
+- https://www.davisulmer.com/all-state-fire-security
+- https://www.davisulmer.com/beach-lake-sprinkler
+- https://www.davisulmer.com/cogswell-sprinkler-company
+- https://www.davisulmer.com/eastern-electronics-and-security
+- https://www.davisulmer.com/eastern-fire
+- https://www.davisulmer.com/ellis-fire-protection
+- https://www.davisulmer.com/flannery-fire-protection
+- https://www.davisulmer.com/grunau-fire-protection
+- https://www.davisulmer.com/gw-systems
+- https://www.integratedprotectionservices.com
+- https://www.davisulmer.com/itg-larson
+- https://www.davisulmer.com/quick-response-fire-protection
+- https://www.davisulmer.com/reliance-fire-protection
+- https://www.davisulmer.com/rich-fire-protection
+- https://www.davisulmer.com/sri-fire-security
+- https://www.wmfireprotection.com
+- https://afpgusa.com/locations
+- https://www.api-nsg.com/our-growth.php
+- https://www.certasitepro.com/acquisitions
+- https://www.certasitepro.com/news/advanced-fire-now-certasite
+- https://www.certasitepro.com/news/certasite-acquires-approved-safety-and-security
+- https://www.privsource.com/acquisitions/deal/certasite-acquires-allied-safety-services-e4SZqm
+- https://www.certasitepro.com/acquisitions/fire-systems-professionals
+- https://www.certasitepro.com/locations
+- https://fireandsafetyjournalamericas.com/apiigroup-onyx-fire-deal
+- https://encorefireprotection.com/about/partnership-strategy
+- https://encorefireprotection.com/about/affiliated-brand-partners
+- https://ccabalt.com/fireline-corporation-acquired-by-encore-fire-protection
+- https://encorefireprotection.com/kistler-obrien-fire-protection
+- https://encorefireprotection.com/locations-sitemap.xml
+- https://marmicfire.com/location-sitemap.xml
+- https://marmicfire.com/balco-systems-chooses-marmic
+- https://marmicfire.com/northwest-fire-protection-chooses-marmic
+- https://marmicfire.com/marmic-acquires-4-new-fire-protection-companies
+- https://www.businesswire.com/news/home/20201210005153/en/Thompson-Street-Capital-Partners-Platform-Company-Marmic-Fire-Safety-Co.-Acquires-Total-Fire-Safety-LLC
+- https://www.cbinsights.com/company/fire-control-systems
+- https://natfiresafety.com/service-areas
+- https://natfiresafety.com/frontier-fire
+- https://natfiresafety.com/rci-fire-systems
+- https://www.natfiresafety.com
+- https://www.businesswire.com/news/home/20211021005344/en/Highview-Backed-National-Fire-Safety-Announces-Acquisition-of-All-Pro-Fire-Protection
+- https://www.businesswire.com/news/home/20220111005525/en/Highview-Backed-National-Fire-Safety-Announces-Acquisition-of-Commercial-Fire-Protection
+- https://www.businesswire.com/news/home/20190916005845/en/Highview-Backed-National-Fire-Safety-Announces-Acquisition-Elite
+- https://www.businesswire.com/news/home/20210526005539/en/Highview-backed-National-Fire-Safety-Announces-Acquisition-of-Texas-Fire-Safety
+- https://www.businesswire.com/news/home/20220301005544/en/Highview-Backed-National-Fire-Safety-Announces-Acquisition-of-Absolute-Fire-Protection
+- https://www.spectrum-safety.com
+- https://www.autronicafire.com/news/news/sentinel-capital-partners-carves-out-industrial-fire-business-from-carrier-2
+- https://www.det-tronics.com/news/news/brand_press_release
+- https://www.marioff.com/en/news/sentinel-capital-partners-carves-out-industrial-fire-business-from-carrier
+- https://www.sentinelpartners.com/company/spectrum-safety-solutions
+- https://www.sec.gov/Archives/edgar/data/1796209/000162828026011620
+- https://data.sec.gov/submissions/CIK0001796209.json
+- https://efts.sec.gov/LATEST/search-index?q=%22Western+States+Fire+Protection%22&ciks=0001796209
+- https://www.api-nsg.com/api-locations.php
+- https://vfpg.com/locations
+- https://vfpg.com/sitemap_index.xml
+- https://www.wsfp.com
+- https://www.vfpfire.com/about.php
+- https://www.grunaufire.com/our-family.php
+- https://www.cogswellsprinkler.com/about-us/our-family.php
+- https://markets.financialcontent.com/worldnow.kotv/article/bizwire-2026-2-3-api-group-completes-acquisition-of-certasite
+- https://www.thecfigroup.com/transactions/wm-crook-fire-protection-co-has-been-acquired-by-viking-fire-protection-a-subsidiary-of-api-group
+- https://www.permira.com/portfolio/our-portfolio/encore-fire-protection
+- https://www.llcp.com/levine-leichtman-capital-partners-sells-encore-fire-protection
+- https://marmicfire.com/marmic-announces-acquisition-by-kkr
+- https://natfiresafety.com/page-sitemap.xml
+- https://www.businesswire.com/news/home/20211207005594/en/Highview-Backed-National-Fire-Safety-Announces-Acquisition-of-Texas-Fire-Alarm
+- https://www.spectrum-safety.com/contact
+- https://www.prnewswire.com/news-releases/sentinel-capital-partners-carves-out-industrial-fire-business-from-carrier-302187450.html
+- https://www.guardianfireprotection.com
+- https://ars-guardian.com
+
+**`10-subvertical-3-sizing.md`** — 37 sources
+
+- https://data.census.gov/api/access/data/table?id=ECNNAPCSPRD2022.EC2200NAPCSPRDIND&g=010XX00US&y=2022
+- https://data.census.gov/api/access/data/table?id=ECNNAPCSIND2022.EC2200NAPCSINDPRD&g=010XX00US&y=2022
+- https://www.sec.gov/Archives/edgar/data/723254/000072325425000017/R11.htm
+- https://www.sec.gov/Archives/edgar/data/723254/000072325425000013/ex992025-5x31.htm
+- https://www.cintas.com/investors/financial-reports
+- https://data.census.gov/api/access/data/table?id=ECNBASIC2022.EC2272BASIC&g=010XX00US&y=2022
+- https://api.census.gov/data/2022/ecnnapcsprd
+- https://www.census.gov/programs-surveys/economic-census/technical-documentation/code-lists/product-codes-descriptions.html
+- https://www.sec.gov/Archives/edgar/data/723254/000072325425000017/ctas-20250531.htm
+- https://www.businesswire.com/news/home/20230417005020/en/Cintas-Fire-Protection-Division-Celebrates-20-Years-of-Impact
+- https://www.law.cornell.edu/regulations/california/19-CCR-568
+- https://nces.ed.gov/ccd/tables/202324_summary_3.asp
+- https://nces.ed.gov/fastfacts/display.asp?id=84
+- https://www.aha.org/system/files/media/file/2026/02/Fast-Facts-on-US-Hospitals-2026.pdf
+- https://www.kff.org/medicaid/a-look-at-nursing-facility-characteristics
+- https://restaurant.org/research-and-media/media/press-releases/persistent-cost-increases-and-enduring-demand-will-shape-the-restaurant-industry-in-2026
+- https://firemarshal.utah.gov/licensees
+- https://firemarshal.utah.gov/licensees/fire-extinguisher-companies-table
+- https://firemarshal.utah.gov/licensees/fire-suppression-companies-table
+- https://firemarshal.utah.gov/licensees/kitchen-exhaust-systems-companies-table
+- https://fire.nv.gov/uploadedFiles/firenvgov/content/bureaus/FPL/LicensingWebsitelist03072022.pdf
+- https://www.tdi.texas.gov/fire/fmliexting.html
+- https://appscenter.tdi.texas.gov/reports/p/sfmo
+- https://www.myfloridacfo.com/docs-sf/state-fire-marshal-libraries/sfm-documents/bfp/florida-fire-prevention-code/69a-21.pdf
+- https://web.nafed.org/search
+- https://www.fssa.net/aboutindustry
+- https://www.riversidecompany.com/investment-portfolio/relay-fire-and-safety
+- https://www.riversidecompany.com/currents/greenguard-news-release
+- https://www.prweb.com/releases/eversmith-brands-reaches-milestone-with-500th-franchise-territory-awarded-302306995.html
+- https://kitchenguardfranchise.com/about
+- https://www.ironcladfireprotection.com/blog/what-fire-extinguisher-service-really-costs
+- https://homeguide.com/costs/fire-extinguisher-inspection-cost
+- https://facilitec-sw.com/pricing-business-planning/commercial-kitchen-hood-cleaning-cost-2026-guide
+- https://www.tfp1.com/blog/kitchen-hood-cleaning-cost
+- https://kinetixfire.com/whats-the-cost-of-a-fire-suppression-inspection
+- https://firetron.com/fire-suppression-systems/fire-suppression-system-cost
+- https://hoodzfranchise.com/featured/hood-cleaning-business
+
+**`11-multiples-gapfill.md`** — 39 sources
+
+- https://www.capstonepartners.com/insights/article-security-ma-update
+- https://www.capstonepartners.com/insights/report-capstone-partners-middle-market-mergers-and-acquisitions-valuations-index
+- https://www.prnewswire.com/news-releases/capstone-partners-reports-middle-market-ma-valuations-prove-resilient-despite-macroeconomic-disruption-as-confidence-builds-entering-2026-302743325.html
+- https://www.capstonepartners.com/insights/merger-and-acquisition-outlook-2026
+- https://www.stocktitan.net/news/HBAN/capstone-partners-reports-industrials-industry-undergoes-structural-wo1zkg0prbyl.html
+- https://gfdata.com/wp-content/uploads/Q3-25_GFData_ESOP_Report.pdf
+- https://gfdata.com/gf-data-report-2025-q3-middle-market-ma-slows
+- https://gfdata.com/about/reports
+- https://www.lincolninternational.com/wp-content/uploads/Lincoln-VOG-Private-Market-Perspectives_Q1-2026_Final.pdf
+- http://cdn.hl.com/pdf/2025/bus-engineering-q2-2025.pdf
+- http://cdn.hl.com/pdf/2026/engineering-industrial-infrastructure-market-update-q4-2025.pdf
+- https://meridianib.com/wp-content/uploads/Fire-Life-Safety-Services-MA-Market-Update-Summer-2025_vWEBSITE.pdf
+- https://meridianib.com/wp-content/uploads/Fire-Life-Safety-Services-MA-Market-Update_vF.pdf
+- https://ccabalt.com/wp-content/uploads/2026/05/CCA_AEC_Market-Update_Q1-2026.pdf
+- https://www.grantthornton.co.uk/insights/uk-fire-and-security-sector-ma-review-2025
+- https://www.deloitte.com/us/en/insights/industry/engineering-and-construction/engineering-and-construction-industry-outlook.html
+- https://www.sec.gov/Archives/edgar/data/1796209/000162828026011620/R13.htm
+- https://www.sec.gov/Archives/edgar/data/1796209/000162828026011620/R55.htm
+- https://www.sec.gov/Archives/edgar/data/1796209/000162828026011620/FilingSummary.xml
+- https://www.sec.gov/Archives/edgar/data/723254/000072325425000017/ctas-20250531.htm
+- https://efts.sec.gov/LATEST/search-index
+- https://www.leonardgreen.com/ares-closes-850-million-single-asset-continuation-vehicle-for-convergint-led-by-leonard-green-partners
+- https://www.weil.com/articles/weil-advised-leonard-green-partners-in-closing-of-ares-850m-singleasset-continuation-vehicle
+- https://natlawreview.com/press-releases/ares-closes-850-million-single-asset-continuation-vehicle-convergint-led
+- https://www.prnewswire.com/news-releases/pye-barker-fire--safety-announces-minority-investments-from-adia-and-gic-to-fuel-new-growth-302347964.html
+- https://www.kirkland.com/news/press-release/2025/01/kirkland-advises-pye-barker-and-altas-on-sale-of-minority-stakes
+- https://www.rwbaird.com/transactions/investment-banking/dealcard/6486
+- https://www.llcp.com/levine-leichtman-capital-partners-sells-encore-fire-protection
+- https://www.sdmmag.com/articles/103337-pye-barker-could-be-eyeing-6b-market-listing-this-year-report-says
+- https://www.pehub.com/on-the-block-three-more-fire-safety-providers-expected-to-hit-the-market
+- https://www.pehub.com/private-equity-finds-recurring-demand-8-notable-deals-in-the-fire-safety-sector
+- https://www.bloomberg.com/news/articles/2025-02-07/blackstone-said-to-buy-ai-fire-from-truarc-in-1-1-billion-deal
+- https://www.themiddlemarket.com/latest-news/blackstone-reportedly-purchases-truarc-partners-backed-ai-fire
+- https://www.bloomberg.com/news/articles/2025-02-06/permira-said-to-buy-encore-fire-protection-in-1-8-billion-deal
+- https://news.bgov.com/private-equity/permira-said-to-buy-encore-fire-protection-in-1-8-billion-deal
+- https://www.securityinfowatch.com/integrators/article/55373411/esx-2026-texas-sized-rmr
+- https://stockanalysis.com/stocks/ctas/statistics
+- https://www.breakwaterma.com/blog/fire-alarm-life-safety-company-valuation-multiples-2026
+- https://morganbusinesssales.com/2026-fire-protection-services-ma-overview
+
+**`12-annuity-quantified.md`** — 38 sources
+
+- https://www.sec.gov/Archives/edgar/data/1796209/000162828026011620/apg-20251231.htm
+- https://www.sec.gov/Archives/edgar/data/1796209/000119312521270859/d399955d424b5.htm
+- https://www.sec.gov/Archives/edgar/data/1796209/000095012319012050/filename1.htm
+- https://www.sec.gov/Archives/edgar/data/723254/000072325425000017/R32.htm
+- https://www.cintas.com/docs/default-source/investor-relations/annual-reports/2024-form-10-k.pdf
+- https://www.sec.gov/Archives/edgar/data/723254/000072325425000033/ctas-20250831.htm
+- https://www.rollins.com/investors/financial-information/sec-filings/content/0000084839-26-000008/rol-20251231.htm
+- https://investors.unifirst.com/static-files/a8fa7b30-f8ff-4cb5-9618-2e047c9fa0ec
+- https://efts.sec.gov/LATEST/search-index?q=<phrase
+- https://s201.q4cdn.com/155847588/files/doc_presentations/2025/May/21/APG-Investor-Day-FINAL.pdf
+- https://www.fool.com/earnings/call-transcripts/2026/02/25/api-group-apg-q4-2025-earnings-call-transcript
+- https://s201.q4cdn.com/155847588/files/doc_news/APi-Group-Corporation-to-Acquire-Chubb-Fire--Security-Business-for-3.1-Billion-2021.pdf
+- https://s201.q4cdn.com/833622905/files/doc_downloads/featured_materials_docs/ADT-Business-Overview-and-Financial-Modeling-April-2022.pdf
+- https://www.globenewswire.com/news-release/2026/03/02/3247200/0/en/adt-reports-fourth-quarter-and-full-year-2025-results-announces-new-1-5-billion-share-repurchase-authorization.html
+- https://www.everonsolutions.com/insights/newsroom/press-release/adt-commercial-establishes-standalone-organization-rebrands-company
+- https://confirmedlifesafety.com/wp-content/uploads/2023/04/Sprinkler_Testing_2622_.pdf
+- https://www.leegov.com/procurement/Project%20Documents/B210350NAT%20Pye-Barker%20(Naples%20FIre
+- https://www.fpiseattle.com/master-service-agreement
+- https://www.rockvillemd.gov/news/2024/01/31/compliance-engine-system-makes-rockville-safer
+- https://www.seattle.gov/fire/business-services/systems-testing
+- https://www.sandiego.gov/fire/fireprev/fireprosys/compliance-engine
+- https://www.forneytx.gov/AgendaCenter/ViewFile/Item/8466?fileID=11907
+- https://www.sedalia.com/wp-content/uploads/compliance-implementation-plan.pdf
+- https://www.thecomplianceengine.com/what-is-tce
+- https://nfsa.org/2018/12/05/third-party-itm-reporting
+- https://servicetrade.com/knowledge-base/fire-industry-benchmark-report
+- https://servicetrade.com/resources/reports/fire-industry-benchmark-report
+- https://servicetrade.com/resources/guides/how-to-grow-repair-revenue
+- https://www.globenewswire.com/news-release/2024/10/30/2971735/0/en/ServiceTrade-2024-Benchmark-Reports-Reveal-Fire-Protection-and-Mechanical-Service-Customers-Outperform-Industry-Peers.html
+- https://www.globenewswire.com/news-release/2026/02/05/3233046/0/en/Commercial-Contractors-Boost-Margins-25-and-Work-Orders-15-While-Cutting-Unplanned-Calls-by-27-With-ServiceTrade.html
+- https://www.servicetitan.com/press/2025-commercial-service-market-report
+- https://www.inspectpoint.com/fire-technician-efficiency-tips-to-streamline-inspections-service-visits
+- https://www.uptickhq.com/us/blog/how-fire-protection-companies-use-software-to-win-and-retain-more-service-contracts
+- https://internationalfireandsafetyjournal.com/fire-protection-servicetrade
+- https://meridianib.com/wp-content/uploads/Fire-Life-Safety-Services-MA-Market-Update_vF.pdf
+- https://zeorouteplanner.com/fire-extinguisher-inspection-route-optimization-guide
+- https://resources.impactfireservices.com/company-blog/a-day-in-the-life-of-a-fire-and-life-safety-field-technician
+- https://www.vettedbiz.com/franchises/hoodz
+
+**`verification-pass-2026-07-30.md`** — 25 sources
+
+- https://www.sec.gov/Archives/edgar/data/1703056/000119312523205548/d531854dex991.htm
+- https://www.sec.gov/Archives/edgar/data/1703056/000170305623000168/commercialproforma-ex992.htm
+- https://s201.q4cdn.com/833622905/files/doc_downloads/featured_materials_docs/ADT-Business-Overview-and-Financial-Modeling-April-2022.pdf
+- https://www.everonsolutions.com/insights/newsroom/press-release/adt-commercial-establishes-standalone-organization-rebrands-company
+- https://www.prnewswire.com/news-releases/gtcr-completes-acquisition-of-adts-commercial-fire-and-security-segment-301944792.html
+- https://regs.maryland.gov/us/md/exec/comar/29.06.01.07
+- https://www.law.cornell.edu/regulations/maryland/Md-Code-Regs-29.06.01.08
+- https://corporate.marsh.com/news-events/2026/july/global-commercial-insurance-falls-6-percent-q2-2026.html
+- https://www.eia.gov/consumption/commercial/data/2018/bc/html/b10.php
+- https://www.eia.gov/consumption/commercial/data/2018/bc/html/b6.php
+- https://data.census.gov/api/access/data/table?id=ECNKOB2022.EC2223KOB&g=010XX00US&y=2022
+- https://api.census.gov/data/2022/ecnkob/variables.html
+- https://bhs.econ.census.gov/ombpdfs2022/export/2022_CC-23820_mu.pdf
+- https://data.census.gov/api/access/data/table?id=ECNLOCCONS2022.EC2223LOCCONS&g=010XX00US&y=2022
+- https://api.census.gov/data/2022/ecnloccons/variables.html
+- https://s201.q4cdn.com/155847588/files/doc_presentations/2025/May/21/APG-Investor-Day-FINAL.pdf
+- https://gfdata.com/wp-content/uploads/Q3-25_GFData_ESOP_Report.pdf
+- https://middlemarketgrowth.org/wp-content/uploads/2025/04/GF-Data-4th-Quarter-Highlights-and-Products.pdf
+- https://www.meridianib.com/wp-content/uploads/Fire-Life-Safety-Services-MA-Market-Update_vF.pdf
+- https://www.sdmmag.com/articles/103337-pye-barker-could-be-eyeing-6b-market-listing-this-year-report-says
+- https://www.prnewswire.com/news-releases/pye-barker-fire--safety-announces-minority-investments-from-adia-and-gic-to-fuel-new-growth-302347964.html
+- https://www.capstonepartners.com/insights/article-security-ma-update
+- https://www.breakwaterma.com/blog/fire-alarm-life-safety-company-valuation-multiples-2026
+- https://www.ctacquisitions.com/guides/private-equity-fire-life-safety-2026
+- https://www.zeusfireandsecurity.com/resources/fire-and-security-mergers-and-acquisitions-trends
+
+**`verification-pass-2026-08-10-domains.md`** — 2 sources
+
+- https://absolutefireaz.com
+- https://www.securityfiresystems.com
+
+- https://www.sec.gov/Archives/edgar/data/1796209/000162828026011620/0001628280-26-011620-index.htm
+
 ## Derivations
 
 Figures below appear in no source and are arithmetic on figures that do. Each states its inputs, its arithmetic and its assumption. Identifiers are scoped by series to the part that uses them.
@@ -2300,7 +3109,7 @@ Inputs are the cited figures above. Nothing here introduces a new source.
 
 **N4 — Renovation shares, floorspace.** 45,165 ÷ 96,423 = **46.8%** renovated since 2000; 43,832 ÷ 96,423 = **45.5%** not renovated; 7,426 ÷ 96,423 = **7.7%** built 2013 or later. Check: 45,165 + 43,832 + 7,426 = **96,423**, so the three categories are exhaustive and mutually exclusive.
 
-**N6 — Grand View internal consistency.** Stated endpoints $88,945.0 m (2024) → $130,369.2 m (2030), a ratio of 1.4657; implied CAGR over six years = 1.4657^(1/6) − 1 = **6.58%** a year. Applying the stated 6.6% over six years: 88,945 × 1.066^6 = 88,945 × 1.4674 = **$130,514 m**, which approximates the published 2030 figure. Assumption: the base year is 2024 as published, so the labelled 2025–2030 window and the compounding window differ.
+**N6 — Grand View internal consistency.** Stated endpoints $88,945.0 m (2024) → $130,369.2 m (2030), a ratio of 1.4657; implied CAGR over six years = 1.4657^(1/6) − 1 = **6.58%** a year. Applying the stated 6.6% over six years: 1.066^6 = 1.467382, and 88,945 × 1.467382 = **$130,516 m**, which approximates the published 2030 figure. Assumption: the base year is 2024 as published, so the labelled 2025–2030 window and the compounding window differ.
 
 **N7 — MarketsandMarkets internal consistency.** $85.06 bn (2025) → $118.14 bn (2030), a ratio of 1.3889; over five years 1.3889^(1/5) − 1 = **6.79%** a year, matching the stated 6.8% CAGR.
 

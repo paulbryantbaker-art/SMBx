@@ -174,3 +174,23 @@ heading followed by the four fields, in order.
 - requires: five-year|Category 5|CAT5|never filed|unfiled|New York|NYC
 - ledger: A.0.4
 - verdict: CORRECTED to 8,442. The 10,000 summed Category 5 never-filed (8,442) with Category 1 never-filed (1,691), two populations that may overlap.
+
+
+## Retired quotations — recorded 2026-08-12 (guard pass, A.0.5)
+
+`quote-check.mts` requires every span in quotation marks to appear verbatim in
+the corpus. A correction ledger has to be able to NAME the wording it retired,
+and the retired wording is by definition not in `research/` — it was never a
+source. It belongs here, with the record of what replaced it.
+
+| Retired wording, as it was published | Replaced by | Where it appeared |
+|---|---|---|
+| "based on the terms and scope of any potential divestments of TKE's or KONE's current business operations required for the satisfaction of regulatory conditions to completion." | The release's own span, opening at "the terms and scope" — the quotation had silently dropped the enumerator "(i)". | `documents/market-assessment.md` |
+| "New York has 120,000 elevators" | "120,000 elevators in New York", the phrase the research records as circulating. | `documents/market-assessment.md` |
+| "40 deals at the 2021 peak, 10+ every year since" | "40 deals at the 2021 peak - and 10+ transactions every year since", the claim as the unread trade article stated it. Still retired as a claim; only the quotation of it is corrected. | `documents/market-assessment.md` |
+
+## Retired arithmetic — recorded 2026-08-12
+
+| Was printed as | Is | Why |
+|---|---|---|
+| NYC devices per licensed contractor, quotient printed as a whole number 697 | 697.5 | 92,075 divided by 132 is 697.538. The deck's own read, approximately 700, is unchanged. |

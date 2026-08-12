@@ -37,7 +37,7 @@ accent: 6.1 The active base | band-highrise.jpg | 50% 50%
 
 - **There is no labour arbitrage in this trade, and a buyer arriving from home services will underwrite the wrong cost line.** BLS OEWS (May 2023) puts the elevator mechanic median at **$102,420** against an HVAC median of $57,300 — 1.79 times — and within 1% of the *ninetieth percentile* for plumbers. California's prevailing determination loads a $63.95 basic rate to a **$108.095** total package. The trade is unionised under a national agreement whose ratio rule caps helpers, apprentices and assistant mechanics against mechanics on any one job, and mechanics come out of a four-year, 6,800-hour apprenticeship. Capacity is bought with route books, not with hiring.
 
-- **A structural event is in flight and it is roughly time-boxed.** KONE agreed to acquire TK Elevator on 29 April 2026 at an enterprise value of **€29.4 billion**, combining approximately **3.2 million** maintained units, with completion no earlier than the second quarter of 2027. Consideration adjusts "based on the terms and scope of any potential divestments of TKE's or KONE's current business operations required for the satisfaction of regulatory conditions to completion." Forced disposals by a merging pair are the largest source of acquirable density this market has produced, and the window is knowable.
+- **A structural event is in flight and it is roughly time-boxed.** KONE agreed to acquire TK Elevator on 29 April 2026 at an enterprise value of **€29.4 billion**, combining approximately **3.2 million** maintained units, with completion no earlier than the second quarter of 2027. Consideration adjusts "the terms and scope of any potential divestments of TKE's or KONE's current business operations required for the satisfaction of regulatory conditions to completion". Forced disposals by a merging pair are the largest source of acquirable density this market has produced, and the window is knowable.
 
 - **The acquirable ground sits below the sponsors' floor.** Ten private-equity-backed service platforms were verified, alongside four adjacent holdings and seven strategic consolidators. Below roughly **750** contracted units no sponsor process was found at all, and no platform presence was found in the Interior Mountain West, the Northern Plains, the Interior South and Appalachia, or Northern New England. That absence is an opportunity only if the route-density arithmetic in Part V survives contact with a specific book.
 
@@ -336,7 +336,7 @@ New York was selected on data availability rather than size. It publishes device
 | Less construction equipment | 1,379 |
 | Permanent vertical-transportation base | **92,075** |
 
-Using record count in place of active count overstates the serviceable base by 29%. Any metropolitan figure built on "New York has 120,000 elevators" is wrong by that margin.
+Using record count in place of active count overstates the serviceable base by 29%. Any metropolitan figure built on "120,000 elevators in New York" is wrong by that margin.
 
 By type: elevators **81,232**; accessibility lifts 7,034; escalators **2,606**; dumbwaiters 1,197; moving walks 6. Escalators are 71.1% Manhattan, the most geographically concentrated segment in the data, and escalator and dumbwaiter decommission rates run at roughly twice the elevator rate — shrinking asset classes that should not be underwritten as growing ones.
 
@@ -436,7 +436,7 @@ The register's own behaviour supplies the boundary: below approximately 750 cont
 |---|---|---|---|
 | Private-equity share of US units | "≈10% of US elevator units," sourced on the published card to a December 2025 trade article | **8–9%, an estimate, with arithmetic in Derivations** | The cited article is paywalled and was never read, so its base year, denominator and treatment of sponsor-owned manufacturers are unknown |
 | Manufacturer/independent split | "OEMs hold ≈60%. Independents still hold ≈30%" | **Retired; no verified US split exists** | Rests on the same unread article. The three published shares also sum to exactly 100%, which no real ownership estimate does |
-| Platform deal cadence | "40 deals at the 2021 peak, 10+ every year since" | **Unverified; not restated** | Same unread article |
+| Platform deal cadence | "40 deals at the 2021 peak - and 10+ transactions every year since" | **Unverified; not restated** | Same unread article |
 | Platform retention | "typically exceeds 90%" | **Unverified, and directionally unsupported** | The only disclosed retention is a manufacturer's own, and it declined |
 | Route density illustration | "5 stops" against "8 stops," rendered as a measured chart | **Withdrawn** | No source on the page. The point survives and is better evidenced by Part VI |
 
@@ -995,7 +995,7 @@ Figures below appear in no source and are arithmetic on figures that do. Each st
 | **29%** New York record-count overstatement | 120,256, 93,454 | 120,256 ÷ 93,454 = 1.287 | Active status as published |
 | **34.5% / 7.1% / 10.5** New York concentration | 32,208, 93,454, 3,072, 43,454 | 32,208 ÷ 93,454; 3,072 ÷ 43,454; 32,208 ÷ 3,072 | Threshold is five or more devices per building |
 | **108,321** annual inspection events | Active base against the 12-month and 60-month structure | Category 1 annually plus Category 5 amortised | Validated against 16,212 observed 2024 Category 5 filings against 16,246 theoretical |
-| **≈700** devices per licensed contractor | 92,075, 132 | 92,075 ÷ 132 = 697 | Licensed contractors only; does not allocate manufacturer branches |
+| **≈700** devices per licensed contractor | 92,075, 132 | 92,075 ÷ 132 = 697.5 | Licensed contractors only; does not allocate manufacturer branches |
 | **12.95 times** APi/Elevated | $570 million, $220 million, 20% | 570 ÷ (220 × 0.20) | The 20% margin is an assumption, not a disclosure. At 15% the multiple is 17.3; at 25%, 10.4 |
 | **18.2 times** KONE/TKE | €29.4 billion, €1,617 million | 29,400 ÷ 1,617 = 18.18 | Enterprise value including net debt against adjusted EBITDA |
 | **€992,312,200** EC fine total | The decision's per-country table | Sum of the table | The decision prints no total; €617 million is Germany, where services were excluded |
