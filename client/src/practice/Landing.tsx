@@ -309,8 +309,8 @@ function ProofBand() {
 }
 
 /** The seven-phase explorer: left rail of mono tabs grouped under the two
- *  engagement names, right pane with the active phase. Auto-cycles every
- *  5.2s until the reader interacts with the section (reference behavior). */
+ *  engagement names, right pane with the active phase. Below 1025 it
+ *  auto-cycles every 4.6s until the reader interacts with the section. */
 /* THE ENGAGEMENT ADVANCES AS YOU SCROLL (2026-08-09, Paul, sending
    progressive screenshots of carta.com's SOLUTIONS section: "look at some of
    the progression scroll animations… this would be kinda cool for how it
@@ -329,10 +329,14 @@ function ProofBand() {
    original timer runs, which also keeps the audited mobile page unchanged.
 
    The travel window is deliberately longer than the block: phases advance
-   from when its top crosses 82% of the viewport until its bottom clears 18%,
-   so all seven land inside one comfortable scroll rather than flickering past
-   in the last 200px. A click PINS the selection — reading beats scrubbing,
-   and the pin is what makes the panel usable as a reference. */
+   from when its top crosses 82% of the viewport until its bottom clears 30%
+   (was 18% — tightened 2026-08-12, Paul on this section: "speed up all 3 of
+   these animations, just a little bit"; a narrower window is what "faster"
+   means for a scroll-driven instrument, so each phase now lands in ~12% less
+   scroll), so all seven land inside one comfortable scroll rather than
+   flickering past in the last 200px. A click PINS the selection — reading
+   beats scrubbing, and the pin is what makes the panel usable as a
+   reference. */
 function Engagement() {
   const [phase, setPhase] = useState(0);
   const pinned = useRef(false);
@@ -341,7 +345,7 @@ function Engagement() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     // Below the desktop breakpoint, keep the original timer.
     if (!window.matchMedia('(min-width: 1025px)').matches) {
-      const t = setInterval(() => { if (!pinned.current) setPhase(p => (p + 1) % 7); }, 5200);
+      const t = setInterval(() => { if (!pinned.current) setPhase(p => (p + 1) % 7); }, 4600);
       return () => clearInterval(t);
     }
     let raf = 0;
@@ -353,7 +357,7 @@ function Engagement() {
       if (!host) return;
       const r = host.getBoundingClientRect();
       const vh = window.innerHeight;
-      const span = r.height + vh * 0.64;
+      const span = r.height + vh * 0.52;
       if (span <= 0) return;
       const p = (vh * 0.82 - r.top) / span;
       const i = Math.max(0, Math.min(6, Math.floor(p * 7)));
@@ -376,7 +380,7 @@ function Engagement() {
             {PHASES.map((p, i) => (
               <Fragment key={p.ph}>
                 {i > 0 && <span className="ch-wire" aria-hidden="true"><i /></span>}
-                <div className="ch-node" style={{ background: i === phase ? '#0A7A58' : i > 4 ? '#16241E' : undefined, borderColor: i === phase ? '#0FA97C' : i > 4 ? '#2E5F4C' : undefined, textAlign: 'center', transition: 'background .35s ease, border-color .35s ease' }}>
+                <div className="ch-node" style={{ background: i === phase ? '#0A7A58' : i > 4 ? '#16241E' : undefined, borderColor: i === phase ? '#0FA97C' : i > 4 ? '#2E5F4C' : undefined, textAlign: 'center', transition: 'background .25s ease, border-color .25s ease' }}>
                   <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: i === phase ? '#DFF5EC' : '#0FA97C' }}>{String(i + 1).padStart(2, '0')}</div>
                   <div style={{ marginTop: 7, fontSize: 13.5, lineHeight: 1.3, color: '#F4F5F1' }}>{p.ph}</div>
                 </div>
@@ -519,9 +523,9 @@ function useCycle(len: number, ms: number, offsetMs = 0) {
     if (len < 2) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     /* offsetMs shifts WHERE in a matching animation cycle the swaps land —
-       the ring's 8s interval alone would fire at 93.75% of the 8s build loop
-       (0.5s animation delay), 140ms BEFORE the chips dissolve, so the reader
-       would catch every retype. +1.3s moves the landing to 10% of the cycle,
+       the ring's 7s interval alone would fire at ~93% of the 7s build loop
+       (0.5s animation delay), just BEFORE the chips dissolve, so the reader
+       would catch every retype. +1.2s moves the landing to 10% of the cycle,
        the middle of the hidden window (95%..30%). */
     let t: ReturnType<typeof setInterval> | undefined;
     const kick = setTimeout(() => {
@@ -700,13 +704,13 @@ export default function Landing() {
   const [ownerHero, setOwnerHero] = useState(false);
   // The hero ring's two chips step through the seven phases, three apart so
   // they never show the same word.
-  /* 8000ms + 1300ms offset, not the old 5600: the ring runs the 8s
-     construction loop now (carta.css, THE RING BUILDS ITSELF) and the chips
-     are hidden between 95% of one cycle and 30% of the next, so a swap on
-     the loop's own period, offset into that window, always lands while
-     they're invisible — each rebuild types a fresh pair of words, and the
-     word never changes in front of the reader. */
-  const ring = useCycle(PHASES.length, 8000, 1300);
+  /* 7000ms + 1200ms offset — the loop's own period (carta.css, THE RING
+     BUILDS ITSELF; 7s since the 2026-08-12 tightening), offset so every
+     swap lands at ~10% of the cycle. The chips are hidden between 95% of
+     one cycle and 30% of the next, so the swap always lands while they're
+     invisible — each rebuild types a fresh pair of words, and the word
+     never changes in front of the reader. */
+  const ring = useCycle(PHASES.length, 7000, 1200);
   const who = useCycle(WHO_WORDS.length, 6400);
   // The hunt board fills under the reader's own scroll (desktop); -1 hands it
   // back to the CSS cascade.
