@@ -13,7 +13,7 @@
  * should say so before someone commits to it). Facet chips render only once
  * a facet has two or more values — a filter with one option is furniture.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'wouter';
 import PracticeShell, { Handles } from './PracticeShell';
 import { REPORT_LIST } from './reports/registry';
@@ -56,20 +56,38 @@ function Chip({ label, on, onClick }: { label: string; on: boolean; onClick: () 
 }
 
 export default function ReportsIndex() {
-  // Same period as the 7s construction loop (carta.css, THE RING BUILDS
-  // ITSELF; 7s since the 2026-08-12 tightening), first swap offset +1200ms
-  // so every swap lands at ~10% of the cycle — the middle of the chip's
-  // hidden window (95%..30%). Each rebuild types a fresh word; the word
-  // never changes in front of the reader.
+  /* The chip retypes every 5.6s. The ring draws ITSELF once and then simply
+     turns (carta.css, THE RING BUILDS ITSELF — rewritten 2026-08-12 evening),
+     so this timer is no longer phase-locked to a rebuild: the retype is the
+     swap the reader is meant to catch. +900ms on the first one clears the
+     chip's own entrance (it lands at ~2.8s). */
   const [ringWord, setRingWord] = useState(0);
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     let t: ReturnType<typeof setInterval> | undefined;
     const kick = setTimeout(() => {
       setRingWord(v => (v + 1) % RING_WORDS.length);
-      t = setInterval(() => setRingWord(v => (v + 1) % RING_WORDS.length), 7000);
-    }, 8200);
+      t = setInterval(() => setRingWord(v => (v + 1) % RING_WORDS.length), 5600);
+    }, 6500);
     return () => { clearTimeout(kick); if (t) clearInterval(t); };
+  }, []);
+  /* Redraw only on reload or on coming back to it — same rule and same
+     mechanism as the landing ring (see useRedraw in Landing.tsx; kept local
+     here rather than shared, because the two pages' rings are otherwise
+     independent and a shared hook would be one import for nine lines). */
+  const ringRef = useRef<HTMLDivElement>(null);
+  const [ringKey, setRingKey] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const el = ringRef.current;
+    if (!el) return;
+    let onScreen = true;
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) onScreen = false;
+      else if (!onScreen) { onScreen = true; setRingKey(k => k + 1); }
+    }, { threshold: 0 });
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
   const [industry, setIndustry] = useState(ALL);
   const [metro, setMetro] = useState(ALL);
@@ -120,11 +138,13 @@ export default function ReportsIndex() {
               That works because the card is `position: relative` and comes
               later in the DOM, so it paints over this at the same z-level —
               and the hero section has no clipping of its own. */}
-          <div aria-hidden="true" data-plx="-0.04" className="ca-orbit ca-orbit-hero" style={{ position: 'absolute', right: 'clamp(-120px, -8vw, -64px)', top: 'clamp(200px, 28vw, 400px)', width: 'clamp(200px, 20vw, 290px)', aspectRatio: '1 / 1', pointerEvents: 'none', zIndex: 0 }}>
-            {/* Construction pass (2026-08-12): same build-hold-dissolve loop
-                and typed word as the landing ring — see THE RING BUILDS
-                ITSELF in carta.css for the mechanics and the video evidence. */}
-            <div style={{ width: '100%', height: '100%', transformOrigin: '50% 50%' }}>
+          <div ref={ringRef} aria-hidden="true" data-plx="-0.04" className="ca-orbit ca-orbit-hero" style={{ position: 'absolute', right: 'clamp(-120px, -8vw, -64px)', top: 'clamp(200px, 28vw, 400px)', width: 'clamp(200px, 20vw, 290px)', aspectRatio: '1 / 1', pointerEvents: 'none', zIndex: 0 }}>
+            {/* Construction pass (2026-08-12): same one-shot draw, continuous
+                turn and typed word as the landing ring — see THE RING BUILDS
+                ITSELF in carta.css for the mechanics and the video evidence.
+                `key` remounts it to replay the draw; the ref stays outside so
+                the observer survives that remount. */}
+            <div key={ringKey} style={{ width: '100%', height: '100%', transformOrigin: '50% 50%' }}>
               <svg viewBox="0 0 300 300" width="100%" height="100%" fill="none">
                 <circle className="ca-arc-draw" pathLength={100} cx="150" cy="150" r="146" stroke="#0A7A58" strokeWidth="1.4" opacity=".42" style={{ ['--arc-op' as string]: 0.42 }} />
                 <ellipse className="ca-arc-fade" cx="150" cy="150" rx="145" ry="58" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 6" opacity=".62" style={{ ['--arc-op' as string]: 0.62 }} />

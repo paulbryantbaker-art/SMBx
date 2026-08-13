@@ -30,14 +30,13 @@
    the chip travels the rim while the label stays level.
 
    THE TWO DURATIONS MUST MATCH — same duration, same delay, same `linear`,
-   same keyframe percentages, opposite sign. Any mismatch and the label
-   slowly cartwheels, which is a slow, easily-missed bug rather than an
-   obvious one. Both live in THE RING BUILDS ITSELF below. */
-.ca-chip-level { display: inline-block; animation: caChipLevel 7s linear 0.5s infinite backwards; }
-@keyframes caChipLevel {
-  0%, 30%   { transform: rotate(0deg); }
-  95%, 100% { transform: rotate(72deg); }
-}
+   opposite sign. Any mismatch and the label slowly cartwheels, which is a
+   slow, easily-missed bug rather than an obvious one. Its partner is on
+   `.ca-orbit-hero > div` in THE RING BUILDS ITSELF below; both are now a
+   full continuous revolution (210s), because the ring stopped rebuilding
+   and simply turns. */
+.ca-chip-level { display: inline-block; animation: smbxOrbitCCW 210s linear 2.3s infinite; }
+@keyframes smbxOrbitCCW { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
 
 /* The orbit settles into place on load (2026-08-08, Paul: "animate this
    little guy more on load to give a slight bouncing into place feel … maybe
@@ -67,29 +66,39 @@
    rotates: on a ~7s loop it DISSOLVES, a node appears, the meridians sweep
    in, the sphere completes, the label chips pop on one at a time, it holds,
    and it rebuilds. Construction, not rotation — the diagram assembles the
-   way the product assembles a cap table. Ours now runs the same story on a
-   7s cycle (8s at first; tightened 2026-08-12, Paul: "the globe being drawn
-   in can be just a tiny bit faster"): solid arcs draw in over ~1.8s
-   (stroke-dash on a pathLength=100 normalised path), the dashed ellipse
-   fades in behind them, the chips pop at ~2.4s and ~2.9s, everything holds
-   ~3.2s, dissolves over ~0.5s, repeats. The stagger lives in keyframe
-   PERCENTAGES, so the period is one number per declaration — but the JS
-   word-swap interval in Landing.tsx and ReportsIndex.tsx is phase-locked to
-   it (swaps land at 10% of the cycle, inside the chips' hidden window), so
-   the FOUR durations below and those two timers move together or the reader
-   catches the retype.
+   way the product assembles a cap table.
+
+   IT BUILDS ONCE AND THEN IT LIVES (2026-08-12 evening, Paul: "once the orbs
+   are drawn they can stay and labels can rotate and swap out. Only repeat the
+   redraw loop when navigating back to the header or reloading the page").
+   A dissolve-and-rebuild every 7s is right for a diagram you meet once and
+   wrong for one you sit beside while you read the page — the third rebuild
+   is the reader watching the same trick again. So the CONSTRUCTION is a
+   one-shot entrance and the LIFE is a slow revolution:
+
+     0.5s  solid arcs draw in over 1.8s (stroke-dash on a pathLength=100
+           normalised path, so the draw is length-independent)
+     1.1s  the dashed meridian fades in behind them
+     2.3s  the top chip pops; 2.7s the left chip
+     2.3s  the whole layer starts turning, and never stops (210s a turn)
+           — the words swap on their own timer as it goes
+
+   Every animation here is one-shot with `both`, so its FINAL frame is the
+   resting state and nothing repeats. The redraw is a React REMOUNT
+   (`useRedraw` in Landing.tsx / ReportsIndex.tsx), which is what makes
+   "only on reload or coming back to the header" expressible at all — CSS
+   can repeat on a timer, but it cannot know you navigated.
 
    Mechanics that matter:
-   - Every element runs the SAME 7s/0.5s-delay cycle; the stagger lives in
-     the KEYFRAME PERCENTAGES, never in animation-delay — a per-element delay
-     shifts that element's whole loop, so its fade-out trespasses into the
-     next build (tried, looked broken).
-   - `backwards` fill so the 0.5s entrance delay (landing after the hero
-     cascade, same reason as the old settle) shows the 0% frame, not a flash
-     of the finished ring.
-   - The house 60s spin is gone HERE ONLY: the `.ca-orbit-hero > div` rule
-     below beats the base `.ca-orbit > div` rule, so the small corner marks
-     keep the house spin + settle exactly as shipped.
+   - The word-swap timers are no longer phase-locked to anything. They used
+     to have to land inside the chips' hidden window; there is no hidden
+     window now, and the retype IS the swap the reader is meant to see.
+   - `both` fill so the entrance delay (landing after the hero cascade, same
+     reason as the old settle) shows the 0% frame rather than a flash of the
+     finished ring, and the 100% frame holds afterwards.
+   - The house 60s spin is overridden HERE ONLY: the `.ca-orbit-hero > div`
+     rule below beats the base `.ca-orbit > div` rule, so the small corner
+     marks keep the house spin + settle exactly as shipped.
    - Under reduced motion the guard at the foot kills the animations and the
      ring renders COMPLETE: dasharray 100 with pathLength 100 at the default
      offset 0 is the full stroke, and the chips' base opacity is 1 — the 0%
@@ -99,65 +108,49 @@
    counter-turn note at the head of this file). This element is the parent of
    BOTH the svg and the chip positioners, so everything travels together and
    nothing can detach again.
-   COUNTER-CLOCKWISE, and the direction is load-bearing rather than taste: the
-   engine card's left edge cuts this ball 0.236r right of its centre, so a rim
-   point passes behind the card just 13.7° clockwise of 12 o'clock — a +72°
-   sweep buries the top chip under the card for its entire readable hold
-   (computed, then confirmed by measuring the rendered chip against the card's
-   left edge). Turning the other way carries both chips into the open gutter.
-   Change the sign here and `caChipLevel` flips with it or the word cartwheels. */
-.ca-orbit-hero > div { animation: caRingTurn 7s linear 0.5s infinite backwards; }
+   IT NEVER STOPS, AND IT NEVER RESTARTS ON ITS OWN (same evening, Paul: "once
+   the orbs are drawn they can stay and labels can rotate and swap out. Only
+   repeat the redraw loop when navigating back to the header or reloading the
+   page"). So this is a plain continuous revolution, delayed until the drawing
+   finishes, and the REDRAW is a React remount rather than a CSS repeat — see
+   `useRedraw` in Landing.tsx / ReportsIndex.tsx.
+   210s a revolution, the calm speed approved on 2026-08-09: the ring is ~4×
+   the corner mark, so 210s puts its rim near the mark's own surface speed.
+   A full turn means a chip does pass behind the engine card once a cycle —
+   that is the 360° era's accepted behaviour, not the old bug where a chip
+   PARKED there for its whole readable hold. */
+.ca-orbit-hero > div { animation: smbxOrbit 210s linear 2.3s infinite; }
 .ca-orbit-hero .ca-arc-draw {
   stroke-dasharray: 100;
-  animation: caArcDraw 7s linear 0.5s infinite backwards;
+  animation: caArcDraw 1.8s linear 0.5s both;
 }
 .ca-orbit-hero .ca-arc-fade {
-  animation: caArcFade 7s linear 0.5s infinite backwards;
+  animation: caArcFade 1s linear 1.1s both;
 }
 @keyframes caArcDraw {
-  0%        { stroke-dashoffset: 100; opacity: 0; }
-  3%        { opacity: var(--arc-op, 0.45); }
-  26%       { stroke-dashoffset: 0; }
-  88%       { stroke-dashoffset: 0; opacity: var(--arc-op, 0.45); }
-  95%, 100% { stroke-dashoffset: 0; opacity: 0; }
+  0%   { stroke-dashoffset: 100; opacity: 0; }
+  12%  { opacity: var(--arc-op, 0.45); }
+  100% { stroke-dashoffset: 0; opacity: var(--arc-op, 0.45); }
 }
 @keyframes caArcFade {
-  0%, 16%   { opacity: 0; }
-  30%       { opacity: var(--arc-op, 0.62); }
-  88%       { opacity: var(--arc-op, 0.62); }
-  95%, 100% { opacity: 0; }
+  from { opacity: 0; }
+  to   { opacity: var(--arc-op, 0.62); }
 }
 /* The chips pop AFTER the arcs complete — first the top node, then the left,
    the same one-at-a-time entrance their CAP TABLE / FUND chips make. `scale`
-   not `transform`: the positioner's inline transform owns the centring. */
-.ca-chip-pop-a { animation: caChipPopA 7s cubic-bezier(0.3, 0.85, 0.35, 1) 0.5s infinite backwards; }
-.ca-chip-pop-b { animation: caChipPopB 7s cubic-bezier(0.3, 0.85, 0.35, 1) 0.5s infinite backwards; }
-/* THE RING TURNS WHILE IT HOLDS (2026-08-12, Paul: "after the globes draw
-   themselves, they should rotate between being redrawn"). Still while the
-   arcs draw (0–30%), a slow ~70° sweep through the hold, and the dissolve
-   (88–95%) hides the snap back to zero at the restart. Same cycle, same
-   delay, same fill as everything else in the loop — a different period here
-   would slowly shear the phases.
-   Applied to `.ca-orbit-hero > div` above, NOT to the svg: the chips are the
-   svg's siblings, and turning the svg alone detached them (Paul, same day).
-   `caChipLevel` at the head of this file is the exact inverse. */
-@keyframes caRingTurn {
-  0%, 30%   { transform: rotate(0deg); }
-  95%, 100% { transform: rotate(-72deg); }
-}
-@keyframes caChipPopA {
-  0%, 30%   { opacity: 0; scale: 0.82; }
-  34%       { opacity: 1; scale: 1.05; }
-  37%       { scale: 1; }
-  88%       { opacity: 1; scale: 1; }
-  95%, 100% { opacity: 0; scale: 1; }
-}
-@keyframes caChipPopB {
-  0%, 37%   { opacity: 0; scale: 0.82; }
-  41%       { opacity: 1; scale: 1.05; }
-  44%       { scale: 1; }
-  88%       { opacity: 1; scale: 1; }
-  95%, 100% { opacity: 0; scale: 1; }
+   not `transform`: the positioner's inline transform owns the centring.
+   The stagger is an animation-DELAY again, and the old law forbidding that
+   ("the stagger lives in keyframe percentages") retires with the loop it
+   was written for: a per-element delay was poison only because every
+   element shared ONE repeating cycle, so a shifted delay dragged that
+   element's fade-out into the next build. These are one-shot entrances
+   now — nothing repeats, so nothing can trespass. */
+.ca-chip-pop-a { animation: caChipPop 520ms cubic-bezier(0.3, 0.85, 0.35, 1) 2.3s both; }
+.ca-chip-pop-b { animation: caChipPop 520ms cubic-bezier(0.3, 0.85, 0.35, 1) 2.7s both; }
+@keyframes caChipPop {
+  0%   { opacity: 0; scale: 0.82; }
+  70%  { opacity: 1; scale: 1.05; }
+  100% { opacity: 1; scale: 1; }
 }
 
 /* ── HERO GEOMETRY: exactly one ring, ever (2026-08-08) ──
