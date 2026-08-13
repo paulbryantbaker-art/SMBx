@@ -22,7 +22,7 @@ const MONO = "'IBM Plex Mono', monospace";
 const WHY_BUILT = [
   { no: '01', t: 'The seller always has someone.', b: 'Sellers have had professional representation for a hundred years — a broker, an advisor, a banker working their number.' },
   { no: '02', t: "The buyer usually doesn't.", b: 'A corporate development team is a luxury of scale. Almost nobody in the lower middle market has one, so the biggest transaction of a career gets run with no one on that side of the table.' },
-  { no: '03', t: 'So we became that team.', b: 'Sourcing, evaluation, negotiation, integration — a complete corp-dev function, led by senior dealmakers, pointed at one side of the table. Yours.' },
+  { no: '03', t: 'So we became that team.', b: 'Sourcing, valuation, negotiation, integration — a complete corp-dev function, led by senior dealmakers, pointed at one side of the table. Yours.' },
 ];
 
 const CREED = [

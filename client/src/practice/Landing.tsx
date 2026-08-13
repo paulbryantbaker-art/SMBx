@@ -138,7 +138,13 @@ const WHY: { nm: string; bd: string; more: string; xp: React.ReactNode }[] = [
 const PHASES = [
   { ph: 'Thesis', g: 'SMBXCORPDEV', t: 'We turn "I want to buy something" into a plan you can act on.', bd: 'The sector, size, and economics worth your time — and the deal-breakers that aren’t. If the thing you’re chasing isn’t buyable in today’s market, we’ll say so early, and point you somewhere better.' },
   { ph: 'Sourcing', g: 'SMBXCORPDEV', t: 'We find the owners who aren’t looking to sell.', bd: 'We map the market, narrow it to the companies worth a call, and reach them directly and quietly, under your name. Most of the deals we work were never listed anywhere.' },
-  { ph: 'Evaluation', g: 'SMBXCORPDEV', t: 'We tell you what a business is really worth, and whether to walk.', bd: 'We rebuild the financials, test the add-backs the seller’s advisor put in, and find the things that don’t show up in a pitch — customer concentration, owner dependence, the maintenance nobody mentioned.' },
+  /* VALUATION, not "Evaluation" (Paul, 2026-08-12: "Small but important, it
+     is Valuation, not evaluation.. Valuation as in how much the business is
+     worth"). The phase names the ANSWER — what it's worth — not the act of
+     looking it over, and this is the practice's own vocabulary (the BUY
+     journey's B2 is Valuation). The owner-side product keeps its separate
+     "owner-evaluation" wording, which is versioned legal text. */
+  { ph: 'Valuation', g: 'SMBXCORPDEV', t: 'We tell you what a business is really worth, and whether to walk.', bd: 'We rebuild the financials, test the add-backs the seller’s advisor put in, and find the things that don’t show up in a pitch — customer concentration, owner dependence, the maintenance nobody mentioned.' },
   { ph: 'Structure & offer', g: 'SMBXCORPDEV', t: 'We shape the deal and take it to the seller.', bd: 'Price is one piece of it; so are seller notes, earnouts, rollover, and escrows. We build the financing a lender will actually back, write the LOI, and run the negotiation for you.' },
   { ph: 'Diligence & close', g: 'SMBXCORPDEV', t: 'This is where most deals come apart, and where we do the heaviest work.', bd: 'We run diligence across the financials, legal, tax, and operations, keep the accountants and lawyers and lenders on schedule, and hold every thread together through to a signed deal.' },
   { ph: 'Integration', g: 'SMBXCORPDEV PREMIUM', t: 'The price is set at close. The value comes in the six months after.', bd: 'We plan the first hundred days — keeping the people and customers you just paid for — the part most buyers underestimate and most advisors skip.' },
@@ -551,6 +557,46 @@ const WHO_MARKS = [
   { plx: '0.04', size: 86, pos: { left: '2%', bottom: -56 }, chip: { left: 0, top: -12 } },
 ] as const;
 
+/* THE RING REDRAWS ONLY WHEN YOU COME BACK TO IT (2026-08-12 evening, Paul:
+   "once the orbs are drawn they can stay and labels can rotate and swap out.
+   Only repeat the redraw loop when navigating back to the header or reloading
+   the page").
+
+   The construction is one-shot CSS now, so it plays on mount and holds. That
+   covers "reloading the page" for free. "Navigating back to the header" is
+   the part CSS cannot express — an animation can repeat on a timer, but it
+   has no idea you left and returned. So this watches the ring itself: once it
+   has been fully OUT of the viewport, the next time it comes back the key
+   bumps, React remounts the subtree, and the entrance plays again from zero.
+
+   That single mechanism covers all three ways you can arrive at the header —
+   scrolling back up, clicking the logo or a #top link (both of which scroll),
+   and a route change back to the page (a remount already) — without the
+   component needing to know which one happened. It is also the existing
+   REVEALS REPLAY law (2026-08-09) applied to a diagram instead of a section.
+
+   Returns 0 and never changes under reduced motion: with the animations
+   killed the ring's base state is already the finished drawing, so a remount
+   would be an invisible no-op with a real cost. */
+function useRedraw(ref: React.RefObject<HTMLElement | null>) {
+  const [key, setKey] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const el = ref.current;
+    if (!el) return;
+    // Starts true: the ring is on screen at mount and has just drawn itself,
+    // so it must not redraw until it has genuinely been away.
+    let onScreen = true;
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) onScreen = false;
+      else if (!onScreen) { onScreen = true; setKey(k => k + 1); }
+    }, { threshold: 0 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [ref]);
+  return key;
+}
+
 /* One cycler for every rotating label on the page (2026-08-09). Returns the
    index that both the hero ring's stage chips and the who-marks' buyer chips
    step through. Paused for prefers-reduced-motion, and it never runs on the
@@ -560,11 +606,14 @@ function useCycle(len: number, ms: number, offsetMs = 0) {
   useEffect(() => {
     if (len < 2) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    /* offsetMs shifts WHERE in a matching animation cycle the swaps land —
-       the ring's 7s interval alone would fire at ~93% of the 7s build loop
-       (0.5s animation delay), just BEFORE the chips dissolve, so the reader
-       would catch every retype. +1.2s moves the landing to 10% of the cycle,
-       the middle of the hidden window (95%..30%). */
+    /* offsetMs delays only the FIRST swap. It used to carry a phase-lock:
+       the ring rebuilt every 7s and a swap had to land inside the window
+       where the chips were invisible, or the reader caught the retype. The
+       ring no longer rebuilds (THE RING BUILDS ITSELF in carta.css), so
+       there is no window to hide in and no lock to keep — the retype IS the
+       swap now, which is what Paul asked the labels to do. The parameter
+       survives for the ring's opening beat: the chips finish popping at
+       ~3.2s, so the first word should not change on top of that. */
     let t: ReturnType<typeof setInterval> | undefined;
     const kick = setTimeout(() => {
       setI(v => (v + 1) % len);
@@ -599,7 +648,7 @@ const MACHINE_VERBS: { w: string; pills: { t: string; x: number; y: number }[] }
     { t: 'UNDER YOUR NAME', x: 78, y: 64 },
     { t: 'NEVER LISTED', x: 18, y: 70 },
   ] },
-  { w: 'Evaluation', pills: [
+  { w: 'Valuation', pills: [
     { t: 'REBUILT FINANCIALS', x: 74, y: 22 },
     { t: 'ADD-BACKS TESTED', x: 80, y: 60 },
     { t: 'WHEN TO WALK', x: 17, y: 72 },
@@ -742,13 +791,16 @@ export default function Landing() {
   const [ownerHero, setOwnerHero] = useState(false);
   // The hero ring's two chips step through the seven phases, three apart so
   // they never show the same word.
-  /* 7000ms + 1200ms offset — the loop's own period (carta.css, THE RING
-     BUILDS ITSELF; 7s since the 2026-08-12 tightening), offset so every
-     swap lands at ~10% of the cycle. The chips are hidden between 95% of
-     one cycle and 30% of the next, so the swap always lands while they're
-     invisible — each rebuild types a fresh pair of words, and the word
-     never changes in front of the reader. */
-  const ring = useCycle(PHASES.length, 7000, 1200);
+  /* The ring's chips swap every 5.6s, retyping in place — the ring holds
+     its drawing now and turns, so the words are the thing that changes
+     (Paul, 2026-08-12: "labels can rotate and swap out"). The +900ms clears
+     the entrance: the second chip finishes popping at ~3.2s and the first
+     swap should not land on top of it. No phase-lock any more. */
+  const ring = useCycle(PHASES.length, 5600, 900);
+  // Bumps when the hero ring returns to view, remounting it so the
+  // construction plays again — the only thing that restarts it.
+  const ringRef = useRef<HTMLDivElement>(null);
+  const ringKey = useRedraw(ringRef);
   const who = useCycle(WHO_WORDS.length, 6400);
   // The hunt board fills under the reader's own scroll (desktop); -1 hands it
   // back to the CSS cascade.
@@ -923,8 +975,13 @@ export default function Landing() {
                 length-independent, and each arc's resting opacity rides in as
                 --arc-op because the keyframes own `opacity` while it runs.
                 The corner mark keeps the house spin. */}
-            <div aria-hidden="true" data-plx="-0.03" className="ca-orbit ca-orbit-hero" style={{ position: 'absolute', left: 0, top: '61.8%', width: 'clamp(210px, 20.5vw, 287px)', aspectRatio: '1 / 1', transform: 'translate(-61.8%, -50%)', pointerEvents: 'none' }}>
-              <div style={{ width: '100%', height: '100%', transformOrigin: '50% 50%' }}>
+            <div ref={ringRef} aria-hidden="true" data-plx="-0.03" className="ca-orbit ca-orbit-hero" style={{ position: 'absolute', left: 0, top: '61.8%', width: 'clamp(210px, 20.5vw, 287px)', aspectRatio: '1 / 1', transform: 'translate(-61.8%, -50%)', pointerEvents: 'none' }}>
+              {/* key = the redraw counter: remounting is what replays the
+                  one-shot construction, and it only bumps when the ring
+                  comes back into view (see useRedraw). The ref stays on the
+                  OUTER element so the observer keeps watching across every
+                  remount of the inner one. */}
+              <div key={ringKey} style={{ width: '100%', height: '100%', transformOrigin: '50% 50%' }}>
                 <svg viewBox="0 0 300 300" width="100%" height="100%" fill="none">
                   <circle className="ca-arc-draw" pathLength={100} cx="150" cy="150" r="146" stroke="#0A7A58" strokeWidth="1.4" opacity=".42" style={{ ['--arc-op' as string]: 0.42 }} />
                   <ellipse className="ca-arc-fade" cx="150" cy="150" rx="145" ry="58" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 6" opacity=".62" style={{ ['--arc-op' as string]: 0.62 }} />
