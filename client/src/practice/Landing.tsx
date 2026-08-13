@@ -323,6 +323,19 @@ function ProofBand() {
    BOTH surfaces, the track's lit node and the explorer's pane, so the two
    read as one mechanism rather than two ideas about the same seven steps.
 
+   THE TRACK KEPT ITS OWN CLOCK (2026-08-12 evening, Paul: "the phase block
+   can move on scroll, but the engagement bar should just progress across
+   over about 5 seconds and repeat after 2 seconds"). The two surfaces are no
+   longer one index. The EXPLORER stays scroll-driven — it is the thing you
+   read, so it should sit still until you move — while the BAR is a diagram
+   of a sequence and reads better simply running: seven steps across 5s, a 2s
+   pause on the last, then back to 01. Driving both from scroll made the bar
+   inert whenever the reader stopped, which is when they were most likely to
+   be looking at it.
+   The bar's loop only runs while the panel is on screen (IntersectionObserver
+   gate) — otherwise it re-renders this subtree every 833ms for the whole
+   length of a very long page, forever.
+
    DESKTOP ONLY (≥1025). On a phone the track is hidden (see [data-trackpanel]
    in carta.css) and the explorer stacks, so content changing under the thumb
    mid-read would be disorienting rather than choreographic — below 1025 the
@@ -339,8 +352,33 @@ function ProofBand() {
    reference. */
 function Engagement() {
   const [phase, setPhase] = useState(0);
+  // The bar's own index — a loop, not the reader's position (see the note
+  // above). 5s to cross the seven, 2s parked on Value creation, repeat.
+  const [barPhase, setBarPhase] = useState(0);
   const pinned = useRef(false);
   const trackRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const el = trackRef.current;
+    if (!el) return;
+    // 5000/6, so the SEVENTH step lands at 5.0s — stepping by 5000/7 would
+    // cross in 4.3s and read a beat quicker than he asked for.
+    const STEP = 5000 / 6, HOLD = 2000;
+    let dead = false;
+    let timers: ReturnType<typeof setTimeout>[] = [];
+    const run = () => {
+      timers = [];
+      for (let i = 1; i < 7; i++) timers.push(setTimeout(() => { if (!dead) setBarPhase(i); }, i * STEP));
+      timers.push(setTimeout(() => { if (!dead) { setBarPhase(0); run(); } }, 6 * STEP + HOLD));
+    };
+    const stop = () => { timers.forEach(clearTimeout); timers = []; };
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { if (!timers.length) { setBarPhase(0); run(); } }
+      else stop();
+    }, { threshold: 0 });
+    io.observe(el);
+    return () => { dead = true; stop(); io.disconnect(); };
+  }, []);
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     // Below the desktop breakpoint, keep the original timer.
@@ -380,8 +418,8 @@ function Engagement() {
             {PHASES.map((p, i) => (
               <Fragment key={p.ph}>
                 {i > 0 && <span className="ch-wire" aria-hidden="true"><i /></span>}
-                <div className="ch-node" style={{ background: i === phase ? '#0A7A58' : i > 4 ? '#16241E' : undefined, borderColor: i === phase ? '#0FA97C' : i > 4 ? '#2E5F4C' : undefined, textAlign: 'center', transition: 'background .25s ease, border-color .25s ease' }}>
-                  <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: i === phase ? '#DFF5EC' : '#0FA97C' }}>{String(i + 1).padStart(2, '0')}</div>
+                <div className="ch-node" style={{ background: i === barPhase ? '#0A7A58' : i > 4 ? '#16241E' : undefined, borderColor: i === barPhase ? '#0FA97C' : i > 4 ? '#2E5F4C' : undefined, textAlign: 'center', transition: 'background .25s ease, border-color .25s ease' }}>
+                  <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: i === barPhase ? '#DFF5EC' : '#0FA97C' }}>{String(i + 1).padStart(2, '0')}</div>
                   <div style={{ marginTop: 7, fontSize: 13.5, lineHeight: 1.3, color: '#F4F5F1' }}>{p.ph}</div>
                 </div>
               </Fragment>
