@@ -50,13 +50,20 @@
    rotates: on a ~7s loop it DISSOLVES, a node appears, the meridians sweep
    in, the sphere completes, the label chips pop on one at a time, it holds,
    and it rebuilds. Construction, not rotation — the diagram assembles the
-   way the product assembles a cap table. Ours now runs the same story on an
-   8s cycle: solid arcs draw in over ~2.1s (stroke-dash on a pathLength=100
-   normalised path), the dashed ellipse fades in behind them, the chips pop
-   at ~2.7s and ~3.3s, everything holds ~3.7s, dissolves over ~0.6s, repeats.
+   way the product assembles a cap table. Ours now runs the same story on a
+   7s cycle (8s at first; tightened 2026-08-12, Paul: "the globe being drawn
+   in can be just a tiny bit faster"): solid arcs draw in over ~1.8s
+   (stroke-dash on a pathLength=100 normalised path), the dashed ellipse
+   fades in behind them, the chips pop at ~2.4s and ~2.9s, everything holds
+   ~3.2s, dissolves over ~0.5s, repeats. The stagger lives in keyframe
+   PERCENTAGES, so the period is one number per declaration — but the JS
+   word-swap interval in Landing.tsx and ReportsIndex.tsx is phase-locked to
+   it (swaps land at 10% of the cycle, inside the chips' hidden window), so
+   the FOUR durations below and those two timers move together or the reader
+   catches the retype.
 
    Mechanics that matter:
-   - Every element runs the SAME 8s/0.5s-delay cycle; the stagger lives in
+   - Every element runs the SAME 7s/0.5s-delay cycle; the stagger lives in
      the KEYFRAME PERCENTAGES, never in animation-delay — a per-element delay
      shifts that element's whole loop, so its fade-out trespasses into the
      next build (tried, looked broken).
@@ -73,10 +80,10 @@
 .ca-orbit-hero > div { animation: none; }
 .ca-orbit-hero .ca-arc-draw {
   stroke-dasharray: 100;
-  animation: caArcDraw 8s linear 0.5s infinite backwards;
+  animation: caArcDraw 7s linear 0.5s infinite backwards;
 }
 .ca-orbit-hero .ca-arc-fade {
-  animation: caArcFade 8s linear 0.5s infinite backwards;
+  animation: caArcFade 7s linear 0.5s infinite backwards;
 }
 @keyframes caArcDraw {
   0%        { stroke-dashoffset: 100; opacity: 0; }
@@ -94,18 +101,18 @@
 /* The chips pop AFTER the arcs complete — first the top node, then the left,
    the same one-at-a-time entrance their CAP TABLE / FUND chips make. `scale`
    not `transform`: the positioner's inline transform owns the centring. */
-.ca-chip-pop-a { animation: caChipPopA 8s cubic-bezier(0.3, 0.85, 0.35, 1) 0.5s infinite backwards; }
-.ca-chip-pop-b { animation: caChipPopB 8s cubic-bezier(0.3, 0.85, 0.35, 1) 0.5s infinite backwards; }
+.ca-chip-pop-a { animation: caChipPopA 7s cubic-bezier(0.3, 0.85, 0.35, 1) 0.5s infinite backwards; }
+.ca-chip-pop-b { animation: caChipPopB 7s cubic-bezier(0.3, 0.85, 0.35, 1) 0.5s infinite backwards; }
 /* THE RING TURNS WHILE IT HOLDS (2026-08-12, Paul: "after the globes draw
    themselves, they should rotate between being redrawn"). The rotation
-   rides the SVG inside the same 8s cycle: still while the arcs draw
+   rides the SVG inside the same 7s cycle: still while the arcs draw
    (0–30%), a slow ~70° sweep through the hold, and the dissolve (88–95%)
    hides the snap back to zero at the restart. The chips never move — they
    sit on the OUTER CIRCLE, which is rotation-invariant (the 2026-08-09
    lesson), so the ellipses are seen to travel while the labels hold still
    and stay readable. Same cycle, same delay, same fill as everything else
    in the loop — a different period here would slowly shear the phases. */
-.ca-orbit-hero svg { transform-origin: 50% 50%; animation: caRingTurn 8s linear 0.5s infinite backwards; }
+.ca-orbit-hero svg { transform-origin: 50% 50%; animation: caRingTurn 7s linear 0.5s infinite backwards; }
 @keyframes caRingTurn {
   0%, 30%   { transform: rotate(0deg); }
   95%, 100% { transform: rotate(72deg); }
@@ -411,7 +418,9 @@
    floating UI fragments pop in one after another over the photo — the
    product builds itself in front of you. The sample read is our version of
    that surface, so its chain now assembles when it enters view: node, wire,
-   node, wire — 240ms a beat, the 9 landing last. Rides the existing reveal
+   node, wire — 200ms a beat (240 at first; tightened 2026-08-12 with the
+   rest of the #how choreography, Paul: "speed up all 3 of these animations,
+   just a little bit"), the 9 landing last. Rides the existing reveal
    observer (data-rv + rv-in), so it replays on every rescroll per the
    replay law. The container NEUTRALIZES the standard [data-rv] block-fade
    at every width (two-attribute specificity beats practice.css's one), and
@@ -422,8 +431,8 @@
 [data-rv][data-assemble] { opacity: 1; translate: none; transition: none; }
 [data-assemble] > .ch-node, [data-assemble] > .ch-wire { opacity: 0; }
 [data-assemble] > .ch-wire { transform-origin: 0 50%; }
-[data-assemble].rv-in > .ch-node { animation: caNodeIn 480ms cubic-bezier(0.3, 0.85, 0.35, 1) calc(var(--as) * 240ms) both; }
-[data-assemble].rv-in > .ch-wire { animation: caWireIn 420ms cubic-bezier(0.3, 0.85, 0.35, 1) calc(var(--as) * 240ms) both; }
+[data-assemble].rv-in > .ch-node { animation: caNodeIn 420ms cubic-bezier(0.3, 0.85, 0.35, 1) calc(var(--as) * 200ms) both; }
+[data-assemble].rv-in > .ch-wire { animation: caWireIn 370ms cubic-bezier(0.3, 0.85, 0.35, 1) calc(var(--as) * 200ms) both; }
 /* On phones the chain is a COLUMN (the ≤900 flip in the chain primitive),
    so a wire grows DOWNWARD from its top edge — scaleX on a 1px-wide
    vertical wire would collapse it sideways and read as a blink
@@ -849,8 +858,9 @@
    not eight fireflies. On phones the chains flip to a COLUMN and the wires
    turn vertical, so the dot runs DOWN there — same current, rotated with
    its wire (mobile pass, 2026-08-12). Reduced motion: guard at the foot,
-   dot rests at centre. */
-.ch-wire i::after { animation: caWireTravel 2.8s linear infinite; }
+   dot rests at centre. 2.4s a traverse (2.8 at first; tightened 2026-08-12
+   with the rest of the #how choreography). */
+.ch-wire i::after { animation: caWireTravel 2.4s linear infinite; }
 @keyframes caWireTravel {
   0%   { left: 8%; opacity: 0; }
   14%  { opacity: 1; }
