@@ -1,0 +1,255 @@
+<!doctype html>
+<!--
+  THE MACHINE — the animated diagram element, standalone (2026-08-12).
+
+  Paul: "can we give Cowork the DL for the new element to be used in
+  collateral? I can create a video slide show with it." This file IS the
+  element, with no app around it: open it in Chrome on the Mac, let it run,
+  and screen-record the span you want (QuickTime → New Screen Recording).
+  The laws and the design language live in MACHINE.md beside this file's
+  copy in the workspace (content/studio/MACHINE.md in the repo).
+
+  WHERE IT CAME FROM: measured off carta.com's Connect diagram
+  (mroeCarta.mov, 60fps). The cycle: the standing words hold in mint while
+  the rotating line TYPES (~90ms/char) → connector elbows draw through the
+  dot grid → pills enter as green bars that then take their labels → mint
+  current marches the wires during the hold → the line UN-TYPES → next.
+
+  FORMATS (pick with a URL query, e.g. machine.html?fmt=tall):
+    ?fmt=wide    1920×1080 — video slideshows, LinkedIn 16:9 (default)
+    ?fmt=square  1080×1080 — LinkedIn square video
+    ?fmt=tall    1080×1350 — LinkedIn portrait, the carousel ratio
+
+  CONTENT LAW (the same law every builder carries): every word and every
+  pill must RESTATE copy the accompanying document already carries — a pill
+  is a claim, and a claim that appears first in a decoration is how a
+  fabrication ships. No fees, no invented figures, THE LINE as always.
+
+  Edit SPEC below per piece. Cowork: treat SPEC as the spec file — copy
+  this HTML into the collateral folder beside the piece it serves, edit
+  SPEC, keep the copy beside the render so the piece can be re-recorded.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>THE MACHINE — smbX collateral element</title>
+<!-- Viewing aid on the Mac, not a server render path: the CDN link is fine
+     here. A frame-dump through the repo's render pipeline would inline
+     fontEmbeds.fontFaceCss instead (the Railway rule only binds renders). -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400..700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; height: 100%; background: #0E0F0D; }
+  body { display: grid; place-items: center; }
+  /* The stage is a fixed-size video surface; the page letterboxes around it. */
+  #stage {
+    position: relative; overflow: hidden; background: #1A1B19;
+    background-image: radial-gradient(rgba(168, 240, 206, .15) 1.4px, transparent 1.4px);
+    background-size: 22px 22px;
+  }
+  #line {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-family: 'Source Serif 4', Georgia, serif; font-weight: 550; letter-spacing: -0.01em;
+    padding: 0 6%; text-align: center;
+  }
+  #line .stand { color: #A8F0CE; white-space: pre; }
+  #line .word { color: #F4F5F1; }
+  #caret {
+    display: inline-block; width: 4px; height: 0.92em; margin-left: 8px;
+    background: #A8F0CE; align-self: center; animation: caret 1.06s steps(1) infinite;
+  }
+  @keyframes caret { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
+  #mark {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    padding: 18px 28px; border: 1px solid #3A3F38; background: #1A1B19;
+    font-family: 'IBM Plex Mono', monospace; font-size: 22px; letter-spacing: 0.14em; color: #F4F5F1;
+    opacity: 0; scale: 0.9; transition: opacity 420ms ease, scale 420ms cubic-bezier(0.3, 0.85, 0.35, 1);
+  }
+  #mark.on { opacity: 1; scale: 1; }
+  svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .mpath { stroke: #3A3F38; stroke-width: 2; fill: none; stroke-dasharray: 100; stroke-dashoffset: 100;
+    transition: stroke-dashoffset 520ms cubic-bezier(0.3, 0.85, 0.35, 1); }
+  .mpath.draw { stroke-dashoffset: 0; }
+  .mflow { stroke: #A8F0CE; stroke-width: 2; fill: none; stroke-dasharray: 3 14; opacity: 0;
+    transition: opacity 400ms ease 600ms; animation: flow 1.15s linear infinite; }
+  .mflow.run { opacity: 0.85; }
+  @keyframes flow { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -68; } }
+  .pill {
+    position: absolute; transform: translate(-50%, -50%); transform-origin: 0 50%;
+    background: #0A7A58; color: #FCFAF6; white-space: nowrap;
+    font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.08em;
+    scale: 0 1; transition: scale 320ms cubic-bezier(0.3, 0.85, 0.35, 1);
+  }
+  .pill.on { scale: 1 1; }
+  .pill > span { opacity: 0; transition: opacity 260ms ease; display: inline-block; }
+  .pill.on > span { opacity: 1; }
+  #plate {
+    position: absolute; display: inline-flex; align-items: center; gap: 9px;
+    font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; color: #8E948B;
+  }
+  #plate i { width: 9px; height: 9px; background: #0A7A58; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg id="wires" preserveAspectRatio="none" viewBox="0 0 1000 460"></svg>
+  <div id="mark"></div>
+  <div id="line"><span class="stand"></span><span class="word"></span><span id="caret"></span></div>
+  <div id="plate"><i></i><span></span></div>
+</div>
+<script>
+/* ═══════════════════ SPEC — edit per collateral piece ═══════════════════
+   stand  the standing words, held in mint (keep them short)
+   words  the rotating entries; each pill RESTATES the piece's own copy.
+          pill.x/.y are percentages of the stage (x>50 hangs off the right
+          anchor, x<50 off the left), three pills reads best.
+   tag    the finale line typed after the last word (no pills — the figure
+          drawn instead), then the loop resets through the boxed mark.
+   mark   the reset box text (or set logo to an image path that exists
+          BESIDE this file, e.g. 'assets/logo-green-x-dark.png').
+   plate  the quiet mono plate, bottom-left. */
+const SPEC = {
+  /* ELEVATOR TEARDOWN — built 2026-08-12 from the two teardown specs, which
+     are the only pieces in this practice currently CLEAN on every guard.
+     THE CONTENT LAW (MACHINE.md): every word and every pill RESTATES copy
+     the piece already carries. Each pill below is traced to its own line in
+     markets/elevator/specs/*.deck.mts — nothing here is written fresh, and
+     no figure appears on the motion that is not on a still page with its
+     source underneath. */
+  stand: 'The money is in ',
+  words: [
+    /* Nº1 page 1 head + WHY IT RECURS + ROUTE DENSITY */
+    { w: 'the service contract', pills: [
+      { t: 'NOT THE EQUIPMENT', x: 72, y: 24 },       // "Nobody in this trade is really in the equipment business."
+      { t: 'A LEGAL OBLIGATION', x: 78, y: 62 },      // "The maintenance contract is not a sale. It is a legal obligation."
+      { t: 'THE CODE SETS THE CLOCK', x: 20, y: 72 }] },  // "Then the code sets the clock"
+    /* Nº1 ROUTE DENSITY + the mechanic page */
+    { w: 'the route book', pills: [
+      { t: 'SAME COUNT, DIFFERENT BUSINESS', x: 71, y: 26 },  // "Two books. Same unit count. Different business."
+      { t: 'YOU BUY CAPACITY', x: 78, y: 64 },        // "You cannot hire your way into capacity here. You buy it."
+      { t: 'DENSITY BEATS SIZE', x: 19, y: 70 }] },   // "A mechanic working the second group barely gets in the van."
+    /* Nº1 TRAP Nº1 and TRAP Nº2 — the two things that decide the buy */
+    { w: 'what you can service', pills: [
+      { t: 'WHOSE CONTROLLERS', x: 74, y: 24 },       // "TRAP Nº1 — WHOSE CONTROLLER"
+      { t: 'ASK FOR THE ASSET REGISTER', x: 80, y: 60 },  // "Ask for the asset register."
+      { t: 'WHO EATS THE CALLBACK', x: 18, y: 72 }] },    // "TRAP Nº2 — WHO EATS THE CALLBACK"
+    /* Nº2 THE OBLIGATION + WHERE IT REALLY LANDS + WHAT TO DO NOW */
+    { w: 'work nobody chooses', pills: [
+      { t: 'BROUGHT UP TO CODE', x: 73, y: 24 },      // "Old elevators have to be brought up to a safety code."
+      { t: 'EVERY MEDICARE HOSPITAL', x: 79, y: 64 }, // "Every hospital taking Medicare is inside the requirement"
+      { t: 'READ THE RETROACTIVITY CLAUSE', x: 19, y: 71 }] },  // "Read the retroactivity clause, not the adoption list."
+  ],
+  tag: 'required work, not forecast work.',   // Nº2: "Modernization reads like a forecast. It is a legal obligation"
+  mark: 'smbX.ai',
+  logo: null,
+  plate: 'LANE TEARDOWN — ELEVATOR SERVICE',
+  // timings (ms) — Carta's measured cadence; slow them for a calmer read
+  typeMs: 92, untypeMs: 46, holdMs: 3100, tagHoldMs: 3800, markMs: 2400,
+};
+/* ═══════════════════ no edits needed below this line ═══════════════════ */
+
+const FMT = { wide: [1920, 1080], square: [1080, 1080], tall: [1080, 1350] };
+const fmt = FMT[new URLSearchParams(location.search).get('fmt')] || FMT.wide;
+const stage = document.getElementById('stage');
+stage.style.width = fmt[0] + 'px'; stage.style.height = fmt[1] + 'px';
+const scaleType = fmt[0] / 1440; // the site element's reference width
+document.getElementById('line').style.fontSize = Math.round(52 * scaleType) + 'px';
+document.querySelectorAll('#plate, .pill').forEach(() => {});
+document.getElementById('plate').style.fontSize = Math.round(16 * scaleType) + 'px';
+document.getElementById('plate').style.left = Math.round(30 * scaleType) + 'px';
+document.getElementById('plate').style.bottom = Math.round(22 * scaleType) + 'px';
+const wires = document.getElementById('wires');
+wires.setAttribute('viewBox', `0 0 1000 ${Math.round(1000 * fmt[1] / fmt[0])}`);
+const VBY = Math.round(1000 * fmt[1] / fmt[0]);
+const ANCHOR = { left: 355, right: 645, y: Math.round(VBY * 0.462) };
+
+const $stand = document.querySelector('#line .stand');
+const $word = document.querySelector('#line .word');
+const $mark = document.getElementById('mark');
+const $plate = document.querySelector('#plate span');
+$stand.textContent = SPEC.stand;
+$mark.textContent = SPEC.logo ? '' : SPEC.mark;
+if (SPEC.logo) { const im = new Image(); im.src = SPEC.logo; im.style.height = '28px'; $mark.appendChild(im); }
+$plate.textContent = SPEC.plate;
+
+const wait = ms => new Promise(r => setTimeout(r, ms));
+function setScene(pills, on) {
+  wires.innerHTML = '';
+  document.querySelectorAll('.pill').forEach(el => el.remove());
+  pills.forEach((p, i) => {
+    const d = `M ${p.x > 50 ? ANCHOR.right : ANCHOR.left} ${ANCHOR.y} H ${p.x * 10} V ${Math.round(p.y * VBY / 100)}`;
+    const base = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    base.setAttribute('d', d); base.setAttribute('pathLength', '100'); base.setAttribute('class', 'mpath');
+    base.style.transitionDelay = (i * 130) + 'ms';
+    const cur = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    cur.setAttribute('d', d); cur.setAttribute('pathLength', '100'); cur.setAttribute('class', 'mflow');
+    wires.appendChild(base); wires.appendChild(cur);
+    const pill = document.createElement('span');
+    pill.className = 'pill';
+    pill.style.left = p.x + '%'; pill.style.top = p.y + '%';
+    pill.style.fontSize = Math.round(17 * scaleType) + 'px';
+    pill.style.padding = Math.round(9 * scaleType) + 'px ' + Math.round(14 * scaleType) + 'px';
+    pill.style.transitionDelay = (140 + i * 150) + 'ms';
+    const lab = document.createElement('span');
+    lab.textContent = p.t; lab.style.transitionDelay = (300 + i * 150) + 'ms';
+    pill.appendChild(lab);
+    stage.appendChild(pill);
+  });
+  if (on) requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.querySelectorAll('.mpath').forEach(el => el.classList.add('draw'));
+    document.querySelectorAll('.mflow').forEach(el => el.classList.add('run'));
+    document.querySelectorAll('.pill').forEach(el => el.classList.add('on'));
+  }));
+}
+function clearScene() {
+  document.querySelectorAll('.mpath').forEach(el => { el.style.transitionDelay = '0ms'; el.classList.remove('draw'); });
+  document.querySelectorAll('.mflow').forEach(el => el.classList.remove('run'));
+  document.querySelectorAll('.pill').forEach(el => { el.style.transitionDelay = '0ms'; el.classList.remove('on'); });
+}
+const TAG_FIGURE = [
+  `M 250 ${Math.round(VBY * 0.65)} H 750`,
+  `M 750 ${Math.round(VBY * 0.65)} V ${Math.round(VBY * 0.84)} H 906`,
+  `M 250 ${Math.round(VBY * 0.65)} V ${Math.round(VBY * 0.29)} H 96`,
+];
+function setTagFigure() {
+  wires.innerHTML = '';
+  TAG_FIGURE.forEach((d, i) => {
+    const base = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    base.setAttribute('d', d); base.setAttribute('pathLength', '100'); base.setAttribute('class', 'mpath');
+    base.style.transitionDelay = (i * 130) + 'ms';
+    const cur = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    cur.setAttribute('d', d); cur.setAttribute('pathLength', '100'); cur.setAttribute('class', 'mflow');
+    wires.appendChild(base); wires.appendChild(cur);
+  });
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.querySelectorAll('.mpath').forEach(el => el.classList.add('draw'));
+    document.querySelectorAll('.mflow').forEach(el => el.classList.add('run'));
+  }));
+}
+
+(async function run() {
+  for (;;) {
+    $mark.classList.add('on'); $word.textContent = '';
+    await wait(SPEC.markMs);
+    $mark.classList.remove('on');
+    await wait(450);
+    for (const entry of SPEC.words) {
+      setScene(entry.pills, false);
+      for (let c = 1; c <= entry.w.length; c++) { $word.textContent = entry.w.slice(0, c); await wait(SPEC.typeMs); }
+      setScene(entry.pills, true);
+      await wait(SPEC.holdMs);
+      clearScene();
+      for (let c = entry.w.length - 1; c >= 0; c--) { $word.textContent = entry.w.slice(0, c); await wait(SPEC.untypeMs); }
+      await wait(260);
+    }
+    for (let c = 1; c <= SPEC.tag.length; c++) { $word.textContent = SPEC.tag.slice(0, c); await wait(Math.round(SPEC.typeMs * 0.66)); }
+    setTagFigure();
+    await wait(SPEC.tagHoldMs);
+    clearScene();
+    for (let c = SPEC.tag.length - 1; c >= 0; c--) { $word.textContent = SPEC.tag.slice(0, c); await wait(Math.round(SPEC.untypeMs * 0.7)); }
+    await wait(320);
+  }
+})();
+</script>
+</body>
+</html>

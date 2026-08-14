@@ -1,0 +1,19 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SAMPLE — Fictional HVAC Co (workbench smoke test, not a real company) — lbo</title><style>
+body{margin:0;background:#FAFAFA;color:#1A1A18;font:15px/1.55 Inter,-apple-system,'Segoe UI',sans-serif;padding:40px 24px}
+.wrap{max-width:960px;margin:0 auto}
+h1{font-family:Sora,Inter,sans-serif;font-weight:800;font-size:26px;margin:0 0 4px}
+h2{font-family:Sora,Inter,sans-serif;font-weight:600;font-size:17px;margin:34px 0 12px}
+.sub{color:#6E6A63;font-size:13px;margin-bottom:8px}
+.engine{color:#6E6A63;font-size:12px;border-left:3px solid #D4714E;padding-left:10px;margin:14px 0 4px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:18px 0}
+.tile{background:#fff;border:1px solid #eeeef0;border-radius:12px;padding:16px 18px}
+.tile .l{font-size:12px;color:#6E6A63;text-transform:uppercase;letter-spacing:.04em}
+.tile .v{font-family:Sora,Inter,sans-serif;font-weight:800;font-size:22px;margin-top:4px}
+.tile .v.accent{color:#D4714E}
+table{border-collapse:collapse;width:100%;background:#fff;border:1px solid #eeeef0;border-radius:12px;overflow:hidden}
+th,td{padding:8px 12px;text-align:right;font-size:13.5px;border-bottom:1px solid #eeeef0}
+th{background:#FAF8F4;color:#44403C;font-weight:600}
+th:first-child,td:first-child{text-align:left}
+.pass{color:#1a7a3c;font-weight:600}.fail{color:#b3261e;font-weight:600}
+.note{color:#6E6A63;font-size:12px;margin-top:22px}
+</style></head><body><div class="wrap"><h1>SAMPLE — Fictional HVAC Co (workbench smoke test, not a real company)</h1><div class="sub">LBO model · run 2026-08-14</div><div class="engine">Engine: v17-reference (engine not yet vendored — see ENGINE_PROVENANCE.md) · Formulas: METHODOLOGY_V17 §5.0</div><div class="tiles"><div class="tile"><div class="l">IRR</div><div class="v accent">68.9%</div></div><div class="tile"><div class="l">MOIC</div><div class="v">6.67x</div></div><div class="tile"><div class="l">Equity invested</div><div class="v">$375,000</div></div><div class="tile"><div class="l">Entry → exit</div><div class="v">3.75x → 4.00x</div></div></div><h2>Pro forma</h2><table><thead><tr><th>Year</th><th>Revenue</th><th>EBITDA</th><th>Debt service</th><th>FCF to equity</th><th>DSCR</th></tr></thead><tbody><tr><td>1</td><td>$3,255,000</td><td>$420,000</td><td>$204,817</td><td>$182,633</td><td>2.05</td></tr><tr><td>2</td><td>$3,417,750</td><td>$441,000</td><td>$204,817</td><td>$202,005</td><td>2.15</td></tr><tr><td>3</td><td>$3,588,638</td><td>$463,050</td><td>$204,817</td><td>$222,346</td><td>2.26</td></tr><tr><td>4</td><td>$3,768,069</td><td>$486,202</td><td>$204,817</td><td>$243,705</td><td>2.37</td></tr><tr><td>5</td><td>$3,956,473</td><td>$510,513</td><td>$204,817</td><td>$266,131</td><td>2.49</td></tr></tbody></table><h2>IRR sensitivity — growth × exit multiple</h2><table><thead><tr><th>growth \ exit</th><th>3.00x</th><th>3.50x</th><th>4.00x</th><th>4.50x</th><th>5.00x</th></tr></thead><tbody><tr><td>1.0%</td><td>50.5%</td><td>54.2%</td><td>57.4%</td><td>60.3%</td><td>63.0%</td></tr><tr><td>3.0%</td><td>56.8%</td><td>60.2%</td><td>63.2%</td><td>66.1%</td><td>68.6%</td></tr><tr><td>5.0%</td><td>62.7%</td><td>65.9%</td><td>68.9%</td><td>71.6%</td><td>74.1%</td></tr><tr><td>7.0%</td><td>68.4%</td><td>71.5%</td><td>74.4%</td><td>77.0%</td><td>79.5%</td></tr><tr><td>9.0%</td><td>73.9%</td><td>76.9%</td><td>79.7%</td><td>82.3%</td><td>84.7%</td></tr></tbody></table><div class="note">Internal analysis. Deterministic output of the deal math workbench — same inputs always produce the same numbers. Not a valuation opinion; no figure here is publishable studio output.</div></div></body></html>

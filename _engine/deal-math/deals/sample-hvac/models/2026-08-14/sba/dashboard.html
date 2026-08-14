@@ -1,0 +1,19 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SAMPLE — Fictional HVAC Co (workbench smoke test, not a real company) — sba</title><style>
+body{margin:0;background:#FAFAFA;color:#1A1A18;font:15px/1.55 Inter,-apple-system,'Segoe UI',sans-serif;padding:40px 24px}
+.wrap{max-width:960px;margin:0 auto}
+h1{font-family:Sora,Inter,sans-serif;font-weight:800;font-size:26px;margin:0 0 4px}
+h2{font-family:Sora,Inter,sans-serif;font-weight:600;font-size:17px;margin:34px 0 12px}
+.sub{color:#6E6A63;font-size:13px;margin-bottom:8px}
+.engine{color:#6E6A63;font-size:12px;border-left:3px solid #D4714E;padding-left:10px;margin:14px 0 4px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:18px 0}
+.tile{background:#fff;border:1px solid #eeeef0;border-radius:12px;padding:16px 18px}
+.tile .l{font-size:12px;color:#6E6A63;text-transform:uppercase;letter-spacing:.04em}
+.tile .v{font-family:Sora,Inter,sans-serif;font-weight:800;font-size:22px;margin-top:4px}
+.tile .v.accent{color:#D4714E}
+table{border-collapse:collapse;width:100%;background:#fff;border:1px solid #eeeef0;border-radius:12px;overflow:hidden}
+th,td{padding:8px 12px;text-align:right;font-size:13.5px;border-bottom:1px solid #eeeef0}
+th{background:#FAF8F4;color:#44403C;font-weight:600}
+th:first-child,td:first-child{text-align:left}
+.pass{color:#1a7a3c;font-weight:600}.fail{color:#b3261e;font-weight:600}
+.note{color:#6E6A63;font-size:12px;margin-top:22px}
+</style></head><body><div class="wrap"><h1>SAMPLE — Fictional HVAC Co (workbench smoke test, not a real company)</h1><div class="sub">SBA model · run 2026-08-14</div><div class="engine">Engine: v17-reference (engine not yet vendored — see ENGINE_PROVENANCE.md) · Formulas: METHODOLOGY_V17 §5.0</div><div class="tiles"><div class="tile"><div class="l">DSCR on EBITDA</div><div class="v accent">1.95</div></div><div class="tile"><div class="l">DSCR on SDE</div><div class="v">2.46</div></div><div class="tile"><div class="l">Annual debt service</div><div class="v">$204,817</div></div><div class="tile"><div class="l">Equity injection</div><div class="v">$300,000</div></div></div><h2>Tests</h2><table><thead><tr><th>Test</th><th>Threshold</th><th>Result</th></tr></thead><tbody><tr><td>SBA 7(a)</td><td>DSCR ≥ 1.25</td><td><span class="pass">PASS</span></td></tr><tr><td>Conventional</td><td>DSCR ≥ 1.50</td><td><span class="pass">PASS</span></td></tr><tr><td>Risk matrix</td><td>LTV 80.0%</td><td>MEDIUM — Approve with conditions</td></tr></tbody></table><h2>Loans</h2><table><thead><tr><th>Loan</th><th>Principal</th><th>Rate</th><th>Term</th><th>Monthly</th><th>Annual</th></tr></thead><tbody><tr><td>SBA 7(a)</td><td>$1,050,000</td><td>10.5%</td><td>10 yrs</td><td>$14,168</td><td>$170,018</td></tr><tr><td>Seller note</td><td>$150,000</td><td>6.0%</td><td>5 yrs</td><td>$2,900</td><td>$34,799</td></tr></tbody></table><div class="note">Internal analysis. Deterministic output of the deal math workbench — same inputs always produce the same numbers. Not a valuation opinion; no figure here is publishable studio output.</div></div></body></html>

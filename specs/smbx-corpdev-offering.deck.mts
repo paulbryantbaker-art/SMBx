@@ -137,7 +137,13 @@ export const deck = {
       bullets: [
         '**Thesis** — what to buy, and whether it is buyable today.',
         '**Sourcing** — the owners who are not looking to sell, reached under your name.',
-        '**Evaluation** — financials rebuilt, every adjustment tested, surprises found early.',
+        /* VALUATION, not evaluation. Paul, 2026-08-13: "as in how much a
+           business is worth. My ICP will catch this." Shipped as "Evaluation"
+           and corrected here at the source, because this spec is what the
+           carousel, the pricing variant and the motion piece all restate — the
+           motion piece was faithfully saying the wrong word BECAUSE the
+           content law held it to this line. */
+        '**Valuation** — financials rebuilt, every adjustment tested, surprises found early.',
         '**Structure & offer** — terms a lender will back. We write it and we negotiate it.',
         '**Diligence & close** — where deals come apart. Every thread held to signing.',
       ],

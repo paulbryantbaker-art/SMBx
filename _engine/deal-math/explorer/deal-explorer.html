@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>smbX Deal Explorer</title>
+<style>
+:root{--bg:#FAFAFA;--ink:#1A1A18;--sub:#44403C;--mut:#6E6A63;--terra:#D4714E;--terrasoft:#FFF0EB;--cream:#FAF8F4;--line:#eeeef0}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Inter,-apple-system,'Segoe UI',sans-serif}
+.wrap{max-width:1200px;margin:0 auto;padding:28px 20px 60px}
+h1{font-family:Sora,Inter,sans-serif;font-weight:800;font-size:22px;margin:0}
+h1 .x{color:var(--terra)}
+.sub{color:var(--mut);font-size:12.5px;margin:4px 0 18px}
+h2{font-family:Sora,Inter,sans-serif;font-weight:600;font-size:15px;margin:26px 0 10px}
+.grid{display:grid;grid-template-columns:340px 1fr;gap:22px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px}
+.ctl{margin:12px 0}
+.ctl label{display:flex;justify-content:space-between;font-size:12.5px;color:var(--sub);margin-bottom:4px}
+.ctl label b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--terra)}
+input[type=number]{width:110px;border:1px solid var(--line);border-radius:8px;padding:5px 8px;font:inherit;color:#0000FF}
+.numrow{display:flex;justify-content:space-between;align-items:center;margin:8px 0;font-size:12.5px;color:var(--sub)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tile{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.tile .l{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+.tile .v{font-family:Sora,Inter,sans-serif;font-weight:800;font-size:20px;margin-top:3px;font-variant-numeric:tabular-nums}
+.tile .v.accent{color:var(--terra)}
+.tile .s{font-size:11px;color:var(--mut);margin-top:2px}
+table{border-collapse:collapse;width:100%;font-size:12.5px;font-variant-numeric:tabular-nums}
+th,td{padding:6px 9px;text-align:right;border-bottom:1px solid var(--line)}
+th{background:var(--cream);color:var(--sub);font-weight:600}
+th:first-child,td:first-child{text-align:left}
+.pass{color:#1a7a3c;font-weight:600}.fail{color:#b3261e;font-weight:600}
+.heat td{text-align:center;border-radius:4px}
+.note{color:var(--mut);font-size:11.5px;margin-top:14px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-left:8px}
+.seg button{border:0;background:#fff;padding:4px 10px;font:inherit;font-size:12px;cursor:pointer;color:var(--sub)}
+.seg button.on{background:var(--terrasoft);color:var(--terra);font-weight:600}
+.btn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 12px;font:inherit;font-size:12.5px;cursor:pointer;color:var(--sub)}
+.btn:hover{border-color:var(--terra);color:var(--terra)}
+svg text{font:10.5px Inter,sans-serif;fill:var(--mut)}
+.bars{margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>smb<span class="x">X</span> Deal Explorer</h1>
+  <div class="sub">Deterministic deal math — METHODOLOGY_V17 §5.0. Move a slider; every output recalculates instantly. Engine: v17-reference (mirrors the workbench; re-sync at vendoring). Sample data is fictional.</div>
+
+  <div class="grid">
+    <div>
+      <div class="panel">
+        <h2 style="margin-top:0">Earnings (latest year)</h2>
+        <div class="numrow">Revenue <input type="number" id="revenue" step="50000"></div>
+        <div class="numrow">Adj. EBITDA <input type="number" id="ebitda" step="10000"></div>
+        <div class="numrow">SDE <input type="number" id="sde" step="10000"></div>
+
+        <h2>Structure</h2>
+        <div class="ctl"><label>Purchase price <b id="v_price"></b></label><input type="range" id="price" min="500000" max="6000000" step="25000"></div>
+        <div class="ctl"><label>SBA loan <b id="v_sba"></b></label><input type="range" id="sba" min="0" max="5000000" step="25000"></div>
+        <div class="ctl"><label>SBA rate <b id="v_sbarate"></b></label><input type="range" id="sbarate" min="0.05" max="0.14" step="0.0025"></div>
+        <div class="ctl"><label>SBA term (yrs) <b id="v_sbaterm"></b></label><input type="range" id="sbaterm" min="5" max="25" step="1"></div>
+        <div class="ctl"><label>Seller note <b id="v_note"></b></label><input type="range" id="note" min="0" max="1500000" step="25000"></div>
+        <div class="ctl"><label>Note rate <b id="v_noterate"></b></label><input type="range" id="noterate" min="0" max="0.12" step="0.0025"></div>
+
+        <h2>Projections</h2>
+        <div class="ctl"><label>Revenue growth <b id="v_growth"></b></label><input type="range" id="growth" min="-0.05" max="0.20" step="0.005"></div>
+        <div class="ctl"><label>EBITDA margin <b id="v_margin"></b></label><input type="range" id="margin" min="0.04" max="0.35" step="0.0025"></div>
+        <div class="ctl"><label>Capex % revenue <b id="v_capex"></b></label><input type="range" id="capex" min="0" max="0.06" step="0.0025"></div>
+        <div class="ctl"><label>Hold (yrs) <b id="v_hold"></b></label><input type="range" id="hold" min="3" max="10" step="1"></div>
+        <div class="ctl"><label>Exit multiple <b id="v_exit"></b></label><input type="range" id="exitm" min="2" max="8" step="0.1"></div>
+
+        <h2>DCF</h2>
+        <div class="ctl"><label>Discount rate <b id="v_disc"></b></label><input type="range" id="disc" min="0.08" max="0.35" step="0.005"></div>
+        <div class="ctl"><label>Terminal growth <b id="v_tg"></b></label><input type="range" id="tg" min="0" max="0.04" step="0.0025"></div>
+        <div class="numrow">Terminal value
+          <span class="seg"><button id="tv_mult" class="on">Exit multiple</button><button id="tv_gordon">Gordon</button></span>
+        </div>
+        <div style="margin-top:14px"><button class="btn" id="copy">Copy assumptions as JSON</button></div>
+        <div class="note">Blue numbers are direct inputs. Paste the copied JSON to Claude in Cowork to run the full workbench (amortization schedules, xlsx with live formulas, filed model run) on this scenario.</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="tiles" id="tiles"></div>
+
+      <h2>Free cash flow to equity by year</h2>
+      <div class="panel bars"><svg id="fcfbars" width="100%" height="150" viewBox="0 0 800 150" preserveAspectRatio="none"></svg></div>
+
+      <h2>Pro forma</h2>
+      <div class="panel" style="overflow-x:auto"><table id="proforma"></table></div>
+
+      <h2>IRR sensitivity — revenue growth × exit multiple</h2>
+      <div class="panel" style="overflow-x:auto"><table class="heat" id="heat"></table></div>
+
+      <h2>DCF (unlevered, pre-tax — simplified)</h2>
+      <div class="tiles" id="dcftiles"></div>
+
+      <div class="note">Internal analysis only. Deterministic: same inputs always produce the same outputs. Not a valuation opinion; nothing here is publishable studio output. Formulas: V17 §5.1–5.4; IRR/MOIC/DCF are standard definitions pending engine vendoring.</div>
+    </div>
+  </div>
+</div>
+<script>
+// ===== engine (mirrors fixtures/v17-reference.mjs — keep in sync) =====
+function monthlyPayment(p,annualRate,termYears){if(!p)return 0;const r=annualRate/12,n=termYears*12;if(r===0)return p/n;const f=Math.pow(1+r,n);return p*(r*f)/(f-1)}
+function amort(p,rate,term){const pmt=monthlyPayment(p,rate,term);const rows=[];let bal=p;for(let y=1;y<=term;y++){let i2=0,pr=0;for(let m=0;m<12;m++){const i=bal*rate/12;const pp=Math.min(pmt-i,bal);i2+=i;pr+=pp;bal-=pp}rows.push({year:y,interest:i2,principal:pr,balance:Math.max(bal,0)})}return rows}
+function dscr(e,ds){return ds===0?Infinity:e/ds}
+function irr(cf){let lo=-0.9999,hi=10;const npv=r=>cf.reduce((s,c,t)=>s+c/Math.pow(1+r,t),0);let fLo=npv(lo),fHi=npv(hi);if(fLo*fHi>0)return NaN;for(let i=0;i<200;i++){const mid=(lo+hi)/2,fm=npv(mid);if(Math.abs(fm)<1e-9)return mid;if(fLo*fm<0){hi=mid}else{lo=mid;fLo=fm}}return(lo+hi)/2}
+// ===== state (fictional sample deal) =====
+const S={revenue:3100000,ebitda:400000,sde:503000,price:1500000,sba:1050000,sbarate:0.105,sbaterm:10,note:150000,noterate:0.06,noteterm:5,growth:0.05,margin:0.129,capex:0.01,hold:5,exitm:4.0,disc:0.22,tg:0.02,tv:'mult'};
+const $=id=>document.getElementById(id);
+const money=v=>v==null||isNaN(v)?'—':(v<0?'(':'')+'$'+Math.abs(Math.round(v)).toLocaleString()+(v<0?')':'');
+const pct=v=>isNaN(v)?'—':(v*100).toFixed(1)+'%';
+const mult=v=>isNaN(v)?'—':v.toFixed(2)+'x';
+function model(s){
+  const loans=[];if(s.sba)loans.push(amort(s.sba,s.sbarate,s.sbaterm));if(s.note)loans.push(amort(s.note,s.noterate,s.noteterm));
+  const equity=s.price-s.sba-s.note;
+  const rows=[];let rev=s.revenue;const flows=[-equity];
+  for(let y=1;y<=s.hold;y++){
+    rev*=(1+s.growth);const e=rev*s.margin;const cx=rev*s.capex;
+    const ds=loans.reduce((a,sc)=>{const r=sc[y-1];return a+(r?r.interest+r.principal:0)},0);
+    let f=e-cx-ds;const row={y,rev,e,cx,ds,f,dscr:dscr(e,ds)};
+    if(y===s.hold){const rem=loans.reduce((a,sc)=>{const r=sc[y-1];return a+(r?r.balance:0)},0);row.exitEV=e*s.exitm;row.rem=rem;row.exitEq=row.exitEV-rem;f+=row.exitEq}
+    flows.push(f);rows.push(row)}
+  const dist=flows.slice(1).reduce((a,b)=>a+b,0);
+  const y1=rows[0];
+  // DCF: unlevered FCF = EBITDA − capex; TV per toggle
+  let dcf=0;for(let y=1;y<=s.hold;y++){dcf+=(rows[y-1].e-rows[y-1].cx)/Math.pow(1+s.disc,y)}
+  const lastF=rows[s.hold-1].e-rows[s.hold-1].cx;
+  const tv=s.tv==='mult'?rows[s.hold-1].e*s.exitm:(s.disc>s.tg?lastF*(1+s.tg)/(s.disc-s.tg):NaN);
+  const ev=dcf+tv/Math.pow(1+s.disc,s.hold);
+  return{equity,rows,flows,irr:irr(flows),moic:equity>0?dist/equity:NaN,dscr1:y1?y1.dscr:NaN,ads1:y1?y1.ds:NaN,entry:s.ebitda?s.price/s.ebitda:NaN,dcfPV:dcf,tv,ev};
+}
+function heatData(s){
+  const exits=[-1,-0.5,0,0.5,1].map(d=>s.exitm+d);
+  const gs=[-0.04,-0.02,0,0.02,0.04].map(d=>s.growth+d);
+  return{exits,gs,cells:gs.map(g=>exits.map(x=>model({...s,growth:g,exitm:x}).irr))}
+}
+function heatColor(v){ // red (<0) → cream (0.15) → green (0.35+); functional gradient, terra reserved for accents
+  if(isNaN(v))return'#f4f4f4';
+  const t=Math.max(0,Math.min(1,(v-0)/0.35));
+  const lerp=(a,b)=>Math.round(a+(b-a)*t);
+  return v<0?'#f6d7d3':`rgb(${lerp(250,209)},${lerp(244,231)},${lerp(233,205)})`;
+}
+function render(){
+  const m=model(S);
+  // sliders labels
+  const lbl={price:money(S.price),sba:money(S.sba),sbarate:pct(S.sbarate),sbaterm:S.sbaterm+'y',note:money(S.note),noterate:pct(S.noterate),growth:pct(S.growth),margin:pct(S.margin),capex:pct(S.capex),hold:S.hold+'y',exit:mult(S.exitm),disc:pct(S.disc),tg:pct(S.tg)};
+  for(const k in lbl){const el=$('v_'+(k==='exit'?'exit':k));if(el)el.textContent=lbl[k]}
+  const sbaOk=m.dscr1>=1.25,convOk=m.dscr1>=1.5;
+  $('tiles').innerHTML=
+    tile('IRR',pct(m.irr),'levered, to equity',true)+
+    tile('MOIC',mult(m.moic),'equity in: '+money(m.equity))+
+    tile('DSCR yr 1',isFinite(m.dscr1)?m.dscr1.toFixed(2):'—',`SBA ≥1.25 <span class="${sbaOk?'pass':'fail'}">${sbaOk?'PASS':'FAIL'}</span> · Conv ≥1.50 <span class="${convOk?'pass':'fail'}">${convOk?'PASS':'FAIL'}</span>`)+
+    tile('Entry multiple',mult(m.entry),'on Adj. EBITDA')+
+    tile('Debt service yr 1',money(m.ads1),'annual');
+  $('dcftiles').innerHTML=
+    tile('PV of FCF',money(m.dcfPV),S.hold+'-yr horizon')+
+    tile('Terminal value',money(m.tv),S.tv==='mult'?'exit multiple':'Gordon growth')+
+    tile('Enterprise value (DCF)',money(m.ev),'@ '+pct(S.disc)+' discount',true);
+  // pro forma
+  let t='<tr><th>Year</th><th>Revenue</th><th>EBITDA</th><th>Capex</th><th>Debt service</th><th>FCF to equity</th><th>DSCR</th></tr>';
+  m.rows.forEach(r=>{t+=`<tr><td>${r.y}</td><td>${money(r.rev)}</td><td>${money(r.e)}</td><td>${money(r.cx)}</td><td>${money(r.ds)}</td><td>${money(r.f)}</td><td>${isFinite(r.dscr)?r.dscr.toFixed(2):'—'}</td></tr>`});
+  const last=m.rows[m.rows.length-1];
+  t+=`<tr><td><b>Exit</b></td><td colspan=3 style="text-align:left;color:var(--mut)">EV ${money(last.exitEV)} − debt ${money(last.rem)}</td><td colspan=3><b>${money(last.exitEq)}</b> equity proceeds</td></tr>`;
+  $('proforma').innerHTML=t;
+  // FCF bars
+  const flows=m.rows.map(r=>r.f+(r.exitEq&&r.y===S.hold?r.exitEq:0));
+  const max=Math.max(...flows.map(Math.abs),1);const w=800/flows.length;
+  $('fcfbars').innerHTML=flows.map((f,i)=>{const h=Math.abs(f)/max*110;const y=f>=0?120-h:120;
+    return`<rect x="${i*w+w*0.2}" y="${y}" width="${w*0.6}" height="${Math.max(h,1)}" rx="3" fill="${f>=0?'#D4714E':'#b3261e'}" opacity="${i===flows.length-1?1:0.55}"></rect><text x="${i*w+w/2}" y="140" text-anchor="middle">Y${i+1}</text>`}).join('');
+  // heatmap
+  const h=heatData(S);
+  let ht='<tr><th>growth \\ exit</th>'+h.exits.map(x=>`<th>${mult(x)}</th>`).join('')+'</tr>';
+  h.gs.forEach((g,i)=>{ht+=`<tr><th>${pct(g)}</th>`+h.cells[i].map(v=>`<td style="background:${heatColor(v)}">${pct(v)}</td>`).join('')+'</tr>'});
+  $('heat').innerHTML=ht;
+}
+function tile(l,v,s,acc){return`<div class="tile"><div class="l">${l}</div><div class="v${acc?' accent':''}">${v}</div><div class="s">${s||''}</div></div>`}
+// wiring
+const sliders={price:'price',sba:'sba',sbarate:'sbarate',sbaterm:'sbaterm',note:'note',noterate:'noterate',growth:'growth',margin:'margin',capex:'capex',hold:'hold',exitm:'exitm',disc:'disc',tg:'tg'};
+for(const key in sliders){const el=$(sliders[key]);el.value=S[key];el.addEventListener('input',()=>{S[key]=parseFloat(el.value);render()})}
+['revenue','ebitda','sde'].forEach(k=>{const el=$(k);el.value=S[k];el.addEventListener('input',()=>{S[k]=parseFloat(el.value)||0;render()})});
+$('tv_mult').onclick=()=>{S.tv='mult';$('tv_mult').classList.add('on');$('tv_gordon').classList.remove('on');render()};
+$('tv_gordon').onclick=()=>{S.tv='gordon';$('tv_gordon').classList.add('on');$('tv_mult').classList.remove('on');render()};
+$('copy').onclick=()=>{navigator.clipboard.writeText(JSON.stringify(S,null,2));$('copy').textContent='Copied — paste to Claude';setTimeout(()=>$('copy').textContent='Copy assumptions as JSON',2000)};
+render();
+</script>
+</body>
+</html>

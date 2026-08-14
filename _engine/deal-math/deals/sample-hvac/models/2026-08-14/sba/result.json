@@ -1,0 +1,253 @@
+{
+  "model": "sba",
+  "engine": "v17-reference (engine not yet vendored — see ENGINE_PROVENANCE.md)",
+  "earnings": {
+    "year": "2024",
+    "sde": 503000,
+    "ebitda": 400000,
+    "verified_addbacks": 18000,
+    "basis": "SDE",
+    "basisAmount": 503000
+  },
+  "structure": {
+    "purchase_price": 1500000,
+    "equity_injection": 300000,
+    "working_capital_injection": 75000,
+    "ltv": 0.8
+  },
+  "loans": [
+    {
+      "name": "SBA 7(a)",
+      "principal": 1050000,
+      "rate": 0.105,
+      "termYears": 10,
+      "monthlyPayment": 14168.1746614324,
+      "schedule": [
+        {
+          "year": 1,
+          "interest": 107288.09213515278,
+          "principal": 62730.00380203602,
+          "balance": 987269.9961979638
+        },
+        {
+          "year": 2,
+          "interest": 100375.0292693124,
+          "principal": 69643.06666787638,
+          "balance": 917626.9295300875
+        },
+        {
+          "year": 3,
+          "interest": 92700.12302246613,
+          "principal": 77317.97291472269,
+          "balance": 840308.9566153649
+        },
+        {
+          "year": 4,
+          "interest": 84179.41562532309,
+          "principal": 85838.68031186571,
+          "balance": 754470.2763034991
+        },
+        {
+          "year": 5,
+          "interest": 74719.69687272454,
+          "principal": 95298.39906446428,
+          "balance": 659171.8772390349
+        },
+        {
+          "year": 6,
+          "interest": 64217.48447328579,
+          "principal": 105800.611463903,
+          "balance": 553371.2657751318
+        },
+        {
+          "year": 7,
+          "interest": 52557.89203005096,
+          "principal": 117460.20390713782,
+          "balance": 435911.06186799385
+        },
+        {
+          "year": 8,
+          "interest": 39613.3722687097,
+          "principal": 130404.72366847908,
+          "balance": 305506.33819951484
+        },
+        {
+          "year": 9,
+          "interest": 25242.32176522681,
+          "principal": 144775.77417196197,
+          "balance": 160730.56402755284
+        },
+        {
+          "year": 10,
+          "interest": 9287.531909642703,
+          "principal": 160730.5640275461,
+          "balance": 6.739355740137398e-9
+        }
+      ]
+    },
+    {
+      "name": "Seller note",
+      "principal": 150000,
+      "rate": 0.06,
+      "termYears": 5,
+      "monthlyPayment": 2899.9202294142406,
+      "schedule": [
+        {
+          "year": 1,
+          "interest": 8278.567666272229,
+          "principal": 26520.475086698658,
+          "balance": 123479.52491330131
+        },
+        {
+          "year": 2,
+          "interest": 6642.84279331768,
+          "principal": 28156.199959653204,
+          "balance": 95323.32495364812
+        },
+        {
+          "year": 3,
+          "interest": 4906.22998938696,
+          "principal": 29892.81276358392,
+          "balance": 65430.51219006418
+        },
+        {
+          "year": 4,
+          "interest": 3062.506707653919,
+          "principal": 31736.536045316963,
+          "balance": 33693.97614474721
+        },
+        {
+          "year": 5,
+          "interest": 1105.0666082199505,
+          "principal": 33693.97614474721,
+          "balance": 0
+        }
+      ]
+    }
+  ],
+  "annual_debt_service": 204817.13869015969,
+  "dscr": {
+    "on_ebitda": 1.952961566390722,
+    "on_sde": 2.4558491697363327,
+    "sba_min": 1.25,
+    "conventional_min": 1.5,
+    "sba_pass": true,
+    "conventional_pass": true
+  },
+  "risk": {
+    "score": "MEDIUM",
+    "recommendation": "Approve with conditions"
+  },
+  "inputs": {
+    "deal": {
+      "name": "sample-hvac",
+      "business": "SAMPLE — Fictional HVAC Co (workbench smoke test, not a real company)",
+      "naics": "238220",
+      "industry": "HVAC services",
+      "location": "DFW (fictional)",
+      "role": "buy",
+      "league": "L2",
+      "stage": "screening"
+    },
+    "financials": {
+      "years": [
+        {
+          "label": "2023",
+          "revenue": 2600000,
+          "net_income": 210000,
+          "owner_salary": 110000,
+          "depreciation": 55000,
+          "amortization": 5000,
+          "interest": 18000,
+          "taxes": 42000,
+          "one_time_expenses": 0,
+          "non_recurring_income": 0,
+          "source": "sample data"
+        },
+        {
+          "label": "2024",
+          "revenue": 3100000,
+          "net_income": 260000,
+          "owner_salary": 120000,
+          "depreciation": 60000,
+          "amortization": 5000,
+          "interest": 15000,
+          "taxes": 52000,
+          "one_time_expenses": 25000,
+          "non_recurring_income": 10000,
+          "source": "sample data"
+        }
+      ],
+      "addbacks": [
+        {
+          "label": "Personal vehicle + insurance",
+          "amount": 18000,
+          "year": "2024",
+          "verified": true,
+          "evidence": "sample"
+        },
+        {
+          "label": "One-off legal settlement",
+          "amount": 30000,
+          "year": "2024",
+          "verified": false,
+          "evidence": "unverified — excluded"
+        }
+      ]
+    },
+    "valuation": {
+      "multiple_low": 2.8,
+      "multiple_high": 3.4,
+      "multiple_basis": "SDE",
+      "multiple_source": "sample range for smoke test"
+    },
+    "structure": {
+      "purchase_price": 1500000,
+      "sba_loan": 1050000,
+      "sba_rate": 0.105,
+      "sba_term_years": 10,
+      "seller_note": 150000,
+      "seller_note_rate": 0.06,
+      "seller_note_term_years": 5,
+      "working_capital_injection": 75000
+    },
+    "projections": {
+      "revenue_growth_pct": 0.05,
+      "margin_pct": null,
+      "hold_years": 5,
+      "exit_multiple": 4,
+      "capex_pct_revenue": 0.01
+    },
+    "earnout": {
+      "base_price": 1350000,
+      "tranches": [
+        {
+          "label": "Year-1 revenue ≥ $3.2M",
+          "amount": 100000,
+          "probability": 0.6,
+          "trigger": "revenue"
+        },
+        {
+          "label": "Year-2 revenue ≥ $3.5M",
+          "amount": 100000,
+          "probability": 0.4,
+          "trigger": "revenue"
+        }
+      ]
+    },
+    "assumption_log": [
+      {
+        "field": "everything",
+        "why": "Fictional smoke-test deal. No real company.",
+        "decided_by": "claude-flagged"
+      }
+    ]
+  },
+  "run": {
+    "date": "2026-08-14",
+    "deal_dirs": [
+      "/home/claude/deal-math-workbench/deals/sample-hvac"
+    ],
+    "engine": "v17-reference (engine not yet vendored — see ENGINE_PROVENANCE.md)"
+  }
+}

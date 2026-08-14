@@ -1,0 +1,62 @@
+{
+  "deal": {
+    "name": "_template",
+    "business": "FILL — business name",
+    "naics": "",
+    "industry": "",
+    "location": "",
+    "role": "buy",
+    "league": "L1",
+    "stage": "screening"
+  },
+  "financials": {
+    "years": [
+      {
+        "label": "2024",
+        "revenue": 0,
+        "net_income": 0,
+        "owner_salary": 0,
+        "depreciation": 0,
+        "amortization": 0,
+        "interest": 0,
+        "taxes": 0,
+        "one_time_expenses": 0,
+        "non_recurring_income": 0,
+        "source": "FILL — which document in documents/ this row came from"
+      }
+    ],
+    "addbacks": [
+      {
+        "label": "EXAMPLE — personal vehicle",
+        "amount": 0,
+        "year": "2024",
+        "verified": false,
+        "evidence": "verified:true requires evidence — document + line"
+      }
+    ]
+  },
+  "valuation": {
+    "multiple_low": null,
+    "multiple_high": null,
+    "multiple_basis": "SDE",
+    "multiple_source": "FILL — where the multiple range comes from, or leave null"
+  },
+  "structure": {
+    "purchase_price": null,
+    "sba_loan": null,
+    "sba_rate": null,
+    "sba_term_years": 10,
+    "seller_note": null,
+    "seller_note_rate": null,
+    "seller_note_term_years": 5,
+    "working_capital_injection": 0
+  },
+  "projections": {
+    "revenue_growth_pct": null,
+    "margin_pct": null,
+    "hold_years": 5,
+    "exit_multiple": null,
+    "capex_pct_revenue": 0
+  },
+  "assumption_log": []
+}

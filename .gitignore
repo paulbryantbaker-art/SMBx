@@ -60,3 +60,6 @@ collateral/**/*.png
 #   markets/*/media/     per-market report art (8M). Same argument.
 #   markets/*/versions/  the master history IS the point of this repo.
 #   markets/*/screen/    the target boards. Confidential, and irreplaceable.
+
+# Raw video footage — too large for GitHub, derived not source (2026-08-14)
+collateral/**/*.mov
