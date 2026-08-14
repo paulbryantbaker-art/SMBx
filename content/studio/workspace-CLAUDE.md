@@ -201,6 +201,12 @@ DESIGN_LANGUAGE.md   the house LOOK — palette, type, and the dead systems name
                      with their hexes. Canonical.
 REPORT_TEMPLATE.md   the cover block, the body rules, the standing appendix.
 CLOUD_BOOTSTRAP.md   only if you are a cloud session and a builder will not run.
+
+definitive/          HOW A DEAL RUNS — the DEFINITIVE layer, lifted out of the
+                     app. Start at definitive/DEFINITIVE.md before ANY work in
+                     deals/. The other six are reference, opened when the deal
+                     trips into them: GATES · MODELS · VALUATION · TAX · LEGAL ·
+                     REAL_ESTATE.
 ```
 
 **Route by what you were asked for:**
@@ -214,6 +220,8 @@ CLOUD_BOOTSTRAP.md   only if you are a cloud session and a builder will not run.
 | write a market map, who's who, target map or thesis | **PLAYBOOK.md** |
 | build a carousel, one-pager or report | **FORMATS.md**, then **DESIGN_LANGUAGE.md** |
 | anything, and you are about to hand-write HTML or CSS | **DESIGN_LANGUAGE.md** — stop, you are drifting |
+| **run a deal** — underwrite a target, read a seller's numbers, structure, diligence, an IOI or LOI | **definitive/DEFINITIVE.md** |
+| a deal question about **tax, legal, or property** | **definitive/GATES.md**, then the file it routes you to |
 
 ## The three hunts are not interchangeable (2026-07-31)
 
@@ -450,9 +458,44 @@ at the root: it overwrites the last build AND files it outside its market.
 
 ### 5. Deal analysis
 
+**Read `definitive/DEFINITIVE.md` first.** The DEFINITIVE layer — the
+classification cascade, the gates, the model catalog, and the tax, legal and
+real-property engines — moved out of the app and onto this disk on 2026-08-14
+(Paul: *"Cowork needs the entire definitive markup to run the deal"*). It is the
+method; what follows is only the filing.
+
 Read what's in `deals/<d>/documents/`, write to `analysis/`. Same citation
 discipline: a number in the analysis comes from a document in `documents/`, or
 it says where it came from.
+
+The shape of the job, in one pass:
+
+1. **Classify** — journey, sub-journey, league, deal type, structure, industry,
+   jurisdiction. Seven steps, in order, `DEFINITIVE.md`.
+2. **Write the deal file** — `deals/<d>/deal-<target>.md`, template in
+   `DEFINITIVE.md`. Every figure carries `explicit` / `derived` / `inferred`.
+3. **Walk the gates** — `GATES.md`. Write down which ones the deal trips. A gate
+   nobody wrote down is a gate nobody closed.
+4. **Compute what is computable** — `VALUATION.md` for the bridge and the band,
+   `MODELS.md` for what a slot computes. **A range, never a point.**
+5. **Open the engine the deal trips into** — `TAX.md`, `LEGAL.md`,
+   `REAL_ESTATE.md`. Not front to back; on demand.
+6. **Name every gap and its owner**, and every specialist handoff with the
+   actual question written out.
+
+**Three things that are different here from every other job in this file.**
+
+- **The numbers came from a counterparty with an interest in them.** In a market
+  master a figure needs a source. In a deal file it needs a source *and* a
+  posture — a seller's adjusted EBITDA and a defended one routinely differ by
+  15–30%, and that gap is the work.
+- **The engagement folder is never a source.** Nothing from `deals/` enters a
+  master, a market document, or `collateral/`. `audit.mts` cannot catch a breach
+  here — it checks whether a figure traces, not where it came from.
+- **Underwriting a named target for the client buying it is the work; signing a
+  number is not.** No appraisal, no fairness opinion, no ESOP valuation, and no
+  point estimate that leaves the engagement folder. `DEFINITIVE.md` states the
+  boundary precisely.
 
 ### 6. Find clients — the prospect board (2026-07-31)
 

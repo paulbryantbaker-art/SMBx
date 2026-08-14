@@ -64,7 +64,7 @@ function law(srcRel: string, dstName: string): void {
      markets/  the knowledge base per market — research in, master out
      deals/    per-deal documents and the analysis produced from them
      the rest  as before (media, assets, collateral, decks) */
-const dirs = ['media', 'assets', 'collateral', 'decks', 'markets', 'deals', 'clients'];
+const dirs = ['media', 'assets', 'collateral', 'decks', 'markets', 'deals', 'clients', 'definitive'];
 for (const d of dirs) mkdirSync(path.join(target, d), { recursive: true });
 
 /* A market is a folder. Seed one so the shape is obvious rather than described. */
@@ -139,6 +139,26 @@ law('scripts/studio/machine.html', 'machine.html');
    rather than in the repo or in whoever set the schedule up. */
 law('content/studio/WEEKLY.md', 'WEEKLY.md');
 
+/* THE DEFINITIVE LAYER (2026-08-14, Paul: "Cowork needs the entire definitive
+   markup to run the deal"). Seven files in their own folder, because this is a
+   REFERENCE SET rather than a standing instruction — a session reads
+   DEFINITIVE.md at the start of deal work and opens TAX/LEGAL/REAL_ESTATE only
+   when the deal trips into them. Root-level law files are read every session;
+   these are read on demand, and mixing the two would bury CLAUDE.md in a folder
+   of twelve.
+
+   It travels for exactly the reason the other laws do, one level worse. The
+   substrate lives in server/services/definitive*.ts and v19ModelRuntime.ts —
+   code a Cowork session cannot import (Postgres at module load) and would not
+   read anyway. Without these files a session running a deal has the citation law
+   and no deal method, and fills the gap from general M&A familiarity: the wrong
+   entity fork, a point estimate where THE LINE requires a range, and a §338(h)(10)
+   proposed to a PE LLC buyer that cannot make the election. Naming the gates and
+   the defer triggers is what lets a session catch itself. */
+for (const f of ['DEFINITIVE', 'GATES', 'MODELS', 'VALUATION', 'TAX', 'LEGAL', 'REAL_ESTATE']) {
+  law(`content/studio/definitive/${f}.md`, path.join('definitive', `${f}.md`));
+}
+
 /* engagements.mjs is a TOOL, not a law, but it travels the same way and for the
    same reason (Paul, 2026-07-29: "I don't want to have to keep downloading main
    and reimporting it so that Cowork can use it"). It lands IN the workspace as
@@ -199,6 +219,7 @@ const notes: Record<string, string> = {
   markets: 'One folder per market you keep a knowledge base for. Copy _example-market/ and rename it. Research goes in research/; the synthesized master is master.md.',
   deals: 'One folder per deal. Copy _example-deal/ and rename it. What the seller sent goes in documents/; what we produce goes in analysis/.',
   clients: 'One folder per client, one folder per engagement inside it — clients/<client>/<engagement>/engagement.md holds the stage, what we owe them, and the log. `node engagements.mjs list` is the board.',
+  definitive: 'The deal method, read on demand — start at DEFINITIVE.md. GATES.md is what a deal trips; TAX/LEGAL/REAL_ESTATE/VALUATION/MODELS are opened when it trips into them. Reference, not a standing instruction — do not edit these here, they are refreshed from the repo by init-workspace --update.',
 };
 writeFileSync(path.join(exampleMarket, 'README.txt'),
   ['A MARKET — everything you know about one lane.', '',
@@ -256,6 +277,7 @@ writeFileSync(path.join(target, 'README.md'), [
   'clients/      one folder per client — engagements, their stage, and the log',
   'markets/      one folder per market — research in, master out, documents derived',
   'deals/        one folder per deal — what they sent, what we produced',
+  'definitive/   the deal method — gates, models, tax, legal, real estate',
   'posting-plan.md   what to build next',
   'THESES.md     every position we hold and what it rests on (generated)',
   '```',
@@ -269,6 +291,9 @@ writeFileSync(path.join(target, 'README.md'), [
   '              The spec, not the method — it assumes research/ is populated.',
   'FORMATS.md    collateral containers: which builder, which fields, slot sizes.',
   'DESIGN.md     the house look — palette, type, and the retired systems by hex.',
+  'definitive/DEFINITIVE.md',
+  '              HOW A DEAL RUNS. Read it before any work in deals/. The other',
+  '              six files in that folder are reference, opened on demand.',
   '```',
   '',
   '## Research a market from scratch',
