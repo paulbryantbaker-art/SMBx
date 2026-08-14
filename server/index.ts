@@ -1001,7 +1001,12 @@ app.get('/api/definitive/enterprise-allow-lists', (req, res) => {
   res.json(buildDefinitiveEnterpriseAllowListTemplates(discoveryOrigin(req)));
 });
 
-app.get('/api/debug/check-ai', async (_req, res) => {
+// requireAuth added 2026-08-14. This sits above the blanket `app.use('/api',
+// requireAuth)` below, so it was answering anonymous callers with the first ten
+// characters of ANTHROPIC_API_KEY, the row count of `conversations`, and a live
+// claude-sonnet-4-6 call on every hit. Same defect as the deleted
+// /api/chat/debug/api-test, with a key prefix on top.
+app.get('/api/debug/check-ai', requireAuth, async (_req, res) => {
   const checks: Record<string, any> = {};
 
   checks.apiKeySet = !!process.env.ANTHROPIC_API_KEY;

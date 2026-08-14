@@ -24,7 +24,7 @@
  * commentary, and the practitioner covers the rest on the call.
  */
 import Anthropic from '@anthropic-ai/sdk';
-import { spendAllowed } from './apiSpend.js';
+import { spendAllowed, recordSpend } from './apiSpend.js';
 
 const MODEL = 'claude-haiku-4-5-20251001';
 const MAX_MESSAGES = 16;
@@ -287,6 +287,10 @@ export async function runPracticeIntake(rawMessages: unknown): Promise<IntakeRes
         system: SYSTEM_PROMPT,
         messages,
       });
+      recordSpend({
+        lane: 'marketing', source: 'practice.intake', model: MODEL,
+        inputTokens: response.usage?.input_tokens, outputTokens: response.usage?.output_tokens,
+      });
       const text = response.content
         .filter(b => b.type === 'text')
         .map(b => (b as { type: 'text'; text: string }).text)
@@ -331,7 +335,11 @@ export async function runPracticeIntakeStream(
         text += chunk;
         try { onDelta(chunk); } catch { /* client gone — final still returns */ }
       });
-      await stream.finalMessage();
+      const final = await stream.finalMessage();
+      recordSpend({
+        lane: 'marketing', source: 'practice.intake.stream', model: MODEL,
+        inputTokens: final.usage?.input_tokens, outputTokens: final.usage?.output_tokens,
+      });
       const trimmed = text.trim();
       if (trimmed) return resultFromText(trimmed);
     } catch (err: any) {

@@ -1,9 +1,17 @@
 /**
  * Menu Catalog Service — Queries menu_items for available deliverables.
- * Handles pricing with league multipliers.
+ *
+ * A deliverable's price is its `base_price_cents`, full stop. It used to be
+ * `base_price_cents × getLeagueMultiplier(league)`, and league is derived from
+ * the target's SDE/EBITDA — so the same document cost 10× more on a $50M+ deal
+ * than on a sub-$500K one. That is pricing by deal size, which is the one thing
+ * this practice's regulatory position rests on not doing (removed 2026-08-14,
+ * with the platform_fee_schedule ladder in migration 125).
+ *
+ * Per-deliverable pricing itself is untouched and still live — only the
+ * size-scaling factor is gone.
  */
 import { sql } from '../db.js';
-import { getLeagueMultiplier } from './leagueClassifier.js';
 
 export interface MenuItem {
   id: number;
@@ -22,7 +30,6 @@ export interface MenuItem {
 export interface PricedMenuItem extends MenuItem {
   final_price_cents: number;
   final_price_display: string;
-  league_multiplier: number;
 }
 
 /** Get all active menu items */
@@ -57,22 +64,20 @@ export async function getMenuItemBySlug(slug: string): Promise<MenuItem | null> 
   return (row as unknown as MenuItem) || null;
 }
 
-/** Price a menu item with league multiplier */
-export function priceMenuItem(item: MenuItem, league: string): PricedMenuItem {
-  const multiplier = getLeagueMultiplier(league);
-  const finalCents = Math.round(item.base_price_cents * multiplier);
+/** Price a menu item. The price is the base price — see the file header. */
+export function priceMenuItem(item: MenuItem): PricedMenuItem {
+  const finalCents = item.base_price_cents;
   return {
     ...item,
     final_price_cents: finalCents,
     final_price_display: finalCents === 0 ? 'Free' : `$${(finalCents / 100).toFixed(2)}`,
-    league_multiplier: multiplier,
   };
 }
 
-/** Get priced menu items for a gate + league */
-export async function getPricedGateItems(gate: string, league: string): Promise<PricedMenuItem[]> {
+/** Get priced menu items for a gate */
+export async function getPricedGateItems(gate: string): Promise<PricedMenuItem[]> {
   const items = await getGateMenuItems(gate);
-  return items.map(item => priceMenuItem(item, league));
+  return items.map(priceMenuItem);
 }
 
 /** Get all free deliverables available at a gate */
