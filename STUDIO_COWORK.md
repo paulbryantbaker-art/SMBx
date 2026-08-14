@@ -199,11 +199,53 @@ going to a client is a **report PDF**; the carousel and one-pager are LinkedIn.
 Field references live beside the builders — `scripts/studio/decks/` for deck and
 post specs, `scripts/studio/reports/` for report cover blocks.
 
-### 4. Deal analysis
+### 4. Deal analysis — the post-LOI phase
 
 What the seller sent goes in `deals/<d>/documents/`; what we produce goes in
 `analysis/`. Same discipline — a number in the analysis comes from a document in
 `documents/`, or it says where it came from.
+
+Four documents, specced section by section in `PLAYBOOK.md` §5: the **model**
+(mechanical, below), the **deal memo** (the recommendation the buyer decides
+from), the **diligence plan** (written early — its job is to decide what would
+change the answer while there is still time to find out), and the **term
+framework** (the commercial position counsel papers; not legal language).
+
+```
+npx tsx $REPO/scripts/studio/deal.mts new <engagement> "<target>"
+npx tsx $REPO/scripts/studio/deal.mts run deals/<d>/analysis/<t>.deal.mts
+npx tsx $REPO/scripts/studio/deal.mts list          # which models are stale
+```
+
+**Model with the CLI, never by hand.** `house/deal.ts` is the same arithmetic
+the app's canvas runs, and `npm run test:deal` imports both engines and fails
+if they ever disagree. That gate exists because of a real near-miss: the
+2026-08-14 Deal Explorer prototype reimplemented `amort`, `dscr` and `irr` in
+browser JS and labelled itself *"mirrors the workbench; re-sync at vendoring"*
+— a mirror kept in step by hand is a second engine, and two engines disagreeing
+about what a deal is worth is the worst failure available here.
+
+The `.deal.mts` spec is the artifact you maintain; the `-model.md` beside it is
+output and the next run overwrites it. Money in cents, rates as decimals.
+
+Two traps worth naming, both of which produce a number that looks fine:
+
+- **The model inherits two shortcuts from the app's canvas and flags both in
+  place** — a straight-line debt paydown that flatters exit equity on a long
+  amortization, and an IRR solver that can fail to converge. It refuses to
+  print a rate that did not converge. Read those notes before repeating a
+  return that looks too good.
+- **League multiples are house assumptions, not comps.** The document says so
+  on the line that prints them. Cite a real comparable before that band informs
+  a price you recommend.
+
+**Tax is the CPA's.** `deal.mts` carries no tax surface on purpose — asset vs
+stock, §338(h)(10), installment treatment and QSBS are jurisdictional and
+material. A test asserts none of it leaks in.
+
+Deal documents render to `deals/<d>/decks/<slug>/$(date +%F)`, never to
+`collateral/` — collateral is publishable anywhere, and these name a live
+target and a client's intentions.
 
 ### 5. Push a research run into the app's CRM
 

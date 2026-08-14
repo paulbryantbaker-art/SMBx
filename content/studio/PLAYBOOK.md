@@ -494,6 +494,185 @@ mechanical will catch it — `audit.mts` checks numbers, not prose.
 
 ---
 
+# 5. The deal documents — everything after the LOI
+
+The four documents above are all **pre-LOI**: they decide what market to hunt
+in, who is in it, which companies fit, and why a particular buyer should care.
+This section is the other side of the line — a named target, a live mandate,
+and a client who is about to spend real money.
+
+Two things change once you cross it, and both change how you write:
+
+- **The audience is one buyer's decision, not a market read.** A market map is
+  interesting; a deal memo gets signed or walked away from. Write for the
+  person who has to defend the decision to a partner or a lender.
+- **Everything is confidential.** These live in `deals/<engagement>/`, they are
+  never a public source, and nothing from them is reused as collateral. See the
+  client-confidentiality law in `CLAUDE.md`.
+
+**THE LINE, sharpened for this phase.** The perimeter in §THE LINE binds
+everything here, and three edges get tested constantly once a deal is live:
+
+- **We advise the BUYER on what a target is worth to them.** That is the job.
+  What we never do is issue an opinion of value as though it were an appraisal,
+  or advise the seller on price. A range with its working shown is analysis; a
+  number presented as *the* value is an appraisal, and that needs a licensed
+  appraiser.
+- **Deal terms are commercial until they are legal.** Working out the earnout
+  mechanics, the escrow, the holdback and the working-capital peg is corp-dev
+  work. Drafting the language that binds them is counsel's, and the moment a
+  question is "does this clause do what we want", it goes to the attorney.
+- **Tax structure goes to the CPA, always.** Asset versus stock, §338(h)(10),
+  installment treatment, QSBS — these change the number materially and they are
+  jurisdictional. Model the deal both ways if you must, label both as
+  *pending confirmation*, and cite the CPA's answer when it arrives.
+  `house/deal.ts` deliberately carries no tax surface for this reason.
+
+## 5a. The deal model → `deals/<e>/analysis/<target>-model.md`
+
+**Mechanical, not written.** Do not hand-build a model in markdown and do not
+compute returns in your head or in a scratch file — the arithmetic is in
+`house/deal.ts`, the same engine the app runs, and a second engine is how two
+documents come to disagree about what a deal is worth.
+
+```
+npx tsx $REPO/scripts/studio/deal.mts new <engagement> "<target>"   # scaffold the spec
+npx tsx $REPO/scripts/studio/deal.mts run deals/<e>/analysis/<t>.deal.mts
+npx tsx $REPO/scripts/studio/deal.mts list                          # what is stale
+```
+
+The **spec is the artifact you maintain** — `<target>.deal.mts`, money in cents,
+rates as decimals. The `-model.md` beside it is output: never hand-edit it,
+because the next run overwrites it and your edit is gone. Change an assumption,
+re-run, commit the spec. Its `git log` is the negotiation.
+
+Three fields carry more weight than the rest:
+
+- **`earningsSource`** is printed verbatim into the document and read by the
+  audit. "Seller's P&L" is not enough — name the document and date it: *"Adj.
+  EBITDA per the QoE dated 2026-07-02, tab 3."* If it is still a TODO, the CLI
+  warns you, because every figure in the model inherits that provenance.
+- **`unknowns`** is always printed, even empty — and an empty list is a *claim*
+  that nothing material is unverified. It almost never is.
+- **`league`** prints a band from `LEAGUE_MULTIPLES`. Those are **house
+  assumptions**, not observed comps, and the document says so on the same line.
+  Cite a real comparable before that band informs a price you recommend.
+
+What the model refuses to do, and why you should not work around it: it will
+not print an IRR that did not converge, and the straight-line debt paydown it
+inherits from the app's canvas flatters exit equity on a long amortization —
+the document flags both in place. If a number looks too good, read those notes
+before you repeat it.
+
+## 5b. The deal memo → `deals/<e>/analysis/<target>-memo.md`
+
+The document the buyer's decision gets made from. One target, one
+recommendation, and enough of the reasoning that a reader can disagree with a
+specific assumption rather than with your conclusion.
+
+```
+# <target> — deal memo
+## The recommendation        proceed / proceed at a lower number / walk, and the
+                             price or range it is conditional on. First, not last.
+## The business              what it does, for whom, how it makes money. Short.
+                             A reader who knows the market should skim this.
+## Why this one              what makes it a fit for THIS buyer — the thesis it
+                             serves, the gap it fills. Not why the market is good.
+## What we would pay         the range, the entry multiple, and what the number
+                             is anchored to. Link the model; do not restate it.
+## How it gets financed      the structure, the coverage, whose money is at risk.
+                             Name the covenant that binds first.
+## What we verified          the diligence that is DONE, and what it showed —
+                             including what came back worse than expected.
+## What would change the answer
+                             the two or three findings that would move the price
+                             or kill it, each with the diligence that tests it.
+## The risks we are accepting
+                             the ones that survive diligence and get priced in
+                             rather than resolved. Say them plainly.
+## What we don't know yet
+```
+
+**The recommendation goes first.** A memo that walks through analysis and
+arrives at a view in the last paragraph makes the reader do the work twice, and
+in practice they skip to the end anyway.
+
+**"What we verified" must include the disappointments.** A memo that reports
+only confirmations is not diligence, it is advocacy, and a reader who later
+finds the thing you left out stops trusting the rest of it.
+
+**Never restate the model's numbers by hand.** Reference the model document and
+let it own the arithmetic. Two places carrying the same figure is two places
+that drift, and the one in prose is always the one that goes stale.
+
+## 5c. The diligence plan → `deals/<e>/analysis/<target>-diligence.md`
+
+Written **early** — right after the LOI, before the work starts — because its
+job is to decide what would change the answer while there is still time to
+find out.
+
+```
+# <target> — diligence plan
+## What we are trying to disprove
+                             the two or three load-bearing assumptions from the
+                             thesis and the model. Frame them as falsifiable.
+## Workstreams               per stream: what gets checked, what document or
+                             party answers it, who owns it, and by when.
+                             Financial · Commercial · Operational · Legal · Tax ·
+                             Insurance · IT — drop what does not apply, and say
+                             you dropped it.
+## The specialists           who is doing the licensed work — CPA for the QoE
+                             and tax, counsel for the legal review, appraiser
+                             where there is real property. Named, with scope.
+## What would stop the deal  the findings that are disqualifying rather than
+                             priceable, agreed with the client IN ADVANCE.
+## Sequence                  what has to come back before the next money is
+                             spent. Cheap disqualifiers first.
+## What we don't know yet
+```
+
+**"What would stop the deal" is agreed before the work starts, not after.**
+Deciding a finding is tolerable while looking at a fee already spent is how
+buyers talk themselves into deals.
+
+**Sequence by what kills the deal cheapest.** A $25k QoE that runs before a
+$500 licence check is a fee spent to discover something a search would have
+told you in an afternoon.
+
+## 5d. The term framework → `deals/<e>/analysis/<target>-terms.md`
+
+**This is not an LOI, and it is not a draft of one.** It is the commercial
+position the practitioner takes to counsel so that counsel drafts once. Nothing
+in this document is legal language, and it says so at the top.
+
+```
+# <target> — term framework
+> Commercial positions for counsel to paper. Not legal language, not an offer.
+## Price and structure       the number, cash at close, and what the rest is
+## Consideration mix         seller note, rollover, earnout — amount and why
+## The earnout, if any       metric, measurement window, who computes it, and
+                             what happens on a dispute. The mechanics, not the
+                             clause.
+## Working capital           the peg, how it is measured, the collar. Reference
+                             the model's peg section rather than re-deriving it.
+## Escrow and holdback       amount, duration, what it secures
+## What the seller keeps     excluded assets, real property, personal items
+## Transition                the seller's role after close, for how long, paid how
+## Conditions                what has to be true at signing and at closing
+## Open for counsel          the questions we are explicitly handing over
+## What we don't know yet
+```
+
+**"Open for counsel" is a required section, not an optional one.** It is the
+list that keeps this document on the right side of the line, and an empty one
+means you have almost certainly answered a legal question yourself.
+
+**The earnout is where most value is lost.** Say who computes the metric and
+what happens when the parties disagree. A payout formula with no dispute
+mechanic is a lawsuit with a number attached.
+
+---
+
 # Turning any of these into something you send
 
 They're markdown, so they render like anything else:

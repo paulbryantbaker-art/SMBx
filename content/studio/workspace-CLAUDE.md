@@ -448,11 +448,54 @@ filename, and **always pass `--out markets/<m>/collateral/<slug>/$(date +%F)`**
 filing law and the output law above. The bare default is a flat `./collateral`
 at the root: it overwrites the last build AND files it outside its market.
 
-### 5. Deal analysis
+### 5. Deal analysis — everything after the LOI
 
 Read what's in `deals/<d>/documents/`, write to `analysis/`. Same citation
 discipline: a number in the analysis comes from a document in `documents/`, or
 it says where it came from.
+
+**The document specs are `PLAYBOOK.md` §5** — the model, the deal memo, the
+diligence plan and the term framework, section by section, with the edges of
+THE LINE that this phase tests hardest.
+
+**Model with the CLI. Never by hand.**
+
+```
+npx tsx $REPO/scripts/studio/deal.mts new <engagement> "<target>"
+npx tsx $REPO/scripts/studio/deal.mts run deals/<d>/analysis/<t>.deal.mts
+npx tsx $REPO/scripts/studio/deal.mts list          # which models are stale
+```
+
+`house/deal.ts` is the same arithmetic the app's canvas runs, and a test
+imports both engines and fails if they ever disagree. Computing a return in a
+scratch file instead is how a second answer gets born — and two documents
+disagreeing about what a deal is worth is the worst failure available here,
+because both look authoritative and one of them reaches the client.
+
+Four things to hold on to, each of which has a way of going wrong quietly:
+
+- **The `.deal.mts` spec is the artifact; `-model.md` is output.** Hand-editing
+  the model gets your edit overwritten on the next run. Change the spec,
+  re-run, commit the spec — its `git log` is the negotiation.
+- **`earningsSource` is printed verbatim and read by the audit.** Name the
+  document and date it. Every figure in the model inherits that provenance, so
+  "seller's P&L" makes the whole model uncitable.
+- **League multiples are OURS, not comps.** The model labels them a house
+  assumption in place. Cite a real comparable before a band informs a price you
+  recommend.
+- **Read the model's own warnings before repeating a number.** It refuses to
+  print an IRR that did not converge, and it flags that the straight-line debt
+  paydown it inherits flatters exit equity on a long amortization. A return
+  that looks too good usually has one of those notes sitting next to it.
+
+**No tax numbers.** Asset vs stock, §338(h)(10), installment treatment, QSBS —
+jurisdictional, material, and the CPA's. `house/deal.ts` carries no tax surface
+on purpose, and a test keeps it that way. Model it both ways if you must, label
+both *pending confirmation*, and cite the CPA when the answer lands.
+
+**Deal documents render to `deals/<d>/decks/<slug>/$(date +%F)`, never to
+`collateral/`.** Collateral is publishable anywhere; a deal memo names a live
+target and a client's intentions. The filing law and the output law both apply.
 
 ### 6. Find clients — the prospect board (2026-07-31)
 
