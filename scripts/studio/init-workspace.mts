@@ -124,6 +124,25 @@ law('content/studio/workspace-CLAUDE.md', 'CLAUDE.md');
 law('content/studio/PLAYBOOK.md', 'PLAYBOOK.md');
 law('content/studio/FORMATS.md', 'FORMATS.md');
 law('content/studio/DESIGN.md', 'DESIGN.md');
+/* THE_LINE.md — added 2026-08-14, Paul: "Make sure that Cowork understands
+   where the Lines are and what we need expert opinions on too. Tax, legal
+   real estate, etc."
+
+   The same defect DESIGN.md was created to fix, in the compliance layer rather
+   than the visual one: `THE_LINE_POLICY.md` lives at the REPO root and was
+   never in this list, so a session opened on the workspace could not read it —
+   while CLAUDE.md cheerfully said "Full text in THE_LINE_POLICY.md in the
+   repo." A pointer to a file that is not there is worse than no pointer,
+   because it reads as though the law is available.
+
+   It is not a copy of the policy. The policy states the perimeter and puts the
+   whole specialist question in ONE clause — "securities, tax opinions, legal
+   opinions, formal appraisal". THE_LINE.md carries the perimeter verbatim and
+   then answers the question that clause leaves open: which QUESTION has crossed
+   into which lane, who owns it, and what to hand them. Tax, legal, the five
+   separate real-estate lanes, valuation, securities, trade licensing,
+   employment, insurance and QoE. */
+law('content/studio/THE_LINE.md', 'THE_LINE.md');
 law('content/studio/RESEARCH.md', 'RESEARCH.md');
 /* THE MACHINE (2026-08-12, Paul: "give Cowork the DL for the new element to
    be used in collateral"). MACHINE.md is the design language + content law;
@@ -285,6 +304,9 @@ writeFileSync(path.join(target, 'README.md'), [
   '              The spec, not the method — it assumes research/ is populated.',
   'FORMATS.md    collateral containers: which builder, which fields, slot sizes.',
   'DESIGN.md     the house look — palette, type, and the retired systems by hex.',
+  'THE_LINE.md   the perimeter, and whose lane each question is in. Read it',
+  '              before anything client-facing, and whenever a question turns',
+  '              tax, legal, real estate, valuation, licensing or insurance.',
   '```',
   '',
   '## Research a market from scratch',

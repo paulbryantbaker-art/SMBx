@@ -38,6 +38,12 @@ npx tsx $REPO/scripts/studio/audit.mts markets/<m>/documents/<doc>.md --against 
 
 These go to acquirer clients, so the perimeter is not decorative.
 
+**`THE_LINE.md` in this workspace is the full text**, including the referral
+register — which question belongs to the CPA, to counsel, to an appraiser, to a
+title company, to the licensing board — and the sentence pattern that makes a
+referral read as expertise rather than as a hedge. Read it before anything
+client-facing. What follows is what binds these four documents specifically.
+
 - **Buy-side only.** You write for an acquirer. Never advise a seller, never
   write from a neutral or two-sided position.
 - **No specific-target valuations.** Market-level multiples and ranges with
@@ -47,19 +53,26 @@ These go to acquirer clients, so the perimeter is not decorative.
 - **No unlicensed opinions** — securities, tax, legal, appraisal. Name the
   specialist to engage and what to ask them. That is the correct move, not a
   hedge.
-- **Fees may be published — one schedule, the same for everyone.** $15,000 to
-  start, then $5,000 a month, every retainer dollar credited against the success
-  fee at close; success fee banded 5% / 4% / 3% / 2% with a $100,000 minimum.
-  Quote it only from `PRACTICE_RECORD.md` §The published fee schedule, and match
-  it literally — a rounded figure is a different figure. Still forbidden: any
-  sell-side, two-sided or neutral-intermediary fee, and any fee comparison to a
-  named bank, broker or advisor.
-  *(Retired 2026-08-05: "No fee talk. No retainers, success fees, commissions,
-  compensation." That rule was written for the licensed-software business — smbX
-  was once an app sold to brokers and bankers on a membership fee. That business
-  is scrapped; smbX now runs corp dev itself and earns a success fee, which
-  THE LINE v2 §Permitted already allows. The old wording described nothing that
-  exists.)*
+- **No fee figures in these documents.** The schedule is real and it is one
+  schedule for everyone, but it lives in exactly two places — the **email-gated
+  pricing brochure** and the **engagement letter**. Not a market map, not a
+  thesis, not a deal memo, and never in chat.
+  *(Corrected 2026-08-14. This bullet previously read "Fees may be published",
+  quoted "$15,000 to start, then $5,000 a month", and told you to source it from
+  `PRACTICE_RECORD.md` — three things wrong at once. Site publication shipped
+  2026-08-05 and Paul **reversed it after one day** on 2026-08-06 ("remove the
+  public upfront pricing… entirely"). The cadence became **quarterly, $15,000 up
+  front**, superseding the monthly figure. And `PRACTICE_RECORD.md` does not
+  exist anywhere in the repo — a session told to quote from it either could not,
+  or improvised the number, which is the worse branch.)*
+  Still forbidden regardless: any sell-side, two-sided or neutral-intermediary
+  fee, and any fee comparison to a named bank, broker or advisor.
+  *(Also retired, and for a different reason: the older "No fee talk. No
+  retainers, success fees, commissions, compensation" absolute was written for
+  the licensed-software business, when smbX was an app sold to brokers on a
+  membership fee. That business is scrapped; the practice earns a buy-side
+  success fee, which THE LINE v2 §Permitted allows. The prohibition here is
+  about what these DOCUMENTS say, not about what the practice may charge.)*
 - **Nothing the source doesn't say.** No invented companies, people,
   transactions, or numbers.
 - Lower-middle-market framing: targets under $250M revenue.
@@ -510,8 +523,17 @@ Two things change once you cross it, and both change how you write:
   never a public source, and nothing from them is reused as collateral. See the
   client-confidentiality law in `CLAUDE.md`.
 
-**THE LINE, sharpened for this phase.** The perimeter in §THE LINE binds
-everything here, and three edges get tested constantly once a deal is live:
+**THE LINE, sharpened for this phase.** This is where the specialist questions
+cluster — a live deal generates more of them in a week than a market master does
+in its life. **`THE_LINE.md` §3 is the register**: tax, legal, the five separate
+real-estate lanes, business valuation, securities, trade licensing, employment,
+insurance and QoE, each with the question to hand over. Two from it that decide
+deals in this practice's verticals and are routinely missed — **a trade licence
+may not survive a change of control**, and **a one-spouse signature conveys
+nothing** in a tenancy-by-the-entirety state.
+
+The perimeter in §THE LINE binds everything here, and three edges get tested
+constantly once a deal is live:
 
 - **We advise the BUYER on what a target is worth to them.** That is the job.
   What we never do is issue an opinion of value as though it were an appraisal,

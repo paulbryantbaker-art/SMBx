@@ -197,8 +197,11 @@ PLAYBOOK.md          the SPEC for each client document — market map, who's who
                      assumes research/ is already populated.
 FORMATS.md           the collateral containers — which builder, which fields,
                      the exact image slot dimensions.
-DESIGN_LANGUAGE.md   the house LOOK — palette, type, and the dead systems named
+DESIGN.md            the house LOOK — palette, type, and the dead systems named
                      with their hexes. Canonical.
+THE_LINE.md          the perimeter, and whose lane each question is in —
+                     tax, legal, real estate, valuation, securities,
+                     licensing, employment, insurance, QoE.
 REPORT_TEMPLATE.md   the cover block, the body rules, the standing appendix.
 CLOUD_BOOTSTRAP.md   only if you are a cloud session and a builder will not run.
 ```
@@ -212,8 +215,11 @@ CLOUD_BOOTSTRAP.md   only if you are a cloud session and a builder will not run.
 | build a **target list** of companies for a client to buy | **RESEARCH.md § C** |
 | fold new research into a master | job 1 below |
 | write a market map, who's who, target map or thesis | **PLAYBOOK.md** |
-| build a carousel, one-pager or report | **FORMATS.md**, then **DESIGN_LANGUAGE.md** |
-| anything, and you are about to hand-write HTML or CSS | **DESIGN_LANGUAGE.md** — stop, you are drifting |
+| build a carousel, one-pager or report | **FORMATS.md**, then **DESIGN.md** |
+| anything, and you are about to hand-write HTML or CSS | **DESIGN.md** — stop, you are drifting |
+| model a deal, write a memo, plan diligence, frame terms | **PLAYBOOK.md §5** |
+| anything client-facing at all | **THE_LINE.md** |
+| a question that turned tax, legal, real estate, valuation, licensing or insurance | **THE_LINE.md §3** — find the lane before you answer |
 
 ## The three hunts are not interchangeable (2026-07-31)
 
@@ -368,12 +374,12 @@ npx tsx $REPO/scripts/studio/audit.mts markets/<m>/documents/thesis.md --against
 
 ### 4. Produce collateral
 
-**Read `FORMATS.md` and `DESIGN_LANGUAGE.md` first, every time.** They are two
+**Read `FORMATS.md` and `DESIGN.md` first, every time.** They are two
 halves of one spec and neither works alone:
 
 - **`FORMATS.md` is the container** — which builder, the exact field grammar,
   the image slot dimensions and ratios, the cover budget, the imagery brief.
-- **`DESIGN_LANGUAGE.md` is the look** — palette, type, and the dead systems
+- **`DESIGN.md` is the look** — palette, type, and the dead systems
   named with their hexes. It is canonical: "if a doc, screenshot, or memory
   disagrees with this file, this file wins."
 
@@ -883,7 +889,17 @@ a manual step and it is on the person changing the master.
 
 ## THE LINE — the practice perimeter
 
-Full text in `THE_LINE_POLICY.md` in the repo. The parts that bind daily work:
+**Read `THE_LINE.md` in this workspace.** It carries the perimeter verbatim and
+— the part that takes real space — the **referral register**: which question has
+crossed into which specialist's lane, who owns it, and what to hand them. Tax,
+legal, the five separate real-estate lanes, business valuation, securities,
+trade licensing, employment, insurance and QoE.
+
+*(`THE_LINE_POLICY.md` v2.0 in the repo is the governing text and wins on any
+conflict. It does not travel here, which is why `THE_LINE.md` exists — the same
+reason `DESIGN.md` exists.)*
+
+The parts that bind daily work:
 
 - **Buy-side only.** Never sell-side, never two-sided, never a neutral
   intermediary. One buyer per target.
@@ -894,6 +910,22 @@ Full text in `THE_LINE_POLICY.md` in the repo. The parts that bind daily work:
   move, not a hedge.
 - **No fee talk** in any client-facing document.
 - Targets under $250M revenue.
+- **Make any accusation implausible.** Operate conservatively inside the
+  perimeter, not hard against it. When something is arguable the test is not
+  "is this defensible" but "could someone tell a bad story about this."
+
+**A referral is a deliverable, not a disclaimer.** "Consult appropriate
+professionals" is worth nothing. Naming the lane *and the exact question* —
+"whether §338(h)(10) is available given the entity form, before we counter" —
+is the most useful sentence in the document, and it is what the expertise is
+for. `THE_LINE.md` §4 has the pattern.
+
+**The tell is a conclusion where a question belongs.** "The tax treatment will
+be…", "this clause means…", "the property is worth…", "the licence will
+transfer" — each is over the line. `THE_LINE.md` §6 is the full table. When it
+is genuinely unclear, write the finding, name the lane you think it is in, and
+flag it for Paul rather than deciding: an unnecessary referral costs a
+sentence, the other error costs the perimeter.
 
 **Client confidentiality (2026-07-29).** `deals/<engagement>/` is a client
 mandate. It is confidential in both directions and the boundary is not soft:
@@ -926,9 +958,20 @@ The track record is **employment** deals, not smbX engagements.
 - Always "**selected transactions**".
 - The attribution line appears **wherever the deal names appear** — never as a
   footnote.
-- Employers are **never named**: "a global investment bank", "a world-class
-  PE-backed aggregator". The total is **150 acquisitions**, no "+".
+- **Employers ARE named** (Paul, 2026-08-07) — **Wrench Group · JPMorgan Chase ·
+  Deloitte Consulting**. This REVERSED the 2026-07-18 anonymization ("a global
+  investment bank", "a world-class PE-backed aggregator"), which is history:
+  do not reinstate it, and **do not "correct" a named employer back into a
+  euphemism**. The boundary that replaced it is résumé scope — what may appear
+  publicly is what is already on Paul's résumé, and he curated that list
+  himself. Never add a deal name from a deck or a memo.
 - Never "our clients" for an employment-era transaction.
+- JPMorgan is **integration** (Director of Acquisition Integration), not
+  origination.
+- Sanctioned stat set: **150+ acquisitions & integrations · $5B+ enterprise
+  value added · ~$21B transactions touched · $2B synergies captured · 0
+  sell-side engagements, ever.** The earlier no-plus rule ("150", no "+") is
+  superseded — keep the "+".
 
 ## Imagery
 
