@@ -181,16 +181,53 @@ law('content/studio/sync.mjs', 'sync.mjs');
    be excluded before anyone commits — a key put somewhere sensible should not
    become a key in a repository. */
 const gitignore = path.join(target, '.gitignore');
+
+/* VIDEO IS THE ONE OUTPUT THAT CANNOT GO IN GIT (2026-08-14). MACHINE.md tells
+   you to record the element with QuickTime, and a 1920×1080 screen recording
+   lands at hundreds of MB — while WEEKLY.md says "commit the collateral you
+   build, a PDF left uncommitted never reaches his Mac." Those two laws met in
+   collateral/…/LinkedIn Test1.mov and GitHub's editor caught it at the commit
+   dialog: over 100MB per file and the push is REJECTED.
+
+   The reason this must be caught BEFORE the commit and not after: a blob is in
+   the history the moment it is committed, so deleting it in a later commit does
+   not help — every push carrying that history is still refused, and the only
+   way out is rewriting history. A .gitignore is the cheap fix; a filter-repo is
+   the expensive one.
+
+   It costs nothing, because a recording is REGENERABLE: machine.html is the
+   source of truth and step 1 of MACHINE.md already says keep it beside the
+   render "so the piece can be re-recorded later". The spec is the artifact; the
+   .mov is a render of it, like a PDF is a render of a .md. */
+const IGNORE_RULES: Array<[string, string[]]> = [
+  ['# Secrets — never commit these.', ['.env', '.env.local']],
+  ['# OS noise', ['.DS_Store']],
+  [
+    '# Video renders. Regenerate from machine.html — see MACHINE.md.\n' +
+    '# A single file over 100MB permanently blocks pushing this repo to GitHub,\n' +
+    '# and committing it once is enough: deleting it later does not undo it.',
+    ['*.mov', '*.mp4', '*.m4v', '*.avi', '*.webm', '*.ProRes.*'],
+  ],
+];
+
 if (!existsSync(gitignore)) {
-  writeFileSync(gitignore, [
-    '# Secrets — never commit these.',
-    '.env',
-    '.env.local',
-    '',
-    '# OS noise',
-    '.DS_Store',
-    '',
-  ].join('\n'));
+  writeFileSync(gitignore, IGNORE_RULES.map(([h, p]) => [h, ...p, ''].join('\n')).join('\n'));
+  refreshed.push('.gitignore');
+} else {
+  /* ADDITIVE, never a rewrite — an existing .gitignore may carry Paul's own
+     entries, and clobbering those (even with a .bak) is worse than appending.
+     Runs on every invocation, not just --update, so the fix lands on a plain
+     re-run rather than waiting to be remembered. */
+  const current = readFileSync(gitignore, 'utf8');
+  const have = new Set(current.split('\n').map(l => l.trim()));
+  const add = IGNORE_RULES
+    .map(([h, p]) => [h, p.filter(x => !have.has(x))] as const)
+    .filter(([, p]) => p.length)
+    .map(([h, p]) => [h, ...p, ''].join('\n'));
+  if (add.length) {
+    writeFileSync(gitignore, current.replace(/\n*$/, '\n\n') + add.join('\n'));
+    refreshed.push('.gitignore');
+  }
 }
 
 /* A .env stub so there is an obvious place for the key, with nothing in it. */

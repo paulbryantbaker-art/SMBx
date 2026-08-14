@@ -66,6 +66,25 @@ decorations exactly as hard as prose.
    entries ≈ 30 seconds, a clean loop length for a slideshow segment.
 5. Slow it down for a calmer read by raising `holdMs`/`typeMs` in SPEC.
 
+**THE RECORDING DOES NOT GO IN GIT (2026-08-14).** A QuickTime screen capture
+at 1920×1080 lands in the hundreds of MB, and **one file over 100MB permanently
+blocks pushing the workspace to GitHub** — committing it once is enough, because
+the blob is in the history from that moment and deleting it in a later commit
+does not undo it. `.gitignore` excludes `*.mov`/`*.mp4` for exactly this; leave
+it alone. This costs nothing, because **the `machine.html` copy beside the
+render IS the artifact** (step 1) — the video is a render of the spec the way a
+PDF is a render of a `.md`, and it can be re-recorded in a minute.
+
+**If a recording has to travel** — to Paul's phone, into a slideshow, onto
+LinkedIn — compress it first and hand it over outside git:
+
+```
+ffmpeg -i "LinkedIn Test1.mov" -vcodec h264 -crf 23 -preset slow -an out.mp4
+```
+
+A 30-second 1080p loop comes out in single-digit MB with no visible loss, and
+LinkedIn re-encodes on upload anyway — the raw capture's bitrate buys nothing.
+
 ## For the video slideshow
 
 Alternate machine segments with still pages from the deck builders — the
