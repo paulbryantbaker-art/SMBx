@@ -105,9 +105,32 @@ function findRepo() {
   const found = [];
   for (const root of roots) {
     if (!existsSync(root)) continue;
-    // The root, then ONE level down. Not a deep walk: a sync script has no
-    // business spending seconds crawling a home directory.
-    for (const dir of [root, ...safeDirs(root)]) {
+    // The root, then TWO levels down. Not a deep walk — a sync script has no
+    // business crawling a home directory — but one level was not enough and
+    // failed in the worst available way (2026-08-14).
+    //
+    // Paul's engine is at GitHubRepos/SMBx-live/SMBx: the clone sits inside a
+    // wrapper folder, so it is TWO below GitHubRepos. A one-level scan checked
+    // GitHubRepos/SMBx-live for scripts/studio/build-report.mts, did not find
+    // it, and moved on — so THE REAL ENGINE WAS INVISIBLE to discovery, while
+    // the stale clones frozen on 2026-07-27 sit one level down and are found.
+    //
+    // How bad that got depended on how many stale clones were lying around,
+    // which is a poor thing to depend on. With SMBx-main AND SMBx-main-old
+    // present the scan found two, the guard fired, and it refused — safe by
+    // luck. With only one of them present it found exactly one candidate, the
+    // guard saw nothing to complain about, and sync would have pulled the
+    // stale clone and refreshed the workspace's laws from it. Silent,
+    // plausible and wrong: the precise failure this file exists to prevent,
+    // arriving through the depth limit rather than through ambiguity.
+    // Verified both ways against a replica of his layout.
+    //
+    // Going deeper makes the guard MORE likely to fire on his machine, not
+    // less, and that is the intended outcome: three clones found, refuse,
+    // print the pin instruction. Refusing loudly beats guessing quietly.
+    const level1 = safeDirs(root);
+    const level2 = level1.flatMap(safeDirs);
+    for (const dir of [root, ...level1, ...level2]) {
       if (isEngine(dir) && !found.includes(dir)) found.push(dir);
     }
   }
