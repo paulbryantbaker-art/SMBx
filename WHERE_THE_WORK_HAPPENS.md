@@ -1,5 +1,5 @@
 # WHERE THE WORK HAPPENS — Cowork vs the app
-Last updated: 2026-08-10
+Last updated: 2026-08-14
 
 > The decision doc for one question: when a piece of work lands, does it go in a
 > Cowork session against `~/Documents/smbx-studio`, or into the app?
@@ -50,7 +50,9 @@ purpose and are not up for relitigation:
   at a keyboard.
 
 Where it is still genuinely ambiguous, §6A names each case and says which way
-it went.
+it went. **§4B measures the deal phase specifically** — modeling and
+counterparty communication call no model at all, so the cost argument that
+moved Studio to disk does not reach them.
 
 ## 1. The rule
 
@@ -257,6 +259,128 @@ and all CRM/deal SQL.
 
 Gate: `npm run test:api-lanes` — 34 cases, most of them about the ways a parser
 can quietly say yes.
+
+## 4B. What the deal phase actually costs (2026-08-14)
+
+*(Paul: "once we get past sourcing… is it more feasible to model the deal and
+run the rest of the process for modeling and communication [in the app], or is
+it better to run everything in Cowork?")*
+
+The question deserved measurement rather than doctrine, so the numbers below
+were measured against this tree, not estimated.
+
+**The answer is: keep it in the app. Modeling and communication are FREE, and
+the only metered thing in the deal phase is Yulia's conversation around
+them — which costs about a tenth of one research run per working session.**
+
+### What the deal phase costs, measured
+
+| Path | Cost | Verified how |
+|---|---|---|
+| `v19ModelRuntime.ts` — 100+ `MODEL.*.v1` slots | **$0** | No `anthropic` / `API_KEY` / `callClaude` reference in the file |
+| `client/src/lib/calculations/core.ts` — the 11 canvas models | **$0** | Same |
+| CRM, deals, `crm_touches`, outreach queue | **$0** | Forms and SQL |
+| `emailService`, `documentShareService` — the counterparty channel | **$0** | No model reference in either, nor in `routes/crm.ts` or `routes/outreach.ts` |
+| Every PDF / render / export path | **$0** | Local Chromium |
+| **Yulia chat (Sonnet 4.6)** | **~$0.15 per API call** | Measured below |
+
+So of the two things Paul named — "modeling the deal" and "communication" —
+**neither one calls a model.** The deal math is deterministic and the
+counterparty channel is `sendEmail` plus a token link. Nothing in either can
+spend a dollar.
+
+### The one metered path, and its defect
+
+`aiService.ts` sends a **43,432-token static prompt on every API call**, before
+any deal data. Measured by importing the real prompt modules (L3 league, B2
+gate, ~3.7 chars/token):
+
+| Layer | Tokens |
+|---|---|
+| `TOOL_DEFINITIONS` (55 tools) | 14,132 |
+| `TAX_ENGINE_FOUNDATION` | 9,766 |
+| `LEGAL_ENGINE_FOUNDATION` | 8,745 |
+| `MASTER_PROMPT` | 6,371 |
+| `AGENCY_DOCTRINE` (pushed **twice** — `promptBuilder.ts:679` and `:850`) | 1,648 |
+| persona + gate + per-league tax/legal + branching + journey | 2,770 |
+| **Static floor, every call** | **43,432** |
+
+**And there is no prompt caching on it.** `cache_control` appears in exactly one
+file in the entire server — `reportQA.ts:170`. The main working surface of the
+app does not use it. The agentic loop re-sends the whole 43k prefix on every
+round, up to `MAX_TOOL_ROUNDS = 10` per user message.
+
+At Sonnet 4.6's $3/M input, that prefix alone is **$0.13 per call**. Cache reads
+bill at $0.30/M, so the same prefix cached costs **$0.013** — a 10× cut on the
+term that dominates the bill.
+
+| | Uncached (today) | With caching |
+|---|---|---|
+| Per API call | $0.148 | $0.031 |
+| 40-message deal session (~80 calls) | **$13.66** | **$5.59** |
+
+### Why that settles the question
+
+A `deep` research run spends **$0.40 in search fees before a single token**,
+and its 25 fetches at 20k tokens re-enter context across up to 12 `pause_turn`
+rounds — up to 6M input tokens, ~$18, on one click. That is the cost profile
+that drove research out of the app.
+
+The deal phase is not that. A full day of deal work in the app costs less than
+one research run, and after caching it costs a third of that. **The cost
+argument that moved Studio to disk does not reach the deal phase**, and §0's
+shape rule points the same way: model output is a number you want again at a
+different assumption, which is a query.
+
+### What moving it to Cowork would actually cost
+
+The `dealexplorer.html` prototype (2026-08-14) is the evidence. It is a good
+artifact and its own header states the price: *"Engine: v17-reference (mirrors
+the workbench; re-sync at vendoring)"* — it reimplements `monthlyPayment`,
+`amort`, `dscr` and `irr` in JavaScript because **the deal math does not exist
+in `house/`.** Every other capability that moved to disk had a pure shared
+implementation first: `house/audit.ts` for citations, `house/screen.ts` for the
+target screen, `house/leads.ts` for ranking — each deliberately pure so the app
+and a local session compute IDENTICAL answers.
+
+Deal math has no such layer. Moving modeling to Cowork therefore means **two
+engines that must agree about what a deal is worth**, and the failure mode is
+the worst one available: they drift silently and produce different numbers for
+the same deal, one of which reaches a client. That is a real cost, paid to save
+a spend that measures at zero.
+
+**If the modeling ever should move, the prerequisite is extracting the math into
+`house/` first** — the same discipline `audit.ts` and `screen.ts` followed — not
+re-deriving it in a second file.
+
+### The split inside the deal phase
+
+| The work | Where | Why |
+|---|---|---|
+| Model runs, sensitivity, DSCR/IRR/LBO, what-if at a different assumption | **App** | Free, and it is a query — you want the answer again at 3.2× and 3.8× |
+| Deal state, gates, tasks, next action | **App** | Rows |
+| Counterparty correspondence — lawyers, CPAs, lenders, sellers' advisors | **App** | Free (`sendEmail` + token links), and rule 3: corresponded with, never onboarded |
+| Yulia working the deal with you | **App** | The practitioner is sitting there asking. §0 names this as outside the rule |
+| **The deal memo / IC packet** | **Cowork** | A document someone reads. Pull the numbers out, write the memo on disk — already §6A |
+| Anything handed to a client | **Cowork** | The citation audit and PLAYBOOK/FORMATS/DESIGN live in the workspace |
+
+### The action item this produced
+
+**Add prompt caching to `aiService.ts`.** One `cache_control` breakpoint after
+the static layers cuts the deal-phase bill by roughly two thirds. Two
+preconditions, both real in this codebase:
+
+1. **Order the layers stable-first.** Caching is a prefix match — anything
+   volatile above the breakpoint invalidates it. `promptBuilder.ts` currently
+   interleaves the frozen engines with per-deal context (work products, data
+   room files, `buildReentryLayer`, V19 readiness, DEFINITIVE packets). The
+   frozen block must render first.
+2. **`TOOL_DEFINITIONS` renders before `system`,** so a breakpoint on the last
+   static system block caches the 14k of tool schemas with it — provided the
+   tool list is serialized deterministically and never varies per request.
+
+Also worth fixing while in there: `AGENCY_DOCTRINE` is pushed twice, once at
+`promptBuilder.ts:679` and again at `:850` — 824 wasted tokens on every call.
 
 ## 5. The CRM gap — what the app does not have
 
