@@ -6,7 +6,7 @@ import { executeGovernedTool } from './governedToolExecutor.js';
 import { persistCanvasTabFromAction } from './canvasTabPersist.js';
 import { resolveChatModel, type ModelPreference } from './modelPreference.js';
 import type { Response } from 'express';
-import { assertSpendAllowed } from './apiSpend.js';
+import { assertSpendAllowed, recordSpend } from './apiSpend.js';
 
 const MODEL = 'claude-sonnet-4-6';
 const MAX_TOOL_ROUNDS = 10; // safety limit on agentic loops
@@ -123,6 +123,16 @@ export async function streamAgenticResponse(
         system: splitCachedSystem(ctx.systemPrompt),
         messages,
         tools: CACHED_TOOLS,
+      });
+
+      // Every round is a separate billed call, so every round is recorded —
+      // the agentic loop is the one path where a single request can spend ten
+      // times, and a per-request record would understate it by that factor.
+      recordSpend({
+        lane: 'chat', source: `agentic.round${round}`,
+        model: resolveChatModel(ctx.modelPreference) || MODEL,
+        inputTokens: response.usage?.input_tokens, outputTokens: response.usage?.output_tokens,
+        userId: ctx.userId ?? null,
       });
 
       // Check if Claude wants to use tools

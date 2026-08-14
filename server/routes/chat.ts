@@ -3,7 +3,7 @@ import type { Response } from 'express';
 import Anthropic from '@anthropic-ai/sdk';
 import multer from 'multer';
 import path from 'path';
-import { optionalAuth, requireAuth } from '../middleware/auth.js';
+import { requireAuth } from '../middleware/auth.js';
 import { buildSystemPrompt, buildDynamicAnonymousPrompt } from '../services/promptBuilder.js';
 import type { ConversationState } from '../services/promptBuilder.js';
 import { streamAgenticResponse } from '../services/aiService.js';
@@ -17,7 +17,7 @@ import {
 } from '../constants/definitive.js';
 import { buildModelBackedChatAuditPacket } from '../services/definitiveAuditPacket.js';
 import { resolveDefinitiveMandateContext } from '../services/definitiveMandateService.js';
-import { assertSpendAllowed } from '../services/apiSpend.js';
+import { assertSpendAllowed, recordSpend } from '../services/apiSpend.js';
 
 /** Safe SSE write — checks destroyed + writableEnded, catches errors */
 function safeWrite(res: Response, data: string): boolean {
@@ -139,7 +139,7 @@ import { extractFields } from '../services/fieldExtractor.js';
 import type { ExtractedFields } from '../services/fieldExtractor.js';
 import { checkGateReadiness } from '../services/gateReadinessService.js';
 // paywallService and dealExecutionFee removed — subscription model handles pricing
-import { classifyLeague, getLeagueMultiplier } from '../services/leagueClassifier.js';
+import { classifyLeague } from '../services/leagueClassifier.js';
 import { getGateMenuItems } from '../services/menuCatalogService.js';
 import { enqueueDeliverableGeneration } from '../services/jobQueue.js';
 import { processDeliverable } from '../services/deliverableProcessor.js';
@@ -271,8 +271,29 @@ if (!_gcRan) {
 
 export const chatRouter = Router();
 
-// Auth is now optional — endpoints work with or without JWT
-chatRouter.use(optionalAuth);
+// EVERY chat route requires a bearer token (2026-08-14).
+//
+// This was `optionalAuth` — "endpoints work with or without JWT" — a product-era
+// posture that outlived the product. The router mounts at server/index.ts above
+// the blanket `app.use('/api', requireAuth)`, and practicePerimeter deliberately
+// lets a TOKENLESS request through (practiceMode.ts: `if (!token) return next()`)
+// so token-link share surfaces keep working. The result was that POST /message —
+// claude-sonnet-4-6, the 35-tool agentic loop, MAX_TOOL_ROUNDS = 10, 4096 output
+// tokens a round — answered anyone who could reach the origin, bounded only by
+// chatLimiter's 20 req/min/IP.
+//
+// Nothing in a production build depended on that. The logged-out surface is the
+// practice site, whose intake is a different service on a different route
+// (/api/practice/intake, Haiku, 1400 max_tokens, 16-turn cap); the logged-in
+// shells run AtlasAuthed → useAuthChat, which attaches authHeaders() to every
+// call and posts to /conversations/:id/messages (already requireAuth). The only
+// tokenless callers were useAnonymousChat — reachable solely through AtlasAnon,
+// which a production build cannot render — and ChatContext, whose consumers are
+// unrouted. See the work-order report for the full trace.
+//
+// Router-level rather than per-route: a per-route list is a list someone has to
+// remember to add to, and this router already had four routes gated and nine not.
+chatRouter.use(requireAuth);
 
 // ─── Advisor detection ───────────────────────────────────────
 const ADVISOR_PATTERNS = [
@@ -456,7 +477,15 @@ chatRouter.post('/message', async (req, res) => {
         stream: true,
       }, { signal: abortController.signal });
 
+      // Usage rides the raw event stream: input on message_start, the running
+      // output total on message_delta. Accumulated here rather than after the
+      // loop because a client disconnect BREAKS out of it — the tokens were
+      // still billed, so they still have to be recorded.
+      let inTok = 0;
+      let outTok = 0;
       for await (const event of stream) {
+        if (event.type === 'message_start') inTok = event.message.usage?.input_tokens ?? 0;
+        else if (event.type === 'message_delta') outTok = event.usage?.output_tokens ?? outTok;
         if (clientDisconnected) break;
         if (
           event.type === 'content_block_delta' &&
@@ -466,6 +495,11 @@ chatRouter.post('/message', async (req, res) => {
           safeWrite(res, `data: ${JSON.stringify({ type: 'text_delta', text: event.delta.text })}\n\n`);
         }
       }
+      recordSpend({
+        lane: 'chat', source: 'chat.message.stream',
+        model: resolveChatModel(normalizedModelPreference) || STREAMING_MODEL,
+        inputTokens: inTok, outputTokens: outTok, userId,
+      });
     } catch (streamErr: any) {
       if (clientDisconnected) {
         console.log(`[chat] Client disconnected during stream (conv ${convId})`);
@@ -1549,18 +1583,7 @@ chatRouter.post('/conversations/:id/upload', requireAuth, upload.single('file'),
   }
 });
 
-// ─── GET /debug/api-test — Test Claude API connection ──────────────────
-chatRouter.get('/debug/api-test', async (_req, res) => {
-  try {
-    const anthropic = getAnthropicClient();
-    const response = await anthropic.messages.create({
-      model: STREAMING_MODEL,
-      max_tokens: 50,
-      messages: [{ role: 'user', content: 'Say "API working" in exactly two words.' }],
-    });
-    const text = response.content.filter(b => b.type === 'text').map(b => (b as any).text).join('');
-    res.json({ ok: true, model: STREAMING_MODEL, response: text });
-  } catch (err: any) {
-    res.json({ ok: false, model: STREAMING_MODEL, error: err.message, status: err.status, code: err.code });
-  }
-});
+// GET /debug/api-test was deleted 2026-08-14. It was unauthenticated, billed a
+// real (if small) call on every hit, and told an anonymous caller whether the
+// key was live. /api/debug/check-ai in server/index.ts covers the same need and
+// already respects the chat lane.

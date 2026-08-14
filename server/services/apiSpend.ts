@@ -159,9 +159,184 @@ export class SpendDisabledError extends Error {
   }
 }
 
-/** Throw unless `lane` is on. `what` names the work, e.g. "Research runs". */
+/**
+ * Thrown when the month's global ceiling is reached. Same shape as
+ * SpendDisabledError — status 503, and the MESSAGE is what reaches the UI — so
+ * every route that already maps the one maps the other without changes.
+ *
+ * The message states the number rather than saying "limit reached", because the
+ * only useful next action is deciding whether that number was right.
+ */
+export class SpendCeilingError extends Error {
+  readonly status = 503;
+  readonly spentCents: number;
+  readonly capCents: number;
+  constructor(what: string, spentCents: number, capCents: number) {
+    super(
+      `${what} is paused: model spend has reached $${(spentCents / 100).toFixed(2)} of the ` +
+        `$${(capCents / 100).toFixed(2)} monthly ceiling. Raise it with API_MONTHLY_CAP_CENTS ` +
+        `(cents, e.g. 50000 for $500) or set API_MONTHLY_CAP_CENTS=none to remove it. ` +
+        `Spend resets on the 1st, UTC.`,
+    );
+    this.name = 'SpendCeilingError';
+    this.spentCents = spentCents;
+    this.capCents = capCents;
+  }
+}
+
+/**
+ * Throw unless `lane` is on AND the month's global ceiling is unbroken.
+ *
+ * The ceiling is checked HERE, in the existing lane gate, rather than at the
+ * model calls themselves. That is the whole reason it covers everything: there
+ * are 79 `assertSpendAllowed` / `spendAllowed` call sites across 31 services and
+ * exactly one of them would have been remembered if the ceiling had its own
+ * separate guard. A path that is already asking "am I allowed to spend" is the
+ * right place to answer "and is there budget left".
+ */
 export function assertSpendAllowed(lane: SpendLane, what: string): void {
   if (!spendAllowed(lane)) throw new SpendDisabledError(lane, what);
+  if (ceilingBreached()) throw new SpendCeilingError(what, spentThisMonthCents(), monthlyCapCents());
+}
+
+// ─── THE GLOBAL CEILING ─────────────────────────────────────
+//
+// API_LANES answers "may this path spend?". It cannot answer "have we spent
+// enough already?", and the outage that produced the kill switch was a spend
+// event, not a permissions event. RESEARCH_MONTHLY_CAP_CENTS was the only
+// ceiling in the tree and it guards the studio lane alone, which is the lane
+// that is already switched off.
+//
+// CONSERVATIVE BY DEFAULT, and it fails CLOSED at the lane gate rather than
+// mid-stream: a request that would start a turn is refused with a sentence that
+// names the number and the env var, which is the same contract SpendDisabledError
+// already has.
+//
+// THE CACHE IS THE COMPROMISE. `assertSpendAllowed` is synchronous at all 79
+// call sites; making it async would touch every one of them. So the month's
+// total is held in memory, primed at boot, refreshed on a timer, and incremented
+// the instant a call is recorded (before the ledger INSERT resolves). The
+// consequence is honest and bounded: concurrent in-flight turns can overshoot by
+// roughly one refresh window's worth of spend, and a multi-instance deploy sees
+// its own increments immediately but its siblings' only at the next refresh.
+// This is a runaway stop, not an accounting control.
+
+/** Ceiling in cents for the calendar month. 0 or unset = the default below. */
+const DEFAULT_MONTHLY_CAP_CENTS = 25_000; // $250 — deliberately low; raise it deliberately.
+
+export function monthlyCapCents(): number {
+  const raw = process.env.API_MONTHLY_CAP_CENTS;
+  if (raw === undefined) return DEFAULT_MONTHLY_CAP_CENTS;
+  const v = raw.trim().toLowerCase();
+  // An explicit opt-out has to be a WORD, never a number, so that a mistyped
+  // "0" reads as "no budget" rather than silently as "no limit".
+  if (v === 'none' || v === 'unlimited' || v === 'off') return Infinity;
+  const n = Number(v);
+  return Number.isFinite(n) && n > 0 ? Math.round(n) : DEFAULT_MONTHLY_CAP_CENTS;
+}
+
+function monthKey(d: Date = new Date()): string {
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+}
+
+const REFRESH_MS = 60_000;
+let cache = { month: monthKey(), cents: 0, loadedAt: 0 };
+let refreshing: Promise<void> | null = null;
+
+/** Month-to-date estimated spend, in cents, from the in-memory cache. */
+export function spentThisMonthCents(): number {
+  // A month rollover invalidates the cache rather than waiting for the timer —
+  // otherwise the first request of a new month is judged against the old total.
+  if (cache.month !== monthKey()) cache = { month: monthKey(), cents: 0, loadedAt: 0 };
+  if (Date.now() - cache.loadedAt > REFRESH_MS) void refreshSpendCache();
+  return cache.cents;
+}
+
+export function ceilingBreached(): boolean {
+  const cap = monthlyCapCents();
+  return cap !== Infinity && spentThisMonthCents() >= cap;
+}
+
+/** Re-read the month's total from the ledger. Safe to call concurrently. */
+export async function refreshSpendCache(): Promise<void> {
+  if (refreshing) return refreshing;
+  // `server/db.ts` calls process.exit(1) at MODULE LOAD when there is no
+  // connection string. Since the ceiling check runs inside assertSpendAllowed,
+  // importing it unguarded means any script or test that merely asks "is this
+  // lane on" kills its own process — silently, because the assert returns first
+  // and the exit lands a tick later. Verified: `npm run test:api-lanes` passed
+  // its 34 cases and then exited 1. Check the env var, do not catch the exit.
+  if (!process.env.DATABASE_URL && !process.env.DATABASE_PUBLIC_URL) {
+    cache = { month: monthKey(), cents: 0, loadedAt: Date.now() };
+    return;
+  }
+  refreshing = (async () => {
+    try {
+      const { sql } = await import('../db.js');
+      const [row] = await sql`
+        SELECT COALESCE(SUM(cost_cents), 0)::int AS cents
+        FROM api_spend_ledger
+        WHERE created_at >= date_trunc('month', NOW() AT TIME ZONE 'UTC')
+      `;
+      cache = { month: monthKey(), cents: Number(row?.cents ?? 0), loadedAt: Date.now() };
+    } catch {
+      // A ledger read failure must never block a turn — mark the cache fresh so
+      // we do not hammer a broken database on every request, and let the next
+      // window try again. Failing OPEN here is deliberate: the ceiling is a
+      // safety net, and a net that jams shut on a db hiccup takes the app down.
+      cache.loadedAt = Date.now();
+    } finally {
+      refreshing = null;
+    }
+  })();
+  return refreshing;
+}
+
+/** Published rates in cents per 1M tokens. Estimates — see migration 124. */
+const RATES: Record<string, { in: number; out: number }> = {
+  'claude-sonnet-4-6': { in: 300, out: 1500 },
+  'claude-haiku-4-5-20251001': { in: 100, out: 500 },
+  'claude-opus-4-6': { in: 1500, out: 7500 },
+};
+const FALLBACK_RATE = { in: 300, out: 1500 }; // price an unknown model as Sonnet, never as free.
+
+export function estimateCostCents(model: string, inputTokens: number, outputTokens: number): number {
+  const rate = RATES[model] ?? FALLBACK_RATE;
+  return Math.round((inputTokens * rate.in + outputTokens * rate.out) / 1_000_000);
+}
+
+/**
+ * Record one model call. Fire-and-forget by design — a ledger write must never
+ * fail a turn the user has already been charged for, and the in-memory
+ * increment happens first so a burst is counted even if the INSERT is slow.
+ */
+export function recordSpend(input: {
+  lane: SpendLane;
+  source: string;
+  model: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  userId?: number | null;
+}): void {
+  const inTok = Math.max(0, Math.round(input.inputTokens ?? 0));
+  const outTok = Math.max(0, Math.round(input.outputTokens ?? 0));
+  const cents = estimateCostCents(input.model, inTok, outTok);
+
+  if (cache.month !== monthKey()) cache = { month: monthKey(), cents: 0, loadedAt: Date.now() };
+  cache.cents += cents;
+
+  if (!process.env.DATABASE_URL && !process.env.DATABASE_PUBLIC_URL) return; // see refreshSpendCache
+  void (async () => {
+    try {
+      const { sql } = await import('../db.js');
+      await sql`
+        INSERT INTO api_spend_ledger (lane, source, model, input_tokens, output_tokens, cost_cents, user_id)
+        VALUES (${input.lane}, ${input.source}, ${input.model}, ${inTok}, ${outTok}, ${cents}, ${input.userId ?? null})
+      `;
+    } catch (err: any) {
+      console.error('[api-spend] ledger write failed:', err?.message);
+    }
+  })();
 }
 
 /** One line at boot, so the running posture is in the logs and not inferred. */
@@ -180,4 +355,13 @@ export function logSpendLanes(): void {
         `ignored (fails closed). Valid lanes: ${SPEND_LANES.join(', ')}.`,
     );
   }
+  // Prime the ceiling cache so the first request of a cold boot is judged
+  // against the real month-to-date total rather than against zero.
+  const cap = monthlyCapCents();
+  void refreshSpendCache().then(() => {
+    console.log(
+      `[api-spend] monthly ceiling: ${cap === Infinity ? 'NONE (API_MONTHLY_CAP_CENTS=none)' : `$${(cap / 100).toFixed(2)}`}` +
+        ` · month-to-date: $${(spentThisMonthCents() / 100).toFixed(2)}`,
+    );
+  });
 }

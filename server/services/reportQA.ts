@@ -30,7 +30,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { findReport, type ReportMeta } from '../../shared/reports.js';
-import { spendAllowed } from './apiSpend.js';
+import { spendAllowed, recordSpend } from './apiSpend.js';
 
 const MODEL = 'claude-haiku-4-5-20251001';
 const MAX_Q_CHARS = 600;
@@ -171,6 +171,11 @@ export async function askReport(input: {
         },
       ],
       messages: [...history, { role: 'user' as const, content: question }],
+    });
+
+    recordSpend({
+      lane: 'marketing', source: 'report.qa', model: MODEL,
+      inputTokens: res.usage?.input_tokens, outputTokens: res.usage?.output_tokens,
     });
 
     const answer = res.content
