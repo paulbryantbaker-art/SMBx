@@ -212,7 +212,9 @@ WHERE.md             WHICH SYSTEM does a piece of work — this workspace or
                      the deal, the CRM, the documents, the collateral — is
                      the app. Three of those have not been switched on yet;
                      WHERE.md says which, and says to keep doing them here
-                     until they are — as of 2026-08-14 all three are LIVE.
+                     Superseded 2026-08-15 by THE_IOI_SEAM.md: the seam is
+                     the IoI, and collateral + corp-dev documents came back
+                     to the studio. WHERE.md is regenerated to match.
 REPORT_TEMPLATE.md   the cover block, the body rules, the standing appendix.
 CLOUD_BOOTSTRAP.md   only if you are a cloud session and a builder will not run.
 ```
@@ -288,31 +290,42 @@ carries the interview.
 
 ## The jobs
 
-> **READ THIS FIRST — the scope changed on 2026-08-14.** This workspace is now
-> the **INPUT LAYER**. Several jobs below describe work that moved to the app,
-> and they are kept because the SPEC in them is still the standard that work is
-> held to, wherever it renders. `WHERE.md` is the authority; this is the
-> summary.
+> **READ THIS FIRST — THE SEAM IS THE IoI (2026-08-15).** `THE_IOI_SEAM.md` is
+> the governing document and `WHERE.md` here implements it.
+>
+> **Market-shaped work is yours. Deal-shaped work is the app's.**
+>
+> Market-shaped is one-to-many and speculative, with no counterparty yet:
+> research, masters, verification, screens, buy-boxes, the corp-dev documents,
+> collateral, and the preliminary math that decides whether a candidate
+> deserves an IoI. Deal-shaped is one-to-one and counterparty-confidential:
+> deal math on real financials, documents, the data room.
+>
+> It splits on **audience** — the same law that already separates
+> `collateral/` from `decks/` in this workspace.
 >
 > | Job | Now |
 > |---|---|
 > | 0 · Start a market | **yours** |
 > | 1 · Fold research into the master | **yours** |
 > | 2 · Verify the master | **yours** |
-> | 3 · Derive a document | **app** — except the **target map**, which the app cannot generate (it does market map, who's who and thesis only). Build target maps here. |
-> | 4 · Produce collateral | **app.** The builders here still work and stay supported; use them when you want a render without opening the app. |
-> | 5 · Deal analysis | **app is the destination, but nothing there produces §5's memo, diligence plan or term framework yet — so write them HERE, to PLAYBOOK §5.** The deal MODEL is the app's and always was. |
-> | 6 · Find clients | **yours** — the research and the register. The pipeline itself is the app's CRM; push with `push-crm.mts`. |
-> | 7 · Track the client work | **app.** `engagements.mjs` still runs and is the fallback while the CRM is where a stage lives. |
+> | 3 · Derive a document | **yours** — market map, who's who, target map, thesis. All four. |
+> | 4 · Produce collateral | **yours** — built here, rendered by the engine on the Mac. |
+> | 5 · Deal analysis | **SPLIT AT THE IoI.** Screening math to decide whether a candidate earns an IoI is yours. From the IoI onward the model, the documents and the data room are the app's, beside the financials they are priced from. |
+> | 6 · Find clients | **yours** — the research and the register. The pipeline is the app's CRM; push with `push-crm.mts`. |
+> | 7 · Track the client work | **app.** `engagements.mjs` still runs as the pre-IoI staging record. |
 >
-> **The four jobs that are wholly yours: research a market, verify it,
-> synthesize the master, wrangle data into the app.** Everything else you
-> either hand over or do on the app's behalf until it catches up.
+> **The one asymmetry: CRM starts before the IoI.** Outreach is app-side from
+> the first touch, so a candidate has a CRM row while its analysis is still in
+> `markets/<m>/screen/`. The two meet at the promotion.
 >
-> **PLAYBOOK, FORMATS and DESIGN did not move.** They are the SPEC — what a
-> good document and a good piece of collateral contain — and the app's output
-> is held to them exactly as a local build is. When you check the app's work,
-> check it against those.
+> **After the promotion, `deals/<engagement>/` here goes read-only** — stop
+> writing, keep reading, drop nothing. Nothing counterparty-confidential comes
+> back across.
+>
+> *(This replaces a 2026-08-14 note that sent collateral and the corp-dev
+> documents to the app. That was a different axis — raw input versus practice
+> output — and it put both in the wrong place. Audience is the axis that holds.)*
 
 ### 0. Start a market
 

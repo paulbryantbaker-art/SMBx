@@ -61,21 +61,38 @@ is('the weekly sweep is the workspace', owns('weekly-sweep'), 'workspace');
 is('the target screen is the workspace', owns('target-screen'), 'workspace');
 is('data wrangling is the workspace', owns('data-wrangling'), 'workspace');
 
-/* Narrowed 2026-08-14 by Paul. The first cut had these three in the workspace
-   on a "documents are files" reading; he moved them to the app. Pinned in the
-   new position so a future edit back is deliberate, not drift — and the axis
-   that replaced the old one is raw INPUT vs practice OUTPUT. */
-is('corp-dev documents are the APP now', owns('corp-dev-documents'), 'app');
-is('deal documents are the APP now', owns('deal-documents'), 'app');
-is('collateral is the APP now', owns('collateral'), 'app');
+/* THE IoI SEAM (Paul, 2026-08-15; THE_IOI_SEAM.md). Third and settled axis.
+   The first cut split on "documents are files, pipelines are rows"; the second
+   on "raw input vs practice output". Both put collateral and the corp-dev
+   documents in the wrong place, from opposite directions. This one splits on
+   AUDIENCE — the same law that already separates collateral/ from decks/ —
+   and returns both to the studio.
+
+   Pinned in the new position so a fourth move is deliberate rather than drift. */
+is('collateral is MARKET-shaped, so the studio', owns('collateral'), 'workspace');
+is('corp-dev documents are MARKET-shaped, so the studio', owns('corp-dev-documents'), 'workspace');
+is('pre-IoI screening math is the studio', owns('pre-ioi-math'), 'workspace');
+
+is('deal documents are DEAL-shaped, so the app', owns('deal-documents'), 'app');
+is('the data room is the app, and is why the modelling is too', owns('data-room'), 'app');
+is('live scenario modelling is the app, from the IoI', owns('valuation'), 'app');
 
 is('the citation audit runs identically either side', owns('citation-audit'), 'both');
+is('the promotion itself spans both sides — that is what a seam is',
+  owns('ioi-promotion'), 'both');
 
-/* The axis, asserted rather than described: everything Cowork keeps is
-   upstream of the practice — sources and raw data nobody has structured yet. */
-is('Cowork holds only the input layer',
+/* THE ASYMMETRY, asserted because it is the one thing about the seam that is
+   NOT "before the IoI is the studio": outreach is app-side from first touch,
+   so a candidate has a CRM row while its analysis is still in the studio. */
+is('CRM is app-side from the first touch, before any IoI', owns('crm'), 'app');
+is('…and so is the outreach queue', owns('outreach'), 'app');
+
+/* The market side, enumerated. Everything here is one-to-many and speculative
+   with no counterparty — which is the whole definition of market-shaped. */
+is('the studio holds exactly the market-shaped work',
   PROCESSES.filter(p => p.owner === 'workspace').map(p => p.id).sort(),
-  ['data-wrangling', 'market-research', 'master-synthesis', 'target-screen', 'weekly-sweep']);
+  ['collateral', 'corp-dev-documents', 'data-wrangling', 'market-research',
+   'master-synthesis', 'pre-ioi-math', 'target-screen', 'weekly-sweep']);
 
 /* ── decided ≠ built ──────────────────────────────────────────────────── */
 
@@ -85,24 +102,40 @@ is('Cowork holds only the input layer',
    plan or term framework. A routing table that sends work somewhere it dies is
    worse than none, so the gap is a field and it is pinned here. Delete a gap
    only when the app can actually do the thing. */
-is('the two known gaps are recorded, and only those',
+is('every gap is recorded, and only those',
   PROCESSES.filter(p => p.gap).map(p => p.id).sort(),
-  ['corp-dev-documents', 'deal-documents']);
+  ['corp-dev-documents', 'deal-documents', 'ioi-promotion', 'pre-ioi-math', 'sourcing-pipeline']);
 
-ok('a gap names the target map specifically',
-  /target map/i.test(byId('corp-dev-documents')?.gap ?? ''));
-ok('…and the deal-document gap says it is not implemented at all',
+ok('the deal-document gap says it is not implemented at all',
   /NOT IMPLEMENTED/.test(byId('deal-documents')?.gap ?? ''));
+
+/* The two the IoI seam added, and the honest state of each. */
+ok('the promotion is recorded as unbuilt — the largest missing piece',
+  /NOT BUILT/.test(byId('ioi-promotion')?.gap ?? ''));
+ok('the engine is recorded as not yet vendored',
+  /not vendored/i.test(byId('pre-ioi-math')?.gap ?? ''));
+
+/* The app's sourcing engine produces figures that would fail this practice's
+   own citation audit — a model-guessed revenue band and no independence check.
+   Pinned because the sourcing lane is now ON by default, so the defects are
+   reachable, and because house/screen.ts exists specifically to correct them. */
+ok('the sourcing engine\'s citation defects are recorded',
+  /CITATION-LAW DEFECTS/.test(byId('sourcing-pipeline')?.gap ?? ''));
 
 /* A gap must not be silently dropped from the document — that is exactly how
    it would go back to reading as "done". */
 ok('every gap is printed in the rendered doc',
   PROCESSES.filter(p => p.gap).every(p => renderMarkdown().includes(p.gap!)));
 
-/* Nothing Cowork owns should carry a gap: a gap means the DECIDED owner cannot
-   do it, and the workspace can do everything assigned to it today. */
-ok('no workspace-owned process carries a gap',
-  PROCESSES.filter(p => p.owner === 'workspace').every(p => !p.gap));
+/* A gap on a STUDIO-owned process means something different from a gap on an
+   app-owned one, and the difference is worth keeping straight: the studio can
+   do the work today, the gap is about HOW WELL. `pre-ioi-math` runs fine — it
+   just cannot yet say which engine version produced its numbers, which is the
+   provenance the IoI seam asks for. An app-side gap means the work does not
+   happen there at all. */
+ok('a studio-side gap never blocks the work, only its provenance',
+  PROCESSES.filter(p => p.owner === 'workspace' && p.gap)
+    .every(p => !/NOT BUILT|NOT IMPLEMENTED/.test(p.gap!)));
 
 /* The cost story, which is the evidence the decision rests on. */
 is('exactly the research paths can spend dollars',
