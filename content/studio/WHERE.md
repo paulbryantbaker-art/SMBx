@@ -4,7 +4,7 @@
 > Do not hand-edit: a test fails when this file and the table disagree.
 > To change a routing decision, change the table and re-render.
 
-**The app is the one place. Cowork keeps research, the documents derived from it, and collateral.**
+**The app is the one place. Cowork is the input layer — research, aggregation, deep search, data wrangling.**
 
 > **Not to be confused with `WHAT_LIVES_WHERE.md`**, which answers a
 > different question. That file maps the two REPOSITORIES on the Mac —
@@ -12,11 +12,22 @@
 > which SYSTEM does a piece of work — this workspace or the app.
 > Repo question → that file. Process question → this one.
 
-Research is the only path that spends real money, and it is a quarterly
-batch per market rather than something done mid-deal — a different season,
-not back-and-forth. Everything that **interleaves in one sitting** —
-sourcing, the model, deal state, the CRM, the call — lives in the app
-together, because splitting interleaved work is what made moving between
+> ⚠️ **Three of these are decided but NOT YET SWITCHED ON.** Corp-dev
+> documents, deal documents and collateral moved to the app on
+> 2026-08-14, and the app cannot serve them yet: `STUDIO_IN_APP` is
+> `false`, and the single `studio` lane in `API_LANES` bundles those
+> cheap composition paths together with the expensive research agent,
+> so it cannot be switched on without also arming the thing that costs
+> ~$18 a press. The lane needs splitting first. **Until that ships,
+> keep doing those three here** — the local builders and the PLAYBOOK
+> specs are unchanged and still correct. This file states where the
+> work is going, and says plainly where it still is.
+
+Cowork is the INPUT layer: gathering sources, aggregating them into a
+master, deep search, and wrangling messy data into something structured.
+Everything the practice PRODUCES or TRACKS — the deal, the CRM, the
+documents, the collateral — is the app, in one place, because that is
+the work that interleaves and splitting it is what made moving between
 systems painful.
 
 ## Why, in four measured findings
@@ -38,17 +49,18 @@ systems painful.
 |---|---|---|
 | Market research — build a master from scratch | **Here** — this workspace | **can spend dollars** |
 | Fold research into the market master | **Here** — this workspace | **can spend dollars** |
-| Market map · who's who · target map · thesis | **Here** — this workspace | free |
+| Market map · who's who · target map · thesis | **The app** | a drip |
 | Build the candidate list for a market | **Here** — this workspace | free |
+| Data wrangling — messy input into something structured | **Here** — this workspace | free |
 | The 5-stage sourcing engine | **The app** | a drip |
 | DEFINITIVE — gates, model slots, DealState | **The app** | free |
 | Valuation and deal modelling | **The app** | free |
 | Deal pipeline — stage, owner, next action | **The app** | free |
-| Deal memo · diligence plan · term framework | **Here** — this workspace | free |
+| Deal memo · diligence plan · term framework | **The app** | a drip |
 | Client register and pipeline | **The app** | free |
 | Outreach queue and sends | **The app** | free |
 | Lawyers, CPAs, lenders, sellers' advisors | **The app** | free |
-| LinkedIn carousels, one-pagers, reports | **Here** — this workspace | free |
+| LinkedIn carousels, one-pagers, reports | **The app** | a drip |
 | The public site and published research | **The app** | free |
 | LinkedIn analytics import | **The app** | free |
 | The Saturday research sweep | **Here** — this workspace | **can spend dollars** |
@@ -78,13 +90,15 @@ Every source's full text in one call, plus a retry when the citation audit fails
 
 ### Market map · who's who · target map · thesis
 
-**Here — this workspace** · free, calls no model
+**The app** · a drip — cents
 
-Documents someone reads later. They want a file, a version and a diff, and the citation audit lives here.
+Moved to the app 2026-08-14 (Paul). These are practice OUTPUT, and they interleave with the deal and the client they are written for — a thesis is held for one buyer profile.
 
-- PLAYBOOK.md §1–4 carries each one section by section.
-- npx tsx $REPO/scripts/studio/thesis.mts new <market> <profile>
-- npx tsx $REPO/scripts/studio/thesis.mts check   # staleness against the master
+- NOT YET ON: needs STUDIO_IN_APP = true and the studio lane split. Until
+- then keep building these here — the local path is unchanged and correct.
+- App → Studio → the market. corpDevDocs.ts already generates all three.
+- PLAYBOOK.md §1–4 remains the SPEC for what each contains, wherever it renders.
+- The master these derive from still lives on disk and is read, never copied.
 
 ### Build the candidate list for a market
 
@@ -96,6 +110,19 @@ A CSV Paul manages in Sheets. Discovery, not commitment — it becomes app rows 
 - npx tsx $REPO/scripts/studio/screen.mts pull <market>   # needs GOOGLE_PLACES_API_KEY
 - npx tsx $REPO/scripts/studio/screen.mts rank <market>   # free, offline
 - Places is DISCOVERY, not evidence — verify against the licence registry before a name reaches a client.
+
+### Data wrangling — messy input into something structured
+
+**Here — this workspace** · free, calls no model
+
+Named by Paul 2026-08-14 as Cowork work. Reading a messy sheet, reconciling exports, mapping columns, bucketing records — judgement over unstructured input, which is what a session is good at and what a form is bad at.
+
+- Do the reading and the mapping here, where the raw files are.
+- Push the RESULT into the app rather than working the app by hand:
+-   npx tsx $REPO/scripts/studio/push-crm.mts
+- The endpoint calls no model — the intelligence is the mapping, and it
+- happens on your own subscription rather than the metered org key.
+- Never invent a row to fill a column. A fabricated CRM contact gets EMAILED.
 
 ### The 5-stage sourcing engine
 
@@ -139,14 +166,16 @@ Interactive modelling is a UI problem — a what-if wants a slider, not a regene
 
 ### Deal memo · diligence plan · term framework
 
-**Here — this workspace** · free, calls no model
+**The app** · a drip — cents
 
-Documents someone reads and signs off. They draw FROM app rows, but the artifact is a file that wants a version history.
+Moved to the app 2026-08-14 (Paul). These sit inside the deal sitting — written from the model, the gates and the diligence state, all of which are app rows. Exporting to write them elsewhere was the back-and-forth.
 
-- PLAYBOOK.md §5b–5d carries each one section by section.
-- Export the numbers from the app, write the memo on disk.
-- Never restate the model's figures by hand — reference the model document.
-- Renders to deals/<d>/decks/, never collateral/.
+- NOT YET ON: the app cannot serve these until the studio lane is split.
+- Until then write them here to PLAYBOOK §5b–5d, which is the spec either way.
+- App → the deal → documents, alongside the model they are written from.
+- PLAYBOOK.md §5b–5d remains the SPEC for what each one contains.
+- Never restate the model's figures by hand — reference the model.
+- Confidential to the engagement: never a source for anything public.
 
 ## CRM and communication — clients, and everyone else
 
@@ -183,14 +212,17 @@ Email out plus token share links — free, and it keeps third parties correspond
 
 ### LinkedIn carousels, one-pagers, reports
 
-**Here — this workspace** · free, calls no model
+**The app** · a drip — cents
 
-Pure local Chromium, ~30s a build, no key. The builders are already here and the specs are versioned beside them.
+Moved to the app 2026-08-14 (Paul). It is practice output, and the app already has the whole surface — CollateralBuilder, the composers, the media library, the review sheet. Nothing needed porting; Studio was hidden, not removed.
 
-- Read FORMATS.md (containers) and DESIGN.md (the look) first, every time.
-- npx tsx $REPO/scripts/studio/build-deck.mts <spec.deck.mts>
-- npx tsx $REPO/scripts/studio/build-onepager.mts <spec.post.mts>
-- npx tsx $REPO/scripts/studio/build-report.mts <report.md>
+- NOT YET ON: needs STUDIO_IN_APP = true and the studio lane split.
+- Until then build here with the builders below — same tokens, same output.
+- App → Studio → Collateral.
+- FORMATS.md (containers) and DESIGN.md (the look) remain the spec either side.
+- The local builders still work and stay supported — same house/ design tokens,
+- so a render away from the app is identical, not an approximation:
+-   npx tsx $REPO/scripts/studio/build-deck.mts <spec.deck.mts>
 
 ### The public site and published research
 
@@ -238,8 +270,8 @@ An unlisted process is one nobody has decided about. **Do not pick a side
 by feel** — that is how the same work ended up in two systems the first
 time. The tiebreak:
 
-- Does it INTERLEAVE with other work in one sitting? → the app.
-- Is the artifact a DOCUMENT someone reads later? → the workspace.
+- Is it RAW INPUT being gathered, aggregated or wrangled? → the workspace.
+- Is it something the practice PRODUCES or TRACKS? → the app.
 - Can one press spend dollars? → the workspace, and say so out loud.
 - Still unclear? Ask Paul and add a row here. Do not decide it twice.
 

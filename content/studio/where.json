@@ -1,8 +1,8 @@
 {
-  "rule": "The app is the one place. Cowork keeps research, the documents derived from it, and collateral.",
+  "rule": "The app is the one place. Cowork is the input layer — research, aggregation, deep search, data wrangling.",
   "tiebreak": [
-    "Does it INTERLEAVE with other work in one sitting? → the app.",
-    "Is the artifact a DOCUMENT someone reads later? → the workspace.",
+    "Is it RAW INPUT being gathered, aggregated or wrangled? → the workspace.",
+    "Is it something the practice PRODUCES or TRACKS? → the app.",
     "Can one press spend dollars? → the workspace, and say so out loud.",
     "Still unclear? Ask Paul and add a row here. Do not decide it twice."
   ],
@@ -52,14 +52,16 @@
       "id": "corp-dev-documents",
       "name": "Market map · who's who · target map · thesis",
       "group": "sourcing",
-      "owner": "workspace",
-      "cost": "free",
-      "interleaves": false,
-      "why": "Documents someone reads later. They want a file, a version and a diff, and the citation audit lives here.",
+      "owner": "app",
+      "cost": "drip",
+      "interleaves": true,
+      "why": "Moved to the app 2026-08-14 (Paul). These are practice OUTPUT, and they interleave with the deal and the client they are written for — a thesis is held for one buyer profile.",
       "workflow": [
-        "PLAYBOOK.md §1–4 carries each one section by section.",
-        "npx tsx $REPO/scripts/studio/thesis.mts new <market> <profile>",
-        "npx tsx $REPO/scripts/studio/thesis.mts check   # staleness against the master"
+        "NOT YET ON: needs STUDIO_IN_APP = true and the studio lane split. Until",
+        "then keep building these here — the local path is unchanged and correct.",
+        "App → Studio → the market. corpDevDocs.ts already generates all three.",
+        "PLAYBOOK.md §1–4 remains the SPEC for what each contains, wherever it renders.",
+        "The master these derive from still lives on disk and is read, never copied."
       ],
       "aka": [
         "market map",
@@ -88,6 +90,33 @@
         "candidates",
         "target list",
         "candidate board"
+      ]
+    },
+    {
+      "id": "data-wrangling",
+      "name": "Data wrangling — messy input into something structured",
+      "group": "sourcing",
+      "owner": "workspace",
+      "cost": "free",
+      "interleaves": false,
+      "why": "Named by Paul 2026-08-14 as Cowork work. Reading a messy sheet, reconciling exports, mapping columns, bucketing records — judgement over unstructured input, which is what a session is good at and what a form is bad at.",
+      "workflow": [
+        "Do the reading and the mapping here, where the raw files are.",
+        "Push the RESULT into the app rather than working the app by hand:",
+        "  npx tsx $REPO/scripts/studio/push-crm.mts",
+        "The endpoint calls no model — the intelligence is the mapping, and it",
+        "happens on your own subscription rather than the metered org key.",
+        "Never invent a row to fill a column. A fabricated CRM contact gets EMAILED."
+      ],
+      "aka": [
+        "data wrangling",
+        "wrangling",
+        "messy data",
+        "spreadsheet",
+        "import",
+        "mapping",
+        "reconcile",
+        "csv"
       ]
     },
     {
@@ -181,15 +210,17 @@
       "id": "deal-documents",
       "name": "Deal memo · diligence plan · term framework",
       "group": "deal",
-      "owner": "workspace",
-      "cost": "free",
-      "interleaves": false,
-      "why": "Documents someone reads and signs off. They draw FROM app rows, but the artifact is a file that wants a version history.",
+      "owner": "app",
+      "cost": "drip",
+      "interleaves": true,
+      "why": "Moved to the app 2026-08-14 (Paul). These sit inside the deal sitting — written from the model, the gates and the diligence state, all of which are app rows. Exporting to write them elsewhere was the back-and-forth.",
       "workflow": [
-        "PLAYBOOK.md §5b–5d carries each one section by section.",
-        "Export the numbers from the app, write the memo on disk.",
-        "Never restate the model's figures by hand — reference the model document.",
-        "Renders to deals/<d>/decks/, never collateral/."
+        "NOT YET ON: the app cannot serve these until the studio lane is split.",
+        "Until then write them here to PLAYBOOK §5b–5d, which is the spec either way.",
+        "App → the deal → documents, alongside the model they are written from.",
+        "PLAYBOOK.md §5b–5d remains the SPEC for what each one contains.",
+        "Never restate the model's figures by hand — reference the model.",
+        "Confidential to the engagement: never a source for anything public."
       ],
       "aka": [
         "memo",
@@ -269,15 +300,18 @@
       "id": "collateral",
       "name": "LinkedIn carousels, one-pagers, reports",
       "group": "collateral",
-      "owner": "workspace",
-      "cost": "free",
+      "owner": "app",
+      "cost": "drip",
       "interleaves": false,
-      "why": "Pure local Chromium, ~30s a build, no key. The builders are already here and the specs are versioned beside them.",
+      "why": "Moved to the app 2026-08-14 (Paul). It is practice output, and the app already has the whole surface — CollateralBuilder, the composers, the media library, the review sheet. Nothing needed porting; Studio was hidden, not removed.",
       "workflow": [
-        "Read FORMATS.md (containers) and DESIGN.md (the look) first, every time.",
-        "npx tsx $REPO/scripts/studio/build-deck.mts <spec.deck.mts>",
-        "npx tsx $REPO/scripts/studio/build-onepager.mts <spec.post.mts>",
-        "npx tsx $REPO/scripts/studio/build-report.mts <report.md>"
+        "NOT YET ON: needs STUDIO_IN_APP = true and the studio lane split.",
+        "Until then build here with the builders below — same tokens, same output.",
+        "App → Studio → Collateral.",
+        "FORMATS.md (containers) and DESIGN.md (the look) remain the spec either side.",
+        "The local builders still work and stay supported — same house/ design tokens,",
+        "so a render away from the app is identical, not an approximation:",
+        "  npx tsx $REPO/scripts/studio/build-deck.mts <spec.deck.mts>"
       ],
       "aka": [
         "carousel",

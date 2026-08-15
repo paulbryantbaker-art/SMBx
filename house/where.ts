@@ -7,11 +7,26 @@
  * completely programatically" → "lets clearly delineate responsibilities and
  * workflows for all processes".)
  *
- * THE SETTLED ANSWER, measured rather than preferred:
+ * THE SETTLED ANSWER (narrowed by Paul 2026-08-14, and this is the current one):
  *
- *   THE APP IS THE ONE PLACE. COWORK KEEPS RESEARCH.
+ *   THE APP IS THE ONE PLACE.
+ *   COWORK IS THE INPUT LAYER — research, aggregation, deep search, wrangling.
  *
- * Four findings decided it, all verified against this tree:
+ * The first cut of this table left the derived documents and the collateral in
+ * Cowork, on a "documents are files, pipelines are rows" reading. Paul moved
+ * all three across — corp-dev documents, deal memo / diligence plan / term
+ * framework, and collateral — and the result is cleaner than the compromise
+ * was, because it swaps the axis for one that actually holds:
+ *
+ *   RAW INPUT being gathered → Cowork.   Practice OUTPUT or STATE → the app.
+ *
+ * A deal memo is not filed away to be read later, it is written from the model
+ * and the gates while the deal is live; a market map is written for a client;
+ * collateral is the thing the practice ships. All of that is output, and output
+ * belongs where the state it draws on already is. What is left in Cowork is
+ * genuinely upstream of the practice: sources nobody has structured yet.
+ *
+ * Four findings still stand behind the app half, all verified against this tree:
  *
  *  1. DEFINITIVE cannot leave the app. 169 gate/slot references and 132
  *     MODEL.* definitions live in `definitiveDealMechanicsCatalog.ts` and
@@ -33,8 +48,18 @@
  * through work that INTERLEAVES: sourcing → model → memo → deal state → client
  * call happens in one sitting. Research does not interleave — it is a
  * quarterly batch per market, a different season rather than back-and-forth.
- * So `interleaves: true` is the real reason a process belongs in the app, and
- * cost is a secondary consideration that happens to agree.
+ * So `interleaves: true` is a sufficient reason to be in the app, though not a
+ * necessary one: collateral does not interleave and is still the app's, because
+ * it is output. Cost is a secondary consideration that happens to agree.
+ *
+ * ONE BLOCKER THIS CREATES, and it is in the app rather than here. `API_LANES`
+ * has a single `studio` lane covering BOTH the expensive research paths
+ * (`researchAgent.ts`, `researchLanes.ts` synthesis) and the cheap composition
+ * paths (`corpDevDocs.ts`, `collateralComposer.ts`, `linkedinAnalytics.ts`).
+ * The split above needs the second group ON and the first OFF, which no single
+ * value of that variable can express — turning on collateral today also arms
+ * the research agent. The lane has to be split (`research` vs `studio`) before
+ * this table is enforceable in the app, and `STUDIO_IN_APP` has to flip true.
  *
  * WHY THIS IS DATA AND NOT PROSE. A paragraph in a doc rots silently, and this
  * repo has three live examples of exactly that — THE_LINE_POLICY.md and
@@ -107,12 +132,14 @@ export const PROCESSES: Process[] = [
   {
     id: 'corp-dev-documents',
     name: 'Market map · who\'s who · target map · thesis',
-    group: 'sourcing', owner: 'workspace', cost: 'free', interleaves: false,
-    why: 'Documents someone reads later. They want a file, a version and a diff, and the citation audit lives here.',
+    group: 'sourcing', owner: 'app', cost: 'drip', interleaves: true,
+    why: 'Moved to the app 2026-08-14 (Paul). These are practice OUTPUT, and they interleave with the deal and the client they are written for — a thesis is held for one buyer profile.',
     workflow: [
-      'PLAYBOOK.md §1–4 carries each one section by section.',
-      'npx tsx $REPO/scripts/studio/thesis.mts new <market> <profile>',
-      'npx tsx $REPO/scripts/studio/thesis.mts check   # staleness against the master',
+      'NOT YET ON: needs STUDIO_IN_APP = true and the studio lane split. Until',
+      'then keep building these here — the local path is unchanged and correct.',
+      'App → Studio → the market. corpDevDocs.ts already generates all three.',
+      'PLAYBOOK.md §1–4 remains the SPEC for what each contains, wherever it renders.',
+      'The master these derive from still lives on disk and is read, never copied.',
     ],
     aka: ['market map', 'who\'s who', 'thesis', 'target map', 'client document'],
   },
@@ -128,6 +155,21 @@ export const PROCESSES: Process[] = [
       'Places is DISCOVERY, not evidence — verify against the licence registry before a name reaches a client.',
     ],
     aka: ['screen', 'candidates', 'target list', 'candidate board'],
+  },
+  {
+    id: 'data-wrangling',
+    name: 'Data wrangling — messy input into something structured',
+    group: 'sourcing', owner: 'workspace', cost: 'free', interleaves: false,
+    why: 'Named by Paul 2026-08-14 as Cowork work. Reading a messy sheet, reconciling exports, mapping columns, bucketing records — judgement over unstructured input, which is what a session is good at and what a form is bad at.',
+    workflow: [
+      'Do the reading and the mapping here, where the raw files are.',
+      'Push the RESULT into the app rather than working the app by hand:',
+      '  npx tsx $REPO/scripts/studio/push-crm.mts',
+      'The endpoint calls no model — the intelligence is the mapping, and it',
+      'happens on your own subscription rather than the metered org key.',
+      'Never invent a row to fill a column. A fabricated CRM contact gets EMAILED.',
+    ],
+    aka: ['data wrangling', 'wrangling', 'messy data', 'spreadsheet', 'import', 'mapping', 'reconcile', 'csv'],
   },
   {
     id: 'sourcing-pipeline',
@@ -178,13 +220,15 @@ export const PROCESSES: Process[] = [
   {
     id: 'deal-documents',
     name: 'Deal memo · diligence plan · term framework',
-    group: 'deal', owner: 'workspace', cost: 'free', interleaves: false,
-    why: 'Documents someone reads and signs off. They draw FROM app rows, but the artifact is a file that wants a version history.',
+    group: 'deal', owner: 'app', cost: 'drip', interleaves: true,
+    why: 'Moved to the app 2026-08-14 (Paul). These sit inside the deal sitting — written from the model, the gates and the diligence state, all of which are app rows. Exporting to write them elsewhere was the back-and-forth.',
     workflow: [
-      'PLAYBOOK.md §5b–5d carries each one section by section.',
-      'Export the numbers from the app, write the memo on disk.',
-      'Never restate the model\'s figures by hand — reference the model document.',
-      'Renders to deals/<d>/decks/, never collateral/.',
+      'NOT YET ON: the app cannot serve these until the studio lane is split.',
+      'Until then write them here to PLAYBOOK §5b–5d, which is the spec either way.',
+      'App → the deal → documents, alongside the model they are written from.',
+      'PLAYBOOK.md §5b–5d remains the SPEC for what each one contains.',
+      'Never restate the model\'s figures by hand — reference the model.',
+      'Confidential to the engagement: never a source for anything public.',
     ],
     aka: ['memo', 'ic packet', 'diligence plan', 'term sheet', 'terms', 'loi framework'],
   },
@@ -230,13 +274,16 @@ export const PROCESSES: Process[] = [
   {
     id: 'collateral',
     name: 'LinkedIn carousels, one-pagers, reports',
-    group: 'collateral', owner: 'workspace', cost: 'free', interleaves: false,
-    why: 'Pure local Chromium, ~30s a build, no key. The builders are already here and the specs are versioned beside them.',
+    group: 'collateral', owner: 'app', cost: 'drip', interleaves: false,
+    why: 'Moved to the app 2026-08-14 (Paul). It is practice output, and the app already has the whole surface — CollateralBuilder, the composers, the media library, the review sheet. Nothing needed porting; Studio was hidden, not removed.',
     workflow: [
-      'Read FORMATS.md (containers) and DESIGN.md (the look) first, every time.',
-      'npx tsx $REPO/scripts/studio/build-deck.mts <spec.deck.mts>',
-      'npx tsx $REPO/scripts/studio/build-onepager.mts <spec.post.mts>',
-      'npx tsx $REPO/scripts/studio/build-report.mts <report.md>',
+      'NOT YET ON: needs STUDIO_IN_APP = true and the studio lane split.',
+      'Until then build here with the builders below — same tokens, same output.',
+      'App → Studio → Collateral.',
+      'FORMATS.md (containers) and DESIGN.md (the look) remain the spec either side.',
+      'The local builders still work and stay supported — same house/ design tokens,',
+      'so a render away from the app is identical, not an approximation:',
+      '  npx tsx $REPO/scripts/studio/build-deck.mts <spec.deck.mts>',
     ],
     aka: ['carousel', 'deck', 'one-pager', 'onepager', 'report pdf', 'linkedin', 'post'],
   },
@@ -327,17 +374,26 @@ export function resolve(query: string): Process[] {
   return scored.map(s => s.p);
 }
 
-/** The rule, in one line, for a header or a prompt. */
+/**
+ * The rule, in one line, for a header or a prompt.
+ *
+ * Narrowed 2026-08-14 on Paul's instruction. The first cut left the derived
+ * documents and collateral in Cowork; he moved them to the app, which makes
+ * the division cleaner than the compromise was: Cowork is the INPUT layer —
+ * gathering, aggregating, wrangling — and everything the practice PRODUCES or
+ * TRACKS is the app. "Documents are files, pipelines are rows" was the wrong
+ * axis; the right one is raw input versus practice output.
+ */
 export const ONE_LINE =
-  'The app is the one place. Cowork keeps research, the documents derived from it, and collateral.';
+  'The app is the one place. Cowork is the input layer — research, aggregation, deep search, data wrangling.';
 
 /**
  * The tiebreak for a process not in the table. Deliberately not a default —
  * a guess is what put the same work in two systems the first time.
  */
 export const TIEBREAK = [
-  'Does it INTERLEAVE with other work in one sitting? → the app.',
-  'Is the artifact a DOCUMENT someone reads later? → the workspace.',
+  'Is it RAW INPUT being gathered, aggregated or wrangled? → the workspace.',
+  'Is it something the practice PRODUCES or TRACKS? → the app.',
   'Can one press spend dollars? → the workspace, and say so out loud.',
   'Still unclear? Ask Paul and add a row here. Do not decide it twice.',
 ];
@@ -383,11 +439,22 @@ export function renderMarkdown(): string {
   L.push('> which SYSTEM does a piece of work — this workspace or the app.');
   L.push('> Repo question → that file. Process question → this one.');
   L.push('');
-  L.push('Research is the only path that spends real money, and it is a quarterly');
-  L.push('batch per market rather than something done mid-deal — a different season,');
-  L.push('not back-and-forth. Everything that **interleaves in one sitting** —');
-  L.push('sourcing, the model, deal state, the CRM, the call — lives in the app');
-  L.push('together, because splitting interleaved work is what made moving between');
+  L.push('> ⚠️ **Three of these are decided but NOT YET SWITCHED ON.** Corp-dev');
+  L.push('> documents, deal documents and collateral moved to the app on');
+  L.push('> 2026-08-14, and the app cannot serve them yet: `STUDIO_IN_APP` is');
+  L.push('> `false`, and the single `studio` lane in `API_LANES` bundles those');
+  L.push('> cheap composition paths together with the expensive research agent,');
+  L.push('> so it cannot be switched on without also arming the thing that costs');
+  L.push('> ~$18 a press. The lane needs splitting first. **Until that ships,');
+  L.push('> keep doing those three here** — the local builders and the PLAYBOOK');
+  L.push('> specs are unchanged and still correct. This file states where the');
+  L.push('> work is going, and says plainly where it still is.');
+  L.push('');
+  L.push('Cowork is the INPUT layer: gathering sources, aggregating them into a');
+  L.push('master, deep search, and wrangling messy data into something structured.');
+  L.push('Everything the practice PRODUCES or TRACKS — the deal, the CRM, the');
+  L.push('documents, the collateral — is the app, in one place, because that is');
+  L.push('the work that interleaves and splitting it is what made moving between');
   L.push('systems painful.');
   L.push('');
   L.push('## Why, in four measured findings');

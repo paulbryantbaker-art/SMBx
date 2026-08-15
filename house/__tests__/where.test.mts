@@ -58,11 +58,24 @@ is('LinkedIn analytics stays the app — the standing exception', owns('linkedin
 is('market research is the workspace', owns('market-research'), 'workspace');
 is('master synthesis is the workspace', owns('master-synthesis'), 'workspace');
 is('the weekly sweep is the workspace', owns('weekly-sweep'), 'workspace');
-is('corp-dev documents are the workspace', owns('corp-dev-documents'), 'workspace');
-is('deal documents are the workspace', owns('deal-documents'), 'workspace');
-is('collateral is the workspace', owns('collateral'), 'workspace');
+is('the target screen is the workspace', owns('target-screen'), 'workspace');
+is('data wrangling is the workspace', owns('data-wrangling'), 'workspace');
+
+/* Narrowed 2026-08-14 by Paul. The first cut had these three in the workspace
+   on a "documents are files" reading; he moved them to the app. Pinned in the
+   new position so a future edit back is deliberate, not drift — and the axis
+   that replaced the old one is raw INPUT vs practice OUTPUT. */
+is('corp-dev documents are the APP now', owns('corp-dev-documents'), 'app');
+is('deal documents are the APP now', owns('deal-documents'), 'app');
+is('collateral is the APP now', owns('collateral'), 'app');
 
 is('the citation audit runs identically either side', owns('citation-audit'), 'both');
+
+/* The axis, asserted rather than described: everything Cowork keeps is
+   upstream of the practice — sources and raw data nobody has structured yet. */
+is('Cowork holds only the input layer',
+  PROCESSES.filter(p => p.owner === 'workspace').map(p => p.id).sort(),
+  ['data-wrangling', 'market-research', 'master-synthesis', 'target-screen', 'weekly-sweep']);
 
 /* The cost story, which is the evidence the decision rests on. */
 is('exactly the research paths can spend dollars',

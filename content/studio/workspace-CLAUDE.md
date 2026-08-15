@@ -206,6 +206,13 @@ WHERE.md             WHICH SYSTEM does a piece of work — this workspace or
                      the app. Read it before starting anything you have not
                      done here before. Generated from house/where.ts;
                      where.json is the same data, machine-readable.
+                     **This workspace is now the INPUT LAYER** (Paul,
+                     2026-08-14): research, aggregation, deep search, data
+                     wrangling. Everything the practice PRODUCES or TRACKS —
+                     the deal, the CRM, the documents, the collateral — is
+                     the app. Three of those have not been switched on yet;
+                     WHERE.md says which, and says to keep doing them here
+                     until they are.
 REPORT_TEMPLATE.md   the cover block, the body rules, the standing appendix.
 CLOUD_BOOTSTRAP.md   only if you are a cloud session and a builder will not run.
 ```
