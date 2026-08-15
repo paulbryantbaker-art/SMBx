@@ -199,6 +199,12 @@ FORMATS.md           the collateral containers — which builder, which fields,
                      the exact image slot dimensions.
 DESIGN.md            the house LOOK — palette, type, and the dead systems named
                      with their hexes. Canonical.
+COLLATERAL_STATE.md  WHICH RENDERERS ARE ACTUALLY ON CARTA, and what to do
+                     about the two that are not. DESIGN.md is the look and
+                     FORMATS.md is the container; neither said what the
+                     builders really do, and for a week DESIGN.md claimed
+                     all four were converted when two were not. Read this
+                     before you build collateral, not after it looks wrong.
 THE_LINE.md          the perimeter, and whose lane each question is in —
                      tax, legal, real estate, valuation, securities,
                      licensing, employment, insurance, QoE.
@@ -228,8 +234,11 @@ CLOUD_BOOTSTRAP.md   only if you are a cloud session and a builder will not run.
 | build a **target list** of companies for a client to buy | **RESEARCH.md § C** |
 | fold new research into a master | job 1 below |
 | write a market map, who's who, target map or thesis | **PLAYBOOK.md** |
-| build a carousel, one-pager or report | **FORMATS.md**, then **DESIGN.md** |
+| build a carousel, one-pager or report | **COLLATERAL_STATE.md**, then **FORMATS.md**, then **DESIGN.md** |
+| build a **one-pager** or a **link-preview card** specifically | **COLLATERAL_STATE.md §2** — both builders are still on the retired palette |
+| a rendered artifact came out in the wrong colours | **COLLATERAL_STATE.md** — convert the BUILDER, never the document |
 | anything, and you are about to hand-write HTML or CSS | **DESIGN.md** — stop, you are drifting |
+| make something **for a named client** | **COLLATERAL_STATE.md §5** — `for:` on the cover, and it files to `decks/` |
 | model a deal, write a memo, plan diligence, frame terms | **PLAYBOOK.md §5** |
 | anything client-facing at all | **THE_LINE.md** |
 | **anything you have not done here before** | **WHERE.md** — is this even ours? |

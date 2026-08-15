@@ -336,6 +336,35 @@ ok('KNOWN GAP: the Ledger palette is still reachable for the un-extracted artifa
 ok('KNOWN GAP: the deck designer still briefs the model in Ledger',
   /import \{ LEDGER/.test(read('server/services/deckDesigner.ts')));
 
+/* ── and the session has to be TOLD ───────────────────────────────────── */
+
+/* Every finding in this file is worthless to Cowork if it stays in the repo.
+   Cowork is Claude Desktop: it reads the files in the workspace and cannot be
+   relied on to run a CLI. COLLATERAL_STATE.md is the write-up, and these three
+   are its delivery mechanism — the same check WHERE.md carries, for the same
+   reason. A law that does not travel is the defect this practice keeps
+   finding. */
+{
+  const state = read('content/studio/COLLATERAL_STATE.md');
+  const init = read('scripts/studio/init-workspace.mts');
+  const ws = read('content/studio/workspace-CLAUDE.md');
+
+  ok('init-workspace copies COLLATERAL_STATE.md into the workspace',
+    init.includes("'COLLATERAL_STATE.md'"));
+  ok('the workspace CLAUDE.md routes to it before a build',
+    ws.includes('COLLATERAL_STATE.md'));
+
+  /* It must NAME the two behind builders. A write-up that says "some builders
+     are behind" sends a session to check, which is the thing it exists to
+     spare them. */
+  ok('…and it names both builders that are still on Ledger',
+    state.includes('build-onepager.mts') && state.includes('build-og-card.mts'));
+  ok('…states the hand-roll law first, because that is the drift',
+    /Never hand-roll a layout/.test(state));
+  ok('…and carries the font trap, which no diff would ever show',
+    /Source Serif 4/.test(state) && /@font-face/.test(state));
+}
+
 /* ── what "separate use cases" means, so it is not read as "separate copies" ─ */
 
 /* The shared thing is the GRAMMAR; the different thing is where the content and

@@ -124,6 +124,12 @@ law('content/studio/workspace-CLAUDE.md', 'CLAUDE.md');
 law('content/studio/PLAYBOOK.md', 'PLAYBOOK.md');
 law('content/studio/FORMATS.md', 'FORMATS.md');
 law('content/studio/DESIGN.md', 'DESIGN.md');
+/* The state of the renderers, as opposed to the look. DESIGN.md says what the
+   house looks like and FORMATS.md says what shape a container is; neither said
+   which builders were actually converted, and for a week DESIGN.md claimed all
+   four were when two were not. A session that trusts a law it cannot verify is
+   exactly how the wrong palette ships. */
+law('content/studio/COLLATERAL_STATE.md', 'COLLATERAL_STATE.md');
 /* THE_LINE.md — added 2026-08-14, Paul: "Make sure that Cowork understands
    where the Lines are and what we need expert opinions on too. Tax, legal
    real estate, etc."
