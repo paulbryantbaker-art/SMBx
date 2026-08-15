@@ -80,16 +80,35 @@ export const SPEND_LANES: readonly SpendLane[] =
   ['chat', 'marketing', 'studio', 'sourcing', 'research'] as const;
 
 /**
- * The posture as of 2026-08-14: everything except research.
+ * The posture as of 2026-08-15: chat, marketing and sourcing. NOT studio.
  *
- * Widened from `chat,marketing` when the routing table settled on "the app is
- * the one place, Cowork is the input layer". The narrow default was correct
- * while Studio was out of the chrome and sourcing had just been ported out; it
- * became wrong the moment the deal, the documents and the collateral all came
- * back. Research stays off because it is the only lane that can spend dollars.
+ * THIS WAS WIDENED AND THEN NARROWED AGAIN, and the reason is worth keeping
+ * because the widening looked correct at the time. On 2026-08-14 the routing
+ * table settled on "the app is the one place, Cowork is the input layer", and
+ * under that axis collateral and the corp-dev documents were app-owned — so
+ * `studio` had to be on. THE_IOI_SEAM.md (2026-08-15) replaced that axis with
+ * AUDIENCE and returned both to the studio, which retired the entire
+ * justification. The default outlived it by a day.
+ *
+ * What the `studio` lane actually arms is deck design, collateral composition,
+ * Gemini artwork and corp-dev documents — every one of them Cowork's work now,
+ * and two of them producing artifacts the palette gate would refuse anyway. An
+ * app that spends money rendering something it then blocks is the worst of both.
+ *
+ * It stayed on for exactly one reason: LinkedIn analytics, the one Studio
+ * capability with no local equivalent, was also on this lane. One standing
+ * exception was holding four superseded paths open. It moved to `chat`, which
+ * is its honest home — Yulia reading an imported document — and the lane went
+ * dark behind it.
+ *
+ * `sourcing` stays on: the seam keeps the 5-stage engine app-side, it runs on a
+ * separate Places key that is free under the monthly tier, and the three
+ * unattended cron jobs that made it dangerous are now individually guarded.
+ * `research` stays off because it is the only lane that can spend dollars on a
+ * single press.
  */
 export const DEFAULT_LANES: readonly SpendLane[] =
-  ['chat', 'marketing', 'studio', 'sourcing'] as const;
+  ['chat', 'marketing', 'sourcing'] as const;
 
 /** What a blocked lane should say, in the practitioner's own vocabulary. */
 const LANE_HELP: Record<SpendLane, string> = {

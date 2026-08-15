@@ -64,20 +64,36 @@ eq('nothing unknown in "all"',       unknownLaneNames(),                    []);
 delete process.env.API_LANES;
 eq('nothing unknown when unset',     unknownLaneNames(),                    []);
 
-console.log('\nthe shipped default, lane by lane (2026-08-14)');
+console.log('\nthe shipped default, lane by lane (2026-08-15)');
 delete process.env.API_LANES;
 for (const lane of SPEND_LANES) {
-  // Everything except `research` is on: the app is the one place, and the
-  // only lane that can spend dollars on a press is the one that stays off.
   eq(`spendAllowed('${lane}')`, spendAllowed(lane), (DEFAULT_LANES as readonly string[]).includes(lane));
 }
+// Named individually, not just derived from DEFAULT_LANES — the loop above
+// passes whatever that constant says, so on its own it asserts nothing about
+// WHICH lanes should be on. These four are the decision.
+eq('chat is on — Yulia is the product',        spendAllowed('chat'),      true);
+eq('marketing is on — the public funnel',      spendAllowed('marketing'), true);
+eq('sourcing is on — app-side, free tier',     spendAllowed('sourcing'),  true);
+eq('studio is OFF — collateral is Cowork\'s',  spendAllowed('studio'),    false);
+eq('research is OFF — the only dollar press',  spendAllowed('research'),  false);
 
 console.log('\nthe research split — the point of the whole exercise');
 delete process.env.API_LANES;
-// The claim the split exists to make good on: collateral and documents can be
-// on WITHOUT arming the ~$18-a-press research agent. Before 2026-08-14 one
-// `studio` lane covered both, so this combination was unexpressible.
-eq('composition is on by default',   spendAllowed('studio'),   true);
+// The claim the split exists to make good on: composition can be armed WITHOUT
+// arming the ~$18-a-press research agent. Before 2026-08-14 one `studio` lane
+// covered both, so this combination was unexpressible.
+//
+// It is now asserted EXPLICITLY rather than through the default, because the
+// default changed underneath it. `studio` was on by default on 2026-08-14 and
+// this line read `spendAllowed('studio') === true`; THE_IOI_SEAM.md returned
+// collateral to the studio a day later and the default went dark, so the
+// assertion started failing while the property it was testing was still
+// perfectly true. A test coupled to a default tests the default.
+process.env.API_LANES = 'studio';
+eq('composition can be armed alone',  spendAllowed('studio'),   true);
+eq('…without arming research',        spendAllowed('research'), false);
+delete process.env.API_LANES;
 eq('…and research is NOT',           spendAllowed('research'), false);
 process.env.API_LANES = 'studio';
 eq('asking for studio alone',        [...enabledLanes()],      ['studio']);
