@@ -5,15 +5,7 @@ import { Router } from 'express';
 import { sql } from '../db.js';
 import { enqueueDeliverableGeneration } from '../services/jobQueue.js';
 import { processDeliverable } from '../services/deliverableProcessor.js';
-import {
-  canGenerateDeliverable,
-  createCheckout,
-  getRequiredPlan,
-  getUserPlan,
-  markFreeDeliverableUsed,
-  planMeetsRequirement,
-  PLANS,
-} from '../services/subscriptionService.js';
+import { canGenerateDeliverable } from '../services/subscriptionService.js';
 import { hasDealAccess } from '../services/dealAccessService.js';
 import { isGateFree } from '../../shared/gateRegistry.js';
 import { markDeliverableRefreshed } from '../services/dealFreshnessService.js';
@@ -190,26 +182,15 @@ deliverablesRouter.post('/deals/:dealId/deliverables', async (req, res) => {
 
     // Subscription model: check if user can generate this deliverable
     const deliverableType = menuItem.slug.replace(/-/g, '_');
+    /* No 402. This returned Payment Required with a live Stripe checkout URL
+       and `subscribeEndpoint: '/api/stripe/subscribe'` — a route that no longer
+       exists. `canGenerateDeliverable` now always allows, so the branch is a
+       guard rather than a gate; see the note on that function. */
     const access = await canGenerateDeliverable(userId, deliverableType);
     if (!access.allowed) {
-      let checkoutUrl: string | null = null;
-      const planInfo = PLANS[access.requiredPlan];
-
-      try {
-        checkoutUrl = (await createCheckout(userId, access.requiredPlan)).url;
-      } catch (checkoutErr: any) {
-        console.error('Create checkout for deliverable paywall failed:', checkoutErr.message);
-      }
-
-      return res.status(402).json({
-        error: 'Subscription required',
-        code: 'SUBSCRIPTION_REQUIRED',
-        requiredPlan: access.requiredPlan,
-        currentPlan: access.currentPlan,
-        priceDisplay: planInfo.priceDisplay,
-        checkoutUrl,
-        subscribeEndpoint: '/api/stripe/subscribe',
-        message: `This deliverable requires ${planInfo.name} (${planInfo.priceDisplay}).`,
+      return res.status(403).json({
+        error: 'This deliverable is not available.',
+        reason: access.reason ?? 'unavailable',
       });
     }
 
@@ -231,10 +212,7 @@ deliverablesRouter.post('/deals/:dealId/deliverables', async (req, res) => {
     };
     const jobId = await enqueueDeliverableGenerationOrInline(jobData);
 
-    // Mark free deliverable as used if this was the user's one free deliverable
-    if (access.isFreeDeliverable) {
-      await markFreeDeliverableUsed(userId, deliverableType);
-    }
+    /* The one-free-deliverable allowance is gone — every deliverable is free. */
 
     // Inline fallback: process in this process if worker isn't running.
     setImmediate(() => {
@@ -423,13 +401,11 @@ deliverablesRouter.get('/deals/:dealId/menu', async (req, res) => {
       ORDER BY gate ASC NULLS LAST, tier ASC, name ASC
     `;
 
-    // Check user's plan to determine included items
-    const userPlan = await getUserPlan(userId);
-    const mapped = (items as any[]).map(item => {
-      const dt = item.slug?.replace(/-/g, '_') || '';
-      const required = getRequiredPlan(dt);
-      return { ...item, included: planMeetsRequirement(userPlan, required) };
-    });
+    /* Every item is included. This mapped each deliverable to the plan that
+       could buy it and marked the rest excluded; there are no plans to be
+       outside of now. The flag itself is kept so the client's list rendering
+       does not have to change. */
+    const mapped = (items as any[]).map(item => ({ ...item, included: true }));
 
     return res.json(mapped);
   } catch (err: any) {

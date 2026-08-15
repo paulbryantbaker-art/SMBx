@@ -1,0 +1,43 @@
+-- 126 — drop the subscription ladder.
+--
+-- Paul, 2026-08-15: "this is old from when I was going to sell the app - not
+-- relevant any more."
+--
+-- 125 took the deal-size fee ladder, the per-deliverable prices and the wallet.
+-- This takes the last of it: the monthly subscription table behind the
+-- $99 / $249 / $749 / $3,000+ ladder.
+--
+-- It was never charging anyone. `/api/stripe` returned 410 in practice mode and
+-- `getUserPlan` short-circuited to `enterprise`. But THE LINE v2 rule 1 is not
+-- "the app does not currently charge money" — it is that NOTHING IN THE APP
+-- CHARGES MONEY, permanently, because the app is Paul's private instrument and
+-- will never be sold. A complete, working Stripe integration sitting behind one
+-- env var is a different posture from not having one.
+--
+-- Removed in the same change: routes/stripe.ts, the webhook mount (the one
+-- piece of billing that had to stay publicly reachable, ahead of the JSON body
+-- parser, so raw bodies survived for signature verification),
+-- client/src/lib/pricing.ts, the price fields on PlanInfo, and the
+-- SUBSCRIPTION CONTEXT layer of Yulia's system prompt — which quoted all three
+-- upgrade prices at her and told her when to raise them.
+--
+-- THE `users` COLUMNS STAY. `plan` and `trial_ends_at` are read by the boot
+-- seed and sit on a table every request touches; dropping columns from `users`
+-- is a bigger blast radius than this change earns, and neither column costs
+-- anything left in place. `getUserPlan` no longer reads either one — it returns
+-- `enterprise` without a query.
+--
+-- WHAT WOULD HAVE BROKEN, none of it visible in this file's diff. A dropped
+-- table is a runtime error, not an empty result:
+--   · admin.ts's funnel endpoint counted DISTINCT user_id FROM subscriptions,
+--     UNGUARDED — a 500 on the first admin page load. tools.ts and
+--     discoveryWorker.ts run the same query but check to_regclass first, which
+--     is why only one of the three was a problem.
+--   · the boot seed INSERTed a fake enterprise row
+--     (stripe_subscription_id 'dev_superadmin_enterprise') so the paywall would
+--     let the superadmin through. At boot, against a dropped table.
+--   · getUserPlan's defensive fallback read `subscriptions` for the case where
+--     users.plan had not been migrated yet — a path that exists to prevent a
+--     throw, which would itself have thrown.
+
+DROP TABLE IF EXISTS subscriptions;

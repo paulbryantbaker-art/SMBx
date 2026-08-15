@@ -8,7 +8,8 @@ import { TAX_ENGINE_FOUNDATION, TAX_ENGINE_BY_LEAGUE } from '../prompts/taxEngin
 import { LEGAL_ENGINE_FOUNDATION, LEGAL_ENGINE_BY_LEAGUE } from '../prompts/legalEngine.js';
 import { BRANCHING_LOGIC } from '../prompts/branchingLogic.js';
 import { AGENCY_DOCTRINE } from '../prompts/agencyDoctrine.js';
-import { getUserPlan, hasActiveSubscription, PLANS } from './subscriptionService.js';
+/* The subscription-context prompt layer is gone (2026-08-15), and with it the
+   only reason this file imported plans at all. */
 import { getKnowledgeForContext, formatKnowledgeForPrompt } from './knowledgeService.js';
 import { getMarketHeat, formatMarketHeatForPrompt } from './marketHeatService.js';
 import {
@@ -1136,22 +1137,15 @@ export async function buildSystemPrompt(
       layers.push(LEGAL_ENGINE_BY_LEAGUE[dealLeague]);
     }
 
-    // Layer 3d: Subscription context
-    if (user.id) {
-      const userPlan = await getUserPlan(user.id);
-      if (!hasActiveSubscription(userPlan)) {
-        layers.push(`
-## SUBSCRIPTION CONTEXT
-The user is on the Free plan. They get unlimited conversation and ONE free structured deliverable.
-If they've used their free deliverable, paid deliverables require a subscription.
-Solo is ${PLANS.solo.priceDisplay} — covers analysis, valuations, exports, and solo deal desk workflows.
-Pro is ${PLANS.pro.priceDisplay} — adds CIM, deal room, matching, sourcing, and parallel deal work.
-Team is ${PLANS.team.priceDisplay} — adds seats, shared vaults, firm templates, and specialist handoff.
-NEVER be pushy. Mention subscription only when the user requests a paid deliverable.
-If they decline, continue helping with conversation and guidance.
-`);
-      }
-    }
+    /* Layer 3d, SUBSCRIPTION CONTEXT — DELETED 2026-08-15.
+       This layer told Yulia the user was on the Free plan and quoted all three
+       upgrade prices at her, with instructions on when to raise them. It was
+       already dead in practice (getUserPlan returns enterprise, so
+       hasActiveSubscription was always true and the layer never appended), but
+       "dead" is the wrong standard for an upsell script sitting in the system
+       prompt of an advisor whose entire positioning is that she is not selling
+       anything. THE LINE v2 rule 1: nothing in the app charges money. There is
+       no subscription to have context about. */
 
     // Layer 3d+: Support behavior
     layers.push(`

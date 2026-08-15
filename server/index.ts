@@ -10,7 +10,6 @@ import { canvasTabsRouter } from './routes/canvasTabs.js';
 import { docViewsRouter } from './routes/docViews.js';
 import { chatRouter } from './routes/chat.js';
 import { anonymousRouter } from './routes/anonymous.js';
-import { stripeRouter, handleStripeWebhook } from './routes/stripe.js';
 import { deliverablesRouter } from './routes/deliverables.js';
 import { pmiPlanRouter } from './routes/pmiPlan.js';
 import { dataRoomRouter } from './routes/dataRoom.js';
@@ -220,7 +219,10 @@ assertProductionBillingSafety();
 app.set('trust proxy', 1);
 
 // ─── 1. Stripe webhook (raw body — MUST be before json parser) ──
-app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook);
+/* The Stripe webhook is GONE (2026-08-15). It was mounted public and ahead of
+   the JSON body parser so the raw body survived for signature verification —
+   the one piece of billing that had to stay reachable while subscriptions were
+   'dormant'. Nothing charges money now, so there are no events to settle. */
 
 // ─── 2. Body parsing ───────────────────────────────────────
 app.use(express.json({ limit: '2mb' }));
@@ -245,7 +247,9 @@ app.get('/api/health', (_req, res) => {
 app.get('/api/config', (_req, res) => {
   res.json({
     googleClientId: process.env.GOOGLE_CLIENT_ID || null,
-    stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY || null,
+    /* stripePublishableKey removed 2026-08-15 — there is no checkout to
+       initialise, and a public endpoint advertising a payments key invites
+       exactly the integration this practice does not have. */
     practiceMode: practiceModeEnabled(),
   });
 });
@@ -1096,15 +1100,18 @@ app.get('/api/debug/check-ai', requireAuth, async (_req, res) => {
 });
 
 app.use('/api/auth', authLimiter, authRouter);
+/* `/api/stripe` is GONE, not 410'd (2026-08-15, Paul: "this is old from when I
+   was going to sell the app - not relevant any more"). It used to fork here:
+   `retiredSurface` in practice mode, the real router otherwise. Both halves are
+   deleted along with routes/stripe.ts — an unmounted path 404s, which is the
+   truthful answer, and a 410 implied something that could come back.
+
+   The anonymous chat fork stays as it was: that surface is retired by THE LINE
+   v2 but the router still exists for a non-practice deployment. */
 if (practiceModeEnabled()) {
-  // Retired public product surfaces: the anonymous marketing funnel and Stripe
-  // checkout/portal have no role in the private practice (THE LINE v2). The
-  // webhook mount above stays live so legacy subscription events still settle.
   app.use('/api/chat/anonymous', retiredSurface);
-  app.use('/api/stripe', retiredSurface);
 } else {
   app.use('/api/chat/anonymous', chatLimiter, anonymousRouter);
-  app.use('/api/stripe', requireAuth, stripeRouter); // routes read req.userId; this mount is before the blanket requireAuth, so gate it here (webhook is mounted separately above, stays public)
 }
 app.use('/api/chat', chatLimiter, chatRouter);
 app.use('/api', shareLinksRouter); // has both public (/shared/:token) and protected routes
@@ -1588,17 +1595,11 @@ runMigrations().then(async () => {
         free_deliverable_used = false,
         updated_at = NOW()
     `;
-    await bootSql`
-      INSERT INTO subscriptions (user_id, plan, status, stripe_subscription_id, stripe_customer_id, current_period_start, current_period_end, trial_ends_at)
-      SELECT id, 'enterprise', 'active', 'dev_superadmin_enterprise', 'dev_superadmin', NOW(), NOW() + INTERVAL '30 days', NOW() + INTERVAL '90 days'
-      FROM users
-      WHERE email = 'pbaker@smbx.ai'
-      ON CONFLICT (user_id) DO UPDATE SET
-        plan = 'enterprise',
-        status = 'active',
-        trial_ends_at = EXCLUDED.trial_ends_at,
-        updated_at = NOW()
-    `;
+    /* The matching `subscriptions` INSERT is gone with the table (migration
+       126). It wrote a fake enterprise row — stripe_subscription_id
+       'dev_superadmin_enterprise' — so the paywall would let the superadmin
+       through. Nothing is gated on a plan any more, and this INSERT would fail
+       at boot against a dropped table, which is the worst place to find out. */
     console.log('[boot] Superadmin account verified');
     try {
       const seeded = await ensureModelRegistrySeeded();
