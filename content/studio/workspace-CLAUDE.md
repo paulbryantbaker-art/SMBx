@@ -212,7 +212,7 @@ WHERE.md             WHICH SYSTEM does a piece of work — this workspace or
                      the deal, the CRM, the documents, the collateral — is
                      the app. Three of those have not been switched on yet;
                      WHERE.md says which, and says to keep doing them here
-                     until they are.
+                     until they are — as of 2026-08-14 all three are LIVE.
 REPORT_TEMPLATE.md   the cover block, the body rules, the standing appendix.
 CLOUD_BOOTSTRAP.md   only if you are a cloud session and a builder will not run.
 ```

@@ -135,9 +135,8 @@ export const PROCESSES: Process[] = [
     group: 'sourcing', owner: 'app', cost: 'drip', interleaves: true,
     why: 'Moved to the app 2026-08-14 (Paul). These are practice OUTPUT, and they interleave with the deal and the client they are written for — a thesis is held for one buyer profile.',
     workflow: [
-      'NOT YET ON: needs STUDIO_IN_APP = true and the studio lane split. Until',
-      'then keep building these here — the local path is unchanged and correct.',
-      'App → Studio → the market. corpDevDocs.ts already generates all three.',
+      'App → Studio → the market. corpDevDocs.ts generates all three.',
+      'LIVE since 2026-08-14: STUDIO_IN_APP is true and the studio lane is on.',
       'PLAYBOOK.md §1–4 remains the SPEC for what each contains, wherever it renders.',
       'The master these derive from still lives on disk and is read, never copied.',
     ],
@@ -223,8 +222,6 @@ export const PROCESSES: Process[] = [
     group: 'deal', owner: 'app', cost: 'drip', interleaves: true,
     why: 'Moved to the app 2026-08-14 (Paul). These sit inside the deal sitting — written from the model, the gates and the diligence state, all of which are app rows. Exporting to write them elsewhere was the back-and-forth.',
     workflow: [
-      'NOT YET ON: the app cannot serve these until the studio lane is split.',
-      'Until then write them here to PLAYBOOK §5b–5d, which is the spec either way.',
       'App → the deal → documents, alongside the model they are written from.',
       'PLAYBOOK.md §5b–5d remains the SPEC for what each one contains.',
       'Never restate the model\'s figures by hand — reference the model.',
@@ -277,9 +274,7 @@ export const PROCESSES: Process[] = [
     group: 'collateral', owner: 'app', cost: 'drip', interleaves: false,
     why: 'Moved to the app 2026-08-14 (Paul). It is practice output, and the app already has the whole surface — CollateralBuilder, the composers, the media library, the review sheet. Nothing needed porting; Studio was hidden, not removed.',
     workflow: [
-      'NOT YET ON: needs STUDIO_IN_APP = true and the studio lane split.',
-      'Until then build here with the builders below — same tokens, same output.',
-      'App → Studio → Collateral.',
+      'App → Studio → Collateral. LIVE since 2026-08-14.',
       'FORMATS.md (containers) and DESIGN.md (the look) remain the spec either side.',
       'The local builders still work and stay supported — same house/ design tokens,',
       'so a render away from the app is identical, not an approximation:',
@@ -439,16 +434,12 @@ export function renderMarkdown(): string {
   L.push('> which SYSTEM does a piece of work — this workspace or the app.');
   L.push('> Repo question → that file. Process question → this one.');
   L.push('');
-  L.push('> ⚠️ **Three of these are decided but NOT YET SWITCHED ON.** Corp-dev');
-  L.push('> documents, deal documents and collateral moved to the app on');
-  L.push('> 2026-08-14, and the app cannot serve them yet: `STUDIO_IN_APP` is');
-  L.push('> `false`, and the single `studio` lane in `API_LANES` bundles those');
-  L.push('> cheap composition paths together with the expensive research agent,');
-  L.push('> so it cannot be switched on without also arming the thing that costs');
-  L.push('> ~$18 a press. The lane needs splitting first. **Until that ships,');
-  L.push('> keep doing those three here** — the local builders and the PLAYBOOK');
-  L.push('> specs are unchanged and still correct. This file states where the');
-  L.push('> work is going, and says plainly where it still is.');
+  L.push('> **Switched on 2026-08-14.** Corp-dev documents, deal documents and');
+  L.push('> collateral moved to the app and the app now serves them: `STUDIO_IN_APP`');
+  L.push('> is true, and `API_LANES` gained a separate `research` lane so the cheap');
+  L.push('> composition paths could be enabled WITHOUT arming the ~$18-a-press');
+  L.push('> research agent. One lane could not say that, which is why the move was');
+  L.push('> blocked for a day. The local builders still work and stay supported.');
   L.push('');
   L.push('Cowork is the INPUT layer: gathering sources, aggregating them into a');
   L.push('master, deep search, and wrangling messy data into something structured.');

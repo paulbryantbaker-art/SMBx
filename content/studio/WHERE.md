@@ -12,16 +12,12 @@
 > which SYSTEM does a piece of work — this workspace or the app.
 > Repo question → that file. Process question → this one.
 
-> ⚠️ **Three of these are decided but NOT YET SWITCHED ON.** Corp-dev
-> documents, deal documents and collateral moved to the app on
-> 2026-08-14, and the app cannot serve them yet: `STUDIO_IN_APP` is
-> `false`, and the single `studio` lane in `API_LANES` bundles those
-> cheap composition paths together with the expensive research agent,
-> so it cannot be switched on without also arming the thing that costs
-> ~$18 a press. The lane needs splitting first. **Until that ships,
-> keep doing those three here** — the local builders and the PLAYBOOK
-> specs are unchanged and still correct. This file states where the
-> work is going, and says plainly where it still is.
+> **Switched on 2026-08-14.** Corp-dev documents, deal documents and
+> collateral moved to the app and the app now serves them: `STUDIO_IN_APP`
+> is true, and `API_LANES` gained a separate `research` lane so the cheap
+> composition paths could be enabled WITHOUT arming the ~$18-a-press
+> research agent. One lane could not say that, which is why the move was
+> blocked for a day. The local builders still work and stay supported.
 
 Cowork is the INPUT layer: gathering sources, aggregating them into a
 master, deep search, and wrangling messy data into something structured.
@@ -94,9 +90,8 @@ Every source's full text in one call, plus a retry when the citation audit fails
 
 Moved to the app 2026-08-14 (Paul). These are practice OUTPUT, and they interleave with the deal and the client they are written for — a thesis is held for one buyer profile.
 
-- NOT YET ON: needs STUDIO_IN_APP = true and the studio lane split. Until
-- then keep building these here — the local path is unchanged and correct.
-- App → Studio → the market. corpDevDocs.ts already generates all three.
+- App → Studio → the market. corpDevDocs.ts generates all three.
+- LIVE since 2026-08-14: STUDIO_IN_APP is true and the studio lane is on.
 - PLAYBOOK.md §1–4 remains the SPEC for what each contains, wherever it renders.
 - The master these derive from still lives on disk and is read, never copied.
 
@@ -170,8 +165,6 @@ Interactive modelling is a UI problem — a what-if wants a slider, not a regene
 
 Moved to the app 2026-08-14 (Paul). These sit inside the deal sitting — written from the model, the gates and the diligence state, all of which are app rows. Exporting to write them elsewhere was the back-and-forth.
 
-- NOT YET ON: the app cannot serve these until the studio lane is split.
-- Until then write them here to PLAYBOOK §5b–5d, which is the spec either way.
 - App → the deal → documents, alongside the model they are written from.
 - PLAYBOOK.md §5b–5d remains the SPEC for what each one contains.
 - Never restate the model's figures by hand — reference the model.
@@ -216,9 +209,7 @@ Email out plus token share links — free, and it keeps third parties correspond
 
 Moved to the app 2026-08-14 (Paul). It is practice output, and the app already has the whole surface — CollateralBuilder, the composers, the media library, the review sheet. Nothing needed porting; Studio was hidden, not removed.
 
-- NOT YET ON: needs STUDIO_IN_APP = true and the studio lane split.
-- Until then build here with the builders below — same tokens, same output.
-- App → Studio → Collateral.
+- App → Studio → Collateral. LIVE since 2026-08-14.
 - FORMATS.md (containers) and DESIGN.md (the look) remain the spec either side.
 - The local builders still work and stay supported — same house/ design tokens,
 - so a render away from the app is identical, not an approximation:
