@@ -41,13 +41,17 @@ const ROOT = path.resolve(new URL('../..', import.meta.url).pathname);
 const { cartaFontFaceCss } = await import(pathToFileURL(path.join(ROOT, 'server/services/fontEmbeds.ts')).href);
 const { newRenderPage } = await import(pathToFileURL(path.join(ROOT, 'server/services/premiumPdfRenderer.ts')).href);
 
-/* ── house palette (mirrors server/services/researchComposer.ts) ──────── */
-/* THE shared definition — see house/tokens.ts. Never hardcode a hex here. */
-const { LEDGER, TYPE } = await import(pathToFileURL(path.join(ROOT, 'house/tokens.ts')).href);
-const INK = LEDGER.ink, BODY = LEDGER.slate, TERT = LEDGER.muted, GREEN = LEDGER.green;
-const WARM = LEDGER.bone, DARK = LEDGER.dark, IVORY = LEDGER.ivory, IVORY_SUB = LEDGER.rule;
-const BRASS = LEDGER.brass, HAIR = LEDGER.hair, MINT = LEDGER.mint;
-const DISPLAY = TYPE.display, SANS = TYPE.sans, MONO = TYPE.mono;
+/* ── palette and type: NEITHER LIVES HERE ANY MORE (2026-08-15) ─────────
+   This builder used to open by pulling eleven LEDGER colour constants and the
+   three Ledger typefaces out of house/tokens.ts. Every one was DEAD — declared
+   and never referenced — because the pages come from house/deck.ts, which is on
+   Carta and reads its own tokens.
+
+   Dead is not harmless. DESIGN.md told a session "all four builders import
+   CARTA", and anyone who checked that claim by grepping this file found LEDGER
+   at the top and had to work out on their own that it did nothing. A retired
+   palette sitting in a live builder is a standing invitation to reach for it.
+   Colour and type belong to the grammar; this file resolves images and renders. */
 
 /* ── CLI args ─────────────────────────────────────────────────────────── */
 const args = process.argv.slice(2);

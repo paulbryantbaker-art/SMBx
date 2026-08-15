@@ -6,9 +6,29 @@
 > because it is inconvenient to move. If you find one, it is a bug to report,
 > not a precedent to follow.
 >
-> **State of the system, 2026-08-08.** The collateral engine is on **Carta**:
-> `house/tokens.ts` exports `CARTA`, all four builders import it, and
-> `server/services/fontEmbeds.ts` embeds Source Serif 4 and Schibsted Grotesk.
+> **State of the system, 2026-08-15 — TWO BUILDERS ARE STILL BEHIND.**
+> `house/tokens.ts` exports `CARTA` and `server/services/fontEmbeds.ts` embeds
+> Source Serif 4 and Schibsted Grotesk. But this notice used to say *"all four
+> builders import it"*, and that was **false for two of them** for a week:
+>
+> | Builder | Grammar | Faces | Palette guard |
+> |---|---|---|---|
+> | `build-deck.mts` | `house/deck.ts` — Carta | Carta | yes |
+> | `build-report.mts` | `house/report.ts` — Carta | Carta | yes |
+> | **`build-onepager.mts`** | **its own, LEDGER** | **Ledger** | **no** |
+> | **`build-og-card.mts`** | **its own, LEDGER** | **Ledger** | **no** |
+>
+> **If you build a one-pager or a link-preview card today, it comes out in the
+> retired palette and nothing stops it.** That is not permission to hand-roll a
+> replacement — see FORMATS.md law 1. The fix is to convert the BUILDER, once,
+> the way the report was converted: lift its grammar into `house/`, point both
+> consumers at it, add `assertCarta`, switch to `cartaFontFaceCss()`.
+>
+> This paragraph is derived from the source by `npm run test:design`, which
+> fails if the table disagrees with what the builders actually import. It said
+> "all four" while two of them said `LEDGER` in their first ten lines, and
+> nothing caught it, because the claim was prose. **Delete a row when its
+> builder converts** — the gate will tell you if you delete one early.
 >
 > **The website stylesheet in this repo is NOT on Carta.**
 > `client/src/practice/practice.css` is still on the Ledger green-black trial —

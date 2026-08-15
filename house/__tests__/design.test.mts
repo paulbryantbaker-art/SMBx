@@ -247,6 +247,77 @@ for (const rel of ['client/src/practice/report.css', 'client/src/practice/practi
   is(`${path.basename(rel)}: no comment terminator outside a comment`, orphanClose, false);
 }
 
+/* ── 4c. the builder-state table must match the builders ──────────────────
+   WHY THIS EXISTS. The notice at the top of DESIGN.md claimed "all four
+   builders import CARTA" and it was FALSE for two of them — `build-onepager`
+   and `build-og-card` both open by destructuring `LEDGER`, embed the Ledger
+   faces, and run no palette guard. The claim was prose, so nothing checked it,
+   and a session reading DESIGN.md as canon had no reason to look.
+
+   That is the fourth time in this codebase a law has read authoritative and
+   been wrong (THE_LINE_POLICY and DESIGN_LANGUAGE cited from a workspace that
+   cannot open them; a fee rule sourced from a file that does not exist). The
+   remedy each time is the same: derive the claim from the thing it describes.
+
+   So the table is checked against the source. A builder counts as CONVERTED
+   when it touches no LEDGER token outside a comment, embeds the Carta faces,
+   and calls assertCarta — all three, because the font seam alone was enough to
+   render a fully-Carta grammar in the wrong typeface for a week. */
+{
+  const BUILDERS = ['build-deck', 'build-report', 'build-onepager', 'build-og-card'];
+  const behind: string[] = [];
+  for (const b of BUILDERS) {
+    const src = readFileSync(path.join(ROOT, `scripts/studio/${b}.mts`), 'utf8');
+    // Comments are where a converted builder legitimately still NAMES Ledger,
+    // to say why it left. Strip them or every explanation reads as a relapse.
+    const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+    const usesLedger = /\bLEDGER\b/.test(code);
+    const cartaFaces = /cartaFontFaceCss/.test(code) && !/[^a]\bfontFaceCss\(/.test(code);
+    const guarded = /assertCarta\(/.test(code);
+    if (usesLedger || !cartaFaces || !guarded) behind.push(`${b}.mts`);
+  }
+
+  /* Now READ THE TABLE and compare, row by row.
+
+     WRONG-FIRST, and instructively so: the first version of this check asserted
+     only that DESIGN.md CONTAINED each behind builder's name. Editing the
+     one-pager's row to claim it was converted left the name in place, so the
+     check stayed green while the document said the opposite of the truth — the
+     precise failure it was written to prevent, reproduced by the check itself.
+     A test that reads a name is not reading a claim. This parses the row. */
+  const rows = new Map<string, boolean>(); // builder → does the doc call it converted
+  for (const line of DESIGN.split('\n')) {
+    /* The `> ` prefix is not optional decoration — the table lives inside the
+       notice's blockquote, and a regex anchored on `|` matched nothing at all.
+       That is why the row loop silently ran zero times on the first attempt and
+       the whole check reported green. An empty iteration is not a pass. */
+    const m = line.match(/^>?\s*\|\s*\*{0,2}`(build-[a-z-]+\.mts)`\*{0,2}\s*\|(.*)$/);
+    if (!m) continue;
+    const [, name, rest] = m;
+    // A row claims CONVERTED when it says neither LEDGER nor "no" for the guard.
+    const claimsBehind = /LEDGER/i.test(rest) || /\|\s*\*{0,2}no\*{0,2}\s*\|?\s*$/i.test(rest);
+    rows.set(name, !claimsBehind);
+  }
+
+  is('the notice tabulates every builder', [...rows.keys()].sort(), BUILDERS.map(b => `${b}.mts`).sort());
+
+  /* Named individually rather than counted: "two are behind" would still pass
+     if a different two were. */
+  is('the builders actually behind Carta are the two the notice names',
+    behind, ['build-onepager.mts', 'build-og-card.mts']);
+
+  for (const [name, claimsConverted] of rows) {
+    /* Both directions are wrong. Claiming converted while a builder still
+       imports LEDGER is how this shipped for a week; claiming behind after one
+       lands turns the table into noise nobody trusts. */
+    is(`DESIGN.md's row for ${name} matches the source`,
+      claimsConverted, !behind.includes(name));
+  }
+
+  is('…and the notice no longer claims all four are converted',
+    /all four builders import it/.test(DESIGN), false);
+}
+
 /* ── 5. it travels ────────────────────────────────────────────────────────
    The document only solves anything if it reaches the workspace. */
 const INIT = readFileSync(path.join(ROOT, 'scripts/studio/init-workspace.mts'), 'utf8');
