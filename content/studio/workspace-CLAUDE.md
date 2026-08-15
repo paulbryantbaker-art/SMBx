@@ -812,9 +812,9 @@ would not make it truer.
 for "just this one PDF" produces something off-brand that looks close enough to
 ship, and it happened on this workspace: a 52-page report went out in
 terra-orange and Georgia because a session could not find the template and
-wrote its own instead of looking harder. The CARTA palette (2026-08-08) is bone
-`#FCFAF6`, ink `#16181A`, Deal Green `#0A7A58`, mint `#A8F0CE` on dark, and a
-FLAT band `#131512`, in Source Serif 4 / Schibsted Grotesk / IBM Plex Mono.
+wrote its own instead of looking harder. The CARTA palette is white `#FFFFFF`,
+ink `#16181A`, Deal Green `#0A7A58`, mint `#A8F0CE` on dark, and a FLAT band
+`#181818`, in Source Serif 4 / Schibsted Grotesk / IBM Plex Mono.
 Radius 0 except buttons and inputs at 10px; framed things wear four ink corner
 handles. If the output does not look like that, it did not come from a builder.
 

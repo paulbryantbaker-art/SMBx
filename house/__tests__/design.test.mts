@@ -336,6 +336,49 @@ for (const rel of ['client/src/practice/report.css', 'client/src/practice/practi
     rows.size, BUILDERS.length);
 }
 
+/* ── 4d. EVERY travelling law file, not just this one ─────────────────────
+   This suite guarded DESIGN.md and nothing else, on the reasonable-sounding
+   basis that DESIGN.md is where the palette is documented. It is not where the
+   palette is USED. `FORMATS.md` carries the Gemini image-brief template — the
+   literal text a session pastes into an image model — and it travels to the
+   workspace beside DESIGN.md with exactly the same authority.
+
+   It was naming `#FCFAF6` as the background and `#131512` as the flat band.
+   Both were real Carta values and both moved: the canvas went bone→white on
+   2026-08-12 and the band is `#181818`. Neither is a token any more, so every
+   illustration generated from that template came back on a ground no renderer
+   produces — sitting slightly warm on a pure-white page, which reads as a
+   printing fault rather than as a palette error.
+
+   A stale hex in a PROMPT is worse than one in a renderer: the renderer is
+   checked by assertCarta at build time, and the prompt's output is a picture,
+   which the palette guard cannot see through. So the rule is now: any law file
+   that travels may name only live tokens, outside its own dead list. */
+{
+  const TRAVELS = [
+    'content/studio/FORMATS.md',
+    'content/studio/COLLATERAL_STATE.md',
+    'content/studio/workspace-CLAUDE.md',
+    'content/studio/PLAYBOOK.md',
+  ];
+  for (const rel of TRAVELS) {
+    let text: string;
+    try { text = readFileSync(path.join(ROOT, rel), 'utf8'); }
+    catch { is(`${rel} exists`, false, true); continue; }
+
+    /* Same exemption shape as §2: a hex may appear where it is being RETIRED.
+       These files defer their graveyard to DESIGN.md rather than keeping their
+       own, so the exemption is narrow — a sentence that retires it by name. */
+    const offenders = hexesIn(text).filter(h => {
+      if (TOKEN_HEXES.has(h)) return false;
+      const at = text.toUpperCase().indexOf(h);
+      const around = text.slice(Math.max(0, at - 220), at + 220);
+      return !/retired|dead|drift|never|no longer|graveyard/i.test(around);
+    });
+    is(`${path.basename(rel)} names only live tokens`, offenders, []);
+  }
+}
+
 /* ── 5. it travels ────────────────────────────────────────────────────────
    The document only solves anything if it reaches the workspace. */
 const INIT = readFileSync(path.join(ROOT, 'scripts/studio/init-workspace.mts'), 'utf8');

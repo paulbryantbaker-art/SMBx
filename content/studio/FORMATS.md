@@ -431,7 +431,7 @@ PROMPT
 A flat editorial illustration of a residential HVAC condenser unit beside a
 suburban house wall, drawn in clean geometric line work. Bright green (#0FA97C)
 for the main masses, deep green (#0A7A58) for shading only, near-black linework
-(#16181A), on a flat bone background (#FCFAF6). No amber, no gold, no brass, no
+(#16181A), on a flat white background (#FFFFFF). No amber, no gold, no brass, no
 warm accent of any kind. Subject centred with
 generous empty background to the left and right. Uniform flat background to all
 four edges. No text, no lettering, no people, no logos, no charts, no vignette,
@@ -441,7 +441,7 @@ no drop shadow, no edge fade. 9:16 portrait.
 **The prompt rules, every time.** Each exists because breaking it produced an
 unusable image:
 
-- **Palette, always named:** bone `#FCFAF6`, bright green `#0FA97C` for masses,
+- **Palette, always named:** white `#FFFFFF`, bright green `#0FA97C` for masses,
   Deal Green `#0A7A58` for shading, ink `#16181A` for linework — and say **no
   amber, no gold, no brass** out loud, because "sparingly" still gets you gold.
   (Carta, 2026-08-08 — amber, honey and the jade block are RETIRED, as is the
@@ -477,8 +477,8 @@ the only photos of him that exist.
 - **Never hand-roll a layout.** All three builders import `house/tokens.ts`;
   that shared import is the only reason the surfaces match. Output looking wrong
   means the spec is wrong.
-- **Palette** bone `#FCFAF6` · ink `#16181A` · Deal Green `#0A7A58` · mint
-  `#A8F0CE` on dark · the flat band `#131512`. Radius 0 except buttons and
+- **Palette** white `#FFFFFF` · ink `#16181A` · Deal Green `#0A7A58` · mint
+  `#A8F0CE` on dark · the flat band `#181818`. Radius 0 except buttons and
   inputs at 10px; framed things wear four ink corner handles. **Type** Source
   Serif 4 / Schibsted Grotesk / IBM Plex
   Mono. If the output is not that, it did not come from a builder. There is no
