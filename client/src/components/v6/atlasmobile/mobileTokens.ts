@@ -16,7 +16,7 @@
  * App" note is superseded by Paul's direction: Cash App's GRAMMAR (tone
  * separation, floating white chrome, card-first), Aurora's PALETTE.
  */
-import { LEDGER, rgba } from '../../../../../house/tokens';
+import { CARTA, rgba } from '../../../../../house/tokens';
 
 /** Liquid-glass tab-bar material (m4 §1d). A small inset rounded bar — NOT a
  *  full-viewport fixed bg div (Safari toolbar rule). The `fallbackBg` is the
@@ -28,10 +28,10 @@ const glassNav = {
   background: "#ffffff",
   fallbackBg: "#ffffff",
   backdropFilter: "none",
-  border: `1px solid ${rgba(LEDGER.ink, 0.07)}`,
-  boxShadow: `0 8px 26px ${rgba(LEDGER.ink, 0.12)}, 0 1px 3px ${rgba(LEDGER.ink, 0.07)}`,
+  border: `1px solid ${rgba(CARTA.ink, 0.07)}`,
+  boxShadow: `0 8px 26px ${rgba(CARTA.ink, 0.12)}, 0 1px 3px ${rgba(CARTA.ink, 0.07)}`,
   /** Selected-tab capsule — the brand accent's tint (was the violet tint). */
-  activeBg: LEDGER.greenTint,
+  activeBg: CARTA.greenTint,
   radius: 30,
   height: 68,
 } as const;
@@ -47,7 +47,7 @@ const glassSheet = {
     "0 -10px 34px rgba(0,0,0,.18), inset 0 1px 1.5px rgba(255,255,255,.9)",
   scrim: "rgba(15,17,22,.4)",
   // Warm-neutral handle (was cool #cdd5df) — sits on the white sheet, one
-  // step lighter than LEDGER.rule.
+  // step lighter than the house hairline.
   handle: { width: 40, height: 5, radius: 3, color: "#D6D0C4" },
 } as const;
 

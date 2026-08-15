@@ -36,7 +36,7 @@
  * on the page, and are one decision away from neutralizing if they read
  * yellowed against it.
  */
-import { LEDGER, rgba } from '../../../../../house/tokens';
+import { CARTA, rgba } from '../../../../../house/tokens';
 
 export const T = {
   // The native system font (San Francisco on iOS/macOS, Segoe UI on Windows).
@@ -48,34 +48,56 @@ export const T = {
   // lift); only the top step moves onto the house ink. Neutral grays sit
   // fine on warm surfaces; re-warming the whole ladder bought nothing in a
   // side-by-side.
-  ink: LEDGER.ink, ink2: '#181a1e', ink3: '#2d3136', label: '#393c41',
+  ink: CARTA.ink, ink2: '#181a1e', ink3: '#2d3136', label: '#393c41',
   muted: '#4d5765', muted2: '#4b5460', faint: '#4e5764',
   // primary / active — Deal Green (slot names historical, see header).
-  // White on LEDGER.green measures 5.3:1 (documented in house/tokens.ts).
-  blue: LEDGER.green, blueBg: LEDGER.greenTint, blueBg3: '#F2F9F5',
-  navActive: rgba(LEDGER.green, 0.16), stageActiveBd: rgba(LEDGER.green, 0.32), approvalBd: rgba(LEDGER.green, 0.26),
-  tabActive: rgba(LEDGER.green, 0.10), tabHover: rgba(LEDGER.green, 0.05),
+  // White on CARTA.green measures 5.3:1 (documented in house/tokens.ts).
+  blue: CARTA.green, blueBg: CARTA.greenTint, blueBg3: '#F2F9F5',
+  navActive: rgba(CARTA.green, 0.16), stageActiveBd: rgba(CARTA.green, 0.32), approvalBd: rgba(CARTA.green, 0.26),
+  tabActive: rgba(CARTA.green, 0.10), tabHover: rgba(CARTA.green, 0.05),
   // verdict green — UNCHANGED on purpose (two-greens law, see header)
   green: '#1f8a5b', greenBg: '#e6f4ec', greenAv: '#cdeada',
-  // semantic warning/danger — already Aurora-compatible warms; unchanged
+  // SEMANTIC WARNING / DANGER — warm, and deliberately KEPT under Carta.
+  //
+  // Carta's "there is no warm colour" is a rule about the BRAND ACCENT, and it
+  // was written for collateral, where nothing has a warning state: a poster has
+  // no overdue task and a report has no failed import. An app does. Rendering a
+  // caution in the same green as a healthy one removes the only pre-attentive
+  // cue a status has, and "one accent" would then mean the interface can no
+  // longer say anything is wrong.
+  //
+  // These are not the retired palette either — Ledger's amber was #E8A62B and
+  // its honey #F5C452; these are a darker functional pair that predates it and
+  // reads as state rather than as brand. 88 usages across the shell.
+  //
+  // Worth Paul's explicit call if he wants them gone; noted here rather than
+  // decided quietly, because a warm pixel in a Carta app is exactly what a
+  // future reader will flag as drift.
   amber: '#9a6b00', amberBg: '#fdf0d5', amberBg2: '#fff3e0', amberAv: '#f3e0b0',
   terra: '#c2410c', terraBg: '#fdeee6',
   // the violet secondary collapses into the brand accent for Phase 1; if a
   // surface needs a genuine second hue in Phase 3, Aurora's answer is amber.
-  violet: LEDGER.green, violetBg: LEDGER.greenTint,
+  violet: CARTA.green, violetBg: CARTA.greenTint,
   // surfaces / borders — bone canvas, white cards, warm hairlines (the
   // Aurora card grammar; separation by tone, per the Cash App reference)
-  white: '#fff', surface: LEDGER.bone, page: '#F9F9F9', hover: '#F8F5EE',
-  track: '#F2EEE5', railDiv: '#F0ECE3',
-  border: LEDGER.rule, hair: LEDGER.hair, rowDiv: '#F2EEE5', rowDiv2: '#F6F2EA',
-  inputBd: LEDGER.rule, progTrack: '#EDE9DF',
-  // gradients — the AI sparkle speaks Aurora now: jade → green → amber
-  spark: `linear-gradient(135deg,${LEDGER.jade},${LEDGER.green} 50%,${LEDGER.brass})`,
+  // CARTA (2026-08-15). Every warm value here is gone: `rule` #DED8CC and
+  // `hair` #EAE5DC are both in the retired table, and the five hard-coded
+  // bone tints (#F8F5EE #F2EEE5 #F0ECE3 #F6F2EA #EDE9DF) were the same warmth
+  // hand-mixed. Carta's neutrals are cool — panel #F3F0E9, hairline #E4DFD3 —
+  // and its canvas is white, not bone.
+  white: '#fff', surface: CARTA.bone, page: CARTA.boneAlt, hover: CARTA.panel,
+  track: CARTA.panel, railDiv: CARTA.hair,
+  border: CARTA.hair, hair: CARTA.hair, rowDiv: CARTA.hair, rowDiv2: CARTA.panel,
+  inputBd: CARTA.chipBorder, progTrack: CARTA.panel,
+  // The sparkle ran jade → green → AMBER, and amber is retired: Carta has
+  // exactly one accent. It runs within the accent now — bright green to Deal
+  // Green — so the mark still reads as a gradient without inventing a hue.
+  spark: `linear-gradient(135deg,${CARTA.greenBright},${CARTA.green} 60%,${CARTA.greenHover})`,
   // FLAT, despite the slot name (2026-08-02, Paul: "my user icon needs to
   // be flattened — it's very 3-D right now"). The diagonal gradient read
   // as a bevel; a flat Deal Green disc with white initials is the Cash App
   // read. The name stays for the same reason `blue` does.
-  avatarGrad: LEDGER.green,
+  avatarGrad: CARTA.green,
   // radii
   rCard: 14, rCardLg: 16, rPill: 999, rComposer: 24,
   // shadow — warm-ink tinted (was faintly violet for the purple wash era)

@@ -21,7 +21,7 @@
  * `accentInk` merges into the same value, as the site's links and CTAs do.
  */
 import { T } from "../../desktop/atlasTokens";
-import { LEDGER } from "../../../../../../house/tokens";
+import { CARTA } from "../../../../../../house/tokens";
 
 export const RT = {
   // surfaces — the warm well over bone-family tones (matches M.frameBg;
@@ -31,16 +31,16 @@ export const RT = {
   card: "#ffffff", // white — every raised element (no border, no shadow)
   // ink scale (NEUTRAL greys — de-tinted + DARKENED so secondary text stays
   // crisp on the light page; Cash App never floats light type on light grey)
-  ink: LEDGER.ink,
+  ink: CARTA.ink,
   ink2: "#3A3A40", // body / descriptions — dark, not grey
   muted: "#4D4D54", // secondary (subs, labels) — darkened for crisp contrast on the page
   faint: "#86868E", // tertiary (timestamps) only — never body
-  line: LEDGER.hair, // warm pill fill / hairline when one is truly needed
+  line: CARTA.hair, // hairline when one is truly needed (Carta's, not the warm one)
   // the one accent — DEAL GREEN (see header: white rides on it now)
-  accent: LEDGER.green,
-  accentStrong: LEDGER.greenHover, // solid buttons / hover
-  accentSoft: LEDGER.greenTint, // soft pill / chip backgrounds
-  accentInk: LEDGER.green, // accent-colored TEXT/icons on white or on accentSoft
+  accent: CARTA.green,
+  accentStrong: CARTA.greenHover, // solid buttons / hover
+  accentSoft: CARTA.greenTint, // soft pill / chip backgrounds
+  accentInk: CARTA.green, // accent-colored TEXT/icons on white or on accentSoft
   onAccent: "#FFFFFF", // text/icon ON the accent fills (5.3:1 on Deal Green)
   // YULIA'S BUTTON ONLY (2026-08-02, Paul: "the Yulia Agent button is too
   // dark"). The agent's control is the one bright object in the chrome —
@@ -48,8 +48,8 @@ export const RT = {
   // bright-fill read. Jade carries no small text anywhere (house law);
   // a glyph at 26px on 6:1 is fine. Do NOT use this pair for ordinary
   // CTAs — they stay Deal Green + white.
-  agent: LEDGER.jade,
-  onAgent: LEDGER.ink,
+  agent: CARTA.greenBright,
+  onAgent: CARTA.ink,
   // live data — the desktop's own semantics (verdict green / terra), so
   // "up" never collides with the brand accent (two-greens law)
   up: "#1f8a5b",
