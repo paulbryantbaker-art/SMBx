@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { MessageParam, ContentBlockParam } from '@anthropic-ai/sdk/resources/messages';
 import { TOOL_DEFINITIONS } from './tools.js';
+import { splitCachedSystem, withToolCache } from './promptCache.js';
 import { executeGovernedTool } from './governedToolExecutor.js';
 import { persistCanvasTabFromAction } from './canvasTabPersist.js';
 import { resolveChatModel, type ModelPreference } from './modelPreference.js';
@@ -9,6 +10,44 @@ import { assertSpendAllowed } from './apiSpend.js';
 
 const MODEL = 'claude-sonnet-4-6';
 const MAX_TOOL_ROUNDS = 10; // safety limit on agentic loops
+
+/* ── PROMPT CACHING ────────────────────────────────────────────────────────
+ *
+ * (2026-08-14.) Measured before writing any of this: a deal-chat request
+ * carries ~43,400 tokens of STATIC prompt before a single byte of deal data —
+ * 14.1k of tool schemas, 9.8k tax engine, 8.7k legal engine, 6.4k master
+ * prompt, plus personas, gates and branching. None of it was cached. Grep for
+ * `cache_control` across server/ matched exactly one file, and it was not this
+ * one.
+ *
+ * The agentic loop re-sends that whole prefix on EVERY round, up to
+ * MAX_TOOL_ROUNDS per user message. At $3/M input that is ~$0.13 a round for
+ * bytes that never change; a cache read is $0.30/M, so the same bytes cost
+ * ~$0.013. A 40-message working session measured $13.66.
+ *
+ * TWO BREAKPOINTS, both on genuinely invariant prefixes:
+ *
+ *   1. TOOLS — rendered first, before system, and TOOL_DEFINITIONS is a frozen
+ *      module-level array. 14.1k tokens that cannot vary by user, deal or turn.
+ *   2. The LEADING SYSTEM BLOCK — everything promptBuilder pushes above
+ *      CACHE_SPLIT: two consts, an argument-free registry dump, another const.
+ *
+ * WHAT IS DELIBERATELY NOT CACHED, and why the win is partial. The tax and
+ * legal engines and the gate prompts — ~21k more of pure static — are pushed
+ * BELOW per-deal context in promptBuilder's assembly. Caching is a prefix
+ * match, so reaching them means reordering the core system prompt, which is a
+ * behaviour change that wants measuring rather than assuming. Left for its own
+ * change; the marker's comment says so at the site.
+ *
+ * VERIFYING IT WORKS: `usage.cache_read_input_tokens` on the second and later
+ * requests. If it stays zero, something above the breakpoint is varying per
+ * request and the cache is being written and never read — which costs 1.25×
+ * rather than saving anything. That is the failure mode to watch for, and it
+ * is silent.
+ */
+
+/** Tools with a cache breakpoint on the last entry. Built once; never mutated. */
+const CACHED_TOOLS = withToolCache(TOOL_DEFINITIONS) as typeof TOOL_DEFINITIONS;
 
 let client: Anthropic | null = null;
 
@@ -81,9 +120,9 @@ export async function streamAgenticResponse(
       const response = await anthropic.messages.create({
         model: resolveChatModel(ctx.modelPreference) || MODEL,
         max_tokens: 4096,
-        system: ctx.systemPrompt,
+        system: splitCachedSystem(ctx.systemPrompt),
         messages,
-        tools: TOOL_DEFINITIONS,
+        tools: CACHED_TOOLS,
       });
 
       // Check if Claude wants to use tools

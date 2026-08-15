@@ -46,7 +46,7 @@ function getClient(): Anthropic {
   // added that quietly skips the switch. The individual entry points below
   // assert as well, but only so the error arrives before a doomed row is
   // written; this is the line that actually holds.
-  assertSpendAllowed('studio', 'The research agent');
+  assertSpendAllowed('research', 'The research agent');
   if (!client) {
     if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY is not set');
     // Research rounds run long (server-side search rounds + long writes).
@@ -402,7 +402,7 @@ export async function createResearchRun(input: CreateRunInput): Promise<number> 
   // Refuse before the row exists. Without this the run is created, executed,
   // and lands in status='failed' — a queued-then-failed row for something that
   // was never going to run is worse than a straight refusal at the button.
-  assertSpendAllowed('studio', 'Research runs');
+  assertSpendAllowed('research', 'Research runs');
   const [row] = await sql`
     INSERT INTO research_runs (user_id, schedule_id, research_type, topic, depth, output_format, post_angle, status, progress)
     VALUES (${input.userId}, ${input.scheduleId ?? null}, ${input.researchType}, ${input.topic.trim()},
@@ -870,16 +870,24 @@ export function startResearchScheduler() {
   // The boot sweep above still runs either way: it only heals orphaned rows
   // and costs nothing.
   //
-  // The studio lane is checked as well as the flag, so the two switches can
+  // The RESEARCH lane is checked as well as the flag, so the two switches can
   // only ever agree: turning RESEARCH_SCHEDULES_ENABLED on while the lane is
   // off would otherwise start a loop whose every run then refuses at
   // getClient() — a scheduler that ticks, fires, and fails on a timer.
+  //
+  // THIS READ `studio` UNTIL 2026-08-14 and had to change with the lane split,
+  // or the guard would have quietly stopped guarding. `studio` is now ON by
+  // default (it carries document and collateral composition, which cost
+  // cents), so a gate keyed to it would have started the scheduler for anyone
+  // with the flag set — and every fired run would then refuse at the research
+  // lane. The whole point of checking a lane here is that it names the same
+  // money the scheduler is about to spend, which is now `research`.
   if (
     process.env.RESEARCH_SCHEDULES_DISABLED === 'true' ||
     process.env.RESEARCH_SCHEDULES_ENABLED !== 'true' ||
-    !spendAllowed('studio')
+    !spendAllowed('research')
   ) {
-    console.log('[research] Campaign scheduler NOT started — scheduled runs spend on the metered key, so they need BOTH RESEARCH_SCHEDULES_ENABLED=true and the "studio" lane in API_LANES. Boot sweep still ran.');
+    console.log('[research] Campaign scheduler NOT started — scheduled runs spend on the metered key, so they need BOTH RESEARCH_SCHEDULES_ENABLED=true and the "research" lane in API_LANES. Boot sweep still ran.');
     return;
   }
 

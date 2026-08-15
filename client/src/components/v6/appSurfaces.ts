@@ -29,9 +29,23 @@
 /**
  * Is Studio offered inside the app?
  *
- * FALSE since 2026-07-31 — the work moved to disk. The screens and the
- * `/api/research`, `/api/studio` routes remain mounted and functional, so a
- * direct URL and every existing export still work; Studio simply is not
- * advertised in the chrome.
+ * TRUE again since 2026-08-14. It was false from 2026-07-31, when Studio work
+ * moved to disk wholesale; Paul brought the output half back — "corp-dev
+ * documents, deal memo / diligence plan / term framework, collateral is in app
+ * too… Everything about the deal and CRM needs to be in app."
+ *
+ * The routing settled on a cleaner axis than the one that took Studio out:
+ * Cowork is the INPUT layer (research, aggregation, deep search, data
+ * wrangling) and the app is everything the practice PRODUCES or TRACKS. The
+ * table is `house/where.ts`; the reasoning is WHERE_THE_WORK_HAPPENS.md.
+ *
+ * Nothing had to be restored — the screens, `/api/research` and `/api/studio`
+ * stayed mounted the whole time. This constant only ever controlled whether
+ * the chrome advertised them.
+ *
+ * IT IS SAFE TO SHOW because the spend split happened in the same change:
+ * `research` is now its own lane and is OFF, so the expensive path is not
+ * reachable from the returning screens. Showing Studio without splitting the
+ * lane would have put a ~$18-a-press button back in the header.
  */
-export const STUDIO_IN_APP = false;
+export const STUDIO_IN_APP = true;

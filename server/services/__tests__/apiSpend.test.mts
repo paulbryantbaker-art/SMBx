@@ -64,29 +64,49 @@ eq('nothing unknown in "all"',       unknownLaneNames(),                    []);
 delete process.env.API_LANES;
 eq('nothing unknown when unset',     unknownLaneNames(),                    []);
 
-console.log('\nthe shipped default, lane by lane (2026-08-09)');
+console.log('\nthe shipped default, lane by lane (2026-08-14)');
 delete process.env.API_LANES;
 for (const lane of SPEND_LANES) {
-  // studio + sourcing are OFF because both have a local Cowork equivalent;
-  // chat + marketing are ON because switching them off leaves a brick and
-  // breaks the lead funnel respectively. See apiSpend.ts's header.
+  // Everything except `research` is on: the app is the one place, and the
+  // only lane that can spend dollars on a press is the one that stays off.
   eq(`spendAllowed('${lane}')`, spendAllowed(lane), (DEFAULT_LANES as readonly string[]).includes(lane));
 }
+
+console.log('\nthe research split — the point of the whole exercise');
+delete process.env.API_LANES;
+// The claim the split exists to make good on: collateral and documents can be
+// on WITHOUT arming the ~$18-a-press research agent. Before 2026-08-14 one
+// `studio` lane covered both, so this combination was unexpressible.
+eq('composition is on by default',   spendAllowed('studio'),   true);
+eq('…and research is NOT',           spendAllowed('research'), false);
+process.env.API_LANES = 'studio';
+eq('asking for studio alone',        [...enabledLanes()],      ['studio']);
+eq('…still does not arm research',   spendAllowed('research'), false);
+// `all` must keep meaning all, or a reader would assume research is exempt.
+process.env.API_LANES = 'all';
+eq('"all" DOES include research',    spendAllowed('research'), true);
 
 console.log('\n"none" really means none — including the on-by-default lanes');
 process.env.API_LANES = 'none';
 for (const lane of SPEND_LANES) eq(`spendAllowed('${lane}')`, spendAllowed(lane), false);
 
 console.log('\nthe refusal is actionable');
+// Tested on `research` because that is the lane a user actually meets: it is
+// the one that is off by default, and the one whose help has somewhere else
+// to send them. (Until 2026-08-14 this read `studio`, which carried the
+// workspace pointer; after the split that pointer belongs to research, and
+// studio's own refusal means "someone set API_LANES narrower than default".)
 process.env.API_LANES = 'chat,marketing';
 let err: any = null;
-try { assertSpendAllowed('studio', 'Research runs'); } catch (e) { err = e; }
+try { assertSpendAllowed('research', 'Research runs'); } catch (e) { err = e; }
 eq('throws SpendDisabledError',  err instanceof SpendDisabledError, true);
-eq('carries the lane',           err?.lane,   'studio');
+eq('carries the lane',           err?.lane,   'research');
 eq('carries a 503, not a 500',   err?.status, 503);
 eq('opens by naming the work',   /^Research runs is switched off/.test(err?.message ?? ''), true);
 eq('points at the workspace',    (err?.message ?? '').includes('~/Documents/smbx-studio'), true);
-eq('spells the fix verbatim',    (err?.message ?? '').includes('API_LANES=chat,marketing,studio'), true);
+eq('names the price, so the default reads as a choice',
+   /\$18/.test(err?.message ?? ''), true);
+eq('spells the fix verbatim',    (err?.message ?? '').includes('API_LANES=chat,marketing,research'), true);
 eq('an ON lane does not throw',
    (() => { try { assertSpendAllowed('chat', 'Yulia'); return 'no throw'; } catch { return 'threw'; } })(),
    'no throw');

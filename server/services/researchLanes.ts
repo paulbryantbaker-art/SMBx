@@ -34,7 +34,7 @@ function anthropic(): Anthropic {
   // failure — one of the two paths CLAUDE.md names as able to spend real money
   // per press. It runs in a Cowork session now; the guard is here rather than
   // only at synthesizeLane so no later call site can slip past it.
-  assertSpendAllowed('studio', 'Master synthesis');
+  assertSpendAllowed('research', 'Master synthesis');
   if (!client) client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 900_000, maxRetries: 2 });
   return client;
 }
@@ -263,7 +263,7 @@ export async function synthesizeLane(userId: number, laneId: number, opts: { ful
   // this function has already stamped synthesis_status='running' — wedging
   // the lane for the full 30-minute stale-lock window over work that never
   // started. Refusing at the door leaves the lane exactly as it was.
-  assertSpendAllowed('studio', 'Master synthesis');
+  assertSpendAllowed('research', 'Master synthesis');
   const lane = await getLane(userId, laneId);
   if (!lane) throw new Error('Lane not found');
 
