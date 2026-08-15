@@ -65,9 +65,20 @@ ALTER TABLE deals DROP COLUMN IF EXISTS platform_fee_paid_at;
 ALTER TABLE deals DROP COLUMN IF EXISTS stripe_payment_intent_id;
 ALTER TABLE deals DROP COLUMN IF EXISTS execution_stripe_id;
 
--- 033 also created `advisor_subscriptions` and `referrals`. Both are dead (no
--- write site in any live code path) but neither prices by deal size, so neither
--- is in scope for this migration. Left in place deliberately.
+-- 033's other two tables go as well (2026-08-15, Paul: "this is old from when
+-- I was going to sell the app - not relevant any more"). An earlier draft
+-- deferred them on the grounds that neither prices by deal size and so neither
+-- was "in scope" — true of the narrow fee-ladder framing, and beside the point
+-- once the framing is the product era itself.
+--
+-- `advisor_subscriptions` has ZERO references in the tree. `referrals` has
+-- eight, and every one of them is PROSE: definitiveMcp and the agency registry
+-- describing what the practice does NOT do ("no referrals, never paid
+-- matching"). The one that looks like a read, providers.ts, is
+-- `service_referrals` — a different table, migration 021, the live typed
+-- register of attorneys and CPAs. Grepping `referrals` finds both; only one is
+-- dead, and deleting the wrong one would take out the specialist register THE
+-- LINE depends on.
 
 -- The wallet-era pricing columns. `menu_items` itself is load-bearing; these
 -- two columns are not. Dropped AFTER the deals columns above so a failure here
@@ -89,3 +100,6 @@ ALTER TABLE menu_items DROP COLUMN IF EXISTS tier;
 -- fails.
 DROP TABLE IF EXISTS wallet_transactions;
 DROP TABLE IF EXISTS wallets;
+
+DROP TABLE IF EXISTS advisor_subscriptions;
+DROP TABLE IF EXISTS referrals;
