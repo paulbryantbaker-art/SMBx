@@ -239,8 +239,16 @@ export function rgba(hex: string, alpha: number): string {
  * that a halo made from it would be invisible. The vivid highlight is what
  * separates from the ground, which is the job a halo has.
  */
-export const MINT_RING = rgba(LEDGER.mint, 0.65);
-export const GREEN_HALO = rgba(LEDGER.jade, 0.28);
+/* Read from CARTA, not LEDGER (2026-08-15, Paul: "no ledger at all. carta").
+   Both values are byte-identical either way — mint and the bright green are two
+   of the six Ledger values the Carta restyle kept unchanged — so this changes
+   no output at all. It changes what a reader concludes: a live constant
+   sourced from LEDGER reads as "still on the old system", and the last time
+   that ambiguity was left in place (build-deck's dead colour block) somebody
+   had to open three files to find out it meant nothing. Source of a token is
+   documentation. */
+export const MINT_RING = rgba(CARTA.mint, 0.65);
+export const GREEN_HALO = rgba(CARTA.greenBright, 0.28);
 
 /**
  * The jade block, laid over the boardroom texture.
@@ -471,13 +479,29 @@ export const ARTWORK_LIFT = 1;
  * Outside a palette change, leave the wording alone.
  */
 export function brandPaletteLines(): string[] {
+  /* CARTA, not LEDGER (2026-08-15, Paul: "no ledger at all. carta").
+     These two lines were the last place a MODEL was still being told the house
+     palette in Ledger — amber on light, honey on the block, the vivid jade, the
+     jade rhythm band, and the flat instruction that "nothing in this system is
+     near-black", which is now exactly backwards: Carta's band IS near-black.
+     deckDesigner is the only consumer and it writes the app's DEFAULT carousel,
+     so every designed deck was briefed in the retired system. */
   return [
-    `- Bone paper ${LEDGER.bone}; ink ${LEDGER.ink}; body gray ${LEDGER.slate}; muted ${LEDGER.muted}; hairline ${LEDGER.hair}.`,
-    `- Deal Green ${LEDGER.green} (deep ${LEDGER.greenHover}); vivid jade ${LEDGER.jade} for large numerals and edges ONLY, never small text; mint on the block ${LEDGER.mint}; amber ${LEDGER.brass} on light and honey ${LEDGER.honey} on the block, for numerals and rules; jade block ${LEDGER.dark} (the rhythm break — nothing in this system is near-black); ivory ${LEDGER.ivory}; ivory-sub ${LEDGER.rule}.`,
+    `- White paper ${CARTA.bone}; ink ${CARTA.ink}; body gray ${CARTA.body}; muted ${CARTA.muted}; hairline ${CARTA.hair}; panel tint ${CARTA.panel}.`,
+    `- EXACTLY ONE accent: Deal Green ${CARTA.green} (hover ${CARTA.greenHover}), its light wash ${CARTA.greenTint}, mint ${CARTA.mint} as its value on dark, and bright green ${CARTA.greenBright} for LARGE marks only, never small text. There is NO warm colour in this system — no amber, brass, gold or honey. The rhythm break is a FLAT near-black band ${CARTA.dark} with no texture, glaze, halo or gradient, carrying reading text ${CARTA.darkInk} (sub ${CARTA.darkSub}, muted ${CARTA.darkMuted}, seams ${CARTA.darkSeam}).`,
+    `- Green is NEVER a resting fill: a primary is ink-on-light or bone-on-dark, and green appears on hover, chips, kickers, links and the bar under a numeral. Radius is 0 everywhere except buttons and inputs.`,
   ];
 }
 
-/** The strict palette clause for image-generation prompts (Gemini artwork). */
+/**
+ * The strict palette clause for image-generation prompts (Gemini artwork).
+ *
+ * Carta's canvas token is named `bone` and its VALUE is white — the name was
+ * kept when Paul moved the ground on 2026-08-12 so every consumer kept reading
+ * `bone`. A prompt must say what the model should paint, not what the token is
+ * called, so this says white and never "bone off-white": describing #FFFFFF as
+ * off-white is an instruction to make it slightly not-white.
+ */
 export function artworkPaletteClause(): string {
-  return `bone off-white background ${LEDGER.bone}, deep green ${LEDGER.green},`;
+  return `pure white background ${CARTA.bone}, deep green ${CARTA.green}, near-black ink ${CARTA.ink}`;
 }

@@ -25,16 +25,25 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(new URL('../..', import.meta.url).pathname);
-const { fontFaceCss } = await import(pathToFileURL(path.join(ROOT, 'server/services/fontEmbeds.ts')).href);
+const { cartaFontFaceCss } = await import(pathToFileURL(path.join(ROOT, 'server/services/fontEmbeds.ts')).href);
+const { assertCarta } = await import(pathToFileURL(path.join(ROOT, 'house/palette-guard.ts')).href);
 const { newRenderPage } = await import(pathToFileURL(path.join(ROOT, 'server/services/premiumPdfRenderer.ts')).href);
 
-/* ── house palette (Ledger) ───────────────────────────────────────────── */
-/* THE shared definition — see house/tokens.ts. Never hardcode a hex here. */
-const { LEDGER, REPORT, blockBackground } = await import(pathToFileURL(path.join(ROOT, 'house/tokens.ts')).href);
-const DARK = LEDGER.dark, IVORY = LEDGER.ivory, IVORY_SUB = REPORT.ivorySub;
-/* The card is the block throughout, so amber is honey here — see tokens. */
-const BRASS = LEDGER.honey, MINT = LEDGER.mint;
-const DISPLAY = `'Fraunces', Georgia, serif`, SANS = `'Inter', -apple-system, sans-serif`, MONO = `'IBM Plex Mono', monospace`;
+/* ── house palette — CARTA (2026-08-15, Paul: "no ledger at all. carta") ──
+   THE shared definition — see house/tokens.ts. Never hardcode a hex here.
+
+   Two things this file got wrong beyond the palette, both invisible until you
+   look for them: REPORT.ivorySub is one of the three retired Ledger report
+   values (it is named in the palette guard's dead table by hex), and the three
+   typefaces were HARD-CODED as string literals rather than read from tokens —
+   so a font change could never have reached this file at all. Both now come
+   from CARTA_TYPE, which is also what the embed actually carries. */
+const { CARTA, CARTA_TYPE } = await import(pathToFileURL(path.join(ROOT, 'house/tokens.ts')).href);
+const DARK = CARTA.dark, IVORY = CARTA.darkInk, IVORY_SUB = CARTA.darkSub;
+/* One accent. The card is dark throughout, so the accent's on-dark value is
+   mint — there is no second warm colour to alternate with any more. */
+const ACCENT = CARTA.mint, MINT = CARTA.mint;
+const DISPLAY = CARTA_TYPE.display, SANS = CARTA_TYPE.sans, MONO = CARTA_TYPE.mono;
 
 /* ── CLI ──────────────────────────────────────────────────────────────── */
 const args = process.argv.slice(2);
@@ -77,7 +86,9 @@ const resolveAsset = (h: string) => {
 };
 
 const LOGO_W = b64(path.join(ROOT, 'client/public/logo-green-x-dark.png'), 'image/png');
-const TEXTURE = b64(path.join(ROOT, 'client/public/textures/blackbleed.webp'), 'image/webp');
+/* No texture. Carta's band is a flat colour — and a texture image sits ABOVE
+   the colour in a background stack and wins outright, so leaving it in place
+   while swapping the token would have rendered identically with a clean diff. */
 const headPath = resolveAsset(cfg.headshot) || path.join(ROOT, 'client/public/founder-portrait.jpg');
 const HEAD = existsSync(headPath) ? b64(headPath, mimeOf(headPath)) : '';
 const heroPath = resolveAsset(cfg.image);
@@ -111,13 +122,13 @@ function twoTone(t: string): string {
 }
 
 /* ── the card ─────────────────────────────────────────────────────────── */
-const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceCss()}</style>
+const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${cartaFontFaceCss()}</style>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { width: 1200px; height: 630px; overflow: hidden; }
   .card {
     position: relative; width: 1200px; height: 630px; display: flex;
-    background: ${blockBackground(TEXTURE)}; color: ${IVORY};
+    background: ${DARK}; color: ${IVORY};
     font-family: ${SANS};
   }
   .card::before {
@@ -137,14 +148,15 @@ const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFace
   .body { flex: 1; display: flex; flex-direction: column; justify-content: center; }
   .kicker {
     font-family: ${MONO}; font-size: 15px; letter-spacing: 0.15em;
-    text-transform: uppercase; color: ${BRASS}; font-weight: 500; margin-bottom: 20px;
+    text-transform: uppercase; color: ${ACCENT}; font-weight: 500; margin-bottom: 20px;
   }
   h1 {
     font-family: ${DISPLAY}; font-weight: 545; font-size: ${title.length > 74 ? '40px' : title.length > 52 ? '46px' : '54px'};
     line-height: 1.07; letter-spacing: -0.02em; color: ${IVORY}; text-wrap: balance;
   }
   h1 .turn { color: ${MINT}; }
-  .rule { width: 78px; height: 4px; background: ${BRASS}; border-radius: 99px; margin-top: 26px; }
+  /* Square, and the accent rather than amber. */
+  .rule { width: 78px; height: 4px; background: ${ACCENT}; margin-top: 26px; }
 
   .byline { display: flex; align-items: center; gap: 14px; }
   .face {
@@ -159,8 +171,7 @@ const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFace
   .right { flex: 1; padding: 54px 58px 46px 0; display: flex; }
   .hero {
     width: 100%; height: 100%; object-fit: cover; object-position: ${cfg.imagePos};
-    border-radius: 18px; border: 1px solid rgba(255,255,255,0.18);
-    box-shadow: 0 18px 44px rgba(0,0,0,0.45);
+    border-radius: 0; border: 1px solid ${CARTA.darkSeam};
   }
 </style></head><body>
   <div class="card">
@@ -184,6 +195,11 @@ const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFace
 </body></html>`;
 
 /* ── render ───────────────────────────────────────────────────────────── */
+
+/* THE PALETTE GUARD — this builder rendered unguarded through the whole Carta
+   era, which is how it kept shipping Ledger unnoticed. */
+assertCarta(html, `og-card ${slug}`);
+
 const page = await newRenderPage();
 try {
   await page.setViewport({ width: 1200, height: 630, deviceScaleFactor: 1 });

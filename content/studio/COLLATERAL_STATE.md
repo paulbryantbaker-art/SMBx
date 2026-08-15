@@ -47,33 +47,41 @@ Step 4 is not optional and is the easiest to miss — see §4.
 
 | Builder | Makes | Grammar | Faces | Guard |
 |---|---|---|---|---|
-| `build-deck.mts` | LinkedIn carousel | `house/deck.ts` — **Carta** | Carta | yes |
-| `build-report.mts` | long-form PDF report | `house/report.ts` — **Carta** | Carta | yes |
-| `build-onepager.mts` | single-image post | its own — **LEDGER** | Ledger | **no** |
-| `build-og-card.mts` | link-preview card | its own — **LEDGER** | Ledger | **no** |
+| `build-deck.mts` | LinkedIn carousel | `house/deck.ts` — Carta | Carta | yes |
+| `build-report.mts` | long-form PDF report | `house/report.ts` — Carta | Carta | yes |
+| `build-onepager.mts` | single-image post | Carta | Carta | yes |
+| `build-og-card.mts` | link-preview card | Carta | Carta | yes |
 
-**The bottom two produce retired-palette output today and nothing stops them.**
-If you build a one-pager right now it comes out in Ledger — amber, brass,
-Fraunces, the jade block — and the PDF will look wrong beside a report built the
-same afternoon.
+**All four are on Carta as of 2026-08-15** (Paul: *"no ledger at all. carta"*).
+`DESIGN.md` carries the same table and `npm run test:design` derives it from the
+source, so it cannot go stale — it previously claimed all four when two were
+still Ledger, as plain prose that nothing checked.
 
-Until they are converted, one of two things is true and you must pick
-deliberately:
+**What the last two lost, so you recognise the old output if you see it.** These
+were not remapped colour-for-colour, because Carta has no slot for most of what
+they carried:
 
-- **Converting them is the work.** Follow §1's four steps. `house/onepager.ts`
-  is the obvious name. This is the right answer if you are producing more than
-  one.
-- **You need a single one-pager today.** Build it and know the output is
-  off-language, or render the same content as a one-page report instead —
-  `build-report.mts` is on Carta and a short `.md` produces a clean single
-  document. Never patch the palette by editing the builder's CSS in place for
-  one post; that is the hand-roll wearing a disguise.
+- **Amber and honey are gone**, not replaced. Carta has exactly one accent, so
+  every kicker takes green on light and mint on the band.
+- **The boardroom texture is gone.** The band is a flat colour now. Note the
+  trap if you ever touch a background stack: a texture image sits ABOVE the
+  colour and wins outright, so swapping the token while leaving the texture in
+  place renders *identically* and shows a clean diff.
+- **The radial glazes are gone.** A wash over a flat ground just makes a
+  slightly different flat ground, and adds a transparency group the
+  renderer-proof law forbids.
+- **Pill rules and rounded image frames are square**, and the drop shadows are
+  deleted. A 99px pill on a 5px bar was the single most visible Ledger tell.
+- `build-og-card.mts` also had its **three typefaces hard-coded as string
+  literals**, so no font change could ever have reached it. That is a second,
+  quieter way to be stranded on a retired system — and it looks nothing like a
+  palette bug.
 
-`DESIGN.md`'s notice carries this same table and `npm run test:design` derives
-it from the source, so it cannot go stale. It previously claimed all four were
-on Carta, which was false for two of them for a week.
-
----
+**The model briefs moved too**, which matters because a model follows the last
+palette it was given, faithfully, forever. `brandPaletteLines()` in
+`house/tokens.ts` (which writes the app's deck-designer contract) and the Gemini
+artwork clause were both still Ledger — the artwork prompt was asking for *"one
+small brass-gold accent"* on every illustration.
 
 ## 3. The app can no longer ship off-language
 
@@ -87,12 +95,14 @@ Two consequences worth knowing:
 
 - **The app's Ledger cards now fail their downloads.** That is intended: those
   artifacts are yours now.
-- **The app's Claude-designed carousel falls back to the house template.**
-  `deckDesigner.ts` briefs a model to write the deck HTML and its brand contract
-  is still Ledger. That path used to *win* over the house grammar at every
-  caller, so the app's default carousel was the designed Ledger one. The gate
-  now rejects it and the Carta template renders instead. Correct outcome,
-  unfinished job — rewriting that contract in Carta is still open.
+- **The app's Claude-designed carousel is now briefed in Carta.**
+  `deckDesigner.ts` has a model write the deck HTML, and that path *wins* over
+  the house grammar at every caller — so while its brand contract said Ledger,
+  the app's default carousel was the designed Ledger one. It now specifies the
+  flat band, the Carta faces and the single accent, and it names the retired
+  faces and colours as **rejects** rather than merely omitting them: a model
+  handed a palette with two accents uses two, and one handed no instruction
+  reaches for whatever it has seen most.
 
 ---
 

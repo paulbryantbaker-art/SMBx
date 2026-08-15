@@ -301,10 +301,12 @@ for (const rel of ['client/src/practice/report.css', 'client/src/practice/practi
 
   is('the notice tabulates every builder', [...rows.keys()].sort(), BUILDERS.map(b => `${b}.mts`).sort());
 
-  /* Named individually rather than counted: "two are behind" would still pass
-     if a different two were. */
-  is('the builders actually behind Carta are the two the notice names',
-    behind, ['build-onepager.mts', 'build-og-card.mts']);
+  /* Paul, 2026-08-15: "no ledger at all. carta." So the expectation is NONE,
+     and this is the assertion that turns that from an intention into a floor:
+     a builder that regains a LEDGER import, loses its Carta faces or drops its
+     guard fails here, named. It was `['build-onepager.mts', 'build-og-card.mts']`
+     for the few hours between measuring the drift and fixing it. */
+  is('no builder is behind Carta', behind, []);
 
   for (const [name, claimsConverted] of rows) {
     /* Both directions are wrong. Claiming converted while a builder still
@@ -314,8 +316,24 @@ for (const rel of ['client/src/practice/report.css', 'client/src/practice/practi
       claimsConverted, !behind.includes(name));
   }
 
-  is('…and the notice no longer claims all four are converted',
-    /all four builders import it/.test(DESIGN), false);
+  /* The notice may now legitimately SAY all four are converted, because they
+     are — but not as bare prose in place of the table. The old sentence is
+     banned by its exact wording so it cannot be pasted back.
+
+     QUOTED USES ARE EXEMPT, and that exemption is not a loophole — it is the
+     same shape as §2's dead-hex rule, where naming a retired value inside the
+     graveyard is how a session catches itself. The notice explains the failure
+     by quoting the sentence that caused it, and a check that cannot tell a
+     citation from a claim fires on its own documentation and gets switched off.
+     (Written after this fired on exactly that, an hour after the identical
+     mistake in the palette-gate check.) */
+  const unquoted = DESIGN.replace(/["“][^"”]*["”]/g, '');
+  is('the notice does not restate the claim as unchecked prose',
+    /all four builders import it/.test(unquoted), false);
+  is('…and the banned sentence IS still quoted, so the lesson survives',
+    /all four builders import it/.test(DESIGN), true);
+  is('…and the table is still what carries it',
+    rows.size, BUILDERS.length);
 }
 
 /* ── 5. it travels ────────────────────────────────────────────────────────

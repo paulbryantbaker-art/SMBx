@@ -53,6 +53,23 @@ function ok(name: string, cond: boolean) { is(name, cond, true); }
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (p: string) => readFileSync(path.join(ROOT, p), 'utf8');
 
+/**
+ * Source with comments stripped — use this for any check about BEHAVIOUR.
+ *
+ * This helper exists because the same mistake was made three times in one day.
+ * A converted file's comments legitimately name the thing it stopped doing —
+ * "CARTA, not LEDGER", "this used to call process.exit", "Fraunces is retired" —
+ * and a regex over raw source reads the explanation as the behaviour and fires
+ * on the file's own documentation. Every one of those failures looked like a
+ * real regression for a minute.
+ *
+ * The inverse also matters and is why this is a helper rather than a blanket
+ * rule: a check that the file still EXPLAINS itself must read the raw source.
+ * Pick deliberately, and the two forms now look different at the call site.
+ */
+const codeOf = (src: string) =>
+  src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
 const composer = read('server/services/researchComposer.ts');
 const buildDeck = read('scripts/studio/build-deck.mts');
 const buildReport = read('scripts/studio/build-report.mts');
@@ -147,12 +164,28 @@ ok('section ordinals come from one place',
   && /HR\.numberSections\(/.test(composer)
   && !/^function numberSections/m.test(composer));
 
-/* Still open, and recorded so the order of work is a fact on disk rather than a
-   memory: the one-pager is two implementations in one palette family. Written
-   to go red the same way the report's did. */
-ok('KNOWN GAP: the one-pager is still a second implementation',
-  /LEDGER, TYPE, blockBackground/.test(buildOnepager)
-  && /export function researchCardHtml/.test(composer));
+/* CLOSED 2026-08-15 (Paul: "no ledger at all. carta"). The one-pager builder
+   was `LEDGER, TYPE, blockBackground` and is now Carta, fonted and guarded.
+   It is still a SEPARATE implementation from the app's researchCardHtml — the
+   grammar has not been lifted into house/ the way the deck's and the report's
+   were — but that no longer risks drift, because the app's copy is BLOCKED by
+   the palette gate rather than rendering beside it. Two implementations where
+   only one can run is a duplication to tidy, not a divergence to fear. */
+ok('the one-pager builder is on Carta',
+  !/\bLEDGER\b/.test(codeOf(buildOnepager))
+  && /cartaFontFaceCss/.test(buildOnepager) && /assertCarta\(/.test(buildOnepager));
+{
+  const og = read('scripts/studio/build-og-card.mts');
+  ok('the OG-card builder is on Carta',
+    !/\bLEDGER\b/.test(codeOf(og)) && /cartaFontFaceCss/.test(og) && /assertCarta\(/.test(og));
+  /* It also hard-coded its three typefaces as string literals, so no font
+     change could ever have reached it — a second, quieter way to be stranded
+     on a retired system that reads nothing like a palette bug. */
+  ok('…and reads its type from tokens rather than hard-coding the faces',
+    /CARTA_TYPE/.test(og) && !/'Fraunces'/.test(og));
+}
+ok('KNOWN GAP: the one-pager grammar is not yet shared, only gated apart',
+  /export function researchCardHtml/.test(composer));
 
 /* The Ledger consts survive in researchComposer for the card, the announcement
    and the postcard — the artifacts not yet extracted. Asserted so that when the
@@ -317,7 +350,7 @@ ok('KNOWN GAP: the Ledger palette is still reachable for the un-extracted artifa
   /* Comments stripped first — the file EXPLAINS why it does not call
      process.exit, and a check that reads the explanation as the behaviour is
      the same mistake the DESIGN.md builder table made an hour ago. */
-  const gateCode = gate.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const gateCode = codeOf(gate);
   ok('the gate throws rather than exiting the process',
     /throw new PaletteGateError/.test(gateCode) && !/process\.exit/.test(gateCode));
   ok('…and blocks by default, warning only when told to',
@@ -326,15 +359,43 @@ ok('KNOWN GAP: the Ledger palette is still reachable for the un-extracted artifa
     /build-report\.mts|build-onepager\.mts/.test(composer));
 }
 
-/* KNOWN GAP, and the sharpest one left: deckDesigner.ts instructs a MODEL to
-   write the deck HTML, and its brand contract is still Ledger — Fraunces,
-   Inter, the jade block, brass. That path WINS over the house grammar at every
-   caller (`designedDeckHtml(run) ?? linkedInDocHtml(...)`), so the app's
-   default carousel was the designed Ledger one. The gate now sends it to the
-   Carta template instead of shipping it, which is a correct outcome and not a
-   fix. Rewriting the contract in Carta is the fix. */
-ok('KNOWN GAP: the deck designer still briefs the model in Ledger',
-  /import \{ LEDGER/.test(read('server/services/deckDesigner.ts')));
+/* CLOSED 2026-08-15. deckDesigner.ts instructs a MODEL to write the deck HTML,
+   and its brand contract was entirely Ledger — Fraunces, Inter, the jade block
+   built as a three-layer texture composite, brass tags and bars. That path WINS
+   at every caller (`designedDeckHtml(run) ?? linkedInDocHtml(...)`), so the
+   app's DEFAULT carousel was the designed Ledger one.
+
+   The contract is now Carta, and the interesting part is what it had to say
+   OUT LOUD rather than merely stop saying: the old text insisted "nothing in
+   this system is near-black", which Carta inverts exactly, and it offered a
+   second image treatment (a masked dissolve) that only worked because there was
+   a texture to melt. A model handed a palette with two accents uses two, so the
+   brief now names the retired faces and colours as rejects rather than omitting
+   them. */
+{
+  const dd = read('server/services/deckDesigner.ts');
+  const ddCode = codeOf(dd);
+  ok('the deck designer briefs the model in Carta', !/\bLEDGER\b/.test(ddCode));
+  ok('…and names the retired faces as rejects rather than omitting them',
+    /Fraunces and Inter are RETIRED/.test(dd));
+  ok('…and the dark page is flat, with the texture explicitly refused',
+    /FLAT NEAR-BLACK BAND/.test(dd) && /TEXTURE_DARK\}\}: it is a Ledger asset/.test(dd));
+}
+
+/* The shared palette lines a model is briefed with come from house/tokens.ts,
+   so a rebrand cannot leave the model painting in the old system. That was
+   already the design; it was pointed at LEDGER until today. */
+{
+  const tokens = read('house/tokens.ts');
+  const span = tokens.slice(tokens.indexOf('export function brandPaletteLines'),
+                            tokens.indexOf('export function artworkPaletteClause'));
+  /* codeOf, because the function's own comment says "CARTA, not LEDGER" — the
+     third time today a check read a file's explanation as its behaviour. */
+  ok('the generated model palette is Carta', !/\bLEDGER\b/.test(codeOf(span)));
+  ok('…and the image brief clause is too',
+    !/\bLEDGER\b/.test(codeOf(tokens.slice(tokens.indexOf('export function artworkPaletteClause'),
+                                            tokens.indexOf('export function artworkPaletteClause') + 900))));
+}
 
 /* ── and the session has to be TOLD ───────────────────────────────────── */
 

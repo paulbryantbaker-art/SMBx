@@ -6,38 +6,40 @@
 > because it is inconvenient to move. If you find one, it is a bug to report,
 > not a precedent to follow.
 >
-> **State of the system, 2026-08-15 — TWO BUILDERS ARE STILL BEHIND.**
-> `house/tokens.ts` exports `CARTA` and `server/services/fontEmbeds.ts` embeds
-> Source Serif 4 and Schibsted Grotesk. But this notice used to say *"all four
-> builders import it"*, and that was **false for two of them** for a week:
+> **State of the system, 2026-08-15 — ALL FOUR BUILDERS ARE ON CARTA.**
+> `house/tokens.ts` exports `CARTA`, `server/services/fontEmbeds.ts` embeds
+> Source Serif 4 and Schibsted Grotesk, and every builder reads all three:
 >
 > | Builder | Grammar | Faces | Palette guard |
 > |---|---|---|---|
 > | `build-deck.mts` | `house/deck.ts` — Carta | Carta | yes |
 > | `build-report.mts` | `house/report.ts` — Carta | Carta | yes |
-> | **`build-onepager.mts`** | **its own, LEDGER** | **Ledger** | **no** |
-> | **`build-og-card.mts`** | **its own, LEDGER** | **Ledger** | **no** |
+> | `build-onepager.mts` | Carta | Carta | yes |
+> | `build-og-card.mts` | Carta | Carta | yes |
 >
-> **If you build a one-pager or a link-preview card today, it comes out in the
-> retired palette and nothing stops it.** That is not permission to hand-roll a
-> replacement — see FORMATS.md law 1. The fix is to convert the BUILDER, once,
-> the way the report was converted: lift its grammar into `house/`, point both
-> consumers at it, add `assertCarta`, switch to `cartaFontFaceCss()`.
+> This table is DERIVED from the source by `npm run test:design`, which fails if
+> it disagrees with what the builders import, embed and guard. It exists because
+> for a week the notice here read "all four builders import it" as plain prose
+> while two of them opened by destructuring `LEDGER`, embedded the Ledger faces
+> and ran no guard at all — and a session reading this file as canon had no
+> reason to look. A claim about the code is checked against the code.
 >
-> This paragraph is derived from the source by `npm run test:design`, which
-> fails if the table disagrees with what the builders actually import. It said
-> "all four" while two of them said `LEDGER` in their first ten lines, and
-> nothing caught it, because the claim was prose. **Delete a row when its
-> builder converts** — the gate will tell you if you delete one early.
+> **What "no Ledger at all" cost the two that moved** (Paul, 2026-08-15): amber
+> and honey are gone rather than remapped — Carta has exactly one accent, so
+> every kicker takes green on light and mint on the band; the boardroom texture
+> is gone, because the band is now a flat colour and a texture image sits ABOVE
+> the colour in a background stack and wins outright; the radial glazes are gone,
+> since a wash over a flat ground just makes a slightly different flat ground
+> while adding a transparency group the renderer-proof law forbids; and the pill
+> rules and rounded image frames are square. `build-og-card.mts` also had its
+> three typefaces HARD-CODED as string literals, so no font change could ever
+> have reached it.
 >
-> **The website stylesheet in this repo is NOT on Carta.**
-> `client/src/practice/practice.css` is still on the Ledger green-black trial —
-> its accent and its dark band are both in §2's dead table, and the gate prints
-> the accent it actually found when you run it. So §3 below describes what the
-> two surfaces must share, and the site is the side that has to move. Do not
-> "correct" the collateral back to match the site. **Delete this paragraph when
-> the stylesheet lands** — `npm run test:design` fails if it is still here after
-> the site converts, and fails if it is missing while the site is behind.
+> **The app is gated, not converted.** `server/services/paletteGate.ts` blocks
+> any artifact the app tries to render in a retired palette. Three of its
+> renderers — the single-image card, the announcement card and the post card —
+> are still Ledger and now fail rather than shipping. Those artifacts are the
+> studio's; see `COLLATERAL_STATE.md`.
 
 # The house design language — collateral
 

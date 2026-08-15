@@ -34,17 +34,33 @@ import { writeBuildRecord } from './build-record.mts';
 import { pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(new URL('../..', import.meta.url).pathname);
-const { fontFaceCss } = await import(pathToFileURL(path.join(ROOT, 'server/services/fontEmbeds.ts')).href);
+const { cartaFontFaceCss } = await import(pathToFileURL(path.join(ROOT, 'server/services/fontEmbeds.ts')).href);
+const { assertCarta } = await import(pathToFileURL(path.join(ROOT, 'house/palette-guard.ts')).href);
 const { newRenderPage } = await import(pathToFileURL(path.join(ROOT, 'server/services/premiumPdfRenderer.ts')).href);
 
-/* ── house palette (mirrors build-deck.mts / researchComposer.ts) ─────── */
-/* THE shared definition — see house/tokens.ts. Never hardcode a hex here. */
-const { LEDGER, TYPE, blockBackground } = await import(pathToFileURL(path.join(ROOT, 'house/tokens.ts')).href);
-const INK = LEDGER.ink, BODY = LEDGER.slate, GREEN = LEDGER.green;
-const WARM = LEDGER.bone, DARK = LEDGER.dark, IVORY = LEDGER.ivory, IVORY_SUB = LEDGER.rule;
-const BRASS = LEDGER.brass, HAIR = LEDGER.hair, MINT = LEDGER.mint;
-const HONEY = LEDGER.honey;
-const DISPLAY = TYPE.display, SANS = TYPE.sans, MONO = TYPE.mono;
+/* ── house palette — CARTA (2026-08-15, Paul: "no ledger at all. carta") ──
+   THE shared definition — see house/tokens.ts. Never hardcode a hex here.
+
+   Four Ledger constants had no Carta equivalent and are GONE rather than
+   remapped, because Carta has exactly ONE accent and no warm colour at all:
+
+     BRASS / HONEY  the amber pair. Every use was a mono kicker, so the kicker
+                    now takes the accent — green on light, mint on the band.
+                    Remapping brass to "some other warm" would have been the
+                    drift; deleting the slot is the conversion.
+     the TEXTURE    blackbleed.webp is a Ledger asset. Carta's band is a FLAT
+                    colour, so blockBackground() has nothing to composite and
+                    the texture would only make the band look like the old one.
+                    Note it could not simply be left in place: a texture image
+                    sits ABOVE the colour in a background stack and wins
+                    outright, so swapping the token and keeping the stack
+                    renders identically while showing a clean diff.
+     IVORY / SUB    renamed, not deleted — Carta's on-dark reading pair. */
+const { CARTA, CARTA_TYPE } = await import(pathToFileURL(path.join(ROOT, 'house/tokens.ts')).href);
+const INK = CARTA.ink, BODY = CARTA.body, GREEN = CARTA.green;
+const WARM = CARTA.bone, DARK = CARTA.dark, IVORY = CARTA.darkInk, IVORY_SUB = CARTA.darkSub;
+const HAIR = CARTA.hair, MINT = CARTA.mint;
+const DISPLAY = CARTA_TYPE.display, SANS = CARTA_TYPE.sans, MONO = CARTA_TYPE.mono;
 
 /* ── CLI args ─────────────────────────────────────────────────────────── */
 const args = process.argv.slice(2);
@@ -95,7 +111,7 @@ const resolveImg = (p?: string): string | null => {
 
 const LOGO = b64(path.join(ROOT, 'client/public/logo-green-x.png'));
 const LOGO_W = b64(path.join(ROOT, 'client/public/logo-green-x-dark.png'));
-const TEXTURE = b64(path.join(ROOT, 'client/public/textures/blackbleed.webp'));
+/* No TEXTURE constant. See the palette note above — the band is a colour. */
 const PHOTO = resolveImg(post.image);
 
 const name = post.byline?.name ?? 'Paul Baker';
@@ -105,13 +121,19 @@ const PHOTOW = 1080 - COLW;
 
 /* ── one card (dark|light), the approved split composition ────────────── */
 function card(dark: boolean): string {
-  const colBg = dark ? `background:${blockBackground(TEXTURE)}` : `background:${WARM}`;
-  const glaze = dark
-    ? `radial-gradient(760px 460px at 30% -6%, rgba(22,98,76,0.22), transparent 62%), linear-gradient(180deg, rgba(15,26,22,0.5), rgba(15,26,22,0.72))`
-    : `radial-gradient(900px 620px at 12% 0%, rgba(22,98,76,0.05), transparent 60%)`;
+  const colBg = `background:${dark ? DARK : WARM}`;
+  /* NO GLAZE. Both of these were atmosphere over the Ledger boardroom texture
+     — a jade bloom and a vertical darkening on the block, a whisper of green on
+     the bone. Carta deleted the whole atmosphere layer: the band is a flat
+     colour and the paper is white, and a radial wash over either just produces
+     a slightly different flat colour while adding a transparency group the
+     renderer-proof law forbids. The element stays (one empty div is cheaper
+     than restructuring the card) and paints nothing. */
+  const glaze = 'none';
   const inkC = dark ? IVORY : INK, subC = dark ? IVORY_SUB : BODY;
   const numC = dark ? MINT : GREEN, ctaC = dark ? MINT : GREEN, logoImg = dark ? LOGO_W : LOGO;
-  const footBorder = dark ? 'rgba(243,241,234,0.12)' : HAIR;
+  /* Flat seam, not a translucent one — see the renderer-proof law. */
+  const footBorder = dark ? CARTA.darkSeam : HAIR;
   const pad = PHOTO ? '66px 60px 46px' : '84px 92px 56px';
   const numLabel = post.numeralLabel ? esc(post.numeralLabel).replace(/\n/g, '<br>') : 'open<br>seats';
 
@@ -157,18 +179,21 @@ const CSS = `
   .glaze { position:absolute; inset:0; }
   .pad { position:absolute; inset:0; display:flex; flex-direction:column; z-index:1; }
   .top { display:flex; align-items:center; justify-content:space-between; }
-  .kick { font-family:${MONO}; font-size:17px; letter-spacing:0.16em; color:${BRASS}; font-weight:600; text-transform:uppercase; }
-  /* Amber sits at 3.8:1 on the jade block — large-text only, and these are
-     small mono labels. HONEY is amber's on-block value and the block gets
-     it, exactly as the site re-scopes --pd-brass inside .pd-dark. Light
-     surfaces keep brass. */
-  .col.dark .kick { color:${HONEY}; }
+  .kick { font-family:${MONO}; font-size:17px; letter-spacing:0.16em; color:${GREEN}; font-weight:600; text-transform:uppercase; }
+  /* Mint is the accent's value on the band, the way green is its value on
+     light — one accent, two grounds. This rule used to hand the dark kicker
+     HONEY, amber's on-block value, chosen because amber sat at 3.8:1 on the
+     old jade block and could not carry small mono text. Neither colour exists
+     any more, and mint clears the small-text floor on the flat band. */
+  .col.dark .kick { color:${MINT}; }
   .mid { flex:1; display:flex; flex-direction:column; justify-content:center; }
   .seats { display:flex; align-items:baseline; gap:20px; margin-bottom:26px; }
   .num { font-family:${DISPLAY}; font-weight:545; font-size:124px; line-height:0.86; }
   .numlab { font-family:${MONO}; font-size:18px; letter-spacing:0.1em; text-transform:uppercase; line-height:1.4; }
   .hook { font-family:${DISPLAY}; font-weight:545; font-size:45px; line-height:1.13; letter-spacing:-0.014em; text-wrap:balance; }
-  .rule { width:72px; height:5px; background:${MINT}; border-radius:99px; margin:30px 0 26px; }
+  /* Square. Radius is 0 in Carta everywhere except buttons and inputs, and a
+     99px pill on a 5px bar is the most visible Ledger tell on the whole card. */
+  .rule { width:72px; height:5px; background:${MINT}; margin:30px 0 26px; }
   .body { font-size:23px; line-height:1.5; }
   .emph { margin-top:20px; font-size:23px; line-height:1.5; font-weight:600; }
   .cta { margin-top:30px; font-family:${MONO}; font-size:20px; letter-spacing:0.05em; font-weight:600; }
@@ -183,8 +208,16 @@ const CSS = `
   .vgrad { position:absolute; inset:0; background:linear-gradient(90deg, rgba(9,15,13,0.78) 0%, rgba(9,15,13,0.34) 6%, transparent 18%); }
 `;
 
-const docFor = (dark: boolean) =>
-  `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceCss()}</style><style>${CSS}</style></head><body>${card(dark)}</body></html>`;
+/* THE PALETTE GUARD. This builder rendered unguarded through the whole Carta
+   era, which is exactly how it kept shipping Ledger without anyone noticing —
+   the two guarded builders were fine and nobody thought to check the third.
+   It reads the rendered document, not the source, because a colour can arrive
+   through a function three files away or out of a spec. */
+const docFor = (dark: boolean) => {
+  const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${cartaFontFaceCss()}</style><style>${CSS}</style></head><body>${card(dark)}</body></html>`;
+  assertCarta(doc, `${post.slug ?? 'one-pager'} (${dark ? 'dark' : 'light'})`);
+  return doc;
+};
 
 /* ── render each mode: PNG + renderer-proof single-image PDF ───────────── */
 const variants = post.variants ?? ['dark', 'light'];
