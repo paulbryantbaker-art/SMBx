@@ -230,10 +230,39 @@ footer:   {Short Title} — {Assessment Type}
 eyebrow:  MARKET ASSESSMENT
 accent:   {substring of a ## heading} | band-{name}.jpg | 50% 50%
 stat:     {figure} | {label, ≤6 words}
+for:      {Client name}          ← CLIENT DOCUMENTS ONLY. Omit for public work.
 -->
 ```
 
 `accent:` and `stat:` repeat. Any other key is silently discarded.
+
+### 3.1a `for:` — the only thing a client document adds
+
+Paul, 2026-08-15: *"i want all decks, docs and collateral for a client to have
+the same look and feel as the branded smbx collateral — it will just have whose
+it's for on the cover too."*
+
+So there is **no client template**. A client deliverable is the house report
+with one extra line, and `for:` is that line: it renders as a plated
+`PREPARED FOR / {name}` block at the right-hand end of the cover's byline rule,
+so the cover reads *by … / for …* across one line. Omit the key and the block
+does not render at all — which is the published-collateral case, and the reason
+you cannot accidentally ship a public report with a client's name on it.
+
+**Three rules on what goes in it.**
+
+1. **A name, not a mandate.** THE LINE's engagement-confidentiality rule is not
+   suspended by the fact that the client is the reader: hold period, check size,
+   equity available and leverage tolerance never reach a page. Those would
+   audit perfectly clean — no figure in them is uncited — so nothing mechanical
+   catches it. This one is on the person writing.
+2. **`for:` makes the document client-direct, which changes where it files.**
+   It renders to `decks/`, never `collateral/`. See the filing law in
+   `CLAUDE.md`: collateral is publishable anywhere, and a document naming a
+   client is not.
+3. **It is on the cover, deliberately, and not in the running footer or as a
+   watermark.** A reader who opens the PDF at page 4 and forwards it should
+   still be able to see from the cover who commissioned it.
 
 ### 3.2 THE COVER BUDGET — and the rule that supersedes it
 

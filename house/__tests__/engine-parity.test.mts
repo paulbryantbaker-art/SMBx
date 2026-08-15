@@ -37,6 +37,8 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import * as HR from '../report.js';
+import { checkCarta } from '../palette-guard.js';
 
 let pass = 0, total = 0;
 function is(name: string, got: unknown, want: unknown) {
@@ -98,32 +100,173 @@ ok('the Ledger embed survives for the not-yet-restyled artifacts',
 ok('build-report.mts guards its palette', /assertCarta\(/.test(buildReport));
 ok('build-deck.mts guards its palette', /assertCarta\(/.test(buildDeck));
 
-/* ── the drift that is still open, recorded rather than asserted away ──── */
+/* ── the report: extracted 2026-08-15, and pinned in the new position ──── */
 
-/* THE REPORT IS TWO IMPLEMENTATIONS IN TWO DESIGN LANGUAGES.
-   `build-report.mts` renders Carta — flat #131512 cover, Source Serif 4, one
-   green accent, radius 0, palette-guarded, renderer-proof asserted.
-   `researchComposer.researchReportHtml` renders Ledger — Fraunces, brass, bone
-   card, radius 14px, a box-shadow. It has no cover page, runs no guard, and
-   would FAIL `assertCarta` outright: it names a retired typeface and retired
-   hexes.
-   `house/report.ts` does not exist yet. These three assertions are the honest
-   state of that, and they are written to GO RED when the extraction lands —
-   which is the point. A test that passes both before and after a fix is not
-   tracking the fix. */
-const REPORT_GRAMMAR_EXTRACTED = false; // flip when house/report.ts exists
-ok('KNOWN GAP: there is no shared report grammar yet',
-  REPORT_GRAMMAR_EXTRACTED === false);
-ok('KNOWN GAP: the app still renders reports in the retired Ledger display face',
-  /const DISPLAY = `'Fraunces'/.test(composer));
-ok('KNOWN GAP: …and still uses brass, which Carta retired',
-  /const BRASS = LEDGER\.brass/.test(composer));
+/* This was three KNOWN-GAP assertions written to go red when the extraction
+   landed, and it landed. Before: build-report.mts rendered Carta (flat #131512
+   cover, Source Serif 4, one green accent, radius 0, guarded, renderer-proof
+   asserted) and researchComposer.researchReportHtml rendered Ledger (Fraunces,
+   brass, a bone card at radius 14 with a box-shadow, no cover page, no guard) —
+   the second would have failed assertCarta outright. Two houses, one artifact.
+   Now both call house/report.ts. */
+const report = read('house/report.ts');
 
-/* The one-pager is the same story one notch less severe: two implementations,
-   same palette family. Recorded so the extraction order is a fact on disk. */
-ok('KNOWN GAP: the one-pager is a second implementation too',
+ok('the shared report grammar exists',
+  /export function reportDocument/.test(report));
+ok('build-report.mts renders through it',
+  /house\/report\.ts/.test(buildReport) && /R\.reportDocument\(/.test(buildReport));
+ok('the app renders through it',
+  /from '\.\.\/\.\.\/house\/report\.js'/.test(composer) && /HR\.reportDocument\(/.test(composer));
+
+ok('both take the Carta faces, which the grammar names',
+  /cartaFontFaceCss\(\)/.test(buildReport) && /CARTA_FONTS_CSS/.test(composer));
+
+/* The renderer-proof split has to be the SAME split on both sides or the two
+   PDFs differ in the one way a reader notices: a re-composited dark cover. */
+ok('both rasterize the cover through the shared helpers',
+  /R\.coverOnlyDocument\(|R\.withFlatCover\(/.test(buildReport)
+  && /HR\.coverOnlyDocument\(/.test(composer) && /HR\.withFlatCover\(/.test(composer));
+ok('…and share the page margins and the footer',
+  /R\.REPORT_MARGIN/.test(buildReport) && /HR\.REPORT_MARGIN/.test(composer)
+  && /R\.reportFooterTemplate/.test(buildReport) && /HR\.reportFooterTemplate/.test(composer));
+
+/* THE ONE THING A CLIENT DOCUMENT ADDS (Paul, 2026-08-15: "it will just have
+   whose it's for on the cover too"). One field, on the cover, in both parsers —
+   so a client deck is the house artifact plus a name, never a second template.
+   `for:` is the .md spelling; `preparedFor` is the API. */
+ok('the cover carries who it is for', /preparedFor\?: string/.test(report));
+ok('…the .md convention reads it as `for:`', /k === 'for' \|\| k === 'preparedFor'/.test(report));
+ok('…and it renders, rather than being parsed and dropped',
+  /class="cv-for"/.test(report) && /\.cv-for \{/.test(report));
+
+/* `sec-N` addresses a section for BOTH the accent bands and the board
+   thumbnails. Two copies of an ordinal scheme is a silent off-by-one, so there
+   is one, and the app calls it rather than keeping its own. */
+ok('section ordinals come from one place',
+  /export function numberSections/.test(report)
+  && /HR\.numberSections\(/.test(composer)
+  && !/^function numberSections/m.test(composer));
+
+/* Still open, and recorded so the order of work is a fact on disk rather than a
+   memory: the one-pager is two implementations in one palette family. Written
+   to go red the same way the report's did. */
+ok('KNOWN GAP: the one-pager is still a second implementation',
   /LEDGER, TYPE, blockBackground/.test(buildOnepager)
   && /export function researchCardHtml/.test(composer));
+
+/* The Ledger consts survive in researchComposer for the card, the announcement
+   and the postcard — the artifacts not yet extracted. Asserted so that when the
+   last one moves, this goes red and the dead code gets deleted rather than
+   sitting there looking live. */
+ok('KNOWN GAP: the Ledger palette is still reachable for the un-extracted artifacts',
+  /const BRASS = LEDGER\.brass/.test(composer));
+
+/* ── the report document itself, exercised rather than grepped ─────────── */
+
+/* Everything above reads source. These build the document the APP now produces
+   — its shapes, its fields — and put it through the same guard the local
+   builder runs, which is the one check that actually answers "is this the
+   house language". Real assets are data URIs and opaque to a substring search,
+   so stubs are honest here.
+
+   This is where the value is: the app's report USED to fail this. */
+{
+  const doc = HR.reportDocument({
+    eyebrow: 'RESEARCH FINDINGS · MARKET ASSESSMENT',
+    titleHtml: HR.splitTitle('<h1>Home Services M&amp;A</h1>').titleHtml,
+    preparedFor: 'Ridgeline Capital Partners',
+    stats: [{ n: '$600B+', l: 'Combined U.S. revenue' }],
+    cards: [{ tag: '01', body: '<em>9.5x median EBITDA</em><br>Capstone · Jul 2026' }],
+    introHtml: '<p>Intro prose.</p>',
+    byline: { name: 'Paul Baker', role: 'smbX — buy-side corporate development' },
+    bodyHtml: HR.numberSections(
+      '<h2>One</h2><p>Body <strong>bold</strong>.</p><blockquote><p>A notice.</p></blockquote>'
+      + '<table><thead><tr><th>A</th></tr></thead><tbody><tr><td>1</td></tr></tbody></table>'),
+    bodyHasH1: false,
+    footerLabel: 'Home Services M&amp;A',
+    appendixHtml: '<h2>Sources</h2><ol class="srcs"><li><span class="st">Capstone</span></li></ol>',
+    disclaimer: 'Research by smbX.',
+  }, { logoWhite: 'data:image/png;base64,AAAA', headshot: 'data:image/jpeg;base64,AAAA', hero: null },
+     "@font-face{font-family:'Source Serif 4';src:url(data:font/woff2;base64,AAAA)}");
+
+  const guard = checkCarta(doc, 'app-report');
+  if (!guard.ok) console.log(guard.report);
+  ok('the app\'s report document passes the palette guard', guard.ok);
+
+  /* RENDERER-PROOF, statically. Everything translucent belongs on the
+     rasterized cover; the vector body must carry none of it, because a
+     transparency group is what lets Preview re-composite a page. The old app
+     report shipped a box-shadow AND a radius in the flow. */
+  const body = doc.slice(doc.indexOf('<main'));
+  const translucent = [/rgba\(/, /box-shadow/, /linear-gradient/, /border-radius/]
+    .filter(re => re.test(body)).map(String);
+  is('nothing translucent reaches the vector body', translucent, []);
+
+  /* WHOSE IT IS FOR — present when supplied, ABSENT when not. The second half
+     matters more than the first: published collateral must not grow a client
+     line because the field defaulted to something. */
+  ok('a client document names who it is for',
+    doc.includes('Prepared for') && doc.includes('Ridgeline Capital Partners'));
+  const published = HR.reportDocument({
+    eyebrow: 'X', titleHtml: '<h1>T</h1>', byline: { name: 'P', role: 'r' },
+    bodyHtml: '<p>b</p>', bodyHasH1: false, footerLabel: 'T',
+  }, { logoWhite: '', headshot: '', hero: null }, '');
+  ok('published collateral carries no client line', !published.includes('Prepared for'));
+
+  /* The two-stage render. Both sides call these, so a mismatch here is a
+     mismatch in the one thing a reader notices — a re-composited dark cover. */
+  const coverOnly = HR.coverOnlyDocument(doc);
+  ok('the cover raster sees the cover and nothing else',
+    /class="cover( nohero)?"/.test(coverOnly)
+    && !coverOnly.includes('<main')
+    && !coverOnly.includes('class="appendix"')
+    && !coverOnly.includes('class="disc"'));
+  const flat = HR.withFlatCover(doc, 'data:image/jpeg;base64,BBBB');
+  ok('the flat cover replaces the live one and keeps everything after it',
+    flat.includes('cover-flat') && !/class="cover( nohero)?"/.test(flat)
+    && flat.includes('<main') && flat.includes('class="appendix"') && flat.includes('class="disc"'));
+
+  /* WRONG-FIRST, kept as a test: the cover is `class="cover nohero"` whenever
+     there is no hero image, so a check written against `class="cover"` reports
+     that the cover was dropped when it is sitting right there. Two of the
+     assertions above were written that way and both lied. */
+  ok('a hero-less cover is still a cover',
+    /class="cover nohero"/.test(doc) && !/class="cover"/.test(doc));
+}
+
+/* ── the cover config convention, shared so both sides read one .md ────── */
+
+{
+  const parsed = HR.parseReportMarkdown([
+    '<!--cover',
+    'byline: Paul Baker',
+    'for: Ridgeline Capital Partners',
+    'stat: $600B+ | Combined U.S. revenue',
+    'accent: Consolidation | wave.png | 50% 30%',
+    'eyebrow: MARKET ASSESSMENT',
+    '-->',
+    '# Home Services',
+    '',
+    '---',
+    '',
+    '## One',
+    'Body.',
+  ].join('\n'));
+
+  is('`for:` lands on preparedFor', parsed.cfg.preparedFor, 'Ridgeline Capital Partners');
+  is('stats parse as value | label', parsed.cfg.stats, [{ n: '$600B+', l: 'Combined U.S. revenue' }]);
+  is('accents parse as match | image | position', parsed.cfg.accents,
+    [{ match: 'Consolidation', img: 'wave.png', pos: '50% 30%' }]);
+  /* This one is a REGRESSION TEST, not a nicety: the parser assigns with
+     `k in cfg`, so a key declared only in the type is silently dropped — which
+     is exactly what happened to `eyebrow:` for a while. It parsed, it matched,
+     and it did nothing. */
+  is('eyebrow is actually assigned, not silently dropped', parsed.cfg.eyebrow, 'MARKET ASSESSMENT');
+  is('a body that leads with ## is not an H1 body', parsed.bodyHasH1, false);
+  ok('the cover is what precedes the first rule', parsed.coverMd.includes('# Home Services'));
+  ok('…and the body is what follows it',
+    parsed.bodyMd.startsWith('## One') && !parsed.bodyMd.includes('# Home Services'));
+}
 
 /* ── what "separate use cases" means, so it is not read as "separate copies" ─ */
 
