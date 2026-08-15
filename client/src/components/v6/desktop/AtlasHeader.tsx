@@ -84,7 +84,15 @@ export function AtlasHeader({
       {/* Logo cluster */}
       <div style={S.logo}>
         <Sparkle size={22} />
-        <span style={S.wordmark}>Atlas</span>
+        {/* "Atlas" was the internal codename for this shell and it had leaked
+            into the one place a user reads on every single screen. Paul,
+            2026-08-15, looking at the header: "it still atlas". The practice is
+            smbX; Atlas is a folder name. Identifiers stay (AtlasApp,
+            atlasTokens, AtlasHeader) — renaming those is a large mechanical
+            diff with no visible effect, and the same precedent applies as
+            `--pd-coral` holding Deal Green across the practice site. What
+            changes is what the app CALLS ITSELF. */}
+        <span style={S.wordmark}>smb<span style={S.wordmarkX}>X</span></span>
       </div>
 
       {/* Module tab list */}
@@ -273,6 +281,9 @@ const S: Record<string, CSSProperties> = {
   },
   logo: { display: "flex", alignItems: "center", gap: 9, marginRight: 6, flex: "none" },
   wordmark: { fontSize: 19, fontWeight: 600, letterSpacing: "-.01em", color: T.ink },
+  // The X carries the accent, matching the logo mark on the practice site
+  // (/logo-green-x.png) — same gesture, one accent, no second hue.
+  wordmarkX: { color: T.blue },
   tabs: {
     // Content-width now (was flex:1) so the open-tab strip can take the flexible
     // middle space. The module nav stays fully visible; on a narrow window it
