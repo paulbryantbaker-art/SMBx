@@ -21,7 +21,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { newRenderPage } from './premiumPdfRenderer.js';
 import { listStudioAssets, getStudioAsset } from './studioAssets.js';
-import { fontFaceCss } from './fontEmbeds.js';
+import { fontFaceCss, cartaFontFaceCss } from './fontEmbeds.js';
 import { LEDGER, BLOCK_GLAZE } from '../../house/tokens.js';
 import { deckPages, deckCss } from '../../house/deck.js';
 
@@ -171,6 +171,29 @@ const BRASS = LEDGER.brass;
 // the Google Fonts CDN, and the container has no brand fonts — the CDN link
 // survives only as the fallback when the woff2 files are missing.
 const EMBEDDED_FONTS = fontFaceCss();
+/**
+ * THE CARTA FACES, embedded separately (2026-08-15).
+ *
+ * `FONTS` below is the LEDGER set — Inter, Fraunces, Plex Mono — and every
+ * artifact in this file that still carries the Ledger grammar needs it. But
+ * `houseDeckHtml` renders through `house/deck.ts`, whose CSS asks for
+ * `CARTA_TYPE.display` (Source Serif 4) and `CARTA_TYPE.sans` (Schibsted
+ * Grotesk), and NEITHER IS IN `FILES`. So the app has been shipping the Carta
+ * carousel grammar with the Carta faces missing: locally it silently borrowed
+ * whatever the machine had, and in the container — Node 22 Alpine with Noto and
+ * nothing else — both fell all the way through to the generic fallback, while
+ * `build-deck.mts` on Paul's Mac rendered the same spec correctly because it
+ * calls `cartaFontFaceCss()`.
+ *
+ * Nothing about this shows in a diff or an error: a missing @font-face is not a
+ * failure, it is a substitution. Same grammar, same tokens, same spec, and a
+ * different document — which is precisely the drift the shared engine exists to
+ * make impossible, arriving through the one seam the engine does not cover.
+ */
+const CARTA_FONTS = (() => {
+  const css = cartaFontFaceCss();
+  return css ? `<style>${css}</style>` : '';
+})();
 const FONTS = EMBEDDED_FONTS
   ? `<style>${EMBEDDED_FONTS}</style>`
   : `
@@ -741,7 +764,11 @@ export function houseDeckHtml(
       image: imageFor,
     };
     if (!assets.logo || !assets.texture) return null; // brand assets missing → legacy
-    return `<!DOCTYPE html><html><head><meta charset="utf-8">${FONTS}
+    // CARTA_FONTS, not FONTS — deckCss() asks for Source Serif 4 and Schibsted
+    // Grotesk, which the Ledger embed does not carry. See the note on the
+    // constant. This is the line that makes the app's carousel and a
+    // `build-deck.mts` carousel the same document rather than the same layout.
+    return `<!DOCTYPE html><html><head><meta charset="utf-8">${CARTA_FONTS}
 <style>${deckCss(assets.texture)}</style></head><body>${deckPages(spec, assets).join('')}</body></html>`;
   } catch (e) {
     console.warn('[composer] house deck grammar failed, using legacy template:', (e as Error).message);
