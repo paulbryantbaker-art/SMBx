@@ -319,9 +319,41 @@ const RATES: Record<string, { in: number; out: number }> = {
 };
 const FALLBACK_RATE = { in: 300, out: 1500 }; // price an unknown model as Sonnet, never as free.
 
-export function estimateCostCents(model: string, inputTokens: number, outputTokens: number): number {
+/**
+ * CACHED TOKENS ARE PRICED SEPARATELY, and leaving them out undercounts.
+ *
+ * Under prompt caching the API splits input three ways and `usage.input_tokens`
+ * is only the UNCACHED part. The other two arrive as their own fields and were
+ * being dropped on the floor, which meant the ceiling measured a fraction of
+ * the chat lane and would not have tripped when it should — the failure
+ * direction that matters for a runaway stop.
+ *
+ *   input_tokens                  full rate
+ *   cache_read_input_tokens       0.1x — cheap, but ~22k of them on every
+ *                                 cached deal-chat turn
+ *   cache_creation_input_tokens   1.25x — the expensive one, and it recurs
+ *                                 every time the cache TTL lapses, so a
+ *                                 low-traffic day pays it repeatedly
+ *
+ * Multipliers are Anthropic's published ratios and travel with the base rate,
+ * so a rate change moves all three together.
+ */
+export const CACHE_READ_MULTIPLIER = 0.1;
+export const CACHE_WRITE_MULTIPLIER = 1.25;
+
+export function estimateCostCents(
+  model: string,
+  inputTokens: number,
+  outputTokens: number,
+  cacheReadTokens = 0,
+  cacheWriteTokens = 0,
+): number {
   const rate = RATES[model] ?? FALLBACK_RATE;
-  return Math.round((inputTokens * rate.in + outputTokens * rate.out) / 1_000_000);
+  const inCents =
+    inputTokens * rate.in
+    + cacheReadTokens * rate.in * CACHE_READ_MULTIPLIER
+    + cacheWriteTokens * rate.in * CACHE_WRITE_MULTIPLIER;
+  return Math.round((inCents + outputTokens * rate.out) / 1_000_000);
 }
 
 /**
@@ -335,11 +367,17 @@ export function recordSpend(input: {
   model: string;
   inputTokens?: number;
   outputTokens?: number;
+  /** usage.cache_read_input_tokens — omitted means none, not unknown. */
+  cacheReadTokens?: number;
+  /** usage.cache_creation_input_tokens */
+  cacheWriteTokens?: number;
   userId?: number | null;
 }): void {
   const inTok = Math.max(0, Math.round(input.inputTokens ?? 0));
   const outTok = Math.max(0, Math.round(input.outputTokens ?? 0));
-  const cents = estimateCostCents(input.model, inTok, outTok);
+  const readTok = Math.max(0, Math.round(input.cacheReadTokens ?? 0));
+  const writeTok = Math.max(0, Math.round(input.cacheWriteTokens ?? 0));
+  const cents = estimateCostCents(input.model, inTok, outTok, readTok, writeTok);
 
   if (cache.month !== monthKey()) cache = { month: monthKey(), cents: 0, loadedAt: Date.now() };
   cache.cents += cents;
@@ -350,7 +388,7 @@ export function recordSpend(input: {
       const { sql } = await import('../db.js');
       await sql`
         INSERT INTO api_spend_ledger (lane, source, model, input_tokens, output_tokens, cost_cents, user_id)
-        VALUES (${input.lane}, ${input.source}, ${input.model}, ${inTok}, ${outTok}, ${cents}, ${input.userId ?? null})
+        VALUES (${input.lane}, ${input.source}, ${input.model}, ${inTok + readTok + writeTok}, ${outTok}, ${cents}, ${input.userId ?? null})
       `;
     } catch (err: any) {
       console.error('[api-spend] ledger write failed:', err?.message);

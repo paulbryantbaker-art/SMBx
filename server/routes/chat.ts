@@ -484,8 +484,19 @@ chatRouter.post('/message', async (req, res) => {
       // still billed, so they still have to be recorded.
       let inTok = 0;
       let outTok = 0;
+      let cacheRead = 0;
+      let cacheWrite = 0;
       for await (const event of stream) {
-        if (event.type === 'message_start') inTok = event.message.usage?.input_tokens ?? 0;
+        if (event.type === 'message_start') {
+          // `input_tokens` is the UNCACHED part only — the other two fields are
+          // where a cached prompt's real cost lives. Recording just the first
+          // one undercounted the chat lane badly enough that the monthly
+          // ceiling could not have tripped on it.
+          const u: any = event.message.usage ?? {};
+          inTok = u.input_tokens ?? 0;
+          cacheRead = u.cache_read_input_tokens ?? 0;
+          cacheWrite = u.cache_creation_input_tokens ?? 0;
+        }
         else if (event.type === 'message_delta') outTok = event.usage?.output_tokens ?? outTok;
         if (clientDisconnected) break;
         if (
@@ -499,7 +510,8 @@ chatRouter.post('/message', async (req, res) => {
       recordSpend({
         lane: 'chat', source: 'chat.message.stream',
         model: resolveChatModel(normalizedModelPreference) || STREAMING_MODEL,
-        inputTokens: inTok, outputTokens: outTok, userId,
+        inputTokens: inTok, outputTokens: outTok,
+        cacheReadTokens: cacheRead, cacheWriteTokens: cacheWrite, userId,
       });
     } catch (streamErr: any) {
       if (clientDisconnected) {
