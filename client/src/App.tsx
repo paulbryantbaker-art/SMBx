@@ -97,9 +97,15 @@ import Terms from './pages/public/Terms';
 const V6App = lazy(() => import('./components/v6/V6App'));
 // 2026-07-11 pivot (THE LINE v2): the public product is retired. The logged-out
 // surface is the practice site (corpdevservices bundle): landing + five
-// buyer-segment pages, converting into Yulia intake + booked calls. The old
-// product-marketing pages (marketing/pages/, marketing/legacy/) stay in the
-// tree unrouted as a repurposing pool.
+// buyer-segment pages, converting into Yulia intake + booked calls.
+//
+// The old product-marketing pages are DELETED as of 2026-08-15 (Paul: "this is
+// old from when I was going to sell the app - not relevant any more"). They sat
+// unrouted "as a repurposing pool" for five weeks and were never repurposed —
+// their copy sells a product that does not exist, so anything drawn from them
+// would have needed rewriting anyway. The redirect stubs below stay: an old
+// inbound link to /pricing or /raise still lands on the practice site rather
+// than a 404.
 const PracticeLanding = lazy(() => import('./practice/Landing'));
 const PracticeIndustries = lazy(() => import('./practice/Industries'));
 const PracticeSegment = lazy(() => import('./practice/SegmentPage'));
