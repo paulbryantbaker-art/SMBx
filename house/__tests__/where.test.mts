@@ -77,6 +77,33 @@ is('Cowork holds only the input layer',
   PROCESSES.filter(p => p.owner === 'workspace').map(p => p.id).sort(),
   ['data-wrangling', 'market-research', 'master-synthesis', 'target-screen', 'weekly-sweep']);
 
+/* ── decided ≠ built ──────────────────────────────────────────────────── */
+
+/* Both of these shipped in this table as app-owned and LIVE, and neither claim
+   survived reading the code: corpDevDocs.ts generates three of PLAYBOOK's four
+   (no target map), and nothing in the app produces §5's deal memo, diligence
+   plan or term framework. A routing table that sends work somewhere it dies is
+   worse than none, so the gap is a field and it is pinned here. Delete a gap
+   only when the app can actually do the thing. */
+is('the two known gaps are recorded, and only those',
+  PROCESSES.filter(p => p.gap).map(p => p.id).sort(),
+  ['corp-dev-documents', 'deal-documents']);
+
+ok('a gap names the target map specifically',
+  /target map/i.test(byId('corp-dev-documents')?.gap ?? ''));
+ok('…and the deal-document gap says it is not implemented at all',
+  /NOT IMPLEMENTED/.test(byId('deal-documents')?.gap ?? ''));
+
+/* A gap must not be silently dropped from the document — that is exactly how
+   it would go back to reading as "done". */
+ok('every gap is printed in the rendered doc',
+  PROCESSES.filter(p => p.gap).every(p => renderMarkdown().includes(p.gap!)));
+
+/* Nothing Cowork owns should carry a gap: a gap means the DECIDED owner cannot
+   do it, and the workspace can do everything assigned to it today. */
+ok('no workspace-owned process carries a gap',
+  PROCESSES.filter(p => p.owner === 'workspace').every(p => !p.gap));
+
 /* The cost story, which is the evidence the decision rests on. */
 is('exactly the research paths can spend dollars',
   PROCESSES.filter(p => p.cost === 'expensive').map(p => p.id).sort(),

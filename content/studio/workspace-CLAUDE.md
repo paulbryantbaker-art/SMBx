@@ -288,6 +288,32 @@ carries the interview.
 
 ## The jobs
 
+> **READ THIS FIRST — the scope changed on 2026-08-14.** This workspace is now
+> the **INPUT LAYER**. Several jobs below describe work that moved to the app,
+> and they are kept because the SPEC in them is still the standard that work is
+> held to, wherever it renders. `WHERE.md` is the authority; this is the
+> summary.
+>
+> | Job | Now |
+> |---|---|
+> | 0 · Start a market | **yours** |
+> | 1 · Fold research into the master | **yours** |
+> | 2 · Verify the master | **yours** |
+> | 3 · Derive a document | **app** — except the **target map**, which the app cannot generate (it does market map, who's who and thesis only). Build target maps here. |
+> | 4 · Produce collateral | **app.** The builders here still work and stay supported; use them when you want a render without opening the app. |
+> | 5 · Deal analysis | **app is the destination, but nothing there produces §5's memo, diligence plan or term framework yet — so write them HERE, to PLAYBOOK §5.** The deal MODEL is the app's and always was. |
+> | 6 · Find clients | **yours** — the research and the register. The pipeline itself is the app's CRM; push with `push-crm.mts`. |
+> | 7 · Track the client work | **app.** `engagements.mjs` still runs and is the fallback while the CRM is where a stage lives. |
+>
+> **The four jobs that are wholly yours: research a market, verify it,
+> synthesize the master, wrangle data into the app.** Everything else you
+> either hand over or do on the app's behalf until it catches up.
+>
+> **PLAYBOOK, FORMATS and DESIGN did not move.** They are the SPEC — what a
+> good document and a good piece of collateral contain — and the app's output
+> is held to them exactly as a local build is. When you check the app's work,
+> check it against those.
+
 ### 0. Start a market
 
 ```

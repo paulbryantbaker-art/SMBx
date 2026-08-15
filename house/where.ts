@@ -98,6 +98,23 @@ export interface Process {
   workflow: string[];
   /** Words a person might use when asking where this goes. */
   aka: string[];
+  /**
+   * What the owner CANNOT do yet, when the routing decision has outrun the
+   * implementation.
+   *
+   * Added 2026-08-14 after this table shipped saying corp-dev documents and
+   * deal documents were live in the app. Both were marked app-owned on Paul's
+   * instruction, the lane was switched on, and neither claim survived a look at
+   * the code: `corpDevDocs.ts` generates three of PLAYBOOK's four (no target
+   * map), and nothing in the app produces PLAYBOOK §5's deal memo, diligence
+   * plan or term framework at all.
+   *
+   * A routing table that says "the app" for something the app cannot produce is
+   * worse than no table — it sends the work somewhere it dies. So a decided
+   * destination and a working implementation are now two different fields, and
+   * the gap is printed next to the answer rather than discovered later.
+   */
+  gap?: string;
 }
 
 /* `$REPO` in a workflow line means the engine checkout; the workspace laws
@@ -140,6 +157,7 @@ export const PROCESSES: Process[] = [
       'PLAYBOOK.md §1–4 remains the SPEC for what each contains, wherever it renders.',
       'The master these derive from still lives on disk and is read, never copied.',
     ],
+    gap: 'The TARGET MAP is not implemented — corpDevDocs.ts covers market map, who\'s who and thesis only, three of PLAYBOOK\'s four. Build target maps HERE until it is. That is the one PLAYBOOK is most emphatic about, because a master contains no target list and inventing one invents companies.',
     aka: ['market map', 'who\'s who', 'thesis', 'target map', 'client document'],
   },
   {
@@ -227,6 +245,7 @@ export const PROCESSES: Process[] = [
       'Never restate the model\'s figures by hand — reference the model.',
       'Confidential to the engagement: never a source for anything public.',
     ],
+    gap: 'NOT IMPLEMENTED ANYWHERE IN THE APP YET. The nearest deliverables are buy_deal_screening_memo (pre-LOI screening, not the §5b memo) and an LOI draft (which §5d deliberately is NOT — drafting is counsel\'s). Write all three HERE to PLAYBOOK §5 until the app has them.',
     aka: ['memo', 'ic packet', 'diligence plan', 'term sheet', 'terms', 'loi framework'],
   },
 
@@ -463,11 +482,11 @@ export function renderMarkdown(): string {
   L.push('');
   L.push('## The table');
   L.push('');
-  L.push('| Process | Where | Cost |');
-  L.push('|---|---|---|');
+  L.push('| Process | Where | Cost | Ready? |');
+  L.push('|---|---|---|---|');
   for (const p of PROCESSES) {
     const cost = p.cost === 'expensive' ? '**can spend dollars**' : p.cost === 'drip' ? 'a drip' : 'free';
-    L.push(`| ${p.name} | ${WHERE_LABEL[p.owner]} | ${cost} |`);
+    L.push(`| ${p.name} | ${WHERE_LABEL[p.owner]} | ${cost} | ${p.gap ? '⚠️ partly — see below' : 'yes'} |`);
   }
   L.push('');
 
@@ -486,6 +505,10 @@ export function renderMarkdown(): string {
       L.push('');
       L.push(p.why);
       L.push('');
+      if (p.gap) {
+        L.push(`> ⚠️ **Not fully there yet.** ${p.gap}`);
+        L.push('');
+      }
       for (const step of p.workflow) L.push(`- ${step}`);
       L.push('');
     }

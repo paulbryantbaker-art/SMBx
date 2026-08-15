@@ -41,26 +41,26 @@ systems painful.
 
 ## The table
 
-| Process | Where | Cost |
-|---|---|---|
-| Market research — build a master from scratch | **Here** — this workspace | **can spend dollars** |
-| Fold research into the market master | **Here** — this workspace | **can spend dollars** |
-| Market map · who's who · target map · thesis | **The app** | a drip |
-| Build the candidate list for a market | **Here** — this workspace | free |
-| Data wrangling — messy input into something structured | **Here** — this workspace | free |
-| The 5-stage sourcing engine | **The app** | a drip |
-| DEFINITIVE — gates, model slots, DealState | **The app** | free |
-| Valuation and deal modelling | **The app** | free |
-| Deal pipeline — stage, owner, next action | **The app** | free |
-| Deal memo · diligence plan · term framework | **The app** | a drip |
-| Client register and pipeline | **The app** | free |
-| Outreach queue and sends | **The app** | free |
-| Lawyers, CPAs, lenders, sellers' advisors | **The app** | free |
-| LinkedIn carousels, one-pagers, reports | **The app** | a drip |
-| The public site and published research | **The app** | free |
-| LinkedIn analytics import | **The app** | free |
-| The Saturday research sweep | **Here** — this workspace | **can spend dollars** |
-| The citation audit | **Either** — identical either side | free |
+| Process | Where | Cost | Ready? |
+|---|---|---|---|
+| Market research — build a master from scratch | **Here** — this workspace | **can spend dollars** | yes |
+| Fold research into the market master | **Here** — this workspace | **can spend dollars** | yes |
+| Market map · who's who · target map · thesis | **The app** | a drip | ⚠️ partly — see below |
+| Build the candidate list for a market | **Here** — this workspace | free | yes |
+| Data wrangling — messy input into something structured | **Here** — this workspace | free | yes |
+| The 5-stage sourcing engine | **The app** | a drip | yes |
+| DEFINITIVE — gates, model slots, DealState | **The app** | free | yes |
+| Valuation and deal modelling | **The app** | free | yes |
+| Deal pipeline — stage, owner, next action | **The app** | free | yes |
+| Deal memo · diligence plan · term framework | **The app** | a drip | ⚠️ partly — see below |
+| Client register and pipeline | **The app** | free | yes |
+| Outreach queue and sends | **The app** | free | yes |
+| Lawyers, CPAs, lenders, sellers' advisors | **The app** | free | yes |
+| LinkedIn carousels, one-pagers, reports | **The app** | a drip | yes |
+| The public site and published research | **The app** | free | yes |
+| LinkedIn analytics import | **The app** | free | yes |
+| The Saturday research sweep | **Here** — this workspace | **can spend dollars** | yes |
+| The citation audit | **Either** — identical either side | free | yes |
 
 ## Sourcing — finding markets and targets
 
@@ -89,6 +89,8 @@ Every source's full text in one call, plus a retry when the citation audit fails
 **The app** · a drip — cents
 
 Moved to the app 2026-08-14 (Paul). These are practice OUTPUT, and they interleave with the deal and the client they are written for — a thesis is held for one buyer profile.
+
+> ⚠️ **Not fully there yet.** The TARGET MAP is not implemented — corpDevDocs.ts covers market map, who's who and thesis only, three of PLAYBOOK's four. Build target maps HERE until it is. That is the one PLAYBOOK is most emphatic about, because a master contains no target list and inventing one invents companies.
 
 - App → Studio → the market. corpDevDocs.ts generates all three.
 - LIVE since 2026-08-14: STUDIO_IN_APP is true and the studio lane is on.
@@ -164,6 +166,8 @@ Interactive modelling is a UI problem — a what-if wants a slider, not a regene
 **The app** · a drip — cents
 
 Moved to the app 2026-08-14 (Paul). These sit inside the deal sitting — written from the model, the gates and the diligence state, all of which are app rows. Exporting to write them elsewhere was the back-and-forth.
+
+> ⚠️ **Not fully there yet.** NOT IMPLEMENTED ANYWHERE IN THE APP YET. The nearest deliverables are buy_deal_screening_memo (pre-LOI screening, not the §5b memo) and an LOI draft (which §5d deliberately is NOT — drafting is counsel's). Write all three HERE to PLAYBOOK §5 until the app has them.
 
 - App → the deal → documents, alongside the model they are written from.
 - PLAYBOOK.md §5b–5d remains the SPEC for what each one contains.

@@ -13,14 +13,17 @@
  *   where.mts <anything>    which system owns it, why, and how it runs
  *   where.mts list          every process, grouped
  *   where.mts app|workspace just that side's responsibilities
- *   where.mts check <id>    exit 0 if the workspace owns it, 1 if the app does
+ *   where.mts check <id>    exit 0 = do it here · 1 = the app's · 2 = undecided
  *
- * `check` is the programmatic form and exists for scripts and for a session
- * that wants a hard answer rather than prose — a weekly agent can gate on it,
- * and a session about to start something can confirm it is in the right place
- * first. Exit 2 means UNKNOWN, which is deliberately distinct from "the app
- * owns it": an unrecognised process is one nobody has decided about, and
- * silently treating it as somebody's is how work ends up in two systems.
+ * `check` is the programmatic form, for scripts and for a session that wants a
+ * hard answer rather than prose. It answers the question a caller actually has
+ * — "may I do this here, now?" — which is NOT the same as who owns it: a
+ * process the app owns but cannot yet perform (see `gap`) exits 0, because
+ * today the honest answer is yes and the gap text says why.
+ *
+ * Exit 2 means UNKNOWN, deliberately distinct from "the app owns it": an
+ * unrecognised process is one nobody has decided about, and silently treating
+ * it as somebody's is how work ends up in two systems.
  */
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -46,6 +49,11 @@ function show(p: Process): void {
   console.log(`  where    ${OWNER_LABEL[p.owner]}`);
   console.log(`  cost     ${COST_LABEL[p.cost]}`);
   console.log(`  why      ${wrap(p.why, 11)}`);
+  if (p.gap) {
+    console.log('');
+    console.log(`  ⚠️  NOT FULLY THERE YET`);
+    console.log(`           ${wrap(p.gap, 11)}`);
+  }
   console.log('');
   for (const step of p.workflow) console.log(`     ${step}`);
 }
@@ -101,12 +109,12 @@ if (cmd === 'list' || (!cmd && false)) {
     console.log(`  ${title[g]}`);
     for (const p of PROCESSES.filter(x => x.group === g)) {
       const w = p.owner === 'app' ? 'app      ' : p.owner === 'workspace' ? 'workspace' : 'either   ';
-      const flag = p.cost === 'expensive' ? '  $' : '';
+      const flag = (p.cost === 'expensive' ? '  $' : '') + (p.gap ? '  ⚠️' : '');
       console.log(`    ${w}  ${p.name}${flag}`);
     }
     console.log('');
   }
-  console.log('  $ = one press can spend dollars.');
+  console.log('  $ = one press can spend dollars.   ⚠️ = decided, but the owner cannot do all of it yet.');
   console.log('  where.mts <anything>  for the why and the workflow.\n');
   process.exit(0);
 }
@@ -140,9 +148,11 @@ if (cmd === 'check') {
     for (const t of TIEBREAK) console.error(`  · ${t}`);
     process.exit(2);
   }
-  console.log(`${p.id}\t${p.owner}`);
-  // 0 = the workspace may proceed. 1 = it is the app's. 2 = undecided.
-  process.exit(p.owner === 'app' ? 1 : 0);
+  console.log(`${p.id}\t${p.owner}${p.gap ? '\tgap' : ''}`);
+  if (p.gap) console.error(`gap: ${p.gap}`);
+  // 0 = do it here (workspace-owned, or app-owned with a gap the app cannot
+  // yet fill). 1 = the app's and the app can do it. 2 = undecided.
+  process.exit(p.owner === 'app' && !p.gap ? 1 : 0);
 }
 
 /* ── the question ─────────────────────────────────────────────────────── */
@@ -167,7 +177,7 @@ if (cmd) {
     console.log(`  also matched: ${hits.slice(1, 4).map(p => p.id).join(', ')}`);
   }
   console.log('');
-  process.exit(hits[0].owner === 'app' ? 1 : 0);
+  process.exit(hits[0].owner === 'app' && !hits[0].gap ? 1 : 0);
 }
 
 /* ── no arguments ─────────────────────────────────────────────────────── */
@@ -175,16 +185,22 @@ if (cmd) {
 console.log(`
 ${ONE_LINE}
 
-  Research is the only path that spends real money, and it is a quarterly
-  batch rather than something you do mid-deal — so it stays here, and nothing
-  else has to. Everything that INTERLEAVES in one sitting — sourcing, the
-  model, deal state, the CRM, the call — is the app, together, because
-  splitting interleaved work is what made going back and forth hard.
+  Cowork is the INPUT layer: gathering sources, aggregating them into a
+  master, deep search, and wrangling messy data into something structured.
+  Everything the practice PRODUCES or TRACKS — the deal, the CRM, the
+  documents, the collateral — is the app, in one place, because that is the
+  work that interleaves and splitting it is what made moving between systems
+  painful.
+
+  Two of the app's are DECIDED BUT NOT BUILT — the target map, and the deal
+  memo / diligence plan / term framework. Those still happen here. The list
+  command marks them, and check exits 0 for them, because today the answer
+  is yes.
 
   where.mts <anything>     which system owns it, why, and how to run it
   where.mts list           every process, grouped
   where.mts app            what the app is responsible for
   where.mts workspace      what this workspace is responsible for
-  where.mts check <id>     exit 0 = yours · 1 = the app's · 2 = undecided
+  where.mts check <id>     exit 0 = do it here · 1 = the app's · 2 = undecided
 `);
 process.exit(0);

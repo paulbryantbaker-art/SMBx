@@ -62,6 +62,7 @@
         "PLAYBOOK.md §1–4 remains the SPEC for what each contains, wherever it renders.",
         "The master these derive from still lives on disk and is read, never copied."
       ],
+      "gap": "The TARGET MAP is not implemented — corpDevDocs.ts covers market map, who's who and thesis only, three of PLAYBOOK's four. Build target maps HERE until it is. That is the one PLAYBOOK is most emphatic about, because a master contains no target list and inventing one invents companies.",
       "aka": [
         "market map",
         "who's who",
@@ -219,6 +220,7 @@
         "Never restate the model's figures by hand — reference the model.",
         "Confidential to the engagement: never a source for anything public."
       ],
+      "gap": "NOT IMPLEMENTED ANYWHERE IN THE APP YET. The nearest deliverables are buy_deal_screening_memo (pre-LOI screening, not the §5b memo) and an LOI draft (which §5d deliberately is NOT — drafting is counsel's). Write all three HERE to PLAYBOOK §5 until the app has them.",
       "aka": [
         "memo",
         "ic packet",
