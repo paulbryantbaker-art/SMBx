@@ -3,6 +3,7 @@
  * Sources: Census CBP, BLS QCEW, FRED
  */
 import { sql } from '../db.js';
+import { RATE_INDEX, SBA_SPREAD_STANDARD_PCT } from '../../house/capital.js';
 
 const CENSUS_CBP_BASE = 'https://api.census.gov/data/2023/cbp';
 const FRED_BASE = 'https://api.stlouisfed.org/fred/series/observations';
@@ -289,12 +290,19 @@ export async function calculateSBABankability(params: {
   const termYears = params.loanTermYears || 10;
   const loanAmount = params.purchasePrice * (1 - downPct);
 
-  // Try to get current SBA rate from FRED (Prime + 2.75% for SBA 7(a))
-  let primeRate = 8.5; // fallback
+  // Try to get current SBA rate from FRED (Prime + 2.75% for SBA 7(a)).
+  //
+  // THE FALLBACK IS NOW SHARED (2026-08-15). It used to be a bare `8.5` here
+  // while `capitalStackEngine.ts` carried `PRIME_RATE = 7.50` — 100bp apart, in
+  // the same codebase, neither dated, neither aware of the other. Both now read
+  // `house/capital.ts` RATE_INDEX, which is the one place a prime rate lives
+  // and the one place it gets a date and a source when someone verifies it.
+  // FRED still wins when it answers; the index is only the offline value.
+  let primeRate = (RATE_INDEX.prime.pct ?? 0.075) * 100;
   const primeData = await fetchFREDData('PRIME');
   if (primeData) primeRate = primeData.latestValue;
 
-  const sbaSpread = 2.75; // typical SBA 7(a) spread
+  const sbaSpread = SBA_SPREAD_STANDARD_PCT * 100; // typical SBA 7(a) spread
   const interestRate = primeRate + sbaSpread;
   const monthlyRate = interestRate / 100 / 12;
   const numPayments = termYears * 12;

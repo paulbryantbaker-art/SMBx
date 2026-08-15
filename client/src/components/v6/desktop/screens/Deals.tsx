@@ -77,6 +77,7 @@ import {
 import { dueLabel, daysUntil } from "../../../../lib/crm";
 import { useDraft } from "../../../../hooks/useDraft";
 import { ValuationPanel } from "./ValuationPanel";
+import { CapitalPanel } from "./CapitalPanel";
 import { T } from "../atlasTokens";
 
 const PAGE_SIZE = 25;
@@ -1402,6 +1403,15 @@ function DealPane({
             house/valuation.ts; this renders it. */}
         <div style={{ borderTop: `1px solid ${T.rowDiv}`, paddingTop: 14 }}>
           <ValuationPanel dealId={row.rawId} sde={row.sde} ebitda={row.ebitda} />
+        </div>
+
+        {/* THE CAPITAL STACK (2026-08-15). Directly under the valuation because
+            the two are one question: what the business is worth, and what the
+            money to buy it costs. The panel refuses to produce a WACC it cannot
+            source — see its header for why that is better than the 0.14 the DCF
+            currently defaults to. */}
+        <div style={{ borderTop: `1px solid ${T.rowDiv}`, paddingTop: 14 }}>
+          <CapitalPanel dealId={row.rawId} askingCents={row.askingPrice ?? null} />
         </div>
 
         <div style={{ borderTop: `1px solid ${T.rowDiv}`, paddingTop: 14 }}>

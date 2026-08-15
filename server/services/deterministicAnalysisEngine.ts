@@ -394,7 +394,21 @@ function buildDcfAnalysis(facts: DealFacts, common: Partial<AnalysisOutput>): An
   const taxRate = pctFromUnknown(facts.financials.tax_rate_pct) ?? 0.26;
   const capexPct = pctFromUnknown(facts.financials.capex_pct) ?? 0.025;
   const wcInvestmentPct = pctFromUnknown(facts.financials.working_capital_investment_pct) ?? 0.01;
-  const wacc = pctFromUnknown(facts.financials.wacc_pct) ?? 0.14;
+  /* THE DISCOUNT RATE SAYS WHERE IT CAME FROM (2026-08-15).
+     `?? 0.14` is unchanged, because every assumption in this engine is a
+     defaulted house figure and singling one out to refuse would break the
+     contract the rest of it runs on. What changes is that the default no
+     longer passes silently: the metric's basis line now reads "house default"
+     rather than presenting 14% as if somebody chose it. A discount rate moves
+     enterprise value by tens of percent, and this is the one assumption here
+     with a real source available — `deals.capital_stack` (migration 127), which
+     `house/capital.ts` turns into a WACC built from the client's own coupons.
+     Populate `wacc_pct` from that and this label flips to "client stack". */
+  const waccSupplied = pctFromUnknown(facts.financials.wacc_pct);
+  const wacc = waccSupplied ?? 0.14;
+  const waccBasis = waccSupplied == null
+    ? 'house default — no capital stack on file'
+    : 'supplied';
   const terminalGrowth = pctFromUnknown(facts.financials.terminal_growth_pct) ?? 0.025;
   const rows = forecastRows(revenue, growth, margin, taxRate, capexPct, wcInvestmentPct);
   const terminalValue = rows.length && wacc > terminalGrowth
@@ -407,7 +421,7 @@ function buildDcfAnalysis(facts: DealFacts, common: Partial<AnalysisOutput>): An
   return finalizeAnalysis(facts, 'dcf', common, {
     summary: `${facts.name} DCF is modeled from revenue growth, margin, reinvestment, discount rate, and terminal value assumptions.`,
     metrics: [
-      metric('enterprise_value', 'DCF enterprise value', enterpriseValue, fmtMoney(enterpriseValue), `${fmtPct(wacc)} WACC · ${fmtPct(terminalGrowth)} terminal growth`, varianceTone(enterpriseValue && facts.askingCents ? (facts.askingCents - enterpriseValue) / enterpriseValue : null)),
+      metric('enterprise_value', 'DCF enterprise value', enterpriseValue, fmtMoney(enterpriseValue), `${fmtPct(wacc)} WACC (${waccBasis}) · ${fmtPct(terminalGrowth)} terminal growth`, varianceTone(enterpriseValue && facts.askingCents ? (facts.askingCents - enterpriseValue) / enterpriseValue : null)),
       metric('year_5_revenue', 'Year 5 revenue', rows[4]?.revenue ?? null, fmtMoney(rows[4]?.revenue), `${fmtPct(growth)} annual growth`),
       metric('terminal_value', 'PV terminal value', pvTerminal, fmtMoney(pvTerminal), 'Discounted terminal value'),
       metric('fcf_conversion', 'FCF conversion', 1 - taxRate - capexPct - wcInvestmentPct, fmtPct(1 - taxRate - capexPct - wcInvestmentPct), 'From EBITDA to unlevered FCF'),
