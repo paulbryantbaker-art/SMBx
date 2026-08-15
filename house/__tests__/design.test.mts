@@ -446,18 +446,36 @@ is('the error screen no longer names Yulia at a stranger', /Yulia/.test(EB_CODE)
    names are historical (T.blue holds Deal Green — the --pd-coral
    precedent); these cases pin the marriage AND the two laws that must
    survive it: the verdict green stays distinct from the brand accent
-   (two-greens law), and no Google-era hue survives in the gradients. */
+   (two-greens law), and no Google-era hue survives in the gradients.
+
+   RE-POINTED TO CARTA 2026-08-15. These read LEDGER, and three of them were
+   actively HOLDING THE SHELL BACK — asserting the warm surfaces and the brass
+   gradient, so the re-skin could not land without them going red. That is the
+   right behaviour from a pin and the wrong content; a test that fails when the
+   system improves is doing its job badly only if nobody updates it. */
 const { T } = await import('../../client/src/components/v6/desktop/atlasTokens');
 const { M } = await import('../../client/src/components/v6/atlasmobile/mobileTokens');
-is('the app primary slot is Deal Green', T.blue, LEDGER.green);
-is('the violet slot collapsed into the accent', T.violet, LEDGER.green);
-is('app surfaces are the bone family',
-  [T.surface, T.border, T.hair], [LEDGER.bone, LEDGER.rule, LEDGER.hair]);
+is('the app primary slot is Deal Green', T.blue, CARTA.green);
+is('the violet slot collapsed into the accent', T.violet, CARTA.green);
+/* Was `[LEDGER.bone, LEDGER.rule, LEDGER.hair]` — the warm family. Two of those
+   three are in the retired table (#DED8CC, #EAE5DC), so this assertion was
+   PINNING the shell to Ledger: the token re-skin could not land without it
+   going red. Carta's neutrals are cool and its canvas is white. */
+is('app surfaces are the Carta neutrals',
+  [T.surface, T.border, T.hair], [CARTA.bone, CARTA.hair, CARTA.hair]);
 is('the verdict green did NOT adopt the brand accent (two-greens law)',
   T.green !== LEDGER.green && T.green.toLowerCase() === '#1f8a5b', true);
-is('the sparkle gradient speaks Aurora, not Google',
-  !T.spark.includes('4285F4') && T.spark.includes(LEDGER.jade) && T.spark.includes(LEDGER.brass), true);
-is('the mobile active capsule is the accent tint', M.glassNav.activeBg, LEDGER.greenTint);
+/* The sparkle ran jade → green → BRASS, and this asserted the brass was there.
+   Carta has one accent, so the gradient now runs WITHIN it — bright green to
+   Deal Green — and the assertion inverts: brass must be absent. Checked against
+   the literal hex rather than a token, because the point is that no warm value
+   reaches the gradient by any route. */
+is('the sparkle gradient stays inside the one accent',
+  !T.spark.includes('4285F4')
+  && T.spark.includes(CARTA.greenBright)
+  && !T.spark.toUpperCase().includes('E8A62B')
+  && !T.spark.toUpperCase().includes('F5C452'), true);
+is('the mobile active capsule is the accent tint', M.glassNav.activeBg, CARTA.greenTint);
 is('the mobile frame is the Claude-app neutral (Paul-sampled)', M.frameBg, '#F9F9F9');
 const ATLAS_CSS = readFileSync(path.join(ROOT, 'client/src/components/v6/desktop/atlas.css'), 'utf8');
 is('the atlas var mirror moved with the tokens',
@@ -482,6 +500,44 @@ for (const f of v6Files) {
   for (const d of DEAD_APP) if (up.includes(d)) offenders.push(`${f}:${d}`);
 }
 is('no retired era hex survives in v6 code', offenders, []);
+
+/* ── the app shell imports CARTA, not LEDGER (2026-08-15) ─────────────────
+   The check above catches a retired HEX pasted into v6. It could never catch
+   the shell importing `LEDGER` and reading values that happen to have survived
+   the restyle — which is exactly what it was doing: 32 references across
+   atlasTokens, mobileTokens, rt.ts and YuliaFab, of which only six lines
+   touched anything retired (`rule`, `hair`, a brass gradient) plus five
+   hand-mixed warm bone tints.
+
+   That is the subtler half of the same problem the collateral builders had. A
+   module reading `LEDGER.green` is correct TODAY and wrong the moment Carta
+   moves a value Ledger keeps — and it reads, to anyone auditing, as a surface
+   still on the old system. Source of a token is documentation.
+
+   Comments are stripped: several of these files legitimately explain what they
+   stopped doing, and a check that reads the explanation as the behaviour is a
+   mistake this suite has now made three times in one day. */
+{
+  const ledgerInV6: string[] = [];
+  for (const f of v6Files) {
+    if (!/\.(ts|tsx)$/.test(f)) continue;
+    const code = readFileSync(path.join(V6DIR, f), 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/(^|[^:])\/\/.*$/gm, '$1');
+    if (/\bLEDGER\b/.test(code)) ledgerInV6.push(String(f));
+  }
+  is('the app shell reads CARTA, never LEDGER', ledgerInV6, []);
+
+  /* The semantic warning/danger warms are a DELIBERATE exception and are
+     documented as one in atlasTokens. Asserted so the exception stays visible:
+     if it is ever removed, this fails and someone has to read the note before
+     concluding the shell drifted. Carta's no-warm-colour rule governs the
+     brand accent in collateral, where nothing has a warning state; an app that
+     cannot say something is wrong has lost more than it gained. */
+  const atlas = readFileSync(path.join(V6DIR, 'desktop/atlasTokens.ts'), 'utf8');
+  is('the semantic warm exception is still documented, not silent',
+    /SEMANTIC WARNING \/ DANGER/.test(atlas) && /deliberately KEPT under Carta/.test(atlas), true);
+}
 
 console.log(`\n${pass}/${total} passed`);
 process.exit(pass === total ? 0 : 1);

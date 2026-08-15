@@ -74,7 +74,7 @@ for (const lane of SPEND_LANES) {
 // WHICH lanes should be on. These four are the decision.
 eq('chat is on — Yulia is the product',        spendAllowed('chat'),      true);
 eq('marketing is on — the public funnel',      spendAllowed('marketing'), true);
-eq('sourcing is on — app-side, free tier',     spendAllowed('sourcing'),  true);
+eq('sourcing is OFF — pre-IoI, so the studio', spendAllowed('sourcing'),  false);
 eq('studio is OFF — collateral is Cowork\'s',  spendAllowed('studio'),    false);
 eq('research is OFF — the only dollar press',  spendAllowed('research'),  false);
 

@@ -49,6 +49,8 @@
     "test:fulleval": "npx tsx house/__tests__/fullEvaluation.test.mts",
     "test:deal": "npx tsx house/__tests__/deal.test.mts",
     "test:where": "npx tsx house/__tests__/where.test.mts",
+    "test:retired": "npx tsx house/__tests__/retired.test.mts",
+    "test:valuation": "npx tsx house/__tests__/valuation.test.mts",
     "test:engine-parity": "npx tsx house/__tests__/engine-parity.test.mts",
     "seed:demo-user": "node scripts/seed-demo-user-data.mjs",
     "design:extract": "node scripts/extract-design-tokens.mjs",

@@ -10,7 +10,7 @@
  */
 import type { CSSProperties } from "react";
 import { RT } from "./redesign/rt";
-import { rgba, LEDGER } from "../../../../../house/tokens";
+import { rgba, CARTA } from "../../../../../house/tokens";
 
 export function YuliaFab({
   onOpen,
@@ -51,7 +51,7 @@ const S: Record<string, CSSProperties> = {
     borderRadius: "50%",
     background: RT.agent,
     border: "none",
-    boxShadow: `0 10px 26px ${rgba(LEDGER.jade, 0.34)}, 0 2px 6px ${rgba(LEDGER.ink, 0.14)}`,
+    boxShadow: `0 10px 26px ${rgba(CARTA.greenBright, 0.34)}, 0 2px 6px ${rgba(CARTA.ink, 0.14)}`,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",

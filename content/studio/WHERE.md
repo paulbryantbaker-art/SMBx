@@ -49,7 +49,7 @@ systems painful.
 | Build the candidate list for a market | **Here** — this workspace | free | yes |
 | Data wrangling — messy input into something structured | **Here** — this workspace | free | yes |
 | Pre-IoI screening math — is this candidate worth an IoI? | **Here** — this workspace | free | ⚠️ partly — see below |
-| The 5-stage sourcing engine | **The app** | a drip | ⚠️ partly — see below |
+| Target sourcing and screening | **Here** — this workspace | free | ⚠️ partly — see below |
 | DEFINITIVE — gates, model slots, DealState | **The app** | free | yes |
 | Valuation and deal modelling | **The app** | free | yes |
 | The data room and financial documents | **The app** | free | yes |
@@ -137,17 +137,19 @@ MARKET-shaped. Screening thirty candidates off a register must not require thirt
 - never a live modelling surface. Live scenario work is in-app, full stop.
 - At the IoI the candidate is PROMOTED and its runs move with it: see ioi-promotion.
 
-### The 5-stage sourcing engine
+### Target sourcing and screening
 
-**The app** · a drip — cents
+**Here — this workspace** · free, calls no model
 
-Haiku per candidate on a separate Places key that is free under 5k/month, feeding the CRM and the pipeline directly — the app-side half of the pre-IoI asymmetry.
+PRE-IoI, therefore market-shaped (Paul, 2026-08-15: "there will be no sourcing in the app the app is internal now IoI to integration"). Finding candidates is one-to-many and speculative with no counterparty — the definition the seam splits on. The app begins at the IoI, when a named target becomes a deal.
 
-> ⚠️ **Not fully there yet.** TWO CITATION-LAW DEFECTS, both verified still present on 2026-08-15. (1) deepAnalysisPrompt.ts line 69 estimates revenue by asking a model to guess from Google review counts — "<10 reviews typically = <$500K rev" — an uncited figure in a practice where every number must trace to a source. (2) NOTHING in sourcingPipelineService or sevenFactorScoring decides whether a business is independent, so a franchise location can rank as a target; house/screen.ts calls that the expensive error, because it sends a client into diligence on a business a sponsor already owns. house/screen.ts is NOT a port of this engine — it is the corrected reimplementation, where affiliation is a register lookup and revenue is a band with its arithmetic attached. Prefer the studio screen for anything a client will see. Whether this engine is fixed or retired is Paul's call; the IoI seam assigns screens to the studio, which points at retirement.
+> ⚠️ **Not fully there yet.** THE APP'S ENGINE IS RETIRED, NOT PORTED, and the difference matters because the app version had TWO CITATION-LAW DEFECTS: deepAnalysisPrompt.ts estimated revenue by asking a model to guess from Google review counts ("<10 reviews typically = <$500K rev"), and NOTHING in it decided whether a business was independent, so a franchise location could rank as a target — the expensive error, because it sends a client into diligence on a business a sponsor already owns. house/screen.ts is the CORRECTED reimplementation: affiliation is a register lookup, revenue is a band with its arithmetic attached, and neither guess can happen. sourcingPipelineService.ts and the Sourcing screen remain in the tree unrouted rather than deleted (the standing "do not delete anything yet" rule); nothing reaches them, and the `sourcing` lane is off.
 
-- App → Sourcing. Needs the `sourcing` lane in API_LANES.
-- Its three UNATTENDED jobs are separately gated — see worker.ts.
-- READ THE DEFECTS BELOW before any output reaches a client document.
+- npx tsx $REPO/scripts/studio/screen.mts init   — buy-box, queries x geographies
+- npx tsx $REPO/scripts/studio/screen.mts pull   — Places, cost printed before it spends
+- npx tsx $REPO/scripts/studio/screen.mts rank   — free and offline
+- The board is markets/<m>/screen/candidates.csv, managed in Google Sheets.
+- A promoted candidate enters the app as a deal — that is the IoI.
 
 ## The deal — from a live target to close
 
