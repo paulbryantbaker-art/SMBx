@@ -268,6 +268,74 @@ ok('KNOWN GAP: the Ledger palette is still reachable for the un-extracted artifa
     parsed.bodyMd.startsWith('## One') && !parsed.bodyMd.includes('# Home Services'));
 }
 
+/* ── THE APP CANNOT SHIP OFF-LANGUAGE (2026-08-15) ─────────────────────── */
+
+/* Paul: *"i'll let cowork remake any collateral that needs remaking. I just
+   want to be sure that any docs or collateral made in app are using the same
+   DL."*
+
+   "Be sure" cannot rest on every future edit remembering. `assertCarta` had
+   guarded the local builders since the Carta pass and NO server path called it,
+   so the app could render a Ledger one-pager, file it into Collateral, and hand
+   it over as a download with nothing saying so. Every artifact-producing
+   function in researchComposer now returns through `gateArtifact`.
+
+   This asserts the SET, not a count: a new producer added without a gate is the
+   failure, and counting would let one be swapped for another. */
+{
+  const PRODUCERS = [
+    'researchReportHtml', 'linkedInDocHtml', 'researchCardHtml',
+    'announcementCardHtml', 'postCardHtml', 'designedDeckHtml',
+  ];
+  ok('the app imports the palette gate', /from '\.\/paletteGate\.js'/.test(composer));
+
+  const ungated: string[] = [];
+  for (const fn of PRODUCERS) {
+    const start = composer.indexOf(`function ${fn}(`);
+    if (start < 0) { ungated.push(`${fn} (missing)`); continue; }
+    const end = composer.indexOf('\n}\n', start);
+    if (!composer.slice(start, end).includes('gateArtifact(')) ungated.push(fn);
+  }
+  is('every artifact producer returns through the gate', ungated, []);
+
+  /* houseDeckHtml is the ONE that must NOT be gated, and the reason is the
+     interesting part: it is fail-soft, so a throw inside it returns null and
+     the caller renders the LEDGER legacy template instead. Gating there would
+     convert "this document is off-language" into "silently render the more
+     off-language one". linkedInDocHtml gates both paths on the way out.
+     Pinned so a later tidy-up does not "fix the missing gate". */
+  {
+    const start = composer.indexOf('function houseDeckHtml(');
+    const end = composer.indexOf('\n}\n', start);
+    ok('houseDeckHtml is deliberately NOT gated — it is fail-soft',
+      !composer.slice(start, end).includes('gateArtifact('));
+  }
+
+  /* The gate must THROW, never exit: assertCarta ends in process.exit(4), which
+     is right for a CLI writing a file and would take the whole server down. */
+  const gate = read('server/services/paletteGate.ts');
+  /* Comments stripped first — the file EXPLAINS why it does not call
+     process.exit, and a check that reads the explanation as the behaviour is
+     the same mistake the DESIGN.md builder table made an hour ago. */
+  const gateCode = gate.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  ok('the gate throws rather than exiting the process',
+    /throw new PaletteGateError/.test(gateCode) && !/process\.exit/.test(gateCode));
+  ok('…and blocks by default, warning only when told to',
+    /COLLATERAL_GUARD === 'warn' \? 'warn' : 'strict'/.test(gate));
+  ok('…and a blocked path says where the work happens instead',
+    /build-report\.mts|build-onepager\.mts/.test(composer));
+}
+
+/* KNOWN GAP, and the sharpest one left: deckDesigner.ts instructs a MODEL to
+   write the deck HTML, and its brand contract is still Ledger — Fraunces,
+   Inter, the jade block, brass. That path WINS over the house grammar at every
+   caller (`designedDeckHtml(run) ?? linkedInDocHtml(...)`), so the app's
+   default carousel was the designed Ledger one. The gate now sends it to the
+   Carta template instead of shipping it, which is a correct outcome and not a
+   fix. Rewriting the contract in Carta is the fix. */
+ok('KNOWN GAP: the deck designer still briefs the model in Ledger',
+  /import \{ LEDGER/.test(read('server/services/deckDesigner.ts')));
+
 /* ── what "separate use cases" means, so it is not read as "separate copies" ─ */
 
 /* The shared thing is the GRAMMAR; the different thing is where the content and

@@ -29,6 +29,13 @@ import { deckPages, deckCss } from '../../house/deck.js';
    historically used for its own copies, and an unqualified import would make
    "which one is running" a question a reader has to answer. */
 import * as HR from '../../house/report.js';
+/* THE PALETTE GATE (2026-08-15, Paul: "I just want to be sure that any docs or
+   collateral made in app are using the same DL"). Every function in this file
+   that produces a finished artifact document ends by handing it through
+   gateArtifact, so the app cannot ship a retired-palette artifact. Three of
+   them are on Ledger today and will therefore THROW — see paletteGate.ts for
+   why that is the right default and what turns it off. */
+import { gateArtifact } from './paletteGate.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -359,7 +366,7 @@ export async function researchReportHtml(run: ResearchRunRow): Promise<string> {
     : '50% 50%';
 
   const u = run.usage || {};
-  return HR.reportDocument({
+  return gateArtifact(HR.reportDocument({
     eyebrow: `RESEARCH FINDINGS · ${typeLabel.toUpperCase()}`,
     // The title goes through the grammar's own splitter so it picks up the
     // ampersand fix and the mint rule exactly as a .md-sourced report does.
@@ -380,7 +387,7 @@ export async function researchReportHtml(run: ResearchRunRow): Promise<string> {
     logoWhite: DARK_LOGO_URI || LOGO_URI || '',
     headshot: photo?.dataUri || '',
     hero,
-  }, CARTA_FONTS_CSS, heroPos);
+  }, CARTA_FONTS_CSS, heroPos), 'the research report PDF', 'scripts/studio/build-report.mts');
 }
 
 /**
@@ -508,7 +515,7 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: Auth
     ? `<img src="${pick.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(pick.focalX * 100)}% ${Math.round(pick.focalY * 100)}%;display:block">`
     : `<div class="panel-brand">${logoImg(64)}</div>`;
 
-  return `<!DOCTYPE html><html><head><meta charset="utf-8">${FONTS}
+  return gateArtifact(`<!DOCTYPE html><html><head><meta charset="utf-8">${FONTS}
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { width: 1080px; height: 1350px; font-family: ${SANS}; color: ${inkC}; ${pageBg} overflow: hidden; position: relative; font-variant-numeric: tabular-nums; }
@@ -563,7 +570,7 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: Auth
         </div>
       </div>
     </div>
-  </body></html>`;
+  </body></html>`, 'the single-image post card', 'scripts/studio/build-onepager.mts');
 }
 
 export async function renderResearchCardPng(run: ResearchRunRow, hookIndex = 0, variant: CardVariant = 'light'): Promise<Buffer> {
@@ -809,6 +816,11 @@ export function houseDeckHtml(
     // Grotesk, which the Ledger embed does not carry. See the note on the
     // constant. This is the line that makes the app's carousel and a
     // `build-deck.mts` carousel the same document rather than the same layout.
+    /* NOT gated here. This function is fail-soft by design — any throw returns
+       null and the caller renders the LEDGER legacy template instead. A gate
+       inside the try block would therefore turn "this document is off-language"
+       into "silently render the MORE off-language one", which is the opposite
+       of the point. linkedInDocHtml gates both paths on the way out. */
     return `<!DOCTYPE html><html><head><meta charset="utf-8">${CARTA_FONTS}
 <style>${deckCss(assets.texture)}</style></head><body>${deckPages(spec, assets).join('')}</body></html>`;
   } catch (e) {
@@ -819,7 +831,11 @@ export function houseDeckHtml(
 
 export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null = null, art: AuthorPhoto | null = null, brand: AuthorPhoto | null = null, pageImgs: Record<number, AuthorPhoto> = {}): string {
   const house = houseDeckHtml(run, photo, art, brand, pageImgs);
-  if (house) return house;
+  /* THE GATE SITS HERE, not inside houseDeckHtml, because that function is
+     fail-soft: it swallows a throw and falls back to the legacy Ledger deck
+     below. Gating on the way OUT covers both paths, and the fallback is the one
+     that most needs covering. */
+  if (house) return gateArtifact(house, 'the carousel', 'scripts/studio/build-deck.mts');
   const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
   const typeLabel = TYPE_LABELS[run.research_type] ?? 'Research';
   const pages = docPages(run);
@@ -1012,7 +1028,7 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     </div>`);
   }
 
-  return `<!DOCTYPE html><html><head><meta charset="utf-8">${FONTS}
+  return gateArtifact(`<!DOCTYPE html><html><head><meta charset="utf-8">${FONTS}
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 1080px; }
@@ -1149,7 +1165,7 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     .brand-big { margin-top: 42px; display: flex; align-items: center; justify-content: center; }
     .close-sub { margin-top: 28px; font-size: 30px; color: ${IVORY_SUB}; max-width: 760px; line-height: 1.45; }
     .follow { margin-top: 54px; font-family: ${MONO}; font-size: 22px; letter-spacing: 0.12em; color: #A8F0CE; font-weight: 600; text-transform: uppercase; }
-  </style></head><body>${pageHtml.join('\n')}</body></html>`;
+  </style></head><body>${pageHtml.join('\n')}</body></html>`, 'the carousel (legacy template)', 'scripts/studio/build-deck.mts');
 }
 
 /** Artwork for a render: the picked/generated image, and when a run has
@@ -1282,9 +1298,29 @@ export async function designedDeckHtml(run: ResearchRunRow): Promise<string | nu
     };
     const key = dd.deckKey(inp);
     const cached = await dd.readDeckCache(Number(run.id));
-    if (cached && cached.key === key) return cached.html;
+    /* GATED INSIDE THE TRY, DELIBERATELY, and this is the one place where
+       falling through the catch is the RIGHT outcome.
+
+       This path is a MODEL writing the HTML, so it is the likeliest of all of
+       them to drift — and `deckDesigner.ts` currently instructs it in LEDGER:
+       Fraunces, Inter, the jade block, brass. Worse, this path WINS: every
+       caller is `(await designedDeckHtml(run)) ?? linkedInDocHtml(...)`, so the
+       app's default carousel is the designed Ledger one and the house Carta
+       grammar only runs when this returns null.
+
+       A gate failure here is caught below and returns null, which sends the
+       caller to the house template. So the effect of the guard on this path is
+       not a broken download — it is the app quietly rendering the CORRECT deck
+       instead of the wrong one. That is the right trade until deckDesigner's
+       brand contract is rewritten in Carta. */
+    if (cached && cached.key === key) {
+      return gateArtifact(cached.html, `the designed carousel (cached, run ${run.id})`);
+    }
     const html = await dd.dedupeDesign(Number(run.id), () => dd.generateDeckHtml(inp, FONTS));
-    if (html) await dd.writeDeckCache(Number(run.id), key, html);
+    if (html) {
+      gateArtifact(html, `the designed carousel (run ${run.id})`);
+      await dd.writeDeckCache(Number(run.id), key, html);
+    }
     return html;
   } catch (err: any) {
     console.warn(`[composer] deck design failed for run ${run.id} — template fallback:`, err?.message);
@@ -1582,7 +1618,7 @@ export function announcementCardHtml(spec: AnnouncementSpec): string {
   </div>
 </div>`;
   }
-  return `<!doctype html><meta charset="utf-8">${FONTS}<style>*{margin:0;padding:0;box-sizing:border-box}</style>
+  return gateArtifact(`<!doctype html><meta charset="utf-8">${FONTS}<style>*{margin:0;padding:0;box-sizing:border-box}</style>
 <div style="width:1080px;height:1350px;position:relative;background:${WARM};overflow:hidden;font-family:${SANS};font-variant-numeric:tabular-nums">
   <div style="position:absolute;inset:0;background:
     radial-gradient(1200px 800px at 8% 0%, rgba(10,122,88,0.045), transparent 60%),
@@ -1602,7 +1638,7 @@ export function announcementCardHtml(spec: AnnouncementSpec): string {
     ${logoImg(48, { white: true })}
     <div style="font-family:${MONO};font-size:19px;letter-spacing:0.1em;color:#A8F0CE;text-transform:uppercase">${annEsc(spec.footerTag)}</div>
   </div>
-</div>`;
+</div>`, 'the announcement card', 'scripts/studio/build-onepager.mts');
 }
 
 export async function renderAnnouncementCardPng(spec: AnnouncementSpec): Promise<Buffer> {
@@ -1787,7 +1823,7 @@ export function postCardHtml(spec: PostCardSpec): string {
       ${spec.photo ? `<div style="margin-top:34px;height:270px;box-shadow:0 20px 60px rgba(0,0,0,0.16)">${annPhotoBlock(16, spec.photo)}</div>` : ''}
       <div style="margin-top:${spec.photo ? 26 : 44}px">${steps}</div>
     </div>`;
-  return cardShell(false, spec.kicker || 'The playbook', spec.footerTag, body);
+  return gateArtifact(cardShell(false, spec.kicker || 'The playbook', spec.footerTag, body), 'the post card', 'scripts/studio/build-onepager.mts');
 }
 
 export async function renderPostCardPng(spec: PostCardSpec): Promise<Buffer> {
