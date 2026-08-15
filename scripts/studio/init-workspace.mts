@@ -153,6 +153,14 @@ law('content/studio/THE_LINE.md', 'THE_LINE.md');
    wants to branch on it rather than read it. */
 law('content/studio/WHERE.md', 'WHERE.md');
 law('content/studio/where.json', 'where.json');
+/* WHAT_LIVES_WHERE.md — the fourth law found dangling in this session's sweep
+   (2026-08-14). It maps the two REPOSITORIES on the Mac and names the debris
+   clones, which is exactly what a session needs when a command aims at the
+   wrong checkout — and it had never been in this list, so it could not be
+   read from the workspace it describes. Distinct from WHERE.md: that one
+   routes PROCESSES between systems, this one routes PATHS between repos. The
+   generated header on WHERE.md says so, because the two names collide. */
+law('content/studio/WHAT_LIVES_WHERE.md', 'WHAT_LIVES_WHERE.md');
 law('content/studio/RESEARCH.md', 'RESEARCH.md');
 /* THE MACHINE (2026-08-12, Paul: "give Cowork the DL for the new element to
    be used in collateral"). MACHINE.md is the design language + content law;

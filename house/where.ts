@@ -377,6 +377,12 @@ export function renderMarkdown(): string {
   L.push('');
   L.push(`**${ONE_LINE}**`);
   L.push('');
+  L.push('> **Not to be confused with `WHAT_LIVES_WHERE.md`**, which answers a');
+  L.push('> different question. That file maps the two REPOSITORIES on the Mac —');
+  L.push('> engine vs workspace, and which clones are debris. This file decides');
+  L.push('> which SYSTEM does a piece of work — this workspace or the app.');
+  L.push('> Repo question → that file. Process question → this one.');
+  L.push('');
   L.push('Research is the only path that spends real money, and it is a quarterly');
   L.push('batch per market rather than something done mid-deal — a different season,');
   L.push('not back-and-forth. Everything that **interleaves in one sitting** —');

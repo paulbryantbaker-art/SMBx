@@ -6,6 +6,12 @@
 
 **The app is the one place. Cowork keeps research, the documents derived from it, and collateral.**
 
+> **Not to be confused with `WHAT_LIVES_WHERE.md`**, which answers a
+> different question. That file maps the two REPOSITORIES on the Mac —
+> engine vs workspace, and which clones are debris. This file decides
+> which SYSTEM does a piece of work — this workspace or the app.
+> Repo question → that file. Process question → this one.
+
 Research is the only path that spends real money, and it is a quarterly
 batch per market rather than something done mid-deal — a different season,
 not back-and-forth. Everything that **interleaves in one sitting** —
