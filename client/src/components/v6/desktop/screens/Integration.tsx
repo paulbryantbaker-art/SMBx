@@ -42,6 +42,9 @@ import {
   type IntegrationWorkstream,
   type IntegrationMilestone,
 } from "../../../../hooks/useIntegrationPlan";
+// Phase 3 of APP_REDESIGN_TRAINLINE.md. "list" is the default; the three
+// sections below stay reachable behind the toggle, the way Deals kept its board.
+import { IntegrationList, IntegrationViewToggle, type IntegrationViewId } from "./IntegrationList";
 
 /* ─── status semantics (mirror server STATUS_META) ──────────── */
 
@@ -163,6 +166,8 @@ export default function IntegrationScreen({ view }: AtlasScreenProps) {
   const { loading, loaded, error, plan, workstreams, milestones, refresh, updateWorkstream } =
     useIntegrationPlan(dealId);
 
+  const [pmiView, setPmiView] = useState<IntegrationViewId>("list");
+
   /* Generate-plan CTA → existing POST endpoint, then refresh the same hook. */
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState<string | null>(null);
@@ -270,9 +275,22 @@ export default function IntegrationScreen({ view }: AtlasScreenProps) {
         regenerating={generating}
         regenError={genError}
       />
-      <MilestoneTimeline workstreams={workstreams} milestones={milestones} />
-      <WorkstreamsSection workstreams={workstreams} onUpdate={updateWorkstream} />
-      <ValueLeversSection levers={levers} targetCents={targetCents} />
+      <IntegrationViewToggle view={pmiView} onView={setPmiView} />
+      {pmiView === "list" ? (
+        <IntegrationList
+          dealName={dealName}
+          plan={plan}
+          workstreams={workstreams}
+          milestones={milestones}
+          onUpdate={updateWorkstream}
+        />
+      ) : (
+        <>
+          <MilestoneTimeline workstreams={workstreams} milestones={milestones} />
+          <WorkstreamsSection workstreams={workstreams} onUpdate={updateWorkstream} />
+          <ValueLeversSection levers={levers} targetCents={targetCents} />
+        </>
+      )}
     </Root>
   );
 }
