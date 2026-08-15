@@ -52,7 +52,12 @@ is('deal state is the app', owns('deal-state'), 'app');
 is('the CRM is the app', owns('crm'), 'app');
 is('outreach is the app', owns('outreach'), 'app');
 is('counterparty comms is the app', owns('counterparty-comms'), 'app');
-is('the sourcing engine is the app', owns('sourcing-pipeline'), 'app');
+/* MOVED 2026-08-15 (Paul: "there will be no sourcing in the app the app is
+   internal now IoI to integration"). Finding candidates is pre-IoI, therefore
+   market-shaped, therefore the studio's — the seam applied consistently rather
+   than carved around. This assertion said 'app' and going red is exactly what
+   it was for. */
+is('sourcing is pre-IoI, so the studio', owns('sourcing-pipeline'), 'workspace');
 is('LinkedIn analytics stays the app — the standing exception', owns('linkedin-analytics'), 'app');
 
 is('market research is the workspace', owns('market-research'), 'workspace');
@@ -92,7 +97,36 @@ is('…and so is the outreach queue', owns('outreach'), 'app');
 is('the studio holds exactly the market-shaped work',
   PROCESSES.filter(p => p.owner === 'workspace').map(p => p.id).sort(),
   ['collateral', 'corp-dev-documents', 'data-wrangling', 'market-research',
-   'master-synthesis', 'pre-ioi-math', 'target-screen', 'weekly-sweep']);
+   'master-synthesis', 'pre-ioi-math', 'sourcing-pipeline', 'target-screen',
+   'weekly-sweep']);
+
+/* THE APP IS IoI → INTEGRATION, stated as a set rather than left implicit.
+   Everything here is downstream of a named target becoming a deal — plus the
+   CRM, which is the seam's one asymmetry (outreach starts before the IoI). If
+   a process is added to the app side that is not one of these, it is either a
+   new deal-phase capability or a mistake, and this makes someone say which. */
+is('the app holds exactly the deal-shaped work, plus three named exceptions',
+  PROCESSES.filter(p => p.owner === 'app').map(p => p.id).sort(),
+  ['counterparty-comms', 'crm', 'data-room', 'deal-documents', 'deal-state',
+   'definitive', 'linkedin-analytics', 'outreach', 'valuation', 'website']);
+
+/* The three that are app-owned WITHOUT being deal-shaped, each for its own
+   reason. Named individually because "the app is IoI → integration" is the
+   rule and these are the exceptions to it — an unnamed exception is how a rule
+   quietly stops meaning anything.
+
+     crm + outreach     the seam's asymmetry: a candidate has a CRM row while
+                        its analysis is still in the studio. Outreach is how
+                        the IoI happens in the first place.
+     linkedin-analytics THE STANDING EXCEPTION — the XLSX parser has no local
+                        equivalent. It is the reason the studio lane stayed on
+                        for a day longer than it should have.
+     website            the practice site is served by the app because it is a
+                        web server. Not deal work, not studio work, just
+                        hosting. */
+for (const id of ['crm', 'outreach', 'linkedin-analytics', 'website']) {
+  is(`${id} is a named app-side exception to IoI → integration`, owns(id), 'app');
+}
 
 /* ── decided ≠ built ──────────────────────────────────────────────────── */
 

@@ -29,23 +29,44 @@
 /**
  * Is Studio offered inside the app?
  *
- * TRUE again since 2026-08-14. It was false from 2026-07-31, when Studio work
- * moved to disk wholesale; Paul brought the output half back — "corp-dev
- * documents, deal memo / diligence plan / term framework, collateral is in app
- * too… Everything about the deal and CRM needs to be in app."
+ * FALSE. The app is IoI → integration (Paul, 2026-08-15: *"there will be no
+ * sourcing in the app the app is internal now IoI to integration"*).
  *
- * The routing settled on a cleaner axis than the one that took Studio out:
- * Cowork is the INPUT layer (research, aggregation, deep search, data
- * wrangling) and the app is everything the practice PRODUCES or TRACKS. The
- * table is `house/where.ts`; the reasoning is WHERE_THE_WORK_HAPPENS.md.
+ * This flag has now been flipped three times and the history is the useful
+ * part, because each move was reasonable on the axis in force at the time:
  *
- * Nothing had to be restored — the screens, `/api/research` and `/api/studio`
- * stayed mounted the whole time. This constant only ever controlled whether
- * the chrome advertised them.
+ *   2026-07-31  FALSE — "all Studio work on disc Cowork", the cost axis
+ *   2026-08-14  TRUE  — the input-vs-output axis put everything the practice
+ *                       PRODUCES in the app, and collateral is produced
+ *   2026-08-15  FALSE — THE_IOI_SEAM.md replaced that axis with AUDIENCE, and
+ *                       collateral is market-shaped: one-to-many, speculative,
+ *                       no counterparty. The app starts at the IoI.
  *
- * IT IS SAFE TO SHOW because the spend split happened in the same change:
- * `research` is now its own lane and is OFF, so the expensive path is not
- * reachable from the returning screens. Showing Studio without splitting the
- * lane would have put a ~$18-a-press button back in the header.
+ * The seam is the one that holds because it is not a judgement about cost or
+ * about verbs — it is the same split the workspace already makes between
+ * `collateral/` and `decks/`, which nobody has ever had to relitigate.
+ *
+ * RETIRED IN PLACE, NOT DELETED (Paul's standing instruction, 2026-07-27:
+ * "let's don't delete anything yet"). Every Studio screen, service, route and
+ * migration stays where it is and still compiles; `/api/research` and
+ * `/api/studio` stay mounted, so direct URLs and existing exports still work.
+ * This constant only controls whether the chrome advertises them.
  */
-export const STUDIO_IN_APP = true;
+export const STUDIO_IN_APP = false;
+
+/**
+ * Is target Sourcing offered inside the app?
+ *
+ * FALSE, same sentence, same reason: sourcing is how you find candidates, which
+ * is entirely pre-IoI. `scripts/studio/screen.mts` is where it happens now, and
+ * that is not a port — it is the CORRECTED implementation. The app's engine
+ * carried two citation-law defects (a model guessing revenue from Google review
+ * counts, and no independence check anywhere, so a franchise location could
+ * rank as a target). Retiring it rather than fixing it is the call `where.ts`
+ * flagged as Paul's and he has now made.
+ *
+ * Same retire-in-place rule: `Sourcing.tsx`, `sourcingPipelineService.ts` and
+ * `/api/sourcing` all stay. The `sourcing` spend lane is off, and the three
+ * unattended cron jobs in worker.ts are separately guarded, so nothing runs.
+ */
+export const SOURCING_IN_APP = false;

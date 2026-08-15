@@ -101,14 +101,22 @@ export const SPEND_LANES: readonly SpendLane[] =
  * is its honest home — Yulia reading an imported document — and the lane went
  * dark behind it.
  *
- * `sourcing` stays on: the seam keeps the 5-stage engine app-side, it runs on a
- * separate Places key that is free under the monthly tier, and the three
- * unattended cron jobs that made it dangerous are now individually guarded.
+ * `sourcing` CAME OFF ON 2026-08-15, one commit after the paragraph above said
+ * it stays. Paul: *"there will be no sourcing in the app the app is internal
+ * now IoI to integration."* Finding candidates is pre-IoI and therefore
+ * market-shaped, so it belongs to the studio like every other pre-IoI process;
+ * the reason given here — that the seam kept the engine app-side — was the
+ * seam being carved around rather than applied. `scripts/studio/screen.mts` is
+ * the corrected implementation and it needs no lane, because it calls no model.
+ *
  * `research` stays off because it is the only lane that can spend dollars on a
  * single press.
+ *
+ * So the default is now just the two the app cannot work without: Yulia, and
+ * the public funnel.
  */
 export const DEFAULT_LANES: readonly SpendLane[] =
-  ['chat', 'marketing', 'sourcing'] as const;
+  ['chat', 'marketing'] as const;
 
 /** What a blocked lane should say, in the practitioner's own vocabulary. */
 const LANE_HELP: Record<SpendLane, string> = {

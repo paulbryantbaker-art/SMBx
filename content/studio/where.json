@@ -146,25 +146,32 @@
     },
     {
       "id": "sourcing-pipeline",
-      "name": "The 5-stage sourcing engine",
+      "name": "Target sourcing and screening",
       "group": "sourcing",
-      "owner": "app",
-      "cost": "drip",
-      "interleaves": true,
-      "why": "Haiku per candidate on a separate Places key that is free under 5k/month, feeding the CRM and the pipeline directly — the app-side half of the pre-IoI asymmetry.",
+      "owner": "workspace",
+      "cost": "free",
+      "interleaves": false,
+      "why": "PRE-IoI, therefore market-shaped (Paul, 2026-08-15: \"there will be no sourcing in the app the app is internal now IoI to integration\"). Finding candidates is one-to-many and speculative with no counterparty — the definition the seam splits on. The app begins at the IoI, when a named target becomes a deal.",
       "workflow": [
-        "App → Sourcing. Needs the `sourcing` lane in API_LANES.",
-        "Its three UNATTENDED jobs are separately gated — see worker.ts.",
-        "READ THE DEFECTS BELOW before any output reaches a client document."
+        "npx tsx $REPO/scripts/studio/screen.mts init   — buy-box, queries x geographies",
+        "npx tsx $REPO/scripts/studio/screen.mts pull   — Places, cost printed before it spends",
+        "npx tsx $REPO/scripts/studio/screen.mts rank   — free and offline",
+        "The board is markets/<m>/screen/candidates.csv, managed in Google Sheets.",
+        "A promoted candidate enters the app as a deal — that is the IoI."
       ],
       "aka": [
+        "sourcing",
         "sourcing engine",
-        "pipeline",
+        "screen",
+        "candidates",
+        "targets",
+        "buy box",
         "enrichment",
         "seven factor",
-        "scoring"
+        "scoring",
+        "places"
       ],
-      "gap": "TWO CITATION-LAW DEFECTS, both verified still present on 2026-08-15. (1) deepAnalysisPrompt.ts line 69 estimates revenue by asking a model to guess from Google review counts — \"<10 reviews typically = <$500K rev\" — an uncited figure in a practice where every number must trace to a source. (2) NOTHING in sourcingPipelineService or sevenFactorScoring decides whether a business is independent, so a franchise location can rank as a target; house/screen.ts calls that the expensive error, because it sends a client into diligence on a business a sponsor already owns. house/screen.ts is NOT a port of this engine — it is the corrected reimplementation, where affiliation is a register lookup and revenue is a band with its arithmetic attached. Prefer the studio screen for anything a client will see. Whether this engine is fixed or retired is Paul's call; the IoI seam assigns screens to the studio, which points at retirement."
+      "gap": "THE APP'S ENGINE IS RETIRED, NOT PORTED, and the difference matters because the app version had TWO CITATION-LAW DEFECTS: deepAnalysisPrompt.ts estimated revenue by asking a model to guess from Google review counts (\"<10 reviews typically = <$500K rev\"), and NOTHING in it decided whether a business was independent, so a franchise location could rank as a target — the expensive error, because it sends a client into diligence on a business a sponsor already owns. house/screen.ts is the CORRECTED reimplementation: affiliation is a register lookup, revenue is a band with its arithmetic attached, and neither guess can happen. sourcingPipelineService.ts and the Sourcing screen remain in the tree unrouted rather than deleted (the standing \"do not delete anything yet\" rule); nothing reaches them, and the `sourcing` lane is off."
     },
     {
       "id": "definitive",
