@@ -21,9 +21,21 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { newRenderPage } from './premiumPdfRenderer.js';
 import { listStudioAssets, getStudioAsset } from './studioAssets.js';
-import { fontFaceCss } from './fontEmbeds.js';
+import { fontFaceCss, cartaFontFaceCss } from './fontEmbeds.js';
 import { LEDGER, BLOCK_GLAZE } from '../../house/tokens.js';
 import { deckPages, deckCss } from '../../house/deck.js';
+/* The shared report grammar — cover, stylesheet, skeleton. Namespaced because
+   several of its exports (numberSections, splitTitle) have names this file has
+   historically used for its own copies, and an unqualified import would make
+   "which one is running" a question a reader has to answer. */
+import * as HR from '../../house/report.js';
+/* THE PALETTE GATE (2026-08-15, Paul: "I just want to be sure that any docs or
+   collateral made in app are using the same DL"). Every function in this file
+   that produces a finished artifact document ends by handing it through
+   gateArtifact, so the app cannot ship a retired-palette artifact. Three of
+   them are on Ledger today and will therefore THROW — see paletteGate.ts for
+   why that is the right default and what turns it off. */
+import { gateArtifact } from './paletteGate.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -171,6 +183,27 @@ const BRASS = LEDGER.brass;
 // the Google Fonts CDN, and the container has no brand fonts — the CDN link
 // survives only as the fallback when the woff2 files are missing.
 const EMBEDDED_FONTS = fontFaceCss();
+/**
+ * THE CARTA FACES, embedded separately (2026-08-15).
+ *
+ * `FONTS` below is the LEDGER set — Inter, Fraunces, Plex Mono — and every
+ * artifact in this file that still carries the Ledger grammar needs it. But
+ * `houseDeckHtml` renders through `house/deck.ts`, whose CSS asks for
+ * `CARTA_TYPE.display` (Source Serif 4) and `CARTA_TYPE.sans` (Schibsted
+ * Grotesk), and NEITHER IS IN `FILES`. So the app has been shipping the Carta
+ * carousel grammar with the Carta faces missing: locally it silently borrowed
+ * whatever the machine had, and in the container — Node 22 Alpine with Noto and
+ * nothing else — both fell all the way through to the generic fallback, while
+ * `build-deck.mts` on Paul's Mac rendered the same spec correctly because it
+ * calls `cartaFontFaceCss()`.
+ *
+ * Nothing about this shows in a diff or an error: a missing @font-face is not a
+ * failure, it is a substitution. Same grammar, same tokens, same spec, and a
+ * different document — which is precisely the drift the shared engine exists to
+ * make impossible, arriving through the one seam the engine does not cover.
+ */
+const CARTA_FONTS_CSS = cartaFontFaceCss();
+const CARTA_FONTS = CARTA_FONTS_CSS ? `<style>${CARTA_FONTS_CSS}</style>` : '';
 const FONTS = EMBEDDED_FONTS
   ? `<style>${EMBEDDED_FONTS}</style>`
   : `
@@ -224,15 +257,10 @@ async function reportBodyHtml(md: string): Promise<string> {
   return String(await marked.parse(withoutH1, { gfm: true, breaks: false }));
 }
 
-/**
- * Tag every `<h2>` in the rendered body with its ordinal, so a section can be
- * pointed at — by the board (which screenshots from a heading down) and by the
- * accent bands (which sit under one).
- */
-function numberSections(bodyHtml: string): string {
-  let n = 0;
-  return bodyHtml.replace(/<h2(\s[^>]*)?>/gi, (m, attrs) => `<h2 id="sec-${n++}"${attrs ?? ''}>`);
-}
+/* numberSections moved to house/report.ts (2026-08-15) — the app and the local
+   builder must agree on what `sec-N` means, because reportArt and the section
+   thumbnails both address sections by that ordinal. Two copies of an ordinal
+   scheme is a silent off-by-one waiting to happen. Call it as HR.numberSections. */
 
 /**
  * Photos placed on a REPORT (Paul, 2026-07-25).
@@ -266,125 +294,168 @@ async function reportAccentBands(bodyHtml: string, run: ResearchRunRow): Promise
   return out;
 }
 
+/**
+ * THE REPORT — rendered through the SHARED house grammar (`house/report.ts`).
+ *
+ * Paul, 2026-08-15: *"i want all decks, docs and collateral for a client to
+ * have the same look and feel as the branded smbx collateral… i just want to
+ * have consistency in design languages."*
+ *
+ * This function used to be a SECOND report renderer, and it was the one in the
+ * wrong house. It set Fraunces on a bone card at radius 14 with a box-shadow,
+ * brass on the findings tag, and no cover page at all — the Ledger language,
+ * retired on 2026-08-08. It would have failed `assertCarta` outright, and it
+ * violated the renderer-proof law twice over (a box-shadow and a radius are
+ * both transparency groups). Meanwhile `build-report.mts` on Paul's Mac
+ * rendered the same artifact in Carta, with the dark cover and the guard.
+ * Two houses, same practice, and the only way to tell was to open both PDFs.
+ *
+ * Now there is one grammar and this is a caller of it. What stays here is the
+ * part that is genuinely the app's: turning a `research_runs` row into content,
+ * and resolving images out of `studio_assets` rather than off disk.
+ *
+ * WHAT CHANGED FOR A READER, stated plainly because it is a visible change to a
+ * shipped artifact: the report gains the dark Carta cover page, the key
+ * findings move onto that cover as framed plates instead of a bone card in the
+ * flow, sources become their own appendix page, and the type becomes Source
+ * Serif 4 / Schibsted Grotesk. The words, the figures, the sources and the
+ * disclaimer are untouched.
+ */
 export async function researchReportHtml(run: ResearchRunRow): Promise<string> {
   const typeLabel = TYPE_LABELS[run.research_type] ?? 'Research Brief';
   const title = run.report_title || run.topic;
-  const body = await reportAccentBands(numberSections(await reportBodyHtml(run.report_md || '')), run);
+  const body = await reportAccentBands(HR.numberSections(await reportBodyHtml(run.report_md || '')), run);
   const sources = Array.isArray(run.sources) ? run.sources : [];
   const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : null;
   const photo = await authorPhoto();
 
-  const sourcesHtml = sources.length
-    ? `<section class="appendix">
-        <h2>Sources</h2>
-        <ol class="srcs">
-          ${sources.map(s => `<li><span class="st">${esc(s.title)}</span><br><a href="${esc(s.url)}">${esc(s.url)}</a></li>`).join('')}
-        </ol>
-      </section>`
+  // FINDINGS-FIRST (Paul, 2026-07-19: the report must lead with what we FOUND,
+  // as a document he can post). The cited data points open the document; the
+  // internal Studio-feed appendix (hooks/angles — marketing scaffolding) does
+  // not ship in this PDF at all. It lives in the review sheet, where it
+  // belongs.
+  //
+  // They render as the cover's framed CARDS rather than its stat plates. A
+  // plate sets its value at 19pt display, which is right for "$600B+" and
+  // wrong for a sentence; the card grammar was built for the cover's numbered
+  // workstream list and takes prose at 9.5pt. Same two elements either way, so
+  // this is a choice between two house treatments rather than a new one.
+  const points: any[] = feed && Array.isArray(feed.dataPoints) ? feed.dataPoints.slice(0, 4) : [];
+  const cards = points.map((p, i) => ({
+    tag: String(i + 1).padStart(2, '0'),
+    body: `<em>${esc(p.stat)}</em>${
+      [p.source, p.freshness].filter(Boolean).length
+        ? `<br>${esc([p.source, p.freshness].filter(Boolean).join(' · '))}`
+        : ''}`,
+  }));
+
+  const appendixHtml = sources.length
+    ? `<h2>Sources</h2><ol class="srcs">${sources.map(s =>
+        `<li><span class="st">${esc(s.title)}</span><br><a href="${esc(s.url)}">${esc(s.url)}</a></li>`,
+      ).join('')}</ol>`
     : '';
 
-  // FINDINGS-FIRST (Paul, 2026-07-19: the report must lead with what we FOUND,
-  // as a document he can post). The cited data points open the document as a
-  // Key-findings block; the internal Studio-feed appendix (hooks/angles —
-  // marketing scaffolding) no longer ships in this PDF at all. It lives in the
-  // review sheet, where it belongs.
-  const points: any[] = feed && Array.isArray(feed.dataPoints) ? feed.dataPoints.slice(0, 4) : [];
-  const findingsHtml = points.length
-    ? `<section class="findings">
-        <div class="ftag">KEY FINDINGS</div>
-        ${points.map(p => `<div class="frow">
-          <div class="fstat">${esc(p.stat)}</div>
-          <div class="fsrc">${esc([p.source, p.freshness].filter(Boolean).join(' · '))}</div>
-        </div>`).join('')}
-      </section>`
-    : '';
+  // The cover hero: the run's own artwork if it has any, else a brand photo.
+  // `null` is a supported cover, not a failure — the grammar centres the block
+  // when there is no image rather than leaving a hole where one would sit.
+  const art = await runArtwork(run).catch(() => null);
+  const brand = art ? null : await brandPhoto().catch(() => null);
+  const hero = art?.dataUri || brand?.dataUri || null;
+  const heroPos = art || brand
+    ? `${Math.round(((art ?? brand)!.focalX ?? 0.5) * 100)}% ${Math.round(((art ?? brand)!.focalY ?? 0.5) * 100)}%`
+    : '50% 50%';
 
   const u = run.usage || {};
-  return `<!DOCTYPE html><html><head><meta charset="utf-8">${FONTS}
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: ${SANS}; color: ${INK}; background: #fff; font-size: 10.5pt; line-height: 1.62; }
-    .kicker { display: flex; justify-content: space-between; align-items: center; font-family: ${MONO};
-      font-size: 8pt; letter-spacing: 0.09em; color: ${TERT}; text-transform: uppercase; }
-    .kicker .kl { display: flex; align-items: center; gap: 12px; }
-    .rule { height: 3px; width: 64px; background: ${CORAL}; margin: 14px 0 22px; border-radius: 2px; }
-    h1.title { font-family: ${DISPLAY}; font-size: 25pt; font-weight: 545; letter-spacing: -0.012em; line-height: 1.14; max-width: 9in; }
-    .meta { margin-top: 10px; font-size: 9pt; color: ${TERT}; }
-    .doc { margin-top: 26px; }
-    .doc h2 { font-size: 13.5pt; font-weight: 800; letter-spacing: -0.01em; margin: 26px 0 10px; padding-top: 14px;
-      border-top: 1px solid ${HAIR}; break-after: avoid; }
-    .doc h2:first-child { border-top: none; padding-top: 0; margin-top: 0; }
-    .doc h3 { font-size: 11pt; font-weight: 700; margin: 16px 0 6px; break-after: avoid; }
-    .doc p { margin: 0 0 10px; color: ${BODY}; }
-    .doc ul, .doc ol { margin: 0 0 12px 1.25em; color: ${BODY}; }
-    .doc li { margin-bottom: 5px; }
-    .doc a { color: ${CORAL_DEEP}; text-decoration: none; word-break: break-all; }
-    .doc b, .doc strong { color: ${INK}; }
-    .doc blockquote { border-left: 3px solid ${CORAL}; padding: 6px 0 6px 14px; margin: 12px 0; color: ${BODY}; background: ${CARD}; }
-    .doc table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 9pt; break-inside: avoid; }
-    .doc th { text-align: left; font-family: ${MONO}; font-size: 7.5pt; letter-spacing: 0.07em; text-transform: uppercase;
-      color: ${TERT}; font-weight: 600; padding: 6px 10px; border-bottom: 2px solid ${INK}; }
-    .doc td { padding: 7px 10px; border-bottom: 1px solid ${HAIR}; vertical-align: top; color: ${BODY}; }
-    .doc tr:nth-child(even) td { background: ${CARD}; }
-    /* TL;DR: the first h2's list reads as the executive summary */
-    /* a photo placed on a section — framed band, never a soft edge (a fade on
-       light paper prints as a smudge; the frame is what survives a rasterizer) */
-    .rb-accent { display: block; width: 100%; height: 2.2in; object-fit: cover; border-radius: 10px;
-      border: 1px solid ${HAIR}; box-shadow: 0 6px 20px rgba(20,24,28,0.13);
-      margin: 0.05in 0 0.22in; page-break-inside: avoid; }
-    .appendix { margin-top: 30px; page-break-before: always; }
-    .appendix h2 { font-size: 12pt; font-weight: 800; margin: 18px 0 8px; }
-    .srcs { margin-left: 1.2em; font-size: 8.5pt; color: ${BODY}; }
-    .srcs li { margin-bottom: 7px; }
-    .srcs .st { font-weight: 600; color: ${INK}; }
-    .srcs a { color: ${CORAL_DEEP}; text-decoration: none; word-break: break-all; }
-    .byline { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
-    .byline .bn { font-size: 9.5pt; font-weight: 700; color: ${INK}; }
-    .byline .bt { font-size: 8.5pt; color: ${TERT}; }
-    .findings { margin-top: 22px; background: ${WARM}; border: 1px solid ${HAIR}; border-radius: 14px; padding: 18px 22px 8px; break-inside: avoid; }
-    .ftag { font-family: ${MONO}; font-size: 7.5pt; letter-spacing: 0.1em; color: ${BRASS}; font-weight: 600; margin-bottom: 10px; }
-    .frow { padding: 8px 0 10px; border-top: 1px solid ${HAIR}; }
-    .frow:first-of-type { border-top: none; padding-top: 0; }
-    .fstat { font-size: 11.5pt; font-weight: 700; color: ${INK}; letter-spacing: -0.008em; line-height: 1.35; }
-    .fsrc { margin-top: 3px; font-family: ${MONO}; font-size: 7.5pt; color: ${TERT}; letter-spacing: 0.03em; }
-    .disc { margin-top: 26px; padding-top: 12px; border-top: 1px solid ${HAIR}; font-size: 7.5pt; color: ${TERT}; line-height: 1.5; }
-  </style></head><body>
-    <div class="kicker"><span class="kl">${logoImg(24)}<span>RESEARCH FINDINGS · ${esc(typeLabel.toUpperCase())}</span></span><span>${esc(fmtDate(run.completed_at))}</span></div>
-    <div class="rule"></div>
-    <h1 class="title">${esc(title)}</h1>
-    <div class="byline">
-      ${faceImg(34, photo)}
-      <div>
-        <div class="bn">Paul Baker</div>
-        <div class="bt">smbX — buy-side corporate development · ${esc(typeLabel)} · ${sources.length} sources</div>
-      </div>
-    </div>
-    ${findingsHtml}
-    <div class="doc">${body}</div>
-    ${sourcesHtml}
-    <div class="disc">Research by smbX. Figures are as reported by the cited sources; items marked (directional) are estimates. This document is not investment, legal, tax, or accounting advice and contains no opinion of value on any specific company. · ${esc(run.depth)} depth · ${Number(u.searches ?? 0)} searches</div>
-  </body></html>`;
+  return gateArtifact(HR.reportDocument({
+    eyebrow: `RESEARCH FINDINGS · ${typeLabel.toUpperCase()}`,
+    // The title goes through the grammar's own splitter so it picks up the
+    // ampersand fix and the mint rule exactly as a .md-sourced report does.
+    titleHtml: HR.splitTitle(`<h1>${esc(title)}</h1>`).titleHtml,
+    cards,
+    byline: {
+      name: 'Paul Baker',
+      role: `smbX — buy-side corporate development · ${typeLabel} · ${sources.length} sources`,
+    },
+    bodyHtml: body,
+    // A research report's markdown leads with `##` — the H1 is the run title,
+    // stripped by reportBodyHtml — so its sections are the page-breaking parts.
+    bodyHasH1: false,
+    footerLabel: esc(title),
+    appendixHtml,
+    disclaimer: `Research by smbX. Figures are as reported by the cited sources; items marked (directional) are estimates. This document is not investment, legal, tax, or accounting advice and contains no opinion of value on any specific company. · ${run.depth} depth · ${Number(u.searches ?? 0)} searches`,
+  }, {
+    logoWhite: DARK_LOGO_URI || LOGO_URI || '',
+    headshot: photo?.dataUri || '',
+    hero,
+  }, CARTA_FONTS_CSS, heroPos), 'the research report PDF', 'scripts/studio/build-report.mts');
 }
 
+/**
+ * The report PDF — same two-stage render `build-report.mts` uses.
+ *
+ * THE RENDERER-PROOF LAW (SMBX_RENDERER_PROOF_LAW_2026-08-04) applies here now
+ * and did not before, because before there was no dark cover to be re-composited.
+ * A PDF that ships transparency groups and shadings lets Preview and LinkedIn
+ * re-composite the page their own way — the hard-edged lighter rectangle that
+ * keeps appearing on dark covers. A carousel solves it by rasterizing every
+ * page; a fifty-page report cannot, or it loses selectable, searchable text.
+ *
+ * So: the cover — one page, dark, and the only thing here that produces
+ * /Shading — becomes a flat JPEG, and the body stays real vector text.
+ *
+ * Unlike the CLI, this does NOT exit non-zero on a surviving /Group: a
+ * download is a user pressing a button, and failing it outright to protect a
+ * print artifact would be the wrong trade. It warns to the log instead, which
+ * is where the app's other soft failures already report. The CLI keeps the hard
+ * exit, because that is where a bad artifact still has a chance to be caught
+ * before it reaches anyone.
+ */
 export async function renderResearchPdf(run: ResearchRunRow): Promise<Buffer> {
   const html = await researchReportHtml(run);
+
+  // stage 1 — the cover, rasterized at 2x so it lands near 192dpi.
+  let flat = html;
+  const cover = await newRenderPage();
+  try {
+    await cover.setViewport({
+      width: Math.round(HR.REPORT_COVER_W_IN * 96), height: 1000, deviceScaleFactor: 2,
+    });
+    await cover.setContent(HR.coverOnlyDocument(html), { waitUntil: 'domcontentloaded', timeout: 120000 });
+    await cover.evaluateHandle('document.fonts.ready').catch(() => {});
+    await cover.evaluate(() => Promise.all(Array.from(document.images).map((im: any) => im.decode().catch(() => {})))).catch(() => {});
+    const el = await cover.$('.cover');
+    if (el) {
+      const b = await el.screenshot({ type: 'jpeg', quality: 92, encoding: 'base64' });
+      flat = HR.withFlatCover(html, `data:image/jpeg;base64,${b}`);
+    }
+    // No cover element → fall through with the live one. A download must not
+    // fail because a raster step did.
+  } catch (e) {
+    console.warn('[composer] cover raster failed, shipping the vector cover:', (e as Error).message);
+  } finally { await cover.close().catch(() => {}); }
+
+  // stage 2 — the document.
   const page = await newRenderPage();
   try {
-    await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 120000 });
+    await page.setContent(flat, { waitUntil: 'domcontentloaded', timeout: 120000 });
     await page.evaluateHandle('document.fonts.ready').catch(() => {});
     await page.evaluate(() => Promise.all(Array.from(document.images).map((im: any) => im.decode().catch(() => {})))).catch(() => {});
     const pdf = await page.pdf({
       format: 'letter',
       printBackground: true,
-      margin: { top: '0.85in', bottom: '0.9in', left: '0.85in', right: '0.85in' },
+      margin: { ...HR.REPORT_MARGIN },
       displayHeaderFooter: true,
       headerTemplate: '<span></span>',
-      footerTemplate: `<div style="width:100%;display:flex;justify-content:space-between;padding:0 0.85in;font-family:'IBM Plex Mono',monospace;font-size:7px;color:#9A9A9A;">
-        <span>smbX — research, with sources</span>
-        <span><span class="pageNumber"></span> / <span class="totalPages"></span></span>
-      </div>`,
+      footerTemplate: HR.reportFooterTemplate(esc(run.report_title || run.topic)),
     });
-    return Buffer.from(pdf);
+    const buf = Buffer.from(pdf);
+    const raw = buf.toString('latin1');
+    const groups = (raw.match(/\/Group/g) || []).length;
+    const shadings = (raw.match(/\/Shading/g) || []).length;
+    if (groups || shadings) {
+      console.warn(`[composer] renderer-proof: /Group=${groups} /Shading=${shadings} survived into ${run.id} — Preview and LinkedIn may re-composite this PDF.`);
+    }
+    return buf;
   } finally {
     await page.close().catch(() => {});
   }
@@ -444,7 +515,7 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: Auth
     ? `<img src="${pick.dataUri}" style="width:100%;height:100%;object-fit:cover;object-position:${Math.round(pick.focalX * 100)}% ${Math.round(pick.focalY * 100)}%;display:block">`
     : `<div class="panel-brand">${logoImg(64)}</div>`;
 
-  return `<!DOCTYPE html><html><head><meta charset="utf-8">${FONTS}
+  return gateArtifact(`<!DOCTYPE html><html><head><meta charset="utf-8">${FONTS}
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { width: 1080px; height: 1350px; font-family: ${SANS}; color: ${inkC}; ${pageBg} overflow: hidden; position: relative; font-variant-numeric: tabular-nums; }
@@ -499,7 +570,7 @@ export function researchCardHtml(run: ResearchRunRow, hookIndex = 0, photo: Auth
         </div>
       </div>
     </div>
-  </body></html>`;
+  </body></html>`, 'the single-image post card', 'scripts/studio/build-onepager.mts');
 }
 
 export async function renderResearchCardPng(run: ResearchRunRow, hookIndex = 0, variant: CardVariant = 'light'): Promise<Buffer> {
@@ -741,7 +812,16 @@ export function houseDeckHtml(
       image: imageFor,
     };
     if (!assets.logo || !assets.texture) return null; // brand assets missing → legacy
-    return `<!DOCTYPE html><html><head><meta charset="utf-8">${FONTS}
+    // CARTA_FONTS, not FONTS — deckCss() asks for Source Serif 4 and Schibsted
+    // Grotesk, which the Ledger embed does not carry. See the note on the
+    // constant. This is the line that makes the app's carousel and a
+    // `build-deck.mts` carousel the same document rather than the same layout.
+    /* NOT gated here. This function is fail-soft by design — any throw returns
+       null and the caller renders the LEDGER legacy template instead. A gate
+       inside the try block would therefore turn "this document is off-language"
+       into "silently render the MORE off-language one", which is the opposite
+       of the point. linkedInDocHtml gates both paths on the way out. */
+    return `<!DOCTYPE html><html><head><meta charset="utf-8">${CARTA_FONTS}
 <style>${deckCss(assets.texture)}</style></head><body>${deckPages(spec, assets).join('')}</body></html>`;
   } catch (e) {
     console.warn('[composer] house deck grammar failed, using legacy template:', (e as Error).message);
@@ -751,7 +831,11 @@ export function houseDeckHtml(
 
 export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null = null, art: AuthorPhoto | null = null, brand: AuthorPhoto | null = null, pageImgs: Record<number, AuthorPhoto> = {}): string {
   const house = houseDeckHtml(run, photo, art, brand, pageImgs);
-  if (house) return house;
+  /* THE GATE SITS HERE, not inside houseDeckHtml, because that function is
+     fail-soft: it swallows a throw and falls back to the legacy Ledger deck
+     below. Gating on the way OUT covers both paths, and the fallback is the one
+     that most needs covering. */
+  if (house) return gateArtifact(house, 'the carousel', 'scripts/studio/build-deck.mts');
   const feed = run.studio_feed && typeof run.studio_feed === 'object' ? run.studio_feed : {};
   const typeLabel = TYPE_LABELS[run.research_type] ?? 'Research';
   const pages = docPages(run);
@@ -944,7 +1028,7 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     </div>`);
   }
 
-  return `<!DOCTYPE html><html><head><meta charset="utf-8">${FONTS}
+  return gateArtifact(`<!DOCTYPE html><html><head><meta charset="utf-8">${FONTS}
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 1080px; }
@@ -1081,7 +1165,7 @@ export function linkedInDocHtml(run: ResearchRunRow, photo: AuthorPhoto | null =
     .brand-big { margin-top: 42px; display: flex; align-items: center; justify-content: center; }
     .close-sub { margin-top: 28px; font-size: 30px; color: ${IVORY_SUB}; max-width: 760px; line-height: 1.45; }
     .follow { margin-top: 54px; font-family: ${MONO}; font-size: 22px; letter-spacing: 0.12em; color: #A8F0CE; font-weight: 600; text-transform: uppercase; }
-  </style></head><body>${pageHtml.join('\n')}</body></html>`;
+  </style></head><body>${pageHtml.join('\n')}</body></html>`, 'the carousel (legacy template)', 'scripts/studio/build-deck.mts');
 }
 
 /** Artwork for a render: the picked/generated image, and when a run has
@@ -1214,9 +1298,29 @@ export async function designedDeckHtml(run: ResearchRunRow): Promise<string | nu
     };
     const key = dd.deckKey(inp);
     const cached = await dd.readDeckCache(Number(run.id));
-    if (cached && cached.key === key) return cached.html;
+    /* GATED INSIDE THE TRY, DELIBERATELY, and this is the one place where
+       falling through the catch is the RIGHT outcome.
+
+       This path is a MODEL writing the HTML, so it is the likeliest of all of
+       them to drift — and `deckDesigner.ts` currently instructs it in LEDGER:
+       Fraunces, Inter, the jade block, brass. Worse, this path WINS: every
+       caller is `(await designedDeckHtml(run)) ?? linkedInDocHtml(...)`, so the
+       app's default carousel is the designed Ledger one and the house Carta
+       grammar only runs when this returns null.
+
+       A gate failure here is caught below and returns null, which sends the
+       caller to the house template. So the effect of the guard on this path is
+       not a broken download — it is the app quietly rendering the CORRECT deck
+       instead of the wrong one. That is the right trade until deckDesigner's
+       brand contract is rewritten in Carta. */
+    if (cached && cached.key === key) {
+      return gateArtifact(cached.html, `the designed carousel (cached, run ${run.id})`);
+    }
     const html = await dd.dedupeDesign(Number(run.id), () => dd.generateDeckHtml(inp, FONTS));
-    if (html) await dd.writeDeckCache(Number(run.id), key, html);
+    if (html) {
+      gateArtifact(html, `the designed carousel (run ${run.id})`);
+      await dd.writeDeckCache(Number(run.id), key, html);
+    }
     return html;
   } catch (err: any) {
     console.warn(`[composer] deck design failed for run ${run.id} — template fallback:`, err?.message);
@@ -1514,7 +1618,7 @@ export function announcementCardHtml(spec: AnnouncementSpec): string {
   </div>
 </div>`;
   }
-  return `<!doctype html><meta charset="utf-8">${FONTS}<style>*{margin:0;padding:0;box-sizing:border-box}</style>
+  return gateArtifact(`<!doctype html><meta charset="utf-8">${FONTS}<style>*{margin:0;padding:0;box-sizing:border-box}</style>
 <div style="width:1080px;height:1350px;position:relative;background:${WARM};overflow:hidden;font-family:${SANS};font-variant-numeric:tabular-nums">
   <div style="position:absolute;inset:0;background:
     radial-gradient(1200px 800px at 8% 0%, rgba(10,122,88,0.045), transparent 60%),
@@ -1534,7 +1638,7 @@ export function announcementCardHtml(spec: AnnouncementSpec): string {
     ${logoImg(48, { white: true })}
     <div style="font-family:${MONO};font-size:19px;letter-spacing:0.1em;color:#A8F0CE;text-transform:uppercase">${annEsc(spec.footerTag)}</div>
   </div>
-</div>`;
+</div>`, 'the announcement card', 'scripts/studio/build-onepager.mts');
 }
 
 export async function renderAnnouncementCardPng(spec: AnnouncementSpec): Promise<Buffer> {
@@ -1719,7 +1823,7 @@ export function postCardHtml(spec: PostCardSpec): string {
       ${spec.photo ? `<div style="margin-top:34px;height:270px;box-shadow:0 20px 60px rgba(0,0,0,0.16)">${annPhotoBlock(16, spec.photo)}</div>` : ''}
       <div style="margin-top:${spec.photo ? 26 : 44}px">${steps}</div>
     </div>`;
-  return cardShell(false, spec.kicker || 'The playbook', spec.footerTag, body);
+  return gateArtifact(cardShell(false, spec.kicker || 'The playbook', spec.footerTag, body), 'the post card', 'scripts/studio/build-onepager.mts');
 }
 
 export async function renderPostCardPng(spec: PostCardSpec): Promise<Buffer> {

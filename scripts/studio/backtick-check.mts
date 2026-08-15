@@ -29,6 +29,10 @@ const ROOT = path.resolve(new URL('../..', import.meta.url).pathname);
    check that fires on those would be noise. */
 const GUARDED = [
   'house/deck.ts',
+  /* house/report.ts builds the report stylesheet inside a template literal the
+     same way deck.ts does — the same trap, so the same guard. A backtick in one
+     of its block comments terminates the string and the file stops parsing. */
+  'house/report.ts',
   'scripts/studio/build-deck.mts',
   'scripts/studio/build-report.mts',
   'scripts/studio/build-onepager.mts',

@@ -1,4 +1,6 @@
 import { MASTER_PROMPT } from '../prompts/masterPrompt.js';
+import { CACHE_SPLIT } from './promptCache.js';
+export { CACHE_SPLIT } from './promptCache.js';
 import { PERSONAS } from '../prompts/personas.js';
 import { JOURNEY_DETECTION_PROMPT } from '../prompts/journeyDetection.js';
 import { GATE_PROMPTS } from '../prompts/gatePrompts.js';
@@ -850,6 +852,25 @@ export async function buildSystemPrompt(
   layers.push(AGENCY_DOCTRINE);
   layers.push(formatAgencyActionContractsForPrompt());
   layers.push(V19_RUNTIME_RULES);
+  // ── CACHE BREAKPOINT ────────────────────────────────────────────────────
+  // Everything ABOVE this line is identical on every request from every user:
+  // two frozen consts, a registry dump with no arguments, and another const.
+  // `aiService` splits here and marks the first half `cache_control`, so those
+  // tokens bill at cache-read rates instead of full price on every round of
+  // the agentic loop.
+  //
+  // Prompt caching is a PREFIX match, so the marker has to sit where the
+  // volatile content starts and not one layer later — the first per-request
+  // byte below invalidates everything after it. Adding a static layer? Put it
+  // above the marker. Anything that varies by user, deal, conversation or
+  // clock goes below, however static it looks.
+  //
+  // The rest of the frozen material — the tax and legal engines, personas,
+  // gate prompts, ~21k tokens — is pushed further down interleaved with deal
+  // context, so it CANNOT be cached without reordering the assembly. That is
+  // a real behaviour change to the core prompt and wants measuring on its own,
+  // so it is deliberately not in this change.
+  layers.push(CACHE_SPLIT);
   const contextText = formatYuliaContextForPrompt(buildYuliaContextPack({
     user,
     deal,

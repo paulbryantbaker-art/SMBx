@@ -1,0 +1,482 @@
+{
+  "rule": "The seam is the IoI. Market-shaped work is the studio; deal-shaped work is the app. CRM is app-side from the first touch.",
+  "tiebreak": [
+    "Is it MARKET-shaped — one-to-many, speculative, no counterparty? → the studio.",
+    "Is it DEAL-shaped — one-to-one and counterparty-confidential? → the app.",
+    "Is it before the IoI or after it? Before is the studio, after is the app.",
+    "CRM is the exception and runs app-side from the first touch.",
+    "Still unclear? Ask Paul and add a row here. Do not decide it twice."
+  ],
+  "processes": [
+    {
+      "id": "market-research",
+      "name": "Market research — build a master from scratch",
+      "group": "sourcing",
+      "owner": "workspace",
+      "cost": "expensive",
+      "interleaves": false,
+      "why": "The only path that spends dollars per press, and it is a quarterly batch rather than something you do mid-deal.",
+      "workflow": [
+        "Read RESEARCH.md § B. A full hunt is ~20 runs over several hours.",
+        "Sources land in markets/<m>/research/, logged in _log.md — it is resumable.",
+        "Never run this in the app: the studio lane is off precisely because of this path."
+      ],
+      "aka": [
+        "research",
+        "market master",
+        "hunt",
+        "gather sources",
+        "new market"
+      ]
+    },
+    {
+      "id": "master-synthesis",
+      "name": "Fold research into the market master",
+      "group": "sourcing",
+      "owner": "workspace",
+      "cost": "expensive",
+      "interleaves": false,
+      "why": "Every source's full text in one call, plus a retry when the citation audit fails. Document-shaped and wants a diff.",
+      "workflow": [
+        "Synthesize into markets/<m>/master.md, version into versions/master-vN.md.",
+        "npx tsx $REPO/scripts/studio/audit.mts markets/<m>/master.md",
+        "The master is the source of truth. Never copy it — derive from it."
+      ],
+      "aka": [
+        "synthesis",
+        "fold in",
+        "update master",
+        "rebuild master"
+      ]
+    },
+    {
+      "id": "corp-dev-documents",
+      "name": "Market map · who's who · target map · thesis",
+      "group": "sourcing",
+      "owner": "workspace",
+      "cost": "free",
+      "interleaves": false,
+      "why": "MARKET-shaped: derived from the master, written before any counterparty exists. THE_IOI_SEAM.md returns these to the studio with research and verification, which is where the master and the citation audit already live.",
+      "workflow": [
+        "App → Studio → the market. corpDevDocs.ts generates all three.",
+        "LIVE since 2026-08-14: STUDIO_IN_APP is true and the studio lane is on.",
+        "PLAYBOOK.md §1–4 remains the SPEC for what each contains, wherever it renders.",
+        "The master these derive from still lives on disk and is read, never copied."
+      ],
+      "gap": "The app CAN generate three of these (corpDevDocs.ts: market map, who's who, thesis) but not the target map — and under the IoI seam that no longer matters much, because all four are studio work now. Noted so nobody re-discovers the missing generator and reads it as a bug.",
+      "aka": [
+        "market map",
+        "who's who",
+        "thesis",
+        "target map",
+        "client document"
+      ]
+    },
+    {
+      "id": "target-screen",
+      "name": "Build the candidate list for a market",
+      "group": "sourcing",
+      "owner": "workspace",
+      "cost": "free",
+      "interleaves": false,
+      "why": "A CSV Paul manages in Sheets. Discovery, not commitment — it becomes app rows only when a target goes live.",
+      "workflow": [
+        "npx tsx $REPO/scripts/studio/screen.mts init <market>",
+        "npx tsx $REPO/scripts/studio/screen.mts pull <market>   # needs GOOGLE_PLACES_API_KEY",
+        "npx tsx $REPO/scripts/studio/screen.mts rank <market>   # free, offline",
+        "Places is DISCOVERY, not evidence — verify against the licence registry before a name reaches a client."
+      ],
+      "aka": [
+        "screen",
+        "candidates",
+        "target list",
+        "candidate board"
+      ]
+    },
+    {
+      "id": "data-wrangling",
+      "name": "Data wrangling — messy input into something structured",
+      "group": "sourcing",
+      "owner": "workspace",
+      "cost": "free",
+      "interleaves": false,
+      "why": "Named by Paul 2026-08-14 as Cowork work. Reading a messy sheet, reconciling exports, mapping columns, bucketing records — judgement over unstructured input, which is what a session is good at and what a form is bad at.",
+      "workflow": [
+        "Do the reading and the mapping here, where the raw files are.",
+        "Push the RESULT into the app rather than working the app by hand:",
+        "  npx tsx $REPO/scripts/studio/push-crm.mts",
+        "The endpoint calls no model — the intelligence is the mapping, and it",
+        "happens on your own subscription rather than the metered org key.",
+        "Never invent a row to fill a column. A fabricated CRM contact gets EMAILED."
+      ],
+      "aka": [
+        "data wrangling",
+        "wrangling",
+        "messy data",
+        "spreadsheet",
+        "import",
+        "mapping",
+        "reconcile",
+        "csv"
+      ]
+    },
+    {
+      "id": "pre-ioi-math",
+      "name": "Pre-IoI screening math — is this candidate worth an IoI?",
+      "group": "sourcing",
+      "owner": "workspace",
+      "cost": "free",
+      "interleaves": false,
+      "why": "MARKET-shaped. Screening thirty candidates off a register must not require thirty deal records in the app — it requires the same formulas the app would use, run over a list.",
+      "workflow": [
+        "npx tsx $REPO/scripts/studio/deal.mts run <spec.deal.mts>   # same engine as the app",
+        "Output is a DELIVERABLE — a document or workbook you can hand someone —",
+        "never a live modelling surface. Live scenario work is in-app, full stop.",
+        "At the IoI the candidate is PROMOTED and its runs move with it: see ioi-promotion."
+      ],
+      "aka": [
+        "screening math",
+        "pre-ioi",
+        "candidate math",
+        "workbench",
+        "quick model",
+        "triage"
+      ],
+      "gap": "The engine is NOT vendored yet. Today this reads $REPO directly, which is always-current but carries NO provenance stamp — an output cannot say which engine version produced it, and it breaks if the clone is missing or stale. THE_IOI_SEAM.md requires a vendored copy at a pinned commit with ENGINE_PROVENANCE.md. Open item."
+    },
+    {
+      "id": "sourcing-pipeline",
+      "name": "The 5-stage sourcing engine",
+      "group": "sourcing",
+      "owner": "app",
+      "cost": "drip",
+      "interleaves": true,
+      "why": "Haiku per candidate on a separate Places key that is free under 5k/month, feeding the CRM and the pipeline directly — the app-side half of the pre-IoI asymmetry.",
+      "workflow": [
+        "App → Sourcing. Needs the `sourcing` lane in API_LANES.",
+        "Its three UNATTENDED jobs are separately gated — see worker.ts.",
+        "READ THE DEFECTS BELOW before any output reaches a client document."
+      ],
+      "aka": [
+        "sourcing engine",
+        "pipeline",
+        "enrichment",
+        "seven factor",
+        "scoring"
+      ],
+      "gap": "TWO CITATION-LAW DEFECTS, both verified still present on 2026-08-15. (1) deepAnalysisPrompt.ts line 69 estimates revenue by asking a model to guess from Google review counts — \"<10 reviews typically = <$500K rev\" — an uncited figure in a practice where every number must trace to a source. (2) NOTHING in sourcingPipelineService or sevenFactorScoring decides whether a business is independent, so a franchise location can rank as a target; house/screen.ts calls that the expensive error, because it sends a client into diligence on a business a sponsor already owns. house/screen.ts is NOT a port of this engine — it is the corrected reimplementation, where affiliation is a register lookup and revenue is a band with its arithmetic attached. Prefer the studio screen for anything a client will see. Whether this engine is fixed or retired is Paul's call; the IoI seam assigns screens to the studio, which points at retirement."
+    },
+    {
+      "id": "definitive",
+      "name": "DEFINITIVE — gates, model slots, DealState",
+      "group": "deal",
+      "owner": "app",
+      "cost": "free",
+      "interleaves": true,
+      "why": "App-only and not portable: 169 gate/slot references, 132 MODEL.* definitions, 385 conformance cases. A stateful substrate, not a document.",
+      "workflow": [
+        "App → the deal. Gates advance as the deal advances.",
+        "Calls no model — verified, no API key reference in v19ModelRuntime.ts.",
+        "There is no local equivalent and building one is not a project, it is a year."
+      ],
+      "aka": [
+        "definitive",
+        "gates",
+        "model slots",
+        "dealstate",
+        "substrate",
+        "conformance"
+      ]
+    },
+    {
+      "id": "valuation",
+      "name": "Valuation and deal modelling",
+      "group": "deal",
+      "owner": "app",
+      "cost": "free",
+      "interleaves": true,
+      "why": "DEAL-shaped, and post-IoI. Paul: \"in-app scenario modeling is going to be much more advantageous than a Google Sheet — plus that is where the data room and financial docs will be housed.\" A what-if wants a slider, and it wants to sit beside the documents it is priced from.",
+      "workflow": [
+        "App → the canvas, beside the data room and the financial documents.",
+        "FROM THE IoI ONWARD. Before that it is screening math — see pre-ioi-math.",
+        "Both surfaces run house/deal.ts and npm run test:deal fails if they disagree,",
+        "so a pre-IoI figure and its post-promotion re-run are comparable by construction."
+      ],
+      "aka": [
+        "valuation",
+        "model",
+        "modelling",
+        "irr",
+        "dscr",
+        "lbo",
+        "dcf",
+        "sensitivity",
+        "what if",
+        "scenario"
+      ]
+    },
+    {
+      "id": "data-room",
+      "name": "The data room and financial documents",
+      "group": "deal",
+      "owner": "app",
+      "cost": "free",
+      "interleaves": true,
+      "why": "DEAL-shaped and counterparty-confidential by definition. It is also the reason the modelling is app-side: the figures are priced from these documents, and separating the two is what made the old split painful.",
+      "workflow": [
+        "App → the deal → data room. Files, share links, and the audit trail.",
+        "Third parties receive documents by token link and never get an account.",
+        "Nothing here crosses back into the studio repo after promotion."
+      ],
+      "aka": [
+        "data room",
+        "dataroom",
+        "documents",
+        "financials",
+        "diligence files",
+        "uploads"
+      ]
+    },
+    {
+      "id": "ioi-promotion",
+      "name": "The IoI promotion — a candidate becomes a deal",
+      "group": "deal",
+      "owner": "both",
+      "cost": "free",
+      "interleaves": false,
+      "why": "THE SEAM ITSELF. A defined event with a packet and a receipt on both sides — not a migration, and not a gradual drift of files across the boundary.",
+      "workflow": [
+        "MOVES: the deal profile (deal.json, every figure carrying a source; add-backs",
+        "  only when verified with evidence), documents so far, the screen record, and",
+        "  the pre-IoI model runs (engine-stamped, so the app can verify continuity).",
+        "LINKS but does not move: the market master. The app records master@commit,",
+        "  so the deal knows what market context priced it. The master stays put.",
+        "NEVER crosses back: nothing counterparty-confidential enters the studio repo.",
+        "STUDIO/deals/<d>/ then goes read-only — stop writing, keep reading, drop nothing."
+      ],
+      "aka": [
+        "ioi",
+        "promotion",
+        "promote",
+        "letter of intent",
+        "handoff",
+        "becomes a deal"
+      ],
+      "gap": "NOT BUILT. There is no deal.json packet, no master@commit pointer on a deal, no receipt either side, and no read-only flip of the staging folder. The largest unbuilt piece of the seam."
+    },
+    {
+      "id": "deal-state",
+      "name": "Deal pipeline — stage, owner, next action",
+      "group": "deal",
+      "owner": "app",
+      "cost": "free",
+      "interleaves": true,
+      "why": "\"What stage is this at\" is a question, and a question needs rows and SQL. A folder cannot answer it.",
+      "workflow": [
+        "App → Deals. Forms and SQL; nothing metered."
+      ],
+      "aka": [
+        "pipeline",
+        "deal stage",
+        "next action",
+        "deal board",
+        "tasks"
+      ]
+    },
+    {
+      "id": "deal-documents",
+      "name": "Deal memo · diligence plan · term framework",
+      "group": "deal",
+      "owner": "app",
+      "cost": "drip",
+      "interleaves": true,
+      "why": "Moved to the app 2026-08-14 (Paul). These sit inside the deal sitting — written from the model, the gates and the diligence state, all of which are app rows. Exporting to write them elsewhere was the back-and-forth.",
+      "workflow": [
+        "App → the deal → documents, alongside the model they are written from.",
+        "PLAYBOOK.md §5b–5d remains the SPEC for what each one contains.",
+        "Never restate the model's figures by hand — reference the model.",
+        "Confidential to the engagement: never a source for anything public."
+      ],
+      "gap": "NOT IMPLEMENTED ANYWHERE IN THE APP YET. The nearest deliverables are buy_deal_screening_memo (pre-LOI screening, not the §5b memo) and an LOI draft (which §5d deliberately is NOT — drafting is counsel's). Write all three HERE to PLAYBOOK §5 until the app has them.",
+      "aka": [
+        "memo",
+        "ic packet",
+        "diligence plan",
+        "term sheet",
+        "terms",
+        "loi framework"
+      ]
+    },
+    {
+      "id": "crm",
+      "name": "Client register and pipeline",
+      "group": "crm",
+      "owner": "app",
+      "cost": "free",
+      "interleaves": true,
+      "why": "A CRM is forms and SQL and calls no model at all. \"Who owes a touch this week\" is a query.",
+      "workflow": [
+        "App → Clients. crm_accounts / crm_contacts / crm_activity.",
+        "Research the register in Cowork, push it in:",
+        "  npx tsx $REPO/scripts/studio/push-crm.mts"
+      ],
+      "aka": [
+        "crm",
+        "clients",
+        "accounts",
+        "contacts",
+        "prospects",
+        "register"
+      ]
+    },
+    {
+      "id": "outreach",
+      "name": "Outreach queue and sends",
+      "group": "crm",
+      "owner": "app",
+      "cost": "free",
+      "interleaves": true,
+      "why": "The queue is rows. THE LINE is structural here: one touch, one press, one human — there is no batch-send endpoint and there must not be.",
+      "workflow": [
+        "App → Clients → Outreach.",
+        "A human presses send on every touch. The worker may assemble; it must never release."
+      ],
+      "aka": [
+        "outreach",
+        "touches",
+        "campaign",
+        "sequence",
+        "email campaign"
+      ]
+    },
+    {
+      "id": "counterparty-comms",
+      "name": "Lawyers, CPAs, lenders, sellers' advisors",
+      "group": "crm",
+      "owner": "app",
+      "cost": "free",
+      "interleaves": true,
+      "why": "Email out plus token share links — free, and it keeps third parties corresponded with rather than onboarded. Never build this on direct_threads.",
+      "workflow": [
+        "App → email + document share links. sendEmail / documentShareService.",
+        "service_providers + service_referrals is the typed register for these people.",
+        "Nobody outside the team ever gets an account."
+      ],
+      "aka": [
+        "counterparty",
+        "lawyer",
+        "attorney",
+        "cpa",
+        "lender",
+        "specialist",
+        "share link"
+      ]
+    },
+    {
+      "id": "collateral",
+      "name": "LinkedIn carousels, one-pagers, reports",
+      "group": "collateral",
+      "owner": "workspace",
+      "cost": "free",
+      "interleaves": false,
+      "why": "MARKET-shaped: one-to-many and speculative, with no counterparty. THE_IOI_SEAM.md returns it to the studio — it was briefly app-owned on 2026-08-14 under a different axis (input vs output), and the audience axis is the one that holds.",
+      "workflow": [
+        "Read FORMATS.md (containers) and DESIGN.md (the look) first, every time.",
+        "npx tsx $REPO/scripts/studio/build-deck.mts <spec.deck.mts>",
+        "npx tsx $REPO/scripts/studio/build-onepager.mts <spec.post.mts>",
+        "npx tsx $REPO/scripts/studio/build-report.mts <report.md>",
+        "Rendered by the engine on the Mac. Client-direct work files to decks/, never collateral/."
+      ],
+      "aka": [
+        "carousel",
+        "deck",
+        "one-pager",
+        "onepager",
+        "report pdf",
+        "linkedin",
+        "post"
+      ]
+    },
+    {
+      "id": "website",
+      "name": "The public site and published research",
+      "group": "collateral",
+      "owner": "app",
+      "cost": "free",
+      "interleaves": false,
+      "why": "Front end and marketing — the half that was never in question. Railway deploys on push to main.",
+      "workflow": [
+        "Engine repo → client/src/practice/.",
+        "A report publishes by dropping the .md in scripts/studio/reports/ and registering it."
+      ],
+      "aka": [
+        "website",
+        "site",
+        "marketing",
+        "landing",
+        "published report",
+        "smbx.ai"
+      ]
+    },
+    {
+      "id": "linkedin-analytics",
+      "name": "LinkedIn analytics import",
+      "group": "collateral",
+      "owner": "app",
+      "cost": "free",
+      "interleaves": false,
+      "why": "THE STANDING EXCEPTION — the XLSX parser has no local equivalent. It calls no model, so importing works whatever the lanes say.",
+      "workflow": [
+        "App → Studio → Performance → import the .xlsx.",
+        "The mechanical parse is the part worth porting one day. The read is a session's job anyway."
+      ],
+      "aka": [
+        "analytics",
+        "linkedin export",
+        "xlsx",
+        "performance"
+      ]
+    },
+    {
+      "id": "weekly-sweep",
+      "name": "The Saturday research sweep",
+      "group": "ops",
+      "owner": "workspace",
+      "cost": "expensive",
+      "interleaves": false,
+      "why": "Research on a schedule, so it belongs where research belongs. A quarterly rotation, one market a week.",
+      "workflow": [
+        "node weekly.mts due       # whose turn it is; exits 0 when nobody is",
+        "WEEKLY.md is the standing prompt. It WRITES but never PUBLISHES.",
+        "Everything lands in a pull request — that is the review gate."
+      ],
+      "aka": [
+        "weekly",
+        "saturday",
+        "sweep",
+        "digest",
+        "scheduled research"
+      ]
+    },
+    {
+      "id": "citation-audit",
+      "name": "The citation audit",
+      "group": "ops",
+      "owner": "both",
+      "cost": "free",
+      "interleaves": false,
+      "why": "house/audit.ts is pure and shared, so both sides compute an identical answer. Run it wherever the document is.",
+      "workflow": [
+        "npx tsx $REPO/scripts/studio/audit.mts <doc.md> --against <master.md>",
+        "Exit 0 clean · 1 not clean · 2 NOT AUDITED (no machine-readable source).",
+        "The honest limit: it checks NUMBERS, not prose. A fabricated claim with no figure passes."
+      ],
+      "aka": [
+        "audit",
+        "citations",
+        "check figures",
+        "verify"
+      ]
+    }
+  ]
+}

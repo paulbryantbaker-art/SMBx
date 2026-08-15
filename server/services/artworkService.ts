@@ -21,7 +21,7 @@
  * falls back to the procedural motif. Artwork must never sink a run.
  */
 import { createStudioAsset } from './studioAssets.js';
-import { LEDGER } from '../../house/tokens.js';
+import { CARTA, artworkPaletteClause } from '../../house/tokens.js';
 import { spendAllowed } from './apiSpend.js';
 
 const IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
@@ -47,8 +47,19 @@ export function artworkPrompt(visualBrief: string, title: string): string {
     'Style: minimal flat vector-like editorial art, generous negative space, confident geometric shapes,',
     // Palette generated from house/tokens.ts — a brand change must never leave
     // the image model painting in the old colours (byte-identical wording).
-    `subtle paper grain. Palette STRICTLY: bone off-white background ${LEDGER.bone}, deep green ${LEDGER.green},`,
-    `near-black ink ${LEDGER.ink}, one small brass-gold accent ${LEDGER.brass}. Portrait 4:5 composition.`,
+    /* The palette clause is GENERATED, not written here (house/tokens.ts).
+       It used to be inlined, which is how it kept its own copy of the colours
+       and drifted: a rebrand changes the renderer and leaves the image model
+       painting in the old system, faithfully, with nothing wrong in any diff. */
+    `subtle paper grain. Palette STRICTLY: ${artworkPaletteClause()}. Portrait 4:5 composition.`,
+    /* NO SECOND ACCENT (2026-08-15, Paul: "no ledger at all. carta"). This line
+       used to ask for "one small brass-gold accent", and brass is retired — so
+       every illustration this service has generated came back carrying a warm
+       accent that the house no longer has anywhere else. Carta has exactly ONE
+       accent, and the model is told so rather than being offered a palette to
+       choose from: a prompt that lists two colours gets two colours. */
+    `Exactly ONE accent colour: the deep green above. NO amber, brass, gold, honey,`,
+    `orange or any warm accent whatsoever — a warm tone anywhere in the image is a reject.`,
     'The background must be ONE uniform flat color reaching all four edges — NO baked-in vignettes,',
     'NO edge fades, NO gradient borders, NO dark side-panels (the page layout handles all blending).',
     'ABSOLUTELY NO: text, letters, numbers, words, logos, watermarks, charts, graphs, documents,',

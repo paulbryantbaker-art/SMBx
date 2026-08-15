@@ -16,6 +16,7 @@ import { checkDealFreshness } from './services/dealFreshnessService.js';
 import { runDailyAggregatorScan } from './services/aggregatorMonitorService.js';
 import { batchEnrichTargets } from './services/websiteEnrichmentService.js';
 import { runStage2, runStage3, runStage4, runWeeklyPortfolioRefresh, runMonthlyPortfolioExpansion } from './services/sourcingPipelineService.js';
+import { spendAllowed } from './services/apiSpend.js';
 import { sql } from './db.js';
 import { refreshNightlyDealReads } from './services/nightlyDealReadService.js';
 import { getDatabaseUrl, shouldUseDatabaseSsl } from './dbConfig.js';
@@ -216,6 +217,27 @@ async function start() {
     });
     console.log('Scheduled: daily_aggregator_scan (daily 5 AM UTC)');
 
+
+    /* THE THREE UNATTENDED SPENDERS.
+     *
+     * Everything else in this block is free — a freshness scan, a rate
+     * monitor, a deal read. These three call models on the metered key with
+     * nobody watching, which is the exact shape of the 2026-08-09 incident
+     * that produced the kill switch.
+     *
+     * ENABLE_SCHEDULED_JOBS already gates the whole block, but it is one
+     * switch over a mixed set: turning it on for the free jobs silently arms
+     * the spending ones too. So these three ALSO check the sourcing lane, and
+     * the repo's existing invariant holds — "the two switches can only ever
+     * agree", the same reasoning the research scheduler carries.
+     *
+     * Added 2026-08-14, when the sourcing lane moved to ON by default. Before
+     * that the lane was off and this could not fire; widening the default
+     * without this guard would have re-armed all three by omission.
+     */
+    if (!spendAllowed('sourcing')) {
+      console.log('[worker] Sourcing jobs NOT scheduled — the "sourcing" lane is off in API_LANES. Interactive sourcing is unaffected; this only skips the unattended enrichment and portfolio jobs.');
+    } else {
     // Website enrichment batch — every day at 8 AM UTC
     await (boss as any).schedule('daily_enrichment_batch', '0 8 * * *', {}, {});
     await (boss as any).work('daily_enrichment_batch', async () => {
@@ -241,7 +263,8 @@ async function start() {
       const result = await runMonthlyPortfolioExpansion();
       console.log(`[worker] Portfolio expansion: ${result.portfoliosExpanded} portfolios, ${result.newCandidates} new candidates`);
     });
-    console.log('Scheduled: portfolio_monthly_expansion (1st of month 5 AM UTC)');
+      console.log('Scheduled: portfolio_monthly_expansion (1st of month 5 AM UTC)');
+    }
   } else {
     console.log('[worker] Scheduled jobs DISABLED (set ENABLE_SCHEDULED_JOBS=true to enable)');
   }

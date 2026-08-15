@@ -124,6 +124,49 @@ law('content/studio/workspace-CLAUDE.md', 'CLAUDE.md');
 law('content/studio/PLAYBOOK.md', 'PLAYBOOK.md');
 law('content/studio/FORMATS.md', 'FORMATS.md');
 law('content/studio/DESIGN.md', 'DESIGN.md');
+/* The state of the renderers, as opposed to the look. DESIGN.md says what the
+   house looks like and FORMATS.md says what shape a container is; neither said
+   which builders were actually converted, and for a week DESIGN.md claimed all
+   four were when two were not. A session that trusts a law it cannot verify is
+   exactly how the wrong palette ships. */
+law('content/studio/COLLATERAL_STATE.md', 'COLLATERAL_STATE.md');
+/* THE_LINE.md — added 2026-08-14, Paul: "Make sure that Cowork understands
+   where the Lines are and what we need expert opinions on too. Tax, legal
+   real estate, etc."
+
+   The same defect DESIGN.md was created to fix, in the compliance layer rather
+   than the visual one: `THE_LINE_POLICY.md` lives at the REPO root and was
+   never in this list, so a session opened on the workspace could not read it —
+   while CLAUDE.md cheerfully said "Full text in THE_LINE_POLICY.md in the
+   repo." A pointer to a file that is not there is worse than no pointer,
+   because it reads as though the law is available.
+
+   It is not a copy of the policy. The policy states the perimeter and puts the
+   whole specialist question in ONE clause — "securities, tax opinions, legal
+   opinions, formal appraisal". THE_LINE.md carries the perimeter verbatim and
+   then answers the question that clause leaves open: which QUESTION has crossed
+   into which lane, who owns it, and what to hand them. Tax, legal, the five
+   separate real-estate lanes, valuation, securities, trade licensing,
+   employment, insurance and QoE. */
+law('content/studio/THE_LINE.md', 'THE_LINE.md');
+/* WHERE.md + where.json — added 2026-08-14. The settled answer to "which
+   system does this", GENERATED from house/where.ts so the app and a session
+   read the same table rather than two prose copies that agree today.
+
+   It travels as a DOCUMENT because Cowork is Claude Desktop, not a terminal
+   (Paul, same day): a session there reads files and cannot be relied on to run
+   `npx tsx`. where.json is the same data machine-readable, for anything that
+   wants to branch on it rather than read it. */
+law('content/studio/WHERE.md', 'WHERE.md');
+law('content/studio/where.json', 'where.json');
+/* WHAT_LIVES_WHERE.md — the fourth law found dangling in this session's sweep
+   (2026-08-14). It maps the two REPOSITORIES on the Mac and names the debris
+   clones, which is exactly what a session needs when a command aims at the
+   wrong checkout — and it had never been in this list, so it could not be
+   read from the workspace it describes. Distinct from WHERE.md: that one
+   routes PROCESSES between systems, this one routes PATHS between repos. The
+   generated header on WHERE.md says so, because the two names collide. */
+law('content/studio/WHAT_LIVES_WHERE.md', 'WHAT_LIVES_WHERE.md');
 law('content/studio/RESEARCH.md', 'RESEARCH.md');
 /* THE MACHINE (2026-08-12, Paul: "give Cowork the DL for the new element to
    be used in collateral"). MACHINE.md is the design language + content law;
@@ -235,8 +278,24 @@ writeFileSync(path.join(exampleDeal, 'README.txt'),
    'analysis/    what we produced (QofE read, model output, memos)',
    'notes.md     the running record',
    '',
+   'MODEL WITH THE CLI, never by hand — house/deal.ts is the same arithmetic',
+   'the app runs, and a test fails if the two ever disagree. Working a return',
+   'out in a scratch file is how a second answer gets born.',
+   '',
+   '  npx tsx <repo>/scripts/studio/deal.mts new <engagement> "<target>"',
+   '  npx tsx <repo>/scripts/studio/deal.mts run analysis/<target>.deal.mts',
+   '  npx tsx <repo>/scripts/studio/deal.mts list',
+   '',
+   'The .deal.mts spec is the artifact you maintain; <target>-model.md is',
+   'output and the next run overwrites it. Money in CENTS, rates as DECIMALS.',
+   '',
+   'Document specs — model, memo, diligence plan, term framework — are in',
+   'PLAYBOOK.md section 5. Deal documents render to decks/, never collateral/:',
+   'collateral is publishable anywhere, and these name a live target.',
+   '',
    'THE LINE applies: buy-side only, no unlicensed opinions — coordinate the',
-   'specialist instead. See THE_LINE_POLICY.md in the repo.',
+   'specialist instead. Tax goes to the CPA (deal.mts carries no tax surface',
+   'on purpose); clause language goes to counsel. See THE_LINE_POLICY.md.',
    ''].join('\n'));
 for (const [d, note] of Object.entries(notes)) {
   const keep = path.join(target, d, 'README.txt');
@@ -269,6 +328,9 @@ writeFileSync(path.join(target, 'README.md'), [
   '              The spec, not the method — it assumes research/ is populated.',
   'FORMATS.md    collateral containers: which builder, which fields, slot sizes.',
   'DESIGN.md     the house look — palette, type, and the retired systems by hex.',
+  'THE_LINE.md   the perimeter, and whose lane each question is in. Read it',
+  '              before anything client-facing, and whenever a question turns',
+  '              tax, legal, real estate, valuation, licensing or insurance.',
   '```',
   '',
   '## Research a market from scratch',

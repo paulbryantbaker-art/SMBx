@@ -27,16 +27,31 @@ import { writeBuildRecord } from './build-record.mts';
 import { pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(new URL('../..', import.meta.url).pathname);
-const { fontFaceCss } = await import(pathToFileURL(path.join(ROOT, 'server/services/fontEmbeds.ts')).href);
+/* cartaFontFaceCss, NOT fontFaceCss (2026-08-15). `deckCss()` sets
+   `CARTA_TYPE.display` = Source Serif 4 and `CARTA_TYPE.sans` = Schibsted
+   Grotesk; `fontFaceCss()` embeds the LEDGER set — Inter, Fraunces, Plex — and
+   carries neither Carta face. So every carousel built since the Carta restyle,
+   here AND in the app, has rendered its display type in the CSS fallback
+   (Georgia) and its working type in the system sans.
+   It never errored and it never showed in a diff, because a missing @font-face
+   is a substitution rather than a failure — and it rendered wrong identically
+   on both sides, which is the one way this kind of defect survives a parity
+   check that only compares the two consumers to each other. Pinned in
+   house/__tests__/engine-parity.test.mts. */
+const { cartaFontFaceCss } = await import(pathToFileURL(path.join(ROOT, 'server/services/fontEmbeds.ts')).href);
 const { newRenderPage } = await import(pathToFileURL(path.join(ROOT, 'server/services/premiumPdfRenderer.ts')).href);
 
-/* ── house palette (mirrors server/services/researchComposer.ts) ──────── */
-/* THE shared definition — see house/tokens.ts. Never hardcode a hex here. */
-const { LEDGER, TYPE } = await import(pathToFileURL(path.join(ROOT, 'house/tokens.ts')).href);
-const INK = LEDGER.ink, BODY = LEDGER.slate, TERT = LEDGER.muted, GREEN = LEDGER.green;
-const WARM = LEDGER.bone, DARK = LEDGER.dark, IVORY = LEDGER.ivory, IVORY_SUB = LEDGER.rule;
-const BRASS = LEDGER.brass, HAIR = LEDGER.hair, MINT = LEDGER.mint;
-const DISPLAY = TYPE.display, SANS = TYPE.sans, MONO = TYPE.mono;
+/* ── palette and type: NEITHER LIVES HERE ANY MORE (2026-08-15) ─────────
+   This builder used to open by pulling eleven LEDGER colour constants and the
+   three Ledger typefaces out of house/tokens.ts. Every one was DEAD — declared
+   and never referenced — because the pages come from house/deck.ts, which is on
+   Carta and reads its own tokens.
+
+   Dead is not harmless. DESIGN.md told a session "all four builders import
+   CARTA", and anyone who checked that claim by grepping this file found LEDGER
+   at the top and had to work out on their own that it did nothing. A retired
+   palette sitting in a live builder is a standing invitation to reach for it.
+   Colour and type belong to the grammar; this file resolves images and renders. */
 
 /* ── CLI args ─────────────────────────────────────────────────────────── */
 const args = process.argv.slice(2);
@@ -107,12 +122,21 @@ const ghost = (n: number) => `<div class="ghost">${String(n).padStart(2, '0')}</
    Paul, 2026-07-24: collateral must render the same whether it is built
    here in a Cowork session or by the app. Both call deckDocument(). */
 const { deckPages, deckCss } = await import(pathToFileURL(path.join(ROOT, 'house/deck.ts')).href);
+const { assertCarta } = await import(pathToFileURL(path.join(ROOT, 'house/palette-guard.ts')).href);
 const html: string[] = deckPages(deck, {
   logo: LOGO, logoWhite: LOGO_W, texture: TEXTURE,
   headshot: HEAD, coverImage: COVER_IMG, image: resolveImg,
 });
-const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${fontFaceCss()}</style>
+const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${cartaFontFaceCss()}</style>
 <style>${deckCss(TEXTURE)}</style></head><body>${html.join('')}</body></html>`;
+
+/* THE PALETTE GUARD. build-report.mts has called this since the Carta pass and
+   this builder never did — an omission, not a decision: the carousel is the
+   artifact that goes out most often, and it was the one rendering unchecked.
+   It reads the document rather than the source because a colour can arrive
+   through a function three files away. Before the raster, so a bad page never
+   becomes a JPEG nobody can grep. */
+assertCarta(doc, deck.slug);
 
 /* ── render: page JPGs + rasterized PDF (the renderer-proof law) ──────── */
 const page = await newRenderPage();

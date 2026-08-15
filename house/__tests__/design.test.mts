@@ -247,6 +247,138 @@ for (const rel of ['client/src/practice/report.css', 'client/src/practice/practi
   is(`${path.basename(rel)}: no comment terminator outside a comment`, orphanClose, false);
 }
 
+/* ── 4c. the builder-state table must match the builders ──────────────────
+   WHY THIS EXISTS. The notice at the top of DESIGN.md claimed "all four
+   builders import CARTA" and it was FALSE for two of them — `build-onepager`
+   and `build-og-card` both open by destructuring `LEDGER`, embed the Ledger
+   faces, and run no palette guard. The claim was prose, so nothing checked it,
+   and a session reading DESIGN.md as canon had no reason to look.
+
+   That is the fourth time in this codebase a law has read authoritative and
+   been wrong (THE_LINE_POLICY and DESIGN_LANGUAGE cited from a workspace that
+   cannot open them; a fee rule sourced from a file that does not exist). The
+   remedy each time is the same: derive the claim from the thing it describes.
+
+   So the table is checked against the source. A builder counts as CONVERTED
+   when it touches no LEDGER token outside a comment, embeds the Carta faces,
+   and calls assertCarta — all three, because the font seam alone was enough to
+   render a fully-Carta grammar in the wrong typeface for a week. */
+{
+  const BUILDERS = ['build-deck', 'build-report', 'build-onepager', 'build-og-card'];
+  const behind: string[] = [];
+  for (const b of BUILDERS) {
+    const src = readFileSync(path.join(ROOT, `scripts/studio/${b}.mts`), 'utf8');
+    // Comments are where a converted builder legitimately still NAMES Ledger,
+    // to say why it left. Strip them or every explanation reads as a relapse.
+    const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+    const usesLedger = /\bLEDGER\b/.test(code);
+    const cartaFaces = /cartaFontFaceCss/.test(code) && !/[^a]\bfontFaceCss\(/.test(code);
+    const guarded = /assertCarta\(/.test(code);
+    if (usesLedger || !cartaFaces || !guarded) behind.push(`${b}.mts`);
+  }
+
+  /* Now READ THE TABLE and compare, row by row.
+
+     WRONG-FIRST, and instructively so: the first version of this check asserted
+     only that DESIGN.md CONTAINED each behind builder's name. Editing the
+     one-pager's row to claim it was converted left the name in place, so the
+     check stayed green while the document said the opposite of the truth — the
+     precise failure it was written to prevent, reproduced by the check itself.
+     A test that reads a name is not reading a claim. This parses the row. */
+  const rows = new Map<string, boolean>(); // builder → does the doc call it converted
+  for (const line of DESIGN.split('\n')) {
+    /* The `> ` prefix is not optional decoration — the table lives inside the
+       notice's blockquote, and a regex anchored on `|` matched nothing at all.
+       That is why the row loop silently ran zero times on the first attempt and
+       the whole check reported green. An empty iteration is not a pass. */
+    const m = line.match(/^>?\s*\|\s*\*{0,2}`(build-[a-z-]+\.mts)`\*{0,2}\s*\|(.*)$/);
+    if (!m) continue;
+    const [, name, rest] = m;
+    // A row claims CONVERTED when it says neither LEDGER nor "no" for the guard.
+    const claimsBehind = /LEDGER/i.test(rest) || /\|\s*\*{0,2}no\*{0,2}\s*\|?\s*$/i.test(rest);
+    rows.set(name, !claimsBehind);
+  }
+
+  is('the notice tabulates every builder', [...rows.keys()].sort(), BUILDERS.map(b => `${b}.mts`).sort());
+
+  /* Paul, 2026-08-15: "no ledger at all. carta." So the expectation is NONE,
+     and this is the assertion that turns that from an intention into a floor:
+     a builder that regains a LEDGER import, loses its Carta faces or drops its
+     guard fails here, named. It was `['build-onepager.mts', 'build-og-card.mts']`
+     for the few hours between measuring the drift and fixing it. */
+  is('no builder is behind Carta', behind, []);
+
+  for (const [name, claimsConverted] of rows) {
+    /* Both directions are wrong. Claiming converted while a builder still
+       imports LEDGER is how this shipped for a week; claiming behind after one
+       lands turns the table into noise nobody trusts. */
+    is(`DESIGN.md's row for ${name} matches the source`,
+      claimsConverted, !behind.includes(name));
+  }
+
+  /* The notice may now legitimately SAY all four are converted, because they
+     are — but not as bare prose in place of the table. The old sentence is
+     banned by its exact wording so it cannot be pasted back.
+
+     QUOTED USES ARE EXEMPT, and that exemption is not a loophole — it is the
+     same shape as §2's dead-hex rule, where naming a retired value inside the
+     graveyard is how a session catches itself. The notice explains the failure
+     by quoting the sentence that caused it, and a check that cannot tell a
+     citation from a claim fires on its own documentation and gets switched off.
+     (Written after this fired on exactly that, an hour after the identical
+     mistake in the palette-gate check.) */
+  const unquoted = DESIGN.replace(/["“][^"”]*["”]/g, '');
+  is('the notice does not restate the claim as unchecked prose',
+    /all four builders import it/.test(unquoted), false);
+  is('…and the banned sentence IS still quoted, so the lesson survives',
+    /all four builders import it/.test(DESIGN), true);
+  is('…and the table is still what carries it',
+    rows.size, BUILDERS.length);
+}
+
+/* ── 4d. EVERY travelling law file, not just this one ─────────────────────
+   This suite guarded DESIGN.md and nothing else, on the reasonable-sounding
+   basis that DESIGN.md is where the palette is documented. It is not where the
+   palette is USED. `FORMATS.md` carries the Gemini image-brief template — the
+   literal text a session pastes into an image model — and it travels to the
+   workspace beside DESIGN.md with exactly the same authority.
+
+   It was naming `#FCFAF6` as the background and `#131512` as the flat band.
+   Both were real Carta values and both moved: the canvas went bone→white on
+   2026-08-12 and the band is `#181818`. Neither is a token any more, so every
+   illustration generated from that template came back on a ground no renderer
+   produces — sitting slightly warm on a pure-white page, which reads as a
+   printing fault rather than as a palette error.
+
+   A stale hex in a PROMPT is worse than one in a renderer: the renderer is
+   checked by assertCarta at build time, and the prompt's output is a picture,
+   which the palette guard cannot see through. So the rule is now: any law file
+   that travels may name only live tokens, outside its own dead list. */
+{
+  const TRAVELS = [
+    'content/studio/FORMATS.md',
+    'content/studio/COLLATERAL_STATE.md',
+    'content/studio/workspace-CLAUDE.md',
+    'content/studio/PLAYBOOK.md',
+  ];
+  for (const rel of TRAVELS) {
+    let text: string;
+    try { text = readFileSync(path.join(ROOT, rel), 'utf8'); }
+    catch { is(`${rel} exists`, false, true); continue; }
+
+    /* Same exemption shape as §2: a hex may appear where it is being RETIRED.
+       These files defer their graveyard to DESIGN.md rather than keeping their
+       own, so the exemption is narrow — a sentence that retires it by name. */
+    const offenders = hexesIn(text).filter(h => {
+      if (TOKEN_HEXES.has(h)) return false;
+      const at = text.toUpperCase().indexOf(h);
+      const around = text.slice(Math.max(0, at - 220), at + 220);
+      return !/retired|dead|drift|never|no longer|graveyard/i.test(around);
+    });
+    is(`${path.basename(rel)} names only live tokens`, offenders, []);
+  }
+}
+
 /* ── 5. it travels ────────────────────────────────────────────────────────
    The document only solves anything if it reaches the workspace. */
 const INIT = readFileSync(path.join(ROOT, 'scripts/studio/init-workspace.mts'), 'utf8');

@@ -17,21 +17,22 @@
  * / `generativelanguage` call site in server/ — not a guess about which
  * services look expensive.
  *
- * THE LANES map onto THE SPLIT (see WHERE_THE_WORK_HAPPENS.md), which is why
- * the defaults are what they are:
+ * THE LANES map onto the routing table in `house/where.ts`, which is why the
+ * defaults are what they are:
  *
- *   studio    OFF — research runs, master synthesis, corp-dev documents,
- *                   collateral, deck design, artwork, LinkedIn analysis.
- *                   ALL of this moved to a Cowork session against
- *                   ~/Documents/smbx-studio, and Studio is already out of the
- *                   app chrome (STUDIO_IN_APP = false). Gating it takes away
- *                   nothing a user can currently reach.
- *   sourcing  OFF — the 5-stage sourcing engine and the portfolio refresh /
- *                   expansion jobs. Ported to house/screen.ts +
- *                   scripts/studio/screen.mts on Paul's own instruction
- *                   ("this whole search and rank function needs to be built
- *                   locally so that Cowork can do it"), so it has a local
- *                   equivalent too.
+ *   research  OFF — web research runs and master synthesis, and nothing else.
+ *                   THE ONLY PATH IN THIS APP THAT CAN SPEND DOLLARS ON ONE
+ *                   PRESS: at `deep` it is 40 searches billed at $10/1k plus 25
+ *                   fetches re-entering context across up to 12 pause_turn
+ *                   rounds, ~$18 a click, and it is the only one that ever ran
+ *                   unattended on a schedule. Lives in Cowork.
+ *   studio    ON  — corp-dev documents, collateral composition, deck design,
+ *                   artwork, and Yulia's read of a LinkedIn import. Cheap,
+ *                   bounded, single-turn work that happens to have lived in the
+ *                   same folder as research.
+ *   sourcing  ON  — the 5-stage sourcing engine and the portfolio jobs. Haiku
+ *                   per candidate, on a Places key that is free under 5k
+ *                   lookups a month. It was never the expensive thing.
  *   chat      ON  — Yulia, the agentic loop, deliverables, document/field
  *                   extraction, gate summaries, briefings. This IS the app;
  *                   killing it leaves a brick. CLAUDE.md: "The operational
@@ -41,35 +42,63 @@
  *                   silently breaks the funnel rather than Paul's work —
  *                   which is the one failure mode CLAUDE.md calls out by name.
  *
- * "Kill all for now" is therefore implemented as: everything that has a Cowork
- * equivalent is off, and the two things that would break the product if they
- * went dark are one env var away from off as well. `API_LANES=none` kills
- * literally everything, including chat — it is deliberately a single word.
+ * WHY `research` WAS SPLIT OUT OF `studio` (2026-08-14, Paul: "corp-dev
+ * documents, deal memo / diligence plan / term framework, collateral is in app
+ * too… research and research aggregation, deep search, data wrangling are
+ * cowork. Everything about the deal and CRM needs to be in app.")
+ *
+ * One lane cannot express that. `studio` bundled the ~$18-a-press research
+ * agent together with document composition and deck design, which cost cents,
+ * so switching collateral on ALSO armed the research agent — the exact thing
+ * this file was written to stop. The bundle was never a judgement that those
+ * paths were alike; it was that they happened to be reachable from the same
+ * screen. Splitting on COST rather than on screen is what makes the routing
+ * table enforceable.
+ *
+ * The `research` lane is therefore deliberately narrow: two services, both
+ * expensive, both with a Cowork equivalent. Everything else that used to be
+ * "studio" is now on by default, because the app is the one place.
+ *
+ * "Kill all for now" still holds where it mattered: the one path that can
+ * spend real money unattended is off, and `API_LANES=none` kills literally
+ * everything including chat — deliberately a single word.
  *
  * ONE ENV VAR, THREE BEHAVIOURS:
- *   API_LANES unset          → chat,marketing        (the default posture)
- *   API_LANES=all            → every lane
- *   API_LANES=none  (or "")  → no lane at all
- *   API_LANES=chat,studio    → exactly those, everything else off
+ *   API_LANES unset            → chat,marketing,studio,sourcing   (the default)
+ *   API_LANES=all              → every lane, RESEARCH INCLUDED
+ *   API_LANES=none  (or "")    → no lane at all
+ *   API_LANES=chat,research    → exactly those, everything else off
  *
  * It is read on every call rather than cached at import, so a Railway variable
  * change takes effect on the next request instead of the next deploy — and so
  * the tests can drive it.
  */
 
-export type SpendLane = 'chat' | 'marketing' | 'studio' | 'sourcing';
+export type SpendLane = 'chat' | 'marketing' | 'studio' | 'sourcing' | 'research';
 
-export const SPEND_LANES: readonly SpendLane[] = ['chat', 'marketing', 'studio', 'sourcing'] as const;
+export const SPEND_LANES: readonly SpendLane[] =
+  ['chat', 'marketing', 'studio', 'sourcing', 'research'] as const;
 
-/** The posture as of 2026-08-09. See the header for why these two and not others. */
-export const DEFAULT_LANES: readonly SpendLane[] = ['chat', 'marketing'] as const;
+/**
+ * The posture as of 2026-08-14: everything except research.
+ *
+ * Widened from `chat,marketing` when the routing table settled on "the app is
+ * the one place, Cowork is the input layer". The narrow default was correct
+ * while Studio was out of the chrome and sourcing had just been ported out; it
+ * became wrong the moment the deal, the documents and the collateral all came
+ * back. Research stays off because it is the only lane that can spend dollars.
+ */
+export const DEFAULT_LANES: readonly SpendLane[] =
+  ['chat', 'marketing', 'studio', 'sourcing'] as const;
 
 /** What a blocked lane should say, in the practitioner's own vocabulary. */
 const LANE_HELP: Record<SpendLane, string> = {
+  research:
+    'Web research and master synthesis happen in a Cowork session against ~/Documents/smbx-studio — this is the one path that can spend dollars on a single press (~$18 at `deep`), which is why it is off by default. See RESEARCH.md in the workspace.',
   studio:
-    'Studio work happens in a Cowork session against ~/Documents/smbx-studio — research, masters, corp-dev documents and collateral all have local builders that cost nothing.',
+    'Corp-dev documents, collateral and deck design are switched off at the API level. They are cheap and on by default, so this means API_LANES was set narrower than the default.',
   sourcing:
-    'Target screening happens locally — `npx tsx scripts/studio/screen.mts` against the market workspace.',
+    'The sourcing engine is switched off at the API level. Target screening also runs locally — `npx tsx scripts/studio/screen.mts` against the market workspace.',
   chat: 'Yulia and the deal tools are switched off at the API level.',
   marketing: 'The public intake engine and report Q&A are switched off at the API level.',
 };
