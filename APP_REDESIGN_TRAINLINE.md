@@ -1,7 +1,20 @@
 # THE APP REDESIGN — Trainline structure, Carta skin
 
-**Status:** PLAN. Nothing below is built yet.
+**Status:** Phases 0, 1 and 2 are BUILT. Phases 3 and 4 are not.
 **Date:** 2026-08-15
+
+| phase | what | state |
+|---|---|---|
+| 0 | the kit — 11 primitives | **built** · `client/src/components/v6/desktop/kit/index.tsx` |
+| 1 | Deals on the kit | **built** · `screens/DealsList.tsx`, wired as the DEFAULT view |
+| 2 | chat rail right / narrow / collapsed / context + suggestions | **built** · `chat/AtlasChatRail.tsx` + `AtlasApp.tsx` |
+| 3 | Clients, Integration, Files onto the kit | not started |
+| 4 | Atlas comes out | not started |
+
+Phase 1 landed **additively** — List is the default, Board and Table are still
+there. See §5 Q2: the point is to compare them honestly rather than from
+memory, and the table carries bulk archive, which is unrelated to the redesign
+and should not be rewritten in the same change.
 **Supersedes:** the app's Atlas layout language. `ATLAS_BUILD_CONTRACT.md` and
 `MOBILE_REDESIGN.md` become history the moment Phase 1 lands.
 

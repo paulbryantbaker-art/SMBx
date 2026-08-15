@@ -1,7 +1,16 @@
 /**
- * AtlasChatRail — the persistent 340px Yulia rail (left of every isApp screen).
+ * AtlasChatRail — the 300px Yulia rail, RIGHT of every app screen, collapsed
+ * by default.
  *
- * ZERO new chat logic. It consumes the MobileChatBridge built in AtlasApp from
+ * Was 340px pinned LEFT and always open. Paul, 2026-08-15, with a screenshot of
+ * the Neo browser: *"the huge chat bar can go.. all i need is the sidebar chat
+ * in the tool pages. like the last image."* The width was only half the
+ * complaint — the real problem was that it was UNCONDITIONAL: the first thing
+ * on every screen, at the same size, whether or not you wanted it. So it moved
+ * right, narrowed, and now opens on request (AtlasApp owns the open state and
+ * renders the edge tab). See `APP_REDESIGN_TRAINLINE.md` §2.
+ *
+ * ZERO new chat logic, still. It consumes the MobileChatBridge built in AtlasApp from
  * the unchanged useAuthChat/useAnonymousChat hooks, and ports the four
  * ChatSheet renderers (Message / Streaming / StagedActionCard / PaywallCard)
  * restyled to T tokens — same props they read. The composer is the shared
@@ -67,9 +76,47 @@ function composerHintFor(view: AtlasView): string {
   return COMPOSER_HINT[view.screen] ?? "Ask Yulia";
 }
 
+/* ─── per-screen suggestions (2026-08-15, the Neo reference) ───────────────
+ * Paul sent a screenshot of the Neo browser's assistant sidebar and said the
+ * app needs "the sidebar chat in the tool pages. like the last image." Two
+ * things that reference does which the rail did not:
+ *
+ *   1. A CONTEXT CHIP naming what the assistant can currently see ("1 Context").
+ *      We have the vocabulary for this already — `yuliaSurfaceContext.ts` is
+ *      the agent↔UI contract — so the chip names the REAL surface rather than
+ *      being decoration. `UI_RETOOL_READINESS.md` lists that vocabulary as a
+ *      preservation contract; this consumes it, it does not change it.
+ *
+ *   2. A SUGGESTED FOR THIS PAGE grid, four per page.
+ *
+ * These are the openings a practitioner actually has on each screen, phrased
+ * as the thing they would type. THE LINE governs them like any other prompt:
+ * every one below asks Yulia to ANALYSE or DRAFT. None instructs her to send,
+ * negotiate, or contact a counterparty — an outreach suggestion here would be
+ * the batch-send button the outreach machine deliberately does not have. */
+
+const SUGGESTIONS: Record<AtlasScreen, string[]> = {
+  today: ["What needs me today", "What slipped this week", "Summarise the pipeline", "Draft my week"],
+  pipeline: ["Where is this stalling", "What is overdue", "Compare the stages", "What closes this quarter"],
+  sourcing: ["Tighten the buy-box", "Why did this rank here", "What is missing", "Draft the screen note"],
+  deals: ["Which deals need me", "Compare these two", "What is missing for an IoI", "Explain this valuation"],
+  clients: ["Who is owed a touch", "Draft the next note", "Which accounts went quiet", "Summarise this firm"],
+  studio: ["Draft the next post", "Restyle this", "What does the master say", "Check the citations"],
+  integration: ["What is at risk", "Draft the day-30 update", "Which workstreams slipped", "Summarise progress"],
+  files: ["What is in here", "What is missing for diligence", "Summarise this document", "Find the LOI"],
+  agent: ["What can this do", "Draft the instruction", "Show recent runs", "Explain the last result"],
+  cockpit: ["Draft the next touch", "What is missing for the IoI", "Explain the WACC", "Compare to the last three"],
+  canvas: ["Explain this model", "What if EBITDA is lower", "Which assumption moves it most", "Sanity-check this"],
+  settings: ["What does this change", "Who is on the team", "Explain practice mode", "Show my entitlements"],
+};
+
+function suggestionsFor(view: AtlasView): string[] {
+  return SUGGESTIONS[view.screen] ?? SUGGESTIONS.today;
+}
+
 /* ─── the rail ─────────────────────────────────────────────── */
 
-export function AtlasChatRail() {
+export function AtlasChatRail({ onClose }: { onClose?: () => void } = {}) {
   const chat = useAtlasChat();
   const nav = useAtlasNav();
   const view = nav.view;
@@ -138,12 +185,21 @@ export function AtlasChatRail() {
       <header style={S.header}>
         <Sparkle size={18} />
         <span style={S.headerTitle}>Yulia</span>
+        {onClose && (
+          <button type="button" onClick={onClose} style={S.railClose} aria-label="Close Yulia">
+            ✕
+          </button>
+        )}
       </header>
 
       {/* Message list */}
       <div ref={scrollRef} onScroll={onConversationScroll} style={S.list}>
         {showEmpty ? (
-          <RailEmpty />
+          <RailEmpty
+            contextLabel={ctxLabelFor(view)}
+            suggestions={suggestionsFor(view)}
+            onPick={handleSend}
+          />
         ) : (
           <>
             {messageRows}
@@ -196,11 +252,34 @@ function buildAtlasSurfaceContext(view: AtlasView): SurfaceContext {
 /** Compact, on-brand empty state sized for the 340px rail: one sparkle + one
  *  short line. (The reused mobile ChatSheet empty state is full-screen and its
  *  illustrations overflow this width — it is deliberately NOT used here.) */
-function RailEmpty() {
+/**
+ * The empty rail is now the Neo reference's opening: what Yulia can see, then
+ * four openings for THIS page.
+ *
+ * The context chip is not decoration — it reads `ctxLabelFor(view)`, the same
+ * derivation that feeds the surface context actually sent with every message.
+ * If the chip and the payload could disagree, the chip would be a lie about
+ * what the model knows, which is worse than showing nothing.
+ */
+function RailEmpty({ contextLabel, suggestions, onPick }: {
+  contextLabel: string;
+  suggestions: string[];
+  onPick: (text: string) => void;
+}) {
   return (
     <div style={S.emptyWrap}>
-      <Sparkle size={20} />
-      <div style={S.emptyTitle}>Ask Yulia about this screen</div>
+      <div style={S.ctxChip}>
+        <MonitorIcon size={12} />
+        <span>Reading <b>{contextLabel}</b></span>
+      </div>
+      <div style={S.suggestLabel}>Suggested for this page</div>
+      <div style={S.suggestGrid}>
+        {suggestions.map(s => (
+          <button key={s} type="button" onClick={() => onPick(s)} style={S.suggestCard}>
+            {s}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -380,7 +459,12 @@ function PaywallCard({ data }: { data: MobilePaywallData }) {
 
 const S: Record<string, CSSProperties> = {
   rail: {
-    width: 340,
+    // 340 -> 300 (2026-08-15). Paul: "the huge chat bar can go." The width was
+    // only half of it -- the rail was pinned LEFT on every app screen and
+    // opened unconditionally, so it was the first thing on the page whether or
+    // not you wanted it. AtlasApp now renders it on the RIGHT and closed by
+    // default; this is the open width.
+    width: 300,
     flex: "none",
     minHeight: 0,
     display: "flex",
@@ -408,17 +492,68 @@ const S: Record<string, CSSProperties> = {
     flexDirection: "column",
     gap: 18,
   },
+  // The empty rail is top-aligned now, not centred: it carries a context chip
+  // and a suggestion grid rather than one line, and a centred block of four
+  // cards floats oddly in a 300px column.
   emptyWrap: {
-    margin: "auto",
     display: "flex",
     flexDirection: "column",
-    alignItems: "center",
-    gap: 9,
-    textAlign: "center",
-    padding: "24px 16px",
-    maxWidth: 240,
+    gap: 10,
+    padding: "4px 14px 16px",
   },
   emptyTitle: { fontSize: 13.5, fontWeight: 500, color: T.muted, lineHeight: 1.45 },
+  ctxChip: {
+    alignSelf: "flex-start",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    fontSize: 11.5,
+    color: T.muted,
+    background: T.track,
+    border: `1px solid ${T.border}`,
+    borderRadius: 10,
+    padding: "4px 9px",
+  },
+  suggestLabel: {
+    fontSize: 10.5,
+    fontWeight: 700,
+    letterSpacing: ".06em",
+    textTransform: "uppercase",
+    color: T.muted2,
+    marginTop: 4,
+  },
+  // Two-up, matching the reference's 2x2. Radius 10 because these are buttons
+  // -- Carta's one exception to radius 0.
+  suggestGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 7,
+  },
+  suggestCard: {
+    font: "inherit",
+    fontSize: 12,
+    fontWeight: 600,
+    color: T.ink,
+    textAlign: "left",
+    lineHeight: 1.35,
+    background: T.white,
+    border: `1px solid ${T.border}`,
+    borderRadius: 10,
+    padding: "10px 10px",
+    cursor: "pointer",
+    minHeight: 56,
+  },
+  railClose: {
+    marginLeft: "auto",
+    font: "inherit",
+    fontSize: 13,
+    lineHeight: 1,
+    color: T.muted2,
+    background: "transparent",
+    border: "none",
+    cursor: "pointer",
+    padding: 4,
+  },
   userBubble: {
     alignSelf: "flex-end",
     maxWidth: "85%",

@@ -78,6 +78,7 @@ import { dueLabel, daysUntil } from "../../../../lib/crm";
 import { useDraft } from "../../../../hooks/useDraft";
 import { ValuationPanel } from "./ValuationPanel";
 import { CapitalPanel } from "./CapitalPanel";
+import { DealsList } from "./DealsList";
 import { T } from "../atlasTokens";
 
 const PAGE_SIZE = 25;
@@ -86,7 +87,12 @@ const PAGE_SIZE = 25;
 // "Sell-side" can never match, so both are gone — the practice does not take
 // sell-side mandates (THE LINE §perimeter). Due now is a real filter instead.
 type FilterId = "all" | "watch" | "due";
-type ViewId = "board" | "table";
+/* "list" is the Trainline-grammar view (2026-08-15, APP_REDESIGN_TRAINLINE.md)
+   and the new default. Board and Table stay: the plan's §5 keeps the board one
+   release so the two can be compared honestly rather than from memory, and the
+   table carries bulk archive, which has nothing to do with the redesign and
+   should not be rewritten in the same change. */
+type ViewId = "list" | "board" | "table";
 /** Which SET of deals we're looking at. Not a filter — a different row set. */
 type ScopeId = "active" | "archived";
 
@@ -231,7 +237,7 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
   // like the other filters — every row is already in memory.
   const [clientCut, setClientCut] = useState<string>("all");
   const [page, setPage] = useState(0);
-  const [view, setView] = useState<ViewId>("board");
+  const [view, setView] = useState<ViewId>("list");
   const [scope, setScope] = useState<ScopeId>("active");
   // Selected rawIds. Survives paging (the selection is over the filtered set,
   // not the visible page) and is cleared on every scope/filter/search change so
@@ -466,7 +472,21 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
         />
       )}
 
-      {effectiveView === "board" ? (
+      {effectiveView === "list" ? (
+        <DealsList
+          rows={filtered}
+          allCount={all.length}
+          query={query}
+          onQuery={onSearch}
+          filter={filter}
+          onFilter={onFilter}
+          clientCut={clientCut}
+          clientFirms={clientFirms}
+          onClientCut={onClientCut}
+          onOpen={openDeal}
+          scopeLabel={scope === "archived" ? "The archive" : "Active deals"}
+        />
+      ) : effectiveView === "board" ? (
         <BoardView
           byStage={byStage}
           matchCount={filtered.length}
@@ -675,7 +695,7 @@ function Toolbar({
         }}
         title={viewLocked ? "The archive is always the table view" : undefined}
       >
-        {(["board", "table"] as ViewId[]).map((v) => {
+        {(["list", "board", "table"] as ViewId[]).map((v) => {
           const active = v === view;
           return (
             <button
@@ -694,7 +714,7 @@ function Toolbar({
                 color: active ? T.ink : T.muted,
               }}
             >
-              {v === "board" ? "Board" : "Table"}
+              {v === "list" ? "List" : v === "board" ? "Board" : "Table"}
             </button>
           );
         })}

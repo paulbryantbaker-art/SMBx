@@ -35,6 +35,7 @@ import {
 } from "./atlasNav";
 import { AtlasHeader } from "./AtlasHeader";
 import { AtlasChatRail } from "./chat/AtlasChatRail";
+import { Sparkle } from "./primitives";
 
 import TodayScreen from "./screens/Today";
 import SourcingScreen from "./screens/Sourcing";
@@ -206,6 +207,12 @@ function AtlasShell({ user, chat, onSignOut }: ShellProps) {
   // starts clean at `today`; reopening a deal re-adds its tab. openTabsRef keeps
   // closeTab's fallback math off the render cycle.
   const [openTabs, setOpenTabs] = useState<OpenTab[]>([]);
+  /* Yulia's rail. CLOSED by default (2026-08-15) — see the body render and
+     APP_REDESIGN_TRAINLINE.md §2. Deliberately session state rather than a
+     stored preference: the right default is "the screen leads", and a
+     remembered `true` from one exploratory click would quietly restore the
+     always-on rail this change exists to remove. */
+  const [railOpen, setRailOpen] = useState(false);
   const openTabsRef = useRef(openTabs);
   openTabsRef.current = openTabs;
 
@@ -416,11 +423,30 @@ function AtlasShell({ user, chat, onSignOut }: ShellProps) {
       <SettingsScreen user={user} view={view} />
     </div>
   ) : (
+    /* THE RAIL MOVED RIGHT AND CLOSED (2026-08-15). Paul: "the huge chat bar
+       can go.. all i need is the sidebar chat in the tool pages." It used to be
+       340px pinned LEFT and always open — the first thing on every screen
+       whether or not you wanted it, which is the actual complaint; the width
+       was secondary. Now the screen leads and Yulia is summoned.
+       See APP_REDESIGN_TRAINLINE.md §2. */
     <div style={S.appBody}>
-      <AtlasChatRail />
       <div style={S.detailRegion}>
         <AppScreen user={user} view={view} />
       </div>
+      {railOpen ? (
+        <AtlasChatRail onClose={() => setRailOpen(false)} />
+      ) : (
+        <button
+          type="button"
+          onClick={() => setRailOpen(true)}
+          style={S.railTab}
+          aria-label="Open Yulia"
+          title="Ask Yulia about this screen"
+        >
+          <Sparkle size={17} />
+          <span style={S.railTabWord}>Yulia</span>
+        </button>
+      )}
     </div>
   );
 
@@ -502,6 +528,8 @@ const S: Record<string, CSSProperties> = {
     minHeight: 0,
     display: "flex",
     overflow: "hidden",
+    // Containing block for the closed rail's edge tab (absolute, not fixed).
+    position: "relative",
   },
   // Canvas: a SMOOTH gradient, white at the very top (so it meets the borderless
   // nav with no seam) fading to a faint tint below — subtly highlights the
@@ -512,6 +540,42 @@ const S: Record<string, CSSProperties> = {
     minWidth: 0,
     display: "flex",
     background: `linear-gradient(180deg, ${T.white} 0px, ${T.surface} 220px)`,
+  },
+  /* The closed rail's edge tab. Vertical, hugging the right edge, quiet enough
+     to ignore and findable when wanted.
+
+     `position: absolute` inside the relative appBody, NEVER `position: fixed` —
+     the Safari toolbar rule (a fixed full-viewport element with a background
+     colour gets read for toolbar tinting and breaks dark-mode switching). It is
+     not full-viewport, but the rule is cheap to honour and expensive to
+     re-learn. */
+  railTab: {
+    position: "absolute",
+    top: 14,
+    right: 0,
+    zIndex: 4,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 7,
+    padding: "12px 7px",
+    font: "inherit",
+    color: T.blue,
+    background: T.white,
+    border: `1px solid ${T.border}`,
+    borderRight: "none",
+    borderRadius: "10px 0 0 10px",
+    cursor: "pointer",
+  },
+  railTabWord: {
+    fontSize: 10.5,
+    fontWeight: 700,
+    letterSpacing: ".06em",
+    textTransform: "uppercase",
+    // Reads bottom-to-top up the tab, so the word fits a 30px-wide column
+    // without one letter per line.
+    writingMode: "vertical-rl",
+    transform: "rotate(180deg)",
   },
   // Settings: no rail.
   settingsWrap: {
