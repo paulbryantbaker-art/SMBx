@@ -34,9 +34,28 @@
 -- Several services do `SELECT * FROM deals`; since no code reads these property
 -- names, their absence is unobservable.
 --
--- The wallet-era `menu_items` per-deliverable prices seeded by 036:9-15 are
--- DELIBERATELY LEFT ALONE. Per-deliverable pricing is a live part of the model;
--- only the deal-SIZE ladder is the problem here.
+-- THE PER-DELIVERABLE PRICES GO TOO (2026-08-15, Paul: "this was when I was
+-- selling the app. not relevant any more").
+--
+-- An earlier draft of this migration kept them, on the stated grounds that
+-- "per-deliverable pricing is a live part of the model". That was wrong twice
+-- over. THE LINE v2 rule 1 is that NOTHING IN THE APP CHARGES MONEY — the app
+-- is Paul's private instrument and will never be sold — so there is no model
+-- for a price to be a live part of. And it is not live in the mechanical sense
+-- either: `base_price_cents` is read by `menuCatalogService.ts` and nowhere
+-- else, every one of that service's four price-bearing exports has ZERO call
+-- sites, its only importer (`chat.ts`) imports `getGateMenuItems` and never
+-- calls it, and no client code mentions a price at all. $125–$700 sitting in a
+-- column nothing reads.
+--
+-- THE TABLE STAYS, and that distinction is the whole care here: `menu_items` is
+-- the deliverable CATALOG — slug, name, journey, gate — and it is joined in 38
+-- places across documentShareService, dealFreshnessService, deliverableProcessor
+-- and reviewService. Dropping the table would take out document sharing and
+-- deliverable generation. Only the price column is dead.
+--
+-- `tier` (analyst/associate/vp) goes with it: it exists to say which
+-- subscription tier could buy the item, which is the same retired question.
 
 DROP TABLE IF EXISTS platform_fee_schedule;
 
@@ -49,3 +68,24 @@ ALTER TABLE deals DROP COLUMN IF EXISTS execution_stripe_id;
 -- 033 also created `advisor_subscriptions` and `referrals`. Both are dead (no
 -- write site in any live code path) but neither prices by deal size, so neither
 -- is in scope for this migration. Left in place deliberately.
+
+-- The wallet-era pricing columns. `menu_items` itself is load-bearing; these
+-- two columns are not. Dropped AFTER the deals columns above so a failure here
+-- cannot leave the fee ladder half-removed.
+ALTER TABLE menu_items DROP COLUMN IF EXISTS base_price_cents;
+ALTER TABLE menu_items DROP COLUMN IF EXISTS tier;
+
+-- `wallets` and `wallet_transactions`, from the same 006 migration that created
+-- menu_items. THE LINE v2 rule 2: "WALLET IS DEAD. walletService,
+-- paywallService, dealExecutionFee, platformFeeService deleted. Never
+-- recreate." The services went; the tables did not, and no migration has ever
+-- dropped them. `wallet_transactions` has zero references in the tree and
+-- `wallets` has exactly one — a string inside an agency-action DESCRIPTION
+-- promising the practice operates "without wallets", which is prose about the
+-- absence of the thing, not a read of it.
+--
+-- Dropped in dependency order: the child table first, because
+-- wallet_transactions carries a foreign key to wallets and the reverse order
+-- fails.
+DROP TABLE IF EXISTS wallet_transactions;
+DROP TABLE IF EXISTS wallets;

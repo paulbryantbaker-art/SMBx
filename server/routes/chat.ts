@@ -140,7 +140,8 @@ import type { ExtractedFields } from '../services/fieldExtractor.js';
 import { checkGateReadiness } from '../services/gateReadinessService.js';
 // paywallService and dealExecutionFee removed — subscription model handles pricing
 import { classifyLeague } from '../services/leagueClassifier.js';
-import { getGateMenuItems } from '../services/menuCatalogService.js';
+/* `getGateMenuItems` was imported here and never called — the last trace of the
+   paid-deliverable menu. Removed 2026-08-15 with the prices themselves. */
 import { enqueueDeliverableGeneration } from '../services/jobQueue.js';
 import { processDeliverable } from '../services/deliverableProcessor.js';
 import { createNotification } from './notifications.js';

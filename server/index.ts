@@ -1117,7 +1117,11 @@ app.get('/api/deliverables/catalog', async (_req, res) => {
   try {
     const sql = (await import('./db.js')).sql;
     const items = await sql`
-      SELECT slug, name, description, journey, gate, category, tier, deliverable_type
+      -- tier dropped from the SELECT with the column itself (migration 125).
+      -- This is a LIVE public endpoint: a dropped column in a select list is a
+      -- runtime error, not a null, so leaving it would have 500'd the Studio
+      -- launcher on the first request after deploy.
+      SELECT slug, name, description, journey, gate, category, deliverable_type
       FROM menu_items
       WHERE active = true
       ORDER BY category, name
