@@ -171,6 +171,14 @@ reading them.
 uncommitted in `collateral/` never reaches his Mac, and that failure looks
 exactly like the builder never having run.
 
+**Except video — never commit a `.mov` or `.mp4`** (2026-08-14). A screen
+recording of the MACHINE element runs to hundreds of MB, and **one file over
+100MB permanently blocks pushing this repo**: the blob enters the history at
+commit time, so removing it in a later commit does not undo it. `.gitignore`
+already excludes them; do not `git add -f` past it. Commit the `machine.html`
+beside the render instead — that is the regenerable source, and it is what
+MACHINE.md treats as the artifact.
+
 ---
 
 ## Sunday — the email

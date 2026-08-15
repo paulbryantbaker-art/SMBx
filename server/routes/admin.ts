@@ -6,7 +6,8 @@ import { Router } from 'express';
 import { sql } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
 import { isSuperAdminUser } from '../adminAccess.js';
-import { PLANS, normalizePlan } from '../services/subscriptionService.js';
+/* PLANS/normalizePlan no longer imported — the only use was MRR, and prices
+   are gone from PlanInfo (2026-08-15). */
 
 export const adminRouter = Router();
 
@@ -26,17 +27,19 @@ function requireAdmin(req: any, res: any, next: any) {
 
 adminRouter.use('/admin', requireAuth, requireAdmin);
 
-async function calculateMrrCents() {
-  const rows = await sql`
-    SELECT plan, COUNT(*)::int as count
-    FROM subscriptions
-    WHERE status IN ('active', 'trialing')
-    GROUP BY plan
-  `;
-  return rows.reduce((sum: number, row: any) => {
-    const plan = normalizePlan(row.plan);
-    return sum + (PLANS[plan].priceCents * Number(row.count || 0));
-  }, 0);
+/**
+ * Always 0. The practice bills nothing through the app.
+ *
+ * This summed active `subscriptions` rows times their plan price. The table is
+ * dropped by migration 126 and PlanInfo no longer carries a price, so the
+ * original cannot run. Kept as a function returning 0 rather than removed
+ * because two admin responses include `mrrCents` and a disappearing field is a
+ * client-side undefined; a zero is an honest answer to a question that no
+ * longer has a non-zero one. Compensation is per-engagement and papered by
+ * humans — THE LINE v2 — so it was never going to show up here anyway.
+ */
+async function calculateMrrCents(): Promise<number> {
+  return 0;
 }
 
 // ─── Test Emails ────────────────────────────────────────────
@@ -99,9 +102,13 @@ adminRouter.get('/admin/metrics/funnel', async (_req, res) => {
     `;
     const [withDeal] = await sql`SELECT COUNT(DISTINCT user_id)::int as c FROM deals`;
     const [withDeliverable] = await sql`SELECT COUNT(DISTINCT user_id)::int as c FROM deliverables`;
-    const [withSubscription] = await sql`
-      SELECT COUNT(DISTINCT user_id)::int as c FROM subscriptions WHERE status IN ('active', 'trialing')
-    `;
+    /* The `subscriptions` table is dropped (migration 126) and this query was
+       NOT guarded — unlike the copies in tools.ts and discoveryWorker.ts, both
+       of which check to_regclass first — so it would have thrown and 500'd the
+       whole funnel endpoint on the first admin page load after deploy. The
+       stage stays at 0 rather than being removed from the funnel array,
+       because the client renders that array positionally. */
+    const withSubscription = { c: 0 };
 
     res.json({
       funnel: [

@@ -31,10 +31,20 @@ const MODEL = 'claude-sonnet-4-6';
 let client: Anthropic | null = null;
 function getClient(): Anthropic {
   // ONLY Yulia's READ of the import is gated. The XLSX parser below calls no
-  // model at all — it is the one Studio capability with no local equivalent
-  // (WHERE_THE_WORK_HAPPENS.md §"The one real gap"), so importing a LinkedIn
-  // export and reading the verbatim stat grid keeps working with the lane off.
-  assertSpendAllowed('studio', "Yulia's read of a LinkedIn import");
+  // model at all, so importing a LinkedIn export and reading the verbatim stat
+  // grid keeps working with the lane off.
+  // THE `chat` LANE, NOT `studio` (2026-08-15). This is the ONE Studio
+  // capability with no local equivalent — the XLSX parser exists nowhere else
+  // — so `where.ts` records it as app-owned, "THE STANDING EXCEPTION". While it
+  // sat on `studio`, that single exception forced the whole studio lane on, and
+  // the studio lane also arms deck design, collateral composition, artwork
+  // generation and corp-dev documents — every one of which the IoI seam returns
+  // to Cowork. One exception was keeping four superseded paths armed.
+  //
+  // `chat` is the honest home rather than a convenient one: this IS Yulia
+  // reading a document the practitioner imported — Sonnet, no web tools, one
+  // bounded turn, user-initiated. Same shape as every other thing on that lane.
+  assertSpendAllowed('chat', "Yulia's read of a LinkedIn import");
   if (!client) {
     if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY is not set');
     client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 300_000, maxRetries: 2 });
@@ -292,7 +302,7 @@ export async function analyzeLinkedInImport(analyticsId: number, userId: number)
   // Before the row is stamped 'running' — otherwise a blocked press parks the
   // import at 'failed', which reads as "the analysis broke" rather than "this
   // lane is off". Importing and reading the verbatim stat grid is unaffected.
-  assertSpendAllowed('studio', "Yulia's read of a LinkedIn import");
+  assertSpendAllowed('chat', "Yulia's read of a LinkedIn import");
   const [row] = await sql`SELECT * FROM studio_analytics WHERE id = ${analyticsId} AND user_id = ${userId}`;
   if (!row) throw new Error('Import not found');
   await sql`UPDATE studio_analytics SET analysis_status = 'running', analysis_error = NULL WHERE id = ${analyticsId}`;

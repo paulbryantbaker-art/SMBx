@@ -10,7 +10,6 @@ import { canvasTabsRouter } from './routes/canvasTabs.js';
 import { docViewsRouter } from './routes/docViews.js';
 import { chatRouter } from './routes/chat.js';
 import { anonymousRouter } from './routes/anonymous.js';
-import { stripeRouter, handleStripeWebhook } from './routes/stripe.js';
 import { deliverablesRouter } from './routes/deliverables.js';
 import { pmiPlanRouter } from './routes/pmiPlan.js';
 import { dataRoomRouter } from './routes/dataRoom.js';
@@ -220,7 +219,10 @@ assertProductionBillingSafety();
 app.set('trust proxy', 1);
 
 // ─── 1. Stripe webhook (raw body — MUST be before json parser) ──
-app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook);
+/* The Stripe webhook is GONE (2026-08-15). It was mounted public and ahead of
+   the JSON body parser so the raw body survived for signature verification —
+   the one piece of billing that had to stay reachable while subscriptions were
+   'dormant'. Nothing charges money now, so there are no events to settle. */
 
 // ─── 2. Body parsing ───────────────────────────────────────
 app.use(express.json({ limit: '2mb' }));
@@ -245,7 +247,9 @@ app.get('/api/health', (_req, res) => {
 app.get('/api/config', (_req, res) => {
   res.json({
     googleClientId: process.env.GOOGLE_CLIENT_ID || null,
-    stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY || null,
+    /* stripePublishableKey removed 2026-08-15 — there is no checkout to
+       initialise, and a public endpoint advertising a payments key invites
+       exactly the integration this practice does not have. */
     practiceMode: practiceModeEnabled(),
   });
 });
@@ -362,14 +366,54 @@ app.post('/api/practice/pricing', leadLimiter, async (req, res) => {
 // needs no carve-out. Financial figures pass through ownerEvaluate() to the
 // pure engine and are NEVER persisted or logged; migration 117's schema has
 // no columns that could hold them.
-app.post('/api/owners/google', ownerLimiter, ownerFunnel.ownerGoogle);
-app.post('/api/owners/magic', ownerLimiter, ownerFunnel.ownerMagicRequest);
-app.get('/api/owners/verify', ownerLimiter, ownerFunnel.ownerMagicVerify);
-app.get('/api/owners/me', ownerLimiter, ownerFunnel.ownerMe);
-app.get('/api/owners/lane-read', ownerLimiter, ownerFunnel.ownerLaneRead);
-app.post('/api/owners/lead', ownerLimiter, ownerFunnel.ownerLead);
-app.post('/api/owners/evaluate', ownerEvaluateLimiter, ownerFunnel.ownerEvaluate);
-app.post('/api/owners/retention', ownerLimiter, ownerFunnel.ownerRetention);
+/**
+ * ASYNC GUARD (2026-08-14) — why every owner handler is wrapped.
+ *
+ * These handlers are `async` and are registered BY REFERENCE, so they carry no
+ * inline try/catch, and **Express 4 does not catch a rejected promise from an
+ * async handler** (we are on 4.22.1). The error handler at the bottom of this
+ * file therefore never sees them: the rejection goes unhandled, and Node 22
+ * terminates the process on an unhandled rejection.
+ *
+ * That is not theoretical. Walking this funnel end to end, the server died
+ * TWICE from two independent causes, both inside the PDF leg:
+ *
+ *   1. `newRenderPage()` could not launch Chromium — and its own zombie-recovery
+ *      retry (premiumPdfRenderer.ts) rethrows if the relaunch also fails.
+ *   2. `page.setContent(…, { waitUntil: 'networkidle0' })` hit its 30s
+ *      navigation timeout on a browser left in a bad state by earlier renders.
+ *
+ * Both are realistic in production for the reason the renderer's own comments
+ * already record — "under container memory pressure it let one renderer crash
+ * turn the whole browser into a zombie". The blast radius was the whole API:
+ * one owner's failed PDF dropped every in-flight request for every user and
+ * restarted the container.
+ *
+ * `wrap` converts that into a 503 for the one request. It changes no success
+ * path — a handler that resolves is untouched, and handlers that already answer
+ * their own errors still do, because this only fires on a REJECTION.
+ */
+const wrap =
+  (fn: (req: any, res: any) => Promise<unknown> | unknown) =>
+  (req: any, res: any) => {
+    Promise.resolve(fn(req, res)).catch((err: any) => {
+      console.error(`[owners] ${req.method} ${req.path} failed:`, err?.message || err);
+      // The handler may have already streamed or sent — never double-send.
+      if (res.headersSent) return res.end();
+      res.status(503).json({
+        error: 'We could not build your report just now. Nothing was lost — try again in a moment.',
+      });
+    });
+  };
+
+app.post('/api/owners/google', ownerLimiter, wrap(ownerFunnel.ownerGoogle));
+app.post('/api/owners/magic', ownerLimiter, wrap(ownerFunnel.ownerMagicRequest));
+app.get('/api/owners/verify', ownerLimiter, wrap(ownerFunnel.ownerMagicVerify));
+app.get('/api/owners/me', ownerLimiter, wrap(ownerFunnel.ownerMe));
+app.get('/api/owners/lane-read', ownerLimiter, wrap(ownerFunnel.ownerLaneRead));
+app.post('/api/owners/lead', ownerLimiter, wrap(ownerFunnel.ownerLead));
+app.post('/api/owners/evaluate', ownerEvaluateLimiter, wrap(ownerFunnel.ownerEvaluate));
+app.post('/api/owners/retention', ownerLimiter, wrap(ownerFunnel.ownerRetention));
 
 // P2 — the FULL evaluation workspace (owner_evaluations, migration 119).
 // Same `smbx_owner` funnel pass; storage here is the EXPLICITLY CONSENTED
@@ -377,13 +421,13 @@ app.post('/api/owners/retention', ownerLimiter, ownerFunnel.ownerRetention);
 // row exists, /answers bodies are never logged, /delete is the delete-
 // anytime right. The report leg runs V19 models in memory only (no
 // persistV19ModelExecution) — the row keeps answers + the finished PDF.
-app.get('/api/owners/full/state', ownerLimiter, ownerFullEval.fullEvalState);
-app.post('/api/owners/full/consent', ownerLimiter, ownerFullEval.fullEvalConsent);
-app.post('/api/owners/full/answers', ownerLimiter, ownerFullEval.fullEvalAnswers);
-app.post('/api/owners/full/checklist', ownerLimiter, ownerFullEval.fullEvalChecklist);
+app.get('/api/owners/full/state', ownerLimiter, wrap(ownerFullEval.fullEvalState));
+app.post('/api/owners/full/consent', ownerLimiter, wrap(ownerFullEval.fullEvalConsent));
+app.post('/api/owners/full/answers', ownerLimiter, wrap(ownerFullEval.fullEvalAnswers));
+app.post('/api/owners/full/checklist', ownerLimiter, wrap(ownerFullEval.fullEvalChecklist));
 // Report renders a Chromium PDF + sends an email — same budget as /evaluate.
-app.post('/api/owners/full/report', ownerEvaluateLimiter, ownerFullEval.fullEvalReport);
-app.post('/api/owners/full/delete', ownerLimiter, ownerFullEval.fullEvalDelete);
+app.post('/api/owners/full/report', ownerEvaluateLimiter, wrap(ownerFullEval.fullEvalReport));
+app.post('/api/owners/full/delete', ownerLimiter, wrap(ownerFullEval.fullEvalDelete));
 
 // ─── Research report downloads — verified email required ────
 // The reports READ free at /reports/:slug; the PDF requires a confirmed email
@@ -1001,7 +1045,12 @@ app.get('/api/definitive/enterprise-allow-lists', (req, res) => {
   res.json(buildDefinitiveEnterpriseAllowListTemplates(discoveryOrigin(req)));
 });
 
-app.get('/api/debug/check-ai', async (_req, res) => {
+// requireAuth added 2026-08-14. This sits above the blanket `app.use('/api',
+// requireAuth)` below, so it was answering anonymous callers with the first ten
+// characters of ANTHROPIC_API_KEY, the row count of `conversations`, and a live
+// claude-sonnet-4-6 call on every hit. Same defect as the deleted
+// /api/chat/debug/api-test, with a key prefix on top.
+app.get('/api/debug/check-ai', requireAuth, async (_req, res) => {
   const checks: Record<string, any> = {};
 
   checks.apiKeySet = !!process.env.ANTHROPIC_API_KEY;
@@ -1051,15 +1100,18 @@ app.get('/api/debug/check-ai', async (_req, res) => {
 });
 
 app.use('/api/auth', authLimiter, authRouter);
+/* `/api/stripe` is GONE, not 410'd (2026-08-15, Paul: "this is old from when I
+   was going to sell the app - not relevant any more"). It used to fork here:
+   `retiredSurface` in practice mode, the real router otherwise. Both halves are
+   deleted along with routes/stripe.ts — an unmounted path 404s, which is the
+   truthful answer, and a 410 implied something that could come back.
+
+   The anonymous chat fork stays as it was: that surface is retired by THE LINE
+   v2 but the router still exists for a non-practice deployment. */
 if (practiceModeEnabled()) {
-  // Retired public product surfaces: the anonymous marketing funnel and Stripe
-  // checkout/portal have no role in the private practice (THE LINE v2). The
-  // webhook mount above stays live so legacy subscription events still settle.
   app.use('/api/chat/anonymous', retiredSurface);
-  app.use('/api/stripe', retiredSurface);
 } else {
   app.use('/api/chat/anonymous', chatLimiter, anonymousRouter);
-  app.use('/api/stripe', requireAuth, stripeRouter); // routes read req.userId; this mount is before the blanket requireAuth, so gate it here (webhook is mounted separately above, stays public)
 }
 app.use('/api/chat', chatLimiter, chatRouter);
 app.use('/api', shareLinksRouter); // has both public (/shared/:token) and protected routes
@@ -1072,7 +1124,11 @@ app.get('/api/deliverables/catalog', async (_req, res) => {
   try {
     const sql = (await import('./db.js')).sql;
     const items = await sql`
-      SELECT slug, name, description, journey, gate, category, tier, deliverable_type
+      -- tier dropped from the SELECT with the column itself (migration 125).
+      -- This is a LIVE public endpoint: a dropped column in a select list is a
+      -- runtime error, not a null, so leaving it would have 500'd the Studio
+      -- launcher on the first request after deploy.
+      SELECT slug, name, description, journey, gate, category, deliverable_type
       FROM menu_items
       WHERE active = true
       ORDER BY category, name
@@ -1539,17 +1595,11 @@ runMigrations().then(async () => {
         free_deliverable_used = false,
         updated_at = NOW()
     `;
-    await bootSql`
-      INSERT INTO subscriptions (user_id, plan, status, stripe_subscription_id, stripe_customer_id, current_period_start, current_period_end, trial_ends_at)
-      SELECT id, 'enterprise', 'active', 'dev_superadmin_enterprise', 'dev_superadmin', NOW(), NOW() + INTERVAL '30 days', NOW() + INTERVAL '90 days'
-      FROM users
-      WHERE email = 'pbaker@smbx.ai'
-      ON CONFLICT (user_id) DO UPDATE SET
-        plan = 'enterprise',
-        status = 'active',
-        trial_ends_at = EXCLUDED.trial_ends_at,
-        updated_at = NOW()
-    `;
+    /* The matching `subscriptions` INSERT is gone with the table (migration
+       126). It wrote a fake enterprise row — stripe_subscription_id
+       'dev_superadmin_enterprise' — so the paywall would let the superadmin
+       through. Nothing is gated on a plan any more, and this INSERT would fail
+       at boot against a dropped table, which is the worst place to find out. */
     console.log('[boot] Superadmin account verified');
     try {
       const seeded = await ensureModelRegistrySeeded();

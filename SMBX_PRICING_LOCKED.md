@@ -3,9 +3,15 @@
 > [`THE_LINE_POLICY.md`](THE_LINE_POLICY.md) (v2). Practice compensation is
 > per-engagement — buy-side retainer + buy-side success fee paid by the acquirer
 > client, papered in the engagement letter — not a product price list. The
-> subscription ladder below is **dormant, not unwound**: `subscriptionService.ts`
-> and Stripe stay in the tree, but practice mode grants the team full entitlements
-> and disables checkout. The 2026-07-11 "July 10 flat-fee" addendum below reached
+> subscription ladder below is now **UNWOUND, not merely dormant** (2026-08-15,
+> Paul: *"this is old from when I was going to sell the app - not relevant any
+> more"*). This banner used to say the opposite — that `subscriptionService.ts`
+> and Stripe stayed in the tree behind a practice-mode flag. They do not:
+> `routes/stripe.ts`, the webhook, `client/src/lib/pricing.ts`, the price fields
+> on `PlanInfo`, the per-deliverable paywall and the `subscriptions` table
+> (migration 126) are all deleted. The figures below are a HISTORICAL RECORD of
+> what was once charged. Nothing reads them, and nothing in the app charges
+> money. The 2026-07-11 "July 10 flat-fee" addendum below reached
 > the marketing surface for one day, was never ratified for billing, and is retired
 > with the pivot. Nothing in this file should gate new work.
 

@@ -73,12 +73,24 @@ export interface Deal {
 
 // ─── Menu Catalog ───────────────────────────────────────────
 
+/**
+ * NOTE (2026-08-15): this shape does not match the table and never did — it
+ * says `journey_type`, `is_active` and `sort_order` where `menu_items` has
+ * `journey`, `active` and no sort column at all. Nothing imports it, which is
+ * why the mismatch survived; the live shape is `MenuItem` in
+ * `server/services/menuCatalogService.ts`, typed against the real columns.
+ *
+ * Left in place rather than deleted because this file is a broad declaration
+ * bank and removing an unused export is a separate sweep. The money fields are
+ * gone though: `base_price_cents` and `tier` were dropped from the table by
+ * migration 125 (THE LINE v2 rule 1 — nothing in the app charges money), and a
+ * type advertising columns that do not exist is how someone writes a SELECT
+ * that throws.
+ */
 export interface MenuItem {
   id: number;
   name: string;
   description: string | null;
-  tier: string;
-  base_price_cents: number;
   journey_type: string | null;
   gate: string | null;
   category: string | null;

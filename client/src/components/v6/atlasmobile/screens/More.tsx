@@ -30,7 +30,6 @@ import { RT } from "../redesign/rt";
 import { DetailSection, Divider, ActionRow } from "../redesign/kit";
 import { ActionSheet } from "../iosKit";
 import { useMobileShell } from "../mobileShell";
-import { planLabel } from "../../../../lib/pricing";
 import { STUDIO_IN_APP } from "../../appSurfaces";
 
 function titleCase(s: string | null | undefined): string {
@@ -50,7 +49,8 @@ function userInitials(u: User | null): string {
 function profileSubtitle(u: User | null): string {
   if (!u) return "";
   const role = titleCase(u.role);
-  const plan = planLabel(u.plan || 'free') ?? titleCase(u.plan);
+  /* No plan label — the subscription ladder is gone (2026-08-15). */
+  const plan = 'Practice';
   return [role, plan ? `${plan} plan` : ""].filter(Boolean).join(" · ");
 }
 

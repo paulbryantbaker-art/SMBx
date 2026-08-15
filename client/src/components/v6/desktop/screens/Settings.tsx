@@ -25,27 +25,12 @@ import { useAtlasNav, useAtlasChat } from "../atlasNav";
 import type { SettingsPane } from "../atlasNav";
 import type { User } from "../../../../hooks/useAuth";
 import { authHeaders } from "../../../../hooks/useAuth";
-import { planLabel, planPriceLine } from "../../../../lib/pricing";
 import { usePracticeMode } from "../../../../lib/practiceMode";
 import { T } from "../atlasTokens";
 import { Card, Avatar, Pill, ProgressBar, LoadingState } from "../primitives";
 import { SettingsGlyph, PlusIcon } from "../icons";
 
 /* ─── server payload shapes (real fields, coerced) ─────────────────────────── */
-interface SubscriptionRow {
-  status?: string | null;
-  current_period_end?: string | null;
-  cancel_at_period_end?: boolean | null;
-  trial_end?: string | null;
-  stripe_customer_id?: string | null;
-}
-interface SubscriptionPayload {
-  plan?: string | null;
-  name?: string | null;
-  priceDisplay?: string | null;
-  note?: string | null;
-  subscription?: SubscriptionRow | null;
-}
 interface UsageCounter {
   used: number;
   limit: number | null;
@@ -217,7 +202,10 @@ function ProfilePane({ user }: { user: User | null }) {
     { key: "Email", value: user.email || "—" },
     { key: "Role", value: titleCase(user.role) },
     { key: "League", value: user.league ? titleCase(user.league) : "—" },
-    { key: "Plan", value: planLabel(user.plan || 'free') ?? titleCase(user.plan) },
+    /* The Plan row is gone with the ladder. It read `planLabel(user.plan)` —
+       Free / Solo / Pro / Team / Enterprise — which described which
+       subscription a user had bought. There is one user set (the team
+       allowlist), it runs at full entitlements, and nothing is bought. */
   ];
 
   return (
@@ -275,141 +263,30 @@ function ProfilePane({ user }: { user: User | null }) {
 /* ─── 6b. ACCOUNT & BILLING ────────────────────────────────────────────────── */
 
 function BillingPane() {
-  const practice = usePracticeMode();
-  const sub = useEndpoint<SubscriptionPayload>("/api/stripe/subscription", true);
-  const ent = useEndpoint<EntitlementsPayload>("/api/v19/entitlements", true);
-  const chat = useAtlasChat();
-  const [portalBusy, setPortalBusy] = useState(false);
-  const [portalError, setPortalError] = useState(false);
+  /* NO BILLING, UNCONDITIONALLY (2026-08-15, Paul: "this is old from when I
+     was going to sell the app - not relevant any more").
 
-  const openPortal = useCallback(async () => {
-    setPortalError(false);
-    setPortalBusy(true);
-    try {
-      const res = await fetch("/api/stripe/portal", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...authHeaders() },
-      });
-      if (!res.ok) throw new Error(String(res.status));
-      const json = (await res.json()) as { url?: string };
-      if (json.url) {
-        window.location.href = json.url;
-        return;
-      }
-      throw new Error("no url");
-    } catch {
-      setPortalError(true);
-      setPortalBusy(false);
-    }
-  }, []);
+     This pane used to fetch GET /api/stripe/subscription, render the plan, the
+     price line and the renewal date, and offer a "Manage" button that POSTed to
+     /api/stripe/portal and redirected to Stripe's customer portal. It already
+     short-circuited to the card below whenever practice mode was on — which is
+     the default and, per THE LINE v2 rule 3, the permanent posture — so the
+     Stripe half was unreachable. Both endpoints are now DELETED, so the old
+     path would fetch a 404 and render the error state.
 
-  // THE LINE v2 pivot: no product billing. The practice team runs at full
-  // entitlements; compensation lives in client engagement letters, not here.
-  if (practice) {
-    return (
-      <Card pad={20} style={{ borderRadius: T.rCardLg }}>
-        <div style={{ fontSize: 24, fontWeight: 600, color: T.ink, marginTop: 4 }}>Practice workspace</div>
-        <div style={{ fontSize: 13, color: T.muted, marginTop: 4 }}>Full access · nothing billed in-app</div>
-        <HonestNote style={{ marginTop: 16 }}>
-          smbX runs as the practice's internal instrument (THE LINE v2). There is no
-          subscription here — client compensation is papered in each engagement
-          letter, never charged through the app.
-        </HonestNote>
-      </Card>
-    );
-  }
-
-  if (sub.loading) return <LoadingState label="Loading your plan…" />;
-  if (sub.error || !sub.data) {
-    return <ErrorNote label="Couldn't load your billing details right now. Please try again in a moment." />;
-  }
-
-  const planKey = (sub.data.plan || "free").toLowerCase();
-  const planName = planLabel(planKey) ?? titleCase(sub.data.name);
-  // Known plans use our own spaced label; an unknown planKey falls back to the
-  // server priceDisplay ("$99/month"), normalized to the screen's "$99 / month".
-  const priceLine = planPriceLine(planKey) ?? normalizePrice(sub.data.priceDisplay) ?? "—";
-  const row = sub.data.subscription || null;
-  const renewLabel = formatRenew(row);
-  const isFree = planKey === "free";
-
-  const changePlan = () => {
-    // Plan changes route through chat (THE LINE: Yulia guides the upgrade; the
-    // user decides). There is no self-serve pricing surface — chat is the door.
-    chat?.send("I'd like to change my plan. What are my options?");
-  };
-
+     The usage rows are unaffected: they come from GET /api/v19/entitlements,
+     which is capability data, not billing.
+  */
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-      {/* plan + usage row */}
-      <div style={{ display: "flex", gap: 14, alignItems: "stretch", flexWrap: "wrap" }}>
-        {/* plan card */}
-        <Card pad={20} style={{ flex: 1, minWidth: 240, borderRadius: T.rCardLg, display: "flex", flexDirection: "column" }}>
-          <div style={{ fontSize: 24, fontWeight: 600, color: T.ink, marginTop: 4 }}>{planName}</div>
-          <div style={{ fontSize: 13, color: T.muted, marginTop: 4 }}>
-            {priceLine}
-            {renewLabel ? ` · ${renewLabel}` : ""}
-          </div>
-          <div style={{ flex: 1 }} />
-          <button
-            type="button"
-            onClick={isFree ? changePlan : openPortal}
-            disabled={portalBusy}
-            style={{
-              marginTop: 16,
-              alignSelf: "flex-start",
-              background: T.blueBg,
-              color: T.blue,
-              border: "none",
-              borderRadius: T.rPill,
-              padding: "9px 16px",
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: portalBusy ? "default" : "pointer",
-              opacity: portalBusy ? 0.65 : 1,
-              fontFamily: T.font,
-            }}
-          >
-            {isFree ? "Change plan" : portalBusy ? "Opening…" : "Manage subscription"}
-          </button>
-          {portalError && (
-            <HonestNote style={{ marginTop: 10, color: T.terra }}>
-              Couldn't open the billing portal. Please try again.
-            </HonestNote>
-          )}
-          {isFree && (
-            <HonestNote style={{ marginTop: 10 }}>
-              Talk to Yulia to upgrade — every plan change routes through chat.
-            </HonestNote>
-          )}
-        </Card>
-
-        {/* usage card */}
-        <Card pad={20} style={{ flex: 1.4, minWidth: 280, borderRadius: T.rCardLg }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>Usage this cycle</div>
-          <div style={{ marginTop: 12 }}>
-            <UsageBody ent={ent} />
-          </div>
-        </Card>
-      </div>
-
-      {/* status / receipts card — honest: no invoice ledger is exposed here */}
-      <Card pad={20} style={{ borderRadius: T.rCardLg }}>
-        <div style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>Billing</div>
-        <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
-          <KeyVal k="Status" v={<StatusValue status={row?.status} />} />
-          {renewLabel && <KeyVal k={renewRowKey(renewLabel)} v={stripLead(renewLabel)} />}
-          {row?.cancel_at_period_end ? (
-            <KeyVal k="Renewal" v="Cancels at period end" />
-          ) : null}
-        </div>
-        <HonestNote style={{ marginTop: 14 }}>
-          {isFree
-            ? "You're on the Free plan — no payment method or invoices yet."
-            : "Payment method, invoices, and receipts are managed in the secure Stripe billing portal — use Manage subscription above."}
-        </HonestNote>
-      </Card>
-    </div>
+    <Card pad={20} style={{ borderRadius: T.rCardLg }}>
+      <div style={{ fontSize: 24, fontWeight: 600, color: T.ink, marginTop: 4 }}>Practice workspace</div>
+      <div style={{ fontSize: 13, color: T.muted, marginTop: 4 }}>Full access · nothing billed in-app</div>
+      <HonestNote style={{ marginTop: 16 }}>
+        smbX runs as the practice's internal instrument (THE LINE v2). There is no
+        subscription here — client compensation is papered in each engagement
+        letter, never charged through the app.
+      </HonestNote>
+    </Card>
   );
 }
 
@@ -482,45 +359,9 @@ function StatusValue({ status }: { status?: string | null }) {
   return <span style={{ color, fontWeight: isActive ? 500 : 600 }}>{text}</span>;
 }
 
-function stripLead(s: string): string {
-  return s.replace(/^(renews|trial ends|ends)\s+/i, "").trim();
-}
-
-/** Label the date row by what the date actually is, so a trial-end date isn't
- *  mislabeled "Next" (which reads as a renewal). */
-function renewRowKey(renewLabel: string): string {
-  const l = renewLabel.toLowerCase();
-  if (l.startsWith("trial ends")) return "Trial ends";
-  if (l.startsWith("ends")) return "Ends";
-  return "Renews";
-}
-
-function formatRenew(row: SubscriptionRow | null): string | null {
-  if (!row) return null;
-  const trial = row.trial_end ? new Date(row.trial_end) : null;
-  if (trial && trial.getTime() > Date.now()) {
-    return `trial ends ${fmtDate(trial)}`;
-  }
-  const end = row.current_period_end ? new Date(row.current_period_end) : null;
-  if (!end || Number.isNaN(end.getTime())) return null;
-  if (row.cancel_at_period_end) return `ends ${fmtDate(end)}`;
-  return `renews ${fmtDate(end)}`;
-}
-
 function fmtDate(d: Date): string {
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
-
-/** Normalize a server priceDisplay ("$99/month") to the screen's spaced
- *  "$99 / month" so an unknown-plan fallback reads consistently. */
-function normalizePrice(s: string | null | undefined): string | null {
-  if (!s) return null;
-  const trimmed = s.trim();
-  if (!trimmed) return null;
-  return trimmed.replace(/\s*\/\s*/g, " / ");
-}
-
-/* ─── 6c. NOTIFICATIONS ────────────────────────────────────────────────────── */
 
 const NOTIF_GROUPS: { title: string; items: { id: string; label: string; on: boolean }[] }[] = [
   {

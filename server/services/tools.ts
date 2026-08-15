@@ -26,7 +26,7 @@ import { getMarketHeat } from './marketHeatService.js';
 import { enrichCompanyWebsite } from './websiteEnrichmentService.js';
 import { enqueueDeliverableGeneration } from './jobQueue.js';
 import { processDeliverable } from './deliverableProcessor.js';
-import { canGenerateDeliverable, markFreeDeliverableUsed, buildDeliverablePaywall } from './subscriptionService.js';
+import { canGenerateDeliverable } from './subscriptionService.js';
 import { hasDealAccess } from './dealAccessService.js';
 import { TOOL_NAMES_REQUIRING_CONFIRMATION } from './agencyActionRegistry.js';
 import { createAnalysisRun, createModelTabRecord, readAnalysisRunSnapshot, readModelTabState, updateAnalysisRunSnapshot, updateModelTabState } from './analysisRuntime.js';
@@ -1435,15 +1435,16 @@ async function generateDealDeliverable(input: Record<string, any>, userId: numbe
   const deliverableType = menuItem.slug.replace(/-/g, '_');
   const access = await canGenerateDeliverable(userId, deliverableType);
   if (!access.allowed) {
-    // Free user past their one free deliverable (or an ineligible type) → surface
-    // the paywall. aiService forwards `paywall` as a `type:'paywall'` SSE event,
-    // which the client renders as the PaywallCard (Critical Rule #3).
+    /* UNREACHABLE, and kept as a guard rather than deleted.
+       `canGenerateDeliverable` now returns allowed:true unconditionally — the
+       app charges nothing — so this branch cannot be taken. It stays because
+       the check is the right SHAPE for a future non-money gate, and because
+       deleting the branch would leave `access` computed and unread.
+       The paywall payload is gone: there is no plan to require and no card to
+       render. */
     return JSON.stringify({
-      error: 'Subscription required',
-      requiredPlan: access.requiredPlan,
-      currentPlan: access.currentPlan,
-      message: `This deliverable requires a ${access.requiredPlan} subscription.`,
-      paywall: buildDeliverablePaywall(access),
+      error: 'This deliverable is not available.',
+      reason: access.reason ?? 'unavailable',
     });
   }
 
@@ -1463,9 +1464,8 @@ async function generateDealDeliverable(input: Record<string, any>, userId: numbe
   };
   const jobId = await enqueueDeliverableGeneration(jobData).catch(() => null);
 
-  if (access.isFreeDeliverable) {
-    await markFreeDeliverableUsed(userId, deliverableType).catch(() => {});
-  }
+  /* `markFreeDeliverableUsed` is gone — it consumed the one-free-deliverable
+     allowance, which does not exist now that every deliverable is free. */
 
   setImmediate(() => {
     processDeliverable(jobData).catch(err =>
@@ -4398,6 +4398,11 @@ async function queryAdminData(input: Record<string, any>, userId: number): Promi
   const { query, timeRange = '7d', limit = 20 } = input;
   const intervalMap: Record<string, string> = { '24h': '24 hours', '7d': '7 days', '30d': '30 days', '90d': '90 days' };
   const interval = intervalMap[timeRange] || '7 days';
+  /* `subscriptions` is dropped (migration 126), so this is permanently false
+   and every branch below takes the zero. Kept as a live check rather than a
+   hard-coded false: it is the same tableExists() guard the rest of this
+   metrics block uses, and inlining `false` would leave four dangling
+   conditionals that read as if a table might come back. */
   const hasSubs = await tableExists('subscriptions');
 
   switch (query) {
@@ -4409,7 +4414,7 @@ async function queryAdminData(input: Record<string, any>, userId: number): Promi
       `;
       const [deals] = await sql`SELECT COUNT(*)::int as total FROM deals WHERE status = 'active' AND archived = FALSE`;
       const [mrr] = hasSubs
-        ? await sql`SELECT COALESCE(SUM(CASE WHEN plan IN ('solo', 'starter') THEN 9900 WHEN plan IN ('pro', 'professional') THEN 24900 WHEN plan = 'team' THEN 74900 WHEN plan = 'enterprise' THEN 300000 ELSE 0 END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')`
+        ? await sql`SELECT 0::bigint as mrr_cents`
         : [{ mrr_cents: 0 }];
       const [msgs] = await sql`SELECT COUNT(*)::int as c FROM messages WHERE created_at > NOW() - ${interval}::interval`;
       const [delivs] = await sql`SELECT COUNT(*)::int as c FROM deliverables WHERE created_at > NOW() - ${interval}::interval`;
@@ -4471,7 +4476,7 @@ async function queryAdminData(input: Record<string, any>, userId: number): Promi
         ? await sql`SELECT plan, status, COUNT(*)::int as count FROM subscriptions GROUP BY plan, status ORDER BY plan`
         : [];
       const [mrr] = hasSubs
-        ? await sql`SELECT COALESCE(SUM(CASE WHEN plan IN ('solo', 'starter') THEN 9900 WHEN plan IN ('pro', 'professional') THEN 24900 WHEN plan = 'team' THEN 74900 WHEN plan = 'enterprise' THEN 300000 ELSE 0 END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')`
+        ? await sql`SELECT 0::bigint as mrr_cents`
         : [{ mrr_cents: 0 }];
       return JSON.stringify({ breakdown, mrrCents: Number(mrr.mrr_cents) });
     }

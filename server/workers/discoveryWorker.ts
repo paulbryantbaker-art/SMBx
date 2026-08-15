@@ -70,15 +70,11 @@ export async function startWorker(): Promise<void> {
         const [delivs] = await metricsSql`SELECT COUNT(*)::int as c FROM deliverables WHERE created_at::date = ${dateStr}`;
         const [mrrExists] = await metricsSql`SELECT to_regclass('public.subscriptions') IS NOT NULL as exists`;
         const [mrr] = mrrExists.exists
-          ? await metricsSql`
-              SELECT COALESCE(SUM(CASE
-                WHEN plan IN ('solo', 'starter') THEN 9900
-                WHEN plan IN ('pro', 'professional') THEN 24900
-                WHEN plan = 'team' THEN 74900
-                WHEN plan = 'enterprise' THEN 300000
-                ELSE 0
-              END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')
-            `
+          /* The $99/$249/$749/$3,000 ladder used to live in this SQL. The
+             table is dropped, so `mrrExists` is permanently false and this
+             branch is unreachable — but a retired price schedule encoded in a
+             worker query is exactly the kind of thing that gets copied. */
+          ? await metricsSql`SELECT 0::bigint as mrr_cents`
           : [{ mrr_cents: 0 }];
         const [errors] = await metricsSql`
           SELECT COUNT(*)::int as c FROM support_issues WHERE type = 'system_error' AND created_at::date = ${dateStr}

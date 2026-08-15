@@ -9,8 +9,13 @@
  *
  * Backend: GET /api/deliverables/catalog (the active menu_items) + the existing
  * generateDealDeliverable() (POST /deals/:id/deliverables → queues + generates →
- * autoFileDeliverable → Files). Paywall (free tier = one free deliverable) comes
- * back as a rich error → honest upgrade note. Nothing fabricated.
+ * autoFileDeliverable → Files).
+ *
+ * NO PAYWALL. This used to say "Paywall (free tier = one free deliverable)
+ * comes back as a rich error → honest upgrade note" — product-era, and dead
+ * twice over: practice mode gives the team enterprise entitlements with no
+ * gate, and THE LINE v2 rule 1 is that nothing in the app charges money.
+ * Migration 125 dropped the price and tier columns behind it.
  *
  * Polish standard: float on the shell gradient, T.border cards, tone not lines.
  */
@@ -37,7 +42,6 @@ interface CatalogItem {
   journey: "sell" | "buy" | "raise" | "pmi" | null;
   gate: string | null;
   category: string | null;
-  tier: string | null;
   deliverable_type: string | null;
 }
 
