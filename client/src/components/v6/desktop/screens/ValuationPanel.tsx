@@ -82,7 +82,12 @@ export function ValuationPanel({
 
   /* The headline range, or the reason there is not one. Both come from
      house/valuation — the panel never decides that a number is unavailable. */
-  const band = useMemo(() => {
+  /* The union is annotated rather than inferred. Inferred, TypeScript widens
+     both arms to carry an optional copy of the other's key, so `"value" in
+     band` stops discriminating and every read below is `possibly undefined` —
+     a real error the Vite build never surfaces because it does not typecheck. */
+  type Band = { blocked: string } | { value: ReturnType<typeof valuation> };
+  const band = useMemo<Band | null>(() => {
     if (!base || !league) return null;
     const gate = bandFor(dealType, base.cents, league.league);
     if (!gate.ok) return { blocked: gate.why };

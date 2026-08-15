@@ -47,14 +47,32 @@ export interface CapitalStackResult {
 
 // ─── SBA constants (2025 rules) ─────────────────────────────
 
-const SBA_MAX = 500_000_000;           // $5M in cents
-const SBA_EQUITY_MIN = 0.10;           // 10% minimum equity injection
-const SBA_DSCR_MIN = 1.25;
+// ONE SOURCE FOR THE RATE AND THE SPREADS (2026-08-15).
+//
+// These were four bare consts here, with `PRIME_RATE = 7.50 // update
+// periodically` — no date, no source, and 100bp away from the 8.5 fallback in
+// marketDataService.ts, which is what a rate with nowhere to live looks like
+// after a year. They now come from `house/capital.ts`, where the value carries
+// its provenance and reports itself as UNVERIFIED until someone stamps it.
+//
+// NOTE THE UNITS. This file works in percentage points (7.50) and house/ works
+// in decimals (0.0750), because house/ is decimals everywhere by doctrine. The
+// x100 is the seam and it is deliberate — converting the whole file would touch
+// every rate string it renders.
+import {
+  RATE_INDEX,
+  SBA_MAX_CENTS, SBA_EQUITY_MIN as H_SBA_EQUITY_MIN, SBA_DSCR_MIN as H_SBA_DSCR_MIN,
+  SBA_SPREAD_SMALL_PCT, SBA_SPREAD_STANDARD_PCT, SBA_SPREAD_LARGE_PCT,
+} from '../../house/capital.js';
+
+const SBA_MAX = SBA_MAX_CENTS;         // $5M in cents
+const SBA_EQUITY_MIN = H_SBA_EQUITY_MIN;
+const SBA_DSCR_MIN = H_SBA_DSCR_MIN;
 const SBA_MIN_CREDIT = 690;
-const PRIME_RATE = 7.50;               // current prime (update periodically)
-const SBA_SPREAD_SMALL = 4.75;         // spread for loans < $50K
-const SBA_SPREAD_STANDARD = 2.75;      // spread for loans $50K-$350K
-const SBA_SPREAD_LARGE = 2.25;         // spread for loans > $350K
+const PRIME_RATE = (RATE_INDEX.prime.pct ?? 0.075) * 100;
+const SBA_SPREAD_SMALL = SBA_SPREAD_SMALL_PCT * 100;       // loans < $50K
+const SBA_SPREAD_STANDARD = SBA_SPREAD_STANDARD_PCT * 100; // $50K-$350K
+const SBA_SPREAD_LARGE = SBA_SPREAD_LARGE_PCT * 100;       // > $350K
 const SBA_TERM_BUSINESS = 10;          // years
 const SBA_TERM_REAL_ESTATE = 25;       // years
 
