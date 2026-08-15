@@ -143,6 +143,16 @@ law('content/studio/DESIGN.md', 'DESIGN.md');
    separate real-estate lanes, valuation, securities, trade licensing,
    employment, insurance and QoE. */
 law('content/studio/THE_LINE.md', 'THE_LINE.md');
+/* WHERE.md + where.json — added 2026-08-14. The settled answer to "which
+   system does this", GENERATED from house/where.ts so the app and a session
+   read the same table rather than two prose copies that agree today.
+
+   It travels as a DOCUMENT because Cowork is Claude Desktop, not a terminal
+   (Paul, same day): a session there reads files and cannot be relied on to run
+   `npx tsx`. where.json is the same data machine-readable, for anything that
+   wants to branch on it rather than read it. */
+law('content/studio/WHERE.md', 'WHERE.md');
+law('content/studio/where.json', 'where.json');
 law('content/studio/RESEARCH.md', 'RESEARCH.md');
 /* THE MACHINE (2026-08-12, Paul: "give Cowork the DL for the new element to
    be used in collateral"). MACHINE.md is the design language + content law;

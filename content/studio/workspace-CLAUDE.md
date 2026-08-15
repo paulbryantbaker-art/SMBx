@@ -202,6 +202,10 @@ DESIGN.md            the house LOOK — palette, type, and the dead systems name
 THE_LINE.md          the perimeter, and whose lane each question is in —
                      tax, legal, real estate, valuation, securities,
                      licensing, employment, insurance, QoE.
+WHERE.md             WHICH SYSTEM does a piece of work — this workspace or
+                     the app. Read it before starting anything you have not
+                     done here before. Generated from house/where.ts;
+                     where.json is the same data, machine-readable.
 REPORT_TEMPLATE.md   the cover block, the body rules, the standing appendix.
 CLOUD_BOOTSTRAP.md   only if you are a cloud session and a builder will not run.
 ```
@@ -219,6 +223,8 @@ CLOUD_BOOTSTRAP.md   only if you are a cloud session and a builder will not run.
 | anything, and you are about to hand-write HTML or CSS | **DESIGN.md** — stop, you are drifting |
 | model a deal, write a memo, plan diligence, frame terms | **PLAYBOOK.md §5** |
 | anything client-facing at all | **THE_LINE.md** |
+| **anything you have not done here before** | **WHERE.md** — is this even ours? |
+| model a deal, work the CRM, advance a gate, run DEFINITIVE | **the APP** — see WHERE.md |
 | a question that turned tax, legal, real estate, valuation, licensing or insurance | **THE_LINE.md §3** — find the lane before you answer |
 
 ## The three hunts are not interchangeable (2026-07-31)
