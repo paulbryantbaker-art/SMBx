@@ -272,6 +272,59 @@ export const DEAL_TYPE_SPECS: readonly DealTypeSpec[] = [
   },
 ];
 
+/* ─── which league ─────────────────────────────────────────────────────── */
+
+/**
+ * The league band an earnings figure falls in.
+ *
+ * PORTED from `server/services/leagueClassifier.ts`, not reinvented, and the
+ * parity test imports both and runs them on the same inputs — the same contract
+ * `house/deal.ts` has with the canvas calculators. The app deriving one league
+ * and a Cowork session deriving another is the "app says 1.31, Cowork says
+ * 1.28" disease with a letter instead of a ratio.
+ *
+ * TAKES CENTS (house rule 10). The server divides by 100 on the way in and this
+ * does the same, in the same place, so a units mistake shows up in both or
+ * neither. My own first demo of this module printed $84,000 for an $8.4M deal
+ * by passing dollars to a cents function; the units are not a formality.
+ *
+ * Scoped to the sell/raise/pmi path deliberately. The server's `buy` journey
+ * classifies the BUYER by capital available, which answers a different question
+ * — how big a deal can this client do — and has no place in valuing a target.
+ */
+export function leagueFor(
+  earningsCents: number | null | undefined,
+  metric: 'SDE' | 'EBITDA',
+): { league: string; metric: 'SDE' | 'EBITDA' } | null {
+  if (!earningsCents) return null;
+  const d = earningsCents / 100;
+
+  if (metric === 'EBITDA' || d >= 2_000_000) {
+    if (d >= 50_000_000) return { league: 'L6', metric: 'EBITDA' };
+    if (d >= 10_000_000) return { league: 'L5', metric: 'EBITDA' };
+    if (d >= 5_000_000) return { league: 'L4', metric: 'EBITDA' };
+    if (d >= 2_000_000) return { league: 'L3', metric: 'EBITDA' };
+    /* EBITDA given but below the L3 floor — the server falls through to the
+       SDE ladder rather than forcing an EBITDA league, and so does this. */
+  }
+  return { league: d >= 500_000 ? 'L2' : 'L1', metric: 'SDE' };
+}
+
+/**
+ * The earnings figure to value on, and which base it is.
+ *
+ * EBITDA wins when both are present — the same precedence the server uses.
+ * Returns null rather than guessing when neither is recorded: a valuation with
+ * no earnings base is the thing this whole module exists to refuse.
+ */
+export function earningsBase(
+  deal: { sde?: number | null; ebitda?: number | null },
+): { cents: number; metric: 'SDE' | 'EBITDA' } | null {
+  if (deal.ebitda) return { cents: deal.ebitda, metric: 'EBITDA' };
+  if (deal.sde) return { cents: deal.sde, metric: 'SDE' };
+  return null;
+}
+
 /* ─── lookups ──────────────────────────────────────────────────────────── */
 
 export function specFor(type: DealType): DealTypeSpec {

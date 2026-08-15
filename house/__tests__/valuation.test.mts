@@ -18,7 +18,7 @@
  */
 import {
   DEAL_TYPES, DEAL_TYPE_SPECS, specFor, methodsToRun, whyNot, referrals,
-  earningsMultipleApplies, bandFor, type DealType, type Method,
+  earningsMultipleApplies, bandFor, leagueFor, earningsBase, type DealType, type Method,
 } from '../valuation.js';
 import { valuation, LEAGUE_MULTIPLES } from '../deal.js';
 
@@ -163,6 +163,91 @@ is('carve-out has no SDE, because it has no owner-operator',
 
 ok('the league bands it routes to are the ones deal.ts holds',
   Object.keys(LEAGUE_MULTIPLES).length === 6 && !!LEAGUE_MULTIPLES.L1);
+
+/* ── league derivation, in parity with the server ─────────────────────── */
+
+/* The same contract house/deal.ts has with the canvas calculators: import BOTH
+   and run them on the same inputs. A letter is easier to disagree about than a
+   ratio and just as damaging — L3 and L4 are 4–6x and 6–8x, so one step is a
+   third of the price. */
+{
+  const { classifyLeague } = await import('../../server/services/leagueClassifier.js');
+  const CASES: Array<[number, 'SDE' | 'EBITDA']> = [
+    [30_000_000, 'SDE'],        // $300K  → L1
+    [50_000_000, 'SDE'],        // $500K  → L2
+    [150_000_000, 'SDE'],       // $1.5M  → L2
+    [250_000_000, 'EBITDA'],    // $2.5M  → L3
+    [600_000_000, 'EBITDA'],    // $6M    → L4
+    [1_200_000_000, 'EBITDA'],  // $12M   → L5
+    [6_000_000_000, 'EBITDA'],  // $60M   → L6
+    [80_000_000, 'EBITDA'],     // $800K EBITDA — below the L3 floor, falls to the SDE ladder
+  ];
+  for (const [cents, metric] of CASES) {
+    const mine = leagueFor(cents, metric);
+    const theirs = classifyLeague({
+      journey: 'sell',
+      [metric === 'EBITDA' ? 'ebitda' : 'sde']: cents,
+    } as any);
+    is(`league parity at ${metric} $${(cents / 100 / 1e6).toFixed(2)}M`,
+      mine?.league, theirs?.league);
+  }
+
+  is('no earnings means no league, rather than a guess', leagueFor(null, 'SDE'), null);
+  is('zero earnings is not L1 by accident', leagueFor(0, 'SDE'), null);
+
+  /* WRONG-FIRST guard, kept: leagueFor takes CENTS. Passing dollars silently
+     lands three leagues low — $6M passed as 6_000_000 reads as $60K. This is
+     the same units mistake my first demo of this module made, and nothing
+     about it throws. */
+  ok('dollars-instead-of-cents lands in a different league, so the units matter',
+    leagueFor(6_000_000, 'EBITDA')?.league !== leagueFor(600_000_000, 'EBITDA')?.league);
+}
+
+/* ── the earnings base ────────────────────────────────────────────────── */
+
+is('EBITDA wins when both are present',
+  earningsBase({ sde: 100, ebitda: 200 })?.metric, 'EBITDA');
+is('…SDE when it is all there is', earningsBase({ sde: 100 })?.metric, 'SDE');
+is('…and null when neither is recorded, rather than zero',
+  earningsBase({ sde: null, ebitda: null }), null);
+
+/* ── the UI renders the table; it does not re-decide ──────────────────── */
+
+/* The architectural guard, and the one most likely to be broken by someone
+   being helpful. A React component that hard-codes "distressed cannot use a
+   multiple" is a SECOND copy of the routing — correct on the day, and exactly
+   the drift this repo spent a week removing from the collateral builders.
+
+   Checked by source, because there is no other way to assert a negative about
+   a file's reasoning. Comments stripped: the panel legitimately EXPLAINS the
+   distressed and ESOP cases in its header, and reading an explanation as the
+   behaviour is a mistake this suite has now made four times. */
+{
+  const { readFileSync } = await import('node:fs');
+  const { fileURLToPath } = await import('node:url');
+  const pathMod = await import('node:path');
+  const root = pathMod.resolve(pathMod.dirname(fileURLToPath(import.meta.url)), '../..');
+  const panel = readFileSync(
+    pathMod.join(root, 'client/src/components/v6/desktop/screens/ValuationPanel.tsx'), 'utf8');
+  const code = panel.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
+  ok('the panel imports the routing rather than restating it',
+    /house\/valuation/.test(code));
+  ok('…and the arithmetic too', /house\/deal/.test(code));
+
+  /* No deal type may appear in the component's LOGIC. The <option> list is
+     generated from DEAL_TYPES, so a literal is a branch. `going-concern` is
+     the one permitted literal: it is the fallback when a draft holds a value
+     no longer in the taxonomy. */
+  const named = ['distressed', 'esop', 'opco-propco', 'carve-out', 'minority-recap', 'platform', 'add-on']
+    .filter(t => new RegExp(`['"\`]${t}['"\`]`).test(code));
+  is('no deal type is hard-coded in the panel', named, []);
+
+  ok('availability comes from whyNot(), not a local condition', /whyNot\(/.test(code));
+  ok('the refusal comes from bandFor(), not a local condition', /bandFor\(/.test(code));
+  ok('the method verdicts are read from the spec, not authored',
+    /spec\.methods\.find/.test(code));
+}
 
 console.log(`\n${pass}/${total} correct`);
 process.exit(pass === total ? 0 : 1);

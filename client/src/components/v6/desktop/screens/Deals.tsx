@@ -76,6 +76,7 @@ import {
 } from "../../../../hooks/useDealTasks";
 import { dueLabel, daysUntil } from "../../../../lib/crm";
 import { useDraft } from "../../../../hooks/useDraft";
+import { ValuationPanel } from "./ValuationPanel";
 import { T } from "../atlasTokens";
 
 const PAGE_SIZE = 25;
@@ -1392,6 +1393,16 @@ function DealPane({
         </button>
 
         <TaskBlock dealId={row.rawId} addressBook={addressBook} />
+
+        {/* VALUATION BY DEAL TYPE (2026-08-15). Sits in the pane rather than the
+            cockpit because the question it answers — is an earnings multiple
+            even the right instrument here — comes BEFORE opening the models,
+            and the two types where the answer is no (distressed, ESOP) are the
+            two where finding out late costs the most. All judgement is in
+            house/valuation.ts; this renders it. */}
+        <div style={{ borderTop: `1px solid ${T.rowDiv}`, paddingTop: 14 }}>
+          <ValuationPanel dealId={row.rawId} sde={row.sde} ebitda={row.ebitda} />
+        </div>
 
         <div style={{ borderTop: `1px solid ${T.rowDiv}`, paddingTop: 14 }}>
           <p style={{ margin: 0, fontSize: 12, color: T.muted2, lineHeight: 1.5 }}>
