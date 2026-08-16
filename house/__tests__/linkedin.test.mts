@@ -175,6 +175,36 @@ function eq(name: string, actual: unknown, expected: unknown) {
   eq('truncated experience entry: headline split still stands', p.company, 'Acme Fire');
 }
 
+/* ── the third live paste (2026-08-16): "I'm looking for..." is a PROMPT ──
+   The register gained a primary contact named "I'm looking for..." — a
+   profile-section prompt, four clean words, first in copy order. Two
+   defences land together: the prompt family is noise, and the DUPLICATED
+   name line (image alt + heading) outranks first-plausible entirely. */
+{
+  const p = parseLinkedInPaste([
+    "I'm looking for...", 'Abbas Hashmi ABFP®', 'Abbas Hashmi ABFP®',
+    'Program Leader - Subject Matter Expert',
+    'Experience', 'Wharton Executive Education logo', 'Program Leader',
+    'Wharton Executive Education · Part-time', 'Jan 2023 - Present',
+  ].join('\n'));
+  eq('prompt is not a person', p.name, 'Abbas Hashmi ABFP®');
+  eq('firm from the most recent role', p.company, 'Wharton Executive Education');
+  eq('title from the most recent role', p.title, 'Program Leader');
+}
+{
+  /* The duplicate vote wins even against a novel, unlisted prompt. */
+  const p = parseLinkedInPaste([
+    'Grow your network', 'Jane Smith', 'Jane Smith', 'Partner at Foundry Holdings',
+  ].join('\n'));
+  eq('duplicated name beats unlisted chrome', p.name, 'Jane Smith');
+}
+{
+  const p = parseLinkedInPaste('Open to work\nBob Jones\nBob Jones\nCFO at Acme Fire\n');
+  eq('open-to-work is noise', p.name, 'Bob Jones');
+  const q = parseLinkedInPaste('Explore premium features…\nAnn Ray\nAnn Ray\nCOO at Beta Plumbing\n');
+  eq('ellipsis-terminated prompts are noise', q.name, 'Ann Ray');
+}
+
 /* ── purity ─────────────────────────────────────────────────────────── */
 {
   const src = readFileSync(join(HERE, '..', 'linkedin.ts'), 'utf8');
