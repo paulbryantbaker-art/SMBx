@@ -40,6 +40,7 @@ import { portfolioBriefRouter } from './routes/portfolioBrief.js';
 import { studioRouter } from './routes/studio.js';
 import { crmRouter } from './routes/crm.js';
 import { targetsRouter } from './routes/targets.js';
+import { dealDatesRouter } from './routes/dealDates.js';
 import postQueueRouter from './routes/postQueue.js';
 import { outreachRouter } from './routes/outreach.js';
 import { dealTasksRouter } from './routes/dealTasks.js';
@@ -1272,6 +1273,7 @@ app.use('/api', dealCapitalRouter);
 app.use('/api', dealGatesRouter);
 app.use('/api', engagementsRouter);
 app.use('/api', targetsRouter);
+app.use('/api', dealDatesRouter);
 app.use('/api', pmiPlanRouter);
 app.use('/api', v19ResourcesRouter);
 

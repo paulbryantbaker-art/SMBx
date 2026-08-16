@@ -53,6 +53,7 @@ import { ScenarioPanel } from "./ScenarioPanel";
 import { DealTasksCard } from "./DealTasksCard";
 import type { AddressBookContact } from "../../../../hooks/useDealTasks";
 import { GateStackPanel } from "./GateStackPanel";
+import { KeyDatesCard } from "./KeyDatesCard";
 import { daysUntil, dueLabel } from "../../../../lib/crm";
 
 /** How many rows before the window closes. The Expander widens it. */
@@ -225,6 +226,13 @@ export function DealsList({
                   Third parties are corresponded with, never onboarded. */}
               <DetailCard title="Actions & specialists">
                 <DealTasksCard dealId={selected.rawId} addressBook={addressBook} framed={false} />
+              </DetailCard>
+
+              {/* KEY DATES sit between the tasks and the money: after "what
+                  needs doing" comes "by when" — the three deadlines here are
+                  what Today's countdown reads. */}
+              <DetailCard title="Key dates">
+                <KeyDatesCard dealId={selected.rawId} />
               </DetailCard>
 
               {/* Valuation and Capital SELF-title (they also mount in the

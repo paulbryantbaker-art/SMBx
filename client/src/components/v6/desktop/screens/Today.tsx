@@ -28,7 +28,7 @@
  * a partial pipeline sum says it is partial, and a user with no deals gets a
  * first-deal CTA rather than fabricated attention items.
  */
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import type { AtlasScreenProps } from "../atlasNav";
 import { useAtlasNav, useAtlasChat } from "../atlasNav";
@@ -40,7 +40,38 @@ import { useMobileDeals } from "../../../../hooks/useMobileDeals";
 import { useNextActions, type NextAction } from "../../../../hooks/useNextActions";
 import { useNotifications, notifTimeAgo, type AppNotification } from "../../../../hooks/useNotifications";
 import { useAdvisorMandates } from "../../../../hooks/useAdvisorMandates";
+import { authHeaders } from "../../../../hooks/useAuth";
 import MandatesBand from "./MandatesBand";
+
+/* ─── the countdown feed (deal key dates, migration 131) ──────────────────
+   One row per (deal, deadline) within a fortnight — INCLUDING overdue, since
+   an expired exclusivity is the loudest fact on the board. Records (IoI,
+   LOI) never appear here: the server excludes them by construction. */
+
+interface KeyDateItem {
+  dealId: number;
+  businessName: string;
+  clientFirm: string | null;
+  kind: string;
+  label: string;
+  on: string;
+  daysLeft: number;
+}
+
+function useKeyDates(canFetch: boolean): KeyDateItem[] {
+  const [items, setItems] = useState<KeyDateItem[]>([]);
+  useEffect(() => {
+    if (!canFetch) return;
+    let live = true;
+    fetch("/api/deals/key-dates?within=14", { headers: authHeaders() })
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => { if (live && Array.isArray(d?.items)) setItems(d.items); })
+      .catch(() => { /* a failed fetch renders as silence, same as empty —
+                        the section never fabricates a deadline */ });
+    return () => { live = false; };
+  }, [canFetch]);
+  return items;
+}
 
 /* ─── greeting ────────────────────────────────────────────── */
 
@@ -81,6 +112,15 @@ const noteSummary: CSSProperties = {
   fontSize: 11.5, fontWeight: 700, color: T.blue, cursor: "pointer",
   marginBottom: 4,
 };
+/* Countdown rows — hairline-divided like every list on this screen. */
+const countdownRow: CSSProperties = {
+  display: "flex", alignItems: "center", justifyContent: "space-between",
+  gap: 14, padding: "10px 12px", borderTop: `1px solid ${T.border}`,
+};
+const countdownWhen: CSSProperties = {
+  marginLeft: 10, fontSize: 13, fontWeight: 700,
+  fontVariantNumeric: "tabular-nums",
+};
 
 /* ─── screen ──────────────────────────────────────────────── */
 
@@ -93,6 +133,7 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
   const next = useNextActions(user, canFetch);
   const mandates = useAdvisorMandates(user);
   const notifs = useNotifications(canFetch);
+  const keyDates = useKeyDates(canFetch);
 
   const first = firstNameOf(user?.display_name);
   const greeting = user
@@ -242,6 +283,43 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
             ]}
           />
         </div>
+
+        {/* THE COUNTDOWN — deal deadlines within a fortnight, overdue first.
+            When nothing is inside the window it renders NOTHING: Today is a
+            queue, and an empty countdown is silence, not a card claiming
+            "all clear" about dates that may simply not be set. */}
+        {keyDates.length > 0 && (
+          <div style={{ width: "100%" }}>
+            <div style={listBox}>
+              <GroupHeader title={`Countdown · ${keyDates.length}`} columns={["When"]} />
+              {keyDates.map(k => {
+                const tone = k.daysLeft < 0 ? T.terra : k.daysLeft <= 7 ? T.amber : T.ink;
+                const when =
+                  k.daysLeft < 0 ? `expired ${-k.daysLeft}d ago`
+                  : k.daysLeft === 0 ? "today"
+                  : `in ${k.daysLeft}d`;
+                return (
+                  <div key={`${k.dealId}-${k.kind}`} style={countdownRow}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: T.ink }}>
+                        {k.businessName}
+                      </div>
+                      {k.clientFirm && (
+                        <div style={{ fontSize: 11.5, color: T.muted2, marginTop: 1 }}>
+                          {k.clientFirm}
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ flex: "none", textAlign: "right" }}>
+                      <span style={{ fontSize: 12.5, color: T.muted }}>{k.label}</span>
+                      <span style={{ ...countdownWhen, color: tone }}>{when}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Multi-mandate roll-up — full-width band, advisors with 2+ sell-side
             mandates only; otherwise Today is unchanged (band never mounts). */}
