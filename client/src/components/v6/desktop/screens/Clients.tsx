@@ -130,6 +130,37 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
     }
   };
 
+  /* THE NUKE (Paul, 2026-08-16: "rigth now everything in the app can be
+     nuked"). Typed confirmation, not a click — and the server demands the
+     word again in the body, so neither side can fire it alone. */
+  const resetRegister = async () => {
+    const word = window.prompt(
+      "This deletes EVERY firm, contact, touch, wave, template and engagement, " +
+      "and archives all deals. Website funnel leads are kept. Type nuke to confirm:",
+    );
+    if (word == null) return;
+    if (word.trim() !== "nuke") { setBanner("Reset cancelled — the word was not typed."); return; }
+    try {
+      const r = await fetch("/api/crm/reset", {
+        method: "POST",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm: "nuke" }),
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok) { setBanner(`Reset failed: ${j?.error ?? r.status}`); return; }
+      setOpenId(null);
+      setBanner(
+        `Register reset — ${j.accountsDeleted} firms deleted (contacts, touches and engagements with them), ` +
+        `${j.wavesDeleted} waves, ${j.templatesDeleted} templates, ${j.eventsDeleted} events removed; ` +
+        `${j.dealsArchived} deals archived (not destroyed — the archive scope still lists them). ` +
+        `Funnel leads kept. Import the DFW register when it's ready.`,
+      );
+      crm.refresh();
+    } catch (e: any) {
+      setBanner(`Reset failed: ${e?.message ?? "network error"}`);
+    }
+  };
+
   const root: React.CSSProperties = {
     flex: 1, minWidth: 0, display: "flex", flexDirection: "column",
     fontFamily: T.font, color: T.ink, overflow: "hidden",
@@ -185,6 +216,7 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
         }
       }}
       onSeed={seedPlan}
+      onReset={resetRegister}
     />
   );
 
@@ -373,7 +405,7 @@ function chip(active: boolean): React.CSSProperties {
 }
 
 function Toolbar({
-  query, onSearch, filters, onToggle, count, onImport, onRescore, onSeed,
+  query, onSearch, filters, onToggle, count, onImport, onRescore, onSeed, onReset,
 }: {
   query: string;
   onSearch: (v: string) => void;
@@ -383,6 +415,7 @@ function Toolbar({
   onImport: (csv: string) => void;
   onRescore: () => void;
   onSeed: () => void;
+  onReset: () => void;
 }) {
   const file = useRef<HTMLInputElement | null>(null);
 
@@ -421,6 +454,14 @@ function Toolbar({
 
       <button type="button" style={ghostBtn} onClick={onSeed} title="Load the 2026-08-05 outreach plan shipped with the app — idempotent, never resets stage/owner/next action on firms you've already worked">
         Seed outreach plan
+      </button>
+      <button
+        type="button"
+        style={{ ...ghostBtn, color: T.terra }}
+        onClick={onReset}
+        title="Delete every firm, contact, touch, wave, template and engagement, and archive all deals. Website leads are kept. Asks for typed confirmation."
+      >
+        Reset register…
       </button>
       <button type="button" style={ghostBtn} onClick={onRescore} title="Re-run the scorer over every firm — needed after a new market master lands">
         Re-score
