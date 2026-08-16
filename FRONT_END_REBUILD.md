@@ -102,7 +102,40 @@ The acquirer clients — the firms the practice serves. Not targets.
 |---|---|
 | Tables | `crm_accounts` · `crm_contacts` · `crm_activity` · `crm_waves` · `crm_sequence_steps` · `crm_templates` · `crm_touches` · `crm_events` |
 | Hooks that survive | `useCrmAccounts` (253) · `useOutreach` (147) |
-| Screens | Accounts (list/detail) · Contacts · Outreach queue |
+| Screens | Accounts (list/detail) · Contacts · Outreach queue · Leads |
+
+**FULL FUNCTION AT BOTH WIDTHS** (Paul, 2026-08-16: *"i want a fully functional
+CRM … on desktop"*). Phone-first authoring (§9) is about which width the layout
+is SOLVED at, not about which width gets the features. The desktop is not a
+stretched phone: `ListDetail` expands into the multi-column density a working
+CRM needs — list, record, and related lists visible at once — while the same
+components stack on a phone. One implementation, two compositions, no feature
+gap in either direction.
+
+### The two object-model gaps, measured
+
+A CRM is not a list of firms with scores. Two things are structurally missing,
+and both have to exist before "fully functional" means anything:
+
+**1 · THERE IS NO ENGAGEMENT OBJECT.** §3 calls the mandate "the seam" and
+there is no table for it. `definitive_agent_mandates` is the mothballed MCP
+agent surface, not this. So the app can record a firm (`crm_accounts`) and a
+target (`deals`) but **not the contract between them** — which client engaged
+us, on what terms, when it started, when it renews, what the retainer credit
+stands at. That is Salesforce's *Opportunity*, and it is the single most
+load-bearing missing row in the schema. The published fee schedule
+(quarterly $15K, banded success fee, every retainer dollar credited at close)
+is arithmetic that currently lives nowhere.
+
+**2 · `practice_leads` NEVER REACHES THE CRM.** Zero references in
+`routes/crm.ts` or `crmOutreachSeed.ts`. The public funnel captures a lead and
+it dies in its own table — there is no Lead → Account conversion, which is the
+one flow every CRM has. The Acquisition Engine on the practice site is
+generating rows nobody works.
+
+`crm_accounts` itself is in good shape — `stage · owner_email · next_action ·
+next_action_on · score · tier · pitch · score_detail` are already there. The
+gap is the two objects above, not the columns.
 
 **THE LINE, structural and already correct: one touch, one press, one human.**
 There is no batch-send endpoint and the rebuild must not add one. The outreach
@@ -297,12 +330,14 @@ The 134-slot gate stack does not belong on a phone at any width. What Paul
 described is *checking, reviewing, responding* — so the phone gets its own
 short list of surfaces built from the same kit and the same hooks:
 
-- **an inbox of what needs your answer** — `deal_tasks` awaiting you,
-  `deal_messages`, `useNotifications`, approvals
 - **a deal read view** — the state, the binding gate, the next action. Read.
-- **respond** — approve, reply, reschedule, hand off
+- **respond** — approve, reschedule, hand off, mark a task done
 
-and it does NOT get: the gate stack editor, the canvas models, bulk anything.
+and it does NOT get: the gate stack editor, the canvas models, bulk anything —
+**nor an inbox.** An earlier draft of this section gave the phone a
+what-needs-your-answer inbox; §10 deletes it. With comms external, the inbox
+Paul opens on his phone is his mail app, and building a second one inside this
+app would recreate exactly the surface §10 exists to remove.
 A SUBSET OF SURFACES, not a subset of pixels. Reaching a full deal page from a
 phone stays possible by URL; it is simply not what the phone is composed for.
 
@@ -335,7 +370,74 @@ TEAM and the practitioner's own specialists. Third parties are still
 corresponded with by email and token link, never onboarded, and Yulia still
 drafts rather than sends.
 
-## 10. What this does not change
+## 10. COMMS ARE EXTERNAL — the app sends and records, it is never an inbox
+
+> Paul, 2026-08-16: *"maybe every comm should be an email.. lets just link to
+> and send everything by email and keep coms external."*
+
+### The finding: this is not a new direction, it is finishing one
+
+Measured, expecting to find in-app messaging to delete. There is almost none:
+
+| | server refs | client refs |
+|---|---|---|
+| `direct_threads` / `direct_messages` | **0** | **0** |
+| `deal_messages` | 3 | **0** |
+| `deal_invitations` | 2 | 0 |
+| `notifications` | 16 | **10** |
+
+`direct_threads` — the product-era social DM feature THE LINE already forbids —
+is referenced **nowhere in the codebase**. It is a table and nothing else, so
+dropping it costs nothing. `deal_messages` has server plumbing and **no client
+UI at all**. Meanwhile the email rail is already everywhere: eleven server files
+call `sendEmail`, token share links are built (`documentShareService`,
+`document_shares`, `transaction_tokens`), and `ownerDigest.ts` already exists.
+
+**The one thing that contradicts "comms external" is the notification centre** —
+10 client references, an in-app inbox under a different name. That is the
+surface this decision actually removes.
+
+### The rule
+
+**The app is a SENDER and a RECORDER. It is never a MAILBOX.**
+
+- Everything that leaves goes as **email**, from the practitioner, one press.
+- Everything the app produces is reachable by **token link** — a document, a
+  report, a market map. The recipient never gets an account (THE LINE §3:
+  third parties are corresponded with, never onboarded).
+- **Alerts are email**, not a bell. `ownerDigest.ts` is the precedent.
+- Replies land in Paul's real mailbox, where they already were.
+
+### What this deletes
+
+- The notification centre as a comms surface (`useNotifications` in Today,
+  mobile Today, mobile More).
+- `direct_threads` + `direct_messages` — free, nothing references them.
+- **The mobile Dealflow inbox proposed in §9.** If comms are email then
+  "responding to communications and alerts on the phone" is the mail app, not a
+  screen this plan has to build. §9's phone surface list drops to **deal read
+  view + respond-to-task**; the inbox is the user's own client.
+
+### Two things this costs, stated plainly
+
+**1 · THE APP LOSES THE REPLY.** A drafted email to a CPA gets answered into
+Paul's mailbox, and the deal's record shows `sent` forever and never
+`answered`. `crm_activity` has exactly this gap today, so the decision does not
+create it — but going all-in on email makes it permanent unless something
+closes the loop. Two ways, neither in this plan's scope: BCC a logging address
+and reconcile by thread id, or publish an inbound forwarding address. **Worth
+deciding before the CRM is called finished**, because a CRM whose activity log
+only records outbound is a send log, not a history.
+
+**2 · ALERT VOLUME.** Every alert as its own email is a firehose that trains
+you to ignore it — the same failure as a warning that fires on every deal. The
+answer is the shape `ownerDigest.ts` already has: **one digest on a cadence,
+plus an immediate email only for things carrying a deadline.** A digest that
+says nothing on a quiet day is a correct digest.
+
+---
+
+## 11. What this does not change
 
 - **Never multi-tenant.** No orgs, no tenants, no seats. Multi-USER (owner
   columns, `user_id` scoping) stays; multi-TENANT is forbidden by law.
