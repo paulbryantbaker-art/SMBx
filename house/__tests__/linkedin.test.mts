@@ -130,6 +130,18 @@ function eq(name: string, actual: unknown, expected: unknown) {
   eq('company: pure chrome names nothing', d.name, null);
 }
 
+/* ── toast + counter noise (Paul's SECOND real paste, 2026-08-16) ───────
+   His copy of a Sales Nav account page carried "0 notifications total",
+   "Chat with us" and the save toast "Cambridge Pacific has been saved" —
+   and "Chat with us" is exactly the shape the name heuristic eats. */
+{
+  const c = parseLinkedInCompany('0 notifications total\nChat with us\nCambridge Pacific has been saved\n');
+  eq('toast NAMES the company', c.name, 'Cambridge Pacific');
+  const p = parseLinkedInPaste('0 notifications total\nChat with us\nPerry J. Pound\nManaging Director at Cambridge Pacific\n');
+  eq('person: chat-with-us is not a person', p.name, 'Perry J. Pound');
+  eq('person: company splits through the noise', p.company, 'Cambridge Pacific');
+}
+
 /* ── purity ─────────────────────────────────────────────────────────── */
 {
   const src = readFileSync(join(HERE, '..', 'linkedin.ts'), 'utf8');

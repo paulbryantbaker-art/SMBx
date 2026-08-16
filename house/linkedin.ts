@@ -58,7 +58,21 @@ const CHROME = new Set([
   'account map', 'add to list', 'save to list', 'view similar', 'unlock',
   'relationship explorer', 'recent activity', 'best path in',
   'view all employees', 'all employees', 'decision makers', 'account hub',
+  'accounts', 'leads', 'personas', 'alerts', 'inbox', 'chat with us',
 ]);
+
+/* Toast and counter lines a live-page copy drags in ("0 notifications total",
+   "Cambridge Pacific has been saved") — Paul's second real paste surfaced
+   these. Pattern-matched because the numbers and names inside them vary. */
+const NOISE_RE = [
+  /^\d+\s+notifications?\b/i,
+  /has been (saved|removed|added)\.?$/i,
+  /^(see|show|view)\s+(all|more)\b/i,
+  /^\d+\s+(results?|of\s+\d+)\b/i,
+];
+function isNoise(line: string): boolean {
+  return NOISE_RE.some(re => re.test(line));
+}
 
 const STOP_SECTIONS = new Set([
   'about', 'activity', 'experience', 'education', 'skills', 'interests',
@@ -106,6 +120,7 @@ export function parseLinkedInPaste(text: string): ParsedProfile {
     if (STOP_SECTIONS.has(lower)) break;
     if (CHROME.has(lower)) continue;
     if (COUNTS_RE.test(line)) continue;
+    if (isNoise(line)) continue;
     if (/^(1st|2nd|3rd\+?)$/i.test(line)) continue;
     line = line.replace(DEGREE_RE, '').trim();
     line = line.replace(/\s*·\s*contact info\s*$/i, '').trim();
@@ -191,10 +206,17 @@ export function parseLinkedInCompany(text: string): ParsedCompany {
     if (STOP_SECTIONS.has(lower)) break;
     if (CHROME.has(lower)) continue;
     if (COUNTS_RE.test(line)) continue;
+    if (isNoise(line)) continue;
     if (lines.length && lines[lines.length - 1] === line) continue;
     lines.push(line);
   }
 
+  /* The save toast NAMES the account ("Cambridge Pacific has been saved") —
+     the strongest signal a Sales Nav page copy carries after the tab title. */
+  if (!out.name) {
+    const toast = text.match(/^\s*(.{2,80}?) has been saved\.?\s*$/im);
+    if (toast) out.name = toast[1].trim();
+  }
   if (!out.name) {
     const cand = lines.find(l => !/\d/.test(l) && l.length <= 80);
     if (cand) out.name = cand;
