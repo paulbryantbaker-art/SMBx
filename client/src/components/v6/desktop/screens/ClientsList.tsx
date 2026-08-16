@@ -86,7 +86,8 @@ import { EngagementCard } from "./EngagementCard";
 import { LeadsPanel } from "./LeadsPanel";
 import {
   CRM_STAGES, STAGE_LABEL, MOMENT_LABEL, MOMENT_WHY, SEGMENT_LABEL,
-  PITCH_LABEL, GRADE_LABEL, dueLabel, touchLabel, daysUntil,
+  PITCH_LABEL, GRADE_LABEL, LOSS_LABEL, dueLabel, touchLabel, daysUntil,
+  stageAging, needsNextStep,
   type CrmAccount, type CrmStage,
 } from "../../../../lib/crm";
 import { useCrmAccount, type CrmFilters } from "../../../../hooks/useCrmAccounts";
@@ -546,7 +547,12 @@ function TierGroup({ title, rows, endorsed, selectedId, onSelect }: {
               />
             )}
             <ResultRow
-              anchor={a.firm}
+              /* Law 3 (CRM_WORKFLOW_SPEC.md): an open pursuit with no dated
+                 next step is flagged where it appears — the dot, not a word,
+                 because the row's words belong to the firm. */
+              anchor={needsNextStep(a)
+                ? <><span style={redDot} title="No next step set" aria-label="No next step set" />{a.firm}</>
+                : a.firm}
               sub={subLine(a)}
               // The register's own do-not-pitch mark, on the row rather than
               // three clicks in — the whole reason it is recorded is that it
@@ -653,6 +659,13 @@ function ClientDetail({ account, onOpenBoard, onOpenDeal, onOpenSourcing }: {
           // Never a bare "0" standing in for "we never ran the scorer".
           account.score == null ? "not yet scored" : `score ${account.score}`,
           place || null,
+          (() => {
+            const ag = stageAging(account.stage, account.stage_entered_at);
+            return ag ? `${ag.days}d in stage` : null;
+          })(),
+          account.stage === "passed" && account.loss_reason
+            ? `passed — ${LOSS_LABEL[account.loss_reason as never] ?? account.loss_reason}`
+            : null,
         ].filter(Boolean).join(" · ")}
         actionLabel="Open the full dossier"
         onAction={() => onOpenBoard(account.id)}
@@ -1041,7 +1054,23 @@ function subLine(a: CrmAccount): ReactNode {
     a.grade === "directory" ? "directory only" : null,
     a.trades || null,
   ].filter(Boolean) as string[];
-  return bits.join(" · ");
+  /* Aging (law 6): days-in-stage on every row, coloured only when it means
+     something — quiet grey under 14d, amber to 28d, red past that. A passed
+     pursuit shows its verdict instead; closed stages never age. */
+  const ag = stageAging(a.stage, a.stage_entered_at);
+  const lost = a.stage === "passed" && a.loss_reason
+    ? (LOSS_LABEL[a.loss_reason as never] ?? a.loss_reason) : null;
+  return (
+    <>
+      {bits.join(" · ")}
+      {ag && (
+        <span style={{ color: ag.tone === "red" ? T.terra : ag.tone === "amber" ? T.amber : undefined }}>
+          {bits.length ? " · " : ""}{ag.days}d in stage
+        </span>
+      )}
+      {lost && <span>{bits.length ? " · " : ""}passed — {lost}</span>}
+    </>
+  );
 }
 
 /* ── styles ───────────────────────────────────────────────────────────── */
@@ -1087,6 +1116,13 @@ const clearBtn: CSSProperties = {
 const blockPill: CSSProperties = {
   fontSize: 9.5, fontWeight: 700, letterSpacing: ".04em", textTransform: "uppercase",
   background: T.amberBg, color: T.amber, padding: "2px 6px", whiteSpace: "nowrap",
+};
+
+/* Law 3's indicator: an open pursuit with no dated next step. Inline-block so
+   it rides the anchor's baseline without disturbing the ellipsis. */
+const redDot: CSSProperties = {
+  display: "inline-block", width: 8, height: 8, borderRadius: 999,
+  background: T.terra, marginRight: 7, verticalAlign: "baseline", flex: "none",
 };
 
 const p: CSSProperties = { margin: "0 0 8px", fontSize: 12.5, color: T.muted, lineHeight: 1.6 };

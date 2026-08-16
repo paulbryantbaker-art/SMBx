@@ -34,7 +34,8 @@ import type { AtlasScreenProps } from "../atlasNav";
 import { useAtlasChat, useAtlasNav } from "../atlasNav";
 import { useCrmAccounts, useCrmAccount, type CrmFilters } from "../../../../hooks/useCrmAccounts";
 import {
-  CRM_STAGES, STAGE_LABEL, MOMENT_LABEL, MOMENT_WHY, SEGMENT_LABEL, PITCH_LABEL,
+  CRM_STAGES, STAGE_LABEL, LOSS_REASONS, LOSS_LABEL, stageAging,
+  MOMENT_LABEL, MOMENT_WHY, SEGMENT_LABEL, PITCH_LABEL,
   GRADE_LABEL, ACTIVITY_KINDS, dueLabel, touchLabel, daysUntil,
   type CrmAccount,
 } from "../../../../lib/crm";
@@ -566,6 +567,10 @@ function DetailPane({
   const [pTitle, setPTitle] = useState("");
   // Lead → deal. The TARGET name, never the client's: a client is not a deal.
   const [target, setTarget] = useState("");
+  // Marking a pursuit passed requires its loss reason (the route refuses the
+  // move without one), so the Passed chip opens this instead of patching.
+  const [losing, setLosing] = useState(false);
+  const [lossReason, setLossReason] = useState("");
 
   const action = nextAction;
   const actionOn = nextOn;
@@ -633,13 +638,61 @@ function DetailPane({
                     key={st}
                     type="button"
                     disabled={saving}
-                    onClick={() => run(() => patch(id, { stage: st }))}
+                    onClick={() => {
+                      if (st === "passed" && account.stage !== "passed") { setLosing(true); return; }
+                      setLosing(false);
+                      run(() => patch(id, { stage: st }));
+                    }}
                     style={chip(account.stage === st)}
                   >
                     {STAGE_LABEL[st]}
                   </button>
                 ))}
               </div>
+              {losing && (
+                <div style={{ display: "flex", gap: 7, alignItems: "center", flexWrap: "wrap", marginBottom: 12 }}>
+                  <select
+                    value={lossReason}
+                    onChange={e => setLossReason(e.target.value)}
+                    style={input}
+                    aria-label="Loss reason"
+                  >
+                    <option value="">Why did it die?</option>
+                    {LOSS_REASONS.map(r => <option key={r} value={r}>{LOSS_LABEL[r]}</option>)}
+                  </select>
+                  <button
+                    type="button"
+                    disabled={saving || !lossReason}
+                    onClick={() => {
+                      run(() => patch(id, { stage: "passed", loss_reason: lossReason }));
+                      setLosing(false); setLossReason("");
+                    }}
+                    style={{ ...chip(true), opacity: lossReason ? 1 : 0.5 }}
+                  >
+                    Mark passed
+                  </button>
+                  <button type="button" onClick={() => setLosing(false)} style={chip(false)}>Cancel</button>
+                </div>
+              )}
+              {account.stage === "passed" && account.loss_reason && (
+                <p style={{ margin: "0 0 12px", fontSize: 12.5, color: T.muted }}>
+                  Passed — {LOSS_LABEL[account.loss_reason as never] ?? account.loss_reason}. Reopening
+                  to any other stage clears the verdict.
+                </p>
+              )}
+              {(() => {
+                // Aging, the pipeline's honesty mechanism: days since the stage
+                // began, not since the last edit. Closed stages never age.
+                const ag = stageAging(account.stage, account.stage_entered_at);
+                if (!ag) return null;
+                const tone = ag.tone === "red" ? T.terra : ag.tone === "amber" ? T.amber : T.muted2;
+                return (
+                  <p style={{ margin: "0 0 12px", fontSize: 12.5, color: tone }}>
+                    {ag.days} day{ag.days === 1 ? "" : "s"} in {STAGE_LABEL[account.stage as never] ?? account.stage}
+                    {ag.tone !== "quiet" ? " — move it or park it" : ""}
+                  </p>
+                );
+              })()}
               <Field label="Next action">
                 <input
                   value={action}

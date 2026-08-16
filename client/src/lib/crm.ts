@@ -101,6 +101,11 @@ export interface CrmAccount {
   score_detail: string | null;
   scored_at: string | null;
   archived: boolean;
+  /** When the CURRENT stage began (migration 130) — aging runs from here,
+   *  never from updated_at, which moves on every edit. */
+  stage_entered_at?: string | null;
+  /** Set only when stage='passed'; the route refuses the move without one. */
+  loss_reason?: string | null;
   contact_count?: number;
   activity_count?: number;
   last_touch_at?: string | null;
@@ -168,6 +173,58 @@ export function dueLabel(iso: string | null | undefined): string | null {
   if (d < 0) return `${Math.abs(d)} day${Math.abs(d) === 1 ? '' : 's'} overdue`;
   if (d === 1) return 'tomorrow';
   return `in ${d} days`;
+}
+
+/** Loss reasons — mirrors LOSS_REASONS in server/routes/crm.ts. The route
+ *  refuses stage='passed' without one; the histogram of these is the
+ *  P4-hypothesis evidence (CRM_WORKFLOW_SPEC.md). */
+export const LOSS_REASONS = [
+  'no_budget', 'internal_bd_owns_origination', 'timing',
+  'lost_to_competitor', 'trigger_evaporated', 'unresponsive',
+] as const;
+export type LossReason = (typeof LOSS_REASONS)[number];
+
+export const LOSS_LABEL: Record<LossReason, string> = {
+  no_budget: 'No budget',
+  internal_bd_owns_origination: 'Internal BD owns origination',
+  timing: 'Timing',
+  lost_to_competitor: 'Lost to a competitor',
+  trigger_evaporated: 'Trigger evaporated',
+  unresponsive: 'Unresponsive',
+};
+
+/** Aging thresholds for the CLIENT funnel (CRM_WORKFLOW_SPEC.md law 6):
+ *  amber at 14 days in stage, red at twice that. */
+export const STAGE_AMBER_DAYS = 14;
+export const STAGE_RED_DAYS = 28;
+
+/** Whole days the account has sat in its current stage. Null when the stamp
+ *  is missing (pre-migration-130 rows before their first move). */
+export function daysInStage(iso: string | null | undefined): number | null {
+  if (!iso) return null;
+  const t = Date.parse(iso);
+  if (!Number.isFinite(t)) return null;
+  return Math.max(0, Math.floor((Date.now() - t) / 86_400_000));
+}
+
+/** The aging read: quiet under 14d, amber to 28d, red past that. The CLOSED
+ *  stages never age — a mandate being live for 90 days is success, not rot. */
+export function stageAging(stage: string, iso: string | null | undefined):
+  { days: number; tone: 'quiet' | 'amber' | 'red' } | null {
+  if (stage === 'mandate_live' || stage === 'passed') return null;
+  const days = daysInStage(iso);
+  if (days == null) return null;
+  return {
+    days,
+    tone: days >= STAGE_RED_DAYS ? 'red' : days >= STAGE_AMBER_DAYS ? 'amber' : 'quiet',
+  };
+}
+
+/** Law 3: an OPEN pursuit with no dated next action is flagged everywhere it
+ *  appears. Closed stages are exempt — nothing is owed on a verdict. */
+export function needsNextStep(a: { stage: string; next_action?: string | null; next_action_on?: string | null }): boolean {
+  if (a.stage === 'mandate_live' || a.stage === 'passed') return false;
+  return !a.next_action || !a.next_action_on;
 }
 
 /** Relative age of the last touch. Null when a firm has never been contacted —
