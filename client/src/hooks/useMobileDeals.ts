@@ -132,6 +132,7 @@ export interface MobileStageRow {
   sde: number | null;
   askingPrice: number | null;
   ebitda: number | null;
+  revenue: number | null;
   /** seven_factor_composite clamped to 0–99, or null when the deal has no
    *  real composite — do NOT substitute a fabricated score here. */
   fit: number | null;
@@ -314,6 +315,7 @@ function shape(deals: RawDeal[]): ShapedDeals {
       sde: d.sde ?? null,
       askingPrice: d.asking_price ?? null,
       ebitda: d.ebitda ?? null,
+      revenue: d.revenue ?? null,
       fit: compositeFit(d),
       isFavorite: d.is_favorite === true,
       disposition: d.disposition || "active",

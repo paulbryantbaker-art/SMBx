@@ -95,9 +95,9 @@ export function ValuationPanel({
   }, [base, league, dealType]);
 
   return (
-    <div style={{ marginTop: 22 }}>
+    <div>
       <div style={row}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: T.ink }}>Valuation</div>
+        <div style={{ fontSize: 15, fontWeight: 700, color: T.ink }}>Valuation</div>
         <select
           value={dealType}
           onChange={e => setType(e.target.value)}
@@ -113,7 +113,7 @@ export function ValuationPanel({
       {/* The tell — one sentence to confirm the type is the right one. Chosen
           over a tooltip because picking the wrong type is the error that
           invalidates everything below it. */}
-      <div style={{ fontSize: 12, color: T.muted, lineHeight: 1.5, marginTop: 6 }}>
+      <div style={{ fontSize: 13, color: T.muted, lineHeight: 1.5, marginTop: 6 }}>
         {spec.tell}
       </div>
 
@@ -123,19 +123,19 @@ export function ValuationPanel({
           gap. */}
       <div style={headline}>
         {!base && (
-          <div style={{ fontSize: 12.5, color: T.muted2 }}>
+          <div style={{ fontSize: 13.5, color: T.muted2 }}>
             No SDE or EBITDA on this deal yet — there is no base to value.
           </div>
         )}
         {base && band && "blocked" in band && (
-          <div style={{ fontSize: 12.5, color: T.ink, lineHeight: 1.5 }}>{band.blocked}</div>
+          <div style={{ fontSize: 13.5, color: T.ink, lineHeight: 1.5 }}>{band.blocked}</div>
         )}
         {base && band && "value" in band && (
           <>
-            <div style={{ fontSize: 22, fontWeight: 700, color: T.ink, letterSpacing: "-0.01em" }}>
+            <div style={{ fontSize: 24, fontWeight: 800, color: T.ink, letterSpacing: "-0.01em" }}>
               {money(band.value.low)} – {money(band.value.high)}
             </div>
-            <div style={{ fontSize: 11.5, color: T.muted, marginTop: 3 }}>
+            <div style={{ fontSize: 12.5, color: T.muted, marginTop: 3 }}>
               {league?.league} · {mult(band.value.multipleMin)}–{mult(band.value.multipleMax)}{" "}
               {band.value.metric} · house assumption, not a comp
             </div>
@@ -155,12 +155,12 @@ export function ValuationPanel({
           return (
             <div key={m} style={{ ...methodRow, opacity: closed ? 0.72 : 1 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{ fontSize: 12.5, fontWeight: closed ? 500 : 700, color: T.ink }}>
+                <div style={{ fontSize: 13.5, fontWeight: closed ? 500 : 700, color: T.ink }}>
                   {METHOD_LABEL[m]}
                 </div>
                 <span style={{ ...tag, background: st.bg, color: st.fg }}>{st.label}</span>
               </div>
-              <div style={{ fontSize: 11.5, color: T.muted, lineHeight: 1.5, marginTop: 3 }}>
+              <div style={{ fontSize: 12.5, color: T.muted, lineHeight: 1.5, marginTop: 3 }}>
                 {whyNot(dealType, m) ?? v.why}
               </div>
             </div>
@@ -186,10 +186,10 @@ export function ValuationPanel({
           colour, and it is doing exactly the job it was kept for. */}
       {spec.line && (
         <div style={lineBand}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".04em", color: T.amber }}>
+          <div style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: ".04em", color: T.amber }}>
             THE LINE
           </div>
-          <div style={{ fontSize: 12, color: T.ink, lineHeight: 1.55, marginTop: 4 }}>{spec.line}</div>
+          <div style={{ fontSize: 13, color: T.ink, lineHeight: 1.55, marginTop: 4 }}>{spec.line}</div>
         </div>
       )}
 
@@ -212,38 +212,40 @@ const row: CSSProperties = {
   display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
 };
 
-/* Radius 10 on the control, 0 on everything else — Carta's one exception is
-   buttons and inputs, and a select is an input. */
+/* THE TRANSCRIPTION'S SHAPES (2026-08-16, kit styles block): filled bands
+   radius 8 with no hairline (a fill IS the boundary), inputs radius 8,
+   13–14.5px working type. The pre-#413 12px/radius-10 values were the last
+   place the detail column still wore the old app. */
 const select: CSSProperties = {
-  font: "inherit", fontSize: 12.5, color: T.ink, background: T.white,
-  border: `1px solid ${T.inputBd}`, borderRadius: 10, padding: "5px 8px",
+  font: "inherit", fontSize: 13.5, fontWeight: 600, color: T.ink, background: T.track,
+  border: "none", borderRadius: 8, padding: "7px 10px",
 };
 
 const headline: CSSProperties = {
   marginTop: 10, padding: "12px 14px",
-  background: T.track, border: `1px solid ${T.border}`,
+  background: T.track, borderRadius: 8,
 };
 
 const methodRow: CSSProperties = {
-  padding: "9px 0", borderTop: `1px solid ${T.border}`,
+  padding: "10px 0", borderTop: `1px solid ${T.border}`,
 };
 
 const tag: CSSProperties = {
-  fontSize: 9.5, fontWeight: 700, letterSpacing: ".05em", textTransform: "uppercase",
-  padding: "2px 6px", flex: "none",
+  fontSize: 10.5, fontWeight: 700, letterSpacing: ".04em", textTransform: "uppercase",
+  padding: "2px 7px", flex: "none", borderRadius: 4,
 };
 
 const sectionLabel: CSSProperties = {
-  fontSize: 10.5, fontWeight: 700, letterSpacing: ".06em",
+  fontSize: 11.5, fontWeight: 700, letterSpacing: ".05em",
   textTransform: "uppercase", color: T.muted2, marginBottom: 6,
 };
 
 const bullet: CSSProperties = {
-  display: "flex", gap: 7, fontSize: 12, color: T.muted,
+  display: "flex", gap: 7, fontSize: 13, color: T.muted,
   lineHeight: 1.55, marginBottom: 5,
 };
 
 const lineBand: CSSProperties = {
-  marginTop: 16, padding: "11px 13px",
-  background: T.amberBg, border: `1px solid ${T.amberAv}`,
+  marginTop: 16, padding: "11px 14px",
+  background: T.amberBg, borderLeft: `3px solid ${T.amber}`, borderRadius: 8,
 };
