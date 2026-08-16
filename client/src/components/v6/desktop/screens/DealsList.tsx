@@ -50,6 +50,8 @@ import type { MobileStageRow } from "../../../../hooks/useMobileDeals";
 import { ValuationPanel } from "./ValuationPanel";
 import { CapitalPanel } from "./CapitalPanel";
 import { ScenarioPanel } from "./ScenarioPanel";
+import { DealTasksCard } from "./DealTasksCard";
+import type { AddressBookContact } from "../../../../hooks/useDealTasks";
 import { GateStackPanel } from "./GateStackPanel";
 import { daysUntil, dueLabel } from "../../../../lib/crm";
 
@@ -58,7 +60,7 @@ const WINDOW = 12;
 
 export function DealsList({
   rows, allCount, query, onQuery, filter, onFilter, clientCut, clientFirms,
-  onClientCut, onOpen, scopeLabel,
+  onClientCut, onOpen, scopeLabel, addressBook,
 }: {
   /** Already filtered by Deals.tsx — one filter pass, shared with the board. */
   rows: MobileStageRow[];
@@ -72,6 +74,8 @@ export function DealsList({
   onClientCut: (c: string) => void;
   onOpen: (row: MobileStageRow) => void;
   scopeLabel: string;
+  /** The CRM contact book — who a deal task can be assigned and emailed to. */
+  addressBook: AddressBookContact[];
 }) {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [stage, setStage] = useState<PipelineStageId | "all">("all");
@@ -213,6 +217,15 @@ export function DealsList({
                   </InfoBanner>
                 </div>
               )}
+
+              {/* THE SPECIALISTS SURFACE. First after the summary, because the
+                  first question after "what is this deal" is "what needs doing
+                  and by whom" — the CPA's QoE scope, counsel's redline, the
+                  appraiser's site visit. Assign, email on a press, remind.
+                  Third parties are corresponded with, never onboarded. */}
+              <DetailCard title="Actions & specialists">
+                <DealTasksCard dealId={selected.rawId} addressBook={addressBook} framed={false} />
+              </DetailCard>
 
               {/* Valuation and Capital SELF-title (they also mount in the
                   cockpit, headerless) — an outer DetailCard title would print
