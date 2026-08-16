@@ -69,6 +69,14 @@ const NOISE_RE = [
   /has been (saved|removed|added)\.?$/i,
   /^(see|show|view)\s+(all|more)\b/i,
   /^\d+\s+(results?|of\s+\d+)\b/i,
+  /* Profile-section prompts ("I'm looking for...", "Open to work") — four
+     clean words that beat a real name to the heuristic (2026-08-16, third
+     live paste: the register gained a primary contact named "I'm looking
+     for..."). Ellipsis-terminated lines are UI prompts generally. */
+  /^i['’]m looking for/i,
+  /^open to (work|new opportunities)\b/i,
+  /^providing services\b/i,
+  /(\.\.\.|…)\s*$/,
 ];
 function isNoise(line: string): boolean {
   return NOISE_RE.some(re => re.test(line));
@@ -110,9 +118,17 @@ export function parseLinkedInPaste(text: string): ParsedProfile {
   if (tabMatch) out.name = tabMatch[1].trim();
 
   /* Line pass: trim, drop chrome/noise, stop at the first section header,
-     and collapse consecutive duplicates (the page renders the name twice —
-     image alt then heading — and a copy keeps both). */
+     and collapse consecutive duplicates — BUT REMEMBER THEM: the page
+     renders the name twice (image alt, then heading), so a consecutive
+     duplicate that reads like a person is the strongest in-body name signal
+     there is. Novel chrome keeps inventing four clean words ("Actions
+     List", "I'm looking for...") that beat a real name to the
+     first-plausible-line heuristic; a repeated line cannot be faked by a
+     prompt that appears once. */
   const lines: string[] = [];
+  let dupName: string | null = null;
+  const nameish = (l: string) =>
+    !/\d/.test(l) && l.length <= 60 && l.split(/\s+/).length >= 2 && l.split(/\s+/).length <= 5;
   for (const raw of text.split(/\r?\n/)) {
     let line = raw.trim();
     if (!line) continue;
@@ -125,20 +141,26 @@ export function parseLinkedInPaste(text: string): ParsedProfile {
     line = line.replace(DEGREE_RE, '').trim();
     line = line.replace(/\s*·\s*contact info\s*$/i, '').trim();
     if (!line) continue;
-    if (lines.length && lines[lines.length - 1] === line) continue;
+    if (lines.length && lines[lines.length - 1] === line) {
+      if (!dupName && nameish(line)) dupName = line;
+      continue;
+    }
     lines.push(line);
   }
 
-  /* Name: the tab title won; otherwise the first surviving line that reads
-     like a person (2–5 words, no digits, sane length). If the tab title
-     found it, its position anchors headline/location below. */
+  /* Name, by strength of signal: tab title > the duplicated line > the first
+     surviving line that reads like a person. The found line's position
+     anchors headline/location below it. */
   let nameIdx = -1;
   if (out.name) {
     nameIdx = lines.findIndex(l => l === out.name);
-  } else {
-    nameIdx = lines.findIndex(l =>
-      !/\d/.test(l) && l.length <= 60 && l.split(/\s+/).length >= 2 && l.split(/\s+/).length <= 5,
-    );
+  }
+  if (!out.name && dupName) {
+    out.name = dupName;
+    nameIdx = lines.findIndex(l => l === dupName);
+  }
+  if (!out.name) {
+    nameIdx = lines.findIndex(nameish);
     if (nameIdx >= 0) out.name = lines[nameIdx];
   }
 
