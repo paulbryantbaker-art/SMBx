@@ -6,7 +6,7 @@
  * noise the real page drags into a copy: chrome rows, degree markers inline
  * on the name, duplicate name lines, "· Contact info" glued to the location.
  */
-import { parseLinkedInPaste } from '../linkedin.js';
+import { parseLinkedInPaste, parseLinkedInCompany } from '../linkedin.js';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -86,6 +86,48 @@ function eq(name: string, actual: unknown, expected: unknown) {
   const r = parseLinkedInPaste('Jane Smith\nInvestor and operator\n');
   eq('no joiner: title is the headline', r.title, 'Investor and operator');
   eq('no joiner: company stays null', r.company, null);
+}
+
+/* ── Sales Navigator hardening ──────────────────────────────────────────
+   WHY-THIS-EXISTS: the first live paste was a Sales Nav page and the
+   register gained a primary contact named "Actions List" — the button bar.
+   Two capitalised words are indistinguishable from a name by shape, so
+   every known Sales Nav control is chrome now. */
+{
+  const p = parseLinkedInPaste([
+    'Actions List', 'Referrals', 'Ashwin Kalsekar', 'Principal at Mergely Capital',
+    'Dallas-Fort Worth Metroplex Area', 'Save', 'View profile', 'Get intro',
+  ].join('\n'));
+  eq('sales nav: the button bar is not a person', p.name, 'Ashwin Kalsekar');
+  eq('sales nav: company still splits', p.company, 'Mergely Capital');
+}
+{
+  const p = parseLinkedInPaste('Jane Smith | Sales\nJane Smith\nPartner at Foundry Holdings\n');
+  eq('sales nav tab title read', p.name, 'Jane Smith');
+  const q = parseLinkedInPaste('linkedin.com/sales/lead/ACwAAA123,NAME,x');
+  ok('sales nav lead url kept', (q.linkedinUrl ?? '').includes('/sales/lead/ACwAAA123'));
+}
+
+/* ── the company parser (step 1 of the two-step add) ────────────────── */
+{
+  const c = parseLinkedInCompany(
+    'Mergely Capital | Sales\nMergely Capital\nLower-middle-market investing\nFinancial Services · Dallas, Texas · 1K followers\n',
+  );
+  eq('company: name from tab', c.name, 'Mergely Capital');
+  eq('company: industry from meta', c.industry, 'Financial Services');
+  eq('company: location from meta', c.location, 'Dallas, Texas');
+}
+{
+  const c = parseLinkedInCompany('Acme Fire Protection\nSecurity & Investigations · 51-200 employees · Fort Worth, Texas\nhttps://www.linkedin.com/company/acme-fire\n');
+  eq('company: headcount segment skipped', c.industry, 'Security & Investigations');
+  eq('company: url normalised', c.linkedinUrl, 'https://www.linkedin.com/company/acme-fire');
+  eq('company: location found', c.location, 'Fort Worth, Texas');
+}
+{
+  const c = parseLinkedInCompany('');
+  eq('company: empty names everything missing', c.missing.length, 4);
+  const d = parseLinkedInCompany('Save\nLists\nActions List\n');
+  eq('company: pure chrome names nothing', d.name, null);
 }
 
 /* ── purity ─────────────────────────────────────────────────────────── */

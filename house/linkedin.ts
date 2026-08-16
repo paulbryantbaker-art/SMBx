@@ -39,13 +39,25 @@ export interface ParsedProfile {
 
 /* Chrome lines a full-page copy drags along. Exact match after trimming,
    case-insensitive. Section headers (About, Experience, …) double as STOP
-   markers: nothing below them is top-card material. */
+   markers: nothing below them is top-card material.
+
+   THE SALES NAVIGATOR ROWS ARE HERE BECAUSE ONE OF THEM GOT FILED AS A
+   PERSON (2026-08-16): Paul pasted a Sales Nav page and the register gained
+   a primary contact named "Actions List" — the button bar, two capitalised
+   words, indistinguishable from a name by shape alone. Every Sales Nav
+   control we know about is listed so the name heuristic can never reach it. */
 const CHROME = new Set([
   'skip to main content', 'home', 'my network', 'jobs', 'messaging',
   'notifications', 'me', 'for business', 'advertise', 'try premium',
   'search', 'connect', 'message', 'follow', 'more', 'pending',
   'contact info', 'view in sales navigator', 'open to', 'add profile section',
   'enhance profile', 'resources', 'saved items',
+  // Sales Navigator
+  'actions list', 'referrals', 'view profile', 'save', 'saved', 'list', 'lists',
+  'notes', 'crm', 'relationship', 'get intro', 'about relationship',
+  'account map', 'add to list', 'save to list', 'view similar', 'unlock',
+  'relationship explorer', 'recent activity', 'best path in',
+  'view all employees', 'all employees', 'decision makers', 'account hub',
 ]);
 
 const STOP_SECTIONS = new Set([
@@ -69,13 +81,18 @@ export function parseLinkedInPaste(text: string): ParsedProfile {
     return out;
   }
 
-  /* The URL can sit anywhere in the paste (address bar, contact-info block). */
+  /* The URL can sit anywhere in the paste (address bar, contact-info block).
+     Sales Navigator lead URLs count too — they are still the person's link. */
   const urlMatch = text.match(/(?:https?:\/\/)?(?:[a-z]{2,3}\.)?linkedin\.com\/in\/([A-Za-z0-9\-_%]+)/i);
   if (urlMatch) out.linkedinUrl = `https://www.linkedin.com/in/${urlMatch[1]}`;
+  if (!out.linkedinUrl) {
+    const nav = text.match(/(?:https?:\/\/)?(?:[a-z]{2,3}\.)?linkedin\.com\/sales\/lead\/([A-Za-z0-9\-_%,]+)/i);
+    if (nav) out.linkedinUrl = `https://www.linkedin.com/sales/lead/${nav[1]}`;
+  }
 
   /* A browser-tab copy carries the strongest name signal there is:
-     "(3) Jane Smith | LinkedIn". Take it when present. */
-  const tabMatch = text.match(/^\s*(?:\(\d+\)\s*)?(.{2,60}?)\s*\|\s*LinkedIn\s*$/im);
+     "(3) Jane Smith | LinkedIn" — or Sales Navigator's "Jane Smith | Sales". */
+  const tabMatch = text.match(/^\s*(?:\(\d+\)\s*)?(.{2,60}?)\s*\|\s*(?:LinkedIn|Sales(?:\s+Navigator)?)\s*$/im);
   if (tabMatch) out.name = tabMatch[1].trim();
 
   /* Line pass: trim, drop chrome/noise, stop at the first section header,
@@ -128,6 +145,83 @@ export function parseLinkedInPaste(text: string): ParsedProfile {
 
   if (!out.name) out.missing.push('name');
   if (!out.headline) out.missing.push('headline');
+  if (!out.location) out.missing.push('location');
+  if (!out.linkedinUrl) out.missing.push('linkedin url');
+  return out;
+}
+
+/* ─── The COMPANY page (step 1 of the two-step add) ─────────────────── */
+
+export interface ParsedCompany {
+  name: string | null;
+  industry: string | null;
+  location: string | null;
+  linkedinUrl: string | null;
+  missing: string[];
+}
+
+/**
+ * Parse a pasted company / Sales Navigator account page. Same doctrine as
+ * the person parser: propose, never write; name what was not found.
+ *
+ * A company top card reads roughly: name, tagline, then a meta line —
+ * "Financial Services · Dallas, Texas · 1K followers" (LinkedIn) or
+ * industry / headcount / location rows (Sales Nav). The meta line is split
+ * on '·': a segment with a comma or "Area" is the location, the first
+ * segment that is neither location nor a count is the industry.
+ */
+export function parseLinkedInCompany(text: string): ParsedCompany {
+  const out: ParsedCompany = { name: null, industry: null, location: null, linkedinUrl: null, missing: [] };
+  if (!text || !text.trim()) {
+    out.missing = ['name', 'industry', 'location', 'linkedin url'];
+    return out;
+  }
+
+  const urlMatch = text.match(/(?:https?:\/\/)?(?:[a-z]{2,3}\.)?linkedin\.com\/(?:company|sales\/company)\/([A-Za-z0-9\-_%]+)/i);
+  if (urlMatch) out.linkedinUrl = `https://www.linkedin.com/company/${urlMatch[1]}`;
+
+  const tabMatch = text.match(/^\s*(?:\(\d+\)\s*)?(.{2,80}?)\s*\|\s*(?:LinkedIn|Sales(?:\s+Navigator)?)\s*$/im);
+  if (tabMatch) out.name = tabMatch[1].trim();
+
+  const lines: string[] = [];
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line) continue;
+    const lower = line.toLowerCase();
+    if (STOP_SECTIONS.has(lower)) break;
+    if (CHROME.has(lower)) continue;
+    if (COUNTS_RE.test(line)) continue;
+    if (lines.length && lines[lines.length - 1] === line) continue;
+    lines.push(line);
+  }
+
+  if (!out.name) {
+    const cand = lines.find(l => !/\d/.test(l) && l.length <= 80);
+    if (cand) out.name = cand;
+  }
+
+  /* The meta line: the first line carrying '·' separators, read segment by
+     segment. Counts ("1K followers", "51-200 employees") are dropped, a
+     comma/Area segment is the location, the first remaining one is the
+     industry. Nothing is guessed from a line with no separators. */
+  const meta = lines.find(l => l.includes('·'));
+  if (meta) {
+    for (const segRaw of meta.split('·')) {
+      const seg = segRaw.trim();
+      if (!seg) continue;
+      if (/\d/.test(seg) && /(follower|employee|connection)/i.test(seg)) continue;
+      if ((/,/.test(seg) || /\barea\b/i.test(seg)) && !out.location) { out.location = seg; continue; }
+      if (!out.industry && !/\d/.test(seg)) out.industry = seg;
+    }
+  }
+  /* Location can also stand alone on its own line (Sales Nav account pages). */
+  if (!out.location) {
+    const loc = lines.find(l => l !== out.name && (/,/.test(l) || /\barea\b/i.test(l)) && l.length <= 80 && !/\d{4}/.test(l));
+    if (loc) out.location = loc;
+  }
+
+  if (!out.name) out.missing.push('name');
+  if (!out.industry) out.missing.push('industry');
   if (!out.location) out.missing.push('location');
   if (!out.linkedinUrl) out.missing.push('linkedin url');
   return out;

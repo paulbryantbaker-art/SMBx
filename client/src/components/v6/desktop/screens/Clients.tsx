@@ -43,7 +43,7 @@ import { MarkBadge, Pill, KpiCard, EmptyState, LoadingState } from "../primitive
 import OutreachPanel from "./ClientsOutreach";
 import { ClientsList } from "./ClientsList";
 import { CONTACT_ROLES, ROLE_LABEL } from "../../../../hooks/useDealTasks";
-import { parseLinkedInPaste, type ParsedProfile } from "../../../../../../house/linkedin";
+import { parseLinkedInPaste, parseLinkedInCompany, type ParsedProfile, type ParsedCompany } from "../../../../../../house/linkedin";
 import { authHeaders } from "../../../../hooks/useAuth";
 import { useDraft } from "../../../../hooks/useDraft";
 import { SearchIcon, ChevronRightIcon } from "../icons";
@@ -82,58 +82,117 @@ function momentPill(m: string | null): { bg: string; fg: string } {
  * rather than a duplicate account — the server owns that check.
  */
 function LinkedInAdd({ onDone }: { onDone: (msg: string) => void }) {
-  const [paste, setPaste] = useState("");
-  const [parsed, setParsed] = useState<ParsedProfile | null>(null);
+  /* TWO STEPS, TWO PARSERS (2026-08-16, Paul after the first live paste:
+     "1 paste and parse the company 2, paste and add people"). One box
+     guessing whether it is looking at a company or a person is how the
+     register gained a contact named "Actions List" — a Sales Navigator
+     button bar. So the flow now mirrors how he actually browses: the
+     ACCOUNT page first (creates or finds the firm), then LEAD pages, as
+     many as needed, each landing on that firm. */
+  const [step, setStep] = useState<1 | 2>(1);
+  const [accountId, setAccountId] = useState<number | null>(null);
+  const [accountFirm, setAccountFirm] = useState("");
+  const [added, setAdded] = useState<string[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  // step 1 — the company
+  const [cPaste, setCPaste] = useState("");
+  const [cParsed, setCParsed] = useState<ParsedCompany | null>(null);
   const [firm, setFirm] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+
+  // step 2 — a person (repeats)
+  const [pPaste, setPPaste] = useState("");
+  const [pParsed, setPParsed] = useState<ParsedProfile | null>(null);
   const [name, setName] = useState("");
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("principal");
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
 
-  const onPaste = (text: string) => {
-    setPaste(text);
-    if (!text.trim()) { setParsed(null); return; }
-    const p = parseLinkedInPaste(text);
-    setParsed(p);
-    if (p.name) setName(p.name);
-    if (p.title) setTitle(p.title);
-    if (p.company) setFirm(p.company);
-    if (p.linkedinUrl) setUrl(p.linkedinUrl);
+  const cell: React.CSSProperties = {
+    font: "inherit", fontSize: 13.5, color: T.ink, background: T.track,
+    border: "none", borderRadius: 8, padding: "9px 11px", outline: "none", minWidth: 0,
+  };
+  const greenBtn: React.CSSProperties = {
+    font: "inherit", fontSize: 13.5, fontWeight: 700, color: "#fff",
+    background: T.blue, border: "none", borderRadius: 8, padding: "9px 16px",
+    cursor: "pointer", flex: "none",
   };
 
-  const save = async () => {
-    if (busy) return;
+  const onCompanyPaste = (text: string) => {
+    setCPaste(text);
+    if (!text.trim()) { setCParsed(null); return; }
+    const c = parseLinkedInCompany(text);
+    setCParsed(c);
+    if (c.name) setFirm(c.name);
+    if (c.location) {
+      const parts = c.location.split(",").map(x => x.trim());
+      if (parts[0]) setCity(parts[0]);
+      if (parts[1]) setState(parts[1]);
+    }
+  };
+
+  const saveCompany = async () => {
+    if (busy || !firm.trim()) return;
     setBusy(true); setErr(null);
     try {
       const r = await fetch("/api/crm/accounts", {
         method: "POST",
         headers: { ...authHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({
-          firm: firm.trim(),
-          contact: name.trim() ? {
-            name: name.trim(), title: title.trim() || null, role,
-            email: email.trim() || null, linkedin_url: url.trim() || null,
-          } : undefined,
+          firm: firm.trim(), hq_city: city.trim() || undefined, hq_state: state.trim() || undefined,
+          notes: cParsed?.industry ? `Industry (LinkedIn): ${cParsed.industry}` : undefined,
         }),
       });
       const j = await r.json().catch(() => null);
       if (!r.ok) { setErr(j?.error || `Save failed (${r.status})`); return; }
-      onDone(
-        j.reused
-          ? `${j.contact ? j.contact.name + " added to " : ""}${j.account.firm} (existing firm — no duplicate created).`
-          : `${j.account.firm} created at Lead${j.contact ? ` with ${j.contact.name} as primary contact` : ""}. It's on the board — set a next step.`,
-      );
+      setAccountId(j.account.id); setAccountFirm(j.account.firm);
+      setStep(2);
+      setErr(null);
     } catch {
       setErr("The network dropped — nothing was saved. Try again.");
     } finally { setBusy(false); }
   };
 
-  const cell: React.CSSProperties = {
-    font: "inherit", fontSize: 13.5, color: T.ink, background: T.track,
-    border: "none", borderRadius: 8, padding: "9px 11px", outline: "none", minWidth: 0,
+  const onPersonPaste = (text: string) => {
+    setPPaste(text);
+    if (!text.trim()) { setPParsed(null); return; }
+    const p = parseLinkedInPaste(text);
+    setPParsed(p);
+    if (p.name) setName(p.name);
+    if (p.title) setTitle(p.title);
+    if (p.linkedinUrl) setUrl(p.linkedinUrl);
+  };
+
+  const savePerson = async () => {
+    if (busy || !name.trim() || accountId == null) return;
+    setBusy(true); setErr(null);
+    try {
+      const r = await fetch(`/api/crm/accounts/${accountId}/contacts`, {
+        method: "POST",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(), role, title: title.trim() || null,
+          email: email.trim() || null, linkedin_url: url.trim() || null,
+          is_primary: added.length === 0,
+        }),
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok) { setErr(j?.error || `Save failed (${r.status})`); return; }
+      setAdded(a => [...a, j.name ?? name.trim()]);
+      setPPaste(""); setPParsed(null); setName(""); setTitle(""); setUrl(""); setEmail("");
+    } catch {
+      setErr("The network dropped — nothing was saved. Try again.");
+    } finally { setBusy(false); }
+  };
+
+  const finish = () => {
+    onDone(
+      `${accountFirm} on the board at Lead${added.length ? ` with ${added.join(", ")}` : ""}. Set a next step.`,
+    );
   };
 
   return (
@@ -142,48 +201,86 @@ function LinkedInAdd({ onDone }: { onDone: (msg: string) => void }) {
       border: `1px solid ${T.border}`, borderRadius: 8,
       display: "flex", flexDirection: "column", gap: 8, flex: "none",
     }}>
-      <textarea
-        value={paste}
-        onChange={e => onPaste(e.target.value)}
-        rows={3}
-        autoFocus
-        placeholder={"While looking at the profile: select the top card (name through location — or the whole page), copy, and paste it here.\nThe fields below fill themselves; fix anything and press Add."}
-        style={{ ...cell, resize: "vertical", lineHeight: 1.5 }}
-      />
-      {parsed && (
-        <p style={{ margin: 0, fontSize: 12.5, color: T.muted, lineHeight: 1.5 }}>
-          {parsed.name ? `Read: ${parsed.name}` : "Could not read a name"}
-          {parsed.company ? ` · ${parsed.company}` : ""}
-          {parsed.location ? ` · ${parsed.location}` : ""}
-          {parsed.missing.length > 0 && (
-            <span style={{ color: T.muted2 }}> — not found: {parsed.missing.join(", ")}. Fill those by hand.</span>
+      {step === 1 && (<>
+        <div style={{ fontSize: 13.5, fontWeight: 700, color: T.ink }}>
+          Step 1 · The company
+        </div>
+        <textarea
+          value={cPaste}
+          onChange={e => onCompanyPaste(e.target.value)}
+          rows={3}
+          autoFocus
+          placeholder={"Paste the COMPANY page (LinkedIn company page or Sales Navigator account page) — or just type the firm name below."}
+          style={{ ...cell, resize: "vertical", lineHeight: 1.5 }}
+        />
+        {cParsed && (
+          <p style={{ margin: 0, fontSize: 12.5, color: T.muted, lineHeight: 1.5 }}>
+            {cParsed.name ? `Read: ${cParsed.name}` : "Could not read a company name"}
+            {cParsed.industry ? ` · ${cParsed.industry}` : ""}
+            {cParsed.location ? ` · ${cParsed.location}` : ""}
+            {cParsed.missing.length > 0 && (
+              <span style={{ color: T.muted2 }}> — not found: {cParsed.missing.join(", ")}.</span>
+            )}
+          </p>
+        )}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <input value={firm} onChange={e => setFirm(e.target.value)} placeholder="Firm (required)" style={{ ...cell, flex: "1 1 200px" }} />
+          <input value={city} onChange={e => setCity(e.target.value)} placeholder="City" style={{ ...cell, flex: "0 1 140px" }} />
+          <input value={state} onChange={e => setState(e.target.value)} placeholder="State" style={{ ...cell, flex: "0 1 100px" }} />
+          <button type="button" disabled={busy || !firm.trim()} onClick={saveCompany}
+                  style={{ ...greenBtn, opacity: firm.trim() && !busy ? 1 : 0.5 }}>
+            {busy ? "Saving…" : "Save firm → add people"}
+          </button>
+        </div>
+      </>)}
+
+      {step === 2 && (<>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 13.5, fontWeight: 700, color: T.ink }}>
+            Step 2 · People at {accountFirm}
+          </span>
+          {added.length > 0 && (
+            <span style={{ fontSize: 12.5, color: T.green }}>added: {added.join(", ")}</span>
           )}
-        </p>
-      )}
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        <input value={firm} onChange={e => setFirm(e.target.value)} placeholder="Firm (required)" style={{ ...cell, flex: "1 1 180px" }} />
-        <input value={name} onChange={e => setName(e.target.value)} placeholder="Person" style={{ ...cell, flex: "1 1 160px" }} />
-        <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title" style={{ ...cell, flex: "1 1 160px" }} />
-      </div>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        <select value={role} onChange={e => setRole(e.target.value)} style={{ ...cell, flex: "0 1 150px" }} aria-label="Role">
-          {CONTACT_ROLES.map(r => <option key={r} value={r}>{ROLE_LABEL[r] ?? r}</option>)}
-        </select>
-        <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email (if known)" style={{ ...cell, flex: "1 1 160px" }} />
-        <input value={url} onChange={e => setUrl(e.target.value)} placeholder="LinkedIn URL" style={{ ...cell, flex: "1 1 200px" }} />
-        <button
-          type="button"
-          disabled={busy || !firm.trim()}
-          onClick={save}
-          style={{
-            font: "inherit", fontSize: 13.5, fontWeight: 700, color: "#fff",
-            background: T.blue, border: "none", borderRadius: 8, padding: "9px 16px",
-            cursor: "pointer", flex: "none", opacity: firm.trim() && !busy ? 1 : 0.5,
-          }}
-        >
-          {busy ? "Adding…" : "Add firm & person"}
-        </button>
-      </div>
+        </div>
+        <textarea
+          value={pPaste}
+          onChange={e => onPersonPaste(e.target.value)}
+          rows={3}
+          autoFocus
+          placeholder={"Paste a PERSON's profile (LinkedIn profile or Sales Navigator lead page). Add as many as you like — each lands on this firm."}
+          style={{ ...cell, resize: "vertical", lineHeight: 1.5 }}
+        />
+        {pParsed && (
+          <p style={{ margin: 0, fontSize: 12.5, color: T.muted, lineHeight: 1.5 }}>
+            {pParsed.name ? `Read: ${pParsed.name}` : "Could not read a name"}
+            {pParsed.title ? ` · ${pParsed.title}` : ""}
+            {pParsed.missing.length > 0 && (
+              <span style={{ color: T.muted2 }}> — not found: {pParsed.missing.join(", ")}. Fill by hand.</span>
+            )}
+          </p>
+        )}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <input value={name} onChange={e => setName(e.target.value)} placeholder="Name (required)" style={{ ...cell, flex: "1 1 160px" }} />
+          <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title" style={{ ...cell, flex: "1 1 160px" }} />
+          <select value={role} onChange={e => setRole(e.target.value)} style={{ ...cell, flex: "0 1 140px" }} aria-label="Role">
+            {CONTACT_ROLES.map(r => <option key={r} value={r}>{ROLE_LABEL[r] ?? r}</option>)}
+          </select>
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email (if known)" style={{ ...cell, flex: "1 1 160px" }} />
+          <input value={url} onChange={e => setUrl(e.target.value)} placeholder="LinkedIn URL" style={{ ...cell, flex: "1 1 200px" }} />
+          <button type="button" disabled={busy || !name.trim()} onClick={savePerson}
+                  style={{ ...greenBtn, opacity: name.trim() && !busy ? 1 : 0.5 }}>
+            {busy ? "Adding…" : "Add person"}
+          </button>
+          <button type="button" onClick={finish}
+                  style={{ ...greenBtn, background: T.ink }}>
+            Done
+          </button>
+        </div>
+      </>)}
+
       {err && <p style={{ margin: 0, fontSize: 12.5, color: T.amber }}>{err}</p>}
     </div>
   );
@@ -1031,14 +1128,41 @@ function DetailPane({
                   and it's the cheapest way to move the firm up the board.
                 </p>
               ) : contacts.map(c => (
-                <div key={c.id} style={{ padding: "8px 0", borderBottom: `1px solid ${T.rowDiv}` }}>
-                  <div style={{ fontWeight: 600, fontSize: 13.5 }}>
+                <div key={c.id} style={{ padding: "8px 0", borderBottom: `1px solid ${T.rowDiv}`, position: "relative" }}>
+                  <div style={{ fontWeight: 600, fontSize: 13.5, paddingRight: 28 }}>
                     {c.name}
                     {c.role && (
                       <span style={{ color: T.blue, fontWeight: 600 }}> · {ROLE_LABEL[c.role] ?? c.role}</span>
                     )}
                     {c.is_primary && <span style={{ color: T.muted2, fontWeight: 400 }}> · primary</span>}
                   </div>
+                  {/* A parse can be wrong — the first live paste filed a Sales
+                      Nav button bar as a person — and a register you cannot
+                      correct stops being trusted. Confirm by name, then hard
+                      delete: a mis-parse is not history. */}
+                  <button
+                    type="button"
+                    disabled={saving}
+                    title={`Remove ${c.name}`}
+                    aria-label={`Remove ${c.name}`}
+                    onClick={() => {
+                      if (!window.confirm(`Remove ${c.name} from this firm?`)) return;
+                      run(async () => {
+                        const r = await fetch(`/api/crm/contacts/${c.id}`, {
+                          method: "DELETE", headers: authHeaders(),
+                        });
+                        if (!r.ok) {
+                          let d = ""; try { d = (await r.json())?.error || ""; } catch { /* none */ }
+                          throw new Error(d || `HTTP ${r.status}`);
+                        }
+                      });
+                    }}
+                    style={{
+                      position: "absolute", top: 6, right: 0,
+                      font: "inherit", fontSize: 15, lineHeight: 1, color: T.muted2,
+                      background: "transparent", border: "none", cursor: "pointer", padding: "2px 6px",
+                    }}
+                  >×</button>
                   {c.title && <div style={{ fontSize: 12.5, color: T.muted }}>{c.title}</div>}
                   {(c.email || c.phone) && (
                     <div style={{ fontSize: 12.5, color: T.muted2 }}>{[c.email, c.phone].filter(Boolean).join(" · ")}</div>
