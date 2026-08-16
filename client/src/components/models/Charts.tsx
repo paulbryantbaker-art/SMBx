@@ -12,6 +12,7 @@ import {
 } from 'chart.js';
 import { centsToDisplay, pctDisplay, multDisplay } from '../../lib/calculations/core';
 import { useDerivedDisplay } from '../v6/shared/useDerivedDisplay';
+import { MC } from './theme';
 import '../v6/shared/workseal.css';
 
 ChartJS.register(
@@ -19,20 +20,23 @@ ChartJS.register(
   RadialLinearScale, Tooltip, Legend, Filler,
 );
 
-// House type + ink for all Chart.js canvases (literal strings — CSS vars don't reach canvas)
-ChartJS.defaults.font.family = "'Schibsted Grotesk', system-ui, sans-serif";
-ChartJS.defaults.color = 'var(--cd-ink)';
+/* House type + ink for all Chart.js canvases. LITERALS ONLY: a CSS var inside
+   a canvas 2D context is never resolved, and the previous 'var(--cd-ink)'
+   here proved it — see theme.ts for the full account. */
+ChartJS.defaults.font.family = "-apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', Roboto, sans-serif";
+ChartJS.defaults.color = MC.muted;
 
-// Brand colors — names kept from the slate era, values map to the warm/green token world
-const TERRA = 'var(--cd-pos)';
-const TERRA_LIGHT = 'rgba(46, 140, 90, 0.14)';
-const TEXT = 'var(--cd-ink)';
-const MUTED = 'var(--cd-ink-2)';
-const CREAM = 'var(--cd-surface-2)';
-const BORDER = 'rgba(25, 24, 19, 0.12)';
-const GREEN = 'var(--cd-pos)';
-const YELLOW = 'var(--cd-warn)';
-const RED = 'var(--cd-neg)';
+/* The accent paints SERIES; the ok/warn/bad triple paints THRESHOLD state.
+   Local aliases keep the chart bodies readable. */
+const TERRA = MC.green;
+const TERRA_LIGHT = MC.greenWash;
+const TEXT = MC.ink;
+const MUTED = MC.muted;
+const CREAM = MC.track;
+const BORDER = MC.border;
+const GREEN = MC.ok;
+const YELLOW = MC.warn;
+const RED = MC.bad;
 
 // ─── Valuation Range Chart ──────────────────────────────────────────
 
@@ -88,7 +92,7 @@ export function DSCRGauge({ dscr, threshold = 1.25 }: { dscr: number; threshold?
           data={{
             datasets: [{
               data: [pct * 100, (1 - pct) * 100],
-              backgroundColor: [color, 'var(--cd-line)'],
+              backgroundColor: [color, BORDER],
               borderWidth: 0,
               circumference: 270,
               rotation: 225,
@@ -103,7 +107,7 @@ export function DSCRGauge({ dscr, threshold = 1.25 }: { dscr: number; threshold?
         />
       </div>
       <div>
-        <p className="text-2xl font-bold m-0" style={{ color, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
+        <p className="text-2xl font-bold m-0" style={{ color, fontVariantNumeric: 'tabular-nums' }}>
           {dscr.toFixed(2)}x
         </p>
         <p className="text-xs m-0" style={{ color: MUTED }}>
@@ -145,7 +149,7 @@ export function WaterfallChart({ items }: { items: { label: string; amount: numb
           datasets: [
             { label: 'Base', data: bases, backgroundColor: 'transparent', borderWidth: 0, barPercentage: 0.5 },
             { label: 'Add', data: positives, backgroundColor: TERRA, borderRadius: 4, barPercentage: 0.5 },
-            { label: 'Less', data: negatives, backgroundColor: 'var(--cd-line)', borderRadius: 4, barPercentage: 0.5 },
+            { label: 'Less', data: negatives, backgroundColor: BORDER, borderRadius: 4, barPercentage: 0.5 },
           ],
         }}
         options={{
@@ -274,7 +278,7 @@ export function ProFormaTable({ years }: { years: { year: number; revenue: numbe
         </thead>
         <tbody>
           {years.map((y, i) => (
-            <tr key={y.year} style={{ background: i % 2 === 0 ? 'transparent' : 'var(--cd-surface)', borderBottom: '1px solid var(--cd-line)' }}>
+            <tr key={y.year} style={{ background: i % 2 === 0 ? 'transparent' : CREAM, borderBottom: `1px solid ${BORDER}` }}>
               <td style={{ padding: '6px 8px', fontWeight: 600 }}>Year {y.year}</td>
               <td style={{ padding: '6px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{centsToDisplay(y.revenue)}</td>
               <td style={{ padding: '6px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{centsToDisplay(y.ebitda)}</td>
@@ -347,7 +351,7 @@ export function SourcesUsesTable({ sources, uses }: { sources: { label: string; 
       <div>
         <h4 className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: MUTED }}>Sources</h4>
         {sources.map(s => (
-          <div key={s.label} className="flex justify-between text-xs py-1" style={{ borderBottom: '1px solid var(--cd-line)' }}>
+          <div key={s.label} className="flex justify-between text-xs py-1" style={{ borderBottom: `1px solid ${BORDER}` }}>
             <span>{s.label}</span>
             <span className="font-medium tabular-nums">{centsToDisplay(s.amount)}</span>
           </div>
@@ -360,7 +364,7 @@ export function SourcesUsesTable({ sources, uses }: { sources: { label: string; 
       <div>
         <h4 className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: MUTED }}>Uses</h4>
         {uses.map(u => (
-          <div key={u.label} className="flex justify-between text-xs py-1" style={{ borderBottom: '1px solid var(--cd-line)' }}>
+          <div key={u.label} className="flex justify-between text-xs py-1" style={{ borderBottom: `1px solid ${BORDER}` }}>
             <span>{u.label}</span>
             <span className="font-medium tabular-nums">{centsToDisplay(u.amount)}</span>
           </div>
@@ -382,7 +386,7 @@ export function KPICard({ label, value, sublabel, color }: { label: string; valu
   return (
     <div className="rounded-lg p-3 sm:p-3" style={{ background: CREAM, border: `1px solid ${BORDER}` }}>
       <p className="text-[10px] sm:text-[9px] font-bold uppercase tracking-wider m-0 mb-1" style={{ color: MUTED }}>{label}</p>
-      <p className="text-lg sm:text-xl font-bold m-0 truncate" style={{ color: color || TEXT, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
+      <p className="text-lg sm:text-xl font-bold m-0 truncate" style={{ color: color || TEXT, fontVariantNumeric: 'tabular-nums' }}>
         <span>{text}</span>
         <i className={`wk-tick${justSettled ? ' on' : ''}`} aria-hidden="true">✓</i>
       </p>
@@ -430,7 +434,7 @@ export function ModelSlider({ label, value, onChange, min, max, step, format = '
           onChange={e => onChange(Number(e.target.value))}
           className="model-range w-full cursor-pointer"
           style={{
-            '--mr-fill': `linear-gradient(to right, ${TERRA} 0%, ${TERRA} ${pct}%, var(--cd-line) ${pct}%, var(--cd-line) 100%)`,
+            '--mr-fill': `linear-gradient(to right, ${TERRA} 0%, ${TERRA} ${pct}%, ${BORDER} ${pct}%, ${BORDER} 100%)`,
           } as CSSProperties}
         />
       </div>
