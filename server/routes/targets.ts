@@ -51,6 +51,7 @@ targetsRouter.get('/crm/targets', async (req, res) => {
       SELECT a.id, a.firm, a.domain, a.hq_city, a.hq_state, a.trades, a.notes,
              a.target_stage, a.client_account_id, a.promoted_deal_id,
              a.stage_entered_at, a.disqualified, a.tier, a.score,
+             a.next_action, a.next_action_on,
              c.firm AS client_firm,
              (SELECT MAX(v.occurred_at) FROM crm_activity v WHERE v.account_id = a.id) AS last_touch_at,
              (SELECT w.name

@@ -235,7 +235,11 @@ crmRouter.get('/crm/contacts', async (req, res) => {
     const rows = await sql`
       SELECT c.id, c.name, c.title, c.role, c.email, c.is_primary,
              c.unsubscribed_at, a.id AS account_id, a.firm,
-             COALESCE(a.kind, 'acquirer') AS account_kind
+             COALESCE(a.kind, 'acquirer') AS account_kind,
+             -- Per-PERSON last touch (People directory). Distinct from the
+             -- account-level MAX the accounts list carries: a firm touched
+             -- yesterday through a colleague still shows THIS person untouched.
+             (SELECT MAX(v.occurred_at) FROM crm_activity v WHERE v.contact_id = c.id) AS last_touch_at
       FROM crm_contacts c
       JOIN crm_accounts a ON a.id = c.account_id
       WHERE a.user_id = ${userId} AND a.archived = FALSE
