@@ -73,6 +73,122 @@ function momentPill(m: string | null): { bg: string; fg: string } {
   }
 }
 
+/**
+ * PASTE-FIRST ADD. Copy a LinkedIn profile while looking at it, paste here,
+ * and the firm and the person are born together — the firm at Lead, the
+ * person as its primary contact. The parse (house/linkedin.ts, pure, no
+ * model) PROPOSES; every field is editable and nothing saves until the
+ * button. A firm that already exists by name gets the person added to it
+ * rather than a duplicate account — the server owns that check.
+ */
+function LinkedInAdd({ onDone }: { onDone: (msg: string) => void }) {
+  const [paste, setPaste] = useState("");
+  const [parsed, setParsed] = useState<ParsedProfile | null>(null);
+  const [firm, setFirm] = useState("");
+  const [name, setName] = useState("");
+  const [title, setTitle] = useState("");
+  const [url, setUrl] = useState("");
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("principal");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const onPaste = (text: string) => {
+    setPaste(text);
+    if (!text.trim()) { setParsed(null); return; }
+    const p = parseLinkedInPaste(text);
+    setParsed(p);
+    if (p.name) setName(p.name);
+    if (p.title) setTitle(p.title);
+    if (p.company) setFirm(p.company);
+    if (p.linkedinUrl) setUrl(p.linkedinUrl);
+  };
+
+  const save = async () => {
+    if (busy) return;
+    setBusy(true); setErr(null);
+    try {
+      const r = await fetch("/api/crm/accounts", {
+        method: "POST",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firm: firm.trim(),
+          contact: name.trim() ? {
+            name: name.trim(), title: title.trim() || null, role,
+            email: email.trim() || null, linkedin_url: url.trim() || null,
+          } : undefined,
+        }),
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok) { setErr(j?.error || `Save failed (${r.status})`); return; }
+      onDone(
+        j.reused
+          ? `${j.contact ? j.contact.name + " added to " : ""}${j.account.firm} (existing firm — no duplicate created).`
+          : `${j.account.firm} created at Lead${j.contact ? ` with ${j.contact.name} as primary contact` : ""}. It's on the board — set a next step.`,
+      );
+    } catch {
+      setErr("The network dropped — nothing was saved. Try again.");
+    } finally { setBusy(false); }
+  };
+
+  const cell: React.CSSProperties = {
+    font: "inherit", fontSize: 13.5, color: T.ink, background: T.track,
+    border: "none", borderRadius: 8, padding: "9px 11px", outline: "none", minWidth: 0,
+  };
+
+  return (
+    <div style={{
+      margin: "0 22px 12px", padding: "14px 16px", background: T.white,
+      border: `1px solid ${T.border}`, borderRadius: 8,
+      display: "flex", flexDirection: "column", gap: 8, flex: "none",
+    }}>
+      <textarea
+        value={paste}
+        onChange={e => onPaste(e.target.value)}
+        rows={3}
+        autoFocus
+        placeholder={"While looking at the profile: select the top card (name through location — or the whole page), copy, and paste it here.\nThe fields below fill themselves; fix anything and press Add."}
+        style={{ ...cell, resize: "vertical", lineHeight: 1.5 }}
+      />
+      {parsed && (
+        <p style={{ margin: 0, fontSize: 12.5, color: T.muted, lineHeight: 1.5 }}>
+          {parsed.name ? `Read: ${parsed.name}` : "Could not read a name"}
+          {parsed.company ? ` · ${parsed.company}` : ""}
+          {parsed.location ? ` · ${parsed.location}` : ""}
+          {parsed.missing.length > 0 && (
+            <span style={{ color: T.muted2 }}> — not found: {parsed.missing.join(", ")}. Fill those by hand.</span>
+          )}
+        </p>
+      )}
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <input value={firm} onChange={e => setFirm(e.target.value)} placeholder="Firm (required)" style={{ ...cell, flex: "1 1 180px" }} />
+        <input value={name} onChange={e => setName(e.target.value)} placeholder="Person" style={{ ...cell, flex: "1 1 160px" }} />
+        <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title" style={{ ...cell, flex: "1 1 160px" }} />
+      </div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <select value={role} onChange={e => setRole(e.target.value)} style={{ ...cell, flex: "0 1 150px" }} aria-label="Role">
+          {CONTACT_ROLES.map(r => <option key={r} value={r}>{ROLE_LABEL[r] ?? r}</option>)}
+        </select>
+        <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email (if known)" style={{ ...cell, flex: "1 1 160px" }} />
+        <input value={url} onChange={e => setUrl(e.target.value)} placeholder="LinkedIn URL" style={{ ...cell, flex: "1 1 200px" }} />
+        <button
+          type="button"
+          disabled={busy || !firm.trim()}
+          onClick={save}
+          style={{
+            font: "inherit", fontSize: 13.5, fontWeight: 700, color: "#fff",
+            background: T.blue, border: "none", borderRadius: 8, padding: "9px 16px",
+            cursor: "pointer", flex: "none", opacity: firm.trim() && !busy ? 1 : 0.5,
+          }}
+        >
+          {busy ? "Adding…" : "Add firm & person"}
+        </button>
+      </div>
+      {err && <p style={{ margin: 0, fontSize: 12.5, color: T.amber }}>{err}</p>}
+    </div>
+  );
+}
+
 function stagePill(s: string): { bg: string; fg: string } {
   switch (s) {
     case "won": return { bg: T.greenBg, fg: T.green };
@@ -105,6 +221,7 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
   // next"); Outreach = the campaign machine ("what does the plan say I owe
   // today", migration 120).
   const [mode, setMode] = useState<"list" | "board" | "outreach">("list");
+  const [pasteOpen, setPasteOpen] = useState(false);
 
   const crm = useCrmAccounts(user, filters, query);
 
@@ -169,26 +286,51 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
     position: "relative",
   };
 
-  // The two modes of the screen, one tab row above whichever is live.
+  // The mode row renders in EVERY branch (loading, error, empty, all three
+  // modes), so the paste panel rides with it — the one affordance that must
+  // exist even when the register is empty, because Paul's workflow STARTS
+  // with a person: connection made on LinkedIn → paste → firm + contact born
+  // together. (2026-08-16, from his screenshot of an empty board: "I dont
+  // see how to paste a linkedin contact" — the dossier's paste box needs a
+  // firm to exist first, which is backwards for a first contact.)
   const modeTabs = (
-    <div style={{ display: "flex", gap: 6, padding: "14px 22px 10px", flex: "none" }}>
-      {(["list", "board", "outreach"] as const).map(k => (
+    <>
+      <div style={{ display: "flex", gap: 6, padding: "14px 22px 10px", flex: "none", alignItems: "center" }}>
+        {(["list", "board", "outreach"] as const).map(k => (
+          <button
+            key={k}
+            type="button"
+            onClick={() => setMode(k)}
+            style={{
+              padding: "7px 16px", borderRadius: 99, fontSize: 13, fontWeight: 700,
+              cursor: "pointer",
+              border: `1px solid ${mode === k ? T.ink : T.border}`,
+              background: mode === k ? T.ink : T.white,
+              color: mode === k ? "#fff" : T.ink,
+            }}
+          >
+            {k === "list" ? "List" : k === "board" ? "Board" : "Outreach"}
+          </button>
+        ))}
+        <div style={{ flex: 1 }} />
         <button
-          key={k}
           type="button"
-          onClick={() => setMode(k)}
+          onClick={() => setPasteOpen(o => !o)}
           style={{
-            padding: "7px 16px", borderRadius: 99, fontSize: 13, fontWeight: 700,
-            cursor: "pointer",
-            border: `1px solid ${mode === k ? T.ink : T.border}`,
-            background: mode === k ? T.ink : T.white,
-            color: mode === k ? "#fff" : T.ink,
+            padding: "8px 16px", borderRadius: 8, fontSize: 13.5, fontWeight: 700,
+            cursor: "pointer", border: "none",
+            background: pasteOpen ? T.track : T.blue, color: pasteOpen ? T.ink : "#fff",
           }}
         >
-          {k === "list" ? "List" : k === "board" ? "Board" : "Outreach"}
+          {pasteOpen ? "Close" : "＋ Paste from LinkedIn"}
         </button>
-      ))}
-    </div>
+      </div>
+      {pasteOpen && (
+        <LinkedInAdd
+          onDone={msg => { setBanner(msg); setPasteOpen(false); crm.refresh(); }}
+        />
+      )}
+    </>
   );
 
   const toolbar = (
@@ -253,7 +395,7 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
       <div style={{ flex: 1, display: "flex" }}>
       <EmptyState
         title="No firms yet"
-        hint="Load the 2026-08-05 buy-side outreach plan — 81 organizations and 75 named contacts across the capital and client layers, with each record's next action dated to its wave — or import the register CSV from the toolbar."
+        hint="Three ways in: paste a LinkedIn profile (the button above — firm and person are created together), import the register CSV from the toolbar, or load the shipped 2026-08-05 outreach plan below."
         cta="Seed the outreach plan"
         onCta={seedPlan}
       />
