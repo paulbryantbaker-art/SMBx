@@ -4,6 +4,7 @@
 import { useModelStore } from '../../lib/modelStore';
 import { KPICard, ModelInput, ModelSlider } from './Charts';
 import { centsToDisplay, pctDisplay, FEDERAL_RATES } from '../../lib/calculations/core';
+import { MC } from './theme';
 
 interface Props { tabId: string; }
 
@@ -30,33 +31,33 @@ export default function TaxImpactModel({ tabId }: Props) {
       {stockSale && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Stock Sale */}
-          <div className="rounded-xl p-4" style={{ border: '1px solid var(--m-outline-var)' }}>
+          <div className="rounded-lg p-4" style={{ border: `1px solid ${MC.border}` }}>
             <h3 className="text-sm font-bold m-0 mb-3" style={{ fontFamily: 'var(--font-body)' }}>Stock Sale</h3>
             <div className="space-y-2 text-xs">
               <Row label="Capital Gain" value={centsToDisplay(stockSale.capitalGain)} />
-              <Row label="Federal Tax (23.8%)" value={centsToDisplay(stockSale.federalTax)} color="var(--m-pass)" />
-              <Row label="State Tax" value={centsToDisplay(stockSale.stateTax)} color="var(--m-pass)" />
-              <div className="pt-2" style={{ borderTop: '2px solid var(--m-primary)' }}>
-                <Row label="Net Proceeds" value={centsToDisplay(stockSale.netProceeds)} bold color="var(--m-pursue)" />
+              <Row label="Federal Tax (23.8%)" value={centsToDisplay(stockSale.federalTax)} color={MC.bad} />
+              <Row label="State Tax" value={centsToDisplay(stockSale.stateTax)} color={MC.bad} />
+              <div className="pt-2" style={{ borderTop: `2px solid ${MC.green}` }}>
+                <Row label="Net Proceeds" value={centsToDisplay(stockSale.netProceeds)} bold color={MC.ok} />
               </div>
             </div>
           </div>
 
           {/* Asset Sale */}
-          <div className="rounded-xl p-4" style={{ border: '1px solid var(--m-outline-var)' }}>
+          <div className="rounded-lg p-4" style={{ border: `1px solid ${MC.border}` }}>
             <h3 className="text-sm font-bold m-0 mb-3" style={{ fontFamily: 'var(--font-body)' }}>Asset Sale</h3>
             {assetSale ? (
               <div className="space-y-2 text-xs">
                 {assetSale.byClass.map((c: any) => (
-                  <Row key={c.class} label={`${c.label} (${pctDisplay(c.sellerRate, 0)})`} value={centsToDisplay(c.tax)} color="var(--m-pass)" />
+                  <Row key={c.class} label={`${c.label} (${pctDisplay(c.sellerRate, 0)})`} value={centsToDisplay(c.tax)} color={MC.bad} />
                 ))}
-                <Row label="State Tax" value={centsToDisplay(assetSale.totalStateTax)} color="var(--m-pass)" />
-                <div className="pt-2" style={{ borderTop: '2px solid var(--m-primary)' }}>
-                  <Row label="Net Proceeds" value={centsToDisplay(assetSale.netProceeds)} bold color="var(--m-pursue)" />
+                <Row label="State Tax" value={centsToDisplay(assetSale.totalStateTax)} color={MC.bad} />
+                <div className="pt-2" style={{ borderTop: `2px solid ${MC.green}` }}>
+                  <Row label="Net Proceeds" value={centsToDisplay(assetSale.netProceeds)} bold color={MC.ok} />
                 </div>
               </div>
             ) : (
-              <p className="text-xs" style={{ color: 'var(--m-on-surface-var)' }}>Add asset allocations to compare.</p>
+              <p className="text-xs" style={{ color: MC.muted }}>Add asset allocations to compare.</p>
             )}
           </div>
         </div>
@@ -65,13 +66,13 @@ export default function TaxImpactModel({ tabId }: Props) {
       {/* KPI comparison */}
       {stockSale && assetSale && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <KPICard label="Stock Sale Net" value={centsToDisplay(stockSale.netProceeds)} color="var(--m-pursue)" />
-          <KPICard label="Asset Sale Net" value={centsToDisplay(assetSale.netProceeds)} color="var(--m-pursue)" />
+          <KPICard label="Stock Sale Net" value={centsToDisplay(stockSale.netProceeds)} color={MC.ok} />
+          <KPICard label="Asset Sale Net" value={centsToDisplay(assetSale.netProceeds)} color={MC.ok} />
           <KPICard
             label="Difference"
             value={centsToDisplay(Math.abs(stockSale.netProceeds - assetSale.netProceeds))}
             sublabel={stockSale.netProceeds > assetSale.netProceeds ? 'Stock sale saves more' : 'Asset sale saves more'}
-            color="var(--cd-pos)"
+            color={MC.ok}
           />
         </div>
       )}
@@ -79,26 +80,26 @@ export default function TaxImpactModel({ tabId }: Props) {
       {/* Installment Sale */}
       {installment && (
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Installment Sale (§453)</h3>
-          <p className="text-xs mb-2" style={{ color: 'var(--m-on-surface-var)' }}>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: MC.muted }}>Installment Sale (§453)</h3>
+          <p className="text-xs mb-2" style={{ color: MC.muted }}>
             Gross Profit Ratio: {pctDisplay(installment.grossProfitRatio)}
           </p>
           <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
             <table className="text-xs w-full" style={{ borderCollapse: 'collapse', minWidth: 400 }}>
               <thead>
-                <tr style={{ borderBottom: '2px solid var(--m-primary)' }}>
+                <tr style={{ borderBottom: `2px solid ${MC.green}` }}>
                   {['Year', 'Payment', 'Taxable Gain', 'Tax Due'].map(h => (
-                    <th key={h} style={{ padding: '4px 8px', textAlign: 'right', fontSize: 10, color: 'var(--m-on-surface-var)', textTransform: 'uppercase' }}>{h}</th>
+                    <th key={h} style={{ padding: '4px 8px', textAlign: 'right', fontSize: 11, color: MC.muted, textTransform: 'uppercase' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {installment.yearlyTax.map((y: any) => (
-                  <tr key={y.year} style={{ borderBottom: '1px solid var(--cd-line)' }}>
+                  <tr key={y.year} style={{ borderBottom: `1px solid ${MC.border}` }}>
                     <td style={{ padding: '4px 8px', textAlign: 'right' }}>Year {y.year}</td>
                     <td style={{ padding: '4px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{centsToDisplay(y.payment)}</td>
                     <td style={{ padding: '4px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{centsToDisplay(y.taxableGain)}</td>
-                    <td style={{ padding: '4px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: 'var(--m-pass)' }}>{centsToDisplay(y.tax)}</td>
+                    <td style={{ padding: '4px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: MC.bad }}>{centsToDisplay(y.tax)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -120,8 +121,8 @@ export default function TaxImpactModel({ tabId }: Props) {
 function Row({ label, value, bold, color }: { label: string; value: string; bold?: boolean; color?: string }) {
   return (
     <div className="flex justify-between">
-      <span style={{ color: 'var(--m-on-surface-var)' }}>{label}</span>
-      <span className="tabular-nums" style={{ fontWeight: bold ? 700 : 500, color: color || 'var(--m-on-surface)' }}>{value}</span>
+      <span style={{ color: MC.muted }}>{label}</span>
+      <span className="tabular-nums" style={{ fontWeight: bold ? 700 : 500, color: color || MC.ink }}>{value}</span>
     </div>
   );
 }

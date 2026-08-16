@@ -4,6 +4,7 @@
 import { useModelStore } from '../../lib/modelStore';
 import { FactorRadar, KPICard } from './Charts';
 import { centsToDisplay, pctDisplay, multDisplay } from '../../lib/calculations/core';
+import { MC } from './theme';
 
 interface Props { tabId: string; }
 
@@ -19,7 +20,7 @@ export default function ComparisonModel({ tabId }: Props) {
   if (linkedTabs.length === 0) {
     return (
       <div className="p-5 text-center">
-        <p className="text-sm" style={{ color: 'var(--m-on-surface-var)' }}>
+        <p className="text-sm" style={{ color: MC.muted }}>
           No models linked for comparison. Open multiple deal models and Yulia will link them here.
         </p>
       </div>
@@ -35,10 +36,10 @@ export default function ComparisonModel({ tabId }: Props) {
       <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
         <table className="w-full text-xs" style={{ borderCollapse: 'collapse', minWidth: 480 }}>
           <thead>
-            <tr style={{ borderBottom: '2px solid var(--m-primary)' }}>
-              <th style={{ padding: '6px 10px', textAlign: 'left', fontSize: 10, color: 'var(--m-on-surface-var)' }}>Metric</th>
+            <tr style={{ borderBottom: `2px solid ${MC.green}` }}>
+              <th style={{ padding: '6px 10px', textAlign: 'left', fontSize: 11, color: MC.muted }}>Metric</th>
               {linkedTabs.map(t => (
-                <th key={t.id} style={{ padding: '6px 10px', textAlign: 'right', fontSize: 10, color: 'var(--m-on-surface)', fontWeight: 700 }}>
+                <th key={t.id} style={{ padding: '6px 10px', textAlign: 'right', fontSize: 11, color: MC.ink, fontWeight: 700 }}>
                   {t.title}
                 </th>
               ))}
@@ -46,14 +47,14 @@ export default function ComparisonModel({ tabId }: Props) {
           </thead>
           <tbody>
             {getComparisonRows(linkedTabs).map((row, i) => (
-              <tr key={row.label} style={{ borderBottom: '1px solid var(--cd-line)', background: i % 2 ? 'var(--cd-surface)' : 'transparent' }}>
-                <td style={{ padding: '6px 10px', color: 'var(--m-on-surface-var)', fontWeight: 500 }}>{row.label}</td>
+              <tr key={row.label} style={{ borderBottom: `1px solid ${MC.border}`, background: i % 2 ? MC.track : 'transparent' }}>
+                <td style={{ padding: '6px 10px', color: MC.muted, fontWeight: 500 }}>{row.label}</td>
                 {row.values.map((val, j) => {
                   const best = row.bestIdx;
                   return (
                     <td key={j} style={{
                       padding: '6px 10px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 500,
-                      color: best === j ? 'var(--m-pursue)' : 'var(--m-on-surface)',
+                      color: best === j ? MC.ok : MC.ink,
                       background: best === j ? 'rgba(46,140,90,0.05)' : undefined,
                     }}>
                       {val}
@@ -69,7 +70,7 @@ export default function ComparisonModel({ tabId }: Props) {
       {/* Radar comparison if we have scores */}
       {linkedTabs.length >= 2 && linkedTabs.some(t => t.outputs.lbo) && (
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Risk-Return Profile</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: MC.muted }}>Risk-Return Profile</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {linkedTabs.map(t => {
               const lbo = t.outputs.lbo;

@@ -5,14 +5,15 @@ import { useModelStore } from '../../lib/modelStore';
 import { KPICard } from './Charts';
 import { Line } from 'react-chartjs-2';
 import { centsToDisplay } from '../../lib/calculations/core';
+import { MC } from './theme';
 
 interface Props { tabId: string; }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const CHART_PRIMARY = 'var(--cd-pos)';
+const CHART_PRIMARY = MC.ok;
 const CHART_PRIMARY_SOFT = 'rgba(46, 140, 90, 0.14)';
-const CHART_TEXT = 'var(--cd-ink)';
-const CHART_MUTED = 'var(--cd-ink-2)';
+const CHART_TEXT = MC.ink;
+const CHART_MUTED = MC.muted;
 
 export default function WorkingCapitalModel({ tabId }: Props) {
   const tab = useModelStore(s => s.tabs[tabId]);
@@ -36,7 +37,7 @@ export default function WorkingCapitalModel({ tabId }: Props) {
       {wc && (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <KPICard label="Working Capital Peg" value={centsToDisplay(wc.peg)} color="var(--cd-pos)" sublabel="12-month average" />
+            <KPICard label="Working Capital Peg" value={centsToDisplay(wc.peg)} color={MC.ok} sublabel="12-month average" />
             <KPICard label="Variance" value={centsToDisplay(wc.variance)} sublabel="Seasonal swing" />
             <KPICard label="Months Analyzed" value={String(wc.monthlyWC.filter((m: any) => m.wc !== 0).length)} />
           </div>
@@ -88,30 +89,30 @@ export default function WorkingCapitalModel({ tabId }: Props) {
 
       {/* Monthly data input */}
       <div>
-        <h3 className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--m-on-surface-var)' }}>Monthly Data</h3>
+        <h3 className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: MC.muted }}>Monthly Data</h3>
         {/* Four columns with live inputs — scroll sideways on phones rather
             than crushing the number fields. */}
         <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
           <table className="text-xs w-full" style={{ borderCollapse: 'collapse', minWidth: 440 }}>
             <thead>
-              <tr style={{ borderBottom: '2px solid var(--m-primary)' }}>
-                <th style={{ padding: '4px 6px', textAlign: 'left', fontSize: 10, color: 'var(--m-on-surface-var)' }}>Month</th>
-                <th style={{ padding: '4px 6px', textAlign: 'right', fontSize: 10, color: 'var(--m-on-surface-var)' }}>Current Assets ($)</th>
-                <th style={{ padding: '4px 6px', textAlign: 'right', fontSize: 10, color: 'var(--m-on-surface-var)' }}>Current Liabilities ($)</th>
-                <th style={{ padding: '4px 6px', textAlign: 'right', fontSize: 10, color: 'var(--m-on-surface-var)' }}>Net WC</th>
+              <tr style={{ borderBottom: `2px solid ${MC.green}` }}>
+                <th style={{ padding: '4px 6px', textAlign: 'left', fontSize: 11, color: MC.muted }}>Month</th>
+                <th style={{ padding: '4px 6px', textAlign: 'right', fontSize: 11, color: MC.muted }}>Current Assets ($)</th>
+                <th style={{ padding: '4px 6px', textAlign: 'right', fontSize: 11, color: MC.muted }}>Current Liabilities ($)</th>
+                <th style={{ padding: '4px 6px', textAlign: 'right', fontSize: 11, color: MC.muted }}>Net WC</th>
               </tr>
             </thead>
             <tbody>
               {monthlyData.map((m: any, i: number) => (
-                <tr key={i} style={{ borderBottom: '1px solid var(--cd-line)' }}>
+                <tr key={i} style={{ borderBottom: `1px solid ${MC.border}` }}>
                   <td style={{ padding: '4px 6px', fontWeight: 600 }}>{m.month}</td>
                   <td style={{ padding: '4px 6px' }}>
                     <input type="number" value={m.currentAssets / 100} onChange={e => updateMonth(i, 'currentAssets', Number(e.target.value) * 100)}
-                      className="w-full text-right text-xs border rounded px-2 py-0.5 outline-none" style={{ borderColor: 'var(--m-outline-var)' }} />
+                      className="w-full text-right text-xs rounded-lg px-2 py-0.5 outline-none" style={{ background: MC.track, border: 'none' }} />
                   </td>
                   <td style={{ padding: '4px 6px' }}>
                     <input type="number" value={m.currentLiabilities / 100} onChange={e => updateMonth(i, 'currentLiabilities', Number(e.target.value) * 100)}
-                      className="w-full text-right text-xs border rounded px-2 py-0.5 outline-none" style={{ borderColor: 'var(--m-outline-var)' }} />
+                      className="w-full text-right text-xs rounded-lg px-2 py-0.5 outline-none" style={{ background: MC.track, border: 'none' }} />
                   </td>
                   <td style={{ padding: '4px 6px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>
                     {centsToDisplay(m.currentAssets - m.currentLiabilities)}

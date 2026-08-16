@@ -5,14 +5,15 @@ import { Line } from 'react-chartjs-2';
 import { useModelStore } from '../../lib/modelStore';
 import { KPICard, ModelInput, ModelSlider } from './Charts';
 import { centsToDisplay } from '../../lib/calculations/core';
+import { MC } from './theme';
 
 interface Props { tabId: string; }
 
-const CHART_PRIMARY = 'var(--cd-pos)';
-const CHART_PRIMARY_SOFT = 'rgba(46, 140, 90, 0.14)';
-const CHART_TEXT = 'var(--cd-ink)';
-const CHART_MUTED = 'var(--cd-ink-2)';
-const CHART_GREEN = 'var(--cd-warn)'; // secondary series — warm gold so it stays distinct from the emerald primary
+const CHART_PRIMARY = MC.green;
+const CHART_PRIMARY_SOFT = MC.greenWash;
+const CHART_TEXT = MC.ink;
+const CHART_MUTED = MC.muted;
+const CHART_GREEN = MC.warn; // secondary series — amber so it stays distinct from the green primary
 
 export default function DCFModel({ tabId }: Props) {
   const tab = useModelStore(s => s.tabs[tabId]);
@@ -32,7 +33,7 @@ export default function DCFModel({ tabId }: Props) {
 
       {dcf && (
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-          <KPICard label="Enterprise Value" value={centsToDisplay(dcf.enterpriseValue)} color="var(--cd-pos)" />
+          <KPICard label="Enterprise Value" value={centsToDisplay(dcf.enterpriseValue)} color={MC.ok} />
           <KPICard label="PV of FCF" value={centsToDisplay(dcf.pvFCF.reduce((sum: number, value: number) => sum + value, 0))} />
           <KPICard label="PV Terminal" value={centsToDisplay(dcf.pvTerminal)} />
           <KPICard label="Terminal Value" value={centsToDisplay(dcf.terminalValue)} />
@@ -76,7 +77,7 @@ export default function DCFModel({ tabId }: Props) {
               },
               scales: {
                 x: { grid: { display: false }, ticks: { color: CHART_TEXT, font: { size: 10 } } },
-                y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => centsToDisplay(Number(v) * 100), color: CHART_MUTED, font: { size: 10 } } },
+                y: { grid: { color: MC.grid }, ticks: { callback: v => centsToDisplay(Number(v) * 100), color: CHART_MUTED, font: { size: 10 } } },
               },
             }}
           />
@@ -85,7 +86,7 @@ export default function DCFModel({ tabId }: Props) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: MC.muted }}>
             Cash Flow Inputs
           </h3>
           <ModelInput
@@ -116,7 +117,7 @@ export default function DCFModel({ tabId }: Props) {
         </div>
 
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: MC.muted }}>
             Discount & Terminal
           </h3>
           <ModelSlider
@@ -138,7 +139,7 @@ export default function DCFModel({ tabId }: Props) {
             format="percent"
           />
           {dcf && (a.discountRate ?? 0.10) <= (a.terminalGrowthRate ?? 0.02) && (
-            <p className="text-xs rounded-lg p-3 m-0" style={{ background: 'rgba(192, 86, 47, 0.10)', color: 'var(--cd-ink-2)' }}>
+            <p className="text-xs rounded-lg p-3 m-0" style={{ background: MC.badBg, color: MC.muted }}>
               Terminal growth must stay below the discount rate. The model keeps terminal value at zero until the inputs are valid.
             </p>
           )}
@@ -149,9 +150,9 @@ export default function DCFModel({ tabId }: Props) {
         <div className="overflow-x-auto">
           <table className="text-xs w-full" style={{ borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ borderBottom: '2px solid var(--cd-pos)' }}>
+              <tr style={{ borderBottom: `2px solid ${MC.green}` }}>
                 {['Year', 'Projected FCF', 'PV of FCF'].map(h => (
-                  <th key={h} style={{ padding: '6px 8px', textAlign: h === 'Year' ? 'left' : 'right', fontSize: 10, color: CHART_MUTED, textTransform: 'uppercase' }}>
+                  <th key={h} style={{ padding: '6px 8px', textAlign: h === 'Year' ? 'left' : 'right', fontSize: 11, color: CHART_MUTED, textTransform: 'uppercase' }}>
                     {h}
                   </th>
                 ))}
@@ -159,7 +160,7 @@ export default function DCFModel({ tabId }: Props) {
             </thead>
             <tbody>
               {projections.map((value, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid rgba(25, 24, 19, 0.12)' }}>
+                <tr key={i} style={{ borderBottom: `1px solid ${MC.border}` }}>
                   <td style={{ padding: '6px 8px', fontWeight: 600 }}>Year {i + 1}</td>
                   <td style={{ padding: '6px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{centsToDisplay(value)}</td>
                   <td style={{ padding: '6px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{centsToDisplay(dcf?.pvFCF?.[i] || 0)}</td>
@@ -167,7 +168,7 @@ export default function DCFModel({ tabId }: Props) {
               ))}
             </tbody>
           </table>
-          <p className="text-[10px] mt-2 mb-0" style={{ color: 'var(--m-on-surface-var)' }}>
+          <p className="text-[11px] mt-2 mb-0" style={{ color: MC.muted }}>
             Each input change creates a new model version; Yulia can compare EV cases across diligence, LOI, negotiation, and PMI.
           </p>
         </div>
