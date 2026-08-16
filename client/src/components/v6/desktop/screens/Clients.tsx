@@ -40,6 +40,7 @@ import {
 } from "../../../../lib/crm";
 import { MarkBadge, Pill, KpiCard, EmptyState, LoadingState } from "../primitives";
 import OutreachPanel from "./ClientsOutreach";
+import { ClientsList } from "./ClientsList";
 import { CONTACT_ROLES, ROLE_LABEL } from "../../../../hooks/useDealTasks";
 import { authHeaders } from "../../../../hooks/useAuth";
 import { useDraft } from "../../../../hooks/useDraft";
@@ -94,9 +95,11 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
   const [openId, setOpenId] = useState<number | null>(null);
   const [detailNonce, setDetailNonce] = useState(0);
   const [banner, setBanner] = useState<string | null>(null);
-  // Board = the ranked register ("who do I call next"); Outreach = the
-  // campaign machine ("what does the plan say I owe today", migration 120).
-  const [mode, setMode] = useState<"board" | "outreach">("board");
+  // List = the same ranked register on the kit grammar (APP_REDESIGN_TRAINLINE
+  // Phase 3) and the default; Board = the original table ("who do I call
+  // next"); Outreach = the campaign machine ("what does the plan say I owe
+  // today", migration 120).
+  const [mode, setMode] = useState<"list" | "board" | "outreach">("list");
 
   const crm = useCrmAccounts(user, filters, query);
 
@@ -133,7 +136,7 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
   // The two modes of the screen, one tab row above whichever is live.
   const modeTabs = (
     <div style={{ display: "flex", gap: 6, padding: "14px 22px 10px", flex: "none" }}>
-      {(["board", "outreach"] as const).map(k => (
+      {(["list", "board", "outreach"] as const).map(k => (
         <button
           key={k}
           type="button"
@@ -146,7 +149,7 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
             color: mode === k ? "#fff" : T.ink,
           }}
         >
-          {k === "board" ? "Board" : "Outreach"}
+          {k === "list" ? "List" : k === "board" ? "Board" : "Outreach"}
         </button>
       ))}
     </div>
@@ -218,6 +221,28 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
         onCta={seedPlan}
       />
     </div></div>;
+  }
+
+  // List mode sits BELOW the loading/error/empty guards on purpose: those three
+  // states are answered once, here, so the kit view can never render a "nothing
+  // matches" that is really a failed load or an unseeded board.
+  if (mode === "list") {
+    return (
+      <div style={root}>
+        {modeTabs}
+        <div style={{ flex: 1, minHeight: 0, overflow: "auto" }}>
+          <ClientsList
+            accounts={crm.accounts}
+            allCount={crm.all.length}
+            query={query} onQuery={setQuery}
+            filters={filters} onToggle={toggle}
+            onOpenBoard={id => { setMode("board"); setOpenId(id); setDetailNonce(n => n + 1); }}
+            onOpenDeal={(dealId, name) => nav.openDeal(dealId, name)}
+            onOpenSourcing={() => nav.go("sourcing")}
+          />
+        </div>
+      </div>
+    );
   }
 
   const s = crm.summary;

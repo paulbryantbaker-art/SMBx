@@ -1,18 +1,32 @@
 /**
- * Atlas — TODAY (view 0, full-bleed Gemini home, NO rail).
+ * TODAY — the working surface. NOT a chat home any more.
  *
- * Design: /tmp/atlas_maps/00 "SCREEN 1 — TODAY". Centered 920px column on
- * #fafbfd with a decorative glow blob, a 50px greeting, a hero composer that
- * sends to Yulia, four quick-action chips, and a two-column lower band:
- *   - "Needs your attention"  ← useNextActions (real gate/stale/review actions)
- *   - "Notifications"         ← useNotifications (real deal-team / deal-activity feed)
- *   plus a "Favorites" band   ← deals.all where isFavorite (real starred deals)
+ * Paul, 2026-08-15, looking at the live screen: *"the huge chat bar can go.. all
+ * i need is the sidebar chat in the tool pages"* and then *"i'm looking for
+ * complete redesign of the internal app."*
  *
- * Honesty: every value is a real hook field or an honest empty note. The old
- * "Yulia & your agents" column rendered non-clickable operating-brief items; it
- * is replaced (per the user) with the real, clickable Notifications feed and a
- * Favorites quick-access band. An authed user with no deals keeps the composer +
- * chips but gets a first-deal CTA instead of fabricated attention items.
+ * WHAT THIS SCREEN WAS. A 100dvh hero holding a 46px serif greeting, a 760px
+ * rounded composer with a drop shadow, four starter chips and an animated glow
+ * blob — the Gemini-home pattern. Everything a practitioner actually opens the
+ * app for (what is overdue, what is at risk, what moved) sat BELOW that fold.
+ * So the first screenful of the practice's own instrument was a text box, and
+ * you had to scroll past it to find out whether anything needed you.
+ *
+ * WHAT IT IS NOW. The day, above the fold. A one-line greeting, then the real
+ * figures, then what needs you — built on `../kit`, the same grammar Deals
+ * runs on: chips that carry their number, a row whose missing figure prints
+ * "Not available", an endorsement band that states its grounds, and a footer
+ * saying how the list is ordered.
+ *
+ * THE COMPOSER IS GONE FROM HERE, not deleted. Yulia lives in the right-hand
+ * rail on every screen (AtlasApp + AtlasChatRail, 2026-08-15) with a context
+ * chip and four per-screen suggestions. One chat surface, summoned, rather
+ * than one screen that IS a chat and five that are not.
+ *
+ * Data unchanged — useMobileDeals / useNextActions / useNotifications /
+ * useAdvisorMandates, the same hooks, the same honesty: every figure is real,
+ * a partial pipeline sum says it is partial, and a user with no deals gets a
+ * first-deal CTA rather than fabricated attention items.
  */
 import { useCallback, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
@@ -21,6 +35,7 @@ import { useAtlasNav, useAtlasChat } from "../atlasNav";
 import { T } from "../atlasTokens";
 import { MarkBadge, fmtCents } from "../primitives";
 import { PlusIcon, ChevronRightIcon, SendArrowIcon } from "../icons";
+import { CompareStrip, RankingNote } from "../kit";
 import { useMobileDeals } from "../../../../hooks/useMobileDeals";
 import { useNextActions, type NextAction } from "../../../../hooks/useNextActions";
 import { useNotifications, notifTimeAgo, type AppNotification } from "../../../../hooks/useNotifications";
@@ -95,19 +110,22 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
   const mandates = useAdvisorMandates(user);
   const notifs = useNotifications(canFetch);
 
-  const [composerValue, setComposerValue] = useState("");
-
-  const sendComposer = useCallback(() => {
-    const text = composerValue.trim();
-    if (!text || !chat) return;
-    chat.send(text);
-    setComposerValue("");
-  }, [composerValue, chat]);
-
   const first = firstNameOf(user?.display_name);
   const greeting = user
     ? `${timeGreeting()}, ${first ?? "there"}.`
     : `${timeGreeting()}.`;
+
+  /* The figures behind the day strip. Hoisted out of the render because the
+     strip needs them and so does the honest "partial sum" label — computing
+     them twice is how the label and the number drift apart. */
+  const valued = deals.all.filter((d) => d.askingPrice != null);
+  const pipelineCents = valued.reduce((sum, d) => sum + (d.askingPrice as number), 0);
+
+  /* The date line. Plain, and it replaces nothing — the old screen never said
+     what day it was, which a screen called Today probably should. */
+  const dayLine = new Date().toLocaleDateString(undefined, {
+    weekday: "long", month: "long", day: "numeric",
+  });
 
   const onAction = useCallback(
     (a: NextAction) => {
@@ -160,141 +178,85 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
         color: T.ink,
       }}
     >
-      {/* decorative glow blob — pointer-events none, behind content. Centered on
-          the composer via NEGATIVE MARGINS (half width / half height), NOT a
-          transform: the atlas-glow keyframe animates `transform: scale()`, which
-          would override an inline `translate(-50%,-50%)` and shove the blob
-          down-and-right. Margins are untouched by the animation, so centering
-          holds. left:50% + marginLeft:-450 = horizontal page-center;
-          top:46dvh + marginTop:-210 = vertical center landing on the composer. */}
-      {/* Aurora glow — jade, quiet (was Google blue→violet in rgb() components,
-          which the hex-sweep gate can't see; recolored with the Today calm
-          pass 2026-08-02). Same geometry, lower presence: the site's
-          pill-spotlight grammar, not a lava lamp. */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          top: "46dvh",
-          left: "50%",
-          marginLeft: -450,
-          marginTop: -210,
-          width: 960,
-          height: 440,
-          background:
-            "radial-gradient(ellipse at center, rgba(15,169,124,.20), rgba(10,122,88,.08) 45%, transparent 70%)",
-          filter: "blur(10px)",
-          animation: "atlas-glow 6s ease-in-out infinite",
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      />
+      {/* The animated glow blob is GONE. It was centred on the composer that no
+          longer exists, and an animating radial gradient behind a list of
+          overdue work is decoration competing with the content it sits under. */}
 
       <div
         style={{
           position: "relative",
           zIndex: 1,
-          width: 920,
-          maxWidth: "92%",
+          /* Was a 920px CENTRED column with `alignItems: center`, which is a
+             reading layout — right for a chat home, wrong for a working
+             surface where the eye should start at a fixed left edge on every
+             row. Left-aligned and wider, matching the Deals list. */
+          width: 1180,
+          maxWidth: "94%",
           margin: "0 auto",
-          padding: "0 0 64px",
+          padding: "18px 0 64px",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
+          alignItems: "stretch",
+          gap: 18,
         }}
       >
-        {/* HERO — greeting + composer vertically centered in the first screenful
-            so the Yulia composer is the focal point (the Gemini-home pattern);
-            the attention / agents band sits just below the fold. */}
-        <div
-          style={{
-            minHeight: "calc(100dvh - 132px)",
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-        {/* greeting — real display_name is unbounded, so wrap+clamp instead of
-            nowrap (a long single first name at 50px would clip the 920px column). */}
-        {/* Fraunces at 545 — the ONE serif display moment on this screen (the
-            Aurora × Cash App pass, 2026-08-02: working type stays the system
-            font; the greeting is Today's headline and earns the house face). */}
-        <h1
-          style={{
-            fontFamily: "'Fraunces', Georgia, serif",
-            fontSize: 46,
-            fontWeight: 545,
-            letterSpacing: "-.01em",
-            margin: "0 0 32px",
-            maxWidth: "100%",
-            textAlign: "center",
-            overflowWrap: "anywhere",
-            color: T.ink,
-          }}
-        >
-          {greeting}
-        </h1>
-
-        {/* hero composer */}
-        <HeroComposer
-          value={composerValue}
-          onChange={setComposerValue}
-          onSend={sendComposer}
-          disabled={!chat || chat.sending}
-        />
-
-        {/* quick-action chips */}
-        <div
-          style={{
-            display: "flex",
-            gap: 11,
-            marginTop: 22,
-            flexWrap: "wrap",
-            justifyContent: "center",
-          }}
-        >
-          {/* The pitch-deck chip pointed at Studio, which is out of the chrome
-              (STUDIO_IN_APP=false) — replaced with a pipeline read via chat,
-              the practice's actual daily ask. */}
-          <QuickChip
-            emoji="📊"
-            label="Read my pipeline"
-            onClick={() => chat?.send("Give me a read on my pipeline — what moved, what's stalled, what needs me this week?")}
-          />
-          <QuickChip emoji="🔍" label="Screen new targets" onClick={() => nav.go("sourcing")} />
-          <QuickChip emoji="📂" label="Summarize a data room" onClick={() => nav.go("files")} />
-          <QuickChip emoji="🤖" label="Set up an agent" onClick={() => nav.go("agent")} />
+        {/* THE DAY, ABOVE THE FOLD.
+            One line of greeting — not a 46px serif in a 100dvh block. The
+            practitioner opens this screen to find out whether anything needs
+            them, and that answer must not be below a text box. */}
+        <div style={{ width: "100%", marginTop: 8 }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color: T.ink, letterSpacing: "-.01em" }}>
+            {greeting}
+          </div>
+          <div style={{ fontSize: 12.5, color: T.muted, marginTop: 3 }}>
+            {dayLine}
+          </div>
         </div>
 
-        {/* HERO NUMBERS — the Cash App move: the state of the practice as two
-            or three big flat figures, no card chrome, straight on the page.
-            Every figure is REAL (honesty law): the pipeline sum only renders
-            when at least one deal carries an asking price, and a partial sum
-            says so in its label rather than posing as the whole book. */}
-        {deals.loaded && deals.hasData && (() => {
-          const valued = deals.all.filter((d) => d.askingPrice != null);
-          const pipelineCents = valued.reduce((s, d) => s + (d.askingPrice as number), 0);
-          const stat = (n: string, l: string) => (
-            <div key={l} style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 34, fontWeight: 700, color: T.ink, fontVariantNumeric: "tabular-nums", letterSpacing: "-.01em" }}>{n}</div>
-              <div style={{ fontSize: 13, color: T.muted, marginTop: 4 }}>{l}</div>
-            </div>
-          );
-          return (
-            <div style={{ display: "flex", gap: 56, marginTop: 34, justifyContent: "center", flexWrap: "wrap" }}>
-              {valued.length > 0 && stat(
-                fmtCents(pipelineCents),
-                valued.length === deals.all.length
+        {/* THE FIGURES, as a comparison strip rather than three centred
+            numerals. Same kit primitive the Deals stage strip uses, so the two
+            screens read as one instrument.
+
+            EVERY CELL CAN BE UNKNOWN, and unknown is not zero. A pipeline with
+            no priced deals renders the not-known glyph, never "$0" — a book
+            full of unpriced targets is a real and common state, and printing
+            $0 for it would be a fabricated figure in the most-read place on
+            the screen. Same for attention before useNextActions has loaded:
+            "nothing needs you" and "we have not checked yet" are different
+            facts and must not look alike. */}
+        <div style={{ width: "100%" }}>
+          <CompareStrip
+            items={[
+              {
+                id: "pipeline",
+                label: valued.length === deals.all.length
                   ? "Pipeline · asking"
                   : `Pipeline · ${valued.length} of ${deals.all.length} valued`,
-              )}
-              {stat(String(deals.all.length), deals.all.length === 1 ? "Deal in motion" : "Deals in motion")}
-              {next.loaded && stat(String(next.actions.length), next.actions.length === 1 ? "Needs your attention" : "Need your attention")}
-            </div>
-          );
-        })()}
+                value: valued.length > 0 ? fmtCents(pipelineCents) : null,
+                unknownWhy: deals.loaded
+                  ? "No deal on the board carries an asking price yet."
+                  : "Still loading the board.",
+              },
+              {
+                id: "deals",
+                label: deals.all.length === 1 ? "Deal in motion" : "Deals in motion",
+                value: deals.loaded ? String(deals.all.length) : null,
+                unknownWhy: "Still loading the board.",
+              },
+              {
+                id: "attention",
+                label: "Needs you",
+                value: next.loaded ? String(next.actions.length) : null,
+                unknownWhy: "Still checking what is due.",
+              },
+              {
+                id: "unread",
+                label: "Unread",
+                value: notifs.loaded ? String(notifs.notifications.length) : null,
+                unknownWhy: "Still loading notifications.",
+              },
+            ]}
+          />
         </div>
 
         {/* Multi-mandate roll-up — full-width band, advisors with 2+ sell-side
@@ -335,15 +297,19 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
             actionable, the activity feed second because it is ambient. The
             stack is capped at a readable width and centered — full-bleed 920px
             rows read as a spreadsheet, not a feed. */}
+        {/* Was `maxWidth: 680, margin: 0 auto` — a centred reading column under
+            a centred hero. With the hero gone the page has a left edge, and a
+            narrow centred stack under a full-width strip reads as a different
+            page. Two columns at this width: what needs you (actionable) beside
+            what happened (ambient), which is the Trainline list/detail split
+            applied to a dashboard. */}
         <div
           style={{
             width: "100%",
-            maxWidth: 680,
-            margin: "16px auto 0",
-            paddingTop: 30,
-            display: "flex",
-            flexDirection: "column",
-            gap: 34,
+            display: "grid",
+            gridTemplateColumns: "1.38fr 1fr",
+            gap: 24,
+            alignItems: "start",
           }}
         >
           <div>
@@ -370,106 +336,28 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
             />
           </div>
         </div>
+
+        {/* P9 — the honest footer. This screen ranks two lists and neither said
+            how. `useNextActions` decides what "needs you" means, and a reader
+            is entitled to know that before acting on the order. */}
+        <RankingNote
+          title="How Today is assembled"
+          ordering="Needs you is whatever the next-actions service returns for your deals — overdue gate work, stale deals and pending reviews — in the order it returns them. Nothing on this screen is re-ranked here."
+          caveats={[
+            "The pipeline figure sums only deals that carry an asking price, and its label says how many of the book that is. A board with no priced deals shows no total rather than a low one.",
+            "A figure that has not loaded yet shows as not-known, not as zero. Nothing needing you and nothing checked yet are different states.",
+          ]}
+        />
       </div>
     </div>
   );
 }
 
-/* ─── hero composer ───────────────────────────────────────── */
-
-function HeroComposer({
-  value,
-  onChange,
-  onSend,
-  disabled,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  onSend: () => void;
-  disabled: boolean;
-}) {
-  return (
-    <div
-      style={{
-        width: 760,
-        maxWidth: "100%",
-        background: T.white,
-        border: `1px solid ${T.border}`,
-        borderRadius: 34,
-        boxShadow: "0 12px 36px rgba(31,41,55,.13)",
-        padding: "8px 10px 8px 24px",
-        display: "flex",
-        alignItems: "center",
-        gap: 13,
-      }}
-    >
-      <PlusIcon size={24} c={T.muted} />
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            onSend();
-          }
-        }}
-        placeholder="Ask Yulia about a deal, or start something new"
-        aria-label="Ask Yulia"
-        style={{
-          flex: 1,
-          minWidth: 0,
-          border: "none",
-          outline: "none",
-          background: "transparent",
-          fontFamily: T.font,
-          fontSize: 17.5,
-          color: T.ink,
-          padding: "18px 0",
-        }}
-      />
-      {/* Model label. There is no model/persona switcher to wire to, so this is
-          a plain label — the design's `▾` chevron is dropped rather than left
-          implying an actionable dropdown that does nothing. */}
-      <span
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          color: T.label,
-          fontSize: 14,
-          fontWeight: 500,
-          padding: "0 8px",
-          flex: "none",
-          whiteSpace: "nowrap",
-        }}
-      >
-        Yulia Pro
-      </span>
-      <button
-        type="button"
-        onClick={onSend}
-        disabled={disabled || !value.trim()}
-        aria-label="Send to Yulia"
-        style={{
-          width: 50,
-          height: 50,
-          flex: "none",
-          borderRadius: "50%",
-          border: "none",
-          background: T.blue,
-          color: "#fff",
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: disabled || !value.trim() ? "default" : "pointer",
-          opacity: disabled || !value.trim() ? 0.55 : 1,
-          transition: "opacity .15s ease",
-        }}
-      >
-        <SendArrowIcon size={22} c="#fff" />
-      </button>
-    </div>
-  );
-}
+/* HeroComposer lived here — a 760px rounded composer with a 36px drop shadow,
+   the focal point of the old chat home. Deleted 2026-08-15 with the redesign:
+   Yulia is the right-hand rail on every screen now, so a second composer that
+   exists on exactly one screen is a second place to type the same thing. Git
+   history has it if the rail ever needs a wide variant. */
 
 /* ─── quick-action chip ───────────────────────────────────── */
 

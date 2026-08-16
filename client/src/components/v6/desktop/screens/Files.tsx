@@ -47,6 +47,7 @@ import {
   Sparkle,
 } from "../primitives";
 import { ChevronRightIcon, DownloadIcon, PlusIcon } from "../icons";
+import { FilesList } from "./FilesList";
 
 /* ─── scope ───────────────────────────────────────────────────
  * The design's scope toggle (My files / Shared with team / Data room ·
@@ -277,6 +278,10 @@ export default function FilesScreen({ view }: AtlasScreenProps) {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  // PHASE 3 (APP_REDESIGN_TRAINLINE.md): the kit view is the default; the
+  // original folder-rail view below stays reachable so the two can be compared
+  // honestly rather than from memory (the plan's §5 Q2 rule, as on Deals).
+  const [kitView, setKitView] = useState(true);
 
   // Per-folder document counts (drive the sub-list badges).
   const counts = useMemo(() => {
@@ -396,6 +401,20 @@ export default function FilesScreen({ view }: AtlasScreenProps) {
     );
   }
 
+  // ── Loaded: the kit view (default) ────────────────────────────────
+  if (kitView) {
+    return (
+      <div style={{ flex: 1, minWidth: 0, overflow: "auto" }}>
+        <FilesList
+          room={room}
+          dealLabel={dealLabel}
+          openDocument={openDataRoomDocument}
+          onClassicView={() => setKitView(false)}
+        />
+      </div>
+    );
+  }
+
   // ── Loaded: 198px sub-list + detail ───────────────────────────────
   return (
     <div style={{ flex: 1, minWidth: 0, display: "flex", overflow: "hidden" }}>
@@ -439,6 +458,23 @@ export default function FilesScreen({ view }: AtlasScreenProps) {
             }}
           >
             <PlusIcon size={13} c={T.blue} /> {uploading ? "Uploading…" : "Upload"}
+          </button>
+          {/* Back to the kit view (the default) — see the kitView note above. */}
+          <button
+            type="button"
+            onClick={() => setKitView(true)}
+            style={{
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              fontFamily: T.font,
+              fontSize: 12,
+              fontWeight: 600,
+              color: T.muted2,
+              padding: 0,
+            }}
+          >
+            List view
           </button>
           {/* Hidden picker — drives room.uploadFile into the open folder (or root). */}
           <input
