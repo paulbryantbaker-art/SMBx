@@ -44,6 +44,7 @@ const TABS: TabDef[] = ([
   { id: "deals", label: "Deals" },
   { id: "people", label: "People" },
   { id: "companies", label: "Companies" },
+  { id: "posting", label: "Posting" },
   { id: "reports", label: "Reports" },
   { id: "agent", label: "Agent" },
 ] as TabDef[]);

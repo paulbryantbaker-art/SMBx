@@ -21,6 +21,7 @@ export type AtlasScreen =
   | "people"
   | "companies"
   | "reports"
+  | "posting"
   | "studio"
   | "integration"
   | "files"

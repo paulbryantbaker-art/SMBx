@@ -262,3 +262,46 @@ export async function queuePerformance(userId: number): Promise<any[]> {
     WHERE q.user_id = ${userId} AND q.status = 'posted'
     ORDER BY q.posted_at DESC NULLS LAST`;
 }
+
+/**
+ * Import a CAMPAIGN file (content/studio/campaign-*.json) — the same
+ * state-preserving upsert as the queue import, plus a schedule map that fills
+ * dates ONLY where the row has none. A re-import proposes the plan's calendar
+ * once; it never moves a date a human set, for the same reason it never
+ * un-posts anything.
+ *
+ * (2026-08-16, Paul: "i have no way of managing the campaign schedule or what
+ * gets made and ready to post when" — the Aug 17 campaign is the first file.)
+ */
+export async function importCampaign(
+  userId: number,
+  file = path.resolve(process.cwd(), 'content/studio/campaign-2026-08-17.json'),
+): Promise<ImportResult & { scheduled: number; campaign: string | null }> {
+  let parsed: any;
+  try {
+    parsed = JSON.parse(await readFile(file, 'utf8'));
+  } catch (err: any) {
+    throw new Error(`Could not read ${path.relative(process.cwd(), file)}: ${err?.message}`);
+  }
+  const problems = validateQueue(parsed?.rows);
+  if (problems.length) {
+    throw new Error(`campaign file is malformed — nothing imported:\n  ${problems.join('\n  ')}`);
+  }
+
+  const result = await importQueue(userId, parsed.rows as QueueRow[]);
+
+  let scheduled = 0;
+  const schedule = parsed?.schedule ?? {};
+  for (const [qid, s] of Object.entries<any>(schedule)) {
+    const on = String(s?.on ?? '').slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(on)) continue;
+    const rows = await sql`
+      UPDATE post_queue
+      SET scheduled_for = ${on}, slot = ${typeof s?.slot === 'string' ? s.slot : null}, updated_at = NOW()
+      WHERE user_id = ${userId} AND queue_id = ${qid} AND scheduled_for IS NULL
+      RETURNING id`;
+    scheduled += rows.length;
+  }
+
+  return { ...result, scheduled, campaign: typeof parsed?.campaign === 'string' ? parsed.campaign : null };
+}
