@@ -330,7 +330,7 @@ export function ResultRow({
       style={{
         ...rowWrap,
         background: selected ? T.blueBg : T.white,
-        border: endorsed ? `1px solid ${T.blue}` : `1px solid transparent`,
+        border: endorsed ? `1.5px solid ${T.blue}` : `1.5px solid transparent`,
         borderBottom: endorsed ? `1px solid ${T.blue}` : `1px solid ${T.border}`,
         cursor: onClick ? "pointer" : "default",
       }}
@@ -546,7 +546,7 @@ export function OptionPair({ options, activeId, onPick }: {
   onPick?: (id: string) => void;
 }) {
   return (
-    <div style={{ display: "flex", border: `1px solid ${T.border}` }}>
+    <div style={{ display: "flex", border: `1px solid ${T.border}`, borderRadius: 8, overflow: "hidden" }}>
       {options.map((o, i) => {
         const on = o.id === activeId;
         return (
@@ -600,167 +600,217 @@ function Chevron({ dir }: { dir: "up" | "down" | "right" }) {
   );
 }
 
-/* ═══ styles ═════════════════════════════════════════════════════════════
- * Radius 0 throughout except buttons and inputs at 10 — Carta's one exception.
+/* ═══ styles — THE TRAINLINE TRANSCRIPTION (2026-08-16) ══════════════════
+ *
+ * Paul, after three "kit" passes still read as the old app: *"I want
+ * trainline UI and all I see is the same crap… This is it .. start over.
+ * Trainline UI is what i want."*
+ *
+ * He was right, and the miss is worth naming so it stays fixed: the kit
+ * carried the reference's GRAMMAR (strips, chips, group headers, honest
+ * absences) wearing the PUBLIC SITE's austerity — radius 0, hairline
+ * dividers, transparent cells. Trainline's actual surface is the opposite
+ * temperature: GREY-FILLED input cells, WHITE BORDERED SHEETS with rounded
+ * corners, 17px bold anchors, a DARK price card with a FILLED GREEN CTA.
+ * So these values are transcribed from his screenshots, not designed:
+ *
+ *   page      white, content centered in a bounded column (Page below)
+ *   inputs    filled cells (T.track), radius 8, bold 15px values
+ *   chips     white pills, radius 999, 14px, selected = green border + tint
+ *   sheet     white, 1px hair border, radius 8, overflow hidden
+ *   group     grey-filled header row inside the sheet
+ *   row       16.5px bold anchor · 12.5px meta with underlined link ·
+ *             fixed right-aligned 110px value columns
+ *   lead      the chosen price as a FILLED Deal-Green chip, white bold
+ *   dark card ink panel, radius 8, 30px price, filled green CTA
+ *
+ * COLOUR IS CARTA, SHAPE IS TRAINLINE. Their purple → Deal Green, their
+ * navy → ink, their yellow "Cheapest" → mint. The public site's radius-0 and
+ * green-never-a-resting-fill laws are SITE laws — the internal tool follows
+ * the reference Paul chose for it, and this comment is the sanction for both
+ * deviations so a future pass does not "correct" them back.
  */
 
+/** The bounded page column — Trainline centers ~1100px on white; full-bleed
+ *  left-aligned sheets were half of why the app read as "the same crap". */
+export function Page({ children }: { children: ReactNode }) {
+  return (
+    <div style={{ width: "100%", background: T.white, minHeight: "100%" }}>
+      <div style={{ maxWidth: 1128, margin: "0 auto", padding: "18px 24px 64px" }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/** The white bordered sheet every list lives in. */
+export function Sheet({ children, style }: { children: ReactNode; style?: CSSProperties }) {
+  return (
+    <div style={{
+      background: T.white, border: `1px solid ${T.border}`,
+      borderRadius: 8, overflow: "hidden", ...style,
+    }}>{children}</div>
+  );
+}
+
 const criteriaWrap: CSSProperties = {
-  display: "flex", alignItems: "stretch",
-  border: `1px solid ${T.border}`, background: T.white,
+  display: "flex", alignItems: "stretch", gap: 8,
 };
 const criteriaCell: CSSProperties = {
-  font: "inherit", textAlign: "left", background: "transparent", border: "none",
-  padding: "9px 13px", display: "flex", flexDirection: "column", gap: 2, minWidth: 0,
+  font: "inherit", textAlign: "left", background: T.track, border: "none",
+  borderRadius: 8, padding: "9px 14px",
+  display: "flex", flexDirection: "column", gap: 2, minWidth: 0,
 };
-const criteriaLabel: CSSProperties = { fontSize: 10.5, color: T.muted2, letterSpacing: ".02em" };
+const criteriaLabel: CSSProperties = { fontSize: 12, color: T.muted };
 const criteriaValue: CSSProperties = {
-  fontSize: 14, fontWeight: 700, color: T.ink,
+  fontSize: 15, fontWeight: 700, color: T.ink,
   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
 };
 const criteriaSearch: CSSProperties = {
-  flex: "none", width: 52, background: T.track, border: "none",
-  borderLeft: `1px solid ${T.border}`, color: T.ink, cursor: "pointer",
+  flex: "none", width: 56, background: T.blue, border: "none", borderRadius: 8,
+  color: "#fff", cursor: "pointer",
   display: "flex", alignItems: "center", justifyContent: "center",
 };
 
 const chipRowWrap: CSSProperties = {
-  display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap", marginTop: 12,
+  display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginTop: 14,
 };
 const chipStyle: CSSProperties = {
-  font: "inherit", fontSize: 12.5, display: "inline-flex", alignItems: "center", gap: 2,
-  padding: "6px 12px", borderRadius: 10, border: "1px solid", cursor: "pointer",
+  font: "inherit", fontSize: 14, display: "inline-flex", alignItems: "center", gap: 3,
+  padding: "9px 16px", borderRadius: 999, border: "1px solid", cursor: "pointer",
+  lineHeight: 1.2,
 };
-const chipValue: CSSProperties = { fontWeight: 500, marginLeft: 3 };
+const chipValue: CSSProperties = { fontWeight: 600, marginLeft: 4 };
 
-/* TIGHT AND LEFT, NOT SPREAD (2026-08-16). `flex: 1 1 0` stretched four cells
-   across 1100px of header and the strip stopped reading as a control at all —
-   it read as four numbers floating in a row, which is exactly how it looked on
-   the deployed screen. The reference's strip is ~800px wide holding seven
-   cells; density is what makes it scan as one object. Cells are now
-   content-width with a floor, and the strip stops where its content stops. */
 const compareWrap: CSSProperties = {
-  display: "flex", alignItems: "stretch", marginTop: 14,
+  display: "flex", alignItems: "stretch", marginTop: 16,
   borderBottom: `1px solid ${T.border}`, overflowX: "auto",
 };
 const compareCell: CSSProperties = {
   font: "inherit", background: "transparent", border: "none",
   flex: "0 0 auto",
-  padding: "7px 20px 8px 0", display: "flex", flexDirection: "column", gap: 2,
-  alignItems: "flex-start", minWidth: 104, marginBottom: -1, textAlign: "left",
+  padding: "8px 20px 10px", display: "flex", flexDirection: "column", gap: 3,
+  alignItems: "center", minWidth: 116, marginBottom: -1, textAlign: "center",
 };
-const compareWhy: CSSProperties = {
-  fontSize: 10.5, color: T.muted2, lineHeight: 1.3, maxWidth: 150,
-};
-const compareLabel: CSSProperties = { fontSize: 12.5, whiteSpace: "nowrap" };
+const compareLabel: CSSProperties = { fontSize: 14, whiteSpace: "nowrap" };
 const compareValue: CSSProperties = {
-  fontSize: 13, fontWeight: 700, color: T.ink, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap",
+  fontSize: 15, fontWeight: 700, color: T.ink, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap",
 };
 const compareUnknown: CSSProperties = {
-  color: T.muted2, fontSize: 15, lineHeight: "17px", height: 17, fontWeight: 700,
+  color: T.muted2, fontSize: 15, lineHeight: "18px", height: 18, fontWeight: 700,
+};
+const compareWhy: CSSProperties = {
+  fontSize: 11, color: T.muted2, lineHeight: 1.3, maxWidth: 150,
 };
 
-const ldWrap: CSSProperties = { display: "flex", gap: 18, alignItems: "flex-start", minHeight: 0 };
-const ldList: CSSProperties = { flex: "1.38 1 0", minWidth: 0 };
-const ldDetail: CSSProperties = { flex: "1 1 0", minWidth: 0, position: "sticky", top: 12 };
+const ldWrap: CSSProperties = { display: "flex", gap: 22, alignItems: "flex-start", minHeight: 0 };
+const ldList: CSSProperties = { flex: "1.32 1 0", minWidth: 0 };
+const ldDetail: CSSProperties = { flex: "1 1 0", minWidth: 0, position: "sticky", top: 14 };
 const ldEmpty: CSSProperties = {
-  padding: "22px 18px", border: `1px solid ${T.border}`, background: T.white,
-  fontSize: 12.5, color: T.muted, lineHeight: 1.6,
+  padding: "20px 18px", border: `1px solid ${T.border}`, borderRadius: 8,
+  background: T.white, fontSize: 13.5, color: T.muted, lineHeight: 1.6,
 };
 
 const groupHeadWrap: CSSProperties = {
   display: "flex", alignItems: "center", justifyContent: "space-between",
-  padding: "8px 12px", background: T.track,
-  borderTop: `1px solid ${T.border}`, borderBottom: `1px solid ${T.border}`,
+  padding: "10px 16px", background: T.track,
+  borderBottom: `1px solid ${T.border}`,
 };
-const groupTitle: CSSProperties = { fontSize: 12.5, fontWeight: 700, color: T.ink };
+const groupTitle: CSSProperties = { fontSize: 14.5, fontWeight: 700, color: T.ink };
 const groupCol: CSSProperties = {
-  fontSize: 11, fontWeight: 700, color: T.muted2, width: 104, textAlign: "right",
+  fontSize: 13, fontWeight: 600, color: T.muted, width: 110, textAlign: "right",
 };
 
 const rowWrap: CSSProperties = {
-  display: "flex", alignItems: "center", gap: 12, padding: "11px 12px",
+  display: "flex", alignItems: "center", gap: 14, padding: "14px 16px",
+  borderBottom: `1px solid ${T.border}`,
 };
 const rowAnchor: CSSProperties = {
-  fontSize: 15, fontWeight: 700, color: T.ink, letterSpacing: "-0.005em",
+  fontSize: 16.5, fontWeight: 700, color: T.ink, letterSpacing: "-0.005em",
   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
 };
-const rowSub: CSSProperties = { fontSize: 11.5, color: T.muted, marginTop: 2 };
+const rowSub: CSSProperties = { fontSize: 12.5, color: T.muted, marginTop: 3 };
 const rowIdentity: CSSProperties = { flex: "none", display: "flex", flexDirection: "column", gap: 2, alignItems: "flex-start" };
 const rowCell: CSSProperties = {
-  width: 104, flex: "none", display: "flex", flexDirection: "column",
-  alignItems: "flex-end", gap: 2,
+  width: 110, flex: "none", display: "flex", flexDirection: "column",
+  alignItems: "flex-end", gap: 3,
 };
-const rowValue: CSSProperties = { fontSize: 13, color: T.ink, fontVariantNumeric: "tabular-nums" };
+const rowValue: CSSProperties = { fontSize: 14.5, color: T.ink, fontVariantNumeric: "tabular-nums" };
+/* The chosen figure as Trainline renders it: a FILLED accent chip, white bold. */
 const rowLead: CSSProperties = {
-  fontSize: 13, fontWeight: 700, color: T.white, background: T.ink,
-  padding: "4px 8px", fontVariantNumeric: "tabular-nums",
+  fontSize: 14.5, fontWeight: 700, color: "#fff", background: T.blue,
+  padding: "6px 10px", borderRadius: 6, fontVariantNumeric: "tabular-nums",
 };
-const rowUnavailable: CSSProperties = { fontSize: 12, color: T.muted2 };
+const rowUnavailable: CSSProperties = { fontSize: 13, color: T.muted2 };
 const rowBadge: CSSProperties = {
-  fontSize: 9.5, fontWeight: 700, letterSpacing: ".04em", textTransform: "uppercase",
-  background: T.blueBg, color: T.blue, padding: "1px 5px",
+  fontSize: 10, fontWeight: 700, letterSpacing: ".03em", textTransform: "uppercase",
+  background: T.blueBg, color: T.blue, padding: "2px 6px", borderRadius: 4,
 };
-const rowNote: CSSProperties = { fontSize: 10.5, color: T.amber };
+const rowNote: CSSProperties = { fontSize: 11, color: T.amber };
 
 const endorseWrap: CSSProperties = {
-  position: "relative", padding: "8px 12px", background: T.blueBg,
-  borderTop: `1px solid ${T.border}`, fontSize: 12, color: T.ink, lineHeight: 1.5,
+  position: "relative", padding: "9px 14px", background: T.blueBg,
+  fontSize: 13, color: T.ink, lineHeight: 1.5,
 };
-/* The notch. A rotated square hanging off the bottom edge, so the band points
-   at the row it endorses rather than merely sitting above it. */
 const endorseNotch: CSSProperties = {
-  position: "absolute", left: 26, bottom: -5, width: 10, height: 10,
-  background: T.blueBg, transform: "rotate(45deg)",
+  position: "absolute", left: 28, bottom: -5, width: 10, height: 10,
+  background: T.blueBg, transform: "rotate(45deg)", zIndex: 1,
 };
 
 const expanderWrap: CSSProperties = {
-  font: "inherit", fontSize: 12.5, fontWeight: 600, color: T.ink,
-  width: "100%", padding: "10px 0", background: T.white,
-  border: `1px solid ${T.border}`, cursor: "pointer",
-  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+  font: "inherit", fontSize: 14, fontWeight: 600, color: T.ink,
+  width: "100%", padding: "12px 0", background: T.white, marginTop: 8,
+  border: `1px solid ${T.border}`, borderRadius: 8, cursor: "pointer",
+  display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
 };
 
-const rankWrap: CSSProperties = { marginTop: 20, maxWidth: 640 };
-const rankTitle: CSSProperties = { fontSize: 13, fontWeight: 700, color: T.ink, marginBottom: 5 };
-const rankBody: CSSProperties = { margin: "0 0 6px", fontSize: 12, color: T.muted, lineHeight: 1.6 };
+const rankWrap: CSSProperties = { marginTop: 22, maxWidth: 680 };
+const rankTitle: CSSProperties = { fontSize: 15, fontWeight: 700, color: T.ink, marginBottom: 6 };
+const rankBody: CSSProperties = { margin: "0 0 7px", fontSize: 13, color: T.muted, lineHeight: 1.6 };
 
+/* The dark price card — Trainline's navy panel in Carta's ink, with the CTA
+ * as a FILLED green button (theirs is literally green; ours is Deal Green). */
 const sumWrap: CSSProperties = {
-  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14,
-  padding: "15px 16px", background: "#181818", color: T.white,
+  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16,
+  padding: "18px 20px", background: "#181818", color: "#fff", borderRadius: 8,
 };
-const sumKicker: CSSProperties = { fontSize: 11.5, color: "#B9BDBF" };
-const sumValue: CSSProperties = { fontSize: 27, fontWeight: 700, letterSpacing: "-0.02em", marginTop: 1 };
+const sumKicker: CSSProperties = { fontSize: 13, color: "#B9BDBF" };
+const sumValue: CSSProperties = { fontSize: 30, fontWeight: 800, letterSpacing: "-0.02em", marginTop: 2 };
 const sumBadge: CSSProperties = {
-  display: "inline-block", marginTop: 5, fontSize: 9.5, fontWeight: 700,
-  letterSpacing: ".05em", textTransform: "uppercase",
-  background: "#A8F0CE", color: "#0A3D2C", padding: "2px 6px",
+  display: "inline-block", marginTop: 6, fontSize: 10.5, fontWeight: 700,
+  letterSpacing: ".04em", textTransform: "uppercase",
+  background: "#A8F0CE", color: "#0A3D2C", padding: "2px 7px", borderRadius: 4,
 };
-const sumSub: CSSProperties = { fontSize: 11.5, color: "#B9BDBF", marginTop: 5 };
+const sumSub: CSSProperties = { fontSize: 12.5, color: "#B9BDBF", marginTop: 6 };
 const sumAction: CSSProperties = {
-  font: "inherit", fontSize: 13.5, fontWeight: 700, color: T.white,
-  background: T.blue, border: "none", borderRadius: 10, padding: "11px 16px",
-  cursor: "pointer", flex: "none", display: "inline-flex", alignItems: "center", gap: 6,
+  font: "inherit", fontSize: 16, fontWeight: 700, color: "#fff",
+  background: T.blue, border: "none", borderRadius: 8, padding: "14px 22px",
+  cursor: "pointer", flex: "none", display: "inline-flex", alignItems: "center", gap: 8,
 };
 
-const infoWrap: CSSProperties = { padding: "10px 13px", fontSize: 12, color: T.ink, lineHeight: 1.55 };
+const infoWrap: CSSProperties = {
+  padding: "11px 14px", fontSize: 13, color: T.ink, lineHeight: 1.55, borderRadius: 8,
+};
 
 const detailHead: CSSProperties = {
-  display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 7,
+  display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 8,
 };
-const detailTitle: CSSProperties = { fontSize: 15, fontWeight: 700, color: T.ink };
-const detailBody: CSSProperties = { border: `1px solid ${T.border}`, background: T.white, padding: "13px 14px" };
+const detailTitle: CSSProperties = { fontSize: 17, fontWeight: 700, color: T.ink };
+const detailBody: CSSProperties = {
+  border: `1px solid ${T.border}`, borderRadius: 8, background: T.white, padding: "15px 16px",
+};
 
-const tlWrap: CSSProperties = { display: "flex", gap: 11 };
+const tlWrap: CSSProperties = { display: "flex", gap: 12 };
 const tlRail: CSSProperties = { display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 5, flex: "none" };
-const tlDot: CSSProperties = { width: 7, height: 7, borderRadius: 999, background: T.muted2, flex: "none" };
-const tlLine: CSSProperties = { width: 1, flex: 1, minHeight: 26, background: T.border };
-const tlPoint: CSSProperties = { fontSize: 12.5, color: T.ink };
-const tlMiddle: CSSProperties = { fontSize: 11.5, color: T.muted, padding: "7px 0" };
+const tlDot: CSSProperties = { width: 8, height: 8, borderRadius: 999, background: T.muted2, flex: "none" };
+const tlLine: CSSProperties = { width: 2, flex: 1, minHeight: 28, background: T.border, borderRadius: 2 };
+const tlPoint: CSSProperties = { fontSize: 13.5, color: T.ink };
+const tlMiddle: CSSProperties = { fontSize: 12.5, color: T.muted, padding: "8px 0" };
 
 const optWrap: CSSProperties = {
-  font: "inherit", flex: "1 1 0", padding: "10px 12px", background: T.white,
-  border: "none", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 2,
+  font: "inherit", flex: "1 1 0", padding: "13px 14px", background: T.white,
+  border: "none", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 3,
 };
-const optLabel: CSSProperties = { fontSize: 12, fontWeight: 700, color: T.ink };
-const optValue: CSSProperties = { fontSize: 13.5, color: T.ink, fontVariantNumeric: "tabular-nums" };
-const optNote: CSSProperties = { fontSize: 11, color: T.muted };
+const optLabel: CSSProperties = { fontSize: 13.5, fontWeight: 700, color: T.ink };
+const optValue: CSSProperties = { fontSize: 14.5, color: T.ink, fontVariantNumeric: "tabular-nums" };
+const optNote: CSSProperties = { fontSize: 11.5, color: T.muted };

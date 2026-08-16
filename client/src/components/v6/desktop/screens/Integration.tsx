@@ -277,6 +277,7 @@ export default function IntegrationScreen({ view }: AtlasScreenProps) {
       />
       <IntegrationViewToggle view={pmiView} onView={setPmiView} />
       {pmiView === "list" ? (
+        <div style={{ maxWidth: 1128, margin: "0 auto", padding: "18px 24px 64px", background: "#fff" }}>
         <IntegrationList
           dealName={dealName}
           plan={plan}
@@ -284,6 +285,7 @@ export default function IntegrationScreen({ view }: AtlasScreenProps) {
           milestones={milestones}
           onUpdate={updateWorkstream}
         />
+        </div>
       ) : (
         <>
           <MilestoneTimeline workstreams={workstreams} milestones={milestones} />

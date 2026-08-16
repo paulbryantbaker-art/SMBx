@@ -1226,12 +1226,12 @@ const detailScroll: CSSProperties = {
 };
 
 const pickHint: CSSProperties = {
-  padding: "18px 16px", border: `1px solid ${T.border}`, background: T.white,
+  padding: "18px 16px", border: `1px solid ${T.border}`, borderRadius: 8, overflow: "hidden", background: T.white,
   fontSize: 12.5, color: T.muted, lineHeight: 1.6,
 };
 
 const noRows: CSSProperties = {
-  padding: "26px 14px", border: `1px solid ${T.border}`, background: T.white,
+  padding: "26px 14px", border: `1px solid ${T.border}`, borderRadius: 8, overflow: "hidden", background: T.white,
   fontSize: 12.5, color: T.muted, lineHeight: 1.6,
 };
 

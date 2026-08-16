@@ -418,6 +418,7 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
       onAdd={() => chat?.send("I want to add a new deal.")}
       onOpenFiles={() => nav.go("files")}
       onOpenIntegration={() => nav.go("integration")}
+      compact={effectiveView === "list"}
     />
   );
 
@@ -561,6 +562,7 @@ function Toolbar({
   onAdd,
   onOpenFiles,
   onOpenIntegration,
+  compact = false,
 }: {
   query: string;
   onSearch: (v: string) => void;
@@ -579,6 +581,11 @@ function Toolbar({
   onAdd: () => void;
   onOpenFiles: () => void;
   onOpenIntegration: () => void;
+  /* List mode: the kit view carries its own criteria bar (search) and chips,
+     so the legacy toolbar renders only what the list lacks — the view toggle,
+     the scope, the Dealflow doors and Add deal. Two search boxes an inch
+     apart was part of what still read as the old app. */
+  compact?: boolean;
 }) {
   return (
     <div
@@ -591,8 +598,8 @@ function Toolbar({
         flex: "none",
       }}
     >
-      {/* search field */}
-      <label
+      {/* search field — hidden in list mode; the kit criteria bar has one */}
+      {!compact && <label
         style={{
           width: 300,
           height: 38,
@@ -626,10 +633,10 @@ function Toolbar({
             fontFamily: T.font,
           }}
         />
-      </label>
+      </label>}
 
       {/* filter chips */}
-      <div style={{ display: "flex", gap: 7 }}>
+      {!compact && <div style={{ display: "flex", gap: 7 }}>
         {FILTERS.map((f) => {
           const active = f.id === filter;
           return (
@@ -681,7 +688,7 @@ function Toolbar({
             <option value="none">Unassigned</option>
           </select>
         )}
-      </div>
+      </div>}
 
       <div style={{ flex: 1 }} />
 

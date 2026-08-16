@@ -208,16 +208,11 @@ export function AtlasHeader({
         {hasNotifications && <span style={S.notifDot} />}
       </button>
 
-      <button
-        type="button"
-        style={S.upgrade}
-        onClick={() => nav.openSettings("billing")}
-        onMouseEnter={(e) => (e.currentTarget.style.background = T.navActive)}
-        onMouseLeave={(e) => (e.currentTarget.style.background = T.blueBg)}
-      >
-        <Mark height={13} />
-        Upgrade
-      </button>
+      {/* The Upgrade pill is GONE (2026-08-16). It routed to a billing pane in
+          an app where nothing charges money — practice mode short-circuits
+          every plan to enterprise, and rule 1 is that the app is never sold.
+          Product-era chrome in the practice's own header, spotted in Paul's
+          screenshot of the deployed app. */}
 
       <div ref={acctRef} style={S.acctWrap}>
         <button
@@ -270,15 +265,17 @@ function hoverIconOff(e: { currentTarget: HTMLElement }) {
 }
 
 const S: Record<string, CSSProperties> = {
+  /* TRAINLINE CHROME (2026-08-16): white bar, hairline bottom, logo left and
+     everything else pushed RIGHT — their header is logo … links · burger ·
+     sign-in, with all the weight on the right edge. */
   header: {
-    height: 58,
+    height: 64,
     flex: "none",
     display: "flex",
     alignItems: "center",
-    gap: 9,
-    padding: "0 16px",
-    // No bottom hairline — the canvas below fades from white at the top
-    // (detailRegion gradient), so the nav meets the content seamlessly.
+    gap: 10,
+    padding: "0 24px",
+    borderBottom: `1px solid ${T.border}`,
     background: T.white,
   },
   logo: { display: "flex", alignItems: "center", gap: 9, marginRight: 6, flex: "none" },
@@ -348,15 +345,14 @@ const S: Record<string, CSSProperties> = {
     transition: "color .12s ease",
   },
   tab: {
+    font: "inherit",
+    fontSize: 14.5,
+    fontWeight: 600,
     border: "none",
-    borderRadius: T.rPill,
-    padding: "7px 12px",
-    fontSize: 14,
+    background: "transparent",
+    padding: "9px 13px",
+    borderRadius: 999,
     cursor: "pointer",
-    fontFamily: T.font,
-    whiteSpace: "nowrap",
-    flex: "none",
-    transition: "background .12s ease, color .12s ease",
   },
   iconBtn: {
     border: "none",
@@ -380,22 +376,7 @@ const S: Record<string, CSSProperties> = {
     background: T.blue,
     border: "1.5px solid #fff",
   },
-  upgrade: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 7,
-    background: T.blueBg,
-    color: T.blue,
-    border: "none",
-    borderRadius: T.rPill,
-    padding: "7px 14px",
-    fontSize: 13,
-    fontWeight: 600,
-    cursor: "pointer",
-    fontFamily: T.font,
-    flex: "none",
-    transition: "background .12s ease",
-  },
+
   avatarBtn: {
     border: "none",
     background: "transparent",

@@ -35,7 +35,7 @@ import { useAtlasNav, useAtlasChat } from "../atlasNav";
 import { T } from "../atlasTokens";
 import { MarkBadge, fmtCents } from "../primitives";
 import { PlusIcon, ChevronRightIcon, SendArrowIcon } from "../icons";
-import { CompareStrip, RankingNote, GroupHeader, ResultRow, Endorsement } from "../kit";
+import { CompareStrip, RankingNote, GroupHeader, ResultRow, Endorsement, Sheet } from "../kit";
 import { useMobileDeals } from "../../../../hooks/useMobileDeals";
 import { useNextActions, type NextAction } from "../../../../hooks/useNextActions";
 import { useNotifications, notifTimeAgo, type AppNotification } from "../../../../hooks/useNotifications";
@@ -65,10 +65,12 @@ function timeGreeting(): string {
    read as Atlas rather than as the reference. */
 const listBox: CSSProperties = {
   border: `1px solid ${T.border}`,
+  borderRadius: 8,
+  overflow: "hidden",
   background: T.white,
 };
 const emptyBox: CSSProperties = {
-  border: `1px solid ${T.border}`, background: T.white,
+  border: `1px solid ${T.border}`, borderRadius: 8, background: T.white,
   padding: "22px 16px", fontSize: 12.5, color: T.muted, lineHeight: 1.6,
 };
 const moreRow: CSSProperties = {
@@ -172,7 +174,7 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
              reading layout — right for a chat home, wrong for a working
              surface where the eye should start at a fixed left edge on every
              row. Left-aligned and wider, matching the Deals list. */
-          width: 1180,
+          width: 1128,
           maxWidth: "94%",
           margin: "0 auto",
           padding: "18px 0 64px",
