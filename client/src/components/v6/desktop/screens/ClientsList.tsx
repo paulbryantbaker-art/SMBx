@@ -82,6 +82,8 @@ import {
   Endorsement, Expander, RankingNote, SummaryCard, DetailCard, InfoBanner,
   type Chip, type CompareItem, type CriteriaCell,
 } from "../kit";
+import { EngagementCard } from "./EngagementCard";
+import { LeadsPanel } from "./LeadsPanel";
 import {
   CRM_STAGES, STAGE_LABEL, MOMENT_LABEL, MOMENT_WHY, SEGMENT_LABEL,
   PITCH_LABEL, GRADE_LABEL, dueLabel, touchLabel, daysUntil,
@@ -110,7 +112,7 @@ const LAYERS = [
 
 export function ClientsList({
   accounts, allCount, query, onQuery, filters, onToggle,
-  onOpenBoard, onOpenDeal, onOpenSourcing,
+  onOpenBoard, onOpenDeal, onOpenSourcing, onLeadConverted,
 }: {
   /** Already server-filtered and search-filtered by `Clients.tsx`. */
   accounts: CrmAccount[];
@@ -122,6 +124,9 @@ export function ClientsList({
   onToggle: (k: keyof CrmFilters, v: string | boolean) => void;
   /** The full editable dossier lives on the Board; this hands off to it. */
   onOpenBoard: (id: number) => void;
+  /** Called after a funnel lead converts, so the parent refetches the board
+   *  and the new account appears in the list without a reload. */
+  onLeadConverted: () => void;
   onOpenDeal: (dealId: number, name?: string) => void;
   onOpenSourcing: () => void;
 }) {
@@ -382,10 +387,20 @@ export function ClientsList({
       <div style={{ marginTop: 16 }}>
         <ListDetail
           detailEmpty={
-            <>
-              Pick a firm to see who is named there, what was said last, and why
-              it ranks where it does. The list stays where it is.
-            </>
+            /* THE EMPTY PANEL IS THE FUNNEL INBOX (2026-08-16). "Select a row"
+               was a slot with nothing to say; the leads the practice site has
+               been capturing into a table nobody worked (§3 gap 2) are the
+               right thing to say. Converting selects nothing automatically —
+               the practitioner lands on a fresh account by finding it in the
+               list, which also proves the conversion actually wrote a row. */
+            <div>
+              <p style={{ margin: "0 0 10px", fontSize: 12.5, color: T.muted, lineHeight: 1.6 }}>
+                Pick a firm to see who is named there, what was said last, and
+                why it ranks where it does. Meanwhile — what the Acquisition
+                Engine has brought in:
+              </p>
+              <LeadsPanel onConverted={() => onLeadConverted()} />
+            </div>
           }
           detail={selected ? (
             <div style={detailScroll}>
@@ -673,6 +688,13 @@ function ClientDetail({ account, onOpenBoard, onOpenDeal, onOpenSourcing }: {
           rather than on the row because on every board in existence it reads
           the same, and because the useful thing to say about it is a paragraph,
           not a pill. */}
+      {/* THE ENGAGEMENT — the relationship's most load-bearing fact, so it
+          reads before the diagnostics: is this firm a mandate or a prospect,
+          and what does the retainer stand at. */}
+      <DetailCard title="Engagement">
+        <EngagementCard accountId={account.id} />
+      </DetailCard>
+
       <DetailCard title="Buy signal">
         <div style={{ fontSize: 13.5, fontWeight: 700, color: T.ink }}>
           {MOMENT_LABEL[moment] ?? "Unknown"}
@@ -814,13 +836,19 @@ function ClientDetail({ account, onOpenBoard, onOpenDeal, onOpenSourcing }: {
 
         {searches.length === 0 ? (
           <p style={{ ...p, marginBottom: 0 }}>
-            No buy-box set up for them. Create one in Sourcing and pick this
-            client — the candidates and any deal that comes out of it then
-            belong to them.
+            No buy-box set up for them. Target screening lives in the local
+            workspace now (scripts/studio/screen.mts) — a buy-box built there
+            lands its candidates here when the deals are created.
           </p>
-        ) : searches.map(s => (
-          <button key={s.id} type="button" onClick={onOpenSourcing} style={linkRow}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: T.blue }}>{s.name} →</div>
+        ) : /* NOT A LINK ANY MORE (2026-08-16). These rows used to
+               nav.go("sourcing"), and Phase A deleted that screen — target
+               discovery lives in the local workspace (screen.mts) now. A
+               button routing to a deleted screen falls through to the default
+               view and reads as a broken app, so each thesis renders as a
+               RECORD: the name, the shape, the counts. */
+        searches.map(s => (
+          <div key={s.id} style={linkRow}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: T.ink }}>{s.name}</div>
             <div style={{ fontSize: 11.5, color: T.muted2 }}>
               {[
                 s.industry, s.geography,
@@ -828,7 +856,7 @@ function ClientDetail({ account, onOpenBoard, onOpenDeal, onOpenSourcing }: {
                 s.is_active === false ? "paused" : null,
               ].filter(Boolean).join(" · ")}
             </div>
-          </button>
+          </div>
         ))}
         </>)}
       </DetailCard>

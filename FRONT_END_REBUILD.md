@@ -8,7 +8,7 @@
 | A | the sweep — 27 files, 19,074 lines | **done** |
 | — | the real logo everywhere + the retired-hex gate | **done** |
 | B | two-function nav — Files + Integration inside Dealflow | **done** |
-| C | CRM on the kit | **partial** — `ClientsList` is the kit CRM; the engagement object and Lead→Account conversion (§3) are schema work, not started |
+| C | CRM on the kit | **done at the spine** — `ClientsList` + the engagement object (`house/engagement.ts`, migration 129, `routes/engagements.ts`, the Engagement card) + Lead→Account conversion (the empty detail panel is the funnel inbox). Contacts/outreach density passes remain open-ended polish |
 | D | the gate-stack deal page (§4) | **core done** — `GET /api/deals/:id/gates` + `GateStackPanel`, mounted in the Deals detail; slot-level VALUES (running a computed slot from the row) not started |
 | E | mobile absorbed into one app (§9) | not started |
 **Scope:** the internal app's FRONT END only. The server, the schema,
