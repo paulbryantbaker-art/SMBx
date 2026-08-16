@@ -786,6 +786,78 @@ crmRouter.post('/crm/accounts/:id/activity', async (req, res) => {
   }
 });
 
+/* ── single add — the paste-first path ────────────────────────────────── */
+
+/**
+ * POST /api/crm/accounts — create ONE firm, optionally with its first person.
+ *
+ * (2026-08-16, Paul, looking at an empty register: "I dont see how to paste
+ * a linkedin contact." The paste box lived on the firm's dossier — but his
+ * workflow starts with a PERSON, a LinkedIn connection, and there was no way
+ * to create the firm from the person. The importer, the seed and the funnel
+ * were the only writers; a register you cannot add one row to by hand is a
+ * register that fights its owner.)
+ *
+ * If a firm with the same name (case-insensitive) already exists, the person
+ * is added to IT and the response says so — pasting the second partner at a
+ * fund must not mint a duplicate account.
+ */
+crmRouter.post('/crm/accounts', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const firm = String(req.body?.firm ?? '').trim();
+    if (!firm) return res.status(400).json({ error: 'firm is required — the person needs a company to belong to' });
+
+    const [existing] = await sql`
+      SELECT id, firm FROM crm_accounts
+      WHERE user_id = ${userId} AND LOWER(firm) = ${firm.toLowerCase()} AND archived = FALSE
+      LIMIT 1
+    `;
+
+    let account = existing;
+    let reused = !!existing;
+    if (!account) {
+      const kind = typeof req.body?.kind === 'string'
+        && (ACCOUNT_KINDS as readonly string[]).includes(req.body.kind) ? req.body.kind : 'acquirer';
+      [account] = await sql`
+        INSERT INTO crm_accounts
+          (user_id, firm, kind, stage, stage_entered_at, hq_city, hq_state, notes)
+        VALUES
+          (${userId}, ${firm.slice(0, 200)}, ${kind}, 'lead', NOW(),
+           ${typeof req.body?.hq_city === 'string' ? req.body.hq_city.slice(0, 120) : null},
+           ${typeof req.body?.hq_state === 'string' ? req.body.hq_state.slice(0, 60) : null},
+           ${typeof req.body?.notes === 'string' ? req.body.notes.slice(0, 2000) : null})
+        RETURNING *
+      `;
+    }
+
+    let contact = null;
+    const c = req.body?.contact;
+    if (c && typeof c?.name === 'string' && c.name.trim()) {
+      [contact] = await sql`
+        INSERT INTO crm_contacts (account_id, name, title, role, email, linkedin_url, is_primary)
+        VALUES (${account.id}, ${c.name.trim().slice(0, 200)},
+                ${typeof c.title === 'string' ? c.title.slice(0, 200) || null : null},
+                ${typeof c.role === 'string' ? c.role || null : null},
+                ${typeof c.email === 'string' ? c.email.trim() || null : null},
+                ${typeof c.linkedin_url === 'string' ? c.linkedin_url.trim() || null : null},
+                TRUE)
+        ON CONFLICT (account_id, lower(name)) DO UPDATE SET
+          title = COALESCE(EXCLUDED.title, crm_contacts.title),
+          email = COALESCE(EXCLUDED.email, crm_contacts.email),
+          linkedin_url = COALESCE(EXCLUDED.linkedin_url, crm_contacts.linkedin_url),
+          updated_at = NOW()
+        RETURNING *
+      `;
+    }
+
+    return res.json({ account, contact, reused });
+  } catch (err: any) {
+    console.error('CRM single-add error:', err.message);
+    return res.status(500).json({ error: 'Failed to add the firm' });
+  }
+});
+
 /* ── the reset ────────────────────────────────────────────────────────── */
 
 /**
