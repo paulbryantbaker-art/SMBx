@@ -90,6 +90,7 @@ import {
   type CrmAccount, type CrmStage,
 } from "../../../../lib/crm";
 import { useCrmAccount, type CrmFilters } from "../../../../hooks/useCrmAccounts";
+import { authHeaders } from "../../../../hooks/useAuth";
 import { ROLE_LABEL } from "../../../../hooks/useDealTasks";
 
 /** How many rows before the window closes. The Expander widens it. */
@@ -858,6 +859,14 @@ function ClientDetail({ account, onOpenBoard, onOpenDeal, onOpenSourcing }: {
             </div>
           </div>
         ))}
+
+        {/* THE HANDOFF (2026-08-16, Paul: "use the Dealflow tool once a client
+            is landed"). POST /crm/accounts/:id/deals existed with NO caller —
+            the server could open a deal FOR a client and no screen offered it.
+            The route refuses without a target name ("a client is not a deal"),
+            so the input is the whole form; success navigates straight into the
+            new deal, which IS the CRM → Dealflow seam. */}
+        <NewDealRow accountId={account.id} onOpened={onOpenDeal} />
         </>)}
       </DetailCard>
 
@@ -891,6 +900,62 @@ function ClientDetail({ account, onOpenBoard, onOpenDeal, onOpenSourcing }: {
  * "none on file" — which is what this panel did before, because the hook hands
  * back the same empty array for all three.
  */
+/**
+ * One input, one button: name the target, get a deal at B0 run for this
+ * client. The server owns the refusal (no target name → 400 with "a client
+ * is not a deal") and the panel shows it verbatim rather than pre-validating
+ * with a second copy of the rule.
+ */
+function NewDealRow({ accountId, onOpened }: {
+  accountId: number;
+  onOpened: (dealId: number, name?: string) => void;
+}) {
+  const [target, setTarget] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const create = async () => {
+    if (busy) return;
+    setBusy(true); setErr(null);
+    try {
+      const r = await fetch(`/api/crm/accounts/${accountId}/deals`, {
+        method: "POST",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ business_name: target.trim() }),
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok) { setErr(j?.error || `Could not open the deal (${r.status})`); return; }
+      setTarget("");
+      onOpened(j.id, j.business_name ?? undefined);
+    } catch {
+      setErr("The network dropped — nothing was created. Try again.");
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <div style={{ marginTop: 10 }}>
+      <div style={{ display: "flex", gap: 6 }}>
+        <input
+          value={target}
+          onChange={e => setTarget(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter" && target.trim()) create(); }}
+          placeholder="Target company — opens a deal run for this client"
+          style={newDealInput}
+        />
+        <button
+          type="button"
+          onClick={create}
+          disabled={busy || !target.trim()}
+          style={{ ...newDealBtn, opacity: target.trim() && !busy ? 1 : 0.5 }}
+        >
+          {busy ? "Opening…" : "Open a deal"}
+        </button>
+      </div>
+      {err && <p style={{ margin: "6px 0 0", fontSize: 12.5, color: T.amber }}>{err}</p>}
+    </div>
+  );
+}
+
 function Unresolved({ error, what }: { error: string | null; what: string }) {
   return (
     <p style={p}>
@@ -1025,6 +1090,18 @@ const blockPill: CSSProperties = {
 };
 
 const p: CSSProperties = { margin: "0 0 8px", fontSize: 12.5, color: T.muted, lineHeight: 1.6 };
+
+/* The transcription's control pair: filled cell + filled-green action. */
+const newDealInput: CSSProperties = {
+  flex: 1, minWidth: 0, font: "inherit", fontSize: 13.5, color: T.ink,
+  background: T.track, border: "none", borderRadius: 8, padding: "9px 11px",
+  outline: "none",
+};
+const newDealBtn: CSSProperties = {
+  font: "inherit", fontSize: 13.5, fontWeight: 700, color: "#fff",
+  background: T.blue, border: "none", borderRadius: 8, padding: "9px 15px",
+  cursor: "pointer", flex: "none",
+};
 
 const code: CSSProperties = { fontSize: 11.5, background: T.track, padding: "1px 4px" };
 
