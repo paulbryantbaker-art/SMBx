@@ -239,6 +239,7 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
             onOpenBoard={id => { setMode("board"); setOpenId(id); setDetailNonce(n => n + 1); }}
             onOpenDeal={(dealId, name) => nav.openDeal(dealId, name)}
             onOpenSourcing={() => nav.go("sourcing")}
+            onLeadConverted={crm.refresh}
           />
         </div>
       </div>

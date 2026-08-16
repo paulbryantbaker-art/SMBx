@@ -122,8 +122,13 @@ crmRouter.get('/crm/accounts', async (req, res) => {
 
     const rows = await sql`
       SELECT a.*,
-             (SELECT COUNT(*) FROM crm_contacts c WHERE c.account_id = a.id) AS contact_count,
-             (SELECT COUNT(*) FROM crm_activity v WHERE v.account_id = a.id) AS activity_count,
+             -- ::int MATTERS (2026-08-16). postgres-js returns a bare COUNT(*)
+             -- (int8) as a STRING to protect precision, and "0" is truthy — so
+             -- Clients.tsx's !a.contact_count "no contact" flag had NEVER
+             -- fired, on desktop or mobile, since the board shipped. The
+             -- summary endpoint below always cast; these two were missed.
+             (SELECT COUNT(*)::int FROM crm_contacts c WHERE c.account_id = a.id) AS contact_count,
+             (SELECT COUNT(*)::int FROM crm_activity v WHERE v.account_id = a.id) AS activity_count,
              (SELECT MAX(v.occurred_at) FROM crm_activity v WHERE v.account_id = a.id) AS last_touch_at
       FROM crm_accounts a
       WHERE a.user_id = ${userId}
@@ -544,6 +549,30 @@ crmRouter.patch('/crm/accounts/:id', async (req, res) => {
     // Scoring inputs.
     if ('last_deal_on' in b) updates.last_deal_on = dateOrNull(b.last_deal_on);
     if ('disqualified' in b) updates.disqualified = String(b.disqualified ?? '').trim() || null;
+    /* buyer_moment IS WRITABLE NOW (2026-08-16). It is 35 of the ~100 points
+       in house/leads.ts's scorer and, until this branch, NOTHING in the app
+       could write it — no default, not seeded, not importable except by CSV —
+       so every firm sat pinned on the unknown floor of 8 and the board's
+       ranking was decided by the other 65 points. Validated against the
+       scorer's own vocabulary, same shape as `stage` and `kind` above. */
+    if (typeof b.buyer_moment === 'string') {
+      const MOMENTS = ['thesis_no_flow', 'capital_no_thesis', 'has_both', 'unknown'];
+      if (!MOMENTS.includes(b.buyer_moment)) {
+        return res.status(400).json({ error: `Invalid buyer_moment (${MOMENTS.join(' | ')})` });
+      }
+      updates.buyer_moment = b.buyer_moment;
+    }
+    if (typeof b.dfw === 'string') {
+      /* The scorer's own vocabulary (house/leads.ts normDfw) — 'adjacent',
+         not 'partial'. The first cut of this enum invented 'partial', which
+         normDfw would have silently collapsed to 'unknown': a validated write
+         that scores as unwritten. Checked against the source, not memory. */
+      const DFW = ['yes', 'adjacent', 'no', 'unknown'];
+      if (!DFW.includes(b.dfw)) {
+        return res.status(400).json({ error: `Invalid dfw (${DFW.join(' | ')})` });
+      }
+      updates.dfw = b.dfw;
+    }
 
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({ error: 'No updatable fields' });
