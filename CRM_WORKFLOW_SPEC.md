@@ -83,33 +83,36 @@ these IS the P4-hypothesis evidence the spec wants Reports to show.
    in-app, and the workbench's pre-IoI numbers land as STAMPED NOTES
    (run date + commit), never as live models.
 
-## FOUNDER-GATED (staged for Paul, not decided overnight)
+## THE FOUNDER-GATED ITEMS — DECIDED (Paul, 2026-08-16 late: "All of this
+## needs to be running in app properly")
 
-- **Stage names.** Current set: prospect / conversation / proposal / engaged /
-  mandate_live / passed. The spec proposes Lead / Contacted / Conversation /
-  Qualified / Proposal / Negotiation / Won (+ Nurture parking lot). The spec
-  itself marks labels as Paul's call — the overnight build keeps the current
-  enum and adds the discipline (aging, red dot, loss reasons), which survives
-  any renaming.
-- **A Nurture parking lot** (real fit, wrong timing, quarterly auto-task) —
-  needs the stage-set decision first.
-- **Deal creation at B0 vs at IoI.** Today "Open a deal" creates at B0; the
-  spec creates a Deal only at the IoI with a promotion checklist and a frozen
-  target record. Both are defensible; the promotion ceremony is worth
-  building only if Paul wants the stricter seam.
-- **Nav shape.** Spec proposes 7 items (adds Targets / People / Companies /
-  Reports). Current: Today / Clients / Deals / Agent. Directory and report
-  screens are thin once the object model holds; add when the volume demands
-  them, not before.
+All three went the spec's way, live as of migration 131:
 
-## BUILD ORDER (remaining, per the spec's §9 adapted)
+- **Stage names**: the spec set — lead / contacted / conversation / qualified /
+  proposal / negotiation / won / nurture / lost. Migration 131 mapped the old
+  six (prospect→lead, engaged→negotiation, mandate_live→won, passed→lost)
+  WITHOUT resetting aging clocks. Nurture is the parking lot and still
+  demands a dated next step (which IS the quarterly touch); it shows its age
+  but never colours.
+- **Deals are created only at the IoI.** `POST /crm/targets/:id/promote`
+  (routes/targets.ts) is the ceremony: refused unless the target sits at
+  'ioi_decision' and is not disqualified; creates the deal at B2 with "Issue
+  the IoI" as its first action; writes the receipt into the target's
+  activity; freezes the target (promoted_deal_id = the pointer AND the
+  read-only flag — every write path 409s a frozen row). The client card's
+  "Open a deal" became "Add a target" (sourced, under that client).
+- **Nav grew to the spec's shape**: Today · Clients · Targets · Deals ·
+  People · Companies · Reports (+ Agent retained — Yulia keeps both the tab
+  and the rail until Paul says otherwise).
 
-1. ~~Stage discipline: aging + red dot + loss reasons~~ — DONE 2026-08-16.
-2. Today: countdown section (needs deal key-date columns: exclusivity expiry,
-   financing commitment, target close — migration first).
-3. Targets board (kind='target' accounts × wave membership) + the wave
-   manager surfacing the existing five-table outreach schema.
-4. Promotion flow (if Paul gates deals at IoI).
-5. Buy-box fields on `engagements`; mandate switcher on Deals/Targets.
-6. People / Companies directories; the four fixed reports (loss-reason
-   histogram first — it tests the P4 hypothesis).
+## BUILD ORDER (remaining)
+
+1. ~~Stage discipline~~ — DONE. ~~Spec stages + Nurture~~ — DONE (131).
+2. ~~Targets board + waves view + promotion~~ — DONE (Targets tab).
+3. ~~Key dates + Today countdown~~ — DONE (deals key-date columns, 131).
+4. ~~People / Companies / Reports~~ — DONE (four fixed reports, no builder).
+5. Buy-box fields on `engagements`; mandate switcher default once the first
+   client signs.
+6. ⌘K command bar (law 4's ten-second logging, globally).
+7. Won → auto-open the engagement draft (today it is one click on the
+   Engagement card).

@@ -27,9 +27,17 @@ export const crmRouter = Router();
 crmRouter.use(requireAuth);
 
 /** Pipeline stages for a CLIENT relationship — deliberately not deal gates.
- *  A deal gate describes a target; this describes whether we have a mandate. */
+ *  A deal gate describes a target; this describes whether we have a mandate.
+ *  The spec set (CRM_WORKFLOW_SPEC.md, adopted 2026-08-16); migration 131
+ *  mapped the old six. Mirrors CRM_STAGES in client/src/lib/crm.ts. */
 export const CRM_STAGES = [
-  'prospect', 'conversation', 'proposal', 'engaged', 'mandate_live', 'passed',
+  'lead', 'contacted', 'conversation', 'qualified', 'proposal', 'negotiation',
+  'won', 'nurture', 'lost',
+] as const;
+
+/** Target origination stages (deal funnel, pre-IoI). Mirrors lib/crm.ts. */
+export const TARGET_STAGES = [
+  'sourced', 'in_wave', 'contacted', 'conversation', 'nda', 'financials_in', 'ioi_decision',
 ] as const;
 
 const ACTIVITY_KINDS = ['note', 'email', 'call', 'meeting', 'intro', 'stage_change'];
@@ -549,15 +557,15 @@ crmRouter.patch('/crm/accounts/:id', async (req, res) => {
         // A lost pursuit must say why — the loss-reason histogram is the
         // P4-hypothesis evidence, and "unresponsive" typed in a hurry still
         // teaches more than a silent archive.
-        if (b.stage === 'passed') {
+        if (b.stage === 'lost') {
           const reason = typeof b.loss_reason === 'string' ? b.loss_reason.trim() : '';
           if (!LOSS_REASONS.includes(reason as any)) {
             return res.status(400).json({
-              error: `Marking a pursuit passed needs a loss_reason (${LOSS_REASONS.join(' | ')})`,
+              error: `Marking a pursuit lost needs a loss_reason (${LOSS_REASONS.join(' | ')})`,
             });
           }
           updates.loss_reason = reason;
-        } else if (owned.stage === 'passed') {
+        } else if (owned.stage === 'lost') {
           // Reopening a passed pursuit clears the verdict that no longer holds.
           updates.loss_reason = null;
         }

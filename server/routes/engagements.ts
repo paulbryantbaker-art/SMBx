@@ -224,7 +224,7 @@ engagementsRouter.post('/crm/leads/:id/convert', async (req, res) => {
 
   const [account] = await sql`
     INSERT INTO crm_accounts (user_id, firm, kind, stage, source_url, notes)
-    VALUES (${userId}, ${firm}, 'acquirer', 'prospect', 'practice-site lead', ${notes})
+    VALUES (${userId}, ${firm}, 'acquirer', 'lead', 'practice-site lead', ${notes})
     RETURNING id, firm
   `;
 

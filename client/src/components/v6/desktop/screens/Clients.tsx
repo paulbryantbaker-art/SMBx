@@ -74,11 +74,14 @@ function momentPill(m: string | null): { bg: string; fg: string } {
 
 function stagePill(s: string): { bg: string; fg: string } {
   switch (s) {
-    case "mandate_live": return { bg: T.greenBg, fg: T.green };
-    case "engaged": return { bg: T.greenBg, fg: T.green };
+    case "won": return { bg: T.greenBg, fg: T.green };
+    case "negotiation": return { bg: T.greenBg, fg: T.green };
+    case "qualified":
     case "proposal": return { bg: T.blueBg, fg: T.blue };
+    case "contacted":
     case "conversation": return { bg: T.amberBg, fg: T.amber };
-    case "passed": return { bg: T.track, fg: T.faint };
+    case "nurture":
+    case "lost": return { bg: T.track, fg: T.faint };
     default: return { bg: T.track, fg: T.muted };
   }
 }
@@ -639,7 +642,7 @@ function DetailPane({
                     type="button"
                     disabled={saving}
                     onClick={() => {
-                      if (st === "passed" && account.stage !== "passed") { setLosing(true); return; }
+                      if (st === "lost" && account.stage !== "lost") { setLosing(true); return; }
                       setLosing(false);
                       run(() => patch(id, { stage: st }));
                     }}
@@ -664,19 +667,19 @@ function DetailPane({
                     type="button"
                     disabled={saving || !lossReason}
                     onClick={() => {
-                      run(() => patch(id, { stage: "passed", loss_reason: lossReason }));
+                      run(() => patch(id, { stage: "lost", loss_reason: lossReason }));
                       setLosing(false); setLossReason("");
                     }}
                     style={{ ...chip(true), opacity: lossReason ? 1 : 0.5 }}
                   >
-                    Mark passed
+                    Mark lost
                   </button>
                   <button type="button" onClick={() => setLosing(false)} style={chip(false)}>Cancel</button>
                 </div>
               )}
-              {account.stage === "passed" && account.loss_reason && (
+              {account.stage === "lost" && account.loss_reason && (
                 <p style={{ margin: "0 0 12px", fontSize: 12.5, color: T.muted }}>
-                  Passed — {LOSS_LABEL[account.loss_reason as never] ?? account.loss_reason}. Reopening
+                  Lost — {LOSS_LABEL[account.loss_reason as never] ?? account.loss_reason}. Reopening
                   to any other stage clears the verdict.
                 </p>
               )}
