@@ -28,12 +28,17 @@ interface TabDef {
    (crm_accounts → buyer_theses.crm_account_id → sourcing_portfolios →
    candidates → deals → gates); the chrome now reads in the same order:
    Clients → Sourcing (the thesis lives there) → Deals (the stages). */
+/* TWO FUNCTIONS, ONE SPINE (2026-08-16, FRONT_END_REBUILD.md Phase B).
+   Integration and Files came OUT of the top nav: a data room belongs to a
+   deal and an integration plan belongs to a closed deal, so both are inside
+   Function 2 (Dealflow) and are reached from the Deals surface. The screens
+   and their routes are untouched — this is navigation, not deletion — and
+   `activeTabFor` below keeps the Deals tab lit while you are in either, so
+   the chrome agrees with the object model. */
 const TABS: TabDef[] = ([
   { id: "today", label: "Today" },
   { id: "clients", label: "Clients" },
   { id: "deals", label: "Deals" },
-  { id: "integration", label: "Integration" },
-  { id: "files", label: "Files" },
   { id: "agent", label: "Agent" },
 ] as TabDef[]);
 
@@ -41,7 +46,13 @@ const TABS: TabDef[] = ([
  *  Deals; the retired "pipeline" alias also highlights Deals (the funnel now
  *  lives in the Deals Board toggle); settings highlights nothing. */
 function activeTabFor(screen: AtlasScreen): AtlasScreen | null {
-  if (screen === "cockpit" || screen === "canvas" || screen === "pipeline") return "deals";
+  // Everything deal-shaped lights the Deals tab — the cockpit, the canvas, the
+  // retired pipeline alias, and (Phase B) the data room and integration, which
+  // are inside Dealflow now rather than tabs of their own.
+  if (
+    screen === "cockpit" || screen === "canvas" || screen === "pipeline" ||
+    screen === "files" || screen === "integration"
+  ) return "deals";
   if (screen === "settings") return null;
   return screen;
 }

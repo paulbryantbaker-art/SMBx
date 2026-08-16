@@ -199,12 +199,28 @@ export function CompareStrip({ items, activeId, onPick }: {
               {it.label}
             </span>
             {it.value === null ? (
-              <span style={compareUnknown}><SearchGlyph size={13} /></span>
+              /* A DASH, NOT A MAGNIFIER (2026-08-16).
+
+                 The reference renders an unknown cell as a magnifying glass and
+                 I copied it. That was wrong, and Paul spotted it on the live
+                 screen: on THEIR site the glyph is an AFFORDANCE — clicking it
+                 fetches that day's price. We have no such action. A magnifier
+                 over a figure we simply cannot compute promises a lookup that
+                 does not exist, so it reads as broken rather than as honest.
+
+                 A dash says "not known" and nothing else, which is the whole
+                 job. The reason rides underneath rather than hiding in a
+                 title attribute, because a fact you have to hover to find is
+                 not really disclosed. */
+              <span style={compareUnknown}>—</span>
             ) : (
               <span style={compareValue}>
                 {it.prefix && <span style={{ color: T.muted2, fontWeight: 400 }}>{it.prefix} </span>}
                 {it.value}
               </span>
+            )}
+            {it.value === null && it.unknownWhy && (
+              <span style={compareWhy}>{it.unknownWhy}</span>
             )}
           </button>
         );
@@ -616,20 +632,32 @@ const chipStyle: CSSProperties = {
 };
 const chipValue: CSSProperties = { fontWeight: 500, marginLeft: 3 };
 
+/* TIGHT AND LEFT, NOT SPREAD (2026-08-16). `flex: 1 1 0` stretched four cells
+   across 1100px of header and the strip stopped reading as a control at all —
+   it read as four numbers floating in a row, which is exactly how it looked on
+   the deployed screen. The reference's strip is ~800px wide holding seven
+   cells; density is what makes it scan as one object. Cells are now
+   content-width with a floor, and the strip stops where its content stops. */
 const compareWrap: CSSProperties = {
   display: "flex", alignItems: "stretch", marginTop: 14,
   borderBottom: `1px solid ${T.border}`, overflowX: "auto",
 };
 const compareCell: CSSProperties = {
-  font: "inherit", background: "transparent", border: "none", flex: "1 1 0",
-  padding: "8px 10px 9px", display: "flex", flexDirection: "column", gap: 3,
-  alignItems: "center", minWidth: 92, marginBottom: -1,
+  font: "inherit", background: "transparent", border: "none",
+  flex: "0 0 auto",
+  padding: "7px 20px 8px 0", display: "flex", flexDirection: "column", gap: 2,
+  alignItems: "flex-start", minWidth: 104, marginBottom: -1, textAlign: "left",
+};
+const compareWhy: CSSProperties = {
+  fontSize: 10.5, color: T.muted2, lineHeight: 1.3, maxWidth: 150,
 };
 const compareLabel: CSSProperties = { fontSize: 12.5, whiteSpace: "nowrap" };
 const compareValue: CSSProperties = {
   fontSize: 13, fontWeight: 700, color: T.ink, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap",
 };
-const compareUnknown: CSSProperties = { color: T.muted2, display: "flex", alignItems: "center", height: 17 };
+const compareUnknown: CSSProperties = {
+  color: T.muted2, fontSize: 15, lineHeight: "17px", height: 17, fontWeight: 700,
+};
 
 const ldWrap: CSSProperties = { display: "flex", gap: 18, alignItems: "flex-start", minHeight: 0 };
 const ldList: CSSProperties = { flex: "1.38 1 0", minWidth: 0 };

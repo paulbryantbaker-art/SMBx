@@ -43,6 +43,7 @@ import postQueueRouter from './routes/postQueue.js';
 import { outreachRouter } from './routes/outreach.js';
 import { dealTasksRouter } from './routes/dealTasks.js';
 import { dealCapitalRouter } from './routes/dealCapital.js';
+import { dealGatesRouter } from './routes/dealGates.js';
 import { logSpendLanes, spendAllowed } from './services/apiSpend.js';
 import { startOwnerDigestScheduler } from './services/ownerDigest.js';
 import { v19ResourcesRouter } from './routes/v19Resources.js';
@@ -1266,6 +1267,7 @@ app.use('/api/post-queue', postQueueRouter);
 app.use('/api', outreachRouter);
 app.use('/api', dealTasksRouter);
 app.use('/api', dealCapitalRouter);
+app.use('/api', dealGatesRouter);
 app.use('/api', pmiPlanRouter);
 app.use('/api', v19ResourcesRouter);
 
