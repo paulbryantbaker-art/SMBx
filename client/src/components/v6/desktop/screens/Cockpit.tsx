@@ -25,8 +25,7 @@ import type { User } from "../../../../hooks/useAuth";
 import type { SurfaceContext } from "../../../../lib/yuliaSurfaceContext";
 import { T } from "../atlasTokens";
 import {
-  Sparkle,
-  MarkBadge,
+    MarkBadge,
   Avatar,
   Card,
   KpiCard,
@@ -38,6 +37,7 @@ import {
   StatusDot,
   fmtCents,
 } from "../primitives";
+import { Mark } from "../Logo";
 import type { StepState } from "../primitives";
 import BuyerFunnel from "./BuyerFunnel";
 import OffersPanel from "./OffersPanel";
@@ -816,7 +816,7 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
           {/* Yulia's read */}
           <Card pad={18} style={{ borderRadius: T.rCardLg }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-              <Sparkle size={16} />
+              <Mark height={16} />
               <span style={{ fontSize: 14.5, fontWeight: 600, color: T.ink }}>Yulia’s read</span>
               {briefState === "ready" && brief?.stale && (
                 <span

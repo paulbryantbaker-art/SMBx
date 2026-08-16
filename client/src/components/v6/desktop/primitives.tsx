@@ -34,27 +34,11 @@ function trim(n: number): string {
   return n.toFixed(1).replace(/\.0$/, "");
 }
 
-/* ─── Sparkle ✦ in the Gemini gradient ───────────────────── */
-
-export function Sparkle({ size = 17 }: { size?: number }) {
-  return (
-    <span
-      aria-hidden="true"
-      className="atlas-spark"
-      style={{
-        background: T.spark,
-        WebkitBackgroundClip: "text",
-        backgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        fontSize: size,
-        lineHeight: 1,
-        flex: "none",
-      }}
-    >
-      ✦
-    </span>
-  );
-}
+/* Sparkle lived here — a Unicode ✦ filled with a two-stop gradient, from the
+   Gemini-home era. Deleted 2026-08-16 (Paul: "actually use the correct logo
+   everywhere"). It was standing in for the house mark in eighteen places and
+   was never the house mark; it was also a gradient, and Carta has exactly one
+   accent and none. `Mark` in ./Logo.tsx renders the real X. */
 
 /* ─── MarkBadge — square deal initial tile ───────────────── */
 

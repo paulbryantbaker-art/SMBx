@@ -34,7 +34,7 @@ export default function ValueLensPage({ token }: ValueLensPageProps) {
   if (loading) {
     return (
       <div className="min-h-dvh bg-[#FFFFFF] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#D4714E] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
+        <div className="w-6 h-6 border-2 border-[#0A7A58] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
       </div>
     );
   }
@@ -56,12 +56,12 @@ export default function ValueLensPage({ token }: ValueLensPageProps) {
       <header className="bg-white border-b border-[#e8e6dc] px-4 py-3">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-lg text-[#1a1918]">smbx<span className="text-[#D4714E]">.</span>ai</span>
+            <span className="font-bold text-lg text-[#1a1918]">smbx<span className="text-[#0A7A58]">.</span>ai</span>
             <span className="text-xs text-[#5e5d59]">ValueLens</span>
           </div>
           <a
             href="/"
-            className="text-sm font-medium text-[#D4714E] hover:underline no-underline"
+            className="text-sm font-medium text-[#0A7A58] hover:underline no-underline"
           >
             Get yours free
           </a>

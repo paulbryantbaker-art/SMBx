@@ -6,7 +6,7 @@ import { Bar } from 'react-chartjs-2';
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
 
 /* ── constants ── */
-const TERRA = '#D4714E';
+const TERRA = '#0A7A58';
 const FONT_FAMILY = 'Inter, sans-serif';
 const GRID_COLOR = 'rgba(0,0,0,0.04)';
 const TICK_COLOR = '#5e5d59';
@@ -213,7 +213,7 @@ export default function AdminTraffic() {
                 onClick={() => setDays(d)}
                 className={`px-3 py-1 rounded-full text-xs font-bold border-none cursor-pointer transition-all ${
                   days === d
-                    ? 'bg-[#D4714E] text-white'
+                    ? 'bg-[#0A7A58] text-white'
                     : 'bg-[#f0eee6] text-[#5e5d59] hover:bg-[#e8e6dc]'
                 }`}
               >

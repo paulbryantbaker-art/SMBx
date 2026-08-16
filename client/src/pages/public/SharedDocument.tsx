@@ -132,7 +132,7 @@ export default function SharedDocument({ token }: SharedDocumentProps) {
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 bg-white" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#1a1918]" style={{ fontFamily: "'Figtree', system-ui, sans-serif" }}>
-          smb<span className="text-[#D4714E]">x</span>.ai
+          smb<span className="text-[#0A7A58]">x</span>.ai
         </div>
         {accessLevel && (
           <span className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full ${
@@ -196,7 +196,7 @@ export default function SharedDocument({ token }: SharedDocumentProps) {
                     value={ndaName}
                     onChange={e => setNdaName(e.target.value)}
                     placeholder="John Smith"
-                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#f5f4ed] text-[#1a1918] outline-none focus:border-[#D4714E]"
+                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#f5f4ed] text-[#1a1918] outline-none focus:border-[#0A7A58]"
                   />
                 </div>
                 <div>
@@ -206,14 +206,14 @@ export default function SharedDocument({ token }: SharedDocumentProps) {
                     value={ndaEmail}
                     onChange={e => setNdaEmail(e.target.value)}
                     placeholder="john@example.com"
-                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#f5f4ed] text-[#1a1918] outline-none focus:border-[#D4714E]"
+                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#f5f4ed] text-[#1a1918] outline-none focus:border-[#0A7A58]"
                   />
                 </div>
               </div>
               <button
                 onClick={signNda}
                 disabled={signingNda || !ndaEmail.trim() || !ndaName.trim()}
-                className="w-full py-2.5 rounded-xl text-sm font-semibold bg-[#D4714E] text-white border-0 cursor-pointer hover:bg-[#B85A3A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-2.5 rounded-xl text-sm font-semibold bg-[#0A7A58] text-white border-0 cursor-pointer hover:bg-[#B85A3A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {signingNda ? 'Signing...' : 'Sign NDA & View Document'}
               </button>
@@ -232,7 +232,7 @@ export default function SharedDocument({ token }: SharedDocumentProps) {
         <div className="text-center mt-8">
           <p className="text-xs text-[#A9A49C] m-0">
             Shared via{' '}
-            <a href="/" className="text-[#D4714E] hover:underline">smbx.ai</a>
+            <a href="/" className="text-[#0A7A58] hover:underline">smbx.ai</a>
             {' '}— AI-powered M&A platform
           </p>
         </div>

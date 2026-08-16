@@ -35,7 +35,7 @@ import {
 } from "./atlasNav";
 import { AtlasHeader } from "./AtlasHeader";
 import { AtlasChatRail } from "./chat/AtlasChatRail";
-import { Sparkle } from "./primitives";
+import { Mark } from "./Logo";
 
 import TodayScreen from "./screens/Today";
 import DealsScreen from "./screens/Deals";
@@ -441,7 +441,7 @@ function AtlasShell({ user, chat, onSignOut }: ShellProps) {
           aria-label="Open Yulia"
           title="Ask Yulia about this screen"
         >
-          <Sparkle size={17} />
+          <Mark height={17} />
           <span style={S.railTabWord}>Yulia</span>
         </button>
       )}

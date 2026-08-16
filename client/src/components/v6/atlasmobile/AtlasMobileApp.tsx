@@ -514,7 +514,7 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
       device: "mobile",
       activeMode: view.screen,
       activeView: view.screen,
-      activeTitle: view.dealName ?? SCREEN_TITLE[view.screen] ?? "Atlas",
+      activeTitle: view.dealName ?? SCREEN_TITLE[view.screen] ?? "smbX",
       dealId: view.dealId,
       dealTitle: view.dealName,
     }),
@@ -554,7 +554,7 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
     null
   ) : (
     <MobileBackHeader
-      title={view.dealName ?? SCREEN_TITLE[view.screen] ?? "Atlas"}
+      title={view.dealName ?? SCREEN_TITLE[view.screen] ?? "smbX"}
       onBack={onBack}
       showSparkle={view.screen === "canvas"}
     />

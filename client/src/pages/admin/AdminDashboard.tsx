@@ -53,8 +53,8 @@ export default function AdminDashboard() {
               onClick={() => setActiveTab(tab.id)}
               className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
                 activeTab === tab.id
-                  ? 'text-[#D4714E] bg-[#D4714E]/5'
-                  : 'text-[#5e5d59] hover:text-[#D4714E] hover:bg-[#D4714E]/5'
+                  ? 'text-[#0A7A58] bg-[#0A7A58]/5'
+                  : 'text-[#5e5d59] hover:text-[#0A7A58] hover:bg-[#0A7A58]/5'
               }`}
               title={tab.label}
               type="button"
@@ -69,7 +69,7 @@ export default function AdminDashboard() {
         <div className="mt-auto">
           <button
             onClick={() => navigate('/chat')}
-            className="w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer text-[#5e5d59] hover:text-[#D4714E] hover:bg-[#D4714E]/5"
+            className="w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer text-[#5e5d59] hover:text-[#0A7A58] hover:bg-[#0A7A58]/5"
             title="Back to Chat"
             type="button"
           >
@@ -94,7 +94,7 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab(tab.id)}
             className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
               activeTab === tab.id
-                ? 'bg-[#D4714E] text-white border-[#D4714E]'
+                ? 'bg-[#0A7A58] text-white border-[#0A7A58]'
                 : 'bg-white text-[#5e5d59] border-[rgba(0,0,0,0.08)]'
             }`}
           >

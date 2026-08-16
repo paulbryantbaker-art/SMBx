@@ -27,7 +27,7 @@ ChartJS.register(
 );
 
 /* ── color constants ── */
-const TERRA = '#D4714E';
+const TERRA = '#0A7A58';
 const GREEN = '#34A853';
 const BLUE = '#4E8FD4';
 const YELLOW = '#FBBC04';

@@ -9,7 +9,8 @@
  */
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useAtlasNav, type AtlasScreen } from "./atlasNav";
-import { Sparkle, Avatar } from "./primitives";
+import { Avatar } from "./primitives";
+import { LogoHome, Mark } from "./Logo";
 import { SearchIcon, HelpIcon, BellIcon } from "./icons";
 import { T } from "./atlasTokens";
 
@@ -78,19 +79,12 @@ export function AtlasHeader({
 
   return (
     <header style={S.header}>
-      {/* Logo cluster */}
-      <div style={S.logo}>
-        <Sparkle size={22} />
-        {/* "Atlas" was the internal codename for this shell and it had leaked
-            into the one place a user reads on every single screen. Paul,
-            2026-08-15, looking at the header: "it still atlas". The practice is
-            smbX; Atlas is a folder name. Identifiers stay (AtlasApp,
-            atlasTokens, AtlasHeader) — renaming those is a large mechanical
-            diff with no visible effect, and the same precedent applies as
-            `--pd-coral` holding Deal Green across the practice site. What
-            changes is what the app CALLS ITSELF. */}
-        <span style={S.wordmark}>smb<span style={S.wordmarkX}>X</span></span>
-      </div>
+      {/* THE REAL MARK (2026-08-16, Paul: "actually use the correct logo
+          everywhere"). This slot held a gradient ✦ beside the word "Atlas" —
+          the shell's internal codename — and then beside a hand-set "smbX".
+          Neither was the logo. It is the logo now, from the tight-cropped
+          asset so no negative-margin correction is needed; see Logo.tsx. */}
+      <LogoHome height={24} onClick={() => nav.go("today")} />
 
       {/* Module tab list */}
       <nav style={S.tabs}>
@@ -210,7 +204,7 @@ export function AtlasHeader({
         onMouseEnter={(e) => (e.currentTarget.style.background = T.navActive)}
         onMouseLeave={(e) => (e.currentTarget.style.background = T.blueBg)}
       >
-        <Sparkle size={14} />
+        <Mark height={13} />
         Upgrade
       </button>
 
@@ -277,10 +271,6 @@ const S: Record<string, CSSProperties> = {
     background: T.white,
   },
   logo: { display: "flex", alignItems: "center", gap: 9, marginRight: 6, flex: "none" },
-  wordmark: { fontSize: 19, fontWeight: 600, letterSpacing: "-.01em", color: T.ink },
-  // The X carries the accent, matching the logo mark on the practice site
-  // (/logo-green-x.png) — same gesture, one accent, no second hue.
-  wordmarkX: { color: T.blue },
   tabs: {
     // Content-width now (was flex:1) so the open-tab strip can take the flexible
     // middle space. The module nav stays fully visible; on a narrow window it

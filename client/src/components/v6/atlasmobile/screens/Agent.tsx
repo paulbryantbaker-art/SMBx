@@ -38,7 +38,8 @@ import { useAtlasNav, useAtlasChat } from "../../desktop/atlasNav";
 import { authHeaders } from "../../../../hooks/useAuth";
 import { useNextActions, type NextAction } from "../../../../hooks/useNextActions";
 import { RT } from "../redesign/rt";
-import { Sparkle, Pill, Card } from "../../desktop/primitives";
+import { Pill, Card } from "../../desktop/primitives";
+import { Mark } from "../../desktop/Logo";
 import { CheckIcon, CloseIcon, ChevronRightIcon } from "../../desktop/icons";
 import { DetailSection, Divider } from "../redesign/kit";
 import ChatDock from "../../../shared/ChatDock";
@@ -509,7 +510,7 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
       >
         <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
           <span style={{ paddingTop: 1, flex: "none" }}>
-            <Sparkle size={16} />
+            <Mark height={16} />
           </span>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 24, fontWeight: 700, color: RT.ink, marginBottom: 5 }}>

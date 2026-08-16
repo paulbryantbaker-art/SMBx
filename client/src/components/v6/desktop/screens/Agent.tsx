@@ -31,13 +31,13 @@ import { authHeaders } from "../../../../hooks/useAuth";
 import { useNextActions } from "../../../../hooks/useNextActions";
 import { T } from "../atlasTokens";
 import {
-  Sparkle,
-  Pill,
+    Pill,
   Card,
   SectionLabel,
   EmptyState,
   LoadingState,
 } from "../primitives";
+import { Mark } from "../Logo";
 import { PlusIcon, CheckIcon, CloseIcon, ChevronRightIcon } from "../icons";
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -529,7 +529,7 @@ export default function AgentScreen({ user }: AtlasScreenProps) {
       <Card pad="16px 18px" style={{ background: T.blueBg3, borderColor: T.approvalBd }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
           <div style={{ paddingTop: 1 }}>
-            <Sparkle size={17} />
+            <Mark height={17} />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 14, fontWeight: 600, color: T.ink, marginBottom: 5 }}>
@@ -756,7 +756,7 @@ export default function AgentScreen({ user }: AtlasScreenProps) {
                 opacity: !agentSetupReady || !draft.trim() ? 0.5 : 1,
               }}
             >
-              <Sparkle size={14} /> Set up with Yulia
+              <Mark height={14} /> Set up with Yulia
             </button>
           </div>
         </div>

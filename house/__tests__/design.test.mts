@@ -21,7 +21,7 @@
  * Plus the dead-systems list, which is the document's main defence against
  * drift and is worthless if a retired hex leaks into the live sections.
  */
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { CARTA, LEDGER, REPORT } from '../tokens.js';
 
@@ -465,16 +465,90 @@ is('app surfaces are the Carta neutrals',
   [T.surface, T.border, T.hair], [CARTA.bone, CARTA.hair, CARTA.hair]);
 is('the verdict green did NOT adopt the brand accent (two-greens law)',
   T.green !== LEDGER.green && T.green.toLowerCase() === '#1f8a5b', true);
-/* The sparkle ran jade → green → BRASS, and this asserted the brass was there.
-   Carta has one accent, so the gradient now runs WITHIN it — bright green to
-   Deal Green — and the assertion inverts: brass must be absent. Checked against
-   the literal hex rather than a token, because the point is that no warm value
-   reaches the gradient by any route. */
-is('the sparkle gradient stays inside the one accent',
-  !T.spark.includes('4285F4')
-  && T.spark.includes(CARTA.greenBright)
-  && !T.spark.toUpperCase().includes('E8A62B')
-  && !T.spark.toUpperCase().includes('F5C452'), true);
+/* THE GRADIENT IS GONE, SO THE ASSERTION INVERTS AGAIN (2026-08-16).
+
+   This has now been rewritten twice. It first asserted the sparkle gradient
+   ran jade → green → BRASS. Carta collapsed it to one accent, so it asserted
+   brass was ABSENT. Paul then asked for the real logo everywhere, `Sparkle`
+   was deleted, and with it the `spark` token — the last gradient in the app's
+   token set.
+
+   The check that survives is the one that was always the point: **no gradient
+   anywhere in T.** A gradient token is how a second hue creeps back in, and
+   the mark is an <img> of the real logo now, which has nothing to recolour. */
+is('the app token set carries no gradient at all',
+  !Object.values(T).some(v => typeof v === 'string' && v.includes('gradient')), true);
+is('…and `spark` specifically is gone rather than merely unused',
+  (T as Record<string, unknown>).spark, undefined);
+/* ── NO RETIRED HEX ANYWHERE IN THE APP (2026-08-16) ──────────────────────
+
+   Paul: *"actually use the correct logo everywhere."* Chasing that turned up
+   something bigger than a logo. **`#D4714E` — the terra-cotta wireframe
+   accent, superseded on 2026-07-10 after two days — was live in 57 places
+   across 17 files**, including `ChatDock` (the send-button fill, on every
+   screen) and all four auth screens. The first thing you saw on signing in was
+   painted in a palette that had been dead for five weeks.
+
+   Nothing caught it because every existing check pointed at `house/tokens.ts`
+   and the practice site. The APP's own source was never scanned, so a hex
+   hard-coded into a Tailwind class or an inline style was invisible to the
+   gate that exists to find exactly that.
+
+   This scans the app. It is deliberately a whole-tree grep rather than a token
+   check, because the defect was never in the tokens. */
+{
+  const RETIRED_HEX: Record<string, string> = {
+    D4714E: 'terra-cotta wireframe accent (2026-07-08, superseded two days later)',
+    FF385C: 'coral (retired by the Office-blue pivot, 2026-07-17)',
+    E61E4D: 'coral hover',
+    '185ABD': 'Office blue (retired by Ledger, 2026-07-17)',
+    '16624C': 'Ledger Deal Green (re-valued by Aurora, 2026-07-31)',
+    E8A62B: 'Ledger amber (retired by Carta, 2026-08-07)',
+    F5C452: 'Ledger honey',
+    D44A78: 'V3/V4 hot pink',
+    '00D632': 'liquid-glass neon',
+  };
+  /* WALK AND STRIP, DO NOT GREP.
+
+     The first cut grepped and then skipped any line whose first character was
+     `*`, `//` or `/*`. It immediately flagged a line of THIS FILE'S OWN
+     explanation in atlas.css — a `/* ... *\/` block whose continuation line
+     starts with plain prose. That is the comment-vs-behaviour trap that has now
+     been made five times in this repo, and the fix is the one already proven in
+     engine-parity: strip comments from the SOURCE, then look. A line-prefix
+     heuristic is not a comment parser. */
+  const APP_DIRS = [
+    'client/src/components', 'client/src/pages', 'client/src/hooks', 'client/src/lib',
+  ];
+  const stripComments = (src: string) =>
+    src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^[ \t]*\/\/.*$/gm, '');
+
+  const walk = (dir: string): string[] => {
+    const out: string[] = [];
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) out.push(...walk(full));
+      else if (/\.(tsx?|css)$/.test(e.name)) out.push(full);
+    }
+    return out;
+  };
+
+  const offenders: string[] = [];
+  for (const dir of APP_DIRS) {
+    const abs = path.join(ROOT, dir);
+    if (!existsSync(abs)) continue;
+    for (const file of walk(abs)) {
+      const code = stripComments(readFileSync(file, 'utf8'));
+      for (const [hex, why] of Object.entries(RETIRED_HEX)) {
+        if (new RegExp(`#${hex}`, 'i').test(code)) {
+          offenders.push(`${file.replace(ROOT + '/', '')}  #${hex} — ${why}`);
+        }
+      }
+    }
+  }
+  is('no retired palette hex is live anywhere in the app', offenders, []);
+}
+
 is('the mobile active capsule is the accent tint', M.glassNav.activeBg, CARTA.greenTint);
 is('the mobile frame is the Claude-app neutral (Paul-sampled)', M.frameBg, '#F9F9F9');
 const ATLAS_CSS = readFileSync(path.join(ROOT, 'client/src/components/v6/desktop/atlas.css'), 'utf8');
@@ -485,7 +559,6 @@ is('the atlas var mirror moved with the tokens',
    The Ramp neon, the Google blue, the Cash-App violet and the Material
    error red are dead in v6. Comments may name them as history (rt.ts
    documents what it replaced), so the scan strips comments first. */
-import { readdirSync } from 'node:fs';
 const DEAD_APP = ['#2BFF77', '#10E060', '#CFFFE1', '#0A5C2E', '#00210F',
   '#0B57D0', '#5B53D6', '#8B7BD8', '#4F9ED9', '#B3261E'];
 const V6DIR = path.join(ROOT, 'client/src/components/v6');

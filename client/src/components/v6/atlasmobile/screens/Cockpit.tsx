@@ -30,11 +30,11 @@ import { SectionHeader, DetailSection, ActionRow, ButtonRow } from "../redesign/
 import { ChevronRightIcon, BackIcon } from "../../desktop/icons";
 import { getCachedDealBrief, setCachedDealBrief } from "../../../../lib/dealBriefCache";
 import {
-  Sparkle,
   EmptyState,
   LoadingState,
   fmtCents,
 } from "../../desktop/primitives";
+import { Mark } from "../../desktop/Logo";
 import type { StepState } from "../../desktop/primitives";
 
 /* ─── API shapes (honest to the real responses) ─────────────── */
@@ -556,7 +556,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
       <SectionHeader
         style={{ display: "flex", alignItems: "center", gap: 9, margin: "38px 0 0", fontSize: 28, fontWeight: 700, letterSpacing: "-0.02em" }}
       >
-        <Sparkle size={20} />
+        <Mark height={20} />
         Yulia&rsquo;s read
         {briefState === "ready" && brief?.stale && (
           <span
@@ -636,7 +636,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
             {canvasItems.map((it) => (
               <ActionRow
                 key={it.id}
-                leading={<Sparkle size={18} />}
+                leading={<Mark height={18} />}
                 title={it.label}
                 sub={it.kind}
                 action={<ChevronRightIcon size={18} c={RT.faint} />}

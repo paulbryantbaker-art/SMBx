@@ -19,7 +19,7 @@
 import { memo, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import ChatDock from "../../shared/ChatDock";
 import { CloseIcon, MonitorIcon } from "../desktop/icons";
-import { Sparkle } from "../desktop/primitives";
+import { Mark } from "../desktop/Logo";
 import { T } from "../desktop/atlasTokens";
 import { useAtlasChat, useAtlasNav } from "../desktop/atlasNav";
 import { RT } from "./redesign/rt";
@@ -228,7 +228,7 @@ export function YuliaSheet({
         >
           <div style={S.handle} aria-hidden="true" />
           <header style={S.header}>
-          <Sparkle size={18} />
+          <Mark height={18} />
           <span style={S.headerTitle}>Yulia</span>
           {surfaceContext?.activeTitle && (
             <span style={S.ctxChip} title={`Yulia sees ${surfaceContext.activeTitle}`}>
@@ -262,7 +262,7 @@ export function YuliaSheet({
         >
           {showEmpty ? (
             <div style={S.emptyWrap}>
-              <Sparkle size={26} />
+              <Mark height={26} />
               <div style={S.emptyTitle}>
                 {surfaceContext?.activeTitle
                   ? `Ask Yulia about ${surfaceContext.activeTitle}`
@@ -320,7 +320,7 @@ function Message({
         <div style={S.userBubble}>{message.text}</div>
       ) : (
         <div style={S.yuliaRow}>
-          <Sparkle size={17} />
+          <Mark height={17} />
           <div style={{ minWidth: 0, flex: 1 }}>
             <div style={S.yuliaText}>{message.text}</div>
             {message.canvasArtifact?.id && (
@@ -401,7 +401,7 @@ function Streaming({ text, tool, trace }: { text: string; tool: string | null; t
   const hiddenCount = trace.length - visible.length;
   return (
     <div style={S.yuliaRow}>
-      <Sparkle size={17} />
+      <Mark height={17} />
       <div style={{ minWidth: 0, flex: 1 }}>
         {hasTrace ? (
           <div style={{ ...S.trace, marginBottom: text ? 8 : 0 }}>

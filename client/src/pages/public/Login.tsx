@@ -144,7 +144,7 @@ export default function Login({ onLogin, onGoogleLogin, googleReady, onNavigateS
           <button
             type="button"
             onClick={onNavigateSignup}
-            className="bg-transparent border-none text-[#D4714E] font-semibold cursor-pointer text-sm p-0"
+            className="bg-transparent border-none text-[#0A7A58] font-semibold cursor-pointer text-sm p-0"
           >
             Get started
           </button>

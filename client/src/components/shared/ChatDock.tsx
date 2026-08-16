@@ -440,7 +440,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             }}
           >
             {uploading ? (
-              <div className="w-4 h-4 border-2 border-[#D4714E] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
+              <div className="w-4 h-4 border-2 border-[#0A7A58] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
             ) : (
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ transform: (isMobile ? mobileStarterOpen : (!onFileUpload && toolsOpen)) ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
                 <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -455,7 +455,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F5F5F5] rounded-full"
               style={{ flexShrink: 0, maxWidth: 200 }}
             >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2" strokeLinecap="round">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0A7A58" strokeWidth="2" strokeLinecap="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
               </svg>
@@ -513,7 +513,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             className="flex items-center justify-center border-none cursor-pointer active:scale-95"
             style={{
               width: 38, height: 38, borderRadius: '50%',
-              background: hasContent && !disabled ? '#D4714E' : '#D8D8DA',
+              background: hasContent && !disabled ? '#0A7A58' : '#D8D8DA',
               color: hasContent && !disabled ? '#fff' : 'rgba(0,0,0,0.3)',
               transition: 'all .25s ease',
               flexShrink: 0,
@@ -548,7 +548,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
                   onClick={() => { setToolsOpen(false); fileInputRef.current?.click(); }}
                   type="button"
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#D4714E' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#0A7A58' }}>
                     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" style={{ display: 'none' }} />
                     <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
                   </svg>
@@ -624,7 +624,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
           {attachment && (
             <div className="flex flex-wrap gap-2 px-4 pt-3 pb-0">
               <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F5F5F5] rounded-lg max-w-[260px]">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A7A58" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
                 <span className="text-[13px] font-medium text-[#1a1918] truncate">{attachment.name}</span>
                 <button onClick={() => setAttachment(null)} className="hover:text-[#1a1918] bg-transparent border-none cursor-pointer p-0 ml-0.5 flex-shrink-0" style={{ color: 'rgba(0,0,0,0.35)' }} type="button">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -727,7 +727,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               type="button"
             >
               {uploading ? (
-                <div className="w-4 h-4 border-2 border-[#D4714E] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
+                <div className="w-4 h-4 border-2 border-[#0A7A58] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
               ) : (
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ transform: toolsOpen ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
                   <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />

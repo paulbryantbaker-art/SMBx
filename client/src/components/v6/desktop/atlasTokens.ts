@@ -89,10 +89,11 @@ export const T = {
   track: CARTA.panel, railDiv: CARTA.hair,
   border: CARTA.hair, hair: CARTA.hair, rowDiv: CARTA.hair, rowDiv2: CARTA.panel,
   inputBd: CARTA.chipBorder, progTrack: CARTA.panel,
-  // The sparkle ran jade → green → AMBER, and amber is retired: Carta has
-  // exactly one accent. It runs within the accent now — bright green to Deal
-  // Green — so the mark still reads as a gradient without inventing a hue.
-  spark: `linear-gradient(135deg,${CARTA.greenBright},${CARTA.green} 60%,${CARTA.greenHover})`,
+  /* `spark` — the ✦ gradient — was DELETED 2026-08-16 with the Sparkle glyph
+     it filled. It was the last gradient in the app's token set, and Carta has
+     exactly one accent and no gradients; the mark is now an <img> of the real
+     logo (see Logo.tsx), which has nothing to recolour. Removed rather than
+     left unreferenced, because an unused gradient token is an invitation. */
   // FLAT, despite the slot name (2026-08-02, Paul: "my user icon needs to
   // be flattened — it's very 3-D right now"). The diagonal gradient read
   // as a bevel; a flat Deal Green disc with white initials is the Cash App

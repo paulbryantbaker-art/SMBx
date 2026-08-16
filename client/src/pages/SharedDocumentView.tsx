@@ -47,7 +47,7 @@ export default function SharedDocumentView({ token }: { token: string }) {
     return (
       <div className="min-h-screen bg-[#faf9f5] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-2 border-[#D4714E] border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-[#0A7A58] border-t-transparent rounded-full animate-spin" />
           <p className="text-sm text-[#5e5d59]">Loading document...</p>
         </div>
       </div>
@@ -71,7 +71,7 @@ export default function SharedDocumentView({ token }: { token: string }) {
           <a
             href="/"
             className="inline-block mt-6 px-6 py-2.5 rounded-full text-sm font-semibold text-white no-underline"
-            style={{ background: '#D4714E' }}
+            style={{ background: '#0A7A58' }}
           >
             Go to smbx.ai
           </a>
@@ -166,7 +166,7 @@ export default function SharedDocumentView({ token }: { token: string }) {
       {/* Footer */}
       <footer className="text-center py-8 border-t border-[#e8e6dc]">
         <p className="text-[11px] text-[#A9A49C]">
-          Shared via <a href="/" className="text-[#D4714E] no-underline font-semibold">smbx.ai</a> — AI-powered deal intelligence
+          Shared via <a href="/" className="text-[#0A7A58] no-underline font-semibold">smbx.ai</a> — AI-powered deal intelligence
         </p>
         <p className="text-[10px] text-[#C8C4BC] mt-1">
           This document is confidential. Unauthorized distribution is prohibited.
@@ -180,7 +180,7 @@ function DocumentEditorLoader() {
   return (
     <div className="min-h-[420px] bg-white border border-[#e8e6dc] rounded-lg flex items-center justify-center">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-7 h-7 border-2 border-[#D4714E] border-t-transparent rounded-full animate-spin" />
+        <div className="w-7 h-7 border-2 border-[#0A7A58] border-t-transparent rounded-full animate-spin" />
         <p className="text-xs text-[#5e5d59]">Preparing document...</p>
       </div>
     </div>

@@ -53,7 +53,7 @@ function PlanBadge({ plan }: { plan: string | null }) {
 
   let classes = 'bg-[#f0eee6] text-[#5e5d59]';
   if (normalized === 'solo' || normalized === 'starter') classes = 'bg-[#FBBC04]/10 text-[#FBBC04]';
-  else if (normalized === 'pro' || normalized === 'professional') classes = 'bg-[#D4714E]/10 text-[#D4714E]';
+  else if (normalized === 'pro' || normalized === 'professional') classes = 'bg-[#0A7A58]/10 text-[#0A7A58]';
   else if (normalized === 'team') classes = 'bg-[#4E8FD4]/10 text-[#4E8FD4]';
   else if (normalized === 'enterprise') classes = 'bg-[#1a1918] text-white';
 
@@ -173,7 +173,7 @@ export default function AdminUsers() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by email or name..."
-          className="w-full rounded-xl bg-white border border-[#e8e6dc] pl-10 pr-4 py-3 text-sm outline-none focus:border-[#D4714E] transition-colors"
+          className="w-full rounded-xl bg-white border border-[#e8e6dc] pl-10 pr-4 py-3 text-sm outline-none focus:border-[#0A7A58] transition-colors"
         />
       </div>
 
@@ -224,7 +224,7 @@ export default function AdminUsers() {
                       <td colSpan={7} className="bg-[#f5f4ed] border-t border-[#e8e6dc] px-6 py-4">
                         {!expandedData ? (
                           <div className="flex items-center gap-2 text-sm text-[#9e9ea0]">
-                            <div className="h-4 w-4 border-2 border-[#D4714E] border-t-transparent rounded-full animate-spin" />
+                            <div className="h-4 w-4 border-2 border-[#0A7A58] border-t-transparent rounded-full animate-spin" />
                             Loading...
                           </div>
                         ) : (

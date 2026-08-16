@@ -13,7 +13,9 @@
 /* background-IMAGE (not the shorthand) so the inline `background-clip:text` that
  * shapes the ✦ glyph survives — the shorthand would reset clip and fill the box. */
 /* Aurora sparkle — jade → Deal Green (was the Ramp neon; mirrors T.avatarGrad's family) */
-.atlas-mobile .atlas-spark { background-image: linear-gradient(135deg, #0FA97C 0%, #0A7A58 100%) !important; }
+/* The .atlas-spark gradient override went with Sparkle itself (2026-08-16).
+   The mark is an <img> of the real logo now — nothing to recolour, and Carta
+   has no gradients to override it with. */
 /* Flat Deal Green disc — no gradient (Paul: avatars "should be flat"). The
    `background-image: none` kills any inherited gradient; the color paints it. */
 .atlas-mobile .atlas-avatar-grad { background-image: none !important; background-color: #0A7A58 !important; }
