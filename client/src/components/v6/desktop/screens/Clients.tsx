@@ -230,7 +230,8 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
     return (
       <div style={root}>
         {modeTabs}
-        <div style={{ flex: 1, minHeight: 0, overflow: "auto" }}>
+        <div style={{ flex: 1, minHeight: 0, overflow: "auto", background: "#fff" }}>
+          <div style={{ maxWidth: 1128, margin: "0 auto", padding: "18px 24px 64px", background: "#fff" }}>
           <ClientsList
             accounts={crm.accounts}
             allCount={crm.all.length}
@@ -241,6 +242,7 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
             onOpenSourcing={() => nav.go("sourcing")}
             onLeadConverted={crm.refresh}
           />
+          </div>
         </div>
       </div>
     );

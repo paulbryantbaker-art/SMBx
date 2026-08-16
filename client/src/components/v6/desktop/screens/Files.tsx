@@ -405,12 +405,14 @@ export default function FilesScreen({ view }: AtlasScreenProps) {
   if (kitView) {
     return (
       <div style={{ flex: 1, minWidth: 0, overflow: "auto" }}>
+        <div style={{ maxWidth: 1128, margin: "0 auto", padding: "18px 24px 64px", background: "#fff" }}>
         <FilesList
           room={room}
           dealLabel={dealLabel}
           openDocument={openDataRoomDocument}
           onClassicView={() => setKitView(false)}
         />
+        </div>
       </div>
     );
   }

@@ -42,6 +42,7 @@ import { T } from "../atlasTokens";
 import {
   CriteriaBar, ChipRow, CompareStrip, ListDetail, GroupHeader, ResultRow,
   Endorsement, Expander, RankingNote, SummaryCard, DetailCard, InfoBanner,
+  Page, Sheet,
   type Chip, type CompareItem,
 } from "../kit";
 import { PIPELINE_STAGES, type PipelineStageId } from "../../../../lib/pipelineStages";
@@ -179,7 +180,7 @@ export function DealsList({
   ];
 
   return (
-    <div style={wrap}>
+    <Page>
       <CriteriaBar cells={cells} />
       <ChipRow chips={chips} activeId={filter} onPick={id => onFilter(id as typeof filter)} />
       <CompareStrip items={strip} activeId={stage} onPick={id => { setStage(id as PipelineStageId | "all"); setWindow(WINDOW); }} />
@@ -232,6 +233,7 @@ export function DealsList({
           ) : null}
           list={
             <div>
+              <Sheet>
               {stage === "all" ? (
                 PIPELINE_STAGES.map(s => {
                   const group = (byStage.get(s.id) ?? []).filter(r => shown.includes(r));
@@ -259,6 +261,7 @@ export function DealsList({
                 />
               )}
 
+              </Sheet>
               {visible.length === 0 && (
                 <div style={noRows}>
                   Nothing matches. {allCount} deal{allCount === 1 ? "" : "s"} in
@@ -292,7 +295,7 @@ export function DealsList({
           }
         />
       </div>
-    </div>
+    </Page>
   );
 }
 
@@ -355,7 +358,6 @@ function money(cents: number): string {
 
 /* ── styles ───────────────────────────────────────────────────────────── */
 
-const wrap: CSSProperties = { padding: "16px 22px 40px", minWidth: 0 };
 
 const searchInput: CSSProperties = {
   font: "inherit", fontSize: 14, fontWeight: 700, color: T.ink,
@@ -374,6 +376,6 @@ const detailScroll: CSSProperties = {
 };
 
 const noRows: CSSProperties = {
-  padding: "26px 14px", border: `1px solid ${T.border}`, background: T.white,
+  padding: "26px 16px", border: `1px solid ${T.border}`, borderRadius: 8, background: T.white,
   fontSize: 12.5, color: T.muted, lineHeight: 1.6,
 };
