@@ -43,7 +43,7 @@ import { MarkBadge, Pill, KpiCard, EmptyState, LoadingState } from "../primitive
 import OutreachPanel from "./ClientsOutreach";
 import { ClientsList } from "./ClientsList";
 import { CONTACT_ROLES, ROLE_LABEL } from "../../../../hooks/useDealTasks";
-import { parseLinkedInPaste, parseLinkedInCompany, type ParsedProfile, type ParsedCompany } from "../../../../../../house/linkedin";
+import { parseLinkedInPaste, type ParsedProfile } from "../../../../../../house/linkedin";
 import { authHeaders } from "../../../../hooks/useAuth";
 import { useDraft } from "../../../../hooks/useDraft";
 import { SearchIcon, ChevronRightIcon } from "../icons";
@@ -74,125 +74,72 @@ function momentPill(m: string | null): { bg: string; fg: string } {
 }
 
 /**
- * PASTE-FIRST ADD. Copy a LinkedIn profile while looking at it, paste here,
- * and the firm and the person are born together — the firm at Lead, the
- * person as its primary contact. The parse (house/linkedin.ts, pure, no
- * model) PROPOSES; every field is editable and nothing saves until the
- * button. A firm that already exists by name gets the person added to it
- * rather than a duplicate account — the server owns that check.
+ * PASTE ONE PERSON — the whole import (2026-08-16, Paul, after trying the
+ * two-step: "we might be complicating it.. let's just make the person the
+ * only thing that imports and let's take the most recent role as their
+ * company").
+ *
+ * One paste: the person's profile (LinkedIn or Sales Navigator, top card or
+ * whole page). The parser reads name, title, and — per Paul's rule — the
+ * firm from their MOST RECENT ROLE (first Experience entry beats the
+ * headline). One press files both: the firm is created at Lead or found by
+ * name (never duplicated — the server owns that check), the person lands on
+ * it. The panel stays open so the next person is one paste away, and the
+ * running log shows where each one went.
  */
-function LinkedInAdd({ onDone }: { onDone: (msg: string) => void }) {
-  /* TWO STEPS, TWO PARSERS (2026-08-16, Paul after the first live paste:
-     "1 paste and parse the company 2, paste and add people"). One box
-     guessing whether it is looking at a company or a person is how the
-     register gained a contact named "Actions List" — a Sales Navigator
-     button bar. So the flow now mirrors how he actually browses: the
-     ACCOUNT page first (creates or finds the firm), then LEAD pages, as
-     many as needed, each landing on that firm. */
-  const [step, setStep] = useState<1 | 2>(1);
-  const [accountId, setAccountId] = useState<number | null>(null);
-  const [accountFirm, setAccountFirm] = useState("");
-  const [added, setAdded] = useState<string[]>([]);
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
-
-  // step 1 — the company
-  const [cPaste, setCPaste] = useState("");
-  const [cParsed, setCParsed] = useState<ParsedCompany | null>(null);
-  const [firm, setFirm] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-
-  // step 2 — a person (repeats)
-  const [pPaste, setPPaste] = useState("");
-  const [pParsed, setPParsed] = useState<ParsedProfile | null>(null);
+function LinkedInAdd({ onAdded }: { onAdded: (msg: string) => void }) {
+  const [paste, setPaste] = useState("");
+  const [parsed, setParsed] = useState<ParsedProfile | null>(null);
   const [name, setName] = useState("");
   const [title, setTitle] = useState("");
+  const [firm, setFirm] = useState("");
   const [url, setUrl] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("principal");
+  const [added, setAdded] = useState<string[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
 
   const cell: React.CSSProperties = {
     font: "inherit", fontSize: 13.5, color: T.ink, background: T.track,
     border: "none", borderRadius: 8, padding: "9px 11px", outline: "none", minWidth: 0,
   };
-  const greenBtn: React.CSSProperties = {
-    font: "inherit", fontSize: 13.5, fontWeight: 700, color: "#fff",
-    background: T.blue, border: "none", borderRadius: 8, padding: "9px 16px",
-    cursor: "pointer", flex: "none",
+
+  const onPaste = (text: string) => {
+    setPaste(text);
+    if (!text.trim()) { setParsed(null); return; }
+    const p2 = parseLinkedInPaste(text);
+    setParsed(p2);
+    if (p2.name) setName(p2.name);
+    if (p2.title) setTitle(p2.title);
+    if (p2.company) setFirm(p2.company);
+    if (p2.linkedinUrl) setUrl(p2.linkedinUrl);
   };
 
-  const onCompanyPaste = (text: string) => {
-    setCPaste(text);
-    if (!text.trim()) { setCParsed(null); return; }
-    const c = parseLinkedInCompany(text);
-    setCParsed(c);
-    if (c.name) setFirm(c.name);
-    if (c.location) {
-      const parts = c.location.split(",").map(x => x.trim());
-      if (parts[0]) setCity(parts[0]);
-      if (parts[1]) setState(parts[1]);
-    }
-  };
-
-  const saveCompany = async () => {
-    if (busy || !firm.trim()) return;
+  const save = async () => {
+    if (busy || !name.trim() || !firm.trim()) return;
     setBusy(true); setErr(null);
     try {
       const r = await fetch("/api/crm/accounts", {
         method: "POST",
         headers: { ...authHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({
-          firm: firm.trim(), hq_city: city.trim() || undefined, hq_state: state.trim() || undefined,
-          notes: cParsed?.industry ? `Industry (LinkedIn): ${cParsed.industry}` : undefined,
+          firm: firm.trim(),
+          contact: {
+            name: name.trim(), title: title.trim() || null, role,
+            email: email.trim() || null, linkedin_url: url.trim() || null,
+          },
         }),
       });
       const j = await r.json().catch(() => null);
       if (!r.ok) { setErr(j?.error || `Save failed (${r.status})`); return; }
-      setAccountId(j.account.id); setAccountFirm(j.account.firm);
-      setStep(2);
-      setErr(null);
+      const line = `${j.contact?.name ?? name.trim()} → ${j.account.firm}${j.reused ? "" : " (new firm, at Lead)"}`;
+      setAdded(a => [...a, line]);
+      onAdded(`${line}. Panel stays open — paste the next person, or Close above.`);
+      setPaste(""); setParsed(null); setName(""); setTitle(""); setFirm(""); setUrl(""); setEmail("");
     } catch {
       setErr("The network dropped — nothing was saved. Try again.");
     } finally { setBusy(false); }
-  };
-
-  const onPersonPaste = (text: string) => {
-    setPPaste(text);
-    if (!text.trim()) { setPParsed(null); return; }
-    const p = parseLinkedInPaste(text);
-    setPParsed(p);
-    if (p.name) setName(p.name);
-    if (p.title) setTitle(p.title);
-    if (p.linkedinUrl) setUrl(p.linkedinUrl);
-  };
-
-  const savePerson = async () => {
-    if (busy || !name.trim() || accountId == null) return;
-    setBusy(true); setErr(null);
-    try {
-      const r = await fetch(`/api/crm/accounts/${accountId}/contacts`, {
-        method: "POST",
-        headers: { ...authHeaders(), "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name.trim(), role, title: title.trim() || null,
-          email: email.trim() || null, linkedin_url: url.trim() || null,
-          is_primary: added.length === 0,
-        }),
-      });
-      const j = await r.json().catch(() => null);
-      if (!r.ok) { setErr(j?.error || `Save failed (${r.status})`); return; }
-      setAdded(a => [...a, j.name ?? name.trim()]);
-      setPPaste(""); setPParsed(null); setName(""); setTitle(""); setUrl(""); setEmail("");
-    } catch {
-      setErr("The network dropped — nothing was saved. Try again.");
-    } finally { setBusy(false); }
-  };
-
-  const finish = () => {
-    onDone(
-      `${accountFirm} on the board at Lead${added.length ? ` with ${added.join(", ")}` : ""}. Set a next step.`,
-    );
   };
 
   return (
@@ -201,86 +148,53 @@ function LinkedInAdd({ onDone }: { onDone: (msg: string) => void }) {
       border: `1px solid ${T.border}`, borderRadius: 8,
       display: "flex", flexDirection: "column", gap: 8, flex: "none",
     }}>
-      {step === 1 && (<>
-        <div style={{ fontSize: 13.5, fontWeight: 700, color: T.ink }}>
-          Step 1 · The company
-        </div>
-        <textarea
-          value={cPaste}
-          onChange={e => onCompanyPaste(e.target.value)}
-          rows={3}
-          autoFocus
-          placeholder={"Paste the COMPANY page (LinkedIn company page or Sales Navigator account page) — or just type the firm name below."}
-          style={{ ...cell, resize: "vertical", lineHeight: 1.5 }}
-        />
-        {cParsed && (
-          <p style={{ margin: 0, fontSize: 12.5, color: T.muted, lineHeight: 1.5 }}>
-            {cParsed.name ? `Read: ${cParsed.name}` : "Could not read a company name"}
-            {cParsed.industry ? ` · ${cParsed.industry}` : ""}
-            {cParsed.location ? ` · ${cParsed.location}` : ""}
-            {cParsed.missing.length > 0 && (
-              <span style={{ color: T.muted2 }}> — not found: {cParsed.missing.join(", ")}.</span>
-            )}
-          </p>
-        )}
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <input value={firm} onChange={e => setFirm(e.target.value)} placeholder="Firm (required)" style={{ ...cell, flex: "1 1 200px" }} />
-          <input value={city} onChange={e => setCity(e.target.value)} placeholder="City" style={{ ...cell, flex: "0 1 140px" }} />
-          <input value={state} onChange={e => setState(e.target.value)} placeholder="State" style={{ ...cell, flex: "0 1 100px" }} />
-          <button type="button" disabled={busy || !firm.trim()} onClick={saveCompany}
-                  style={{ ...greenBtn, opacity: firm.trim() && !busy ? 1 : 0.5 }}>
-            {busy ? "Saving…" : "Save firm → add people"}
-          </button>
-        </div>
-      </>)}
-
-      {step === 2 && (<>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
-          <span style={{ fontSize: 13.5, fontWeight: 700, color: T.ink }}>
-            Step 2 · People at {accountFirm}
-          </span>
-          {added.length > 0 && (
-            <span style={{ fontSize: 12.5, color: T.green }}>added: {added.join(", ")}</span>
+      <textarea
+        value={paste}
+        onChange={e => onPaste(e.target.value)}
+        rows={3}
+        autoFocus
+        placeholder={"Paste a PERSON's profile — LinkedIn or Sales Navigator, top card or the whole page. Their most recent role becomes the firm; fix anything below and press Add."}
+        style={{ ...cell, resize: "vertical", lineHeight: 1.5 }}
+      />
+      {parsed && (
+        <p style={{ margin: 0, fontSize: 12.5, color: T.muted, lineHeight: 1.5 }}>
+          {parsed.name ? `Read: ${parsed.name}` : "Could not read a name"}
+          {parsed.company ? ` · ${parsed.company}` : " · no firm found — type it below"}
+          {parsed.location ? ` · ${parsed.location}` : ""}
+          {parsed.missing.length > 0 && (
+            <span style={{ color: T.muted2 }}> — not found: {parsed.missing.join(", ")}.</span>
           )}
-        </div>
-        <textarea
-          value={pPaste}
-          onChange={e => onPersonPaste(e.target.value)}
-          rows={3}
-          autoFocus
-          placeholder={"Paste a PERSON's profile (LinkedIn profile or Sales Navigator lead page). Add as many as you like — each lands on this firm."}
-          style={{ ...cell, resize: "vertical", lineHeight: 1.5 }}
-        />
-        {pParsed && (
-          <p style={{ margin: 0, fontSize: 12.5, color: T.muted, lineHeight: 1.5 }}>
-            {pParsed.name ? `Read: ${pParsed.name}` : "Could not read a name"}
-            {pParsed.title ? ` · ${pParsed.title}` : ""}
-            {pParsed.missing.length > 0 && (
-              <span style={{ color: T.muted2 }}> — not found: {pParsed.missing.join(", ")}. Fill by hand.</span>
-            )}
-          </p>
-        )}
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <input value={name} onChange={e => setName(e.target.value)} placeholder="Name (required)" style={{ ...cell, flex: "1 1 160px" }} />
-          <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title" style={{ ...cell, flex: "1 1 160px" }} />
-          <select value={role} onChange={e => setRole(e.target.value)} style={{ ...cell, flex: "0 1 140px" }} aria-label="Role">
-            {CONTACT_ROLES.map(r => <option key={r} value={r}>{ROLE_LABEL[r] ?? r}</option>)}
-          </select>
-        </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email (if known)" style={{ ...cell, flex: "1 1 160px" }} />
-          <input value={url} onChange={e => setUrl(e.target.value)} placeholder="LinkedIn URL" style={{ ...cell, flex: "1 1 200px" }} />
-          <button type="button" disabled={busy || !name.trim()} onClick={savePerson}
-                  style={{ ...greenBtn, opacity: name.trim() && !busy ? 1 : 0.5 }}>
-            {busy ? "Adding…" : "Add person"}
-          </button>
-          <button type="button" onClick={finish}
-                  style={{ ...greenBtn, background: T.ink }}>
-            Done
-          </button>
-        </div>
-      </>)}
-
+        </p>
+      )}
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <input value={name} onChange={e => setName(e.target.value)} placeholder="Person (required)" style={{ ...cell, flex: "1 1 160px" }} />
+        <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title" style={{ ...cell, flex: "1 1 160px" }} />
+        <input value={firm} onChange={e => setFirm(e.target.value)} placeholder="Firm (required — their most recent role)" style={{ ...cell, flex: "1 1 200px" }} />
+      </div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <select value={role} onChange={e => setRole(e.target.value)} style={{ ...cell, flex: "0 1 140px" }} aria-label="Role">
+          {CONTACT_ROLES.map(r => <option key={r} value={r}>{ROLE_LABEL[r] ?? r}</option>)}
+        </select>
+        <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email (if known)" style={{ ...cell, flex: "1 1 160px" }} />
+        <input value={url} onChange={e => setUrl(e.target.value)} placeholder="LinkedIn URL" style={{ ...cell, flex: "1 1 200px" }} />
+        <button
+          type="button"
+          disabled={busy || !name.trim() || !firm.trim()}
+          onClick={save}
+          style={{
+            font: "inherit", fontSize: 13.5, fontWeight: 700, color: "#fff",
+            background: T.blue, border: "none", borderRadius: 8, padding: "9px 16px",
+            cursor: "pointer", flex: "none", opacity: name.trim() && firm.trim() && !busy ? 1 : 0.5,
+          }}
+        >
+          {busy ? "Adding…" : "Add person"}
+        </button>
+      </div>
+      {added.length > 0 && (
+        <p style={{ margin: 0, fontSize: 12.5, color: T.green, lineHeight: 1.5 }}>
+          Added this session: {added.join(" · ")}
+        </p>
+      )}
       {err && <p style={{ margin: 0, fontSize: 12.5, color: T.amber }}>{err}</p>}
     </div>
   );
@@ -424,7 +338,7 @@ export default function ClientsScreen({ user }: AtlasScreenProps) {
       </div>
       {pasteOpen && (
         <LinkedInAdd
-          onDone={msg => { setBanner(msg); setPasteOpen(false); crm.refresh(); }}
+          onAdded={msg => { setBanner(msg); crm.refresh(); }}
         />
       )}
     </>
