@@ -45,6 +45,7 @@ import TargetsScreen from "./screens/Targets";
 import PeopleScreen from "./screens/People";
 import CompaniesScreen from "./screens/Companies";
 import ReportsScreen from "./screens/Reports";
+import PostingScreen from "./screens/Posting";
 import IntegrationScreen from "./screens/Integration";
 import FilesScreen from "./screens/Files";
 import AgentScreen from "./screens/Agent";
@@ -489,6 +490,8 @@ function AppScreen({ user, view }: { user: User | null; view: AtlasView }) {
       return <CompaniesScreen user={user} view={view} />;
     case "reports":
       return <ReportsScreen user={user} view={view} />;
+    case "posting":
+      return <PostingScreen user={user} view={view} />;
     case "integration":
       return <IntegrationScreen user={user} view={view} />;
     case "files":

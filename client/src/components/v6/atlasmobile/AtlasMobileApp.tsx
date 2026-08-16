@@ -218,6 +218,7 @@ const SCREEN_TITLE: Record<AtlasScreen, string> = {
   deals: "Deals",
   clients: "Clients",
   targets: "Targets",
+  posting: "Posting",
   people: "People",
   companies: "Companies",
   reports: "Reports",

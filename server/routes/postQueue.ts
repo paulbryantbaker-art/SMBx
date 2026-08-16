@@ -18,7 +18,7 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import {
-  importQueue, listQueue, updateQueueState, queuePerformance, readQueueFile,
+  importQueue, importCampaign, listQueue, updateQueueState, queuePerformance, readQueueFile,
 } from '../services/postQueue.js';
 
 const router = Router();
@@ -44,6 +44,20 @@ router.post('/import', requireAuth, async (req: any, res) => {
   } catch (err: any) {
     // A malformed queue names every problem and imports nothing — 422 rather
     // than 500, because the file is wrong, not the server.
+    res.status(422).json({ error: err.message });
+  }
+});
+
+/**
+ * Import the shipped campaign file (content/studio/campaign-*.json) — same
+ * state-preserving contract as /import, plus dates filled ONLY where a row
+ * has none. Idempotent; safe to press twice.
+ */
+router.post('/import-campaign', requireAuth, async (req: any, res) => {
+  try {
+    const result = await importCampaign(req.user.id);
+    res.json(result);
+  } catch (err: any) {
     res.status(422).json({ error: err.message });
   }
 });
