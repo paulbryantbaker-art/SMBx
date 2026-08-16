@@ -663,8 +663,8 @@ function ClientDetail({ account, onOpenBoard, onOpenDeal, onOpenSourcing }: {
             const ag = stageAging(account.stage, account.stage_entered_at);
             return ag ? `${ag.days}d in stage` : null;
           })(),
-          account.stage === "passed" && account.loss_reason
-            ? `passed — ${LOSS_LABEL[account.loss_reason as never] ?? account.loss_reason}`
+          account.stage === "lost" && account.loss_reason
+            ? `lost — ${LOSS_LABEL[account.loss_reason as never] ?? account.loss_reason}`
             : null,
         ].filter(Boolean).join(" · ")}
         actionLabel="Open the full dossier"
@@ -873,13 +873,13 @@ function ClientDetail({ account, onOpenBoard, onOpenDeal, onOpenSourcing }: {
           </div>
         ))}
 
-        {/* THE HANDOFF (2026-08-16, Paul: "use the Dealflow tool once a client
-            is landed"). POST /crm/accounts/:id/deals existed with NO caller —
-            the server could open a deal FOR a client and no screen offered it.
-            The route refuses without a target name ("a client is not a deal"),
-            so the input is the whole form; success navigates straight into the
-            new deal, which IS the CRM → Dealflow seam. */}
-        <NewDealRow accountId={account.id} onOpened={onOpenDeal} />
+        {/* THE HANDOFF, PROMOTED TO A CEREMONY (2026-08-16 late, Paul adopted
+            the spec whole: deals are created only at the IoI). Naming a target
+            here no longer opens a B0 deal — it files the company as a TARGET
+            under this client (sourced), and the Targets tab walks it
+            Sourced → … → IoI decision → Promote, where the deal is born at B2
+            with the record frozen behind it. */}
+        <NewTargetRow accountId={account.id} />
         </>)}
       </DetailCard>
 
@@ -914,32 +914,30 @@ function ClientDetail({ account, onOpenBoard, onOpenDeal, onOpenSourcing }: {
  * back the same empty array for all three.
  */
 /**
- * One input, one button: name the target, get a deal at B0 run for this
- * client. The server owns the refusal (no target name → 400 with "a client
- * is not a deal") and the panel shows it verbatim rather than pre-validating
- * with a second copy of the rule.
+ * One input, one button: name a target COMPANY and it files under this client
+ * as Sourced on the Targets tab. Deals are created only at the IoI decision
+ * (the promotion — CRM_WORKFLOW_SPEC.md), so nothing here opens a deal; the
+ * server still owns every refusal (no firm name → 400).
  */
-function NewDealRow({ accountId, onOpened }: {
-  accountId: number;
-  onOpened: (dealId: number, name?: string) => void;
-}) {
+function NewTargetRow({ accountId }: { accountId: number }) {
   const [target, setTarget] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [done, setDone] = useState<string | null>(null);
 
   const create = async () => {
     if (busy) return;
-    setBusy(true); setErr(null);
+    setBusy(true); setErr(null); setDone(null);
     try {
-      const r = await fetch(`/api/crm/accounts/${accountId}/deals`, {
+      const r = await fetch(`/api/crm/targets`, {
         method: "POST",
         headers: { ...authHeaders(), "Content-Type": "application/json" },
-        body: JSON.stringify({ business_name: target.trim() }),
+        body: JSON.stringify({ firm: target.trim(), client_account_id: accountId }),
       });
       const j = await r.json().catch(() => null);
-      if (!r.ok) { setErr(j?.error || `Could not open the deal (${r.status})`); return; }
+      if (!r.ok) { setErr(j?.error || `Could not add the target (${r.status})`); return; }
+      setDone(`${j.firm} filed under this client as Sourced — work it on the Targets tab, promote it to a deal at the IoI.`);
       setTarget("");
-      onOpened(j.id, j.business_name ?? undefined);
     } catch {
       setErr("The network dropped — nothing was created. Try again.");
     } finally { setBusy(false); }
@@ -952,7 +950,7 @@ function NewDealRow({ accountId, onOpened }: {
           value={target}
           onChange={e => setTarget(e.target.value)}
           onKeyDown={e => { if (e.key === "Enter" && target.trim()) create(); }}
-          placeholder="Target company — opens a deal run for this client"
+          placeholder="Target company — files under this client on the Targets tab"
           style={newDealInput}
         />
         <button
@@ -961,10 +959,11 @@ function NewDealRow({ accountId, onOpened }: {
           disabled={busy || !target.trim()}
           style={{ ...newDealBtn, opacity: target.trim() && !busy ? 1 : 0.5 }}
         >
-          {busy ? "Opening…" : "Open a deal"}
+          {busy ? "Adding…" : "Add a target"}
         </button>
       </div>
       {err && <p style={{ margin: "6px 0 0", fontSize: 12.5, color: T.amber }}>{err}</p>}
+      {done && <p style={{ margin: "6px 0 0", fontSize: 12.5, color: T.green }}>{done}</p>}
     </div>
   );
 }
@@ -1058,7 +1057,7 @@ function subLine(a: CrmAccount): ReactNode {
      something — quiet grey under 14d, amber to 28d, red past that. A passed
      pursuit shows its verdict instead; closed stages never age. */
   const ag = stageAging(a.stage, a.stage_entered_at);
-  const lost = a.stage === "passed" && a.loss_reason
+  const lost = a.stage === "lost" && a.loss_reason
     ? (LOSS_LABEL[a.loss_reason as never] ?? a.loss_reason) : null;
   return (
     <>
@@ -1068,7 +1067,7 @@ function subLine(a: CrmAccount): ReactNode {
           {bits.length ? " · " : ""}{ag.days}d in stage
         </span>
       )}
-      {lost && <span>{bits.length ? " · " : ""}passed — {lost}</span>}
+      {lost && <span>{bits.length ? " · " : ""}lost — {lost}</span>}
     </>
   );
 }

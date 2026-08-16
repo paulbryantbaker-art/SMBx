@@ -35,10 +35,16 @@ interface TabDef {
    and their routes are untouched — this is navigation, not deletion — and
    `activeTabFor` below keeps the Deals tab lit while you are in either, so
    the chrome agrees with the object model. */
+/* The spec's seven (CRM_WORKFLOW_SPEC.md §5, adopted 2026-08-16) plus Agent —
+   Yulia keeps her tab alongside the rail until Paul retires one of them. */
 const TABS: TabDef[] = ([
   { id: "today", label: "Today" },
   { id: "clients", label: "Clients" },
+  { id: "targets", label: "Targets" },
   { id: "deals", label: "Deals" },
+  { id: "people", label: "People" },
+  { id: "companies", label: "Companies" },
+  { id: "reports", label: "Reports" },
   { id: "agent", label: "Agent" },
 ] as TabDef[]);
 

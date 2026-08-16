@@ -62,6 +62,9 @@ export interface AddressBookContact {
   account_id: number;
   firm: string;
   account_kind: string;
+  /** Per-PERSON last touch (crm_activity.contact_id), added for the People
+   *  directory — null means this person specifically was never logged. */
+  last_touch_at?: string | null;
 }
 
 async function json<T>(url: string, init?: RequestInit): Promise<T> {

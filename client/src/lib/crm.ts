@@ -10,18 +10,64 @@
  *  describes a target being underwritten; this describes whether we have a
  *  mandate. Mirrors CRM_STAGES in server/routes/crm.ts. */
 export const CRM_STAGES = [
-  'prospect', 'conversation', 'proposal', 'engaged', 'mandate_live', 'passed',
+  'lead', 'contacted', 'conversation', 'qualified', 'proposal', 'negotiation',
+  'won', 'nurture', 'lost',
 ] as const;
 export type CrmStage = (typeof CRM_STAGES)[number];
 
+/* The spec's set, adopted whole (Paul, 2026-08-16: "All of this needs to be
+   running in app properly"). Won creates the mandate (the Engagement card);
+   Nurture is the parking lot — real fit, wrong timing — and it still demands
+   a dated next step, which IS the quarterly touch. Migration 131 mapped the
+   old six (prospect→lead, engaged→negotiation, mandate_live→won,
+   passed→lost) without resetting anyone's aging clock. */
 export const STAGE_LABEL: Record<CrmStage, string> = {
-  prospect: 'Prospect',
+  lead: 'Lead',
+  contacted: 'Contacted',
   conversation: 'In conversation',
+  qualified: 'Qualified',
   proposal: 'Proposal out',
-  engaged: 'Engaged',
-  mandate_live: 'Mandate live',
-  passed: 'Passed',
+  negotiation: 'Negotiation',
+  won: 'Won — mandate',
+  nurture: 'Nurture',
+  lost: 'Lost',
 };
+
+/** What has to be true to leave each stage — the spec's exit criteria,
+ *  rendered where the stage is worked instead of remembered. */
+export const STAGE_EXIT: Record<CrmStage, string> = {
+  lead: 'Trigger verified (dated, sourced) and fits the beachhead → Contacted. Otherwise archive with a reason.',
+  contacted: 'Any reply or meeting → Conversation. Three attempts without a response → Nurture.',
+  conversation: 'Need confirmed — they have or expect a mandate and lack origination capacity → Qualified.',
+  qualified: 'Fit, budget-holder and timing all confirmed; verbal interest in a proposal → Proposal out.',
+  proposal: 'Negotiation begins → Negotiation. Three weeks silent → chase or park.',
+  negotiation: 'Signed → Won (open the engagement). Dead → Lost with its reason.',
+  won: 'The mandate is live — the work moves to Targets and Deals.',
+  nurture: 'Real fit, wrong timing. The dated next step IS the quarterly touch; trigger fires → back to Conversation.',
+  lost: 'Closed with a reason. Reopening to any other stage clears the verdict.',
+};
+
+/* ── the TARGET origination pipeline (deal funnel, pre-IoI) ──────────── */
+
+export const TARGET_STAGES = [
+  'sourced', 'in_wave', 'contacted', 'conversation', 'nda', 'financials_in', 'ioi_decision',
+] as const;
+export type TargetStage = (typeof TARGET_STAGES)[number];
+
+export const TARGET_STAGE_LABEL: Record<TargetStage, string> = {
+  sourced: 'Sourced',
+  in_wave: 'In wave',
+  contacted: 'Contacted',
+  conversation: 'Conversation',
+  nda: 'NDA',
+  financials_in: 'Financials in',
+  ioi_decision: 'IoI decision',
+};
+
+/** Target aging thresholds run hotter than the client funnel (spec law 6):
+ *  outreach that sits ten days is already cooling. */
+export const TARGET_AMBER_DAYS = 10;
+export const TARGET_RED_DAYS = 20;
 
 /** What the buyer is missing — the buy signal. `thesis_no_flow` is the sale;
  *  `has_both` means they already have the function in-house. */
@@ -208,12 +254,15 @@ export function daysInStage(iso: string | null | undefined): number | null {
 }
 
 /** The aging read: quiet under 14d, amber to 28d, red past that. The CLOSED
- *  stages never age — a mandate being live for 90 days is success, not rot. */
+ *  stages never age — a mandate being live for 90 days is success, not rot —
+ *  and NURTURE shows its age but never colours: a parking lot is supposed to
+ *  hold things. */
 export function stageAging(stage: string, iso: string | null | undefined):
   { days: number; tone: 'quiet' | 'amber' | 'red' } | null {
-  if (stage === 'mandate_live' || stage === 'passed') return null;
+  if (stage === 'won' || stage === 'lost') return null;
   const days = daysInStage(iso);
   if (days == null) return null;
+  if (stage === 'nurture') return { days, tone: 'quiet' };
   return {
     days,
     tone: days >= STAGE_RED_DAYS ? 'red' : days >= STAGE_AMBER_DAYS ? 'amber' : 'quiet',
@@ -221,9 +270,10 @@ export function stageAging(stage: string, iso: string | null | undefined):
 }
 
 /** Law 3: an OPEN pursuit with no dated next action is flagged everywhere it
- *  appears. Closed stages are exempt — nothing is owed on a verdict. */
+ *  appears. Closed stages are exempt — nothing is owed on a verdict. Nurture
+ *  is NOT exempt: its dated next step is the quarterly touch. */
 export function needsNextStep(a: { stage: string; next_action?: string | null; next_action_on?: string | null }): boolean {
-  if (a.stage === 'mandate_live' || a.stage === 'passed') return false;
+  if (a.stage === 'won' || a.stage === 'lost') return false;
   return !a.next_action || !a.next_action_on;
 }
 
