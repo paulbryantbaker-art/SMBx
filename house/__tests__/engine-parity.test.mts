@@ -34,7 +34,7 @@
  * needs Chromium and real assets, and it belongs in a render harness. Wiring is
  * where every drift so far has actually entered, so wiring is what is watched.
  */
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as HR from '../report.js';
@@ -70,42 +70,60 @@ const read = (p: string) => readFileSync(path.join(ROOT, p), 'utf8');
 const codeOf = (src: string) =>
   src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
-const composer = read('server/services/researchComposer.ts');
 const buildDeck = read('scripts/studio/build-deck.mts');
 const buildReport = read('scripts/studio/build-report.mts');
 const buildOnepager = read('scripts/studio/build-onepager.mts');
 const deck = read('house/deck.ts');
 
-/* ── the carousel: the artifact that already shares its engine ─────────── */
+/* ── ONE ENGINE, ONE CONSUMER (2026-08-16) ─────────────────────────────────
+   This block replaces three sections — "the carousel", "THE APP CANNOT SHIP
+   OFF-LANGUAGE", and the deck-designer brief — and it is a STRONGER guarantee
+   than what they asserted.
 
-/* This pair is the PRECEDENT the rest of the collateral is meant to follow, so
-   it is pinned hard. If either side stops importing the house grammar, the two
-   surfaces have quietly become two builders again. */
-ok('the app renders the carousel through house/deck.ts',
-  /from '\.\.\/\.\.\/house\/deck\.js'/.test(composer));
-ok('build-deck.mts renders the carousel through house/deck.ts',
-  /house\/deck\.ts/.test(buildDeck));
+   Those sections existed because there were TWO renderers: the app's
+   `researchComposer` / `deckDesigner`, and the local `scripts/studio/*.mts`
+   builders. Parity is what you check when you cannot have singularity. Phase A
+   deleted the app's side outright, so the question stops being "do the two
+   agree" and becomes "is there still only one" — which is checkable by
+   existence rather than by grepping two files for matching strings.
 
-ok('both reach the same two entry points — deckPages and deckCss',
-  /deckPages, deckCss/.test(composer) && /deckPages, deckCss/.test(buildDeck));
+   `paletteGate.ts` went with them. It was a choke point that threw before an
+   off-language artifact could leave the server; with no server-side renderer
+   left there is nothing for it to stand in front of, and an unreferenced guard
+   is worse than no guard because it reads as protection.
 
-/* THE FONT SEAM — the defect above, pinned so it cannot come back.
-   `deckCss()` names the Carta faces; a document that embeds the Ledger set
-   renders the Carta grammar in whatever the host happens to have. */
-ok('house/deck.ts asks for the Carta faces',
-  /CARTA_TYPE/.test(deck));
-ok('the app embeds the CARTA faces on the deck, not the Ledger set',
-  /CARTA_FONTS}\s*\n?<style>\$\{deckCss/.test(composer));
-ok('…and it imports cartaFontFaceCss to do it',
-  /import \{[^}]*cartaFontFaceCss[^}]*\} from '\.\/fontEmbeds\.js'/.test(composer));
-ok('build-deck.mts embeds the same Carta faces',
-  /cartaFontFaceCss/.test(buildDeck));
+   IF ANY OF THESE FILES COMES BACK, THIS TEST FAILS — which is the point. A
+   second renderer inside the app is exactly the drift the whole `house/`
+   doctrine exists to prevent, and it would arrive looking like a convenience. */
+{
+  const gone = [
+    'server/services/researchComposer.ts',
+    'server/services/deckDesigner.ts',
+    'server/services/collateralComposer.ts',
+    'server/services/artworkService.ts',
+    'server/services/paletteGate.ts',
+    'server/routes/research.ts',
+  ];
+  for (const f of gone) {
+    ok(`no server-side renderer: ${f}`, !existsSync(path.join(ROOT, f)));
+  }
 
-/* The Ledger embed still exists and is still correct for the artifacts in this
-   file that have not been restyled. Asserting it stays REACHABLE stops a future
-   cleanup from deleting it and silently un-fonting the report and the card. */
-ok('the Ledger embed survives for the not-yet-restyled artifacts',
-  /const EMBEDDED_FONTS = fontFaceCss\(\)/.test(composer));
+  /* And the local builders are still the ones that exist, still routed through
+     house/. This is the half of the old parity check that survives, because it
+     was never about the app — it was about the builders not hand-rolling. */
+  /* NOTE THE IMPORT FORM. The builders reach house/ through a DYNAMIC
+     `await import(pathToFileURL(path.join(ROOT, 'house/deck.ts')))`, not the
+     static `from '../../house/deck.js'` the deleted app renderer used — they
+     are .mts run by tsx from an arbitrary cwd, so the path is resolved at
+     runtime. The first cut of this assertion grepped for the static form and
+     failed on both builders; the check was wrong, not the code. */
+  ok('build-deck routes through house/deck', /house\/deck\.ts'\)\)/.test(buildDeck));
+  ok('build-report routes through house/report', /house\/report\.ts'\)\)/.test(buildReport));
+  ok('build-deck embeds the CARTA faces, not the retired set',
+    /cartaFontFaceCss/.test(buildDeck) && !/\bfontFaceCss\(\)/.test(codeOf(buildDeck)));
+  ok('build-report embeds the CARTA faces', /cartaFontFaceCss/.test(buildReport));
+  ok('build-onepager embeds the CARTA faces', /cartaFontFaceCss/.test(buildOnepager));
+}
 
 /* ── the guards: a local builder may not render unguarded ─────────────── */
 
@@ -132,20 +150,18 @@ ok('the shared report grammar exists',
   /export function reportDocument/.test(report));
 ok('build-report.mts renders through it',
   /house\/report\.ts/.test(buildReport) && /R\.reportDocument\(/.test(buildReport));
-ok('the app renders through it',
-  /from '\.\.\/\.\.\/house\/report\.js'/.test(composer) && /HR\.reportDocument\(/.test(composer));
-
-ok('both take the Carta faces, which the grammar names',
-  /cartaFontFaceCss\(\)/.test(buildReport) && /CARTA_FONTS_CSS/.test(composer));
+/* The app's half of these assertions is gone with its renderer (Phase A). What
+   they were really guarding is that the ONE remaining builder does not drift
+   from the grammar, so each check keeps its local half and drops the pair. */
+ok('it takes the Carta faces, which the grammar names',
+  /cartaFontFaceCss\(\)/.test(buildReport));
 
 /* The renderer-proof split has to be the SAME split on both sides or the two
    PDFs differ in the one way a reader notices: a re-composited dark cover. */
-ok('both rasterize the cover through the shared helpers',
-  /R\.coverOnlyDocument\(|R\.withFlatCover\(/.test(buildReport)
-  && /HR\.coverOnlyDocument\(/.test(composer) && /HR\.withFlatCover\(/.test(composer));
-ok('…and share the page margins and the footer',
-  /R\.REPORT_MARGIN/.test(buildReport) && /HR\.REPORT_MARGIN/.test(composer)
-  && /R\.reportFooterTemplate/.test(buildReport) && /HR\.reportFooterTemplate/.test(composer));
+ok('it rasterizes the cover through the shared helpers',
+  /R\.coverOnlyDocument\(|R\.withFlatCover\(/.test(buildReport));
+ok('…and takes the page margins and the footer from the grammar',
+  /R\.REPORT_MARGIN/.test(buildReport) && /R\.reportFooterTemplate/.test(buildReport));
 
 /* THE ONE THING A CLIENT DOCUMENT ADDS (Paul, 2026-08-15: "it will just have
    whose it's for on the cover too"). One field, on the cover, in both parsers —
@@ -160,17 +176,15 @@ ok('…and it renders, rather than being parsed and dropped',
    thumbnails. Two copies of an ordinal scheme is a silent off-by-one, so there
    is one, and the app calls it rather than keeping its own. */
 ok('section ordinals come from one place',
-  /export function numberSections/.test(report)
-  && /HR\.numberSections\(/.test(composer)
-  && !/^function numberSections/m.test(composer));
+  /export function numberSections/.test(report));
 
 /* CLOSED 2026-08-15 (Paul: "no ledger at all. carta"). The one-pager builder
    was `LEDGER, TYPE, blockBackground` and is now Carta, fonted and guarded.
    It is still a SEPARATE implementation from the app's researchCardHtml — the
    grammar has not been lifted into house/ the way the deck's and the report's
-   were — but that no longer risks drift, because the app's copy is BLOCKED by
-   the palette gate rather than rendering beside it. Two implementations where
-   only one can run is a duplication to tidy, not a divergence to fear. */
+   were. As of Phase A that is no longer a drift risk at all: the app's rival
+   copy is DELETED rather than gated, so there is nothing left to diverge from.
+   Lifting it into house/ is now tidiness, not safety. */
 ok('the one-pager builder is on Carta',
   !/\bLEDGER\b/.test(codeOf(buildOnepager))
   && /cartaFontFaceCss/.test(buildOnepager) && /assertCarta\(/.test(buildOnepager));
@@ -184,15 +198,31 @@ ok('the one-pager builder is on Carta',
   ok('…and reads its type from tokens rather than hard-coding the faces',
     /CARTA_TYPE/.test(og) && !/'Fraunces'/.test(og));
 }
-ok('KNOWN GAP: the one-pager grammar is not yet shared, only gated apart',
-  /export function researchCardHtml/.test(composer));
+ok('KNOWN GAP: the one-pager grammar still lives in its builder, not in house/',
+  /function post(Dark|Light)?Html|export const post|function render/.test(buildOnepager));
 
-/* The Ledger consts survive in researchComposer for the card, the announcement
-   and the postcard — the artifacts not yet extracted. Asserted so that when the
-   last one moves, this goes red and the dead code gets deleted rather than
-   sitting there looking live. */
-ok('KNOWN GAP: the Ledger palette is still reachable for the un-extracted artifacts',
-  /const BRASS = LEDGER\.brass/.test(composer));
+/* THE TRIPWIRE FIRED, AND IT FIRED CORRECTLY (2026-08-16).
+
+   This used to assert `const BRASS = LEDGER.brass` still existed in
+   researchComposer, with the note: "asserted so that when the last one moves,
+   this goes red and the dead code gets deleted rather than sitting there
+   looking live." Phase A deleted the whole file, the assertion went red, and
+   the dead code went with it. That is a check doing its job.
+
+   What replaces it points at where Ledger ACTUALLY still lives, so the same
+   tripwire keeps working. `ownerFunnel.ts` and `ownerFullReport.ts` are the
+   OWNER-side artifacts — the free valuation and the full evaluation the public
+   funnel mails out. They are still Ledger, they are still live, and they are
+   the last two renderers in the server on a retired palette. Neither was in
+   scope for Phase A (they are the funnel, not the app), and neither ever passed
+   through the palette gate. When they convert, this goes red. */
+{
+  const ledgerLeft = ['server/services/ownerFunnel.ts', 'server/services/ownerFullReport.ts']
+    .filter(f => /LEDGER/.test(read(f)));
+  is('KNOWN GAP: the owner-side artifacts are the last Ledger renderers', ledgerLeft, [
+    'server/services/ownerFunnel.ts', 'server/services/ownerFullReport.ts',
+  ]);
+}
 
 /* ── the report document itself, exercised rather than grepped ─────────── */
 
@@ -299,102 +329,6 @@ ok('KNOWN GAP: the Ledger palette is still reachable for the un-extracted artifa
   ok('the cover is what precedes the first rule', parsed.coverMd.includes('# Home Services'));
   ok('…and the body is what follows it',
     parsed.bodyMd.startsWith('## One') && !parsed.bodyMd.includes('# Home Services'));
-}
-
-/* ── THE APP CANNOT SHIP OFF-LANGUAGE (2026-08-15) ─────────────────────── */
-
-/* Paul: *"i'll let cowork remake any collateral that needs remaking. I just
-   want to be sure that any docs or collateral made in app are using the same
-   DL."*
-
-   "Be sure" cannot rest on every future edit remembering. `assertCarta` had
-   guarded the local builders since the Carta pass and NO server path called it,
-   so the app could render a Ledger one-pager, file it into Collateral, and hand
-   it over as a download with nothing saying so. Every artifact-producing
-   function in researchComposer now returns through `gateArtifact`.
-
-   This asserts the SET, not a count: a new producer added without a gate is the
-   failure, and counting would let one be swapped for another. */
-{
-  const PRODUCERS = [
-    'researchReportHtml', 'linkedInDocHtml', 'researchCardHtml',
-    'announcementCardHtml', 'postCardHtml', 'designedDeckHtml',
-  ];
-  ok('the app imports the palette gate', /from '\.\/paletteGate\.js'/.test(composer));
-
-  const ungated: string[] = [];
-  for (const fn of PRODUCERS) {
-    const start = composer.indexOf(`function ${fn}(`);
-    if (start < 0) { ungated.push(`${fn} (missing)`); continue; }
-    const end = composer.indexOf('\n}\n', start);
-    if (!composer.slice(start, end).includes('gateArtifact(')) ungated.push(fn);
-  }
-  is('every artifact producer returns through the gate', ungated, []);
-
-  /* houseDeckHtml is the ONE that must NOT be gated, and the reason is the
-     interesting part: it is fail-soft, so a throw inside it returns null and
-     the caller renders the LEDGER legacy template instead. Gating there would
-     convert "this document is off-language" into "silently render the more
-     off-language one". linkedInDocHtml gates both paths on the way out.
-     Pinned so a later tidy-up does not "fix the missing gate". */
-  {
-    const start = composer.indexOf('function houseDeckHtml(');
-    const end = composer.indexOf('\n}\n', start);
-    ok('houseDeckHtml is deliberately NOT gated — it is fail-soft',
-      !composer.slice(start, end).includes('gateArtifact('));
-  }
-
-  /* The gate must THROW, never exit: assertCarta ends in process.exit(4), which
-     is right for a CLI writing a file and would take the whole server down. */
-  const gate = read('server/services/paletteGate.ts');
-  /* Comments stripped first — the file EXPLAINS why it does not call
-     process.exit, and a check that reads the explanation as the behaviour is
-     the same mistake the DESIGN.md builder table made an hour ago. */
-  const gateCode = codeOf(gate);
-  ok('the gate throws rather than exiting the process',
-    /throw new PaletteGateError/.test(gateCode) && !/process\.exit/.test(gateCode));
-  ok('…and blocks by default, warning only when told to',
-    /COLLATERAL_GUARD === 'warn' \? 'warn' : 'strict'/.test(gate));
-  ok('…and a blocked path says where the work happens instead',
-    /build-report\.mts|build-onepager\.mts/.test(composer));
-}
-
-/* CLOSED 2026-08-15. deckDesigner.ts instructs a MODEL to write the deck HTML,
-   and its brand contract was entirely Ledger — Fraunces, Inter, the jade block
-   built as a three-layer texture composite, brass tags and bars. That path WINS
-   at every caller (`designedDeckHtml(run) ?? linkedInDocHtml(...)`), so the
-   app's DEFAULT carousel was the designed Ledger one.
-
-   The contract is now Carta, and the interesting part is what it had to say
-   OUT LOUD rather than merely stop saying: the old text insisted "nothing in
-   this system is near-black", which Carta inverts exactly, and it offered a
-   second image treatment (a masked dissolve) that only worked because there was
-   a texture to melt. A model handed a palette with two accents uses two, so the
-   brief now names the retired faces and colours as rejects rather than omitting
-   them. */
-{
-  const dd = read('server/services/deckDesigner.ts');
-  const ddCode = codeOf(dd);
-  ok('the deck designer briefs the model in Carta', !/\bLEDGER\b/.test(ddCode));
-  ok('…and names the retired faces as rejects rather than omitting them',
-    /Fraunces and Inter are RETIRED/.test(dd));
-  ok('…and the dark page is flat, with the texture explicitly refused',
-    /FLAT NEAR-BLACK BAND/.test(dd) && /TEXTURE_DARK\}\}: it is a Ledger asset/.test(dd));
-}
-
-/* The shared palette lines a model is briefed with come from house/tokens.ts,
-   so a rebrand cannot leave the model painting in the old system. That was
-   already the design; it was pointed at LEDGER until today. */
-{
-  const tokens = read('house/tokens.ts');
-  const span = tokens.slice(tokens.indexOf('export function brandPaletteLines'),
-                            tokens.indexOf('export function artworkPaletteClause'));
-  /* codeOf, because the function's own comment says "CARTA, not LEDGER" — the
-     third time today a check read a file's explanation as its behaviour. */
-  ok('the generated model palette is Carta', !/\bLEDGER\b/.test(codeOf(span)));
-  ok('…and the image brief clause is too',
-    !/\bLEDGER\b/.test(codeOf(tokens.slice(tokens.indexOf('export function artworkPaletteClause'),
-                                            tokens.indexOf('export function artworkPaletteClause') + 900))));
 }
 
 /* ── and the session has to be TOLD ───────────────────────────────────── */

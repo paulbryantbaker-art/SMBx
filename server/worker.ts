@@ -15,7 +15,6 @@ import { refreshAllValuations } from './services/valuationRefreshService.js';
 import { checkDealFreshness } from './services/dealFreshnessService.js';
 import { runDailyAggregatorScan } from './services/aggregatorMonitorService.js';
 import { batchEnrichTargets } from './services/websiteEnrichmentService.js';
-import { runStage2, runStage3, runStage4, runWeeklyPortfolioRefresh, runMonthlyPortfolioExpansion } from './services/sourcingPipelineService.js';
 import { spendAllowed } from './services/apiSpend.js';
 import { sql } from './db.js';
 import { refreshNightlyDealReads } from './services/nightlyDealReadService.js';
@@ -88,26 +87,12 @@ async function start() {
   await (boss as any).work('listing-match-check', { teamSize: 2, teamConcurrency: 1 }, handleListingMatchCheck);
   console.log('Registered job handlers: generate-deliverable, listing-match-check');
 
-  // Sourcing pipeline stage handlers
-  await ensureQueue('sourcing-stage-2');
-  await ensureQueue('sourcing-stage-3');
-  await ensureQueue('sourcing-stage-4');
-  await (boss as any).work('sourcing-stage-2', { teamSize: 1, teamConcurrency: 1 }, async (job: { data: { portfolioId: number } }) => {
-    console.log(`[worker] Running sourcing Stage 2 for portfolio ${job.data.portfolioId}`);
-    await runStage2(job.data.portfolioId);
-    console.log(`[worker] Sourcing Stage 2 complete for portfolio ${job.data.portfolioId}`);
-  });
-  await (boss as any).work('sourcing-stage-3', { teamSize: 1, teamConcurrency: 1 }, async (job: { data: { portfolioId: number } }) => {
-    console.log(`[worker] Running sourcing Stage 3 for portfolio ${job.data.portfolioId}`);
-    await runStage3(job.data.portfolioId);
-    console.log(`[worker] Sourcing Stage 3 complete for portfolio ${job.data.portfolioId}`);
-  });
-  await (boss as any).work('sourcing-stage-4', { teamSize: 1, teamConcurrency: 1 }, async (job: { data: { portfolioId: number } }) => {
-    console.log(`[worker] Running sourcing Stage 4 for portfolio ${job.data.portfolioId}`);
-    await runStage4(job.data.portfolioId);
-    console.log(`[worker] Sourcing Stage 4 complete for portfolio ${job.data.portfolioId}`);
-  });
-  console.log('Registered job handlers: sourcing-stage-2, sourcing-stage-3, sourcing-stage-4');
+  /* The three sourcing stage handlers were removed 2026-08-16 (Phase A).
+     The service they called is deleted — the app begins at the IoI, and
+     house/screen.ts is the corrected local reimplementation. Their pg-boss
+     queues are simply never registered; any row already sitting in
+     sourcing-stage-2/3/4 is inert rather than replayed, which is the safe
+     direction for a pipeline that could spend on Places lookups. */
 
   // ─── Scheduled jobs (disabled pre-launch to save API costs) ───
   // To re-enable: set ENABLE_SCHEDULED_JOBS=true in Railway env vars
@@ -247,23 +232,13 @@ async function start() {
     });
     console.log('Scheduled: daily_enrichment_batch (daily 8 AM UTC)');
 
-    // Weekly portfolio refresh — Wednesday 4 AM UTC
-    await (boss as any).schedule('portfolio_weekly_refresh', '0 4 * * 3', {}, {});
-    await (boss as any).work('portfolio_weekly_refresh', async () => {
-      console.log('[worker] Running weekly portfolio refresh...');
-      const result = await runWeeklyPortfolioRefresh();
-      console.log(`[worker] Portfolio refresh: ${result.portfoliosRefreshed} portfolios, ${result.candidatesUpdated} candidates updated`);
-    });
-    console.log('Scheduled: portfolio_weekly_refresh (Wednesday 4 AM UTC)');
-
-    // Monthly portfolio expansion — 1st of month 5 AM UTC
-    await (boss as any).schedule('portfolio_monthly_expansion', '0 5 1 * *', {}, {});
-    await (boss as any).work('portfolio_monthly_expansion', async () => {
-      console.log('[worker] Running monthly portfolio expansion...');
-      const result = await runMonthlyPortfolioExpansion();
-      console.log(`[worker] Portfolio expansion: ${result.portfoliosExpanded} portfolios, ${result.newCandidates} new candidates`);
-    });
-      console.log('Scheduled: portfolio_monthly_expansion (1st of month 5 AM UTC)');
+    /* The weekly portfolio refresh and monthly expansion went with the
+       sourcing service (2026-08-16, Phase A). They were the two unattended
+       jobs that walked the candidate board and re-pulled Places content —
+       exactly the shape the kill switch was built for, and now simply absent
+       rather than guarded. `daily_enrichment_batch` survives above because
+       `batchEnrichTargets` enriches WEBSITES for records the practitioner
+       already holds; it does not discover anything. */
     }
   } else {
     console.log('[worker] Scheduled jobs DISABLED (set ENABLE_SCHEDULED_JOBS=true to enable)');

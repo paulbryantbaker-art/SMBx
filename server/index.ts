@@ -17,7 +17,6 @@ import { collaborationRouter } from './routes/collaboration.js';
 import { pipelineRouter } from './routes/pipeline.js';
 import { notificationRouter } from './routes/notifications.js';
 import { intelligenceRouter } from './routes/intelligence.js';
-import { sourcingRouter } from './routes/sourcing.js';
 import { shareLinksRouter } from './routes/shareLinks.js';
 import { deepDataRouter } from './routes/deepData.js';
 import { gtmRouter } from './routes/gtm.js';
@@ -39,13 +38,11 @@ import { analysisRunsRouter } from './routes/analysisRuns.js';
 import { modelExecutionsRouter } from './routes/modelExecutions.js';
 import { portfolioBriefRouter } from './routes/portfolioBrief.js';
 import { studioRouter } from './routes/studio.js';
-import { researchRouter } from './routes/research.js';
 import { crmRouter } from './routes/crm.js';
 import postQueueRouter from './routes/postQueue.js';
 import { outreachRouter } from './routes/outreach.js';
 import { dealTasksRouter } from './routes/dealTasks.js';
 import { dealCapitalRouter } from './routes/dealCapital.js';
-import { startResearchScheduler } from './services/researchAgent.js';
 import { logSpendLanes, spendAllowed } from './services/apiSpend.js';
 import { startOwnerDigestScheduler } from './services/ownerDigest.js';
 import { v19ResourcesRouter } from './routes/v19Resources.js';
@@ -1241,7 +1238,6 @@ app.use('/api', collaborationRouter);
 app.use('/api', pipelineRouter);
 app.use('/api', notificationRouter);
 app.use('/api', intelligenceRouter);
-app.use('/api', sourcingRouter);
 app.use('/api', deepDataRouter);
 app.use('/api', gtmRouter);
 app.use('/api', flywheelRouter);
@@ -1264,7 +1260,6 @@ app.use('/api', portfolioBriefRouter);
 app.use('/api', canvasTabsRouter);
 app.use('/api', docViewsRouter);
 app.use('/api', studioRouter);
-app.use('/api', researchRouter);
 app.use('/api', crmRouter);
 // The post queue holds ROWS. It dispatches nothing — see migration 123.
 app.use('/api/post-queue', postQueueRouter);
@@ -1627,11 +1622,12 @@ runMigrations().then(async () => {
     // answer that question about a running deploy.
     logSpendLanes();
     startWorker().catch(err => console.warn('[worker] Init skipped:', err.message));
-    try {
-      startResearchScheduler();
-    } catch (err: any) {
-      console.warn('[research] Scheduler init skipped:', err?.message);
-    }
+    /* The research scheduler is gone with the Phase A sweep (2026-08-16).
+       It was the one unattended path that could spend real money on a timer,
+       and the work it scheduled now happens in a Cowork session on Paul's own
+       subscription — see WHERE_THE_WORK_HAPPENS.md and content/studio/WEEKLY.md.
+       RESEARCH_SCHEDULES_ENABLED / RESEARCH_SCHEDULES_DISABLED no longer do
+       anything; the rows in research_schedules are inert data. */
     try {
       startOwnerDigestScheduler();
     } catch (err: any) {

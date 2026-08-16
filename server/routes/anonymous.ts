@@ -6,7 +6,6 @@ import { sql } from '../db.js';
 import { buildAnonymousPrompt } from '../services/promptBuilder.js';
 import { streamAnonymousResponse } from '../services/aiService.js';
 import { extractFields } from '../services/fieldExtractor.js';
-import { scoreSevenFactors, calculateCompositeScore, scoredFactorCount } from '../services/sevenFactorScoring.js';
 import { extractFinancialsFromUploadBuffer, persistUploadedFile } from '../services/uploadPersistence.js';
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
 
@@ -221,23 +220,13 @@ anonymousRouter.post('/:sessionId/messages', async (req, res) => {
                 WHERE id = ${session.id}
               `;
 
-              // Run seven-factor scoring if we have enough data
-              const [currentSession] = await sql`
-                SELECT data FROM anonymous_sessions WHERE id = ${session.id}
-              `;
-              const allData = currentSession?.data || {};
-              if (allData.industry && allData.revenue) {
-                const scores = await scoreSevenFactors(allData);
-                if (scores && scoredFactorCount(scores) >= 2) {
-                  const composite = calculateCompositeScore(scores);
-                  await sql`
-                    UPDATE anonymous_sessions
-                    SET data = COALESCE(data, '{}'::jsonb)
-                      || ${sql.json({ seven_factor_scores: scores, seven_factor_composite: composite })}::jsonb
-                    WHERE id = ${session.id}
-                  `;
-                }
-              }
+              /* The seven-factor scoring block was removed 2026-08-16 with the
+                 Phase A sweep. It was SOURCING functionality riding inside the
+                 retired public chat, and its scorer had the two citation-law
+                 defects house/screen.ts was written to correct — no
+                 independence check at all, and revenue guessed from review
+                 counts. This route is 410 in practice mode anyway; captured
+                 fields are still stored above. */
             } catch (e: any) {
               console.error('Field storage error:', e.message);
             }

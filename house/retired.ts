@@ -64,98 +64,86 @@ export interface Retired {
 }
 
 export const RETIRED: readonly Retired[] = [
-  /* ── the sourcing engine (2026-08-15) ──────────────────────────────────
-     Paul: "there will be no sourcing in the app the app is internal now IoI
-     to integration." Retired rather than fixed, which is the important word:
-     the app's engine had two citation-law defects and house/screen.ts is the
-     corrected reimplementation, not a port. Fixing this one would have meant
-     maintaining two screens, one of which can invent a revenue figure. */
-  {
-    id: 'client/src/components/v6/desktop/screens/Sourcing.tsx',
-    kind: 'dark',
-    why: 'Target discovery is entirely pre-IoI, and the app begins at the IoI.',
-    replacedBy: 'scripts/studio/screen.mts + house/screen.ts',
-    marked: '2026-08-15',
-    proof: { check: 'flagOff', file: 'client/src/components/v6/appSurfaces.ts', constant: 'SOURCING_IN_APP' },
-    note: 'Still routed at AtlasApp case "sourcing" — a direct URL reaches it. Deleting the screen means deleting that case and the mobile More row together.',
-  },
+  /* ── SWEPT 2026-08-16 (Phase A of FRONT_END_REBUILD.md) ────────────────
+     Eight of this register's entries have been DELETED, not merely marked.
+     They are recorded here as `swept` rather than dropped from the file,
+     because the register's value is that it can answer "did this come back",
+     and an empty list answers nothing. Each carries an `unreferenced` proof
+     now: if the path reappears anywhere, the test goes red.
+
+     Deleted: the Studio screens and services, the Sourcing screen, engine,
+     scorer and prompt, the app's artifact renderers, and paletteGate — which
+     went with them, because a choke point with nothing left to stand in front
+     of reads as protection it no longer provides. */
   {
     id: 'server/services/sourcingPipelineService.ts',
-    kind: 'dark',
-    why: 'The 5-stage engine behind the Sourcing screen. Its lane is off, so every entry point refuses.',
-    replacedBy: 'house/screen.ts — affiliation by register lookup, revenue as a band with its arithmetic',
+    kind: 'orphaned',
+    why: 'SWEPT. The 5-stage engine. Target discovery is entirely pre-IoI and the app begins at the IoI.',
+    replacedBy: 'house/screen.ts + scripts/studio/screen.mts — affiliation by register lookup, revenue as a band with its arithmetic',
     marked: '2026-08-15',
-    proof: { check: 'laneOff', lane: 'sourcing' },
-    note: 'THREE unattended cron jobs in worker.ts call into this and are separately guarded. Delete those guards WITH the service, never before it.',
+    proof: { check: 'unreferenced', pattern: 'sourcingPipelineService', selfPath: 'server/services/sourcingPipelineService.ts' },
+    note: 'Its three worker cron jobs and its two Yulia tools (get_sourcing_portfolio, start_sourcing_run) went with it. sourcing_candidates rows survive — they are a Places content cache with a retention rule; read house/screen.ts PLACES_CONTENT before dropping any.',
   },
   {
     id: 'server/prompts/deepAnalysisPrompt.ts',
-    kind: 'dark',
-    why: 'Asks a model to estimate revenue from Google review counts ("<10 reviews typically = <$500K rev") — an uncited figure in a practice where every number must trace.',
-    replacedBy: 'house/screen.ts revenue_basis — employee range x NAICS revenue-per-employee, emitting its own Derivations entry',
+    kind: 'orphaned',
+    why: 'SWEPT. Asked a model to estimate revenue from Google review counts — an uncited figure in a practice where every number must trace.',
+    replacedBy: 'house/screen.ts revenue_basis',
     marked: '2026-08-15',
-    proof: { check: 'laneOff', lane: 'sourcing' },
-    note: 'Imported by sourcingPipelineService stage 3 only. It goes with that service, not separately — deleting the prompt alone leaves a stage that calls nothing.',
+    proof: { check: 'unreferenced', pattern: 'deepAnalysisPrompt', selfPath: 'server/prompts/deepAnalysisPrompt.ts' },
   },
   {
     id: 'server/services/sevenFactorScoring.ts',
-    kind: 'dark',
-    why: 'Scores candidates with no independence check anywhere, so a franchise location can rank as a target — the expensive error: it sends a client into diligence on a business a sponsor already owns.',
+    kind: 'orphaned',
+    why: 'SWEPT. Scored candidates with no independence check anywhere, so a franchise location could rank as a target.',
     replacedBy: 'house/screen.ts — affiliation GATES rather than weights',
     marked: '2026-08-15',
-    proof: { check: 'laneOff', lane: 'sourcing' },
-    note: 'Writes the score columns the Sourcing screen reads and the candidates table stores. Deleting it means deciding what happens to sourcing_candidates — the rows are a Places content cache with a retention rule, so read house/screen.ts PLACES_CONTENT before dropping anything.',
+    proof: { check: 'unreferenced', pattern: 'sevenFactorScoring', selfPath: 'server/services/sevenFactorScoring.ts' },
+    note: 'Its last caller was routes/anonymous.ts — sourcing functionality riding inside the retired public chat. That block went too.',
   },
-
-  /* ── Studio in the app (2026-08-15) ────────────────────────────────────
-     Collateral is market-shaped, so it is the studio's. These screens are
-     dark rather than orphaned: /api/research and /api/studio stay mounted so
-     direct URLs and existing exports keep working. */
   {
-    id: 'client/src/components/v6/desktop/screens/StudioResearch.tsx (+ StudioCreate, StudioAnnouncement, CollateralBuilder, MarketWorkspace, atlasmobile/screens/StudioResearchM.tsx)',
-    kind: 'dark',
-    why: 'Collateral and research are market-shaped — one-to-many, speculative, no counterparty — so THE_IOI_SEAM.md puts them in the studio.',
+    id: 'client/src/components/v6/desktop/screens/Sourcing.tsx (+ atlasmobile/screens/Sourcing.tsx)',
+    kind: 'orphaned',
+    why: 'SWEPT. Both shells. Target discovery is pre-IoI.',
+    replacedBy: 'scripts/studio/screen.mts',
+    marked: '2026-08-15',
+    proof: { check: 'unreferenced', pattern: 'screens/Sourcing', selfPath: 'client/src/components/v6/desktop/screens/Sourcing.tsx' },
+  },
+  {
+    id: 'the Studio screens (StudioCreate · StudioResearch · StudioAnnouncement · CollateralBuilder · MarketWorkspace · atlasmobile Studio + StudioResearchM)',
+    kind: 'orphaned',
+    why: 'SWEPT. Collateral and research are market-shaped — one-to-many, speculative, no counterparty — so THE_IOI_SEAM.md puts them in the studio.',
     replacedBy: 'the four builders in scripts/studio/, against ~/Documents/smbx-studio',
     marked: '2026-08-15',
-    proof: { check: 'flagOff', file: 'client/src/components/v6/appSurfaces.ts', constant: 'STUDIO_IN_APP' },
-    note: 'This flag has flipped three times. Do NOT delete these on the strength of it being false today — read the history in appSurfaces.ts first. The audience axis is the one that has held, but it has held for one day.',
+    proof: { check: 'unreferenced', pattern: 'screens/StudioCreate', selfPath: 'client/src/components/v6/desktop/screens/StudioCreate.tsx' },
+    note: 'STUDIO_IN_APP and SOURCING_IN_APP went with them. A flag guarding a file that no longer exists is a lie about what is reachable.',
   },
-
-  /* ── the Ledger artifact renderers (2026-08-15) ────────────────────────
-     Not dark by a flag — dark because the palette gate throws on them. That
-     is a stronger proof than a flag, and a stranger one: the code runs, gets
-     all the way to a finished document, and is refused at the last step. */
   {
-    id: 'researchCardHtml / announcementCardHtml / postCardHtml in server/services/researchComposer.ts',
-    kind: 'dark',
-    why: 'Still render in the retired Ledger palette. server/services/paletteGate.ts throws before any of them can ship, so their downloads fail rather than producing off-language collateral.',
-    replacedBy: 'scripts/studio/build-onepager.mts',
-    marked: '2026-08-15',
-    proof: { check: 'exists', path: 'server/services/paletteGate.ts' },
-    note: 'Deleting these means deleting the Ledger consts they are the last users of (BRASS, WARM, CARD, DARK_TEXTURE_URI) and the legacy deck template in linkedInDocHtml. That is the change that finally removes LEDGER from researchComposer.',
+    id: 'the Studio/research services (researchAgent · researchComposer · researchLanes · deckDesigner · studioAssets · studioRepos · collateralComposer · corpDevDocs · linkedinAnalytics · artworkService · postcardFiller) + routes/research.ts',
+    kind: 'orphaned',
+    why: 'SWEPT with the screens. researchAgent was additionally the only unattended path that could spend real money on a timer.',
+    replacedBy: 'scripts/studio/*.mts run in a Cowork session on Paul\'s own subscription',
+    marked: '2026-08-16',
+    proof: { check: 'unreferenced', pattern: 'services/researchComposer', selfPath: 'server/services/researchComposer.ts' },
+    note: 'The TABLES survive — research_lanes, research_runs, studio_assets and the rest keep their data. marketKnowledgeTools reads research_lanes through sql directly, not through the service, so Yulia KEEPS list_markets / read_market / search_market.',
+  },
+  {
+    id: 'server/services/paletteGate.ts',
+    kind: 'orphaned',
+    why: 'SWEPT. A choke point that threw before an off-language artifact could leave the server. With no server-side renderer left there is nothing for it to stand in front of, and an unreferenced guard is worse than no guard because it reads as protection.',
+    replacedBy: 'assertCarta in the local builders — the guard now sits where the rendering does',
+    marked: '2026-08-16',
+    proof: { check: 'unreferenced', pattern: 'paletteGate', selfPath: 'server/services/paletteGate.ts' },
   },
   {
     id: 'server/services/sectorArt.ts',
     kind: 'orphaned',
-    why: '21 hand-drawn line-art trade illustrations. Paul rejected them on sight in 2026-07-20 ("awful… looks terrible") and no composer has referenced them since.',
+    why: 'SWEPT. 21 line-art trade illustrations Paul rejected on sight in 2026-07-20; no composer had referenced them since.',
     marked: '2026-08-15',
     proof: { check: 'unreferenced', pattern: 'sectorArt', selfPath: 'server/services/sectorArt.ts' },
-    note: 'The only genuinely orphaned entry in this register — safe to delete without touching anything else.',
-  },
-
-  /* ── superseded documents ──────────────────────────────────────────────
-     The dangerous kind: reachable, and gives an older answer than the thing
-     that replaced it. */
-  {
-    id: 'server/services/corpDevDocs.ts',
-    kind: 'superseded',
-    why: 'Duplicates the PLAYBOOK document specs and is missing the target map entirely — so a document derived here is built from an incomplete spec.',
-    replacedBy: 'content/studio/PLAYBOOK.md, which travels to the workspace',
-    marked: '2026-08-15',
-    proof: { check: 'exists', path: 'content/studio/PLAYBOOK.md' },
-    note: 'REACHABLE — routes/research.ts imports it in three places. Retire the routes with it; leaving them is how someone generates a who\'s-who against the stale spec.',
   },
 ];
+
 
 /** Everything marked, grouped by how it is dead. */
 export function byKind(kind: RetirementKind): readonly Retired[] {

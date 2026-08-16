@@ -38,10 +38,8 @@ import { AtlasChatRail } from "./chat/AtlasChatRail";
 import { Sparkle } from "./primitives";
 
 import TodayScreen from "./screens/Today";
-import SourcingScreen from "./screens/Sourcing";
 import DealsScreen from "./screens/Deals";
 import CockpitScreen from "./screens/Cockpit";
-import StudioScreen from "./screens/StudioCreate";
 import ClientsScreen from "./screens/Clients";
 import IntegrationScreen from "./screens/Integration";
 import FilesScreen from "./screens/Files";
@@ -467,8 +465,10 @@ function AtlasShell({ user, chat, onSignOut }: ShellProps) {
 /** The active app screen (isApp views 1–8 + cockpit + canvas). */
 function AppScreen({ user, view }: { user: User | null; view: AtlasView }) {
   switch (view.screen) {
-    case "sourcing":
-      return <SourcingScreen user={user} view={view} />;
+    // "sourcing" and "studio" are retired SCREENS as of 2026-08-16, not just
+    // retired tabs: the files are deleted, so a deep link falls through to the
+    // default rather than resolving. Target discovery is pre-IoI and document
+    // work is the studio's — see FRONT_END_REBUILD.md Phase A.
     // "pipeline" is a retired tab — kept in the AtlasScreen union as an alias so
     // lingering deep links / nav.go('pipeline') still resolve to the merged
     // table-first Deals screen (which carries the Board funnel toggle).
@@ -477,8 +477,6 @@ function AppScreen({ user, view }: { user: User | null; view: AtlasView }) {
       return <DealsScreen user={user} view={view} />;
     case "clients":
       return <ClientsScreen user={user} view={view} />;
-    case "studio":
-      return <StudioScreen user={user} view={view} />;
     case "integration":
       return <IntegrationScreen user={user} view={view} />;
     case "files":

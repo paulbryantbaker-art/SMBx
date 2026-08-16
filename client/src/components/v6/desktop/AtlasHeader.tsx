@@ -12,7 +12,6 @@ import { useAtlasNav, type AtlasScreen } from "./atlasNav";
 import { Sparkle, Avatar } from "./primitives";
 import { SearchIcon, HelpIcon, BellIcon } from "./icons";
 import { T } from "./atlasTokens";
-import { STUDIO_IN_APP, SOURCING_IN_APP } from "../appSurfaces";
 
 interface TabDef {
   id: AtlasScreen;
@@ -31,9 +30,7 @@ interface TabDef {
 const TABS: TabDef[] = ([
   { id: "today", label: "Today" },
   { id: "clients", label: "Clients" },
-  ...(SOURCING_IN_APP ? [{ id: "sourcing", label: "Sourcing" } as TabDef] : []),
   { id: "deals", label: "Deals" },
-  ...(STUDIO_IN_APP ? [{ id: "studio", label: "Studio" } as TabDef] : []),
   { id: "integration", label: "Integration" },
   { id: "files", label: "Files" },
   { id: "agent", label: "Agent" },
