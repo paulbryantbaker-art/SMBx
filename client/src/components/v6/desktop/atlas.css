@@ -57,7 +57,11 @@
   --at-row-div2: #F6F2EA;
   --at-input-bd: #DED8CC;
   --at-prog-track: #EDE9DF;
-  --at-spark: linear-gradient(135deg, #0FA97C, #0A7A58 50%, #E8A62B);
+  /* --at-spark is DELETED (2026-08-16). It was the CSS mirror of the `spark`
+     token and it still ended on #E8A62B — Ledger's amber, retired since
+     2026-08-07 — so the app's one gradient was two-thirds Carta and
+     one-third a dead palette. The mark is an <img> of the real logo now
+     (see Logo.tsx); there is no gradient left in the app to mirror. */
   /* Flat despite the name — see T.avatarGrad (Paul: "needs to be flattened"). */
   --at-avatar-grad: #0A7A58;
 

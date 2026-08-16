@@ -9,10 +9,10 @@
  */
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useAtlasNav, type AtlasScreen } from "./atlasNav";
-import { Sparkle, Avatar } from "./primitives";
+import { Avatar } from "./primitives";
+import { LogoHome, Mark } from "./Logo";
 import { SearchIcon, HelpIcon, BellIcon } from "./icons";
 import { T } from "./atlasTokens";
-import { STUDIO_IN_APP, SOURCING_IN_APP } from "../appSurfaces";
 
 interface TabDef {
   id: AtlasScreen;
@@ -28,14 +28,17 @@ interface TabDef {
    (crm_accounts → buyer_theses.crm_account_id → sourcing_portfolios →
    candidates → deals → gates); the chrome now reads in the same order:
    Clients → Sourcing (the thesis lives there) → Deals (the stages). */
+/* TWO FUNCTIONS, ONE SPINE (2026-08-16, FRONT_END_REBUILD.md Phase B).
+   Integration and Files came OUT of the top nav: a data room belongs to a
+   deal and an integration plan belongs to a closed deal, so both are inside
+   Function 2 (Dealflow) and are reached from the Deals surface. The screens
+   and their routes are untouched — this is navigation, not deletion — and
+   `activeTabFor` below keeps the Deals tab lit while you are in either, so
+   the chrome agrees with the object model. */
 const TABS: TabDef[] = ([
   { id: "today", label: "Today" },
   { id: "clients", label: "Clients" },
-  ...(SOURCING_IN_APP ? [{ id: "sourcing", label: "Sourcing" } as TabDef] : []),
   { id: "deals", label: "Deals" },
-  ...(STUDIO_IN_APP ? [{ id: "studio", label: "Studio" } as TabDef] : []),
-  { id: "integration", label: "Integration" },
-  { id: "files", label: "Files" },
   { id: "agent", label: "Agent" },
 ] as TabDef[]);
 
@@ -43,7 +46,13 @@ const TABS: TabDef[] = ([
  *  Deals; the retired "pipeline" alias also highlights Deals (the funnel now
  *  lives in the Deals Board toggle); settings highlights nothing. */
 function activeTabFor(screen: AtlasScreen): AtlasScreen | null {
-  if (screen === "cockpit" || screen === "canvas" || screen === "pipeline") return "deals";
+  // Everything deal-shaped lights the Deals tab — the cockpit, the canvas, the
+  // retired pipeline alias, and (Phase B) the data room and integration, which
+  // are inside Dealflow now rather than tabs of their own.
+  if (
+    screen === "cockpit" || screen === "canvas" || screen === "pipeline" ||
+    screen === "files" || screen === "integration"
+  ) return "deals";
   if (screen === "settings") return null;
   return screen;
 }
@@ -81,19 +90,12 @@ export function AtlasHeader({
 
   return (
     <header style={S.header}>
-      {/* Logo cluster */}
-      <div style={S.logo}>
-        <Sparkle size={22} />
-        {/* "Atlas" was the internal codename for this shell and it had leaked
-            into the one place a user reads on every single screen. Paul,
-            2026-08-15, looking at the header: "it still atlas". The practice is
-            smbX; Atlas is a folder name. Identifiers stay (AtlasApp,
-            atlasTokens, AtlasHeader) — renaming those is a large mechanical
-            diff with no visible effect, and the same precedent applies as
-            `--pd-coral` holding Deal Green across the practice site. What
-            changes is what the app CALLS ITSELF. */}
-        <span style={S.wordmark}>smb<span style={S.wordmarkX}>X</span></span>
-      </div>
+      {/* THE REAL MARK (2026-08-16, Paul: "actually use the correct logo
+          everywhere"). This slot held a gradient ✦ beside the word "Atlas" —
+          the shell's internal codename — and then beside a hand-set "smbX".
+          Neither was the logo. It is the logo now, from the tight-cropped
+          asset so no negative-margin correction is needed; see Logo.tsx. */}
+      <LogoHome height={24} onClick={() => nav.go("today")} />
 
       {/* Module tab list */}
       <nav style={S.tabs}>
@@ -213,7 +215,7 @@ export function AtlasHeader({
         onMouseEnter={(e) => (e.currentTarget.style.background = T.navActive)}
         onMouseLeave={(e) => (e.currentTarget.style.background = T.blueBg)}
       >
-        <Sparkle size={14} />
+        <Mark height={13} />
         Upgrade
       </button>
 
@@ -280,10 +282,6 @@ const S: Record<string, CSSProperties> = {
     background: T.white,
   },
   logo: { display: "flex", alignItems: "center", gap: 9, marginRight: 6, flex: "none" },
-  wordmark: { fontSize: 19, fontWeight: 600, letterSpacing: "-.01em", color: T.ink },
-  // The X carries the accent, matching the logo mark on the practice site
-  // (/logo-green-x.png) — same gesture, one accent, no second hue.
-  wordmarkX: { color: T.blue },
   tabs: {
     // Content-width now (was flex:1) so the open-tab strip can take the flexible
     // middle space. The module nav stays fully visible; on a narrow window it

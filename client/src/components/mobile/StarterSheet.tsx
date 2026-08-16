@@ -48,7 +48,7 @@ export function StarterSheet({
   const borderC = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
   const rowBg = dark ? '#1f2123' : '#ffffff';
   const rowBd = dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.06)';
-  const accent = dark ? '#ec9d78' : '#D4714E';
+  const accent = dark ? '#ec9d78' : '#0A7A58';
 
   const journeys = tools.filter(t => t.group === 'journey');
   const toolItems = tools.filter(t => t.group === 'tool');

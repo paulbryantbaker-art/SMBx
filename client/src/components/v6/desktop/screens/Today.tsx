@@ -35,7 +35,7 @@ import { useAtlasNav, useAtlasChat } from "../atlasNav";
 import { T } from "../atlasTokens";
 import { MarkBadge, fmtCents } from "../primitives";
 import { PlusIcon, ChevronRightIcon, SendArrowIcon } from "../icons";
-import { CompareStrip, RankingNote } from "../kit";
+import { CompareStrip, RankingNote, GroupHeader, ResultRow, Endorsement } from "../kit";
 import { useMobileDeals } from "../../../../hooks/useMobileDeals";
 import { useNextActions, type NextAction } from "../../../../hooks/useNextActions";
 import { useNotifications, notifTimeAgo, type AppNotification } from "../../../../hooks/useNotifications";
@@ -57,46 +57,28 @@ function timeGreeting(): string {
   return "Good evening";
 }
 
-/* ─── attention-item icon tile (tinted by action semantics) ──
- *
- * Keyed off the server's known Material-Symbol `icon` ids (nextActions.ts) so
- * every action type lands on a distinct tile — not a regex over free text that
- * collapses nearly everything to the default blue/`›` (the design wants the
- * three semantic families: review ⚑ blue, nudge/stale ✎ terra, draft 📝 green).
- *
- *   rate_review        → ⚑ blue  (someone is blocked on your review — urgent)
- *   schedule           → ✎ terra (stale deal, needs a nudge)
- *   arrow_circle_right → 📝 green (ready to advance — the "done, move on" case)
- *   sell/shopping_cart/savings/merge/auto_awesome → journey-tinted gate work
- */
+/* ── the kit-era styles for this screen ─────────────────────────────────── */
 
-type AttentionKind = { bg: string; fg: string; glyph: string };
-
-function attentionKind(a: NextAction): AttentionKind {
-  switch (a.icon) {
-    case "rate_review":
-      return { bg: T.blueBg3, fg: T.blue, glyph: "⚑" };
-    case "schedule":
-      return { bg: T.terraBg, fg: T.terra, glyph: "✎" };
-    case "arrow_circle_right":
-      return { bg: T.greenBg, fg: T.green, glyph: "📝" };
-    default:
-      break;
-  }
-  // Gate-work actions (icon = journeyIcon) — tint by journey so buy/sell/raise
-  // read distinctly instead of an identical blue tile.
-  switch (a.journeyType) {
-    case "sell":
-      return { bg: T.amberBg, fg: T.amber, glyph: "▲" };
-    case "raise":
-      return { bg: T.violetBg, fg: T.violet, glyph: "◆" };
-    case "pmi":
-      return { bg: T.greenBg, fg: T.green, glyph: "⤢" };
-    case "buy":
-    default:
-      return { bg: T.blueBg3, fg: T.blue, glyph: "▸" };
-  }
-}
+/* ONE BORDERED CONTAINER, hairline-divided. Radius 0 — Carta's exception is
+   buttons and inputs, and a list is neither. The old rows were radius-13 cards
+   with a 9px gap between them, which is the single biggest reason the screen
+   read as Atlas rather than as the reference. */
+const listBox: CSSProperties = {
+  border: `1px solid ${T.border}`,
+  background: T.white,
+};
+const emptyBox: CSSProperties = {
+  border: `1px solid ${T.border}`, background: T.white,
+  padding: "22px 16px", fontSize: 12.5, color: T.muted, lineHeight: 1.6,
+};
+const moreRow: CSSProperties = {
+  padding: "10px 12px", borderTop: `1px solid ${T.border}`,
+  fontSize: 11.5, color: T.muted2,
+};
+const noteSummary: CSSProperties = {
+  fontSize: 11.5, fontWeight: 700, color: T.blue, cursor: "pointer",
+  marginBottom: 4,
+};
 
 /* ─── screen ──────────────────────────────────────────────── */
 
@@ -297,34 +279,72 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
             actionable, the activity feed second because it is ambient. The
             stack is capped at a readable width and centered — full-bleed 920px
             rows read as a spreadsheet, not a feed. */}
-        {/* Was `maxWidth: 680, margin: 0 auto` — a centred reading column under
-            a centred hero. With the hero gone the page has a left edge, and a
-            narrow centred stack under a full-width strip reads as a different
-            page. Two columns at this width: what needs you (actionable) beside
-            what happened (ambient), which is the Trainline list/detail split
-            applied to a dashboard. */}
-        <div
-          style={{
-            width: "100%",
-            display: "grid",
-            gridTemplateColumns: "1.38fr 1fr",
-            gap: 24,
-            alignItems: "start",
-          }}
-        >
+        {/* THE BODY IS THE KIT NOW (2026-08-16).
+
+            Paul, looking at the deployed screen: *"it is a far cry from the
+            cool sophistication of trainline UI, which is what i thought we
+            were doing."* He was right, and the reason was visible in the
+            markup: the STRIP was the kit and everything under it was still
+            Atlas — `AttentionColumn` rendering `borderRadius: 13` cards
+            floating in a 9px gap, five of them, each saying the same
+            "your next step is due."
+
+            Three things separate that from the reference, and none of them is
+            colour:
+              · DENSITY. One bordered container with hairline dividers, not
+                cards with gaps. A gap says "these are separate things"; a
+                rule says "these are rows of one thing", which is what they are.
+              · COLUMNS. The reference's prices sit in fixed right-aligned
+                columns under a header, so the eye compares straight down. Ours
+                had every value inline in a sentence, so there was nothing to
+                compare.
+              · A ROW THAT SAYS SOMETHING. "your next step is due" on all five
+                rows is not information. The client, what is owed, and its tier
+                are all on the record and none of them were rendered. */}
+        <div style={{ width: "100%", display: "grid", gridTemplateColumns: "1.62fr 1fr", gap: 26, alignItems: "start" }}>
           <div>
-            <ColumnHeading>Needs your attention</ColumnHeading>
-            <AttentionColumn
-              noDeals={noDeals}
-              loading={next.loading || deals.loading}
-              actions={next.actions}
-              onAction={onAction}
-              onStartDeal={() =>
-                chat
-                  ? chat.send("I want to start a new deal — help me set it up.")
-                  : nav.go("deals")
-              }
-            />
+            {noDeals && next.actions.length === 0 ? (
+              <div style={emptyBox}>
+                Nothing is waiting on you. When a gate goes overdue or a client
+                is owed a touch, it lands here.
+              </div>
+            ) : (
+              <div style={listBox}>
+                <GroupHeader
+                  title={`Needs you${next.loaded ? ` · ${next.actions.length}` : ""}`}
+                  columns={["Client", "Tier"]}
+                />
+                {next.actions.slice(0, 8).map((a, idx) => (
+                  <div key={a.id}>
+                    {/* The endorsement goes on the FIRST row only, and its
+                        grounds are `because` — the traceable reason the
+                        service gives, never generated prose. If the service
+                        did not supply one, no band: a claim with no grounds
+                        is exactly what the kit refuses to render. */}
+                    {idx === 0 && a.because && (
+                      <Endorsement claim="Start here." grounds={a.because} />
+                    )}
+                    <ResultRow
+                      anchor={a.action || a.title}
+                      sub={a.currentGate ? `${a.journeyType ?? "deal"} · ${a.currentGate}` : (a.journeyType ?? undefined)}
+                      subLink={a.dealName || undefined}
+                      onSubLink={() => onAction(a)}
+                      onClick={() => onAction(a)}
+                      endorsed={idx === 0 && !!a.because}
+                      values={[
+                        { text: a.client ?? null },
+                        { text: a.clientTier ?? null },
+                      ]}
+                    />
+                  </div>
+                ))}
+                {next.actions.length > 8 && (
+                  <div style={moreRow}>
+                    {next.actions.length - 8} more waiting — open Deals to work the rest.
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div>
@@ -337,17 +357,26 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
           </div>
         </div>
 
-        {/* P9 — the honest footer. This screen ranks two lists and neither said
-            how. `useNextActions` decides what "needs you" means, and a reader
-            is entitled to know that before acting on the order. */}
-        <RankingNote
-          title="How Today is assembled"
-          ordering="Needs you is whatever the next-actions service returns for your deals — overdue gate work, stale deals and pending reviews — in the order it returns them. Nothing on this screen is re-ranked here."
-          caveats={[
-            "The pipeline figure sums only deals that carry an asking price, and its label says how many of the book that is. A board with no priced deals shows no total rather than a low one.",
-            "A figure that has not loaded yet shows as not-known, not as zero. Nothing needing you and nothing checked yet are different states.",
-          ]}
-        />
+        {/* P9 — the honest footer, COLLAPSED. It was three paragraphs of prose
+            sitting open at the bottom of the page, which on the deployed
+            screen was the largest block of text on it. The reference's
+            equivalent is four quiet lines. It is for the moment somebody
+            challenges the order, so it has to be complete and it does not have
+            to be loud. */}
+        <details style={{ marginTop: 4 }}>
+          <summary style={noteSummary}>How Today is assembled</summary>
+          <div style={{ marginTop: -12 }}>
+            <RankingNote
+              title=""
+              ordering="Needs you is whatever the next-actions service returns for your deals — overdue gate work, stale deals and pending reviews — in the order it returns them. Nothing on this screen is re-ranked here, and only the first eight are shown."
+              caveats={[
+                "The pipeline figure sums only deals that carry an asking price, and its label says how many of the book that is. A board with no priced deals shows no total rather than a low one.",
+                "A figure that has not loaded yet shows as not-known, not as zero. Nothing needing you and nothing checked yet are different states.",
+                "The highlighted row is simply the first one the service returned, and its reason is the service's own — not a judgement made here.",
+              ]}
+            />
+          </div>
+        </details>
       </div>
     </div>
   );
@@ -380,12 +409,14 @@ function QuickChip({
         gap: 9,
         background: T.white,
         border: `1px solid ${T.border}`,
-        borderRadius: 13,
+        /* Radius 0. Carta's one exception is buttons and inputs; a card is
+           neither, and radius-13 cards in a gapped stack are the Atlas
+           grammar this screen was rebuilt to leave. */
+        borderRadius: 0,
         padding: "11px 16px",
         fontSize: 13.5,
         fontWeight: 500,
         color: T.ink,
-        boxShadow: T.shCard,
         cursor: "pointer",
         fontFamily: T.font,
         transition: "background .15s ease",
@@ -422,127 +453,14 @@ function ColumnHeading({ children }: { children: ReactNode }) {
   );
 }
 
-/* ─── attention column ────────────────────────────────────── */
+/* AttentionColumn lived here — radius-13 cards in a 9px gap, each with a
+   30px tinted glyph tile. Deleted 2026-08-16: the kit's GroupHeader +
+   ResultRow render that list now, as one bordered container with hairline
+   dividers and right-aligned columns. Its `attentionKind` tile palette went
+   with it; a per-journey tint on a 30px square was carrying no information a
+   reader could act on, and it was five different colours on a screen whose
+   design system has one accent. */
 
-function AttentionColumn({
-  noDeals,
-  loading,
-  actions,
-  onAction,
-  onStartDeal,
-}: {
-  noDeals: boolean;
-  loading: boolean;
-  actions: NextAction[];
-  onAction: (a: NextAction) => void;
-  onStartDeal: () => void;
-}) {
-  if (loading) {
-    return <ColumnLoading rows={3} />;
-  }
-
-  if (noDeals) {
-    return (
-      <FirstDealCard onStartDeal={onStartDeal} />
-    );
-  }
-
-  if (actions.length === 0) {
-    return (
-      <NoteCard text="You're all caught up — nothing needs you right now." />
-    );
-  }
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-      {actions.map((a) => {
-        const kind = attentionKind(a);
-        return (
-          <button
-            key={a.id}
-            type="button"
-            onClick={() => onAction(a)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 11,
-              textAlign: "left",
-              background: T.white,
-              border: `1px solid ${T.border}`,
-              borderRadius: 13,
-              padding: "13px 15px",
-              cursor: "pointer",
-              boxShadow: T.shSoft,
-              fontFamily: T.font,
-              transition: "box-shadow .15s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = T.shHover;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = T.shSoft;
-            }}
-          >
-            <span
-              aria-hidden="true"
-              style={{
-                width: 30,
-                height: 30,
-                flex: "none",
-                borderRadius: 9,
-                background: kind.bg,
-                color: kind.fg,
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 15,
-              }}
-            >
-              {kind.glyph}
-            </span>
-            <span style={{ flex: 1, minWidth: 0 }}>
-              <span
-                style={{
-                  display: "block",
-                  fontSize: 13.5,
-                  fontWeight: 600,
-                  color: T.ink,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {/* The client line, when there is one: TIER · FIRM — why this
-                    row jumped the queue is visible, not just computed (the
-                    server orders same-urgency rows by tier). */}
-                {a.client && (
-                  <span style={{ color: T.blue, fontWeight: 700 }}>
-                    {a.clientTier ? `${a.clientTier} · ` : ""}{a.client}
-                    <span style={{ color: T.faint, fontWeight: 400 }}> › </span>
-                  </span>
-                )}
-                {a.title}
-              </span>
-              <span
-                style={{
-                  display: "block",
-                  fontSize: 12,
-                  color: T.muted2,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {a.description || a.cta}
-              </span>
-            </span>
-            <ChevronRightIcon size={16} c={T.faint} />
-          </button>
-        );
-      })}
-    </div>
-  );
-}
 
 function FirstDealCard({ onStartDeal }: { onStartDeal: () => void }) {
   return (
@@ -550,9 +468,8 @@ function FirstDealCard({ onStartDeal }: { onStartDeal: () => void }) {
       style={{
         background: T.white,
         border: `1px solid ${T.border}`,
-        borderRadius: 13,
+        borderRadius: 0,
         padding: "18px 16px",
-        boxShadow: T.shSoft,
       }}
     >
       <div style={{ fontSize: 13.5, fontWeight: 600, color: T.ink, marginBottom: 4 }}>
@@ -569,7 +486,7 @@ function FirstDealCard({ onStartDeal }: { onStartDeal: () => void }) {
           background: T.blue,
           color: "#fff",
           border: "none",
-          borderRadius: T.rPill,
+          borderRadius: 10,
           padding: "9px 16px",
           fontSize: 13,
           fontWeight: 600,
@@ -605,10 +522,9 @@ function FavoriteCard({
         textAlign: "left",
         background: T.white,
         border: `1px solid ${T.border}`,
-        borderRadius: 13,
+        borderRadius: 0,
         padding: "11px 14px",
         cursor: "pointer",
-        boxShadow: T.shSoft,
         fontFamily: T.font,
         flex: "1 1 220px",
         minWidth: 200,
@@ -616,10 +532,10 @@ function FavoriteCard({
         transition: "box-shadow .15s ease",
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = T.shHover;
+        e.currentTarget.style.background = T.track;
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = T.shSoft;
+        e.currentTarget.style.background = T.white;
       }}
     >
       <MarkBadge letter={name} size={30} radius={8} />
@@ -668,16 +584,21 @@ function NotificationColumn({
   notifications: AppNotification[];
   onOpen: (n: AppNotification) => void;
 }) {
-  if (!loaded) {
-    return <ColumnLoading rows={3} />;
-  }
+  if (!loaded) return <ColumnLoading rows={3} />;
   if (notifications.length === 0) {
     return (
-      <NoteCard text="You're all caught up — no new notifications. Updates from your deal team show here." />
+      <div style={emptyBox}>
+        You&rsquo;re all caught up. Updates from your deal team show here.
+      </div>
     );
   }
+  /* THE SAME CONTAINER AS THE LEFT COLUMN. It used to be radius-13 cards in a
+     9px gap with a 30px tinted glyph tile each; beside a hairline-divided list
+     the two columns read as two different products. An unread row is marked by
+     a 3px accent bar on its leading edge rather than by a coloured tile —
+     one accent, and the mark sits where the eye enters the row. */
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+    <div style={listBox}>
       {notifications.slice(0, 6).map((n) => {
         const unread = !n.read_at;
         return (
@@ -686,77 +607,27 @@ function NotificationColumn({
             type="button"
             onClick={() => onOpen(n)}
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 11,
+              display: "block",
+              width: "100%",
               textAlign: "left",
               background: T.white,
-              border: `1px solid ${T.border}`,
-              borderRadius: 13,
-              padding: "13px 15px",
+              border: "none",
+              borderTop: `1px solid ${T.border}`,
+              borderLeft: `3px solid ${unread ? T.blue : "transparent"}`,
+              padding: "10px 12px",
               cursor: "pointer",
-              boxShadow: T.shSoft,
               fontFamily: T.font,
-              transition: "box-shadow .15s ease",
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = T.shHover;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = T.shSoft;
-            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = T.track; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = T.white; }}
           >
-            <span
-              aria-hidden="true"
-              style={{
-                width: 30,
-                height: 30,
-                flex: "none",
-                borderRadius: 9,
-                background: unread ? T.greenBg : T.hair,
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <span
-                style={{
-                  width: 9,
-                  height: 9,
-                  borderRadius: "50%",
-                  background: unread ? T.green : T.faint,
-                }}
-              />
-            </span>
-            <span style={{ flex: 1, minWidth: 0 }}>
-              <span
-                style={{
-                  display: "block",
-                  fontSize: 13.5,
-                  fontWeight: unread ? 700 : 600,
-                  color: T.ink,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {n.title}
-              </span>
-              <span
-                style={{
-                  display: "block",
-                  fontSize: 12,
-                  color: T.muted2,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {n.body ? `${n.body} · ` : ""}
-                <span style={{ color: T.faint }}>{notifTimeAgo(n.created_at)}</span>
-              </span>
-            </span>
-            {n.deal_id != null && <ChevronRightIcon size={16} c={T.faint} />}
+            <div style={{ fontSize: 12.5, fontWeight: unread ? 700 : 500, color: T.ink }}>
+              {n.title}
+            </div>
+            <div style={{ fontSize: 11, color: T.muted, marginTop: 2 }}>
+              {notifTimeAgo(n.created_at)}
+              {n.body ? ` · ${n.body}` : ""}
+            </div>
           </button>
         );
       })}
@@ -786,8 +657,7 @@ function ColumnLoading({ rows }: { rows: number }) {
             height: 58,
             background: T.white,
             border: `1px solid ${T.border}`,
-            borderRadius: 13,
-            boxShadow: T.shSoft,
+            borderRadius: 0,
             opacity: 0.7,
             animation: "atlas-glow 1.4s ease-in-out infinite",
           }}
@@ -805,9 +675,8 @@ function NoteCard({ text, style }: { text: string; style?: CSSProperties }) {
       style={{
         background: T.white,
         border: `1px solid ${T.border}`,
-        borderRadius: 13,
+        borderRadius: 0,
         padding: "16px 15px",
-        boxShadow: T.shSoft,
         fontSize: 13,
         color: T.muted,
         lineHeight: 1.5,

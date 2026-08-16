@@ -1,0 +1,80 @@
+-- 128 — DROP THE SIX PRODUCT-ERA TABLES
+--
+-- Phase A of FRONT_END_REBUILD.md. Paul, 2026-08-16: "let's start creating!"
+--
+-- These are the last structural residue of the era when smbX was a product
+-- sold to other people. Every one of them is forbidden by a standing rule, and
+-- none of them has a single line of code left that reads or writes it.
+--
+-- ── WHY THESE FIVE AND NOTHING ELSE ──────────────────────────────────────
+-- The sweep deleted ~18,000 lines of application code and dropped FIVE tables.
+-- That asymmetry is deliberate. The standing rule since 2026-07-27 is "let's
+-- don't delete anything yet", and it has been right three times — so Studio,
+-- research, sourcing and collateral keep ALL their data even though their
+-- screens and services are gone. `research_lanes` still holds the masters,
+-- `sourcing_candidates` still holds the board, `studio_assets` still holds the
+-- media. Re-mounting a route would find them intact.
+--
+-- These five are different because they cannot come back by rule, not by
+-- preference:
+--
+--   wallets, wallet_transactions   THE WALLET IS DEAD (CLAUDE.md rule 2).
+--                                  walletService, paywallService,
+--                                  dealExecutionFee and platformFeeService
+--                                  were deleted long ago; these are the tables
+--                                  they wrote to.
+--   platform_fee_schedule          The per-deliverable price ladder. Retired
+--                                  with the product era — nothing in the app
+--                                  charges money (THE LINE v2).
+--   direct_threads,                A product-era SOCIAL DM feature that
+--   direct_messages                presumes both sides of a conversation have
+--                                  accounts. THE LINE §3 forbids exactly that:
+--                                  third parties are CORRESPONDED WITH, never
+--                                  onboarded — email out plus token share
+--                                  links. Measured before dropping: ZERO
+--                                  references anywhere in the codebase, server
+--                                  or client. They have never been read.
+--
+-- ── subscriptions IS DEFERRED, AND THIS IS WHY ──────────────────────────
+-- It was on the list and it comes off. The $99/$249/$749/$3,000 Stripe ladder
+-- is dead by rule, but the TABLE still has six live readers, found by grep
+-- before writing the DROP rather than after deploying it:
+--
+--   server/services/tools.ts:4205   a Yulia tool reading plan + status
+--   server/services/tools.ts:4294   an admin metric, active/trialing count
+--   server/services/tools.ts:4328   an admin metric, plan breakdown
+--   server/routes/admin.ts:165      the admin dashboard
+--   server/routes/admin.ts:333-334  per-user subscription status + plan
+--
+-- All six are reachable, and all six would throw at runtime the moment the
+-- table went. They are reporting on a concept that no longer exists — practice
+-- mode short-circuits getUserPlan to 'enterprise' and nothing in the app
+-- charges money — so the right end state is that the queries go and then the
+-- table does. But Phase A is a DELETION pass over the front end, and rewriting
+-- two server surfaces to get one more DROP into this file is how a clean sweep
+-- turns into a broken deploy.
+--
+-- FOLLOW-UP, named so it does not get lost: remove the six reads, then drop
+-- `subscriptions` in its own migration. Until then the table sits there holding
+-- rows nobody bills against, which is untidy and harmless — the two properties
+-- that make something safe to defer.
+
+-- ── AND WHY THIS IS SAFE ────────────────────────────────────────────────
+-- Verified by grep before writing this file: no service, route, hook, screen
+-- or script references any of the five. That grep is also what caught
+-- `subscriptions`, which is why it is deferred above rather than dropped here. `IF EXISTS` on every statement so a
+-- database that never had them (a fresh dev box) migrates cleanly, and CASCADE
+-- only where a foreign key inside this same set requires it —
+-- wallet_transactions references wallets, direct_messages references
+-- direct_threads, so each pair drops child-first and needs no CASCADE at all.
+--
+-- Nothing outside this set has a foreign key INTO it. If that turns out to be
+-- wrong, Postgres will RESTRICT the drop and this migration will fail loudly
+-- rather than taking a table something still depends on — which is the correct
+-- direction for a destructive migration to fail.
+
+DROP TABLE IF EXISTS wallet_transactions;
+DROP TABLE IF EXISTS wallets;
+DROP TABLE IF EXISTS platform_fee_schedule;
+DROP TABLE IF EXISTS direct_messages;
+DROP TABLE IF EXISTS direct_threads;

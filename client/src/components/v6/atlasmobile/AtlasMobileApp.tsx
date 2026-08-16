@@ -66,9 +66,7 @@ import CockpitMobileScreen from "./screens/Cockpit";
 import CanvasMobileScreen from "./screens/Canvas";
 import FilesMobileScreen from "./screens/Files";
 import MoreScreen from "./screens/More";
-import SourcingMobileScreen from "./screens/Sourcing";
 import ClientsMobileScreen from "./screens/ClientsM";
-import StudioMobileScreen from "./screens/Studio";
 import IntegrationMobileScreen from "./screens/Integration";
 import AgentMobileScreen from "./screens/Agent";
 import SettingsMobileScreen from "./screens/Settings";
@@ -516,7 +514,7 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
       device: "mobile",
       activeMode: view.screen,
       activeView: view.screen,
-      activeTitle: view.dealName ?? SCREEN_TITLE[view.screen] ?? "Atlas",
+      activeTitle: view.dealName ?? SCREEN_TITLE[view.screen] ?? "smbX",
       dealId: view.dealId,
       dealTitle: view.dealName,
     }),
@@ -556,7 +554,7 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
     null
   ) : (
     <MobileBackHeader
-      title={view.dealName ?? SCREEN_TITLE[view.screen] ?? "Atlas"}
+      title={view.dealName ?? SCREEN_TITLE[view.screen] ?? "smbX"}
       onBack={onBack}
       showSparkle={view.screen === "canvas"}
     />
@@ -620,10 +618,6 @@ function ActiveScreen({
       return <MoreScreen user={user} view={view} />;
     case "clients":
       return <ClientsMobileScreen user={user} view={view} />;
-    case "sourcing":
-      return <SourcingMobileScreen user={user} view={view} />;
-    case "studio":
-      return <StudioMobileScreen user={user} view={view} />;
     case "integration":
       return <IntegrationMobileScreen user={user} view={view} />;
     case "agent":

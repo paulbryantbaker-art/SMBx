@@ -1,72 +1,34 @@
 /**
- * WHICH SURFACES THE APP OFFERS — one switch, one place.
+ * WHICH SURFACES THE APP OFFERS.
  *
- * Paul, 2026-07-31: "i think i want all Studio work to be on disc Cowork —
- * ill do CRM and Deal management in the app."
+ * ── THIS FILE IS NOW EMPTY OF FLAGS, AND THAT IS THE POINT (2026-08-16) ──
  *
- * That is the settled division of labour, and it is a division by SHAPE, not by
- * cost (see WHERE_THE_WORK_HAPPENS.md):
+ * It used to export `STUDIO_IN_APP = false` and `SOURCING_IN_APP = false`, two
+ * build-time constants that hid Studio and Sourcing from the chrome while
+ * leaving every screen, service, route and migration in the tree. That was the
+ * right intermediate step — the practice changed its mind about the boundary
+ * four times in three weeks, and three of those reversals would have been
+ * expensive if the code had gone.
  *
- *   - STUDIO produces DOCUMENTS — research masters, corp-dev documents,
- *     carousels, one-pagers, reports. Files, versioned on disk, built by
- *     `scripts/studio/build-*.mts` with no API key and a ~30s loop. The
- *     workspace at `~/Documents/smbx-studio` is the system of record.
- *   - CRM AND DEALS are RECORDS — state that changes and gets queried. Rows in
- *     Postgres, because a folder cannot answer "who do I owe a touch to this
- *     week" and forks the moment two writers touch it.
+ * Phase A of `FRONT_END_REBUILD.md` deleted them for real. So the flags went
+ * too: **a flag guarding a file that no longer exists is a lie about what is
+ * reachable.** Reading `SOURCING_IN_APP === false` would suggest the screen is
+ * one boolean away from returning, and it is not — it is one `git revert` away,
+ * which is a different and more honest thing.
  *
- * RETIRED IN PLACE, NOT DELETED (Paul's standing instruction, 2026-07-27:
- * "let's don't delete anything yet"). Every Studio screen, service, route and
- * migration stays exactly where it is and still compiles; this flag only takes
- * Studio out of the NAVIGATION so the app presents one coherent job. Flip it
- * back to `true` and Studio returns intact — no restoration work, no archaeology.
+ * WHAT SURVIVED THE DELETE, because a sweep should say what it did not take:
+ *   · the TABLES. `research_lanes`, `research_runs`, `studio_assets`,
+ *     `sourcing_candidates` and the rest keep their data. Nothing was dropped
+ *     except the six product-era tables (migration 128).
+ *   · `marketKnowledgeTools` — Yulia keeps `list_markets`, `read_market` and
+ *     `search_market`, because it reads `research_lanes` through `sql`
+ *     directly rather than through the deleted service layer.
+ *   · `/api/studio` (`routes/studio.ts`), which serves the pitch-book and
+ *     export surfaces, not the collateral studio.
  *
- * Deliberately a build-time constant rather than an env var: this is a product
- * decision with a documented rationale, not per-deployment configuration. An env
- * var would invite the two halves to disagree between environments.
+ * The file is kept rather than deleted so this note has somewhere to live, and
+ * so the next person to reach for a build-time surface flag finds the argument
+ * about when one is appropriate before they add it.
  */
 
-/**
- * Is Studio offered inside the app?
- *
- * FALSE. The app is IoI → integration (Paul, 2026-08-15: *"there will be no
- * sourcing in the app the app is internal now IoI to integration"*).
- *
- * This flag has now been flipped three times and the history is the useful
- * part, because each move was reasonable on the axis in force at the time:
- *
- *   2026-07-31  FALSE — "all Studio work on disc Cowork", the cost axis
- *   2026-08-14  TRUE  — the input-vs-output axis put everything the practice
- *                       PRODUCES in the app, and collateral is produced
- *   2026-08-15  FALSE — THE_IOI_SEAM.md replaced that axis with AUDIENCE, and
- *                       collateral is market-shaped: one-to-many, speculative,
- *                       no counterparty. The app starts at the IoI.
- *
- * The seam is the one that holds because it is not a judgement about cost or
- * about verbs — it is the same split the workspace already makes between
- * `collateral/` and `decks/`, which nobody has ever had to relitigate.
- *
- * RETIRED IN PLACE, NOT DELETED (Paul's standing instruction, 2026-07-27:
- * "let's don't delete anything yet"). Every Studio screen, service, route and
- * migration stays where it is and still compiles; `/api/research` and
- * `/api/studio` stay mounted, so direct URLs and existing exports still work.
- * This constant only controls whether the chrome advertises them.
- */
-export const STUDIO_IN_APP = false;
-
-/**
- * Is target Sourcing offered inside the app?
- *
- * FALSE, same sentence, same reason: sourcing is how you find candidates, which
- * is entirely pre-IoI. `scripts/studio/screen.mts` is where it happens now, and
- * that is not a port — it is the CORRECTED implementation. The app's engine
- * carried two citation-law defects (a model guessing revenue from Google review
- * counts, and no independence check anywhere, so a franchise location could
- * rank as a target). Retiring it rather than fixing it is the call `where.ts`
- * flagged as Paul's and he has now made.
- *
- * Same retire-in-place rule: `Sourcing.tsx`, `sourcingPipelineService.ts` and
- * `/api/sourcing` all stay. The `sourcing` spend lane is off, and the three
- * unattended cron jobs in worker.ts are separately guarded, so nothing runs.
- */
-export const SOURCING_IN_APP = false;
+export {};

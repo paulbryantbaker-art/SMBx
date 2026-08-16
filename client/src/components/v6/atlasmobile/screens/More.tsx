@@ -30,7 +30,6 @@ import { RT } from "../redesign/rt";
 import { DetailSection, Divider, ActionRow } from "../redesign/kit";
 import { ActionSheet } from "../iosKit";
 import { useMobileShell } from "../mobileShell";
-import { STUDIO_IN_APP, SOURCING_IN_APP } from "../../appSurfaces";
 
 function titleCase(s: string | null | undefined): string {
   if (!s) return "";
@@ -86,24 +85,16 @@ export default function MoreScreen({ user }: AtlasScreenProps) {
           it is core work, not a module. */}
       <DetailSection title="Pipeline" desc="The acquirers we serve, ranked by fit.">
         <ActionRow leading={<ClientsGlyph />} title="Clients" action={<Chevron />} onClick={() => nav.go("clients")} />
-        {/* Sourcing is retired from the chrome (2026-08-15) — the app is IoI →
-            integration, and finding candidates is entirely pre-IoI. The screen
-            still exists and still routes; see appSurfaces.ts. */}
-        {SOURCING_IN_APP && (
-          <ActionRow leading={<SourcingGlyph />} title="Sourcing" action={<Chevron />} onClick={() => nav.go("sourcing")} />
-        )}
       </DetailSection>
 
       <Divider />
 
-      {/* Studio is retired from the chrome (2026-07-31) — the document work
-          moved to disk. The screen still exists and still routes; see
-          appSurfaces.ts. The section blurb drops "Build collateral" with it,
-          rather than advertising a door that is no longer here. */}
+      {/* Studio and Sourcing are DELETED as of 2026-08-16 (Phase A) — not
+          flag-hidden. Document work is the studio's on disk; target discovery
+          is pre-IoI. Their rows and the appSurfaces flags that gated them are
+          gone together, because a flag guarding a file that no longer exists
+          is just a lie about what is reachable. */}
       <DetailSection title="Modules" desc="Connect your tools and run agents.">
-        {STUDIO_IN_APP && (
-          <ActionRow leading={<StudioGlyph />} title="Studio" action={<Chevron />} onClick={() => nav.go("studio")} />
-        )}
         <ActionRow leading={<IntegrationGlyph />} title="Integration" action={<Chevron />} onClick={() => nav.go("integration")} />
         <ActionRow leading={<AgentGlyph />} title="Agent" action={<Chevron />} onClick={() => nav.go("agent")} />
       </DetailSection>

@@ -48,6 +48,7 @@ import { PIPELINE_STAGES, type PipelineStageId } from "../../../../lib/pipelineS
 import type { MobileStageRow } from "../../../../hooks/useMobileDeals";
 import { ValuationPanel } from "./ValuationPanel";
 import { CapitalPanel } from "./CapitalPanel";
+import { GateStackPanel } from "./GateStackPanel";
 import { daysUntil, dueLabel } from "../../../../lib/crm";
 
 /** How many rows before the window closes. The Expander widens it. */
@@ -217,6 +218,15 @@ export function DealsList({
 
               <DetailCard title="Capital">
                 <CapitalPanel dealId={selected.rawId} askingCents={selected.askingPrice ?? null} />
+              </DetailCard>
+
+              {/* THE GATE STACK (Phase D). DEFINITIVE rendered — see
+                  GateStackPanel's header. It sits LAST in the detail column
+                  because valuation and capital answer "what is it worth and
+                  what does the money cost" before the stack answers "what
+                  machinery runs on it". */}
+              <DetailCard title="DEFINITIVE — the gate stack">
+                <GateStackPanel dealId={selected.rawId} />
               </DetailCard>
             </div>
           ) : null}

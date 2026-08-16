@@ -16,7 +16,8 @@ import type { CSSProperties, ReactNode } from "react";
 import { T } from "../desktop/atlasTokens";
 import { RT } from "./redesign/rt";
 import { BackIcon, SearchIcon } from "../desktop/icons";
-import { Sparkle, Avatar, MarkBadge } from "../desktop/primitives";
+import { Avatar, MarkBadge } from "../desktop/primitives";
+import { Mark } from "../desktop/Logo";
 
 /* ─── Variant A — top bar: page title + search + avatar ─────── */
 
@@ -84,7 +85,7 @@ export function MobileBackHeader({
       {badge && (
         <MarkBadge letter={badge.letter} bg={badge.bg} fg={badge.fg} size={28} radius={8} />
       )}
-      {showSparkle && <Sparkle size={18} />}
+      {showSparkle && <Mark height={18} />}
       <span style={centered ? S.backTitleCentered : S.backTitle}>{title}</span>
       {centered ? (
         <span style={{ width: 40, flex: "none" }} aria-hidden="true" />

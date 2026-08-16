@@ -47,7 +47,7 @@
  * and a false block on a collision would be worse than a flag someone reads.
  * The pane surfaces that warning verbatim.
  */
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import type { AtlasScreenProps } from "../atlasNav";
 import { useAtlasNav, useAtlasChat } from "../atlasNav";
 import { authHeaders } from "../../../../hooks/useAuth";
@@ -416,6 +416,8 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
       scope={scope}
       onScope={onScope}
       onAdd={() => chat?.send("I want to add a new deal.")}
+      onOpenFiles={() => nav.go("files")}
+      onOpenIntegration={() => nav.go("integration")}
     />
   );
 
@@ -557,6 +559,8 @@ function Toolbar({
   scope,
   onScope,
   onAdd,
+  onOpenFiles,
+  onOpenIntegration,
 }: {
   query: string;
   onSearch: (v: string) => void;
@@ -573,6 +577,8 @@ function Toolbar({
   scope: ScopeId;
   onScope: (s: ScopeId) => void;
   onAdd: () => void;
+  onOpenFiles: () => void;
+  onOpenIntegration: () => void;
 }) {
   return (
     <div
@@ -591,7 +597,7 @@ function Toolbar({
           width: 300,
           height: 38,
           background: T.track,
-          borderRadius: T.rPill,
+          borderRadius: 10,
           padding: "0 14px",
           display: "flex",
           alignItems: "center",
@@ -635,7 +641,7 @@ function Toolbar({
                 fontSize: 12.5,
                 fontWeight: 600,
                 padding: "7px 13px",
-                borderRadius: T.rPill,
+                borderRadius: 10,
                 cursor: "pointer",
                 fontFamily: T.font,
                 border: `1px solid ${active ? T.blue : T.border}`,
@@ -659,7 +665,7 @@ function Toolbar({
               fontSize: 12.5,
               fontWeight: 600,
               padding: "7px 11px",
-              borderRadius: T.rPill,
+              borderRadius: 10,
               cursor: "pointer",
               fontFamily: T.font,
               border: `1px solid ${clientCut !== "all" ? T.blue : T.border}`,
@@ -689,7 +695,7 @@ function Toolbar({
         style={{
           display: "flex",
           border: `1px solid ${T.border}`,
-          borderRadius: T.rPill,
+          borderRadius: 10,
           overflow: "hidden",
           opacity: viewLocked ? 0.55 : 1,
         }}
@@ -728,7 +734,7 @@ function Toolbar({
           fontSize: 12.5,
           fontWeight: 600,
           padding: "7px 13px",
-          borderRadius: T.rPill,
+          borderRadius: 10,
           cursor: "pointer",
           fontFamily: T.font,
           border: `1px solid ${scope === "archived" ? T.ink3 : T.border}`,
@@ -739,6 +745,14 @@ function Toolbar({
         {scope === "archived" ? "← Back to board" : "Archived"}
       </button>
 
+      {/* THE REST OF DEALFLOW (Phase B). Files and Integration left the top
+          nav — a data room belongs to a deal, an integration plan to a closed
+          one — so their doors are here, inside Function 2, as quiet links
+          rather than primary actions. The header keeps the Deals tab lit on
+          both, so going through a door does not feel like leaving. */}
+      <button type="button" onClick={onOpenFiles} style={quietLink}>Data room</button>
+      <button type="button" onClick={onOpenIntegration} style={quietLink}>Integration</button>
+
       {/* + Add deal → Yulia */}
       <button
         type="button"
@@ -747,7 +761,7 @@ function Toolbar({
           background: T.blue,
           color: "#fff",
           border: "none",
-          borderRadius: T.rPill,
+          borderRadius: 10,
           padding: "8px 15px",
           fontSize: 13,
           fontWeight: 600,
@@ -760,6 +774,12 @@ function Toolbar({
     </div>
   );
 }
+
+const quietLink: CSSProperties = {
+  font: "inherit", fontSize: 12.5, fontWeight: 600, color: T.muted,
+  background: "transparent", border: `1px solid ${T.inputBd}`,
+  borderRadius: 10, padding: "7px 12px", cursor: "pointer",
+};
 
 /* ─── bulk action bar ──────────────────────────────────────── */
 
@@ -818,7 +838,7 @@ function BulkBar({
           fontSize: 12.5,
           fontWeight: 600,
           padding: "7px 13px",
-          borderRadius: T.rPill,
+          borderRadius: 10,
           border: `1px solid ${T.border}`,
           background: T.white,
           color: T.muted,
@@ -836,7 +856,7 @@ function BulkBar({
           fontSize: 12.5,
           fontWeight: 600,
           padding: "7px 15px",
-          borderRadius: T.rPill,
+          borderRadius: 10,
           border: "none",
           background: busy ? T.muted2 : T.blue,
           color: "#fff",
@@ -1119,7 +1139,7 @@ function KanbanColumn({
             color: T.muted2,
             background: T.white,
             border: `1px solid ${T.hair}`,
-            borderRadius: T.rPill,
+            borderRadius: 10,
             padding: "2px 9px",
             flex: "none",
           }}
@@ -1605,7 +1625,7 @@ function TaskBlock({ dealId, addressBook }: { dealId: number; addressBook: Addre
 }
 
 const paneGhost: React.CSSProperties = {
-  fontSize: 12.5, fontWeight: 600, padding: "8px 14px", borderRadius: T.rPill,
+  fontSize: 12.5, fontWeight: 600, padding: "8px 14px", borderRadius: 10,
   border: `1px solid ${T.border}`, background: T.white, color: T.muted,
   cursor: "pointer", fontFamily: T.font,
 };
@@ -1763,7 +1783,7 @@ function DealRow({
           onClick={e => { e.stopPropagation(); onManage(); }}
           title="Assign a client, set what's next"
           style={{
-            fontSize: 12, fontWeight: 600, padding: "4px 9px", borderRadius: T.rPill,
+            fontSize: 12, fontWeight: 600, padding: "4px 9px", borderRadius: 10,
             border: `1px solid ${T.border}`, background: T.white, color: T.muted,
             cursor: "pointer", fontFamily: T.font,
           }}

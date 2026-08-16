@@ -44,8 +44,8 @@ import {
   Pill,
   EmptyState,
   LoadingState,
-  Sparkle,
-} from "../primitives";
+  } from "../primitives";
+import { Mark } from "../Logo";
 import { ChevronRightIcon, DownloadIcon, PlusIcon } from "../icons";
 import { FilesList } from "./FilesList";
 
@@ -770,7 +770,7 @@ function DocViewer({
                   marginBottom: 7,
                 }}
               >
-                <Sparkle size={13} />
+                <Mark height={13} />
                 Working paper provenance
               </div>
               {doc.model_execution_title && (
