@@ -138,7 +138,7 @@ export function GateStackPanel({ dealId }: { dealId: number }) {
     );
   }
   if (!data) {
-    return <div style={{ fontSize: 12, color: T.muted2 }}>Loading the gate stack…</div>;
+    return <div style={{ fontSize: 13, color: T.muted2 }}>Loading the gate stack…</div>;
   }
 
   /* The default filter is the narrowest honest view: route-matched slots when
@@ -270,8 +270,8 @@ export function GateStackPanel({ dealId }: { dealId: number }) {
 /* ── styles ── */
 
 const lineNote: CSSProperties = {
-  padding: "6px 12px",
-  fontSize: 11,
+  padding: "7px 16px",
+  fontSize: 12,
   color: T.muted2,
   lineHeight: 1.5,
   borderBottom: `1px solid ${T.border}`,
@@ -279,9 +279,10 @@ const lineNote: CSSProperties = {
 };
 
 const emptyNote: CSSProperties = {
-  padding: "18px 14px",
+  padding: "18px 16px",
   border: `1px solid ${T.border}`,
+  borderRadius: 8,
   background: T.white,
-  fontSize: 12.5,
+  fontSize: 13.5,
   color: T.muted,
 };

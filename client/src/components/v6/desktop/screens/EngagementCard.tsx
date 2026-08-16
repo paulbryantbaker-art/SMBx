@@ -173,20 +173,22 @@ function money(cents: number): string {
   return `$${Math.round(d)}`;
 }
 
-const para: CSSProperties = { margin: 0, fontSize: 12, color: T.muted, lineHeight: 1.55 };
-const quiet: CSSProperties = { fontSize: 12, color: T.muted2 };
-const errText: CSSProperties = { margin: "6px 0 0", fontSize: 11.5, color: T.amber };
+/* The transcription's shapes (2026-08-16): filled radius-8 input cell, the
+   filled-green primary action, 13–14.5px working type. */
+const para: CSSProperties = { margin: 0, fontSize: 13, color: T.muted, lineHeight: 1.55 };
+const quiet: CSSProperties = { fontSize: 13, color: T.muted2 };
+const errText: CSSProperties = { margin: "6px 0 0", fontSize: 12.5, color: T.amber };
 const statLabel: CSSProperties = {
-  fontSize: 10.5, fontWeight: 700, letterSpacing: ".05em", textTransform: "uppercase", color: T.muted2,
+  fontSize: 11.5, fontWeight: 700, letterSpacing: ".04em", textTransform: "uppercase", color: T.muted2,
 };
 const statValue: CSSProperties = { fontSize: 15, fontWeight: 700, color: T.ink, marginTop: 2 };
-const statSub: CSSProperties = { fontSize: 11, color: T.muted, marginTop: 1 };
+const statSub: CSSProperties = { fontSize: 12, color: T.muted, marginTop: 1 };
 const input: CSSProperties = {
-  font: "inherit", fontSize: 12.5, color: T.ink, background: T.white,
-  border: `1px solid ${T.inputBd}`, borderRadius: 10, padding: "6px 9px", width: 170,
+  font: "inherit", fontSize: 13.5, color: T.ink, background: T.track,
+  border: "none", borderRadius: 8, padding: "8px 11px", width: 180,
 };
 const primaryBtn: CSSProperties = {
-  font: "inherit", fontSize: 12.5, fontWeight: 700, color: "#fff", background: T.ink,
-  border: "none", borderRadius: 10, padding: "7px 13px", cursor: "pointer",
+  font: "inherit", fontSize: 13.5, fontWeight: 700, color: "#fff", background: T.blue,
+  border: "none", borderRadius: 8, padding: "9px 15px", cursor: "pointer",
 };
-const summaryStyle: CSSProperties = { fontSize: 11.5, fontWeight: 700, color: T.blue, cursor: "pointer" };
+const summaryStyle: CSSProperties = { fontSize: 13, fontWeight: 700, color: T.blue, cursor: "pointer" };

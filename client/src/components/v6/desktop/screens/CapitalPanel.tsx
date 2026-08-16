@@ -149,13 +149,13 @@ export function CapitalPanel({ dealId, askingCents }: { dealId: number; askingCe
   const total = doc.layers.reduce((s, l) => s + (l.amountCents || 0), 0);
 
   if (!loaded) {
-    return <div style={{ marginTop: 22, fontSize: 12, color: T.muted2 }}>Loading the capital stack…</div>;
+    return <div style={{ fontSize: 13, color: T.muted2 }}>Loading the capital stack…</div>;
   }
 
   return (
-    <div style={{ marginTop: 22 }}>
+    <div>
       <div style={rowBetween}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: T.ink }}>Capital stack</div>
+        <div style={{ fontSize: 15, fontWeight: 700, color: T.ink }}>Capital stack</div>
         <button type="button" onClick={() => setOpen(o => !o)} style={ghostBtn}>
           {open ? "Hide" : doc.layers.length ? "Edit" : "Add the client’s stack"}
         </button>
@@ -165,20 +165,20 @@ export function CapitalPanel({ dealId, askingCents }: { dealId: number; askingCe
       <div style={headline}>
         {w.ok ? (
           <>
-            <div style={{ fontSize: 22, fontWeight: 700, color: T.ink, letterSpacing: "-0.01em" }}>
+            <div style={{ fontSize: 24, fontWeight: 800, color: T.ink, letterSpacing: "-0.01em" }}>
               {pctS(w.result.waccPct)} WACC
             </div>
-            <div style={{ fontSize: 11.5, color: T.muted, marginTop: 3 }}>
+            <div style={{ fontSize: 12.5, color: T.muted, marginTop: 3 }}>
               {pctS(w.result.debtWeight)} debt at {pctS(w.result.afterTaxCostOfDebtPct)} after tax
               {" · "}{pctS(w.result.equityWeight)} equity at {pctS(w.result.costOfEquityPct)}
             </div>
           </>
         ) : (
           <>
-            <div style={{ fontSize: 12.5, fontWeight: 700, color: T.ink }}>
+            <div style={{ fontSize: 13.5, fontWeight: 700, color: T.ink }}>
               No discount rate yet — and no default.
             </div>
-            <div style={{ fontSize: 11.5, color: T.muted, lineHeight: 1.55, marginTop: 5 }}>
+            <div style={{ fontSize: 13, color: T.muted, lineHeight: 1.55, marginTop: 5 }}>
               A defaulted WACC moves enterprise value by tens of percent and reads
               as sourced. These are outstanding:
             </div>
@@ -192,7 +192,7 @@ export function CapitalPanel({ dealId, askingCents }: { dealId: number; askingCe
       {w.ok && w.result.warnings.length > 0 && (
         <div style={warnBand}>
           {w.result.warnings.map((x, i) => (
-            <div key={i} style={{ fontSize: 11.5, color: T.ink, lineHeight: 1.5 }}>{x}</div>
+            <div key={i} style={{ fontSize: 13, color: T.ink, lineHeight: 1.5 }}>{x}</div>
           ))}
         </div>
       )}
@@ -206,30 +206,30 @@ export function CapitalPanel({ dealId, askingCents }: { dealId: number; askingCe
             return (
               <div key={i} style={layerRow}>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                  <div style={{ fontSize: 12.5, fontWeight: 700, color: T.ink }}>
+                  <div style={{ fontSize: 13.5, fontWeight: 700, color: T.ink }}>
                     {l.label || SOURCE_LABEL[l.kind]}
                   </div>
                   <span style={{ ...tag, background: isDebt(l.kind) ? T.blueBg : T.track, color: isDebt(l.kind) ? T.blue : T.muted }}>
                     {isDebt(l.kind) ? "Debt" : "Equity"}
                   </span>
-                  <div style={{ marginLeft: "auto", fontSize: 12.5, color: T.ink, fontVariantNumeric: "tabular-nums" }}>
+                  <div style={{ marginLeft: "auto", fontSize: 14.5, color: T.ink, fontVariantNumeric: "tabular-nums" }}>
                     {money(l.amountCents)}
                     {total > 0 && <span style={{ color: T.muted2 }}> · {pctS(l.amountCents / total)}</span>}
                   </div>
                 </div>
-                <div style={{ fontSize: 11.5, color: T.muted, lineHeight: 1.5, marginTop: 3 }}>
+                <div style={{ fontSize: 12.5, color: T.muted, lineHeight: 1.5, marginTop: 3 }}>
                   {line ? line.basis : rateSummary(l)}
                 </div>
               </div>
             );
           })}
           <div style={{ ...layerRow, borderBottom: "none" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 700, color: T.ink }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13.5, fontWeight: 700, color: T.ink }}>
               <span>Total capital</span>
               <span style={{ fontVariantNumeric: "tabular-nums" }}>{money(total)}</span>
             </div>
             {price > 0 && (
-              <div style={{ fontSize: 11.5, color: T.muted, marginTop: 3 }}>
+              <div style={{ fontSize: 12.5, color: T.muted, marginTop: 3 }}>
                 against a {money(price)} purchase price
               </div>
             )}
@@ -296,7 +296,7 @@ export function CapitalPanel({ dealId, askingCents }: { dealId: number; askingCe
           {/* Equity is a build-up and every component is argued for separately.
               There is no house default for any of them, on purpose. */}
           <div style={{ ...sectionLabel, marginTop: 16 }}>Cost of equity — build-up</div>
-          <div style={{ fontSize: 11.5, color: T.muted, lineHeight: 1.5, marginBottom: 8 }}>
+          <div style={{ fontSize: 12.5, color: T.muted, lineHeight: 1.5, marginBottom: 8 }}>
             A build-up, not CAPM. There is no observable beta for a business this
             size, and levering a public comp down to it produces four decimal
             places and no meaning.
@@ -315,7 +315,7 @@ export function CapitalPanel({ dealId, askingCents }: { dealId: number; askingCe
           />
 
           <div style={{ ...sectionLabel, marginTop: 16 }}>Marginal tax rate</div>
-          <div style={{ fontSize: 11.5, color: T.muted, lineHeight: 1.5, marginBottom: 8 }}>
+          <div style={{ fontSize: 12.5, color: T.muted, lineHeight: 1.5, marginBottom: 8 }}>
             For the interest shield. This is the client’s CPA’s number, not ours —
             THE LINE puts tax opinions out of lane. Ask, record, cite.
           </div>
@@ -334,9 +334,9 @@ export function CapitalPanel({ dealId, askingCents }: { dealId: number; askingCe
               {saving ? "Saving…" : dirty ? "Save stack" : "Saved"}
             </button>
             {doc.updatedAt && !dirty && (
-              <span style={{ fontSize: 11.5, color: T.muted2 }}>Last saved {doc.updatedAt}</span>
+              <span style={{ fontSize: 12.5, color: T.muted2 }}>Last saved {doc.updatedAt}</span>
             )}
-            {saveErr && <span style={{ fontSize: 11.5, color: T.amber }}>{saveErr}</span>}
+            {saveErr && <span style={{ fontSize: 12.5, color: T.amber }}>{saveErr}</span>}
           </div>
         </div>
       )}
@@ -395,10 +395,10 @@ export function CapitalPanel({ dealId, askingCents }: { dealId: number; askingCe
           It only matters for a floating layer the client has not priced. */}
       {primeState.status !== "fresh" && (
         <div style={{ ...warnBand, marginTop: 14 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".04em", color: T.amber }}>
+          <div style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: ".04em", color: T.amber }}>
             PRIME RATE · {primeState.status.toUpperCase()}
           </div>
-          <div style={{ fontSize: 11.5, color: T.ink, lineHeight: 1.55, marginTop: 4 }}>
+          <div style={{ fontSize: 13, color: T.ink, lineHeight: 1.55, marginTop: 4 }}>
             Carrying {RATE_INDEX.prime.pct != null ? pctS(RATE_INDEX.prime.pct) : "no value"}. {primeState.note}
             {" "}It is used only where a layer floats and the client has not given an
             all-in rate — a quoted rate always wins.
@@ -413,7 +413,7 @@ export function CapitalPanel({ dealId, askingCents }: { dealId: number; askingCe
           <summary style={summaryStyle}>Workings</summary>
           <div style={{ marginTop: 8 }}>
             {w.result.workings.map((x, i) => (
-              <div key={i} style={{ fontSize: 11.5, color: T.muted, lineHeight: 1.6, marginBottom: 3 }}>{x}</div>
+              <div key={i} style={{ fontSize: 12.5, color: T.muted, lineHeight: 1.6, marginBottom: 3 }}>{x}</div>
             ))}
           </div>
         </details>
@@ -427,9 +427,9 @@ export function CapitalPanel({ dealId, askingCents }: { dealId: number; askingCe
 function Stat({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
     <div>
-      <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: ".05em", textTransform: "uppercase", color: T.muted2 }}>{label}</div>
+      <div style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: ".04em", textTransform: "uppercase", color: T.muted2 }}>{label}</div>
       <div style={{ fontSize: 15, fontWeight: 700, color: T.ink, marginTop: 2, fontVariantNumeric: "tabular-nums" }}>{value}</div>
-      <div style={{ fontSize: 11, color: T.muted, marginTop: 1 }}>{sub}</div>
+      <div style={{ fontSize: 12, color: T.muted, marginTop: 1 }}>{sub}</div>
     </div>
   );
 }
@@ -530,52 +530,55 @@ const rowBetween: CSSProperties = {
   display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
 };
 
+/* THE TRANSCRIPTION'S SHAPES (2026-08-16): filled radius-8 bands with no
+   hairline, radius-8 inputs, the filled-green primary action, 13–14.5px
+   working type. See the kit styles block for the sanction. */
 const headline: CSSProperties = {
   marginTop: 10, padding: "12px 14px",
-  background: T.track, border: `1px solid ${T.border}`,
+  background: T.track, borderRadius: 8,
 };
 
 const warnBand: CSSProperties = {
-  marginTop: 10, padding: "10px 12px",
-  background: T.amberBg, border: `1px solid ${T.amberAv}`,
+  marginTop: 10, padding: "10px 14px",
+  background: T.amberBg, borderLeft: `3px solid ${T.amber}`, borderRadius: 8,
 };
 
 const doctrineBand: CSSProperties = {
-  marginTop: 10, padding: "10px 12px",
-  background: T.track, border: `1px solid ${T.border}`,
-  fontSize: 11.5, color: T.muted, lineHeight: 1.6,
+  marginTop: 10, padding: "10px 14px",
+  background: T.track, borderRadius: 8,
+  fontSize: 12.5, color: T.muted, lineHeight: 1.6,
 };
 
 const layerRow: CSSProperties = {
-  padding: "9px 0", borderBottom: `1px solid ${T.border}`,
+  padding: "10px 0", borderBottom: `1px solid ${T.border}`,
 };
 
 const editor: CSSProperties = {
   marginTop: 14, padding: "14px", background: T.white,
-  border: `1px solid ${T.border}`,
+  border: `1px solid ${T.border}`, borderRadius: 8,
 };
 
 const editRow: CSSProperties = {
   display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center", marginBottom: 6,
 };
 
-/* Radius 10 on inputs and buttons — Carta's one exception to radius 0. */
 const input: CSSProperties = {
-  font: "inherit", fontSize: 12.5, color: T.ink, background: T.white,
-  border: `1px solid ${T.inputBd}`, borderRadius: 10, padding: "5px 8px", minWidth: 0,
+  font: "inherit", fontSize: 13.5, color: T.ink, background: T.track,
+  border: "none", borderRadius: 8, padding: "8px 10px", minWidth: 0,
 };
 
 const ghostBtn: CSSProperties = {
-  font: "inherit", fontSize: 12, fontWeight: 600, color: T.blue,
-  background: "transparent", border: `1px solid ${T.inputBd}`,
-  borderRadius: 10, padding: "5px 10px", cursor: "pointer",
+  font: "inherit", fontSize: 13, fontWeight: 600, color: T.blue,
+  background: T.white, border: `1px solid ${T.inputBd}`,
+  borderRadius: 999, padding: "7px 14px", cursor: "pointer",
 };
 
+/* The one primary action wears the reference's filled green. */
 function primaryBtn(disabled: boolean): CSSProperties {
   return {
-    font: "inherit", fontSize: 12.5, fontWeight: 700,
-    color: "#fff", background: disabled ? T.muted2 : T.ink,
-    border: "none", borderRadius: 10, padding: "7px 14px",
+    font: "inherit", fontSize: 13.5, fontWeight: 700,
+    color: "#fff", background: disabled ? T.muted2 : T.blue,
+    border: "none", borderRadius: 8, padding: "9px 16px",
     cursor: disabled ? "default" : "pointer", opacity: disabled ? 0.6 : 1,
   };
 }
@@ -586,24 +589,24 @@ const xBtn: CSSProperties = {
 };
 
 const tag: CSSProperties = {
-  fontSize: 9.5, fontWeight: 700, letterSpacing: ".05em", textTransform: "uppercase",
-  padding: "2px 6px", flex: "none",
+  fontSize: 10.5, fontWeight: 700, letterSpacing: ".04em", textTransform: "uppercase",
+  padding: "2px 7px", flex: "none", borderRadius: 4,
 };
 
 const sectionLabel: CSSProperties = {
-  fontSize: 10.5, fontWeight: 700, letterSpacing: ".06em",
+  fontSize: 11.5, fontWeight: 700, letterSpacing: ".05em",
   textTransform: "uppercase", color: T.muted2, marginBottom: 6,
 };
 
 const bullet: CSSProperties = {
-  display: "flex", gap: 7, fontSize: 12, color: T.muted,
+  display: "flex", gap: 7, fontSize: 13, color: T.muted,
   lineHeight: 1.55, marginTop: 5,
 };
 
 const missingList: CSSProperties = {
-  margin: "6px 0 0", paddingLeft: 16, fontSize: 11.5, color: T.muted, lineHeight: 1.55,
+  margin: "6px 0 0", paddingLeft: 18, fontSize: 13, color: T.muted, lineHeight: 1.55,
 };
 
 const summaryStyle: CSSProperties = {
-  fontSize: 11.5, fontWeight: 700, color: T.blue, cursor: "pointer",
+  fontSize: 13, fontWeight: 700, color: T.blue, cursor: "pointer",
 };

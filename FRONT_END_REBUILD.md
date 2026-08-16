@@ -10,6 +10,7 @@
 | B | two-function nav — Files + Integration inside Dealflow | **done** |
 | C | CRM on the kit | **done at the spine** — `ClientsList` + the engagement object (`house/engagement.ts`, migration 129, `routes/engagements.ts`, the Engagement card) + Lead→Account conversion (the empty detail panel is the funnel inbox). Contacts/outreach density passes remain open-ended polish |
 | D | the gate-stack deal page (§4) | **core done** — `GET /api/deals/:id/gates` + `GateStackPanel`, mounted in the Deals detail; slot-level VALUES (running a computed slot from the row) not started |
+| D+ | scenario analysis (2026-08-16, Paul: "extra focus on deal valuation and model and scenario analysis") | **done** — `house/scenarios.ts` (pure; 66 cases; refuse-don't-default, IRR never prints unconverged) + `ScenarioPanel` in the Deals detail: base/conservative/stretch as a delta-priced `OptionPair` running on the client's OWN stack (`lboRatesFrom`), growth×exit sensitivity grid keeping convergence flags. The four detail panels (Valuation/Capital/GateStack/Engagement) moved onto the transcription's shapes in the same pass |
 | E | mobile absorbed into one app (§9) | not started |
 **Scope:** the internal app's FRONT END only. The server, the schema,
 DEFINITIVE and THE LINE are untouched.

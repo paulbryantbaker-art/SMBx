@@ -49,6 +49,7 @@ import { PIPELINE_STAGES, type PipelineStageId } from "../../../../lib/pipelineS
 import type { MobileStageRow } from "../../../../hooks/useMobileDeals";
 import { ValuationPanel } from "./ValuationPanel";
 import { CapitalPanel } from "./CapitalPanel";
+import { ScenarioPanel } from "./ScenarioPanel";
 import { GateStackPanel } from "./GateStackPanel";
 import { daysUntil, dueLabel } from "../../../../lib/crm";
 
@@ -213,12 +214,27 @@ export function DealsList({
                 </div>
               )}
 
-              <DetailCard title="Valuation">
+              {/* Valuation and Capital SELF-title (they also mount in the
+                  cockpit, headerless) — an outer DetailCard title would print
+                  the word twice, so these two cards carry none. */}
+              <DetailCard>
                 <ValuationPanel dealId={selected.rawId} sde={selected.sde} ebitda={selected.ebitda} />
               </DetailCard>
 
-              <DetailCard title="Capital">
+              <DetailCard>
                 <CapitalPanel dealId={selected.rawId} askingCents={selected.askingPrice ?? null} />
+              </DetailCard>
+
+              {/* SCENARIOS sit after Capital because they RUN on it — debt
+                  service comes from the client's stack, so the reading order
+                  is worth → cost of money → what the returns look like. */}
+              <DetailCard title="Scenarios">
+                <ScenarioPanel
+                  dealId={selected.rawId}
+                  ebitda={selected.ebitda}
+                  revenue={selected.revenue}
+                  askingCents={selected.askingPrice ?? null}
+                />
               </DetailCard>
 
               {/* THE GATE STACK (Phase D). DEFINITIVE rendered — see
