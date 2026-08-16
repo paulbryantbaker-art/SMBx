@@ -786,6 +786,68 @@ crmRouter.post('/crm/accounts/:id/activity', async (req, res) => {
   }
 });
 
+/* ── the reset ────────────────────────────────────────────────────────── */
+
+/**
+ * POST /api/crm/reset — wipe the register and start clean.
+ *
+ * Paul, 2026-08-16: "rigth now everything in the app can be nuked" — the
+ * shipped seed was scaffolding to build against, and the real register starts
+ * from the DFW PE-operator research about to be imported.
+ *
+ * WHAT IT DELETES (this user's rows, FK order): waves (cascades steps →
+ * touches), events, templates, then accounts — which cascade contacts,
+ * activity, engagements, and any remaining touches. Targets are accounts, so
+ * they go too. practice_leads.converted_account_id is NULLed first (bare FK,
+ * would otherwise block); the LEADS THEMSELVES ARE KEPT — they came from the
+ * live website funnel and deleting a real prospect because the register was
+ * being reset would be the expensive kind of tidy.
+ *
+ * DEALS ARE ARCHIVED, NOT DELETED. The deals graph is ~60 tables that do NOT
+ * all cascade (the 113 header says so explicitly), and archived=TRUE removes
+ * them from every default query while destroying nothing. A hard delete can
+ * be its own deliberate act later.
+ *
+ * The confirmation phrase is required IN THE BODY — a reset reachable by a
+ * stray click is worse than no reset.
+ */
+crmRouter.post('/crm/reset', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    if (String(req.body?.confirm ?? '') !== 'nuke') {
+      return res.status(400).json({ error: 'Type the word "nuke" to confirm — this deletes the whole register.' });
+    }
+
+    // One transaction: a reset that half-runs leaves a register that LOOKS
+    // intact and is missing its waves — worse than either state.
+    const counts = await sql.begin(async (tx: any) => {
+      await tx`UPDATE practice_leads SET converted_account_id = NULL WHERE converted_account_id IS NOT NULL`;
+      const waves = await tx`DELETE FROM crm_waves WHERE user_id = ${userId} RETURNING id`;
+      const events = await tx`DELETE FROM crm_events WHERE user_id = ${userId} RETURNING id`;
+      const templates = await tx`DELETE FROM crm_templates WHERE user_id = ${userId} RETURNING id`;
+      const accounts = await tx`DELETE FROM crm_accounts WHERE user_id = ${userId} RETURNING id`;
+      const deals = await tx`
+        UPDATE deals SET archived = TRUE, updated_at = NOW()
+        WHERE user_id = ${userId} AND archived = FALSE RETURNING id
+      `;
+      return { waves, events, templates, accounts, deals };
+    });
+    const { waves, events, templates, accounts, deals } = counts;
+
+    return res.json({
+      accountsDeleted: accounts.length,
+      wavesDeleted: waves.length,
+      eventsDeleted: events.length,
+      templatesDeleted: templates.length,
+      dealsArchived: deals.length,
+      leadsKept: true,
+    });
+  } catch (err: any) {
+    console.error('CRM reset error:', err.message);
+    return res.status(500).json({ error: 'Reset failed — the transaction rolled back, nothing was deleted.' });
+  }
+});
+
 /* ── export ───────────────────────────────────────────────────────────── */
 
 /** GET /api/crm/accounts.csv — back out to the Sheet, ranking first. */
