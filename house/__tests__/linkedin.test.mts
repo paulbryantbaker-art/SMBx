@@ -142,6 +142,39 @@ function eq(name: string, actual: unknown, expected: unknown) {
   eq('person: company splits through the noise', p.company, 'Cambridge Pacific');
 }
 
+/* ── the most recent role wins (Paul, 2026-08-16: person-only import,
+      "take the most recent role as their company") ───────────────────── */
+{
+  const p = parseLinkedInPaste([
+    'Perry J. Pound', 'Investor and operator', 'Dallas, Texas',
+    'Experience', 'Cambridge Pacific logo', 'Managing Director',
+    'Cambridge Pacific · Full-time', 'Jan 2021 - Present · 5 yrs',
+  ].join('\n'));
+  eq('experience beats a joiner-less headline: company', p.company, 'Cambridge Pacific');
+  eq('experience beats a joiner-less headline: title', p.title, 'Managing Director');
+  eq('headline itself is preserved', p.headline, 'Investor and operator');
+}
+{
+  /* And it beats the headline even when the headline HAS a joiner — the
+     headline is a self-description, the first Experience entry is the job. */
+  const p = parseLinkedInPaste([
+    'Jane Smith', 'Board member at Various', 'Experience',
+    'Operating Partner', 'Foundry Holdings', 'Mar 2024 - Present',
+  ].join('\n'));
+  eq('most recent role overrides headline company', p.company, 'Foundry Holdings');
+}
+{
+  const p = parseLinkedInPaste('Bob Jones\nCurrent: Principal at Mergely Capital\n');
+  eq('Sales Nav Current line: company', p.company, 'Mergely Capital');
+  eq('Sales Nav Current line: title', p.title, 'Principal');
+}
+{
+  /* An Experience section with only a title (entry cut off) must not invent
+     a company from a date line. */
+  const p = parseLinkedInPaste('Ann Ray\nCFO at Acme Fire\nExperience\nCFO\nJan 2020 - Present\n');
+  eq('truncated experience entry: headline split still stands', p.company, 'Acme Fire');
+}
+
 /* ── purity ─────────────────────────────────────────────────────────── */
 {
   const src = readFileSync(join(HERE, '..', 'linkedin.ts'), 'utf8');

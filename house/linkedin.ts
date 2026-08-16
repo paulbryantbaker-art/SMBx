@@ -158,6 +158,41 @@ export function parseLinkedInPaste(text: string): ParsedProfile {
     else out.title = out.headline;
   }
 
+  /* THE MOST RECENT ROLE WINS (2026-08-16, Paul: "let's take the most recent
+     role as their company"). The headline is a self-description; the first
+     Experience entry is the current JOB, and when both exist the job decides
+     the firm. Two sources, tried in order:
+
+     1. Sales Nav's "Current: Title at Company" line.
+     2. The Experience section's first entry — "Title \n Company · Full-time"
+        (the "CompanyName logo" alt line and date ranges are skipped, the
+        " · Full-time" employment-type suffix is stripped). */
+  const current = text.match(/^\s*current:?\s+(.{2,80}?)\s+(?:at|@)\s+(.{2,80}?)\s*$/im);
+  if (current) {
+    out.title = current[1].trim();
+    out.company = current[2].trim();
+  } else {
+    const expAt = text.search(/^\s*experience\s*$/im);
+    if (expAt >= 0) {
+      const entry: string[] = [];
+      for (const raw of text.slice(expAt).split(/\r?\n/).slice(1)) {
+        const line = raw.trim();
+        if (!line) continue;
+        const lower = line.toLowerCase();
+        if (STOP_SECTIONS.has(lower)) break;
+        if (CHROME.has(lower) || COUNTS_RE.test(line) || isNoise(line)) continue;
+        if (/\blogo$/i.test(line)) continue;
+        if (/\b(19|20)\d{2}\b|·\s*\d+\s*(yrs?|mos?)\b|present/i.test(line)) break;
+        entry.push(line);
+        if (entry.length === 2) break;
+      }
+      if (entry.length === 2) {
+        out.title = entry[0];
+        out.company = entry[1].split('·')[0].trim();
+      }
+    }
+  }
+
   if (!out.name) out.missing.push('name');
   if (!out.headline) out.missing.push('headline');
   if (!out.location) out.missing.push('location');
