@@ -34,6 +34,14 @@ export const CRM_STAGES = [
 
 const ACTIVITY_KINDS = ['note', 'email', 'call', 'meeting', 'intro', 'stage_change'];
 
+/** Why a pursuit died (CRM_WORKFLOW_SPEC.md). Required when stage → passed.
+ *  The histogram of these is the P4-hypothesis evidence — in particular
+ *  whether "internal BD owns origination" is the pattern that beats us. */
+export const LOSS_REASONS = [
+  'no_budget', 'internal_bd_owns_origination', 'timing',
+  'lost_to_competitor', 'trigger_evaporated', 'unresponsive',
+] as const;
+
 /**
  * What kind of organisation a row is (migration 115). ONE address book, because
  * Paul's framing is "whatever, as long as I have their email" — a CPA has to be
@@ -532,6 +540,27 @@ crmRouter.patch('/crm/accounts/:id', async (req, res) => {
     if (typeof b.stage === 'string') {
       if (!CRM_STAGES.includes(b.stage as any)) {
         return res.status(400).json({ error: `Invalid stage (${CRM_STAGES.join(' | ')})` });
+      }
+      if (b.stage !== owned.stage) {
+        // Aging law (CRM_WORKFLOW_SPEC.md): days-in-stage runs from the move,
+        // not from the last edit — updated_at moves on every save and would
+        // reset the clock a note should never reset.
+        updates.stage_entered_at = new Date();
+        // A lost pursuit must say why — the loss-reason histogram is the
+        // P4-hypothesis evidence, and "unresponsive" typed in a hurry still
+        // teaches more than a silent archive.
+        if (b.stage === 'passed') {
+          const reason = typeof b.loss_reason === 'string' ? b.loss_reason.trim() : '';
+          if (!LOSS_REASONS.includes(reason as any)) {
+            return res.status(400).json({
+              error: `Marking a pursuit passed needs a loss_reason (${LOSS_REASONS.join(' | ')})`,
+            });
+          }
+          updates.loss_reason = reason;
+        } else if (owned.stage === 'passed') {
+          // Reopening a passed pursuit clears the verdict that no longer holds.
+          updates.loss_reason = null;
+        }
       }
       updates.stage = b.stage;
     }
