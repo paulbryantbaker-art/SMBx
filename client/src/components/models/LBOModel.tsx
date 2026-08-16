@@ -6,6 +6,7 @@
  */
 import { useMemo, useState, type CSSProperties } from 'react';
 import { useModelStore } from '../../lib/modelStore';
+import { MC } from './theme';
 import {
   KPICard, ModelSlider, ModelInput, ProFormaTable, DSCRTimeline,
   SourcesUsesTable, SensitivityHeatmap,
@@ -45,7 +46,7 @@ export default function LBOModel({ tabId, onTalkToYulia }: Props) {
 
   const a = tab.assumptions;
   const lbo = tab.outputs.lbo;
-  if (!lbo) return <div className="p-5 text-sm" style={{ color: 'var(--m-on-surface-var)' }}>Set purchase price and EBITDA to begin.</div>;
+  if (!lbo) return <div className="p-5 text-sm" style={{ color: MC.muted }}>Set purchase price and EBITDA to begin.</div>;
 
   // Build sensitivity matrix on the fly
   const sensitivityData = lboAssumptions ? buildSensitivityMatrix(
@@ -108,17 +109,17 @@ export default function LBOModel({ tabId, onTalkToYulia }: Props) {
         <KPICard
           label="IRR"
           value={pctDisplay(lbo.irr)}
-          color={lbo.irr >= 0.20 ? 'var(--m-pursue)' : lbo.irr >= 0.10 ? 'var(--m-watch)' : 'var(--m-pass)'}
+          color={lbo.irr >= 0.20 ? MC.ok : lbo.irr >= 0.10 ? MC.warn : MC.bad}
         />
         <KPICard
           label="MOIC"
           value={multDisplay(lbo.moic)}
-          color={lbo.moic >= 2.5 ? 'var(--m-pursue)' : lbo.moic >= 1.5 ? 'var(--m-watch)' : 'var(--m-pass)'}
+          color={lbo.moic >= 2.5 ? MC.ok : lbo.moic >= 1.5 ? MC.warn : MC.bad}
         />
         <KPICard
           label="Year 1 DSCR"
           value={lbo.dscrByYear[0] ? `${lbo.dscrByYear[0].toFixed(2)}x` : '—'}
-          color={lbo.dscrByYear[0] >= 1.25 ? 'var(--m-pursue)' : 'var(--m-pass)'}
+          color={lbo.dscrByYear[0] >= 1.25 ? MC.ok : MC.bad}
           sublabel={lbo.dscrByYear[0] >= 1.25 ? 'SBA eligible' : 'Below threshold'}
         />
         <KPICard
@@ -220,7 +221,7 @@ export default function LBOModel({ tabId, onTalkToYulia }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         {/* Left: Deal Inputs */}
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Deal Assumptions</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: MC.muted }}>Deal Assumptions</h3>
 
           <ModelInput
             label="Purchase Price (EV)"
@@ -258,7 +259,7 @@ export default function LBOModel({ tabId, onTalkToYulia }: Props) {
 
         {/* Middle: Exit & Structure */}
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Exit & Structure</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: MC.muted }}>Exit & Structure</h3>
 
           <ModelSlider
             label="Exit Multiple"
@@ -275,7 +276,7 @@ export default function LBOModel({ tabId, onTalkToYulia }: Props) {
             suffix=" years"
           />
 
-          <h4 className="text-[10px] font-bold uppercase tracking-wider mt-4 mb-2" style={{ color: 'var(--m-on-surface-var)' }}>Debt Structure</h4>
+          <h4 className="text-[11px] font-bold uppercase tracking-wider mt-4 mb-2" style={{ color: MC.muted }}>Debt Structure</h4>
 
           <ModelSlider
             label="Senior Debt (% of EV)"
@@ -302,20 +303,20 @@ export default function LBOModel({ tabId, onTalkToYulia }: Props) {
 
         {/* Right: Sources & Uses */}
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Sources & Uses</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: MC.muted }}>Sources & Uses</h3>
           <SourcesUsesTable sources={lbo.sourcesUses.sources} uses={lbo.sourcesUses.uses} />
 
-          <div className="mt-4 rounded-lg p-3" style={{ background: 'var(--m-surface-container)', border: '1px solid var(--m-outline-var)' }}>
+          <div className="mt-4 rounded-lg p-3" style={{ background: MC.track, border: `1px solid ${MC.border}` }}>
             <div className="flex justify-between text-xs mb-1">
-              <span style={{ color: 'var(--m-on-surface-var)' }}>Exit Value ({a.holdPeriod || 5}yr)</span>
+              <span style={{ color: MC.muted }}>Exit Value ({a.holdPeriod || 5}yr)</span>
               <span className="font-bold">{centsToDisplay(lbo.exitValue)}</span>
             </div>
             <div className="flex justify-between text-xs mb-1">
-              <span style={{ color: 'var(--m-on-surface-var)' }}>Exit Equity</span>
-              <span className="font-bold" style={{ color: 'var(--m-pursue)' }}>{centsToDisplay(lbo.exitEquity)}</span>
+              <span style={{ color: MC.muted }}>Exit Equity</span>
+              <span className="font-bold" style={{ color: MC.ok }}>{centsToDisplay(lbo.exitEquity)}</span>
             </div>
             <div className="flex justify-between text-xs">
-              <span style={{ color: 'var(--m-on-surface-var)' }}>Cash-on-Cash</span>
+              <span style={{ color: MC.muted }}>Cash-on-Cash</span>
               <span className="font-bold">{pctDisplay(lbo.cashOnCash)}</span>
             </div>
           </div>
@@ -324,20 +325,20 @@ export default function LBOModel({ tabId, onTalkToYulia }: Props) {
 
       {/* DSCR Timeline */}
       <div>
-        <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>DSCR by Year</h3>
+        <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: MC.muted }}>DSCR by Year</h3>
         <DSCRTimeline dscrByYear={lbo.dscrByYear} />
       </div>
 
       {/* Pro Forma */}
       <div>
-        <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Pro Forma Projections</h3>
+        <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: MC.muted }}>Pro Forma Projections</h3>
         <ProFormaTable years={lbo.proForma} />
       </div>
 
       {/* Sensitivity */}
       {sensitivityData && sensitivityData.var1Values.length > 0 && (
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>IRR Sensitivity: EBITDA vs Exit Multiple</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: MC.muted }}>IRR Sensitivity: EBITDA vs Exit Multiple</h3>
           <SensitivityHeatmap {...sensitivityData} metric="irr" />
         </div>
       )}
@@ -485,11 +486,10 @@ function buildLboOptimizationPrompt(input: {
 
 const O: Record<string, CSSProperties> = {
   panel: {
-    border: '1px solid var(--m-outline-var)',
-    borderRadius: 18,
-    background: 'linear-gradient(135deg, rgba(247,245,239,0.84), rgba(255,255,255,0.72))',
+    border: `1px solid ${MC.border}`,
+    borderRadius: 8,
+    background: MC.white,
     padding: 16,
-    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.78)',
   },
   panelTop: {
     display: 'grid',
@@ -502,7 +502,7 @@ const O: Record<string, CSSProperties> = {
   },
   title: {
     margin: '4px 0 6px',
-    color: 'var(--m-on-surface)',
+    color: MC.ink,
     fontSize: 21,
     lineHeight: 1.08,
     letterSpacing: '-0.02em',
@@ -510,30 +510,29 @@ const O: Record<string, CSSProperties> = {
   body: {
     margin: 0,
     maxWidth: 620,
-    color: 'var(--m-on-surface-var)',
+    color: MC.muted,
     fontSize: 12.5,
     lineHeight: 1.45,
   },
   resultBox: {
-    border: '1px solid rgba(25,24,19,0.14)',
-    borderRadius: 16,
+    borderRadius: 8,
     padding: 12,
-    background: 'rgba(255,255,255,0.7)',
+    background: MC.track,
     display: 'grid',
     gap: 3,
   },
   resultLabel: {
-    color: 'var(--m-on-surface-mid)',
+    color: MC.faint,
     fontSize: 11,
     fontWeight: 700,
   },
   resultValue: {
-    color: 'var(--m-on-surface)',
+    color: MC.ink,
     fontSize: 20,
     letterSpacing: '-0.02em',
   },
   resultSub: {
-    color: 'var(--m-on-surface-var)',
+    color: MC.muted,
     fontSize: 11.5,
     lineHeight: 1.35,
   },
@@ -554,18 +553,18 @@ const O: Record<string, CSSProperties> = {
     justifyContent: 'flex-end',
   },
   objectiveButton: {
-    border: '1px solid var(--m-outline-var)',
-    borderRadius: 999,
+    border: `1px solid ${MC.border}`,
+    borderRadius: 8,
     padding: '8px 10px',
-    background: 'rgba(255,255,255,0.62)',
-    color: 'var(--m-on-surface-var)',
+    background: MC.white,
+    color: MC.muted,
     fontSize: 12,
     fontWeight: 700,
   },
   objectiveButtonActive: {
-    background: 'var(--m-primary-container)',
-    color: 'var(--m-on-primary-container)',
-    borderColor: 'rgba(25,24,19,0.16)',
+    background: MC.greenTint,
+    color: MC.ink,
+    borderColor: MC.green,
   },
   recommendationRow: {
     display: 'flex',
@@ -582,21 +581,20 @@ const O: Record<string, CSSProperties> = {
     flex: '1 1 320px',
   },
   delta: {
-    borderRadius: 14,
+    borderRadius: 8,
     padding: '9px 10px',
-    background: 'rgba(255,255,255,0.66)',
-    border: '1px solid rgba(25,24,19,0.10)',
+    background: MC.track,
     display: 'grid',
     gap: 2,
   },
   deltaLabel: {
-    color: 'var(--m-on-surface-mid)',
-    fontSize: 9,
+    color: MC.faint,
+    fontSize: 11,
     fontWeight: 800,
     letterSpacing: '0.12em',
   },
   deltaValue: {
-    color: 'var(--m-on-surface)',
+    color: MC.ink,
     fontSize: 13,
     whiteSpace: 'nowrap',
   },
@@ -607,11 +605,9 @@ const O: Record<string, CSSProperties> = {
     justifyContent: 'flex-end',
   },
   darkButton: {
-    color: '#FFFFFF',
-    border: '1px solid rgba(255,255,255,0.28)',
-    background:
-      'radial-gradient(circle at 18% 0%, rgba(255,255,255,0.2), transparent 38%), linear-gradient(135deg, rgba(25,24,19,0.92), rgba(25,24,19,0.72) 58%, rgba(46,140,90,0.54))',
-    boxShadow:
-      '0 16px 32px -22px rgba(0,0,0,0.62), inset 0 1px 0 rgba(255,255,255,0.32), inset 0 -1px 0 rgba(255,255,255,0.08)',
+    color: '#fff',
+    border: 'none',
+    borderRadius: 8,
+    background: MC.green,
   },
 };

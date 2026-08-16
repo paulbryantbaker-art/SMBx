@@ -4,6 +4,7 @@
 import { useModelStore } from '../../lib/modelStore';
 import { SensitivityHeatmap, ModelSlider } from './Charts';
 import { centsToDisplay } from '../../lib/calculations/core';
+import { MC } from './theme';
 
 interface Props { tabId: string; }
 
@@ -17,7 +18,7 @@ export default function SensitivityModel({ tabId }: Props) {
   if (!matrix || !matrix.var1Values?.length) {
     return (
       <div className="p-5 text-center">
-        <p className="text-sm" style={{ color: 'var(--m-on-surface-var)' }}>
+        <p className="text-sm" style={{ color: MC.muted }}>
           Link this sensitivity tab to a parent model to generate the matrix.
         </p>
       </div>
@@ -31,12 +32,12 @@ export default function SensitivityModel({ tabId }: Props) {
       </h2>
 
       <div className="mb-2">
-        <label className="block text-[10px] font-medium mb-1" style={{ color: 'var(--m-on-surface-var)' }}>Output Metric</label>
+        <label className="block text-[11px] font-medium mb-1" style={{ color: MC.muted }}>Output Metric</label>
         <select
           value={tab.assumptions.outputMetric || 'irr'}
           onChange={e => update(tabId, 'outputMetric', e.target.value)}
-          className="px-3 py-1.5 text-xs rounded-lg border outline-none"
-          style={{ borderColor: 'var(--m-outline-var)' }}
+          className="px-3 py-1.5 text-xs rounded-lg outline-none"
+          style={{ background: MC.track, border: 'none', color: MC.ink }}
         >
           <option value="irr">IRR</option>
           <option value="moic">MOIC</option>
@@ -53,7 +54,7 @@ export default function SensitivityModel({ tabId }: Props) {
         metric={tab.assumptions.outputMetric || 'irr'}
       />
 
-      <p className="text-[10px]" style={{ color: 'var(--m-on-surface-mid)' }}>
+      <p className="text-[11px]" style={{ color: MC.faint }}>
         Green = exceeds target. Yellow = acceptable. Red = below threshold.
         All calculations are deterministic — same inputs always produce same outputs.
       </p>

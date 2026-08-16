@@ -4,6 +4,7 @@
 import { useModelStore } from '../../lib/modelStore';
 import { KPICard, ModelInput, ModelSlider, DSCRGauge } from './Charts';
 import { centsToDisplay, pctDisplay } from '../../lib/calculations/core';
+import { MC } from './theme';
 
 interface Props { tabId: string; }
 
@@ -15,9 +16,9 @@ export default function CovenantModel({ tabId }: Props) {
   const a = tab.assumptions;
   const cov = tab.outputs.covenant;
 
-  const GREEN = 'var(--m-pursue)';
-  const YELLOW = 'var(--m-watch)';
-  const RED = 'var(--m-pass)';
+  const GREEN = MC.ok;
+  const YELLOW = MC.warn;
+  const RED = MC.bad;
 
   return (
     <div className="p-5 space-y-6 max-w-3xl mx-auto">
@@ -25,7 +26,7 @@ export default function CovenantModel({ tabId }: Props) {
 
       {/* Compliance status */}
       {cov && (
-        <div className={`rounded-xl p-4 text-center`} style={{ background: cov.compliant ? `${GREEN}10` : `${RED}10`, border: `2px solid ${cov.compliant ? GREEN : RED}` }}>
+        <div className={`rounded-lg p-4 text-center`} style={{ background: cov.compliant ? `${GREEN}10` : `${RED}10`, border: `2px solid ${cov.compliant ? GREEN : RED}` }}>
           <p className="text-xl font-bold m-0" style={{ color: cov.compliant ? GREEN : RED, fontFamily: 'var(--font-body)' }}>
             {cov.compliant ? 'ALL COVENANTS MET' : 'COVENANT BREACH'}
           </p>
@@ -43,12 +44,12 @@ export default function CovenantModel({ tabId }: Props) {
       {cov && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* DSCR */}
-          <div className="rounded-lg p-4" style={{ border: '1px solid var(--m-outline-var)' }}>
-            <h4 className="text-[10px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>DSCR</h4>
+          <div className="rounded-lg p-4" style={{ border: `1px solid ${MC.border}` }}>
+            <h4 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: MC.muted }}>DSCR</h4>
             <DSCRGauge dscr={cov.dscrHeadroom + (a.minDscr ?? 1.25)} threshold={a.minDscr ?? 1.25} />
             <div className="mt-2 text-xs">
               <div className="flex justify-between">
-                <span style={{ color: 'var(--m-on-surface-var)' }}>Headroom</span>
+                <span style={{ color: MC.muted }}>Headroom</span>
                 <span className="font-bold" style={{ color: cov.dscrHeadroom >= 0 ? GREEN : RED }}>
                   {cov.dscrHeadroom >= 0 ? '+' : ''}{cov.dscrHeadroom.toFixed(2)}x
                 </span>
@@ -57,20 +58,19 @@ export default function CovenantModel({ tabId }: Props) {
           </div>
 
           {/* Debt/EBITDA */}
-          <div className="rounded-lg p-4" style={{ border: '1px solid var(--m-outline-var)' }}>
-            <h4 className="text-[10px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Debt / EBITDA</h4>
+          <div className="rounded-lg p-4" style={{ border: `1px solid ${MC.border}` }}>
+            <h4 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: MC.muted }}>Debt / EBITDA</h4>
             <p className="text-2xl font-bold m-0" style={{
               color: cov.debtToEbitdaHeadroom >= 0 ? GREEN : RED,
-              fontFamily: 'var(--font-mono)',
               fontVariantNumeric: 'tabular-nums',
             }}>
               {cov.debtToEbitda.toFixed(1)}x
             </p>
-            <p className="text-xs m-0 mt-1" style={{ color: 'var(--m-on-surface-var)' }}>
+            <p className="text-xs m-0 mt-1" style={{ color: MC.muted }}>
               Limit: {(a.maxDebtToEbitda ?? 3.5).toFixed(1)}x
             </p>
             <div className="mt-2 text-xs flex justify-between">
-              <span style={{ color: 'var(--m-on-surface-var)' }}>Headroom</span>
+              <span style={{ color: MC.muted }}>Headroom</span>
               <span className="font-bold" style={{ color: cov.debtToEbitdaHeadroom >= 0 ? GREEN : RED }}>
                 {cov.debtToEbitdaHeadroom >= 0 ? '+' : ''}{cov.debtToEbitdaHeadroom.toFixed(1)}x
               </span>
@@ -78,20 +78,19 @@ export default function CovenantModel({ tabId }: Props) {
           </div>
 
           {/* LTV */}
-          <div className="rounded-lg p-4" style={{ border: '1px solid var(--m-outline-var)' }}>
-            <h4 className="text-[10px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>LTV</h4>
+          <div className="rounded-lg p-4" style={{ border: `1px solid ${MC.border}` }}>
+            <h4 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: MC.muted }}>LTV</h4>
             <p className="text-2xl font-bold m-0" style={{
               color: cov.ltvHeadroom >= 0 ? GREEN : RED,
-              fontFamily: 'var(--font-mono)',
               fontVariantNumeric: 'tabular-nums',
             }}>
               {pctDisplay(cov.ltv)}
             </p>
-            <p className="text-xs m-0 mt-1" style={{ color: 'var(--m-on-surface-var)' }}>
+            <p className="text-xs m-0 mt-1" style={{ color: MC.muted }}>
               Limit: {pctDisplay(a.maxLtv ?? 0.80)}
             </p>
             <div className="mt-2 text-xs flex justify-between">
-              <span style={{ color: 'var(--m-on-surface-var)' }}>Headroom</span>
+              <span style={{ color: MC.muted }}>Headroom</span>
               <span className="font-bold" style={{ color: cov.ltvHeadroom >= 0 ? GREEN : RED }}>
                 {cov.ltvHeadroom >= 0 ? '+' : ''}{pctDisplay(cov.ltvHeadroom)}
               </span>
@@ -103,14 +102,14 @@ export default function CovenantModel({ tabId }: Props) {
       {/* Inputs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Business Financials</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: MC.muted }}>Business Financials</h3>
           <ModelInput label="EBITDA (Annual)" value={a.ebitda || 0} onChange={v => update(tabId, 'ebitda', v)} prefix="$" />
           <ModelInput label="Annual Debt Service" value={a.annualDebtService || 0} onChange={v => update(tabId, 'annualDebtService', v)} prefix="$" />
           <ModelInput label="Total Debt Outstanding" value={a.totalDebt || 0} onChange={v => update(tabId, 'totalDebt', v)} prefix="$" />
           <ModelInput label="Total Asset Value" value={a.assetValue || 0} onChange={v => update(tabId, 'assetValue', v)} prefix="$" />
         </div>
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Covenant Requirements</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: MC.muted }}>Covenant Requirements</h3>
           <ModelSlider label="Min DSCR" value={a.minDscr ?? 1.25} onChange={v => update(tabId, 'minDscr', v)} min={1.0} max={2.0} step={0.05} format="multiple" />
           <ModelSlider label="Max Debt/EBITDA" value={a.maxDebtToEbitda ?? 3.5} onChange={v => update(tabId, 'maxDebtToEbitda', v)} min={1.0} max={6.0} step={0.5} format="multiple" />
           <ModelSlider label="Max LTV" value={a.maxLtv ?? 0.80} onChange={v => update(tabId, 'maxLtv', v)} min={0.50} max={1.0} step={0.05} format="percent" />

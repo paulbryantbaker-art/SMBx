@@ -6,11 +6,12 @@ import { useModelStore } from '../../lib/modelStore';
 import { KPICard, ModelInput, ModelSlider } from './Charts';
 import { Doughnut } from 'react-chartjs-2';
 import { centsToDisplay, pctDisplay, multDisplay } from '../../lib/calculations/core';
+import { MC } from './theme';
 
 interface Props { tabId: string; }
 
-const CHART_MUTED = 'var(--cd-ink-2)';
-const COLORS = ['var(--cd-pos)', 'var(--cd-warn)', '#629987', '#8F6BD4', '#86C5C0', '#4ECDC4', 'var(--cd-neg)', CHART_MUTED];
+const CHART_MUTED = MC.muted;
+const COLORS = [MC.ok, MC.warn, '#629987', '#8F6BD4', '#86C5C0', '#4ECDC4', MC.bad, CHART_MUTED];
 
 export default function CapTableModel({ tabId }: Props) {
   const tab = useModelStore(s => s.tabs[tabId]);
@@ -58,38 +59,38 @@ export default function CapTableModel({ tabId }: Props) {
       {/* Rounds */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-[11px] font-bold uppercase tracking-wider m-0" style={{ color: 'var(--m-on-surface-var)' }}>Investment Rounds</h3>
-          <button onClick={addRound} className="text-xs font-semibold px-3 py-1 rounded-full border-0 cursor-pointer" style={{ background: 'var(--m-primary)', color: 'white' }}>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider m-0" style={{ color: MC.muted }}>Investment Rounds</h3>
+          <button onClick={addRound} className="text-xs font-semibold px-3 py-1 rounded-lg border-0 cursor-pointer" style={{ background: MC.green, color: '#fff' }}>
             + Add Round
           </button>
         </div>
 
         {rounds.map((round: any, i: number) => (
-          <div key={i} className="rounded-lg p-3 mb-2" style={{ border: '1px solid var(--m-outline-var)' }}>
+          <div key={i} className="rounded-lg p-3 mb-2" style={{ border: `1px solid ${MC.border}` }}>
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold" style={{ color: COLORS[i % COLORS.length] }}>{round.label}</span>
-              <button onClick={() => removeRound(i)} className="text-[10px] px-2 py-0.5 rounded bg-transparent border border-[var(--m-outline-var)] cursor-pointer" style={{ color: 'var(--m-on-surface-var)' }}>Remove</button>
+              <button onClick={() => removeRound(i)} className="text-[11px] px-2 py-0.5 rounded-lg bg-transparent cursor-pointer" style={{ color: MC.muted, border: `1px solid ${MC.border}` }}>Remove</button>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <div>
-                <label className="block text-[9px] font-medium mb-0.5" style={{ color: 'var(--m-on-surface-var)' }}>Investment</label>
+                <label className="block text-[11px] font-medium mb-0.5" style={{ color: MC.muted }}>Investment</label>
                 <input type="number" value={(round.investment || 0) / 100} onChange={e => updateRound(i, 'investment', Number(e.target.value) * 100)}
-                  className="w-full px-2 py-1 text-xs rounded border outline-none" style={{ borderColor: 'var(--m-outline-var)' }} />
+                  className="w-full px-2 py-1 text-xs rounded-lg outline-none" style={{ background: MC.track, border: 'none' }} />
               </div>
               <div>
-                <label className="block text-[9px] font-medium mb-0.5" style={{ color: 'var(--m-on-surface-var)' }}>Pre-Money Val</label>
+                <label className="block text-[11px] font-medium mb-0.5" style={{ color: MC.muted }}>Pre-Money Val</label>
                 <input type="number" value={(round.preMoneyVal || 0) / 100} onChange={e => updateRound(i, 'preMoneyVal', Number(e.target.value) * 100)}
-                  className="w-full px-2 py-1 text-xs rounded border outline-none" style={{ borderColor: 'var(--m-outline-var)' }} />
+                  className="w-full px-2 py-1 text-xs rounded-lg outline-none" style={{ background: MC.track, border: 'none' }} />
               </div>
               <div>
-                <label className="block text-[9px] font-medium mb-0.5" style={{ color: 'var(--m-on-surface-var)' }}>Option Pool</label>
+                <label className="block text-[11px] font-medium mb-0.5" style={{ color: MC.muted }}>Option Pool</label>
                 <input type="number" value={(round.optionPoolPct || 0) * 100} onChange={e => updateRound(i, 'optionPoolPct', Number(e.target.value) / 100)}
-                  className="w-full px-2 py-1 text-xs rounded border outline-none" style={{ borderColor: 'var(--m-outline-var)' }} />
+                  className="w-full px-2 py-1 text-xs rounded-lg outline-none" style={{ background: MC.track, border: 'none' }} />
               </div>
               <div>
-                <label className="block text-[9px] font-medium mb-0.5" style={{ color: 'var(--m-on-surface-var)' }}>Liq Pref</label>
+                <label className="block text-[11px] font-medium mb-0.5" style={{ color: MC.muted }}>Liq Pref</label>
                 <select value={round.liquidationPref || 1.0} onChange={e => updateRound(i, 'liquidationPref', Number(e.target.value))}
-                  className="w-full px-2 py-1 text-xs rounded border outline-none" style={{ borderColor: 'var(--m-outline-var)' }}>
+                  className="w-full px-2 py-1 text-xs rounded-lg outline-none" style={{ background: MC.track, border: 'none' }}>
                   <option value={1.0}>1.0x</option>
                   <option value={1.5}>1.5x</option>
                   <option value={2.0}>2.0x</option>
@@ -105,7 +106,7 @@ export default function CapTableModel({ tabId }: Props) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Pie chart */}
           <div>
-            <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Ownership</h3>
+            <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: MC.muted }}>Ownership</h3>
             <div style={{ height: 220 }}>
               <Doughnut
                 data={{
@@ -132,23 +133,23 @@ export default function CapTableModel({ tabId }: Props) {
 
           {/* Table */}
           <div>
-            <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Cap Table</h3>
+            <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: MC.muted }}>Cap Table</h3>
             <div className="space-y-1">
               {dilution.rows.map((r: any, i: number) => (
-                <div key={i} className="flex items-center justify-between text-xs py-1" style={{ borderBottom: '1px solid var(--cd-line)' }}>
+                <div key={i} className="flex items-center justify-between text-xs py-1" style={{ borderBottom: `1px solid ${MC.border}` }}>
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
                     <span>{r.stakeholder}</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="tabular-nums" style={{ color: 'var(--m-on-surface-var)' }}>{r.shares.toLocaleString()} shares</span>
+                    <span className="tabular-nums" style={{ color: MC.muted }}>{r.shares.toLocaleString()} shares</span>
                     <span className="font-bold tabular-nums" style={{ width: 50, textAlign: 'right' }}>{pctDisplay(r.ownership)}</span>
                   </div>
                 </div>
               ))}
             </div>
             {dilution.postMoneyVal > 0 && (
-              <p className="text-[10px] mt-2" style={{ color: 'var(--m-on-surface-var)' }}>Post-money: {centsToDisplay(dilution.postMoneyVal)}</p>
+              <p className="text-[11px] mt-2" style={{ color: MC.muted }}>Post-money: {centsToDisplay(dilution.postMoneyVal)}</p>
             )}
           </div>
         </div>
@@ -157,15 +158,15 @@ export default function CapTableModel({ tabId }: Props) {
       {/* Exit Waterfall Scenarios */}
       {waterfalls && waterfalls.length > 0 && (
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Exit Payout Scenarios</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: MC.muted }}>Exit Payout Scenarios</h3>
           {/* One column per exit scenario — scrolls sideways on phones. */}
           <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
             <table className="text-xs w-full" style={{ borderCollapse: 'collapse', minWidth: 480 }}>
               <thead>
-                <tr style={{ borderBottom: '2px solid var(--m-primary)' }}>
-                  <th style={{ padding: '4px 8px', textAlign: 'left', fontSize: 10, color: 'var(--m-on-surface-var)' }}>Stakeholder</th>
+                <tr style={{ borderBottom: `2px solid ${MC.green}` }}>
+                  <th style={{ padding: '4px 8px', textAlign: 'left', fontSize: 11, color: MC.muted }}>Stakeholder</th>
                   {waterfalls.map((w: any) => (
-                    <th key={w.exitValue} style={{ padding: '4px 8px', textAlign: 'right', fontSize: 10, color: 'var(--m-on-surface-var)' }}>
+                    <th key={w.exitValue} style={{ padding: '4px 8px', textAlign: 'right', fontSize: 11, color: MC.muted }}>
                       {centsToDisplay(w.exitValue)} Exit
                     </th>
                   ))}
@@ -173,13 +174,13 @@ export default function CapTableModel({ tabId }: Props) {
               </thead>
               <tbody>
                 {waterfalls[0]?.distributions.map((d: any, i: number) => (
-                  <tr key={i} style={{ borderBottom: '1px solid var(--cd-line)' }}>
+                  <tr key={i} style={{ borderBottom: `1px solid ${MC.border}` }}>
                     <td style={{ padding: '4px 8px' }}>{d.stakeholder}</td>
                     {waterfalls.map((w: any) => (
                       <td key={w.exitValue} style={{ padding: '4px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
                         {centsToDisplay(w.distributions[i]?.amount || 0)}
                         {w.distributions[i]?.moic > 0 && (
-                          <span style={{ color: 'var(--m-on-surface-var)', marginLeft: 4 }}>({multDisplay(w.distributions[i].moic)})</span>
+                          <span style={{ color: MC.muted, marginLeft: 4 }}>({multDisplay(w.distributions[i].moic)})</span>
                         )}
                       </td>
                     ))}
@@ -193,7 +194,7 @@ export default function CapTableModel({ tabId }: Props) {
 
       {/* Exit value inputs */}
       <div>
-        <label className="block text-[10px] font-medium mb-1" style={{ color: 'var(--m-on-surface-var)' }}>Exit Scenarios (comma-separated, in dollars)</label>
+        <label className="block text-[11px] font-medium mb-1" style={{ color: MC.muted }}>Exit Scenarios (comma-separated, in dollars)</label>
         <input
           type="text"
           defaultValue={(a.exitValues || [50000000, 100000000, 250000000, 500000000]).map((v: number) => v / 100).join(', ')}
@@ -201,8 +202,8 @@ export default function CapTableModel({ tabId }: Props) {
             const vals = e.target.value.split(',').map(s => Math.round(Number(s.trim()) * 100)).filter(v => v > 0);
             if (vals.length > 0) updateOne(tabId, 'exitValues', vals);
           }}
-          className="w-full px-3 py-1.5 text-xs rounded-lg border outline-none"
-          style={{ borderColor: 'var(--m-outline-var)' }}
+          className="w-full px-3 py-1.5 text-xs rounded-lg outline-none"
+          style={{ background: MC.track, border: 'none' }}
           placeholder="500000, 1000000, 2500000, 5000000"
         />
       </div>
