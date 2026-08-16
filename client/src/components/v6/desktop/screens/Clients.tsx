@@ -43,6 +43,7 @@ import { MarkBadge, Pill, KpiCard, EmptyState, LoadingState } from "../primitive
 import OutreachPanel from "./ClientsOutreach";
 import { ClientsList } from "./ClientsList";
 import { CONTACT_ROLES, ROLE_LABEL } from "../../../../hooks/useDealTasks";
+import { parseLinkedInPaste, type ParsedProfile } from "../../../../../../house/linkedin";
 import { authHeaders } from "../../../../hooks/useAuth";
 import { useDraft } from "../../../../hooks/useDraft";
 import { SearchIcon, ChevronRightIcon } from "../icons";
@@ -606,6 +607,9 @@ function DetailPane({
   // Add a person — who's who at the firm. Role is the field that decides who
   // gets which email later.
   const [pName, setPName] = useState("");
+  const [pLinkedIn, setPLinkedIn] = useState("");
+  const [pPaste, setPPaste] = useState("");
+  const [pParsed, setPParsed] = useState<ParsedProfile | null>(null);
   const [pRole, setPRole] = useState("principal");
   const [pEmail, setPEmail] = useState("");
   const [pTitle, setPTitle] = useState("");
@@ -904,8 +908,42 @@ function DetailPane({
               ))}
 
               {/* Add a person. ROLE is the load-bearing field: it decides who
-                  gets a campaign and who can be assigned a deal action. */}
+                  gets a campaign and who can be assigned a deal action.
+
+                  PASTE FROM LINKEDIN (2026-08-16, Paul: "Yeah if you could
+                  view the LinkedIn page?"). The app cannot — LinkedIn serves
+                  an authwall to any server fetch — but Paul is LOOKING at the
+                  page, so he copies it (top card or the whole page) and
+                  house/linkedin.ts proposes the fields into these inputs.
+                  Nothing saves until he presses Add person: the parse
+                  prefills, the human confirms, and what it could not find it
+                  names instead of guessing. */}
               <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+                <textarea
+                  value={pPaste}
+                  onChange={e => {
+                    setPPaste(e.target.value);
+                    if (!e.target.value.trim()) { setPParsed(null); return; }
+                    const parsed = parseLinkedInPaste(e.target.value);
+                    setPParsed(parsed);
+                    if (parsed.name) setPName(parsed.name);
+                    if (parsed.title) setPTitle(parsed.title);
+                    if (parsed.linkedinUrl) setPLinkedIn(parsed.linkedinUrl);
+                  }}
+                  rows={2}
+                  placeholder="Paste a LinkedIn profile here (copy the page while you're looking at it) — the fields below fill themselves"
+                  style={{ ...input, resize: "vertical", lineHeight: 1.5 }}
+                />
+                {pParsed && (
+                  <p style={{ margin: 0, fontSize: 12.5, color: T.muted, lineHeight: 1.5 }}>
+                    {pParsed.name ? `Read: ${pParsed.name}` : "Could not read a name"}
+                    {pParsed.company ? ` · ${pParsed.company}` : ""}
+                    {pParsed.location ? ` · ${pParsed.location}` : ""}
+                    {pParsed.missing.length > 0 && (
+                      <span style={{ color: T.muted2 }}> — not found: {pParsed.missing.join(", ")}. Check the fields before adding.</span>
+                    )}
+                  </p>
+                )}
                 <input value={pName} onChange={e => setPName(e.target.value)} placeholder="Name" style={input} />
                 <div style={{ display: "flex", gap: 8 }}>
                   <select value={pRole} onChange={e => setPRole(e.target.value)} style={{ ...input, flex: 1 }}>
@@ -915,7 +953,10 @@ function DetailPane({
                   </select>
                   <input value={pTitle} onChange={e => setPTitle(e.target.value)} placeholder="Title (optional)" style={{ ...input, flex: 1 }} />
                 </div>
-                <input value={pEmail} onChange={e => setPEmail(e.target.value)} placeholder="Email" style={input} />
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input value={pEmail} onChange={e => setPEmail(e.target.value)} placeholder="Email" style={{ ...input, flex: 1 }} />
+                  <input value={pLinkedIn} onChange={e => setPLinkedIn(e.target.value)} placeholder="LinkedIn URL" style={{ ...input, flex: 1 }} />
+                </div>
                 <button
                   type="button"
                   disabled={saving || !pName.trim()}
@@ -926,13 +967,14 @@ function DetailPane({
                       body: JSON.stringify({
                         name: pName.trim(), role: pRole,
                         title: pTitle.trim() || null, email: pEmail.trim() || null,
+                        linkedin_url: pLinkedIn.trim() || null,
                       }),
                     });
                     if (!r.ok) {
                       let d = ""; try { d = (await r.json())?.error || ""; } catch { /* none */ }
                       throw new Error(d || `HTTP ${r.status}`);
                     }
-                    setPName(""); setPTitle(""); setPEmail("");
+                    setPName(""); setPTitle(""); setPEmail(""); setPLinkedIn(""); setPPaste(""); setPParsed(null);
                   })}
                   style={{ ...ghostBtn, alignSelf: "flex-start", opacity: pName.trim() ? 1 : 0.5 }}
                 >
