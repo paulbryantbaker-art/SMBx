@@ -786,6 +786,30 @@ crmRouter.post('/crm/accounts/:id/activity', async (req, res) => {
   }
 });
 
+/**
+ * DELETE /api/crm/contacts/:id — remove one person. Exists because a parse
+ * can be wrong (the first live paste filed a Sales Nav button bar as a
+ * primary contact named "Actions List") and a register you cannot correct
+ * stops being trusted. Hard delete: a mis-parse is not history worth keeping.
+ */
+crmRouter.delete('/crm/contacts/:id', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ error: 'Bad id' });
+    const [row] = await sql`
+      DELETE FROM crm_contacts c USING crm_accounts a
+      WHERE c.id = ${id} AND a.id = c.account_id AND a.user_id = ${userId}
+      RETURNING c.id, c.name
+    `;
+    if (!row) return res.status(404).json({ error: 'Contact not found' });
+    return res.json({ deleted: row.id, name: row.name });
+  } catch (err: any) {
+    console.error('CRM contact delete error:', err.message);
+    return res.status(500).json({ error: 'Failed to delete the contact' });
+  }
+});
+
 /* ── single add — the paste-first path ────────────────────────────────── */
 
 /**
