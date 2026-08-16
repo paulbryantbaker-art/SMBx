@@ -233,32 +233,107 @@ as a string so `"0"` is truthy and the no-contact flag has never fired; and
 (§4) — the centrepiece, and the phase worth the most time. Data room and
 Integration fold in underneath.
 
-**Phase E — responsive, or the second shell.** See §9.
+**Phase E — the phone.** Absorb `v6/atlasmobile` into the one app: the kit
+gains its width behaviour, CRM is authored phone-first (Phase C, not E — see
+§9), and Dealflow gets its own short list of phone surfaces (inbox · read ·
+respond). `v6/atlasmobile` and `mobileTokens.ts` stop existing.
 
 A and B are independent of C and D. C and D are independent of each other.
+**Phase C is authored at 390px from the first line** — CRM is the phone's
+primary surface, so building it desktop-first and narrowing it later reproduces
+the exact inversion §9 measures.
 
 ---
 
-## 9. THE ONE OPEN DECISION: mobile
+## 9. Mobile — ANSWERED, and it is not "responsive"
 
-`v6/atlasmobile` is **12,386 lines — a second, parallel application** with its
-own tokens, its own screens, its own navigation. It is a quarter of the
-front-end weight and every feature must be built twice.
+> Paul, 2026-08-16: *"phone is for checking and reviewing, responding to
+> communications and alerts on Deal Flow IoI > Integration. Mobile should be
+> completely functional for CRM, as is the biggest phone function."*
 
-**Recommendation: one responsive shell, not two apps.** The kit's primitives
-are already flexbox/grid and collapse cleanly; `ListDetail` becomes a stack, the
-`CompareStrip` scrolls, the rail becomes a sheet. That deletes 12,386 lines and
-halves the cost of every future screen.
+That is a better answer than either option I offered, because **it splits the
+two functions in opposite directions**:
 
-**This is reversible and it is Paul's call**, because it turns on something
-only he knows: whether the phone is for *checking* (responsive is plainly
-right) or for *working* — assembling an outreach queue between meetings, which
-`OutreachM` was built for and which a responsive desktop layout serves badly.
+| | phone | desktop |
+|---|---|---|
+| **CRM** | **full function** — the primary surface | full function |
+| **Dealflow** | check · review · respond to comms and alerts | full function, incl. the gate stack |
 
-If the answer is "working," the second shell stays and Phase E is real work. If
-it is "checking," Phase E is a deletion.
+### The finding that settles the architecture
 
----
+Bucket the existing 11,990 mobile lines against what Paul just said:
+
+| | lines |
+|---|---|
+| Studio + Sourcing (dark, deleted in Phase A regardless) | 3,531 |
+| Dealflow — Deals · Cockpit · Integration · Files | 3,044 |
+| shell / chrome | 2,380 |
+| Today · Agent · Settings · More · Canvas | 2,103 |
+| **CRM — ClientsM + OutreachM** | **932** |
+
+**The function Paul calls the biggest phone function has the least mobile code
+in the app** — 932 lines, less than dead Studio's 2,584. And `ClientsM.tsx` is
+656 lines against the desktop `Clients.tsx`'s 954, so the phone's most important
+surface is also its most abridged. The mobile app's weight is distributed almost
+exactly inversely to its value.
+
+That is an argument FOR the rebuild, not against it. A responsive squeeze of the
+desktop would preserve the same inversion.
+
+### THREE SURFACES, ONE APPLICATION
+
+Not "responsive" (the same screens, narrower) and not "two apps" (what exists).
+A third thing, and the distinction is load-bearing:
+
+**1 · CRM IS BUILT PHONE-FIRST, ONE IMPLEMENTATION.**
+If it must be fully functional at 390px then the phone is the CONSTRAINT, and a
+layout that works there works at 1440 with more room. The current 656-line
+`ClientsM` that does less than its desktop twin is the predictable result of
+building desktop-first and squeezing — which is exactly what a "responsive"
+answer would have institutionalised. One CRM, authored at the hard width.
+
+**2 · DEALFLOW ON A PHONE IS A DIFFERENT SET OF SCREENS, NOT SMALLER ONES.**
+The 134-slot gate stack does not belong on a phone at any width. What Paul
+described is *checking, reviewing, responding* — so the phone gets its own
+short list of surfaces built from the same kit and the same hooks:
+
+- **an inbox of what needs your answer** — `deal_tasks` awaiting you,
+  `deal_messages`, `useNotifications`, approvals
+- **a deal read view** — the state, the binding gate, the next action. Read.
+- **respond** — approve, reply, reschedule, hand off
+
+and it does NOT get: the gate stack editor, the canvas models, bulk anything.
+A SUBSET OF SURFACES, not a subset of pixels. Reaching a full deal page from a
+phone stays possible by URL; it is simply not what the phone is composed for.
+
+**3 · THE KIT CARRIES THE WIDTH BEHAVIOUR, so no screen re-implements it.**
+`ListDetail` becomes a push/stack below 900. `CompareStrip` scrolls. The Yulia
+rail and `YuliaSheet` (697 lines today, a second implementation of the same
+conversation) become one component with two presentations.
+
+### What that deletes
+
+Everything in the mobile column above except the CRM pair and the pieces the
+Dealflow inbox reuses — call it **~9,000 of the 11,990**, most of it already
+going in Phase A. What survives is absorbed, not kept as a parallel tree:
+`v6/atlasmobile` stops existing as a directory.
+
+**`mobileTokens.ts` goes with it.** Two token files (`atlasTokens` violet-era
+`M`, `mobileTokens`) for one design system is how the phone drifted off Carta
+in the first place.
+
+### THE LINE IS STRICTER ON A PHONE, NOT LOOSER
+
+"Responding to communications" with a thumb is the highest-risk input surface
+this practice has: a press is cheap, the screen is small, and the context above
+the fold is thin. So the draft → review → **send** affordance from §5 is
+*more* deliberate on mobile, not less — the send control is the one thing on the
+screen that asks for intent, and it never sits under a thumb by accident.
+
+And the perimeter is unchanged: the counterparties in that inbox are the deal
+TEAM and the practitioner's own specialists. Third parties are still
+corresponded with by email and token link, never onboarded, and Yulia still
+drafts rather than sends.
 
 ## 10. What this does not change
 
