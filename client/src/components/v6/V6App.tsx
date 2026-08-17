@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useIsDesktop } from "../../hooks/useIsDesktop";
+import { LOGGED_IN_CHROME } from "./appSurfaces";
 
 /* ───────────────────────────────────────────────────────────────────────────
  * Two render paths, split by viewport at 1024px:
@@ -20,6 +21,7 @@ import { useIsDesktop } from "../../hooks/useIsDesktop";
 
 const AtlasMobileApp = lazy(() => import("./atlasmobile/AtlasMobileApp"));
 const AtlasApp = lazy(() => import("./desktop/AtlasApp"));
+const ZeroShell = lazy(() => import("./ZeroShell"));
 
 // The mobile (<1024px) render path.
 const MobileShell = AtlasMobileApp;
@@ -44,6 +46,17 @@ export default function V6App() {
     onSignOut: async () => { await auth.logout(); },
     onDevSignIn: auth.devSignIn,
   };
+
+  /* THE ZERO STATE (2026-08-16, Paul: "get rid of all of the logged in
+     chrome... and start over completely"). Both shells stand behind the
+     flag; the rethink is FRONT_END_ZERO.md. */
+  if (!LOGGED_IN_CHROME) {
+    return (
+      <Suspense fallback={<div style={FULLSCREEN_CENTER}>Loading…</div>}>
+        <ZeroShell user={auth.user} onSignOut={sharedProps.onSignOut} />
+      </Suspense>
+    );
+  }
 
   return (
     <Suspense fallback={<div style={FULLSCREEN_CENTER}>Loading workspace…</div>}>

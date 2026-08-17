@@ -50,3 +50,15 @@
  * The restart brief is CRM_RESTART.md. Flip this to true and the old
  * surfaces return intact for reference. */
 export const CRM_SURFACES_IN_APP = false;
+
+/* ── AND THEN THE WHOLE CHROME (2026-08-16, minutes later) ───────────────
+ *
+ * Paul: "let's get rid of all of the logged in chrome in app... and start
+ * over completely. The backend as you just said, stays intact, we just need
+ * to really think through properly how the front end should work."
+ *
+ * false = every logged-in surface (both shells, all tabs, the rail) is
+ * replaced by ZeroShell — the mark, an honest sentence, sign-out. The
+ * rethink brief is FRONT_END_ZERO.md; the old shells return with one flip
+ * for reference. The logged-out practice site is NOT this flag's business. */
+export const LOGGED_IN_CHROME = false;
