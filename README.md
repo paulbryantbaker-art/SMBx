@@ -1,31 +1,58 @@
-# smbx.ai
+# smbX Deal Skills — consolidated pack
 
-AI-powered deal intelligence platform for business acquisitions from $300K to mega-cap. Users talk to **Yulia** (AI deal intelligence) who guides them through buying, selling, or raising capital. Chat-first — Yulia is the front door.
+**Built 2026-08-17** from four downloaded skill sets, distilled to eight SMB-calibrated
+skills for deal-shaped work. Ready for CC review and install into the SMBx repo.
 
-> Production runs on `main`. The build is current as long as **Yulia Prompts V3** + **Methodology V18a (tax)** + **Methodology V18b (legal)** + the **V6 design handoff bundles** are wired in — and they are.
+## What this is
 
-## Read these first (in order)
+Eight skills covering a deal from CIM arrival to post-close value creation, written for
+smbX's architecture rather than the institutional-PE world the source material assumed:
 
-1. **[`REPO_STATUS.md`](./REPO_STATUS.md)** — what's current, what's stale, how to tell the difference. Start here if you're reviewing the repo from a clone or on GitHub.
-2. **[`CLAUDE.md`](./CLAUDE.md)** — project operating instructions. Architecture, critical rules, key file map.
-3. **[`YULIA_AGENCY_SPEC.md`](./YULIA_AGENCY_SPEC.md)** — Yulia's agentic operating doctrine: methodology, permissions, app surfaces, data-room boundaries, and legal/tax guardrails.
-4. **[`YULIA_AGENCY_IMPLEMENTATION_PLAN.md`](./YULIA_AGENCY_IMPLEMENTATION_PLAN.md)** — how to wire the surfaces, prompt stack, tools, approval gates, and file/data-room model together.
-5. **[`DESIGN_SOURCE.md`](./DESIGN_SOURCE.md)** — V6 design handoff → production code map.
+| Skill | Job | Descends from |
+|---|---|---|
+| `smbx-cim-teardown` | Broker package → analytical brief | PE: cim-teardown · CIM: growth-narrative-validation |
+| `smbx-add-back-scrutiny` | STAR test, verified-flag gate, clean earnings | CIM: ebitda-add-back-scrutiny · PE: teardown step 4 |
+| `smbx-concentration-forensics` | Pyramid, cohort test, walk-away sim | CIM: customer-concentration-forensics |
+| `smbx-dependency-transfer-risk` | Owner/bus-factor + license/contract transfer triage | CIM: key-person-dependency-map + change-of-control-contract-review |
+| `smbx-diligence-plan` | SMB-scaled workplan, DDQ, issues log | PE: diligence-architecture |
+| `smbx-deal-scenarios` | Bear/base/bull through the engine, DSCR, bid ceiling | PE: financial-scenario-modelling |
+| `smbx-ic-deal-memo` | Answer-first decision memo, risk register, 3 pressure questions | PE: ic-memo-drafting · CIM: ic-diligence-memo |
+| `smbx-value-creation-plan` | 100-day plan, lever bridge, KPI dashboard | PE: portfolio-value-creation |
 
-## Don't read these
+Source sets: `claude-skills-investment-banking-deal-engine-skills` (21 — discarded,
+superseded), `private-equity-claude-skill-set-skills` (8 — the stage playbooks),
+`past-cim-claude-due-diligence-skills-private-skills` (6 — the forensic tests),
+`claude-skills-build-boardroom-strategy-decks-skills` (25 — discarded as skills; three
+narrative rules harvested into `STUDIO_ADDENDUM.md`).
 
-Files in [`docs/_archive/`](./docs/_archive/) describe earlier eras of the platform (V3/V4 design, March 2026 pricing model, pre-V18 methodology). They are retained for history. **Do not build against them.** Each archived markdown carries a banner saying so.
+## The three laws baked into every skill
 
-## Stack
+1. **The seam** (2026-08-15): these are deal-shaped, counterparty-confidential tools.
+   They run app-side with CC from IoI. Pre-IoI screening stays in the studio.
+2. **The engine**: no deal figure is computed in conversation. Skills fill the deal
+   profile and interpret engine runs (valuation, sba, lbo, earnout, compare). Every
+   output is engine-stamped. League rule: L1–L2 lead SDE, L3–L6 lead Adjusted EBITDA.
+   DSCR floor 1.25, strong 1.50.
+3. **Evidence**: every figure carries a source. Add-backs enter the math only when
+   `verified: true` with evidence — the STAR test is the rubric for that flag. Claims
+   are graded Primary / Secondary / Asserted.
 
-React 19 + Vite 7 + Tailwind v3 + Radix UI · Node + Express (ESM) · PostgreSQL (postgres-js, no ORM) · Claude API primary · Stripe monthly subscriptions · Railway deployment.
+## Install (CC, on the Mac)
 
-## Commands
+1. Review each SKILL.md against METHODOLOGY_V17 and the current engine module names —
+   adjust any drift (these were written from the workbench/seam project docs of
+   2026-08-14/15, not from the repo at today's commit).
+2. Copy the eight folders from `skills/` into `SMBx/.claude/skills/` so every CC
+   session in the repo loads them. (Repo-level, not `~/.claude/skills/`, so they stay
+   versioned with the engine they depend on.)
+3. Commit on the Mac. Standard rule: never push from a cloud session.
 
-```bash
-npm run dev               # Vite dev server (frontend, port 5173)
-npx tsx server/index.ts   # Express backend (port 3000)
-npm run build             # Production build
-```
+Names are prefixed `smbx-` so they never collide with generic downloads.
 
-See `CLAUDE.md` for environment variables, the four user journeys (SELL / BUY / RAISE / PMI), the calculation engine, and the agentic tool inventory.
+## Also in this pack
+
+- `STUDIO_ADDENDUM.md` — studio-side harvest (sizing cross-checks, screening additions,
+  three narrative rules). File into the studio workspace via a studio session with
+  smbx-studio preflight; it is NOT a CC/app item.
+- `YULIA_MINING_BRIEF.md` — product-side harvest for Yulia's prompts. A CC brief
+  against `YULIA_PROMPTS_V2.md` / `METHODOLOGY_V17.md`.
