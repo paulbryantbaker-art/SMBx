@@ -2,29 +2,18 @@
  * house/engagement.ts — THE FEE SCHEDULE'S ARITHMETIC, PURE
  *
  * FRONT_END_REBUILD.md §3: *"THERE IS NO ENGAGEMENT OBJECT… the published fee
- * schedule ($5K a month, banded success fee, every retainer dollar credited
+ * schedule (quarterly $15K, banded success fee, every retainer dollar credited
  * at close) is arithmetic that currently lives nowhere."* This file is where
  * it lives now — migration 129's `engagements` table stores what happened,
  * and this computes what the schedule says about it.
  *
  * ── THE SCHEDULE IS LAW, NOT AN INPUT ───────────────────────────────────
  * The numbers below are Paul's published schedule (CLAUDE.md, 2026-08-05/06,
- * MONTHLY retainer 2026-08-17): ONE schedule, every client, no negotiated
+ * quarterly retainer 2026-08-06): ONE schedule, every client, no negotiated
  * pricing — the no-negotiation posture is itself a loyalty statement. So the
  * bands are CONSTANTS here, not parameters. A `successFee(ev, rates)` that
  * took rates as an argument would be the negotiation the schedule forbids,
  * wearing a function signature.
- *
- * ── THE CADENCE MOVED; THE RATE DID NOT ─────────────────────────────────
- * 2026-08-17, Paul: *"I want the monthly fee to be 5k per month in addition
- * to the scale. All credit towards close just like we have it."* The schedule
- * billed $15,000 a QUARTER up front from 2026-08-06 — the same $5K a month in
- * dollars-per-month terms, but a quarter of committed retainer at a time. It
- * now bills MONTHLY at $5,000. The bands, the $100K floor and every credit
- * rule are untouched; what changed is the billing unit, and with it the
- * minimum commitment (a month, not a quarter). Migration 133 carries existing
- * rows across by dividing the papered quarterly rate by three, so nobody's
- * dollars-per-month moved.
  *
  * ── THE LINE ────────────────────────────────────────────────────────────
  * This is the practice's own book-keeping of a schedule papered by the
@@ -43,8 +32,8 @@
 
 /* ── the published schedule, in cents ─────────────────────────────────── */
 
-/** $5,000 per month, paid up front. The first month IS the engagement. */
-export const MONTH_RETAINER_CENTS = 500_000;
+/** $15,000 per quarter, paid up front. The first quarter IS the engagement. */
+export const QUARTER_RETAINER_CENTS = 1_500_000;
 
 /** The success-fee floor: $100,000. */
 export const FEE_FLOOR_CENTS = 10_000_000;
@@ -224,8 +213,8 @@ export function retainerCredit(input: {
 /* ── the engagement, summarised ───────────────────────────────────────── */
 
 export const SCHEDULE_SUMMARY =
-  `One schedule, every client, no negotiated pricing. ${money(MONTH_RETAINER_CENTS)} per month, ` +
-  `paid up front — the first month IS the engagement, and each renewal is another month up front. ` +
+  `One schedule, every client, no negotiated pricing. ${money(QUARTER_RETAINER_CENTS)} per quarter, ` +
+  `paid up front — the first quarter IS the engagement, and each renewal is another quarter up front. ` +
   `Success fee banded like tax brackets: 5% of the first $1M, 4% of $1–5M, 3% of $5–10M, 2% above $10M, ` +
   `${money(FEE_FLOOR_CENTS)} minimum. Every retainer dollar credits against the success fee at close; ` +
   `credit caps at the fee; no close, no credit. Premium adds no second formula — the retainer simply ` +

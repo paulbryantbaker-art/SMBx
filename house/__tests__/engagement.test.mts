@@ -8,7 +8,7 @@
  */
 import {
   successFee, retainerCredit, SCHEDULE_SUMMARY,
-  MONTH_RETAINER_CENTS, FEE_FLOOR_CENTS, FLOOR_BINDS_BELOW_CENTS, FEE_BANDS,
+  QUARTER_RETAINER_CENTS, FEE_FLOOR_CENTS, FLOOR_BINDS_BELOW_CENTS, FEE_BANDS,
 } from '../engagement.js';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -32,7 +32,7 @@ const fee = (evCents: number) => {
 };
 
 /* ── the schedule's constants ── */
-eq('the retainer is $5,000 a month, in cents', MONTH_RETAINER_CENTS, 500_000);
+eq('the retainer is $15,000 a quarter, in cents', QUARTER_RETAINER_CENTS, 1_500_000);
 eq('the floor is $100,000, in cents', FEE_FLOOR_CENTS, 10_000_000);
 eq('four bands', FEE_BANDS.length, 4);
 eq('band rates are 5/4/3/2', FEE_BANDS.map(b => b.rateBps), [500, 400, 300, 200]);
@@ -95,30 +95,18 @@ ok('NaN refuses', !successFee(NaN).ok);
 
 /* ── retainer credit ── */
 {
-  const r = retainerCredit({ retainerPaidCents: 9 * MONTH_RETAINER_CENTS, feeCents: 21_000_000, closed: true });
+  const r = retainerCredit({ retainerPaidCents: 3 * QUARTER_RETAINER_CENTS, feeCents: 21_000_000, closed: true });
   ok('a closed deal credits', r.ok);
   if (r.ok) {
-    eq('nine months credit in full', r.credit.creditCents, 4_500_000);
+    eq('three quarters credit in full', r.credit.creditCents, 4_500_000);
     eq('due at close is fee minus credit', r.credit.dueAtCloseCents, 16_500_000);
     eq('nothing forfeited', r.credit.excessForfeitedCents, 0);
   }
 }
 {
-  /* THE CADENCE CHANGE, END TO END (2026-08-17). A year on the monthly
-     retainer against the $5M anchor: 12 × $5,000 = $60,000 credits, $150,000
-     due at close. Written out because "all credit towards close just like we
-     have it" is the half of the change that must NOT have moved, and an
-     anchor is the only thing that proves the retainer constant reached the
-     credit rather than only the summary sentence. */
-  const r = retainerCredit({ retainerPaidCents: 12 * MONTH_RETAINER_CENTS, feeCents: 21_000_000, closed: true });
-  eq('a year of monthly retainer is $60K', 12 * MONTH_RETAINER_CENTS, 6_000_000);
-  ok('…all of it credits', r.ok && r.credit.creditCents === 6_000_000);
-  ok('…leaving $150K due at close', r.ok && r.credit.dueAtCloseCents === 15_000_000);
-}
-{
-  /* The long mandate on a floor deal: 24 months = $120K paid, $100K fee.
+  /* The long mandate on a floor deal: 8 quarters = $120K paid, $100K fee.
      Credit caps at the fee, $0 due, $20K forfeited AND PRINTED. */
-  const r = retainerCredit({ retainerPaidCents: 24 * MONTH_RETAINER_CENTS, feeCents: FEE_FLOOR_CENTS, closed: true });
+  const r = retainerCredit({ retainerPaidCents: 8 * QUARTER_RETAINER_CENTS, feeCents: FEE_FLOOR_CENTS, closed: true });
   ok('credit caps at the fee', r.ok && r.credit.creditCents === FEE_FLOOR_CENTS);
   ok('nothing due at close', r.ok && r.credit.dueAtCloseCents === 0);
   eq('the excess is named, not zeroed', r.ok ? r.credit.excessForfeitedCents : -1, 2_000_000);
@@ -135,12 +123,6 @@ ok('negative retainer refuses', !retainerCredit({ retainerPaidCents: -1, feeCent
 /* ── doctrine ── */
 ok('the summary states no-negotiation', /no negotiated pricing/.test(SCHEDULE_SUMMARY));
 ok('…and no-close-no-credit', /no close, no credit/.test(SCHEDULE_SUMMARY));
-/* The cadence is stated in the summary and nowhere else in code, so the
-   summary is the only thing that can drift back to the retired quarterly
-   wording while the constant reads $5K — a pair that would look right in a
-   diff and misstate the schedule to the practitioner reading the card. */
-ok('the summary bills monthly', /per month/.test(SCHEDULE_SUMMARY));
-ok('…and says nothing about a quarter', !/quarter/i.test(SCHEDULE_SUMMARY));
 
 /* ── purity (comments stripped first — the header EXPLAINS the bans) ── */
 const SRC = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'engagement.ts'), 'utf8');
