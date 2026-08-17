@@ -17,7 +17,7 @@
  *
  * ── FACTS IN, ARITHMETIC OUT ────────────────────────────────────────────
  * The table stores what HAPPENED — dates, cents received, status. The fee
- * schedule's consequences (quarters covered, what the retainer is worth at a
+ * schedule's consequences (months covered, what the retainer is worth at a
  * close) are computed by house/engagement.ts on every read and never stored,
  * so a stored fee can never drift from the schedule that defines it.
  *
@@ -31,7 +31,7 @@ import { Router } from 'express';
 import { sql } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
 import {
-  successFee, retainerCredit, QUARTER_RETAINER_CENTS, SCHEDULE_SUMMARY,
+  successFee, retainerCredit, MONTH_RETAINER_CENTS, SCHEDULE_SUMMARY,
 } from '../../house/engagement.js';
 
 export const engagementsRouter = Router();
@@ -40,10 +40,10 @@ engagementsRouter.use(requireAuth);
 /* One engagement row + everything the schedule says about it. */
 function view(row: any) {
   const paid = Number(row.retainer_paid_cents ?? 0);
-  const rate = Number(row.quarter_rate_cents ?? QUARTER_RETAINER_CENTS);
-  /* Whole quarters the money on hand covers — floor, not round: a quarter is
+  const rate = Number(row.month_rate_cents ?? MONTH_RETAINER_CENTS);
+  /* Whole months the money on hand covers — floor, not round: a month is
      paid up front or it is not covered. */
-  const quartersCovered = rate > 0 ? Math.floor(paid / rate) : 0;
+  const monthsCovered = rate > 0 ? Math.floor(paid / rate) : 0;
   const credit = retainerCredit({
     retainerPaidCents: paid,
     /* The fee needs an EV, which an engagement does not have until a deal
@@ -60,11 +60,11 @@ function view(row: any) {
     status: row.status,
     letterSignedOn: row.letter_signed_on,
     startedOn: row.started_on,
-    quarterRateCents: rate,
+    monthRateCents: rate,
     retainerPaidCents: paid,
     premium: row.premium,
     notes: row.notes,
-    quartersCovered,
+    monthsCovered,
     creditRule: credit.ok ? credit.credit.workings[0] : null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

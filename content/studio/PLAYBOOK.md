@@ -61,10 +61,13 @@ client-facing. What follows is what binds these four documents specifically.
   quoted "$15,000 to start, then $5,000 a month", and told you to source it from
   `PRACTICE_RECORD.md` — three things wrong at once. Site publication shipped
   2026-08-05 and Paul **reversed it after one day** on 2026-08-06 ("remove the
-  public upfront pricing… entirely"). The cadence became **quarterly, $15,000 up
-  front**, superseding the monthly figure. And `PRACTICE_RECORD.md` does not
-  exist anywhere in the repo — a session told to quote from it either could not,
-  or improvised the number, which is the worse branch.)*
+  public upfront pricing… entirely"). The cadence went quarterly ($15,000 up
+  front) on 2026-08-06 and back to **monthly, $5,000 up front** on 2026-08-17 —
+  which is exactly why no document in this playbook may carry a figure: the
+  schedule has moved three times in a fortnight, and a fee quoted in a market
+  map goes stale where a brochure gets rebuilt. And `PRACTICE_RECORD.md` does
+  not exist anywhere in the repo — a session told to quote from it either could
+  not, or improvised the number, which is the worse branch.)*
   Still forbidden regardless: any sell-side, two-sided or neutral-intermediary
   fee, and any fee comparison to a named bank, broker or advisor.
   *(Also retired, and for a different reason: the older "No fee talk. No
