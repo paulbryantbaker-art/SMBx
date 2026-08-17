@@ -32,7 +32,11 @@
  *     node sync.mjs --install    print the launchd job that runs this hourly
  *
  * WHERE THE ENGINE IS: $SMBX_REPO, else a `.smbx-repo` file beside this script
- * holding the path, else the usual places. If it cannot be found, the workspace
+ * holding the path, else the usual places. YOU SHOULD NOT HAVE TO WRITE THAT
+ * FILE: `init-workspace.mts <workspace>` writes it automatically, pinned to the
+ * clone it was run from — which it knows with certainty, being inside it. That
+ * matters on a Mac carrying several clones, where the scan below finds more than
+ * one, correctly refuses to choose, and exits 2 until it is pinned. If it cannot be found, the workspace
  * still syncs and the engine is reported as unknown — a partial sync that says
  * so beats a total refusal.
  *
@@ -193,6 +197,13 @@ Write this to ${plist}, then:
 It runs every hour. Merging a weekly PR on your phone therefore lands the files
 on this Mac within the hour, with nothing to remember. Logs to sync.log here.
 
+NODE IS NAMED ABSOLUTELY here on purpose. launchd runs jobs with a minimal PATH
+(/usr/bin:/bin:/usr/sbin:/sbin), so "/usr/bin/env node" resolves to nothing when
+node came from Homebrew or nvm — the job would load, fire hourly, fail to find
+node, and write that to sync.log forever while the clone silently never updated.
+
+Easier: init-workspace.mts <workspace> --launchd writes and loads this for you.
+
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -200,10 +211,11 @@ on this Mac within the hour, with nothing to remember. Logs to sync.log here.
   <key>Label</key><string>ai.smbx.studio.sync</string>
   <key>ProgramArguments</key>
   <array>
-    <string>/usr/bin/env</string>
-    <string>node</string>
+    <string>${process.execPath}</string>
     <string>${path.join(WS, 'sync.mjs')}</string>
   </array>
+  <key>EnvironmentVariables</key>
+  <dict><key>PATH</key><string>${path.dirname(process.execPath)}:/usr/bin:/bin:/usr/sbin:/sbin</string></dict>
   <key>StartInterval</key><integer>3600</integer>
   <key>RunAtLoad</key><true/>
   <key>WorkingDirectory</key><string>${WS}</string>

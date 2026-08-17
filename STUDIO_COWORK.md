@@ -48,8 +48,25 @@ DESIGN.md             the look       ┘ any of it
 Create it in one command (from the repo dir, target your workspace path):
 
 ```
-npx tsx scripts/studio/init-workspace.mts ~/Documents/smbx-studio
+npx tsx scripts/studio/init-workspace.mts ~/Documents/smbx-studio --update --launchd
 ```
+
+That one command also wires the workspace to **this** clone and keeps it fed:
+
+- **`--update`** refreshes the law files from the repo (a `.bak` is kept for any
+  that actually differed). Without it a workspace quietly keeps whatever version
+  it was created with, and a fix in the repo never arrives.
+- **`.smbx-repo`** is written automatically, pinning the workspace to the clone
+  you ran this from. `sync.mjs` otherwise has to *find* the engine by scanning,
+  and on a Mac with more than one clone lying around that is ambiguous — so it
+  refuses and exits 2 rather than risk building from a stale copy. The pin
+  removes the question: this script lives *in* the engine, so it knows the path
+  with certainty instead of inferring it. Re-running from a different clone
+  repoints it and says so.
+- **`--launchd`** installs the hourly pull (macOS only) so a PR merged on your
+  phone reaches this disk within the hour. **Git is a transport, not a
+  destination** — a merged PR puts nothing on the Mac until something pulls it,
+  and until then every builder here renders from a stale master, silently.
 
 Those four matter. With the app out of the loop, no server prompt enforces the
 citation law, THE LINE, the document structures, or the house style any more —
@@ -67,10 +84,14 @@ palettes, and nothing that travelled to the workspace described the current one.
 ## One-time setup
 
 1. Clone the repo locally and `npm install`.
-2. Run `init-workspace.mts` (above).
-3. Open **Cowork** on the workspace folder. Set `REPO` to wherever the repo is
-   cloned — every command below uses it.
-4. For job 5 (pushing research into the app's CRM), get a token from the app —
+2. **Pull the clone current first** — `git pull --ff-only origin main`. Running
+   step 3 from a stale clone copies stale laws into the workspace and pins it
+   there, which is the one way this setup can leave you worse off than before.
+3. Run `init-workspace.mts` with `--update --launchd` (above).
+4. Open **Cowork** on the workspace folder. Set `REPO` to wherever the repo is
+   cloned — every command below uses it. Add the *workspace* folder too if you
+   want sessions to read the markets and masters, not just the engine.
+5. For job 5 (pushing research into the app's CRM), get a token from the app —
    **Settings → Connections → "Show my token"** — and put it in the session's
    environment as `SMBX_TOKEN`. (Google sign-in has no password for a script
    to use; that pane is the answer to it.)

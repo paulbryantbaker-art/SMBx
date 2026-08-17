@@ -15,13 +15,23 @@
  * (build-deck defaults to ./media + ./assets for images and ./collateral for
  *  output — no flags needed from inside the workspace.)
  *
- * Usage: npx tsx scripts/studio/init-workspace.mts [targetDir]
+ * Usage: npx tsx scripts/studio/init-workspace.mts [targetDir] [--update] [--launchd]
+ *   --update   refresh the law files from this repo (keeps a .bak of any that differed)
+ *   --launchd  install the hourly sync job on macOS, so a merged PR reaches this disk
+ *
+ * It also writes `.smbx-repo` pinning the workspace to THIS clone, which is the
+ * one thing sync.mjs cannot work out for itself when several clones are present.
  */
 import { mkdirSync, writeFileSync, copyFileSync, existsSync, readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
+import os from 'node:os';
 
 const ROOT = path.resolve(new URL('../..', import.meta.url).pathname);
-const args = process.argv.slice(2).filter(a => a !== '--update');
+/* Every flag is filtered out, not just --update: `init-workspace.mts --launchd`
+   with no target would otherwise resolve `target` to "--launchd" and scaffold a
+   whole workspace into a folder of that name. */
+const args = process.argv.slice(2).filter(a => !a.startsWith('--'));
 const target = path.resolve(args[0] || '.');
 
 /* --update refreshes the LAW FILES.
@@ -39,7 +49,11 @@ const target = path.resolve(args[0] || '.');
  * anything that actually differed so nothing is lost silently.
  */
 const UPDATE = process.argv.includes('--update');
+/* --launchd installs the hourly pull. See the block beside the pin below. */
+const LAUNCHD = process.argv.includes('--launchd');
 const refreshed: string[] = [], backedUp: string[] = [], stale: string[] = [];
+let repointed: string | null = null;
+const launchdNotes: string[] = [];
 
 /** Copy a law file: always if missing, on --update if changed (with a backup). */
 function law(srcRel: string, dstName: string): void {
@@ -219,6 +233,33 @@ law('content/studio/engagements.mjs', 'engagements.mjs');
    makes it automatic. */
 law('content/studio/sync.mjs', 'sync.mjs');
 
+/* THE PIN — `.smbx-repo`, written by the engine that is running.
+ *
+ * sync.mjs locates the engine by scanning the places clones land and confirming
+ * a hit by the presence of scripts/studio/build-report.mts. On this Mac that
+ * scan finds MORE THAN ONE (GitHubRepos/SMBx-live/SMBx beside SMBx-main and
+ * older copies), and more than one is ambiguous, so it refuses and exits 2
+ * rather than pick — correctly, because picking the stale one would render this
+ * week's collateral from last quarter's design system and look like it worked.
+ *
+ * Which makes the pin the entire answer, and it never needed to be typed by
+ * anyone: THIS SCRIPT IS IN THE ENGINE. It knows the path with certainty rather
+ * than by inference, so writing it here means discovery never runs at all and
+ * therefore cannot be ambiguous, on this machine or any other.
+ *
+ * Repointed when it names a different clone, because the pin means "the engine
+ * this workspace is wired to" and running init-workspace from a clone is the
+ * act of wiring it to that clone. A pin left pointing at a stale copy is the
+ * precise failure the whole file exists to prevent, and it would be silent.
+ */
+const pinFile = path.join(target, '.smbx-repo');
+const priorPin = existsSync(pinFile) ? readFileSync(pinFile, 'utf8').trim() : null;
+if (priorPin !== ROOT) {
+  writeFileSync(pinFile, ROOT + '\n');
+  refreshed.push('.smbx-repo');
+  if (priorPin) repointed = priorPin;
+}
+
 /* The workspace is meant to live in git (that is how a master gets version
    history without a database), so the one file that must never go up needs to
    be excluded before anyone commits — a key put somewhere sensible should not
@@ -250,6 +291,14 @@ const IGNORE_RULES: Array<[string, string[]]> = [
     '# A single file over 100MB permanently blocks pushing this repo to GitHub,\n' +
     '# and committing it once is enough: deleting it later does not undo it.',
     ['*.mov', '*.mp4', '*.m4v', '*.avi', '*.webm', '*.ProRes.*'],
+  ],
+  [
+    '# Machine-local sync state, written by init-workspace.\n' +
+    '# .smbx-repo holds an ABSOLUTE path to the engine clone on THIS Mac, so\n' +
+    '# committing it would point every other machine at a folder it does not have.\n' +
+    '# sync.log is churn. sync.mjs itself stays tracked, like engagements.mjs —\n' +
+    '# it is a tool that travels with the workspace, not machine state.',
+    ['.smbx-repo', 'sync.log'],
   ],
 ];
 
@@ -423,6 +472,72 @@ writeFileSync(path.join(target, 'README.md'), [
   'specs are in CLAUDE.md and PLAYBOOK.md right here.',
 ].join('\n'));
 
+/* --launchd: the hourly pull, INSTALLED rather than described.
+ *
+ * `node sync.mjs --install` prints a plist and leaves you to write it, strip the
+ * prose off the front of it and load it — three careful steps at the tail of a
+ * setup nobody performs twice, and the step most likely to be the one skipped.
+ * Skipping it is not visibly different from doing it, until a master is a month
+ * stale. So this does it.
+ *
+ * NODE IS NAMED ABSOLUTELY, and that is the load-bearing part rather than a
+ * detail. launchd runs jobs with a minimal PATH — /usr/bin:/bin:/usr/sbin:/sbin
+ * — so the `/usr/bin/env node` in the printed plist resolves to NOTHING when
+ * node came from Homebrew (/opt/homebrew/bin) or nvm, which is every Mac this
+ * runs on. The job loads, fires on the hour, fails to find node, and writes that
+ * to sync.log forever: a job that reports as installed and has never once run,
+ * which is the same silent-and-plausible failure the pin above exists to stop.
+ * process.execPath is the node executing this line, so it is a node that exists.
+ */
+if (LAUNCHD) {
+  const label = 'ai.smbx.studio.sync';
+  const plistPath = path.join(os.homedir(), 'Library/LaunchAgents', label + '.plist');
+  if (process.platform !== 'darwin') {
+    launchdNotes.push('skipped — launchd is macOS only, and this is ' + process.platform + '.');
+  } else {
+    const plist = [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">',
+      '<plist version="1.0">',
+      '<dict>',
+      '  <key>Label</key><string>' + label + '</string>',
+      '  <key>ProgramArguments</key>',
+      '  <array>',
+      '    <string>' + process.execPath + '</string>',
+      '    <string>' + path.join(target, 'sync.mjs') + '</string>',
+      '  </array>',
+      '  <key>EnvironmentVariables</key>',
+      '  <dict><key>PATH</key><string>' + path.dirname(process.execPath) +
+        ':/usr/bin:/bin:/usr/sbin:/sbin</string></dict>',
+      '  <key>StartInterval</key><integer>3600</integer>',
+      '  <key>RunAtLoad</key><true/>',
+      '  <key>WorkingDirectory</key><string>' + target + '</string>',
+      '  <key>StandardOutPath</key><string>' + path.join(target, 'sync.log') + '</string>',
+      '  <key>StandardErrorPath</key><string>' + path.join(target, 'sync.log') + '</string>',
+      '</dict>',
+      '</plist>',
+      '',
+    ].join('\n');
+    mkdirSync(path.dirname(plistPath), { recursive: true });
+    writeFileSync(plistPath, plist);
+
+    /* Reloaded, not just loaded — a second run must land the NEW plist rather
+       than fail with "service already loaded" and leave the old one running. */
+    const uid = typeof process.getuid === 'function' ? process.getuid() : 0;
+    const quiet = (a: string[]) => {
+      try { execFileSync('launchctl', a, { stdio: 'ignore' }); return true; } catch { return false; }
+    };
+    quiet(['bootout', `gui/${uid}/${label}`]);
+    const up = quiet(['bootstrap', `gui/${uid}`, plistPath]) || quiet(['load', plistPath]);
+    launchdNotes.push(
+      up ? 'installed and loaded — pulls both repos hourly, logging to sync.log.'
+         : 'plist written, but launchctl would not load it. Load it by hand:\n' +
+           `      launchctl bootstrap gui/${uid} ${plistPath}`,
+    );
+    launchdNotes.push('plist: ' + plistPath);
+  }
+}
+
 const builder = path.join(ROOT, 'scripts/studio/build-deck.mts');
 console.log(`✓ studio workspace ready at ${target}`);
 if (refreshed.length) console.log(`  rules: ${refreshed.join(', ')}${UPDATE ? ' — refreshed from the repo' : ''}`);
@@ -434,6 +549,22 @@ console.log(`  to build a deck:`);
 console.log(`    cd ${target}`);
 console.log(`    npx tsx ${builder} decks/example.deck.mts`);
 console.log(`  → outputs land in ${path.join(target, 'collateral')}/`);
+
+/* THE SYNC WIRING, reported explicitly. It is the half of this script whose
+   whole job is to be automatic, which means nothing about it is visible unless
+   it is said out loud once, here, at the moment it is set up. */
+console.log(`  engine pinned: ${ROOT}`);
+if (repointed) {
+  console.log(`    ! was pinned to ${repointed}`);
+  console.log(`      That clone is no longer what this workspace builds from.`);
+}
+if (launchdNotes.length) {
+  console.log(`  hourly sync: ${launchdNotes[0]}`);
+  for (const n of launchdNotes.slice(1)) console.log(`    ${n}`);
+} else {
+  console.log(`  hourly sync: not installed — add --launchd to set it up, or pull by hand:`);
+  console.log(`    cd ${target} && node sync.mjs`);
+}
 if (stale.length) {
   console.log(`\n  ! ${stale.join(', ')} differ${stale.length === 1 ? 's' : ''} from the repo — this workspace is running OLDER RULES.`);
   console.log(`    A session here will follow them, so a fix in the repo never arrives.`);
