@@ -21,7 +21,7 @@ import { LOGGED_IN_CHROME } from "./appSurfaces";
 
 const AtlasMobileApp = lazy(() => import("./atlasmobile/AtlasMobileApp"));
 const AtlasApp = lazy(() => import("./desktop/AtlasApp"));
-const ZeroShell = lazy(() => import("./ZeroShell"));
+const V2Shell = lazy(() => import("../v2/V2Shell"));
 
 // The mobile (<1024px) render path.
 const MobileShell = AtlasMobileApp;
@@ -47,13 +47,13 @@ export default function V6App() {
     onDevSignIn: auth.devSignIn,
   };
 
-  /* THE ZERO STATE (2026-08-16, Paul: "get rid of all of the logged in
-     chrome... and start over completely"). Both shells stand behind the
-     flag; the rethink is FRONT_END_ZERO.md. */
+  /* THE RESTART (2026-08-16). The old shells stand behind LOGGED_IN_CHROME;
+     the live app is the V2 shell — Carta language, grown one surface at a
+     time per SMBX_CRM_V2_SPEC.md. ZeroShell served for the hours between. */
   if (!LOGGED_IN_CHROME) {
     return (
       <Suspense fallback={<div style={FULLSCREEN_CENTER}>Loading…</div>}>
-        <ZeroShell user={auth.user} onSignOut={sharedProps.onSignOut} />
+        <V2Shell user={auth.user} onSignOut={sharedProps.onSignOut} />
       </Suspense>
     );
   }

@@ -4,7 +4,17 @@ Paul: *"let's get rid of all of the logged in chrome in app... and start over
 completely. The backend as you just said, stays intact, we just need to
 really think through properly how the front end should work."*
 
-The logged-in app is now `ZeroShell` — the mark, an honest sentence,
+**UPDATE, hours later: the narration arrived.** Paul delivered his workflow
+and a full V2 spec — saved as `SMBX_CRM_V2_SPEC.md` — plus two directives:
+**Carta UI, not Trainline** ("i dont want train UI -- can you just use the
+Carta UI that we have for the external site") and **manual-first entry**
+("i dont want to type in anyones name etc, so we'll figure out how to get it
+from the copy paste better later"). Build order §8 is running one step at a
+time: steps 1–2 (Leads + Today, `client/src/components/v2/`) shipped
+2026-08-16. §2's question set below is answered; §3's constraints stand
+except the Trainline shape line, superseded by the Carta directive.
+
+The logged-in app was briefly `ZeroShell` — the mark, an honest sentence,
 sign-out. Both old shells (desktop Atlas + atlasmobile, ~36k lines) stand
 behind `LOGGED_IN_CHROME` in appSurfaces.ts for reference. **Nothing gets
 built against this file until the §2 conversation has happened.**
