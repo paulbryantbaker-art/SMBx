@@ -1,6 +1,6 @@
 # THE FRONT-END REBUILD — two functions, one spine
 
-**Status:** IN EXECUTION.
+**Status:** SUPERSEDED (2026-08-16 night) — the logged-in chrome came down whole; see FRONT_END_ZERO.md. This file is the record of what was built (all of it standing behind LOGGED_IN_CHROME).
 **Date:** 2026-08-16
 
 | phase | what | state |

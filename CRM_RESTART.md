@@ -1,5 +1,8 @@
 # CRM RESTART (2026-08-16 night)
 
+> Superseded hours later by the FULL front-end restart — FRONT_END_ZERO.md.
+> The lessons below still bind; the scope grew from the CRM to everything.
+
 Paul, after a day of live use: *"i cant tell where anything actually is and i
 think everything is jumbled together with outreach and marketing ... so for
 everything that is not deal management - IoI through integration (Definitive
