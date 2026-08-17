@@ -13,6 +13,7 @@ import { Avatar } from "./primitives";
 import { LogoHome, Mark } from "./Logo";
 import { SearchIcon, HelpIcon, BellIcon } from "./icons";
 import { T } from "./atlasTokens";
+import { CRM_SURFACES_IN_APP } from "../appSurfaces";
 
 interface TabDef {
   id: AtlasScreen;
@@ -35,17 +36,24 @@ interface TabDef {
    and their routes are untouched — this is navigation, not deletion — and
    `activeTabFor` below keeps the Deals tab lit while you are in either, so
    the chrome agrees with the object model. */
-/* The spec's seven (CRM_WORKFLOW_SPEC.md §5, adopted 2026-08-16) plus Agent —
-   Yulia keeps her tab alongside the rail until Paul retires one of them. */
+/* THE DEMOLITION (2026-08-16 night, Paul: "for everything that is not deal
+   management - IoI through integration (Definitive and the LIne) - i want to
+   blow up the CRM and Campaign management so we can start over"). The chrome
+   is deal management only; the CRM/campaign screens survive behind
+   CRM_SURFACES_IN_APP (appSurfaces.ts) for the restart to reference. */
 const TABS: TabDef[] = ([
   { id: "today", label: "Today" },
-  { id: "clients", label: "Clients" },
-  { id: "targets", label: "Targets" },
+  ...(CRM_SURFACES_IN_APP ? [
+    { id: "clients", label: "Clients" },
+    { id: "targets", label: "Targets" },
+  ] : []),
   { id: "deals", label: "Deals" },
-  { id: "people", label: "People" },
-  { id: "companies", label: "Companies" },
-  { id: "posting", label: "Posting" },
-  { id: "reports", label: "Reports" },
+  ...(CRM_SURFACES_IN_APP ? [
+    { id: "people", label: "People" },
+    { id: "companies", label: "Companies" },
+    { id: "posting", label: "Posting" },
+    { id: "reports", label: "Reports" },
+  ] : []),
   { id: "agent", label: "Agent" },
 ] as TabDef[]);
 
