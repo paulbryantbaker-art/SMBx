@@ -134,7 +134,8 @@ target (`deals`) but **not the contract between them** — which client engaged
 us, on what terms, when it started, when it renews, what the retainer credit
 stands at. That is Salesforce's *Opportunity*, and it is the single most
 load-bearing missing row in the schema. The published fee schedule
-(quarterly $15K, banded success fee, every retainer dollar credited at close)
+($5K a month, banded success fee, every retainer dollar credited at close —
+quarterly $15K when this was written, monthly again from 2026-08-17)
 is arithmetic that currently lives nowhere.
 
 **2 · `practice_leads` NEVER REACHES THE CRM.** Zero references in

@@ -30,11 +30,11 @@ interface Engagement {
   status: string;
   letterSignedOn: string | null;
   startedOn: string | null;
-  quarterRateCents: number;
+  monthRateCents: number;
   retainerPaidCents: number;
   premium: boolean;
   notes: string | null;
-  quartersCovered: number;
+  monthsCovered: number;
   creditRule: string | null;
 }
 
@@ -120,9 +120,9 @@ export function EngagementCard({ accountId }: { accountId: number }) {
         <Stat label="Status" value={eng.status} />
         <Stat label="Retainer received" value={money(eng.retainerPaidCents)} />
         <Stat
-          label="Quarters covered"
-          value={String(eng.quartersCovered)}
-          sub={`at ${money(eng.quarterRateCents)} / quarter`}
+          label="Months covered"
+          value={String(eng.monthsCovered)}
+          sub={`at ${money(eng.monthRateCents)} / month`}
         />
         {eng.premium && <Stat label="Premium" value="yes" sub="retainer continues through integration" />}
       </div>

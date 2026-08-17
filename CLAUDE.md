@@ -561,10 +561,19 @@ sells CLARITY warmly — "Simple, up-front pricing your whole team can
 embrace", "nothing to haggle over, no surprises at close" — never the
 defiant register ("No negotiation." / "the schedule is the schedule"
 stay out of customer copy; the mechanics don't soften, the voice does).
-- **Retainer: QUARTERLY (Paul, 2026-08-06 — supersedes the same-week
-  monthly billing): $15,000 per quarter, paid up front** ($5K/month
-  equivalent). The first quarter IS the engagement; each renewal is
-  another $15K quarter up front; step away at any quarter's end.
+- **Retainer: MONTHLY (Paul, 2026-08-17 — supersedes the 2026-08-06
+  quarterly billing, which had itself superseded monthly): $5,000 per
+  month, paid up front.** The first month IS the engagement; each
+  renewal is another month up front; step away at any month's end.
+  *The rate did not move* — $15,000 a quarter was already $5K/month in
+  dollars-per-month terms; what moved is the BILLING UNIT, and with it
+  the minimum commitment (a month, not a quarter). Everything else in
+  this schedule is untouched, which is the point of the change: bands,
+  floor, and every credit rule stand exactly as they were. In code:
+  `MONTH_RETAINER_CENTS` in `house/engagement.ts`, `month_rate_cents`
+  on `engagements` (migration 133 converts existing rows ÷3, so no
+  papered letter silently reprices), months-covered on the engagement
+  card.
 - **Success fee, banded like tax brackets** (each dollar priced in its
   band, no cliffs): **5%** of the first $1M · **4%** of $1–5M · **3%** of
   $5–10M · **2%** above $10M · **$100,000 minimum** (floor binds below
@@ -589,6 +598,16 @@ stay out of customer copy; the mechanics don't soften, the voice does).
   the intake still NEVER quote fees. The one-time
   §15(b)(13)/state-registration counsel confirmation remains pending and
   should bless this schedule before the first letter papers it.
+- **THE BROCHURE IS THE ONE COPY OF THE SCHEDULE CODE CANNOT REACH
+  (2026-08-17).** `content/collateral/smbx-corpdev-pricing.pdf` is a
+  rendered 6-page binary with no text layer and no source markdown in
+  the repo, so the monthly-retainer change could NOT be applied to it
+  from here — it still states whatever cadence it was built with, and
+  `POST /api/practice/pricing` mails it to every lead that asks. It is
+  the customer-facing half of a schedule whose internal half now says
+  monthly. **Rebuild it in the studio session and drop the new file in
+  at that exact filename** (the route picks it up by name); the same
+  goes for the engagement letter, the schedule's other papered home.
 
 ## Business Model — The Practice (THE LINE v2)
 smbX.ai is a buy-side corp-dev-as-a-service practice. Revenue is per-engagement, papered by humans in the engagement letter: a **buy-side retainer** and a **buy-side success fee**, both paid by the practice's own acquirer client (independent-sponsor economics). The perimeter: buy-side only, one buyer per target, never sell-side/two-sided/neutral-intermediary, targets under $250M revenue. One-time counsel confirmation (Exchange Act §15(b)(13), state M&A-broker regimes, engagement-letter language) is pending — see `THE_LINE_POLICY.md`.
