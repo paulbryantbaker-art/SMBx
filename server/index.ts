@@ -42,6 +42,7 @@ import { crmRouter } from './routes/crm.js';
 import { targetsRouter } from './routes/targets.js';
 import { dealDatesRouter } from './routes/dealDates.js';
 import { reportsRouter } from './routes/reports.js';
+import { leadsRouter } from './routes/leads.js';
 import postQueueRouter from './routes/postQueue.js';
 import { outreachRouter } from './routes/outreach.js';
 import { dealTasksRouter } from './routes/dealTasks.js';
@@ -1276,6 +1277,7 @@ app.use('/api', engagementsRouter);
 app.use('/api', targetsRouter);
 app.use('/api', dealDatesRouter);
 app.use('/api', reportsRouter);
+app.use('/api', leadsRouter);
 app.use('/api', pmiPlanRouter);
 app.use('/api', v19ResourcesRouter);
 
