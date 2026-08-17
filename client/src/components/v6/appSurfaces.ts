@@ -31,4 +31,22 @@
  * about when one is appropriate before they add it.
  */
 
-export {};
+/* ── AND THEN A FLAG CAME BACK (2026-08-16 night) — deliberately ─────────
+ *
+ * Paul, after a day of live use: "i cant tell where anything actually is and
+ * i think everything is jumbled together with outreach and marketing ... so
+ * for everything that is not deal management - IoI through integration
+ * (Definitive and the LIne) - i want to blow up the CRM and Campaign
+ * management so we can start over."
+ *
+ * This is EXACTLY the case the note above says a flag is FOR: the screens
+ * exist, work, and are one boolean from returning — the practice is starting
+ * the CRM design over, not abandoning the capability. Hidden from the
+ * chrome: Clients (List/Board/Outreach), Targets, People, Companies,
+ * Posting, Reports. Untouched: every route, table, migration, the reset
+ * endpoint, the deal-side reads of CRM data (client chips on deals, the
+ * specialists address book), and Yulia's tools.
+ *
+ * The restart brief is CRM_RESTART.md. Flip this to true and the old
+ * surfaces return intact for reference. */
+export const CRM_SURFACES_IN_APP = false;

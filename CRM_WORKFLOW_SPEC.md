@@ -1,5 +1,13 @@
 # CRM WORKFLOW SPEC — reconciled (2026-08-16)
 
+> **RETIRED FROM THE CHROME THE SAME NIGHT (2026-08-16, Paul: "i want to
+> blow up the CRM and Campaign management so we can start over").** The
+> surfaces this spec produced are hidden behind `CRM_SURFACES_IN_APP`
+> (appSurfaces.ts); the schema, routes and discipline mechanics survive.
+> **Read `CRM_RESTART.md` before building any new CRM surface** — it names
+> why this one failed in live use. This file remains as the record of what
+> was built.
+
 Paul brought a workspace spec from a Cowork session ("SMBX WORKSPACE — CRM
 WORKFLOW & SCREEN SPEC") the night the Trainline conversion landed. Its
 diagnosis is CORRECT and is hereby adopted as doctrine; three of its details
