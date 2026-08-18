@@ -1,0 +1,182 @@
+/**
+ * smbX corp-dev offering sheet — the two products, and the why underneath them.
+ *
+ * THE MESSAGE, in one line: smbX is a corporate development function you engage
+ * for the deal — smbXCorpDev runs it to close, smbXCorpDev Premium carries it
+ * through the first hundred days.
+ *
+ * Paul, 2026-08-04, supplied the hook and the tag verbatim from the practice's
+ * own hero: "Buying a Business is Hard Work. We Make it Easier." / "Whether your
+ * 1st or your 100th acquisition, we run the process for you, freeing up your
+ * time and resources." Both carry across from
+ * `specs/smbx-open-for-business.post.mts` — this deck is the same argument with
+ * the products named.
+ *
+ * "3 page carousel" is read as THREE CONTENT BEATS. FORMATS.md §1 auto-adds the
+ * cover and closer as the two bookends, so three body pages renders as five —
+ * why · smbXCorpDev · smbXCorpDev Premium. Cutting to one body page to hit a
+ * literal three would put both products on the same page, which is the opposite
+ * of "diving deeper into each service".
+ *
+ * EVERY FIGURE HERE IS IN `PRACTICE_RECORD.md`. 150 acquisitions, $5B+ enterprise
+ * value added (corrected from "revenue" 2026-08-06 — see the note in the record), ≈$21B transaction value touched, 0 sell-side transactions ever, the
+ * $250M ceiling. Check it with:
+ *   verify-spec.mts specs/smbx-corpdev-offering.deck.mts --against PRACTICE_RECORD.md
+ *
+ * NO PRICING ON THIS VARIANT — AN EDITORIAL CHOICE, NO LONGER A RULE. The old
+ * comment here cited "No fee talk on any public surface", which Paul RETIRED on
+ * 2026-08-05. Publishing the schedule is now allowed and
+ * `smbx-corpdev-offering-pricing.deck.mts` does exactly that. This variant stays
+ * clean because a cold LinkedIn audience is being sold the IDEA, and a price on
+ * slide 1 answers a question they have not asked yet — not because the perimeter
+ * forbids it. If that judgement changes, change it; no policy is in the way.
+ *
+ * The pivot underneath: smbX was once an APP licensed to brokers and bankers, on
+ * a membership fee, collecting no success fee. That business is scrapped. smbX
+ * now runs corp dev itself and earns a success fee, which is why the old rule
+ * stopped describing anything real. THE_LINE_POLICY.md says the same thing from
+ * the other side — v1 was "written to make a software product a regulatory safe
+ * harbor" — and its v2 §Permitted already allows both the buy-side retainer and
+ * the buy-side success fee. PLAYBOOK's fee bullet was the last stale copy and
+ * was amended 2026-08-06. `PRACTICE_RECORD.md` §The perimeter carries the full
+ * note, including the warning that other pre-pivot copy may still be describing
+ * the app rather than the practice.
+ *
+ * ON THE "WHY" PAGE AND COMPETITORS. PLAYBOOK's THE LINE: "Never criticize a
+ * named competitor, bank, or advisor." Page 2 therefore names three structural
+ * realities of how buying gets resourced — a standing team, an advisory firm,
+ * doing it yourself — and indicts none of them. Frame B's cardinal rule, applied
+ * one step out: name the reality of the work, never the reader and never a rival.
+ *
+ * TEXT-ONLY TRADE PAGES, deliberately. `trade` is the only body kind with an
+ * image slot and `tradewrap.noimg` is a real format, not a degraded one. Nothing
+ * in `assets/` depicts corporate development — the library is trade
+ * illustrations, MEP photography and one tree. A wrong picture is worse than
+ * none. The imagery brief for two proper panels is the obvious next step.
+ */
+const CAPTION = [
+  'Buying a business is hard work. We make it easier.',
+  '',
+  'Two ways to work with smbX, and one idea underneath both of them.',
+  '',
+  'Most buyers in the lower middle market have three options for getting a deal done.',
+  '',
+  '• A standing corp-dev team — $500,000 to $1,500,000 a year all-in, attached to an activity that only happens occasionally, and idle in between.',
+  '• An advisory firm — real capacity, brought to several clients at once.',
+  '• Doing it yourself — no fees, and no bandwidth, against someone who does this every week.',
+  '',
+  'smbX is a fourth: a corporate development function you engage for the deal.',
+  '',
+  '→ smbXCorpDev runs it end to end. Thesis, market sized from primary sources, off-market outreach, diligence, negotiation, close. Then it scales to zero.',
+  '',
+  '→ smbXCorpDev Premium carries the same team past signing into the first hundred days. A deal is not finished when it closes. It is finished when the thing you underwrote is actually running.',
+  '',
+  'One buyer per target. Never the sell side. Never two-sided. It is in the engagement letter.',
+  '',
+  'About 150 acquisitions behind it, and zero sell-side transactions. Ever.',
+  '',
+  'If you are buying in the lower middle market this year — are you resourcing it with a team, a firm, or your own evenings? Curious what people are actually doing. 👇',
+  '',
+  '#MergersAndAcquisitions #CorporateDevelopment #PrivateEquity #LowerMiddleMarket',
+].join('\n');
+
+export const deck = {
+  slug: 'smbx-corpdev-offering',
+  kicker: 'CORPORATE DEVELOPMENT',
+
+  /* Cover mode 1b — editorial. NOT 1a, and the reason is the spec's own rule:
+     "every hero number carries its comparison." 150 acquisitions has no
+     honest baseline to sit beside it, so the hero-figure mode is the wrong
+     one here and COVER-CTA-SPEC.md §7 names 1b as the documented fallback.
+     The three figures move off the hero and onto the ruled row, where they
+     support the claim instead of competing with it. */
+  cover: {
+    style: '1b',
+    claim: 'Buying a business is hard work. We make it easier.',
+    promise: 'Whether it’s your 1st or your 100th acquisition, we run the process for you — thesis, sourcing, diligence, close.',
+    figures: [
+      { value: '150', label: 'Acquisitions' },
+      { value: '$5B+', label: 'Enterprise value added' },
+      { value: '0', label: 'Sell-side deals. Ever.' },
+    ],
+    /* No cover image. Spec option 1a: the portrait is the 92px identity disc
+       in the bottom strip, not a competing element in the hero. The bottom
+       BAND would need a landscape frame, and neither founder photograph is
+       one — see the note in house/deck.ts. */
+  },
+
+  pages: [
+    {
+      kind: 'statement',
+      tag: 'THE PROBLEM',
+      /* THE FIGURE IS EXACT AND REGISTERED. `PRACTICE_RECORD.md` §What a
+         standing corp-dev function costs — Paul, 2026-08-06, from practical
+         experience. Published as a RANGE; the midpoint is not a figure anyone
+         stated. This replaces "a year and a million dollars", which shipped
+         2026-08-06 registered nowhere and invisible to verify-spec because the
+         extractor required a digit.
+
+         "A year to hire and ramp" was CUT, not lost. Same class of claim —
+         asserted, unsourced, no digit — and a per-year run rate says nothing
+         about time to first deal. It goes back the moment Paul sources it. */
+      head: 'Building corp dev in-house runs **$500,000 to $1,500,000 a year.**',
+      body: 'Most buyers do not have a corporate development function. Standing one up is the expensive way to find that out.',
+      bullets: [
+        '**All-in, not just salary** — and it is a fixed cost attached to an activity that only happens occasionally.',
+        '**It does not scale down between deals.** The function is idle and the cost is not.',
+        '**Most banks are built for the sell side.** A buy-side search is a different job.',
+      ],
+      source: 'Targets under $250M revenue. Buy-side only — THE LINE, smbX practice perimeter.',
+    },
+    {
+      kind: 'statement',
+      tag: 'THE ENGAGEMENT',
+      head: 'smbXCorpDev',
+      body: 'Thesis to close. The whole buy-side function, run for you.',
+      bulletsFrom: 1,
+      bullets: [
+        '**Thesis** — what to buy, and whether it is buyable today.',
+        '**Sourcing** — the owners who are not looking to sell, reached under your name.',
+        /* VALUATION, not evaluation. Paul, 2026-08-13: "as in how much a
+           business is worth. My ICP will catch this." Shipped as "Evaluation"
+           and corrected here at the source, because this spec is what the
+           carousel, the pricing variant and the motion piece all restate — the
+           motion piece was faithfully saying the wrong word BECAUSE the
+           content law held it to this line. */
+        '**Valuation** — financials rebuilt, every adjustment tested, surprises found early.',
+        '**Structure & offer** — terms a lender will back. We write it and we negotiate it.',
+        '**Diligence & close** — where deals come apart. Every thread held to signing.',
+      ],
+      source: 'One buyer per target. Never the sell side — it is in the engagement letter.',
+    },
+    {
+      kind: 'statement',
+      tag: 'THE UPGRADE',
+      head: 'smbXCorpDev Premium',
+      body: 'Everything above. Then the part most advisors skip.',
+      bulletsFrom: 6,
+      bullets: [
+        '**Integration** — the first hundred days, planned before close. You keep the people and the customers you just paid for.',
+        '**Value creation** — we stay past day 100: the thesis tracked, the levers pulled, the add-ons sourced.',
+      ],
+      source: 'Premium is the same team staying in the deal after the wire clears.',
+    },
+  ],
+
+  /* Closer 2a — the offer ladder. The two engagements are a ruled CHOICE and
+     the action is a filled bar, because the old close buried "Book a call at
+     smbx.ai" as the last clause of the last sentence. */
+  closer: {
+    tag: 'FOR THE ACQUIRER',
+    head: 'Pick the engagement. We’ll bring the function.',
+    rows: [
+      { name: 'smbXCorpDev', note: 'Thesis to close.' },
+      { name: 'smbXCorpDev Premium', note: 'Stays through the first hundred days and beyond.' },
+    ],
+    line: 'One senior operator, on your side of the table.',
+    action: 'Book a call — smbx.ai',
+    proof: '150 acquisitions. Zero sell-side deals. Ever.',
+  },
+
+  caption: CAPTION,
+};

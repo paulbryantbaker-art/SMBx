@@ -1,0 +1,76 @@
+SMBX CORP-DEV FILM — CUE SHEET FOR SCORING
+29.200s · 1752 frames · 60fps · identical in 1:1, 4:5 and 16:9 · ALL CUTS SILENT
+
+THE TEMPO THAT FITS THE PICTURE
+  125.902 BPM   ·   bar = 1906.25 ms   ·   beat = 476.56 ms
+  The ring closes at 18.915s and the mark lands at 26.540s — 7.625s apart.
+  Four bars fits that gap EXACTLY, so at this tempo both of the picture's
+  biggest moments sit on bar lines. Anchor your grid on 18.915s.
+
+  Bar lines, counted out from the drop:
+    bar  -9     1.759s   00:00:01:46
+    bar  -8     3.665s   00:00:03:40
+    bar  -7     5.571s   00:00:05:34
+    bar  -6     7.478s   00:00:07:29
+    bar  -5     9.384s   00:00:09:23
+    bar  -4    11.290s   00:00:11:17
+    bar  -3    13.196s   00:00:13:12
+    bar  -2    15.102s   00:00:15:06
+    bar  -1    17.009s   00:00:17:01
+    bar  +0    18.915s   00:00:18:55
+    bar  +1    20.821s   00:00:20:49
+    bar  +2    22.727s   00:00:22:44
+
+THE THREE THAT MATTER
+    0.577s  ★ THE LANDING     the X hits its seat. Your first hit goes here.
+   18.915s  ★ RING CLOSES     the loop completes. Drop point.
+   26.540s  ★ THE MARK        the logo. Final drop — 2.66s of tail to the end.
+
+EVERYTHING ELSE
+    0.017s  00:00:00:01  X thrown in
+    0.577s  00:00:00:35  ★ LANDING — the X hits
+    0.577s  00:00:00:35  light flash
+    0.957s  00:00:00:57  wordmark glyph 1
+    1.041s  00:00:01:02  wordmark glyph 2
+    1.125s  00:00:01:08  wordmark glyph 3
+    1.209s  00:00:01:13  wordmark glyph 4
+    1.293s  00:00:01:18  wordmark glyph 5
+    1.377s  00:00:01:23  wordmark glyph 6
+    2.177s  00:00:02:11  lockup glows
+    2.717s  00:00:02:43  ident recedes
+    3.687s  00:00:03:41  beat 0
+    5.885s  00:00:05:53  beat 1
+    8.279s  00:00:08:17  beat 2
+   10.771s  00:00:10:46  beat 3
+   13.655s  00:00:13:39  beat 4
+   16.949s  00:00:16:57  loop starts assembling
+   17.883s  00:00:17:53  ring arc sets off
+   17.883s  00:00:17:53  station 0
+   18.055s  00:00:18:03  station 1
+   18.227s  00:00:18:14  station 2
+   18.399s  00:00:18:24  station 3
+   18.571s  00:00:18:34  station 4
+   18.743s  00:00:18:45  station 5
+   18.915s  00:00:18:55  ★ RING CLOSES — drop point
+   19.155s  00:00:19:09  light flash
+   19.875s  00:00:19:52  value line 1
+   20.105s  00:00:20:06  value line 2
+   21.725s  00:00:21:44  loop out
+   22.745s  00:00:22:45  catch phrase starts typing
+   26.540s  00:00:26:32  ★ THE MARK — final drop
+   27.360s  00:00:27:22  mark breathes
+   28.280s  00:00:28:17  mark breathes
+   29.180s  00:00:29:11  end of picture
+
+NOTES
+  · Not estimates. The film renders on a frozen clock, so every number is
+    the exact millisecond of the frame carrying that event, identical on
+    every re-render.
+  · Times shifted ~100ms earlier from the previous sheet: "Evaluation"
+    became "Valuation", one character shorter, so that beat types and
+    un-types faster and everything after it moves up. The TEMPO is
+    unchanged — the drop-to-mark gap is the same, so 125.902 BPM still
+    puts both on bar lines. Only the absolute times moved.
+  · Keystrokes (66) and pill appearances (15) are omitted; they are in
+    cues-wide.json if you want them.
+  · Every delivered cut has NO AUDIO STREAM.
