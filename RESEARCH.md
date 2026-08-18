@@ -230,6 +230,30 @@ looks like here · where the openings are · what would make us walk*.
   the edition the state is on). Recurring revenue a **code requires** is a
   different asset from recurring revenue a customer chooses.
 
+### Sizing cross-checks — before a figure enters the master
+
+**Added 2026-08-17.** Traceability is not sizing discipline. `audit.mts` proves a
+number appears in a source; it cannot tell you it is the wrong number for the
+market you actually defined. These four run here, at Pass 1, before any size
+figure is written down.
+
+- **Substitution test — define the market before sizing it.** One sentence: what
+  would a buyer use if this category did not exist? That sentence anchors every
+  figure that follows, and it kills the inflated-TAM problem at the definition
+  stage instead of at review.
+- **Top-down and bottom-up, within 3×.** Every market size gets both builds —
+  top-down from a named, attributable source; bottom-up from establishment count
+  × realistic spend. Divergence beyond 3× means the definition or an assumption
+  is wrong. Investigate it before the figure enters the master, and never split
+  the difference: an averaged figure is an invented one, and it audits green
+  because both endpoints are cited.
+- **Growth ceiling check.** Project any claimed growth rate five years forward.
+  If it implies penetration above 30–40% of the serviceable market, the claim
+  needs market expansion to hold — a different risk profile than the one the
+  figure implies. Say so in the master.
+- **Base-rate test.** A projected rate materially above the historical rate
+  requires a named structural change. No name, no credit.
+
 ### Pass 1b — How the market PERFORMED, by segment, over time (3–4 runs)
 
 **Added 2026-08-12.** Paul: *"how come in none of these reports do we get any

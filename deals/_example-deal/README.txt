@@ -1,25 +1,24 @@
-AN ENGAGEMENT — one client mandate.
+A DEAL — one transaction.
 
-thesis-<market>.md   the position held for this client, one per market they are
-                     looking at. The mandate block in it comes from THE CLIENT,
-                     asked in conversation — PLAYBOOK.md section 4 has the
-                     interview. Leave a line blank rather than guessing; a blank
-                     is visible and a guess is not.
-documents/           what the seller sent (financials, CIM, contracts)
-analysis/            what we produced (QofE read, model output, memos)
-notes.md             the running record
+documents/   what the seller sent (financials, CIM, contracts)
+analysis/    what we produced (QofE read, model output, memos)
+notes.md     the running record
 
-Scaffold the thesis:
-  npx tsx <repo>/scripts/studio/thesis.mts new <market> --client <engagement>
-  npx tsx <repo>/scripts/studio/thesis.mts list      (standing, per thesis)
-  npx tsx <repo>/scripts/studio/thesis.mts register  (rewrite THESES.md)
+MODEL WITH THE CLI, never by hand — house/deal.ts is the same arithmetic
+the app runs, and a test fails if the two ever disagree. Working a return
+out in a scratch file is how a second answer gets born.
 
-The buy-box comes AFTER the thesis, never before — screen.mts init refuses to
-seed one for a market with no thesis. "What we would buy" in the thesis is the
-buy-box in prose; screen.md is a transcription of it, not a new decision.
+  npx tsx <repo>/scripts/studio/deal.mts new <engagement> "<target>"
+  npx tsx <repo>/scripts/studio/deal.mts run analysis/<target>.deal.mts
+  npx tsx <repo>/scripts/studio/deal.mts list
 
-CONFIDENTIAL. Nothing here is a source for a master or for public collateral.
-A mandate figure never reaches a posted document. audit.mts cannot catch that —
-it checks whether a figure traces, not where it came from. See THE LINE.
+The .deal.mts spec is the artifact you maintain; <target>-model.md is
+output and the next run overwrites it. Money in CENTS, rates as DECIMALS.
 
-Buy-side only. No unlicensed opinions — name the specialist to engage instead.
+Document specs — model, memo, diligence plan, term framework — are in
+PLAYBOOK.md section 5. Deal documents render to decks/, never collateral/:
+collateral is publishable anywhere, and these name a live target.
+
+THE LINE applies: buy-side only, no unlicensed opinions — coordinate the
+specialist instead. Tax goes to the CPA (deal.mts carries no tax surface
+on purpose); clause language goes to counsel. See THE_LINE_POLICY.md.

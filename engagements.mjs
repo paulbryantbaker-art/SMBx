@@ -25,22 +25,8 @@
  *   engagements.mjs board                       rewrite ENGAGEMENTS.md
  *   engagements.mjs check [--days N]            exit 1 if anything has stalled
  *
- * Layout:  deals/<engagement>/engagement.md
- *          plus documents/ and analysis/ beside it.
- *
- * IT SCANS deals/, NOT clients/ (Paul, 2026-07-31). This was a real decision,
- * not an accident of naming. `thesis.mts` and `screen.mts` both scan `deals/`
- * for a client's thesis, one level deep. Put the engagement folder anywhere
- * else and `thesis.mts check` prints a clean board while reading an empty
- * directory — a false green light, which this workspace treats as worse than
- * no check at all. If the layout ever moves, those two scripts move with it in
- * the same commit.
- *
- * `clients/` is a different thing entirely: `clients/register.csv` is the
- * PROSPECT board — firms we would like to work for, none of whom have hired
- * us. Hunt A in RESEARCH.md, scored by `leads.mts`. A firm crosses from there
- * to here when there is an engagement, and that is the only relationship
- * between the two folders.
+ * Layout:  clients/<client>/<engagement>/engagement.md
+ *          plus documents/ and analysis/ beside it, same shape as deals/.
  *
  * THE LINE still governs what these stages can mean. We analyse, model, draft
  * and coordinate; the CLIENT decides, signs, and carries the deal. A stage
@@ -50,7 +36,7 @@ import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, statSy
 import path from 'node:path';
 
 const WS = process.cwd();
-const ROOT = path.join(WS, 'deals');
+const ROOT = path.join(WS, 'clients');
 
 /* ── the stage ladder ──────────────────────────────────────────────────────
    Ordered, so the board can sort by how far along something is. Edit this
@@ -115,16 +101,16 @@ function listDirs(dir) {
 
 function load() {
   const out = [];
-  for (const eng of listDirs(ROOT)) {
-    {
-      const file = path.join(ROOT, eng, 'engagement.md');
+  for (const client of listDirs(ROOT)) {
+    for (const eng of listDirs(path.join(ROOT, client))) {
+      const file = path.join(ROOT, client, eng, 'engagement.md');
       if (!existsSync(file)) continue;
       const { fm, body } = parse(file);
       const stage = (fm.stage || 'prospect').toLowerCase();
       out.push({
         file,
-        rel: eng,
-        client: fm.client || eng,
+        rel: `${client}/${eng}`,
+        client: fm.client || client,
         name: fm.engagement || eng,
         stage,
         stageIndex: STAGES.indexOf(stage),
@@ -156,26 +142,12 @@ const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g
 
 function cmdNew(clientName, engName) {
   if (!clientName || !engName) {
-    console.error('Usage: engagements.mjs new "<client>" "<engagement>" [--folder <name>]');
+    console.error('Usage: engagements.mjs new "<client>" "<engagement>"');
     process.exit(1);
   }
-  /* The folder is named for the CLIENT, one level under deals/, because that is
-     the name `thesis.mts new <market> --client <name>` writes against. Keeping
-     the two in agreement is the whole point — a mismatch here means a thesis
-     lands in a folder the board never shows. Pass --folder for a second,
-     genuinely separate mandate from the same client. */
-  const override = process.argv.includes('--folder')
-    ? process.argv[process.argv.indexOf('--folder') + 1] : null;
-  const dir = path.join(ROOT, slug(override || clientName));
+  const dir = path.join(ROOT, slug(clientName), slug(engName));
   const file = path.join(dir, 'engagement.md');
-  if (existsSync(file)) {
-    console.error(`Already exists: ${path.relative(WS, file)}`);
-    console.error(`For a second mandate from the same client:  --folder "<name>"`);
-    process.exit(1);
-  }
-  if (existsSync(dir)) {
-    console.log(`  (adopting the existing folder ${path.relative(WS, dir)} — nothing in it is touched)`);
-  }
+  if (existsSync(file)) { console.error(`Already exists: ${path.relative(WS, file)}`); process.exit(1); }
   for (const sub of ['', 'documents', 'analysis']) mkdirSync(path.join(dir, sub), { recursive: true });
 
   const fm = {
@@ -208,16 +180,7 @@ function cmdNew(clientName, engName) {
 
 ## Documents
 <!-- documents/ is what the client and counterparties sent us.
-     analysis/ is what we produced — including the tiered target board,
-     target-map-<market>.md. Both are confidential: never a source for a
-     market master, and if either renders it renders to markets/<m>/decks/,
-     never collateral/. See THE LINE in CLAUDE.md.
-
-     The thesis held for this client sits beside this file as
-     thesis-<market>.md — scaffold it with:
-       npx tsx $REPO/scripts/studio/thesis.mts new <market> --client ${path.basename(dir)}
-     PLAYBOOK.md section 4 carries the mandate interview. Ask it; do not
-     infer a hold period from the research. -->
+     analysis/ is what we produced. Same split as deals/. -->
 `;
   write(file, fm, body);
   console.log(`✓ ${path.relative(WS, file)}`);
@@ -296,7 +259,7 @@ function cmdBoard() {
     out.push('| --- | --- | --- | ---: | --- |');
     for (const e of live) {
       const d = days(e.moved);
-      out.push(`| [${e.client} — ${e.name}](deals/${e.rel}/engagement.md) | ${e.stage} | ${e.waiting} | ${d === null ? '?' : d + 'd'} | ${e.next || '—'} |`);
+      out.push(`| [${e.client} — ${e.name}](clients/${e.rel}/engagement.md) | ${e.stage} | ${e.waiting} | ${d === null ? '?' : d + 'd'} | ${e.next || '—'} |`);
     }
     out.push('');
   }
@@ -369,8 +332,7 @@ switch (cmd) {
            (plus ${RESTING.join(', ')})
   waiting  ${WAITING.join(' · ')}
 
-Every engagement is a markdown file under deals/<engagement>/. (clients/ is
-something else: register.csv, the PROSPECT board — see leads.mts.)
+Every engagement is a markdown file under clients/<client>/<engagement>/.
 Edit them by hand whenever you like — this script only does the mechanical
 parts. Run it from the workspace root.`);
 }

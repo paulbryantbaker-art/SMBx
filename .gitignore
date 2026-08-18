@@ -63,3 +63,13 @@ collateral/**/*.png
 
 # Raw video footage — too large for GitHub, derived not source (2026-08-14)
 collateral/**/*.mov
+
+# Video renders. Regenerate from machine.html — see MACHINE.md.
+# A single file over 100MB permanently blocks pushing this repo to GitHub,
+# and committing it once is enough: deleting it later does not undo it.
+*.mov
+*.mp4
+*.m4v
+*.avi
+*.webm
+*.ProRes.*

@@ -197,10 +197,38 @@ PLAYBOOK.md          the SPEC for each client document — market map, who's who
                      assumes research/ is already populated.
 FORMATS.md           the collateral containers — which builder, which fields,
                      the exact image slot dimensions.
-DESIGN_LANGUAGE.md   the house LOOK — palette, type, and the dead systems named
+DESIGN.md            the house LOOK — palette, type, and the dead systems named
                      with their hexes. Canonical.
+COLLATERAL_STATE.md  WHICH RENDERERS ARE ACTUALLY ON CARTA, and what to do
+                     about the two that are not. DESIGN.md is the look and
+                     FORMATS.md is the container; neither said what the
+                     builders really do, and for a week DESIGN.md claimed
+                     all four were converted when two were not. Read this
+                     before you build collateral, not after it looks wrong.
+THE_LINE.md          the perimeter, and whose lane each question is in —
+                     tax, legal, real estate, valuation, securities,
+                     licensing, employment, insurance, QoE.
+WHERE.md             WHICH SYSTEM does a piece of work — this workspace or
+                     the app. Read it before starting anything you have not
+                     done here before. Generated from house/where.ts;
+                     where.json is the same data, machine-readable.
+                     **This workspace is now the INPUT LAYER** (Paul,
+                     2026-08-14): research, aggregation, deep search, data
+                     wrangling. Everything the practice PRODUCES or TRACKS —
+                     the deal, the CRM, the documents, the collateral — is
+                     the app. Three of those have not been switched on yet;
+                     WHERE.md says which, and says to keep doing them here
+                     Superseded 2026-08-15 by THE_IOI_SEAM.md: the seam is
+                     the IoI, and collateral + corp-dev documents came back
+                     to the studio. WHERE.md is regenerated to match.
 REPORT_TEMPLATE.md   the cover block, the body rules, the standing appendix.
 CLOUD_BOOTSTRAP.md   only if you are a cloud session and a builder will not run.
+
+definitive/          HOW A DEAL RUNS — the DEFINITIVE layer, lifted out of the
+                     app. Start at definitive/DEFINITIVE.md before ANY work in
+                     deals/. The other six are reference, opened when the deal
+                     trips into them: GATES · MODELS · VALUATION · TAX · LEGAL ·
+                     REAL_ESTATE.
 ```
 
 **Route by what you were asked for:**
@@ -212,8 +240,17 @@ CLOUD_BOOTSTRAP.md   only if you are a cloud session and a builder will not run.
 | build a **target list** of companies for a client to buy | **RESEARCH.md § C** |
 | fold new research into a master | job 1 below |
 | write a market map, who's who, target map or thesis | **PLAYBOOK.md** |
-| build a carousel, one-pager or report | **FORMATS.md**, then **DESIGN_LANGUAGE.md** |
-| anything, and you are about to hand-write HTML or CSS | **DESIGN_LANGUAGE.md** — stop, you are drifting |
+| build a carousel, one-pager or report | **COLLATERAL_STATE.md**, then **FORMATS.md**, then **DESIGN.md** |
+| a rendered artifact came out in the wrong colours | **COLLATERAL_STATE.md** — convert the BUILDER, never the document |
+| anything, and you are about to hand-write HTML or CSS | **DESIGN.md** — stop, you are drifting |
+| make something **for a named client** | **COLLATERAL_STATE.md §5** — `for:` on the cover, and it files to `decks/` |
+| **run a deal** — underwrite a target, read a seller's numbers, structure, diligence, an IOI or LOI | **definitive/DEFINITIVE.md** |
+| a deal question about **tax, legal, or property** | **definitive/GATES.md**, then the file it routes you to |
+| model a deal, write a memo, plan diligence, frame terms | **PLAYBOOK.md §5** |
+| anything client-facing at all | **THE_LINE.md** |
+| **anything you have not done here before** | **WHERE.md** — is this even ours? |
+| model a deal, work the CRM, advance a gate, run DEFINITIVE | **the APP** — see WHERE.md |
+| a question that turned tax, legal, real estate, valuation, licensing or insurance | **THE_LINE.md §3** — find the lane before you answer |
 
 ## The three hunts are not interchangeable (2026-07-31)
 
@@ -268,6 +305,43 @@ mandate is the half of it the research cannot supply. PLAYBOOK.md section 4
 carries the interview.
 
 ## The jobs
+
+> **READ THIS FIRST — THE SEAM IS THE IoI (2026-08-15).** `THE_IOI_SEAM.md` is
+> the governing document and `WHERE.md` here implements it.
+>
+> **Market-shaped work is yours. Deal-shaped work is the app's.**
+>
+> Market-shaped is one-to-many and speculative, with no counterparty yet:
+> research, masters, verification, screens, buy-boxes, the corp-dev documents,
+> collateral, and the preliminary math that decides whether a candidate
+> deserves an IoI. Deal-shaped is one-to-one and counterparty-confidential:
+> deal math on real financials, documents, the data room.
+>
+> It splits on **audience** — the same law that already separates
+> `collateral/` from `decks/` in this workspace.
+>
+> | Job | Now |
+> |---|---|
+> | 0 · Start a market | **yours** |
+> | 1 · Fold research into the master | **yours** |
+> | 2 · Verify the master | **yours** |
+> | 3 · Derive a document | **yours** — market map, who's who, target map, thesis. All four. |
+> | 4 · Produce collateral | **yours** — built here, rendered by the engine on the Mac. |
+> | 5 · Deal analysis | **SPLIT AT THE IoI.** Screening math to decide whether a candidate earns an IoI is yours. From the IoI onward the model, the documents and the data room are the app's, beside the financials they are priced from. |
+> | 6 · Find clients | **yours** — the research and the register. The pipeline is the app's CRM; push with `push-crm.mts`. |
+> | 7 · Track the client work | **app.** `engagements.mjs` still runs as the pre-IoI staging record. |
+>
+> **The one asymmetry: CRM starts before the IoI.** Outreach is app-side from
+> the first touch, so a candidate has a CRM row while its analysis is still in
+> `markets/<m>/screen/`. The two meet at the promotion.
+>
+> **After the promotion, `deals/<engagement>/` here goes read-only** — stop
+> writing, keep reading, drop nothing. Nothing counterparty-confidential comes
+> back across.
+>
+> *(This replaces a 2026-08-14 note that sent collateral and the corp-dev
+> documents to the app. That was a different axis — raw input versus practice
+> output — and it put both in the wrong place. Audience is the axis that holds.)*
 
 ### 0. Start a market
 
@@ -368,12 +442,12 @@ npx tsx $REPO/scripts/studio/audit.mts markets/<m>/documents/thesis.md --against
 
 ### 4. Produce collateral
 
-**Read `FORMATS.md` and `DESIGN_LANGUAGE.md` first, every time.** They are two
+**Read `FORMATS.md` and `DESIGN.md` first, every time.** They are two
 halves of one spec and neither works alone:
 
 - **`FORMATS.md` is the container** — which builder, the exact field grammar,
   the image slot dimensions and ratios, the cover budget, the imagery brief.
-- **`DESIGN_LANGUAGE.md` is the look** — palette, type, and the dead systems
+- **`DESIGN.md` is the look** — palette, type, and the dead systems
   named with their hexes. It is canonical: "if a doc, screenshot, or memory
   disagrees with this file, this file wins."
 
@@ -448,11 +522,96 @@ filename, and **always pass `--out markets/<m>/collateral/<slug>/$(date +%F)`**
 filing law and the output law above. The bare default is a flat `./collateral`
 at the root: it overwrites the last build AND files it outside its market.
 
-### 5. Deal analysis
+### 5. Deal analysis — everything after the LOI
+
+**Read `definitive/DEFINITIVE.md` first.** The DEFINITIVE layer — the
+classification cascade, the gates, the model catalog, and the tax, legal and
+real-property engines — moved out of the app and onto this disk on 2026-08-14
+(Paul: *"Cowork needs the entire definitive markup to run the deal"*). It is the
+method; what follows is only the filing.
 
 Read what's in `deals/<d>/documents/`, write to `analysis/`. Same citation
 discipline: a number in the analysis comes from a document in `documents/`, or
 it says where it came from.
+
+**Two files govern this job and they do different things.**
+`definitive/DEFINITIVE.md` is the METHOD — how a deal runs, start to finish.
+`PLAYBOOK.md` §5 is the SPEC — what the model, the deal memo, the diligence plan
+and the term framework each contain, section by section. Read the method first;
+reach for the spec when you are writing the document.
+
+The shape of the job, in one pass:
+
+1. **Classify** — journey, sub-journey, league, deal type, structure, industry,
+   jurisdiction. Seven steps, in order, `DEFINITIVE.md`.
+2. **Write the deal file** — `deals/<d>/deal-<target>.md`, template in
+   `DEFINITIVE.md`. Every figure carries `explicit` / `derived` / `inferred`.
+3. **Walk the gates** — `GATES.md`. Write down which ones the deal trips. A gate
+   nobody wrote down is a gate nobody closed.
+4. **Compute what is computable** — `VALUATION.md` for the bridge and the band,
+   `MODELS.md` for what a slot computes. **A range, never a point.**
+5. **Open the engine the deal trips into** — `TAX.md`, `LEGAL.md`,
+   `REAL_ESTATE.md`. Not front to back; on demand.
+6. **Name every gap and its owner**, and every specialist handoff with the
+   actual question written out.
+
+**Three things that are different here from every other job in this file.**
+
+- **The numbers came from a counterparty with an interest in them.** In a market
+  master a figure needs a source. In a deal file it needs a source *and* a
+  posture — a seller's adjusted EBITDA and a defended one routinely differ by
+  15–30%, and that gap is the work.
+- **The engagement folder is never a source.** Nothing from `deals/` enters a
+  master, a market document, or `collateral/`. `audit.mts` cannot catch a breach
+  here — it checks whether a figure traces, not where it came from.
+- **Underwriting a named target for the client buying it is the work; signing a
+  number is not.** No appraisal, no fairness opinion, no ESOP valuation, and no
+  point estimate that leaves the engagement folder. `DEFINITIVE.md` states the
+  boundary precisely.
+
+**The document specs are `PLAYBOOK.md` §5** — the model, the deal memo, the
+diligence plan and the term framework, section by section, with the edges of
+THE LINE that this phase tests hardest.
+
+**Model with the CLI. Never by hand.**
+
+```
+npx tsx $REPO/scripts/studio/deal.mts new <engagement> "<target>"
+npx tsx $REPO/scripts/studio/deal.mts run deals/<d>/analysis/<t>.deal.mts
+npx tsx $REPO/scripts/studio/deal.mts list          # which models are stale
+```
+
+`house/deal.ts` is the same arithmetic the app's canvas runs, and a test
+imports both engines and fails if they ever disagree. Computing a return in a
+scratch file instead is how a second answer gets born — and two documents
+disagreeing about what a deal is worth is the worst failure available here,
+because both look authoritative and one of them reaches the client.
+
+Four things to hold on to, each of which has a way of going wrong quietly:
+
+- **The `.deal.mts` spec is the artifact; `-model.md` is output.** Hand-editing
+  the model gets your edit overwritten on the next run. Change the spec,
+  re-run, commit the spec — its `git log` is the negotiation.
+- **`earningsSource` is printed verbatim and read by the audit.** Name the
+  document and date it. Every figure in the model inherits that provenance, so
+  "seller's P&L" makes the whole model uncitable.
+- **League multiples are OURS, not comps.** The model labels them a house
+  assumption in place. Cite a real comparable before a band informs a price you
+  recommend.
+- **Read the model's own warnings before repeating a number.** It refuses to
+  print an IRR that did not converge, and it flags that the straight-line debt
+  paydown it inherits flatters exit equity on a long amortization. A return
+  that looks too good usually has one of those notes sitting next to it.
+
+**No tax numbers.** Asset vs stock, §338(h)(10), installment treatment, QSBS —
+jurisdictional, material, and the CPA's. `house/deal.ts` carries no tax surface
+on purpose, and a test keeps it that way. Model it both ways if you must, label
+both *pending confirmation*, and cite the CPA when the answer lands.
+
+**Deal documents render to `deals/<d>/decks/<slug>/$(date +%F)`, never to
+`collateral/`.** Collateral is publishable anywhere; a deal memo names a live
+target and a client's intentions. The filing law and the output law both apply.
+
 
 ### 6. Find clients — the prospect board (2026-07-31)
 
@@ -702,9 +861,9 @@ would not make it truer.
 for "just this one PDF" produces something off-brand that looks close enough to
 ship, and it happened on this workspace: a 52-page report went out in
 terra-orange and Georgia because a session could not find the template and
-wrote its own instead of looking harder. The CARTA palette (2026-08-08) is bone
-`#FCFAF6`, ink `#16181A`, Deal Green `#0A7A58`, mint `#A8F0CE` on dark, and a
-FLAT band `#131512`, in Source Serif 4 / Schibsted Grotesk / IBM Plex Mono.
+wrote its own instead of looking harder. The CARTA palette is white `#FFFFFF`,
+ink `#16181A`, Deal Green `#0A7A58`, mint `#A8F0CE` on dark, and a FLAT band
+`#181818`, in Source Serif 4 / Schibsted Grotesk / IBM Plex Mono.
 Radius 0 except buttons and inputs at 10px; framed things wear four ink corner
 handles. If the output does not look like that, it did not come from a builder.
 
@@ -840,7 +999,17 @@ a manual step and it is on the person changing the master.
 
 ## THE LINE — the practice perimeter
 
-Full text in `THE_LINE_POLICY.md` in the repo. The parts that bind daily work:
+**Read `THE_LINE.md` in this workspace.** It carries the perimeter verbatim and
+— the part that takes real space — the **referral register**: which question has
+crossed into which specialist's lane, who owns it, and what to hand them. Tax,
+legal, the five separate real-estate lanes, business valuation, securities,
+trade licensing, employment, insurance and QoE.
+
+*(`THE_LINE_POLICY.md` v2.0 in the repo is the governing text and wins on any
+conflict. It does not travel here, which is why `THE_LINE.md` exists — the same
+reason `DESIGN.md` exists.)*
+
+The parts that bind daily work:
 
 - **Buy-side only.** Never sell-side, never two-sided, never a neutral
   intermediary. One buyer per target.
@@ -851,6 +1020,22 @@ Full text in `THE_LINE_POLICY.md` in the repo. The parts that bind daily work:
   move, not a hedge.
 - **No fee talk** in any client-facing document.
 - Targets under $250M revenue.
+- **Make any accusation implausible.** Operate conservatively inside the
+  perimeter, not hard against it. When something is arguable the test is not
+  "is this defensible" but "could someone tell a bad story about this."
+
+**A referral is a deliverable, not a disclaimer.** "Consult appropriate
+professionals" is worth nothing. Naming the lane *and the exact question* —
+"whether §338(h)(10) is available given the entity form, before we counter" —
+is the most useful sentence in the document, and it is what the expertise is
+for. `THE_LINE.md` §4 has the pattern.
+
+**The tell is a conclusion where a question belongs.** "The tax treatment will
+be…", "this clause means…", "the property is worth…", "the licence will
+transfer" — each is over the line. `THE_LINE.md` §6 is the full table. When it
+is genuinely unclear, write the finding, name the lane you think it is in, and
+flag it for Paul rather than deciding: an unnecessary referral costs a
+sentence, the other error costs the perimeter.
 
 **Client confidentiality (2026-07-29).** `deals/<engagement>/` is a client
 mandate. It is confidential in both directions and the boundary is not soft:
@@ -883,9 +1068,20 @@ The track record is **employment** deals, not smbX engagements.
 - Always "**selected transactions**".
 - The attribution line appears **wherever the deal names appear** — never as a
   footnote.
-- Employers are **never named**: "a global investment bank", "a world-class
-  PE-backed aggregator". The total is **150 acquisitions**, no "+".
+- **Employers ARE named** (Paul, 2026-08-07) — **Wrench Group · JPMorgan Chase ·
+  Deloitte Consulting**. This REVERSED the 2026-07-18 anonymization ("a global
+  investment bank", "a world-class PE-backed aggregator"), which is history:
+  do not reinstate it, and **do not "correct" a named employer back into a
+  euphemism**. The boundary that replaced it is résumé scope — what may appear
+  publicly is what is already on Paul's résumé, and he curated that list
+  himself. Never add a deal name from a deck or a memo.
 - Never "our clients" for an employment-era transaction.
+- JPMorgan is **integration** (Director of Acquisition Integration), not
+  origination.
+- Sanctioned stat set: **150+ acquisitions & integrations · $5B+ enterprise
+  value added · ~$21B transactions touched · $2B synergies captured · 0
+  sell-side engagements, ever.** The earlier no-plus rule ("150", no "+") is
+  superseded — keep the "+".
 
 ## Imagery
 

@@ -2,47 +2,53 @@
 
 Everything runs on this computer. No SMBX app, no app API key.
 
-Organised **by market first, then by category.** Every market folder has the
-same shape, so you always know where a thing is.
-
 ```
-assets/       THE HOUSE LIBRARY — brand images shared by every market
-              brand/ · trades/ · mep/ · concept/ · INDEX.md · PROMPTS.md
-
-markets/<market>/
-    research/     the reads you gathered — Claude, Gemini, PDFs, pasted text
-    master.md     the one synthesized document, built from all of research/
-    versions/     master-v1.md, master-v2.md … the history
-    documents/    what you derive: market-map, whos-who, thesis, report source
-    screen/       the target board — buy-box, consolidators, candidates.csv
-    specs/        the build specs — <name>.deck.mts, <name>.post.mts
-    media/        the pictures used on THIS market's collateral
-    collateral/<slug>/<date>/   finished work that can be posted publicly
-    decks/<slug>/<date>/        client-direct material — never posted
-
-deals/<deal>/     one folder per deal — what they sent, what we produced
+media/        per-slot artwork (Gemini exports, photos)
+assets/       recurring images (headshots, brand shots)
+collateral/   rendered outputs — post the .pdf, paste the -caption.txt
+decks/        your deck specs (start from example.deck.mts)
+clients/      one folder per client — engagements, their stage, and the log
+markets/      one folder per market — research in, master out, documents derived
+deals/        one folder per deal — what they sent, what we produced
+definitive/   the deal method — gates, models, tax, legal, real estate
 posting-plan.md   what to build next
-THESES.md         every position we hold and what it rests on (generated)
+THESES.md     every position we hold and what it rests on (generated)
 ```
 
-**collateral vs decks** is about audience, not file type. `collateral/` is
-posting content, anywhere it can be posted — the carousel PDF, its page JPGs
-and its caption stay together. `decks/` is client-specific material cut for a
-named acquirer. Not sure which? Ask before filing.
+## The rule files — read the right one first
+```
+CLAUDE.md     the laws + the four jobs. A session here loads this automatically.
+RESEARCH.md   HOW to gather a market: six passes, ~20 runs, several hours.
+              Start here when a market has no research/ yet.
+PLAYBOOK.md   WHAT each client document contains, section by section.
+              The spec, not the method — it assumes research/ is populated.
+FORMATS.md    collateral containers: which builder, which fields, slot sizes.
+DESIGN.md     the house look — palette, type, and the retired systems by hex.
+THE_LINE.md   the perimeter, and whose lane each question is in. Read it
+              before anything client-facing, and whenever a question turns
+              tax, legal, real estate, valuation, licensing or insurance.
+COLLATERAL_STATE.md
+              which renderers are on Carta and what to do about it. Read
+              before building collateral, not after it looks wrong.
+WHERE.md      WHICH SYSTEM owns a piece of work — here or the app.
+definitive/DEFINITIVE.md
+              HOW A DEAL RUNS. Read it before any work in deals/. The other
+              six files in that folder are reference, opened on demand.
+```
+
+## Research a market from scratch
+```
+# in a session opened on this folder:
+#   "Build the research for <trade> in <geography>. Read RESEARCH.md first."
+```
+It is resumable: read markets/<m>/research/_log.md and continue from the first
+row that is not `done`.
 
 ## Build a deck
-Run from this folder — that is what makes `./assets` resolve the house library.
-
 ```
-npx tsx <path-to-SMBx-repo>/scripts/studio/build-deck.mts \
-  markets/<m>/specs/<name>.deck.mts \
-  --media markets/<m>/media \
-  --out markets/<m>/collateral/<slug>/$(date +%F)
+npx tsx <path-to-SMBx-repo>/scripts/studio/build-deck.mts decks/<name>.deck.mts
 ```
-
-Images resolve `--media` → `./assets` → the repo. Output goes where `--out`
-says: always a dated folder inside the market, so a rebuild never overwrites
-the last one.
+Reads images from ./media + ./assets, writes to ./collateral.
 
 ## Track the theses
 ```

@@ -230,10 +230,39 @@ footer:   {Short Title} — {Assessment Type}
 eyebrow:  MARKET ASSESSMENT
 accent:   {substring of a ## heading} | band-{name}.jpg | 50% 50%
 stat:     {figure} | {label, ≤6 words}
+for:      {Client name}          ← CLIENT DOCUMENTS ONLY. Omit for public work.
 -->
 ```
 
 `accent:` and `stat:` repeat. Any other key is silently discarded.
+
+### 3.1a `for:` — the only thing a client document adds
+
+Paul, 2026-08-15: *"i want all decks, docs and collateral for a client to have
+the same look and feel as the branded smbx collateral — it will just have whose
+it's for on the cover too."*
+
+So there is **no client template**. A client deliverable is the house report
+with one extra line, and `for:` is that line: it renders as a plated
+`PREPARED FOR / {name}` block at the right-hand end of the cover's byline rule,
+so the cover reads *by … / for …* across one line. Omit the key and the block
+does not render at all — which is the published-collateral case, and the reason
+you cannot accidentally ship a public report with a client's name on it.
+
+**Three rules on what goes in it.**
+
+1. **A name, not a mandate.** THE LINE's engagement-confidentiality rule is not
+   suspended by the fact that the client is the reader: hold period, check size,
+   equity available and leverage tolerance never reach a page. Those would
+   audit perfectly clean — no figure in them is uncited — so nothing mechanical
+   catches it. This one is on the person writing.
+2. **`for:` makes the document client-direct, which changes where it files.**
+   It renders to `decks/`, never `collateral/`. See the filing law in
+   `CLAUDE.md`: collateral is publishable anywhere, and a document naming a
+   client is not.
+3. **It is on the cover, deliberately, and not in the running footer or as a
+   watermark.** A reader who opens the PDF at page 4 and forwards it should
+   still be able to see from the cover who commissioned it.
 
 ### 3.2 THE COVER BUDGET — and the rule that supersedes it
 
@@ -402,7 +431,7 @@ PROMPT
 A flat editorial illustration of a residential HVAC condenser unit beside a
 suburban house wall, drawn in clean geometric line work. Bright green (#0FA97C)
 for the main masses, deep green (#0A7A58) for shading only, near-black linework
-(#16181A), on a flat bone background (#FCFAF6). No amber, no gold, no brass, no
+(#16181A), on a flat white background (#FFFFFF). No amber, no gold, no brass, no
 warm accent of any kind. Subject centred with
 generous empty background to the left and right. Uniform flat background to all
 four edges. No text, no lettering, no people, no logos, no charts, no vignette,
@@ -412,7 +441,7 @@ no drop shadow, no edge fade. 9:16 portrait.
 **The prompt rules, every time.** Each exists because breaking it produced an
 unusable image:
 
-- **Palette, always named:** bone `#FCFAF6`, bright green `#0FA97C` for masses,
+- **Palette, always named:** white `#FFFFFF`, bright green `#0FA97C` for masses,
   Deal Green `#0A7A58` for shading, ink `#16181A` for linework — and say **no
   amber, no gold, no brass** out loud, because "sparingly" still gets you gold.
   (Carta, 2026-08-08 — amber, honey and the jade block are RETIRED, as is the
@@ -448,8 +477,8 @@ the only photos of him that exist.
 - **Never hand-roll a layout.** All three builders import `house/tokens.ts`;
   that shared import is the only reason the surfaces match. Output looking wrong
   means the spec is wrong.
-- **Palette** bone `#FCFAF6` · ink `#16181A` · Deal Green `#0A7A58` · mint
-  `#A8F0CE` on dark · the flat band `#131512`. Radius 0 except buttons and
+- **Palette** white `#FFFFFF` · ink `#16181A` · Deal Green `#0A7A58` · mint
+  `#A8F0CE` on dark · the flat band `#181818`. Radius 0 except buttons and
   inputs at 10px; framed things wear four ink corner handles. **Type** Source
   Serif 4 / Schibsted Grotesk / IBM Plex
   Mono. If the output is not that, it did not come from a builder. There is no
@@ -531,6 +560,26 @@ the writing sounds human.** It finds shorthand, filler and long sentences. It
 cannot find a sentence that is short, plain, jargon-free and still lifeless.
 Step 8 above is not decoration — read the copy aloud before it renders. That is
 still the actual test, and this only clears the floor beneath it.
+
+### Three structure tests — above the word level (2026-08-17)
+
+`voice-check.mts` works on words. These three work on the argument, and no
+script runs them — they are read-aloud tests, applied before a piece renders.
+Three tests, not new formats: the slot tables above still own layout.
+
+- **SCQA opener.** A report or market assessment opens situation →
+  complication → question, so the reader arrives at the document's governing
+  question feeling it is inevitable. If the executive summary opens with the
+  answer to a question the reader was never given, the opener failed.
+- **Spine test.** Read only the titles of a deck or carousel, top to bottom:
+  they must form the complete argument alone. A title that is a label
+  ("Market Overview") fails — rewrite it as the takeaway. This is the hook
+  law from the carousel table, applied to the whole run of pages.
+- **Approve-from-this-page test.** Any executive summary — report, one-pager,
+  memo — must let the reader make the decision from that page alone:
+  recommendation first and largest, then the two or three pillars, then the
+  explicit ask. If the reader must turn the page to know what is being asked
+  of them, the summary is a table of contents, not a summary.
 
 
 ---
