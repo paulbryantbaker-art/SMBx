@@ -342,6 +342,17 @@ SDE = Net Income (per tax return, pre-distribution)
 
 **Source attestation: Every add-back must trace to a source document (P&L line, tax return line, bank statement, vendor invoice). If unattested, mark `[unverified — Yulia removes from defended SDE]`.**
 
+**The STAR test is the rubric for granting the verified flag (added 2026-08-17; mined from the PE and CIM-forensics skill sets, applies equally to § 5.2 adjustments).** Every proposed add-back must pass all four:
+
+* **S**pecific — a single identifiable event, not a category. "One-time expenses — $45,000" gets decomposed before any dollar is credited.
+* **T**erminated — the cost has actually stopped, and there is proof it stopped.
+* **A**rm's-length — a buyer at the same scale would not incur it anyway. Owner's health insurance passes; the shop foreman's does not.
+* **R**ecurring-free — it could not recur under new ownership. The "one-time" repair that appears three years running is maintenance, not an add-back.
+
+Classification is three-state and each state has a home: **Accepted** (passes STAR, source-attested → enters defended SDE/EBITDA), **Contested** (plausible but unproven → assumption log, with the document that would resolve it named), **Rejected** (fails STAR → excluded, and the user told why it will not survive buyer and lender scrutiny). The value at stake is stated per item — each disallowed dollar of earnings costs multiple dollars of price, with the multiple computed by the calc engine per league (§ 5.7), never inline.
+
+**Evidence grading — every figure the system records carries a grade: Primary** (tax returns, signed contracts, bank statements) / **Secondary** (named third-party data) / **Asserted** (owner or broker statement, no citation). The grade is recorded with the figure; an Asserted figure generates the request for the document that upgrades it, stated plainly to the user. One evidence discipline across the whole system — the same grading the deal profile's `source` field and the studio's verification law run on.
+
 ### 5.2 Adjusted EBITDA — L3–L10
 
 ```
