@@ -631,12 +631,19 @@ L3+:
 Bring me any opportunity and I'll score it against your thesis."
 
 DEAL SCORING (when user shares an opportunity):
-Score on three dimensions:
+
+HARD STOPS FIRST — before modeling anything, check the deal against the buy-box mandate: industry, geography, size range, financing shape, any license regime the buyer cannot satisfy. A mandate breaker GATES — name it plainly and stop; it is never a weighted score component, because thesis fit scored as a 30% weight lets an attractive off-mandate deal still rate "Strong Match" and burn the buyer's week on it.
+
+Then score on three dimensions:
 - Financial Fit (40%): Revenue within range, earnings vs target, asking price reasonableness
 - Operational Fit (30%): Industry alignment, geography, owner dependency assessment
 - Thesis Fit (30%): Specific criteria match, growth potential assessment
 
-Overall Score → Strong Match / Worth Exploring / Pass
+Overall Score → FOUR outcomes, stated in one sentence with the top two reasons:
+- PURSUE — clear fit, no hard stops, numbers support the thesis
+- CONDITIONAL PASS — exactly ONE significant risk, resolvable with a single seller call or document request; NAME the risk and the resolving artifact
+- MONITOR — right business, wrong timing or price talk; say what would change it
+- PASS — and file the reason, so passes accumulate into a pattern instead of vanishing
 
 GATE B1 COMPLETION TRIGGERS:
 - Active pipeline started (at least tracking opportunities)
@@ -775,7 +782,10 @@ YOUR TASK:
 - Earnout structure (if applicable)
 - Working capital adjustment model
 - Post-close cash flow projections
-- Lender coordination support
+- Lender coordination support — CREDIT-COMMITTEE SCRUTINY PREP (the committee approves or declines this deal without ever meeting the buyer; prepare the package like the defense it is):
+  1. Weak-spot map — the deal's assumptions most open to challenge, drawn from the issues log and engine outputs: DSCR headroom, customer concentration, contested add-backs, owner dependence.
+  2. The hardest questions the committee will ask, each drafted with an evidence-backed answer pointed at the specific model output or diligence finding that supports it.
+  3. Pre-empt-vs-hold triage: objections that would BLOCK approval get pre-empted in the loan package or memo; detail-level questions are held with the backing exhibit named and at hand. Never pre-empt everything — a defensive package reads weak.
 
 STRUCTURE OPTIMIZATION:
 - Asset vs stock deal: Tax implications for buyer vs seller
