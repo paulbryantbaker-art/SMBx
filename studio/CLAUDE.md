@@ -22,8 +22,10 @@
 > missing or stale relative to the other — the failure the 2026-08-12 note
 > below was written about cannot recur. The old separate folder
 > (`~/Documents/smbx-studio`, remote `smbx-ai/smbx-studio`) is history: it was
-> brought in with `git subtree add` (its 21 commits are in this repo's log) and
-> the remote is archive-only. **Do not run against `~/Documents/smbx-studio`
+> brought in with `git subtree add` and squash-merged as PR #433 (its 21 commits
+> live on branch `claude/studio-into-repo`, kept for that reason, and in the
+> archived remote — `main` shows one commit for the move) and the remote is
+> archive-only. **Do not run against `~/Documents/smbx-studio`
 > or `SMBx-live/SMBx` — they are renamed `_old` and exist only for the
 > git-ignored renders they still hold.**
 >

@@ -13,6 +13,19 @@
  * Cowork plan and arrive by re-import, which can push a row forward but can
  * never un-post one.
  *
+ * ── CAMPAIGNS (2026-08-18) ─────────────────────────────────────────────
+ * The plan was remade the same day the first one shipped — Tue/Wed/Thu spine,
+ * P-1…P-8 + five Mandate editions, Aug 18 – Sep 16 — and this screen kept
+ * showing the calendar it retired, because the import was wired to ONE file
+ * and the week labels were typed in here. Now: `/api/post-queue/campaigns`
+ * lists every shipped campaign file (newest first); the calendar shows ONE
+ * campaign at a time (a chip per campaign, plus the standing queue); week
+ * labels and the strip come from the campaign file's own `weeks`; and Import
+ * loads the selected campaign, which parks the superseded calendar's rows
+ * (never a posted one) and reports exactly what it did. Migration 135 stamps
+ * `campaign` on each row so two calendars can share the table without sharing
+ * a week.
+ *
  * ── NOTHING HERE FIRES ──────────────────────────────────────────────────
  * The queue is rows carrying a date and a status. There is no dispatcher and
  * no scheduler; "Mark posted" is a human recording that a human posted, and
@@ -51,23 +64,54 @@ interface QueueRow {
   post_url: string | null;
   retired_check: string;        // clean · flagged · not_run
   notes: string | null;
+  campaign: string | null;      // `2026-08-18` = the file it came from; null = the standing queue
 }
+
+interface CampaignMeta {
+  name: string;                 // `2026-08-18`
+  file: string;
+  title: string | null;
+  note: string | null;
+  rows: number;
+  weeks: Record<string, string>;
+  first: string | null;
+  last: string | null;
+  supersedes: string | null;
+}
+
+/** The standing queue (POST_QUEUE.md rows) has no campaign; this is its chip id. */
+const STANDING = "standing";
 
 const STATUS_LABEL: Record<string, string> = {
   next: "Next", drafted: "Drafted", posted: "Posted", parked: "Parked", recurring: "Recurring",
 };
 
-const WEEK_LABEL: Record<string, string> = {
+/* Fallback only — used when a campaign file carries no `weeks` of its own.
+   These are the Aug 17 labels this screen used to hard-code, kept so an old
+   file still renders; a real campaign supplies its own. */
+const FALLBACK_WEEKS: Record<string, string> = {
   W1: "Week 1 · Aug 17–21 · establish the seat",
   W2: "Week 2 · Aug 24–28 · register credibility",
   W3: "Week 3 · Aug 31 – Sep 4 · DEALSOURCE WEEK",
   W4: "Week 4 · Sep 7–11 · close the arc",
 };
 
-type FilterId = "all" | "today" | "videos" | "mandates" | "posted";
+/** "Aug 18 – Sep 16" from two ISO dates, for chips and titles. */
+function windowLabel(first: string | null, last: string | null): string {
+  const f = (d: string) => new Date(d + "T12:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+  if (first && last) return `${f(first)} – ${f(last)}`;
+  return first ? f(first) : "undated";
+}
+
+type FilterId = "all" | "today" | "videos" | "carousels" | "mandates" | "posted";
 
 export default function PostingScreen(_props: AtlasScreenProps) {
   const [rows, setRows] = useState<QueueRow[] | null>(null);
+  const [campaigns, setCampaigns] = useState<CampaignMeta[]>([]);
+  /* Which calendar is on screen: a campaign name, or STANDING for the queue.
+     Defaults to the NEWEST shipped campaign once the list arrives — the same
+     file Import loads with no argument, so what you see is what you press. */
+  const [view, setView] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterId>("all");
@@ -79,21 +123,43 @@ export default function PostingScreen(_props: AtlasScreenProps) {
       .then(r => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then(d => { setRows(d.rows ?? []); setError(null); })
       .catch(e => setError(e?.message ?? "load failed"));
+    fetch("/api/post-queue/campaigns", { headers: authHeaders() })
+      .then(r => (r.ok ? r.json() : { campaigns: [] }))
+      .then(d => {
+        const list: CampaignMeta[] = d.campaigns ?? [];
+        setCampaigns(list);
+        setView(v => v ?? (list[0]?.name ?? STANDING));
+      })
+      .catch(() => setCampaigns([]));
   }, []);
   useEffect(load, [load]);
 
+  const current = campaigns.find(c => c.name === view) ?? null;
+
+  /* Import the campaign on screen. State-preserving by contract: dates only
+     where none, the superseded calendar PARKED (a posted row is left alone and
+     named), the file's queue bookkeeping applied with the same floor. The
+     banner says exactly what moved, because "imported" alone hides the part
+     that matters — what stepped aside. */
   const seedCampaign = async () => {
     setBusy(true); setBanner(null);
     try {
+      const name = current?.name ?? campaigns[0]?.name ?? null;
       const r = await fetch("/api/post-queue/import-campaign", {
-        method: "POST", headers: authHeaders(),
+        method: "POST", headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify(name ? { campaign: name } : {}),
       });
       const j = await r.json().catch(() => null);
       if (!r.ok) { setBanner(`Import failed: ${j?.error ?? r.status}`); return; }
-      setBanner(
-        `${j.campaign ?? "Campaign"} — ${j.inserted} slots new, ${j.updated} refreshed, ${j.scheduled} dated.` +
-        (j.heldAtHigherState?.length ? ` Held at higher state: ${j.heldAtHigherState.length}.` : ""),
-      );
+      const parts = [
+        `${j.title ?? j.campaign ?? "Campaign"} — ${j.inserted} slots new, ${j.updated} refreshed, ${j.scheduled} dated.`,
+        j.parkedSuperseded ? `Parked ${j.parkedSuperseded} slot${j.parkedSuperseded === 1 ? "" : "s"} of the superseded calendar.` : "",
+        j.parkedBookkeeping || j.draftedBookkeeping ? `Standing queue: ${j.parkedBookkeeping} parked, ${j.draftedBookkeeping} moved to drafted.` : "",
+        j.keptPosted?.length ? `Left alone because already posted: ${j.keptPosted.join(", ")}.` : "",
+        j.heldAtHigherState?.length ? `Held at higher state: ${j.heldAtHigherState.length}.` : "",
+      ].filter(Boolean);
+      setBanner(parts.join(" "));
+      if (j.campaign) setView(j.campaign);
       load();
     } finally { setBusy(false); }
   };
@@ -129,26 +195,44 @@ export default function PostingScreen(_props: AtlasScreenProps) {
   };
 
   const todayIso = new Date().toISOString().slice(0, 10);
-  const isVideo = (r: QueueRow) => (r.format ?? "").startsWith("Video");
-  const isMandate = (r: QueueRow) => r.status === "recurring";
+  const isVideo = (r: QueueRow) => /^Video|🎥/.test(r.format ?? "");
+  const isCarousel = (r: QueueRow) => /carousel/i.test(`${r.format ?? ""} ${r.angle}`);
+  /* A Mandate edition is recurring in the standing sense, but the salvaged
+     first edition arrives already `drafted` — so the angle decides, not the
+     status. */
+  const isMandate = (r: QueueRow) => r.status === "recurring" || /^THE MANDATE/i.test(r.angle);
 
-  const all = rows ?? [];
+  const total = rows ?? [];
+  /* The calendar on screen: one campaign's rows, or the standing queue's. A
+     row imported before migration 135 stamped campaigns sits under STANDING
+     until the press that parks it also stamps it. */
+  const all = useMemo(
+    () => total.filter(r => (view === STANDING || view === null ? r.campaign == null : r.campaign === view)),
+    [total, view],
+  );
   const shown = useMemo(() => all.filter(r => {
     switch (filter) {
       case "today": return String(r.scheduled_for ?? "").slice(0, 10) === todayIso;
       case "videos": return isVideo(r);
+      case "carousels": return isCarousel(r);
       case "mandates": return isMandate(r);
       case "posted": return r.status === "posted";
       default: return true;
     }
   }), [all, filter, todayIso]);
 
+  /* Week labels come from the CAMPAIGN FILE, so a new calendar never inherits
+     the old one's dates. The fallback exists for a file that has none. */
+  const weekLabel: Record<string, string> =
+    current && Object.keys(current.weeks).length ? current.weeks : (view === STANDING ? {} : FALLBACK_WEEKS);
+  const weekIds = Object.keys(weekLabel);
+
   /* Weeks, from the campaign's own tier labels — an unlabelled row still
      renders, in its own trailing group, rather than vanishing. */
   const weeks = useMemo(() => {
     const m = new Map<string, QueueRow[]>();
     for (const r of shown) {
-      const k = r.tier && WEEK_LABEL[r.tier] ? r.tier : "other";
+      const k = r.tier && weekLabel[r.tier] ? r.tier : "other";
       if (!m.has(k)) m.set(k, []);
       m.get(k)!.push(r);
     }
@@ -156,9 +240,9 @@ export default function PostingScreen(_props: AtlasScreenProps) {
       list.sort((a, b) => String(a.scheduled_for ?? "9999").localeCompare(String(b.scheduled_for ?? "9999")));
     }
     return m;
-  }, [shown]);
+  }, [shown, weekLabel]);
 
-  const strip: CompareItem[] = ["W1", "W2", "W3", "W4"].map(w => {
+  const strip: CompareItem[] = weekIds.map(w => {
     const group = all.filter(r => r.tier === w);
     const posted = group.filter(r => r.status === "posted").length;
     return {
@@ -169,11 +253,24 @@ export default function PostingScreen(_props: AtlasScreenProps) {
     };
   });
 
+  /* One chip per shipped campaign (newest first) plus the standing queue.
+     Counts are rows actually in the table, so a campaign that ships in the
+     code but has not been imported reads "0" — press Import to load it. */
+  const campaignChips: Chip[] = [
+    ...campaigns.map(c => ({
+      id: c.name,
+      label: `${windowLabel(c.first, c.last)}${c.name === campaigns[0]?.name ? "" : " · superseded"}`,
+      value: String(total.filter(r => r.campaign === c.name).length),
+    })),
+    { id: STANDING, label: "Standing queue", value: String(total.filter(r => r.campaign == null).length) },
+  ];
+
   const chips: Chip[] = [
     { id: "all", label: "All", value: String(all.length) },
     { id: "today", label: "Today", value: (() => { const n = all.filter(r => String(r.scheduled_for ?? "").slice(0, 10) === todayIso).length; return n ? String(n) : null; })() },
-    { id: "videos", label: "Videos", value: String(all.filter(isVideo).length) },
-    { id: "mandates", label: "Mandates", value: String(all.filter(isMandate).length) },
+    ...(all.some(isVideo) ? [{ id: "videos", label: "Videos", value: String(all.filter(isVideo).length) }] : []),
+    ...(all.some(isCarousel) ? [{ id: "carousels", label: "Carousels", value: String(all.filter(isCarousel).length) }] : []),
+    ...(all.some(isMandate) ? [{ id: "mandates", label: "Mandates", value: String(all.filter(isMandate).length) }] : []),
     { id: "posted", label: "Posted", value: String(all.filter(r => r.status === "posted").length) },
   ];
 
@@ -191,21 +288,30 @@ export default function PostingScreen(_props: AtlasScreenProps) {
     return <Page><div style={{ fontSize: 13, color: T.muted2 }}>Loading the posting queue…</div></Page>;
   }
 
-  if (all.length === 0) {
+  const newest = campaigns[0] ?? null;
+  const loadLabel = current
+    ? `Load ${current.title ?? current.name}`
+    : newest ? `Load ${newest.title ?? newest.name}` : "Load campaign";
+
+  /* Nothing in the table at all: the first press. */
+  if (total.length === 0) {
     return (
       <Page>
         {banner && <div style={bannerBox}>{banner}</div>}
         <div style={{ maxWidth: 560, margin: "80px auto", textAlign: "center" }}>
           <div style={{ fontSize: 17, fontWeight: 700, color: T.ink }}>No campaign loaded</div>
           <p style={{ fontSize: 13.5, color: T.muted, lineHeight: 1.6, marginTop: 8 }}>
-            The 30-day plan (Aug 17 – Sep 11 · 12 posts · 8 videos · 4 Mandate
-            editions) ships with the app as content. Loading it here creates
-            the calendar; drafting stays in Cowork, and posting stays a human
-            press on LinkedIn — this screen only ever tracks.
+            {newest
+              ? <>{newest.title ?? newest.name} ({newest.rows} slots · {windowLabel(newest.first, newest.last)}) ships with the app as content. </>
+              : <>No campaign file ships with this build. </>}
+            Loading it here creates the calendar; drafting stays in Cowork, and
+            posting stays a human press on LinkedIn — this screen only ever tracks.
           </p>
-          <button type="button" onClick={seedCampaign} disabled={busy} style={primaryBtn}>
-            {busy ? "Loading…" : "Load the Aug 17 campaign"}
-          </button>
+          {newest && (
+            <button type="button" onClick={seedCampaign} disabled={busy} style={primaryBtn}>
+              {busy ? "Loading…" : loadLabel}
+            </button>
+          )}
         </div>
       </Page>
     );
@@ -214,16 +320,54 @@ export default function PostingScreen(_props: AtlasScreenProps) {
   return (
     <Page>
       {banner && <div style={bannerBox}>{banner}</div>}
+      {/* Which calendar. The newest shipped campaign is first and is what
+          Import loads; a superseded one stays readable — parked, not deleted. */}
+      {campaignChips.length > 1 && (
+        <div style={{ marginBottom: 10 }}>
+          <ChipRow
+            chips={campaignChips}
+            activeId={view ?? STANDING}
+            onPick={id => { setView(id); setFilter("all"); setSelectedId(null); }}
+            right={
+              current && current.name !== newest?.name
+                ? <span style={{ fontSize: 12.5, color: T.muted2 }}>Superseded by {newest?.title ?? newest?.name} — read-only in spirit; its rows were parked, not deleted.</span>
+                : current?.note
+                  ? <span style={{ fontSize: 12.5, color: T.muted2 }} title={current.note}>{current.note.split(/(?<=\.)\s/)[0]}</span>
+                  : null
+            }
+          />
+        </div>
+      )}
+      {all.length === 0 ? (
+        <div style={{ maxWidth: 560, margin: "48px auto", textAlign: "center" }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: T.ink }}>
+            {view === STANDING ? "Nothing in the standing queue" : "This campaign is not loaded yet"}
+          </div>
+          {view !== STANDING && current && (
+            <>
+              <p style={{ fontSize: 13.5, color: T.muted, lineHeight: 1.6, marginTop: 8 }}>
+                {current.title ?? current.name} · {current.rows} slots · {windowLabel(current.first, current.last)}.
+                {current.supersedes ? ` Loading it parks the ${current.supersedes} calendar's slots (never a posted one) and says so.` : ""}
+              </p>
+              <button type="button" onClick={seedCampaign} disabled={busy} style={primaryBtn}>
+                {busy ? "Loading…" : loadLabel}
+              </button>
+            </>
+          )}
+        </div>
+      ) : (<>
       <CompareStrip items={strip} />
       <ChipRow
         chips={chips}
         activeId={filter}
         onPick={id => setFilter(id as FilterId)}
         right={
-          <button type="button" onClick={seedCampaign} disabled={busy} style={ghostBtn}
-                  title="Re-import the plan's content. State-preserving: it can never un-post or re-date anything a human set.">
-            Re-import plan
-          </button>
+          view !== STANDING && current ? (
+            <button type="button" onClick={seedCampaign} disabled={busy} style={ghostBtn}
+                    title="Re-import this campaign's content. State-preserving: it can never un-post or re-date anything a human set; it parks a superseded calendar and reports what moved.">
+              Re-import {current.name}
+            </button>
+          ) : null
         }
       />
 
@@ -244,7 +388,7 @@ export default function PostingScreen(_props: AtlasScreenProps) {
                 {[...weeks.entries()].map(([w, group]) => (
                   <div key={w}>
                     <GroupHeader
-                      title={WEEK_LABEL[w] ?? "Unscheduled"}
+                      title={weekLabel[w] ?? (view === STANDING ? "Standing queue — no week" : "Unscheduled")}
                       columns={["When", "Status"]}
                     />
                     {group.map(r => {
@@ -290,14 +434,16 @@ export default function PostingScreen(_props: AtlasScreenProps) {
         />
       </div>
 
+      </>)}
+
       <RankingNote
         title="How this calendar works"
-        ordering="Slots group by campaign week and sort by date. The content (copy, scripts, collateral specs) is owned by the Cowork plan — edit there and re-import; this screen owns only state."
+        ordering="Slots group by the campaign's own weeks and sort by date. The content (copy, scripts, collateral specs) is owned by the plan in the studio — edit there, re-export, re-import; this screen owns only state."
         caveats={[
           "Nothing here fires. There is no scheduler and no auto-post: Mark posted records that a human posted, and the timestamp is stamped at the click.",
           "A slot that may state figures cannot be marked posted until retired-check has run clean on its caption — the server refuses, not the button.",
-          "The four Mandate editions carry live deal data and are unwritten by design: built each week from actual announcements, nothing invented, a thin week runs four bullets.",
-          "The month's metric is not impressions — it is profile views from named people in DFW. Decide now to trust the small number.",
+          "A new campaign parks the calendar it supersedes rather than deleting it — a posted row is never touched — and a queue id belongs to one campaign forever, because that id is what its analytics are joined on.",
+          ...(all.some(isMandate) ? ["A Mandate edition ships only when the sweep verifies three or more in-window deals against primary sources; a padded Mandate is worse than a skipped one — a quiet week is stated, not filled."] : []),
         ]}
       />
     </Page>

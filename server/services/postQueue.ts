@@ -27,7 +27,7 @@
  * calendar is rows with dates; it needs no dispatcher. This file calls no
  * model, reads no API key, and must never be invoked on a timer.
  */
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { sql } from '../db.js';
 
@@ -119,13 +119,36 @@ export async function readQueueFile(file = QUEUE_JSON): Promise<QueueRow[]> {
  * let a routine re-import erase a posted date, and nothing in a diff would look
  * wrong.
  */
-export async function importQueue(userId: number, rows?: QueueRow[]): Promise<ImportResult> {
+export async function importQueue(
+  userId: number,
+  rows?: QueueRow[],
+  /** The campaign a row belongs to (`2026-08-18` for campaign-2026-08-18.json);
+   *  null = the standing queue (POST_QUEUE.md). Content, stamped by the import. */
+  campaign: string | null = null,
+): Promise<ImportResult> {
   const queue = rows ?? (await readQueueFile());
   const result: ImportResult = { inserted: 0, updated: 0, skipped: [], heldAtHigherState: [] };
 
-  const existing = await sql<{ queue_id: string; status: string }[]>`
-    SELECT queue_id, status FROM post_queue WHERE user_id = ${userId}`;
+  const existing = await sql<{ queue_id: string; status: string; campaign: string | null }[]>`
+    SELECT queue_id, status, campaign FROM post_queue WHERE user_id = ${userId}`;
   const current = new Map(existing.map(r => [r.queue_id, r.status]));
+
+  // ONE ID, ONE CAMPAIGN, FOREVER (migration 135). Analytics join by queue_id,
+  // so an id reused across campaigns folds two posts' numbers into one line.
+  // A row already stamped with a DIFFERENT campaign is a collision: refuse the
+  // whole import and name every offender — the fix is a new id in the new
+  // file, never an overwrite. A NULL stamp (rows imported before the column
+  // existed) may be adopted once, and the standing queue (campaign=null) never
+  // un-stamps a campaign row.
+  if (campaign) {
+    const stamped = new Map(existing.map(r => [r.queue_id, r.campaign]));
+    const collisions = queue
+      .filter(r => { const c = stamped.get(r.queue_id); return c != null && c !== campaign; })
+      .map(r => `${r.queue_id} already belongs to campaign ${stamped.get(r.queue_id)}`);
+    if (collisions.length) {
+      throw new Error(`campaign ${campaign} reuses queue ids from another campaign — nothing imported:\n  ${collisions.join('\n  ')}\n  Give the new posts new ids; an id is one post forever, because that is what its analytics are joined on.`);
+    }
+  }
 
   for (const r of queue) {
     // The floor rule. The markdown may push a row forward (next → drafted); it
@@ -156,11 +179,11 @@ export async function importQueue(userId: number, rows?: QueueRow[]): Promise<Im
     const [row] = await sql<{ inserted: boolean }[]>`
       INSERT INTO post_queue (
         user_id, queue_id, tier, lead, angle, format, carries,
-        evidence_grade, source_disclosure, may_state_figure, status
+        evidence_grade, source_disclosure, may_state_figure, status, campaign
       ) VALUES (
         ${userId}, ${r.queue_id}, ${r.tier ?? null}, ${r.lead ?? null}, ${r.angle},
         ${r.format ?? null}, ${r.carries ?? null}, ${r.evidence_grade ?? null},
-        ${r.source_disclosure ?? null}, ${r.may_state_figure}, ${incoming}
+        ${r.source_disclosure ?? null}, ${r.may_state_figure}, ${incoming}, ${campaign}
       )
       ON CONFLICT (user_id, queue_id) DO UPDATE SET
         tier              = EXCLUDED.tier,
@@ -173,6 +196,8 @@ export async function importQueue(userId: number, rows?: QueueRow[]): Promise<Im
         may_state_figure  = EXCLUDED.may_state_figure,
         status            = CASE WHEN ${rank(sql`post_queue.status`)} > ${rank(sql`EXCLUDED.status`)}
                                  THEN post_queue.status ELSE EXCLUDED.status END,
+        -- a campaign stamps; the standing queue (null) never un-stamps
+        campaign          = COALESCE(EXCLUDED.campaign, post_queue.campaign),
         updated_at        = NOW()
       RETURNING (xmax = 0) AS inserted`;
     if (row?.inserted) result.inserted++; else result.updated++;
@@ -263,33 +288,136 @@ export async function queuePerformance(userId: number): Promise<any[]> {
     ORDER BY q.posted_at DESC NULLS LAST`;
 }
 
+/* ── campaigns ─────────────────────────────────────────────────────────── */
+
+const CAMPAIGN_DIR = path.resolve(process.cwd(), 'content/studio');
+const CAMPAIGN_FILE = /^campaign-(\d{4}-\d{2}-\d{2})\.json$/;
+
+export interface CampaignMeta {
+  /** The date part of the filename — `2026-08-18`. This is the row stamp. */
+  name: string;
+  file: string;
+  title: string | null;
+  note: string | null;
+  rows: number;
+  /** Week labels the calendar renders, keyed by tier — `{ W1: "Week 1 · Aug 18–20 · …" }`.
+   *  Owned by the campaign file, so a new calendar never inherits the old one's dates. */
+  weeks: Record<string, string>;
+  /** First and last scheduled dates, from the schedule map. */
+  first: string | null;
+  last: string | null;
+  supersedes: string | null;
+}
+
+/** Pure: read one campaign file's shape into meta. Exported for the tests. */
+export function campaignMeta(name: string, file: string, parsed: any): CampaignMeta {
+  const rows = Array.isArray(parsed?.rows) ? parsed.rows : [];
+  const dates = Object.values<any>(parsed?.schedule ?? {})
+    .map(s => String(s?.on ?? '').slice(0, 10))
+    .filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d))
+    .sort();
+  const weeks: Record<string, string> = {};
+  if (parsed?.weeks && typeof parsed.weeks === 'object') {
+    for (const [k, v] of Object.entries(parsed.weeks)) if (typeof v === 'string') weeks[k] = v;
+  }
+  return {
+    name, file,
+    title: typeof parsed?.campaign === 'string' ? parsed.campaign : null,
+    note: typeof parsed?.note === 'string' ? parsed.note : null,
+    rows: rows.length,
+    weeks,
+    first: dates[0] ?? null,
+    last: dates[dates.length - 1] ?? null,
+    // The file may name its predecessor by filename or by name; the meta
+    // always speaks in NAMES (`2026-08-17`), which is what rows are stamped with.
+    supersedes: /(\d{4}-\d{2}-\d{2})/.exec(String(parsed?.supersedes?.campaign ?? ''))?.[1] ?? null,
+  };
+}
+
+/** Every campaign file the app ships, NEWEST FIRST — the first entry is what
+ *  "Import campaign" loads when no name is given. */
+export async function listCampaigns(dir = CAMPAIGN_DIR): Promise<CampaignMeta[]> {
+  const names = (await readdir(dir)).filter(f => CAMPAIGN_FILE.test(f)).sort().reverse();
+  const out: CampaignMeta[] = [];
+  for (const f of names) {
+    const name = CAMPAIGN_FILE.exec(f)![1];
+    let parsed: any = null;
+    try { parsed = JSON.parse(await readFile(path.join(dir, f), 'utf8')); } catch { /* reported as 0 rows */ }
+    out.push(campaignMeta(name, path.join('content/studio', f), parsed));
+  }
+  return out;
+}
+
+export interface CampaignImportResult extends ImportResult {
+  campaign: string;
+  title: string | null;
+  scheduled: number;
+  /** Rows of the superseded campaign(s) parked by this press. Never a posted row. */
+  parkedSuperseded: number;
+  /** Standing-queue rows parked / advanced by the file's `queue_bookkeeping`. */
+  parkedBookkeeping: number;
+  draftedBookkeeping: number;
+  /** Superseded or bookkept rows that were left alone because a human had already posted them. */
+  keptPosted: string[];
+}
+
 /**
- * Import a CAMPAIGN file (content/studio/campaign-*.json) — the same
- * state-preserving upsert as the queue import, plus a schedule map that fills
- * dates ONLY where the row has none. A re-import proposes the plan's calendar
- * once; it never moves a date a human set, for the same reason it never
- * un-posts anything.
+ * Import a CAMPAIGN file — `content/studio/campaign-<name>.json`, newest by
+ * name when none is given — with the same state-preserving upsert as the queue
+ * import, plus THREE presses that are the human's decision recorded once:
+ *
+ *   1. the schedule map fills dates ONLY where a row has none (a re-import
+ *      proposes the plan's calendar once; it never moves a date a human set);
+ *   2. `supersedes.rows` are PARKED — the retired calendar's slots step aside
+ *      — unless a row is already `posted`, which is left exactly as it is and
+ *      reported in `keptPosted` (the floor rule: nothing pulls a posted row);
+ *   3. `queue_bookkeeping` (park / drafted) is applied to the standing queue
+ *      with the same floor.
+ *
+ * All three are idempotent: press it twice and the second press parks nothing,
+ * schedules nothing, and reports `updated` for every row.
  *
  * (2026-08-16, Paul: "i have no way of managing the campaign schedule or what
- * gets made and ready to post when" — the Aug 17 campaign is the first file.)
+ * gets made and ready to post when" — the Aug 17 campaign was the first file.
+ * 2026-08-18: the plan was remade the same day — Tue/Wed/Thu spine, P-1…P-8 +
+ * five Mandate editions — and the app was still showing the calendar it
+ * retired. A named import and the supersede press are what let the second
+ * plan land without hand-editing rows.)
  */
 export async function importCampaign(
   userId: number,
-  file = path.resolve(process.cwd(), 'content/studio/campaign-2026-08-17.json'),
-): Promise<ImportResult & { scheduled: number; campaign: string | null }> {
+  name?: string | null,
+  dir = CAMPAIGN_DIR,
+): Promise<CampaignImportResult> {
+  const campaigns = await listCampaigns(dir);
+  if (!campaigns.length) throw new Error(`No campaign files in ${path.relative(process.cwd(), dir) || 'content/studio'}`);
+  const meta = name ? campaigns.find(c => c.name === name) : campaigns[0];
+  if (!meta) {
+    throw new Error(`No campaign named ${name}. Available: ${campaigns.map(c => c.name).join(', ')}`);
+  }
+  // A SUPERSEDED campaign is read, never re-imported. Its rows were parked by
+  // the newer file's press; the floor rule (which is right for the standing
+  // queue) would read that file's `next` as a step FORWARD from `parked` and
+  // quietly un-park the retired calendar. Refuse, and name the file to load.
+  const successor = campaigns.find(c => c.supersedes === meta.name);
+  if (successor) {
+    throw new Error(`campaign ${meta.name} is superseded by ${successor.name} — nothing imported. Load ${successor.name}; the ${meta.name} rows stay readable (parked) under their own chip.`);
+  }
+
   let parsed: any;
   try {
-    parsed = JSON.parse(await readFile(file, 'utf8'));
+    parsed = JSON.parse(await readFile(path.join(dir, path.basename(meta.file)), 'utf8'));
   } catch (err: any) {
-    throw new Error(`Could not read ${path.relative(process.cwd(), file)}: ${err?.message}`);
+    throw new Error(`Could not read ${meta.file}: ${err?.message}`);
   }
   const problems = validateQueue(parsed?.rows);
   if (problems.length) {
     throw new Error(`campaign file is malformed — nothing imported:\n  ${problems.join('\n  ')}`);
   }
 
-  const result = await importQueue(userId, parsed.rows as QueueRow[]);
+  const result = await importQueue(userId, parsed.rows as QueueRow[], meta.name);
 
+  // 1. dates, only where none
   let scheduled = 0;
   const schedule = parsed?.schedule ?? {};
   for (const [qid, s] of Object.entries<any>(schedule)) {
@@ -303,5 +431,56 @@ export async function importCampaign(
     scheduled += rows.length;
   }
 
-  return { ...result, scheduled, campaign: typeof parsed?.campaign === 'string' ? parsed.campaign : null };
+  // 2 + 3. the state presses. `park` never touches a posted row; `drafted`
+  // only ever moves a row UP the ladder (next/recurring/parked → drafted).
+  const keptPosted: string[] = [];
+  /* `stamp`: the campaign the parked rows belong to, applied only where the row
+     has none — rows imported before migration 135 carry no stamp, and without
+     it the superseded calendar would sit under "standing queue" on screen. */
+  const park = async (ids: string[], stamp: string | null = null): Promise<number> => {
+    if (!ids.length) return 0;
+    const posted = await sql<{ queue_id: string }[]>`
+      SELECT queue_id FROM post_queue
+      WHERE user_id = ${userId} AND queue_id = ANY(${ids}) AND status = 'posted'`;
+    keptPosted.push(...posted.map(r => r.queue_id));
+    // stamp first (posted rows included — the stamp is content, not state)…
+    if (stamp) {
+      await sql`
+        UPDATE post_queue SET campaign = ${stamp}, updated_at = NOW()
+        WHERE user_id = ${userId} AND queue_id = ANY(${ids}) AND campaign IS NULL`;
+    }
+    // …then park what is not posted and not already parked.
+    const rows = await sql`
+      UPDATE post_queue SET status = 'parked', updated_at = NOW()
+      WHERE user_id = ${userId} AND queue_id = ANY(${ids})
+        AND status NOT IN ('posted', 'parked')
+      RETURNING id`;
+    return rows.length;
+  };
+  const draft = async (ids: string[]): Promise<number> => {
+    if (!ids.length) return 0;
+    const rows = await sql`
+      UPDATE post_queue
+      SET status = 'drafted', drafted_at = COALESCE(drafted_at, NOW()), updated_at = NOW()
+      WHERE user_id = ${userId} AND queue_id = ANY(${ids})
+        AND status IN ('next', 'recurring', 'parked')
+      RETURNING id`;
+    return rows.length;
+  };
+  const strList = (v: unknown): string[] => Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
+
+  const parkedSuperseded = await park(strList(parsed?.supersedes?.rows), meta.supersedes);
+  const parkedBookkeeping = await park(strList(parsed?.queue_bookkeeping?.park));
+  const draftedBookkeeping = await draft(strList(parsed?.queue_bookkeeping?.drafted));
+
+  return {
+    ...result,
+    campaign: meta.name,
+    title: meta.title,
+    scheduled,
+    parkedSuperseded,
+    parkedBookkeeping,
+    draftedBookkeeping,
+    keptPosted,
+  };
 }

@@ -18,7 +18,7 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import {
-  importQueue, importCampaign, listQueue, updateQueueState, queuePerformance, readQueueFile,
+  importQueue, importCampaign, listCampaigns, listQueue, updateQueueState, queuePerformance, readQueueFile,
 } from '../services/postQueue.js';
 
 const router = Router();
@@ -49,13 +49,31 @@ router.post('/import', requireAuth, async (req: any, res) => {
 });
 
 /**
- * Import the shipped campaign file (content/studio/campaign-*.json) — same
- * state-preserving contract as /import, plus dates filled ONLY where a row
- * has none. Idempotent; safe to press twice.
+ * The campaign files the app ships, newest first — what the calendar offers
+ * and what /import-campaign loads by default. Reads the filesystem, calls no
+ * model, touches no row.
+ */
+router.get('/campaigns', requireAuth, async (_req, res) => {
+  try {
+    res.json({ campaigns: await listCampaigns() });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * Import a campaign file (content/studio/campaign-<name>.json; body
+ * `{ campaign: "2026-08-18" }`, newest when omitted) — the same
+ * state-preserving contract as /import, plus dates filled ONLY where a row has
+ * none, the superseded calendar's rows PARKED (never a posted one), and the
+ * file's queue bookkeeping applied with the same floor. Idempotent; safe to
+ * press twice. A campaign that reuses another campaign's queue ids is refused
+ * whole and every collision named (422) — an id is one post forever.
  */
 router.post('/import-campaign', requireAuth, async (req: any, res) => {
   try {
-    const result = await importCampaign(req.user.id);
+    const name = typeof req.body?.campaign === 'string' && req.body.campaign.trim() ? req.body.campaign.trim() : null;
+    const result = await importCampaign(req.user.id, name);
     res.json(result);
   } catch (err: any) {
     res.status(422).json({ error: err.message });

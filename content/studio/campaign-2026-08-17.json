@@ -1,6 +1,12 @@
 {
   "campaign": "smbX studio · 30-day campaign · Aug 17 – Sep 11, 2026",
-  "note": "Content of record: CAMPAIGN_2026-08-17.md (Paul's plan, 2026-08-16). Rows are CONTENT ONLY — the app owns state. The schedule map below is applied ONLY where a row has no date yet; a re-import never moves a date a human set.",
+  "note": "Content of record: CAMPAIGN_2026-08-17.md (Paul's plan, 2026-08-16). Rows are CONTENT ONLY — the app owns state. The schedule map below is applied ONLY where a row has no date yet; a re-import never moves a date a human set. SUPERSEDED 2026-08-18 by campaign-2026-08-18.json (the Tue/Wed/Thu spine): importing that file parks these rows — none of them posted.",
+  "weeks": {
+    "W1": "Week 1 · Aug 17–21 · establish the seat",
+    "W2": "Week 2 · Aug 24–28 · register credibility",
+    "W3": "Week 3 · Aug 31 – Sep 4 · DEALSOURCE WEEK",
+    "W4": "Week 4 · Sep 7–11 · close the arc"
+  },
   "rows": [
     { "queue_id": "C01", "tier": "W1", "lead": "Mon Aug 17 · Post 1", "angle": "Hand-raiser — the seat I built this practice for", "format": "One-pager · masthead · dark · 150/20/1", "carries": "Buy-side only positioning; 150 acquisitions · 20 years · 1 side of the table (resume-cleared set)", "evidence_grade": "VERIFIED", "source_disclosure": "Employment-history figures from the cleared resume set; attribution law applies (led or co-led, selected transactions)", "may_state_figure": true, "status": "next" },
     { "queue_id": "C02", "tier": "W1", "lead": "Tue Aug 18 · Video 1 · 2:30", "angle": "Where the return comes from now — the four levers (thesis video)", "format": "Video 2:30 · frames the series · first frame: THE MULTIPLE ISN'T COMING TO SAVE YOU", "carries": "Multiple expansion is done; return comes from pricing, dispatch/utilization, agreement attachment, back office — all visible in diligence", "evidence_grade": "n/a", "source_disclosure": null, "may_state_figure": false, "status": "next" },
