@@ -274,6 +274,13 @@ Gates R0–R5. Six exit-type detection: (1) full sale, (2) partner buyout, (3) c
 
 Gates B0–B5. Thesis definition → sourcing (5-stage pipeline § 19) → screening (90-second teaser screen) → QoE Lite pre-LOI → LBO + valuation → DD → structuring → close. Buyer value framing: **speed to conviction**.
 
+**The 90-second teaser screen — the method (added 2026-08-17; mined from the PE deal-screening set).** A one-sitting go/no-go for an inbound teaser or broker blast, run before any CIM request:
+
+1. **Hard-stop scan first.** League/size outside the buy-box, geography, a license regime the client cannot satisfy, industry exclusion — any hit ends the triage in one line. A hard stop GATES; it is never a weighted score component, because a mandate breaker scored as a 30% weight lets an attractive off-thesis deal still rate as a match.
+2. **Organic CAGR strip.** Separate stated growth from acquisition-driven growth before crediting any rate — consolidator-built businesses quote blended CAGRs that no organic engine ever produced.
+3. **Screen-stage cash proxies** — computable from one year of teaser numbers via the engine: SDE less equipment-replacement capex as rough FCF, and whether the business generates cash before or after working capital.
+4. **Four-outcome verdict**, one sentence plus the top two reasons: *pursue to CIM* / *conditional* (exactly one significant question, resolvable with a single broker call or document — named) / *monitor* (right business, wrong timing or price talk) / *pass*. The note is filed either way, so passes accumulate into a pattern library instead of vanishing.
+
 ### 4.5 Phase 4: The Deal Architect (Structuring & Cap Tables)
 
 Asset vs. stock vs. merger; §338(h)(10); F-reorg; §351; §368(a)(1)(A/B/C/D/F); §355 spin; earnout vs. rollover vs. seller note; R&W insurance vs. escrow; indemnification cap/basket/survival; PPA optimization (§1060 + §168(k)/§168(n)). Full tax + legal architecture in §§ 9, 10.
