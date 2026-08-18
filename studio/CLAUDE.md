@@ -6,9 +6,14 @@
 > clone on this machine and both agents work from it:
 >
 > ```
-> CLONE     /Users/paulbaker/Documents/GitHubRepos/smbx-prod   # paulbryantbaker-art/SMBx
-> STUDIO    $CLONE/studio                                       # this folder — Cowork opens HERE
-> REPO      $CLONE                                              # the engine — Claude Code opens HERE
+> CLONE     /Users/paulbaker/Developer/smbx-prod   # paulbryantbaker-art/SMBx
+> STUDIO    $CLONE/studio                          # this folder — Cowork opens HERE
+> REPO      $CLONE                                 # the engine — Claude Code opens HERE
+>
+> NOT under ~/Documents or ~/Desktop: both are iCloud-synced on this Mac, and
+> iCloud duplicates files as git writes them and times out lock writes (seen
+> 2026-08-18: 337 " 2" copies and an index.lock timeout in one afternoon). A
+> git repo here lives outside iCloud — that is why the clone is in ~/Developer.
 > ```
 >
 > Set it once per session; every `$REPO/…` command below still works because
