@@ -23,7 +23,7 @@ process.env.DATABASE_URL = process.env.PQ_URL || 'postgres://postgres@127.0.0.1:
  * make "never inferred" checkable was failing the one path that honoured it.
  * Reading the code would not have found that.
  */
-const { importQueue, listQueue, updateQueueState, readQueueFile, validateQueue } =
+const { importQueue, listQueue, updateQueueState, readQueueFile, validateQueue, listCampaigns, campaignMeta } =
   await import('../postQueue.js');
 const { sql } = await import('../../db.js');
 
@@ -60,6 +60,37 @@ await T('missing may_state_figure is an error', () => validateQueue([{queue_id:'
 await T('...and the message says why', () => validateQueue([{queue_id:'Q99',angle:'x'}])[0].includes('may_state_figure must be true or false'), true);
 await T('duplicate id caught', () => validateQueue([{queue_id:'Q1',angle:'a',may_state_figure:true},{queue_id:'Q1',angle:'b',may_state_figure:true}]).some(p=>p.includes('duplicate')), true);
 await T('a clean queue has no problems', async () => validateQueue(await readQueueFile()).length, 0);
+
+console.log('\nCAMPAIGNS — named files, newest first, one id one campaign (pure: no DB)');
+/* 2026-08-18: the plan was remade the same day the first campaign shipped, and
+   the app was still showing the calendar it retired. The importer now resolves
+   a NAMED file (newest by default), carries the calendar's own week labels,
+   and its `supersedes`/`queue_bookkeeping` blocks are what the press applies.
+   These cases pin the shape a campaign file must have to be importable and the
+   ordering that decides what "Import campaign" loads with no argument. */
+const camps = await listCampaigns();
+await T('the newest campaign is first', () => camps[0]?.name, '2026-08-18');
+await T('…and it supersedes the Aug 17 file', () => camps[0]?.supersedes, '2026-08-17');
+await T('…carries its own week labels (W1…W5)', () => Object.keys(camps[0]?.weeks ?? {}).join(','), 'W1,W2,W3,W4,W5');
+await T('…knows its window from the schedule map', () => `${camps[0]?.first} → ${camps[0]?.last}`, '2026-08-18 → 2026-09-16');
+await T('…and its 14 slots', () => camps[0]?.rows, 14);
+await T('the Aug 17 file is still listed (history, not deleted)', () => camps.some(c => c.name === '2026-08-17' && c.rows === 20), true);
+await T('every shipped campaign validates', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const bad: string[] = [];
+  for (const c of camps) { const j = JSON.parse(await readFile(c.file, 'utf8')); if (validateQueue(j.rows).length) bad.push(c.name); }
+  return bad;
+}, []);
+await T('a queue_id belongs to exactly one campaign across the shipped files', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const owner = new Map<string, string>(); const dup: string[] = [];
+  for (const c of camps) { const j = JSON.parse(await readFile(c.file, 'utf8')); for (const r of j.rows) { if (owner.has(r.queue_id) && owner.get(r.queue_id) !== c.name) dup.push(r.queue_id); owner.set(r.queue_id, c.name); } }
+  return dup;
+}, []);
+await T('the superseded file is refused by name (would un-park its rows via the floor)', async () => { const { importCampaign } = await import('../postQueue.js'); try { await importCampaign(1, '2026-08-17'); return 'imported'; } catch (e: any) { return /superseded by 2026-08-18/.test(e.message) ? 'refused, names successor' : `THREW: ${e.message.slice(0,60)}`; } }, 'refused, names successor');
+await T('an unknown campaign name is refused and the available ones named', async () => { const { importCampaign } = await import('../postQueue.js'); try { await importCampaign(1, '2099-01-01'); return 'imported'; } catch (e: any) { return /Available: 2026-08-18, 2026-08-17/.test(e.message); } }, true);
+await T('campaignMeta tolerates a malformed file (0 rows, no dates)', () => { const m = campaignMeta('2099-01-01', 'x.json', null); return `${m.rows} ${m.first} ${Object.keys(m.weeks).length}`; }, '0 null 0');
+await T('campaignMeta ignores non-string week labels', () => Object.keys(campaignMeta('2099-01-01', 'x.json', { weeks: { W1: 'ok', W2: 7 } }).weeks).join(','), 'W1');
 
 console.log('\nTHE DB CONSTRAINT — posted with no timestamp is impossible');
 await T('CHECK blocks a raw posted row', async () => { try { await sql`UPDATE post_queue SET status='posted', posted_at=NULL WHERE queue_id='Q03'`; return 'allowed'; } catch { return 'blocked'; } }, 'blocked');

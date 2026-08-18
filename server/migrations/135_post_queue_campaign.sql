@@ -1,0 +1,25 @@
+-- WHICH CALENDAR A ROW BELONGS TO (2026-08-18).
+--
+-- The Posting tab held ONE campaign (Aug 17 – Sep 11, C01–C20) and grouped it
+-- by `tier` (W1…W4). Then the plan was remade the same day — Aug 18 – Sep 16,
+-- Tue/Wed/Thu spine, P-1…P-8 + M-1…M-5 — and the old rows were retired before
+-- any of them posted. Two calendars now share one table, both carry W1…W5
+-- tiers, and nothing said which was which. A parked C05 in "Week 1" beside a
+-- live P-2 in "Week 1" is not a calendar; it is two calendars printed on one
+-- sheet.
+--
+-- `campaign` is the name of the file a row was imported from — `2026-08-18`
+-- for content/studio/campaign-2026-08-18.json — and NULL for the standing
+-- queue (POST_QUEUE.md → post-queue.json). It is CONTENT, stamped by the
+-- import, never set by the state patch, and it obeys the same ownership rule
+-- as every other content column: the file decides, the app records.
+--
+-- ONE ID, ONE CAMPAIGN, FOREVER. Analytics join by queue_id (studio_analytics
+-- .queue_id), so a queue_id reused across two campaigns would silently fold two
+-- different posts' numbers into one line — the exact thing "score the content
+-- over time" cannot survive. The importer therefore REFUSES a campaign row
+-- whose queue_id already exists under a DIFFERENT campaign and names the
+-- collision; the fix is a new id in the new file, never an overwrite. A NULL
+-- stamp (rows imported before this column existed) may be adopted once.
+ALTER TABLE post_queue ADD COLUMN IF NOT EXISTS campaign TEXT;
+CREATE INDEX IF NOT EXISTS post_queue_campaign ON post_queue (user_id, campaign);

@@ -1,6 +1,13 @@
 {
   "campaign": "smbX studio · The 30-Day Posts · Aug 18 – Sep 16, 2026",
   "note": "Content of record: CAMPAIGN_2026-08-18.md (Paul's plan, Cowork, 2026-08-18 — Drive: claude_SMBX_30DAY_POSTS_2026-08-18.md). SUPERSEDES campaign-2026-08-17.json (C01–C20, the five-slot spine with videos): that calendar is retired before any of it posts. Rows are CONTENT ONLY — the app owns state. The schedule map below is applied ONLY where a row has no date yet; a re-import never moves a date a human set. Ids: P-1…P-8 are the plan's own post ids (they identify posts, not order); M-1…M-5 are the five Wednesday Mandate editions, one row each because each edition is its own LinkedIn post with its own analytics; BLACKOUT-0903 is Thu Sep 3 (DealSource — no post) carried as a parked row so the slot reads as a decision, not a miss. Tier = week of the window (W1 = Aug 18–20 … W5 = Sep 15–16). Status is the markdown floor: text posts with complete copy are `drafted`; carousels are `next` until the deck is rendered by build-deck.mts; Mandate editions the Sunday run has not built yet are `recurring`; P-8 is `next` until the receipts interview (by Fri Sep 11) fills it, else the understudy runs.",
+  "weeks": {
+    "W1": "Week 1 · Aug 18–20 · the seat, the salvage, the first document",
+    "W2": "Week 2 · Aug 25–27 · the funnel, and the HVAC read live before DealSource",
+    "W3": "Week 3 · Sep 1–3 · DEALSOURCE WEEK · 37 days, then the blackout",
+    "W4": "Week 4 · Sep 8–10 · the contrarian, and the cost sheet",
+    "W5": "Week 5 · Sep 15–16 · the receipt-gated close · day 30"
+  },
   "supersedes": {
     "campaign": "campaign-2026-08-17.json",
     "rows": ["C01","C02","C03","C04","C05","C06","C07","C08","C09","C10","C11","C12","C13","C14","C15","C16","C17","C18","C19","C20"],
