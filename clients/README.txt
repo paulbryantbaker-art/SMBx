@@ -3,6 +3,12 @@ THE PROSPECT BOARD — firms we would like to work FOR.
 Nobody in this folder has hired us, so nothing in it is confidential. This is
 hunt A in RESEARCH.md — read § A before filling anything in.
 
+  candidates.csv THE FUNNEL. Everything sourced but not yet primary-source
+                 verified — 161 rows as of 2026-08-18. NEVER pushed to the app.
+                 A row is promoted into crm-bundle/02_organizations.csv when it
+                 is verified against a primary source, and `register_match`
+                 says which existing row it must merge into if any.
+
   crm-bundle/    THE LIVING BUY-SIDE REGISTER (moved here 2026-08-18).
                  81 organizations, 91 contacts, and the outreach plan. This is
                  the record of truth for the FACTS about who we would serve.

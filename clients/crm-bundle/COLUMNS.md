@@ -96,3 +96,54 @@ One-way door. Facts flow git → app and never back. The copy rule from
 not allowed to be edited.** Correcting a firm name, a domain or a segment in the
 app UI puts the two out of sync with no diff to find it by. Correct it here and
 push.
+
+---
+
+## The two-stage shape (settled 2026-08-18)
+
+The market side already works this way — `screen/candidates.csv` is the funnel
+and a deal row in the app is the commitment; *"the CSV is the funnel; the deal is
+the commitment"* (`WHERE_THE_WORK_HAPPENS.md` §6A). The client side now matches.
+
+```
+clients/candidates.csv          THE FUNNEL — everything, DISCOVERY included.
+                                Never pushed. `push-crm.mts` cannot see it: it
+                                sends only *.csv inside the bundle folder, and
+                                this file sits one level up.
+
+clients/crm-bundle/02_organizations.csv
+                                THE REGISTER — VERIFIED only. This is what gets
+                                pushed, scored, and pitched from.
+```
+
+**Promotion is the verification act.** A candidate row moves up when its
+`primary_source_url` is a deep link somebody actually read, per
+`STUDIO_ROTATION.md`: *"Only primary-source verification upgrades it, with the
+confirming source cited."* Stamp `promoted_on` and let reconcile move it.
+
+**The invariant:** no row in the register may carry `verification` other than
+`VERIFIED`. `reconcile.mts` should refuse on it — add to `RECONCILE_SPEC.md` §9.
+Blank is tolerated on the 75 legacy rows that pre-date the scale; they carry
+`confidence` (High/Medium/Low) instead, and backfilling them is a follow-up.
+
+`candidates.csv` carries `register_match` — six rows already correspond to a
+register entry, so promotion must MERGE them, never append a duplicate.
+
+## What the 2026-08-18 merge settled
+
+- **Schema.** The bundle is canonical and absorbs the extras. Ten columns added:
+  `account_type` `sponsor_parent` `verticals_active` `states_active`
+  `platform_count` `texas_exposure` `trigger_type` `trigger_date` `verification`
+  `last_checked`. The loader ignores columns it does not know and names them, so
+  this costs nothing app-side.
+- **`tier` is A/B/C.** The incoming 1/2/3 scale maps `1→A · 2→B · 3→C` on new
+  rows. On a matched row the existing value wins, unchanged.
+- **`account_type` and `bucket` are different axes and both are kept.** `bucket`
+  says whether we pitch them; `account_type` says what kind of capital they are.
+  This is the same argument as `kind` → `roles`, one file over.
+- **`segment` is left BLANK on the 15 `P5_SEARCH_FUND_INVESTOR` rows.** No clean
+  mapping exists in the bundle's vocabulary, and a visible gap beats a plausible
+  guess.
+- **A sponsor is a distinct entity from the platform it owns.** Altas Partners,
+  Gridiron Capital and Highview Capital each matched the register row of a
+  platform they own, via its parenthetical. All three resolved as separate firms.
