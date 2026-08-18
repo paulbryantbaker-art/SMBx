@@ -561,6 +561,26 @@ cannot find a sentence that is short, plain, jargon-free and still lifeless.
 Step 8 above is not decoration — read the copy aloud before it renders. That is
 still the actual test, and this only clears the floor beneath it.
 
+### Three structure tests — above the word level (2026-08-17)
+
+`voice-check.mts` works on words. These three work on the argument, and no
+script runs them — they are read-aloud tests, applied before a piece renders.
+Three tests, not new formats: the slot tables above still own layout.
+
+- **SCQA opener.** A report or market assessment opens situation →
+  complication → question, so the reader arrives at the document's governing
+  question feeling it is inevitable. If the executive summary opens with the
+  answer to a question the reader was never given, the opener failed.
+- **Spine test.** Read only the titles of a deck or carousel, top to bottom:
+  they must form the complete argument alone. A title that is a label
+  ("Market Overview") fails — rewrite it as the takeaway. This is the hook
+  law from the carousel table, applied to the whole run of pages.
+- **Approve-from-this-page test.** Any executive summary — report, one-pager,
+  memo — must let the reader make the decision from that page alone:
+  recommendation first and largest, then the two or three pillars, then the
+  explicit ask. If the reader must turn the page to know what is being asked
+  of them, the summary is a table of contents, not a summary.
+
 
 ---
 

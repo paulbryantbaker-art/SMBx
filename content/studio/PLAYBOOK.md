@@ -304,6 +304,18 @@ optional and it is not something the script can do for you.
 - No commentary on owners as people. Situation, yes — "founder in his
   sixties, no successor named in the source" — character, no.
 - Nothing about willingness to sell unless a source says it.
+- **Priority tier carries an angle and an objection (2026-08-17).** Every Tier 1
+  row gets two more fields: the tailored approach angle, and the likely
+  objection with its answer. That is what converts a list into an outreach
+  plan — a tier without them is a ranking, not a plan. Both are the
+  practitioner's judgment: write them as judgment, never as fact about the
+  company.
+- **Traffic-light quality scorecard, at screen stage (2026-08-17).** Screened
+  candidates get green/amber/red on five axes — revenue quality, customer
+  concentration, margin vs the trade norm, owner-dependence signals, competitive
+  moat — one evidence line each, sourced like everything else. A colour with no
+  evidence line is a guess wearing a uniform. Cheap now, and it pre-loads the
+  deal-side work if the candidate is promoted at IoI.
 
 ---
 
@@ -486,7 +498,9 @@ mechanical will catch it — `audit.mts` checks numbers, not prose.
                                  follows.
 ## Why this market, now          the structural conditions, with figures and
                                  sources. Separate durable structure from
-                                 cyclical noise.
+                                 cyclical noise — and state the timing catalyst
+                                 in ONE sentence. A thesis without a why-now is
+                                 a watch-list entry, not a thesis (2026-08-17).
 ## What we would buy             the acquisition profile, concrete enough to
                                  screen against
 ## How value is created after close
