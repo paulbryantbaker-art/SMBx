@@ -1,7 +1,7 @@
 # CRM_BRIDGE.md — the Cowork → app contract
 
-Last updated: 2026-08-14. Written from the code and verified by round-trip, not
-from any prior status document.
+Last updated: 2026-08-14; §0 added 2026-08-18. Written from the code and
+verified by round-trip, not from any prior status document.
 
 The division of labour is THE SPLIT applied to data. The **smart half** —
 enumeration, entity resolution, enrichment, affiliation screening, tiering —
@@ -10,6 +10,32 @@ scored list has to become accounts, contacts, waves and touches, and it is pure
 code: `POST /api/crm/import-bundle` **calls no model**. That is the entire point
 of the loop, and it is verified — `server/routes/crm.ts:441` imports only
 `parseCsv` and `seedOutreachFromTables`, and neither reaches an API key.
+
+---
+
+## 0. Where the register lives (2026-08-18)
+
+**The living register is in the WORKSPACE repo.**
+
+```
+~/Documents/smbx-studio/clients/crm-bundle/     ← edit here, push from here
+~/Documents/GitHubRepos/SMBx-live/SMBx/content/crm-seed/   ← FROZEN fixture
+```
+
+It moved because this repo deploys: Railway builds `smbx.ai` on every push to
+`main`, and a research edit to a register should not ship a website. The
+workspace deploys nothing and pushing it costs nothing.
+
+`content/crm-seed/` **stays and must stay** — `crmOutreachSeed.ts:88` resolves
+it and reads all seven files by name at runtime, so the app's seed press throws
+without it. It is now the 2026-08-05 plan exactly as shipped: a deploy fixture
+and the header contract, never a working copy. See `content/crm-seed/README.md`.
+
+**Column ownership is written down for the first time** in
+`clients/crm-bundle/COLUMNS.md`: git owns the facts, the app owns the state, and
+the three contested columns (`grade`, `tier`, `source_key`) are decided there
+against the COALESCE policy in §5. The one-way door is the rule — facts flow
+git → app and never back, and the app's copy is not allowed to be edited.
 
 ---
 
@@ -92,8 +118,9 @@ byte-identical to "you didn't send any waves." Re-pushed with the canonical
 headers, the same file produced `1 waves · 3 steps · 2 templates · 4 touches`.
 
 **A zero in the campaign line is ambiguous. Treat it as a header check, not as
-an empty sheet.** The canonical headers are the ones in `content/crm-seed/*.csv`;
-copy them verbatim.
+an empty sheet.** The canonical headers are the ones in
+`~/Documents/smbx-studio/clients/crm-bundle/*.csv` (and, frozen and identical,
+`content/crm-seed/*.csv`); copy them verbatim.
 
 Required headers per slot (everything else is optional):
 
@@ -122,7 +149,7 @@ SMBX_TOKEN=… npx tsx scripts/studio/push-crm.mts <dir>
 | `SMBX_TOKEN` | — | Cowork access token (Settings → Connections → "Show my token"). The normal path: Paul signs in with Google and has no password. |
 | `SMBX_EMAIL` + `SMBX_PASSWORD` | — | Fallback; POSTs `/api/auth/login` for a token. |
 | `SMBX_APP_URL` | `https://smbx.ai` | App base. |
-| `<dir>` | `./crm-bundle`, then `content/crm-seed` | Folder of CSVs. |
+| `<dir>` | `./crm-bundle`, then `content/crm-seed` | Folder of CSVs. **Run from `~/Documents/smbx-studio/clients/` and the first default finds the living register with no argument.** |
 
 It reads the directory, **sends only `*.csv`**, and POSTs
 `{files: {basename: text}}` with `Authorization: Bearer <token>`.
