@@ -186,8 +186,11 @@ export function calculateSBAFinancing(
   termMonths: number,
   sellerNotePct: number = 0,
   workingCapital: number = 0,
+  transactionFees: number = 0,
 ): SBAResult {
-  const totalProjectCost = purchasePrice + workingCapital;
+  // Parity with house/deal.ts sbaFinancing (2026-08-17): fees are explicit
+  // inputs folded into total project cost — see the note there.
+  const totalProjectCost = purchasePrice + workingCapital + transactionFees;
   const downPayment = Math.round(totalProjectCost * downPaymentPct);
   const sellerNote = Math.round(purchasePrice * sellerNotePct);
   const loanAmount = totalProjectCost - downPayment - sellerNote;

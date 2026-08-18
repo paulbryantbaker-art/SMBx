@@ -42,10 +42,11 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import {
   lbo, sbaFinancing, valuation, dcf, earnout, workingCapitalPeg,
-  covenantCompliance, sensitivityMatrix, amortize,
+  covenantCompliance, sensitivityMatrix, sensitivityBreakpoints, amortize,
   money, pct, mult, derivations, LEAGUE_MULTIPLES,
   type LBOAssumptions, type EarnoutMilestone,
 } from '../../house/deal.js';
+import { lenderProjections, type ProjectionDrivers } from '../../house/projections.js';
 
 const WS = process.cwd();
 const DEALS = path.join(WS, 'deals');
@@ -64,7 +65,15 @@ export interface DealSpec {
   sba?: {
     downPaymentPct: number; rate: number; termMonths: number;
     sellerNotePct?: number; workingCapital?: number;
+    /** SBA guaranty (~3%), lender/packaging, legal, QoE — cents. Explicit, never assumed absorbed. */
+    transactionFees?: number;
   };
+  /**
+   * The lender projection set — monthly year-1 + annual 5-year, real
+   * amortization, two coverage bases. Refuses on missing drivers; the
+   * refusal is printed, never papered over. See house/projections.ts.
+   */
+  projections?: ProjectionDrivers;
   covenants?: { minDscr: number; maxDebtToEbitda: number; maxLtv: number };
   workingCapital?: { month: string; currentAssets: number; currentLiabilities: number }[];
   earnout?: { milestones: EarnoutMilestone[]; discountRate: number };
@@ -73,6 +82,8 @@ export interface DealSpec {
     var1: keyof LBOAssumptions; values1: number[];
     var2: keyof LBOAssumptions; values2: number[];
     metric: 'irr' | 'moic' | 'dscr';
+    /** Where the deal BREAKS: cells under this are marked. dscr → 1.25 is the SBA floor; irr → the client's hurdle. */
+    threshold?: number;
   };
   /** Open questions. Always printed, even when empty — an empty list is a claim. */
   unknowns?: string[];
@@ -222,12 +233,17 @@ function render(spec: DealSpec): string {
     const s = sbaFinancing(
       spec.model.purchasePrice, spec.model.ebitda, spec.sba.downPaymentPct,
       spec.sba.rate, spec.sba.termMonths, spec.sba.sellerNotePct ?? 0,
-      spec.sba.workingCapital ?? 0,
+      spec.sba.workingCapital ?? 0, spec.sba.transactionFees ?? 0,
     );
     out.push('## If this is financed SBA');
     out.push('');
+    if (!spec.sba.transactionFees) {
+      out.push('> **No transaction fees entered.** The SBA guaranty fee (~3% of the guaranteed portion), lender/packaging, legal and QoE are NOT in this project cost, so debt service is understated and the equity injection reads low. Enter `transactionFees` before this reaches a lender.');
+      out.push('');
+    }
     out.push(table(['Line', 'Amount'], [
       ['Total project cost', money(s.totalProjectCost)],
+      ...(spec.sba.transactionFees ? [['  of which transaction fees', money(spec.sba.transactionFees)]] : []),
       ['Down payment', `${money(s.downPayment)} (${pct(spec.sba.downPaymentPct)})`],
       ['Seller note', money(s.sellerNote)],
       ['Loan amount', money(s.loanAmount)],
@@ -356,12 +372,64 @@ function render(spec: DealSpec): string {
       /Pct|Rate|Margin/.test(k) ? pct(v) : /Multiple/.test(k) ? mult(v) : String(v);
     out.push(`## Sensitivity — ${s.metric.toUpperCase()}`);
     out.push('');
+    const bp = s.threshold !== undefined ? sensitivityBreakpoints(grid, s.threshold) : null;
+    const isFail = (i: number, j: number) => !!bp && bp.failing.some(f => f.row === i && f.col === j);
     out.push(table([`${String(s.var1)} \\ ${String(s.var2)}`, ...s.values2.map(v => label(String(s.var2), v))],
       grid.matrix.map((row, i) => [
         label(String(s.var1), s.values1[i]),
-        ...row.map(v => fmt(v)),
+        ...row.map((v, j) => isFail(i, j) ? `**${fmt(v)} ✗**` : fmt(v)),
       ])));
     out.push('');
+    if (bp) {
+      const thr = s.metric === 'irr' ? pct(bp.threshold) : mult(bp.threshold);
+      if (bp.noBoundary) {
+        out.push(`> Threshold ${thr}: ${bp.failingCount === 0 ? 'every cell clears it' : 'every cell fails it'} — this grid shows no boundary and teaches nothing. Widen the ranges until the break is inside the table.`);
+      } else {
+        out.push(`> **✗ = under ${thr}** (${bp.failingCount} of ${bp.totalCells} cells). The boundary between marked and unmarked cells is where this deal breaks — that line, not the base case, is what the IC memo should carry.`);
+      }
+      out.push('');
+    }
+  }
+
+  /* Lender projections */
+  if (spec.projections) {
+    out.push('## Lender projections — monthly year 1, annual years 1–5');
+    out.push('');
+    const p = lenderProjections(spec.projections);
+    if (!p.ok) {
+      out.push('> **NOT BUILT — drivers missing.** The projection refuses rather than defaults; a defaulted growth rate or an assumed contribution margin is an invented number wearing a model\'s clothes. Supply:');
+      out.push('');
+      out.push(p.missing.map(m => `- \`${m}\``).join('\n'));
+      out.push('');
+    } else {
+      for (const n of p.notes) out.push(`> ${n}`);
+      out.push('');
+      out.push('### Year 1 by month');
+      out.push('');
+      out.push(table(['Mo', 'Revenue', 'EBITDA', 'Capex', 'ΔWC', 'Debt svc', 'FCF after DS', 'Closing cash'],
+        p.monthly.map(m => [String(m.month), money(m.revenue), money(m.ebitda), money(m.capex), money(m.wcChange), money(m.debtService), money(m.fcfAfterDebtService), money(m.closingCash)])));
+      out.push('');
+      out.push('### Years 1–5');
+      out.push('');
+      out.push(table(['Yr', 'Revenue', 'EBITDA', 'Debt svc', 'DSCR (EBITDA)', 'DSCR (cash)', 'FCF after DS', 'Closing cash', 'Loan bal', 'Note bal'],
+        p.annual.map(y => [String(y.year), money(y.revenue), money(y.ebitda), money(y.debtService),
+          Number.isFinite(y.dscrEbitda) ? mult(y.dscrEbitda) : '—', Number.isFinite(y.dscrCash) ? mult(y.dscrCash) : '—',
+          money(y.fcfAfterDebtService), money(y.closingCash), money(y.closingLoanBalance), money(y.closingSellerNoteBalance)])));
+      out.push('');
+      const c = p.checks;
+      out.push('### Checks');
+      out.push('');
+      out.push(`- DSCR (EBITDA basis) under the 1.25 floor: ${c.dscrFloorBreachYears.length ? '**years ' + c.dscrFloorBreachYears.join(', ') + '**' : 'none'}`);
+      out.push(`- First month closing cash goes negative: ${c.firstNegativeCashMonth === null ? 'never in year 1' : '**month ' + c.firstNegativeCashMonth + '**'}`);
+      out.push(`- Lowest year-1 closing cash: ${money(c.minMonthlyCash.cash)} in month ${c.minMonthlyCash.month}`);
+      out.push(`- Monthly roll ties to annual roll at year 1: ${c.monthlyAnnualTie ? 'yes' : '**NO — internal inconsistency, do not send**'}`);
+      out.push('');
+      derived.push({
+        figure: `Year-1 EBITDA ${money(p.annual[0].ebitda)}`,
+        from: `revenue ${money(p.annual[0].revenue)} × contribution margin ${pct(spec.projections.contributionMargin ?? 0)} − fixed costs ${money(spec.projections.fixedCostsAnnualCents ?? 0)}.`,
+        assumption: 'The fixed/variable split is from the verified P&L; the bear case moves revenue against a fixed base, never a margin haircut.',
+      });
+    }
   }
 
   /* Unknowns — always present */
@@ -431,7 +499,9 @@ export const deal = {
     mezDebtPct:    0,    mezRate:    0,     mezTerm:    0,
   },
 
-  sba: { downPaymentPct: 0.10, rate: 0.105, termMonths: 120, sellerNotePct: 0.10 },
+  // transactionFees: SBA guaranty (~3% of the guaranteed portion) + lender/packaging + legal + QoE, in cents.
+  // Leave it out and the model SAYS SO rather than pretending the fees vanish.
+  sba: { downPaymentPct: 0.10, rate: 0.105, termMonths: 120, sellerNotePct: 0.10, transactionFees: 6_500_000 },
 
   covenants: { minDscr: 1.25, maxDebtToEbitda: 3.5, maxLtv: 0.80 },
 
@@ -439,6 +509,29 @@ export const deal = {
     var1: 'revenueGrowthRate', values1: [0.01, 0.03, 0.05, 0.07, 0.09],
     var2: 'exitMultiple',      values2: [3.0, 3.5, 4.0, 4.5, 5.0],
     metric: 'irr',
+    threshold: 0.20,   // the client's hurdle — cells under it are marked ✗; that boundary is the finding
+  },
+
+  // The lender set. Every driver is REQUIRED — the model refuses on a gap and
+  // names it, because a defaulted driver is an invented number.
+  // Money is CENTS. contributionMargin = 1 − variable-cost ratio from the P&L.
+  projections: {
+    year1RevenueCents:            310_000_000,
+    contributionMargin:           0.38,     // TODO — from the verified P&L's fixed/variable split
+    fixedCostsAnnualCents:         78_000_000, // TODO — rent, office payroll, trucks, insurance, replacement-manager wage
+    revenueGrowthRate:            0.05,
+    maintenanceCapexAnnualCents:    6_000_000,
+    wcPctOfRevenue:               0.10,
+    loanAmountCents:              120_000_000, // = the SBA loan above once fees are in
+    annualRate:                   0.105,
+    termMonths:                   120,
+    sellerNoteCents:               15_000_000,
+    sellerNoteRate:               0.06,
+    sellerNoteTermMonths:         60,
+    sellerNoteStandbyMonths:      24,        // full standby, the equity-injection shape
+    openingCashCents:              10_000_000,
+    // monthlyRevenueWeights: [..12 weights summing to 1..]  — supply for a seasonal trade
+    // baselineMonthlyRevenueCents: <trailing monthly revenue at close>
   },
 
   // Say what is still open. An empty list is a claim.

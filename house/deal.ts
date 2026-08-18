@@ -255,8 +255,13 @@ export function sbaFinancing(
   termMonths: number,
   sellerNotePct: number = 0,
   workingCapital: number = 0,
+  transactionFees: number = 0,
 ): SBAResult {
-  const totalProjectCost = purchasePrice + workingCapital;
+  // Fees (SBA guaranty ~3%, lender/packaging, legal, QoE) are EXPLICIT inputs,
+  // never assumed absorbed: a DSCR computed on a loan that omits them
+  // understates debt service, and the equity injection is checked against
+  // TOTAL PROJECT COST — price + working capital + fees (2026-08-17).
+  const totalProjectCost = purchasePrice + workingCapital + transactionFees;
   const downPayment = Math.round(totalProjectCost * downPaymentPct);
   const sellerNote = Math.round(purchasePrice * sellerNotePct);
   const loanAmount = totalProjectCost - downPayment - sellerNote;
@@ -448,6 +453,37 @@ export function sensitivityMatrix(
   return {
     matrix, var1Values, var2Values,
     var1Key: String(var1Key), var2Key: String(var2Key), metric,
+  };
+}
+
+/**
+ * Breakpoint read on a finished sensitivity grid — where the deal BREAKS,
+ * not just what the numbers are (2026-08-17, from the IB sensitivity set's
+ * one good atom). Additive on purpose: `SensitivityMatrix` is printed by the
+ * CLI and consumed as-is; this annotates without changing its shape. Below
+ * the threshold is failing for every supported metric (irr/moic/dscr all
+ * read "higher is better").
+ */
+export interface SensitivityBreakpoints {
+  threshold: number;
+  metric: 'irr' | 'moic' | 'dscr';
+  /** Cells strictly under the threshold, with the driver values that produce them. */
+  failing: { row: number; col: number; var1: number; var2: number; value: number }[];
+  failingCount: number;
+  totalCells: number;
+  /** True when every cell fails or every cell passes — a grid with no boundary teaches nothing; widen the ranges. */
+  noBoundary: boolean;
+}
+
+export function sensitivityBreakpoints(m: SensitivityMatrix, threshold: number): SensitivityBreakpoints {
+  const failing: SensitivityBreakpoints['failing'] = [];
+  m.matrix.forEach((row, i) => row.forEach((value, j) => {
+    if (value < threshold) failing.push({ row: i, col: j, var1: m.var1Values[i], var2: m.var2Values[j], value });
+  }));
+  const totalCells = m.matrix.length * (m.matrix[0]?.length ?? 0);
+  return {
+    threshold, metric: m.metric, failing, failingCount: failing.length, totalCells,
+    noBoundary: failing.length === 0 || failing.length === totalCells,
   };
 }
 
