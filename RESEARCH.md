@@ -241,6 +241,10 @@ figure is written down.
   would a buyer use if this category did not exist? That sentence anchors every
   figure that follows, and it kills the inflated-TAM problem at the definition
   stage instead of at review.
+  A corollary: horizontal adjacencies (the trade next door a platform could
+  expand into) are noted SEPARATELY as expansion optionality — they are not
+  current market, and folding them into a size figure is the inflated-TAM
+  problem wearing a plausible face.
 - **Top-down and bottom-up, within 3×.** Every market size gets both builds —
   top-down from a named, attributable source; bottom-up from establishment count
   × realistic spend. Divergence beyond 3× means the definition or an assumption
@@ -290,6 +294,16 @@ Three rules that make this pass worth running rather than decorative:
 - **Divergence is the finding, not the aggregate.** "The market grew 4%" tells a
   buyer nothing. Cooling down 26% while furnaces rose 4% tells them what they
   are buying.
+- **Attribute the move — price × volume × mix, with a number on each (2026-08-17).**
+  When the master reports that a market moved, the sentence carrying the
+  aggregate is followed by its attribution: how much is price (PPI series), how
+  much is volume (shipments, C30, QCEW employment), how much is mix (filer
+  segment notes) — arithmetic registered in `## Derivations` where
+  `crossfoot.mts` recomputes it. Where the instruments cannot separate the
+  drivers, the master says so plainly rather than implying the aggregate is
+  demand. "Revenue held while shipments fell 20%" is a price story, and price
+  normalises — a buyer who underwrites it as demand overpays on exactly the
+  mechanism the master failed to name.
 
 ### Pass 2 — Who already owns what (5–6 runs, the longest)
 
@@ -306,6 +320,23 @@ owned business, and this is the same knowledge gathered once.
 **Highest fabrication risk in the job.** Labour and wage inflation (QCEW, BLS
 OES — not a vibe about "tight labour"), insurance, fleet, bonding, parts.
 Multiples with their sources and the outlet that carried them.
+
+Two labeling rules, because the subtlest fabrication here is a REAL, cited
+figure used in the wrong class — traceability is not comparability, and
+`audit.mts` catches only the first (2026-08-17):
+
+- **Every multiple carries its CLASS beside its source**: *asking* (broker or
+  listing figure), *transaction* (a completed deal — control premium and any
+  synergy paid for are inside it), or *trading* (public-market — no control
+  premium, different scale). The classes sit at structurally different levels,
+  so a range assembled from mixed classes is a category error even when both
+  endpoints are cited; transaction multiples sit at the top of any triangulated
+  range because the control premium is inside them.
+- **A public-filer or platform benchmark used against SMB-scale targets carries
+  a one-line like-for-like note** — why the comparison holds, or which direction
+  the scale bias runs. A benchmark with no comparability note is the prose
+  equivalent of an uncited figure. The class label travels with the figure into
+  every document that quotes it.
 
 ### Pass 4 — The gap sweep (1–2 runs)
 
