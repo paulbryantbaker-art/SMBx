@@ -10,7 +10,8 @@ uploads/
 # Texture masters moved out of public/ (2026-06-11 ship-weight fix) — local archive only
 client/textures_backup/
 .DS_Store
-.claude/
+.claude/settings.local.json
+.claude/worktrees/
 
 # Generated test-run artifacts (not source)
 testing/agent-pov/results/
