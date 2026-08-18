@@ -29,7 +29,7 @@
  *   1  something does — a flagged audit, a stale thesis, unfolded research
  *   2  a market could not be read at all
  *
- * Run from the workspace root (~/Documents/smbx-studio).
+ * Run from the workspace root — `studio/` inside the SMBx clone (ONE CLONE, 2026-08-18).
  */
 import { readFileSync, readdirSync, existsSync, statSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';

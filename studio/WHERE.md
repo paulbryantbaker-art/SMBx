@@ -130,7 +130,7 @@ Named by Paul 2026-08-14 as Cowork work. Reading a messy sheet, reconciling expo
 
 MARKET-shaped. Screening thirty candidates off a register must not require thirty deal records in the app — it requires the same formulas the app would use, run over a list.
 
-> ⚠️ **Not fully there yet.** The engine is NOT vendored yet. Today this reads $REPO directly, which is always-current but carries NO provenance stamp — an output cannot say which engine version produced it, and it breaks if the clone is missing or stale. THE_IOI_SEAM.md requires a vendored copy at a pinned commit with ENGINE_PROVENANCE.md. Open item.
+> ⚠️ **Not fully there yet.** The engine is NOT vendored (studio/_engine/deal-math/engine/ is empty; its ENGINE_PROVENANCE.md says so). ONE CLONE (2026-08-18) changes what that costs: this reads $REPO, which is now the parent of studio/ at the SAME commit as the laws, so it cannot be missing or stale — the clone HEAD is the provenance. What is still open is that an OUTPUT carries no engine-version stamp; THE_IOI_SEAM.md asks for a pinned copy with ENGINE_PROVENANCE.md, and in one clone the cheaper answer may be stamping `git rev-parse HEAD` onto the output. Open item.
 
 - npx tsx $REPO/scripts/studio/deal.mts run <spec.deal.mts>   # same engine as the app
 - Output is a DELIVERABLE — a document or workbook you can hand someone —

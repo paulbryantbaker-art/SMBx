@@ -19,9 +19,10 @@
  * here is a finding (nobody knows its source); one that is mapped but whose
  * studio source is missing is a finding (the source of truth is gone).
  *
- *   npx tsx scripts/studio/drift-check.mts --studio <path-to-smbx-studio> [--repo <path>]
+ *   npx tsx scripts/studio/drift-check.mts [--studio <path>] [--repo <path>]
  *
- * Runs on the Mac, where both trees exist. Exit 0 in sync · 1 drift or
+ * ONE CLONE (2026-08-18): both trees are in this repo — the studio root defaults
+ * to `<repo>/studio`, so no flag is needed. Runs anywhere the clone is. Exit 0 in sync · 1 drift or
  * mapping failure · 2 usage.
  */
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
@@ -48,24 +49,22 @@ const MANIFEST: { repo: string; studio: string }[] = [
   },
 ];
 
-/* Copies of the method docs the engine repo carries for workspace seeding.
-   Same rule, no cover exemption: byte-identical or drifted. */
-const DOC_PAIRS: { repo: string; studio: string }[] = [
-  { repo: 'content/studio/workspace-CLAUDE.md', studio: 'CLAUDE.md' },
-  { repo: 'content/studio/PLAYBOOK.md', studio: 'PLAYBOOK.md' },
-  { repo: 'content/studio/RESEARCH.md', studio: 'RESEARCH.md' },
-  { repo: 'content/studio/FORMATS.md', studio: 'FORMATS.md' },
-  { repo: 'content/studio/DESIGN.md', studio: 'DESIGN.md' },
-  { repo: 'content/studio/REPORT_TEMPLATE.md', studio: 'REPORT_TEMPLATE.md' },
-  { repo: 'content/studio/CLOUD_BOOTSTRAP.md', studio: 'CLOUD_BOOTSTRAP.md' },
-];
+/* The method docs used to be carried TWICE — `content/studio/*` in the engine
+   repo and a copy in the workspace, refreshed by init-workspace — and this
+   list checked the pair. ONE CLONE (2026-08-18) ended that: the workspace is
+   `studio/` inside this repo and the laws exist once, so there is no pair to
+   compare. Empty on purpose; the MANIFEST above (published website copies vs
+   their studio masters) is still two real copies and still the point. */
+const DOC_PAIRS: { repo: string; studio: string }[] = [];
 
 const args = process.argv.slice(2);
 const flag = (name: string) => (args.includes(name) ? args[args.indexOf(name) + 1] : null);
-const studioRoot = flag('--studio');
 const repoRoot = flag('--repo') ?? path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
-if (!studioRoot || !existsSync(studioRoot)) {
-  console.error('usage: drift-check.mts --studio <path-to-smbx-studio> [--repo <path>]');
+/* ONE CLONE: the studio root defaults to `<repo>/studio`. `--studio` remains
+   for the transition (an old separate folder), not as the normal case. */
+const studioRoot = flag('--studio') ?? path.join(repoRoot, 'studio');
+if (!existsSync(studioRoot)) {
+  console.error(`drift-check.mts: studio root not found at ${studioRoot} — pass --studio <path> if the workspace is elsewhere`);
   process.exit(2);
 }
 

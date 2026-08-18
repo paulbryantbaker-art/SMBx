@@ -340,12 +340,14 @@ ok('KNOWN GAP: the one-pager grammar still lives in its builder, not in house/',
    reason. A law that does not travel is the defect this practice keeps
    finding. */
 {
-  const state = read('content/studio/COLLATERAL_STATE.md');
-  const init = read('scripts/studio/init-workspace.mts');
-  const ws = read('content/studio/workspace-CLAUDE.md');
+  /* ONE CLONE (2026-08-18): the workspace lives at `studio/` in this repo and
+     the write-up is read in place — the copier that used to carry it there is
+     retired, so "it travels" is now "it is there and the CLAUDE.md beside it
+     points at it". */
+  const state = read('studio/COLLATERAL_STATE.md');
+  const ws = read('studio/CLAUDE.md');
 
-  ok('init-workspace copies COLLATERAL_STATE.md into the workspace',
-    init.includes("'COLLATERAL_STATE.md'"));
+  ok('COLLATERAL_STATE.md lives in the workspace itself', state.length > 0);
   ok('the workspace CLAUDE.md routes to it before a build',
     ws.includes('COLLATERAL_STATE.md'));
 

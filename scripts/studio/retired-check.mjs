@@ -29,7 +29,7 @@
  *
  * Zero dependencies. Plain node, no tsx, no install, no network.
  *
- *   node retired-check.mjs --studio ~/Documents/smbx-studio
+ *   node retired-check.mjs --studio ./studio        # ONE CLONE: the workspace is studio/ in this repo
  *   node retired-check.mjs --studio . --market home-services
  *   node retired-check.mjs --studio . --json
  *

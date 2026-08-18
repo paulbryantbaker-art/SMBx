@@ -1,43 +1,80 @@
 # smbX studio workspace
 
-This folder is Paul Baker's corp-dev practice, on his machine. Claude Code
-drives it. There is no app, no server, no database — the folders below are the
-system of record, and the SMBx repo is the engine you run against them.
-
-**The paths on this machine (corrected 2026-08-12 — see the note below):**
-
-```
-REPO      /Users/paulbaker/Documents/GitHubRepos/SMBx-live/SMBx   # the engine
-STUDIO    /Users/paulbaker/Documents/smbx-studio                  # this folder
-```
-
-Set `REPO` once per session — every command below uses it:
-
-```
-export REPO=/Users/paulbaker/Documents/GitHubRepos/SMBx-live/SMBx
-```
-
-`$REPO` is the checkout that has `package.json`, `scripts/`, `house/` and
-`server/` in it — the one `npm install` was run in. The builders live at
-`$REPO/scripts/studio/`.
-
-> **Why this changed.** Until 2026-08-12 this file pointed `REPO` at
-> `GitHubRepos/SMBx-main`, which was locked in on 2026-07-27 and has been an
-> **empty folder** since at least 2026-08-11 — no `.git`, no `package.json`,
-> nothing. Every command in this file silently pointed at nothing, which is how
-> a session ends up rendering from a copy of the engine it found somewhere else.
-> There are exactly **two** git repositories in this practice and neither is
-> called SMBx-main:
+> ## ONE CLONE — read this first (Paul, 2026-08-18)
 >
-> | | path | remote | deploys |
-> |---|---|---|---|
-> | **ENGINE + WEBSITE** | `GitHubRepos/SMBx-live/SMBx` | `paulbryantbaker-art/SMBx` | **yes — smbx.ai, on every push to `main`** |
-> | **WORKSPACE** | `smbx-studio` (this folder) | `smbx-ai/smbx-studio` | no |
+> **This folder now lives INSIDE the SMBx repo, at `studio/`.** There is one
+> clone on this machine and both agents work from it:
 >
-> `GitHubRepos/SMBx-main` (empty), `GitHubRepos/smbx-engine` (a two-commit
-> snapshot of the website repo, unrelated history, deploys nothing) and
-> `GitHubRepos/Git` (a GitHub issue export) are debris. Do not run against them
-> and do not push to them.
+> ```
+> CLONE     /Users/paulbaker/Documents/GitHubRepos/smbx-prod   # paulbryantbaker-art/SMBx
+> STUDIO    $CLONE/studio                                       # this folder — Cowork opens HERE
+> REPO      $CLONE                                              # the engine — Claude Code opens HERE
+> ```
+>
+> Set it once per session; every `$REPO/…` command below still works because
+> **`$REPO` is simply the parent of this folder**:
+>
+> ```
+> export REPO="$(cd .. && pwd)"        # from inside studio/
+> ```
+>
+> The engine and these laws are always the SAME COMMIT, so neither can be
+> missing or stale relative to the other — the failure the 2026-08-12 note
+> below was written about cannot recur. The old separate folder
+> (`~/Documents/smbx-studio`, remote `smbx-ai/smbx-studio`) is history: it was
+> brought in with `git subtree add` (its 21 commits are in this repo's log) and
+> the remote is archive-only. **Do not run against `~/Documents/smbx-studio`
+> or `SMBx-live/SMBx` — they are renamed `_old` and exist only for the
+> git-ignored renders they still hold.**
+>
+> **The rule — main is deploy, nobody commits to it:**
+> - `git pull` on `main` first. Branch: `cowork/<topic>` (Cowork) ·
+>   `claude/<topic>` (Claude Code). Open a PR; Paul merges. Every push to
+>   `main` builds smbx.ai on Railway.
+> - If `git status` shows changes you did not make, **stop and say so.** Never
+>   commit someone else's working tree; never force-push; never rewrite
+>   history; never delete a branch you did not create.
+> - A cloud Cowork session **cannot push** (no credential helper). Commit from
+>   the Mac, or hand the diff to Paul.
+> - Studio work stays under `studio/`. The root `CLAUDE.md`, `.gitignore`,
+>   `.dockerignore`, `Dockerfile`, `server/`, `client/`, `house/`, `shared/`
+>   are Claude Code's — ask for an engine change, do not make it here.
+> - No file over 20 MB. `studio/.gitignore` (nested, honoured by git) keeps
+>   PDFs, page JPGs and video out of the repo; video never goes in any repo;
+>   GitHub rejects anything over 100 MB outright.
+>
+> **What the APP reads, and where it lives:** the posting calendar's content
+> of record and the JSON the Posting tab imports are `../content/studio/`
+> (`CAMPAIGN_2026-08-18.md` + `campaign-2026-08-18.json`, `POST_QUEUE.md` +
+> `post-queue.json`) — the ONE studio-authored set the server reads at
+> runtime, so it stays under `content/`, not here. Everything else the studio
+> produces is a file in this folder and never reaches the image (`.dockerignore`
+> excludes `studio/`).
+>
+> **Retired with the move:** `init-workspace.mts` (there is no separate
+> workspace to seed or `--update` — the laws are read in place; the script
+> refuses to run and says so), the two-repo `sync.mjs` (one clone pulls
+> itself; see its header), the `content/studio/*` law copies (deleted; these
+> files are the only copies), and `CLOUD_BOOTSTRAP.md`'s tar-the-engine dance
+> (a cloud session that mounts the clone has the engine beside it).
+
+This folder is Paul Baker's corp-dev practice. Claude Code and Cowork drive
+it. There is no app UI over it, no server, no database — the folders below are
+the system of record, and the SMBx repo around them is the engine you run
+against them.
+
+> **The 2026-08-12 note, kept for the record (paths superseded above).** Until
+> 2026-08-12 this file pointed `REPO` at `GitHubRepos/SMBx-main`, which was
+> locked in on 2026-07-27 and had been an **empty folder** since at least
+> 2026-08-11 — no `.git`, no `package.json`, nothing. Every command in this
+> file silently pointed at nothing, which is how a session ends up rendering
+> from a copy of the engine it found somewhere else. That was the two-places
+> failure in its purest form, and ONE CLONE is the structural answer to it:
+> there is now exactly ONE git repository in this practice, and this folder is
+> inside it. `GitHubRepos/SMBx-main` (empty), `GitHubRepos/smbx-engine` (a
+> two-commit snapshot of the website repo, unrelated history) and
+> `GitHubRepos/Git` (a GitHub issue export) are debris. Do not run against
+> them and do not push to them.
 
 ## Layout
 

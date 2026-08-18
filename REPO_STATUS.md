@@ -1,5 +1,18 @@
 # REPO_STATUS.md — what's current, what's stale
 
+> **ONE CLONE (2026-08-18) — read before acting on any path in this document.**
+> The studio workspace now lives at **`studio/` inside this repo** (the one
+> clone: `~/Documents/GitHubRepos/smbx-prod`). `~/Documents/smbx-studio` and
+> its remote `smbx-ai/smbx-studio` are history (brought in by `git subtree`,
+> history kept); `content/studio/` keeps only the app-read posting files
+> (`POST_QUEUE.md`/`post-queue.json`, `CAMPAIGN_*.md`/`campaign-*.json`,
+> `queue-export.mjs`); `init-workspace.mts` is retired. Where this document says
+> `~/Documents/smbx-studio` read `studio/`; where it says "the workspace repo"
+> read this repo. **Nobody commits to `main`** — branch (`claude/<topic>` ·
+> `cowork/<topic>`), PR, Paul merges. Full statement: the ONE CLONE section of
+> `CLAUDE.md`. Everything below is otherwise unchanged and still binding.
+
+
 **Last updated: 2026-07-11.**
 
 ## 2026-07-11 — BUSINESS-MODEL PIVOT (THE LINE v2) — read this first
@@ -65,7 +78,9 @@ Connector distribution is now a first-class discovery surface at `/api/definitiv
 ## ✅ Current — read these as authoritative
 
 ### Architecture & operating instructions
-- `CLAUDE.md` — project instructions (canonical entry point)
+- `CLAUDE.md` — project instructions (canonical entry point); its ONE CLONE section (2026-08-18) is the current operating model — one clone, `main` is deploy, branch + PR
+- **`studio/` — THE STUDIO WORKSPACE, in-repo since 2026-08-18** (masters, research, documents, clients, collateral specs, the definitive layer, and its own `CLAUDE.md`/`PLAYBOOK.md`/`FORMATS.md`/`DESIGN.md`/`RESEARCH.md`/`WEEKLY.md` — the ONLY copies of the studio laws). Excluded from the Railway image by `.dockerignore`. Cowork sessions open here.
+- `content/studio/` — ONLY the app-read posting files now: `POST_QUEUE.md`/`post-queue.json`, `CAMPAIGN_*.md`/`campaign-*.json`, `queue-export.mjs` (the law copies that used to sit here were deleted 2026-08-18)
 - `methodology/V19_BUILD_PLAN.md` — current build state and sequencing
 - `BUILD_STATUS.md` — May 3 pre-V19 audit; historical baseline, not the active V19 build list
 - `V6_WIRING_LOG.md`, `V6_MOBILE_WIRING_LOG.md` — what V6 wiring landed and where

@@ -73,3 +73,6 @@ collateral/**/*.mov
 *.avi
 *.webm
 *.ProRes.*
+
+# the hourly one-clone sync writes its log beside itself; an untracked log must never dirty the tree (a dirty main BLOCKS the sync — 2026-08-18)
+sync.log

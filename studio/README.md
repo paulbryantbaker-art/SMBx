@@ -1,5 +1,17 @@
 # smbX Studio — local workspace
 
+> **ONE CLONE (2026-08-18) — read before acting on any path in this document.**
+> This workspace now lives at **`studio/` inside the SMBx repo** — the one
+> clone at `~/Documents/GitHubRepos/smbx-prod`; the engine is `..`. The old
+> `~/Documents/smbx-studio` folder and its remote `smbx-ai/smbx-studio` are
+> history. Where this document says `$REPO`, that is now the parent of this
+> folder; where it says "the workspace repo" or "the engine repo", they are
+> the same repo. **Nobody commits to `main`** — branch (`cowork/<topic>` ·
+> `claude/<topic>`), PR, Paul merges; a cloud session cannot push. Full
+> statement: the ONE CLONE section at the top of `CLAUDE.md` in this folder.
+> Everything below is otherwise unchanged and still binding.
+
+
 Everything runs on this computer. No SMBX app, no app API key.
 
 ```

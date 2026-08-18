@@ -1,5 +1,17 @@
 # THE WEEKLY SWEEP — the standing job for the Saturday agent
 
+> **ONE CLONE (2026-08-18) — read before acting on any path in this document.**
+> This workspace now lives at **`studio/` inside the SMBx repo** — the one
+> clone at `~/Documents/GitHubRepos/smbx-prod`; the engine is `..`. The old
+> `~/Documents/smbx-studio` folder and its remote `smbx-ai/smbx-studio` are
+> history. Where this document says `$REPO`, that is now the parent of this
+> folder; where it says "the workspace repo" or "the engine repo", they are
+> the same repo. **Nobody commits to `main`** — branch (`cowork/<topic>` ·
+> `claude/<topic>`), PR, Paul merges; a cloud session cannot push. Full
+> statement: the ONE CLONE section at the top of `CLAUDE.md` in this folder.
+> Everything below is otherwise unchanged and still binding.
+
+
 > Paul, 2026-08-10: *"why can we not have a series of agents that automate some
 > of these processes where the agent goes out and does the industry research
 > every week for the verticals that we use, and brings back an update the docs
