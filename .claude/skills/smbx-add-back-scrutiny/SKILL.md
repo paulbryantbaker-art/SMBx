@@ -12,6 +12,7 @@ Any time a deal's earnings figure includes adjustments — the broker recast in 
 - **Engine:** clean SDE/EBITDA is computed by the engine from the deal profile. This skill decides *which add-backs enter the profile*; the engine does the math. Never total a bridge in conversation.
 - **Evidence gate:** an add-back enters the math only when marked `verified: true` with `evidence` in deal.json. **This skill is the rubric for granting that flag.** Everything else goes to the assumption log.
 - **League rule:** L1–L2 deals lead with SDE (one owner's compensation added back by definition — a second owner's is a red flag); L3–L6 lead with Adjusted EBITDA (a market-rate manager replacement wage must be *deducted*, not ignored).
+- **`deal.json` is design, not yet built.** As of 2026-08-17 there is no IoI promotion packet — `house/where.ts` records it as the largest unbuilt piece of the seam. Keep the discipline (every figure carries a source; add-backs enter only when verified with evidence; everything else to the assumption log) but record it in the deal's `.deal.mts` spec (`earningsSource`, `unknowns`) and the analysis document. Do not tell anyone to open a file that is not there.
 
 ## Method
 1. **Inventory.** List every add-back preserving the exact source label and dollar amount, per year. No consolidation, no rounding — the label the seller chose is itself evidence.

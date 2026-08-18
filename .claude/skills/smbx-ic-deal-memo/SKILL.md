@@ -12,6 +12,7 @@ Diligence is substantially complete and the client must decide. The memo is the 
 - **Answer-first.** The recommendation is the first sentence of the memo and of its own section. Nothing is buried.
 - **Evidence:** every figure is engine-stamped; every claim cites its source (document, engine run, or call note). Anything still Asserted at memo time is named as such — an Asserted claim load above a handful of items means the memo is early, not that the language should soften.
 - **The risk register is built from the issues log,** not reconstructed from memory. Risks that appear in the memo but not the log indicate a broken process; fix the log.
+- **`master@commit` is design, not yet built.** As of 2026-08-17 a deal carries no pointer to the market master that priced it — `house/where.ts` records it as part of the largest unbuilt piece of the seam. Cite the master by name and version instead, and read it in the studio rather than copying it.
 
 ## Method
 1. **Executive summary (write last, present first).** One page: the company in a sentence; the deal (price, structure, multiple on verified earnings, equity and debt); the thesis in three bullets; the primary risk and its mitigant in one; the recommendation; base-case returns and bear-case DSCR headroom.

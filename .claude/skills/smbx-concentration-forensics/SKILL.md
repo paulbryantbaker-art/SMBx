@@ -11,6 +11,7 @@ Customer-level revenue data is available (or claimed) for a live deal. In SMB �
 ## House rules
 - **Engine:** the walk-away simulation is an engine run — remove revenue, recompute SDE/EBITDA and DSCR from the profile — not chat arithmetic.
 - **Evidence:** "no customer over 10%" is an Asserted claim until the customer-level ledger proves it. Concentration findings carry the ledger reference as their source line.
+- **`deal.json` is design, not yet built.** As of 2026-08-17 there is no IoI promotion packet — `house/where.ts` records it as the largest unbuilt piece of the seam. Keep the discipline (every figure carries a source; add-backs enter only when verified with evidence; everything else to the assumption log) but record it in the deal's `.deal.mts` spec (`earningsSource`, `unknowns`) and the analysis document. Do not tell anyone to open a file that is not there.
 
 ## Method
 1. **Pyramid.** Top 1 / 3 / 5 / 10 / 20 customers and remainder, each tier's share of revenue, from the actual ledger — not the CIM summary. SMB thresholds: flag any customer above **10%**; above **20%** is a pricing and financing event (SBA underwriters treat it as one).

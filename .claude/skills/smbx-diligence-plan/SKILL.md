@@ -11,6 +11,7 @@ The teardown is done, or an LOI has been signed with a diligence window running.
 ## House rules
 - **Seam & engine:** deal-shaped, app-side. Documents land in the deal's data room; every finding that carries a figure is engine-verified from documents before it enters the profile.
 - **Evidence:** the DDQ exists to convert Asserted claims to Primary evidence. Each request traces to a specific teardown question — no boilerplate requests, no unowned findings.
+- **`deal.json` and `master@commit` are design, not yet built.** As of 2026-08-17 there is no IoI promotion packet and no master pointer on a deal — `house/where.ts` records this as the largest unbuilt piece of the seam. Keep the discipline (every figure carries a source; add-backs enter only when verified with evidence; everything else to the assumption log) but record it in the deal's `.deal.mts` spec (`earningsSource`, `unknowns`) and the analysis document. Do not tell anyone to open a file that is not there.
 
 ## Method
 1. **Activate workstreams (SMB set).**

@@ -11,6 +11,7 @@ Twice in every deal: early (before LOI, to price the owner's true role) and agai
 ## House rules
 - **Evidence:** "strong second-tier team" is Asserted until org chart, tenure, payroll, and license records prove it. Revenue-at-risk from transfer failures is an engine computation from the profile, not an estimate in chat.
 - **Seam:** counterparty-confidential; app-side from IoI.
+- **`deal.json` is design, not yet built.** As of 2026-08-17 there is no IoI promotion packet — `house/where.ts` records it as the largest unbuilt piece of the seam. Keep the discipline (every figure carries a source; add-backs enter only when verified with evidence; everything else to the assumption log) but record it in the deal's `.deal.mts` spec (`earningsSource`, `unknowns`) and the analysis document. Do not tell anyone to open a file that is not there.
 
 ## Method
 1. **Map the people.** Every named person by function: owner(s), managers, estimators/service leads, license holders, office/books. Tenure, family relationship to seller, compensation (cross-check the add-back schedule — a "redundant" family member who actually dispatches every job is not an add-back), and whether a deputy exists.
