@@ -85,6 +85,20 @@ section with inputs, arithmetic and assumption. **A rounded figure is a
 different figure.** Conflicting sources keep **both** values and cite both —
 never an invented midpoint. Every document ends on **What we don't know yet**.
 
+## The so-what filter — how a document is derived from a master (2026-08-17)
+
+The master is the knowledge base; the documents are the argument. When deriving
+any client document, every finding carried over must survive the question *"why
+should this acquirer care?"* — answered in one sentence beside the finding. A
+cited, verified finding with no decision-relevant so-what stays in the master
+and is cut from the document. Cluster the survivors by theme, then compress
+them into ONE governing insight: the single sentence the whole document exists
+to land — and check that "Where the openings are" (market map) or "The thesis
+in one paragraph" actually states it. Traceability is unchanged: each so-what
+points back to its master finding, so the audit still passes. Without this
+filter a derived document becomes an audited-clean inventory of facts —
+comprehensive, traceable, and useless to an acquirer deciding.
+
 ---
 
 # 1. Market map
@@ -533,6 +547,18 @@ Two things change once you cross it, and both change how you write:
 - **The audience is one buyer's decision, not a market read.** A market map is
   interesting; a deal memo gets signed or walked away from. Write for the
   person who has to defend the decision to a partner or a lender.
+  And write the READER LEDGER before drafting (2026-08-17): every person who
+  will read or hear this document — the client principal, the lender's credit
+  officer or SBA underwriter, the client's CPA or counsel, sometimes a spouse
+  or partner — each with their one blocking question and the objection they are
+  most likely to raise. Then triage: an objection that would BLOCK the decision
+  (kill the deal, fail credit approval) is answered inside the document, in the
+  section where that reader would raise it; a detail or verification question
+  is deliberately HELD for the live conversation, with the backing exhibit
+  named so it is at hand. Never pre-empt everything — a memo that answers every
+  conceivable question reads as defensive and buries its recommendation. A deal
+  memo in this practice is defended twice: once to the client, then by the
+  client to their lender.
 - **Everything is confidential.** These live in `deals/<engagement>/`, they are
   never a public source, and nothing from them is reused as collateral. See the
   client-confidentiality law in `CLAUDE.md`.

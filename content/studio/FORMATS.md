@@ -60,6 +60,10 @@ outside its market. Always pass `--out`.
 **If a layout genuinely cannot express something, say so and stop.** Do not
 invent a page.
 
+**And between the master and the spec sits the skeleton** — the one-line-per-page
+message list in §7. Master verified → skeleton → spec → build. Copy written
+before the skeleton is copy that will be rewritten.
+
 ---
 
 ## 1 · CAROUSEL — `build-deck.mts`
@@ -566,6 +570,18 @@ still the actual test, and this only clears the floor beneath it.
 `voice-check.mts` works on words. These three work on the argument, and no
 script runs them — they are read-aloud tests, applied before a piece renders.
 Three tests, not new formats: the slot tables above still own layout.
+
+**The skeleton comes first — the generative half of these tests (2026-08-17).**
+Before drafting any report body, carousel spec or memo, write the whole
+document as an ordered list of one-line declarative messages — one sentence per
+section or page, each stating that unit's TAKEAWAY, never its topic. Check the
+sequence reads as one argument (a grouped structure or a chain, no logical
+leaps), cut or merge any line that detours from the governing question, and
+mark on the skeleton where the evidence, the recommendation and the ask will
+land. Only then write copy into slots. The spine test below verifies titles
+after the fact; the skeleton produces the titles that will pass it — and it
+fixes section order while the document is one page instead of twenty (§3.4's
+"reorder" instruction currently fires after a full build; this fires before).
 
 - **SCQA opener.** A report or market assessment opens situation →
   complication → question, so the reader arrives at the document's governing
