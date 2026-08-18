@@ -1,0 +1,10 @@
+built      2026-08-15T02:43:55.417Z
+builder    build-deck.mts
+engine     8b24ae9b
+node       v26.5.0
+spec       /Users/paulbaker/Documents/smbx-studio/markets/fire-safety/specs/fire-safety-teardown.deck.mts  sha256:f30c90ddf2a0
+master     /Users/paulbaker/Documents/smbx-studio/markets/fire-safety/master.md  sha256:776e3c606173
+
+Rebuild: same spec + same master + this engine commit reproduces this
+output. If any hash above differs on disk, this artifact is from a
+different text than the one now sitting there.

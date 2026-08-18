@@ -63,7 +63,7 @@
     "studio:preflight": "npx tsx scripts/studio/preflight.mts",
     "studio:crossfoot": "npx tsx scripts/studio/crossfoot.mts",
     "studio:quotes": "npx tsx scripts/studio/quote-check.mts",
-    "studio:drift": "npx tsx scripts/studio/drift-check.mts --studio ~/Documents/smbx-studio"
+    "studio:drift": "npx tsx scripts/studio/drift-check.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",

@@ -101,7 +101,7 @@ export function checkCarta(html: string, label: string): GuardResult {
       `\n\nCarta is canon (2026-08-08). Nothing renders in a retired palette.\n` +
       `  · A hex reached the document from somewhere — a hardcoded literal, a\n` +
       `    LEDGER import, or a token whose JOB changed while its consumers did not.\n` +
-      `  · content/studio/DESIGN.md §2 lists every dead system with its hexes.\n` +
+      `  · studio/DESIGN.md §2 lists every dead system with its hexes.\n` +
       `  · Nothing new imports LEDGER. It survives only as the rollback path.\n`,
   };
 }

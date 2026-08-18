@@ -73,7 +73,7 @@
  * is the commit that moves the renderers over and deletes LEDGER.
  *
  * THE COST OF THAT, STATED PLAINLY: between now and phase 2 the site and the
- * collateral are DIFFERENT SYSTEMS. `content/studio/DESIGN.md` exists on the
+ * collateral are DIFFERENT SYSTEMS. `studio/DESIGN.md` exists on the
  * premise that they are one, and `npm run test:design` checks that premise —
  * so both say so during the interim rather than quietly asserting something
  * false. A deck built this week will not match the website; that is a known,

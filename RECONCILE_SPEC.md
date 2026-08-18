@@ -1,5 +1,18 @@
 # RECONCILE_SPEC.md — `reconcile.mts`, the register merge
 
+> **ONE CLONE (2026-08-18) — read before acting on any path in this document.**
+> The studio workspace now lives at **`studio/` inside this repo** (the one
+> clone: `~/Documents/GitHubRepos/smbx-prod`). `~/Documents/smbx-studio` and
+> its remote `smbx-ai/smbx-studio` are history (brought in by `git subtree`,
+> history kept); `content/studio/` keeps only the app-read posting files
+> (`POST_QUEUE.md`/`post-queue.json`, `CAMPAIGN_*.md`/`campaign-*.json`,
+> `queue-export.mjs`); `init-workspace.mts` is retired. Where this document says
+> `~/Documents/smbx-studio` read `studio/`; where it says "the workspace repo"
+> read this repo. **Nobody commits to `main`** — branch (`claude/<topic>` ·
+> `cowork/<topic>`), PR, Paul merges. Full statement: the ONE CLONE section of
+> `CLAUDE.md`. Everything below is otherwise unchanged and still binding.
+
+
 **Spec written 2026-08-18. Nothing below is built yet.** Companion to
 `CRM_BRIDGE.md` (the app-side contract this sits one layer upstream of) and
 `~/Documents/smbx-studio/clients/crm-bundle/COLUMNS.md` (who owns which column).

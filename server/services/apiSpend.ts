@@ -121,7 +121,7 @@ export const DEFAULT_LANES: readonly SpendLane[] =
 /** What a blocked lane should say, in the practitioner's own vocabulary. */
 const LANE_HELP: Record<SpendLane, string> = {
   research:
-    'Web research and master synthesis happen in a Cowork session against ~/Documents/smbx-studio — this is the one path that can spend dollars on a single press (~$18 at `deep`), which is why it is off by default. See RESEARCH.md in the workspace.',
+    'Web research and master synthesis happen in a Cowork session against the studio workspace (studio/ in this repo) — this is the one path that can spend dollars on a single press (~$18 at `deep`), which is why it is off by default. See RESEARCH.md in the workspace.',
   studio:
     'Corp-dev documents, collateral and deck design are switched off at the API level. They are cheap and on by default, so this means API_LANES was set narrower than the default.',
   sourcing:

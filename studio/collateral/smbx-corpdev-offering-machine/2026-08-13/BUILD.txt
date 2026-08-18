@@ -1,0 +1,435 @@
+THE MACHINE — corp-dev offer film · built 2026-08-13 (v15 — sized for the phone)
+
+SIZED FOR THE DISPLAY, NOT THE FILE  (v15 — the important one)
+  Paul, 2026-08-13, after posting: "very little on the video is going to be
+  legible on either desktop or mobile... we need all of the text to be legible
+  and can take up a lot more room on screen."
+
+  Measured against where the piece plays. LinkedIn's 16:9 stage is ~219pt tall
+  on a phone and ~347pt on desktop, so a design unit is worth almost nothing:
+
+                          WAS                       NOW
+      hero word     7.7% ht = 17pt phone     11.9% = 26pt
+      pill          2.3%    =  5pt            4.9% = 11pt
+      loop chip     2.0%    =  4pt            4.7% = 10pt
+      ident caption 2.1%    =  5pt            4.0% =  9pt
+      value payoff  5.7%    = 12pt            8.9% = 20pt
+
+  Under ~3% of frame height is decoration, not copy. Half of this piece was
+  decoration on a phone and I had never once looked at it at the size it plays.
+  Rendering at 1920x1080 and reviewing at 1920x1080 is reviewing a poster and
+  shipping a stamp.
+
+  THE RATIO CHANGED, NOT JUST THE SCALE. Pills grew 2.3x and words 1.5x, because
+  a global multiplier preserves exactly the hierarchy that was failing.
+
+  CONSEQUENCES, because bigger type does not fit the old picture:
+   · PILLS WRAP. "WE WRITE IT, WE NEGOTIATE IT" is 47% of the frame on one line
+     at this size. Capped at a third of the width, long labels fold to two lines
+     and read as blocks rather than bars.
+   · THE WIDE LAYOUTS WERE REBUILT. The old set counterweighted horizontally —
+     words left, rail right — which needs width the 16:9 frame has and height it
+     does not. Words now take a full-width band and the pill mass moves above
+     and below it; the per-beat variety is the SHAPE of that mass.
+     1 Thesis two above one below · 2 Sourcing arc above, words low ·
+     3 Valuation arc below, words high · 4 Offer & Close one above two below ·
+     5 Integration an L, a stacked pair left and one right.
+   · THE CLOSING PHRASE gets its own size (0.78em) or it wraps to leave "you"
+     alone on a line.
+
+THE GREEN GOES ON THE STAGE NAME
+  Paul: "the words, like we run Thesis >>> Thesis should be green, not run.. in
+  all of these scenarios." Corrects an earlier read of mine — I had put the mint
+  on the verb on the theory that WE RUN it was the claim. But "we run" is the
+  same five characters on every beat: colouring the constant and greying the
+  variable emphasises the part that never changes. The colour now arrives WITH
+  the typing, because the stage name is the word being typed.
+
+A REAL CSS BUG THIS SURFACED
+  Percentage padding resolves against the containing block's WIDTH — including
+  padding-TOP and padding-BOTTOM. So `padding-top: 30%` on a 1920x1080 stage is
+  576px, which is 53% of the HEIGHT, and the same declaration lands somewhere
+  different again in 1:1 and 4:5. Every vertical word station in this piece was
+  mis-set, and differently mis-set per format; it only ever looked right because
+  I tuned the numbers by eye against one frame. They are pixels off the frame
+  height now, so "high" means the same thing in every aspect ratio.
+
+RENDER ROBUSTNESS
+  The container restarted twice during a 25-minute render and took the whole run
+  with it. render.mjs now retries a timed-out screenshot (up to 4x, 90s ceiling)
+  and takes --resume, which keeps frames already on disk and skips only the
+  screenshot — the clock still advances through every tick, because determinism
+  depends on the order.
+
+WHAT IS IN THIS FOLDER — EVERY CUT IS SILENT
+  SMBX-corpdev-offering-16x9.mp4   1920×1080 · 60fps · 29.20s · 6.6MB  ← POST THIS
+  (1:1 and 4:5 removed — LinkedIn pillarboxes anything that is not 16:9, and
+   their layouts have not been re-cut for the larger type. Ask if you need them.)
+  smbx-machine.mp4 / .webm         web weight, 3.0MB / 2.3MB    website
+  smbx-machine-poster.jpg          the mark — a legitimate static hero
+  MachineFilm.tsx                  site component (sound prop defaults FALSE)
+  MARKERS.txt / MARKERS.csv        cue sheet for scoring to picture
+  LINKEDIN-POST.md                 caption + provenance + posting notes
+  offer-machine.html · render.mjs · score.py · cues-*.json
+
+  NO AUDIO STREAM IN ANY DELIVERED FILE. Paul, 2026-08-13: "let's make
+  everything without any music, i have my own." score.py still generates the
+  designed score if it is ever wanted; nothing ships with it.
+
+VALUATION, NOT EVALUATION — AND WHERE THE ERROR ACTUALLY LIVED
+  Paul, 2026-08-13: "it isn Valuation not evaluation. as in how much a business
+  is worth. My ICP will catch this."
+
+  THE DECK SPEC SAID "Evaluation" TOO. The video was faithfully restating a word
+  that was wrong at its source: the content law held the two in step and
+  therefore PROPAGATED the error rather than catching it. Worth writing down,
+  because it is a real limit of the rule — a check that collateral matches its
+  spec cannot tell you the spec is wrong. Only a reader who knows the trade can,
+  and in this practice that reader is the buyer.
+
+  Corrected in BOTH:
+    specs/smbx-corpdev-offering.deck.mts  §pages[1].bullets — the canon
+    offer-machine.html                     the beat word and the ring station
+
+  ⚠ ANYTHING ELSE BUILT FROM THAT SPEC INHERITS THE OLD WORD UNTIL REBUILT —
+  the carousel and smbx-corpdev-offering-pricing.deck.mts both restate this
+  bullet. Check the website copy too; this grep only covered specs/ and the
+  motion piece.
+
+  Timing consequence: "Valuation" is one character shorter than "Evaluation",
+  so that beat types and un-types ~100ms faster and the piece is 29.20s rather
+  than 29.30s. Everything after that beat moved up by the same 100ms, so
+  MARKERS.txt was regenerated. THE TEMPO IS UNCHANGED — the drop-to-mark gap is
+  still 7.625s, so 125.902 BPM still puts both on bar lines.
+
+SOURCE OF CONTENT
+  specs/smbx-corpdev-offering.deck.mts
+  Every word and every pill RESTATES copy that deck already carries; each pill
+  in offer-machine.html cites its deck line in a trailing comment. The ident
+  caption is the deck's kicker verbatim. The tag completes the standing words
+  into the deck cover's promise, verbatim. NO FIGURES appear in the motion —
+  150 / $5B+ / 0 stay on still pages where they carry their sources
+  (PRACTICE_RECORD.md).
+
+THE SOUND, AND WHY IT IS NOT PLACED BY EAR
+  The picture emits its own cue sheet. Because the render runs on a frozen
+  clock, performance.now() inside the page IS virtual time, so the piece can
+  record the exact millisecond of every event it contains — the throw, the
+  landing, each of the six glyphs of the wordmark, all 67 keystrokes, every
+  pill (carrying its own CSS transition delay AND its x position on screen),
+  the six stations of the loop, the close, the mark. 127 cues.
+
+  score.py reads that file and synthesises to it. Nothing is nudged against a
+  video. Consequences worth keeping:
+    · measured after the fact, audio onsets land within 5ms of their cues —
+      a quarter of one frame at 60fps;
+    · re-time the animation and re-run: the score re-times with it, because
+      there is one set of numbers and the picture owns them;
+    · pill blips are PANNED BY THEIR x ON SCREEN and the six stations are
+      panned around the ring, so the stereo image IS the composition. Verified:
+      the station balance runs +0.07 → +0.16 → +0.13 → +0.01 → -0.12 → -0.04,
+      tracing the ring clockwise.
+
+  Everything is generated from first principles — sines, noise, filters. No
+  sample library, no licensed music, nothing to clear. A licensed bed can sit
+  under this later without re-rendering a frame.
+
+  Musically: A major pentatonic, open voicings, no third in the low register —
+  confident and modal rather than major-sweet or minor-sad. Weight at the
+  landing, air through the middle, warmth at the mark. A first pass left dead
+  stretches at 15-17s and 22-25s (0.004 RMS against a 0.063 average); silence
+  in an ident reads as a dropout, not as restraint, so a root-and-fifth drone
+  now runs from the first beat to the end and holds the floor.
+
+SCORING IT YOURSELF — SILENT / QUIET / MARKERS
+  Paul, 2026-08-13, on the EDM mix: "your EDM is bad. make it quiet and I will
+  mix something over it." Correct call. I was synthesising a genre mix without
+  being able to hear it, judging the result off RMS curves and loudness
+  meters — which will tell you the ARC is right and cannot tell you whether it
+  SOUNDS good. Those are different questions and only one of them is
+  measurable from here.
+
+  So the handoff:
+    -SILENT.mp4   no audio stream. Drop it on a timeline and score it clean.
+    -QUIET.mp4    the DESIGNED score (not the EDM) at -26 LUFS — roughly 16dB
+                  under a loud master. The landing, the glyph ticks and the six
+                  stations still register as texture under a track without
+                  fighting it. Delete the audio track if you don't want it.
+    score-quiet.wav / score-norm.wav   that bed alone, at -26 and -14 LUFS.
+
+  Both were built by REMUXING — `-c:v copy`, audio swapped, picture never
+  re-encoded. The video stream in every variant is bit-identical to the master.
+
+  MARKERS.txt / MARKERS.csv is the useful part. Every musical event with its
+  millisecond, its 60fps timecode and its frame number — not estimates, the
+  exact frame each event was drawn on, identical on every re-render. Plus the
+  tempo that fits the picture:
+
+      125.902 BPM · bar 1906.25ms · anchor the grid on 19.013s
+
+  because the ring closes at 19.013 and the mark lands at 26.638, exactly four
+  bars apart at that tempo. Score to that grid and the drop lands on the frame
+  the loop closes, and the final hit lands on the logo, without nudging
+  anything.
+
+  THE EDM MIX IS STILL IN THIS FOLDER (below) — ignore it or delete it.
+
+THE FLASH — WHAT REPLACED THE TRAVELLING SHIMMER
+  Paul called this out twice and both times I answered the wrong question.
+  v8: "the swoosh only looks like a glitch" — I read that as the box's EDGES
+  being visible and made the box the size of the screen. v12: "these shimmers
+  that slide across are a little bit cheesy... more of a glow in across the
+  page and fade out, like a flashing light and not just a line that runs across
+  the screen."
+
+  The note was never about edges. A translucent band travelling left to right
+  is a WIPE, and a wipe is a transition effect, not light. Light does not cross
+  a room in a straight line at a readable speed. It IGNITES somewhere, floods
+  outward, is brightest at its source, and is gone before you have finished
+  registering it.
+
+  So there is no gradient band, no travel and no direction left. lightPass()
+  takes a position, a peak brightness and a room lift, and puts a radial bloom
+  at the thing that just happened — the X's seat (offset XDX from centre, not
+  the middle of the frame), or the closed ring. It snaps up in 90ms, pushes
+  outward across the frame as it decays, and is gone in half a second. Under it
+  one frame of the WHOLE ROOM lifting, which is the part a travelling band can
+  never do: light arrives everywhere at once, not one column at a time.
+
+  Measured, frame mean luma:
+    landing   27 → 50 peak → back under 30 by 0.97s
+    ring      28 → 43 peak → back under 28 by 0.83s
+  The first tuning peaked at 65 and was still washed at 0.9s — a bloom, not a
+  flash. Power 0.50→0.36, blur 34→30px, falloff 820→500ms.
+
+  The score follows: the old sound panned hard left to hard right because the
+  picture travelled. A flash does not pan, it ARRIVES — centred, fast up, gone
+  with the light.
+
+REMOVED IN v12
+  The EDM mix. Paul: "your EDM is bad. make it quiet and I will mix something
+  over it." Correct call — I was synthesising a genre mix without being able to
+  hear it, judging it off RMS curves and loudness meters, which tell you the
+  ARC is right and cannot tell you whether it SOUNDS good. score.py --edm still
+  works if it is ever wanted; the mp4s are gone.
+
+AUTOPLAY ONLY WORKS MUTED — THIS IS NOT A SETTING
+  Every current browser refuses to start audio without a user gesture, and
+  iOS Safari refuses to autoplay at all unless the element is muted AND
+  playsInline. There is no configuration that gets autoplay and sound
+  together. MachineFilm.tsx therefore starts silent and OFFERS sound, and the
+  film was built to read with the sound off — it is all type and figure, no
+  voiceover, nothing load-bearing in the audio. The score is a reward for
+  unmuting, not a requirement.
+  It also catches the play() rejection (Low Power Mode, Data Saver, per-site
+  settings all still refuse) and falls back to the poster with a control,
+  because a hero that silently fails to a black rectangle is worse than one
+  that never tried. prefers-reduced-motion gets the poster and no autoplay.
+
+WHICH RATIO FOR LINKEDIN — 16:9, MEASURED OFF THE LIVE POSTS
+  I got this wrong TWICE by reading published LinkedIn spec guides: first 4:5
+  ("most feed real estate"), then 1:1 ("clean on both"). Paul posted each and
+  each was boxed. The third answer came from measuring his own screenshots
+  instead of reading anybody's guide.
+
+  LINKEDIN RENDERS FEED VIDEO INSIDE A 16:9 STAGE, ON BOTH SURFACES:
+    desktop feed        player 617 x 347  = 1.778   1:1 file shown 349 x 347
+    mobile immersive    stage  921 x 518  = 1.778   1:1 file shown 517 x 517
+  Two independent screenshots, both matching a 16:9 stage to within a pixel,
+  and in both the container did NOT resize to the video — which is what proves
+  the stage is fixed rather than adaptive. The file's own metadata was honest
+  throughout (1080x1080, square pixels, no rotation), so this was never an
+  encode fault.
+
+  The "4:5 wins the feed" advice everywhere online describes LinkedIn's
+  VERTICAL VIDEO SURFACE, not an ordinary post from a personal profile. Those
+  are different players. A spec guide cannot tell you which one your post lands
+  in; a screenshot of your own post can.
+
+  Filling the stage also fixes legibility, because the alternative is the frame
+  being scaled DOWN to fit inside it:
+                       word shown   pill shown   (mobile immersive)
+       16:9              40px         12.0px
+       1:1               28px          8.6px
+       4:5               24px          7.3px
+
+  NOTHING WAS RE-RENDERED FOR THIS. The 16:9 master has existed since the first
+  build; it is now simply the one to post. It also carries an explicit
+  display_aspect_ratio 16:9 so no player has to infer it.
+
+  THE LESSON, AND IT COST THREE POSTS: for anything that renders inside someone
+  else's player, MEASURE THE PLAYER. Published specs describe what a platform
+  accepts, not what it does with it.
+
+SQUARE IS PART OF THE PORTRAIT FAMILYSQUARE IS PART OF THE PORTRAIT FAMILY, NOT THE WIDE ONE. `PORTRAIT` is now
+  fmt[1] >= fmt[0]. Given the 16:9 treatment a square frame would take the
+  horizontal counterweight layouts — words left, rail right — into a frame with
+  no width to spare, at S=0.75: the same illegible-pills failure the 4:5 cut had
+  before it was recomposed. Scale multiplier is 1.24 for square against 1.34 for
+  4:5, because a square frame is shorter and needs slightly less type.
+
+  Verified: 1758 frames, 127 cues, edge-scan clean apart from the route-2 wires
+  that are drawn from the frame edge on purpose.
+
+4:5 IS A RECOMPOSITION, NOT A CROP
+  Scale is struck off frame WIDTH, so a 1080-wide feed cut rendered everything
+  a quarter smaller than the 1920 master while the frame got 25% taller —
+  pills at 14px, unreadable on a phone, marooned in dead space. The feed cut
+  needs type proportionally LARGER than the master's. It carries its own five
+  layouts (SPEC.tall): the same five CHARACTERS — mass above / stair / split /
+  stack below / flanking — expressed vertically, with every pill centre inside
+  x 26-70 so the widest label still clears both margins. Same words, same
+  citations, different picture. The loop's radius is larger too (205 vs 168),
+  because a third of the width is two thirds of a 16:9 height but barely a
+  quarter of a 4:5 one.
+
+  PROOF THE PIPELINE HOLDS ACROSS FORMATS: both formats render 1758 frames and
+  their cue sheets agree on all 127 cues to the millisecond — zero mismatches.
+  One score fits both.
+
+HOW TO RE-RENDER
+  PW=<path-to-chromium> node render.mjs wide 60      # or: tall 60
+  python3 score.py cues-wide.json score.wav
+  ffmpeg -y -i score.wav -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a pcm_s16le score-norm.wav
+  ffmpeg -y -framerate 60 -i frames-wide/%05d.png -c:v libx264 -crf 17 \
+    -preset slow -pix_fmt yuv420p -movflags +faststart <out>.mp4
+  Formats: wide (1920×1080) · square (1080×1080) · tall (1080×1350).
+
+WHY THE RENDER IS DETERMINISTIC, AND WHY THAT WAS THE WHOLE FIX
+  v1–v5 were CAPTURED — Playwright recorded the page off a wall clock. Measured
+  on this container that page ran at 2.4fps through the ident and ~18fps after:
+  the 940ms throw was rendered as TWO frames and a jump. No easing curve can
+  fix a browser that is not being given frames, and that starvation — not the
+  choreography — is what "the transitions are very rough" was describing.
+  render.mjs pauses the clock (CDP Emulation.setVirtualTimePolicy), advances it
+  by exactly one frame, screenshots, repeats. --disable-threaded-animations is
+  required: transform and opacity otherwise animate on the compositor thread,
+  which ignores virtual time and simply does not move. Verified against a known
+  linear translate before use. Consequence worth keeping: the same file renders
+  the same frames every time, so a change request produces the piece plus the
+  change, not a differently-janky take.
+
+MEASUREMENTS THIS CUT DEPENDS ON (both PNGs scanned, not eyeballed)
+  lockup 1584×396 · mint X at x 795–1107, y 36–368
+                  · centre 0.60038W 0.51010H · glyph height 0.84091H
+  xmark   346×364 · glyph inset 4/3/4/3 → 0.98077 of image height
+  letter boundaries (white glyph gaps, /1584):
+      0 · 0.2446 · 0.4100 · 0.5227 · 0.7121 · 0.8371 · 1
+  The thrown X lands on the lockup's own X to the pixel, so the reveal hands
+  off under a hard clip edge with nothing crossfading. 0.5227 is the b's own
+  right edge — 795 (the X's left arm) sliced the b down its bowl and the third
+  step read "smt".
+
+PAUL'S NOTES, 2026-08-12, AND WHERE EACH LANDED
+  "first 2 seconds of nothing happening can be cut off"
+      → fonts inlined (were fetched from Google), throw starts on frame one,
+        veil down in 240ms. First visible frame is the X entering the frame.
+  "start with the X being thrown in and landing in place, then the rest of the
+   word being typed into place from left to right"
+      → the throw, then the rule struck outward from the landing, then the
+        wordmark stepped through its six measured glyph boundaries.
+  "every transition needs to be smoothed out"
+      → deterministic render (above); exits given their own full duration
+        before the DOM is cleared; one continuous 46s camera keyframe replacing
+        per-beat transforms that killed each other mid-flight.
+  "the logo does not need the brackets"
+      → corner handles removed from the ident as well as the close.
+
+PAUL'S NOTES, 2026-08-13, AND WHERE EACH LANDED
+  "we have this whole frame, why is it so small?"
+      → ident lockup 560 → 900 units (39% → 62% of frame), close 690 → 1080
+        (48% → 75%), words 52 → 62, pills 17 → 19, kicker 15 → 17.
+  "every one of the arms is in the same position, there should be some
+   variation, i have said that many times now" · "every idea has the same
+   physical layout, monotonous"
+      → THE VARIABLE WAS WRONG. v5 rotated the wire ROUTE and the TIMING while
+        all five beats put a pill at 72/24, one at 78/62, one at 20/72 and the
+        words dead centre — the same picture, differently drawn. The layout
+        itself is the variable now, words and pills composed as a balanced
+        pair: 1 words LEFT + right rail · 2 words LOW + overhead bus · 3 words
+        CENTRE + corners · 4 words RIGHT + left rail · 5 words HIGH + floor
+        row. And the wires are struck from the words' MEASURED bounding box
+        (measureAnchor) instead of the constant {left:355, right:645}, which
+        was the other half of why every beat made the same shape.
+  "Only 2 on the globe doesn't paint a picture of a closed loop, a circle of
+   execution"
+      → six stations on the rim — Thesis · Sourcing · Evaluation · Offer &
+        Close · Integration · Value creation — lit in turn by an arc that
+        travels round and MEETS ITSELF at the top. It then resolves into the
+        two engagement names. Moved from a mid-piece break to after every beat:
+        shown early it would have spoiled the two beats still to come.
+  "What does this line supposed to do? there is no purpose, it is not drawing
+   attention to anything..?"
+      → it was a grey rule lying across the frame through the logo for two
+        seconds. It is a SHOCKWAVE now: mint, 5px, struck outward from the
+        landing with a grid flare behind it, gone inside half a second. A line
+        that persists is a frame; a line that snaps out of an impact is a
+        force. Nothing frames the mark now — at 62% it does not need it.
+  "The swoosh through the logo only looks like a glitch and not a feature.. it
+   should be full screen and cinematic"
+      → the old sweep was sized to the ELEMENT: a screen-blended rectangle laid
+        over the logo whose own edges were visible, which is what a compositing
+        glitch looks like. lightPass() spans the stage and past it, is
+        transparent at both ends so there is no edge anywhere, peaks at 0.19
+        white (the first full-screen attempt peaked at 0.58 and screen-blended
+        to a grey wash across a third of the frame), and is blurred 11px.
+
+PAUL'S NOTES, 2026-08-13 (second pass)
+  "let's just say our catch phrase, 'we run the process for you' and that's it,
+   nothing else needs to be said"
+      → the tag was "the process for you — thesis, sourcing, diligence,
+        close." The list has already BEEN the last twenty seconds of the piece;
+        restating it in eight words is the piece explaining itself. Still the
+        deck cover's own promise, still verbatim — just the clause that carries
+        it. tagHold up from 1400 to 2300 so the phrase gets the room the list
+        was taking.
+  "highlight run only"
+      → the whole standing phrase "We run " was mint. The verb is the claim.
+        `standLit: 'run'` marks the one word that takes the colour.
+  "at the 28 sec mark let's remove the left to right shimmer... we can leave
+   the slight glow up at the very end"
+      → lightPass removed from endCard. A sweep on the ident is the impact
+        still ringing; a sweep on the close is a lens flare on a full stop.
+        The ident keeps its pass; the close is the mark arriving and breathing.
+
+PAUL'S NOTE, 2026-08-13 (third pass)
+  "not sure i like this, maybe we can say something about tieing it all
+   together to create value"  [the loop's resolution]
+      → it was two product rows — smbXCorpDev · thesis to close, and Premium ·
+        and the first hundred days. A price list at the emotional top of the
+        piece: the ring has just closed and the answer to "so what" was a menu.
+        It is now the deck's own sentence for exactly that, verbatim from the
+        caption of specs/smbx-corpdev-offering.deck.mts:
+            "A deal is not finished when it closes. It is finished when the
+             thing you underwrote is actually running."
+        — which is the argument for the whole ring, since value creation is its
+        last station. Setup quiet and small, payoff bright and large, and
+        RUNNING takes the mint, answering the RUN of the catch phrase that
+        follows it. The two product names live in the post caption and on the
+        deck where a reader can act on them; they were never doing work here.
+
+  NOTE ON THE "nothing after you" NOTE: already shipped in v9 — the copy Paul
+  was watching was the v8 download. From v10 the delivered file carries its
+  version in the name (SMBX-corpdev-offering-v10.mp4) so two cuts can never be
+  confused again; the studio copy keeps the stable name.
+
+FOUND WHILE VERIFYING v9 — THE GHOST, IN A NEW PLACE
+  #line fades over 520ms and every hand-off OUT of it was waiting less than
+  that, so the mark began arriving under a phrase still on screen — the same
+  defect Paul caught in v2, moved. All three exits now clear their own full
+  duration (640 / 600 / 660ms), and the line's text is emptied besides, so
+  there is nothing left that COULD ghost if a duration is ever retuned. The
+  general rule, and it has now been broken twice: AN EXIT IS NOT AN
+  INSTRUCTION, IT IS A DURATION. Nothing may begin inside it.
+
+STILL OPEN
+  · square (1080×1080) cut not rendered — render.mjs takes it as an argument.
+  · The LinkedIn caption's figures were NOT re-verified: PRACTICE_RECORD.md
+    lives on Paul's machine and file staging failed (untrusted_device — the
+    desktop app's sign-in went stale). Every claim is carried verbatim out of
+    a caption that WAS verified when the deck shipped, so nothing new is
+    asserted — but carried-from-verified is not verified-today. Sign in and
+    run preflight before this posts. See LINKEDIN-POST.md §What has NOT been
+    re-verified.
+  · The ghost-character fix and this render harness should be upstreamed to
+    scripts/studio/machine.html in the repo that deploys smbx.ai.

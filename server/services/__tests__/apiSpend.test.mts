@@ -119,7 +119,7 @@ eq('throws SpendDisabledError',  err instanceof SpendDisabledError, true);
 eq('carries the lane',           err?.lane,   'research');
 eq('carries a 503, not a 500',   err?.status, 503);
 eq('opens by naming the work',   /^Research runs is switched off/.test(err?.message ?? ''), true);
-eq('points at the workspace',    (err?.message ?? '').includes('~/Documents/smbx-studio'), true);
+eq('points at the workspace',    (err?.message ?? '').includes('studio/ in this repo'), true);
 eq('names the price, so the default reads as a choice',
    /\$18/.test(err?.message ?? ''), true);
 eq('spells the fix verbatim',    (err?.message ?? '').includes('API_LANES=chat,marketing,research'), true);

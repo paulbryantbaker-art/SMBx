@@ -1,0 +1,66 @@
+{
+  "model": "compare",
+  "engine": "v17-reference (engine not yet vendored — see ENGINE_PROVENANCE.md)",
+  "deals": [
+    {
+      "name": "sample-hvac",
+      "league": "L2",
+      "earnings": {
+        "year": "2024",
+        "sde": 503000,
+        "ebitda": 400000,
+        "verified_addbacks": 18000,
+        "basis": "SDE",
+        "basisAmount": 503000
+      },
+      "valuation_range": {
+        "low": 1408400,
+        "high": 1710200,
+        "mid": 1559299.9999999998,
+        "basis": "SDE",
+        "multiple_low": 2.8,
+        "multiple_high": 3.4,
+        "multiple_source": "sample range for smoke test"
+      },
+      "dscr": 1.952961566390722,
+      "risk": "MEDIUM",
+      "irr": 0.6890092395106162,
+      "moic": 6.665863352327121,
+      "purchase_price": 1500000
+    },
+    {
+      "name": "sample-hvac",
+      "league": "L2",
+      "earnings": {
+        "year": "2024",
+        "sde": 503000,
+        "ebitda": 400000,
+        "verified_addbacks": 18000,
+        "basis": "SDE",
+        "basisAmount": 503000
+      },
+      "valuation_range": {
+        "low": 1408400,
+        "high": 1710200,
+        "mid": 1559299.9999999998,
+        "basis": "SDE",
+        "multiple_low": 2.8,
+        "multiple_high": 3.4,
+        "multiple_source": "sample range for smoke test"
+      },
+      "dscr": 1.952961566390722,
+      "risk": "MEDIUM",
+      "irr": 0.6890092395106162,
+      "moic": 6.665863352327121,
+      "purchase_price": 1500000
+    }
+  ],
+  "run": {
+    "date": "2026-08-14",
+    "deal_dirs": [
+      "/home/claude/deal-math-workbench/deals/sample-hvac",
+      "/home/claude/deal-math-workbench/deals/sample-hvac"
+    ],
+    "engine": "v17-reference (engine not yet vendored — see ENGINE_PROVENANCE.md)"
+  }
+}

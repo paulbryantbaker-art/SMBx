@@ -110,8 +110,12 @@ export interface Process {
   gap?: string;
 }
 
-/* `$REPO` in a workflow line means the engine checkout; the workspace laws
-   define it. App entries name the surface, since there is no command to give. */
+/* `$REPO` in a workflow line means the engine checkout. ONE CLONE (2026-08-18):
+   the workspace lives at `studio/` INSIDE that checkout, so from a session
+   opened on the workspace `$REPO` is simply `..` — the parent of `studio/`. It
+   can no longer be missing or stale relative to the laws, because the laws and
+   the engine are the same commit. App entries name the surface, since there is
+   no command to give. */
 
 export const PROCESSES: Process[] = [
   /* ── sourcing ─────────────────────────────────────────────────────── */
@@ -193,7 +197,7 @@ export const PROCESSES: Process[] = [
       'At the IoI the candidate is PROMOTED and its runs move with it: see ioi-promotion.',
     ],
     aka: ['screening math', 'pre-ioi', 'candidate math', 'workbench', 'quick model', 'triage'],
-    gap: 'The engine is NOT vendored yet. Today this reads $REPO directly, which is always-current but carries NO provenance stamp — an output cannot say which engine version produced it, and it breaks if the clone is missing or stale. THE_IOI_SEAM.md requires a vendored copy at a pinned commit with ENGINE_PROVENANCE.md. Open item.',
+    gap: 'The engine is NOT vendored (studio/_engine/deal-math/engine/ is empty; its ENGINE_PROVENANCE.md says so). ONE CLONE (2026-08-18) changes what that costs: this reads $REPO, which is now the parent of studio/ at the SAME commit as the laws, so it cannot be missing or stale — the clone HEAD is the provenance. What is still open is that an OUTPUT carries no engine-version stamp; THE_IOI_SEAM.md asks for a pinned copy with ENGINE_PROVENANCE.md, and in one clone the cheaper answer may be stamping `git rev-parse HEAD` onto the output. Open item.',
   },
   {
     id: 'sourcing-pipeline',

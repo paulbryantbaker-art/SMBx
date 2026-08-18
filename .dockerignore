@@ -1,0 +1,71 @@
+# .dockerignore — what the Railway image must NOT carry (2026-08-18).
+#
+# The Dockerfile does `COPY . .`, so without this file EVERYTHING in the repo
+# lands in the build context and the image. On 2026-08-18 the whole studio
+# workspace (`studio/` — masters, research PDFs, client registers, collateral
+# specs; ~106 MB tracked) moved into this repo so Claude Code and Cowork work
+# from ONE clone. None of it is read by the server, so none of it belongs in
+# the image. This file is what keeps "one repo" from meaning "one image that
+# ships the practice's research".
+#
+# WHAT THE SERVER READS FROM DISK AT RUNTIME OR BUILD (measured, not assumed —
+# grep for readFile/existsSync in server/, house/, shared/, vite-plugins/):
+#   content/reports/*.pdf                    (reportAccess — the mailed PDFs)
+#   content/collateral/smbx-corpdev-pricing.pdf  (POST /api/practice/pricing)
+#   content/studio/post-queue.json + campaign-*.json  (postQueue import)
+#   content/crm-seed/                        (the frozen CRM deploy fixture)
+#   scripts/studio/reports/*.md              (reportQA context + vite build)
+#   client/public/**                         (logos, textures for composers)
+#   server/migrations/*.sql, server/templates/**, server/prompts/**
+#   house/**, shared/**, client/src/**       (bundled by vite / esbuild)
+# Nothing below excludes any of those. If you add a runtime read of a new
+# directory, un-ignore it here in the same commit, or production 404s quietly.
+
+# ── the studio workspace: documents are files, and none of them ship ─────
+studio/
+
+# ── version control + local build state ──────────────────────────────────
+.git
+.gitignore
+.gitattributes
+node_modules
+dist
+dist-preview
+test-results
+playwright-report
+fold-shots
+mobile-shots
+uploads
+database.db
+.env
+.env.*
+!.env.example
+
+# ── agent/editor state ───────────────────────────────────────────────────
+.claude
+.agents
+.github
+.worktreeinclude
+.impeccable.md
+
+# ── design handoffs, docs, methodology, test fixtures — read by people ────
+design_handoff_*
+smbX.ai Marketing Redesign
+corpdevservices
+practiceSite
+docs
+methodology
+testing
+studio-kit
+
+# ── large media that has a served, optimised copy elsewhere ──────────────
+# (client/public/textures/blackbleed.webp is the served texture; the 8.4 MB
+#  master lives at the repo root only as history)
+*.mp4
+*.mov
+*.m4v
+blackBleedBG.png
+
+# ── root-level docs (root-only match; nested *.md such as
+#    scripts/studio/reports/*.md are NOT touched by this pattern) ──────────
+*.md

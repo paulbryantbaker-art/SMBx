@@ -83,13 +83,15 @@ const [cmd, ...rest] = process.argv.slice(2);
    source of truth. */
 if (cmd === 'render') {
   const here = path.dirname(fileURLToPath(import.meta.url));
-  const out = path.resolve(here, '../../content/studio');
+  /* ONE CLONE (2026-08-18): render straight into the workspace, which lives
+     at `studio/` in this repo. There is no `content/studio/` copy any more. */
+  const out = path.resolve(here, '../../studio');
   writeFileSync(path.join(out, 'WHERE.md'), renderMarkdown());
   writeFileSync(
     path.join(out, 'where.json'),
     JSON.stringify({ rule: ONE_LINE, tiebreak: TIEBREAK, processes: PROCESSES }, null, 2) + '\n',
   );
-  console.log('Wrote content/studio/WHERE.md and where.json from house/where.ts');
+  console.log('Wrote studio/WHERE.md and studio/where.json from house/where.ts');
   process.exit(0);
 }
 

@@ -1,0 +1,339 @@
+{
+  "model": "lbo",
+  "engine": "v17-reference (engine not yet vendored — see ENGINE_PROVENANCE.md)",
+  "earnings": {
+    "year": "2024",
+    "sde": 503000,
+    "ebitda": 400000,
+    "verified_addbacks": 18000,
+    "basis": "SDE",
+    "basisAmount": 503000
+  },
+  "assumptions": {
+    "hold_years": 5,
+    "revenue_growth_pct": 0.05,
+    "margin_pct": 0.12903225806451613,
+    "entry_multiple": 3.75,
+    "exit_multiple": 4,
+    "capex_pct_revenue": 0.01,
+    "equity_invested": 375000
+  },
+  "proForma": [
+    {
+      "year": 1,
+      "revenue": 3255000,
+      "ebitda": 420000,
+      "capex": 32550,
+      "debt_service": 204817.13869015969,
+      "fcf_to_equity": 182632.86130984031,
+      "dscr": 2.050609644710258
+    },
+    {
+      "year": 2,
+      "revenue": 3417750,
+      "ebitda": 441000,
+      "capex": 34177.5,
+      "debt_service": 204817.13869015966,
+      "fcf_to_equity": 202005.36130984034,
+      "dscr": 2.1531401269457713
+    },
+    {
+      "year": 3,
+      "revenue": 3588637.5,
+      "ebitda": 463050,
+      "capex": 35886.375,
+      "debt_service": 204817.1386901597,
+      "fcf_to_equity": 222346.4863098403,
+      "dscr": 2.260797133293059
+    },
+    {
+      "year": 4,
+      "revenue": 3768069.375,
+      "ebitda": 486202.5,
+      "capex": 37680.69375,
+      "debt_service": 204817.13869015969,
+      "fcf_to_equity": 243704.66755984034,
+      "dscr": 2.3738369899577125
+    },
+    {
+      "year": 5,
+      "revenue": 3956472.84375,
+      "ebitda": 510512.625,
+      "capex": 39564.7284375,
+      "debt_service": 204817.138690156,
+      "fcf_to_equity": 266130.757872344,
+      "dscr": 2.4925288394556433,
+      "exit_ev": 2042050.5,
+      "remaining_debt": 659171.8772390349,
+      "exit_equity_proceeds": 1382878.622760965
+    }
+  ],
+  "equityFlows": [
+    -375000,
+    182632.86130984031,
+    202005.36130984034,
+    222346.4863098403,
+    243704.66755984034,
+    1649009.380633309
+  ],
+  "returns": {
+    "irr": 0.6890092395106162,
+    "moic": 6.665863352327121,
+    "arbitrage_spread": 100000
+  },
+  "sensitivity": {
+    "rows": [
+      {
+        "growth": 0.010000000000000002,
+        "cells": [
+          {
+            "exit_multiple": 3,
+            "irr": 0.505487699408927
+          },
+          {
+            "exit_multiple": 3.5,
+            "irr": 0.5415950979343562
+          },
+          {
+            "exit_multiple": 4,
+            "irr": 0.5737928620573165
+          },
+          {
+            "exit_multiple": 4.5,
+            "irr": 0.6029454946455624
+          },
+          {
+            "exit_multiple": 5,
+            "irr": 0.6296492477430908
+          }
+        ]
+      },
+      {
+        "growth": 0.030000000000000002,
+        "cells": [
+          {
+            "exit_multiple": 3,
+            "irr": 0.5675868616388124
+          },
+          {
+            "exit_multiple": 3.5,
+            "irr": 0.6017292199908038
+          },
+          {
+            "exit_multiple": 4,
+            "irr": 0.6324674070467655
+          },
+          {
+            "exit_multiple": 4.5,
+            "irr": 0.6605016808818753
+          },
+          {
+            "exit_multiple": 5,
+            "irr": 0.6863285387878928
+          }
+        ]
+      },
+      {
+        "growth": 0.05,
+        "cells": [
+          {
+            "exit_multiple": 3,
+            "irr": 0.6267350257575279
+          },
+          {
+            "exit_multiple": 3.5,
+            "irr": 0.6593900254353924
+          },
+          {
+            "exit_multiple": 4,
+            "irr": 0.6890092395106162
+          },
+          {
+            "exit_multiple": 4.5,
+            "irr": 0.7161797324886587
+          },
+          {
+            "exit_multiple": 5,
+            "irr": 0.7413269359679737
+          }
+        ]
+      },
+      {
+        "growth": 0.07,
+        "cells": [
+          {
+            "exit_multiple": 3,
+            "irr": 0.6835580520072342
+          },
+          {
+            "exit_multiple": 3.5,
+            "irr": 0.7150655723931127
+          },
+          {
+            "exit_multiple": 4,
+            "irr": 0.7438150995404915
+          },
+          {
+            "exit_multiple": 4.5,
+            "irr": 0.7703122183177247
+          },
+          {
+            "exit_multiple": 5,
+            "irr": 0.7949298505508668
+          }
+        ]
+      },
+      {
+        "growth": 0.09,
+        "cells": [
+          {
+            "exit_multiple": 3,
+            "irr": 0.7385050728236147
+          },
+          {
+            "exit_multiple": 3.5,
+            "irr": 0.7691158169521963
+          },
+          {
+            "exit_multiple": 4,
+            "irr": 0.7971837231214518
+          },
+          {
+            "exit_multiple": 4.5,
+            "irr": 0.8231536647680908
+          },
+          {
+            "exit_multiple": 5,
+            "irr": 0.8473586067230274
+          }
+        ]
+      }
+    ],
+    "exits": [
+      3,
+      3.5,
+      4,
+      4.5,
+      5
+    ],
+    "growths": [
+      0.010000000000000002,
+      0.030000000000000002,
+      0.05,
+      0.07,
+      0.09
+    ]
+  },
+  "inputs": {
+    "deal": {
+      "name": "sample-hvac",
+      "business": "SAMPLE — Fictional HVAC Co (workbench smoke test, not a real company)",
+      "naics": "238220",
+      "industry": "HVAC services",
+      "location": "DFW (fictional)",
+      "role": "buy",
+      "league": "L2",
+      "stage": "screening"
+    },
+    "financials": {
+      "years": [
+        {
+          "label": "2023",
+          "revenue": 2600000,
+          "net_income": 210000,
+          "owner_salary": 110000,
+          "depreciation": 55000,
+          "amortization": 5000,
+          "interest": 18000,
+          "taxes": 42000,
+          "one_time_expenses": 0,
+          "non_recurring_income": 0,
+          "source": "sample data"
+        },
+        {
+          "label": "2024",
+          "revenue": 3100000,
+          "net_income": 260000,
+          "owner_salary": 120000,
+          "depreciation": 60000,
+          "amortization": 5000,
+          "interest": 15000,
+          "taxes": 52000,
+          "one_time_expenses": 25000,
+          "non_recurring_income": 10000,
+          "source": "sample data"
+        }
+      ],
+      "addbacks": [
+        {
+          "label": "Personal vehicle + insurance",
+          "amount": 18000,
+          "year": "2024",
+          "verified": true,
+          "evidence": "sample"
+        },
+        {
+          "label": "One-off legal settlement",
+          "amount": 30000,
+          "year": "2024",
+          "verified": false,
+          "evidence": "unverified — excluded"
+        }
+      ]
+    },
+    "valuation": {
+      "multiple_low": 2.8,
+      "multiple_high": 3.4,
+      "multiple_basis": "SDE",
+      "multiple_source": "sample range for smoke test"
+    },
+    "structure": {
+      "purchase_price": 1500000,
+      "sba_loan": 1050000,
+      "sba_rate": 0.105,
+      "sba_term_years": 10,
+      "seller_note": 150000,
+      "seller_note_rate": 0.06,
+      "seller_note_term_years": 5,
+      "working_capital_injection": 75000
+    },
+    "projections": {
+      "revenue_growth_pct": 0.05,
+      "margin_pct": null,
+      "hold_years": 5,
+      "exit_multiple": 4,
+      "capex_pct_revenue": 0.01
+    },
+    "earnout": {
+      "base_price": 1350000,
+      "tranches": [
+        {
+          "label": "Year-1 revenue ≥ $3.2M",
+          "amount": 100000,
+          "probability": 0.6,
+          "trigger": "revenue"
+        },
+        {
+          "label": "Year-2 revenue ≥ $3.5M",
+          "amount": 100000,
+          "probability": 0.4,
+          "trigger": "revenue"
+        }
+      ]
+    },
+    "assumption_log": [
+      {
+        "field": "everything",
+        "why": "Fictional smoke-test deal. No real company.",
+        "decided_by": "claude-flagged"
+      }
+    ]
+  },
+  "run": {
+    "date": "2026-08-14",
+    "deal_dirs": [
+      "/home/claude/deal-math-workbench/deals/sample-hvac"
+    ],
+    "engine": "v17-reference (engine not yet vendored — see ENGINE_PROVENANCE.md)"
+  }
+}

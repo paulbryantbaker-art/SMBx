@@ -1,0 +1,1 @@
+The deal method, read on demand — start at DEFINITIVE.md. GATES.md is what a deal trips; TAX/LEGAL/REAL_ESTATE/VALUATION/MODELS are opened when it trips into them. Reference, not a standing instruction — do not edit these here, they are refreshed from the repo by init-workspace --update.

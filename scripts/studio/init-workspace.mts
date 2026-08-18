@@ -21,6 +21,36 @@ import { mkdirSync, writeFileSync, copyFileSync, existsSync, readFileSync } from
 import path from 'node:path';
 
 const ROOT = path.resolve(new URL('../..', import.meta.url).pathname);
+
+/* ══════════════════════════════════════════════════════════════════════════
+   RETIRED — ONE CLONE (Paul, 2026-08-18: "i want everything in one place for
+   you 2 to work from").
+
+   This script existed to seed a SEPARATE workspace folder on Paul's Mac and to
+   refresh the law files into it from `content/studio/`. On 2026-08-18 the whole
+   workspace moved INTO this repo at `studio/` (git subtree, history kept), the
+   `content/studio/` copies were deleted, and the laws are read in place —
+   `studio/CLAUDE.md`, `studio/PLAYBOOK.md`, `studio/FORMATS.md`,
+   `studio/DESIGN.md`, `studio/RESEARCH.md`, `studio/WEEKLY.md` … are the ONLY
+   copies. There is nothing to init and nothing to update: a Cowork session
+   opens `<clone>/studio`, Claude Code opens `<clone>`, and both read the same
+   files at the same commit.
+
+   The body below is kept for the record (it documents why each law file
+   exists) but is unreachable. If you find yourself wanting a second workspace
+   folder, that is the two-places problem this retirement exists to end — see
+   the ONE CLONE section of the root CLAUDE.md.
+   ══════════════════════════════════════════════════════════════════════════ */
+console.error(
+  'init-workspace is RETIRED (2026-08-18). The workspace lives at studio/ inside this repo;\n' +
+  'the law files are read in place and there is nothing to init or --update.\n' +
+  '  Cowork:      open <clone>/studio\n' +
+  '  Claude Code: open <clone>\n' +
+  'See the ONE CLONE section of CLAUDE.md.',
+);
+process.exit(2);
+
+// eslint-disable-next-line no-unreachable
 const args = process.argv.slice(2).filter(a => a !== '--update');
 const target = path.resolve(args[0] || '.');
 
@@ -83,7 +113,7 @@ const exampleDst = path.join(target, 'decks/example.deck.mts');
 if (existsSync(exampleSrc) && !existsSync(exampleDst)) copyFileSync(exampleSrc, exampleDst);
 
 // starter plan
-const planSrc = path.join(ROOT, 'content/studio/posting-plan.md');
+const planSrc = path.join(ROOT, 'studio/posting-plan.md');
 const planDst = path.join(target, 'posting-plan.md');
 if (existsSync(planSrc) && !existsSync(planDst)) copyFileSync(planSrc, planDst);
 
@@ -120,16 +150,16 @@ if (existsSync(planSrc) && !existsSync(planDst)) copyFileSync(planSrc, planDst);
    contains seven retired palettes in committed CSS. The tell was always a warm
    accent where a green belongs. Naming the dead hexes is what lets a session
    catch itself. */
-law('content/studio/workspace-CLAUDE.md', 'CLAUDE.md');
-law('content/studio/PLAYBOOK.md', 'PLAYBOOK.md');
-law('content/studio/FORMATS.md', 'FORMATS.md');
-law('content/studio/DESIGN.md', 'DESIGN.md');
+law('studio/workspace-CLAUDE.md', 'CLAUDE.md');
+law('studio/PLAYBOOK.md', 'PLAYBOOK.md');
+law('studio/FORMATS.md', 'FORMATS.md');
+law('studio/DESIGN.md', 'DESIGN.md');
 /* The state of the renderers, as opposed to the look. DESIGN.md says what the
    house looks like and FORMATS.md says what shape a container is; neither said
    which builders were actually converted, and for a week DESIGN.md claimed all
    four were when two were not. A session that trusts a law it cannot verify is
    exactly how the wrong palette ships. */
-law('content/studio/COLLATERAL_STATE.md', 'COLLATERAL_STATE.md');
+law('studio/COLLATERAL_STATE.md', 'COLLATERAL_STATE.md');
 /* THE_LINE.md — added 2026-08-14, Paul: "Make sure that Cowork understands
    where the Lines are and what we need expert opinions on too. Tax, legal
    real estate, etc."
@@ -148,7 +178,7 @@ law('content/studio/COLLATERAL_STATE.md', 'COLLATERAL_STATE.md');
    into which lane, who owns it, and what to hand them. Tax, legal, the five
    separate real-estate lanes, valuation, securities, trade licensing,
    employment, insurance and QoE. */
-law('content/studio/THE_LINE.md', 'THE_LINE.md');
+law('studio/THE_LINE.md', 'THE_LINE.md');
 /* WHERE.md + where.json — added 2026-08-14. The settled answer to "which
    system does this", GENERATED from house/where.ts so the app and a session
    read the same table rather than two prose copies that agree today.
@@ -157,8 +187,8 @@ law('content/studio/THE_LINE.md', 'THE_LINE.md');
    (Paul, same day): a session there reads files and cannot be relied on to run
    `npx tsx`. where.json is the same data machine-readable, for anything that
    wants to branch on it rather than read it. */
-law('content/studio/WHERE.md', 'WHERE.md');
-law('content/studio/where.json', 'where.json');
+law('studio/WHERE.md', 'WHERE.md');
+law('studio/where.json', 'where.json');
 /* WHAT_LIVES_WHERE.md — the fourth law found dangling in this session's sweep
    (2026-08-14). It maps the two REPOSITORIES on the Mac and names the debris
    clones, which is exactly what a session needs when a command aims at the
@@ -166,21 +196,21 @@ law('content/studio/where.json', 'where.json');
    read from the workspace it describes. Distinct from WHERE.md: that one
    routes PROCESSES between systems, this one routes PATHS between repos. The
    generated header on WHERE.md says so, because the two names collide. */
-law('content/studio/WHAT_LIVES_WHERE.md', 'WHAT_LIVES_WHERE.md');
-law('content/studio/RESEARCH.md', 'RESEARCH.md');
+law('studio/WHAT_LIVES_WHERE.md', 'WHAT_LIVES_WHERE.md');
+law('studio/RESEARCH.md', 'RESEARCH.md');
 /* THE MACHINE (2026-08-12, Paul: "give Cowork the DL for the new element to
    be used in collateral"). MACHINE.md is the design language + content law;
    machine.html is the runnable element itself — a self-contained animated
    diagram a session copies beside a piece, edits the SPEC of, and Paul
    screen-records for video slideshows. The HTML travels like engagements.mjs:
    a tool, not a law, but it has to BE here or a session can't use it. */
-law('content/studio/MACHINE.md', 'MACHINE.md');
+law('studio/MACHINE.md', 'MACHINE.md');
 law('scripts/studio/machine.html', 'machine.html');
 /* The standing job for the Saturday agent (2026-08-10). It travels with the
    workspace for the same reason the other laws do: a scheduled session opens
    on this folder with nothing but what is in it, so the prompt has to be here
    rather than in the repo or in whoever set the schedule up. */
-law('content/studio/WEEKLY.md', 'WEEKLY.md');
+law('studio/WEEKLY.md', 'WEEKLY.md');
 
 /* THE DEFINITIVE LAYER (2026-08-14, Paul: "Cowork needs the entire definitive
    markup to run the deal"). Seven files in their own folder, because this is a
@@ -199,7 +229,7 @@ law('content/studio/WEEKLY.md', 'WEEKLY.md');
    proposed to a PE LLC buyer that cannot make the election. Naming the gates and
    the defer triggers is what lets a session catch itself. */
 for (const f of ['DEFINITIVE', 'GATES', 'MODELS', 'VALUATION', 'TAX', 'LEGAL', 'REAL_ESTATE']) {
-  law(`content/studio/definitive/${f}.md`, path.join('definitive', `${f}.md`));
+  law(`studio/definitive/${f}.md`, path.join('definitive', `${f}.md`));
 }
 
 /* engagements.mjs is a TOOL, not a law, but it travels the same way and for the
@@ -208,7 +238,7 @@ for (const f of ['DEFINITIVE', 'GATES', 'MODELS', 'VALUATION', 'TAX', 'LEGAL', '
    plain JavaScript on node built-ins — no npm install, no tsx, no network — so
    a session opened on this folder can run it immediately and never needs the
    repo again. `--update` refreshes it in place, keeping a .bak. */
-law('content/studio/engagements.mjs', 'engagements.mjs');
+law('studio/engagements.mjs', 'engagements.mjs');
 
 /* sync.mjs travels for the same reason and closes the loop the weekly agent
    opens (Paul, 2026-08-10: "the only thing that I want to be sure that happens
@@ -217,7 +247,7 @@ law('content/studio/engagements.mjs', 'engagements.mjs');
    until something pulls it, and until then every builder here renders from a
    stale master, silently. `node sync.mjs --install` prints the launchd job that
    makes it automatic. */
-law('content/studio/sync.mjs', 'sync.mjs');
+law('studio/sync.mjs', 'sync.mjs');
 
 /* The workspace is meant to live in git (that is how a master gets version
    history without a database), so the one file that must never go up needs to

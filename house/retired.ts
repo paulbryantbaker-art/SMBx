@@ -113,7 +113,7 @@ export const RETIRED: readonly Retired[] = [
     id: 'the Studio screens (StudioCreate · StudioResearch · StudioAnnouncement · CollateralBuilder · MarketWorkspace · atlasmobile Studio + StudioResearchM)',
     kind: 'orphaned',
     why: 'SWEPT. Collateral and research are market-shaped — one-to-many, speculative, no counterparty — so THE_IOI_SEAM.md puts them in the studio.',
-    replacedBy: 'the four builders in scripts/studio/, against ~/Documents/smbx-studio',
+    replacedBy: 'the four builders in scripts/studio/, against the studio workspace (studio/ in this repo since 2026-08-18)',
     marked: '2026-08-15',
     proof: { check: 'unreferenced', pattern: 'screens/StudioCreate', selfPath: 'client/src/components/v6/desktop/screens/StudioCreate.tsx' },
     note: 'STUDIO_IN_APP and SOURCING_IN_APP went with them. A flag guarding a file that no longer exists is a lie about what is reachable.',

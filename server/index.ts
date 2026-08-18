@@ -1637,7 +1637,7 @@ runMigrations().then(async () => {
     /* The research scheduler is gone with the Phase A sweep (2026-08-16).
        It was the one unattended path that could spend real money on a timer,
        and the work it scheduled now happens in a Cowork session on Paul's own
-       subscription — see WHERE_THE_WORK_HAPPENS.md and content/studio/WEEKLY.md.
+       subscription — see WHERE_THE_WORK_HAPPENS.md and studio/WEEKLY.md.
        RESEARCH_SCHEDULES_ENABLED / RESEARCH_SCHEDULES_DISABLED no longer do
        anything; the rows in research_schedules are inert data. */
     try {

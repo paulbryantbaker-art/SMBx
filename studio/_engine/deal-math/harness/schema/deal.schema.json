@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Deal Profile",
+  "description": "Single source of inputs for every model run. Amounts in whole dollars. Nothing in this file may be invented — every figure traces to a document in documents/ or is explicitly marked an assumption.",
+  "type": "object",
+  "required": ["deal", "financials"],
+  "properties": {
+    "deal": {
+      "type": "object",
+      "required": ["name", "role"],
+      "properties": {
+        "name": { "type": "string", "description": "Deal slug, matches folder name" },
+        "business": { "type": "string" },
+        "naics": { "type": "string" },
+        "industry": { "type": "string" },
+        "location": { "type": "string" },
+        "role": { "enum": ["buy"], "description": "Studio is buy-side only" },
+        "league": { "enum": ["L1", "L2", "L3", "L4", "L5", "L6"], "description": "L1-L2 use SDE; L3-L6 use Adjusted EBITDA (V17 §5.5)" },
+        "stage": { "type": "string", "description": "Free text: screening / LOI / DD / structure / closing" }
+      }
+    },
+    "financials": {
+      "type": "object",
+      "required": ["years"],
+      "properties": {
+        "years": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Most recent year LAST. TTM allowed as a year with label.",
+          "items": {
+            "type": "object",
+            "required": ["label", "revenue", "net_income"],
+            "properties": {
+              "label": { "type": "string", "description": "e.g. 2023, 2024, TTM-2026-06" },
+              "revenue": { "type": "number" },
+              "cogs": { "type": "number" },
+              "gross_profit": { "type": "number" },
+              "net_income": { "type": "number" },
+              "owner_salary": { "type": "number", "description": "Owner comp on the books" },
+              "depreciation": { "type": "number" },
+              "amortization": { "type": "number" },
+              "interest": { "type": "number" },
+              "taxes": { "type": "number" },
+              "one_time_expenses": { "type": "number" },
+              "non_recurring_income": { "type": "number" },
+              "source": { "type": "string", "description": "Which document in documents/ this row came from" }
+            }
+          }
+        },
+        "addbacks": {
+          "type": "array",
+          "description": "Itemized add-backs beyond the standard lines. Only verified:true items enter SDE/EBITDA (V17: Verified_Addbacks).",
+          "items": {
+            "type": "object",
+            "required": ["label", "amount", "verified"],
+            "properties": {
+              "label": { "type": "string" },
+              "amount": { "type": "number" },
+              "year": { "type": "string" },
+              "verified": { "type": "boolean" },
+              "evidence": { "type": "string", "description": "Document + line proving it. Required when verified:true." }
+            }
+          }
+        }
+      }
+    },
+    "valuation": {
+      "type": "object",
+      "description": "Assumptions for the valuation model. Multiples must carry a source.",
+      "properties": {
+        "multiple_low": { "type": "number" },
+        "multiple_high": { "type": "number" },
+        "multiple_basis": { "enum": ["SDE", "EBITDA"] },
+        "multiple_source": { "type": "string" }
+      }
+    },
+    "structure": {
+      "type": "object",
+      "description": "Capital stack for SBA / LBO models",
+      "properties": {
+        "purchase_price": { "type": "number" },
+        "down_payment_pct": { "type": "number" },
+        "sba_loan": { "type": "number" },
+        "sba_rate": { "type": "number", "description": "Annual, decimal (0.105 = 10.5%)" },
+        "sba_term_years": { "type": "number" },
+        "seller_note": { "type": "number" },
+        "seller_note_rate": { "type": "number" },
+        "seller_note_term_years": { "type": "number" },
+        "working_capital_injection": { "type": "number" }
+      }
+    },
+    "projections": {
+      "type": "object",
+      "description": "LBO / pro forma assumptions",
+      "properties": {
+        "revenue_growth_pct": { "type": "number" },
+        "margin_pct": { "type": "number", "description": "EBITDA margin held or per-year override in years[]" },
+        "hold_years": { "type": "number" },
+        "exit_multiple": { "type": "number" },
+        "capex_pct_revenue": { "type": "number" }
+      }
+    },
+    "earnout": {
+      "type": "object",
+      "properties": {
+        "base_price": { "type": "number" },
+        "tranches": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["label", "amount", "probability"],
+            "properties": {
+              "label": { "type": "string" },
+              "amount": { "type": "number" },
+              "probability": { "type": "number", "description": "0..1" },
+              "trigger": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "assumption_log": {
+      "type": "array",
+      "description": "Every figure above that is an assumption rather than a documented fact gets a line here.",
+      "items": {
+        "type": "object",
+        "required": ["field", "why"],
+        "properties": {
+          "field": { "type": "string" },
+          "why": { "type": "string" },
+          "decided_by": { "enum": ["paul", "claude-flagged"] }
+        }
+      }
+    }
+  }
+}

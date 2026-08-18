@@ -30,7 +30,9 @@ function is(name: string, got: unknown, want: unknown) {
 function ok(name: string, cond: boolean) { is(name, cond, true); }
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const STUDIO = path.resolve(HERE, '../../content/studio');
+/* ONE CLONE (2026-08-18): WHERE.md and where.json are rendered straight into
+   the workspace, which now lives at `studio/` inside this repo. */
+const STUDIO = path.resolve(HERE, '../../studio');
 
 /* ── the table is well formed ─────────────────────────────────────────── */
 
@@ -239,9 +241,14 @@ if (existsSync(jsonPath)) {
    Cowork is Claude Desktop — it READS FILES and cannot be relied on to run a
    CLI — so WHERE.md reaching the workspace is the whole delivery mechanism,
    not a nicety. */
+/* ONE CLONE (2026-08-18): nothing copies WHERE.md anywhere any more — the
+   workspace is `studio/` in this repo and `where.mts render` writes there
+   directly. So the delivery check is: the renderer targets studio/, and the
+   retired copier no longer claims the job. */
+const renderer = readFileSync(path.resolve(HERE, '../../scripts/studio/where.mts'), 'utf8');
+ok('where.mts renders straight into studio/', /'\.\.\/\.\.\/studio'/.test(renderer));
 const init = readFileSync(path.resolve(HERE, '../../scripts/studio/init-workspace.mts'), 'utf8');
-ok('init-workspace copies WHERE.md into the workspace', init.includes("'WHERE.md'"));
-ok('init-workspace copies where.json too', init.includes("'where.json'"));
+ok('init-workspace is retired and says so', /RETIRED/.test(init) && /process\.exit\(2\)/.test(init));
 
 console.log(`\n${pass}/${total} correct`);
 process.exit(pass === total ? 0 : 1);

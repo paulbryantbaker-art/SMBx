@@ -1,0 +1,40 @@
+{
+  "deal": {
+    "name": "sample-hvac",
+    "business": "SAMPLE — Fictional HVAC Co (workbench smoke test, not a real company)",
+    "naics": "238220",
+    "industry": "HVAC services",
+    "location": "DFW (fictional)",
+    "role": "buy",
+    "league": "L2",
+    "stage": "screening"
+  },
+  "financials": {
+    "years": [
+      { "label": "2023", "revenue": 2600000, "net_income": 210000, "owner_salary": 110000, "depreciation": 55000, "amortization": 5000, "interest": 18000, "taxes": 42000, "one_time_expenses": 0, "non_recurring_income": 0, "source": "sample data" },
+      { "label": "2024", "revenue": 3100000, "net_income": 260000, "owner_salary": 120000, "depreciation": 60000, "amortization": 5000, "interest": 15000, "taxes": 52000, "one_time_expenses": 25000, "non_recurring_income": 10000, "source": "sample data" }
+    ],
+    "addbacks": [
+      { "label": "Personal vehicle + insurance", "amount": 18000, "year": "2024", "verified": true, "evidence": "sample" },
+      { "label": "One-off legal settlement", "amount": 30000, "year": "2024", "verified": false, "evidence": "unverified — excluded" }
+    ]
+  },
+  "valuation": { "multiple_low": 2.8, "multiple_high": 3.4, "multiple_basis": "SDE", "multiple_source": "sample range for smoke test" },
+  "structure": {
+    "purchase_price": 1500000,
+    "sba_loan": 1050000, "sba_rate": 0.105, "sba_term_years": 10,
+    "seller_note": 150000, "seller_note_rate": 0.06, "seller_note_term_years": 5,
+    "working_capital_injection": 75000
+  },
+  "projections": { "revenue_growth_pct": 0.05, "margin_pct": null, "hold_years": 5, "exit_multiple": 4.0, "capex_pct_revenue": 0.01 },
+  "earnout": {
+    "base_price": 1350000,
+    "tranches": [
+      { "label": "Year-1 revenue ≥ $3.2M", "amount": 100000, "probability": 0.6, "trigger": "revenue" },
+      { "label": "Year-2 revenue ≥ $3.5M", "amount": 100000, "probability": 0.4, "trigger": "revenue" }
+    ]
+  },
+  "assumption_log": [
+    { "field": "everything", "why": "Fictional smoke-test deal. No real company.", "decided_by": "claude-flagged" }
+  ]
+}

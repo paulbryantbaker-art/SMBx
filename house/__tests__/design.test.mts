@@ -3,7 +3,7 @@
  *
  * Run: npx tsx house/__tests__/design.test.mts
  *
- * Why this file exists: `content/studio/DESIGN.md` describes the palette in
+ * Why this file exists: `studio/DESIGN.md` describes the palette in
  * prose, and prose about colour is exactly the kind of thing that goes quietly
  * wrong. A brand change moves `house/tokens.ts`, every renderer follows it, and
  * the document keeps instructing sessions in the OLD colours — which they
@@ -26,7 +26,10 @@ import path from 'node:path';
 import { CARTA, LEDGER, REPORT } from '../tokens.js';
 
 const ROOT = path.resolve(new URL('../..', import.meta.url).pathname);
-const DESIGN = readFileSync(path.join(ROOT, 'content/studio/DESIGN.md'), 'utf8');
+/* ONE CLONE (2026-08-18): the studio workspace lives at `studio/` inside this
+   repo, and the law files are read IN PLACE — there is no longer a
+   `content/studio/` copy that a script refreshes into a separate folder. */
+const DESIGN = readFileSync(path.join(ROOT, 'studio/DESIGN.md'), 'utf8');
 const SITE_CSS = readFileSync(path.join(ROOT, 'client/src/practice/practice.css'), 'utf8');
 const REPORT_CSS = readFileSync(path.join(ROOT, 'client/src/practice/report.css'), 'utf8');
 
@@ -356,10 +359,10 @@ for (const rel of ['client/src/practice/report.css', 'client/src/practice/practi
    that travels may name only live tokens, outside its own dead list. */
 {
   const TRAVELS = [
-    'content/studio/FORMATS.md',
-    'content/studio/COLLATERAL_STATE.md',
-    'content/studio/workspace-CLAUDE.md',
-    'content/studio/PLAYBOOK.md',
+    'studio/FORMATS.md',
+    'studio/COLLATERAL_STATE.md',
+    'studio/CLAUDE.md',
+    'studio/PLAYBOOK.md',
   ];
   for (const rel of TRAVELS) {
     let text: string;
@@ -379,15 +382,21 @@ for (const rel of ['client/src/practice/report.css', 'client/src/practice/practi
   }
 }
 
-/* ── 5. it travels ────────────────────────────────────────────────────────
-   The document only solves anything if it reaches the workspace. */
+/* ── 5. it is where the sessions are ──────────────────────────────────────
+   The document only solves anything if a session opened on the workspace
+   reads it. Until 2026-08-18 that meant `init-workspace.mts` copying it from
+   `content/studio/` into a separate folder — and this suite asserted the copy
+   line existed. Now the workspace IS `studio/` in this repo, the copier is
+   retired, and the assertion is the simpler one: the file is there, the
+   workspace CLAUDE.md points at it, and nothing still claims to copy it. */
 const INIT = readFileSync(path.join(ROOT, 'scripts/studio/init-workspace.mts'), 'utf8');
-is('init-workspace copies DESIGN.md into the workspace',
-  INIT.includes(`law('content/studio/DESIGN.md', 'DESIGN.md')`), true);
-const WS = readFileSync(path.join(ROOT, 'content/studio/workspace-CLAUDE.md'), 'utf8');
+is('init-workspace no longer copies law files (ONE CLONE — nothing to refresh)',
+  INIT.includes(`law('content/studio/DESIGN.md'`), false);
+is('DESIGN.md lives in the workspace itself', existsSync(path.join(ROOT, 'studio/DESIGN.md')), true);
+const WS = readFileSync(path.join(ROOT, 'studio/CLAUDE.md'), 'utf8');
 is('the workspace CLAUDE.md tells a session to read it', WS.includes('DESIGN.md'), true);
 is('FORMATS.md cross-references it',
-  readFileSync(path.join(ROOT, 'content/studio/FORMATS.md'), 'utf8').includes('DESIGN.md'), true);
+  readFileSync(path.join(ROOT, 'studio/FORMATS.md'), 'utf8').includes('DESIGN.md'), true);
 
 /* ── 6. image briefs ──────────────────────────────────────────────────────
    A brief hardcodes the palette as literal text, because a human copies it
