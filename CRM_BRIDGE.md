@@ -119,8 +119,10 @@ headers, the same file produced `1 waves · 3 steps · 2 templates · 4 touches`
 
 **A zero in the campaign line is ambiguous. Treat it as a header check, not as
 an empty sheet.** The canonical headers are the ones in
-`~/Documents/smbx-studio/clients/crm-bundle/*.csv` (and, frozen and identical,
-`content/crm-seed/*.csv`); copy them verbatim.
+`~/Documents/smbx-studio/clients/crm-bundle/*.csv`; copy them verbatim.
+`content/crm-seed/*.csv` carries the same seven headers but is **no longer
+identical** — the living register gained ten columns on 2026-08-18 and the
+frozen fixture did not. The loader ignores columns it does not know.
 
 Required headers per slot (everything else is optional):
 
