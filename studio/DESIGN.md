@@ -384,10 +384,32 @@ renderer may do to a page, not about what we put on it.
 
 ## 6.2 One-pager — `build-onepager.mts`
 
-A vertical split: a copy column on the band or on bone, the photograph
-full-bleed beside it. The copy column is the framed thing — an inset hairline
-panel wearing the four handles. Do not run the frame across the whole card; it
-crosses the photograph and reads as a stray box.
+**The FIGURE layout is the default (Paul, 2026-08-18; the split below is
+preserved, inferred for any spec that names `image` without `layout`).** The
+full-length founder cutout floats in the text flow and the copy wraps his
+silhouette. The geometry is measured: figure height 834px = 1350 × φ⁻¹, the
+same golden construction the site hero took from carta.com; spacing steps the
+Fibonacci ladder (21 · 34 · 55); the frame is the full-card inset hairline
+with the four handles (sanctioned here — there is no photograph column for it
+to cross); feet land just above the foot hairline, the approved v6 rendering.
+
+**THE BLOOM, SANCTIONED AND SCOPED (Paul, 2026-08-18).** The figure layout's
+dark variant carries a radial Deal Green bloom behind the figure. This is a
+deliberate, dated amendment to the flat-band law below — chosen from a ladder
+where flat, bloom, and bloom-plus-texture were shown side by side. The scope
+is exactly this: **the figure layout, dark ground, radial Deal Green.** It is
+not a general licence to glaze: the boardroom texture stays retired (it was in
+the same ladder and was not chosen), no other surface gains a wash, and the
+dead-systems table below still governs everything else. `bloom: false` in the
+spec returns the Carta-flat card. Renderer-proof holds because the PDF is
+rebuilt from the flat PNG — no gradient reaches the vector layer. The foot CTA
+on the band is `CARTA.white` — bright white by Paul's call, one step above the
+dark reading ink; green on paper.
+
+The split layout, preserved: a vertical split — a copy column on the band or
+on bone, the photograph full-bleed beside it. The copy column is the framed
+thing — an inset hairline panel wearing the four handles. Do not run the frame
+across the whole card; it crosses the photograph and reads as a stray box.
 
 The seam between column and photograph is an **ink shadow**, not the band. It
 must stay on `ink`: under Carta the two darks are nearly identical, which makes

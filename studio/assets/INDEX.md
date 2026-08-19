@@ -17,6 +17,8 @@ filename on a file.
 | File | Shows | Used by |
 |---|---|---|
 | `founder-portrait.jpg` | Paul Baker byline headshot, 1200×1944 | Every deck, one-pager and report byline. Note the builders fall back to the repo copy at `client/public/founder-portrait.jpg` if this is missing, so a broken path here fails quietly. |
+| `founder-standing.png` | Paul full length, transparent cutout, 1150×3560 — the DERIVED WORKING COPY of `Image.png`: axis-straightened 13.67° (measured centroid lean; residual −0.41°) and the matte re-cut (alpha eroded ~5px, edge mean RGB (57,54,53)) so it sits on light AND dark grounds without a halo. Sanctioned by Paul 2026-08-18. Known blemishes carried from the source, accepted for now: gold background residue at the left shoulder; the phone in hand (mirror selfie). | The `figure` layout — the DEFAULT one-pager layout (2026-08-18) — and the deck figure cover once built. Regenerate from `Image.png` with the recipe in `FORMATS.md` §2.1 if the source is ever re-shot. |
+| `Image.png` | Paul full length, transparent cutout, AS DELIVERED (1633×3456, leaning −13.67°, light-feathered matte that halos on dark). Kept as the untouched source; breaks the naming law knowingly — renaming it would orphan the derivation note above. | Nothing renders from it directly. Source for `founder-standing.png` only. |
 
 ## `trades/` — lane illustrations
 

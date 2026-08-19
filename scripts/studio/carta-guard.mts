@@ -119,12 +119,41 @@ for f in sys.argv[1:]:
     try:
         im = Image.open(f)
         im.draft('RGB', (900, 900))                 # JPEG fast-path decode
+        rgba = im.convert('RGBA')
         im = im.convert('RGB')
     except Exception: continue
     w, h = im.size
     corners = [im.getpixel(p) for p in ((3,3),(w-4,3),(3,h-4),(w-4,h-4))]
     im.thumbnail((360, 360))                        # the analysis does not need full res
     a = np.array(im)
+    # A CUTOUT IS JUDGED ON ITS INK, NOT ITS ABSENCE (2026-08-18). Converting
+    # RGBA->RGB collapses transparency to literal black, which did two wrong
+    # things at once to founder-standing.png: the transparent field's single
+    # colour dragged the unique-colour count under the photograph threshold,
+    # and the border test then read (0,0,0) as a missing bone ground. A
+    # transparent border is not a ground at all - the asset composites onto
+    # whatever surface the builder gives it - so for a mostly-transparent
+    # image, classify on the OPAQUE pixels only and skip the ground test.
+    rgba.thumbnail((360, 360))
+    ar = np.array(rgba)
+    alpha = ar[..., 3]
+    is_cutout = (alpha < 8).mean() > 0.05
+    if is_cutout:
+        opaque = ar[alpha > 200][:, :3]
+        # The absolute 22000 threshold assumes a ~360x360 sample. A tall cutout
+        # thumbnails to a sliver (founder-standing: 116x360, ~25k opaque px),
+        # so the photograph test must be PROPORTIONAL: resampled photo pixels
+        # are nearly all distinct, an illustration's flat fills are not.
+        if len(opaque) > 500 and len(np.unique(opaque, axis=0)) / len(opaque) > 0.35:
+            skipped += 1; continue                  # a photographic cutout: exempt
+        a = None                                    # illustration cutout: warm test only, below
+        ai = opaque.astype(int); r,g,b = ai[:,0], ai[:,1], ai[:,2]
+        mx = ai.max(axis=1); mn = ai.min(axis=1)
+        sat = np.where(mx > 0, (mx-mn)/np.maximum(mx,1), 0)
+        warm = ((r > g+18) & (g > b+18) & (sat > 0.30) & (mx > 90)).mean()*100
+        if warm > 0.5:
+            print('  FAIL  %-52s warm %.1f%% - amber/gold masses (cutout, ground exempt)' % (f, warm)); bad += 1
+        continue
     uniq = len(np.unique(a.reshape(-1,3), axis=0))
     if uniq > 22000:
         skipped += 1; continue                      # a photograph: exempt

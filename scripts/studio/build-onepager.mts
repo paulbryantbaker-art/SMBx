@@ -20,9 +20,26 @@
  * spec's own folder, then CWD; absolute paths pass through; brand assets (logo,
  * texture) come from the repo.
  *
- * Layout: a vertical split — copy column (dark boardroom OR light bone) on the
- * left, your photo full-bleed on the right with a recessed-shadow seam (no
- * light line, at any zoom). Omit `image` and the copy fills the whole card.
+ * Layouts (2026-08-18, Paul: "lock that in for carousel and single image
+ * formats… don't remove the other types, but this can be the default"):
+ *
+ *   'figure'  THE DEFAULT for new specs. The full-length founder cutout
+ *             (assets/brand/founder-standing.png — axis-straightened, matte
+ *             re-cut for any ground) floats in the text flow, so the copy
+ *             WRAPS his silhouette via shape-outside. Geometry is measured,
+ *             not felt: figure height 834px = 1350 × φ⁻¹ (the figure : card
+ *             ratio IS the golden ratio), vertical intervals step the
+ *             Fibonacci ladder (21 · 34 · 55), and the dark ground carries the
+ *             SANCTIONED green bloom behind the figure (Paul, 2026-08-18 —
+ *             a scoped amendment to Carta's flat-band law; see DESIGN.md §6.2.
+ *             `bloom: false` switches it off; the texture stays retired).
+ *   'split'   The prior layout — copy column left, photo full-bleed right,
+ *             recessed-shadow seam. Fully preserved.
+ *
+ * BACK-COMPAT INFERENCE, load-bearing for rebuild-all.sh: a spec that names
+ * `image` and no `layout` is a split spec from before the default flipped, and
+ * MUST keep rendering split — otherwise re-rendering the back catalogue would
+ * silently change what was published. `layout` unset + no `image` = figure.
  *
  * Outputs (into --out, default ./collateral): <slug>-dark.png / -light.png (the
  * postable images), <slug>-dark.pdf / -light.pdf (single-page document form),
@@ -77,16 +94,23 @@ const { post } = await import(pathToFileURL(specPath).href) as { post: Post };
 /* ── types (documented in the example spec) ───────────────────────────── */
 interface Post {
   slug: string;
-  kicker?: string;                          // mono brass top-right label, e.g. 'AVAILABILITY'
-  numeral?: string;                         // giant mint/green figure, e.g. '2'
+  layout?: 'figure' | 'split';              // default 'figure'; a spec with `image` and no `layout` infers 'split' (back-compat)
+  kicker?: string;                          // mono top-right label, e.g. 'AVAILABILITY'
+  numeral?: string;                         // giant mint/green figure, e.g. '2' (split layout)
   numeralLabel?: string;                    // small mono label beside it ('\n' = line break)
-  hook: string;                             // Fraunces headline — use ‑ (U+2011) to glue compounds like buy‑side
-  body?: string;                            // supporting paragraph
-  invite?: string;                          // bold, warm invitation line
+  hook: string;                             // display-serif headline — use ‑ (U+2011) to glue compounds like buy‑side
+  body?: string;                            // supporting paragraph (figure layout: the lede)
+  invite?: string;                          // bold, warm invitation line (split layout)
   cta?: string;                             // mono call-to-action, e.g. "Let's talk  →"
   byline?: { name?: string; title?: string };
-  image?: string;                           // right-panel photo; omit for a full-width text card
+  image?: string;                           // split layout: right-panel photo; its PRESENCE infers layout:'split' when layout is unset
   imagePos?: string;                        // CSS object-position, default '50% 42%'
+  /* figure layout */
+  figure?: string;                          // the cutout; default 'brand/founder-standing.png'. MISSING = HARD ERROR, never a quiet text-only card
+  points?: { k: string; v: string }[];      // numbered list — k bold lead-in, v the rest of the sentence
+  note?: string;                            // mono foot-of-copy line — sources and their interests
+  bloom?: boolean;                          // dark ground only; default true (sanctioned 2026-08-18). Set false for the Carta-flat card
+  headshot?: string;                        // byline face; defaults to the repo founder portrait
   caption?: string;                         // the LinkedIn post text
   variants?: ('dark' | 'light')[];          // default: both
 }
@@ -112,15 +136,81 @@ const resolveImg = (p?: string): string | null => {
 const LOGO = b64(path.join(ROOT, 'client/public/logo-green-x.png'));
 const LOGO_W = b64(path.join(ROOT, 'client/public/logo-green-x-dark.png'));
 /* No TEXTURE constant. See the palette note above — the band is a colour. */
-const PHOTO = resolveImg(post.image);
+
+/* Which layout? The inference is the back-compat contract (see header). */
+const LAYOUT: 'figure' | 'split' = post.layout ?? (post.image ? 'split' : 'figure');
+
+const PHOTO = LAYOUT === 'split' ? resolveImg(post.image) : null;
+
+/* The figure is load-bearing in its layout: a missing cutout must be a
+   blocker, not a quiet text-only card. Quiet degradation is exactly how a
+   spec pointing at pest.png/plumbing.png shipped pages with no art. */
+const FIG = LAYOUT === 'figure' ? resolveImg(post.figure ?? 'brand/founder-standing.png') : null;
+if (LAYOUT === 'figure' && !FIG) {
+  console.error(`[onepager] figure layout, but the cutout is missing: ${post.figure ?? 'brand/founder-standing.png'}`);
+  console.error('           render from the STUDIO ROOT so ./assets resolves, or pass figure:/--media explicitly.');
+  process.exit(1);
+}
+const HEAD = resolveImg(post.headshot) || b64(path.join(ROOT, 'client/public/founder-portrait.jpg'));
 
 const name = post.byline?.name ?? 'Paul Baker';
 const title = post.byline?.title ?? 'Buy-side corporate development';
 const COLW = PHOTO ? 610 : 1080;
 const PHOTOW = 1080 - COLW;
 
-/* ── one card (dark|light), the approved split composition ────────────── */
+/* ── the FIGURE card (default layout; approved v6 mock, 2026-08-18) ─────
+   Geometry, measured rather than felt — every number below is one of these:
+     · figure height 834px = 1350 × φ⁻¹  (figure : card = the golden ratio)
+     · the float's top margin 100px is the APPROVED v6 value — it lands his
+       feet just above the foot hairline, the rendering Paul signed off; do
+       not "correct" it to touch without a new sign-off
+     · vertical intervals step the Fibonacci ladder: 21 · 34 · 55
+   The wrap is CSS shape-outside on the cutout's own alpha, which is the whole
+   reason the figure must float IN FLOW: position:absolute removes it from
+   flow and silently turns the wrap into a plain column (the v2 mock defect).
+   The dark ground's green bloom is a SANCTIONED, SCOPED exception to Carta's
+   flat-band law (Paul, 2026-08-18) — this layout, dark variant, radial Deal
+   Green, nothing else; the boardroom texture stays retired. Renderer-proof is
+   unaffected: the PDF is rebuilt from the flat PNG, so no gradient survives
+   to the vector layer. */
+function figureCard(dark: boolean): string {
+  const inkC = dark ? IVORY : INK, subC = dark ? IVORY_SUB : BODY;
+  const accC = dark ? MINT : GREEN, logoSrc = dark ? LOGO_W : LOGO;
+  const seamC = dark ? CARTA.darkSeam : HAIR;
+  /* White CTA on the band (Paul, 2026-08-18: "the site address in the footer
+     needs to be bright white") — CARTA.white, not a new hex. Green on paper. */
+  const ctaC = dark ? CARTA.white : GREEN;
+  const plateC = dark ? CARTA.darkPlate : CARTA.panel;
+  const bloom = dark && post.bloom !== false
+    ? `<div class="lay" style="background:radial-gradient(ellipse 760px 980px at 76% 58%, rgba(10,122,88,0.34) 0%, rgba(10,122,88,0.14) 42%, transparent 72%)"></div>`
+    : '';
+  const points = (post.points ?? []).map((p, i) =>
+    `<li><span class="fn" style="color:${accC};border-color:${seamC};background:${plateC}">${i + 1}</span><div style="color:${subC}"><b style="color:${inkC}">${esc(p.k)}</b> ${esc(p.v)}</div></li>`).join('');
+  return `<div class="card fig-card" style="background:${dark ? DARK : WARM};color:${inkC}">
+    ${bloom}
+    <div class="fframe" style="border-color:${seamC}"><i class="hdl" style="background:${inkC};left:-4px;top:-4px"></i><i class="hdl" style="background:${inkC};right:-4px;top:-4px"></i><i class="hdl" style="background:${inkC};left:-4px;bottom:-4px"></i><i class="hdl" style="background:${inkC};right:-4px;bottom:-4px"></i></div>
+    <div class="fpad">
+      <div class="ftop"><div class="fkick" style="color:${accC}"><span class="fsq" style="background:${accC}"></span>${esc(post.kicker ?? '')}</div><img src="${logoSrc}" style="height:30px;width:auto;display:block"></div>
+      <div class="fflow">
+        <img class="ffig" src="${FIG}" style="shape-outside:url(${FIG})">
+        <div class="fhook" style="color:${inkC}">${esc(post.hook)}</div>
+        ${post.body ? `<div class="flede" style="color:${subC}">${esc(post.body)}</div>` : ''}
+        <div class="frule" style="background:${accC}"></div>
+        ${points ? `<ol class="fpoints">${points}</ol>` : ''}
+        ${post.note ? `<div class="fnote" style="color:${dark ? CARTA.darkMuted : CARTA.muted}">${esc(post.note)}</div>` : ''}
+      </div>
+      <div class="ffoot" style="border-color:${seamC}">
+        <img class="fface" src="${HEAD}" style="border-color:${plateC}">
+        <div class="fwho"><b style="color:${inkC}">${esc(name)}</b><span style="color:${dark ? CARTA.darkMuted : CARTA.muted}">${esc(title)}</span></div>
+        <span class="fcta" style="color:${ctaC}">${esc(post.cta ?? 'smbx.ai  →')}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── one card (dark|light), the preserved split composition ───────────── */
 function card(dark: boolean): string {
+  if (LAYOUT === 'figure') return figureCard(dark);
   const colBg = `background:${dark ? DARK : WARM}`;
   /* NO GLAZE. Both of these were atmosphere over the Ledger boardroom texture
      — a jade bloom and a vertical darkening on the block, a whisper of green on
@@ -206,6 +296,32 @@ const CSS = `
   /* Recessed-shadow seam: a DARK gradient on the photo's left edge. No light
      element near the join, so nothing can read as a white line, in any renderer. */
   .vgrad { position:absolute; inset:0; background:linear-gradient(90deg, rgba(9,15,13,0.78) 0%, rgba(9,15,13,0.34) 6%, transparent 18%); }
+
+  /* ── figure layout (see figureCard's header for the geometry law) ──── */
+  .fig-card { display:block; }
+  .lay { position:absolute; inset:0; }
+  .fframe { position:absolute; inset:46px; border:1px solid; pointer-events:none; z-index:3; }
+  .hdl { position:absolute; width:8px; height:8px; }
+  .fpad { position:absolute; inset:46px; padding:52px 56px 44px; display:flex; flex-direction:column; z-index:2; }
+  .ftop { display:flex; align-items:center; justify-content:space-between; margin-bottom:55px; }
+  .fkick { font-family:${MONO}; font-size:17px; letter-spacing:0.16em; font-weight:600; text-transform:uppercase; display:flex; align-items:center; gap:13px; }
+  .fsq { width:8px; height:8px; display:block; flex:none; }
+  .fflow { flex:1; position:relative; }
+  .ffig { float:right; height:834px; width:auto; margin-top:100px; margin-left:30px; shape-margin:30px; shape-image-threshold:0.45; }
+  .fhook { font-family:${DISPLAY}; font-weight:545; font-size:80px; line-height:1.05; letter-spacing:-0.014em; margin-bottom:55px; }
+  .flede { font-size:25px; line-height:1.55; margin-bottom:34px; }
+  .frule { width:72px; height:5px; margin-bottom:34px; }
+  .fpoints { list-style:none; }
+  .fpoints li { display:flex; gap:18px; margin-bottom:34px; }
+  .fn { font-family:${MONO}; font-size:15px; font-weight:600; border:1px solid; width:34px; height:34px; display:flex; align-items:center; justify-content:center; flex:none; margin-top:4px; }
+  .fpoints b { font-weight:600; }
+  .fpoints div { font-size:22px; line-height:1.55; }
+  .fnote { font-family:${MONO}; font-size:14px; line-height:1.6; }
+  .ffoot { display:flex; align-items:center; gap:16px; border-top:1px solid; padding-top:21px; height:92px; position:relative; z-index:2; }
+  .fface { width:56px; height:56px; border-radius:50%; object-fit:cover; object-position:50% 22%; border:3px solid; flex:none; }
+  .fwho b { display:block; font-size:22px; font-weight:700; letter-spacing:-0.01em; }
+  .fwho span { font-size:16px; }
+  .fcta { margin-left:auto; font-family:${MONO}; font-size:20px; letter-spacing:0.05em; font-weight:600; }
 `;
 
 /* THE PALETTE GUARD. This builder rendered unguarded through the whole Carta
