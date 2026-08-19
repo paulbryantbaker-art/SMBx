@@ -1,0 +1,11 @@
+Nobody publishes what an add-on program costs to run. So here is the sheet, assembled from what is public — with every source’s commercial interest named, because most of these numbers come from someone selling something.
+
+The person: $150–250K before carry. The data stack: routinely six figures. The ramp: first LOI around month seven in search data, and no clean published number for time-to-first-sourced-close — a gap worth knowing by name. The coverage all of it buys: the median firm sees about 17.6% of its own market’s deal flow, per the one longitudinal series that exists (published by a firm that sells origination analytics).
+
+And the line nobody budgets: dead deals. $25–50K of QoE per busted exclusivity, with ~47% of post-LOI breaks now driven by diligence findings.
+
+One page in the carousel does the arithmetic — fully loaded cost divided by sourced closes, somewhere between $60K and $200K each. It is labeled illustrative on the page, because it is my arithmetic on published ranges and not a benchmark anybody has established. Redo it with your own numbers.
+
+The sheet’s conclusion is not "spend less". It is that the function is expensive whether or not it works — so the question is where the next dollar of finite attention produces a return. On most platforms I have seen, the starved end is not the top of the funnel.
+
+If you have built this function: what did your cost per closed add-on actually come out to?

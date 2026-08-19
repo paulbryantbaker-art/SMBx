@@ -1,0 +1,13 @@
+Every HVAC thesis written in 2025 priced in four things. Three of them have since expired.
+
+The refrigerant crisis is over — HARDI said so in October 2025. R-454B peaked above $900 a cylinder and now runs $449–499, falling. The tariff stack is gone: SCOTUS struck the IEEPA duties 6–3 in February, and residential HVAC Section 232 was cut from 25% to 15% in June. And the R-410A installation deadline the whole mandated-replacement case rested on was withdrawn by EPA on 27 July.
+
+The one that did not ease is labor. About 40,100 HVAC openings a year through 2034, and no purchase order fixes it.
+
+Meanwhile the price came down. Capstone puts HVAC services at 9.5x EV/EBITDA across 2024–YTD 2026 against 13.3x across 2021–23. Roughly four turns.
+
+A correction I owe this feed, since it is the kind that matters. I had a figure staged for this post claiming PE add-ons had nearly doubled year over year, attributed to S&P. I could not stand it up at that source or any other. Capstone’s actual count is 38 add-ons against 36 — two deals — and sector volume is down 4.2%. I am not going to restate the number I could not verify, because a figure repeated in order to knock it down is still a figure being repeated. The booming-deal-market version of this post was wrong, and it is not the one I am posting.
+
+What is actually happening is duller and more useful: platform formation has slowed, add-ons carry the volume, and the good metros are taken. The opening is where the platforms have not formed yet.
+
+If you are underwriting HVAC right now — have you re-run the model without the deadline in it?

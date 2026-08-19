@@ -131,7 +131,5 @@ export const deck = {
     'One page in there refuses a claim rather than making it. Does pre-LOI screening actually reduce break rates? The vendors say yes. No causal study exists. Cheap insurance with an unproven payout is the honest version, so that is what the page says.',
     '',
     'Which finding killed your last dead deal — and could you have seen it at day 4?',
-    '',
-    '#MergersAndAcquisitions #PrivateEquity #CorporateDevelopment #DueDiligence',
   ].join('\n'),
 };
