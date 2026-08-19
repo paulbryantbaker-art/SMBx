@@ -112,6 +112,69 @@ await T('a re-import overwrites the copy and leaves state alone', async () => {
   return `${r.b}|${r.notes}`;
 }, 'A sub-$10M|mine');
 
+console.log('\nTHE DRAFT (migration 138) — decide in the app, render in Cowork');
+/* 2026-08-19: Paul chooses a template and edits copy in the app; Cowork renders
+   from it. These pin the three things a review said could go wrong: the SQL
+   shape (CASE WHEN $bool THEN col ELSE $jsonb END — "could not determine data
+   type" would 400 every save), the anchor (an edit remembers the plan text it
+   edited, so a later plan revision reads as SUPERSEDED and never resurrects a
+   consumed edit as the Copy default), and the importer's silence (a re-import
+   must not touch a decision). */
+const { updateQueueDraft, listQueueDrafts } = await import('../postQueue.js');
+const { copyDraftState } = await import('../../../shared/draft.js');
+await T('a template the register knows is stored; an unknown one is refused', async () => {
+  await updateQueueDraft(1, 'P-2', { template: 'figure-deck-dark' });
+  let refused = 'no';
+  try { await updateQueueDraft(1, 'P-2', { template: 'not-a-template' }); } catch { refused = 'yes'; }
+  return `${(await sql`SELECT template FROM post_queue WHERE user_id=1 AND queue_id='P-2'`)[0].template} ${refused}`;
+}, 'figure-deck-dark yes');
+await T('a text-slot template is refused on a document slot', async () => { try { await updateQueueDraft(1, 'P-2', { template: 'figure-card' }); return 'accepted'; } catch (e: any) { return /renders a text slot/.test(e.message) ? 'refused' : e.message; } }, 'refused');
+await T('an undefined field is left alone; null clears', async () => {
+  await updateQueueDraft(1, 'P-2', { copyEdit: 'X caption' });
+  const a = (await sql`SELECT template, copy_edit FROM post_queue WHERE user_id=1 AND queue_id='P-2'`)[0];
+  await updateQueueDraft(1, 'P-2', { template: null });
+  const b = (await sql`SELECT template, copy_edit FROM post_queue WHERE user_id=1 AND queue_id='P-2'`)[0];
+  return `${a.template}/${a.copy_edit} → ${b.template}/${b.copy_edit}`;
+}, 'figure-deck-dark/X caption → null/X caption');
+await T('pages_edit round-trips through the CASE as jsonb (the shape a review feared would 400)', async () => {
+  const row = await updateQueueDraft(1, 'P-2', { pagesEdit: [{ n: 1, label: 'Cover', text: 'edited page one', note: null }] });
+  return `${Array.isArray(row.pages_edit)} ${row.pages_edit[0].text}`;
+}, 'true edited page one');
+await T('an edit equal to the plan (end whitespace aside) is stored as NULL, not as an edit', async () => {
+  const plan = (await sql`SELECT body FROM post_queue WHERE user_id=1 AND queue_id='P-1'`)[0].body;
+  const row = await updateQueueDraft(1, 'P-1', { copyEdit: plan + '\n  ' });
+  return row.copy_edit;
+}, null);
+await T('the edit remembers the plan it edited (copy_base), and reads LIVE while the plan stands', async () => {
+  const plan = (await sql`SELECT body FROM post_queue WHERE user_id=1 AND queue_id='P-1'`)[0].body;
+  const row = await updateQueueDraft(1, 'P-1', { copyEdit: 'my caption' });
+  return `${row.copy_base === plan} ${copyDraftState(row)}`;
+}, 'true live');
+await T('a re-import does not touch the decision', async () => {
+  const { importCampaign } = await import('../postQueue.js');
+  await importCampaign(1, '2026-08-18');
+  const r = (await sql`SELECT template, copy_edit FROM post_queue WHERE user_id=1 AND queue_id='P-1'`)[0];
+  return `${r.copy_edit}`;
+}, 'my caption');
+await T('the plan catching up reads SATISFIED; the plan moving PAST the edit reads SUPERSEDED — never live again', async () => {
+  await sql`UPDATE post_queue SET body='my caption' WHERE user_id=1 AND queue_id='P-1'`;
+  const sat = copyDraftState((await sql`SELECT copy_edit, body, copy_base FROM post_queue WHERE user_id=1 AND queue_id='P-1'`)[0]);
+  await sql`UPDATE post_queue SET body='a later revision Y' WHERE user_id=1 AND queue_id='P-1'`;
+  const sup = copyDraftState((await sql`SELECT copy_edit, body, copy_base FROM post_queue WHERE user_id=1 AND queue_id='P-1'`)[0]);
+  return `${sat} ${sup}`;
+}, 'satisfied superseded');
+await T('GET /drafts lists the slot with the template resolved to its renderer + hint and the copy state', async () => {
+  await updateQueueDraft(1, 'P-2', { template: 'figure-deck-dark' });   // P-2: template + the live 'X caption' edit (its plan has not moved)
+  const ds = await listQueueDrafts(1);
+  const d = ds.find((x: any) => x.queue_id === 'P-2');
+  return `${d?.template?.renderer} ${d?.template?.status} ${d?.copy?.state} ${typeof d?.template?.hint}`;
+}, 'figure-deck.py live live string');
+await T('clean-up: revert leaves no decision on the rows', async () => {
+  await updateQueueDraft(1, 'P-1', { template: null, copyEdit: null, pagesEdit: null });
+  await updateQueueDraft(1, 'P-2', { template: null, copyEdit: null, pagesEdit: null });
+  return (await listQueueDrafts(1)).filter((d: any) => ['P-1', 'P-2'].includes(d.queue_id)).length;
+}, 0);
+
 console.log('\nTHE DB CONSTRAINT — posted with no timestamp is impossible');
 await T('CHECK blocks a raw posted row', async () => { try { await sql`UPDATE post_queue SET status='posted', posted_at=NULL WHERE queue_id='Q03'`; return 'allowed'; } catch { return 'blocked'; } }, 'blocked');
 

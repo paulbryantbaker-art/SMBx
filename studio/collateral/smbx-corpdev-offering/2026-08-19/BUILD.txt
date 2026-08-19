@@ -1,0 +1,41 @@
+built      2026-08-19 · THE OFFER DOCUMENT (no-pricing, 5pp) — the Claude
+           Design build, superseding the same-day in-house 8-page carousel.
+reference  design_handoff_smbx_offer_docs/ (repo root) — RULE ZERO: the HTML
+           wins. Design transcribed 1:1: portal cover with ruled stat rows,
+           gradient body pages with 300px ghost numerals, dash/numbered rows,
+           Frame C two-column closer with the plate pair. Hex audit: all 12
+           reference files resolve to CARTA tokens. Mobile floor holds.
+builder    scripts/studio/offer-docs.py --doc nopricing (PIL raster)
+COPY       FIVE canon corrections vs the handoff (CD transcribed the OUTDATED
+           published brochure faithfully — the defects were in its source):
+           1. RETAINER: handoff said "$5,000 a month, stop any time" — the
+              monthly cadence REVERSED 2026-08-17 with "DO NOT REDO IT".
+              Corrected to $15,000 a quarter, up front; step away at any
+              quarter's end. (Pricing doc only, but recorded here too.)
+           2. "retainer was free" → credited against the success fee at close
+              (credit CAPS at the fee).
+           3. Evaluation → VALUATION (Paul, 2026-08-13).
+           4. smbXCorpDev / Premium → smbX Core / smbX Premium (2026-08-19).
+           5. "$5B+ REVENUE ADDED" → ENTERPRISE VALUE ADDED (the sanctioned
+              stat set; revenue is a different, unsanctioned claim).
+           Also "≈$21B" → "~$21B" (canon glyph; ≈ absent from the serif subset).
+
+2026-08-19 · A COVER RESTYLE SHIPPED AND WAS REVERSED THE SAME DAY — do
+not redo it. Paul asked for the Featured-thumbnail composition on the
+cover ("I was wrong, i need the cover to be that way"), then reversed
+within hours ("i didn't want to change the actual docs, change them back
+to how they were"). Both documents carry the HANDOFF cover (150 numeral,
+plate label, ruled stat rows). What survives is the reason for the round
+trip: LinkedIn's Featured card crops a 4:5 cover to ~1.91:1 and beheads
+the figure — so the Featured slot gets its own image instead:
+
+smbx-corpdev-offering-featured.pdf · 5pp LANDSCAPE (2400×1260, native
+1.91:1) · scripts/studio/featured-doc.py · THIS is what goes in the
+Featured slot. Page 1 is the approved thumbnail composition (rendered by
+featured-thumb.py at build, so cover and thumbnail cannot drift); pages
+2–5 are the same canon-corrected copy (imported from offer-docs.py's own
+dicts) re-laid sideways — left column kicker/headline/lede/note, rows
+right, Frame C closer with the plate pair and the φ-rect portrait.
+smbx-featured-thumbnail.png is that page 1 as a standalone image, kept
+for anywhere a single image serves. The 4:5 documents are unchanged and
+remain the documents of record; they are never uploaded to Featured.

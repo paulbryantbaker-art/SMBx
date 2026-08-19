@@ -18,8 +18,7 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import {
-  importQueue, importCampaign, listCampaigns, listQueue, updateQueueState, queuePerformance, readQueueFile,
-} from '../services/postQueue.js';
+  importQueue, importCampaign, listCampaigns, listQueue, updateQueueState, queuePerformance, readQueueFile, updateQueueDraft, listQueueDrafts } from '../services/postQueue.js';
 
 const router = Router();
 
@@ -97,6 +96,38 @@ router.get('/check', requireAuth, async (_req, res) => {
 });
 
 /** State only. Content fields are not settable — the markdown owns them. */
+/**
+ * THE DRAFT (migration 138) — template pick + edited copy, decided in the app
+ * before Cowork renders. Separate from PATCH /:queueId on purpose: that route
+ * is STATE (posted, parked, URL, notes) and refuses content; this one is the
+ * human's decision ABOUT the content, which the importer never overwrites.
+ * Body: { template?: string|null, copyEdit?: string|null, pagesEdit?: [{n,label,text,note}]|null }.
+ * An undefined field is left alone; null clears it.
+ */
+router.patch('/:queueId/draft', requireAuth, async (req: any, res) => {
+  try {
+    const b = req.body || {};
+    const row = await updateQueueDraft(req.userId, req.params.queueId, {
+      template: 'template' in b ? b.template : undefined,
+      copyEdit: 'copyEdit' in b ? b.copyEdit : undefined,
+      pagesEdit: 'pagesEdit' in b ? b.pagesEdit : undefined,
+    });
+    if (!row) return res.status(404).json({ error: 'Not in the queue' });
+    res.json(row);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+/** What the studio pulls before rendering: every slot carrying a decision, edit beside plan. */
+router.get('/drafts', requireAuth, async (req: any, res) => {
+  try {
+    res.json({ drafts: await listQueueDrafts(req.userId) });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.patch('/:queueId', requireAuth, async (req: any, res) => {
   try {
     const row = await updateQueueState(req.userId, req.params.queueId, req.body || {});

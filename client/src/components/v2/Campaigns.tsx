@@ -33,6 +33,8 @@ import type { CSSProperties } from "react";
 import { authHeaders } from "../../hooks/useAuth";
 import { C, input, btnPrimary, btnGhost, mono, chip } from "./tokens";
 import { daysUntil, localIso } from "./Leads";
+import { templatesFor, templateById } from "@shared/templates";
+import { copyDraftState, pagesDraftState, pagesEqual, hasLiveDraft } from "@shared/draft";
 
 /* ── the rows, as the API returns them ───────────────────────────────── */
 
@@ -71,7 +73,18 @@ export interface QueueRow {
     pdf: string | null; cover: string | null; thumbs: string[];
     pages: number | null; bytes: number | null; deck_caption_matches: boolean;
   } | null;
+  /* THE DRAFT (migration 138) — decisions made here before Cowork renders:
+     state, never overwritten by an import. */
+  template: string | null;
+  copy_edit: string | null;
+  copy_base: string | null;     // the plan text the edit was made against (shared/draft.ts)
+  pages_edit: { n: number; label: string | null; text: string; note: string | null }[] | null;
+  pages_base: { n: number; label: string | null; text: string; note: string | null }[] | null;
+  draft_at: string | null;
 }
+
+/** A slot carries a LIVE decision Cowork has not rendered from — shared/draft.ts is the rule. */
+export const hasDraft = (r: QueueRow) => hasLiveDraft(r);
 
 export interface CampaignMeta {
   name: string;
@@ -111,6 +124,11 @@ export function kindLabel(r: QueueRow): string {
 /** What is READY for a slot — the answer to "what gets made and ready to post when". */
 export function readiness(r: QueueRow): { text: string; ok: boolean; note?: string } {
   if (r.status === "posted") return { text: "posted", ok: true };
+  // THE GATE OUTRANKS THE EDIT: a receipt-gated frame with one bracket filled
+  // is still gated, and "edited" would hide that everywhere the label shows.
+  if (r.kind === "text" && r.gate && r.body) return { text: "gated", ok: false, note: "needs receipts" };
+  // A LIVE decision Cowork has not rendered from is the next most important state — it outranks "copy · PDF".
+  if (hasDraft(r)) return { text: "edited", ok: false, note: "waiting on a Cowork render" };
   if (r.queue_id.startsWith("BLACKOUT")) return { text: "no post", ok: true };
   if (r.kind === "document") {
     const pdf = !!r.document?.pdf;
@@ -154,7 +172,9 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
   const [onlyOpen, setOnlyOpen] = useState(false);
 
   const load = useCallback(() => {
-    fetch("/api/post-queue/", { headers: authHeaders() })
+    // Returns the rows fetch so a caller that must not resolve before the new
+    // rows are on screen (a draft save) can await it.
+    const rowsP = fetch("/api/post-queue/", { headers: authHeaders() })
       .then(r => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then(d => { setRows(d.rows ?? []); setError(null); })
       .catch(e => setError(e?.message ?? "load failed"));
@@ -166,8 +186,9 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
         setView(v => v ?? (list[0]?.name ?? STANDING));
       })
       .catch(() => setCampaigns([]));
+    return rowsP;
   }, []);
-  useEffect(load, [load]);
+  useEffect(() => { load(); }, [load]);
 
   const total = rows ?? [];
   const current = campaigns.find(c => c.name === view) ?? null;
@@ -240,6 +261,19 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
     const j = await r.json().catch(() => null);
     if (!r.ok) return j?.error ?? `Save failed (${r.status})`;
     load();
+    return null;
+  }, [load]);
+
+  /* The draft goes to its own route: PATCH /:id refuses content by law; the
+     draft is the human's decision ABOUT the content. */
+  const patchDraft = useCallback(async (queueId: string, body: Record<string, unknown>): Promise<string | null> => {
+    const r = await fetch(`/api/post-queue/${encodeURIComponent(queueId)}/draft`, {
+      method: "PATCH", headers: { ...authHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const j = await r.json().catch(() => null);
+    if (!r.ok) return j?.error ?? `Save failed (${r.status})`;
+    await load();
     return null;
   }, [load]);
 
@@ -370,6 +404,7 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
                     isToday={r.queue_id === todays?.queue_id}
                     onToggle={() => setOpenId(openId === r.queue_id ? null : r.queue_id)}
                     onPatch={b => patch(r.queue_id, b)}
+                    onPatchDraft={b => patchDraft(r.queue_id, b)}
                     onMarkPosted={(u, c) => markPosted(r.queue_id, u, c)}
                   />
                 ))}
@@ -415,12 +450,13 @@ function Focus({ label, row, empty, onOpen }: { label: string; row: QueueRow | n
 
 /* ── one slot line + its expanded record ─────────────────────────────── */
 
-function SlotLine({ row, open, isToday, onToggle, onPatch, onMarkPosted }: {
+function SlotLine({ row, open, isToday, onToggle, onPatch, onPatchDraft, onMarkPosted }: {
   row: QueueRow;
   open: boolean;
   isToday: boolean;
   onToggle: () => void;
   onPatch: (body: Record<string, unknown>) => Promise<string | null>;
+  onPatchDraft: (body: Record<string, unknown>) => Promise<string | null>;
   onMarkPosted: (postUrl: string, retiredCheck: string) => Promise<string | null>;
 }) {
   const rd = readiness(row);
@@ -466,7 +502,7 @@ function SlotLine({ row, open, isToday, onToggle, onPatch, onMarkPosted }: {
             <p style={{ margin: "0 0 10px", fontSize: 13, color: C.body, lineHeight: 1.6 }}>
               {row.lead}{row.format ? ` · ${row.format}` : ""}
             </p>
-            {row.body ? <PostCopy row={row} /> : (
+            {(row.body || copyDraftState(row) === "live") ? <PostCopy row={row} /> : (
               <div style={{ padding: "12px 14px", background: C.panel, fontSize: 13.5, color: C.body, lineHeight: 1.6 }}>
                 {isMandate(row)
                   ? <>This edition's copy is not in the app: the Sunday run builds a Mandate from the deal sweep{row.status === "drafted" ? " (edition 1 was drafted in the Cowork week file)" : ""} and it lands here by re-import once the plan carries it. Paste from the drafted file when you post; mark it here.</>
@@ -475,6 +511,7 @@ function SlotLine({ row, open, isToday, onToggle, onPatch, onMarkPosted }: {
                     : <>Copy has not been carried into the app for this slot — it lives in the plan's markdown. Re-export the campaign once the section is written.</>}
               </div>
             )}
+            {(row.kind === "text" || row.kind === "document") && row.status !== "posted" && <DraftBlock row={row} onPatchDraft={onPatchDraft} />}
             {row.kind === "document" && <DocumentBlock row={row} />}
             {(row.carries || row.law_check || row.source_disclosure) && (
               <div style={{ marginTop: 14, fontSize: 13, color: C.body, lineHeight: 1.6 }}>
@@ -573,6 +610,12 @@ type CopyVariant = { id: string; label: string; text: string; caution?: string }
  */
 export function PostCopy({ row }: { row: QueueRow }) {
   const variants: CopyVariant[] = [];
+  // Your edit leads — when it is LIVE (the plan has not moved past it): it is
+  // what you will post and what Cowork renders from. It carries the slot's
+  // gate as its caution, because filling one bracket does not un-gate a frame.
+  if (row.copy_edit && copyDraftState(row) === "live") {
+    variants.push({ id: "edit", label: "Your edit", text: row.copy_edit, caution: row.gate ?? undefined });
+  }
   if (row.body) {
     variants.push({
       id: "plan",
@@ -584,7 +627,7 @@ export function PostCopy({ row }: { row: QueueRow }) {
   if (row.body_deck) variants.push({ id: "deck", label: "Deck's caption", text: row.body_deck });
   if (row.body_alt) variants.push({ id: "alt", label: "The understudy", text: row.body_alt });
   // A gated frame cannot ship; open on the understudy so the default press is the shippable one.
-  const first = row.gate && row.body_alt ? "alt" : "plan";
+  const first = row.gate && row.body_alt ? "alt" : variants[0]?.id === "edit" ? "edit" : "plan";
   const [pick, setPick] = useState<string>(first);
   const [copied, setCopied] = useState(false);
   useEffect(() => { setPick(first); setCopied(false); }, [row.queue_id, first]);
@@ -645,6 +688,182 @@ function Notice({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 8, padding: "9px 12px", background: C.dangerTint, fontSize: 13, color: C.ink, lineHeight: 1.55 }}>
       {children}
+    </div>
+  );
+}
+
+/* ── THE DRAFT BLOCK — decide here, render in Cowork ──────────────────── */
+
+/**
+ * Paul, 2026-08-19: "i want to be able to choose the template and edit the
+ * copy before anything is finally rendered in Cowork." This is where the
+ * decision is made. It saves to the row (PATCH /:id/draft) and NOTHING
+ * renders from here — Cowork pulls the drafts (scripts/studio/pull-queue.mjs)
+ * and renders from the spec on disk, then the plan catches up and the next
+ * export carries the edit as the content of record.
+ *
+ * The editor is pre-filled with the current edit, else the plan's copy, so
+ * "edit" means "start from what is there". Save is explicit; the textarea is
+ * not live-saved because a half-typed caption is not a decision.
+ */
+export function DraftBlock({ row, onPatchDraft }: { row: QueueRow; onPatchDraft: (b: Record<string, unknown>) => Promise<string | null> }) {
+  const options = templatesFor(row.kind);
+  const [template, setTemplate] = useState<string>(row.template ?? "");
+  const [copy, setCopy] = useState<string>(row.copy_edit ?? row.body ?? "");
+  const [pages, setPages] = useState<{ n: number; label: string | null; text: string; note: string | null }[]>(
+    (row.pages_edit ?? row.pages ?? []).map(p => ({ ...p })),
+  );
+  const [openPages, setOpenPages] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  const copyState = copyDraftState(row);
+  const pagesState = pagesDraftState(row);
+  const plan = row.body ?? "";
+  const planPages = row.pages ?? [];
+
+  // Where the editor STARTS from: a live edit, else the plan. A superseded
+  // edit is history — the plan moved past it — so the editor seeds from the
+  // plan and the old text is offered below, never silently re-saved.
+  const seedCopy = copyState === "live" ? (row.copy_edit ?? "") : plan;
+  const seedPages = pagesState === "live" ? (row.pages_edit ?? []) : planPages;
+
+  const copyDirty = copy.trim() !== seedCopy.trim();
+  const templateDirty = template !== (row.template ?? "");
+  const pagesDirty = !pagesEqual(pages, seedPages);
+  const dirty = copyDirty || templateDirty || pagesDirty;
+
+  // Re-seed when the row's draft or its PLAN changes (a save refetches; an
+  // import moves the plan; another slot opens). The one time typing is lost
+  // is a plan change under an open editor — the safe failure, since the
+  // alternative is persisting superseded text as an edit. `saved` is not
+  // reset here; the refetch after a save would wipe the confirmation the
+  // instant it appeared.
+  const planKey = plan + " " + JSON.stringify(planPages.map(p => [p.n, p.label, p.text, p.note]));
+  useEffect(() => {
+    setTemplate(row.template ?? "");
+    setCopy(seedCopy);
+    setPages(seedPages.map(p => ({ ...p })));
+    setErr(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [row.queue_id, row.draft_at, planKey]);
+  useEffect(() => { setSaved(false); }, [row.queue_id]);
+
+  const chosen = templateById(template);
+
+  const save = async () => {
+    setSaving(true); setErr(null); setSaved(false);
+    const body: Record<string, unknown> = {};
+    if (templateDirty) body.template = template || null;
+    // Equal-to-plan (ignoring end whitespace) is no edit → null; the server applies the same rule.
+    if (copyDirty) body.copyEdit = copy.trim() && copy.trim() !== plan.trim() ? copy : null;
+    if (pagesDirty) body.pagesEdit = pagesEqual(pages, planPages) ? null : pages;
+    const e = await onPatchDraft(body);
+    setSaving(false);
+    if (e) setErr(e); else setSaved(true);
+  };
+  const revert = async () => {
+    setSaving(true); setErr(null);
+    const e = await onPatchDraft({ copyEdit: null, pagesEdit: null });
+    setSaving(false);
+    if (e) setErr(e);
+  };
+
+  const live = hasDraft(row);
+  const superseded = copyState === "superseded" || pagesState === "superseded";
+  return (
+    <div style={{ marginTop: 14, border: `1px solid ${live ? C.green : C.hair}`, padding: "12px 14px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
+        <span style={{ fontSize: 13, fontWeight: 700 }}>Before Cowork renders</span>
+        {live
+          ? <span style={{ ...chip, color: C.green, background: C.greenTint }}>edited · waiting on a render</span>
+          : copyState === "satisfied" || pagesState === "satisfied"
+            ? <span style={{ ...chip, color: C.body, background: C.panel }}>plan matches your edit</span>
+            : <span style={{ ...mono, color: C.muted }}>the plan's copy</span>}
+        {row.template && chosen && (
+          <span style={{ ...chip, color: C.body, background: C.panel }} title={chosen.hint}>
+            template · {chosen.label}{chosen.status === "pending" ? " · not built yet" : ""}
+          </span>
+        )}
+        <div style={{ flex: 1 }} />
+        {(live || superseded) && (
+          <button type="button" onClick={revert} disabled={saving} style={{ ...btnGhost, padding: "4px 10px", fontSize: 12.5 }}
+                  title="Clear the copy edits — back to the plan's copy (the template pick stays)">
+            Revert to plan
+          </button>
+        )}
+      </div>
+
+      {superseded && (
+        <div style={{ marginBottom: 10, padding: "8px 10px", background: C.panel, fontSize: 12.5, color: C.body, lineHeight: 1.55 }}>
+          <b style={{ color: C.ink }}>The plan moved on since your edit.</b> The editor below starts from the new plan; your earlier text is kept here for reference — re-save it if you still want it.
+          {copyState === "superseded" && row.copy_edit && (
+            <details style={{ marginTop: 6 }}>
+              <summary style={{ cursor: "pointer" }}>your earlier caption</summary>
+              <pre style={{ margin: "6px 0 0", whiteSpace: "pre-wrap", fontFamily: C.sans, fontSize: 12.5 }}>{row.copy_edit}</pre>
+            </details>
+          )}
+        </div>
+      )}
+
+      <div style={{ display: "grid", gap: 10 }}>
+        <label style={{ display: "grid", gap: 5 }}>
+          <span style={{ fontSize: 12.5, fontWeight: 600 }}>Template</span>
+          <select value={template} onChange={e => setTemplate(e.target.value)} style={{ ...input, maxWidth: 440 }}>
+            <option value="">— the spec's default —</option>
+            {options.map(t => <option key={t.id} value={t.id}>{t.label}{t.status === "pending" ? " (not built yet — pick is recorded)" : ""}</option>)}
+          </select>
+          {chosen && (
+            <span style={{ fontSize: 12.5, color: C.body, lineHeight: 1.5 }}>
+              {chosen.desc} <span style={mono}>· {chosen.renderer} · {chosen.hint}</span>
+            </span>
+          )}
+        </label>
+
+        <label style={{ display: "grid", gap: 5 }}>
+          <span style={{ fontSize: 12.5, fontWeight: 600 }}>
+            {row.kind === "document" ? "The caption" : "The post"}
+            {copyDirty ? " · unsaved" : copyState === "live" ? " · your edit" : ""}
+          </span>
+          <textarea value={copy} onChange={e => setCopy(e.target.value)} rows={Math.min(16, Math.max(5, copy.split("\n").length + 1))}
+                    style={{ ...input, fontFamily: C.sans, fontSize: 14, lineHeight: 1.55, resize: "vertical" }} />
+          <span style={{ ...mono, color: C.muted }}>{copy.length} characters{copy.length > 210 ? ` · folds at ≈210` : ""}{row.gate ? " · this slot is receipt-gated: brackets must be filled before it ships" : ""}</span>
+        </label>
+
+        {row.kind === "document" && pages.length > 0 && (
+          <div>
+            <button type="button" onClick={() => setOpenPages(v => !v)}
+                    style={{ font: "inherit", fontSize: 12.5, fontWeight: 600, color: C.green, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+              {openPages ? "▾" : "▸"} Page copy ({pages.length}){pagesDirty ? " · unsaved" : pagesState === "live" ? " · your edit" : ""}
+            </button>
+            {openPages && (
+              <ol style={{ margin: "8px 0 0", paddingLeft: 20, display: "grid", gap: 8 }}>
+                {pages.map((pg, i) => (
+                  <li key={pg.n} style={{ fontSize: 13 }}>
+                    {pg.label && <div style={{ fontWeight: 600, marginBottom: 3 }}>{pg.label}</div>}
+                    <textarea value={pg.text} rows={Math.min(8, Math.max(2, pg.text.split("\n").length + 1))}
+                              onChange={e => setPages(prev => prev.map((q, j) => j === i ? { ...q, text: e.target.value } : q))}
+                              style={{ ...input, width: "100%", fontFamily: C.sans, fontSize: 13, lineHeight: 1.5, resize: "vertical" }} />
+                    {pg.note && <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>({pg.note})</div>}
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+        )}
+
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <button type="button" onClick={save} disabled={!dirty || saving} style={{ ...btnPrimary, padding: "7px 14px", fontSize: 13, opacity: !dirty || saving ? 0.5 : 1 }}>
+            {saving ? "Saving…" : "Save the decision"}
+          </button>
+          {saved && !dirty && <span style={{ ...mono, color: C.green }}>saved</span>}
+          {err && <span style={{ fontSize: 12.5, color: C.danger }}>{err}</span>}
+          <span style={{ fontSize: 12.5, color: C.muted, lineHeight: 1.5 }}>
+            Nothing renders from here. Cowork pulls this with <code style={code}>node scripts/studio/pull-queue.mjs</code>, renders from the spec, and the next export carries it.
+          </span>
+        </div>
+      </div>
     </div>
   );
 }

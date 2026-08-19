@@ -1,0 +1,15 @@
+built      2026-08-19 · THE OFFERING PDF (pricing, 7pp) — Claude Design
+           build: offer document + THE SCHEDULE table + THE TERMS page.
+reference  design_handoff_smbx_offer_docs/ · builder scripts/studio/offer-docs.py
+schedule   VERIFIED against root CLAUDE.md canon: 5% first $1M · 4% $1–5M ·
+           3% $5–10M · 2% above $10M · $100,000 minimum · $5M anchor $210K =
+           4.2% ✓ · retainer $15,000/QUARTER up front, credited against the
+           success fee, step away at quarter's end. The handoff's terms page
+           carried the REVERSED monthly cadence and was corrected — see the
+           offering folder's BUILD.txt for all five copy corrections.
+GO-LIVE    NOT DONE, DELIBERATELY. The live brochure is
+           content/collateral/smbx-corpdev-pricing.pdf — the exact file
+           POST /api/practice/pricing emails to every lead. Replacing it with
+           this PDF changes what leads receive and needs Paul's say-so (and
+           ideally the §15(b)(13) counsel pass noted in canon). One copy
+           step when approved; until then the old brochure keeps mailing.
