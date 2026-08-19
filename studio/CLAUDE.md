@@ -5,12 +5,20 @@
 > *"you work in 1 branch all the time and i will tell cc the same.. we dont
 > need 15 branches which right now there are too many."*
 >
-> **Cowork works in `cowork` — one long-lived branch, always.** Not
-> `cowork/<topic>`: that rule produced 8 local and **149 remote** branches,
-> which is the mess this replaces. Claude Code takes the same instruction on
-> its own single branch.
+> **Cowork works in `Cowork` — capital C, one long-lived branch, always,
+> anywhere in this project.** Paul created the branch himself on 2026-08-19
+> and confirmed the standing rule: "from now on you only work in Cowork
+> branch anywhere in this project." The exact name matters — git refs are
+> case-sensitive while the Mac's filesystem is not, so a lowercase `cowork`
+> beside `Cowork` is a collision, not a synonym. Not `cowork/<topic>`: that
+> rule produced 8 local and **149 remote** branches, which is the mess this
+> replaces. Claude Code takes the same instruction on its own single branch.
 >
-> The mechanic is simpler than what it replaces. Stay on `cowork`, commit
+> A session's first move before writing any file: `git branch --show-current`
+> must answer `Cowork`. If it answers anything else, say so — never write
+> onto `main` or a `claude/*` branch.
+>
+> The mechanic is simpler than what it replaces. Stay on `Cowork`, commit
 > there, push, and merge into `main` when a batch is worth deploying. The
 > branch is **not** deleted after merging — it keeps going. Still never commit
 > directly to `main` while Railway builds on every push to it; root CLAUDE.md
