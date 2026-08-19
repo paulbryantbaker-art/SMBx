@@ -44,6 +44,7 @@ import { dealDatesRouter } from './routes/dealDates.js';
 import { reportsRouter } from './routes/reports.js';
 import { leadsRouter } from './routes/leads.js';
 import postQueueRouter from './routes/postQueue.js';
+import { siteVisitMiddleware, sendDailyDigest, computeDigest } from './services/siteVisits.js';
 import { outreachRouter } from './routes/outreach.js';
 import { dealTasksRouter } from './routes/dealTasks.js';
 import { dealCapitalRouter } from './routes/dealCapital.js';
@@ -221,6 +222,14 @@ assertProductionBillingSafety();
 
 // ─── 0. Trust proxy (Railway) ───────────────────────────────
 app.set('trust proxy', 1);
+
+// ─── 0a. Who looked at the site (2026-08-18) ─────────────────
+// One row per HTML page view on the public site, IP hashed, bots classified,
+// the team's own views marked — the 7am email in server/services/siteVisits.ts
+// reads it. Fire-and-forget: it calls next() first and never throws into a
+// response. Mounted before the body parser and every route so it sees the
+// navigation, not the assets.
+app.use(siteVisitMiddleware);
 
 // ─── 1. Stripe webhook (raw body — MUST be before json parser) ──
 /* The Stripe webhook is GONE (2026-08-15). It was mounted public and ahead of
@@ -1269,6 +1278,24 @@ app.use('/api', studioRouter);
 app.use('/api', crmRouter);
 // The post queue holds ROWS. It dispatches nothing — see migration 123.
 app.use('/api/post-queue', postQueueRouter);
+
+/* Who looked at the site — read a day's numbers, or send the morning email
+   now (the 7am job in workers/discoveryWorker.ts is the standing sender).
+   Team only. `?day=YYYY-MM-DD` (Central) defaults to yesterday. */
+app.get('/api/site-visits/summary', requireAuth, async (req, res) => {
+  try {
+    const { sql } = await import('./db.js');
+    const day = typeof req.query.day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(req.query.day)
+      ? req.query.day : (await import('./services/siteVisits.js')).centralYesterday();
+    res.json(await computeDigest(sql, day));
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});
+app.post('/api/site-visits/digest', requireAuth, async (req, res) => {
+  try {
+    const day = typeof req.body?.day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(req.body.day) ? req.body.day : undefined;
+    res.json(await sendDailyDigest({ day, force: true }));
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});
 app.use('/api', outreachRouter);
 app.use('/api', dealTasksRouter);
 app.use('/api', dealCapitalRouter);

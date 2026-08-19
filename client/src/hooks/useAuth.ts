@@ -99,6 +99,12 @@ export function useAuth() {
       if (res.ok) {
         meRetriesRef.current = 0;
         setUser(await res.json());
+        /* This browser belongs to the team: mark it so the public site's
+           visitor count (server/services/siteVisits.ts, the 7am email) does
+           not count Paul reading his own site. A year-long first-party
+           cookie, no value beyond "1", sent with plain page navigations —
+           which the JWT in localStorage never is. */
+        try { document.cookie = 'smbx_team=1; path=/; max-age=31536000; SameSite=Lax'; } catch { /* non-browser */ }
       } else if (res.status === 401 || res.status === 403) {
         // Definitive: the token is invalid or expired — sign out.
         clearToken();

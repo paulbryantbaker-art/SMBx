@@ -101,6 +101,26 @@ export async function startWorker(): Promise<void> {
       console.log('[worker] Scheduled: daily-metrics-aggregation (midnight UTC)');
     } catch { /* schedule may already exist */ }
 
+    // WHO LOOKED AT THE SITE — the 7am Central email (2026-08-18, Paul: "an
+    // email every morning like the others that tells me how many … viewed the
+    // site, so i can tell how many people besides me looked at it").
+    // Yesterday's unique visitors besides the team, page views, pages,
+    // referrers, bots named separately. Idempotent per day; the handler logs
+    // what it did. Calls no model.
+    await register('site-visitors-digest', async () => {
+      try {
+        const { sendDailyDigest } = await import('../services/siteVisits.js');
+        const r = await sendDailyDigest();
+        console.log(`[worker] site-visitors-digest ${r.day}: ${r.sent ? `sent to ${r.to} — ${r.visitors} visitors · ${r.views} views` : `not sent (${r.skipped ?? 'unknown'})`}`);
+      } catch (err: any) {
+        console.error('[worker] site-visitors-digest failed:', err.message);
+      }
+    });
+    try {
+      await boss!.schedule('site-visitors-digest', '0 7 * * *', {}, { tz: 'America/Chicago' });
+      console.log('[worker] Scheduled: site-visitors-digest (7:00 America/Chicago)');
+    } catch { /* schedule may already exist */ }
+
     console.log('[worker] Init complete');
   } catch (err: any) {
     console.warn('[worker] Init failed (non-fatal):', err.message);

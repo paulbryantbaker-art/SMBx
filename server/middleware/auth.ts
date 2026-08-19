@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import type { Request, Response, NextFunction } from 'express';
+import { noteTeamIp } from '../services/siteVisits.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || process.env.SESSION_SECRET || 'dev-secret-change-me';
 
@@ -83,12 +84,14 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
         if (!ok) return res.status(401).json({ error: 'This Cowork token was revoked — generate a new one in Settings → Connections.' });
         (req as any).userId = payload.userId;
         (req as any).authClaims = payload;
+        noteTeamIp(req);   // this IP is the team's today — the site-visit email excludes it
         next();
       }).catch(() => res.status(401).json({ error: 'Invalid or expired token' }));
       return;
     }
     (req as any).userId = payload.userId;
     (req as any).authClaims = payload;
+    noteTeamIp(req);   // this IP is the team's today — the site-visit email excludes it
     next();
   } catch {
     return res.status(401).json({ error: 'Invalid or expired token' });
@@ -122,6 +125,7 @@ export function requireAuthQueryToken(req: Request, res: Response, next: NextFun
     const payload = jwt.verify(token, JWT_SECRET) as AuthTokenClaims;
     (req as any).userId = payload.userId;
     (req as any).authClaims = payload;
+    noteTeamIp(req);   // this IP is the team's today — the site-visit email excludes it
     next();
   } catch {
     return res.status(401).json({ error: 'Invalid or expired token' });
