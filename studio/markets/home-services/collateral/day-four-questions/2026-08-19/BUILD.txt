@@ -1,0 +1,6 @@
+built      2026-08-19 · PIL fallback raster of the CLAUDE DESIGN grounds
+spec       studio/markets/home-services/specs/day-four-questions.post.mts
+reference  design_handoff_smbx_figure_card/{dark-2a-green-monolith,light-2b-stepped-portal}.html
+note       Faithful transcription (same tokens, fonts, geometry); line wraps
+           may differ a few px from Chromium. The next build-onepager.mts
+           render on the Mac replaces these files, per COLLATERAL_STATE 1B.
