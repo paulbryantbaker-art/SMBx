@@ -21,10 +21,10 @@
  * with the no-close-no-credit rule stated — the drawer never implies money is
  * owed before a close.
  *
- * Money in: the user types dollars with any punctuation ("7,240,122.34",
- * "$7.24M", "7240122"); it is parsed to integer CENTS before it reaches the
- * engine (house rule 10 — the engine refuses a float). Money out: `money()`
- * here prints cents, never floats.
+ * Money in: whole dollars, digits only, comma-formatted live as you type so
+ * the magnitude is never a guess; converted to integer CENTS before it
+ * reaches the engine (house rule 10 — the engine refuses a float). Money out:
+ * whole dollars too — the engine keeps cents, the display rounds.
  *
  * Safari rule: the drawer is NOT position:fixed — the V2 shell is a flowing
  * document and the site law forbids fixed full-viewport divs with a
@@ -43,23 +43,27 @@ import {
 
 /* ── money in / out ─────────────────────────────────────────────────────── */
 
-/** "7,240,122.34" · "$7.24M" · "7240122" · "950k" → integer cents, or null. */
+/** Whole dollars, digits only — "7,233,333" → 723333300 cents. (Paul,
+ *  2026-08-19, after typing "7, 23333" and reading $723,333: "just make it a
+ *  regular number with commas (no cents) that shows what i am typing so i
+ *  dont have to guess decimal place." So no decimals, no K/M shorthand — the
+ *  field formats itself with commas as you type, and what you see is the
+ *  number.) */
 export function parseMoneyToCents(raw: string): number | null {
-  const s = raw.trim().toLowerCase().replace(/[$,\s_]/g, "");
-  if (!s) return null;
-  const m = s.match(/^(\d+(?:\.\d+)?)(k|m|mm|b)?$/);
-  if (!m) return null;
-  let n = Number(m[1]);
-  const suf = m[2];
-  if (suf === "k") n *= 1e3;
-  else if (suf === "m" || suf === "mm") n *= 1e6;
-  else if (suf === "b") n *= 1e9;
+  const digits = raw.replace(/\D/g, "");
+  if (!digits) return null;
+  const n = Number(digits);
   if (!Number.isFinite(n) || n <= 0) return null;
-  return Math.round(n * 100);
+  return n * 100;
+}
+/** Live formatter: keeps only digits, inserts thousands commas. */
+export function formatDollarsTyped(raw: string): string {
+  const digits = raw.replace(/\D/g, "").replace(/^0+(?=\d)/, "");
+  return digits ? Number(digits).toLocaleString("en-US") : "";
 }
 
 const money = (cents: number) =>
-  (cents / 100).toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  Math.round(cents / 100).toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 });
 const moneyShort = (cents: number) => {
   const d = cents / 100;
   if (d >= 1e6) return `$${(d / 1e6).toFixed(d % 1e6 === 0 ? 0 : 2)}M`;
@@ -132,13 +136,13 @@ export default function FeeCalc({ onClose, docked }: { onClose: () => void; dock
           <input
             ref={inputRef}
             value={evText}
-            onChange={e => setEvText(e.target.value)}
-            placeholder="7,240,122.34  ·  $7.24M  ·  950k"
-            inputMode="decimal"
+            onChange={e => setEvText(formatDollarsTyped(e.target.value))}
+            placeholder="7,240,122"
+            inputMode="numeric"
             style={{ ...input, fontFamily: C.mono, fontSize: 16, padding: "10px 12px" }}
           />
           {evText && evCents == null && (
-            <span style={{ fontSize: 12.5, color: C.danger }}>Not a dollar amount I can read — digits, with optional $ , . and K/M.</span>
+            <span style={{ fontSize: 12.5, color: C.danger }}>Digits only — whole dollars.</span>
           )}
         </label>
 
