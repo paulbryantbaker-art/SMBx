@@ -33,3 +33,7 @@ mobile-shots/
 # the boundary. (2026-08-19)
 studio/drafts/
 
+
+# Python bytecode from the studio scripts (figure-deck.py, offer-docs.py…) — build litter, never source. (2026-08-19)
+__pycache__/
+*.pyc
