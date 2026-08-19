@@ -663,7 +663,11 @@ export function DocumentBlock({ row }: { row: QueueRow }) {
   const doc = row.document;
   const [big, setBig] = useState<string | null>(null);
   useEffect(() => setBig(null), [row.queue_id]);
-  const pagesPlanned = row.pages ?? [];
+  // Belt to the server's braces: the API normalises these, but a render site
+  // that can throw on a shape it did not expect takes the whole screen down —
+  // which is what "c.map is not a function" was (2026-08-19).
+  const pagesPlanned = Array.isArray(row.pages) ? row.pages : [];
+  const thumbs = Array.isArray(doc?.thumbs) ? doc!.thumbs : [];
   return (
     <div style={{ marginTop: 14 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 8 }}>
@@ -679,9 +683,9 @@ export function DocumentBlock({ row }: { row: QueueRow }) {
       </div>
       {doc?.pdf ? (
         <>
-          {doc.thumbs.length > 0 && (
+          {thumbs.length > 0 && (
             <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 6 }}>
-              {doc.thumbs.map((t, i) => (
+              {thumbs.map((t, i) => (
                 <img key={t} src={t} alt={`Page ${i + 1}`} loading="lazy"
                      onClick={() => setBig(big === t ? null : t)}
                      style={{ width: 96, height: 120, objectFit: "cover", border: `1px solid ${big === t ? C.green : C.hair}`, cursor: "pointer", flex: "none", background: C.bg }} />
