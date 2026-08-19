@@ -35,7 +35,8 @@
  * position: static — a sticky element on its own wrapped line would float
  * over the content beneath it. `useDocked()` is the one switch.
  */
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import type React from "react";
 import { C, input, btnPrimary } from "./tokens";
 import {
   successFee, retainerCredit, QUARTER_RETAINER_CENTS, FEE_FLOOR_CENTS, FLOOR_BINDS_BELOW_CENTS,
@@ -49,8 +50,12 @@ import {
  *  dont have to guess decimal place." So no decimals, no K/M shorthand — the
  *  field formats itself with commas as you type, and what you see is the
  *  number.) */
+/** 15 digits — $999 trillion. Past 2^53 Number() reshapes the value silently
+ *  and the engine would accept the wrong figure; the cap makes that
+ *  unreachable by typing. */
+export const MAX_DIGITS = 15;
 export function parseMoneyToCents(raw: string): number | null {
-  const digits = raw.replace(/\D/g, "");
+  const digits = raw.replace(/\D/g, "").slice(0, MAX_DIGITS);
   if (!digits) return null;
   const n = Number(digits);
   if (!Number.isFinite(n) || n <= 0) return null;
@@ -58,7 +63,7 @@ export function parseMoneyToCents(raw: string): number | null {
 }
 /** Live formatter: keeps only digits, inserts thousands commas. */
 export function formatDollarsTyped(raw: string): string {
-  const digits = raw.replace(/\D/g, "").replace(/^0+(?=\d)/, "");
+  const digits = raw.replace(/\D/g, "").replace(/^0+(?=\d)/, "").slice(0, MAX_DIGITS);
   return digits ? Number(digits).toLocaleString("en-US") : "";
 }
 
@@ -93,12 +98,37 @@ export function useDocked(): boolean {
   return docked;
 }
 
-export default function FeeCalc({ onClose, docked }: { onClose: () => void; docked: boolean }) {
+export default function FeeCalc({ onClose, docked, focusOnOpen = true }: { onClose: () => void; docked: boolean; focusOnOpen?: boolean }) {
   const [evText, setEvText] = useState("");
   const [quarters, setQuarters] = useState(1);
   const [closed, setClosed] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => { inputRef.current?.focus(); }, []);
+  // Focus the field when the user OPENS the drawer — not when a reload
+  // restores it, which would steal focus from whatever they came back to do.
+  useEffect(() => { if (focusOnOpen) inputRef.current?.focus(); }, [focusOnOpen]);
+
+  // CARET PRESERVATION. The field is controlled and re-formatted on every
+  // keystroke; when the formatted string differs from what the DOM holds
+  // (commas re-seated after a mid-string edit) React re-assigns value and
+  // the browser throws the caret to the end — so correcting a typo in the
+  // middle typed into the wrong place. The fix: remember how many DIGITS sat
+  // left of the caret before the change, then after render put the caret
+  // after that many digits in the new string.
+  const caretDigits = useRef<number | null>(null);
+  const onChangeEv = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const el = e.target;
+    const left = el.value.slice(0, el.selectionStart ?? el.value.length).replace(/\D/g, "").length;
+    caretDigits.current = left;
+    setEvText(formatDollarsTyped(el.value));
+  };
+  useLayoutEffect(() => {
+    const el = inputRef.current, want = caretDigits.current;
+    if (!el || want == null) return;
+    let pos = 0, seen = 0;
+    while (pos < el.value.length && seen < want) { if (/\d/.test(el.value[pos])) seen++; pos++; }
+    el.setSelectionRange(pos, pos);
+    caretDigits.current = null;
+  }, [evText]);
 
   const evCents = useMemo(() => parseMoneyToCents(evText), [evText]);
   const fee = useMemo(() => (evCents == null ? null : successFee(evCents)), [evCents]);
@@ -113,7 +143,9 @@ export default function FeeCalc({ onClose, docked }: { onClose: () => void; dock
       aria-label="Fee calculator"
       style={{
         ...(docked
-          ? { width: 340, flex: "none", alignSelf: "flex-start", position: "sticky" as const, top: 16, order: 1 }
+          ? { width: 340, flex: "none", alignSelf: "flex-start", position: "sticky" as const, top: 16, order: 1,
+              // taller than the viewport, the sticky panel's bottom would be unreachable until the page ends
+              maxHeight: "calc(100vh - 32px)", overflowY: "auto" as const }
           : { flex: "1 1 100%", maxWidth: 560, position: "static" as const, order: -1 }),
         border: `1px solid ${C.hair}`, background: C.bg,
         fontFamily: C.sans, color: C.ink,
@@ -136,13 +168,13 @@ export default function FeeCalc({ onClose, docked }: { onClose: () => void; dock
           <input
             ref={inputRef}
             value={evText}
-            onChange={e => setEvText(formatDollarsTyped(e.target.value))}
+            onChange={onChangeEv}
             placeholder="7,240,122"
             inputMode="numeric"
             style={{ ...input, fontFamily: C.mono, fontSize: 16, padding: "10px 12px" }}
           />
           {evText && evCents == null && (
-            <span style={{ fontSize: 12.5, color: C.danger }}>Digits only — whole dollars.</span>
+            <span style={{ fontSize: 12.5, color: C.muted }}>A sale price above zero.</span>
           )}
         </label>
 
@@ -218,9 +250,9 @@ export default function FeeCalc({ onClose, docked }: { onClose: () => void; dock
               </label>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr auto", rowGap: 4, fontSize: 13, fontVariantNumeric: "tabular-nums" }}>
-              <span style={{ color: C.body }}>Credit against the fee</span>
+              <span style={{ color: C.body }}>{closed ? "Credit against the fee" : "Credit today (no close yet)"}</span>
               <span style={{ fontFamily: C.mono, fontSize: 12.5, textAlign: "right" }}>{money(credit.credit.creditCents)}</span>
-              <span style={{ fontWeight: 700 }}>Due at close</span>
+              <span style={{ fontWeight: 700 }}>{closed ? "Due at close" : "Fee if it closes (before any credit)"}</span>
               <span style={{ fontFamily: C.mono, fontSize: 13, fontWeight: 700, textAlign: "right" }}>{money(credit.credit.dueAtCloseCents)}</span>
               {credit.credit.excessForfeitedCents > 0 && (
                 <>
@@ -230,7 +262,7 @@ export default function FeeCalc({ onClose, docked }: { onClose: () => void; dock
               )}
             </div>
             {!closed && (
-              <div style={{ fontSize: 12.5, color: C.muted, lineHeight: 1.5 }}>No close, no credit — retainers are earned as the work runs. The credit exists only at a close.</div>
+              <div style={{ fontSize: 12.5, color: C.muted, lineHeight: 1.5 }}>No close, no credit — retainers are earned as the work runs. If this deal closes at the fee shown, the {moneyShort(retainerPaid)} paid to date credits then (capped at the fee) and {money(Math.max(0, (fee && fee.ok ? fee.fee.feeCents : 0) - retainerPaid))} is due.</div>
             )}
           </div>
         )}

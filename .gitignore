@@ -24,3 +24,12 @@ fold-shots/
 # every audit run. The FINDINGS are the artifact and they live in the run
 # output; the strips are what you look at while fixing one.
 mobile-shots/
+
+# studio/drafts/ — what scripts/studio/pull-queue.mjs writes: the decisions
+# made in the app (template pick, edited copy) handed to a Cowork session
+# before it renders. A hand-off, not a record: the record is the row in the
+# app until the plan markdown catches up. Ignored here (the root file) rather
+# than in studio/.gitignore because the pull script is Claude Code's side of
+# the boundary. (2026-08-19)
+studio/drafts/
+

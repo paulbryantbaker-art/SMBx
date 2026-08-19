@@ -30,6 +30,8 @@
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { sql } from '../db.js';
+import { templateById } from '../../shared/templates.js';
+import { copyDraftState, pagesDraftState, pagesEqual } from '../../shared/draft.js';
 
 const QUEUE_JSON = path.resolve(process.cwd(), 'content/studio/post-queue.json');
 
@@ -303,13 +305,15 @@ const isDoc = (x: unknown): x is QueueDocument => !!x && typeof x === 'object' &
 
 export function normalizeQueueRow<R extends Record<string, any>>(row: R): R {
   const pages = unwrapJson(row.pages, isPages);
+  const pages_edit = unwrapJson(row.pages_edit, isPages);
+  const pages_base = unwrapJson(row.pages_base, isPages);
   const document = unwrapJson(row.document, isDoc);
   // a document whose thumbs were themselves stringified (nested double-encode) — same unwrap, one level down
   if (document && typeof (document as any).thumbs === 'string') {
     (document as any).thumbs = unwrapJson((document as any).thumbs, (x): x is string[] => Array.isArray(x)) ?? [];
   }
   if (document && !Array.isArray((document as any).thumbs)) (document as any).thumbs = [];
-  return { ...row, pages, document };
+  return { ...row, pages, pages_edit, pages_base, document };
 }
 
 export async function listQueue(userId: number): Promise<any[]> {
@@ -387,7 +391,100 @@ export async function updateQueueState(
   return row ? normalizeQueueRow(row) : null;
 }
 
-/** Per-angle performance: the queue joined to what LinkedIn actually reported. */
+/* ── THE DRAFT — decisions made in the app before Cowork renders ──────────
+ *
+ * Paul, 2026-08-19: "i want to be able to choose the template and edit the
+ * copy before anything is finally rendered in Cowork." Migration 138. These
+ * are the human's call on the row — template pick, edited copy, edited page
+ * copy — and they are STATE: the importer never writes them, so a re-import
+ * cannot discard a decision. The studio reads them with
+ * scripts/studio/pull-queue.mjs and renders from them.
+ *
+ * Validation is deliberately thin: the template must be a known id for the
+ * slot's kind (shared/templates.ts — one register for the picker, this check,
+ * and the pull script), pages_edit must be the plan's page shape, and an
+ * empty edit CLEARS (null) rather than storing "". Nothing here can fire a
+ * render; the app calls no builder. */
+const isQueuePage = (x: any): x is QueuePage =>
+  !!x && typeof x === 'object' && Number.isInteger(x.n) && typeof x.text === 'string'
+  && (x.label == null || typeof x.label === 'string') && (x.note == null || typeof x.note === 'string');
+
+export async function updateQueueDraft(
+  userId: number,
+  queueId: string,
+  patch: { template?: string | null; copyEdit?: string | null; pagesEdit?: QueuePage[] | null },
+): Promise<any | null> {
+  const [curRaw] = await sql`SELECT queue_id, kind, body, pages FROM post_queue WHERE user_id = ${userId} AND queue_id = ${queueId}`;
+  if (!curRaw) return null;
+  const cur = normalizeQueueRow(curRaw);
+
+  let template: string | null | undefined = patch.template;
+  if (template !== undefined) {
+    template = template && template.trim() ? template.trim() : null;
+    if (template) {
+      const t = templateById(template);
+      if (!t) throw new Error(`Unknown template "${template}" — it is not in shared/templates.ts`);
+      if (cur.kind && t.for !== cur.kind) throw new Error(`Template "${template}" renders a ${t.for} slot; this slot is ${cur.kind}`);
+    }
+  }
+  // An edit equal to the plan (ignoring end whitespace) is no edit — store
+  // null, so "edited" is never claimed for a no-op. Otherwise the edit is
+  // stored WITH the plan text it was made against (copy_base), which is what
+  // lets shared/draft.ts tell a live edit from one the plan has since moved
+  // past.
+  let copyEdit: string | null | undefined = patch.copyEdit;
+  if (copyEdit !== undefined) copyEdit = copyEdit && copyEdit.trim() && copyEdit.trim() !== (cur.body ?? '').trim() ? copyEdit : null;
+  let pagesEdit: QueuePage[] | null | undefined = patch.pagesEdit;
+  if (pagesEdit !== undefined) {
+    if (pagesEdit == null || (Array.isArray(pagesEdit) && pagesEdit.length === 0)) pagesEdit = null;
+    else if (!Array.isArray(pagesEdit) || !pagesEdit.every(isQueuePage)) throw new Error('pages_edit must be [{n, label, text, note}]');
+    else if (pagesEqual(pagesEdit, cur.pages)) pagesEdit = null;
+  }
+
+  const [row] = await sql`
+    UPDATE post_queue SET
+      template   = CASE WHEN ${template === undefined} THEN template   ELSE ${template ?? null} END,
+      copy_edit  = CASE WHEN ${copyEdit === undefined} THEN copy_edit  ELSE ${copyEdit ?? null} END,
+      copy_base  = CASE WHEN ${copyEdit === undefined} THEN copy_base  ELSE ${copyEdit ? (cur.body ?? null) : null} END,
+      pages_edit = CASE WHEN ${pagesEdit === undefined} THEN pages_edit ELSE ${pagesEdit ? sql.json(pagesEdit as any) : null} END,
+      pages_base = CASE WHEN ${pagesEdit === undefined} THEN pages_base ELSE ${pagesEdit && cur.pages ? sql.json(cur.pages as any) : null} END,
+      draft_at   = NOW(),
+      updated_at = NOW()
+    WHERE user_id = ${userId} AND queue_id = ${queueId}
+    RETURNING *`;
+  return row ? normalizeQueueRow(row) : null;
+}
+
+/**
+ * The drafts, as the studio pulls them: every row carrying a decision, with
+ * the plan's own copy beside the edit so a session sees the DIFF and not just
+ * the override, and the document's spec path so it knows which file to open.
+ */
+export async function listQueueDrafts(userId: number): Promise<any[]> {
+  const rows = await sql`
+    SELECT queue_id, campaign, title, kind, status, scheduled_for,
+           template, copy_edit, copy_base, pages_edit, pages_base, draft_at,
+           body, pages, document
+    FROM post_queue
+    WHERE user_id = ${userId}
+      AND (template IS NOT NULL OR copy_edit IS NOT NULL OR pages_edit IS NOT NULL)
+    ORDER BY scheduled_for NULLS LAST, queue_id`;
+  return rows.map(normalizeQueueRow).map((r: any) => {
+    const t = templateById(r.template);
+    return {
+      queue_id: r.queue_id, campaign: r.campaign, title: r.title, kind: r.kind, status: r.status,
+      scheduled_for: r.scheduled_for, draft_at: r.draft_at,
+      // The pick WITH its renderer and the flag to set — the pull script
+      // promised this and the first cut sent only the id.
+      template: t ? { id: t.id, label: t.label, renderer: t.renderer, hint: t.hint, status: t.status } : r.template ? { id: r.template, unknown: true } : null,
+      copy: r.copy_edit != null ? { state: copyDraftState(r), edit: r.copy_edit, plan: r.body, base: r.copy_base } : null,
+      pages: r.pages_edit != null ? { state: pagesDraftState(r), edit: r.pages_edit, plan: r.pages, base: r.pages_base } : null,
+      spec: r.document?.spec ?? null,
+      filed_at: r.document?.filed_at ?? null,
+    };
+  });
+}
+
 export async function queuePerformance(userId: number): Promise<any[]> {
   return sql`
     SELECT q.queue_id, q.lead, q.format, q.evidence_grade, q.status, q.posted_at,

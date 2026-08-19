@@ -47,6 +47,9 @@ export default function V2Shell({ user, onSignOut }: {
   const [calc, setCalc] = useState<boolean>(() => {
     try { return sessionStorage.getItem("smbx_v2_feecalc") === "1"; } catch { return false; }
   });
+  // Focus the field only when the USER opened the drawer this session — a
+  // reload that restores it open must not steal focus from the page.
+  const [calcFocus, setCalcFocus] = useState(false);
   useEffect(() => { try { sessionStorage.setItem("smbx_v2_feecalc", calc ? "1" : "0"); } catch { /* private mode */ } }, [calc]);
   const docked = useDocked();
 
@@ -94,7 +97,7 @@ export default function V2Shell({ user, onSignOut }: {
         <div style={{ flex: 1 }} />
         <button
           type="button"
-          onClick={() => setCalc(v => !v)}
+          onClick={() => { setCalc(v => !v); setCalcFocus(true); }}
           aria-pressed={calc}
           title="Success fee on a sale price — the published schedule"
           style={{
@@ -148,7 +151,7 @@ export default function V2Shell({ user, onSignOut }: {
           {screen === "leads" && <LeadsScreen />}
           {screen === "campaigns" && <CampaignsScreen key={openSlot ?? "campaigns"} openQueueId={openSlot} />}
         </main>
-        {calc && <FeeCalc docked={docked} onClose={() => setCalc(false)} />}
+        {calc && <FeeCalc docked={docked} focusOnOpen={calcFocus} onClose={() => setCalc(false)} />}
       </div>
     </div>
   );
