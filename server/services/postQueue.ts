@@ -213,8 +213,23 @@ export async function importQueue(
     // the parsed value or NULL; a malformed shape is the exporter's problem
     // and `--check` catches it before it gets here.
     const kind = r.kind === 'text' || r.kind === 'document' ? r.kind : null;
-    const pages = Array.isArray(r.pages) && r.pages.length ? JSON.stringify(r.pages) : null;
-    const document = r.document && typeof r.document === 'object' ? JSON.stringify(r.document) : null;
+    // THE DOUBLE-ENCODE (2026-08-19, Paul: "any time i try to view or edit a
+    // post, i get an error: c.map is not a function"). These two were
+    // JSON.stringify'd here and then passed as `${x}::jsonb`. postgres-js
+    // sends an unprepared query's params untyped, lets Postgres DESCRIBE them,
+    // learns from the cast that the param is jsonb (3802), and then runs its
+    // jsonb serializer — JSON.stringify — on the value AGAIN. The column ended
+    // up holding a JSON *string* whose content was JSON; the read parsed it
+    // back to a JS string; `row.pages.map` threw in the one screen that reads
+    // it. The local mock skipped Postgres and could never show it; tools.ts
+    // carries seven `typeof x === 'string' ? JSON.parse(x)` guards that are
+    // this same bug met earlier and patched at the read. Pass the OBJECT and
+    // let the driver serialize exactly once. `sql.json()` makes the intent
+    // explicit and survives a future switch to prepared statements.
+    // (the `as any` is postgres-js's JSONValue type refusing an interface with
+    // `string | null` fields; the runtime shape is plain JSON either way)
+    const pages = Array.isArray(r.pages) && r.pages.length ? sql.json(r.pages as any) : null;
+    const document = r.document && typeof r.document === 'object' ? sql.json(r.document as any) : null;
 
     const [row] = await sql<{ inserted: boolean }[]>`
       INSERT INTO post_queue (
@@ -226,7 +241,7 @@ export async function importQueue(
         ${r.format ?? null}, ${r.carries ?? null}, ${r.evidence_grade ?? null},
         ${r.source_disclosure ?? null}, ${r.may_state_figure}, ${incoming}, ${campaign},
         ${r.title ?? null}, ${kind}, ${r.body ?? null}, ${r.body_alt ?? null}, ${r.body_deck ?? null},
-        ${r.gate ?? null}, ${r.copy_note ?? null}, ${r.law_check ?? null}, ${pages}::jsonb, ${document}::jsonb
+        ${r.gate ?? null}, ${r.copy_note ?? null}, ${r.law_check ?? null}, ${pages}, ${document}
       )
       ON CONFLICT (user_id, queue_id) DO UPDATE SET
         tier              = EXCLUDED.tier,
@@ -267,14 +282,45 @@ export async function importQueue(
   return result;
 }
 
+/**
+ * A jsonb column that holds a JSON *string* (the double-encode described at the
+ * import) comes back as a JS string. Every row already in production was
+ * written that way before the fix, and "re-import to repair" is a step that
+ * does not get taken at 8pm from a phone. So the read unwraps it: a string
+ * that parses to the expected shape is returned as that shape. Idempotent on
+ * correctly-stored rows; a string that is not JSON is left alone.
+ */
+function unwrapJson<T>(v: unknown, ok: (x: unknown) => x is T): T | null {
+  if (v == null) return null;
+  if (ok(v)) return v;
+  if (typeof v === 'string') {
+    try { const p = JSON.parse(v); return ok(p) ? p : null; } catch { return null; }
+  }
+  return null;
+}
+const isPages = (x: unknown): x is QueuePage[] => Array.isArray(x);
+const isDoc = (x: unknown): x is QueueDocument => !!x && typeof x === 'object' && !Array.isArray(x);
+
+export function normalizeQueueRow<R extends Record<string, any>>(row: R): R {
+  const pages = unwrapJson(row.pages, isPages);
+  const document = unwrapJson(row.document, isDoc);
+  // a document whose thumbs were themselves stringified (nested double-encode) — same unwrap, one level down
+  if (document && typeof (document as any).thumbs === 'string') {
+    (document as any).thumbs = unwrapJson((document as any).thumbs, (x): x is string[] => Array.isArray(x)) ?? [];
+  }
+  if (document && !Array.isArray((document as any).thumbs)) (document as any).thumbs = [];
+  return { ...row, pages, document };
+}
+
 export async function listQueue(userId: number): Promise<any[]> {
-  return sql`
+  const rows = await sql`
     SELECT * FROM post_queue WHERE user_id = ${userId}
     ORDER BY
       CASE status WHEN 'drafted' THEN 0 WHEN 'next' THEN 1 WHEN 'recurring' THEN 2
                   WHEN 'posted' THEN 3 ELSE 4 END,
       scheduled_for NULLS LAST,
       queue_id`;
+  return rows.map(normalizeQueueRow);
 }
 
 /**
@@ -336,7 +382,9 @@ export async function updateQueueState(
       updated_at      = NOW()
     WHERE user_id = ${userId} AND queue_id = ${queueId}
     RETURNING *`;
-  return row ?? null;
+  // The client swaps its row for this one — it must come back in the same
+  // unwrapped shape as the list, or "edit" crashes on the row "view" just fixed.
+  return row ? normalizeQueueRow(row) : null;
 }
 
 /** Per-angle performance: the queue joined to what LinkedIn actually reported. */
