@@ -251,6 +251,17 @@ the chin); the small round foot disc crops at 0.283 (crown 273, eyes 664, chin
 1257 — at 0.06 the chin sat at 99% of the circle); exposure lift is
 renderer-side, 1.16/1.05 dark and 1.08/1.02 light, never baked into the asset.
 
+**THE MOBILE FLOOR (2026-08-19, Paul: "none of this text is going to be
+legible... think of it as mobile because even desktop is very small on
+LinkedIn").** LinkedIn renders a 1080px carousel at ~360px on a phone — every
+size divides by three. The site's customer-facing floor is 13px, so the
+carousel floor is **~40px ON CANVAS for reading text**: heads 68, body 40,
+bullets 40/38, mono kickers 26, source lines 22, nothing below 20. And a page
+carries **one idea in ≤45 words** — at legible sizes there is no room for
+more, which is the constraint doing the editing. A page that needs more words
+is two pages. `figure-deck.py` carries this scale; the dead-deal render of
+2026-08-20 predates it and wants a re-render before posting.
+
 Worked example: `markets/home-services/collateral/dead-deal-economics/2026-08-20/`.
 
 ### 2.1 Regenerating the standing figure from a new source photo
