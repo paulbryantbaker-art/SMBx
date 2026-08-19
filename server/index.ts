@@ -1447,7 +1447,7 @@ app.get('/research/:slug', async (req, res, next) => {
       // two og:image tags leave the crawler to pick, and it picks the first.
       .replace(
         /<meta property="og:image" content="[^"]*" \/>/,
-        `<meta property="og:image" content="${esc(origin + (report.ogImage || '/site-card.png'))}" />`,
+        `<meta property="og:image" content="${esc(origin + (report.ogImage || '/site-card-v2.png'))}" />`,
       )
       .replace(/<title>[\s\S]*?<\/title>/, `<title>${esc(title)}</title>`)
       .replace(

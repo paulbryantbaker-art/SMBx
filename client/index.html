@@ -21,20 +21,29 @@
     <meta property="og:type" content="website" />
     <!-- The DEFAULT link-preview card. Without one, a posted smbx.ai link
          previewed as bare text on LinkedIn, Slack and iMessage — which is the
-         one channel the practice markets through. CURRENT CARD (2026-08-06):
-         Paul's Claude-Design Aurora card ("this is what pasted links should
-         look like style wise") — jade sweep, wordmark + BUY-SIDE CORPORATE
-         DEVELOPMENT kicker, two-tone Fraunces H1. The file carries a NEW name
-         on purpose: LinkedIn caches OG images by URL, so replacing the bytes
-         at the old URL would keep showing the stale card; a new URL forces a
-         fresh scrape. (The old builder path — build-og-card.mts + site-og.md
-         → site-cover.jpg — is superseded for the SITE card; report cards
-         still use it.) Report pages REPLACE this tag with their own card
-         (server/index.ts) — replace, never append, or a crawler picks
-         whichever it sees first. -->
-    <meta property="og:image" content="https://smbx.ai/site-card.png" />
+         one channel the practice markets through. CURRENT CARD (2026-08-19):
+         built by scripts/studio/build-site-card.mts, and the law it enforces
+         is THE CENTRE SQUARE — Paul, from his own LinkedIn comment: "it not
+         legible at all on mobile and not much better on desktop". The card is
+         authored at 1200×630 but almost nothing displays it at 1.91:1: the
+         comment thumbnail is ~1.3–1.6:1 and Slack/iMessage are 1:1, all
+         object-fit:cover, so they centre-crop the sides. The old left-aligned
+         card lost its first letters on every one of those ("mbX.ai … uying a
+         business"). Everything meaningful now lives in the centre 630×630
+         (survives every crop from 1:1 to 1.91:1); the flanks are ground only;
+         and the copy is mark + six words, because a phone comment renders the
+         image ~90px wide and a sentence does not survive 7× downscale. Change
+         the card = run the builder with --proof and look at the CROP SHEET,
+         never the full-size render. The file carries a NEW name on purpose:
+         LinkedIn caches OG images by URL, so replacing the bytes at the old
+         URL would keep showing the stale card; a new URL forces a fresh
+         scrape — a copy change therefore needs a new --name here AND in
+         server/index.ts's report fallback. Report pages REPLACE this tag with
+         their own card (server/index.ts) — replace, never append, or a
+         crawler picks whichever it sees first. -->
+    <meta property="og:image" content="https://smbx.ai/site-card-v2.png" />
     <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="628" />
+    <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="color-scheme" content="light" />
     <!-- iOS toolbar match (2026-08-12, Paul: "on ios i want to match the ios
