@@ -32,6 +32,11 @@ The approved geometry, from the one-pager conversion (reuse, do not re-derive):
 - dark cover: the SANCTIONED radial Deal Green bloom behind the figure
   (scope is exact: figure layouts, dark ground, radial Deal Green — DESIGN.md
   §6.2; the boardroom texture stays retired; `bloom: false` opts out);
+- **the C treatment is the dark default** (Paul, 2026-08-18; FORMATS §2.0 has
+  the numbers): bloom AIMED at the figure torso (600 × 860 ellipse, peak
+  0.52) plus a 1.16/1.05 exposure lift on the figure applied at render — a
+  CSS `filter: brightness(1.16) contrast(1.05)` on the cutout `<img>` is the
+  Chromium equivalent; the asset itself is never lifted;
 - CTA/address on the band in `CARTA.white` (Paul: "bright white") — consider
   whether this wants a token (`darkCta`?) rather than reading `white`, since
   the same value now appears in two builders.

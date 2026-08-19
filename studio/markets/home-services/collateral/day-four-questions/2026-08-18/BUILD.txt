@@ -6,3 +6,10 @@ note       Same fonts (embedded woff2->ttf), same CARTA hexes, same φ geometry,
            mock, but NOT the canonical renderer: line metrics may differ by a
            few px from a Chromium build. Re-render from the spec on the Mac to
            replace this file; the spec is the source of record.
+
+2026-08-18 later · THE C TREATMENT. What POSTED is the file above (A: ambient
+bloom, no lift) — kept untouched as the record. Paul reviewed it live ("too
+dark") and picked C from a four-step board: bloom aimed at the figure's torso
+(peak 0.52, ellipse 600x860) + a 1.16/1.05 exposure lift on the figure, applied
+in the RENDERER, never the asset. day-four-questions-dark-C.png is that
+render, now the standing default in figure-fallback.py and FORMATS §2.0.

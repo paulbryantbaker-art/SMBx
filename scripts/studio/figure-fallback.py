@@ -65,6 +65,14 @@ console.log(JSON.stringify({{ post: s.post, CARTA: t.CARTA }}));
 """
 import tempfile
 tsx = ROOT / 'node_modules/tsx/dist/cli.mjs'
+if not tsx.exists():
+    # tsx is installed --no-save on sandboxes and evaporates on restart —
+    # it has now vanished mid-session twice. Self-heal rather than error.
+    print('tsx missing — installing (--no-save)…')
+    subprocess.run(['npm', 'install', 'tsx', '--no-save', '--prefer-offline'],
+                   cwd=str(ROOT), capture_output=True)
+    if not tsx.exists():
+        print('could not install tsx; run: npm install tsx --no-save'); sys.exit(69)
 with tempfile.NamedTemporaryFile('w', suffix='.mts', delete=False) as tf:
     tf.write(emit); emit_path = tf.name
 r = subprocess.run(['node', str(tsx), emit_path], capture_output=True, text=True, cwd=str(ROOT))
@@ -139,10 +147,27 @@ def render(dark: bool) -> Image.Image:
     GREEN = hx(CARTA['green'])
 
     img = Image.new('RGB', (W, H), BG)
+    # THE C TREATMENT (Paul, 2026-08-18, picked from a four-step board:
+    # as-posted / aimed bloom / +exposure lift / +rim). The first posted card
+    # read too dark — a figure in black trousers on the band, lit by an
+    # ambient bloom centred somewhere south-west of him. C aims the bloom AT
+    # the figure's torso and lifts the figure's own exposure 16%; the rim
+    # light (D) was considered and not chosen. `pop: false` in a spec returns
+    # the original ambient numbers with no lift.
+    pop = dark and post.get('pop') is not False
+    flow_y_c = (46 + 52) * S + max(30 * S, int(17 * S * 1.4)) + 55 * S
+    figy_c = flow_y_c + 100 * S
+    figx_c = (46 + 56) * S + (W - 2 * 46 * S - 56 * S * 2) - fw
     if dark and post.get('bloom') is not False:
+        if pop:
+            bcx, bcy = figx_c + fw * 0.5, figy_c + fh * 0.45
+            rx, ry, A = 600 * S, 860 * S, 0.52
+        else:
+            bcx, bcy, rx, ry, A = 0.76 * W, 0.58 * H, 760 * S, 980 * S, 0.34
         yy, xx = np.mgrid[0:H, 0:W]
-        d = np.sqrt(((xx - 0.76 * W) / (760 * S)) ** 2 + ((yy - 0.58 * H) / (980 * S)) ** 2)
-        a = np.where(d < 0.42, 0.34 - (d / 0.42) * 0.20, np.where(d < 0.72, 0.14 * (1 - (d - 0.42) / 0.30), 0))
+        d = np.sqrt(((xx - bcx) / rx) ** 2 + ((yy - bcy) / ry) ** 2)
+        a = np.where(d < 0.42, A - (d / 0.42) * (A * 0.59),
+                     np.where(d < 0.85, A * 0.41 * (1 - (d - 0.42) / 0.43), 0))
         img = Image.fromarray((np.array(img, float) * (1 - a[..., None]) + np.array(GREEN, float) * a[..., None]).astype('uint8'))
     d0 = ImageDraw.Draw(img)
 
@@ -170,7 +195,17 @@ def render(dark: bool) -> Image.Image:
     flow_y = cy0 + max(30 * S, int(17 * S * 1.4)) + 55 * S
     foot_top = H - inset - padb - 92 * S
     figx, figy = cx0 + cw - fw, flow_y + 100 * S
-    img.paste(FIG, (figx, figy), FIG)
+    fig_v = FIG
+    if pop:
+        # The lift lives in the RENDERER, never in the asset: founder-standing.png
+        # stays untouched so light grounds don't inherit an exposure they don't
+        # need. 1.16 brightness / 1.05 contrast — the C numbers.
+        from PIL import ImageEnhance
+        r_, g_, b_, al_ = FIG.split()
+        rgb_ = ImageEnhance.Contrast(ImageEnhance.Brightness(Image.merge('RGB', (r_, g_, b_))).enhance(1.16)).enhance(1.05)
+        r2_, g2_, b2_ = rgb_.split()
+        fig_v = Image.merge('RGBA', (r2_, g2_, b2_, al_))
+    img.paste(fig_v, (figx, figy), fig_v)
     d0 = ImageDraw.Draw(img)
 
     margin = 30 * S

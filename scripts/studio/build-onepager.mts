@@ -110,6 +110,7 @@ interface Post {
   points?: { k: string; v: string }[];      // numbered list — k bold lead-in, v the rest of the sentence
   note?: string;                            // mono foot-of-copy line — sources and their interests
   bloom?: boolean;                          // dark ground only; default true (sanctioned 2026-08-18). Set false for the Carta-flat card
+  pop?: boolean;                            // the C treatment (default true): bloom aimed at the figure + 1.16/1.05 renderer lift. false = original ambient bloom, unlifted
   headshot?: string;                        // byline face; defaults to the repo founder portrait
   caption?: string;                         // the LinkedIn post text
   variants?: ('dark' | 'light')[];          // default: both
@@ -151,6 +152,22 @@ if (LAYOUT === 'figure' && !FIG) {
   console.error('           render from the STUDIO ROOT so ./assets resolves, or pass figure:/--media explicitly.');
   process.exit(1);
 }
+/* The C treatment aims the bloom at the FIGURE, so the builder needs the
+   cutout's aspect to know where the figure's centre lands. PNG IHDR carries
+   width/height at fixed offsets; anything unparseable falls back to the
+   founder-standing aspect rather than erroring — a slightly mis-aimed bloom
+   is a lesser failure than no render. */
+const figAspect = (() => {
+  try {
+    const m = /^data:image\/png;base64,(.{200})/.exec(FIG ?? '');
+    if (m) {
+      const head = Buffer.from(m[1], 'base64');
+      if (head.readUInt32BE(12) === 0x49484452) // 'IHDR'
+        return head.readUInt32BE(16) / head.readUInt32BE(20);
+    }
+  } catch { /* fall through */ }
+  return 0.323; // founder-standing.png, straightened
+})();
 const HEAD = resolveImg(post.headshot) || b64(path.join(ROOT, 'client/public/founder-portrait.jpg'));
 
 const name = post.byline?.name ?? 'Paul Baker';
@@ -181,9 +198,23 @@ function figureCard(dark: boolean): string {
      needs to be bright white") — CARTA.white, not a new hex. Green on paper. */
   const ctaC = dark ? CARTA.white : GREEN;
   const plateC = dark ? CARTA.darkPlate : CARTA.panel;
+  /* THE C TREATMENT (Paul, 2026-08-18 — FORMATS §2.0). The first posted card
+     read too dark: ambient bloom, unlit figure, black trousers into the band.
+     C aims the bloom at the figure's torso and lifts the figure 1.16/1.05 in
+     the RENDERER (the asset is never touched, so light grounds inherit no
+     lift). `pop: false` returns the original ambient numbers, unlifted. */
+  const pop = dark && post.pop !== false;
+  /* Figure geometry: content right edge 978 (1080−46−56); figure width from
+     the cutout's aspect at the 834px φ height; top = 46+52+30+55+100 = 283;
+     centre-y at 45% of the figure. */
+  const figW = Math.round(834 * figAspect);
+  const bx = Math.round(978 - figW / 2), by = Math.round(283 + 834 * 0.45);
   const bloom = dark && post.bloom !== false
-    ? `<div class="lay" style="background:radial-gradient(ellipse 760px 980px at 76% 58%, rgba(10,122,88,0.34) 0%, rgba(10,122,88,0.14) 42%, transparent 72%)"></div>`
+    ? (pop
+      ? `<div class="lay" style="background:radial-gradient(ellipse 600px 860px at ${bx}px ${by}px, rgba(10,122,88,0.52) 0%, rgba(10,122,88,0.213) 42%, transparent 85%)"></div>`
+      : `<div class="lay" style="background:radial-gradient(ellipse 760px 980px at 76% 58%, rgba(10,122,88,0.34) 0%, rgba(10,122,88,0.14) 42%, transparent 72%)"></div>`)
     : '';
+  const figFilter = pop ? 'filter:brightness(1.16) contrast(1.05);' : '';
   const points = (post.points ?? []).map((p, i) =>
     `<li><span class="fn" style="color:${accC};border-color:${seamC};background:${plateC}">${i + 1}</span><div style="color:${subC}"><b style="color:${inkC}">${esc(p.k)}</b> ${esc(p.v)}</div></li>`).join('');
   return `<div class="card fig-card" style="background:${dark ? DARK : WARM};color:${inkC}">
@@ -192,7 +223,7 @@ function figureCard(dark: boolean): string {
     <div class="fpad">
       <div class="ftop"><div class="fkick" style="color:${accC}"><span class="fsq" style="background:${accC}"></span>${esc(post.kicker ?? '')}</div><img src="${logoSrc}" style="height:30px;width:auto;display:block"></div>
       <div class="fflow">
-        <img class="ffig" src="${FIG}" style="shape-outside:url(${FIG})">
+        <img class="ffig" src="${FIG}" style="shape-outside:url(${FIG});${figFilter}">
         <div class="fhook" style="color:${inkC}">${esc(post.hook)}</div>
         ${post.body ? `<div class="flede" style="color:${subC}">${esc(post.body)}</div>` : ''}
         <div class="frule" style="background:${accC}"></div>
