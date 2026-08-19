@@ -1,0 +1,54 @@
+built      2026-08-19 · the OFFER carousel, PORTAL-LIGHT (Stepped Portal)
+pages      8 (consolidated same day from 11; Paul: "too many pages, we can
+           consolidate and tell a better story") — cover · the problem · smbX Core overview · SEVEN PHASE PAGES
+           merged into FOUR VERB PAGES —
+           FIND (thesis+sourcing) · DECIDE (valuation+structure) · CLOSE
+           (diligence, its own page: "where most deals come apart") · OWN
+           (integration+value creation, the Premium page) · the CTA close.
+           Phase sentences stay VERBATIM from Landing.tsx as bullets.
+audience   Cover upper-right, on the plate in tint: "Outsourced Corporate
+           Development for Private Equity and Family Offices" — the slot the
+           logo vacated. First render drew it in body-grey on the green steps
+           (illegible); plate text takes the plate label colour.
+
+expanded   Paul, 2026-08-19: "the content seems pretty sparse... can we talk
+           more about the processes in each and give the viewer a better sense
+           of 'this is how we run corp dev'". The five-page version named the
+           phases in one bullet list; this walks each one.
+
+           PHASE COPY IS VERBATIM from client/src/practice/Landing.tsx PHASES —
+           the approved site copy, not rewritten. A reader who sees the post
+           and then the site must hear one voice, so the carousel quotes the
+           site rather than paraphrasing it. If the site copy changes, this
+           deck is regenerated, never edited independently.
+
+cta        Paul: "The CTA page is also super boring". The two engagements are
+           now two PLATES side by side — phase range, name, what it covers —
+           so the choice is visible at a glance instead of read as a list.
+           Premium carries a green top edge as the fuller option. Proof line
+           sits ABOVE the action bar: it is the reason to press, and under the
+           bar it collided with the signature logo.
+
+renamed    smbXCorpDev -> smbX Core · smbXCorpDev Premium -> smbX Premium.
+           STILL CARRYING THE OLD NAMES (Claude Code's side of ONE CLONE):
+             client/src/practice/Landing.tsx   (the LIVE SITE, incl. PHASES)
+             server/index.ts · house/assets.ts · CLAUDE.md (product naming)
+             studio/specs/hs-teardown-preview.deck.mts
+             studio/collateral/smbx-corpdev-offering-machine/2026-08-13/*
+           The site and this carousel disagree until those are updated.
+
+cover      Three proof figures in a hairline-ruled row in the copy panel, not
+           a hero numeral — the spec's own rule ("every hero number carries
+           its comparison"; 150 acquisitions has no honest baseline).
+spec       studio/specs/smbx-corpdev-offering.deck.mts
+builder    scripts/studio/figure-deck.py --ground portal-light
+note       PIL raster. The PRICING variant was deliberately NOT rebuilt.
+
+2026-08-19 later · THE MOBILE PASS (Paul: "none of this text is going to be
+legible... think of it as mobile"). The arithmetic: LinkedIn renders 1080px
+at ~360px on a phone — divide by 3. Body was 21px (reads as 7px), sources
+13px (reads as 4px). New scale, canvas px: heads 68 · body 40 · bullets
+40/38 · kickers 26 · sources 22 · card notes 30. Copy cut to ≤45 words a
+page. Cover logo corrected to phi-squared of ITS OWN panel (portal 520 →
+199px, not the monolith's 228). Cards closer carries its logo in the chrome;
+the bar owns the foot.

@@ -2,7 +2,13 @@
  * smbX corp-dev offering sheet — the two products, and the why underneath them.
  *
  * THE MESSAGE, in one line: smbX is a corporate development function you engage
- * for the deal — smbXCorpDev runs it to close, smbXCorpDev Premium carries it
+ * for the deal — smbX Core runs it to close, smbX Premium carries it
+ *
+ * RENAMED 2026-08-19 (Paul): smbXCorpDev -> smbX Core, smbXCorpDev Premium ->
+ * smbX Premium. The old names still appear in the LIVE SITE
+ * (client/src/practice/Landing.tsx), server/index.ts, house/assets.ts and the
+ * root CLAUDE.md product-naming section — all Claude Code's side of ONE
+ * CLONE, all flagged rather than edited from here.
  * through the first hundred days.
  *
  * Paul, 2026-08-04, supplied the hook and the tag verbatim from the practice's
@@ -14,7 +20,7 @@
  *
  * "3 page carousel" is read as THREE CONTENT BEATS. FORMATS.md §1 auto-adds the
  * cover and closer as the two bookends, so three body pages renders as five —
- * why · smbXCorpDev · smbXCorpDev Premium. Cutting to one body page to hit a
+ * why · smbX Core · smbX Premium. Cutting to one body page to hit a
  * literal three would put both products on the same page, which is the opposite
  * of "diving deeper into each service".
  *
@@ -67,9 +73,9 @@ const CAPTION = [
   '',
   'smbX is a fourth: a corporate development function you engage for the deal.',
   '',
-  '→ smbXCorpDev runs it end to end. Thesis, market sized from primary sources, off-market outreach, diligence, negotiation, close. Then it scales to zero.',
+  '→ smbX Core runs it end to end. Thesis, market sized from primary sources, off-market outreach, diligence, negotiation, close. Then it scales to zero.',
   '',
-  '→ smbXCorpDev Premium carries the same team past signing into the first hundred days. A deal is not finished when it closes. It is finished when the thing you underwrote is actually running.',
+  '→ smbX Premium carries the same team past signing into the first hundred days. A deal is not finished when it closes. It is finished when the thing you underwrote is actually running.',
   '',
   'One buyer per target. Never the sell side. Never two-sided. It is in the engagement letter.',
   '',
@@ -92,6 +98,10 @@ export const deck = {
      support the claim instead of competing with it. */
   cover: {
     style: '1b',
+    /* Upper-right positioning line (Paul, 2026-08-19) — the slot the logo
+       vacated when it moved to the lower-left signature. Names the ICP on
+       the artifact itself. */
+    audience: 'Outsourced Corporate Development\nfor Private Equity and Family Offices',
     claim: 'Buying a business is hard work. We make it easier.',
     promise: 'Whether it’s your 1st or your 100th acquisition, we run the process for you — thesis, sourcing, diligence, close.',
     figures: [
@@ -106,76 +116,77 @@ export const deck = {
   },
 
   pages: [
+    /* ── PHONE-FIRST REWRITE 2026-08-19 (Paul: "none of this text is going
+       to be legible... think of it as mobile"). The arithmetic: LinkedIn
+       renders 1080px at ~360px on a phone — divide every size by 3. The
+       site's own floor is 13px customer-facing, so the carousel floor is
+       ~40px ON CANVAS for reading text, and a page carries ONE idea in
+       ≤45 words. Heads stay verbatim site voice; bodies are the site's key
+       clauses, cut to phone length. */
     {
       kind: 'statement',
       tag: 'THE PROBLEM',
-      /* THE FIGURE IS EXACT AND REGISTERED. `PRACTICE_RECORD.md` §What a
-         standing corp-dev function costs — Paul, 2026-08-06, from practical
-         experience. Published as a RANGE; the midpoint is not a figure anyone
-         stated. This replaces "a year and a million dollars", which shipped
-         2026-08-06 registered nowhere and invisible to verify-spec because the
-         extractor required a digit.
-
-         "A year to hire and ramp" was CUT, not lost. Same class of claim —
-         asserted, unsourced, no digit — and a per-year run rate says nothing
-         about time to first deal. It goes back the moment Paul sources it. */
-      head: 'Building corp dev in-house runs **$500,000 to $1,500,000 a year.**',
-      body: 'Most buyers do not have a corporate development function. Standing one up is the expensive way to find that out.',
-      bullets: [
-        '**All-in, not just salary** — and it is a fixed cost attached to an activity that only happens occasionally.',
-        '**It does not scale down between deals.** The function is idle and the cost is not.',
-        '**Most banks are built for the sell side.** A buy-side search is a different job.',
-      ],
-      source: 'Targets under $250M revenue. Buy-side only — THE LINE, smbX practice perimeter.',
+      head: 'Corp dev in-house: **$500K–$1.5M a year.**',
+      body: 'All-in, and it does not scale down between deals. The function is idle. The cost is not.',
+      source: 'Buy-side only, under $250M revenue — THE LINE.',
     },
     {
       kind: 'statement',
-      tag: 'THE ENGAGEMENT',
-      head: 'smbXCorpDev',
-      body: 'Thesis to close. The whole buy-side function, run for you.',
-      bulletsFrom: 1,
+      tag: 'THE MODEL',
+      head: 'Engage the function for the deal.',
+      body: 'The whole buy-side function, one senior operator, run in your name. Then it scales to zero.',
       bullets: [
-        '**Thesis** — what to buy, and whether it is buyable today.',
-        '**Sourcing** — the owners who are not looking to sell, reached under your name.',
-        /* VALUATION, not evaluation. Paul, 2026-08-13: "as in how much a
-           business is worth. My ICP will catch this." Shipped as "Evaluation"
-           and corrected here at the source, because this spec is what the
-           carousel, the pricing variant and the motion piece all restate — the
-           motion piece was faithfully saying the wrong word BECAUSE the
-           content law held it to this line. */
-        '**Valuation** — financials rebuilt, every adjustment tested, surprises found early.',
-        '**Structure & offer** — terms a lender will back. We write it and we negotiate it.',
-        '**Diligence & close** — where deals come apart. Every thread held to signing.',
+        '**smbX Core** — thesis to close.',
+        '**smbX Premium** — Core, then ownership.',
       ],
-      source: 'One buyer per target. Never the sell side — it is in the engagement letter.',
+      source: 'One buyer per target. Never the sell side.',
     },
     {
       kind: 'statement',
-      tag: 'THE UPGRADE',
-      head: 'smbXCorpDev Premium',
-      body: 'Everything above. Then the part most advisors skip.',
-      bulletsFrom: 6,
-      bullets: [
-        '**Integration** — the first hundred days, planned before close. You keep the people and the customers you just paid for.',
-        '**Value creation** — we stay past day 100: the thesis tracked, the levers pulled, the add-ons sourced.',
-      ],
-      source: 'Premium is the same team staying in the deal after the wire clears.',
+      tag: '01–02 · FIND',
+      head: 'We find the owners who aren’t looking to sell.',
+      body: 'Thesis first: what to buy, and whether it is buyable today. Then the market mapped, and reached quietly — under your name.',
+      source: 'smbX Core · thesis + sourcing.',
+    },
+    {
+      kind: 'statement',
+      tag: '03–04 · DECIDE',
+      head: 'What it’s really worth — and whether to walk.',
+      body: 'Financials rebuilt. Add-backs tested. Then the offer: seller notes, earnouts, rollover — terms a lender will actually back.',
+      source: 'smbX Core · valuation + structure.',
+    },
+    {
+      kind: 'statement',
+      tag: '05 · CLOSE',
+      head: 'Where most deals come apart. Our heaviest work.',
+      body: 'Diligence across financials, legal, tax and operations — every thread held together to a signed deal.',
+      source: 'smbX Core · diligence & close.',
+    },
+    {
+      kind: 'statement',
+      tag: '06–07 · OWN',
+      head: 'The price is set at close. The value comes after.',
+      body: 'The first hundred days, planned before close. Then the levers, and the add-ons that turn one deal into a platform.',
+      source: 'smbX Premium — scoped to the deal.',
     },
   ],
 
-  /* Closer 2a — the offer ladder. The two engagements are a ruled CHOICE and
-     the action is a filled bar, because the old close buried "Book a call at
-     smbx.ai" as the last clause of the last sentence. */
   closer: {
     tag: 'FOR THE ACQUIRER',
     head: 'Pick the engagement. We’ll bring the function.',
-    rows: [
-      { name: 'smbXCorpDev', note: 'Thesis to close.' },
-      { name: 'smbXCorpDev Premium', note: 'Stays through the first hundred days and beyond.' },
+    /* TWO PLATES, not two rows (2026-08-19, Paul: "The CTA page is also super
+       boring"). A closer asking the reader to CHOOSE should show the choice
+       as two objects side by side with what each covers, so the decision is
+       visible at a glance rather than read as a list. */
+    cards: [
+      { name: 'smbX Core', phases: 'PHASES 01–05',
+        note: 'Thesis to close. Then it scales to zero.' },
+      { name: 'smbX Premium', phases: 'PHASES 01–07',
+        note: 'Core, then the first hundred days and beyond.' },
     ],
     line: 'One senior operator, on your side of the table.',
     action: 'Book a call — smbx.ai',
-    proof: '150 acquisitions. Zero sell-side deals. Ever.',
+    proof: '150 acquisitions. $5B+ enterprise value added. Zero sell-side deals. Ever.',
   },
 
   caption: CAPTION,

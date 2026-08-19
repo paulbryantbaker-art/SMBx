@@ -131,12 +131,18 @@ def F(n,s,ax=None):
         except: pass
     return f
 serif168=F('serif-var.ttf',168*S,[550]); serif64=F('serif-var.ttf',64*S,[550])
-serif46=F('serif-var.ttf',46*S,[550])
-serif56=F('serif-var.ttf',56*S,[550]); serif120=F('serif-var.ttf',120*S,[550])
-sans21=F('sans-400.ttf',21*S); sans19b=F('sans-600.ttf',19*S)
-sans145=F('sans-400.ttf',int(14.5*S)); sans19n=F('sans-600.ttf',19*S)
-mono135=F('mono-600.ttf',int(13.5*S)); mono13=F('mono-400.ttf',13*S); mono17=F('mono-600.ttf',17*S)
-mono115=F('mono-600.ttf',int(11.5*S))
+serif46=F('serif-var.ttf',68*S,[550])
+serif56=F('serif-var.ttf',60*S,[550]); serif120=F('serif-var.ttf',120*S,[550])
+sans21=F('sans-400.ttf',40*S)
+sans21b=F('sans-400.ttf',38*S)
+sans26=F('sans-600.ttf',40*S)
+sans17=F('sans-400.ttf',30*S)
+serif90=F('serif-var.ttf',90*S,[550])
+serif68=F('serif-var.ttf',68*S,[550])
+serif44=F('serif-var.ttf',54*S,[550]); sans19b=F('sans-600.ttf',40*S)
+sans145=F('sans-400.ttf',22*S); sans19n=F('sans-600.ttf',28*S)
+mono135=F('mono-600.ttf',26*S); mono13=F('mono-400.ttf',22*S); mono17=F('mono-600.ttf',26*S)
+mono115=F('mono-600.ttf',20*S)
 serif_ghost=F('serif-var.ttf',300*S,[550])
 
 FIGSRC=Image.open('studio/assets/brand/founder-standing.png').convert('RGBA')
@@ -199,15 +205,16 @@ def chrome(img,d,kicker,pnum=None,total=10,logo=True,light=False):
     d.rectangle([64*S,ky+3*S,64*S+sq,ky+3*S+sq],fill=acc)
     cx=64*S+sq+12*S
     for ch in kicker.upper():
-        d.text((cx,ky),ch,font=mono135,fill=acc); cx+=d.textlength(ch,font=mono135)+0.16*13.5*S
+        d.text((cx,ky),ch,font=mono135,fill=acc); cx+=d.textlength(ch,font=mono135)+0.14*26*S
     if logo:
-        lh_=26*S; lw=int(LOGO_W.size[0]*lh_/LOGO_W.size[1])
-        lgx=LOGO_W.resize((lw,lh_),Image.LANCZOS); img.paste(lgx,(W-64*S-lw,52*S),lgx)
+        _l=LOGO if light else LOGO_W
+        lh_=30*S; lw=int(_l.size[0]*lh_/_l.size[1])
+        lgx=_l.resize((lw,lh_),Image.LANCZOS); img.paste(lgx,(W-64*S-lw,52*S),lgx)
     if pnum:
         t=f'{pnum:02d} / {total}'
-        tw=sum(d.textlength(c,font=mono115)+0.1*11.5*S for c in t)
+        tw=sum(d.textlength(c,font=mono115)+0.08*20*S for c in t)
         x=W-64*S-tw
-        for ch in t: d.text((x,1160*S),ch,font=mono115,fill=T['dLegal']); x+=d.textlength(ch,font=mono115)+0.1*11.5*S
+        for ch in t: d.text((x,1160*S),ch,font=mono115,fill=T['dLegal']); x+=d.textlength(ch,font=mono115)+0.08*20*S
 
 def foot(img,d,cta=True,light=False):
     y0=1232*S
@@ -243,6 +250,25 @@ def figure(img,lift=1.16,h=930,x=515,y=302):
 L=dict(bone=(255,255,255),ink=(22,24,26),body=(74,79,84),muted=(124,129,135),
 hair=(228,223,211),green=(10,122,88),tint=(223,245,236),panel=(243,240,233))
 
+def rich(d,x,y,width,txt,fnorm,fbold,lh,cnorm,cbold):
+    """Render **bold** spans as weight, not asterisks. Returns next y."""
+    segs=str(txt).split('**'); lines=[[]]; curw=0
+    for j,seg in enumerate(segs):
+        f=fbold if j%2 else fnorm
+        c=cbold if j%2 else cnorm
+        for w in seg.split(' '):
+            if not w: continue
+            wl=d.textlength(w+' ',font=f)
+            if curw+wl>width and lines[-1]: lines.append([]); curw=0
+            lines[-1].append((w,f,c)); curw+=wl
+    for ln in lines:
+        cx=x
+        for w,f,c in ln:
+            d.text((cx,y),w,font=f,fill=c); cx+=d.textlength(w+' ',font=f)
+        y+=lh
+    return y
+
+
 def light_page(p,n,total=10):
     img=Image.new('RGB',(W,H),L['bone']); d=ImageDraw.Draw(img)
     # ghost numeral at 5%
@@ -253,14 +279,14 @@ def light_page(p,n,total=10):
     tag=(p.get('tag') or deck['kicker']).upper()
     cx=88*S
     for ch in tag:
-        d.text((cx,120*S),ch,font=mono135,fill=L['green']); cx+=d.textlength(ch,font=mono135)+0.12*13.5*S
+        d.text((cx,120*S),ch,font=mono135,fill=L['green']); cx+=d.textlength(ch,font=mono135)+0.1*26*S
     d.line([88*S,158*S,W-88*S,158*S],fill=L['hair'],width=S)
     y=200*S
     if p['kind']=='numeral':
         d.text((88*S,y),p['numeral'],font=serif120,fill=L['ink'])
         d.rectangle([88*S,y+150*S,160*S,y+155*S],fill=L['green'])
         y=y+200*S
-    y=wrap(d,88*S,y,760*S,p['head'],serif46,int(46*1.14*S),L['ink'])
+    y=rich(d,88*S,y,880*S,p['head'],serif46,serif46,int(68*1.14*S),L['ink'],L['ink'])
     if p['kind']!='numeral':
         d.rectangle([88*S,y+26*S,160*S,y+31*S],fill=L['green']); y=y+62*S
     else: y=y+34*S
@@ -278,17 +304,35 @@ def light_page(p,n,total=10):
             cwid=d.textlength(p['connector'],font=mono135)
             d.text((x0+bw+(gapx-cwid)/2,base_y-190*S),p['connector'],font=mono135,fill=L['green'])
         y=base_y+90*S
-    y=wrap(d,88*S,y,720*S,p['body'],sans21,int(21*1.62*S),L['body'])
+    y=rich(d,88*S,y,880*S,p.get('body',''),sans21,sans19b,int(40*1.5*S),L['body'],L['ink']) if p.get('body') else y
+    for b in (p.get('bullets') or []):
+        y+=26*S
+        d.rectangle([88*S,y+9*S,88*S+9*S,y+18*S],fill=L['green'])
+        segs=b.split('**')
+        cx=88*S+26*S; lines=[[]]; curw=0; maxw=830*S
+        for j,seg in enumerate(segs):
+            f=sans19b if j%2 else sans21b
+            for w in seg.split(' '):
+                if not w: continue
+                wl=d.textlength(w+' ',font=f)
+                if curw+wl>maxw and lines[-1]: lines.append([]); curw=0
+                lines[-1].append((w,f)); curw+=wl
+        for ln in lines:
+            x=88*S+26*S
+            for w,f in ln:
+                d.text((x,y),w,font=f,fill=L['ink'] if f is sans19b else L['body'])
+                x+=d.textlength(w+' ',font=f)
+            y+=int(38*1.45*S)
     if p.get('source'):
-        wrap(d,88*S,1168*S,780*S,'Source: '+p['source'],mono13,int(13*1.55*S),L['muted'])
+        wrap(d,88*S,1160*S,860*S,'Source: '+p['source'],mono13,int(22*1.5*S),L['muted'])
     # flat dark band strip at the foot
     d.rectangle([0,1266*S,W,H],fill=T['dark'])
     lh_=22*S; lw=int(LOGO_W.size[0]*lh_/LOGO_W.size[1])
     lg=LOGO_W.resize((lw,lh_),Image.LANCZOS); img.paste(lg,(88*S,1266*S+(84*S-lh_)//2),lg)
     t=f'{n:02d} / {total}'
-    tw=sum(d.textlength(c,font=mono115)+0.1*11.5*S for c in t)
+    tw=sum(d.textlength(c,font=mono115)+0.08*20*S for c in t)
     x=W-88*S-tw
-    for ch in t: d.text((x,1266*S+(84*S-11.5*S)//2),ch,font=mono115,fill=T['dMut']); x+=d.textlength(ch,font=mono115)+0.1*11.5*S
+    for ch in t: d.text((x,1266*S+(84*S-11.5*S)//2),ch,font=mono115,fill=T['dMut']); x+=d.textlength(ch,font=mono115)+0.08*20*S
     return img
 
 os.makedirs(OUT,exist_ok=True)
@@ -318,28 +362,55 @@ def build_cover(light):
         img,d=portal_base(); portal_steps(img,d)
         NUM_X,LAB_X,LAB_W=682,688,240
         INKC,SUBC,ACC=T['ink'],T['body'],T['green']
+        SEAMC2,MUTC2=T['hair'],T['muted']
         LIFT=1.08; FIGX=500
     else:
         img,d=base(bloom_at=(655,620)); plate(img,d)
         NUM_X,LAB_X,LAB_W=644,754,230
         INKC,SUBC,ACC=T['dInk'],T['dSub'],T['mint']
+        SEAMC2,MUTC2=T['dSeam'],T['dMut']
         LIFT=1.16; FIGX=515
-    d.text((NUM_X*S,70*S),deck['cover'].get('numeral','')+deck['cover'].get('unit',''),font=serif168,fill=T['white'])
-    d.rectangle([LAB_X*S,252*S,(LAB_X+52)*S,256*S],fill=T['mint'])
-    wrap(d,LAB_X*S,278*S,LAB_W*S,str(deck['cover'].get('numeralLabel','')).replace(chr(10),' ').upper(),
-         mono135,int(13.5*1.7*S),T['tint'],ls=0.12*13.5*S)
+    cov=deck['cover']
+    figs=cov.get('figures')
+
+    if cov.get('numeral'):
+        d.text((NUM_X*S,70*S),cov.get('numeral','')+cov.get('unit',''),font=serif168,fill=T['white'])
+        d.rectangle([LAB_X*S,252*S,(LAB_X+52)*S,256*S],fill=T['mint'])
+        wrap(d,LAB_X*S,278*S,LAB_W*S,str(cov.get('numeralLabel','')).replace(chr(10),' ').upper(),
+             mono135,int(26*1.6*S),T['tint'],ls=0.1*26*S)
+    # figures render in the copy panel below (the spec's ruled row)
     chrome(img,d,deck['kicker'],logo=False,light=light)
-    _LW=228; _lg=LOGO if light else LOGO_W
+    aud=cov.get('audience')
+    if aud:
+        ay2=56*S
+        for ln in str(aud).split(chr(10)):
+            lw3=sum(d.textlength(ch,font=mono115)+0.06*20*S for ch in ln)
+            ax2=W-64*S-lw3
+            for ch in ln:
+                d.text((ax2,ay2),ch,font=mono115,fill=T['white']); ax2+=d.textlength(ch,font=mono115)+0.06*20*S
+            ay2+=int(20*1.7*S)
+    _LW=199 if light else 228   # panel/phi-squared: 520/2.618 vs 596/2.618
+    _lg=LOGO if light else LOGO_W
     _lg=_lg.resize((_LW*S,int(_lg.size[1]*_LW*S/_lg.size[0])),Image.LANCZOS)
     img.paste(_lg,(64*S,1232*S-64*S-_lg.size[1]),_lg); d=ImageDraw.Draw(img)
-    hook=deck['cover']['hook']; parts=hook.split('. ')
+    hook=deck['cover'].get('hook') or deck['cover'].get('claim',''); parts=hook.split('. ')
     if len(parts)>1:
         y=wrap(d,64*S,132*S,420*S,parts[0]+'.',serif56,int(56*1.05*S),INKC)
         y=wrap(d,64*S,y+6*S,420*S,'. '.join(parts[1:]),serif56,int(56*1.05*S),ACC)
     else:
         y=wrap(d,64*S,132*S,420*S,hook,serif56,int(56*1.05*S),INKC)
     d.rectangle([64*S,y+34*S,136*S,y+39*S],fill=ACC)
-    wrap(d,64*S,y+74*S,410*S,deck['cover'].get('sub',''),sans21,int(21*1.5*S),SUBC)
+    y=wrap(d,64*S,y+74*S,430*S,deck['cover'].get('sub') or deck['cover'].get('promise',''),sans21,int(40*1.45*S),SUBC)
+    if figs:
+        y+=34*S
+        d.line([64*S,y,474*S,y],fill=SEAMC2,width=S); y+=30*S
+        for f in figs:
+            d.text((64*S,y),str(f['value']),font=serif44,fill=INKC)
+            lw2=d.textlength(str(f['value']),font=serif44)
+            wrap(d,64*S+lw2+18*S,y+16*S,(410-int(lw2/S)-18)*S,str(f['label']).upper(),
+                 mono115,int(20*1.6*S),MUTC2,ls=0.08*20*S)
+            y+=72*S
+        d.line([64*S,y-14*S,474*S,y-14*S],fill=SEAMC2,width=S)
     figure(img,LIFT,x=FIGX); d=ImageDraw.Draw(img)
     foot(img,d,light=light)
     return img
@@ -352,16 +423,16 @@ def build_closer(light):
         img.paste(lingrad(W,H,[(0,T['bone']),(0.55,T['boneAlt']),(1,T['panel'])],170),(0,0))
         d=ImageDraw.Draw(img)
         INKC,SUBC,MUTC=T['ink'],T['body'],T['muted']
-        BARBG,BARFG,SEAMC=T['ink'],T['bone'],T['hair']
+        BARBG,BARFG,SEAMC=T['ink'],T['bone'],T['hair']; PLATEBG=T['bone']
     else:
         img,d=base(bloom_at=(540,880))
         INKC,SUBC,MUTC=T['dInk'],T['dSub'],T['dMut']
-        BARBG,BARFG,SEAMC=T['white'],T['dark'],T['dSeam']
-    chrome(img,d,c['tag'],logo=False,light=light)
+        BARBG,BARFG,SEAMC=T['white'],T['dark'],T['dSeam']; PLATEBG=T['dPlate']
+    chrome(img,d,c['tag'],logo=bool(c.get('cards')),light=light)
     # FRAME C — phi portrait, whole photo, green offset plate + handles
-    fw_=330*S; fh_=int(fw_*1.618)
+    fw_=(160 if (c.get('rows') or c.get('cards')) else 330)*S; fh_=int(fw_*1.618)
     port=HEAD.resize((fw_,fh_),Image.LANCZOS)
-    px_=(W-fw_)//2; py_=186*S; off=14*S
+    px_=(W-fw_)//2; py_=(104 if (c.get('rows') or c.get('cards')) else 186)*S; off=14*S
     d.rectangle([px_+off,py_+off,px_+fw_+off,py_+fh_+off],fill=T['green'])
     img.paste(port,(px_,py_)); d=ImageDraw.Draw(img)
     d.rectangle([px_,py_,px_+fw_,py_+fh_],outline=SEAMC,width=S)
@@ -369,24 +440,68 @@ def build_closer(light):
     for hxp in (px_-hsz//2,px_+fw_-hsz//2):
         for hyp in (py_-hsz//2,py_+fh_-hsz//2):
             d.rectangle([hxp,hyp,hxp+hsz,hyp+hsz],fill=INKC)
-    y=py_+fh_+off+64*S
-    y=centre(d,y,c['head'],serif46,INKC,820*S,int(46*1.14*S))
+    y=py_+fh_+off+(44 if c.get('cards') else 64)*S
+    y=centre(d,y,c['head'],serif46,INKC,820*S,int(68*1.14*S))
     d.rectangle([(W-72*S)//2,y+30*S,(W+72*S)//2,y+35*S],fill=T['green'] if light else T['mint'])
-    q=c.get('question') or 'For those who have had a deal die in exclusivity: which finding killed it — and could you have seen it at day four?'
-    y=centre(d,y+70*S,q,sans21,SUBC,700*S,int(21*1.62*S))
-    bw_,bh_=430*S,74*S; bx_=(W-bw_)//2; by_=y+70*S
+    if c.get('cards'):
+        # TWO PLATES — the choice as two objects, so the reader picks at a
+        # glance instead of reading a list. Panel/handles grammar, radius 0.
+        y+=34*S
+        cards=c['cards']; n=len(cards)
+        gap=28*S; cw_=(760*S-gap*(n-1))//n; x0=(W-760*S)//2
+        ch_=292*S
+        for i,cd in enumerate(cards):
+            cx=x0+i*(cw_+gap)
+            prime = i==len(cards)-1
+            d.rectangle([cx,y,cx+cw_,y+ch_],fill=PLATEBG,outline=SEAMC,width=S)
+            if prime:
+                d.rectangle([cx,y,cx+cw_,y+5*S],fill=T['green'])
+            hs2=8*S
+            for hxp in (cx-hs2//2,cx+cw_-hs2//2):
+                for hyp in (y-hs2//2,y+ch_-hs2//2):
+                    d.rectangle([hxp,hyp,hxp+hs2,hyp+hs2],fill=INKC)
+            px2=cx+26*S
+            ph=str(cd.get('phases','')); pxw=px2
+            for chx in ph:
+                d.text((pxw,y+30*S),chx,font=mono115,fill=T['green'] if light else T['mint'])
+                pxw+=d.textlength(chx,font=mono115)+0.08*20*S
+            d.text((px2,y+64*S),str(cd['name']),font=sans26,fill=INKC)
+            wrap(d,px2,y+128*S,cw_-56*S,str(cd.get('note','')),sans17,int(30*1.45*S),SUBC)
+        y+=ch_+36*S
+        if c.get('line'): y=centre(d,y,c['line'],sans21,SUBC,760*S,int(40*1.5*S))
+        y+=10*S
+    elif c.get('rows'):
+        y+=54*S
+        for r in c['rows']:
+            d.line([(W-760*S)//2,y,(W+760*S)//2,y],fill=SEAMC,width=S); y+=26*S
+            nm=str(r['name']); d.text(((W-760*S)//2+6*S,y),nm,font=sans19b,fill=INKC)
+            note=str(r.get('note','')); tw2=d.textlength(note,font=sans21)
+            d.text(((W+760*S)//2-6*S-tw2,y+1*S),note,font=sans21,fill=SUBC); y+=52*S
+        d.line([(W-760*S)//2,y,(W+760*S)//2,y],fill=SEAMC,width=S); y+=44*S
+        if c.get('line'): y=centre(d,y,c['line'],sans21,SUBC,700*S,int(40*1.5*S))
+    else:
+        q=c.get('question') or 'For those who have had a deal die in exclusivity: which finding killed it — and could you have seen it at day four?'
+        y=centre(d,y+70*S,q,sans21,SUBC,700*S,int(40*1.5*S))
+    if c.get('proof'):
+        y=centre(d,y+6*S,c['proof'],mono115,MUTC,860*S,int(20*1.6*S),ls=0.06*20*S)
+    bw_,bh_=560*S,92*S; bx_=(W-bw_)//2; by_=min(y+34*S,(H-84*S-92*S))
     d.rectangle([bx_,by_,bx_+bw_,by_+bh_],fill=BARBG)
-    lab=c.get('cta') or 'READ THE FULL ASSESSMENT'
-    lw_=sum(d.textlength(ch,font=mono17)+0.08*17*S for ch in lab)
+    lab=(c.get('action') or c.get('cta') or 'READ THE FULL ASSESSMENT').upper()
+    lw_=sum(d.textlength(ch,font=mono17)+0.08*26*S for ch in lab)
     tx_=bx_+(bw_-lw_-34*S)/2; ty_=by_+(bh_-17*S)//2-2*S
-    for ch in lab: d.text((tx_,ty_),ch,font=mono17,fill=BARFG); tx_+=d.textlength(ch,font=mono17)+0.08*17*S
+    for ch in lab: d.text((tx_,ty_),ch,font=mono17,fill=BARFG); tx_+=d.textlength(ch,font=mono17)+0.08*26*S
     ay_=by_+bh_//2; ax_=tx_+14*S
     d.line([ax_,ay_,ax_+18*S,ay_],fill=T['green'],width=3*S)
     d.polygon([(ax_+24*S,ay_),(ax_+16*S,ay_-6*S),(ax_+16*S,ay_+6*S)],fill=T['green'])
-    centre(d,by_+bh_+34*S,'smbx.ai',mono135,MUTC,600*S,int(13.5*1.6*S),ls=0.16*13.5*S)
-    _LW=228; _lg=(LOGO if light else LOGO_W)
-    _lg=_lg.resize((_LW*S,int(_lg.size[1]*_LW*S/_lg.size[0])),Image.LANCZOS)
-    img.paste(_lg,(64*S,H-64*S-_lg.size[1]),_lg)
+    if not c.get('proof'):
+        centre(d,by_+bh_+34*S,'smbx.ai',mono135,MUTC,700*S,int(26*1.6*S),ls=0.1*26*S)
+    if not c.get('cards'):
+        # signature logo only when the foot is empty — a cards closer carries
+        # its logo in the chrome, and the bar owns the foot
+        _LW=199 if light else 228
+        _lg=(LOGO if light else LOGO_W)
+        _lg=_lg.resize((_LW*S,int(_lg.size[1]*_LW*S/_lg.size[0])),Image.LANCZOS)
+        img.paste(_lg,(64*S,H-64*S-_lg.size[1]),_lg)
     return img
 
 GROUNDS=['monolith-dark','portal-light'] if GROUND=='both' else [GROUND]
