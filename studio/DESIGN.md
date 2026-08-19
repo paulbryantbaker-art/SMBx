@@ -393,6 +393,20 @@ Fibonacci ladder (21 · 34 · 55); the frame is the full-card inset hairline
 with the four handles (sanctioned here — there is no photograph column for it
 to cross); feet land just above the foot hairline, the approved v6 rendering.
 
+**FRAME C — THE PORTRAIT IS A RECTANGLE ON THE CLOSER (Paul, 2026-08-19:
+"maybe instead of a round frame, it should be rectangle to accommodate the
+imperfect pic").** The round headshot disc was Carta's ONE sanctioned radius
+exception. On a CTA closer it fails for a measurable reason: a square/circular
+frame on a 1:1.62 source must discard 38% of the image, and what it discards is
+everything below the chin — "it looks like i have no neck". So the closer's
+portrait is a **φ rectangle**: `founder-portrait.jpg` is 1200×1944 = 1:1.620 and
+φ is 1.618, so the frame shows the WHOLE photograph, uncropped, and the collar
+and shoulders survive. Radius 0 with four corner handles — which is the house
+grammar rather than an exception to it — plus a **14px Deal Green offset plate**,
+the monolith's rim-light move, so the closer rhymes with the cover instead of
+copying it. The small byline disc in a FOOT stays round (it is a byline mark,
+not a portrait) and crops at 0.283 of the source height.
+
 **THE BLOOM, SANCTIONED AND SCOPED (Paul, 2026-08-18).** The figure layout's
 dark variant carries a radial Deal Green bloom behind the figure. This is a
 deliberate, dated amendment to the flat-band law below — chosen from a ladder

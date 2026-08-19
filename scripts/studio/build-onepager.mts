@@ -349,7 +349,7 @@ const CSS = `
   .fpoints div { font-size:22px; line-height:1.55; }
   .fnote { font-family:${MONO}; font-size:14px; line-height:1.6; }
   .ffoot { display:flex; align-items:center; gap:16px; border-top:1px solid; padding-top:21px; height:92px; position:relative; z-index:2; }
-  .fface { width:56px; height:56px; border-radius:50%; object-fit:cover; object-position:50% 22%; border:3px solid; flex:none; }
+  .fface { width:56px; height:56px; border-radius:50%; object-fit:cover; object-position:50% 28%; border:3px solid; flex:none; }
   .fwho b { display:block; font-size:22px; font-weight:700; letter-spacing:-0.01em; }
   .fwho span { font-size:16px; }
   .fcta { margin-left:auto; font-family:${MONO}; font-size:20px; letter-spacing:0.05em; font-weight:600; }

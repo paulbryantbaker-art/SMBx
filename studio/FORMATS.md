@@ -222,6 +222,37 @@ hero band + `accent:` bands (§3). The figure treatment is for the carousel
 cover and the one-pager; the deck-cover half is a `house/deck.ts` change and
 lives with Claude Code (work order: `FIGURE_COVER_WORK_ORDER.md`).
 
+### 2.2 The figure CAROUSEL — `figure-deck.py` (2026-08-19)
+
+```
+python3 $REPO/scripts/studio/figure-deck.py <spec.deck.mts> --out <dir> \
+        --ground monolith-dark|portal-light|both
+```
+
+**The bookend law decides the whole structure.** COVER and CLOSER wear the
+figure-card ground — `monolith-dark` or `portal-light`, the two Claude Design
+grounds. Every page between is the HOUSE LIGHT GRAMMAR (bone, ghost numeral at
+5%, mono kicker over a hairline rule, green rule under the head, flat dark band
+strip at the foot). A first cut wore the monolith on all ten pages: wrong, and
+Paul caught it — the monolith is a COVER treatment, not a page style.
+
+**Eight measured corrections live in that script's header** and each exists
+because the obvious version failed on the page. Read them before changing any
+number. In brief: logo lower-left at panel/φ² = 228px on the 64px rail (in the
+corner at 26px it disappears); cover hook 420px at 56px (480 collides with the
+figure); a numeral page sets its figure at the top of the COPY column and gives
+the plate the page number (the head is a fragment — split them and the reader
+gets a stranded "of broken post-LOI deals…"); body measure ~24em; the CLOSER IS
+THE CTA PAGE, never a second cover; **FRAME C** — the portrait is a φ RECTANGLE
+with corner handles and a 14px green offset plate, because `founder-portrait.jpg`
+is 1200×1944 = 1:1.620 and φ is 1.618, so the frame shows the WHOLE photograph
+and the neck survives (a square frame discards 38% of the image, all of it below
+the chin); the small round foot disc crops at 0.283 (crown 273, eyes 664, chin
+1257 — at 0.06 the chin sat at 99% of the circle); exposure lift is
+renderer-side, 1.16/1.05 dark and 1.08/1.02 light, never baked into the asset.
+
+Worked example: `markets/home-services/collateral/dead-deal-economics/2026-08-20/`.
+
 ### 2.1 Regenerating the standing figure from a new source photo
 
 The recipe that produced `founder-standing.png` (2026-08-18), for when the
