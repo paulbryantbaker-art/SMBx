@@ -4,6 +4,59 @@ Newest first. One section per run.
 
 ---
 
+## 2026-08-19 · defect pass — the register session's own flags, applied
+
+The Cowork session that emitted register v1 flagged three defects in its own
+output (relayed by Paul, 2026-08-19). This pass applies the two mechanical
+fixes to the LIVING layers — `candidates.csv` and the bundle — and leaves
+`candidates/2026-08-18-client-register-v1.csv` untouched: it is the dated
+record of what the hunt emitted, defects included.
+
+**1 · 42 fake-precision trigger dates → bare year.** Where a source said only
+"2025," the hunt wrote `2025-01-01` — a year-only fact wearing a day stamp,
+and the seeded tiering partly rested on it. Every `*-01-01` value is now the
+bare year, which reads as what it is: sometime that year. 34 rows in
+`candidates.csv`; 8 rows in the bundle, in BOTH `trigger_date` and
+`signal_date` (the reconcile had carried the fake value into both).
+Month-precision dates (`*-07-01` etc.) were not flagged and were not touched.
+The importer strings these into notes/evidence text, so a bare year renders
+correctly app-side.
+
+**2 · Deep-bench megafirms out of the working tiers.** The session's read:
+~36 of the 103 PE/FO rows run large in-house origination benches — market
+intelligence, not prospects. Most already sat at tier 3; the live defect was
+ten still at tier 2, now demoted to 3: Blackstone · Apollo Global Management ·
+Bain Capital · Permira · Leonard Green & Partners · Altas Partners · Percheron
+Capital (named by the session) + Ardian · BDT & MSD Partners · Investcorp
+(same class, added this pass). All ten are DISCOVERY rows in the funnel; none
+are in the register. App-side `tier` is COALESCE-protected on update, so a
+human re-score is never clobbered by any of this. The funnel's PE/FO board now
+reads 7 tier-1 · 5 tier-2 · 69 tier-3 — the five surviving tier-2s are the
+thin-bench sponsors with real triggers (Agellus, Carousel, Hastings,
+Heartwood, Paceline).
+
+**3 · `account_type` backfilled on 26 legacy register rows** — follow-up #1
+from the 2026-08-18 run, the part that is mechanical: segment ↔ persona is
+1:1 for three segments, so FAMILY_OFFICE → P2 (12 rows), LMM_PE → P1 (3),
+IND_SPONSOR → P3 (11). The other 49 legacy rows are referral / capital /
+ecosystem / operator rows with no persona code; blank kept — a visible gap
+beats a guess. The register now types P1 21 · P2 16 · P3 17 · P4 20 · P5 16 ·
+blank 49.
+
+**Still open, named rather than fixed:**
+
+- 100 of 225 register-v1 rows carry no domain — the domain hunt is
+  verification work, not an edit.
+- The FO seed is thin BY LAW: of the 103 PE/FO rows, 81 are DISCOVERY and sit
+  in the funnel — including every Dallas family office on the DealSource
+  list. They reach the app only through primary-source verification +
+  promotion (or a deliberate reversal of decision 4 below, which is Paul's).
+- The register session's third artifact, "smbx studio personas v1," is not on
+  disk or in Drive — it exists only in that chat. P1–P5 are defined nowhere
+  durable.
+
+---
+
 ## 2026-08-18 · `2026-08-18-client-register-v1.csv` → `crm-bundle/02_organizations.csv`
 
 **Run by hand.** `reconcile.mts` is specced (`SMBx/RECONCILE_SPEC.md`) and not
