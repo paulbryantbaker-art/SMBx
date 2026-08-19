@@ -51,7 +51,10 @@ image formats… don't remove the other types, but this can be the default."*
 - `build-onepager.mts` now defaults to `layout: 'figure'`: the full-length
   founder cutout (`assets/brand/founder-standing.png`), copy wrapping the
   silhouette, φ geometry, Fibonacci spacing, the SANCTIONED green bloom on
-  dark, bright-white CTA. A spec naming `image` with no `layout` still
+  dark, bright-white CTA. The dark default is the **C treatment** (2026-08-18,
+  after the first posted card read too dark): bloom aimed at the figure +
+  a 1.16/1.05 exposure lift applied in the renderer, never the asset —
+  FORMATS §2.0 carries the numbers, `pop: false` opts out. A spec naming `image` with no `layout` still
   renders the old split — that inference is what keeps `rebuild-all.sh` from
   silently changing the back catalogue. FORMATS §2.0 has the full contract.
 - **The carousel figure cover is NOT built yet** — it lives in

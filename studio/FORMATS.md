@@ -195,6 +195,16 @@ The figure card, measured (approved as the v6 mock, 2026-08-18):
   `bloom: false` returns the Carta-flat card. The CTA on the band is
   `CARTA.white` (Paul: "bright white"), green on paper. The boardroom texture
   remains retired everywhere.
+- **THE C TREATMENT is the dark default (Paul, 2026-08-18, from a four-step
+  board after the first posted card read too dark).** Two moves, together:
+  the bloom is AIMED — centred on the figure's torso (figure centre x, figure
+  top + 45% of figure height), ellipse 600 × 860 px, peak 0.52 falling to 41%
+  at 0.42 of ellipse distance and to zero at 0.85 — and the figure takes a
+  **1.16 brightness / 1.05 contrast lift, in the RENDERER, never the asset**
+  (black trousers reflect nothing; a brighter bloom alone makes them read
+  darker). `founder-standing.png` stays untouched so light grounds inherit no
+  lift. The rim-light step (D) was shown and not chosen. `pop: false` in a
+  spec returns the original ambient bloom with no lift.
 - **First render on a new machine:** check the wrap engaged (copy shortens at
   the shoulder) and the feet sit just above the foot hairline — the approved
   geometry; if the figure renders as a plain column, the float is out of flow.
