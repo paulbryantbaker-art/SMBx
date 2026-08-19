@@ -1,0 +1,8 @@
+built      2026-08-18 · EMERGENCY PIL RASTER, in-sandbox (no Chromium available)
+builder    hand-raster of the approved v6 geometry — NOT build-onepager.mts
+spec       studio/markets/home-services/specs/day-four-questions.post.mts
+note       Same fonts (embedded woff2->ttf), same CARTA hexes, same φ geometry,
+           same figure asset (founder-standing.png). Faithful to the approved
+           mock, but NOT the canonical renderer: line metrics may differ by a
+           few px from a Chromium build. Re-render from the spec on the Mac to
+           replace this file; the spec is the source of record.
