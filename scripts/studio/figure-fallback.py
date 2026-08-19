@@ -252,7 +252,7 @@ def render(dark: bool) -> Image.Image:
     d0.line([cx0, foot_top, cx0 + cw, foot_top], fill=SEAM, width=S)
     fy = foot_top + 21 * S
     face = Image.open(head_path).convert('RGB'); fs = 56 * S
-    face = face.resize((fs, int(face.size[1] * fs / face.size[0])), Image.LANCZOS).crop((0, int(fs * 0.22), fs, int(fs * 0.22) + fs))
+    face = face.resize((fs, int(face.size[1] * fs / face.size[0])), Image.LANCZOS).crop((0, int(fs * 0.283), fs, int(fs * 0.283) + fs))
     mask = Image.new('L', (fs, fs), 0); ImageDraw.Draw(mask).ellipse([0, 0, fs, fs], fill=255)
     ring = Image.new('RGB', (fs + 6 * S, fs + 6 * S), PLATE)
     rmask = Image.new('L', (fs + 6 * S, fs + 6 * S), 0); ImageDraw.Draw(rmask).ellipse([0, 0, fs + 6 * S, fs + 6 * S], fill=255)

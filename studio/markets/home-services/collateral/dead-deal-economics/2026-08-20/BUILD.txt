@@ -1,10 +1,32 @@
-built      2026-08-18T23:50:24.265Z
-builder    build-deck.mts
-engine     6fd725ca + uncommitted changes
-node       v26.5.0
-spec       /Users/paulbaker/Developer/smbx-prod/studio/markets/home-services/specs/dead-deal-economics.deck.mts  sha256:a120c16b90bd
-master     /Users/paulbaker/Developer/smbx-prod/studio/markets/home-services/master.md  sha256:e4b338dfd6dd
+built      2026-08-19 for the Thu 20 Aug slot
+style      GREEN MONOLITH bookends + house light body pages.
+           p01 COVER   monolith, figure on the plate, 47% + hook.
+           p02-09      house light grammar — bone ground, ghost numeral at
+                       5%, mono kicker + hairline rule, dark band strip foot.
+           p10 CLOSER  THE CTA PAGE, FRAME C: phi portrait frame, payoff line, the
+                       follow-up question, one filled action bar (the only
+                       filled control in the system), signature logo.
+           Two corrections behind this build. (1) A first cut wore the
+           monolith on all ten pages — it is a COVER treatment, and the
+           bookend law is two darks with light pages between. (2) The closer
+           was rendered as a mirror of the cover with the standing figure;
+           the closer is the CTA and takes the HEADSHOT, a question and a
+           call to action, or a swiper reaches the end and is given nothing.
+logo       On both dark bookends the logo sits lower-left, not in the corner:
+           width = panel/phi-squared = 228px on the 64px rail. It reads as a
+           signature; at 26px in the corner it was lost against the plate.
+spec       studio/markets/home-services/specs/dead-deal-economics.deck.mts
+reference  design_handoff_smbx_figure_card/dark-2a-green-monolith.html
+note       PIL raster. Copy verbatim from the spec; every colour a CARTA
+           token. build-deck.mts does not yet carry these — see
+           FIGURE_COVER_WORK_ORDER.md for the engine change.
 
-Rebuild: same spec + same master + this engine commit reproduces this
-output. If any hash above differs on disk, this artifact is from a
-different text than the one now sitting there.
+frame C    The closer portrait is a RECTANGLE, not a disc (Paul, 2026-08-19:
+           the round crop could not show a neck). founder-portrait.jpg is
+           1200x1944 = 1:1.620 and phi is 1.618, so a phi portrait frame shows
+           the WHOLE photograph with no crop at all — which is what put the
+           collar and shoulders back. Radius 0 + four corner handles is the
+           house grammar; the round disc was the one sanctioned exception and
+           this replaces it here. The green offset plate (14px) is the
+           monolith rim-light move, tying the closer to the cover.
+           The small foot disc on the cover stays round at 0.283 crop.

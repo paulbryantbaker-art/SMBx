@@ -67,6 +67,23 @@ image formats… don't remove the other types, but this can be the default."*
   fallback and the next `build-onepager.mts` render replaces it. First use
   2026-08-18 (`day-four-questions`, posted).
 
+## 1C. The figure CAROUSEL — `figure-deck.py` (2026-08-19)
+
+The one-pager grounds have a carousel sibling. `scripts/studio/figure-deck.py`
+renders a deck spec with the figure-card ground on the COVER and CLOSER and the
+house light grammar on every page between — the bookend law, applied. Both
+grounds work: `--ground monolith-dark|portal-light|both`.
+
+**Its header carries eight measured corrections** and they are the file's real
+value; each one is a thing that looked right in the abstract and failed on the
+page (logo lost in the corner, hook colliding with the figure, a numeral
+stranded from its own sentence, a closer that mirrored the cover, a round frame
+that cropped Paul's neck off). Read them before touching a number.
+
+Same standing as `figure-fallback.py`: a PIL raster, subordinate to
+`build-deck.mts`, which does not yet know this family — `FIGURE_COVER_WORK_ORDER.md`
+is the engine change that would retire it.
+
 ## 2. State of the four builders
 
 | Builder | Makes | Grammar | Faces | Guard |
