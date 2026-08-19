@@ -1,5 +1,30 @@
 # smbX studio workspace
 
+> ## ONE BRANCH (Paul, 2026-08-19 — amends the branch-per-topic rule)
+>
+> *"you work in 1 branch all the time and i will tell cc the same.. we dont
+> need 15 branches which right now there are too many."*
+>
+> **Cowork works in `cowork` — one long-lived branch, always.** Not
+> `cowork/<topic>`: that rule produced 8 local and **149 remote** branches,
+> which is the mess this replaces. Claude Code takes the same instruction on
+> its own single branch.
+>
+> The mechanic is simpler than what it replaces. Stay on `cowork`, commit
+> there, push, and merge into `main` when a batch is worth deploying. The
+> branch is **not** deleted after merging — it keeps going. Still never commit
+> directly to `main` while Railway builds on every push to it; root CLAUDE.md
+> names the fix (set Railway watch-paths to ignore `studio/**`), and once that
+> is set this rule can relax further.
+>
+> Nothing else changes: never force-push, never rewrite history, never delete
+> a branch you did not create, and if `git status` shows changes you did not
+> make, stop and say so.
+>
+> **Root `CLAUDE.md` still says `cowork/<topic>` in its ONE CLONE section.**
+> That file is Claude Code's — flag the line, do not edit it from a studio
+> session.
+
 > ## ONE CLONE — read this first (Paul, 2026-08-18)
 >
 > **This folder now lives INSIDE the SMBx repo, at `studio/`.** There is one

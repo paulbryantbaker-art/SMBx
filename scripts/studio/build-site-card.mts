@@ -69,8 +69,14 @@ const has = (n: string) => args.includes(n);
    put the em dash alone at the head of line 2. Left as one run with no `|`,
    the browser balances it. The dash became a full stop for the same reason:
    at three lines "— we run" opened a line on a dash, and a dash is not a word. */
-const LINE = flag('--line', 'Buy-side M&A.|We run the process.');
-const NAME = flag('--name', 'site-card-v3');
+/* THREE forced lines, not two (2026-08-19, Paul on the live comment render:
+   "anything we can do to improve legibility a little more?"). Two lines were
+   bound by "We run the process." at 58px; breaking it at the verb lets the
+   fit grow every line to 80px — a 38% larger letter at the 90px phone
+   thumbnail, which is exactly where the type was dissolving. Judged at
+   thumbnail size on a four-way sheet, not at 1200px. */
+const LINE = flag('--line', 'Buy-side M&A.|We run|the process.');
+const NAME = flag('--name', 'site-card-v4');
 const OUT = flag('--out') ? path.resolve(flag('--out')) : path.join(ROOT, 'client/public');
 /* The proof sheet is a working file, not an asset — it defaults OUT of the
    published folder so a review render can never ship as part of the site. */
@@ -89,8 +95,13 @@ const rgba = (hex: string, a: number) => {
 const W = 1200, H = 630;
 /** The safe square. Any crop from 1:1 to 1.91:1 keeps every pixel of it. */
 const SAFE = H;                       // 630
-const PAD = 40;                       // breathing room inside the square
-const BOX = SAFE - PAD * 2;           // 550 — the real measure for type
+/* --pad / --mark / --gap tune how much of the safe square the content uses.
+   Legibility at a 90px phone thumbnail is decided ENTIRELY by these three
+   numbers — the square is fixed, so every pixel of padding is a pixel the
+   wordmark and the line do not get. */
+const PAD = Number(flag('--pad', '32'));        // breathing room inside the square
+const BOX = SAFE - PAD * 2;                     // the real measure for type
+const GAP = Number(flag('--gap', '24'));
 
 /* ── the wordmark, trimmed to its INK ─────────────────────────────────────
    `/logo-green-x-dark.png` is 1584×396 carrying ~13% TRANSPARENT padding on
@@ -131,7 +142,7 @@ if (ink.w <= 0 || ink.h <= 0) {
   process.exit(1);
 }
 
-const MARK_W = 470;                                   // ink width on the card
+const MARK_W = Number(flag('--mark', '550'));         // ink width on the card — the full measure
 const scale = MARK_W / ink.w;
 const markH = Math.round(ink.h * scale);
 
@@ -186,7 +197,7 @@ const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${cartaFon
     ${PANEL ? `border-left: 1px solid ${CARTA.darkSeam}; border-right: 1px solid ${CARTA.darkSeam};
     background: ${rgba(CARTA.white, 0.022)};` : ''}
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: ${PAD}px; gap: 30px;
+    padding: ${PAD}px; gap: ${GAP}px;
   }
   /* sprite-trim: the wrapper is the INK box, the image is scaled and pulled so
      only the ink shows. */
@@ -251,12 +262,27 @@ try {
      RETURNED and judged, because a fit that hits its 24px floor still
      overflowing must fail the build — the overflow gets cropped by the very
      surfaces this file exists to survive, and it looks like a design choice. */
-  const fit = await page.evaluate((box: number, availH: number) => {
+  const fit = await page.evaluate((box: number, availH: number, maxSize: number) => {
     const h1 = document.querySelector('h1') as HTMLElement;
     const safe = document.querySelector('.safe') as HTMLElement;
     const lines = Array.from(h1.querySelectorAll('.ln')) as HTMLElement[];
     let size = parseFloat(getComputedStyle(h1).fontSize);
     const gap = parseFloat(getComputedStyle(safe).rowGap) || 0;
+    /* (measure() is written out twice below on purpose — see the keepNames
+       note above: a named inner function would not survive into the page.) */
+    /* GROW first: forced short lines should use the square, not sit at a size
+       picked from the character count of the whole string. Then SHRINK until
+       both axes fit. Growth stops at maxSize so a two-word line cannot become
+       a poster. */
+    for (;;) {
+      let w = h1.scrollWidth <= box ? 0 : h1.scrollWidth;
+      for (const l of lines) { const r = l.scrollWidth; if (r > w) w = r; }
+      let stack = 0, kids = 0;
+      for (const k of Array.from(safe.children) as HTMLElement[]) { stack += k.getBoundingClientRect().height; kids++; }
+      stack += gap * (kids - 1);
+      if (w > box || stack > availH || size >= maxSize) break;
+      size += 1; h1.style.fontSize = size + 'px';
+    }
     for (;;) {
       let w = h1.scrollWidth <= box ? 0 : h1.scrollWidth;
       for (const l of lines) { const r = l.scrollWidth; if (r > w) w = r; }
@@ -264,15 +290,14 @@ try {
       for (const k of Array.from(safe.children) as HTMLElement[]) { stack += k.getBoundingClientRect().height; kids++; }
       stack += gap * (kids - 1);
       if ((w <= box && stack <= availH) || size <= 24) return { size, widest: w, stack };
-      size -= 1;
-      h1.style.fontSize = size + 'px';
+      size -= 1; h1.style.fontSize = size + 'px';
     }
-  }, BOX, SAFE - PAD * 2);
+  }, BOX, SAFE - PAD * 2, Number(flag('--max-size', '96')));
   if (fit.widest > BOX || fit.stack > SAFE - PAD * 2) {
     console.error(`✗ copy does not fit the centre square even at the ${fit.size}px floor — widest line ${Math.round(fit.widest)}px vs ${BOX}px, stack ${Math.round(fit.stack)}px vs ${SAFE - PAD * 2}px. Shorten the --line; the overflow would be cropped on every non-1.91:1 surface.`);
     process.exit(1);
   }
-  if (fit.size !== SIZE) console.log(`  · line fitted ${SIZE}px → ${fit.size}px to hold the ${BOX}px measure`);
+  if (fit.size !== SIZE) console.log(`  · line fitted ${SIZE}px → ${fit.size}px (measure ${BOX}px · stack ${Math.round(fit.stack)}/${SAFE - PAD * 2}px)`);
   buf = Buffer.from(await page.screenshot({ type: 'png' }));
   writeFileSync(path.join(OUT, `${NAME}.png`), buf);
   console.log(`✓ ${NAME}.png  ${W}×${H}  (${Math.round(buf.length / 1024)}KB) → ${OUT}`);
