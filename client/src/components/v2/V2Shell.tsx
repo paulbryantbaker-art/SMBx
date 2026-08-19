@@ -22,6 +22,7 @@ import { C } from "./tokens";
 import LeadsScreen from "./Leads";
 import TodayScreen from "./Today";
 import CampaignsScreen from "./Campaigns";
+import FeeCalc, { FEE_CALC_LABEL, useDocked } from "./FeeCalc";
 
 type ScreenId = "today" | "leads" | "campaigns";
 
@@ -38,6 +39,16 @@ export default function V2Shell({ user, onSignOut }: {
   const [screen, setScreen] = useState<ScreenId>("today");
   /* Today can hand Campaigns a slot to open — "content queued today → open". */
   const [openSlot, setOpenSlot] = useState<string | null>(null);
+  /* THE FEE CALCULATOR (2026-08-19, Paul: "a quick access button in menu and
+     it can run in the side page gutter on any page im on currently"). One
+     piece of state at the shell, so it survives Today → Leads → Campaigns.
+     Remembered across reloads — a calculator you reopen every morning is one
+     you stop opening. */
+  const [calc, setCalc] = useState<boolean>(() => {
+    try { return sessionStorage.getItem("smbx_v2_feecalc") === "1"; } catch { return false; }
+  });
+  useEffect(() => { try { sessionStorage.setItem("smbx_v2_feecalc", calc ? "1" : "0"); } catch { /* private mode */ } }, [calc]);
+  const docked = useDocked();
 
   /* index.css scroll-locks html/body at ≥901px for the Atlas shells' internal
      panes (`html, body { height: 100%; overflow: hidden; }`). This shell is a
@@ -81,6 +92,20 @@ export default function V2Shell({ user, onSignOut }: {
           ))}
         </nav>
         <div style={{ flex: 1 }} />
+        <button
+          type="button"
+          onClick={() => setCalc(v => !v)}
+          aria-pressed={calc}
+          title="Success fee on a sale price — the published schedule"
+          style={{
+            font: "inherit", fontSize: 13, fontWeight: 700,
+            color: calc ? C.green : C.body,
+            background: "transparent", border: `1px solid ${calc ? C.green : C.chipBd}`,
+            borderRadius: 6, padding: "6px 12px", cursor: "pointer",
+          }}
+        >
+          {FEE_CALC_LABEL}
+        </button>
         <span style={{ fontFamily: C.mono, fontSize: 12, color: C.muted }}>
           {user?.email ?? ""}
         </span>
@@ -97,16 +122,34 @@ export default function V2Shell({ user, onSignOut }: {
         </button>
       </header>
 
-      <main style={{ maxWidth: 1080, margin: "0 auto", padding: "26px 28px 80px" }}>
-        {screen === "today" && (
-          <TodayScreen
-            onGoLeads={() => setScreen("leads")}
-            onGoCampaigns={id => { setOpenSlot(id ?? null); setScreen("campaigns"); }}
-          />
-        )}
-        {screen === "leads" && <LeadsScreen />}
-        {screen === "campaigns" && <CampaignsScreen key={openSlot ?? "campaigns"} openQueueId={openSlot} />}
-      </main>
+      {/* The screen and, when open, the calculator beside it in the right
+          gutter. A flex ROW with the drawer `position: sticky` keeps it in view
+          while the screen scrolls — no fixed element (Safari rule). The main
+          column keeps its 1080 measure; the drawer takes the gutter, and the
+          pair centres as one unit so the screen shifts left by half the drawer
+          rather than being covered by it. */}
+      {/* `wrap`, not `wrap-reverse`: under wrap-reverse the cross axis flips and
+          align-items:flex-start means the BOTTOM of the line, which parked the
+          drawer low on a short screen (seen 2026-08-19). Above-vs-beside is
+          done with CSS `order` instead — the drawer is order -1 (first, its own
+          line) when undocked and 1 (after main, same line) when docked. */}
+      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", alignItems: "flex-start", gap: docked ? 28 : 18, padding: "26px 28px 80px" }}>
+        {/* flex-basis 0 + grow so main SHRINKS to make room for the drawer
+            (otherwise width:100% forces a wrap at every width). The 720 floor
+            is where Campaigns' two-column rows stop fitting; `min(720px,100%)`
+            so a phone (no drawer) is never forced wider than itself. */}
+        <main style={{ flex: "1 1 0", minWidth: "min(720px, 100%)", maxWidth: 1080, order: 0 }}>
+          {screen === "today" && (
+            <TodayScreen
+              onGoLeads={() => setScreen("leads")}
+              onGoCampaigns={id => { setOpenSlot(id ?? null); setScreen("campaigns"); }}
+            />
+          )}
+          {screen === "leads" && <LeadsScreen />}
+          {screen === "campaigns" && <CampaignsScreen key={openSlot ?? "campaigns"} openQueueId={openSlot} />}
+        </main>
+        {calc && <FeeCalc docked={docked} onClose={() => setCalc(false)} />}
+      </div>
     </div>
   );
 }
