@@ -55,7 +55,7 @@ const SITE = 'smbX.ai';
 const STATIC_PAGES: PageMeta[] = [
   {
     path: '/',
-    title: `${SITE} — Buy-side corporate development`,
+    title: `${SITE} — Buy-side corporate development for humans.`,
     description:
       'An on-demand corporate development team that guides your acquisition from thesis to close. We build value by applying operator instincts to the buy-side.',
   },

@@ -70,7 +70,7 @@ const has = (n: string) => args.includes(n);
    the browser balances it. The dash became a full stop for the same reason:
    at three lines "— we run" opened a line on a dash, and a dash is not a word. */
 const LINE = flag('--line', 'Buy-side M&A.|We run the process.');
-const NAME = flag('--name', 'site-card-v2');
+const NAME = flag('--name', 'site-card-v3');
 const OUT = flag('--out') ? path.resolve(flag('--out')) : path.join(ROOT, 'client/public');
 /* The proof sheet is a working file, not an asset — it defaults OUT of the
    published folder so a review render can never ship as part of the site. */
@@ -221,7 +221,13 @@ assertCarta(html, 'site-card');
 const page = await newRenderPage();
 let buf: Buffer;
 try {
-  await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
+  /* deviceScaleFactor 2 → the file is 2400×1260. LinkedIn re-encodes every
+     OG image through its media proxy and the inspector/retina feeds display it
+     upscaled — a 1200px source came back visibly blurry (Paul, 2026-08-19,
+     from the Post Inspector). The 2× master survives the round trip sharp;
+     og:image:width/height in index.html state the FILE's pixels, so they move
+     with this. */
+  await page.setViewport({ width: W, height: H, deviceScaleFactor: 2 });
   /* `load` + fonts.ready, NOT networkidle0: every byte here is inlined, so
      there is no network to go idle — on a machine without egress the idle
      watcher simply times out and the build dies with nothing wrong. What
