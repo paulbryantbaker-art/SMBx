@@ -4,6 +4,58 @@ Newest first. One section per run.
 
 ---
 
+## 2026-08-19 · FO verification pass — 19 checked, 16 promoted, 3 held
+
+The priority family offices (the DealSource Dallas list + the A-list FOs) were
+DISCOVERY rows barred from the register — every one sourced to an Axial
+directory page, the class the 2026-08-18 gate exists to catch. Per Paul's call
+(verify rather than admit-with-status), each was checked against a PRIMARY
+source actually read: the firm's own site, a named press release, or EDGAR.
+
+```
+checked     19
+VERIFIED    16   ->  15 appended ORG-140…ORG-154 · 1 merged (ORG-012 Rosewood)
+held         3   ->  stay in candidates.csv, failure reason appended to notes
+register   139 rows -> 154        funnel   161 rows -> 145
+```
+
+**Held, honestly:** Rhino Ventures LLC (no website, zero EDGAR filings, no
+release — and Ken Manning's public affiliation is Hughes & Company), Schultz
+Brothers Holdings (Axial + a cofounder's LinkedIn only), Elm Fork Partners (no
+website, zero EDGAR hits, the Pumpco claim untraceable outside Axial). An
+entity that exists only in aggregator directories is not verifiable today.
+
+**Corrections the pass forced — each one would have been pitched to:**
+
+- **Preservation Holdings' trigger was misattributed.** Air Assurance /
+  HomeTown Services (2022) is a CenterOak Partners portfolio company per
+  CenterOak's own investments page. Trigger struck, HVAC verticals and OK
+  exposure struck with it. Also Fort Worth, not Dallas.
+- **Investar's "$1.0B AUM (self-stated)" is not self-stated** — it appears
+  nowhere on the firm's site, only in third-party databases. Dropped.
+- **NorthCurrent is New York, NY** — TX/FL is portfolio geography (Liberty
+  Service Partners, Dallas). Type conflict resolved to P2 on the firm's own
+  language ("extension of a family office"); nothing primary says
+  deal-by-deal.
+- **Kompass is Overland Park KS with a DALLAS OFFICE** (own site) — Texas
+  exposure flipped to yes; the AAA City Plumbing deal confirmed by PR
+  Newswire 2026-05-01, replacing the ctacquisitions listicle.
+- **Lang's Service Star Brands link is aggregator-only** — Lang's site never
+  mentions it and SSB's site names no investor.
+- Real dates recovered from releases: Treaty Oak 2024 → 2024-03-29, Pearl
+  Street 2026 → 2026-04-01 (Panther launch), SIG 2026 → 2026-01 (site:
+  "Closed: January 2026"), Progeny 3 2026-04-15 confirmed. Progeny 3 gains
+  Texas exposure via Cadre (Houston). Cranbrook holds 4 companies, not 5.
+
+**Scope kept from the 2026-08-18 run:** contacts are still not reconciled —
+the people the pass surfaced (Derry Burns, Danny Knight, JC Mas, Zachary
+Savas) are named in the account notes only, not in `01_contacts.csv`.
+Domains recovered for 12 of the 16 (MasGroup and Progeny 3 have no site to
+find; Pearl Street's and Rosewood's were partial). HQ still unverified on
+MasGroup and Pearl Street — blank beats a guess.
+
+---
+
 ## 2026-08-19 · defect pass — the register session's own flags, applied
 
 The Cowork session that emitted register v1 flagged three defects in its own
