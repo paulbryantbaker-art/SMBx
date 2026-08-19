@@ -64,7 +64,7 @@ export const deck = {
   slug: 'corp-dev-cost-sheet',
   kicker: 'THE COST SHEET',
   cover: {
-    hook: 'What it actually costs to run an add-on programme.',
+    hook: 'What it actually costs to run an add-on program.',
     sub: 'Line by line — with every source’s commercial interest named on the page it appears on, because most of these numbers come from somebody selling something.',
     /* Cited on pages of this deck: the numeral on page 5, the stats on pages
        2, 3 and 7. */
@@ -100,7 +100,7 @@ export const deck = {
 
     { kind: 'numeral', numeral: '47%',
       head: 'of post-LOI breaks now come from diligence findings — and each one has a bill.',
-      body: 'Quality of earnings at lower-middle-market sizes runs $25–50K per busted exclusivity, with legal on top of it. The break data is member-reported through a marketplace that sells access to the channel it measures, and the QoE pricing comes from the firms selling QoE, so both carry their interest. The budgeting point survives either caveat: dead deals are not an accident in this function, they are a recurring line item with a predictable frequency, and a programme budgeted as though every process closes is a programme budgeted wrong.',
+      body: 'Quality of earnings at lower-middle-market sizes runs $25–50K per busted exclusivity, with legal on top of it. The break data is member-reported through a marketplace that sells access to the channel it measures, and the QoE pricing comes from the firms selling QoE, so both carry their interest. The budgeting point survives either caveat: dead deals are not an accident in this function, they are a recurring line item with a predictable frequency, and a program budgeted as though every process closes is a program budgeted wrong.',
       source: 'Axial Dead Deal Report, member-reported, 2025' },
 
     { kind: 'numeral', numeral: '30%',
@@ -118,18 +118,16 @@ export const deck = {
     body: 'For anyone who has built this function at a platform: what did your cost per closed add-on actually come out to? I read everything.',
   },
   caption: [
-    'Nobody publishes what an add-on programme costs to run. So here is the sheet, assembled from what is public — with every source’s commercial interest named, because most of these numbers come from someone selling something.',
+    'Nobody publishes what an add-on program costs to run. So here is the sheet, assembled from what is public — with every source’s commercial interest named, because most of these numbers come from someone selling something.',
     '',
     'The person: $150–250K before carry. The data stack: routinely six figures. The ramp: first LOI around month seven in search data, and no clean published number for time-to-first-sourced-close — a gap worth knowing by name. The coverage all of it buys: the median firm sees about 17.6% of its own market’s deal flow, per the one longitudinal series that exists (published by a firm that sells origination analytics).',
     '',
     'And the line nobody budgets: dead deals. $25–50K of QoE per busted exclusivity, with ~47% of post-LOI breaks now driven by diligence findings.',
     '',
-    'One page in the carousel does the arithmetic — fully loaded cost divided by sourced closes, somewhere between $60K and $200K each. It is labelled illustrative on the page, because it is my arithmetic on published ranges and not a benchmark anybody has established. Redo it with your own numbers.',
+    'One page in the carousel does the arithmetic — fully loaded cost divided by sourced closes, somewhere between $60K and $200K each. It is labeled illustrative on the page, because it is my arithmetic on published ranges and not a benchmark anybody has established. Redo it with your own numbers.',
     '',
     'The sheet’s conclusion is not "spend less". It is that the function is expensive whether or not it works — so the question is where the next dollar of finite attention produces a return. On most platforms I have seen, the starved end is not the top of the funnel.',
     '',
     'If you have built this function: what did your cost per closed add-on actually come out to?',
-    '',
-    '#PrivateEquity #CorporateDevelopment #MergersAndAcquisitions #BusinessDevelopment',
   ].join('\n'),
 };

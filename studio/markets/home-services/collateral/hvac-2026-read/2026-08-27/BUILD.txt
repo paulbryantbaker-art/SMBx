@@ -1,0 +1,10 @@
+built      2026-08-18T23:50:27.112Z
+builder    build-deck.mts
+engine     6fd725ca + uncommitted changes
+node       v26.5.0
+spec       /Users/paulbaker/Developer/smbx-prod/studio/markets/home-services/specs/hvac-2026-read.deck.mts  sha256:15cbf16f8b9a
+master     /Users/paulbaker/Developer/smbx-prod/studio/markets/home-services/master.md  sha256:e4b338dfd6dd
+
+Rebuild: same spec + same master + this engine commit reproduces this
+output. If any hash above differs on disk, this artifact is from a
+different text than the one now sitting there.

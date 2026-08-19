@@ -120,7 +120,7 @@ export const deck = {
 
     { kind: 'numeral', numeral: '40,100',
       head: 'HVAC openings a year through 2034 — the one constraint that did not ease.',
-      body: 'Plumbing runs about 44,000 a year on the same projection, against a separately modelled 550,000 unfilled plumbing positions by 2027. Three of the four things a 2025 thesis worried about have resolved in the buyer’s favour: refrigerant, tariffs, and the deadline. Labour did not, and labour is the one that cannot be fixed with a purchase order. That is what makes a technician pipeline the asset in this cycle rather than a line in the diligence checklist — the constraint outlasts the holding period.',
+      body: 'Plumbing runs about 44,000 a year on the same projection, against a separately modeled 550,000 unfilled plumbing positions by 2027. Three of the four things a 2025 thesis worried about have resolved in the buyer’s favor: refrigerant, tariffs, and the deadline. Labor did not, and labor is the one that cannot be fixed with a purchase order. That is what makes a technician pipeline the asset in this cycle rather than a line in the diligence checklist — the constraint outlasts the holding period.',
       source: 'BLS projections to 2034; LIXIL / John Dunham & Associates' },
 
     { kind: 'statement', tag: 'WHERE THE OPENING IS', head: 'Demand is softening beneath the pricing, and the good metros are taken.',
@@ -130,14 +130,14 @@ export const deck = {
   closer: {
     tag: 'FOR THE ACQUIRER',
     head: 'Re-run the 2025 thesis without the 2025 fear set.',
-    body: 'Three of its four cost assumptions have expired and the price came down four turns. What is left is a labour constraint and a service book — which is what you were buying anyway. Follow for the weekly sector reads.',
+    body: 'Three of its four cost assumptions have expired and the price came down four turns. What is left is a labor constraint and a service book — which is what you were buying anyway. Follow for the weekly sector reads.',
   },
   caption: [
     'Every HVAC thesis written in 2025 priced in four things. Three of them have since expired.',
     '',
     'The refrigerant crisis is over — HARDI said so in October 2025. R-454B peaked above $900 a cylinder and now runs $449–499, falling. The tariff stack is gone: SCOTUS struck the IEEPA duties 6–3 in February, and residential HVAC Section 232 was cut from 25% to 15% in June. And the R-410A installation deadline the whole mandated-replacement case rested on was withdrawn by EPA on 27 July.',
     '',
-    'The one that did not ease is labour. About 40,100 HVAC openings a year through 2034, and no purchase order fixes it.',
+    'The one that did not ease is labor. About 40,100 HVAC openings a year through 2034, and no purchase order fixes it.',
     '',
     'Meanwhile the price came down. Capstone puts HVAC services at 9.5x EV/EBITDA across 2024–YTD 2026 against 13.3x across 2021–23. Roughly four turns.',
     '',
@@ -146,7 +146,5 @@ export const deck = {
     'What is actually happening is duller and more useful: platform formation has slowed, add-ons carry the volume, and the good metros are taken. The opening is where the platforms have not formed yet.',
     '',
     'If you are underwriting HVAC right now — have you re-run the model without the deadline in it?',
-    '',
-    '#MergersAndAcquisitions #HVAC #PrivateEquity #CorporateDevelopment',
   ].join('\n'),
 };

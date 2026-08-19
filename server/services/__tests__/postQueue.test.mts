@@ -92,6 +92,26 @@ await T('an unknown campaign name is refused and the available ones named', asyn
 await T('campaignMeta tolerates a malformed file (0 rows, no dates)', () => { const m = campaignMeta('2099-01-01', 'x.json', null); return `${m.rows} ${m.first} ${Object.keys(m.weeks).length}`; }, '0 null 0');
 await T('campaignMeta ignores non-string week labels', () => Object.keys(campaignMeta('2099-01-01', 'x.json', { weeks: { W1: 'ok', W2: 7 } }).weeks).join(','), 'W1');
 
+console.log('\nTHE COPY RIDES WITH THE ROW (migration 136) — content, overwritten on import, never state');
+/* 2026-08-18: campaign-export.mjs lifts each slot's copy out of
+   CAMPAIGN_<date>.md into the JSON; the import carries it. These pin that the
+   copy lands, that a document slot's PDF pointer only exists where the file
+   ships, that the receipt-gated slot carries both the frame and the understudy,
+   and that a re-import overwrites copy without touching state. */
+await T('meta counts the rows with copy and the PDFs that ship', () => `${camps[0]?.withCopy} ${camps[0]?.documentsReady}`, '8 3');
+await T('importing the campaign lands the copy', async () => { const { importCampaign } = await import('../postQueue.js'); await importCampaign(1, '2026-08-18'); return (await sql`SELECT left(body, 30) b, kind, title FROM post_queue WHERE user_id=1 AND queue_id='P-1'`)[0]; }, { b: 'A sub-$10M EBITDA company trad', kind: 'text', title: 'The multiple nobody publishes' });
+await T('a document slot carries its caption, its pages, and a PDF the build actually ships', async () => { const r = (await sql`SELECT kind, body IS NOT NULL AS has_body, jsonb_array_length(pages) np, document->>'pdf' pdf, (document->>'pages')::int dp FROM post_queue WHERE user_id=1 AND queue_id='P-2'`)[0]; return `${r.kind} ${r.has_body} ${r.np} ${r.pdf} ${r.dp}`; }, 'document true 10 /collateral/dead-deal-economics/2026-08-20/dead-deal-economics.pdf 10');
+await T('where the deck caption differs from the plan, BOTH are carried and the difference is named', async () => { const r = (await sql`SELECT body_deck IS NOT NULL AS deck, copy_note FROM post_queue WHERE user_id=1 AND queue_id='P-5'`)[0]; return `${r.deck} ${/argues differently/.test(r.copy_note ?? '')}`; }, 'true true');
+await T('the receipt-gated slot carries the frame, the gate, and the understudy', async () => { const r = (await sql`SELECT gate IS NOT NULL AS g, body ~ '\\[TRADE\\]' AS brackets, body_alt IS NOT NULL AS alt FROM post_queue WHERE user_id=1 AND queue_id='P-8'`)[0]; return `${r.g} ${r.brackets} ${r.alt}`; }, 'true true true');
+await T('a Mandate edition carries no copy (the Sunday run builds it)', async () => (await sql`SELECT body, kind FROM post_queue WHERE user_id=1 AND queue_id='M-2'`)[0], { body: null, kind: null });
+await T('a re-import overwrites the copy and leaves state alone', async () => {
+  const { importCampaign } = await import('../postQueue.js');
+  await sql`UPDATE post_queue SET body='stale', notes='mine' WHERE user_id=1 AND queue_id='P-1'`;
+  await importCampaign(1, '2026-08-18');
+  const r = (await sql`SELECT left(body, 10) b, notes FROM post_queue WHERE user_id=1 AND queue_id='P-1'`)[0];
+  return `${r.b}|${r.notes}`;
+}, 'A sub-$10M|mine');
+
 console.log('\nTHE DB CONSTRAINT — posted with no timestamp is impossible');
 await T('CHECK blocks a raw posted row', async () => { try { await sql`UPDATE post_queue SET status='posted', posted_at=NULL WHERE queue_id='Q03'`; return 'allowed'; } catch { return 'blocked'; } }, 'blocked');
 

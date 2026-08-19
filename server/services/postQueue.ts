@@ -33,6 +33,22 @@ import { sql } from '../db.js';
 
 const QUEUE_JSON = path.resolve(process.cwd(), 'content/studio/post-queue.json');
 
+/** One page of a document slot's carousel copy, as the plan wrote it. */
+export interface QueuePage { n: number; label: string | null; text: string; note: string | null }
+
+/** Where a document slot's rendered deck lives, and what the app can serve of it. */
+export interface QueueDocument {
+  slug: string;
+  spec: string;                 // studio/markets/<m>/specs/<slug>.deck.mts
+  filed_at: string;             // studio/markets/<m>/collateral/<slug>/<date>/
+  pdf: string | null;           // /collateral/<slug>/<date>/<slug>.pdf — null until the file exists in the build
+  cover: string | null;
+  thumbs: string[];
+  pages: number | null;
+  bytes: number | null;
+  deck_caption_matches: boolean;
+}
+
 export interface QueueRow {
   queue_id: string;
   tier: string | null;
@@ -44,6 +60,17 @@ export interface QueueRow {
   source_disclosure: string | null;
   status: string | null;
   may_state_figure: boolean;
+  /* ── the copy (migration 136) — all content, all overwritten on import ── */
+  title?: string | null;
+  kind?: 'text' | 'document' | null;
+  body?: string | null;         // paste-ready: the post, or a document slot's caption
+  body_alt?: string | null;     // the understudy, where a slot has one
+  body_deck?: string | null;    // the deck's caption, only where it differs from the plan's
+  gate?: string | null;         // why the body cannot ship as-is
+  copy_note?: string | null;    // how body_deck differs
+  law_check?: string | null;
+  pages?: QueuePage[] | null;
+  document?: QueueDocument | null;
 }
 
 const STATUSES = new Set(['next', 'drafted', 'posted', 'parked', 'recurring']);
@@ -176,14 +203,26 @@ export async function importQueue(
     const rank = (col: any) => sql`CASE ${col}
         WHEN 'posted' THEN 3 WHEN 'drafted' THEN 2 WHEN 'next' THEN 1 ELSE 0 END`;
 
+    // The copy (migration 136). Content like everything else in this list —
+    // the file decides, every import overwrites, a row without copy reads NULL
+    // rather than keeping a stale body from an earlier file. JSON columns take
+    // the parsed value or NULL; a malformed shape is the exporter's problem
+    // and `--check` catches it before it gets here.
+    const kind = r.kind === 'text' || r.kind === 'document' ? r.kind : null;
+    const pages = Array.isArray(r.pages) && r.pages.length ? JSON.stringify(r.pages) : null;
+    const document = r.document && typeof r.document === 'object' ? JSON.stringify(r.document) : null;
+
     const [row] = await sql<{ inserted: boolean }[]>`
       INSERT INTO post_queue (
         user_id, queue_id, tier, lead, angle, format, carries,
-        evidence_grade, source_disclosure, may_state_figure, status, campaign
+        evidence_grade, source_disclosure, may_state_figure, status, campaign,
+        title, kind, body, body_alt, body_deck, gate, copy_note, law_check, pages, document
       ) VALUES (
         ${userId}, ${r.queue_id}, ${r.tier ?? null}, ${r.lead ?? null}, ${r.angle},
         ${r.format ?? null}, ${r.carries ?? null}, ${r.evidence_grade ?? null},
-        ${r.source_disclosure ?? null}, ${r.may_state_figure}, ${incoming}, ${campaign}
+        ${r.source_disclosure ?? null}, ${r.may_state_figure}, ${incoming}, ${campaign},
+        ${r.title ?? null}, ${kind}, ${r.body ?? null}, ${r.body_alt ?? null}, ${r.body_deck ?? null},
+        ${r.gate ?? null}, ${r.copy_note ?? null}, ${r.law_check ?? null}, ${pages}::jsonb, ${document}::jsonb
       )
       ON CONFLICT (user_id, queue_id) DO UPDATE SET
         tier              = EXCLUDED.tier,
@@ -194,6 +233,16 @@ export async function importQueue(
         evidence_grade    = EXCLUDED.evidence_grade,
         source_disclosure = EXCLUDED.source_disclosure,
         may_state_figure  = EXCLUDED.may_state_figure,
+        title             = EXCLUDED.title,
+        kind              = EXCLUDED.kind,
+        body              = EXCLUDED.body,
+        body_alt          = EXCLUDED.body_alt,
+        body_deck         = EXCLUDED.body_deck,
+        gate              = EXCLUDED.gate,
+        copy_note         = EXCLUDED.copy_note,
+        law_check         = EXCLUDED.law_check,
+        pages             = EXCLUDED.pages,
+        document          = EXCLUDED.document,
         status            = CASE WHEN ${rank(sql`post_queue.status`)} > ${rank(sql`EXCLUDED.status`)}
                                  THEN post_queue.status ELSE EXCLUDED.status END,
         -- a campaign stamps; the standing queue (null) never un-stamps
@@ -307,11 +356,14 @@ export interface CampaignMeta {
   first: string | null;
   last: string | null;
   supersedes: string | null;
+  /** Rows carrying paste-ready copy, and document slots whose PDF ships in this build (migration 136). */
+  withCopy: number;
+  documentsReady: number;
 }
 
 /** Pure: read one campaign file's shape into meta. Exported for the tests. */
 export function campaignMeta(name: string, file: string, parsed: any): CampaignMeta {
-  const rows = Array.isArray(parsed?.rows) ? parsed.rows : [];
+  const rows: any[] = Array.isArray(parsed?.rows) ? parsed.rows : [];
   const dates = Object.values<any>(parsed?.schedule ?? {})
     .map(s => String(s?.on ?? '').slice(0, 10))
     .filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d))
@@ -331,6 +383,8 @@ export function campaignMeta(name: string, file: string, parsed: any): CampaignM
     // The file may name its predecessor by filename or by name; the meta
     // always speaks in NAMES (`2026-08-17`), which is what rows are stamped with.
     supersedes: /(\d{4}-\d{2}-\d{2})/.exec(String(parsed?.supersedes?.campaign ?? ''))?.[1] ?? null,
+    withCopy: rows.filter(r => typeof r?.body === 'string' && r.body.trim()).length,
+    documentsReady: rows.filter(r => typeof r?.document?.pdf === 'string').length,
   };
 }
 

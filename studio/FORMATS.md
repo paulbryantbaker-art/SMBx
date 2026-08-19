@@ -165,6 +165,55 @@ cited — summing rows with different vintages, publishers and scopes is how the
 
 **Canvas** 1080 × 1350 px. Renders both `dark` and `light` variants by default.
 
+### 2.0 The FIGURE layout is the default (Paul, 2026-08-18)
+
+*"Def full axis correction! Let's lock that in for carousel and single image
+formats… let's don't remove the other types, but I think this can be the
+default."* The split layout below is fully preserved; a new spec with no
+`layout` and no `image` renders the figure card.
+
+**The inference that keeps the back catalogue honest:** a spec naming `image`
+with no `layout` is a pre-2026-08-18 split spec and keeps rendering split —
+otherwise `rebuild-all.sh` would silently change what was published. Set
+`layout: 'split'` explicitly in new split specs.
+
+The figure card, measured (approved as the v6 mock, 2026-08-18):
+
+- **The cutout** — `figure:` defaulting to `brand/founder-standing.png`
+  (INDEX.md carries its derivation; §2.1 the regeneration recipe). Height
+  **834px = 1350 × φ⁻¹** — the figure : card ratio IS the golden ratio. It
+  floats IN FLOW so `shape-outside` wraps the copy along the silhouette;
+  `position: absolute` kills the wrap silently, which was the v2 mock defect.
+  A missing cutout is a **hard error**, never a quiet text-only card.
+- **Spacing steps the Fibonacci ladder** — 21 · 34 · 55.
+- **Fields** — `hook` (80px display serif, full band), `body` (the 25px lede),
+  `points: [{k, v}]` (numbered chips; `k` is the bold lead-in), `note` (mono
+  sources-and-interests line), `cta` (defaults `smbx.ai  →`), `bloom`,
+  `headshot`. The foot is face + byline + CTA; the logo rides top-right.
+- **The dark ground carries the green bloom** behind the figure — a
+  SANCTIONED, SCOPED amendment to the flat-band law (DESIGN.md §6.2);
+  `bloom: false` returns the Carta-flat card. The CTA on the band is
+  `CARTA.white` (Paul: "bright white"), green on paper. The boardroom texture
+  remains retired everywhere.
+- **First render on a new machine:** check the wrap engaged (copy shortens at
+  the shoulder) and the feet sit just above the foot hairline — the approved
+  geometry; if the figure renders as a plain column, the float is out of flow.
+
+**Reports are NOT this.** Long-form reports keep the banner grammar — cover
+hero band + `accent:` bands (§3). The figure treatment is for the carousel
+cover and the one-pager; the deck-cover half is a `house/deck.ts` change and
+lives with Claude Code (work order: `FIGURE_COVER_WORK_ORDER.md`).
+
+### 2.1 Regenerating the standing figure from a new source photo
+
+The recipe that produced `founder-standing.png` (2026-08-18), for when the
+source is re-shot. Measure, never eyeball: fit the alpha-mass centroid line
+through the torso (skip head and shoe-splay), rotate by the measured lean
+(−13.67° on `Image.png`; residual after −0.41°), then re-cut the matte —
+threshold alpha >230, erode ~5px (`MinFilter(11)`), soft 1.4px blur — so the
+light feather cannot halo on the band. Verify edge mean RGB lands dark
+(≈(57,54,53)) and file the INDEX.md row with the numbers.
+
 **Spec shape** — `export const post = {...}` in `markets/<m>/specs/<name>.post.mts`
 
 | Field | Required | Slot |

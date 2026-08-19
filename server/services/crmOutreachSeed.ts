@@ -234,8 +234,22 @@ export async function seedOutreachFromTables(userId: number, tables: SeedTables)
       disqualified: doNot
         ? 'ECOSYSTEM_DO_NOT_PITCH — register intelligence / potential exit counterparty; never pitched (outreach plan 2026-08-05)'
         : null,
+      /* THE 2026-08-18 REGISTER COLUMNS. The reconcile that took the studio
+         register from 81 to 139 organizations (studio/clients/reconcile/
+         2026-08-18/RECONCILE_LOG.md) added ten research columns to
+         02_organizations.csv — account_type · sponsor_parent · verticals_active
+         · states_active · platform_count · texas_exposure · trigger_type ·
+         trigger_date · verification · last_checked. Two land in columns this
+         table already has for exactly that fact (`sponsor` ← sponsor_parent,
+         `trades` ← verticals_active); the rest ride in notes so a push loses
+         nothing. `dfw` and `buyer_moment` are NOT filled from texas_exposure
+         or trigger_type — different vocabularies, and a near-miss in a
+         filtered column is worse than a blank. */
+      sponsor: r.sponsor_parent || null,
+      trades: r.verticals_active ? r.verticals_active.split('|').map(s => s.trim()).filter(Boolean).join(', ') : null,
       notes: packNotes(r, [
         ['Bucket', bucket],
+        ['Account type', r.account_type || ''],
         ['Firm type', r.firm_type || ''],
         ['AUM / fund size', r.aum_or_fund_size || ''],
         ['Check size', r.check_size || ''],
@@ -243,6 +257,11 @@ export async function seedOutreachFromTables(userId: number, tables: SeedTables)
         ['Vertical fit', r.vertical_fit || ''],
         ['Internal corp dev', r.internal_corpdev || ''],
         ['Confidence', r.confidence || ''],
+        ['States active', r.states_active || ''],
+        ['Platforms', r.platform_count || ''],
+        ['Texas exposure', r.texas_exposure || ''],
+        ['Trigger', r.trigger_type && r.trigger_type !== 'NONE' ? `${r.trigger_type}${r.trigger_date ? ` (${r.trigger_date})` : ''}` : ''],
+        ['Verification', r.verification ? `${r.verification}${r.last_checked ? ` (checked ${r.last_checked})` : ''}` : ''],
       ]),
     };
     const [row] = await sql`
@@ -260,6 +279,8 @@ export async function seedOutreachFromTables(userId: number, tables: SeedTables)
         evidence = COALESCE(EXCLUDED.evidence, crm_accounts.evidence),
         source_url = COALESCE(EXCLUDED.source_url, crm_accounts.source_url),
         disqualified = COALESCE(EXCLUDED.disqualified, crm_accounts.disqualified),
+        sponsor = COALESCE(EXCLUDED.sponsor, crm_accounts.sponsor),
+        trades = COALESCE(EXCLUDED.trades, crm_accounts.trades),
         notes = COALESCE(EXCLUDED.notes, crm_accounts.notes),
         updated_at = NOW()
       RETURNING id, (created_at = updated_at) AS is_new

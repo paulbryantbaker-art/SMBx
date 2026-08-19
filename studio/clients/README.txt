@@ -10,15 +10,28 @@ hunt A in RESEARCH.md — read § A before filling anything in.
                  says which existing row it must merge into if any.
 
   crm-bundle/    THE LIVING BUY-SIDE REGISTER (moved here 2026-08-18).
-                 81 organizations, 91 contacts, and the outreach plan. This is
+                 139 organizations (81 + the 2026-08-18 reconcile: 58 VERIFIED
+                 appended, 6 merged — see reconcile/2026-08-18/), 91 contacts,
+                 and the outreach plan. This is
                  the record of truth for the FACTS about who we would serve.
                  Read crm-bundle/COLUMNS.md before editing anything in it —
                  it says which columns git owns and which the app owns, and
                  why changing a firm string is currently a destructive act.
 
-                 Push it to the app with:
-                   cd ~/Documents/smbx-studio/clients
-                   SMBX_TOKEN=… npx tsx $REPO/scripts/studio/push-crm.mts
+                 Push it to the app — either way lands on the same
+                 idempotent loader (/api/crm/import-bundle):
+                   · in the app: Leads → "Load the register from CSVs",
+                     pick crm-bundle/*.csv (2026-08-18; no terminal, no token)
+                   · or from a terminal:
+                       cd $REPO/studio/clients
+                       SMBX_TOKEN=… npx tsx $REPO/scripts/studio/push-crm.mts
+
+                 The importer carries the 2026-08-18 columns (account_type,
+                 sponsor_parent → sponsor, verticals_active → trades, states,
+                 platform_count, texas_exposure, trigger, verification) — the
+                 first six ride in the account's notes, the two named land in
+                 their own columns. Contacts are NOT reconciled yet: the 58
+                 new organizations reach the app with no named person.
 
                  One-way door: facts flow git → app, never back. Stage, next
                  action, touches and activity are the app's and are never

@@ -55,12 +55,18 @@ const DROP_REASONS = [
   { id: "other", label: "Other" },
 ];
 
+/** Today's date as YYYY-MM-DD in the BROWSER'S zone — not UTC. `toISOString()`
+ *  flips to tomorrow at 7pm Central, which made "today" wrong every evening. */
+export function localIso(d: Date = new Date()): string {
+  const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, "0"), day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 export function daysUntil(iso: string | null): number | null {
   if (!iso) return null;
   const t = Date.parse(`${String(iso).slice(0, 10)}T00:00:00Z`);
   if (!Number.isFinite(t)) return null;
-  const now = new Date();
-  const today = Date.parse(`${now.toISOString().slice(0, 10)}T00:00:00Z`);
+  const today = Date.parse(`${localIso()}T00:00:00Z`);
   return Math.round((t - today) / 86_400_000);
 }
 
@@ -87,12 +93,13 @@ export default function LeadsScreen() {
   useEffect(load, [load]);
 
   /* The org datalist — the pushed universe, for typeahead. Best-effort. */
-  useEffect(() => {
+  const loadOrgs = useCallback(() => {
     fetch("/api/crm/picker", { headers: authHeaders() })
       .then(r => (r.ok ? r.json() : []))
       .then(list => setOrgs((Array.isArray(list) ? list : []).map((x: any) => x.firm).filter(Boolean)))
       .catch(() => {});
   }, []);
+  useEffect(loadOrgs, [loadOrgs]);
 
   const patch = useCallback(async (id: number, body: Record<string, unknown>) => {
     const r = await fetch(`/api/leads/${id}`, {
@@ -137,6 +144,8 @@ export default function LeadsScreen() {
 
       <QuickAdd orgs={orgs} onAdded={l => { setBanner(`${l.name} added — follow up ${l.next_follow_up_on}.`); load(); }} />
 
+      <RegisterLoad count={orgs.length} onLoaded={msg => { setBanner(msg); loadOrgs(); }} />
+
       {banner && (
         <div style={{ marginTop: 12, padding: "9px 13px", background: C.greenTint, fontSize: 13.5, color: C.ink }}>
           {banner}
@@ -175,6 +184,63 @@ export default function LeadsScreen() {
         nowhere — no automation touches LinkedIn, ever. Converting a Ready lead
         into a contact + pipeline entry arrives with the Pipeline build.
       </p>
+    </div>
+  );
+}
+
+/* ── the universe behind the typeahead: load the register from its CSVs ── */
+
+/**
+ * The org typeahead reads the universe the studio register pushed into the
+ * app. The register lives in git (studio/clients/crm-bundle/*.csv — 139
+ * organizations on 2026-08-18) and used to reach the app only through
+ * `push-crm.mts` on a terminal. This is the same press from the screen that
+ * consumes it: pick the bundle's CSVs, they go to /api/crm/import-bundle,
+ * the app's own idempotent loader does the rest — facts refresh, a blank
+ * never erases, and every app-owned column (stage, next action, touches) is
+ * untouched. Files that are not part of the bundle are named back, never
+ * silently dropped. No model, no key: pure code on both sides.
+ */
+function RegisterLoad({ count, onLoaded }: { count: number; onLoaded: (msg: string) => void }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const pick = async (files: FileList | null) => {
+    if (!files || !files.length) return;
+    setBusy(true); setErr(null);
+    try {
+      const payload: Record<string, string> = {};
+      for (const f of Array.from(files)) {
+        if (!/\.csv$/i.test(f.name)) { setErr(`${f.name} is not a CSV — pick the bundle's *.csv files.`); return; }
+        payload[f.name] = await f.text();
+      }
+      const r = await fetch("/api/crm/import-bundle", {
+        method: "POST", headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ files: payload }),
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok) { setErr(j?.error ?? `Load failed (${r.status})`); return; }
+      onLoaded(
+        `Register loaded — ${j.accountsCreated ?? 0} firms new, ${j.accountsUpdated ?? 0} refreshed, ${j.contactsAdded ?? 0} contacts.` +
+        (j.touchesQueued ? ` ${j.touchesQueued} touches queued.` : "") +
+        (j.unnamedParked ? ` ${j.unnamedParked} records still need a named person.` : "") +
+        (j.ignoredFiles?.length ? ` Not part of the bundle, ignored: ${j.ignoredFiles.join(", ")}.` : "") +
+        (j.targetsUnmatched?.length ? ` Unmatched targets: ${j.targetsUnmatched.length}.` : ""),
+      );
+    } catch {
+      setErr("The network dropped — nothing was loaded.");
+    } finally { setBusy(false); }
+  };
+  return (
+    <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", fontSize: 12.5, color: C.muted }}>
+      <span style={mono}>{count} firms</span>
+      <span>in the org typeahead — the register pushed from the studio.</span>
+      <label style={{ ...btnGhost, padding: "5px 11px", fontSize: 12.5, opacity: busy ? 0.6 : 1, cursor: busy ? "default" : "pointer" }}
+             title="Pick the register's CSVs (studio/clients/crm-bundle/*.csv). Facts refresh; nothing you did in the app is overwritten.">
+        {busy ? "Loading…" : "Load the register from CSVs"}
+        <input type="file" accept=".csv,text/csv" multiple disabled={busy} style={{ display: "none" }}
+               onChange={e => { void pick(e.target.files); e.target.value = ""; }} />
+      </label>
+      {err && <span style={{ color: C.danger }}>{err}</span>}
     </div>
   );
 }
