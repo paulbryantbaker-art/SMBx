@@ -30,11 +30,16 @@ export async function startWorker(): Promise<void> {
     // Register handlers — each wrapped so missing queues don't crash
     const register = async (name: string, handler: (job: any) => Promise<void>) => {
       try {
-        await (boss as any).createQueue(name).catch(() => {});
+        await (boss as any).createQueue(name).catch((err: any) => {
+          // A queue that cannot be created is a job that will never run. It used
+          // to be swallowed here AND still print "Registered" below — a log line
+          // asserting something that had just failed. Name it and carry on.
+          console.warn(`[worker] createQueue(${name}) failed: ${err?.message}`);
+        });
         await boss!.work(name, handler);
         console.log(`[worker] Registered: ${name}`);
-      } catch {
-        // Queue doesn't exist or can't be created — skip silently
+      } catch (err: any) {
+        console.warn(`[worker] NOT registered: ${name} — ${err?.message}`);
       }
     };
 
@@ -119,7 +124,11 @@ export async function startWorker(): Promise<void> {
     try {
       await boss!.schedule('site-visitors-digest', '0 7 * * *', {}, { tz: 'America/Chicago' });
       console.log('[worker] Scheduled: site-visitors-digest (7:00 America/Chicago)');
-    } catch { /* schedule may already exist */ }
+    } catch (err: any) {
+      // Re-scheduling an existing cron is normal and harmless; anything else
+      // means no email will ever arrive, so say which it was.
+      console.warn(`[worker] site-visitors-digest schedule: ${err?.message}`);
+    }
 
     console.log('[worker] Init complete');
   } catch (err: any) {

@@ -195,7 +195,11 @@ export async function importQueue(
     // decides the floor against the row it already has.
     const now = current.get(r.queue_id);
     const incoming = r.status && STATUSES.has(r.status) ? r.status : 'next';
-    if (now && (RANK[now] ?? 0) > (RANK[incoming] ?? 0)) {
+    if (now === 'parked' && incoming !== 'parked') {
+      // Reported, not silent: a parked row the file wants to move is exactly the
+      // case that used to disappear without a word.
+      result.heldAtHigherState.push(`${r.queue_id}: you parked it — the plan says ${incoming}; kept parked (press Unpark to take it back)`);
+    } else if (now && (RANK[now] ?? 0) > (RANK[incoming] ?? 0)) {
       result.heldAtHigherState.push(`${r.queue_id}: markdown says ${incoming}, row is ${now} — kept ${now}`);
     }
 
@@ -243,7 +247,16 @@ export async function importQueue(
         law_check         = EXCLUDED.law_check,
         pages             = EXCLUDED.pages,
         document          = EXCLUDED.document,
-        status            = CASE WHEN ${rank(sql`post_queue.status`)} > ${rank(sql`EXCLUDED.status`)}
+        -- PARKED IS A HUMAN DECISION AND OUTRANKS THE FILE (2026-08-18 review).
+        -- The rank ladder scores parked as 0, so a re-import of a file whose row
+        -- says next (rank 1) read as a step FORWARD and silently un-parked a slot
+        -- Paul had parked — on a screen where Park and Re-import sit next to each
+        -- other, under a button whose tooltip says state-preserving. A park is
+        -- undone by pressing Unpark, never by re-reading the plan.
+        -- (No backticks in here: this is inside a JS template literal, and the
+        --  first one ends the string. That was a compile error for one minute.)
+        status            = CASE WHEN post_queue.status = 'parked' THEN post_queue.status
+                                 WHEN ${rank(sql`post_queue.status`)} > ${rank(sql`EXCLUDED.status`)}
                                  THEN post_queue.status ELSE EXCLUDED.status END,
         -- a campaign stamps; the standing queue (null) never un-stamps
         campaign          = COALESCE(EXCLUDED.campaign, post_queue.campaign),

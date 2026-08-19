@@ -223,6 +223,23 @@ assertProductionBillingSafety();
 // ─── 0. Trust proxy (Railway) ───────────────────────────────
 app.set('trust proxy', 1);
 
+/* ONE BAD HANDLER MUST NOT TAKE THE SITE DOWN (2026-08-18).
+   `npm start` is a bare `node dist/server/index.js`, so Node's default
+   --unhandled-rejections=throw turns any un-awaited rejection inside a route
+   into a process exit — and this server also serves the public marketing site,
+   so a defect on one signed-in endpoint would take smbx.ai offline with it.
+   Tonight's `req.user.id` outage was one keystroke away from exactly that
+   (postgres-js throws UNDEFINED_VALUE on an undefined parameter). Logging it
+   degrades the failure to a hung request for one caller, which is recoverable
+   and diagnosable; a dead process is neither. This is a net, not a licence:
+   anything caught here is a bug to fix, and it says so in the log. */
+process.on('unhandledRejection', (reason: any) => {
+  console.error('[unhandledRejection] a route or job rejected without a catch — FIX THE CALL SITE:', reason?.stack || reason);
+});
+process.on('uncaughtException', (err: any) => {
+  console.error('[uncaughtException] FIX THE CALL SITE:', err?.stack || err);
+});
+
 // ─── 0a. Who looked at the site (2026-08-18) ─────────────────
 // One row per HTML page view on the public site, IP hashed, bots classified,
 // the team's own views marked — the 7am email in server/services/siteVisits.ts

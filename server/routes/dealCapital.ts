@@ -227,7 +227,7 @@ export function computeCapital(doc: CapitalDoc, today: string) {
 /* ── routes ───────────────────────────────────────────────────────────── */
 
 dealCapitalRouter.get('/deals/:dealId/capital', async (req, res) => {
-  const userId = (req as any).user?.id as number;
+  const userId = (req as any).userId as number;
   const dealId = Number(req.params.dealId);
   if (!Number.isFinite(dealId)) return res.status(400).json({ error: 'Bad deal id' });
 
@@ -246,7 +246,7 @@ dealCapitalRouter.get('/deals/:dealId/capital', async (req, res) => {
 });
 
 dealCapitalRouter.put('/deals/:dealId/capital', async (req, res) => {
-  const userId = (req as any).user?.id as number;
+  const userId = (req as any).userId as number;
   const dealId = Number(req.params.dealId);
   if (!Number.isFinite(dealId)) return res.status(400).json({ error: 'Bad deal id' });
 

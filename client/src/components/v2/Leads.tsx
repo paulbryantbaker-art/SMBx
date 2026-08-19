@@ -142,7 +142,7 @@ export default function LeadsScreen() {
         every open lead carries its next follow-up date, and Today reads it.
       </p>
 
-      <QuickAdd orgs={orgs} onAdded={l => { setBanner(`${l.name} added — follow up ${l.next_follow_up_on}.`); load(); }} />
+      <QuickAdd orgs={orgs} onAdded={l => { setBanner(`${l.name} added — follow up ${String(l.next_follow_up_on ?? "").slice(0, 10)}.`); load(); }} />
 
       <RegisterLoad count={orgs.length} onLoaded={msg => { setBanner(msg); loadOrgs(); }} />
 
@@ -372,7 +372,11 @@ export function LeadLine({ lead, open, onToggle, onTouch, onPatch }: {
                 +{n}d
               </button>
             ))}
-            <input type="date" defaultValue={lead.next_follow_up_on ?? ""} style={{ ...input, padding: "6px 9px" }}
+            {/* `.slice(0, 10)`: postgres-js parses a DATE column into a JS Date and
+                RETURNING * serialises it as a full ISO timestamp, which
+                <input type="date"> refuses — the field rendered BLANK on every
+                lead, so the date it showed was never the date on the row. */}
+            <input type="date" defaultValue={(lead.next_follow_up_on ?? "").slice(0, 10)} style={{ ...input, padding: "6px 9px" }}
                    onChange={e => { if (e.target.value) onPatch({ next_follow_up_on: e.target.value }); }} />
           </div>
 
@@ -430,8 +434,13 @@ export function LeadLine({ lead, open, onToggle, onTouch, onPatch }: {
   );
 }
 
+/* +2d/+4d/+7d. `localIso`, NOT toISOString: the latter is UTC, so after 7pm
+   Central every tap wrote a date one day later than the one it printed on the
+   button — the same drift localIso() was written for, in the function right
+   beside it. The value goes straight to the DB and then drives Today's due
+   query, so the follow-up surfaced a day late. */
 function plusDaysLocal(n: number): string {
   const d = new Date();
   d.setDate(d.getDate() + n);
-  return d.toISOString().slice(0, 10);
+  return localIso(d);
 }

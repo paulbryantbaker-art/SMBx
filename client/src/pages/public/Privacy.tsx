@@ -44,15 +44,25 @@ export default function Privacy() {
           name and email address Google provides. We also keep standard technical data such as
           IP address and browser type in our server logs.
         </p>
+        <p style={{ margin: '10px 0 0' }}>
+          We also count page loads so we know how many people read the site. Each one records
+          the page, the referring site, your browser family, and a keyed hash derived from your
+          IP address and browser — the address itself is not stored, the hash cannot be reversed
+          without our server's secret, it changes daily so it does not follow you between days,
+          and these rows are deleted after 180 days. No third-party analytics and no advertising
+          identifiers. No cookie is set on your browser for this; the practice's own signed-in
+          browsers carry one, so our visits are excluded from the count rather than yours.
+        </p>
       </div>
 
       <div>
         <LegalH2>How we use it</LegalH2>
         <p style={{ margin: 0 }}>
           To run the tool you asked for and deliver what it produced to the address you gave,
-          and to respond to your request — nothing else. When you ask for a market read or a
-          brochure, the practice keeps the request itself: who asked, and about what. We do not
-          sell your information, and we run no third-party advertising.
+          to respond to your request, and to count how many people read the site — nothing
+          else. When you ask for a market read or a brochure, the practice keeps the request
+          itself: who asked, and about what. We do not sell your information, and we run no
+          third-party advertising.
         </p>
       </div>
 

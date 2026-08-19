@@ -72,7 +72,7 @@ function view(row: any) {
 }
 
 engagementsRouter.get('/crm/accounts/:accountId/engagements', async (req, res) => {
-  const userId = (req as any).user?.id as number;
+  const userId = (req as any).userId as number;
   const accountId = Number(req.params.accountId);
   if (!Number.isFinite(accountId)) return res.status(400).json({ error: 'Bad account id' });
   const rows = await sql`
@@ -84,7 +84,7 @@ engagementsRouter.get('/crm/accounts/:accountId/engagements', async (req, res) =
 });
 
 engagementsRouter.post('/crm/accounts/:accountId/engagements', async (req, res) => {
-  const userId = (req as any).user?.id as number;
+  const userId = (req as any).userId as number;
   const accountId = Number(req.params.accountId);
   if (!Number.isFinite(accountId)) return res.status(400).json({ error: 'Bad account id' });
 
@@ -110,7 +110,7 @@ engagementsRouter.post('/crm/accounts/:accountId/engagements', async (req, res) 
 const PATCHABLE_STATUS = new Set(['draft', 'active', 'paused', 'ended', 'closed']);
 
 engagementsRouter.patch('/crm/engagements/:id', async (req, res) => {
-  const userId = (req as any).user?.id as number;
+  const userId = (req as any).userId as number;
   const id = Number(req.params.id);
   if (!Number.isFinite(id)) return res.status(400).json({ error: 'Bad engagement id' });
 
@@ -159,7 +159,7 @@ engagementsRouter.patch('/crm/engagements/:id', async (req, res) => {
 /* ── the close: the one place the fee arithmetic runs with a real EV ───── */
 
 engagementsRouter.post('/crm/engagements/:id/close-preview', async (req, res) => {
-  const userId = (req as any).user?.id as number;
+  const userId = (req as any).userId as number;
   const id = Number(req.params.id);
   const [row] = await sql`SELECT * FROM engagements WHERE id = ${id} AND user_id = ${userId}`;
   if (!row) return res.status(404).json({ error: 'Engagement not found' });
@@ -196,7 +196,7 @@ engagementsRouter.get('/crm/leads', async (_req, res) => {
 });
 
 engagementsRouter.post('/crm/leads/:id/convert', async (req, res) => {
-  const userId = (req as any).user?.id as number;
+  const userId = (req as any).userId as number;
   const id = Number(req.params.id);
   if (!Number.isFinite(id)) return res.status(400).json({ error: 'Bad lead id' });
 

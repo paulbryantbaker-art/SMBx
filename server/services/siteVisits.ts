@@ -11,25 +11,40 @@
  *
  *   1. `siteVisitMiddleware` — records one row per HTML page view on the
  *      public site. Fire-and-forget: it never delays a response and never
- *      throws into one. The IP is hashed, never stored.
+ *      throws into one. The IP is never stored — only a KEYED hash of it (see
+ *      `sha` below), which cannot be reversed without the server's secret.
  *   2. `noteTeamIp` — called by requireAuth on every authenticated API call,
  *      so an IP that used the app that day is "the team" for that day and is
  *      excluded from "besides you". Deduped in memory; one insert per IP per
  *      day at most.
  *   3. `sendDailyDigest` — the 7am Central email: unique visitors besides the
- *      team, page views, top pages, referrers, bots named separately, and the
+ *      team, page loads, top pages, referrers, bots named separately, and the
  *      last seven days for context. Idempotent per day (site_visit_digests).
  *
  * The pure parts — bot classification, UA family, referer host, the Central
  * day, and the email's text — take no db and are the tested surface
  * (server/services/__tests__/siteVisits.test.mts).
  */
-import { createHash } from 'node:crypto';
+import { createHmac } from 'node:crypto';
 import type { Request, Response, NextFunction } from 'express';
 
 /* ── pure ─────────────────────────────────────────────────────────────── */
 
-const BOT_RE = /bot|crawl|spider|slurp|preview|facebookexternalhit|linkedin|twitterbot|whatsapp|telegram|slackbot|discordbot|embedly|pinterest|quora|vkshare|w3c_validator|headless|lighthouse|pingdom|uptime|monitor|curl\/|wget\/|python-requests|go-http-client|okhttp|java\/|axios\/|node-fetch|scrapy|httpclient|semrush|ahrefs|mj12|dotbot|petalbot|bytespider|gptbot|claudebot|anthropic|ccbot|applebot|bingpreview|yandex|baiduspider|duckduckbot/i;
+/**
+ * BRAND NAMES MUST BE THE FETCHER'S NAME, NEVER THE BARE BRAND.
+ *
+ * The first cut of this list carried a bare `linkedin`, and LinkedIn's iOS and
+ * Android in-app browsers append `[LinkedInApp]` to an otherwise ordinary
+ * Safari/Chrome user agent. So every person who tapped a link IN THE LINKEDIN
+ * APP — which is how most of this practice's readers arrive — was classified a
+ * bot and dropped from the count. The email would have reported "0 visitors
+ * besides you" on precisely the mornings after a post worked, which is worse
+ * than sending nothing. Same trap for `whatsapp`, `telegram`, `pinterest` and
+ * `quora`: each is a real crawler name AND a substring of a real in-app
+ * browser. Every entry below is therefore the crawler's own token
+ * (`linkedinbot`, `whatsapp/`), never the company.
+ */
+const BOT_RE = /bot\b|crawler|crawling|spider|slurp|facebookexternalhit|linkedinbot|twitterbot|whatsapp\/|telegrambot|slackbot|discordbot|embedly|pinterestbot|quorabot|vkshare|w3c_validator|headless|lighthouse|pingdom|uptime|curl\/|wget\/|python-requests|go-http-client|okhttp|java\/|axios\/|node-fetch|scrapy|httpclient|semrush|ahrefs|mj12|dotbot|petalbot|bytespider|gptbot|claudebot|anthropic|ccbot|applebot|bingpreview|yandex|baiduspider|duckduckbot/i;
 
 /** Is this user agent a crawler, a link-preview fetcher, or a script? */
 export function isBotUa(ua: string | undefined | null): boolean {
@@ -37,10 +52,15 @@ export function isBotUa(ua: string | undefined | null): boolean {
   return BOT_RE.test(ua);
 }
 
-/** "Chrome · Mac", "Safari · iPhone", "LinkedInBot" — enough to read, no fingerprinting. */
+/** "Chrome · Mac", "Safari · iPhone", "LinkedIn app", "LinkedInBot" — enough to read, no fingerprinting. */
 export function uaFamily(ua: string | undefined | null): string {
   if (!ua) return 'unknown';
   const u = ua;
+  /* In-app browsers first: these are PEOPLE, and knowing they came through the
+     LinkedIn app is the most useful thing the line can say on this account. */
+  if (/\[LinkedInApp\]/i.test(u)) return 'LinkedIn app';
+  if (/FBAN\/|FBAV\/|FB_IAB/i.test(u)) return 'Facebook app';
+  if (/Instagram /i.test(u)) return 'Instagram app';
   const named = /LinkedInBot|Slackbot|Twitterbot|facebookexternalhit|WhatsApp|TelegramBot|Discordbot|Googlebot|bingbot|Applebot|GPTBot|ClaudeBot|PerplexityBot|DuckDuckBot|YandexBot|Baiduspider|AhrefsBot|SemrushBot|PetalBot|Bytespider|MJ12bot|DotBot/i.exec(u);
   if (named) return named[0];
   if (isBotUa(u)) return 'bot';
@@ -82,16 +102,59 @@ export function centralYesterday(d: Date = new Date()): string {
   return centralDay(t);
 }
 
-/** A page view worth counting: a GET for an HTML document on the public site. */
+/**
+ * The public pages this site actually serves — the FIRST path segment, plus ''
+ * for the landing. Anything else is not counted.
+ *
+ * WHY AN ALLOWLIST AND NOT A DENYLIST. `app.get('*')` answers index.html with
+ * HTTP 200 for every unmatched path, so a vulnerability scanner probing
+ * /wp-admin, /.env or /phpmyadmin looks exactly like a reader — and on a site
+ * whose honest answer is often "2 people", a handful of probes doubles the
+ * headline. An allowlist fails CLOSED: a new page is under-counted until this
+ * line is updated, which is the safe direction for a number Paul is going to
+ * trust.
+ */
+const PUBLIC_PAGES = new Set([
+  '', 'about', 'industries', 'track-record', 'research', 'reports', 'buyers',
+  'legal', 'owners', 'how-it-works', 'pricing', 'advise', 'brokers',
+  'buy', 'sell', 'raise', 'integrate', 'connectors', 'standard',
+]);
+
+/**
+ * TOKEN ROUTES ARE NEVER RECORDED — they carry live secrets in the path.
+ * `/reset-password/<token>` is a working credential; `/shared/<token>`,
+ * `/shared/doc/<token>`, `/biz/<token>`, `/invite/<token>` and
+ * `/day-pass/<token>` are bearer links. All are extensionless GETs the SPA
+ * answers with 200, so without this they would be written to site_visits with
+ * no expiry AND could surface in the morning email's "pages" list.
+ */
+const SECRET_PATHS = /^\/(shared|invite|day-pass|valuelens|biz|reset-password|verify-email|forgot-password|login|signup|admin)(\/|$)/;
+
+/** A page view worth counting: a GET for an HTML document on a real public page. */
 export function isPageView(method: string, path: string, accept: string | undefined): boolean {
   if (method !== 'GET') return false;
   if (!accept || !/text\/html/.test(accept)) return false;
-  if (/^\/(api|assets|collateral|reports|textures|mcp|\.well-known)(\/|$)/.test(path)) return false;
+  if (SECRET_PATHS.test(path)) return false;
+  if (/^\/(api|assets|collateral|textures|mcp|\.well-known)(\/|$)/.test(path)) return false;
   if (/\.[a-z0-9]{2,5}$/i.test(path)) return false;      // a file, not a page
-  return true;
+  if (/\/unlock$/.test(path)) return false;              // the report-unlock hop redirects to the page itself — one read, not two
+  return PUBLIC_PAGES.has(path.split('/')[1] ?? '');
 }
 
-const sha = (s: string) => createHash('sha256').update(s).digest('hex').slice(0, 32);
+/**
+ * A KEYED hash, not a bare one. `sha256(ip)` sounds anonymising and is not:
+ * the whole IPv4 space is 2^32, so an unkeyed digest is a lookup table anyone
+ * with the database can build in minutes — the comments claiming "the IP is
+ * never stored" would have been an overclaim, which is the one thing this
+ * practice's own law forbids in a document. Keyed with the server secret AND
+ * the day, so a hash is meaningless without the key and does not link a
+ * visitor across days. Every consumer only ever compares hashes WITHIN one day
+ * (the team-exclusion join is `t.day = v.day AND t.ip_hash = v.ip_hash`), so
+ * per-day keying costs nothing.
+ */
+const VISIT_KEY = () => process.env.SITE_VISIT_SALT || process.env.JWT_SECRET || 'smbx-site-visits';
+const sha = (day: string, s: string) =>
+  createHmac('sha256', `${VISIT_KEY()}|${day}`).update(s).digest('hex').slice(0, 32);
 
 export interface DigestRow { path: string; visitor: string; is_bot: boolean; ua_family: string | null; referer_host: string | null }
 
@@ -130,27 +193,39 @@ export function summarise(day: string, human: DigestRow[], team: DigestRow[], we
 }
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+/* `iso.slice(0, 10)`: generate_series over two dates resolves to TIMESTAMPTZ, so a
+   row can arrive as '2026-08-12 00:00:00+00'. `new Date('2026-08-12 00:00:00+00T12:00:00Z')`
+   is unparseable and prints the literal "Invalid Date" — which is what every cell of
+   the seven-day strip did before the SELECT below was cast to ::date. Belt and braces:
+   the query is fixed AND this tolerates any date-ish string. */
 const dayLabel = (iso: string) =>
-  new Date(iso + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' });
+  new Date(iso.slice(0, 10) + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' });
 
 /** Pure: the subject line — the answer first. */
 export function digestSubject(d: Digest): string {
   const v = d.visitors;
-  return `smbx.ai ${dayLabel(d.day)}: ${v} visitor${v === 1 ? '' : 's'} besides you · ${d.views} page view${d.views === 1 ? '' : 's'}`;
+  return `smbx.ai ${dayLabel(d.day)}: ${v} visitor${v === 1 ? '' : 's'} besides you · ${d.views} page load${d.views === 1 ? '' : 's'}`;
 }
 
 /** Pure: the email body. Plain, in his words, honest about what a "visitor" is. */
 export function digestHtml(d: Digest, trackingSince: string | null): string {
   const li = (xs: [string, number][], empty: string) =>
     xs.length ? `<ul style="margin:4px 0 0;padding-left:18px">${xs.map(([k, n]) => `<li>${esc(k)} <span style="color:#7C8187">· ${n}</span></li>`).join('')}</ul>` : `<div style="color:#7C8187">${empty}</div>`;
-  const week = d.week.map(w => `<td style="padding:2px 8px;text-align:center;border-bottom:1px solid #E4DFD3"><div style="font-family:ui-monospace,Menlo,monospace;font-size:16px;font-weight:700">${w.visitors}</div><div style="color:#7C8187;font-size:11px">${esc(dayLabel(w.day).replace(/,.*$/, ''))}</div></td>`).join('');
+  /* A day BEFORE counting started is unknown, not zero. The SQL COALESCEs a
+     missing day to 0, which would draw a flat line of zeroes across the first
+     week and read as "nobody came" when the truth is "we were not counting".
+     Missing renders as missing — the house rule. */
+  const week = d.week.map(w => {
+    const known = !trackingSince || w.day.slice(0, 10) >= trackingSince.slice(0, 10);
+    return `<td style="padding:2px 8px;text-align:center;border-bottom:1px solid #E4DFD3"><div style="font-family:ui-monospace,Menlo,monospace;font-size:16px;font-weight:700;color:${known ? '#16181A' : '#B9B3A6'}">${known ? w.visitors : '–'}</div><div style="color:#7C8187;font-size:11px">${esc(dayLabel(w.day).replace(/,.*$/, ''))}</div></td>`;
+  }).join('');
   return `<div style="font-family:system-ui,-apple-system,sans-serif;font-size:14px;line-height:1.6;color:#16181A;max-width:560px">
   <div style="font-size:12px;color:#7C8187;letter-spacing:.02em">smbx.ai · ${esc(dayLabel(d.day))} (Central)</div>
   <div style="font-size:30px;font-weight:700;margin:6px 0 2px">${d.visitors} <span style="font-size:15px;font-weight:600;color:#4A4F54">visitor${d.visitors === 1 ? '' : 's'} besides you</span></div>
-  <div style="color:#4A4F54">${d.views} page view${d.views === 1 ? '' : 's'}${d.teamViews ? ` · your own ${d.teamViews} view${d.teamViews === 1 ? '' : 's'} not counted` : ''}</div>
+  <div style="color:#4A4F54">${d.views} page load${d.views === 1 ? '' : 's'}${d.teamViews ? ` · your own ${d.teamViews} view${d.teamViews === 1 ? '' : 's'} not counted` : ''}</div>
 
-  <div style="margin-top:16px;font-weight:700">Pages they read</div>
-  ${li(d.topPages, 'No pages read by anyone but you.')}
+  <div style="margin-top:16px;font-weight:700">Pages they landed on</div>
+  ${li(d.topPages, 'No page loaded by anyone but you.')}
 
   <div style="margin-top:14px;font-weight:700">Where they came from</div>
   ${li(d.referrers, d.visitors ? 'Direct — no referrer (typed, bookmarked, or an app that strips it, e.g. LinkedIn’s).' : '—')}
@@ -162,7 +237,7 @@ export function digestHtml(d: Digest, trackingSince: string | null): string {
   <table style="border-collapse:collapse;margin-top:4px"><tr>${week}</tr></table>
 
   <div style="margin-top:18px;padding-top:10px;border-top:1px solid #E4DFD3;font-size:12px;color:#7C8187;line-height:1.55">
-    A visitor is one IP address + browser on one day — a website cannot see MAC addresses, and this is what every analytics tool means by “unique visitor”. Your own browsers (any that have signed in to the app) and any IP that used the app that day are excluded. Crawlers and link-preview fetchers are listed separately, never counted as readers.${trackingSince ? ` Counting since ${esc(dayLabel(trackingSince))}.` : ''}
+    A visitor is one IP address + browser on one day — a website cannot see MAC addresses, and this is what every analytics tool means by “unique visitor”. The address itself is never stored: it is kept as a keyed hash that cannot be reversed without this server's secret, and rows are deleted after 180 days. Your own browsers (any that have signed in to the app) and any IP that used the app that day are excluded. Crawlers and link-preview fetchers are listed separately, never counted as readers. Counts are page LOADS: the site navigates in the browser, so moving between sections after landing is not a second load.${trackingSince ? ` Counting since ${esc(dayLabel(trackingSince))}.` : ''}
   </div>
 </div>`;
 }
@@ -179,23 +254,41 @@ async function db(): Promise<Sql> {
 const clientIp = (req: Request): string =>
   (req.ip || (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || '0.0.0.0');
 
-/** Records a page view. Never blocks, never throws into the response. */
+/**
+ * Records a page view. Never blocks, never throws into the response.
+ *
+ * THE FACTS ARE CAPTURED BEFORE `next()`, and that is not a style choice.
+ * Express REWRITES `req.url`/`req.path` while a request is inside a mounted
+ * router — `/api/shared/x` reads as `/shared/x` under `app.use('/api', …)` —
+ * and restores it only when that router unwinds. Every real handler here is
+ * async, so `next()` returns while the request is still inside the router and
+ * the path is still trimmed. Reading `req.path` after `next()` therefore saw
+ * the WRONG path and silently defeated the `/api` exclusion. `originalUrl` is
+ * the one Express never rewrites; the rest are read up front.
+ */
 export function siteVisitMiddleware(req: Request, _res: Response, next: NextFunction) {
+  const method = req.method;
+  const path = (req.originalUrl || req.url || '/').split('?')[0];
+  const accept = req.headers.accept;
+  const uaNow = req.headers['user-agent'] || '';
+  const ipNow = clientIp(req);
+  const cookie = req.headers.cookie || '';
+  const referer = req.headers.referer as string | undefined;
   next();
   try {
-    if (!isPageView(req.method, req.path, req.headers.accept)) return;
-    const ua = req.headers['user-agent'] || '';
-    const ip = clientIp(req);
+    if (!isPageView(method, path, accept)) return;
+    const ua = uaNow;
+    const ip = ipNow;
     const day = centralDay();
     const row = {
       day,
-      path: req.path.length > 200 ? req.path.slice(0, 200) : req.path,
-      visitor: sha(`${day}|${ip}|${ua}`),
-      ip_hash: sha(ip),
+      path: path.length > 200 ? path.slice(0, 200) : path,
+      visitor: sha(day, `${ip}|${ua}`),
+      ip_hash: sha(day, ip),
       ua_family: uaFamily(ua),
-      referer_host: refererHost(req.headers.referer as string | undefined),
+      referer_host: refererHost(referer),
       is_bot: isBotUa(ua),
-      is_team: /(^|;\s*)smbx_team=1(;|$)/.test(req.headers.cookie || ''),
+      is_team: /(^|;\s*)smbx_team=1(;|$)/.test(cookie),
     };
     db().then(sql => sql`INSERT INTO site_visits ${sql(row)}`).catch(() => { /* never a user-facing failure */ });
   } catch { /* same */ }
@@ -207,7 +300,7 @@ const seenTeam = new Set<string>();   // `${day}|${ip_hash}` — one insert per 
 export function noteTeamIp(req: Request): void {
   try {
     const day = centralDay();
-    const h = sha(clientIp(req));
+    const h = sha(day, clientIp(req));
     const key = `${day}|${h}`;
     if (seenTeam.has(key)) return;
     seenTeam.add(key);
@@ -232,7 +325,7 @@ export async function computeDigest(sql: Sql, day: string): Promise<Digest> {
   const human = rows.filter(r => !r.is_team);
   const team = rows.filter(r => r.is_team);
   const weekRows: { day: string; visitors: number }[] = await sql`
-    SELECT d.day::text AS day, COALESCE(u.n, 0)::int AS visitors
+    SELECT d.day::date::text AS day, COALESCE(u.n, 0)::int AS visitors
     FROM generate_series(${day}::date - 6, ${day}::date, '1 day') AS d(day)
     LEFT JOIN (
       SELECT v.day, COUNT(DISTINCT v.visitor) AS n
@@ -254,13 +347,27 @@ export async function computeDigest(sql: Sql, day: string): Promise<Digest> {
 export async function sendDailyDigest(opts: { day?: string; force?: boolean } = {}): Promise<{ day: string; sent: boolean; skipped?: string; to?: string; visitors?: number; views?: number }> {
   const sql = await db();
   const day = opts.day ?? centralYesterday();
-  if (!opts.force) {
-    const [done] = await sql`SELECT sent FROM site_visit_digests WHERE day = ${day}`;
-    if (done?.sent) return { day, sent: false, skipped: 'already sent' };
-  }
   const { teamAllowlist } = await import('./practiceMode.js');
   const to = teamAllowlist()[0];
   if (!to) return { day, sent: false, skipped: 'no team email (TEAM_ALLOWLIST)' };
+
+  /* CLAIM THE DAY BEFORE SENDING, not after. Read-then-send-then-write leaves
+     the whole duration of an SMTP call as a window in which a second worker —
+     or the same one after a Railway restart — reads "not sent" and mails the
+     same digest again. The INSERT is the lock: whoever wins the row sends, and
+     `ON CONFLICT DO NOTHING` returns nothing to everyone else. `force` (the
+     manual press) deliberately bypasses it. */
+  if (!opts.force) {
+    const claimed = await sql`
+      INSERT INTO site_visit_digests (day, to_email, sent) VALUES (${day}, ${to}, false)
+      ON CONFLICT (day) DO NOTHING RETURNING day`;
+    if (!claimed.length) {
+      const [done] = await sql`SELECT sent FROM site_visit_digests WHERE day = ${day}`;
+      // A row that exists but never sent (a crash mid-send, or no mail key at
+      // the time) is worth retrying; one that sent is not.
+      if (done?.sent) return { day, sent: false, skipped: 'already sent' };
+    }
+  }
 
   const digest = await computeDigest(sql, day);
   const [first] = await sql`SELECT MIN(day)::text AS d FROM site_visits`;
@@ -271,5 +378,17 @@ export async function sendDailyDigest(opts: { day?: string; force?: boolean } = 
     VALUES (${day}, ${to}, ${digest.visitors}, ${digest.views}, ${ok})
     ON CONFLICT (day) DO UPDATE SET sent_at = NOW(), to_email = EXCLUDED.to_email,
       visitors = EXCLUDED.visitors, views = EXCLUDED.views, sent = EXCLUDED.sent`;
+
+  /* RETENTION. Nothing else prunes these tables and a crawler can write
+     thousands of rows a day, so the daily job that reads them also ages them
+     out. 180 days keeps a year-over-nothing comparison possible while the
+     footer's promise ("deleted after 180 days") stays true. */
+  try {
+    await sql`DELETE FROM site_visits WHERE day < CURRENT_DATE - 180`;
+    await sql`DELETE FROM site_team_ips WHERE day < CURRENT_DATE - 180`;
+  } catch (err: any) {
+    console.warn('[site-visits] retention sweep failed (non-fatal):', err?.message);
+  }
+
   return { day, sent: ok, to, visitors: digest.visitors, views: digest.views, ...(ok ? {} : { skipped: 'mail did not send (RESEND_API_KEY / EMAIL_FROM)' }) };
 }

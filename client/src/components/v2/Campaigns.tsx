@@ -523,7 +523,10 @@ function SlotLine({ row, open, isToday, onToggle, onPatch, onMarkPosted }: {
               <div style={{ padding: "12px 14px", background: C.panel, fontSize: 13.5, lineHeight: 1.6 }}>
                 <div style={{ fontWeight: 700 }}>Posted</div>
                 <div style={{ color: C.body }}>
-                  {row.posted_at ? `Marked ${String(row.posted_at).slice(0, 16).replace("T", " ")}.` : ""}{" "}
+                  {/* Rendered in the reader's own zone: `posted_at` is a UTC
+                      timestamp, so slicing the ISO string stamped an 8pm
+                      Central post with TOMORROW's date. */}
+                  {row.posted_at ? `Marked ${new Date(row.posted_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}.` : ""}{" "}
                   {row.post_url && <a href={row.post_url} target="_blank" rel="noreferrer" style={{ color: C.green, fontWeight: 600 }}>Open the post →</a>}
                 </div>
                 <div style={{ color: C.muted, fontSize: 12.5, marginTop: 4 }}>

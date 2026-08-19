@@ -34,6 +34,14 @@ T('a collateral PDF does not (it is a download, counted nowhere here)', () => is
 T('a file by extension does not', () => isPageView('GET', '/logo-lockup.png', 'image/webp,*/*'), false);
 T('a fetch without Accept text/html does not', () => isPageView('GET', '/', 'application/json'), false);
 T('POST does not', () => isPageView('POST', '/', 'text/html'), false);
+/* Written after the 2026-08-18 review: the SPA catch-all answers 200 for ANY
+   unmatched path, so without an allowlist a scanner is a "visitor" and a
+   password-reset token gets written to the table and printed in the email. */
+T('a vulnerability probe is not a visitor', () => [isPageView('GET', '/wp-admin', 'text/html'), isPageView('GET', '/phpmyadmin/index', 'text/html')], [false, false]);
+T('a password-reset link is NEVER recorded — the path is a live credential', () => isPageView('GET', '/reset-password/eyJhbGciOiJIUzI1NiJ9.abc', 'text/html'), false);
+T('a share token is never recorded', () => [isPageView('GET', '/shared/tok123', 'text/html'), isPageView('GET', '/shared/doc/tok123', 'text/html'), isPageView('GET', '/biz/tok', 'text/html')], [false, false, false]);
+T('the report-unlock hop is not double-counted with the page it redirects to', () => isPageView('GET', '/reports/fire-safety/unlock', 'text/html'), false);
+T('the real pages still count', () => ['/', '/about', '/industries', '/track-record', '/research/hvac-2026-read', '/buyers/private-equity', '/legal/privacy'].every(p => isPageView('GET', p, 'text/html')), true);
 
 console.log('\nBOTS AND BROWSERS');
 T('LinkedIn preview fetcher is a bot', () => isBotUa(LINKEDIN), true);
@@ -45,6 +53,17 @@ T('Safari on an iPhone', () => uaFamily(SAFARI_IPHONE), 'Safari · iPhone');
 T('Opera is not mistaken for Chrome', () => uaFamily(OPERA_MAC), 'Opera · Mac');
 T('curl is a bot', () => isBotUa('curl/8.4.0'), true);
 T('GPTBot is a bot and named', () => [isBotUa('Mozilla/5.0 (compatible; GPTBot/1.2)'), uaFamily('Mozilla/5.0 (compatible; GPTBot/1.2)')], [true, 'GPTBot']);
+/* THE ONE THAT MATTERS ON THIS ACCOUNT. LinkedIn's in-app browser appends
+   [LinkedInApp] to an ordinary Safari UA. The first cut of BOT_RE carried a
+   bare `linkedin`, so every reader who tapped a link inside the LinkedIn app —
+   most of this practice's traffic — was counted as a bot, and the email would
+   have said "0 visitors besides you" on the mornings after a post worked. */
+const LI_APP = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 [LinkedInApp]/9.29.1234';
+T('a reader in the LinkedIn app is a PERSON, not a bot', () => isBotUa(LI_APP), false);
+T('…and reads as the LinkedIn app', () => uaFamily(LI_APP), 'LinkedIn app');
+T('LinkedIn’s crawler is still a bot', () => isBotUa(LINKEDIN), true);
+T('the Facebook in-app browser is a person', () => isBotUa('Mozilla/5.0 (iPhone) AppleWebKit/605.1.15 [FBAN/FBIOS;FBAV/470.0]'), false);
+T('WhatsApp’s preview fetcher is a bot, its in-app browser is not', () => [isBotUa('WhatsApp/2.23.20'), isBotUa('Mozilla/5.0 (Linux; Android 14) Chrome/120 Mobile WhatsApp Browser')], [true, false]);
 
 console.log('\nREFERRERS');
 T('a LinkedIn referer reads as its host', () => refererHost('https://www.linkedin.com/feed/'), 'linkedin.com');
@@ -76,12 +95,18 @@ T('the team’s own views are counted separately', () => d.teamViews, 2);
 T('bots are counted separately and named', () => [d.bots, d.botNames], [2, [['LinkedInBot', 2]]]);
 T('top pages, most read first', () => d.topPages, [['/', 2], ['/research/hvac-2026-read', 1], ['/about', 1]]);
 T('referrers exclude direct', () => d.referrers, [['linkedin.com', 2]]);
-T('the subject answers first', () => digestSubject(d), 'smbx.ai Mon, Aug 17: 3 visitors besides you · 4 page views');
-T('singular reads right', () => digestSubject(summarise('2026-08-17', [row({ visitor: 'z' })], [], week)), 'smbx.ai Mon, Aug 17: 1 visitor besides you · 1 page view');
+T('the subject answers first', () => digestSubject(d), 'smbx.ai Mon, Aug 17: 3 visitors besides you · 4 page loads');
+T('singular reads right', () => digestSubject(summarise('2026-08-17', [row({ visitor: 'z' })], [], week)), 'smbx.ai Mon, Aug 17: 1 visitor besides you · 1 page load');
 const html = digestHtml(d, '2026-08-11');
 T('the email says what a visitor is and what is excluded', () => /cannot see MAC addresses/.test(html) && /Your own browsers/.test(html) && /Counting since/.test(html), true);
+T('…and claims only what the code does — keyed hash, 180-day deletion, loads not views', () => /keyed hash/.test(html) && /180 days/.test(html) && /page LOADS/i.test(html), true);
+/* generate_series over two dates resolves to timestamptz, so a week row can
+   arrive as '2026-08-12 00:00:00+00'. Before the ::date cast + slice, every
+   cell of the strip printed the literal "Invalid Date", every morning. */
+T('a timestamptz-shaped week row still labels correctly', () => { const h = digestHtml(summarise('2026-08-17', human, team, [{ day: '2026-08-11 00:00:00+00', visitors: 2 }]), null); return !/Invalid Date/.test(h) && />Tue</.test(h); }, true);
+T('days before counting began read as – , not 0', () => { const h = digestHtml(summarise('2026-08-17', human, team, [{ day: '2026-08-10', visitors: 0 }, { day: '2026-08-17', visitors: 3 }]), '2026-08-15'); return /–/.test(h); }, true);
 T('the email carries the numbers and the week', () => /3 <span/.test(html) && /linkedin\.com/.test(html) && /LinkedInBot/.test(html) && (html.match(/<td /g) ?? []).length === 7, true);
-T('an empty day still reads as a sentence, not a hole', () => { const e = summarise('2026-08-17', [], [], week); const h = digestHtml(e, null); return /0 <span/.test(h) && /No pages read by anyone but you/.test(h); }, true);
+T('an empty day still reads as a sentence, not a hole', () => { const e = summarise('2026-08-17', [], [], week); const h = digestHtml(e, null); return /0 <span/.test(h) && /No page loaded by anyone but you/.test(h); }, true);
 
 console.log(`\n${pass}/${total} passed`);
 process.exit(pass === total ? 0 : 1);
