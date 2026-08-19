@@ -43,6 +43,27 @@ Step 4 is not optional and is the easiest to miss — see §4.
 
 ---
 
+## 1A. The figure layout — the one-pager default (2026-08-18)
+
+Paul: *"Def full axis correction! Let's lock that in for carousel and single
+image formats… don't remove the other types, but this can be the default."*
+
+- `build-onepager.mts` now defaults to `layout: 'figure'`: the full-length
+  founder cutout (`assets/brand/founder-standing.png`), copy wrapping the
+  silhouette, φ geometry, Fibonacci spacing, the SANCTIONED green bloom on
+  dark, bright-white CTA. A spec naming `image` with no `layout` still
+  renders the old split — that inference is what keeps `rebuild-all.sh` from
+  silently changing the back catalogue. FORMATS §2.0 has the full contract.
+- **The carousel figure cover is NOT built yet** — it lives in
+  `house/deck.ts` (Claude Code's side; parity-guarded). The contract is
+  written: `FIGURE_COVER_WORK_ORDER.md`. Until it lands, decks keep their
+  current covers.
+- **A no-Chromium session can still ship a figure one-pager**:
+  `scripts/studio/figure-fallback.py` — same spec, live tokens, converted
+  repo fonts, PIL raster. Subordinate by design: its BUILD.txt names itself a
+  fallback and the next `build-onepager.mts` render replaces it. First use
+  2026-08-18 (`day-four-questions`, posted).
+
 ## 2. State of the four builders
 
 | Builder | Makes | Grammar | Faces | Guard |

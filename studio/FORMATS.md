@@ -198,6 +198,14 @@ The figure card, measured (approved as the v6 mock, 2026-08-18):
 - **First render on a new machine:** check the wrap engaged (copy shortens at
   the shoulder) and the feet sit just above the foot hairline — the approved
   geometry; if the figure renders as a plain column, the float is out of flow.
+- **Worked example:** `markets/home-services/specs/day-four-questions.post.mts`
+  — the first figure spec, posted 2026-08-18. Copy a new post from its shape.
+- **No Chromium? The fallback exists.** A sandbox session with no browser runs
+  `python3 $REPO/scripts/studio/figure-fallback.py <spec> --out <dir>` from the
+  studio root — same spec, same live tokens, same fonts, PIL text engine. Its
+  BUILD.txt names itself a fallback; the next Mac build replaces the file. It
+  renders the FIGURE layout only, and it is never the reason to skip the real
+  builder on a machine that has one.
 
 **Reports are NOT this.** Long-form reports keep the banner grammar — cover
 hero band + `accent:` bands (§3). The figure treatment is for the carousel
