@@ -26,7 +26,7 @@ const router = Router();
 /** The board. */
 router.get('/', requireAuth, async (req: any, res) => {
   try {
-    res.json({ rows: await listQueue(req.user.id) });
+    res.json({ rows: await listQueue(req.userId) });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -39,7 +39,7 @@ router.get('/', requireAuth, async (req: any, res) => {
  */
 router.post('/import', requireAuth, async (req: any, res) => {
   try {
-    const result = await importQueue(req.user.id);
+    const result = await importQueue(req.userId);
     res.json(result);
   } catch (err: any) {
     // A malformed queue names every problem and imports nothing — 422 rather
@@ -73,7 +73,7 @@ router.get('/campaigns', requireAuth, async (_req, res) => {
 router.post('/import-campaign', requireAuth, async (req: any, res) => {
   try {
     const name = typeof req.body?.campaign === 'string' && req.body.campaign.trim() ? req.body.campaign.trim() : null;
-    const result = await importCampaign(req.user.id, name);
+    const result = await importCampaign(req.userId, name);
     res.json(result);
   } catch (err: any) {
     res.status(422).json({ error: err.message });
@@ -99,7 +99,7 @@ router.get('/check', requireAuth, async (_req, res) => {
 /** State only. Content fields are not settable — the markdown owns them. */
 router.patch('/:queueId', requireAuth, async (req: any, res) => {
   try {
-    const row = await updateQueueState(req.user.id, req.params.queueId, req.body || {});
+    const row = await updateQueueState(req.userId, req.params.queueId, req.body || {});
     if (!row) return res.status(404).json({ error: 'Not in the queue' });
     res.json(row);
   } catch (err: any) {
@@ -116,7 +116,7 @@ router.patch('/:queueId', requireAuth, async (req: any, res) => {
  */
 router.post('/:queueId/posted', requireAuth, async (req: any, res) => {
   try {
-    const row = await updateQueueState(req.user.id, req.params.queueId, {
+    const row = await updateQueueState(req.userId, req.params.queueId, {
       status: 'posted',
       postUrl: req.body?.postUrl ?? null,
       retiredCheck: req.body?.retiredCheck ?? null,
@@ -131,7 +131,7 @@ router.post('/:queueId/posted', requireAuth, async (req: any, res) => {
 /** The loop closed: posted angles joined to what LinkedIn actually reported. */
 router.get('/performance', requireAuth, async (req: any, res) => {
   try {
-    res.json({ rows: await queuePerformance(req.user.id) });
+    res.json({ rows: await queuePerformance(req.userId) });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
