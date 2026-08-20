@@ -14,6 +14,8 @@
 #   content/collateral/smbx-corpdev-pricing.pdf  (POST /api/practice/pricing)
 #   content/studio/post-queue.json + campaign-*.json  (postQueue import)
 #   content/crm-seed/                        (the frozen CRM deploy fixture)
+#   studio/clients/crm-bundle/*.csv          (POST /api/crm/sync-register — the
+#                                             one-press register sync, 2026-08-19)
 #   scripts/studio/reports/*.md              (reportQA context + vite build)
 #   client/public/**                         (logos, textures for composers)
 #   server/migrations/*.sql, server/templates/**, server/prompts/**
@@ -22,7 +24,13 @@
 # directory, un-ignore it here in the same commit, or production 404s quietly.
 
 # ── the studio workspace: documents are files, and none of them ship ─────
+# …except the LIVING CRM REGISTER (~150 KB of CSVs), which
+# /api/crm/sync-register reads at runtime so one press in Leads refreshes the
+# app from whatever register the deployed commit carries (2026-08-19). The
+# route 409s with this file's name if the exception ever goes missing.
 studio/
+!studio/clients/crm-bundle
+!studio/clients/crm-bundle/**
 
 # ── version control + local build state ──────────────────────────────────
 .git

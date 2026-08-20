@@ -192,21 +192,50 @@ export default function LeadsScreen() {
 
 /**
  * The org typeahead reads the universe the studio register pushed into the
- * app. The register lives in git (studio/clients/crm-bundle/*.csv — 139
- * organizations on 2026-08-18) and used to reach the app only through
- * `push-crm.mts` on a terminal. This is the same press from the screen that
- * consumes it: pick the bundle's CSVs, they go to /api/crm/import-bundle,
- * the app's own idempotent loader does the rest — facts refresh, a blank
- * never erases, and every app-owned column (stage, next action, touches) is
- * untouched. Files that are not part of the bundle are named back, never
- * silently dropped. No model, no key: pure code on both sides.
+ * app. The register lives in git (studio/clients/crm-bundle/*.csv — 154
+ * organizations on 2026-08-19) and reaches the app two ways, both landing on
+ * the same idempotent loader — facts refresh, a blank never erases, and every
+ * app-owned column (stage, next action, touches) is untouched:
+ *
+ *   · "Sync register from the repo" (2026-08-19, Paul: "as cowork updates
+ *     companies etc, you can update too") — POST /api/crm/sync-register; the
+ *     SERVER reads the bundle the deployed commit ships, so this works from a
+ *     phone with no files on it. Merge a register change, let Railway
+ *     rebuild, press this.
+ *   · "Load the register from CSVs" — pick the bundle's files here; they go
+ *     to /api/crm/import-bundle as text. Works for ad-hoc CSVs and for a
+ *     register newer than the deploy.
+ *
+ * Files that are not part of the bundle are named back, never silently
+ * dropped. No model, no key: pure code on both sides.
  */
 function RegisterLoad({ count, onLoaded }: { count: number; onLoaded: (msg: string) => void }) {
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<false | "sync" | "pick">(false);
   const [err, setErr] = useState<string | null>(null);
+  const reportMsg = (j: any, verb: string) =>
+    `${verb} — ${j.accountsCreated ?? 0} firms new, ${j.accountsUpdated ?? 0} refreshed, ${j.contactsAdded ?? 0} contacts.` +
+    (j.touchesQueued ? ` ${j.touchesQueued} touches queued.` : "") +
+    (j.unnamedParked ? ` ${j.unnamedParked} records still need a named person.` : "") +
+    (j.ignoredFiles?.length ? ` Not part of the bundle, ignored: ${j.ignoredFiles.join(", ")}.` : "") +
+    (j.targetsUnmatched?.length ? ` Unmatched targets: ${j.targetsUnmatched.length}.` : "");
+  /* The one-press sync: the server reads the register the DEPLOYED COMMIT
+     carries (studio/clients/crm-bundle ships in the image since 2026-08-19),
+     so this works from any device with no files on it. Merge a register
+     change, let Railway rebuild, press this. */
+  const sync = async () => {
+    setBusy("sync"); setErr(null);
+    try {
+      const r = await fetch("/api/crm/sync-register", { method: "POST", headers: authHeaders() });
+      const j = await r.json().catch(() => null);
+      if (!r.ok) { setErr(j?.error ?? `Sync failed (${r.status})`); return; }
+      onLoaded(reportMsg(j, `Register synced from the deploy (${j.filesRead?.length ?? 0} files)`));
+    } catch {
+      setErr("The network dropped — nothing was synced.");
+    } finally { setBusy(false); }
+  };
   const pick = async (files: FileList | null) => {
     if (!files || !files.length) return;
-    setBusy(true); setErr(null);
+    setBusy("pick"); setErr(null);
     try {
       const payload: Record<string, string> = {};
       for (const f of Array.from(files)) {
@@ -219,13 +248,7 @@ function RegisterLoad({ count, onLoaded }: { count: number; onLoaded: (msg: stri
       });
       const j = await r.json().catch(() => null);
       if (!r.ok) { setErr(j?.error ?? `Load failed (${r.status})`); return; }
-      onLoaded(
-        `Register loaded — ${j.accountsCreated ?? 0} firms new, ${j.accountsUpdated ?? 0} refreshed, ${j.contactsAdded ?? 0} contacts.` +
-        (j.touchesQueued ? ` ${j.touchesQueued} touches queued.` : "") +
-        (j.unnamedParked ? ` ${j.unnamedParked} records still need a named person.` : "") +
-        (j.ignoredFiles?.length ? ` Not part of the bundle, ignored: ${j.ignoredFiles.join(", ")}.` : "") +
-        (j.targetsUnmatched?.length ? ` Unmatched targets: ${j.targetsUnmatched.length}.` : ""),
-      );
+      onLoaded(reportMsg(j, "Register loaded"));
     } catch {
       setErr("The network dropped — nothing was loaded.");
     } finally { setBusy(false); }
@@ -234,10 +257,15 @@ function RegisterLoad({ count, onLoaded }: { count: number; onLoaded: (msg: stri
     <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", fontSize: 12.5, color: C.muted }}>
       <span style={mono}>{count} firms</span>
       <span>in the org typeahead — the register pushed from the studio.</span>
+      <button style={{ ...btnGhost, padding: "5px 11px", fontSize: 12.5, opacity: busy ? 0.6 : 1, cursor: busy ? "default" : "pointer" }}
+              disabled={!!busy} onClick={() => void sync()}
+              title="Reads studio/clients/crm-bundle/*.csv as shipped in the current deploy — no files needed on this device. Facts refresh; nothing you did in the app is overwritten.">
+        {busy === "sync" ? "Syncing…" : "Sync register from the repo"}
+      </button>
       <label style={{ ...btnGhost, padding: "5px 11px", fontSize: 12.5, opacity: busy ? 0.6 : 1, cursor: busy ? "default" : "pointer" }}
              title="Pick the register's CSVs (studio/clients/crm-bundle/*.csv). Facts refresh; nothing you did in the app is overwritten.">
-        {busy ? "Loading…" : "Load the register from CSVs"}
-        <input type="file" accept=".csv,text/csv" multiple disabled={busy} style={{ display: "none" }}
+        {busy === "pick" ? "Loading…" : "Load the register from CSVs"}
+        <input type="file" accept=".csv,text/csv" multiple disabled={!!busy} style={{ display: "none" }}
                onChange={e => { void pick(e.target.files); e.target.value = ""; }} />
       </label>
       {err && <span style={{ color: C.danger }}>{err}</span>}

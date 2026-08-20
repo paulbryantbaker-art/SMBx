@@ -19,10 +19,17 @@ hunt A in RESEARCH.md — read § A before filling anything in.
                  it says which columns git owns and which the app owns, and
                  why changing a firm string is currently a destructive act.
 
-                 Push it to the app — either way lands on the same
-                 idempotent loader (/api/crm/import-bundle):
+                 Push it to the app — all three land on the same idempotent
+                 loader:
+                   · ONE PRESS, NO FILES (2026-08-19): Leads → "Sync register
+                     from the repo". The server reads the bundle the DEPLOYED
+                     commit carries (.dockerignore ships exactly this folder),
+                     so it works from a phone. Merge the register change, let
+                     Railway rebuild, press. A deploy older than the change
+                     serves the older register — the press names what it read.
                    · in the app: Leads → "Load the register from CSVs",
-                     pick crm-bundle/*.csv (2026-08-18; no terminal, no token)
+                     pick crm-bundle/*.csv (2026-08-18; no terminal, no token;
+                     loads files NEWER than the deploy)
                    · or from a terminal:
                        cd $REPO/studio/clients
                        SMBX_TOKEN=… npx tsx $REPO/scripts/studio/push-crm.mts
