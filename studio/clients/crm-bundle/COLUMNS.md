@@ -80,8 +80,12 @@ file already contains `Capital Southwest (NASDAQ: CSWC)`,
 `Main Street Capital (NYSE: MAIN)` and `Genesis Park / GP Capital Partners`. A
 later run that emits `Capital Southwest` creates a SECOND row, silently, and
 merging it afterwards means adjudicating which row's human state survives.
-Until `reconcile.mts` exists, changing a firm string in this file is a
-destructive act — treat it as one.
+**`reconcile.mts` exists now (2026-08-19)** and is the way rows enter this
+file: `npx tsx ../../scripts/studio/reconcile.mts propose --candidates <file>`
+from `studio/clients/` merges MATCHED rows, appends VERIFIED NEW rows, holds
+everything else in `reconcile/<date>/review-queue.csv`, and refuses rather
+than guessing (`RECONCILE_SPEC.md`, repo root). Changing a firm string BY HAND
+is still a destructive act — the app-side row keyed to the old string strands.
 
 **Three more loader behaviors that make a careless import destructive
 (2026-08-19, written after a session projected a drop-in from a stale schema

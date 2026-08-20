@@ -96,8 +96,12 @@ export function parseRegister(md: string): Consolidator[] {
  * Fold a name to comparable form. HTML entities are decoded first because
  * scraped listings carry "PARKER &amp; SONS", and left alone the `amp` becomes
  * a word that stops the brand matching — a false independent, silently.
+ *
+ * Exported (2026-08-19) because house/reconcile.ts matches register firms with
+ * the SAME fold — two entity-matchers that disagree is how a coverage number
+ * starts depending on which reader you asked (RECONCILE_SPEC.md §5).
  */
-const norm = (s: string) => s
+export const norm = (s: string) => s
   .replace(/&amp;/gi, '&').replace(/&#0*38;/g, '&').replace(/&nbsp;/gi, ' ')
   .toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
 
@@ -159,8 +163,9 @@ export function classify(c: Candidate, register: Consolidator[]): Classification
   return { affiliation: 'independent', affiliatedTo: '', evidence: `no match in ${register.length}-entry register` };
 }
 
-/** `needle` appears in `haystack` on word boundaries (both already normalized). */
-function wordMatch(haystack: string, needle: string): boolean {
+/** `needle` appears in `haystack` on word boundaries (both already normalized).
+ *  Exported for house/reconcile.ts (T6 token-containment) — same matcher, one home. */
+export function wordMatch(haystack: string, needle: string): boolean {
   if (!haystack || !needle) return false;
   const i = haystack.indexOf(needle);
   if (i < 0) return false;
@@ -362,8 +367,12 @@ export function score(c: Candidate, s: Screen, cls: Classification, rev: Revenue
  * RFC4180-ish parse. Handles quoted fields containing commas, quotes and
  * newlines — which a Sheets export absolutely will contain the moment anyone
  * types a note with a comma in it.
+ *
+ * `csvRecords` is the raw record loop, exported so house/reconcile.ts can read
+ * a header IN FILE ORDER (COLUMNS.md: "copy from the file itself, never from a
+ * description") without a second CSV parser existing anywhere.
  */
-export function parseCsv(text: string): Candidate[] {
+export function csvRecords(text: string): string[][] {
   const rows: string[][] = [];
   let row: string[] = [], field = '', quoted = false;
   const src = text.replace(/^﻿/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
@@ -380,6 +389,11 @@ export function parseCsv(text: string): Candidate[] {
     else field += ch;
   }
   if (field.length || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+export function parseCsv(text: string): Candidate[] {
+  const rows = csvRecords(text);
   if (!rows.length) return [];
 
   const header = rows[0].map(h => h.trim());

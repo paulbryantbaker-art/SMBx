@@ -13,9 +13,16 @@
 > `CLAUDE.md`. Everything below is otherwise unchanged and still binding.
 
 
-**Spec written 2026-08-18. Nothing below is built yet.** Companion to
-`CRM_BRIDGE.md` (the app-side contract this sits one layer upstream of) and
-`~/Documents/smbx-studio/clients/crm-bundle/COLUMNS.md` (who owns which column).
+**Spec written 2026-08-18. BUILT 2026-08-19** as specced — `house/reconcile.ts`
+(pure) + `scripts/studio/reconcile.mts` (the CLI) + `npm run test:reconcile`
+(131 cases). Additions beyond this spec, from the 2026-08-18 hand run's log:
+the register refuses on any `verification` other than VERIFIED/blank (§9);
+not-VERIFIED candidates are computed but HELD (promotion is the verification
+act); an explicit alias map (`clients/reconcile/aliases.csv`, `alias,canonical`)
+carries identity knowledge like Reedy Industries → PremiStar; and nothing ever
+writes on a path inside `clients/candidates/` — dated emissions are records.
+Companion to `CRM_BRIDGE.md` (the app-side contract this sits one layer
+upstream of) and `studio/clients/crm-bundle/COLUMNS.md` (who owns which column).
 
 Build order: `house/reconcile.ts` first, pure and tested. The CLI is thin.
 
