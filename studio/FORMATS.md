@@ -12,6 +12,10 @@ Three formats. Each is a **fixed set of slots**. Copy is written *into* slots.
 Copy is never written and then hoped into a layout — that is the failure this
 file exists to end.
 
+**`TEMPLATES.md` is the index — the exact NAMES.** Builders, grounds,
+layouts, page kinds, named devices, one-offs, each pointing back here. Start
+there when you need to say what a thing is called; come here for what it is.
+
 **`DESIGN.md` is the other half — the house LOOK.** Palette, type, the
 dead systems named with their hexes. This file tells you where a thing goes;
 that one tells you what it looks like when it gets there. Read both before
