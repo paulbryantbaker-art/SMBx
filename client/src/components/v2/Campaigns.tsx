@@ -60,7 +60,8 @@ export interface QueueRow {
   campaign: string | null;      // `2026-08-18` = the file it came from; null = the standing queue
   /* the copy (migration 136) — content, carried from the plan */
   title: string | null;
-  kind: "text" | "document" | null;
+  /** The MEDIUM. null is a Mandate edition or a blackout — they carry no copy of their own. */
+  kind: "text" | "image" | "video" | "document" | null;
   body: string | null;          // paste-ready: the post, or a document slot's caption
   body_alt: string | null;      // the understudy (receipt-gated slots)
   body_deck: string | null;     // the deck's caption, only where it differs from the plan's
@@ -72,6 +73,11 @@ export interface QueueRow {
     slug: string; spec: string; filed_at: string;
     pdf: string | null; cover: string | null; thumbs: string[];
     pages: number | null; bytes: number | null; deck_caption_matches: boolean;
+  } | null;
+  /* the plan, where the draft does not exist yet (migration 139) */
+  brief: {
+    hook: string | null; rehook: string | null; beats: string[];
+    source: string | null; extraction: string | null; note: string | null;
   } | null;
   /* THE DRAFT (migration 138) — decisions made here before Cowork renders:
      state, never overwritten by an import. */
@@ -98,6 +104,7 @@ export interface CampaignMeta {
   supersedes: string | null;
   withCopy: number;
   documentsReady: number;
+  withBrief: number;
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -110,23 +117,43 @@ const STANDING = "standing";
 export const isMandate = (r: Pick<QueueRow, "angle" | "status">) =>
   r.status === "recurring" || /^THE MANDATE/i.test(r.angle);
 
-/** What KIND of slot, in the plan's own word. */
+/**
+ * What KIND of slot, in the plan's own word.
+ *
+ * The MEDIUM earns its own column because it is the production fact: a video
+ * day needs a camera booked and a real face on it — the plan's rule is "real
+ * camera, not an AI avatar" — and a row that reads "Text" hides that entirely.
+ */
 export function kindLabel(r: QueueRow): string {
   if (r.queue_id.startsWith("BLACKOUT")) return "Blackout";
   if (isMandate(r)) return "Mandate";
   if (r.kind === "document") return "Document";
+  if (r.kind === "video") return "Video";
+  if (r.kind === "image") return "Image";
   if (r.kind === "text") return "Text";
   if (/carousel/i.test(`${r.format ?? ""} ${r.angle}`)) return "Document";
   if (/^Video|🎥/.test(r.format ?? "")) return "Video";
   return "Text";
 }
 
+/** A slot the human pastes as a post: text, a single image, or a piece to camera. */
+const isPost = (r: QueueRow) => r.kind === "text" || r.kind === "image" || r.kind === "video";
+
+/** The first sentence of a gate note, for the readiness tooltip. */
+const firstSentence = (t: string) => {
+  const one = t.trim().split(/(?<=[.!?])\s/)[0] ?? t;
+  return one.length > 110 ? one.slice(0, 107) + "…" : one;
+};
+
 /** What is READY for a slot — the answer to "what gets made and ready to post when". */
 export function readiness(r: QueueRow): { text: string; ok: boolean; note?: string } {
   if (r.status === "posted") return { text: "posted", ok: true };
   // THE GATE OUTRANKS THE EDIT: a receipt-gated frame with one bracket filled
   // is still gated, and "edited" would hide that everywhere the label shows.
-  if (r.kind === "text" && r.gate && r.body) return { text: "gated", ok: false, note: "needs receipts" };
+  // A gate is a reason the slot cannot ship AS PLANNED — a receipt that has not
+  // been extracted, or a figure the retired register blocked. It applies to a
+  // brief exactly as it does to a body: the block is on the post, not the draft.
+  if (isPost(r) && r.gate && (r.body || r.brief)) return { text: "gated", ok: false, note: firstSentence(r.gate) };
   // A LIVE decision Cowork has not rendered from is the next most important state — it outranks "copy · PDF".
   if (hasDraft(r)) return { text: "edited", ok: false, note: "waiting on a Cowork render" };
   if (r.queue_id.startsWith("BLACKOUT")) return { text: "no post", ok: true };
@@ -136,9 +163,17 @@ export function readiness(r: QueueRow): { text: string; ok: boolean; note?: stri
     if (r.body) return { text: "copy", ok: false, note: "no PDF yet" };
     return { text: pdf ? "PDF" : "—", ok: false, note: pdf ? "no copy" : "nothing yet" };
   }
-  if (r.kind === "text") {
-    if (!r.body) return { text: "—", ok: false, note: "no copy" };
-    return r.gate ? { text: "gated", ok: false, note: "needs receipts" } : { text: "copy", ok: true };
+  // text · image · video all ship as a post the human pastes, so readiness is
+  // about the COPY. The medium sits in its own column; the app deliberately does
+  // not claim to know whether a video is filmed or an image is made — it gates
+  // only on what it can actually see, which is why a document gates on a PDF
+  // that exists in the build and nothing else pretends to.
+  if (isPost(r)) {
+    if (r.body) return r.gate ? { text: "gated", ok: false, note: firstSentence(r.gate) } : { text: "copy", ok: true };
+    // A BRIEF is not a missing draft — it is the plan, which is what this stage
+    // of a campaign legitimately has. Saying "—" would read as a broken import.
+    if (r.brief) return { text: "brief", ok: false, note: "the plan; the draft comes from the Sunday run" };
+    return { text: "—", ok: false, note: "no copy" };
   }
   if (isMandate(r)) return { text: "Sunday run", ok: false };
   return { text: "—", ok: false };
@@ -348,17 +383,25 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
               {(current ?? newest)!.title ?? (current ?? newest)!.name} · {(current ?? newest)!.rows} slots ·{" "}
               {windowLabel((current ?? newest)!.first, (current ?? newest)!.last)}
               {(current ?? newest)!.withCopy ? ` · ${(current ?? newest)!.withCopy} with copy` : ""}
+              {(current ?? newest)!.withBrief ? ` · ${(current ?? newest)!.withBrief} briefed` : ""}
               {(current ?? newest)!.documentsReady ? ` · ${(current ?? newest)!.documentsReady} PDF${(current ?? newest)!.documentsReady === 1 ? "" : "s"} ready` : ""}
-              . Loading it creates the calendar with each slot's copy ready to paste; drafting stays in
+              . Loading it creates the calendar with each slot's copy ready to paste — or, where the
+              plan is ahead of the drafts, the brief the post gets written from. Drafting stays in
               Cowork and posting stays a human press on LinkedIn — this screen only ever tracks.
               {(current ?? newest)!.supersedes ? ` It parks the ${(current ?? newest)!.supersedes} calendar's slots (never a posted one) and says so.` : ""}
             </p>
           )}
-          {(current ?? newest) && (
+          {(current ?? newest) && !campaigns.some(c => c.supersedes === (current ?? newest)!.name) ? (
             <button type="button" onClick={importCampaign} disabled={busy} style={btnPrimary}>
               {busy ? "Loading…" : loadLabel}
             </button>
-          )}
+          ) : (current ?? newest) ? (
+            <p style={{ margin: 0, fontSize: 13.5, color: C.muted, lineHeight: 1.6 }}>
+              This calendar is superseded by{" "}
+              {campaigns.find(c => c.supersedes === (current ?? newest)!.name)?.name} and cannot be
+              loaded — its slots stay readable under their own chip once the newer campaign is loaded.
+            </p>
+          ) : null}
         </div>
       )}
       {rows !== null && !error && all.length === 0 && view === STANDING && (
@@ -379,7 +422,14 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
               {onlyOpen ? "Showing open slots" : "Show open slots only"}
             </button>
             <div style={{ flex: 1 }} />
-            {view !== STANDING && current && (
+            {/* A SUPERSEDED calendar has no re-import button, because the server
+                refuses that import by design: its rows were parked by the newer
+                file's press, and re-reading a file whose rows say `next` would
+                read as a step FORWARD from `parked` and quietly un-park the
+                retired calendar. The chip already says "superseded"; a button
+                that can only ever error does not belong beside it. The test is
+                the server's own — does any other campaign supersede this one. */}
+            {view !== STANDING && current && !campaigns.some(c => c.supersedes === current.name) && (
               <button type="button" onClick={importCampaign} disabled={busy} style={btnGhost}
                       title="Re-import this campaign's content from the file that ships with the app. State-preserving: it can never un-post or re-date anything a human set.">
                 {busy ? "Loading…" : `Re-import ${current.name}`}
@@ -502,7 +552,7 @@ function SlotLine({ row, open, isToday, onToggle, onPatch, onPatchDraft, onMarkP
             <p style={{ margin: "0 0 10px", fontSize: 13, color: C.body, lineHeight: 1.6 }}>
               {row.lead}{row.format ? ` · ${row.format}` : ""}
             </p>
-            {(row.body || copyDraftState(row) === "live") ? <PostCopy row={row} /> : (
+            {(row.body || copyDraftState(row) === "live") ? <PostCopy row={row} /> : row.brief ? <BriefBlock row={row} /> : (
               <div style={{ padding: "12px 14px", background: C.panel, fontSize: 13.5, color: C.body, lineHeight: 1.6 }}>
                 {isMandate(row)
                   ? <>This edition's copy is not in the app: the Sunday run builds a Mandate from the deal sweep{row.status === "drafted" ? " (edition 1 was drafted in the Cowork week file)" : ""} and it lands here by re-import once the plan carries it. Paste from the drafted file when you post; mark it here.</>
@@ -511,7 +561,13 @@ function SlotLine({ row, open, isToday, onToggle, onPatch, onPatchDraft, onMarkP
                     : <>Copy has not been carried into the app for this slot — it lives in the plan's markdown. Re-export the campaign once the section is written.</>}
               </div>
             )}
-            {(row.kind === "text" || row.kind === "document") && row.status !== "posted" && <DraftBlock row={row} onPatchDraft={onPatchDraft} />}
+            {row.body && row.brief && (
+              <details style={{ marginTop: 12 }}>
+                <summary style={{ fontSize: 13, fontWeight: 600, cursor: "pointer" }}>The brief this was drafted from</summary>
+                <div style={{ marginTop: 8 }}><BriefBlock row={row} bare /></div>
+              </details>
+            )}
+            {(isPost(row) || row.kind === "document") && row.status !== "posted" && <DraftBlock row={row} onPatchDraft={onPatchDraft} />}
             {row.kind === "document" && <DocumentBlock row={row} />}
             {(row.carries || row.law_check || row.source_disclosure) && (
               <div style={{ marginTop: 14, fontSize: 13, color: C.body, lineHeight: 1.6 }}>
@@ -590,6 +646,60 @@ function SlotLine({ row, open, isToday, onToggle, onPatch, onPatchDraft, onMarkP
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ── the brief — the plan, where the draft does not exist yet ────────── */
+
+/**
+ * A slot's BRIEF: hook and rehook verbatim from the plan, the beats the draft
+ * gets written from, the source line with its disclosure, and whatever has to
+ * happen first.
+ *
+ * IT IS NEVER OFFERED AS SOMETHING TO PASTE. There is no Copy button here and
+ * that is the whole point: the copy box on this screen means "this text goes on
+ * LinkedIn", and a brief that borrowed it would eventually be pasted. The gate
+ * and the caution are two different things and render as two different things —
+ * a gate stops the post, a caution is something to read before drafting it.
+ */
+export function BriefBlock({ row, bare = false }: { row: QueueRow; bare?: boolean }) {
+  const b = row.brief;
+  if (!b) return null;
+  const beats = Array.isArray(b.beats) ? b.beats : [];
+  return (
+    <div>
+      {!bare && (
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+          <span style={{ fontSize: 13, fontWeight: 700 }}>The brief</span>
+          <span style={{ fontSize: 12.5, color: C.muted }}>
+            the plan for this slot — the post itself is drafted in the studio and lands here by re-import
+          </span>
+        </div>
+      )}
+      {row.gate && <Notice>{row.gate}</Notice>}
+      {b.note && <Notice>{b.note}</Notice>}
+      <div style={{ background: C.panel, padding: "12px 14px", lineHeight: 1.6 }}>
+        {b.hook && <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: C.ink }}>{b.hook}</p>}
+        {b.rehook && <p style={{ margin: "6px 0 0", fontSize: 14.5, color: C.ink }}>{b.rehook}</p>}
+        {beats.length > 0 && (
+          <ol style={{ margin: "12px 0 0", paddingLeft: 20 }}>
+            {beats.map((beat, i) => (
+              <li key={i} style={{ fontSize: 13.5, color: C.body, lineHeight: 1.6, marginBottom: 5 }}>{beat}</li>
+            ))}
+          </ol>
+        )}
+        {b.extraction && (
+          <p style={{ margin: "12px 0 0", fontSize: 13, color: C.body, whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
+            {b.extraction}
+          </p>
+        )}
+        {b.source && (
+          <p style={{ margin: "12px 0 0", fontSize: 13, color: C.muted, lineHeight: 1.6 }}>
+            <b style={{ color: C.ink }}>Source in-post: </b>{b.source}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -707,7 +817,13 @@ function Notice({ children }: { children: React.ReactNode }) {
  * not live-saved because a half-typed caption is not a decision.
  */
 export function DraftBlock({ row, onPatchDraft }: { row: QueueRow; onPatchDraft: (b: Record<string, unknown>) => Promise<string | null> }) {
-  const options = templatesFor(row.kind);
+  // THE MEDIUM IS NOT THE RENDERER. `TemplateFor` names what a builder makes:
+  // a `text` template IS the single-image post (build-onepager.mts), so an
+  // `image` slot maps onto it — that is the same artifact under the plan's own
+  // word for it. A `video` slot maps to NOTHING on purpose: no builder renders
+  // a piece to camera, and widening TemplateFor to admit one would put a
+  // template picker in front of a job that is done with a camera.
+  const options = templatesFor(row.kind === "image" ? "text" : row.kind === "video" ? null : row.kind);
   const [template, setTemplate] = useState<string>(row.template ?? "");
   const [copy, setCopy] = useState<string>(row.copy_edit ?? row.body ?? "");
   const [pages, setPages] = useState<{ n: number; label: string | null; text: string; note: string | null }[]>(
@@ -808,18 +924,26 @@ export function DraftBlock({ row, onPatchDraft }: { row: QueueRow; onPatchDraft:
       )}
 
       <div style={{ display: "grid", gap: 10 }}>
-        <label style={{ display: "grid", gap: 5 }}>
-          <span style={{ fontSize: 12.5, fontWeight: 600 }}>Template</span>
-          <select value={template} onChange={e => setTemplate(e.target.value)} style={{ ...input, maxWidth: 440 }}>
-            <option value="">— the spec's default —</option>
-            {options.map(t => <option key={t.id} value={t.id}>{t.label}{t.status === "pending" ? " (not built yet — pick is recorded)" : ""}</option>)}
-          </select>
-          {chosen && (
-            <span style={{ fontSize: 12.5, color: C.body, lineHeight: 1.5 }}>
-              {chosen.desc} <span style={mono}>· {chosen.renderer} · {chosen.hint}</span>
-            </span>
-          )}
-        </label>
+        {options.length > 0 ? (
+          <label style={{ display: "grid", gap: 5 }}>
+            <span style={{ fontSize: 12.5, fontWeight: 600 }}>Template</span>
+            <select value={template} onChange={e => setTemplate(e.target.value)} style={{ ...input, maxWidth: 440 }}>
+              <option value="">— the spec's default —</option>
+              {options.map(t => <option key={t.id} value={t.id}>{t.label}{t.status === "pending" ? " (not built yet — pick is recorded)" : ""}</option>)}
+            </select>
+            {chosen && (
+              <span style={{ fontSize: 12.5, color: C.body, lineHeight: 1.5 }}>
+                {chosen.desc} <span style={mono}>· {chosen.renderer} · {chosen.hint}</span>
+              </span>
+            )}
+          </label>
+        ) : (
+          /* An empty picker offering only "the spec's default" would imply a
+             builder is waiting on a pick. Nothing renders a piece to camera. */
+          <p style={{ margin: 0, fontSize: 12.5, color: C.muted, lineHeight: 1.5 }}>
+            No template — this slot is filmed, not rendered. The copy below is the script.
+          </p>
+        )}
 
         <label style={{ display: "grid", gap: 5 }}>
           <span style={{ fontSize: 12.5, fontWeight: 600 }}>

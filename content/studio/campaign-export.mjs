@@ -19,14 +19,32 @@
  * `pages`, `law_check`, `document`), the TABLE owns STATE. These fields ride
  * the same import and are overwritten by it; nothing here can un-post a row.
  *
- * WHAT IT PARSES. The plan's own structure — one `### P-N · <date> · TEXT|DOCUMENT
- * — <title>` section per post; text posts run from the italic pattern line to
- * `**Law check:**`; document posts carry `**Pg N …**` lines then a `**Caption**`
- * block; P-8 is receipt-gated (`**The frame…**` + `**The understudy…**`).
+ * WHAT IT PARSES. The plan's own structure — one
+ * `### <id> · <date> · TEXT|IMAGE|VIDEO|MANDATE|DOCUMENT — <title>` section per
+ * post — in two shapes, because a plan arrives before its drafts do:
+ *
+ *   COPY   (CAMPAIGN_2026-08-18.md) the finished post, as bare paragraphs from
+ *          the italic pattern line to `**Law check:**`; document posts carry
+ *          `**Pg N …**` lines then a `**Caption**` block; a receipt-gated slot
+ *          carries `**The frame…**` + `**The understudy…**`.
+ *   BRIEF  (CAMPAIGN_2026-08-21.md) the plan BEFORE the draft exists: labelled
+ *          `**Hook:**` / `**Rehook:**` / `**Beats:**` / `**Source in-post:**`
+ *          lines, which is what the 30-day sequence gives each day. The brief
+ *          rides into the app as `brief` and the slot reads "brief", not
+ *          "copy" — the honest state. When the Sunday staging run writes the
+ *          post it APPENDS it to the same section under `**The post:**` and
+ *          the exporter carries it as the body with the brief still beside it.
+ *
+ * ROUTING IS EXPLICIT, never guessed: a MANDATE section is always a brief (its
+ * copy is built by the Sunday run from the sweep, so its prose here is the
+ * standing rule and must never become a paste-ready body); a DOCUMENT section
+ * always takes the page/caption path; anything carrying a `**Hook` line is a
+ * brief; everything else is the 2026-08-18 copy shape, byte-for-byte.
+ *
  * A section it cannot read is REPORTED and left without copy — the row still
- * imports, the UI says "copy not carried", and `--check` fails — never
- * silently emptied, never guessed at. Mandate editions (M-n) are built by the
- * Sunday run and carry no copy here by design.
+ * imports, the UI says so, and `--check` fails — never silently emptied, never
+ * guessed at. A brief without a body is NOT a problem; a `**The post:**` marker
+ * with nothing under it is.
  *
  * DOCUMENTS. A document slot's `document` block records the deck spec, where
  * the plan files the render, and — ONLY IF THE FILE EXISTS under
@@ -82,7 +100,7 @@ function paragraphs(lines) {
 /* ── the sections ──────────────────────────────────────────────────────── */
 
 const lines = md.split('\n');
-const HEAD = /^###\s+(P-\d+)\s+·\s+(.+?)\s+·\s+(TEXT|DOCUMENT)\s+—\s+(.+?)\s*$/;
+const HEAD = /^###\s+([A-Z]+-\d+)\s+·\s+(.+?)\s+·\s+(TEXT|IMAGE|VIDEO|MANDATE|DOCUMENT)\s+—\s+(.+?)\s*$/;
 const sections = [];
 for (let i = 0; i < lines.length; i++) {
   const m = HEAD.exec(lines[i]);
@@ -124,6 +142,110 @@ function parseText(sec) {
   }
   const paras = paragraphs(b.slice(meta + 1, law >= 0 ? law : b.length)).map(plain);
   return { body: paras.join('\n\n'), body_alt: null, gate: null, law_check: lawText, pages: null, pattern: plain(b[meta] ?? '') };
+}
+
+/* ── the brief — a day of the plan before its draft exists ──────────────── */
+
+/** The app's `kind`: the MEDIUM, because a video day needs a camera and that is
+ *  the single most important production fact on the screen. MANDATE carries no
+ *  kind — the Sunday run builds it, and `isMandate()` already reads those rows. */
+const KIND = { TEXT: 'text', IMAGE: 'image', VIDEO: 'video', DOCUMENT: 'document', MANDATE: null };
+
+/** `**Label:** value` — the labelled lines a brief is made of. */
+const LABEL = /^\*\*([A-Z][^:*]*?)\*\*:?\s*(.*)$/;
+/** Same, where the plan wrote the colon inside the bold: `**Label:** value`. */
+const LABEL_IN = /^\*\*([A-Z][^*]*?):\*\*\s*(.*)$/;
+
+/** Which label a line opens, and what it carries on that same line. */
+function labelAt(line) {
+  const t = line.trim();
+  const m = LABEL_IN.exec(t) || LABEL.exec(t);
+  if (!m) return null;
+  // The plan qualifies its own labels and the label is still the label:
+  //   "Beats — CONFIRM/EDIT this list, it becomes yours"        → beats
+  //   "Hook (as planned, with the middle figure blocked)"       → hook
+  //   "Source in-post"                                          → source in post
+  // Drop a trailing dash clause and any parenthetical, drop apostrophes so a
+  // contraction stays one word, then let every other non-letter become a SPACE
+  // — deleting them instead silently welded "in-post" into "inpost" and the
+  // source line stopped being carried, with nothing failing.
+  const key = m[1].toLowerCase()
+    .split(/\s+[—-]\s+/)[0]
+    .replace(/\([^)]*\)?/g, ' ')
+    .replace(/['’]/g, '')
+    .replace(/[^a-z]+/g, ' ')
+    .trim();
+  return { key, raw: m[1].trim(), rest: m[2] ?? '' };
+}
+
+/**
+ * Parse one labelled block: the remainder of its own line plus every line up to
+ * the next label. Numbered lines come back as a list, everything else as
+ * paragraphs — which is the difference between "Beats:" followed by 1./2./3.
+ * and "Beats: pattern-level recap …" written inline.
+ */
+function block(lines, from) {
+  const buf = [];
+  for (let i = from; i < lines.length; i++) {
+    if (i > from && labelAt(lines[i])) break;
+    buf.push(lines[i]);
+  }
+  const items = buf.filter(l => /^\s*\d+\.\s/.test(l)).map(l => plain(l.replace(/^\s*\d+\.\s*/, '')));
+  const rest = buf.filter(l => !/^\s*\d+\.\s/.test(l));
+  return { items, text: paragraphs(rest).map(plain).join('\n\n') };
+}
+
+function parseBrief(sec, kindToken) {
+  const b = sec.body;
+  const meta = b.findIndex(isMeta);
+  const law = b.findIndex(isLaw);
+  if (meta < 0) problems.push(`${sec.id}: no *Pattern:* line`);
+  if (law < 0) problems.push(`${sec.id}: no **Law check** line`);
+
+  // ⛔ stops the post from shipping as-is; ⚠ is a caution the human must read
+  // before drafting. They are different things and are not merged: a gate makes
+  // the slot read "gated" on screen, a caution does not.
+  const gate = b.filter(l => /^⛔/.test(l.trim())).map(l => plain(l.replace(/^⛔\s*/, ''))).join(' ') || null;
+  const caution = b.filter(l => /^⚠/.test(l.trim())).map(l => plain(l.replace(/^⚠\s*/, ''))).join(' ') || null;
+
+  const brief = { hook: null, rehook: null, beats: [], source: null, extraction: null, note: caution };
+  let post = null, understudy = null;
+  for (let i = 0; i < b.length; i++) {
+    const at = labelAt(b[i]);
+    if (!at) continue;
+    const { items, text } = block(b, i);
+    const value = items.length ? items.join('\n') : text.replace(/^\*\*[^*]*\*\*:?\s*/, '');
+    switch (at.key) {
+      case 'hook': case 'hook skeleton': brief.hook = plain(at.rest) || value; break;
+      case 'rehook': brief.rehook = plain(at.rest) || value; break;
+      case 'beats': brief.beats = items.length ? items : (plain(at.rest) ? [plain(at.rest)] : []); break;
+      case 'beats close': case 'close': case 'series proposal': case 'anonymisation':
+      case 'anonymization': case 'extraction prompt': case 'extraction questions':
+      case 'expect': case 'if the receipt isnt ready': case 'medium': {
+        // The plan's own label, not the normalised key — a key is for matching,
+        // and title-casing it back produces "Extraction Prompt", which is nobody's writing.
+        const line = `${at.raw}: ${plain(at.rest) || value}`.trim();
+        brief.extraction = brief.extraction ? `${brief.extraction}\n${line}` : line;
+        break;
+      }
+      case 'source in post': brief.source = plain(at.rest) || value; break;
+      case 'the post': post = items.length ? items.join('\n\n') : value; break;
+      case 'the understudy': understudy = items.length ? items.join('\n\n') : value; break;
+      default: break;
+    }
+  }
+  if (kindToken !== 'MANDATE' && !brief.hook) problems.push(`${sec.id}: brief with no **Hook** line`);
+  if (post !== null && !post.trim()) problems.push(`${sec.id}: **The post:** marker with nothing under it`);
+
+  return {
+    body: post && post.trim() ? post.trim() : null,
+    body_alt: understudy && understudy.trim() ? understudy.trim() : null,
+    gate,
+    law_check: law >= 0 ? plain(b[law].replace(/^\*\*Law check[^*]*\*\*:?\s*/, '')) : null,
+    pages: null,
+    pattern: plain(b[meta] ?? ''),
+    brief,
+  };
 }
 
 const PG = /^\*\*Pg\s+(\d+)(?:\s+—\s+([^*]+?))?\.\*\*\s*(.*)$/;
@@ -223,20 +345,30 @@ function describeDrift(plan, deck) {
 /* ── merge ─────────────────────────────────────────────────────────────── */
 
 const byId = new Map(sections.map(s => [s.id, s]));
-let carried = 0;
+let carried = 0, briefed = 0;
 for (const row of campaign.rows) {
   const sec = byId.get(row.queue_id);
   if (!sec) {
-    // M-n editions and the blackout carry no copy here by design; a P-row
-    // without a section is a real gap.
-    if (/^P-\d+$/.test(row.queue_id)) problems.push(`${row.queue_id}: no ### section in ${MD.split('/').pop()}`);
+    // M-n editions and the blackout carry no copy here by design; a numbered
+    // post row (P-n, D-nn) without a section is a real gap.
+    if (/^[PD]-\d+$/.test(row.queue_id)) problems.push(`${row.queue_id}: no ### section in ${MD.split('/').pop()}`);
     continue;
   }
-  const parsed = sec.kind === 'DOCUMENT' ? parseDocument(sec) : parseText(sec);
-  if (!parsed.body) problems.push(`${row.queue_id}: empty copy`);
+  // Explicit routing — see the header. MANDATE is a brief by definition; a
+  // `**Hook` line is the brief shape; everything else is the copy shape.
+  const isBrief = sec.kind === 'MANDATE' || sec.body.some(l => /^\*\*Hook/.test(l.trim()));
+  const parsed = sec.kind === 'DOCUMENT' ? parseDocument(sec)
+    : isBrief ? parseBrief(sec, sec.kind)
+    : parseText(sec);
+  // A BRIEF legitimately has no body — the draft has not been written yet, and
+  // saying so is the point. Only a copy-shaped section owes one.
+  if (!parsed.body && !isBrief) problems.push(`${row.queue_id}: empty copy`);
   delete row.body_plan; // a field an earlier cut wrote; the deck caption now rides as body_deck
   row.title = sec.title;
-  row.kind = sec.kind === 'DOCUMENT' ? 'document' : 'text';
+  // `in`, not `??`: MANDATE maps to null ON PURPOSE (the Sunday run builds it and
+  // `isMandate()` reads those rows), and `null ?? 'text'` would have quietly
+  // relabelled every Mandate edition as a text post with no copy.
+  row.kind = sec.kind in KIND ? KIND[sec.kind] : 'text';
   row.body = parsed.body || null;
   row.body_alt = parsed.body_alt;
   row.body_deck = null;
@@ -244,6 +376,7 @@ for (const row of campaign.rows) {
   row.gate = parsed.gate;
   row.pages = parsed.pages;
   row.law_check = parsed.law_check;
+  row.brief = parsed.brief ?? null;
   const doc = sec.kind === 'DOCUMENT' ? documentFor(row, parsed.pattern) : null;
   if (sec.kind === 'DOCUMENT' && !doc) problems.push(`${row.queue_id}: document slot with no "file to markets/<m>/collateral/<slug>/<date>/" pointer`);
   if (doc) {
@@ -267,7 +400,7 @@ for (const row of campaign.rows) {
   } else {
     row.document = null;
   }
-  carried++;
+  if (parsed.body) carried++; else if (parsed.brief) briefed++;
 }
 for (const s of sections) {
   if (!campaign.rows.some(r => r.queue_id === s.id)) problems.push(`${s.id}: section in the markdown has no row in the JSON`);
@@ -278,10 +411,15 @@ campaign.copy_source = `content/studio/CAMPAIGN_${name}.md`;
 if (problems.length) {
   console.error(`campaign-export: ${problems.length} problem(s) —\n  ${problems.join('\n  ')}`);
 }
+/** "18 carry copy, 12 carry a brief" — the two states are reported apart,
+ *  because a brief is a plan and a body is something you can paste. */
+const tally = `${carried} of ${campaign.rows.length} rows carry copy` +
+  (briefed ? `, ${briefed} carry a brief and are waiting on a draft` : '');
+
 if (CHECK) {
-  console.error(`${carried} of ${campaign.rows.length} rows carry copy${problems.length ? '' : ' — clean'}.`);
+  console.error(`${tally}${problems.length ? '' : ' — clean'}.`);
   process.exit(problems.length ? 1 : 0);
 }
 writeFileSync(JSON_FILE, JSON.stringify(campaign, null, 2) + '\n');
-console.error(`wrote ${JSON_FILE.replace(REPO + '/', '')} — ${carried} rows carry copy${problems.length ? ` (${problems.length} problem(s) above)` : ''}.`);
+console.error(`wrote ${JSON_FILE.replace(REPO + '/', '')} — ${tally}${problems.length ? ` (${problems.length} problem(s) above)` : ''}.`);
 process.exit(problems.length ? 1 : 0);

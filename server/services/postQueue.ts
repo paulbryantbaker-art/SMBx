@@ -51,6 +51,30 @@ export interface QueueDocument {
   deck_caption_matches: boolean;
 }
 
+/**
+ * The plan for a slot BEFORE its draft exists (migration 139).
+ *
+ * The 30-day "How I" hook sequence gives each day its hook and rehook verbatim
+ * and its beats as the drafting brief; the copy is written later by the Sunday
+ * staging run. A brief is therefore not a degraded body and must never be shown
+ * as one — it is what the slot IS until the draft lands, and the screen says so.
+ *
+ * It is CONTENT (the plan owns it, every import overwrites it) and so has
+ * nothing to do with the DRAFT columns of migration 138, which are Paul's own
+ * decisions and are never touched by the importer.
+ */
+export interface QueueBrief {
+  hook: string | null;
+  rehook: string | null;
+  beats: string[];
+  /** The plan's "Source in-post" line — publisher plus its commercial interest. */
+  source: string | null;
+  /** What has to happen before this can be drafted (a receipt interview, an anonymisation rule). */
+  extraction: string | null;
+  /** A caution to read before drafting — a contested count, a vintage, a protocol conflict. */
+  note: string | null;
+}
+
 export interface QueueRow {
   queue_id: string;
   tier: string | null;
@@ -64,7 +88,9 @@ export interface QueueRow {
   may_state_figure: boolean;
   /* ── the copy (migration 136) — all content, all overwritten on import ── */
   title?: string | null;
-  kind?: 'text' | 'document' | null;
+  /** The MEDIUM. text|image|video ship as a post; document ships a deck too;
+   *  null is a Mandate edition or a blackout, which carry no copy of their own. */
+  kind?: 'text' | 'image' | 'video' | 'document' | null;
   body?: string | null;         // paste-ready: the post, or a document slot's caption
   body_alt?: string | null;     // the understudy, where a slot has one
   body_deck?: string | null;    // the deck's caption, only where it differs from the plan's
@@ -73,7 +99,12 @@ export interface QueueRow {
   law_check?: string | null;
   pages?: QueuePage[] | null;
   document?: QueueDocument | null;
+  /* ── the plan, where the draft does not exist yet (migration 139) ── */
+  brief?: QueueBrief | null;
 }
+
+/** The mediums a row may claim. Anything else is NULL — never coerced to text. */
+const KINDS = new Set(['text', 'image', 'video', 'document']);
 
 const STATUSES = new Set(['next', 'drafted', 'posted', 'parked', 'recurring']);
 
@@ -214,7 +245,10 @@ export async function importQueue(
     // rather than keeping a stale body from an earlier file. JSON columns take
     // the parsed value or NULL; a malformed shape is the exporter's problem
     // and `--check` catches it before it gets here.
-    const kind = r.kind === 'text' || r.kind === 'document' ? r.kind : null;
+    // text · image · video · document. The MEDIUM, because a video day needs a
+    // camera booked and a row that reads "Text" hides that; NULL for a Mandate
+    // edition or a blackout, which carry no copy of their own.
+    const kind = typeof r.kind === 'string' && KINDS.has(r.kind) ? r.kind : null;
     // THE DOUBLE-ENCODE (2026-08-19, Paul: "any time i try to view or edit a
     // post, i get an error: c.map is not a function"). These two were
     // JSON.stringify'd here and then passed as `${x}::jsonb`. postgres-js
@@ -232,18 +266,26 @@ export async function importQueue(
     // `string | null` fields; the runtime shape is plain JSON either way)
     const pages = Array.isArray(r.pages) && r.pages.length ? sql.json(r.pages as any) : null;
     const document = r.document && typeof r.document === 'object' ? sql.json(r.document as any) : null;
+    // A brief with nothing in it is NULL, not an empty shell: the screen decides
+    // what to show by whether a brief EXISTS, and an object of six nulls would
+    // render an empty panel that reads as a rendering bug. `sql.json` for the
+    // same reason as the two above — pass the object, serialize exactly once.
+    const brief = r.brief && typeof r.brief === 'object' &&
+      (r.brief.hook || r.brief.rehook || r.brief.source || r.brief.extraction || r.brief.note ||
+       (Array.isArray(r.brief.beats) && r.brief.beats.length))
+      ? sql.json(r.brief as any) : null;
 
     const [row] = await sql<{ inserted: boolean }[]>`
       INSERT INTO post_queue (
         user_id, queue_id, tier, lead, angle, format, carries,
         evidence_grade, source_disclosure, may_state_figure, status, campaign,
-        title, kind, body, body_alt, body_deck, gate, copy_note, law_check, pages, document
+        title, kind, body, body_alt, body_deck, gate, copy_note, law_check, pages, document, brief
       ) VALUES (
         ${userId}, ${r.queue_id}, ${r.tier ?? null}, ${r.lead ?? null}, ${r.angle},
         ${r.format ?? null}, ${r.carries ?? null}, ${r.evidence_grade ?? null},
         ${r.source_disclosure ?? null}, ${r.may_state_figure}, ${incoming}, ${campaign},
         ${r.title ?? null}, ${kind}, ${r.body ?? null}, ${r.body_alt ?? null}, ${r.body_deck ?? null},
-        ${r.gate ?? null}, ${r.copy_note ?? null}, ${r.law_check ?? null}, ${pages}, ${document}
+        ${r.gate ?? null}, ${r.copy_note ?? null}, ${r.law_check ?? null}, ${pages}, ${document}, ${brief}
       )
       ON CONFLICT (user_id, queue_id) DO UPDATE SET
         tier              = EXCLUDED.tier,
@@ -264,6 +306,7 @@ export async function importQueue(
         law_check         = EXCLUDED.law_check,
         pages             = EXCLUDED.pages,
         document          = EXCLUDED.document,
+        brief             = EXCLUDED.brief,
         -- PARKED IS A HUMAN DECISION AND OUTRANKS THE FILE (2026-08-18 review).
         -- The rank ladder scores parked as 0, so a re-import of a file whose row
         -- says next (rank 1) read as a step FORWARD and silently un-parked a slot
@@ -302,18 +345,25 @@ function unwrapJson<T>(v: unknown, ok: (x: unknown) => x is T): T | null {
 }
 const isPages = (x: unknown): x is QueuePage[] => Array.isArray(x);
 const isDoc = (x: unknown): x is QueueDocument => !!x && typeof x === 'object' && !Array.isArray(x);
+const isBrief = (x: unknown): x is QueueBrief => !!x && typeof x === 'object' && !Array.isArray(x);
 
 export function normalizeQueueRow<R extends Record<string, any>>(row: R): R {
   const pages = unwrapJson(row.pages, isPages);
   const pages_edit = unwrapJson(row.pages_edit, isPages);
   const pages_base = unwrapJson(row.pages_base, isPages);
   const document = unwrapJson(row.document, isDoc);
+  const brief = unwrapJson(row.brief, isBrief);
+  // `beats` is the one field the screen iterates, so it is the one that throws
+  // if it arrives as anything else — the same shape of failure as `pages.map`.
+  if (brief && !Array.isArray((brief as any).beats)) {
+    (brief as any).beats = unwrapJson((brief as any).beats, (x): x is string[] => Array.isArray(x)) ?? [];
+  }
   // a document whose thumbs were themselves stringified (nested double-encode) — same unwrap, one level down
   if (document && typeof (document as any).thumbs === 'string') {
     (document as any).thumbs = unwrapJson((document as any).thumbs, (x): x is string[] => Array.isArray(x)) ?? [];
   }
   if (document && !Array.isArray((document as any).thumbs)) (document as any).thumbs = [];
-  return { ...row, pages, pages_edit, pages_base, document };
+  return { ...row, pages, pages_edit, pages_base, document, brief };
 }
 
 export async function listQueue(userId: number): Promise<any[]> {
@@ -517,6 +567,10 @@ export interface CampaignMeta {
   /** Rows carrying paste-ready copy, and document slots whose PDF ships in this build (migration 136). */
   withCopy: number;
   documentsReady: number;
+  /** Rows carrying a PLAN and no draft yet (migration 139). A campaign can be
+   *  entirely briefs — the 30-day sequence is — and the load card must say that
+   *  rather than reporting "0 with copy" as if the import had failed. */
+  withBrief: number;
 }
 
 /** Pure: read one campaign file's shape into meta. Exported for the tests. */
@@ -543,6 +597,7 @@ export function campaignMeta(name: string, file: string, parsed: any): CampaignM
     supersedes: /(\d{4}-\d{2}-\d{2})/.exec(String(parsed?.supersedes?.campaign ?? ''))?.[1] ?? null,
     withCopy: rows.filter(r => typeof r?.body === 'string' && r.body.trim()).length,
     documentsReady: rows.filter(r => typeof r?.document?.pdf === 'string').length,
+    withBrief: rows.filter(r => !(typeof r?.body === 'string' && r.body.trim()) && r?.brief && typeof r.brief === 'object').length,
   };
 }
 

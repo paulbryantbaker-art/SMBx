@@ -71,7 +71,8 @@
       "pages": null,
       "law_check": "GF Data gradient — STRONG (consistent across reporters), publisher + interest named inline. Axial figure — publisher named. No retired values.",
       "document": null,
-      "body_deck": null
+      "body_deck": null,
+      "brief": null
     },
     {
       "queue_id": "M-1",
@@ -187,7 +188,8 @@
         "bytes": 3590161,
         "deck_caption_matches": false
       },
-      "body_deck": "Three years ago, deals died on financing. Now they die on findings.\n\nAxial’s dead-deal data (75 broken lower-middle-market transactions, member-reported — and Axial sells the channel it measures) puts diligence findings behind ~47% of post-LOI breaks in 2025. QoE discrepancies as the killer more than doubled in two years while financing breaks fell by half.\n\nThe carousel covers what a dead deal costs, how long each buyer type sits in exclusivity before walking, and the part that interests me most: the four findings that kill deals are the same four that wreck integrations when the deal closes anyway.\n\nA finding you didn’t price doesn’t disappear at close. It moves to the integration budget.\n\nOne page in there refuses a claim rather than making it. Does pre-LOI screening actually reduce break rates? The vendors say yes. No causal study exists. Cheap insurance with an unproven payout is the honest version, so that is what the page says.\n\nWhich finding killed your last dead deal — and could you have seen it at day 4?"
+      "body_deck": "Three years ago, deals died on financing. Now they die on findings.\n\nAxial’s dead-deal data (75 broken lower-middle-market transactions, member-reported — and Axial sells the channel it measures) puts diligence findings behind ~47% of post-LOI breaks in 2025. QoE discrepancies as the killer more than doubled in two years while financing breaks fell by half.\n\nThe carousel covers what a dead deal costs, how long each buyer type sits in exclusivity before walking, and the part that interests me most: the four findings that kill deals are the same four that wreck integrations when the deal closes anyway.\n\nA finding you didn’t price doesn’t disappear at close. It moves to the integration budget.\n\nOne page in there refuses a claim rather than making it. Does pre-LOI screening actually reduce break rates? The vendors say yes. No causal study exists. Cheap insurance with an unproven payout is the honest version, so that is what the page says.\n\nWhich finding killed your last dead deal — and could you have seen it at day 4?",
+      "brief": null
     },
     {
       "queue_id": "P-6",
@@ -209,7 +211,8 @@
       "pages": null,
       "law_check": "IESE, Stanford, Teten & Farmer — STRONG (multiple independent academic sources converge), publishers named, Teten's commercial interest disclosed inline. Coverage stated qualitatively here (\"a fraction\") — the SPS 17.6% figure is reserved for P-7 where its interest disclosure gets full treatment. No retired values.",
       "document": null,
-      "body_deck": null
+      "body_deck": null,
+      "brief": null
     },
     {
       "queue_id": "M-2",
@@ -325,7 +328,8 @@
         "bytes": 3972851,
         "deck_caption_matches": false
       },
-      "body_deck": "Every HVAC thesis written in 2025 priced in four things. Three of them have since expired.\n\nThe refrigerant crisis is over — HARDI said so in October 2025. R-454B peaked above $900 a cylinder and now runs $449–499, falling. The tariff stack is gone: SCOTUS struck the IEEPA duties 6–3 in February, and residential HVAC Section 232 was cut from 25% to 15% in June. And the R-410A installation deadline the whole mandated-replacement case rested on was withdrawn by EPA on 27 July.\n\nThe one that did not ease is labor. About 40,100 HVAC openings a year through 2034, and no purchase order fixes it.\n\nMeanwhile the price came down. Capstone puts HVAC services at 9.5x EV/EBITDA across 2024–YTD 2026 against 13.3x across 2021–23. Roughly four turns.\n\nA correction I owe this feed, since it is the kind that matters. I had a figure staged for this post claiming PE add-ons had nearly doubled year over year, attributed to S&P. I could not stand it up at that source or any other. Capstone’s actual count is 38 add-ons against 36 — two deals — and sector volume is down 4.2%. I am not going to restate the number I could not verify, because a figure repeated in order to knock it down is still a figure being repeated. The booming-deal-market version of this post was wrong, and it is not the one I am posting.\n\nWhat is actually happening is duller and more useful: platform formation has slowed, add-ons carry the volume, and the good metros are taken. The opening is where the platforms have not formed yet.\n\nIf you are underwriting HVAC right now — have you re-run the model without the deadline in it?"
+      "body_deck": "Every HVAC thesis written in 2025 priced in four things. Three of them have since expired.\n\nThe refrigerant crisis is over — HARDI said so in October 2025. R-454B peaked above $900 a cylinder and now runs $449–499, falling. The tariff stack is gone: SCOTUS struck the IEEPA duties 6–3 in February, and residential HVAC Section 232 was cut from 25% to 15% in June. And the R-410A installation deadline the whole mandated-replacement case rested on was withdrawn by EPA on 27 July.\n\nThe one that did not ease is labor. About 40,100 HVAC openings a year through 2034, and no purchase order fixes it.\n\nMeanwhile the price came down. Capstone puts HVAC services at 9.5x EV/EBITDA across 2024–YTD 2026 against 13.3x across 2021–23. Roughly four turns.\n\nA correction I owe this feed, since it is the kind that matters. I had a figure staged for this post claiming PE add-ons had nearly doubled year over year, attributed to S&P. I could not stand it up at that source or any other. Capstone’s actual count is 38 add-ons against 36 — two deals — and sector volume is down 4.2%. I am not going to restate the number I could not verify, because a figure repeated in order to knock it down is still a figure being repeated. The booming-deal-market version of this post was wrong, and it is not the one I am posting.\n\nWhat is actually happening is duller and more useful: platform formation has slowed, add-ons carry the volume, and the good metros are taken. The opening is where the platforms have not formed yet.\n\nIf you are underwriting HVAC right now — have you re-run the model without the deadline in it?",
+      "brief": null
     },
     {
       "queue_id": "P-3",
@@ -347,7 +351,8 @@
       "pages": null,
       "law_check": "Exclusivity-day figures — same Axial dataset as P-2, publisher + interest inline. UBS ~12 staff — MODERATE (single flagship survey), caveat stated inline. No retired values.",
       "document": null,
-      "body_deck": null
+      "body_deck": null,
+      "brief": null
     },
     {
       "queue_id": "M-3",
@@ -393,7 +398,8 @@
       "pages": null,
       "law_check": "$10T/12M — THIN per the substrate and the queue's own flag; debunked, never claimed. 2.9M — the defensible primary figure, publisher named. Gallup 67% — publisher named. Double-count warning — source's commercial interest disclosed. No retired values.",
       "document": null,
-      "body_deck": null
+      "body_deck": null,
+      "brief": null
     },
     {
       "queue_id": "M-4",
@@ -509,7 +515,8 @@
         "bytes": 3757702,
         "deck_caption_matches": false
       },
-      "body_deck": "Nobody publishes what an add-on program costs to run. So here is the sheet, assembled from what is public — with every source’s commercial interest named, because most of these numbers come from someone selling something.\n\nThe person: $150–250K before carry. The data stack: routinely six figures. The ramp: first LOI around month seven in search data, and no clean published number for time-to-first-sourced-close — a gap worth knowing by name. The coverage all of it buys: the median firm sees about 17.6% of its own market’s deal flow, per the one longitudinal series that exists (published by a firm that sells origination analytics).\n\nAnd the line nobody budgets: dead deals. $25–50K of QoE per busted exclusivity, with ~47% of post-LOI breaks now driven by diligence findings.\n\nOne page in the carousel does the arithmetic — fully loaded cost divided by sourced closes, somewhere between $60K and $200K each. It is labeled illustrative on the page, because it is my arithmetic on published ranges and not a benchmark anybody has established. Redo it with your own numbers.\n\nThe sheet’s conclusion is not \"spend less\". It is that the function is expensive whether or not it works — so the question is where the next dollar of finite attention produces a return. On most platforms I have seen, the starved end is not the top of the funnel.\n\nIf you have built this function: what did your cost per closed add-on actually come out to?"
+      "body_deck": "Nobody publishes what an add-on program costs to run. So here is the sheet, assembled from what is public — with every source’s commercial interest named, because most of these numbers come from someone selling something.\n\nThe person: $150–250K before carry. The data stack: routinely six figures. The ramp: first LOI around month seven in search data, and no clean published number for time-to-first-sourced-close — a gap worth knowing by name. The coverage all of it buys: the median firm sees about 17.6% of its own market’s deal flow, per the one longitudinal series that exists (published by a firm that sells origination analytics).\n\nAnd the line nobody budgets: dead deals. $25–50K of QoE per busted exclusivity, with ~47% of post-LOI breaks now driven by diligence findings.\n\nOne page in the carousel does the arithmetic — fully loaded cost divided by sourced closes, somewhere between $60K and $200K each. It is labeled illustrative on the page, because it is my arithmetic on published ranges and not a benchmark anybody has established. Redo it with your own numbers.\n\nThe sheet’s conclusion is not \"spend less\". It is that the function is expensive whether or not it works — so the question is where the next dollar of finite attention produces a return. On most platforms I have seen, the starved end is not the top of the funnel.\n\nIf you have built this function: what did your cost per closed add-on actually come out to?",
+      "brief": null
     },
     {
       "queue_id": "P-8",
@@ -531,7 +538,8 @@
       "pages": null,
       "law_check": "Objections — MODERATE-STRONG per substrate, sources characterized. Teten interest disclosed. Zero self-reference, zero fee content — the restraint is the post.",
       "document": null,
-      "body_deck": null
+      "body_deck": null,
+      "brief": null
     },
     {
       "queue_id": "M-5",

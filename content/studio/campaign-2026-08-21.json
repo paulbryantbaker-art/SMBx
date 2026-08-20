@@ -1,0 +1,1133 @@
+{
+  "campaign": "smbX studio · 30-Day \"How I\" Hook Sequence · Aug 21 – Sep 19, 2026",
+  "note": "Content of record: CAMPAIGN_2026-08-21.md (Paul’s plan, Cowork, 2026-08-20 — Google Doc 1TVfT5K9TCk0fw6nl7b86853OMyTzsQsjsWGZ_sfXM-M). SUPERSEDES campaign-2026-08-18.json from Aug 21 forward. P-1 (Aug 18) and P-2 (Aug 20) SHIPPED under that calendar and STAND — they are deliberately absent from `supersedes.rows`, so nothing parks or re-dates them; mark them posted in the app if that has not been done. Everything else on the Aug 18 calendar steps aside, including M-1 (Wed Aug 19), which the plan is silent about: parking a past-dated Mandate edition is honest, and a row already marked posted is left exactly as it is. THIRTY ROWS CARRY BRIEFS, NOT DRAFTS. The plan gives each day its hook and rehook verbatim and its beats as the drafting brief; the finished post is written by the Sunday staging run and lands in the markdown under a `**The post:**` marker in the same section. Until then a slot reads \"brief\" rather than \"copy\" — the honest state. Ids D-01…D-30 are this campaign’s own and reuse no P-, M-, Q- or C- id: an id is one post forever, because that is what its analytics are joined on. Tier = week of the window. Rows are CONTENT ONLY — the app owns state. The schedule map is applied ONLY where a row has no date yet; a re-import never moves a date a human set. ONE FIGURE IS BLOCKED BEFORE DRAFTING: Day 11’s \"PE add-ons up 88%\" is retired (R-HS-017 — not found in any S&P or secondary source, and contradicted by Capstone’s own count of 38 add-ons). Two more are flagged for vintage/merge risk (Days 17 and 23, the $1.2T buyout figure; Day 21, the fire-safety counts). See §A.2 of the markdown.",
+  "weeks": {
+    "W1": "Week 1 · Aug 21–27 · PLANT THE FLAG — receipts-independent",
+    "W2": "Week 2 · Aug 28 – Sep 3 · THE MECHANICS — into DealSource",
+    "W3": "Week 3 · Sep 4–10 · THE AUTOPSIES — new connections watching",
+    "W4": "Week 4 · Sep 11–19 · THE BUYER’S MATH"
+  },
+  "supersedes": {
+    "campaign": "campaign-2026-08-18.json",
+    "rows": [
+      "M-1",
+      "P-3",
+      "P-4",
+      "P-5",
+      "P-6",
+      "P-7",
+      "P-8",
+      "M-2",
+      "M-3",
+      "M-4",
+      "M-5",
+      "BLACKOUT-0903"
+    ],
+    "action": "park — STATE change, applied by the import press through updateQueueState, never by this file’s upsert (content columns only). P-1 and P-2 are NOT listed: the plan records that both shipped and stand. Any listed row already `posted` is left alone — the floor rule forbids pulling a row backwards — and the press reports it."
+  },
+  "schedule": {
+    "D-01": {
+      "on": "2026-08-21",
+      "slot": "fri"
+    },
+    "D-02": {
+      "on": "2026-08-22",
+      "slot": "sat"
+    },
+    "D-03": {
+      "on": "2026-08-23",
+      "slot": "sun"
+    },
+    "D-04": {
+      "on": "2026-08-24",
+      "slot": "mon"
+    },
+    "D-05": {
+      "on": "2026-08-25",
+      "slot": "tue"
+    },
+    "D-06": {
+      "on": "2026-08-26",
+      "slot": "wed"
+    },
+    "D-07": {
+      "on": "2026-08-27",
+      "slot": "thu"
+    },
+    "D-08": {
+      "on": "2026-08-28",
+      "slot": "fri"
+    },
+    "D-09": {
+      "on": "2026-08-29",
+      "slot": "sat"
+    },
+    "D-10": {
+      "on": "2026-08-30",
+      "slot": "sun"
+    },
+    "D-11": {
+      "on": "2026-08-31",
+      "slot": "mon"
+    },
+    "D-12": {
+      "on": "2026-09-01",
+      "slot": "tue"
+    },
+    "D-13": {
+      "on": "2026-09-02",
+      "slot": "wed"
+    },
+    "D-14": {
+      "on": "2026-09-03",
+      "slot": "thu"
+    },
+    "D-15": {
+      "on": "2026-09-04",
+      "slot": "fri"
+    },
+    "D-16": {
+      "on": "2026-09-05",
+      "slot": "sat"
+    },
+    "D-17": {
+      "on": "2026-09-06",
+      "slot": "sun"
+    },
+    "D-18": {
+      "on": "2026-09-07",
+      "slot": "mon"
+    },
+    "D-19": {
+      "on": "2026-09-08",
+      "slot": "tue"
+    },
+    "D-20": {
+      "on": "2026-09-09",
+      "slot": "wed"
+    },
+    "D-21": {
+      "on": "2026-09-10",
+      "slot": "thu"
+    },
+    "D-22": {
+      "on": "2026-09-11",
+      "slot": "fri"
+    },
+    "D-23": {
+      "on": "2026-09-12",
+      "slot": "sat"
+    },
+    "D-24": {
+      "on": "2026-09-13",
+      "slot": "sun"
+    },
+    "D-25": {
+      "on": "2026-09-14",
+      "slot": "mon"
+    },
+    "D-26": {
+      "on": "2026-09-15",
+      "slot": "tue"
+    },
+    "D-27": {
+      "on": "2026-09-16",
+      "slot": "wed"
+    },
+    "D-28": {
+      "on": "2026-09-17",
+      "slot": "thu"
+    },
+    "D-29": {
+      "on": "2026-09-18",
+      "slot": "fri"
+    },
+    "D-30": {
+      "on": "2026-09-19",
+      "slot": "sat"
+    }
+  },
+  "rows": [
+    {
+      "queue_id": "D-01",
+      "tier": "W1",
+      "lead": "Fri Aug 21 · Day 1",
+      "angle": "Will this deal survive — 47% die on diligence findings",
+      "format": "Video · Diligence Tell · pillar Dead Deal Economics",
+      "carries": "Axial Dead Deal Report 2025 (75 broken lower-middle-market transactions, member-reported): ~47% of post-LOI breaks died on diligence findings in 2025 — 25.3% non-QoE findings plus 21.3% QoE discrepancies.",
+      "evidence_grade": null,
+      "source_disclosure": "Axial Dead Deal Report 2025, member-reported sample — Axial sells access to the channel it measures, stated inline. The screening→break-rate claim is THIN and is REFUSED in the post rather than argued around: no causal study proves pre-LOI screening reduces break rates.",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "Will this deal survive",
+      "kind": "video",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "The screening→break-rate claim is THIN and is argued, never claimed — beat 2 is the refusal, stated out loud. Axial sells access to the channel it measures; say so. Attribution formula, approximate track-record number, no employer names. Real camera.",
+      "brief": {
+        "hook": "47% of broken lower-middle-market deals die on diligence findings. Most of those findings existed before the LOI was signed.",
+        "rehook": "After ~150 acquisitions led or co-led over twenty years, I underwrite one question before anything else: will this deal survive?",
+        "beats": [
+          "Axial dead-deal data: 25.3% non-QoE findings + 21.3% QoE discrepancies, 75 broken deals, self-reported.",
+          "The claim I refuse to make: no causal study proves pre-LOI screening reduces break rates. What's provable: the killing fact was discoverable.",
+          "Tease the week-one list — delivered Day 4."
+        ],
+        "source": "Axial Dead Deal Report 2025, member-reported sample.",
+        "extraction": null,
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-02",
+      "tier": "W1",
+      "lead": "Sat Aug 22 · Day 2",
+      "angle": "QoE discrepancies doubled in two years",
+      "format": "Image · Threshold · pillar Dead Deal Economics",
+      "carries": "Axial: QoE EBITDA discrepancies as cause of death 10.6% (2023) → 21.3% (2025). Both endpoints stated, never the delta alone.",
+      "evidence_grade": null,
+      "source_disclosure": "Axial Dead Deal Report 2025 — publisher and its interest named inline.",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "QoE discrepancies doubled in two years",
+      "kind": "image",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "Both endpoints stated (10.6% → 21.3%), never the delta alone. Axial's interest disclosed. Beat 3 is optional and bracketed — the post ships without it; brackets never ship.",
+      "brief": {
+        "hook": "QoE discrepancies killed 10.6% of broken LMM deals in 2023. Two years later: 21.3%. Sellers didn't get worse in two years.",
+        "rehook": "Buyers stopped verifying early enough.",
+        "beats": [
+          "What doubled it — add-back aggression meeting a tighter rate environment.",
+          "The move: verification shifted left of the LOI, not after it.",
+          "One concrete check that moved. [RECEIPT-optional: name the check you actually moved earlier; the post works without it.]"
+        ],
+        "source": "Axial Dead Deal Report 2025.",
+        "extraction": null,
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-03",
+      "tier": "W1",
+      "lead": "Sun Aug 23 · Day 3",
+      "angle": "The share of deal flow you actually see",
+      "format": "Image · Reconciliation · pillar Where the Return Comes From",
+      "carries": "Sutton Place Strategies Deal Origination Benchmark, 177 firms: median PE firm sees 17.6% of relevant deal flow · top quartile 27.5% · best-in-class 57.1% · LTM average 18.4%.",
+      "evidence_grade": null,
+      "source_disclosure": "SPS is Bain-owned and sells origination analytics — it profits from the gap looking large. The ownership disclosure runs inline, not as a footnote; the sample size travels with the figures.",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "The share of deal flow you actually see",
+      "kind": "image",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "The ownership disclosure is load-bearing and runs inline, not as a footnote — a vendor that profits from the gap looking large is the definition of a disclosed interest. Sample size (177 firms) named with the figures.",
+      "brief": {
+        "hook": "The median PE firm sees 17.6% of its relevant deal flow. Top quartile: 27.5%. Best-in-class: 57.1%.",
+        "rehook": "Almost nobody knows which one they are.",
+        "beats": [
+          "Sutton Place Strategies benchmark — 177 firms, LTM average 18.4%. Disclose: SPS is Bain-owned, sells origination analytics, profits from the gap looking large. The numbers hold anyway.",
+          "The self-test: last 12 months of closed deals in your box — how many did you see before they traded?",
+          "How I measure coverage for a mandate before promising anything."
+        ],
+        "source": "SPS Deal Origination Benchmark Report, with the ownership disclosure.",
+        "extraction": null,
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-04",
+      "tier": "W1",
+      "lead": "Mon Aug 24 · Day 4",
+      "angle": "Five checks in week one, before anyone drafts an LOI",
+      "format": "Video · Diligence Tell · pillar Dead Deal Economics",
+      "carries": "No published figures. The five week-one checks and the registries they run against — TDLR, TSBPE, State Fire Marshal — plus the proposed name for the list.",
+      "evidence_grade": null,
+      "source_disclosure": "Practice methodology; registries named. Registry names must be correct as written — a misnamed licensing authority is a correction pass waiting to happen.",
+      "may_state_figure": false,
+      "status": "next",
+      "title": "Five checks in week one",
+      "kind": "video",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": "PAUL CONFIRMS THIS ONE BEFORE IT DRAFTS. The five items become the practice's own list and the name becomes a recurring asset (it is asked for again on Days 15 and 30). Neither is a drafting decision.",
+      "pages": null,
+      "law_check": "No published figures — methodology and named registries only. Registry names must be correct as written (TDLR, TSBPE, State Fire Marshal); a misnamed authority is the elevator market's R-EL-005 all over again. Real camera.",
+      "brief": {
+        "hook": "Five things I check in week one, before anyone drafts an LOI.",
+        "rehook": "None of them require the seller's cooperation.",
+        "beats": [
+          "Revenue concentration signals from public and registry sources.",
+          "Licence standing and transferability — TDLR, TSBPE, State Fire Marshal, by state.",
+          "Owner-dependence tells.",
+          "Add-back plausibility against payroll reality.",
+          "Working-capital seasonality in the trade."
+        ],
+        "source": "practice methodology; registries named.",
+        "extraction": "Close: propose the name \"the Week One Kill List\" — naming is Paul's call.",
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-05",
+      "tier": "W1",
+      "lead": "Tue Aug 25 · Day 5",
+      "angle": "Bankers carry about 20%. The other 80% is the buyer’s job",
+      "format": "Image · Line Item · pillar Where the Return Comes From",
+      "carries": "SPS channel data: at full coverage the banked channel carries about 20% of relevant flow.",
+      "evidence_grade": null,
+      "source_disclosure": "SPS, disclosed as on Day 3. ALLY FRAMING IS MANDATORY (stop-list rule): the post describes the work and never describes a competitor — bankers are allies and the first call, not the whole map.",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "Bankers carry 20%. The other 80%",
+      "kind": "image",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "Ally framing is mandatory — stop-list rule. The post describes the work; it never describes a competitor, and bankers are not one. SPS interest disclosed as on Day 3.",
+      "brief": {
+        "hook": "The best origination channel in this market is investment bankers. At full coverage, the banked channel carries about 20% of relevant flow.",
+        "rehook": "The other 80% is the buyer's job. Here's how I build it.",
+        "beats": [
+          "SPS channel data — and why this is arithmetic, not criticism: mandate economics mean most trades deals below a size floor never get banked. Bankers are allies and the first call, not the whole map.",
+          "The build: registry-first enumeration, verification before a name enters the pipeline.",
+          "DISCOVERY is not VERIFIED — one line, expanded Day 17."
+        ],
+        "source": "SPS, disclosed.",
+        "extraction": null,
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-06",
+      "tier": "W1",
+      "lead": "Wed Aug 26 · Day 6",
+      "angle": "THE MANDATE — deal sweep roundup, edition 1",
+      "format": "Mandate · Register · pillar The Register",
+      "carries": "Five bullets, at least three primary-verified in-window trades deals, staged from that week’s sweep.",
+      "evidence_grade": "n/a",
+      "source_disclosure": "Ships only when the sweep verifies ≥3 in-window deals against primary sources; scope is the trades and adjacent industrial services. A padded Mandate is worse than a skipped one — a quiet week is stated, not filled.",
+      "may_state_figure": true,
+      "status": "recurring",
+      "title": "THE MANDATE, edition 1",
+      "kind": null,
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "It ships only when the sweep verifies ≥3 in-window deals against primary sources; scope is the trades and adjacent industrial services. A padded Mandate is worse than a skipped one — a quiet week is stated, not filled.",
+      "brief": {
+        "hook": null,
+        "rehook": null,
+        "beats": [],
+        "source": null,
+        "extraction": null,
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-07",
+      "tier": "W1",
+      "lead": "Thu Aug 27 · Day 7",
+      "angle": "80 opportunities to close one",
+      "format": "Image · Cost Sheet · pillar The Buyer’s Math",
+      "carries": "Teten & Farmer, Journal of Private Equity: the median investor reviews 80+ opportunities per closed deal; the median fund needs 3.1 investment professionals per closed deal per year. Worked against a $150M fund with three years left.",
+      "evidence_grade": null,
+      "source_disclosure": "Teten & Farmer — the lead author runs an outsourced-sourcing bank; the finding cuts both ways, which is what makes it credible. Disclosed inline. The $150M worked example is arithmetic on the reader’s own inputs and reads as an illustration, not a finding.",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "80 opportunities to close one",
+      "kind": "image",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "Beat 2 is arithmetic on the reader's own inputs, shown as arithmetic — it is an illustration, not a finding, and must read as one. Teten's interest disclosed. Beat 3 states our own structure only; the moment it compares to an outsourced alternative it becomes fee content.",
+      "brief": {
+        "hook": "The median investor reviews 80+ opportunities to close one deal. The median fund needs 3.1 investment professionals per closed deal per year.",
+        "rehook": "Run that against your remaining investment period.",
+        "beats": [
+          "Teten & Farmer, Journal of Private Equity — disclose: lead author runs an outsourced-sourcing bank; the finding cuts both ways, which makes it more credible.",
+          "The arithmetic on a $150M fund with three years left.",
+          "What I take off the desk vs what stays in-house — the hybrid answer, stated plainly."
+        ],
+        "source": "Teten & Farmer, with the disclosure.",
+        "extraction": null,
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-08",
+      "tier": "W2",
+      "lead": "Fri Aug 28 · Day 8",
+      "angle": "Dead Deal Files, No. 1 — it was public record the whole time",
+      "format": "Video · Post-Mortem · pillar Dead Deal Economics",
+      "carries": "Paul’s own record: one of the ~150 where the killing fact was discoverable pre-LOI. Trade, size band and timeline only.",
+      "evidence_grade": null,
+      "source_disclosure": "No publisher figures — every number is Paul’s own, sanitised at capture: no counterparty, no metro, no year, attribution \"in the course of employment.\"",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "Dead Deal Files, No. 1",
+      "kind": "video",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": "RECEIPT-GATED. This post does not ship with brackets in it. The load-bearing details are Paul's, not a publisher's. An invented deal detail is a practice-ending error.",
+      "pages": null,
+      "law_check": "Every figure in this post is Paul's own record, sanitised at capture. No publisher figures, so nothing to disclose — and nothing to invent. Real camera.",
+      "brief": {
+        "hook": "The deal died on day [N]. Not at price. On something that was public record the whole time.",
+        "rehook": null,
+        "beats": [],
+        "source": null,
+        "extraction": "Extraction prompt: pick one of the ~150 where the killing fact was discoverable pre-LOI. Structure: what we knew at LOI / what surfaced at week [N] / the check that finds it in week one now.\nAnonymisation: trade, size band, and timeline only. No counterparty, no metro, no year. Attribution \"in the course of employment.\"\nSeries proposal: \"Dead Deal Files, No. 1\" — series name is Paul's call.\nIf the receipt isn't ready: swap with Day 9 and slide. The number posts hold the cadence; story slots slide rather than fake.",
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-09",
+      "tier": "W2",
+      "lead": "Sat Aug 29 · Day 9",
+      "angle": "5.9x to 10.0x — and when the spread is real",
+      "format": "Image · Threshold · pillar Dead Deal Economics",
+      "carries": "GF Data sponsored-deal gradient: $10–25M TEV 5.9x · $100–250M 10.0x. Deliberate second run of P-1’s figure with a changed job — where the spread is real versus illusory, because integration cost eats it.",
+      "evidence_grade": null,
+      "source_disclosure": "GF Data — subscription product, sponsored transactions only, undercounts founder-direct deals, and the publisher sells the data. State the POPULATION, not just the name. No platform/add-on split may be restated: R-HS-027 retired it, GF Data publishes only a blended figure.",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "5.9x to 10.0x, and when the spread is real",
+      "kind": "image",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "GF Data covers sponsored transactions only and undercounts founder-direct deals; the publisher sells the data. State the population, not just the name. Do not restate a platform/add-on split — R-HS-027 retired it; GF Data publishes only a blended figure. Deliberate second run, flagged in §4 so the repetition is a decision.",
+      "brief": {
+        "hook": "$10–25M TEV trades at 5.9x. $100–250M trades at 10.0x.",
+        "rehook": "Every add-on is bought at the bottom of that gradient and revalued at the top. That spread is the entire thesis — when it's real.",
+        "beats": [
+          "GF Data, sponsored deals only — disclose the population.",
+          "Second run by design: this figure carried P-1 on Aug 18; today's job is different — where the spread is real vs illusory, because integration cost eats it. One seam line.",
+          "How I underwrite the spread per trade before assuming it."
+        ],
+        "source": "GF Data, population disclosed.",
+        "extraction": null,
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-10",
+      "tier": "W2",
+      "lead": "Sun Aug 30 · Day 10",
+      "angle": "What tracking 60+ platforms shows right now",
+      "format": "Image · Register Read · pillar The Register",
+      "carries": "Our own register: 60+ PE-backed platforms consolidating HVAC, plumbing, electrical, roofing, fire and life safety and commercial MEP. Three reads — new 2025–26 platforms sitting at zero disclosed add-ons; accelerating sponsor turnover; the verticals at different stages, roofing where HVAC was three years ago.",
+      "evidence_grade": null,
+      "source_disclosure": "\"My own tracking of announced transactions\" — NO CENSUS CLAIMS. Every count is a statement about the register, not about the market. The roofing/HVAC stage comparison carries no number.",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "What tracking 60+ platforms shows",
+      "kind": "image",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "No census claims. \"60+ in my tracking\" is a statement about the register, not about the market; every count is framed as ours and announced-transaction-based. Beat 3 is a comparison, not a measurement — it carries no number.",
+      "brief": {
+        "hook": "I track 60+ PE-backed platforms consolidating HVAC, plumbing, electrical, roofing, fire and life safety, and commercial MEP.",
+        "rehook": "Three things the tracking shows right now.",
+        "beats": [
+          "New platforms are still forming — several launched 2025–26 sit at zero disclosed add-ons, which is a pipeline gap wearing a press release.",
+          "Sponsor turnover is accelerating — recaps hand platforms fresh capital and a fresh clock.",
+          "The verticals are not at the same stage — roofing is where HVAC was three years ago."
+        ],
+        "source": "\"my own tracking of announced transactions\" — no census claims.",
+        "extraction": null,
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-11",
+      "tier": "W2",
+      "lead": "Mon Aug 31 · Day 11",
+      "angle": "The 2026 HVAC tape — more deals, lower entry",
+      "format": "Image · Register Read · pillar The Register",
+      "carries": "Capstone Partners: 149 HVAC services deals closed in 2025, up 12.9%; average entry ~9.5x, down from a 13.3x peak. THE PLAN’S THIRD FIGURE — \"PE add-ons up 88%\" — IS RETIRED (R-HS-017) and does not ship.",
+      "evidence_grade": null,
+      "source_disclosure": "Capstone Partners HVAC M&A coverage — credited as the best original data in the vertical. The 13.3x here is the HVAC entry-multiple peak and is NOT the Chubb carve-out 13.3x (R-FS-038, PRE-2023, including synergies); the two may never share an axis.",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "The 2026 HVAC tape",
+      "kind": "image",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": "ONE FIGURE IS BLOCKED. See §A.2. The plan's hook carries \"PE add-ons up 88%,\" which is R-HS-017 — RETIRED: not found in any S&P or secondary source, and contradicted by Capstone's own count of 38 add-ons against 36. It does not ship, and P-5's own rendered caption already retires it in public. Rebuild the hook on the deal count and the entry multiple, or restate the add-on line as Capstone's 38-against-36 with its own basis. Two further checks before drafting: the plan's \"up 12.9%\" and P-5's \"sector volume down 4.2%\" are both credited to Capstone and point opposite ways — name the series and the window; and the multiples carry periods, \"9.5x across 2024–YTD 2026 against 13.3x across 2021–23\".",
+      "pages": null,
+      "law_check": "The 88% add-on figure is retired and blocked (R-HS-017). The 13.3x here is the HVAC entry-multiple peak — it is NOT the Chubb carve-out 13.3x (R-FS-038, PRE-2023, including synergies), and the two may never share an axis or a sentence.",
+      "brief": {
+        "hook": "149 HVAC services deals closed in 2025, up 12.9%. [STRUCK — retired figure, does not ship: \"PE add-ons up 88%.\"] Average entry: ~9.5x, down from a 13.3x peak.",
+        "rehook": "More deals, lower entry. That's a window, not a trend.",
+        "beats": [
+          "Capstone Partners' dataset — credit them; it's the best original data in the vertical.",
+          "What I'd underwrite in this window and what I wouldn't.",
+          "Counterweight: the QoE-doubling line from Day 2 — cheaper entry, dirtier books."
+        ],
+        "source": "Capstone Partners HVAC M&A coverage.",
+        "extraction": null,
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-12",
+      "tier": "W2",
+      "lead": "Tue Sep 1 · Day 12",
+      "angle": "37 days, 106, 129 — how fast you kill is a strategy",
+      "format": "Video · Post-Mortem · pillar Dead Deal Economics",
+      "carries": "Axial exclusivity days before a broken deal dies: family offices 37 · PE funds 106 · independent sponsors 129 (corporates 125 on the same table). Deliberate second run — the full treatment of the figures that appeared on P-2’s page 5.",
+      "evidence_grade": null,
+      "source_disclosure": "Axial Dead Deal Report 2025, member-reported sample, interest named. QoE cost ranges are MODERATE — stated as ranges with the vendor-interest caveat, never as a point figure.",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "37 days, 106, 129",
+      "kind": "video",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "Axial's interest disclosed; member-reported sample named. QoE cost ranges are MODERATE — state them as ranges with the vendor-interest caveat, never as a point figure. Deliberate second run, flagged in §4. Real camera.",
+      "brief": {
+        "hook": "A family office kills a broken deal in 37 days. PE firms: 106. Independent sponsors: 129.",
+        "rehook": "How fast you kill is a strategy — whether you chose it or not.",
+        "beats": [
+          "Axial's exclusivity-day data. Scheduled second run — these figures appeared on P-2's page 5 Aug 20; this is the full treatment the old calendar planned for today.",
+          "What each speed costs in QoE and legal burn.",
+          "How I set kill criteria at LOI so day 37 is a decision, not a discovery."
+        ],
+        "source": "Axial Dead Deal Report 2025.",
+        "extraction": null,
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-13",
+      "tier": "W2",
+      "lead": "Wed Sep 2 · Day 13",
+      "angle": "THE MANDATE — deal sweep roundup, edition 2",
+      "format": "Mandate · Register · pillar The Register",
+      "carries": "Five bullets, at least three primary-verified in-window trades deals.",
+      "evidence_grade": "n/a",
+      "source_disclosure": "As edition 1 — ≥3 primary-verified in-window deals or it does not ship.",
+      "may_state_figure": true,
+      "status": "recurring",
+      "title": "THE MANDATE, edition 2",
+      "kind": null,
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "As edition 1 — ≥3 primary-verified in-window trades deals or it does not ship.",
+      "brief": {
+        "hook": null,
+        "rehook": null,
+        "beats": [],
+        "source": null,
+        "extraction": null,
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-14",
+      "tier": "W2",
+      "lead": "Thu Sep 3 · Day 14",
+      "angle": "DealSource day — what killed your last dead deal",
+      "format": "Text · Hand-Raiser · pillar The Ask",
+      "carries": "No published figure. The three buckets every answer lands in: earnings quality, key-person and licensing, working capital.",
+      "evidence_grade": null,
+      "source_disclosure": "None — the post carries no published figure. \"The same three buckets every time\" is a practitioner observation, not a measurement. No link, no booking ask. Check follower vs non-follower reach today.",
+      "may_state_figure": false,
+      "status": "next",
+      "title": "DealSource day, morning-of",
+      "kind": "text",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "No figures, no link, no booking ask. \"The same three buckets every time\" is a practitioner observation, not a measurement, and reads as one. Check follower vs non-follower reach today (§0 measurement).",
+      "brief": {
+        "hook": "One question I'm asking every buyer at DealSource today: what killed your last dead deal?",
+        "rehook": "The answers land in the same three buckets every time.",
+        "beats": [
+          "The three buckets — earnings quality, key-person/licensing, working capital.",
+          "Invite the corridor version of the conversation.",
+          "Where to find me today — no link, just presence."
+        ],
+        "source": "none — the post carries no published figure.",
+        "extraction": null,
+        "note": "The Aug 18 calendar made this date a deliberate blackout — the 90-minute protocol"
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-15",
+      "tier": "W3",
+      "lead": "Fri Sep 4 · Day 15",
+      "angle": "\"We should have known\" — usually, they could have",
+      "format": "Text · Reconciliation · pillar Where the Return Comes From",
+      "carries": "No published figure. A pattern-level recap of DealSource conversations, with the Week One Kill List offered by DM.",
+      "evidence_grade": null,
+      "source_disclosure": "None — conversations characterised at pattern level. No names, no firms, no attributable detail: a recognisable paraphrase is a named source. Soft DM ask only; no link in body or first comment.",
+      "may_state_figure": false,
+      "status": "next",
+      "title": "\"We should have known\"",
+      "kind": "text",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": "REQUIRES DAY-14 NOTES. The post is a pattern-level recap of conversations that have not happened yet; it cannot be drafted before Sept 3.",
+      "pages": null,
+      "law_check": "No names, no firms, no attributable detail — a recognisable paraphrase is a named source. Depends on Day 4's list existing and being named. Soft DM ask only; no link, in body or first comment.",
+      "brief": {
+        "hook": "Every dead-deal story I heard this week ended the same sentence: \"we should have known.\"",
+        "rehook": "Usually, they could have.",
+        "beats": [
+          "pattern-level recap of DealSource conversations — no names, no firms. Close: the Week One Kill List exists — DM me and I'll send it. (Soft DM ask is allowed; a link is not.)"
+        ],
+        "source": "none — conversations, characterised at pattern level.",
+        "extraction": null,
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-16",
+      "tier": "W3",
+      "lead": "Sat Sep 5 · Day 16",
+      "angle": "Reconciling the add-back schedule against payroll",
+      "format": "Text · Diligence Tell · pillar Dead Deal Economics",
+      "carries": "Owner-comp normalisation against actuals; the one-time expense that recurs. The Day-2 Axial QoE-kill figures referenced once. A receipt STRENGTHENS this post and does not gate it.",
+      "evidence_grade": null,
+      "source_disclosure": "Methodology, plus the Axial figures from Day 2 carried forward WITH their publisher named again. The optional receipt is bracketed and the post ships without it — brackets never ship.",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "Reconciling the add-back schedule",
+      "kind": "text",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "A receipt STRENGTHENS this post and does not gate it — beat 3 is bracketed and the post ships without it. Brackets never ship. The Day-2 Axial figures are referenced once, with the publisher named again; a figure carried forward still carries its source.",
+      "brief": {
+        "hook": "The add-back schedule is a story about the past. Payroll runs and bank statements are also the past.",
+        "rehook": "How I reconcile the two before a QoE does it for me.",
+        "beats": [
+          "Owner-comp normalization against actuals, not against the narrative.",
+          "The one-time expense that recurs — the most common add-back fiction in the trades.",
+          "[RECEIPT-optional: the range these swings hit across your deals — \"$[X]–[Y] per acquisition on [N] deals.\"]"
+        ],
+        "source": "methodology; Axial QoE-kill figures from Day 2 referenced once.",
+        "extraction": null,
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-17",
+      "tier": "W3",
+      "lead": "Sun Sep 6 · Day 17",
+      "angle": "DISCOVERY is not VERIFIED",
+      "format": "Text · Definition Fight · pillar The Evidence Rules",
+      "carries": "The evidence rule — smallest defensible number, conflicting figures carried and never averaged, every source named with its interest. Worked example: dry powder as $1.2T or $2.5T or $3.9T depending on universe, teased for Day 23.",
+      "evidence_grade": null,
+      "source_disclosure": "The practice’s own evidence rules. The $1.2T tease carries a VINTAGE: it is Bain’s 2025 all-sector global buyout figure and Bain’s 2026 edition prints $1.3T (R-HS-008/009). State the year, or state both. Never the sector-segmented use — that is what was retired.",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "DISCOVERY is not VERIFIED",
+      "kind": "text",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "⚠ The $1.2T tease carries a vintage: it is Bain's 2025 all-sector global buyout figure, and Bain's 2026 edition prints $1.3T (R-HS-008/009's verdict). On a post about universe-and-vintage discipline, state the year or state both. Never the sector-segmented use — that is what was retired.",
+      "brief": {
+        "hook": "DISCOVERY is not VERIFIED.",
+        "rehook": "Half the market data in my category fails that test. Here's the rule I run instead.",
+        "beats": [
+          "The rule: smallest defensible number; conflicting figures carried, never averaged; every source named with its interest.",
+          "Worked example: dry powder is $1.2T or $2.5T or $3.9T depending on universe — all \"true,\" teased for Day 23.",
+          "Why I refuse claims I can't source — one line, referencing the Day-1 refusal, not re-arguing it."
+        ],
+        "source": "the practice's own evidence rules.",
+        "extraction": null,
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-18",
+      "tier": "W3",
+      "lead": "Mon Sep 7 · Day 18",
+      "angle": "Dead Deal Files, No. 2 — the licence holder wasn’t staying",
+      "format": "Video · Post-Mortem · pillar Dead Deal Economics",
+      "carries": "Paul’s own record: the licensing/succession deal — trade, state, the week the risk surfaced, and the registry check that now catches it. Closes on the week-one registry pass and licence transferability by state.",
+      "evidence_grade": null,
+      "source_disclosure": "No publisher figures — Paul’s own record, sanitised at capture. Registry names correct as written; transferability is state-specific and must not be generalised into a national rule.",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "Dead Deal Files, No. 2, the licence",
+      "kind": "video",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": "RECEIPT-GATED. This post does not ship with brackets in it.",
+      "pages": null,
+      "law_check": "Registry names correct as written; transferability is state-specific and must not be generalised into a national rule. Paul's own record, sanitised at capture. Real camera.",
+      "brief": {
+        "hook": "In the trades, the licence can be the business. On day [N] we learned the licence holder wasn't staying.",
+        "rehook": null,
+        "beats": [],
+        "source": null,
+        "extraction": "Extraction prompt: the licensing/succession deal — trade, state, week the risk surfaced, what the registry check now catches.\nAnonymisation: trade, state, timeline only. No counterparty, no metro, no year.\nBeats close: the week-one registry pass — TDLR, TSBPE, State Fire Marshal — and licence transferability by state. \"Dead Deal Files, No. 2.\"",
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-19",
+      "tier": "W3",
+      "lead": "Tue Sep 8 · Day 19",
+      "angle": "Roofing: 17 platforms to 56",
+      "format": "Image · Register Read · pillar The Register",
+      "carries": "Roofing Contractor, March 2025: PE-backed roofing platforms 17 at the start of 2023, 56 by the end of 2024. The HVAC precedent for the curve — rush, multiple peak, normalisation (13.3x → ~9.5x, Capstone).",
+      "evidence_grade": null,
+      "source_disclosure": "Two publishers, two claims, each attributed to its own: the roofing count is Roofing Contractor’s, the HVAC curve is Capstone’s, and they are never merged into one series. Storm-driven revenue quality is underwritten differently from service-agreement revenue and the post says so.",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "Roofing: 17 platforms to 56",
+      "kind": "image",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "Two publishers, two claims, each attributed to its own — the roofing count is Roofing Contractor's, the HVAC curve is Capstone's, and they are not merged into one series. Both endpoints of the count stated with their dates. The 13.3x is the HVAC entry peak, not the Chubb carve-out multiple.",
+      "brief": {
+        "hook": "PE-backed roofing platforms: 17 at the start of 2023. 56 by the end of 2024.",
+        "rehook": "How I read a trade going institutional — and what it does to entry price.",
+        "beats": [
+          "Roofing Contractor's count, March 2025.",
+          "The HVAC precedent: rush → multiple peak → normalization (13.3x → ~9.5x). Where roofing sits on that curve.",
+          "The caution: storm-driven revenue quality, and how I underwrite it differently from service-agreement revenue."
+        ],
+        "source": "Roofing Contractor; Capstone for the HVAC curve.",
+        "extraction": null,
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-20",
+      "tier": "W3",
+      "lead": "Wed Sep 9 · Day 20",
+      "angle": "THE MANDATE — deal sweep roundup, edition 3",
+      "format": "Mandate · Register · pillar The Register",
+      "carries": "Five bullets, at least three primary-verified in-window trades deals.",
+      "evidence_grade": "n/a",
+      "source_disclosure": "As edition 1.",
+      "may_state_figure": true,
+      "status": "recurring",
+      "title": "THE MANDATE, edition 3",
+      "kind": null,
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "As edition 1.",
+      "brief": {
+        "hook": null,
+        "rehook": null,
+        "beats": [],
+        "source": null,
+        "extraction": null,
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-21",
+      "tier": "W3",
+      "lead": "Thu Sep 10 · Day 21",
+      "angle": "Fire and life safety — when buyers outnumber targets",
+      "format": "Image · Register Read · pillar The Register",
+      "carries": "Lincoln International: 129 sponsor-backed fire and life safety deals in 2023, 109 through September 2024, plus more than a dozen active consolidators — and our own tracking alongside.",
+      "evidence_grade": null,
+      "source_disclosure": "Lincoln International, plus own tracking framed as such. The two are SEPARATE claims with separate attributions and are never merged into one number; \"109 through September 2024\" is a partial year and must be labelled as one. This practice’s own register already corrected a merged fire-safety count (R-FS-024).",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "Fire and life safety, saturated",
+      "kind": "image",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "Lincoln's counts and our tracking are two separate claims with two separate attributions in the same post — never one merged number. \"109 through September 2024\" is a partial year and must be labelled as one; comparing it to a full 2023 as a decline is the error the label prevents.",
+      "brief": {
+        "hook": "Fire and life safety: 129 sponsor-backed deals in 2023, 109 through September 2024, and more than a dozen active consolidators.",
+        "rehook": "When buyers outnumber good targets, the work moves from finding to verifying.",
+        "beats": [
+          "Lincoln International's counts plus my own tracking.",
+          "Why the vertical attracts capital — compliance-mandated recurring revenue.",
+          "What verification-first sourcing looks like in a saturated vertical."
+        ],
+        "source": "Lincoln International; own tracking, framed as such.",
+        "extraction": null,
+        "note": "The counts are contested inside this practice — see §A.2. R-FS-024 corrected a"
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-22",
+      "tier": "W4",
+      "lead": "Fri Sep 11 · Day 22",
+      "angle": "What a BD hire costs — and the number that does not exist",
+      "format": "Text · Cost Sheet · pillar The Buyer’s Math",
+      "carries": "A dedicated BD hire runs $150–250K all-in; the data stack behind them roughly another $100K; time to first sourced close — NO published figure exists, and the post says so.",
+      "evidence_grade": null,
+      "source_disclosure": "Compensation ranges as market data, characterised as ranges; the DueDilio concession named. OUR COST STRUCTURE ONLY — never the comparison to an outsourced alternative; the moment it compares, it is fee content. The missing number is stated as missing: inventing a plausible one would be the most expensive fabrication in this window.",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "What a BD hire costs",
+      "kind": "text",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "Never the comparison to an outsourced alternative. The moment it compares, it's fee content. The missing number is stated as missing — that refusal is the post's credibility, and inventing a plausible one would be the single most expensive fabrication in this window. Compensation ranges are market data, characterised as ranges; the DueDilio concession is named.",
+      "brief": {
+        "hook": "A dedicated BD hire runs $150–250K all-in. The data stack behind them, roughly another $100K. Time to their first sourced close: no published figure exists.",
+        "rehook": "The one number that would settle make-vs-buy doesn't exist. Here's how I run the math anyway.",
+        "beats": [
+          "What is knowable: the funnel math from Day 7.",
+          "The consensus even the vendors concede: outsourcing shouldn't fully replace internal ownership — hybrid is the answer, and principal relationships stay in-house.",
+          "Their cost structure only."
+        ],
+        "source": "compensation ranges as market data; DueDilio concession named.",
+        "extraction": null,
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-23",
+      "tier": "W4",
+      "lead": "Sat Sep 12 · Day 23",
+      "angle": "$1.2T. Or $2.5T. Or $3.9T",
+      "format": "Image · Definition Fight · pillar The Evidence Rules",
+      "carries": "Buyout-only $1.2T (Bain 2025) vs all PE $2.5T vs all private capital $3.9T. The aging stat — 24% held four-plus years, 26% a report earlier. Bain’s 2026 edition prints $1.3T for the buyout universe: state the vintage.",
+      "evidence_grade": null,
+      "source_disclosure": "Bain Global PE Report 2025, Preqin, S&P — each with its universe named. Bain sells deployment-pressure consulting and the aging stat is single-vendor (Bain on Preqin); say so. Three bars, never a midpoint. Never as sector-segmented dry powder (R-HS-008/009).",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "$1.2T. Or $2.5T. Or $3.9T",
+      "kind": "image",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "Every figure carries its universe AND its vintage — that is the whole post, and an unlabelled year would refute it in its own frame. Conflicting figures are carried, never averaged; the three-bar chart shows three bars, never a midpoint. Bain's consulting interest disclosed inline. Never as sector-segmented dry powder — that use is retired (R-HS-008/009).",
+      "brief": {
+        "hook": "Global buyout dry powder is $1.2 trillion. Or $2.5 trillion. Or $3.9 trillion.",
+        "rehook": "All three are \"true.\" How I decide which numbers get into my underwriting.",
+        "beats": [
+          "The universes: buyout-only ($1.2T, Bain 2025) vs all PE ($2.5T) vs all private capital ($3.9T).",
+          "The aging stat everyone quotes — 24% held four-plus years, was 26% a report earlier — is single-vendor: Bain on Preqin, and Bain sells deployment-pressure consulting. Say so.",
+          "The rule: smallest defensible number, universe named, vendor named."
+        ],
+        "source": "Bain Global PE Report 2025, Preqin, S&P — each with universe.",
+        "extraction": null,
+        "note": "Vintage flagged — see §A.2. Bain's 2026 edition prints $1.3T for the buyout"
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-24",
+      "tier": "W4",
+      "lead": "Sun Sep 13 · Day 24",
+      "angle": "Growth drove 54% — and 71% of it in 2024",
+      "format": "Image · Threshold · pillar Dead Deal Economics",
+      "carries": "Gain.pro value-creation decomposition: revenue growth drove 54% of PE value creation across the cycle and 71% in 2024 exits. Average and peak BOTH stated.",
+      "evidence_grade": null,
+      "source_disclosure": "Gain.pro Value Creation Report, peak-versus-average stated. Quoting 71% alone would present a peak as a norm. The trades levers — route density, service agreements, technician retention — carry no number: no recurring-revenue threshold may be stated (R-HS-001…R-HS-005).",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "Growth drove 54%, and 71% in 2024",
+      "kind": "image",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "Peak and average both stated, always. Quoting 71% alone would be the rounded-figure error in its worst form — a peak presented as a norm. Publisher named. Beat 2 names operational levers without attaching a number to any of them; no recurring-revenue threshold may be stated — R-HS-001 through R-HS-005 retired that whole cluster.",
+      "brief": {
+        "hook": "Revenue growth drove 54% of PE value creation across the cycle — and 71% of it in 2024 exits.",
+        "rehook": "Multiple expansion is not coming back to save the model. You buy growth or you build it.",
+        "beats": [
+          "Gain.pro decomposition — 54% is the multi-year average, 71% is the 2024 peak; say both, never just the peak.",
+          "What it means for add-on programs in the trades: route density, service agreements, technician retention — the growth is operational.",
+          "One seam line: growth underwritten is not growth realized — Day 25."
+        ],
+        "source": "Gain.pro Value Creation Report, peak-vs-average stated.",
+        "extraction": null,
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-25",
+      "tier": "W4",
+      "lead": "Mon Sep 14 · Day 25",
+      "angle": "The number that could not exist",
+      "format": "Video · Reconciliation · pillar Where the Return Comes From",
+      "carries": "Paul’s own record: the canonical reconciliation from the ~36 longitudinal integrations — the cross-sell revenue underwritten versus the share actually captured two years in, and why the model number was never real.",
+      "evidence_grade": null,
+      "source_disclosure": "No publisher figures. \"Roughly 36\" stays approximate; the employer is described — \"inside a home-services consolidator\" — and never named, which is the attribution rule at its tightest because the post is about that employer’s deals.",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "The number that could not exist",
+      "kind": "video",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": "RECEIPT-GATED. This post does not ship with brackets in it. This is the spine pattern from canon and the single post only Paul can write.",
+      "pages": null,
+      "law_check": "Both numbers are Paul's own record. \"Roughly 36\" stays approximate. The employer is described, never named — this is the attribution rule at its tightest, because the post is about that employer's deals. Real camera.",
+      "brief": {
+        "hook": "We underwrote [X]% of revenue in cross-sell. Two years in, we had captured [Y]%.",
+        "rehook": "The gap wasn't execution. It was that we'd underwritten a number that couldn't exist.",
+        "beats": [],
+        "source": null,
+        "extraction": "Extraction prompt: the canonical reconciliation from the ~36 longitudinal integrations — model number vs realized number, and the reason the model number was never real.\nAnonymisation: \"inside a home-services consolidator.\" No employer name, no counterparty, no year.",
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-26",
+      "tier": "W4",
+      "lead": "Tue Sep 15 · Day 26",
+      "angle": "Dead Deal Files, No. 3 — the working capital peg",
+      "format": "Video · Post-Mortem · pillar Dead Deal Economics",
+      "carries": "Paul’s own record: the WC/seasonality deal — trade, season, what the peg missed. Closes on setting the peg conversation pre-LOI in seasonal trades, with HVAC’s shoulder seasons as the worked example.",
+      "evidence_grade": null,
+      "source_disclosure": "No publisher figures. Seasonality is trade-specific; the HVAC shoulder-season example illustrates method and is not a benchmark.",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "Dead Deal Files, No. 3, the peg",
+      "kind": "video",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": "RECEIPT-GATED. This post does not ship with brackets in it.",
+      "pages": null,
+      "law_check": "Seasonality is trade-specific; the HVAC shoulder-season example is an illustration of method, not a benchmark, and carries no published figure. Paul's own record, sanitised at capture.",
+      "brief": {
+        "hook": "The working capital true-up is where deals go to die quietly. On day [N], the peg turned a fine deal into a dead one.",
+        "rehook": null,
+        "beats": [],
+        "source": null,
+        "extraction": "Extraction prompt: the WC/seasonality deal — trade, season, what the peg missed.\nBeats close: how I set the peg conversation pre-LOI in seasonal trades — HVAC's shoulder seasons as the worked example. \"Dead Deal Files, No. 3.\"",
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-27",
+      "tier": "W4",
+      "lead": "Wed Sep 16 · Day 27",
+      "angle": "THE MANDATE — deal sweep roundup, edition 4",
+      "format": "Mandate · Register · pillar The Register",
+      "carries": "Five bullets, at least three primary-verified in-window trades deals.",
+      "evidence_grade": "n/a",
+      "source_disclosure": "As edition 1.",
+      "may_state_figure": true,
+      "status": "recurring",
+      "title": "THE MANDATE, edition 4",
+      "kind": null,
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "As edition 1.",
+      "brief": {
+        "hook": null,
+        "rehook": null,
+        "beats": [],
+        "source": null,
+        "extraction": null,
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-28",
+      "tier": "W4",
+      "lead": "Thu Sep 17 · Day 28",
+      "angle": "It closed because it almost died in week two",
+      "format": "Video · Post-Mortem · pillar Dead Deal Economics",
+      "carries": "Paul’s own record: the save — early kill-risk surfaced, restructured, survived. Killing early and saving early are the same skill.",
+      "evidence_grade": null,
+      "source_disclosure": "No publisher figures. \"The best deal I worked on\" is a judgement about Paul’s own record and reads as one — no outcome superlative that could imply an smbX engagement. Anonymised as every story post is.",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "The deal that closed because it almost died",
+      "kind": "video",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": "RECEIPT-GATED. This post does not ship with brackets in it.",
+      "pages": null,
+      "law_check": "\"The best deal I worked on\" is a judgement about Paul's own record and reads as one — no superlative about outcomes that implies an smbX engagement. Anonymised as every story post is. Real camera.",
+      "brief": {
+        "hook": "The best deal I worked on almost died in week two. It closed because it almost died in week two.",
+        "rehook": null,
+        "beats": [],
+        "source": null,
+        "extraction": "Extraction prompt: the save — early kill-risk surfaced, restructured, survived.\nBeats close: killing early and saving early are the same skill. The list finds both.",
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-29",
+      "tier": "W4",
+      "lead": "Fri Sep 18 · Day 29",
+      "angle": "I was wrong about it for most of N deals",
+      "format": "Text · Quiet Admission · pillar Quiet Admission",
+      "carries": "Paul’s own record: the belief, the cost of being wrong, and the deal number where it became undeniable. The one admission this window.",
+      "evidence_grade": null,
+      "source_disclosure": "No publisher figures. The cost of being wrong is Paul’s own number, approximate. No counterparty, no metro, no year. Expect profile views, not comments; do not run a second admission inside this window.",
+      "may_state_figure": true,
+      "status": "next",
+      "title": "I was wrong about it for most of N deals",
+      "kind": "text",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": "RECEIPT-GATED. This post does not ship with brackets in it.",
+      "pages": null,
+      "law_check": "One admission per month, and this is it. The cost of being wrong is Paul's own number, approximate. No counterparty, no metro, no year.",
+      "brief": {
+        "hook": "I was wrong about [thing] for most of [N] deals.",
+        "rehook": null,
+        "beats": [],
+        "source": null,
+        "extraction": "Extraction prompt: canon pattern 7 — the belief, the cost of being wrong, the deal number where it became undeniable.\nExpect: profile views, not comments. Do not run a second admission inside this window.",
+        "note": null
+      },
+      "document": null
+    },
+    {
+      "queue_id": "D-30",
+      "tier": "W4",
+      "lead": "Sat Sep 19 · Day 30",
+      "angle": "Run the list before your next LOI",
+      "format": "Text · Hand-Raiser · pillar The Ask",
+      "carries": "No published figure. The claim restated, the scope stated plainly — buy-side only — and the soft DM ask for the Week One Kill List.",
+      "evidence_grade": null,
+      "source_disclosure": "None. THE LINE stated as scope: buy-side only, one buyer per target, never sell-side or two-sided. NO fee talk, no rate, no engagement terms; \"no call attached\" means no booking link and no calendar.",
+      "may_state_figure": false,
+      "status": "next",
+      "title": "Run the list before your next LOI",
+      "kind": "text",
+      "body": null,
+      "body_alt": null,
+      "body_deck": null,
+      "copy_note": null,
+      "gate": null,
+      "pages": null,
+      "law_check": "THE LINE, stated as scope: buy-side only, one buyer per target, never sell-side or two-sided. No fee talk, no rate, no engagement terms — the ask is the list, free, and \"no call attached\" means no booking link and no calendar. Depends on Day 4's list existing under its confirmed name.",
+      "brief": {
+        "hook": "Before your next LOI, run the Week One Kill List on the deal. I would rather you kill it in week one than week fifteen.",
+        "rehook": "DM me and I'll send it. No call attached.",
+        "beats": [
+          "The claim restated — survival, underwritten before LOI and after close.",
+          "Scope, plainly: buy-side only, and what that excludes.",
+          "The soft DM ask — the list, free, no gate."
+        ],
+        "source": "none — the close carries no published figure.",
+        "extraction": null,
+        "note": null
+      },
+      "document": null
+    }
+  ],
+  "copy_source": "content/studio/CAMPAIGN_2026-08-21.md"
+}

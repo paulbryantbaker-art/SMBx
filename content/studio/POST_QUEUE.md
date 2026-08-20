@@ -17,6 +17,17 @@ Thursday's objection — and costs one review sitting. **Posting stays daily.**
 
 ## The spine — already written, not invented here
 
+> **THE SPINE BELOW IS RETIRED FOR THE Aug 21 – Sep 19 WINDOW (2026-08-20).**
+> `CAMPAIGN_2026-08-21.md` — the 30-Day "How I" Hook Sequence — is the calendar
+> the staging run stages from, and it is **one post a day, thirty days**, not the
+> five-slot week below. Its Mandate lands on Wednesdays (Days 6, 13, 20, 27) and
+> everything else is its own named slot with its own hook, rehook and beats.
+> Seven of those slots are receipt-gated and **must not be drafted at all** until
+> the extraction interview fills them. The Aug 18 calendar it replaced is marked
+> superseded in its own file. The five-slot spine and the vertical rotation below
+> stay on the record as the standing shape for after this window; they are not
+> what to stage this month.
+
 From `SMBX_30DAY_POSTING_PLAN_V2.md`:
 
 | Day | Slot |
