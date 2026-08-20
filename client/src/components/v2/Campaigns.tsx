@@ -59,6 +59,7 @@ export interface QueueRow {
   retired_check: string;        // clean · flagged · not_run
   notes: string | null;
   campaign: string | null;      // `2026-08-18` = the file it came from; null = the standing queue
+  origin: string | null;        // 'app' = born here from a library hook or blank (migration 141)
   /* the copy (migration 136) — content, carried from the plan */
   title: string | null;
   /** The MEDIUM. null is a Mandate edition or a blackout — they carry no copy of their own. */
@@ -97,6 +98,13 @@ export interface QueueRow {
 
 /** A slot carries a LIVE decision Cowork has not rendered from — shared/draft.ts is the rule. */
 export const hasDraft = (r: QueueRow) => hasLiveDraft(r);
+
+/** The month's hooks — a guide, not a calendar. Read-only; never rows. */
+export interface Library {
+  name: string; title: string; note: string; file: string;
+  pillars: { id: string; title: string; sub: string; goal: string;
+             hooks: { id: string; style: string; hook: string; direction: string }[] }[];
+}
 
 export interface CampaignMeta {
   name: string;
@@ -217,6 +225,8 @@ function dayLabel(iso: string | null): string {
 export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: string | null }) {
   const [rows, setRows] = useState<QueueRow[] | null>(null);
   const [campaigns, setCampaigns] = useState<CampaignMeta[]>([]);
+  const [libraries, setLibraries] = useState<Library[]>([]);
+  const [picking, setPicking] = useState(false);
   const [view, setView] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [banner, setBanner] = useState<string | null>(null);
@@ -239,11 +249,23 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
         setView(v => v ?? (list[0]?.name ?? STANDING));
       })
       .catch(() => setCampaigns([]));
+    /* The month's hooks. Read-only and never rows — a failure here costs the
+       picker its menu and nothing else, so it never blocks the queue loading. */
+    fetch("/api/post-queue/library", { headers: authHeaders() })
+      .then(r => (r.ok ? r.json() : { libraries: [] }))
+      .then(d => setLibraries(d.libraries ?? []))
+      .catch(() => setLibraries([]));
     return rowsP;
   }, []);
   useEffect(() => { load(); }, [load]);
 
   const total = rows ?? [];
+  /* The library months that actually carry posts — a library with no posts yet
+     gets no chip, because an empty chip is a question rather than a place. */
+  const libRows = useMemo(
+    () => [...new Set(total.map(r => r.campaign).filter((c): c is string => !!c && c.startsWith("library-")))].sort().reverse(),
+    [total],
+  );
   const current = campaigns.find(c => c.name === view) ?? null;
   const newest = campaigns[0] ?? null;
 
@@ -332,6 +354,23 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
     return null;
   }, [load]);
 
+  /* MAKE A POST — from a hook, or blank. The row is born here rather than in a
+     file, which is the whole shape of the library model: a hook is a reference
+     Paul draws from, and using one never uses it up. */
+  const newPost = useCallback(async (body: Record<string, unknown>): Promise<string | null> => {
+    const r = await fetch("/api/post-queue/new", {
+      method: "POST", headers: { ...authHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const j = await r.json().catch(() => null);
+    if (!r.ok) return j?.error ?? `Could not create the post (${r.status})`;
+    await load();
+    setPicking(false);
+    // Open what was just made, on the view it landed on.
+    if (j?.queue_id) { setView(j.campaign ?? STANDING); setOpenId(j.queue_id); }
+    return null;
+  }, [load]);
+
   const patchDraft = useCallback(async (queueId: string, body: Record<string, unknown>): Promise<string | null> => {
     const r = await fetch(`/api/post-queue/${encodeURIComponent(queueId)}/draft`, {
       method: "PATCH", headers: { ...authHeaders(), "Content-Type": "application/json" },
@@ -373,9 +412,20 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
         document, the deck to download — you post on LinkedIn by hand and mark it here.
       </p>
 
-      {/* which calendar — only when there is more than one to choose from */}
-      {campaigns.length > 0 && (campaigns.length > 1 || total.some(r => r.campaign == null)) && (
+      {/* WHICH VIEW — the dated calendars, then the months of library posts, then
+          the standing queue. A library's posts carry `library-<month>` as their
+          campaign, so without a chip of their own they would import fine and be
+          invisible: `view` could never equal a value nothing offered. */}
+      {(campaigns.length > 0 || libRows.length > 0) &&
+       (campaigns.length + libRows.length > 1 || total.some(r => r.campaign == null)) && (
         <div style={{ marginTop: 14, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+          {libRows.map(name => (
+            <button key={name} type="button" onClick={() => { setView(name); setOpenId(null); }}
+                    style={{ ...btnGhost, ...(view === name ? { border: `1px solid ${C.green}`, color: C.green } : null) }}>
+              {libraries.find(l => `library-${l.name}` === name)?.title?.replace(/^.*· /, "") ?? name}
+              <span style={{ ...mono, marginLeft: 8 }}>{total.filter(r => r.campaign === name).length}</span>
+            </button>
+          ))}
           {campaigns.map(c => (
             <button key={c.name} type="button" onClick={() => { setView(c.name); setOpenId(null); }}
                     style={{ ...btnGhost, ...(view === c.name ? { border: `1px solid ${C.green}`, color: C.green } : null) }}>
@@ -404,7 +454,10 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
       )}
 
       {/* the first press: nothing loaded for this campaign */}
-      {rows !== null && !error && all.length === 0 && view !== STANDING && (
+      {/* A library view is never empty by construction (its chip only exists
+          where posts do), so this card is the CAMPAIGN one and must not claim a
+          library needs loading. */}
+      {rows !== null && !error && all.length === 0 && view !== STANDING && !String(view ?? "").startsWith("library-") && (
         <div style={{ marginTop: 26, padding: "18px 20px", background: C.panel, maxWidth: 680 }}>
           <div style={{ fontSize: 16, fontWeight: 700 }}>
             {current ? "This campaign is not loaded yet" : newest ? "No campaign loaded" : "No campaign file ships with this build"}
@@ -436,8 +489,13 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
         </div>
       )}
       {rows !== null && !error && all.length === 0 && view === STANDING && (
-        <p style={{ marginTop: 26, fontSize: 14, color: C.muted }}>Nothing in the standing queue.</p>
+        <div style={{ marginTop: 26 }}>
+          <p style={{ margin: "0 0 10px", fontSize: 14, color: C.muted }}>Nothing here yet.</p>
+          <button type="button" onClick={() => setPicking(true)} style={btnPrimary}>New post</button>
+        </div>
       )}
+
+      {picking && <HookPicker libraries={libraries} onPick={newPost} onClose={() => setPicking(false)} />}
 
       {all.length > 0 && (
         <>
@@ -448,6 +506,10 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
           </div>
 
           <div style={{ marginTop: 18, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <button type="button" onClick={() => setPicking(true)} style={btnPrimary}
+                    title="Start a post from one of the month's hooks, or blank. Nothing is scheduled until you give it a date.">
+              New post
+            </button>
             <button type="button" onClick={() => setOnlyOpen(v => !v)}
                     style={{ ...btnGhost, ...(onlyOpen ? { border: `1px solid ${C.green}`, color: C.green } : null) }}>
               {onlyOpen ? "Showing open slots" : "Show open slots only"}
@@ -473,7 +535,9 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
               <div key={w}>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 12, padding: "14px 4px 6px" }}>
                   <span style={{ fontSize: 13.5, fontWeight: 700 }}>
-                    {weekLabel[w] ?? (view === STANDING ? "Standing queue" : "Unscheduled")}
+                    {weekLabel[w] ?? (view === STANDING ? "Standing queue"
+                      : String(view ?? "").startsWith("library-") ? "Posts from this month's hooks"
+                      : "Unscheduled")}
                   </span>
                   <span style={mono}>{group.filter(r => r.status === "posted").length}/{group.length} posted</span>
                 </div>
@@ -503,6 +567,117 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
         posted, and a slot that may state figures cannot be marked posted until retired-check
         has run clean on its caption — the server refuses, not the button.
       </p>
+    </div>
+  );
+}
+
+/* ── the hook picker — where an idea becomes a post ──────────────────── */
+
+/**
+ * THE MONTH'S HOOKS (2026-08-20, Paul: *"I'm going to go with more of a GUIDE
+ * and less of a specific post per day prescription… I will just come up with
+ * the copy and paste that into the app and then hit send to Cowork."*).
+ *
+ * A HOOK IS NOT A POST AND IS NEVER USED UP. It seeds a new row and stays on
+ * the menu — one hook may carry three posts across a month or none at all,
+ * which is exactly the difference between a guide and a calendar. That is why
+ * this is a picker rather than a list of slots to fill: a slot you fill is
+ * gone, and a reference is not.
+ *
+ * The direction line rides in with it as the post's brief, so the reason the
+ * hook was written is still on screen when the copy gets written from it.
+ *
+ * Absolute, never fixed — Safari reads a fixed full-viewport coloured layer for
+ * toolbar tinting and it breaks dark-mode switching (CLAUDE.md rule 5).
+ */
+function HookPicker({ libraries, onPick, onClose }: {
+  libraries: Library[];
+  onPick: (body: Record<string, unknown>) => Promise<string | null>;
+  onClose: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [kind, setKind] = useState("text");
+  const lib = libraries[0] ?? null;
+
+  const make = async (body: Record<string, unknown>) => {
+    setBusy(true); setErr(null);
+    const e = await onPick({ ...body, kind });
+    setBusy(false);
+    if (e) setErr(e);
+  };
+
+  return (
+    <div style={{ position: "absolute", inset: 0, background: "rgba(20,22,24,0.34)", zIndex: 40 }}
+         onClick={onClose}>
+      <div onClick={e => e.stopPropagation()}
+           style={{ position: "absolute", top: 40, left: "50%", transform: "translateX(-50%)",
+                    width: "min(760px, calc(100% - 32px))", maxHeight: "calc(100vh - 80px)", overflowY: "auto",
+                    background: C.bg, border: `1px solid ${C.hair}`, padding: "20px 22px" }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
+          <h2 style={{ margin: 0, fontFamily: C.display, fontSize: 22, fontWeight: 600 }}>New post</h2>
+          {lib && <span style={mono}>{lib.title}</span>}
+          <div style={{ flex: 1 }} />
+          <button type="button" onClick={onClose} style={{ ...btnGhost, padding: "5px 11px", fontSize: 12.5 }}>Close</button>
+        </div>
+        <p style={{ margin: "8px 0 0", fontSize: 13.5, color: C.body, lineHeight: 1.6 }}>
+          Start from one of the month's hooks or from nothing. A hook is a starting point, not a post —
+          picking it never uses it up, and you write the copy yourself. Nothing is scheduled until you give it a date.
+        </p>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "14px 0 4px", flexWrap: "wrap" }}>
+          <span style={{ fontSize: 12.5, fontWeight: 600 }}>Medium</span>
+          {(["text", "image", "video", "document"] as const).map(k => (
+            <button key={k} type="button" onClick={() => setKind(k)}
+                    style={{ ...btnGhost, padding: "4px 11px", fontSize: 12.5, textTransform: "capitalize",
+                             ...(kind === k ? { borderColor: C.green, color: C.green } : null) }}>
+              {k}
+            </button>
+          ))}
+          <div style={{ flex: 1 }} />
+          <button type="button" disabled={busy} onClick={() => make({})} style={{ ...btnGhost, padding: "5px 12px", fontSize: 12.5 }}>
+            {busy ? "…" : "Blank post"}
+          </button>
+        </div>
+        <p style={{ margin: "0 0 6px", fontSize: 12.5, color: C.muted, lineHeight: 1.5 }}>
+          {kind === "video"
+            ? "A filmed post — nothing for Cowork to build; you post it and mark it here."
+            : kind === "text"
+              ? "A plain text post — no template needed."
+              : `A ${kind} post — you pick the template on the slot, then Send to Cowork.`}
+        </p>
+
+        {err && (
+          <div style={{ margin: "10px 0", padding: "9px 12px", background: C.dangerTint, fontSize: 13, color: C.ink }}>{err}</div>
+        )}
+
+        {!lib ? (
+          <p style={{ marginTop: 16, fontSize: 13.5, color: C.muted, lineHeight: 1.6 }}>
+            No hook library ships with this build — start a blank post above. A library is a monthly file
+            (<code style={code}>content/studio/library-&lt;month&gt;.json</code>) written from that month's research.
+          </p>
+        ) : lib.pillars.map(p => (
+          <div key={p.id} style={{ marginTop: 18 }}>
+            <div style={{ fontSize: 14, fontWeight: 700 }}>
+              {p.title}{p.sub ? <span style={{ color: C.muted, fontWeight: 400 }}> · {p.sub}</span> : null}
+            </div>
+            {p.goal && <div style={{ fontSize: 12.5, color: C.muted, marginTop: 2, lineHeight: 1.5 }}>{p.goal}</div>}
+            <div style={{ marginTop: 8, borderTop: `1px solid ${C.hair}` }}>
+              {p.hooks.map(h => (
+                <button key={h.id} type="button" disabled={busy}
+                        onClick={() => make({ hookId: h.id })}
+                        style={{ display: "block", width: "100%", textAlign: "left", font: "inherit",
+                                 background: "none", border: "none", borderBottom: `1px solid ${C.hair}`,
+                                 padding: "10px 4px", cursor: busy ? "default" : "pointer", color: C.ink }}>
+                  <span style={{ ...mono, color: C.green }}>{h.style}</span>
+                  <div style={{ fontSize: 14, lineHeight: 1.5, marginTop: 3 }}>{h.hook}</div>
+                  <div style={{ fontSize: 12.5, color: C.muted, marginTop: 3, lineHeight: 1.5 }}>{h.direction}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -550,11 +725,13 @@ function SlotLine({ row, open, isToday, onToggle, onPatch, onPatchDraft, onSend,
   const [check, setCheck] = useState(row.retired_check === "not_run" ? "" : row.retired_check);
   const [notes, setNotes] = useState(row.notes ?? "");
   const [draftDirty, setDraftDirty] = useState(false);
+  const [when, setWhen] = useState(String(row.scheduled_for ?? "").slice(0, 10));
   useEffect(() => {
     setErr(null); setPostUrl(row.post_url ?? "");
     setCheck(row.retired_check === "not_run" ? "" : row.retired_check);
     setNotes(row.notes ?? "");
-  }, [row.queue_id, row.post_url, row.retired_check, row.notes]);
+    setWhen(String(row.scheduled_for ?? "").slice(0, 10));
+  }, [row.queue_id, row.post_url, row.retired_check, row.notes, row.scheduled_for]);
   const act = async (p: Promise<string | null>) => setErr(await p);
 
   return (
@@ -597,7 +774,9 @@ function SlotLine({ row, open, isToday, onToggle, onPatch, onPatchDraft, onSend,
             )}
             {row.body && row.brief && (
               <details style={{ marginTop: 12 }}>
-                <summary style={{ fontSize: 13, fontWeight: 600, cursor: "pointer" }}>The brief this was drafted from</summary>
+                <summary style={{ fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                  {row.origin === "app" ? "The hook this started from" : "The brief this was drafted from"}
+                </summary>
                 <div style={{ marginTop: 8 }}><BriefBlock row={row} bare /></div>
               </details>
             )}
@@ -620,6 +799,29 @@ function SlotLine({ row, open, isToday, onToggle, onPatch, onPatchDraft, onSend,
           {/* right: what to do with it — the hand-off first, because that is
               the press you are here for; the after-you-post record below it. */}
           <div style={{ minWidth: 0 }}>
+            {/* WHEN. Empty is a real answer, not a missing one — a library post is
+                a worklist item until Paul decides it has a day, and only then
+                does it join Today / Up next and start warning if it slips. The
+                empty string CLEARS it server-side; undefined would leave it. */}
+            {row.status !== "posted" && (
+              <div style={{ marginBottom: 10, padding: "12px 14px", background: C.panel }}>
+                <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>When</div>
+                <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                  <input type="date" value={when} onChange={e => setWhen(e.target.value)}
+                         style={{ ...input, width: 170 }} aria-label="Scheduled date" />
+                  <button type="button" style={btnGhost}
+                          disabled={when === String(row.scheduled_for ?? "").slice(0, 10)}
+                          onClick={() => act(onPatch({ scheduledFor: when || "" }))}>
+                    {when || !row.scheduled_for ? "Set" : "Clear"}
+                  </button>
+                </div>
+                <div style={{ ...mono, marginTop: 6, color: C.muted }}>
+                  {row.scheduled_for
+                    ? `scheduled ${dayLabel(row.scheduled_for)}`
+                    : "no date — it sits in the list until you give it one"}
+                </div>
+              </div>
+            )}
             {row.status !== "posted" && <SendToCowork row={row} unsaved={draftDirty} onSend={onSend} />}
             {row.status !== "posted" ? (
               <div style={{ padding: "12px 14px", background: C.panel }}>
@@ -707,9 +909,14 @@ export function BriefBlock({ row, bare = false }: { row: QueueRow; bare?: boolea
     <div>
       {!bare && (
         <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
-          <span style={{ fontSize: 13, fontWeight: 700 }}>The brief</span>
+          <span style={{ fontSize: 13, fontWeight: 700 }}>{row.origin === "app" ? "The hook" : "The brief"}</span>
           <span style={{ fontSize: 12.5, color: C.muted }}>
-            the plan for this slot — the post itself is drafted in the studio and lands here by re-import
+            {/* An app-born post has no plan behind it and no import coming — Paul
+                started it from a hook and writes the copy right here. Saying
+                otherwise would send him looking for a draft nobody is writing. */}
+            {row.origin === "app"
+              ? "what this post starts from — write the copy below"
+              : "the plan for this slot — the post itself is drafted in the studio and lands here by re-import"}
           </span>
         </div>
       )}
