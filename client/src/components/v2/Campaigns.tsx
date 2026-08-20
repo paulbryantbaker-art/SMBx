@@ -127,6 +127,11 @@ const STATUS_LABEL: Record<string, string> = {
 
 /** The standing queue (POST_QUEUE.md rows) has no campaign; this is its view id. */
 const STANDING = "standing";
+/** The month's hook library, as a PLACE you can go and read — not only a step
+ *  inside creating a post. Paul, 2026-08-20: "Where is the campaign guide?"
+ *  It shipped buried in the New post dialog, which is backwards for a thing
+ *  whose job is to be browsed before you decide anything. */
+const GUIDE = "guide";
 
 export const isMandate = (r: Pick<QueueRow, "angle" | "status">) =>
   r.status === "recurring" || /^THE MANDATE/i.test(r.angle);
@@ -416,9 +421,19 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
           the standing queue. A library's posts carry `library-<month>` as their
           campaign, so without a chip of their own they would import fine and be
           invisible: `view` could never equal a value nothing offered. */}
-      {(campaigns.length > 0 || libRows.length > 0) &&
-       (campaigns.length + libRows.length > 1 || total.some(r => r.campaign == null)) && (
+      {(campaigns.length > 0 || libRows.length > 0 || libraries.length > 0) &&
+       (campaigns.length + libRows.length + (libraries.length ? 1 : 0) > 1 || total.some(r => r.campaign == null)) && (
         <div style={{ marginTop: 14, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+          {libraries.length > 0 && (
+            <button type="button" onClick={() => { setView(GUIDE); setOpenId(null); }}
+                    style={{ ...btnGhost, ...(view === GUIDE ? { border: `1px solid ${C.green}`, color: C.green } : null) }}
+                    title="The month's hooks — read them any time; start a post from one when you are ready.">
+              Guide
+              <span style={{ ...mono, marginLeft: 8 }}>
+                {libraries[0].pillars.reduce((n, p) => n + p.hooks.length, 0)}
+              </span>
+            </button>
+          )}
           {libRows.map(name => (
             <button key={name} type="button" onClick={() => { setView(name); setOpenId(null); }}
                     style={{ ...btnGhost, ...(view === name ? { border: `1px solid ${C.green}`, color: C.green } : null) }}>
@@ -454,10 +469,30 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
       )}
 
       {/* the first press: nothing loaded for this campaign */}
+      {/* THE GUIDE — the month's hooks, readable on their own. Rendered in place
+          of the slot list, because it is not a calendar and the week headers,
+          Today and Up next would all be answering questions it does not have. */}
+      {view === GUIDE && (
+        <div style={{ marginTop: 20, maxWidth: 780 }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 16, fontWeight: 700 }}>{libraries[0]?.title ?? "The guide"}</span>
+            <div style={{ flex: 1 }} />
+            <button type="button" onClick={() => setPicking(true)} style={btnGhost}>Blank post</button>
+          </div>
+          <p style={{ margin: "8px 0 0", fontSize: 13.5, color: C.body, lineHeight: 1.6 }}>
+            The month's hooks, from that month's research. A hook is a starting point, not a post —
+            press one to start a post from it and write the copy yourself. Picking a hook never uses
+            it up, so one can carry three posts or none.
+          </p>
+          <HookList lib={libraries[0] ?? null} busy={busy}
+                    onPick={id => { setBusy(true); newPost({ hookId: id, kind: "text" }).then(e => { setBusy(false); if (e) setBanner(e); }); }} />
+        </div>
+      )}
+
       {/* A library view is never empty by construction (its chip only exists
           where posts do), so this card is the CAMPAIGN one and must not claim a
-          library needs loading. */}
-      {rows !== null && !error && all.length === 0 && view !== STANDING && !String(view ?? "").startsWith("library-") && (
+          library needs loading — nor the guide, which is not a campaign at all. */}
+      {rows !== null && !error && all.length === 0 && view !== STANDING && view !== GUIDE && !String(view ?? "").startsWith("library-") && (
         <div style={{ marginTop: 26, padding: "18px 20px", background: C.panel, maxWidth: 680 }}>
           <div style={{ fontSize: 16, fontWeight: 700 }}>
             {current ? "This campaign is not loaded yet" : newest ? "No campaign loaded" : "No campaign file ships with this build"}
@@ -571,6 +606,54 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
   );
 }
 
+/* ── the month's hooks, as a list ────────────────────────────────────── */
+
+/**
+ * The pillars and their hooks, rendered once and used twice: as the browsable
+ * GUIDE and inside the New post dialog. One rendering, because two would drift
+ * and the guide is the thing Paul reads before he decides anything.
+ *
+ * A hook row is a button, and pressing it starts a post — reading and using are
+ * the same surface, which is what "curate the idea" wants. It is never consumed:
+ * the hook stays on the list afterwards.
+ */
+function HookList({ lib, busy, onPick }: {
+  lib: Library | null; busy: boolean; onPick: (hookId: string) => void;
+}) {
+  if (!lib) {
+    return (
+      <p style={{ marginTop: 16, fontSize: 13.5, color: C.muted, lineHeight: 1.6 }}>
+        No hook library ships with this build. A library is a monthly file
+        (<code style={code}>content/studio/library-&lt;month&gt;.json</code>) written from that month's research.
+      </p>
+    );
+  }
+  return (
+    <>
+      {lib.pillars.map(p => (
+        <div key={p.id} style={{ marginTop: 18 }}>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>
+            {p.title}{p.sub ? <span style={{ color: C.muted, fontWeight: 400 }}> · {p.sub}</span> : null}
+          </div>
+          {p.goal && <div style={{ fontSize: 12.5, color: C.muted, marginTop: 2, lineHeight: 1.5 }}>{p.goal}</div>}
+          <div style={{ marginTop: 8, borderTop: `1px solid ${C.hair}` }}>
+            {p.hooks.map(h => (
+              <button key={h.id} type="button" disabled={busy} onClick={() => onPick(h.id)}
+                      style={{ display: "block", width: "100%", textAlign: "left", font: "inherit",
+                               background: "none", border: "none", borderBottom: `1px solid ${C.hair}`,
+                               padding: "10px 4px", cursor: busy ? "default" : "pointer", color: C.ink }}>
+                <span style={{ ...mono, color: C.green }}>{h.style}</span>
+                <div style={{ fontSize: 14, lineHeight: 1.5, marginTop: 3 }}>{h.hook}</div>
+                <div style={{ fontSize: 12.5, color: C.muted, marginTop: 3, lineHeight: 1.5 }}>{h.direction}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
+
 /* ── the hook picker — where an idea becomes a post ──────────────────── */
 
 /**
@@ -651,32 +734,7 @@ function HookPicker({ libraries, onPick, onClose }: {
           <div style={{ margin: "10px 0", padding: "9px 12px", background: C.dangerTint, fontSize: 13, color: C.ink }}>{err}</div>
         )}
 
-        {!lib ? (
-          <p style={{ marginTop: 16, fontSize: 13.5, color: C.muted, lineHeight: 1.6 }}>
-            No hook library ships with this build — start a blank post above. A library is a monthly file
-            (<code style={code}>content/studio/library-&lt;month&gt;.json</code>) written from that month's research.
-          </p>
-        ) : lib.pillars.map(p => (
-          <div key={p.id} style={{ marginTop: 18 }}>
-            <div style={{ fontSize: 14, fontWeight: 700 }}>
-              {p.title}{p.sub ? <span style={{ color: C.muted, fontWeight: 400 }}> · {p.sub}</span> : null}
-            </div>
-            {p.goal && <div style={{ fontSize: 12.5, color: C.muted, marginTop: 2, lineHeight: 1.5 }}>{p.goal}</div>}
-            <div style={{ marginTop: 8, borderTop: `1px solid ${C.hair}` }}>
-              {p.hooks.map(h => (
-                <button key={h.id} type="button" disabled={busy}
-                        onClick={() => make({ hookId: h.id })}
-                        style={{ display: "block", width: "100%", textAlign: "left", font: "inherit",
-                                 background: "none", border: "none", borderBottom: `1px solid ${C.hair}`,
-                                 padding: "10px 4px", cursor: busy ? "default" : "pointer", color: C.ink }}>
-                  <span style={{ ...mono, color: C.green }}>{h.style}</span>
-                  <div style={{ fontSize: 14, lineHeight: 1.5, marginTop: 3 }}>{h.hook}</div>
-                  <div style={{ fontSize: 12.5, color: C.muted, marginTop: 3, lineHeight: 1.5 }}>{h.direction}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
+        <HookList lib={lib} busy={busy} onPick={id => make({ hookId: id })} />
       </div>
     </div>
   );
