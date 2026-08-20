@@ -449,6 +449,21 @@ crmRouter.post('/crm/seed-outreach', async (req, res) => {
   }
 });
 
+/** Which of the seven bundle tables a CSV filename belongs to — shared by
+ *  import-bundle (browser-picked files) and sync-register (the shipped copy).
+ *  Matched by number prefix or meaning; null = not part of the bundle. */
+const bundleSlotFor = (name: string): string | null => {
+  const n = name.toLowerCase();
+  if (/^0?1[_\-.]|contact/.test(n) && !/queue|research/.test(n)) return 'contacts';
+  if (/^0?2[_\-.]|organi[sz]|^orgs?\b/.test(n)) return 'orgs';
+  if (/^0?3[_\-.]|wave/.test(n)) return 'waves';
+  if (/^0?4[_\-.]|step|sequence/.test(n)) return 'steps';
+  if (/^0?5[_\-.]|template|message/.test(n)) return 'templates';
+  if (/^0?6[_\-.]|event/.test(n)) return 'events';
+  if (/^0?7[_\-.]|research|queue/.test(n)) return 'queue';
+  return null;
+};
+
 /**
  * POST /api/crm/import-bundle   { files: { "<name>.csv": "<csv text>", … } }
  *
@@ -474,21 +489,10 @@ crmRouter.post('/crm/import-bundle', async (req, res) => {
     const tables: Record<string, Record<string, string>[]> = {
       contacts: [], orgs: [], waves: [], steps: [], templates: [], events: [], queue: [],
     };
-    const slotFor = (name: string): string | null => {
-      const n = name.toLowerCase();
-      if (/^0?1[_\-.]|contact/.test(n) && !/queue|research/.test(n)) return 'contacts';
-      if (/^0?2[_\-.]|organi[sz]|^orgs?\b/.test(n)) return 'orgs';
-      if (/^0?3[_\-.]|wave/.test(n)) return 'waves';
-      if (/^0?4[_\-.]|step|sequence/.test(n)) return 'steps';
-      if (/^0?5[_\-.]|template|message/.test(n)) return 'templates';
-      if (/^0?6[_\-.]|event/.test(n)) return 'events';
-      if (/^0?7[_\-.]|research|queue/.test(n)) return 'queue';
-      return null;
-    };
     const ignored: string[] = [];
     for (const [name, text] of Object.entries(files)) {
       if (typeof text !== 'string') { ignored.push(`${name} (not text)`); continue; }
-      const slot = slotFor(name);
+      const slot = bundleSlotFor(name);
       if (!slot) { ignored.push(name); continue; }
       tables[slot] = tables[slot].concat(parseCsv(text));
     }
@@ -500,6 +504,58 @@ crmRouter.post('/crm/import-bundle', async (req, res) => {
   } catch (err: any) {
     console.error('CRM bundle import error:', err.message);
     return res.status(500).json({ error: `Bundle import failed: ${err.message}` });
+  }
+});
+
+/**
+ * POST /api/crm/sync-register   (no body)
+ *
+ * THE ONE-PRESS SYNC (2026-08-19, Paul: "as cowork updates companies etc,
+ * you can update too"). Same idempotent loader as import-bundle, different
+ * transport: instead of the browser uploading picked files, the server reads
+ * the register THE DEPLOYED COMMIT CARRIES at studio/clients/crm-bundle/
+ * (.dockerignore un-ignores exactly that folder — nothing else in studio/
+ * ships). The loop: a session edits the register → PR → merge → Railway
+ * rebuilds carrying the new CSVs → one press here, from any device, with no
+ * files on it. The press stays a press — facts refresh on a human's action,
+ * never on a deploy. Fails loudly, never silently: an image without the
+ * folder gets a 409 naming the .dockerignore exception (no pass on silence).
+ */
+crmRouter.post('/crm/sync-register', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const dir = path.resolve(process.cwd(), 'studio/clients/crm-bundle');
+    if (!fs.existsSync(dir)) {
+      return res.status(409).json({
+        error: 'This deploy does not carry studio/clients/crm-bundle — the .dockerignore exception (!studio/clients/crm-bundle) is missing from the build, or the deploy predates 2026-08-19. Use "Load the register from CSVs" until the next deploy.',
+      });
+    }
+    const names = fs.readdirSync(dir).filter((n) => /\.csv$/i.test(n));
+    const { parseCsv, seedOutreachFromTables } = await import('../services/crmOutreachSeed.js');
+    const tables: Record<string, Record<string, string>[]> = {
+      contacts: [], orgs: [], waves: [], steps: [], templates: [], events: [], queue: [],
+    };
+    const read: string[] = [];
+    const ignored: string[] = [];
+    for (const name of names) {
+      const slot = bundleSlotFor(name);
+      if (!slot) { ignored.push(name); continue; }
+      const text = fs.readFileSync(path.join(dir, name), 'utf8').replace(/^\uFEFF/, '');
+      tables[slot] = tables[slot].concat(parseCsv(text));
+      read.push(name);
+    }
+    if (!tables.orgs.length && !tables.contacts.length) {
+      return res.status(409).json({
+        error: `studio/clients/crm-bundle is present but held no readable organizations/contacts CSVs (files seen: ${names.join(', ') || 'none'}).`,
+      });
+    }
+    const report = await seedOutreachFromTables(userId, tables as any);
+    return res.json({ ...report, filesRead: read, ignoredFiles: ignored });
+  } catch (err: any) {
+    console.error('CRM register sync error:', err.message);
+    return res.status(500).json({ error: `Register sync failed: ${err.message}` });
   }
 });
 
