@@ -1,0 +1,17 @@
+built      2026-08-20 · TEMPLATES — THE VISUAL REGISTER (6pp Letter)
+what       TEMPLATES.md rendered as reference cards, so the register can be
+           looked at rather than read. Paul: "Can you give it to me in a
+           multi-card style PDF that i can visually reference".
+builder    scripts/studio/templates-card.py (PIL raster) — NOT in
+           rebuild-all.sh. Regenerate when the register changes.
+sections   1 cover + at-a-glance strip · 2 the four builders · 3 grounds and
+           layouts · 4 page kinds · 5 the named devices · 6 the one-offs.
+law        Names only. FORMATS.md owns the slot tables, DESIGN.md owns the
+           look, TEMPLATES.md is the written index — the deck states outright
+           that they win over a card.
+honesty    Every thumbnail is a REAL render cropped from filed collateral.
+           Where nothing survives on disk the plate is empty and says so
+           rather than showing a mock-up: `trade` (the teardown folders kept
+           only their captions, and figure-deck.py has no trade layout — that
+           page comes back from build-deck.mts on the Mac), plus `split` and
+           the text card.
