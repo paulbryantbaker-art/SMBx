@@ -1,17 +1,25 @@
 built      2026-08-20 · TEMPLATES — THE VISUAL REGISTER (6pp Letter)
-what       TEMPLATES.md rendered as reference cards, so the register can be
-           looked at rather than read. Paul: "Can you give it to me in a
-           multi-card style PDF that i can visually reference".
+what       The five templates Paul picks from, each shown COVER · CONTENT ·
+           CTA, because that is the question: "as long as you understand what
+           content pages go with each and which CTA pages goes with each, CC
+           just needs to know which I will pick from."
+the five   Carousel · One page (image) · Monolith (dark look) · Portal (light
+           look) · Report. MONOLITH AND PORTAL ARE LOOKS, NOT LENGTHS — each
+           arrives as a carousel or as a single image, so a request names
+           both the look and the length. THE OFFER DOCUMENT IS PORTAL; the
+           content varies with the need, the template does not.
 builder    scripts/studio/templates-card.py (PIL raster) — NOT in
            rebuild-all.sh. Regenerate when the register changes.
-sections   1 cover + at-a-glance strip · 2 the four builders · 3 grounds and
-           layouts · 4 page kinds · 5 the named devices · 6 the one-offs.
-law        Names only. FORMATS.md owns the slot tables, DESIGN.md owns the
-           look, TEMPLATES.md is the written index — the deck states outright
-           that they win over a card.
+supersedes the 2026-08-19 cut, which sorted by BUILDER and carried a one-offs
+           section. Paul removed the one-offs and folded the offer document
+           into Portal. Do not reinstate either.
+law        Names and parts only. FORMATS.md owns the slot tables, DESIGN.md
+           owns the look, TEMPLATES.md is the written index — the deck states
+           outright that they win over a card.
 honesty    Every thumbnail is a REAL render cropped from filed collateral.
            Where nothing survives on disk the plate is empty and says so
            rather than showing a mock-up: `trade` (the teardown folders kept
-           only their captions, and figure-deck.py has no trade layout — that
-           page comes back from build-deck.mts on the Mac), plus `split` and
-           the text card.
+           only their captions, and figure-deck.py has no trade layout), the
+           split and text-card layouts, and the report body. The report cover
+           shown is the real OG card, built from the same cover config, and
+           the card says so.
