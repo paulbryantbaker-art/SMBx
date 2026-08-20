@@ -76,3 +76,10 @@ collateral/**/*.mov
 
 # the hourly one-clone sync writes its log beside itself; an untracked log must never dirty the tree (a dirty main BLOCKS the sync — 2026-08-18)
 sync.log
+
+# Ready-to-post folders — assembled by scripts/studio/pull-queue.mjs from things
+# that are already versioned (the caption is in the plan markdown, the render is
+# reproducible from its spec) plus a link to a video that must never be in git.
+# Nothing in here is source, and a hard-linked 500MB take would be catastrophic
+# to commit even once — see the video rules above.
+ready/

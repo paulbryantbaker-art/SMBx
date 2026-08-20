@@ -30,7 +30,8 @@
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { sql } from '../db.js';
-import { templateById } from '../../shared/templates.js';
+import { templateById, templateForKind } from '../../shared/templates.js';
+import { sendReadiness, sendState, outgoingCopy } from '../../shared/studioSend.js';
 import { copyDraftState, pagesDraftState, pagesEqual } from '../../shared/draft.js';
 
 const QUEUE_JSON = path.resolve(process.cwd(), 'content/studio/post-queue.json');
@@ -462,7 +463,7 @@ const isQueuePage = (x: any): x is QueuePage =>
 export async function updateQueueDraft(
   userId: number,
   queueId: string,
-  patch: { template?: string | null; copyEdit?: string | null; pagesEdit?: QueuePage[] | null },
+  patch: { template?: string | null; copyEdit?: string | null; pagesEdit?: QueuePage[] | null; videoFile?: string | null },
 ): Promise<any | null> {
   const [curRaw] = await sql`SELECT queue_id, kind, body, pages FROM post_queue WHERE user_id = ${userId} AND queue_id = ${queueId}`;
   if (!curRaw) return null;
@@ -474,7 +475,16 @@ export async function updateQueueDraft(
     if (template) {
       const t = templateById(template);
       if (!t) throw new Error(`Unknown template "${template}" — it is not in shared/templates.ts`);
-      if (cur.kind && t.for !== cur.kind) throw new Error(`Template "${template}" renders a ${t.for} slot; this slot is ${cur.kind}`);
+      // Compare against the MEDIUM's renderer family, not the medium itself:
+      // an `image` slot is rendered by the `text` templates (the single-image
+      // post), and comparing kind to `for` directly refused on Save the exact
+      // pick the app had just offered.
+      const want = templateForKind(cur.kind);
+      if (cur.kind && t.for !== want) {
+        throw new Error(want
+          ? `Template "${template}" renders a ${t.for} slot; this slot is ${cur.kind}`
+          : `This slot is ${cur.kind} — nothing renders it, so it takes a video file rather than a template`);
+      }
     }
   }
   // An edit equal to the plan (ignoring end whitespace) is no edit — store
@@ -491,9 +501,29 @@ export async function updateQueueDraft(
     else if (pagesEqual(pagesEdit, cur.pages)) pagesEdit = null;
   }
 
+  // The video pick is a DECISION like the template — same table, same
+  // never-touched-by-the-importer rule, and it bumps draft_at for the same
+  // reason: changing which take goes out after Send to Studio makes the
+  // outstanding request stale, and the screen has to say so.
+  let videoFile: string | null | undefined = patch.videoFile;
+  if (videoFile !== undefined) {
+    videoFile = videoFile && videoFile.trim() ? videoFile.trim() : null;
+    // A path is resolved on the Mac, never here — the app cannot see the file.
+    // What it CAN refuse is a value that would escape the video folder or name
+    // something that is plainly not a video, because both only fail later, on
+    // his machine, as a work order nobody can fill.
+    if (videoFile) {
+      if (videoFile.includes('..')) throw new Error('The video path may not contain ".." — name the file, or give its full path.');
+      if (!/\.(mov|mp4|m4v|avi|webm)$/i.test(videoFile)) {
+        throw new Error(`"${videoFile}" does not look like a video file (.mov .mp4 .m4v .avi .webm).`);
+      }
+    }
+  }
+
   const [row] = await sql`
     UPDATE post_queue SET
       template   = CASE WHEN ${template === undefined} THEN template   ELSE ${template ?? null} END,
+      video_file = CASE WHEN ${videoFile === undefined} THEN video_file ELSE ${videoFile ?? null} END,
       copy_edit  = CASE WHEN ${copyEdit === undefined} THEN copy_edit  ELSE ${copyEdit ?? null} END,
       copy_base  = CASE WHEN ${copyEdit === undefined} THEN copy_base  ELSE ${copyEdit ? (cur.body ?? null) : null} END,
       pages_edit = CASE WHEN ${pagesEdit === undefined} THEN pages_edit ELSE ${pagesEdit ? sql.json(pagesEdit as any) : null} END,
@@ -510,14 +540,82 @@ export async function updateQueueDraft(
  * the plan's own copy beside the edit so a session sees the DIFF and not just
  * the override, and the document's spec path so it knows which file to open.
  */
-export async function listQueueDrafts(userId: number): Promise<any[]> {
+/**
+ * SEND TO STUDIO (migration 140) — record that this slot is ready to be built.
+ *
+ * It records a request. It does not build: the app calls no builder, writes
+ * nothing to the clone, and could not render if it wanted to — the renderer is
+ * local Chromium against the workspace on Paul's Mac. `pull-queue.mjs --sent`
+ * is what acts on this, and the round trip closes at `markQueueBuilt`.
+ *
+ * THE SERVER REFUSES, NOT THE BUTTON — the same posture as Mark posted. The
+ * rule is `shared/studioSend.ts` so the button can grey itself out with the
+ * same sentence, and the two can never drift into disagreeing about whether a
+ * bracketed caption may be built.
+ */
+export async function sendQueueToStudio(userId: number, queueId: string): Promise<any | null> {
+  const [cur] = await sql`
+    SELECT kind, status, body, copy_edit, gate, template, video_file
+    FROM post_queue WHERE user_id = ${userId} AND queue_id = ${queueId}`;
+  if (!cur) return null;
+  const verdict = sendReadiness(cur as any);
+  if (!verdict.ok) throw new Error(`${queueId}: ${verdict.reason}`);
+
+  // Re-sending CLEARS the previous build. The studio is being asked for a new
+  // one, and leaving built_at behind would let the screen keep reporting a
+  // render that answers the old decision — the same class of lie `copy_base`
+  // was added to prevent one step earlier.
+  const [row] = await sql`
+    UPDATE post_queue
+    SET sent_at = NOW(), built_at = NULL, built_path = NULL, updated_at = NOW()
+    WHERE user_id = ${userId} AND queue_id = ${queueId}
+    RETURNING *`;
+  return row ? { ...normalizeQueueRow(row), asks: verdict.asks } : null;
+}
+
+/** Un-send: the request is withdrawn. Leaves every decision on the row alone. */
+export async function unsendQueue(userId: number, queueId: string): Promise<any | null> {
+  const [row] = await sql`
+    UPDATE post_queue SET sent_at = NULL, updated_at = NOW()
+    WHERE user_id = ${userId} AND queue_id = ${queueId}
+    RETURNING *`;
+  return row ? normalizeQueueRow(row) : null;
+}
+
+/**
+ * The studio's answer: it built the slot and filed it here. Called by
+ * `pull-queue.mjs --built`, never by a person in the app — the app has no way
+ * to know a render happened, and a button that claimed one would be guessing.
+ *
+ * `path` is required by the table's own CHECK, and required here with a better
+ * error than the constraint's: a build with no location is not a record of a
+ * build, it is a claim.
+ */
+export async function markQueueBuilt(userId: number, queueId: string, builtPath: string): Promise<any | null> {
+  const where = String(builtPath ?? '').trim();
+  if (!where) throw new Error(`${queueId}: a build has to say where it landed — pass the path it was filed at.`);
+  const [row] = await sql`
+    UPDATE post_queue
+    SET built_at = NOW(), built_path = ${where}, updated_at = NOW()
+    WHERE user_id = ${userId} AND queue_id = ${queueId} AND sent_at IS NOT NULL
+    RETURNING *`;
+  // No row means either no such slot or one that was never sent. The second is
+  // the interesting one and is reported rather than swallowed: a build nobody
+  // asked for is a session working from a stale pull.
+  return row ? normalizeQueueRow(row) : null;
+}
+
+export async function listQueueDrafts(userId: number, sentOnly = false): Promise<any[]> {
   const rows = await sql`
     SELECT queue_id, campaign, title, kind, status, scheduled_for,
            template, copy_edit, copy_base, pages_edit, pages_base, draft_at,
-           body, pages, document
+           video_file, sent_at, built_at, built_path,
+           body, pages, document, gate, law_check
     FROM post_queue
     WHERE user_id = ${userId}
-      AND (template IS NOT NULL OR copy_edit IS NOT NULL OR pages_edit IS NOT NULL)
+      AND (template IS NOT NULL OR copy_edit IS NOT NULL OR pages_edit IS NOT NULL
+           OR video_file IS NOT NULL OR sent_at IS NOT NULL)
+      AND (${sentOnly} = false OR sent_at IS NOT NULL)
     ORDER BY scheduled_for NULLS LAST, queue_id`;
   return rows.map(normalizeQueueRow).map((r: any) => {
     const t = templateById(r.template);
@@ -531,6 +629,18 @@ export async function listQueueDrafts(userId: number): Promise<any[]> {
       pages: r.pages_edit != null ? { state: pagesDraftState(r), edit: r.pages_edit, plan: r.pages, base: r.pages_base } : null,
       spec: r.document?.spec ?? null,
       filed_at: r.document?.filed_at ?? null,
+      /* the request (migration 140) — what the studio is being asked for */
+      video_file: r.video_file ?? null,
+      sent_at: r.sent_at ?? null,
+      built_at: r.built_at ?? null,
+      built_path: r.built_path ?? null,
+      send: sendState(r),
+      asks: sendReadiness(r).asks ?? null,
+      /* the text to post, resolved once here so the pull script never has to
+         choose between the edit and the plan — that rule lives in one place */
+      caption: outgoingCopy(r),
+      gate: r.gate ?? null,
+      law_check: r.law_check ?? null,
     };
   });
 }

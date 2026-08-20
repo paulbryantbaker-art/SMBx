@@ -227,6 +227,53 @@ await T('the superseded calendar was parked by the press', async () => (await sq
 await T('…but the two posts that shipped were left alone', async () => (await sql<{ queue_id: string; status: string }[]>`SELECT queue_id, status FROM post_queue WHERE user_id=1 AND queue_id IN ('P-1','P-2') ORDER BY queue_id`).map(r => `${r.queue_id}:${r.status}`).join(' '), 'P-1:drafted P-2:next');
 await T('pressing it twice parks nothing more and moves no date', async () => { const { importCampaign } = await import('../postQueue.js'); const r = await importCampaign(1, '2026-08-21'); return `${r.inserted} ${r.scheduled} ${r.parkedSuperseded}`; }, '0 0 0');
 
+console.log('\nSEND TO STUDIO (migration 140) — the request, the video pick, the round trip');
+/* 2026-08-20, Paul: "we need a Send to Studio button that tells cowork to build
+   it… I need to be able to tell cowork which template style to use or if this
+   is using one of the videos." The RULE is pure and lives in
+   shared/studioSend.ts with its own suite (npm run test:studio-send, 35 cases);
+   what needs a database is the round trip — that the request is recorded, that
+   re-sending drops a stale build, that a build cannot be claimed for a slot
+   nobody asked about, and that the importer still cannot touch any of it. */
+const { sendQueueToStudio, unsendQueue, markQueueBuilt, updateQueueDraft: upd } = await import('../postQueue.js');
+await T('a brief-only slot cannot be sent — there is no post yet', async () => { try { await sendQueueToStudio(1, 'D-02'); return 'sent'; } catch (e: any) { return /has not been drafted/.test(e.message) ? 'refused' : `THREW: ${e.message.slice(0, 70)}`; } }, 'refused');
+await T('an image slot with copy but no template is refused', async () => { await upd(1, 'D-02', { copyEdit: 'QoE discrepancies killed 10.6% in 2023. Two years later: 21.3%.' }); try { await sendQueueToStudio(1, 'D-02'); return 'sent'; } catch (e: any) { return /Pick a template first/.test(e.message) ? 'refused' : `THREW: ${e.message.slice(0, 70)}`; } }, 'refused');
+/* THE BUG THIS CAUGHT ON THE WAY IN: the picker offers a `text` template on an
+   `image` slot (a single-image post is what those render) and updateQueueDraft
+   compared `t.for` to the KIND, so Save threw on the exact pick the app had
+   just offered. templateForKind is the one mapping both sides read now. */
+await T('an image slot ACCEPTS a text-family template (the single-image post)', async () => { const r = await upd(1, 'D-02', { template: 'figure-card' }); return r.template; }, 'figure-card');
+await T('…and a video slot refuses a template outright', async () => { try { await upd(1, 'D-01', { template: 'figure-card' }); return 'accepted'; } catch (e: any) { return /takes a video file rather than a template/.test(e.message) ? 'refused' : `THREW: ${e.message.slice(0, 70)}`; } }, 'refused');
+await T('with a template it sends, and says what it is asking for', async () => (await sendQueueToStudio(1, 'D-02'))?.asks, 'template');
+await T('…and the row carries the request', async () => { const r = (await sql`SELECT sent_at IS NOT NULL s, built_at FROM post_queue WHERE user_id=1 AND queue_id='D-02'`)[0]; return `${r.s} ${r.built_at}`; }, 'true null');
+await T('a video day needs the file, not a template', async () => { await upd(1, 'D-01', { copyEdit: 'Forty-seven percent of broken deals die on diligence findings.' }); try { await sendQueueToStudio(1, 'D-01'); return 'sent'; } catch (e: any) { return /Pick the video file first/.test(e.message) ? 'refused' : `THREW: ${e.message.slice(0, 70)}`; } }, 'refused');
+await T('a path that is not a video is refused before it can be sent', async () => { try { await upd(1, 'D-01', { videoFile: 'notes.txt' }); return 'accepted'; } catch (e: any) { return /does not look like a video file/.test(e.message) ? 'refused' : `THREW: ${e.message.slice(0, 70)}`; } }, 'refused');
+await T('…and so is one that climbs out of the video folder', async () => { try { await upd(1, 'D-01', { videoFile: '../../etc/passwd.mov' }); return 'accepted'; } catch (e: any) { return /may not contain/.test(e.message) ? 'refused' : `THREW: ${e.message.slice(0, 70)}`; } }, 'refused');
+await T('with a take it sends as a video', async () => { await upd(1, 'D-01', { videoFile: 'day-01.mov' }); return (await sendQueueToStudio(1, 'D-01'))?.asks; }, 'video');
+/* THE RECEIPT LAW, at the last mechanical moment. D-08's frame carries [N]; a
+   build is the last thing that can catch it before a person pastes it. */
+await T('a caption with unfilled receipt brackets cannot be sent', async () => { await upd(1, 'D-08', { copyEdit: 'The deal died on day [N]. Not at price.' }); try { await sendQueueToStudio(1, 'D-08'); return 'sent'; } catch (e: any) { return /unfilled brackets/.test(e.message) ? 'refused' : `THREW: ${e.message.slice(0, 70)}`; } }, 'refused');
+
+console.log('\nTHE ROUND TRIP — and what the studio may and may not claim');
+await T('the studio reports the build and where it landed', async () => { const r = await markQueueBuilt(1, 'D-02', 'studio/ready/2026-08-22-D-02'); return r?.built_path; }, 'studio/ready/2026-08-22-D-02');
+await T('a build with no path is refused, with a better message than the constraint', async () => { try { await markQueueBuilt(1, 'D-02', '  '); return 'accepted'; } catch (e: any) { return /has to say where it landed/.test(e.message) ? 'refused' : `THREW: ${e.message.slice(0, 70)}`; } }, 'refused');
+/* A session working from a stale pull would otherwise stamp a build onto a slot
+   nobody asked about, and the app would report it ready to post. */
+await T('a build for a slot that was never sent lands nowhere', async () => await markQueueBuilt(1, 'D-03', 'studio/ready/x'), null);
+await T('re-sending DROPS the previous build — it answered the old decision', async () => { const r = await sendQueueToStudio(1, 'D-02'); return `${r.built_at} ${r.built_path}`; }, 'null null');
+await T('withdrawing clears the request and keeps every decision', async () => { const r = await unsendQueue(1, 'D-02'); return `${r.sent_at} ${r.template} ${r.copy_edit != null}`; }, 'null figure-card true');
+await T('the drafts feed can be narrowed to what was actually sent', async () => { const all = await listQueueDrafts(1); const sent = await listQueueDrafts(1, true); return `${all.length > sent.length} ${sent.every((d: any) => d.sent_at != null)}`; }, 'true true');
+await T('…and it hands the studio the resolved caption, not both texts to choose from', async () => { const [d] = (await listQueueDrafts(1, true)).filter((x: any) => x.queue_id === 'D-01'); return d.caption.slice(0, 12); }, 'Forty-seven ');
+/* THE OWNERSHIP RULE, one more column family: a re-import is content and must
+   never touch a request or a video pick. */
+await T('a re-import touches neither the request nor the video pick', async () => {
+  const { importCampaign } = await import('../postQueue.js');
+  await importCampaign(1, '2026-08-21');
+  const r = (await sql`SELECT sent_at IS NOT NULL s, video_file FROM post_queue WHERE user_id=1 AND queue_id='D-01'`)[0];
+  return `${r.s} ${r.video_file}`;
+}, 'true day-01.mov');
+await T('CHECK blocks a built row with no path', async () => { try { await sql`UPDATE post_queue SET built_at=NOW(), built_path=NULL WHERE user_id=1 AND queue_id='D-01'`; return 'allowed'; } catch { return 'blocked'; } }, 'blocked');
+
 console.log('\nTHE DB CONSTRAINT — posted with no timestamp is impossible');
 await T('CHECK blocks a raw posted row', async () => { try { await sql`UPDATE post_queue SET status='posted', posted_at=NULL WHERE queue_id='Q03'`; return 'allowed'; } catch { return 'blocked'; } }, 'blocked');
 
