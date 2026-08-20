@@ -22,13 +22,24 @@ import { C } from "./tokens";
 import LeadsScreen from "./Leads";
 import TodayScreen from "./Today";
 import CampaignsScreen from "./Campaigns";
+import FirmsScreen from "./Firms";
+import OutreachScreen from "./Outreach";
 import FeeCalc, { FEE_CALC_LABEL, useDocked } from "./FeeCalc";
 
-type ScreenId = "today" | "leads" | "campaigns";
+type ScreenId = "today" | "leads" | "firms" | "outreach" | "campaigns";
 
+/* Firms · Outreach join 2026-08-19. Paul pressed "Sync register from the repo",
+   watched it report 154 firms and 88 queued touches, and found nowhere to read
+   any of them: "so i guess there is no UI for the register and managing
+   outreach?" The rows and the endpoints had been live for weeks; only the
+   screens were missing. Firms sits after Leads because the hunt is where a
+   person is found and the register is who they belong to; Outreach sits after
+   Firms because a touch cannot exist without a named person on a firm. */
 const NAV: { id: ScreenId; label: string }[] = [
   { id: "today", label: "Today" },
   { id: "leads", label: "Leads" },
+  { id: "firms", label: "Firms" },
+  { id: "outreach", label: "Outreach" },
   { id: "campaigns", label: "Campaigns" },
 ];
 
@@ -149,6 +160,8 @@ export default function V2Shell({ user, onSignOut }: {
             />
           )}
           {screen === "leads" && <LeadsScreen />}
+          {screen === "firms" && <FirmsScreen />}
+          {screen === "outreach" && <OutreachScreen user={user} />}
           {screen === "campaigns" && <CampaignsScreen key={openSlot ?? "campaigns"} openQueueId={openSlot} />}
         </main>
         {calc && <FeeCalc docked={docked} focusOnOpen={calcFocus} onClose={() => setCalc(false)} />}

@@ -212,12 +212,22 @@ export default function LeadsScreen() {
 function RegisterLoad({ count, onLoaded }: { count: number; onLoaded: (msg: string) => void }) {
   const [busy, setBusy] = useState<false | "sync" | "pick">(false);
   const [err, setErr] = useState<string | null>(null);
+  /* THE UNMATCHED TARGETS ARE NAMED, NOT COUNTED (2026-08-19). The server has
+     always returned `targetsUnmatched` as an array of the actual expressions
+     `parseTargets` could not resolve — "S-021 All independent sponsor and
+     capital records", "S-017 RQ-013" — and this line printed its LENGTH. A
+     count is not a work list: 15 says something is wrong and nothing about
+     what, while the strings say which step aimed at what and let you fix it.
+     The bridge's own law is that an unresolved target is reported and never
+     silently dropped; a bare number is one step from dropping it. */
   const reportMsg = (j: any, verb: string) =>
     `${verb} — ${j.accountsCreated ?? 0} firms new, ${j.accountsUpdated ?? 0} refreshed, ${j.contactsAdded ?? 0} contacts.` +
-    (j.touchesQueued ? ` ${j.touchesQueued} touches queued.` : "") +
-    (j.unnamedParked ? ` ${j.unnamedParked} records still need a named person.` : "") +
+    (j.touchesQueued ? ` ${j.touchesQueued} touches queued — they are on the Outreach tab.` : "") +
+    (j.unnamedParked ? ` ${j.unnamedParked} records still need a named person (Firms → "Needs a person").` : "") +
     (j.ignoredFiles?.length ? ` Not part of the bundle, ignored: ${j.ignoredFiles.join(", ")}.` : "") +
-    (j.targetsUnmatched?.length ? ` Unmatched targets: ${j.targetsUnmatched.length}.` : "");
+    (j.targetsUnmatched?.length
+      ? ` ${j.targetsUnmatched.length} targeting expression${j.targetsUnmatched.length === 1 ? "" : "s"} matched nobody: ${j.targetsUnmatched.join("; ")}.`
+      : "");
   /* The one-press sync: the server reads the register the DEPLOYED COMMIT
      carries (studio/clients/crm-bundle ships in the image since 2026-08-19),
      so this works from any device with no files on it. Merge a register
@@ -414,7 +424,10 @@ export function LeadLine({ lead, open, onToggle, onTouch, onPatch }: {
             {["identified", "invited", "connected", "in_thread", "ready"].map(s => (
               <button key={s} type="button"
                       onClick={() => onPatch({ status: s })}
-                      style={{ ...btnGhost, ...(lead.status === s ? { borderColor: C.green, color: C.green } : null) }}>
+                      /* `border` shorthand, not borderColor — btnGhost sets the
+                         shorthand and React warns that mixing them on a rerender
+                         can leave the previous colour behind. */
+                      style={{ ...btnGhost, ...(lead.status === s ? { border: `1px solid ${C.green}`, color: C.green } : null) }}>
                 {STATUS_LABEL[s]}
               </button>
             ))}

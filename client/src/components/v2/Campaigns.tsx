@@ -312,14 +312,14 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
         <div style={{ marginTop: 14, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
           {campaigns.map(c => (
             <button key={c.name} type="button" onClick={() => { setView(c.name); setOpenId(null); }}
-                    style={{ ...btnGhost, ...(view === c.name ? { borderColor: C.green, color: C.green } : null) }}>
+                    style={{ ...btnGhost, ...(view === c.name ? { border: `1px solid ${C.green}`, color: C.green } : null) }}>
               {windowLabel(c.first, c.last)}{c.name !== newest?.name ? " · superseded" : ""}
               <span style={{ ...mono, marginLeft: 8 }}>{total.filter(r => r.campaign === c.name).length}</span>
             </button>
           ))}
           {total.some(r => r.campaign == null) && (
             <button type="button" onClick={() => { setView(STANDING); setOpenId(null); }}
-                    style={{ ...btnGhost, ...(view === STANDING ? { borderColor: C.green, color: C.green } : null) }}>
+                    style={{ ...btnGhost, ...(view === STANDING ? { border: `1px solid ${C.green}`, color: C.green } : null) }}>
               Standing queue <span style={{ ...mono, marginLeft: 8 }}>{total.filter(r => r.campaign == null).length}</span>
             </button>
           )}
@@ -375,7 +375,7 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
 
           <div style={{ marginTop: 18, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <button type="button" onClick={() => setOnlyOpen(v => !v)}
-                    style={{ ...btnGhost, ...(onlyOpen ? { borderColor: C.green, color: C.green } : null) }}>
+                    style={{ ...btnGhost, ...(onlyOpen ? { border: `1px solid ${C.green}`, color: C.green } : null) }}>
               {onlyOpen ? "Showing open slots" : "Show open slots only"}
             </button>
             <div style={{ flex: 1 }} />
@@ -658,7 +658,7 @@ export function PostCopy({ row }: { row: QueueRow }) {
         <span style={{ fontSize: 13, fontWeight: 700 }}>{row.kind === "document" ? "The caption" : "The post"}</span>
         {variants.length > 1 && variants.map(v => (
           <button key={v.id} type="button" onClick={() => { setPick(v.id); setCopied(false); }}
-                  style={{ ...btnGhost, padding: "4px 10px", fontSize: 12.5, ...(cur.id === v.id ? { borderColor: C.green, color: C.green } : null) }}>
+                  style={{ ...btnGhost, padding: "4px 10px", fontSize: 12.5, ...(cur.id === v.id ? { border: `1px solid ${C.green}`, color: C.green } : null) }}>
             {v.label}
           </button>
         ))}
