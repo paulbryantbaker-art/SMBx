@@ -511,6 +511,37 @@ npx tsx $REPO/scripts/studio/audit.mts markets/<m>/documents/thesis.md --against
 
 ### 4. Produce collateral
 
+**FIRST: is anything waiting? (2026-08-20)** Paul decides a slot in the app —
+the copy and the template style — and presses **Send to Studio**. That press is
+the only thing that means "build it"; a row carrying an edit he is still working
+on looks identical without it.
+
+```bash
+node scripts/studio/pull-queue.mjs      # what has been SENT
+```
+
+It writes `studio/drafts/<campaign>/<slot>.json` per slot and prints the report:
+the caption to render from (already resolved between his edit and the plan), the
+template id **with its renderer and the exact flag**, the spec path, the gate and
+the law check. That is the whole hand-off — **where the collateral goes is your
+call and always has been**: the plan's `filed_at`, `markets/<m>/collateral/
+<slug>/<date>/`. Nothing in the app decides that.
+
+Then, when it is filed:
+
+```bash
+node scripts/studio/pull-queue.mjs --built <slot> <where you filed it>
+```
+
+or the app shows the slot waiting forever.
+
+Two rules on what comes back: **a pending template stays pending** — record it,
+do not hand-roll it from the reference HTML; and **a video slot never appears
+here at all**, because there is nothing to build (Paul films it and already has
+the file). Then update the plan markdown to the copy that actually went out,
+re-run `content/studio/campaign-export.mjs` and re-import, so the app shows
+plan == edit and the "edited" flag clears.
+
 **Read `FORMATS.md` and `DESIGN.md` first, every time.** They are two
 halves of one spec and neither works alone:
 

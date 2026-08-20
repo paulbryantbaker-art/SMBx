@@ -143,8 +143,36 @@ export const TEMPLATES: readonly CollateralTemplate[] = [
 
 export const TEMPLATE_IDS = new Set(TEMPLATES.map(t => t.id));
 
+/**
+ * THE MEDIUM IS NOT THE RENDERER, and this is the one place that says so.
+ *
+ * `post_queue.kind` is the medium the plan chose — text · image · video ·
+ * document. `TemplateFor` is the renderer family. They are not the same
+ * vocabulary and mapping them in two places is how the app offers a template
+ * the server then refuses to save (which is exactly what happened when the
+ * 30-day sequence introduced `image`: the picker mapped image → text, the
+ * server compared `t.for !== cur.kind` and threw "renders a text slot; this
+ * slot is image" on Save).
+ *
+ *   text     → text      a plain post; a `text` template adds the single image
+ *   image    → text      the single-image post IS what those templates render
+ *   document → document  a carousel / offer document
+ *   video    → null      NOTHING renders a piece to camera. A video slot picks
+ *                        a FILE, not a template — see `video_file`.
+ */
+export function templateForKind(kind: string | null | undefined): TemplateFor | null {
+  if (kind === 'text' || kind === 'image') return 'text';
+  if (kind === 'document') return 'document';
+  return null;
+}
+
 export function templatesFor(kind: TemplateFor | null | undefined): CollateralTemplate[] {
   return TEMPLATES.filter(t => t.for === kind && !t.retired);
+}
+
+/** Every template a slot of this MEDIUM may pick. Empty for video, by design. */
+export function templatesForKind(kind: string | null | undefined): CollateralTemplate[] {
+  return templatesFor(templateForKind(kind));
 }
 
 export function templateById(id: string | null | undefined): CollateralTemplate | null {

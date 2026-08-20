@@ -33,8 +33,9 @@ import type { CSSProperties } from "react";
 import { authHeaders } from "../../hooks/useAuth";
 import { C, input, btnPrimary, btnGhost, mono, chip } from "./tokens";
 import { daysUntil, localIso } from "./Leads";
-import { templatesFor, templateById } from "@shared/templates";
+import { templatesForKind, templateById } from "@shared/templates";
 import { copyDraftState, pagesDraftState, pagesEqual, hasLiveDraft } from "@shared/draft";
+import { sendReadiness, sendState } from "@shared/studioSend";
 
 /* ── the rows, as the API returns them ───────────────────────────────── */
 
@@ -83,7 +84,12 @@ export interface QueueRow {
      state, never overwritten by an import. */
   template: string | null;
   copy_edit: string | null;
-  copy_base: string | null;     // the plan text the edit was made against (shared/draft.ts)
+  copy_base: string | null;
+  /* the request (migration 140) — Send to Studio, and what came back.
+     Where it landed is `collateral_path`, which the row already carried. */
+  sent_at: string | null;
+  built_at: string | null;
+  collateral_path: string | null;     // the plan text the edit was made against (shared/draft.ts)
   pages_edit: { n: number; label: string | null; text: string; note: string | null }[] | null;
   pages_base: { n: number; label: string | null; text: string; note: string | null }[] | null;
   draft_at: string | null;
@@ -148,6 +154,15 @@ const firstSentence = (t: string) => {
 /** What is READY for a slot — the answer to "what gets made and ready to post when". */
 export function readiness(r: QueueRow): { text: string; ok: boolean; note?: string } {
   if (r.status === "posted") return { text: "posted", ok: true };
+  // THE REQUEST OUTRANKS EVERYTHING BELOW IT, the gate included — because the
+  // server refuses to send a slot whose copy still carries unfilled brackets,
+  // so a slot that IS sent has already passed that check mechanically. "ready
+  // to post" is the strongest state on this screen: the artifact exists, in a
+  // folder, and the only thing left is to paste it.
+  const send = sendState(r);
+  if (send === "built") return { text: "ready to post", ok: true, note: r.collateral_path ? `filed at ${r.collateral_path}` : undefined };
+  if (send === "sent") return { text: "at the studio", ok: false, note: "sent — waiting on Cowork to build it" };
+  if (send === "stale") return { text: "sent · edited", ok: false, note: "you changed the decision after sending — send it again" };
   // THE GATE OUTRANKS THE EDIT: a receipt-gated frame with one bracket filled
   // is still gated, and "edited" would hide that everywhere the label shows.
   // A gate is a reason the slot cannot ship AS PLANNED — a receipt that has not
@@ -301,6 +316,19 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
 
   /* The draft goes to its own route: PATCH /:id refuses content by law; the
      draft is the human's decision ABOUT the content. */
+  /* SEND TO STUDIO (migration 140). Records the request; renders nothing —
+     the app calls no builder. `undo` withdraws it and leaves every decision
+     on the row alone. */
+  const sendToStudio = useCallback(async (queueId: string, undo: boolean): Promise<string | null> => {
+    const r = await fetch(`/api/post-queue/${encodeURIComponent(queueId)}/send`, {
+      method: undo ? "DELETE" : "POST", headers: { ...authHeaders(), "Content-Type": "application/json" },
+    });
+    const j = await r.json().catch(() => null);
+    if (!r.ok) return j?.error ?? `${undo ? "Withdraw" : "Send"} failed (${r.status})`;
+    await load();
+    return null;
+  }, [load]);
+
   const patchDraft = useCallback(async (queueId: string, body: Record<string, unknown>): Promise<string | null> => {
     const r = await fetch(`/api/post-queue/${encodeURIComponent(queueId)}/draft`, {
       method: "PATCH", headers: { ...authHeaders(), "Content-Type": "application/json" },
@@ -455,6 +483,7 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
                     onToggle={() => setOpenId(openId === r.queue_id ? null : r.queue_id)}
                     onPatch={b => patch(r.queue_id, b)}
                     onPatchDraft={b => patchDraft(r.queue_id, b)}
+                    onSend={undo => sendToStudio(r.queue_id, undo)}
                     onMarkPosted={(u, c) => markPosted(r.queue_id, u, c)}
                   />
                 ))}
@@ -500,13 +529,14 @@ function Focus({ label, row, empty, onOpen }: { label: string; row: QueueRow | n
 
 /* ── one slot line + its expanded record ─────────────────────────────── */
 
-function SlotLine({ row, open, isToday, onToggle, onPatch, onPatchDraft, onMarkPosted }: {
+function SlotLine({ row, open, isToday, onToggle, onPatch, onPatchDraft, onSend, onMarkPosted }: {
   row: QueueRow;
   open: boolean;
   isToday: boolean;
   onToggle: () => void;
   onPatch: (body: Record<string, unknown>) => Promise<string | null>;
   onPatchDraft: (body: Record<string, unknown>) => Promise<string | null>;
+  onSend: (undo: boolean) => Promise<string | null>;
   onMarkPosted: (postUrl: string, retiredCheck: string) => Promise<string | null>;
 }) {
   const rd = readiness(row);
@@ -567,7 +597,7 @@ function SlotLine({ row, open, isToday, onToggle, onPatch, onPatchDraft, onMarkP
                 <div style={{ marginTop: 8 }}><BriefBlock row={row} bare /></div>
               </details>
             )}
-            {(isPost(row) || row.kind === "document") && row.status !== "posted" && <DraftBlock row={row} onPatchDraft={onPatchDraft} />}
+            {(isPost(row) || row.kind === "document") && row.status !== "posted" && <DraftBlock row={row} onPatchDraft={onPatchDraft} onSend={onSend} />}
             {row.kind === "document" && <DocumentBlock row={row} />}
             {(row.carries || row.law_check || row.source_disclosure) && (
               <div style={{ marginTop: 14, fontSize: 13, color: C.body, lineHeight: 1.6 }}>
@@ -816,14 +846,11 @@ function Notice({ children }: { children: React.ReactNode }) {
  * "edit" means "start from what is there". Save is explicit; the textarea is
  * not live-saved because a half-typed caption is not a decision.
  */
-export function DraftBlock({ row, onPatchDraft }: { row: QueueRow; onPatchDraft: (b: Record<string, unknown>) => Promise<string | null> }) {
-  // THE MEDIUM IS NOT THE RENDERER. `TemplateFor` names what a builder makes:
-  // a `text` template IS the single-image post (build-onepager.mts), so an
-  // `image` slot maps onto it — that is the same artifact under the plan's own
-  // word for it. A `video` slot maps to NOTHING on purpose: no builder renders
-  // a piece to camera, and widening TemplateFor to admit one would put a
-  // template picker in front of a job that is done with a camera.
-  const options = templatesFor(row.kind === "image" ? "text" : row.kind === "video" ? null : row.kind);
+export function DraftBlock({ row, onPatchDraft, onSend }: { row: QueueRow; onPatchDraft: (b: Record<string, unknown>) => Promise<string | null>; onSend: (undo: boolean) => Promise<string | null> }) {
+  // The medium → renderer mapping lives in shared/templates.ts, because the
+  // SERVER applies the same rule when it validates the save. Keeping a private
+  // copy here is what made the picker offer a template the server refused.
+  const options = templatesForKind(row.kind);
   const [template, setTemplate] = useState<string>(row.template ?? "");
   const [copy, setCopy] = useState<string>(row.copy_edit ?? row.body ?? "");
   const [pages, setPages] = useState<{ n: number; label: string | null; text: string; note: string | null }[]>(
@@ -939,9 +966,11 @@ export function DraftBlock({ row, onPatchDraft }: { row: QueueRow; onPatchDraft:
           </label>
         ) : (
           /* An empty picker offering only "the spec's default" would imply a
-             builder is waiting on a pick. Nothing renders a piece to camera. */
+             builder is waiting on a pick. Nothing renders a piece to camera,
+             and there is nothing to send: Paul films it and has the file. */
           <p style={{ margin: 0, fontSize: 12.5, color: C.muted, lineHeight: 1.5 }}>
-            No template — this slot is filmed, not rendered. The copy below is the script.
+            No template — this one is filmed, not rendered, and there is nothing for the studio to build.
+            The copy below is the script.
           </p>
         )}
 
@@ -987,7 +1016,119 @@ export function DraftBlock({ row, onPatchDraft }: { row: QueueRow; onPatchDraft:
             Nothing renders from here. Cowork pulls this with <code style={code}>node scripts/studio/pull-queue.mjs</code>, renders from the spec, and the next export carries it.
           </span>
         </div>
+
+        <SendToStudio row={row} unsaved={dirty} onSend={onSend} />
       </div>
+    </div>
+  );
+}
+
+/* ── Send to Studio — the request, and what came back ─────────────────── */
+
+/**
+ * The press that says "I am done deciding; build it".
+ *
+ * IT DOES NOT BUILD, and the copy on it says so plainly rather than implying
+ * a render is happening somewhere. The app is on Railway and the renderer is
+ * local Chromium against the workspace on Paul's Mac; what this records is a
+ * REQUEST, which `pull-queue.mjs` turns into a folder in Finder holding the
+ * caption, the work order, and any video pick. Before it existed the pull
+ * script could not tell a caption still being worked on from a finished one.
+ *
+ * THE SERVER REFUSES, NOT THE BUTTON — `shared/studioSend.ts` is the one rule,
+ * so the greyed-out reason here and the 400 from the API are the same sentence
+ * and cannot drift apart. The button is disabled with the reason showing; it
+ * is never hidden, because a missing button is a question and a disabled one
+ * with a sentence beside it is an answer.
+ */
+function SendToStudio({ row, unsaved, onSend }: {
+  row: QueueRow; unsaved: boolean; onSend: (undo: boolean) => Promise<string | null>;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  useEffect(() => { setErr(null); }, [row.queue_id, row.sent_at, row.built_at]);
+
+  const verdict = sendReadiness(row);
+  const state = sendState(row);
+  const when = (v: string | null) =>
+    v ? new Date(v).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "";
+
+  const press = async (undo: boolean) => {
+    setBusy(true); setErr(null);
+    const e = await onSend(undo);
+    setBusy(false);
+    if (e) setErr(e);
+  };
+
+  const asksLabel = verdict.asks === "template" ? "build it" : "file the copy";
+
+  // A filmed slot has nothing to send and never will. It gets a sentence, not a
+  // disabled button: a greyed-out control reads as something to go and fix.
+  if (verdict.noBuild && state === "none") {
+    return (
+      <div style={{ marginTop: 4, paddingTop: 12, borderTop: `1px solid ${C.hair}`, fontSize: 12.5, color: C.muted, lineHeight: 1.5 }}>
+        {verdict.reason}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: 4, paddingTop: 12, borderTop: `1px solid ${C.hair}` }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+        {state === "built" ? (
+          <>
+            <span style={{ ...chip, color: C.green, background: C.greenTint }}>built · ready to post</span>
+            <span style={{ fontSize: 12.5, color: C.body }}>
+              Filed {when(row.built_at)}{row.collateral_path ? <> at <code style={code}>{row.collateral_path}</code></> : ""}.
+            </span>
+            <div style={{ flex: 1 }} />
+            <button type="button" onClick={() => press(false)} disabled={busy || !verdict.ok}
+                    style={{ ...btnGhost, padding: "6px 12px", fontSize: 12.5 }}
+                    title={verdict.ok ? "Ask for it again — the previous build stops being reported as current" : verdict.reason}>
+              {busy ? "…" : "Send again"}
+            </button>
+          </>
+        ) : state === "sent" || state === "stale" ? (
+          <>
+            <span style={{ ...chip, color: state === "stale" ? C.danger : C.body, background: C.panel }}>
+              {state === "stale" ? "sent, then edited" : "sent to the studio"}
+            </span>
+            <span style={{ fontSize: 12.5, color: C.body, lineHeight: 1.5 }}>
+              {state === "stale"
+                ? <>You changed the decision after sending it ({when(row.sent_at)}). Cowork would build the old one — send it again.</>
+                : <>Waiting on Cowork ({when(row.sent_at)}). It picks this up with <code style={code}>node scripts/studio/pull-queue.mjs</code>, builds it and files it where the plan says.</>}
+            </span>
+            <div style={{ flex: 1 }} />
+            {state === "stale" && (
+              <button type="button" onClick={() => press(false)} disabled={busy || !verdict.ok}
+                      style={{ ...btnPrimary, padding: "6px 12px", fontSize: 12.5 }} title={verdict.reason}>
+                {busy ? "…" : "Send again"}
+              </button>
+            )}
+            <button type="button" onClick={() => press(true)} disabled={busy}
+                    style={{ ...btnGhost, padding: "6px 12px", fontSize: 12.5 }}
+                    title="Withdraw the request. Your template pick and copy edits stay exactly as they are.">
+              {busy ? "…" : "Withdraw"}
+            </button>
+          </>
+        ) : (
+          <>
+            <button type="button" onClick={() => press(false)} disabled={busy || !verdict.ok || unsaved}
+                    style={{ ...btnPrimary, padding: "7px 14px", fontSize: 13, opacity: busy || !verdict.ok || unsaved ? 0.5 : 1 }}
+                    title={verdict.ok ? "Records that this slot is ready to build. Nothing is rendered from here — Cowork picks it up on the Mac." : verdict.reason}>
+              {busy ? "Sending…" : "Send to Studio"}
+            </button>
+            <span style={{ fontSize: 12.5, color: verdict.ok && !unsaved ? C.muted : C.body, lineHeight: 1.5, flex: "1 1 260px" }}>
+              {unsaved
+                ? "Save the decision first — the studio builds what is saved, not what is on screen."
+                : verdict.ok
+                  ? <>Cowork will {asksLabel} from this copy and the template, and file it where the plan says.</>
+                  : verdict.reason}
+            </span>
+          </>
+        )}
+      </div>
+      {err && <div style={{ marginTop: 8, padding: "8px 11px", background: C.dangerTint, fontSize: 12.5, color: C.ink, lineHeight: 1.5 }}>{err}</div>}
     </div>
   );
 }

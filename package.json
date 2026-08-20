@@ -37,6 +37,7 @@
     "launch-readiness": "npx tsx scripts/launch-readiness.ts",
     "test:marketing-math": "npx tsx scripts/marketing-math-reconcile.ts",
     "test:post-queue": "npx tsx server/services/__tests__/postQueue.test.mts",
+    "test:studio-send": "npx tsx house/__tests__/studioSend.test.mts",
     "test:api-lanes": "npx tsx server/services/__tests__/apiSpend.test.mts",
     "test:prompt-cache": "npx tsx server/services/__tests__/promptCache.test.mts",
     "studio:sourcing": "npx tsx scripts/studio/sourcing-protection.mts",

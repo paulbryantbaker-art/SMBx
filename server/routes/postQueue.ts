@@ -17,8 +17,10 @@
  */
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
+import { sql } from '../db.js';
 import {
-  importQueue, importCampaign, listCampaigns, listQueue, updateQueueState, queuePerformance, readQueueFile, updateQueueDraft, listQueueDrafts } from '../services/postQueue.js';
+  importQueue, importCampaign, listCampaigns, listQueue, updateQueueState, queuePerformance, readQueueFile, updateQueueDraft, listQueueDrafts,
+  sendQueueToStudio, unsendQueue, markQueueBuilt } from '../services/postQueue.js';
 
 const router = Router();
 
@@ -119,12 +121,68 @@ router.patch('/:queueId/draft', requireAuth, async (req: any, res) => {
   }
 });
 
-/** What the studio pulls before rendering: every slot carrying a decision, edit beside plan. */
+/**
+ * What the studio pulls before rendering: every slot carrying a decision, edit
+ * beside plan. `?sent=1` narrows it to the slots Paul has actually pressed Send
+ * to Studio on — which is the difference between "I am still working on this"
+ * and "build it", and the reason the button exists.
+ */
 router.get('/drafts', requireAuth, async (req: any, res) => {
   try {
-    res.json({ drafts: await listQueueDrafts(req.userId) });
+    res.json({ drafts: await listQueueDrafts(req.userId, req.query.sent === '1' || req.query.sent === 'true') });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * SEND TO STUDIO (migration 140) — record that this slot is ready to be built.
+ * Nothing is rendered here: the app calls no builder. It records a request that
+ * `pull-queue.mjs` picks up on the Mac, carrying the copy and the template
+ * type; Cowork already knows where the collateral goes. The server refuses a
+ * slot that is not ready (no copy, unfilled receipt brackets, no template where
+ * one is owed, or a video day — which has nothing to build) with the sentence
+ * the button shows.
+ */
+router.post('/:queueId/send', requireAuth, async (req: any, res) => {
+  try {
+    const row = await sendQueueToStudio(req.userId, req.params.queueId);
+    if (!row) return res.status(404).json({ error: 'Not in the queue' });
+    res.json(row);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+/** Withdraw the request. Leaves every decision on the row alone. */
+router.delete('/:queueId/send', requireAuth, async (req: any, res) => {
+  try {
+    const row = await unsendQueue(req.userId, req.params.queueId);
+    if (!row) return res.status(404).json({ error: 'Not in the queue' });
+    res.json(row);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+/**
+ * The studio's answer — called by `pull-queue.mjs --built`, not by a person.
+ * A 409 rather than a 404 when the slot was never sent, because that case is a
+ * session working from a stale pull and is worth telling apart from a typo in
+ * the id.
+ */
+router.post('/:queueId/built', requireAuth, async (req: any, res) => {
+  try {
+    const row = await markQueueBuilt(req.userId, req.params.queueId, req.body?.path);
+    if (!row) {
+      const [exists] = await sql`SELECT 1 FROM post_queue WHERE user_id = ${req.userId} AND queue_id = ${req.params.queueId}`;
+      return exists
+        ? res.status(409).json({ error: `${req.params.queueId} was never sent to the studio — nothing asked for this build.` })
+        : res.status(404).json({ error: 'Not in the queue' });
+    }
+    res.json(row);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
   }
 });
 
