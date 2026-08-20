@@ -546,6 +546,7 @@ function SlotLine({ row, open, isToday, onToggle, onPatch, onPatchDraft, onSend,
   const [postUrl, setPostUrl] = useState(row.post_url ?? "");
   const [check, setCheck] = useState(row.retired_check === "not_run" ? "" : row.retired_check);
   const [notes, setNotes] = useState(row.notes ?? "");
+  const [draftDirty, setDraftDirty] = useState(false);
   useEffect(() => {
     setErr(null); setPostUrl(row.post_url ?? "");
     setCheck(row.retired_check === "not_run" ? "" : row.retired_check);
@@ -597,7 +598,7 @@ function SlotLine({ row, open, isToday, onToggle, onPatch, onPatchDraft, onSend,
                 <div style={{ marginTop: 8 }}><BriefBlock row={row} bare /></div>
               </details>
             )}
-            {(isPost(row) || row.kind === "document") && row.status !== "posted" && <DraftBlock row={row} onPatchDraft={onPatchDraft} onSend={onSend} />}
+            {(isPost(row) || row.kind === "document") && row.status !== "posted" && <DraftBlock row={row} onPatchDraft={onPatchDraft} onDirty={setDraftDirty} />}
             {row.kind === "document" && <DocumentBlock row={row} />}
             {(row.carries || row.law_check || row.source_disclosure) && (
               <div style={{ marginTop: 14, fontSize: 13, color: C.body, lineHeight: 1.6 }}>
@@ -613,8 +614,10 @@ function SlotLine({ row, open, isToday, onToggle, onPatch, onPatchDraft, onSend,
             )}
           </div>
 
-          {/* right: the state */}
+          {/* right: what to do with it — the hand-off first, because that is
+              the press you are here for; the after-you-post record below it. */}
           <div style={{ minWidth: 0 }}>
+            {row.status !== "posted" && <SendToCowork row={row} unsaved={draftDirty} onSend={onSend} />}
             {row.status !== "posted" ? (
               <div style={{ padding: "12px 14px", background: C.panel }}>
                 <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>After you post</div>
@@ -846,7 +849,7 @@ function Notice({ children }: { children: React.ReactNode }) {
  * "edit" means "start from what is there". Save is explicit; the textarea is
  * not live-saved because a half-typed caption is not a decision.
  */
-export function DraftBlock({ row, onPatchDraft, onSend }: { row: QueueRow; onPatchDraft: (b: Record<string, unknown>) => Promise<string | null>; onSend: (undo: boolean) => Promise<string | null> }) {
+export function DraftBlock({ row, onPatchDraft, onDirty }: { row: QueueRow; onPatchDraft: (b: Record<string, unknown>) => Promise<string | null>; onDirty?: (dirty: boolean) => void }) {
   // The medium → renderer mapping lives in shared/templates.ts, because the
   // SERVER applies the same rule when it validates the save. Keeping a private
   // copy here is what made the picker offer a template the server refused.
@@ -912,6 +915,13 @@ export function DraftBlock({ row, onPatchDraft, onSend }: { row: QueueRow; onPat
     setSaving(false);
     if (e) setErr(e);
   };
+
+  // The send control lives in the right column, where the eye lands when a slot
+  // opens — it needs to know the editor has unsaved changes without being
+  // inside it. (Measured before the move: the button sat 770px below the slot
+  // row, under the brief and the copy box. Paul: "where is the send to Cowork
+  // button and the template picker?")
+  useEffect(() => { onDirty?.(dirty); }, [dirty, onDirty]);
 
   const live = hasDraft(row);
   const superseded = copyState === "superseded" || pagesState === "superseded";
@@ -1013,17 +1023,16 @@ export function DraftBlock({ row, onPatchDraft, onSend }: { row: QueueRow; onPat
           {saved && !dirty && <span style={{ ...mono, color: C.green }}>saved</span>}
           {err && <span style={{ fontSize: 12.5, color: C.danger }}>{err}</span>}
           <span style={{ fontSize: 12.5, color: C.muted, lineHeight: 1.5 }}>
-            Nothing renders from here. Cowork pulls this with <code style={code}>node scripts/studio/pull-queue.mjs</code>, renders from the spec, and the next export carries it.
+            Nothing renders from here. Save, then press <b>Send to Cowork</b> on the right — that is what tells Cowork to build it.
           </span>
         </div>
 
-        <SendToStudio row={row} unsaved={dirty} onSend={onSend} />
       </div>
     </div>
   );
 }
 
-/* ── Send to Studio — the request, and what came back ─────────────────── */
+/* ── Send to Cowork — the request, and what came back ─────────────────── */
 
 /**
  * The press that says "I am done deciding; build it".
@@ -1041,7 +1050,7 @@ export function DraftBlock({ row, onPatchDraft, onSend }: { row: QueueRow; onPat
  * is never hidden, because a missing button is a question and a disabled one
  * with a sentence beside it is an answer.
  */
-function SendToStudio({ row, unsaved, onSend }: {
+function SendToCowork({ row, unsaved, onSend }: {
   row: QueueRow; unsaved: boolean; onSend: (undo: boolean) => Promise<string | null>;
 }) {
   const [busy, setBusy] = useState(false);
@@ -1066,14 +1075,15 @@ function SendToStudio({ row, unsaved, onSend }: {
   // disabled button: a greyed-out control reads as something to go and fix.
   if (verdict.noBuild && state === "none") {
     return (
-      <div style={{ marginTop: 4, paddingTop: 12, borderTop: `1px solid ${C.hair}`, fontSize: 12.5, color: C.muted, lineHeight: 1.5 }}>
+      <div style={{ marginBottom: 10, padding: "12px 14px", background: C.panel, fontSize: 12.5, color: C.muted, lineHeight: 1.5 }}>
         {verdict.reason}
       </div>
     );
   }
 
   return (
-    <div style={{ marginTop: 4, paddingTop: 12, borderTop: `1px solid ${C.hair}` }}>
+    <div style={{ marginBottom: 10, padding: "12px 14px", background: C.panel }}>
+      <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>Hand it to Cowork</div>
       <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
         {state === "built" ? (
           <>
@@ -1091,7 +1101,7 @@ function SendToStudio({ row, unsaved, onSend }: {
         ) : state === "sent" || state === "stale" ? (
           <>
             <span style={{ ...chip, color: state === "stale" ? C.danger : C.body, background: C.panel }}>
-              {state === "stale" ? "sent, then edited" : "sent to the studio"}
+              {state === "stale" ? "sent, then edited" : "sent to Cowork"}
             </span>
             <span style={{ fontSize: 12.5, color: C.body, lineHeight: 1.5 }}>
               {state === "stale"
@@ -1116,11 +1126,11 @@ function SendToStudio({ row, unsaved, onSend }: {
             <button type="button" onClick={() => press(false)} disabled={busy || !verdict.ok || unsaved}
                     style={{ ...btnPrimary, padding: "7px 14px", fontSize: 13, opacity: busy || !verdict.ok || unsaved ? 0.5 : 1 }}
                     title={verdict.ok ? "Records that this slot is ready to build. Nothing is rendered from here — Cowork picks it up on the Mac." : verdict.reason}>
-              {busy ? "Sending…" : "Send to Studio"}
+              {busy ? "Sending…" : "Send to Cowork"}
             </button>
             <span style={{ fontSize: 12.5, color: verdict.ok && !unsaved ? C.muted : C.body, lineHeight: 1.5, flex: "1 1 260px" }}>
               {unsaved
-                ? "Save the decision first — the studio builds what is saved, not what is on screen."
+                ? "Save the decision first — Cowork builds what is saved, not what is on screen."
                 : verdict.ok
                   ? <>Cowork will {asksLabel} from this copy and the template, and file it where the plan says.</>
                   : verdict.reason}
