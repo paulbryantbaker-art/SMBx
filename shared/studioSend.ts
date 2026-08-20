@@ -1,18 +1,22 @@
 /**
  * SEND TO STUDIO — is this slot ready to be built, and what is being asked for.
  *
- * Paul, 2026-08-20: *"when i have the copy the way i want it and have saved the
- * decision — we need a Send to Studio button that tells cowork to build it and
- * put it in the Finder and ready for posting. I need to be able to tell cowork
- * which template style to use or if this is using one of the videos."*
+ * Paul, 2026-08-20: *"we need a Send to Studio button that tells cowork to build
+ * it… we just need to pass back what I want it to build and template type."*
  *
  * THE APP CANNOT BUILD ANYTHING and this file does not pretend otherwise. The
  * renderer is local Chromium against the workspace on Paul's Mac; the app runs
  * on Railway, calls no builder and writes nothing to the clone. So "Send to
- * Studio" is a REQUEST — a timestamp and a work order — and `pull-queue.mjs`
+ * Studio" is a REQUEST — a timestamp against a decision — and `pull-queue.mjs`
  * on the Mac is what acts on it. What the button actually buys is the thing
  * that was missing: before it, `pull-queue` pulled every row carrying an edit,
  * with no way to tell "I am still working on this" from "build this one".
+ *
+ * AND IT PASSES BACK THE DECISION, NOT A PLACE TO PUT THE RESULT. The first cut
+ * of this also assembled a ready-to-post folder on disk; Paul: *"Cowork already
+ * knows where to put created collateral just let it do its thing."* It does —
+ * `studio/CLAUDE.md` §4 and the plan's own `filed_at` have said where since
+ * July. What the studio was missing was never the destination.
  *
  * ONE DEFINITION, THREE READERS — the server (which refuses the request), the
  * client (which disables the button and says why) and the pull script (which
@@ -23,13 +27,16 @@
  *
  *   text      nothing but the copy. Seven of the thirty days are plain text
  *             posts — there is no artifact to render, and requiring a template
- *             would block them. The ready folder gets caption.txt and that is
- *             the whole job.
+ *             would block them.
  *   image     a TEMPLATE. Something has to be rendered; without a pick the
  *             session is guessing at the house style, which is the drift
  *             FORMATS.md exists to stop.
- *   video     a VIDEO FILE. Nothing renders a piece to camera.
  *   document  a TEMPLATE, same argument as image.
+ *   video     NOTHING, and there is nothing to send (Paul, 2026-08-20: "if it
+ *             is a video, then there is nothing for it to do i guess bc i will
+ *             have the video already made"). He films it; the file is already
+ *             on his disk. The app does not ask which take, because knowing
+ *             would not change anything it does.
  *
  * THE BRACKET RULE IS ABSOLUTE. A receipt-gated slot carries [N], [X]% and
  * [TRADE] where Paul's own record has to go, and the plan's law is that it
@@ -50,7 +57,6 @@ export interface SendRow {
   copy_edit?: string | null;
   gate?: string | null;
   template?: string | null;
-  video_file?: string | null;
 }
 
 export interface SendVerdict {
@@ -59,7 +65,13 @@ export interface SendVerdict {
   /** Why not — one sentence, shown on the button and returned by the API. */
   reason?: string;
   /** What Cowork is being asked to make, once ok. */
-  asks?: 'template' | 'video' | 'copy only';
+  asks?: 'template' | 'copy only';
+  /**
+   * There is nothing for the studio to do — not a problem to fix, a fact about
+   * the slot. Separate from `ok: false` so the screen can say it in grey rather
+   * than dressing a filmed post up as a blocked one.
+   */
+  noBuild?: boolean;
 }
 
 /** The text that would be posted: the live edit if there is one, else the plan's. */
@@ -71,6 +83,14 @@ export function outgoingCopy(row: SendRow): string {
 export function sendReadiness(row: SendRow): SendVerdict {
   if (row.status === 'posted') return { ok: false, reason: 'Already posted — there is nothing left to build.' };
   if (row.status === 'parked') return { ok: false, reason: 'This slot is parked. Unpark it first.' };
+
+  // A VIDEO SLOT HAS NOTHING TO SEND, and that is true whether or not the
+  // script is written — so it is decided BEFORE the copy is looked at. Ordering
+  // it after meant a filmed day with no script yet showed a live Send button
+  // reading "no copy yet", which is a job to go and finish; there is no job.
+  if (row.kind === 'video') {
+    return { ok: false, noBuild: true, reason: 'Nothing to build — this one is filmed and you already have it. Post it and mark it here.' };
+  }
 
   const copy = outgoingCopy(row);
   if (!copy) {
@@ -88,26 +108,7 @@ export function sendReadiness(row: SendRow): SendVerdict {
     };
   }
 
-  const video = !!(row.video_file && row.video_file.trim());
-  const template = !!(row.template && row.template.trim());
-
-  // A VIDEO SLOT IS SATISFIED BY A FILE AND BY NOTHING ELSE, and this has to be
-  // decided BEFORE the template is looked at. Checking the template first made
-  // a video day with a stray template pick read as ready to build — a work
-  // order asking a builder to render a piece to camera, which no builder does.
-  // (`updateQueueDraft` refuses that pick as well; the two guards are
-  // independent so a hand-written row cannot slip past both.)
-  if (row.kind === 'video') {
-    return video
-      ? { ok: true, asks: 'video' }
-      : { ok: false, reason: 'Pick the video file first — nothing renders a piece to camera, so the studio needs to know which take to file.' };
-  }
-
-  // On every other medium a video pick is allowed and WINS: a number post can
-  // go out as a video if that is the call, and choosing a file is the more
-  // specific decision than choosing a renderer.
-  if (video) return { ok: true, asks: 'video' };
-  if (template) return { ok: true, asks: 'template' };
+  if (row.template && row.template.trim()) return { ok: true, asks: 'template' };
 
   if (row.kind === 'image' || row.kind === 'document') {
     return { ok: false, reason: `Pick a template first — an ${row.kind} slot has something to render, and without a pick the studio is guessing at the house style.` };

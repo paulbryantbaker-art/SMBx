@@ -13,8 +13,8 @@
  *   • A caption with [RECEIPT] brackets still in it must never be buildable.
  *     The plan's law is absolute — "does not ship with brackets in it" — and a
  *     build is the last moment anything mechanical can catch it.
- *   • A video day must not be sendable without a video: nothing renders a piece
- *     to camera, so a work order with no file is one nobody can fill.
+ *   • A video day must not be sendable at all: Paul films it and already has the
+ *     file, so there is nothing for the studio to do.
  *   • An image slot must not be sendable without a template, or the session is
  *     guessing at the house style — the drift FORMATS.md exists to stop.
  *   • A plain TEXT day must be sendable with NOTHING but copy. Seven of the
@@ -32,7 +32,7 @@ const T = (name: string, got: any, want: any) => {
   console.log(`${ok ? '  ok  ' : ' FAIL '}${name.padEnd(62)} ${typeof got === 'object' ? JSON.stringify(got).slice(0, 70) : String(got).slice(0, 70)}`);
 };
 
-const base = { kind: 'text', status: 'next', body: 'A finished post.', copy_edit: null, gate: null, template: null, video_file: null };
+const base = { kind: 'text', status: 'next', body: 'A finished post.', copy_edit: null, gate: null, template: null };
 
 console.log('\nWHAT EACH MEDIUM OWES');
 T('a plain text day needs only copy', sendReadiness(base), { ok: true, asks: 'copy only' });
@@ -40,16 +40,21 @@ T('an image day needs a template', sendReadiness({ ...base, kind: 'image' }).ok,
 T('…and the reason names the medium', /image slot/.test(sendReadiness({ ...base, kind: 'image' }).reason ?? ''), true);
 T('an image day with a template is ready', sendReadiness({ ...base, kind: 'image', template: 'figure-card' }), { ok: true, asks: 'template' });
 T('a document day needs a template too', sendReadiness({ ...base, kind: 'document' }).ok, false);
-T('a video day needs a video, not a template', sendReadiness({ ...base, kind: 'video' }).ok, false);
-T('…and says so in the plan\'s own terms', /nothing renders a piece to camera/.test(sendReadiness({ ...base, kind: 'video' }).reason ?? ''), true);
-T('a video day with a take is ready', sendReadiness({ ...base, kind: 'video', video_file: 'day-01.mov' }), { ok: true, asks: 'video' });
-/* A template on a video slot is not a way to satisfy it: the pick has to be a
-   file. (updateQueueDraft refuses the pick too, but the two guards are
-   independent — this one holds even if a row was written by hand.) */
-T('a template does NOT satisfy a video day', sendReadiness({ ...base, kind: 'video', template: 'figure-card' }).ok, false);
-/* And the reverse IS allowed: a number post can go out as a video if that is
-   the call. The video wins because it is the more specific decision. */
-T('a video pick beats a template on any slot', sendReadiness({ ...base, kind: 'image', template: 'figure-card', video_file: 'x.mov' }).asks, 'video');
+/* A VIDEO DAY HAS NOTHING TO SEND — Paul films it and has the file. It is
+   `noBuild`, not a blocked send: the screen says it in grey rather than
+   dressing a filmed post up as something to go and fix. */
+T('a video day is not sendable', sendReadiness({ ...base, kind: 'video' }).ok, false);
+T('…and it is noBuild, not a blocker', sendReadiness({ ...base, kind: 'video' }).noBuild, true);
+T('…and the reason says he already has it', /already have it/.test(sendReadiness({ ...base, kind: 'video' }).reason ?? ''), true);
+/* A stray template pick on a video day must not turn it into a build request:
+   no builder renders a piece to camera. (updateQueueDraft refuses the pick too;
+   the two guards are independent, so a hand-written row cannot pass both.) */
+T('a template does NOT make a video day sendable', sendReadiness({ ...base, kind: 'video', template: 'figure-card' }).ok, false);
+/* AND IT IS DECIDED BEFORE THE COPY. Ordered after, a filmed day with no script
+   yet showed a live Send button reading "no copy yet" — a job to go and finish,
+   when there is no job. Caught by driving the screen, not by reading. */
+T('…and a video day with no script still says nothing to build, not "no copy"',
+  sendReadiness({ ...base, kind: 'video', body: null }).noBuild, true);
 
 console.log('\nTHE BRACKET RULE — a receipt that was never filled must not ship');
 const gated = { ...base, gate: 'RECEIPT-GATED. Does not ship with brackets in it.', body: 'The deal died on day [N]. Not at price.' };

@@ -463,7 +463,7 @@ const isQueuePage = (x: any): x is QueuePage =>
 export async function updateQueueDraft(
   userId: number,
   queueId: string,
-  patch: { template?: string | null; copyEdit?: string | null; pagesEdit?: QueuePage[] | null; videoFile?: string | null },
+  patch: { template?: string | null; copyEdit?: string | null; pagesEdit?: QueuePage[] | null },
 ): Promise<any | null> {
   const [curRaw] = await sql`SELECT queue_id, kind, body, pages FROM post_queue WHERE user_id = ${userId} AND queue_id = ${queueId}`;
   if (!curRaw) return null;
@@ -501,29 +501,9 @@ export async function updateQueueDraft(
     else if (pagesEqual(pagesEdit, cur.pages)) pagesEdit = null;
   }
 
-  // The video pick is a DECISION like the template — same table, same
-  // never-touched-by-the-importer rule, and it bumps draft_at for the same
-  // reason: changing which take goes out after Send to Studio makes the
-  // outstanding request stale, and the screen has to say so.
-  let videoFile: string | null | undefined = patch.videoFile;
-  if (videoFile !== undefined) {
-    videoFile = videoFile && videoFile.trim() ? videoFile.trim() : null;
-    // A path is resolved on the Mac, never here — the app cannot see the file.
-    // What it CAN refuse is a value that would escape the video folder or name
-    // something that is plainly not a video, because both only fail later, on
-    // his machine, as a work order nobody can fill.
-    if (videoFile) {
-      if (videoFile.includes('..')) throw new Error('The video path may not contain ".." — name the file, or give its full path.');
-      if (!/\.(mov|mp4|m4v|avi|webm)$/i.test(videoFile)) {
-        throw new Error(`"${videoFile}" does not look like a video file (.mov .mp4 .m4v .avi .webm).`);
-      }
-    }
-  }
-
   const [row] = await sql`
     UPDATE post_queue SET
       template   = CASE WHEN ${template === undefined} THEN template   ELSE ${template ?? null} END,
-      video_file = CASE WHEN ${videoFile === undefined} THEN video_file ELSE ${videoFile ?? null} END,
       copy_edit  = CASE WHEN ${copyEdit === undefined} THEN copy_edit  ELSE ${copyEdit ?? null} END,
       copy_base  = CASE WHEN ${copyEdit === undefined} THEN copy_base  ELSE ${copyEdit ? (cur.body ?? null) : null} END,
       pages_edit = CASE WHEN ${pagesEdit === undefined} THEN pages_edit ELSE ${pagesEdit ? sql.json(pagesEdit as any) : null} END,
@@ -555,7 +535,7 @@ export async function updateQueueDraft(
  */
 export async function sendQueueToStudio(userId: number, queueId: string): Promise<any | null> {
   const [cur] = await sql`
-    SELECT kind, status, body, copy_edit, gate, template, video_file
+    SELECT kind, status, body, copy_edit, gate, template
     FROM post_queue WHERE user_id = ${userId} AND queue_id = ${queueId}`;
   if (!cur) return null;
   const verdict = sendReadiness(cur as any);
@@ -567,7 +547,7 @@ export async function sendQueueToStudio(userId: number, queueId: string): Promis
   // was added to prevent one step earlier.
   const [row] = await sql`
     UPDATE post_queue
-    SET sent_at = NOW(), built_at = NULL, built_path = NULL, updated_at = NOW()
+    SET sent_at = NOW(), built_at = NULL, updated_at = NOW()
     WHERE user_id = ${userId} AND queue_id = ${queueId}
     RETURNING *`;
   return row ? { ...normalizeQueueRow(row), asks: verdict.asks } : null;
@@ -587,16 +567,17 @@ export async function unsendQueue(userId: number, queueId: string): Promise<any 
  * `pull-queue.mjs --built`, never by a person in the app — the app has no way
  * to know a render happened, and a button that claimed one would be guessing.
  *
- * `path` is required by the table's own CHECK, and required here with a better
- * error than the constraint's: a build with no location is not a record of a
- * build, it is a claim.
+ * The path lands in `collateral_path` — the column migration 123 already added
+ * for where the collateral went. It is required by the table's own CHECK, and
+ * required here with a better error than the constraint's: a build with no
+ * location is not a record of a build, it is a claim.
  */
 export async function markQueueBuilt(userId: number, queueId: string, builtPath: string): Promise<any | null> {
   const where = String(builtPath ?? '').trim();
-  if (!where) throw new Error(`${queueId}: a build has to say where it landed — pass the path it was filed at.`);
+  if (!where) throw new Error(`${queueId}: a build has to say where it landed — pass the path Cowork filed it at.`);
   const [row] = await sql`
     UPDATE post_queue
-    SET built_at = NOW(), built_path = ${where}, updated_at = NOW()
+    SET built_at = NOW(), collateral_path = ${where}, updated_at = NOW()
     WHERE user_id = ${userId} AND queue_id = ${queueId} AND sent_at IS NOT NULL
     RETURNING *`;
   // No row means either no such slot or one that was never sent. The second is
@@ -609,12 +590,12 @@ export async function listQueueDrafts(userId: number, sentOnly = false): Promise
   const rows = await sql`
     SELECT queue_id, campaign, title, kind, status, scheduled_for,
            template, copy_edit, copy_base, pages_edit, pages_base, draft_at,
-           video_file, sent_at, built_at, built_path,
+           sent_at, built_at, collateral_path,
            body, pages, document, gate, law_check
     FROM post_queue
     WHERE user_id = ${userId}
       AND (template IS NOT NULL OR copy_edit IS NOT NULL OR pages_edit IS NOT NULL
-           OR video_file IS NOT NULL OR sent_at IS NOT NULL)
+           OR sent_at IS NOT NULL)
       AND (${sentOnly} = false OR sent_at IS NOT NULL)
     ORDER BY scheduled_for NULLS LAST, queue_id`;
   return rows.map(normalizeQueueRow).map((r: any) => {
@@ -630,10 +611,9 @@ export async function listQueueDrafts(userId: number, sentOnly = false): Promise
       spec: r.document?.spec ?? null,
       filed_at: r.document?.filed_at ?? null,
       /* the request (migration 140) — what the studio is being asked for */
-      video_file: r.video_file ?? null,
       sent_at: r.sent_at ?? null,
       built_at: r.built_at ?? null,
-      built_path: r.built_path ?? null,
+      collateral_path: r.collateral_path ?? null,
       send: sendState(r),
       asks: sendReadiness(r).asks ?? null,
       /* the text to post, resolved once here so the pull script never has to

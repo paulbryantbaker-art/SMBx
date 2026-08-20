@@ -512,36 +512,35 @@ npx tsx $REPO/scripts/studio/audit.mts markets/<m>/documents/thesis.md --against
 ### 4. Produce collateral
 
 **FIRST: is anything waiting? (2026-08-20)** Paul decides a slot in the app —
-the copy, the template style, or which video goes out — and presses **Send to
-Studio**. That press is the only thing that means "build it"; a row carrying an
-edit he is still working on looks identical without it. Start here:
+the copy and the template style — and presses **Send to Studio**. That press is
+the only thing that means "build it"; a row carrying an edit he is still working
+on looks identical without it.
 
 ```bash
-node scripts/studio/pull-queue.mjs          # what has been SENT
-node scripts/studio/pull-queue.mjs --videos # the video folder, by name
+node scripts/studio/pull-queue.mjs      # what has been SENT
 ```
 
-It writes `studio/ready/<date>-<slot>/` per slot — **`WORK-ORDER.md`** (the
-template and its exact flag, or the video, plus the gate and the law check) and
-**`caption.txt`** (the text to paste, already resolved between his edit and the
-plan). A video pick is linked in beside them; a pick that will not resolve is
-reported loudly and the folder says so rather than quietly holding nothing.
+It writes `studio/drafts/<campaign>/<slot>.json` per slot and prints the report:
+the caption to render from (already resolved between his edit and the plan), the
+template id **with its renderer and the exact flag**, the spec path, the gate and
+the law check. That is the whole hand-off — **where the collateral goes is your
+call and always has been**: the plan's `filed_at`, `markets/<m>/collateral/
+<slug>/<date>/`. Nothing in the app decides that.
 
-Three rules on that folder:
+Then, when it is filed:
 
-1. **Leave the finished artifact IN it.** `studio/ready/` is the folder Paul
-   opens in Finder (there is an alias on his Desktop) — a render filed only
-   under `markets/<m>/collateral/…` is a render he cannot find. File it in both.
-2. **Close the request** when the artifact is there, or the app shows the slot
-   waiting forever:
-   `node scripts/studio/pull-queue.mjs --built <slot> studio/ready/<folder>`
-3. **Never substitute a decision.** A pending template stays pending — record
-   it, do not hand-roll it. A missing video is a question for Paul, not a
-   different take. The work order says which, every time.
+```bash
+node scripts/studio/pull-queue.mjs --built <slot> <where you filed it>
+```
 
-Then update the plan markdown to the copy that actually went out, re-run
-`content/studio/campaign-export.mjs` and re-import, so the app shows plan ==
-edit and the "edited" flag clears.
+or the app shows the slot waiting forever.
+
+Two rules on what comes back: **a pending template stays pending** — record it,
+do not hand-roll it from the reference HTML; and **a video slot never appears
+here at all**, because there is nothing to build (Paul films it and already has
+the file). Then update the plan markdown to the copy that actually went out,
+re-run `content/studio/campaign-export.mjs` and re-import, so the app shows
+plan == edit and the "edited" flag clears.
 
 **Read `FORMATS.md` and `DESIGN.md` first, every time.** They are two
 halves of one spec and neither works alone:

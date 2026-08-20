@@ -85,11 +85,11 @@ export interface QueueRow {
   template: string | null;
   copy_edit: string | null;
   copy_base: string | null;
-  /* the request (migration 140) — Send to Studio, and what came back */
-  video_file: string | null;
+  /* the request (migration 140) — Send to Studio, and what came back.
+     Where it landed is `collateral_path`, which the row already carried. */
   sent_at: string | null;
   built_at: string | null;
-  built_path: string | null;     // the plan text the edit was made against (shared/draft.ts)
+  collateral_path: string | null;     // the plan text the edit was made against (shared/draft.ts)
   pages_edit: { n: number; label: string | null; text: string; note: string | null }[] | null;
   pages_base: { n: number; label: string | null; text: string; note: string | null }[] | null;
   draft_at: string | null;
@@ -160,7 +160,7 @@ export function readiness(r: QueueRow): { text: string; ok: boolean; note?: stri
   // to post" is the strongest state on this screen: the artifact exists, in a
   // folder, and the only thing left is to paste it.
   const send = sendState(r);
-  if (send === "built") return { text: "ready to post", ok: true, note: r.built_path ? `filed at ${r.built_path}` : undefined };
+  if (send === "built") return { text: "ready to post", ok: true, note: r.collateral_path ? `filed at ${r.collateral_path}` : undefined };
   if (send === "sent") return { text: "at the studio", ok: false, note: "sent — waiting on Cowork to build it" };
   if (send === "stale") return { text: "sent · edited", ok: false, note: "you changed the decision after sending — send it again" };
   // THE GATE OUTRANKS THE EDIT: a receipt-gated frame with one bracket filled
@@ -853,7 +853,6 @@ export function DraftBlock({ row, onPatchDraft, onSend }: { row: QueueRow; onPat
   const options = templatesForKind(row.kind);
   const [template, setTemplate] = useState<string>(row.template ?? "");
   const [copy, setCopy] = useState<string>(row.copy_edit ?? row.body ?? "");
-  const [video, setVideo] = useState<string>(row.video_file ?? "");
   const [pages, setPages] = useState<{ n: number; label: string | null; text: string; note: string | null }[]>(
     (row.pages_edit ?? row.pages ?? []).map(p => ({ ...p })),
   );
@@ -875,9 +874,8 @@ export function DraftBlock({ row, onPatchDraft, onSend }: { row: QueueRow; onPat
 
   const copyDirty = copy.trim() !== seedCopy.trim();
   const templateDirty = template !== (row.template ?? "");
-  const videoDirty = video.trim() !== (row.video_file ?? "");
   const pagesDirty = !pagesEqual(pages, seedPages);
-  const dirty = copyDirty || templateDirty || pagesDirty || videoDirty;
+  const dirty = copyDirty || templateDirty || pagesDirty;
 
   // Re-seed when the row's draft or its PLAN changes (a save refetches; an
   // import moves the plan; another slot opens). The one time typing is lost
@@ -888,7 +886,6 @@ export function DraftBlock({ row, onPatchDraft, onSend }: { row: QueueRow; onPat
   const planKey = plan + " " + JSON.stringify(planPages.map(p => [p.n, p.label, p.text, p.note]));
   useEffect(() => {
     setTemplate(row.template ?? "");
-    setVideo(row.video_file ?? "");
     setCopy(seedCopy);
     setPages(seedPages.map(p => ({ ...p })));
     setErr(null);
@@ -902,7 +899,6 @@ export function DraftBlock({ row, onPatchDraft, onSend }: { row: QueueRow; onPat
     setSaving(true); setErr(null); setSaved(false);
     const body: Record<string, unknown> = {};
     if (templateDirty) body.template = template || null;
-    if (videoDirty) body.videoFile = video.trim() || null;
     // Equal-to-plan (ignoring end whitespace) is no edit → null; the server applies the same rule.
     if (copyDirty) body.copyEdit = copy.trim() && copy.trim() !== plan.trim() ? copy : null;
     if (pagesDirty) body.pagesEdit = pagesEqual(pages, planPages) ? null : pages;
@@ -970,32 +966,13 @@ export function DraftBlock({ row, onPatchDraft, onSend }: { row: QueueRow; onPat
           </label>
         ) : (
           /* An empty picker offering only "the spec's default" would imply a
-             builder is waiting on a pick. Nothing renders a piece to camera. */
+             builder is waiting on a pick. Nothing renders a piece to camera,
+             and there is nothing to send: Paul films it and has the file. */
           <p style={{ margin: 0, fontSize: 12.5, color: C.muted, lineHeight: 1.5 }}>
-            No template — this slot is filmed, not rendered. The copy below is the script.
+            No template — this one is filmed, not rendered, and there is nothing for the studio to build.
+            The copy below is the script.
           </p>
         )}
-
-        {/* THE VIDEO PICK. It sits on every slot, not just the video days: a
-            number post can go out as a video if that is the call, and a video
-            day cannot go out any other way. It is a FILE NAME rather than a
-            picker because the videos are on this Mac and the app is on Railway
-            — it cannot see them, so there is no list to offer. pull-queue.mjs
-            resolves the name on the Mac and says loudly when it cannot. */}
-        <label style={{ display: "grid", gap: 5 }}>
-          <span style={{ fontSize: 12.5, fontWeight: 600 }}>
-            Video file{videoDirty ? " · unsaved" : ""}
-            {row.kind === "video" && !video.trim() && <span style={{ color: C.danger, fontWeight: 400 }}> — a video day needs one</span>}
-          </span>
-          <input value={video} onChange={e => setVideo(e.target.value)}
-                 placeholder="e.g. day-01-diligence-tell.mov — the file name, or a full path"
-                 style={{ ...input, maxWidth: 440, fontFamily: C.mono, fontSize: 12.5 }} />
-          <span style={{ fontSize: 12.5, color: C.muted, lineHeight: 1.5 }}>
-            {video.trim()
-              ? <>Cowork places this file in the ready folder instead of rendering. Nothing here checks it exists — the studio resolves it and reports back.</>
-              : <>Leave empty unless this slot posts a video. <code style={code}>node scripts/studio/pull-queue.mjs --videos</code> lists what is in the folder.</>}
-          </span>
-        </label>
 
         <label style={{ display: "grid", gap: 5 }}>
           <span style={{ fontSize: 12.5, fontWeight: 600 }}>
@@ -1083,7 +1060,17 @@ function SendToStudio({ row, unsaved, onSend }: {
     if (e) setErr(e);
   };
 
-  const asksLabel = verdict.asks === "video" ? "place the video" : verdict.asks === "template" ? "render it" : "file the copy";
+  const asksLabel = verdict.asks === "template" ? "build it" : "file the copy";
+
+  // A filmed slot has nothing to send and never will. It gets a sentence, not a
+  // disabled button: a greyed-out control reads as something to go and fix.
+  if (verdict.noBuild && state === "none") {
+    return (
+      <div style={{ marginTop: 4, paddingTop: 12, borderTop: `1px solid ${C.hair}`, fontSize: 12.5, color: C.muted, lineHeight: 1.5 }}>
+        {verdict.reason}
+      </div>
+    );
+  }
 
   return (
     <div style={{ marginTop: 4, paddingTop: 12, borderTop: `1px solid ${C.hair}` }}>
@@ -1092,7 +1079,7 @@ function SendToStudio({ row, unsaved, onSend }: {
           <>
             <span style={{ ...chip, color: C.green, background: C.greenTint }}>built · ready to post</span>
             <span style={{ fontSize: 12.5, color: C.body }}>
-              Filed {when(row.built_at)} at <code style={code}>{row.built_path}</code> — open that folder in Finder.
+              Filed {when(row.built_at)}{row.collateral_path ? <> at <code style={code}>{row.collateral_path}</code></> : ""}.
             </span>
             <div style={{ flex: 1 }} />
             <button type="button" onClick={() => press(false)} disabled={busy || !verdict.ok}
@@ -1109,7 +1096,7 @@ function SendToStudio({ row, unsaved, onSend }: {
             <span style={{ fontSize: 12.5, color: C.body, lineHeight: 1.5 }}>
               {state === "stale"
                 ? <>You changed the decision after sending it ({when(row.sent_at)}). Cowork would build the old one — send it again.</>
-                : <>Waiting on Cowork ({when(row.sent_at)}). It picks this up with <code style={code}>node scripts/studio/pull-queue.mjs</code> and files it in <code style={code}>studio/ready/</code>.</>}
+                : <>Waiting on Cowork ({when(row.sent_at)}). It picks this up with <code style={code}>node scripts/studio/pull-queue.mjs</code>, builds it and files it where the plan says.</>}
             </span>
             <div style={{ flex: 1 }} />
             {state === "stale" && (
@@ -1120,7 +1107,7 @@ function SendToStudio({ row, unsaved, onSend }: {
             )}
             <button type="button" onClick={() => press(true)} disabled={busy}
                     style={{ ...btnGhost, padding: "6px 12px", fontSize: 12.5 }}
-                    title="Withdraw the request. Your template pick, video pick and copy edits all stay exactly as they are.">
+                    title="Withdraw the request. Your template pick and copy edits stay exactly as they are.">
               {busy ? "…" : "Withdraw"}
             </button>
           </>
@@ -1135,7 +1122,7 @@ function SendToStudio({ row, unsaved, onSend }: {
               {unsaved
                 ? "Save the decision first — the studio builds what is saved, not what is on screen."
                 : verdict.ok
-                  ? <>Cowork will {asksLabel} and leave it in <code style={code}>studio/ready/</code> with the caption, ready to post.</>
+                  ? <>Cowork will {asksLabel} from this copy and the template, and file it where the plan says.</>
                   : verdict.reason}
             </span>
           </>

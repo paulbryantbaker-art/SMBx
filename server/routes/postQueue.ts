@@ -113,7 +113,6 @@ router.patch('/:queueId/draft', requireAuth, async (req: any, res) => {
       template: 'template' in b ? b.template : undefined,
       copyEdit: 'copyEdit' in b ? b.copyEdit : undefined,
       pagesEdit: 'pagesEdit' in b ? b.pagesEdit : undefined,
-      videoFile: 'videoFile' in b ? b.videoFile : undefined,
     });
     if (!row) return res.status(404).json({ error: 'Not in the queue' });
     res.json(row);
@@ -139,9 +138,11 @@ router.get('/drafts', requireAuth, async (req: any, res) => {
 /**
  * SEND TO STUDIO (migration 140) — record that this slot is ready to be built.
  * Nothing is rendered here: the app calls no builder. It records a request that
- * `pull-queue.mjs --sent` picks up on the Mac. The server refuses a slot that
- * is not ready (no copy, unfilled receipt brackets, no template on a slot that
- * needs one, no video on a video slot) with the sentence the button shows.
+ * `pull-queue.mjs` picks up on the Mac, carrying the copy and the template
+ * type; Cowork already knows where the collateral goes. The server refuses a
+ * slot that is not ready (no copy, unfilled receipt brackets, no template where
+ * one is owed, or a video day — which has nothing to build) with the sentence
+ * the button shows.
  */
 router.post('/:queueId/send', requireAuth, async (req: any, res) => {
   try {

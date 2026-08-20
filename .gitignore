@@ -37,7 +37,3 @@ studio/drafts/
 # Python bytecode from the studio scripts (figure-deck.py, offer-docs.py…) — build litter, never source. (2026-08-19)
 __pycache__/
 *.pyc
-
-# Where this Mac keeps the video takes (pull-queue.mjs reads it). A path on one
-# machine, like .smbx-repo — never the same on two of them, so never committed.
-.smbx-video-dir
