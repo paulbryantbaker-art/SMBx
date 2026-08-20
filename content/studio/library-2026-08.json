@@ -1,0 +1,137 @@
+{
+  "name": "2026-08",
+  "title": "M&A Content Hook Library · August & September 2026",
+  "note": "A GUIDE, not a calendar (Paul, 2026-08-20: \"more of a GUIDE and less of a specific post per day prescription — every month will run a research to see what topics are hot\"). Five pillars, each in three hook styles: the Data Drop, the Provocation, the Thesis. A hook is a STARTING POINT, never a post: Paul writes the copy in the app, picks a template, and presses Send to Cowork. One hook may feed three posts or none — nothing here is consumed by being used. Source: Google Doc 10vJNy7CVDKVFCUdhyJtW8o-Z2hy3sadzlmX45ApGUiQ, transcribed verbatim; only the Drive exporter’s escaping and its stray \"end list\" markers normalised. CHECKED against every market’s retired-figure denylist on 2026-08-20: clean, no known-retired figure. That proves nothing dead is present; it does not prove what IS present is true. Three to verify before they ship: \"$1.1 Trillion in dry powder\" carries no universe (the Aug 21 calendar’s own Day 23 argues you must name one, and lists $1.2T buyout-only / $2.5T all PE / $3.9T all private capital, with Bain 2026 at $1.3T); the \"GF Data 2.8 turn gap\" must be the published size-band gradient and not the platform/add-on split, which R-HS-027 retired as subscriber-only; and the \"$1.2 Trillion\" deal-value figure shares a numeral with the retired sector-segmented dry powder, so never put them on one page.",
+  "pillars": [
+    {
+      "id": "L1",
+      "title": "The Bifurcation",
+      "sub": "Quality vs. the rest",
+      "goal": "Highlight the stark contrast between top-tier asset pricing and the rest of the market.",
+      "hooks": [
+        {
+          "id": "L1.1",
+          "style": "Data Drop",
+          "hook": "M&A volume is down 4%, but deal value just hit $1.2 Trillion. The market isn't just bifurcating — it's splitting into two entirely different realities.",
+          "direction": "Follow up with the GF Data stat on the 2.8 turn gap, then pivot to how 'The Settlement' bridges this."
+        },
+        {
+          "id": "L1.2",
+          "style": "Provocation",
+          "hook": "A-tier assets are commanding 2021 peak pricing. Everything else is getting a brutal reality check. Here is why the middle market is feeling the squeeze.",
+          "direction": "Discuss the compression of average assets and why buyers are hoarding capital for perfect targets."
+        },
+        {
+          "id": "L1.3",
+          "style": "Thesis — The Settlement",
+          "hook": "The gap between medium and large deal multiples just hit 2.8 turns. The entire premium now sits on one thing: post-close platform building.",
+          "direction": "Lead directly into the P-1 post framework. Explain how platform characteristics dictate who wins the premium."
+        }
+      ]
+    },
+    {
+      "id": "L2",
+      "title": "The Exit Logjam",
+      "sub": "vs. the dry-powder clock",
+      "goal": "Exploit the tension between record capital and record holding periods.",
+      "hooks": [
+        {
+          "id": "L2.1",
+          "style": "Data Drop",
+          "hook": "We have $1.1 Trillion in dry powder waiting to deploy, yet it would take 9 years to clear existing PE inventory. Welcome to the great M&A paradox.",
+          "direction": "Break down the friction between buy-pressure and exit constipation."
+        },
+        {
+          "id": "L2.2",
+          "style": "Provocation",
+          "hook": "Paper marks don't return capital.",
+          "direction": "A punchy one-liner. Follow immediately with the reality of 2020–2022 vintage funds hitting mandatory deployment deadlines and why value creation has to be real now."
+        },
+        {
+          "id": "L2.3",
+          "style": "Thesis — Function / Settlement",
+          "hook": "How do you solve buy-side pressure and sell-side constipation at the exact same time? You stop relying on multiple expansion.",
+          "direction": "Transition into how functional value creation is the only way to break the logjam."
+        }
+      ]
+    },
+    {
+      "id": "L3",
+      "title": "Risk Migrating into Deal Structure",
+      "sub": "Earnouts",
+      "goal": "Reframe the rise in earnouts not just as a trend, but as the contractualization of market uncertainty.",
+      "hooks": [
+        {
+          "id": "L3.1",
+          "style": "Thesis — the \"aha\" moment",
+          "hook": "An earnout isn't just a deal term. It's the bid-ask gap contractualized.",
+          "direction": "The best near-term Provenance post. Explain how the market is converting uncertainty into a deferred reconciliation."
+        },
+        {
+          "id": "L3.2",
+          "style": "Data Drop",
+          "hook": "A third of all small deals are now settling the final price after the close. The risk is migrating directly into the deal structure.",
+          "direction": "Use the SRS Acquiom data: 35% of sub-$25M deals have earnouts, compared to the drop in all-cash deals."
+        },
+        {
+          "id": "L3.3",
+          "style": "Provocation",
+          "hook": "Sub-$25M deals are escrowing 15% of transaction value. Deals over $750M? Just 2.7%. If you are playing in the LMM, the safety net is gone.",
+          "direction": "Highlight the disparity in risk tolerance between the LMM and the upper tier."
+        }
+      ]
+    },
+    {
+      "id": "L4",
+      "title": "Diligence as the Kill Floor",
+      "sub": "",
+      "goal": "Expose how underwriting rigor has replaced loose capital, and highlight the new diligence dimensions.",
+      "hooks": [
+        {
+          "id": "L4.1",
+          "style": "Data Drop",
+          "hook": "For three consecutive years, inflation was the #1 diligence boogeyman. Today, it's been displaced by geopolitics and tariffs.",
+          "direction": "Explore this shift in advisor focus and how it changes the underwriting model."
+        },
+        {
+          "id": "L4.2",
+          "style": "Provocation",
+          "hook": "QoE discrepancies are doubling. Buyers aren't just being thorough — they are daring your fundamentals to fail.",
+          "direction": "Frame diligence as the 'kill floor' where 47% of breaks happen."
+        },
+        {
+          "id": "L4.3",
+          "style": "Thesis — Model Misses",
+          "hook": "Nearly half of all broken deals die in diligence. If your underwriting rigor isn't flawless, the market will find the model miss.",
+          "direction": "Land the P-2 Thursday post here. Focus on the execution hinging on valuation discipline."
+        }
+      ]
+    },
+    {
+      "id": "L5",
+      "title": "AI as Diligence",
+      "sub": "and the reality check",
+      "goal": "Address AI as a constraint/risk rather than hype, and push back on false market narratives (multiples).",
+      "hooks": [
+        {
+          "id": "L5.1",
+          "style": "Provocation — AI underwriting",
+          "hook": "Stop treating AI as a headline. Treat it as a diligence question: will this technology accelerate or erode the target's moat in 36 months?",
+          "direction": "Keep to the constraint. Discuss AI purely as a factor of underwriting rigor — did anyone actually diligence the AI risk?"
+        },
+        {
+          "id": "L5.2",
+          "style": "Reality Check — Provenance / competitor signal",
+          "hook": "13.4x is not your multiple. If your target isn't earning $60M+ in EBITDA, you need to stop looking at headline medians.",
+          "direction": "Claim this lane. Deconstruct why sellers anchor to PE mega-deal medians and why LMM advisors have to reset those expectations."
+        },
+        {
+          "id": "L5.3",
+          "style": "Thesis — Model Misses, tech",
+          "hook": "Acquirers are quietly asking one crucial question in diligence right now: 'Did anyone underwrite the AI risk?'",
+          "direction": "Connect the AI moat question directly to the 'Model Misses' concept."
+        }
+      ]
+    }
+  ]
+}

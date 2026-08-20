@@ -20,7 +20,8 @@ import { requireAuth } from '../middleware/auth.js';
 import { sql } from '../db.js';
 import {
   importQueue, importCampaign, listCampaigns, listQueue, updateQueueState, queuePerformance, readQueueFile, updateQueueDraft, listQueueDrafts,
-  sendQueueToStudio, unsendQueue, markQueueBuilt } from '../services/postQueue.js';
+  sendQueueToStudio, unsendQueue, markQueueBuilt,
+  listLibraries, createQueuePost } from '../services/postQueue.js';
 
 const router = Router();
 
@@ -132,6 +133,36 @@ router.get('/drafts', requireAuth, async (req: any, res) => {
     res.json({ drafts: await listQueueDrafts(req.userId, req.query.sent === '1' || req.query.sent === 'true') });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * THE LIBRARY — the month's hooks, read-only. A guide, not a calendar: these
+ * never become rows on their own, and nothing here is consumed by being used.
+ */
+router.get('/library', requireAuth, async (_req, res) => {
+  try {
+    res.json({ libraries: await listLibraries() });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * MAKE A POST — from a library hook, or blank. The one place a row is born
+ * without a file behind it, which is why it owns its own content (migration
+ * 141). Body: { hookId?, kind?, title?, angle?, scheduledFor? }.
+ */
+router.post('/new', requireAuth, async (req: any, res) => {
+  try {
+    const b = req.body || {};
+    res.json(await createQueuePost(req.userId, {
+      hookId: b.hookId ?? null, kind: b.kind ?? null,
+      title: b.title ?? null, angle: b.angle ?? null,
+      scheduledFor: b.scheduledFor ?? null,
+    }));
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
   }
 });
 

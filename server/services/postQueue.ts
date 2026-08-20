@@ -422,7 +422,12 @@ export async function updateQueueState(
     UPDATE post_queue SET
       status          = COALESCE(${patch.status ?? null}, status),
       slot            = COALESCE(${patch.slot ?? null}, slot),
-      scheduled_for   = COALESCE(${patch.scheduledFor ?? null}::date, scheduled_for),
+      -- COALESCE cannot CLEAR a value, and a date you can set but never remove
+      -- is a trap on a surface whose whole point is "schedule it when you are
+      -- ready". An explicit empty string is the un-set; undefined still means
+      -- leave it alone, so nothing that already works changes.
+      scheduled_for   = CASE WHEN ${patch.scheduledFor === ''} THEN NULL
+                             ELSE COALESCE(${patch.scheduledFor || null}::date, scheduled_for) END,
       post_url        = COALESCE(${patch.postUrl ?? null}, post_url),
       draft_path      = COALESCE(${patch.draftPath ?? null}, draft_path),
       collateral_path = COALESCE(${patch.collateralPath ?? null}, collateral_path),
@@ -633,6 +638,129 @@ export async function queuePerformance(userId: number): Promise<any[]> {
     LEFT JOIN studio_analytics a ON a.queue_id = q.queue_id AND a.user_id = q.user_id
     WHERE q.user_id = ${userId} AND q.status = 'posted'
     ORDER BY q.posted_at DESC NULLS LAST`;
+}
+
+/* ── the library — a guide, not a calendar ──────────────────────────────── */
+
+/**
+ * THE HOOK LIBRARY (2026-08-20, Paul: *"I'm going to go with more of a GUIDE and
+ * less of a specific post per day prescription — every month will run a research
+ * to see what topics are hot and right now these are hot. I will just come up
+ * with the copy and paste that into the app and then hit send to Cowork."*).
+ *
+ * A CAMPAIGN IS A CALENDAR; A LIBRARY IS A REFERENCE. That is the whole
+ * difference and it decides the data model: a campaign's rows ARE the posts,
+ * one per day, and the file owns their content. A library's hooks are not
+ * posts and never become rows — they are a menu Paul draws from, and one hook
+ * may feed three posts or none. Nothing here is consumed by being used.
+ *
+ * So the library is READ, never imported. `post_queue` gains nothing from it;
+ * a post made from a hook is an ordinary row that happens to have been seeded
+ * with one, and it carries no link back — using a hook twice must not make the
+ * second post look like a duplicate of the first.
+ */
+export interface LibraryHook { id: string; style: string; hook: string; direction: string }
+export interface LibraryPillar { id: string; title: string; sub: string; goal: string; hooks: LibraryHook[] }
+export interface Library { name: string; title: string; note: string; pillars: LibraryPillar[]; file: string }
+
+const LIBRARY_FILE = /^library-([\w-]+)\.json$/;
+
+/** Every library the build ships, NEWEST FIRST by name — a month is a file. */
+export async function listLibraries(dir = CAMPAIGN_DIR): Promise<Library[]> {
+  let names: string[];
+  try { names = (await readdir(dir)).filter(f => LIBRARY_FILE.test(f)).sort().reverse(); } catch { return []; }
+  const out: Library[] = [];
+  for (const f of names) {
+    try {
+      const parsed = JSON.parse(await readFile(path.join(dir, f), 'utf8'));
+      const pillars: LibraryPillar[] = Array.isArray(parsed?.pillars) ? parsed.pillars.filter((p: any) =>
+        p && typeof p.id === 'string' && Array.isArray(p.hooks)) : [];
+      if (!pillars.length) continue;   // a library with no hooks is not a library
+      out.push({
+        name: LIBRARY_FILE.exec(f)![1],
+        title: typeof parsed.title === 'string' ? parsed.title : f,
+        note: typeof parsed.note === 'string' ? parsed.note : '',
+        pillars,
+        file: path.join('content/studio', f),
+      });
+    } catch { /* a malformed library is skipped, never half-read */ }
+  }
+  return out;
+}
+
+/** One hook, by its id, across every shipped library. */
+export async function findHook(hookId: string, dir = CAMPAIGN_DIR): Promise<{ hook: LibraryHook; pillar: LibraryPillar; library: Library } | null> {
+  for (const library of await listLibraries(dir)) {
+    for (const pillar of library.pillars) {
+      const hook = pillar.hooks.find(h => h.id === hookId);
+      if (hook) return { hook, pillar, library };
+    }
+  }
+  return null;
+}
+
+/**
+ * Make a post. Paul curates the idea in the app and only Cowork's half happens
+ * elsewhere, so this is the one place a row is born without a file behind it.
+ *
+ * THAT IS SAFE BY CONSTRUCTION, not by promise: every importer iterates the
+ * ids in a FILE, so an id no file contains can never be overwritten by one.
+ * The row therefore owns its own content — which is exactly the opposite of a
+ * campaign row, and the reason `origin` records which kind it is.
+ *
+ * THE ID IS DATED AND SEQUENTIAL WITHIN ITS DAY (`N-20260820-1`) because an id
+ * is one post forever — analytics join on it — and a scheme that could ever
+ * repeat would fold two posts' numbers into one line. The suffix counts the
+ * ids already taken for that day rather than the rows created, so deleting one
+ * cannot hand its id to the next post.
+ */
+export async function createQueuePost(
+  userId: number,
+  input: { hookId?: string | null; kind?: string | null; title?: string | null; angle?: string | null; scheduledFor?: string | null },
+  dir = CAMPAIGN_DIR,
+): Promise<any> {
+  const found = input.hookId ? await findHook(input.hookId, dir) : null;
+  if (input.hookId && !found) throw new Error(`No hook "${input.hookId}" in any library that ships with this build.`);
+
+  const kind = typeof input.kind === 'string' && KINDS.has(input.kind) ? input.kind : 'text';
+  const title = (input.title ?? '').trim() || (found ? `${found.pillar.title} — ${found.hook.style}` : 'Untitled post');
+  // `angle` is required by validateQueue and is what the screen falls back to
+  // when there is no title; the hook is the truest one-line answer to "what is
+  // this post", so it is the angle when a hook seeded it.
+  const angle = (input.angle ?? '').trim() || (found ? found.hook.hook : title);
+
+  const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const taken = await sql<{ queue_id: string }[]>`
+    SELECT queue_id FROM post_queue
+    WHERE user_id = ${userId} AND queue_id LIKE ${'N-' + today + '-%'}`;
+  let n = taken.length + 1;
+  const used = new Set(taken.map(r => r.queue_id));
+  while (used.has(`N-${today}-${n}`)) n++;
+  const queueId = `N-${today}-${n}`;
+
+  const brief = found ? {
+    hook: found.hook.hook,
+    rehook: null,
+    beats: [],
+    source: null,
+    extraction: null,
+    note: `${found.pillar.title}${found.pillar.sub ? ' · ' + found.pillar.sub : ''} — ${found.hook.style}. Direction: ${found.hook.direction}`,
+  } : null;
+
+  const [row] = await sql`
+    INSERT INTO post_queue (
+      user_id, queue_id, angle, title, kind, status, campaign, brief,
+      may_state_figure, scheduled_for, origin
+    ) VALUES (
+      ${userId}, ${queueId}, ${angle}, ${title}, ${kind}, 'next', ${found ? `library-${found.library.name}` : null},
+      ${brief ? sql.json(brief as any) : null},
+      -- A post starts ALLOWED to state figures: the library's hooks are mostly
+      -- data drops, and the retired-check before Mark posted is what actually
+      -- guards the number. Defaulting to false would refuse most of the menu.
+      true, ${input.scheduledFor ?? null}::date, 'app'
+    )
+    RETURNING *`;
+  return normalizeQueueRow(row);
 }
 
 /* ── campaigns ─────────────────────────────────────────────────────────── */
