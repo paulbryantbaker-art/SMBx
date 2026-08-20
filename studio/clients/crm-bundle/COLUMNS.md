@@ -32,7 +32,7 @@ ownership law: markdown owns content, the table owns status.
 
 | File | Columns |
 |---|---|
-| `02_organizations.csv` | `org_id` `firm` `firm_type` `segment` `bucket` `city` `state` `website` `aum_or_fund_size` `check_size` `ebitda_range` `vertical_fit` `internal_corpdev` `buyside_signal` `signal_date` `contact_count` `contact_ids` `confidence` `source_url` `notes` |
+| `02_organizations.csv` | **31 columns, this exact order (2026-08-18 merge onward — copy from the file itself, never from a description):** `org_id` `firm` `firm_type` `segment` `bucket` `tier` `city` `state` `website` `aum_or_fund_size` `check_size` `ebitda_range` `vertical_fit` `internal_corpdev` `buyside_signal` `signal_date` `contact_count` `contact_ids` `confidence` `source_url` `notes` `account_type` `sponsor_parent` `verticals_active` `states_active` `platform_count` `texas_exposure` `trigger_type` `trigger_date` `verification` `last_checked` |
 | `01_contacts.csv` | `record_id` `full_name` `title` `firm` `email` `phone` `source_url` `outreach_hook` `warm_path` `channel` `template_id` `verification_status` |
 | `03`–`06` | the campaign plan — waves, steps, templates, events. Content columns refresh on push; status columns do not exist in the CSV and are the app's |
 | `07_research_queue.csv` | `queue_id` `firm` `what_is_needed` `why_it_matters` `suggested_source` `linked_record` |
@@ -83,12 +83,54 @@ merging it afterwards means adjudicating which row's human state survives.
 Until `reconcile.mts` exists, changing a firm string in this file is a
 destructive act — treat it as one.
 
+**Three more loader behaviors that make a careless import destructive
+(2026-08-19, written after a session projected a drop-in from a stale schema
+description):**
+
+- **`notes` REPLACES on import when non-empty.** `packNotes` builds a notes
+  blob from the row and the upsert takes the new value over the existing one.
+  Ship curated notes or ship the column empty — a key=value dump packed into
+  notes overwrites the register's provenance (verification lines, correction
+  records) on every name-matched firm, app-side, with no diff to find it by.
+- **`kind` is set unconditionally from `bucket`, and a blank bucket means
+  `acquirer`.** Never ship a bundle row without its bucket, or an
+  `ECOSYSTEM_DO_NOT_PITCH` firm's kind flips to acquirer on import (its
+  `disqualified` note survives, so the damage is quiet).
+- **Unknown columns are ignored silently at the column level** (unrecognized
+  FILES are named back; unrecognized COLUMNS are simply never read). A
+  projection with wrong column names imports "successfully" and drops the
+  facts — the worst outcome, because it looks like it worked.
+
+## The row-universe law (2026-08-19)
+
+**This file is the VERIFIED register — 154 rows as of 2026-08-19 — never the
+research universe.** A research run's full emission (225 rows on 2026-08-18)
+lands in `../candidates/` as a DATED file, and reconcile promotes what
+verifies. A drop-in replacement of this file with the research universe would
+have: dropped the 75 legacy rows (the referral layer and the firms the
+campaign plan's targeting expressions resolve against by `source_key`),
+re-admitted rows that FAILED primary-source verification (Rhino Ventures,
+Schultz Brothers, Elm Fork — held 2026-08-19 with reasons in their funnel
+notes), and replaced curated notes wholesale. The studio master keeps its own
+richer schema; this file is the projection INTO the register, and the
+projection is append/merge per reconcile — never file replacement.
+
 ## The workflow
 
+Three transports, one idempotent loader (paths corrected 2026-08-19 — the
+old block predated ONE CLONE and pointed at folders that no longer exist):
+
+- **One press, no files (2026-08-19):** in the app, Leads → **"Sync register
+  from the repo"** — the server reads THIS folder as shipped in its own
+  deploy (`.dockerignore` un-ignores exactly `studio/clients/crm-bundle`).
+  Merge the register change, let Railway rebuild, press. Works from a phone.
+- **File picker:** Leads → **"Load the register from CSVs"**, pick this
+  folder's `*.csv` — for files newer than the deploy.
+- **Terminal:**
+
 ```bash
-export REPO=~/Documents/GitHubRepos/SMBx-live/SMBx
-cd ~/Documents/smbx-studio/clients        # push-crm.mts's first default is ./crm-bundle
-SMBX_TOKEN=…  npx tsx $REPO/scripts/studio/push-crm.mts
+cd ~/Developer/smbx-prod/studio/clients   # push-crm.mts's first default is ./crm-bundle
+SMBX_TOKEN=…  npx tsx ../../scripts/studio/push-crm.mts
 ```
 
 One-way door. Facts flow git → app and never back. The copy rule from

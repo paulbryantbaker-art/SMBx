@@ -4,6 +4,43 @@ Newest first. One section per run.
 
 ---
 
+## 2026-08-19 · Cowork's re-projection, held at the door — and what was taken from it
+
+A Cowork session re-emitted the 225-row research universe as a 19-column
+"bundle-shaped" `02_organizations.csv` meant to drop into this folder, built
+from a schema DESCRIPTION rather than the file (the description it worked
+from was this log's own COLUMNS.md table, which still showed the
+pre-2026-08-18 columns — corrected today). The file itself never landed
+anywhere durable (not the clone, not the `cowork` branch, not Drive) — the
+evaporation problem that session itself named. It was not imported, and the
+row-universe law now written into COLUMNS.md says why a 225-row drop-in must
+never happen: it would drop the 75 legacy rows, re-admit the three
+verification-failed firms, and overwrite curated notes app-side.
+
+**Taken from its read anyway (the two live findings its named list carried
+that this register did not yet encode):**
+
+- **Comfort Systems USA (ORG-108): tier A → C, `internal_corpdev` filled.**
+  The row's own 2026-08-18 notes said "Large in-house corp dev" while the
+  row sat pitchable at tier A with the disqualifier column empty.
+- **Pye-Barker Fire & Safety (funnel): tier 1 → 3**, deep-bench note added,
+  no register_match (it is in no register row under any name — if promoted,
+  it belongs as ECOSYSTEM_DO_NOT_PITCH beside Apex/Legacy/Redwood).
+
+The rest of its named set (Blackstone, KKR, Apollo, Bain, Carlyle, Alpine,
+Apex …) was already encoded — the funnel demotions of 2026-08-19 and the
+register's existing ECOSYSTEM rows with register_match pointers. Its full
+43-firm `internal_corpdev` list evaporated with the session; if it re-emits,
+the landing is `../candidates/` as a dated 23-column master, never this
+folder.
+
+**Its identity warning stands and is the open item:** the loader matches on
+exact lowercase firm name, so "Reedy Industries" vs "PremiStar" mints two
+entities. `RECONCILE_SPEC.md` (repo root) is the spec; `reconcile.mts` is
+still unbuilt and belongs upstream of this folder.
+
+---
+
 ## 2026-08-19 · FO verification pass — 19 checked, 16 promoted, 3 held
 
 The priority family offices (the DealSource Dallas list + the A-list FOs) were
