@@ -170,7 +170,10 @@ export function readiness(r: QueueRow): { text: string; ok: boolean; note?: stri
   // brief exactly as it does to a body: the block is on the post, not the draft.
   if (isPost(r) && r.gate && (r.body || r.brief)) return { text: "gated", ok: false, note: firstSentence(r.gate) };
   // A LIVE decision Cowork has not rendered from is the next most important state — it outranks "copy · PDF".
-  if (hasDraft(r)) return { text: "edited", ok: false, note: "waiting on a Cowork render" };
+  // A FILMED SLOT IS NEVER WAITING ON A RENDER. Nothing renders a piece to
+  // camera, so "waiting on a Cowork render" describes something that will never
+  // happen and reads as a step still to come.
+  if (hasDraft(r)) return { text: "edited", ok: false, note: r.kind === "video" ? "your edit, saved" : "waiting on a Cowork render" };
   if (r.queue_id.startsWith("BLACKOUT")) return { text: "no post", ok: true };
   if (r.kind === "document") {
     const pdf = !!r.document?.pdf;
@@ -925,12 +928,17 @@ export function DraftBlock({ row, onPatchDraft, onDirty }: { row: QueueRow; onPa
 
   const live = hasDraft(row);
   const superseded = copyState === "superseded" || pagesState === "superseded";
+  // Nothing about this panel is true for a filmed slot: there is no render to
+  // come, no button to point at, and no wait. Paul, looking at a video day:
+  // "I dont see the button??" — the right column said "nothing to build" while
+  // this panel told him to press one. Every string here forks on it.
+  const noBuild = sendReadiness(row).noBuild === true;
   return (
     <div style={{ marginTop: 14, border: `1px solid ${live ? C.green : C.hair}`, padding: "12px 14px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
-        <span style={{ fontSize: 13, fontWeight: 700 }}>Before Cowork renders</span>
+        <span style={{ fontSize: 13, fontWeight: 700 }}>{noBuild ? "Your copy" : "Before Cowork renders"}</span>
         {live
-          ? <span style={{ ...chip, color: C.green, background: C.greenTint }}>edited · waiting on a render</span>
+          ? <span style={{ ...chip, color: C.green, background: C.greenTint }}>{noBuild ? "edited" : "edited · waiting on a render"}</span>
           : copyState === "satisfied" || pagesState === "satisfied"
             ? <span style={{ ...chip, color: C.body, background: C.panel }}>plan matches your edit</span>
             : <span style={{ ...mono, color: C.muted }}>the plan's copy</span>}
@@ -1023,7 +1031,9 @@ export function DraftBlock({ row, onPatchDraft, onDirty }: { row: QueueRow; onPa
           {saved && !dirty && <span style={{ ...mono, color: C.green }}>saved</span>}
           {err && <span style={{ fontSize: 12.5, color: C.danger }}>{err}</span>}
           <span style={{ fontSize: 12.5, color: C.muted, lineHeight: 1.5 }}>
-            Nothing renders from here. Save, then press <b>Send to Cowork</b> on the right — that is what tells Cowork to build it.
+            {noBuild
+              ? <>Nothing for Cowork to build — this one is filmed and you have it. Save your edit, post it on LinkedIn, then mark it posted on the right.</>
+              : <>Nothing renders from here. Save, then press <b>Send to Cowork</b> on the right — that is what tells Cowork to build it.</>}
           </span>
         </div>
 
