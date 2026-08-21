@@ -36,7 +36,7 @@ import { daysUntil, localIso } from "./Leads";
 import { templatesForKind, templateById } from "@shared/templates";
 import { copyDraftState, pagesDraftState, pagesEqual, hasLiveDraft } from "@shared/draft";
 import { sendReadiness, sendState } from "@shared/studioSend";
-import { PillarPick, Readings, Engagers, PillarRollup, type ReadingRow } from "./PostMetrics";
+import { PillarPick, Readings, Engagers, PillarRollup, PillarGuide, LogPost, type ReadingRow } from "./PostMetrics";
 import type { PillarId, PostRow } from "@shared/pillars";
 
 /* ── the rows, as the API returns them ───────────────────────────────── */
@@ -406,6 +406,22 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
     return null;
   }, [load]);
 
+  /* THE ONE PRESS THE APP EXISTS FOR NOW. The post is already live; this is
+     the row arriving after the fact so the readings have something to hang on. */
+  const logPost = useCallback(async (body: Record<string, string>): Promise<string | null> => {
+    const r = await fetch("/api/post-queue/log", {
+      method: "POST", headers: { ...authHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const j = await r.json().catch(() => null);
+    if (!r.ok) return j?.error ?? `Could not log that (${r.status})`;
+    await load();
+    /* Open it: the next thing he does is type numbers into it, and that is a
+       week away — but landing on the row proves the log worked. */
+    if (j?.queue_id) { setView(STANDING); setOpenId(j.queue_id); }
+    return null;
+  }, [load]);
+
   /* ── what the post did ─────────────────────────────────────────────────
      A reading is recorded against a DAY, so re-recording the same day is a
      correction and a different day is a new point on the curve. Nothing here
@@ -619,6 +635,15 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
                 {busy ? "Loading…" : `Re-import ${current.name}`}
               </button>
             )}
+          </div>
+
+          {/* WHAT I WRITE AGAINST, and the one press that records what went out.
+              These two are the whole of the app's job now: the argument is
+              written in Gemini, published through Typegrow, and any collateral
+              is built in Cowork. */}
+          <div style={{ marginTop: 18 }}>
+            <PillarGuide />
+            <LogPost onLog={logPost} />
           </div>
 
           {/* BY PILLAR — the reason the tagging and the typing exist. Reads `all`

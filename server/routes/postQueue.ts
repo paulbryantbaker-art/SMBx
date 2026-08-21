@@ -21,6 +21,7 @@ import { sql } from '../db.js';
 import {
   importQueue, importCampaign, listCampaigns, listQueue, updateQueueState, queuePerformance, readQueueFile, updateQueueDraft, listQueueDrafts,
   recordReading, listReadings, deleteReading,
+  logPostedPost,
   sendQueueToStudio, unsendQueue, markQueueBuilt,
   listLibraries, createQueuePost } from '../services/postQueue.js';
 
@@ -255,6 +256,21 @@ router.get('/performance', requireAuth, async (req: any, res) => {
     res.json({ rows: await queuePerformance(req.userId) });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * Log a post that is already up.
+ *
+ * The app does not compose any more — the argument is written elsewhere and
+ * published elsewhere. This is the row arriving after the fact, born posted, so
+ * there is something for the readings and the pillar rollup to hang on.
+ */
+router.post('/log', requireAuth, async (req: any, res) => {
+  try {
+    res.json(await logPostedPost(req.userId, req.body || {}));
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
   }
 });
 

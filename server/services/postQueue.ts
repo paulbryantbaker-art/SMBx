@@ -649,6 +649,78 @@ export async function queuePerformance(userId: number): Promise<any[]> {
     ORDER BY q.posted_at DESC NULLS LAST`;
 }
 
+/* ── LOG A POST THAT IS ALREADY UP ──────────────────────────────────────── */
+
+/**
+ * (Paul, 2026-08-21: "All of the app creation will be outside of the app… I
+ * just need a place in the app to log once a post has been made so that we can
+ * track metrics.")
+ *
+ * The queue was built as a PLAN — rows created ahead of time, drafted, sent to
+ * the studio, then marked posted. That shape assumes the app holds the copy. It
+ * no longer does: the argument is written in Gemini, formatted and published in
+ * Typegrow, and any collateral is built in Cowork. By the time the app hears
+ * about a post, it is already live on LinkedIn.
+ *
+ * So this is not `createQueueRow` followed by `updateQueueState`. It is one
+ * insert producing a row born POSTED, because the three states in between never
+ * happened — and a row that pretended they did would carry a `drafted_at` for a
+ * draft nobody wrote here.
+ *
+ * WHY THIS DOES NOT RUN THE RETIRED-CHECK GATE, stated so it reads as a
+ * decision rather than an omission. `updateQueueState` refuses to mark a row
+ * posted until retired-check has run, and that gate is right: it stands between
+ * a caption the app is holding and a retired figure going out. Here the post is
+ * ALREADY OUT. Refusing the log protects nothing — it only means the post goes
+ * untracked, which is strictly worse. `retired_check` records whatever Paul
+ * says it was and defaults to `not_run`, which is this schema's honest value
+ * for "we did not check": migration 123 made the column NOT NULL precisely so
+ * that "we didn't check" could never look the same as "we checked and it was
+ * fine". The gate on the planned path is untouched.
+ */
+export async function logPostedPost(
+  userId: number,
+  input: { title?: string; pillar?: string; url?: string; postedOn?: string; retiredCheck?: string; notes?: string },
+): Promise<any> {
+  const title = (input.title ?? '').trim();
+  if (!title) throw new Error('Say what the post was — a few words is enough to recognise it later.');
+  if (input.pillar && !isPillarId(input.pillar)) throw new Error(`Unknown pillar "${input.pillar}"`);
+
+  const today = new Date().toISOString().slice(0, 10);
+  const postedOn = input.postedOn && ISO_DAY.test(input.postedOn) ? input.postedOn : null;
+  if (postedOn && postedOn > today) throw new Error('That date is in the future — log a post after it goes up.');
+
+  const stamp = today.replace(/-/g, '');
+  const taken = await sql<{ queue_id: string }[]>`
+    SELECT queue_id FROM post_queue
+    WHERE user_id = ${userId} AND queue_id LIKE ${'L-' + stamp + '-%'}`;
+  let n = taken.length + 1;
+  const used = new Set(taken.map(r => r.queue_id));
+  while (used.has(`L-${stamp}-${n}`)) n++;
+  /* `L-` rather than `N-`: a logged post and one composed in the app are
+     different animals, and the id says which without anyone reading the row. */
+  const queueId = `L-${stamp}-${n}`;
+
+  const [row] = await sql`
+    INSERT INTO post_queue (
+      user_id, queue_id, angle, title, kind, status, campaign, pillar,
+      may_state_figure, post_url, retired_check, notes, origin, posted_at
+    ) VALUES (
+      ${userId}, ${queueId}, ${title}, ${title}, 'text', 'posted', NULL, ${input.pillar || null},
+      true, ${(input.url ?? '').trim() || null},
+      ${input.retiredCheck === 'clean' || input.retiredCheck === 'flagged' ? input.retiredCheck : 'not_run'},
+      ${(input.notes ?? '').trim() || null}, 'app',
+      -- Logged today: the real moment. Backdated: NOON UTC, so no reader's
+      -- timezone can slide it onto the wrong day in either direction — the trap
+      -- the Posted line already carries a comment about. days_after_post reads
+      -- posted_at::date, so noon is safe for the metrics too.
+      CASE WHEN ${postedOn}::date IS NULL THEN NOW()
+           ELSE (${postedOn}::date + TIME '12:00') AT TIME ZONE 'UTC' END
+    )
+    RETURNING *`;
+  return normalizeQueueRow(row);
+}
+
 /* ── WHAT THE POST ACTUALLY DID — one reading, one day ───────────────────── */
 
 /**
