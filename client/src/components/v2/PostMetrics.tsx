@@ -37,7 +37,7 @@ import { authHeaders } from "../../hooks/useAuth";
 import { C, input, btnPrimary, btnGhost, mono, chip } from "./tokens";
 import { localIso } from "./Leads";
 import {
-  PILLARS, pillarById, pillarRollup, per1k,
+  PILLARS, AVOID, pillarById, pillarRollup, per1k,
   MIN_TAGGED_FOR_SHARE, MIN_READINGS_FOR_RATE,
   type PillarId, type Reading, type PostRow, type Rollup,
 } from "@shared/pillars";
@@ -425,6 +425,160 @@ export function PillarRollup({ posts, readings, campaign }: {
           A pillar shows no rate until it has {MIN_READINGS_FOR_RATE} readings. A post you have not typed in is
           counted as unread, never as a zero.
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── 5 · the pillars, so they are not in your head ────────────────────── */
+
+/**
+ * (Paul, 2026-08-21: "keeping in the app what the pillars are that I'm creating
+ * content against is a good idea so that I can… not have to keep track of it in
+ * my head.")
+ *
+ * A reference, not a control. It answers "what am I writing against today" and
+ * "what am I deliberately not writing about" — the second half matters as much,
+ * because the rooms this practice stays out of are all high-engagement and the
+ * temptation is real. Collapsed by default: it is a thing you consult, not a
+ * thing you read every visit.
+ */
+export function PillarGuide() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ border: `1px solid ${C.hair}`, marginBottom: 14, background: C.bg }}>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        style={{
+          display: "flex", width: "100%", alignItems: "baseline", gap: 10, flexWrap: "wrap",
+          padding: "11px 14px", background: "none", border: "none", cursor: "pointer",
+          font: "inherit", textAlign: "left",
+        }}
+      >
+        <span style={{ fontFamily: C.display, fontSize: 17, fontWeight: 600, color: C.ink }}>
+          What I write against
+        </span>
+        <span style={{ ...mono, color: C.muted }}>{open ? "hide" : "what each one covers"}</span>
+      </button>
+
+      {/* THE NAMES ARE ON THE FACE OF IT, not behind the click. The whole point
+          of this panel is not having to hold five names in your head, and a
+          collapsed panel reading "5 pillars" would have failed at exactly that.
+          The detail — scope, what each carries, the rooms we stay out of — is
+          what folds away, because that you consult rather than scan. */}
+      {!open && (
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", padding: "0 14px 12px" }}>
+          {PILLARS.map(p => (
+            <span key={p.id} style={{ ...chip }}>{p.name}</span>
+          ))}
+        </div>
+      )}
+
+      {open && (
+        <div style={{ borderTop: `1px solid ${C.hair}` }}>
+          {PILLARS.map(p => (
+            <div key={p.id} style={{ padding: "11px 14px", borderBottom: `1px solid ${C.hair}` }}>
+              <div style={{ display: "flex", gap: 8, alignItems: "baseline", flexWrap: "wrap" }}>
+                <span style={{ fontSize: 14.5, fontWeight: 700, color: C.ink }}>{p.name}</span>
+                <span style={{ ...mono, color: C.muted }}>target {p.targetPct}%</span>
+              </div>
+              <div style={{ fontSize: 13.5, color: C.body, lineHeight: 1.55, marginTop: 3 }}>{p.scope}</div>
+              <div style={{ fontSize: 12.5, color: C.muted, lineHeight: 1.55, marginTop: 3 }}>
+                {p.carries.join(" · ")}
+              </div>
+            </div>
+          ))}
+          {/* The other half of knowing what to write: what not to. Every line
+              here is a high-engagement room this practice stays out of on
+              purpose, so the reason travels with the rule. */}
+          <div style={{ padding: "11px 14px", background: C.panel }}>
+            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 5 }}>Rooms we don’t enter</div>
+            {AVOID.map(a => (
+              <div key={a.topic} style={{ fontSize: 12.5, lineHeight: 1.55, marginBottom: 3 }}>
+                <span style={{ color: C.ink, fontWeight: 600 }}>{a.topic}</span>
+                <span style={{ color: C.muted }}> — {a.why}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── 6 · log a post that is already up ────────────────────────────────── */
+
+/**
+ * (Paul, 2026-08-21: "All of the app creation will be outside of the app… I
+ * just need a place in the app to log once a post has been made so that we can
+ * track metrics.")
+ *
+ * Four fields and one press. Deliberately NOT a composer: there is no copy box,
+ * no template, no schedule — the post already exists somewhere else and this is
+ * the app finding out about it. Everything optional except what it was, because
+ * a row you cannot recognise a fortnight later is worse than no row.
+ */
+export function LogPost({ onLog }: {
+  onLog: (body: Record<string, string>) => Promise<string | null>;
+}) {
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [pillar, setPillar] = useState("");
+  const [url, setUrl] = useState("");
+  const [on, setOn] = useState(localIso());
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const submit = useCallback(async () => {
+    if (!title.trim()) return;
+    setBusy(true); setErr(null);
+    const e = await onLog({ title: title.trim(), pillar, url: url.trim(), postedOn: on });
+    setBusy(false);
+    if (e) { setErr(e); return; }
+    setTitle(""); setPillar(""); setUrl(""); setOn(localIso()); setOpen(false);
+  }, [title, pillar, url, on, onLog]);
+
+  if (!open) {
+    return (
+      <button type="button" style={btnPrimary} onClick={() => setOpen(true)}>
+        Log a post
+      </button>
+    );
+  }
+
+  return (
+    <div style={{ border: `1px solid ${C.hair}`, padding: "12px 14px", background: C.bg, width: "100%" }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+        <div style={{ fontSize: 13, fontWeight: 700 }}>Log a post</div>
+        <div style={{ ...mono, color: C.muted }}>it’s already up — this is just the record</div>
+      </div>
+
+      <div style={{ display: "grid", gap: 8 }}>
+        <input value={title} onChange={e => setTitle(e.target.value)} autoFocus
+               placeholder="What was it? — enough to recognise it later"
+               style={input} />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 8 }}>
+          <select value={pillar} onChange={e => setPillar(e.target.value)} style={input} aria-label="Pillar">
+            <option value="">— pillar —</option>
+            {PILLARS.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+          <input type="date" value={on} max={localIso()} onChange={e => setOn(e.target.value)}
+                 style={input} aria-label="Date posted" />
+        </div>
+        <input value={url} onChange={e => setUrl(e.target.value)}
+               placeholder="LinkedIn post URL" style={input} />
+      </div>
+
+      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
+        <button type="button" style={btnPrimary} disabled={!title.trim() || busy} onClick={() => void submit()}>
+          {busy ? "Logging…" : "Log it"}
+        </button>
+        <button type="button" style={btnGhost} onClick={() => { setOpen(false); setErr(null); }}>Cancel</button>
+        {err && <span style={{ color: C.danger, fontSize: 13 }}>{err}</span>}
+      </div>
+      <div style={{ ...mono, color: C.muted, marginTop: 8 }}>
+        no pillar is allowed — but an untagged post cannot count toward anything
       </div>
     </div>
   );
