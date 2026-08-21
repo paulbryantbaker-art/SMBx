@@ -7,6 +7,7 @@
 import assert from 'node:assert/strict';
 import {
   isBotUa, uaFamily, refererHost, centralDay, centralYesterday, isPageView,
+  normalisePath,
   summarise, digestSubject, digestHtml, type DigestRow,
 } from '../siteVisits.js';
 
@@ -43,6 +44,23 @@ T('a share token is never recorded', () => [isPageView('GET', '/shared/tok123', 
 T('the report-unlock hop is not double-counted with the page it redirects to', () => isPageView('GET', '/reports/fire-safety/unlock', 'text/html'), false);
 T('the real pages still count', () => ['/', '/about', '/industries', '/track-record', '/research/hvac-2026-read', '/buyers/private-equity', '/legal/privacy'].every(p => isPageView('GET', p, 'text/html')), true);
 
+/* THESE FIVE EXIST BECAUSE THE EMAIL REPORTED A PAGE THAT DOES NOT EXIST.
+   On 2026-08-20 the digest listed `/feed` among nine visitors. `/feed` is not
+   a route on this site — it is the WordPress RSS probe. It got in through the
+   doubled slash: PUBLIC_PAGES must hold '' for the landing page, and
+   '//feed'.split('/')[1] is also '', so the allowlist admitted it. The
+   single-slash probe test three lines above passed the entire time, which is
+   the lesson — a guard tested only on the tidy input is not tested. */
+T('a doubled slash does NOT smuggle a probe past the allowlist', () => [isPageView('GET', '//feed', 'text/html'), isPageView('GET', '//wp-admin', 'text/html'), isPageView('GET', '///feed', 'text/html'), isPageView('GET', '//anything/at/all', 'text/html')], [false, false, false, false]);
+T('…and `//` is still just the landing page', () => isPageView('GET', '//', 'text/html'), true);
+T('a trailing slash cannot dodge the extension or unlock tests either', () => [isPageView('GET', '/logo-lockup.png/', 'text/html'), isPageView('GET', '/reports/fire-safety/unlock/', 'text/html')], [false, false]);
+T('a protocol-relative redirect target is not a visitor', () => isPageView('GET', '//evil.example.com/x', 'text/html'), false);
+T('normalisePath collapses and trims without ever returning empty', () => ['//feed', '///a//b///', '/', '//', '/about/', ''].map(normalisePath), ['/feed', '/a/b', '/', '/', '/about', '/']);
+
+/* Same defect one segment deeper: the allowlist only reads the FIRST segment,
+   so anything riding behind a real page name was admitted verbatim. */
+T('a traversal probe behind a real page is not a visitor', () => ['/research/../wp-admin', '/about/../../etc/passwd', '/buyers/..%2fwp-admin', '/research/%00'].map(p => isPageView('GET', p, 'text/html')), [false, false, false, false]);
+T('…but every real slug still counts', () => ['/research/fire-safety', '/research/commercial-mep', '/research/home-services', '/research/dfw-home-services', '/buyers/private-equity', '/legal/privacy', '/track-record'].every(p => isPageView('GET', p, 'text/html')), true);
 console.log('\nBOTS AND BROWSERS');
 T('LinkedIn preview fetcher is a bot', () => isBotUa(LINKEDIN), true);
 T('…and is named', () => uaFamily(LINKEDIN), 'LinkedInBot');

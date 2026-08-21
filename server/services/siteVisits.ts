@@ -130,10 +130,57 @@ const PUBLIC_PAGES = new Set([
  */
 const SECRET_PATHS = /^\/(shared|invite|day-pass|valuelens|biz|reset-password|verify-email|forgot-password|login|signup|admin)(\/|$)/;
 
+/**
+ * COLLAPSE REPEATED SLASHES BEFORE ANY CHECK — and it is the allowlist itself
+ * that makes this load-bearing rather than tidy.
+ *
+ * `PUBLIC_PAGES` MUST contain `''`, because that is what the landing page's
+ * first segment is: `'/'.split('/')[1] === ''`. But `'//feed'.split('/')[1]` is
+ * ALSO `''` — so any path wearing a doubled leading slash is on the allowlist
+ * by construction. `//feed`, `//wp-admin`, `//phpmyadmin` all walked straight
+ * past the guard written to stop exactly them, were recorded as visitors, and
+ * showed up in the morning email's "Pages they landed on" under their own
+ * literal path. The single-slash test on line 40 of the test file passed the
+ * whole time.
+ *
+ * Doubled slashes are not exotic. They are what naive URL joining emits
+ * (`base + '/' + path` where base already ends in one), which is how feed
+ * fetchers and vulnerability scanners are written — `//feed` is the WordPress
+ * RSS probe, and it is the one that arrived.
+ *
+ * Trailing slashes are stripped in the same pass, which quietly fixes three
+ * more escapes: `/logo.png/` dodged the file-extension test, `/x/unlock/`
+ * dodged the unlock test, and `/about` vs `/about/` could occupy two separate
+ * lines in an email reporting eight visitors.
+ */
+export function normalisePath(path: string): string {
+  const collapsed = (path || '/').replace(/\/{2,}/g, '/');
+  const trimmed = collapsed.length > 1 ? collapsed.replace(/\/+$/, '') : collapsed;
+  return trimmed || '/';
+}
+
+/**
+ * A REAL PAGE PATH, CHARACTER BY CHARACTER — because the allowlist only ever
+ * inspects the FIRST segment, and everything after it was taken on trust.
+ * `/research/../wp-admin` and `/buyers/..%2fwp-admin` both lead with a genuine
+ * page, so both were recorded as visitors and both printed their literal probe
+ * string into the morning email's page list.
+ *
+ * Every public path on this site is kebab-case ASCII — `fire-safety`,
+ * `dfw-home-services`, `private-equity`, `track-record` — so the shape can
+ * simply be required: no percent-encoding, no dot segments, no backslashes, no
+ * control characters. It fails CLOSED in the same direction the allowlist
+ * does: an exotic new slug is under-counted until this line is updated, which
+ * is the safe way to be wrong about a number Paul is going to trust.
+ */
+const PAGE_SHAPE = /^\/(?:[A-Za-z0-9][A-Za-z0-9._-]*(?:\/[A-Za-z0-9][A-Za-z0-9._-]*)*)?$/;
+
 /** A page view worth counting: a GET for an HTML document on a real public page. */
-export function isPageView(method: string, path: string, accept: string | undefined): boolean {
+export function isPageView(method: string, rawPath: string, accept: string | undefined): boolean {
   if (method !== 'GET') return false;
   if (!accept || !/text\/html/.test(accept)) return false;
+  const path = normalisePath(rawPath);
+  if (!PAGE_SHAPE.test(path)) return false;
   if (SECRET_PATHS.test(path)) return false;
   if (/^\/(api|assets|collateral|textures|mcp|\.well-known)(\/|$)/.test(path)) return false;
   if (/\.[a-z0-9]{2,5}$/i.test(path)) return false;      // a file, not a page
@@ -268,7 +315,9 @@ const clientIp = (req: Request): string =>
  */
 export function siteVisitMiddleware(req: Request, _res: Response, next: NextFunction) {
   const method = req.method;
-  const path = (req.originalUrl || req.url || '/').split('?')[0];
+  /* Normalised here too, not just inside isPageView: this is the value that
+     gets STORED, and an email should never print `//feed` at a reader. */
+  const path = normalisePath((req.originalUrl || req.url || '/').split('?')[0]);
   const accept = req.headers.accept;
   const uaNow = req.headers['user-agent'] || '';
   const ipNow = clientIp(req);

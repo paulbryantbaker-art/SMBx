@@ -36,6 +36,8 @@ import { daysUntil, localIso } from "./Leads";
 import { templatesForKind, templateById } from "@shared/templates";
 import { copyDraftState, pagesDraftState, pagesEqual, hasLiveDraft } from "@shared/draft";
 import { sendReadiness, sendState } from "@shared/studioSend";
+import { PillarPick, Readings, Engagers, PillarRollup, type ReadingRow } from "./PostMetrics";
+import type { PillarId, PostRow } from "@shared/pillars";
 
 /* ── the rows, as the API returns them ───────────────────────────────── */
 
@@ -59,6 +61,10 @@ export interface QueueRow {
   retired_check: string;        // clean · flagged · not_run
   notes: string | null;
   campaign: string | null;      // `2026-08-18` = the file it came from; null = the standing queue
+  /* THE PILLAR (migration 142) — which of the five this post argues for. STATE:
+     Paul sets it here and an import never writes it. The plan file may declare
+     a different one in `format` prose; PillarPick shows both. */
+  pillar: string | null;
   origin: string | null;        // 'app' = born here from a library hook or blank (migration 141)
   /* the copy (migration 136) — content, carried from the plan */
   title: string | null;
@@ -229,6 +235,7 @@ function dayLabel(iso: string | null): string {
 
 export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: string | null }) {
   const [rows, setRows] = useState<QueueRow[] | null>(null);
+  const [readings, setReadings] = useState<ReadingRow[]>([]);
   const [campaigns, setCampaigns] = useState<CampaignMeta[]>([]);
   const [libraries, setLibraries] = useState<Library[]>([]);
   const [picking, setPicking] = useState(false);
@@ -251,9 +258,21 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
       .then(d => {
         const list: CampaignMeta[] = d.campaigns ?? [];
         setCampaigns(list);
-        setView(v => v ?? (list[0]?.name ?? STANDING));
+        /* THE STANDING QUEUE IS THE DEFAULT VIEW (2026-08-21, Paul: "the live
+           plan can go.. i will create every post based on the pillar from
+           scratch"). It used to open on the newest calendar, which is right
+           while a calendar is the working surface and wrong once posts are
+           written one at a time from a pillar. The retired campaigns are still
+           in the switcher — nothing is deleted, it just is not what opens. */
+        setView(v => v ?? STANDING);
       })
       .catch(() => setCampaigns([]));
+    /* What each post did. A failure here empties the rollup and costs nothing
+       else — the queue itself never waits on it. */
+    fetch("/api/post-queue/metrics", { headers: authHeaders() })
+      .then(r => (r.ok ? r.json() : { readings: [] }))
+      .then(d => setReadings(d.readings ?? []))
+      .catch(() => setReadings([]));
     /* The month's hooks. Read-only and never rows — a failure here costs the
        picker its menu and nothing else, so it never blocks the queue loading. */
     fetch("/api/post-queue/library", { headers: authHeaders() })
@@ -386,6 +405,43 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
     await load();
     return null;
   }, [load]);
+
+  /* ── what the post did ─────────────────────────────────────────────────
+     A reading is recorded against a DAY, so re-recording the same day is a
+     correction and a different day is a new point on the curve. Nothing here
+     ever sends a zero for a box left blank — the server reads '' as null. */
+  const recordReading = useCallback(async (queueId: string, body: Record<string, string>): Promise<string | null> => {
+    const r = await fetch(`/api/post-queue/${encodeURIComponent(queueId)}/metrics`, {
+      method: "POST", headers: { ...authHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const j = await r.json().catch(() => null);
+    if (!r.ok) return j?.error ?? `Could not record that (${r.status})`;
+    await load();
+    return null;
+  }, [load]);
+
+  const removeReading = useCallback(async (queueId: string, readOn: string): Promise<string | null> => {
+    const r = await fetch(`/api/post-queue/${encodeURIComponent(queueId)}/metrics/${encodeURIComponent(readOn)}`, {
+      method: "DELETE", headers: authHeaders(),
+    });
+    if (!r.ok) return `Could not remove that reading (${r.status})`;
+    await load();
+    return null;
+  }, [load]);
+
+  /* An engager becomes a LEAD, never a touch. This writes a name and a
+     follow-up date; it sends nothing to anyone, which is what keeps the
+     practice's one-touch-one-press-one-human law intact. */
+  const saveLead = useCallback(async (lead: { name: string; org: string; linkedin_url: string; source: string }): Promise<string | null> => {
+    const r = await fetch("/api/leads", {
+      method: "POST", headers: { ...authHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify({ ...lead, status: "identified" }),
+    });
+    const j = await r.json().catch(() => null);
+    if (!r.ok) return j?.error ?? `Could not save the lead (${r.status})`;
+    return null;
+  }, []);
 
   const markPosted = useCallback(async (queueId: string, postUrl: string, retiredCheck: string): Promise<string | null> => {
     const r = await fetch(`/api/post-queue/${encodeURIComponent(queueId)}/posted`, {
@@ -565,6 +621,24 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
             )}
           </div>
 
+          {/* BY PILLAR — the reason the tagging and the typing exist. Reads `all`
+              rather than `shown`, so hiding posted slots cannot silently change
+              the mix. Blackouts carry no argument, so they are not "untagged". */}
+          <div style={{ marginTop: 18 }}>
+            <PillarRollup
+              posts={all
+                .filter(r => !r.queue_id.startsWith("BLACKOUT"))
+                .map(r => ({
+                  queueId: r.queue_id,
+                  pillar: (r.pillar ?? null) as PillarId | null,
+                  status: r.status,
+                  campaign: r.campaign,
+                } satisfies PostRow))}
+              readings={readings}
+              campaign={view === STANDING ? null : (view ?? null)}
+            />
+          </div>
+
           <div style={{ marginTop: 10, borderTop: `1px solid ${C.hair}` }}>
             {weeks.map(([w, group]) => (
               <div key={w}>
@@ -585,6 +659,10 @@ export default function CampaignsScreen({ openQueueId = null }: { openQueueId?: 
                     onToggle={() => setOpenId(openId === r.queue_id ? null : r.queue_id)}
                     onPatch={b => patch(r.queue_id, b)}
                     onPatchDraft={b => patchDraft(r.queue_id, b)}
+                    readings={readings}
+                    onRecordReading={b => recordReading(r.queue_id, b)}
+                    onRemoveReading={d => removeReading(r.queue_id, d)}
+                    onSaveLead={saveLead}
                     onSend={undo => sendToStudio(r.queue_id, undo)}
                     onMarkPosted={(u, c) => markPosted(r.queue_id, u, c)}
                   />
@@ -765,7 +843,8 @@ function Focus({ label, row, empty, onOpen }: { label: string; row: QueueRow | n
 
 /* ── one slot line + its expanded record ─────────────────────────────── */
 
-function SlotLine({ row, open, isToday, onToggle, onPatch, onPatchDraft, onSend, onMarkPosted }: {
+function SlotLine({ row, open, isToday, onToggle, onPatch, onPatchDraft, onSend, onMarkPosted,
+                   readings, onRecordReading, onRemoveReading, onSaveLead }: {
   row: QueueRow;
   open: boolean;
   isToday: boolean;
@@ -774,6 +853,10 @@ function SlotLine({ row, open, isToday, onToggle, onPatch, onPatchDraft, onSend,
   onPatchDraft: (body: Record<string, unknown>) => Promise<string | null>;
   onSend: (undo: boolean) => Promise<string | null>;
   onMarkPosted: (postUrl: string, retiredCheck: string) => Promise<string | null>;
+  readings: ReadingRow[];
+  onRecordReading: (body: Record<string, string>) => Promise<string | null>;
+  onRemoveReading: (readOn: string) => Promise<string | null>;
+  onSaveLead: (lead: { name: string; org: string; linkedin_url: string; source: string }) => Promise<string | null>;
 }) {
   const rd = readiness(row);
   const d = daysUntil(row.scheduled_for);
@@ -857,6 +940,13 @@ function SlotLine({ row, open, isToday, onToggle, onPatch, onPatchDraft, onSend,
           {/* right: what to do with it — the hand-off first, because that is
               the press you are here for; the after-you-post record below it. */}
           <div style={{ minWidth: 0 }}>
+            {/* WHICH OF THE FIVE THIS ARGUES FOR. Sits above everything else in
+                the pane because it is the only field that has to be right for
+                the rollup to mean anything, and it is one press. */}
+            {!row.queue_id.startsWith("BLACKOUT") && (
+              <PillarPick pillar={row.pillar} format={row.format}
+                          onSet={p => onPatch({ pillar: p === "" ? "" : p })} />
+            )}
             {/* WHEN. Empty is a real answer, not a missing one — a library post is
                 a worklist item until Paul decides it has a day, and only then
                 does it join Today / Up next and start warning if it slips. The
@@ -918,10 +1008,20 @@ function SlotLine({ row, open, isToday, onToggle, onPatch, onPatchDraft, onSend,
                   {row.posted_at ? `Marked ${new Date(row.posted_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}.` : ""}{" "}
                   {row.post_url && <a href={row.post_url} target="_blank" rel="noreferrer" style={{ color: C.green, fontWeight: 600 }}>Open the post →</a>}
                 </div>
-                <div style={{ color: C.muted, fontSize: 12.5, marginTop: 4 }}>
-                  Performance arrives with the next LinkedIn analytics import — every number in the app is one LinkedIn wrote.
-                </div>
               </div>
+            )}
+
+            {/* AFTER IT IS UP: the numbers, then the people. Both only once the
+                post exists — there is nothing to read and nobody to save before
+                that. The .xlsx importer this pane used to promise was deleted
+                in #411, so these are typed in, and the copy no longer claims
+                otherwise. */}
+            {row.status === "posted" && (
+              <>
+                <Readings queueId={row.queue_id} readings={readings}
+                          onRecord={onRecordReading} onRemove={onRemoveReading} />
+                <Engagers queueId={row.queue_id} pillar={row.pillar} onSave={onSaveLead} />
+              </>
             )}
 
             <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "flex-start" }}>

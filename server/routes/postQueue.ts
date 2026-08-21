@@ -20,6 +20,7 @@ import { requireAuth } from '../middleware/auth.js';
 import { sql } from '../db.js';
 import {
   importQueue, importCampaign, listCampaigns, listQueue, updateQueueState, queuePerformance, readQueueFile, updateQueueDraft, listQueueDrafts,
+  recordReading, listReadings, deleteReading,
   sendQueueToStudio, unsendQueue, markQueueBuilt,
   listLibraries, createQueuePost } from '../services/postQueue.js';
 
@@ -254,6 +255,49 @@ router.get('/performance', requireAuth, async (req: any, res) => {
     res.json({ rows: await queuePerformance(req.userId) });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── readings: what LinkedIn showed, on the day it showed it ─────────────── */
+
+/**
+ * Record one day's numbers for a post.
+ *
+ * A READING, NOT A SCORE. Re-posting the same day corrects that day; a
+ * different day is a different row, which is the whole point — LinkedIn keeps
+ * revising a post's figures upward for the better part of a fortnight, so a
+ * single overwritten number is a snapshot at an unknown age and cannot be
+ * compared with another post's.
+ *
+ * Everything left blank comes back NULL. Nothing here infers a zero.
+ */
+router.post('/:queueId/metrics', requireAuth, async (req: any, res) => {
+  try {
+    const row = await recordReading(req.userId, req.params.queueId, req.body || {});
+    if (!row) return res.status(404).json({ error: 'Not in the queue' });
+    res.json(row);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+/** Every reading, for the per-pillar rollup. The arithmetic lives in shared/pillars.ts. */
+router.get('/metrics', requireAuth, async (req: any, res) => {
+  try {
+    res.json({ readings: await listReadings(req.userId) });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/** Remove a reading recorded against the wrong day. */
+router.delete('/:queueId/metrics/:readOn', requireAuth, async (req: any, res) => {
+  try {
+    const gone = await deleteReading(req.userId, req.params.queueId, req.params.readOn);
+    if (!gone) return res.status(404).json({ error: 'No reading on that day' });
+    res.json({ ok: true });
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
   }
 });
 

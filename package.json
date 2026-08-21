@@ -59,6 +59,7 @@
     "test:engagement": "npx tsx house/__tests__/engagement.test.mts",
     "test:scenarios": "npx tsx house/__tests__/scenarios.test.mts",
     "test:linkedin": "npx tsx house/__tests__/linkedin.test.mts",
+    "test:pillars": "npx tsx house/__tests__/pillars.test.mts",
     "test:engine-parity": "npx tsx house/__tests__/engine-parity.test.mts",
     "seed:demo-user": "node scripts/seed-demo-user-data.mjs",
     "design:extract": "node scripts/extract-design-tokens.mjs",
