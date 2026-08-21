@@ -64,6 +64,13 @@ export interface Pillar {
   scope: string;
   /** The conversations it bundles, from the discourse map. */
   carries: string[];
+  /**
+   * Words that, appearing in a post, point at THIS pillar. Used only to
+   * PROPOSE a pillar from pasted copy — never to set one. Deliberately
+   * vocabulary a practitioner actually types, not synonyms of the pillar's
+   * own name, because the name almost never appears in the post itself.
+   */
+  cues: string[];
 }
 
 export const PILLARS: readonly Pillar[] = [
@@ -78,6 +85,9 @@ export const PILLARS: readonly Pillar[] = [
       'owner dependency and customer concentration',
       'AI as an underwriting question (never as the headline)',
     ],
+    cues: [
+      'diligence', 'due diligence', 'qoe', 'quality of earnings', 'add-back', 'add back', 'addback', 'recast', 'screening', 'screen', 'loi', 'letter of intent', 'walked away', 'deal died', 'dead deal', 'owner dependency', 'key man', 'concentration', 'underwrite', 'underwriting', 'broken deal', 'retrade',
+    ],
   },
   {
     id: 'the-settlement',
@@ -89,6 +99,9 @@ export const PILLARS: readonly Pillar[] = [
       'escrow and survival periods',
       'the BUY-SIDE read of structure, not seller protection',
       'all-cash share and what replaced it',
+    ],
+    cues: [
+      'earnout', 'earn-out', 'escrow', 'holdback', 'seller note', 'indemnity', 'survival', 'working capital peg', 'purchase price', 'all-cash', 'structure', 'terms', 'reps and warranties', 'rwi', 'promote', 'waterfall',
     ],
   },
   {
@@ -102,6 +115,9 @@ export const PILLARS: readonly Pillar[] = [
       'the first hundred days, honestly',
       'value that was modelled and did not arrive',
     ],
+    cues: [
+      'integration', 'post-close', 'post close', 'day one', 'first 100 days', '100-day', 'synergy', 'synergies', 'realized', 'underwritten', 'value creation', 'pmi', 'capture', 'bridge', 'carve-out', 'stand-up',
+    ],
   },
   {
     id: 'the-consolidation',
@@ -113,6 +129,9 @@ export const PILLARS: readonly Pillar[] = [
       'HVAC, roofing, plumbing, electrical, MEP consolidation',
       'why platforms stall after the third add-on',
     ],
+    cues: [
+      'roll-up', 'rollup', 'roll up', 'add-on', 'bolt-on', 'platform', 'hvac', 'plumbing', 'roofing', 'electrical', 'mep', 'trades', 'home services', 'consolidation', 'consolidator', 'tuck-in', 'multiple arbitrage',
+    ],
   },
   {
     id: 'the-standard',
@@ -123,6 +142,9 @@ export const PILLARS: readonly Pillar[] = [
       'the evidence rules the practice holds itself to',
       'operating cadence and firm-building',
       'the hand-raiser / the ask',
+    ],
+    cues: [
+      'cadence', 'how we work', 'evidence', 'our standard', 'the ask', 'operating rhythm', 'scorecard', 'weekly', 'checklist', 'playbook', 'discipline',
     ],
   },
 ];
@@ -354,4 +376,124 @@ export function pillarRollup(
     shareIsMeaningful,
     lines,
   };
+}
+
+/* ── paste a post, get a proposal ─────────────────────────────────────── */
+
+/**
+ * (Paul, 2026-08-21: "Can we simplify this process and i just paste in the URL
+ * and you extrapolate everything else?")
+ *
+ * WHAT CANNOT BE DONE, first, because it shapes everything below. The app
+ * cannot READ a LinkedIn post. A server-side fetch of a post URL gets the
+ * authwall, not the post — LinkedIn serves content only to a logged-in browser,
+ * and working around that is scraping their terms prohibit. house/linkedin.ts
+ * says the same thing about profiles and for the same reason. So nothing here
+ * fetches anything.
+ *
+ * WHAT CAN. Two real signals, both already in Paul's clipboard:
+ *
+ *   1. THE URL'S OWN SLUG. LinkedIn's share link comes in two shapes, and one
+ *      of them carries the opening words of the post:
+ *        linkedin.com/posts/paulbaker_ma-volume-is-down-4-activity-7…   ← words
+ *        linkedin.com/feed/update/urn:li:activity:7…                    ← none
+ *      When the first shape is pasted, the title writes itself.
+ *   2. THE COPY, when he pastes it alongside — which he has, because he just
+ *      copied it out of Typegrow to post it.
+ *
+ * IT PROPOSES, IT NEVER SETS. Same doctrine as parseLinkedInPaste: the parse
+ * fills the form and the human presses the button. A pillar guessed wrong and
+ * silently saved would put a post in the wrong column of the one table Paul is
+ * using to settle a strategic bet — so a guess with no clear winner returns
+ * null and says nothing rather than picking the likeliest.
+ */
+export interface ParsedPost {
+  /** The LinkedIn URL found in the paste, if there was one. */
+  url: string | null;
+  /** First line of pasted copy, else words recovered from the URL slug. */
+  title: string | null;
+  /** A PROPOSAL only — null when nothing clearly wins. */
+  pillar: PillarId | null;
+  /** The cue words that drove the proposal, so a wrong guess is legible. */
+  matched: string[];
+}
+
+const LINKEDIN_URL = /https?:\/\/(?:[a-z]{2,3}\.)?linkedin\.com\/[^\s<>"')\]]+/i;
+
+/**
+ * A slug is lowercased and stripped of punctuation by LinkedIn, so this trade's
+ * vocabulary comes back mangled — `qoe`, `ma`, `ebitda`. Restoring them is the
+ * difference between a title Paul reads and one he squints at. Only terms whose
+ * lowercase form is not an ordinary English word are listed, so nothing here can
+ * turn a real word into an acronym by accident.
+ */
+const ACRONYMS: Record<string, string> = {
+  qoe: 'QoE', loi: 'LOI', ebitda: 'EBITDA', sba: 'SBA', hvac: 'HVAC', mep: 'MEP',
+  pmi: 'PMI', dscr: 'DSCR', roi: 'ROI', irr: 'IRR', lbo: 'LBO', ma: 'M&A',
+  rwi: 'RWI', naics: 'NAICS', sde: 'SDE', ic: 'IC', pe: 'PE',
+};
+
+/** The `/posts/<author>_<slug>-activity-<id>` shape carries the opening words. */
+function titleFromUrl(url: string): string | null {
+  const m = /linkedin\.com\/posts\/[^/_]*_([a-z0-9-]+?)-activity-\d+/i.exec(url);
+  if (!m) return null;
+  const words = m[1].split('-').filter(Boolean);
+  if (words.length < 2) return null;
+  const t = words.map(w => ACRONYMS[w] ?? w).join(' ');
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+/** Cap a title where a reader would — a whole word, never mid-syllable. */
+function clip(s: string, max = 90): string {
+  const t = s.trim().replace(/\s+/g, ' ');
+  if (t.length <= max) return t;
+  const cut = t.slice(0, max);
+  const sp = cut.lastIndexOf(' ');
+  return (sp > max * 0.6 ? cut.slice(0, sp) : cut).replace(/[,;:–—-]+$/, '') + '…';
+}
+
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Which pillar the language points at. Returns the winner ONLY when it is a
+ * clear winner: a tie means two pillars are equally supported, and choosing
+ * between them is a judgement the text does not contain.
+ */
+export function suggestPillar(text: string): { pillar: PillarId | null; matched: string[] } {
+  const hay = ' ' + text.toLowerCase().replace(/[‐-―]/g, '-') + ' ';
+  const scores = PILLARS.map(p => {
+    const matched = p.cues.filter(c => {
+      /* Word-bounded so `loi` cannot match "exploit" and `mep` cannot match
+         "development" — the false positives that make a guess look stupid. */
+      const re = new RegExp(`(^|[^a-z0-9])${escapeRe(c)}([^a-z0-9]|$)`, 'i');
+      return re.test(hay);
+    });
+    return { id: p.id, n: matched.length, matched };
+  }).sort((a, b) => b.n - a.n);
+
+  const [top, second] = scores;
+  if (!top || top.n === 0) return { pillar: null, matched: [] };
+  if (second && second.n === top.n) return { pillar: null, matched: [] };
+  return { pillar: top.id, matched: top.matched };
+}
+
+/** Pull whatever is knowable out of one paste. Never fetches, never guesses hard. */
+export function parsePostPaste(raw: string): ParsedPost {
+  const text = (raw ?? '').trim();
+  if (!text) return { url: null, title: null, pillar: null, matched: [] };
+
+  const urlMatch = LINKEDIN_URL.exec(text);
+  const url = urlMatch ? urlMatch[0].replace(/[.,;]+$/, '') : null;
+
+  /* The copy is whatever is not the URL. A paste of only a link leaves nothing,
+     and that is the case the slug exists to rescue. */
+  const body = (url ? text.replace(url, ' ') : text).trim();
+  const firstLine = body.split(/\r?\n/).map(l => l.trim()).find(l => l.length > 2) ?? null;
+
+  const title = firstLine ? clip(firstLine) : (url ? titleFromUrl(url) : null);
+  /* The slug is real evidence about the post, so it feeds the guess too — for a
+     URL-only paste it is the ONLY evidence there is. */
+  const { pillar, matched } = suggestPillar(`${body} ${url ? titleFromUrl(url) ?? '' : ''}`);
+
+  return { url, title, pillar, matched };
 }

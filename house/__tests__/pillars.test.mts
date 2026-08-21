@@ -9,6 +9,7 @@
 import {
   PILLARS, AVOID, TARGETS_BEGIN_AFTER, targetsApply, pillarById, isPillarId,
   per1k, latestByPost, pillarRollup, MIN_TAGGED_FOR_SHARE, MIN_READINGS_FOR_RATE,
+  parsePostPaste, suggestPillar,
   type Reading, type PostRow,
 } from '../../shared/pillars.js';
 
@@ -173,6 +174,57 @@ const P = (queueId: string, pillar: PostRow['pillar'], status = 'posted'): PostR
 
 eq('the share floor is Paul\'s own benchmark', MIN_TAGGED_FOR_SHARE, 12);
 eq('a median needs at least three readings', MIN_READINGS_FOR_RATE, 3);
+
+/* ── the paste parser: it proposes, it never sets ──────────────────────── */
+
+const POSTS_URL = 'https://www.linkedin.com/posts/paulbaker_the-qoe-came-back-and-the-addback-schedule-activity-7231234567890123456-Ab1c';
+const FEED_URL  = 'https://www.linkedin.com/feed/update/urn:li:activity:7231234567890123456/';
+
+eq('the URL is found on its own line', parsePostPaste(FEED_URL).url, FEED_URL);
+eq('…and inside pasted copy', parsePostPaste(`Some post text.\n\n${FEED_URL}`).url, FEED_URL);
+eq('trailing punctuation is not part of the link', parsePostPaste(`see ${FEED_URL.slice(0, -1)}.`).url, FEED_URL.slice(0, -1));
+eq('a paste with no link still parses', parsePostPaste('Just some copy').url, null);
+eq('empty in, nothing out', parsePostPaste('   '), { url: null, title: null, pillar: null, matched: [] });
+
+/* THE SLUG IS THE WHOLE REASON A URL-ONLY PASTE IS USEFUL. LinkedIn's /posts/
+   share link embeds the opening words; /feed/update/ carries none. */
+eq('a /posts/ link recovers the opening words as a title',
+  parsePostPaste(POSTS_URL).title, 'The QoE came back and the addback schedule');
+eq('the trade\'s acronyms survive LinkedIn\'s lowercasing of the slug',
+  parsePostPaste('https://www.linkedin.com/posts/paulbaker_ma-volume-and-the-ebitda-bridge-activity-7231234567890-Ab1c').title,
+  'M&A volume and the EBITDA bridge');
+eq('a /feed/update/ link recovers nothing — and says so rather than inventing',
+  parsePostPaste(FEED_URL).title, null);
+eq('pasted copy beats the slug — it is the real thing',
+  parsePostPaste(`What the QoE actually found\n${POSTS_URL}`).title, 'What the QoE actually found');
+eq('a long first line is clipped at a word',
+  parsePostPaste('The quality of earnings report came back on Tuesday and it moved the number by a full turn of EBITDA which changes everything about this deal').title,
+  'The quality of earnings report came back on Tuesday and it moved the number by a full…');
+
+/* THE PROPOSAL. A clear winner is offered; a tie is not. */
+eq('diligence language points at the Kill Floor',
+  suggestPillar('The QoE came back and the add-back schedule fell apart during diligence.').pillar, 'the-kill-floor');
+eq('structure language points at the Settlement',
+  suggestPillar('The earnout was 40% of consideration and the escrow ran 18 months.').pillar, 'the-settlement');
+eq('post-close language points at the Capture',
+  suggestPillar('What we underwrote at IC versus what integration actually captured by day one.').pillar, 'the-capture');
+eq('trade roll-up language points at the Consolidation Playbook',
+  suggestPillar('The third add-on is where an HVAC platform usually stalls.').pillar, 'the-consolidation');
+eq('a URL-only /posts/ paste can still propose, from the slug alone',
+  parsePostPaste(POSTS_URL).pillar, 'the-kill-floor');
+
+/* THESE FOUR ARE THE POINT: a wrong confident guess puts a post in the wrong
+   column of the table settling a strategic bet. Silence beats a coin flip. */
+eq('no cue words, no proposal', suggestPillar('Had a good week. Grateful for the team.').pillar, null);
+eq('…and nothing is claimed as evidence', suggestPillar('Had a good week.').matched, []);
+eq('an even split proposes NOTHING rather than the likeliest',
+  suggestPillar('The earnout depends on integration.').pillar, null);
+eq('the cue words are reported, so a wrong guess is legible',
+  suggestPillar('The QoE and the add-back schedule.').matched.sort(), ['add-back', 'qoe']);
+
+/* Word-bounded: the false positives that make a parser look stupid. */
+eq('`loi` does not match "exploit"', suggestPillar('We exploit that gap.').pillar, null);
+eq('`mep` does not match "development"', suggestPillar('Business development work.').pillar, null);
 
 /* ── report ────────────────────────────────────────────────────────────── */
 for (const f of fails) console.log(`✗ ${f}`);
