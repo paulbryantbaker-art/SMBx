@@ -251,6 +251,65 @@ the chin); the small round foot disc crops at 0.283 (crown 273, eyes 664, chin
 1257 — at 0.06 the chin sat at 99% of the circle); exposure lift is
 renderer-side, 1.16/1.05 dark and 1.08/1.02 light, never baked into the asset.
 
+### 2.3 The figure ONE PAGE — `figure-deck.py --card` (2026-08-20)
+
+```
+python3 $REPO/scripts/studio/figure-deck.py <spec.post.mts> --card \
+        --ground monolith-dark|portal-light|both --out <dir>
+```
+
+Monolith and Portal each arrive as a carousel **or as a single image**. This is
+the single image. Same grounds, same figure, same foot — the copy column
+carries kicker · hook · rule · lede · numbered points · fine-print source, and
+the plate carries the numeral.
+
+Worked example: `studio/specs/valuation-gap.post.mts`. Start from
+`studio/specs/_template.post.mts`, which is this section as a fillable spec.
+
+**THE COPY BUDGET, MEASURED. The column is 470px and the type is at the mobile
+floor, so about 23 characters fit on a line. Every one of these was found by
+something overrunning and getting silently clipped:**
+
+| Slot | Budget | What goes wrong past it |
+|---|---|---|
+| `numeralLabel` | **ONE line, ~15 chars** | the label sits beside the figure's head (x 753–869 from y 302 down) and a second line runs into his face — a first render read `…PLATFORMS / EAR` |
+| `hook` | ~40 chars, 3 lines | a 4-line hook pushes the whole column down and the source falls under the foot |
+| `body` | ~85 chars, 4 lines | same |
+| `points` | 3 keys, **no values** | at floor type a `v` string cannot fit beside a `k`; use two points if the keys are long |
+| `note` | ~100 chars, 3 lines | it is anchored UP from the foot, so a long one collides with the points |
+
+The renderer now **prints a warning naming the overrun in pixels** rather than
+clipping silently. If you see it, cut copy — never shrink type.
+
+**SAY THE FIGURE IN A UNIT THE READER OWNS (Paul, 2026-08-20: "people may not
+know what that means").** `2.8 turns of EBITDA` is trade language; `40% more
+per dollar` is the same fact and needs no glossary. Two rules come with the
+translation:
+
+- **Register the derivation.** A card has no Derivations section, so the
+  working goes in the spec comment and in `BUILD.txt`. Here: 9.8 ÷ 7.0 = 1.40,
+  nothing rounded, both multiples the publisher's own.
+- **A translation must not smuggle in an assumption the source does not make.**
+  `$28M on $10M of EBITDA` was the more visceral option and it was wrong: GF
+  Data's bands are defined by ENTERPRISE VALUE, and $10M of EBITDA at 9.8x is
+  $98M — inside the *sub*-$100M band. The illustration would have contradicted
+  the series it cited. A ratio carries no such assumption; a worked dollar
+  example carries several.
+
+**THE SOURCE IS FINE PRINT** — 20px mono, sitting exactly ON the floor.
+Recessive enough to read as attribution, never small enough to be unreadable.
+Publisher, vintage, and the commercial interest, in that order.
+
+**ONE MARK, AT THE BOTTOM.** The logo replaces the `smbx.ai` wordmark on the
+right of the byline strip at 38px. It is NOT also at top-right: there it sat at
+30px on a green plate and disappeared — the same failure as the carousel's
+corner logo, which is why that one moved to φ² lower-left.
+
+**THE PLATE NUMERAL RIDES 30px HIGH** of the handoff's `70 / 252 / 278`, and
+its bar and label align with the NUMERAL rather than the handoff's indent. That
+indent was cut for a wide numeral (`47%`); on a narrow one it pushes a one-line
+label past the plate's right edge.
+
 **THE MOBILE FLOOR (2026-08-19, Paul: "none of this text is going to be
 legible... think of it as mobile because even desktop is very small on
 LinkedIn").** LinkedIn renders a 1080px carousel at ~360px on a phone — every

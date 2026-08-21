@@ -1,0 +1,75 @@
+built      2026-08-20 · MONOLITH, ONE PAGE — the card for Paul's post on the
+           volume/value paradox and the size premium.
+spec       studio/specs/valuation-gap.post.mts
+builder    python3 scripts/studio/figure-deck.py <spec> --card
+             --ground monolith-dark        (PIL raster; the Mac renders the
+           same spec through build-onepager.mts)
+NEW        --card is new today. The register says Monolith and Portal each
+           arrive as a carousel OR a single image; only the carousel had a
+           renderer here, and the two one-page cards filed 2026-08-19 came
+           from a throwaway script. That render is kept now.
+
+NUMERAL    40% MORE PER DOLLAR, not "2.8 turns of EBITDA" (Paul: "people may
+           not know what that means"). Turns are trade language; a percentage
+           on a dollar of profit needs no glossary and says the same thing.
+           DERIVATION, registered here because a card has no Derivations
+           section: 9.8 / 7.0 = 1.40. Nothing rounded — both multiples are GF
+           Data's own.
+           A DOLLAR FIGURE WAS CONSIDERED AND REJECTED. "$28M on $10M of
+           EBITDA" is more visceral and it is a trap: GF Data's bands are
+           defined by ENTERPRISE VALUE, and $10M of EBITDA at 9.8x is $98M —
+           inside the SUB-$100M band, not the large one. The illustration
+           would quietly contradict the series it cites. The ratio carries no
+           such assumption.
+
+SOURCE     Fine print (Paul: "put the sources as small fine print") — 20px
+           mono rather than the 22px source tier. The floor says nothing
+           under 20px and this sits ON it: recessive enough to read as
+           attribution, never small enough to be unreadable.
+
+LOGO       At the BOTTOM, replacing the smbx.ai wordmark on the right of the
+           byline strip, at 38px (Paul: "improve the logo appearance.. it
+           gets lost and just put it at the bottom instead of the site
+           address"). The small top-right mark it supersedes was 30px on a
+           green plate — exactly where it was getting lost. One mark per
+           card, on the quietest surface, at a size that reads.
+
+FIGURE     VERIFIED before it went on the card, and it holds — with two
+           precisions the post leaves loose, both now ON the card:
+           · GF Data, platform buyouts, FIRST NINE MONTHS OF 2025. Large
+             platforms ($100-500M TEV) 9.8x TTM EBITDA; sub-$100M 7.0x. Gap
+             2.8x, up from 2.4x at the half, long-run average 2.6x.
+           · The spread is measured by SIZE, not by quality. "A-tier vs the
+             rest" is a reading of it, not what the series reports, so the
+             card says large and small and lets the argument interpret.
+           · GF Data sells the database it reports from — named on the card.
+
+NOT ON IT  The $1.2 trillion. It checks out but is narrower than the post
+           implies: US M&A value over the FIRST FIVE MONTHS of 2026, volume
+           down 4%. A one-page card carries one idea, and a second figure
+           needs a second source line. It stays in the post copy.
+
+THE LINE   Buy-side throughout. The post has one passage addressed to sellers
+           about closing the gap; the card reads from the acquirer's seat.
+
+TWO GEOMETRY CORRECTIONS, both in the renderer with comments:
+           1. The numeral block rides 30px above the handoff's 70/252/278 and
+              THE LABEL IS ONE LINE (~15 chars). The figure's head occupies
+              x 753-869 from y 302 down, so at floor-corrected type any label
+              that wraps runs into the face — the first render read
+              "...PLATFORMS / EAR".
+           2. Bar and label align with the NUMERAL, not the handoff's indent.
+              That indent was cut for a wide numeral ("47%"); on a narrow one
+              it pushes a one-line label past the plate's right edge.
+
+PROCESS    SAVED, so the next card does not repeat the fixes (Paul: "lets save
+           that process so we dont have to fix next time"):
+           · FORMATS.md §2.3 — the copy budget as a table, the
+             figure-translation rule, fine-print source, foot logo, the two
+             plate-geometry corrections.
+           · studio/specs/_template.post.mts — that section as a fillable
+             spec, with the budget beside each slot. Start there.
+           · The renderer now WARNS instead of clipping: it names an overrun
+             in pixels ("copy overruns the note by 274px") and clamps a wide
+             numeral to the plate, warning if even that will not hold it.
+             Tested by deliberately overrunning both.

@@ -84,14 +84,14 @@ if not tsx.exists():
 emit = ("import { pathToFileURL } from 'node:url';\n"
         f"const m = await import(pathToFileURL({json.dumps(str(SPEC))}).href);\n"
         f"const t = await import(pathToFileURL({json.dumps(str(ROOT / 'house/tokens.ts'))}).href);\n"
-        "console.log(JSON.stringify({deck: m.deck, CARTA: t.CARTA}));")
+        "console.log(JSON.stringify({deck: m.deck ?? null, post: m.post ?? null, CARTA: t.CARTA}));")
 with tempfile.NamedTemporaryFile('w', suffix='.mts', delete=False) as tf:
     tf.write(emit); ep = tf.name
 r = subprocess.run(['node', str(tsx), ep], capture_output=True, text=True, cwd=str(ROOT))
 os.unlink(ep)
 if r.returncode != 0: print('spec import failed:\n', r.stderr[-700:]); sys.exit(65)
 _d = json.loads(r.stdout.strip().split(chr(10))[-1])
-deck = _d['deck']; CARTA = _d['CARTA']
+deck = _d.get('deck'); CARTA = _d['CARTA']
 os.chdir(ROOT)
 
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
@@ -216,7 +216,13 @@ def chrome(img,d,kicker,pnum=None,total=10,logo=True,light=False):
         x=W-64*S-tw
         for ch in t: d.text((x,1160*S),ch,font=mono115,fill=T['dLegal']); x+=d.textlength(ch,font=mono115)+0.08*20*S
 
-def foot(img,d,cta=True,light=False):
+def foot(img,d,cta=True,light=False,logo_cta=False):
+    """logo_cta (Paul, 2026-08-20: "improve the logo appearance.. it gets lost
+    and just put it at the bottom instead of the site address"): the mark
+    replaces the smbx.ai wordmark on the right of the byline strip, at 38px —
+    the small top-right logo it supersedes was 30px on a green plate, which is
+    exactly where it was getting lost. One mark per card, on the quietest
+    surface, at a size that reads."""
     y0=1232*S
     d.rectangle([0,y0,W,H],fill=T['bone'] if light else T['dark'])
     d.line([0,y0,W,y0],fill=T['hair'] if light else T['dSeam'],width=S)
@@ -229,7 +235,12 @@ def foot(img,d,cta=True,light=False):
     tx=64*S+ring+16*S
     d.text((tx,cy+2*S),'Paul Baker',font=sans19n,fill=T['ink'] if light else T['dInk'])
     d.text((tx,cy+2*S+26*S),'Buy-side corporate development',font=sans145,fill=T['muted'] if light else T['dMut'])
-    if cta:
+    if logo_cta:
+        _l=LOGO if light else LOGO_W
+        lh2=38*S; lw2=int(_l.size[0]*lh2/_l.size[1])
+        lg2=_l.resize((lw2,lh2),Image.LANCZOS)
+        img.paste(lg2,(W-64*S-lw2,y0+(118*S-lh2)//2),lg2)
+    elif cta:
         c=T['green'] if light else T['white']
         txt='smbx.ai'; tw=d.textlength(txt,font=mono17); aw,gap=24*S,10*S
         x=W-64*S-(tw+gap+aw)
@@ -503,6 +514,106 @@ def build_closer(light):
         _lg=_lg.resize((_LW*S,int(_lg.size[1]*_LW*S/_lg.size[0])),Image.LANCZOS)
         img.paste(_lg,(64*S,H-64*S-_lg.size[1]),_lg)
     return img
+
+def build_card(light,post):
+    """MONOLITH / PORTAL AS A ONE PAGE (2026-08-20).
+
+    The register says both looks arrive as a carousel or as a single image;
+    until now only the carousel had a renderer here, and the two one-page
+    cards filed on 2026-08-19 came from a throwaway script. This is that
+    render, kept.
+
+    Geometry is the CD figure-card table (design_handoff_smbx_figure_card),
+    with ONE deliberate departure, the same one the rest of this file makes:
+    the handoff's type sizes (21px lede, 19/16.5 points, 13px note) are below
+    THE MOBILE FLOOR — 1080px renders at ~360px on a phone, so 21px reads as
+    7px. The floor-corrected fonts already defined above are used instead.
+    That is why the copy budget is tighter than the handoff's: three point
+    KEYS, no values, or the column overruns the foot."""
+    if light:
+        img,d=portal_base(); portal_steps(img,d)
+        NUM_X,LAB_X,LAB_W=682,688,240
+        INKC,SUBC,ACC=T['ink'],T['body'],T['green']
+        MUTC2=T['muted']; LIFT=1.08; FIGX=500
+    else:
+        img,d=base(bloom_at=(655,620)); plate(img,d)
+        NUM_X,LAB_X,LAB_W=644,754,230
+        INKC,SUBC,ACC=T['dInk'],T['dSub'],T['mint']
+        MUTC2=T['dMut']; LIFT=1.16; FIGX=515
+    if post.get('numeral'):
+        # THE NUMERAL BLOCK RIDES 30px HIGHER THAN THE HANDOFF'S 70/252/278,
+        # and THE LABEL IS ONE LINE. The figure's head occupies x 753-869 from
+        # y 302 down; the handoff's label sits at x 754 w 230, so at the
+        # floor-corrected mono any label that wraps runs straight into the
+        # face — the first render read "...PLATFORMS / EAR". Moving the block
+        # up clears the head, and a one-line label keeps it clear. Budget is
+        # ~15 characters. Say the unit, not the sentence.
+        # THE NUMERAL IS MEASURED AND RIGHT-BOUNDED TO THE PLATE. At 168px a
+        # glyph like % is far wider than a digit, so a three-character numeral
+        # starting at the handoff's x ran off the plate and onto the paper on
+        # portal-light. Clamp left; warn if even that will not hold it.
+        nx=NUM_X*S; nw2=d.textlength(post['numeral'],font=serif168)
+        if nx+nw2>1000*S:
+            nx=max(612*S,int(1000*S-nw2))
+            if nx+nw2>1000*S:
+                print(f'  ! numeral overruns the plate by {int((nx+nw2-1000*S)//S)}px — shorten it')
+        d.text((nx,40*S),post['numeral'],font=serif168,fill=T['white'])
+        # bar and label align with the NUMERAL, not the handoff's indent: that
+        # indent was cut for a wide numeral ("47%"), and on a narrow one it
+        # pushes a one-line label past the plate's right edge
+        d.rectangle([nx,222*S,nx+52*S,226*S],fill=T['mint'])
+        wrap(d,nx,250*S,356*S,str(post.get('numeralLabel','')).upper(),
+             mono135,int(26*1.6*S),T['tint'],ls=0.1*26*S)
+    chrome(img,d,post.get('kicker',''),logo=False,light=light)
+    hook=post.get('hook',''); parts=hook.split('. ')
+    if len(parts)>1:
+        y=wrap(d,64*S,132*S,470*S,parts[0]+'.',serif56,int(56*1.05*S),INKC)
+        y=wrap(d,64*S,y+6*S,470*S,'. '.join(parts[1:]),serif56,int(56*1.05*S),ACC)
+    else:
+        y=wrap(d,64*S,132*S,470*S,hook,serif56,int(56*1.05*S),INKC)
+    d.rectangle([64*S,y+30*S,136*S,y+35*S],fill=ACC)
+    y=wrap(d,64*S,y+68*S,470*S,post.get('body',''),sans21,int(40*1.45*S),SUBC)
+    y+=26*S
+    for i,p in enumerate(post.get('points') or []):
+        ch=44*S
+        d.rectangle([64*S,y,64*S+ch,y+ch],fill=T['dPlate'] if not light else T['tint'])
+        nw=d.textlength(str(i+1),font=mono135)
+        d.text((64*S+(ch-nw)/2,y+(ch-26*S)/2),str(i+1),font=mono135,fill=ACC)
+        y2=wrap(d,64*S+ch+20*S,y+2*S,(470-44-20)*S,p['k'],sans19b,int(40*1.35*S),INKC)
+        if p.get('v'):
+            y2=wrap(d,64*S+ch+20*S,y2+4*S,(470-44-20)*S,p['v'],sans21b,int(38*1.4*S),SUBC)
+        y=max(y2,y+ch)+18*S
+    if post.get('note'):
+        # THE SOURCE IS FINE PRINT (Paul, 2026-08-20: "put the sources as small
+        # fine print"). 20px mono rather than the 22px source tier — the floor
+        # says nothing under 20px and this sits ON it, deliberately: recessive
+        # enough to read as attribution, never small enough to be unreadable.
+        # Anchored UP from the foot, never flowed down from the points: a long
+        # note flowed downward disappears under the byline strip.
+        sd=ImageDraw.Draw(Image.new('RGB',(8,8)))
+        nh=wrap(sd,0,0,470*S,post['note'],mono115,int(20*1.55*S),MUTC2)
+        ny=1232*S-30*S-nh
+        if y+16*S>ny:
+            print(f'  ! copy overruns the note by {(y+16*S-ny)//S}px — cut the lede or a point')
+        wrap(d,64*S,ny,470*S,post['note'],mono115,int(20*1.55*S),MUTC2)
+    figure(img,LIFT,x=FIGX); d=ImageDraw.Draw(img)
+    foot(img,d,light=light,logo_cta=True)
+    return img
+
+if '--card' in args:
+    GROUNDS=['monolith-dark','portal-light'] if GROUND=='both' else [GROUND]
+    if 'post' not in _d or _d['post'] is None:
+        print('--card wants a .post.mts spec (export const post)'); sys.exit(65)
+    post=_d['post']
+    os.makedirs(OUT,exist_ok=True)
+    for g in GROUNDS:
+        im=build_card(g=='portal-light',post)
+        sfx='' if len(GROUNDS)==1 else '-'+g
+        im.save(f"{OUT}/{post['slug']}{sfx}.png",optimize=True)
+        print(f"  {g}: one page -> {OUT}/{post['slug']}{sfx}.png")
+    if post.get('caption'):
+        open(f"{OUT}/{post['slug']}-caption.txt",'w').write(post['caption'].strip()+chr(10))
+    sys.exit(0)
 
 GROUNDS=['monolith-dark','portal-light'] if GROUND=='both' else [GROUND]
 os.makedirs(OUT,exist_ok=True)
