@@ -33,6 +33,7 @@ import { sql } from '../db.js';
 import { templateById, templateForKind } from '../../shared/templates.js';
 import { sendReadiness, sendState, outgoingCopy } from '../../shared/studioSend.js';
 import { copyDraftState, pagesDraftState, pagesEqual } from '../../shared/draft.js';
+import { isPillarId } from '../../shared/pillars.js';
 
 const QUEUE_JSON = path.resolve(process.cwd(), 'content/studio/post-queue.json');
 
@@ -393,10 +394,14 @@ export async function updateQueueState(
   patch: {
     status?: string; slot?: string | null; scheduledFor?: string | null;
     postUrl?: string | null; draftPath?: string | null; collateralPath?: string | null;
-    retiredCheck?: string | null; notes?: string | null;
+    retiredCheck?: string | null; notes?: string | null; pillar?: string | null;
   },
 ): Promise<any | null> {
   if (patch.status && !STATUSES.has(patch.status)) throw new Error(`Unknown status "${patch.status}"`);
+  /* The pillar vocabulary is owned by shared/pillars.ts and checked HERE rather
+     than by a CHECK constraint, the same way crm_leads.status is — a CHECK makes
+     a rename a migration. '' is the deliberate un-set (see the SET clause). */
+  if (patch.pillar && !isPillarId(patch.pillar)) throw new Error(`Unknown pillar "${patch.pillar}"`);
 
   // THE FIGURE GATE, at the last possible moment. A row that may not state a
   // figure is not a soft warning to render differently — it is a rule about
@@ -433,6 +438,10 @@ export async function updateQueueState(
       collateral_path = COALESCE(${patch.collateralPath ?? null}, collateral_path),
       retired_check   = COALESCE(${patch.retiredCheck ?? null}, retired_check),
       notes           = COALESCE(${patch.notes ?? null}, notes),
+      -- Same empty-string un-set as scheduled_for above: a pillar you can set
+      -- but never clear would strand a mis-tagged post in a rollup forever.
+      pillar          = CASE WHEN ${patch.pillar === ''} THEN NULL
+                             ELSE COALESCE(${patch.pillar || null}, pillar) END,
       drafted_at      = CASE WHEN ${patch.status ?? null} = 'drafted' AND drafted_at IS NULL
                              THEN NOW() ELSE drafted_at END,
       -- Stamped here, never accepted from the caller, and only ever on the
@@ -638,6 +647,113 @@ export async function queuePerformance(userId: number): Promise<any[]> {
     LEFT JOIN studio_analytics a ON a.queue_id = q.queue_id AND a.user_id = q.user_id
     WHERE q.user_id = ${userId} AND q.status = 'posted'
     ORDER BY q.posted_at DESC NULLS LAST`;
+}
+
+/* ── WHAT THE POST ACTUALLY DID — one reading, one day ───────────────────── */
+
+/**
+ * A reading is what LinkedIn showed on ONE day. Migration 142 carries the
+ * reasoning for why these are rows rather than five columns; the short form is
+ * that LinkedIn revises a post's figures upward for days, so an impression
+ * count with no age is two numbers multiplied, and a per-pillar median built
+ * from mixed-age readings answers "which pillar did I check later".
+ *
+ * NULL MEANS UNKNOWN AND NEVER ZERO. A blank box comes back null, not 0 — a
+ * zero would be a measurement, and it would drag its pillar's median while
+ * looking like one.
+ */
+export interface ReadingInput {
+  readOn?: string | null;
+  impressions?: unknown;
+  membersReached?: unknown;
+  reactions?: unknown;
+  comments?: unknown;
+  reposts?: unknown;
+}
+
+/** '' and null and undefined are all "not typed in". A real 0 survives. */
+function count(v: unknown, field: string): number | null {
+  if (v == null || v === '') return null;
+  const n = typeof v === 'number' ? v : Number(String(v).replace(/[,\s]/g, ''));
+  if (!Number.isFinite(n)) throw new Error(`${field} is not a number.`);
+  if (n < 0) throw new Error(`${field} cannot be negative.`);
+  return Math.round(n);
+}
+
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Record (or correct) one day's reading.
+ *
+ * UPSERT ON THE DAY, not append: re-typing today's numbers fixes today's
+ * reading rather than leaving a ghost that skews the median. A different day
+ * is a different row, which is how the curve survives.
+ *
+ * `days_after_post` is derived from post_queue.posted_at in SQL rather than
+ * accepted from the caller — it is the field that makes two posts comparable,
+ * so it must not be typeable.
+ */
+export async function recordReading(userId: number, queueId: string, input: ReadingInput): Promise<any | null> {
+  const [slot] = await sql<{ posted_at: string | null }[]>`
+    SELECT posted_at FROM post_queue WHERE user_id = ${userId} AND queue_id = ${queueId}`;
+  if (!slot) return null;
+
+  const readOn = input.readOn && ISO_DAY.test(input.readOn) ? input.readOn : null;
+  const nums = {
+    impressions:     count(input.impressions, 'Impressions'),
+    members_reached: count(input.membersReached, 'Members reached'),
+    reactions:       count(input.reactions, 'Reactions'),
+    comments:        count(input.comments, 'Comments'),
+    reposts:         count(input.reposts, 'Reposts'),
+  };
+  if (Object.values(nums).every(v => v === null)) {
+    throw new Error('Nothing to record — type at least one number from the post\u2019s analytics.');
+  }
+  /* A reading dated before the post is a typo, and it would land as a negative
+     age that the CHECK rejects with a message nobody can act on. Say it here. */
+  if (readOn && slot.posted_at && readOn < String(slot.posted_at).slice(0, 10)) {
+    throw new Error(`${queueId}: that reading is dated before the post went up (${String(slot.posted_at).slice(0, 10)}).`);
+  }
+
+  const [row] = await sql`
+    INSERT INTO post_metrics (user_id, queue_id, read_on, days_after_post,
+                              impressions, members_reached, reactions, comments, reposts)
+    VALUES (
+      ${userId}, ${queueId},
+      COALESCE(${readOn}::date, CURRENT_DATE),
+      (SELECT COALESCE(${readOn}::date, CURRENT_DATE) - q.posted_at::date
+         FROM post_queue q WHERE q.user_id = ${userId} AND q.queue_id = ${queueId}),
+      ${nums.impressions}, ${nums.members_reached}, ${nums.reactions}, ${nums.comments}, ${nums.reposts}
+    )
+    ON CONFLICT (user_id, queue_id, read_on) DO UPDATE SET
+      impressions     = EXCLUDED.impressions,
+      members_reached = EXCLUDED.members_reached,
+      reactions       = EXCLUDED.reactions,
+      comments        = EXCLUDED.comments,
+      reposts         = EXCLUDED.reposts,
+      days_after_post = EXCLUDED.days_after_post,
+      updated_at      = NOW()
+    RETURNING *`;
+  return row ?? null;
+}
+
+/** Every reading this user has recorded, oldest first. The rollup folds them. */
+export async function listReadings(userId: number): Promise<any[]> {
+  return sql`
+    SELECT queue_id, read_on::text AS read_on, days_after_post,
+           impressions, members_reached, reactions, comments, reposts
+    FROM post_metrics WHERE user_id = ${userId}
+    ORDER BY queue_id, read_on`;
+}
+
+/** Remove one day's reading — a mis-typed date is the only way to strand one. */
+export async function deleteReading(userId: number, queueId: string, readOn: string): Promise<boolean> {
+  if (!ISO_DAY.test(readOn)) throw new Error('A reading is removed by its date (YYYY-MM-DD).');
+  const rows = await sql`
+    DELETE FROM post_metrics
+    WHERE user_id = ${userId} AND queue_id = ${queueId} AND read_on = ${readOn}::date
+    RETURNING id`;
+  return rows.length > 0;
 }
 
 /* ── the library — a guide, not a calendar ──────────────────────────────── */
