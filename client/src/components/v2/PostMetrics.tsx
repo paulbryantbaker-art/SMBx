@@ -39,6 +39,7 @@ import { localIso } from "./Leads";
 import {
   PILLARS, AVOID, pillarById, pillarRollup, per1k,
   MIN_TAGGED_FOR_SHARE, MIN_READINGS_FOR_RATE,
+  parsePostPaste,
   type PillarId, type Reading, type PostRow, type Rollup,
 } from "@shared/pillars";
 
@@ -510,19 +511,25 @@ export function PillarGuide() {
 /* ── 6 · log a post that is already up ────────────────────────────────── */
 
 /**
- * (Paul, 2026-08-21: "All of the app creation will be outside of the app… I
- * just need a place in the app to log once a post has been made so that we can
- * track metrics.")
+ * (Paul, 2026-08-21: "Can we simplify this process and i just paste in the URL
+ * and you extrapolate everything else?")
  *
- * Four fields and one press. Deliberately NOT a composer: there is no copy box,
- * no template, no schedule — the post already exists somewhere else and this is
- * the app finding out about it. Everything optional except what it was, because
- * a row you cannot recognise a fortnight later is worse than no row.
+ * ONE BOX. Paste the link, or the link and the copy — whatever is on the
+ * clipboard when you finish posting. `parsePostPaste` pulls out the URL, writes
+ * a title from the first line (or, for a `/posts/…` link, from the slug LinkedIn
+ * builds out of your opening words), and PROPOSES a pillar from the language.
+ *
+ * The fields stay visible and editable underneath, because the parse proposes
+ * and the human confirms — the same rule parseLinkedInPaste follows for a CRM
+ * contact, and for the same reason: a pillar quietly guessed wrong puts a post
+ * in the wrong column of the one table this is all for. When it cannot tell, it
+ * says so and leaves the pillar empty rather than picking the likeliest.
  */
 export function LogPost({ onLog }: {
   onLog: (body: Record<string, string>) => Promise<string | null>;
 }) {
   const [open, setOpen] = useState(false);
+  const [paste, setPaste] = useState("");
   const [title, setTitle] = useState("");
   const [pillar, setPillar] = useState("");
   const [url, setUrl] = useState("");
@@ -530,13 +537,31 @@ export function LogPost({ onLog }: {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
+  const parsed = useMemo(() => parsePostPaste(paste), [paste]);
+
+  /* The parse fills the fields; a later hand-edit sticks until the PASTE
+     changes again. Keyed on the parse result rather than on every keystroke, so
+     typing in the box does not fight a correction made below it. */
+  const stamp = `${parsed.url ?? ""}|${parsed.title ?? ""}|${parsed.pillar ?? ""}`;
+  useEffect(() => {
+    if (!paste.trim()) return;
+    if (parsed.url) setUrl(parsed.url);
+    if (parsed.title) setTitle(parsed.title);
+    if (parsed.pillar) setPillar(parsed.pillar);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stamp]);
+
+  const reset = () => {
+    setPaste(""); setTitle(""); setPillar(""); setUrl(""); setOn(localIso()); setErr(null);
+  };
+
   const submit = useCallback(async () => {
     if (!title.trim()) return;
     setBusy(true); setErr(null);
     const e = await onLog({ title: title.trim(), pillar, url: url.trim(), postedOn: on });
     setBusy(false);
     if (e) { setErr(e); return; }
-    setTitle(""); setPillar(""); setUrl(""); setOn(localIso()); setOpen(false);
+    reset(); setOpen(false);
   }, [title, pillar, url, on, onLog]);
 
   if (!open) {
@@ -547,6 +572,8 @@ export function LogPost({ onLog }: {
     );
   }
 
+  const proposed = parsed.pillar && parsed.pillar === pillar;
+
   return (
     <div style={{ border: `1px solid ${C.hair}`, padding: "12px 14px", background: C.bg, width: "100%" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
@@ -554,10 +581,27 @@ export function LogPost({ onLog }: {
         <div style={{ ...mono, color: C.muted }}>it’s already up — this is just the record</div>
       </div>
 
+      <textarea
+        value={paste}
+        onChange={e => setPaste(e.target.value)}
+        autoFocus
+        rows={3}
+        placeholder="Paste the post — the link, or the link and the copy"
+        style={{ ...input, width: "100%", resize: "vertical", lineHeight: 1.5 }}
+      />
+      <div style={{ ...mono, color: C.muted, marginTop: 4, marginBottom: 10 }}>
+        {!paste.trim()
+          ? "the link alone is enough — copy is better, it names the post and suggests a pillar"
+          : proposed
+            ? `pillar suggested from: ${parsed.matched.slice(0, 4).join(", ")} — change it if that’s wrong`
+            : parsed.url && !parsed.title
+              ? "that link carries no words — give it a name below so you recognise it later"
+              : "nothing to suggest a pillar from — pick one below"}
+      </div>
+
       <div style={{ display: "grid", gap: 8 }}>
-        <input value={title} onChange={e => setTitle(e.target.value)} autoFocus
-               placeholder="What was it? — enough to recognise it later"
-               style={input} />
+        <input value={title} onChange={e => setTitle(e.target.value)}
+               placeholder="What was it? — enough to recognise it later" style={input} />
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 8 }}>
           <select value={pillar} onChange={e => setPillar(e.target.value)} style={input} aria-label="Pillar">
             <option value="">— pillar —</option>
@@ -566,19 +610,18 @@ export function LogPost({ onLog }: {
           <input type="date" value={on} max={localIso()} onChange={e => setOn(e.target.value)}
                  style={input} aria-label="Date posted" />
         </div>
-        <input value={url} onChange={e => setUrl(e.target.value)}
-               placeholder="LinkedIn post URL" style={input} />
+        {url && <div style={{ ...mono, color: C.green, overflowWrap: "anywhere" }}>{url}</div>}
       </div>
 
       <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
         <button type="button" style={btnPrimary} disabled={!title.trim() || busy} onClick={() => void submit()}>
           {busy ? "Logging…" : "Log it"}
         </button>
-        <button type="button" style={btnGhost} onClick={() => { setOpen(false); setErr(null); }}>Cancel</button>
+        <button type="button" style={btnGhost} onClick={() => { reset(); setOpen(false); }}>Cancel</button>
         {err && <span style={{ color: C.danger, fontSize: 13 }}>{err}</span>}
       </div>
       <div style={{ ...mono, color: C.muted, marginTop: 8 }}>
-        no pillar is allowed — but an untagged post cannot count toward anything
+        an untagged post is allowed — it just cannot count toward anything
       </div>
     </div>
   );
