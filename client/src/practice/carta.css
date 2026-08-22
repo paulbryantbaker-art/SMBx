@@ -261,7 +261,7 @@
 }
 @keyframes caType { from { width: 0; } to { width: calc(var(--n) * (1ch + 0.08em)); } }
 @keyframes caCaret {
-  0%, 78% { border-right-color: #0A7A58; }
+  0%, 78% { border-right-color: #B8431E; }
   100%    { border-right-color: transparent; }
 }
 
@@ -280,7 +280,7 @@
 [data-proof] .ch-node { position: relative; }
 [data-proof] .ch-node::after {
   content: ''; position: absolute; left: 20px; right: 20px; bottom: 16px; height: 2px;
-  background: #A8F0CE; transform: scaleX(0); opacity: 0;
+  background: #FFAA90; transform: scaleX(0); opacity: 0;
   animation: caSpot 15s linear infinite;
   animation-delay: var(--spot-delay, 0s);
 }
@@ -323,8 +323,8 @@
   padding: 8px 13px; border: 1px solid #E4DFD3; background: #FFFFFF; color: #16181A;
   transition: border-color 160ms ease, color 160ms ease;
 }
-.ca-ind-chip:hover { border-color: #0A7A58; color: #0A7A58; }
-.ca-ind-chip b { font-weight: 400; color: #0A7A58; margin-right: 8px; }
+.ca-ind-chip:hover { border-color: #B8431E; color: #B8431E; }
+.ca-ind-chip b { font-weight: 400; color: #B8431E; margin-right: 8px; }
 
 /* The phone overrides sit AFTER the base rules on purpose — same
    specificity, so source order is the whole mechanism (the first cut put
@@ -358,7 +358,7 @@
 .ca-mword { display: inline-flex; align-items: center; justify-content: center; }
 .ca-mcaret {
   display: inline-block; width: 3px; height: 0.92em; margin-left: 6px;
-  background: #A8F0CE; align-self: center;
+  background: #FFAA90; align-self: center;
   animation: caMCaret 1.06s steps(1) infinite;
 }
 @keyframes caMCaret { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
@@ -366,7 +366,7 @@
 /* The boxed wordmark the cycle resets through — their `carta` box, our mark. */
 .ca-mmark {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  padding: 14px 22px; border: 1px solid #3A3F38; background: #181818;
+  padding: 14px 22px; border: 1px solid #C08D90; background: #8A2B32;
   opacity: 0; scale: 0.9; transition: opacity 420ms ease, scale 420ms cubic-bezier(0.3, 0.85, 0.35, 1);
 }
 .ca-mmark.on { opacity: 1; scale: 1; }
@@ -393,7 +393,7 @@
    (the inline delay is zeroed when .on drops). */
 .ca-mpill {
   position: absolute; transform: translate(-50%, -50%); transform-origin: 0 50%;
-  background: #0A7A58; color: #FFFFFF; white-space: nowrap;
+  background: #B8431E; color: #FFFFFF; white-space: nowrap;
   font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; letter-spacing: 0.08em;
   padding: 7px 11px; scale: 0 1;
   transition: scale 320ms cubic-bezier(0.3, 0.85, 0.35, 1);
@@ -530,19 +530,19 @@
    marker: enough to draw the eye to the end of the sentence, not enough to
    blink at the reader. */
 @keyframes caTargetPulse {
-  0%, 100% { border-color: #3A3F38; box-shadow: 0 0 0 0 rgba(15, 169, 124, 0); }
-  50%      { border-color: #0FA97C; box-shadow: 0 0 0 4px rgba(15, 169, 124, 0.10); }
+  0%, 100% { border-color: #C08D90; box-shadow: 0 0 0 0 rgba(255, 125, 85, 0); }
+  50%      { border-color: #FF7D55; box-shadow: 0 0 0 4px rgba(255, 125, 85, 0.10); }
 }
 .ca-target { animation: caTargetPulse 3.6s ease-in-out infinite; }
-/* …and its value was #8E948B on #202020 — 3.4:1, under the floor for the one
+/* …and its value was #DCB8B4 on #964046 — 3.4:1, under the floor for the one
    phrase the band is built to land (Paul: "the font is too dim on the one
    company"). Ivory reads at 12:1 and matches the two nodes beside it. */
-[data-chain].ch-dark .ch-node.ca-target > div + div { color: #F4F5F1; }
+[data-chain].ch-dark .ch-node.ca-target > div + div { color: #FFF3F0; }
 
 @keyframes smbxCaret { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
 
 /* ── Base, scoped to the practice root ── */
-.pd ::selection { background: #DFF5EC; color: #16181A; }
+.pd ::selection { background: #FBE7DF; color: #16181A; }
 .pd input::placeholder { color: #8B9088; }
 .pd details > summary { list-style: none; }
 .pd details > summary::-webkit-details-marker { display: none; }
@@ -855,27 +855,35 @@
 .ch-node > div + div { color: #7C8187; }
 /* The terminal node is a CONCLUSION, not another step, so it takes the accent
    fill rather than another hairline box. */
-.ch-hit { background: #0A7A58; border-color: #0A7A58; color: #FFFFFF; }
-.ch-hit > div + div { color: #DFF5EC; }
+.ch-hit { background: #B8431E; border-color: #B8431E; color: #FFFFFF; }
+.ch-hit > div + div { color: #FBE7DF; }
 
 /* On a dark band the same node inverts: a lifted panel on the near-black
    rather than white-on-bone. Deal Green stays the joint colour throughout —
    it is the accent everywhere — but node TEXT never uses it on dark (the
    contrast trap the token table warns about); mint carries that job. */
-[data-chain].ch-dark .ch-node { background: #202020; border-color: #3A3F38; color: #F4F5F1; }
-[data-chain].ch-dark .ch-node > div + div { color: #8E948B; }
-[data-chain].ch-dark .ch-hit { background: #0A7A58; border-color: #0A7A58; }
-[data-chain].ch-dark .ch-hit > div + div { color: #DFF5EC; }
+[data-chain].ch-dark .ch-node { background: #964046; border-color: #C08D90; color: #FFF3F0; }
+[data-chain].ch-dark .ch-node > div + div { color: #DCB8B4; }
+/* OXBLOOD, 2026-08-22: this fill USED to be byte-identical to the light
+   variant, which worked only because green read on white AND on near-black.
+   On the field it would be dark-red-on-dark-red and the conclusion node —
+   the one thing the graphic exists to land — would dissolve. It forks now,
+   and the node's text inverts to ink because white on #FF7D55 is 2.53:1. */
+[data-chain].ch-dark .ch-hit { background: #FF7D55; border-color: #FF7D55; color: #1A1A1A; }
+[data-chain].ch-dark .ch-hit > div + div { color: #5E280F; }  /* 4.66:1 on the coral fill */
 
 .ch-wire { flex: 0 0 30px; display: grid; place-items: center; }
 .ch-wire i { display: block; width: 100%; height: 1px; background: #D8D3C6; position: relative; }
-[data-chain].ch-dark .ch-wire i { background: #3A3F38; }
+[data-chain].ch-dark .ch-wire i { background: #C08D90; }
 .ch-wire i::after {
   content: '';
   position: absolute; left: 50%; top: 50%;
-  width: 6px; height: 6px; background: #0A7A58;
+  width: 6px; height: 6px; background: #B8431E;
   transform: translate(-50%, -50%);
 }
+/* The wire forks for dark two rules up; the DOT never did — one declaration
+   served both grounds. On the field #B8431E is invisible. (OXBLOOD 2026-08-22) */
+[data-chain].ch-dark .ch-wire i::after { background: #FF7D55; }
 /* THE DOT TRAVELS (2026-08-12, from the second carta.com recording —
    mroeCarta.mov, a 60fps dwell on their Connect diagram: during the hold,
    small nodes RUN ALONG the connector wires, which is most of why the panel
@@ -923,7 +931,7 @@
      would spend a whole phone screen on one band, and the grid genuinely
      reads better — the 0 takes the last row alone, which is where the
      punchline wants to be. */
-  [data-proof] { display: grid !important; grid-template-columns: repeat(2, 1fr); gap: 1px; background: #2A2E29; border: 1px solid #2A2E29; }
+  [data-proof] { display: grid !important; grid-template-columns: repeat(2, 1fr); gap: 1px; background: #AF6F74; border: 1px solid #AF6F74; }
   [data-proof] .ch-wire { display: none; }
   [data-proof] .ch-node { border: none; padding: 30px 16px 28px; }
   [data-proof] .ch-node > div:first-child { font-size: clamp(38px, 9vw, 52px); }
@@ -1027,7 +1035,7 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    background: #0A7A58;
+    background: #B8431E;
     color: #FFFFFF;
     font-family: 'IBM Plex Mono', monospace;
     font-weight: 400;
@@ -1054,7 +1062,7 @@
     margin: 10px 16px calc(14px + env(safe-area-inset-bottom, 0px));
     padding: 6px 6px 6px 14px;
   }
-  .ca-engine .pd-chat .pd-chat-inputrow:focus-within { border-color: #0A7A58; }
+  .ca-engine .pd-chat .pd-chat-inputrow:focus-within { border-color: #B8431E; }
   .ca-engine .pd-chat .pd-chat-inputrow .pd-send { border-radius: 9px; }
 }
 
@@ -1080,7 +1088,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: #0A7A58;
+  background: #B8431E;
   color: #FFFFFF;
   font-family: 'IBM Plex Mono', monospace;
   font-size: 11.5px;
@@ -1134,13 +1142,13 @@
   display: inline-block;
   width: 1.5px;
   height: 16px;
-  background: #0A7A58;
+  background: #B8431E;
   margin-left: 3px;
   vertical-align: -2px;
   animation: smbxCaret 1.1s step-end infinite;
 }
 .ca-engine .pd-herobar:focus-within .ca-caret { display: none; }
-.ca-engine .pd-herobar:focus-within { border-color: #0A7A58; }
+.ca-engine .pd-herobar:focus-within { border-color: #B8431E; }
 .ca-engine .pd-herobar input { font-size: 15.5px; padding: 9px 0; }
 /* The send control is the reference's 42px ink square with the ↑ glyph; the
    step label ("CONTINUE" …) moves to the mono line under the bar. */
@@ -1159,7 +1167,7 @@
   overflow: hidden;
 }
 .ca-engine .pd-herobar .pd-send:hover,
-.ca-engine .pd-chat-inputrow .pd-send:hover { background: #0A7A58; }
+.ca-engine .pd-chat-inputrow .pd-send:hover { background: #B8431E; }
 
 /* Chips → mono tiles on hairline borders, square. NO text-transform: the
    reference renders the featured lanes in sentence case; only the two tail
@@ -1177,12 +1185,12 @@
   padding: 7px 11px;
   white-space: nowrap;
 }
-.ca-engine .pd-chip:hover { border-color: #0A7A58; color: #0A7A58; background: #FFFFFF; }
+.ca-engine .pd-chip:hover { border-color: #B8431E; color: #B8431E; background: #FFFFFF; }
 /* The two colored doorways at the tail of the chip row. */
-.ca-engine .pd-chip.ca-chip-green { color: #0A7A58; border-color: #0A7A58; }
-.ca-engine .pd-chip.ca-chip-green:hover { background: #DFF5EC; }
-.ca-engine .pd-chip.ca-chip-tint { color: #0A7A58; background: #DFF5EC; border-color: #DFF5EC; }
-.ca-engine .pd-chip.ca-chip-tint:hover { border-color: #0A7A58; background: #DFF5EC; }
+.ca-engine .pd-chip.ca-chip-green { color: #B8431E; border-color: #B8431E; }
+.ca-engine .pd-chip.ca-chip-green:hover { background: #FBE7DF; }
+.ca-engine .pd-chip.ca-chip-tint { color: #B8431E; background: #FBE7DF; border-color: #FBE7DF; }
+.ca-engine .pd-chip.ca-chip-tint:hover { border-color: #B8431E; background: #FBE7DF; }
 
 /* Engaged card (desktop): the conversation lives inside the same frame —
    square, no second border, the head restyled to the reference header. */
@@ -1206,7 +1214,7 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    background: #0A7A58;
+    background: #B8431E;
     color: #FFFFFF;
     font-family: 'IBM Plex Mono', monospace;
     font-weight: 400;
@@ -1228,7 +1236,7 @@
     background: #FFFFFF;
     box-shadow: none;
   }
-  .ca-engine .pd-chat-inputrow:focus-within { border-color: #0A7A58; }
+  .ca-engine .pd-chat-inputrow:focus-within { border-color: #B8431E; }
   .ca-engine .pd-chat-input { font-size: 15.5px; }
 }
 
@@ -1252,8 +1260,8 @@
   white-space: nowrap;
   cursor: pointer;
 }
-.ca-lanechip:hover { border-color: #0A7A58; color: #0A7A58; }
-.ca-lanechip.alt { color: #0A7A58; border-color: #0A7A58; background: #DFF5EC; }
+.ca-lanechip:hover { border-color: #B8431E; color: #B8431E; }
+.ca-lanechip.alt { color: #B8431E; border-color: #B8431E; background: #FBE7DF; }
 .ca-lanechip.alt:hover { background: #FFFFFF; }
 
 /* Evidence paragraphs inside the Why-us cards — strongs read in ink. */
@@ -1262,17 +1270,17 @@
 /* The pricing band's input: keyboard focus must be visible on the dark band
    (the renders-not-errors trap from the Aurora band — a transparent border
    override killed :focus-visible there). */
-.ca-price-input:focus-visible { border-color: #0A7A58 !important; outline: none; }
+.ca-price-input:focus-visible { border-color: #B8431E !important; outline: none; }
 
 /* ── Footer link columns ── */
-.ca-foot-col a { display: block; color: #D7DBD2; font-size: 14.5px; }
+.ca-foot-col a { display: block; color: #F0D8D4; font-size: 14.5px; }
 .ca-foot-col a + a { margin-top: 11px; }
-.ca-foot-col a:hover { color: #A8F0CE; }
+.ca-foot-col a:hover { color: #FFAA90; }
 
-/* ── Dark surfaces: keyboard focus must survive #181818 — the global ring
+/* ── Dark surfaces: keyboard focus must survive #8A2B32 — the global ring
       is ink, invisible there. Every inline-styled dark band and the footer
       carry .ca-dark so the ring flips to bone. ── */
-.ca-dark :focus-visible { outline-color: #F4F5F1; }
+.ca-dark :focus-visible { outline-color: #FFF3F0; }
 
 /* ── Engine chat: the opening line reads the same before and after the
       first send — the 21px statement rule was pre-Carta chrome. ── */

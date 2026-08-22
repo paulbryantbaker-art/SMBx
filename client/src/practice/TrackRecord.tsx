@@ -37,7 +37,7 @@ export const ATTRIBUTION =
 function DealGroup({ label, names, first = false }: { label: string; names: string; first?: boolean }) {
   return (
     <div style={first ? undefined : { borderTop: '1px solid #E4DFD3', paddingTop: 18 }}>
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#0A7A58', color: '#FFFFFF', fontFamily: MONO, fontSize: 11, letterSpacing: '0.1em', padding: '4px 8px', whiteSpace: 'nowrap' }}>
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#B8431E', color: '#FFFFFF', fontFamily: MONO, fontSize: 11, letterSpacing: '0.1em', padding: '4px 8px', whiteSpace: 'nowrap' }}>
         <span style={{ width: 6, height: 6, background: '#FFFFFF', display: 'inline-block' }} />{label}
       </div>
       <div style={{ marginTop: 10, fontSize: 15, lineHeight: 1.7, color: '#4A4F54' }}>{names}</div>
@@ -86,11 +86,11 @@ export default function TrackRecord() {
         {/* ══ HERO ══ */}
         <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(52px, 9vw, 150px) clamp(20px, 4vw, 32px) 30px', textAlign: 'center', position: 'relative' }}>
           <div aria-hidden="true" data-plx="-0.02" style={{ position: 'absolute', left: '6%', top: 80, width: 110, height: 110, backgroundImage: 'radial-gradient(rgba(22,24,26,.14) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
-          <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', right: '7%', top: 150, width: 90, height: 90, backgroundImage: 'radial-gradient(rgba(10,122,88,.22) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
+          <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', right: '7%', top: 150, width: 90, height: 90, backgroundImage: 'radial-gradient(rgba(184,67,30,.22) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
           <div data-hs="0"><Kicker center>SELECTED TRANSACTION EXPERIENCE</Kicker></div>
           <h1 data-hs="1" style={{ margin: '28px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(32px, 4.6vw, 78px)', lineHeight: 1.05, letterSpacing: '-0.015em', textWrap: 'balance' }}>More than 150 deals. One side of the table.</h1>
           <p data-hs="2" style={{ margin: '28px auto 0', maxWidth: '34em', fontSize: 18.5, lineHeight: 1.65, color: '#4A4F54' }}>A selection of the acquisitions Paul Baker led or co-led over two decades in corporate development.</p>
-          <div data-hs="3" style={{ margin: '30px auto 0', maxWidth: '46em', textAlign: 'left', fontStyle: 'italic', fontSize: 14, lineHeight: 1.65, color: '#7C8187', borderLeft: '2px solid #0A7A58', paddingLeft: 16 }}>{ATTRIBUTION}</div>
+          <div data-hs="3" style={{ margin: '30px auto 0', maxWidth: '46em', textAlign: 'left', fontStyle: 'italic', fontSize: 14, lineHeight: 1.65, color: '#7C8187', borderLeft: '2px solid #B8431E', paddingLeft: 16 }}>{ATTRIBUTION}</div>
         </section>
 
         {/* ══ STAT STRIP ══ */}
@@ -117,9 +117,9 @@ export default function TrackRecord() {
                 terminal node), so the dark-card treatment retires and the
                 label chip goes with it — a green chip inside a green cell
                 was only ever there to bring green to a dark card. */}
-            <div style={{ background: '#0A7A58', padding: '38px 28px 34px', textAlign: 'center' }}>
+            <div style={{ background: '#B8431E', padding: '38px 28px 34px', textAlign: 'center' }}>
               <div style={{ ...statNum, color: '#FFFFFF' }}>0</div>
-              <div style={{ ...statLabel, color: '#DFF5EC' }}>SELL-SIDE ENGAGEMENTS. EVER.</div>
+              <div style={{ ...statLabel, color: '#FBE7DF' }}>SELL-SIDE ENGAGEMENTS. EVER.</div>
             </div>
           </div>
         </section>
@@ -130,7 +130,7 @@ export default function TrackRecord() {
             <div>
               <Kicker>CHAPTER 01</Kicker>
               <h2 style={{ margin: '20px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(20px, 2.6vw, 40px)', lineHeight: 1.15, letterSpacing: '-0.012em' }}>Wrench Group</h2>
-              <div style={{ marginTop: 14, fontFamily: MONO, fontSize: 12, letterSpacing: '0.08em', color: '#0A7A58' }}>2016–2025 · DIRECTOR, CORPORATE DEVELOPMENT &amp; M&amp;A INTEGRATION</div>
+              <div style={{ marginTop: 14, fontFamily: MONO, fontSize: 12, letterSpacing: '0.08em', color: '#B8431E' }}>2016–2025 · DIRECTOR, CORPORATE DEVELOPMENT &amp; M&amp;A INTEGRATION</div>
               <p style={{ margin: '22px 0 0', fontSize: 16, lineHeight: 1.7, color: '#4A4F54' }}>Recruited to build the M&amp;A pipeline and execution engine for a PE-backed mid-market buy-and-build consolidator. Over nine years Paul led or co-led 36 acquisitions representing roughly $2.9B in enterprise value — then built the integration playbook that made them work.</p>
             </div>
             <div data-dealcard style={{ position: 'relative', border: '1px solid #16181A', background: '#FFFFFF', padding: '28px 32px 30px' }}>
@@ -152,7 +152,7 @@ export default function TrackRecord() {
             <div>
               <Kicker>CHAPTER 02</Kicker>
               <h2 style={{ margin: '20px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(20px, 2.6vw, 40px)', lineHeight: 1.15, letterSpacing: '-0.012em' }}>JPMorgan Chase</h2>
-              <div style={{ marginTop: 14, fontFamily: MONO, fontSize: 12, letterSpacing: '0.08em', color: '#0A7A58' }}>2005–2015 · DIRECTOR, ACQUISITION INTEGRATION</div>
+              <div style={{ marginTop: 14, fontFamily: MONO, fontSize: 12, letterSpacing: '0.08em', color: '#B8431E' }}>2005–2015 · DIRECTOR, ACQUISITION INTEGRATION</div>
               <p style={{ margin: '22px 0 0', fontSize: 16, lineHeight: 1.7, color: '#4A4F54' }}>Led integration on the bank's largest platform and fintech acquisitions, delivering over $2B in synergies across 100+ stakeholder touchpoints.</p>
             </div>
             <div data-dealcard style={{ position: 'relative', border: '1px solid #16181A', background: '#FFFFFF', padding: '28px 32px 30px' }}>
@@ -169,15 +169,15 @@ export default function TrackRecord() {
             <div>
               <Kicker>CHAPTER 03</Kicker>
               <h2 style={{ margin: '20px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(20px, 2.6vw, 40px)', lineHeight: 1.15, letterSpacing: '-0.012em' }}>Deloitte Consulting</h2>
-              <div style={{ marginTop: 14, fontFamily: MONO, fontSize: 12, letterSpacing: '0.08em', color: '#0A7A58' }}>2010–2011 · ENGAGEMENT MANAGER, STRATEGY &amp; OPERATIONS</div>
+              <div style={{ marginTop: 14, fontFamily: MONO, fontSize: 12, letterSpacing: '0.08em', color: '#B8431E' }}>2010–2011 · ENGAGEMENT MANAGER, STRATEGY &amp; OPERATIONS</div>
             </div>
             <p style={{ margin: 0, fontSize: 16, lineHeight: 1.7, color: '#4A4F54', maxWidth: '44em' }}>Advised Fortune 500 clients on inorganic growth strategy, target operating models, and post-merger integration.</p>
           </div>
         </section>
 
         {/* ══ CLOSER — dark band ══ */}
-        <section className="ca-dark" style={{ background: '#181818', color: '#F4F5F1', padding: 'clamp(68px, 11vw, 180px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
-          <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', left: '6%', bottom: 36, width: 280, height: 160, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
+        <section className="ca-dark" style={{ background: '#8A2B32', color: '#FFF3F0', padding: 'clamp(68px, 11vw, 180px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
+          <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', left: '6%', bottom: 36, width: 280, height: 160, backgroundImage: 'radial-gradient(rgba(255,170,144,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
             <p data-rv style={{ margin: '0 auto', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 4vw, 64px)', lineHeight: 1.12, letterSpacing: '-0.014em', textWrap: 'balance' }}>Every transaction above was done for a buyer. That hasn't&nbsp;changed.</p>
             <div data-rv style={{ marginTop: 40 }}>

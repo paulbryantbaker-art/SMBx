@@ -23,7 +23,7 @@
      the accent lifted ~9 L* and gained chroma, and brass grew from jewelry on
      one stat into a working amber.
 
-     The accent is deliberately NOT the vivid jade (#0FA97C) it looks like it
+     The accent is deliberately NOT the vivid jade (#FF7D55) it looks like it
      should be: white on that jade is 2.97:1 and it reads at 2.85:1 as a link
      on bone — both under the 4.5:1 floor, and neither failure shows up in a
      diff. The vivid jade lives in --pd-jade and is used ONLY where no small
@@ -196,9 +196,9 @@
        The fade above survives regardless: it is what lets `theme-color` stay a
        flat bone where the page meets Safari's toolbar. */
     radial-gradient(52% 18% at 3% 40%,  rgba(206, 196, 174, 0.13),  rgba(206, 196, 174, 0) 62%),
-    radial-gradient(50% 18% at 99% 56%, rgba(15, 169, 124, 0.085),  rgba(15, 169, 124, 0) 64%),
+    radial-gradient(50% 18% at 99% 56%, rgba(255, 125, 85, 0.085),  rgba(255, 125, 85, 0) 64%),
     radial-gradient(48% 18% at 7% 80%,  rgba(232, 166, 43, 0.090),  rgba(232, 166, 43, 0) 62%),
-    radial-gradient(46% 17% at 96% 97%, rgba(15, 169, 124, 0.075),  rgba(15, 169, 124, 0) 62%);
+    radial-gradient(46% 17% at 96% 97%, rgba(255, 125, 85, 0.075),  rgba(255, 125, 85, 0) 62%);
 }
 /* ─── accent bands (2026-08-01) ───
    Paul: "on desktop, it is really big space… what if we put a couple of the
@@ -264,7 +264,7 @@
      against a bottom-anchored field it would have animated the one part of the
      page the new structure deliberately keeps clean. */
   background:
-    radial-gradient(150% 60% at 50% 110%, rgba(15, 169, 124, 0.13), rgba(15, 169, 124, 0) 72%);
+    radial-gradient(150% 60% at 50% 110%, rgba(255, 125, 85, 0.13), rgba(255, 125, 85, 0) 72%);
   animation: pd-settle-in 2200ms cubic-bezier(0.22, 0.61, 0.36, 1) 1 both;
 }
 @keyframes pd-settle-in {
@@ -383,14 +383,14 @@
      numeral, so large-text). Every reading role clears AA, which is the bar a
      mid-lightness ground has to be held to — a near-black one clears it by
      accident, which is why it was never worth checking before. */
-  --pd-ink: #F2FBF6;
-  --pd-body: #E4F4EB;
-  --pd-tert: #C9E8DA;
-  --pd-faint: #A8C9BA;
-  --pd-card: #0D6B52;
-  --pd-border: #2E7A61;
+  --pd-ink: #FFF3F0;
+  --pd-body: #F0D8D4;
+  --pd-tert: #DCB8B4;
+  --pd-faint: #D6B2AF;
+  --pd-card: #964046;
+  --pd-border: #AF6F74;
   --pd-hair: rgba(242, 251, 246, 0.12);
-  --pd-coral-link: #F2FBF6;
+  --pd-coral-link: #FFF3F0;
   /* Amber drops to 3.1:1 on the block, so the block re-scopes it to honey
      rather than every brass rule growing a .pd-dark twin. */
   --pd-brass: #F5C452;
@@ -424,7 +424,7 @@
 
      This replaces a six-layer stack, and removing it was not optional: an
      84%-opaque jade glaze plus the blackbleed texture sat ABOVE the only layer
-     that read --pd-dark-*, so swapping that token to #181818 changed the
+     that read --pd-dark-*, so swapping that token to #8A2B32 changed the
      computed custom property and NOTHING on screen. The design gate passed the
      whole time, because it verifies the token's value and not the paint. That
      is the trap CLAUDE.md documents for Aurora, hit in reverse — and the reason
@@ -466,10 +466,10 @@
    panels need a white outline") — give them a clear white outline, brightening
    to solid with a faint fill on hover. */
 .pd-dark .pd-pill { border-color: rgba(242, 251, 246, 0.9); }
-.pd-dark .pd-pill:hover { border-color: #F2FBF6; background: rgba(242, 251, 246, 0.10); }
+.pd-dark .pd-pill:hover { border-color: #FFF3F0; background: rgba(255, 243, 240, 0.10); }
 /* text links stay a bright, legible coral so they still read as links even
    with all other dark-band text white */
-.pd-dark a.pd-link, .pd-dark a.pd-link:hover { color: #A8F0CE; }
+.pd-dark a.pd-link, .pd-dark a.pd-link:hover { color: #FFAA90; }
 
 /* ─── type ─── */
 /* ─── unified type scale (2026-07-13 consistency pass) ───
@@ -605,7 +605,7 @@
   font-size: 15px; font-weight: 600; white-space: nowrap;
   transition: background-color 160ms ease;
 }
-.pd-pill-primary:hover { background: #0A7A58; color: #FFFFFF; }
+.pd-pill-primary:hover { background: #B8431E; color: #FFFFFF; }
 .pd-pill-lg { padding: 17px 36px; font-size: 16.5px; }
 /* The nowrap above is correct in the nav, where every pill is two or three
    words. In body copy a long label ("Talk to our team — confidential
@@ -907,7 +907,7 @@
      as it does on a full-fold landing. A viewport-anchored layer cannot know
      where the section ends, and that is what put the seam there. */
   background:
-    radial-gradient(170% 52% at 50% 76%, rgba(15, 169, 124, 0.24), rgba(15, 169, 124, 0.06) 52%, rgba(15, 169, 124, 0) 88%);
+    radial-gradient(170% 52% at 50% 76%, rgba(255, 125, 85, 0.24), rgba(255, 125, 85, 0.06) 52%, rgba(255, 125, 85, 0) 88%);
   /* RAMP IN FROM ZERO OVER THE FIRST 150px (2026-07-31). This bloom is nearly
      three times the strength of the page wash, and both of its strong stops
      are centred at or above the hero's own top edge — so it arrived at full
@@ -947,7 +947,7 @@
      masked to sit under the input bar rather than across the headline, it
      reads as paper instead of as a second pattern competing with the wash. */
   background-image:
-    radial-gradient(rgba(15, 169, 124, 0.10) 1.1px, rgba(15, 169, 124, 0) 1.6px),
+    radial-gradient(rgba(255, 125, 85, 0.10) 1.1px, rgba(255, 125, 85, 0) 1.6px),
     radial-gradient(rgba(20, 24, 28, 0.06) 1px, rgba(20, 24, 28, 0) 1.4px);
   background-size: 96px 96px, 24px 24px;
   background-position: 11px 13px, 0 0;
@@ -1006,16 +1006,16 @@
   background-repeat: no-repeat;
   background-image:
     radial-gradient(1.5px 1.5px at 82% 12%, rgba(242, 251, 246, 0.60), transparent 60%),
-    radial-gradient(1.5px 1.5px at 91% 24%, rgba(168, 240, 206, 0.50), transparent 60%),
+    radial-gradient(1.5px 1.5px at 91% 24%, rgba(255, 170, 144, 0.50), transparent 60%),
     radial-gradient(1px 1px at 74% 20%, rgba(242, 251, 246, 0.42), transparent 60%),
     radial-gradient(1px 1px at 95% 9%, rgba(242, 251, 246, 0.40), transparent 60%),
     radial-gradient(1.5px 1.5px at 86% 33%, rgba(232, 166, 43, 0.45), transparent 60%);
 }
-.pd-dark.bl-tr::before { background: radial-gradient(48% 72% at 72% 44%, rgba(15, 169, 124, 0.08), rgba(15, 169, 124, 0) 72%); }
-.pd-dark.bl-val::before { background: radial-gradient(42% 64% at 16% 32%, rgba(15, 169, 124, 0.11), rgba(15, 169, 124, 0) 70%); }
-.pd-dark.bl-side::before { background: radial-gradient(42% 64% at 78% 60%, rgba(15, 169, 124, 0.09), rgba(15, 169, 124, 0) 72%); }
-.pd-dark.bl-cta::before { background: radial-gradient(44% 66% at 16% 36%, rgba(15, 169, 124, 0.085), rgba(15, 169, 124, 0) 72%); }
-.pd-dark.bl-creed::before { background: radial-gradient(42% 58% at 82% 10%, rgba(15, 169, 124, 0.07), rgba(15, 169, 124, 0) 72%); }
+.pd-dark.bl-tr::before { background: radial-gradient(48% 72% at 72% 44%, rgba(255, 125, 85, 0.08), rgba(255, 125, 85, 0) 72%); }
+.pd-dark.bl-val::before { background: radial-gradient(42% 64% at 16% 32%, rgba(255, 125, 85, 0.11), rgba(255, 125, 85, 0) 70%); }
+.pd-dark.bl-side::before { background: radial-gradient(42% 64% at 78% 60%, rgba(255, 125, 85, 0.09), rgba(255, 125, 85, 0) 72%); }
+.pd-dark.bl-cta::before { background: radial-gradient(44% 66% at 16% 36%, rgba(255, 125, 85, 0.085), rgba(255, 125, 85, 0) 72%); }
+.pd-dark.bl-creed::before { background: radial-gradient(42% 58% at 82% 10%, rgba(255, 125, 85, 0.07), rgba(255, 125, 85, 0) 72%); }
 
 .pd-bandart { position: absolute; inset: 0; overflow: hidden; pointer-events: none; user-select: none; }
 .pd-mapart {
@@ -1212,12 +1212,12 @@
      had no edge — it read as coloured text rather than as something to press.
      The hairline is the accent at low alpha, so it states the boundary without
      becoming a second button weight beside the primary pill. */
-  display: inline-block; border: 1px solid rgba(10, 122, 88, 0.24); border-radius: 999px;
+  display: inline-block; border: 1px solid rgba(184, 67, 30, 0.24); border-radius: 999px;
   padding: 11px 23px; font-size: 15px; font-weight: 700;
   background: var(--pd-tint-chip); color: var(--pd-coral-link);
   transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
 }
-.pd-hero-book:hover { background: #CFEEE0; color: #06503A; border-color: rgba(10, 122, 88, 0.42); }
+.pd-hero-book:hover { background: #FBE7DF; color: #9C3717; border-color: rgba(184, 67, 30, 0.42); }
 .pd-cta-row { margin-top: 36px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 .pd-proofrow { margin-top: 34px; display: flex; gap: 10px 20px; justify-content: center; align-items: center; flex-wrap: wrap; }
 .pd-proofrow .lab { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--pd-tert); }
@@ -1377,24 +1377,24 @@
 }
 .pd-map > * { animation: pd-rise 260ms ease both; }
 .pd-map .map-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--pd-hair); }
-.pd-map .map-label { display: inline-flex; align-items: center; gap: 7px; background: #0A7A58; color: #FFFFFF; font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.12em; padding: 5px 9px; text-align: right; }
+.pd-map .map-label { display: inline-flex; align-items: center; gap: 7px; background: #B8431E; color: #FFFFFF; font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.12em; padding: 5px 9px; text-align: right; }
 .pd-map .map-label::before { content: ''; width: 7px; height: 7px; background: #FFFFFF; flex: none; }
 .pd-map .map-title { margin-top: 18px; font-family: var(--pd-display); font-size: clamp(22px, 2.6vw, 30px); font-weight: 600; letter-spacing: -0.01em; line-height: 1.12; color: var(--pd-ink); }
 .pd-map .map-thesis { margin-top: 8px; font-family: var(--pd-mono); font-size: 12.5px; letter-spacing: 0.05em; color: var(--pd-tert); line-height: 1.6; }
 .pd-map .map-answer { margin-top: 20px; border-left: 3px solid var(--pd-ink); padding: 4px 0 4px 16px; }
-.pd-map .map-answer .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #0A7A58; }
+.pd-map .map-answer .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #B8431E; }
 .pd-map .map-answer .v { margin-top: 6px; font-size: 17px; font-weight: 700; line-height: 1.5; color: var(--pd-ink); }
 .pd-map .map-funnel { margin-top: 22px; border-top: 1px solid var(--pd-hair); padding-top: 16px; }
-.pd-map .map-funnel .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #0A7A58; }
+.pd-map .map-funnel .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #B8431E; }
 .pd-map .map-step { display: flex; align-items: baseline; gap: 26px; padding: 8px 0 2px; animation: pd-rise 260ms ease both; }
 .pd-map .map-step .n { font-family: var(--pd-display); font-size: clamp(30px, 3.8vw, 46px); font-weight: 600; letter-spacing: -0.02em; line-height: 1; color: var(--pd-ink); min-width: clamp(96px, 13vw, 150px); white-space: nowrap; }
 .pd-map .map-step .l { font-size: 14.5px; line-height: 1.45; color: var(--pd-body); }
 .pd-map .map-sec { margin-top: 18px; }
-.pd-map .map-sec .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #0A7A58; }
+.pd-map .map-sec .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #B8431E; }
 .pd-map .map-sec .v { margin-top: 5px; font-size: 14.5px; line-height: 1.6; color: var(--pd-ink); }
 /* The punchline block — the one place a tint and a weight shift is earned. */
 .pd-map .map-insight { margin-top: 22px; background: #F9F7F1; border: 1px solid var(--pd-hair); border-radius: 0; padding: 18px 20px; }
-.pd-map .map-insight .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #0A7A58; }
+.pd-map .map-insight .k { font-family: var(--pd-mono); font-size: 11.5px; letter-spacing: 0.14em; color: #B8431E; }
 .pd-map .map-insight .v { margin-top: 7px; font-size: 15.5px; font-weight: 600; line-height: 1.6; color: var(--pd-ink); }
 .pd-map .map-foot { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--pd-hair); display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap; }
 .pd-map .map-foot .src { font-family: var(--pd-mono); font-size: 13px; letter-spacing: 0.02em; line-height: 1.6; color: var(--pd-body); flex: 1 1 320px; }
@@ -1404,7 +1404,7 @@
   border-radius: 9px; padding: 11px 20px; font-size: 14px; font-weight: 600; white-space: nowrap;
   transition: background-color 160ms ease;
 }
-.pd-map .map-pdf:hover { background: #0A7A58; color: #FFFFFF; }
+.pd-map .map-pdf:hover { background: #B8431E; color: #FFFFFF; }
 .pd-map .map-pdf:disabled { opacity: 0.55; cursor: default; }
 /* Rebuilt sample read (Paul, 2026-07-15): counts compress to one setup strip;
    the payoff is judgment — the 9, the screens, the dollar swing, the verdict. */
@@ -1424,7 +1424,7 @@
   /* Matches .pd-herobar — see the note there (white since 2026-08-03; these
      two rules exist to be the same element, so the fill moves with it).
      Inside the white card the green outline is what defines the control. */
-  border: 1px solid rgba(10, 122, 88, 0.20); border-radius: 999px; background: #FFFFFF;
+  border: 1px solid rgba(184, 67, 30, 0.20); border-radius: 999px; background: #FFFFFF;
   box-shadow: 0 1px 2px rgba(20, 24, 28, 0.05);
   transition: border-color 160ms ease;
 }
@@ -1525,7 +1525,7 @@
      Green at 0.20 alpha over bone reads as a soft sage line — a visible
      edge that ties the pill to the send disc and the jade halo behind it,
      without the hard-gray-ring problem --pd-border had. */
-  border: 1.5px solid rgba(10, 122, 88, 0.20);
+  border: 1.5px solid rgba(184, 67, 30, 0.20);
   /* A PILL, not a 16px box (2026-08-02, Paul: "it looks like a square in the
      middle of the page and looks awkward" — wanting the Grok/Gemini shape on
      both breakpoints).
@@ -1608,11 +1608,11 @@
    chat") — tappable thesis starters that drop into the field. ── */
 .pd-chips { display: flex; flex-wrap: wrap; gap: 9px; padding: 6px 32px 4px; }
 .pd-chip {
-  border: 1px solid rgba(15, 169, 124, 0.26); background: var(--pd-tint-chip); color: var(--pd-coral-link);
+  border: 1px solid rgba(255, 125, 85, 0.26); background: var(--pd-tint-chip); color: var(--pd-coral-link);
   border-radius: 99px; padding: 9px 16px; font-size: 14px; font-weight: 600; white-space: nowrap;
   cursor: pointer; transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
 }
-.pd-chip:hover { border-color: #0A7A58; color: #06503A; background: #CFEEE0; }
+.pd-chip:hover { border-color: #B8431E; color: #9C3717; background: #FBE7DF; }
 
 /* ── Mobile: the hero bar stays in the page as the doorway (typing never
    happens in-page); the actual chat is a bottom sheet that is ALWAYS
@@ -1902,10 +1902,10 @@
 /* The brochure ask on the JADE BAND (#pricing became the third block,
    2026-08-07). .pd-dark re-scopes ink/body/tert/hair/coral-link/brass but
    NOT --pd-coral — so without these rules the "Sent" confirmation renders
-   Deal Green #0A7A58 on jade #0A6A4C (~1.1:1, invisible) and the input
+   Deal Green #B8431E on jade #8A2B32 (~1.1:1, invisible) and the input
    keeps a hairline drawn for bone. All renders-not-errors traps: clean in
    a diff, silent in the browser. The input's TEXT color is the sneakiest —
-   `color: var(--pd-ink)` re-scopes to #F2FBF6 inside the band, so the
+   `color: var(--pd-ink)` re-scopes to #FFF3F0 inside the band, so the
    visitor's typed email (and the caret) went near-white on the white fill
    while the idle form looked fine in screenshots (the placeholder is UA
    grey). Literal ink on the white fill, exactly why .pd-input hard-codes
@@ -1973,7 +1973,7 @@
 /* ─── industries — the anchor market as a near-black card, the hunt as a
    numbered board ─── */
 .pd-anchorcard {
-  background: #0A6A4C; color: #F5F5F5; border-radius: 18px;
+  background: #8A2B32; color: #F5F5F5; border-radius: 18px;
   padding: clamp(28px, 3.4vw, 44px) clamp(28px, 3.6vw, 52px);
   margin-top: 48px;
 }
@@ -1996,7 +1996,7 @@
 /* ─── Why us — pillar ledger (3×2 hairline grid, research-desk voice) ─── */
 .pd-whygrid { margin-top: clamp(44px, 5vw, 68px); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--pd-hair); border-left: 1px solid var(--pd-hair); }
 .pd-why { padding: clamp(28px, 3vw, 42px) clamp(24px, 2.6vw, 38px) clamp(32px, 3.4vw, 46px); border-right: 1px solid var(--pd-hair); border-bottom: 1px solid var(--pd-hair); transition: background 0.25s; }
-.pd-why:hover, .pd-why[open] { background: rgba(15, 169, 124, 0.024); }
+.pd-why:hover, .pd-why[open] { background: rgba(255, 125, 85, 0.024); }
 .pd-why summary { list-style: none; cursor: pointer; }
 .pd-why summary::-webkit-details-marker { display: none; }
 .pd-why .more { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; font-family: var(--pd-mono); font-size: 12.5px; letter-spacing: 0.08em; color: var(--pd-tert); transition: color 0.2s; }
@@ -2143,7 +2143,7 @@
    it fails. A stat that vanishes is worse than a stat that is white. */
 .pd-dark .pd-stat .n {
   color: var(--pd-ink);
-  background: linear-gradient(104deg, #A8F0CE 6%, #F5C452 92%);
+  background: linear-gradient(104deg, #FFAA90 6%, #F5C452 92%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -2353,7 +2353,11 @@
    a closing section; without one the two greens stack with a hole between. */
 .pd-footer {
   margin-top: clamp(130px, 15vw, 210px);
-  background: #084433;
+  /* OXBLOOD 2026-08-22: the rule above wants a base DEEPER than the band,
+     which near-black could never actually give (it was already at the
+     floor). The field sits mid-luminance, so `well` is a real step down —
+     this is the depth the comment always described. */
+  background: #50191D;
   --pd-ink: #FFFFFF; --pd-body: rgba(255, 255, 255, 0.75); --pd-tert: rgba(255, 255, 255, 0.52);
   --pd-faint: rgba(255, 255, 255, 0.35); --pd-hair: rgba(255, 255, 255, 0.12);
   color: var(--pd-body);
@@ -2373,7 +2377,7 @@
 }
 .pd-footer-founder .fname { font-size: 15.5px; font-weight: 700; color: var(--pd-ink); line-height: 1.3; }
 .pd-footer-founder .frole { font-size: 14px; color: var(--pd-tert); margin-top: 3px; line-height: 1.4; }
-.pd .pd-footer-founder a.fmeet { font-size: 14px; color: #A8F0CE; margin-top: 2px; padding-block: 3px; display: inline-block; }
+.pd .pd-footer-founder a.fmeet { font-size: 14px; color: #FFAA90; margin-top: 2px; padding-block: 3px; display: inline-block; }
 .pd .pd-footer-founder a.fmeet:hover { color: #fff; }
 .pd-footer-inner {
   max-width: var(--pd-max); margin: 0 auto; padding: clamp(36px, 4.5vw, 64px) var(--pd-pad-x);
@@ -2553,9 +2557,9 @@
     inset: -190px -70px -300px;
     background:
       radial-gradient(82% 36% at 50% 40%,
-        rgba(15, 169, 124, 0.21), rgba(15, 169, 124, 0.08) 56%, rgba(15, 169, 124, 0) 96%),
+        rgba(255, 125, 85, 0.21), rgba(255, 125, 85, 0.08) 56%, rgba(255, 125, 85, 0) 96%),
       radial-gradient(140% 60% at 50% 42%,
-        rgba(15, 169, 124, 0.10), rgba(15, 169, 124, 0) 76%);
+        rgba(255, 125, 85, 0.10), rgba(255, 125, 85, 0) 76%);
   }
   /* (The old two-auto slack split and the 36px H1 cap lived here — retired
      by the ONE CLUSTER grammar above, which owns the fold's spacing and
@@ -2607,7 +2611,7 @@
    promise, same material. The delete action is a REAL button, never
    hidden — the right to erasure isn't fine print. */
 .pd .ow-onfile {
-  margin: 6px 20px 28px; border: 1px solid var(--pd-border); border-left: 3px solid #0A7A58;
+  margin: 6px 20px 28px; border: 1px solid var(--pd-border); border-left: 3px solid #B8431E;
   border-radius: 0; background: #fff; padding: 20px 24px 22px;
 }
 .pd .ow-onfile .k { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; color: var(--pd-ink); }

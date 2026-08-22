@@ -65,7 +65,7 @@ const SECTORS: Sector[] = [
 }
 
 
-const TAG_STYLE = { fontFamily: MONO, fontSize: 11, letterSpacing: '0.05em', color: '#0A7A58', background: '#DFF5EC', padding: '6px 10px' } as const;
+const TAG_STYLE = { fontFamily: MONO, fontSize: 11, letterSpacing: '0.05em', color: '#B8431E', background: '#FBE7DF', padding: '6px 10px' } as const;
 
 /* THE SECTOR MACHINE (2026-08-12, Paul: "maybe we can use this to update the
    industries page? the industries page looks pretty boring"). The landing's
@@ -128,28 +128,28 @@ function SectorMachine() {
     return `M ${p.x > 50 ? SM_MX.right : SM_MX.left} ${SM_MX.y} H ${p.x * 10} V ${p.y * 4.6}`;
   });
   return (
-    <div className="ca-machine" style={{ position: 'relative', background: '#181818', overflow: 'hidden', height: 'clamp(340px, 27vw, 420px)' }}>
-      <Handles color="#F4F5F1" />
-      <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.15) 1.1px, transparent 1.1px)', backgroundSize: '16px 16px' }} />
+    <div className="ca-machine" style={{ position: 'relative', background: '#8A2B32', overflow: 'hidden', height: 'clamp(340px, 27vw, 420px)' }}>
+      <Handles color="#FFF3F0" />
+      <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,170,144,.15) 1.1px, transparent 1.1px)', backgroundSize: '16px 16px' }} />
       <svg aria-hidden="true" viewBox="0 0 1000 460" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} fill="none">
         {paths.map((d, i) => (
           <Fragment key={`${s.vi}-${i}`}>
-            <path d={d} pathLength={100} className={`ca-mpath${on ? ' draw' : ''}`} style={{ transitionDelay: on ? `${i * 130}ms` : '0ms' }} stroke="#3A3F38" strokeWidth="1.4" />
-            <path d={d} pathLength={100} className={`ca-mflow${on ? ' run' : ''}`} stroke="#A8F0CE" strokeWidth="1.4" />
+            <path d={d} pathLength={100} className={`ca-mpath${on ? ' draw' : ''}`} style={{ transitionDelay: on ? `${i * 130}ms` : '0ms' }} stroke="#C08D90" strokeWidth="1.4" />
+            <path d={d} pathLength={100} className={`ca-mflow${on ? ' run' : ''}`} stroke="#FFAA90" strokeWidth="1.4" />
           </Fragment>
         ))}
       </svg>
       <div className="ca-mline sm on" aria-hidden="true">
-        <span style={{ color: '#A8F0CE' }}>We cover&nbsp;</span>
-        <span className="ca-mword"><span style={{ color: '#F4F5F1' }}>{nm.slice(0, s.chars)}</span><span className="ca-mcaret" /></span>
+        <span style={{ color: '#FFAA90' }}>We cover&nbsp;</span>
+        <span className="ca-mword"><span style={{ color: '#FFF3F0' }}>{nm.slice(0, s.chars)}</span><span className="ca-mcaret" /></span>
       </div>
       {pills.map((t, i) => (
         <span key={`${s.vi}-${t}`} className={`ca-mpill i${i}${on ? ' on' : ''}`} style={{ left: `${PILL_AT[i].x}%`, top: `${PILL_AT[i].y}%`, transitionDelay: on ? `${140 + i * 150}ms` : '0ms' }}>
           <span style={{ transitionDelay: on ? `${300 + i * 150}ms` : '0ms' }}>{t}</span>
         </span>
       ))}
-      <div style={{ position: 'absolute', left: 22, bottom: 16, display: 'inline-flex', alignItems: 'center', gap: 7, fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: '#8E948B' }}>
-        <span style={{ width: 7, height: 7, background: '#0A7A58', display: 'inline-block' }} />FIFTEEN SECTOR THESES
+      <div style={{ position: 'absolute', left: 22, bottom: 16, display: 'inline-flex', alignItems: 'center', gap: 7, fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: '#DCB8B4' }}>
+        <span style={{ width: 7, height: 7, background: '#B8431E', display: 'inline-block' }} />FIFTEEN SECTOR THESES
       </div>
     </div>
   );
@@ -158,7 +158,7 @@ function SectorMachine() {
 function Aside({ k, children }: { k: string; children: React.ReactNode }) {
   return (
     <div style={{ borderTop: '2px solid #16181A', paddingTop: 16, position: 'relative', marginTop: k === 'WHO WE RUN IT FOR' ? 0 : 24 }}>
-      <span style={{ position: 'absolute', top: -2, left: 0, width: 38, height: 2, background: '#0A7A58' }} />
+      <span style={{ position: 'absolute', top: -2, left: 0, width: 38, height: 2, background: '#B8431E' }} />
       <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.13em', color: '#7C8187' }}>{k}</div>
       <p style={{ margin: '10px 0 0', fontSize: 14, lineHeight: 1.6, color: '#4A4F54' }}>{children}</p>
     </div>
@@ -173,7 +173,7 @@ export default function Industries() {
         {/* ══ HERO ══ */}
         <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(52px, 9vw, 150px) clamp(20px, 4vw, 32px) 0', textAlign: 'center', position: 'relative' }}>
           <div aria-hidden="true" data-plx="-0.02" style={{ position: 'absolute', left: '6%', top: 70, width: 110, height: 110, backgroundImage: 'radial-gradient(rgba(22,24,26,.14) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
-          <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', right: '7%', top: 140, width: 90, height: 90, backgroundImage: 'radial-gradient(rgba(10,122,88,.22) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
+          <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', right: '7%', top: 140, width: 90, height: 90, backgroundImage: 'radial-gradient(rgba(184,67,30,.22) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
           <div data-hs="0"><Kicker center>KEY INDUSTRY VERTICALS</Kicker></div>
           <h1 data-hs="1" style={{ margin: '28px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.6vw, 60px)', lineHeight: 1.1, letterSpacing: '-0.013em', textWrap: 'balance' }}>Buy-side M&amp;A for acquirers of private companies under $250M in revenue.</h1>
           <p data-hs="2" style={{ margin: '26px auto 0', maxWidth: '42em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>We work on a retainer plus a success fee, paid by the acquirer, never the seller. These lanes are where we know the most; bring us a market that isn't here and we'll go learn it.</p>
@@ -183,7 +183,7 @@ export default function Industries() {
           <div className="ca-ind-band" data-hs="3" style={{ margin: '52px auto 0', maxWidth: 1080, position: 'relative' }}>
             <img src="/industries/trade-home.jpg" alt="" style={{ display: 'block', width: '100%', height: 300, objectFit: 'cover' }} />
             <Handles />
-            <span style={{ position: 'absolute', left: 14, bottom: 14, display: 'inline-flex', alignItems: 'center', gap: 7, background: '#0A7A58', color: '#FFFFFF', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '5px 9px', whiteSpace: 'nowrap' }}>
+            <span style={{ position: 'absolute', left: 14, bottom: 14, display: 'inline-flex', alignItems: 'center', gap: 7, background: '#B8431E', color: '#FFFFFF', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '5px 9px', whiteSpace: 'nowrap' }}>
               <span style={{ width: 7, height: 7, background: '#FFFFFF', display: 'inline-block' }} />FIFTEEN SECTOR THESES
             </span>
           </div>
@@ -217,11 +217,11 @@ export default function Industries() {
               <div key={s.nm} id={sectorSlug(s.nm)} data-rv className="rv-stagger" data-sector style={{ display: 'grid', gap: 56, alignItems: 'start', padding: '64px 0', borderBottom: '1px solid #E4DFD3', gridTemplateColumns: even ? '7fr 4fr' : '4fr 7fr', scrollMarginTop: 92 }}>
                 <div style={{ order: even ? 1 : 2 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.1em', color: '#0A7A58' }}>{String(i + 1).padStart(2, '0')}</span>
+                    <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.1em', color: '#B8431E' }}>{String(i + 1).padStart(2, '0')}</span>
                     <span style={{ height: 1, flex: 1, background: '#E4DFD3' }} />
                   </div>
                   <h2 style={{ margin: '18px 0 0', fontFamily: SERIF, fontWeight: 600, fontSize: 'clamp(20px, 2.5vw, 38px)', lineHeight: 1.15, letterSpacing: '-0.01em' }}>{s.nm}</h2>
-                  <div style={{ marginTop: 12, fontSize: 18, fontWeight: 600, color: '#16181A' }}>{s.lead}<span style={{ color: '#0A7A58' }}>.</span></div>
+                  <div style={{ marginTop: 12, fontSize: 18, fontWeight: 600, color: '#16181A' }}>{s.lead}<span style={{ color: '#B8431E' }}>.</span></div>
                   {s.tags && s.tags.length > 0 && (
                     <div style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                       {s.tags.map(t => <span key={t} data-tag style={TAG_STYLE}>{t}</span>)}
