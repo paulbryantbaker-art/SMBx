@@ -1,0 +1,42 @@
+built      2026-08-22 · THE OFFERING PDF, OXBLOOD (pricing, 7pp) — the offer
+           document plus THE SCHEDULE table and THE TERMS page.
+reference  design_handoff_smbx_offer_docs/ · builder
+           scripts/studio/offer-docs.py --doc pricing
+full record of the names, the fonts, the three canon corrections and the open
+neutrals question: ../../smbx-offer/2026-08-22/BUILD.txt
+
+SCHEDULE   VERIFIED against OFFER_REFERENCE.md §2 — 5% first $1M · 4% $1–5M ·
+           3% $5–10M · 2% above $10M · $100,000 minimum · retainer $15,000 a
+           QUARTER paid up front · $5M anchor $210,000 = 4.2% ✓
+           The monthly cadence was shipped and reversed inside an hour on
+           2026-08-17 and the handoff already carries the quarter. Do not
+           redo it: $15,000 a quarter IS $5,000 a month, and the QUARTER is
+           the deliberate billing unit because it commits three months where
+           a month lets a client leave after thirty.
+TERMS      The handoff's "Close the deal and the retainer was free" is CUT.
+           The credit caps at the fee and there is no credit without a close.
+
+⚠ GO-LIVE  NOT DONE, DELIBERATELY — and there is a trap in it.
+           The live brochure is `content/collateral/smbx-corpdev-pricing.pdf`,
+           the exact file `POST /api/practice/pricing` emails to every lead.
+           OFFER_REFERENCE.md §5: THE SPEC SLUG AND THE SERVED FILENAME
+           DIFFER. Copying this PDF under its own name lands it BESIDE the
+           live file and every lead keeps receiving the old green brochure,
+           silently. The swap is:
+
+             cp smbx-offer-pricing.pdf \
+                content/collateral/smbx-corpdev-pricing.pdf
+
+           then CONFIRM the served file's size or mtime actually changed.
+           It needs Paul's say-so — it changes what leads receive — and
+           ideally the §15(b)(13) counsel pass noted in canon. Until then the
+           old brochure keeps mailing, carrying the retired name AND the
+           retired palette.
+
+ALSO STILL ON THE OLD SYSTEM (not in this build):
+           · client/public/collateral/smbx-corpdev-offering.pdf — the public
+             download on Landing.tsx. Same rename, same palette problem.
+           · The landscape featured build's body pages.
+           · The site's own smbXCorpDev / Premium strings (Landing.tsx,
+             server/index.ts, house/assets.ts, root CLAUDE.md) — Claude Code's
+             side, flagged.
