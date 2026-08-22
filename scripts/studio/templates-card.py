@@ -34,6 +34,28 @@ args = sys.argv[1:]
 OUT = pathlib.Path(args[args.index('--out')+1]).resolve() if '--out' in args \
     else ROOT/'studio/collateral/_reference'
 
+# ── LIVE TOKENS (2026-08-22) ───────────────────────────────────────────────
+# This dict was hard-coded Deal Green. When house/tokens.ts was revalued to
+# OXBLOOD the deck kept rendering the retired palette, correctly and silently —
+# the same failure figure-deck.py had in its light pages. A palette lives in
+# ONE place: read it, never transcribe it.
+import json, subprocess, tempfile, os
+_tsx = ROOT/'node_modules/tsx/dist/cli.mjs'
+if not _tsx.exists():
+    subprocess.run(['npm','install','tsx','--no-save','--prefer-offline'],
+                   cwd=str(ROOT), capture_output=True)
+_emit = ("import { pathToFileURL } from 'node:url';\n"
+         f"const t = await import(pathToFileURL({json.dumps(str(ROOT/'house/tokens.ts'))}).href);\n"
+         "console.log(JSON.stringify(t.CARTA));")
+with tempfile.NamedTemporaryFile('w', suffix='.mts', delete=False) as _tf:
+    _tf.write(_emit); _ep = _tf.name
+_r = subprocess.run(['node', str(_tsx), _ep], capture_output=True, text=True, cwd=str(ROOT))
+os.unlink(_ep)
+if _r.returncode != 0:
+    raise SystemExit('token read failed:\n' + _r.stderr[-500:])
+CARTA = json.loads(_r.stdout.strip().split(chr(10))[-1])
+def _hx(h): return tuple(int(h[i:i+2],16) for i in (1,3,5))
+
 CACHE = HERE/'.fonts-cache'
 from PIL import Image, ImageDraw, ImageFont
 
@@ -46,10 +68,12 @@ def F(n,s,ax=None):
 
 S=2; W,H=1275*S,1650*S
 M=78*S
-T=dict(white=(255,255,255),boneAlt=(249,247,241),panel=(243,240,233),
-       ink=(22,24,26),body=(74,79,84),muted=(124,129,135),hair=(228,223,211),
-       chipB=(216,211,198),green=(10,122,88),greenHover=(8,99,72),
-       greenBright=(15,169,124),tint=(223,245,236),mint=(168,240,206))
+# the keys are historical ROLES, not colours — `green` is the accent on light
+T=dict(white=_hx(CARTA['white']),boneAlt=_hx(CARTA['boneAlt']),panel=_hx(CARTA['panel']),
+       ink=_hx(CARTA['ink']),body=_hx(CARTA['body']),muted=_hx(CARTA['muted']),
+       hair=_hx(CARTA['hair']),chipB=_hx(CARTA['chipBorder']),green=_hx(CARTA['green']),
+       greenHover=_hx(CARTA['greenHover']),greenBright=_hx(CARTA['greenBright']),
+       tint=_hx(CARTA['greenTint']),mint=_hx(CARTA['mint']))
 
 serif64=F('serif-var.ttf',64*S,[550]); serif34=F('serif-var.ttf',34*S,[550])
 sans20b=F('sans-600.ttf',20*S); sans16b=F('sans-600.ttf',16*S)
@@ -61,8 +85,8 @@ mono12b=F('mono-600.ttf',12*S)
 
 LOGO=Image.open(ROOT/'client/public/logo-green-x.png').convert('RGBA')
 C=ROOT/'studio/markets/home-services/collateral'
-O=ROOT/'studio/collateral/smbx-corpdev-offering/2026-08-19'
-HV=C/'hvac-2026-read/2026-08-27'; DD=C/'dead-deal-economics/2026-08-20'
+O=ROOT/'studio/collateral/smbx-offer/2026-08-22'
+HV=C/'hvac-2026-read/2026-08-27'; DD=C/'dead-deal-economics/2026-08-22'
 D4=C/'day-four-questions'
 
 def tracked(d,pos,txt,font,fill,ls):
@@ -114,6 +138,12 @@ def thumb(im,d,box,src,crop=None,label=None):
     identifying is not a reference."""
     x,y,w,h=box
     d.rectangle([x,y,x+w,y+h],fill=T['panel'])
+    # A MISSING FILE IS AN EMPTY PLATE, NOT A CRASH. The green renders were
+    # deleted on 2026-08-22 and this deck read them by path, so it died on the
+    # first one. The deck's own law already covers this case — say there is no
+    # render rather than draw something.
+    if src is not None and not pathlib.Path(src).exists():
+        src, label = None, 'AWAITING OXBLOOD|REBUILD'
     if src is None:
         d.rectangle([x,y,x+w,y+h],outline=T['chipB'],width=S)
         if label:
@@ -216,7 +246,7 @@ y=row(im,d,y,[
 ],h=520*S)
 y=row(im,d,y,[
  dict(role='CONTENT',title="kind:'statement'",src=HV/'hvac-2026-read-p04.jpg',
-      line='Mono eyebrow, serif headline, green rule. A claim with no figure attached.'),
+      line='Mono eyebrow, serif headline, accent rule. A claim with no figure attached.'),
  dict(role='CONTENT',title="kind:'diagram'",src=DD/'dead-deal-economics-p05.jpg',
       line='Two bars and a connector. Bar heights hold the ratio of the numbers; a label over six glyphs clips silently.'),
  dict(role='CONTENT',title="kind:'trade'",src=None,label='NO RENDER ON DISK|REBUILD ON THE MAC',
@@ -244,14 +274,14 @@ foot(im,d,3,TOTAL); pages.append(im)
 
 # ── 4 · MONOLITH ───────────────────────────────────────────────────────
 im,d=page()
-y=header(d,'TEMPLATE 03','Monolith — the dark look','Deal Green monolith on the dark band, greenBright offset rim plate, aimed bloom, gradient copy panel. Arrives as a carousel or as a single image — say which.')
+y=header(d,'TEMPLATE 03','Monolith — the dark look','Oxblood monolith on the dark band, bright-accent offset rim plate, aimed bloom, gradient copy panel. Arrives as a carousel or as a single image — say which.')
 y=row(im,d,y,[
  dict(role='COVER',title='The monolith',src=DD/'dead-deal-economics-p01.jpg',
       line='The figure on the plate, numeral and hook in the copy panel. The C treatment is default: bloom aimed at the torso, 1.16/1.05 lift in the renderer.'),
  dict(role='CONTENT',title='House light grammar',src=DD/'dead-deal-economics-p05.jpg',
-      line='Bone ground, mono kicker over a hairline rule, serif head, green rule, prose or a list, ghost numeral behind, dark strip foot.'),
+      line='Bone ground, mono kicker over a hairline rule, serif head, accent rule, prose or a list, ghost numeral behind, dark strip foot.'),
  dict(role='CTA',title='Frame C',src=DD/'dead-deal-economics-p10.jpg',
-      line='The portrait in a golden rectangle with corner handles and a 14px green offset plate, payoff line, green action bar, logo lower-left.'),
+      line='The portrait in a golden rectangle with corner handles and a 14px accent offset plate, payoff line, action bar, logo lower-left.'),
 ],h=790*S)
 y=note(d,y+6*S,'THE BOOKEND LAW','The ground is worn by the COVER and the CTA page only; every page between is light. A first cut wore the monolith on all ten pages and it was wrong — the monolith is a cover treatment, not a page style. Never a third bookend, never two in a row.')
 y=note(d,y+30*S,'AS A ONE PAGE','The dark figure card is this same look on one surface — the day-four card on the cover strip, page 1. pop:false returns the ambient bloom with no lift.')
@@ -260,13 +290,13 @@ foot(im,d,4,TOTAL); pages.append(im)
 
 # ── 5 · PORTAL ─────────────────────────────────────────────────────────
 im,d=page()
-y=header(d,'TEMPLATE 04','Portal — the light look','Four receding green portal steps on paper, gradient copy panel, dot field. A different mechanic from the monolith, not a recolour. THE OFFER DOCUMENT IS THIS TEMPLATE — the content varies with the need, the template does not.')
+y=header(d,'TEMPLATE 04','Portal — the light look','Four receding portal steps on paper, gradient copy panel, dot field. A different mechanic from the monolith, not a recolour. THE OFFER DOCUMENT IS THIS TEMPLATE — the content varies with the need, the template does not.')
 y=row(im,d,y,[
- dict(role='COVER',title='The portal steps',src=O/'smbx-corpdev-offering-p01.jpg',
+ dict(role='COVER',title='The portal steps',src=O/'smbx-offer-p01.jpg',
       line='The figure on the steps, with an optional numeral, plate label and ruled stat rows in the copy column.'),
- dict(role='CONTENT',title='House light grammar',src=O/'smbx-corpdev-offering-p03.jpg',
-      line='Top strip, kicker, serif headline, green rule, lede, then a dash list or a numbered list, note at the foot, ghost numeral behind.'),
- dict(role='CTA',title='Frame C, light',src=O/'smbx-corpdev-offering-p05.jpg',
+ dict(role='CONTENT',title='House light grammar',src=O/'smbx-offer-p03.jpg',
+      line='Top strip, kicker, serif headline, accent rule, lede, then a dash list or a numbered list, note at the foot, ghost numeral behind.'),
+ dict(role='CTA',title='Frame C, light',src=O/'smbx-offer-p05.jpg',
       line='Payoff, the plate pair when the content calls for it, the action bar, the proof line, the portrait framed right with its byline.'),
 ],h=790*S)
 y=note(d,y+6*S,'AS A ONE PAGE','The light figure card is the same look on one surface, 1.08/1.02 lift. Same bookend law as Monolith: ground on the cover and the CTA page only.')

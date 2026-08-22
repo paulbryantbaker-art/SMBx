@@ -8,8 +8,8 @@ after it is the reasoning and the checks, for you, not for the model.
 ## 1 · The prompt block — paste this verbatim
 
 > **Palette, strict.** Flat solid background exactly **#FCFAF6** with no
-> gradient, no vignette, no texture, no drop shadow and no border. Deep green
-> **#0A7A58** for shading. Bright green **#0FA97C** for the main masses.
+> gradient, no vignette, no texture, no drop shadow and no border. Oxblood accent
+> **#B8431E** for shading. Bright accent **#FF7D55** for the main masses.
 > **NO amber, no gold, no brass — this palette has one colour.** Near-black linework
 > **#16181A**. Use no other colours — no additional greens, no greys, no
 > off-whites, no blues, no skin tones.
@@ -117,7 +117,7 @@ the same tokens the pages use** — do not retype these hexes into a prompt file
 When the palette moves, the prompt moves with it.
 
 That function had been stale since the ink ground landed: it still described the
-retired jade block and asserted "nothing in this system is near-black", which
+retired bright accent block and asserted "nothing in this system is near-black", which
 became false the moment ink was adopted. Corrected 2026-08-06 — which is the
 whole failure mode in one line. **A palette written down in two places is a
 palette that will disagree with itself.**

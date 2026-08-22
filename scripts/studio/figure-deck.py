@@ -40,9 +40,13 @@ abstract and wrong on the page. Do not "simplify" any of them away:
      in the system), signature logo. Rendering it as a mirror of the cover
      gives a swiper nothing at the end — Paul: "that is not the content
      pages... the CTA page is supposed to be my headshot."
-  6. FRAME C — the portrait is a RECTANGLE. founder-portrait.jpg is
-     1200x1944 = 1:1.620 and phi is 1.618, so a phi portrait frame shows the
-     WHOLE photograph and the neck and shoulders survive. A square frame has
+  6. FRAME C — the portrait is a RECTANGLE, phi by construction. The rule was
+     measured against founder-portrait.jpg at 1200x1944 = 1:1.620, where a phi
+     frame showed the WHOLE photograph. THE ASSET CHANGED 2026-08-22:
+     founder-headshot.jpg is 1536x2732 = 1:1.779, so a phi frame now CROPS
+     about 9% of the height. That is fine and deliberate — the new shot is
+     already chest-up, so the crop takes headroom rather than his neck — but
+     do not re-derive "shows the whole photograph" from the new file. A square frame has
      to discard 38% of the image and it discards him from the chin down
      ("it looks like i have no neck"). Radius 0 + four corner handles is the
      house grammar; the round disc was the one sanctioned exception and this
@@ -140,9 +144,27 @@ mono115=F('mono-600.ttf',int(11.5*S))
 serif_ghost=F('serif-var.ttf',300*S,[550])
 
 FIGSRC=Image.open('studio/assets/brand/founder-standing.png').convert('RGBA')
-HEAD=Image.open('client/public/founder-portrait.jpg').convert('RGB')
+HEAD=Image.open('client/public/founder-headshot.jpg').convert('RGB')
 LOGO_W=Image.open('client/public/logo-green-x-dark.png').convert('RGBA')
 LOGO=Image.open('client/public/logo-green-x.png').convert('RGBA')
+
+# ── THE BYLINE HEADSHOT (2026-08-22) ──────────────────────────────────────
+# founder-headshot.jpg replaces founder-portrait.jpg on EVERY CTA and footer
+# mark (Paul: "be sure to swap out my headshot for all CTA and footer
+# images"). THE OLD CROP CONSTANTS DO NOT TRANSFER, which is the trap:
+#   old founder-portrait  1200x2732 -> 1:1.620, skin rows 0.144..0.827
+#   new founder-headshot  1536x2732 -> 1:1.779, skin rows 0.083..0.458
+# The new frame is TALLER and the face sits in its TOP 46%, so the old 0.283
+# fraction — measured against a shot whose face ran most of the frame — lands
+# on his chest. HEAD_BOX is a square measured around the face instead:
+# columns 139..1439, rows 88..1388, i.e. the head with a little air.
+HEAD_BOX = (0.0905, 0.0322, 0.9368, 0.5081)
+
+def head_square(src, px):
+    """The byline mark: a measured square around the face, then resized."""
+    w, h = src.size
+    b = (int(HEAD_BOX[0]*w), int(HEAD_BOX[1]*h), int(HEAD_BOX[2]*w), int(HEAD_BOX[3]*h))
+    return src.crop(b).resize((px, px), Image.LANCZOS)
 
 def lingrad(w,h,stops,ang):
     ar=math.radians(ang); dx,dy=math.sin(ar),-math.cos(ar)
@@ -216,7 +238,7 @@ def foot(img,d,cta=True,light=False):
     fs=54*S; cy=y0+(118*S-fs)//2; ring=fs+6*S
     d.ellipse([64*S-1,cy-3*S-1,64*S+ring+1,cy-3*S+ring+1],fill=T['dBtn'])
     d.ellipse([64*S,cy-3*S,64*S+ring,cy-3*S+ring],fill=T['white'])
-    face=HEAD.resize((fs,int(HEAD.size[1]*fs/HEAD.size[0])),Image.LANCZOS).crop((0,int(fs*0.283),fs,int(fs*0.283)+fs))
+    face=head_square(HEAD,fs)
     mask=Image.new('L',(fs,fs),0); ImageDraw.Draw(mask).ellipse([0,0,fs,fs],fill=255)
     img.paste(face,(64*S+3*S,cy),mask)
     tx=64*S+ring+16*S
@@ -240,8 +262,13 @@ def figure(img,lift=1.16,h=930,x=515,y=302):
     img.paste(f,(x*S,y*S),f)
 
 
-L=dict(bone=(255,255,255),ink=(22,24,26),body=(74,79,84),muted=(124,129,135),
-hair=(228,223,211),green=(10,122,88),tint=(223,245,236),panel=(243,240,233))
+# THE LIGHT PAGES READ THE LIVE TOKENS TOO (2026-08-22). This dict was
+# hard-coded Deal Green, so when house/tokens.ts was revalued to OXBLOOD the
+# BOOKENDS moved and the BODY PAGES did not — a deck would have come out with
+# an oxblood cover and green interiors, rendering fine and erroring nowhere.
+# A palette lives in one place or it does not live anywhere.
+L=dict(bone=T['bone'],ink=T['ink'],body=T['body'],muted=T['muted'],
+hair=T['hair'],green=T['green'],tint=T['tint'],panel=T['panel'])
 
 def light_page(p,n,total=10):
     img=Image.new('RGB',(W,H),L['bone']); d=ImageDraw.Draw(img)

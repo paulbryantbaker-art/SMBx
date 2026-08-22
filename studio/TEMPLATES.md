@@ -18,6 +18,62 @@ output means a wrong spec, never a wrong renderer.
 
 ---
 
+## LOCKED ON OXBLOOD — 2026-08-22
+
+Paul: *"lock these designs in. Get rid of all of the old green designs."*
+
+**The palette is OXBLOOD and Deal Green is a dead system.** Field `#8A2B32`,
+accent `#B8431E` on light and `#FF7D55` on the field, ground bone, depth by the
+ramp (well `#50191D` recessed · plate `#964046` raised by an `#AF6F74` rim).
+`DESIGN.md` §2 carries the dead-systems table with the retired hexes; if a
+draft comes back green, that is the system it reconstructed.
+
+**Two families are locked and shipped:**
+
+| Locked | Builder | Reference |
+|---|---|---|
+| **The offer documents** — 5pp postable · 7pp gated | `offer-docs.py` | `design_handoff_smbx_offer_docs/`, now filed IN THIS REPO |
+| **The Featured cover** — 1200×630 landscape | `featured-cover.py` | same bundle, `featured/` |
+
+**The offer cover has three cuts, all built:**
+
+| Say | Flag | What it is |
+|---|---|---|
+| **3b** | `--cover photo` | DEFAULT. The photograph full-bleed in the field panel, well at the panel's FOOT |
+| **3c light** | `--cover framed` | the well as a smaller block at the TOP, portrait framed beneath it |
+| **3c dark** | `--cover framed --surface dark` | 3c on a FULL FIELD PAGE |
+
+The dark cut still obeys the two-field law — a full-field cover plus the field
+closer is exactly two — and it gives the document a dark opening the way a
+carousel has a dark bookend. On the field the stat values take `#FF7D55`; the
+light accent `#B8431E` measures 1.9:1 there and would vanish.
+
+The Featured cover is the **plane shot with a horizontal split** and the four
+sanctioned stats as a 2×2 square of wells.
+
+**THE BYLINE MARK IS `founder-headshot.jpg`** on every CTA and footer — the
+cover foot disc, the carousel foot disc and the Frame C closer. THE OLD CROP
+CONSTANTS DO NOT TRANSFER: the retired portrait was 1:1.620 with skin from 14%
+to 83% of the frame; the new one is 1:1.779 with the face in its TOP 46%, so
+the old 0.283 fraction lands on his chest. The mark uses a square measured
+around the face instead. `build-deck.mts` and `build-onepager.mts` still
+default to the old portrait — engine files, Claude Code's side, flagged.
+
+**A PALETTE LIVES IN ONE PLACE, AND THAT LESSON COST A BUILD.** Every renderer
+now reads `house/tokens.ts` live. Three did not, and each failed silently
+rather than erroring: `figure-deck.py` read the tokens for its BOOKENDS but
+carried a hard-coded green dict for its BODY PAGES, so a deck would have come
+out with an oxblood cover and green interiors; `templates-card.py` was green
+throughout; `featured-thumb.py` and `featured-doc.py` were green and superseded,
+and are deleted. **Never transcribe a palette into a builder.**
+
+**The green renders are gone from disk** — each folder keeps its spec, its
+`BUILD.txt`, its caption and a `RETIRED-PALETTE.txt`. What was posted stays
+posted; the deletion is about what gets REUSED. Anything whose `BUILD.txt` says
+`build-deck.mts` needs Chromium and therefore the Mac to come back.
+
+---
+
 ## THE FIVE
 
 | Say | What it is | Pages |
@@ -45,8 +101,8 @@ The house deck. `build-deck.mts`, 1080×1350, `--bookend dark|light|both`.
 
   | Kind | Reads as | Use it for |
   |---|---|---|
-  | `numeral` | giant figure, green bar, serif sub-head | one number that carries a whole idea |
-  | `statement` | mono eyebrow, serif headline, green rule | a claim with no figure attached |
+  | `numeral` | giant figure, accent bar, serif sub-head | one number that carries a whole idea |
+  | `statement` | mono eyebrow, serif headline, accent rule | a claim with no figure attached |
   | `diagram` | two bars with a connector | a comparison |
   | `trade` | copy left, framed image panel right | a sub-vertical with its art |
 
@@ -54,7 +110,7 @@ The house deck. `build-deck.mts`, 1080×1350, `--bookend dark|light|both`.
   other three is silently dropped. Any page with a figure and no `source:` is
   a defect. One idea per page.
 - **CTA page** — auto-added, `closer: {tag, head, body}`. Mono tag, serif
-  payoff, green rule, body, byline foot with FOLLOW. It wears the same
+  payoff, accent rule, body, byline foot with FOLLOW. It wears the same
   surface as the cover: exactly two bookends, and they match.
 
 ---
@@ -77,7 +133,7 @@ rendered by default.
 
 ## 3 · MONOLITH — the dark look
 
-Deal Green monolith on the dark band, greenBright offset rim plate, aimed
+Oxblood monolith on the dark band, bright-accent offset rim plate, aimed
 bloom, gradient copy panel. Claude Design, `design_handoff_smbx_figure_card/`.
 
 - **As a one page** — the dark figure card. The C treatment is its default:
@@ -86,12 +142,12 @@ bloom, gradient copy panel. Claude Design, `design_handoff_smbx_figure_card/`.
 - **As a carousel** — `figure-deck.py --ground monolith-dark`.
   - **Cover** wears the monolith.
   - **Content pages are the house LIGHT grammar** — bone ground, mono kicker
-    over a hairline rule, serif head, green rule, then either prose with a
+    over a hairline rule, serif head, accent rule, then either prose with a
     source line or a dash / numbered list, ghost numeral behind, dark strip
     foot. **The monolith is a cover treatment, not a page style**; a first cut
     wore it on all ten pages and it was wrong.
   - **CTA page is FRAME C** — the portrait in a golden rectangle with corner
-    handles and a 14px green offset plate, payoff line, the green action bar
+    handles and a 14px accent offset plate, payoff line, the action bar
     (`BOOK A CALL — SMBX.AI`), proof line, logo lower-left. Never a second
     cover.
 
@@ -99,20 +155,24 @@ bloom, gradient copy panel. Claude Design, `design_handoff_smbx_figure_card/`.
 
 ## 4 · PORTAL — the light look
 
-Four receding green portal steps on paper, gradient copy panel, dot field. A
+Four receding portal steps on paper, gradient copy panel, dot field. A
 different mechanic from the monolith, not a recolour. **The offer document is
 this template.**
 
 - **As a one page** — the light figure card, 1.08/1.02 lift.
-- **As a carousel or document** — `offer-docs.py` is the worked example.
-  - **Cover** wears the portal steps; optional numeral, plate label and ruled
-    stat rows in the copy column.
-  - **Content pages** — the same house light grammar as Monolith's: top
-    strip, kicker, serif headline, green rule, lede, then a dash list or a
-    numbered list, note at the foot, ghost numeral behind.
-  - **CTA page is FRAME C**, light: the payoff, the plate pair when the
-    content calls for it (`smbX Core` / `smbX Premium`), the action bar, the
-    proof line, the portrait framed right with its byline.
+- **As a document** — `offer-docs.py`, and this is the LOCKED build, so read
+  it rather than the older portal-steps description:
+  - **Cover** is a bone copy column against a field panel carrying the
+    PHOTOGRAPH FULL-BLEED, with the well at the panel's FOOT. The four
+    receding portal steps are RETIRED from this cover (Paul, 2026-08-22, 3b
+    ADOPTED); they survive only as the one-page ground.
+  - **Content pages** — flat bone: running header flush left, serif headline,
+    accent rule, lede, then a dash list or a numbered list, note at the foot.
+    No eyebrows, no ghost numerals, no gradients.
+  - **CTA page** — a full field page, the second and last of the two field
+    surfaces: payoff, the plate pair when the content calls for it
+    (`smbx Dev` / `smbx Dev Pro`), the bone action bar, the proof line, and
+    the portrait framed right with two corner handles and its byline.
 
 **Bookend law, both looks:** the ground is worn by the cover and the CTA page
 only. Every page between is light. Never a third bookend, never two in a row.

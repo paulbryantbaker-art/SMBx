@@ -1,0 +1,16 @@
+RETIRED — CARTA / DEAL GREEN. 2026-08-22.
+
+The renders that were in this folder were built on the Deal Green palette
+(#0A7A58 accent, #A8F0CE mint, #181818 bands), which OXBLOOD replaced on
+2026-08-22. Paul: "lock these designs in. Get rid of all of the old green
+designs." The image files are deleted; the SPEC, the BUILD record and the
+caption stay, because they are the record of what was posted and the source a
+rebuild reads.
+
+TO REBUILD ON OXBLOOD: run this folder's builder again (named in BUILD.txt).
+The builders now read house/tokens.ts live, so a re-run comes out oxblood with
+no edit. Two of them need Chromium and therefore the Mac — anything whose
+BUILD.txt says build-deck.mts.
+
+WHAT WAS POSTED IS NOT UNPOSTED. These went out in green and that is history;
+the deletion is about what gets REUSED, not about the record.

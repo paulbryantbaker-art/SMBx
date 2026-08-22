@@ -53,7 +53,7 @@ library was generated from, and why it does not match the pages.
 Three faults, all measurable:
   · "Warm off-white background" — an instruction to drift warm, and it did.
     trades/homes.png measures rgb(243,239,229) against bone's rgb(252,250,246).
-  · mint #A8F0CE — retired with the jade block on 2026-08-06.
+  · field accent #FFAA90 — retired with the jade block on 2026-08-06.
   · "Soft ambient occlusion, gentle long shadows" — shading on the background
     is a gradient, and a gradient can never match a flat page at any brightness.
     Every file in the library fails the corner check for exactly this reason.
@@ -134,7 +134,7 @@ library was generated from, and why it does not match the pages.
 Three faults, all measurable:
   · "Warm off-white background" — an instruction to drift warm, and it did.
     trades/homes.png measures rgb(243,239,229) against bone's rgb(252,250,246).
-  · mint #A8F0CE — retired with the jade block on 2026-08-06.
+  · field accent #FFAA90 — retired with the jade block on 2026-08-06.
   · "Soft ambient occlusion, gentle long shadows" — shading on the background
     is a gradient, and a gradient can never match a flat page at any brightness.
     Every file in the library fails the corner check for exactly this reason.

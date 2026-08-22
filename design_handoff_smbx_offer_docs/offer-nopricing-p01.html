@@ -1,60 +1,46 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>smbXCorpDev — cover</title><style>
-@font-face{font-family:'Source Serif 4';src:url('assets/fonts/serif-var.ttf') format('truetype');font-weight:200 900;}
-@font-face{font-family:'Schibsted Grotesk';src:url('assets/fonts/sans-400.ttf');font-weight:400;}
-@font-face{font-family:'Schibsted Grotesk';src:url('assets/fonts/sans-600.ttf');font-weight:600;}
-@font-face{font-family:'IBM Plex Mono';src:url('assets/fonts/mono-400.ttf');font-weight:400;}
-@font-face{font-family:'IBM Plex Mono';src:url('assets/fonts/mono-600.ttf');font-weight:600;}
+<html><head><meta charset="utf-8"><title>smbx Dev — cover</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
 html,body{margin:0;padding:0;}
-.card{position:relative;width:1080px;height:1350px;background:#FFFFFF;overflow:hidden;font-family:'Schibsted Grotesk';}
-.panel{position:absolute;left:0;top:0;width:520px;height:1232px;background:linear-gradient(170deg,#FFFFFF 0%,#F9F7F1 46%,#F3F0E9 100%);border-right:1px solid #E4DFD3;}
-.dots{position:absolute;left:430px;top:120px;width:170px;height:400px;}
-.dots i{position:absolute;width:3px;height:3px;background:#D8D3C6;}
-.p1{position:absolute;left:520px;top:0;width:496px;height:1232px;background:#DFF5EC;}
-.p2{position:absolute;left:558px;top:0;width:458px;height:1194px;background:#0FA97C;}
-.p3{position:absolute;left:596px;top:0;width:420px;height:1156px;background:#0A7A58;}
-.p4{position:absolute;left:634px;top:0;width:382px;height:1118px;background:#086348;}
-.num{position:absolute;top:70px;left:682px;font:550 168px/0.9 'Source Serif 4';letter-spacing:-0.03em;color:#FFFFFF;z-index:1;}
-.nbar{position:absolute;top:252px;left:688px;width:52px;height:4px;background:#A8F0CE;z-index:1;}
-.nlab{position:absolute;top:278px;left:688px;width:250px;font:600 22px/1.55 'IBM Plex Mono';letter-spacing:.1em;color:#DFF5EC;z-index:1;}
-.kick{position:absolute;top:58px;left:64px;display:flex;align-items:center;gap:14px;font:600 26px 'IBM Plex Mono';letter-spacing:.14em;color:#0A7A58;z-index:2;}
-.kick i{width:10px;height:10px;background:#0A7A58;}
-.hook{position:absolute;top:130px;left:64px;width:470px;font:550 64px/1.06 'Source Serif 4';color:#16181A;letter-spacing:-0.01em;z-index:1;}
-.hook em{font-style:normal;color:#0A7A58;}
-.lede{position:absolute;top:492px;left:64px;width:452px;font:400 40px/1.32 'Schibsted Grotesk';color:#4A4F54;z-index:1;}
-.stats{position:absolute;top:846px;left:64px;width:452px;z-index:1;}
-.srow{border-top:1px solid #E4DFD3;padding:16px 0 14px;display:flex;align-items:baseline;gap:16px;}
-.srow .v{font:550 42px/1 'Source Serif 4';color:#0A7A58;letter-spacing:-0.01em;min-width:128px;}
-.srow .l{font:600 20px/1.25 'IBM Plex Mono';letter-spacing:.08em;color:#7C8187;}
-.blogo{position:absolute;left:64px;top:1128px;width:199px;z-index:2;}
-.fig{position:absolute;top:302px;left:500px;height:930px;z-index:2;filter:brightness(1.08) contrast(1.02);}
-.foot{position:absolute;left:0;right:0;bottom:0;height:118px;border-top:1px solid #E4DFD3;background:#FFFFFF;display:flex;align-items:center;justify-content:space-between;padding:0 64px;box-sizing:border-box;z-index:3;}
+.card{position:relative;width:1080px;height:1350px;background:#FCFAF6;overflow:hidden;font-family:'Plus Jakarta Sans';}
+.fieldp{position:absolute;left:667px;top:0;width:413px;height:1232px;background:#8A2B32;}
+.blogo{position:absolute;left:64px;top:56px;width:199px;z-index:4;}
+.photo{position:absolute;left:667px;top:0;width:413px;height:1232px;background-image:url('assets/founder-suit.jpg');background-size:1001px auto;background-position:-179px -39px;z-index:1;}
+.well{position:absolute;left:699px;top:896px;width:349px;height:304px;background:#50191D;z-index:2;}
+.num{position:absolute;left:731px;top:928px;font:400 144px/0.86 'Instrument Serif';color:#FFF3F0;z-index:2;}
+.nbar{position:absolute;left:735px;top:1082px;width:56px;height:4px;background:#FF7D55;z-index:2;}
+.nlab{position:absolute;left:735px;top:1108px;width:285px;font:500 20px/1.5 'IBM Plex Mono';letter-spacing:.1em;color:#DCB8B4;z-index:2;}
+.hook{position:absolute;left:64px;top:168px;width:539px;font:400 72px/1.04 'Instrument Serif';color:#1A1A1A;letter-spacing:-0.004em;text-wrap:pretty;}
+.hook em{font-style:italic;color:#B8431E;}
+.lede{position:absolute;left:64px;top:471px;width:539px;font:400 36px/1.34 'Plus Jakarta Sans';color:#57534E;text-wrap:pretty;}
+.stats{position:absolute;left:64px;top:800px;width:603px;}
+.srow{border-top:1px solid #E3DDD4;padding:20px 0 18px;display:flex;align-items:baseline;gap:16px;}
+.srow .v{font:400 46px/1 'Instrument Serif';color:#B8431E;min-width:120px;font-variant-numeric:tabular-nums;}
+.srow .l{font:500 20px/1.3 'IBM Plex Mono';letter-spacing:.08em;color:#76726B;}
+.foot{position:absolute;left:0;right:0;bottom:0;height:118px;border-top:1px solid #E3DDD4;background:#FCFAF6;display:flex;align-items:center;justify-content:space-between;padding:0 64px;box-sizing:border-box;z-index:5;}
 .who{display:flex;align-items:center;gap:16px;}
-.who img{width:56px;height:56px;border-radius:50%;object-fit:cover;border:3px solid #FFFFFF;outline:1px solid #D8D3C6;}
-.nm{font:600 24px 'Schibsted Grotesk';color:#16181A;}
-.tt{font:400 20px 'Schibsted Grotesk';color:#7C8187;margin-top:2px;white-space:nowrap;}
-.cta{font:600 22px 'IBM Plex Mono';color:#0A7A58;letter-spacing:.08em;}
+.who img{width:56px;height:56px;object-fit:cover;object-position:50% 18%;border:1px solid #E3DDD4;}
+.nm{font:600 24px 'Plus Jakarta Sans';color:#1A1A1A;}
+.tt{font:400 20px 'Plus Jakarta Sans';color:#76726B;margin-top:2px;white-space:nowrap;}
+.cta{font:500 22px 'IBM Plex Mono';color:#B8431E;letter-spacing:.08em;}
 </style></head><body>
 <div class="card">
-  <div class="panel"></div>
-  <div class="dots"><i style="left:0px;top:0px"></i><i style="left:34px;top:0px"></i><i style="left:68px;top:0px"></i><i style="left:102px;top:0px"></i><i style="left:136px;top:0px"></i><i style="left:0px;top:34px"></i><i style="left:34px;top:34px"></i><i style="left:68px;top:34px"></i><i style="left:102px;top:34px"></i><i style="left:136px;top:34px"></i><i style="left:0px;top:68px"></i><i style="left:34px;top:68px"></i><i style="left:68px;top:68px"></i><i style="left:102px;top:68px"></i><i style="left:136px;top:68px"></i><i style="left:0px;top:102px"></i><i style="left:34px;top:102px"></i><i style="left:68px;top:102px"></i><i style="left:102px;top:102px"></i><i style="left:136px;top:102px"></i><i style="left:0px;top:136px"></i><i style="left:34px;top:136px"></i><i style="left:68px;top:136px"></i><i style="left:102px;top:136px"></i><i style="left:136px;top:136px"></i><i style="left:0px;top:170px"></i><i style="left:34px;top:170px"></i><i style="left:68px;top:170px"></i><i style="left:102px;top:170px"></i><i style="left:136px;top:170px"></i><i style="left:0px;top:204px"></i><i style="left:34px;top:204px"></i><i style="left:68px;top:204px"></i><i style="left:102px;top:204px"></i><i style="left:136px;top:204px"></i><i style="left:0px;top:238px"></i><i style="left:34px;top:238px"></i><i style="left:68px;top:238px"></i><i style="left:102px;top:238px"></i><i style="left:136px;top:238px"></i><i style="left:0px;top:272px"></i><i style="left:34px;top:272px"></i><i style="left:68px;top:272px"></i><i style="left:102px;top:272px"></i><i style="left:136px;top:272px"></i><i style="left:0px;top:306px"></i><i style="left:34px;top:306px"></i><i style="left:68px;top:306px"></i><i style="left:102px;top:306px"></i><i style="left:136px;top:306px"></i><i style="left:0px;top:340px"></i><i style="left:34px;top:340px"></i><i style="left:68px;top:340px"></i><i style="left:102px;top:340px"></i><i style="left:136px;top:340px"></i><i style="left:0px;top:374px"></i><i style="left:34px;top:374px"></i><i style="left:68px;top:374px"></i><i style="left:102px;top:374px"></i><i style="left:136px;top:374px"></i></div>
-  <div class="p1"></div><div class="p2"></div><div class="p3"></div><div class="p4"></div>
+  <div class="fieldp"></div>
+  <div class="photo"></div>
+  <img class="blogo" src="assets/logo-accent-x.png" alt="smbx.ai">
+  <div class="well"></div>
   <div class="num">150</div>
   <div class="nbar"></div>
-  <div class="nlab">ACQUISITIONS — TWO DECADES, ONE SIDE OF THE TABLE</div>
-  <div class="kick"><i></i>CORPORATE DEVELOPMENT</div>
+  <div class="nlab">ACQUISITIONS<br>LED OR CO-LED</div>
   <div class="hook">Buying a business is hard work. <em>We make it easier.</em></div>
-  <div class="lede">Whether it’s your 1st or your 100th acquisition, we run the process for you, freeing up your time and resources.</div>
+  <div class="lede">Whether it&rsquo;s your 1st or your 100th acquisition, we run the process for you, freeing up your time and resources.</div>
   <div class="stats">
     <div class="srow"><span class="v">$5B+</span><span class="l">REVENUE ADDED</span></div>
-    <div class="srow"><span class="v">≈$21B</span><span class="l">TRANSACTION VALUE TOUCHED</span></div>
-    <div class="srow" style="border-bottom:1px solid #E4DFD3;"><span class="v">0</span><span class="l">SELL-SIDE DEALS. EVER.</span></div>
+    <div class="srow"><span class="v">&asymp;$21B</span><span class="l">TRANSACTION VALUE TOUCHED</span></div>
+    <div class="srow" style="border-bottom:1px solid #E3DDD4;"><span class="v">0</span><span class="l">SELL-SIDE DEALS. EVER.</span></div>
   </div>
-  <img class="blogo" src="assets/logo-green-x.png" alt="smbx.ai">
-  <img class="fig" src="assets/founder-standing.png" alt="">
   <div class="foot">
     <div class="who"><img src="assets/founder-portrait.jpg" alt=""><div><div class="nm">Paul Baker</div><div class="tt">Buy-side corporate development</div></div></div>
-    <div class="cta">SWIPE&nbsp;&nbsp;→</div>
+    <div class="cta">SWIPE&nbsp;&nbsp;&rarr;</div>
   </div>
 </div>
 </body></html>

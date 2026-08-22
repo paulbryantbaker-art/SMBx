@@ -44,8 +44,8 @@ imagePos: 50% 50%
 a bank of three closed elevator doors in a building lobby, seen straight on, with call fixtures beside them
 
 PALETTE, STRICT. Flat solid background exactly #FCFAF6 (252, 250, 246) with no gradient,
-vignette, texture, border or drop shadow. Bright green #0FA97C for the main masses. Deep
-green #0A7A58 for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
+vignette, texture, border or drop shadow. Bright accent #FF7D55 for the main masses. Deep
+green #B8431E for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
 highlight surfaces — window glass, a van panel. NO amber, no gold, no brass, no warm
 accent of any kind. Use no other colours: no additional greens, no greys, no
 off-whites, no blues, no skin tones.
@@ -80,8 +80,8 @@ imagePos: 50% 50%
 an elevator machine room in cross-section with a traction motor, a governor and a controller cabinet
 
 PALETTE, STRICT. Flat solid background exactly #FCFAF6 (252, 250, 246) with no gradient,
-vignette, texture, border or drop shadow. Bright green #0FA97C for the main masses. Deep
-green #0A7A58 for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
+vignette, texture, border or drop shadow. Bright accent #FF7D55 for the main masses. Deep
+green #B8431E for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
 highlight surfaces — window glass, a van panel. NO amber, no gold, no brass, no warm
 accent of any kind. Use no other colours: no additional greens, no greys, no
 off-whites, no blues, no skin tones.
@@ -116,8 +116,8 @@ imagePos: 50% 50%
 an elevator hoistway seen in cutaway showing guide rails, a counterweight and travelling cables
 
 PALETTE, STRICT. Flat solid background exactly #FCFAF6 (252, 250, 246) with no gradient,
-vignette, texture, border or drop shadow. Bright green #0FA97C for the main masses. Deep
-green #0A7A58 for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
+vignette, texture, border or drop shadow. Bright accent #FF7D55 for the main masses. Deep
+green #B8431E for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
 highlight surfaces — window glass, a van panel. NO amber, no gold, no brass, no warm
 accent of any kind. Use no other colours: no additional greens, no greys, no
 off-whites, no blues, no skin tones.
@@ -152,8 +152,8 @@ imagePos: 50% 50%
 a row of elevator hall call stations and position indicators along a corridor wall
 
 PALETTE, STRICT. Flat solid background exactly #FCFAF6 (252, 250, 246) with no gradient,
-vignette, texture, border or drop shadow. Bright green #0FA97C for the main masses. Deep
-green #0A7A58 for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
+vignette, texture, border or drop shadow. Bright accent #FF7D55 for the main masses. Deep
+green #B8431E for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
 highlight surfaces — window glass, a van panel. NO amber, no gold, no brass, no warm
 accent of any kind. Use no other colours: no additional greens, no greys, no
 off-whites, no blues, no skin tones.
@@ -188,8 +188,8 @@ imagePos: 50% 50%
 a dense block of mid-rise and high-rise buildings seen from above at a three-quarter angle
 
 PALETTE, STRICT. Flat solid background exactly #FCFAF6 (252, 250, 246) with no gradient,
-vignette, texture, border or drop shadow. Bright green #0FA97C for the main masses. Deep
-green #0A7A58 for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
+vignette, texture, border or drop shadow. Bright accent #FF7D55 for the main masses. Deep
+green #B8431E for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
 highlight surfaces — window glass, a van panel. NO amber, no gold, no brass, no warm
 accent of any kind. Use no other colours: no additional greens, no greys, no
 off-whites, no blues, no skin tones.
@@ -224,8 +224,8 @@ imagePos: 50% 40%
 a single closed elevator car door with a call button panel on the wall beside it
 
 PALETTE, STRICT. Flat solid background exactly #FCFAF6 (252, 250, 246) with no gradient,
-vignette, texture, border or drop shadow. Bright green #0FA97C for the main masses. Deep
-green #0A7A58 for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
+vignette, texture, border or drop shadow. Bright accent #FF7D55 for the main masses. Deep
+green #B8431E for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
 highlight surfaces — window glass, a van panel. NO amber, no gold, no brass, no warm
 accent of any kind. Use no other colours: no additional greens, no greys, no
 off-whites, no blues, no skin tones.
@@ -260,8 +260,8 @@ imagePos: 50% 40%
 an elevator controller cabinet standing open, showing relay boards and wiring looms
 
 PALETTE, STRICT. Flat solid background exactly #FCFAF6 (252, 250, 246) with no gradient,
-vignette, texture, border or drop shadow. Bright green #0FA97C for the main masses. Deep
-green #0A7A58 for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
+vignette, texture, border or drop shadow. Bright accent #FF7D55 for the main masses. Deep
+green #B8431E for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
 highlight surfaces — window glass, a van panel. NO amber, no gold, no brass, no warm
 accent of any kind. Use no other colours: no additional greens, no greys, no
 off-whites, no blues, no skin tones.
@@ -296,8 +296,8 @@ imagePos: 50% 50%
 a stack of building service records and a route clipboard on a workbench beside a governor
 
 PALETTE, STRICT. Flat solid background exactly #FCFAF6 (252, 250, 246) with no gradient,
-vignette, texture, border or drop shadow. Bright green #0FA97C for the main masses. Deep
-green #0A7A58 for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
+vignette, texture, border or drop shadow. Bright accent #FF7D55 for the main masses. Deep
+green #B8431E for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
 highlight surfaces — window glass, a van panel. NO amber, no gold, no brass, no warm
 accent of any kind. Use no other colours: no additional greens, no greys, no
 off-whites, no blues, no skin tones.

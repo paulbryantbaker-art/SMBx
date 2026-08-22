@@ -120,7 +120,7 @@ fig_path = resolve(post.get('figure') or 'brand/founder-standing.png')
 if not fig_path:
     print(f"figure cutout missing: {post.get('figure') or 'brand/founder-standing.png'}")
     print('run from the STUDIO ROOT so ./assets resolves.'); sys.exit(1)
-head_path = resolve(post.get('headshot')) or ROOT / 'client/public/founder-portrait.jpg'
+head_path = resolve(post.get('headshot')) or ROOT / 'client/public/founder-headshot.jpg'
 
 S = 2; W, H = 1080 * S, 1350 * S
 FIG = Image.open(fig_path).convert('RGBA')

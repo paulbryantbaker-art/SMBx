@@ -9,9 +9,9 @@
 ## What it is
 
 A dark panel on which a line of copy performs: the standing words hold in
-mint while the rotating word **types** in ivory, connector elbows **draw**
+field accent while the rotating word **types** in ivory, connector elbows **draw**
 through a dot grid, claim pills **enter as green bars** that then take their
-labels, mint current **marches along the wires** while it holds, the word
+labels, field accent current **marches along the wires** while it holds, the word
 **un-types**, and the next entry begins. The loop closes by typing a tagline
 over a drawn figure, then resets through the boxed wordmark.
 
@@ -30,13 +30,13 @@ in collateral, for MOTION pieces only** (DESIGN.md's interim notice keeps
 LEDGER as the source for the static builders until phase 2; a video element
 that mirrors the live site is the deliberate exception, Paul 2026-08-12).
 
-- Panel: `#1A1B19` (dark), mint dot grid `rgba(168,240,206,.15)` on ~22px
+- Panel: `#1A1B19` (dark), field accent dot grid `rgba(168,240,206,.15)` on ~22px
   pitch, square corners, no texture.
-- The line: Source Serif 4, weight 550 — standing words **mint `#A8F0CE`**,
-  typed words **ivory `#F4F5F1`**, block caret in mint.
-- Pills: **Deal Green `#0A7A58`** fill, `#FFFFFF` IBM Plex Mono labels,
+- The line: Source Serif 4, weight 550 — standing words **field accent `#FFAA90`**,
+  typed words **ivory `#FFF3F0`**, block caret in field accent.
+- Pills: **Accent `#B8431E`** fill, `#FFFFFF` IBM Plex Mono labels,
   letter-spaced, square.
-- Wires: `#3A3F38` hairlines; the current is mint marching dashes.
+- Wires: `#3A3F38` hairlines; the current is field accent marching dashes.
 - Plate (bottom-left): mono `#8E948B` with a 9px green square.
 - Never: warm accents, rounded pills, textures, or any retired palette hex
   (DESIGN.md carries the dead table).

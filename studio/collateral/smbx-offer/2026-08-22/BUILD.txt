@@ -1,0 +1,118 @@
+built      2026-08-22 · THE OFFER DOCUMENT, OXBLOOD (no-pricing, 5pp) — the
+           postable cut. Supersedes the CARTA / Deal Green build of
+           2026-08-19 in full; that palette is now a dead system.
+reference  design_handoff_smbx_offer_docs/ — RULE ZERO: the HTML wins.
+           12 pages transcribed 1:1.
+builder    scripts/studio/offer-docs.py --doc nopricing   (PIL raster)
+           --handoff <dir> points at the bundle; the ASSETS SHIP WITH IT and
+           are used from there, because the repo's own copies are the green
+           originals and would silently render the retired mark.
+names      smbXCorpDev → smbx Dev · Premium → smbx Dev Pro (OFFER_REFERENCE.md).
+           The names are lower-case, so the capital-X mark is gone from the
+           wordmark and survives as the lower-case x set in the accent.
+           On the closer's RAISED Dev Pro plate that x is #FFF3F0, not accent
+           — §3.4.3 bars the accent from a raised surface (#FF7D55 on #964046
+           is 2.67:1). The two plates carry differently-coloured x marks ON
+           PURPOSE; do not "fix" one to match the other.
+absent     smbx Coach and smbx Crew appear nowhere. OFFER_REFERENCE.md §3: no
+           figure has been set for either, and none may be invented. Never
+           attach a success fee to either.
+
+FONTS      Instrument Serif 400 + italic and Plus Jakarta Sans 400/500/600/700
+           were INSTALLED (@fontsource) and cached as .fonts-cache/ox-*.ttf,
+           not substituted. Root CLAUDE.md warns that any face which is not
+           installed ships as Noto — a missing face does not error, it just
+           renders wrong. IBM Plex Mono 500 was cached too; the repo only had
+           400/600.
+
+THREE CANON CORRECTIONS vs the handoff. Design is 1:1; copy follows the
+practice's own record. Two of these the handoff's own TOKENS-USED believes
+were already made:
+           1. "REVENUE ADDED" → "ENTERPRISE VALUE ADDED" on the cover stat
+              rows. Enterprise value is the sanctioned stat; revenue is a
+              different, unsanctioned claim. THE DOCUMENT CONTRADICTED ITSELF
+              — its own closer proof line already read "$5B+ enterprise value
+              added".
+           2. "Evaluation" → "VALUATION" in the smbx Dev list (Paul,
+              2026-08-13: "as in how much a business is worth. My ICP will
+              catch this").
+           3. "Close the deal and the retainer was free." — CUT from the terms
+              page (pricing doc). The credit CAPS at the fee: a long mandate
+              on a floor deal owes $0 at close and the excess is NOT refunded,
+              and there is no credit at all without a close. "Free" is true
+              only when the fee exceeds the retainers paid.
+
+SCHEDULE   VERIFIED against OFFER_REFERENCE.md §2, no correction needed:
+           5% / 4% / 3% / 2%, $100,000 minimum, $15,000 a quarter paid up
+           front, $5M → $210,000 = 4.2%. (Pricing document only.)
+
+⚠ OPEN — THE LIGHT NEUTRALS DISAGREE WITH THE REPO'S OWN LAW. The field side
+matches house/tokens.ts exactly. The light side does not:
+
+           handoff   ground #FCFAF6 · rule #E3DDD4 · ink #1A1A1A ·
+                     body #57534E · muted #76726B
+           repo law  ground #FFFFFF · hair #E4DFD3 · ink #16181A ·
+                     body #4A4F54 · muted #7C8187
+
+DESIGN_LANGUAGE.md §3 puts the WHITE ground on the record — Paul, 2026-08-12,
+side by side against carta.com: the warm #FCFAF6 "read dingy" beside their
+pure white, and the note says the ground is white, NOT bone. The handoff
+reverts to the warm set for a printed document, where the argument that
+produced that decision (a screen, beside a competitor's screen) does not
+apply. Neither is obviously wrong and they must not silently disagree.
+BOTH RENDER: `--neutrals handoff` (default, RULE ZERO) or `--neutrals repo`.
+One flag either way, Paul's call.
+
+ACCEPTANCE run and passing: every field/accent hex resolves to house/tokens.ts
+· no dead-system hex anywhere (green, mint, amber, teal, blue, near-black) ·
+exactly two oxblood surfaces per document (cover field panel + closer) · no
+gradient, no curve, no radius outside the action bar's 6px · accent never on a
+resting button fill or a raised surface · smallest type 20px.
+
+GO-LIVE     NOT DONE for the pricing cut — see that folder's BUILD.txt.
+
+
+COVER VARIANTS — 3b ADOPTED, 3c KEPT, and 3c now has a DARK (2026-08-22).
+Paul asked where "the one with the smaller block on top right" lives: it is
+3c, `candidates/cover-suit-b-framed.html` in the handoff — the well as a
+SMALLER BLOCK at the TOP of the panel with the portrait framed beneath it,
+rather than 3b's photograph filling the panel with the well at its foot.
+It was KEPT on the reference sheet and had never been built. It is now:
+
+  --cover photo             3b, the default and the shipped cover
+  --cover framed            3c on the light ground
+  --cover framed --surface dark   3c on a FULL FIELD PAGE
+
+Samples filed here as cover-3c-framed-light.jpg and cover-3c-framed-dark.jpg.
+
+THE DARK ONE STILL OBEYS THE TWO-FIELD LAW: a full-field cover plus the field
+closer is exactly two field surfaces, and it gives the document a dark opening
+the way a carousel has a dark bookend. On dark the copy column re-scopes to
+the field's own text tiers, hairlines become the rim, the mark switches to
+logo-bone-x, and THE STAT VALUES TAKE #FF7D55 — never #B8431E, which measures
+1.9:1 on the field. The well still reads as a recess because it is darker than
+the field; that is what the ramp is for.
+
+
+HEADSHOT SWAPPED ON EVERY CTA AND FOOTER MARK (Paul, 2026-08-22: "be sure to
+swap out my headshot for all CTA and footer images"). founder-headshot.jpg
+replaces founder-portrait.jpg on the cover foot disc, the carousel foot disc
+and the Frame C closer. The asset is now also in studio/assets/brand/ and
+client/public/ so the non-handoff builders can find it.
+
+THE OLD CROP CONSTANTS DO NOT TRANSFER, and that is the trap:
+   old founder-portrait  1200x1944 = 1:1.620, skin rows 0.144..0.827
+   new founder-headshot  1536x2732 = 1:1.779, skin rows 0.083..0.458
+The new frame is taller and the face sits in its TOP 46%, so the old 0.283
+fraction — measured against a shot whose face ran most of the frame — lands on
+his chest. The byline mark now uses HEAD_BOX, a square measured around the
+face: columns 139..1439, rows 88..1388 of the source.
+
+FRAME C's "shows the WHOLE photograph" note was corrected rather than left to
+be re-derived: a phi frame on a 1:1.779 source crops about 9% of the height.
+That is fine here — the new shot is already chest-up, so the crop takes
+headroom, not his neck.
+
+STILL ON THE OLD PORTRAIT: build-deck.mts and build-onepager.mts default to
+client/public/founder-portrait.jpg. Those are engine files — Claude Code's
+side — so the default is flagged rather than changed here.
