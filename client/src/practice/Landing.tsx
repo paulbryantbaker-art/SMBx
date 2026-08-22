@@ -891,15 +891,26 @@ export default function Landing() {
                 overhangs the cap line, because rows floating above the
                 headline in open bone looked like an accident. */}
             <span aria-hidden="true" className="ca-hero-hdots" style={{ position: 'absolute', left: -22, top: -6, width: 300, height: 180, backgroundImage: 'radial-gradient(rgba(22,24,26,.12) 1.5px, transparent 1.5px)', backgroundSize: '20px 20px', maskImage: 'linear-gradient(to bottom right, #000 18%, transparent 76%)', WebkitMaskImage: 'linear-gradient(to bottom right, #000 18%, transparent 76%)', zIndex: -1 }} />
+            {/* THE TAG (Paul, 2026-08-22). "Build. Run. Go." is the product line
+                stated in three words, so it carries information rather than
+                decorating — which is the test CLAUDE.md's no-eyebrows rule
+                applies. Buyer hero only: the owner-side fold sells a valuation,
+                not the three products. */}
+            {!ownerHero && (
+              <p data-hs="0" style={{ margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: 9, fontFamily: MONO, fontSize: 12, fontWeight: 500, letterSpacing: '0.13em', textTransform: 'uppercase', color: '#16181A' }}>
+                <span aria-hidden="true" style={{ width: 8, height: 8, background: '#B8431E', flex: 'none' }} />
+                Build. Run. Go.
+              </p>
+            )}
             {ownerHero ? (
               <h1 data-hs="0" style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(35px, 4.05vw, 82px)', lineHeight: 1.05, letterSpacing: '-0.015em', textWrap: 'balance' }}>Think like a buyer. Exit on your&nbsp;terms.</h1>
             ) : (
-              <h1 data-hs="0" style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(35px, 4.05vw, 82px)', lineHeight: 1.05, letterSpacing: '-0.015em', textWrap: 'balance' }}>Buying a business is hard&nbsp;work. We make it&nbsp;easier.</h1>
+              <h1 data-hs="0" style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(35px, 4.05vw, 82px)', lineHeight: 1.05, letterSpacing: '-0.015em', textWrap: 'balance' }}>We&rsquo;ll build and run your business acquisition engine for&nbsp;you.</h1>
             )}
             {ownerHero ? (
               <p data-hs="1" style={{ margin: '26px 0 0', maxWidth: '28em', fontSize: 19, lineHeight: 1.68, color: '#4A4F54', textWrap: 'pretty' }}>Thinking like a buyer is the best way to prepare — and starting here, with your valuation, puts you in front of potential buyers when you're{' '}ready.</p>
             ) : (
-              <p data-hs="1" style={{ margin: '26px 0 0', maxWidth: '28em', fontSize: 19, lineHeight: 1.68, color: '#4A4F54', textWrap: 'pretty' }}>Whether your 1st or your 100th acquisition, we run the process for you, freeing up your time and&nbsp;resources.</p>
+              <p data-hs="1" style={{ margin: '26px 0 0', maxWidth: '28em', fontSize: 19, lineHeight: 1.68, color: '#4A4F54', textWrap: 'pretty' }}>Whether it&rsquo;s your 1st acquisition or your 100th &mdash; the function, the deals, or the people to run&nbsp;them.</p>
             )}
             <div data-hs="2" style={{ marginTop: 36, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
               <a
@@ -1595,7 +1606,7 @@ export default function Landing() {
         <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(62px, 11vw, 190px) clamp(20px, 4vw, 32px) 0' }}>
           <div data-rv data-fnd className="rv-stagger" style={{ background: '#F3F0E9', display: 'grid', gridTemplateColumns: '300px 1fr', gap: 48, padding: '48px 52px', alignItems: 'center', position: 'relative' }}>
             <div style={{ position: 'relative', width: 230 }}>
-              <img data-rvimg src="/founder-portrait.jpg" alt="Paul Baker" loading="lazy" style={{ display: 'block', width: 230, height: 250, objectFit: 'cover', objectPosition: '50% 32%' }} />
+              <img data-rvimg src="/founder-headshot-web.jpg" alt="Paul Baker" loading="lazy" style={{ display: 'block', width: 230, height: 250, objectFit: 'cover', objectPosition: '50% 24%' }} />
               <span style={{ position: 'absolute', right: -14, bottom: -14, width: 34, height: 34, background: '#B8431E', color: '#FFFFFF', display: 'grid', placeItems: 'center', fontFamily: SERIF, fontWeight: 700, fontSize: 20, fontStyle: 'italic' }}>"</span>
               {/* No ornament over the portrait (2026-08-08, Paul: "there is an
                   arc on my headshot that should not be"). A dashed quarter-arc

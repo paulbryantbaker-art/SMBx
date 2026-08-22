@@ -1,3 +1,11 @@
+> **SUPERSEDED 2026-08-22 — see `SERVICE_OFFERINGS.md`.**
+> This file is the record of an earlier pass. The names, prices and product
+> boundaries in it are out of date: `smbx Crew` is now **smbx Team**, the
+> coaching line is **$75,000 / 6 months** rather than a quarterly retainer, and
+> the offerings are three distinct JOBS rather than a layered stack. Kept
+> because the reasoning behind the rejected options is worth having; do not
+> build from the figures.
+
 # smbx Coach and smbx Crew — the build
 
 **2026-08-22.** From a nine-agent pass: five design lanes, three sceptics attacking

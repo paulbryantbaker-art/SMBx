@@ -1,234 +1,245 @@
-# smbX service offerings — the three lines
+# smbX service offerings — the canonical definition
 
-**DRAFT for Paul's approval, 2026-08-22.** Not law yet. When approved, the
-"Product naming" section of `CLAUDE.md` points here and this file becomes the
-canonical offering definition; `THE_LINE_POLICY.md` takes the amendment in §5.
-
----
-
-## 0. What was asked for
-
-Paul, 2026-08-22, verbatim (the message truncated mid-sentence — noted so the
-record is honest about what is his and what is filled in):
-
-> I want to offer customers:
-> - Corporate Development Coaching for brand that have a team but could use assistance and support
-> - Corporate Development staffing - a variety of roles that suport _
->
-> 1. CD project manager
-
-Then: *"etc"* — carry the list.
-
-**So: two new lines, and one named role.** Everything below marked 🟡 is
-proposed and needs your yes/no. Everything marked ⚪ is existing law, unchanged.
+**Current as of 2026-08-22.** This file is the single source of truth for what
+smbX sells. `OFFER_REFERENCE.md` carries the fee arithmetic and the collateral
+production notes; `COACH_CREW_BUILD.md` is a superseded earlier pass kept for its
+reasoning. Where any of them disagree, **this file wins.**
 
 ---
 
-## 1. The three lines
+## 0. The three products
 
-The practice sells one thing — a corporate development function — in three
-delivery modes. The difference between them is *who holds the seat*.
+**smbx Build · smbx Run · smbx Go.** Build develops the corporate development
+function. Run runs corporate development, period. Go is the staffing function,
+period. **Run carries a Pro option** (smbx Run Pro) that continues through
+integration — it is a scope election on Run, not a fourth product.
 
-| Line | We… | For a buyer who… | Paid |
+Named by Paul, 2026-08-22. The names are VERBS because that is the axis a buyer
+actually chooses on: how much of the work they hand over.
+
+---
+
+## 1. The three products, by subject
+
+Not a ladder and not a stack. Four things a buyer might need, distinguished by
+**what is being worked on**.
+
+| Subject | Product | The client's sentence | Status |
 |---|---|---|---|
-| 🟡 **smbx Dev** | run the deal, through close | has no corp-dev function, or no capacity | Retainer + success fee |
-| 🟡 **smbx Coach** | make your team better at running it | has a team that needs a sharper method | Retainer only |
-| 🟡 **smbx Crew** | fill the seats on your team | has the mandate and is short a body | Per seat, per month |
+| **The machine** | **smbx Build** | "My function doesn't work." | $75K / 6 months |
+| **The deal** | **smbx Run** | "Get this deal done." | LAW — priced, live |
+| **The asset** | **smbx Run Pro** | "And fix what I bought." | LAW — scope election on Run |
+| **The seats** | **smbx Go** | "I'm short a body." | Price open |
 
-🟡 **smbx Dev Pro** (with PMI) is the renamed Premium tier. ⚪ **smbXDefinitive**
-(the method) is what all three lines run on — that is the through-line in the
-pitch: *same method, three ways to get it.*
-
-### ✅ Naming — DECIDED (Paul, 2026-08-22)
-
-> smbx Dev (and Dev Pro) · smbx Coach · smbx Crew
-
-**This retires `smbXCorpDev` and `smbXCorpDev Premium`.** The new set follows
-Carta's own product convention — mark plus a plain word, the way *Carta Law* and
-*Carta Fund ERP* work — which is consistent with the design direction.
-
-Two consequences, neither of them free:
-
-**The flagship rename costs a brochure rebuild.** `smbXCorpDev` is the name
-inside `content/collateral/smbx-corpdev-pricing.pdf`, a rendered binary with no
-source markdown in the repo that `POST /api/practice/pricing` mails to every lead
-who asks. The name is also in the engagement letter. This is the §3 trap, now
-triggered by the rename rather than by adding lines — and it fires whether or not
-the two new lines ever ship.
-
-**`smbXDefinitive` is now inconsistent** with the set. Either it becomes
-**smbx Definitive** or it stays as the one camel-case name because it's the
-method rather than a product. 🟡 Your call — I'd move it, since it appears
-alongside the three lines in exactly the places the inconsistency shows.
-
-## 2. 🟡 smbx Crew — the role ladder
-
-You named the CD Project Manager. Here is the full ladder, and it isn't a list —
-**it's the seats along the engagement track the site already publishes.** Every
-phase of B0→B5 + PMI has exactly one seat, which is why this reads as designed
-rather than assembled.
-
-| # | Seat | Owns | Track phase |
-|---|---|---|---|
-| 1 | **CD Project Manager** *(yours)* | The calendar, the workstream owners, the close checklist. The spine of the deal. | B3–B5 |
-| 2 | **CD Analyst** | The numbers — valuation, LBO, the model build, QoE support | B2 |
-| 3 | **Diligence Manager** | The DDQ, the data room, the issues log, coordinating the licensed specialists | B3 |
-| 4 | **Sourcing Associate** | The target list, the outreach cadence, owner conversations, pipeline hygiene | B1 |
-| 5 | **Integration Manager** | Day 0 → 100 days: the plan, the workstreams, synergy tracking | PMI0–PMI3 |
-| 6 | **Interim Head of Corp Dev** | The senior seat — thesis, IC/board reporting, leading the negotiation | B0 + whole track |
-
-Seats 1–5 are individual contributors and are the volume business. Seat 6 is a
-different sale (fractional executive, longer term, higher rate) — worth keeping
-on the ladder because it's the one an acquirer between hires actually needs.
-
-**Add or cut freely.** The one I'd resist adding is anything named "counsel",
-"tax" or "appraisal" — THE LINE says we coordinate those specialists, we don't
-seat them.
-
-### 🔴 The question this line raises, and it is the big one
-
-**smbX has one employee.** `THE_LINE_POLICY.md` says so, and staffing sells
-labour the practice does not currently have. Three honest ways to have it:
-
-- **(a) Paul takes one seat.** Real revenue immediately, but it consumes the
-  person who runs the mandates. One seat at a time, max.
-- **(b) A vetted contractor bench.** Scales, but it makes smbX a firm that
-  carries people — and `CLAUDE.md` rule 2 says *"a partner is the only growth
-  path… not customers."* A contractor bench is a third category that rule
-  doesn't contemplate. **This is an amendment to rule 2, not an application of
-  it,** and it should be made deliberately.
-- **(c) 🟡 AI-augmented seats.** One person plus DEFINITIVE covering what a
-  client would otherwise hire two or three people for. This is the practice's
-  own thesis pointed at staffing, it's the only version that's differentiated
-  rather than a commodity staffing agency, and it's the one that prices on
-  *output* instead of *headcount*.
-
-**I'd build (c), open with (a).** But this is your call and nothing below
-depends on it.
+**smbXDefinitive** is the method underneath all four. 🟡 Open: does it become
+**smbx Definitive** for consistency?
 
 ---
 
-## 3. 🟡 How each line gets paid
+## 2. How they combine — three jobs, not layers
 
-smbx Dev's economics are unchanged: **$15,000/quarter up front + the banded success
-fee, every retainer dollar credited at close.** No figure from it reaches the
-site. Nothing here touches that.
+**They co-occur across different SUBJECTS. They never stack on the same subject.**
 
-**smbx Coach — quarterly retainer, no success fee.**
-Same unit as the mandate, and the unit is the deliberate part: a quarter commits
-where a month lets them leave after thirty days. Priced meaningfully below the
-mandate rate or it cannibalises — a buyer who'd pay $15K/quarter for coaching
-pays it for the mandate instead.
+- ✅ Dev running Deal A **+** a Team PM handling the client's own tuck-ins — two
+  jobs, two subjects, sell both.
+- ❌ Dev running Deal A **+** a Team PM on Deal A — Dev already holds the close
+  checklist. That is billing the same work twice.
 
-**smbx Crew — per seat, per month, minimum one quarter.**
-The seat is smbX's person, not the client's hire. Two clauses that have to be in
-the contract from day one:
-- **Convert-to-hire fee.** If the client wants to hire the person, that's a
-  priced event — otherwise smbX is a free recruiter.
-- **No success fee, ever, on a Crew or Coach engagement.** See §4.
+**THE REDUNDANCY RULE: never sell a seat and the work that seat would do.**
+Staff an Interim Head of Corp Dev and that person owns process improvement, so
+selling smbx Build on top is double-selling. **smbx Build and the
+senior seat are substitutes, not complements.** This does not extend to the
+junior seats — an Analyst, PM or Diligence Manager *executes* the function
+rather than redesigning it, so smbx Build plus an IC seat is honest.
 
-**Figures are yours to set.** I've deliberately not invented any, and none of
-this reaches the public site — same as the mandate schedule.
-
-### ⚠️ The brochure trap, which applies here in full
-
-`content/collateral/smbx-corpdev-pricing.pdf` is a rendered binary with no text
-layer and no source markdown in the repo, and `POST /api/practice/pricing` mails
-it to every lead who asks. **Adding two lines to the schedule is not a code
-change — it is a studio rebuild dropped back at that exact filename,** plus the
-engagement letter. Until that happens, the app and the customer-facing schedule
-disagree. This is the same trap `CLAUDE.md` documents at the 2026-08-17 cadence
-change; it cost a round trip then.
+**A note on the arbitrage.** A client could in principle buy smbx Build
+plus a seat instead of a mandate and avoid the success fee entirely — on paper
+that is ~$372K a year cheaper at three deals. In practice the populations barely
+overlap: a buyer with a working corp-dev leader and analysts is not shopping for
+a mandate. Watch it if a Run client starts hiring; do not design around it.
 
 ---
 
-## 4. THE LINE — what these two lines do to the perimeter
+## 3. smbx Run / Dev Pro — unchanged
 
-**The good news is structural: neither new line takes transaction-contingent
-compensation.** Coaching and staffing are fee-for-service — you're selling
-instruction and labour, not effecting transactions for a fee. That sits *further
-inside* the perimeter than the existing success fee does, not closer to it. The
-§15(b)(13) / state-registration question that's pending on the mandate does not
-newly arise here.
+$15,000 per quarter, paid up front. Banded success fee: 5% of the first $1M of
+enterprise value, 4% of $1–5M, 3% of $5–10M, 2% above $10M, **$100,000 minimum**
+(the floor binds below $2.25M EV). Every retainer dollar credits against the fee
+at close, capped at the fee, forfeited if there is no close. Dev Pro continues the
+retainer through PMI0–PMI3 and adds no second formula.
 
-**But three things do, and they're new:**
-
-**4.1 — One buyer per target has to cover coaching and staffing too.**
-Today the rule and the `ENGAGED_LANES` register are aimed at mandates. If we
-coach Acquirer A on hunting HVAC in Phoenix while running a smbx Dev mandate
-for Acquirer B in the same lane, that's the same conflict the perimeter
-forbids — *even though no fee touches either deal.* The register has to include
-Coach and Crew engagements, or the honest "this lane is open" close stops being
-honest.
-
-**4.2 — A seated person is still smbX.**
-An embedded CD PM negotiating with a seller is the practitioner-runs-the-deal
-boundary, and it is fine — *while the client is the acquirer.* It is fatal the
-day a Crew client asks that seat to work a sell-side or two-sided mandate. The
-Bench contract needs the same buy-side-only clause the engagement letter carries,
-and the seat needs to know it can say no.
-
-**4.3 — Never mix the two compensation shapes.**
-If a Crew client closes a deal the seat worked on, smbX bills the seat, not the
-outcome. A success fee on a staffing engagement re-creates exactly the structure
-the perimeter exists to prevent — contingent money out of a transaction —
-*without* the buy-side mandate that makes it defensible. This is the single
-easiest way to undo the whole perimeter, and it will be proposed by a client at
-some point because it sounds generous.
-
-**4.4 — Coaching is still not licensed advice.**
-A coach who says "structure it as an F-reorg" is giving tax advice. Same rule,
-same words: coordinate the specialist.
-
-### 🔴 For counsel — add to the pending call, don't book a new one
-
-The one-time §15(b)(13) / state-registration confirmation is already pending.
-These ride along on the same call for very little extra:
-1. Confirm coaching and staffing, as fee-for-service with no transaction
-   contingency, sit outside the broker-registration analysis entirely.
-2. **Co-employment and worker classification** on Crew — the standard staffing
-   clauses (no transfer of direction-and-control, conversion fee, W-2 vs 1099).
-3. Whether the buy-side-only clause papers cleanly into a staffing contract, where
-   the client directs the day-to-day work.
-
-Item 2 is the only genuinely new legal surface in this update. It's ordinary
-staffing-contract law, not securities law, and it's cheap — but it is real, and
-it should not be improvised.
+Full arithmetic and worked anchors: `OFFER_REFERENCE.md`.
 
 ---
 
-## 5. What has to change if this ships
+## 4. smbx Build — $75,000 / 6 months
 
-Nothing here is built yet. In rough dependency order:
+Full process improvement of the client's own corporate development function:
+management consulting, Lean Six Sigma, business architecture. **The subject is
+the machine that buys, not the company being bought** — that distinction is what
+separates it from Dev Pro, which optimises the acquired asset.
 
-| # | Change | Where |
+### One price, two entry points
+$75,000 either way. The effort converges (17 days design-led vs 16 diagnose-led),
+and two prices for one offering starts the negotiation the one-schedule posture
+exists to prevent.
+
+- **Stand up** — design-led. Month 1 is a design sprint: buy-box and thesis
+  charter, operating calendar, stage gates, decision rights, template library.
+  Then run it with them, then hand over.
+- **Optimise** — diagnose-led. Month 1 measures a baseline: cycle time, where
+  deals die, screen-to-LOI ratio, what diligence missed. Then intervene, then
+  re-measure.
+
+⚠️ **Lean Six Sigma only genuinely applies to Optimise.** DMAIC needs an existing
+process to measure. A stand-up is design and install, not improvement — claiming
+Six Sigma there is a stretch a sophisticated buyer will catch. Only Optimise can
+promise a measured delta.
+
+### The bright line
+> "We work with your team. We never speak to a seller, an owner, a broker, a
+> lender, or their counsel — that is a mandate."
+
+For Optimise, where diagnosing means looking at live deals, the holdable form is:
+**we review how you worked the deal, never whether the deal is good.** Process,
+not position. The moment it becomes "what should we pay", it is a mandate.
+
+### Eligibility — this, not price, is the anti-cannibalisation mechanism
+Sold only where the client already employs a **named, full-time person whose job
+is corporate development**, named in the engagement letter. No person, no sale —
+the honest answer is Dev or a Team seat.
+
+### 🟡 Proposed: a $12,500 diagnostic as the front door
+Two to three weeks, credited against the $75,000 if they proceed. Reuses the Dev
+schedule's own mechanic, drops the client's risk of saying yes from $75K to
+$12.5K, and doubles as the qualifier — it tells you which of the two engagements
+they actually need instead of guessing at proposal stage.
+
+### Anchors
+$75K is **21–30% of one fully loaded corp-dev hire** ($250–350K/yr), to make the
+whole function work. A Big-4 six-month engagement is $300K–1M. A solo Six Sigma
+Black Belt project is $30–60K — you sit above it because you bring 150+
+acquisitions they cannot. Against the mandate it is 2.5× the Run retainer over
+the same period, so there is no downward arbitrage.
+
+---
+
+## 5. smbx Go — the seats
+
+Six seats mapped to the engagement track. **Sell only the top two now** —
+augmentability tracks inversely with hours spent in a room with someone who is
+not our client.
+
+| Seat | Substrate carries | Sellable now |
 |---|---|---|
-| 1 | Offering fork — the site presents one shape today (seven phases, one brochure gate) | `client/src/practice/Landing.tsx` `#how`, `#pricing` |
-| 2 | Two new pages, or two new segments | `client/src/practice/` |
-| 3 | Engagement `kind` — coaching/staffing rows must not inherit the success-fee arithmetic | migration + `house/engagement.ts` |
-| 4 | `ENGAGED_LANES` covers Coach + Crew engagements (§4.1) | `server/`, env |
-| 5 | The intake assumes the visitor wants a market map; a coaching or staffing lead is a different conversation | `services/practiceIntake.ts` |
-| 6 | Brochure + engagement letter rebuilt (§3 trap) | studio, on the Mac |
+| CD Analyst | ~75–80% | **Yes** |
+| Diligence Manager | ~65–70% | **Yes** |
+| CD Project Manager | moderate | Later |
+| Sourcing Associate | moderate | Later |
+| Integration Manager | low | No |
+| Interim Head of Corp Dev | low — the seat *is* the room | No |
 
-**None of it is hard. #3 and #4 are the two that fail silently if skipped** —
-a coaching engagement quietly carrying a success-fee calculation, and a lane
-conflict the register can't see.
+**60-day version:** one half-seat "Diligence Desk", held by Paul, sold to one
+acquirer with more flow than they can process. Not six seats. Not a bench.
+
+**Metered method on a cadence, never an FTE.** Full seat 100 hrs/month, half 50.
+Monday plan call, Wednesday working session, Friday register by noon Central
+without exception — including weeks where nothing moved, which is the most
+valuable one, because it names what is overdue from the seller.
+
+**Dual reporting line:** the client sets priority and sequence; smbX sets method,
+supervision and quality.
+
+### 🔴 Pricing — OPEN, and the two models are not equivalent
+Paul's model: establish an hourly rate for the person placed, **add 20%**.
+
+At a $75/hr contractor that bills $90/hr — $9,000/month — which is exactly where
+an independent per-seat analysis landed. **The number is right. The structure
+inverts as the substrate improves:**
+
+| Substrate carries | Contractor hrs | Cost-plus margin | Seat-rate margin |
+|---|---|---|---|
+| 0% | 100 | $1,500 | $1,500 |
+| 50% | 50 | $750 | $5,250 |
+| **80%** | 20 | **$300** | **$7,500** |
+
+Cost-plus bills hours, so the better DEFINITIVE gets the fewer hours you bill —
+20% of a shrinking number, with the client capturing all the leverage. It also
+presupposes a contractor: if Paul is the seat there is no underlying rate to mark
+up, and it makes every seat a negotiated rate, which the one-schedule posture
+forbids. **The alternative that keeps the intent — one simple transparent number
+per role — is to set the rate by the SEAT, not the person.**
 
 ---
 
-## 6. 🟡 Open decisions — answer by number
+## 6. Positioning
 
-1. ~~**Names.**~~ ✅ Answered — smbx Dev / Dev Pro / Coach / Crew. Remaining
-   sub-question: does **smbXDefinitive** become **smbx Definitive** too?
-2. **The ladder.** Six seats as listed — cut any, add any?
-3. **Who fills the seats** — (a) Paul, (b) contractor bench, (c) AI-augmented?
-   (b) amends `CLAUDE.md` rule 2 and should be decided knowingly.
-4. **Figures** for Coach (per quarter) and Crew (per seat, per month).
-5. **Is coaching capped?** "A team that needs support" ranges from a monthly
-   review to a second full-time brain. Where does Coach end and a mandate begin?
-6. **Do we do permanent placement at all** — find-and-place for a one-time fee?
-   It's a recruiting business, different muscle, and I'd say no. But it's the
-   thing clients will ask for.
+**Exclusivity overflow.** We run one buy-side mandate per lane, so we turn people
+away. Team and smbx Build are what the second caller in a taken lane gets
+offered instead of a no — not three doors on a homepage competing with the
+mandate.
 
-Answer 2–3 and I can write the site copy, the page structure and the brochure
-spec. Answer 4 and the engagement arithmetic follows in an afternoon.
+> "We run one buy-side mandate per lane, through close, and we take a piece of the
+> deal only when the deal is ours to run. If your lane is already taken we don't
+> turn you away — we put the same department to work under your direction, either
+> as the analyst bench your team is missing or as a standing rebuild of the
+> function you already have. Neither one ever carries a success fee."
+
+Dev stays the only thing on the landing page and the only thing the Acquisition
+Engine sells. **Cost, stated plainly:** this makes the other lines feel like
+consolation prizes and they will be harder to sell in their own right.
+
+**Dead: "levels of ownership."** Every principal answers "whose name is on the
+decision?" identically, so the axis sorts nobody — and it is the compliance
+perimeter dressed as a buying question, which invites the buyer to wonder what we
+are worried about. If the lines do go on the page, the axis all three sceptics
+converged on is **how much of the work you hand us**.
+
+---
+
+## 7. The risks that are not securities law
+
+1. **"0 sell-side transactions. Ever." becomes falsifiable.** It is published, and
+   Team is the first offering putting that number in the hands of someone Paul
+   does not supervise, inside a business he does not control. Any instruction to
+   perform sell-side, two-sided or capital-raise work must be a **material
+   breach** — seat withdrawn, quarter not refunded — in the termination section.
+2. **Worker classification.** A corp-dev contractor supplied by a corp-dev firm
+   fails **prong B of the ABC test** almost by definition — the work is not
+   outside our usual course of business. In CA, MA, NJ and IL these seats are W-2
+   or they are a wage claim. That is a different lawyer from the securities one.
+3. **One buyer per target is a target-level rule; these produce conflicts with no
+   target in them.** A process-line or Team client must be a **hard block** as a
+   Run target — identity is certain there, not inferred, which is why the existing
+   warn-never-block posture is wrong for this case.
+4. **The blind clearance desk.** A Team seat submits every target name before
+   touching it and gets CLEARED / NOT CLEARED / HOLD **with no reason attached**,
+   plus a pre-agreed script for what they tell the client, in the contract at
+   signature.
+
+---
+
+## 8. What would mis-sell a lead on Monday
+
+1. `practiceIntake.ts` `closeMessage()` promises **lane exclusivity
+   unconditionally** to every visitor. smbx Build carries none.
+2. `POST /api/practice/pricing` mails the **Dev success-fee brochure to any
+   lead** — quoting contingent transaction compensation on engagements where THE
+   LINE forbids it, from our own server.
+3. The `engagements` table has **no `kind`**, so `successFee()` can run on a
+   coaching row. Add `kind` and make it refuse.
+4. **Procurement** — W-9, COI naming GL and E&O, MSA, cyber line, security
+   questionnaire. A PE-backed acquirer signs none of this without them.
+5. **Client-confidential documents default into a git repo**, where "we delete
+   your files at termination" cannot be true.
+
+---
+
+## 9. Open decisions
+
+2. **Go seat pricing** — cost-plus 20%, or a published rate per seat? (§5)
+3. **Is there a bench, or is Paul the seat?** Only the top two seats are sellable
+   without one, and a bench amends CLAUDE.md rule 2.
+4. **Adopt the $12,500 diagnostic?**
+5. **Overflow or front-door** for the two new products? (§6)
+6. **Does smbXDefinitive become smbx Definitive?**

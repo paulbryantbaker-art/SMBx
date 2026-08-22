@@ -4,7 +4,7 @@
  * Transcribed 1:1 from the reference pages, which all share this shell:
  * sticky 76px nav (logo · Why us · How it works · Industries · Research ·
  * Who it's for hover-dropdown · Free Valuation · Confidential consultation
- * outline CTA · Build your market map ink CTA) that gains its hairline +
+ * outline CTA · Map your market ink CTA) that gains its hairline +
  * shadow past 24px of scroll and never hides, and the dark mega footer
  * (brand + founder chip · FIRM · BUYERS · WHERE WE WORK · disclosures ·
  * legal row). Layout values live INLINE per the transcription doctrine;
@@ -13,8 +13,11 @@
  * Real-machinery mappings (the prototype's stand-in hrefs → live routes):
  * Industries/Research/Track record → their routes; the dropdown's five buyer
  * names → /buyers/<slug> (each name goes to ITS OWN page — the 2026-08-02
- * lesson: five labels, one destination reads as broken); Team sign in →
- * /login. The burger + slide-down menu (≤760px) stay from the previous
+ * lesson: five labels, one destination reads as broken). SIGN IN APPEARS ONCE,
+ * in the legal row (2026-08-22): the FIRM column carried a second "Team sign
+ * in" to the same /login, which is the same defect as the five-labels one, and
+ * "Team" is now a product name — smbx Team — so the word could not go on
+ * meaning the practice's own people two lines from where it means staffing. The burger + slide-down menu (≤760px) stay from the previous
  * chrome — the bundle ships no mobile ("no mobile yet", Paul 2026-08-07),
  * and a phone with no nav is a regression, not a transcription.
  */
@@ -544,7 +547,7 @@ export default function PracticeShell({
               style={{ fontSize: 15.5, fontWeight: 600, color: '#FFFFFF', background: '#16181A', padding: '12.5px 20px', borderRadius: 10, whiteSpace: 'nowrap' }}
               onClick={() => trackEvent('practice_cta_clicked', { placement: 'nav-yulia' })}
             >
-              Build your market map
+              Map your market
             </a>
             <button
               type="button"
@@ -577,7 +580,7 @@ export default function PracticeShell({
           href={anchor('#yulia')}
           onClick={() => { closeMenu(); trackEvent('practice_cta_clicked', { placement: 'mobile-menu' }); }}
         >
-          Build your market map
+          Map your market
         </a>
         <a className="quiet" href={ctaHref} onClick={() => { closeMenu(); trackEvent('practice_booking_clicked', { placement: 'mobile-menu' }); }}>Confidential consultation</a>
       </nav>
@@ -606,7 +609,7 @@ export default function PracticeShell({
                   : "Buy-side corporate development for acquirers in the lower middle market. A senior operator and a full team's output, exclusively on your side of the table."}
               </p>
               <div style={{ marginTop: 26, display: 'flex', gap: 14, alignItems: 'center' }}>
-                <img src="/founder-portrait.jpg" alt="Paul Baker" loading="lazy" style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', objectPosition: '50% 18%', border: '2px solid #FFAA90' }} />
+                <img src="/founder-headshot-web.jpg" alt="Paul Baker" loading="lazy" style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', objectPosition: '50% 22%', border: '2px solid #FFAA90' }} />
                 <div>
                   <div style={{ fontSize: 14.5, fontWeight: 600, color: '#FFF3F0' }}>Paul Baker</div>
                   <div style={{ fontSize: 12.5, color: '#DCB8B4' }}>Founder · two decades on the buy side</div>
@@ -631,7 +634,6 @@ export default function PracticeShell({
                 <Link href="/research">Research</Link>
                 {!footCompact && !onTrackRecord && <Link href="/track-record">Track record</Link>}
                 <a href={ctaHref}>Confidential consultation</a>
-                <a href="/login">Team sign in</a>
               </div>
             </div>
             {!footCompact && (

@@ -10,10 +10,10 @@ constants — none is quoted from memory or from a prior document.
 
 | Name | We… | For a buyer who… | Status |
 |---|---|---|---|
-| **smbx Dev** | run the deal, through close | has no corp-dev function, or no capacity | Renamed from smbXCorpDev |
-| **smbx Dev Pro** | the same, continuing through integration (PMI0–PMI3) | wants the value-creation phase covered | Renamed from Premium |
-| **smbx Coach** | make your team better at running it | has a team that needs a sharper method | NEW |
-| **smbx Crew** | fill the seats on your team | has the mandate and is short a body | NEW |
+| **smbx Run** | run the deal, through close | has no corp-dev function, or no capacity | Renamed from smbx Run |
+| **smbx Run Pro** | the same, continuing through integration (PMI0–PMI3) | wants the value-creation phase covered | Renamed from Premium |
+| **smbx Build** | make your team better at running it | has a team that needs a sharper method | NEW |
+| **smbx Go** | fill the seats on your team | has the mandate and is short a body | NEW |
 
 **smbXDefinitive** is the process behind all four. 🟡 **Open:** does it become
 **smbx Definitive** for consistency, or stay camel-case because it names the
@@ -21,7 +21,7 @@ method rather than a product? It is the only name in the set still undecided.
 
 **These are ENGAGEMENT names, not app products.** The app is never sold.
 
-### smbx Crew — the six seats
+### smbx Go — the six seats
 Not a list: these are the seats along the engagement track the site already
 publishes, one per phase.
 
@@ -39,7 +39,7 @@ coordinate those specialists, we do not seat them.
 
 ---
 
-## 2. smbx Dev — the fee schedule (LAW, unchanged)
+## 2. smbx Run — the fee schedule (LAW, unchanged)
 
 **ONE schedule, every client, no negotiated pricing.** The no-negotiation
 posture is itself a loyalty statement: the fee cannot grow by talking a client
@@ -92,21 +92,21 @@ prepayment, not a refundable deposit:
   the excess is **not** refunded.
 - **No close, no credit.** Retainers are earned as the work runs.
 
-### smbx Dev Pro
+### smbx Run Pro
 **Adds no second formula.** The retainer simply continues through integration.
 Add-on acquisitions run the same schedule; one retainer covers the platform.
 
 ---
 
-## 3. smbx Coach and smbx Crew — NO FIGURES EXIST YET
+## 3. smbx Build and smbx Go — NO FIGURES EXIST YET
 
 🔴 **Do not put a number for these in any collateral.** None has been set, and
 nothing in the repo carries one. The SHAPE is decided; the figures are yours.
 
-- **smbx Coach** — quarterly retainer, paid up front, **no success fee ever**.
+- **smbx Build** — quarterly retainer, paid up front, **no success fee ever**.
   Same unit as the mandate. Must sit meaningfully below $15,000/quarter or it
   cannibalises: a buyer who would pay mandate money for coaching buys the mandate.
-- **smbx Crew** — per seat, per month, minimum one quarter. The seat is smbX's
+- **smbx Go** — per seat, per month, minimum one quarter. The seat is smbX's
   person, not the client's hire. Needs a **convert-to-hire fee** in the contract
   from day one, or smbX is a free recruiter.
 
@@ -144,16 +144,16 @@ route serves `smbx-corpdev-pricing.pdf`.** A naive rebuild lands a new file
 Build it with an explicit `--slug smbx-corpdev-pricing`, then confirm the file at
 `content/collateral/smbx-corpdev-pricing.pdf` actually changed size or mtime.
 
-**Both PDFs carry the old name `smbXCorpDev` and the retired green palette.** The
+**Both PDFs carry the old name `smbx Run` and the retired green palette.** The
 rename alone forces a rebuild, independent of the two new lines.
 
 ---
 
 ## 6. What to change in the collateral
 
-1. `smbXCorpDev` → **smbx Dev** · `Premium` → **smbx Dev Pro** everywhere.
+1. `smbx Run` → **smbx Run** · `Premium` → **smbx Run Pro** everywhere.
 2. Palette: build against `DESIGN_LANGUAGE.md` (oxblood) — the shipped PDFs are
    still Deal Green.
-3. Add **smbx Coach** and **smbx Crew** only once you have set their figures.
+3. Add **smbx Build** and **smbx Go** only once you have set their figures.
 4. Rebuild the pricing brochure with the explicit slug, and verify it replaced
    rather than joined the served file.
