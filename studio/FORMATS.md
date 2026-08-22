@@ -111,7 +111,7 @@ devices:
 
 | Slot | What it renders |
 |---|---|
-| `numeral` + `unit?` + `numeralLabel?` | the signature figure above the hook — reading ink on both grounds, over a 4px green bar (mint on the band) |
+| `numeral` + `unit?` + `numeralLabel?` | the signature figure above the hook — reading ink on both grounds, over a 4px green bar (field accent on the band) |
 | `stats: [{value, label}]` | the proof strip — up to three hairline cards at the foot of the copy column. This is the report cover's stat band. |
 | `ghost: false` | switch off the oversized `X` behind the copy (default on) |
 | `spark: false` | switch off the corner constellation (default on) |
@@ -144,7 +144,7 @@ cited — summing rows with different vintages, publishers and scopes is how the
 
 **Rules that hold across every page**
 
-- `tagColor: 'brass'` marks a **trap or caution**. The key name is historical — Carta has one accent, so both tag colours now render green on paper and mint on the band; the distinction survives in the word, not the hue. Green is neutral. Never
+- `tagColor: 'brass'` marks a **trap or caution**. The key name is historical — Carta has one accent, so both tag colours now render green on paper and field accent on the band; the distinction survives in the word, not the hue. Green is neutral. Never
   decorative — the colour is carrying meaning.
 - `source:` is a **mono line at the foot of the page**. Any page with a figure
   and no `source:` is a defect. Publisher and date, nothing more.
@@ -289,7 +289,7 @@ light feather cannot halo on the band. Verify edge mean RGB lands dark
 | `variants` | no | `['dark','light']` |
 | `caption` | yes | LinkedIn post text |
 
-Mint rule is 72 × 5, fixed. The photo panel is `object-fit: cover` full-bleed —
+Field accent rule is 72 × 5, fixed. The photo panel is `object-fit: cover` full-bleed —
 **it always fills.** If art looks stranded on a one-pager the file is wrong, not
 the layout.
 
@@ -313,6 +313,47 @@ carries `text-wrap: balance`, which optimises line lengths and will happily
 orphan a short word onto its own line — "Buying a business / is hard work. We /
 make it easier." Glue each sentence with non-breaking spaces and balance can
 only break between them. Same technique as the U+2011 note on `hook` above.
+
+---
+
+## 2A · THE OFFER DOCUMENT AND THE FEATURED COVER — LOCKED 2026-08-22
+
+Two OXBLOOD families, locked by Paul on 2026-08-22 ("lock these designs in").
+Reference bundle: `design_handoff_smbx_offer_docs/`, filed IN THIS REPO so a
+rebuild never depends on a Downloads folder. RULE ZERO: the HTML wins.
+
+**The offer documents** — `scripts/studio/offer-docs.py --doc nopricing|pricing`
+· 1080×1350 · 5pp postable, 7pp email-gated.
+
+- Cover: PHOTOGRAPH FULL-BLEED in the field panel (667,0 → 413×1232,
+  `background-size: 1001px auto`, position −179,−39) with the well at the panel
+  FOOT (699,896 → 349×304), because the photograph owns the top. NO exposure
+  filter — the lift belonged to a cut-out against flat colour.
+- Body pages: flat bone, running header flush left, no eyebrows, no ghost
+  numerals, no gradients.
+- Closer: the second and last field surface. `founder-headshot.jpg` in a
+  380×616 frame, two corner handles at −8, the Core plate at field level and
+  the Dev Pro plate RAISED — which is why their `x` marks are different
+  colours on purpose.
+- **Two field surfaces per document and no more.**
+
+**The Featured cover** — `scripts/studio/featured-cover.py` · 1200×630, the
+Featured card's own ratio so LinkedIn crops nothing.
+
+- Photograph 1200×330 full width; field band 1200×300 beneath. The split is
+  HORIZONTAL because `founder-plane.jpg` is 2.36:1 and a side panel would
+  throw away half its width.
+- Hook left, four sanctioned stats as a 2×2 square of WELLS right, both centred
+  on the band's midline. Logo w280 ON the photograph — the mark is the only
+  type allowed over a photograph.
+- The italic turn is `#FF7D55`, never `#B8431E`: the light accent measures
+  1.9:1 on the field.
+- **Sized against 550px**, which is roughly what the Featured column renders,
+  not against 1200.
+
+**THE CARDS ARE WELLS, NOT PLATES** (DESIGN §3.4.2). Dense content belongs in
+the recess, which carries all four text tiers where a raised plate carries two,
+and the accent is legal there at 5.55:1 against 2.67:1 on a plate.
 
 ---
 
@@ -440,7 +481,7 @@ Composed art only, **1700 × 520 px** (3.27:1) — that is the file to make.
 The print box is 7.0 × 2.2 in (3.18:1), so the render trims ≈3% off the sides;
 compose with the subject clear of the outer 2%. Rendered at 100% × 2.2in with
 `object-fit: cover`. The composition is: bone canvas, illustration at **full
-band height** sitting right of centre, a short Deal Green rule anchoring the
+band height** sitting right of centre, a short Accent rule anchoring the
 left third. Compose at print weight — 1700×520 JPEG at q88 is ≈45KB; the raw
 4–5MB PNGs took one report to 11MB.
 
@@ -535,8 +576,8 @@ imagePos: 50% 45%
 
 PROMPT
 A flat editorial illustration of a residential HVAC condenser unit beside a
-suburban house wall, drawn in clean geometric line work. Bright green (#0FA97C)
-for the main masses, deep green (#0A7A58) for shading only, near-black linework
+suburban house wall, drawn in clean geometric line work. Bright accent (#FF7D55)
+for the main masses, oxblood accent (#B8431E) for shading only, near-black linework
 (#16181A), on a flat white background (#FFFFFF). No amber, no gold, no brass, no
 warm accent of any kind. Subject centred with
 generous empty background to the left and right. Uniform flat background to all
@@ -547,10 +588,10 @@ no drop shadow, no edge fade. 9:16 portrait.
 **The prompt rules, every time.** Each exists because breaking it produced an
 unusable image:
 
-- **Palette, always named:** white `#FFFFFF`, bright green `#0FA97C` for masses,
-  Deal Green `#0A7A58` for shading, ink `#16181A` for linework — and say **no
+- **Palette, always named:** white `#FFFFFF`, bright accent `#FF7D55` for masses,
+  Accent `#B8431E` for shading, ink `#16181A` for linework — and say **no
   amber, no gold, no brass** out loud, because "sparingly" still gets you gold.
-  (Carta, 2026-08-08 — amber, honey and the jade block are RETIRED, as is the
+  (Carta, 2026-08-08 — amber, honey and the bright accent block are RETIRED, as is the
   whole green-black era before them. **Their hexes are deliberately not repeated
   here:** DESIGN.md §2 is the one graveyard, and a retired hex quoted in a live
   file is a retired hex a session can copy. If a prompt you are copying names a
@@ -583,7 +624,7 @@ the only photos of him that exist.
 - **Never hand-roll a layout.** All three builders import `house/tokens.ts`;
   that shared import is the only reason the surfaces match. Output looking wrong
   means the spec is wrong.
-- **Palette** white `#FFFFFF` · ink `#16181A` · Deal Green `#0A7A58` · mint
+- **Palette** white `#FFFFFF` · ink `#16181A` · Accent `#B8431E` · field accent
   `#FFAA90` on the field · the flat field `#8A2B32`. Radius 0 except buttons and
   inputs at 10px; framed things wear four ink corner handles. **Type** Source
   Serif 4 / Schibsted Grotesk / IBM Plex
@@ -735,7 +776,7 @@ not there. `--allow-missing-art` overrides it for a deliberate dry run.
 npx tsx $REPO/scripts/studio/design-check.mts
 ```
 
-Any cover or closer rule coloured with a block-only token — mint, darkInk, darkSub —
+Any cover or closer rule coloured with a block-only token — field accent, darkInk, darkSub —
 must have a matching `.bk-lt` override. Miss one and the light bookend renders
 that element at roughly 2.8:1 on bone, which `DESIGN.md` §4 warns "does not show
 up in a diff or in a screenshot you are not squinting at."

@@ -171,8 +171,8 @@ it is Paul's call, not a session's — but do not let a future session
 |---|---|
 | Ink (body headings, light pages) | `#16181A` |
 | Body text on light | `#3F464C` |
-| Deal Green (numerals, total rule) | `#0A7A58` |
-| Brass (accent keylines) | `#E8A62B` |
+| the accent (numerals, total rule) | `#B8431E` |
+| Brass (accent keylines) | `#B8431E` |
 | Honey (on-dark accent: kickers, turns, rules, stat labels) | `#F5C452` |
 | Bone (light page background) | `#FCFAF6` |
 | Ivory (on-dark text) | `#F3F1EA` |
@@ -320,7 +320,7 @@ multiple" + paragraph → h2 "What underwrites the range" + paragraph.
 
 **P4 — readiness (light).** h2 "Where Acme sits, and why" + position line
 → 5-row drivers table: driver name (bold, 118px) · status (bold 10.5px:
-Strength `#0A7A58`, Watch `#E8A62B`, Fix before sale `#B00` dark red) ·
+Strength `#B8431E`, Watch `#B8431E`, Fix before sale `#B00` dark red) ·
 note (11px) → attribution line (muted 9.5px) → h2 "The real estate" +
 paragraph → h2 "What moves the number" + paragraph → disclaimer box
 pinned at bottom (white, hairline, 3px brass left keyline, 10px).
@@ -654,8 +654,8 @@ from `tokens.ts` plus memory and shipped all five of these:
 | Shipped | DESIGN.md says | Fixed to |
 |---|---|---|
 | Stat-card labels in **honey at 8px** | §4: honey is "large-text-only… never a caption" | `REPORT.statLabel` `#BFE3D2`, the token that exists for this job |
-| Hook rule in **honey**, 72×4 square | §6.1: "a **mint** rule (70×6, fully rounded)" | mint `#A8F0CE`, 70×6, `border-radius:99px` |
-| Headshot ring in **honey** | §6.1: "a 72px **mint**-ringed disc" | mint |
+| Hook rule in **honey**, 72×4 square | §6.1: "a **field accent** rule (70×6, fully rounded)" | field accent `#FFAA90`, 70×6, `border-radius:99px` |
+| Headshot ring in **honey** | §6.1: "a 72px **field accent**-ringed disc" | mint |
 | Right-edge mono + closing CTA in **honey** | §4: mint carries "SWIPE and FOLLOW" | mint |
 | `opacity:0.9` / `0.78` on block text | §4: "hierarchy comes from size and weight, not colour… the text is ivory, the secondary is `#DED8CC`, and that is the whole ladder" | removed entirely; two solid rungs |
 | `#B00` for "Fix before sale" | §10: "a hex appears that is not in §4"; FORMATS §1: green is neutral, brass is caution — there is no third level | brass; the *word* carries the distinction |

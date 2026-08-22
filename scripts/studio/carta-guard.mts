@@ -47,6 +47,12 @@ const RETIRED = [
   ...Object.values(LEDGER).map(String).filter(h => !live.has(h.toUpperCase())),
   '#C9E8DA', '#BFE3D2', '#F1ECE0', '#16624C', '#0F4E3C', '#0F1A16', '#B08637',
   '#F6F4EF', '#14181C', '#8FD0AE', '#F3F1EA', '#FF385C', '#185ABD', '#D4714E', '#D44A78',
+  /* CARTA / DEAL GREEN — retired 2026-08-22 when OXBLOOD took the CARTA keys.
+     These do not fall out of the LEDGER spread above: they were the LIVE
+     values until that day, so the guard would have passed them forever. Any
+     draft that comes back green reconstructed THIS system. */
+  '#0A7A58', '#086348', '#0FA97C', '#A8F0CE', '#DFF5EC', '#0A6A4C',
+  '#181818', '#2A2E29', '#22261F', '#4A4F44', '#F4F5F1', '#D7DBD2', '#ABB2AB', '#8A9088',
 ];
 
 let findings = 0;

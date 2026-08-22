@@ -14,7 +14,7 @@ the pages render with. Anything else will not match.
 
 ```
 PALETTE, STRICT. Flat solid background exactly #FCFAF6 with no gradient,
-vignette, texture or drop shadow. Deep green #0A7A58. Jade #0FA97C.
+vignette, texture or drop shadow. Oxblood accent #B8431E. Bright accent #FF7D55.
 NO amber, no gold, no brass — Carta has one colour. Near-black linework #16181A. Use no other colours: no
 additional greens, no greys, no off-whites, no blues, no skin tones.
 
@@ -72,8 +72,8 @@ plate reads as a card and puts the rectangle straight back.
 | Role | Hex | RGB | Use |
 |---|---|---|---|
 | **Background — the one that matters** | `#FCFAF6` | 252, 250, 246 | The whole canvas, flat, edge to edge |
-| Deep green, dominant | `#0A7A58` | 10, 122, 88 | Main masses — roofs, bodywork, large planes |
-| Jade, highlight | `#0FA97C` | 15, 169, 124 | Secondary planes, lighter faces |
+| Oxblood accent, dominant | `#B8431E` | 10, 122, 88 | Main masses — roofs, bodywork, large planes |
+| Bright accent, highlight | `#FF7D55` | 15, 169, 124 | Secondary planes, lighter faces |
 | ~~Amber~~ | **RETIRED 2026-08-08** | — | Carta has no warm colour and no replacement for one. See DESIGN.md §2. |
 | Near-black, linework | `#16181A` | 22, 24, 26 | Structure, deep shadow, outlines |
 
@@ -81,7 +81,7 @@ Pure white `#FFFFFF` is allowed for highlight surfaces — window glass, van pan
 
 ## 3 · Do NOT use — retired
 
-the jade block, honey and ivory — all retired 2026-08-08; DESIGN.md §2 holds the hexes so this file does not have to
+the bright accent block, honey and ivory — all retired 2026-08-08; DESIGN.md §2 holds the hexes so this file does not have to
 — the emerald ground, withdrawn 2026-08-06.
 
 the green-black era's forest green, brass, bone and near-black — older still, and also in DESIGN.md §2.
@@ -134,12 +134,12 @@ npx tsx $REPO/scripts/studio/art-normalize.mts assets/trades
 Every pixel within tolerance of a palette colour becomes that colour exactly.
 Pixels further away are anti-aliased edges — real blends between two shapes — and
 are left alone, because snapping those would put jaggies on every outline. On the
-test image: bone 66.4%, jade 10.7%, ink 9.9%, green 5.0%, amber 2.1%, white 0.2%,
+test image: bone 66.4%, bright accent 10.7%, ink 9.9%, green 5.0%, amber 2.1%, white 0.2%,
 with 5.7% left as edges. Corner (251,248,243) becomes (252,250,246) and the check
 passes.
 
-**It is a quantiser, not an art director.** If the model painted the body jade
-where the brief said Deal Green, this makes it *exactly* jade. Read the report it
+**It is a quantiser, not an art director.** If the model painted the body bright accent
+where the brief said Accent, this makes it *exactly* bright accent. Read the report it
 prints — the percentages tell you whether the drawing used the palette the way
 you asked.
 

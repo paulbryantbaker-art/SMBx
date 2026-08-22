@@ -67,8 +67,8 @@ spec:     markets/elevator/specs/elevator-teardown-1.deck.mts
 a single closed elevator car door with a call button panel on the wall beside it
 
 PALETTE, STRICT. Flat solid background exactly #FFFFFF (255, 255, 255) with no gradient,
-vignette, texture, border or drop shadow. Bright green #0FA97C for the main masses. Deep
-green #0A7A58 for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
+vignette, texture, border or drop shadow. Bright accent #FF7D55 for the main masses. Deep
+green #B8431E for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
 highlight surfaces — window glass, a van panel. NO amber, no gold, no brass, no warm
 accent of any kind. Use no other colours: no additional greens, no greys, no
 off-whites, no blues, no skin tones.
@@ -106,8 +106,8 @@ spec:     markets/elevator/specs/elevator-teardown-2.deck.mts
 an elevator controller cabinet standing open, showing relay boards and wiring looms
 
 PALETTE, STRICT. Flat solid background exactly #FFFFFF (255, 255, 255) with no gradient,
-vignette, texture, border or drop shadow. Bright green #0FA97C for the main masses. Deep
-green #0A7A58 for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
+vignette, texture, border or drop shadow. Bright accent #FF7D55 for the main masses. Deep
+green #B8431E for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
 highlight surfaces — window glass, a van panel. NO amber, no gold, no brass, no warm
 accent of any kind. Use no other colours: no additional greens, no greys, no
 off-whites, no blues, no skin tones.
@@ -145,8 +145,8 @@ spec:     markets/elevator/specs/elevator-teardown-2.deck.mts
 a stack of building service records and a route clipboard on a workbench beside a governor
 
 PALETTE, STRICT. Flat solid background exactly #FFFFFF (255, 255, 255) with no gradient,
-vignette, texture, border or drop shadow. Bright green #0FA97C for the main masses. Deep
-green #0A7A58 for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
+vignette, texture, border or drop shadow. Bright accent #FF7D55 for the main masses. Deep
+green #B8431E for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
 highlight surfaces — window glass, a van panel. NO amber, no gold, no brass, no warm
 accent of any kind. Use no other colours: no additional greens, no greys, no
 off-whites, no blues, no skin tones.
@@ -184,8 +184,8 @@ spec:     specs/hs-teardown-preview.deck.mts
 three rooftop air-conditioning condenser units in a row on a flat commercial roof deck
 
 PALETTE, STRICT. Flat solid background exactly #FFFFFF (255, 255, 255) with no gradient,
-vignette, texture, border or drop shadow. Bright green #0FA97C for the main masses. Deep
-green #0A7A58 for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
+vignette, texture, border or drop shadow. Bright accent #FF7D55 for the main masses. Deep
+green #B8431E for shading. Near-black #16181A for linework. Pure white #FFFFFF only for
 highlight surfaces — window glass, a van panel. NO amber, no gold, no brass, no warm
 accent of any kind. Use no other colours: no additional greens, no greys, no
 off-whites, no blues, no skin tones.

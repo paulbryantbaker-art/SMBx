@@ -70,3 +70,49 @@ gradient, no curve, no radius outside the action bar's 6px · accent never on a
 resting button fill or a raised surface · smallest type 20px.
 
 GO-LIVE     NOT DONE for the pricing cut — see that folder's BUILD.txt.
+
+
+COVER VARIANTS — 3b ADOPTED, 3c KEPT, and 3c now has a DARK (2026-08-22).
+Paul asked where "the one with the smaller block on top right" lives: it is
+3c, `candidates/cover-suit-b-framed.html` in the handoff — the well as a
+SMALLER BLOCK at the TOP of the panel with the portrait framed beneath it,
+rather than 3b's photograph filling the panel with the well at its foot.
+It was KEPT on the reference sheet and had never been built. It is now:
+
+  --cover photo             3b, the default and the shipped cover
+  --cover framed            3c on the light ground
+  --cover framed --surface dark   3c on a FULL FIELD PAGE
+
+Samples filed here as cover-3c-framed-light.jpg and cover-3c-framed-dark.jpg.
+
+THE DARK ONE STILL OBEYS THE TWO-FIELD LAW: a full-field cover plus the field
+closer is exactly two field surfaces, and it gives the document a dark opening
+the way a carousel has a dark bookend. On dark the copy column re-scopes to
+the field's own text tiers, hairlines become the rim, the mark switches to
+logo-bone-x, and THE STAT VALUES TAKE #FF7D55 — never #B8431E, which measures
+1.9:1 on the field. The well still reads as a recess because it is darker than
+the field; that is what the ramp is for.
+
+
+HEADSHOT SWAPPED ON EVERY CTA AND FOOTER MARK (Paul, 2026-08-22: "be sure to
+swap out my headshot for all CTA and footer images"). founder-headshot.jpg
+replaces founder-portrait.jpg on the cover foot disc, the carousel foot disc
+and the Frame C closer. The asset is now also in studio/assets/brand/ and
+client/public/ so the non-handoff builders can find it.
+
+THE OLD CROP CONSTANTS DO NOT TRANSFER, and that is the trap:
+   old founder-portrait  1200x1944 = 1:1.620, skin rows 0.144..0.827
+   new founder-headshot  1536x2732 = 1:1.779, skin rows 0.083..0.458
+The new frame is taller and the face sits in its TOP 46%, so the old 0.283
+fraction — measured against a shot whose face ran most of the frame — lands on
+his chest. The byline mark now uses HEAD_BOX, a square measured around the
+face: columns 139..1439, rows 88..1388 of the source.
+
+FRAME C's "shows the WHOLE photograph" note was corrected rather than left to
+be re-derived: a phi frame on a 1:1.779 source crops about 9% of the height.
+That is fine here — the new shot is already chest-up, so the crop takes
+headroom, not his neck.
+
+STILL ON THE OLD PORTRAIT: build-deck.mts and build-onepager.mts default to
+client/public/founder-portrait.jpg. Those are engine files — Claude Code's
+side — so the default is flagged rather than changed here.

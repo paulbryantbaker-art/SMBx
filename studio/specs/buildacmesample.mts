@@ -52,7 +52,7 @@
  *                  tag. Never body text, never a button, never a fill.
  *                  Large-text-only — a numeral, a rule, a tag — NEVER A CAPTION."
  *                  → stat-card labels were honey at 8px. Banned twice over.
- *   mint  #A8F0CE  "rules on the block, the headshot ring, SWIPE and FOLLOW."
+ *   field accent  #FFAA90  "rules on the block, the headshot ring, SWIPE and FOLLOW."
  *                  → the hook rule, the headshot ring and the closing mono line
  *                  are MINT, not honey.
  *   statLabel #BFE3D2 exists for "cover stat-card labels". Use the token.

@@ -85,6 +85,16 @@ OUT = pathlib.Path(flag('--out', 'collateral')).resolve()
 DOC = flag('--doc', 'both')
 HANDOFF = pathlib.Path(flag('--handoff',
     str(pathlib.Path.home()/'Downloads/design_handoff_smbx_offer_docs')))
+# COVER VARIANTS (2026-08-22). `photo` is 3b, ADOPTED — the photograph filling
+# the field panel with the well at its FOOT. `framed` is 3c, KEPT — the well as
+# a SMALLER BLOCK at the TOP of the panel with the portrait framed beneath it,
+# transcribed from candidates/cover-suit-b-framed.html.
+# `--surface dark` puts the framed cover on a FULL FIELD PAGE. The two-field
+# law still holds — a full-field cover plus the field closer is exactly two —
+# and it gives the document a dark opening the way a carousel has a dark
+# bookend.
+COVER   = flag('--cover', 'photo')      # photo | framed
+SURFACE = flag('--surface', 'light')    # light | dark
 
 CACHE = HERE / '.fonts-cache'
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
@@ -149,10 +159,29 @@ def A(p):
     """Assets ship WITH the handoff; the repo's own copies are the green
     originals and would silently render the retired mark."""
     return HANDOFF / 'assets' / p
-FIG  = Image.open(A('founder-standing.png')).convert('RGBA')
-HEAD = Image.open(A('founder-portrait.jpg')).convert('RGB')
+SUIT = Image.open(A('founder-suit.jpg')).convert('RGB')
+HEAD = Image.open(A('founder-headshot.jpg')).convert('RGB')
+PORT = Image.open(A('founder-headshot.jpg')).convert('RGB')
 LOGO_A = Image.open(A('logo-accent-x.png')).convert('RGBA')   # ink + accent X
 LOGO_B = Image.open(A('logo-bone-x.png')).convert('RGBA')     # bone + #FF7D55 X
+
+# ── THE BYLINE HEADSHOT (2026-08-22) ──────────────────────────────────────
+# founder-headshot.jpg replaces founder-portrait.jpg on EVERY CTA and footer
+# mark (Paul: "be sure to swap out my headshot for all CTA and footer
+# images"). THE OLD CROP CONSTANTS DO NOT TRANSFER, which is the trap:
+#   old founder-portrait  1200x2732 -> 1:1.620, skin rows 0.144..0.827
+#   new founder-headshot  1536x2732 -> 1:1.779, skin rows 0.083..0.458
+# The new frame is TALLER and the face sits in its TOP 46%, so the old 0.283
+# fraction — measured against a shot whose face ran most of the frame — lands
+# on his chest. HEAD_BOX is a square measured around the face instead:
+# columns 139..1439, rows 88..1388, i.e. the head with a little air.
+HEAD_BOX = (0.0905, 0.0322, 0.9368, 0.5081)
+
+def head_square(src, px):
+    """The byline mark: a measured square around the face, then resized."""
+    w, h = src.size
+    b = (int(HEAD_BOX[0]*w), int(HEAD_BOX[1]*h), int(HEAD_BOX[2]*w), int(HEAD_BOX[3]*h))
+    return src.crop(b).resize((px, px), Image.LANCZOS)
 
 def tracked(d, pos, txt, font, fill, ls):
     x, y = pos
@@ -227,9 +256,11 @@ def wrap(d, x, y, width, txt, font, lh, col, bold=None, ls=0):
     return _flow(d, x, y, width, _runs(txt, font, bold or font, font, col, T['ink']),
                  lh, ls)
 
-def em_head(d, x, y, width, txt, font, fital, lh, ls):
-    return _flow(d, x, y, width, _runs(txt, font, font, fital, T['ink'], T['ink']),
-                 lh, ls)
+def em_head(d, x, y, width, txt, font, fital, lh, ls, ink=None, accent=None):
+    r = _runs(txt, font, font, fital, ink or T['ink'], ink or T['ink'])
+    if accent:
+        r = [(t, f, accent if c == T['accent'] else c) for t, f, c in r]
+    return _flow(d, x, y, width, r, lh, ls)
 
 def foot90(img, d, pg, total):
     y0 = H - 90*S
@@ -295,63 +326,111 @@ def body_page(pg, total, top, hl, lede, rows, kind, note, start=1, gap=26,
     return img
 
 def cover(total):
-    """THE COVER. Grid: 1080/phi = 667 is the panel seam — the copy column
-    takes the major share, the field the minor. THE WELL'S TOP EDGE IS 106,
-    which continues the logo's baseline straight across the seam; keep the two
-    equal if either moves."""
+    """THE COVER — 3b, ADOPTED: PHOTOGRAPH FULL-BLEED, WELL AT THE FOOT.
+
+    Grid: 1080 / phi = 667 is the panel seam. The photograph fills the panel
+    edge to edge and the well sits at the panel's FOOT, because the photograph
+    owns the top. NO FILTER — the 1.08/1.02 lift belonged to the cut-out
+    against flat oxblood and washes out a photograph.
+
+    `--cover framed` renders 3c instead (KEPT): the well as a smaller block at
+    the TOP with the portrait framed beneath it."""
+    if COVER == 'framed':
+        return _cover_framed()
     img = Image.new('RGB', (W, H), T['ground']); d = ImageDraw.Draw(img)
     d.rectangle([667*S, 0, W, 1232*S], fill=T['field'])
+    ph_w = int(1001*S); ph_h = int(SUIT.size[1] * ph_w / SUIT.size[0])
+    ph = SUIT.resize((ph_w, ph_h), Image.LANCZOS).crop((179*S, 39*S, 179*S + 413*S, 39*S + 1232*S))
+    img.paste(ph, (667*S, 0)); d = ImageDraw.Draw(img)
     lw = 199*S; lg = LOGO_A.resize((lw, int(LOGO_A.size[1]*lw/LOGO_A.size[0])), Image.LANCZOS)
     img.paste(lg, (64*S, 56*S), lg); d = ImageDraw.Draw(img)
-    # the stat block is RECESSED — no border, because an edge means lift and a
-    # darker fill means depth (§3.4.1)
+    d.rectangle([699*S, 896*S, 699*S + 349*S, 896*S + 304*S], fill=T['well'])
+    d.text((731*S, 928*S - int(0.07*144*S)), '150', font=serif144, fill=T['fInk'])
+    d.rectangle([735*S, 1082*S, 735*S + 56*S, 1082*S + 4*S], fill=T['onField'])
+    ly = 1108*S
+    for ln in ('ACQUISITIONS', 'LED OR CO-LED'):
+        tracked(d, (735*S, ly), ln, mono20, T['fMut'], .1*20*S); ly += int(20*1.5*S)
+    _cover_copy(d, T['ink'], T['body'], T['muted'], T['rule'], T['accent'])
+    return _cover_foot(img, d)
+
+def _cover_copy(d, INK, BODY, MUTED, RULE, ACC):
+    """The copy column — shared by both covers and re-scoped for the field."""
+    em_head(d, 64*S, 168*S, 539*S,
+            'Buying a business is hard work. ~We make it easier.~',
+            serif72, serif72i, int(72*1.04*S), -0.004*72*S, ink=INK, accent=ACC)
+    wrap(d, 64*S, 471*S, 539*S,
+         'Whether it\u2019s your 1st or your 100th acquisition, we run the process for you, '
+         'freeing up your time and resources.', sans36, int(36*1.34*S), BODY)
+    y = 800*S
+    for v, l in (('$5B+', 'ENTERPRISE VALUE ADDED'),
+                 ('~$21B', 'TRANSACTION VALUE TOUCHED'),
+                 ('0', 'SELL-SIDE DEALS. EVER.')):
+        d.line([64*S, y, 667*S, y], fill=RULE, width=S)
+        ry = y + 20*S
+        d.text((64*S, ry - int(0.16*46*S)), v, font=serif46, fill=ACC)
+        tracked(d, ((64+120+16)*S, ry + int(46*0.30*S)), l, mono20, MUTED, .08*20*S)
+        y = ry + 46*S + 18*S
+    d.line([64*S, y, 667*S, y], fill=RULE, width=S)
+
+def _cover_framed():
+    """3c — KEPT. The well is a SMALLER BLOCK at the TOP of the panel and the
+    portrait is framed beneath it. Transcribed from
+    candidates/cover-suit-b-framed.html.
+
+    ON DARK the copy column re-scopes to the field's own text tiers, the
+    hairlines become the rim, the stat values take the ON-FIELD accent
+    #FF7D55 — never #B8431E, which measures 1.9:1 there — and the mark
+    switches to logo-bone-x. The well still reads as a recess because it is
+    darker than the field: that is what the ramp is for."""
+    dark = SURFACE == 'dark'
+    GROUND = T['field'] if dark else T['ground']
+    INK   = T['fInk'] if dark else T['ink']
+    BODY  = T['fSub'] if dark else T['body']
+    MUTED = T['fMut'] if dark else T['muted']
+    RULE  = T['rim']  if dark else T['rule']
+    ACC   = T['onField'] if dark else T['accent']
+    MARK  = LOGO_B if dark else LOGO_A
+    img = Image.new('RGB', (W, H), GROUND); d = ImageDraw.Draw(img)
+    if not dark:
+        d.rectangle([667*S, 0, W, 1232*S], fill=T['field'])
+    lw = 199*S; lg = MARK.resize((lw, int(MARK.size[1]*lw/MARK.size[0])), Image.LANCZOS)
+    img.paste(lg, (64*S, 56*S), lg); d = ImageDraw.Draw(img)
     d.rectangle([699*S, 106*S, 699*S + 349*S, 106*S + 304*S], fill=T['well'])
     d.text((731*S, 138*S - int(0.07*144*S)), '150', font=serif144, fill=T['fInk'])
     d.rectangle([735*S, 292*S, 735*S + 56*S, 292*S + 4*S], fill=T['onField'])
     ly = 318*S
-    for ln in ('ACQUISITIONS', 'LED OR CO-LED'):   # hard-broken in the reference
+    for ln in ('ACQUISITIONS', 'LED OR CO-LED'):
         tracked(d, (735*S, ly), ln, mono20, T['fMut'], .1*20*S); ly += int(20*1.5*S)
-    y = em_head(d, 64*S, 168*S, 539*S,
-                'Buying a business is hard work. ~We make it easier.~',
-                serif72, serif72i, int(72*1.04*S), -0.004*72*S)
-    wrap(d, 64*S, 471*S, 539*S,
-         'Whether it’s your 1st or your 100th acquisition, we run the process for you, '
-         'freeing up your time and resources.', sans36, int(36*1.34*S), T['body'])
-    # stats — rules run flush to the panel seam at x667 so every label fits one line
-    y = 800*S
-    for i, (v, l) in enumerate((('$5B+', 'ENTERPRISE VALUE ADDED'),
-                                ('~$21B', 'TRANSACTION VALUE TOUCHED'),
-                                ('0', 'SELL-SIDE DEALS. EVER.'))):
-        d.line([64*S, y, 667*S, y], fill=T['rule'], width=S)
-        ry = y + 20*S
-        d.text((64*S, ry - int(0.16*46*S)), v, font=serif46, fill=T['accent'])
-        tracked(d, ((64+120+16)*S, ry + int(46*0.30*S)), l, mono20, T['muted'], .08*20*S)
-        y = ry + 46*S + 18*S
-    d.line([64*S, y, 667*S, y], fill=T['rule'], width=S)
-    # the figure spans to the card edge so the trailing arm cuts flush; the head
-    # crossing the well's lower edge IS the depth cue — keep the overlap
-    fh = 1300*S; fw = int(FIG.size[0]*fh/FIG.size[1])
-    r_, g_, b_, a_ = FIG.resize((fw, fh), Image.LANCZOS).split()
-    rgb = ImageEnhance.Contrast(ImageEnhance.Brightness(
-        Image.merge('RGB', (r_, g_, b_))).enhance(1.08)).enhance(1.02)
-    fig = Image.merge('RGBA', (*rgb.split(), a_))
-    fig = fig.crop((0, 0, fw, min(fh, 1232*S - 381*S)))
-    img.paste(fig, (675*S, 381*S), fig); d = ImageDraw.Draw(img)
-    # foot
+    fx, fy, fw2, fh2 = 699*S, 442*S, 349*S, 750*S
+    d.rectangle([fx + 18*S, fy + 18*S, fx + 18*S + fw2, fy + 18*S + fh2], fill=T['well'])
+    sw = int(702*S); sh = int(SUIT.size[1] * sw / SUIT.size[0])
+    shot = SUIT.resize((sw, sh), Image.LANCZOS).crop((95*S, 27*S, 95*S + fw2, 27*S + fh2))
+    shot = ImageEnhance.Contrast(ImageEnhance.Brightness(shot).enhance(1.04)).enhance(1.02)
+    img.paste(shot, (fx, fy)); d = ImageDraw.Draw(img)
+    d.rectangle([fx, fy, fx + fw2, fy + fh2], outline=T['rim'], width=S)
+    hs = 16*S
+    for hx, hy in ((fx - 8*S, fy - 8*S), (fx + fw2 - 8*S, fy + fh2 - 8*S)):
+        d.rectangle([hx, hy, hx + hs, hy + hs], fill=T['ink'])
+    _cover_copy(d, INK, BODY, MUTED, RULE, ACC)
+    return _cover_foot(img, d, dark=dark)
+
+def _cover_foot(img, d, dark=False):
+    """The byline strip — bone by default, field on a dark cover."""
     y0 = 1232*S
-    d.rectangle([0, y0, W, H], fill=T['ground'])
-    d.line([0, y0, W, y0], fill=T['rule'], width=S)
+    G = T['field'] if dark else T['ground']; R = T['rim'] if dark else T['rule']
+    I = T['fInk'] if dark else T['ink'];     M = T['fMut'] if dark else T['muted']
+    A = T['onField'] if dark else T['accent']
+    d.rectangle([0, y0, W, H], fill=G)
+    d.line([0, y0, W, y0], fill=R, width=S)
     fs = 56*S; fy = y0 + (118*S - fs)//2
-    face = HEAD.resize((fs, int(HEAD.size[1]*fs/HEAD.size[0])), Image.LANCZOS)
-    off = int((face.size[1] - fs) * 0.18)          # object-position 50% 18%
-    img.paste(face.crop((0, off, fs, off + fs)), (64*S, fy)); d = ImageDraw.Draw(img)
-    d.rectangle([64*S, fy, 64*S + fs, fy + fs], outline=T['rule'], width=S)
-    d.text((64*S + fs + 16*S, fy + 2*S), 'Paul Baker', font=sans24b, fill=T['ink'])
+    img.paste(head_square(HEAD, fs), (64*S, fy)); d = ImageDraw.Draw(img)
+    d.rectangle([64*S, fy, 64*S + fs, fy + fs], outline=R, width=S)
+    d.text((64*S + fs + 16*S, fy + 2*S), 'Paul Baker', font=sans24b, fill=I)
     d.text((64*S + fs + 16*S, fy + 2*S + 30*S), 'Buy-side corporate development',
-           font=sans20, fill=T['muted'])
+           font=sans20, fill=M)
     t = 'SWIPE'; x = W - 64*S - tw(d, t, mono22, .08*22*S) - 40*S
-    x = tracked(d, (x, y0 + (118*S - 22*S)//2), t, mono22, T['accent'], .08*22*S)
-    arrow(d, x + 14*S, y0 + 118*S//2, T['accent'])
+    x = tracked(d, (x, y0 + (118*S - 22*S)//2), t, mono22, A, .08*22*S)
+    arrow(d, x + 14*S, y0 + 118*S//2, A)
     return img
 
 def closer(total, pricing):
@@ -404,7 +483,9 @@ def closer(total, pricing):
     # ARE. The PHOTO is the content and the photo aligns. Do not "fix" them.
     fx, fy = W - 64*S - 380*S, 64*S + 222*S
     d.rectangle([fx + 18*S, fy + 18*S, fx + 18*S + 380*S, fy + 18*S + 616*S], fill=T['well'])
-    port = HEAD.resize((380*S, int(HEAD.size[1]*380*S/HEAD.size[0])), Image.LANCZOS).crop((0, 0, 380*S, 616*S))
+    _p = PORT.resize((380*S, int(PORT.size[1]*380*S/PORT.size[0])), Image.LANCZOS)
+    _off = int((_p.size[1] - 616*S) * 0.20)
+    port = _p.crop((0, _off, 380*S, _off + 616*S))
     img.paste(port, (fx, fy)); d = ImageDraw.Draw(img)
     d.rectangle([fx, fy, fx + 380*S, fy + 616*S], outline=T['rim'], width=S)
     hs = 16*S

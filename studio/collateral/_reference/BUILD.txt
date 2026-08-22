@@ -1,25 +1,17 @@
-built      2026-08-20 · TEMPLATES — THE VISUAL REGISTER (6pp Letter)
-what       The five templates Paul picks from, each shown COVER · CONTENT ·
-           CTA, because that is the question: "as long as you understand what
-           content pages go with each and which CTA pages goes with each, CC
-           just needs to know which I will pick from."
-the five   Carousel · One page (image) · Monolith (dark look) · Portal (light
-           look) · Report. MONOLITH AND PORTAL ARE LOOKS, NOT LENGTHS — each
-           arrives as a carousel or as a single image, so a request names
-           both the look and the length. THE OFFER DOCUMENT IS PORTAL; the
-           content varies with the need, the template does not.
-builder    scripts/studio/templates-card.py (PIL raster) — NOT in
-           rebuild-all.sh. Regenerate when the register changes.
-supersedes the 2026-08-19 cut, which sorted by BUILDER and carried a one-offs
-           section. Paul removed the one-offs and folded the offer document
-           into Portal. Do not reinstate either.
-law        Names and parts only. FORMATS.md owns the slot tables, DESIGN.md
-           owns the look, TEMPLATES.md is the written index — the deck states
-           outright that they win over a card.
-honesty    Every thumbnail is a REAL render cropped from filed collateral.
-           Where nothing survives on disk the plate is empty and says so
-           rather than showing a mock-up: `trade` (the teardown folders kept
-           only their captions, and figure-deck.py has no trade layout), the
-           split and text-card layouts, and the report body. The report cover
-           shown is the real OG card, built from the same cover config, and
-           the card says so.
+built      2026-08-22 · TEMPLATES — THE VISUAL REGISTER (6pp Letter), OXBLOOD.
+           Regenerated after the palette cutover; the Deal Green edition is
+           gone with the rest of the green renders.
+builder    scripts/studio/templates-card.py — NOT in rebuild-all.
+           It now READS house/tokens.ts live (tsx) instead of carrying a
+           transcribed palette. It was hard-coded Deal Green, so after the
+           cutover it kept rendering the retired system correctly and
+           silently — the exact failure the deck exists to prevent.
+sources    Thumbnails point at the OXBLOOD renders: the offer document and
+           featured cover of 2026-08-22, and dead-deal-economics/2026-08-22.
+           A MISSING FILE IS NOW AN EMPTY PLATE reading AWAITING OXBLOOD
+           REBUILD, not a crash — the deck died on the first deleted green
+           render, and its own law already said to say there is no render
+           rather than draw one.
+still owed anything whose BUILD.txt names build-deck.mts needs Chromium and
+           therefore the Mac: hvac-2026-read, corp-dev-cost-sheet. Those
+           plates read AWAITING OXBLOOD REBUILD until they are re-run.
