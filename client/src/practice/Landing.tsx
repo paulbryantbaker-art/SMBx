@@ -211,7 +211,7 @@ function PricingRequest() {
   };
   if (state === 'sent') {
     return (
-      <p data-rv style={{ margin: '36px auto 0', fontSize: 17, color: '#A8F0CE' }}>
+      <p data-rv style={{ margin: '36px auto 0', fontSize: 17, color: '#FFAA90' }}>
         Sent — the pricing brochure is on its way to your inbox.
       </p>
     );
@@ -245,7 +245,7 @@ function PricingRequest() {
           {state === 'busy' ? 'Sending…' : 'Email me the pricing brochure'}
         </button>
       </form>
-      {state === 'err' && <p style={{ margin: '16px 0 0', fontSize: 15, color: '#D7DBD2' }}>{msg}</p>}
+      {state === 'err' && <p style={{ margin: '16px 0 0', fontSize: 15, color: '#F0D8D4' }}>{msg}</p>}
     </div>
   );
 }
@@ -271,7 +271,7 @@ function ProofBand() {
   // express "smaller in a rail, larger in a 2-up".
   const num = { fontFamily: SERIF, fontWeight: 550, lineHeight: 1, letterSpacing: '-0.02em' } as const;
   return (
-    <section id="proof" className="ca-dark" style={{ background: '#181818', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px) clamp(62px, 10vw, 180px)' }}>
+    <section id="proof" className="ca-dark" style={{ background: '#8A2B32', color: '#FFF3F0', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px) clamp(62px, 10vw, 180px)' }}>
       <div style={{ maxWidth: 1360, margin: '0 auto' }}>
         <div data-rv><Kicker dark center>TWO DECADES ON THE BUY SIDE</Kicker></div>
         {/* THE PROOF AS A CHAIN (2026-08-08). Five nodes wired, ending on
@@ -289,7 +289,7 @@ function ProofBand() {
             the grid is genuinely better there. The 0 spans the last row on
             its own, which is where it wants to be anyway. */}
         <div ref={ref} data-rv data-chain data-proof className="rv-stagger ch-dark" style={{ marginTop: 'clamp(30px, 5vw, 84px)', position: 'relative' }}>
-          <Handles color="#F4F5F1" />
+          <Handles color="#FFF3F0" />
           {[
             { c: '150', v: '150+', l: 'ACQUISITIONS & INTEGRATIONS' },
             { c: '5', v: '$5B+', l: 'ENTERPRISE VALUE ADDED' },
@@ -415,25 +415,25 @@ function Engagement() {
   }, []);
   return (
     <>
-          <div data-rv data-trackpanel ref={trackRef} style={{ marginTop: 'clamp(29px, 5vw, 84px)', position: 'relative', background: '#181818', padding: 'clamp(26px, 3vw, 40px)' }}>
-        <Handles color="#F4F5F1" />
-        <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.13) 1.1px, transparent 1.1px)', backgroundSize: '16px 16px' }} />
+          <div data-rv data-trackpanel ref={trackRef} style={{ marginTop: 'clamp(29px, 5vw, 84px)', position: 'relative', background: '#8A2B32', padding: 'clamp(26px, 3vw, 40px)' }}>
+        <Handles color="#FFF3F0" />
+        <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,170,144,.13) 1.1px, transparent 1.1px)', backgroundSize: '16px 16px' }} />
         <div style={{ position: 'relative' }}>
-          <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.14em', color: '#A8F0CE' }}>THE ENGAGEMENT</div>
+          <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.14em', color: '#FFAA90' }}>THE ENGAGEMENT</div>
           <div data-chain data-track className="ch-dark" style={{ marginTop: 20 }}>
             {PHASES.map((p, i) => (
               <Fragment key={p.ph}>
                 {i > 0 && <span className="ch-wire" aria-hidden="true"><i /></span>}
-                <div className="ch-node" style={{ background: i === barPhase ? '#0A7A58' : i > 4 ? '#16241E' : undefined, borderColor: i === barPhase ? '#0FA97C' : i > 4 ? '#2E5F4C' : undefined, textAlign: 'center', transition: 'background .25s ease, border-color .25s ease' }}>
-                  <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: i === barPhase ? '#DFF5EC' : '#0FA97C' }}>{String(i + 1).padStart(2, '0')}</div>
-                  <div style={{ marginTop: 7, fontSize: 13.5, lineHeight: 1.3, color: '#F4F5F1' }}>{p.ph}</div>
+                <div className="ch-node" style={{ background: i === barPhase ? '#B8431E' : i > 4 ? '#6C2227' : undefined, borderColor: i === barPhase ? '#FF7D55' : i > 4 ? '#AF6F74' : undefined, textAlign: 'center', transition: 'background .25s ease, border-color .25s ease' }}>
+                  <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: i === barPhase ? '#FBE7DF' : '#FF7D55' }}>{String(i + 1).padStart(2, '0')}</div>
+                  <div style={{ marginTop: 7, fontSize: 13.5, lineHeight: 1.3, color: '#FFF3F0' }}>{p.ph}</div>
                 </div>
               </Fragment>
             ))}
           </div>
           <div data-trackbr style={{ display: 'flex', marginTop: 14, fontFamily: MONO, fontSize: 12, letterSpacing: '0.1em' }}>
-            <div style={{ flex: '0 0 calc(5 / 7 * 100% + 12px)', paddingTop: 10, borderTop: '1px solid #3A3F38', color: '#8E948B', textAlign: 'center' }}>SMBXCORPDEV</div>
-            <div style={{ flex: 1, marginLeft: 18, paddingTop: 10, borderTop: '1px solid #2E5F4C', color: '#A8F0CE', textAlign: 'center' }}>PREMIUM</div>
+            <div style={{ flex: '0 0 calc(5 / 7 * 100% + 12px)', paddingTop: 10, borderTop: '1px solid #C08D90', color: '#DCB8B4', textAlign: 'center' }}>SMBXCORPDEV</div>
+            <div style={{ flex: 1, marginLeft: 18, paddingTop: 10, borderTop: '1px solid #AF6F74', color: '#FFAA90', textAlign: 'center' }}>PREMIUM</div>
           </div>
         </div>
       </div>
@@ -708,14 +708,14 @@ function MachineRun() {
       : [];
   return (
     <div className="ca-machine-wrap" data-rv>
-      <div className="ca-machine" style={{ position: 'relative', marginTop: 56, background: '#181818', overflow: 'hidden', height: 'clamp(400px, 32vw, 500px)' }}>
-        <Handles color="#F4F5F1" />
-        <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.15) 1.1px, transparent 1.1px)', backgroundSize: '16px 16px' }} />
+      <div className="ca-machine" style={{ position: 'relative', marginTop: 56, background: '#8A2B32', overflow: 'hidden', height: 'clamp(400px, 32vw, 500px)' }}>
+        <Handles color="#FFF3F0" />
+        <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,170,144,.15) 1.1px, transparent 1.1px)', backgroundSize: '16px 16px' }} />
         <svg aria-hidden="true" viewBox="0 0 1000 460" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} fill="none">
           {paths.map((d, i) => (
             <Fragment key={`${s.mode}-${s.vi}-${i}`}>
-              <path d={d} pathLength={100} className={`ca-mpath${on ? ' draw' : ''}`} style={{ transitionDelay: on ? `${i * 130}ms` : '0ms' }} stroke="#3A3F38" strokeWidth="1.4" />
-              <path d={d} pathLength={100} className={`ca-mflow${on ? ' run' : ''}`} stroke="#A8F0CE" strokeWidth="1.4" />
+              <path d={d} pathLength={100} className={`ca-mpath${on ? ' draw' : ''}`} style={{ transitionDelay: on ? `${i * 130}ms` : '0ms' }} stroke="#C08D90" strokeWidth="1.4" />
+              <path d={d} pathLength={100} className={`ca-mflow${on ? ' run' : ''}`} stroke="#FFAA90" strokeWidth="1.4" />
             </Fragment>
           ))}
         </svg>
@@ -724,8 +724,8 @@ function MachineRun() {
           <img src="/logo-green-x-dark.png" alt="" style={{ height: 20, width: 'auto', display: 'block' }} />
         </div>
         <div className={`ca-mline${s.mode !== 'mark' ? ' on' : ''}`} aria-hidden="true">
-          <span style={{ color: '#A8F0CE' }}>We run&nbsp;</span>
-          <span className="ca-mword"><span style={{ color: '#F4F5F1' }}>{word}</span><span className="ca-mcaret" /></span>
+          <span style={{ color: '#FFAA90' }}>We run&nbsp;</span>
+          <span className="ca-mword"><span style={{ color: '#FFF3F0' }}>{word}</span><span className="ca-mcaret" /></span>
         </div>
         {pills.map((p, i) => (
           <span key={`${s.vi}-${p.t}`} className={`ca-mpill i${i}${on ? ' on' : ''}`} style={{ left: `${p.x}%`, top: `${p.y}%`, transitionDelay: on ? `${140 + i * 150}ms` : '0ms' }}>
@@ -733,7 +733,7 @@ function MachineRun() {
           </span>
         ))}
         {/* the panel states its own honesty law once, quietly */}
-        <div style={{ position: 'absolute', left: 22, bottom: 16, fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: '#8E948B' }}>THE ENGAGEMENT, END TO END</div>
+        <div style={{ position: 'absolute', left: 22, bottom: 16, fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: '#DCB8B4' }}>THE ENGAGEMENT, END TO END</div>
       </div>
     </div>
   );
@@ -761,21 +761,21 @@ function PhaseExplorer({ phase, setPhase, pin }: { phase: number; setPhase: (i: 
       <Handles />
       <div data-phase-rail style={{ borderRight: '1px solid #16181A', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '16px 20px', borderBottom: '1px solid #E4DFD3', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ width: 8, height: 8, background: '#0A7A58' }} />
+          <span style={{ width: 8, height: 8, background: '#B8431E' }} />
           <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.14em', color: '#7C8187' }}>THE SEVEN PHASES</span>
         </div>
         <div style={{ padding: '12px 20px 4px', fontSize: 13.5, color: '#7C8187' }}>
-          <span style={{ fontWeight: 700, color: '#16181A' }}>smb<span style={{ color: '#0A7A58' }}>x</span>CorpDev</span> — The full buy-side engagement — thesis to close.
+          <span style={{ fontWeight: 700, color: '#16181A' }}>smb<span style={{ color: '#B8431E' }}>x</span>CorpDev</span> — The full buy-side engagement — thesis to close.
         </div>
         {PHASES.slice(0, 5).map((p, i) => tab(p, i))}
         <div style={{ padding: '16px 20px 4px', fontSize: 13.5, color: '#7C8187', borderTop: '1px solid #E4DFD3', marginTop: 8 }}>
-          <span style={{ fontWeight: 700, color: '#16181A' }}>smb<span style={{ color: '#0A7A58' }}>x</span>CorpDev Premium</span> — Everything above — then the part most advisors skip.
+          <span style={{ fontWeight: 700, color: '#16181A' }}>smb<span style={{ color: '#B8431E' }}>x</span>CorpDev Premium</span> — Everything above — then the part most advisors skip.
         </div>
         {PHASES.slice(5).map((p, i) => tab(p, i + 5))}
       </div>
       <div data-phase-pane style={{ padding: '44px 48px 48px', minHeight: 430, position: 'relative' }}>
-        <div aria-hidden="true" style={{ position: 'absolute', top: 0, right: 0, width: 220, height: 130, backgroundImage: 'radial-gradient(rgba(10,122,88,.2) 1.1px, transparent 1.1px)', backgroundSize: '15px 15px' }} />
-        <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.14em', color: '#0A7A58' }}>PHASE {String(phase + 1).padStart(2, '0')} — {active.g}</div>
+        <div aria-hidden="true" style={{ position: 'absolute', top: 0, right: 0, width: 220, height: 130, backgroundImage: 'radial-gradient(rgba(184,67,30,.2) 1.1px, transparent 1.1px)', backgroundSize: '15px 15px' }} />
+        <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.14em', color: '#B8431E' }}>PHASE {String(phase + 1).padStart(2, '0')} — {active.g}</div>
         <div style={{ marginTop: 16, fontFamily: SERIF, fontWeight: 600, fontSize: 'clamp(22px, 2.6vw, 44px)', lineHeight: 1.12, letterSpacing: '-0.01em', maxWidth: '15em' }}>{active.ph}</div>
         <p style={{ margin: '22px 0 0', fontSize: 18, lineHeight: 1.6, color: '#16181A', fontWeight: 500, maxWidth: '30em' }}>{active.t}</p>
         <p style={{ margin: '16px 0 0', fontSize: 16.5, lineHeight: 1.7, color: '#4A4F54', maxWidth: '34em' }}>{active.bd}</p>
@@ -929,7 +929,7 @@ export default function Landing() {
               <a
                 href="#owners"
                 className="ca-h-deepgreen"
-                style={{ display: 'inline-block', fontSize: 15.5, fontWeight: 500, color: '#0A7A58', borderBottom: '1px solid #0A7A58', paddingBottom: 2 }}
+                style={{ display: 'inline-block', fontSize: 15.5, fontWeight: 500, color: '#B8431E', borderBottom: '1px solid #B8431E', paddingBottom: 2 }}
                 onClick={() => trackEvent('practice_cta_clicked', { placement: 'hero-owner-button' })}
               >
                 Are you a business owner? →
@@ -944,7 +944,7 @@ export default function Landing() {
                 1024 (where the ring is hidden) they are the hero's geometry
                 exactly as before. Two green textures plus a 600px green ring
                 in the same corner is the "busy" Paul is steering away from. */}
-            <div aria-hidden="true" className="ca-hero-cdots" style={{ position: 'absolute', inset: '-10px -20px 30px', backgroundImage: 'radial-gradient(rgba(10,122,88,.22) 1.2px, transparent 1.2px)', backgroundSize: '17px 17px' }} />
+            <div aria-hidden="true" className="ca-hero-cdots" style={{ position: 'absolute', inset: '-10px -20px 30px', backgroundImage: 'radial-gradient(rgba(184,67,30,.22) 1.2px, transparent 1.2px)', backgroundSize: '17px 17px' }} />
             {/* THE BALL — third object, sized and placed by φ (see the section
                 comment). `left: 0` is the card's own left edge; the transform
                 then splits the ball across it φ⁻¹ clear / φ⁻² behind, and
@@ -983,9 +983,9 @@ export default function Landing() {
                   remount of the inner one. */}
               <div key={ringKey} style={{ width: '100%', height: '100%', transformOrigin: '50% 50%' }}>
                 <svg viewBox="0 0 300 300" width="100%" height="100%" fill="none">
-                  <circle className="ca-arc-draw" pathLength={100} cx="150" cy="150" r="146" stroke="#0A7A58" strokeWidth="1.4" opacity=".42" style={{ ['--arc-op' as string]: 0.42 }} />
-                  <ellipse className="ca-arc-fade" cx="150" cy="150" rx="145" ry="58" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 6" opacity=".62" style={{ ['--arc-op' as string]: 0.62 }} />
-                  <ellipse className="ca-arc-draw" pathLength={100} cx="150" cy="150" rx="58" ry="145" stroke="#0A7A58" strokeWidth="1.4" opacity=".45" style={{ ['--arc-op' as string]: 0.45 }} />
+                  <circle className="ca-arc-draw" pathLength={100} cx="150" cy="150" r="146" stroke="#B8431E" strokeWidth="1.4" opacity=".42" style={{ ['--arc-op' as string]: 0.42 }} />
+                  <ellipse className="ca-arc-fade" cx="150" cy="150" rx="145" ry="58" stroke="#B8431E" strokeWidth="1.4" strokeDasharray="5 6" opacity=".62" style={{ ['--arc-op' as string]: 0.62 }} />
+                  <ellipse className="ca-arc-draw" pathLength={100} cx="150" cy="150" rx="58" ry="145" stroke="#B8431E" strokeWidth="1.4" opacity=".45" style={{ ['--arc-op' as string]: 0.45 }} />
                 </svg>
                 {/* ATTACHED TO THE RING, so they travel with it (2026-08-09,
                     Paul: "the labels on the ball need to rotate with the ball
@@ -1008,7 +1008,7 @@ export default function Landing() {
                     <span key={n.off} aria-hidden="true" className={n.pop} style={{ position: 'absolute', ...n.at, transform: 'translate(-50%, -50%)' }}>
                       <span className="ca-chip-level">
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '3px 9px 2px 8px', background: '#FFFFFF', border: '1px solid #E4DFD3', fontFamily: MONO, fontSize: 13, letterSpacing: '0.08em', color: '#16181A', whiteSpace: 'nowrap' }}>
-                          <span style={{ width: 7, height: 7, background: '#0A7A58', flex: 'none' }} />
+                          <span style={{ width: 7, height: 7, background: '#B8431E', flex: 'none' }} />
                           <span key={word} className="ca-type" style={{ ['--n' as string]: word.length }}>{word}</span>
                         </span>
                       </span>
@@ -1023,9 +1023,9 @@ export default function Landing() {
                   the settle-in. */}
               <div style={{ width: 150, height: 150, transformOrigin: '50% 50%' }}>
                 <svg width="150" height="150" viewBox="0 0 150 150" fill="none">
-                  <ellipse cx="75" cy="75" rx="72" ry="30" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 5" opacity=".7" />
-                  <ellipse cx="75" cy="75" rx="30" ry="72" stroke="#0A7A58" strokeWidth="1.4" opacity=".55" />
-                  <circle cx="75" cy="75" r="71" stroke="#0A7A58" strokeWidth="1.4" opacity=".35" />
+                  <ellipse cx="75" cy="75" rx="72" ry="30" stroke="#B8431E" strokeWidth="1.4" strokeDasharray="5 5" opacity=".7" />
+                  <ellipse cx="75" cy="75" rx="30" ry="72" stroke="#B8431E" strokeWidth="1.4" opacity=".55" />
+                  <circle cx="75" cy="75" r="71" stroke="#B8431E" strokeWidth="1.4" opacity=".35" />
                 </svg>
               </div>
             </div>
@@ -1041,7 +1041,7 @@ export default function Landing() {
           <div data-marquee className="ca-marquee" style={{ display: 'flex', width: 'max-content', animation: 'smbxMarquee 46s linear infinite' }}>
             {marquee.map((m, i) => (
               <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '16px 26px', fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.12em', color: '#4A4F54', whiteSpace: 'nowrap' }}>
-                {m}<span aria-hidden="true" style={{ width: 7, height: 7, background: '#0A7A58', display: 'inline-block' }} />
+                {m}<span aria-hidden="true" style={{ width: 7, height: 7, background: '#B8431E', display: 'inline-block' }} />
               </span>
             ))}
           </div>
@@ -1053,7 +1053,7 @@ export default function Landing() {
         <section id="why" style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(68px, 12vw, 200px) clamp(20px, 4vw, 32px) 40px' }}>
           <div data-rv style={{ maxWidth: HEAD_L }}>
             <Kicker>WHY US</Kicker>
-            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'pretty' }}>The machine serial acquirers build in-house. <span style={{ color: '#0A7A58' }}>Yours</span>, without the headcount.</h2>
+            <h2 style={{ margin: '22px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(26px, 3.4vw, 56px)', lineHeight: 1.08, letterSpacing: '-0.012em', textWrap: 'pretty' }}>The machine serial acquirers build in-house. <span style={{ color: '#B8431E' }}>Yours</span>, without the headcount.</h2>
             <p style={{ margin: '24px 0 0', maxWidth: '42em', fontSize: 18, lineHeight: 1.65, color: '#4A4F54' }}>You already know what you want to buy. The question is who runs the hunt — a team you'd spend a year hiring, a bank with a seller's habits, or us. Here's the case.</p>
           </div>
           {/* No `alignItems: start` (2026-08-08). Grid's default IS stretch,
@@ -1076,11 +1076,11 @@ export default function Landing() {
                       case and kept them. They are also in the approved Carta
                       reference. Do not "tidy" them out on either ground. */}
                   <span aria-hidden="true" style={{ display: 'block', height: 84, backgroundImage: 'radial-gradient(rgba(22,24,26,.16) 1.1px, transparent 1.1px)', backgroundSize: '15px 15px', marginBottom: 20, position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: 0, bottom: 0, background: '#0A7A58', color: '#FFFFFF', fontFamily: MONO, fontSize: 11, letterSpacing: '0.1em', padding: '4px 8px' }}>{String(i + 1).padStart(2, '0')}</span>
+                    <span style={{ position: 'absolute', left: 0, bottom: 0, background: '#B8431E', color: '#FFFFFF', fontFamily: MONO, fontSize: 11, letterSpacing: '0.1em', padding: '4px 8px' }}>{String(i + 1).padStart(2, '0')}</span>
                   </span>
                   <span style={{ display: 'block', fontFamily: SERIF, fontWeight: 600, fontSize: 23, lineHeight: 1.2 }}>{w.nm}</span>
                   <span style={{ display: 'block', marginTop: 12, fontSize: 15.5, lineHeight: 1.6, color: '#4A4F54' }}>{w.bd}</span>
-                  <span style={{ display: 'inline-block', marginTop: 16, fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.12em', color: '#0A7A58', borderBottom: '1px solid #0A7A58', paddingBottom: 2 }}>{w.more}</span>
+                  <span style={{ display: 'inline-block', marginTop: 16, fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.12em', color: '#B8431E', borderBottom: '1px solid #B8431E', paddingBottom: 2 }}>{w.more}</span>
                 </summary>
                 <div className="ca-why-xp" style={{ padding: '0 26px 26px', fontSize: 15, lineHeight: 1.65, color: '#4A4F54', borderTop: '1px solid #E4DFD3' }}>
                   {w.xp}
@@ -1096,7 +1096,7 @@ export default function Landing() {
               and never wraps). */}
           <div data-rv style={{ marginTop: 44, display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between', gap: 24, borderTop: '1px solid #E4DFD3', paddingTop: 26 }}>
             <p style={{ margin: 0, fontSize: 17, lineHeight: 1.6, color: '#4A4F54', maxWidth: '44em' }}>And it compounds — every engagement sharpens the thesis, the scorecards, and the playbook the next one runs on.</p>
-            <a href="#how" className="ca-h-deepgreen" style={{ flex: 'none', fontSize: 16, fontWeight: 600, color: '#0A7A58', borderBottom: '1.5px solid #0A7A58', paddingBottom: 2, whiteSpace: 'nowrap' }}>See how the machine runs →</a>
+            <a href="#how" className="ca-h-deepgreen" style={{ flex: 'none', fontSize: 16, fontWeight: 600, color: '#B8431E', borderBottom: '1.5px solid #B8431E', paddingBottom: 2, whiteSpace: 'nowrap' }}>See how the machine runs →</a>
           </div>
           {/* …and here it is running (2026-08-12): the sentence above promises
               the machine, the panel below shows it working — the same seam
@@ -1140,14 +1140,14 @@ export default function Landing() {
               <Handles />
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 26px', borderBottom: '1px solid #E4DFD3' }}>
                 <img src="/logo-green-x.png" alt="smbX.ai" style={{ height: 22, width: 'auto', display: 'block' }} />
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#0A7A58', color: '#FFFFFF', fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.12em', padding: '5px 9px', whiteSpace: 'nowrap' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#B8431E', color: '#FFFFFF', fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.12em', padding: '5px 9px', whiteSpace: 'nowrap' }}>
                   <span style={{ width: 7, height: 7, background: '#FFFFFF', display: 'inline-block' }} />SAMPLE READ
                 </span>
               </div>
               <div data-sample-body style={{ padding: '34px 40px 38px' }}>
                 <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 30, letterSpacing: '-0.01em' }}>Commercial Landscaping — Southeast</div>
                 <div style={{ marginTop: 8, fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.05em', color: '#7C8187' }}>Commercial landscaping · GA, NC, SC, TN · $2–8M EBITDA · commercial-contract mix</div>
-                <div style={{ marginTop: 30, fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#0A7A58' }}>THE FUNNEL</div>
+                <div style={{ marginTop: 30, fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#B8431E' }}>THE FUNNEL</div>
                 {/* THE FUNNEL AS A WIRED NODE CHAIN (2026-08-08, the Carta
                     polish pass). It was three flat boxes with → glyphs between
                     them and the payoff — the 9 — stranded in a separate panel
@@ -1190,16 +1190,16 @@ export default function Landing() {
                     </Fragment>
                   ))}
                 </div>
-                <div style={{ marginTop: 20, background: '#181818', color: '#F4F5F1', padding: '20px 24px', position: 'relative', overflow: 'hidden' }}>
-                  <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.16) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
+                <div style={{ marginTop: 20, background: '#8A2B32', color: '#FFF3F0', padding: '20px 24px', position: 'relative', overflow: 'hidden' }}>
+                  <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,170,144,.16) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
                   {/* The giant "9" that used to sit here is now the chain's
                       terminal node — repeating it beside the sentence that
                       explains it was the redundancy that made the old block
                       read as two graphics arguing. The words are unchanged. */}
-                  <div style={{ position: 'relative', fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.14em', color: '#A8F0CE' }}>THE DROP</div>
-                  <div style={{ position: 'relative', marginTop: 10, fontSize: 15, lineHeight: 1.6, color: '#D7DBD2' }}>Of those 55, the number we'd tell you to spend real time on. The drop from 55 to 9 is the part you can't Google.</div>
+                  <div style={{ position: 'relative', fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.14em', color: '#FFAA90' }}>THE DROP</div>
+                  <div style={{ position: 'relative', marginTop: 10, fontSize: 15, lineHeight: 1.6, color: '#F0D8D4' }}>Of those 55, the number we'd tell you to spend real time on. The drop from 55 to 9 is the part you can't Google.</div>
                 </div>
-                <div style={{ marginTop: 30, fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#0A7A58' }}>WHAT SEPARATES THE 9</div>
+                <div style={{ marginTop: 30, fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#B8431E' }}>WHAT SEPARATES THE 9</div>
                 <div style={{ marginTop: 6 }}>
                   <div data-numrow style={{ display: 'grid', gridTemplateColumns: '44px 200px 1fr', gap: 16, padding: '16px 0', borderBottom: '1px solid #E4DFD3' }}>
                     <div style={{ fontFamily: MONO, fontSize: 12, color: '#7C8187' }}>01</div>
@@ -1218,20 +1218,20 @@ export default function Landing() {
                   </div>
                 </div>
                 <div style={{ marginTop: 8, border: '1px solid #E4DFD3', background: '#F9F7F1', padding: '20px 24px' }}>
-                  <div style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#0A7A58' }}>WHAT MOST BUYERS MISS</div>
+                  <div style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#B8431E' }}>WHAT MOST BUYERS MISS</div>
                   <div style={{ marginTop: 10, fontSize: 15, lineHeight: 1.65, color: '#4A4F54' }}>Two companies here with identical EBITDA can be worth two turns apart on route density alone. Most buyers underwrite the earnings, ignore the drive time, and wonder why margins compress the quarter after close. We price the routes first, the EBITDA second.</div>
                 </div>
                 <div data-split style={{ marginTop: 22, display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 26, alignItems: 'center' }}>
                   <div>
-                    <div style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#0A7A58' }}>THE NUMBER</div>
+                    <div style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#B8431E' }}>THE NUMBER</div>
                     <div style={{ marginTop: 6, fontFamily: SERIF, fontWeight: 550, fontSize: 58, lineHeight: 1, letterSpacing: '-0.02em' }}>
-                      $6–8M<span style={{ display: 'block', height: 5, width: 76, background: '#0A7A58', marginTop: 10 }} />
+                      $6–8M<span style={{ display: 'block', height: 5, width: 76, background: '#B8431E', marginTop: 10 }} />
                     </div>
                   </div>
                   <div style={{ fontSize: 15, lineHeight: 1.65, color: '#4A4F54' }}>On a $4M-EBITDA target at this size, getting the route-density read wrong is roughly a <strong style={{ color: '#16181A' }}>1.5–2.0x swing in EBITDA multiple</strong> — call it $6–8M of purchase price on a single deal, decided by one variable most buyers never model.</div>
                 </div>
                 <div style={{ marginTop: 26, borderTop: '1px solid #E4DFD3', paddingTop: 22 }}>
-                  <div style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#0A7A58' }}>OUR READ</div>
+                  <div style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#B8431E' }}>OUR READ</div>
                   <div style={{ marginTop: 10, fontSize: 15.5, lineHeight: 1.65, color: '#16181A' }}>This is one of the last genuinely fragmented service niches in the region, and the window is open — but only for a buyer disciplined enough to pay for route quality and walk from the pretty-EBITDA traps. That discipline is the whole game here.</div>
                 </div>
               </div>
@@ -1263,7 +1263,7 @@ export default function Landing() {
                   href="/collateral/smbx-corpdev-offering.pdf"
                   download="smbx-corpdev-offering.pdf"
                   className="ca-h-deepgreen"
-                  style={{ fontSize: 14.5, color: '#0A7A58', borderBottom: '1px solid #0A7A58', paddingBottom: 2 }}
+                  style={{ fontSize: 14.5, color: '#B8431E', borderBottom: '1px solid #B8431E', paddingBottom: 2 }}
                   onClick={() => trackEvent('practice_cta_clicked', { placement: 'how-offering-pdf' })}
                 >
                   Take this with you — the smbXCorpDev offering (PDF)
@@ -1274,15 +1274,15 @@ export default function Landing() {
         </section>
 
         {/* ══ PRICING — dark band ══ */}
-        <section id="pricing" className="ca-dark" style={{ background: '#181818', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative' }}>
-          <div aria-hidden="true" data-plx="0.02" style={{ position: 'absolute', top: 40, right: '6%', width: 280, height: 190, backgroundImage: 'radial-gradient(rgba(168,240,206,.2) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
+        <section id="pricing" className="ca-dark" style={{ background: '#8A2B32', color: '#FFF3F0', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative' }}>
+          <div aria-hidden="true" data-plx="0.02" style={{ position: 'absolute', top: 40, right: '6%', width: 280, height: 190, backgroundImage: 'radial-gradient(rgba(255,170,144,.2) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           {/* HEAD_CTR, not the reference's 840 — same one-line finding as
               #owners. The sub (38em) and the form (520) carry their own caps,
               so only the headline takes the extra width. */}
           <div style={{ maxWidth: HEAD_CTR, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
             <div data-rv><Kicker dark center>PRICING</Kicker></div>
             <h2 data-rv style={{ margin: '26px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(24px, 3.2vw, 54px)', lineHeight: 1.12, letterSpacing: '-0.012em', textWrap: 'balance' }}>Simple, up-front pricing — we'll send you the schedule.</h2>
-            <p data-rv style={{ margin: '22px auto 0', maxWidth: '38em', fontSize: 17.5, lineHeight: 1.65, color: '#ABB2AB' }}>One schedule for every client, spelled out in a short brochure — the retainer, the success fee, and how the credit at close works. Nothing to haggle over. Tell us where to send it.</p>
+            <p data-rv style={{ margin: '22px auto 0', maxWidth: '38em', fontSize: 17.5, lineHeight: 1.65, color: '#DCB8B4' }}>One schedule for every client, spelled out in a short brochure — the retainer, the success fee, and how the credit at close works. Nothing to haggle over. Tell us where to send it.</p>
             <PricingRequest />
           </div>
         </section>
@@ -1299,7 +1299,7 @@ export default function Landing() {
                 set keeps rotating through everyone the section is for. */}
             {WHO_MARKS.map((m, k) => (
               <div key={k} aria-hidden="true" data-whomark data-plx={m.plx} style={{ position: 'absolute', ...m.pos, width: m.size, height: m.size, zIndex: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(rgba(22,24,26,.15) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }}>
-                <span style={{ position: 'absolute', ...m.chip, background: '#0A7A58', color: '#FFFFFF', fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.1em', padding: '3px 7px', whiteSpace: 'nowrap' }}>
+                <span style={{ position: 'absolute', ...m.chip, background: '#B8431E', color: '#FFFFFF', fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.1em', padding: '3px 7px', whiteSpace: 'nowrap' }}>
                   <span key={WHO_WORDS[(who + k * 2) % WHO_WORDS.length]} className="ca-flip">{WHO_WORDS[(who + k * 2) % WHO_WORDS.length]}</span>
                 </span>
               </div>
@@ -1327,8 +1327,8 @@ export default function Landing() {
               >
                 <span style={{ display: 'block', fontFamily: SERIF, fontWeight: 600, fontSize: 22, lineHeight: 1.15 }}>{w.label}</span>
                 <span style={{ display: 'block', marginTop: 14, fontSize: 14, lineHeight: 1.6, color: '#4A4F54' }}>{w.body}</span>
-                <span style={{ position: 'absolute', left: 22, bottom: 18, fontSize: 13.5, fontWeight: 600, color: '#0A7A58' }}>{w.link}</span>
-                <span aria-hidden="true" style={{ position: 'absolute', top: 14, right: 14, width: 26, height: 26, background: '#0A7A58', color: '#FFFFFF', display: 'grid', placeItems: 'center', fontSize: 14 }}>→</span>
+                <span style={{ position: 'absolute', left: 22, bottom: 18, fontSize: 13.5, fontWeight: 600, color: '#B8431E' }}>{w.link}</span>
+                <span aria-hidden="true" style={{ position: 'absolute', top: 14, right: 14, width: 26, height: 26, background: '#B8431E', color: '#FFFFFF', display: 'grid', placeItems: 'center', fontSize: 14 }}>→</span>
               </Link>
             ))}
           </div>
@@ -1352,7 +1352,7 @@ export default function Landing() {
               >
                 <span style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
                   <span style={{ fontWeight: 600, fontSize: 16.5, lineHeight: 1.3 }}>{l.nm}</span>
-                  <span aria-hidden="true" style={{ flex: 'none', color: '#0A7A58', fontSize: 15 }}>→</span>
+                  <span aria-hidden="true" style={{ flex: 'none', color: '#B8431E', fontSize: 15 }}>→</span>
                 </span>
                 <span style={{ display: 'block', marginTop: 9, fontSize: 14, lineHeight: 1.55, color: '#7C8187' }}>{l.th}</span>
               </Link>
@@ -1382,7 +1382,7 @@ export default function Landing() {
                 <Link
                   href="/industries"
                   className={`ca-lanefill-link ca-h-band${fillClass(hunt, HUNT_LANES.length)}`}
-                  style={{ gridColumn: `span ${3 - (HUNT_LANES.length % 3)}`, background: '#FFFFFF', padding: '22px 24px', fontSize: 16, fontWeight: 600, color: '#0A7A58' }}
+                  style={{ gridColumn: `span ${3 - (HUNT_LANES.length % 3)}`, background: '#FFFFFF', padding: '22px 24px', fontSize: 16, fontWeight: 600, color: '#B8431E' }}
                   onClick={() => trackEvent('practice_sector_clicked', { sector: 'all-theses' })}
                 >
                   Read the full sector theses →
@@ -1391,12 +1391,12 @@ export default function Landing() {
             )}
           </div>
           <div data-rv className="ca-theses-below" style={{ marginTop: 38, textAlign: 'center' }}>
-            <Link href="/industries" className="ca-h-deepgreen" style={{ fontSize: 16, fontWeight: 600, color: '#0A7A58', borderBottom: '1.5px solid #0A7A58', paddingBottom: 2 }}>Read the full sector theses →</Link>
+            <Link href="/industries" className="ca-h-deepgreen" style={{ fontSize: 16, fontWeight: 600, color: '#B8431E', borderBottom: '1.5px solid #B8431E', paddingBottom: 2 }}>Read the full sector theses →</Link>
           </div>
         </section>
 
         {/* ══ WHOSE SIDE — dark band ══ */}
-        <section className="ca-dark" style={{ background: '#181818', color: '#F4F5F1', padding: 'clamp(68px, 11vw, 180px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
+        <section className="ca-dark" style={{ background: '#8A2B32', color: '#FFF3F0', padding: 'clamp(68px, 11vw, 180px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(57px, 10vw, 170px)', position: 'relative', overflow: 'hidden' }}>
           {/* The dot field sits BEHIND the headline, not marooned in a corner
               (2026-08-08). It was anchored `left: 5%; bottom: 36` — a 300×170
               block alone in the band's bottom-left, aligned to nothing and
@@ -1407,19 +1407,19 @@ export default function Landing() {
               it on both sides, so the type reads as sitting ON the field
               rather than next to it. z-index 0 under the content's z-index 1
               — the copy below already carries its own stacking. */}
-          <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', left: '50%', top: '30%', transform: 'translateX(-50%)', width: 'min(760px, 86%)', height: 200, zIndex: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(rgba(168,240,206,.16) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
+          <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', left: '50%', top: '30%', transform: 'translateX(-50%)', width: 'min(760px, 86%)', height: 200, zIndex: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(rgba(255,170,144,.16) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
             <div data-rv><Kicker dark center>WHOSE SIDE WE'RE ON</Kicker></div>
             {/* TWO-TONE (2026-08-08). The accent lands on the TURN, never on the
                 setup — the sentence states a fact, then asks the question that
                 is the whole practice. Mint rather than Deal Green because this
-                is a dark band: green on #181818 is the low-contrast trap the
+                is a dark band: green on #8A2B32 is the low-contrast trap the
                 token table already warns about, and mint is the sanctioned
                 on-dark accent. The device is not new here — the collateral
                 deck builder has drawn hooks this way for months
                 (`twoToneHook`); it had simply never reached the site. */}
-            <p data-rv style={{ margin: '34px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(27px, 4.2vw, 68px)', lineHeight: 1.1, letterSpacing: '-0.014em', textWrap: 'balance' }}>The seller has a broker. <span style={{ color: '#A8F0CE' }}>Who is working for&nbsp;you?</span></p>
-            <p data-rv style={{ margin: '26px auto 0', maxWidth: '38em', fontSize: 17.5, lineHeight: 1.65, color: '#ABB2AB' }}>We represent buyers, and only buyers — one client per target. You get our full attention, unfiltered analysis, and a proprietary deal that stays yours.</p>
+            <p data-rv style={{ margin: '34px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(27px, 4.2vw, 68px)', lineHeight: 1.1, letterSpacing: '-0.014em', textWrap: 'balance' }}>The seller has a broker. <span style={{ color: '#FFAA90' }}>Who is working for&nbsp;you?</span></p>
+            <p data-rv style={{ margin: '26px auto 0', maxWidth: '38em', fontSize: 17.5, lineHeight: 1.65, color: '#DCB8B4' }}>We represent buyers, and only buyers — one client per target. You get our full attention, unfiltered analysis, and a proprietary deal that stays yours.</p>
             {/* THE LINE, DRAWN (2026-08-08). The band asserted exclusivity in
                 prose; this is the same claim as a picture — you, us, and ONE
                 company, wired, with the target left unlit because it is the
@@ -1450,10 +1450,10 @@ export default function Landing() {
             </div>
             <div data-rv style={{ margin: '20px auto 0', display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
               {['NOT SHOPPED', 'NO SECOND BUYER', 'NO SELL-SIDE FEE'].map(c => (
-                <span key={c} style={{ border: '1px dashed #3A3F38', color: '#8E948B', fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.08em', padding: '9px 13px' }}>{c}</span>
+                <span key={c} style={{ border: '1px dashed #C08D90', color: '#DCB8B4', fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.08em', padding: '9px 13px' }}>{c}</span>
               ))}
             </div>
-            <div data-rv style={{ margin: '22px auto 0', fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.14em', color: '#A8F0CE' }}>ONE CLIENT · ONE TARGET · ONE SIDE</div>
+            <div data-rv style={{ margin: '22px auto 0', fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.14em', color: '#FFAA90' }}>ONE CLIENT · ONE TARGET · ONE SIDE</div>
             <div data-rv style={{ marginTop: 52, display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
               <a
                 href="#yulia"
@@ -1468,7 +1468,7 @@ export default function Landing() {
                 target={bookTarget()}
                 rel={bookRel()}
                 className="ca-h-mintline"
-                style={{ fontSize: 16, fontWeight: 500, color: '#F4F5F1', padding: '13.5px 24px', border: '1.5px solid #4A4F44', borderRadius: 10 }}
+                style={{ fontSize: 16, fontWeight: 500, color: '#FFF3F0', padding: '13.5px 24px', border: '1.5px solid #C08D90', borderRadius: 10 }}
                 onClick={() => trackEvent('practice_booking_clicked', { placement: 'whose-side' })}
               >
                 Book a call
@@ -1500,15 +1500,15 @@ export default function Landing() {
           </div>
           <div data-rv data-g3 className="rv-stagger" style={{ position: 'relative', zIndex: 1, marginTop: 'clamp(36px, 6vw, 104px)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
             <div style={{ borderTop: '2px solid #16181A', paddingTop: 20 }}>
-              <div style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.13em', color: '#0A7A58' }}>BUYERS REBUILD YOUR NUMBERS</div>
+              <div style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.13em', color: '#B8431E' }}>BUYERS REBUILD YOUR NUMBERS</div>
               <p style={{ margin: '14px 0 0', fontSize: 15, lineHeight: 1.65, color: '#4A4F54' }}>A buyer's accountants don't price the tax return — they rebuild it: owner compensation, one-time costs, personal expenses, owned real estate restated to market rent. Your valuation runs that same walk, line by line, so the number your range applies to is the one a buyer would actually use.</p>
             </div>
             <div style={{ borderTop: '2px solid #16181A', paddingTop: 20 }}>
-              <div style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.13em', color: '#0A7A58' }}>BUYERS PAY FOR WHAT RECURS</div>
+              <div style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.13em', color: '#B8431E' }}>BUYERS PAY FOR WHAT RECURS</div>
               <p style={{ margin: '14px 0 0', fontSize: 15, lineHeight: 1.65, color: '#4A4F54' }}>Two businesses with identical profit can trade turns apart. Maintenance contracts, a team that runs without you, a granular customer base, clean books — these are the drivers buyers price, and your readiness read scores every one and names which is worth your next year of work.</p>
             </div>
             <div style={{ borderTop: '2px solid #16181A', paddingTop: 20 }}>
-              <div style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.13em', color: '#0A7A58' }}>BUYERS PRICE THE TRADE FIRST</div>
+              <div style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.13em', color: '#B8431E' }}>BUYERS PRICE THE TRADE FIRST</div>
               <p style={{ margin: '14px 0 0', fontSize: 15, lineHeight: 1.65, color: '#4A4F54' }}>Every trade has a published band where deals actually clear. Your valuation cites that band — source and vintage named — and shows where your business profile sits inside it. No made-up number, and never a single magic figure.</p>
             </div>
           </div>
@@ -1557,7 +1557,7 @@ export default function Landing() {
                 'Leave and come back as needed — finish on your time.',
               ].map((step, i) => (
                 <li key={step} style={{ display: 'grid', gridTemplateColumns: '26px 1fr', gap: 12, alignItems: 'baseline' }}>
-                  <span aria-hidden="true" style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: '#0A7A58' }}>{String(i + 1).padStart(2, '0')}</span>
+                  <span aria-hidden="true" style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: '#B8431E' }}>{String(i + 1).padStart(2, '0')}</span>
                   <span style={{ fontSize: 16.5, lineHeight: 1.6, color: '#16181A', fontWeight: 500 }}>{step}</span>
                 </li>
               ))}
@@ -1596,7 +1596,7 @@ export default function Landing() {
           <div data-rv data-fnd className="rv-stagger" style={{ background: '#F3F0E9', display: 'grid', gridTemplateColumns: '300px 1fr', gap: 48, padding: '48px 52px', alignItems: 'center', position: 'relative' }}>
             <div style={{ position: 'relative', width: 230 }}>
               <img data-rvimg src="/founder-portrait.jpg" alt="Paul Baker" loading="lazy" style={{ display: 'block', width: 230, height: 250, objectFit: 'cover', objectPosition: '50% 32%' }} />
-              <span style={{ position: 'absolute', right: -14, bottom: -14, width: 34, height: 34, background: '#0A7A58', color: '#FFFFFF', display: 'grid', placeItems: 'center', fontFamily: SERIF, fontWeight: 700, fontSize: 20, fontStyle: 'italic' }}>"</span>
+              <span style={{ position: 'absolute', right: -14, bottom: -14, width: 34, height: 34, background: '#B8431E', color: '#FFFFFF', display: 'grid', placeItems: 'center', fontFamily: SERIF, fontWeight: 700, fontSize: 20, fontStyle: 'italic' }}>"</span>
               {/* No ornament over the portrait (2026-08-08, Paul: "there is an
                   arc on my headshot that should not be"). A dashed quarter-arc
                   used to spring off the top-right corner; against a face it
@@ -1608,7 +1608,7 @@ export default function Landing() {
               <p style={{ margin: '20px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(20px, 2.4vw, 38px)', lineHeight: 1.25, letterSpacing: '-0.01em', maxWidth: '22em' }}>Twenty years as the internal deal captain for major platforms. Now running that same playbook for independent buyers.</p>
               <div style={{ marginTop: 26, fontFamily: MONO, fontSize: 13, letterSpacing: '0.1em', color: '#16181A' }}>PAUL BAKER</div>
               <div style={{ marginTop: 4, fontFamily: MONO, fontSize: 12, letterSpacing: '0.08em', color: '#7C8187' }}>FOUNDER · TWO DECADES ON THE BUY SIDE</div>
-              <Link href="/about" className="ca-h-deepgreen" style={{ display: 'inline-block', marginTop: 18, fontSize: 15.5, fontWeight: 600, color: '#0A7A58', borderBottom: '1.5px solid #0A7A58', paddingBottom: 2 }}>Meet Paul →</Link>
+              <Link href="/about" className="ca-h-deepgreen" style={{ display: 'inline-block', marginTop: 18, fontSize: 15.5, fontWeight: 600, color: '#B8431E', borderBottom: '1.5px solid #B8431E', paddingBottom: 2 }}>Meet Paul →</Link>
             </div>
           </div>
         </section>
@@ -1627,8 +1627,8 @@ export default function Landing() {
                 straight through that preference. */}
             <div style={{ width: 132, height: 132, transformOrigin: '50% 50%' }}>
               <svg width="132" height="132" viewBox="0 0 132 132" fill="none">
-                <ellipse cx="66" cy="66" rx="63" ry="26" stroke="#0A7A58" strokeWidth="1.2" strokeDasharray="5 6" opacity=".55" />
-                <circle cx="66" cy="66" r="62" stroke="#0A7A58" strokeWidth="1.2" opacity=".3" />
+                <ellipse cx="66" cy="66" rx="63" ry="26" stroke="#B8431E" strokeWidth="1.2" strokeDasharray="5 6" opacity=".55" />
+                <circle cx="66" cy="66" r="62" stroke="#B8431E" strokeWidth="1.2" opacity=".3" />
               </svg>
             </div>
           </div>

@@ -36,7 +36,11 @@
  * on the page, and are one decision away from neutralizing if they read
  * yellowed against it.
  */
-import { CARTA, rgba } from '../../../../../house/tokens';
+/* OXBLOOD CUTOVER, 2026-08-22: the app is scoped OUT of the palette change
+   (the new accent #B8431E sits 20.7 RGB from this shell's danger colour).
+   Aliased so every CARTA.* below keeps working against the frozen values —
+   see CARTA_APP in house/tokens.ts before repointing this back. */
+import { CARTA_APP as CARTA, rgba } from '../../../../../house/tokens';
 
 export const T = {
   // The native system font (San Francisco on iOS/macOS, Segoe UI on Windows).

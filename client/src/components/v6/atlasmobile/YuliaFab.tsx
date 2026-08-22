@@ -10,7 +10,11 @@
  */
 import type { CSSProperties } from "react";
 import { RT } from "./redesign/rt";
-import { rgba, CARTA } from "../../../../../house/tokens";
+/* OXBLOOD CUTOVER, 2026-08-22: the app is scoped OUT of the palette change
+   (the new accent #B8431E sits 20.7 RGB from this shell's danger colour).
+   Aliased so every CARTA.* below keeps working against the frozen values —
+   see CARTA_APP in house/tokens.ts before repointing this back. */
+import { rgba, CARTA_APP as CARTA } from "../../../../../house/tokens";
 
 export function YuliaFab({
   onOpen,

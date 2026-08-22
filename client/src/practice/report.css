@@ -60,7 +60,7 @@
    7px white leading square (same device as the /research index cards). */
 .rp-kicker {
   display: inline-flex; align-items: center; gap: 7px;
-  background: #0A7A58; color: #FFFFFF;
+  background: #B8431E; color: #FFFFFF;
   font-family: var(--pd-mono); font-size: 11px; letter-spacing: 0.12em;
   text-transform: uppercase; font-weight: 400; padding: 5px 9px;
 }
@@ -86,7 +86,7 @@
 }
 .rp-face {
   width: 46px; height: 46px; border-radius: 50%; object-fit: cover;
-  object-position: 50% 20%; flex: none; border: 2px solid rgba(10, 122, 88, 0.32);
+  object-position: 50% 20%; flex: none; border: 2px solid rgba(184, 67, 30, 0.32);
 }
 .rp-meta-t { display: flex; flex-direction: column; gap: 2px; }
 .rp-by { font-size: 15px; font-weight: 600; color: var(--pd-ink); }
@@ -113,7 +113,7 @@
   font-family: var(--pd-mono); font-size: 12.5px; letter-spacing: 0.16em;
   text-transform: uppercase; color: var(--pd-tert); font-weight: 400;
 }
-.rp-stats-h::before { content: ''; width: 8px; height: 8px; background: #0A7A58; flex: none; }
+.rp-stats-h::before { content: ''; width: 8px; height: 8px; background: #B8431E; flex: none; }
 .rp-stats-grid {
   display: grid; gap: clamp(26px, 3vw, 44px);
   grid-template-columns: repeat(auto-fit, minmax(238px, 1fr));
@@ -131,7 +131,7 @@
 }
 .rp-stat-l::before {
   content: ''; position: absolute; top: -2px; left: 0;
-  width: 38px; height: 2px; background: #0A7A58;
+  width: 38px; height: 2px; background: #B8431E;
 }
 
 /* ═══ the read — contents rail + column ══════════════════════════════════ */
@@ -212,7 +212,7 @@
 .rp-find-in::placeholder { color: var(--pd-faint); }
 .rp-find-in:focus {
   outline: none; border-color: var(--pd-coral);
-  box-shadow: 0 0 0 3px rgba(10, 122, 88, 0.12);
+  box-shadow: 0 0 0 3px rgba(184, 67, 30, 0.12);
 }
 /* The field is the focus affordance; the global ring would draw a second box
    inside it (the same rule the practice chat input carries). */
@@ -242,7 +242,7 @@
 .rp-toc-n {
   flex: none; margin-left: auto;
   font-family: var(--pd-mono); font-size: 11.5px; font-variant-numeric: tabular-nums;
-  color: #0A7A58; padding: 1px 6px;
+  color: #B8431E; padding: 1px 6px;
   background: var(--pd-tint-chip); border-radius: 0;
 }
 .rp-toc-a:hover { color: var(--pd-ink); }
@@ -286,7 +286,7 @@
 }
 .rp-prose h1::before {
   content: ''; position: absolute; top: -2px; left: 0;
-  width: 44px; height: 2px; background: #0A7A58;
+  width: 44px; height: 2px; background: #B8431E;
 }
 .rp-prose h2 {
   margin: clamp(48px, 5vw, 72px) 0 18px;
@@ -304,7 +304,7 @@
 .rp-prose em { font-style: italic; }
 .rp-prose a {
   color: var(--pd-coral-link); text-decoration: underline;
-  text-decoration-color: rgba(10, 122, 88, 0.34); text-underline-offset: 3px;
+  text-decoration-color: rgba(184, 67, 30, 0.34); text-underline-offset: 3px;
 }
 .rp-prose a:hover { text-decoration-color: var(--pd-coral); }
 
@@ -318,8 +318,8 @@
    tint, the Carta notice material. */
 .rp-prose blockquote {
   margin: 30px 0; padding: 16px 22px;
-  border-left: 3px solid #0A7A58;
-  background: rgba(10, 122, 88, 0.06); border-radius: 0;
+  border-left: 3px solid #B8431E;
+  background: rgba(184, 67, 30, 0.06); border-radius: 0;
   color: #3F464C;
 }
 .rp-prose blockquote > :last-child { margin-bottom: 0; }
@@ -479,20 +479,20 @@
   position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
   z-index: 55; display: flex; align-items: center; gap: 12px;
   padding: 11px 12px 11px 20px; max-width: calc(100vw - 32px);
-  background: #181818; color: #F4F5F1;
+  background: #8A2B32; color: #FFF3F0;
   border-radius: 0; box-shadow: 0 12px 34px rgba(22, 24, 26, 0.34);
   animation: rp-rise 0.32s ease-out both;
 }
 @keyframes rp-rise { from { opacity: 0; transform: translate(-50%, 12px); } }
-.rp-resume-t { font-size: 14.5px; color: #D7DBD2; }
+.rp-resume-t { font-size: 14.5px; color: #F0D8D4; }
 .rp-resume-go {
   background: #FFFFFF; color: #16181A; border: 0; cursor: pointer;
   font: inherit; font-size: 14.5px; font-weight: 600;
   padding: 9px 18px; border-radius: 8px; white-space: nowrap;
 }
-.rp-resume-go:hover { background: #A8F0CE; }
+.rp-resume-go:hover { background: #FFAA90; }
 .rp-resume-x {
-  background: none; border: 0; cursor: pointer; color: #D7DBD2;
+  background: none; border: 0; cursor: pointer; color: #F0D8D4;
   font-size: 22px; line-height: 1; padding: 0 6px;
 }
 .rp-resume-x:hover { color: #fff; }
@@ -508,10 +508,10 @@
 .rp-missing { padding: clamp(80px, 12vw, 160px) 0 clamp(60px, 8vw, 100px); }
 .rp-missing .pd-body { margin-top: 16px; }
 .rp-missing a {
-  color: #0A7A58; font-weight: 600;
-  border-bottom: 1px solid #0A7A58; padding-bottom: 1px;
+  color: #B8431E; font-weight: 600;
+  border-bottom: 1px solid #B8431E; padding-bottom: 1px;
 }
-.rp-missing a:hover { color: #086348; }
+.rp-missing a:hover { color: #9C3717; }
 
 /* ═══ responsive ═════════════════════════════════════════════════════════ */
 @media (max-width: 1000px) {
@@ -531,7 +531,7 @@
     box-shadow: 0 10px 28px rgba(22, 24, 26, 0.3);
     transition: background 0.15s;
   }
-  .rp-toc-fab:hover { background: #0A7A58; }
+  .rp-toc-fab:hover { background: #B8431E; }
   /* The place-keeper sits above the contents button rather than under it. */
   .rp-resume { bottom: 84px; }
 
@@ -669,7 +669,7 @@
   transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
 }
 .rp-ask-fab:hover {
-  background: #0A7A58;
+  background: #B8431E;
   transform: translateY(-1px); box-shadow: 0 14px 36px rgba(20, 24, 28, 0.26);
 }
 .rp-ask-fab svg { width: 17px; height: 17px; flex: none; }
@@ -708,7 +708,7 @@
   font: inherit; font-size: 13.5px; color: var(--pd-ink);
   transition: border-color 0.14s, background 0.14s;
 }
-.rp-ask-chip:hover { border-color: #0A7A58; color: #0A7A58; background: #fff; }
+.rp-ask-chip:hover { border-color: #B8431E; color: #B8431E; background: #fff; }
 
 .rp-ask-turn p { margin: 0 0 8px; font-size: 14.5px; line-height: 1.62; }
 .rp-ask-turn p:last-child { margin-bottom: 0; }
@@ -736,8 +736,8 @@
 }
 .rp-ask-in::placeholder { color: var(--pd-faint); }
 .rp-ask-in:focus {
-  outline: none; border-color: #0A7A58; background: #fff;
-  box-shadow: 0 0 0 3px rgba(10, 122, 88, 0.12);
+  outline: none; border-color: #B8431E; background: #fff;
+  box-shadow: 0 0 0 3px rgba(184, 67, 30, 0.12);
 }
 /* Same reason as the search field: the border carries focus, and the global
    ring would draw a second box inside the input. */
@@ -749,7 +749,7 @@
   transition: background 0.14s, opacity 0.14s;
 }
 .rp-ask-send:disabled { opacity: 0.34; cursor: default; }
-.rp-ask-send:not(:disabled):hover { background: #0A7A58; }
+.rp-ask-send:not(:disabled):hover { background: #B8431E; }
 
 /* The mobile Contents launcher already owns the bottom-left; keep the two
    from colliding on a phone by shortening the FAB to its icon. */

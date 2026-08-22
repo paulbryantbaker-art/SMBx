@@ -205,7 +205,7 @@ export default function DocumentEditor({
           {/* Action bar */}
           <div className="shrink-0 flex items-center justify-between px-4 py-2 border-b border-[#e8e6dc] dark:border-[#3A3C3E]">
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#0A7A58] text-white">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#B8431E] text-white">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
                   <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
@@ -246,7 +246,7 @@ export default function DocumentEditor({
 
           {/* Yulia revision bar */}
           <div className="shrink-0 flex items-center gap-2 px-4 py-2 border-b border-[#e8e6dc] dark:border-[#3A3C3E] bg-[#faf9f5] dark:bg-[#222426]">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A7A58" strokeWidth="2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B8431E" strokeWidth="2">
               <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
             </svg>
             <input
@@ -260,7 +260,7 @@ export default function DocumentEditor({
             <button
               onClick={handleRevision}
               disabled={!revisionPrompt.trim() || revising}
-              className="px-3 py-1 rounded-md text-[10px] font-semibold bg-[#0A7A58] text-white border-0 cursor-pointer hover:bg-[#B85A3A] disabled:opacity-40 transition-colors"
+              className="px-3 py-1 rounded-md text-[10px] font-semibold bg-[#B8431E] text-white border-0 cursor-pointer hover:bg-[#9C3717] disabled:opacity-40 transition-colors"
             >
               {revising ? 'Revising...' : 'Revise'}
             </button>

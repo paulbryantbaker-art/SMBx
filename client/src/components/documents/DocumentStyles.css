@@ -31,7 +31,7 @@
   color: #1a1918;
   margin: 0 0 16px 0;
   padding-bottom: 10px;
-  border-bottom: 2px solid #0A7A58;
+  border-bottom: 2px solid #B8431E;
   line-height: 1.3;
 }
 
@@ -42,7 +42,7 @@
   color: #1a1918;
   margin: 28px 0 12px 0;
   padding-left: 12px;
-  border-left: 3px solid #0A7A58;
+  border-left: 3px solid #B8431E;
   line-height: 1.35;
 }
 
@@ -80,14 +80,14 @@
 /* ─── Links ─────────────────────────────────────────────────────────── */
 
 .document-editor-content a {
-  color: #0A7A58;
+  color: #B8431E;
   text-decoration: none;
   border-bottom: 1px solid transparent;
   transition: border-color 0.15s ease;
 }
 
 .document-editor-content a:hover {
-  border-bottom-color: #0A7A58;
+  border-bottom-color: #B8431E;
 }
 
 /* ─── Lists ─────────────────────────────────────────────────────────── */
@@ -117,7 +117,7 @@
 }
 
 .document-editor-content thead {
-  border-top: 2px solid #0A7A58;
+  border-top: 2px solid #B8431E;
 }
 
 .document-editor-content th {
@@ -150,7 +150,7 @@
 /* ─── Table editing — selected cells ────────────────────────────────── */
 
 .document-editor-content .selectedCell {
-  background: rgba(10, 122, 88, 0.08);
+  background: rgba(184, 67, 30, 0.08);
 }
 
 .document-editor-content .column-resize-handle {
@@ -159,7 +159,7 @@
   top: 0;
   bottom: 0;
   width: 4px;
-  background: #0A7A58;
+  background: #B8431E;
   cursor: col-resize;
 }
 
@@ -168,7 +168,7 @@
 .document-editor-content blockquote {
   margin: 16px 0;
   padding: 12px 16px;
-  border-left: 3px solid #0A7A58;
+  border-left: 3px solid #B8431E;
   background: #FFF8F5;
   border-radius: 0 6px 6px 0;
 }
@@ -194,7 +194,7 @@
   background: #F5F5F5;
   padding: 2px 5px;
   border-radius: 3px;
-  color: #0A7A58;
+  color: #B8431E;
 }
 
 .document-editor-content pre {
@@ -240,7 +240,7 @@
 }
 
 .document-editor-content ::selection {
-  background: rgba(10, 122, 88, 0.15);
+  background: rgba(184, 67, 30, 0.15);
 }
 
 /* ─── Dark Mode ─────────────────────────────────────────────────────── */

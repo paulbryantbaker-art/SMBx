@@ -124,7 +124,7 @@ export function FootprintMap() {
         return m.hot ? (
           <g key={m.k}>
             <circle cx={x} cy={y} r={17} fill="url(#pdm-halo)" />
-            <circle cx={x} cy={y} r={3.4} fill="#A8F0CE" />
+            <circle cx={x} cy={y} r={3.4} fill="#FFAA90" />
           </g>
         ) : (
           <circle key={m.k} cx={x} cy={y} r={2} fill="rgba(255, 255, 255, 0.30)" />
@@ -169,7 +169,7 @@ export function Mesh() {
         hot ? (
           <g key={i}>
             <circle cx={x} cy={y} r={14} fill="url(#pdm-halo2)" />
-            <circle cx={x} cy={y} r={2.6} fill="#A8F0CE" />
+            <circle cx={x} cy={y} r={2.6} fill="#FFAA90" />
           </g>
         ) : (
           <circle key={i} cx={x} cy={y} r={1.7} fill="rgba(255, 255, 255, 0.28)" />

@@ -88,21 +88,59 @@ The business splits into three separate workflows with separate infra and separa
 The Track Record page (`/track-record`) and the landing track-record band present Paul Baker's employment deals — they were NOT smbX engagements — so six rules are non-negotiable and enforced in `TrackRecord.tsx` (see its header + the exported `AttributionLine`/`ATTRIBUTION`): (1) always "led or co-led", never "deal captain on every one" or unqualified "closed"; (2) always "selected transactions" (the wall is a selection, which reconciles it with the 150+ figure); (3) the attribution shield sentence appears WHEREVER the deal names appear (landing band, track-record page, any deck/PDF) — never a footnote; (4) names, not logos; (5) never "our clients" for a Wrench/JPMorgan transaction; (6) JPMorgan is integration (Director of Acquisition Integration), not origination. The interactive filter/search deal sheet (old task #27) was replaced by static per-employer selected-transaction lists so names sit under the employer they belong to. The proof stat strip now ends on "0 · sell-side transactions. Ever." (was "1 · side of the table").
 
 ## Design System
-**CARTA (2026-08-07, `design_handoff_smbx_carta_restyle/` — THE CURRENT PUBLIC-SITE
-LANGUAGE; Aurora below is now the app/collateral language only, pending phase 2.)**
+**OXBLOOD (2026-08-22 — THE CURRENT PUBLIC-SITE AND COLLATERAL LANGUAGE.
+Supersedes CARTA's palette; CARTA's structure, type and layout doctrine survive
+intact underneath it.)** Paul, on seeing Carta's own coral: *"i dont think I want
+Green accent any more … i want more fully align with Carta's color scheme"*, then
+*"there needs to be compatible colors for building depth."* The second sentence is
+the one that mattered — the accent was never the hard part.
+
+**60 / 30 / 10.** Ground `#FFFFFF` (white, not bone — Paul's 2026-08-12 call
+against carta.com stands) · field **oxblood `#8A2B32`** · accent **`#B8431E` on
+light, `#FF7D55` on the field**, with `#FFAA90` as the field's text-safe value.
+ONE accent with TWO SURFACE VALUES, which is the same structure `green`/`mint`
+already had — the keys keep their historical names and are read as ROLES.
+
+**THE FIELD BUYS RECESS, WHICH NEAR-BLACK COULD NOT.** `#181818` sat at luminance
+0.0091 with nothing below it, so every surface had to go lighter and "recessed"
+did not exist. Oxblood sits at 0.0736 — 8.1× — so the ramp runs both ways:
+`darkWell #50191D` · `darkShade #6C2227` · FIELD · `darkPlate #964046` ·
+`darkSeam #AF6F74` (a rim, never a fill) · `darkBtnBorder #C08D90`; text
+`#FFF3F0 / #F0D8D4 / #DCB8B4 / #D6B2AF`. **Three rules the measurements force:**
+lift comes from an EDGE not a fill (raising the fill to the rim value drops
+`darkSub` to 2.89:1); `darkWell` is the MOST legible surface, so dense text
+belongs in the well and not on a raised card; and the accent lives at field level
+and BELOW — `#FF7D55` is 5.55:1 on the well, 3.36:1 on the field, 1.55:1 on a rim.
+
+**THE APP IS SCOPED OUT** via a frozen `CARTA_APP` literal in `house/tokens.ts`,
+because `#B8431E` sits 20.7 RGB / 3.1° from Atlas's danger `#C2410C` and 32.8 from
+V2's `#B42318` — a repainted app would signal "brand" and "error" with one hue,
+and crimson does not escape either since oxblood is itself a deep red. The scope
+is PUBLIC-WHEREVER-IT-LIVES: the practice site plus `/legal/*`, the auth pages,
+the `/shared/:token` counterparty surfaces and `components/documents/*`.
+**Type did NOT change** — only `ibm-plex-mono`, `schibsted-grotesk` and variable
+`source-serif-4` are installed, and renderers embed woff2s locally because Railway
+blocks the Google CDN, so any other face ships as Noto. Records:
+`DESIGN_LANGUAGE.md` (hand this to a design tool), `SITE_CUTOVER.md`,
+`PALETTE_MIGRATION_PLAN.md`.
+
+**CARTA (2026-08-07, `design_handoff_smbx_carta_restyle/` — the structure Oxblood
+kept; its PALETTE below is superseded, its type/shape/layout doctrine is not.)**
 Paul's correction set the method: *"this is not what Claude Design shipped.. it
 shipped a new design for the existing content"* — so the five logged-out pages
 (Landing, About, Industries, Research, Track Record) were REBUILT by transcribing the
 `.dc.html` references 1:1, not by evolving the Aurora components. The system:
 Source Serif 4 (550/600 display) · Schibsted Grotesk (working) · IBM Plex Mono;
 bone `#FCFAF6` / panel `#F3F0E9` neutrals with cooler ink scale (`#16181A/#4A4F54/#7C8187`);
-ONE accent (Deal Green `#0A7A58`, hover `#086348`, tint `#DFF5EC`, mint `#A8F0CE` on
-dark) — brass/honey are GONE from the site; flat near-black dark bands `#131512`
+ONE accent (then Deal Green `#0A7A58`, hover `#086348`, tint `#DFF5EC`, mint
+`#A8F0CE` on dark — ALL RETIRED 2026-08-22, see Oxblood above) — brass/honey are
+GONE from the site; flat near-black dark bands `#131512` (RETIRED — now oxblood)
 (square edges, no texture, no curves); radius 0 except buttons/inputs; corner-handle
 frames (8px ink squares at −4px — the house gesture that replaced the curved band
-crests); dot-field ornaments + orbit; hairline 1px grids. THE BUTTON LAW: green is
-NEVER a resting button fill — primary is ink-on-light / bone-on-dark, green appears
-on hover, chips, kickers, links. Tokens live in `house/tokens.ts` (`CARTA`,
+crests); dot-field ornaments + orbit; hairline 1px grids. **THE BUTTON LAW SURVIVES
+OXBLOOD UNCHANGED: the accent is NEVER a resting button fill** — primary is
+ink-on-light / bone-on-field, the accent appears on hover, chips, kickers, links.
+carta.com reaches the same rule independently: their primary is `rgb(26,26,26)`. Tokens live in `house/tokens.ts` (`CARTA`,
 `CARTA_TYPE`, `CARTA_HANDLE`); the `.pd` var layer mirrors them; layout values live
 INLINE in the transcribed pages per the handoff doctrine, and `carta.css` carries only
 hover/media/keyframes plus the `.ca-engine` intake redress. Build record:

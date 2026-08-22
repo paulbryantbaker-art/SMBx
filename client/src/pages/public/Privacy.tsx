@@ -111,8 +111,8 @@ export default function Privacy() {
         <LegalH2>Contact</LegalH2>
         <p style={{ margin: 0 }}>
           Questions or removal requests:{' '}
-          <a href="mailto:hello@smbx.ai" className="ca-h-deepgreen" style={{ color: '#0A7A58', borderBottom: '1px solid #0A7A58', paddingBottom: 1 }}>hello@smbx.ai</a>.
-          Our terms are at <a href="/legal/terms" className="ca-h-deepgreen" style={{ color: '#0A7A58', borderBottom: '1px solid #0A7A58', paddingBottom: 1 }}>/legal/terms</a>.
+          <a href="mailto:hello@smbx.ai" className="ca-h-deepgreen" style={{ color: '#B8431E', borderBottom: '1px solid #B8431E', paddingBottom: 1 }}>hello@smbx.ai</a>.
+          Our terms are at <a href="/legal/terms" className="ca-h-deepgreen" style={{ color: '#B8431E', borderBottom: '1px solid #B8431E', paddingBottom: 1 }}>/legal/terms</a>.
         </p>
       </div>
     </LegalFrame>

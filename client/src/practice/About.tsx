@@ -40,14 +40,14 @@ export default function About() {
         {/* ══ HERO ══ */}
         <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(52px, 9vw, 150px) clamp(20px, 4vw, 32px) clamp(31px, 6vw, 90px)', textAlign: 'center', position: 'relative' }}>
           <div aria-hidden="true" data-plx="-0.02" style={{ position: 'absolute', left: '7%', top: 70, width: 110, height: 110, backgroundImage: 'radial-gradient(rgba(22,24,26,.14) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
-          <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', right: '8%', top: 130, width: 90, height: 90, backgroundImage: 'radial-gradient(rgba(10,122,88,.22) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
+          <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', right: '8%', top: 130, width: 90, height: 90, backgroundImage: 'radial-gradient(rgba(184,67,30,.22) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
           <nav data-hs="0" aria-label="Breadcrumb" style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.12em', color: '#7C8187' }}>
-            <Link href="/" className="ca-h-deepgreen" style={{ color: '#0A7A58' }}>SMBX</Link>
+            <Link href="/" className="ca-h-deepgreen" style={{ color: '#B8431E' }}>SMBX</Link>
             <span style={{ margin: '0 10px' }}>/</span>
             <span style={{ color: '#16181A' }}>ABOUT</span>
           </nav>
           <h1 data-hs="1" style={{ margin: '30px auto 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(32px, 4.6vw, 78px)', lineHeight: 1.05, letterSpacing: '-0.015em', textWrap: 'balance' }}>A new firm. Decades of execution.</h1>
-          <p data-hs="2" style={{ margin: '32px auto 0', maxWidth: '37em', fontSize: 18.5, lineHeight: 1.65, color: '#4A4F54' }}>smb<span style={{ color: '#0A7A58' }}>x</span>.ai was built to give buyers in the lower middle market something they have rarely had access to — a dedicated corporate development function, on demand, exclusively on their side of the table.</p>
+          <p data-hs="2" style={{ margin: '32px auto 0', maxWidth: '37em', fontSize: 18.5, lineHeight: 1.65, color: '#4A4F54' }}>smb<span style={{ color: '#B8431E' }}>x</span>.ai was built to give buyers in the lower middle market something they have rarely had access to — a dedicated corporate development function, on demand, exclusively on their side of the table.</p>
         </section>
 
         {/* ══ WHY WE BUILT IT ══ */}
@@ -59,7 +59,7 @@ export default function About() {
           <div data-rv className="rv-stagger" data-tri style={{ marginTop: 52, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 26 }}>
             {WHY_BUILT.map(c => (
               <div key={c.no} style={{ borderTop: '2px solid #16181A', paddingTop: 22, position: 'relative' }}>
-                <span style={{ position: 'absolute', top: -2, left: 0, width: 44, height: 2, background: '#0A7A58' }} />
+                <span style={{ position: 'absolute', top: -2, left: 0, width: 44, height: 2, background: '#B8431E' }} />
                 <div style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.1em', color: '#7C8187' }}>{c.no}</div>
                 <div style={{ marginTop: 12, fontFamily: SERIF, fontWeight: 600, fontSize: 24, lineHeight: 1.2 }}>{c.t}</div>
                 <p style={{ margin: '14px 0 0', fontSize: 15.5, lineHeight: 1.65, color: '#4A4F54' }}>{c.b}</p>
@@ -69,18 +69,18 @@ export default function About() {
         </section>
 
         {/* ══ WHAT WE BELIEVE — dark band ══ */}
-        <section className="ca-dark" style={{ background: '#181818', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(52px, 9vw, 160px)', position: 'relative', overflow: 'hidden' }}>
-          <div aria-hidden="true" data-plx="0.025" style={{ position: 'absolute', top: 44, right: '5%', width: 260, height: 160, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
+        <section className="ca-dark" style={{ background: '#8A2B32', color: '#FFF3F0', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(52px, 9vw, 160px)', position: 'relative', overflow: 'hidden' }}>
+          <div aria-hidden="true" data-plx="0.025" style={{ position: 'absolute', top: 44, right: '5%', width: 260, height: 160, backgroundImage: 'radial-gradient(rgba(255,170,144,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 1360, margin: '0 auto', position: 'relative' }}>
             <div data-rv><Kicker dark>WHAT WE BELIEVE</Kicker></div>
             <h2 data-rv style={{ margin: '24px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(24px, 3.4vw, 56px)', lineHeight: 1.1, letterSpacing: '-0.012em' }}>Four convictions run the practice.</h2>
-            <div data-rv className="rv-stagger" data-creed style={{ marginTop: 56, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: '#2A2E29', border: '1px solid #2A2E29', position: 'relative' }}>
-              <Handles color="#F4F5F1" />
+            <div data-rv className="rv-stagger" data-creed style={{ marginTop: 56, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: '#AF6F74', border: '1px solid #AF6F74', position: 'relative' }}>
+              <Handles color="#FFF3F0" />
               {CREED.map(c => (
-                <div key={c.n} style={{ background: '#181818', padding: '34px 28px 36px' }}>
-                  <div style={{ fontFamily: SERIF, fontWeight: 550, fontSize: 44, lineHeight: 1, color: '#A8F0CE' }}>{c.n}</div>
-                  <div style={{ marginTop: 18, fontFamily: SERIF, fontWeight: 600, fontSize: 21, lineHeight: 1.25 }}>{c.t}<span style={{ color: '#0A7A58' }}>.</span></div>
-                  <p style={{ margin: '12px 0 0', fontSize: 14.5, lineHeight: 1.65, color: '#ABB2AB' }}>{c.b}</p>
+                <div key={c.n} style={{ background: '#8A2B32', padding: '34px 28px 36px' }}>
+                  <div style={{ fontFamily: SERIF, fontWeight: 550, fontSize: 44, lineHeight: 1, color: '#FFAA90' }}>{c.n}</div>
+                  <div style={{ marginTop: 18, fontFamily: SERIF, fontWeight: 600, fontSize: 21, lineHeight: 1.25 }}>{c.t}<span style={{ color: '#FFAA90' }}>.</span></div>
+                  <p style={{ margin: '12px 0 0', fontSize: 14.5, lineHeight: 1.65, color: '#DCB8B4' }}>{c.b}</p>
                 </div>
               ))}
             </div>
@@ -96,7 +96,7 @@ export default function About() {
               <div style={{ marginTop: 32, position: 'relative', width: '100%', maxWidth: 360 }}>
                 <img data-rvimg src="/founder-portrait.jpg" alt="Paul Baker, founder of smbX" style={{ display: 'block', width: '100%', aspectRatio: '4 / 5', objectFit: 'cover', objectPosition: '50% 32%' }} />
                 <Handles />
-                <span style={{ position: 'absolute', left: 12, bottom: 12, display: 'inline-flex', alignItems: 'center', gap: 7, background: '#0A7A58', color: '#FFFFFF', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '5px 9px', whiteSpace: 'nowrap' }}>
+                <span style={{ position: 'absolute', left: 12, bottom: 12, display: 'inline-flex', alignItems: 'center', gap: 7, background: '#B8431E', color: '#FFFFFF', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '5px 9px', whiteSpace: 'nowrap' }}>
                   <span style={{ width: 7, height: 7, background: '#FFFFFF', display: 'inline-block' }} />FOUNDER
                 </span>
               </div>
@@ -112,7 +112,7 @@ export default function About() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="ca-h-deepgreen"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 9, marginTop: 22, fontSize: 15.5, fontWeight: 600, color: '#0A7A58', borderBottom: '1.5px solid #0A7A58', paddingBottom: 3 }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 9, marginTop: 22, fontSize: 15.5, fontWeight: 600, color: '#B8431E', borderBottom: '1.5px solid #B8431E', paddingBottom: 3 }}
                 onClick={() => trackEvent('practice_cta_clicked', { placement: 'about-linkedin' })}
               >
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ flex: 'none' }}>
@@ -127,7 +127,7 @@ export default function About() {
                 {[['150+', 'ACQUISITIONS & INTEGRATIONS'], ['$5B+', 'ENTERPRISE VALUE ADDED'], ['$2B', 'SYNERGIES CAPTURED']].map(([n, l]) => (
                   <div key={l}>
                     <div style={{ fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(29px, 3.4vw, 58px)', lineHeight: 1, letterSpacing: '-0.02em' }}>
-                      {n}<span style={{ display: 'block', height: 4, width: 52, background: '#0A7A58', marginTop: 10 }} />
+                      {n}<span style={{ display: 'block', height: 4, width: 52, background: '#B8431E', marginTop: 10 }} />
                     </div>
                     <div style={{ marginTop: 12, fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.12em', color: '#7C8187' }}>{l}</div>
                   </div>
@@ -135,16 +135,16 @@ export default function About() {
               </div>
               <div style={{ marginTop: 34, display: 'flex', flexDirection: 'column' }}>
                 <div data-deflist style={{ display: 'grid', gridTemplateColumns: '170px 1fr', gap: 28, alignItems: 'baseline', padding: '22px 0', borderTop: '1px solid #E4DFD3' }}>
-                  <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: '#0A7A58' }}>10 YEARS</div>
+                  <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: '#B8431E' }}>10 YEARS</div>
                   <div style={{ fontSize: 15.5, lineHeight: 1.65, color: '#4A4F54' }}><strong style={{ color: '#16181A' }}>Wrench Group</strong> — PE-backed mid-market buy-and-build consolidator.</div>
                 </div>
                 <div data-deflist style={{ display: 'grid', gridTemplateColumns: '170px 1fr', gap: 28, alignItems: 'baseline', padding: '22px 0', borderTop: '1px solid #E4DFD3', borderBottom: '1px solid #E4DFD3' }}>
-                  <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: '#0A7A58' }}>10 YEARS</div>
+                  <div style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: '#B8431E' }}>10 YEARS</div>
                   <div style={{ fontSize: 15.5, lineHeight: 1.65, color: '#4A4F54' }}><strong style={{ color: '#16181A' }}>JPMorgan Chase</strong> — Mega-cap integration and value capture.</div>
                 </div>
               </div>
               <p style={{ margin: '28px 0 0', fontSize: 14.5, lineHeight: 1.65, color: '#4A4F54' }}>Earlier, inorganic growth strategy for Fortune&nbsp;500 clients at Deloitte Consulting. Master of Applied Statistics and a BBA from LeTourneau University; certified Lean Six Sigma Black Belt. Based in Dallas–Fort Worth, deals nationwide.</p>
-              <div style={{ marginTop: 28, fontStyle: 'italic', fontSize: 14, lineHeight: 1.65, color: '#7C8187', maxWidth: '48em', borderLeft: '2px solid #0A7A58', paddingLeft: 16 }}>Selected transactions led or co-led by Paul Baker in the course of his employment at Wrench Group and at JPMorgan Chase. These transactions were completed by those firms and were not smbx.ai engagements.</div>
+              <div style={{ marginTop: 28, fontStyle: 'italic', fontSize: 14, lineHeight: 1.65, color: '#7C8187', maxWidth: '48em', borderLeft: '2px solid #B8431E', paddingLeft: 16 }}>Selected transactions led or co-led by Paul Baker in the course of his employment at Wrench Group and at JPMorgan Chase. These transactions were completed by those firms and were not smbx.ai engagements.</div>
             </div>
           </div>
         </section>

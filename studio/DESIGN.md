@@ -72,19 +72,20 @@ actually says.
 > smbX house style ("Carta") — a square, structural, print-plate editorial
 > system. White paper `#FFFFFF` (canvas moved bone→white 2026-08-12,
 > matching carta.com's measured ground), ink `#16181A`, white cards with a 1px ink
-> border. **Exactly one accent: Deal Green `#0A7A58`**, with mint `#A8F0CE` as
-> its value on the dark band and bright green `#0FA97C` reserved for large
-> marks — never small text. **There is no warm colour: no amber, no brass, no
-> gold, no honey.** The full-bleed rhythm break is a **flat near-black band
-> `#181818`** — no texture, no glaze, no halo, no gradient — carrying reading
-> text `#F4F5F1`. **Radius is 0 everywhere except buttons and inputs, at
+> border. **Exactly one accent with two surface values: `#B8431E` on light,
+> `#FF7D55` on the field** — its text-safe value on the field is `#FFAA90`.
+> **The one warm family here is RED-warm, never YELLOW-warm**: no amber, no
+> brass, no gold, no honey. Those sit at hue 39–42°; the accent sits at 14° and
+> the field at 356°. The full-bleed rhythm break is a **flat oxblood field
+> `#8A2B32`** — no texture, no glaze, no halo, no gradient — carrying reading
+> text `#FFF3F0`. **Radius is 0 everywhere except buttons and inputs, at
 > 10px.** Framed things wear four 8px ink corner handles at −4px, outside the
-> frame. **Green is never a resting fill**: a primary is ink-on-light or
-> bone-on-dark, and green appears on hover, chips, kickers, links and the bar
-> under a numeral. Display type is **Source Serif 4** at weight **550** (600
+> frame. **The accent is never a resting fill**: a primary is ink-on-light or
+> bone-on-field, and the accent appears on hover, chips, kickers, links and the
+> bar under a numeral. Display type is **Source Serif 4** at weight **550** (600
 > for card titles); working type is **Schibsted Grotesk** with tabular figures;
 > labels are **IBM Plex Mono** at 0.16em tracking. A cited number rendered
-> enormous over a green bar IS the graphic. Photography is real or absent.
+> enormous over an accent bar IS the graphic. Photography is real or absent.
 
 ---
 
@@ -96,7 +97,8 @@ with their hexes because that is how you catch yourself: a hex that is not in
 
 | Dead system | Signature | Died |
 |---|---|---|
-| **Ledger, Aurora values** (the system Carta replaced) | amber `#E8A62B`, honey `#F5C452`, the jade block `#0A6A4C`, ivory `#F2FBF6`, slate `#5A6169`, muted `#83898F`, hair `#EAE5DC`, rule `#DED8CC`. Six values survived the restyle unchanged and are live in §4 — bone, ink, Deal Green, its hover, the chip tint and mint — which is why "it was in Ledger" is not by itself evidence of death. The vivid highlight kept its hex and lost its job: it is no longer an ambient bloom. | 2026-08-08 |
+| **Carta / Deal Green** (the system oxblood replaced) | Deal Green `#0A7A58`, hover `#086348`, chip tint `#DFF5EC`, mint `#A8F0CE`, jade `#0FA97C`, jade block `#0A6A4C` — and the entire near-black band ramp: `#181818` `#2A2E29` `#22261F` `#4A4F44` `#F4F5F1` `#D7DBD2` `#ABB2AB` `#8A9088`. **If your draft is green anywhere, this is the system you reconstructed.** | 2026-08-22 |
+| **Ledger, Aurora values** (the system Carta replaced) | amber `#E8A62B`, honey `#F5C452`, the jade block `#0A6A4C`, ivory `#F2FBF6`, slate `#5A6169`, muted `#83898F`, hair `#EAE5DC`, rule `#DED8CC`. Only bone and ink survived into the current system. Deal Green, its hover, the chip tint and mint were live through Carta and died with it on 2026-08-22, so "it was in Ledger" is now weak evidence of life, not of death. The vivid highlight kept its hex and lost its job: it is no longer an ambient bloom. | 2026-08-08 |
 | Ledger report trio | `#C9E8DA` `#BFE3D2` `#F1ECE0` — block sub-text, stat labels and a warm GFM table head | 2026-08-08 |
 | Ledger green-black (the first Ledger pass) | Deal Green `#16624C`, hover `#0F4E3C`, boardroom band `#0F1A16`, bone `#F6F4EF`, ink `#14181C`, brass `#B08637`, mint `#8FD0AE` | 2026-07-31 |
 | Coral practice site v1–v3 | `#FF385C` `#E61E4D` `#D70466`, pink/rose ambient washes | 2026-07-17 |
@@ -125,12 +127,17 @@ The tells change every pass, so learn the current ones rather than the last
 ones. As of Carta they are:
 
 - **A rounded corner.** A 12–24px card is Ledger. Carta is square.
-- **Anything warm.** Amber was a working house colour for eight days and is now
-  the single most likely wrong hex in a draft, precisely because it was recent
-  and legitimate.
-- **A textured or bloomed dark surface.** Carta's band is flat. If a dark page
-  has plaster, a glaze, or a green glow rising from a corner, it is Ledger.
-- **A green button.** See §4. This one passes every colour check.
+- **Anything green.** Deal Green was the house accent for eight months and is
+  now the single most likely wrong hex in a draft — recent, legitimate, and
+  still sitting in old CSS all over this repo.
+- **Yellow-warm rather than red-warm.** This system IS warm now, so "is it
+  warm?" no longer separates right from wrong — the HUE ANGLE does. Amber,
+  honey and brass sit at 39–42°; the accent sits at 14°, the field at 356°.
+  If your warm reads golden rather than burnt, it is Ledger.
+- **A textured or bloomed dark surface.** The field is flat. If a dark page has
+  plaster, a glaze, or a glow rising from a corner, it is Ledger.
+- **A black band.** There is no black band. The dark surface is oxblood.
+- **An accent-filled button.** See §4. This one passes every colour check.
 
 ---
 
@@ -166,19 +173,21 @@ The rest maps one-to-one:
 | Muted | sources, page numbers, captions, kicker labels | `#7C8187` |
 | Hairline | separators inside a card | `#E4DFD3` |
 | Heavier divider | chip and plate edges, frame hairlines on paper | `#D8D3C6` |
-| The accent | kickers, rules, list markers, links, the stat bar | Deal Green `#0A7A58` |
-| Accent hover | link and control hover only | `#086348` |
-| Chip fill | a chip, a tint behind a notice | `#DFF5EC` |
-| Vivid highlight | large marks and illustration masses only | `#0FA97C` |
-| The accent on dark | rules, links and the stat bar on the band | mint `#A8F0CE` |
-| The dark band | deck cover and closer, dark one-pager, report cover | `#181818` |
-| Hairline on the band | strips, table rules, frame edges on dark | `#2A2E29` |
-| Label plate on the band | cover stat cards, numbered workstream cards | `#22261F` |
-| Reading text on the band | every head and paragraph on dark | `#F4F5F1` |
-| Secondary on the band | sub-heads, supporting copy on dark | `#D7DBD2` |
-| Labels on the band | mono kickers, captions, figure labels on dark | `#ABB2AB` |
-| Smallest legal line on the band | the source line under a stat | `#8A9088` |
-| Outlined control on the band | a bordered button on dark | `#4A4F44` |
+| The accent | kickers, rules, list markers, links, chip fills, the stat bar | `#B8431E` |
+| Accent hover | link and control hover only | `#9C3717` |
+| Chip fill on light | a chip, a tint behind a notice | `#FBE7DF` |
+| Vivid highlight | large marks, illustration masses, chip fills on the field — never small text | `#FF7D55` |
+| The accent on the field | rules, links and the stat bar, as TEXT | `#FFAA90` |
+| The field | deck cover and closer, dark one-pager, report cover | `#8A2B32` |
+| Recess on the field | inputs, insets, dense text, the footer base | `#50191D` |
+| Subtle recess | alternating rows, quiet grouping | `#6C2227` |
+| Hairline on the field | strips, table rules, frame edges — an EDGE, never a fill | `#AF6F74` |
+| Label plate on the field | cover stat cards, numbered workstream cards | `#964046` |
+| Reading text on the field | every head and paragraph on the field | `#FFF3F0` |
+| Secondary on the field | sub-heads, supporting copy | `#F0D8D4` |
+| Labels on the field | mono kickers, captions, figure labels | `#DCB8B4` |
+| Smallest legal line on the field | the source line under a stat | `#D6B2AF` |
+| Outlined control on the field | a bordered button | `#C08D90` |
 | Display face | every hook, head and report title | Source Serif 4, 550 |
 | Working face | all working copy and every figure | Schibsted Grotesk, tabular |
 | Label face | kickers, sources, page numbers | IBM Plex Mono |
@@ -213,23 +222,32 @@ one: a chip edge, a plate edge, a frame on paper.
 
 ### The one accent
 
-`green #0A7A58` is the whole accent system. It is a kicker square, a rule, a
-list marker, a link, and the 4px bar under a numeral. `greenHover #086348` is
-for hover and nothing else. `greenTint #DFF5EC` fills a chip.
-`greenBright #0FA97C` is a large mark — a chart mass, an illustration plane —
-and **never small text**; on bone it does not hold contrast.
-`mint #A8F0CE` is the accent's value **on the band**, because Deal Green on
-`#181818` is a 1.9:1 mark that reads as a dark smudge.
+`green #B8431E` is the whole accent system on LIGHT surfaces — a kicker square,
+a rule, a list marker, a link, a chip fill, and the 4px bar under a numeral. At
+5.44:1 on white it is one of the few accents this house has had that carries
+text AND fills, so it does all three jobs. `greenHover #9C3717` is for hover and
+nothing else. `greenTint #FBE7DF` fills a chip on light.
+`greenBright #FF7D55` is a large mark — a chart mass, an illustration plane, a
+chip fill on the field — and **never small text**: 2.53:1 on white, 3.36:1 on
+the field, which clears AA only at display sizes (≥24px).
+`mint #FFAA90` is the accent's text-safe value **on the field**, at 4.61:1.
 
-**THE BUTTON LAW: green is never a resting fill.** A primary button is
-ink-on-light or bone-on-dark. Green appears on hover, on chips, on kickers, on
-links, and on the bar. A green button is the fastest way to make a surface look
-off-brand while every individual hex still checks out — nothing in a diff or a
-contrast checker will catch it.
+**THE NAMES ARE ROLES, NOT COLOURS.** `green`, `mint` and `greenBright` are
+historical keys kept so 16 importers did not need editing in a palette commit.
+Read them as: accent-on-light, accent-on-field-as-text, accent-as-large-mark.
+
+**THE BUTTON LAW: the accent is never a resting fill.** A primary button is
+ink-on-light or bone-on-field. The accent appears on hover, on chips, on
+kickers, on links, and on the bar. An accent-filled button is the fastest way to
+make a surface look off-brand while every individual hex still checks out —
+nothing in a diff or a contrast checker will catch it. carta.com reaches the
+same rule independently: their primary is `rgb(26,26,26)` on white.
 
 ### There is no jewelry
 
-Ledger's amber and honey have no Carta equivalent and no replacement. Where a
+Ledger's amber and honey have no equivalent here and no replacement. They are
+the trap this pass makes sharpest: the system is warm now, so a golden hex no
+longer looks obviously foreign — check the hue angle, not the temperature. Where a
 brass bar sat under a big numeral, Carta puts a **green bar** — 4px tall, 52px
 wide on a card-scale numeral, 10px below it, taken from the live site's proof
 trio. Where a brass rule underlined a table head, Carta puts ink. Where a brass
@@ -238,14 +256,30 @@ want a second colour, it wants a rule, a plate or a handle instead.
 
 ### The band
 
-`dark #181818`, **flat**. No texture, no glaze, no halo, no gradient, no bloom.
+`dark #8A2B32` — oxblood — **flat**. No texture, no glaze, no halo, no gradient,
+no bloom.
+
+**THE FIELD BUYS SOMETHING NEAR-BLACK COULD NOT GIVE: RECESS.** The old band sat
+at luminance 0.0091 with nothing below it, so every surface on it had to go
+lighter and "recessed" did not exist as a move. Oxblood sits at 0.0736 — 8.1×
+higher — so the ramp runs in both directions. Three consequences worth knowing
+before you place anything on it:
+1. **Lift comes from an edge, not a fill.** A 1px `darkSeam` rim on a
+   `darkPlate` reads as raised and costs the text nothing; raising the FILL to
+   the rim value drops `darkSub` to 2.89:1.
+2. **`darkWell` is the most legible surface in the system** — all four text
+   tiers clear AA on it, where the field carries three and `darkPlate` two.
+   Dense reading belongs in the well, not on a raised card.
+3. **The accent lives at field level and below.** `greenBright` is 5.55:1 on the
+   well, 3.36:1 on the field, 2.67:1 on a plate, 1.55:1 on the rim. A raised
+   surface carries content, never the accent.
 This is the largest single change in the Carta pass and it *deletes machinery*:
 the Ledger block was a composite built by `blockBackground()` — plaster under a
 jade glaze under a radial halo — and every one of those layers is gone.
 
 Do not keep the texture "for depth". Depth on a Carta surface is structural:
 the frame, the handles, the plate, the rule. And note the trap — writing
-`background: #181818 url(texture)` changes nothing on screen, because the image
+`background: <dark> url(texture)` changes nothing on screen, because the image
 sits above the colour in the CSS background stack. The colour underneath is
 only ever a no-image fallback. **Delete the layer; do not re-point it.**
 
@@ -260,11 +294,15 @@ seam or a recess is `ink`. Carta makes this trap quieter and therefore more
 dangerous: its band and its ink are near-identical darks, so a consumer holding
 the wrong one looks right until the next palette move.
 
-The band's own neutrals are named values, not bone at alpha:
-`darkInk #F4F5F1` reading text · `darkSub #D7DBD2` secondary ·
-`darkMuted #ABB2AB` labels · `darkLegal #8A9088` the smallest source line ·
-`darkSeam #2A2E29` hairlines · `darkPlate #22261F` label plates ·
-`darkBtnBorder #4A4F44` an outlined control.
+The field's own values are named, not bone at alpha. Every one is the field
+mixed toward black or white by a fixed fraction, so surfaces read as ONE
+MATERIAL under different light — if `dark` ever moves, regenerate the whole
+ramp rather than nudging members of it:
+`darkWell #50191D` recess · `darkShade #6C2227` subtle recess ·
+`darkPlate #964046` label plates · `darkSeam #AF6F74` the rim, an EDGE never a
+fill · `darkBtnBorder #C08D90` an outlined control ·
+`darkInk #FFF3F0` reading text · `darkSub #F0D8D4` secondary ·
+`darkMuted #DCB8B4` labels · `darkLegal #D6B2AF` the smallest source line.
 
 ### Structure replaces atmosphere — the rule the first Carta pass missed
 

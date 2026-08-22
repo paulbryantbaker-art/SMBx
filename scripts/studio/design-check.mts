@@ -265,8 +265,13 @@ const SLOTS = deriveSlots();
    of is reported as NOT CHECKED — so when the grammar grows a page kind, this
    check says it went blind instead of printing a clean line about the rules
    it still recognises. That is the difference between a guard and a habit. */
-const GROUND_DARK = LEDGER.dark;      // the block, flat value — tokens.ts: the flat number is the worse case
-const GROUND_LIGHT = LEDGER.bone;     // the body pages and the light bookend
+/* THESE READ CARTA, NOT LEDGER (2026-08-22). They were LEDGER.dark/.bone —
+   the Aurora jade block and its bone — while house/deck.ts has rendered from
+   CARTA since 2026-08-07. Every contrast number this file printed was measured
+   against a ground the collateral had already stopped using, which is the
+   quietest way for a guard to be confidently wrong. */
+const GROUND_DARK = CARTA.dark;       // the field — the flat value is the worse case
+const GROUND_LIGHT = CARTA.bone;      // the body pages and the light bookend
 
 const ON_DARK = new Set([
   '.pg.dark', '.cv-hook', '.cv-sub', '.wn', '.wt', '.swipe', '.cv-rule',
@@ -281,7 +286,7 @@ const ON_LIGHT = new Set([
   '.trade-num', '.trade-h', '.trade-b', '.bl-rule',
 ]);
 /** Grounds that are neither bookend nor bone. */
-const ON_OTHER: Record<string, string> = { '.bar.green .barnum': LEDGER.green };
+const ON_OTHER: Record<string, string> = { '.bar.green .barnum': CARTA.green };
 /** Not evaluated, each with the reason. Printed every run — an exemption that
  *  is invisible is an exemption nobody can argue with. */
 const EXEMPT: Record<string, string> = {

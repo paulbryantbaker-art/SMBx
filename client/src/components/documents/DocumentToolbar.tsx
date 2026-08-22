@@ -35,7 +35,7 @@ export default function DocumentToolbar({ editor }: DocumentToolbarProps) {
         border-0 cursor-pointer transition-colors
         ${disabled ? 'opacity-30 cursor-not-allowed' : ''}
         ${active
-          ? 'bg-[rgba(10, 122, 88,0.12)] text-[#0A7A58]'
+          ? 'bg-[rgba(184,67,30,0.12)] text-[#B8431E]'
           : 'bg-transparent text-[#3d3d3a] hover:bg-[#F5F5F5] dark:text-[#C8C4BC] dark:hover:bg-[#141413]'
         }
       `}

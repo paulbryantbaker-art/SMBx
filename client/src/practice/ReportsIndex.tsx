@@ -45,8 +45,8 @@ function Chip({ label, on, onClick }: { label: string; on: boolean; onClick: () 
       style={{
         cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: MONO, fontSize: 11.5,
         letterSpacing: '0.06em', padding: '8px 12px', textTransform: 'uppercase',
-        border: `1px solid ${on ? '#0A7A58' : '#D8D3C6'}`,
-        background: on ? '#0A7A58' : '#FFFFFF',
+        border: `1px solid ${on ? '#B8431E' : '#D8D3C6'}`,
+        background: on ? '#B8431E' : '#FFFFFF',
         color: on ? '#FFFFFF' : '#16181A',
       }}
     >
@@ -122,7 +122,7 @@ export default function ReportsIndex() {
 
         {/* ══ HERO ══ */}
         <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(52px, 9vw, 150px) clamp(20px, 4vw, 32px) 20px', position: 'relative' }}>
-          <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', right: '7%', top: 80, width: 130, height: 130, backgroundImage: 'radial-gradient(rgba(10,122,88,.2) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
+          <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', right: '7%', top: 80, width: 130, height: 130, backgroundImage: 'radial-gradient(rgba(184,67,30,.2) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
           {/* THE RING, ON RESEARCH TOO (2026-08-09, Paul marked the empty
               block right of the masthead). Same instrument as the landing
               hero — since 2026-08-12 that means the build-hold-dissolve
@@ -146,14 +146,14 @@ export default function ReportsIndex() {
                 the observer survives that remount. */}
             <div key={ringKey} style={{ width: '100%', height: '100%', transformOrigin: '50% 50%' }}>
               <svg viewBox="0 0 300 300" width="100%" height="100%" fill="none">
-                <circle className="ca-arc-draw" pathLength={100} cx="150" cy="150" r="146" stroke="#0A7A58" strokeWidth="1.4" opacity=".42" style={{ ['--arc-op' as string]: 0.42 }} />
-                <ellipse className="ca-arc-fade" cx="150" cy="150" rx="145" ry="58" stroke="#0A7A58" strokeWidth="1.4" strokeDasharray="5 6" opacity=".62" style={{ ['--arc-op' as string]: 0.62 }} />
-                <ellipse className="ca-arc-draw" pathLength={100} cx="150" cy="150" rx="58" ry="145" stroke="#0A7A58" strokeWidth="1.4" opacity=".45" style={{ ['--arc-op' as string]: 0.45 }} />
+                <circle className="ca-arc-draw" pathLength={100} cx="150" cy="150" r="146" stroke="#B8431E" strokeWidth="1.4" opacity=".42" style={{ ['--arc-op' as string]: 0.42 }} />
+                <ellipse className="ca-arc-fade" cx="150" cy="150" rx="145" ry="58" stroke="#B8431E" strokeWidth="1.4" strokeDasharray="5 6" opacity=".62" style={{ ['--arc-op' as string]: 0.62 }} />
+                <ellipse className="ca-arc-draw" pathLength={100} cx="150" cy="150" rx="58" ry="145" stroke="#B8431E" strokeWidth="1.4" opacity=".45" style={{ ['--arc-op' as string]: 0.45 }} />
               </svg>
               <span className="ca-chip-pop-a" style={{ position: 'absolute', left: '50%', top: '2.4%', transform: 'translate(-100%, -50%)' }}>
                 <span className="ca-chip-level">
                   <span style={{ display: 'inline-flex', flexDirection: 'row-reverse', alignItems: 'center', gap: 7, padding: '3px 8px 2px 9px', background: '#FFFFFF', border: '1px solid #E4DFD3', fontFamily: MONO, fontSize: 13, letterSpacing: '0.08em', color: '#16181A', whiteSpace: 'nowrap' }}>
-                    <span style={{ width: 7, height: 7, background: '#0A7A58', flex: 'none' }} />
+                    <span style={{ width: 7, height: 7, background: '#B8431E', flex: 'none' }} />
                     <span key={RING_WORDS[ringWord]} className="ca-type" style={{ ['--n' as string]: RING_WORDS[ringWord].length }}>{RING_WORDS[ringWord]}</span>
                   </span>
                 </span>
@@ -161,7 +161,7 @@ export default function ReportsIndex() {
             </div>
           </div>
           <div data-hs="0" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ width: 8, height: 8, background: '#0A7A58' }} />
+            <span style={{ width: 8, height: 8, background: '#B8431E' }} />
             <span style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.16em', color: '#7C8187' }}>PUBLISHED ASSESSMENTS</span>
           </div>
           <h1 data-hs="1" style={{ position: 'relative', zIndex: 1, margin: '24px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(32px, 4.6vw, 78px)', lineHeight: 1.05, letterSpacing: '-0.015em' }}>Research</h1>
@@ -200,7 +200,7 @@ export default function ReportsIndex() {
                 <Handles />
                 <div style={{ padding: '34px 38px 30px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 14, width: '100%' }}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#0A7A58', color: '#FFFFFF', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '5px 9px', whiteSpace: 'nowrap', textTransform: 'uppercase' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#B8431E', color: '#FFFFFF', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '5px 9px', whiteSpace: 'nowrap', textTransform: 'uppercase' }}>
                       <span style={{ width: 7, height: 7, background: '#FFFFFF', display: 'inline-block' }} />{r.kicker}
                     </span>
                     <span style={{ marginLeft: 'auto', fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.1em', color: '#7C8187', textTransform: 'uppercase' }}>{r.publishedLabel}</span>
@@ -230,8 +230,8 @@ export default function ReportsIndex() {
                     </span>
                   </div>
                 </div>
-                <div style={{ position: 'relative', borderLeft: '1px solid #16181A', minHeight: 280, background: '#181818', display: 'grid', placeItems: 'center', padding: 24, overflow: 'hidden' }}>
-                  <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(168,240,206,.14) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
+                <div style={{ position: 'relative', borderLeft: '1px solid #16181A', minHeight: 280, background: '#8A2B32', display: 'grid', placeItems: 'center', padding: 24, overflow: 'hidden' }}>
+                  <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,170,144,.14) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
                   {r.ogImage && (
                     <div
                       role="img"
@@ -250,7 +250,7 @@ export default function ReportsIndex() {
                   type="button"
                   className="ca-h-tintbg"
                   onClick={() => { setIndustry(ALL); setMetro(ALL); }}
-                  style={{ marginTop: 18, fontFamily: MONO, fontSize: 12, letterSpacing: '0.08em', color: '#0A7A58', border: '1px solid #0A7A58', background: '#FFFFFF', padding: '9px 14px', cursor: 'pointer' }}
+                  style={{ marginTop: 18, fontFamily: MONO, fontSize: 12, letterSpacing: '0.08em', color: '#B8431E', border: '1px solid #B8431E', background: '#FFFFFF', padding: '9px 14px', cursor: 'pointer' }}
                 >
                   SHOW EVERYTHING
                 </button>
@@ -260,11 +260,11 @@ export default function ReportsIndex() {
         </section>
 
         {/* ══ CTA — dark band ══ */}
-        <section id="cta" className="ca-dark" style={{ background: '#181818', color: '#F4F5F1', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(52px, 9vw, 160px)', position: 'relative', overflow: 'hidden' }}>
-          <div aria-hidden="true" data-plx="0.025" style={{ position: 'absolute', right: '6%', bottom: 30, width: 260, height: 150, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
+        <section id="cta" className="ca-dark" style={{ background: '#8A2B32', color: '#FFF3F0', padding: 'clamp(62px, 10vw, 170px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(52px, 9vw, 160px)', position: 'relative', overflow: 'hidden' }}>
+          <div aria-hidden="true" data-plx="0.025" style={{ position: 'absolute', right: '6%', bottom: 30, width: 260, height: 150, backgroundImage: 'radial-gradient(rgba(255,170,144,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 840, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
             <h2 data-rv style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(24px, 3.6vw, 58px)', lineHeight: 1.1, letterSpacing: '-0.014em' }}>Want this run on your lane?</h2>
-            <p data-rv style={{ margin: '24px auto 0', maxWidth: '36em', fontSize: 17.5, lineHeight: 1.65, color: '#ABB2AB' }}>We build the same register for a client's specific market before the first approach goes out. If you're buying, start with a conversation.</p>
+            <p data-rv style={{ margin: '24px auto 0', maxWidth: '36em', fontSize: 17.5, lineHeight: 1.65, color: '#DCB8B4' }}>We build the same register for a client's specific market before the first approach goes out. If you're buying, start with a conversation.</p>
             <div data-rv style={{ marginTop: 38 }}>
               <a
                 href={bookHref()}

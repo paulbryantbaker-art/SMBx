@@ -50,8 +50,8 @@ export function Handles({ color = '#16181A', small = false }: { color?: string; 
 export function Kicker({ children, dark = false, center = false }: { children: ReactNode; dark?: boolean; center?: boolean }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: center ? 'center' : undefined, gap: 8 }}>
-      <span style={{ width: 8, height: 8, background: '#0A7A58', flex: 'none' }} />
-      <span style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.16em', color: dark ? '#ABB2AB' : '#7C8187' }}>{children}</span>
+      <span style={{ width: 8, height: 8, background: '#B8431E', flex: 'none' }} />
+      <span style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.16em', color: dark ? '#DCB8B4' : '#7C8187' }}>{children}</span>
     </div>
   );
 }
@@ -109,7 +109,7 @@ function WhoMenu({ anchor }: { anchor: (hash: string) => string }) {
           <div style={{ width: 560, background: '#FFFFFF', border: '1px solid #E4DFD3', boxShadow: '0 24px 60px rgba(22,24,26,.10)', display: 'grid', gridTemplateColumns: '1fr 220px' }}>
             <div style={{ padding: '26px 28px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                <span style={{ width: 8, height: 8, background: '#0A7A58' }} />
+                <span style={{ width: 8, height: 8, background: '#B8431E' }} />
                 <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.14em', color: '#7C8187' }}>BUYERS</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, fontSize: 16, fontWeight: 500 }}>
@@ -119,7 +119,7 @@ function WhoMenu({ anchor }: { anchor: (hash: string) => string }) {
               </div>
             </div>
             <a href={anchor('#owners')} className="ca-h-bandmenu" style={{ display: 'block', background: '#F3F0E9', padding: '22px 20px', borderLeft: '1px solid #E4DFD3' }} onClick={() => setOpen(false)}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#0A7A58', color: '#FFFFFF', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '4px 8px', whiteSpace: 'nowrap' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#B8431E', color: '#FFFFFF', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', padding: '4px 8px', whiteSpace: 'nowrap' }}>
                 <span style={{ width: 7, height: 7, background: '#FFFFFF', display: 'inline-block' }} />FREE VALUATION
               </span>
               <span style={{ display: 'block', marginTop: 12, fontSize: 14.5, lineHeight: 1.5, color: '#16181A', fontWeight: 500 }}>
@@ -452,7 +452,7 @@ export default function PracticeShell({
   /* The current page's nav link wears the reference's active treatment —
      green with a 2px green underline and aria-current (the Industries and
      Research references both mark themselves this way). */
-  const navOnStyle = { color: '#0A7A58', padding: '6px 0', borderBottom: '2px solid #0A7A58' } as const;
+  const navOnStyle = { color: '#B8431E', padding: '6px 0', borderBottom: '2px solid #B8431E' } as const;
   const onIndustries = loc === '/industries';
   const onResearch = loc.startsWith('/research') || loc.startsWith('/reports');
   const onTrackRecord = loc === '/track-record';
@@ -472,7 +472,7 @@ export default function PracticeShell({
      buyer segments. carta.com itself runs one mega footer on every page;
      ours does now too. Two per-page nuances survive because they are not
      variants of CONTENT: Track Record still drops its own self-link, and
-     the pages that close on a dark band keep the #2A2E29 hairline atop the
+     the pages that close on a dark band keep the #AF6F74 hairline atop the
      footer so the blocks don't run together. */
   const footCompact = false;
   const footSeam = onResearch || onTrackRecord;
@@ -588,33 +588,40 @@ export default function PracticeShell({
              page: Industries/Research run compact (short blurb, no BUYERS,
              six-link FIRM), Track Record drops its self-link, and the pages
              that close on a dark band carry a hairline seam up top. ══ */}
-      <footer className="ca-dark" style={{ background: '#181818', color: '#F4F5F1', padding: 'clamp(56px, 7vw, 88px) clamp(20px, 4vw, 32px) 40px', borderTop: footSeam ? '1px solid #2A2E29' : undefined }}>
+      {/* THE FOOTER IS THE WELL, NOT THE FIELD (OXBLOOD 2026-08-22).
+          Under near-black this was the same value as every band and that was
+          fine — near-black is near-black. On a coloured field an identical
+          footer reads as one more band rather than the page's base, and the
+          page stops having a bottom. `well` #50191D is the step down that
+          near-black could never provide, because it was already at the floor.
+          practice.css:2356 has carried the intent in prose for months. */}
+      <footer className="ca-dark" style={{ background: '#50191D', color: '#FFF3F0', padding: 'clamp(56px, 7vw, 88px) clamp(20px, 4vw, 32px) 40px', borderTop: footSeam ? '1px solid #AF6F74' : undefined }}>
         <div style={{ maxWidth: 1360, margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 44 }}>
             <div>
               <img src="/logo-green-x-dark.png" alt="smbX.ai" width={1584} height={396} loading="lazy" style={{ height: 36, width: 'auto', display: 'block' }} />
-              <p style={{ margin: '18px 0 0', fontSize: 14.5, lineHeight: 1.65, color: '#ABB2AB', maxWidth: '22em' }}>
+              <p style={{ margin: '18px 0 0', fontSize: 14.5, lineHeight: 1.65, color: '#DCB8B4', maxWidth: '22em' }}>
                 {footCompact
                   ? 'Buy-side corporate development for acquirers in the lower middle market.'
                   : "Buy-side corporate development for acquirers in the lower middle market. A senior operator and a full team's output, exclusively on your side of the table."}
               </p>
               <div style={{ marginTop: 26, display: 'flex', gap: 14, alignItems: 'center' }}>
-                <img src="/founder-portrait.jpg" alt="Paul Baker" loading="lazy" style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', objectPosition: '50% 18%', border: '2px solid #A8F0CE' }} />
+                <img src="/founder-portrait.jpg" alt="Paul Baker" loading="lazy" style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', objectPosition: '50% 18%', border: '2px solid #FFAA90' }} />
                 <div>
-                  <div style={{ fontSize: 14.5, fontWeight: 600, color: '#F4F5F1' }}>Paul Baker</div>
-                  <div style={{ fontSize: 12.5, color: '#ABB2AB' }}>Founder · two decades on the buy side</div>
+                  <div style={{ fontSize: 14.5, fontWeight: 600, color: '#FFF3F0' }}>Paul Baker</div>
+                  <div style={{ fontSize: 12.5, color: '#DCB8B4' }}>Founder · two decades on the buy side</div>
                   {/* On About the reference sends "Meet Paul" to the page's
                       own CTA — you're already meeting him. */}
                   {onAbout
-                    ? <a href="#cta" className="ca-h-tint" style={{ fontSize: 13, color: '#A8F0CE' }}>Meet Paul →</a>
-                    : <Link href="/about" className="ca-h-tint" style={{ fontSize: 13, color: '#A8F0CE' }}>Meet Paul →</Link>}
+                    ? <a href="#cta" className="ca-h-tint" style={{ fontSize: 13, color: '#FFAA90' }}>Meet Paul →</a>
+                    : <Link href="/about" className="ca-h-tint" style={{ fontSize: 13, color: '#FFAA90' }}>Meet Paul →</Link>}
                 </div>
               </div>
             </div>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #2A2E29', paddingBottom: 12 }}>
-                <span style={{ width: 7, height: 7, background: '#0A7A58' }} />
-                <span style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.16em', color: '#ABB2AB' }}>FIRM</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #AF6F74', paddingBottom: 12 }}>
+                <span style={{ width: 7, height: 7, background: '#B8431E' }} />
+                <span style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.16em', color: '#DCB8B4' }}>FIRM</span>
               </div>
               <div className="ca-foot-col" style={{ marginTop: 16 }}>
                 {!footCompact && <a href={anchor('#why')}>Why us</a>}
@@ -629,9 +636,9 @@ export default function PracticeShell({
             </div>
             {!footCompact && (
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #2A2E29', paddingBottom: 12 }}>
-                <span style={{ width: 7, height: 7, background: '#0A7A58' }} />
-                <span style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.16em', color: '#ABB2AB' }}>BUYERS</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #AF6F74', paddingBottom: 12 }}>
+                <span style={{ width: 7, height: 7, background: '#B8431E' }} />
+                <span style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.16em', color: '#DCB8B4' }}>BUYERS</span>
               </div>
               {/* Each name goes to ITS OWN page — the segment pages are routed
                   and richer than any landing panel (2026-08-02 law). */}
@@ -645,16 +652,16 @@ export default function PracticeShell({
             </div>
             )}
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #2A2E29', paddingBottom: 12 }}>
-                <span style={{ width: 7, height: 7, background: '#0A7A58' }} />
-                <span style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.16em', color: '#ABB2AB' }}>WHERE WE WORK</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #AF6F74', paddingBottom: 12 }}>
+                <span style={{ width: 7, height: 7, background: '#B8431E' }} />
+                <span style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.16em', color: '#DCB8B4' }}>WHERE WE WORK</span>
               </div>
-              <p style={{ margin: '16px 0 0', fontSize: 14.5, lineHeight: 1.65, color: '#D7DBD2' }}>
+              <p style={{ margin: '16px 0 0', fontSize: 14.5, lineHeight: 1.65, color: '#F0D8D4' }}>
                 Nationwide, from Dallas–Fort Worth, Texas.
               </p>
             </div>
           </div>
-          <div id="disclosures" style={{ marginTop: 64, borderTop: '1px solid #2A2E29', paddingTop: 26, fontSize: 12.5, lineHeight: 1.7, color: '#8A9088', maxWidth: '76em' }}>
+          <div id="disclosures" style={{ marginTop: 64, borderTop: '1px solid #AF6F74', paddingTop: 26, fontSize: 12.5, lineHeight: 1.7, color: '#D6B2AF', maxWidth: '76em' }}>
             smbx.ai advises buyers only. We work exclusively on acquisitions of privately held
             companies with under $250M in annual revenue, and we do not represent sellers or act
             for both sides of a transaction. smbx.ai is not a registered broker-dealer or
@@ -662,12 +669,12 @@ export default function PracticeShell({
             and does not provide legal, tax, or accounting advice — we coordinate the licensed
             specialists your deal requires. Nothing here is an offer to buy or sell any security.
           </div>
-          <div style={{ marginTop: 22, fontSize: 13, color: '#8A9088', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ marginTop: 22, fontSize: 13, color: '#D6B2AF', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <span>© 2026 smbx.ai. Buy-side only, by design.</span><span>·</span>
-            <a href="/legal/terms" className="ca-h-mint" style={{ color: '#ABB2AB' }}>Terms</a><span>·</span>
-            <a href="/legal/privacy" className="ca-h-mint" style={{ color: '#ABB2AB' }}>Privacy</a><span>·</span>
-            <a href="#disclosures" className="ca-h-mint" style={{ color: '#ABB2AB' }}>Disclosures</a><span>·</span>
-            <a href="/login" className="ca-h-mint" style={{ color: '#ABB2AB' }}>Sign in</a>
+            <a href="/legal/terms" className="ca-h-mint" style={{ color: '#DCB8B4' }}>Terms</a><span>·</span>
+            <a href="/legal/privacy" className="ca-h-mint" style={{ color: '#DCB8B4' }}>Privacy</a><span>·</span>
+            <a href="#disclosures" className="ca-h-mint" style={{ color: '#DCB8B4' }}>Disclosures</a><span>·</span>
+            <a href="/login" className="ca-h-mint" style={{ color: '#DCB8B4' }}>Sign in</a>
           </div>
         </div>
       </footer>

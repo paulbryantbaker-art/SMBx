@@ -69,11 +69,11 @@ export default function SegmentPage({ slug }: { slug: string }) {
         {/* ══ HERO ══ */}
         <section style={{ maxWidth: 1360, margin: '0 auto', padding: 'clamp(52px, 9vw, 150px) clamp(20px, 4vw, 32px) clamp(31px, 6vw, 90px)', textAlign: 'center', position: 'relative' }}>
           <div aria-hidden="true" data-plx="-0.02" style={{ position: 'absolute', left: '7%', top: 70, width: 110, height: 110, backgroundImage: 'radial-gradient(rgba(22,24,26,.14) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
-          <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', right: '8%', top: 130, width: 90, height: 90, backgroundImage: 'radial-gradient(rgba(10,122,88,.22) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
+          <div aria-hidden="true" data-plx="0.03" style={{ position: 'absolute', right: '8%', top: 130, width: 90, height: 90, backgroundImage: 'radial-gradient(rgba(184,67,30,.22) 1.1px, transparent 1.1px)', backgroundSize: '14px 14px' }} />
           <nav data-hs="0" aria-label="Breadcrumb" style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.12em', color: '#7C8187' }}>
-            <Link href="/" className="ca-h-deepgreen" style={{ color: '#0A7A58' }}>SMBX</Link>
+            <Link href="/" className="ca-h-deepgreen" style={{ color: '#B8431E' }}>SMBX</Link>
             <span style={{ margin: '0 10px' }}>/</span>
-            <a href="/#who" className="ca-h-deepgreen" style={{ color: '#0A7A58' }}>WHO IT'S FOR</a>
+            <a href="/#who" className="ca-h-deepgreen" style={{ color: '#B8431E' }}>WHO IT'S FOR</a>
             <span style={{ margin: '0 10px' }}>/</span>
             <span style={{ color: '#16181A' }}>{seg.footerLabel.toUpperCase()}</span>
           </nav>
@@ -103,28 +103,28 @@ export default function SegmentPage({ slug }: { slug: string }) {
               grammar: mono kicker, serif numeral over a green bar, the
               approved line as its explanation. */}
           <div data-hs="3" style={{ margin: '56px auto 0', maxWidth: '34em' }}>
-            <div style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#0A7A58' }}>THE NUMBER</div>
+            <div style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: '#B8431E' }}>THE NUMBER</div>
             <div style={{ marginTop: 10, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(32px, 4vw, 64px)', lineHeight: 1, letterSpacing: '-0.02em' }}>
               {seg.stat.n}
-              <span style={{ display: 'block', height: 5, width: 76, background: '#0A7A58', margin: '10px auto 0' }} />
+              <span style={{ display: 'block', height: 5, width: 76, background: '#B8431E', margin: '10px auto 0' }} />
             </div>
             <p style={{ margin: '14px 0 0', fontSize: 15, lineHeight: 1.65, color: '#4A4F54' }}>{seg.stat.l}</p>
           </div>
         </section>
 
         {/* ══ THE PROBLEM — dark band ══ */}
-        <section className="ca-dark" style={{ background: '#181818', color: '#F4F5F1', padding: 'clamp(57px, 10vw, 160px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(31px, 6vw, 100px)', position: 'relative', overflow: 'hidden' }}>
-          <div aria-hidden="true" data-plx="0.025" style={{ position: 'absolute', top: 44, right: '5%', width: 260, height: 160, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
+        <section className="ca-dark" style={{ background: '#8A2B32', color: '#FFF3F0', padding: 'clamp(57px, 10vw, 160px) clamp(20px, 4vw, 32px)', marginTop: 'clamp(31px, 6vw, 100px)', position: 'relative', overflow: 'hidden' }}>
+          <div aria-hidden="true" data-plx="0.025" style={{ position: 'absolute', top: 44, right: '5%', width: 260, height: 160, backgroundImage: 'radial-gradient(rgba(255,170,144,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 1360, margin: '0 auto', position: 'relative' }}>
             <div data-rv><Kicker dark>THE PROBLEM</Kicker></div>
             <h2 data-rv style={{ margin: '24px 0 0', fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(23px, 3.2vw, 52px)', lineHeight: 1.1, letterSpacing: '-0.012em', maxWidth: '20em', textWrap: 'balance' }}>{seg.painTitle}</h2>
-            <div data-rv className="rv-stagger" data-tri style={{ marginTop: 56, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: '#2A2E29', border: '1px solid #2A2E29', position: 'relative' }}>
-              <Handles color="#F4F5F1" />
+            <div data-rv className="rv-stagger" data-tri style={{ marginTop: 56, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: '#AF6F74', border: '1px solid #AF6F74', position: 'relative' }}>
+              <Handles color="#FFF3F0" />
               {seg.pains.map(p => (
-                <div key={p.name} style={{ background: '#181818', padding: '34px 28px 36px' }}>
-                  <div style={{ display: 'table', background: '#22261F', color: '#D7DBD2', fontFamily: MONO, fontSize: 11, letterSpacing: '0.1em', padding: '5px 9px' }}>{p.tag}</div>
-                  <div style={{ marginTop: 18, fontFamily: SERIF, fontWeight: 600, fontSize: 22, lineHeight: 1.25 }}>{p.name}<span style={{ color: '#0A7A58' }}>.</span></div>
-                  <p style={{ margin: '12px 0 0', fontSize: 14.5, lineHeight: 1.65, color: '#ABB2AB' }}>{p.body}</p>
+                <div key={p.name} style={{ background: '#8A2B32', padding: '34px 28px 36px' }}>
+                  <div style={{ display: 'table', background: '#964046', color: '#F0D8D4', fontFamily: MONO, fontSize: 11, letterSpacing: '0.1em', padding: '5px 9px' }}>{p.tag}</div>
+                  <div style={{ marginTop: 18, fontFamily: SERIF, fontWeight: 600, fontSize: 22, lineHeight: 1.25 }}>{p.name}<span style={{ color: '#FFAA90' }}>.</span></div>
+                  <p style={{ margin: '12px 0 0', fontSize: 14.5, lineHeight: 1.65, color: '#DCB8B4' }}>{p.body}</p>
                 </div>
               ))}
             </div>
@@ -140,8 +140,8 @@ export default function SegmentPage({ slug }: { slug: string }) {
           <div data-rv className="rv-stagger" data-tri style={{ marginTop: 52, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 26 }}>
             {[work, practitioner, side].map(a => (
               <div key={a.k} style={{ borderTop: '2px solid #16181A', paddingTop: 22, position: 'relative' }}>
-                <span style={{ position: 'absolute', top: -2, left: 0, width: 44, height: 2, background: '#0A7A58' }} />
-                <div style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.13em', color: '#0A7A58' }}>{a.k.toUpperCase()}</div>
+                <span style={{ position: 'absolute', top: -2, left: 0, width: 44, height: 2, background: '#B8431E' }} />
+                <div style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.13em', color: '#B8431E' }}>{a.k.toUpperCase()}</div>
                 <p style={{ margin: '14px 0 0', fontSize: 15.5, lineHeight: 1.65, color: '#4A4F54' }}>{a.v}</p>
               </div>
             ))}
@@ -176,7 +176,7 @@ export default function SegmentPage({ slug }: { slug: string }) {
           <div data-rv className="rv-stagger" data-tri style={{ marginTop: 52, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: '#E4DFD3', border: '1px solid #E4DFD3' }}>
             {seg.gets.map((g, i) => (
               <div key={g} style={{ background: '#FFFFFF', padding: '22px 24px', display: 'flex', alignItems: 'baseline', gap: 12 }}>
-                <span style={{ fontFamily: MONO, fontSize: 12, color: '#0A7A58', flex: 'none' }}>{String(i + 1).padStart(2, '0')}</span>
+                <span style={{ fontFamily: MONO, fontSize: 12, color: '#B8431E', flex: 'none' }}>{String(i + 1).padStart(2, '0')}</span>
                 <span style={{ fontWeight: 600, fontSize: 15.5, lineHeight: 1.45 }}>{g}</span>
               </div>
             ))}
@@ -199,13 +199,13 @@ export default function SegmentPage({ slug }: { slug: string }) {
               <div data-count="21" style={statNum}>~$21B</div>
               <div style={statLabel}>TRANSACTIONS TOUCHED</div>
             </div>
-            <div style={{ background: '#181818', padding: '38px 28px 34px', textAlign: 'center' }}>
-              <div style={{ ...statNum, color: '#A8F0CE' }}>0</div>
-              <div style={{ margin: '16px auto 0', display: 'table', background: '#0A7A58', color: '#FFFFFF', fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.12em', padding: '5px 9px' }}>SELL-SIDE ENGAGEMENTS. EVER.</div>
+            <div style={{ background: '#8A2B32', padding: '38px 28px 34px', textAlign: 'center' }}>
+              <div style={{ ...statNum, color: '#FF7D55' }}>0</div>
+              <div style={{ margin: '16px auto 0', display: 'table', background: '#FF7D55', color: '#1A1A1A', fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.12em', padding: '5px 9px' }}>SELL-SIDE ENGAGEMENTS. EVER.</div>
             </div>
           </div>
           <p data-rv style={{ margin: '22px 0 0', fontSize: 15, lineHeight: 1.6, color: '#4A4F54' }}>
-            The record behind every engagement — <Link href="/track-record" className="ca-h-deepgreen" style={{ color: '#0A7A58', fontWeight: 600, borderBottom: '1px solid #0A7A58', paddingBottom: 2 }}>explore the full deal sheet →</Link>
+            The record behind every engagement — <Link href="/track-record" className="ca-h-deepgreen" style={{ color: '#B8431E', fontWeight: 600, borderBottom: '1px solid #B8431E', paddingBottom: 2 }}>explore the full deal sheet →</Link>
           </p>
         </section>
 

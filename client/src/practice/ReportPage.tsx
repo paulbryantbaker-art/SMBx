@@ -235,9 +235,9 @@ export default function ReportPage({ slug }: { slug: string }) {
           <div className="pd-wrap rp-head-in">
             {/* The Carta mono breadcrumb (the About-page grammar). */}
             <nav aria-label="Breadcrumb" style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, letterSpacing: '0.12em', color: '#7C8187' }}>
-              <Link href="/" className="ca-h-deepgreen" style={{ color: '#0A7A58' }}>SMBX</Link>
+              <Link href="/" className="ca-h-deepgreen" style={{ color: '#B8431E' }}>SMBX</Link>
               <span style={{ margin: '0 10px' }}>/</span>
-              <Link href="/research" className="ca-h-deepgreen" style={{ color: '#0A7A58' }}>RESEARCH</Link>
+              <Link href="/research" className="ca-h-deepgreen" style={{ color: '#B8431E' }}>RESEARCH</Link>
               <span style={{ margin: '0 10px' }}>/</span>
               <span style={{ color: '#16181A' }}>{report.shortTitle.toUpperCase()}</span>
             </nav>
@@ -326,11 +326,11 @@ export default function ReportPage({ slug }: { slug: string }) {
         </div>
 
         {/* ── the ask — the dark band the Research index also closes on ── */}
-        <section id="cta" className="ca-dark" style={{ background: '#181818', color: '#F4F5F1', padding: 'clamp(110px, 10vw, 160px) 32px', marginTop: 'clamp(70px, 8vw, 120px)', position: 'relative', overflow: 'hidden' }}>
-          <div aria-hidden="true" data-plx="0.025" style={{ position: 'absolute', right: '6%', bottom: 30, width: 260, height: 150, backgroundImage: 'radial-gradient(rgba(168,240,206,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
+        <section id="cta" className="ca-dark" style={{ background: '#8A2B32', color: '#FFF3F0', padding: 'clamp(110px, 10vw, 160px) 32px', marginTop: 'clamp(70px, 8vw, 120px)', position: 'relative', overflow: 'hidden' }}>
+          <div aria-hidden="true" data-plx="0.025" style={{ position: 'absolute', right: '6%', bottom: 30, width: 260, height: 150, backgroundImage: 'radial-gradient(rgba(255,170,144,.18) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
           <div style={{ maxWidth: 840, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
             <h2 data-rv style={{ margin: 0, fontFamily: "'Source Serif 4', Georgia, serif", fontWeight: 550, fontSize: 'clamp(34px, 3.6vw, 58px)', lineHeight: 1.1, letterSpacing: '-0.014em' }}>Buying in this market?</h2>
-            <p data-rv style={{ margin: '24px auto 0', maxWidth: '36em', fontSize: 17.5, lineHeight: 1.65, color: '#ABB2AB' }}>
+            <p data-rv style={{ margin: '24px auto 0', maxWidth: '36em', fontSize: 17.5, lineHeight: 1.65, color: '#DCB8B4' }}>
               This is the research we run before a mandate. If you're building a
               platform or adding to one, a conversation costs nothing and we'll
               tell you plainly whether the lane is open.

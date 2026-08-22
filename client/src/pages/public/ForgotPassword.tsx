@@ -62,14 +62,14 @@ export default function ForgotPassword({ onNavigateLogin }: ForgotPasswordProps)
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full px-3.5 py-2.5 text-[15px] border border-[#f5f4ed] rounded-xl outline-none mb-4 bg-white text-[#1a1918] focus:border-[#0A7A58]"
+              className="w-full px-3.5 py-2.5 text-[15px] border border-[#f5f4ed] rounded-xl outline-none mb-4 bg-white text-[#1a1918] focus:border-[#B8431E]"
               required
             />
 
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-3 bg-[#0A7A58] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer mt-1 hover:bg-[#B85A3A] transition-colors disabled:opacity-50"
+              className="w-full py-3 bg-[#B8431E] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer mt-1 hover:bg-[#9C3717] transition-colors disabled:opacity-50"
             >
               {submitting ? 'Sending...' : 'Send reset link'}
             </button>
@@ -80,7 +80,7 @@ export default function ForgotPassword({ onNavigateLogin }: ForgotPasswordProps)
           <button
             type="button"
             onClick={onNavigateLogin}
-            className="bg-transparent border-none text-[#0A7A58] font-semibold cursor-pointer text-sm p-0"
+            className="bg-transparent border-none text-[#B8431E] font-semibold cursor-pointer text-sm p-0"
           >
             Back to sign in
           </button>

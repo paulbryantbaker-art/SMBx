@@ -39,9 +39,14 @@ const OUT = path.join(ROOT, 'client/public');
 mkdirSync(OUT, { recursive: true });
 
 /* THE shared definition — see house/tokens.ts. Never hardcode a hex here. */
-const { LEDGER } = await import(pathToFileURL(path.join(ROOT, 'house/tokens.ts')).href);
-const BONE = LEDGER.bone;
-const DARK = LEDGER.dark;
+/* READS CARTA, NOT LEDGER (OXBLOOD 2026-08-22). These were LEDGER.bone/.dark —
+   the Aurora jade plate — so every shipped favicon was a solid #0A6A4C tile, a
+   hex the current palette retires. The tile's JOB is unchanged: a saturated
+   plate that separates from a light tab strip and a dark one alike. The field
+   does that at 8.49:1 against the bone mark. */
+const { CARTA } = await import(pathToFileURL(path.join(ROOT, 'house/tokens.ts')).href);
+const BONE = CARTA.bone;
+const DARK = CARTA.dark;
 
 const MARK = 'data:image/png;base64,' +
   readFileSync(path.join(OUT, 'logo-x-green.png')).toString('base64');
@@ -95,7 +100,7 @@ try {
       clip: { x: 0, y: 0, width: icon.size, height: icon.size },
     });
     writeFileSync(path.join(OUT, icon.file), buf);
-    console.log(`  ✓ ${icon.file.padEnd(26)} ${icon.size}×${icon.size}  ${icon.dark ? 'bone on jade' : 'green on bone'}  ${Math.round(buf.length / 1024)}KB`);
+    console.log(`  ✓ ${icon.file.padEnd(26)} ${icon.size}×${icon.size}  ${icon.dark ? 'bone on the field' : 'green on bone'}  ${Math.round(buf.length / 1024)}KB`);
   }
 } finally {
   await page.close();

@@ -20,7 +20,7 @@ export function LegalFrame({ crumb, title, children }: { crumb: string; title: s
       <main style={{ background: '#FFFFFF', overflow: 'clip' }}>
         <section style={{ maxWidth: 820, margin: '0 auto', padding: 'clamp(80px, 8vw, 130px) 32px clamp(100px, 10vw, 160px)' }}>
           <nav data-hs="0" aria-label="Breadcrumb" style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.12em', color: '#7C8187' }}>
-            <Link href="/" className="ca-h-deepgreen" style={{ color: '#0A7A58' }}>SMBX</Link>
+            <Link href="/" className="ca-h-deepgreen" style={{ color: '#B8431E' }}>SMBX</Link>
             <span style={{ margin: '0 10px' }}>/</span>
             <span style={{ color: '#16181A' }}>{crumb}</span>
           </nav>
@@ -89,7 +89,7 @@ export default function Terms() {
 
       <p style={{ margin: 0, fontSize: 13.5, color: '#7C8187' }}>
         Questions or removal requests: hello@smbx.ai. Our privacy notice
-        is at <a href="/legal/privacy" className="ca-h-deepgreen" style={{ color: '#0A7A58', borderBottom: '1px solid #0A7A58', paddingBottom: 1 }}>/legal/privacy</a>.
+        is at <a href="/legal/privacy" className="ca-h-deepgreen" style={{ color: '#B8431E', borderBottom: '1px solid #B8431E', paddingBottom: 1 }}>/legal/privacy</a>.
       </p>
     </LegalFrame>
   );
