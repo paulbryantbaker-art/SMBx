@@ -547,22 +547,29 @@
 .pd details > summary { list-style: none; }
 .pd details > summary::-webkit-details-marker { display: none; }
 
-/* ── Hover vocabulary — one class per distinct style-hover in the handoff ── */
-.ca-h-green:hover { color: #0A7A58 !important; }
-.ca-h-deepgreen:hover { color: #086348 !important; }
-.ca-h-mint:hover { color: #A8F0CE !important; }
-.ca-h-tint:hover { color: #DFF5EC !important; }
-.ca-h-greenbg:hover { background: #0A7A58 !important; }
-.ca-h-mintbg:hover { background: #A8F0CE !important; }
-.ca-h-tintbg:hover { background: #DFF5EC !important; }
+/* ── Hover vocabulary — one class per distinct style-hover in the handoff ──
+   OXBLOOD, 2026-08-22. The class NAMES are historical and now describe roles,
+   not colours: `green*` = the accent on LIGHT grounds, `mint*` = the accent on
+   the FIELD. Renaming means touching 53 call sites across 8 .tsx files and
+   belongs in its own commit.
+   The mint trio is NOT one value: `-mintbg` is a FILL and takes the bright
+   #FF7D55, while `-mint` and `-mintline` carry TEXT and take #FFAA90, which is
+   the only value that clears AA on the field at small sizes (4.61:1 vs 3.36:1). */
+.ca-h-green:hover { color: #B8431E !important; }
+.ca-h-deepgreen:hover { color: #9C3717 !important; }
+.ca-h-mint:hover { color: #FFAA90 !important; }
+.ca-h-tint:hover { color: #FBE7DF !important; }
+.ca-h-greenbg:hover { background: #B8431E !important; }
+.ca-h-mintbg:hover { background: #FF7D55 !important; }
+.ca-h-tintbg:hover { background: #FBE7DF !important; }
 .ca-h-whitebg:hover { background: #FFFFFF !important; }
 .ca-h-band:hover { background: #F3F0E9 !important; }
 .ca-h-bandhv:hover { background: #EFEBE1 !important; }
 .ca-h-banddeep:hover { background: #ECE8DC !important; }
 .ca-h-bandmenu:hover { background: #EDE9DF !important; }
-.ca-h-greenline:hover { border-color: #0A7A58 !important; color: #0A7A58 !important; }
-.ca-h-mintline:hover { border-color: #A8F0CE !important; color: #A8F0CE !important; }
-.ca-h-greenborder:hover { border-color: #0A7A58 !important; }
+.ca-h-greenline:hover { border-color: #B8431E !important; color: #B8431E !important; }
+.ca-h-mintline:hover { border-color: #FFAA90 !important; color: #FFAA90 !important; }
+.ca-h-greenborder:hover { border-color: #B8431E !important; }
 
 /* ── Nav: sticky bar that gains its hairline + shadow past 24px of scroll
       (the reference's data-nav behavior — the bar never hides). ── */

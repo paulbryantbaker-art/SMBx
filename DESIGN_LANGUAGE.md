@@ -19,10 +19,10 @@ here rather than cited. Where a number appears twice in this repo, this file and
 *If you copy one thing into another prompt, copy this.*
 
 > smbX is a buy-side corporate development practice. The design language is
-> **bone paper, oxblood fields, one warm accent, square corners, hairlines.**
-> Ground `#FCFAF6`. Field `#8A2B32` oxblood — this is the dark surface; there is
+> **white paper, oxblood fields, one warm accent, square corners, hairlines.**
+> Ground `#FFFFFF`. Field `#8A2B32` oxblood — this is the dark surface; there is
 > **no black band**. Accent `#B8431E` on light, `#FF7D55` on the field. Ink
-> `#1A1A1A`. Type is **Instrument Serif** for display, **Plus Jakarta Sans** for
+> `#16181A`. Type is **Source Serif 4** for display, **Schibsted Grotesk** for
 > working text, **IBM Plex Mono** for labels and data. Radius 0 everywhere except
 > buttons and inputs. **The accent is never a resting button fill** — primary
 > buttons are ink on light, bone on the field. No gradients, no drop shadows, no
@@ -65,7 +65,7 @@ historical and means *accent*. Never restore an actual coral value to it.
 
 | Share | Role | Value |
 |---|---|---|
-| **60** | ground — paper, the canvas everything sits on | `#FCFAF6` bone |
+| **60** | ground — paper, the canvas everything sits on | `#FFFFFF` white |
 | **30** | field — bands, covers, section breaks | `#8A2B32` oxblood |
 | **10** | accent — chips, marks, rules, the two-tone turn | `#B8431E` light · `#FF7D55` field |
 
@@ -74,17 +74,24 @@ use is decided by the ground it sits on, never by preference.
 
 ### 3.2 Light surfaces
 
+> **THE GROUND IS WHITE, NOT BONE — and that is a decision on the record.**
+> Paul, 2026-08-12, side by side against carta.com: *"the background is
+> definitely darker still"* — our warm `#FCFAF6` read dingy beside Carta's pure
+> white. The Scheme B swatch showed bone, so this is the one value where the
+> proposal and the standing decision disagree, and the standing decision wins
+> until it is revisited by looking. It is a one-token change either way.
+
 | Token | Hex | Contrast on bone | Use |
 |---|---|---|---|
-| ground | `#FCFAF6` | — | the page |
+| ground | `#FFFFFF` | — | the page. See the note below |
 | card | `#FFFFFF` | — | lift above the ground; square, hairline edge |
-| panel | `#F3EFE9` | — | recess; quiet grouping, code, inset rows |
-| rule | `#E3DDD4` | — | hairlines. Never a fill |
-| ink | `#1A1A1A` | 16.69:1 | headlines, primary button fill |
-| body | `#57534E` | 7.32:1 | running text |
-| muted | `#76726B` | 4.59:1 | labels, captions, meta |
+| panel | `#F3F0E9` | — | recess; quiet grouping, code, inset rows |
+| rule | `#E4DFD3` | — | hairlines. Never a fill |
+| ink | `#16181A` | 17.09:1 | headlines, primary button fill |
+| body | `#4A4F54` | 7.72:1 | running text |
+| muted | `#7C8187` | 4.62:1 | labels, captions, meta |
 | **accent** | `#B8431E` | 5.22:1 | text, marks *and* fills — all three |
-| accent hover | `#9C3717` | 6.78:1 | hover only |
+| accent hover | `#9C3717` | 7.05:1 | hover only |
 | accent tint | `#FBE7DF` | — | chip fill under `#9C3717` text (5.92:1) |
 
 ### 3.3 The field, and its depth ramp
@@ -141,9 +148,17 @@ tried as a button fill in two prior systems and it reads as a warning both times
 
 | Role | Face | Notes |
 |---|---|---|
-| Display | **Instrument Serif** 400 | High contrast, fine hairlines. One weight — display only |
-| Working | **Plus Jakarta Sans** 400/500/600/700 | All body, UI, buttons |
-| Data & labels | **IBM Plex Mono** 400/500 | Kickers, stat labels, page numbers, sources. 0.08–0.13em tracking |
+| Display | **Source Serif 4**, weight 550 | Headlines; 600 for card titles |
+| Working | **Schibsted Grotesk** 400/500/600/700 | All body, UI, buttons |
+| Data & labels | **IBM Plex Mono** 400/500/600 | Kickers, stat labels, page numbers, sources. 0.08–0.13em tracking |
+
+**TYPE IS NOT CHANGING IN THIS PASS, AND THIS IS LOAD-BEARING.** Every renderer
+embeds its woff2s locally from `@fontsource` packages, because Railway blocks the
+Google Fonts CDN and the Docker image carries only Noto. Only `ibm-plex-mono`,
+`schibsted-grotesk` and the variable `source-serif-4` are installed. **A template
+built in any other face renders as Noto in production.** A serif change is a
+separate job: add the package, extend `server/services/fontEmbeds.ts`, then
+update this table.
 
 **Floor: nothing customer-facing below 13px.** Mono label voice runs 13–13.5px.
 Headings take `text-wrap: balance` when centred, `pretty` when left-aligned.
@@ -161,7 +176,7 @@ it carries information the reader cannot infer.
   exception is the phone bottom-sheet's 22px top corners.
 - **Corner-handle frames** — 8px ink squares at −4px on two opposite corners.
   This is the house gesture. Use it once per page, on the thing that matters.
-- **Hairline grids**, 1px, at `#E3DDD4` on light and `#AF6F74` on the field.
+- **Hairline grids**, 1px, at `#E4DFD3` on light and `#AF6F74` on the field.
 - **The kicker mark** — an 8px accent square preceding a mono label.
 - **No** drop shadows, gradients, glows, textures, rounded cards, or curves.
 

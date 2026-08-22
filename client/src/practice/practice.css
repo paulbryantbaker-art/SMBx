@@ -58,10 +58,10 @@
   --pd-bone-alt: #F9F7F1;
   --pd-border: #D8D3C6;
   --pd-hair: #E4DFD3;
-  --pd-coral: #0A7A58;
-  --pd-coral-link: #086348;
-  --pd-cta: #0A7A58;
-  --pd-cta-hover: #086348;
+  --pd-coral: #B8431E;
+  --pd-coral-link: #9C3717;
+  --pd-cta: #B8431E;
+  --pd-cta-hover: #9C3717;
   /* NOT part of the Carta palette — kept because `report.css` uses it in six
      places (numerals, rules, the key-findings band) and the research pages hold
      parity with the report PDF, so they are deliberately OUT of this pass and
@@ -73,25 +73,32 @@
   --pd-brass: #E8A62B;
   /* The vivid highlight. Ambient layers, the hero mesh and large numerals only
      — it carries no small text anywhere, by rule. */
-  --pd-jade: #0FA97C;
+  --pd-jade: #FF7D55;
   /* chip fill — .pd-chip and the hero's booking chip read from this */
-  --pd-tint-chip: #DFF5EC;
+  --pd-tint-chip: #FBE7DF;
   /* Band depth tokens — the band bg gradient and BOTH curve fills read from
      these, so the curve can never drift from the band edge it meets.
      AURORA: a saturated jade block, not a green-black. */
   /* Flat, square, untextured — a single value, not a gradient triple. The top
      and bottom slots keep the same value so any rule still reading them (the
      curve fills, until those are ported out) cannot produce a seam. */
-  --pd-dark-bg: #181818;
-  --pd-dark-top: #181818;
-  --pd-dark-bot: #181818;
-  --pd-dark-seam: #2A2E29;
-  --pd-dark-plate: #22261F;
-  --pd-dark-ink: #F4F5F1;
-  --pd-dark-sub: #D7DBD2;
-  --pd-dark-muted: #ABB2AB;
-  --pd-dark-legal: #8A9088;
-  --pd-dark-btn-border: #4A4F44;
+  --pd-dark-bg: #8A2B32;
+  --pd-dark-top: #8A2B32;
+  --pd-dark-bot: #8A2B32;
+  /* OXBLOOD, 2026-08-22: the field sits at luminance 0.0736 against
+     near-black's 0.0091, so the ramp now runs in BOTH directions and a
+     recessed surface exists for the first time. --pd-dark-well is the most
+     legible surface in the system (all four text tiers); the seam is a RIM
+     and must never be used as a fill. See house/tokens.ts CARTA. */
+  --pd-dark-well: #50191D;
+  --pd-dark-shade: #6C2227;
+  --pd-dark-seam: #AF6F74;
+  --pd-dark-plate: #964046;
+  --pd-dark-ink: #FFF3F0;
+  --pd-dark-sub: #F0D8D4;
+  --pd-dark-muted: #DCB8B4;
+  --pd-dark-legal: #D6B2AF;
+  --pd-dark-btn-border: #C08D90;
   /* CARTA type (2026-08-07): Schibsted Grotesk is the working voice again,
      Source Serif 4 the display serif (weight 550 via the variable axis —
      loaded in index.html). Values mirror CARTA_TYPE in house/tokens.ts. */

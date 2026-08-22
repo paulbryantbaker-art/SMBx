@@ -150,7 +150,20 @@ for f in sys.argv[1:]:
         ai = opaque.astype(int); r,g,b = ai[:,0], ai[:,1], ai[:,2]
         mx = ai.max(axis=1); mn = ai.min(axis=1)
         sat = np.where(mx > 0, (mx-mn)/np.maximum(mx,1), 0)
-        warm = ((r > g+18) & (g > b+18) & (sat > 0.30) & (mx > 90)).mean()*100
+        # HUE-GATED, NOT MERELY WARM (OXBLOOD, 2026-08-22).
+        # The old mask was channel-ORDER only (r>g>b) and so matched the live brand
+        # accent #B8431E exactly: it would have PASSED every stale green illustration
+        # and REJECTED every correctly converted one. The retired amber/gold this
+        # test exists to catch clusters at hue 39-42 (amber #E8A62B 39.0, honey
+        # #F5C452 42.0, brass #B08637 39.2); the new accents sit at 14 (#B8431E 14.4,
+        # #FF7D55 14.1, #FFAA90 14.1). Inside this mask r is the max and b the min,
+        # so hue reduces to 60*(g-b)/(r-b).
+        # ACCEPTED COST: terra cotta #D4714E sits at 15.7 and is no longer caught
+        # HERE. It stays caught by house/palette-guard.ts, which reads the document
+        # rather than the pixels. No hue test separates a retired terracotta from a
+        # live burnt orange 1.3 degrees away.
+        _hue = 60.0*(g-b)/np.maximum(r-b, 1)
+        warm = ((r > g+18) & (g > b+18) & (sat > 0.30) & (mx > 90) & (_hue >= 28) & (_hue <= 62)).mean()*100
         if warm > 0.5:
             print('  FAIL  %-52s warm %.1f%% - amber/gold masses (cutout, ground exempt)' % (f, warm)); bad += 1
         continue
@@ -160,7 +173,9 @@ for f in sys.argv[1:]:
     ai = a.astype(int); r,g,b = ai[...,0], ai[...,1], ai[...,2]
     mx = ai.max(axis=2); mn = ai.min(axis=2)
     sat = np.where(mx > 0, (mx-mn)/np.maximum(mx,1), 0)
-    warm = ((r > g+18) & (g > b+18) & (sat > 0.30) & (mx > 90)).mean()*100
+    # see the hue-gate note above
+    _hue = 60.0*(g-b)/np.maximum(r-b, 1)
+    warm = ((r > g+18) & (g > b+18) & (sat > 0.30) & (mx > 90) & (_hue >= 28) & (_hue <= 62)).mean()*100
     # THE GROUND TEST, on the border rather than on four corners.
     #
     # Four corners was the artwork brief's shorthand and it is wrong in one

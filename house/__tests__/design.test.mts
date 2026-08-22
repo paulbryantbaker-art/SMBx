@@ -23,7 +23,7 @@
  */
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
-import { CARTA, LEDGER, REPORT } from '../tokens.js';
+import { CARTA, CARTA_APP, LEDGER, REPORT } from '../tokens.js';
 
 const ROOT = path.resolve(new URL('../..', import.meta.url).pathname);
 /* ONE CLONE (2026-08-18): the studio workspace lives at `studio/` inside this
@@ -464,14 +464,22 @@ is('the error screen no longer names Yulia at a stranger', /Yulia/.test(EB_CODE)
    system improves is doing its job badly only if nobody updates it. */
 const { T } = await import('../../client/src/components/v6/desktop/atlasTokens');
 const { M } = await import('../../client/src/components/v6/atlasmobile/mobileTokens');
-is('the app primary slot is Deal Green', T.blue, CARTA.green);
-is('the violet slot collapsed into the accent', T.violet, CARTA.green);
+/* THESE READ CARTA_APP, NOT CARTA (2026-08-22, the oxblood cutover).
+   The app is deliberately scoped OUT of the palette change — the new accent
+   #B8431E sits 20.7 RGB / 3.1 degrees from this shell's own danger colour
+   #C2410C, so a repainted app would signal "brand" and "error" with one hue.
+   The five shell files now import CARTA_APP (a frozen literal), and these
+   assertions follow them there. Left reading CARTA they would have gone red
+   for the RIGHT reason and been "fixed" by repainting the app, which is the
+   opposite of the decision. */
+is('the app primary slot is the frozen accent', T.blue, CARTA_APP.green);
+is('the violet slot collapsed into the accent', T.violet, CARTA_APP.green);
 /* Was `[LEDGER.bone, LEDGER.rule, LEDGER.hair]` — the warm family. Two of those
    three are in the retired table (#DED8CC, #EAE5DC), so this assertion was
    PINNING the shell to Ledger: the token re-skin could not land without it
    going red. Carta's neutrals are cool and its canvas is white. */
 is('app surfaces are the Carta neutrals',
-  [T.surface, T.border, T.hair], [CARTA.bone, CARTA.hair, CARTA.hair]);
+  [T.surface, T.border, T.hair], [CARTA_APP.bone, CARTA_APP.hair, CARTA_APP.hair]);
 is('the verdict green did NOT adopt the brand accent (two-greens law)',
   T.green !== LEDGER.green && T.green.toLowerCase() === '#1f8a5b', true);
 /* THE GRADIENT IS GONE, SO THE ASSERTION INVERTS AGAIN (2026-08-16).
@@ -558,11 +566,11 @@ is('…and `spark` specifically is gone rather than merely unused',
   is('no retired palette hex is live anywhere in the app', offenders, []);
 }
 
-is('the mobile active capsule is the accent tint', M.glassNav.activeBg, CARTA.greenTint);
+is('the mobile active capsule is the accent tint', M.glassNav.activeBg, CARTA_APP.greenTint);
 is('the mobile frame is the Claude-app neutral (Paul-sampled)', M.frameBg, '#F9F9F9');
 const ATLAS_CSS = readFileSync(path.join(ROOT, 'client/src/components/v6/desktop/atlas.css'), 'utf8');
 is('the atlas var mirror moved with the tokens',
-  ATLAS_CSS.includes('--at-blue: #0A7A58') && !ATLAS_CSS.toLowerCase().includes('#0b57d0'), true);
+  ATLAS_CSS.includes(`--at-blue: ${CARTA_APP.green}`) && !ATLAS_CSS.toLowerCase().includes('#0b57d0'), true);
 
 /* ── 9. no retired era survives in the app CODE (Phase 3 sweep, 2026-08-02).
    The Ramp neon, the Google blue, the Cash-App violet and the Material

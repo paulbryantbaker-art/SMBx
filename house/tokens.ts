@@ -120,18 +120,102 @@ export const CARTA = {
   hair: '#E4DFD3',        // hairlines AND the 1px grid seam behind tiles
   chipBorder: '#D8D3C6',
 
-  /* the one accent — identical to Aurora's, deliberately */
-  green: '#0A7A58',       // links, chips, kickers, ACTIVE states
-  greenHover: '#086348',  // the hover FILL (never a resting fill — see above)
-  greenTint: '#DFF5EC',   // light-surface wash
-  greenBright: '#0FA97C', // rare
-  mint: '#A8F0CE',        // the accent ON dark surfaces
+  /* ── THE ONE ACCENT, TWO SURFACE VALUES (OXBLOOD, 2026-08-22) ──────────
+     Deal Green is retired. The keys keep their historical names — `green`,
+     `mint`, `greenBright`, `dark` — and only the VALUES move, which is the
+     same call the Office-blue pivot made about `--pd-coral*`: 16 files read
+     CARTA by key, so a rename is a 100-call-site diff that belongs in its own
+     commit, not riding along inside a palette change.
+     READ THE NAMES AS ROLES, NOT AS COLOURS:
+       green        the accent on LIGHT surfaces — text, marks AND fills
+       greenHover   its hover value
+       greenTint    its light wash, for chips
+       greenBright  the bright accent, LARGE MARKS ONLY, never small text
+       mint         the accent ON the dark surface, and text-safe there
+     WHY THE SPLIT IS NOT OPTIONAL: #B8431E measures 5.44:1 on white and reads
+     as small text; #FF7D55 measures 2.53:1 and does not. Using one value for
+     both grounds produces an illegible page that renders fine and errors
+     nowhere. */
+  green: '#B8431E',       // 5.44:1 on white — links, chips, kickers, ACTIVE states
+  greenHover: '#9C3717',  // the hover FILL (never a resting fill — see THE BUTTON LAW)
+  greenTint: '#FBE7DF',   // light-surface wash; carries greenHover text at 5.92:1
+  greenBright: '#FF7D55', // large marks only — 2.53:1 on white, 3.36:1 on the field
+  mint: '#FFAA90',        // the accent ON the field, text-safe there at 4.61:1
 
-  /* dark bands + footer — flat, square, untextured */
+  /* ── THE FIELD AND ITS DEPTH RAMP ──────────────────────────────────────
+     There is no black band any more. The dark surface is oxblood, and that
+     changes more than a hue: near-black sits at luminance 0.0091 with nowhere
+     below it, so every surface on it had to go LIGHTER and "recessed" did not
+     exist as a move. Oxblood sits at 0.0736 — 8.1x higher — so the ramp runs
+     in both directions and depth is real rather than implied.
+     Each step is the field mixed toward black or white by a fixed fraction,
+     so surfaces read as ONE MATERIAL under different light. If `dark` ever
+     moves, regenerate the whole ramp rather than nudging members of it.
+     THREE RULES THE MEASUREMENTS FORCE:
+       1. Lift comes from an EDGE, not a fill. A 1px darkSeam rim on a
+          darkPlate reads as raised and costs the text nothing; raising the
+          FILL to the rim value drops darkSub to 2.89:1.
+       2. darkWell is the MOST LEGIBLE surface here — it carries all four text
+          tiers where the field carries three and darkPlate carries two. Dense
+          reading belongs in the well, not on a raised card.
+       3. The accent lives at field level and BELOW. greenBright is 5.55:1 on
+          the well, 3.36:1 on the field, 2.67:1 on a plate, 1.55:1 on the rim.
+          A raised surface carries content, never the accent. */
+  dark: '#8A2B32',        // THE FIELD — the 30% of 60/30/10
+  darkWell: '#50191D',    // recessed — inputs, insets, dense text
+  darkShade: '#6C2227',   // subtle recess — alternating rows
+  darkPlate: '#964046',   // label plates, chips, cards — a SUBTLE lift
+  darkSeam: '#AF6F74',    // the rim. An EDGE, never a fill (rule 1)
+  darkBtnBorder: '#C08D90', // ghost outlines — 3.02:1 on the field
+  darkInk: '#FFF3F0',     // reading text on the field, 7.82:1
+  darkSub: '#F0D8D4',     // 6.26:1
+  darkMuted: '#DCB8B4',   // 4.68:1
+  darkLegal: '#D6B2AF',   // 4.39:1 — the floor; do not go quieter
+} as const;
+
+/**
+ * THE APP'S FROZEN PALETTE (2026-08-22).
+ *
+ * The oxblood cutover is scoped to PUBLIC SURFACES — the practice site, the
+ * legal and auth pages, the counterparty share-link surfaces, and posted
+ * collateral. The logged-in app and admin stay where they are, and this is the
+ * mechanism: a frozen literal rather than a spread of CARTA, so the app cannot
+ * drift when the site's values move again.
+ *
+ * IT IS NOT ONLY A SCOPE PREFERENCE — IT IS A COLLISION. The new accent
+ * #B8431E sits 20.7 RGB from the Atlas danger colour #C2410C and 32.8 from V2's
+ * #B42318, at hue gaps of 3.1° and 10.2°. Side by side they are the same
+ * colour, so a repainted app would signal "brand" and "something is wrong" with
+ * one hue. Moving danger to a crimson does not escape either: oxblood is itself
+ * a deep red, and crimson lands 20-33 from the FIELD. The whole warm-red family
+ * now belongs to the brand, so the app's state colours need their own pass —
+ * most likely pairing hue with an icon, which is better practice regardless.
+ *
+ * To move the app later, repoint its six importers back to CARTA and solve the
+ * state colours in the same commit. Do not do one without the other.
+ */
+export const CARTA_APP = {
+  bone: '#FFFFFF',
+  boneAlt: '#F9F7F1',
+  panel: '#F3F0E9',
+  panelHover: '#EFEBE1',
+  panelDeep: '#ECE8DC',
+  white: '#FFFFFF',
+  ink: '#16181A',
+  body: '#4A4F54',
+  muted: '#7C8187',
+  placeholder: '#8B9088',
+  hair: '#E4DFD3',
+  chipBorder: '#D8D3C6',
+  green: '#0A7A58',
+  greenHover: '#086348',
+  greenTint: '#DFF5EC',
+  greenBright: '#0FA97C',
+  mint: '#A8F0CE',
   dark: '#181818',
-  darkSeam: '#2A2E29',    // grid seams and hairlines on dark
-  darkPlate: '#22261F',   // label plates
-  darkInk: '#F4F5F1',     // reading text on dark
+  darkSeam: '#2A2E29',
+  darkPlate: '#22261F',
+  darkInk: '#F4F5F1',
   darkSub: '#D7DBD2',
   darkMuted: '#ABB2AB',
   darkLegal: '#8A9088',
