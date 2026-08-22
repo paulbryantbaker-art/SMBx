@@ -584,7 +584,7 @@ the only photos of him that exist.
   that shared import is the only reason the surfaces match. Output looking wrong
   means the spec is wrong.
 - **Palette** white `#FFFFFF` · ink `#16181A` · Deal Green `#0A7A58` · mint
-  `#A8F0CE` on dark · the flat band `#181818`. Radius 0 except buttons and
+  `#FFAA90` on the field · the flat field `#8A2B32`. Radius 0 except buttons and
   inputs at 10px; framed things wear four ink corner handles. **Type** Source
   Serif 4 / Schibsted Grotesk / IBM Plex
   Mono. If the output is not that, it did not come from a builder. There is no

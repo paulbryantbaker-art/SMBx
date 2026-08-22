@@ -137,7 +137,7 @@ export default function Signup({ onLogin, onGoogleLogin, googleReady, onNavigate
           <button
             type="button"
             onClick={onNavigateLogin}
-            className="bg-transparent border-none text-[#0A7A58] font-semibold cursor-pointer text-sm p-0"
+            className="bg-transparent border-none text-[#B8431E] font-semibold cursor-pointer text-sm p-0"
           >
             Sign in
           </button>

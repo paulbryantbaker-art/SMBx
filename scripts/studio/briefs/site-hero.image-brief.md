@@ -65,7 +65,7 @@ electrical panel cabinet, and a low warehouse with a loading dock. Each object
 is separate, evenly spaced, and roughly the same visual weight — a row, not a
 scene, with clear air between the objects.
 
-Palette, exactly: deep green #0A7A58 as the dominant colour, amber #E8A62B for
+Palette, exactly: burnt orange #B8431E as the dominant colour, oxblood #8A2B32 for
 small accents only (a handle, a hinge, a stripe), ink #16181A for outlines,
 background bone #FFFFFF.
 

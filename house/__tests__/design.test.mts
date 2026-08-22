@@ -56,6 +56,18 @@ const hexesIn = (s: string) => [...new Set((s.match(HEX_RE) || []).map(up))];
    is CARTA's — requiring LEDGER rows in a Carta palette table would demand
    the doc teach a retired system. */
 const TOKENS: Record<string, string> = { ...LEDGER, ...REPORT };
+
+/* THE LIVE SET, WHICH IS NOT THE SAME AS THE TOKEN UNIVERSE (2026-08-22).
+   `TOKENS` above is LEDGER+REPORT — an ARCHIVE plus the report scope, and it
+   was what "dead X is not a house token" checked. That made LEDGER a shield:
+   Deal Green is a genuine Ledger value, so the moment it retired, naming it
+   dead would have failed an assertion claiming it was still a house token.
+   The effect was that the six greens could not be entered in the dead list at
+   all, and a future session could restore #0A7A58 to any law file with the
+   whole suite green. The assertion's INTENT is "a retired hex must not be a
+   LIVE token", so it now reads the live set. LEDGER stays exported as the
+   rollback path; being in it is not evidence of life. */
+const LIVE_TOKENS: Record<string, string> = { ...REPORT, ...CARTA };
 const DOCUMENTED: Record<string, string> = { ...CARTA };
 /* The hex universe is the VALUES of all three exports taken separately —
    spreading them into one record silently DROPS every LEDGER value whose
@@ -79,6 +91,10 @@ const DEAD = [
   '#D4714E',                        // terra cotta wireframe pass
   '#00D632',                        // liquid-glass neon
   '#D44A78',                        // hot pink V3/V4
+  /* OXBLOOD, 2026-08-22 — the Carta/Deal Green era. */
+  '#0A7A58', '#086348', '#DFF5EC', '#A8F0CE', '#0FA97C', '#0A6A4C',  // the accent family
+  '#181818', '#2A2E29', '#22261F', '#4A4F44',                        // the near-black band ramp
+  '#F4F5F1', '#D7DBD2', '#ABB2AB', '#8A9088',                        // its text tiers
 ];
 
 const DEAD_START = DESIGN.indexOf('# 2. DEAD');
@@ -129,7 +145,7 @@ is('no retired hex is used as live guidance anywhere in the file', leaked, []);
 
 /* A retired hex must never be a live token either — the belt to that suspenders. */
 for (const d of DEAD) {
-  is(`dead ${d} is not a house token`, Object.values(TOKENS).map(up).includes(d), false);
+  is(`dead ${d} is not a LIVE token`, Object.values(LIVE_TOKENS).map(up).includes(d), false);
 }
 
 /* ── 2. nothing invented, nothing omitted ─────────────────────────────────
@@ -419,7 +435,10 @@ for (const rel of BRIEFS) {
   const promptEnd = brief.indexOf('## Accepting it');
   is(`${name} has a prompt block`, promptStart > 0 && promptEnd > promptStart, true);
   const prompt = brief.slice(promptStart, promptEnd).toUpperCase();
-  for (const [label, hex] of [['accent', LEDGER.green], ['ink', LEDGER.ink], ['paper', LEDGER.bone]] as const) {
+  /* READ THE LIVE SET, NOT THE ARCHIVE (2026-08-22). These were LEDGER.*, so
+     the brief was checked against a retired palette and the oxblood cutover
+     would have left it demanding Deal Green forever. */
+  for (const [label, hex] of [['accent', CARTA.green], ['ink', CARTA.ink], ['paper', CARTA.bone]] as const) {
     is(`${name} prompt names the live ${label} ${hex}`, prompt.includes(hex.toUpperCase()), true);
   }
   // …and must not name a retired one, where the model would obey it.
@@ -441,7 +460,9 @@ const EB = readFileSync(path.join(ROOT, 'client/src/components/shared/ErrorBound
    legitimate there and nowhere else — same scoping as the image briefs. */
 const EB_CODE = EB.slice(EB.indexOf('export class'));
 const ebHexes = [...new Set((EB_CODE.match(/#[0-9A-Fa-f]{6}/g) || []).map(h => h.toUpperCase()))];
-const LIVE = new Set([...Object.values(LEDGER), ...Object.values(REPORT)].map(v => String(v).toUpperCase()));
+/* CARTA joins the live set — it was LEDGER+REPORT, so the error screen was
+   measured against an archive and any current accent read as invented. */
+const LIVE = new Set([...Object.values(CARTA), ...Object.values(REPORT)].map(v => String(v).toUpperCase()));
 is('the error screen invents no colours',
   ebHexes.filter(h => !LIVE.has(h) && h !== '#FFFFFF'), []);
 is('the error screen names no retired colour',

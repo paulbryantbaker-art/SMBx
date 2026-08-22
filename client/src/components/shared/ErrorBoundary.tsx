@@ -77,7 +77,7 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
             {/* True for a practitioner and for a stranger reading a report,
                 which the old copy was not — and specifically true of the most
                 common cause, a tab left open across a deploy. */}
-            <p style={{ fontSize: 16, color: '#5A6169', marginBottom: 26, lineHeight: 1.65 }}>
+            <p style={{ fontSize: 16, color: '#4A4F54', marginBottom: 26, lineHeight: 1.65 }}>
               This page hit an error and it has been reported. Refreshing usually fixes it.
             </p>
             <button
@@ -85,7 +85,7 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
               style={{
                 padding: '14px 30px',
                 borderRadius: 999,
-                background: '#0A7A58',
+                background: '#B8431E',
                 color: '#fff',
                 border: 'none',
                 fontSize: 15.5,
@@ -95,7 +95,7 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
             >
               Refresh the page
             </button>
-            <p style={{ fontSize: 12, color: '#83898F', marginTop: 18, lineHeight: 1.5 }}>
+            <p style={{ fontSize: 12, color: '#7C8187', marginTop: 18, lineHeight: 1.5 }}>
               {this.state.error?.message}
             </p>
           </div>
