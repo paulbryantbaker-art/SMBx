@@ -905,7 +905,7 @@ export default function Landing() {
             {ownerHero ? (
               <h1 data-hs="0" style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(35px, 4.05vw, 82px)', lineHeight: 1.05, letterSpacing: '-0.015em', textWrap: 'balance' }}>Think like a buyer. Exit on your&nbsp;terms.</h1>
             ) : (
-              <h1 data-hs="0" style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(35px, 4.05vw, 82px)', lineHeight: 1.05, letterSpacing: '-0.015em', textWrap: 'balance' }}>We&rsquo;ll build and run your business acquisition engine for&nbsp;you.</h1>
+              <h1 data-hs="0" style={{ margin: 0, fontFamily: SERIF, fontWeight: 550, fontSize: 'clamp(35px, 4.05vw, 82px)', lineHeight: 1.05, letterSpacing: '-0.015em', textWrap: 'balance' }}>We create world-class corporate development&nbsp;teams.</h1>
             )}
             {ownerHero ? (
               <p data-hs="1" style={{ margin: '26px 0 0', maxWidth: '28em', fontSize: 19, lineHeight: 1.68, color: '#4A4F54', textWrap: 'pretty' }}>Thinking like a buyer is the best way to prepare — and starting here, with your valuation, puts you in front of potential buyers when you're{' '}ready.</p>
